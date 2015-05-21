@@ -233,7 +233,7 @@ PBAR_0 = PBAR(K,PRESSURE_ZONE(I,J,K))
 
 INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
-   IF (SUPPRESSION .AND. TIME_ITER==1) EXTINCT = FUNC_EXTINCT(ZZ_MIXED,TMP_MIXED)
+   IF (SUPPRESSION .AND. TIME_ITER==1) EXTINCT = FUNC_EXTINCT(ZZ_MIXED,TMP_MIXED,MIX_TIME(I,J,K))
 
    INTEGRATOR_SELECT: SELECT CASE (COMBUSTION_ODE_SOLVER)
 
@@ -491,8 +491,8 @@ END SELECT KINETICS_SELECT
 END SUBROUTINE REACTION_RATE
 
 
-LOGICAL FUNCTION FUNC_EXTINCT(ZZ_MIXED_IN,TMP_MIXED)
-REAL(EB), INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED
+LOGICAL FUNCTION FUNC_EXTINCT(ZZ_MIXED_IN,TMP_MIXED,TAU_MIX)
+REAL(EB), INTENT(IN) :: ZZ_MIXED_IN(1:N_TRACKED_SPECIES),TMP_MIXED,TAU_MIX
 
 FUNC_EXTINCT = .FALSE.
 IF (ANY(REACTION(:)%FAST_CHEMISTRY)) THEN
@@ -503,6 +503,8 @@ IF (ANY(REACTION(:)%FAST_CHEMISTRY)) THEN
          FUNC_EXTINCT = EXTINCT_2(ZZ_MIXED_IN,TMP_MIXED)
       CASE(EXTINCTION_3)
          FUNC_EXTINCT = .FALSE.
+      CASE(EXTINCTION_4)
+         FUNC_EXTINCT = EXTINCT_4(ZZ_MIXED_IN,TMP_MIXED,TAU_MIX)
    END SELECT
 ENDIF
 
@@ -716,6 +718,148 @@ ELSE
 ENDIF
 
 END FUNCTION EXTINCT_3
+
+
+LOGICAL FUNCTION EXTINCT_4(ZZ_MIXED_IN,TMP_MIXED,TAU_RES)
+! Vaidya Sankaran, UTRC, 2014 (experimental)
+
+USE PHYSICAL_FUNCTIONS,ONLY:GET_SENSIBLE_ENTHALPY
+REAL(EB),INTENT(IN)::ZZ_MIXED_IN(0:N_TRACKED_SPECIES),TMP_MIXED,TAU_RES
+REAL(EB):: ZZ_F,ZZ_HAT_F,ZZ_GET_F(0:N_TRACKED_SPECIES),ZZ_A,ZZ_HAT_A,ZZ_GET_A(0:N_TRACKED_SPECIES),ZZ_P,ZZ_HAT_P,&
+           ZZ_GET_P(0:N_TRACKED_SPECIES),H_F_0,H_A_0,H_P_0,H_F_N,H_A_N,H_P_N
+INTEGER :: NR,NS
+TYPE(REACTION_TYPE),POINTER :: RN=>NULL()
+
+TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM   
+REAL(EB) :: TAU_CHEM,YN2,YCO,YH2O,YCO2,addN2,fprod,fN2,fCO2,fH2O,YDIL_NORM
+REAL(EB) :: MWN2,MWO2,MWCO,MWCO2,MWH2O
+INTEGER  :: IDN2,IDO2,IDCO,IDCO2,IDH2O
+
+EXTINCT_4 = .FALSE.
+REACTION_LOOP: DO NR=1,N_REACTIONS
+   RN => REACTION(NR)
+   IF (.NOT.RN%FAST_CHEMISTRY) CYCLE REACTION_LOOP
+
+   AIT_IF: IF (TMP_MIXED < RN%AUTO_IGNITION_TEMPERATURE) THEN
+   
+      EXTINCT_4 = .TRUE.
+   
+   ELSE AIT_IF
+
+      ZZ_F = ZZ_MIXED_IN(RN%FUEL_SMIX_INDEX)
+      ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
+      ZZ_P = 1._EB - ZZ_F - ZZ_A
+
+      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S)             ! burned fuel, FDS Tech Guide (5.16)
+      ZZ_HAT_A = ZZ_HAT_F*RN%S                                             ! FDS Tech Guide (5.17)
+      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
+
+      MWCO2 = 1.0_EB ; MWH2O = 1.0_EB ; MWCO = 1.0_EB
+      YCO2  = 0.0_EB ;  YH2O = 0.0_EB ;  YCO = 0.0_EB
+      DO NS = 0,N_TRACKED_SPECIES
+         SM => SPECIES_MIXTURE(NS)
+         SELECT CASE(TRIM(SM%ID))
+            CASE('NITROGEN')
+               IDN2 = NS
+               MWN2 = SM%MW
+               YN2  = ZZ_MIXED_IN(IDN2)
+            CASE('OXYGEN')
+               IDO2 = NS
+               MWO2 = SM%MW
+            CASE('CARBON MONOXIDE') 
+               IDCO = NS
+               MWCO = SM%MW
+               YCO  = ZZ_MIXED_IN(IDCO)
+            CASE('WATER VAPOR')
+               IDH2O = NS
+               MWH2O = SM%MW
+               YH2O  = ZZ_MIXED_IN(IDH2O)
+            CASE('CARBON DIOXIDE')
+               IDCO2 = NS
+               MWCO2 = SM%MW
+               YCO2  = ZZ_MIXED_IN(IDCO2)
+         END SELECT
+      ENDDO
+
+      !Added nitrogen = Total N2 - N2 associated with left over O2 - N2 in the combustion products
+      !N2_associated with o2 in AIR = (0.77/0.23)*(ZZ_A)
+      !N2_in_comb_prod =   (0.77/0.23)*(ZZ_A + YCO*0.5_EB*MWO2/MWCO + YH2O*0.5_EB*MWO2/MWH2O + YCO2*MWO2/MWCO2)
+      ADDN2  = YN2 - (0.77_EB/0.23_EB)*(ZZ_A + YCO*0.5_EB*MWO2/MWCO + YH2O*0.5_EB*MWO2/MWH2O + YCO2*MWO2/MWCO2)
+      ADDN2  = MAX(ADDN2,0._EB)
+
+      !fraction of the products+diluent in the reaction zone
+      FPROD = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))
+      !fraction of the added nitrogen in the reaction zone
+      FN2  = FPROD*ADDN2
+      !fraction of the combustion product CO2 in the reaction zone
+      FCO2 = FPROD*ZZ_MIXED_IN(IDCO2)
+      !fraction of the combustion product H2O in the reaction zone
+      FH2O = FPROD*ZZ_MIXED_IN(IDH2O)
+      !normalized mass-fraction of N2 and combustion products 
+      YDIL_NORM = FN2/0.412_EB + FCO2/0.375_EB + FH2O/0.227_EB
+
+      EXT_CRIT_12: IF (YDIL_NORM > 1._EB) THEN
+         
+         ! 1st criterion: UTRC, 2014
+         EXTINCT_4 = .TRUE.
+
+      ELSE EXT_CRIT_12
+
+         !TAU_RES  = MU(I,J,K)/(0.5_EB*RHO(I,J,K)*(U(I,J,K)**2+V(I,J,K)**2+W(I,J,K)**2))
+         TAU_CHEM = 0.069_EB*EXP(2.48_EB*YDIL_NORM)*0.001_EB
+
+         EXT_CRIT_23: IF (TAU_CHEM > TAU_RES) THEN
+            ! 2nd criterion: UTRC, 2014
+            EXTINCT_4 = .TRUE.
+         ELSE EXT_CRIT_23
+            ! 3rd criterion based on computed Critical Flame Temperature: UTRC, 2014
+
+            ZZ_GET_F = 0._EB
+            ZZ_GET_A = 0._EB
+            ZZ_GET_P = ZZ_MIXED_IN
+
+            ZZ_GET_F(RN%FUEL_SMIX_INDEX) = ZZ_HAT_F ! fuel in reactant mixture composition
+            ZZ_GET_A(RN%AIR_SMIX_INDEX)  = ZZ_HAT_A ! air  in reactant mixture composition
+         
+            ZZ_GET_P(RN%FUEL_SMIX_INDEX) = MAX(ZZ_GET_P(RN%FUEL_SMIX_INDEX)-ZZ_HAT_F,0._EB) ! remove burned fuel from products
+            ZZ_GET_P(RN%AIR_SMIX_INDEX)  = MAX(ZZ_GET_P(RN%AIR_SMIX_INDEX) -ZZ_A    ,0._EB) ! remove all air from products
+         
+            ! Normalize concentrations
+            ZZ_GET_F = ZZ_GET_F/(SUM(ZZ_GET_F)+TWO_EPSILON_EB)
+            ZZ_GET_A = ZZ_GET_A/(SUM(ZZ_GET_A)+TWO_EPSILON_EB)
+            ZZ_GET_P = ZZ_GET_P/(SUM(ZZ_GET_P)+TWO_EPSILON_EB)
+
+            RN%CRIT_FLAME_TMP=1464.386823_EB*(TAU_RES*1000.0_EB)**(-0.053780_EB)
+
+            ! Equation for water-vapor
+            IF(YH2O > 0.0) THEN
+             RN%CRIT_FLAME_TMP=(1._EB-YH2O)*RN%CRIT_FLAME_TMP + (YH2O)*1545.118849_EB*(TAU_RES*1000.0_EB)**(-0.033793_EB)
+            ENDIF
+
+            IF(RN%CRIT_FLAME_TMP<=1450._EB) RN%CRIT_FLAME_TMP=1450._EB   ! lower limit T_CFT for most hydro-carbons
+            IF(RN%CRIT_FLAME_TMP>=1800._EB) RN%CRIT_FLAME_TMP=1800._EB   ! upper limit T_CFT for most hydro-carbons
+
+            ! Get the specific heat for the fuel and diluent at the current and critical flame temperatures
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_0,TMP_MIXED)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_0,TMP_MIXED)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_0,TMP_MIXED) 
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_F,H_F_N,RN%CRIT_FLAME_TMP)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_A,H_A_N,RN%CRIT_FLAME_TMP)
+            CALL GET_SENSIBLE_ENTHALPY(ZZ_GET_P,H_P_N,RN%CRIT_FLAME_TMP)  
+   
+            ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp
+            IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
+                 ZZ_HAT_F* H_F_N + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) THEN
+               EXTINCT_4 = .TRUE.
+            ENDIF
+
+         ENDIF EXT_CRIT_23
+      ENDIF EXT_CRIT_12
+   ENDIF AIT_IF
+
+ENDDO REACTION_LOOP
+
+END FUNCTION EXTINCT_4
 
 
 REAL(EB) FUNCTION FLAME_SPEED_FACTOR(ZZ_0,DT_LOC,RHO_0,TMP_0,PBAR_0,NR,DELTA,VEL_RMS)
