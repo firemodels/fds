@@ -29,7 +29,7 @@ set CURDIR=%CD%
 
 if NOT exist %repo_dir% (
   echo *** warning: The directory %repo_dir% does not exist.
-  exit /b 1
+  goto eof
 )
 
 :: ----------------- make sure various required software tools are available --------------------------
@@ -60,7 +60,7 @@ if %havesvn% == 0 goto skiphavesvn
     set validsvn=0
     if %havegit% == 0 (
       echo "*** warning: %repo_dir% is not a valid svn repository"
-      exit /b 1
+      goto eof
     )
   )
 :skiphavesvn
@@ -75,7 +75,7 @@ if %flag% == 1 (
   set havegit=0
   if %havesvn% == 0 (
     echo *** warning: both svn and git were not found
-    exit /b 1
+    goto eof
   )
 )
 
@@ -93,7 +93,7 @@ if %validsvn% == 0 (
       cd %CURDIR%
       set validgit=0
       echo *** warning: %repo_dir% is not a valid git repository
-      exit /b 1
+      goto eof
     ) 
   )
 )
@@ -107,7 +107,7 @@ if %validgit% == 1 (
   set /p flag=<%temp1c%
   if %flag% == 1 (
     echo *** warning: head was not found.
-    exit /b 1
+    goto eof
   ) 
 )
 
@@ -120,7 +120,7 @@ if %validgit% == 1 (
   set /p flag=<%temp1c%
   if %flag% == 1 (
     echo *** warning: tail was not found.
-    exit /b 1
+    goto eof
   )
 )
 
@@ -132,7 +132,7 @@ set flag=
 set /p flag=<%temp1c%
 if %flag% == 1 (
   echo *** warning: gawk was not found.
-  exit /b 1
+  goto eof
 )
 
 :: ----------------- get properties --------------------------
@@ -170,4 +170,5 @@ set /p build_date=<%temp1%
 echo %time% 2>&1 | gawk -F":" "{print $1\":\"$2}" > %temp1%
 set /p build_time=<%temp1%
 
+:eof
 cd %CURDIR%
