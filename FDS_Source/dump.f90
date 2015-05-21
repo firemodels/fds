@@ -1315,7 +1315,7 @@ WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
 ! Write out the SVN number and revision date to a file
 
 OPEN(LU_SVN,FILE=FN_SVN,FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_SVN,'(I5)') SVN_REVISION_NUMBER
+WRITE(LU_SVN,'(A)') REVISION
 CLOSE(LU_SVN)
 
 ! Indicate the "endian-ness" of the output files
@@ -1335,7 +1335,7 @@ WRITE(LU_SMV,'(1X,A)') TRIM(FN_INPUT)
 ! Write out svn revision number
 
 WRITE(LU_SMV,'(/A)') 'REVISION'
-WRITE(LU_SMV,'(I6)') SVN_REVISION_NUMBER
+WRITE(LU_SMV,'(A)') REVISION
 
 ! Write out the CHID
 
