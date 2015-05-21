@@ -14,8 +14,10 @@ set bindir=%~p0
 set dir=%1
 set file=%2
 
+goto eof
+
 if NOT exist %file% (
-  exit /b 1
+  goto eof
 )
 call "%bindir%\get_repo_properties" %dir%
 
