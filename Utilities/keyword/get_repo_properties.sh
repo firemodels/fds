@@ -101,6 +101,15 @@ fi
 build_date=`date "+%F %T"`
 
 cd $CURDIR
+if [ "$revision" == "" ] ; then
+  revision="unknown"
+fi
+if [ "$revision_date" == "" ] ; then
+  revision_date="unknown"
+fi
+if [ "$build_date" == "" ] ; then
+  build_date="unknown"
+fi
 export revision
 export revision_date
 export build_date
