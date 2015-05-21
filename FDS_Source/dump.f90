@@ -553,7 +553,6 @@ ENDIF
 END SUBROUTINE ASSIGN_FILE_NAMES
 
 
-
 SUBROUTINE INITIALIZE_GLOBAL_DUMPS(T)
 
 ! Open and initialize all files that are not tied to a particular mesh
