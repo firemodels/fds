@@ -84,21 +84,24 @@ if [ "$validsvn" == 1 ] ; then
   revision=`svn info 2>&1 | grep "Last Changed Rev:" | awk -F' ' '{print $4}'`
 fi
 if [ "$validgit" == 1 ] ; then
-  revision=`git log . 2>&1 | head -1 | awk -F " " '{print $2}'`
+  revision=`git log --abbrev-commit . 2>&1 | head -1 | awk -F " " '{print $2}'`
 fi
 
 # get date/time of latest repository commit
 
 if [ "$validsvn" == 1 ] ; then
-  revision_date=`svn info 2>&1 | grep "Last Changed Date:" | awk -F" " '{print $4,$5}'`
+  revision_monthdate=`svn info 2>&1 | grep "Last Changed Date:" | awk -F" " '{print $9,$8}'`
+  revision_year=`svn info 2>&1 | grep "Last Changed Date:" | awk -F" " '{print $4}' | awk -F"-" '{print $1}'`
+  revision_time=`svn info 2>&1 | grep "Last Changed Date:" | awk -F" " '{print $5}'`
+  revision_date="$revision_monthdate, $revision_year  $revision_time"
 fi
 if [ "$validgit" == 1 ] ; then
-  revision_date=`git log --date=iso . 2>&1 | head -3 | tail -1 | awk -F" " '{print $2,$3}'`
+  revision_date=`git log . 2>&1 | head -3 | tail -1 | awk -F" " '{print $3,$4",",$6," "$5}'`
 fi
 
 # get current date/time
 
-build_date=`date "+%F %T"`
+build_date=`date "+%b %d, %Y  %T"`
 
 cd $CURDIR
 if [ "$revision" == "" ] ; then
