@@ -195,9 +195,9 @@ if %validsvn% == 1 (
   set /p revision_time=<%temp1%
 )
 if %validgit% ==1 (
-  git log --date=short . 2>&1 | head -3 | tail -1 | gawk -F" " "{print $2}" > %temp1%
+  git log . 2>&1 | head -3 | tail -1 | gawk -F" " "{print $3,$4\",\",$6}" > %temp1%
   set /p revision_date=<%temp1%
-  git log . 2>&1 | head -3 | tail -1 | gawk -F" " "{print $5}" |gawk -F":" "{print $1\":\"$2}"  > %temp1%
+  git log . 2>&1 | head -3 | tail -1 | gawk -F" " "{print $5}" > %temp1%
   set /p revision_time=<%temp1%
 )
 
