@@ -20,7 +20,7 @@ if NOT exist %file% (
 call "%bindir%\get_repo_properties" %dir%
 
 call "%bindir%\expand_keyword" Revision %revision% %file%
-call "%bindir%\expand_keyword" RevisionDate "%revision_date% %revision_time%" %file%
-call "%bindir%\expand_keyword" CompileDate "%build_date% %build_time%" %file%
+call "%bindir%\expand_keyword" RevisionDate "%revision_date%  %revision_time%" %file%
+call "%bindir%\expand_keyword" CompileDate "%build_date%  %build_time%" %file%
 
 :eof
