@@ -20,6 +20,8 @@ set havegit=1
 set validsvn=0
 set validgit=0
 
+set havedate=1
+
 set havesoftware=1
 
 set temp1="%temp%\temp.txt"
@@ -105,6 +107,19 @@ if %validsvn% == 0 (
   )
 )
 
+:: looking for getdate
+
+getdate 1> %temp1% 2>&1
+type %temp1% | find /i /c "not recognized" > %temp1c%
+set flag=
+set /p flag=<%temp1c%
+if %flag% == 1 (
+  set havedate=0
+  if "%fds_build_debug%" == "1" (
+    echo getdate not found (not required)
+  )
+)
+
 :: looking for head (used only with git)
 
 if %validgit% == 1 (
@@ -168,9 +183,15 @@ if %validgit% ==1 (
 :: get date and time of latest repository commit
 
 if %validsvn% == 1 (
-  svn info 2>&1 | find /i "Last Changed Date:" | gawk -F" " "{print $4}" > %temp1%
-  set /p revision_date=<%temp1%
-  svn info 2>&1 | find /i "Last Changed Date:" | gawk -F" " "{print $5}" |gawk -F":" "{print $1\":\"$2}"  > %temp1%
+  svn info 2>&1 | find /i "Last Changed Date:" | gawk -F" " "{print $9,$8}" > %temp1%
+  set /p revision_monthdate=<%temp1%
+  
+  svn info 2>&1 | find /i "Last Changed Date:" | gawk -F" " "{print $4}" | gawk -F"-" "{print $1}" > %temp1%
+  set /p revision_year=<%temp1%
+  
+  set revision_date=%revision_monthdate%, %revision_year%
+  
+  svn info 2>&1 | find /i "Last Changed Date:" | gawk -F" " "{print $5}" > %temp1%
   set /p revision_time=<%temp1%
 )
 if %validgit% ==1 (
@@ -182,10 +203,18 @@ if %validgit% ==1 (
 
 :: get current date time
 
-echo %date% 2>&1 | gawk -F" " "{print $2}" | gawk -F"/" "{print $3\"-\"$1\"-\"$2}" > %temp1% 
-set /p build_date=<%temp1%
-echo %time% 2>&1 | gawk -F":" "{print $1\":\"$2}" > %temp1%
-set /p build_time=<%temp1%
+if %havedate% == 0 (
+  echo %date% 2>&1 | gawk -F" " "{print $2}" | gawk -F"/" "{print $3\"-\"$1\"-\"$2}" > %temp1% 
+  set /p build_date=<%temp1%
+  echo %time% 2>&1 | gawk -F":" "{print $1\":\"$2}" > %temp1%
+  set /p build_time=<%temp1%
+)
+if %havedate% == 1 (
+  getdate 2>&1 | gawk -F" " "{print $1,$2,$3}" > %temp1% 
+  set /p build_date=<%temp1%
+  getdate 2>&1 | gawk -F" " "{print $4}" > %temp1%
+  set /p build_time=<%temp1%
+)
 
 :eof
 cd %CURDIR%
