@@ -12,10 +12,8 @@ if "%1" == "" (
 set bindir=%~p0
 set file=%1
 
-goto eof
-
 if NOT exist %file% (
-  exit /b 1
+  goto eof
 )
 
 call "%bindir%\contract_keyword" Revision %file%
