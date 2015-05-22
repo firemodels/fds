@@ -34,7 +34,7 @@ intel_win_64 : CC        = icl
 intel_win_64 : exe       = getdate_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CC) -o $(bin)/$(exe) $(objwin)
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
