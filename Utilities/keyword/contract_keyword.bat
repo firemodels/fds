@@ -13,7 +13,7 @@ set keyword=%1
 set file=%2
 
 if NOT exist %file% (
-  exit 1 /b
+  goto eof
 )
 
 :: looking for sed
@@ -26,6 +26,9 @@ type %temp1% | find /i /c "not recognized" > %temp1c%
 set flag=
 set /p flag=<%temp1c%
 if %flag% == 1 (
+  if "%fds_build_debug%" == "1" (
+    echo sed not found
+  )
   goto eof
 )
 

@@ -14,8 +14,6 @@ set bindir=%~p0
 set dir=%1
 set file=%2
 
-goto eof
-
 if NOT exist %file% (
   goto eof
 )
