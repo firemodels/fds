@@ -10,5 +10,5 @@ erase *.obj *.mod
 call %KWDIR%\expand_file %SDIR%\smokezip %SDIR%\shared\string_util.c
 make -f ..\Makefile intel_win_64
 call %KWDIR%\contract_file %SDIR%\shared\string_util.c
-pause+
+pause
 
