@@ -3,7 +3,7 @@
 &MULT ID='m1', DX=0.425,DY=0.60,DZ=0.30, I_UPPER=1,J_UPPER=0,K_UPPER=3 /
 &MESH IJK=34,48,24, XB=-0.425,0.0,-0.30,0.30,-0.0125,0.2875, MULT_ID='m1' /
 
-&TIME T_BEGIN=20., T_END=80. /
+&TIME T_BEGIN=40., T_END=80. /
 
 &DUMP DT_HRR=1 /
 
@@ -43,7 +43,7 @@ RAMP ID='N2 RAMP', T= 100.0, F=1.000000 /
 
 ! linear ramps to determine extinction location
 &RAMP ID='N2 RAMP', T= 0.0, F=0.0 /0.21 vol frac O2
-&RAMP ID='N2 RAMP', T= 20.0, F=0.0 / 
+&RAMP ID='N2 RAMP', T= 40.0, F=0.0 / 
 &RAMP ID='N2 RAMP', T= 60.0, F=1.000000 / 0.151
 &RAMP ID='N2 RAMP', T= 80.0, F=2.000000 /
 
