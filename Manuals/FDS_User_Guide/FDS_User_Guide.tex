@@ -1000,12 +1000,6 @@ to avoid a numerical instability caused by too large a time step.
 Experiment with different values of {\ct DT} by monitoring the initial time step sizes
 recorded in the output file {\ct job\_name.out}.
 
-One additional parameter in the {\ct TIME} group is {\ct SYNCHRONIZE}, a
-logical flag ({\ct .TRUE.} or {\ct .FALSE.}) indicating that in a
-multi-mesh computation the time step for each mesh should be the same, thus
-ensuring that each mesh is processed each iteration. More details can
-be found in Section~\ref{info:multimesh}. The default value of {\ct SYNCHRONIZE} is {\ct .TRUE.}
-
 Finally, if you want to prevent FDS from automatically changing the time step, set {\ct LOCK\_TIME\_STEP} equal to {\ct .TRUE.}
 on the {\ct TIME} line, in which case the specified
 time step, {\ct DT}, will not be adjusted.
@@ -1067,9 +1061,7 @@ The governing equations solved in FDS are written in terms of a three dimensiona
 
 The term ``multiple meshes'' means that the computational domain consists of more than one computational mesh, usually connected although this is not required. If more than one mesh is used, there should be a {\ct MESH} line for each. The order in which these lines are entered in the input file matters. In general, the meshes should be entered from finest to coarsest. FDS assumes that a mesh listed first in the input file has precedence over a mesh listed second if the two meshes overlap. Meshes can overlap, abut, or not touch at all. In the last case, essentially two separate calculations are performed with no communication at all between them. Obstructions and vents are entered in terms of the overall coordinate system and need not apply to any one particular mesh. Each mesh checks the coordinates of all the geometric entities and decides whether or not they are to be included.
 
-To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases with the MPI version of FDS if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the MPI version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the non-MPI version of FDS, in which case one CPU will serially process each mesh, one by one. Why do this? For one, if you set {\ct SYNCHRONIZE=.FALSE.} on the {\ct TIME} line, then in each mesh, the governing equations will be solved with a time step based on the flow speed within that particular mesh. Because each mesh can have different time steps, this technique can save CPU time by requiring relatively coarse meshes to be updated only when necessary. Coarse meshes are best used in regions where temporal and spatial gradients of key quantities are small or unimportant. Be aware, however, that unsynchronized time steps are more likely to lead to numerical instabilities.
-
-By default, the time steps in each mesh are synchronized. With this setting, all meshes are active during each iteration. For a non-MPI multiple mesh calculation, this strategy reduces and may even eliminate any benefit seen by using multiple meshes. However, in an MPI calculation, if a particular mesh is inactive during an iteration because it is not ready to be updated, then the processor assigned to that mesh is also inactive. Forcing the mesh to be updated with a smaller than ideal time step does not cost anything since that processor would have been idle anyway. The benefit is that there is a tighter connection between meshes. It is also possible to synchronize the time step in only a select set of meshes. To do this, add {\ct SYNCHRONIZE=.TRUE.} to the appropriate {\ct MESH} lines and then add {\ct SYNCHRONIZE=.FALSE.} to the {\ct TIME} line.
+To run FDS in parallel using MPI (Message Passing Interface), you {\bf must} break up the computational domain into multiple meshes so that the workload can be divided among the computers. In general, it is better to run multiple mesh cases with the MPI version of FDS if you have the computers available, but be aware that two computers will not necessarily finish the job in half the time as one. For the MPI version to work well, there has to be a comparable number of cells in each mesh, or otherwise most of the computers will sit idle waiting for the one with the largest mesh to finish processing each time step. You can use multiple meshes even when running the non-MPI version of FDS, in which case one CPU will serially process each mesh, one by one.
 
 Usually in a MPI calculation, each mesh is assigned its own process, and each process its own processor. However, it is possible to assign more than one mesh to a single process, and it is possible to assign more than one process to a single processor. Consider a case that involves six meshes:
 \begin{lstlisting}
@@ -8912,7 +8904,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct MPI\_PROCESS}      & Integer                       & Section~\ref{info:multimesh}              &    &                  \\ \hline
 {\ct MULT\_ID }         & Character                     & Section~\ref{info:MULT}                   &    &                  \\ \hline
 {\ct RGB}               & Integer Triplet               & Section~\ref{info:multimesh}              &    & 0,0,0            \\ \hline
-{\ct SYNCHRONIZE}       & Logical                       & Section~\ref{info:multimesh}              &    & {\ct .TRUE.}     \\ \hline
 {\ct XB(6)}             & Real Sextuplet                & Section~\ref{info:MESH_Basics}            & m  & 0,1,0,1,0,1      \\ \hline
 \end{longtable}
 
@@ -9689,7 +9680,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct LIMITING\_DT\_RATIO}       & Real       & Section~\ref{info:Errors}                 &               &  0.0001         \\ \hline
 {\ct LOCK\_TIME\_STEP}          & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .FALSE.}   \\ \hline
 {\ct RESTRICT\_TIME\_STEP}      & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
-{\ct SYNCHRONIZE}               & Logical    & Section~\ref{info:TIME_Control}           &             & {\ct .TRUE.}    \\ \hline
 {\ct T\_BEGIN}                  & Real       & Section~\ref{info:TIME_Basics}            & s           & 0.              \\ \hline
 {\ct T\_END}                    & Real       & Section~\ref{info:TIME_Basics}            & s           & 1.              \\ \hline
 {\ct TIME\_SHRINK\_FACTOR}      & Real       & Section~\ref{info:steady_state}           &             & 1.              \\ \hline
