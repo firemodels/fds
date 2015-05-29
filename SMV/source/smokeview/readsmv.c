@@ -2275,7 +2275,7 @@ int readsmv(char *file, char *file2){
   int errorcode;
   int noGRIDpresent=1,startpass;
   slicedata *sliceinfo_copy=NULL;
-  int nisos_per_mesh;
+  int nisos_per_mesh=1;
 
   int nn_smoke3d=0,nn_patch=0,nn_iso=0,nn_part=0,nn_slice=0,nslicefiles=0,nvents;
 
@@ -3019,7 +3019,7 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
-  nisos_per_mesh = nisoinfo / nmeshes;
+  if(nisoinfo>0&&nmeshes>0)nisos_per_mesh = nisoinfo / nmeshes;
   if(ncsvinfo > 0){
    NewMemory((void **)&csvinfo,ncsvinfo*sizeof(csvdata));
    ncsvinfo=0;
