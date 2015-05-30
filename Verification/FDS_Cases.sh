@@ -405,7 +405,7 @@ $QFDS -d WUI random_walk_2.fds
 
 $QFDS -p 4 -t -d Adaptive_Mesh_Refinement random_meshes.fds
 
-$QFDS -p 3 -t -d Evacuation evac_smv_testcase1.fds
+#$QFDS -p 3 -t -d Evacuation evac_smv_testcase1.fds
 
 $QFDS -p 8 -t -d Fires circular_burner.fds
 
