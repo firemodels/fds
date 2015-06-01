@@ -1,6 +1,6 @@
 ../../../../../FDS_Compilation/intel_linux_64/fds_intel_linux_64 h_profile.fds 
 ansys150 -b nolist -j h_profile_T_ansys -i read_geometry_h_profile.ans
-../../intel_linux_64/fds2ftmi_linux_64 h_profile 0.05 2 0 30 2 10 h_profile_to_ansys 
+../../intel_linux_64/fds2ftmi_linux_64 h_profile 0.05 2 0 30 2 10 1 h_profile_to_ansys 
 ansys150 -b nolist -j h_profile_T_ansys -i run_h_profile_T.ans
 ansys150 -b nolist -j h_profile_M_ansys -i run_h_profile_M.ans 
 ansys150 -b nolist -j h_profile_M_ansys -i plot_h_profile.ans 
