@@ -10,6 +10,8 @@ set WARNING_LOG=%OUTPUT_DIR%/warnings
 :: Update Repository
 set SVN_REVISION="%1"
 echo %SVN_REVISION%
+cd %FDS_SVNROOT%\FDS_Source
+svn up -r %SVN_REVISION%
 
 
 :: Clean outputs

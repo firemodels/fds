@@ -6,9 +6,9 @@ bin = .
 
 # Definition of the object variables
 
-obj = interface.o fds2ast.o
-objgnu = interface.o fds2ast.o
-objwin = interface.obj fds2ast.obj
+obj = interface.o fds2ast.o fds2lsdyna.o
+objgnu = interface.o fds2ast.o fds2lsdyna.o
+objwin = interface.obj fds2ast.obj fds2lsdyna.obj
 
 #*** General Purpose Rules ***
 
@@ -19,7 +19,7 @@ no_target:
 setup_win:
 %.obj : %.mod	
 
-.SUFFIXES: .F90 .c .obj .o .f90 .cpp
+.SUFFIXES: .f90 .o .obj
 
 .f90.obj:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
@@ -45,6 +45,16 @@ intel_win_64 : FC        = ifort
 intel_win_64 : obj       = fds2ftmi_win_64
 
 intel_win_64 : setup_win $(objwin)
+	$(FC) -o $(obj) $(FFLAGS) $(objwin)
+
+# ----------- debug Win 64 --------------
+#  64 bit windows
+
+intel_win_64_db : FFLAGS    = /CB -auto -WB -traceback -fltconsistency -stand:f08
+intel_win_64_db : FC        = ifort
+intel_win_64_db : obj       = fds2ftmi_win_64_db
+
+intel_win_64_db : setup_win $(objwin)
 	$(FC) -o $(obj) $(FFLAGS) $(objwin)
 
 # ------------- Linux 32 ----------------
@@ -101,7 +111,7 @@ intel_osx_64 : $(obj)
 # ------------- Win 64 ----------------
 #  64 bit GNU windows
 
-gnu_win_64 : FFLAGS    = -O3 -fbounds-check -fno-range-check
+gnu_win_64 : FFLAGS    = -O3 -fbounds-check -fno-range-check -ffree-form -frecord-marker=4
 gnu_win_64 : FC        = gfortran
 gnu_win_64 : obj       = fds2ftmi_gnu_win_64
 gnu_win_64 : setup_win $(objgnu)
@@ -120,9 +130,11 @@ gnu_win_32 : setup_win $(objgnu)
 
 # *** Object Dependencies ***
 
-interface.o : fds2ast.o	
+interface.o : fds2ast.o fds2lsdyna.o	
+fds2lsdyna.o : fds2ast.o	
 
-interface.obj : fds2ast.obj	
+interface.obj : fds2ast.obj fds2lsdyna.obj		
+fds2lsdyna.obj : fds2ast.obj
 
 #-------------- Clean Target to remove Object and Module files -----------
 
