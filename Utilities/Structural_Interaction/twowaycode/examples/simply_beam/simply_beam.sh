@@ -1,5 +1,5 @@
 ansys150 -b nolist -j simply_beam_ansys -i read_geometry_simply_beam.ans
-sed '38 r 2fds_input.geo' simply_input.fds > simply_beam.fds
+python simply_beam.py
 ansys150 -b -j simply_beam_step1 -i simply_beam_step1.ans
 ansys150 -b -j simply_beam_step2 -i simply_beam_step2.ans
 ../../intel_linux_64/twowaycode_linux_64 input_simply_beam.2way
