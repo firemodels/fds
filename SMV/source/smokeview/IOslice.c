@@ -4188,8 +4188,7 @@ void drawvolslice_terrain(const slicedata *sd){
 
     znode = terri->znode_scaled;
     constval = zplt[plotz]+offset_slice*sd->sliceoffset+0.001;
-    zoffset = znode[IJ2(0, 0)];
-   // zoffset -= SCALE2SMV(zbar0);
+    zoffset = SCALE2SMV(sd->above_ground_level);
     glBegin(GL_TRIANGLES);
     maxi = MAX(sd->is1+sd->nslicei-1,sd->is1+1);
     for(i=sd->is1; i<maxi; i++){
@@ -4205,10 +4204,10 @@ void drawvolslice_terrain(const slicedata *sd){
         float ymid, rmid;
         int n11, n31, n13, n33;
 
-        z11 = constval + znode[IJ2(i,j)] - zoffset;
-        z31 = constval + znode[IJ2(i+1,j)] - zoffset;
-        z13 = constval + znode[IJ2(i,j+1)] - zoffset;
-        z33 = constval + znode[IJ2(i+1,j+1)] - zoffset;
+        z11 = znode[IJ2(i,j)] + zoffset;
+        z31 = znode[IJ2(i+1,j)] + zoffset;
+        z13 = znode[IJ2(i,j+1)] + zoffset;
+        z33 = znode[IJ2(i+1,j+1)] + zoffset;
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
         if(iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
