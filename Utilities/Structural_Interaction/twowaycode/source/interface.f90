@@ -234,11 +234,6 @@ ENDDO
 15  CONTINUE
 !***********************************
 !!WORKING!!
-!****** LOOP NO FDS2AST PARA RETIRAR OS RESULTADOS DO FDS *****
-PRINT *, 'LOOP_FDS2AST'
-    CALL BE2FTMI (CHID,NOMASTER,TBEG,TEND,TINT,NUMEL,SHELL)
-!*******************
-!!WORKING!!
 !*******************
 IF (LAYER.EQ.3) THEN 
 L_LAYER=1
@@ -377,10 +372,10 @@ LOOP_TABLES_BEG:DO I=ST,ENDI
     WRITE(70,'(A)') "!*"
     IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, I8, A)') "*DIM,H", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME,," 
     IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
-    WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
-    WRITE(70,'(A)') "!*"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
+    !WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
+    !WRITE(70,'(A)') "!*"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
 ENDDO LOOP_TABLES_BEG  
 ENDIF
 !  
@@ -388,10 +383,10 @@ IF (TBEG.NE.0) THEN
 LOOP_TABLES:DO I=ST,ENDI
     WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
 !    PRINT *, INTFILE2
-    WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
-    WRITE(70,'(A)') "!*"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
-    IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
+    !WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
+    !WRITE(70,'(A)') "!*"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
+    !IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
 ENDDO LOOP_TABLES 
 ENDIF     
 !****************************
@@ -422,6 +417,14 @@ IF (LAYER.EQ.3 .AND. L_LAYER.EQ.1) THEN
     ROUND=ROUND+1
     GO TO 20
 END IF    
+
+
+!****** LOOP NO FDS2AST PARA RETIRAR OS RESULTADOS DO FDS *****
+PRINT *, 'LOOP_FDS2AST'
+    CALL BE2FTMI (CHID,NOMASTER,TBEG,TEND,TINT,NUMEL,SHELL)
+!*******************
+!!WORKING!!
+
 
 !READ(2,'(a)') FILE_END
 !IF (FILE_END=='END') THEN
