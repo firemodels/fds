@@ -19,7 +19,7 @@ PRIVATE
 PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           GET_REV_turb, WALL_MODEL, COMPRESSION_WAVE, VELTAN2D,VELTAN3D, &
           SYNTHETIC_TURBULENCE, SYNTHETIC_EDDY_SETUP, TEST_FILTER, EX2G3D, TENSOR_DIFFUSIVITY_MODEL, &
-          TWOD_VORTEX_CERFACS, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
+          TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES
  
@@ -375,6 +375,45 @@ DO K=0,KBAR
 ENDDO
 
 END SUBROUTINE TWOD_VORTEX_CERFACS
+
+
+SUBROUTINE TWOD_VORTEX_UMD(NM)
+!-------------------------------------------------------------------------------
+! James White, University of Maryland
+!-------------------------------------------------------------------------------
+IMPLICIT NONE
+
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K
+REAL(EB), PARAMETER :: RC    = 0.005_EB  ! Core radius of vortex (m)
+REAL(EB), PARAMETER :: UMAX  = 0.5_EB    ! Vortex maximum velocity (m/s)
+REAL(EB), PARAMETER :: XCLOC = 0._EB     ! Center of vortex, x (m)
+REAL(EB), PARAMETER :: ZCLOC = 0._EB     ! Center of vortex, z (m)
+REAL(EB), PARAMETER :: UCOF  = 0.1_EB    ! Coflow velocity (m/s)
+
+CALL POINT_TO_MESH(NM)
+
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         U(I,J,K) = UMAX*((ZC(K)-ZCLOC)/RC)*EXP(0.5_EB- &
+                    ((((X(I)-XCLOC)**2)+((ZC(K)-ZCLOC)**2))/(2._EB*RC**2)))+UCOF
+      ENDDO
+   ENDDO
+ENDDO
+
+V=0._EB
+
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         W(I,J,K) = -UMAX*((XC(I)-XCLOC)/RC)*EXP(0.5_EB- &
+                    ((((XC(I)-XCLOC)**2)+((Z(K)-ZCLOC)**2))/(2._EB*RC**2)))
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE TWOD_VORTEX_UMD
 
 
 SUBROUTINE VARDEN_DYNSMAG(NM)
