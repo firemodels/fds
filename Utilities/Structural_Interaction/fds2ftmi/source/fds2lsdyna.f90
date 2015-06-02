@@ -5,9 +5,9 @@ SUBROUTINE FDS2LS_DYNA (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N,N_AV
 ! This program is part of a Coupling Procedure between fire and structural models
 !                                                                       - SILVA, JC
 
-! $Id: fds2ast.f90 22683 2015-05-19 18:45:51Z arquitetojulio@gmail.com $  
-! $Revision: 22683 $
-! $Date: 2015-05-19 15:45:51 -0300 (ter, 19 mai 2015) $
+! $Id$  
+! $Revision$
+! $Date$
  
 IMPLICIT NONE
 
