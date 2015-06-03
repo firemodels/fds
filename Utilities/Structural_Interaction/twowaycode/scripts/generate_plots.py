@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.get_configdir()
-'/home/jgs/.matplotlib'
 matplotlib.use('Agg') # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt
 
