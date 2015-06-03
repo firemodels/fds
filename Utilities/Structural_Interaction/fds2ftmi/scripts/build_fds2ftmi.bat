@@ -1,6 +1,5 @@
 
 :: Firebot variables
-set FDS_SVNROOT=c:/users/JulioC/Documents/FDS-SMV
 set FIREBOT_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/fds2ftmi/scripts
 set FDS2FTMI_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/fds2ftmi
 set OUTPUT_DIR=%FDS2FTMI_DIR%/scripts/output
