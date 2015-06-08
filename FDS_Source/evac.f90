@@ -968,7 +968,6 @@ CONTAINS
 
     NPPS = 30000 ! Number Persons Per Set (dump to a file)
     !
-    EVAC_DT = EVAC_DT_FLOWFIELD     ! Initialize the clock
     EVAC_CLOCK = T_BEGIN    ! clock for the CHID_evac.csv file
     EVAC_N_QUANTITIES = 0
 
