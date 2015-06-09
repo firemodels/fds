@@ -3706,10 +3706,9 @@ Note, do not split an HVAC {\ct VENT} over multiple-meshes. It is permissible to
 Below are given sample inputs for the three types of fans supported by FDS.
 
 \begin{lstlisting}
-&HVAC TYPE_ID='FAN', ID='constant volume', DEVC_ID='device 1', VOLUME_FLOW=1.0, LOSS=2./
-&HVAC TYPE_ID='FAN', ID='quadratic', DEVC_ID='device 1',
-      MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
-&HVAC TYPE_ID='FAN', ID='user fan curve', RAMP_ID='fan curve',  DEVC_ID='device 1', LOSS=2. /
+&HVAC TYPE_ID='FAN', ID='constant volume', VOLUME_FLOW=1.0, LOSS=2./
+&HVAC TYPE_ID='FAN', ID='quadratic', MAX_FLOW=1., MAX_PRESSURE=1000., LOSS=2. /
+&HVAC TYPE_ID='FAN', ID='user fan curve', RAMP_ID='fan curve',  LOSS=2. /
 \end{lstlisting}
 
 \noindent where:
