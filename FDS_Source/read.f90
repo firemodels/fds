@@ -7221,7 +7221,8 @@ MESH_LOOP: DO NM=1,NMESHES
             IF (MULT_ID==MR%ID) N_OBST_NEW = MR%N_COPIES
          ENDDO
          IF (N_OBST_NEW==0) THEN
-            WRITE(MESSAGE,'(A,A,A,I3)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1
+            WRITE(MESSAGE,'(A,A,A,I3,A,I5)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on OBST ', N_OBST+1,&
+                                             ', line number',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
@@ -8508,7 +8509,8 @@ MESH_LOOP_1: DO NM=1,NMESHES
          N_VENT_NEW = 1
       ELSE
          IF (SURF_ID=='HVAC') THEN
-            WRITE(MESSAGE,'(A,I4)') 'ERROR: Cannot use MULT with an HVAC VENT, VENT ', N_VENT+1
+            WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: Cannot use MULT with an HVAC VENT, VENT ', N_VENT+1,&
+                                         ', line number',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
          DO N=1,N_MULT
@@ -8516,12 +8518,14 @@ MESH_LOOP_1: DO NM=1,NMESHES
             IF (MULT_ID==MR%ID) N_VENT_NEW = MR%N_COPIES
          ENDDO
          IF (N_VENT_NEW==0) THEN
-            WRITE(MESSAGE,'(A,A,A,I4)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1
+            WRITE(MESSAGE,'(A,A,A,I4,A,I4)') 'ERROR: MULT line ', TRIM(MULT_ID),' not found on VENT ', N_VENT+1,&
+                                             ', line number',INPUT_FILE_LINE_NUMBER
             CALL SHUTDOWN(MESSAGE) ; RETURN
          ENDIF
       ENDIF
       IF (SURF_ID=='HVAC' .AND. ID=='null') THEN
-         WRITE(MESSAGE,'(A,I4)') 'ERROR: must specify an ID for an HVAC VENT, VENT ', N_VENT+1
+         WRITE(MESSAGE,'(A,I4,A,I4)') 'ERROR: must specify an ID for an HVAC VENT, VENT ', N_VENT+1,&
+                                      ', line number',INPUT_FILE_LINE_NUMBER
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF      
       N_VENT = N_VENT + N_VENT_NEW
