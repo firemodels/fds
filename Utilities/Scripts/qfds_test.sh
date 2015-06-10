@@ -3,7 +3,7 @@
 # $Revision$
 # $Author$
 #
-# dummy change
+#   dummy change
 
 if [ $# -lt 1 ]
 then
