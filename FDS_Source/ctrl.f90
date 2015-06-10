@@ -62,21 +62,17 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
          SELECT CASE (CF%INPUT_TYPE(NC))
             CASE (DEVICE_INPUT)
                DV => DEVICE(CF%INPUT(NC))
-               IF (T(DV%MESH) >T_CHANGE) THEN
-                  CF%MESH = DV%MESH
-                  T_CHANGE = T(DV%MESH)
-               ENDIF
+               IF (T(DV%MESH) >T_CHANGE) CF%MESH = DV%MESH
+               T_CHANGE = T(DV%MESH)               
                STATE1 = DV%CURRENT_STATE       
             CASE (CONTROL_INPUT)
                IF (.NOT. CONTROL(CF%INPUT(NC))%UPDATED) THEN
                   CALL EVALUATE_CONTROL(T,CF%INPUT(NC),DT,CTRL_STOP_STATUS) 
-                   CF => CONTROL(ID)
+                  CF => CONTROL(ID)
                ENDIF
                STATE1 = CONTROL(CF%INPUT(NC))%CURRENT_STATE
-               IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) THEN
-                  CF%MESH=CONTROL(CF%INPUT(NC))%MESH
-                  T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
-               ENDIF
+               IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) CF%MESH=CONTROL(CF%INPUT(NC))%MESH
+               T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
          END SELECT
          IF (NC==1) THEN
             STATE2 = STATE1
@@ -90,10 +86,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
          SELECT CASE (CF%INPUT_TYPE(NC))
             CASE (DEVICE_INPUT)
                DV => DEVICE(CF%INPUT(NC))
-               IF (T(DV%MESH) >T_CHANGE) THEN
-                  CF%MESH = DV%MESH
-                  T_CHANGE = T(DV%MESH)
-               ENDIF
+               IF (T(DV%MESH) >T_CHANGE) CF%MESH = DV%MESH
+               T_CHANGE = T(DV%MESH)
                STATE1 = DV%CURRENT_STATE
             CASE (CONTROL_INPUT)
                IF (.NOT. CONTROL(CF%INPUT(NC))%UPDATED) THEN
@@ -101,10 +95,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
                   CF => CONTROL(ID)
                ENDIF
                STATE1 = CONTROL(CF%INPUT(NC))%CURRENT_STATE
-               IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) THEN
-                  CF%MESH=CONTROL(CF%INPUT(NC))%MESH
-                  T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
-               ENDIF
+               IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) CF%MESH=CONTROL(CF%INPUT(NC))%MESH
+               T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
          END SELECT
          IF (NC==1) THEN
             STATE2 = STATE1
@@ -133,10 +125,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
                ENDIF
                IF (CONTROL(CF%INPUT(NC))%CURRENT_STATE) THEN
                   COUNTER = COUNTER + 1
-                  IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) THEN
-                     CF%MESH=CONTROL(CF%INPUT(NC))%MESH
-                     T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
-                  ENDIF
+                  IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) CF%MESH=CONTROL(CF%INPUT(NC))%MESH
+                  T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
                ENDIF
          END SELECT
       ENDDO
@@ -149,10 +139,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
                DV => DEVICE(CF%INPUT(NC))
                IF (DV%CURRENT_STATE) THEN
                   COUNTER = COUNTER + 1
-                  IF (T(DV%MESH) >T_CHANGE) THEN
-                     CF%MESH = DV%MESH
-                     T_CHANGE = T(DV%MESH)
-                  ENDIF              
+                  IF (T(DV%MESH) >T_CHANGE) CF%MESH = DV%MESH
+                  T_CHANGE = T(DV%MESH)
                ENDIF
             CASE (CONTROL_INPUT)
                IF (.NOT. CONTROL(CF%INPUT(NC))%UPDATED) THEN
@@ -161,10 +149,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
                ENDIF
                IF (CONTROL(CF%INPUT(NC))%CURRENT_STATE) THEN
                   COUNTER = COUNTER + 1
-                  IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) THEN
-                     CF%MESH=CONTROL(CF%INPUT(NC))%MESH
-                     T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
-                  ENDIF
+                  IF (T(CONTROL(CF%INPUT(NC))%MESH) > T_CHANGE) CF%MESH=CONTROL(CF%INPUT(NC))%MESH
+                  T_CHANGE = T(CONTROL(CF%INPUT(NC))%MESH) 
                ENDIF
          END SELECT
       ENDDO
@@ -198,10 +184,8 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
             DV => DEVICE(CF%INPUT(1))
             CF%MESH = DV%MESH
             CF%INSTANT_VALUE = T(DV%MESH) - DV%T_CHANGE
-            IF (T(DV%MESH) - DV%T_CHANGE >= CF%DELAY) THEN
-               T_CHANGE = T(DV%MESH)
-               STATE2 = .TRUE.
-            ENDIF
+            IF (CF%INSTANT_VALUE >= CF%DELAY .AND. CF%T_CHANGE <= DV%T_CHANGE) CF%CURRENT_STATE = .NOT. CF%PRIOR_STATE
+            T_CHANGE = T(DV%MESH)
          CASE (CONTROL_INPUT)
             CF%MESH=CONTROL(CF%INPUT(1))%MESH
             IF (.NOT. CONTROL(CF%INPUT(1))%UPDATED) THEN
@@ -209,14 +193,11 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
                CF => CONTROL(ID)
             ENDIF
             CF%INSTANT_VALUE = T(CONTROL(CF%INPUT(1))%MESH)  - CONTROL(CF%INPUT(1))%T_CHANGE
-            IF (T(CONTROL(CF%INPUT(1))%MESH)  - CONTROL(CF%INPUT(1))%T_CHANGE >= CF%DELAY) THEN
-               IF (T(CONTROL(CF%INPUT(1))%MESH) > T_CHANGE) THEN
-                  T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
-               ENDIF
-               STATE2 = .TRUE.
-            ENDIF
-      END SELECT
-
+            IF (CF%INSTANT_VALUE >= CF%DELAY .AND. CF%T_CHANGE <= CONTROL(CF%INPUT(1))%T_CHANGE) CF%CURRENT_STATE = .NOT. CF%PRIOR_STATE
+            T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
+         END SELECT
+      ! Special case first flip
+      IF ( CF%INSTANT_VALUE >= CF%DELAY .AND. ABS(CF%T_CHANGE-1000000._EB) <= TWO_EPSILON_EB) CF%CURRENT_STATE = .NOT. CF%PRIOR_STATE
    CASE (CYCLING)
 
    CASE (CUSTOM)
@@ -234,9 +215,7 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
          CASE (DEVICE_INPUT)
             DV => DEVICE(CF%INPUT(1))
             CF%MESH = DV%MESH
-            IF (T(DV%MESH) >T_CHANGE) THEN
-               T_CHANGE = T(DV%MESH)
-            ENDIF
+            T_CHANGE = T(DV%MESH)
             STATE2 = DV%CURRENT_STATE               
          CASE (CONTROL_INPUT)
             IF (.NOT. CONTROL(CF%INPUT(1))%UPDATED) THEN
@@ -245,9 +224,7 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
             ENDIF
             STATE2 = CONTROL(CF%INPUT(1))%CURRENT_STATE
             CF%MESH=CONTROL(CF%INPUT(1))%MESH
-            IF (T(CONTROL(CF%INPUT(1))%MESH) > T_CHANGE) THEN
-               T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
-            ENDIF
+            T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
       END SELECT
       IF (STATE2) CTRL_STOP_STATUS=.TRUE.
 
@@ -256,9 +233,7 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
          CASE (DEVICE_INPUT)
             DV => DEVICE(CF%INPUT(1))
             CF%MESH = DV%MESH
-            IF (T(DV%MESH) >T_CHANGE) THEN
-               T_CHANGE = T(DV%MESH)
-            ENDIF
+            T_CHANGE = T(DV%MESH)
             STATE2 = DV%CURRENT_STATE               
          CASE (CONTROL_INPUT)
             IF (.NOT. CONTROL(CF%INPUT(1))%UPDATED) THEN
@@ -267,9 +242,7 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
             ENDIF
             STATE2 = CONTROL(CF%INPUT(1))%CURRENT_STATE
             CF%MESH=CONTROL(CF%INPUT(1))%MESH
-            IF (T(CONTROL(CF%INPUT(1))%MESH) > T_CHANGE) THEN
-               T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
-            ENDIF
+            T_CHANGE = T(CONTROL(CF%INPUT(1))%MESH) 
       END SELECT
       IF (STATE2) CORE_CLOCK = T_CHANGE
       
@@ -638,17 +611,17 @@ CONTROL_SELECT: SELECT CASE (CF%CONTROL_INDEX)
       ENDIF
       T_CHANGE = T(CF%MESH)
             
-END SELECT CONTROL_SELECT
+   END SELECT CONTROL_SELECT
 
-IF (STATE2) THEN
-   CF%CURRENT_STATE = .NOT. CF%INITIAL_STATE
-ELSE
-   CF%CURRENT_STATE = CF%INITIAL_STATE      
+IF (CF%CONTROL_INDEX/=TIME_DELAY) THEN
+   IF (STATE2) THEN
+      CF%CURRENT_STATE = .NOT. CF%INITIAL_STATE
+   ELSE
+      CF%CURRENT_STATE = CF%INITIAL_STATE      
+   ENDIF
 ENDIF
-
-IF(CF%CURRENT_STATE .NEQV. CF%PRIOR_STATE) THEN
-   CF%T_CHANGE = T_CHANGE
-ENDIF
+   
+IF(CF%CURRENT_STATE .NEQV. CF%PRIOR_STATE) CF%T_CHANGE = T_CHANGE
 
 CF%UPDATED = .TRUE.
 
