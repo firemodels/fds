@@ -6622,7 +6622,7 @@ changes the state from {\ct .FALSE.} to {\ct .TRUE.} when 3, and \underline{only
 
 \label{info:TIME_DELAY}
 
-There is often a time delay between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
+The {\ct TIME\_DELAY} control function starts a timer of length {\ct DELAY} when its input changes state. When the timer expires, the {\ct TIME\_DELAY} control function will change state. Note, that the timer starts at each change in state of the input; therefore, if the input changes state a second time before the first timer ends, the timer will get reset. This function enables FDS to model time delays between when a device activates and when some other action occurs, like in a dry pipe sprinkler system.
 \begin{lstlisting}
 &DEVC XYZ=2,2,3, PROP_ID='Acme Sprinkler_link', QUANTITY='LINK TEMPERATURE',
       ID='Spk_29_link' /
