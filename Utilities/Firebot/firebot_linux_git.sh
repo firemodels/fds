@@ -202,7 +202,7 @@ clean_firebot_metafiles()
 delete_unversioned_files()
 {
    # Delete all unversioned SVN files
-   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+   git clean -dxf
 }
 
 #  ========================
@@ -223,13 +223,16 @@ clean_svn_repo()
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDS_SVNROOT
-      svn revert -Rq *
-      delete_unversioned_files
+# remove unversioned files
+      git clean -dxf
+# revert to last revision
+      git add .
+      git reset --hard HEAD
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $FIREBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username $SVN_USERNAME >> $OUTPUT_DIR/stage1 2>&1
+#      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username $SVN_USERNAME >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
@@ -239,12 +242,12 @@ do_svn_checkout()
    # If an SVN revision number is specified, then get that revision
    if [[ $SVN_REVISION != "" ]]; then
       echo "Checking out revision r${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
-      svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
+   #   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
       echo "At revision ${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
    # If no SVN revision number is specified, then get the latest revision
    else
       echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      svn update >> $OUTPUT_DIR/stage1 2>&1
+      git pull >> $OUTPUT_DIR/stage1 2>&1
 
       # Only run if firebot is in "verification" mode and SKIP_SVN_PROPS_AND_SVN_BUMP is not set
       if [[ $FIREBOT_MODE == "verification" && ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
@@ -259,12 +262,19 @@ do_svn_checkout()
          sed -i "s/.*! dummy comment to force svn change.*/! dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/FDS_Source/main.f90
 
          # Commit back results
-         svn commit -m 'Firebot: Bump SVN revision of FDS guides and FDS source' &> /dev/null
+         git add $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+         git add $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+         git add $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+         git add $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+         git add $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+         git add $FDS_SVNROOT/FDS_Source/main.f90
+         git commit -m 'Firebot: Bump SVN revision of FDS guides and FDS source' &> /dev/null
+         git push &> /dev/null
       fi
       
       echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      svn update >> $OUTPUT_DIR/stage1 2>&1
-      SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
+      git pull >> $OUTPUT_DIR/stage1 2>&1
+      SVN_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
    fi
 }
 
@@ -290,6 +300,8 @@ check_svn_checkout()
 
 fix_svn_properties()
 {
+#*** need to port this to git
+#*** note: it is not called now
    # This function fixes SVN properties
    # (e.g., svn:executable, svn:keywords, svn:eol-style, and svn:mime-type)
    # throughout the FDS-SMV repository.
@@ -1250,9 +1262,10 @@ clean_svn_repo
 do_svn_checkout
 check_svn_checkout
 # Only run if -s option (skip SVN properties) is not used
-if [[ ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
-   fix_svn_properties
-fi
+#*** need to port following to git
+#if [[ ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
+#   fix_svn_properties
+#fi
 archive_compiler_version
 
 ### Stage 2a ###
