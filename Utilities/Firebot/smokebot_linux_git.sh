@@ -163,19 +163,24 @@ run_auto()
   MESSAGE_FILE=$SVN_STATUSDIR/message
 
   MKDIR $SVN_STATUSDIR
-  cd $SMV_SOURCE
-  svn update > /dev/null
-  THIS_SMVSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
-  THIS_SMVAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
-  LAST_SMVSVN=`cat $SVN_SMVFILE`
-  svn log -r $THIS_SMVSVN > $SVN_SMVLOG
+# remove untracked files, revert repo files, update to latest revision
+  git add .
+  git reset --hard HEAD
+  git pull 
 
+# get info for smokeview
+  cd $SMV_SOURCE
+  THIS_SMVSVN=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
+  LAST_SMVSVN=`cat $SVN_SMVFILE`
+  git log . | head -5 | tail -1 > $SVN_SMVLOG
+
+# get info for FDS
   cd $FDS_SOURCE
-  svn update > /dev/null
-  THIS_FDSSVN=`svn info | tail -3 | head -1 | awk '{print $4}'`
-  THIS_FDSAUTHOR=`svn info | tail -4 | head -1 | awk '{print $4}'`
+  THIS_FDSSVN=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  THIS_FDSAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
   LAST_FDSSVN=`cat $SVN_FDSFILE`
-  svn log -r $THIS_FDSSVN > $SVN_FDSLOG
+  git log . | head -5 | tail -1 > $SVN_FDSLOG
 
   if [[ $THIS_SMVSVN == $LAST_SMVSVN && $THIS_FDSSVN == $LAST_FDSSVN ]] ; then
     exit
@@ -274,7 +279,7 @@ clean_smokebot_history()
 delete_unversioned_files()
 {
    # Delete all unversioned SVN files
-   svn status --no-ignore | grep '^[I?]' | cut -c 9- | while IFS= read -r f; do rm -rf "$f"; done
+   git clean -dxf
 }
 
 
@@ -298,18 +303,18 @@ update_and_compile_cfast()
    then
       echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
       cd $CFAST_SVNROOT
-      svn revert -Rq *
-      delete_unversioned_files
+      git add .
+      git reset --hard HEAD
 
       # Update to latest SVN revision
-      svn update >> $OUTPUT_DIR/stage0_cfast 2>&1
+      git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
       
    # If no, then checkout the CFAST repository and compile CFAST
    else
       echo "Downloading and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
       cd $SMV_HOME_DIR
 
-      svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
+     # svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
       
    fi
     # Build CFAST
@@ -342,14 +347,14 @@ clean_svn_repo()
    if [ -e "$FDS_SVNROOT" ]
    then
       cd $FDS_SVNROOT
-      svn revert -Rq *
-      delete_unversioned_files
+      git add .
+      git reset --hard HEAD
    # If not, create FDS repository and checkout
      dummy=true
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $SMOKEBOT_HOME_DIR
-      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SVNbase >> $OUTPUT_DIR/stage1 2>&1
+   #   svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SVNbase >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
@@ -357,8 +362,8 @@ do_svn_checkout()
 {
    cd $FDS_SVNROOT
    echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-   svn update >> $OUTPUT_DIR/stage1 2>&1
-   SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
+   git pull >> $OUTPUT_DIR/stage1 2>&1
+   SVN_REVISION==`git log --abbrev-commit . | head -1 | awk '{print $2}'`
 }
 
 check_svn_checkout()
