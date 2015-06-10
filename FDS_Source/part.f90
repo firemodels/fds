@@ -563,13 +563,13 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             LP%V = SF%VEL_T(1)
             LP%W = SF%VEL_T(2)
          CASE( 2)
-            LP%U = SF%VEL_T(2)
+            LP%U = SF%VEL_T(1)
             LP%V = -WALL(IW)%ONE_D%UW
-            LP%W = SF%VEL_T(1)
+            LP%W = SF%VEL_T(2)
          CASE(-2)
-            LP%U = SF%VEL_T(2)
+            LP%U = SF%VEL_T(1)
             LP%V =  WALL(IW)%ONE_D%UW
-            LP%W = SF%VEL_T(1)
+            LP%W = SF%VEL_T(2)
          CASE( 3)
             LP%U = SF%VEL_T(1)
             LP%V = SF%VEL_T(2)
