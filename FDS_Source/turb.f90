@@ -1633,9 +1633,9 @@ VENT_LOOP: DO NV=1,N_VENT
       CASE(2)
          EDDY_LOOP_2: DO NE=1,VT%N_EDDY
             PROFILE_FACTOR=1._EB
-            VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
+            VT%X_EDDY(NE) = VT%X_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
             VT%Y_EDDY(NE) = VT%Y_EDDY(NE) - DT*SF%VEL*SIGN(1._EB,REAL(VT%IOR,EB))*PROFILE_FACTOR*RAMP_T
-            VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(1)*PROFILE_FACTOR*RAMP_T
+            VT%Z_EDDY(NE) = VT%Z_EDDY(NE) + DT*SF%VEL_T(2)*PROFILE_FACTOR*RAMP_T
             IERROR=0;      CALL EDDY_POSITION(NE,NV,NM,IERROR)
             IF (IERROR==1) CALL EDDY_AMPLITUDE(NE,NV,NM)
             DO KK=VT%K1+1,VT%K2
@@ -3304,11 +3304,12 @@ MODULE ONE_DIMENSIONAL_TURBULENCE
 
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS, ONLY: LU_ERR,CHID
+USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 
 IMPLICIT NONE
 
 PRIVATE
-PUBLIC :: gODT
+PUBLIC :: GODT,SHEARLAYERODT
 
 CONTAINS
 
@@ -3336,7 +3337,7 @@ CONTAINS
 ! flows. J. Fluid Mech., 447:85-109, 2001.                              !
 !                                                                       !
 ! [2] V. Nilsen. ODTN code description. Sandia National Laboratories    !
-! dinternal Report.                                                     !
+! internal Report.                                                      !
 !                                                                       !
 ! [3] S. Wunsch and A. Kerstein. A model for layer formation in stably  !
 ! stratified turbulence. Phys. Fluids, 13(3):702, 2001.                 !
@@ -3354,7 +3355,7 @@ CONTAINS
 ! stratified flows. J. Fluid Mech. 392:277-334, 1999.                   !
 !=======================================================================!
 
-SUBROUTINE gODT(U,V,W,RHO,PHI,MU,DTS,PA,LEDDY,Y0,L, &
+SUBROUTINE GODT(U,V,W,RHO,PHI,MU,DTS,PA,LEDDY,Y0,L, &
                 J0,KE,N_ODT,N_SCALAR,H,N_LMAX,G,GC, &
                 BC,DEBUG,LE_SUP,PDFTAG,RET,C_EDDY,Z_EDDY,PAMAX,DTS_MIN)
 IMPLICIT NONE
@@ -3493,7 +3494,7 @@ JL_IF: IF (JL < N_ODT) THEN
       ENDDO
    ENDDO
 ELSE JL_IF
-   ! SHOULD ONLY POSSIBLY USE THIS IF BC == 1
+   ! should only possibly use this if bc == 1 (periodic)
    IF (BC/=1) THEN
       WRITE(LU_ERR,*) 'WARNING: EDDY EXTENDS OUTSIDE BOUNDARY'
       WRITE(LU_ERR,*) 'J0 = ',J0, ' KE = ',KE
@@ -3607,7 +3608,7 @@ LEDDY_IF: IF (LEDDY==1) THEN
 
 ENDIF LEDDY_IF
 
-END SUBROUTINE gODT
+END SUBROUTINE GODT
 
 
 SUBROUTINE SELECTEDDY(J0,KE,Y0,L,R0,RD,L_MIN,L_MAX,L_MP,H,J1,BC,PDFTAG,RET,N_LMAX)
@@ -3662,12 +3663,13 @@ REAL(EB), PARAMETER :: FIVETHIRDS = 5._EB/3._EB, THREEFIFTHS = 3._EB/5._EB
 !  SELECT THE LENGTH SCALE, EQN (14) IN [2]
 CALL RANDOM_NUMBER(RN)
 SELECT CASE(PDFTAG)
+   CASE(0)
+      L = RN*(1./(L_MAX-L_MIN))
    CASE(1)
       L = L_MP/(((1./GAMMA)* &
           LOG(EXP(GAMMA*((L_MP/L_MIN)**(FIVETHIRDS)))+ &
           (EXP(GAMMA*((L_MP/L_MAX)**(FIVETHIRDS)))- &
           EXP(GAMMA*((L_MP/L_MIN)**(FIVETHIRDS))))*RN))**(THREEFIFTHS))
-!       L = RN*(1./(L_MAX-L_MIN)) ! guess from uniform distribution
    CASE(2)
       P = 1.334_EB
       ! RET = 80._EB
@@ -3692,7 +3694,7 @@ IF (BC==1) THEN
    Y0 = R0 + RN*(RD-R0)
 ELSE IF (BC==2) THEN
 !  BOUNDED
-   Y0 = R0 + RN*(RD-R0-(KE-1)*H)
+   Y0 = R0 + RN*(RD-R0-KE*H)
 ENDIF
 
 !   THE SUBTRACTION OF 1.E-10 HANDLES THE CASE WHERE RN = 1.D0, WHICH
@@ -3799,6 +3801,8 @@ LEDDY = 1
 
 ! EVALUATE LOCATION PROBABILITY DENSITY AT L
 SELECT CASE(PDFTAG)
+   CASE(0)
+      FL = 1._EB/(L_MAX-L_MIN) ! uniform distribution
    CASE(1)
       ! LNORM can be precomputed...
       LNORM =(-(FIVETHIRDS)*GAMMA*(L_MP**(FIVETHIRDS)))/ &
@@ -3832,9 +3836,8 @@ ELSEIF (KE==5) THEN
    F(4) = 2
    F(5) = 5
 ELSE
-   IF (MOD(KE,3)==0) THEN
-      PRINT *, 'EDDY NOT DIVISIBLE BY 3!'
-      STOP
+   IF (MOD(KE,3)/=0) THEN
+      CALL SHUTDOWN('ERROR: eddy not divisible by 3!') ; RETURN
    ENDIF
    M = KE/3
    DO I = 1,M
@@ -3916,11 +3919,8 @@ RE_V = V_RHOK*LD/MU_BAR
 RE_W = W_RHOK*LD/MU_BAR
 
 ! EDDY GRASHOF NUMBER
-IF (G<EPS_LOC) THEN
-   GR = (2*LD**3*RHO_KK/MU_BAR**2)*G*RHO_K
-ELSE
-   GR = 0._EB
-ENDIF
+GR = (2._EB*LD**3*RHO_KK/MU_BAR**2)*G*RHO_K
+print *, GR
 
 ! HARMANJEET SHIHN (SUNY, BUFFALO) BAROCLINIC TORQUE TERM
 IF (GC>EPS_LOC) THEN
@@ -3949,7 +3949,7 @@ ENDIF
 ENERGY = RHO_KK*LD/(2._EB*S*MU_BAR**2)*(P_U**2 + P_V**2 + P_W**2) + GR + B*RI_RE2 - Z_EDDY**2
 
 IF (ENERGY>TWO_EPSILON_EB) THEN
-   LAMBDA = (C_EDDY*MU_BAR)/(RHO_KK*LD**2)*SQRT(ENERGY)
+   LAMBDA = C_EDDY*MU_BAR/(RHO_KK*LD**2)*SQRT(ENERGY)
 ELSE
    PA = 0._EB
    LEDDY = 0
@@ -3959,11 +3959,17 @@ ENDIF
 ! CONTINUOUS--DISCRETE CORRECTION FACTOR NEEDED TO MAKE THE
 ! CONTINUOUS RANDOM-WALK DIFFUSIVITY EQUAL TO THE DISCRETE
 ! RANDOM-WALK DIFFUSIVITY
-DISCOR = (L/LD)**2 * REAL((KE-1)**3,EB)/REAL(KE**3 - 3._EB*KE**2,EB)
+DISCOR = (L/LD)**2 * REAL((KE-1)**3,EB)/REAL(KE**3 - 3*KE**2,EB)
 LAMBDA = DISCOR*LAMBDA
 
 ! ACCEPTANCE PROBABILITY
 PA=LAMBDA*DTS/(FY0*FL)
+
+! CHECK THAT PA IS POSITIVE
+IF (PA<0._EB) THEN
+   CALL SHUTDOWN('ERROR: acceptance probability < 0')
+   RETURN
+ENDIF
 
 ! SAMPLING PERIOD CONTROLLER:
 IF (PA > PAMAX) THEN
@@ -4441,15 +4447,15 @@ IMPLICIT NONE
 !
 ! HENCE, WE OBTAIN FOR RE_D = 427, NU = 2/(3*427).
 
-INTEGER, PARAMETER :: N_PTS = 16383
+INTEGER, PARAMETER :: N_PTS = 100000
 INTEGER, PARAMETER :: N_SCALAR = 1
 
 INTEGER :: J,J1,JD,BC,JD1,JD2,K
-REAL(EB) :: NU,SC,RE,DU,DY,D,H,L_MAX
+REAL(EB) :: NU,SC,RE,DU,DY,D,H,H2,L_MAX,UL,UH,ETA
 REAL(EB) :: R0,RD
 REAL(EB) :: R(N_PTS),RHO(N_PTS),PHI(N_SCALAR,N_PTS)
 REAL(EB) :: U(N_PTS),V(N_PTS),W(N_PTS),MU(N_PTS)
-REAL(EB) :: U_N(N_PTS),V_N(N_PTS),W_N(N_PTS)
+REAL(EB) :: U_N(N_PTS),V_N(N_PTS),W_N(N_PTS),PHI_N(N_PTS)
 REAL(EB) :: MW0,MW(N_SCALAR+1),PRT
 
 REAL(EB) :: DT,DTS,T,TNP1,TOTAL_TIME,DM
@@ -4471,37 +4477,60 @@ CHARACTER(80) :: FN_MOM,FN_EDD
 
 ! PROBLEM PARAMETERS
 ! BC = 2
-! RE = 427.
-! DU = 2.
-! DY = 2.
-! NU = DU*(DY/6.)/RE
-! D = 3.D3*(20*NU)/DU
+! RE = 427._EB
+! DU = 2._EB
+! DY = 2._EB
+! NU = DU*DY/RE
+! D = 3000._EB*(20._EB*NU)/DU
 ! J1 = 1
 ! JD = N_PTS
 ! H = D/(JD-J1+1)
 ! L_MAX = D
 ! N_LMAX = INT(D/H)
+! LIMPLICIT = .TRUE.
 
 ! ASHURST PARAMETERS
 ! THE SHEAR LAYER SIMULATION IN THE 2001 JFM PAPER WAS RUN BY BILL ASHURST
 ! AND HE HAS INFORMED ME THAT THESE ARE THE PARAMETERS HE USED IN RUNNING
 ! THE SIMULATION.  THE NUMBER OF ODT POINTS WAS 16383, VISCOSITY = 0.05,
 ! GRID SPACING = UNITY.  ALSO, THE DIFFUSION EQUATION WAS SOLVED WITH
-! FORWARD EULER (EXPLICIT) WITH CFL = 0.2.  THE REST OF THE DETAILS AREC
+! FORWARD EULER (EXPLICIT) WITH CFL = 0.2.  THE REST OF THE DETAILS ARE
 ! GIVEN IN THE 2001 JFM PAPER, BUT NOTE THE RATE CONSTANT SHOULD BE 3.68.
+! BC = 2
+! RE = 427._EB
+! DU = 2._EB
+! DY = 64.05_EB
+! NU = 0.05_EB
+! SC = 1._EB
+! H = 1._EB
+! D = N_PTS*H
+! L_MAX = D
+! N_LMAX = INT(D/H)
+! J1 = 1
+! JD = N_PTS
+! LIMPLICIT = .FALSE.
+
+! ROGERS AND MOSER (1994)
 BC = 2
-RE = 427._EB
-DU = 2._EB
-DY = 64.05_EB
-NU = 0.05_EB
+UL = -0.5_EB
+UH =  0.5_EB
+DU = UH-UL ! 1
+RE = 800._EB 
+DY = 100._EB
+NU = RE/(DU*DY)
 SC = 1._EB
-H = 1._EB
+ETA = DY*RE**(-0.75_EB) ! KOLMOGOROV LENGTH SCALE
+H = ETA/6._EB
 D = N_PTS*H
 L_MAX = D
 N_LMAX = INT(D/H)
 J1 = 1
 JD = N_PTS
 LIMPLICIT = .TRUE.
+
+!WRITE(LU_ERR,*) 'KOLMOGOROV = ', ETA
+
+H2 = H**2
 
 ! INITIALIZE DOMAIN
 R(J1) = -D/2._EB + H/2._EB
@@ -4515,13 +4544,13 @@ RD = R(JD)+H/2._EB
 JD1 = JD/2-INT((DY/2)/H)
 JD2 = JD/2+INT((DY/2)/H)
 DO J = J1,JD1
-   U(J) = -1._EB
+   U(J) = UL
 ENDDO
 DO J = JD1+1,JD2
    U(J) = DU/DY*R(J)
 ENDDO
 DO J = JD2+1,JD
-   U(J) = 1._EB
+   U(J) = UH
 ENDDO
 
 DO J = J1,JD
@@ -4540,39 +4569,39 @@ ENDDO
 
 ! COMPUTE INITIAL DENSITY
 ! FOR FUN, LET COMP 1 BE AIR, COMP 2 BE HELIUM
-MW(1) = 29._EB
-MW(2) = 4._EB
+MW(1) = 24.4530_EB
+MW(2) = 24.4530_EB
 ! P = 1. ATM
 ! R = 0.082057 KG*ATM/(KMOL*K)
 ! T = 298. K        
 PRT = 1._EB/(0.082057_EB*298._EB)
 DO J = J1,JD
-   MW0 = 1./( PHI(1,J)/MW(1) + (1.-PHI(1,J))/MW(2) )
+   MW0 = 1._EB/( PHI(1,J)/MW(1) + (1._EB-PHI(1,J))/MW(2) )
    RHO(J) = MW0*PRT
    MU(J) = NU*RHO(J)
 ENDDO
 
 ! SIMULATION TIME
-TOTAL_TIME = 1.E4_EB*(20._EB*NU/DU**2)
+TOTAL_TIME = 200._EB*DY/DU
 T = 0._EB
 K = 0
 
 ! DIFFUSION TIME SCALE
-DT = 0.2*(H**2)/NU                    ! EXPLICIT SOLVER
-IF (LIMPLICIT) DT = TOTAL_TIME/100    ! IMPLICIT SOLVER
+DT = 0.2*H2/NU                            ! EXPLICIT SOLVER
+IF (LIMPLICIT) DT = TOTAL_TIME/1000._EB    ! IMPLICIT SOLVER
 ! INITIAL SAMPLING TIME PERIOD (ADJUSTED LATER)
-DTS = 1.E-5_EB*DT
+DTS = 0.01_EB*DT
 
 IF (LIMPLICIT) THEN
    ! SET COEFFICIENTS
    A1(1) = 0.5_EB
-   A0(1) = -(1.5+H**2/(4*DT*NU))
+   A0(1) = -(1.5+H2/(4*DT*NU))
    DO J = 2,N_PTS-1
       A1(J) = 1._EB
-      A0(J) = -(2._EB+H**2/(DT*NU))
+      A0(J) = -(2._EB+H2/(DT*NU))
    ENDDO
    A1(N_PTS) = 0.5_EB
-   A0(N_PTS) = -(1.5_EB+H**2/(4._EB*DT*NU))
+   A0(N_PTS) = -(1.5_EB+H2/(4._EB*DT*NU))
    ! SET DIRICHLET BCS
    UBC0 = U(1)
    VBC0 = V(1)
@@ -4593,8 +4622,8 @@ N_SAMPLES = 0
 
 LU_MOM = GET_FILE_NUMBER()
 LU_EDD = GET_FILE_NUMBER()
-FN_MOM = TRIM(CHID)//'_mom.csv'
-FN_EDD = TRIM(CHID)//'_edd.csv'
+FN_MOM = TRIM(CHID)//'_mom.dat'
+FN_EDD = TRIM(CHID)//'_edd.dat'
 OPEN(LU_MOM,FILE=FN_MOM,STATUS='UNKNOWN',FORM='FORMATTED')
 OPEN(LU_EDD,FILE=FN_EDD,STATUS='UNKNOWN',FORM='FORMATTED')
 
@@ -4603,24 +4632,28 @@ TIME_LOOP: DO
    TNP1 = T + DT
    K = K + 1
    IF (TNP1 > TOTAL_TIME) THEN
-      EXIT
+      EXIT TIME_LOOP
    ENDIF
 
    EDDY_SAMPLING_LOOP: DO
 
       LEDDY = 0
-      CALL gODT(U,V,W,RHO,PHI,MU,DTS,PA,LEDDY,Y0,L, &
-                J0,KE,N_PTS,N_SCALAR,H,N_LMAX,0._EB,0._EB,BC,1,1, &
-                1,0._EB,3.68_EB,0.14_EB,PA_MAX,1.E-5_EB)
-      
+      CALL GODT(U,V,W,RHO,PHI,MU,DTS,PA,LEDDY,Y0,L, &
+                J0,KE,N_PTS,N_SCALAR,H,N_LMAX,0._EB,0._EB, &
+                BC,1,1,0,0._EB,3.68_EB,0._EB,PA_MAX,1.E-6_EB)
+
+          !GODT(U,V,W,RHO,PHI,MU,DTS,PA,LEDDY,Y0,L, &
+          !     J0,KE,N_ODT,N_SCALAR,H,N_LMAX,G,GC, &
+          !     BC,DEBUG,LE_SUP,PDFTAG,RET,C_EDDY,Z_EDDY,PAMAX,DTS_MIN)
+
       N_TRIALS = N_TRIALS + 1
       N_SAMPLES = N_SAMPLES + 1
       PA_SUM = PA_SUM + PA
       PA_CUM = PA_CUM + PA
       IF (PA > PA_MAXIMP) PA_MAXIMP = PA
 
-      IF (N_TRIALS>10000) THEN
-         DTS = 0.1_EB/(PA_SUM/N_TRIALS)*DTS
+      IF (N_TRIALS>10000 .AND. PA_SUM>TWO_EPSILON_EB) THEN
+         DTS = 0.1_EB/(PA_SUM/REAL(N_TRIALS,EB))*DTS
          N_TRIALS = 0
          PA_SUM = 0._EB
       ENDIF
@@ -4633,26 +4666,27 @@ TIME_LOOP: DO
       T = T + DTS
       IF (T > TNP1) THEN
          T = TNP1
-         EXIT
+         EXIT EDDY_SAMPLING_LOOP
       ENDIF
  
    ENDDO EDDY_SAMPLING_LOOP
 
    ! INTEGRATE DIFFUSION EQUATION
-   IMPLICIT_IF: IF (LIMPLICIT .AND. BC==2) THEN
+   IMPLICIT_IF: IF (LIMPLICIT) THEN
       ! IMPLICIT BACKWARD EULER, ONLY WITH DIRICHLET B.C.S
+      IF (BC/=2) CALL SHUTDOWN('ERROR: must use Dirichlet bc with LIMPLICIT ODT')
       ! SET RIGHT-HAND-SIDE
-      B_U(1) = -(U(1)*H**2/(4._EB*DT*NU) + UBC0)
-      B_V(1) = -(V(1)*H**2/(4._EB*DT*NU) + VBC0)
-      B_W(1) = -(W(1)*H**2/(4._EB*DT*NU) + WBC0)
+      B_U(1) = -(U(1)*H2/(4._EB*DT*NU) + UBC0)
+      B_V(1) = -(V(1)*H2/(4._EB*DT*NU) + VBC0)
+      B_W(1) = -(W(1)*H2/(4._EB*DT*NU) + WBC0)
       DO J = 2,N_PTS-1
-         B_U(J) = -U(J)*H**2/(DT*NU)
-         B_V(J) = -V(J)*H**2/(DT*NU)
-         B_W(J) = -W(J)*H**2/(DT*NU)
+         B_U(J) = -U(J)*H2/(DT*NU)
+         B_V(J) = -V(J)*H2/(DT*NU)
+         B_W(J) = -W(J)*H2/(DT*NU)
       ENDDO
-      B_U(N_PTS) = -(U(N_PTS)*H**2/(4._EB*DT*NU) + UBCN)
-      B_V(N_PTS) = -(V(N_PTS)*H**2/(4._EB*DT*NU) + VBCN)
-      B_W(N_PTS) = -(W(N_PTS)*H**2/(4._EB*DT*NU) + WBCN)
+      B_U(N_PTS) = -(U(N_PTS)*H2/(4._EB*DT*NU) + UBCN)
+      B_V(N_PTS) = -(V(N_PTS)*H2/(4._EB*DT*NU) + VBCN)
+      B_W(N_PTS) = -(W(N_PTS)*H2/(4._EB*DT*NU) + WBCN)
       CALL TRIDIAGODT(A1,A0,A1,B_U,U,N_PTS)
       CALL TRIDIAGODT(A1,A0,A1,B_V,V,N_PTS)
       CALL TRIDIAGODT(A1,A0,A1,B_W,W,N_PTS)
@@ -4664,13 +4698,13 @@ TIME_LOOP: DO
          U_N(J) = U(J)
          V_N(J) = V(J)
          W_N(J) = W(J)
-         ! PHI_N(J) = PHI(1,J)
+         PHI_N(J) = PHI(1,J)
       ENDDO
       DO J = J1+1,JD-1
-         U(J)=U_N(J)+DT*NU*(U_N(J+1)-2*U_N(J)+U_N(J-1))/(H**2)
-         V(J)=V_N(J)+DT*NU*(V_N(J+1)-2*V_N(J)+V_N(J-1))/(H**2)
-         W(J)=W_N(J)+DT*NU*(W_N(J+1)-2*W_N(J)+W_N(J-1))/(H**2)
-         ! PHI(1,J) = PHI_N(J) + DT*NU/SC*(PHI_N(J+1)-2*PHI_N(J)+PHI_N(J-1))/(H**2)
+         U(J)=U_N(J) + DT*NU*(U_N(J+1)-2._EB*U_N(J)+U_N(J-1))/H2
+         V(J)=V_N(J) + DT*NU*(V_N(J+1)-2._EB*V_N(J)+V_N(J-1))/H2
+         W(J)=W_N(J) + DT*NU*(W_N(J+1)-2._EB*W_N(J)+W_N(J-1))/H2
+         PHI(1,J) = PHI_N(J) + DT*NU/SC*(PHI_N(J+1)-2._EB*PHI_N(J)+PHI_N(J-1))/H2
       ENDDO
       DO J = J1,JD
          MW0 = 1._EB/( PHI(1,J)/MW(1) + (1._EB-PHI(1,J))/MW(2) )
@@ -4694,13 +4728,13 @@ TIME_LOOP: DO
       WRITE(LU_ERR,201) T,DTS,PA_MEAN,PA_MAXIMP,N_EDDIES
 
    ENDIF
-   IF (.FALSE. .AND. MOD(K,10)==0) THEN
+   IF (.TRUE. .AND. MOD(K,1)==0) THEN
       ! WRITE VELOCITY PROFILES
       LU_PRO=GET_FILE_NUMBER()
       WRITE(EXT,202) K
-      OPEN(LU_PRO,FILE='PROFILES'//EXT//'.DAT',STATUS='UNKNOWN',FORM='FORMATTED')
+      OPEN(LU_PRO,FILE=TRIM(CHID)//'_profiles_'//TRIM(EXT)//'.dat',STATUS='UNKNOWN',FORM='FORMATTED')
       DO J = J1,JD
-         WRITE(LU_PRO,201) R(J),U(J),V(J),RHO(J)
+         WRITE(LU_PRO,203) R(J),U(J),V(J),RHO(J)
       ENDDO
       CLOSE(LU_PRO)
    ENDIF
@@ -4713,8 +4747,9 @@ WRITE(LU_ERR,*) 'SHEAR_LAYER_ODT FINISHED!!'
 WRITE(LU_ERR,*) 'PA_CUM = ',PA_CUM/N_SAMPLES
 STOP
 
-201   FORMAT (F12.6,F12.6,F12.6,F12.6,I10)
-202   FORMAT (I5.5)
+201 FORMAT (F12.6,F12.6,F12.6,F12.6,I10)
+202 FORMAT (I5.5)
+203 FORMAT (E14.6,F12.6,F12.6,F12.6)
 
 END SUBROUTINE SHEARLAYERODT
 
@@ -4725,23 +4760,22 @@ INTEGER, INTENT(IN) :: N
 REAL(EB) :: A(N),B(N),C(N),R(N),U(N)
 INTEGER, PARAMETER :: NMAX = 1000000
 INTEGER J
-REAL(EB) :: BET,GAM(NMAX)
+REAL(EB) :: BB,AA(NMAX)
 
-BET = B(1)
-U(1) = R(1)/BET
-! DECOMPOSITION AND FORWARD SUBSTITUTION
+BB = B(1)
+U(1) = R(1)/BB
+! forward sub
 DO J = 2,N
-   GAM(J) = C(J-1)/BET
-   BET = B(J)-A(J)*GAM(J)
-   IF (BET==0._EB) THEN
-      WRITE(LU_ERR,*) 'TRIDIAG FAILED'
-      STOP
+   AA(J) = C(J-1)/BB
+   BB = B(J)-A(J)*AA(J)
+   IF (ABS(BB)<TWO_EPSILON_EB) THEN
+      CALL SHUTDOWN('ERROR: tridiagodt failed') ; RETURN
    ENDIF
-   U(J) = (R(J)-A(J)*U(J-1))/BET
+   U(J) = (R(J)-A(J)*U(J-1))/BB
 ENDDO
-! BACKSUBSTITUTION
+! backward sub
 DO J = N-1,1,-1
-   U(J) = U(J)-GAM(J+1)*U(J+1)
+   U(J) = U(J)-AA(J+1)*U(J+1)
 ENDDO
 
 END SUBROUTINE TRIDIAGODT
