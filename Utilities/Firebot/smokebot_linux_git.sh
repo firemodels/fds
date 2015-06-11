@@ -11,8 +11,8 @@
 #  = Input variables =
 #  ===================
 
-FDS_SVNbase=FDS-SMVclean
-cfastbase=cfastclean
+FDS_SVNbase=FDS-SMVcleangit
+cfastbase=cfastcleangit
 SMOKEBOT_USERNAME="smokebot"
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
@@ -314,7 +314,7 @@ update_and_compile_cfast()
       echo "Downloading and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
       cd $SMV_HOME_DIR
 
-     # svn co https://cfast.googlecode.com/svn/trunk/cfast/trunk $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
+     git clone git@github.com:firemodels/cfast.git $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
       
    fi
     # Build CFAST
@@ -341,7 +341,7 @@ update_and_compile_cfast()
 #  = Stage 1 - SVN operations =
 #  ============================
 
-clean_svn_repo()
+clean_git_repo()
 {
    # Check to see if FDS repository exists
    if [ -e "$FDS_SVNROOT" ]
@@ -354,11 +354,11 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $SMOKEBOT_HOME_DIR
-   #   svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ $FDS_SVNbase >> $OUTPUT_DIR/stage1 2>&1
+      git clone git@github.com:firemodels/fds-smv.git $FDS_SVNbase >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
-do_svn_checkout()
+do_git_checkout()
 {
    cd $FDS_SVNROOT
    echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
@@ -366,7 +366,7 @@ do_svn_checkout()
    SVN_REVISION==`git log --abbrev-commit . | head -1 | awk '{print $2}'`
 }
 
-check_svn_checkout()
+check_git_checkout()
 {
    cd $FDS_SVNROOT
    # Check for SVN errors
@@ -1288,9 +1288,9 @@ clean_smokebot_history
 update_and_compile_cfast
 
 ### Stage 1 ###
-clean_svn_repo
-do_svn_checkout
-check_svn_checkout
+clean_git_repo
+do_git_checkout
+check_git_checkout
 PRELIM_end=`GET_TIME`
 DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
 echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
