@@ -1,5 +1,6 @@
 # mac file
 .DS_Store
+._*
 
 # compiler output files
 *.exe
