@@ -28,7 +28,8 @@ ulimit -s unlimited
 
 # Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
-FDS_SVNROOT="$FIREBOT_HOME_DIR/FDS-SMV"
+FDS_SVNBASE=FDS-SMVgitclean
+FDS_SVNROOT="$FIREBOT_HOME_DIR/$FDS_SVNBASE"
 OUTPUT_DIR="$FIREBOT_DIR/output"
 HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
@@ -47,7 +48,7 @@ fi
 source $FIREBOT_DIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
+echo "firebot.sh [ -q queue_name -r revision_number -s -v max_validation_processes -y ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
@@ -72,8 +73,7 @@ exit
 
 QUEUE=firebot
 SVN_REVISION=
-SVN_USERNAME=fds.firebot
-while getopts 'hq:r:su:v:y' OPTION
+while getopts 'hq:r:sv:y' OPTION
 do
 case $OPTION in
   h)
@@ -87,9 +87,6 @@ case $OPTION in
    ;;
   s)
    SKIP_SVN_PROPS_AND_SVN_BUMP=true
-   ;;
-  u)
-   SVN_USERNAME="$OPTARG"
    ;;
   v)
    FIREBOT_MODE="validation"
@@ -215,7 +212,7 @@ delete_unversioned_files()
 #  = Stage 1 - SVN operations =
 #  ============================
 
-clean_svn_repo()
+clean_git_repo()
 {
    # Check to see if FDS repository exists
    if [ -e "$FDS_SVNROOT" ]
@@ -232,19 +229,19 @@ clean_svn_repo()
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $FIREBOT_HOME_DIR
-#      svn co https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/ FDS-SMV --username $SVN_USERNAME >> $OUTPUT_DIR/stage1 2>&1
+      git clone git@github.com:firemodels/fds-smv.git $FDS_SVNBASE >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
-do_svn_checkout()
+do_git_checkout()
 {
    cd $FDS_SVNROOT
    # If an SVN revision number is specified, then get that revision
    if [[ $SVN_REVISION != "" ]]; then
-      echo "Checking out revision r${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
-   #   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
+      echo "Checking out revision ${SVN_REVISION}" >> $OUTPUT_DIR/stage1 2>&1
+      git checkout $SVN_REVISION . >> $OUTPUT_DIR/stage1 2>&1
       echo "At revision ${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
-   # If no SVN revision number is specified, then get the latest revision
+   # If no revision string is specified, then get the latest revision
    else
       echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
       git pull >> $OUTPUT_DIR/stage1 2>&1
@@ -254,12 +251,12 @@ do_svn_checkout()
          # Bump SVN revision number of all guides (so that the SVN revision keyword gets updated)
          echo "Bump SVN revision number of all guides." >> $OUTPUT_DIR/stage1 2>&1
          CURRENT_TIMESTAMP=`date`
-         sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-         sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-         sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-         sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-         sed -i "s/.*% dummy comment to force svn change.*/% dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-         sed -i "s/.*! dummy comment to force svn change.*/! dummy comment to force svn change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/FDS_Source/main.f90
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/FDS_Source/main.f90
 
          # Commit back results
          git add $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
@@ -278,7 +275,7 @@ do_svn_checkout()
    fi
 }
 
-check_svn_checkout()
+check_git_checkout()
 {
    cd $FDS_SVNROOT
    # Check for SVN errors
@@ -298,7 +295,7 @@ check_svn_checkout()
    fi
 }
 
-fix_svn_properties()
+fix_git_properties()
 {
 #*** need to port this to git
 #*** note: it is not called now
@@ -1258,13 +1255,13 @@ clean_firebot_metafiles
 update_and_compile_cfast
 
 ### Stage 1 ###
-clean_svn_repo
-do_svn_checkout
-check_svn_checkout
+clean_git_repo
+do_git_checkout
+check_git_checkout
 # Only run if -s option (skip SVN properties) is not used
 #*** need to port following to git
 #if [[ ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
-#   fix_svn_properties
+#   fix_git_properties
 #fi
 archive_compiler_version
 
