@@ -130,7 +130,7 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
 void getRevision(char *revision){
   char rev[256], *beg=NULL, *end=NULL;
 
-  strcpy(rev,"$Revision: 22783 $");
+  strcpy(rev,"$Revision: unknown $");
   beg = strchr(rev,':');
   if(beg!=NULL){
     beg=trim_front(beg+1);
