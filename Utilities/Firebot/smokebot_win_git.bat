@@ -127,6 +127,9 @@ echo             found pdflatex
 call :is_file_installed grep|| exit /b 1
 echo             found grep
 
+call :is_file_installed gawk|| exit /b 1
+echo             found gawk
+
 call :is_file_installed sed|| exit /b 1
 echo             found sed
 
@@ -171,10 +174,10 @@ if "%fdsbasename%" == "FDS-SMVclean" (
 echo             updating %fdsbasename% repository
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-git log --abbrev-commit . | head -1 | awk '{print $2}' > %revisionfilestring%
+git log --abbrev-commit . | head -1 | gawk '{print $2}' > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
-git log --abbrev-commit . | head -1 | awk '{print $2}' > %revisionfilenum%
+git log --abbrev-commit . | head -1 | gawk '{print $2}' > %revisionfilenum%
 set /p revisionnum=<%revisionfilenum%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
