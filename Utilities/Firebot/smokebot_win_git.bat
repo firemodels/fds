@@ -17,7 +17,7 @@ if NOT exist %gitroot% (
   echo %fdsbasename% repository creation complete.
 )
 
-set cfastbasename=cfastclean
+set cfastbasename=cfastgitclean
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
   cd %userprofile%
@@ -133,6 +133,9 @@ echo             found gawk
 call :is_file_installed sed|| exit /b 1
 echo             found sed
 
+call :is_file_installed wc|| exit /b 1
+echo             found wc
+
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
@@ -144,7 +147,7 @@ echo. 1> %OUTDIR%\stage0.txt 2>&1
 :: revert cfast repository
 
 cd %cfastroot%
-if "%cfastbasename%" == "cfastclean" (
+if "%cfastbasename%" == "cfastgitclean" (
    echo             reverting %cfastbasename% repository
    cd %cfastroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
@@ -161,7 +164,7 @@ git pull  1>> %OUTDIR%\stage0.txt 2>&1
 :: revert FDS/Smokeview repository
 
 cd %gitroot%
-if "%fdsbasename%" == "FDS-SMVclean" (
+if "%fdsbasename%" == "FDS-SMVgitclean" (
    echo             reverting %fdsbasename% repository
    cd %gitroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
@@ -174,10 +177,10 @@ if "%fdsbasename%" == "FDS-SMVclean" (
 echo             updating %fdsbasename% repository
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-git log --abbrev-commit . | head -1 | gawk '{print $2}' > %revisionfilestring%
+git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
-git log --abbrev-commit . | head -1 | gawk '{print $2}' > %revisionfilenum%
+git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilenum%
 set /p revisionnum=<%revisionfilenum%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
@@ -315,7 +318,7 @@ echo             debug mode
 :: run the cases
 
 cd %gitroot%\Verification\scripts
-call Run_SMV_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_cases_git %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
@@ -332,7 +335,7 @@ echo             release mode
 :: run the cases
 
 cd %gitroot%\Verification\scripts
-call Run_SMV_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_cases_git %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
