@@ -112,7 +112,7 @@ mpi_intel_win_64 : setup_win $(objwin_mpi)
 
 mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
+mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
 mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64_db : FCOMPL = mpiifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
