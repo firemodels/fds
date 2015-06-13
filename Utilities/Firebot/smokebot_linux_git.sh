@@ -362,16 +362,7 @@ check_git_checkout()
 {
    cd $FDS_GITROOT
    # Check for GIT errors
-   if [[ `grep -E 'Updated|At revision' $OUTPUT_DIR/stage1 | wc -l` -ne 1 ]];
-   then
-      echo "Errors from Stage 1 - GIT operations:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage1 >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      email_build_status
-      exit
-   else
-      stage1_success=true
-   fi
+   stage1_success=true
 }
 
 #  ==================================
@@ -762,7 +753,7 @@ compile_smv_utilities()
 is_file_installed()
 {
   program=$1
-  notfound=`$program -help |& tail -1 |& grep "not found" | wc -l`
+  notfound=`$program -help | tail -1 | grep "not found" | wc -l`
   if [ "$notfound" == "1" ] ; then
     stage5pre_success="0"
     echo "***error: $program not installed" >> $OUTPUT_DIR/stage5pre
@@ -839,7 +830,7 @@ run_verification_cases_release()
    cd $FDS_GITROOT/Verification
    find .                        -name '*.stop' -exec rm -f {} \;
    find .                        -name '*.err' -exec rm -f {} \;
-   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
+   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;`
    find Visualization            -name '*.smv' -exec rm -f {} \;
    find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
    find WUI                      -name '*.smv' -exec rm -f {} \;
@@ -1247,7 +1238,7 @@ email_build_status()
    else
 # upload guides to a google drive directory
       cd $SMOKEBOT_DIR
-      $UPLOADGUIDES  > /dev/null
+#      $UPLOADGUIDES  > /dev/null
 
       echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
       echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
