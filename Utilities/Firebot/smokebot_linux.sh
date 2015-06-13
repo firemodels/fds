@@ -75,7 +75,7 @@ if [[ "$FDS_SVNbase" == "FDS-SMVclean" ]];
       # Continue along
       :
    else
-      echo "Warning: You are running the Smokebot script with the"
+      echo "Error: You are running the Smokebot script with the"
       echo "repo $FDS_SVNbase, not FDS-SMVclean."
       echo "Terminating script."
       exit
