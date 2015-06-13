@@ -18,10 +18,10 @@ set OMP_NUM_THREADS=1
 ::                         set repository names
 :: -------------------------------------------------------------
 
-set fdsbasename=FDS-SMVclean
-set svnroot=%userprofile%\%fdsbasename%
-if NOT exist %svnroot% (
-  echo ***Fatal error: The svn repository %fdsbasename% does not exist.
+set fdsbasename=FDS-SMVgitclean
+set gitroot=%userprofile%\%fdsbasename%
+if NOT exist %gitroot% (
+  echo ***Fatal error: The git repository %fdsbasename% does not exist.
   echo Aborting firebot
   exit /b 1
 )
@@ -42,7 +42,7 @@ set TIMINGSDIR=%CURDIR%\timings
 
 erase %OUTDIR%\*.txt %OUTDIR%\*.log 1> Nul 2>&1
 
-set email=%svnroot%\SMV\scripts\email.bat
+set email=%gitroot%\SMV\scripts\email.bat
 
 set release=0
 set debug=1
@@ -60,20 +60,20 @@ set counta=%OUTDIR%\firebot_count0a.txt
 set countb=%OUTDIR%\firebot_count0b.txt
 set scratchfile=%OUTDIR%\firebot_scratch.txt
 
-set fromsummarydir=%svnroot%\Manuals\SMV_Summary
+set fromsummarydir=%gitroot%\Manuals\SMV_Summary
 
 set haveerrors=0
 set havewarnings=0
 set have_icc=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
-set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
-set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
+set gettimeexe=%gitroot%\Utilities\get_time\intel_win_64\get_time.exe
+set runbatchexe=%gitroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
 call :get_datetime startdate starttime
 
-call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %svnroot%\Utilities\Firebot\firebot_email_list.bat
+call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
+call %gitroot%\Utilities\Firebot\firebot_email_list.bat
 if "%DEBUGOPT%" == "debug" (
    set mailToList=%mailToFDSDebug%
 ) else (
@@ -140,29 +140,32 @@ echo             found sed
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
-call :is_file_installed svn|| exit /b 1
-echo             found svn
+call :is_file_installed git|| exit /b 1
+echo             found git
 
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
-if "%fdsbasename%" == "FDS-SMVclean" (
+if "%fdsbasename%" == "FDS-SMVgitclean" (
    echo             reverting %fdsbasename% repository
-   cd %svnroot%
-   call :svn_revert 1> Nul 2>&1
+   cd %gitroot%
+   git clean -dxf 1> Nul 2>&1
+   git add . 1> Nul 2>&1
+   git reset --hard HEAD 1> Nul 2>&1
+
 )
 
 :: update FDS/Smokeview repository
 
 echo             updating %fdsbasename% repository
-cd %svnroot%
-svn update 1>> %OUTDIR%\stage0.txt 2>&1
+cd %gitroot%
+git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-svn info | grep Revision > %revisionfilestring%
+git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
-svn info | grep Revision | cut -d " " -f 2 > %revisionfilenum%
+git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
 set /p revisionnum=<%revisionfilenum%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
@@ -178,7 +181,7 @@ echo Stage 1 - Building FDS
 
 echo             parallel debug
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
+cd %gitroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1> %OUTDIR%\makefdsd.log 2>&1
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
@@ -186,7 +189,7 @@ call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debu
 
 echo             parallel release
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_64
+cd %gitroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makefdsr.log 2>&1
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makefdsr.log|| exit /b 1
@@ -200,12 +203,12 @@ echo Stage 2 - Building Smokeview
 
 echo             libs
 
-cd %svnroot%\SMV\Build\LIBS\lib_win_intel_64
+cd %gitroot%\SMV\Build\LIBS\lib_win_intel_64
 call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
-cd %svnroot%\SMV\Build\intel_win_64
+cd %gitroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> Nul 2>&1
 make -f ..\Makefile intel_win_64_db 1> %OUTDIR%\makesmvd.log 2>&1
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
@@ -213,7 +216,7 @@ call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug c
 
 echo             release
 
-cd %svnroot%\SMV\Build\intel_win_64
+cd %gitroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> Nul 2>&1
 make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmvr.log 2>&1
 
@@ -227,7 +230,7 @@ call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release
 echo Stage 3 - Building Utilities
 
 echo             fds2ascii
-cd %svnroot%\Utilities\fds2ascii\intel_win_64
+cd %gitroot%\Utilities\fds2ascii\intel_win_64
 erase *.obj *.mod *.exe 1> Nul 2>&1
 ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1> %OUTDIR%\makefds2ascii.log 2>&1
 call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
@@ -235,7 +238,7 @@ call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/
 
 if %have_icc% == 1 (
   echo             background
-  cd %svnroot%\Utilities\background\intel_win_32
+  cd %gitroot%\Utilities\background\intel_win_32
   erase *.obj *.mod *.exe 1> Nul 2>&1
   make -f ..\Makefile intel_win_32 1> %OUTDIR%\makebackground.log 2>&1
   call :does_file_exist background.exe %OUTDIR%\makebackground.log
@@ -258,14 +261,14 @@ echo             debug mode
 
 :: run cases
 
-cd %svnroot%\Verification\
+cd %gitroot%\Verification\
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %svnroot%\Verification\
+cd %gitroot%\Verification\
 call Check_FDS_cases 
 
 :: report errors
@@ -276,14 +279,14 @@ echo             release mode
 
 :: run cases
 
-cd %svnroot%\Verification\
+cd %gitroot%\Verification\
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %svnroot%\Verification\
+cd %gitroot%\Verification\
 call Check_FDS_cases
 
 :: report errors
@@ -309,7 +312,7 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making pictures
 echo             FDS verification cases
 
-cd %svnroot%\Verification\
+cd %gitroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
 call :GET_DURATION MAKEPICS %MAKEPICS_beg%
@@ -324,16 +327,16 @@ call :GET_TIME MAKEGUIDES_beg
 
 :: don't build FDS guides until a "matlab" stage is added
 ::echo             FDS Technical Reference
-::call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+::call :build_guide FDS_Technical_Reference_Guide %gitroot%\Manuals\FDS_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 ::echo             FDS User
-::call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+::call :build_guide FDS_User_Guide %gitroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 ::echo             FDS Verification
-::call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+::call :build_guide FDS_Verification_Guide %gitroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 ::echo             FDS Validation
-::call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+::call :build_guide FDS_Validation_Guide %gitroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
@@ -549,28 +552,6 @@ if %nerrors% GTR 0 (
   type %OUTDIR%\stage_error.txt >> %errorlog%
   set haveerrors=1
   set haveerrors_now=1
-)
-exit /b
-
-:: -------------------------------------------------------------
-:svn_revert
-:: -------------------------------------------------------------
-svn cleanup .
-svn revert -R .
-For /f "tokens=1,2" %%A in ('svn status --no-ignore') Do (
-     If [%%A]==[?] ( Call :UniDelete %%B
-     ) Else If [%%A]==[I] Call :UniDelete %%B
-   )
-exit /b
-
-:: -------------------------------------------------------------
-:UniDelete delete file/dir
-:: -------------------------------------------------------------
-if "%1"=="%~nx0" exit /b
-IF EXIST "%1\*" ( 
-    RD /S /Q "%1"
-) Else (
-    If EXIST "%1" DEL /S /F /Q "%1"
 )
 exit /b
 
