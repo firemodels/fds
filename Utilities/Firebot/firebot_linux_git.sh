@@ -16,9 +16,6 @@
 # Firebot mode (verification or validation); default mode: verification
 FIREBOT_MODE="verification"
 
-# Firebot's username
-FIREBOT_USERNAME="firebot"
-
 # Change to home directory
 cd
 FIREBOT_HOME_DIR="`pwd`"
@@ -28,8 +25,8 @@ ulimit -s unlimited
 
 # Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
-FDS_SVNBASE=FDS-SMVgitclean
-FDS_SVNROOT="$FIREBOT_HOME_DIR/$FDS_SVNBASE"
+FDS_GITBASE=FDS-SMVgitclean
+FDS_GITROOT="$FIREBOT_HOME_DIR/$FDS_GITBASE"
 OUTPUT_DIR="$FIREBOT_DIR/output"
 HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
@@ -48,32 +45,31 @@ fi
 source $FIREBOT_DIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_number -s -v max_validation_processes -y ]"
+echo "firebot.sh [ -q queue_name -r revision_string -s -v max_validation_processes -y ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
 echo ""
-echo "-r - revision_number - run cases using a specific SVN revision number"
-echo "     default: (none, latest SVN HEAD)"
+echo "-r - revision_string - run cases using a specific GIT revision string"
+echo "     default: (none, latest GIT HEAD)"
 echo ""
-echo "-s - skip fixing SVN properties and SVN bump of manuals"
-echo "     default: SKIP_SVN_PROPS_AND_SVN_BUMP is undefined (false)"
+echo "-s - skip fixing GIT properties and GIT bump of manuals"
+echo "     default: SKIP_GIT_PROPS_AND_GIT_BUMP is undefined (false)"
 echo ""
-echo "-u - specify SVN username to use"
+echo "-u - specify GIT username to use"
 echo "     default: fds.firebot"
 echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
 echo ""
-echo "-y - run Firebot as any user (warning!)"
 exit
 }
 
 QUEUE=firebot
-SVN_REVISION=
-while getopts 'hq:r:sv:y' OPTION
+GIT_REVISION=
+while getopts 'hq:r:sv:' OPTION
 do
 case $OPTION in
   h)
@@ -83,10 +79,10 @@ case $OPTION in
    QUEUE="$OPTARG"
    ;;
   r)
-   SVN_REVISION="$OPTARG"
+   GIT_REVISION="$OPTARG"
    ;;
   s)
-   SKIP_SVN_PROPS_AND_SVN_BUMP=true
+   SKIP_GIT_PROPS_AND_GIT_BUMP=true
    ;;
   v)
    FIREBOT_MODE="validation"
@@ -96,9 +92,6 @@ case $OPTION in
    # Set Validationbot email list
    mailToFDS="$mailToFDS_verbose"
    ;;
-  y)
-   RUN_AS_ANOTHER_USER=true
-   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -107,22 +100,15 @@ shift $(($OPTIND-1))
 #  = End user warning =
 #  ====================
 
-if [[ $RUN_AS_ANOTHER_USER ]] ; then
-# Continue along
-:
-else
-   # Warn if running as user other than firebot
-   if [[ `whoami` == "$FIREBOT_USERNAME" ]];
-      then
-         # Continue along
-         :
-      else
-         echo "Warning: You are running the Firebot script as an end user."
-         echo "This script will definitely modify and/or erase your repository."
-         echo "If you wish to continue, run Firebot with the -y option at your own risk."
-         echo "Terminating script."
-         exit
-   fi
+if [[ "FDS_GITBASE" == "FDS-SMVgitclean" ]];
+   then
+      # Continue along
+      :
+   else
+      echo "Error: You are running the Firebot script with the"
+      echo "repo $FDS_GITBASE, not FDS-SMVgitclean."
+      echo "Terminating script."
+      exit
 fi
 
 #  =============================================
@@ -181,7 +167,7 @@ check_time_limit()
 
 set_files_world_readable()
 {
-   cd $FDS_SVNROOT
+   cd $FDS_GITROOT
    chmod -R go+r *
 }
 
@@ -196,12 +182,6 @@ clean_firebot_metafiles()
    chmod 775 $NEWGUIDE_DIR
 }
 
-delete_unversioned_files()
-{
-   # Delete all unversioned SVN files
-   git clean -dxf
-}
-
 #  ========================
 #  ========================
 #  = Firebot Build Stages =
@@ -209,17 +189,17 @@ delete_unversioned_files()
 #  ========================
 
 #  ============================
-#  = Stage 1 - SVN operations =
+#  = Stage 1 - GIT operations =
 #  ============================
 
 clean_git_repo()
 {
    # Check to see if FDS repository exists
-   if [ -e "$FDS_SVNROOT" ]
+   if [ -e "$FDS_GITROOT" ]
    # If yes, clean FDS repository
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
-      cd $FDS_SVNROOT
+      cd $FDS_GITROOT
 # remove unversioned files
       git clean -dxf
 # revert to last revision
@@ -229,59 +209,59 @@ clean_git_repo()
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
       cd $FIREBOT_HOME_DIR
-      git clone git@github.com:firemodels/fds-smv.git $FDS_SVNBASE >> $OUTPUT_DIR/stage1 2>&1
+      git clone git@github.com:firemodels/fds-smv.git $FDS_GITBASE >> $OUTPUT_DIR/stage1 2>&1
    fi
 }
 
 do_git_checkout()
 {
-   cd $FDS_SVNROOT
-   # If an SVN revision number is specified, then get that revision
-   if [[ $SVN_REVISION != "" ]]; then
-      echo "Checking out revision ${SVN_REVISION}" >> $OUTPUT_DIR/stage1 2>&1
-      git checkout $SVN_REVISION . >> $OUTPUT_DIR/stage1 2>&1
-      echo "At revision ${SVN_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
+   cd $FDS_GITROOT
+   # If an GIT revision string is specified, then get that revision
+   if [[ $GIT_REVISION != "" ]]; then
+      echo "Checking out revision ${GIT_REVISION}" >> $OUTPUT_DIR/stage1 2>&1
+      git checkout $GIT_REVISION . >> $OUTPUT_DIR/stage1 2>&1
+      echo "At revision ${GIT_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
    # If no revision string is specified, then get the latest revision
    else
       echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
       git pull >> $OUTPUT_DIR/stage1 2>&1
 
-      # Only run if firebot is in "verification" mode and SKIP_SVN_PROPS_AND_SVN_BUMP is not set
-      if [[ $FIREBOT_MODE == "verification" && ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
-         # Bump SVN revision number of all guides (so that the SVN revision keyword gets updated)
-         echo "Bump SVN revision number of all guides." >> $OUTPUT_DIR/stage1 2>&1
+      # Only run if firebot is in "verification" mode and SKIP_GIT_PROPS_AND_GIT_BUMP is not set
+      if [[ $FIREBOT_MODE == "verification" && ! $SKIP_GIT_PROPS_AND_GIT_BUMP ]] ; then
+         # Bump GIT revision string of all guides (so that the GIT revision keyword gets updated)
+         echo "Bump GIT revision string of all guides." >> $OUTPUT_DIR/stage1 2>&1
          CURRENT_TIMESTAMP=`date`
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_SVNROOT/FDS_Source/main.f90
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $FDS_GITROOT/FDS_Source/main.f90
 
          # Commit back results
-         git add $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-         git add $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-         git add $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-         git add $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-         git add $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-         git add $FDS_SVNROOT/FDS_Source/main.f90
-         git commit -m 'Firebot: Bump SVN revision of FDS guides and FDS source' &> /dev/null
+         git add $FDS_GITROOT/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+         git add $FDS_GITROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+         git add $FDS_GITROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+         git add $FDS_GITROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+         git add $FDS_GITROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+         git add $FDS_GITROOT/FDS_Source/main.f90
+         git commit -m 'Firebot: Bump GIT revision of FDS guides and FDS source' &> /dev/null
          git push &> /dev/null
       fi
       
       echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
       git pull >> $OUTPUT_DIR/stage1 2>&1
-      SVN_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+      GIT_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
    fi
 }
 
 check_git_checkout()
 {
-   cd $FDS_SVNROOT
-   # Check for SVN errors
+   cd $FDS_GITROOT
+   # Check for GIT errors
    if [[ `grep -E 'Updated|At revision' $OUTPUT_DIR/stage1 | wc -l` -ne 2 ]];
    then
-      echo "Errors from Stage 1 - SVN operations:" >> $ERROR_LOG
+      echo "Errors from Stage 1 - GIT operations:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       if [ $FIREBOT_MODE == "verification" ] ; then
@@ -299,29 +279,29 @@ fix_git_properties()
 {
 #*** need to port this to git
 #*** note: it is not called now
-   # This function fixes SVN properties
+   # This function fixes GIT properties
    # (e.g., svn:executable, svn:keywords, svn:eol-style, and svn:mime-type)
    # throughout the FDS-SMV repository.
 
-   # cd to SVN root
-   cd $FDS_SVNROOT
+   # cd to GIT root
+   cd $FDS_GITROOT
 
    # Delete all svn:executable properties
    svn propdel svn:executable --recursive &> /dev/null
 
    # Restore local executable property to svn-fix-props.py
-   chmod +x $FDS_SVNROOT/Utilities/Subversion/svn-fix-props.py &> /dev/null
+   chmod +x $FDS_GITROOT/Utilities/Subversion/svn-fix-props.py &> /dev/null
 
-   # Run svn-fix-props.py script (fixes all SVN properties)
-   $FDS_SVNROOT/Utilities/Subversion/svn-fix-props.py --config $FDS_SVNROOT/Utilities/Subversion/config &> /dev/null
+   # Run svn-fix-props.py script (fixes all GIT properties)
+   $FDS_GITROOT/Utilities/Subversion/svn-fix-props.py --config $FDS_GITROOT/Utilities/Subversion/config &> /dev/null
 
    # Commit back results
-   svn commit -m 'Firebot: Fix SVN properties throughout repository' &> /dev/null
+   svn commit -m 'Firebot: Fix GIT properties throughout repository' &> /dev/null
 }
 
 archive_compiler_version()
 {
-   ifort -V &> "$HISTORY_DIR/${SVN_REVISION}_compiler_info.txt"
+   ifort -V &> "$HISTORY_DIR/${GIT_REVISION}_compiler_info.txt"
 }
 
 #  ============================================
@@ -331,7 +311,7 @@ archive_compiler_version()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -339,7 +319,7 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
       stage2a_success=true
@@ -364,14 +344,14 @@ check_compile_fds_db()
 inspect_fds_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
-   cd $FDS_SVNROOT/Utilities/Scripts
+   cd $FDS_GITROOT/Utilities/Scripts
    ./inspect_openmp.sh &> $OUTPUT_DIR/stage2a_inspect
 }
 
 check_inspect_fds_db()
 {
    # Scan for errors in thread checking results
-   cd $FDS_SVNROOT/Utilities/Scripts
+   cd $FDS_GITROOT/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
       if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
@@ -394,7 +374,7 @@ check_inspect_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
+   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
 }
@@ -402,7 +382,7 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
+   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB
    if [ -e "fds_mpi_intel_linux_64$IB$DB" ]
    then
       stage2b_success=true
@@ -431,9 +411,9 @@ check_compile_fds_mpi_db()
 
 generate_validation_set_list()
 {
-   cd $FDS_SVNROOT/Validation
+   cd $FDS_GITROOT/Validation
 
-   # List and sort the oldest validation sets in the $FDS_SVNROOT/Validation/Process_All_Output.sh script
+   # List and sort the oldest validation sets in the $FDS_GITROOT/Validation/Process_All_Output.sh script
    # based on the modification date of $VDIR/FDS_Output_Files. The result is an array of the validation
    # sets ordered from oldest to newest.
 #   VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
@@ -482,7 +462,7 @@ check_current_utilization()
 run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_GITROOT/Verification
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
@@ -494,7 +474,7 @@ run_verification_cases_debug()
    wait_cases_debug_end 'verification'
 
    # Remove all .stop files from Verification directories (recursively)
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_GITROOT/Verification
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -514,7 +494,7 @@ run_validation_cases_debug()
          break
       fi
 
-      cd $FDS_SVNROOT/Validation/"$SET"
+      cd $FDS_GITROOT/Validation/"$SET"
 
       # Submit FDS validation cases and wait for them to start
       echo "Running FDS validation cases for ${SET}:" >> $OUTPUT_DIR/stage3
@@ -536,7 +516,7 @@ run_validation_cases_debug()
 
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
-      cd $FDS_SVNROOT/Validation/"$SET"
+      cd $FDS_GITROOT/Validation/"$SET"
       ./Run_All.sh -b -s >> $OUTPUT_DIR/stage3 2>&1
       echo "" >> $OUTPUT_DIR/stage3 2>&1
    done
@@ -550,7 +530,7 @@ run_validation_cases_debug()
    #  ======================
 
    # Remove all .stop files from Validation directories (recursively)
-   cd $FDS_SVNROOT/Validation
+   cd $FDS_GITROOT/Validation
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -580,7 +560,7 @@ check_cases_debug()
 # copy casename.err to casename.err_stage3 for any cases that had errors
       echo "#/bin/bash" > $OUTPUT_DIR/stage3_filelist
       grep err $OUTPUT_DIR/stage3_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage3_filelist
-      cd $FDS_SVNROOT/Verification
+      cd $FDS_GITROOT/Verification
       source $OUTPUT_DIR/stage3_filelist
 
       # If errors encountered in validation mode, then email status and exit
@@ -592,12 +572,6 @@ check_cases_debug()
    fi
 }
 
-clean_debug_stage()
-{
-   cd $FDS_SVNROOT
-   delete_unversioned_files
-}
-
 #  ==================================
 #  = Stage 4a - Compile FDS release =
 #  ==================================
@@ -605,7 +579,7 @@ clean_debug_stage()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -613,7 +587,7 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
       stage4a_success=true
@@ -643,7 +617,7 @@ check_compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS MPI
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
+   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_linux_64$IB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
 }
@@ -651,7 +625,7 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS MPI compilation
-   cd $FDS_SVNROOT/FDS_Compilation/mpi_intel_linux_64$IB
+   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_linux_64$IB
    if [ -e "fds_mpi_intel_linux_64$IB" ]
    then
       stage4b_success=true
@@ -682,7 +656,7 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
-   cd $FDS_SVNROOT/SMV/Build/LIBS/lib_linux_intel_64
+   cd $FDS_GITROOT/SMV/Build/LIBS/lib_linux_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
@@ -741,7 +715,7 @@ wait_cases_release_end()
       TIME_LIMIT_STAGE="5"
       check_time_limit
       if [ $FIREBOT_MODE == "validation" ] ; then
-         check_cases_release $FDS_SVNROOT/Validation 'validation'
+         check_cases_release $FDS_GITROOT/Validation 'validation'
          sleep 300
       fi
       sleep 60
@@ -751,7 +725,7 @@ wait_cases_release_end()
 run_verification_cases_release()
 {
    # Start running all FDS verification cases
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_GITROOT/Verification
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
@@ -771,7 +745,7 @@ run_validation_cases_release()
 
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
-      cd $FDS_SVNROOT/Validation/"$SET"
+      cd $FDS_GITROOT/Validation/"$SET"
 
       # Start running FDS validation cases
       echo "Running FDS validation cases:" >> $OUTPUT_DIR/stage5
@@ -790,12 +764,12 @@ commit_validation_results()
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
       # Copy new FDS files from Current_Results to FDS_Output_Files using Process_Output.csh script for the validation set
-      cd $FDS_SVNROOT/Validation/"$SET"/FDS_Output_Files
+      cd $FDS_GITROOT/Validation/"$SET"/FDS_Output_Files
       ./Process_Output.csh
    done
 
-   # cd to SVN root
-   cd $FDS_SVNROOT
+   # cd to GIT root
+   cd $FDS_GITROOT
 
    # Commit new validation results
    svn commit -m "Validationbot: Update validation results for: ${CURRENT_VALIDATION_SETS[*]}" &> /dev/null
@@ -808,14 +782,14 @@ commit_validation_results()
 compile_smv_db()
 {
    # Clean and compile SMV debug
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
+   cd $FDS_GITROOT/SMV/Build/intel_linux_64
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
 }
 
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
+   cd $FDS_GITROOT/SMV/Build/intel_linux_64
    if [ -e "smokeview_linux_64_db" ]
    then
       stage6a_success=true
@@ -845,14 +819,14 @@ check_compile_smv_db()
 compile_smv()
 {
    # Clean and compile SMV
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
+   cd $FDS_GITROOT/SMV/Build/intel_linux_64
    ./make_smv.sh &> $OUTPUT_DIR/stage6c
 }
 
 check_compile_smv()
 {
    # Check for errors in SMV release compilation
-   cd $FDS_SVNROOT/SMV/Build/intel_linux_64
+   cd $FDS_GITROOT/SMV/Build/intel_linux_64
    if [ -e "smokeview_linux_64" ]
    then
       stage6c_success=true
@@ -882,7 +856,7 @@ check_compile_smv()
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
-   cd $FDS_SVNROOT/Verification
+   cd $FDS_GITROOT/Verification
    ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
 }
 
@@ -923,7 +897,7 @@ check_fds_pictures()
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license
 }
 
@@ -956,7 +930,7 @@ check_matlab_license_server()
 run_matlab_verification()
 {
    # Run Matlab plotting script
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification
 }
 
@@ -977,7 +951,7 @@ check_matlab_verification()
 check_verification_stats()
 {
    # Check for existence of verification statistics output file
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
    if [ -e "FDS_verification_scatterplot_output.csv" ]
    then
       # Continue along
@@ -990,7 +964,7 @@ check_verification_stats()
    fi
 
    # Scan for and report warnings for any verification cases that are outside of their specified error tolerance
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
    if [[ `grep "Out of Tolerance" FDS_verification_scatterplot_output.csv` == "" ]]
    then
       # Continue along
@@ -1023,7 +997,7 @@ check_verification_stats()
 run_matlab_validation()
 {
    # Run Matlab plotting script
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation
 }
 
@@ -1043,15 +1017,15 @@ check_matlab_validation()
 
 archive_validation_stats()
 {
-   cd $FDS_SVNROOT/Utilities/Matlab
+   cd $FDS_GITROOT/Utilities/Matlab
 
    STATS_FILE_BASENAME=FDS_validation_scatterplot_output
-   CURRENT_STATS_FILE=$FDS_SVNROOT/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
+   CURRENT_STATS_FILE=$FDS_GITROOT/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
 
    if [ -e ${CURRENT_STATS_FILE} ]
    then
       # Archive stats to Firebot history
-      cp ${CURRENT_STATS_FILE} "$HISTORY_DIR/${SVN_REVISION}_${STATS_FILE_BASENAME}.csv"
+      cp ${CURRENT_STATS_FILE} "$HISTORY_DIR/${GIT_REVISION}_${STATS_FILE_BASENAME}.csv"
 
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
@@ -1063,8 +1037,8 @@ archive_validation_stats()
 
 validation_svn_stats()
 {
-   # Output a LaTeX file with a table of the FDS validation sets and their corresponding SVN information
-   cd $FDS_SVNROOT/Utilities/Scripts
+   # Output a LaTeX file with a table of the FDS validation sets and their corresponding GIT information
+   cd $FDS_GITROOT/Utilities/Scripts
    ./validation_svn_stats.sh
 }
 
@@ -1074,14 +1048,14 @@ validation_svn_stats()
 
 generate_timing_stats()
 {
-   cd $FDS_SVNROOT/Utilities/Scripts
+   cd $FDS_GITROOT/Utilities/Scripts
    ./fds_timing_stats.sh
 }
 
 archive_timing_stats()
 {
-   cd $FDS_SVNROOT/Utilities/Scripts
-   cp fds_timing_stats.csv "$HISTORY_DIR/${SVN_REVISION}_timing.csv"
+   cd $FDS_GITROOT/Utilities/Scripts
+   cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
 #  ==================================
@@ -1110,57 +1084,57 @@ check_guide()
 
 make_fds_user_guide()
 {
-   cd $FDS_SVNROOT/Manuals/FDS_User_Guide
+   cd $FDS_GITROOT/Manuals/FDS_User_Guide
 
    # Build FDS User Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_user_guide $FDS_SVNROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_user_guide $FDS_GITROOT/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
 }
 
 make_fds_technical_guide()
 {
-   cd $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide
+   cd $FDS_GITROOT/Manuals/FDS_Technical_Reference_Guide
 
    # Build FDS Technical Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $FDS_SVNROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $FDS_GITROOT/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
 }
 
 make_fds_verification_guide()
 {
-   cd $FDS_SVNROOT/Manuals/FDS_Verification_Guide
+   cd $FDS_GITROOT/Manuals/FDS_Verification_Guide
 
    # Build FDS Verification Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $FDS_SVNROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $FDS_GITROOT/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
 }
 
 make_fds_validation_guide()
 {
-   cd $FDS_SVNROOT/Manuals/FDS_Validation_Guide
+   cd $FDS_GITROOT/Manuals/FDS_Validation_Guide
 
    # Build FDS Validation Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $FDS_SVNROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $FDS_GITROOT/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
 }
 
 make_fds_configuration_management_plan()
 {
-   cd $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan
+   cd $FDS_GITROOT/Manuals/FDS_Configuration_Management_Plan
 
    # Build FDS Configuration Management Plan
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $FDS_SVNROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
+   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $FDS_GITROOT/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
 }
 
 #  =====================================================
@@ -1175,24 +1149,24 @@ save_build_status()
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Revision ${SVN_REVISION}." > "$HISTORY_DIR/${SVN_REVISION}.txt"
-     cat $ERROR_LOG > "$HISTORY_DIR/${SVN_REVISION}_errors.txt"
+     echo "Build failure and warnings for Revision ${GIT_REVISION}." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Revision ${SVN_REVISION}." > "$HISTORY_DIR/${SVN_REVISION}.txt"
-      cat $ERROR_LOG > "$HISTORY_DIR/${SVN_REVISION}_errors.txt"
+      echo "Build failure for Revision ${GIT_REVISION}." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Revision ${SVN_REVISION} has warnings." > "$HISTORY_DIR/${SVN_REVISION}.txt"
-      cat $WARNING_LOG > "$HISTORY_DIR/${SVN_REVISION}_warnings.txt"
+      echo "Revision ${GIT_REVISION} has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success! Revision ${SVN_REVISION} passed all build tests." > "$HISTORY_DIR/${SVN_REVISION}.txt"
+      echo "Build success! Revision ${GIT_REVISION} passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
@@ -1203,19 +1177,19 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[${1}@$hostname] ${2} failure and warnings for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+     mail -s "[${1}@$hostname] ${2} failure and warnings for Revision ${GIT_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[${1}@$hostname] ${2} failure for Revision ${SVN_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} failure for Revision ${GIT_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[${1}@$hostname] ${2} success, with warnings. Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success, with warnings. Revision ${GIT_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
@@ -1237,7 +1211,7 @@ email_build_status()
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
-      mail -s "[${1}@$hostname] ${2} success! Revision ${SVN_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success! Revision ${GIT_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
 }
 
@@ -1258,9 +1232,9 @@ update_and_compile_cfast
 clean_git_repo
 do_git_checkout
 check_git_checkout
-# Only run if -s option (skip SVN properties) is not used
+# Only run if -s option (skip GIT properties) is not used
 #*** need to port following to git
-#if [[ ! $SKIP_SVN_PROPS_AND_SVN_BUMP ]] ; then
+#if [[ ! $SKIP_GIT_PROPS_AND_GIT_BUMP ]] ; then
 #   fix_git_properties
 #fi
 archive_compiler_version
@@ -1284,14 +1258,16 @@ fi
 # Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_debug
-   check_cases_debug $FDS_SVNROOT/Verification 'verification'
+   check_cases_debug $FDS_GITROOT/Verification 'verification'
 
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_debug
-   check_cases_debug $FDS_SVNROOT/Validation 'validation'
+   check_cases_debug $FDS_GITROOT/Validation 'validation'
 fi
 
-clean_debug_stage
+# clean debug stage
+cd $FDS_GITROOT
+git clean -dxf
 
 ### Stage 4a ###
 compile_fds
@@ -1312,11 +1288,11 @@ fi
 # Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_release
-   check_cases_release $FDS_SVNROOT/Verification 'verification'
+   check_cases_release $FDS_GITROOT/Verification 'verification'
 
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_release
-   check_cases_release $FDS_SVNROOT/Validation 'validation'
+   check_cases_release $FDS_GITROOT/Validation 'validation'
 fi
 
 # Depends on successful run of validation cases in debug and release mode
