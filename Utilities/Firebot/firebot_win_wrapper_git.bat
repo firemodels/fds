@@ -7,7 +7,6 @@
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
-  svn update
   echo 1 > %running%
   call firebot_win_git.bat
   cd %curdir%
