@@ -74,7 +74,7 @@ if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]];
       # Continue along
       :
    else
-      echo "Warning: You are running the Smokebot script with the"
+      echo "Error: You are running the Smokebot script with the"
       echo "repo $FDS_GITbase, not FDS-SMVgitclean."
       echo "Terminating script."
       exit
