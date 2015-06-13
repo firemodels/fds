@@ -11,8 +11,8 @@
 #  = Input variables =
 #  ===================
 
-FDS_GITbase=FDS-SMVcleangit
-cfastbase=cfastcleangit
+FDS_GITbase=FDS-SMVgitclean
+cfastbase=cfastgitclean
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
