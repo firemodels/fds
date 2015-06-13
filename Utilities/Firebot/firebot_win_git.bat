@@ -54,7 +54,6 @@ set warninglog=%OUTDIR%\firebot_warnings.txt
 set errorwarninglog=%OUTDIR%\firebot_errorswarnings.txt
 set infofile=%OUTDIR%\firebot_info.txt
 set revisionfilestring=%OUTDIR%\revision_string.txt
-set revisionfilenum=%OUTDIR%\revision_num.txt
 set stagestatus=%OUTDIR%\firebot_status.log
 set counta=%OUTDIR%\firebot_count0a.txt
 set countb=%OUTDIR%\firebot_count0b.txt
@@ -166,7 +165,7 @@ git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
 git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
-set /p revisionnum=<%revisionfilenum%
+set /p revisionnum=<%revisionfilestring%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
 set warninglogpc=%HISTORYDIR%\warnings_%revisionnum%.txt
