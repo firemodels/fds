@@ -294,9 +294,9 @@ update_and_compile_cfast()
    then
       echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
       cd $CFAST_GITROOT
-      git clean -dxf
-      git add .
-      git reset --hard HEAD
+      git clean -dxf > /dev/null
+      git add . > /dev/null
+      git reset --hard HEAD > /dev/null
 
       # Update to latest GIT revision
       git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
@@ -338,9 +338,9 @@ clean_git_repo()
    if [ -e "$FDS_GITROOT" ]
    then
       cd $FDS_GITROOT
-      git clean -dxf
-      git add .
-      git reset --hard HEAD
+      git clean -dxf > /dev/null
+      git add . > /dev/null
+      git reset --hard HEAD > /dev/null
    # If not, create FDS repository and checkout
      dummy=true
    else
@@ -830,7 +830,7 @@ run_verification_cases_release()
    cd $FDS_GITROOT/Verification
    find .                        -name '*.stop' -exec rm -f {} \;
    find .                        -name '*.err' -exec rm -f {} \;
-   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;`
+   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
    find Visualization            -name '*.smv' -exec rm -f {} \;
    find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
    find WUI                      -name '*.smv' -exec rm -f {} \;
