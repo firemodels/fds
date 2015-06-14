@@ -24,7 +24,7 @@ FIREBOT_HOME_DIR="`pwd`"
 ulimit -s unlimited
 
 # Additional definitions
-FIREBOT_DIR="$FIREBOT_HOME_DIR/firebot"
+FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
 FDS_GITBASE=FDS-SMVgitclean
 FDS_GITROOT="$FIREBOT_HOME_DIR/$FDS_GITBASE"
 OUTPUT_DIR="$FIREBOT_DIR/output"
@@ -100,7 +100,7 @@ shift $(($OPTIND-1))
 #  = End user warning =
 #  ====================
 
-if [[ "FDS_GITBASE" == "FDS-SMVgitclean" ]];
+if [[ "$FDS_GITBASE" == "FDS-SMVgitclean" ]];
    then
       # Continue along
       :
@@ -201,10 +201,10 @@ clean_git_repo()
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDS_GITROOT
 # remove unversioned files
-      git clean -dxf
+      git clean -dxf &> /dev/null
 # revert to last revision
-      git add .
-      git reset --hard HEAD
+      git add . &> /dev/null
+      git reset --hard HEAD &> /dev/null
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
@@ -259,20 +259,7 @@ check_git_checkout()
 {
    cd $FDS_GITROOT
    # Check for GIT errors
-   if [[ `grep -E 'Updated|At revision' $OUTPUT_DIR/stage1 | wc -l` -ne 2 ]];
-   then
-      echo "Errors from Stage 1 - GIT operations:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage1 >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      if [ $FIREBOT_MODE == "verification" ] ; then
-         email_build_status 'Firebot' 'Build'
-      elif [ $FIREBOT_MODE == "validation" ] ; then
-         email_build_status 'Validationbot' 'Validation'
-      fi
-      exit
-   else
-      stage1_success=true
-   fi
+   stage1_success=true
 }
 
 fix_git_properties()
@@ -1225,9 +1212,6 @@ start_time=`date`
 ### Clean up on start ###
 clean_firebot_metafiles
 
-### Stage 0 ###
-update_and_compile_cfast
-
 ### Stage 1 ###
 clean_git_repo
 do_git_checkout
@@ -1267,7 +1251,7 @@ fi
 
 # clean debug stage
 cd $FDS_GITROOT
-git clean -dxf
+git clean -dxf &> /dev/null
 
 ### Stage 4a ###
 compile_fds
