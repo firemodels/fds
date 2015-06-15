@@ -72,7 +72,7 @@ set runbatchexe=%gitroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 call :get_datetime startdate starttime
 
 call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %gitroot%\Utilities\Firebot\firebot_email_list.bat
+call %gitroot%\Utilities\Firebot\firebot_email_list_git.bat
 if "%DEBUGOPT%" == "debug" (
    set mailToList=%mailToFDSDebug%
 ) else (
