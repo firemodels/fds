@@ -76,7 +76,7 @@ if ! [ -e $fulldir/$ssffile ]; then
   exit
 fi
 
-source ~/.bashrc_fds
+source ~/.bashrc_fds default
 cd $fulldir
 echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
 $SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in
