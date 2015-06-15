@@ -72,7 +72,7 @@ time /t > %OUTDIR%\starttime.txt
 set /p starttime=<%OUTDIR%\starttime.txt
 
 call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %gitroot%\Utilities\Firebot\firebot_email_list.bat
+call %gitroot%\Utilities\Firebot\firebot_email_list_git.bat
 
 :: -------------------------------------------------------------
 ::                           stage 0
