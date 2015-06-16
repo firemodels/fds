@@ -20,14 +20,17 @@ FIREBOT_MODE="verification"
 cd
 FIREBOT_HOME_DIR="`pwd`"
 
-# Set unlimited stack size
-ulimit -s unlimited
-
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
   platform="osx"
 fi
+
 export platform
+
+# Set unlimited stack size
+if [ "$platform" == "linux" ] ; then
+  ulimit -s unlimited
+fi
 
 # Additional definitions
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
