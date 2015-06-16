@@ -237,22 +237,22 @@ do_git_checkout()
          # Bump GIT revision string of all guides (so that the GIT revision keyword gets updated)
          echo "Bump GIT revision string of all guides." >> $OUTPUT_DIR/stage1 2>&1
          CURRENT_TIMESTAMP=`date`
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/FDS_Source/main.f90
+#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+#         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/FDS_Source/main.f90
 
          # Commit back results
-         git add $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-         git add $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-         git add $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-         git add $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-         git add $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-         git add $fdsroot/FDS_Source/main.f90
-         git commit -m 'Firebot: Bump GIT revision of FDS guides and FDS source' &> /dev/null
-         git push &> /dev/null
+#         git add $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
+#         git add $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
+#         git add $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
+#         git add $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
+#         git add $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
+#         git add $fdsroot/FDS_Source/main.f90
+#         git commit -m 'Firebot: Bump GIT revision of FDS guides and FDS source' &> /dev/null
+#         git push &> /dev/null
       fi
       
       echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
