@@ -99,23 +99,26 @@ cd
 SMOKEBOT_HOME_DIR="`pwd`"
 SMOKEBOT_DIR="$SMOKEBOT_HOME_DIR/smokebotgit"
 OUTPUT_DIR="$SMOKEBOT_DIR/output"
-export FDS_GITROOT="$SMOKEBOT_HOME_DIR/$FDS_GITbase"
-export SMV_Summary="$FDS_GITROOT/Manuals/SMV_Summary"
-CFAST_GITROOT="$SMOKEBOT_HOME_DIR/$cfastbase"
+
+export fdsroot="$SMOKEBOT_HOME_DIR/$FDS_GITbase"
+cfastroot="$SMOKEBOT_HOME_DIR/$cfastbase"
+
+export SMV_Summary="$fdsroot/Manuals/SMV_Summary"
+
 ERROR_LOG=$OUTPUT_DIR/errors
 TIME_LOG=$OUTPUT_DIR/timings
 WARNING_LOG=$OUTPUT_DIR/warnings
 GUIDE_DIR=$SMOKEBOT_DIR/guides
 STAGE_STATUS=$OUTPUT_DIR/stage_status
-SMV_VG_GUIDE=$FDS_GITROOT/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
-SMV_UG_GUIDE=$FDS_GITROOT/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
-GEOM_NOTES=$FDS_GITROOT/Manuals/FDS_User_Guide/geom_notes.pdf
+SMV_VG_GUIDE=$fdsroot/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+SMV_UG_GUIDE=$fdsroot/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
+GEOM_NOTES=$fdsroot/Manuals/FDS_User_Guide/geom_notes.pdf
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 UPLOADGUIDES=./smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
-FDS_STATUS_FILE=$FDS_GITROOT/FDS_status
+FDS_STATUS_FILE=$fdsroot/FDS_status
 LAST_FDS_FAILED=0
 if [ -e $FDS_STATUS_FILE ] ; then
   LAST_FDS_FAILED=`cat $FDS_STATUS_FILE`
@@ -150,11 +153,11 @@ TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 run_auto()
 {
   GIT_STATUSDIR=~/.smokebot
-  SMV_SOURCE=$FDS_GITROOT/SMV/source
+  SMV_SOURCE=$fdsroot/SMV/source
   GIT_SMVFILE=$GIT_STATUSDIR/smv_revision
   GIT_SMVLOG=$GIT_STATUSDIR/smv_log
 
-  FDS_SOURCE=$FDS_GITROOT/FDS_Source
+  FDS_SOURCE=$fdsroot/FDS_Source
   GIT_FDSFILE=$GIT_STATUSDIR/fds_revision
   GIT_FDSLOG=$GIT_STATUSDIR/FDS_log
 
@@ -162,6 +165,7 @@ run_auto()
 
   MKDIR $GIT_STATUSDIR
 # remove untracked files, revert repo files, update to latest revision
+  git clean -dxf
   git add .
   git reset --hard HEAD
   git pull 
@@ -256,7 +260,7 @@ check_time_limit()
 
 set_files_world_readable()
 {
-   cd $FDS_GITROOT
+   cd $fdsroot
    chmod -R go+r *
 }
 
@@ -289,11 +293,11 @@ update_and_compile_cfast()
    cd $SMOKEBOT_HOME_DIR
 
    # Check to see if CFAST repository exists
-   if [ -e "$CFAST_GITROOT" ]
+   if [ -e "$cfastroot" ]
    # If yes, then update the CFAST repository and compile CFAST
    then
       echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
-      cd $CFAST_GITROOT
+      cd $cfastroot
       git clean -dxf > /dev/null
       git add . > /dev/null
       git reset --hard HEAD > /dev/null
@@ -309,13 +313,13 @@ update_and_compile_cfast()
       git clone git@github.com:firemodels/cfast.git $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
    fi
     # Build CFAST
-    cd $CFAST_GITROOT/CFAST/intel_${platform}_64
+    cd $cfastroot/CFAST/intel_${platform}_64
     rm -f cfast7_${platform}_64
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
 
    # Check for errors in CFAST compilation
-   cd $CFAST_GITROOT/CFAST/intel_${platform}_64
+   cd $cfastroot/CFAST/intel_${platform}_64
    if [ -e "cfast7_${platform}_64" ]
    then
       stage0_success=true
@@ -335,9 +339,9 @@ update_and_compile_cfast()
 clean_git_repo()
 {
    # Check to see if FDS repository exists
-   if [ -e "$FDS_GITROOT" ]
+   if [ -e "$fdsroot" ]
    then
-      cd $FDS_GITROOT
+      cd $fdsroot
       git clean -dxf > /dev/null
       git add . > /dev/null
       git reset --hard HEAD > /dev/null
@@ -352,7 +356,7 @@ clean_git_repo()
 
 do_git_checkout()
 {
-   cd $FDS_GITROOT
+   cd $fdsroot
    echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
    git pull >> $OUTPUT_DIR/stage1 2>&1
    GIT_REVISION==`git log --abbrev-commit . | head -1 | awk '{print $2}'`
@@ -360,7 +364,7 @@ do_git_checkout()
 
 check_git_checkout()
 {
-   cd $FDS_GITROOT
+   cd $fdsroot
    # Check for GIT errors
    stage1_success=true
 }
@@ -372,7 +376,7 @@ check_git_checkout()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_GITROOT/FDS_Compilation/${OPENMP}intel_${platform}_64_db
+   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64_db
    rm -f fds_${OPENMP}intel_${platform}_64_db
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
@@ -381,7 +385,7 @@ compile_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   cd $fdsroot/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
    rm -f fds_mpi_intel_${platform}_64$IB$DB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
@@ -390,7 +394,7 @@ compile_fds_mpi_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_GITROOT/FDS_Compilation/${OPENMP}intel_${platform}_64_db
+   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64_db
    if [ -e "fds_${OPENMP}intel_${platform}_64_db" ]
    then
       stage2a_success=true
@@ -420,7 +424,7 @@ check_compile_fds_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   cd $fdsroot/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
    if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ]
    then
       stage2b_success=true
@@ -481,7 +485,7 @@ run_verification_cases_debug()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
    find .                        -name '*.stop' -exec rm -f {} \;
    find .                        -name '*.err' -exec rm -f {} \;
    find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
@@ -493,7 +497,7 @@ run_verification_cases_debug()
    #  = Run all SMV cases =
    #  =====================
 
-   cd $FDS_GITROOT/Verification/scripts
+   cd $fdsroot/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
@@ -509,7 +513,7 @@ run_verification_cases_debug()
 check_verification_cases_debug()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
 
    if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3a` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
@@ -574,7 +578,7 @@ run_fds_verification_cases_debug()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
    find . -name '*.stop' -exec rm -f {} \;
    find . -name '*.err' -exec rm -f {} \;
    find . -name '*.out' -exec rm -f {} \;
@@ -586,7 +590,7 @@ run_fds_verification_cases_debug()
    #  = Run all FDS cases =
    #  =====================
 
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
 
    # Submit FDS verification cases and wait for them to start
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
@@ -600,7 +604,7 @@ run_fds_verification_cases_debug()
 check_fds_verification_cases_debug()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
 
    if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
@@ -638,7 +642,7 @@ check_fds_verification_cases_debug()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_GITROOT/FDS_Compilation/${OPENMP}intel_${platform}_64
+   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64
    rm -f fds_${OPENMP}intel_${platform}_64
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
@@ -647,7 +651,7 @@ compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_${platform}_64$IB
+   cd $fdsroot/FDS_Compilation/mpi_intel_${platform}_64$IB
    rm -f fds_mpi_intel_${platform}_64$IB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
@@ -656,7 +660,7 @@ compile_fds_mpi()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_GITROOT/FDS_Compilation/${OPENMP}intel_${platform}_64
+   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64
    if [ -e "fds_${OPENMP}intel_${platform}_64" ]
    then
       stage4a_success=true
@@ -682,7 +686,7 @@ check_compile_fds()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS compilation
-   cd $FDS_GITROOT/FDS_Compilation/mpi_intel_${platform}_64$IB
+   cd $fdsroot/FDS_Compilation/mpi_intel_${platform}_64$IB
    if [ -e "fds_mpi_intel_${platform}_64$IB" ]
    then
       stage4b_success=true
@@ -715,32 +719,32 @@ compile_smv_utilities()
    if [ "$haveCC" == "1" ] ; then
 
    # smokeview libraries
-   cd $FDS_GITROOT/SMV/Build/LIBS/lib_${platform}_intel_64
+   cd $fdsroot/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
 
    # smokezip:
-   cd $FDS_GITROOT/Utilities/smokezip/intel_${platform}_64
+   cd $fdsroot/Utilities/smokezip/intel_${platform}_64
    rm -f *.o smokezip_${platform}_64
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # smokediff:
-   cd $FDS_GITROOT/Utilities/smokediff/intel_${platform}_64
+   cd $fdsroot/Utilities/smokediff/intel_${platform}_64
    rm -f *.o smokediff_${platform}_64
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # background:
-   cd $FDS_GITROOT/Utilities/background/intel_${platform}_32
+   cd $fdsroot/Utilities/background/intel_${platform}_32
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
    
   # wind2fds:
-   cd $FDS_GITROOT/Utilities/wind2fds/intel_${platform}_64
+   cd $fdsroot/Utilities/wind2fds/intel_${platform}_64
    rm -f *.o wind2fds_${platform}_64
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
@@ -764,11 +768,11 @@ check_smv_utilities()
 {
    if [ "$haveCC" == "1" ] ; then
      # Check for errors in SMV utilities compilation
-     cd $FDS_GITROOT
-     if [ -e "$FDS_GITROOT/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
-        [ -e "$FDS_GITROOT/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
-        [ -e "$FDS_GITROOT/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
-        [ -e "$FDS_GITROOT/Utilities/background/intel_${platform}_32/background" ]
+     cd $fdsroot
+     if [ -e "$fdsroot/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
+        [ -e "$fdsroot/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
+        [ -e "$fdsroot/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
+        [ -e "$fdsroot/Utilities/background/intel_${platform}_32/background" ]
      then
         stage5pre_success="1"
      else
@@ -827,7 +831,7 @@ run_verification_cases_release()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
    find .                        -name '*.stop' -exec rm -f {} \;
    find .                        -name '*.err' -exec rm -f {} \;
    find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
@@ -836,7 +840,7 @@ run_verification_cases_release()
    find WUI                      -name '*.smv' -exec rm -f {} \;
 
    # Start running all SMV verification cases
-   cd $FDS_GITROOT/Verification/scripts
+   cd $fdsroot/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
    ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
 #   ./Run_SMV_Cases.sh -S $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
@@ -849,7 +853,7 @@ run_verification_cases_release()
 check_verification_cases_release()
 {
    # Scan and report any errors in FDS verification cases
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
 
    if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage5` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
@@ -890,7 +894,7 @@ compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Clean and compile SMV debug
-   cd $FDS_GITROOT/SMV/Build/intel_${platform}_64
+   cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
    fi
@@ -900,7 +904,7 @@ check_compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
-   cd $FDS_GITROOT/SMV/Build/intel_${platform}_64
+   cd $fdsroot/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64_db" ]
    then
       stage6a_success=true
@@ -931,7 +935,7 @@ check_compile_smv_db()
 make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
-   cd $FDS_GITROOT/Verification/scripts
+   cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
 }
 
@@ -972,7 +976,7 @@ compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Clean and compile SMV
-   cd $FDS_GITROOT/SMV/Build/intel_${platform}_64
+   cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
    fi
@@ -982,7 +986,7 @@ check_compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
-   cd $FDS_GITROOT/SMV/Build/intel_${platform}_64
+   cd $fdsroot/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64" ]
    then
       stage6c_success=true
@@ -1014,7 +1018,7 @@ check_compile_smv()
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
-   cd $FDS_GITROOT/Verification/scripts
+   cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
 }
 
@@ -1040,7 +1044,7 @@ check_smv_pictures()
 
 make_smv_movies()
 {
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
    scripts/Make_SMV_Movies.sh 2>&1  &> $OUTPUT_DIR/stage6e
 }
 
@@ -1078,22 +1082,22 @@ check_smv_movies()
 
 generate_timing_stats()
 {
-   cd $FDS_GITROOT/Verification/scripts/
-   export QFDS="$FDS_GITROOT/Verification/scripts/copyout.sh"
-   export RUNCFAST="$FDS_GITROOT/Verification/scripts/copyout.sh"
-   export RUNTFDS="$FDS_GITROOT/Verification/scripts/copyout.sh"
+   cd $fdsroot/Verification/scripts/
+   export QFDS="$fdsroot/Verification/scripts/copyout.sh"
+   export RUNCFAST="$fdsroot/Verification/scripts/copyout.sh"
+   export RUNTFDS="$fdsroot/Verification/scripts/copyout.sh"
 
-   cd $FDS_GITROOT/Verification
+   cd $fdsroot/Verification
    scripts/SMV_Cases.sh
    scripts/SMV_geom_Cases.sh
 
-   cd $FDS_GITROOT/Utilities/Scripts
+   cd $fdsroot/Utilities/Scripts
    ./fds_timing_stats.sh smokebot
 }
 
 archive_timing_stats()
 {
-   cd $FDS_GITROOT/Utilities/Scripts
+   cd $fdsroot/Utilities/Scripts
    cp fds_timing_stats.csv "$SMOKEBOT_DIR/history/${GIT_REVISION}_timing.csv"
 }
 
@@ -1385,10 +1389,10 @@ fi
 ### Stage 8 ###
 MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
-#  make_guide geom_notes $FDS_GITROOT/Manuals/FDS_User_Guide 'geometry notes'
-  make_guide SMV_User_Guide $FDS_GITROOT/Manuals/SMV_User_Guide 'SMV User Guide'
-  make_guide SMV_Technical_Reference_Guide $FDS_GITROOT/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
-  make_guide SMV_Verification_Guide $FDS_GITROOT/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+#  make_guide geom_notes $fdsroot/Manuals/FDS_User_Guide 'geometry notes'
+  make_guide SMV_User_Guide $fdsroot/Manuals/SMV_User_Guide 'SMV User Guide'
+  make_guide SMV_Technical_Reference_Guide $fdsroot/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
+  make_guide SMV_Verification_Guide $fdsroot/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
