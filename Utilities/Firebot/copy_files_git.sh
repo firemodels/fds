@@ -5,4 +5,4 @@ repo=FDS-SMVgitclean
 cd ~/$repo
 git pull
 cd $CURDIR
-cp $repo/Utilities/Firebot/*.sh .
+cp ~$repo/Utilities/Firebot/*.sh .
