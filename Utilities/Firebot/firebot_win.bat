@@ -330,7 +330,7 @@ echo             matlab verification plots
 cd %svnroot%\Utilities\Matlab
 matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
 
-echo             matlab verification plots
+echo             matlab validation plots
 cd %svnroot%\Utilities\Matlab
 matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
 
