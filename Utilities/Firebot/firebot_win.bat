@@ -59,6 +59,7 @@ set stagestatus=%OUTDIR%\firebot_status.log
 set counta=%OUTDIR%\firebot_count0a.txt
 set countb=%OUTDIR%\firebot_count0b.txt
 set scratchfile=%OUTDIR%\firebot_scratch.txt
+set have_matlab=0
 
 set fromsummarydir=%svnroot%\Manuals\SMV_Summary
 
@@ -142,6 +143,18 @@ echo             found cut
 
 call :is_file_installed svn|| exit /b 1
 echo             found svn
+
+::*** looking for matlab
+
+where matlab 2>&1 | find /i /c "Could not find" > %OUTDIR%\stage_count0a.txt
+set /p nothavematlab=<%OUTDIR%\stage_count0a.txt
+if %nothavematlab% == 0 (
+  echo             found matlab
+  set have_matlab=1
+)
+if %nothavematlab% == 1 (
+  echo             matlab not found - VV and User guides will not be built
+)
 
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
@@ -312,6 +325,18 @@ echo             FDS verification cases
 cd %svnroot%\Verification\
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
+if %have_matlab%==0 goto skip_matlabplots
+echo             matlab verification plots
+cd %svnroot%\Utilities\Matlab
+matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
+
+echo             matlab verification plots
+cd %svnroot%\Utilities\Matlab
+matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
+
+:skip_matlabplots
+
+
 call :GET_DURATION MAKEPICS %MAKEPICS_beg%
 
 :: -------------------------------------------------------------
@@ -320,20 +345,21 @@ call :GET_DURATION MAKEPICS %MAKEPICS_beg%
 
 call :GET_TIME MAKEGUIDES_beg
 
-:: echo Stage 6 - Building guides
+echo Stage 6 - Building guides
 
-:: don't build FDS guides until a "matlab" stage is added
-::echo             FDS Technical Reference
-::call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+echo             FDS Technical Reference
+call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
 
-::echo             FDS User
-::call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+if have_matlab==0 goto skip_VV
+  echo             FDS User
+  call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-::echo             FDS Verification
-::call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  echo             FDS Verification
+  call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-::echo             FDS Validation
-::call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  echo             FDS Validation
+  call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+:skip_VV
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
