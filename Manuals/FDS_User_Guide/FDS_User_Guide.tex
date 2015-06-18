@@ -8149,7 +8149,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct AEROSOL VOLUME FRACTION}$^*$               & Section~\ref{info:soot}                       & mol/mol        & D,I,P,S      \\ \hline
 {\ct AMPUA}$^{**}$                              & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
 {\ct AMPUA\_Z}$^{*}$                            & Section~\ref{info:part_output}                & kg/m$^2$       & B,D          \\ \hline
-{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%             & D            \\ \hline
+{\ct ASPIRATION}                                & Section~\ref{info:aspiration_detector}        & \%/m           & D            \\ \hline
 {\ct BACKGROUND PRESSURE}                       & Background pressure, $\bp$                    & Pa             & D,I,P,S      \\ \hline
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)} & B,D       \\ \hline
@@ -8169,7 +8169,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
-{\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      &                & B,D          \\ \hline
+{\ct FRICTION VELOCITY}                         & Section~\ref{info:yplus}                      & m/s            & B,D          \\ \hline
 {\ct GAUGE HEAT FLUX}                           & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct HEAT FLOW}                                 & Section~\ref{info:flows}                      & kW             & D            \\ \hline
 {\ct HEAT FLOW WALL}                            & Section~\ref{info:flows}                      & kW             & D            \\ \hline
@@ -8219,7 +8219,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
 {\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
-{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(m.K)}  & D            \\ \hline
+{\ct SOLID SPECIFIC HEAT}                       & Section~\ref{info:DEPTH}                      & \si{kJ/(kg.K)} & D            \\ \hline
 {\ct SPECIFIC ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
 {\ct SPECIFIC HEAT}                             & $c_p$                                         & \si{kJ/(kg.K)} & D,I,P,S      \\ \hline
 {\ct SPECIFIC SENSIBLE ENTHALPY}                & Section~\ref{info:enthalpy}                   & kJ/kg          & D,I,P,S      \\ \hline
@@ -8306,12 +8306,12 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
 {\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
-{\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           &                & D            \\ \hline
+{\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section \ref{info:material_components}            & W/g            & B,D          \\ \hline
 {\ct NORMALIZED HEAT RELEASE RATE}              & Section \ref{info:material_components}            & W/g            & B,D          \\ \hline
 {\ct NORMALIZED MASS}                           & Section \ref{info:material_components}            &                & B,D          \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}                 & Section \ref{info:material_components}            & 1/s            & B,D          \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section \ref{info:material_components}            & 1/s            & B,D          \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
