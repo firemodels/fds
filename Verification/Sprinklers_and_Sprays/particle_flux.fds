@@ -13,7 +13,7 @@ A test of the insertion of solid, non-evaporating particles.
 
 &PART ID='particles', SURF_ID='sphere', QUANTITIES(1)='PARTICLE DIAMETER' /
 
-&SURF ID='HOLE', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED' /
+&SURF ID='HOLE', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED',TAU_PART=0. /
 
 &OBST XB=-0.2, 0.2,-0.2, 0.2, 4.0, 4.4, SURF_IDS='INERT','HOLE','INERT', DEVC_ID='clock' /
 
