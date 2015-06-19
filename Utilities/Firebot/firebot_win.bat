@@ -334,31 +334,43 @@ echo             matlab validation plots
 cd %svnroot%\Utilities\Matlab
 matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
 
-:skip_matlabplots
-
-
-call :GET_DURATION MAKEPICS %MAKEPICS_beg%
-
 :: -------------------------------------------------------------
 ::                           stage 6
 :: -------------------------------------------------------------
 
+echo Stage 6 - Generating statistics
+echo             validation stats
+call :archive_validation_stats
+call :verification_stats
+
+echo             timing stats
+call :generate_timing_stats
+call :archive_timing_stats
+
+:skip_matlabplots
+
+call :GET_DURATION MAKEPICS %MAKEPICS_beg%
+
+:: -------------------------------------------------------------
+::                           stage 7
+:: -------------------------------------------------------------
+
 call :GET_TIME MAKEGUIDES_beg
 
-echo Stage 6 - Building guides
+echo Stage 7 - Building guides
 
 echo             FDS Technical Reference
-call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
+call :build_guide FDS_Technical_Reference_Guide %svnroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage7.txt 2>&1
 
 if have_matlab==0 goto skip_VV
   echo             FDS User
-  call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  call :build_guide FDS_User_Guide %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage7.txt 2>&1
 
   echo             FDS Verification
-  call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  call :build_guide FDS_Verification_Guide %svnroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage7.txt 2>&1
 
   echo             FDS Validation
-  call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  call :build_guide FDS_Validation_Guide %svnroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage7.txt 2>&1
 :skip_VV
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
@@ -453,6 +465,53 @@ exit /b 0
     call %email% %mailToList% "firebot failure on %COMPUTERNAME% %revisionstring%" %errorlogpc%
   )
 exit /b
+
+:: -------------------------------------------------------------
+:archive_validation_stats
+:: -------------------------------------------------------------
+
+  cd %svnroot%\Utilities\Matlab
+
+  set STATS_FILE_BASENAME=FDS_validation_scatterplot_output
+  set CURRENT_STATS_FILE=%svnroot%\Utilities\Matlab\%STATS_FILE_BASENAME%.csv
+
+  if exist %CURRENT_STATS_FILE% (
+:: Archive stats to Firebot history
+    copy %CURRENT_STATS_FILE% "%HISTORY_DIR%/%revisionstring%_%STATS_FILE_BASENAME%.csv"
+  )  
+
+  if NOT exist %CURRENT_STATS_FILE% (
+    echo "Warnings from Stage 5b - Matlab plotting and statistics (validation):" >> %warninglog%
+    echo "Warning: The validation statistics output file does not exist." >> %warninglog%
+    echo "Expected the file Utilities/Matlab/FDS_validation_scatterplot_output.csv" >> %warninglog%
+    echo "" >> %warninglog%
+  )
+
+exit /b 0
+
+:: -------------------------------------------------------------
+:validation_svn_stats
+:: -------------------------------------------------------------
+
+  cd %svnroot%\Utilities\Scripts
+  call validation_svn_stats
+exit /b 0
+
+:: -------------------------------------------------------------
+:generate_timing_stats
+:: -------------------------------------------------------------
+
+  cd %svnroot%\Utilities\Scripts
+  call fds_timing_stats
+exit /b 0
+
+:: -------------------------------------------------------------
+:archive_timing_stats
+:: -------------------------------------------------------------
+
+  cd %svnroot%\Utilities\Scripts
+  copy fds_timing_stats.csv "%HISTORY_DIR%/%revision_string%_timing.csv"
+exit /b 0
 
 :: -------------------------------------------------------------
 :get_datetime
