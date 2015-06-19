@@ -1031,7 +1031,7 @@ validation_svn_stats()
 {
    # Output a LaTeX file with a table of the FDS validation sets and their corresponding GIT information
    cd $fdsroot/Utilities/Scripts
-   ./validation_svn_stats.sh
+   ./validation_git_stats.sh
 }
 
 #  ======================================
