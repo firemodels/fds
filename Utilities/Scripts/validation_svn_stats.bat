@@ -14,7 +14,6 @@ cd %SVNROOT%\Utilities\Scripts
 
 :: Name and location of output .tex file with validation SVN statistics
 set OUTPUT_TEX_FILE=%SVNROOT%\Manuals\FDS_Validation_Guide\SCRIPT_FIGURES\ScatterPlots\validation_svn_stats.tex
-set OUTPUT_TEX_FILE=xxx.tex
 
 ::Table header
 
