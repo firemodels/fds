@@ -477,7 +477,7 @@ exit /b
 
   if exist %CURRENT_STATS_FILE% (
 :: Archive stats to Firebot history
-    copy %CURRENT_STATS_FILE% "%HISTORY_DIR%/%revisionstring%_%STATS_FILE_BASENAME%.csv"
+    copy %CURRENT_STATS_FILE% "%HISTORYDIR%\%revisionstring%_%STATS_FILE_BASENAME%.csv"
   )  
 
   if NOT exist %CURRENT_STATS_FILE% (
@@ -510,7 +510,7 @@ exit /b 0
 :: -------------------------------------------------------------
 
   cd %svnroot%\Utilities\Scripts
-  copy fds_timing_stats.csv "%HISTORY_DIR%/%revision_string%_timing.csv"
+  copy fds_timing_stats.csv "%HISTORYDIR%\%revisionstring%_timing.csv"
 exit /b 0
 
 :: -------------------------------------------------------------
