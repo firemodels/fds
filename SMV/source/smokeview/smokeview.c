@@ -628,7 +628,7 @@ void parse_commandline(int argc, char **argv){
     STRCPY(volrender_scriptname,fdsprefix);
     STRCAT(volrender_scriptname,"_volrender.ssf");
 
-    init_volrender_script(fdsprefix, NULL, startframe0, skipframe0);
+    init_volrender_script(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
   }
 #ifndef pp_BETA
   if(time_flag==1){

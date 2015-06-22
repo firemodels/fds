@@ -497,7 +497,6 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     glui_3dsmoke->add_radiobutton_to_group(RADIO_alpha,_("both"));
   }
 
-
   // volume render dialog
 
   if(nvolrenderinfo > 0){
@@ -536,8 +535,8 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
     PANEL_generate_images = glui_3dsmoke->add_rollout_to_panel(ROLLOUT_volume, _("Generate images"), false);
 
-    SPINNER_startframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("start frame"), GLUI_SPINNER_INT, &startframe0, START_FRAME, Smoke3d_CB);
-    SPINNER_skipframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("skip frame"), GLUI_SPINNER_INT, &skipframe0, SKIP_FRAME, Smoke3d_CB);
+    SPINNER_startframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("start frame"), GLUI_SPINNER_INT, &vol_startframe0, START_FRAME, Smoke3d_CB);
+    SPINNER_skipframe = glui_3dsmoke->add_spinner_to_panel(PANEL_generate_images, _("skip frame"), GLUI_SPINNER_INT, &vol_skipframe0, SKIP_FRAME, Smoke3d_CB);
     Smoke3d_CB(START_FRAME);
     Smoke3d_CB(SKIP_FRAME);
     if(ntours > 0){
@@ -593,15 +592,15 @@ extern "C" void Smoke3d_CB(int var){
     TOUR_CB(TOUR_LIST);
     break;
   case START_FRAME:
-    if(startframe0<0){
-      startframe0=0;
-      SPINNER_startframe->set_int_val(startframe0);
+    if(vol_startframe0<0){
+      vol_startframe0=0;
+      SPINNER_startframe->set_int_val(vol_startframe0);
     }
     break;
   case SKIP_FRAME:
-    if(skipframe0<1){
-      skipframe0=1;
-      SPINNER_skipframe->set_int_val(skipframe0);
+    if(vol_skipframe0<1){
+      vol_skipframe0=1;
+      SPINNER_skipframe->set_int_val(vol_skipframe0);
     }
     break;
   case CANCEL_GENERATE_IMAGES:
@@ -617,7 +616,7 @@ extern "C" void Smoke3d_CB(int var){
     trim(vol_prefix);
     vol_prefixptr=trim_front(vol_prefix);
     if(strlen(vol_prefixptr)==0)vol_prefixptr=fdsprefix;
-    init_volrender_script(vol_prefixptr, tour_label, startframe0, skipframe0);
+    init_volrender_script(vol_prefixptr, tour_label, vol_startframe0, vol_skipframe0);
     break;
   case NONGPU_VOL_FACTOR:
     init_volrender_surface(NOT_FIRSTCALL);
