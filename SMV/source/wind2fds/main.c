@@ -12,7 +12,6 @@
 
 void usage(char *prog);
 void version(char *prog);
-void getRevision(char *revision);
 
 /* ------------------ gettokens ------------------------ */
 
