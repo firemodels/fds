@@ -17,6 +17,8 @@ set OUTPUT_TEX_FILE=%SVNROOT%\Manuals\FDS_Validation_Guide\SCRIPT_FIGURES\Scatte
 
 ::Table header
 
+:: note, ^ is used to "escape" the '|' and '&' characters 
+
 echo \begin{longtable}[c]{^|l^|c^|c^|} > %OUTPUT_TEX_FILE%
 echo \caption[Validation SVN Statistics]{Validation SVN statistics for all data sets} >> %OUTPUT_TEX_FILE%
 echo \label{validation_svn_stats} >> %OUTPUT_TEX_FILE%
