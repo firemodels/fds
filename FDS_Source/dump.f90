@@ -243,9 +243,9 @@ FILE_COUNTER = 10
 
 FN_END = TRIM(CHID)//'.end'
 
-! SVN ID file
+! GIT ID file
 
-FN_SVN = TRIM(CHID)//'_svn.txt'
+FN_GIT = TRIM(CHID)//'_git.txt'
 
 ! Smokeview File
 
@@ -1285,11 +1285,11 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'VERSION'
 WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
 
-! Write out the SVN number and revision date to a file
+! Write out the GIT number and revision date to a file
 
-OPEN(LU_SVN,FILE=FN_SVN,FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_SVN,'(A)') TRIM(REVISION)
-CLOSE(LU_SVN)
+OPEN(LU_GIT,FILE=FN_GIT,FORM='FORMATTED',STATUS='REPLACE')
+WRITE(LU_GIT,'(A)') TRIM(REVISION)
+CLOSE(LU_GIT)
 
 ! Indicate the "endian-ness" of the output files
  
@@ -1305,7 +1305,7 @@ WRITE(LU_SMV,'(1X,A)') TRIM(CHID)//'.end'
 WRITE(LU_SMV,'(/A)') 'INPF'
 WRITE(LU_SMV,'(1X,A)') TRIM(FN_INPUT)
 
-! Write out svn revision number
+! Write out git revision number
 
 WRITE(LU_SMV,'(/A)') 'REVISION'
 WRITE(LU_SMV,'(A)') REVISION
