@@ -227,7 +227,7 @@ REAL(EB) :: CHARACTERISTIC_CELL_SIZE
 
 ! Logical units and output file names
 
-INTEGER                              :: LU_ERR=0,LU_END=2,LU_SVN=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7
+INTEGER                              :: LU_ERR=0,LU_END=2,LU_GIT=3,LU_SMV=4,LU_INPUT=5,LU_OUTPUT=6,LU_STOP=7
 INTEGER                              :: LU_MASS,LU_HRR,LU_NOTREADY,LU_VELOCITY_ERROR,LU_LINE=-1,LU_CUTCELL
 INTEGER                              :: LU_EVACCSV,LU_EVACEFF,LU_EVACFED,LU_EVACOUT,LU_HISTOGRAM,LU_EVAC_CB
 INTEGER                              :: LU_BNDC=-1,LU_GEOC=-1,LU_TGA
