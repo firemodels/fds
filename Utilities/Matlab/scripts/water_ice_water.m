@@ -46,18 +46,10 @@ legend('Cooling (freezing)','Heating (melting)')
 axis([-10 10 0 1000])
 set(h,'LineStyle','-')
 
-% add SVN if file is available
+% add git version if file is available
 
-SVN_Filename = ['water_ice_water_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = ['water_ice_water_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % Create the PDF files
 
