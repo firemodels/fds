@@ -416,32 +416,8 @@ for i=2:n_plots
                 end
             end
 
-            % Add SVN if file is available
-            if exist(SVN_Filename,'file')
-                SVN = importdata(SVN_Filename);
-                x_lim = get(gca,'XLim');
-                y_lim = get(gca,'YLim');
-                if strcmp(Plot_Type,'loglog')
-                    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-                    Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-                elseif strcmp(Plot_Type,'semilogx')
-                    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-                elseif strcmp(Plot_Type,'semilogy')
-                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-                    Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-                else
-                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-                end
-                if isnumeric(SVN)
-                    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-                elseif ischar(SVN{1})
-                    text(X_SVN_Position,Y_SVN_Position,[SVN], ...
-                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-                end
-            end
+            % Add version string if file is available
+            addverstr(gca,VerStr_Filename,Plot_Type)
 
             % Save plot file
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
