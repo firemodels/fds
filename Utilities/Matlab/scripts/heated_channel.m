@@ -134,16 +134,17 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'heated_channel_Pr_1p00_32_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datadir,'heated_channel_Pr_1p00_32_git.txt'];
+addverstr(gca,SVN_Filename,'semilogx')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print pdf
 
@@ -159,16 +160,17 @@ set(h,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'heated_channel_Pr_0p71_32_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datadir,'heated_channel_Pr_0p71_32_git.txt'];
+addverstr(gca,SVN_Filename,'semilogx')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print pdf
 
