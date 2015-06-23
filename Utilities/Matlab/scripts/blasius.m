@@ -77,16 +77,17 @@ set(h,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 % add SVN if file is available
 
-SVN_Filename = [repository,'blasius_16_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [repository,'blasius_16_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf for whole velocity profile
 set(gcf,'Visible',Figure_Visibility);
@@ -148,16 +149,17 @@ set(gca,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
 
-SVN_Filename = [repository,'blasius_16_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-    Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [repository,'blasius_16_git.txt'];
+addverstr(gca,SVN_Filename,'loglog')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
