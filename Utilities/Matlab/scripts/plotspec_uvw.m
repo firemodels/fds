@@ -8,9 +8,9 @@ if ~exist(filename)
     display(['Error: File ' filename ' does not exist. Skipping case.'])
     return
 end
-M = csvread(filename);
-s = size(M);
-n = round(s(1)^(1/3));
+M = importdata(filename,',',1);
+s = str2num(M.textdata{:});
+n = s(2);
 
 % convert to 3D array
 p=0;
@@ -18,9 +18,9 @@ for k=1:n
     for j=1:n
         for i=1:n
             p=p+1;
-            u(i,j,k) = M(p,1);
-            v(i,j,k) = M(p,2);
-            w(i,j,k) = M(p,3);
+            u(i,j,k) = M.data(p,1);
+            v(i,j,k) = M.data(p,2);
+            w(i,j,k) = M.data(p,3);
             tke(i,j,k) = 0.5*(u(i,j,k)^2+v(i,j,k)^2+w(i,j,k)^2);
         end
     end
