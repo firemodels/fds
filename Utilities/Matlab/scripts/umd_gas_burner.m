@@ -176,16 +176,8 @@ legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
 
 % add SVN if file is available
 
-svn_file = [fdsdir,'methane_dx_1p25cm_svn.txt'];
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
@@ -256,16 +248,8 @@ legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
 
 % add SVN if file is available
 
-svn_file = [fdsdir,'methane_dx_1p25cm_svn.txt'];
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
@@ -330,16 +314,8 @@ legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwes
 
 % add SVN if file is available
 
-svn_file = [fdsdir,'methane_dx_1p25cm_svn.txt'];
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
@@ -404,16 +380,8 @@ legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwes
 
 % add SVN if file is available
 
-svn_file = [fdsdir,'methane_dx_1p25cm_svn.txt'];
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p250'])
