@@ -337,7 +337,7 @@ matlab -automation -wait -noFigureWindows -r "try; run('%svnroot%\Utilities\Matl
 echo Stage 6 - Generating statistics
 echo             validation stats
 call :archive_validation_stats
-call :verification_stats
+call :validation_svn_stats
 
 echo             timing stats
 call :generate_timing_stats
@@ -473,7 +473,7 @@ exit /b
 
   if exist %CURRENT_STATS_FILE% (
 :: Archive stats to Firebot history
-    copy %CURRENT_STATS_FILE% "%HISTORYDIR%\%revisionstring%_%STATS_FILE_BASENAME%.csv"
+    copy %CURRENT_STATS_FILE% "%HISTORYDIR%\%revisionnum%_%STATS_FILE_BASENAME%.csv"
   )  
 
   if NOT exist %CURRENT_STATS_FILE% (
@@ -506,7 +506,7 @@ exit /b 0
 :: -------------------------------------------------------------
 
   cd %svnroot%\Utilities\Scripts
-  copy fds_timing_stats.csv "%HISTORYDIR%\%revisionstring%_timing.csv"
+  copy fds_timing_stats.csv "%HISTORYDIR%\%revisionnum%_timing.csv"
 exit /b 0
 
 :: -------------------------------------------------------------
