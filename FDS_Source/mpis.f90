@@ -5,14 +5,14 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        integer LAM_MAJOR_VERSION, LAM_MINOR_VERSION
        integer LAM_RELEASE_VERSION
        integer LAM_ALPHA_VERSION, LAM_BETA_VERSION
-       integer LAM_SVN_VERSION
+       integer LAM_GIT_VERSION
        integer MPI_IN_PLACE
        parameter (LAM_MAJOR_VERSION=7)
        parameter (LAM_MINOR_VERSION=1)
        parameter (LAM_RELEASE_VERSION=2)
        parameter (LAM_ALPHA_VERSION=0)
        parameter (LAM_BETA_VERSION=0)
-       parameter (LAM_SVN_VERSION=0)
+       parameter (LAM_GIT_VERSION=0)
        integer MPI_VERSION, MPI_SUBVERSION
        parameter (MPI_VERSION=1)
        parameter (MPI_SUBVERSION=2)
