@@ -41,10 +41,6 @@ Scat_Paper_Width  = 6.0;
 Figure_Visibility = 'on';
 Image_File_Type = '-dpdf';
 
-% SVN text position
-SVN_Scale_X = 0.80;
-SVN_Scale_Y = 1.05;
-
 % Set default figure properties
 set(0,'DefaultAxesUnits',Plot_Units)
 set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
