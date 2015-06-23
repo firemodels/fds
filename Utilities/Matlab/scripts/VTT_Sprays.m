@@ -74,16 +74,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_40.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40');
@@ -116,16 +108,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40');
@@ -158,16 +142,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40');
@@ -201,16 +177,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_62.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62');
@@ -243,16 +211,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62');
@@ -285,16 +245,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'FDS_Output_Files/LN02_4_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
+addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62');
