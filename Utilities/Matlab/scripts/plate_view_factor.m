@@ -113,16 +113,17 @@ set(leg,'FontSize',Key_Font_Size);
 
 % add SVN if file is available
 
-SVN_Filename = 'plate_view_factor_2D_30_svn.txt';
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = 'plate_view_factor_2D_30_git.txt';
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print pdf
 set(gcf,'Visible',Figure_Visibility);
