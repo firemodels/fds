@@ -3,7 +3,7 @@
 % velocity_signal.m
 
 function []=velocity_signal(devc_file,devc_col,vel_style,tmin,tmax,vmin,vmax,xaxis_title,yaxis_title, ...
-                            title_label,text_label,signal_file,svn_file)
+                            title_label,text_label,signal_file,git_file)
 
 plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
 datadir = ['../../Validation/Sandia_Plumes/FDS_Output_Files/'];
@@ -40,17 +40,9 @@ set(gca,'YTick',vmin:1:vmax)
 set(gca,'XTick',tmin:1:tmax)
 %set(gca,'XMinorTick','on')
 
-% add SVN if file is available
+% add git version if file is available
 
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
