@@ -142,16 +142,17 @@ set(lh,'box','off')
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -214,16 +215,17 @@ hold on
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -302,16 +304,17 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -386,16 +389,17 @@ hold on
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -471,16 +475,17 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -558,16 +563,17 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
@@ -647,16 +653,17 @@ hold on
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 print(gcf,'-dpdf',[pltdir,'backward_facing_step_uw'])
