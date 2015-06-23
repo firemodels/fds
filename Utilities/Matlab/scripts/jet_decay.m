@@ -29,19 +29,19 @@ m_1 = 0.12;
 m_2 = 0.20;
 
 for j=1:length(x)
-	if x(j)<h/m_1
-		u_1(j) = u_0;
-	else
+    if x(j)<h/m_1
+        u_1(j) = u_0;
+    else
         u_1(j) = u_0/(m_1*x(j))*sqrt(b*h);
-	end
+    end
 end
 
 for j=1:length(x)
-	if x(j)<h/m_2
-		u_2(j) = u_0;
-	else
+    if x(j)<h/m_2
+        u_2(j) = u_0;
+    else
         u_2(j) = u_0/(m_2*x(j))*sqrt(b*h);
-	end
+    end
 end
 
 plot_style
@@ -69,27 +69,28 @@ text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'FontName'
 xlabel('{\it x/h}','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
 ylabel('{\it u}_{max}/{\it u}_0','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 legend_handle = legend(H,'analytical, {\it m}=0.12','analytical, {\it m}=0.20',...
-	                     'csmag, {\it h/\deltax}=8','csmag, {\it h/\deltax}=16',...
-	                     'dsmag, {\it h/\deltax}=8','dsmag, {\it h/\deltax}=16',...
-		                 'Deardorff, {\it h/\deltax}=8','Deardorff, {h/\deltax}=16',...
-		                 'Vreman, {\it h/\deltax}=8','Vreman, {\it h/\deltax}=16',...
-						 'Location','EastOutside');
+                         'csmag, {\it h/\deltax}=8','csmag, {\it h/\deltax}=16',...
+                         'dsmag, {\it h/\deltax}=8','dsmag, {\it h/\deltax}=16',...
+                         'Deardorff, {\it h/\deltax}=8','Deardorff, {h/\deltax}=16',...
+                         'Vreman, {\it h/\deltax}=8','Vreman, {\it h/\deltax}=16',...
+                         'Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter);
 set(legend_handle,'Fontsize',Key_Font_Size);
 set(legend_handle,'Box','on');
 
 % add SVN if file is available
 
-SVN_Filename = ['jet_dsmag_dx5cm_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = ['jet_dsmag_dx5cm_git.txt'];
+addverstr(gca,SVN_Filename,'linear')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
+%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 
