@@ -44,25 +44,11 @@ filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3
 
 skip_case = 0;
 
-if ~exist([datadir,'shunn3_32_mms.csv'])
-    display(['Error: File ' [datadir,'shunn3_32_mms.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([datadir,'shunn3_64_mms.csv'])
-    display(['Error: File ' [datadir,'shunn3_64_mms.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([datadir,'shunn3_128_mms.csv'])
-    display(['Error: File ' [datadir,'shunn3_128_mms.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([datadir,'shunn3_256_mms.csv'])
-    display(['Error: File ' [datadir,'shunn3_256_mms.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
-end
-if ~exist([datadir,'shunn3_512_mms.csv'])
-    display(['Error: File ' [datadir,'shunn3_512_mms.csv'] ' does not exist. Skipping case.'])
-    skip_case = 1;
+for n=1:length(filename)
+    if ~exist([datadir,filename{n}])
+        display(['Error: File ' [datadir,filename{n}] ' does not exist. Skipping case.'])
+        skip_case = 1;
+    end
 end
 
 if skip_case
@@ -154,16 +140,17 @@ legend('boxoff')
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'shunn3_256_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-    Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+SVN_Filename = [datadir,'shunn3_256_git.txt'];
+addverstr(gca,SVN_Filename,'loglog')
+% if exist(SVN_Filename,'file')
+%     SVN = importdata(SVN_Filename);
+%     x_lim = get(gca,'XLim');
+%     y_lim = get(gca,'YLim');
+%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
+%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
+%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
+%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+% end
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
