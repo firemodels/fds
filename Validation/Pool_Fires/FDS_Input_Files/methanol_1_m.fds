@@ -17,7 +17,7 @@
       CONDUCTIVITY           = 0.20
       SPECIFIC_HEAT          = 2.48
       DENSITY                = 796
-      ABSORPTION_COEFFICIENT = 1500
+      ABSORPTION_COEFFICIENT = 1140
       BOILING_TEMPERATURE    = 64.8 /
 	  
 &MATL ID            = 'STEEL'
