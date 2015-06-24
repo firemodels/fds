@@ -7336,7 +7336,7 @@ the former is the rate at which energy is absorbed by the solid surface; the lat
 \be
    \dq_{\rm gauge}'' = \dq_{\rm r}''/\epsilon + \dq_{\rm c}'' + h(T_{\rm w}-T_{\rm G}) + \sigma (T_{\rm w}^4-T_{\rm G}^4)
 \ee
-If the heat flux gauge used in an experiment has a temperature other than ambient, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
+If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than that of the surrounding surface, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
 \be
    \dq_{\rm radiometer}'' = \dq_{\rm r}''/\epsilon + \sigma (T_{\rm w}^4-T_\infty^4)
 \ee
@@ -9271,6 +9271,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
+{\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 0.9       \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}\\ \hline
