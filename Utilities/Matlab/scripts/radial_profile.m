@@ -8,7 +8,7 @@
 %
 % function []=radial_profile(plot_file,data_format,devc_col,error,error_type,tmin, ...
 %                            xaxis_label,yaxis_label,title_label,text_label,legend_pos, ...
-%                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy,svn_file, ...
+%                            rmin,rmax,dr,xmin,xmax,dx,ymin,ymax,dy,git_file, ...
 %                            exp_file,exp_format,exp_label,exp_stride, ...
 %                            fds_file1,fds_format1,fds_label1, ...
 %                            fds_file2,fds_format2,fds_label2, ...
@@ -44,7 +44,7 @@ if nargin>=1
     ymin        = varargin{iarg}; iarg=iarg+1;
     ymax        = varargin{iarg}; iarg=iarg+1;
     dy          = varargin{iarg}; iarg=iarg+1;
-    svn_file    = varargin{iarg}; iarg=iarg+1;
+    git_file    = varargin{iarg}; iarg=iarg+1;
     exp_file    = varargin{iarg}; iarg=iarg+1;
     exp_format  = varargin{iarg}; iarg=iarg+1;
     exp_label   = varargin{iarg}; iarg=iarg+1;
@@ -318,15 +318,7 @@ legend boxoff
 
 % add SVN if file is available
 
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,plot_file])
