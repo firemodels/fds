@@ -71,17 +71,9 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 Plot_Title=['{\it y} = ',line_plot,' m'];
                 text(.01,1.2,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
-                % Add SVN if file is available
-                SVN_Filename = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_svn.txt'];
-                if exist(SVN_Filename,'file')
-                    SVN = importdata(SVN_Filename);
-                    x_lim = get(gca,'XLim');
-                    y_lim = get(gca,'YLim');
-                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-                    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-                end
+                % Add git version if file is available
+                git_file = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_git.txt'];
+                addverstr(gca,git_file,'linear')
 
                 legend('FDS (Windward Wall)','FDS (Roof)','FDS (Leeward Wall)', 'Exp','Location', 'NorthEast')
                 legend boxoff
@@ -108,17 +100,9 @@ for ind1 = 1:length(str_mesh) % cycles through meshes
                 Plot_Title=['Side wall, {\it z} = ',line_plot,' m'];
                 text(.005,1.2,Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 
-                % Add SVN if file is available
-                SVN_Filename = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_svn.txt'];
-                if exist(SVN_Filename,'file')
-                    SVN = importdata(SVN_Filename);
-                    x_lim = get(gca,'XLim');
-                    y_lim = get(gca,'YLim');
-                    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-                    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-                    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-                        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-                end
+                % Add git version if file is available
+                git_file = [res_dir,'UWO_test7_case1_',angle,'_',mesh,'_git.txt'];
+                addverstr(gca,git_file,'linear')
 
                 legend('FDS','Exp','Location', 'NorthEast')
                 legend boxoff
