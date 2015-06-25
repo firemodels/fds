@@ -14,7 +14,6 @@
 function [] = plotspec(chid,N)
 
 close all
-%addpath('../../Verification/Turbulence/cbc')
 
 % set FDS standard plot format
 plot_style
@@ -26,9 +25,11 @@ L = 9*2*pi/100; % box length (m)
 k0 = 2*pi/L;
 kc = 1/2*N*k0;
 
-uvw_file1 = [chid,'_uvw_001.csv'];
-uvw_file2 = [chid,'_uvw_002.csv'];
-uvw_file3 = [chid,'_uvw_003.csv'];
+ddir = '../../Verification/Turbulence/';
+
+uvw_file1 = [ddir,chid,'_uvw_001.csv'];
+uvw_file2 = [ddir,chid,'_uvw_002.csv'];
+uvw_file3 = [ddir,chid,'_uvw_003.csv'];
 
 skip_case = 0;
 if ~exist(uvw_file1)
@@ -51,6 +52,8 @@ end
 H(1) = plotspec_uvw(uvw_file1,'k.-'); hold on
 H(2) = plotspec_uvw(uvw_file2,'r.-');
 H(3) = plotspec_uvw(uvw_file3,'b.-');
+
+% DO NOT DELETE these commented lines; they are in development
 
 % spec_file1 = [chid,'_spec_001.csv'];
 % spec_file2 = [chid,'_spec_002.csv'];
@@ -79,7 +82,7 @@ H(3) = plotspec_uvw(uvw_file3,'b.-');
 % H(3) = plotspec_fft(spec_file3,'b.-');
 
 % Gather the Comte-Bellot/Corrsin data
-CBC = load('cbcdata.txt');
+CBC = load([ddir,'cbcdata.txt']);
 k  = CBC(:,1)*1e2;
 E1 = CBC(:,2)/1e6;
 E2 = CBC(:,3)/1e6;
