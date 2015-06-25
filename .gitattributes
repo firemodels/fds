@@ -1,0 +1,4 @@
+*.f linguist-language = f77
+*.f90 linguist-languate = Fortran
+*.c linguist-languate = C
+
