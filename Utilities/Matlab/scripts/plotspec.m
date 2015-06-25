@@ -130,22 +130,13 @@ set(anno_obj_handle,'FontName',Font_Name)
 
 % add SVN if file is available
 
-SVN_Filename = [chid,'_git.txt'];
+SVN_Filename = [ddir,chid,'_git.txt'];
 addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',[chid,'_spectra'])
+print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',chid,'_spectra'])
     
