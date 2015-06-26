@@ -1,4 +1,4 @@
-SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N,N_AVERAGE)
+SUBROUTINE FDS2AST (CHID,NOMASTER,C_S,TBEG,TEND,TINT,COUNTER,VARIABLE,N,N_AVERAGE,T_AVERAGE)
 
 ! Program to read the Adiabatic Surface Temperature from bndf files for a specific 
 ! location, based on fds2ascii (part of FDS package)
@@ -48,16 +48,16 @@ INTEGER :: BATCHMODE
 !INTEGER :: ERROR_STATUS
 
 INTEGER COUNTER
-INTEGER V,SIZE,VCOUNT(7),P,POND,VARIABLE,WARNING,IN,VAR
+INTEGER V,SIZE,VCOUNT(7),P,POND,VARIABLE,VARIAB,WARNING,IN,VAR,BEG_VAR
 REAL Xa,Ya,Za,C_SIZE,TINT,A,B,C,C_S,NX,NY,NZ
-REAL TBEG,TEND
+REAL TBEG,TEND,SUM
 REAL NOMASTER(COUNTER,4),N(COUNTER,4)
 REAL, ALLOCATABLE, DIMENSION(:,:) :: M_AST
-REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST
+REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST,MED_TAST
 CHARACTER(8) OUTFILE
 CHARACTER(30) VARIABLE_KIND
 REAL MED
-INTEGER N_AVERAGE
+INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE
 
 !REAL(FB) :: tb_init,te_init,te_nmeshes,tb_nmeshes,te_fds2ast,tb_fds2ast
 
@@ -66,6 +66,7 @@ INTEGER N_AVERAGE
 
 ! Set a few default values
 BATCHMODE=0
+VARIAB=VARIABLE
 
 ! Check to see if the .smv file exists
 GRIDFILE = TRIM(CHID)//'.smv'
@@ -191,6 +192,16 @@ CALL TOUPPER(ANS,ANS)
 
 !CALL CPU_TIME (te_init)
 !WRITE (50,*) 'Time of initialization was ', te_init-tb_init, ' seconds'
+BEG_VAR=1
+IF (VARIAB==3) THEN
+  DO I=1,500
+    IF (TRIM(BNDF_TEXT(I))==' NET HEAT FLUX                ') THEN
+      BEG_VAR=I
+      VARIAB=I
+      EXIT
+    ENDIF
+  ENDDO
+ENDIF
 
 LOOP_FDS2AST:DO P=1,COUNTER
 !CALL CPU_TIME (tb_fds2ast)
@@ -203,11 +214,10 @@ LOOP_FDS2AST:DO P=1,COUNTER
     NX=N(P,2)
     NY=N(P,3)
     NZ=N(P,4)
-
          
 !$omp parallel 
 !$omp do
-VARIABLE_NUMBER: DO VAR=1,VARIABLE
+VARIABLE_NUMBER: DO VAR=BEG_VAR,VARIAB
 ! 500 - Point of the loop in case of the point does not reach a meaning value - SILVA, JC         
 500 CONTINUE
    XS = Xa-(C_SIZE/2)
@@ -229,14 +239,14 @@ VARIABLE_NUMBER: DO VAR=1,VARIABLE
 !                M_AST(I,J)=0.0
 !                ENDDO
 !             ENDDO
-             IF (VAR.EQ.1) VCOUNT=0.0
+             IF (VAR.EQ.BEG_VAR) VCOUNT=0.0
              V_TIME=0.0
              TAST=0.0
              M_AST=0.0
 
              
 ! IN_LOOP is a loop at index file - SILVA, JC
-IN_LOOP: DO IN=VAR,VARIABLE*NMESHES,VARIABLE
+IN_LOOP: DO IN=VAR,VARIAB*NMESHES,VARIAB
 
 !CALL CPU_TIME (tb_nmeshes)
 !*********
@@ -382,7 +392,7 @@ IN_LOOP: DO IN=VAR,VARIABLE*NMESHES,VARIABLE
                         IF (M%Y(J).GT.YF .OR. M%Y(J).LT.YS) CYCLE
                         IF (M%Z(K).GT.ZF .OR. M%Z(K).LT.ZS) CYCLE
                         M_AST(V,IOR_LOOP)=M_AST(V,IOR_LOOP)+Q(I,J,K,NV)
-                        IF (VAR.EQ.1 .AND. TIME.EQ.TBEG .AND. Q(I,J,K,NV).GT.0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                        IF (VAR.EQ.BEG_VAR .AND. TIME.EQ.TBEG .AND. Q(I,J,K,NV).NE.0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
                      ENDDO 
                   ENDDO
                ENDDO
@@ -555,7 +565,67 @@ IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
         IF (M_AST(1,3).LT.20 .AND. M_AST(1,3).GT.0) THEN
             M_AST(1,3)=20.0
         END IF 
-!         
+!        
+       IF (NZ.LT.0) THEN
+          IF (M_AST(1,1).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+!
+        IF (NY.LT.0) THEN
+          IF (M_AST(1,2).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+! 
+        IF (NX.LT.0) THEN
+          IF (M_AST(1,3).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF 
+!
+       IF (NZ.GT.0) THEN
+          IF (M_AST(1,7).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+!
+        IF (NY.GT.0) THEN
+          IF (M_AST(1,6).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+! 
+        IF (NX.GT.0) THEN
+          IF (M_AST(1,5).EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+! 
 C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
         IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.20 .AND. &
@@ -1137,28 +1207,476 @@ C=SQRT((NX**2)+(NY**2)+(NZ**2))
         GOTO 500
         END IF
 END IF
-!****************
+
+IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
+        IF (NZ.GT.0) THEN
+            DO I=1,V
+            M_AST(I,1)=0.D0
+            END DO
+        END IF
+        IF (NZ.LT.0) THEN 
+            DO I=1,V
+            M_AST(I,7)=0.D0
+            END DO
+        END IF
+        IF (NZ.EQ.0) THEN 
+            DO I=1,V
+            M_AST(I,1)=0.D0
+            M_AST(I,7)=0.D0
+            END DO
+        END IF
+!        
+        IF (NY.GT.0) THEN
+            DO I=1,V
+            M_AST(I,2)=0.D0
+            END DO
+        END IF
+        IF (NY.LT.0) THEN 
+            DO I=1,V
+            M_AST(I,6)=0.D0
+            END DO
+        END IF
+        IF (NY.EQ.0) THEN 
+            DO I=1,V
+            M_AST(I,2)=0.D0
+            M_AST(I,6)=0.D0
+            END DO
+        END IF
+!
+        IF (NX.GT.0) THEN
+            DO I=1,V
+            M_AST(I,3)=0.D0
+            END DO
+        END IF
+        IF (NX.LT.0) THEN 
+            DO I=1,V
+            M_AST(I,5)=0.D0
+            END DO
+        END IF
+        IF (NX.EQ.0) THEN 
+            DO I=1,V
+            M_AST(I,3)=0.D0
+            M_AST(I,5)=0.D0
+            END DO
+        END IF
+!
+       IF (NZ.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,1))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+!
+        IF (NY.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,2))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+! 
+        IF (NX.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,3))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF 
+!
+       IF (NZ.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,7))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+!
+        IF (NY.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,6))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+! 
+        IF (NX.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,5))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+          ENDIF
+        END IF
+!        
+C=SQRT((NX**2)+(NY**2)+(NZ**2))
+!
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
+            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,1)*NZ))
+            B=SQRT((M_AST(I,1)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
+            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF  
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
+            DO I=1,V
+            A=((M_AST(I,7)*NZ))
+            B=SQRT((M_AST(I,7)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN      
+            DO I=1,V
+            A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((-M_AST(I,2)*NY))
+            B=SQRT((M_AST(I,2)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((M_AST(I,6)*NY))
+            B=SQRT((M_AST(I,6)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN         
+            DO I=1,V
+            A=((-M_AST(I,3)*NX))
+            B=SQRT((M_AST(I,3)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            DO I=1,V
+            A=((M_AST(I,5)*NX))
+            B=SQRT((M_AST(I,5)**2))
+            TAST(I)=(A/(B*C))*B
+            END DO
+        END IF
+        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
+        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
+            TAST=0.D0
+        END IF
+!********************************
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(TAST(I))
+        ENDDO
+        IF (SUM.GT.0) THEN
+            TAST(1)=0.0
+        ELSE 
+            IF (C_SIZE.GE.(2.5*C_S)) THEN
+                WRITE (6,'(F8.3,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3)') C_SIZE,M_AST(10,1),M_AST(10,2),M_AST(10,3),M_AST(10,5), &
+                M_AST(10,6),M_AST(10,7)
+                WRITE (6,'(F8.5,F8.5,F8.5,F8.5,F8.5,F8.5)') NX,NY,NZ
+124             WRITE(6,*) ' WARNING: C_SIZE has reached the maximum for',OUTFILE,'!',C_SIZE
+                WRITE(6,*) ' (1) if you want to ignore this node'
+                WRITE(6,*) ' (2) if you want to stop the code'
+                WRITE(6,*) ' (3) if you want to continue increasing C_SIZE'
+                READ(*,*) WARNING
+                IF (WARNING.EQ.1) THEN
+                    DEALLOCATE (V_TIME)
+                    DEALLOCATE (TAST)
+                    DEALLOCATE (M_AST)
+                    GO TO 100
+                END IF
+                IF (WARNING.EQ.2) STOP
+                IF (WARNING.NE.1 .AND. WARNING.NE.2 .AND. WARNING.NE.3) THEN
+                WRITE(6,*) ' WRONG ANSWER! '
+                GO TO 124                
+                END IF
+            END IF
+            DEALLOCATE (V_TIME)
+            DEALLOCATE (TAST)
+            DEALLOCATE (M_AST)
+            C_SIZE=C_SIZE*1.1
+            GOTO 500
+        END IF 
+END IF
 !CALL CPU_TIME (te_fds2ast)
 !WRITE (50,*) 'Time of FDS2AST was ', te_fds2ast-tb_fds2ast, ' seconds'
 !DO I=1,V
 !    WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(I)
 !    WRITE (100+VAR,'(E12.5)', ADVANCE='YES') TAST(I)
 !ENDDO
-DO I=1,V-1
-  IF (VAR.EQ.2) THEN
-    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
-    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
-  ELSE    
-    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
-    WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
-  ENDIF
-ENDDO
 
+!*** Set an time averaged function to represent the evaluation of the variables (T_AVERAGE)
+IF (T_AVERAGE==0) THEN
+  DO I=1,V
+   IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
+   ENDIF
+   IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", TAST(I)
+   ENDIF
+   IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME(I)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", TAST(I)*1000
+   ENDIF
+  ENDDO
+ELSE
+  I_AVERAGE=T_AVERAGE/TINT
+  ALLOCATE (MED_TAST((V-1)/I_AVERAGE))
+  DO I=1,(V-1)/I_AVERAGE
+    MED=0.0
+    DO J=I_AVERAGE*(I-1),(I_AVERAGE*I)-1
+      MED=MED+TAST(J+2)
+    ENDDO
+    MED=MED/I_AVERAGE
+    MED_TAST(I)=MED
+  ENDDO
+   IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", MED_TAST(1)/2
+     DO I=2,((V-1)/I_AVERAGE)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
+     ENDDO
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     IF (N_AVERAGE.NE.0) THEN
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     ENDIF
+   ENDIF
+   IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", 1, ",1),", MED_TAST(1)/2
+     DO I=2,((V-1)/I_AVERAGE)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
+     ENDDO
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     IF (N_AVERAGE.NE.0) THEN
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     ENDIF
+   ENDIF
+   IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", (MED_TAST(1)/2)*1000
+     DO I=2,((V-1)/I_AVERAGE)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", ((MED_TAST(I-1)+MED_TAST(I))/2)*1000
+     ENDDO
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
+     IF (N_AVERAGE.NE.0) THEN
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
+        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
+     ENDIF
+   ENDIF
+  DEALLOCATE (MED_TAST)   
+ENDIF 
 !**********************
 !*** Set an average value for a steady simulation (last N_AVERAGE results)
 IF (N_AVERAGE==0) THEN
   CONTINUE
-ELSE
+ELSE IF (T_AVERAGE==0) THEN
     MED=0.0
     DO I=0,N_AVERAGE-1
       MED=MED+TAST(V-I)
@@ -1169,16 +1687,23 @@ ELSE
     !WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
     !WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED     
 
-    IF (VAR.EQ.2) THEN
-      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
-      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",1),", MED
-      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
-      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",1),", MED
-    ELSE    
+    IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN    
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",1),", MED
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",1),", MED
+    ENDIF
+    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V, ",1),", MED
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", V+1, ",1),", MED
+    ENDIF
+    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN    
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",0),", V_TIME(V)+TINT
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V, ",1),", MED*1000
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",1),", MED*1000
     ENDIF
 ENDIF    
 !**********************
