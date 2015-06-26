@@ -6140,8 +6140,8 @@ Here is a very simple example of a sprinkler:
 \end{lstlisting}
 A sprinkler, known as {\ct 'Spr\_60'}, is located at a point in space given by {\ct XYZ}. It is a {\ct 'K-11'} type sprinkler, whose properties are given on the {\ct PROP} line. Note that the various names ({\ct ID}s) mean nothing to FDS, except as a means of associating one thing with another, so try to use {\ct ID}s that are meaningful.  The parameter {\ct QUANTITY='SPRINKLER LINK TEMPERATURE'} {\em does} have a specific meaning to FDS, directing it to compute the activation of the device using the standard RTI (Response Time Index~\cite{Heskestad:3}) algorithm. Properties associated with sprinklers included in the {\ct PROP} group are:
 \begin{description}
-\item[{\ct RTI}] Response Time Index in units of $\si{m^\ha.s^\ha}$. (Default 100. $\si{m^\ha.s^\ha}$)
-\item[{\ct C\_FACTOR}] Conduction Factor in units of $\si{m^\ha/s^\ha}$. (Default 0. $\si{m^\ha/s^\ha}$)
+\item[{\ct RTI}] Response Time Index in units of (m$\cdot$s)$^{1/2}$. (Default 100.)
+\item[{\ct C\_FACTOR}] Conduction Factor in units of (m/s)$^{1/2}$. (Default 0.)
 \item[{\ct ACTIVATION\_TEMPERATURE}] in units of $^\circ$C. (Default 74~$^\circ$C)
 \item[{\ct INITIAL\_TEMPERATURE}] of the link in units of $^\circ$C. (Default {\ct TMPA})
 \item[{\ct FLOW\_RATE} or {\ct MASS\_FLOW\_RATE}] in units of L/min or kg/s. An alternative is to provide the {\ct K\_FACTOR} in units of $\si{L/(min.bar^{\ha})}$ and the {\ct OPERATING\_PRESSURE}, the gauge pressure at the sprinkler, in units of bar. The flow rate is then given by $K \sqrt{p}$. Note that 1 bar is equivalent to 14.5~psi, 1 gpm is equivalent to 3.785~L/min, 1~gpm/psi$^\ha$ is equivalent to 14.41~L/min/bar$^\ha$.  If {\ct MASS\_FLOW\_RATE} is given then {\ct PARTICLE\_VELOCITY} must also be defined. Note that {\ct FLOW\_RATE} is only appropriate for liquid droplets; solid particles should use {\ct MASS\_FLOW\_RATE}
@@ -9267,7 +9267,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
-{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.        \\ \hline
+{\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.        \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline

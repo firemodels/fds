@@ -1,0 +1,49 @@
+&HEAD CHID='PRS_vent' / 
+
+&MESH IJK=102,60,40, XB=0,10.2,0,6,0,4/
+&ZONE XB=0,10.2,0,6,0,4, LEAK_AREA(0) = 0.0095 /
+
+&TIME T_END=30. /
+
+&MISC TMPA= 25., P_INF= 100805   /
+
+&OBST XB = 5,5.2,0,   2.64,0,   4 /
+&OBST XB = 5,5.2,2.64,3.36,2.15,4 /
+&OBST XB = 5,5.2,3.36,6,   0,   4 /
+
+Ventilation
+
+&SURF ID='FLOOR', LEAK_PATH=1,0 /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+
+ VENT XB= 2.3, 2.7, 5.2, 5.6, 4.0, 4.0, SURF_ID='OPEN', DYNAMIC_PRESSURE=0. /     
+ VENT XB= 7.5, 7.9, 5.2, 5.6, 4.0, 4.0, SURF_ID='OPEN', DYNAMIC_PRESSURE=0. /   
+
+ VENT XB= 2.3, 2.7, 0.4, 0.8, 4.0, 4.0, SURF_ID='OPEN', DYNAMIC_PRESSURE=-50. /
+&VENT XB= 7.5, 7.9, 0.4, 0.8, 4.0, 4.0, SURF_ID='HVAC', ID='Exhaust Vent Room 2' /
+
+&HVAC TYPE_ID='DUCT', ID='Exhaust Duct Room 2', NODE_ID='node 1','node 2', AREA=0.16, LOSS=1,1, FAN_ID='fan 1' /
+&HVAC TYPE_ID='NODE', ID='node 1', VENT_ID='Exhaust Vent Room 2', DUCT_ID='Exhaust Duct Room 2' /
+&HVAC TYPE_ID='NODE', ID='node 2', AMBIENT=.TRUE., DUCT_ID='Exhaust Duct Room 2', XYZ=0,0,4 /
+&HVAC TYPE_ID='FAN', ID='fan 1', MAX_FLOW=0.5, MAX_PRESSURE=758. /
+
+&SLCF PBX=2.5,QUANTITY='PRESSURE',VECTOR=.TRUE. /
+&SLCF PBX=7.7,QUANTITY='PRESSURE',VECTOR=.TRUE. /
+
+Pressure
+
+&DEVC XYZ=4.40,5.5,0.50, QUANTITY='PRESSURE', ID='P_L1' /
+&DEVC XYZ=5.70,5.5,1.00, QUANTITY='PRESSURE', ID='P_L2' /
+
+Supply and exhaust for Room 1
+
+ DEVC XB=2.3, 2.7, 5.2, 5.6, 4.0, 4.0, QUANTITY='VOLUME FLOW', ID='DADM_L1' /
+ DEVC XB=2.3, 2.7, 0.4, 0.8, 4.0, 4.0, QUANTITY='VOLUME FLOW', ID='DEXT_L1' /
+
+Supply and exhaust for Room 2
+
+ DEVC XB=7.5, 7.9, 5.2, 5.6, 4.0, 4.0, QUANTITY='VOLUME FLOW', ID='DADM_L2' /
+&DEVC XB=7.5, 7.9, 0.4, 0.8, 4.0, 4.0, QUANTITY='VOLUME FLOW', ID='DEXT_L2' /
+
+&TAIL /
+
