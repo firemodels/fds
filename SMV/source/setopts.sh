@@ -1,5 +1,6 @@
 #!/bin/bash
 # test
+# test 2
 SIZE="-m64"
 COMPILER="icc"
 COMPILER2="icc"
