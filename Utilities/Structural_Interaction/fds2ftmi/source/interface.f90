@@ -6,7 +6,7 @@ IMPLICIT NONE
 
 CHARACTER(256) NODES,ELMS,INTFILE
 INTEGER NUMEL,NNODE,I,J,NO1,NO2,NO3,NO4,LINHAS,VARIABLE,CURVEID
-INTEGER SHELL,EL,LAYER,HIGHNODE,N_OR,ROUND,CODE,N_AVERAGE
+INTEGER SHELL,EL,LAYER,HIGHNODE,N_OR,ROUND,CODE,N_AVERAGE,T_AVERAGE
 REAL SOMAX,SOMAY,SOMAZ,A(3),B(3),C(3)
 REAL, ALLOCATABLE, DIMENSION(:,:) :: NOS,NOMASTER,N,BOUNDARY
 INTEGER, ALLOCATABLE, DIMENSION(:,:) :: ELEMENTOS
@@ -83,7 +83,19 @@ IF (VARIABLE==1) THEN
     READ(ARG,*) TINT
     CALL GET_COMMAND_ARGUMENT(8,ARG)
     READ(ARG,*) N_AVERAGE
-    CALL GET_COMMAND_ARGUMENT(9,INTFILE)
+    CALL GET_COMMAND_ARGUMENT(9,ARG)
+    READ(ARG,*) T_AVERAGE
+    CALL GET_COMMAND_ARGUMENT(10,ARG)    
+    READ(ARG,*) CODE
+    CALL GET_COMMAND_ARGUMENT(11,INTFILE)
+    IF (CODE==2) THEN
+        CALL GET_COMMAND_ARGUMENT(11,ARG)
+        READ(ARG,*) CURVEID
+        CALL GET_COMMAND_ARGUMENT(12,ARG)
+        READ(ARG,*) EM
+        WRITE(6,*) 'Support for export just one variable to LS-Dyna is under development...'
+        STOP
+    ENDIF
 ELSE
     CALL GET_COMMAND_ARGUMENT(4,ARG)
     READ(ARG,*) TBEG
@@ -94,12 +106,14 @@ ELSE
     CALL GET_COMMAND_ARGUMENT(7,ARG)
     READ(ARG,*) N_AVERAGE
     CALL GET_COMMAND_ARGUMENT(8,ARG)
+    READ(ARG,*) T_AVERAGE
+    CALL GET_COMMAND_ARGUMENT(9,ARG)
     READ(ARG,*) CODE
-    CALL GET_COMMAND_ARGUMENT(9,INTFILE)
+    CALL GET_COMMAND_ARGUMENT(10,INTFILE)
     IF (CODE==2) THEN
-        CALL GET_COMMAND_ARGUMENT(10,ARG)
-        READ(ARG,*) CURVEID
         CALL GET_COMMAND_ARGUMENT(11,ARG)
+        READ(ARG,*) CURVEID
+        CALL GET_COMMAND_ARGUMENT(12,ARG)
         READ(ARG,*) EM
     ENDIF
 ENDIF
@@ -110,7 +124,7 @@ READ(3,'(a)') CHID
 READ(3,*) C_SIZE
 READ(3,*) VARIABLE,HC
 READ(3,*) TBEG,TEND,TINT
-READ(3,*) N_AVERAGE
+READ(3,*) N_AVERAGE,T_AVERAGE
 READ(3,*) CODE
 READ(3,'(a)') INTFILE
 IF (CODE==2) THEN
@@ -138,6 +152,8 @@ READ(*,'(a)') CHID
          READ(*,*) TINT
          WRITE(6,*) ' Enter number of average points to consider constant steady-state exposure conditions (0 if NO average)'
          READ(*,*) N_AVERAGE
+         WRITE(6,*) ' Enter time interval to average the exposure conditions (0 if NO average)'
+         READ(*,*) T_AVERAGE
          WRITE(6,*) ' Enter FEM code to use: (1) Ansys, (2) LS-Dyna'
          READ(*,*) CODE
          IF (CODE==2) THEN
@@ -232,20 +248,22 @@ END IF
 
 
 IF (ROUND.EQ.1) THEN
-IF (LEN_TRIM(INTFILE)==0) THEN
-WRITE(6,*) ' Enter output file name :'
-READ(*,'(a)') INTFILE
-END IF
-OPEN(70,FILE=TRIM(INTFILE)//'.dat',FORM='FORMATTED',STATUS='UNKNOWN')
+ IF (LEN_TRIM(INTFILE)==0) THEN
+   WRITE(6,*) ' Enter output file name :'
+   READ(*,'(a)') INTFILE
+ END IF
+ OPEN(70,FILE=TRIM(INTFILE)//'.dat',FORM='FORMATTED',STATUS='UNKNOWN')
 END IF
 
 !************** CREATE EXTRA NODES *********************
-   WRITE(70,'(A)') '/PREP7' 
-DO I=1,NUMEL
+WRITE(70,'(A)') '/PREP7' 
+IF (VARIABLE.EQ.1 .OR. VARIABLE.EQ.2) THEN
+ DO I=1,NUMEL
    WRITE(70,'(A, I8, A, F7.3, A, F7.3, A, F7.3, A)') "N,", INT(NOMASTER(I,1)), ",", NOMASTER(I,2), ",", &
    NOMASTER(I,3), ",", NOMASTER(I,4), ",,,,"
 !  N,"NODE NUMBER","COORD X","COORD Y","COORD Z",,,,
-ENDDO
+ ENDDO
+ENDIF
 !***********************************
 !!WORKING!!
 !**************** CREATE ELEMENT TYPE SURF152 ********************
@@ -257,11 +275,23 @@ ENDDO
    WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",2,0"
    WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",3,0"
    WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",4,0"
-   WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",5,1"
-   WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",6,0"
-   WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",7,0"
-   WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",8,4"
-   WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",9,1"
+   IF (VARIABLE.EQ.3) THEN
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",5,0"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",6,0"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",7,0"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",8,1"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",9,0"
+      IF (SHELL.EQ.0) THEN
+       WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",11,0"
+      ENDIF
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",13,0"
+   ELSE
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",5,1"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",6,0"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",7,0"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",8,4"
+      WRITE(70,'(A, I8, A)') "KEYOPT,", EL, ",9,1"
+   ENDIF
 ! IF IT IS SHELL ELEMENTS,
 ! 1 FOR TOP LAYER AND 2 FOR BOTTOM LAYER !
 IF (SHELL.EQ.1) THEN
@@ -293,7 +323,11 @@ LOOP_SURF152:DO I=1,NUMEL
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,3)
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,4)
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,5)
-    WRITE(70,'(A, I8)') "ESURF,", INT(NOMASTER(I,1))
+       IF (VARIABLE.EQ.3) THEN
+       WRITE(70,'(A)') "ESURF,0"
+       ELSE
+       WRITE(70,'(A, I8)') "ESURF,", INT(NOMASTER(I,1))
+       ENDIF
     WRITE(70,'(A)') "!*"
     ELSE
     WRITE(70,'(A, I8)') "nsel,S,node,,", ELEMENTOS(I,2)
@@ -304,12 +338,18 @@ LOOP_SURF152:DO I=1,NUMEL
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,7)
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,8)
     WRITE(70,'(A, I8)') "nsel,A,node,,", ELEMENTOS(I,9)
-    WRITE(70,'(A, I8)') "ESURF,", INT(NOMASTER(I,1))
+       IF (VARIABLE.EQ.3) THEN
+       WRITE(70,'(A)') "ESURF,0"
+       ELSE
+       WRITE(70,'(A, I8)') "ESURF,", INT(NOMASTER(I,1))
+       ENDIF
     WRITE(70,'(A)') "!*"
     END IF
-    WRITE(70,'(A)') "ALLSELL,ALL"
-    WRITE(70,'(A)') "!*"
+    !WRITE(70,'(A)') "ALLSEL,ALL"
+    !WRITE(70,'(A)') "!*"
 ENDDO LOOP_SURF152
+    WRITE(70,'(A)') "ALLSEL,ALL"
+    WRITE(70,'(A)') "!*"
 !*******************************
 !!WORKING!!
 !*********** CREATING TABLES (.DAT) **********
@@ -317,15 +357,29 @@ PRINT *, 'LOOP_TABELAS'
 LOOP_TABELAS:DO I=1,NUMEL
     WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
     PRINT *, INTFILE2
-    IF (N_AVERAGE==0) THEN
-        LINHAS=INT((TEND-TBEG)/TINT)
-    ELSE
+    IF (T_AVERAGE==0) THEN
+      IF (N_AVERAGE==0) THEN
+        LINHAS=INT((TEND-TBEG)/TINT)+1
+      ELSE
         LINHAS=INT((TEND-TBEG)/TINT)+2
+      ENDIF
+    ELSE
+      IF (N_AVERAGE==0) THEN
+        LINHAS=INT((TEND-TBEG)/T_AVERAGE)+1
+      ELSE
+        LINHAS=INT((TEND-TBEG)/T_AVERAGE)+2
+      ENDIF
     ENDIF
+    IF (VARIABLE.EQ.1 .OR. VARIABLE.EQ.2) THEN
     WRITE(70,'(A, A, A, I8, A)') "*DIM,A", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME,TEMP," 
     WRITE(70,'(A)') "!*"
     IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, I8, A)') "*DIM,H", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME,," 
     IF (VARIABLE.EQ.2) WRITE(70,'(A)') "!*"
+    ENDIF
+    IF (VARIABLE.EQ.3) THEN
+    WRITE(70,'(A, A, A, I8, A)') "*DIM,A", INTFILE2, ",TABLE,", LINHAS, ",1,1,TIME, ," 
+    WRITE(70,'(A)') "!*"
+    ENDIF
     !WRITE(70,'(A, A, A, A, A)') "*TREAD,A", INTFILE2, ",'", INTFILE2, "','dat',' ', ,"
     !WRITE(70,'(A)') "!*"
     !IF (VARIABLE.EQ.2) WRITE(70,'(A, A, A, A, A)') "*TREAD,H", INTFILE2, ",'", INTFILE2, "H','dat',' ', ,"
@@ -336,10 +390,11 @@ ENDDO LOOP_TABELAS
 !200 CONTINUE
 !****** LOOP AT FDS2AST TO EXTRACT RESULTS FROM BNDF FILES *****
 PRINT *, 'LOOP_FDS2AST'
-CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NUMEL,VARIABLE,N,N_AVERAGE)
+CALL FDS2AST (CHID,NOMASTER,C_SIZE,TBEG,TEND,TINT,NUMEL,VARIABLE,N,N_AVERAGE,T_AVERAGE)
 !*******************
 !!WORKING!!
 !*********** APPLYING TABLES AS NODAL LOADS **********
+IF (VARIABLE.EQ.1 .OR. VARIABLE.EQ.2) THEN
     WRITE(70,'(A)') "/PREP7"
     PRINT *, 'LOOP_CARGAS'
 LOOP_CARGAS:DO I=1,NUMEL
@@ -348,6 +403,7 @@ LOOP_CARGAS:DO I=1,NUMEL
     WRITE(70,'(A)') "!*"
     WRITE(70,'(A, A, A, A, A)') "D,",INTFILE2,", , %A", INTFILE2, "% , , , ,TEMP, , , , ,"
 ENDDO LOOP_CARGAS
+ENDIF
 !*******************************
 !!WORKING!!
 !*********** APPLYING TABLES AS CONVECTIVE HEAT TRANSFER COEFFICIENT **********
@@ -372,6 +428,19 @@ LOOP_HEAT1:DO I=1,NUMEL
     PRINT *, INTFILE3
     WRITE(70,'(A,A,A,F7.3)') "SFE,",INTFILE3,",1,CONV,0,",HC
 ENDDO LOOP_HEAT1
+ENDIF
+!*******************************
+!*********** APPLYING TABLES AS CONVECTIVE HEAT TRANSFER COEFFICIENT **********
+IF (VARIABLE.EQ.3) THEN
+    WRITE(70,'(A)') "/PREP7"
+    PRINT *, 'LOOP_HEAT_FLUX'
+LOOP_HEAT3:DO I=1,NUMEL
+    WRITE (INTFILE2,'(g8.0)') INT(NOMASTER(I,1))
+    PRINT *, INTFILE2
+    WRITE (INTFILE3,'(g8.0)') INT(ELEMENTOS(I,1))
+    PRINT *, INTFILE3
+    WRITE(70,'(A,A,A,A,A)') "SFE,",INTFILE3,",1,HFLUX,0,%A",INTFILE2,"%"
+ENDDO LOOP_HEAT3
 ENDIF
 !*******************************
 READ(2,'(a)') FILE_END

@@ -59,7 +59,8 @@ The Fire-ThermoMechanical Interface \cite{FTMI:Methodology} is a one-way couplin
 
 The code FDS2FTMI is included in the FDS-SVM repository \cite{FDS-SMV_repository} under \path{Utilities/Structural_Interaction/fds2ftmi}. A makefile is provided to help in the compilation process with different operational systems and compilers. A shell script (\path{scripts/build_fds2ftmi.sh}) is also provided to build this manual, run the Verification cases and check the results.  
 
-%If a reference to this methodology is needed, Silva~{\textit {et. al}} \cite{FTMI:Methodology} should be used. Some validation work done with this methodology is provided at Zhang~{\textit {et. al}} \cite{FTMI:Validation}.
+%If a reference to this methodology is needed, Silva~{\textit {et. al}} \cite{FTMI:Methodology} should be used. 
+Some validation work done with this methodology is provided at Zhang~{\textit {et. al}} \cite{FTMI:Validation}.
 
 \chapter{Getting Started}
 \label{info:start}
@@ -162,15 +163,17 @@ If the number of variables is defines as 2, the code will extract both $T_{\hbox
 To address the time boundary, the code needs the starting, ending time and the time interval. The time interval that the results are written into {\ct BNDF} files can be controlled by {\ct DT\_BNDF} at {\ct DUMP} line, the default is given by $2 \Delta t$/{\footnotesize NFRAMES}.
 \paragraph{Number of average points} 
 In some scenarios, a constant exposure condition can be assumed. To calculate a constant steady-state exposure condition from 
-a short time history, a number of average points should be provided. If NO average is wanted, 0 (zero) should be prescribed. 
-\paragraph{Output file}
-The code will generate an output file containing all the commands that need to be read by A{\footnotesize NSYS} (File > Read input from). This ouput file will create all elements, parameters and loads necessary to input the heat flux from the flames and hot gases into the nodes of the exposed surfaces.
+a short time history, a number of average points should be provided. If NO average is wanted, 0 (zero) should be prescribed.
+\paragraph{Time average} 
+The time step at the FEM model can be bigger than the time interval when FDS write results. In this case, an average needs to be performed to calculate the correct thermal exposure of the surfaces. If NO average is wanted, 0 (zero) should be prescribed.  
 \paragraph{FEM Code}
-This is used to tell FDS2FTMI which FEM code will be used in the thermomechanical analysis. At this moment, only A{\footnotesize NSYS} is supported, and this variable should be equal to 1. \\
+This is used to tell FDS2FTMI which FEM code will be used in the thermomechanical analysis. At this moment, only A{\footnotesize NSYS} is supported, and this variable should be equal to 1.
+\paragraph{Output file}
+The code will generate an output file containing all the commands that need to be read by A{\footnotesize NSYS} (File > Read input from). This ouput file will create all elements, parameters and loads necessary to input the heat flux from the flames and hot gases into the nodes of the exposed surfaces. \\
 
 These information can be passed to the code via arguments (command line), input file or just typing as the code steps through execution. As arguments or input file, the paramenters need to be given at the same order they are presented above. For example:
 \begin{verbatim}
-  fds2ftmi_linux_64 simple_panel_hot 0.05 2 0 600 2 0 1 simple_panel
+  fds2ftmi_linux_64 simple_panel_hot 0.05 2 0 600 2 0 0 1 simple_panel
 \end{verbatim}
   or 
 \begin{verbatim}
@@ -182,11 +185,11 @@ with simple\_fire\_hot.fds2ftmi:
   0.05 
   2
   0 600 2 
-  0
+  0 0
   1
   simple_panel
 \end{verbatim}
-start the code with simple\_panel\_hot as {\ct CHID}, a cell size equal to 0.05, 2 variables, starting at 0s to 600s with 2s as time interval, with no average calculation, exporting the results in A{\footnotesize NSYS} format and writting the results at ``simple\_panel.dat''.
+start the code with simple\_panel\_hot as {\ct CHID}, a cell size equal to 0.05, 2 variables, starting at 0s to 600s with 2s as time interval, with no average points, no time average, exporting the results in A{\footnotesize NSYS} format and writting the results at ``simple\_panel.dat''.
 
 The code will search into the {\ct BNDF} files for the results. Searching over every surface in the FDS simulation can slow down this process. To reduce the size of the {\ct BNDF} files, add {\ct BNDF\_DEFAULT=.FALSE.} in {\ct MISC} line and the add {\ct BNDF\_OBST=.TRUE.} at the exposed surfaces {\ct OBST} lines.
 
