@@ -16,6 +16,7 @@ fds_intel_*
 
 # latex output files
 *.aux
+*.bak
 *.bbl
 *.blg
 *.brf
