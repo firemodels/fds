@@ -4,11 +4,11 @@
 mailToSMV="gforney@gmail.com"
 
 # General mailing list for Firebot status report
-mailToFDS="gforney@gmail.com"
+mailToFDS="mcgratta@gmail.com, randy.mcdermott@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com, drjfloyd@gmail.com"
 
 # Verbose mailing list for Validationbot, Macbot, etc.
-mailToFDS_verbose="gforney@gmail.com"
+mailToFDS_verbose="mcgratta@gmail.com, randy.mcdermott@gmail.com, drjfloyd@gmail.com, gforney@gmail.com, CraigWeinschenk@gmail.com"
 
 # mailing list when debugging firebot
-mailToFDS_debug="gforney@gmail.com"
+mailToFDS_debug="gforney@gmail.com randy.mcdermott@gmail.com"
 
