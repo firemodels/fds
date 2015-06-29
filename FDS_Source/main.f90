@@ -1,7 +1,5 @@
 PROGRAM FDS  
 
-! dummy change to test https
-
 ! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
 USE PRECISION_PARAMETERS
