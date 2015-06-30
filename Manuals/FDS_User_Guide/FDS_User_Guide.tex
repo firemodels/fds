@@ -3832,7 +3832,7 @@ Note that a filter input refers to a class of filters and that multiple ducts ca
 An aircoil refers to a device that either adds or removes heat from air flowing through a duct.  In a typical HVAC system this is done by blowing the air over a heat exchanger (hence the term aircoil) containing a working fluid such as chilled water or a refrigerant.  A sample input line is as follows:
 
 \begin{lstlisting}
-&HVAC TYPE_ID='AIRCOIL', ID='aircoil 1', DEVC_ID='device 1', EFFICIENCY=0.5,
+&HVAC TYPE_ID='AIRCOIL', ID='aircoil 1', EFFICIENCY=0.5,
       COOLANT_SPECIFIC_HEAT=4.186, COOLANT_TEMPERATURE=10., COOLANT_MASS_FLOW=1./
 \end{lstlisting}
 
@@ -3842,7 +3842,6 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \item[{\ct COOLANT\_MASS\_FLOW}] is the flow rate of the working fluid (kg/s).
 \item[{\ct COOLANT\_SPECIFIC\_HEAT}] is the specific heat (\si{kJ/(kg.K)}) of the working fluid.
 \item[{\ct COOLANT\_TEMPERATURE}] is the inlet temperature of the working fluid ($^\circ$C).
-\item[{\ct DEVC\_ID}] is the name of a device controlling the operation of the aircoil. A {\ct CTRL\_ID} can be used as an alternative.
 \item[{\ct EFFICIENCY}] is the heat exchanger efficiency, $\eta$, from 0 to 1.  A value of 1 indicates the exit temperatures on both sides of the heat exchanger will be equal.
 \item[{\ct FIXED\_Q}] is the constant heat exchange rate. A negative value indicates heat removal from the duct.  The heat exchange rate can be controlled by either {\ct RAMP\_ID} or by {\ct TAU\_AC}.
 \item[{\ct TAU\_AC}]  defines a tanh ({\ct TAU\_AC}>0) or t$^2$ ramp ({\ct TAU\_AC}<0) for the aircoil.  This is applied to the {\ct FIXED\_Q} of the aircoil. Alternatively, a {\ct RAMP\_ID} can be given.
