@@ -84,7 +84,7 @@ if [ "$validsvn" == 1 ] ; then
   revision=`svn info 2>&1 | grep "Last Changed Rev:" | awk -F' ' '{print $4}'`
 fi
 if [ "$validgit" == 1 ] ; then
-  revision=`git log --abbrev-commit . 2>&1 | head -1 | awk -F " " '{print $2}'`
+  revision=`git describe --long --dirty`
 fi
 
 # get date/time of latest repository commit
