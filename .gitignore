@@ -26,3 +26,10 @@ fds_intel_*
 *.out
 *.pdfsync
 *.toc
+
+# smokeview vs build directory
+SMV/win32_local
+
+# smokeview upload directory 
+SMV/for_bundle/uploads
+

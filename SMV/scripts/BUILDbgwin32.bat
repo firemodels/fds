@@ -22,5 +22,5 @@ call %envfile%
 
 cd %svn_root%\Utilities\background\intel_win_32
 erase *.obj
-make_background.bat
+call make_background.bat
 pause

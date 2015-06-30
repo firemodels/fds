@@ -489,7 +489,7 @@ void usage(char *prog){
   char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getRevision(revision);    // get svn revision number
+  getRevision(revision);    // get revision
 
   printf("\n");
   printf("wind2fds %s(%s) - %s\n",prog_version,revision,__DATE__);
@@ -519,7 +519,7 @@ void version(char *prog){
     char revision[100];
 
     getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     printf("\n");
     printf("%s\n\n",prog);
     printf("Version: %s\n",version_local);
