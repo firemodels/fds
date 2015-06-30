@@ -12399,7 +12399,7 @@ void writeini(int flag,char *filename){
     char revision[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     fprintf(fileout,"\n\n");
     fprintf(fileout,"# FDS/Smokeview Environment\n");
     fprintf(fileout,"# -------------------------\n\n");

@@ -645,7 +645,7 @@ void display_version_info(void){
     char revision[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     PRINTF("\n");
     PRINTF("%s\n\n",TITLERELEASE);
     PRINTF("Version: %s\n",version);
