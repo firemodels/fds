@@ -265,7 +265,7 @@ void usage(void){
   char revision[100];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getRevision(revision);    // get svn revision number
+  getRevision(revision);    // get revision
 
   PRINTF("\n");
   PRINTF("  smokediff [options] smv_case1 smv_case2\n");
