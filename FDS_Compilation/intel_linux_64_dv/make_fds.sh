@@ -2,8 +2,6 @@
 platform=intel64
 dir=`pwd`
 target=${dir##*/}
-KWDIR=../../Utilities/keyword
-SDIR=../../FDS_Source
 
 source $IFORT_COMPILER/bin/compilervars.sh $platform
 
