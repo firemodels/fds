@@ -9,7 +9,7 @@ set SDIR=..\..\FDS_Source
 
 Title Building debug FDS for 64 bit Windows
 
-call %KWDIR%\expand_file %SDIR% %SDIR%\main.f90
+::call %KWDIR%\expand_file %SDIR% %SDIR%\main.f90
 make VPATH="../../FDS_Source" -f ..\makefile intel_win_64_db
-call %KWDIR%\contract_file %SDIR%\main.f90
+::call %KWDIR%\contract_file %SDIR%\main.f90
 pause

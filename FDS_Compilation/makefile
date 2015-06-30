@@ -99,7 +99,7 @@ intel_win_64_dv : obj = fds_win_64_dv
 intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : FFLAGS = /Od /nologo /debug:full /check /warn /extend_source:132 /traceback /stand:f08 /Z7 /MDd
+intel_win_64_db : FFLAGS = /Od /nologo /debug:full /check /warn /extend_source:132 /traceback /stand:f08 /Z7 /MDd -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 intel_win_64_db : obj = fds_win_64_db
