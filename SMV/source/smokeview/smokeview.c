@@ -645,14 +645,14 @@ void display_version_info(void){
     char revision[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     PRINTF("\n");
     PRINTF("%s\n\n",TITLERELEASE);
     PRINTF("Version: %s\n",version);
 #ifdef BIT64
-    PRINTF("Smokeview (64 bit) Revision Number: %s\n",revision);
+    PRINTF("Smokeview (64 bit) Revision: %s\n",revision);
 #else
-    PRINTF("Smokeview (32 bit) Revision Number: %s\n",revision);
+    PRINTF("Smokeview (32 bit) Revision: %s\n",revision);
 #endif
 #ifdef WIN32
 #ifdef X64
@@ -686,7 +686,7 @@ void display_version_info(void){
 #endif
     PRINTF("Build Date: %s\n",__DATE__);
     if(revision_fds>0){
-      PRINTF("FDS Revision Number: %i\n",revision_fds);
+      PRINTF("FDS Revision: %i\n",revision_fds);
     }
     if(smokeviewpath!=NULL){
       PRINTF("Smokeview path: %s\n",smokeviewpath);

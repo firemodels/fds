@@ -1918,7 +1918,7 @@ void initvars(void){
     char version[100];
     char svn_version[100];
 
-    getRevision(svn_version);    // get svn revision number
+    getRevision(svn_version);    // get revision
 
 // construct string of the form:
 //   5.x.y_#
