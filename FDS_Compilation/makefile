@@ -13,7 +13,7 @@ VPATH = ../FDS_Source
 
 # Find the Git revision
 
-GIT_HASH := $(shell git describe --always --dirty --tags)
+GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
 
 # Definition of the non-MPI object variables
