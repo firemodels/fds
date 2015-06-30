@@ -2,6 +2,7 @@
 = Firebot configuration information =
 =====================================
 
+# dummy change to test git 
 # Firebot
 # FDS automatIc veRification and validation tEst bot
 # Kristopher Overholt
