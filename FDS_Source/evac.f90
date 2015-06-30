@@ -955,7 +955,7 @@ CONTAINS
     END IF IF_IMODE_1
 
     ! Lines below are only for imode=2, i.e., after the READ_MESH in read.f90.
-    IF (.NOT. ANY(EVACUATION_GRID)) THEN
+    IF (.NOT. ANY(EVACUATION_ONLY)) THEN
        N_EVAC = 0
        IF (MYID==MAX(0,EVAC_PROCESS)) THEN
           IF (ANY(EVACUATION_ONLY)) THEN
@@ -1308,7 +1308,7 @@ CONTAINS
          EMESH_INDEX = 0
          N_EGRIDS = 0
          DO N = 1, NMESHES
-            IF (EVACUATION_ONLY(N) .AND. EVACUATION_GRID(N)) THEN
+            IF (EVACUATION_ONLY(N) .AND. EVACUATION_SKIP(N)) THEN
                N_EGRIDS = N_EGRIDS + 1
                EMESH_INDEX(N) = N_EGRIDS
             END IF
@@ -2289,7 +2289,7 @@ CONTAINS
          ! Check which evacuation mesh
          II = 0
          PEX_MeshLoop: DO I = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
                     MESHES(i)%XS,MESHES(i)%XF,MESHES(i)%YS,MESHES(i)%YF,MESHES(i)%ZS,MESHES(i)%ZF, 0._EB, 0._EB, 0._EB)) THEN
                   IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == TRIM(MESH_NAME(i))) THEN
@@ -2522,7 +2522,7 @@ CONTAINS
          ii  = 0
          iii = 0
          PEX_Mesh3Loop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF ( (PEX%Z >= MESHES(i)%ZS .AND. PEX%Z <= MESHES(i)%ZF).AND. &
                     (PEX%Y >= MESHES(i)%YS .AND. PEX%Y <= MESHES(i)%YF).AND. &
                     (PEX%X >= MESHES(i)%XS .AND. PEX%X <= MESHES(i)%XF)) THEN
@@ -2740,7 +2740,7 @@ CONTAINS
          ! Check which evacuation floor. Now there may be overlapping meshes.
          ii = 0
          PDX_MeshLoop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
                     MESHES(i)%XS,MESHES(i)%XF,MESHES(i)%YS,MESHES(i)%YF,MESHES(i)%ZS,MESHES(i)%ZF, 0._EB, 0._EB, 0._EB)) THEN
                   IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == TRIM(MESH_NAME(i))) THEN
@@ -2985,7 +2985,7 @@ CONTAINS
          ii = 0
          iii = 0
          PDX_Mesh3Loop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF ( (PDX%Z >= MESHES(i)%ZS .AND. PDX%Z <= MESHES(i)%ZF).AND. &
                     (PDX%Y >= MESHES(i)%YS .AND. PDX%Y <= MESHES(i)%YF).AND. &
                     (PDX%X >= MESHES(i)%XS .AND. PDX%X <= MESHES(i)%XF)) THEN
@@ -3386,7 +3386,7 @@ CONTAINS
          END IF
          STRP_MeshLoop: DO I = 1, NMESHES
             IF (.NOT. EVACUATION_ONLY(I)) CYCLE
-            IF (.NOT. EVACUATION_GRID(I)) CYCLE
+            IF (.NOT. EVACUATION_SKIP(I)) CYCLE
             IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID)==TRIM(MESH_NAME(I))) THEN
                ii = ii + 1
                STRP%IMESH = I
@@ -3588,7 +3588,7 @@ CONTAINS
       IF (N_NODES > 0 .AND. MYID==MAX(0,EVAC_PROCESS)) THEN
          n_tmp = 0
          DO N = 1, NMESHES
-            IF (EVACUATION_ONLY(N).AND.EVACUATION_GRID(N)) THEN
+            IF (EVACUATION_ONLY(N).AND.EVACUATION_SKIP(N)) THEN
                n_tmp = n_tmp + 1
                EVAC_Node_List(n_tmp)%Node_Index = n_tmp
                EVAC_Node_List(n_tmp)%Node_Type  = 'Floor'
@@ -3885,7 +3885,7 @@ CONTAINS
          ii = 0
          n_tmp = 0
          PNX_MeshLoop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                n_tmp = n_tmp + 1
                IF (Is_Within_Bounds(XB(1),XB(2),XB(3),XB(4),XB(5),XB(6),&
                     MESHES(i)%XS,MESHES(i)%XF,MESHES(i)%YS,MESHES(i)%YF,MESHES(i)%ZS,MESHES(i)%ZF, 0._EB, 0._EB, 0._EB)) THEN
@@ -4385,7 +4385,7 @@ CONTAINS
          ! Check which evacuation floor
          ii = 0
          HP_MeshLoop: DO i = 1, nmeshes
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF ( Is_Within_Bounds(HPT%X1,HPT%X2,HPT%Y1,HPT%Y2,HPT%Z1,HPT%Z2,&
                     MESHES(i)%XS,MESHES(i)%XF,MESHES(i)%YS,MESHES(i)%YF,MESHES(i)%ZS,MESHES(i)%ZF, 0._EB, 0._EB, 0._EB)) THEN
                   IF (TRIM(MESH_ID) == 'null' .OR. TRIM(MESH_ID) == TRIM(MESH_NAME(i))) THEN
@@ -4539,7 +4539,7 @@ CONTAINS
          EDV%MESH_ID   = TRIM(MESH_ID)
          IF (TRIM(MESH_ID) /= 'null') THEN
             EDV_MeshLoop: DO I = 1, NMESHES
-               IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I) .AND. &
+               IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I) .AND. &
                     TRIM(MESH_ID) == TRIM(MESH_NAME(i))) THEN
                   EDV%IMESH = I
                   EXIT EDV_MeshLoop
@@ -4647,7 +4647,7 @@ CONTAINS
          ! Check which evacuation floor
          ii = 0
          EHX_MeshLoop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF ( (EHX%Z1 >= MESHES(i)%ZS .AND. EHX%Z2 <= MESHES(i)%ZF).AND. &
                     (EHX%Y1 >= MESHES(i)%YS .AND. EHX%Y2 <= MESHES(i)%YF).AND. &
                     (EHX%X1 >= MESHES(i)%XS .AND. EHX%X2 <= MESHES(i)%XF)) THEN
@@ -4769,7 +4769,7 @@ CONTAINS
          ! Check which evacuation floor
          ii = 0
          ESS_MeshLoop: DO i = 1, NMESHES
-            IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+            IF (EVACUATION_ONLY(I) .AND. EVACUATION_SKIP(I)) THEN
                IF ( (ESS%Z1 >= MESHES(i)%ZS .AND. ESS%Z2 <= MESHES(i)%ZF).AND. &
                     (ESS%Y1 >= MESHES(i)%YS .AND. ESS%Y2 <= MESHES(i)%YF).AND. &
                     (ESS%X1 >= MESHES(i)%XS .AND. ESS%X2 <= MESHES(i)%XF)) THEN
@@ -5403,7 +5403,7 @@ CONTAINS
                 CALL SHUTDOWN(MESSAGE) ; RETURN
              END IF
              MESH_LOOP: DO NM=1,NMESHES
-                IF ( .NOT.(EVACUATION_GRID(NM) .AND. EVACUATION_ONLY(NM)) ) CYCLE
+                IF ( .NOT.(EMESH_INDEX(NM)>0 .AND. EVACUATION_ONLY(NM)) ) CYCLE
                 CALL POINT_TO_MESH(NM)
                 READ (LU_EVACFED,IOSTAT=IOS) IBAR_TMP, JBAR_TMP, KBAR_TMP, N_TMP
                 IF (IOS/=0) THEN
@@ -5830,7 +5830,8 @@ CONTAINS
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        ReadEffLoop: DO NM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM)) THEN
-             IF (.NOT. EVACUATION_GRID(NM)) CYCLE ReadEffLoop
+             !IF (.NOT. EVACUATION_GRID(NM)) CYCLE ReadEffLoop
+             IF (EMESH_INDEX(NM)==0) CYCLE ReadEffLoop
              MFF=>MESHES(NM)
              NFIELDS = EMESH_NFIELDS(EMESH_INDEX(NM))
              DO IFIELD = 1, NFIELDS
@@ -5968,7 +5969,9 @@ CONTAINS
     TYPE (EVAC_HOLE_TYPE),  POINTER :: EHX=>NULL()
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL(), HRE=>NULL()
     !
-    IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
+    !IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
+    IF (.NOT.(EVACUATION_ONLY(NM))) RETURN
+    IF (EMESH_INDEX(NM)==0) RETURN
     ! Next means that only EVAC_PROCESS is doing something
     IF (MYID /= PROCESS(NM)) RETURN
 
@@ -6173,7 +6176,8 @@ CONTAINS
        ! Check which evacuation floor node  (=1,...,n_egrids)
        n_tmp = 0
        HP_MeshLoop: DO i = 1, NMESHES
-          IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+          !IF (EVACUATION_ONLY(I) .AND. EVACUATION_GRID(I)) THEN
+          IF (EVACUATION_ONLY(I) .AND. EMESH_INDEX(I)>0) THEN
              n_tmp = n_tmp +1
              IF (HPT%IMESH == i) THEN
                 EXIT HP_MeshLoop
@@ -6609,7 +6613,7 @@ CONTAINS
     TYPE (EVAC_SSTAND_TYPE), POINTER :: ESS=>NULL()
     TYPE (HUMAN_TYPE), POINTER :: HR=>NULL()
     !
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (STOP_STATUS > 0) RETURN
 
     !
@@ -6660,7 +6664,7 @@ CONTAINS
        N_CHANGE_DOORS  = 0 ! Count the initialization Nash equilibrium iterations
        N_CHANGE_TRIALS = 0 ! Count the initialization Nash equilibrium iterations
        I_CHANGE_OLD    = -1
-       IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
+       IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EMESH_INDEX(NOM)>0) ) CYCLE
        TNOW=SECOND()
        M => MESHES(NOM)
        GROUP_LIST(:)%GROUP_SIZE  = 0
@@ -6791,7 +6795,7 @@ CONTAINS
     ! Initialize the GROUP_I_FFIELDS
     I_EGRID = 0
     DO NOM = 1, NMESHES
-       IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EVACUATION_GRID(NOM)) ) CYCLE
+       IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EMESH_INDEX(NOM)>0) ) CYCLE
        TNOW=SECOND()
        M => MESHES(NOM)
        I_EGRID = I_EGRID + 1
@@ -6864,7 +6868,7 @@ CONTAINS
 
     EXCHANGE_EVACUATION=.FALSE.
     !
-    IF (.NOT. ANY(EVACUATION_GRID)) RETURN
+    IF (.NOT. ANY(EVACUATION_ONLY)) RETURN
     IF (ICYC < 1) RETURN
     !
     ! I_MODE: 'binary' index:
@@ -6949,7 +6953,7 @@ CONTAINS
        ! Next loop interpolates fire mesh (soot+fed) into human_grids and
        ! saves it to the disk, or it reads fed+soot from the disk.
        MESH_LOOP: DO NM=1,NMESHES
-          IF ( .NOT.(EVACUATION_GRID(NM) .AND. EVACUATION_ONLY(NM)) ) CYCLE
+          IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0) ) CYCLE
           !
           TNOW=SECOND() 
           CALL POINT_TO_MESH(NM)
@@ -7191,7 +7195,7 @@ CONTAINS
     ! 
     TYPE (MESH_TYPE), POINTER :: MFF=>NULL()
 
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
 
     L_EFF_READ = BTEST(I_EVAC,2)
     L_EFF_SAVE = BTEST(I_EVAC,0)
@@ -7199,7 +7203,7 @@ CONTAINS
        N_END = N_EXITS - N_CO_EXITS + N_DOORS
        WRITE_EFF_LOOP: DO NM_TIM = 1, NMESHES
           EVAC_ONLY_NM: IF (EVACUATION_ONLY(NM_TIM)) THEN
-             IF (.NOT. EVACUATION_GRID(NM_TIM)) CYCLE WRITE_EFF_LOOP
+             IF (.NOT. EMESH_INDEX(NM_TIM)>0) CYCLE WRITE_EFF_LOOP
              MFF=>MESHES(NM_TIM)
              IBAR_TMP = MFF%IBAR
              JBAR_TMP = MFF%JBAR
@@ -7250,7 +7254,7 @@ CONTAINS
     ! Local variables
     ! 
     LOGICAL, INTRINSIC :: BTEST
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (ICYC < 1) RETURN
     ! Check if FED is used
     IF (BTEST(I_MODE,3) .OR. BTEST(I_MODE,1)) EVAC_DEVICES(:)%USE_NOW = .FALSE.
@@ -7347,7 +7351,7 @@ CONTAINS
     !
     LOGICAL, INTRINSIC :: BTEST
     !
-    IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
+    IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
     TNOW=SECOND()
     ! Check if FED is used
     USE_FED = .FALSE.
@@ -14782,8 +14786,8 @@ CONTAINS
     TYPE (HUMAN_TYPE), ALLOCATABLE, DIMENSION(:) :: DUMMY
     TYPE (MESH_TYPE), POINTER :: M =>NULL()
     !
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
-    IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM)) ) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.EVACUATION_ONLY(NM)) RETURN
 
     SELECT CASE(CODE)
        !
@@ -14820,8 +14824,8 @@ CONTAINS
     INTEGER, ALLOCATABLE, DIMENSION(:) :: TA
     TYPE (HUMAN_TYPE), POINTER :: HR =>NULL()
     !
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
-    IF (.NOT.(EVACUATION_ONLY(NM) .AND. EVACUATION_GRID(NM))) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
+    IF (.NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0)) RETURN
     TNOW=SECOND() 
     !
     CALL POINT_TO_MESH(NM)
@@ -15135,7 +15139,7 @@ CONTAINS
     INTEGER n_cols, n_tot_humans, i, ii, izero, ii_ntargets, ii_density
     REAL(FB), ALLOCATABLE, DIMENSION(:) :: ITEMP
     !
-    IF (.NOT.ANY(EVACUATION_GRID)) RETURN
+    IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     !
     ALLOCATE(ITEMP(MAX(1,N_EXITS+N_DOORS)), STAT = IZERO)
     CALL ChkMemErr('DUMP_EVAC_CSV','ITEMP', IZERO)
