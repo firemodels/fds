@@ -131,7 +131,7 @@ mpi_intel_win_64_db : setup_win $(objwin_mpi)
 # 2.  run case as usual
 # 3.  type: gprof fds_linux_64_profile > results.out
 
-intel_linux_64_profile : FFLAGS = -m64 -O2 -p
+intel_linux_64_profile : FFLAGS = -m64 -O2 -p -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_linux_64_profile : LFLAGS = -static-intel
 intel_linux_64_profile : FCOMPL = ifort
 intel_linux_64_profile : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -139,7 +139,7 @@ intel_linux_64_profile : obj = fds_intel_linux_64_profile
 intel_linux_64_profile : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback
+intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_linux_64 : LFLAGS = -static-intel
 intel_linux_64 : FCOMPL = ifort
 intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -155,7 +155,7 @@ intel_linux_64_dv : obj = fds_intel_linux_64_dv
 intel_linux_64_dv : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -mt_mpi -traceback
+impi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -mt_mpi -traceback -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 impi_intel_linux_64 : LFLAGS = -static-intel
 impi_intel_linux_64 : FCOMPL = mpiifort
 impi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -163,7 +163,7 @@ impi_intel_linux_64 : obj = fds_impi_intel_linux_64
 impi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+impi_intel_linux_64_db : FFLAGS = -m64 -mt_mpi -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 impi_intel_linux_64_db : LFLAGS = -static-intel
 impi_intel_linux_64_db : FCOMPL = mpiifort
 impi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -171,7 +171,7 @@ impi_intel_linux_64_db : obj = fds_impi_intel_linux_64_db
 impi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback
+mpi_intel_linux_64 : FFLAGS = -m64 -O2 -ipo -traceback -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_linux_64 : LFLAGS = -static-intel
 mpi_intel_linux_64 : FCOMPL = mpifort
 mpi_intel_linux_64 : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -179,7 +179,7 @@ mpi_intel_linux_64 : obj = fds_mpi_intel_linux_64
 mpi_intel_linux_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback
+mpi_intel_linux_64ib : FFLAGS = -m64 -O2 -ipo -traceback -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_linux_64ib : LFLAGS = -static-intel
 mpi_intel_linux_64ib : FCOMPL = mpifort
 mpi_intel_linux_64ib : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -187,7 +187,7 @@ mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
 mpi_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08
+intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
 intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -195,7 +195,7 @@ intel_linux_64_db : obj = fds_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_inspect : FFLAGS = -g -O0
+intel_linux_64_inspect : FFLAGS = -g -O0 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_linux_64_inspect : LFLAGS = -shared-intel
 intel_linux_64_inspect : FCOMPL = ifort
 intel_linux_64_inspect : FOPENMPFLAGS = -openmp
@@ -203,7 +203,7 @@ intel_linux_64_inspect : obj = fds_intel_linux_64_inspect -liomp5
 intel_linux_64_inspect : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency
+mpi_intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_linux_64_db : LFLAGS = -static-intel
 mpi_intel_linux_64_db : FCOMPL = mpifort
 mpi_intel_linux_64_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -211,7 +211,7 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64_inspect : FFLAGS = -g -O0
+mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_linux_64_inspect : LFLAGS = -static-intel
 mpi_intel_linux_64_inspect : FCOMPL = mpifort
 mpi_intel_linux_64_inspect : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -219,7 +219,7 @@ mpi_intel_linux_64_inspect : obj = fds_mpi_intel_linux_64_inspect
 mpi_intel_linux_64_inspect : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08
+mpi_intel_linux_64ib_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_linux_64ib_db : LFLAGS = -static-intel
 mpi_intel_linux_64ib_db : FCOMPL = mpifort
 mpi_intel_linux_64ib_db : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
@@ -229,7 +229,7 @@ mpi_intel_linux_64ib_db : setup $(obj_mpi)
 
 # OSX   
 
-intel_osx_64 : FFLAGS = -m64 -O2 -ipo
+intel_osx_64 : FFLAGS = -m64 -O2 -ipo -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64 : FCOMPL = ifort
@@ -237,7 +237,7 @@ intel_osx_64 : obj = fds_intel_osx_64
 intel_osx_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08
+intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_osx_64_db : LFLAGS = -static-intel
 intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64_db : FCOMPL = ifort
@@ -245,7 +245,7 @@ intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 mpi_intel_osx_64 : FCOMPL = mpifort
@@ -253,7 +253,7 @@ mpi_intel_osx_64 : obj = fds_mpi_intel_osx_64
 mpi_intel_osx_64 : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08
+mpi_intel_osx_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 mpi_intel_osx_64_db : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64_db : FOPENMPFLAGS = -openmp -openmp-link static
 mpi_intel_osx_64_db : FCOMPL = mpifort
@@ -261,7 +261,7 @@ mpi_intel_osx_64_db : obj = fds_mpi_intel_osx_64_db
 mpi_intel_osx_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08
+intel_osx_64_dv : FFLAGS = -m64 -O1 -traceback -stand:f08 -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_osx_64_dv : LFLAGS = -static-intel
 intel_osx_64_dv : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64_dv : FCOMPL = ifort
