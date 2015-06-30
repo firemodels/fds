@@ -11,8 +11,11 @@
 *.exp
 *.lib
 
-# fds executables
+# executables
 fds_intel_*
+smokeview*64*
+smokediff*64*
+smokezip*64*
 
 # latex output files
 *.aux
