@@ -1,5 +1,7 @@
 PROGRAM FDS  
 
+! test Glenn's demo
+
 ! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
 USE PRECISION_PARAMETERS
