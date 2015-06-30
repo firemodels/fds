@@ -11,6 +11,11 @@
 
 VPATH = ../FDS_Source
 
+# Find the Git revision
+
+GIT_HASH := $(shell git describe --long --dirty)
+GIT_DATE := $(shell git log -1 --format=%cd)
+
 # Definition of the non-MPI object variables
 
 obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
@@ -142,7 +147,7 @@ intel_linux_64 : obj = fds_intel_linux_64
 intel_linux_64 : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback
+intel_linux_64_dv : FFLAGS = -m64 -O1 -traceback -fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 intel_linux_64_dv : LFLAGS = -static-intel
 intel_linux_64_dv : FCOMPL = ifort
 intel_linux_64_dv : FOPENMPFLAGS = -openmp -openmp-link static -liomp5
