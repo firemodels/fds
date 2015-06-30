@@ -1288,7 +1288,7 @@ WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
 ! Write out the GIT number and revision date to a file
 
 OPEN(LU_GIT,FILE=FN_GIT,FORM='FORMATTED',STATUS='REPLACE')
-WRITE(LU_GIT,'(A)') TRIM(REVISION)
+WRITE(LU_GIT,'(A)') TRIM(GITHASH_PP)
 CLOSE(LU_GIT)
 
 ! Indicate the "endian-ness" of the output files
