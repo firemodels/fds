@@ -394,7 +394,7 @@ void version(void){
 
     getPROGversion(version);
 
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     printf("\n");
     printf("set_path %s - %s\n\n",version,__DATE__);
     printf("Version: %s\n",version);

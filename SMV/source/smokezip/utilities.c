@@ -64,7 +64,7 @@ void version(void){
     char revision[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     PRINTF("\n");
     PRINTF("Smokezip\n\n");
     PRINTF("Version: %s\n",smv_version);

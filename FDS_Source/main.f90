@@ -39,6 +39,7 @@ USE BOXTETRA_ROUTINES, ONLY: GET_REV_gsmv
 USE SOOT_ROUTINES, ONLY: CALC_AGGLOMERATION
 
 ! dummy comment to force svn change - Thu Jun 25 21:56:37 EDT 2015
+! test git commit
 
 IMPLICIT NONE
 
