@@ -169,6 +169,7 @@ if %havesoftware% == 0 (
 
 :: ----------------- get properties --------------------------
 
+cd %repo_dir%
 :: get revision number
 
 if %validsvn% == 1 (
