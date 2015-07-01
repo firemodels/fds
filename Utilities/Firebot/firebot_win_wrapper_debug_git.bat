@@ -1,9 +1,5 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
