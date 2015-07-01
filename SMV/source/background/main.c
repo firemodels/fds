@@ -299,7 +299,7 @@ void usage(char *prog){
   char pp[] = "%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getRevision(revision);    // get svn revision number
+  getRevision(revision);    // get revision
 
   printf("\n");
   printf("background %s(%s) - %s\n",prog_version,revision,__DATE__);
@@ -637,7 +637,7 @@ void version(void){
     char revision[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get svn revision number
+    getRevision(revision);    // get revision
     printf("\n");
     printf("background\n\n");
     printf("Version: %s\n",smv_version);
