@@ -26,6 +26,9 @@ fds_intel_*
 *.out
 *.pdfsync
 *.toc
+*.gz
+*.lot
+*.pdf
 
 # smokeview vs build directory
 SMV/win32_local
