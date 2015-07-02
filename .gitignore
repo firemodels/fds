@@ -30,7 +30,10 @@ smokezip*64*
 *.pdfsync
 *.toc
 
-# smokeview vs build directory
+# *nix files
+*.swp
+
+# smokeview build directory
 SMV/win32_local
 
 # smokeview upload directory 
