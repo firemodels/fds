@@ -8,7 +8,7 @@
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-//  dummy change to update version to 6.2.3
+//  dummy change to update version to 6.2.4
 //  dummy change  to force revision update
 
 /* ------------------ main ------------------------ */

@@ -12,9 +12,9 @@
 
 <ul>
 
-<li><a href="http://code.google.com/p/fds-smv/downloads/list">Downloads</a><br>
+<li><a href="http://firemodels.github.io/fds-smv/downloads.html">Downloads</a><br>
 <li><a href="http://fire.nist.gov/fds/documentation.html">Documentation</a><br>
-<li><a href="http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/SMV/for_bundle/readme.html">Smokeview release notes (this page)</a>
+<li><a href="http://htmlpreview.github.com/?https://github.com/firemodels/fds-smv/blob/master/SMV/for_bundle/readme.html">Smokeview release notes (this page)</a>
 </ul>
 
 <h3>Release Notes</h3>
@@ -24,6 +24,42 @@
     comment
 
 -->
+
+<li>6.2.4 - (build: gee24231) July 2, 2015</li>
+
+<ol>
+<li>enhancement: implement the script keyword ISORENDERALL for rendering all frames of an isosurface 
+file one frame at a time
+<li>enhancement: improve isosurface visualization by averaging isosurface normal vectors at mesh boundaries
+<li>enhancement: allow geometry to be colored using shades of gray and data can be colored 
+with a regular (non b/w) colorbar, cleanup up the coloring menu and dialog box - 
+(<a href="https://github.com/firemodels/fds-smv/issues/2386">Issue 2386</a>)
+
+<li>usability: add texture lighting, multiple lights, add ini parameters (Richard O'Konski)
+<li>usability: improve the isosurface color setting dialog box
+<li>usability: add widget for setting isosurface colors using names instead of color coordinates
+<li>usability: allocate memory used for isosurfaces more efficiently 
+(allocate triangles for all points in a time step with one allocation rather 
+than one allocation per point)
+<li>usability: add widgets to set isosurface transparency for each isosurface level independently 
+(just like colors)
+<li>usability: improve isosurface file loading efficiency for large cases
+<li>usabliity: increase permitted frame skip to 1000
+
+<li>fix: fix problem with windows build of wind2fds
+<li>fix: fix problems with skipping frames when rendering in a script - 
+(<a href="https://github.com/firemodels/fds-smv/issues/2416">Issue 2416</a>)
+<li>fix: correct logic for offsetting slice files above terrain - 
+(<a href="https://github.com/firemodels/fds-smv/issues/2377">Issue 2377</a>)
+<li>fix: trap a division by zero that occurs when there are no meshes such as in a cfast case - 
+(<a href="https://github.com/firemodels/fds-smv/issues/2413">Issue 2413</a>)
+<li>fix: fix problem when loading volume rendered smoke at arbitrary time steps (ie in single frame mode)
+<li>fix: fix memory overwrite bug in isosurface color setting code
+<li>fix: fix isosurface colors so that they turn to shades of gray when the 
+black/white data option is selected
+<li>fix: fix 'o' keyboard shortcut so that it toggles outline mode properly - 
+(<a href="https://github.com/firemodels/fds-smv/issues/2381">Issue 2381</a>)
+</ol>
 
 <li>6.2.3 (build 22541) - April 28, 2015</li>
 <ol>
