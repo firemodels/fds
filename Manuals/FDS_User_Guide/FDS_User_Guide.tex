@@ -1316,8 +1316,7 @@ and initial conditions are perfectly symmetric. To turn this off, set {\ct NOISE
 \item[{\ct OVERWRITE}] If {\ct .FALSE.} FDS checks for the existence of  {\ct CHID.out} and stops execution if it exists.
 \item[{\ct P\_INF}] Background pressure (at the ground) in Pa. The default is 101325 Pa.
 \item[{\ct TMPA}] Ambient temperature, the temperature of everything at the start of the simulation. The default is 20~$^\circ$C.
-\item[{\ct U0, V0, W0}] Initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is
-convenient to start the flow immediately, like in an outdoor simulation involving wind.
+\item[{\ct U0, V0, W0}] Computationally, these are the initial values of the gas velocity in each of the coordinate directions. Normally, these are all 0~m/s, but there are a few applications where it is convenient to start the flow immediately, like in an outdoor simulation involving wind.  Physically, these values should be thought of a ``far-field'' values of the velocity components.  Setting these values affects the pressure boundary condition for {\ct OPEN} vents.  See the FDS Tech Guide \cite{FDS_Math_Guide}.
 \end{description}
 
 \subsection{Special Topic: Mean Forcing and Data Assimilation}
