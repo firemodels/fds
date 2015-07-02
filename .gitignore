@@ -11,8 +11,11 @@
 *.exp
 *.lib
 
-# fds executables
+# executables
 fds_intel_*
+smokeview*64*
+smokediff*64*
+smokezip*64*
 
 # latex output files
 *.aux
@@ -27,7 +30,10 @@ fds_intel_*
 *.pdfsync
 *.toc
 
-# smokeview vs build directory
+# *nix files
+*.swp
+
+# smokeview build directory
 SMV/win32_local
 
 # smokeview upload directory 

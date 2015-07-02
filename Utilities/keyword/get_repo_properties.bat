@@ -177,7 +177,8 @@ if %validsvn% == 1 (
   set /p revision=<%temp1%
 )
 if %validgit% ==1 (
-  git log --abbrev-commit . 2>&1 | head -1 | gawk -F" " "{print $2}" > %temp1%
+  ::git log --abbrev-commit . 2>&1 | head -1 | gawk -F" " "{print $2}" > %temp1%
+  git describe --long --dirty > %temp1%
   set /p revision=<%temp1%
 )
 
