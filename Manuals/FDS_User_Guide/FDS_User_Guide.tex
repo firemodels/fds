@@ -5390,11 +5390,14 @@ The original version of RadCal included only absorption data for methane, which 
 
 \label{info:RADI_Absorption}
 
-The absorption and scattering of thermal radiation by Lagrangian particles is included in the radiation transport equation. The radiative properties of
-the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. For other types of particles, the
-radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
+The absorption and scattering of thermal radiation by Lagrangian
+particles is included in the radiation transport equation.
+The radiative properties can be given by specifying the components of the material refractive index on the corresponding {\ct PART} line, using keywords
 {\ct REAL\_REFRACTIVE\_INDEX} and {\ct COMPLEX\_REFRACTIVE\_INDEX}. Alternatively, wavelength dependent values of these two
 quantities can be tabulated in a {\ct TABLE} and called using the {\ct RADIATIVE\_PROPERTY\_TABLE}. More details can be found in Section~\ref{radiative_part_props}.
+
+The radiative properties of the water and fuel particles (droplets) are determined automatically. For fuel, the properties of heptane are assumed. The heptane values can
+be overriden by specifying them on the {\ct PART} line.
 
 Other parameters affecting the computations of particle-radiation interaction are listed here. {\ct RADTMP} is the assumed radiative source temperature.
 It is used in the spectral weighting during the computation of the mean scattering and absorption cross sections. The default is 900~$^\circ$C.
