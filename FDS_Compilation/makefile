@@ -111,7 +111,7 @@ mpi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO) 
 mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
-mpi_intel_win_64 : FCOMPL = mpiifort
+mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
@@ -120,7 +120,7 @@ mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO) 
 mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
-mpi_intel_win_64_db : FCOMPL = mpiifort
+mpi_intel_win_64_db : FCOMPL = ifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
 mpi_intel_win_64_db : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
