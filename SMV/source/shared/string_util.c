@@ -130,7 +130,7 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   #define pp_GITHASH "unknown"
 #endif
 void getRevision(char *revision){
-  char rev[256], *beg=NULL, *end=NULL;
+  char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
   trim(rev);
