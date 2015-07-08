@@ -16,18 +16,21 @@ cfastbase=cfastgitclean
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
-BUILDBUNDLE=
+BRANCH=
 RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 TESTFLAG=
-RUNFDSCASES=
+FORCECLEANREPO=0
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
 WEBHOSTNAME=$SMOKEBOT_HOSTNAME
 fi
- 
+
+if [[ "$IFORT_COMPILER" != "" ]] ; then
+  source $IFORT_COMPILER/bin/compilervars.sh intel64
+fi 
 notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ] ; then
   export haveCC="0"
@@ -39,14 +42,20 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'abmo:q:st' OPTION
+while getopts 'ab:d:fmo:q:st' OPTION
 do
 case $OPTION in
   a)
    RUNAUTO="y"
    ;;
   b)
-   BUILDBUNDLE="y"
+   BRANCH="$OPTARG"
+   ;;
+  d)
+   FDS_GITbase="$OPTARG"
+   ;;
+  f)
+   FORCECLEANREPO=1
    ;;
   m)
    MAKEMOVIES="1"
@@ -74,10 +83,12 @@ if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]];
       # Continue along
       :
    else
-      echo "Error: You are running the Smokebot script with the"
-      echo "repo $FDS_GITbase, not FDS-SMVgitclean."
-      echo "Terminating script."
-      exit
+      if [[ "$FORCECLEANREPO" == "0" ]]; then
+         echo "Error: Smokebot must remove all unversioned files in the repo $FDS_GITbase."
+         echo "To force this, re-run with the -f option. Terminating script."
+         exit
+      fi
+
 fi
 
 DB=_db
@@ -168,18 +179,33 @@ run_auto()
   git clean -dxf
   git add .
   git reset --hard HEAD
+
+  CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+  if [[ "$BRANCH" != "" ]] ; then
+    if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+       echo "Error: the branch $BRANCH does not exist. Terminating script."
+       exit
+    fi
+    if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+       echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+       git checkout $BRANCH
+    fi
+  else
+     BRANCH=$CURRENT_BRANCH
+  fi
+  echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
   git pull 
 
 # get info for smokeview
   cd $SMV_SOURCE
-  THIS_SMVGIT=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  THIS_SMVGIT=`git describe --long --dirty`
   THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
   LAST_SMVGIT=`cat $GIT_SMVFILE`
   git log . | head -5 | tail -1 > $GIT_SMVLOG
 
 # get info for FDS
   cd $FDS_SOURCE
-  THIS_FDSGIT=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  THIS_FDSGIT=`git describe --long --dirty`
   THIS_FDSAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
   LAST_FDSGIT=`cat $GIT_FDSFILE`
   git log . | head -5 | tail -1 > $GIT_FDSLOG
@@ -198,7 +224,6 @@ run_auto()
     echo $THIS_FDSGIT>$GIT_FDSFILE
     echo -e "FDS source has changed. $LAST_FDSGIT->$THIS_FDSGIT($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
     cat $GIT_FDSLOG >> $MESSAGE_FILE
-#    RUNFDSCASES=1
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
@@ -268,13 +293,13 @@ clean_smokebot_history()
 {
    
    # Clean Smokebot metafiles
-   MKDIR $SMOKEBOT_DIR
+   MKDIR $SMOKEBOT_DIR > /dev/null
    cd $SMOKEBOT_DIR
-   MKDIR guides
-   MKDIR history
-   MKDIR output
+   MKDIR guides > /dev/null
+   MKDIR history > /dev/null
+   MKDIR output > /dev/null
    rm -rf output/* > /dev/null
-   MKDIR $NEWGUIDE_DIR
+   MKDIR $NEWGUIDE_DIR > /dev/null
    chmod 775 $NEWGUIDE_DIR
 }
 
@@ -357,9 +382,23 @@ clean_git_repo()
 do_git_checkout()
 {
    cd $fdsroot
-   echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+
+   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+   if [[ "$BRANCH" != "" ]] ; then
+     if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        exit
+     fi
+     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        git checkout $BRANCH
+     fi
+   else
+      BRANCH=$CURRENT_BRANCH
+   fi
+   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    git pull >> $OUTPUT_DIR/stage1 2>&1
-   GIT_REVISION==`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+   GIT_REVISION=`git describe --long --dirty`
 }
 
 check_git_checkout()
@@ -373,15 +412,6 @@ check_git_checkout()
 #  = Stage 2a/b - Compile FDS debug =
 #  ==================================
 
-compile_fds_db()
-{
-   # Clean and compile FDS debug
-   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64_db
-   rm -f fds_${OPENMP}intel_${platform}_64_db
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage2a
-}
-
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
@@ -389,36 +419,6 @@ compile_fds_mpi_db()
    rm -f fds_mpi_intel_${platform}_64$IB$DB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
-}
-
-check_compile_fds_db()
-{
-   # Check for errors in FDS debug compilation
-   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64_db
-   if [ -e "fds_${OPENMP}intel_${platform}_64_db" ]
-   then
-      stage2a_success=true
-   else
-      echo "Errors from Stage 2a - Compile FDS debug:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      THIS_FDS_FAILED=1
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2a` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 2a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2a >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   # if the executable does not exist then an email has already been sent
-      if [ -e "fds_${OPENMP}intel_${platform}_64_db" ] ; then
-        THIS_FDS_FAILED=1
-      fi
-   fi
 }
 
 check_compile_fds_mpi_db()
@@ -486,12 +486,7 @@ run_verification_cases_debug()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    cd $fdsroot/Verification
-   find .                        -name '*.stop' -exec rm -f {} \;
-   find .                        -name '*.err' -exec rm -f {} \;
-   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
-   find Visualization            -name '*.smv' -exec rm -f {} \;
-   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
-   find WUI                      -name '*.smv' -exec rm -f {} \;
+   git clean -dxf > /dev/null
 
    #  =====================
    #  = Run all SMV cases =
@@ -502,8 +497,6 @@ run_verification_cases_debug()
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
    ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
-#   ./Run_SMV_Cases.sh -S $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
-#   ./Run_SMV_Cases.sh -M $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -544,109 +537,9 @@ check_verification_cases_debug()
    fi
 }
 
-#  ======================================================
-#  = Stage 3b - Run FDS verification cases (debug mode) =
-#  ======================================================
-
-wait_fds_verification_cases_debug_end()
-{
-   # Scans qstat and waits for verification cases to end
-   if [[ "$SMOKEBOT_QUEUE" == "none" ]]
-   then
-     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
-        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
-        TIME_LIMIT_STAGE="3"
-        check_time_limit
-        sleep 30
-     done
-   else
-     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
-        TIME_LIMIT_STAGE="3"
-        check_time_limit
-        sleep 30
-     done
-   fi
-}
-
-run_fds_verification_cases_debug()
-{
-   #  ======================
-   #  = Remove .stop files =
-   #  ======================
-
-   # Remove all .stop and .err files from Verification directories (recursively)
-   cd $fdsroot/Verification
-   find . -name '*.stop' -exec rm -f {} \;
-   find . -name '*.err' -exec rm -f {} \;
-   find . -name '*.out' -exec rm -f {} \;
-   find . -name '*.smv' -exec rm -f {} \;
-   find . -name '*.smv' -exec rm -f {} \;
-   find . -name '*.smv' -exec rm -f {} \;
-
-   #  =====================
-   #  = Run all FDS cases =
-   #  =====================
-
-   cd $fdsroot/Verification
-
-   # Submit FDS verification cases and wait for them to start
-   echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
-   ./Run_FDS_Cases.sh -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
-
-   # Wait for FDS verification cases to end
-   wait_fds_verification_cases_debug_end
-
-}
-
-check_fds_verification_cases_debug()
-{
-   # Scan and report any errors in FDS verification cases
-   cd $fdsroot/Verification
-
-   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b` == "" ]] && \
-      [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
-      [[ `grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]]
-   then
-      stage3b_success=true
-   else
-      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b > $OUTPUT_DIR/stage3b_errors
-      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
-      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
-      grep -rIi 'STOP: Numerical' -rIi Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
-      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
-      
-      echo "Errors from Stage 3b - Run verification cases (debug mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage3b_errors >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-      THIS_FDS_FAILED=1
-   fi
-   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage3b` == "" ]] 
-   then
-      no_warnings=true
-   else
-      echo "Stage 3b warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI $OUTPUT_DIR/stage3b >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
 #  ====================================
 #  = Stage 4a/b - Compile FDS release =
 #  ====================================
-
-compile_fds()
-{
-   # Clean and compile FDS
-   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64
-   rm -f fds_${OPENMP}intel_${platform}_64
-   make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage4a
-}
 
 compile_fds_mpi()
 {
@@ -655,32 +548,6 @@ compile_fds_mpi()
    rm -f fds_mpi_intel_${platform}_64$IB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
-}
-
-check_compile_fds()
-{
-   # Check for errors in FDS compilation
-   cd $fdsroot/FDS_Compilation/${OPENMP}intel_${platform}_64
-   if [ -e "fds_${OPENMP}intel_${platform}_64" ]
-   then
-      stage4a_success=true
-   else
-      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4a >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Stage 4a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'>> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
 }
 
 check_compile_fds_mpi()
@@ -832,19 +699,12 @@ run_verification_cases_release()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    cd $fdsroot/Verification
-   find .                        -name '*.stop' -exec rm -f {} \;
-   find .                        -name '*.err' -exec rm -f {} \;
-   find scripts/Outfiles         -name '*.out' -exec rm -f {} \;
-   find Visualization            -name '*.smv' -exec rm -f {} \;
-   find Immersed_Boundary_Method -name '*.smv' -exec rm -f {} \;
-   find WUI                      -name '*.smv' -exec rm -f {} \;
+   git clean -dxf > /dev/null
 
    # Start running all SMV verification cases
    cd $fdsroot/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
    ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
-#   ./Run_SMV_Cases.sh -S $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
-#   ./Run_SMV_Cases.sh -M $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -1169,27 +1029,27 @@ save_build_status()
    then
      cat "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Revision ${GIT_REVISION}." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
+     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_errors.txt"
      touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Revision ${GIT_REVISION}." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
+      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_errors.txt"
       touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Revision ${GIT_REVISION} has warnings." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
+      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_warnings.txt"
       touch output/status_warnings
 
    # No errors or warnings
    else
-      echo "Build success! Revision ${GIT_REVISION} passed all build tests." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
+      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
       touch output/status_success
    fi
 }
@@ -1222,21 +1082,21 @@ email_build_status()
      cat $TIME_LOG >> $ERROR_LOG
      cat $TIME_LOG >> $WARNING_LOG
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "smokebot build failure and warnings on ${hostname}. Revision ${GIT_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+     mail -s "smokebot build failure and warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
      cat $TIME_LOG >> $ERROR_LOG
       # Send email with failure message, body of email contains error log file
-      mail -s "smokebot build failure on ${hostname}. Revision ${GIT_REVISION}." $mailTo < $ERROR_LOG > /dev/null
+      mail -s "smokebot build failure on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
      cat $TIME_LOG >> $WARNING_LOG
       # Send email with success message, include warnings
-      mail -s "smokebot build success with warnings on ${hostname}. Revision ${GIT_REVISION}." $mailTo < $WARNING_LOG > /dev/null
+      mail -s "smokebot build success with warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
@@ -1249,7 +1109,7 @@ email_build_status()
       echo "-------------------------------" >> $TIME_LOG
 
       # Send success message with links to nightly manuals
-      mail -s "smokebot build success on ${hostname}! Revision ${GIT_REVISION}." $mailTo < $TIME_LOG > /dev/null
+      mail -s "smokebot build success on ${hostname}! Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $TIME_LOG > /dev/null
    fi
 }
 
@@ -1282,25 +1142,13 @@ PRELIM_end=`GET_TIME`
 DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
 echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
-### Stage 2a ###
-BUILDFDS_beg=`GET_TIME`
-#compile_fds_db
-#check_compile_fds_db
-stage2a_success=true
-
 ### Stage 2b ###
+BUILDFDS_beg=`GET_TIME`
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
-### Stage 4a ###
-stage4_beg=`GET_TIME`
-#if [[ $stage2a_success ]] ; then
-#   compile_fds
-#   check_compile_fds
-#fi
-stage4a_success=true
-
 ### Stage 4b ###
+stage4_beg=`GET_TIME`
 if [[ $stage2b_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
@@ -1319,17 +1167,13 @@ echo "Build SMV Utilities: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
 
 ### Stage 3 ###
 RUNCASES_beg=`GET_TIME`
-if [[ $stage2a_success && $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
+if [[ $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
-   if [ "$RUNFDSCASES" == "1" ] ; then
-     run_fds_verification_cases_debug
-     check_fds_verification_cases_debug
-   fi
 fi
 
 ### Stage 5 ###
-if [[ $stage4a_success && $stage4b_success ]] ; then
+if [[ $stage4b_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
@@ -1349,17 +1193,8 @@ BUILDSMV_end=`GET_TIME`
 DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
 echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
 
-### Stage 6b ###
-MAKEPICTURES_beg=`GET_TIME`
-if [[ $stage4a_success && $stage4b_success && $stage6a_success && "$RUNDEBUG" == "1" ]] ; then
-# for now skip image generation in debug mode
-DUMMY=
-#  make_smv_pictures_db
-#  check_smv_pictures_db
-fi
-
 ### Stage 6d ###
-if [[ $stage4a_success && $stage4b_success && $stage6c_success ]] ; then
+if [[ $stage4b_success && $stage6c_success ]] ; then
   make_smv_pictures
   check_smv_pictures
 fi
@@ -1381,14 +1216,14 @@ then
 fi
 
 ### Stage 7 ###
-if [[ $stage4a_success && $stage4b_success ]] ; then
+if [[ $stage4b_success ]] ; then
   generate_timing_stats
   archive_timing_stats
 fi
 
 ### Stage 8 ###
 MAKEGUIDES_beg=`GET_TIME`
-if [[ $stage4a_success && $stage4b_success && $stage6d_success ]] ; then
+if [[ $stage4b_success && $stage6d_success ]] ; then
 #  make_guide geom_notes $fdsroot/Manuals/FDS_User_Guide 'geometry notes'
   make_guide SMV_User_Guide $fdsroot/Manuals/SMV_User_Guide 'SMV User Guide'
   make_guide SMV_Technical_Reference_Guide $fdsroot/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
