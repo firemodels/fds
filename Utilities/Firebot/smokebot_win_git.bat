@@ -1,5 +1,19 @@
 @echo   off
 
+set altemail=%1
+set fdsrepoin=%2
+set cfastrepoin=%3
+
+set fdsrepo=FDS-SMVgitclean
+if NOT "%fdsrepoin%" == "" (
+  set fdsrepo=%fdsrepoin%
+)
+
+set cfastrepo=cfastgitclean
+if NOT "%cfastrepoin%" == "" (
+  set cfastrepo=%cfastrepoin%
+)
+
 ::  set number of OpenMP threads
 
 set OMP_NUM_THREADS=1
@@ -8,7 +22,7 @@ set OMP_NUM_THREADS=1
 ::                         set repository names
 :: -------------------------------------------------------------
 
-set fdsbasename=FDS-SMVgitclean
+set fdsbasename=%fdsrepo%
 set gitroot=%userprofile%\%fdsbasename%
 if NOT exist %gitroot% (
   cd %userprofile%
@@ -17,7 +31,7 @@ if NOT exist %gitroot% (
   echo %fdsbasename% repository creation complete.
 )
 
-set cfastbasename=cfastgitclean
+set cfastbasename=%cfastrepo%
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
   cd %userprofile%
@@ -44,6 +58,13 @@ set timefile=%OUTDIR%\time.txt
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
 set email=%gitroot%\SMV\scripts\email.bat
+
+set emailaltsetup=%userprofile%\bin\setup_gmail.bat
+if "%altemail%" == "1" (
+  if exist %emailaltsetup% (
+     call %emailaltsetup%  
+  )
+)
 
 set debug=1
 set release=0
@@ -177,7 +198,7 @@ if "%fdsbasename%" == "FDS-SMVgitclean" (
 echo             updating %fdsbasename% repository
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
+git describe --long --dirty > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
 git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilenum%

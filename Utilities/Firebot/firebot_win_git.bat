@@ -1,6 +1,13 @@
 @echo off
 
 set DEBUGOPT=%1
+set altemail=%2
+set fdsrepoin=%3
+
+set fdsrepo=FDS-SMVgitclean
+if NOT "%fdsrepoin%" == "" (
+  set fdsrepo=%fdsrepoin%
+)
 
 :: -------------------------------------------------------------
 ::                         set environment
@@ -14,7 +21,7 @@ set OMP_NUM_THREADS=1
 ::                         set repository names
 :: -------------------------------------------------------------
 
-set fdsbasename=FDS-SMVgitclean
+set fdsbasename=%fdsrepo%
 set gitroot=%userprofile%\%fdsbasename%
 if NOT exist %gitroot% (
   echo ***Fatal error: The git repository %fdsbasename% does not exist.
@@ -39,6 +46,13 @@ set TIMINGSDIR=%CURDIR%\timings
 erase %OUTDIR%\*.txt %OUTDIR%\*.log 1> Nul 2>&1
 
 set email=%gitroot%\SMV\scripts\email.bat
+
+set emailaltsetup=%userprofile%\bin\setup_gmail.bat
+if "%altemail%" == "1" (
+  if exist %emailaltsetup% (
+     call %emailaltsetup%  
+  )
+)
 
 set release=0
 set debug=1
@@ -170,7 +184,7 @@ echo             updating %fdsbasename% repository
 cd %gitroot%
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%
+git describe --long --dirty > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
 git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilestring%

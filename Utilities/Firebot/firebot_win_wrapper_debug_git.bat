@@ -1,14 +1,10 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
   echo 1 > %running%
-  call firebot_win_git.bat debug
+  call firebot_win_git.bat debug 1
   cd %curdir%
   erase %running%
 ) else (
