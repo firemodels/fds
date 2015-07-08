@@ -1,2 +1,3 @@
 dummy text to trigger smokebot
-dummy change to test git
+ dummy change to test git
+git diff test
