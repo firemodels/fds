@@ -296,10 +296,10 @@ clean_smokebot_history()
    MKDIR $SMOKEBOT_DIR > /dev/null
    cd $SMOKEBOT_DIR
    MKDIR guides > /dev/null
-   MKDIR history /dev/null
-   MKDIR output /dev/null
+   MKDIR history > /dev/null
+   MKDIR output > /dev/null
    rm -rf output/* > /dev/null
-   MKDIR $NEWGUIDE_DIR /dev/null
+   MKDIR $NEWGUIDE_DIR > /dev/null
    chmod 775 $NEWGUIDE_DIR
 }
 
