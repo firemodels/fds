@@ -55,9 +55,9 @@
       SPEC_ID(2)='NITROGEN', MASS_FLUX(2)=0.089602, RAMP_MF(2)='N2 RAMP' / time varied N2 dilution
 
 RAMP ID='N2 RAMP', T= 0.0, F=0.0 /0.21 vol frac O2
-RAMP ID='N2 RAMP', T= 20.0, F=0.0 / 
+RAMP ID='N2 RAMP', T= 20.0, F=0.0 /
 RAMP ID='N2 RAMP', T= 21.0, F=0.393605 / 0.181
-RAMP ID='N2 RAMP', T= 40.0, F=0.393605 / 
+RAMP ID='N2 RAMP', T= 40.0, F=0.393605 /
 RAMP ID='N2 RAMP', T= 41.0, F=0.629786 / 0.168
 RAMP ID='N2 RAMP', T= 60.0, F=0.629786 /
 RAMP ID='N2 RAMP', T= 61.0, F=0.837911 / 0.158
@@ -67,7 +67,7 @@ RAMP ID='N2 RAMP', T= 100.0, F=1.000000 /
 
 ! linear ramps to determine extinction location
 &RAMP ID='N2 RAMP', T= 0.0, F=0.0 /0.21 vol frac O2
-&RAMP ID='N2 RAMP', T= 40.0, F=0.0 / 
+&RAMP ID='N2 RAMP', T= 40.0, F=0.0 /
 &RAMP ID='N2 RAMP', T= 60.0, F=1.000000 / 0.151
 &RAMP ID='N2 RAMP', T= 80.0, F=2.000000 /
 
@@ -360,30 +360,3 @@ SLCF XB=-0.425,0.425,-0.30,0.30,-0.0125,1.1875, QUANTITY='DENSITY', SPEC_ID='SOO
 &DEVC XYZ=0, 0.24375,0.250, QUANTITY='VOLUME FRACTION', SPEC_ID='OXYGEN', TIME_AVERAGED=.FALSE. /
 
 &TAIL /
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
