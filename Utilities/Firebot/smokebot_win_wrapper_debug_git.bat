@@ -1,15 +1,11 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
   svn update
   echo 1 > %running%
-  call smokebot_win_git.bat debug
+  call smokebot_win_git.bat 1
   cd %curdir%
   erase %running%
 ) else (

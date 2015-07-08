@@ -3,7 +3,7 @@ set curdir=%CD%
 set running=bot.running
 if not exist %running% (
   echo 1 > %running%
-  call smokebot_win_git.bat
+  call smokebot_win_git.bat 0
   cd %curdir%
   erase %running%
 ) else (
