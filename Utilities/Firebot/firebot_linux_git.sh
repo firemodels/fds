@@ -33,6 +33,7 @@ if [ "$platform" == "linux" ] ; then
 fi
 
 # Additional definitions
+BRANCH=
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
 FDS_GITBASE=FDS-SMVgitclean
 fdsroot="$FIREBOT_HOME_DIR/$FDS_GITBASE"
@@ -58,6 +59,8 @@ echo "firebot.sh [ -q queue_name -r revision_string -s -v max_validation_process
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
+echo "-b - branch_name - run firebot using branch branch_name"
+echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
 echo ""
@@ -78,9 +81,12 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'hq:r:sv:' OPTION
+while getopts 'b:hq:r:sv:' OPTION
 do
 case $OPTION in
+  b)
+   BRANCH="$OPTARG"
+   ;;
   h)
    usage;
    ;;
@@ -233,6 +239,20 @@ do_git_checkout()
    # If no revision string is specified, then get the latest revision
    else
       echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+      if [[ "$BRANCH" != "" ]] ; then
+        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+           echo "Error: the branch $BRANCH does not exist. Terminating script."
+           exit
+        fi
+        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+           git checkout $BRANCH
+        fi
+      else
+         BRANCH=$CURRENT_BRANCH
+      fi
+      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
       git pull >> $OUTPUT_DIR/stage1 2>&1
 
       # Only run if firebot is in "verification" mode and SKIP_GIT_PROPS_AND_GIT_BUMP is not set
@@ -259,6 +279,20 @@ do_git_checkout()
       fi
       
       echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+      if [[ "$BRANCH" != "" ]] ; then
+        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+           echo "Error: the branch $BRANCH does not exist. Terminating script."
+           exit
+        fi
+        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+           git checkout $BRANCH
+        fi
+      else
+         BRANCH=$CURRENT_BRANCH
+      fi
+      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
       git pull >> $OUTPUT_DIR/stage1 2>&1
       GIT_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
    fi
@@ -1141,24 +1175,24 @@ save_build_status()
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Revision ${GIT_REVISION}." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Revision ${GIT_REVISION}." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Revision ${GIT_REVISION} has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success! Revision ${GIT_REVISION} passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
@@ -1169,19 +1203,19 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[${1}@$hostname] ${2} failure and warnings for Revision ${GIT_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+     mail -s "[${1}@$hostname] ${2} failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[${1}@$hostname] ${2} failure for Revision ${GIT_REVISION}." $mailToFDS < $ERROR_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} failure for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS < $ERROR_LOG > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[${1}@$hostname] ${2} success, with warnings. Revision ${GIT_REVISION} passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
 
    # No errors or warnings
    else
@@ -1203,7 +1237,7 @@ email_build_status()
       echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
       echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
       echo "-------------------------------" >> $TIME_LOG
-      mail -s "[${1}@$hostname] ${2} success! Revision ${GIT_REVISION} passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+      mail -s "[${1}@$hostname] ${2} success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
    fi
 }
 
