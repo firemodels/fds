@@ -398,7 +398,7 @@ do_git_checkout()
    fi
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    git pull >> $OUTPUT_DIR/stage1 2>&1
-   GIT_REVISION==`git describe --long --dirty`
+   GIT_REVISION=`git describe --long --dirty`
 }
 
 check_git_checkout()
