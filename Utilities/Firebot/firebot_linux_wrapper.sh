@@ -8,6 +8,6 @@ if [ -e $running ] ; then
   exit
 fi
 touch $running
-$firebotdir/firebot_linux_git.sh "$@"
+$firebotdir/firebot_linux.sh "$@"
 rm $running
 
