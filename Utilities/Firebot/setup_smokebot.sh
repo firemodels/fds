@@ -1,32 +1,35 @@
 #!/bin/bash
 
 CURDIR=`pwd`
+gitrepo=FDS-SMVgitclean
+gitrepodir=~/$gitrepo
+botdir=~/firebotgit
 
-# create smokebot directory
-
-if [ ! -d ~/smokebot ] ; then
+if [ ! -d $gitrepodir ] ; then
   cd 
-  echo ~\smokebot does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot smokebot
-  echo ~\smokebot created.
+  echo $gitrepodir does not exist - creating
+  git clone git@github.com:firemodels/fds-smv.git $gitrepo
+  echo $gitrepodir created.
 fi
 
-# create a clean cfast repository 
+# create directory where firebot runs
 
-if [ ! -d ~/cfastclean ] ; then
+if [ ! -d $botdir ] ; then
   cd 
-  echo ~\cfastclean does not exist - creating
-  svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk cfastclean
-  echo ~\cfastclean created.
+  echo $botdir does not exist - creating
+  mkdir $botdir
+  cd %botdir%
+  cp $gitrepodir/Utilities/Firebot/*.sh .
+  echo $botdir created.
 fi
 
-# create a clean FDS-SMV repository 
-
-if [ ! -d ~/FDS-SMVclean ] ; then
+gitrepo=cfastgitclean
+gitrepodir=~/$gitrepo
+if [ ! -d $gitrepodir ] ; then
   cd 
-  echo ~\FDS-SMVclean does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk FDS-SMVclean
-  echo ~\FDS-SMVclean created.
+  echo $gitrepodir does not exist - creating
+  git clone git@github.com:firemodels/cfast.git $gitrepo
+  echo $gitrepodir created.
 fi
 
 cd $CURDIR
