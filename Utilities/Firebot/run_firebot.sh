@@ -8,7 +8,7 @@ if [ -e bot_running ] ; then
 fi
 
 CURDIR=`pwd`
-FDS_GITbase=FDS-SMVgitclean
+FDS_GITbase=
 BRANCH=development
 botscript=firebot_linux.sh
 cFDS_GITbase=
@@ -31,7 +31,7 @@ done
 shift $(($OPTIND-1))
 
 if [[ "$FDS_GITbase" != "" ]]; then
-   cFDS_GITbase="-d $FDS_GITbase"
+   FDS_GITbase="-d $FDS_GITbase"
 fi 
 if [[ "$BRANCH" != "" ]]; then
    cBRANCH="-b $BRANCH"
@@ -44,5 +44,5 @@ if [[ "$UPDATEREPO" == "1" ]]; then
    cd $CURDIR
 fi
 touch $running
-./$botscript $cBRANCH $cFDS_GITbase "$@"
+./$botscript $cBRANCH $FDS_GITbase "$@"
 rm $running
