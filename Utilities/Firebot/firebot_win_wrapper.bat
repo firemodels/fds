@@ -4,7 +4,7 @@ set curdir=%CD%
 set running=bot.running
 if not exist %running% (
   echo 1 > %running%
-  call firebot_win_git.bat
+  call firebot_win.bat
   cd %curdir%
   erase %running%
 ) else (
