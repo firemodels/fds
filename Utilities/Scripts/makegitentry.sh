@@ -4,8 +4,8 @@ curdir=`pwd`
 gitrevisions=/tmp/gitrevisions.$$
 ncfile=/tmp/ncfile.$$
 cat ~/FDS-SMVgitclean/Validation/$DIR/FDS_Output_Files/*svn.txt 2> /dev/null | sort -u > $gitrevisions
-gitrev=`head -1 $gitrevisions
-gitrev2=`tail -1 $gitrevisions
+gitrev=`head -1 $gitrevisions`
+gitrev2=`tail -1 $gitrevisions`
 cat $gitrevisions | wc -l > $ncfile 2> /dev/null
 nc=`cat $ncfile`
 if [ "$gitrev" != "" ] ; then
