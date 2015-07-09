@@ -34,7 +34,7 @@ if [[ "$FDS_GITbase" != "" ]]; then
    cFDS_GITbase="-d $FDS_GITbase"
 fi 
 if [[ "$BRANCH" != "" ]]; then
-   cFDS_GITbase="-b $BRANCH"
+   cBRANCH="-b $BRANCH"
 fi 
 if [[ "$UPDATEREPO" == "1" ]]; then
    cd ~/$FDS_GITbase
