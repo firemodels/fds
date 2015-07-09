@@ -52,7 +52,7 @@ IB=ib
 fi
 
 # Load mailing list for status report
-source $FIREBOT_DIR/firebot_email_list_git.sh
+source $FIREBOT_DIR/firebot_email_list.sh
 
 function usage {
 echo "firebot.sh [ -q queue_name -r revision_string -s -v max_validation_processes -y ]"

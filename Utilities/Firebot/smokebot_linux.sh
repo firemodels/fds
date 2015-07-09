@@ -136,7 +136,7 @@ if [ -e $FDS_STATUS_FILE ] ; then
 fi
 
 # Load mailing list for status report
-source $SMOKEBOT_DIR/firebot_email_list_git.sh
+source $SMOKEBOT_DIR/firebot_email_list.sh
 
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
