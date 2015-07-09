@@ -1,20 +1,23 @@
 @echo   off
 
 set CURDIR=%CD%
-
-if NOT exist %userprofile%\firebot (
-  cd %userprofile%
-  echo %userprofile%\firebot does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot firebot
-  echo %userprofile%\firebot created.
-)
+set gitrepo=FDS-SMVgitclean
+set gitrepodir=%userprofile%\%gitrepo%
+set botdir=%userprofile%\firebotgit
 
 :: create a clean FDS repository
 
-if NOT exist %userprofile%\FDS-SMVclean (
+if NOT exist %gitrepodir% (
   cd %userprofile%
-  echo %userprofile%\FDS-SMVclean does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk FDS-SMVclean
+  echo %gitrepo% does not exist - creating
+  git clone git@github.com:firemodels/fds-smv.git %gitrepo%
+)
+
+if NOT exist %botdir% (
+  echo %botdir% does not exist - creating
+  mkdir %botdir%
+  cd %botdir%
+  copy %gitrepodir%\Utilities\Firebot\*.bat
 )
 
 cd %CURDIR%
