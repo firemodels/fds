@@ -84,8 +84,8 @@ if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
       :
    else
       if [[ "$FORCECLEANREPO" == "0" ]]; then
-         echo "Error: Smokebot will remove all unversioned files in $FDS_GITbase."
-         echo "To force this, re-run using the -f option."
+         echo "Error: Smokebot needs to remove all unversioned files in $FDS_GITbase."
+         echo "To allow this, re-run using the -f option."
          echo "Terminating smokebot."
          exit
       fi
