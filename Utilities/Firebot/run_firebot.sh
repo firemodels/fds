@@ -2,7 +2,7 @@
 
 running=bot_running
 if [ -e bot_running ] ; then
-  echo Smokebot is already running.
+  echo Firebot is already running.
   echo Erase the file $running if this is not the case.
   exit
 fi
@@ -10,7 +10,7 @@ fi
 CURDIR=`pwd`
 FDS_GITbase=FDS-SMVgitclean
 BRANCH=development
-botscript=smokebot_linux.sh
+botscript=firebot_linux.sh
 cFDS_GITbase=
 cBRANCH=
 UPDATEREPO=

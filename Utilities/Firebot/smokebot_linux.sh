@@ -78,14 +78,15 @@ esac
 done
 shift $(($OPTIND-1))
 
-if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]];
-   then
+if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
       # Continue along
+      echo continuing along
       :
    else
       if [[ "$FORCECLEANREPO" == "0" ]]; then
-         echo "Error: Smokebot must remove all unversioned files in the repo $FDS_GITbase."
-         echo "To force this, re-run with the -f option. Terminating script."
+         echo "Error: Smokebot will remove all unversioned files in $FDS_GITbase."
+         echo "To force this, re-run using the -f option."
+         echo "Terminating smokebot."
          exit
       fi
 
