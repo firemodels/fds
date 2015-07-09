@@ -81,7 +81,7 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:hq:r:sv:' OPTION
+while getopts 'b:hq:sv:' OPTION
 do
 case $OPTION in
   b)
@@ -92,9 +92,6 @@ case $OPTION in
    ;;
   q)
    QUEUE="$OPTARG"
-   ;;
-  r)
-   GIT_REVISION="$OPTARG"
    ;;
   s)
    SKIP_GIT_PROPS_AND_GIT_BUMP=true
@@ -232,70 +229,40 @@ do_git_checkout()
 {
    cd $fdsroot
    # If an GIT revision string is specified, then get that revision
-   if [[ $GIT_REVISION != "" ]]; then
-      echo "Checking out revision ${GIT_REVISION}" >> $OUTPUT_DIR/stage1 2>&1
-      git checkout $GIT_REVISION . >> $OUTPUT_DIR/stage1 2>&1
-      echo "At revision ${GIT_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
-   # If no revision string is specified, then get the latest revision
+   echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+   if [[ "$BRANCH" != "" ]] ; then
+     if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        exit
+     fi
+     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        git checkout $BRANCH
+     fi
    else
-      echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-      if [[ "$BRANCH" != "" ]] ; then
-        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
-           echo "Error: the branch $BRANCH does not exist. Terminating script."
-           exit
-        fi
-        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-           git checkout $BRANCH
-        fi
-      else
-         BRANCH=$CURRENT_BRANCH
-      fi
-      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-      git pull >> $OUTPUT_DIR/stage1 2>&1
-
-      # Only run if firebot is in "verification" mode and SKIP_GIT_PROPS_AND_GIT_BUMP is not set
-      if [[ $FIREBOT_MODE == "verification" && ! $SKIP_GIT_PROPS_AND_GIT_BUMP ]] ; then
-         # Bump GIT revision string of all guides (so that the GIT revision keyword gets updated)
-         echo "Bump GIT revision string of all guides." >> $OUTPUT_DIR/stage1 2>&1
-         CURRENT_TIMESTAMP=`date`
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-#         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/FDS_Source/main.f90
-
-         # Commit back results
-#         git add $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-#         git add $fdsroot/FDS_Source/main.f90
-#         git commit -m 'Firebot: Bump GIT revision of FDS guides and FDS source' &> /dev/null
-#         git push &> /dev/null
-      fi
-      
-      echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-      if [[ "$BRANCH" != "" ]] ; then
-        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
-           echo "Error: the branch $BRANCH does not exist. Terminating script."
-           exit
-        fi
-        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-           git checkout $BRANCH
-        fi
-      else
-         BRANCH=$CURRENT_BRANCH
-      fi
-      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-      git pull >> $OUTPUT_DIR/stage1 2>&1
-      GIT_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+      BRANCH=$CURRENT_BRANCH
    fi
+   echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
+   git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+
+   echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+   if [[ "$BRANCH" != "" ]] ; then
+     if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        exit
+     fi
+     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        git checkout $BRANCH >> $OUTPUT_DIR/stage1 2>&1
+     fi
+   else
+      BRANCH=$CURRENT_BRANCH
+   fi
+   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+   git pull >> $OUTPUT_DIR/stage1 2>&1
+   GIT_REVISION=`git describe --long --dirty`
 }
 
 check_git_checkout()
