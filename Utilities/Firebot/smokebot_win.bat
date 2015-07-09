@@ -1,5 +1,19 @@
 @echo   off
 
+set altemail=%1
+set fdsrepoin=%2
+set cfastrepoin=%3
+
+set fdsrepo=FDS-SMVgitclean
+if NOT "%fdsrepoin%" == "" (
+  set fdsrepo=%fdsrepoin%
+)
+
+set cfastrepo=cfastgitclean
+if NOT "%cfastrepoin%" == "" (
+  set cfastrepo=%cfastrepoin%
+)
+
 ::  set number of OpenMP threads
 
 set OMP_NUM_THREADS=1
@@ -8,21 +22,21 @@ set OMP_NUM_THREADS=1
 ::                         set repository names
 :: -------------------------------------------------------------
 
-set fdsbasename=FDS-SMVclean
-set svnroot=%userprofile%\%fdsbasename%
-if NOT exist %svnroot% (
+set fdsbasename=%fdsrepo%
+set gitroot=%userprofile%\%fdsbasename%
+if NOT exist %gitroot% (
   cd %userprofile%
   echo %fdsbasename% repository does not exist - creating.
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk %fdsbasename%
+  git clone git@github.com:firemodels/fds-smv.git %fdsbasename%
   echo %fdsbasename% repository creation complete.
 )
 
-set cfastbasename=cfastclean
+set cfastbasename=%cfastrepo%
 set cfastroot=%userprofile%\%cfastbasename%
 if NOT exist %cfastroot% (
   cd %userprofile%
   echo %cfastbasename% repository does not exist - creating.
-  svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk %cfastbasename%
+  git clone git@github.com:firemodels/cfast.git %cfastbasename%
   echo %cfastbasename% repository creation complete.
 )
 
@@ -43,7 +57,14 @@ set timefile=%OUTDIR%\time.txt
 
 erase %OUTDIR%\*.txt 1> Nul 2>&1
 
-set email=%svnroot%\SMV\scripts\email.bat
+set email=%gitroot%\SMV\scripts\email.bat
+
+set emailaltsetup=%userprofile%\bin\setup_gmail.bat
+if "%altemail%" == "1" (
+  if exist %emailaltsetup% (
+     call %emailaltsetup%  
+  )
+)
 
 set debug=1
 set release=0
@@ -55,7 +76,7 @@ set revisionfilestring=%OUTDIR%\revision.txt
 set revisionfilenum=%OUTDIR%\revision_num.txt
 set stagestatus=%OUTDIR%\stage_status.log
 
-set fromsummarydir=%svnroot%\Manuals\SMV_Summary
+set fromsummarydir=%gitroot%\Manuals\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
 
 set haveerrors=0
@@ -63,16 +84,16 @@ set havewarnings=0
 set haveCC=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
-set gettimeexe=%svnroot%\Utilities\get_time\intel_win_64\get_time.exe
-set runbatchexe=%svnroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
+set gettimeexe=%gitroot%\Utilities\get_time\intel_win_64\get_time.exe
+set runbatchexe=%gitroot%\SMV\source\runbatch\intel_win_64\runbatch.exe
 
 date /t > %OUTDIR%\starttime.txt
 set /p startdate=<%OUTDIR%\starttime.txt
 time /t > %OUTDIR%\starttime.txt
 set /p starttime=<%OUTDIR%\starttime.txt
 
-call "%svnroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %svnroot%\Utilities\Firebot\firebot_email_list.bat
+call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
+call %gitroot%\Utilities\Firebot\firebot_email_list.bat
 
 :: -------------------------------------------------------------
 ::                           stage 0
@@ -127,50 +148,60 @@ echo             found pdflatex
 call :is_file_installed grep|| exit /b 1
 echo             found grep
 
+call :is_file_installed gawk|| exit /b 1
+echo             found gawk
+
 call :is_file_installed sed|| exit /b 1
 echo             found sed
+
+call :is_file_installed wc|| exit /b 1
+echo             found wc
 
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
-call :is_file_installed svn|| exit /b 1
-echo             found svn
+call :is_file_installed git|| exit /b 1
+echo             found git
 
 echo. 1> %OUTDIR%\stage0.txt 2>&1
 
 :: revert cfast repository
 
 cd %cfastroot%
-if "%cfastbasename%" == "cfastclean" (
+if "%cfastbasename%" == "cfastgitclean" (
    echo             reverting %cfastbasename% repository
    cd %cfastroot%
-   call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
+   git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
+   git add . 1>> %OUTDIR%\stage0.txt 2>&1
+   git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
 )
 
 :: update cfast repository
 
 echo             updating %cfastbasename% repository
 cd %cfastroot%
-svn update  1>> %OUTDIR%\stage0.txt 2>&1
+git pull  1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
-cd %svnroot%
-if "%fdsbasename%" == "FDS-SMVclean" (
+cd %gitroot%
+if "%fdsbasename%" == "FDS-SMVgitclean" (
    echo             reverting %fdsbasename% repository
-   cd %svnroot%
-   call :svn_revert 1>> %OUTDIR%\stage0.txt 2>&1
+   cd %gitroot%
+   git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
+   git add . 1>> %OUTDIR%\stage0.txt 2>&1
+   git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
 )
 
 :: update FDS/Smokeview repository
 
 echo             updating %fdsbasename% repository
-svn update 1>> %OUTDIR%\stage0.txt 2>&1
+git pull 1>> %OUTDIR%\stage0.txt 2>&1
 
-svn info | grep Revision > %revisionfilestring%
+git describe --long --dirty > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
 
-svn info | grep Revision | cut -d " " -f 2 > %revisionfilenum%
+git log --abbrev-commit . | head -1 | gawk "{print $2}" > %revisionfilenum%
 set /p revisionnum=<%revisionfilenum%
 
 set errorlogpc=%HISTORYDIR%\errors_%revisionnum%.txt
@@ -198,7 +229,7 @@ echo Stage 1 - Building FDS
 
 echo             parallel debug
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_64_db
+cd %gitroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
@@ -207,7 +238,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
 echo             parallel release
 
-cd %svnroot%\FDS_Compilation\mpi_intel_win_64
+cd %gitroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
 make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1>> %OUTDIR%\stage1d.txt 2>&1
 
@@ -226,12 +257,12 @@ echo Stage 2 - Building Smokeview
 
 echo             libs
 
-cd %svnroot%\SMV\Build\LIBS\lib_win_intel_64
+cd %gitroot%\SMV\Build\LIBS\lib_win_intel_64
 call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
-cd %svnroot%\SMV\Build\intel_win_64
+cd %gitroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
 make -f ..\Makefile intel_win_64_db 1>> %OUTDIR%\stage2a.txt 2>&1
 
@@ -240,7 +271,7 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
 
 echo             release
 
-cd %svnroot%\SMV\Build\intel_win_64
+cd %gitroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> %OUTDIR%\stage2b.txt 2>&1
 make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage2b.txt 2>&1
 
@@ -254,32 +285,32 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 echo Stage 3 - Building FDS/Smokeview utilities
 
 echo             fds2ascii
-cd %svnroot%\Utilities\fds2ascii\intel_win_64
+cd %gitroot%\Utilities\fds2ascii\intel_win_64
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
 ifort -o fds2ascii_win_64.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
   echo             background
-  cd %svnroot%\Utilities\background\intel_win_32
+  cd %gitroot%\Utilities\background\intel_win_32
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   make -f ..\Makefile intel_win_32 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist background.exe %OUTDIR%\stage3.txt
 
   echo             smokediff
-  cd %svnroot%\Utilities\smokediff\intel_win_64
+  cd %gitroot%\Utilities\smokediff\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokediff_win_64.exe %OUTDIR%\stage3.txt
 
   echo             smokezip
-  cd %svnroot%\Utilities\smokezip\intel_win_64
+  cd %gitroot%\Utilities\smokezip\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokezip_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
   echo             wind2fds
-  cd %svnroot%\Utilities\wind2fds\intel_win_64
+  cd %gitroot%\Utilities\wind2fds\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
@@ -307,12 +338,12 @@ echo             debug mode
 
 :: run the cases
 
-cd %svnroot%\Verification\scripts
-call Run_SMV_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+cd %gitroot%\Verification\scripts
+call Run_SMV_cases_git %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
-cd %svnroot%\Verification\scripts
+cd %gitroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
@@ -324,12 +355,12 @@ echo             release mode
 
 :: run the cases
 
-cd %svnroot%\Verification\scripts
-call Run_SMV_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+cd %gitroot%\Verification\scripts
+call Run_SMV_cases_git %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
-cd %svnroot%\Verification\scripts
+cd %gitroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
@@ -347,7 +378,7 @@ call :GET_TIME MAKEPICS_beg
 
 echo Stage 5 - Making Smokeview pictures
 
-cd %svnroot%\Verification\scripts
+cd %gitroot%\Verification\scripts
 call MAKE_SMV_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
@@ -363,16 +394,16 @@ call :GET_TIME MAKEGUIDES_beg
 echo Stage 6 - Building Smokeview guides
 
 echo             Technical Reference
-call :build_guide SMV_Technical_Reference_Guide %svnroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_Technical_Reference_Guide %gitroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             Verification
-call :build_guide SMV_Verification_Guide %svnroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_Verification_Guide %gitroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             User
-call :build_guide SMV_User_Guide %svnroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_User_Guide %gitroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             Geom Notes
-call :build_guide geom_notes %svnroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide geom_notes %gitroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
@@ -574,28 +605,6 @@ if %nwarnings% GTR 0 (
   echo. >> %warninglog%
   type %OUTDIR%\stage_warning.txt >> %warninglog%
   set havewarnings=1
-)
-exit /b
-
-:: -------------------------------------------------------------
-:svn_revert
-:: -------------------------------------------------------------
-svn cleanup .
-svn revert -R .
-For /f "tokens=1,2" %%A in ('svn status --no-ignore') Do (
-     If [%%A]==[?] ( Call :UniDelete %%B
-     ) Else If [%%A]==[I] Call :UniDelete %%B
-   )
-exit /b
-
-:: -------------------------------------------------------------
-:UniDelete delete file/dir
-:: -------------------------------------------------------------
-if "%1"=="%~nx0" exit /b
-IF EXIST "%1\*" ( 
-    RD /S /Q "%1"
-) Else (
-    If EXIST "%1" DEL /S /F /Q "%1"
 )
 exit /b
 
