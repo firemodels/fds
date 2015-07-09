@@ -1,15 +1,10 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
-  svn update
   echo 1 > %running%
-  call firebot_win.bat debug
+  call firebot_win.bat debug 1
   cd %curdir%
   erase %running%
 ) else (
