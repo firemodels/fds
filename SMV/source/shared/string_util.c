@@ -126,23 +126,20 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
 }
 
 /* ------------------ getRevision ------------------------ */
-
+#ifndef pp_GITHASH
+  #define pp_GITHASH "unknown"
+#endif
 void getRevision(char *revision){
-  char rev[256], *beg=NULL, *end=NULL;
+  char rev[256], *beg=NULL;
 
-  strcpy(rev,"$Revision: unknown $");
-  beg = strchr(rev,':');
-  if(beg!=NULL){
-    beg=trim_front(beg+1);
-    end = strchr(beg,'$');
-  }
-  if(end==NULL){
-    strcpy(revision,"unknown");
+  strcpy(rev,pp_GITHASH);
+  trim(rev);
+  beg = trim_front(rev);
+  if(strlen(beg)>0){
+    strcpy(revision,beg);
   }
   else{
-    *end=0;
-    trim(beg);
-    strcpy(revision,beg);
+    strcpy(revision,"unknown");
   }
 }
 

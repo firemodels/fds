@@ -1,28 +1,34 @@
 @echo   off
 
 set CURDIR=%CD%
-
-if NOT exist %userprofile%\smokebot (
-  cd %userprofile%
-  echo %userprofile%\smokebot does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Utilities/Firebot smokebot
-  echo %userprofile%\smokebot created.
-)
-
-:: create a clean cfast repository 
-
-if NOT exist %userprofile%\cfastclean (
-  cd %userprofile%
-  echo %userprofile%\cfastclean does not exist - creating
-  svn co http://cfast.googlecode.com/svn/trunk/cfast/trunk cfastclean
-)
+set gitrepo=FDS-SMVgitclean
+set gitrepodir=%userprofile%\%gitrepo%
+set botdir=%userprofile%\smokebotgit
 
 :: create a clean FDS repository
 
-if NOT exist %userprofile%\FDS-SMVclean (
+if NOT exist %gitrepodir% (
   cd %userprofile%
-  echo %userprofile%\FDS-SMVclean does not exist - creating
-  svn co http://fds-smv.googlecode.com/svn/trunk/FDS/trunk FDS-SMVclean
+  echo %gitrepo% does not exist - creating
+  git clone git@github.com:firemodels/fds-smv.git %gitrepo%
 )
+
+if NOT exist %botdir% (
+  echo %botdir% does not exist - creating
+  mkdir %botdir%
+  cd %botdir%
+  copy %gitrepodir%\Utilities\Firebot\*.bat
+)
+
+:: create a clean cfast repository
+
+set gitrepo=cfastgitclean
+set gitrepodir=%userprofile%\%gitrepo%
+if NOT exist %gitrepodir% (
+  cd %userprofile%
+  echo %gitrepo% does not exist - creating
+  git clone git@github.com:firemodels/cfast.git %gitrepo%
+)
+
 
 cd %CURDIR%

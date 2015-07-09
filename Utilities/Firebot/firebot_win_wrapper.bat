@@ -1,13 +1,10 @@
 @echo off
 
-set emailto=%1
-
 set curdir=%CD%
 set running=bot.running
 if not exist %running% (
-  svn update
   echo 1 > %running%
-  call firebot_win.bat %emailto%
+  call firebot_win.bat
   cd %curdir%
   erase %running%
 ) else (
