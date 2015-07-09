@@ -2,7 +2,7 @@
 
 running=bot_running
 if [ -e bot_running ] ; then
-  echo Smokebot is already running.
+  echo Firebot is already running.
   echo Erase the file $running if this is not the case.
   exit
 fi
@@ -34,7 +34,7 @@ if [[ "$FDS_GITbase" != "" ]]; then
    cFDS_GITbase="-d $FDS_GITbase"
 fi 
 if [[ "$BRANCH" != "" ]]; then
-   cFDS_GITbase="-b $BRANCH"
+   cBRANCH="-b $BRANCH"
 fi 
 if [[ "$UPDATEREPO" == "1" ]]; then
    cd ~/$FDS_GITbase
