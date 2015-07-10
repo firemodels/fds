@@ -18,12 +18,9 @@
 !*********************************************************
 Module DCDFLIB
   Implicit None
-  CHARACTER(255), PARAMETER :: ievaid='$Id$'
-  CHARACTER(255), PARAMETER :: ievarev='$Revision$'
-  CHARACTER(255), PARAMETER :: ievadate='$Date$'
 
   Private
-  Public cdfbet,cdfgam,cdfnor,GET_REV_ieva,gamma
+  Public cdfbet,cdfgam,cdfnor,gamma
 
   !
   !*********************************************************
@@ -13414,18 +13411,6 @@ Contains
 
     Return
   End Subroutine timestring
-
-SUBROUTINE GET_REV_ieva(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-INTEGER :: IERR
-
-WRITE(MODULE_DATE,'(A)') ievarev(INDEX(ievarev,':')+2:LEN_TRIM(ievarev)-2)
-READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
-IF (IERR/=0) MODULE_REV = 0
-WRITE(MODULE_DATE,'(A)') ievadate
-
-END SUBROUTINE GET_REV_ieva
 
 End Module DCDFLIB
 

@@ -9,11 +9,6 @@ USE MPI
 USE TYPES, ONLY: MULTIPLIER_TYPE
  
 IMPLICIT NONE
-
-CHARACTER(255), PARAMETER :: scrchid='$Id$'
-CHARACTER(255), PARAMETER :: scrcrev='$Revision$'
-CHARACTER(255), PARAMETER :: scrcdate='$Date$'
-
 PRIVATE
 
 ! Public structures (needed in main, read, divg, dump)
@@ -24,7 +19,6 @@ PRIVATE
 PUBLIC SCARC_SETUP                             !< Setup routine for ScaRC, needed in main.f90
 PUBLIC SCARC_SOLVER                            !< Call of basic ScaRC solver
 PUBLIC SCARC_TIMINGS                           !< Call of time measurements for ScaRC
-PUBLIC GET_REV_SCRC                            !< Get revision number of ScaRC
 
 !> ------------------------------------------------------------------------------------------------
 !> Public variables   (explanations in declaration part below)
@@ -14149,22 +14143,6 @@ ENDIF
 
 END SUBROUTINE SCARC_TIMINGS
 
-
-
-!> ------------------------------------------------------------------------------------------------
-!> Compute current revision number
-!> ------------------------------------------------------------------------------------------------
-SUBROUTINE GET_REV_SCRC(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-INTEGER :: IERR
-
-WRITE(MODULE_DATE,'(A)') SCRCREV(INDEX(SCRCREV,':')+2:LEN_TRIM(SCRCREV)-2)
-READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
-IF (IERR/=0) MODULE_REV = 0
-WRITE(MODULE_DATE,'(A)') SCRCDATE
-
-END SUBROUTINE GET_REV_SCRC
 
 SUBROUTINE SCARC_HANDLE_MPI_ERROR(ERROR_MESSAGE,ERROR_CODE)
 
