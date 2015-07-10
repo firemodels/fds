@@ -398,7 +398,7 @@ void version(void){
     printf("\n");
     printf("set_path %s - %s\n\n",version,__DATE__);
     printf("Version: %s\n",version);
-    printf("Revision: %s\n",revision);
+    printf("Build: %s\n",revision);
     printf("Build Date: %s\n",__DATE__);
 }
 
@@ -409,7 +409,7 @@ void usage(void){
 
   getRevision(revision);
 
-  printf("set_path Revision:%s\n",revision);
+  printf("set_path Build:%s\n",revision);
   printf("  Modify or display the User or System path environmental variables.\n\n");
   printf("Usage:\n\n");
   printf("  set_path [-s][-u] [-a path_entry] [-r path_entry] [-d][-p][-v]\n\n");

@@ -523,6 +523,6 @@ void version(char *prog){
     printf("\n");
     printf("%s\n\n",prog);
     printf("Version: %s\n",version_local);
-    printf("Revision: %s\n",revision);
+    printf("Build: %s\n",revision);
     printf("Compile Date: %s\n",__DATE__);
 }
