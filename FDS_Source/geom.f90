@@ -16,12 +16,8 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 
-CHARACTER(255), PARAMETER :: geomid='$Id$'
-CHARACTER(255), PARAMETER :: geomrev='$Revision$'
-CHARACTER(255), PARAMETER :: geomdate='$Date$'
-
 PRIVATE
-PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE,GET_REV_geom, &
+PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE, &
           READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,LINKED_LIST_INSERT,&
           WRITE_GEOM,WRITE_GEOM_ALL
  
@@ -4348,25 +4344,6 @@ ELSE
    ENDIF
 ENDIF
    
-RETURN
 END SUBROUTINE POLYGON_CLOSE_TO_EDGE
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!! End cut cell subroutines by Charles Luo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-! ---------------------------- GET_REV_geom ----------------------------------------
-
-SUBROUTINE GET_REV_geom(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-INTEGER :: IERR
-
-WRITE(MODULE_DATE,'(A)') geomrev(INDEX(geomrev,':')+2:LEN_TRIM(geomrev)-2)
-READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
-IF (IERR/=0) MODULE_REV = 0
-WRITE(MODULE_DATE,'(A)') geomdate
-
-END SUBROUTINE GET_REV_geom
-
 
 END MODULE COMPLEX_GEOMETRY
