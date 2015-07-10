@@ -4,23 +4,8 @@ MODULE COMP_FUNCTIONS
 
 USE PRECISION_PARAMETERS 
 IMPLICIT NONE 
-CHARACTER(255), PARAMETER :: funcid='$Id$'
-CHARACTER(255), PARAMETER :: funcrev='$Revision$'
-CHARACTER(255), PARAMETER :: funcdate='$Date$'
 
 CONTAINS
-
-SUBROUTINE GET_REV_func(MODULE_REV,MODULE_DATE)
-INTEGER,INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-INTEGER :: IERR
-
-WRITE(MODULE_DATE,'(A)') funcrev(INDEX(funcrev,':')+2:LEN_TRIM(funcrev)-2)
-READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
-IF (IERR/=0) MODULE_REV = 0
-WRITE(MODULE_DATE,'(A)') funcdate
-
-END SUBROUTINE GET_REV_func
 
 REAL(EB) FUNCTION SECOND()  ! Returns the CPU time in seconds.
 !$ USE OMP_LIB
@@ -3058,11 +3043,11 @@ INTEGER, INTENT(IN) :: LU
 CALL GET_DATE(DATE)
 
 WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
-WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
-WRITE(LU,'(A,A)')      ' Compilation Date : ',TRIM(COMPILE_DATE)
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
 WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
-WRITE(LU,'(A,A/)')     ' Revision         : ',TRIM(GITHASH_PP)
+WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
+WRITE(LU,'(A,A/)')     ' Revision Date    : ',TRIM(GITDATE_PP)
+!WRITE(LU,'(A,A/)')     ' Compilation Date : ',TRIM(COMPILE_DATE)
 IF (.NOT.USE_MPI)     WRITE(LU,'(A)')     ' MPI Disabled'
 IF (USE_MPI)          WRITE(LU,'(A,I5)')  ' MPI Enabled; Number of MPI Processes: ',N_MPI_PROCESSES
 IF (.NOT. USE_OPENMP) WRITE(LU,'(A)')     ' OpenMP Disabled'
