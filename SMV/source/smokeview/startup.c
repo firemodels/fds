@@ -1448,7 +1448,7 @@ void initvars(void){
   setpartmin=PERCENTILE_MIN, setpartmax=PERCENTILE_MAX;
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
-  setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX, setzonemin=0, setzonemax=0;
+  setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX;
   loadpatchbysteps=0;
   settargetmin=0, settargetmax=0;
   setpartchopmin=0, setpartchopmax=0;

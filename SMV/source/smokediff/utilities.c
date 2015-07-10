@@ -39,7 +39,7 @@ void version(void){
     PRINTF("\n");
     PRINTF("Smokediff\n\n");
     PRINTF("Version: %s\n",smv_version);
-    PRINTF("Revision: %s\n",revision);
+    PRINTF("Build: %s\n",revision);
     PRINTF("Compile Date: %s\n",__DATE__);
 #ifdef X64
     PRINTF("Platform: WIN64\n");
