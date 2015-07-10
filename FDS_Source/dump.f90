@@ -2425,7 +2425,7 @@ ENDDO
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
-   WRITE(LU_OUTPUT,'(/3X,A)') SS%ID
+   WRITE(LU_OUTPUT,'(/3X,A)') SS%ID  ! Test comment
    SELECT CASE(SS%MODE)
       CASE (GAS_SPECIES)
          WRITE(LU_OUTPUT,'( 3X,A)') 'Gas Species'
