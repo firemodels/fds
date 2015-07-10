@@ -2428,7 +2428,7 @@ ENDDO
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
-   WRITE(LU_OUTPUT,'(/3X,A)') SS%ID
+   WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SS%ID)
    SELECT CASE(SS%MODE)
       CASE (GAS_SPECIES)
          WRITE(LU_OUTPUT,'( 3X,A)') 'Gas Species'
@@ -2450,7 +2450,7 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
-   WRITE(LU_OUTPUT,'(/3X,A)') SM%ID
+   WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
    IF(N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
@@ -2547,6 +2547,9 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(/3X,A,A)')      'ODE Solver:  ', TRIM(ODE_SOLVER)
    IF (SUPPRESSION .AND. RN%FAST_CHEMISTRY) THEN
       WRITE(LU_OUTPUT,'(3X,A,A)')    'Extinction Model:  ', TRIM(EXTINCTION_MODEL)
+      IF (RN%ALT_INDEX>0) WRITE(LU_OUTPUT,'(3X,A,A)') &
+                                     'Alternate REAC ID:  ', REACTION(RN%ALT_INDEX)%ID
+      WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Ignition Temperature (K):       ', RN%AUTO_IGNITION_TEMPERATURE
       WRITE(LU_OUTPUT,'(3X,A,F8.1)') 'Critical Flame Temperature (K): ', RN%CRIT_FLAME_TMP
    ENDIF
 
