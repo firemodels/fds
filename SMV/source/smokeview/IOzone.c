@@ -746,6 +746,7 @@ void readzone(int ifile, int flag, int *errorcode){
   else{
     FORTgetzonedata(file,&nzone_times,&nrooms, &nfires, zone_times,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
   }
+  CheckMemory;
 
   if(zonei->csv==0){
     ii=0;
@@ -812,6 +813,7 @@ void readzone(int ifile, int flag, int *errorcode){
     getzoneventbounds();
   }
   Idle_CB();
+  CheckMemory;
 
 }
 
@@ -972,6 +974,10 @@ void drawroomgeom(void){
   int i;
   int idir;
   float yy,zz;
+
+#ifdef pp_ZONE_DEBUG
+  printf("room geom begin\n");
+#endif  
   
   fill_zonedata(izone);
 
@@ -1042,6 +1048,7 @@ void drawroomgeom(void){
     glVertex3f(xroom0,yroom,zroom);
   }
   glEnd();
+#ifndef pp_ZONE_DEBUG
   antialias(OFF);
 
   if(visVents==1){
@@ -1053,6 +1060,29 @@ void drawroomgeom(void){
 
       glColor4fv(zvi->color);
       idir=zvi->dir;
+#else
+  printf("room geom end\n");
+  antialias(OFF);
+  printf("vent begin\n");
+  if(visVents==1){
+    glLineWidth(ventlinewidth);
+    for(i=0;i<nzvents;i++){
+      zvent *zvi;
+
+      zvi = zventinfo + i;
+
+      idir = zvi->dir;
+      printf("before zvi test\n");
+      if(zventinfo==NULL)printf("oops zventinfo is NULL!!!\n");
+      printf("after zvitest\n");
+      printf("before color test\n");
+      if(zvi->color==NULL)printf("oops zvi->color is NULL!!!\n");
+      printf("after color test\n");
+      printf("before color\n");
+      printf("color pointer=%p\n",zvi->color);
+      //glColor4fv(zvi->color);
+      printf("after color\n");
+#endif      
       x1=zvi->x1;
       x2=zvi->x2;
       z1=zvi->z1;
@@ -1094,6 +1124,9 @@ void drawroomgeom(void){
       glEnd();
     }
   }
+#ifdefpp_ZONE_DEBUG  
+  printf("vent end\n");
+#endif  
 }
 
 /* ------------------ getzoneventbounds ------------------------ */
