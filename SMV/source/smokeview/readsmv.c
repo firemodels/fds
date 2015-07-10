@@ -12407,7 +12407,7 @@ void writeini(int flag,char *filename){
     fprintf(fileout,"# Smokeview Revision Number: %s\n",revision);
     fprintf(fileout,"# Smokeview Build Date: %s\n",__DATE__);
     if(revision_fds>0){
-      fprintf(fileout,"# FDS Revision: %i\n",revision_fds);
+      fprintf(fileout,"# FDS Build: %i\n",revision_fds);
     }
 #ifdef X64
     fprintf(fileout,"# Platform: WIN64\n");

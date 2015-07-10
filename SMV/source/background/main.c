@@ -641,6 +641,6 @@ void version(void){
     printf("\n");
     printf("background\n\n");
     printf("Version: %s\n",smv_version);
-    printf("Revision: %s\n",revision);
+    printf("Build: %s\n",revision);
     printf("Compile Date: %s\n",__DATE__);
 }
