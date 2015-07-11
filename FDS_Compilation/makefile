@@ -15,7 +15,8 @@ VPATH = ../FDS_Source
 
 GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
-GITINFO=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+BUILD_DATE := $(shell date "+%b %d, %Y %T")
+GITINFO=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\" -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
 # Definition of the non-MPI object variables
 
