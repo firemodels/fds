@@ -322,10 +322,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
         
       sprintf(label, "%s_%i", "HSLAB", i + 1); 
       GETZONEDEV(zoneslab_n_devs[i]); 
-      for(ii = 0; ii < zoneslab_n_devs[i]->nvals; ii++){
-        printf(" %f", zoneslab_n_devs[i]->vals[ii]);
-      }
-      printf("\n");
       for(islab = 0; islab < MAXSLABS; islab++){
         int idev; 
           
