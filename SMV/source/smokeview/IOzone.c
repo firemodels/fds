@@ -104,70 +104,6 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
   FREEMEMORY(zonefbase_devs)
 #endif
 
-#ifdef pp_ZONEVENT
-/* ------------------ getzonedatacsv ------------------------ */
-
-#define GET_VENTSLAB(slabtype,ventbeg,ventend,have_ventslab_flow)\
-  have_ventslab_flow = 0;\
-  for(i = ventbeg; i < ventend; i++){\
-    char label[100];\
-    int islab;\
-\
-    sprintf(label, "%s_%i",#slabtype, i + 1);\
-    zoneslab_n_devs[i] = getdevice(label, -1);\
-    if(zoneslab_n_devs[i] != NULL){\
-      have_ventslab_flow = 1;\
-      break;\
-    }\
-    for(islab = 0; islab < MAXSLABS; islab++){\
-      int idev;\
-\
-      idev = MAXSLABS * i + islab;\
-      sprintf(label, "%s_%i_%i", #slabtype,i + 1, islab + 1);\
-      zoneslab_T_devs[idev] = getdevice(label, -1);\
-      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
-\
-      sprintf(label, "%sF_%i_%i",#slabtype, i + 1, islab + 1);\
-      zoneslab_F_devs[idev] = getdevice(label, -1);\
-      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
-\
-      sprintf(label, "%sYB_%i_%i",#slabtype, i + 1, islab + 1);\
-      zoneslab_YB_devs[idev] = getdevice(label, -1);\
-      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
-\
-      sprintf(label, "%sYT_%i_%i",#slabtype, i + 1, islab + 1);\
-      zoneslab_YT_devs[idev] = getdevice(label, -1);\
-      if(zoneslab_T_devs[idev] != NULL)have_ventslab_flow = 1;\
-    }\
-    if(have_ventslab_flow == 1)break;\
-  }\
-  if(have_ventslab_flow == 1){\
-    for(i = ventbeg; ventend < nzhvents; i++){\
-      char label[100];\
-      int islab;\
-\
-      sprintf(label, "%s_%i", #slabtype,i + 1);\
-      GETZONEDEV(zoneslab_n_devs[i]);\
-      for(islab = 0; islab < MAXSLABS; islab++){\
-        int idev;\
-\
-        idev = MAXSLABS * i + islab;\
-        sprintf(label, "%sT_%i_%i", #slabtype,i + 1, islab + 1);\
-        GETZONEDEV(zoneslab_T_devs[idev]);\
-\
-        sprintf(label, "%sF_%i_%i", #slabtype,i + 1, islab + 1);\
-        GETZONEDEV(zoneslab_F_devs[idev]);\
-\
-        sprintf(label, "%sYB_%i_%i",#slabtype, i + 1, islab + 1);\
-        GETZONEDEV(zoneslab_YB_devs[idev]);\
-\
-        sprintf(label, "%sYT_%i_%i",#slabtype, i + 1, islab + 1);\
-        GETZONEDEV(zoneslab_YT_devs[idev]);\
-      }\
-    }\
-  }
-#endif  
-
 /* ------------------ getzonedatacsv ------------------------ */
 
 void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local, 
@@ -344,7 +280,70 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   }
 
 #ifdef pp_ZONEVENT
-  GET_VENTSLAB("HSLAB",0,nzhvents,have_hventslab_flow);
+//  setup devices that describe HVENTS
+  have_hventslab_flow = 0; 
+  for(i = 0; i < nzhvents; i++){
+    char label[100]; 
+    int islab; 
+    
+    sprintf(label, "%s_%i", "HSLAB", i + 1); 
+    zoneslab_n_devs[i] = getdevice(label, -1); 
+    if(zoneslab_n_devs[i] != NULL){
+      have_hventslab_flow = 1; 
+      break; 
+    }
+    for(islab = 0; islab < MAXSLABS; islab++){
+      int idev; 
+      
+      idev = MAXSLABS * i + islab; 
+      sprintf(label, "%s_%i_%i", "HSLAB", i + 1, islab + 1); 
+      zoneslab_T_devs[idev] = getdevice(label, -1); 
+      if(zoneslab_T_devs[idev] != NULL)have_hventslab_flow = 1; 
+      
+      sprintf(label, "%sF_%i_%i", "HSLAB", i + 1, islab + 1); 
+      zoneslab_F_devs[idev] = getdevice(label, -1); 
+      if(zoneslab_T_devs[idev] != NULL)have_hventslab_flow = 1; 
+      
+      sprintf(label, "%sYB_%i_%i", "HSLAB", i + 1, islab + 1); 
+      zoneslab_YB_devs[idev] = getdevice(label, -1); 
+      if(zoneslab_T_devs[idev] != NULL)have_hventslab_flow = 1; 
+      
+      sprintf(label, "%sYT_%i_%i", "HSLAB", i + 1, islab + 1); 
+      zoneslab_YT_devs[idev] = getdevice(label, -1); 
+      if(zoneslab_T_devs[idev] != NULL)have_hventslab_flow = 1; 
+    }
+    if(have_hventslab_flow == 1)break; 
+  }
+  if(have_hventslab_flow == 1){
+    for(i = 0; i < nzhvents; i++){
+      char label[100]; 
+      int islab; 
+      int ii;
+        
+      sprintf(label, "%s_%i", "HSLAB", i + 1); 
+      GETZONEDEV(zoneslab_n_devs[i]); 
+      for(ii = 0; ii < zoneslab_n_devs[i]->nvals; ii++){
+        printf(" %f", zoneslab_n_devs[i]->vals[ii]);
+      }
+      printf("\n");
+      for(islab = 0; islab < MAXSLABS; islab++){
+        int idev; 
+          
+        idev = MAXSLABS * i + islab; 
+        sprintf(label, "%sT_%i_%i", "HSLAB", i + 1, islab + 1); 
+        GETZONEDEV(zoneslab_T_devs[idev]); 
+          
+        sprintf(label, "%sF_%i_%i", "HSLAB", i + 1, islab + 1); 
+        GETZONEDEV(zoneslab_F_devs[idev]); 
+          
+        sprintf(label, "%sYB_%i_%i", "HSLAB", i + 1, islab + 1); 
+        GETZONEDEV(zoneslab_YB_devs[idev]); 
+          
+        sprintf(label, "%sYT_%i_%i", "HSLAB", i + 1, islab + 1); 
+        GETZONEDEV(zoneslab_YT_devs[idev]); 
+      }
+    }
+  }
 #endif    
 
   for(i=0;i<nzvvents;i++){
@@ -975,10 +974,6 @@ void drawroomgeom(void){
   int idir;
   float yy,zz;
 
-#ifdef pp_ZONE_DEBUG
-  printf("room geom begin\n");
-#endif  
-  
   fill_zonedata(izone);
 
 /* draw the frame */
@@ -1048,7 +1043,6 @@ void drawroomgeom(void){
     glVertex3f(xroom0,yroom,zroom);
   }
   glEnd();
-#ifndef pp_ZONE_DEBUG
   antialias(OFF);
 
   if(visVents==1){
@@ -1060,29 +1054,6 @@ void drawroomgeom(void){
 
       glColor4fv(zvi->color);
       idir=zvi->dir;
-#else
-  printf("room geom end\n");
-  antialias(OFF);
-  printf("vent begin\n");
-  if(visVents==1){
-    glLineWidth(ventlinewidth);
-    for(i=0;i<nzvents;i++){
-      zvent *zvi;
-
-      zvi = zventinfo + i;
-
-      idir = zvi->dir;
-      printf("before zvi test\n");
-      if(zventinfo==NULL)printf("oops zventinfo is NULL!!!\n");
-      printf("after zvitest\n");
-      printf("before color test\n");
-      if(zvi->color==NULL)printf("oops zvi->color is NULL!!!\n");
-      printf("after color test\n");
-      printf("before color\n");
-      printf("color pointer=%p\n",zvi->color);
-      //glColor4fv(zvi->color);
-      printf("after color\n");
-#endif      
       x1=zvi->x1;
       x2=zvi->x2;
       z1=zvi->z1;
@@ -1124,9 +1095,6 @@ void drawroomgeom(void){
       glEnd();
     }
   }
-#ifdef pp_ZONE_DEBUG  
-  printf("vent end\n");
-#endif  
 }
 
 /* ------------------ getzoneventbounds ------------------------ */

@@ -19,9 +19,6 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 
 void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   CheckMemory;
-#ifdef pp_ZONE_DEBUG  
-  printf("showscene begin\n");
-#endif  
 
   show_mode = mode;
 
@@ -64,9 +61,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     Scene_viewport(quad, view_mode, s_left, s_down);
     SNIFF_ERRORS("after Scene_viewport");
-#ifdef pp_ZONE_DEBUG    
-    printf("showscene end\n");
-#endif    
   }
 
 
@@ -92,10 +86,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ------------------ ShowScene ------------------------ */
 
 void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
-#ifdef  pp_ZONE_DEBUG
-  printf("begin  showscene2\n");
-#endif  
-
   if(rotation_type==EYE_CENTERED&&nskyboxinfo>0)draw_skybox();
 
   if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
@@ -501,8 +491,5 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     drawplot3d_frame();
   }
   SNIFF_ERRORS("after drawplot3d");
-#ifdef pp_ZONE_DEBUG  
-  printf("end showscene2\n");
-#endif  
 }
 
