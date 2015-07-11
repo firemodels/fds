@@ -1124,7 +1124,7 @@ void drawroomgeom(void){
       glEnd();
     }
   }
-#ifdefpp_ZONE_DEBUG  
+#ifdef pp_ZONE_DEBUG  
   printf("vent end\n");
 #endif  
 }
