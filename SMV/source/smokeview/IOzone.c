@@ -59,7 +59,6 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
    *nfires_local=nf;
 }
 
-#ifdef pp_ZONEVENT
 #define FREEZONEMEM \
   FREEMEMORY(zonehvents_devs); \
   FREEMEMORY(zonehvents_devs); \
@@ -88,40 +87,20 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
         return;\
       }\
       zonedev->in_zone_csv = 1
-#else
-#define FREEZONEMEM \
-  FREEMEMORY(zonehvents_devs); \
-  FREEMEMORY(zonevvents_devs); \
-  FREEMEMORY(zoneqfire_devs); \
-  FREEMEMORY(zonepr_devs); \
-  FREEMEMORY(zoneylay_devs); \
-  FREEMEMORY(zonetl_devs); \
-  FREEMEMORY(zonetu_devs); \
-  FREEMEMORY(zoneodl_devs); \
-  FREEMEMORY(zoneodu_devs); \
-  FREEMEMORY(zonefheight_devs); \
-  FREEMEMORY(zonefarea_devs); \
-  FREEMEMORY(zonefbase_devs)
-#endif
-
 /* ------------------ getzonedatacsv ------------------------ */
 
 void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local, 
                     float *zone_times_local, float *zoneqfire_local, float *zonefheight_local, float *zonefbase_local, float *zonefdiam_local,
                     float *zonepr_local, float *zoneylay_local,  float *zonetl_local, float *zonetu_local,
                     float **zoneodlptr, float **zoneoduptr, float *zonehvents_local, float *zonevvents_local,
-#ifdef pp_ZONEVENT                    
                     int *zoneslab_n_local, float *zoneslab_T_local, float *zoneslab_F_local, float *zoneslab_YB_local, float *zoneslab_YT_local,
-#endif
                     int *error){
   int i,ii,iif, use_od=1, iihv, iivv;
   devicedata **zoneqfire_devs=NULL;
   devicedata **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   devicedata **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
   devicedata **zonehvents_devs=NULL, **zonevvents_devs=NULL;
-#ifdef pp_ZONEVENT  
   devicedata **zoneslab_n_devs = NULL, **zoneslab_T_devs = NULL, **zoneslab_F_devs = NULL, **zoneslab_YB_devs = NULL, **zoneslab_YT_devs = NULL;
-#endif  
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
 
@@ -144,13 +123,11 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
 
   if(nzhvents>0){
     NewMemory((void **)&zonehvents_devs,nzhvents*sizeof(devicedata *));
-#ifdef pp_ZONEVENT    
     NewMemory((void **)&zoneslab_n_devs,  nzhvents*sizeof(devicedata *));
     NewMemory((void **)&zoneslab_T_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
     NewMemory((void **)&zoneslab_F_devs,  MAXSLABS*nzhvents*sizeof(devicedata *));
     NewMemory((void **)&zoneslab_YB_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
     NewMemory((void **)&zoneslab_YT_devs, MAXSLABS*nzhvents*sizeof(devicedata *));
-#endif    
   }
 
   if(nzvvents>0){
@@ -279,7 +256,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     zonehvents_devs[i]->in_zone_csv = 1;
   }
 
-#ifdef pp_ZONEVENT
 //  setup devices that describe HVENTS
   have_hventslab_flow = 0; 
   for(i = 0; i < nzhvents; i++){
@@ -340,7 +316,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       }
     }
   }
-#endif    
 
   for(i=0;i<nzvvents;i++){
     char label[100];
@@ -361,9 +336,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   iivv=0;
   times_local = zonepr_devs[0]->times;
 
-#ifdef pp_ZONEVENT
   maxslabflow = 0.0;
-#endif
   for(i=0;i<nzone_times_local;i++){
     int j, ivent;
 
@@ -410,12 +383,9 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       iif++;
     }
     for(ivent=0;ivent<nzhvents;ivent++){
-#ifdef pp_ZONEVENT    
       int islab;
-#endif      
 
       zonehvents_local[iihv] = zonehvents_devs[ivent]->vals[i];
-#ifdef pp_ZONEVENT      
       if(zoneslab_n_devs[ivent]!=NULL)zoneslab_n_local[iihv] = (int)(zoneslab_n_devs[ivent]->vals[i]+0.1);
       for(islab = 0; islab<MAXSLABS; islab++){
         int idev, ival;
@@ -433,7 +403,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
         if(zoneslab_YB_devs[idev]!=NULL)zoneslab_YB_local[ival] = zoneslab_YB_devs[idev]->vals[i];
         if(zoneslab_YT_devs[idev]!=NULL)zoneslab_YT_local[ival] = zoneslab_YT_devs[idev]->vals[i];
       }
-#endif      
       iihv++;
     }
     for(j=0;j<nzvvents;j++){
@@ -591,13 +560,11 @@ void readzone(int ifile, int flag, int *errorcode){
   FREEMEMORY(izonetu);
   FREEMEMORY(zoneodl);
   FREEMEMORY(zoneodu);
-#ifdef pp_ZONEVENT  
   FREEMEMORY(zoneslab_n);
   FREEMEMORY(zoneslab_T);
   FREEMEMORY(zoneslab_F);
   FREEMEMORY(zoneslab_YB);
   FREEMEMORY(zoneslab_YT);
-#endif  
 
   activezone=NULL;
   if(flag==UNLOAD){
@@ -678,22 +645,18 @@ void readzone(int ifile, int flag, int *errorcode){
       return;
     }
     FREEMEMORY(zonehvents); 
-#ifdef pp_ZONEVENT    
     FREEMEMORY(zoneslab_n);
     FREEMEMORY(zoneslab_T);
     FREEMEMORY(zoneslab_F);
     FREEMEMORY(zoneslab_YB);
     FREEMEMORY(zoneslab_YT);
-#endif    
     if(nzhvents>0){
       NewMemory((void **)&zonehvents,nzhvents*nzone_times*sizeof(float));
-#ifdef pp_ZONEVENT      
       NewMemory((void **)&zoneslab_n, nzone_times*nzhvents*sizeof(int));
       NewMemory((void **)&zoneslab_T, nzone_times*nzhvents*MAXSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_YT, nzone_times*nzhvents*MAXSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_F, nzone_times*nzhvents*MAXSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_YB, nzone_times*nzhvents*MAXSLABS*sizeof(float));
-#endif      
     }
     FREEMEMORY(zonevvents); 
     if(nzvvents>0){
@@ -728,15 +691,10 @@ void readzone(int ifile, int flag, int *errorcode){
   }
   CheckMemory;
   if(zonei->csv==1){
-#ifdef pp_ZONEVENT
     getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
                    zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, 
                    zoneslab_n, zoneslab_T, zoneslab_F, zoneslab_YB, zoneslab_YT,
                    &error);
-#else
-    getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
-                   zonepr,zoneylay,zonetl,zonetu,&zoneodl,&zoneodu, zonehvents, zonevvents, &error);
-#endif                   
   }
   else{
     FORTgetzonedata(file,&nzone_times,&nrooms, &nfires, zone_times,zoneqfire,zonepr,zoneylay,zonetl,zonetu,&error,zonefilelen);
@@ -818,10 +776,8 @@ void fill_zonedata(int izone_index){
   float *pr0, *tl0, *tu0, *ylay0, *odl0, *odu0, *hvent0;
   int iroom,ivent;
   roomdata *roomi;
-#ifdef pp_ZONEVENT
   int *zoneslab_n0;
   float *zoneslab_T0, *zoneslab_F0, *zoneslab_YB0, *zoneslab_YT0;
-#endif
 
   float CP=1004.0;
   float R=0.4*CP/1.4;
@@ -832,16 +788,13 @@ void fill_zonedata(int izone_index){
   tl0 = zonetl + izone_index*nrooms;
   tu0 = zonetu + izone_index*nrooms;
   hvent0 = zonehvents + izone_index*nzhvents;
-#ifdef pp_ZONEVENT
   zoneslab_n0  = zoneslab_n  + izone_index*nzhvents;
   zoneslab_T0  = zoneslab_T  + izone_index*MAXSLABS*nzhvents;
   zoneslab_F0  = zoneslab_F  + izone_index*MAXSLABS*nzhvents;
   zoneslab_YB0 = zoneslab_YB + izone_index*MAXSLABS*nzhvents;
   zoneslab_YT0 = zoneslab_YT + izone_index*MAXSLABS*nzhvents;
-#endif
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
-#ifdef pp_ZONEVENT
   for(ivent=0;ivent<nzhvents;ivent++){
     zvent *zventi;
     int islab;
@@ -860,14 +813,6 @@ void fill_zonedata(int izone_index){
       zventi->slab_temp[islab] = zoneslab_T0[iislab];
     }
   }
-#else
-  for(ivent=0;ivent<nzhvents;ivent++){
-    zvent *zventi;
-
-    zventi = zventinfo + ivent;
-    zventi->area_fraction=CLAMP(hvent0[ivent]/zventi->area,0.0,1.0);
-  }
-#endif
   for(iroom=0;iroom<nrooms;iroom++){
     roomi = roominfo + iroom;
     roomi->pfloor=pr0[iroom];
@@ -1135,11 +1080,7 @@ void getzoneventbounds(void){
 
 /* ------------------ drawventdataORIG ------------------------ */
 
-#ifdef pp_ZONEVENT
 void drawventdataORIG(void){
-#else
-void drawventdata(void){
-#endif
   float factor;
   int i;
   int idir;
@@ -1258,7 +1199,6 @@ void drawventdata(void){
 
 }
 
-#ifdef pp_ZONEVENT
 /* ------------------ drawventslabdata ------------------------ */
 
 void drawventslabdata(void){
@@ -1353,7 +1293,6 @@ void drawventdata(void){
     drawventdataORIG();
   }
 }
-#endif
 
 /* ------------------ getzonethick ------------------------ */
 

@@ -18,9 +18,7 @@ void _Sniff_Errors(char *whereat);
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
 
-#ifdef pp_ZONEVENT
 #define MAXSLABS 10
-#endif
 
 #define MAKE_MOVIE 28
 
