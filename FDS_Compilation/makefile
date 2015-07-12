@@ -12,17 +12,24 @@
 VPATH = ../FDS_Source
 
 # Find the Git revision
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+   WINDOWS := yes
+else
+   WINDOWS := no
+endif
 
 GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
 GITINFO_BASE=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 
-BUILD_DATE := $(shell echo | date "+%b %d, %Y  %T")
-GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
-
-BUILD_DATE_PC := $(shell date /t  time /t)
-BUILD_TIME_PC := $(shell time /t)
-GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
+ifeq ($(WINDOWS),no)
+  BUILD_DATE := $(shell date "+%b %d, %Y  %T")
+  GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+else
+  BUILD_DATE_PC := $(shell date /t  time /t)
+  BUILD_TIME_PC := $(shell time /t)
+  GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
+endif
 
 # Definition of the non-MPI object variables
 
