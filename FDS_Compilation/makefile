@@ -15,8 +15,14 @@ VPATH = ../FDS_Source
 
 GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
-BUILD_DATE := $(shell date "+%b %d, %Y  %T")
-GITINFO=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\"" -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+GITINFO_BASE=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+
+BUILD_DATE := $(shell echo | date "+%b %d, %Y  %T")
+GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+
+BUILD_DATE_PC := $(shell date /t  time /t)
+BUILD_TIME_PC := $(shell time /t)
+GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 
 # Definition of the non-MPI object variables
 
@@ -80,28 +86,28 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-intel_win_64_ps : FFLAGS = -O2 /Qipo /traceback $(GITINFO)
+intel_win_64_ps : FFLAGS = -O2 /Qipo /traceback $(GITINFO_PC)
 intel_win_64_ps : FCOMPL = ifort
 intel_win_64_ps : FOPENMPFLAGS = /Qopenmp
 intel_win_64_ps : obj = fds_win_64_ps
 intel_win_64_ps : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
-intel_win_64 : FFLAGS = /O2 /Qipo /traceback $(GITINFO) 
+intel_win_64 : FFLAGS = /O2 /Qipo /traceback $(GITINFO_PC) 
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : FOPENMPFLAGS = /Qopenmp
 intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_dv : FFLAGS = /O1 /traceback $(GITINFO) 
+intel_win_64_dv : FFLAGS = /O1 /traceback $(GITINFO_PC) 
 intel_win_64_dv : FCOMPL = ifort
 intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
 intel_win_64_dv : obj = fds_win_64_dv
 intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : FFLAGS = /Od /nologo /debug:full /check /warn /extend_source:132 /traceback /stand:f08 /Z7 /MDd $(GITINFO) 
+intel_win_64_db : FFLAGS = /Od /nologo /debug:full /check /warn /extend_source:132 /traceback /stand:f08 /Z7 /MDd $(GITINFO_PC) 
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 intel_win_64_db : obj = fds_win_64_db
@@ -110,7 +116,7 @@ intel_win_64_db : setup_win $(objwin_serial)
 
 mpi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib" 
 mpi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO) 
+mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO_PC) 
 mpi_intel_win_64 : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64 : FCOMPL = ifort
 mpi_intel_win_64 : obj = fds_mpi_win_64
@@ -119,7 +125,7 @@ mpi_intel_win_64 : setup_win $(objwin_mpi)
 
 mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
-mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO) 
+mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO_PC) 
 mpi_intel_win_64_db : FOPENMPFLAGS = /Qopenmp
 mpi_intel_win_64_db : FCOMPL = ifort
 mpi_intel_win_64_db : obj = fds_mpi_win_64_db
