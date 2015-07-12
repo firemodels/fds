@@ -1057,24 +1057,24 @@ void drawroomgeom(void){
       yy=zvi->yy;
       glBegin(GL_LINE_LOOP);
       switch(idir){
-      case 1:
-      case 3:
+      case FRONT_WALL:
+      case BACK_WALL:
         glVertex3f(x1,yy,z1);
         glVertex3f(x2,yy,z1);
         glVertex3f(x2,yy,z2);
         glVertex3f(x1,yy,z2);
         glVertex3f(x1,yy,z1);
         break;
-      case 2:
-      case 4:
+      case RIGHT_WALL:
+      case LEFT_WALL:
         glVertex3f(yy,x1,z1);
         glVertex3f(yy,x2,z1);
         glVertex3f(yy,x2,z2);
         glVertex3f(yy,x1,z2);
         glVertex3f(yy,x1,z1);
         break;
-      case 5:
-      case 6:
+      case BOTTOM_WALL:
+      case TOP_WALL:
         yy1=zvi->y1;
         yy2=zvi->y2;
         zz=zvi->zz;
@@ -1191,8 +1191,8 @@ void drawventdata(void){
       vcolor2=rgb_full[zvi->itempdata[j+1]];
       vcolor2=vcolor1;
       switch(idir){
-      case 4:
-      case 2:
+      case LEFT_WALL:
+      case RIGHT_WALL:
         if(dy1*dy2>=0.0){
           glColor3fv(vcolor1);
           glVertex3f(yy,    x1,yelev[j]);
@@ -1219,8 +1219,8 @@ void drawventdata(void){
           glVertex3f(yy,    x1,yelev[j+1]);
         }
         break;
-      case 3:
-      case 1:
+      case BACK_WALL:
+      case FRONT_WALL:
         if(dy1*dy2>=0.0){
           glColor3fv(vcolor1);
           glVertex3f(x1,yy,    yelev[j]);
@@ -1265,7 +1265,7 @@ void drawventslabdata(void){
   float factor;
   int i;
   int idir;
-  float x1, yy, dyy;
+  float x1, yy;
 
   if(visVentFlow==0)return;
 
@@ -1291,6 +1291,7 @@ void drawventslabdata(void){
     for(islab = 0; islab<zvi->nslab;islab++){
       float slab_bot, slab_top, tslab, *tcolor;
       int itslab;
+      float dyy;
 
       slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
       slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
@@ -1299,21 +1300,33 @@ void drawventslabdata(void){
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
-      dyy = -0.1*(slab_vel[islab]/maxslabflow);
+      dyy = 0.1*(slab_vel[islab] / maxslabflow);
       switch(idir){
-      case 5:
-      case 6:
+      case BOTTOM_WALL:
+      case TOP_WALL:
         break;
-      case 4:
-      case 2:
+      case LEFT_WALL:
+        glVertex3f(yy,     x1, slab_bot);
+        glVertex3f(yy-dyy, x1, slab_bot);
+
+        glVertex3f(yy-dyy, x1, slab_top);
+        glVertex3f(yy,     x1, slab_top);
+        break;
+      case RIGHT_WALL:
         glVertex3f(yy,     x1, slab_bot);
         glVertex3f(yy+dyy, x1, slab_bot);
 
         glVertex3f(yy+dyy, x1, slab_top);
         glVertex3f(yy,     x1, slab_top);
         break;
-      case 3:
-      case 1:
+      case FRONT_WALL:
+        glVertex3f(x1,     yy, slab_bot);
+        glVertex3f(x1, yy-dyy, slab_bot);
+
+        glVertex3f(x1, yy-dyy, slab_top);
+        glVertex3f(x1,     yy, slab_top);
+        break;
+      case BACK_WALL:
         glVertex3f(x1,     yy, slab_bot);
         glVertex3f(x1, yy+dyy, slab_bot);
 
