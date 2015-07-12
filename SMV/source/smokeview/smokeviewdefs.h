@@ -361,6 +361,14 @@ void _Sniff_Errors(char *whereat);
 #define WALL_3 1
 #define WALL_6 2
 
+#define LEFT_WALL 1
+#define RIGHT_WALL 2
+#define FRONT_WALL 3
+#define BACK_WALL 4
+#define BOTTOM_WALL 5
+#define TOP_WALL 6
+
+
 #define IMIN 0
 #define IMAX 1
 #define JMIN 2
