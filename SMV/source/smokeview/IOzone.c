@@ -1307,9 +1307,9 @@ void drawventslabdata(void){
       case 4:
       case 2:
         glVertex3f(yy,     x1, slab_bot);
-        glVertex3f(yy+dyy, x1, slab_bot);
+        glVertex3f(yy-dyy, x1, slab_bot);
 
-        glVertex3f(yy+dyy, x1, slab_top);
+        glVertex3f(yy-dyy, x1, slab_top);
         glVertex3f(yy,     x1, slab_top);
         break;
       case 3:
