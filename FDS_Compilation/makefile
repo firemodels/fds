@@ -20,6 +20,10 @@ GITINFO_BASE=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 BUILD_DATE := $(shell echo | date "+%b %d, %Y  %T")
 GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
+BUILD_DATE_PC := $(shell date /t  time /t)
+BUILD_TIME_PC := $(shell time /t)
+GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
+
 # Definition of the non-MPI object variables
 
 obj_serial = prec.o mpis.o cons.o devc.o data.o type.o mesh.o func.o smvv.o irad.o turb.o soot.o\
@@ -82,9 +86,6 @@ main.obj: FFLAGS += $(FOPENMPFLAGS)
 #*** note: the following scripts (located in ..\Scripts directory) must be run before running make with this target
 #    ..\Scripts\ifortvars intel64
 
-intel_win_64_ps : BUILD_DATE_PC := $(shell date /t  time /t)
-intel_win_64_ps : BUILD_TIME_PC := $(shell time /t)
-intel_win_64_ps : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 intel_win_64_ps : FFLAGS = -O2 /Qipo /traceback $(GITINFO_PC)
 intel_win_64_ps : FCOMPL = ifort
 intel_win_64_ps : FOPENMPFLAGS = /Qopenmp
@@ -92,9 +93,6 @@ intel_win_64_ps : obj = fds_win_64_ps
 intel_win_64_ps : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial) /link /SUBSYSTEM:CONSOLE,5.02
 
-intel_win_64 : BUILD_DATE_PC := $(shell date /t  time /t)
-intel_win_64 : BUILD_TIME_PC := $(shell time /t)
-intel_win_64 : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 intel_win_64 : FFLAGS = /O2 /Qipo /traceback $(GITINFO_PC) 
 intel_win_64 : FCOMPL = ifort
 intel_win_64 : FOPENMPFLAGS = /Qopenmp
@@ -102,9 +100,6 @@ intel_win_64 : obj = fds_win_64
 intel_win_64 : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_dv : BUILD_DATE_PC := $(shell date /t  time /t)
-intel_win_64_dv : BUILD_TIME_PC := $(shell time /t)
-intel_win_64_dv : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 intel_win_64_dv : FFLAGS = /O1 /traceback $(GITINFO_PC) 
 intel_win_64_dv : FCOMPL = ifort
 intel_win_64_dv : FOPENMPFLAGS = /Qopenmp
@@ -112,9 +107,6 @@ intel_win_64_dv : obj = fds_win_64_dv
 intel_win_64_dv : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-intel_win_64_db : BUILD_DATE_PC := $(shell date /t  time /t)
-intel_win_64_db : BUILD_TIME_PC := $(shell time /t)
-intel_win_64_db : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 intel_win_64_db : FFLAGS = /Od /nologo /debug:full /check /warn /extend_source:132 /traceback /stand:f08 /Z7 /MDd $(GITINFO_PC) 
 intel_win_64_db : FCOMPL = ifort
 intel_win_64_db : FOPENMPFLAGS = /Qopenmp
@@ -122,9 +114,6 @@ intel_win_64_db : obj = fds_win_64_db
 intel_win_64_db : setup_win $(objwin_serial)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_serial)
 
-mpi_intel_win_64 : BUILD_DATE_PC := $(shell date /t  time /t)
-mpi_intel_win_64 : BUILD_TIME_PC := $(shell time /t)
-mpi_intel_win_64 : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 mpi_intel_win_64 : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib" 
 mpi_intel_win_64 : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 mpi_intel_win_64 : FFLAGS = /Qipo /O2 /I$(MPIINCLUDE) /traceback $(GITINFO_PC) 
@@ -134,9 +123,6 @@ mpi_intel_win_64 : obj = fds_mpi_win_64
 mpi_intel_win_64 : setup_win $(objwin_mpi)
 	$(FCOMPL) -o $(obj) $(FFLAGS) $(FOPENMPFLAGS) /F1000000000 $(objwin_mpi) $(MPILIB)
 
-mpi_intel_win_64_db : BUILD_DATE_PC := $(shell date /t  time /t)
-mpi_intel_win_64_db : BUILD_TIME_PC := $(shell time /t)
-mpi_intel_win_64_db : GITINFO_PC=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE_PC) $(BUILD_TIME_PC)\""
 mpi_intel_win_64_db : MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
 mpi_intel_win_64_db : MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 mpi_intel_win_64_db : FFLAGS = /Od /nologo /debug:all /I$(MPIINCLUDE) /Z7 /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08 $(GITINFO_PC) 
