@@ -1057,8 +1057,8 @@ void drawroomgeom(void){
       yy=zvi->yy;
       glBegin(GL_LINE_LOOP);
       switch(idir){
-      case LEFT_WALL:
       case FRONT_WALL:
+      case BACK_WALL:
         glVertex3f(x1,yy,z1);
         glVertex3f(x2,yy,z1);
         glVertex3f(x2,yy,z2);
@@ -1066,7 +1066,7 @@ void drawroomgeom(void){
         glVertex3f(x1,yy,z1);
         break;
       case RIGHT_WALL:
-      case BACK_WALL:
+      case LEFT_WALL:
         glVertex3f(yy,x1,z1);
         glVertex3f(yy,x2,z1);
         glVertex3f(yy,x2,z2);
@@ -1191,7 +1191,7 @@ void drawventdata(void){
       vcolor2=rgb_full[zvi->itempdata[j+1]];
       vcolor2=vcolor1;
       switch(idir){
-      case BACK_WALL:
+      case LEFT_WALL:
       case RIGHT_WALL:
         if(dy1*dy2>=0.0){
           glColor3fv(vcolor1);
@@ -1219,8 +1219,8 @@ void drawventdata(void){
           glVertex3f(yy,    x1,yelev[j+1]);
         }
         break;
+      case BACK_WALL:
       case FRONT_WALL:
-      case LEFT_WALL:
         if(dy1*dy2>=0.0){
           glColor3fv(vcolor1);
           glVertex3f(x1,yy,    yelev[j]);
@@ -1305,7 +1305,13 @@ void drawventslabdata(void){
       case BOTTOM_WALL:
       case TOP_WALL:
         break;
-      case BACK_WALL:
+      case LEFT_WALL:
+        glVertex3f(yy,     x1, slab_bot);
+        glVertex3f(yy-dyy, x1, slab_bot);
+
+        glVertex3f(yy-dyy, x1, slab_top);
+        glVertex3f(yy,     x1, slab_top);
+        break;
       case RIGHT_WALL:
         glVertex3f(yy,     x1, slab_bot);
         glVertex3f(yy+dyy, x1, slab_bot);
@@ -1314,11 +1320,17 @@ void drawventslabdata(void){
         glVertex3f(yy,     x1, slab_top);
         break;
       case FRONT_WALL:
-      case LEFT_WALL:
         glVertex3f(x1,     yy, slab_bot);
         glVertex3f(x1, yy-dyy, slab_bot);
 
         glVertex3f(x1, yy-dyy, slab_top);
+        glVertex3f(x1,     yy, slab_top);
+        break;
+      case BACK_WALL:
+        glVertex3f(x1,     yy, slab_bot);
+        glVertex3f(x1, yy+dyy, slab_bot);
+
+        glVertex3f(x1, yy+dyy, slab_top);
         glVertex3f(x1,     yy, slab_top);
         break;
       default:
