@@ -10,6 +10,7 @@
 *.pdb
 *.exp
 *.lib
+*.i90
 
 # fds executables
 fds_intel_*
