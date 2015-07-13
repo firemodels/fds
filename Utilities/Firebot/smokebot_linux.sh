@@ -80,7 +80,6 @@ shift $(($OPTIND-1))
 
 if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
       # Continue along
-      echo continuing along
       :
    else
       if [[ "$FORCECLEANREPO" == "0" ]]; then
@@ -177,6 +176,7 @@ run_auto()
 
   MKDIR $GIT_STATUSDIR
 # remove untracked files, revert repo files, update to latest revision
+  cd $fdsroot
   git clean -dxf
   git add .
   git reset --hard HEAD
