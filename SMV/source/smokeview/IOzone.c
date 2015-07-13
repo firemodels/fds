@@ -294,7 +294,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     for(i = 0; i < nzhvents; i++){
       char label[100]; 
       int islab; 
-      int ii;
         
       sprintf(label, "%s_%i", "HSLAB", i + 1); 
       GETZONEDEV(zoneslab_n_devs[i]); 
@@ -1202,7 +1201,6 @@ void drawventdataORIG(void){
 /* ------------------ drawventslabdata ------------------------ */
 
 void drawventslabdata(void){
-  float factor;
   int i;
   int idir;
   float x1, yy;
@@ -1213,9 +1211,6 @@ void drawventslabdata(void){
 
   for(i = 0; i<nzvents; i++){
     zvent *zvi;
-    int j;
-    float yelev[20];
-    float *vcolor1, *vcolor2;
     float *slab_vel;
     int islab;
 
