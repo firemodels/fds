@@ -7,6 +7,8 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NELEV_ZONE 1000
+
 #define UPDATE_ISO_OFF 0
 #define UPDATE_ISO_ONE_NOW 1
 #define UPDATE_ISO_ALL_NOW 2
