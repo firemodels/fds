@@ -17,12 +17,14 @@ RUN_MPI=0
 STOPFDS=
 errfileoption=
 RUNOPTION=
+CFASTREPO=cfastgitclean
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue_name -s ]"
 echo "Runs Smokeview verification suite"
 echo ""
 echo "Options"
+echo "-c - cfast repo directory"
 echo "-d - use debug version of FDS"
 echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-g - run only geometry cases"
@@ -66,9 +68,12 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'dEghj:Mm:o:p:q:rSsu' OPTION
+while getopts 'c:dEghj:Mm:o:p:q:rSsu' OPTION
 do
 case $OPTION in
+  c)
+   CFASTREPO="$OPTARG"
+   ;;
   d)
    DEBUG=_db
    FDS_DEBUG=1
@@ -156,7 +161,7 @@ export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
-export CFAST=~/cfast/CFAST/intel_$PLATFORM/cfast7_$PLATFORM
+export CFAST=~/$CFASTREPO/CFAST/intel_$PLATFORM/cfast7_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION $errfileoption"
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
