@@ -396,6 +396,13 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
           float slabflow;
 
           slabflow = zoneslab_F_devs[idev]->vals[i];
+          if(zoneslab_YB_devs[idev] != NULL&&zoneslab_YT_devs[idev] != NULL){
+            float factor;
+
+            factor = ABS(zoneslab_YT_devs[idev]->vals[i] - zoneslab_YB_devs[idev]->vals[i]);
+            if(factor == 0.0)factor = 1.0;
+            slabflow /= factor;
+          }
           maxslabflow = MAX(ABS(slabflow), maxslabflow);
           zoneslab_F_local[ival] = slabflow;
         }
@@ -1240,7 +1247,7 @@ void drawventslabdata(void){
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
-      dyy = 0.1*(slab_vel[islab] / maxslabflow);
+      dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
       switch(idir){
       case BOTTOM_WALL:
       case TOP_WALL:
