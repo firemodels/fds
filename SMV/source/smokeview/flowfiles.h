@@ -1369,15 +1369,15 @@ typedef struct {
 typedef struct {
   float x1,x2,y1,y2,z1,z2,yy,zz;
   int dir;
-  float dpmin, dpmax;
-  float g_dpmin, g_dpmax;
+  float vmin, vmax;
+  float g_vmin, g_vmax;
   roomdata *room1, *room2;
   float area, area_fraction;
   float slab_bot[MAXSLABS], slab_top[MAXSLABS], slab_vel[MAXSLABS], slab_temp[MAXSLABS];
   int nslab;
   float *color;
-  float vdata[20];
-  int itempdata[20];
+  float vdata[NELEV_ZONE];
+  int itempdata[NELEV_ZONE];
   int vent_orien, vent_type, face;
 } zvent;
 
