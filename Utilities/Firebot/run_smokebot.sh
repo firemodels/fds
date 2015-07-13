@@ -13,15 +13,23 @@ BRANCH=development
 botscript=smokebot_linux.sh
 cFDS_GITbase=
 cBRANCH=
+RUNAUTO=
 UPDATEREPO=
-while getopts 'b:d:u' OPTION
+QUEUE=
+while getopts 'ab:d:q:u' OPTION
 do
 case $OPTION  in
+  a)
+   RUNAUTO=-a
+   ;;
   b)
    BRANCH="$OPTARG"
    ;;
   d)
    FDS_GITbase="$OPTARG"
+   ;;
+  d)
+   QUEUE="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
@@ -30,6 +38,9 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [[ "$QUEUE" != "" ]]; then
+   QUEUE="-q $QUEUE"
+fi 
 if [[ "$FDS_GITbase" != "" ]]; then
    cFDS_GITbase="-d $FDS_GITbase"
 fi 
@@ -44,5 +55,5 @@ if [[ "$UPDATEREPO" == "1" ]]; then
    cd $CURDIR
 fi
 touch $running
-./$botscript $cBRANCH $cFDS_GITbase "$@"
+./$botscript $RUNAUTO $cBRANCH $cFDS_GITbase $QUEUE "$@"
 rm $running
