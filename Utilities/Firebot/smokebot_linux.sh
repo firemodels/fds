@@ -199,31 +199,31 @@ run_auto()
 
 # get info for smokeview
   cd $SMV_SOURCE
-  THIS_SMVGIT=`git describe --long --dirty`
+  THIS_SMVREVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
   THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_SMVGIT=`cat $GIT_SMVFILE`
+  LAST_SMVREVISION=`cat $GIT_SMVFILE`
   git log . | head -5 | tail -1 > $GIT_SMVLOG
 
 # get info for FDS
   cd $FDS_SOURCE
-  THIS_FDSGIT=`git describe --long --dirty`
+  THIS_FDSREVISION=`git log --abbrev-commit . | head -1 | awk '{printf $2}'`
   THIS_FDSAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_FDSGIT=`cat $GIT_FDSFILE`
+  LAST_FDSREVISION=`cat $GIT_FDSFILE`
   git log . | head -5 | tail -1 > $GIT_FDSLOG
 
-  if [[ $THIS_SMVGIT == $LAST_SMVGIT && $THIS_FDSGIT == $LAST_FDSGIT ]] ; then
+  if [[ $THIS_SMVREVISION == $LAST_SMVREVISION && $THIS_FDSREVISION == $LAST_FDSREVISION ]] ; then
     exit
   fi
 
   rm -f $MESSAGE_FILE
-  if [[ $THIS_SMVGIT != $LAST_SMVGIT ]] ; then
-    echo $THIS_SMVGIT>$GIT_SMVFILE
-    echo -e "smokeview source has changed. $LAST_SMVGIT->$THIS_SMVGIT($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+  if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
+    echo $THIS_SMVREVISION>$GIT_SMVFILE
+    echo -e "smokeview source has changed. $LAST_SMVREVISION->$THIS_SMVREVISINO($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
     cat $GIT_SMVLOG >> $MESSAGE_FILE
   fi
-  if [[ $THIS_FDSGIT != $LAST_FDSGIT ]] ; then
-    echo $THIS_FDSGIT>$GIT_FDSFILE
-    echo -e "FDS source has changed. $LAST_FDSGIT->$THIS_FDSGIT($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
+  if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
+    echo $THIS_FDSREVISION>$GIT_FDSFILE
+    echo -e "FDS source has changed. $LAST_FDSREVISION->$THIS_FDSREVISION($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
     cat $GIT_FDSLOG >> $MESSAGE_FILE
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
@@ -1069,10 +1069,10 @@ email_build_status()
    echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
-  if [[ $THIS_SMVGIT != $LAST_SMVGIT ]] ; then
+  if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     cat $GIT_SMVLOG >> $TIME_LOG
   fi
-  if [[ $THIS_FDSGIT != $LAST_FDSGIT ]] ; then
+  if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
     cat $GIT_FDSLOG >> $TIME_LOG
   fi
    echo "----------------------------------------------" >> $TIME_LOG
