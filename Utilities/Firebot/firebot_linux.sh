@@ -113,7 +113,7 @@ fdsroot="$FIREBOT_HOME_DIR/$FDS_GITBASE"
 #  = End user warning =
 #  ====================
 
-if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
+if [[ "$FDS_GITBASE" == "FDS-SMVgitclean" ]]; then
       # Continue along
       :
    else
