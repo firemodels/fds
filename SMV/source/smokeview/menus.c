@@ -37,6 +37,8 @@
 #define MENU_ZONE_LAYERHIDE 4
 #define MENU_ZONE_VENTS 14
 #define MENU_ZONE_FIRES 15
+#define MENU_ZONE_VENT_SLAB 16
+#define MENU_ZONE_VENT_PROFILE 17
 
 #define MENU_SHOWSLICE_INBLOCKAGE -11
 #define MENU_SHOWSLICE_SLICEANDVECTORS -15
@@ -4471,6 +4473,26 @@ void ZoneShowMenu(int value){
   case MENU_ZONE_VENTS:
     visVentFlow=1-visVentFlow;
     break;
+  case MENU_ZONE_VENT_SLAB:
+    visventslab = 1 - visventslab;
+    if(visventslab==1)visventprofile=0;
+    if(visventprofile==1||visventslab==1){
+      visVentFlow=1;
+    }
+    else{
+      visVentFlow=0;
+    }
+    break;
+  case MENU_ZONE_VENT_PROFILE:
+    visventprofile = 1 - visventprofile;
+    if(visventprofile==1)visventslab=0;
+    if(visventprofile==1||visventslab==1){
+      visVentFlow=1;
+    }
+    else{
+      visVentFlow=0;
+    }
+    break;
   case MENU_ZONE_FIRES:
     viszonefire=1-viszonefire;
     break;
@@ -5865,11 +5887,28 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
-      if(visVentFlow==1){
-        glutAddMenuEntry(_("*Vent flow"), MENU_ZONE_VENTS);
+      if(have_hventslab_flow==0){
+        if(visVentFlow==1){
+          glutAddMenuEntry(_("*Vent flow (velocity profile)"), MENU_ZONE_VENTS);
+        }
+        else{
+          glutAddMenuEntry(_("Vent flow (velocity profile)"), MENU_ZONE_VENTS);
+        }
       }
       else{
-        glutAddMenuEntry(_("Vent flow"), MENU_ZONE_VENTS);
+        glutAddMenuEntry(_("Vent flow"), MENU_DUMMY);
+        if(visventslab==1){
+          glutAddMenuEntry(_("   *mass (slab)"), MENU_ZONE_VENT_SLAB);
+        }
+        else{
+          glutAddMenuEntry(_("   mass (slab)"), MENU_ZONE_VENT_SLAB);
+        }
+        if(visventprofile==1){
+          glutAddMenuEntry(_("   *velocity (profile)"), MENU_ZONE_VENT_PROFILE);
+        }
+        else{
+          glutAddMenuEntry(_("   velocity (profile)"), MENU_ZONE_VENT_PROFILE);
+        }
       }
     }
     if(nfires>0){

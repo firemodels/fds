@@ -9926,7 +9926,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "SHOWVENTFLOW") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i", &visVentFlow);
+      sscanf(buffer, "%i %i %i", &visVentFlow,&visventslab,&visventprofile);
       continue;
     }
     if(match(buffer, "SHOWVENTS") == 1){
@@ -12153,7 +12153,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRIANGLECOUNT\n");
   fprintf(fileout, " %i\n", show_triangle_count);
   fprintf(fileout, "SHOWVENTFLOW\n");
-  fprintf(fileout, " %i\n", visVentFlow);
+  fprintf(fileout, " %i %i %i\n", visVentFlow,visventslab,visventprofile);
   fprintf(fileout, "SHOWVENTS\n");
   fprintf(fileout, " %i\n", visVents);
   fprintf(fileout, "SHOWWALLS\n");
