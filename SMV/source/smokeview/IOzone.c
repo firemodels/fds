@@ -1286,7 +1286,7 @@ void drawventslabdata(void){
 /* ------------------ drawventdata ------------------------ */
 
 void drawventdata(void){
-  if(have_hventslab_flow==1){
+  if(have_hventslab_flow==1&&visventslab==1){
     drawventslabdata();
   }
   else{
