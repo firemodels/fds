@@ -1117,7 +1117,7 @@ void drawventdataORIG(void){
 
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
-      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(FLOAT)(NELEV_ZONE-1);
+      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
     idir=zvi->dir;
     x1=(zvi->x1+zvi->x2)/2.0;
