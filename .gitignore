@@ -10,6 +10,7 @@
 *.pdb
 *.exp
 *.lib
+*.i90
 
 # fds executables
 fds_intel_*
@@ -27,9 +28,9 @@ fds_intel_*
 *.pdfsync
 *.toc
 
-# smokeview vs build directory
+# smokeview files, directories
 SMV/win32_local
-
-# smokeview upload directory 
+*.a
+smokeview*64*
 SMV/for_bundle/uploads
 
