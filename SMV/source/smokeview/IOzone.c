@@ -1089,9 +1089,9 @@ void getzoneventbounds(void){
   }
 }
 
-/* ------------------ drawventdataORIG ------------------------ */
+/* ------------------ drawventdataPROFILE ------------------------ */
 
-void drawventdataORIG(void){
+void drawventdataPROFILE(void){
   float factor;
   int i;
   int idir;
@@ -1210,9 +1210,9 @@ void drawventdataORIG(void){
 
 }
 
-/* ------------------ drawventslabdata ------------------------ */
+/* ------------------ drawventdataSLAB ------------------------ */
 
-void drawventslabdata(void){
+void drawventdataSLAB(void){
   int i;
   int idir;
   float x1, yy;
@@ -1294,10 +1294,10 @@ void drawventslabdata(void){
 
 void drawventdata(void){
   if(have_hventslab_flow==1&&visventslab==1){
-    drawventslabdata();
+    drawventdataSLAB();
   }
   else{
-    drawventdataORIG();
+    drawventdataPROFILE();
   }
 }
 
