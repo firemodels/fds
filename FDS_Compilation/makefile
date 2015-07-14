@@ -13,7 +13,7 @@ VPATH = ../FDS_Source
 
 GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
-GITINFO_BASE=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
@@ -23,7 +23,8 @@ else
   BUILD_DATE := $(shell date "+%b %d, %Y  %T")
 endif
 
-GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
 
 # Definition of the non-MPI object variables
@@ -409,28 +410,28 @@ gnu_win_64 : obj = fds_gnu_win_64
 gnu_win_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux : FFLAGS = -O2
+gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
 gnu_linux : FCOMPL = gfortran
 gnu_linux : FOPENMPFLAGS = -fopenmp
 gnu_linux : obj = fds_gnu_linux
 gnu_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx : FFLAGS  = -O2
+gnu_osx : FFLAGS  = -O2 $(GITINFOGNU)
 gnu_osx : FCOMPL  = gfortran
 gnu_osx : FOPENMPFLAGS = -fopenmp
 gnu_osx : obj     = fds_gnu_osx
 gnu_osx : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_gnu_linux : FFLAGS = -O2
+mpi_gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_linux : FCOMPL = mpifort
 mpi_gnu_linux : FOPENMPFLAGS = 
 mpi_gnu_linux : obj = fds_mpi_gnu_linux
 mpi_gnu_linux : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
-mpi_gnu_osx : FFLAGS = -O2
+mpi_gnu_osx : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_osx : FCOMPL = mpif90
 mpi_gnu_osx : FOPENMPFLAGS = 
 mpi_gnu_osx : obj = fds_mpi_gnu_osx
