@@ -29,7 +29,7 @@ fds_intel_*
 *.toc
 
 # smokeview files, directories
-SMV/win32_local
+SMV/win32_local/
 *.a
 smokeview*64*
 SMV/for_bundle/uploads
