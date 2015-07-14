@@ -27,15 +27,12 @@ MODULE EVAC
   USE DCDFLIB, ONLY : DCDFLIB_Gamma => Gamma
   USE DEVICE_VARIABLES
   USE CONTROL_VARIABLES
-  !
+
   IMPLICIT NONE
-  !
-  CHARACTER(255), PARAMETER :: evacid='$Id$'
-  CHARACTER(255), PARAMETER :: evacrev='$Revision$'
-  CHARACTER(255), PARAMETER :: evacdate='$Date$'
-  !
   PRIVATE
+
   ! Public subprograms (called from the main program or read or dump)
+
   PUBLIC EVACUATE_HUMANS, INITIALIZE_EVACUATION, INIT_EVAC_GROUPS
   PUBLIC READ_EVAC, DUMP_EVAC, DUMP_EVAC_CSV, PREPARE_TO_EVACUATE, CLEAN_AFTER_EVACUATE
   PUBLIC EVAC_MESH_EXCHANGE, INITIALIZE_EVAC_DUMPS
@@ -5230,10 +5227,8 @@ CONTAINS
 
     ! Write program info
 
-    !
-    WRITE(LU_EVACOUT,'(/A)')          ' FDS+Evac Evacuation Module'
+    WRITE(LU_EVACOUT,'(/A)')   ' FDS+Evac Evacuation Module'
     WRITE(LU_EVACOUT,'(A,A)')  ' FDS+Evac Version         : ', TRIM(EVAC_VERSION)
-
     WRITE(LU_EVACOUT,FMT='(/A,I2)')  ' FDS+Evac Color_Method    :', COLOR_METHOD
     IF (L_fed_read .OR. L_fed_save) THEN
        IF (Fed_Door_Crit >= 0) THEN
@@ -16586,6 +16581,5 @@ CONTAINS
     END IF
 
   END SUBROUTINE Change_Target_Door
-  !
-  
+
 END MODULE EVAC

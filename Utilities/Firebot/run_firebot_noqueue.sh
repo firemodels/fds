@@ -1,3 +1,3 @@
 #!/bin/bash  
 
-bash -lc "./firebot_linux_wrapper.sh -q none &
+bash -lc "./run_firebot.sh -q none" &

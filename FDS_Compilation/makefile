@@ -11,11 +11,20 @@
 
 VPATH = ../FDS_Source
 
-# Find the Git revision
-
 GIT_HASH := $(shell git describe --long --dirty)
 GIT_DATE := $(shell git log -1 --format=%cd)
-GITINFO=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+GITINFO_BASE=-fpp -DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
+
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+# windows
+  BUILD_DATE := $(shell date /t) $(shell time /t)
+else
+# linux/osx
+  BUILD_DATE := $(shell date "+%b %d, %Y  %T")
+endif
+
+GITINFO=$(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
+
 
 # Definition of the non-MPI object variables
 

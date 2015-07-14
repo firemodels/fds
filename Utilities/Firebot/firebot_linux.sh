@@ -34,9 +34,9 @@ fi
 
 # Additional definitions
 BRANCH=
+FORCECLEANREPO=0
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
 FDS_GITBASE=FDS-SMVgitclean
-fdsroot="$FIREBOT_HOME_DIR/$FDS_GITBASE"
 OUTPUT_DIR="$FIREBOT_DIR/output"
 HISTORY_DIR="$FIREBOT_DIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
@@ -61,14 +61,10 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
+echo "-d - git_directory - run firebot in git_directory"
+echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
-echo ""
-echo "-r - revision_string - run cases using a specific GIT revision string"
-echo "     default: (none, latest GIT HEAD)"
-echo ""
-echo "-s - skip fixing GIT properties and GIT bump of manuals"
-echo "     default: SKIP_GIT_PROPS_AND_GIT_BUMP is undefined (false)"
 echo ""
 echo "-u - specify GIT username to use"
 echo "     default: fds.firebot"
@@ -81,23 +77,23 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:hq:r:sv:' OPTION
+while getopts 'b:d:fhq:v:' OPTION
 do
 case $OPTION in
   b)
    BRANCH="$OPTARG"
+   ;;
+  d)
+   FDS_GITBASE="$OPTARG"
+   ;;
+  f)
+   FORCECLEANREPO=1
    ;;
   h)
    usage;
    ;;
   q)
    QUEUE="$OPTARG"
-   ;;
-  r)
-   GIT_REVISION="$OPTARG"
-   ;;
-  s)
-   SKIP_GIT_PROPS_AND_GIT_BUMP=true
    ;;
   v)
    FIREBOT_MODE="validation"
@@ -111,20 +107,25 @@ esac
 done
 shift $(($OPTIND-1))
 
+fdsroot="$FIREBOT_HOME_DIR/$FDS_GITBASE"
+
 #  ====================
 #  = End user warning =
 #  ====================
 
-if [[ "$FDS_GITBASE" == "FDS-SMVgitclean" ]];
-   then
+if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
       # Continue along
       :
    else
-      echo "Error: You are running the Firebot script with the"
-      echo "repo $FDS_GITBASE, not FDS-SMVgitclean."
-      echo "Terminating script."
-      exit
+      if [[ "$FORCECLEANREPO" == "0" ]]; then
+         echo "Error: Firebot needs to remove all unversioned files in $FDS_GITBASE."
+         echo "To allow this, re-run using the -f option."
+         echo "Terminating firebot."
+         exit
+      fi
+
 fi
+
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
@@ -189,11 +190,11 @@ set_files_world_readable()
 clean_firebot_metafiles()
 {
    cd $FIREBOT_DIR
-   MKDIR guides
-   MKDIR $HISTORY_DIR
-   MKDIR $OUTPUT_DIR
-   rm -rf $OUTPUT_DIR/* > /dev/null
-   MKDIR $NEWGUIDE_DIR
+   MKDIR guides &> /dev/null
+   MKDIR $HISTORY_DIR &> /dev/null
+   MKDIR $OUTPUT_DIR &> /dev/null
+   rm -rf $OUTPUT_DIR/* &> /dev/null
+   MKDIR $NEWGUIDE_DIR &> /dev/null
    chmod 775 $NEWGUIDE_DIR
 }
 
@@ -232,70 +233,40 @@ do_git_checkout()
 {
    cd $fdsroot
    # If an GIT revision string is specified, then get that revision
-   if [[ $GIT_REVISION != "" ]]; then
-      echo "Checking out revision ${GIT_REVISION}" >> $OUTPUT_DIR/stage1 2>&1
-      git checkout $GIT_REVISION . >> $OUTPUT_DIR/stage1 2>&1
-      echo "At revision ${GIT_REVISION}." >> $OUTPUT_DIR/stage1 2>&1
-   # If no revision string is specified, then get the latest revision
+   echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+   if [[ "$BRANCH" != "" ]] ; then
+     if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        exit
+     fi
+     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        git checkout $BRANCH
+     fi
    else
-      echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-      if [[ "$BRANCH" != "" ]] ; then
-        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
-           echo "Error: the branch $BRANCH does not exist. Terminating script."
-           exit
-        fi
-        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-           git checkout $BRANCH
-        fi
-      else
-         BRANCH=$CURRENT_BRANCH
-      fi
-      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-      git pull >> $OUTPUT_DIR/stage1 2>&1
-
-      # Only run if firebot is in "verification" mode and SKIP_GIT_PROPS_AND_GIT_BUMP is not set
-      if [[ $FIREBOT_MODE == "verification" && ! $SKIP_GIT_PROPS_AND_GIT_BUMP ]] ; then
-         # Bump GIT revision string of all guides (so that the GIT revision keyword gets updated)
-         echo "Bump GIT revision string of all guides." >> $OUTPUT_DIR/stage1 2>&1
-         CURRENT_TIMESTAMP=`date`
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-#         sed -i "s/.*% dummy comment to force git change.*/% dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-#         sed -i "s/.*! dummy comment to force git change.*/! dummy comment to force git change - ${CURRENT_TIMESTAMP}/" $fdsroot/FDS_Source/main.f90
-
-         # Commit back results
-#         git add $fdsroot/Manuals/FDS_User_Guide/FDS_User_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.tex
-#         git add $fdsroot/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.tex
-#         git add $fdsroot/FDS_Source/main.f90
-#         git commit -m 'Firebot: Bump GIT revision of FDS guides and FDS source' &> /dev/null
-#         git push &> /dev/null
-      fi
-      
-      echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
-      CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
-      if [[ "$BRANCH" != "" ]] ; then
-        if [[ `git branch | grep $BRANCH` == "" ]] ; then 
-           echo "Error: the branch $BRANCH does not exist. Terminating script."
-           exit
-        fi
-        if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-           echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-           git checkout $BRANCH
-        fi
-      else
-         BRANCH=$CURRENT_BRANCH
-      fi
-      echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-      git pull >> $OUTPUT_DIR/stage1 2>&1
-      GIT_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+      BRANCH=$CURRENT_BRANCH
    fi
+   echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
+   git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+
+   echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
+   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+   if [[ "$BRANCH" != "" ]] ; then
+     if [[ `git branch | grep $BRANCH` == "" ]] ; then 
+        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        exit
+     fi
+     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        git checkout $BRANCH >> $OUTPUT_DIR/stage1 2>&1
+     fi
+   else
+      BRANCH=$CURRENT_BRANCH
+   fi
+   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+   git pull >> $OUTPUT_DIR/stage1 2>&1
+   GIT_REVISION=`git describe --long --dirty`
 }
 
 check_git_checkout()
@@ -303,30 +274,6 @@ check_git_checkout()
    cd $fdsroot
    # Check for GIT errors
    stage1_success=true
-}
-
-fix_git_properties()
-{
-#*** need to port this to git
-#*** note: it is not called now
-   # This function fixes GIT properties
-   # (e.g., svn:executable, svn:keywords, svn:eol-style, and svn:mime-type)
-   # throughout the FDS-SMV repository.
-
-   # cd to GIT root
-   cd $fdsroot
-
-   # Delete all svn:executable properties
-   svn propdel svn:executable --recursive &> /dev/null
-
-   # Restore local executable property to svn-fix-props.py
-   chmod +x $fdsroot/Utilities/Subversion/svn-fix-props.py &> /dev/null
-
-   # Run svn-fix-props.py script (fixes all GIT properties)
-   $fdsroot/Utilities/Subversion/svn-fix-props.py --config $fdsroot/Utilities/Subversion/config &> /dev/null
-
-   # Commit back results
-   svn commit -m 'Firebot: Fix GIT properties throughout repository' &> /dev/null
 }
 
 archive_compiler_version()
@@ -1255,11 +1202,6 @@ clean_firebot_metafiles
 clean_git_repo
 do_git_checkout
 check_git_checkout
-# Only run if -s option (skip GIT properties) is not used
-#*** need to port following to git
-#if [[ ! $SKIP_GIT_PROPS_AND_GIT_BUMP ]] ; then
-#   fix_git_properties
-#fi
 archive_compiler_version
 
 ### Stage 2a ###

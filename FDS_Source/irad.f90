@@ -277,30 +277,6 @@ REAL(EB) :: PFUEL
 INTEGER, PARAMETER :: I_CO=3, I_CO2=1, I_H2O=2, I_N2=14, I_O2=15, I_FV=16, I_C2H4=5, I_C2H6=6, I_C3H6=7, I_C3H8=8, &
                       I_C7H8=9, I_C7H16=10, I_CH3OH=11, I_CH4=4, I_CH4_OLD=13, I_MMA=12
 
-CHARACTER(255), PARAMETER :: IRADID='$ID: IRAD.F90 21134 2014-12-08 20:53:48Z DRJFLOYD@GMAIL.COM $'
-CHARACTER(255), PARAMETER :: IRADREV='$REVISION: 21134 $'
-CHARACTER(255), PARAMETER :: IRADDATE='$DATE: 2014-12-08 15:53:48 -0500 (MON, 08 DEC 2014) $'
-   
-CONTAINS
- 
-!==============================================================================
-SUBROUTINE GET_REV_IRAD(MODULE_REV,MODULE_DATE)
-!==============================================================================
-! VARIABLES PASSED IN
-
-INTEGER, INTENT(INOUT) :: MODULE_REV
-CHARACTER(255),INTENT(INOUT) :: MODULE_DATE
-INTEGER :: IERR
-!------------------------------------------------------------------------------
-
-WRITE(MODULE_DATE,'(A)') IRADREV(INDEX(IRADREV,':')+2:LEN_TRIM(IRADREV)-2)
-READ (MODULE_DATE,'(I5)',IOSTAT=IERR) MODULE_REV
-IF (IERR/=0) MODULE_REV = 0
-WRITE(MODULE_DATE,'(A)') IRADDATE
-
-!------------------------------------------------------------------------------
-END SUBROUTINE GET_REV_IRAD   
-
 END MODULE RADCAL_VAR
 
    
