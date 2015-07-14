@@ -525,18 +525,18 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
  
                
 !              1 
-!             /|\  
-!            / | \
-!           /  |  \  
-!          /   |   \  
-!         /    |    \ 
-!        /     4     \
-!       /     . .     \
-!      /     .    .    \   
-!     /    .        .   \
-!    /   .            .  \    
-!   /  .               .  \
-!  / .                    .\
+!             /|\                       . 
+!            / | \                      .
+!           /  |  \                     . 
+!          /   |   \                    .  
+!         /    |    \                   . 
+!        /     4     \                  . 
+!       /     . .     \                 . 
+!      /     .    .    \                .  
+!     /    .        .   \               .  
+!    /   .            .  \              . 
+!   /  .               .  \             . 
+!  / .                    .\            . 
 ! 2-------------------------3
 
          DO I = 0, N_VOLUS-1
@@ -989,9 +989,9 @@ SUBROUTINE PRISM2TETRA(PRISM,TETRAS)
 ! split a prism defined by a list of 6 vertices into 3 tetrahedrons
 
 !       6
-!      /.\
-!    /  .  \
-!  /    .    \
+!      /.\                      . 
+!    /  .  \                    .
+!  /    .    \                  .
 ! 4-----------5
 ! |     .     |
 ! |     .     |
@@ -1496,9 +1496,9 @@ V23 = V23/NORM2(V23) ! N_VERTS + 3
 ! split triangle 123 into 4 triangles
 
 !         1
-!       /F1\             
+!       /F1\                          .
 !     12----13                     
-!    /F2\F3/F4\
+!    /F2\F3/F4\                       i.
 !  2 --- 23----3 
 
 FACE2(1:3) = (/N_VERTS+1,FACE1(2),N_VERTS+3/)
