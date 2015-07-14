@@ -218,7 +218,7 @@ run_auto()
   rm -f $MESSAGE_FILE
   if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     echo $THIS_SMVREVISION>$GIT_SMVFILE
-    echo -e "smokeview source has changed. $LAST_SMVREVISION->$THIS_SMVREVISINO($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+    echo -e "smokeview source has changed. $LAST_SMVREVISION->$THIS_SMVREVISION($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
     cat $GIT_SMVLOG >> $MESSAGE_FILE
   fi
   if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
