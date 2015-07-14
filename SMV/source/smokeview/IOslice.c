@@ -1092,7 +1092,8 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       return;
     }
     if(settmax_s==0&&settmin_s==0&&sd->compression_type==0){
-      if(framesize == 0){
+      if(framesize <= 0){
+        fprintf(stderr,"*** Error: frame size is 0 in slice file %s . \n",file);
         error = 1;
       }
       else{
