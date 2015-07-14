@@ -5889,25 +5889,25 @@ updatemenu=0;
     if(nzvents>0){
       if(have_hventslab_flow==0){
         if(visVentFlow==1){
-          glutAddMenuEntry(_("*Vent flow (velocity profile)"), MENU_ZONE_VENTS);
+          glutAddMenuEntry(_("*Vent flow - velocity profile"), MENU_ZONE_VENTS);
         }
         else{
-          glutAddMenuEntry(_("Vent flow (velocity profile)"), MENU_ZONE_VENTS);
+          glutAddMenuEntry(_("Vent flow - velocity profile"), MENU_ZONE_VENTS);
         }
       }
       else{
         glutAddMenuEntry(_("Vent flow"), MENU_DUMMY);
         if(visventslab==1){
-          glutAddMenuEntry(_("   *mass (slab)"), MENU_ZONE_VENT_SLAB);
+          glutAddMenuEntry(_("   *mass slab flow"), MENU_ZONE_VENT_SLAB);
         }
         else{
-          glutAddMenuEntry(_("   mass (slab)"), MENU_ZONE_VENT_SLAB);
+          glutAddMenuEntry(_("   mass slab flow"), MENU_ZONE_VENT_SLAB);
         }
         if(visventprofile==1){
-          glutAddMenuEntry(_("   *velocity (profile)"), MENU_ZONE_VENT_PROFILE);
+          glutAddMenuEntry(_("   *velocity profile"), MENU_ZONE_VENT_PROFILE);
         }
         else{
-          glutAddMenuEntry(_("   velocity (profile)"), MENU_ZONE_VENT_PROFILE);
+          glutAddMenuEntry(_("   velocity profile"), MENU_ZONE_VENT_PROFILE);
         }
       }
     }

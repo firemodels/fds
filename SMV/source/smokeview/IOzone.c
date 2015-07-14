@@ -396,6 +396,13 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
           float slabflow;
 
           slabflow = zoneslab_F_devs[idev]->vals[i];
+          if(zoneslab_YB_devs[idev] != NULL&&zoneslab_YT_devs[idev] != NULL){
+            float factor;
+
+            factor = ABS(zoneslab_YT_devs[idev]->vals[i] - zoneslab_YB_devs[idev]->vals[i]);
+            if(factor == 0.0)factor = 1.0;
+            slabflow /= factor;
+          }
           maxslabflow = MAX(ABS(slabflow), maxslabflow);
           zoneslab_F_local[ival] = slabflow;
         }
@@ -1117,7 +1124,7 @@ void drawventdataORIG(void){
 
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
-      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(FLOAT)(NELEV_ZONE-1);
+      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
     idir=zvi->dir;
     x1=(zvi->x1+zvi->x2)/2.0;
@@ -1240,7 +1247,7 @@ void drawventslabdata(void){
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
-      dyy = 0.1*(slab_vel[islab] / maxslabflow);
+      dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
       switch(idir){
       case BOTTOM_WALL:
       case TOP_WALL:
