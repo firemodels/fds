@@ -1337,11 +1337,11 @@ void keyboard(unsigned char key, int flag){
         break;
       }
       if(isZoneFireModel==1){
-        if(FlowDir>0){
-          zone_ventfactor*=1.5;
+        if(keystate==GLUT_ACTIVE_ALT){
+          zone_ventfactor /= 1.5;
         } 
         else{
-          zone_ventfactor/=1.5;
+          zone_ventfactor *= 1.5;
         }
         PRINTF("zone vent factor: %f\n",zone_ventfactor);
       }

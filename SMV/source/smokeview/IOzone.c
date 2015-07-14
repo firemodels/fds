@@ -294,7 +294,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     for(i = 0; i < nzhvents; i++){
       char label[100]; 
       int islab; 
-      int ii;
         
       sprintf(label, "%s_%i", "HSLAB", i + 1); 
       GETZONEDEV(zoneslab_n_devs[i]); 
@@ -397,6 +396,13 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
           float slabflow;
 
           slabflow = zoneslab_F_devs[idev]->vals[i];
+          if(zoneslab_YB_devs[idev] != NULL&&zoneslab_YT_devs[idev] != NULL){
+            float factor;
+
+            factor = ABS(zoneslab_YT_devs[idev]->vals[i] - zoneslab_YB_devs[idev]->vals[i]);
+            if(factor == 0.0)factor = 1.0;
+            slabflow /= factor;
+          }
           maxslabflow = MAX(ABS(slabflow), maxslabflow);
           zoneslab_F_local[ival] = slabflow;
         }
@@ -857,19 +863,20 @@ float get_p(float y, float pfloor, float ylay, float rho_L, float rho_U){
 
 /* ------------------ get_dpT ------------------------ */
 
-void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, float *dpmin, float *dpmax, int *iT){
+void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata, float *vmin, float *vmax, int *iT){
   float p1, p2;
   int itslab;
   int fsign;
   int i;
   float y;
+  float rho_slab;
 
   for(i=0;i<n;i++){
 
     y=yy[i];
 
     if(y<r1->z0||y<r2->z0||y>r1->z1||y>r2->z1){
-      delp[i]=0.0;
+      vdata[i]=0.0;
       iT[i]=r1->itl;
     }
 
@@ -880,28 +887,32 @@ void get_dpT(float *yy, int n, roomdata *r1, roomdata *r2, float *delp, float *d
       fsign=1.0;
       if(y>r1->ylay){
         itslab=r1->itu;
+        rho_slab = r1->rho_U;
       }
       else{
         itslab=r1->itl;
+        rho_slab = r1->rho_L;
       }
     }
     else{
       fsign=-1.0;
       if(y>r2->ylay){
         itslab=r2->itu;
+        rho_slab = r2->rho_U;
       }
       else{
         itslab=r2->itl;
+        rho_slab = r2->rho_L;
       }
     }
-    delp[i]=fsign*sqrt(ABS(p1-p2));
+    vdata[i]=fsign*sqrt(2.0*ABS(p1-p2)/rho_slab);
     iT[i]=itslab;
   }
-  *dpmin=delp[0];
-  *dpmax=delp[0];
+  *vmin=vdata[0];
+  *vmax=vdata[0];
   for(i=1;i<n;i++){
-    if(delp[i]<*dpmin)*dpmin=delp[i];
-    if(delp[i]>*dpmax)*dpmax=delp[i];
+    *vmin = MIN(*vmin, vdata[i]);
+    *vmax = MAX(*vmax, vdata[i]);
   }
   return;
 }
@@ -1047,24 +1058,24 @@ void getzoneventbounds(void){
     zvent *zvi;
 
     zvi = zventinfo + i;
-    zvi->g_dpmax=-1000000000.0;
-    zvi->g_dpmin=1000000000.0;
+    zvi->g_vmax=-1000000000.0;
+    zvi->g_vmin=1000000000.0;
   }
   for(izone=0;izone<nzone_times;izone++){
     fill_zonedata(izone);
     for(i=0;i<nzvents;i++){
       int j;
       zvent *zvi;
-      float yelev[20];
+      float yelev[NELEV_ZONE];
 
       zvi = zventinfo + i;
       if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
-      for(j=0;j<20;j++){
-        yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
+      for(j=0;j<NELEV_ZONE;j++){
+        yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
       }
-      get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
-      if(zvi->dpmin<zvi->g_dpmin)zvi->g_dpmin=zvi->dpmin;
-      if(zvi->dpmax>zvi->g_dpmax)zvi->g_dpmax=zvi->dpmax;
+      get_zoneventvel(yelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
+      if(zvi->vmin<zvi->g_vmin)zvi->g_vmin=zvi->vmin;
+      if(zvi->vmax>zvi->g_vmax)zvi->g_vmax=zvi->vmax;
     }
   }
   zone_maxventflow=0.0;
@@ -1073,8 +1084,8 @@ void getzoneventbounds(void){
 
     zvi = zventinfo + i;
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
-    if(ABS(zvi->g_dpmin)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmin);
-    if(ABS(zvi->g_dpmax)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_dpmax);
+    if(ABS(zvi->g_vmin)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_vmin);
+    if(ABS(zvi->g_vmax)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_vmax);
   }
 }
 
@@ -1093,33 +1104,33 @@ void drawventdataORIG(void){
   for(i=0;i<nzvents;i++){
     int j;
     zvent *zvi;
-    float yelev[20];
+    float yelev[NELEV_ZONE];
 
     zvi = zventinfo + i;
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
-    for(j=0;j<20;j++){
-      yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
+    for(j=0;j<NELEV_ZONE;j++){
+      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
-    get_dpT(yelev, 20, zvi->room1, zvi->room2, zvi->vdata, &zvi->dpmin, &zvi->dpmax, zvi->itempdata);
+    get_zoneventvel(yelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
   }
   factor = 0.1*zone_ventfactor/zone_maxventflow;
   for(i=0;i<nzvents;i++){
     zvent *zvi;
     int j;
-    float yelev[20];
+    float yelev[NELEV_ZONE];
     float *vcolor1,*vcolor2;
 
     zvi = zventinfo + i;
 
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
-    for(j=0;j<20;j++){
-      yelev[j]=(zvi->z1*(19-j)+zvi->z2*j)/19.0;
+    for(j=0;j<NELEV_ZONE;j++){
+      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
     idir=zvi->dir;
     x1=(zvi->x1+zvi->x2)/2.0;
     yy=zvi->yy;
     glBegin(GL_QUADS);
-    for(j=0;j<19;j++){
+    for(j=0;j<NELEV_ZONE-1;j++){
       float dy1,dy2;
 
       dy1 = factor*zvi->area_fraction*zvi->vdata[j];
@@ -1202,7 +1213,6 @@ void drawventdataORIG(void){
 /* ------------------ drawventslabdata ------------------------ */
 
 void drawventslabdata(void){
-  float factor;
   int i;
   int idir;
   float x1, yy;
@@ -1213,9 +1223,6 @@ void drawventslabdata(void){
 
   for(i = 0; i<nzvents; i++){
     zvent *zvi;
-    int j;
-    float yelev[20];
-    float *vcolor1, *vcolor2;
     float *slab_vel;
     int islab;
 
@@ -1240,7 +1247,7 @@ void drawventslabdata(void){
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
-      dyy = 0.1*(slab_vel[islab] / maxslabflow);
+      dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
       switch(idir){
       case BOTTOM_WALL:
       case TOP_WALL:
