@@ -55,3 +55,11 @@ intel_win_64 : $(objwin)
 .PHONY : clean
 clean:
 	erase *.obj
+
+#-------------- compile sring_util.c so revision strings are updated -----------
+
+string_util.o:  .FORCE
+string_util.obj:        .FORCE
+
+.FORCE:
+
