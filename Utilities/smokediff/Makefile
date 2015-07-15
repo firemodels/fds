@@ -112,3 +112,11 @@ intel_osx_64 : exe       = smokediff_osx_64
 
 intel_osx_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -m64 -static-intel $(obj) -mmacosx-version-min=10.4 $(MACFORTLIBS)
+
+#-------------- compile sring_util.c so revision strings are updated -----------
+
+string_util.o:  .FORCE
+string_util.obj:        .FORCE
+
+.FORCE:
+
