@@ -92,3 +92,11 @@ intel_osx_64 : $(obj)
 .PHONY : clean
 clean:
 	rm *.o
+
+#-------------- compile sring_util.c so revision strings are updated -----------
+
+string_util.o:  .FORCE
+string_util.obj:        .FORCE
+
+.FORCE:
+
