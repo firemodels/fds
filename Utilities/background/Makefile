@@ -74,3 +74,11 @@ gcc_osx_32 : exe       = background
 
 gcc_osx_32 : $(obj)
 	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
+
+#-------------- compile sring_util.c so revision strings are updated -----------
+
+string_util.o:  .FORCE
+string_util.obj:        .FORCE
+
+.FORCE:
+
