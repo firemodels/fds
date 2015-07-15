@@ -848,20 +848,15 @@ void fill_zonedata(int izone_index){
 /* ------------------ get_p ------------------------ */
 
 float get_p(float y, float pfloor, float ylay, float rho_L, float rho_U){
+// y and ylay are relative coordinates
   float g=9.80;
   float p;
 
-  if(y<ylay){
-    p = pfloor - SCALE2FDS(rho_L*g*y);
-  }
-  else{
-    p = pfloor - SCALE2FDS(rho_L*g*ylay);
-    p -= SCALE2FDS(rho_U*g*(y-ylay));
-  }
+  p = pfloor - rho_L*g*SCALE2FDS(MIN(y,ylay)) - rho_U*g*SCALE2FDS(MAX(y-ylay,0.0));
   return p;
 }
 
-/* ------------------ get_dpT ------------------------ */
+/* ------------------ get_zoneventvel ------------------------ */
 
 void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata, float *vmin, float *vmax, int *iT){
   float p1, p2;
@@ -871,6 +866,9 @@ void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata,
   float y;
   float rho_slab;
 
+  // yy - absolute coordinates
+  // r1->ylay, r2->ylay - relative coordinates
+
   for(i=0;i<n;i++){
 
     y=yy[i];
@@ -878,14 +876,15 @@ void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata,
     if(y<r1->z0||y<r2->z0||y>r1->z1||y>r2->z1){
       vdata[i]=0.0;
       iT[i]=r1->itl;
+      continue;
     }
 
-    p1=get_p(y,              r1->pfloor,r1->ylay,r1->rho_L,r1->rho_U);
-    p2=get_p(y+r1->z0-r2->z0,r2->pfloor,r2->ylay,r2->rho_L,r2->rho_U);
+    p1=get_p(y-r1->z0,r1->pfloor,r1->ylay,r1->rho_L,r1->rho_U);
+    p2=get_p(y-r2->z0,r2->pfloor,r2->ylay,r2->rho_L,r2->rho_U);
 
     if(p1>p2){
       fsign=1.0;
-      if(y>r1->ylay){
+      if(y-r1->z0>r1->ylay){
         itslab=r1->itu;
         rho_slab = r1->rho_U;
       }
@@ -896,7 +895,7 @@ void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata,
     }
     else{
       fsign=-1.0;
-      if(y>r2->ylay){
+      if(y-r2->z0>r2->ylay){
         itslab=r2->itu;
         rho_slab = r2->rho_U;
       }
