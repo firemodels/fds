@@ -861,7 +861,7 @@ float get_p(float y, float pfloor, float ylay, float rho_L, float rho_U){
 void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata, float *vmin, float *vmax, int *iT){
   float p1, p2;
   int itslab;
-  int fsign;
+  float fsign;
   int i;
   float y;
   float rho_slab;
@@ -1073,8 +1073,8 @@ void getzoneventbounds(void){
         yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
       }
       get_zoneventvel(yelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
-      if(zvi->vmin<zvi->g_vmin)zvi->g_vmin=zvi->vmin;
-      if(zvi->vmax>zvi->g_vmax)zvi->g_vmax=zvi->vmax;
+      zvi->g_vmin = MIN(zvi->vmin,zvi->g_vmin);
+      zvi->g_vmax = MAX(zvi->vmax,zvi->g_vmax);
     }
   }
   zone_maxventflow=0.0;
@@ -1083,8 +1083,8 @@ void getzoneventbounds(void){
 
     zvi = zventinfo + i;
     if(zvi->vent_orien==VFLOW_VENT||zvi->vent_orien==HVAC_VENT)continue;
-    if(ABS(zvi->g_vmin)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_vmin);
-    if(ABS(zvi->g_vmax)>zone_maxventflow)zone_maxventflow=ABS(zvi->g_vmax);
+    zone_maxventflow = MAX(ABS(zvi->g_vmin),zone_maxventflow);
+    zone_maxventflow = MAX(ABS(zvi->g_vmax),zone_maxventflow);
   }
 }
 
