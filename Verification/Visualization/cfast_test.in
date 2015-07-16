@@ -17,7 +17,7 @@ COMPA,Compartment 2,3.6,2.4,2.4,3.6,0,0,GYPSUM,OFF,GYPSUM,50,50,50
 !!
 !!Vent keywords
 !!
-HVENT,1,2,1,1,2,0,0,1,1
+HVENT,1,2,1,1,2,0,0.6,2,1
 HVENT,1,3,1,1,2,0,0,1,1
 HVENT,2,3,1,1,0.1,0,0,1,1
 !!
