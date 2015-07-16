@@ -11029,7 +11029,7 @@ int readini2(char *inifile, int localfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
 
-    if(localfile==1&&match(buffer,"LABEL") == 1){
+    if(localfile==1&&(match(buffer,"LABEL") == 1||match(buffer,"TICKLABEL")==1)){
 
       /*
       LABEL
@@ -11037,18 +11037,26 @@ int readini2(char *inifile, int localfile){
       label
 
       */
-      {
         float *xyz, *rgbtemp, *tstart_stop;
         labeldata labeltemp, *labeli;
         int *useforegroundcolor;
         char *bufferptr;
         int *show_always;
+        int ticklabel = 0;
+        float *xyztick, *xyztickdir;
+        int *showtick;
+
+        if(match(buffer, "TICKLABEL")==1)ticklabel = 1;
 
         labeli = &labeltemp;
 
         labeli->labeltype=TYPE_INI;
         xyz = labeli->xyz;
         rgbtemp = labeli->frgb;
+        xyztick = labeli->tick_begin;
+        xyztickdir = labeli->tick_direction;
+        showtick = &labeli->show_tick;
+        
         useforegroundcolor=&labeli->useforegroundcolor;
         tstart_stop = labeli->tstart_stop;
         show_always = &labeli->show_always;
@@ -11067,6 +11075,15 @@ int readini2(char *inifile, int localfile){
           xyz,xyz+1,xyz+2,
           rgbtemp,rgbtemp+1,rgbtemp+2,
           tstart_stop,tstart_stop+1,useforegroundcolor,show_always);
+
+        if(ticklabel==1){
+          fgets(buffer, 255, stream);
+          sscanf(buffer, "%f %f %f %f %f %f %i",
+            xyztick, xyztick+1, xyztick+2,
+            xyztickdir, xyztickdir+1, xyztickdir+2,
+            showtick);
+          *showtick = CLAMP(*showtick, 0, 1);
+        }
         *show_always=CLAMP(*show_always,0,1);
         *useforegroundcolor = CLAMP(*useforegroundcolor,-1,1);
         if(*useforegroundcolor==-1){
@@ -11082,7 +11099,6 @@ int readini2(char *inifile, int localfile){
         bufferptr = trim_front(buffer);
         strcpy(labeli->name,bufferptr);
         LABEL_insert(labeli);
-      }
       continue;
     }
 
@@ -11407,6 +11423,8 @@ void writeini_local(FILE *fileout){
     labeldata *labeli;
     float *xyz, *rgbtemp, *tstart_stop;
     int *useforegroundcolor, *show_always;
+    float *xyztick, *xyztickdir;
+    int *showtick;
 
     labeli = thislabel;
     if(labeli->labeltype == TYPE_SMV)continue;
@@ -11415,13 +11433,20 @@ void writeini_local(FILE *fileout){
     tstart_stop = labeli->tstart_stop;
     useforegroundcolor = &labeli->useforegroundcolor;
     show_always = &labeli->show_always;
+    xyztick = labeli->tick_begin;
+    xyztickdir = labeli->tick_direction;
+    showtick = &labeli->show_tick;
 
-    fprintf(fileout, "LABEL\n");
+    fprintf(fileout, "TICKLABEL\n");
     fprintf(fileout, " %f %f %f %f %f %f %f %f %i %i\n",
       xyz[0], xyz[1], xyz[2],
       rgbtemp[0], rgbtemp[1], rgbtemp[2],
       tstart_stop[0], tstart_stop[1],
       *useforegroundcolor, *show_always);
+    fprintf(fileout, " %f %f %f %f %f %f %i\n",
+      xyztick[0], xyztick[1], xyztick[2],
+      xyztickdir[0], xyztickdir[1], xyztickdir[2],
+      *showtick);
     fprintf(fileout, " %s\n", labeli->name);
   }
   fprintf(fileout, "LOADFILESATSTARTUP\n");

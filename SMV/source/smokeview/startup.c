@@ -1188,7 +1188,14 @@ void initvars(void){
     gl->xyz[0]=0.0;
     gl->xyz[1]=0.0;
     gl->xyz[2]=0.0;
-    gl->labeltype=TYPE_INI;
+    gl->tick_begin[0] = 0.0;
+    gl->tick_begin[1] = 0.0;
+    gl->tick_begin[2] = 0.0;
+    gl->tick_direction[0] = 1.0;
+    gl->tick_direction[1] = 0.0;
+    gl->tick_direction[2] = 0.0;
+    gl->show_tick = 0;
+    gl->labeltype = TYPE_INI;
     memcpy(&LABEL_local,&LABEL_default,sizeof(labeldata));
   }
 

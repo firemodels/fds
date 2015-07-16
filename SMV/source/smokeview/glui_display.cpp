@@ -26,6 +26,13 @@ GLUI_Spinner *SPINNER_cullgeom_portsize=NULL;
 GLUI_Listbox *LIST_colorbar2=NULL;
 GLUI_Listbox *LIST_LB_labels=NULL;
 
+GLUI_Spinner *SPINNER_LB_tick_xbeg=NULL;
+GLUI_Spinner *SPINNER_LB_tick_ybeg=NULL;
+GLUI_Spinner *SPINNER_LB_tick_zbeg=NULL;
+GLUI_Spinner *SPINNER_LB_tick_xdir=NULL;
+GLUI_Spinner *SPINNER_LB_tick_ydir=NULL;
+GLUI_Spinner *SPINNER_LB_tick_zdir=NULL;
+
 GLUI_Spinner *SPINNER_down_red=NULL,*SPINNER_down_green=NULL,*SPINNER_down_blue=NULL;
 GLUI_Spinner *SPINNER_up_red=NULL,*SPINNER_up_green=NULL,*SPINNER_up_blue=NULL;
 GLUI_Spinner *SPINNER_LB_time_start=NULL;
@@ -59,7 +66,8 @@ GLUI_Spinner *SPINNER_scaled_font3d_height2width=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
 
-GLUI_Checkbox *CHECKBOX_labels_meshlabel=NULL;
+GLUI_Checkbox *CHECKBOX_labels_showtick = NULL;
+GLUI_Checkbox *CHECKBOX_labels_meshlabel = NULL;
 GLUI_Checkbox *CHECKBOX_labels_version=NULL;
 GLUI_Checkbox *CHECKBOX_visUSERticks=NULL;
 GLUI_Checkbox *CHECKBOX_visUSERticks2=NULL;
@@ -100,6 +108,7 @@ GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shadedata=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
 
+GLUI_Rollout *ROLLOUT_LB_tick0 = NULL;
 GLUI_Rollout *ROLLOUT_coloring=NULL;
 GLUI_Rollout *ROLLOUT_font=NULL;
 GLUI_Rollout *ROLLOUT_user_labels=NULL;
@@ -121,9 +130,10 @@ GLUI_Panel *PANEL_tick1;
 GLUI_Panel *PANEL_tick1a;
 GLUI_Panel *PANEL_tick1b;
 GLUI_Panel *PANEL_tick2;
-GLUI_Panel *PANEL_transparency=NULL;
+GLUI_Panel *PANEL_transparency = NULL;
 GLUI_Panel *PANEL_font2d=NULL;
 GLUI_Panel *PANEL_font3d=NULL;
+GLUI_Panel *PANEL_LB_tick = NULL;
 
 GLUI_RadioGroup *RADIO2_plot3d_display=NULL;
 GLUI_RadioGroup *RADIO_fontsize = NULL;
@@ -158,6 +168,8 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LB_PREVIOUS 9
 #define LB_NEXT 10
 #define LB_VISLABELS 11
+#define LB_TICK_XYZ 12
+#define LB_SHOW_TICK 13
 
 #define LABELS_label 0
 #define FRAME_label 21
@@ -223,6 +235,15 @@ extern "C" void update_glui_label_text(void){
     SPINNER_LB_x->set_float_val(gl->xyz[0]);
     SPINNER_LB_y->set_float_val(gl->xyz[1]);
     SPINNER_LB_z->set_float_val(gl->xyz[2]);
+    SPINNER_LB_tick_xbeg->set_float_val(gl->tick_begin[0]);
+    SPINNER_LB_tick_ybeg->set_float_val(gl->tick_begin[1]);
+    SPINNER_LB_tick_zbeg->set_float_val(gl->tick_begin[2]);
+    SPINNER_LB_tick_xdir->set_float_val(gl->tick_direction[0]);
+    SPINNER_LB_tick_ydir->set_float_val(gl->tick_direction[1]);
+    SPINNER_LB_tick_zdir->set_float_val(gl->tick_direction[2]);
+    CHECKBOX_labels_showtick->set_int_val(gl->show_tick);
+
+
     SPINNER_LB_time_start->set_float_val(gl->tstart_stop[0]);
     SPINNER_LB_time_stop->set_float_val(gl->tstart_stop[1]);
     CHECKBOX_LB_label_show_always->set_int_val(gl->show_always);
@@ -235,29 +256,19 @@ extern "C" void update_glui_label_text(void){
     CHECKBOX_LB_visLabels->enable();
     LIST_LB_labels->enable();
     EDIT_LB_label_string->enable();
-    SPINNER_LB_x->enable();
-    SPINNER_LB_y->enable();
-    SPINNER_LB_z->enable();
-    SPINNER_LB_time_start->enable();
-    SPINNER_LB_time_stop->enable();
-    SPINNER_LB_red->enable();
-    SPINNER_LB_green->enable();
-    SPINNER_LB_blue->enable();
-    CHECKBOX_LB_label_show_always->enable();
+    ROLLOUT_LB_tick0->enable();
+    PANEL_LB_position->enable();
+    PANEL_LB_time->enable();
+    PANEL_LB_color->enable();
   }
   else{
     CHECKBOX_LB_visLabels->disable();
     LIST_LB_labels->disable();
     EDIT_LB_label_string->disable();
-    SPINNER_LB_x->disable();
-    SPINNER_LB_y->disable();
-    SPINNER_LB_z->disable();
-    SPINNER_LB_time_start->disable();
-    SPINNER_LB_time_stop->disable();
-    SPINNER_LB_red->disable();
-    SPINNER_LB_green->disable();
-    SPINNER_LB_blue->disable();
-    CHECKBOX_LB_label_show_always->disable();
+    ROLLOUT_LB_tick0->disable();
+    PANEL_LB_position->disable();
+    PANEL_LB_time->disable();
+    PANEL_LB_color->disable();
   }
 }
 
@@ -602,8 +613,21 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_LB_green->set_int_limits(0,255);
   SPINNER_LB_blue->set_int_limits(0,255);
   CHECKBOX_LB_label_use_foreground=glui_labels->add_checkbox_to_panel(PANEL_LB_color,"Use foreground color",&gl->useforegroundcolor,LB_FOREGROUND,Text_Labels_CB);
-  Text_Labels_CB(LB_LIST);
 
+  ROLLOUT_LB_tick0 = glui_labels->add_rollout_to_panel(ROLLOUT_user_labels, "tick",false);
+  CHECKBOX_labels_showtick = glui_labels->add_checkbox_to_panel(ROLLOUT_LB_tick0, "show tick", &gl->show_tick, LB_SHOW_TICK, Text_Labels_CB);
+  PANEL_LB_tick = glui_labels->add_panel_to_panel(ROLLOUT_LB_tick0, "",GLUI_PANEL_NONE);
+  SPINNER_LB_tick_xbeg = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "x", GLUI_SPINNER_FLOAT, gl->tick_begin, LB_TICK_XYZ, Text_Labels_CB);
+  SPINNER_LB_tick_ybeg = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "y", GLUI_SPINNER_FLOAT, gl->tick_begin+1, LB_TICK_XYZ, Text_Labels_CB);
+  SPINNER_LB_tick_zbeg = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "z", GLUI_SPINNER_FLOAT, gl->tick_begin+2, LB_TICK_XYZ, Text_Labels_CB);
+  glui_labels->add_column_to_panel(PANEL_LB_tick, false);
+  SPINNER_LB_tick_xdir = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "dx", GLUI_SPINNER_FLOAT, gl->tick_direction, LB_TICK_XYZ, Text_Labels_CB);
+  SPINNER_LB_tick_ydir = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "dy", GLUI_SPINNER_FLOAT, gl->tick_direction+1, LB_TICK_XYZ, Text_Labels_CB);
+  SPINNER_LB_tick_zdir = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "dz", GLUI_SPINNER_FLOAT, gl->tick_direction+2, LB_TICK_XYZ, Text_Labels_CB);
+
+  Text_Labels_CB(LB_LIST);
+  Text_Labels_CB(LB_TICK_XYZ);
+  Text_Labels_CB(LB_XYZ);
 
   // -------------- 
 
@@ -766,6 +790,13 @@ void Text_Labels_CB(int var){
       break;
     case LB_XYZ:
       memcpy(LABEL_global_ptr->xyz,gl->xyz,3*sizeof(float));
+      break;
+    case LB_TICK_XYZ:
+      memcpy(LABEL_global_ptr->tick_begin, gl->tick_begin, 3*sizeof(float));
+      memcpy(LABEL_global_ptr->tick_direction, gl->tick_direction, 3*sizeof(float));
+      break;
+    case LB_SHOW_TICK:
+      memcpy(&LABEL_global_ptr->show_tick, &gl->show_tick, sizeof(int));
       break;
     default:
       ASSERT(FFALSE);
