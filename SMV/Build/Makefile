@@ -260,3 +260,10 @@ gcc_osx : $(obj)
 .PHONY : clean
 clean:
 	rm -f *.o *.mod
+
+#-------------- force compilation of string_util.c -----------
+
+string_util.o:	.FORCE
+string_util.obj:	.FORCE
+
+.FORCE:
