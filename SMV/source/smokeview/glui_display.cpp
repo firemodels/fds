@@ -792,11 +792,15 @@ void Text_Labels_CB(int var){
       memcpy(LABEL_global_ptr->xyz,gl->xyz,3*sizeof(float));
       break;
     case LB_TICK_XYZ:
-      memcpy(LABEL_global_ptr->tick_begin, gl->tick_begin, 3*sizeof(float));
-      memcpy(LABEL_global_ptr->tick_direction, gl->tick_direction, 3*sizeof(float));
+      if(LABEL_global_ptr!=NULL){
+        memcpy(LABEL_global_ptr->tick_begin, gl->tick_begin, 3*sizeof(float));
+        memcpy(LABEL_global_ptr->tick_direction, gl->tick_direction, 3*sizeof(float));
+      }
       break;
     case LB_SHOW_TICK:
-      memcpy(&LABEL_global_ptr->show_tick, &gl->show_tick, sizeof(int));
+      if(LABEL_global_ptr!=NULL){
+        memcpy(&LABEL_global_ptr->show_tick, &gl->show_tick, sizeof(int));
+      }
       break;
     default:
       ASSERT(FFALSE);
