@@ -9856,7 +9856,12 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%f ",&gridlinewidth);
       continue;
     }
-    if(match(buffer,"PLOT3DLINEWIDTH")==1){
+    if(match(buffer, "TICKLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &ticklinewidth);
+      continue;
+    }
+    if(match(buffer, "PLOT3DLINEWIDTH") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f ",&plot3dlinewidth);
       continue;
@@ -11084,6 +11089,15 @@ int readini2(char *inifile, int localfile){
             showtick);
           *showtick = CLAMP(*showtick, 0, 1);
         }
+        else{
+          xyztick[0] = 0.0;
+          xyztick[1] = 0.0;
+          xyztick[2] = 0.0;
+          xyztickdir[0] = 1.0;
+          xyztickdir[1] = 0.0;
+          xyztickdir[2] = 0.0;
+          *showtick = 0;
+        }
         *show_always=CLAMP(*show_always,0,1);
         *useforegroundcolor = CLAMP(*useforegroundcolor,-1,1);
         if(*useforegroundcolor==-1){
@@ -11952,6 +11966,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f\n", sprinklerabssize);
   fprintf(fileout, "STREAKLINEWIDTH\n");
   fprintf(fileout, " %f\n", streaklinewidth);
+  fprintf(fileout, "TICKLINEWIDTH\n");
+  fprintf(fileout, " %f\n", ticklinewidth);
   fprintf(fileout, "USENEWDRAWFACE\n");
   fprintf(fileout, " %i\n", use_new_drawface);
   fprintf(fileout, "VECCONTOURS\n");
