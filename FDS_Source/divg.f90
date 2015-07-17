@@ -89,10 +89,10 @@ RHO_D_DZDX => SCALAR_WORK1
 RHO_D_DZDY => SCALAR_WORK2
 RHO_D_DZDZ => SCALAR_WORK3
 SELECT CASE(PREDICTOR)
-   CASE(.TRUE.)  
-      ZZP => ZZS 
-   CASE(.FALSE.) 
-      ZZP => ZZ  
+   CASE(.TRUE.)
+      ZZP => ZZS
+   CASE(.FALSE.)
+      ZZP => ZZ
 END SELECT
    
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
@@ -239,7 +239,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                H_RHO_D_DZDY(I,J,K) = H_S*RHO_D_DZDY(I,J,K,N)
 
                ! H_RHO_D_DZDZ
-               TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))               
+               TMP_G = 0.5_EB*(TMP(I,J,K+1)+TMP(I,J,K))
                CALL GET_SENSIBLE_ENTHALPY_Z(N,TMP_G,H_S)
                H_RHO_D_DZDZ(I,J,K) = H_S*RHO_D_DZDZ(I,J,K,N)
             ENDDO
@@ -262,6 +262,8 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          ENDDO
       ENDDO
       !$OMP END PARALLEL DO
+
+!       print *, sum(dp(1:ibar,1:jbar,1:kbar))
          
       ! Compute div rho*D grad Z_n
 

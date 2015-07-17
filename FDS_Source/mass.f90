@@ -208,9 +208,14 @@ IF (SOLID_PHASE_ONLY) RETURN
 ! If the RHS of the continuity equation does not yet satisfy the divergence constraint, return.
 ! This is typical of the case where an initial velocity field is specified by the user.
 
-IF (PROJECTION .AND. ICYC<=1) RETURN
-IF (PERIODIC_TEST==5) RETURN
-IF (PERIODIC_TEST==8) RETURN
+SELECT CASE (PERIODIC_TEST)
+   CASE DEFAULT
+      IF (PROJECTION .AND. ICYC<=1) RETURN
+   CASE (5,8)
+      RETURN
+   CASE (7,11)
+      ! CONTINUE
+END SELECT
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
