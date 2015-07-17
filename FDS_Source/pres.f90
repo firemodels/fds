@@ -306,10 +306,24 @@ SELECT CASE(IPS)
                   TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
                   TRM4 = -DDDT(I,J,K)
                   PRHS(I,J,K) = TRM1 + TRM2 + TRM3 + TRM4
+
+                  WORK1(I,J,K) = TRM1
+                  WORK2(I,J,K) = TRM2
+                  WORK3(I,J,K) = TRM3
+                  WORK4(I,J,K) = TRM4
                ENDDO
             ENDDO
          ENDDO
          !$OMP END PARALLEL DO
+
+!          print *, PREDICTOR
+!          print *,sum(prhs(1:ibar,1:jbar,1:kbar))
+!          print *,sum(work1(1:ibar,1:jbar,1:kbar))
+!          print *,sum(work2(1:ibar,1:jbar,1:kbar))
+!          print *,sum(work3(1:ibar,1:jbar,1:kbar))
+!          print *,sum(work4(1:ibar,1:jbar,1:kbar))
+!          print *
+
       ENDIF
  
    CASE(2)  ! Switch x and y
