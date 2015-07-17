@@ -131,7 +131,7 @@ SVEXTERN int SVDECL(h_space,2), SVDECL(v_space,2);
 SVEXTERN portdata VP_fullscreen, VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
 SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
-SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
+SVEXTERN labeldata LABEL_local, SVDECL(*LABEL_global_ptr,NULL), LABEL_default;
 
 SVEXTERN int SVDECL(renderdoublenow,0);
 SVEXTERN int SVDECL(nrender_rows,2);
@@ -781,7 +781,7 @@ SVEXTERN int SVDECL(scaled_font3d_thickness,1);
 SVEXTERN int SVDECL(scaled_font2d_thickness,1);
 SVEXTERN float SVDECL(vectorlinewidth,1.0);
 SVEXTERN int SVDECL(cell_center_text,0);
-SVEXTERN float SVDECL(gridlinewidth,2.0);
+SVEXTERN float SVDECL(gridlinewidth,2.0),SVDECL(ticklinewidth,2.0);
 SVEXTERN int SVDECL(zone_highlight,0),SVDECL(zone_highlight_room,0);
 SVEXTERN int SVDECL(script_step,0), SVDECL(script_step_now,0);
 SVEXTERN int SVDECL(script_keystate,0);

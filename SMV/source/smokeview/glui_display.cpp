@@ -49,7 +49,8 @@ GLUI_Spinner *SPINNER_tick_zmin=NULL;
 GLUI_Spinner *SPINNER_tick_xmax=NULL;
 GLUI_Spinner *SPINNER_tick_ymax=NULL;
 GLUI_Spinner *SPINNER_tick_zmax=NULL;
-GLUI_Spinner *SPINNER_gridlinewidth=NULL;
+GLUI_Spinner *SPINNER_gridlinewidth = NULL;
+GLUI_Spinner *SPINNER_ticklinewidth = NULL;
 GLUI_Spinner *SPINNER_linewidth=NULL;
 GLUI_Spinner *SPINNER_tick_x0=NULL;
 GLUI_Spinner *SPINNER_tick_y0=NULL;
@@ -364,6 +365,8 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_linewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
   SPINNER_gridlinewidth=glui_labels->add_spinner_to_panel(PANEL_gen3,"grid line width",GLUI_SPINNER_FLOAT,&gridlinewidth);
   SPINNER_gridlinewidth->set_float_limits(1.0,10.0,GLUI_LIMIT_CLAMP);
+  SPINNER_ticklinewidth = glui_labels->add_spinner_to_panel(PANEL_gen3, "tick line width", GLUI_SPINNER_FLOAT, &ticklinewidth);
+  SPINNER_ticklinewidth->set_float_limits(1.0, 10.0, GLUI_LIMIT_CLAMP);
 
   glui_labels->add_column_to_panel(PANEL_gen3,false);
 
@@ -540,7 +543,7 @@ extern "C" void glui_labels_setup(int main_window){
   // -------------- User labels -------------------
 
   gl=&LABEL_local;
-  ROLLOUT_user_labels = glui_labels->add_rollout("Labels",false,LABELS_ROLLOUT,Display_Rollout_CB);
+  ROLLOUT_user_labels = glui_labels->add_rollout("Labels + Ticks",false,LABELS_ROLLOUT,Display_Rollout_CB);
   ADDPROCINFO(displayprocinfo, ndisplayprocinfo, ROLLOUT_user_labels, LABELS_ROLLOUT);
 
   PANEL_LB_panel1 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"",GLUI_PANEL_NONE);
@@ -626,8 +629,6 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_LB_tick_zdir = glui_labels->add_spinner_to_panel(PANEL_LB_tick, "dz", GLUI_SPINNER_FLOAT, gl->tick_direction+2, LB_TICK_XYZ, Text_Labels_CB);
 
   Text_Labels_CB(LB_LIST);
-  Text_Labels_CB(LB_TICK_XYZ);
-  Text_Labels_CB(LB_XYZ);
 
   // -------------- 
 
@@ -789,18 +790,14 @@ void Text_Labels_CB(int var){
       memcpy(LABEL_global_ptr->rgb,gl->rgb,3*sizeof(int));
       break;
     case LB_XYZ:
-      memcpy(LABEL_global_ptr->xyz,gl->xyz,3*sizeof(float));
+      memcpy(LABEL_global_ptr->xyz, gl->xyz, 3 * sizeof(float));
       break;
     case LB_TICK_XYZ:
-      if(LABEL_global_ptr!=NULL){
-        memcpy(LABEL_global_ptr->tick_begin, gl->tick_begin, 3*sizeof(float));
-        memcpy(LABEL_global_ptr->tick_direction, gl->tick_direction, 3*sizeof(float));
-      }
+      memcpy(LABEL_global_ptr->tick_begin, gl->tick_begin, 3*sizeof(float));
+      memcpy(LABEL_global_ptr->tick_direction, gl->tick_direction, 3*sizeof(float));
       break;
     case LB_SHOW_TICK:
-      if(LABEL_global_ptr!=NULL){
-        memcpy(&LABEL_global_ptr->show_tick, &gl->show_tick, sizeof(int));
-      }
+      memcpy(&LABEL_global_ptr->show_tick, &gl->show_tick, sizeof(int));
       break;
     default:
       ASSERT(FFALSE);
