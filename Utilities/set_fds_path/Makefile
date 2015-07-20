@@ -5,6 +5,9 @@ FILTERF =
 
 VPATH = $(SOURCE_DIR)/set_path:$(SOURCE_DIR)/shared
 bin = .
+GIT_HASH := $(shell git describe --long --dirty)
+GIT_DATE := $(shell git log -1 --format=%cd)
+GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
@@ -29,7 +32,7 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -D WIN32 -O2 /nologo 
+intel_win_32 : CFLAGS    = -D WIN32 -O2 /nologo $(GITINFO)
 intel_win_32 : CC        = icl
 intel_win_32 : CPP       = icl
 intel_win_32 : FC        = ifort
@@ -41,7 +44,7 @@ intel_win_32 : $(objwin)
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -D WIN32 -O2 /nologo 
+intel_win_64 : CFLAGS    = -D WIN32 -O2 /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
