@@ -33,6 +33,13 @@ wind2fds_*
 *.pdfsync
 *.toc
 
+# FDS output files
+*.sf
+*.bf
+*.s3d
+*.q
+*.sz
+
 # smokeview files, directories
 SMV/win32_local/
 *.a
