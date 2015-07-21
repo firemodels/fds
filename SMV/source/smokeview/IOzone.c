@@ -785,8 +785,9 @@ void fill_zonedata(int izone_index){
   int *zoneslab_n0;
   float *zoneslab_T0, *zoneslab_F0, *zoneslab_YB0, *zoneslab_YT0;
 
+  float gamma = 1.4;
   float CP=1004.0;
-  float R=0.4*CP/1.4;
+  float R=(gamma-1.0)*CP/gamma;
 
   if(ReadZoneFile==0)return;
   pr0 = zonepr + izone_index*nrooms;
