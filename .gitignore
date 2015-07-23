@@ -49,6 +49,9 @@ Manuals/*/*Guide.pdf
 *_devc.csv
 *_hrr.csv
 *_git.txt
+*.fed_smv
+*slice.info
+*svn.txt
 
 # smokeview files, directories
 SMV/win32_local/
