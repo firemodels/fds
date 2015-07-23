@@ -232,6 +232,25 @@ void drawLabels(void){
     }
     if(drawlabel==1){
       output3Text(labelcolor,xyz[0],xyz[1],xyz[2],thislabel->name);
+      if(thislabel->show_tick==1){
+        float *xyztick, *xyztickdir;
+        float xb[3], xe[3];
+        int i;
+
+        xyztick = thislabel->tick_begin;
+        xyztickdir = thislabel->tick_direction;
+        for(i = 0; i<3; i++){
+          xb[i] = xyz[i]+xyztick[i];
+          xe[i] = xb[i]+xyztickdir[i];
+        }
+        antialias(ON);
+        glLineWidth(ticklinewidth);
+        glBegin(GL_LINES);
+        glVertex3fv(xb);
+        glVertex3fv(xe);
+        glEnd();
+        antialias(OFF);
+      }
     }
   }
   glPopMatrix();

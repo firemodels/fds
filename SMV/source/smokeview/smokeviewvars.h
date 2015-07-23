@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(zone_rho, 1);
 SVEXTERN int SVDECL(visventslab, 0), SVDECL(visventprofile,1);
 SVEXTERN int SVDECL(update_readiso_geom_wrapup, UPDATE_ISO_OFF);
 SVEXTERN int SVDECL(nmemory_ids, 0);
@@ -131,7 +132,7 @@ SVEXTERN int SVDECL(h_space,2), SVDECL(v_space,2);
 SVEXTERN portdata VP_fullscreen, VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
 SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
-SVEXTERN labeldata LABEL_local, *LABEL_global_ptr, LABEL_default;
+SVEXTERN labeldata LABEL_local, SVDECL(*LABEL_global_ptr,NULL), LABEL_default;
 
 SVEXTERN int SVDECL(renderdoublenow,0);
 SVEXTERN int SVDECL(nrender_rows,2);
@@ -401,6 +402,7 @@ SVEXTERN float zonelevels256[256];
 SVEXTERN float boundarylevels256[256];
 SVEXTERN float partlevels256[256];
 SVEXTERN float SVDECL(*zone_times,NULL), SVDECL(*zoneylay,NULL), SVDECL(*zonetl,NULL), SVDECL(*zonetu,NULL), SVDECL(*zonepr,NULL);
+SVEXTERN float SVDECL(*zonerhol, NULL), SVDECL(*zonerhou, NULL);
 SVEXTERN float SVDECL(*zoneqfire,NULL), SVDECL(*zonefheight,NULL), SVDECL(*zonefbase,NULL), SVDECL(*zonefdiam,NULL);
 SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,NULL), SVDECL(*zonevvents,NULL);
 SVEXTERN float SVDECL(maxslabflow, 0.0);
@@ -781,7 +783,7 @@ SVEXTERN int SVDECL(scaled_font3d_thickness,1);
 SVEXTERN int SVDECL(scaled_font2d_thickness,1);
 SVEXTERN float SVDECL(vectorlinewidth,1.0);
 SVEXTERN int SVDECL(cell_center_text,0);
-SVEXTERN float SVDECL(gridlinewidth,2.0);
+SVEXTERN float SVDECL(gridlinewidth,2.0),SVDECL(ticklinewidth,2.0);
 SVEXTERN int SVDECL(zone_highlight,0),SVDECL(zone_highlight_room,0);
 SVEXTERN int SVDECL(script_step,0), SVDECL(script_step_now,0);
 SVEXTERN int SVDECL(script_keystate,0);

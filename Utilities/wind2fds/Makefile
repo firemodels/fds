@@ -8,6 +8,10 @@ FILTERF =
 
 VPATH = $(SOURCE_DIR)/wind2fds $(SOURCE_DIR)/shared 
 bin = .
+GIT_HASH := $(shell git describe --long --dirty)
+GIT_DATE := $(shell git log -1 --format=%cd)
+GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
+
 
 # Definition of the object variables
 
@@ -44,7 +48,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D X64 -D pp_WIN_INTEL
+intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D X64 -D pp_WIN_INTEL $(GITHASH)
 intel_win_64 : FFLAGS    = -Od /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -57,7 +61,7 @@ intel_win_64 : $(objwin)
 # ------------- gcc Linux 64 ----------------
 #  64 bit gcc linux
 
-gcc_linux_64 : CFLAGS    = -O0 -m64 
+gcc_linux_64 : CFLAGS    = -O0 -m64 $(GITHASH)
 gcc_linux_64 : CC        = gcc
 gcc_linux_64 : CPP       = g++
 gcc_linux_64 : exe       = wind2fds_linux_64
@@ -68,7 +72,7 @@ gcc_linux_64 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64 $(GITHASH)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : exe       = wind2fds_linux_64
@@ -79,7 +83,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64 $(GITHASH)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : exe       = wind2fds_osx_64

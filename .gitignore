@@ -12,8 +12,13 @@
 *.lib
 *.i90
 
-# fds executables
+# executables
 fds_intel_*
+background
+fds2ascii_*
+smokediff_*
+smokezip_*
+wind2fds_*
 
 # latex output files
 *.aux
@@ -27,6 +32,13 @@ fds_intel_*
 *.out
 *.pdfsync
 *.toc
+
+# FDS output files
+*.sf
+*.bf
+*.s3d
+*.q
+*.sz
 
 # smokeview files, directories
 SMV/win32_local/
