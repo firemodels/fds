@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(zone_rho, 1);
 SVEXTERN int SVDECL(visventslab, 0), SVDECL(visventprofile,1);
 SVEXTERN int SVDECL(update_readiso_geom_wrapup, UPDATE_ISO_OFF);
 SVEXTERN int SVDECL(nmemory_ids, 0);
@@ -401,6 +402,7 @@ SVEXTERN float zonelevels256[256];
 SVEXTERN float boundarylevels256[256];
 SVEXTERN float partlevels256[256];
 SVEXTERN float SVDECL(*zone_times,NULL), SVDECL(*zoneylay,NULL), SVDECL(*zonetl,NULL), SVDECL(*zonetu,NULL), SVDECL(*zonepr,NULL);
+SVEXTERN float SVDECL(*zonerhol, NULL), SVDECL(*zonerhou, NULL);
 SVEXTERN float SVDECL(*zoneqfire,NULL), SVDECL(*zonefheight,NULL), SVDECL(*zonefbase,NULL), SVDECL(*zonefdiam,NULL);
 SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,NULL), SVDECL(*zonevvents,NULL);
 SVEXTERN float SVDECL(maxslabflow, 0.0);
