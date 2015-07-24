@@ -1,11 +1,10 @@
-% $Date$
-% $Revision$
-% $Author$
-
 \documentclass[11pt,twoside]{book}
 
 %% include commands for bios, titles etc used in multiple documents
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 
 %\doublespace
 \begin{document}
@@ -72,7 +71,7 @@ Volume II: Technical Reference Guide\\
 \begin{flushright}
 September 2014 \\
 Smokeview Version \smvversion \\
-\emph{SVN Repository}~$Revision$
+\emph{GIT Revision:}~\gitrevision
 \end{flushright}
 
 \vfill
@@ -345,7 +344,7 @@ very useful services.
 
 The Smokeview manuals are typeset using \LaTeX, specifically, PDF
 \LaTeX. The \LaTeX\ files are essentially text files that are
-under SVN (Subversion) control. The figures are either in the form
+under GIT version control. The figures are either in the form
 of PDF or jpeg files, depending on whether they are vector or
 raster format. There are a variety of \LaTeX\ packages available,
 including MiKTeX, a Windows version. The FDS-Smokeview developers
