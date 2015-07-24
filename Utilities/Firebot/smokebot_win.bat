@@ -1,8 +1,8 @@
 @echo   off
 
-set altemail=%1
+set cfastrepoin=%1
 set fdsrepoin=%2
-set cfastrepoin=%3
+set altmail=%3
 
 set fdsrepo=FDS-SMVgitclean
 if NOT "%fdsrepoin%" == "" (
