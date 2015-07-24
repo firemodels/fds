@@ -1,11 +1,10 @@
-% $Date$
-% $Revision$
-% $Author$
-
 \documentclass[11pt,twoside]{book}
 
 %% include commands for bios, titles etc used in multiple documents
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 
 %\doublespace
 \begin{document}
@@ -88,7 +87,7 @@ Volume III: Verification Guide\\
 %\today\\
 September 2014\\
 Smokeview Version \smvversion \\
-\emph{SVN Repository}~$Revision$
+\emph{GIT Revision:}~\gitrevision
 \end{flushright}
 %
 \vfill
@@ -291,8 +290,8 @@ and perform properly.
 The FDS input files used for the verification cases are documented in
 Appendix \ref{fdsinputfiles}.  The Smokeview scripts used to generate
 the verification figures are documented in Appendix \ref{smvscripts}.
-Note that these input files and scripts are located in the FDS Subversion
-(SVN) repository.  In fact, the entries in the appendices are included
+Note that these input files and scripts are located in the FDS GIT repository.  
+In fact, the entries in the appendices are included
 directly from the repository, and will therefore be up to date as this
 document is regenerated.
 

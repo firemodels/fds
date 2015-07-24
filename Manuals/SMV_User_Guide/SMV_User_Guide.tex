@@ -3,6 +3,9 @@
 %% include commands for bios, titles etc used in multiple documents
 %%
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 \usepackage{picins}
 
 %% commands only used by this guide
@@ -51,8 +54,6 @@
 \newcommand{\hitem}[1]{\item[{\bf #1} \hfill]}
 \newcommand{\hitemNULL}[1]{}
 \newcommand{\hhitem}[2]{\item[{\bf #1}\ ({\em #2}) \hfill]}
-
-
 
 %\doublespace
 \begin{document}
@@ -120,7 +121,7 @@ Volume I: User's Guide\\
 \begin{flushright}
 April 2015 \\
 Smokeview Version \smvversion \\
-\emph{SVN Repository}~$Revision$
+\emph{GIT Revision:}~\gitrevision
 \end{flushright}
 %
 \vfill
@@ -3160,8 +3161,7 @@ left and right slice file images.
     {\tt Verification/Visualization}\ directory in
 the FDS$-$SMV repository.  Copy this file to a separate directory
  if a local copy of the repository already exists
- ( so that svn updates will not overwrite the script
- file generated in this example).  Of course, these steps may be repeated
+ Of course, these steps may be repeated
  for any test case that have data files defined.
 \item Run the case with FDS \item Open the case in Smokeview \item
 Open the Scripts/Config panel of the {\em File/Bounds}\ dialog
@@ -6680,7 +6680,7 @@ determine whether data should be converted between these two
 systems before it is visualized. The valid {\tt ENDIAN}\ parameters
 are {\tt BIG}\ or {\tt LITTLE}.
 
-\hitem{REVISION}The {\tt REVISION}\ keyword defines the SVN revision or
+\hitem{REVISION}The {\tt REVISION}\ keyword defines the GIT revision or
 build number for the version of FDS that ran the case currently being visualized.
 The FDS build number is displayed in the Help menu along with the Smokeview build number.
 
