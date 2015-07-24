@@ -1630,47 +1630,46 @@ ELSE
   ENDDO
    IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", MED_TAST(1)/2
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", 20.0
      DO I=2,((V-1)/I_AVERAGE)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
-     IF (N_AVERAGE.NE.0) THEN
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
-     ENDIF
+!     IF (N_AVERAGE.NE.0) THEN
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+!     ENDIF
    ENDIF
    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", 1, ",1),", MED_TAST(1)/2
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", 1, ",1),", 0.0
      DO I=2,((V-1)/I_AVERAGE)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
-     IF (N_AVERAGE.NE.0) THEN
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
-     ENDIF
+!     IF (N_AVERAGE.NE.0) THEN
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+!     ENDIF
    ENDIF
    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",0),", V_TIME(1)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", (MED_TAST(1)/2)*1000
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", 1, ",1),", 0.0
      DO I=2,((V-1)/I_AVERAGE)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",0),", V_TIME((I-1)*I_AVERAGE+1)
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", ((MED_TAST(I-1)+MED_TAST(I))/2)*1000
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
-     IF (N_AVERAGE.NE.0) THEN
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000
-        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
-     ENDIF
-   ENDIF
-  DEALLOCATE (MED_TAST)   
+!     IF (N_AVERAGE.NE.0) THEN
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
+!     ENDIF
+   ENDIF 
 ENDIF 
 !**********************
 !*** Set an average value for a steady simulation (last N_AVERAGE results)
@@ -1705,6 +1704,35 @@ ELSE IF (T_AVERAGE==0) THEN
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",0),", 18000.0
       WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", V+1, ",1),", MED*1000
     ENDIF
+ELSE IF (T_AVERAGE.NE.0) THEN
+    MED=0.0
+    DO I=0,N_AVERAGE-1
+      MED=MED+MED_TAST(((V-1)/I_AVERAGE)-I)
+    ENDDO
+    MED=MED/(N_AVERAGE)
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='NO') V_TIME(V)+TINT
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED          
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='NO') 18000.0
+    !WRITE (100+VAR,'(E12.5)', ADVANCE='YES') MED     
+
+    IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN    
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", V_TIME(V)+T_AVERAGE
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",1),", MED
+    ENDIF
+    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", V_TIME(V)+T_AVERAGE
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",1),", MED
+    ENDIF
+    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN    
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", V_TIME(V)+T_AVERAGE
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED*1000
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",0),", 18000.0
+      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2+1, ",1),", MED*1000
+    ENDIF    
 ENDIF    
 !**********************
     IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
@@ -1716,6 +1744,7 @@ ENDIF
     DEALLOCATE (V_TIME)
     DEALLOCATE (TAST)
     DEALLOCATE (M_AST)
+    IF (T_AVERAGE.NE.0) DEALLOCATE (MED_TAST)  
     !CLOSE (100+VAR)
 100 CONTINUE
     ENDDO VARIABLE_NUMBER
