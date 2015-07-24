@@ -9,12 +9,13 @@ clean_build=1
 KWDIR=../../Utilities/keyword
 SDIR=.
 
-source $KWDIR/expand_file.sh $KWDIR $SDIR $SDIR/SMV_User_Guide.tex
+gitrevision=`git describe --long --dirty`
+echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
+
 pdflatex -interaction nonstopmode SMV_User_Guide &> SMV_User_Guide.err
 bibtex SMV_User_Guide &> SMV_User_Guide.err
 pdflatex -interaction nonstopmode SMV_User_Guide &> SMV_User_Guide.err
 pdflatex -interaction nonstopmode SMV_User_Guide &> SMV_User_Guide.err
-source $KWDIR/contract_file.sh $KWDIR $SDIR/SMV_User_Guide.tex
 
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I SMV_User_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
@@ -44,3 +45,4 @@ if [[ $clean_build == 0 ]]
    else
       echo "SMV User Guide built successfully!"
 fi    
+rm -f ../Bibliography/gitrevision.tex
