@@ -856,7 +856,7 @@ IF (N_FACE>0) CALL IBM_VELOCITY_FLUX(NM)
 
 ! Source term in manufactured solution
 
-IF (PERIODIC_TEST==7) CALL MMS_VELOCITY_FLUX(NM,T)
+IF (PERIODIC_TEST==7 .AND. .FALSE.) CALL MMS_VELOCITY_FLUX(NM,T)
 
 CONTAINS
 
@@ -1540,7 +1540,6 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    WS = W
 ELSE FREEZE_VELOCITY_IF
 
-
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -1565,7 +1564,6 @@ DO K=0,KBAR
    ENDDO
 ENDDO
 
-
 ENDIF FREEZE_VELOCITY_IF
 
 ! Manufactured solution (debug)
@@ -1574,18 +1572,18 @@ IF (PERIODIC_TEST==7 .and. .FALSE.) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=0,IBAR
-            XHAT =  X(I) - UF_MMS*(T+DT)
-            ZHAT = ZC(K) - WF_MMS*(T+DT)
-            US(I,J,K) = VD2D_MMS_U(XHAT,ZHAT,T+DT)
+            XHAT =  X(I) - UF_MMS*(T)
+            ZHAT = ZC(K) - WF_MMS*(T)
+            US(I,J,K) = VD2D_MMS_U(XHAT,ZHAT,T)
          ENDDO
       ENDDO
    ENDDO
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            XHAT = XC(I) - UF_MMS*(T+DT)
-            ZHAT =  Z(K) - WF_MMS*(T+DT)
-            WS(I,J,K) = VD2D_MMS_V(XHAT,ZHAT,T+DT)
+            XHAT = XC(I) - UF_MMS*(T)
+            ZHAT =  Z(K) - WF_MMS*(T)
+            WS(I,J,K) = VD2D_MMS_V(XHAT,ZHAT,T)
          ENDDO
       ENDDO
    ENDDO
@@ -1633,7 +1631,6 @@ FREEZE_VELOCITY_IF: IF (FREEZE_VELOCITY) THEN
    W = WS
 ELSE FREEZE_VELOCITY_IF
 
-
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
@@ -1657,7 +1654,6 @@ DO K=0,KBAR
       ENDDO
    ENDDO
 ENDDO
-
 
 ENDIF FREEZE_VELOCITY_IF
 
@@ -2946,7 +2942,7 @@ ENDIF
 !$OMP DO SCHEDULE(static)
 DO K=0,KBP1
    DO J=0,JBP1
-      DO I=0,IBP1         
+      DO I=0,IBP1
          RHMK(I,J,K) = RHOP(I,J,K)*(HP(I,J,K)-KRES(I,J,K))
          RRHO(I,J,K) = 1._EB/RHOP(I,J,K)
       ENDDO

@@ -36,12 +36,30 @@ vd2d_mms_H = @(x,y,t) ...
     vd2d_mms_p(x,y,t)/vd2d_mms_rho(x,y,t) + 0.5*(vd2d_mms_u(x,y,t)^2+vd2d_mms_v(x,y,t)^2);
 
 L = 2;
-nx = [32,64,128,256,512];
+nx = [32,64,128];%,256];%,512];
 dx = L./nx;
+
+% % visualize p field in time
+% n=1;
+% x=linspace(-L/2,L/2,nx(n)+1);
+% xc = x(1:nx(n)) + .5*dx(n);
+% yc = xc;
+% for t=linspace(0,1,100)
+%     for j=1:nx(n)
+%         for i=1:nx(n)
+%             %pres(i,j) = vd2d_mms_p(xc(i),yc(j),t);
+%             hfld(i,j) = vd2d_mms_H(xc(i),yc(j),t);
+%         end
+%     end
+%     surf(xc,yc,hfld)
+%     axis([-1 1 -1 1 0 1])
+%     pause(0.001)
+% end
+% return
 
 datadir = '../../Verification/Scalar_Analytical_Solution/';
 %datadir = '/Volumes/firebot/FDS-SMVgitclean/Verification/Scalar_Analytical_Solution/';
-filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv'};
+filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv'};%,'shunn3_256_mms.csv'};%,'shunn3_512_mms.csv'};
 
 skip_case = 0;
 
@@ -90,22 +108,22 @@ for n=1:length(filename)
     for j=1:nx(n)
         for i=1:nx(n)
             p = p+1;
-            
+
             rho = M.data(p,1);
             rho_mms = vd2d_mms_rho(xc(i),yc(j),T);
             rho_error(i,j) = rho - rho_mms;
             e_r_vec(p) = rho_error(i,j);
-            
+
             z = M.data(p,2);
             z_mms = vd2d_mms_z(xc(i),yc(j),T);
             z_error(i,j) = z - z_mms;
             e_z_vec(p) = z_error(i,j);
-            
+
             u = M.data(p,3);
             u_mms = vd2d_mms_u(x(i+1),yc(j),T);
             u_error(i,j) = u - u_mms;
             e_u_vec(p) = u_error(i,j);
-            
+
             H = M.data(p,5);
             H_mms = vd2d_mms_H(xc(i),yc(j),T);
             H_error(i,j) = H - H_mms;
@@ -144,7 +162,7 @@ hh(3)=loglog(dx,e_u,'k>-');
 hh(4)=loglog(dx,e_H,'k+-');
 hh(5)=loglog(dx,dx,'k--');
 hh(6)=loglog(dx,dx.^2,'k-');
-%axis([10^-3 10^-1 10^-7 10^-1])
+axis([10^-3 10^-1 10^-7 10^-1])
 
 xlabel('{\it \Delta x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('L2 Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
@@ -175,5 +193,3 @@ end
 if e_H(length(e_H)) > 8.43e-04
    display(['Matlab Warning: Pressure in shunn3 is out of tolerance. e_H = ',num2str(e_H(length(e_H)))])
 end
-
-
