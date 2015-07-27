@@ -126,6 +126,9 @@ TYPE MESH_TYPE
    REAL(EB) :: VEG_CLOCK_BC !surf veg
 !rm <-
 
+   ! OPENMP number of threads
+   INTEGER :: OPENMP_NUM_THREADS
+
    ! Embedded Mesh
 
    REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: SCALAR_SAVE1,SCALAR_SAVE2,SCALAR_SAVE3

@@ -1,4 +1,4 @@
-PROGRAM FDS  
+PROGRAM FDS
 
 ! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
@@ -86,11 +86,11 @@ IF (PNAME/='null') USE_MPI = .TRUE.
  
 ! Initialize OpenMP
 
-CALL OPENMP_CHECK
+CALL OPENMP_INIT
 
 ! Check that MPI processes and OpenMP threads are working properly
 
-CALL CHECK_MPI_OPENMP
+CALL CHECK_MPI
 
 ! Start wall clock timing
 
@@ -108,6 +108,12 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 CALL READ_DATA
 
 CALL STOP_CHECK(1)
+
+! Setup number of OPENMP threads
+CALL OPENMP_SET_THREADS
+
+! Print OPENMP thread status
+CALL OPENMP_PRINT_STATUS
 
 ! Set up send and receive buffer counts and displacements
 
@@ -1045,9 +1051,7 @@ CALL END_FDS
 CONTAINS
 
 
-SUBROUTINE CHECK_MPI_OPENMP
-
-INTEGER :: THREAD_ID
+SUBROUTINE CHECK_MPI
 
 IF (.NOT.USE_OPENMP .AND. .NOT.USE_MPI) RETURN
 
@@ -1058,29 +1062,7 @@ IF (USE_MPI .AND. PROVIDED<REQUIRED) THEN
    !$ CALL OMP_SET_NUM_THREADS(1)
 ENDIF
 
-! The multi-threaded section where all threads will say hello
-
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(THREAD_ID)
-
-THREAD_ID = 0
-!$ THREAD_ID = OMP_GET_THREAD_NUM()  
-
-!$OMP CRITICAL
-IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID," of ",OPENMP_AVAILABLE_THREADS-1,&
-   " assigned to MPI process ",MYID," of ",N_MPI_PROCESSES-1," is running on ",PNAME(1:PNAMELEN)
-IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",MYID," of ",N_MPI_PROCESSES-1,&
-                                                    " is running on ",PNAME(1:PNAMELEN)
-IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,93) " OpenMP thread ",THREAD_ID," of ",OPENMP_AVAILABLE_THREADS-1,&
-      " is running"
-!$OMP END CRITICAL
-
-!$OMP END PARALLEL
-
-91 FORMAT(A,I3,A,I3,A,I3,A,I3,A,A)
-92 FORMAT(A,I3,A,I3,A,A)
-93 FORMAT(A,I3,A,I3,A)
-
-END SUBROUTINE CHECK_MPI_OPENMP
+END SUBROUTINE CHECK_MPI
 
 
 SUBROUTINE MPI_INITIALIZATION_CHORES(TASK_NUMBER)
