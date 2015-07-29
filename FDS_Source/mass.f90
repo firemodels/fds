@@ -107,10 +107,10 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP_2
 
-      II  = WC%ONE_D%II 
+      II  = WC%ONE_D%II
       JJ  = WC%ONE_D%JJ
       KK  = WC%ONE_D%KK
-      IIG = WC%ONE_D%IIG 
+      IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
@@ -172,7 +172,7 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
                   FZ(II,JJ,KK-2,N) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
                ENDIF
          END SELECT OFF_WALL_SELECT_2
-         
+
       ENDIF OFF_WALL_IF_2
 
    ENDDO WALL_LOOP_2
@@ -208,9 +208,14 @@ IF (SOLID_PHASE_ONLY) RETURN
 ! If the RHS of the continuity equation does not yet satisfy the divergence constraint, return.
 ! This is typical of the case where an initial velocity field is specified by the user.
 
-IF (PROJECTION .AND. ICYC<=1) RETURN
-IF (PERIODIC_TEST==5) RETURN
-IF (PERIODIC_TEST==8) RETURN
+SELECT CASE (PERIODIC_TEST)
+   CASE DEFAULT
+      IF (PROJECTION .AND. ICYC<=1) RETURN
+   CASE (5,8)
+      RETURN
+   CASE (7,11)
+      ! CONTINUE
+END SELECT
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
@@ -240,7 +245,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP
 
-      IIG = WC%ONE_D%IIG 
+      IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
@@ -288,8 +293,8 @@ CASE(.TRUE.) PREDICTOR_STEP
          DO J=1,JBAR
             DO I=1,IBAR
                ! divergence from EOS
-               XHAT = XC(I) - UF_MMS*(T)
-               ZHAT = ZC(K) - WF_MMS*(T)
+               XHAT = XC(I) - UF_MMS*T
+               ZHAT = ZC(K) - WF_MMS*T
                Q_Z = VD2D_MMS_Z_SRC(XHAT,ZHAT,T)
                ZZS(I,J,K,1) = ZZS(I,J,K,1) - DT*Q_Z
                ZZS(I,J,K,2) = ZZS(I,J,K,2) + DT*Q_Z
@@ -340,7 +345,7 @@ CASE(.TRUE.) PREDICTOR_STEP
       DO J=1,JBAR
          DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)            
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
             CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
          ENDDO
       ENDDO
@@ -351,7 +356,7 @@ CASE(.TRUE.) PREDICTOR_STEP
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE               
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
          ENDDO
       ENDDO
@@ -373,11 +378,11 @@ CASE(.FALSE.) PREDICTOR_STEP
       WC=>WALL(IW)
       IF (WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE WALL_LOOP_2
 
-      IIG = WC%ONE_D%IIG 
+      IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
-      
+
       UN = UVW_SAVE(IW)
       SELECT CASE(IOR)
          CASE( 1)
@@ -396,9 +401,9 @@ CASE(.FALSE.) PREDICTOR_STEP
    ENDDO WALL_LOOP_2
 
    IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_SETTLING) CALL SETTLING_VELOCITY(NM)
-   
-   ! Compute species mass density at the next time step   
-   
+
+   ! Compute species mass density at the next time step
+
    DO N=1,N_TOTAL_SCALARS
       DO K=1,KBAR
          DO J=1,JBAR
