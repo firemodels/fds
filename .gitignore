@@ -34,6 +34,7 @@ wind2fds_*
 *.out
 *.pdfsync
 *.toc
+*.gz
 Manuals/*/*Guide.pdf
 
 # FDS output files
@@ -48,6 +49,8 @@ Manuals/*/*Guide.pdf
 *.iso
 *_devc.csv
 *_hrr.csv
+*_mass.csv
+*_mms.csv
 *_git.txt
 *.fed_smv
 *slice.info
@@ -58,4 +61,7 @@ SMV/win32_local/
 *.a
 smokeview*64*
 SMV/for_bundle/uploads
+
+# manuals script-generated files
+Manuals/*/SCRIPT_FIGURES/*.pdf
 

@@ -29,17 +29,17 @@ vd2d_mms_u = @(x,y,t) ...
 vd2d_mms_v = @(x,y,t) ...
     vf + (r1-r0)/vd2d_mms_rho(x,y,t)*(-w/(4.*k))*sin(pi*k*(x-uf*t))*cos(pi*k*(y-vf*t))*sin(pi*w*t);
 
-vd2d_mms_p = @(x,y,t) ...
-    .5*vd2d_mms_rho(x,y,t)*vd2d_mms_u(x,y,t)*vd2d_mms_v(x,y,t);
-
 vd2d_mms_H = @(x,y,t) ...
-    vd2d_mms_p(x,y,t)/vd2d_mms_rho(x,y,t) + 0.5*(vd2d_mms_u(x,y,t)^2+vd2d_mms_v(x,y,t)^2);
+    0.5*(vd2d_mms_u(x,y,t)-uf)*(vd2d_mms_v(x,y,t)-vf);
+
+vd2d_mms_p = @(x,y,t) ...
+    vd2d_mms_rho(x,y,t)*(vd2d_mms_H(x,y,t) - 0.5*(vd2d_mms_u(x,y,t)^2 + vd2d_mms_v(x,y,t)^2));
 
 L = 2;
-nx = [32,64,128];%,256];%,512];
+nx = [32,64,128,256,512];
 dx = L./nx;
 
-% % visualize p field in time
+% % visualize field in time
 % n=1;
 % x=linspace(-L/2,L/2,nx(n)+1);
 % xc = x(1:nx(n)) + .5*dx(n);
@@ -58,8 +58,8 @@ dx = L./nx;
 % return
 
 datadir = '../../Verification/Scalar_Analytical_Solution/';
-%datadir = '/Volumes/firebot/FDS-SMVgitclean/Verification/Scalar_Analytical_Solution/';
-filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv'};%,'shunn3_256_mms.csv'};%,'shunn3_512_mms.csv'};
+%datadir = '/Volumes/firebot/FDS-SMVgitclean/Verification/Scalar_Analytical_Solution/'; % check firebot run
+filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv'};
 
 skip_case = 0;
 
@@ -137,16 +137,6 @@ for n=1:length(filename)
     e_z(n) = norm(e_z_vec(1:N),2)/nx(n);
     e_u(n) = norm(e_u_vec(1:N),2)/nx(n);
     e_H(n) = norm(e_H_vec(1:N),2)/nx(n);
-
-    % e_r(n) = norm(e_r_vec(1:N),1)/N;
-    % e_z(n) = norm(e_z_vec(1:N),1)/N;
-    % e_u(n) = norm(e_u_vec(1:N),1)/N;
-    % e_H(n) = norm(e_H_vec(1:N),1)/N;
-
-    % e_r(n) = norm(e_r_vec,Inf);
-    % e_z(n) = norm(e_z_vec,Inf);
-    % e_u(n) = norm(e_u_vec,Inf);
-    % e_H(n) = norm(e_H_vec,Inf);
 end
 
 plot_style
@@ -162,7 +152,7 @@ hh(3)=loglog(dx,e_u,'k>-');
 hh(4)=loglog(dx,e_H,'k+-');
 hh(5)=loglog(dx,dx,'k--');
 hh(6)=loglog(dx,dx.^2,'k-');
-axis([10^-3 10^-1 10^-7 10^-1])
+axis([5*10^-4 10^-1 10^-6 10^-1])
 
 xlabel('{\it \Delta x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('L2 Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
@@ -181,15 +171,15 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
 
 % check errors
-if e_r(length(e_r)) > 4.96e-06
-   display(['Matlab Warning: Density in shunn3 is out of tolerance. e_r = ',num2str(e_r(length(e_r)))])
+if e_r(end) > 2e-4
+   display(['Matlab Warning: Density in shunn3 is out of tolerance. e_r = ',num2str(e_r(end))])
 end
-if e_z(length(e_z)) > 9.57e-07
-   display(['Matlab Warning: Mixture fraction in shunn3 is out of tolerance. e_z = ',num2str(e_z(length(e_z)))])
+if e_z(end) > 1e-4
+   display(['Matlab Warning: Mixture fraction in shunn3 is out of tolerance. e_z = ',num2str(e_z(end))])
 end
-if e_u(length(e_u)) > 3.34e-06
-   display(['Matlab Warning: Velocity in shunn3 is out of tolerance. e_u = ',num2str(e_u(length(e_u)))])
+if e_u(end) > 3e-5
+   display(['Matlab Warning: Velocity in shunn3 is out of tolerance. e_u = ',num2str(e_u(end))])
 end
-if e_H(length(e_H)) > 8.43e-04
-   display(['Matlab Warning: Pressure in shunn3 is out of tolerance. e_H = ',num2str(e_H(length(e_H)))])
+if e_H(end) > 2e-3
+   display(['Matlab Warning: Pressure in shunn3 is out of tolerance. e_H = ',num2str(e_H(end))])
 end
