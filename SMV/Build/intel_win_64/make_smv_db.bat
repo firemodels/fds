@@ -8,5 +8,5 @@ set KWDIR=..\..\..\Utilities\keyword
 set SDIR=..\..\source
 
 erase *.obj *.mod
-make SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db
+make SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db
 pause
