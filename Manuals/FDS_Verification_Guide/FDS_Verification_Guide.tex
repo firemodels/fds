@@ -859,7 +859,7 @@ this test case confirms that relatively low levels of diffusion are incurred at 
 
 \section{Variable-Density Manufactured Solution (\texorpdfstring\textct{shunn3}{shunn3})}
 
-To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
+To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
 
 \begin{table}[!hbt]
 \centering
@@ -881,7 +881,7 @@ $\rho D = \mu$ & 0.001 & \si{kg/(m.s)}
 \label{eqn_mms_rho} \rho(x,y,t) &= \left( \frac{Z(x,y,t)}{\rho_1} + \frac{1-Z(x,y,t)}{\rho_0} \right)^{-1} \\
 \label{eqn_mms_u} u(x,y,t) &= u_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \cos(\pi k \hat{x}) \sin(\pi k \hat{y}) \sin(\pi \omega t) \\
 \label{eqn_mms_v} v(x,y,t) &= v_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \sin(\pi k \hat{x}) \cos(\pi k \hat{y}) \sin(\pi \omega t) \\
-\label{eqn_mms_p} \tilde{p}(x,y,t) &= \frac{1}{2} \rho(x,y,t) u(x,y,t) v(x,y,t)
+\label{eqn_mms_p} H(x,y,t) &= \frac{1}{2} ( u(x,y,t) - u_f ) ( v(x,y,t) - v_f )
 \end{align}
 
 %Note that (\ref{eqn_mms_rho}) is the equation of state (EOS) and may be rearranged for this simple problem to give $Z$ in terms of $\rho$,
@@ -890,17 +890,17 @@ $\rho D = \mu$ & 0.001 & \si{kg/(m.s)}
 %Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
 %\end{equation}
 
-The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the conservative form of the transport equations:
+The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the transport equations:
 \begin{align}
 \label{eqn_mms_continuity} \frac{\partial \rho}{\partial t} + \Div(\rho \mathbf{u}) &= \dot{Q}_\rho \,\mbox{,}\\
 \frac{\partial (\rho Z)}{\partial t} + \Div(\rho Z \mathbf{u}) - \Div\left(\rho D \nabla Z\right) &= \dot{Q}_Z \,\mbox{,}\\
-\frac{\partial (\rho \mathbf{u})}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) + \nabla \tilde{p} - \Div{\sf T} &= \dot{Q}_{\mathbf{u}} \,\mbox{,}
+\frac{\partial \mathbf{u}}{\partial t} - \mathbf{u} \times (\nabla \times \mathbf{u}) + \nabla H - \tilde{p} \nabla(1/\rho) - \frac{1}{\rho}\Div{\sf T} &= \dot{Q}_{\mathbf{u}} \,\mbox{,}
 \end{align}
 where the components of the deviatoric stress tensor, ${\sf T}$, are given by
 \begin{equation}
 T_{ij} = 2\mu \left( S_{ij} -  \frac{1}{3} S_{kk} \delta_{ij} \right) \quad\mbox{;}\quad S_{ij} \equiv \frac{1}{2}\left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \,\mbox{.}
 \end{equation}
-The source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct FDS-SMV/Utilities/Python/shunn\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.
+The mass source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct /Utilities/Python/shunn3\_stokes\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.  Note that the pressure solution has been modified from Shunn et al. \cite{Shunn:2012} so that the $H$ solution is compatible with periodic boundary conditions.  A new momentum source term is derived $\dot{Q}_{\mathbf{u}}$ that differs from Shunn et al.
 
 \subsubsection*{Manufactured Solution Procedure}
 
@@ -921,12 +921,12 @@ The density is obtained via $\rho = (\rho Z)_1 + (\rho Z)_2$.
 The RHS of the momentum equation is augmented as follows:
 \begin{equation}
 \label{eqn_mms_u_eqn}
-\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}}/\rho \,\mbox{.}
+\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}} \,\mbox{.}
 \end{equation}
 The Poisson equation for $H$ becomes
 \begin{align}
 \label{eqn_poisson_mms}
-\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
+\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}} \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
 \end{align}
 
 %For the flow to remain isothermal the ideal gas law must be obeyed identically. Since a transport equation is solved for density, the mixture fraction must be obtained from the EOS.  Hence, in this problem $Z$ plays the role usually played by temperature in a typical fire problem.  For the manufactured solution, the basic FDS algorithm is modified as follows.  Given $u_i^n$, $\rho^n$, $Z^n$, and $H^n$ at time $t^n$:
