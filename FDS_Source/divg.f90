@@ -1,19 +1,19 @@
-MODULE DIVG              
- 
+MODULE DIVG
+
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_POINTERS
- 
+
 IMPLICIT NONE
 PRIVATE
 
 PUBLIC DIVERGENCE_PART_1,DIVERGENCE_PART_2,CHECK_DIVERGENCE
- 
+
 CONTAINS
- 
+
 SUBROUTINE DIVERGENCE_PART_1(T,NM)
 
-USE COMP_FUNCTIONS, ONLY: SECOND 
+USE COMP_FUNCTIONS, ONLY: SECOND
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP,INTERPOLATE1D_UNIFORM
 USE PHYSICAL_FUNCTIONS, ONLY: GET_CONDUCTIVITY,GET_SPECIFIC_HEAT,GET_SENSIBLE_ENTHALPY_Z,GET_SENSIBLE_ENTHALPY,&
                               GET_VISCOSITY,GET_MOLECULAR_WEIGHT
@@ -24,7 +24,7 @@ USE MANUFACTURED_SOLUTIONS, ONLY: DIFF_MMS,UF_MMS,WF_MMS,VD2D_MMS_Z_SRC,VD2D_MMS
 USE EVAC, ONLY: EVAC_EMESH_EXITS_TYPE, EMESH_EXITS, EMESH_NFIELDS, N_EXITS, N_CO_EXITS, N_DOORS
 
 ! Compute contributions to the divergence term
- 
+
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX,KDTDY,KDTDZ,DP,KP,CP, &
@@ -42,7 +42,7 @@ TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ,N_ZZ_MAX
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
- 
+
 ! Check whether to skip this routine
 
 IF (SOLID_PHASE_ONLY) RETURN
@@ -51,9 +51,9 @@ IF (SOLID_PHASE_ONLY) RETURN
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
- 
+
 RDT = 1._EB/DT
- 
+
 SELECT CASE(PREDICTOR)
    CASE(.TRUE.)
       DP => DS
@@ -94,11 +94,11 @@ SELECT CASE(PREDICTOR)
    CASE(.FALSE.)
       ZZP => ZZ
 END SELECT
-   
+
 ! Add species diffusion terms to divergence expression and compute diffusion term for species equations
 
-SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN   
-   
+SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
+
    DEL_RHO_D_DEL_Z = 0._EB
    RHO_D => WORK4
    IF (LES) THEN
@@ -137,7 +137,7 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
                      RHO_D(I,J,K) = RHOP(I,J,K)*D_Z_TEMP
                   ENDDO
                ENDDO
-            ENDDO            
+            ENDDO
          ENDIF
       ENDIF
 
@@ -184,17 +184,17 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          KKG = WC%ONE_D%KKG
          IOR = WC%ONE_D%IOR
          SELECT CASE(IOR)
-            CASE( 1) 
+            CASE( 1)
                RHO_D_DZDX(IIG-1,JJG,KKG,N) = 0._EB
-            CASE(-1) 
+            CASE(-1)
                RHO_D_DZDX(IIG,JJG,KKG,N)   = 0._EB
-            CASE( 2) 
+            CASE( 2)
                RHO_D_DZDY(IIG,JJG-1,KKG,N) = 0._EB
-            CASE(-2) 
+            CASE(-2)
                RHO_D_DZDY(IIG,JJG,KKG,N)   = 0._EB
-            CASE( 3) 
+            CASE( 3)
                RHO_D_DZDZ(IIG,JJG,KKG-1,N) = 0._EB
-            CASE(-3) 
+            CASE(-3)
                RHO_D_DZDZ(IIG,JJG,KKG,N)   = 0._EB
          END SELECT
       ENDDO WALL_LOOP
@@ -263,8 +263,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
       ENDDO
       !$OMP END PARALLEL DO
 
-!       print *, sum(dp(1:ibar,1:jbar,1:kbar))
-         
       ! Compute div rho*D grad Z_n
 
       !$OMP PARALLEL DO SCHEDULE(STATIC)
@@ -300,17 +298,17 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
          CALL GET_SENSIBLE_ENTHALPY_Z(N,WC%TMP_F_GAS,H_S)
 
          SELECT CASE(IOR)
-            CASE( 1) 
+            CASE( 1)
                JCOR = RHO_D_DZDN*RDX(IIG)*RRN(IIG)*R(IIG-1)
-            CASE(-1) 
+            CASE(-1)
                JCOR = RHO_D_DZDN*RDX(IIG)*RRN(IIG)*R(IIG)
-            CASE( 2) 
+            CASE( 2)
                JCOR = RHO_D_DZDN*RDY(JJG)
-            CASE(-2) 
+            CASE(-2)
                JCOR = RHO_D_DZDN*RDY(JJG)
-            CASE( 3) 
+            CASE( 3)
                JCOR = RHO_D_DZDN*RDZ(KKG)
-            CASE(-3) 
+            CASE(-3)
                JCOR = RHO_D_DZDN*RDZ(KKG)
          END SELECT
 
@@ -358,7 +356,7 @@ K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
 
    ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
    KP = 0._EB
-   
+
    IF (WD_PROPS) THEN ! Use thermal diffusivity from Westbrook + Dryer
       DO K=1,KBAR
          DO J=1,JBAR
@@ -376,13 +374,13 @@ K_DNS_OR_LES: IF (DNS .OR. RESEARCH_MODE) THEN
             DO I=1,IBAR
                IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                ZZ_GET(1:N_TRACKED_SPECIES) = ZZP(I,J,K,1:N_TRACKED_SPECIES)
-               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K)) 
+               CALL GET_CONDUCTIVITY(ZZ_GET,KP(I,J,K),TMP(I,J,K))
             ENDDO
          ENDDO
       ENDDO
    ENDIF
 
-   DEALLOCATE(ZZ_GET)      
+   DEALLOCATE(ZZ_GET)
 
    IF (RESEARCH_MODE) THEN
       KP = KP + MAX(0._EB,(MU-MU_DNS))*CP*RPR
@@ -463,7 +461,7 @@ CORRECTION_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          KDTDZ(II,JJ,KK-1) = 0._EB
    END SELECT
    !$OMP ATOMIC UPDATE
-   ! Q_LEAK accounts for enthalpy moving through leakage paths    
+   ! Q_LEAK accounts for enthalpy moving through leakage paths
    DP(IIG,JJG,KKG) = DP(IIG,JJG,KKG) - ( WC%ONE_D%QCONF*WC%RDN - WC%Q_LEAK )
 ENDDO CORRECTION_LOOP
 !$OMP END PARALLEL DO
@@ -488,7 +486,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DELKDELT = & 
+            DELKDELT = &
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                  (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
             DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
@@ -547,7 +545,7 @@ CONST_GAMMA_IF_2: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
    DO N=1,N_TRACKED_SPECIES
 
       CALL SPECIES_ADVECTION ! Compute u dot grad rho Z_n
-      
+
       SM  => SPECIES_MIXTURE(N)
       !$OMP PARALLEL DO PRIVATE(H_S) SCHEDULE(guided)
       DO K=1,KBAR
@@ -669,7 +667,7 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
       IF (PREDICTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UWS*WALL(IW)%AW
       IF (CORRECTOR) USUM(IPZ,NM) = USUM(IPZ,NM) + WC%ONE_D%UW*WALL(IW)%AW
    ENDDO WALL_LOOP4
-   
+
 ENDIF IF_PRESSURE_ZONES
 
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
@@ -734,7 +732,7 @@ ENDDO
 !$OMP END DO NOWAIT
 
 !$OMP DO SCHEDULE(STATIC)
-DO K=1,KBM1 
+DO K=1,KBM1
    DO J=1,JBAR
       DO I=1,IBAR
          ZZZ(1:4) = RHO_H_S_P(I,J,K-1:K+2)
@@ -751,10 +749,10 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
-   II  = WC%ONE_D%II 
+   II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
+   IIG = WC%ONE_D%IIG
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
@@ -803,7 +801,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                FZ_H_S(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
             ENDIF
       END SELECT OFF_WALL_SELECT_1
-   
+
    ENDIF
 
    SELECT CASE(IOR)
@@ -863,7 +861,7 @@ DO K=1,KBAR
          U_DOT_DEL_RHO_H_S(I,J,K) = U_DOT_DEL_RHO_H_S(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
-   ENDDO 
+   ENDDO
 ENDDO
 
 END SUBROUTINE ENTHALPY_ADVECTION
@@ -878,7 +876,7 @@ FY_ZZ=>WORK3
 FZ_ZZ=>WORK4
 
 RHO_Z_P=>WORK6
-U_DOT_DEL_RHO_Z=>WORK7 
+U_DOT_DEL_RHO_Z=>WORK7
 U_DOT_DEL_RHO_Z=0._EB
 
 IF (.NOT.ENTHALPY_TRANSPORT) RETURN
@@ -934,10 +932,10 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
 
-   II  = WC%ONE_D%II 
+   II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
-   IIG = WC%ONE_D%IIG 
+   IIG = WC%ONE_D%IIG
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
@@ -984,7 +982,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                FZ_ZZ(II,JJ,KK-2) = SCALAR_FACE_VALUE(WW(II,JJ,KK-2),ZZZ,FLUX_LIMITER)
             ENDIF
       END SELECT OFF_WALL_SELECT_2
-   
+
    ENDIF OFF_WALL_IF_2
 
    SELECT CASE(IOR)
@@ -1023,7 +1021,7 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
    DU = (WC%RHO_F*WC%ZZ_F(N) - RHO_Z_P(IIG,JJG,KKG))*UN
    U_DOT_DEL_RHO_Z(IIG,JJG,KKG) = U_DOT_DEL_RHO_Z(IIG,JJG,KKG) - SIGN(1._EB,REAL(IOR,EB))*DU*WC%RDN
-      
+
 ENDDO WALL_LOOP
 
 !$OMP PARALLEL DO PRIVATE(DU_P, DU_M) SCHEDULE(static)
@@ -1045,7 +1043,7 @@ DO K=1,KBAR
          U_DOT_DEL_RHO_Z(I,J,K) = U_DOT_DEL_RHO_Z(I,J,K) + (DU_P-DU_M)*RDZ(K)
 
       ENDDO
-   ENDDO 
+   ENDDO
 ENDDO
 !$OMP END PARALLEL DO
 
@@ -1064,7 +1062,7 @@ END IF
 DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    WC=>WALL(IW)
    IF (WC%BOUNDARY_TYPE/=NULL_BOUNDARY .AND. WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. &
-      WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE   
+      WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE
    II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
@@ -1093,12 +1091,12 @@ END SUBROUTINE MERGE_PRESSURE_ZONES
 SUBROUTINE PREDICT_NORMAL_VELOCITY
 
 PREDICT_NORMALS: IF (PREDICTOR) THEN
- 
+
    WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       WC => WALL(IW)
       IOR = WC%ONE_D%IOR
-      
+
       WALL_CELL_TYPE: SELECT CASE (WC%BOUNDARY_TYPE)
 
          CASE (NULL_BOUNDARY)
@@ -1114,7 +1112,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                 WC%NODE_INDEX > 0                        .OR. &
                 ANY(SF%LEAK_PATH>0._EB))                      &
                 CYCLE WALL_LOOP3
-            
+
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN) < SPACING(WC%ONE_D%T_IGN) .AND. SF%RAMP_INDEX(TIME_VELO)>=1) THEN
                TSI = T + DT
             ELSE
@@ -1128,7 +1126,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
             KK               = WC%ONE_D%KK
             DELTA_P          = PBAR_P(KK,SF%DUCT_PATH(1)) - PBAR_P(KK,SF%DUCT_PATH(2))
             PRES_RAMP_FACTOR = SIGN(1._EB,SF%MAX_PRESSURE-DELTA_P)*SQRT(ABS((DELTA_P-SF%MAX_PRESSURE)/SF%MAX_PRESSURE))
-            SELECT CASE(IOR) 
+            SELECT CASE(IOR)
                CASE( 1)
                   WC%ONE_D%UWS =-U0 + TIME_RAMP_FACTOR*(WC%UW0+U0)
                CASE(-1)
@@ -1147,7 +1145,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
                KKG = WC%ONE_D%KKG
-               SELECT CASE(IOR) 
+               SELECT CASE(IOR)
                   CASE( 1)
                      WC%ONE_D%UWS =-(U(IIG,JJG,KKG)   + SF%VEL_GRAD*WC%RDN)
                   CASE(-1)
@@ -1163,7 +1161,7 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
                END SELECT
             ENDIF NEUMANN_IF
             IF (ABS(SURFACE(WC%SURF_INDEX)%MASS_FLUX_TOTAL)>=TWO_EPSILON_EB) WC%ONE_D%UWS = WC%ONE_D%UWS*RHOA/WC%RHO_F
-            VENT_IF: IF (WC%VENT_INDEX>0) THEN 
+            VENT_IF: IF (WC%VENT_INDEX>0) THEN
                VT=>VENTS(WC%VENT_INDEX)
                IF (VT%N_EDDY>0) THEN ! Synthetic Eddy Method
                   II = WC%ONE_D%II
@@ -1247,12 +1245,12 @@ PREDICT_NORMALS: IF (PREDICTOR) THEN
       WALL(IW)%DUWDT = RDT*(WALL(IW)%ONE_D%UWS-WALL(IW)%ONE_D%UW)
    ENDDO
    !$OMP END PARALLEL DO
-   
+
 ELSE PREDICT_NORMALS
 
    ! In the CORRECTOR step, the normal component of velocity, UW, is the same as the predicted value, UWS. However, for species
    ! mass fluxes and HVAC, UW is computed elsewhere (wall.f90).
-   
+
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
@@ -1329,7 +1327,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
             EXIT
          END IF
       END DO
-      IF (N==0) THEN 
+      IF (N==0) THEN
          WRITE(LU_ERR,'(A,A)') 'ERROR FDS+Evac: Zone error, no pressure zone found for mesh ',TRIM(MESH_NAME(NM))
       END IF
 
@@ -1338,7 +1336,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
       P_0=P_INF; TMP_0=TMPA
       PBAR=P_INF; PBAR_S=P_INF; R_PBAR=0._EB; D_PBAR_DT=0._EB; D_PBAR_DT_S=0._EB
       RHO=RHO_0(1); RHOS=RHO_0(1); TMP=TMPA
-      FRHO= 0._EB; 
+      FRHO= 0._EB;
       USUM(:,NM) = 0.0_EB ; DSUM(:,NM) = 0.0_EB; PSUM(:,NM) = 0.0_EB
       PRESSURE_ZONE = 0
 
@@ -1348,7 +1346,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
                IF (PRESSURE_ZONE(I,J,K)==N) CYCLE
                IF (XC(I) - X1 >=0._EB .AND. XC(I) < X2 .AND. &
                     YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
-                    ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN 
+                    ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN
                   PRESSURE_ZONE(I,J,K) = N
                   IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N)
                ENDIF
@@ -1464,9 +1462,9 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
    IF (CORRECTOR) D_PBAR_DT_P => D_PBAR_DT
 
    ! Compute change in background pressure
- 
+
    DO IPZ=1,N_ZONE
-      IF (ABS(PSUM(IPZ,NM)) > TWO_EPSILON_EB) D_PBAR_DT_P(IPZ) = (DSUM(IPZ,NM) - USUM(IPZ,NM))/PSUM(IPZ,NM)      
+      IF (ABS(PSUM(IPZ,NM)) > TWO_EPSILON_EB) D_PBAR_DT_P(IPZ) = (DSUM(IPZ,NM) - USUM(IPZ,NM))/PSUM(IPZ,NM)
       IF (CORRECTOR) P_ZONE(IPZ)%DPSTAR =  D_PBAR_DT_P(IPZ)
    ENDDO
 
@@ -1476,7 +1474,7 @@ IF_PRESSURE_ZONES: IF (N_ZONE>0) THEN
       DO J=1,JBAR
          DO I=1,IBAR
             IPZ = PRESSURE_ZONE(I,J,K)
-            IF (IPZ<1) CYCLE 
+            IF (IPZ<1) CYCLE
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
             DP(I,J,K) = DP(I,J,K) - (R_PBAR(K,IPZ)-RTRM(I,J,K))*D_PBAR_DT_P(IPZ)
          ENDDO
@@ -1568,7 +1566,7 @@ TRUE_PROJECTION: IF (PROJECTION) THEN
       D = DDDT
       DDDT = (2._EB*DP-DIV)*RDT
    ENDIF
-   
+
 ELSE TRUE_PROJECTION
 
    IF (PREDICTOR) THEN
@@ -1579,9 +1577,9 @@ ELSE TRUE_PROJECTION
       DDDT  = (2._EB*D_NEW-DS-D)*RDT
       D     = D_NEW
    ENDIF
-   
+
    ! Adjust dD/dt to correct error in divergence due to velocity matching at interpolated boundaries
-   
+
    NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
       DO IW=1,N_EXTERNAL_WALL_CELLS
          IF (WALL(IW)%NOM==0) CYCLE
@@ -1594,24 +1592,24 @@ ELSE TRUE_PROJECTION
    ENDIF NO_SCARC_IF
 
 ENDIF TRUE_PROJECTION
-   
+
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE DIVERGENCE_PART_2
- 
- 
+
+
 SUBROUTINE CHECK_DIVERGENCE(NM)
 
 ! Computes maximum velocity divergence
 
-USE COMP_FUNCTIONS, ONLY: SECOND 
+USE COMP_FUNCTIONS, ONLY: SECOND
 INTEGER, INTENT(IN) :: NM
 INTEGER  :: I,J,K
 REAL(EB) :: DIV,RES,TNOW
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,DP
- 
+
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
- 
+
 IF (PREDICTOR) THEN
    UU=>US
    VV=>VS
@@ -1623,7 +1621,7 @@ ELSEIF (CORRECTOR) THEN
    WW=>W
    DP=>D
 ENDIF
- 
+
 RESMAX = 0._EB
 DIVMX  = -10000._EB
 DIVMN  =  10000._EB
@@ -1631,7 +1629,7 @@ IMX    = 0
 JMX    = 0
 KMX    = 0
 Q_MAX  = -10000._EB
- 
+
 DO K=1,KBAR
    DO J=1,JBAR
       LOOP1: DO I=1,IBAR
@@ -1669,9 +1667,8 @@ DO K=1,KBAR
       ENDDO LOOP1
    ENDDO
 ENDDO
- 
+
 TUSED(2,NM)=TUSED(2,NM)+SECOND()-TNOW
 END SUBROUTINE CHECK_DIVERGENCE
 
 END MODULE DIVG
-
