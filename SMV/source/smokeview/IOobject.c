@@ -5508,8 +5508,6 @@ void read_device_data(char *file, int filetype, int loadstatus){
   NewMemory((void **)&devices,ncols*sizeof(devicedata *));
 
   for(i = 0; i<ncols; i++){
-    devicedata *devicei;
-
     devices[i] = NULL;
   }
 
