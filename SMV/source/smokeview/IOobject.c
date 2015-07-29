@@ -5507,6 +5507,12 @@ void read_device_data(char *file, int filetype, int loadstatus){
   NewMemory((void **)&devclabels,ncols*sizeof(char *));
   NewMemory((void **)&devices,ncols*sizeof(devicedata *));
 
+  for(i = 0; i<ncols; i++){
+    devicedata *devicei;
+
+    devices[i] = NULL;
+  }
+
   fgets(buffer,buffer_len,stream);
   parsecsv(buffer,devcunits,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
