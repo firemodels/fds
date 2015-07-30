@@ -88,7 +88,8 @@ void MakeMovie(void){
   strcpy(frame0, render_file_base);
   strcat(frame0, "_0001");
   strcat(frame0, image_ext);
-  if(runscript==0&&file_exists(frame0)==0){
+  if(runscript==0&&(file_exists(frame0)==0||regenerate_images==1)){
+    regenerate_images=0;
     Render_CB(RENDER_START);
     return;
   }

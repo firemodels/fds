@@ -140,6 +140,7 @@ GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Checkbox *CHECKBOX_gvec_down=NULL;
 GLUI_Checkbox *CHECKBOX_showgravity=NULL;
 GLUI_Checkbox *CHECKBOX_overwrite_movie = NULL;
+GLUI_Checkbox *CHECKBOX_regenerate_images = NULL;
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
@@ -694,6 +695,7 @@ extern "C" void glui_motion_setup(int main_window){
     ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_make_movie, MOVIE_ROLLOUT);
 
     CHECKBOX_overwrite_movie = glui_motion->add_checkbox_to_panel(ROLLOUT_make_movie, "overwrite movie", &overwrite_movie);
+    CHECKBOX_regenerate_images = glui_motion->add_checkbox_to_panel(ROLLOUT_make_movie, "regenerate images", &regenerate_images);
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
     PANEL_movie_type = glui_motion->add_panel_to_panel(ROLLOUT_make_movie, "movie type:", true);
