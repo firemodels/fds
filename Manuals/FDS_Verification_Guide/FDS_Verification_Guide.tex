@@ -1045,6 +1045,50 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
+\clearpage
+
+\section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring\textct{saad}{saad})}
+\label{sec:saad_temporal_error}
+
+\textbf{Tony Saad and James Sutherland, The University of Utah}\\
+
+\noindent This is a 1D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum are
+\begin{equation}
+\frac{\partial Z}{\partial t} = - u\frac{\partial Z}{\partial x} \,\mbox{,}
+\end{equation}
+\begin{equation}
+\frac{\partial u}{\partial t} = - u\frac{\partial u}{\partial x} - \frac{1}{\rho} \frac{\partial \tilde{p}}{\partial x} \,\mbox{.}
+\end{equation}
+The equation of state gives the following relationship between the mixture fraction and the density:
+\begin{align}
+\frac{1}{\rho} &= \frac{(1-Z)}{\rho_0} + \frac{Z}{\rho_1} \,\mbox{.}
+\end{align}
+
+The FDS input files may be found in\\
+{\ct /Verification/Scalar\_Analytical\_Solution/saad\_512\_cfl*.fds}.\\
+
+\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1D domain of length $L=2$ m (see Fig. \ref{fig} below).
+\begin{align}
+Z(x,0) = \frac{1}{2}\left( 1 + \sin(2\pi x/L) \right)
+\end{align}
+The velocity field is initialized to $u(x,0) = U_0 = 1$ m/s and this remains the analytical solution for the velocity, $u(x,t) = U_0$.  The analytical solution for the mixture fraction is given by a characteristic solution:
+\begin{align}
+Z(x,t) = Z_0(x-U_0 t) \,\mbox{.}
+\end{align}
+
+\paragraph{Computing Temporal Order without an Analytical Solution}
+
+Despite having an analytical solution for this case, it is difficult to use this solution assess the temporal error in the time integration scheme alone.  This is because the spatial errors will typically dominate for an explicit scheme.  To overcome this, we use a method based on Richardson extrapolation (see, e.g., Moin \cite{Moin}).  The idea is to expand a quantity $f$ in a Taylor series with different time increments with a constant ratio $r = \frac{\Delta t_{fine}}{\Delta t_{coarse}} < 1$.
+
+\begin{align}
+f_1 &= f_0 + a_0 \Delta t^p + \mathcal{O}(\Delta t^{p+1}) \\
+f_2 &= f_0 + a_0 (r \Delta t)^p + \mathcal{O}(r^{p+1} \Delta t^{p+1}) \\
+f_3 &= f_0 + a_0 (r^2 \Delta t)^p + \mathcal{O}(r^{2p+2} \Delta t^{p+1})
+\end{align}
+The temporal order of accuracy is given by $p$, which may be written as
+\begin{equation}
+p = \frac{\ln \left(\frac{f_3-f_2}{f_2-f_1}\right)}{\ln r}
+\end{equation}
 
 \clearpage
 
