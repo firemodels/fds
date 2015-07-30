@@ -12,7 +12,7 @@ from matplotlib import rcParams
 from scipy import integrate
 
 # Getting SVN number 
-SVN=
+GIT='GITV1-29-g296c114-dirty '
 
 # Help to find the fonts properly!
 # You can find the list of fonts installed on the system with:
