@@ -11,7 +11,7 @@ r = 0.5;
 nx = 512;
 L = 2;
 dx = L/nx;
-x = dx/2:dx:L-dx/2;
+x = -L/2+dx/2:dx:L/2-dx/2;
 rho__0 = 5;
 rho__1 = .5;
 f = .5*(1+sin(2*pi*x/L));
@@ -66,11 +66,12 @@ disp('Saad temporal order')
 disp(' ')
 disp(['L1 p rho = ',num2str( norm(p_rho,1)/nx )])
 disp(['L2 p rho = ',num2str( norm(p_rho,2)/sqrt(nx) )])
-% disp(['Linf p rho = ',num2str( norm(p_rho,inf) )])
+disp(['Linf p rho = ',num2str( norm(p_rho,-inf) )])
 disp(' ')
 disp(['L1 p Z = ',num2str( norm(p_Z,1)/nx )])
 disp(['L2 p Z = ',num2str( norm(p_Z,2)/sqrt(nx) )])
-% disp(['Linf p Z = ',num2str( norm(p_Z,inf) )])
+disp(['Linf p Z = ',num2str( norm(p_Z,-inf) )])
+disp(' ')
 
 % flag errors
 
@@ -83,6 +84,22 @@ L2_Z = norm(p_Z,2)/sqrt(nx);
 if L2_Z<1.99
     disp(['Matlab Warning: L2_Z = ',num2str(L2_Z),' in Saad MMS'])
 end
+
+% Tony Saad's way...
+p1_rho_saad = log( norm(rho_3-rho_2,1)./norm(rho_2-rho_1,1) )./log(r);
+p2_rho_saad = log( norm(rho_3-rho_2,2)./norm(rho_2-rho_1,2) )./log(r);
+pinf_rho_saad = log( norm(rho_3-rho_2,inf)./norm(rho_2-rho_1,inf) )./log(r);
+disp(['L1 p rho Saad = ',num2str( p1_rho_saad )])
+disp(['L2 p rho Saad = ',num2str( p2_rho_saad )])
+disp(['Linf p rho Saad = ',num2str( pinf_rho_saad )])
+disp(' ')
+p1_Z_saad = log( norm(Z_3-Z_2,1)./norm(Z_2-Z_1,1) )./log(r);
+p2_Z_saad = log( norm(Z_3-Z_2,2)./norm(Z_2-Z_1,2) )./log(r);
+pinf_Z_saad = log( norm(Z_3-Z_2,inf)./norm(Z_2-Z_1,inf) )./log(r);
+disp(['L1 p Z Saad = ',num2str( p1_Z_saad )])
+disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
+disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
+disp(' ')
 
 Git_Filename = [datadir,'saad_512_cfl_p0625_git.txt'];
 plot_style
@@ -118,7 +135,7 @@ plot(x,rho,'r--'); hold on
 plot(x,rho_3,'r-')
 xlabel('{\it x} (m)')
 ylabel('density (kg/m^3)')
-legend('initial field','final field','location','northwest')
+legend('initial field','final field','location','northeast')
 addverstr(gca,Git_Filename,'linear')
 print(gcf,'-dpdf',[plotdir,'saad_rho'])
 
@@ -131,8 +148,20 @@ plot(x,f,'b--'); hold on
 plot(x,Z_3,'b-')
 xlabel('{\it x} (m)')
 ylabel('mixture fraction, {\it Z}')
-legend('initial field','final field','location','northeast')
+legend('initial field','final field','location','northwest')
 addverstr(gca,Git_Filename,'linear')
 print(gcf,'-dpdf',[plotdir,'saad_Z'])
 
+figure
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+plot(x,rho_3-rho_2,'b-'); hold on
+plot(x,rho_2-rho_1,'r-')
+xlabel('{\it x} (m)')
+ylabel('density (kg/m^3) ')
+legend('rho_3-rho_2','rho_2-rho_1','location','northeast')
+addverstr(gca,Git_Filename,'linear')
+print(gcf,'-dpdf',[plotdir,'saad_rho_diff_godunov'])
 
