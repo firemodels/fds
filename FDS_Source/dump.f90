@@ -5364,9 +5364,9 @@ IND_SELECT: SELECT CASE(IND)
                   CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
                                              SPECIES(LPC%Y_INDEX)%C_P_L_BAR,LP%ONE_D%TMP_F,CPBAR)
                   VEL = CPBAR*LP%ONE_D%TMP_F
-                  CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
-                                             SPECIES(LPC%Y_INDEX)%C_P_L_BAR,SPECIES(LPC%Y_INDEX)%TMP_MELT,CPBAR)
-                  VEL = VEL - CPBAR*SPECIES(LPC%Y_INDEX)%TMP_MELT
+                  !CALL INTERPOLATE1D_UNIFORM(LBOUND(SPECIES(LPC%Y_INDEX)%C_P_L_BAR,1),&
+                  !                           SPECIES(LPC%Y_INDEX)%C_P_L_BAR,SPECIES(LPC%Y_INDEX)%TMP_MELT,CPBAR)
+                  !VEL = VEL - CPBAR*SPECIES(LPC%Y_INDEX)%TMP_MELT
                   VEL = 0.001_EB*LPC%FTPR*VEL
                CASE DEFAULT
                   VEL = 1.0_EB
