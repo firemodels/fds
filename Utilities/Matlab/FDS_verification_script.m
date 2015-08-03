@@ -91,5 +91,6 @@ openmp_timing_benchmarks
 rms_cov_corr
 hot_layer_collapse
 radiating_polygon
+saad_mms_temporal_error
 
 display('verification scripts completed successfully!')
