@@ -148,6 +148,7 @@ The following individuals contributed to the verification process of FDS.
 \item Joonas Ryyn\"{a}nen of VTT, Finland, designed and documented the FED/FIC test cases.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
+\item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
 \end{itemize}
 
 
@@ -1052,7 +1053,7 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 
 \textbf{Tony Saad and James Sutherland, The University of Utah}\\
 
-\noindent This is a 1D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum are
+\noindent This is a 1D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum, $u$, are
 \begin{equation}
 \frac{\partial Z}{\partial t} = - u\frac{\partial Z}{\partial x} \,\mbox{,}
 \end{equation}
@@ -1067,19 +1068,18 @@ The equation of state gives the following relationship between the mixture fract
 The FDS input files may be found in\\
 {\ct /Verification/Scalar\_Analytical\_Solution/saad\_512\_cfl*.fds}.\\
 
-\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1D domain of length $L=2$ m (see Fig. \ref{fig} below).
+\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1D domain of length $L=2$ m (see Fig.~\ref{fig:saad_temporal_order} below).
 \begin{align}
 Z(x,0) = \frac{1}{2}\left( 1 + \sin(2\pi x/L) \right)
 \end{align}
-The velocity field is initialized to $u(x,0) = U_0 = 1$ m/s and this remains the analytical solution for the velocity, $u(x,t) = U_0$.  The analytical solution for the mixture fraction is given by a characteristic solution:
+All cases are run with $N_x = 512$ grid points.  The effect of the spatial error is discussed below. The velocity field is initialized to $u(x,0) = U_0 = 1$ m/s, which is the analytical solution for the velocity for all time, $u(x,t) = U_0$.  Note, however, that the velocity field is not ``frozen'' in the calculations, it is subject to variation by the projection scheme (if we are doing things correctly, then the velocity will not change).  The analytical solution for the mixture fraction is given by a characteristic solution:
 \begin{align}
 Z(x,t) = Z_0(x-U_0 t) \,\mbox{.}
 \end{align}
 
 \paragraph{Computing Temporal Order without an Analytical Solution}
 
-Despite having an analytical solution for this case, it is difficult to use this solution assess the temporal error in the time integration scheme alone.  This is because the spatial errors will typically dominate for an explicit scheme.  To overcome this, we use a method based on Richardson extrapolation (see, e.g., Moin \cite{Moin}).  The idea is to expand a quantity $f$ in a Taylor series with different time increments with a constant ratio $r = \frac{\Delta t_{fine}}{\Delta t_{coarse}} < 1$.
-
+Despite having an analytical solution for this case, it is difficult to use this solution to assess the temporal error in the time integration scheme alone.  This is because the spatial errors will typically dominate for an explicit scheme.  To overcome this, we use a method based on Richardson extrapolation (see, e.g., Moin \cite{Moin:2001}).  The idea is to expand a quantity $f$ in a Taylor series with different time increments with a constant ratio $r = \frac{\Delta t_{fine}}{\Delta t_{coarse}} < 1$.
 \begin{align}
 f_1 &= f_0 + a_0 \Delta t^p + \mathcal{O}(\Delta t^{p+1}) \\
 f_2 &= f_0 + a_0 (r \Delta t)^p + \mathcal{O}(r^{p+1} \Delta t^{p+1}) \\
@@ -1087,8 +1087,24 @@ f_3 &= f_0 + a_0 (r^2 \Delta t)^p + \mathcal{O}(r^{2p+2} \Delta t^{p+1})
 \end{align}
 The temporal order of accuracy is given by $p$, which may be written as
 \begin{equation}
+\label{eq:temporal_order}
 p = \frac{\ln \left(\frac{f_3-f_2}{f_2-f_1}\right)}{\ln r}
 \end{equation}
+This procedure effectively filters out the spatial error.  It is, in fact, possible to run this case with a first-order spatial scheme (e.g., Godunov) and still see second-order temporal convergence.
+
+\paragraph{Temporal Order Results} The {\ct saad*.fds} cases are run with three different time steps, each refined by a factor of 2, and integrated to a total time $T=0.390625$.  This time represents two time steps for a case with CFL = 1.  To assess the asymptotic temporal order from Eq.~(\ref{eq:temporal_order}), we use the three finest time steps corresponding to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$], respectively.
+
+The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1D domain. Generally, the convergence is second-order, $p=2$.  The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $L_2$ norm of $p$ computed pointwise is 2.0053.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_Z.pdf}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho.pdf}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho_diff}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_temporal_order_rho}
+\caption[The {\ct saad} temporal order test case]{Temporal order for a variable-density projection.  (Upper-left) Initial and final field for mixture fraction.  (Upper-right) Initial and final field for density.  (Lower-left) Plot of numerator and denominator in Eq.~(\ref{eq:temporal_order}) for density at final time. (Lower-right) Plot of $p$ computed pointwise from Eq.~(\ref{eq:temporal_order}).  Fluctuations are due to degenerate points in the formula for $p$.  The temporal order is $p = 2$.}
+\label{fig:saad_temporal_order}
+\end{figure}
 
 \clearpage
 
