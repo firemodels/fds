@@ -9,11 +9,6 @@ clear all
 % Problem 1 parameters
 r = 0.5;
 nx = 256;
-L = 2;
-dx = L/nx;
-x = -L/2+dx/2:dx:L/2-dx/2;
-rho__0 = 5;
-rho__1 = .5;
 
 % Output files
 
