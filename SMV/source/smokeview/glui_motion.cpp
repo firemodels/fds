@@ -633,7 +633,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_farclip=glui_motion->add_spinner_to_panel(ROLLOUT_scale,_("Far depth"),GLUI_SPINNER_FLOAT,&farclip);
   SPINNER_farclip->set_float_limits(0.001,10.0,GLUI_LIMIT_CLAMP);
 
-  ROLLOUT_render = glui_motion->add_rollout(_("Render"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
+  ROLLOUT_render = glui_motion->add_rollout(_("Images"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_render,RENDER_ROLLOUT);
 
   EDIT_render_file_base = glui_motion->add_edittext_to_panel(ROLLOUT_render, "file prefix:", GLUI_EDITTEXT_TEXT, render_file_base);
@@ -686,8 +686,8 @@ extern "C" void glui_motion_setup(int main_window){
 
   CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(ROLLOUT_scene_clip, "clip rendered scene", &clip_rendered_scene);
 
-  BUTTON_render_start = glui_motion->add_button_to_panel(ROLLOUT_render, _("Start rendering"), RENDER_START, Render_CB);
-  BUTTON_render_stop = glui_motion->add_button_to_panel(ROLLOUT_render, _("Stop"), RENDER_STOP, Render_CB);
+  BUTTON_render_start = glui_motion->add_button_to_panel(ROLLOUT_render, _("Generate Images"), RENDER_START, Render_CB);
+  BUTTON_render_stop = glui_motion->add_button_to_panel(ROLLOUT_render, _("Stop Image Generation"), RENDER_STOP, Render_CB);
 
   if(have_ffmpeg == 1){
     ROLLOUT_make_movie = glui_motion->add_rollout("Movie", false, MOVIE_ROLLOUT,Motion_Rollout_CB);
@@ -703,9 +703,10 @@ extern "C" void glui_motion_setup(int main_window){
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
-    BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make", MAKE_MOVIE, Render_CB);
+    glui_motion->add_button_to_panel(ROLLOUT_make_movie, _("Generate Images"), RENDER_START, Render_CB);    
+    BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
-      BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play", PLAY_MOVIE, Render_CB);
+      BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play Movie", PLAY_MOVIE, Render_CB);
       enable_disable_playmovie();
     }
   }

@@ -5,7 +5,9 @@ FILTERF =
 
 VPATH = $(SOURCE_DIR)/getdate $(SOURCE_DIR)/shared  
 bin = .
-
+GIT_HASH := $(shell git describe --long --dirty)
+GIT_DATE := $(shell git log -1 --format=%cd)
+GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
@@ -29,7 +31,7 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-intel_win_64 : CFLAGS    = -Od /nologo
+intel_win_64 : CFLAGS    = -Od /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : exe       = getdate_win_64.exe
 
@@ -39,7 +41,7 @@ intel_win_64 : $(objwin)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : CFLAGS    = -O2 -m64
+intel_linux_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_linux_64 : CC        = icc
 intel_linux_64 : exe       = getdate_linux_64
 
@@ -50,7 +52,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : CFLAGS    = -O2 -m64
+intel_osx_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : exe       = getdate_osx_64
 

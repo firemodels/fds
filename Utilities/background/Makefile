@@ -5,6 +5,10 @@ FILTERF =
 
 VPATH = $(SOURCE_DIR)/background $(SOURCE_DIR)/shared
 bin = .
+GIT_HASH := $(shell git describe --long --dirty)
+GIT_DATE := $(shell git log -1 --format=%cd)
+GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
+
 
 # Definition of the object variables
 
@@ -29,7 +33,7 @@ no_target:
 # ------------- Win 32 ----------------
 #  32 bit windows
 
-intel_win_32 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared
+intel_win_32 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared $(GITINFO)
 intel_win_32 : CC        = icl
 intel_win_32 : exe       = background.exe
 
@@ -39,7 +43,7 @@ intel_win_32 : $(objwin)
 # ------------- Linux 32 ----------------
 #  32 bit linux
 
-intel_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+intel_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX $(GITINFO)
 intel_linux_32 : CC        = icc
 intel_linux_32 : exe       = background
 
@@ -48,18 +52,17 @@ intel_linux_32 : $(obj)
 
 # ------------- gcc Linux 32 ----------------
 
-gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX
+gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX $(GITINFO)
 gcc_linux_32 : CC        = gcc
 gcc_linux_32 : exe       = background
 
 gcc_linux_32 : $(obj)
 	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
 
-
 # ------------- OSX 32 ----------------
 #  32 bit osx
 
-intel_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX
+intel_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX $(GITINFO)
 intel_osx_32 : CC        = icc
 intel_osx_32 : exe       = background
 
@@ -68,7 +71,7 @@ intel_osx_32 : $(obj)
 
 # ------------- gcc OSX 32 ----------------
 
-gcc_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX
+gcc_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX $(GITINFO)
 gcc_osx_32 : CC        = gcc
 gcc_osx_32 : exe       = background
 

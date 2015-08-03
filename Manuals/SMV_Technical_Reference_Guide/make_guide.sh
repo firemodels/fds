@@ -6,6 +6,10 @@ export TEXINPUTS=".:../LaTeX_Style_Files:"
 clean_build=1
 
 # Build SMV Technical Reference Guide
+
+gitrevision=`git describe --long --dirty`
+echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
+
 pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> SMV_Technical_Reference_Guide.err
 bibtex SMV_Technical_Reference_Guide &> SMV_Technical_Reference_Guide.err
 pdflatex -interaction nonstopmode SMV_Technical_Reference_Guide &> SMV_Technical_Reference_Guide.err
@@ -39,3 +43,4 @@ if [[ $clean_build == 0 ]]
    else
       echo "SMV Technical Reference Guide built successfully!"
 fi    
+rm -f ../Bibliography/gitrevision.tex
