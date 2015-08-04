@@ -6,5 +6,5 @@ if exist "%VS_COMPILER%\vcvars32x86_amd64.bat" call "%VS_COMPILER%\vcvars32x86_a
 Title Building background for 32 bit Windows
 
 erase *.obj *.mod
-make -f ..\Makefile intel_win_32
+make SHELL="%ComSpec%" -f ..\Makefile intel_win_32
 pause

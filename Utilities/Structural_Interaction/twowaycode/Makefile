@@ -18,7 +18,7 @@ no_target:
 setup_win:
 %.obj : %.mod		
 
-.SUFFIXES: .F90 .c .obj .o .f90 .cpp
+.SUFFIXES: .f90 .o .obj
 
 .f90.obj:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
