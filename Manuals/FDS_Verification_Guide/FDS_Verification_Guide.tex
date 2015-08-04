@@ -14,6 +14,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 
 \begin{document}
 
@@ -75,8 +78,7 @@ Volume 2: Verification\\
 \headerC{
 \today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$}
-% dummy comment to force svn change - Thu Jun 25 21:56:37 EDT 2015
+\emph{Git Repository}~\gitrevision}
 
 
 \vfill
