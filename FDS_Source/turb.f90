@@ -18,7 +18,7 @@ PUBLIC :: INIT_TURB_ARRAYS, VARDEN_DYNSMAG, WANNIER_FLOW, &
           TWOD_VORTEX_CERFACS, TWOD_VORTEX_UMD, HEAT_FLUX_MODEL, ABL_HEAT_FLUX_MODEL, RNG_EDDY_VISCOSITY, &
           NS_ANALYTICAL_SOLUTION, NS_U_EXACT, NS_V_EXACT, NS_H_EXACT, SANDIA_DAT, SPECTRAL_OUTPUT, SANDIA_OUT, &
           FILL_EDGES
- 
+
 CONTAINS
 
 
@@ -76,7 +76,7 @@ IF (TURB_MODEL==DYNSMAG) THEN
    ALLOCATE(M%TURB_WORK8(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK8',IZERO)
    M%TURB_WORK8 = 0._EB
-   
+
    ALLOCATE(M%TURB_WORK9(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT_TURB_ARRAYS','TURB_WORK9',IZERO)
    M%TURB_WORK9 = 0._EB
@@ -88,7 +88,7 @@ ENDIF
 ! Decaying isotropic turbulence (high resolution)
 
 IF (PERIODIC_TEST==9) CALL INIT_SPECTRAL_DATA(NM)
-   
+
 END SUBROUTINE INIT_TURB_ARRAYS
 
 
@@ -179,7 +179,7 @@ END FUNCTION NS_H_EXACT
 REAL(EB) FUNCTION WANNIER_FLOW(XX,YY,IVEL)
 
 ! References:
-! 
+!
 ! G.H. Wannier. A contribution to the hydrodynamics of lubrication. Quart. Appl.
 ! Math. 8(1) (1950).
 !
@@ -453,7 +453,7 @@ REAL(EB), PARAMETER :: ALPHA = 6.0_EB ! See Lund, 1997 CTR briefs.
 
 IF (EVACUATION_ONLY(NM)) RETURN
 CALL POINT_TO_MESH(NM)
- 
+
 IF (PREDICTOR) THEN
    UU=>U
    VV=>V
@@ -485,18 +485,18 @@ DO K = 1,KBAR
          UP(I,J,K) = 0.5_EB*(UU(I,J,K) + UU(I-1,J,K))
          VP(I,J,K) = 0.5_EB*(VV(I,J,K) + VV(I,J-1,K))
          WP(I,J,K) = 0.5_EB*(WW(I,J,K) + WW(I,J,K-1))
-         
+
          S11(I,J,K) = RDX(I)*(UU(I,J,K)-UU(I-1,J,K))
          S22(I,J,K) = RDY(J)*(VV(I,J,K)-VV(I,J-1,K))
          S33(I,J,K) = RDZ(K)*(WW(I,J,K)-WW(I,J,K-1))
-         
+
          ONTHDIV = ONTH*(S11(I,J,K)+S22(I,J,K)+S33(I,J,K))
          S11(I,J,K) = S11(I,J,K)-ONTHDIV
          S22(I,J,K) = S22(I,J,K)-ONTHDIV
          S33(I,J,K) = S33(I,J,K)-ONTHDIV
-         
+
          DUDY = 0.25_EB*RDY(J)*(UU(I,J+1,K)-UU(I,J-1,K)+UU(I-1,J+1,K)-UU(I-1,J-1,K))
-         DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1)) 
+         DUDZ = 0.25_EB*RDZ(K)*(UU(I,J,K+1)-UU(I,J,K-1)+UU(I-1,J,K+1)-UU(I-1,J,K-1))
          DVDX = 0.25_EB*RDX(I)*(VV(I+1,J,K)-VV(I-1,J,K)+VV(I+1,J-1,K)-VV(I-1,J-1,K))
          DVDZ = 0.25_EB*RDZ(K)*(VV(I,J,K+1)-VV(I,J,K-1)+VV(I,J-1,K+1)-VV(I,J-1,K-1))
          DWDX = 0.25_EB*RDX(I)*(WW(I+1,J,K)-WW(I-1,J,K)+WW(I+1,J,K-1)-WW(I-1,J,K-1))
@@ -504,7 +504,7 @@ DO K = 1,KBAR
          S12(I,J,K) = 0.5_EB*(DUDY+DVDX)
          S13(I,J,K) = 0.5_EB*(DUDZ+DWDX)
          S23(I,J,K) = 0.5_EB*(DVDZ+DWDY)
-         
+
          ! calculate magnitude of the grid strain rate
 
          SS(I,J,K) = RHOP(I,J,K)*STRAIN_RATE(I,J,K)
@@ -644,13 +644,13 @@ MLHAT => TURB_WORK2
 DO K = 1,KBAR
    DO J = 1,JBAR
       DO I = 1,IBAR
-      
+
          ML(I,J,K) = M11(I,J,K)*L11(I,J,K) + M22(I,J,K)*L22(I,J,K) + M33(I,J,K)*L33(I,J,K) + &
               2._EB*(M12(I,J,K)*L12(I,J,K) + M13(I,J,K)*L13(I,J,K) + M23(I,J,K)*L23(I,J,K))
-       
+
          MM(I,J,K) = M11(I,J,K)*M11(I,J,K) + M22(I,J,K)*M22(I,J,K) + M33(I,J,K)*M33(I,J,K) + &
               2._EB*(M12(I,J,K)*M12(I,J,K) + M13(I,J,K)*M13(I,J,K) + M23(I,J,K)*M23(I,J,K))
-              
+
       ENDDO
    ENDDO
 ENDDO
@@ -682,7 +682,7 @@ DO K = 1,KBAR
          ELSE
             CSD2(I,J,K) = MLHAT(I,J,K)/MMHAT(I,J,K) ! (Cs*Delta)**2
          ENDIF
-         
+
       END DO
    END DO
 END DO
@@ -798,12 +798,12 @@ DO K = 1,KBAR
    DO J = 1,JBAR
       DO I = 1,IBAR
          INV_RHOPHAT = 1._EB/RHOPHAT(I,J,K)
-         L11(I,J,K) = RUU_HAT(I,J,K) - RU_HAT(I,J,K)*RU_HAT(I,J,K)*INV_RHOPHAT 
-         L22(I,J,K) = RVV_HAT(I,J,K) - RV_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT 
-         L33(I,J,K) = RWW_HAT(I,J,K) - RW_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
-         L12(I,J,K) = RUV_HAT(I,J,K) - RU_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT 
-         L13(I,J,K) = RUW_HAT(I,J,K) - RU_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
-         L23(I,J,K) = RVW_HAT(I,J,K) - RV_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT 
+         L11(I,J,K) = RUU_HAT(I,J,K) - RU_HAT(I,J,K)*RU_HAT(I,J,K)*INV_RHOPHAT
+         L22(I,J,K) = RVV_HAT(I,J,K) - RV_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT
+         L33(I,J,K) = RWW_HAT(I,J,K) - RW_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT
+         L12(I,J,K) = RUV_HAT(I,J,K) - RU_HAT(I,J,K)*RV_HAT(I,J,K)*INV_RHOPHAT
+         L13(I,J,K) = RUW_HAT(I,J,K) - RU_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT
+         L23(I,J,K) = RVW_HAT(I,J,K) - RV_HAT(I,J,K)*RW_HAT(I,J,K)*INV_RHOPHAT
       ENDDO
    ENDDO
 ENDDO
@@ -1168,7 +1168,7 @@ LES_IF: IF (LES) THEN
    ENDDO
 
    ! NOTE: SLIP_FACTOR is no longer used to compute the wall stress, see VELOCITY_BC.
-   ! The stress is taken directly from U_TAU. SLIP_FACTOR is, however, still used to 
+   ! The stress is taken directly from U_TAU. SLIP_FACTOR is, however, still used to
    ! compute the velocity gradient at the wall that feeds into the wall vorticity.
    ! Since the gradients implied by the wall function can be large and lead to instabilities,
    ! we bound the wall slip between no slip and free slip.
@@ -1334,14 +1334,14 @@ DPDS = C(1,1)*GRADP(1) + C(2,1)*GRADP(2)
 ! transform velocity gradient tensor (Pope A.23)
 DUSDS = C(1,1)*C(1,1)*GRADU(1,1) + C(1,1)*C(2,1)*GRADU(1,2) &
       + C(2,1)*C(1,1)*GRADU(2,1) + C(2,1)*C(2,1)*GRADU(2,2)
-      
+
 DUSDN = C(1,1)*C(1,2)*GRADU(1,1) + C(1,1)*C(2,2)*GRADU(1,2) &
       + C(2,1)*C(1,2)*GRADU(2,1) + C(2,1)*C(2,2)*GRADU(2,2)
 
 ! transform stress tensor
 TSN = C(1,1)*C(1,2)*TAU_IJ(1,1) + C(1,1)*C(2,2)*TAU_IJ(1,2) &
     + C(2,1)*C(1,2)*TAU_IJ(2,1) + C(2,1)*C(2,2)*TAU_IJ(2,2)
-    
+
 ! update boundary layer equations
 
 ! update wall-normal velocity
@@ -1442,7 +1442,7 @@ DO I=1,3
       DUSDS = DUSDS + C(I,1)*C(J,1)*GRADU(I,J)
       DUPDP = DUPDP + C(I,2)*C(J,2)*GRADU(I,J)
       DUNDN = DUNDN + C(I,3)*C(J,3)*GRADU(I,J)
-      
+
       DUSDN = DUSDN + C(I,1)*C(J,3)*GRADU(I,J)
       TSN   = TSN   + C(I,1)*C(J,3)*TAU_IJ(I,J)
    ENDDO
@@ -1452,7 +1452,7 @@ ENDDO
 !print *
 !print *,DIVU,DUSDS+DUPDP+DUNDN
 !print *,GRADU
-    
+
 ! update boundary layer equations
 
 ! update wall-normal velocity
@@ -1506,7 +1506,7 @@ IF (EVACUATION_ONLY(NM)) RETURN
 VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    VT => MESHES(NM)%VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
-   
+
    SELECT CASE(ABS(VT%IOR))
       CASE(1)
          VT%X_EDDY_MIN = VT%X1-MAXVAL(VT%SIGMA_IJ(:,1))
@@ -1532,12 +1532,12 @@ VENT_LOOP: DO NV=1,MESHES(NM)%N_VENT
    END SELECT
 
    VT%EDDY_BOX_VOLUME = (VT%X_EDDY_MAX-VT%X_EDDY_MIN)*(VT%Y_EDDY_MAX-VT%Y_EDDY_MIN)*(VT%Z_EDDY_MAX-VT%Z_EDDY_MIN)
-   
+
    EDDY_LOOP: DO NE=1,VT%N_EDDY
       IERROR=1; CALL EDDY_POSITION(NE,NV,NM,IERROR)
       CALL EDDY_AMPLITUDE(NE,NV,NM)
    ENDDO EDDY_LOOP
-   
+
    ! Cholesky decomposition of Reynolds stress tensor
    A_IJ => VT%A_IJ
    R_IJ => VT%R_IJ
@@ -1581,7 +1581,7 @@ CALL POINT_TO_MESH(NM)
 VENT_LOOP: DO NV=1,N_VENT
    VT => VENTS(NV)
    IF (VT%N_EDDY==0) CYCLE VENT_LOOP
-   
+
    VT%U_EDDY = 0._EB
    VT%V_EDDY = 0._EB
    VT%W_EDDY = 0._EB
@@ -1594,7 +1594,7 @@ VENT_LOOP: DO NV=1,N_VENT
    ENDIF
    PROFILE_FACTOR = 1._EB
    RAMP_T = EVALUATE_RAMP(TSI,SF%TAU(TIME_VELO),SF%RAMP_INDEX(TIME_VELO))
-   
+
    IOR_SELECT: SELECT CASE(ABS(VT%IOR))
       CASE(1)
          EDDY_LOOP_1: DO NE=1,VT%N_EDDY ! loop over eddies
@@ -1611,13 +1611,13 @@ VENT_LOOP: DO NV=1,N_VENT
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%U_EDDY(JJ,KK) = VT%U_EDDY(JJ,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (VT%X1  - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%V_EDDY(JJ,KK) = VT%V_EDDY(JJ,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (VT%X1  - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
@@ -1641,20 +1641,20 @@ VENT_LOOP: DO NV=1,N_VENT
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%U_EDDY(II,KK) = VT%U_EDDY(II,KK) + VT%CU_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (VT%Y1  - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%V_EDDY(II,KK) = VT%V_EDDY(II,KK) + VT%CV_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (VT%Y1  - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (ZC(KK) - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
-                  VT%W_EDDY(II,KK) = VT%W_EDDY(II,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
+                  VT%W_EDDY(II,KK) = VT%W_EDDY(II,KK) + VT%CW_EDDY(NE)*SHAPE_FACTOR
                ENDDO
-            ENDDO  
+            ENDDO
          ENDDO EDDY_LOOP_2
       CASE(3)
          EDDY_LOOP_3: DO NE=1,VT%N_EDDY
@@ -1671,39 +1671,39 @@ VENT_LOOP: DO NV=1,N_VENT
                   ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(1,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%U_EDDY(II,JJ) = VT%U_EDDY(II,JJ) + VT%CU_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(2,1)
                   YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(2,2)
                   ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(2,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
                   VT%V_EDDY(II,JJ) = VT%V_EDDY(II,JJ) + VT%CV_EDDY(NE)*SHAPE_FACTOR
-                  
+
                   XX = (XC(II) - VT%X_EDDY(NE))/VT%SIGMA_IJ(3,1)
                   YY = (YC(JJ) - VT%Y_EDDY(NE))/VT%SIGMA_IJ(3,2)
                   ZZ = (VT%Z1  - VT%Z_EDDY(NE))/VT%SIGMA_IJ(3,3)
                   SHAPE_FACTOR = SHAPE_FUNCTION(XX,SHAPE_CODE)*SHAPE_FUNCTION(YY,SHAPE_CODE)*SHAPE_FUNCTION(ZZ,SHAPE_CODE)
-                  VT%W_EDDY(II,JJ) = VT%W_EDDY(II,JJ) + VT%CW_EDDY(NE)*SHAPE_FACTOR 
+                  VT%W_EDDY(II,JJ) = VT%W_EDDY(II,JJ) + VT%CW_EDDY(NE)*SHAPE_FACTOR
                ENDDO
-            ENDDO  
+            ENDDO
          ENDDO EDDY_LOOP_3
    END SELECT IOR_SELECT
-   
+
    EDDY_VOLUME(1) = VT%SIGMA_IJ(1,1)*VT%SIGMA_IJ(1,2)*VT%SIGMA_IJ(1,3)
    EDDY_VOLUME(2) = VT%SIGMA_IJ(2,1)*VT%SIGMA_IJ(2,2)*VT%SIGMA_IJ(2,3)
    EDDY_VOLUME(3) = VT%SIGMA_IJ(3,1)*VT%SIGMA_IJ(3,2)*VT%SIGMA_IJ(3,3)
-   
+
    VOLUME_WEIGHTING_FACTOR(1) = MIN(1._EB,SQRT(VT%EDDY_BOX_VOLUME/REAL(VT%N_EDDY,EB)/EDDY_VOLUME(1)))
    VOLUME_WEIGHTING_FACTOR(2) = MIN(1._EB,SQRT(VT%EDDY_BOX_VOLUME/REAL(VT%N_EDDY,EB)/EDDY_VOLUME(2)))
    VOLUME_WEIGHTING_FACTOR(3) = MIN(1._EB,SQRT(VT%EDDY_BOX_VOLUME/REAL(VT%N_EDDY,EB)/EDDY_VOLUME(3)))
-   
+
    ! note: EDDY_VOLUME included in SQRT based on Jung-il Choi write up.
-   
+
    VT%U_EDDY = VT%U_EDDY*VOLUME_WEIGHTING_FACTOR(1)
    VT%V_EDDY = VT%V_EDDY*VOLUME_WEIGHTING_FACTOR(2)
    VT%W_EDDY = VT%W_EDDY*VOLUME_WEIGHTING_FACTOR(3)
-   
+
    ! subtract mean from normal components so that fluctuations do not affect global volume flow
-   
+
    SELECT CASE (ABS(VT%IOR))
       CASE(1)
          VT%U_EDDY = VT%U_EDDY - SUM(VT%U_EDDY)/SIZE(VT%U_EDDY)
@@ -1733,7 +1733,7 @@ IF (IERROR==0) THEN
    IF (VT%X_EDDY(NE)<VT%X_EDDY_MIN .OR. VT%X_EDDY(NE)>VT%X_EDDY_MAX .OR. &
        VT%Y_EDDY(NE)<VT%Y_EDDY_MIN .OR. VT%Y_EDDY(NE)>VT%Y_EDDY_MAX .OR. &
        VT%Z_EDDY(NE)<VT%Z_EDDY_MIN .OR. VT%Z_EDDY(NE)>VT%Z_EDDY_MAX)       THEN
-       
+
        IERROR=1 ! generate new positions and amplitudes (see EDDY_AMPLITUDE)
     ENDIF
 ENDIF
@@ -1754,7 +1754,7 @@ REAL(EB) :: EPS_EDDY(3)
 REAL     :: RN
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 INTEGER :: J
-    
+
 EPS_EDDY=-1._EB
 CALL RANDOM_NUMBER(RN); IF (RN>0.5_EB) EPS_EDDY(1)=1._EB
 CALL RANDOM_NUMBER(RN); IF (RN>0.5_EB) EPS_EDDY(2)=1._EB
@@ -1833,7 +1833,7 @@ DO K=1,KBAR
       DO I=0,IBAR
 
          DELTA = LES_FILTER_WIDTH_FUNCTION(DXN(I),DY(J),DZ(K))
-               
+
          DUDX = (UU(I+1,J,K)-UU(I-1,J,K))/(DX(I)+DX(I+1))
          DUDY = (UU(I,J+1,K)-UU(I,J-1,K))*DYN1
          DUDZ = (UU(I,J,K+1)-UU(I,J,K-1))*DZN1
@@ -1845,9 +1845,9 @@ DO K=1,KBAR
 
          DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I+1,J,K+1)*ZZP(I+1,J,K+1,N) &
                                   - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I+1,J,K-1)*ZZP(I+1,J,K-1,N) )
-               
+
          RHO_D_DZDX(I,J,K) = RHO_D_DZDX(I,J,K) - DELTA**2*OO12*(DUDX*DRHOZDX + DUDY*DRHOZDY + DUDZ*DRHOZDZ)
-              
+
       ENDDO
    ENDDO
 ENDDO
@@ -1859,7 +1859,7 @@ DO K=1,KBAR
       DO I=1,IBAR
 
          DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DYN(J),DZ(K))
-               
+
          DVDX = (VV(I+1,J,K)-VV(I-1,J,K))/(DXN(I-1)+DXN(I))
          DVDY = (VV(I,J+1,K)-VV(I,J-1,K))*DYN1
          DVDZ = (VV(I,J,K+1)-VV(I,J,K-1))*DZN1
@@ -1871,9 +1871,9 @@ DO K=1,KBAR
 
          DRHOZDZ = 0.25_EB*RDZ(K)*( RHOP(I,J,K+1)*ZZP(I,J,K+1,N) + RHOP(I,J+1,K+1)*ZZP(I,J+1,K+1,N) &
                                   - RHOP(I,J,K-1)*ZZP(I,J,K-1,N) - RHOP(I,J+1,K-1)*ZZP(I,J+1,K-1,N) )
-            
+
          RHO_D_DZDY(I,J,K) = RHO_D_DZDY(I,J,K) - DELTA**2*OO12*(DVDX*DRHOZDX + DVDY*DRHOZDY + DVDZ*DRHOZDZ)
-               
+
       ENDDO
    ENDDO
 ENDDO
@@ -1885,7 +1885,7 @@ DO K=0,KBAR
       DO I=1,IBAR
 
          DELTA = LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZN(K))
-               
+
          DWDX = (WW(I+1,J,K)-WW(I-1,J,K))/(DXN(I-1)+DXN(I))
          DWDY = (WW(I,J+1,K)-WW(I,J-1,K))*DYN1
          DWDZ = (WW(I,J,K+1)-WW(I,J,K-1))*DZN1
@@ -1897,9 +1897,9 @@ DO K=0,KBAR
                                   - RHOP(I,J-1,K)*ZZP(I,J-1,K,N) - RHOP(I,J-1,K+1)*ZZP(I,J-1,K+1,N) )
 
          DRHOZDZ = RDZN(K)*(RHOP(I,J,K+1)*ZZP(I,J,K+1,N)-RHOP(I,J,K)*ZZP(I,J,K,N))
-               
+
          RHO_D_DZDZ(I,J,K) = RHO_D_DZDZ(I,J,K) - DELTA**2*OO12*(DWDX*DRHOZDX + DWDY*DRHOZDY + DWDZ*DRHOZDZ)
-               
+
       ENDDO
    ENDDO
 ENDDO
@@ -1964,7 +1964,7 @@ DO KK=1,NX
       DO II=1,NX
          I_MESH = CEILING(REAL(II,EB)/REAL(NX_BLOCK,EB))
          I = II-(I_MESH-1)*NX_BLOCK
-         
+
          ! lexicographic ordering of mesh blocks
          IM = (K_MESH-1)*MX*MX + (J_MESH-1)*MX + I_MESH
          M=>MESHES(IM)
@@ -2185,7 +2185,7 @@ DO k = 1,nn(3)
       DO i = 1,nn(1)
 
          WRITE (file_num,999) UU(I,J,K),VV(I,J,K),WW(I,J,K),0._EB,0._EB
-         
+
       END DO
    END DO
 END DO
@@ -2302,12 +2302,12 @@ REAL(EB) :: vt(0:n)
 ! for dimensional wavenumbers
 REAL(EB) :: wn(0:n)
 REAL(EB) :: L, k0
-      
+
 L = Lm
 
 k0 = 2*PI/L
 kmax = n/2
-   
+
 wn(0) = 0._EB
 do k = 1,n
    wn(k) = k0*k
@@ -2504,7 +2504,7 @@ IMPLICIT NONE
       INTEGER, INTENT(IN) :: nn(3),ndim,isign,iform
       COMPLEX(DPC), INTENT(INOUT) :: data3(nn(1),nn(2),nn(3))
       REAL(EB), INTENT (INOUT) :: work(2*nn(1))
-      
+
       INTEGER :: ifact(32),ntot,idim,np1,n,np2,m,ntwo,iif,idiv,iquot,irem,inon2,     &
                  icase,ifmin,i1rng,i,j,k,np2hf,i2,i1max,i1,i3,j3,nwork,ifp2,ifp1,    &
                  i2max,np1tw,ipar,k1,k2,mmax,lmax,l,kmin,kdif,kstep,k3,k4,np1hf,     &
@@ -2514,9 +2514,9 @@ IMPLICIT NONE
       REAL(EB) :: data(2*nn(1)*nn(2)*nn(3)),tempr,tempi,u1r,u1i,u2r,u2i,u3r,         &
                   u3i,u4r,u4i,t2r,t2i,t3r,t3i,t4r,t4i,sumr,sumi,oldsr,oldsi,         &
                   difr,difi,theta,wr,wi,w2r,w2i,w3r,w3i,wstpr,wstpi,twowr
-      
+
       REAL(EB), PARAMETER :: twopi=6.2831853071796, rthlf=0.70710678118655
-      
+
       ! reshape data3 to 1D array
       data=0._EB
       n=1
@@ -2529,7 +2529,7 @@ IMPLICIT NONE
           enddo
         enddo
       enddo
-      
+
       if(ndim-1.lt.0) goto 920
 1     ntot=2
       do idim=1,ndim
@@ -3024,14 +3024,14 @@ IMPLICIT NONE
       enddo
 
       ! reshape data back to 3D complex array
-      
+
       !! for debug purposes (move to 920)
       !print *,size(data)
       !do i=1,size(data)
       !   print *,data(i)
       !enddo
       !stop
-      
+
 920   n=1
       do k=1,nn(3)
         do j=1,nn(2)
@@ -3042,7 +3042,7 @@ IMPLICIT NONE
         enddo
       enddo
       return
-      
+
 END SUBROUTINE fourier_f2003
 
 END MODULE TURBULENCE
@@ -3063,10 +3063,45 @@ REAL(EB), PUBLIC :: RHO_0_MMS,RHO_1_MMS
 REAL(EB), PUBLIC, PARAMETER :: UF_MMS=0.5_EB,WF_MMS=0.5_EB,VISC_MMS=0.001_EB,DIFF_MMS=0.001_EB,WAVE_NUM_MMS=2._EB,FREQ_MMS=2._EB
 
 PRIVATE
-PUBLIC :: SHUNN_MMS_3,VD2D_MMS_Z,VD2D_MMS_RHO,VD2D_MMS_RHO_OF_Z,VD2D_MMS_U,VD2D_MMS_V, &
-          VD2D_MMS_Z_SRC,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC,VD2D_MMS_Z_OF_RHO,VD2D_MMS_DIV
+PUBLIC :: SHUNN_MMS_3,VD2D_MMS_Z,VD2D_MMS_RHO,VD2D_MMS_RHO_OF_Z,VD2D_MMS_U,VD2D_MMS_V,VD2D_MMS_P, &
+          VD2D_MMS_Z_SRC,VD2D_MMS_U_SRC,VD2D_MMS_V_SRC,VD2D_MMS_Z_OF_RHO,VD2D_MMS_DIV,SAAD_MMS_1,VD2D_MMS_H, &
+          VD2D_MMS_U_SRC_3,VD2D_MMS_V_SRC_3,VD2D_MMS_H_3,VD2D_MMS_P_3
 
 CONTAINS
+
+SUBROUTINE SAAD_MMS_1(NM)
+USE MESH_POINTERS
+USE MESH_VARIABLES
+USE GLOBAL_CONSTANTS, ONLY: P_INF,TMPA,N_TRACKED_SPECIES
+USE PHYSICAL_FUNCTIONS, ONLY: GET_SPECIFIC_GAS_CONSTANT
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K
+REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB), PARAMETER :: L=2._EB, X0=0._EB, SIGMA=0.1_EB
+REAL(EB), PARAMETER :: GAS_CONSTANT=8314.472_EB
+
+! set up problem parameters
+
+RHO_0_MMS = P_INF*SPECIES_MIXTURE(1)%MW/(GAS_CONSTANT*TMPA)
+RHO_1_MMS = P_INF*SPECIES_MIXTURE(2)%MW/(GAS_CONSTANT*TMPA)
+
+CALL POINT_TO_MESH(NM)
+
+DO K=0,KBP1
+   DO J=0,JBP1
+      DO I=0,IBP1
+         !ZZ(I,J,K,2) = EXP(-.5_EB*(XC(I)-X0)**2/SIGMA**2)
+         ZZ(I,J,K,2) = 0.5_EB*(1._EB+SIN(2._EB*PI*XC(I)/L))
+         ZZ(I,J,K,1) = 1._EB - ZZ(I,J,K,2)
+         ZZ_GET(1:2) = ZZ(I,J,K,1:2)
+         CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
+         RHO(I,J,K) = P_INF/(TMPA*RSUM(I,J,K))
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE SAAD_MMS_1
 
 SUBROUTINE SHUNN_MMS_3(NM)
 USE MESH_POINTERS
@@ -3101,7 +3136,9 @@ DO K=0,KBP1
          ZZ(I,J,K,1) = 1._EB - ZZ(I,J,K,2)
          ZZ_GET(1:2) = ZZ(I,J,K,1:2)
          CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
-         RHO(I,J,K) = P_INF/(TMPA*RSUM(I,J,K))
+         RHO(I,J,K) = P_INF/(TMPA*RSUM(I,J,K)) !; print *, RHO(I,J,K), VD2D_MMS_RHO(XC(I),ZC(K),0._EB)
+         H(I,J,K)  = VD2D_MMS_H_3(XC(I),ZC(K),0._EB)
+         HS(I,J,K) = VD2D_MMS_H_3(XC(I),ZC(K),DT)
       ENDDO
    ENDDO
 ENDDO
@@ -3154,16 +3191,18 @@ FUNCTION VD2D_MMS_U(X,Y,T)
 IMPLICIT NONE
 REAL(EB),INTENT (IN) :: X,Y,T
 REAL(EB) :: VD2D_MMS_U
-VD2D_MMS_U=-W/K/4.0_EB * COS(K * PI * X) * SIN(K * PI * Y) * SIN(W * PI * T) &
-   * (R1-R0)/VD2D_MMS_RHO(X,Y,T)
+! VD2D_MMS_U=-W/K/4.0_EB * COS(K * PI * X) * SIN(K * PI * Y) * SIN(W * PI * T) &
+!    * (R1-R0)/VD2D_MMS_RHO(X,Y,T)
+VD2D_MMS_U = UF_MMS + (R1-R0)/VD2D_MMS_RHO(X,Y,T)*(-W/(4._EB*K))*COS(PI*K*X)*SIN(PI*K*Y)*SIN(PI*W*T)
 END FUNCTION VD2D_MMS_U
 
 FUNCTION VD2D_MMS_V(X,Y,T)
 IMPLICIT NONE
 REAL(EB),INTENT (IN) :: X,Y,T
 REAL(EB) :: VD2D_MMS_V
-VD2D_MMS_V = VD2D_MMS_U(Y,X,T)
-!! NOTE: V OBTAINED FROM U BY TRANSPOSING X <--> Y
+! VD2D_MMS_V = VD2D_MMS_U(Y,X,T)
+! !! NOTE: V OBTAINED FROM U BY TRANSPOSING X <--> Y
+VD2D_MMS_V = WF_MMS + (R1-R0)/VD2D_MMS_RHO(X,Y,T)*(-W/(4._EB*K))*SIN(PI*K*X)*COS(PI*K*Y)*SIN(PI*W*T)
 END FUNCTION VD2D_MMS_V
 
 FUNCTION VD2D_MMS_P(X,Y,T)
@@ -3171,9 +3210,32 @@ IMPLICIT NONE
 REAL(EB),INTENT (IN) :: X,Y,T
 REAL(EB) :: VD2D_MMS_P
 VD2D_MMS_P = &
-   VD2D_MMS_RHO(X,Y,T) * VD2D_MMS_U(X,Y,T) * VD2D_MMS_V(X,Y,T)/2.0_EB
+   VD2D_MMS_RHO(X,Y,T) * VD2D_MMS_U(X,Y,T) * VD2D_MMS_V(X,Y,T) / 2.0_EB
    !! NOTE: PRESSURE CAN VARY BY A CONSTANT AND STILL SATISFY THE MMS
 END FUNCTION VD2D_MMS_P
+
+FUNCTION VD2D_MMS_P_3(X,Y,T)
+IMPLICIT NONE
+REAL(EB),INTENT (IN) :: X,Y,T
+REAL(EB) :: VD2D_MMS_P_3
+VD2D_MMS_P_3 = &
+   VD2D_MMS_RHO(X,Y,T) * ( VD2D_MMS_H_3(X,Y,T) - 0.5_EB*(VD2D_MMS_U(X,Y,T)**2 + VD2D_MMS_V(X,Y,T)**2) )
+END FUNCTION VD2D_MMS_P_3
+
+FUNCTION VD2D_MMS_H(X,Y,T)
+IMPLICIT NONE
+REAL(EB),INTENT (IN) :: X,Y,T
+REAL(EB) :: VD2D_MMS_H
+VD2D_MMS_H = &
+   VD2D_MMS_P(X,Y,T)/VD2D_MMS_RHO(X,Y,T) + 0.5_EB*(VD2D_MMS_U(X,Y,T)**2 + VD2D_MMS_V(X,Y,T)**2)
+END FUNCTION VD2D_MMS_H
+
+FUNCTION VD2D_MMS_H_3(X,Y,T)
+IMPLICIT NONE
+REAL(EB),INTENT (IN) :: X,Y,T
+REAL(EB) :: VD2D_MMS_H_3
+VD2D_MMS_H_3 = 0.5_EB * (VD2D_MMS_U(X,Y,T)-UF_MMS) * (VD2D_MMS_V(X,Y,T)-WF_MMS)
+END FUNCTION VD2D_MMS_H_3
 
 FUNCTION VD2D_MMS_Z_SRC(X,Y,T)
 IMPLICIT NONE
@@ -3277,6 +3339,252 @@ VD2D_MMS_DIV = DUDX + DVDY
 
 END FUNCTION VD2D_MMS_DIV
 
+FUNCTION VD2D_MMS_U_SRC_3(X,Y,T)
+! This source term is obtained by running the symbolic python script
+! /Utilities/Python/shunn3_stokes_mms_sym.py
+IMPLICIT NONE
+REAL(EB),INTENT (IN) :: X,Y,T
+REAL(EB) :: VD2D_MMS_U_SRC_3, UF,VF
+UF=UF_MMS
+VF=WF_MMS
+
+VD2D_MMS_U_SRC_3 = -pi*uf*w*(-r0 + r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + &
+(-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w)/4 + pi*vf*w*(-r0 + r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf &
++ y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + &
+1)/r0)*sin(pi*t*w)*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))/4 - (vf - w*(-r0 + &
+r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*sin(pi*k*(-t*uf + &
+x))*sin(pi*t*w)*cos(pi*k*(-t*vf + y))/(4*k))*(w*(-r0 + r1)*(-pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)**2) + pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (pi*k*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1))/r0)*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/(4*k) - w*(-r0 + r1)*(-pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)**2) + pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (pi*k*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1))/r0)*sin(pi*k*(-t*uf + &
+x))*sin(pi*t*w)*cos(pi*k*(-t*vf + y))/(4*k)) - (2*mu*(pi**2*k*w*(-r0 + r1)*((sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1) + 1)/r0)*sin(pi*k*(-t*vf + y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/12 + pi*w*(-r0 + &
+r1)*(-pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf &
++ x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*t*w)*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))/12 + pi*w*(-r0 + r1)*(-pi*k*(-r0/r1 &
++ 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w)/4 - w*(-r0 + &
+r1)*(2*pi**2*k**2*(-r0/r1 + 1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))**2*cos(pi*k*(-t*uf + x))**2*cos(pi*t*w)**2/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3) + pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*vf + &
+y))**2*cos(pi*k*(-t*uf + x))**2*cos(pi*t*w)**2/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - pi**2*k**2*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (-2*pi**2*k**2*(-r0/r1 + 1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))**2*cos(pi*k*(-t*uf + x))**2*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3 - pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 + 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*vf + y))**2*cos(pi*k*(-t*uf + &
+x))**2*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) &
++ 1)**2 + pi**2*k**2*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1))/r0)*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/(6*k) + w*(-r0 + r1)*(2*pi**2*k**2*(-r0/r1 + &
+1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r1*(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3) - pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*cos(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r1*(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + &
+pi**2*k**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-2*pi**2*k**2*(-r0/r1 + &
+1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3 + pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*cos(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 + 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf &
++ x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi**2*k**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*k*(-t*uf + x))*sin(pi*t*w)*cos(pi*k*(-t*vf + y))/(12*k)) + mu*(pi**2*k*w*(-r0 + &
+r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/2 - 3*pi*w*(-r0 + r1)*(-pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)**2) + pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (pi*k*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*t*w)*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))/4 + pi*w*(-r0 + r1)*(-pi*k*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w)/4 - w*(-r0 + &
+r1)*(2*pi**2*k**2*(-r0/r1 + 1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*uf + x))**2*cos(pi*k*(-t*vf + y))**2*cos(pi*t*w)**2/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3) + pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))**2*cos(pi*k*(-t*vf + y))**2*cos(pi*t*w)**2/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - pi**2*k**2*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (-2*pi**2*k**2*(-r0/r1 + 1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*uf + x))**2*cos(pi*k*(-t*vf + y))**2*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3 - pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 + 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))**2*cos(pi*k*(-t*vf + &
+y))**2*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) &
++ 1)**2 + pi**2*k**2*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1))/r0)*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/(4*k) - w*(-r0 + r1)*(2*pi**2*k**2*(-r0/r1 + &
+1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r1*(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3) - pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*cos(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) - 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r1*(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + &
+pi**2*k**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-2*pi**2*k**2*(-r0/r1 + &
+1)**2*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**3 + pi**2*k**2*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*cos(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 + 2*pi**2*k**2*(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w)**2/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf &
++ x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi**2*k**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*k*(-t*uf + x))*sin(pi*t*w)*cos(pi*k*(-t*vf + y))/(4*k)))*((sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1) + 1)/r0) - (-pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf &
++ x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)) + (pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*(-(uf - w*(-r0 + r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + &
+(-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/(4*k))**2/2 - (vf - w*(-r0 + r1)*((sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1) + 1)/r0)*sin(pi*k*(-t*uf + x))*sin(pi*t*w)*cos(pi*k*(-t*vf + y))/(4*k))**2/2 + w**2*(-r0 + &
+r1)**2*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)**2*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))/(32*k**2))/((sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1) + 1)/r0) - pi*w**2*(-r0 + r1)**2*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + &
+(-(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)**2*sin(pi*k*(-t*uf + &
+x))**2*sin(pi*k*(-t*vf + y))*sin(pi*t*w)**2*cos(pi*k*(-t*vf + y))/(32*k) + pi*w**2*(-r0 + &
+r1)**2*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)**2*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w)**2*cos(pi*k*(-t*uf + x))**2*cos(pi*k*(-t*vf + y))/(32*k) - pi*w**2*(-r0 + &
+r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(4*k) - w*(-r0 + r1)*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)*(pi*k*uf*(-r0/r1 + 1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w) + pi*k*vf*(-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w) + pi*w*(-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w))/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2) + (-pi*k*uf*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w) - pi*k*vf*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w) - &
+pi*w*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w))/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*(pi*k*uf*(-r0/r1 + 1)*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w) + pi*k*vf*(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + pi*w*(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w))/(r0/r1 &
++ (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)**2 - &
+(-pi*k*uf*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w) - pi*k*vf*sin(pi*k*(-t*uf + &
+x))*cos(pi*k*(-t*vf + y))*cos(pi*t*w) - pi*w*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*sin(pi*t*w))/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1))/r0)*sin(pi*k*(-t*vf + y))*sin(pi*t*w)*cos(pi*k*(-t*uf + x))/(4*k) + w**2*(-r0 + &
+r1)**2*((sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + (-(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1) + 1)/r0)*(-2*pi*k*(-r0/r1 + 1)*(sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + &
+x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + &
+1)**2) + 2*pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r1*(r0/r1 + (-r0/r1 + &
+1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)) + 2*(pi*k*(-r0/r1 + &
+1)*(sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1)*sin(pi*k*(-t*vf + &
+y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + (-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + &
+y))*cos(pi*t*w) + 1)**2 - pi*k*sin(pi*k*(-t*vf + y))*cos(pi*k*(-t*uf + x))*cos(pi*t*w)/(r0/r1 + &
+(-r0/r1 + 1)*sin(pi*k*(-t*uf + x))*sin(pi*k*(-t*vf + y))*cos(pi*t*w) + 1))/r0)*sin(pi*k*(-t*uf + &
+x))*sin(pi*k*(-t*vf + y))*sin(pi*t*w)**2*cos(pi*k*(-t*uf + x))*cos(pi*k*(-t*vf + y))/(32*k**2)
+
+END FUNCTION VD2D_MMS_U_SRC_3
+
+FUNCTION VD2D_MMS_V_SRC_3(X,Y,T)
+IMPLICIT NONE
+REAL(EB),INTENT (IN) :: X,Y,T
+REAL(EB) :: VD2D_MMS_V_SRC_3
+
+VD2D_MMS_V_SRC_3 = VD2D_MMS_U_SRC_3(Y,X,T)
+
+END FUNCTION VD2D_MMS_V_SRC_3
 
 END MODULE MANUFACTURED_SOLUTIONS
 
@@ -3456,7 +3764,7 @@ L_MP = 3._EB*L_MIN
 !          |<------------- L ------------->|
 !          4   5   6   7   8   9   10  11  12
 !        | O | O | O | O | O | O | O | O | O |   FOR THIS EXAMPLE, KE = 9
-!          ^                               ^ 
+!          ^                               ^
 !          J0                              JL    JL = J0 + KE - 1
 
 CALL SELECTEDDY(J0,KE,Y0,L,0._EB,D,L_MIN,L_MAX,L_MP,H,1,BC,PDFTAG,RET,N_LMAX)
@@ -3657,7 +3965,7 @@ SELECT CASE(PDFTAG)
       ! RET = 80._EB
       REFAC = RET**((3._EB/P)-1._EB)
       LK = 0.4_EB/(RD-R0)
-      NK = (LK)/(RET**(1._EB/P))    
+      NK = (LK)/(RET**(1._EB/P))
       L = (LK)*((RN*(1._EB-(RET**((3._EB/P)-1._EB)))+(RET**((3._EB/P)-1._EB)))**(1._EB/(P-3._EB)))
 END SELECT
 
@@ -3795,7 +4103,7 @@ SELECT CASE(PDFTAG)
       !RET = 80.D0
       P = 1.334D0
       LK = 0.4D0/(RD-R0)
-      NK = (LK)/(RET**(1.D0/P))  
+      NK = (LK)/(RET**(1.D0/P))
       FL =  ((3-P)/(LK*(((LK/NK)**(3-P))-1))) ! LEM PDF
 END SELECT
 ! EVALUATE LOCATION PROBABILITY DENSITY AT Y0 (UNIFORM)
@@ -4300,7 +4608,7 @@ IF (FLAVOR==1) THEN
       SGN = SIGN(1._EB,P_U)
    ENDIF
    C_U = COEF_C*( -P_U + SGN*SQRT(ARG) )
- 
+
    IF (ABS(P_V) < EPS_LOC) THEN
       CALL RANDOM_NUMBER(RN)
       IF (RN > 0.5_EB) THEN
@@ -4324,7 +4632,7 @@ IF (FLAVOR==1) THEN
       SGN = SIGN(1._EB,P_W)
    ENDIF
    C_W = COEF_C*( -P_W + SGN*SQRT(ARG) )
- 
+
 ELSE
 
    PU2=P_U**2 + ALPHA*(-P_U**2 + 0.5*P_V**2 + 0.5*P_W**2)
@@ -4350,7 +4658,7 @@ ELSE
       GRAVITY_TERM = 4._EB*BETA_U*S*LD**2*G*RHO_K
    ENDIF
    C_U = COEF_C*( -P_U + SGN*SQRT( PU2 + GRAVITY_TERM ) )
- 
+
    IF (ABS(P_V) < EPS_LOC) THEN
       CALL RANDOM_NUMBER(RN)
       IF (RN > 0.5) THEN
@@ -4365,7 +4673,7 @@ ELSE
       GRAVITY_TERM = 4._EB*BETA_V*S*LD**2*G*RHO_K
    ENDIF
    C_V = COEF_C*( -P_V + SGN*SQRT( PV2 + GRAVITY_TERM ) )
- 
+
    IF (ABS(P_W) < EPS_LOC) THEN
       CALL RANDOM_NUMBER(RN)
       IF (RN > 0.5) THEN
@@ -4380,7 +4688,7 @@ ELSE
       GRAVITY_TERM = 4._EB*BETA_W*S*LD**2*G*RHO_K
    ENDIF
    C_W = COEF_C*( -P_W + SGN*SQRT( PW2 + GRAVITY_TERM ) )
- 
+
 ENDIF
 
 END SUBROUTINE KERNELAMP
@@ -4395,11 +4703,11 @@ IMPLICIT NONE
 ! C = 3.68 AND Z = 0.14. [1] THEN COMPARES THE EVOLUTION OF THE
 ! MOMENTUM DEFICIT, \DELTA_M, WITH THE DNS RESULTS OF MOSER AND
 ! ROGERS (JFM, 1998), WHO OBTAIN D(\DELTA_M)/DT = 0.014*(\DELTA U)
-! FOR THE SELF-SIMILAR REGION.  IN [1], THE ODT FIELD IS INITIALIZED 
+! FOR THE SELF-SIMILAR REGION.  IN [1], THE ODT FIELD IS INITIALIZED
 ! WITH A PIECEWISE-LINEAR PROFILE SUCH THAT THE RE BASED ON \DELTA_M
 ! WAS 427.  THAT IS, RE_D = (\DELTA U)*(\DELTA_M)/NU = 427.
 !
-!                            Y ^   
+!                            Y ^
 !                              :---->| U(Y) = (\DELTA U)/2
 !                              :     |
 !                              :     |
@@ -4410,16 +4718,16 @@ IMPLICIT NONE
 !   U(Y) = ((\DELTA U)/DY)*Y   :  /             |
 !                              :/____> Y = 0    |
 !                             /:                DY
-!                           /  :                | 
+!                           /  :                |
 !                         /    :       _ _ _ _ _V_ _
-!                        |     : 
+!                        |     :
 !                        |     :
 !                        |     :
 !                        |     :
 !                        |     :
 !   U(Y) = -(\DELTA U)/2 |<----:
 !                              :
-!                       
+!
 !
 !
 ! HERE WE PICK (\DELTA U) = 2, AND DY = 2.  THE MOMENTUM DEFICIT FOR
@@ -4497,7 +4805,7 @@ BC = 2
 UL = -0.5_EB
 UH =  0.5_EB
 DU = UH-UL ! 1
-RE = 800._EB 
+RE = 800._EB
 DY = 100._EB
 NU = RE/(DU*DY)
 SC = 1._EB
@@ -4555,7 +4863,7 @@ MW(1) = 24.4530_EB
 MW(2) = 24.4530_EB
 ! P = 1. ATM
 ! R = 0.082057 KG*ATM/(KMOL*K)
-! T = 298. K        
+! T = 298. K
 PRT = 1._EB/(0.082057_EB*298._EB)
 DO J = J1,JD
    MW0 = 1._EB/( PHI(1,J)/MW(1) + (1._EB-PHI(1,J))/MW(2) )
@@ -4650,7 +4958,7 @@ TIME_LOOP: DO
          T = TNP1
          EXIT EDDY_SAMPLING_LOOP
       ENDIF
- 
+
    ENDDO EDDY_SAMPLING_LOOP
 
    ! INTEGRATE DIFFUSION EQUATION

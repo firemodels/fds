@@ -1,13 +1,11 @@
 @echo off
 
-set DEBUGOPT=%1
+set fdsrepoin=%1
 set altemail=%2
-set fdsrepoin=%3
+set usematlab=%3
+set emailto=%4
 
-set fdsrepo=FDS-SMVgitclean
-if NOT "%fdsrepoin%" == "" (
-  set fdsrepo=%fdsrepoin%
-)
+set fdsrepo=%fdsrepoin%
 
 :: -------------------------------------------------------------
 ::                         set environment
@@ -84,10 +82,10 @@ call :get_datetime startdate starttime
 
 call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %gitroot%\Utilities\Firebot\firebot_email_list.bat
-if "%DEBUGOPT%" == "debug" (
-   set mailToList=%mailToFDSDebug%
-) else (
-   set mailToList=%mailToFDS%
+
+set mailToList=%mailToFDS%
+if NOT "%emailto%" == "" (
+  set mailToList=%emailto%
 )
 
 :: -------------------------------------------------------------
