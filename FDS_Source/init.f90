@@ -867,7 +867,7 @@ USE PHYSICAL_FUNCTIONS, ONLY: GET_VISCOSITY,GET_SPECIFIC_GAS_CONSTANT,GET_SPECIF
 USE MEMORY_FUNCTIONS, ONLY: COMPUTE_ONE_D_STORAGE_DIMENSIONS,COMPUTE_PARTICLE_STORAGE_DIMENSIONS,COMPUTE_WALL_STORAGE_DIMENSIONS
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE,SEARCH_OTHER_MESHES
 USE CONTROL_VARIABLES
-INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IERR,IPZ,NOM
+INTEGER :: N,I,J,K,II,JJ,KK,IPTS,JPTS,KPTS,N_EDGES_DIM,IW,IC,ICG,IOR,IERR,IPZ,NOM,ITER
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: ZZ_GET(1:N_TRACKED_SPECIES),VC,RTRM,CP
 INTEGER, POINTER :: IBP1, JBP1, KBP1,IBAR, JBAR, KBAR, N_EDGES
@@ -950,8 +950,10 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP_0
 
-! Determine back wall index for exposed surfaces. Only assign BACK_INDEX to wall cells that are not attached 
-! to the exterior boundary of the computational domain.
+! Determine back wall index for wall cells that have an EXPOSED backing and are assigned to OBSTructions that are either 0 or 1
+! cell thick. If the OBSTruction backs up to the exterior face of a MESH, look for the adjacent mesh and assign a back wall index
+! if the OBSTruction is 0 or 1 cell thick. For OBSTructions that abut or cross mesh boundaries, count the wall cells so that they
+! may be exchanged via MPI.
 
 NON_EVAC_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
@@ -967,51 +969,51 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    IF (M%SOLID(ICG)) CYCLE WALL_LOOP
    SF => SURFACE(WC%SURF_INDEX)
 
-   IF (SF%THERMALLY_THICK .AND. SF%BACKING==EXPOSED) THEN
+   IF_THERM_THICK_EXPOSED: IF (SF%THERMALLY_THICK .AND. SF%BACKING==EXPOSED) THEN ! search for the back side
 
+      IOR = WC%ONE_D%IOR
       NOM = NM
+      OM => MESHES(NOM)
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
-      IF (II<1 .OR. II>M%IBAR .OR. JJ<1 .OR. JJ>M%JBAR .OR. KK<1 .OR. KK>M%KBAR) THEN
-         CALL SEARCH_OTHER_MESHES(M%XC(II),M%YC(JJ),M%ZC(KK),NOM,II,JJ,KK)
-         IF (NOM==0) CYCLE WALL_LOOP
-      ENDIF
-      IC = MESHES(NOM)%CELL_INDEX(II,JJ,KK)
-      IOR = WC%ONE_D%IOR
-      IF (.NOT.MESHES(NOM)%SOLID(IC)) THEN
-         WC%BACK_INDEX = MESHES(NOM)%WALL_INDEX(IC,IOR)
-         WC%BACK_MESH  = NOM
-      ELSE
-         SELECT CASE(IOR)
-            CASE(-1)
-               II=II+1
-            CASE( 1)
-               II=II-1
-            CASE(-2)
-               JJ=JJ+1
-            CASE( 2)
-               JJ=JJ-1
-            CASE(-3)
-               KK=KK+1
-            CASE( 3)
-               KK=KK-1
-         END SELECT
-         IF (II<1 .OR. II>MESHES(NOM)%IBAR .OR. JJ<1 .OR. JJ>MESHES(NOM)%JBAR .OR. KK<1 .OR. KK>MESHES(NOM)%KBAR) THEN
-            CALL SEARCH_OTHER_MESHES(MESHES(NOM)%XC(II),MESHES(NOM)%YC(JJ),MESHES(NOM)%ZC(KK),NOM,II,JJ,KK)
+
+      ZERO_OR_ONE_CELL_THICK: DO ITER=1,2 ! Look for the back wall cell face 
+
+         IF (II==0 .OR. II==OM%IBP1 .OR. JJ==0 .OR. JJ==OM%JBP1 .OR. KK==0 .OR. KK==OM%KBP1) THEN
+            IF (II==0)       CALL SEARCH_OTHER_MESHES(OM%X(II)  ,OM%YC(JJ) ,OM%ZC(KK) ,NOM,II,JJ,KK)
+            IF (II==OM%IBP1) CALL SEARCH_OTHER_MESHES(OM%X(II-1),OM%YC(JJ) ,OM%ZC(KK) ,NOM,II,JJ,KK)
+            IF (JJ==0)       CALL SEARCH_OTHER_MESHES(OM%XC(II) ,OM%Y(JJ)  ,OM%ZC(KK) ,NOM,II,JJ,KK)
+            IF (JJ==OM%JBP1) CALL SEARCH_OTHER_MESHES(OM%XC(II) ,OM%Y(JJ-1),OM%ZC(KK) ,NOM,II,JJ,KK)
+            IF (KK==0)       CALL SEARCH_OTHER_MESHES(OM%XC(II) ,OM%YC(JJ) ,OM%Z(KK)  ,NOM,II,JJ,KK)
+            IF (KK==OM%KBP1) CALL SEARCH_OTHER_MESHES(OM%XC(II) ,OM%YC(JJ) ,OM%Z(KK-1),NOM,II,JJ,KK)
             IF (NOM==0) CYCLE WALL_LOOP
+            OM => MESHES(NOM)
          ENDIF
-         IC = MESHES(NOM)%CELL_INDEX(II,JJ,KK)
-         IF (MESHES(NOM)%SOLID(IC)) CYCLE WALL_LOOP
-         WC%BACK_INDEX = MESHES(NOM)%WALL_INDEX(IC,IOR)
-         WC%BACK_MESH  = NOM
-      ENDIF
+         IC = OM%CELL_INDEX(II,JJ,KK)
+         IF (.NOT.OM%SOLID(IC)) THEN ! the back wall face is found
+            WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
+            WC%BACK_MESH  = NOM
+            EXIT ZERO_OR_ONE_CELL_THICK
+         ELSE ! see if the obstruction is one cell thick. If not, get out.
+            IF (ITER==2) CYCLE WALL_LOOP
+            SELECT CASE(IOR)
+               CASE(-1) ; II=II+1
+               CASE( 1) ; II=II-1
+               CASE(-2) ; JJ=JJ+1
+               CASE( 2) ; JJ=JJ-1
+               CASE(-3) ; KK=KK+1
+               CASE( 3) ; KK=KK-1
+            END SELECT
+         ENDIF
+
+      ENDDO ZERO_OR_ONE_CELL_THICK
    
-      IF (NOM/=NM) THEN
+      IF (NOM/=NM) THEN ! count the number of wall cells that need to be exchanged
          M%OMESH(NOM)%N_BACK_WALL_CELLS = M%OMESH(NOM)%N_BACK_WALL_CELLS + 1
       ENDIF
 
-   ENDIF
+   ENDIF IF_THERM_THICK_EXPOSED
 
 ENDDO WALL_LOOP
 
