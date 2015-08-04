@@ -489,7 +489,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
             DELKDELT = &
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                  (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
