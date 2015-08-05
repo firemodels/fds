@@ -137,7 +137,7 @@ fi
 # This check runs during Stages 3 and 5.
 
 # Start firebot timer
-START_TIME=$(date +%s)
+START_TIME=$(date)
 
 # Set time limit (43,200 seconds = 12 hours)
 TIME_LIMIT=43200
