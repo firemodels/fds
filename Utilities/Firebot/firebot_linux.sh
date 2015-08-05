@@ -35,6 +35,7 @@ fi
 # Additional definitions
 BRANCH=
 FORCECLEANREPO=0
+UPDATEREPO=1
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
 FDS_GITBASE=FDS-SMVgitclean
 OUTPUT_DIR="$FIREBOT_DIR/output"
@@ -61,7 +62,9 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
-echo "-d - git_directory - run firebot in git_directory"
+echo "-d - git repository name [default: $FDS_GITBASE]"
+echo ""
+echo "-p - directory containing git repository [default: $FIREBOT_HOME_DIR]"
 echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
@@ -77,7 +80,7 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:d:fhq:v:' OPTION
+while getopts 'b:d:fhnp:q:v:' OPTION
 do
 case $OPTION in
   b)
@@ -86,11 +89,18 @@ case $OPTION in
   d)
    FDS_GITBASE="$OPTARG"
    ;;
+  p)
+   FIREBOT_HOME_DIR="$OPTARG"
+   ;;
   f)
    FORCECLEANREPO=1
+   UPDATEREPO=1
    ;;
   h)
    usage;
+   ;;
+  n)
+   UPDATEREPO=0
    ;;
   q)
    QUEUE="$OPTARG"
@@ -118,10 +128,7 @@ if [[ "$FDS_GITBASE" == "FDS-SMVgitclean" ]]; then
       :
    else
       if [[ "$FORCECLEANREPO" == "0" ]]; then
-         echo "Error: Firebot needs to remove all unversioned files in $FDS_GITBASE."
-         echo "To allow this, re-run using the -f option."
-         echo "Terminating firebot."
-         exit
+         UPDATEREPO=0 
       fi
 
 fi
@@ -216,11 +223,13 @@ clean_git_repo()
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $fdsroot
+      if [[ "$UPDATEREPO" == "1" ]] ; then
 # remove unversioned files
-      git clean -dxf &> /dev/null
+        git clean -dxf &> /dev/null
 # revert to last revision
-      git add . &> /dev/null
-      git reset --hard HEAD &> /dev/null
+        git add . &> /dev/null
+        git reset --hard HEAD &> /dev/null
+      fi
    # If not, create FDS repository and checkout
    else
       echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
@@ -247,8 +256,10 @@ do_git_checkout()
    else
       BRANCH=$CURRENT_BRANCH
    fi
-   echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
-   git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+   if [[ "$UPDATEREPO" == "1" ]] ; then
+     echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
+     git fetch origin >> $OUTPUT_DIR/stage1 2>&1
+   fi
 
    echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
    CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
@@ -265,7 +276,9 @@ do_git_checkout()
       BRANCH=$CURRENT_BRANCH
    fi
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-   git pull >> $OUTPUT_DIR/stage1 2>&1
+   if [[ "$UPDATEREPO" == "1" ]] ; then
+      git pull >> $OUTPUT_DIR/stage1 2>&1
+   fi
    GIT_REVISION=`git describe --long --dirty`
    GIT_SHORTHASH=`git rev-parse --short HEAD`
    GIT_LONGHASH=`git rev-parse HEAD`
@@ -1236,7 +1249,9 @@ fi
 
 # clean debug stage
 cd $fdsroot
-git clean -dxf &> /dev/null
+if [[ "$UPDATEREPO" == "1" ]] ; then
+   git clean -dxf &> /dev/null
+fi
 
 ### Stage 4a ###
 compile_fds
