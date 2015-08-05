@@ -24,7 +24,7 @@ case $OPTION  in
   d)
    FDS_GITbase="$OPTARG"
    ;;
-  d)
+  p)
    FDS_PARENT="$OPTARG"
    ;;
   u)
