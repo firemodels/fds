@@ -9,12 +9,13 @@ fi
 
 CURDIR=`pwd`
 FDS_GITbase=
+FDS_PARENT=
 BRANCH=development
 botscript=firebot_linux.sh
 cFDS_GITbase=
 cBRANCH=
 UPDATEREPO=
-while getopts 'b:d:u' OPTION
+while getopts 'b:d:p:u' OPTION
 do
 case $OPTION  in
   b)
@@ -22,6 +23,9 @@ case $OPTION  in
    ;;
   d)
    FDS_GITbase="$OPTARG"
+   ;;
+  d)
+   FDS_PARENT="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
@@ -32,6 +36,9 @@ shift $(($OPTIND-1))
 
 if [[ "$FDS_GITbase" != "" ]]; then
    FDS_GITbase="-d $FDS_GITbase"
+fi 
+if [[ "$FDS_PARENT" != "" ]]; then
+   FDS_PARENT="-p $FDS_PARENT"
 fi 
 if [[ "$BRANCH" != "" ]]; then
    cBRANCH="-b $BRANCH"
@@ -44,5 +51,5 @@ if [[ "$UPDATEREPO" == "1" ]]; then
    cd $CURDIR
 fi
 touch $running
-./$botscript $cBRANCH $FDS_GITbase "$@"
+./$botscript $cBRANCH $FDS_GITbase $FDS_PARENT "$@"
 rm $running
