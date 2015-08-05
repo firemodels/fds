@@ -1107,6 +1107,21 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
 
+\begin{table}[ht]
+\centering
+\caption[Shunn temporal error norms]{Shunn temporal error norms.}
+\begin{tabular}{lcccc}
+\input{SCRIPT_FIGURES/shunn_terr_norms}
+% here are the numbers as of Aug 5, 2015
+%$L_1$ & 2.0316 & 2.0342 & 2.0164 & 1.0122 \\
+%$L_2$ & 2.0588 & 2.0642 & 2.0533 & 1.0362 \\
+%$L_1$ Saad & 2.0292 & 2.0431 & 1.9994 & 1.0005 \\
+%$L_2$ Saad & 2.0789 & 2.1276 & 1.998 & 1.0004 \\
+%$L_{\infty}$ Saad & 2.1744 & 2.2366 & 1.9734 & 0.99659
+\end{tabular}
+\label{tab:shunn_terr_norms}
+\end{table}
+
 
 \clearpage
 
