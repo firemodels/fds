@@ -3066,7 +3066,7 @@ WRITE(LU,'(/A/)')      ' Fire Dynamics Simulator'
 WRITE(LU,'(A,A)')      ' Current Date     : ',TRIM(DATE)
 WRITE(LU,'(A,A)')      ' Version          : ',TRIM(VERSION_STRING)
 WRITE(LU,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
-WRITE(LU,'(A,A/)')     ' Revision Date    : ',TRIM(GITDATE_PP)
+WRITE(LU,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
 WRITE(LU,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
 IF (.NOT.USE_MPI)     WRITE(LU,'(A)')     ' MPI Disabled'
 IF (USE_MPI)          WRITE(LU,'(A,I5)')  ' MPI Enabled; Number of MPI Processes: ',N_MPI_PROCESSES
