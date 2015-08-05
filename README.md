@@ -9,6 +9,6 @@ Smokeview (SMV) is a visualization program used to display the output of FDS and
 
 For more information, including a link to our discussion forum, please visit the [FDS-SMV website](http://firemodels.github.io/fds-smv/).
 
-Here is a link to our [Firebot Build Status](http://firemodels/github.io/fds-smv/firebot_status).
+Here is a link to our [Firebot Build Status](http://firemodels.github.io/fds-smv/firebot_status).
 
 Pull requests welcome!
