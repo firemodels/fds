@@ -137,7 +137,7 @@ fi
 # This check runs during Stages 3 and 5.
 
 # Start firebot timer
-START_TIME=$(date)
+START_TIME=$(date +%s)
 
 # Set time limit (43,200 seconds = 12 hours)
 TIME_LIMIT=43200
@@ -1118,7 +1118,7 @@ make_fds_configuration_management_plan()
 
 save_build_status()
 {
-   STOP_TIME=$(date +%s)
+   STOP_TIME=$(date)
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
