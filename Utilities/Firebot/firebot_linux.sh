@@ -1119,30 +1119,31 @@ make_fds_configuration_management_plan()
 save_build_status()
 {
    STOP_TIME=$(date)
+   STOP_TIME_INT=$(date +%s)
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Build success with warning; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warning;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
