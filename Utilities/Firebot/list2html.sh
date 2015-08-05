@@ -1,5 +1,6 @@
 #!/bin/bash
-# this script must be run in the firebot history directory
+CURDIR=`pwd`
+cd history
 listin=/tmp/list.in.$$
 ls -tl *-????????.txt | head -30 |  awk '{system("head "  $9)}' > $listin
 cat << EOF
@@ -18,7 +19,7 @@ cat << EOF
 This page displays the status for up to 30 of the most recent build/test cycles.<br>
 
 EOF
-cat $listin | awk -F ';' '{printf "<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a> %s<br>\n%s\n", $4,$3,$1,$2}'
+cat $listin | awk -F ';' '{printf "<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a> %s<br>\n%s\n", $4,$5,$1,$2}'
 cat << EOF
 <br><br>
 <hr align='left'><br>
@@ -28,3 +29,4 @@ cat << EOF
 </html>
 EOF
 rm $listin
+cd $CURDIR
