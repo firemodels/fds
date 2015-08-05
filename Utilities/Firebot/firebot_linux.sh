@@ -267,6 +267,8 @@ do_git_checkout()
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    git pull >> $OUTPUT_DIR/stage1 2>&1
    GIT_REVISION=`git describe --long --dirty`
+   GIT_SHORTHASH=`git rev-parse --short HEAD`
+   GIT_LONGHASH=`git rev-parse HEAD`
 }
 
 check_git_checkout()
@@ -1116,30 +1118,31 @@ make_fds_configuration_management_plan()
 
 save_build_status()
 {
+   STOP_TIME=$(date +%s)
    cd $FIREBOT_DIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warning; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success; $STOP_TIME; $GIT_SHORTHASH; $GIT_LONGHASH; ${GIT_REVISION}; $BRANCH" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
