@@ -6,6 +6,10 @@ export TEXINPUTS=".:../LaTeX_Style_Files:"
 clean_build=1
 
 # Build FDS Configuration Management Plan
+
+gitrevision=`git describe --long --dirty`
+echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
+
 pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> FDS_Configuration_Management_Plan.err
 bibtex FDS_Configuration_Management_Plan &> FDS_Configuration_Management_Plan.err
 pdflatex -interaction nonstopmode FDS_Configuration_Management_Plan &> FDS_Configuration_Management_Plan.err
