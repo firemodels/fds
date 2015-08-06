@@ -33,7 +33,7 @@ if [ "$platform" == "linux" ] ; then
 fi
 
 # Additional definitions
-BRANCH=
+BRANCH=development
 FORCECLEANREPO=0
 UPDATEREPO=1
 FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
