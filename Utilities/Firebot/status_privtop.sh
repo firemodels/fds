@@ -26,7 +26,7 @@ cat << EOF
 <h3>Smokeview Manuals</h3>
 <ul>
 EOF
-ls -l *.pdf | grep -v geom|awk '{printf("<li><a href=\"http://blaze.nist.gov/firebot/manuals/%s\">%s</a> <em>%s %s %s</em>\n",$9,$9,$6,$7,$8)}'
+ls -l *.pdf | grep -v geom|awk '{printf("<li><a href=\"http://blaze.nist.gov/smokebot/manuals/%s\">%s</a> <em>%s %s %s</em>\n",$9,$9,$6,$7,$8)}'
 cat << EOF
 </ul>
 EOF
