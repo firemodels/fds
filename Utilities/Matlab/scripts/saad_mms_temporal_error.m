@@ -85,6 +85,12 @@ if L2_Z<1.99
     disp(['Matlab Warning: L2_Z = ',num2str(L2_Z),' in Saad MMS'])
 end
 
+% write the l2 norm to latex
+
+fid = fopen([plotdir,'saad_l2_norm.tex'],'wt');
+fprintf(fid,'%s\n',num2str(L2_rho));
+fclose(fid);
+
 % Tony Saad's way...
 p1_rho_saad = log( norm(rho_3-rho_2,1)./norm(rho_2-rho_1,1) )./log(r);
 p2_rho_saad = log( norm(rho_3-rho_2,2)./norm(rho_2-rho_1,2) )./log(r);

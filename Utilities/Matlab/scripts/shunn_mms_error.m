@@ -155,7 +155,7 @@ hh(6)=loglog(dx,dx.^2,'k-');
 axis([5*10^-4 10^-1 10^-6 10^-1])
 
 xlabel('{\it \Delta x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('L2 Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
+ylabel('{\it l_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
 legend(hh,'FDS {\it \rho}','FDS {\it Z}','FDS {\it u}','FDS {\it H}','{\it O(\Delta x)}','{\it O(\Delta x^2)}','location','northwest')
 legend('boxoff')
 
