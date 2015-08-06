@@ -903,23 +903,24 @@ p = \frac{\ln \left(\frac{f_3-f_2}{f_2-f_1}\right)}{\ln r}
 \end{equation}
 This procedure effectively filters out the spatial error.  It is, in fact, possible to run this case with a first-order spatial scheme (e.g., Godunov) and still see second-order temporal convergence.
 
-\paragraph{Temporal Order Results} The {\ct saad*.fds} cases are run with three different time steps, each refined by a factor of 2, and integrated to a total time $T=0.390625$ s.  This time represents two time steps for a case with CFL = 1.  To assess the asymptotic temporal order from Eq.~(\ref{eq:temporal_order}), we use the three finest time steps corresponding to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$], respectively.
+\paragraph{Temporal Order Results} The {\ct saad*.fds} cases are run with three different time steps, each refined by a factor of 2, and integrated to a total time $T=0.390625$ s.  This time represents 100 time steps for a case with CFL = 1.  To assess the asymptotic temporal order from Eq.~(\ref{eq:temporal_order}), we use the three finest time steps corresponding to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$], respectively.
 
-The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1D domain. Generally, the convergence is second-order, $p=2$.  The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $L_2$ norm of $p$ computed pointwise is 2.0053.
+The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1D domain. The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $l_2$ norm of $p$ computed pointwise is \input{SCRIPT_FIGURES/saad_l2_norm}\!.  Note that the $l_\infty$ norm (computed pointwise) is degenerate for the reasons just discussed.  A method to overcome this issue is discussed in Sec.~\ref{sec:shunn_mms}.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_Z.pdf}
-\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho.pdf}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_Z}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho}
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho_diff}
 \includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_temporal_order_rho}
-\caption[The {\ct saad} temporal order test case]{Temporal order for a variable-density projection.  (Upper-left) Initial and final field for mixture fraction.  (Upper-right) Initial and final field for density.  (Lower-left) Plot of numerator and denominator in Eq.~(\ref{eq:temporal_order}) for density at final time. (Lower-right) Plot of $p$ computed pointwise from Eq.~(\ref{eq:temporal_order}).  Fluctuations are due to degenerate points in the formula for $p$.  The temporal order is $p = 2$.}
+\caption[The {\ct saad} temporal order test case]{Temporal order for a variable-density projection.  (Upper-left) Initial and final field for mixture fraction.  (Upper-right) Initial and final field for density.  (Lower-left) Plot of numerator and denominator in Eq.~(\ref{eq:temporal_order}) for density at final time. (Lower-right) Plot of $p$ computed pointwise from Eq.~(\ref{eq:temporal_order}).  Fluctuations are due to degenerate points in the formula for $p$.  The temporal order is $p$ = \input{SCRIPT_FIGURES/saad_l2_norm}\!.}
 \label{fig:saad_temporal_order}
 \end{figure}
 
 \clearpage
 
 \section{Variable-Density Manufactured Solution (\texorpdfstring\textct{shunn3}{shunn3})}
+\label{sec:shunn_mms}
 
 To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
 
@@ -962,7 +963,8 @@ where the components of the deviatoric stress tensor, ${\sf T}$, are given by
 \begin{equation}
 T_{ij} = 2\mu \left( S_{ij} -  \frac{1}{3} S_{kk} \delta_{ij} \right) \quad\mbox{;}\quad S_{ij} \equiv \frac{1}{2}\left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \,\mbox{.}
 \end{equation}
-The mass source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct /Utilities/Python/shunn3\_stokes\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.  Note that the pressure solution has been modified from Shunn et al. \cite{Shunn:2012} so that the $H$ solution is compatible with periodic boundary conditions.  A new momentum source term is derived $\dot{Q}_{\mathbf{u}}$ that differs from Shunn et al.
+The mass source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under\\
+{\ct /Utilities/Python/shunn3\_stokes\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.  Note that the pressure solution has been modified from Shunn et al. \cite{Shunn:2012} so that the $H$ solution is compatible with periodic boundary conditions.  A new momentum source term is derived $\dot{Q}_{\mathbf{u}}$ that differs from Shunn et al.
 
 \subsubsection*{Manufactured Solution Procedure}
 
@@ -1001,7 +1003,7 @@ The Poisson equation for $H$ becomes
 %\end{enumerate}
 %This procedure represents a single stage in the RK2 time integration scheme.
 
-Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $l_2$ error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
 \begin{figure}[ht]
 \centering
@@ -1104,13 +1106,24 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
-\caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
+\caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The $l_2$ error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
+
+\subsubsection*{Temporal Error Analysis}
+
+The convergence plot in Fig.~\ref{fig_mms_convergence} is based on a constant CFL with increasing spatial resolution.  From this plot, the temporal accuracy is hard to discern.  Further, the temporal accuracy for the Saad problem in Sec.~\ref{sec:saad_temporal_error} may be a special case since most of the terms in the divergence are zero for that problem.  For the Shunn case, the right-hand-side of the Poisson equation is non-trivial and so it is useful to re-examine the temporal order for this case.  As with the Saad case, here we run a series of tests at constant grid resolution $256 \times 256$ while decreasing the time step.  The three finest time steps correspond to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$] in Eq.~(\ref{eq:temporal_order}).  The simulations are run to a total time equivalent to 2 time steps for a CFL=1 calculation.
+
+Several different norms are considered and the results are listed in Table~\ref{tab:shunn_terr_norms}.  In the left column of the table, the $l_1$ and $l_2$ norms are taken from the vector $p$ computed pointwise on the domain.  Note that, as discussed in Sec.~\ref{sec:saad_temporal_error}, the infinity norm for this approach is degenerate.  The ``Saad'' norms are formed by taking the norms of the differences in the numerator and denominator of Eq.~(\ref{eq:temporal_order}),
+\begin{equation}
+\Vert p \Vert \; \mbox{Saad} = \frac{ \ln \left( \frac{\Vert f_3-f_2 \Vert}{\Vert f_2-f_1 \Vert} \right) }{\ln r}
+\end{equation}
 
 \begin{table}[ht]
 \centering
-\caption[Shunn temporal error norms]{Shunn temporal error norms.}
+\caption[Shunn temporal error norms]{Shunn temporal error norms for the order $p$.}
 \begin{tabular}{lcccc}
+Norm & $\rho$ & $Z$ & $u$ & $H$ \\
+\hline
 \input{SCRIPT_FIGURES/shunn_terr_norms}
 % here are the numbers as of Aug 5, 2015
 %$L_1$ & 2.0316 & 2.0342 & 2.0164 & 1.0122 \\
