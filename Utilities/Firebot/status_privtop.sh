@@ -7,13 +7,29 @@ cat << EOF
 </head>
 <body>
 <h2>FDS Automatic Verification Summary Page</h2>
-
-<h3>FDS Manuals</h3>
 EOF
 
 curdir=`pwd`
 cd /var/www/html/firebot/manuals
+cat << EOF
+<h3>FDS Manuals</h3>
+<ul>
+EOF
 ls -l *.pdf | awk '{printf("<li><a href=\"http://blaze.nist.gov/firebot/manuals/%s\">%s</a> <em>%s %s %s</em>\n",$9,$9,$6,$7,$8)}'
+cat << EOF
+</ul>
+EOF
+cd $curdir
+
+cd /var/www/html/smokebot/manuals
+cat << EOF
+<h3>Smokeview Manuals</h3>
+<ul>
+EOF
+ls -l *.pdf | grep -v geom|awk '{printf("<li><a href=\"http://blaze.nist.gov/firebot/manuals/%s\">%s</a> <em>%s %s %s</em>\n",$9,$9,$6,$7,$8)}'
+cat << EOF
+</ul>
+EOF
 cd $curdir
 
 cat << EOF
