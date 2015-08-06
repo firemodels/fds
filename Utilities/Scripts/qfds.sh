@@ -1,9 +1,9 @@
 #!/bin/bash
-# $Date$ 
-# $Revision$
-# $Author$
-#
 
+FDSROOT=~/FDS-SMV
+if [ "$FDSSMV" != "" ] ; then
+  FDSROOT=$FDSSMV
+fi
 
 if [ $# -lt 1 ]
 then
@@ -20,7 +20,7 @@ then
   echo " -e exe - full path of FDS used to run case"
   echo " -E     - redirect stderr to a file if the 'none' queue is used"
   echo " -f repository root - name and location of repository where FDS is located"
-  echo "    [default: ~/FDS-SMV]"
+  echo "    [default: $FDSROOT]"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
   echo " -M   - run only if number of process is greater than 1"
@@ -47,7 +47,6 @@ ncores=8
 if [ "`uname`" != "Darwin" ]; then
   ncores=`grep processor /proc/cpuinfo | wc -l`
 fi
-FDSROOT=~/FDS-SMV
 MPIRUN=
 ABORTRUN=n
 IB=
