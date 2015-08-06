@@ -12,12 +12,14 @@ cd $firebotdir
 if [ -e $running ] ; then
   exit
 fi
-./list2html.sh statusonly > $new
-./list2html.sh > $newpage
+./status2html.sh  > $new
 ndiff=`diff $old $new|wc -l`
 if [ "$ndiff" == "0" ] ; then
 exit
 fi
+./status_pubtop.sh > $newpage
+./status2html.sh >> $newpage
+./status_pubbot.sh >> $newpage
 cp $new $old
 cd $repo
 git remote update
