@@ -6,7 +6,7 @@ CURDIR=`pwd`
 PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
 
 # directory containing guides within firebot account
-FROMDIR=~firebot/firebot/output
+FROMDIR=~firebot/firebotgit/output
 BASEDIR=Newest_Guides
 
 UPLOAD ()
