@@ -6,6 +6,10 @@ export TEXINPUTS=".:../LaTeX_Style_Files:"
 clean_build=1
 
 # Build Correlation Guide
+
+gitrevision=`git describe --long --dirty`
+echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
+
 pdflatex -interaction nonstopmode Correlation_Guide &> Correlation_Guide.err
 bibtex Correlation_Guide &> Correlation_Guide.err
 pdflatex -interaction nonstopmode Correlation_Guide &> Correlation_Guide.err
