@@ -20,7 +20,7 @@ UPLOAD ()
 
 if [ -e $GDRIVE ] ; then
   cd $FROMDIR/$BASEDIR
-  UPLOAD FDS_Configuration_Management_Plan
+#  UPLOAD FDS_Configuration_Management_Plan
   UPLOAD FDS_Technical_Reference_Guide
   UPLOAD FDS_User_Guide
   UPLOAD FDS_Validation_Guide
