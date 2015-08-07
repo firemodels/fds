@@ -36,10 +36,10 @@ fi
 BRANCH=development
 FORCECLEANREPO=0
 UPDATEREPO=1
-FIREBOT_DIR="$FIREBOT_HOME_DIR/firebotgit"
-FDS_GITBASE=FDS-SMVgitclean
-OUTPUT_DIR="$FIREBOT_DIR/output"
-HISTORY_DIR="$FIREBOT_DIR/history"
+FIREBOT_RUNDIR=~/firebotgit
+fdsroot=~/FDS-SMVgitclean
+OUTPUT_DIR="$FIREBOT_RUNDIR/output"
+HISTORY_DIR="$FIREBOT_RUNDIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -53,24 +53,21 @@ IB=ib
 fi
 
 # Load mailing list for status report
-source $FIREBOT_DIR/firebot_email_list.sh
+source $FIREBOT_RUNDIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -q queue_name -r revision_string -s -v max_validation_processes -y ]"
+echo "firebot.sh [ -b branch -f -n -q queue_name -r repo -v max_validation_processes ]"
 echo "Runs Firebot V&V testing script"
 echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
-echo "-d - git repository name [default: $FDS_GITBASE]"
+echo "-f - force repo to be cleaned"
 echo ""
-echo "-p - directory containing git repository [default: $FIREBOT_HOME_DIR]"
+echo "-r - repository location [default: $fdsroot]"
 echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
-echo ""
-echo "-u - specify GIT username to use"
-echo "     default: fds.firebot"
 echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
@@ -80,17 +77,14 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:d:fhnp:q:v:' OPTION
+while getopts 'b:fhnq:r:v:' OPTION
 do
 case $OPTION in
   b)
    BRANCH="$OPTARG"
    ;;
-  d)
-   FDS_GITBASE="$OPTARG"
-   ;;
-  p)
-   FIREBOT_HOME_DIR="$OPTARG"
+  r)
+   fdsroot="$OPTARG"
    ;;
   f)
    FORCECLEANREPO=1
@@ -117,7 +111,8 @@ esac
 done
 shift $(($OPTIND-1))
 
-fdsroot="$FIREBOT_HOME_DIR/$FDS_GITBASE"
+FIREBOT_HOME_DIR=$(dirname "${fdsroot}")
+FDS_GITBASE=`basename $fdsroot`
 
 #  ====================
 #  = End user warning =
@@ -196,7 +191,7 @@ set_files_world_readable()
 
 clean_firebot_metafiles()
 {
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    MKDIR guides &> /dev/null
    MKDIR $HISTORY_DIR &> /dev/null
    MKDIR $OUTPUT_DIR &> /dev/null
@@ -322,13 +317,13 @@ check_compile_fds_db()
    fi
 
    # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2a` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 2a - Compile and inspect FDS debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2a >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -345,13 +340,13 @@ check_inspect_fds_db()
    # Scan for errors in thread checking results
    cd $fdsroot/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
-      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_DIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
+      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_RUNDIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
-      cat ${FIREBOT_DIR}/output/stage2a_inspect >> $ERROR_LOG
+      cat ${FIREBOT_RUNDIR}/output/stage2a_inspect >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
       echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
@@ -386,13 +381,13 @@ check_compile_fds_mpi_db()
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2b | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 2b - Compile FDS MPI debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2b | grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -529,7 +524,7 @@ check_cases_debug()
    # Scan for and report any errors in FDS cases
    cd $1
 
-   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage3` == "" ]] && \
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_RUNDIR}/output/stage3` == "" ]] && \
       [[ `grep -rI Segmentation *` == "" ]] && \
       [[ `grep -rI ERROR: *` == "" ]] && \
       [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
@@ -589,13 +584,13 @@ check_compile_fds()
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4a | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -628,13 +623,13 @@ check_compile_fds_mpi()
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4b | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -667,7 +662,7 @@ check_cases_release()
    # Scan for and report any errors in FDS cases
    cd $1
 
-   if [[ `grep -rI 'Run aborted' ${FIREBOT_DIR}/output/stage5` == "" ]] && \
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_RUNDIR}/output/stage5` == "" ]] && \
       [[ `grep -rI Segmentation *` == "" ]] && \
       [[ `grep -rI ERROR: *` == "" ]] && \
       [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
@@ -789,13 +784,13 @@ check_compile_smv_db()
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 6a - Compile SMV debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -826,13 +821,13 @@ check_compile_smv()
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 6c - Compile SMV release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_DIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -851,7 +846,7 @@ make_fds_pictures()
 check_fds_pictures()
 {
    # Scan for and report any errors in make FDS pictures process
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6e` == "" ]]
    then
       stage6e_success=true
@@ -864,7 +859,7 @@ check_fds_pictures()
    fi
 
    # Scan for and report any warnings in make FDS pictures process
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6e` == "" ]]
    then
       # Continue along
@@ -925,7 +920,7 @@ run_matlab_verification()
 check_matlab_verification()
 {
    # Scan for and report any errors in Matlab scripts
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep -A 50 "Error" $OUTPUT_DIR/stage7a_verification` == "" ]]
    then
       stage7a_success=true
@@ -966,7 +961,7 @@ check_verification_stats()
    fi
 
    # Scan for and report any case warnings in Matlab scripts
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep "Matlab Warning" $OUTPUT_DIR/stage7a_verification` == "" ]]
    then
       # Continue along
@@ -992,7 +987,7 @@ run_matlab_validation()
 check_matlab_validation()
 {
    # Scan for and report any errors in Matlab scripts
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep -A 50 "Error" $OUTPUT_DIR/stage7b_validation` == "" ]]
    then
       stage7b_success=true
@@ -1053,7 +1048,7 @@ archive_timing_stats()
 check_guide()
 {
    # Scan for and report any errors or warnings in build process for guides
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    if [[ `grep -I "successfully" $1` == "" ]]
    then
       # There were errors/warnings in the guide build process
@@ -1133,7 +1128,7 @@ save_build_status()
 {
    STOP_TIME=$(date)
    STOP_TIME_INT=$(date +%s)
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
@@ -1162,7 +1157,7 @@ save_build_status()
 
 email_build_status()
 {
-   cd $FIREBOT_DIR
+   cd $FIREBOT_RUNDIR
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
@@ -1184,7 +1179,7 @@ email_build_status()
    # No errors or warnings
    else
 #  upload guides to a google drive directory
-      cd $FIREBOT_DIR
+      cd $FIREBOT_RUNDIR
       $UPLOADGUIDES > /dev/null
 
       # Send success message with links to nightly manuals
