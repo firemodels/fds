@@ -37,7 +37,6 @@ $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires couch.fds
 $QFDS -d Fires fire_whirl_pool.fds
-$QFDS -d Fires room_fire.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
 $QFDS -d Fires HoC_NonIdeal.fds
