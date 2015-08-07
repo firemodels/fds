@@ -5,10 +5,8 @@ The case is meant as a teaching tool and to test functionality.
 
 &MESH IJK=24,10,24, XB=1.1,3.5,3.6,4.6,0.0,2.4 /
 
-&TIME T_END=900. /
-&DUMP DT_RESTART=100. /
+&TIME T_END=600. /
 
- SURF ID='BURNER', HRRPUA=1000.  /
 &REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
@@ -59,8 +57,6 @@ The case is meant as a teaching tool and to test functionality.
 &OBST XB= 1.30, 1.50, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
 &OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
 &OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
-
- VENT XB= 2.40, 2.60, 4.30, 4.40, 0.60, 0.60, SURF_ID='BURNER' /
 
 &PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE. /
 &SURF ID='ignitor', TMP_FRONT=1000., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /

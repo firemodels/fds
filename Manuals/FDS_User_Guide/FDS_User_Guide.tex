@@ -3046,12 +3046,7 @@ value of heat of combustion can be specified for each reaction, $j$, via the par
 
 \subsubsection{Modeling Upholstered Furnishings}
 
-The example input files called {\ct Fires/couch.fds} and {\ct Fires/room\_fire.fds} demonstrate a simple way to model upholstered furniture.
-In residential fires, upholstered furniture makes up a significant
-fraction of the combustible load. A single couch can generate several
-megawatts of energy and sometimes lead to compartment flashover. Modeling
-a couch fire requires a simplification of its structure and materials.
-At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
+The example input files called {\ct Fires/couch.fds} and {\ct Fires/room\_fire.fds} demonstrate a simple way to model upholstered furniture. In residential fires, upholstered furniture makes up a significant fraction of the combustible load. A single couch can generate several megawatts of energy and sometimes lead to compartment flashover. Modeling a couch fire requires a simplification of its structure and materials.  At the very least, we want the upholstery to be modeled as a layer of fabric covering polyurethane foam. We need the thermal properties of each, along with estimates of the ``reference'' temperatures as described above. The foam might be described as follows:
 \begin{lstlisting}
 &MATL ID                    = 'FOAM'
       SPECIFIC_HEAT         = 1.0
@@ -3064,24 +3059,14 @@ At the very least, we want the upholstery to be modeled as a layer of fabric cov
       HEAT_OF_REACTION      = 1500.
       HEAT_OF_COMBUSTION    = 30000. /
 \end{lstlisting}
-Note that these properties are completely made up.
-Both the fabric and the foam decompose into fuel gases via
-single-step reactions. The fuel gases from each have different
-composition and heats of combustion. FDS automatically adjusts
-the mass loss rate of each so that the ``effective'' fuel gas
-is that which is specified on the {\ct REAC} line.
-
-The same couch model is included in a room-scale fire simulation, known as the
-{\ct room\_fire} test case. Figure~\ref{room_fire} shows the fire after 5~min.
-Only the reaction zone of the fire is shown; the smoke is hidden so that you can see the fire progressing
-along the couch.
+Note that these properties are completely made up.  Both the fabric and the foam decompose into fuel gases via single-step reactions. The fuel gases from each have different composition and heats of combustion. FDS automatically adjusts the mass loss rate of each so that the ``effective'' fuel gas is that which is specified on the {\ct REAC} line.  Figure~\ref{couch} shows the fire after 10~min.  Only the reaction zone of the fire is shown; the smoke is hidden so that you can see the fire progressing along the couch.
 
 \begin{figure}[ht]
-\includegraphics[width=\textwidth]{SCRIPT_FIGURES/room_fire_300}
-\caption[Results of the {\ct room\_fire} test case]{Output of {\ct room\_fire} test case showing fire on the couch at
-5 min.}
-\label{room_fire}
+\includegraphics[width=\textwidth]{SCRIPT_FIGURES/couch_600}
+\caption[Results of the {\ct couch} test case]{Output of {\ct couch} test case showing fire on the couch at 10 min.}
+\label{couch}
 \end{figure}
+
 
 \subsection{Shrinking and swelling materials}
 \label{info:shrink_swell}
