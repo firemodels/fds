@@ -64,6 +64,9 @@ echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
 echo "-f - force repo to be cleaned"
 echo ""
+echo "-m email_address "
+echo ""
+echo "-r - repository location [default: $fdsroot]"
 echo "-r - repository location [default: $fdsroot]"
 echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
@@ -77,11 +80,14 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:fhnq:r:v:' OPTION
+while getopts 'b:fhm:nq:r:v:' OPTION
 do
 case $OPTION in
   b)
    BRANCH="$OPTARG"
+   ;;
+  m)
+   mailToFDS="$OPTARG"
    ;;
   r)
    fdsroot="$OPTARG"
