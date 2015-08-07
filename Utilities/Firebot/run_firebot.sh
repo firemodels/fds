@@ -50,7 +50,7 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
-exit
+
 if [[ "$UPDATEREPO" == "1" ]]; then
    cd $reponame
    git remote update
