@@ -1,5 +1,4 @@
 #!/bin/bash
-
 running=bot_running
 if [ -e bot_running ] ; then
   echo Firebot is already running.
@@ -7,25 +6,38 @@ if [ -e bot_running ] ; then
   exit
 fi
 
+reponame=~/FDS-SMVgitclean
+if [ "$FDSSMV" != "" ] ; then
+  reponame=$FDSSMV
+fi
+
+function usage {
+echo "run_firebot.sh [ -b branch_name -h -r repo_name -u ]"
+echo "Run Firebot V&V testing script"
+echo ""
+echo "Options:"
+echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
+echo "-h - display this message"
+echo "-r - repository location [default: $reponame]"
+echo "-u - update repo"
+exit
+}
+
 CURDIR=`pwd`
-FDS_GITbase=
-FDS_PARENT=
 BRANCH=development
 botscript=firebot_linux.sh
-cFDS_GITbase=
-cBRANCH=
 UPDATEREPO=
-while getopts 'b:d:p:u' OPTION
+while getopts 'b:hr:u' OPTION
 do
 case $OPTION  in
   b)
    BRANCH="$OPTARG"
    ;;
-  d)
-   FDS_GITbase="$OPTARG"
+  h)
+   usage;
    ;;
-  p)
-   FDS_PARENT="$OPTARG"
+  r)
+   reponame="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
@@ -33,23 +45,17 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
-
-if [[ "$FDS_GITbase" != "" ]]; then
-   FDS_GITbase="-d $FDS_GITbase"
-fi 
-if [[ "$FDS_PARENT" != "" ]]; then
-   FDS_PARENT="-p $FDS_PARENT"
-fi 
-if [[ "$BRANCH" != "" ]]; then
-   cBRANCH="-b $BRANCH"
-fi 
+exit
 if [[ "$UPDATEREPO" == "1" ]]; then
-   cd ~/$FDS_GITbase
+   cd $reponame
+   git remote update
    git checkout $BRANCH
    git pull
    cp Utilities/Firebot/$botscript $CURDIR/.
    cd $CURDIR
 fi
 touch $running
-./$botscript $cBRANCH $FDS_GITbase $FDS_PARENT "$@"
+BRANCH="-b $BRANCH"
+reponame="-r $reponame"
+./$botscript $BRANCH $reponame "$@"
 rm $running
