@@ -383,8 +383,8 @@ mpi_pgi_linux_64 : obj = fds_mpi_pgi_Opteron64
 mpi_pgi_linux_64 : $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_mpi)
 
-#XLF-Compiler, IBM Power7 Core, OpenMP, full optimized settings
-xlf_openmp : FFLAGS  = -O2 -qhot -q64 -qtune=pwr7 -qarch=pwr7 -qmaxmem=-1 -qsmp=omp $(GITINFOXLF)
+#XLF-Compiler, IBM Power architecture, OpenMP, full optimized settings
+xlf_openmp : FFLAGS  = -O2 -qhot -q64 -qtune=auto -qarch=auto -qmaxmem=-1 -qsmp=omp $(GITINFOXLF)
 xlf_openmp : FCOMPL  = xlf2008_r
 xlf_openmp : obj     = fds_xlf_openmp
 xlf_openmp : $(obj_serial)
@@ -398,7 +398,7 @@ xlf_openmp_nooptimization : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial) 
 
 #AIX, JUMP, MPI-Version
-aix_mpi : FFLAGS  = -O2 -q64 $(GITINFOXLF)
+aix_mpi : FFLAGS  = -O2 -q64 -qtune=auto -qarch=auto $(GITINFOXLF)
 aix_mpi : FCOMPL  = mpxlf90
 aix_mpi : obj     = fds_jump_mpi_64
 aix_mpi : $(obj_mpi)
