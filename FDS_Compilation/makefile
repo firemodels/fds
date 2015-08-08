@@ -21,6 +21,8 @@ ifeq ($(shell echo "check_quotes"),"check_quotes")
 else
 # linux/osx
   BUILD_DATE := $(shell date "+%b %d, %Y  %T")
+# The preprocessor used by xlf uses comma as separation between preprocessing commands.
+# Commas needs to be escaped if they are to be used as part of a value in a preprocessing variable.
   BUILD_DATE_XLF := $(shell date "+%b %d\, %Y  %T")  
 endif
 
