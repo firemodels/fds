@@ -64,6 +64,9 @@ echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
 echo "-f - force repo to be cleaned"
 echo ""
+echo "-m email_address "
+echo ""
+echo "-r - repository location [default: $fdsroot]"
 echo "-r - repository location [default: $fdsroot]"
 echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
@@ -77,11 +80,14 @@ exit
 
 QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:fhnq:r:v:' OPTION
+while getopts 'b:fhm:nq:r:v:' OPTION
 do
 case $OPTION in
   b)
    BRANCH="$OPTARG"
+   ;;
+  m)
+   mailToFDS="$OPTARG"
    ;;
   r)
    fdsroot="$OPTARG"
@@ -710,6 +716,8 @@ wait_cases_release_end()
 run_verification_cases_release()
 {
    # Start running all FDS verification cases
+   echo -e "stage 5 beginning." | mail -s "[Firebot@$hostname] Notice: Stage 5 beginning." $mailToFDS > /dev/null
+
    cd $fdsroot/Verification
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
