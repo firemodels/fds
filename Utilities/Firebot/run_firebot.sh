@@ -18,6 +18,7 @@ echo ""
 echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-h - display this message"
+echo "-m email_address "
 echo "-r - repository location [default: $reponame]"
 echo "-u - update repo"
 echo "-v - show options used to run firebot"
@@ -29,7 +30,8 @@ BRANCH=development
 botscript=firebot_linux.sh
 UPDATEREPO=
 RUNFIREBOT=1
-while getopts 'b:hr:uv' OPTION
+EMAIL=
+while getopts 'b:hm:r:uv' OPTION
 do
 case $OPTION  in
   b)
@@ -37,6 +39,9 @@ case $OPTION  in
    ;;
   h)
    usage;
+   ;;
+  m)
+   EMAIL="$OPTARG"
    ;;
   r)
    reponame="$OPTARG"
@@ -51,6 +56,9 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [[ "$EMAIL" != "" ]]; then
+  EMAIL="-m $EMAIL"
+fi
 if [[ "$UPDATEREPO" == "1" ]]; then
    cd $reponame
    git remote update
@@ -63,8 +71,8 @@ touch $running
 BRANCH="-b $BRANCH"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $BRANCH $reponame "$@"
+  ./$botscript $BRANCH $reponame $EMAIL "$@"
 else
-  echo ./$botscript $BRANCH $reponame "$@"
+  echo ./$botscript $BRANCH $reponame $EMAIL "$@"
 fi
 rm $running
