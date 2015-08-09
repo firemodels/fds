@@ -41,7 +41,7 @@ case $OPTION  in
    usage;
    ;;
   m)
-   EMAIL=
+   EMAIL="$OPTARG"
    ;;
   r)
    reponame="$OPTARG"
