@@ -566,7 +566,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchainged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
-              WRITE(MESSAGE, '(A)') 'ERROR: OPENMP_NUM_THREADS must be at least 1'
+              WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS must be at least 1'
               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
@@ -576,7 +576,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
               ! Check if OPENMP is active
               IF (USE_OPENMP .NEQV. .TRUE.) THEN
-                WRITE(MESSAGE, '(A)') 'ERROR: setting OPENMP_NUM_THREADS, but OPENMP is not active'
+                WRITE(MESSAGE, '(A)') 'ERROR: setting N_THREADS, but OPENMP is not active'
                 CALL SHUTDOWN(MESSAGE) ; RETURN
               END IF
 
@@ -584,7 +584,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
                 ! Check if previous definitions are consistent
                 IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
-                  WRITE(MESSAGE, '(A)') 'ERROR: OPENMP_NUM_THREADS not consistent for MPI process'
+                  WRITE(MESSAGE, '(A)') 'ERROR: N_THREADS not consistent for MPI process'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
               END IF
