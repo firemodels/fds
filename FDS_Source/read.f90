@@ -564,8 +564,6 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (MYID==0 .AND. USE_MPI) WRITE(LU_ERR,'(A,I3,A,I3)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)
             IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
-            ! Check the user set value of OPENMP_NUM_THREADS
-            WRITE(*,*) "LA: Mesh ID ", NM, " omp threads ", N_THREADS, " on MPI process ", PROCESS(NM)
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchainged value
             IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
               WRITE(MESSAGE, '(A)') 'ERROR: OPENMP_NUM_THREADS must be at least 1'
