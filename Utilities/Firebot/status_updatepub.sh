@@ -1,5 +1,5 @@
 #!/bin/bash
-repo=~/FDS-SMVgitclean
+repo=~/FDS-SMVgitweb
 firebotdir=~/firebotgit
 old=$firebotdir/history/old
 new=$firebotdir/history/new
@@ -23,9 +23,8 @@ fi
 cp $new $old
 cd $repo
 git remote update
-git checkout gh-pages
+git pull
 cp $newpage firebot_status.html
 git add firebot_status.html
 git commit -m "firebot: update firebot status page `date`"
 git push
-git checkout development
