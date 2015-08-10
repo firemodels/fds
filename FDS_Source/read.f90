@@ -268,13 +268,13 @@ USE EVAC, ONLY: N_DOORS, N_EXITS, N_CO_EXITS, EVAC_EMESH_EXITS_TYPE, EMESH_EXITS
                 EMESH_STAIRS, EVAC_EMESH_STAIRS_TYPE, N_STRS, INPUT_EVAC_GRIDS, NO_EVAC_MESHES
 INTEGER, INTENT(IN) :: IMODE
 INTEGER :: IJK(3),NM,CURRENT_MPI_PROCESS,MPI_PROCESS,RGB(3),LEVEL,N_MESH_NEW,N,II,JJ,KK,NMESHES_READ,NNN,NEVAC_MESHES,IERR, &
-           NMESHES_EVAC, NMESHES_FIRE, NM_EVAC, OPENMP_NUM_THREADS
+           NMESHES_EVAC, NMESHES_FIRE, NM_EVAC, N_THREADS
 LOGICAL :: EVACUATION, EVAC_HUMANS
 REAL(EB) :: EVAC_Z_OFFSET,XB1,XB2,XB3,XB4,XB5,XB6
 CHARACTER(25) :: COLOR
 CHARACTER(LABEL_LENGTH) :: MULT_ID
 NAMELIST /MESH/ COLOR,CYLINDRICAL,EVACUATION,EVAC_HUMANS,EVAC_Z_OFFSET, FYI,ID,IJK,LEVEL,MPI_PROCESS,MULT_ID,RGB,XB, &
-                OPENMP_NUM_THREADS
+                N_THREADS
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 TYPE (MULTIPLIER_TYPE), POINTER :: MR=>NULL()
 
@@ -462,7 +462,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
    MPI_PROCESS = -1
    LEVEL = 0
    MULT_ID = 'null'
-   OPENMP_NUM_THREADS = -1
+   N_THREADS = -1
 
    ! Read the MESH line
 
@@ -565,16 +565,16 @@ MESH_LOOP: DO N=1,NMESHES_READ
             IF (EVACUATION_ONLY(NM) .AND. (USE_MPI.AND.N_MPI_PROCESSES>1)) EVAC_PROCESS = N_MPI_PROCESSES-1
 
             ! Check the user set value of OPENMP_NUM_THREADS
-            WRITE(*,*) "LA: Mesh ID ", NM, " omp threads ", OPENMP_NUM_THREADS, " on MPI process ", PROCESS(NM)
+            WRITE(*,*) "LA: Mesh ID ", NM, " omp threads ", N_THREADS, " on MPI process ", PROCESS(NM)
             ! Check the number of OMP threads for a valid value (positive, larger than 0), -1 indicates default unchainged value
-            IF (OPENMP_NUM_THREADS < 1 .AND. OPENMP_NUM_THREADS /= -1) THEN
+            IF (N_THREADS < 1 .AND. N_THREADS /= -1) THEN
               WRITE(MESSAGE, '(A)') 'ERROR: OPENMP_NUM_THREADS must be at least 1'
               CALL SHUTDOWN(MESSAGE) ; RETURN
             ENDIF
 
             ! If OMP number of threads is explicitly set for this mesh and the mesh is assigned to this MPI process,
             ! then set this value
-            IF (MYID == PROCESS(NM) .AND. OPENMP_NUM_THREADS > 0) THEN
+            IF (MYID == PROCESS(NM) .AND. N_THREADS > 0) THEN
 
               ! Check if OPENMP is active
               IF (USE_OPENMP .NEQV. .TRUE.) THEN
@@ -585,7 +585,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
               ! Check if the process' thread number was already set in a previous mesh definition
               IF (OPENMP_USER_SET_THREADS .EQV. .TRUE.) THEN
                 ! Check if previous definitions are consistent
-                IF (OPENMP_NUM_THREADS .NE. OPENMP_USED_THREADS) THEN
+                IF (N_THREADS .NE. OPENMP_USED_THREADS) THEN
                   WRITE(MESSAGE, '(A)') 'ERROR: OPENMP_NUM_THREADS not consistent for MPI process'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                 END IF
@@ -593,7 +593,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
               ! set the value-changed-flag and the new thread number
               OPENMP_USER_SET_THREADS = .TRUE.
-              OPENMP_USED_THREADS      = OPENMP_NUM_THREADS
+              OPENMP_USED_THREADS      = N_THREADS
             END IF
 
             ! Mesh boundary colors
