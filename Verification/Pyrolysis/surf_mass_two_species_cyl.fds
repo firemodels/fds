@@ -17,7 +17,7 @@
 &SURF ID='HOT WALL', TMP_FRONT=700.,RAMP_T = 'T_RAMP' COLOR='RED', DEFAULT=.TRUE. /
 
 &RAMP ID = 'T_RAMP', T = 0, F = 0 /
-&RAMP ID = 'T_RAMP', T = 1000, F = 1 /
+&RAMP ID = 'T_RAMP', T = 600, F = 1 /
 
 &SURF ID                        	= 'SAMPLE'
      	MATL_ID(1,1:2)            	= 'SOLID','MOISTURE'
