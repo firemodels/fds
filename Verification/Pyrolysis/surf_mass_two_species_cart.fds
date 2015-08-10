@@ -2,7 +2,7 @@
 
 &MESH IJK=4,4,4, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
-&TIME T_END=10000./ 
+&TIME T_END=1000./ 
 &MISC Y_O2_INFTY=0.0000001, Y_CO2_INFTY=0.,HUMIDITY=0./ 
 
 &REAC FUEL = 'FUEL'
@@ -17,7 +17,7 @@
 &SURF ID='HOT WALL', TMP_FRONT=700.,RAMP_T = 'T_RAMP' COLOR='RED', DEFAULT=.TRUE. /
 
 &RAMP ID = 'T_RAMP', T = 0, F = 0 /
-&RAMP ID = 'T_RAMP', T = 10000, F = 1 /
+&RAMP ID = 'T_RAMP', T = 1000, F = 1 /
 
 &SURF ID                        	= 'SAMPLE'
         BACKING = 'INSULATED'
