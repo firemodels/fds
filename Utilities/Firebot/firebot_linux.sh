@@ -1166,23 +1166,39 @@ save_build_status()
 email_build_status()
 {
    cd $FIREBOT_RUNDIR
+
+   stop_time=`date`
+   echo "" > $TIME_LOG
+   echo "-------------------------------" >> $TIME_LOG
+   echo "Host OS: Linux " >> $TIME_LOG
+   echo "Host Name: $hostname " >> $TIME_LOG
+   if [ $FIREBOT_MODE == "validation" ] ; then
+      echo "Validation Set(s): ${CURRENT_VALIDATION_SETS[*]} " >> $TIME_LOG
+   fi
+   echo "Start Time: $start_time " >> $TIME_LOG
+   echo "Stop Time: $stop_time " >> $TIME_LOG
+   echo "-------------------------------" >> $TIME_LOG
+   echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
+   echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+   echo "-------------------------------" >> $TIME_LOG
+
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "[${1}@$hostname] ${2} failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS < $ERROR_LOG > /dev/null
+     cat $ERROR_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      mail -s "[${1}@$hostname] ${2} failure for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS < $ERROR_LOG > /dev/null
+      cat $ERROR_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} failure for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      mail -s "[${1}@$hostname] ${2} success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS < $WARNING_LOG > /dev/null
+      cat $WARNING_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS > /dev/null
 
    # No errors or warnings
    else
@@ -1191,20 +1207,7 @@ email_build_status()
       $UPLOADGUIDES > /dev/null
 
       # Send success message with links to nightly manuals
-      stop_time=`date`
-      echo "-------------------------------" >> $TIME_LOG
-      echo "Host OS: Linux " >> $TIME_LOG
-      echo "Host Name: $hostname " >> $TIME_LOG
-      if [ $FIREBOT_MODE == "validation" ] ; then
-         echo "Validation Set(s): ${CURRENT_VALIDATION_SETS[*]} " >> $TIME_LOG
-      fi
-      echo "Start Time: $start_time " >> $TIME_LOG
-      echo "Stop Time: $stop_time " >> $TIME_LOG
-      echo "-------------------------------" >> $TIME_LOG
-      echo "Nightly Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
-      echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
-      echo "-------------------------------" >> $TIME_LOG
-      mail -s "[${1}@$hostname] ${2} success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS < $TIME_LOG > /dev/null
+      cat $TIME_LOG | mail -s "[${1}@$hostname] ${2} success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS > /dev/null
    fi
 }
 
