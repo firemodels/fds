@@ -1257,7 +1257,8 @@ LEVEL_MESHES_LOOP: DO NM = 1, NMESHES
    S => SCARC(NM)
    
    !DO IX=1,M%N_EXTERNAL_WALL_CELLS
-   !   WRITE(LU_SCARC,'(a,7i4)') '0:  IX=',IX, M%WALL(IX)%NOM_IB(1:6)
+   !   WRITE(LU_SCARC,'(a,7i4)') '0:  IX=',IX,M%EXTERNAL_WALL(IX)%IIO_MIN,M%EXTERNAL_WALL(IX)%JJO_MIN,M%EXTERNAL_WALL(IX)%KKO_MIN,&
+   !                                          M%EXTERNAL_WALL(IX)%IIO_MAX,M%EXTERNAL_WALL(IX)%JJO_MAX,M%EXTERNAL_WALL(IX)%KKO_MAX
    !ENDDO
    !< ---- END   DEBUG MESSAGE
 
@@ -1845,7 +1846,8 @@ MESHES_LOOP: DO NM = 1, NMESHES
    NUM_MESH_NEIGHBORS = 0
 
    !DO IWG=1,M%N_EXTERNAL_WALL_CELLS
-   !   WRITE(LU_SCARC,'(a,7i4)') 'A:  IWG=',IWG, M%WALL(IWG)%NOM_IB(1:6)
+   !  WRITE(LU_SCARC,'(a,7i4)') 'A:  IWG=',IWG,M%EXTERNAL_WALL(IX)%IIO_MIN,M%EXTERNAL_WALL(IX)%JJO_MIN,M%EXTERNAL_WALL(IX)%KKO_MIN,&
+   !                                           M%EXTERNAL_WALL(IX)%IIO_MAX,M%EXTERNAL_WALL(IX)%JJO_MAX,M%EXTERNAL_WALL(IX)%KKO_MAX
    !ENDDO
 
    !! For all solvers: 
@@ -1927,11 +1929,11 @@ MESHES_LOOP: DO NM = 1, NMESHES
    GLOBAL_WALLCELLS_LOOP1: DO IWG = 1, SLF%NW
 
       !< Determine and store neighbors, orientation and number of couplings for a single wall cell
-      NOM  =  M%WALL(IWG)%NOM
+      NOM  =  M%EXTERNAL_WALL(IWG)%NOM
       IOR0 =  M%WALL(IWG)%ONE_D%IOR
-      NCPL = (M%WALL(IWG)%NOM_IB(4) - M%WALL(IWG)%NOM_IB(1) + 1) * &
-             (M%WALL(IWG)%NOM_IB(5) - M%WALL(IWG)%NOM_IB(2) + 1) * &
-             (M%WALL(IWG)%NOM_IB(6) - M%WALL(IWG)%NOM_IB(3) + 1) 
+      NCPL = (M%EXTERNAL_WALL(IWG)%IIO_MAX - M%EXTERNAL_WALL(IWG)%IIO_MIN + 1) * &
+             (M%EXTERNAL_WALL(IWG)%JJO_MAX - M%EXTERNAL_WALL(IWG)%JJO_MIN + 1) * &
+             (M%EXTERNAL_WALL(IWG)%KKO_MAX - M%EXTERNAL_WALL(IWG)%KKO_MIN + 1) 
 
       SLF%WALL(IWG)%NOM  = NOM                              !< store data in SCARC-structure
       SLF%WALL(IWG)%IOR  = IOR0
@@ -2039,7 +2041,9 @@ MESHES_LOOP: DO NM = 1, NMESHES
    ENDDO NEIGHBORS_OF_FACE_LOOP
 
    !DO IWG=1,SLF%NW
-   !   WRITE(LU_SCARC,'(a,7i4)') 'B: IWG=',IWG, M%WALL(IWG)%NOM_IB(1:6)
+   !   WRITE(LU_SCARC,'(a,7i4)') 'B: IWG=',IWG,M%EXTERNAL_WALL(IWG)%IIO_MIN,M%EXTERNAL_WALL(IWG)%JJO_MIN,&
+   !                                           M%EXTERNAL_WALL(IWG)%KKO_MIN,M%EXTERNAL_WALL(IWG)%IIO_MAX,&
+   !                                           M%EXTERNAL_WALL(IWG)%JJO_MAX,M%EXTERNAL_WALL(IWG)%KKO_MAX
    !ENDDO
 
    !> -----------------------------------------------------------------------
@@ -2059,7 +2063,7 @@ MESHES_LOOP: DO NM = 1, NMESHES
       NCPL = SLF%WALL(IWG)%NCPL
 
       !< Determine boundary type for IW
-      IF (M%WALL(IWG)%NOM /= 0) THEN 
+      IF (M%EXTERNAL_WALL(IWG)%NOM /= 0) THEN 
          SLF%WALL(IWG)%BTYPE = INTERNAL
       ELSE IF (M%WALL(IWG)%PRESSURE_BC_INDEX == DIRICHLET) THEN
          SLF%WALL(IWG)%BTYPE = DIRICHLET
@@ -2084,21 +2088,21 @@ MESHES_LOOP: DO NM = 1, NMESHES
       !WRITE(LU_SCARC,*) NM,': NEUMANN  : WALL(',IWG,')=',SLF%WALL(IWG)%BTYPE
       !WRITE(LU_SCARC,*) ' NOM=',NOM
       !WRITE(LU_SCARC,*) ' IOR=',IOR0
-      !WRITE(LU_SCARC,*) ' NOM_IB(1)=',M%WALL(IWG)%NOM_IB(1)
-      !WRITE(LU_SCARC,*) ' NOM_IB(2)=',M%WALL(IWG)%NOM_IB(2)
-      !WRITE(LU_SCARC,*) ' NOM_IB(3)=',M%WALL(IWG)%NOM_IB(3)
-      !WRITE(LU_SCARC,*) ' NOM_IB(4)=',M%WALL(IWG)%NOM_IB(4)
-      !WRITE(LU_SCARC,*) ' NOM_IB(5)=',M%WALL(IWG)%NOM_IB(5)
-      !WRITE(LU_SCARC,*) ' NOM_IB(6)=',M%WALL(IWG)%NOM_IB(6)
+      !WRITE(LU_SCARC,*) ' IIO_MIN=',M%EXTERNAL_WALL(IWG)%IIO_MIN
+      !WRITE(LU_SCARC,*) ' JJO_MIN=',M%EXTERNAL_WALL(IWG)%JJO_MIN
+      !WRITE(LU_SCARC,*) ' KKO_MIN=',M%EXTERNAL_WALL(IWG)%KKO_MIN
+      !WRITE(LU_SCARC,*) ' IIO_MAX=',M%EXTERNAL_WALL(IWG)%IIO_MAX
+      !WRITE(LU_SCARC,*) ' JJO_MAX=',M%EXTERNAL_WALL(IWG)%JJO_MAX
+      !WRITE(LU_SCARC,*) ' KKO_MAX=',M%EXTERNAL_WALL(IWG)%KKO_MAX
 
       !< If there exists a neighbor for that wall cell, setup corresponding neighborship information
       IF (NOM /= 0) THEN
-         CALL SCARC_SETUP_WALLCELL_NEIGHBOR(M%WALL(IWG)%NOM_IB(1), &
-                                            M%WALL(IWG)%NOM_IB(4), &
-                                            M%WALL(IWG)%NOM_IB(2), &
-                                            M%WALL(IWG)%NOM_IB(5), &
-                                            M%WALL(IWG)%NOM_IB(3), &
-                                            M%WALL(IWG)%NOM_IB(6), &
+         CALL SCARC_SETUP_WALLCELL_NEIGHBOR(M%EXTERNAL_WALL(IWG)%IIO_MIN, &
+                                            M%EXTERNAL_WALL(IWG)%IIO_MAX, &
+                                            M%EXTERNAL_WALL(IWG)%JJO_MIN, &
+                                            M%EXTERNAL_WALL(IWG)%JJO_MAX, &
+                                            M%EXTERNAL_WALL(IWG)%KKO_MIN, &
+                                            M%EXTERNAL_WALL(IWG)%KKO_MAX, &
                                             IWG, IOR0, NM, NOM, NLEVEL_MIN)
       ENDIF
 
@@ -12966,19 +12970,19 @@ SELECT CASE (NTYPE)
          WRITE(LU_SCARC,*) ' M%WALL(.)%VENT_INDEX'
          WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%VENT_INDEX, IW=1,SL%NW)
          WRITE(LU_SCARC,*) ' M%WALL(.)%NOM'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM, IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(1)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(1), IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(2)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(2), IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(3)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(3), IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(4)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(4), IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(5)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(5), IW=1,SL%NW)
-         WRITE(LU_SCARC,*) ' M%WALL(.)%NOM_IB(6)'
-         WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%NOM_IB(6), IW=1,SL%NW)
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%NOM, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%IIO_MIN'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%IIO_MIN, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%JJO_MIN'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%JJO_MIN, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%KKO_MIN'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%KKO_MIN, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%IIO_MAX'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%IIO_MAX, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%JJO_MAX'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%JJO_MAX, IW=1,SL%NW)
+         WRITE(LU_SCARC,*) ' M%WALL(.)%KKO_MAX'
+         WRITE(LU_SCARC,'(16i8)') (M%EXTERNAL_WALL(IW)%KKO_MAX, IW=1,SL%NW)
          WRITE(LU_SCARC,*) ' M%WALL(.)%ONE_D%II'
          WRITE(LU_SCARC,'(16i8)') (M%WALL(IW)%ONE_D%II, IW=1,SL%NW)
          WRITE(LU_SCARC,*) ' M%WALL(.)%ONE_D%JJ'
