@@ -945,7 +945,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
  
             ! Boundary conditions: Intensities leaving the boundaries.
             
-            !$OMP PARALLEL DO PRIVATE(IOR, II, JJ, KK) SCHEDULE(GUIDED)
+            !$OMP PARALLEL DO PRIVATE(IOR, II, JJ, KK, LL, NOM) SCHEDULE(GUIDED)
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
                IOR = WALL(IW)%ONE_D%IOR
@@ -956,36 +956,28 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                IF (.NOT.TWO_D .OR. ABS(IOR)/=2) THEN
                   SELECT CASE (WALL(IW)%BOUNDARY_TYPE)
                      CASE (OPEN_BOUNDARY) 
-                        !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
                      CASE (MIRROR_BOUNDARY) 
-                        !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = WALL(IW)%ONE_D%ILW(DLM(N,ABS(IOR)),IBND)
-                        !$OMP END CRITICAL
-                        !$OMP ATOMIC WRITE
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
                      CASE (INTERPOLATED_BOUNDARY) 
                         ! IL_R holds the intensities from mesh NOM in the ghost cells of mesh NM.
                         ! IL(II,JJ,KK) is the average of the intensities from the other mesh.
                         NOM = EXTERNAL_WALL(IW)%NOM
-                        M2 => OMESH(NOM)
                         IL(II,JJ,KK) = 0._EB
                         DO LL=EXTERNAL_WALL(IW)%NIC_MIN,EXTERNAL_WALL(IW)%NIC_MAX
-                           IL(II,JJ,KK) = IL(II,JJ,KK) + M2%IL_R(LL,N,IBND)
+                           IL(II,JJ,KK) = IL(II,JJ,KK) + OMESH(NOM)%IL_R(LL,N,IBND)
                         ENDDO
                         IL(II,JJ,KK) = IL(II,JJ,KK)/REAL(EXTERNAL_WALL(IW)%NIC_MAX-EXTERNAL_WALL(IW)%NIC_MIN+1,EB)
                      CASE DEFAULT ! solid wall
-                        !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%ONE_D%EMISSIVITY)*INRAD_W(IW)
-                        !$OMP END CRITICAL
                   END SELECT
                ELSEIF (CYLINDRICAL) THEN
                   IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) CYCLE WALL_LOOP1
-                  !$OMP ATOMIC WRITE
                   IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
                ENDIF
             ENDDO WALL_LOOP1
-            !$omp end parallel do
+            !$OMP END PARALLEL DO
 
             ! Determine sweep direction in physical space
  
