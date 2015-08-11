@@ -37,7 +37,6 @@ $QFDS -d Fires box_burn_away_2D.fds
 $QFDS -d Fires box_burn_away_2D_residue.fds
 $QFDS -d Fires couch.fds
 $QFDS -d Fires fire_whirl_pool.fds
-$QFDS -d Fires room_fire.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
 $QFDS -d Fires HoC_NonIdeal.fds
@@ -366,6 +365,18 @@ $QFDS -d Scalar_Analytical_Solution shunn3_64.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_128.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_256.fds
 $QFDS -d Scalar_Analytical_Solution shunn3_512.fds
+
+$QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_1.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p5.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p25.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p125.fds
+$QFDS -d Scalar_Analytical_Solution shunn3_256_cfl_p0625.fds
+
+$QFDS -d Scalar_Analytical_Solution saad_512_cfl_1.fds
+$QFDS -d Scalar_Analytical_Solution saad_512_cfl_p5.fds
+$QFDS -d Scalar_Analytical_Solution saad_512_cfl_p25.fds
+$QFDS -d Scalar_Analytical_Solution saad_512_cfl_p125.fds
+$QFDS -d Scalar_Analytical_Solution saad_512_cfl_p0625.fds
 
 $QFDS -d Turbulence csmag0_32.fds
 $QFDS -d Turbulence csmag_32.fds

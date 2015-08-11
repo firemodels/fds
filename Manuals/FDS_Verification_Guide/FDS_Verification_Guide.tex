@@ -14,6 +14,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 
 \begin{document}
 
@@ -75,8 +78,7 @@ Volume 2: Verification\\
 \headerC{
 \today \\
 FDS Version \fdsversion \\
-\emph{SVN Repository}~$Revision$}
-% dummy comment to force svn change - Thu Jun 25 21:56:37 EDT 2015
+\emph{Git Repository}~\gitrevision}
 
 
 \vfill
@@ -148,6 +150,7 @@ The following individuals contributed to the verification process of FDS.
 \item Joonas Ryyn\"{a}nen of VTT, Finland, designed and documented the FED/FIC test cases.
 \item Max Gould, Summer Undergraduate Research Fellow, helped develop and produce the ``2D Vortex'' test case.
 \item Howard Baum, NIST Fellow Emeritus, contributed the analytical solution ``Collapse of a Hot Layer in a Micro-gravity Environment''.
+\item Tony Saad and James Sutherland of the University of Utah developed an analysis for temporal order of accuracy for variable-density projection schemes.
 \end{itemize}
 
 
@@ -854,12 +857,72 @@ this test case confirms that relatively low levels of diffusion are incurred at 
    \label{fig_move_slug}
 \end{figure}
 
+\clearpage
+
+\section{Temporal Error Analysis for a Variable-Density Projection (\texorpdfstring\textct{saad}{saad})}
+\label{sec:saad_temporal_error}
+
+\textbf{Tony Saad and James Sutherland, The University of Utah}\\
+
+\noindent This is a 1D variable-density benchmark solution for an inviscid, non-reacting mixture of two fluids with different densities (10:1 ratio) in a plug-flow system \cite{Biglari:2013}.  The diffusivity is set to zero.  The governing equations for the mixture fraction, $Z$, and the $x$ component of momentum, $u$, are
+\begin{equation}
+\frac{\partial Z}{\partial t} = - u\frac{\partial Z}{\partial x} \,\mbox{,}
+\end{equation}
+\begin{equation}
+\frac{\partial u}{\partial t} = - u\frac{\partial u}{\partial x} - \frac{1}{\rho} \frac{\partial \tilde{p}}{\partial x} \,\mbox{.}
+\end{equation}
+The equation of state gives the following relationship between the mixture fraction and the density:
+\begin{align}
+\frac{1}{\rho} &= \frac{(1-Z)}{\rho_0} + \frac{Z}{\rho_1} \,\mbox{.}
+\end{align}
+
+The FDS input files may be found in\\
+{\ct /Verification/Scalar\_Analytical\_Solution/saad\_512\_cfl*.fds}.\\
+
+\noindent The densities are set to $\rho_0 = 0.5$ \si{kg/m^3} and $\rho_1 = 5$ \si{kg/m^3}, respectively.  The initial field for $Z$ is specified as a sine wave on a 1D domain of length $L=2$ m (see Fig.~\ref{fig:saad_temporal_order} below).
+\begin{align}
+Z(x,0) = \frac{1}{2}\left( 1 + \sin(2\pi x/L) \right)
+\end{align}
+All cases are run with $N_x = 512$ grid points.  The effect of the spatial error is discussed below. The velocity field is initialized to $u(x,0) = U_0 = 1$ m/s, which is the analytical solution for the velocity for all time, $u(x,t) = U_0$.  Note, however, that the velocity field is not ``frozen'' in the calculations, it is subject to variation by the projection scheme (if we are doing things correctly, then the velocity will not change).  The analytical solution for the mixture fraction is given by a characteristic solution:
+\begin{align}
+Z(x,t) = Z_0(x-U_0 t) \,\mbox{.}
+\end{align}
+
+\paragraph{Computing Temporal Order without an Analytical Solution}
+
+Despite having an analytical solution for this case, it is difficult to use this solution to assess the temporal error in the time integration scheme alone.  This is because the spatial errors will typically dominate for an explicit scheme.  To overcome this, we use a method based on Richardson extrapolation (see, e.g., Moin \cite{Moin:2001}).  The idea is to expand a quantity $f$ in a Taylor series with different time increments with a constant ratio $r = \frac{\Delta t_{fine}}{\Delta t_{coarse}} < 1$.
+\begin{align}
+f_1 &= f_0 + a_0 \Delta t^p + \mathcal{O}(\Delta t^{p+1}) \\
+f_2 &= f_0 + a_0 (r \Delta t)^p + \mathcal{O}(r^{p+1} \Delta t^{p+1}) \\
+f_3 &= f_0 + a_0 (r^2 \Delta t)^p + \mathcal{O}(r^{2p+2} \Delta t^{p+1})
+\end{align}
+The temporal order of accuracy is given by $p$, which may be written as
+\begin{equation}
+\label{eq:temporal_order}
+p = \frac{\ln \left(\frac{f_3-f_2}{f_2-f_1}\right)}{\ln r}
+\end{equation}
+This procedure effectively filters out the spatial error.  It is, in fact, possible to run this case with a first-order spatial scheme (e.g., Godunov) and still see second-order temporal convergence.
+
+\paragraph{Temporal Order Results} The {\ct saad*.fds} cases are run with three different time steps, each refined by a factor of 2, and integrated to a total time $T=0.390625$ s.  This time represents 100 time steps for a case with CFL = 1.  To assess the asymptotic temporal order from Eq.~(\ref{eq:temporal_order}), we use the three finest time steps corresponding to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$], respectively.
+
+The results are shown in Fig.~\ref{fig:saad_temporal_order}.  At the top of the figure you can see the initial and final fields for the mixture fraction and density for the finest time step.  Both fields have been advected to the right.  In the lower-left we plot the numerator and denominator in Eq.~(\ref{eq:temporal_order}) for the density solution.  On the bottom-right we show the order $p$ computed pointwise on the 1D domain. The deviations from second-order behavior correspond to degenerate in the formula for $p$ (as shown in the lower-left plot) where either the denominator is near zero ($p$ spikes up) or the numerator and denominator cross (thus $p=0$).  The $l_2$ norm of $p$ computed pointwise is \input{SCRIPT_FIGURES/saad_l2_norm}\!.  Note that the $l_\infty$ norm (computed pointwise) is degenerate for the reasons just discussed.  A method to overcome this issue is discussed in Sec.~\ref{sec:shunn_mms}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_Z}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_rho_diff}
+\includegraphics[width=.49\textwidth]{SCRIPT_FIGURES/saad_temporal_order_rho}
+\caption[The {\ct saad} temporal order test case]{Temporal order for a variable-density projection.  (Upper-left) Initial and final field for mixture fraction.  (Upper-right) Initial and final field for density.  (Lower-left) Plot of numerator and denominator in Eq.~(\ref{eq:temporal_order}) for density at final time. (Lower-right) Plot of $p$ computed pointwise from Eq.~(\ref{eq:temporal_order}).  Fluctuations are due to degenerate points in the formula for $p$.  The temporal order is $p$ = \input{SCRIPT_FIGURES/saad_l2_norm}\!.}
+\label{fig:saad_temporal_order}
+\end{figure}
 
 \clearpage
 
 \section{Variable-Density Manufactured Solution (\texorpdfstring\textct{shunn3}{shunn3})}
+\label{sec:shunn_mms}
 
-To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012}. The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $\tilde{p}$ is the hydrodynamic pressure.  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
+To demonstrate second-order accuracy of the FDS time-marching algorithm, here we present numerical results for the manufactured solution proposed by Shunn et al.~\cite{Shunn:2012} (with a modified pressure solution). The parameters for this problem are given in Table~\ref{tab_shunn_params}.  In the 2D sinusoidal solution given below, $Z$ is the mixture fraction, $\rho$ is the density, $u$ and $v$ are velocity components, and $H$ is the Bernoulli integral ($H \equiv \tilde{p}/\rho + \frac{1}{2}|\mathbf{u}|^2$ where $\tilde{p}$ is the hydrodynamic pressure).  The solution translates diagonally across the domain with velocity $[u_f, v_f]$.  The translated positions are define by $\hat{x} \equiv x- u_f t$ and $\hat{y} \equiv y - v_f t$. The solution is spatially periodic on a square domain extending from $-1$ m to 1 m ($L=2$ m) on each side and has a time period of 1 s.
 
 \begin{table}[!hbt]
 \centering
@@ -881,7 +944,7 @@ $\rho D = \mu$ & 0.001 & \si{kg/(m.s)}
 \label{eqn_mms_rho} \rho(x,y,t) &= \left( \frac{Z(x,y,t)}{\rho_1} + \frac{1-Z(x,y,t)}{\rho_0} \right)^{-1} \\
 \label{eqn_mms_u} u(x,y,t) &= u_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \cos(\pi k \hat{x}) \sin(\pi k \hat{y}) \sin(\pi \omega t) \\
 \label{eqn_mms_v} v(x,y,t) &= v_f + \frac{\rho_1 - \rho_0}{\rho(x,y,t)} \left(\frac{-\omega}{4 k}\right) \sin(\pi k \hat{x}) \cos(\pi k \hat{y}) \sin(\pi \omega t) \\
-\label{eqn_mms_p} \tilde{p}(x,y,t) &= \frac{1}{2} \rho(x,y,t) u(x,y,t) v(x,y,t)
+\label{eqn_mms_p} H(x,y,t) &= \frac{1}{2} ( u(x,y,t) - u_f ) ( v(x,y,t) - v_f )
 \end{align}
 
 %Note that (\ref{eqn_mms_rho}) is the equation of state (EOS) and may be rearranged for this simple problem to give $Z$ in terms of $\rho$,
@@ -890,17 +953,18 @@ $\rho D = \mu$ & 0.001 & \si{kg/(m.s)}
 %Z = \frac{(\rho_0 - \rho) \rho_1}{(\rho_0 - \rho_1) \rho} \,\mbox{.}
 %\end{equation}
 
-The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the conservative form of the transport equations:
+The source terms for the manufactured solution, $\dot{Q}_\rho$, etc., are defined as the residuals of the transport equations:
 \begin{align}
 \label{eqn_mms_continuity} \frac{\partial \rho}{\partial t} + \Div(\rho \mathbf{u}) &= \dot{Q}_\rho \,\mbox{,}\\
 \frac{\partial (\rho Z)}{\partial t} + \Div(\rho Z \mathbf{u}) - \Div\left(\rho D \nabla Z\right) &= \dot{Q}_Z \,\mbox{,}\\
-\frac{\partial (\rho \mathbf{u})}{\partial t} + \Div(\rho \mathbf{u} \mathbf{u}) + \nabla \tilde{p} - \Div{\sf T} &= \dot{Q}_{\mathbf{u}} \,\mbox{,}
+\frac{\partial \mathbf{u}}{\partial t} - \mathbf{u} \times (\nabla \times \mathbf{u}) + \nabla H - \tilde{p} \nabla(1/\rho) - \frac{1}{\rho}\Div{\sf T} &= \dot{Q}_{\mathbf{u}} \,\mbox{,}
 \end{align}
 where the components of the deviatoric stress tensor, ${\sf T}$, are given by
 \begin{equation}
 T_{ij} = 2\mu \left( S_{ij} -  \frac{1}{3} S_{kk} \delta_{ij} \right) \quad\mbox{;}\quad S_{ij} \equiv \frac{1}{2}\left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right) \,\mbox{.}
 \end{equation}
-The source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under {\ct FDS-SMV/Utilities/Python/shunn\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.
+The mass source terms (which are complex sinusoidal functions) may be obtained from \cite{Shunn:2012}, by looking at the source code in the FDS repository \cite{FDS-SMV_repository} (see module {\ct MANUFACTURED\_SOLUTIONS} in {\ct turb.f90}), or by running the sympy (Symbolic Python) script provided under\\
+{\ct /Utilities/Python/shunn3\_stokes\_mms\_sym.py}.  A feature of this particular solution is that the mass source is zero, $\dot{Q}_\rho = 0$, which provides a more realistic test case and simplifies the MMS implementation.  Note that the pressure solution has been modified from Shunn et al. \cite{Shunn:2012} so that the $H$ solution is compatible with periodic boundary conditions.  A new momentum source term is derived $\dot{Q}_{\mathbf{u}}$ that differs from Shunn et al.
 
 \subsubsection*{Manufactured Solution Procedure}
 
@@ -921,12 +985,12 @@ The density is obtained via $\rho = (\rho Z)_1 + (\rho Z)_2$.
 The RHS of the momentum equation is augmented as follows:
 \begin{equation}
 \label{eqn_mms_u_eqn}
-\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}}/\rho \,\mbox{.}
+\frac{\partial \mathbf{u}}{\partial t} = - ( \mathbf{F} + \nabla H ) + \dot{Q}_{\mathbf{u}} \,\mbox{.}
 \end{equation}
 The Poisson equation for $H$ becomes
 \begin{align}
 \label{eqn_poisson_mms}
-\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}}/\rho \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
+\nabla^2 H = - \left[ \Div \left( \mathbf{F} - \dot{Q}_{\mathbf{u}} \right) + \frac{\partial}{\partial t} (\Div\mathbf{u}) \right] \,\mbox{.}
 \end{align}
 
 %For the flow to remain isothermal the ideal gas law must be obeyed identically. Since a transport equation is solved for density, the mixture fraction must be obtained from the EOS.  Hence, in this problem $Z$ plays the role usually played by temperature in a typical fire problem.  For the manufactured solution, the basic FDS algorithm is modified as follows.  Given $u_i^n$, $\rho^n$, $Z^n$, and $H^n$ at time $t^n$:
@@ -939,7 +1003,7 @@ The Poisson equation for $H$ becomes
 %\end{enumerate}
 %This procedure represents a single stage in the RK2 time integration scheme.
 
-Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the L2 error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
+Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the number of cells in each direction, using an adaptive time step satisfying both convective and diffusive CFL numbers of 0.5.  The time step criterion and the simulation parameters in Table \ref{tab_shunn_params} were chosen to match Shunn et al.~\cite{Shunn:2012}. The species mass density equations, (\ref{eqn_fds_species_1}) and (\ref{eqn_fds_species_2}), are solved using the CHARM flux limiter. Qualitative results for the $256^2$ case are shown in Fig.~\ref{fig_mms_evo}.  These images may be compared to the images presented in \cite{Shunn:2012}.  In Fig.~\ref{fig_mms_convergence}, we plot the $l_2$ error at time $t = 1$ s as a function of grid spacing, $\Delta x = L/N$, confirming second-order accuracy of the solutions for density, mixture fraction, and velocity.  As shown in Fig.~\ref{fig_mms_convergence}, schemes such as ours, where the pressure is set to zero at the beginning of each stage of the integration (in other words, no pressure gradient term shows up in the force on the RHS of the Poisson equation), are known to be first-order accurate for pressure \cite{Armfield:2002}. This is not a severe limitation of the algorithm since the hyrdrodynamic pressure does not factor into the equation of state for low-Mach flows.
 
 \begin{figure}[ht]
 \centering
@@ -1042,8 +1106,34 @@ Simulations were performed for $N = \{32, 64, 128, 256, 512\}$, where $N$ is the
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/shunn_mms_convergence}
-\caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The L2 error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
+\caption[Convergence of the manufactured solution]{\label{fig_mms_convergence} Convergence for the manufactured solution.  The $l_2$ error at time $t = 1$ s is plotted as a function of grid spacing for $N=\{32,64,128,256,512\}$ points in each direction.  The grid spacing is $\Delta x = L/N$, where $L=2$ m.  Calculations were performed with an adaptive time step satisfying both convective and diffusive CFL (Von Neumann) limits of 0.5. These results confirm second-order accuracy of the flow solver for density, mixture fraction, and velocity. As is known for projection schemes like ours, the pressure solution (represented by $H$) is first-order accurate \cite{Armfield:2002}.}
 \end{figure}
+
+\subsubsection*{Temporal Error Analysis}
+
+The convergence plot in Fig.~\ref{fig_mms_convergence} is based on a constant CFL with increasing spatial resolution.  From this plot, the temporal accuracy is hard to discern.  Further, the temporal accuracy for the Saad problem in Sec.~\ref{sec:saad_temporal_error} may be a special case since most of the terms in the divergence are zero for that problem.  For the Shunn case, the right-hand-side of the Poisson equation is non-trivial and so it is useful to re-examine the temporal order for this case.  As with the Saad case, here we run a series of tests at constant grid resolution $256 \times 256$ while decreasing the time step.  The three finest time steps correspond to CFL = [0.25, 0.125, 0.0625] for the solutions [$f_1$, $f_2$, $f_3$] in Eq.~(\ref{eq:temporal_order}).  The simulations are run to a total time equivalent to 2 time steps for a CFL=1 calculation.
+
+Several different norms are considered and the results are listed in Table~\ref{tab:shunn_terr_norms}.  In the left column of the table, the $l_1$ and $l_2$ norms are taken from the vector $p$ computed pointwise on the domain.  Note that, as discussed in Sec.~\ref{sec:saad_temporal_error}, the infinity norm for this approach is degenerate.  The ``Saad'' norms are formed by taking the norms of the differences in the numerator and denominator of Eq.~(\ref{eq:temporal_order}),
+\begin{equation}
+\Vert p \Vert \; \mbox{Saad} = \frac{ \ln \left( \frac{\Vert f_3-f_2 \Vert}{\Vert f_2-f_1 \Vert} \right) }{\ln r}
+\end{equation}
+
+\begin{table}[ht]
+\centering
+\caption[Shunn temporal error norms]{Shunn temporal error norms for the order $p$.}
+\begin{tabular}{lcccc}
+Norm & $\rho$ & $Z$ & $u$ & $H$ \\
+\hline
+\input{SCRIPT_FIGURES/shunn_terr_norms}
+% here are the numbers as of Aug 5, 2015
+%$L_1$ & 2.0316 & 2.0342 & 2.0164 & 1.0122 \\
+%$L_2$ & 2.0588 & 2.0642 & 2.0533 & 1.0362 \\
+%$L_1$ Saad & 2.0292 & 2.0431 & 1.9994 & 1.0005 \\
+%$L_2$ Saad & 2.0789 & 2.1276 & 1.998 & 1.0004 \\
+%$L_{\infty}$ Saad & 2.1744 & 2.2366 & 1.9734 & 0.99659
+\end{tabular}
+\label{tab:shunn_terr_norms}
+\end{table}
 
 
 \clearpage
@@ -2953,53 +3043,25 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 
 \chapter{Pyrolysis}
 
-This chapter tests the routines in FDS that calculate the thermal decomposition of materials. Solid
-surfaces can consist of multiple layers, and each layer can consist of multiple material components.
-Each material component may undergo several competing reactions, and
-each of these reactions may produce some other solid component
-(residue), gaseous fuel, and/or water vapor.
+This chapter includes tests of the routines that calculate the thermal decomposition of materials. Solid surfaces can consist of multiple layers, and each layer can consist of multiple material components. Each material component may undergo several competing reactions, and each of these reactions may produce some other solid component (residue), gaseous fuel, and/or water vapor.
 
+\section{Conservation of Pyrolyzed Mass (\texorpdfstring{\textct{surf\_mass\_conservation}}{surf\_mass\_conservation})}
 
-\section{Mass conservation of pyrolyzed mass (\texorpdfstring{\textct{surf\_mass\_conservation}}{surf\_mass\_conservation})}
-
-The calculations described in this section check the conservation of
-mass produced by the pyrolysis algorithm. Parameters describing the geometric configuration of the solid are input via a \textct{SURF} line,  and
-the reacting materials are described on respective \textct{MATL} lines. In the tests, four independent modeling options are varied:
+The calculations described in this section check the conservation of mass produced by the pyrolysis algorithm. In the tests, four independent modeling options are varied:
 \begin{enumerate}
-\item The \textct{SURF} line can be associated with either a solid surface as designated by a \textct{VENT} line, or by solid particles as
-described by a \textct{PART} line.
+\item The \textct{SURF} line can be associated with either a solid surface as designated by a \textct{VENT} line, or by solid particles as described by a \textct{PART} line.
 \item The \textct{SURF} geometry can be either \textct{CARTESIAN}, \textct{CYLINDRICAL}, or \textct{SPHERICAL}.
 \item The \textct{MATL} can be either charring (non-zero \textct{NU\_RESIDUE}) or non-charring.
-\item The pyrolysis product can be either the fuel gas defined by the
-mixture fraction model, or an additional gas species, defined by a \textct{SPEC} line.
+\item The pyrolysis product can be either the fuel gas defined by the mixture fraction model, or an additional gas species, defined by a \textct{SPEC} line.
 \end{enumerate}
-In all cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~\si{kg/m^3} and the yield of gaseous
-products for the charring cases is 0.5, i.e., half of the original mass. For Cartesian surfaces, the mass loss per unit area is
-1.8~\si{kg/m^2} for charring, and 3.6~\si{kg/m^2} for non-charring materials.
-For cylindrical surfaces, the volume per unit surface area is $r/2$, and thus the mass loss per unit area
-is $360(1-0.5) \times r/2$=0.9~\si{kg/m^2} for charring, and 1.8~\si{kg/m^2} for non-charring materials.
-For spherical surfaces, the volume per unit surface area is $r/3$, and thus the mass loss per unit area is
-$360(1-0.5) \times r/3$=0.6~\si{kg/m^2} for charring, and 1.2~\si{kg/m^2} for non-charring materials.
-On the figures found on the following pages, the computed results are labeled as follows:
-\begin{description}
-\item[Expected] indicates the total mass that has pyrolyzed by the end of the simulation.
-\item[Gaseous] indicates the instantaneous concentration of pyrolyzed mass integrated over the volume of the
-computational domain. It should gradually increase from zero to the ``Expected'' value.
-\item[Solid] indicates the instantaneous value of the solid surface density integrated over the entire surface area.
-For charring materials it should decrease from its initial value (twice the final value) to the final ``Expected'' value. For non-charring materials, it should
-decrease from the ``Expected'' value to zero.
-\item[Fuel Gas] is the total burning rate integrated over time. It should increase from zero to the ``Expected'' value.
-\end{description}
+In most cases, the wall thickness (or radius for cylindrical and spherical geometries) is 0.01~m. The material density is 360~\si{kg/m^3} and the yield of gaseous products for the charring cases is 0.5, i.e., half of the original mass. For Cartesian surfaces, the mass loss per unit area is 1.8~\si{kg/m^2} for charring, and 3.6~\si{kg/m^2} for non-charring materials. For cylindrical surfaces, the volume per unit surface area is $r/2$, and thus the mass loss per unit area is $360(1-0.5) \times r/2$=0.9~\si{kg/m^2} for charring, and 1.8~\si{kg/m^2} for non-charring materials. For spherical surfaces, the volume per unit surface area is $r/3$, and thus the mass loss per unit area is $360(1-0.5) \times r/3$=0.6~\si{kg/m^2} for charring, and 1.2~\si{kg/m^2} for non-charring materials.
 
 
 \subsection{Pyrolysis at a Solid Surface}
 
-The analytical mass losses are calculated by multiplying the mass per unit area by the \textct{VENT} area,
-which in all cases is 1~m$^2$.
-The expected and computed results for charring material are compared in Fig.~\ref{surf_mass_vent_char}.
-The expected and computed results for non-charring material are compared in Fig.~\ref{surf_mass_vent_nonchar}.
-\begin{figure}[ht!]
-\noindent
+The analytical mass losses are calculated by multiplying the mass per unit area by the \textct{VENT} area, which in all cases is 1~m$^2$. The expected and computed results for charring material are compared in Fig.~\ref{surf_mass_vent_char}. The expected and computed results for non-charring material are compared in Fig.~\ref{surf_mass_vent_nonchar}.
+
+\begin{figure}[!htb]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_fuel} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_char_cart_gas} \\
@@ -3012,7 +3074,7 @@ The expected and computed results for non-charring material are compared in Fig.
 \label{surf_mass_vent_char}
 \end{figure}
 
-\begin{figure}[ht!]
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_nonchar_cart_fuel} &
@@ -3030,20 +3092,13 @@ The expected and computed results for non-charring material are compared in Fig.
 
 \subsection{Pyrolysis of Discrete Particles}
 
-For Lagrangian particles, the expected values of the mass are obtained by multiplying the material density by the particle volume by the residue fraction.
-For Cartesian surfaces, the particle area is two times the product of the parameters \textct{LENGTH} and \textct{WIDTH} on the \textct{SURF} line, both of
-which are given a value of 0.05~m. As a result, the expected masses for particles with Cartesian surfaces are
-$360 (1-0.5) \times 2\delta L W=0.009$~kg for charring, and 0.018~kg for non-charring materials. Note that the half-thickness, $\delta=0.01$~m, is
-specified on the \textct{SURF} line as \textct{THICKNESS}.
-For cylindrical particles, the \textct{LENGTH} is 0.1~m, and the radius, $r$
-(specified via \textct{THICKNESS}), is 0.01~m. The expected masses are thus
-$360(1-0.5) \times \pi r^2 L=0.00565$~kg for charring, and 0.0113~kg for non-charring materials.
-For spherical particles, the expected mass is $360(1-0.5) \times 4\pi r^3/3=7.54\times 10^{-4}$~kg for charring, and $1.51\times 10^{-3}$~kg for
-non-charring materials.
+For Lagrangian particles, the expected values of the mass are obtained by multiplying the material density by the particle volume by the residue fraction. For Cartesian surfaces (plates), the particle area is two times the product of the parameters \textct{LENGTH} and \textct{WIDTH} on the \textct{SURF} line, both of which are given a value of 0.05~m. As a result, the expected masses for plate particles are $360 (1-0.5) \times 2\delta L W=0.009$~kg for charring, and 0.018~kg for non-charring materials. Note that the half-thickness, $\delta=0.01$~m, is specified on the \textct{SURF} line as \textct{THICKNESS}. For cylindrical particles, the \textct{LENGTH} is 0.1~m, and the radius, $r$ (specified via \textct{THICKNESS}), is 0.01~m. The expected masses are thus $360(1-0.5) \times \pi r^2 L=0.00565$~kg for charring, and 0.0113~kg for non-charring materials. For spherical particles, the expected mass is $360(1-0.5) \times 4\pi r^3/3=7.54\times 10^{-4}$~kg for charring, and $1.51\times 10^{-3}$~kg for non-charring materials.
 
-The analytical and computed results for charring material are compared in Fig.~\ref{surf_mass_part_char}.
-The analytical and computed results for non-charring material are compared in Fig.~\ref{surf_mass_part_nonchar}.
-\begin{figure}[ht]
+\subsubsection{Charring Particles}
+
+The analytical and computed results for charring material are compared in Fig.~\ref{surf_mass_part_char}. The analytical and computed results for non-charring material are compared in Fig.~\ref{surf_mass_part_nonchar}.
+
+\begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel} &
@@ -3057,7 +3112,7 @@ The analytical and computed results for non-charring material are compared in Fi
 \label{surf_mass_part_char}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[p]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel} &
@@ -3073,60 +3128,75 @@ The analytical and computed results for non-charring material are compared in Fi
 
 \clearpage
 
-A set of more advanced computations are performed to test mass conservation in cases involving multiple and split particles.
-The case has three meshes, and each mesh has the same mass of charring cylindrical particles as the cases above.
-Because the length of the cylindrical particles is four times 0.1~m, the cylinder diameter is only half of the value used above.
+
+\subsubsection{Multiple Particles}
+
+This is a test case for mass conservation involving multiple particles. The case has three meshes, and each mesh has the same mass of charring cylindrical particles as the cases above. Because the length of the cylindrical particles is four times 0.1~m, the cylinder diameter is only half of the value used above.
 \begin{description}
 \item[Mesh 1] has four 0.1 m long cylinders with 5 mm radius. The locations are randomly chosen from a plane defined by the \textct{INIT} statement.
 \item[Mesh 2] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements.
 \item[Mesh 3] has eight 0.05 m long cylinders, initialized using the \textct{INIT} and \textct{MULT} statements. The cylinders are split in two sections using the
 \textct{NUMBER\_RADIATIVE\_ANGLES} feature of the \textct{PART} class.
 \end{description}
-The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}.
-The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
-\begin{figure}[ht]
+The analytical and computed results are compared in Fig.~\ref{surf_mass_part_char_advanced}. The readability of the figure is improved by setting the external heat fluxes for Meshes 1, 2, and 3 to 50 \si{kW/m^2}, 45 \si{kW/m^2}, and 40 \si{kW/m^2}, respectively.
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_gas_advanced}
-\caption[The \textct{surf\_mass\_part\_char\_cyl\_gas\_advanced} test cases]{Comparison of analytical and predicted mass change for a charring, cylindrical surface
-associated with particles in three variations.}
+\caption[The \textct{surf\_mass\_part\_char\_cyl\_gas\_advanced} test cases]{Comparison of analytical and predicted mass change for a charring, cylindrical surface associated with particles in three variations.}
 \label{surf_mass_part_char_advanced}
 \end{figure}
 
-\clearpage
-%The splitted particles are studied more systematically here. The particles with solid surfaces (surf mass part) with and without char yield, producing fuel, are splitted in two radiation angles (x, y and z directions). The mass conservation results are seen in Fig.~\ref{surf_mass_part_fuel_split} The ambient is air, so also the effects in total energy release are seen in Fig.~\ref{surf_mass_part_fuel_energy_split}.
-%
-%\begin{figure}[ht]
-%\noindent
-%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_split} \\
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_split} \\
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
-%\end{tabular*}
-%\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted mass change for splitted particle surfaces.}
-%\label{surf_mass_part_fuel_split}
-%\end{figure}
-%
-%\begin{figure}[ht]
-%\noindent
-%\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_energy_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_energy_split} \\
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_energy_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_energy_split} \\
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
-%\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
-%\end{tabular*}
-%\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases.]{Comparison of analytical and predicted total energy release for splitted particle surfaces.}
-%\label{surf_mass_part_fuel_energy_split}
-%\end{figure}
+\subsubsection{Split Particles}
 
+``Split'' particles are Lagrangian particles that are allowed to have more than one orientation. For example, a sphere might be split in two halves, with its upper hemisphere pointing upwards and its lower hemisphere pointing downwards. In the test cases, particles in the shape of plates, cylinders and spheres are split in the $x$, $y$, and $z$ coordinate directions, respectively. The mass conservation results are shown in Fig.~\ref{surf_mass_part_fuel_split}, and the total energy conservation results are shown in Fig.~\ref{surf_mass_part_fuel_energy_split}.
+
+\begin{figure}[!htb]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_split} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_split} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_split}
+\end{tabular*}
+\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, mass conservation]{Comparison of analytical and predicted mass change for split particle surfaces.}
+\label{surf_mass_part_fuel_split}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cart_fuel_energy_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cart_fuel_energy_split} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_cyl_fuel_energy_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_cyl_fuel_energy_split} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_char_spher_fuel_energy_split} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_part_nonchar_spher_fuel_energy_split}
+\end{tabular*}
+\caption[The \textct{surf\_mass\_part\_fuel\_split} test cases, energy conservation]{Comparison of analytical and predicted total energy release for split particle surfaces.}
+\label{surf_mass_part_fuel_energy_split}
+\end{figure}
 
 \clearpage
 
-\subsection{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
+\subsubsection{Particles that Generate Multiple Gas Species}
+
+Figure~\ref{surf_mass_two_species} shows the results of three test cases involving 1~kg of flat, cylindrical, or spherical particles in a unit cube that simultaneously generate fuel gas and water vapor, like wood or vegetation.
+
+\begin{figure}[!htb]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_cart} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_cyl} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_two_species_spher}
+\caption[The \textct{surf\_mass\_two\_species} test cases]{Comparison of analytical and predicted mass change for particles that generate water and fuel gas.}
+\label{surf_mass_two_species}
+\end{figure}
+
+\clearpage
+
+
+
+
+\section{Burning Rate of a Small Object (\texorpdfstring{\textct{cell\_burn\_away}}{cell\_burn\_away})}
 
 In FDS, it is assumed that heat conduction and pyrolysis within solids are functions of depth only. This can be problematic in cases where entire solid obstructions burn away. In this example, a single grid cell, 4~cm on a side, is made up of a material with density $\rho_{\rm s}=50$~\si{kg/m^3} and constant reaction rate, $r_{\rm s}=0.05$~s$^{-1}$. The burning rate of the single grid cell, $\dm$, is given by:
 \be
@@ -3137,7 +3207,7 @@ where $\delta$ is the thickness of the surface layer and $A$ is the area of the 
    \dm = m \, r_{\rm s} = m_0 \, r_{\rm s} \, {\rm e}^{-r_{\rm s} t}
 \ee
 Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. Note that the burning rate is proportional to the mass and the mass decays exponentially to zero in this case because we have specified the {\ct THICKNESS} to be $V/A$ and set the {\ct BULK\_DENSITY} to be 50~\si{kg/m^3} on the {\ct OBST} line defining the single solid grid cell.
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/cell_burn_away}
 \caption[The {\ct cell\_burn\_away} test case.]{Burning rate of a single grid cell with fixed reaction rate.}
@@ -3145,46 +3215,41 @@ Figure~\ref{cell_burn_away} displays the computed and analytical burning rate. N
 \end{figure}
 
 
-\subsection{Evaporation of a Liquid Surface}
 
-A liquid evaporation model was tested in a mass conservation test similar to the surf\_mass\_vent\_nonchar\_fuel test above. A 1 cm layer of heptane
-fuel was exposed to a 50 kW/m$^2$ heat flux and the evolution of gas phase fuel mass and surface density were tracked. Results are shown in Fig.~\ref{surf_mass_vent_liquid}.
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel}
-\caption[The \textct{surf\_mass\_vent\_liquid\_fuel} test case.]{Comparison of analytical and predicted mass change for a liquid surface.}
+
+\section{Evaporation of a Liquid Surface (\texorpdfstring{\textct{surf\_mass\_vent\_liquid}}{surf\_mass\_vent\_liquid})}
+
+To test the liquid fuel evaporation model, a 1~cm deep pool of heptane is exposed to a 50~kW/m$^2$ heat flux and the evolution of fuel vapor and surface density are tracked. Results are shown in Fig.~\ref{surf_mass_vent_liquid}. Note that in the ``nonconforming'' case, the specified pool dimensions do not align with the specified mesh, but the same amount of fuel vapor is expected.
+
+\begin{figure}[!htb]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel} & 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/surf_mass_vent_liquid_fuel_nonconforming}
+\end{tabular*}
+\caption[The \textct{surf\_mass\_vent\_liquid\_fuel} test cases]{Comparison of analytical and predicted mass change for a liquid surface.}
 \label{surf_mass_vent_liquid}
 \end{figure}
 
-\section{Development of surface emissivity (\texorpdfstring{\textct{emissivity}}{emissivity})}
 
-For thermally thick materials, the surface emissivity is computed as a
-mass-weighted sum of the individual values of the emissivity
-in the first condensed phase grid cell. In this verification test, the
-initial material, having emissivity of 1.0, is converted to another
-material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a
-result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s (Fig.~\ref{emissivity}).
+\section{Change in Surface Emissivity (\texorpdfstring{\textct{emissivity}}{emissivity})}
 
-\begin{figure}[ht]
+For thermally thick materials, the surface emissivity is computed as a mass-weighted sum of the individual values of the emissivity in the first condensed phase grid cell. In this verification test, the initial material, having emissivity of 1.0, is converted to another material, having emissivity of 0.0, at a constant rate of 0.1~s$^{-1}$. As a result, the surface emissivity should change linearly from 1.0 to 0.0 in 10~s (Fig.~\ref{emissivity}).
+
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/emissivity}
 \caption[The \textct{emissivity} test case]{Testing the emissivity of solid materials.}
 \label{emissivity}
 \end{figure}
 
-\clearpage
+
+
 
 \section{Shrinking and swelling materials (\texorpdfstring{\textct{shrink\_swell}}{shrink\_swell})}
 
-A single layer of material mixture contains reacting material (1) and inert matrix (2).
-If the product material (3) of the reaction is of higher density than the
-reactant ($\rho_3 > \rho_1$), the layer thickness $\Delta$ should shrink.
-If the product density is lower than the reactant's density ($\rho_3 < \rho_1$) the layer should swell (increase) in thickness. If the inert material has
-a static matrix structure (\textct{ALLOW\_SHRINKING=.FALSE.} or \textct{ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the
-six test cases are shown in the following table. Figure \ref{shrink_swell2} shows the surface densities, which obviously should not change, and the surface
-thicknesses over the time of the simulation.
+A single layer of a multi-component material contains reacting material (1) and an inert matrix (2). If the product material (3) of the reaction is of higher density than the reactant ($\rho_3 > \rho_1$), the layer thickness $\Delta$ should shrink. If the product density is lower than the reactant's density ($\rho_3 < \rho_1$) the layer should swell (increase) in thickness. If the inert material has a static matrix structure (\textct{ALLOW\_SHRINKING=.FALSE.} or \textct{ALLOW\_SWELLING=.FALSE.}) the layer thickness should not change. The parameters of the six test cases are shown in the following table. Figure~\ref{shrink_swell2} shows the surface densities, which obviously should not change, and the surface thicknesses over the time of the simulation.
 
-\begin{table}[ht]
+\begin{table}[!htb]
 \centering
 \caption[Parameters for shrinking and swelling of materials]{Parameters used to test the shrinking and swelling of materials.}
 \label{shrink_swell}
@@ -3203,7 +3268,7 @@ Swell 3          & 1000 &0.9  &1000 &0.1  &F &450  &1000 &1000 &0.001   &0.001 \
 \end{tabular}
 \end{table}
 
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/shrink_mass_conservation} &
@@ -3215,42 +3280,34 @@ Swell 3          & 1000 &0.9  &1000 &0.1  &F &450  &1000 &1000 &0.001   &0.001 \
 \label{shrink_swell2}
 \end{figure}
 
-\clearpage
 
-\section{Enthalpy of solid materials (\texorpdfstring{\textct{enthalpy}}{enthalpy})}
 
-Consider a thin plate of conductive material that is exposed on one side to an elevated temperature heat source and exposed on the
-other to an ambient temperature void. In the thermally thin limit, the temperature of the slab is governed by the following equation
+\section{Enthalpy of Solid Materials (\texorpdfstring{\textct{enthalpy}}{enthalpy})}
+
+Consider a thin plate of conductive material that is exposed on one side to an elevated temperature heat source and exposed on the other to an ambient temperature void. In the thermally thin limit, the temperature of the slab is governed by the following equation
 \be
    \frac{\d T_{\rm s}}{\d t} = \frac{\dq_{\hbox{\tiny front}}'' + \dq_{\hbox{\tiny back}}''}{c_{\rm s} \, \rho_{\rm s} \, \delta}
 \ee
-In this example, the initial exposure to the front side of the slab is
-3~kW/m$^2$. The original material A undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this
-case means that material A disappears in exactly 5~s. This is achieved by setting $n_{\rm s}$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
+In this example, the initial exposure to the front side of the slab is 3~kW/m$^2$. The original material A undergoes a reaction to form material B.  The reaction rate is constant, 0.2~s$^{-1}$, which in this case means that material A disappears in exactly 5~s. This is achieved by setting $n_{\rm s}$ and $E$ to 0 and $A$ to 0.2 in the reaction rate term:
 \be
     r = \left( \frac{\rho_{s,A}}{\rho_{s0}}\right)^{n_{s}}
     A \; \exp \left(-\frac{E}{RT_{\rm s}}\right)
 \ee
-The density and conductivity of both materials are
-30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from
-1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
-
-\begin{figure}[ht]
+The density and conductivity of both materials are 30~\si{kg/m^3} and 10~\si{W/(m.K)}, respectively. The emissivity of the front and back is 1.  The specific heat of material A changes from 1.0~\si{kJ/(kg.K)} to 0.1~\si{kJ/(kg.K)} above 80~\si{\degree C}, while the specific heat of material B is constant at 1.0~\si{kJ/(kg.K)}. The slab is 1~mm thick.
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/enthalpy}
 \caption[The \textct{enthalpy} test case]{Testing the enthalpy of solid materials.}
 \label{fig:solid_phase_enthalpy}
 \end{figure}
-
-\noindent
 Note that the ``analytical'' solution is actually a simple numerical integration of the equations above with a small time step to ensure accuracy.
 This example (Fig.~\ref{fig:solid_phase_enthalpy}) tests a number of features, including the reaction rate, mass weighted specific heats, and radiation boundary conditions. Note that the
 convective heat transfer has been turned off, and the correct steady-state temperature is calculated by FDS.
 
-\clearpage
 
 
-\section{Simple phase change reaction (\texorpdfstring{\textct{pcm\_slab}}{pcm\_slab})}
+
+\section{Simple Phase Change Reaction (\texorpdfstring{\textct{pcm\_slab}}{pcm\_slab})}
 
 A semi-infinite layer of liquid in the semi-infinite region, $x>0$,
 is cooled by setting the surface, $x=0$, to a constant temperature, $T_0$,
@@ -3292,7 +3349,7 @@ Analytical and simulated results are compared in Fig.~\ref{pcm_slab}. The plot o
 From the FDS results, two estimates of $x_f$ are determined because in the numerical solution, the boundary of the two phases is not perfectly sharp.
 ``FDS min'' is the largest value of $x$ for which $\rho_{\rm s} > 990$~\si{kg/m^3} and ``FDS max'' is the largest $x$ for which $\rho_{\rm s} > 0$~\si{kg/m^3}. The plot on the right
 shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
-\begin{figure}[ht!]
+\begin{figure}[!htb]
 \noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/pcm_slab_xf} &
@@ -3303,7 +3360,6 @@ shows temperatures at three depths from the surface: 1~cm, 5~cm, and 10~cm.
 \end{figure}
 
 
-\clearpage
 
 
 \section{A Simple Two-Step Pyrolysis Example (\texorpdfstring{\textct{two\_step\_solid\_reaction}}{two\_step\_solid\_reaction})}
@@ -3326,7 +3382,7 @@ analytical solution is:
 \end{eqnarray}
 The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $K_{bc} = 0.262$ are shown in Fig.~\ref{fig:two_step_solid_reaction}:
 
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/two_step_solid_reaction}
 \caption[The \textct{two\_step\_solid\_reaction} test case]{Comparison of a two-step solid pyrolysis calculation with an analytical solution.}
@@ -3334,9 +3390,8 @@ The analytical and  numerical solution for the parameters $K_{ab} = 0.389$ and $
 \end{figure}
 
 
-
-
 \clearpage
+
 
 \section{Interpreting Bench-Scale Measurements}
 \label{solid_kinetics}
@@ -3400,7 +3455,7 @@ The examples in the following section describe how to interpret output from benc
 \label{tga_sample}
 
 The solid curve of the left hand plot of Fig.~\ref{tga_sample_plot} shows the measured normalized mass of a small solid sample undergoing heating at a rate of 5~$^\circ$C/min in the TGA apparatus. The solid curve of the right hand plot is the mass loss rate, or minus the first derivative of the plot on the left. The goal of this example is to obtain the kinetic parameters, $E_\alpha$ and $A_\alpha$, from Eqs.~(\ref{E_formula}) and (\ref{A_formula}) to solve numerically the ODE, Eqs.~(\ref{dYdt}) and (\ref{dYrdt}).
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mass}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/tga_sample_mlr}
 \caption[Results of a TGA analysis]{Results of a TGA analysis. At left is the normalized sample mass as a function of the temperature. At right is the corresponding mass loss rate.}
@@ -3446,7 +3501,7 @@ Note that {\ct REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,{\rm p
 \label{birch_tga}
 
 This is an example of a comparison of a candidate solid phase model with TGA data that shows the effect of the sample heating rate. The sample cases called \textct{birch\_tga\_1step\_2} and \textct{birch\_tga\_1step\_20} simulate two standard TGA experiments in which small samples of birch wood are heated up slowly at constant rates of 2~\si{\degree C}/min and 20~\si{\degree C}/min, respectively. The model of the wood consists of only one reaction that converts virgin wood to char and fuel gases. There is also a reaction in the simulation that does nothing more than evaporate the small amount of moisture in the wood. This evaporation is evident in Fig.~\ref{fig_birch_tga} near the temperature of 100~\si{\degree C}.
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \centering
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/birch_tga}
 \caption[An example of TGA data]{\label{fig_birch_tga} Comparison of a solid phase model of birch wood with TGA data.}
@@ -3470,7 +3525,7 @@ is the sample heating rate, $\beta$, multiplied by the energy released per unit 
 where $\nu_{\rm r}$ is the fraction of the original mass that remains as residue. Sometimes this is referred to as the ``char yield.'' Note that it is assumed to be the same for all reactions.
 
 The MCC measurement is similar to TGA in that it is possible to derive the kinetic parameters, $A_\alpha$ and $E_\alpha$, for the various reactions from the heat release rate curve. As an example of how to work with MCC data, consider the two plots shown in Fig.~\ref{mcc_plots}. The solid curves in the figures display the results of micro-calorimetry measurements for the insulation and jacket material of a multi-conductor control cable (the number 11 has no particular meaning other than to distinguish it from other cables being studied).
-\begin{figure}[ht]
+\begin{figure}[!htb]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_insulation_mcc}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cable_11_jacket_mcc}
 \caption[Results of a micro-calorimetry analysis of cable materials]{Results of a micro-calorimetry analysis of a sample of cable insulation (left) and jacket material (right).}
@@ -3497,8 +3552,7 @@ The dashed curves in Fig.~\ref{mcc_plots} are the results of numerically integra
 \end{lstlisting}
 Only the relevant parameters are shown. The other parameters are not relevant in this exercise. Note that \textct{REFERENCE\_TEMPERATURE} is $T_{\alpha,{\rm p}}$ in units of \si{\degree C}. \textct{REFERENCE\_RATE} is actually $r_{\alpha,{\rm p}}/Y_{\alpha,0}$, in units of s$^{-1}$. \textct{HEATING\_RATE} is $\beta$ in units of \si{\degree C}/min. \textct{NU\_MATL} is $\nu_{\rm r}$ and \textct{NU\_SPEC} is ($1-\nu_{\rm r}$). Table~\ref{cable_parameters} lists all of the kinetic parameters for the cable insulation and jacket materials. The peak temperatures are easy to estimate, and the values of $r_{p,i}/Y_{0,i}$ can be fine-tuned to closely match the data. Note that it is possible to compute values of $A_i$ and $E_i$ and input them directly into FDS, rather than inputting those listed in the table. However, the values of $A_i$ and $E_i$ are fairly large numbers and have little meaning in their own.
 
-
-\begin{table}[ht]
+\begin{table}[!htb]
 \centering
 \caption[Parameters for kinetic constants for cable materials]{Parameters used to derive the kinetic constants for cable materials. The heating rate for both is
 60~\si{\degree C}/min.}
@@ -3803,9 +3857,10 @@ In the fourth case, air at 500~\si{\degree C} is forced through a 3~m long, 1~m 
 introduced in the middle of the tunnel at a rate of 0.05~kg/s, starting at 10~s. The water temperature is 20~\si{\degree C}.
 The mass fraction of water vapor in the hot air flowing into the tunnel is 0.
 The water evaporates at approximately the same rate at which it is introduced.
-Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 228~kW above its ambient value, and this
-value drops to approximately 100~kW after about 20~s. The evaporation of the water droplets is extracting energy from the hot gas at a rate of
-\be \left( 4.184 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 130 \; \hbox{kW} \ee
+Figure~\ref{water_evaporation_4_plot}, left, displays the time history of the enthalpy flow out of the tunnel. The enthalpy flow rate of the dry hot air is 229~kW above its ambient value, and this
+value drops to approximately 99~kW after about 20~s. The evaporation of the water droplets is extracting energy from the hot gas at a rate of
+\be \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 0.05 \; \hbox{kg/s} = 130 \; \hbox{kW} \ee .
+
 
 \begin{figure}[h!]
 \centering
@@ -3847,7 +3902,7 @@ In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vert
 introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
 The water completely evaporates before it drips down to the bottom of the channel.
 Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 320~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
-\be - \left( 4.184 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2260 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.2 \; \hbox{kW} \ee
+\be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.4 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
 \begin{figure}[h!]

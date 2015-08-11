@@ -13,6 +13,6 @@ if "%1" NEQ "-t" goto endif
   set SMV_TESTSTRING=test_
 :endif
 
-make SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
+make SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
 pause
 
