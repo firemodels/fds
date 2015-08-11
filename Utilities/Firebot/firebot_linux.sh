@@ -716,7 +716,6 @@ wait_cases_release_end()
 run_verification_cases_release()
 {
    # Start running all FDS verification cases
-   echo -e "stage 5 beginning." | mail -s "[Firebot@$hostname] Notice: Stage 5 beginning." $mailToFDS > /dev/null
 
    cd $fdsroot/Verification
    # Run FDS with 1 OpenMP thread
