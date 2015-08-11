@@ -12,6 +12,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \input{../Bibliography/commoncommands}
+\IfFileExists{../Bibliography/gitrevision.tex}
+{\input{../Bibliography/gitrevision}}
+{\newcommand{\gitrevision}{unknown} }
 
 % Math shortcuts
 \renewcommand{\sb}[1]{_\mathrm{#1}}
@@ -99,7 +102,7 @@ Engineering Laboratory} \\
 \begingroup
 \hypersetup{urlcolor=black}
 \href{http://dx.doi.org/10.6028/NIST.SP.1169}{http://dx.doi.org/10.6028/NIST.SP.1169} \\
-\emph{SVN Repository}~$Revision$
+\emph{Git Repository}~\gitrevision
 \endgroup
 
 \vspace*{2\baselineskip}

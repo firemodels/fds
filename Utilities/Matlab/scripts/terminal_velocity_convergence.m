@@ -34,9 +34,12 @@ if skip_case
     return
 end
 
+% get precise ambient density
+M = importdata([repository, 'terminal_velocity_dt_1_0_devc.csv'],',',2);
+rhoa = M.data(end,2);
+
 g = 9.8;
 Cd = 1;
-rhoa = 1.19576554603369;
 rhod = 1000;
 D = 10e-3;
 
@@ -110,17 +113,8 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 display('Printing plot terminal_velocity_convergence.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
@@ -157,61 +151,9 @@ set(gcf, 'PaperUnits', Paper_Units);
 set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
 set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
 
-SVN_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 display('Printing plot position_convergence.pdf...')
 print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
 
-% figure(1)
-% H(1) = loglog(dtvec, errtvec, '-*k');
-% hold on
-% H(2) = loglog(dtvec, 50 * dtvec, '--k');
-% H(3) = loglog(dtvec, 10 * dtvec.^2, '-k');
-% hold off
-% dto = dtvec((length(dtvec) - 1):length(dtvec));
-% erro = errtvec((length(errtvec) - 1):length(errtvec));
-% [a, b] = polyfit(log(dto), log(erro), 1);
-% fprintf('order of accuracy: %f\n', a(1))
-% figure(1)
-% plot_style
-% 
-% set(gca, 'Units', Plot_Units)
-% set(gca, 'Position', [Plot_X, Plot_Y, Plot_Width, Plot_Height])
-% set(gcf, 'DefaultLineLineWidth', Line_Width)
-% 
-% set(gca, 'FontName', Font_Name)
-% set(gca, 'FontSize', Key_Font_Size)
-% 
-% xlabel('Time Step (s)', 'Interpreter', Font_Interpreter)
-% ylabel('Position Error')
-% h = legend(H, 'FDS', 'O(\delta t)',...
-%     'O(\delta t^2)', 'Location', 'Southeast');
-% set(h,'Interpreter', Font_Interpreter)
-% 
-% set(gcf, 'Visible', Figure_Visibility);
-% set(gcf, 'PaperUnits', Paper_Units);
-% set(gcf, 'PaperSize', [Paper_Width Paper_Height]);
-% set(gcf, 'PaperPosition', [0 0 Paper_Width Paper_Height]);
-% 
-% SVN_Filename = [repository, 'terminal_velocity_dt_1_0_svn.txt'];
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
-% 
-% print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');

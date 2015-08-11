@@ -177,9 +177,6 @@ run_auto()
   MKDIR $GIT_STATUSDIR
 # remove untracked files, revert repo files, update to latest revision
   cd $fdsroot
-  git clean -dxf
-  git add .
-  git reset --hard HEAD
 
   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
   if [[ "$BRANCH" != "" ]] ; then
