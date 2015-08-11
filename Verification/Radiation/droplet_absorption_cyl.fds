@@ -37,8 +37,10 @@ value of dT should be equal to the time averaged Q_abs.
 &SPEC ID='WATER VAPOR'
       VAPORIZATION_TEMPERATURE = 1000.
       MELTING_TEMPERATURE = -273.15
-      HEAT_OF_VAPORIZATION = 0.01
-      SPECIFIC_HEAT_LIQUID = 1.0 /
+      SPECIFIC_HEAT_LIQUID = 1.0 
+      HEAT_OF_VAPORIZATION = 1000.
+      REFERENCE_ENTHALPY=298.15
+      SPECIFIC_HEAT=1.   /
 
 &PART ID='drops'
       STATIC = .TRUE.

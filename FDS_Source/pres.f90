@@ -1,7 +1,7 @@
 MODULE PRES
- 
+
 ! Find the perturbation pressure by solving Poisson's Equation
- 
+
 USE PRECISION_PARAMETERS
 USE MESH_POINTERS
 
@@ -9,9 +9,9 @@ IMPLICIT NONE
 PRIVATE
 
 PUBLIC PRESSURE_SOLVER,COMPUTE_VELOCITY_ERROR !,BUILD_SPARSE_MATRIX_LAPLACE
- 
+
 CONTAINS
- 
+
 SUBROUTINE PRESSURE_SOLVER(T,NM)
 
 USE POIS, ONLY: H3CZSS,H2CZSS,H2CYSS,H3CSSS
@@ -20,7 +20,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP, AFILL2
 USE GLOBAL_CONSTANTS
 USE TRAN, ONLY: GET_IJK
 USE TURBULENCE, ONLY: NS_H_EXACT
- 
+
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP
@@ -30,7 +30,8 @@ REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,TNOW,DUMMY=0._EB, &
             XIO,YJO,ZKO,PP,RR,SS,UBAR,VBAR,WBAR
 TYPE (VENTS_TYPE), POINTER :: VT
 TYPE (WALL_TYPE), POINTER :: WC
- 
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
+
 IF (SOLID_PHASE_ONLY) RETURN
 IF (FREEZE_VELOCITY)  RETURN
 
@@ -59,6 +60,7 @@ ENDIF
 WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC => WALL(IW)
+   EWC => EXTERNAL_WALL(IW)
    I   = WC%ONE_D%II
    J   = WC%ONE_D%JJ
    K   = WC%ONE_D%KK
@@ -84,89 +86,89 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
    ENDIF IF_NEUMANN
 
    ! Apply pressures at DIRICHLET boundaries, depending on the specific type
- 
+
    IF_DIRICHLET: IF (WC%PRESSURE_BC_INDEX==DIRICHLET) THEN
 
       NOT_OPEN: IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY .AND. WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) THEN
 
          ! Solid boundary that uses a Dirichlet BC. Assume that the pressure at the boundary (BXS, etc) is the average of the
          ! last computed pressures in the ghost and adjacent gas cells.
- 
+
          SELECT CASE(IOR)
             CASE( 1)
                BXS(J,K) = 0.5_EB*(HP(0,J,K)+HP(1,J,K))
-            CASE(-1) 
+            CASE(-1)
                BXF(J,K) = 0.5_EB*(HP(IBAR,J,K)+HP(IBP1,J,K))
             CASE( 2)
                BYS(I,K) = 0.5_EB*(HP(I,0,K)+HP(I,1,K))
-            CASE(-2) 
+            CASE(-2)
                BYF(I,K) = 0.5_EB*(HP(I,JBAR,K)+HP(I,JBP1,K))
             CASE( 3)
                BZS(I,J) = 0.5_EB*(HP(I,J,0)+HP(I,J,1))
-            CASE(-3) 
+            CASE(-3)
                BZF(I,J) = 0.5_EB*(HP(I,J,KBAR)+HP(I,J,KBP1))
          END SELECT
 
       ENDIF NOT_OPEN
 
       ! Interpolated boundary -- set boundary value of H to be average of neighboring cells from previous time step
- 
+
       INTERPOLATED_ONLY: IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-         
-         NOM     = WC%NOM
+
+         NOM     = EWC%NOM
          H_OTHER = 0._EB
-         DO KKO=WC%NOM_IB(3),WC%NOM_IB(6)
-            DO JJO=WC%NOM_IB(2),WC%NOM_IB(5)
-               DO IIO=WC%NOM_IB(1),WC%NOM_IB(4)
+         DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+            DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+               DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
                   IF (PREDICTOR) H_OTHER = H_OTHER + OMESH(NOM)%H(IIO,JJO,KKO)
                   IF (CORRECTOR) H_OTHER = H_OTHER + OMESH(NOM)%HS(IIO,JJO,KKO)
                ENDDO
             ENDDO
          ENDDO
-         N_INT_CELLS = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+         N_INT_CELLS = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
          H_OTHER = H_OTHER/REAL(N_INT_CELLS,EB)
-         
+
          SELECT CASE(IOR)
             CASE( 1)
-               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
+               DX_OTHER = MESHES(NOM)%DX(EWC%IIO_MIN)
                BXS(J,K) = (DX_OTHER*HP(1,J,K) + DX(1)*H_OTHER)/(DX(1)+DX_OTHER) + WALL_WORK1(IW)
             CASE(-1)
-               DX_OTHER = MESHES(NOM)%DX(WC%NOM_IB(1))
+               DX_OTHER = MESHES(NOM)%DX(EWC%IIO_MIN)
                BXF(J,K) = (DX_OTHER*HP(IBAR,J,K) + DX(IBAR)*H_OTHER)/(DX(IBAR)+DX_OTHER) + WALL_WORK1(IW)
             CASE( 2)
-               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
+               DY_OTHER = MESHES(NOM)%DY(EWC%JJO_MIN)
                BYS(I,K) = (DY_OTHER*HP(I,1,K) + DY(1)*H_OTHER)/(DY(1)+DY_OTHER) + WALL_WORK1(IW)
             CASE(-2)
-               DY_OTHER = MESHES(NOM)%DY(WC%NOM_IB(2))
+               DY_OTHER = MESHES(NOM)%DY(EWC%JJO_MIN)
                BYF(I,K) = (DY_OTHER*HP(I,JBAR,K) + DY(JBAR)*H_OTHER)/(DY(JBAR)+DY_OTHER) + WALL_WORK1(IW)
             CASE( 3)
-               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
+               DZ_OTHER = MESHES(NOM)%DZ(EWC%KKO_MIN)
                BZS(I,J) = (DZ_OTHER*HP(I,J,1) + DZ(1)*H_OTHER)/(DZ(1)+DZ_OTHER) + WALL_WORK1(IW)
             CASE(-3)
-               DZ_OTHER = MESHES(NOM)%DZ(WC%NOM_IB(3))
+               DZ_OTHER = MESHES(NOM)%DZ(EWC%KKO_MIN)
                BZF(I,J) = (DZ_OTHER*HP(I,J,KBAR) + DZ(KBAR)*H_OTHER)/(DZ(KBAR)+DZ_OTHER) + WALL_WORK1(IW)
          END SELECT
-      
+
       ENDIF INTERPOLATED_ONLY
-      
+
       ! Interpolation for embedded meshes --- set H on the boundary of mesh level 1 to an interpolated value from mesh level 0
-      
+
       EMBEDDED_MESH_IF: IF (PERIODIC_TEST==8 .AND. WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY .AND. MESH_LEVEL==1) THEN
-         
-         NOM = WC%NOM
-         
+
+         NOM = EWC%NOM
+
          CALL GET_IJK(XC(I)-TWO_EPSILON_EB,YC(J)-TWO_EPSILON_EB,ZC(K)-TWO_EPSILON_EB,NOM,XIO,YJO,ZKO,IIO,JJO,KKO)
-         
+
          IIX = FLOOR(XIO+.5_EB)
          JJY = FLOOR(YJO+.5_EB)
          KKZ = FLOOR(ZKO+.5_EB)
-         
+
          SELECT CASE(IOR)
             CASE( 1)
                PP = (X(I)  - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (YC(J) - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (ZC(K) - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BXS(J,K) = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BXS(J,K) = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BXS(J,K) = NS_H_EXACT(X(I),ZC(K),T,MU(I,J,K),WC%RHO_F,2._EB)
@@ -174,7 +176,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                PP = (X(I - 1) - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (YC(J)    - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (ZC(K)    - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BXF(J,K) = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BXF(J,K) = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BXS(J,K) = NS_H_EXACT(X(I-1),ZC(K),T,MU(I,J,K),WC%RHO_F,2._EB)
@@ -182,7 +184,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                PP = (XC(I) - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (Y(J)  - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (ZC(K) - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BYS(I,K) = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BYS(I,K) = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BYS(I,K) = 0._EB
@@ -190,7 +192,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                PP = (XC(I)    - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (Y(J - 1) - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (ZC(K)    - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BYF(I,K) = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BYF(I,K) = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BYF(I,K) = 0._EB
@@ -198,7 +200,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                PP = (XC(I) - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (YC(J) - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (Z(K)  - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BZS(I,J)  = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BZS(I,J)  = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BZS(I,J) = NS_H_EXACT(XC(I),Z(K),T,MU(I,J,K),WC%RHO_F,2._EB)
@@ -206,18 +208,18 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                PP = (XC(I)    - MESHES(NOM)%XC(IIX)) * MESHES(NOM)%RDX(IIX)
                RR = (YC(J)    - MESHES(NOM)%YC(JJY)) * MESHES(NOM)%RDY(JJY)
                SS = (Z(K - 1) - MESHES(NOM)%ZC(KKZ)) * MESHES(NOM)%RDZ(KKZ)
-               
+
                !IF (PREDICTOR) BZF(I,J) = AFILL2( MESHES(NOM)%H,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                !IF (CORRECTOR) BZF(I,J) = AFILL2(MESHES(NOM)%HS,IIX,JJY,KKZ,PP,RR,SS) + WALL_WORK1(IW)
                BZS(I,J) = NS_H_EXACT(XC(I),Z(K-1),T,MU(I,J,K),WC%RHO_F,2._EB)
          END SELECT
-      
+
       ENDIF EMBEDDED_MESH_IF
-      
+
       ! OPEN (passive opening to exterior of domain) boundary. Apply inflow/outflow BC.
 
       OPEN_IF: IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
- 
+
          IF (WC%VENT_INDEX>0) THEN
             VT => VENTS(WC%VENT_INDEX)
             IF (ABS(WC%ONE_D%T_IGN-T_BEGIN)<=TWO_EPSILON_EB .AND. VT%PRESSURE_RAMP_INDEX >=1) THEN
@@ -226,7 +228,7 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                TSI = T - T_BEGIN
             ENDIF
             TIME_RAMP_FACTOR = EVALUATE_RAMP(TSI,DUMMY,VT%PRESSURE_RAMP_INDEX)
-            P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE      
+            P_EXTERNAL = TIME_RAMP_FACTOR*VT%DYNAMIC_PRESSURE
          ENDIF
 
          IF (ANY(MEAN_FORCING)) THEN
@@ -274,11 +276,11 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
                   BZF(I,J) = P_EXTERNAL/WC%RHO_F + H0
                ENDIF
          END SELECT
-    
+
       ENDIF OPEN_IF
- 
+
    ENDIF IF_DIRICHLET
- 
+
 ENDDO WALL_CELL_LOOP
 
 ! Compute the RHS of the Poisson equation
@@ -302,7 +304,7 @@ SELECT CASE(IPS)
             DO J=1,JBAR
                DO I=1,IBAR
                   TRM1 = (FVX(I-1,J,K)-FVX(I,J,K))*RDX(I)
-                  TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J) 
+                  TRM2 = (FVY(I,J-1,K)-FVY(I,J,K))*RDY(J)
                   TRM3 = (FVZ(I,J,K-1)-FVZ(I,J,K))*RDZ(K)
                   TRM4 = -DDDT(I,J,K)
                   PRHS(I,J,K) = TRM1 + TRM2 + TRM3 + TRM4
@@ -310,8 +312,9 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
          !$OMP END PARALLEL DO
+
       ENDIF
- 
+
    CASE(2)  ! Switch x and y
       DO K=1,KBAR
          DO J=1,JBAR
@@ -326,7 +329,7 @@ SELECT CASE(IPS)
       ENDDO
       BZST = TRANSPOSE(BZS)
       BZFT = TRANSPOSE(BZF)
- 
+
    CASE(3,6)  ! Switch x and z
       DO K=1,KBAR
          DO J=1,JBAR
@@ -345,7 +348,7 @@ SELECT CASE(IPS)
       BYFT = TRANSPOSE(BYF)
       BZST = TRANSPOSE(BZS)
       BZFT = TRANSPOSE(BZF)
- 
+
    CASE(5)  ! Switch y and z
       DO K=1,KBAR
          DO J=1,JBAR
@@ -368,25 +371,25 @@ END SELECT
 IF (PRES_METHOD == 'SCARC') RETURN
 
 ! Call the Poisson solver
- 
+
 SELECT CASE(IPS)
-   CASE(:1) 
+   CASE(:1)
       IF (.NOT.TWO_D) CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
       IF (TWO_D .AND. .NOT.CYLINDRICAL) CALL H2CZSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
       IF (TWO_D .AND.      CYLINDRICAL) CALL H2CYSS(BXS,BXF,BZS,BZF,ITRN,PRHS,POIS_PTB,SAVE1,WORK)
-   CASE(2) 
+   CASE(2)
       CALL H3CZSS(BYS,BYF,BXS,BXF,BZST,BZFT,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HY)
-   CASE(3)      
+   CASE(3)
       IF (.NOT.TWO_D) CALL H3CZSS(BZST,BZFT,BYST,BYFT,BXST,BXFT,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HZ)
       IF (TWO_D)      CALL H2CZSS(BZS,BZF,BXS,BXF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HZ)
-   CASE(4)  
+   CASE(4)
       CALL H3CSSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX,HY)
-   CASE(5)      
+   CASE(5)
       IF (.NOT.TWO_D) CALL H3CSSS(BXST,BXFT,BZS,BZF,BYS,BYF,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HX,HZ)
       IF (     TWO_D) CALL H2CZSS(BZS,BZF,BXS,BXF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HZ)
-   CASE(6) 
+   CASE(6)
       CALL H3CSSS(BZST,BZFT,BYST,BYFT,BXST,BXFT,ITRN,JTRN,PRHS,POIS_PTB,SAVE1,WORK,HZ,HY)
-   CASE(7)  
+   CASE(7)
       CALL H2CZSS(BXS,BXF,BYS,BYF,ITRN,PRHS,POIS_PTB,SAVE1,WORK,HX)
 END SELECT
 
@@ -423,7 +426,7 @@ SELECT CASE(IPS)
             ENDDO
          ENDDO
       ENDDO
-END SELECT 
+END SELECT
 
 ! Apply boundary conditions to H
 
@@ -507,6 +510,7 @@ REAL(EB) :: TNOW,UN_NEW,UN_NEW_OTHER,VELOCITY_ERROR,DUDT,DVDT,DWDT,ITERATIVE_FAC
 TYPE(OMESH_TYPE), POINTER :: OM
 TYPE(MESH_TYPE), POINTER :: M2
 TYPE(WALL_TYPE), POINTER :: WC
+TYPE(EXTERNAL_WALL_TYPE), POINTER :: EWC
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
@@ -528,8 +532,9 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
        WC%BOUNDARY_TYPE/=INTERPOLATED_BOUNDARY) CYCLE CHECK_WALL_LOOP
 
    IF (WC%BOUNDARY_TYPE==INTERPOLATED_BOUNDARY) THEN
-      OM => OMESH(WC%NOM)
-      M2 => MESHES(WC%NOM)
+      EWC=>EXTERNAL_WALL(IW)
+      OM => OMESH(EWC%NOM)
+      M2 => MESHES(EWC%NOM)
    ENDIF
 
    II  = WC%ONE_D%II
@@ -577,12 +582,13 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       UN_NEW_OTHER = 0._EB
 
-      IIO1 = WC%NOM_IB(1)
-      JJO1 = WC%NOM_IB(2)
-      KKO1 = WC%NOM_IB(3)
-      IIO2 = WC%NOM_IB(4)
-      JJO2 = WC%NOM_IB(5)
-      KKO2 = WC%NOM_IB(6)
+      EWC=>EXTERNAL_WALL(IW)
+      IIO1 = EWC%IIO_MIN
+      JJO1 = EWC%JJO_MIN
+      KKO1 = EWC%KKO_MIN
+      IIO2 = EWC%IIO_MAX
+      JJO2 = EWC%JJO_MAX
+      KKO2 = EWC%KKO_MAX
 
       IF (PREDICTOR) THEN
          SELECT CASE(IOR)
@@ -652,12 +658,12 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          END SELECT
       ENDIF
 
-      N_INT_CELLS  = (WC%NOM_IB(4)-WC%NOM_IB(1)+1) * (WC%NOM_IB(5)-WC%NOM_IB(2)+1) * (WC%NOM_IB(6)-WC%NOM_IB(3)+1)
+      N_INT_CELLS  = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
       UN_NEW_OTHER = UN_NEW_OTHER/REAL(N_INT_CELLS,EB)
 
    ENDIF
 
-   ! At solid boundaries, compare updated normal velocity with specified normal velocity 
+   ! At solid boundaries, compare updated normal velocity with specified normal velocity
 
    IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
       IF (PREDICTOR) THEN
@@ -697,7 +703,7 @@ END SUBROUTINE COMPUTE_VELOCITY_ERROR
 ! SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE(NM)
 ! USE GLOBAL_CONSTANTS, ONLY: FISHPAK_BC_NEUMANN_NEUMANN, FISHPAK_BC_NEUMANN_DIRICHLET, FISHPAK_BC_DIRICHLET_NEUMANN, &
 !                             FISHPAK_BC_DIRICHLET_DIRICHLET
-! USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR 
+! USE MEMORY_FUNCTIONS, ONLY: CHKMEMERR
 ! IMPLICIT NONE
 
 ! INTEGER, INTENT(IN) :: NM
@@ -1005,16 +1011,3 @@ END SUBROUTINE COMPUTE_VELOCITY_ERROR
 
 
 END MODULE PRES
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,7 +6,7 @@ function []=addverstr(ha,fn,pt)
 
 Font_Name = 'Times';
 Font_Interpreter = 'TeX';
-VerStr_Scale_X = 0.80;
+VerStr_Scale_X = 0.65;
 VerStr_Scale_Y = 1.05;
 
 if exist(fn,'file')
@@ -28,9 +28,9 @@ if exist(fn,'file')
     end
     if isnumeric(VerStr)
         text(X_VerStr_Position,Y_VerStr_Position,['VerStr ',num2str(VerStr)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            'FontSize',10,'FontName',Font_Name,'Interpreter','none')
     elseif ischar(VerStr{1})
         text(X_VerStr_Position,Y_VerStr_Position,[VerStr], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            'FontSize',10,'FontName',Font_Name,'Interpreter','none')
     end
 end
