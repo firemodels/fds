@@ -17,8 +17,8 @@ echo "inspect_report.sh [ -d result-dir -r report-type ]"
 echo "Report results from thread checker"
 echo ""
 echo "Options"
-echo "-d result-dir - directory that contains thread checker results"
-echo "-r report-type - type of report: problems [or] observations"
+echo "-d result-dir - directory that contains thread checker results [default: $RESULT_DIR]"
+echo "-r report-type - type of report: problems [or] observations [default: $REPORT_TYPE]"
 exit
 }
 
@@ -26,13 +26,13 @@ while getopts 'd:hr:' OPTION
 do
 case $OPTION in
   d)
-   cases="$OPTARG"
+   RESULT_DIR="$OPTARG"
    ;;
   h)
    usage;
    ;;
   r)
-   cases="$OPTARG"
+   REPORT_TYPE="$OPTARG"
    ;;
 esac
 done
