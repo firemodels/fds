@@ -1,4 +1,4 @@
-PROGRAM FDS  
+PROGRAM FDS
 
 ! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
@@ -30,7 +30,7 @@ USE TURBULENCE, ONLY: NS_ANALYTICAL_SOLUTION,INIT_TURB_ARRAYS,COMPRESSION_WAVE,T
                       SYNTHETIC_TURBULENCE,SYNTHETIC_EDDY_SETUP,SANDIA_DAT
 USE EMBEDDED_MESH_METHOD, ONLY: SCALARF_EMB,VELOCITY_EMB,RESTRICT_MASS_EMB,RESTRICT_DIV_EMB,SCALAR_GHOST_EMB, &
                                 PROJECT_VELOCITY,SORT_MESH_LEVEL,MATCH_VELOCITY_EMB
-USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3
+USE MANUFACTURED_SOLUTIONS, ONLY: SHUNN_MMS_3,SAAD_MMS_1
 USE COMPLEX_GEOMETRY, ONLY: INIT_IBM
 USE OPENMP
 USE MPI
@@ -54,7 +54,7 @@ LOGICAL, ALLOCATABLE, DIMENSION(:) ::  ACTIVE_MESH,STATE_GLB,STATE_LOC
 INTEGER :: NOM,IWW,IW !,IERROR
 TYPE (MESH_TYPE), POINTER :: M,M4
 TYPE (OMESH_TYPE), POINTER :: M2,M3,M5
- 
+
 ! MPI stuff
 
 INTEGER :: N,I,IERR=0,STATUS(MPI_STATUS_SIZE)
@@ -74,29 +74,29 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:)     :: REAL_BUFFER_3,REAL_BUFFER_5,REAL_BU
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)   :: REAL_BUFFER_7,REAL_BUFFER_8
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: REAL_BUFFER_9
 LOGICAL, ALLOCATABLE, DIMENSION(:)        :: LOGICAL_BUFFER_1
- 
+
 ! Initialize MPI (First executable lines of code)
- 
+
 CALL MPI_INIT_THREAD(REQUIRED,PROVIDED,IERR)
 CALL MPI_COMM_RANK(MPI_COMM_WORLD, MYID, IERR)
 CALL MPI_COMM_SIZE(MPI_COMM_WORLD, N_MPI_PROCESSES, IERR)
 CALL MPI_GET_PROCESSOR_NAME(PNAME, PNAMELEN, IERR)
 
 IF (PNAME/='null') USE_MPI = .TRUE.
- 
+
 ! Initialize OpenMP
 
-CALL OPENMP_CHECK
+CALL OPENMP_INIT
 
 ! Check that MPI processes and OpenMP threads are working properly
 
-CALL CHECK_MPI_OPENMP
+CALL CHECK_MPI
 
 ! Start wall clock timing
 
 INITIALIZATION_PHASE = .TRUE.
 WALL_CLOCK_START = WALL_CLOCK_TIME()
- 
+
 ! Assign a compilation date (All Nodes)
 
 WRITE(VERSION_STRING,'(A)') 'FDS 6.2.0'
@@ -104,17 +104,24 @@ WRITE(VERSION_STRING,'(A)') 'FDS 6.2.0'
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 ! Read input from CHID.fds file and stop the code if any errors are found
- 
+
 CALL READ_DATA
 
 CALL STOP_CHECK(1)
 
+! Setup number of OPENMP threads
+CALL OPENMP_SET_THREADS
+
+! Print OPENMP thread status
+CALL OPENMP_PRINT_STATUS
+
+
 ! Set up send and receive buffer counts and displacements
 
 CALL MPI_INITIALIZATION_CHORES(1)
- 
+
 ! Open and write to Smokeview and status file (Master Node Only)
- 
+
 CALL ASSIGN_FILE_NAMES
 
 DO N=0,N_MPI_PROCESSES-1
@@ -129,7 +136,7 @@ IF (MYID==0) THEN
 ENDIF
 
 ! Stop all the processes if this is just a set-up run
- 
+
 IF (SET_UP_ONLY) THEN
    IF (MYID==0) CALL INITIALIZE_DIAGNOSTIC_FILE
    STOP_STATUS = SETUP_ONLY_STOP
@@ -137,38 +144,38 @@ IF (SET_UP_ONLY) THEN
 ENDIF
 
 ! Allocate various utility arrays
- 
+
 CALL MPI_INITIALIZATION_CHORES(2)
 
 ! Start the clock
 
 T = T_BEGIN
- 
+
 ! Initialize global parameters
- 
+
 CALL INITIALIZE_GLOBAL_VARIABLES
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
-! Initialize radiation 
- 
+! Initialize radiation
+
 IF (RADIATION) CALL INIT_RADIATION
 
 ! Allocate and initialize mesh-specific variables, and check to see if the code should stop
- 
+
 DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_VARIABLES_1(NM)
 ENDDO
 CALL STOP_CHECK(1)
- 
+
 ! Allocate and initialize OMESH arrays to hold "other mesh" data for a given mesh
- 
+
 N_COMMUNICATIONS = 0
 
 DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID) CALL INITIALIZE_MESH_EXCHANGE_1(NM)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
- 
+
 ! Allocate "request" arrays to keep track of MPI communications
 
 CALL MPI_INITIALIZATION_CHORES(3)
@@ -253,6 +260,7 @@ DO NM=1,NMESHES
    IF (PERIODIC_TEST==8) CALL NS_ANALYTICAL_SOLUTION(NM,T_BEGIN,RK_STAGE=2)
    IF (PERIODIC_TEST==9) CALL SANDIA_DAT(NM,UVW_FILE)
    IF (PERIODIC_TEST==10) CALL TWOD_VORTEX_UMD(NM)
+   IF (PERIODIC_TEST==11) CALL SAAD_MMS_1(NM)
    IF (UVW_RESTART)      CALL UVW_INIT(NM,CSVFINFO(NM)%UVWFILE)
    CALL COMPUTE_VISCOSITY(T_BEGIN,NM) ! needed here for KRES prior to mesh exchange
 ENDDO
@@ -310,7 +318,7 @@ ENDDO
 ! ENDIF
 
 ! ! Apply normal boundary conditions to embedded meshes
-   
+
 ! IF (EMBEDDED_MESH) THEN
 !    DO NM=1,NMESHES
 !       DO NOM=1,NMESHES
@@ -321,15 +329,15 @@ ENDDO
 !    ENDDO
 ! ENDIF
 
-! Potentially read data from a previous calculation 
- 
+! Potentially read data from a previous calculation
+
 DO NM=1,NMESHES
    IF (RESTART .AND. PROCESS(NM)==MYID) CALL READ_RESTART(T(NM),NM)
 ENDDO
 CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
- 
+
 ! Initialize output files that are mesh-specific
- 
+
 DO NM=1,NMESHES
    IF (PROCESS(NM)/=MYID) CYCLE
    IF (TGA_SURF_INDEX<1) CALL INITIALIZE_MESH_DUMPS(NM)
@@ -368,10 +376,10 @@ ENDIF
 ! Initialize HVAC variables
 IF (HVAC_SOLVE) THEN
    DO NM=1,NMESHES
-      IF (PROCESS(NM)/=MYID) CYCLE  
+      IF (PROCESS(NM)/=MYID) CYCLE
       CALL HVAC_BC_IN(NM)
    ENDDO
-   IF (N_MPI_PROCESSES>1) CALL EXCHANGE_HVAC_BC    
+   IF (N_MPI_PROCESSES>1) CALL EXCHANGE_HVAC_BC
    IF (PROCESS(1)==MYID) THEN
       CALL COLLAPSE_HVAC_BC
       CALL SET_INIT_HVAC
@@ -383,7 +391,7 @@ ENDIF
 IF (.NOT.RESTART) THEN
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
-      CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)      
+      CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)
       CALL DUMP_MESH_OUTPUTS(T(NM),NM)
    ENDDO
 ENDIF
@@ -410,16 +418,16 @@ ENDIF
 
 IF (.NOT.RESTART) THEN
    DO NM=1,NMESHES
-      IF (PROCESS(NM)==MYID) CALL OPEN_AND_CLOSE(T(NM),NM)  
+      IF (PROCESS(NM)==MYID) CALL OPEN_AND_CLOSE(T(NM),NM)
    ENDDO
 ENDIF
 
 ! Write out character strings to .smv file
- 
+
 CALL WRITE_STRINGS
 
 ! Check for evacuation initialization stop
- 
+
 IF (ANY(EVACUATION_GRID)) CALL STOP_CHECK(1)
 
 ! Sprinkler piping calculation
@@ -451,9 +459,9 @@ INITIALIZATION_PHASE = .FALSE.
 !***********************************************************************************************************************************
 !                                                   MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
- 
-MAIN_LOOP: DO  
-   
+
+MAIN_LOOP: DO
+
    ICYC  = ICYC + 1   ! Time step iterations
 
    ! Do not print out general diagnostics into .out file every time step
@@ -462,14 +470,14 @@ MAIN_LOOP: DO
    EXCHANGE_EVACUATION = .FALSE.
 
    ! Synchronize clocks
-   
+
    IF (N_MPI_PROCESSES>1) THEN
       CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_DOUBLE_PRECISION,T,COUNTS,DISPLS,MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
       IF (IERR/=MPI_SUCCESS) CALL HANDLE_MPI_ERROR('Error in MPI_ALLGATHERV for T',IERR)
    ENDIF
-   
+
    ! Check for program stops
- 
+
    INQUIRE(FILE=FN_STOP,EXIST=EX)
    IF (EX .AND. ICYC>=STOP_AT_ITER) THEN
       STOP_STATUS = USER_STOP
@@ -477,14 +485,14 @@ MAIN_LOOP: DO
    ENDIF
 
    ! Figure out fastest and slowest meshes
- 
+
    T_MAX = MAXVAL(T,MASK=.NOT.EVACUATION_ONLY)
    T_MIN = MINVAL(T,MASK=.NOT.EVACUATION_ONLY)
    IF (ALL(EVACUATION_ONLY)) T_MAX = T_EVAC
    IF (ALL(EVACUATION_ONLY)) T_MIN = T_EVAC
- 
+
    ! Determine time step
- 
+
    DO NM=1,NMESHES
       IF (PROCESS(NM)==MYID) DT_SYNC(NM) = MESHES(NM)%DT_NEXT
    ENDDO
@@ -508,14 +516,14 @@ MAIN_LOOP: DO
    IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. T_MIN>=T_END) DIAGNOSTICS = .TRUE.
 
    ! Give every processor the full ACTIVE_MESH array
- 
+
    IF (N_MPI_PROCESSES>1) THEN
       CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_LOGICAL,ACTIVE_MESH,COUNTS,DISPLS,MPI_LOGICAL,MPI_COMM_WORLD,IERR)
       IF (IERR/=MPI_SUCCESS) CALL HANDLE_MPI_ERROR('Error in MPI_ALLGATHERV for ACTIVE_MESH',IERR)
    ENDIF
 
    ! If no meshes are due to be updated, update them all
- 
+
    IF (ALL(.NOT.ACTIVE_MESH)) ACTIVE_MESH = .TRUE.
 
    ! If evacuation, set up special time iteration parameters
@@ -525,7 +533,7 @@ MAIN_LOOP: DO
    !============================================================================================================================
    !                                          Start of Predictor part of time step
    !============================================================================================================================
- 
+
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
 
@@ -562,11 +570,11 @@ MAIN_LOOP: DO
    ! Estimate quantities at next time step, and decrease/increase time step if necessary based on CFL condition
 
    FIRST_PASS = .TRUE.
- 
+
    CHANGE_TIME_STEP_LOOP: DO
 
       ! Predict density and mass fractions at next time step, and then start the divergence calculation
- 
+
       COMPUTE_DENSITY_LOOP: DO NM=1,NMESHES
          IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_DENSITY_LOOP
          CALL DENSITY(T(NM),NM)
@@ -582,10 +590,10 @@ MAIN_LOOP: DO
 !             ENDDO
 !          ENDDO
 !       ENDIF
-      
+
       ! Exchange density and species mass fractions in interpolated boundaries
 
-      IF (FIRST_PASS) CALL MESH_EXCHANGE(1)
+      CALL MESH_EXCHANGE(1)
 
       ! Do mass and energy boundary conditions, and begin divergence calculation
 
@@ -700,13 +708,13 @@ MAIN_LOOP: DO
       ENDIF
 
       IF (.NOT.ANY(CHANGE_TIME_STEP)) EXIT CHANGE_TIME_STEP_LOOP
- 
+
       FIRST_PASS = .FALSE.
 
    ENDDO CHANGE_TIME_STEP_LOOP
 
    CHANGE_TIME_STEP = .FALSE.
- 
+
    ! Exchange velocity and pressures at interpolated boundaries
 
    CALL MESH_EXCHANGE(3)
@@ -728,9 +736,9 @@ MAIN_LOOP: DO
 !          ENDDO
 !       ENDDO
 !    ENDIF
-   
+
 !    ! Apply normal boundary conditions to embedded meshes
-   
+
 !    IF (EMBEDDED_MESH) THEN
 !       DO NM=1,NMESHES
 !          DO NOM=1,NMESHES
@@ -750,10 +758,10 @@ MAIN_LOOP: DO
    ENDDO VELOCITY_BC_LOOP
 
    ! Advance the time to start the CORRECTOR step
- 
+
    UPDATE_TIME: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE UPDATE_TIME
-      T(NM) = T(NM) + MESHES(NM)%DT  
+      T(NM) = T(NM) + MESHES(NM)%DT
    ENDDO UPDATE_TIME
 
    ! Ensure the time is known to all meshes
@@ -770,7 +778,7 @@ MAIN_LOOP: DO
    !===============================================================================================================================
    !                                          Start of Corrector part of time step
    !===============================================================================================================================
- 
+
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
 
@@ -789,7 +797,7 @@ MAIN_LOOP: DO
 
    COMPUTE_FINITE_DIFFERENCES_2: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID)    CYCLE COMPUTE_FINITE_DIFFERENCES_2
-      CALL OPEN_AND_CLOSE(T(NM),NM)   
+      CALL OPEN_AND_CLOSE(T(NM),NM)
       IF (.NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_FINITE_DIFFERENCES_2
       CALL COMPUTE_VELOCITY_FLUX(T(NM),NM,1)
       CALL MASS_FINITE_DIFFERENCES(NM)
@@ -832,7 +840,7 @@ MAIN_LOOP: DO
 !    ENDIF
 
    IF (HVAC_SOLVE .AND. ACTIVE_MESH(1)) CALL HVAC_CALC(T(1),.TRUE.)
- 
+
    COMPUTE_WALL_BC_2A: DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID .OR. .NOT.ACTIVE_MESH(NM)) CYCLE COMPUTE_WALL_BC_2A
       CALL UPDATE_PARTICLES(T(NM),NM)
@@ -845,7 +853,7 @@ MAIN_LOOP: DO
    ENDDO COMPUTE_WALL_BC_2A
 
    ! Apply coarse mesh scalar bc to fine mesh
-   
+
 !    IF (.FALSE.) THEN
 !       DO NM=1,NMESHES
 !          DO NOM=1,NMESHES
@@ -888,7 +896,7 @@ MAIN_LOOP: DO
 
    ! Set up the last big exchange of info
 
-   CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,0)   
+   CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,0)
 
    ! Correct the velocity
 
@@ -905,7 +913,7 @@ MAIN_LOOP: DO
 
    ! Exchange velocity, pressure, particles at interpolated boundaries
 
-   CALL POST_RECEIVES(6) 
+   CALL POST_RECEIVES(6)
    CALL MESH_EXCHANGE(6)
 
    ! Exchange radiation at interpolated boundaries
@@ -923,7 +931,7 @@ MAIN_LOOP: DO
    ENDDO
 
 !    ! Restrict fine mesh velocity components to coarse mesh
-   
+
 !    IF (EMBEDDED_MESH) THEN
 !       DO NM=NMESHES,1,-1
 !          DO NOM=NMESHES,1,-1
@@ -934,7 +942,7 @@ MAIN_LOOP: DO
 !    ENDIF
 
 !    ! Apply normal boundary conditions to embedded meshes
-   
+
 !    IF (EMBEDDED_MESH) THEN
 !       DO NM=1,NMESHES
 !          DO NOM=1,NMESHES
@@ -964,12 +972,12 @@ MAIN_LOOP: DO
             IF (CTRL_STOP_STATUS) STOP_STATUS = CTRL_STOP
          ENDIF
          CALL_UPDATE_CONTROLS = .TRUE.
-         CALL DUMP_MESH_OUTPUTS(T(NM),NM) 
+         CALL DUMP_MESH_OUTPUTS(T(NM),NM)
       ENDIF
    ENDDO
 
    ! Dump outputs such as HRR, DEVC, etc.
-   
+
    CALL DUMP_GLOBAL_OUTPUTS(T_MIN)
 
    ! Exchange EVAC information among meshes
@@ -1000,15 +1008,15 @@ MAIN_LOOP: DO
    CALL STOP_CHECK(1)  ! The argument 1 means that FDS will end unless there is logic associated with the STOP_STATUS
 
    ! Stop the run normally
-   
+
    IF (T_MIN>=T_END) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
- 
+
 !***********************************************************************************************************************************
 !                                                     END OF TIME STEPPING LOOP
 !***********************************************************************************************************************************
- 
+
 ! Gather up timings for the meshes
 
 DO NM=1,NMESHES
@@ -1045,11 +1053,9 @@ CALL END_FDS
 CONTAINS
 
 
-SUBROUTINE CHECK_MPI_OPENMP
+SUBROUTINE CHECK_MPI
 
-INTEGER :: THREAD_ID
-
-IF (.NOT.USE_OPENMP .AND. .NOT.USE_MPI) RETURN
+IF (.NOT.USE_MPI) RETURN
 
 ! Check the threading support level
 
@@ -1058,29 +1064,7 @@ IF (USE_MPI .AND. PROVIDED<REQUIRED) THEN
    !$ CALL OMP_SET_NUM_THREADS(1)
 ENDIF
 
-! The multi-threaded section where all threads will say hello
-
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(THREAD_ID)
-
-THREAD_ID = 0
-!$ THREAD_ID = OMP_GET_THREAD_NUM()  
-
-!$OMP CRITICAL
-IF (USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,91) " OpenMP thread ",THREAD_ID," of ",OPENMP_AVAILABLE_THREADS-1,&
-   " assigned to MPI process ",MYID," of ",N_MPI_PROCESSES-1," is running on ",PNAME(1:PNAMELEN)
-IF (.NOT.USE_OPENMP .AND. USE_MPI) WRITE(LU_ERR,92) " MPI process ",MYID," of ",N_MPI_PROCESSES-1,&
-                                                    " is running on ",PNAME(1:PNAMELEN)
-IF (USE_OPENMP .AND. .NOT.USE_MPI) WRITE(LU_ERR,93) " OpenMP thread ",THREAD_ID," of ",OPENMP_AVAILABLE_THREADS-1,&
-      " is running"
-!$OMP END CRITICAL
-
-!$OMP END PARALLEL
-
-91 FORMAT(A,I3,A,I3,A,I3,A,I3,A,A)
-92 FORMAT(A,I3,A,I3,A,A)
-93 FORMAT(A,I3,A,I3,A)
-
-END SUBROUTINE CHECK_MPI_OPENMP
+END SUBROUTINE CHECK_MPI
 
 
 SUBROUTINE MPI_INITIALIZATION_CHORES(TASK_NUMBER)
@@ -1108,9 +1092,9 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(REAL_BUFFER_11(N_Q_DOT,NMESHES))
       ALLOCATE(REAL_BUFFER_12(N_M_DOT,NMESHES))
       ALLOCATE(INTEGER_BUFFER_1(NMESHES))
-      ALLOCATE(INTEGER_BUFFER_2(N_DUCTNODES,NMESHES))      
+      ALLOCATE(INTEGER_BUFFER_2(N_DUCTNODES,NMESHES))
       ALLOCATE(LOGICAL_BUFFER_1(NMESHES))
-      
+
       ALLOCATE(COUNTS(0:N_MPI_PROCESSES-1))
       ALLOCATE(COUNTS2D(0:N_MPI_PROCESSES-1))
       ALLOCATE(COUNTS_TIMERS(0:N_MPI_PROCESSES-1))
@@ -1119,7 +1103,7 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(COUNTS_MASS(0:N_MPI_PROCESSES-1))
       ALLOCATE(COUNTS_Q_DOT(0:N_MPI_PROCESSES-1))
       ALLOCATE(COUNTS_M_DOT(0:N_MPI_PROCESSES-1))
-      
+
       ALLOCATE(DISPLS(0:N_MPI_PROCESSES-1))
       ALLOCATE(DISPLS2D(0:N_MPI_PROCESSES-1))
       ALLOCATE(DISPLS_MASS(0:N_MPI_PROCESSES-1))
@@ -1128,7 +1112,7 @@ SELECT CASE(TASK_NUMBER)
       ALLOCATE(DISPLS_HVAC_SPECIES(0:N_MPI_PROCESSES-1))
       ALLOCATE(DISPLS_Q_DOT(0:N_MPI_PROCESSES-1))
       ALLOCATE(DISPLS_M_DOT(0:N_MPI_PROCESSES-1))
-      
+
       COUNTS    = 0
       DO N=0,N_MPI_PROCESSES-1
          DO NM=1,NMESHES
@@ -1167,9 +1151,9 @@ SELECT CASE(TASK_NUMBER)
       CALL ChkMemErr('MAIN','DT_SYNC',IZERO)
       ALLOCATE(DT_NEXT_SYNC(NMESHES),STAT=IZERO)
       CALL ChkMemErr('MAIN','DT_NEXT_SYNC',IZERO)
-      
+
       ! Set up dummy arrays to hold various arrays that must be exchanged among meshes
-      
+
       ALLOCATE(TI_LOC(N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','TI_LOC',IZERO)
       ALLOCATE(TI_GLB(N_DEVC),STAT=IZERO)
@@ -1182,9 +1166,9 @@ SELECT CASE(TASK_NUMBER)
       CALL ChkMemErr('MAIN','TC_GLB',IZERO)
       ALLOCATE(TC_LOC(N_DEVC),STAT=IZERO)
       CALL ChkMemErr('MAIN','TC_LOC',IZERO)
-      
+
       ! Allocate a few arrays needed to exchange divergence and pressure info among meshes
-      
+
       IF (N_ZONE > 0) THEN
          ALLOCATE(DSUM_ALL(N_ZONE),STAT=IZERO)
          ALLOCATE(PSUM_ALL(N_ZONE),STAT=IZERO)
@@ -1221,7 +1205,7 @@ SELECT CASE(TASK_NUMBER)
       REQ7 = MPI_REQUEST_NULL
       REQ8 = MPI_REQUEST_NULL
       REQ9 = MPI_REQUEST_NULL
-      
+
    CASE(4)
 
       ! Exchange information related to size of OMESH arrays
@@ -1275,7 +1259,7 @@ SELECT CASE(TASK_NUMBER)
             ENDIF
          ENDDO
       ENDDO
- 
+
       IF (N_MPI_PROCESSES>1) CALL MPI_WAITALL(N_REQ0,REQ0(1:N_REQ0),MPI_STATUSES_IGNORE,IERR)
 
       DO NM=1,NMESHES
@@ -1296,7 +1280,7 @@ SELECT CASE(TASK_NUMBER)
          ENDDO
       ENDDO
 
-      IF (N_MPI_PROCESSES>1) THEN 
+      IF (N_MPI_PROCESSES>1) THEN
          DEALLOCATE(REQ0)
          CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
       ENDIF
@@ -1447,7 +1431,7 @@ IF (N_MPI_PROCESSES>1) THEN
 ENDIF
 
 SELECT CASE(STOP_STATUS)
-   CASE(NO_STOP) 
+   CASE(NO_STOP)
       RETURN
    CASE(USER_STOP)
       IF (STOP_AT_ITER==0.AND..NOT.RADIATION_COMPLETED) RETURN
@@ -1479,21 +1463,21 @@ IF (MYID==0) THEN
       CASE(NO_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS completed successfully'
          IF (STATUS_FILES) CLOSE(LU_NOTREADY,STATUS='DELETE')
-      CASE(INSTABILITY_STOP) 
+      CASE(INSTABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Numerical Instability'
-      CASE(USER_STOP) 
+      CASE(USER_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS stopped by user'
-      CASE(SETUP_STOP) 
+      CASE(SETUP_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS was improperly set-up'
-      CASE(SETUP_ONLY_STOP) 
+      CASE(SETUP_ONLY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Set-up only'
-      CASE(CTRL_STOP) 
+      CASE(CTRL_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: FDS was stopped by KILL control function'
-      CASE(TGA_ANALYSIS_STOP) 
+      CASE(TGA_ANALYSIS_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: TGA analysis only'
-      CASE(LEVELSET_STOP) 
+      CASE(LEVELSET_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Level set analysis only'
-      CASE(REALIZABILITY_STOP) 
+      CASE(REALIZABILITY_STOP)
          WRITE(MESSAGE,'(A)') 'STOP: Unrealizable mass density'
    END SELECT
 
@@ -1506,8 +1490,8 @@ ENDIF
 STOP
 
 END SUBROUTINE END_FDS
- 
- 
+
+
 SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 ! Exchange information mesh to mesh needed for divergence integrals
@@ -1567,7 +1551,7 @@ ENDDO
 ! Connect zones to others which are not directly connected
 
 DO NM=1,NMESHES
-   IF(EVACUATION_ONLY(NM)) CYCLE 
+   IF(EVACUATION_ONLY(NM)) CYCLE
    DO IPZ=1,N_ZONE
       IF(P_ZONE(IPZ)%EVACUATION) CYCLE
       DO IOPZ=1,N_ZONE
@@ -1589,40 +1573,21 @@ END SUBROUTINE EXCHANGE_DIVERGENCE_INFO
 
 
 SUBROUTINE INITIALIZE_MESH_EXCHANGE_1(NM)
- 
+
 ! Create arrays by which info is to exchanged across meshes
- 
-INTEGER :: IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS,IIO,JJO,KKO,NIC_R, &
-           IIO_MIN,IIO_MAX,JJO_MIN,JJO_MAX,KKO_MIN,KKO_MAX
+
+INTEGER :: IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,NOM,IOR,IW,N,N_STORAGE_SLOTS,IIO,JJO,KKO,NIC_R
 INTEGER, INTENT(IN) :: NM
 TYPE (MESH_TYPE), POINTER :: M2,M
+TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 LOGICAL :: FOUND
- 
+
 M=>MESHES(NM)
 
 NOT_EVACUATION_MESH_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
 ALLOCATE(MESHES(NM)%OMESH(NMESHES))
-ALLOCATE(M%OMESH(NM)%IJKW(15,M%N_EXTERNAL_WALL_CELLS))
-
-DO IW=1,M%N_EXTERNAL_WALL_CELLS
-   M%OMESH(NM)%IJKW( 1,IW) = M%WALL(IW)%ONE_D%II
-   M%OMESH(NM)%IJKW( 2,IW) = M%WALL(IW)%ONE_D%JJ
-   M%OMESH(NM)%IJKW( 3,IW) = M%WALL(IW)%ONE_D%KK
-   M%OMESH(NM)%IJKW( 4,IW) = M%WALL(IW)%ONE_D%IOR
-   M%OMESH(NM)%IJKW( 5,IW) = M%WALL(IW)%SURF_INDEX
-   M%OMESH(NM)%IJKW( 6,IW) = M%WALL(IW)%ONE_D%IIG
-   M%OMESH(NM)%IJKW( 7,IW) = M%WALL(IW)%ONE_D%JJG
-   M%OMESH(NM)%IJKW( 8,IW) = M%WALL(IW)%ONE_D%KKG
-   M%OMESH(NM)%IJKW( 9,IW) = M%WALL(IW)%NOM
-   M%OMESH(NM)%IJKW(10,IW) = M%WALL(IW)%NOM_IB(1)
-   M%OMESH(NM)%IJKW(11,IW) = M%WALL(IW)%NOM_IB(2)
-   M%OMESH(NM)%IJKW(12,IW) = M%WALL(IW)%NOM_IB(3)
-   M%OMESH(NM)%IJKW(13,IW) = M%WALL(IW)%NOM_IB(4)
-   M%OMESH(NM)%IJKW(14,IW) = M%WALL(IW)%NOM_IB(5)
-   M%OMESH(NM)%IJKW(15,IW) = M%WALL(IW)%NOM_IB(6)
-ENDDO
 
 ALLOCATE(M%OMESH(NM)%BOUNDARY_TYPE(0:M%N_EXTERNAL_WALL_CELLS))
 M%OMESH(NM)%BOUNDARY_TYPE(0) = 0
@@ -1633,54 +1598,49 @@ ENDDO
 END IF NOT_EVACUATION_MESH_IF
 
 OTHER_MESH_LOOP: DO NOM=1,NMESHES
- 
+
    IF (EVACUATION_ONLY(NM)) THEN
       IF (EVACUATION_GRID(NM) .AND. .NOT.EVACUATION_ONLY(NOM)) N_COMMUNICATIONS = N_COMMUNICATIONS + 1
       CYCLE OTHER_MESH_LOOP
    ENDIF
    IF (EVACUATION_ONLY(NOM)) THEN
       IF (EVACUATION_GRID(NOM) .AND. .NOT.EVACUATION_ONLY(NM)) N_COMMUNICATIONS = N_COMMUNICATIONS + 1
-      CYCLE OTHER_MESH_LOOP 
+      CYCLE OTHER_MESH_LOOP
    ENDIF
- 
+
    M2=>MESHES(NOM)
-   IMIN=0 
+   IMIN=0
    IMAX=M2%IBP1
-   JMIN=0 
+   JMIN=0
    JMAX=M2%JBP1
-   KMIN=0 
+   KMIN=0
    KMAX=M2%KBP1
    M%OMESH(NOM)%NIC_R = 0
    FOUND = .FALSE.
 
    SEARCH_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
-      IF (M%WALL(IW)%NOM/=NOM) CYCLE SEARCH_LOOP
-      IIO_MIN = M%WALL(IW)%NOM_IB(1)
-      JJO_MIN = M%WALL(IW)%NOM_IB(2)
-      KKO_MIN = M%WALL(IW)%NOM_IB(3)
-      IIO_MAX = M%WALL(IW)%NOM_IB(4)
-      JJO_MAX = M%WALL(IW)%NOM_IB(5)
-      KKO_MAX = M%WALL(IW)%NOM_IB(6)
-      M%WALL(IW)%NIC_MIN = M%OMESH(NOM)%NIC_R + 1
-      M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + (IIO_MAX-IIO_MIN+1)*(JJO_MAX-JJO_MIN+1)*(KKO_MAX-KKO_MIN+1)
-      M%WALL(IW)%NIC_MAX = M%OMESH(NOM)%NIC_R
+      EWC => M%EXTERNAL_WALL(IW)
+      IF (EWC%NOM/=NOM) CYCLE SEARCH_LOOP
+      EWC%NIC_MIN = M%OMESH(NOM)%NIC_R + 1
+      M%OMESH(NOM)%NIC_R = M%OMESH(NOM)%NIC_R + (EWC%IIO_MAX-EWC%IIO_MIN+1)*(EWC%JJO_MAX-EWC%JJO_MIN+1)*(EWC%KKO_MAX-EWC%KKO_MIN+1)
+      EWC%NIC_MAX = M%OMESH(NOM)%NIC_R
       FOUND = .TRUE.
       CONNECTED_MESHES(NM,NOM) = .TRUE.
       CONNECTED_MESHES(NOM,NM) = .TRUE.
       IOR = M%WALL(IW)%ONE_D%IOR
       SELECT CASE(IOR)
-         CASE( 1) 
-            IMIN=MAX(IMIN,IIO_MIN-1)
-         CASE(-1) 
-            IMAX=MIN(IMAX,IIO_MAX+1)
-         CASE( 2) 
-            JMIN=MAX(JMIN,JJO_MIN-1)
-         CASE(-2) 
-            JMAX=MIN(JMAX,JJO_MAX+1)
-         CASE( 3) 
-            KMIN=MAX(KMIN,KKO_MIN-1)
-         CASE(-3) 
-            KMAX=MIN(KMAX,KKO_MAX+1)
+         CASE( 1)
+            IMIN=MAX(IMIN,EWC%IIO_MIN-1)
+         CASE(-1)
+            IMAX=MIN(IMAX,EWC%IIO_MAX+1)
+         CASE( 2)
+            JMIN=MAX(JMIN,EWC%JJO_MIN-1)
+         CASE(-2)
+            JMAX=MIN(JMAX,EWC%JJO_MAX+1)
+         CASE( 3)
+            KMIN=MAX(KMIN,EWC%KKO_MIN-1)
+         CASE(-3)
+            KMAX=MIN(KMAX,EWC%KKO_MAX+1)
       END SELECT
    ENDDO SEARCH_LOOP
 
@@ -1693,10 +1653,11 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       ALLOCATE(M%OMESH(NOM)%IOR_R(M%OMESH(NOM)%NIC_R))
       NIC_R = 0
       INDEX_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS
-         IF (M%WALL(IW)%NOM/=NOM) CYCLE INDEX_LOOP
-         DO KKO=M%WALL(IW)%NOM_IB(3),M%WALL(IW)%NOM_IB(6)
-            DO JJO=M%WALL(IW)%NOM_IB(2),M%WALL(IW)%NOM_IB(5)
-               DO IIO=M%WALL(IW)%NOM_IB(1),M%WALL(IW)%NOM_IB(4)
+         EWC => M%EXTERNAL_WALL(IW)
+         IF (EWC%NOM/=NOM) CYCLE INDEX_LOOP
+         DO KKO=EWC%KKO_MIN,EWC%KKO_MAX
+            DO JJO=EWC%JJO_MIN,EWC%JJO_MAX
+               DO IIO=EWC%IIO_MIN,EWC%IIO_MAX
                   NIC_R = NIC_R + 1
                   IOR = M%WALL(IW)%ONE_D%IOR
                   M%OMESH(NOM)%IIO_R(NIC_R) = IIO
@@ -1714,7 +1675,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    IF (IMIN>IMAX) THEN; IMIN=0; IMAX=M2%IBP1; ENDIF
    IF (JMIN>JMAX) THEN; JMIN=0; JMAX=M2%JBP1; ENDIF
    IF (KMIN>KMAX) THEN; KMIN=0; KMAX=M2%KBP1; ENDIF
- 
+
    ! Embedded meshes
 
    IF ( NM/=NOM .AND. M2%XS>=M%XS .AND. M2%XF<=M%XF .AND. M2%YS>=M%YS .AND. M2%YF<=M%YF .AND. M2%ZS>=M%ZS .AND. M2%ZF<=M%ZF ) THEN
@@ -1730,7 +1691,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    ! Tally the number of communications for this process
 
    N_COMMUNICATIONS = N_COMMUNICATIONS + 1
- 
+
    ! Save the dimensions of the volume of cells from mesh NOM whose data is received by mesh NM
 
    M%OMESH(NOM)%I_MIN_R = IMIN
@@ -1740,8 +1701,8 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    M%OMESH(NOM)%K_MIN_R = KMIN
    M%OMESH(NOM)%K_MAX_R = KMAX
 
-   ! Allocate the arrays that hold information about the other meshes (OMESH) 
- 
+   ! Allocate the arrays that hold information about the other meshes (OMESH)
+
    ALLOCATE(M%OMESH(NOM)% RHO(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    ALLOCATE(M%OMESH(NOM)%RHOS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    M%OMESH(NOM)%RHO  = RHOA
@@ -1776,7 +1737,7 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    M%OMESH(NOM)%FVZ = 0._EB
    ALLOCATE(M%OMESH(NOM)%KRES(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX))
    M%OMESH(NOM)%KRES = 0._EB
- 
+
    ALLOCATE(M%OMESH(NOM)%  ZZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,N_TOTAL_SCALARS))
    ALLOCATE(M%OMESH(NOM)% ZZS(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX,N_TOTAL_SCALARS))
    DO N=1,N_TRACKED_SPECIES
@@ -1787,15 +1748,14 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
       M%OMESH(NOM)%ZZ(:,:,:,N)  = INITIAL_UNMIXED_FRACTION
       M%OMESH(NOM)%ZZS(:,:,:,N) = INITIAL_UNMIXED_FRACTION
    ENDDO
-  
+
    ! Wall arrays
-   
-   IF (.NOT.ALLOCATED(M%OMESH(NOM)%IJKW)) ALLOCATE(M%OMESH(NOM)%IJKW(15,M2%N_EXTERNAL_WALL_CELLS))
+
    IF (.NOT.ALLOCATED(M%OMESH(NOM)%BOUNDARY_TYPE)) ALLOCATE(M%OMESH(NOM)%BOUNDARY_TYPE(0:M2%N_EXTERNAL_WALL_CELLS))
    M%OMESH(NOM)%BOUNDARY_TYPE(0)=0
 
    ! Particle and PARTICLE Orphan Arrays
- 
+
    IF (OMESH_PARTICLES) THEN
       ALLOCATE(M%OMESH(NOM)%N_PART_ORPHANS(N_LAGRANGIAN_CLASSES))
       ALLOCATE(M%OMESH(NOM)%N_PART_ADOPT(N_LAGRANGIAN_CLASSES))
@@ -1836,7 +1796,7 @@ M=>MESHES(NM)
 
 ! Allocate arrays to send (IL_S) and receive (IL_R) the radiation intensity (IL) at interpolated boundaries.
 ! MESHES(NM)%OMESH(NOM)%IL_S are the intensities in mesh NM that are just outside the boundary of mesh NOM. IL_S is populated
-! in radi.f90 and then sent to MESHES(NOM)%OMESH(NM)%IL_R in MESH_EXCHANGE. IL_R holds the intensities until they are 
+! in radi.f90 and then sent to MESHES(NOM)%OMESH(NM)%IL_R in MESH_EXCHANGE. IL_R holds the intensities until they are
 ! transferred to the ghost cells of MESHES(NOM)%IL in radi.f90. The IL_S and IL_R arrays are indexed by NIC_S and NIC_R.
 
 DO NOM=1,NMESHES
@@ -1883,7 +1843,7 @@ CALL MPI_BARRIER(MPI_COMM_WORLD, IERR)
 
 ! Allocate arrays for sending and receiving BACK_WALL info. Also, for MESH NM, loop over all wall cells (IW) and if a wall cell
 ! has a back side in another mesh, NOM, (M%WALL(IW)%BACK_MESH==NOM), loop over the M3%N_EXT_BACK_WALL_CELLS wall cells looking
-! for a M3%EXT_BACK_WALL_CELL_INDEX that matches M%WALL(IW)%BACK_INDEX. When found, reassign the M%WALL(IW)%BACK_INDEX to I, the 
+! for a M3%EXT_BACK_WALL_CELL_INDEX that matches M%WALL(IW)%BACK_INDEX. When found, reassign the M%WALL(IW)%BACK_INDEX to I, the
 ! index of the short list of BACK_WALL cells.
 
 MESH_LOOP_1: DO NM=1,NMESHES
@@ -1893,11 +1853,11 @@ MESH_LOOP_1: DO NM=1,NMESHES
       IF (NM==NOM .OR. EVACUATION_ONLY(NOM)) CYCLE MESH_LOOP_2
       M3 => M%OMESH(NOM)
       IF (M3%N_EXT_BACK_WALL_CELLS>0) THEN
-         IF (M3%N_BACK_WALL_CELLS/=M3%N_EXT_BACK_WALL_CELLS) THEN
-            WRITE(0,'(A,I2,A,I2)') 'ERROR: Mismatch of back wall cells between MESH ',NM,', and MESH ',NOM
-            STOP_STATUS = SETUP_STOP
-            EXIT MESH_LOOP_1
-         ENDIF
+      !  IF (M3%N_BACK_WALL_CELLS/=M3%N_EXT_BACK_WALL_CELLS) THEN
+      !     WRITE(0,'(A,I2,A,I2)') 'ERROR: Mismatch of back wall cells between MESH ',NM,', and MESH ',NOM
+      !     STOP_STATUS = SETUP_STOP
+      !     EXIT MESH_LOOP_1
+      !  ENDIF
          ALLOCATE(M3%REAL_SEND_PKG6(M3%N_BACK_WALL_CELLS*2))
          ALLOCATE(M3%REAL_RECV_PKG6(M3%N_EXT_BACK_WALL_CELLS*2))
          ALLOCATE(M3%BACK_WALL(M3%N_EXT_BACK_WALL_CELLS))
@@ -1949,46 +1909,46 @@ TNOW = SECOND()
 
 N_REQ = 0
 
-! Loop over all receive meshes (NM) and look for the send meshes (NOM). 
+! Loop over all receive meshes (NM) and look for the send meshes (NOM).
 
 MESH_LOOP: DO NM=1,NMESHES
 
-   IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP 
+   IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
 
    RNODE = PROCESS(NM)
    IF (RNODE/=MYID) CYCLE MESH_LOOP
    M => MESHES(NM)
- 
+
    OTHER_MESH_LOOP: DO NOM=1,NMESHES
-    
+
       IF (EVACUATION_ONLY(NOM)) CYCLE OTHER_MESH_LOOP
       IF (CODE>0 .AND. (.NOT.ACTIVE_MESH(NOM).OR..NOT.ACTIVE_MESH(NM))) CYCLE OTHER_MESH_LOOP
-   
+
       SNODE = PROCESS(NOM)
       IF (RNODE==SNODE) CYCLE OTHER_MESH_LOOP
-   
+
       M4=>MESHES(NOM)
       M3=>MESHES(NM)%OMESH(NOM)
-   
+
       IF (M3%NIC_S==0 .AND. M3%NIC_R==0) CYCLE OTHER_MESH_LOOP
-    
+
       ! Set up receives for one-time exchanges or persistent send/receives.
-   
+
       INITIALIZATION_IF: IF (CODE==0) THEN
-   
+
          IF (.NOT.ALLOCATED(M4%CELL_INDEX)) ALLOCATE(M4%CELL_INDEX(0:M4%IBP1,0:M4%JBP1,0:M4%KBP1))
          IF (.NOT.ALLOCATED(M4%SOLID))      ALLOCATE(M4%SOLID(0:CELL_COUNT(NOM)))
          IF (.NOT.ALLOCATED(M4%WALL_INDEX)) ALLOCATE(M4%WALL_INDEX(0:CELL_COUNT(NOM),-3:3))
-   
+
          N_REQ = MIN(N_REQ+1,SIZE(REQ))
          CALL MPI_IRECV(M4%CELL_INDEX(0,0,0),SIZE(M4%CELL_INDEX),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
          N_REQ = MIN(N_REQ+1,SIZE(REQ))
          CALL MPI_IRECV(M4%SOLID(0),SIZE(M4%SOLID),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
          N_REQ = MIN(N_REQ+1,SIZE(REQ))
          CALL MPI_IRECV(M4%WALL_INDEX(0,-3),SIZE(M4%WALL_INDEX),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
-    
+
          IJK_SIZE = (M3%I_MAX_R-M3%I_MIN_R+1)*(M3%J_MAX_R-M3%J_MIN_R+1)*(M3%K_MAX_R-M3%K_MIN_R+1)
-   
+
          IF (M3%NIC_R>0) THEN
 
             ! Determine the maximum number of radiation angles that are to be received
@@ -2015,75 +1975,72 @@ MESH_LOOP: DO NM=1,NMESHES
             ALLOCATE(M3%REAL_RECV_PKG5(NRA_MAX*NUMBER_SPECTRAL_BANDS*M3%NIC_R))
             ALLOCATE(M3%REAL_RECV_PKG7(M3%NIC_R*3))
          ENDIF
-    
-         N_REQ = MIN(N_REQ+1,SIZE(REQ))
-         CALL MPI_IRECV(M3%IJKW(1,1),SIZE(M3%IJKW),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
-   
+
          ! Set up persistent receive requests
-    
+
          IF (M3%NIC_R>0) THEN
-   
+
             N_REQ1 = N_REQ1 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG1(1),SIZE(M3%REAL_RECV_PKG1),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ1(N_REQ1),IERR)
-   
+
             IF (OMESH_PARTICLES) THEN
                N_REQ2 = N_REQ2 + 1
                CALL MPI_RECV_INIT(M3%N_PART_ADOPT,SIZE(M3%N_PART_ADOPT),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,&
                                   REQ2(N_REQ2),IERR)
             ENDIF
-   
+
             N_REQ3 = N_REQ3 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG2(1),SIZE(M3%REAL_RECV_PKG2),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ3(N_REQ3),IERR)
-   
+
             N_REQ4 = N_REQ4 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG3(1),SIZE(M3%REAL_RECV_PKG3),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ4(N_REQ4),IERR)
-   
+
             N_REQ5 = N_REQ5 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG7(1),SIZE(M3%REAL_RECV_PKG7),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ5(N_REQ5),IERR)
-   
+
             N_REQ7 = N_REQ7 + 1
             CALL MPI_RECV_INIT(M3%REAL_RECV_PKG4(1),SIZE(M3%REAL_RECV_PKG4),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ7(N_REQ7),IERR)
-   
-            N_REQ8 = N_REQ8 + 1      
+
+            N_REQ8 = N_REQ8 + 1
             CALL MPI_RECV_INIT(M3%BOUNDARY_TYPE(0),SIZE(M3%BOUNDARY_TYPE),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,&
                                REQ8(N_REQ8),IERR)
-   
+
             IF (RADIATION) THEN
                N_REQ9 = N_REQ9 + 1
                CALL MPI_RECV_INIT(M3%REAL_RECV_PKG5(1),SIZE(M3%REAL_RECV_PKG5),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                                   REQ9(N_REQ9),IERR)
             ENDIF
-   
+
          ENDIF
-   
+
       ENDIF INITIALIZATION_IF
-   
+
       ! Exchange BACK_WALL information
-   
+
       IF (CODE==8) THEN
          N_REQ=MIN(N_REQ+1,SIZE(REQ))
          CALL MPI_IRECV(M3%N_EXT_BACK_WALL_CELLS,1,MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
       ENDIF
-   
+
       IF (CODE==9 .AND. M3%N_EXT_BACK_WALL_CELLS>0) THEN
             N_REQ=MIN(N_REQ+1,SIZE(REQ))
             CALL MPI_IRECV(M3%EXT_BACK_WALL_CELL_INDEX,SIZE(M3%EXT_BACK_WALL_CELL_INDEX),MPI_INTEGER,SNODE,NOM,MPI_COMM_WORLD,&
                            REQ(N_REQ),IERR)
       ENDIF
-   
+
       IF (CODE==10 .AND. M3%N_EXT_BACK_WALL_CELLS>0) THEN
-         N_REQ6 = N_REQ6 + 1     
+         N_REQ6 = N_REQ6 + 1
          CALL MPI_RECV_INIT(M3%REAL_RECV_PKG6(1),SIZE(M3%REAL_RECV_PKG6),MPI_DOUBLE_PRECISION,SNODE,NOM,MPI_COMM_WORLD,&
                             REQ6(N_REQ6),IERR)
       ENDIF
-   
+
       ! PARTICLEs
-    
+
       IF (CODE==6 .AND. OMESH_PARTICLES) THEN
          DO N=1,N_LAGRANGIAN_CLASSES
             IF (M3%N_PART_ADOPT(N)==0) CYCLE
@@ -2100,9 +2057,9 @@ MESH_LOOP: DO NM=1,NMESHES
                            MPI_LOGICAL,SNODE,NOM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
          ENDDO
       ENDIF
-   
+
    ENDDO OTHER_MESH_LOOP
-   
+
 ENDDO MESH_LOOP
 
 ! Receive EVACuation information
@@ -2130,15 +2087,15 @@ DO NOM=1,NMESHES
       CALL MPI_IRECV(M4%SOLID(0),IWW,MPI_LOGICAL,SNODE,TAG_EVAC,MPI_COMM_WORLD,REQ(N_REQ),IERR)
    ENDIF
 ENDDO
- 
+
 TUSED(11,:)=TUSED(11,:) + SECOND() - TNOW
 END SUBROUTINE POST_RECEIVES
 
 
 SUBROUTINE MESH_EXCHANGE(CODE)
- 
+
 ! Exchange Information between Meshes
- 
+
 REAL(EB) :: TNOW
 INTEGER, INTENT(IN) :: CODE
 INTEGER :: NM,II,JJ,KK,LL,LLL,N,RNODE,SNODE,IMIN,IMAX,JMIN,JMAX,KMIN,KMAX,IJK_SIZE,N_STORAGE_SLOTS,N_NEW_STORAGE_SLOTS
@@ -2165,29 +2122,29 @@ ENDIF
 SENDING_MESH_LOOP: DO NM=1,NMESHES
 
    IF (PROCESS(NM)/=MYID)   CYCLE SENDING_MESH_LOOP
-   IF (EVACUATION_ONLY(NM)) CYCLE SENDING_MESH_LOOP 
+   IF (EVACUATION_ONLY(NM)) CYCLE SENDING_MESH_LOOP
 
    M =>MESHES(NM)
    M5=>MESHES(NM)%OMESH(NM)
 
    ! Information about Mesh NM is packed into SEND packages and shipped out to the other meshes (machines) via MPI
- 
+
    RECEIVING_MESH_LOOP: DO NOM=1,NMESHES
- 
+
       SNODE = PROCESS(NOM)
       RNODE = PROCESS(NM)
 
-      IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP 
+      IF (EVACUATION_ONLY(NOM)) CYCLE RECEIVING_MESH_LOOP
 
       M3=>MESHES(NM)%OMESH(NOM)
       M4=>MESHES(NOM)
 
       IF (M3%NIC_S==0 .AND. M3%NIC_R==0)  CYCLE RECEIVING_MESH_LOOP
- 
+
       IF (CODE>0) THEN
          IF (.NOT.ACTIVE_MESH(NM) .OR. .NOT.ACTIVE_MESH(NOM))  CYCLE RECEIVING_MESH_LOOP
       ENDIF
- 
+
       IMIN = M3%I_MIN_S
       IMAX = M3%I_MAX_S
       JMIN = M3%J_MIN_S
@@ -2237,14 +2194,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             ALLOCATE(M3%REAL_SEND_PKG7(M3%NIC_S*3))
 
          ENDIF
- 
-         IF (RNODE/=SNODE) THEN
-            N_REQ=MIN(N_REQ+1,SIZE(REQ))
-            CALL MPI_ISEND(M%OMESH(NM)%IJKW(1,1),SIZE(M%OMESH(NM)%IJKW),MPI_INTEGER,SNODE,NM,MPI_COMM_WORLD,REQ(N_REQ),IERR)
-         ELSE
-            M%OMESH(NOM)%IJKW = M4%OMESH(NOM)%IJKW(:,1:M4%N_EXTERNAL_WALL_CELLS)
-         ENDIF
- 
+
          ! Initialize persistent send requests
 
          IF (M3%NIC_S>0 .AND. RNODE/=SNODE) THEN
@@ -2330,12 +2280,12 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
                JJ1 = M3%JJO_S(LL) ; JJ2 = JJ1
                KK1 = M3%KKO_S(LL) ; KK2 = KK1
                SELECT CASE(M3%IOR_S(LL))
-                  CASE(-1) ; II1=M3%IIO_S(LL)   ; II2=II1+1 
-                  CASE( 1) ; II1=M3%IIO_S(LL)-1 ; II2=II1+1 
-                  CASE(-2) ; JJ1=M3%JJO_S(LL)   ; JJ2=JJ1+1 
-                  CASE( 2) ; JJ1=M3%JJO_S(LL)-1 ; JJ2=JJ1+1 
-                  CASE(-3) ; KK1=M3%KKO_S(LL)   ; KK2=KK1+1 
-                  CASE( 3) ; KK1=M3%KKO_S(LL)-1 ; KK2=KK1+1 
+                  CASE(-1) ; II1=M3%IIO_S(LL)   ; II2=II1+1
+                  CASE( 1) ; II1=M3%IIO_S(LL)-1 ; II2=II1+1
+                  CASE(-2) ; JJ1=M3%JJO_S(LL)   ; JJ2=JJ1+1
+                  CASE( 2) ; JJ1=M3%JJO_S(LL)-1 ; JJ2=JJ1+1
+                  CASE(-3) ; KK1=M3%KKO_S(LL)   ; KK2=KK1+1
+                  CASE( 3) ; KK1=M3%KKO_S(LL)-1 ; KK2=KK1+1
                END SELECT
                M3%REAL_SEND_PKG1(NQT2*(LL-1)+1) = M%RHOS(II1,JJ1,KK1)
                M3%REAL_SEND_PKG1(NQT2*(LL-1)+2) = M%RHOS(II2,JJ2,KK2)
@@ -2395,13 +2345,13 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             IF (CORRECTOR) HP2 => M2%HS
             M2%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVX(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
             M2%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVY(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
-            M2%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)         
+            M2%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX) = M%FVZ(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
             HP2(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)    = HP(IMIN:IMAX,JMIN:JMAX,KMIN:KMAX)
          ENDIF
       ENDIF
 
       ! Send pressure information at the end of the PREDICTOR stage of the time step
- 
+
       IF (CODE==3 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
@@ -2426,7 +2376,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
       ENDIF
 
       ! Exchange density and mass fraction following CORRECTOR update
- 
+
       IF (CODE==4 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             NQT2 = 2*(4+N_TOTAL_SCALARS)
@@ -2466,7 +2416,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
          ENDIF
       ENDIF
 
-      ! Exchange BOUNDARY_TYPE following the CORRECTOR stage of the time step 
+      ! Exchange BOUNDARY_TYPE following the CORRECTOR stage of the time step
 
       IF (CODE==0 .OR. CODE==6) THEN
          IF (RNODE/=SNODE) THEN
@@ -2501,7 +2451,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
       ENDIF
 
       ! Exchange pressure and velocities following CORRECTOR stage of time step
- 
+
       IF (CODE==6 .AND. M3%NIC_S>0) THEN
          IF (RNODE/=SNODE) THEN
             LL = 0
@@ -2546,7 +2496,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
             M2%IL_R = M3%IL_S
          ENDIF
       ENDIF SEND_RADIATION
- 
+
       ! Get Number of PARTICLE Orphans (PARTICLEs that have left other meshes and are waiting to be picked up)
 
       IF (CODE==7 .AND. OMESH_PARTICLES) THEN
@@ -2558,10 +2508,10 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
 
       ! Sending/Receiving PARTICLE Buffer Arrays
 
-      IF_SEND_PARTICLES: IF (CODE==6 .AND. OMESH_PARTICLES) THEN 
- 
+      IF_SEND_PARTICLES: IF (CODE==6 .AND. OMESH_PARTICLES) THEN
+
          NODE_CHECK_PARTICLE: IF (SNODE/=RNODE) THEN
-            
+
             DO IPC=1,N_LAGRANGIAN_CLASSES
 
                IF (M3%N_PART_ORPHANS(IPC)==0) CYCLE
@@ -2595,7 +2545,7 @@ SENDING_MESH_LOOP: DO NM=1,NMESHES
          ENDIF NODE_CHECK_PARTICLE
 
       ENDIF IF_SEND_PARTICLES
- 
+
    ENDDO RECEIVING_MESH_LOOP
 
 ENDDO SENDING_MESH_LOOP
@@ -2683,13 +2633,13 @@ ENDIF
 
 SEND_MESH_LOOP: DO NOM=1,NMESHES
 
-IF (EVACUATION_ONLY(NOM)) CYCLE SEND_MESH_LOOP 
+IF (EVACUATION_ONLY(NOM)) CYCLE SEND_MESH_LOOP
 
 SNODE = PROCESS(NOM)
 IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
- 
+
    RECV_MESH_LOOP: DO NM=1,NMESHES
- 
+
       IF (EVACUATION_ONLY(NM)) CYCLE RECV_MESH_LOOP
       IF (CODE>0 .AND. (.NOT.ACTIVE_MESH(NM).OR..NOT.ACTIVE_MESH(NOM))) CYCLE RECV_MESH_LOOP
 
@@ -2700,14 +2650,14 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       M4=>MESHES(NOM)
 
       IF (M2%NIC_S==0 .AND. M2%NIC_R==0) CYCLE RECV_MESH_LOOP
- 
+
       IMIN = M2%I_MIN_R
       IMAX = M2%I_MAX_R
       JMIN = M2%J_MIN_R
       JMAX = M2%J_MAX_R
       KMIN = M2%K_MIN_R
       KMAX = M2%K_MAX_R
-     
+
       ! Unpack densities and species mass fractions following PREDICTOR exchange
 
       IF (CODE==1 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
@@ -2737,10 +2687,10 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
                   M2%ZZS(II2,JJ2,KK2,NN) = M2%REAL_RECV_PKG1(NQT2*(LL-1)+8+2*NN  )
                ENDDO
             ENDDO UNPACK_REAL_RECV_PKG1
-      ENDIF 
-   
+      ENDIF
+
       ! Unpack densities and species mass fractions following PREDICTOR exchange
-   
+
       IF (CODE==5 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          IF (PREDICTOR) HP => M2%H
          IF (CORRECTOR) HP => M2%HS
@@ -2767,9 +2717,9 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
             END SELECT
          ENDDO UNPACK_REAL_RECV_PKG7
       ENDIF
-   
+
       ! Unpack pressure following PREDICTOR stage of time step
-    
+
       IF (CODE==3 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
@@ -2783,10 +2733,10 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
                ENDDO
             ENDDO
          ENDDO
-      ENDIF 
-   
+      ENDIF
+
       ! Unpack density and species mass fractions following CORRECTOR update
-   
+
       IF (CODE==4 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          NQT2 = 2*(4+N_TOTAL_SCALARS)
          UNPACK_REAL_RECV_PKG3: DO LL=1,M2%NIC_R
@@ -2815,9 +2765,9 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
             ENDDO
          ENDDO UNPACK_REAL_RECV_PKG3
       ENDIF
-   
+
       ! Unpack pressure and velocities at the end of the CORRECTOR stage of the time step
-    
+
       IF (CODE==6 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          LL = 0
          DO KK=KMIN,KMAX
@@ -2832,9 +2782,9 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
             ENDDO
          ENDDO
       ENDIF
-   
+
       ! Unpack radiation information at the end of the CORRECTOR stage of the time step
-   
+
       RECEIVE_RADIATION: IF (CODE==2 .AND. M2%NIC_R>0 .AND. RNODE/=SNODE) THEN
          IF (ICYC>1) ANG_INC_COUNTER = M4%ANGLE_INC_COUNTER
          LLL = 0
@@ -2862,8 +2812,8 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
       ENDIF RECEIVE_BACK_WALL
 
       ! Sending/Receiving PARTICLE Buffer Arrays
-    
-      IF (CODE==7 .AND. OMESH_PARTICLES) THEN 
+
+      IF (CODE==7 .AND. OMESH_PARTICLES) THEN
          DO IPC=1,N_LAGRANGIAN_CLASSES
             IF (M2%N_PART_ADOPT(IPC)>M2%ADOPT_PARTICLE_STORAGE(IPC)%N_STORAGE_SLOTS) THEN
                N_NEW_STORAGE_SLOTS = M2%N_PART_ADOPT(IPC)-M2%ADOPT_PARTICLE_STORAGE(IPC)%N_STORAGE_SLOTS
@@ -2872,8 +2822,8 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
          ENDDO
       ENDIF
 
-      IF_RECEIVE_PARTICLES: IF (CODE==6 .AND. OMESH_PARTICLES) THEN 
-   
+      IF_RECEIVE_PARTICLES: IF (CODE==6 .AND. OMESH_PARTICLES) THEN
+
          DO IPC=1,N_LAGRANGIAN_CLASSES
             IF (M2%N_PART_ADOPT(IPC)==0) CYCLE
             CNT = 0
@@ -2883,7 +2833,7 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
                CALL ALLOCATE_STORAGE(NOM,IBC,LPC_INDEX=IPC,LP_INDEX=N,TAG=-1)
                LP=>M4%LAGRANGIAN_PARTICLE(N)
                STORAGE_INDEX_SAVE = LP%STORAGE_INDEX
- 
+
                M4%PARTICLE_STORAGE(IPC)%REALS(:,LP%STORAGE_INDEX)    = M2%ADOPT_PARTICLE_STORAGE(IPC)%REALS(:,CNT)
                M4%PARTICLE_STORAGE(IPC)%INTEGERS(:,LP%STORAGE_INDEX) = M2%ADOPT_PARTICLE_STORAGE(IPC)%INTEGERS(:,CNT)
 
@@ -2894,17 +2844,17 @@ IF (SNODE/=MYID) CYCLE SEND_MESH_LOOP
             ENDDO
             M4%NLP = M4%NLP + M2%N_PART_ADOPT(IPC)
          ENDDO
-   
+
       ENDIF IF_RECEIVE_PARTICLES
-   
+
    ENDDO RECV_MESH_LOOP
-   
+
 ENDDO SEND_MESH_LOOP
 
 ! Ensure that all processes wait until all exchanges are complete
 
 CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
-    
+
 TUSED(11,:)=TUSED(11,:) + SECOND() - TNOW
 END SUBROUTINE MESH_EXCHANGE
 
@@ -2943,14 +2893,14 @@ END SUBROUTINE HANDLE_MPI_ERROR
 
 
 SUBROUTINE WRITE_STRINGS
- 
+
 ! Write character strings out to the .smv file
- 
+
 INTEGER :: N,NOM,N_STRINGS_DUM
 CHARACTER(80), ALLOCATABLE, DIMENSION(:) :: STRING_DUM
- 
+
 ! All meshes send their STRINGs to node 0
- 
+
 DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID .AND. MYID>0) THEN
       CALL MPI_SEND(MESHES(NM)%N_STRINGS,1,MPI_INTEGER,0,1,MPI_COMM_WORLD,IERR)
@@ -2958,14 +2908,14 @@ DO NM=1,NMESHES
                                                 MPI_COMM_WORLD,IERR)
    ENDIF
 ENDDO
- 
+
 ! Node 0 receives the STRINGs and writes them to the .smv file
- 
+
 IF (MYID==0) THEN
    DO N=1,MESHES(1)%N_STRINGS
       WRITE(LU_SMV,'(A)') TRIM(MESHES(1)%STRING(N))
    ENDDO
-   OTHER_MESH_LOOP: DO NOM=2,NMESHES 
+   OTHER_MESH_LOOP: DO NOM=2,NMESHES
       IF (PROCESS(NOM)>0) THEN
          CALL MPI_RECV(N_STRINGS_DUM,1,MPI_INTEGER,PROCESS(NOM),1,MPI_COMM_WORLD,STATUS,IERR)
          IF (N_STRINGS_DUM>0) THEN
@@ -2985,21 +2935,21 @@ IF (MYID==0) THEN
       IF (ALLOCATED(STRING_DUM)) DEALLOCATE(STRING_DUM)
    ENDDO OTHER_MESH_LOOP
 ENDIF
- 
+
 ! All STRING arrays are zeroed out
- 
+
 DO NM=1,NMESHES
    IF (PROCESS(NM)==MYID) MESHES(NM)%N_STRINGS = 0
 ENDDO
- 
+
 END SUBROUTINE WRITE_STRINGS
 
 
 SUBROUTINE EXCHANGE_DIAGNOSTICS
- 
+
 INTEGER  :: NOM,NECYC,CNT, N_TIMERS_TMP,DISP
 REAL(EB) :: T_SUM, TNOW
- 
+
 TNOW = SECOND()
 
 DO NM=1,NMESHES
@@ -3015,7 +2965,7 @@ DO NM=1,NMESHES
    T_ACCUM(NM)    = T_SUM
    NCYC(NM)       = NTCYC(NM)
 ENDDO
- 
+
 DISP = DISPLS(MYID)+1
 CNT  = COUNTS(MYID)
 IF (N_MPI_PROCESSES>1) THEN
@@ -3041,7 +2991,7 @@ IF (N_MPI_PROCESSES>1) THEN
                     MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,IERR)
    IF (IERR/=MPI_SUCCESS) CALL HANDLE_MPI_ERROR('Error in MPI_GATHERV for M_DOT',IERR)
 ENDIF
- 
+
 ! All nodes greater than 0 send various values to node 0
 
 DO NM=1,NMESHES
@@ -3101,7 +3051,7 @@ DO NOM=1,NMESHES
    CALL MPI_RECV(MESHES(NOM)%K_VN,                    1,MPI_INTEGER,         PROCESS(NOM),1,MPI_COMM_WORLD,STATUS,IERR)
    CALL MPI_RECV(MESHES(NOM)%NLP,                     1,MPI_INTEGER,         PROCESS(NOM),1,MPI_COMM_WORLD,STATUS,IERR)
 ENDDO
- 
+
 TUSED(11,:) = TUSED(11,:) + SECOND() - TNOW
 END SUBROUTINE EXCHANGE_DIAGNOSTICS
 
@@ -3190,16 +3140,16 @@ IF_DUMP_MASS: IF (T>=MINT_CLOCK) THEN
 ENDIF IF_DUMP_MASS
 
 ! Exchange DEVICE parameters among meshes and dump out DEVICE info after first "gathering" data to node 0
- 
+
 IF (N_DEVC>0) THEN
-  
+
    ! Exchange the CURRENT_STATE of each DEViCe
 
    STATE_LOC(1:N_DEVC) = .FALSE.  ! _LOC is a temporary array that holds the STATE value for the devices on each node
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       DO N=1,N_DEVC
-         IF (DEVICE(N)%MESH==NM) STATE_LOC(N) = DEVICE(N)%CURRENT_STATE 
+         IF (DEVICE(N)%MESH==NM) STATE_LOC(N) = DEVICE(N)%CURRENT_STATE
       ENDDO
    ENDDO
    IF (N_MPI_PROCESSES>1) THEN
@@ -3236,7 +3186,7 @@ IF (N_DEVC>0) THEN
 
    ! Exchange the INSTANT_VALUE of each DEViCe
 
-   TC_LOC(1:N_DEVC) = 0._EB 
+   TC_LOC(1:N_DEVC) = 0._EB
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       DO N=1,N_DEVC
@@ -3253,7 +3203,7 @@ IF (N_DEVC>0) THEN
 
    ! Exchange the SMOOTHED_VALUE of each DEViCe
 
-   TC_LOC(1:N_DEVC) = 0._EB 
+   TC_LOC(1:N_DEVC) = 0._EB
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       DO N=1,N_DEVC
@@ -3305,7 +3255,7 @@ IF_DUMP_DEVC: IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
    ! Get the current VALUEs of all DEViCes into DEVICE(:)%VALUE on node 0
 
    IF (MINVAL(TI_GLB)>0._EB) THEN
-      TC_LOC(1:N_DEVC) = DEVICE(1:N_DEVC)%VALUE 
+      TC_LOC(1:N_DEVC) = DEVICE(1:N_DEVC)%VALUE
       IF (N_MPI_PROCESSES>1) THEN
          CALL MPI_REDUCE(TC_LOC(1),TC_GLB(1),N_DEVC,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,IERR)
          IF (IERR/=MPI_SUCCESS) CALL HANDLE_MPI_ERROR('Error in MPI_REDUCE for VALUE',IERR)
@@ -3340,7 +3290,7 @@ END SUBROUTINE DUMP_GLOBAL_OUTPUTS
 SUBROUTINE INITIALIZE_EVAC
 
 ! Initialize evacuation meshes
- 
+
 DO NM=1,NMESHES
    IF (USE_MPI .AND. N_MPI_PROCESSES>1 .AND. MYID==EVAC_PROCESS .AND. .NOT.EVACUATION_ONLY(NM)) THEN
       M=>MESHES(NM)
@@ -3378,7 +3328,7 @@ SUBROUTINE INIT_EVAC_DUMPS
 REAL(EB) :: T_TMP
 
 IF (.NOT.ANY(EVACUATION_ONLY)) RETURN ! No evacuation
- 
+
 IF (RESTART) THEN
    T_TMP = MINVAL(T,MASK=.NOT.EVACUATION_ONLY)
    T_EVAC_SAVE = T_TMP
@@ -3395,7 +3345,7 @@ END SUBROUTINE INIT_EVAC_DUMPS
 
 
 SUBROUTINE EVAC_CSV(T)
- 
+
 ! Dump out Evac info
 
 REAL(EB), INTENT(IN) :: T
@@ -3412,9 +3362,9 @@ SUBROUTINE EVAC_EXCHANGE
 
 LOGICAL EXCHANGE_EVACUATION
 INTEGER NM, II, IVENT, I, J, EMESH, JJ, N_END
- 
+
 ! Fire mesh information ==> Evac meshes
- 
+
 IF (.NOT. ANY(EVACUATION_GRID)) RETURN
 IF (N_MPI_PROCESSES>1 .AND. MYID /= EVAC_PROCESS) CALL EVAC_MESH_EXCHANGE(T_EVAC,T_EVAC_SAVE,I_EVAC,ICYC,EXCHANGE_EVACUATION,1)
 IF ((.NOT.USE_MPI .OR. N_MPI_PROCESSES==1) .OR. (N_MPI_PROCESSES>1 .AND. MYID==EVAC_PROCESS)) &
@@ -3426,7 +3376,7 @@ DO NM=1,NMESHES
    IF (ACTIVE_MESH(NM)) CYCLE
    IF (.NOT.EVACUATION_GRID(NM)) CYCLE
    IF (MYID/=MAX(0,EVAC_PROCESS)) CYCLE
-   CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)      
+   CALL UPDATE_GLOBAL_OUTPUTS(T(NM),NM)
 ENDDO
 
 ! Save the evacuation flow fields to the arrays U_EVAC and V_EVAC
@@ -3452,18 +3402,18 @@ DO NM = 1, NMESHES
          END IF
       END DO LOOP_EXITS
    END IF
-   
+
 ENDDO
 
 END SUBROUTINE EVAC_EXCHANGE
 
 
 SUBROUTINE EVAC_PRESSURE_ITERATION_SCHEME
- 
+
 ! Evacuation flow field calculation
- 
+
 INTEGER :: N
- 
+
 COMPUTE_PRESSURE_LOOP: DO NM=1,NMESHES
    IF (.NOT.EVACUATION_ONLY(NM))  CYCLE COMPUTE_PRESSURE_LOOP
    IF (PROCESS(NM)/=MYID)         CYCLE COMPUTE_PRESSURE_LOOP
@@ -3481,12 +3431,12 @@ END SUBROUTINE EVAC_PRESSURE_ITERATION_SCHEME
 SUBROUTINE EVAC_MAIN_LOOP
 
 ! Call the evacuation routine and adjust the time steps for the evacuation meshes
- 
+
 REAL(EB) :: T_FIRE, FIRE_DT, EVAC_DT
 INTEGER :: II
- 
+
 IF (.NOT. ANY(EVACUATION_GRID)) RETURN
- 
+
 IF (ANY(EVACUATION_ONLY) .AND. (ICYC <= 0)) THEN
    ACTIVE_MESH = .FALSE.  ! Be sure that no fire meshes are updated for icyc < 0
 ENDIF
