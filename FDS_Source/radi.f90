@@ -967,13 +967,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                      CASE (INTERPOLATED_BOUNDARY) 
                         ! IL_R holds the intensities from mesh NOM in the ghost cells of mesh NM.
                         ! IL(II,JJ,KK) is the average of the intensities from the other mesh.
-                        NOM = WALL(IW)%NOM
+                        NOM = EXTERNAL_WALL(IW)%NOM
                         M2 => OMESH(NOM)
                         IL(II,JJ,KK) = 0._EB
-                        DO LL=WALL(IW)%NIC_MIN,WALL(IW)%NIC_MAX
+                        DO LL=EXTERNAL_WALL(IW)%NIC_MIN,EXTERNAL_WALL(IW)%NIC_MAX
                            IL(II,JJ,KK) = IL(II,JJ,KK) + M2%IL_R(LL,N,IBND)
                         ENDDO
-                        IL(II,JJ,KK) = IL(II,JJ,KK)/REAL(WALL(IW)%NIC_MAX-WALL(IW)%NIC_MIN+1,EB)
+                        IL(II,JJ,KK) = IL(II,JJ,KK)/REAL(EXTERNAL_WALL(IW)%NIC_MAX-EXTERNAL_WALL(IW)%NIC_MIN+1,EB)
                      CASE DEFAULT ! solid wall
                         !$OMP CRITICAL
                         WALL(IW)%ONE_D%ILW(N,IBND) = OUTRAD_W(IW) + RPI*(1._EB-WALL(IW)%ONE_D%EMISSIVITY)*INRAD_W(IW)

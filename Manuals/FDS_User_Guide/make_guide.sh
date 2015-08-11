@@ -6,6 +6,10 @@ export TEXINPUTS=".:../LaTeX_Style_Files:"
 clean_build=1
 
 # Build FDS User Guide
+
+gitrevision=`git describe --long --dirty`
+echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex
+
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
 bibtex FDS_User_Guide &> FDS_User_Guide.err
 pdflatex -interaction nonstopmode FDS_User_Guide &> FDS_User_Guide.err
