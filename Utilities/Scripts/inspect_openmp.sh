@@ -20,9 +20,9 @@ cd $TARGET
 make -f ../makefile clean
 ./make_fds.sh
 
-cd $SVNROOT/Verification/Timing_Benchmarks
+cd $SVNROOT/Verification/Thread_Check
 export OMP_NUM_THREADS=2
 inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $SVNROOT/Utilities/Scripts/inspect_openmp_ti3 \
           -search-dir src=$SVNROOT/FDS_Source \
-          -- $SVNROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect bench2.fds
+          -- $SVNROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect thread_check.fds
