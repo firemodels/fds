@@ -2241,6 +2241,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
                ITMP = NINT(TMP_DROP)
                ITMP2 = MIN(I_BOIL,MAX(I_MELT,NINT(TMP_DROP_NEW)))
+               C_DROP2 = SS%C_P_L(ITMP2)
                IF (ITMP/=ITMP2) THEN
                   C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
                   TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP2 * (M_DROP - M_VAP))
@@ -2260,9 +2261,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ! If the PARTICLE temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
             IF (TMP_DROP_NEW>T_BOIL_EFF .AND. M_VAP < M_DROP) THEN
-               ITMP = NINT(T_BOIL_EFF)
-               ITMP2 = NINT(TMP_DROP_NEW) 
-               C_DROP2 = SUM(SS%C_P_L(ITMP:ITMP2))/REAL(ABS(ITMP2-ITMP)+1,EB)               
                M_VAP  = MIN(M_VAP_MAX,M_DROP,M_VAP + (TMP_DROP_NEW - T_BOIL_EFF)*C_DROP2*M_DROP/H_V)
                IF (M_VAP == M_DROP) THEN
                   Q_FRAC = M_VAP*H_V/Q_TOT
