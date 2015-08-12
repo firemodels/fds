@@ -8,7 +8,7 @@ fi
 
 if [ $# -lt 1 ]
 then
-  echo "Usage: inspect_openmp2.sh [-r repository root] [-v] casename.dfs"
+  echo "Usage: inspect_openmp.sh [-r repository root] [-v] casename.dfs"
   echo ""
   echo " -r repository root - name and location of repository where FDS is located"
   echo "    [default: $GITROOT]"
