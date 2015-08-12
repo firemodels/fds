@@ -1,4 +1,4 @@
-&HEAD CHID='shrink_swell', TITLE='Test case for shrinking and swelling materials, SVN $Revision$' / 
+&HEAD CHID='shrink_swell', TITLE='Test case for shrinking and swelling materials' / 
 
 Mesh 1: Pure shrink
 Mesh 2: Matrix allows shrinking 
