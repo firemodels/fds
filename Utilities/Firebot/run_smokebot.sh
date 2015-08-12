@@ -71,7 +71,7 @@ fi
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-#  ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
+  ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
   rm $running
 else
   echo ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
