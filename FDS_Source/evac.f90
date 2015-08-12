@@ -1035,7 +1035,7 @@ CONTAINS
     CALL READ_PERS ; IF (STOP_STATUS==SETUP_STOP) RETURN
     CALL READ_STRS ; IF (STOP_STATUS==SETUP_STOP) RETURN
     CALL READ_EXIT ; IF (STOP_STATUS==SETUP_STOP) RETURN
-    CALL READ_DOOR ; IF (STOP_STATUS==SETUP_STOP) RETURN
+    CALL READ_DOOR ; IF (STOP_STATUS==SETUP_STOP) RETURN   
     CALL READ_CORR ; IF (STOP_STATUS==SETUP_STOP) RETURN
     CALL READ_ENTRIES ; IF (STOP_STATUS==SETUP_STOP) RETURN
     CALL COLLECT_NODE_INFO
@@ -15792,7 +15792,7 @@ CONTAINS
     INTEGER :: i_old_ffield, i_tmp, i_new_ffield, IEL, color_index, DOOR_IOR
     INTEGER :: i, i_o, izero, nm_tmp, I_Agent_Type, I_Old_Target
     CHARACTER(LABEL_LENGTH) :: name_old_ffield, name_new_ffield
-    LOGICAL :: PP_see_door, PP_see_doorXB
+    LOGICAL :: PP_see_door, PP_see_doorXB, PP_correct_side
     REAL(EB) :: T_tmp, T_tmp1, Width
     INTEGER :: N_queue, ii
     TYPE (EVACUATION_TYPE), POINTER :: HPT =>NULL()
@@ -16052,6 +16052,7 @@ CONTAINS
 
     ! Find the visible doors.
     DO i = 1, N_DOORS + N_EXITS
+       PP_correct_side = .TRUE.  ! If the door xb is seen on the correct side of the door
        IF ( Is_Visible_Door(i) ) THEN
 
           IF (EVAC_Node_List(n_egrids+N_ENTRYS+i)%Node_Type == 'Door' ) THEN
@@ -16074,10 +16075,17 @@ CONTAINS
           ELSE
              X1 = X1+MIN(0.3_EB,0.5_EB*DOOR_WIDTH) ; X2 = X2-MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
           END IF
+          ! Check if the agent is on the correct side of the door (thin obsts)
+          IF (ABS(DOOR_IOR)==1)THEN
+             IF ( DOOR_IOR*(x1_old-XBx)>0.0_EB ) PP_correct_side = .FALSE.
+          ELSE
+             IF ( DOOR_IOR*(y1_old-XBy)>0.0_EB ) PP_correct_side = .FALSE.
+          END IF
+
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x1, y1)
-          Is_BeeLineXB_Door(i,2) = PP_see_door
+          Is_BeeLineXB_Door(i,2) = PP_see_door .AND. PP_correct_side 
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x2, y2)
-          Is_BeeLineXB_Door(i,3) = PP_see_door
+          Is_BeeLineXB_Door(i,3) = PP_see_door .AND. PP_correct_side 
           IF (ABS(DOOR_IOR)==1)THEN
              Y1 = Y_XYZ - 0.5_EB*DOOR_WIDTH + MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
              Y2 = Y_XYZ + 0.5_EB*DOOR_WIDTH - MIN(0.3_EB,0.5_EB*DOOR_WIDTH)
@@ -16099,7 +16107,7 @@ CONTAINS
           END IF
           ! Groups: the first member (x1_old,y1_old) of the group is used.
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x11, y11)
-          Is_BeeLineXB_Door(i,1) = PP_see_door
+          Is_BeeLineXB_Door(i,1) = PP_see_door .AND. PP_correct_side 
           IF (EVAC_Node_List(n_egrids+N_ENTRYS+i)%Node_Type == 'Door' ) THEN
              X11 = EVAC_DOORS(i)%X 
              Y11 = EVAC_DOORS(i)%Y
@@ -16110,14 +16118,14 @@ CONTAINS
           PP_see_door = See_each_other(nm_tmp, x1_old, y1_old, x11, y11)
           Is_BeeLine_Door(i,1) = PP_see_door
           PP_see_door = See_door(nm_tmp, x1_old, y1_old, x11, y11, ave_K, max_fed)
-          PP_see_doorXB = See_door(nm_tmp, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2)
+          PP_see_doorXB = See_door(nm_tmp, x1_old, y1_old, XBx, XBy, ave_K2, max_fed2) .AND. PP_correct_side 
           IF (PP_see_doorXB .AND. .NOT.PP_see_door) THEN
              max_fed = max_fed2 ; ave_K = ave_K2
           END IF
           IF (PP_see_doorXB .AND. PP_see_door) THEN
              max_fed = MIN(max_fed, max_fed2) ; ave_K = MIN(ave_K, ave_K2)
           END IF
-          PP_see_door = PP_see_door .OR. PP_see_doorXB
+          PP_see_door = PP_see_door .OR. (PP_see_doorXB .AND. PP_correct_side)
           FED_max_Door(i) = max_fed
           K_ave_Door(i) = ave_K
           IF (FED_DOOR_CRIT < TWO_EPSILON_EB) THEN
