@@ -6,22 +6,30 @@ if [ "$FDSSMV" != "" ] ; then
   GITROOT=$FDSSMV
 fi
 
-if [ $# -lt 1 ]
-then
-  echo "Usage: inspect_openmp2.sh [-r repository root] [-v] casename.dfs"
+function usage {
+  echo "Usage: inspect_openmp.sh [-r repository root] [-v] casename.dfs"
   echo ""
+  echo " -h display this message"
   echo " -r repository root - name and location of repository where FDS is located"
   echo "    [default: $GITROOT]"
   echo " -v   - list command used to thread check"
   echo "input_file - input file"
   echo ""
   exit
+}
+
+if [ $# -lt 1 ]
+then
+  usage
 fi
 
 showinput=
-while getopts 'r:v' OPTION
+while getopts 'hr:v' OPTION
 do
 case $OPTION  in
+  h)
+   usage;
+   ;;
   r)
    GITROOT="$OPTARG"
    ;;
