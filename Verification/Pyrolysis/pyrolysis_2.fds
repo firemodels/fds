@@ -1,4 +1,4 @@
-&HEAD CHID='pyrolysis_2', TITLE='TGA example case for Users Guide, SVN $Revision$' / 
+&HEAD CHID='pyrolysis_2', TITLE='TGA example case for Users Guide' / 
 
 &MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
 
