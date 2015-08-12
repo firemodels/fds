@@ -6,7 +6,7 @@ CURDIR=`pwd`
 PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
 
 # directory containing guides within firebot account
-FROMDIR=~firebot/firebot/output
+FROMDIR=~firebot/firebotgit/output
 BASEDIR=Newest_Guides
 
 UPLOAD ()
@@ -20,7 +20,7 @@ UPLOAD ()
 
 if [ -e $GDRIVE ] ; then
   cd $FROMDIR/$BASEDIR
-  UPLOAD FDS_Configuration_Management_Plan
+#  UPLOAD FDS_Configuration_Management_Plan
   UPLOAD FDS_Technical_Reference_Guide
   UPLOAD FDS_User_Guide
   UPLOAD FDS_Validation_Guide

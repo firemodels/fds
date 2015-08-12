@@ -177,9 +177,6 @@ run_auto()
   MKDIR $GIT_STATUSDIR
 # remove untracked files, revert repo files, update to latest revision
   cd $fdsroot
-  git clean -dxf
-  git add .
-  git reset --hard HEAD
 
   CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
   if [[ "$BRANCH" != "" ]] ; then
@@ -188,13 +185,13 @@ run_auto()
        exit
     fi
     if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-       echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+       echo Checking out branch $BRANCH.
        git checkout $BRANCH
     fi
   else
      BRANCH=$CURRENT_BRANCH
   fi
-  echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+  echo Pulling latest revision of branch $BRANCH.
   git pull 
 
 # get info for smokeview
@@ -1078,39 +1075,34 @@ email_build_status()
    echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_DIR
    # Check for warnings and errors
+   echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+   echo "-------------------------------" >> $TIME_LOG
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-     cat $TIME_LOG >> $ERROR_LOG
-     cat $TIME_LOG >> $WARNING_LOG
      # Send email with failure message and warnings, body of email contains appropriate log file
-     mail -s "smokebot build failure and warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $ERROR_LOG > /dev/null
+     cat $ERROR_LOG $TIME_LOG | mail -s "smokebot build failure and warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-     cat $TIME_LOG >> $ERROR_LOG
       # Send email with failure message, body of email contains error log file
-      mail -s "smokebot build failure on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $ERROR_LOG > /dev/null
+      cat $ERROR_LOG $TIME_LOG | mail -s "smokebot build failure on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-     cat $TIME_LOG >> $WARNING_LOG
-      # Send email with success message, include warnings
-      mail -s "smokebot build success with warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $WARNING_LOG > /dev/null
+     # Send email with success message, include warnings
+     cat $WARNING_LOG $TIME_LOG | mail -s "smokebot build success with warnings on ${hostname}. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
 
    # No errors or warnings
    else
 # upload guides to a google drive directory
       cd $SMOKEBOT_DIR
-#      $UPLOADGUIDES  > /dev/null
-
-      echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-      echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
-      echo "-------------------------------" >> $TIME_LOG
+      $UPLOADGUIDES  > /dev/null
 
       # Send success message with links to nightly manuals
-      mail -s "smokebot build success on ${hostname}! Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo < $TIME_LOG > /dev/null
+      cat $TIME_LOG | mail -s "smokebot build success on ${hostname}! Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
    fi
 }
 
@@ -1195,6 +1187,7 @@ DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
 echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
 
 ### Stage 6d ###
+MAKEPICTURES_beg=`GET_TIME`
 if [[ $stage4b_success && $stage6c_success ]] ; then
   make_smv_pictures
   check_smv_pictures

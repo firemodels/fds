@@ -489,7 +489,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
             DELKDELT = &
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                  (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -1581,7 +1581,7 @@ ELSE TRUE_PROJECTION
 
    NO_SCARC_IF: IF (PRES_METHOD /='SCARC') THEN
       DO IW=1,N_EXTERNAL_WALL_CELLS
-         IF (WALL(IW)%NOM==0) CYCLE
+         IF (EXTERNAL_WALL(IW)%NOM==0) CYCLE
          IIG = WALL(IW)%ONE_D%IIG
          JJG = WALL(IW)%ONE_D%JJG
          KKG = WALL(IW)%ONE_D%KKG

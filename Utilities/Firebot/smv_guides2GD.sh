@@ -6,7 +6,7 @@ CURDIR=`pwd`
 PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
 
 # directory containing guides within smokebot account
-FROMDIR=~smokebot/smokebot/output
+FROMDIR=~smokebot/smokebotgit/output
 BASEDIR=Newest_Guides
 
 UPLOAD ()
