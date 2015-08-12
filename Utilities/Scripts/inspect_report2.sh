@@ -11,15 +11,18 @@ REPORT_TYPE=problems
 showinput=
 
 function usage {
-echo "inspect_report.sh [ -d result-dir -r report-type ]"
+echo "inspect_report.sh [-d result-dir -h -r repository root -R report-type -v output command]"
 echo "Report results from thread checker"
 echo ""
 echo "Options"
-echo "-d result-dir      - directory that contains thread checker results [default: $RESULT_DIR]"
+echo "-d result-dir - directory that contains thread checker results"
+echo "   [default: $RESULT_DIR]"
+echo "-h - display this message"
 echo "-r repository root - name and location of repository where FDS is located"
 echo "   [default: $GITROOT]"
-echo "-R report-type     - type of report: problems [or] observations [default: $REPORT_TYPE]"
-echo "-v                 - list command used to thread check"
+echo "-R report-type - type of report: problems or observations"
+echo "   [default: $REPORT_TYPE]"
+echo "-v - list command used to report thread checking results"
 exit
 }
 
