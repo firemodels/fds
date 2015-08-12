@@ -79,7 +79,7 @@ User's Guide\\
 \headerC{
 \today \\
 FDS Version \fdsversion \\
-\emph{Git Repository}~\gitrevision}
+Revision:~\gitrevision}
 
 
 \vfill
@@ -1076,7 +1076,7 @@ Usually in a MPI calculation, each mesh is assigned its own process, and each pr
 \end{lstlisting}
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3' can communicate directly with each other without having to transmit data using MPI calls over the network. Same goes for `mesh5' and `mesh6'. In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be walked next door.
 
-Additioally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
+Additioally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
 \begin{lstlisting}
 &MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
 &MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
@@ -7349,7 +7349,7 @@ All of the above heat flux output quantities are defined at a solid surface. To 
 \begin{lstlisting}
 &DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=0.45,0.0,0.3, ORIENTATION=-1,0,0 /
 \end{lstlisting}
-This single line of input is a special shortcut\footnote{This feature maintains backward compatibility with FDS~5.} for the following lines of input that make use of a Lagrangian particle as a surrogate target:
+Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  This single line of input is a special shortcut\footnote{This feature maintains backward compatibility with FDS~5.} for the following lines of input that make use of a Lagrangian particle as a surrogate target:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=1, PART_ID='rad gauge' /
