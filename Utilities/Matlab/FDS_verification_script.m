@@ -14,7 +14,7 @@
 % file to "o" to process only that line.
 %
 % If you create your own script (your plots are not generated with dataplot.m),
-% please do not forget to add the SVN number to the plot.  Examples for how
+% please do not forget to add the Git revision number to the plot.  Examples for how
 % this is done can be found in any of the 'Special cases' scripts below dataplot.
 
 close all
