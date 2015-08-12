@@ -559,7 +559,7 @@ check_cases_debug()
 
       # If errors encountered in validation mode, then email status and exit
       if [ $FIREBOT_MODE == "validation" ] ; then
-         email_build_status 'Validationbot' 'Validation'
+         email_build_status 'Validationbot'
          set_files_world_readable
          exit
       fi
@@ -691,7 +691,7 @@ check_cases_release()
 
       # If errors encountered in validation mode, then email status and exit
       if [ $FIREBOT_MODE == "validation" ] ; then
-         email_build_status 'Validationbot' 'Validation'
+         email_build_status 'Validationbot'
          # Stop all Validationbot cases in queue system
          qdel all
          set_files_world_readable
@@ -1169,6 +1169,9 @@ email_build_status()
 {
    cd $FIREBOT_RUNDIR
 
+   bottype=${1}
+   botuser=${1}@$hostname
+   
    stop_time=`date`
    echo "" > $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
@@ -1188,19 +1191,19 @@ email_build_status()
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
-     cat $ERROR_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
+     cat $ERROR_LOG $TIME_LOG | mail -s "[$botuser] $bottype failure and warnings. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       # Send email with failure message, body of email contains error log file
-      cat $ERROR_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} failure for Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
+      cat $ERROR_LOG $TIME_LOG | mail -s "[$botuser] $bottype failure. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       # Send email with success message, include warnings
-      cat $WARNING_LOG $TIME_LOG | mail -s "[${1}@$hostname] ${2} success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS > /dev/null
+      cat $WARNING_LOG $TIME_LOG | mail -s "[$botuser] $bottype success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH" $mailToFDS > /dev/null
 
    # No errors or warnings
    else
@@ -1209,7 +1212,7 @@ email_build_status()
       $UPLOADGUIDES > /dev/null
 
       # Send success message with links to nightly manuals
-      cat $TIME_LOG | mail -s "[${1}@$hostname] ${2} success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." $mailToFDS > /dev/null
+      cat $TIME_LOG | mail -s "[$botuser] $bottype success! Version: ${GIT_REVISION}, Branch: $BRANCH" $mailToFDS > /dev/null
    fi
 }
 
@@ -1343,8 +1346,8 @@ fi
 set_files_world_readable
 if [ $FIREBOT_MODE == "verification" ] ; then
    save_build_status
-   email_build_status 'Firebot' 'Build'
+   email_build_status 'Firebot'
 elif [ $FIREBOT_MODE == "validation" ] ; then
-   email_build_status 'Validationbot' 'Validation'
+   email_build_status 'Validationbot'
 fi
 
