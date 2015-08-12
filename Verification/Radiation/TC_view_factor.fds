@@ -1,4 +1,4 @@
-&HEAD CHID='TC_view_factor', TITLE='Test of TC model, SVN $Revision$'/
+&HEAD CHID='TC_view_factor', TITLE='Test of TC model'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
 
