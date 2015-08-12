@@ -1,22 +1,23 @@
 #!/bin/bash
 
 running=bot_running
-if [ -e bot_running ] ; then
-  echo Smokebot is already running.
-  echo Erase the file $running if this is not the case.
-  exit
+
+reponame=~/FDS-SMVgitclean
+if [ "$FDSSMV" != "" ] ; then
+  reponame=$FDSSMV
 fi
 
 CURDIR=`pwd`
 FDS_GITbase=FDS-SMVgitclean
 BRANCH=development
 botscript=smokebot_linux.sh
-cFDS_GITbase=
-cBRANCH=
 RUNAUTO=
 UPDATEREPO=
 QUEUE=
-while getopts 'ab:d:q:u' OPTION
+RUNSMOKEBOT=1
+fopt=
+mopt=
+while getopts 'ab:d:fmq:r:uv' OPTION
 do
 case $OPTION  in
   a)
@@ -25,35 +26,53 @@ case $OPTION  in
   b)
    BRANCH="$OPTARG"
    ;;
-  d)
-   FDS_GITbase="$OPTARG"
+  f)
+   fopt="-f"
    ;;
-  d)
-   QUEUE="$OPTARG"
+  m)
+   mopt="-m"
+   ;;
+  r)
+   reponame="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
+   ;;
+  v)
+   RUNSMOKEBOT=
    ;;
 esac
 done
 shift $(($OPTIND-1))
 
+if [[ "$RUNSMOKEBOT" == "1" ]]; then
+  if [ -e bot_running ] ; then
+    echo Smokebot is already running.
+    echo Erase the file $running if this is not the case.
+    exit
+  fi
+fi
+
+FDS_GITBASE=`basename $reponame`
 if [[ "$QUEUE" != "" ]]; then
    QUEUE="-q $QUEUE"
 fi 
-if [[ "$FDS_GITbase" != "" ]]; then
-   cFDS_GITbase="-d $FDS_GITbase"
-fi 
-if [[ "$BRANCH" != "" ]]; then
-   cBRANCH="-b $BRANCH"
-fi 
-if [[ "$UPDATEREPO" == "1" ]]; then
-   cd ~/$FDS_GITbase
-   git checkout $BRANCH
-   git pull
-   cp Utilities/Firebot/$botscript $CURDIR/.
-   cd $CURDIR
+reponame="-r $reponame"
+if [[ "$RUNSMOKEBOT" == "1" ]]; then
+  if [[ "$UPDATEREPO" == "1" ]]; then
+     cd ~/$FDS_GITBASE
+     git remote update
+     git checkout $BRANCH
+     git pull
+     cp Utilities/Firebot/$botscript $CURDIR/.
+     cd $CURDIR
+  fi
 fi
-touch $running
-./$botscript $RUNAUTO $cBRANCH $cFDS_GITbase $QUEUE "$@"
-rm $running
+BRANCH="-b $BRANCH"
+if [[ "$RUNSMOKEBOT" == "1" ]]; then
+  touch $running
+#  ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
+  rm $running
+else
+  echo ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
+fi
