@@ -1,6 +1,6 @@
 A simple example of how to use VEL_T.
 
-&HEAD CHID='tangential_velocity', TITLE='Test VEL_T, the Tangential Velocity, SVN $Revision$' /
+&HEAD CHID='tangential_velocity', TITLE='Test VEL_T, the Tangential Velocity' /
 
 &MESH IJK=50,50,10, XB=0.0,5.0,0.0,5.0,0.0,1.0 /
 &TIME T_END=8.0 /
