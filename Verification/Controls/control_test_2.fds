@@ -1,4 +1,4 @@
-&HEAD CHID='control_test_2', TITLE='Control function testing part 2, SVN $Revision$'/
+&HEAD CHID='control_test_2', TITLE='Control function testing part 2'/
 
 &MESH XB=-1.05,1.05,-1,1,0,2, IJK=22,20,20 /
 &TIME T_END=10,DT=0.1/

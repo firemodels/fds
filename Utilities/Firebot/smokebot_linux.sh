@@ -12,6 +12,7 @@
 #  ===================
 
 FDS_GITbase=FDS-SMVgitclean
+reponame=~/$FDS_GITbase
 cfastbase=cfastgitclean
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
@@ -42,7 +43,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:d:fmo:q:st' OPTION
+while getopts 'ab:fmo:q:r:st' OPTION
 do
 case $OPTION in
   a)
@@ -50,9 +51,6 @@ case $OPTION in
    ;;
   b)
    BRANCH="$OPTARG"
-   ;;
-  d)
-   FDS_GITbase="$OPTARG"
    ;;
   f)
    FORCECLEANREPO=1
@@ -68,6 +66,9 @@ case $OPTION in
   q)
    SMOKEBOT_QUEUE="$OPTARG"
    ;;
+  r)
+   reponame="$OPTARG"
+   ;;
   s)
    RUNDEBUG="0"
    ;;
@@ -77,6 +78,8 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+FDS_GITBASE=`basename $reponame`
 
 if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
       # Continue along
@@ -1005,11 +1008,8 @@ make_guide()
    label=$3
 
    cd $directory
-   export TEXINPUTS=".:../LaTeX_Style_Files:"
-   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
-   bibtex $document &> $OUTPUT_DIR/stage8_$document
-   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
-   pdflatex -interaction nonstopmode $document &> $OUTPUT_DIR/stage8_$document
+  
+   ./make_guide.sh &> $OUTPUT_DIR/stage8_$document
 
    # Check guide for completion and copy to website if successful
    check_guide $OUTPUT_DIR/stage8_$document $directory/$document.pdf $label
