@@ -1,7 +1,7 @@
 Water droplets evaporate in a small box.
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_1', TITLE='Water Evaporation Test, SVN $Revision$' / 
+&HEAD CHID='water_evaporation_1', TITLE='Water Evaporation Test' / 
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 / 
 

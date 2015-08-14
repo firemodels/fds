@@ -1,6 +1,6 @@
 A test of the insertion of solid, non-evaporating particles.
 
-&HEAD CHID='particle_flux', TITLE='Simple test of particle mass flux from a surface, SVN $Revision$' /
+&HEAD CHID='particle_flux', TITLE='Simple test of particle mass flux from a surface' /
 
 &MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
 

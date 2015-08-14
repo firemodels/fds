@@ -1,4 +1,4 @@
-&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function, SVN $Revision$' /
+&HEAD CHID='pyramid', TITLE='Simple demo of multiplier function' /
 
 &MESH IJK=100,100,100, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 
