@@ -344,6 +344,9 @@ echo             matlab validation plots
 cd %gitroot%\Utilities\Matlab
 matlab -automation -wait -noFigureWindows -r "try; run('%gitroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
 
+cd %gitroot%\Utilities\Scripts
+validation_git_stats
+
 :skip_matlabplots
 
 call :GET_DURATION MAKEPICS %MAKEPICS_beg%
