@@ -958,6 +958,8 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP_0
 
+! DEFINITION N_BACK_WALL_CELLS
+! DEFINITION BACK_WALL_CELL_INDEX
 ! Determine back wall index for wall cells that have an EXPOSED backing and are assigned to OBSTructions that are either 0 or 1
 ! cell thick. If the OBSTruction backs up to the exterior face of a MESH, look for the adjacent mesh and assign a back wall index
 ! if the OBSTruction is 0 or 1 cell thick. For OBSTructions that abut or cross mesh boundaries, count the wall cells so that they
