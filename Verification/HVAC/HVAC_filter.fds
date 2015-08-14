@@ -1,4 +1,4 @@
-&HEAD CHID='HVAC_filter',TITLE='Mass Conservation, SVN $Revision$' /
+&HEAD CHID='HVAC_filter',TITLE='Mass Conservation' /
 
 &MESH IJK=10,10,10, XB=0.,1.,0.,1.,0.,1./
 &MISC STRATIFICATION=.TRUE./

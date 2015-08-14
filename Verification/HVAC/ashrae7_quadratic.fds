@@ -1,4 +1,4 @@
-&HEAD CHID='ashrae7_quadratic',TITLE='AHSRAHE Fundamentals HVAC Sample Case 7 Quadratic Fan Curve, SVN $Revision$' /
+&HEAD CHID='ashrae7_quadratic',TITLE='AHSRAHE Fundamentals HVAC Sample Case 7 Quadratic Fan Curve' /
 
 &MESH IJK=20,20,20, XB=0.,10.,0.,10.,0.,10./
 

@@ -1,7 +1,7 @@
 Surface with NET_HEAT_FLUX and remaining boundaries adiabatic.  Verify that NET_HEAT_FLUX is achieved and
 that gas temperatures remain stable when flux goes to zero.  
 
-&HEAD CHID='adiabatic_net_flux', TITLE='Net heat flux surface with adiabatic walls, SVN $Revision$' /
+&HEAD CHID='adiabatic_net_flux', TITLE='Net heat flux surface with adiabatic walls' /
 
 &MESH IJK=10,10,10, XB=0.0,2.0,0.0,2.0,0.0,2.0 /
 &TIME T_END=60.,WALL_INCREMENT=1 /
