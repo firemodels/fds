@@ -9933,7 +9933,7 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
          ENDIF
       ENDDO CHECK_MESH_LOOP
 
-      IF (BAD) THEN
+      IF (BAD .AND. .NOT.ALL(EVACUATION_ONLY)) THEN
          WRITE(MESSAGE,'(A,A,A)')  'ERROR: XB for DEVC ',TRIM(ID),' must be completely within a mesh.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
