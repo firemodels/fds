@@ -8,8 +8,13 @@ FILTERF =
 
 VPATH = $(SOURCE_DIR)/smokezip ../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
-GIT_HASH := $(shell git describe --long --dirty)
-GIT_DATE := $(shell git log -1 --format=%cd)
+ifeq ($(shell echo "check_quotes"),"check_quotes")
+  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
+else
+  GIT_HASH := $(shell git describe --long --dirty)
+  GIT_DATE := $(shell git log -1 --format=%cd)
+endif
 GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 
