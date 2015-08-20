@@ -16,12 +16,100 @@ USE MEMORY_FUNCTIONS, ONLY: ChkMemErr
 IMPLICIT NONE
 REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 
+
+! Start Variable declaration for CC_IBM:
+! Local constants used on routines:
+REAL(EB), PARAMETER :: GEOMEPS = 1.E-12_EB 
+
+INTEGER,  PARAMETER :: LOW   = 1
+INTEGER,  PARAMETER :: HIGH  = 2
+
+INTEGER,  PARAMETER :: IAXIS = 1
+INTEGER,  PARAMETER :: JAXIS = 2
+INTEGER,  PARAMETER :: KAXIS = 3
+INTEGER,  PARAMETER :: NGUARD= 1 ! See if we can do with one layer of guard-cells.
+INTEGER,  PARAMETER :: FCELL = 1 ! Right face index.
+ 
+! Media definition parameters:
+INTEGER,  PARAMETER :: IBM_INBOUNDCC = -3
+INTEGER,  PARAMETER :: IBM_INBOUNDCF = -2
+INTEGER,  PARAMETER :: IBM_GASPHASE  = -1 
+INTEGER,  PARAMETER :: IBM_CUTCFE    =  0
+INTEGER,  PARAMETER :: IBM_SOLID     =  1
+INTEGER,  PARAMETER :: IBM_INBOUNDARY=  2
+  
+! Intersection type definition parameters:
+INTEGER,  PARAMETER :: IBM_GG =  1 ! Gas - Gas intersection.
+INTEGER,  PARAMETER :: IBM_SS =  3 ! Solid - Solid intersection.
+INTEGER,  PARAMETER :: IBM_GS = -1 ! Gas to Solid intersection (as coordinate xi increases).
+INTEGER,  PARAMETER :: IBM_SG =  5 ! Solid to Gas intersection (as coordinate xi increases).
+INTEGER,  PARAMETER :: IBM_SGG= IBM_GG ! Single point GG intersection. Might not be needed.
+
+! Constants used to identify variables on Eulerian grid arrays:
+! Vertex centered variables:
+INTEGER,  PARAMETER :: IBM_VGSC   = 1 ! Type of vertex media, IBM_GASPHASE or IBM_SOLID.
+INTEGER,  PARAMETER :: IBM_NVVARS = 1 ! Number of vertex variables in MESHES(N)%IBM_VERTVAR.
+
+! Cartesian Edge centered variables:
+INTEGER,  PARAMETER :: IBM_EGSC   = 1 ! Edge media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
+INTEGER,  PARAMETER :: IBM_IDCE   = 2 ! MESHES(N)%IBM_CUT_EDGE data struct entry index location. 
+INTEGER,  PARAMETER :: IBM_ECRS   = 3 ! MESHES(N)%IBM_EDGECROSS data struct entry index location. 
+INTEGER,  PARAMETER :: IBM_NEVARS = 3 ! Number of edge variables in MESHES(N)%IBM_ECVAR.
+
+! Cartesian Face centered variables:
+INTEGER,  PARAMETER :: IBM_FGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
+!INTEGER, PARAMETER :: IBM_IDCE   = 2 ! MESHES(N)%IBM_CUT_EDGE data struct entry index location,
+                                      ! IBM_INBOUNDCF type.
+INTEGER,  PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%IBM_CUT_FACE data struct entry index location,
+                                      ! IBM_INBOUNDCF type cut-faces.                                       
+INTEGER,  PARAMETER :: IBM_NFVARS = 3 ! Number of face variables in MESHES(N)%IBM_FCVAR.
+
+! Cartesian Cell centered variables:
+INTEGER,  PARAMETER :: IBM_CGSC   = 1 ! Face media type: IBM_GASPHASE, IBM_SOLID or IBM_CUTCFE.
+!INTEGER, PARAMETER :: IBM_IDCE   = 2 ! MESHES(N)%IBM_CUT_EDGE data struct entry index location,
+                                      ! cut edges in Cartesian cell.
+!INTEGER, PARAMETER :: IBM_IDCF   = 3 ! MESHES(N)%IBM_CUT_FACE data struct entry index location,
+                                      ! IBM_INBOUNDCC type cut-faces in Cartesian cell.
+INTEGER,  PARAMETER :: IBM_IDCC   = 4 ! MESHES(N)%IBM_CUT_CELL data struct entry index location,
+                                      ! cut-cells in Cartesian cell.                                       
+INTEGER,  PARAMETER :: IBM_NCVARS = 4 ! Number of face variables in MESHES(N)%IBM_CCVAR.
+
+! Local integers:
+INTEGER :: IBM_NEDGECROSS, IBM_NCUTEDGE, IBM_NCUTFACE, IBM_NCUTCELL
+INTEGER :: ILO_CELL,IHI_CELL,JLO_CELL,JHI_CELL,KLO_CELL,KHI_CELL
+INTEGER :: ILO_FACE,IHI_FACE,JLO_FACE,JHI_FACE,KLO_FACE,KHI_FACE
+
+
+! Allocatable real arrays
+
+
+
+
+
+! End Variable declaration for CC_IBM. 
+
+
+
 PRIVATE
 PUBLIC :: INIT_IBM,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE, &
           READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,LINKED_LIST_INSERT,&
           WRITE_GEOM,WRITE_GEOM_ALL
  
 CONTAINS
+
+! ---------------------------- SET_CUTCELLS -------------------------------------
+
+SUBROUTINE SET_CUTCELLS
+
+
+
+
+
+
+
+
+RETURN
+END SUBROUTINE SET_CUTCELLS
 
 ! ---------------------------- READ_GEOM ----------------------------------------
 
