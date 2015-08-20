@@ -2246,13 +2246,13 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
 
             IF (M_VAP < M_DROP) THEN
-               TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * (H_V+H_L))/(C_DROP * (M_DROP - M_VAP))
+               TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
                ITMP = NINT(TMP_DROP)
                ITMP2 = MIN(I_BOIL,MAX(I_MELT,NINT(TMP_DROP_NEW)))
                C_DROP2 = SS%C_P_L(ITMP2)
                IF (ITMP/=ITMP2) THEN
                   C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
-                  TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * (H_V+H_L))/(C_DROP2 * (M_DROP - M_VAP))
+                  TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP2 * (M_DROP - M_VAP))
                ENDIF
             ELSE
                Q_FRAC = M_VAP*H_V/Q_TOT
