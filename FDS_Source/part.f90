@@ -1929,9 +1929,10 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             SC_AIR,D_AIR,DHOR,SHERWOOD,X_DROP,M_DROP,RHO_G,MW_RATIO,MW_DROP,FTPR,&
             C_DROP,M_GAS,A_DROP,TMP_G,TMP_DROP,TMP_MELT,TMP_BOIL,MINIMUM_FILM_THICKNESS,RE_L,OMRAF,Q_FRAC,Q_TOT,DT_SUBSTEP, &
             CP,H_NEW,ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES), &
-            M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_D_OLD, &
+            M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_D_OLD,H_G, &
             H_L_REF,TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR,RHOCBAR,MCBAR
+            T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR,RHOCBAR,MCBAR,&
+            M_GAS_OLD,TMP_G_OLD
             
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T
@@ -2098,6 +2099,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
             M_GAS  = RHO_G/RVC  
+            IF (DT_SUM <= TWO_EPSILON_EB) THEN
+               TMP_G_OLD = TMP_G
+               M_GAS_OLD = M_GAS
+               CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
+               H_G_OLD = CP * TMP_G * M_GAS               
+            ENDIF
             M_VAP_MAX = (0.33_EB * M_GAS - MVAP_TOT(II,JJ,KK)) / WGT ! limit to avoid diveregence errors
             K_AIR  = CPOPR*MU_AIR
             IF (Y_INDEX>=0) THEN
@@ -2237,6 +2244,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             M_VAP = DT_SUBSTEP*A_DROP*H_MASS*RHO_G*(Y_DROP+0.5_EB*DZ_DTMP_DROP*(TMP_DROP_NEW-TMP_DROP)-Y_GAS) 
             M_VAP = MAX(0._EB,MIN(M_VAP,M_DROP,M_VAP_MAX))
+
             IF (M_VAP < M_DROP) THEN
                TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP * (M_DROP - M_VAP))
                ITMP = NINT(TMP_DROP)
@@ -2261,7 +2269,10 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ! If the PARTICLE temperature reaches boiling, use only enough energy from gas to vaporize liquid
 
             IF (TMP_DROP_NEW>T_BOIL_EFF .AND. M_VAP < M_DROP) THEN
-               M_VAP  = MIN(M_VAP_MAX,M_DROP,M_VAP + (TMP_DROP_NEW - T_BOIL_EFF)*C_DROP2*M_DROP/H_V)
+               ITMP = NINT(TMP_DROP)
+               ITMP2 = NINT(T_BOIL_EFF)
+               C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
+               M_VAP  = MIN(M_DROP,(Q_TOT-M_DROP*C_DROP2*(T_BOIL_EFF-TMP_DROP))/(H_V-C_DROP2*(T_BOIL_EFF-TMP_DROP)))
                IF (M_VAP == M_DROP) THEN
                   Q_FRAC = M_VAP*H_V/Q_TOT
                   Q_RAD = Q_RAD*Q_FRAC
@@ -2271,7 +2282,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                TMP_DROP_NEW = T_BOIL_EFF
             ENDIF
             M_DROP = M_DROP - M_VAP
-            
+
             ! Add fuel evaporation rate to running counter and adjust mass of evaporated fuel to account for different 
             ! Heat of Combustion between fuel PARTICLE and gas
 
@@ -2318,13 +2329,12 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             ENDIF            
             
             ! Update gas temperature
-
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)       
          
-            H_G_OLD = M_GAS*CP*TMP_G         
+            H_G = M_GAS*CP*TMP_G         
             TMP_G_NEW = TMP_G
-            
-            H_NEW = H_G_OLD + WGT*(M_VAP*(H_V+H_L) - Q_CON_GAS)
+
+            H_NEW = H_G + WGT*(M_VAP*(H_V+H_L) - Q_CON_GAS)
 
             !IF (H_NEW > 0._EB) THEN
                TMP_G_I = TMP_G
@@ -2388,8 +2398,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Compute contribution to the divergence
 
-            CALL GET_SPECIFIC_HEAT(ZZ_GET,CP,TMP_G)
-            H_G_OLD = CP * TMP_G * M_GAS
             ZZ_GET = 0._EB
             ZZ_GET(Z_INDEX) = 1._EB
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
