@@ -89,7 +89,14 @@ TYPE MESH_TYPE
    
    INTEGER :: N_CUTCELLS=0 ! for debugging/visualization
    INTEGER, ALLOCATABLE, DIMENSION(:) :: CUTCELL_LIST ! for debugging/visualization
-
+   
+   !---------------------- STR: CC_IBM mesh Arrays ------------------------------------------
+   INTEGER :: IBM_NEDGECROSS_MESH, IBM_NCUTEDGE_MESH, IBM_NCUTFACE_MESH, IBM_NCUTCELL_MESH  
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:) :: VERTVAR, CCVAR
+   INTEGER, ALLOCATABLE, DIMENSION(:,:,:,:,:) :: ECVAR, FCVAR
+   
+   !---------------------- END: CC_IBM mesh Arrays ------------------------------------------
+   
    INTEGER :: N_WALL_CELLS,N_WALL_CELLS_DIM,N_INTERNAL_WALL_CELLS,N_EXTERNAL_WALL_CELLS,WALL_COUNTER
    REAL(EB) :: BC_CLOCK
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: EDGE_INTERPOLATION_FACTOR

@@ -17,6 +17,7 @@ IMPLICIT NONE
 REAL(EB), PARAMETER :: DEG2RAD=4.0_EB*ATAN(1.0_EB)/180.0_EB
 
 
+!! ---------------------------------------------------------------------------------
 ! Start Variable declaration for CC_IBM:
 ! Local constants used on routines:
 REAL(EB), PARAMETER :: GEOMEPS = 1.E-12_EB 
@@ -24,6 +25,7 @@ REAL(EB), PARAMETER :: GEOMEPS = 1.E-12_EB
 INTEGER,  PARAMETER :: LOW   = 1
 INTEGER,  PARAMETER :: HIGH  = 2
 
+INTEGER,  PARAMETER :: MDIM  = 3 ! Maximum number of spatial dimensions for a problem.
 INTEGER,  PARAMETER :: IAXIS = 1
 INTEGER,  PARAMETER :: JAXIS = 2
 INTEGER,  PARAMETER :: KAXIS = 3
@@ -75,18 +77,89 @@ INTEGER,  PARAMETER :: IBM_IDCC   = 4 ! MESHES(N)%IBM_CUT_CELL data struct entry
 INTEGER,  PARAMETER :: IBM_NCVARS = 4 ! Number of face variables in MESHES(N)%IBM_CCVAR.
 
 ! Local integers:
-INTEGER :: IBM_NEDGECROSS, IBM_NCUTEDGE, IBM_NCUTFACE, IBM_NCUTCELL
-INTEGER :: ILO_CELL,IHI_CELL,JLO_CELL,JHI_CELL,KLO_CELL,KHI_CELL
-INTEGER :: ILO_FACE,IHI_FACE,JLO_FACE,JHI_FACE,KLO_FACE,KHI_FACE
+INTEGER, SAVE :: IBM_NEDGECROSS, IBM_NCUTEDGE, IBM_NCUTFACE, IBM_NCUTCELL
+INTEGER, SAVE :: IBM_NEDGECROSS_MESH, IBM_NCUTEDGE_MESH, IBM_NCUTFACE_MESH, IBM_NCUTCELL_MESH
+INTEGER, SAVE :: ILO_CELL,IHI_CELL,JLO_CELL,JHI_CELL,KLO_CELL,KHI_CELL
+INTEGER, SAVE :: ILO_FACE,IHI_FACE,JLO_FACE,JHI_FACE,KLO_FACE,KHI_FACE
+INTEGER, SAVE :: NXB, NYB, NZB
+
+INTEGER, PARAMETER :: NOD1 = 1
+INTEGER, PARAMETER :: NOD2 = 2
+INTEGER, PARAMETER :: NOD3 = 3
+
+! Intersection Body-plane data structure:
+TYPE BODINT_PLANE_TYPE
+   INTEGER :: NNODS     ! Number of intersection vertices.
+   INTEGER :: NSGLS     ! Number of single point intersection elements.
+   INTEGER :: NSEGS     ! Number of intersection segments.
+   INTEGER :: NTRIS     ! Number of in-plane intersections triangles.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZ  ! (1:NNODS,IAXIS:KAXIS) vertex coordinates.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SGLS ! (1:NSGLS,NOD1) connectivity list for single node elements.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SEGS ! (1:NSEGS,NOD1:NOD2) connectivity list for segments.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: TRIS ! (1:NTRIS,NOD1:NOD3) connectivity list for triangle elements.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDSGL ! Wet surface triangles associated with single node elems.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDSEG ! Wet surface triangles associated with intersection segments.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: INDTRI ! Wet surface triangles associated with intersection triangles.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)   :: X2ALIGNED ! For segments.
+   LOGICAL,  ALLOCATABLE, DIMENSION(:)   :: X3ALIGNED ! For segments.
+   INTEGER,  ALLOCATABLE, DIMENSION(:)   :: NBCROSS   ! Number of crossings per segment with x2,x3 grid lines.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SVAR   ! Intersections with gridlines for SEGS.
+   INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SEGTYPE   ! Type of SEG based on the media it separates.
+END TYPE BODINT_PLANE_TYPE
+
+INTEGER, SAVE :: IBM_MAX_NNODS, IBM_MAX_NSGLS, IBM_MAX_NSEGS, IBM_MAX_NTRIS,       &
+                 IBM_MAX_WSTRIANG_SGL, IBM_MAX_WSTRIANG_SEG, IBM_MAX_WSTRIANG_TRI, &
+                 IBM_MAX_NBCROSS
+           
+TYPE(BODINT_PLANE_TYPE) :: IBM_BODINT_PLANE
+
+
+! Edge crossings data structure:
+INTEGER, PARAMETER :: IBM_MAXCROSS_EDGE = 10 ! Size definition parameter. Max number of crossings per Cartesian Edge.
+TYPE EDGECROSS_TYPE
+   INTEGER :: NCROSS   ! Number of BODINT_PLANE segments - Cartesian edge crossings.
+   REAL(EB), DIMENSION(1:IBM_MAXCROSS_EDGE)   ::  SVAR ! Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(1:IBM_MAXCROSS_EDGE)   :: ISVAR ! Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(5)                     ::   IJK ! [ i j k N X2AXIS]
+END TYPE EDGECROSS_TYPE
+
+INTEGER, SAVE :: IBM_MAX_EDGECROSS
+
+TYPE(EDGECROSS_TYPE), SAVE, ALLOCATABLE, DIMENSION(:), TARGET :: IBM_EDGECROSS
+
+! Wet surface edges intersection with Cartesian cells data structure:
+TYPE BODINT_CELL_TYPE
+   INTEGER :: NWSEGS ! Number of wet surface edges in immersed body ibod.
+   INTEGER, ALLOCATABLE, DIMENSION(:) :: NWCROSS ! Number of intersections with Cartesian grid planes. 
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SVAR ! Intersection with grid planes defined by local coord s.
+END TYPE BODINT_CELL_TYPE
+
+INTEGER, SAVE :: IBM_MAX_NWCROSS
+
+TYPE(BODINT_CELL_TYPE), SAVE :: IBM_BODINT_CELL
 
 
 ! Allocatable real arrays
+! Grid position containers:
+REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:) :: XFACE,YFACE,ZFACE,XCELL,YCELL,ZCELL, &
+          DXFACE,DYFACE,DZFACE,DXCELL,DYCELL,DZCELL,X1FACE,X2FACE,X3FACE,X1CELL,  & 
+          X2CELL,X3CELL,DX1FACE,DX2FACE,DX3FACE,DX1CELL,DX2CELL,DX3CELL
+
+REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:) :: GEOM_XYZ
 
 
+! x2 Intersection data containers:
+INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 32
+INTEGER,  SAVE :: IBM_N_CRS
+REAL(EB), SAVE :: IBM_SVAR_CRS(IBM_MAXCROSS_X2)
+INTEGER,  SAVE :: IBM_IS_CRS(1:2,IBM_MAXCROSS_X2)
+REAL(EB), SAVE :: IBM_SEG_TAN(1:2,IBM_MAXCROSS_X2)
+INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
 
 
 
 ! End Variable declaration for CC_IBM. 
+!! ---------------------------------------------------------------------------------
 
 
 
@@ -99,17 +172,366 @@ CONTAINS
 
 ! ---------------------------- SET_CUTCELLS -------------------------------------
 
-SUBROUTINE SET_CUTCELLS
+SUBROUTINE SET_CUTCELLS_3D
+
+IMPLICIT NONE
+
+! Local indexes:
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
+INTEGER :: I,J,K,KK
+INTEGER :: X1AXIS, X2AXIS, X3AXIS
+INTEGER :: XIAXIS, XJAXIS, XKAXIS
+INTEGER :: X2LO, X2HI, X3LO, X3HI
+INTEGER :: X2LO_CELL, X2HI_CELL, X3LO_CELL, X3HI_CELL
+INTEGER :: ISTR, IEND, JSTR, JEND, KSTR, KEND
+INTEGER :: NM
+
+! Miscellaneous:
+REAL(EB), DIMENSION(MDIM) :: PLNORMAL
+INTEGER,  DIMENSION(MDIM) :: INDX1
+REAL(EB) :: X1PLN, X3RAY
+LOGICAL :: TRI_ONPLANE_ONLY
 
 
+! Reset variables:
+IBM_NEDGECROSS = 0
+IBM_NCUTEDGE   = 0
+IBM_NCUTFACE   = 0
+IBM_NCUTCELL   = 0
 
 
+! Main Loop over Meshes
+MAIN_MESH_LOOP : DO NM=1,NMESHES
+   
+   IF (PROCESS(NM)/=MYID) CYCLE
+   
+   ! Mesh sizes:
+   NXB=MESHES(NM)%IBAR
+   NYB=MESHES(NM)%JBAR
+   NZB=MESHES(NM)%KBAR
+   
+   ! X direction bounds:
+   ILO_FACE = 0                    ! Low mesh boundary face index.
+   IHI_FACE = MESHES(NM)%IBAR      ! High mesh boundary face index.
+   ILO_CELL = ILO_FACE + FCELL     ! First internal cell index. See notes.
+   IHI_CELL = IHI_FACE + FCELL - 1 ! Last internal cell index.   
+   ISTR     = ILO_FACE - NGUARD    ! Allocation start x arrays.
+   IEND     = IHI_FACE + NGUARD    ! Allocation end x arrays.
+      
+   ! Y direction bounds:
+   JLO_FACE = 0                    ! Low mesh boundary face index.
+   JHI_FACE = MESHES(NM)%JBAR      ! High mesh boundary face index.
+   JLO_CELL = JLO_FACE + FCELL     ! First internal cell index. See notes.
+   JHI_CELL = JHI_FACE + FCELL - 1 ! Last internal cell index.   
+   JSTR     = JLO_FACE - NGUARD    ! Allocation start y arrays.
+   JEND     = JHI_FACE + NGUARD    ! Allocation end y arrays.
+   
+   ! Z direction bounds:
+   KLO_FACE = 0                    ! Low mesh boundary face index.
+   KHI_FACE = MESHES(NM)%KBAR      ! High mesh boundary face index.
+   KLO_CELL = KLO_FACE + FCELL     ! First internal cell index. See notes.
+   KHI_CELL = KHI_FACE + FCELL - 1 ! Last internal cell index.   
+   KSTR     = KLO_FACE - NGUARD    ! Allocation start z arrays.
+   KEND     = KHI_FACE + NGUARD    ! Allocation end z arrays.   
+   
+   ! Define grid arrays for this mesh:
+   ! Populate position and cell size arrays: Uniform grid implementation.
+   ! X direction:
+   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL= MESHES(NM)%DX
+   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE= MESHES(NM)%DX
+   ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
+   XCELL(ILO_CELL-1:IHI_FACE+1) = MESHES(NM)%XC(ILO_CELL-1:IHI_CELL+1)
+   ALLOCATE(XFACE(ISTR:IEND));  XFACE = 1._EB/GEOMEPS ! Initialize huge.
+   XFACE(ILO_FACE:IHI_FACE) = MESHES(NM)%X(ILO_FACE:IHI_FACE)
+   XFACE(ILO_FACE-1)        = XFACE(ILO_FACE) - DXCELL(ILO_FACE+FCELL-1)
+   XFACE(IHI_FACE+1)        = XFACE(IHI_FACE) - DXCELL(IHI_FACE+FCELL)
+   
+   ! Y direction:
+   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL= MESHES(NM)%DY
+   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE= MESHES(NM)%DY
+   ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
+   YCELL(JLO_CELL-1:JHI_FACE+1) = MESHES(NM)%YC(JLO_CELL-1:JHI_CELL+1)
+   ALLOCATE(YFACE(JSTR:JEND));  YFACE = 1._EB/GEOMEPS ! Initialize huge.
+   YFACE(JLO_FACE:JHI_FACE) = MESHES(NM)%Y(JLO_FACE:JHI_FACE)
+   YFACE(JLO_FACE-1)        = YFACE(JLO_FACE) - DYCELL(JLO_FACE+FCELL-1)
+   YFACE(JHI_FACE+1)        = YFACE(JHI_FACE) - DYCELL(JHI_FACE+FCELL)
+   
+   ! Z direction:
+   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL= MESHES(NM)%DZ
+   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE= MESHES(NM)%DZ
+   ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
+   ZCELL(KLO_CELL-1:KHI_FACE+1) = MESHES(NM)%ZC(KLO_CELL-1:KHI_CELL+1)
+   ALLOCATE(ZFACE(KSTR:KEND));  ZFACE = 1._EB/GEOMEPS ! Initialize huge.
+   ZFACE(KLO_FACE:KHI_FACE) = MESHES(NM)%Z(KLO_FACE:KHI_FACE)
+   ZFACE(KLO_FACE-1)        = ZFACE(KLO_FACE) - DZCELL(KLO_FACE+FCELL-1)
+   ZFACE(KHI_FACE+1)        = ZFACE(KHI_FACE) - DZCELL(KHI_FACE+FCELL)
+   
+   ! Initialize CC_IBM arrays for mesh NM:
+   ! Vertices:
+   IF (.NOT. ALLOCATED(MESHES(NM)%VERTVAR)) &
+      ALLOCATE(MESHES(NM)%VERTVAR(ISTR:IEND,JSTR:JEND,KSTR:KEND,IBM_NVVARS))
+   MESHES(NM)%VERTVAR = 0
+   MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC) = IBM_GASPHASE
+   
+   ! Cartesian Edges:
+   IF (.NOT. ALLOCATED(MESHES(NM)%ECVAR)) &
+      ALLOCATE(MESHES(NM)%ECVAR(ISTR:IEND,JSTR:JEND,KSTR:KEND,IBM_NEVARS,MDIM))
+   MESHES(NM)%ECVAR = 0
+   MESHES(NM)%ECVAR(:,:,:,IBM_EGSC,:) = IBM_GASPHASE
+   
+   ! Cartesian Faces:
+   IF (.NOT. ALLOCATED(MESHES(NM)%FCVAR)) &
+      ALLOCATE(MESHES(NM)%FCVAR(ISTR:IEND,JSTR:JEND,KSTR:KEND,IBM_NFVARS,MDIM))
+   MESHES(NM)%FCVAR = 0
+   MESHES(NM)%FCVAR(:,:,:,IBM_FGSC,:) = IBM_GASPHASE
+   
+   ! Cartesian cells:
+   IF (.NOT. ALLOCATED(MESHES(NM)%CCVAR)) &
+      ALLOCATE(MESHES(NM)%CCVAR(ISTR:IEND,JSTR:JEND,KSTR:KEND,IBM_NCVARS))
+   MESHES(NM)%CCVAR = 0
+   MESHES(NM)%CCVAR(:,:,:,IBM_CGSC) = IBM_GASPHASE
+   
+   ! Reset Local variables:
+   IBM_NEDGECROSS_MESH = 0
+   IBM_NCUTEDGE_MESH   = 0
+   IBM_NCUTFACE_MESH   = 0
+   IBM_NCUTCELL_MESH   = 0
+   
+   ! Do Loop for different x1 planes:
+   X1AXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
+      
+      SELECT CASE(X1AXIS)
+       CASE(IAXIS)
+          
+          PLNORMAL = (/ 1._EB, 0._EB, 0._EB/)
+          ILO = ILO_FACE;  IHI = IHI_FACE
+          JLO = JLO_FACE;  JHI = JLO_FACE
+          KLO = KLO_FACE;  KHI = KLO_FACE
+          
+          ! x2, x3 axes parameters:
+          X2AXIS = JAXIS; X2LO = JLO_FACE; X2HI = JHI_FACE
+          X3AXIS = KAXIS; X3LO = KLO_FACE; X3HI = KHI_FACE
+          
+          ! location in I,J,K of x2,x2,x3 axes:
+          XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
+          
+          ! Face coordinates in x1,x2,x3 axes:
+          ALLOCATE(X1FACE(ISTR:IEND),DX1FACE(ISTR:IEND))
+          X1FACE = XFACE; DX1FACE = DXFACE
+          ALLOCATE(X2FACE(JSTR:JEND),DX2FACE(JSTR:JEND))
+          X2FACE = YFACE; DX2FACE = DYFACE
+          ALLOCATE(X3FACE(KSTR:KEND),DX3FACE(KSTR:KEND))
+          X3FACE = ZFACE; DX3FACE = DZFACE
+          
+          ! x2 cell center parameters:
+          X2LO_CELL = JLO_CELL; X2HI_CELL = JHI_CELL
+          ALLOCATE(X2CELL(JSTR:JEND),DX2CELL(JSTR:JEND))
+          X2CELL = YCELL; DX2CELL = DYCELL
+          
+          ! x3 cell center parameters:
+          X3LO_CELL = KLO_CELL; X3HI_CELL = KHI_CELL
+          ALLOCATE(X3CELL(KSTR:KEND),DX3CELL(KSTR:KEND))
+          X3CELL = ZCELL; DX3CELL = DZCELL
+          
+       CASE(JAXIS)
+          
+          PLNORMAL = (/ 0._EB, 1._EB, 0._EB/)
+          ILO = ILO_FACE;  IHI = ILO_FACE
+          JLO = JLO_FACE;  JHI = JHI_FACE
+          KLO = KLO_FACE;  KHI = KLO_FACE
+          
+          ! x2, x3 axes parameters:
+          X2AXIS = KAXIS; X2LO = KLO_FACE; X2HI = KHI_FACE
+          X3AXIS = IAXIS; X3LO = ILO_FACE; X3HI = IHI_FACE
+          
+          ! location in I,J,K of x2,x2,x3 axes:
+          XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
+          
+          ! Face coordinates in x1,x2,x3 axes:
+          ALLOCATE(X1FACE(JSTR:JEND),DX1FACE(JSTR:JEND))
+          X1FACE = YFACE; DX1FACE = DYFACE
+          ALLOCATE(X2FACE(KSTR:KEND),DX2FACE(KSTR:KEND))
+          X2FACE = ZFACE; DX2FACE = DZFACE
+          ALLOCATE(X3FACE(ISTR:IEND),DX3FACE(ISTR:IEND))
+          X3FACE = XFACE; DX3FACE = DXFACE
+          
+          ! x2 cell center parameters:
+          X2LO_CELL = KLO_CELL; X2HI_CELL = KHI_CELL
+          ALLOCATE(X2CELL(KSTR:KEND),DX2CELL(KSTR:KEND))
+          X2CELL = ZCELL; DX2CELL = DZCELL
+          
+          ! x3 cell center parameters:
+          X3LO_CELL = ILO_CELL; X3HI_CELL = IHI_CELL
+          ALLOCATE(X3CELL(ISTR:IEND),DX3CELL(ISTR:IEND))
+          X3CELL = XCELL; DX3CELL = DXCELL
+          
+       CASE(KAXIS)
+          
+          PLNORMAL = (/ 0._EB, 0._EB, 1._EB/)
+          ILO = ILO_FACE;  IHI = ILO_FACE
+          JLO = JLO_FACE;  JHI = JLO_FACE
+          KLO = KLO_FACE;  KHI = KHI_FACE
+          
+          ! x2, x3 axes parameters:
+          X2AXIS = IAXIS; X2LO = ILO_FACE; X2HI = IHI_FACE
+          X3AXIS = JAXIS; X3LO = JLO_FACE; X3HI = JHI_FACE
+          
+          ! location in I,J,K of x2,x2,x3 axes:
+          XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
+          
+          ! Face coordinates in x1,x2,x3 axes:
+          ALLOCATE(X1FACE(KSTR:KEND),DX1FACE(KSTR:KEND))
+          X1FACE = ZFACE; DX1FACE = DZFACE
+          ALLOCATE(X2FACE(ISTR:IEND),DX2FACE(ISTR:IEND))
+          X2FACE = XFACE; DX2FACE = DXFACE
+          ALLOCATE(X3FACE(JSTR:JEND),DX3FACE(JSTR:JEND))
+          X3FACE = YFACE; DX3FACE = DYFACE
+          
+          ! x2 cell center parameters:
+          X2LO_CELL = ILO_CELL; X2HI_CELL = IHI_CELL
+          ALLOCATE(X2CELL(ISTR:IEND),DX2CELL(ISTR:IEND))
+          X2CELL = XCELL; DX2CELL = DXCELL
+          
+          ! x3 cell center parameters:
+          X3LO_CELL = JLO_CELL; X3HI_CELL = JHI_CELL
+          ALLOCATE(X3CELL(JSTR:JEND),DX3CELL(JSTR:JEND))
+          X3CELL = YCELL; DX3CELL = DYCELL
+          
+      END SELECT
+      
+      
+      ! Loop Coordinate Planes:
+      DO K=KLO,KHI
+         DO J=JLO,JHI
+            DO I=ILO,IHI
+               
+               ! Which Plane?
+               INDX1(IAXIS:KAXIS) = (/ I, J, K /)
+               X1PLN = X1FACE(INDX1(X1AXIS))
+               
+               ! Get intersection of body on plane defined by X!PLN, normal to X1AXIS:
+               TRI_ONPLANE_ONLY = .FALSE.
+               CALL GET_BODINT_PLANE(X1AXIS,X1PLN,PLNORMAL,X2AXIS,X3AXIS,TRI_ONPLANE_ONLY)
+               
+               ! Test that there is an intersection:
+               IF((IBM_BODINT_PLANE%NSGLS+IBM_BODINT_PLANE%NSEGS+IBM_BODINT_PLANE%NTRIS) .EQ. 0) CYCLE
+               
+               ! Drop if node locations outside block plane area:
+               IF((X2FACE(X2LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X2AXIS))) .GT. GEOMEPS) CYCLE
+               IF((MINVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X2AXIS))-X2FACE(X2HI)) .GT. GEOMEPS) CYCLE
+               IF((X3FACE(X3LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X3AXIS))) .GT. GEOMEPS) CYCLE
+               IF((MINVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X3AXIS))-X3FACE(X3HI)) .GT. GEOMEPS) CYCLE
+               
+               ! For plane normal to X1AXIS, shoot rays along X2AXIS on all X3AXIS gridline
+               ! locations, get intersection data: Loop x3 axis locations
+               DO KK=X3LO,X3HI
+                  
+                  ! x3 location of ray along x2, on the x2-x3 plane:
+                  X3RAY = X3FACE(KK)
+                  
+                  ! Intersections along x2 for X3RAY x3 location:
+                  CALL GET_X2INTERSECTIONS(X1AXIS,X2AXIS,X3AXIS,X3RAY)
+                  
+                  ! Drop x2 ray if all intersections are outside of the MESH block domain:
+                  IF(IBM_N_CRS > 0) THEN
+                     IF((X2FACE(X2LO)-IBM_SVAR_CRS(IBM_N_CRS)) .GT. GEOMEPS) THEN
+                        CYCLE
+                     ELSEIF(IBM_SVAR_CRS(1)-X2FACE(X2HI) .GT. GEOMEPS) THEN
+                        CYCLE
+                     END IF
+                  END IF
+                  
+                  
+                  
+                  ! WORK HERE:
+                  
+                  
+                  
+               END DO ! KK - x3 gridlines.
+               
+               
+               ! WORK HERE:
+               
+               
+            END DO ! I index
+         END DO ! J index
+      END DO ! K index
+      
+      
+      ! Deallocate local plane arrays:
+      DEALLOCATE(X1FACE,X2FACE,X3FACE,X2CELL)
+      DEALLOCATE(DX1FACE,DX2FACE,DX3FACE,DX2CELL)
+      
+   END DO X1AXIS_LOOP
+   
+   
+   
+   ! WORK HERE:
+   
+   
+   
+   ! Deallocate arrays:
+   ! Face centered positions and cell sizes:
+   IF(ALLOCATED(XFACE)) DEALLOCATE(XFACE)
+   IF(ALLOCATED(YFACE)) DEALLOCATE(YFACE)
+   IF(ALLOCATED(ZFACE)) DEALLOCATE(ZFACE)
+   IF(ALLOCATED(DXFACE)) DEALLOCATE(DXFACE)
+   IF(ALLOCATED(DYFACE)) DEALLOCATE(DYFACE)
+   IF(ALLOCATED(DZFACE)) DEALLOCATE(DZFACE)
+   
+   ! Cell centered positions and cell sizes:
+   IF(ALLOCATED(XCELL)) DEALLOCATE(XCELL)
+   IF(ALLOCATED(YCELL)) DEALLOCATE(YCELL)
+   IF(ALLOCATED(ZCELL)) DEALLOCATE(ZCELL)
+   IF(ALLOCATED(DXCELL)) DEALLOCATE(DXCELL)
+   IF(ALLOCATED(DYCELL)) DEALLOCATE(DYCELL)
+   IF(ALLOCATED(DZCELL)) DEALLOCATE(DZCELL)
+   
+END DO MAIN_MESH_LOOP
 
+
+RETURN
+END SUBROUTINE SET_CUTCELLS_3D
+
+
+! -------------------------- GET_BODINT_PLANE -----------------------------------
+
+SUBROUTINE GET_BODINT_PLANE(X1AXIS,X1PLN,PLNORMAL,X2AXIS,X3AXIS,TRI_ONPLANE_ONLY)
+
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: X1AXIS, X2AXIS, X3AXIS
+REAL(EB),INTENT(IN) :: X1PLN, PLNORMAL(MDIM)
+LOGICAL, INTENT(IN) :: TRI_ONPLANE_ONLY
+
+
+! WORK HERE:
 
 
 
 RETURN
-END SUBROUTINE SET_CUTCELLS
+END SUBROUTINE GET_BODINT_PLANE
+
+
+
+! -------------------------- GET_X2INTERSECTIONS --------------------------------
+
+SUBROUTINE GET_X2INTERSECTIONS(X1AXIS,X2AXIS,X3AXIS,X3RAY)
+
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: X1AXIS, X2AXIS, X3AXIS
+REAL(EB),INTENT(IN) :: X3RAY
+
+
+! WORK HERE:
+
+
+RETURN
+END SUBROUTINE GET_X2INTERSECTIONS
+
+
+
+
 
 ! ---------------------------- READ_GEOM ----------------------------------------
 

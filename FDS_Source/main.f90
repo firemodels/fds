@@ -107,6 +107,37 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 CALL READ_DATA
 
+!#define WRITEGEOMFLG 1
+!#ifdef WRITEGEOMFLG 
+!#warning "WRITEGEOMFLG DEFINED!"
+write(*,*) 'N_GEOMETRY=',N_GEOMETRY
+write(*,*) 'NVERTS=',GEOMETRY(1)%N_VERTS,GEOMETRY(1)%N_FACES,GEOMETRY(1)%N_VOLUS
+write(*,*) ' '
+write(*,*) 'Size VERTS=',size(GEOMETRY(1)%VERTS,dim=1)
+DO N=1,GEOMETRY(1)%N_VERTS
+   write(*,'(I3,A,3F12.6)') N,'=',GEOMETRY(1)%VERTS(3*(N-1)+1:3*N)
+ENDDO
+write(*,*) ' '
+write(*,*) 'Size FACES=',size(GEOMETRY(1)%FACES,dim=1)
+DO N=1,GEOMETRY(1)%N_FACES
+   write(*,'(I3,A,3I3)') N,'=',GEOMETRY(1)%FACES(3*(N-1)+1:3*N)
+ENDDO
+write(*,*) ' '
+write(*,*) 'Size VOLUS=',size(GEOMETRY(1)%VOLUS,dim=1)
+DO N=1,GEOMETRY(1)%N_VOLUS
+   write(*,'(I3,A,4I3)') N,'=',GEOMETRY(1)%VOLUS(4*(N-1)+1:4*N)
+ENDDO
+write(*,*) 'NMESHES=',NMESHES
+write(*,*) 'MESHES(1)%IBAR=',MESHES(1)%IBAR,MESHES(1)%JBAR,MESHES(1)%KBAR
+write(*,*) 'MESHES(1)%IBP1=',MESHES(1)%IBP1,MESHES(1)%JBP1,MESHES(1)%KBP1
+write(*,*) 'size(MESHES(1)%X)',size(MESHES(1)%X,dim=1)
+write(*,*) 'MESHES(1)%X=',MESHES(1)%X(0:MESHES(1)%IBAR)
+write(*,*) ' '
+write(*,*) 'size(MESHES(1)%XC)',size(MESHES(1)%XC,dim=1)
+write(*,*) 'MESHES(1)%XC=',MESHES(1)%XC(0:MESHES(1)%IBP1)
+pause
+!#endif
+
 CALL STOP_CHECK(1)
 
 ! Setup number of OPENMP threads
