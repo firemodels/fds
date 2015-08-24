@@ -214,6 +214,7 @@ The filtered volumetric source terms for mass and energy---which are required in
 \dot{m}_{{\rm b},\alpha}^{\ppp} = - \frac{ \sum_p \sum_n \delta m_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \quad ; \quad
 \dot{q}_{\rm b}^{\ppp} = - \frac{ \sum_p \sum_n \delta q_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \,\mbox{.}
 \end{equation}
+where $n$ represents the sub-time step in the integration of the droplet mass and energy equations.  The summation over $p$ is over all the particles within the cell.
 
 \subsection{Lagrangian Contribution to the Velocity Divergence}
 
