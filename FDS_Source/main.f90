@@ -111,15 +111,15 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 CALL READ_DATA
 
-!#define WRITEGEOMFLG 1
-!#ifdef WRITEGEOMFLG 
+#define WRITEGEOMFLG 1
+#ifdef WRITEGEOMFLG 
 !#warning "WRITEGEOMFLG DEFINED!"
 write(*,*) 'N_GEOMETRY=',N_GEOMETRY
 write(*,*) 'NVERTS=',GEOMETRY(1)%N_VERTS,GEOMETRY(1)%N_FACES,GEOMETRY(1)%N_VOLUS
 write(*,*) ' '
 write(*,*) 'Size VERTS=',size(GEOMETRY(1)%VERTS,dim=1)
 DO N=1,GEOMETRY(1)%N_VERTS
-   write(*,'(I3,A,3F12.6)') N,'=',GEOMETRY(1)%VERTS(3*(N-1)+1:3*N)
+   write(*,'(I3,A,3F18.14)') N,'=',GEOMETRY(1)%VERTS(3*(N-1)+1:3*N)
 ENDDO
 write(*,*) ' '
 write(*,*) 'Size FACES=',size(GEOMETRY(1)%FACES,dim=1)
@@ -150,7 +150,7 @@ ENDDO
 CALL SET_CUTCELLS_3D
 
 pause
-!#endif
+#endif
 
 CALL STOP_CHECK(1)
 

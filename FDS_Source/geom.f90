@@ -242,30 +242,33 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! Define grid arrays for this mesh:
    ! Populate position and cell size arrays: Uniform grid implementation.
    ! X direction:
-   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL= MESHES(NM)%DX
-   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE= MESHES(NM)%DX
+   ALLOCATE(DXCELL(ISTR:IEND)); DXCELL(ILO_CELL-1:IHI_CELL+1)= MESHES(NM)%DX(ILO_CELL-1:IHI_CELL+1)
+   ALLOCATE(DXFACE(ISTR:IEND)); DXFACE(ILO_FACE:IHI_FACE)= MESHES(NM)%DXN(ILO_FACE:IHI_FACE)
+   DXFACE(ILO_FACE-1)=DXFACE(ILO_FACE); DXFACE(IHI_FACE+1)=DXFACE(IHI_FACE)
    ALLOCATE(XCELL(ISTR:IEND));  XCELL = 1._EB/GEOMEPS ! Initialize huge.
-   XCELL(ILO_CELL-1:IHI_FACE+1) = MESHES(NM)%XC(ILO_CELL-1:IHI_CELL+1)
+   XCELL(ILO_CELL-1:IHI_CELL+1) = MESHES(NM)%XC(ILO_CELL-1:IHI_CELL+1)
    ALLOCATE(XFACE(ISTR:IEND));  XFACE = 1._EB/GEOMEPS ! Initialize huge.
    XFACE(ILO_FACE:IHI_FACE) = MESHES(NM)%X(ILO_FACE:IHI_FACE)
    XFACE(ILO_FACE-1)        = XFACE(ILO_FACE) - DXCELL(ILO_FACE+FCELL-1)
    XFACE(IHI_FACE+1)        = XFACE(IHI_FACE) - DXCELL(IHI_FACE+FCELL)
    
    ! Y direction:
-   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL= MESHES(NM)%DY
-   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE= MESHES(NM)%DY
+   ALLOCATE(DYCELL(JSTR:JEND)); DYCELL(JLO_CELL-1:JHI_CELL+1)= MESHES(NM)%DY(JLO_CELL-1:JHI_CELL+1)
+   ALLOCATE(DYFACE(JSTR:JEND)); DYFACE(JLO_FACE:JHI_FACE)= MESHES(NM)%DYN(JLO_FACE:JHI_FACE)
+   DYFACE(JLO_FACE-1)=DYFACE(JLO_FACE); DYFACE(JHI_FACE+1)=DYFACE(JHI_FACE)
    ALLOCATE(YCELL(JSTR:JEND));  YCELL = 1._EB/GEOMEPS ! Initialize huge.
-   YCELL(JLO_CELL-1:JHI_FACE+1) = MESHES(NM)%YC(JLO_CELL-1:JHI_CELL+1)
+   YCELL(JLO_CELL-1:JHI_CELL+1) = MESHES(NM)%YC(JLO_CELL-1:JHI_CELL+1)
    ALLOCATE(YFACE(JSTR:JEND));  YFACE = 1._EB/GEOMEPS ! Initialize huge.
    YFACE(JLO_FACE:JHI_FACE) = MESHES(NM)%Y(JLO_FACE:JHI_FACE)
    YFACE(JLO_FACE-1)        = YFACE(JLO_FACE) - DYCELL(JLO_FACE+FCELL-1)
    YFACE(JHI_FACE+1)        = YFACE(JHI_FACE) - DYCELL(JHI_FACE+FCELL)
    
    ! Z direction:
-   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL= MESHES(NM)%DZ
-   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE= MESHES(NM)%DZ
+   ALLOCATE(DZCELL(KSTR:KEND)); DZCELL(KLO_CELL-1:KHI_CELL+1)= MESHES(NM)%DZ(KLO_CELL-1:KHI_CELL+1)
+   ALLOCATE(DZFACE(KSTR:KEND)); DZFACE(KLO_FACE:KHI_FACE)= MESHES(NM)%DZN(KLO_FACE:KHI_FACE)
+   DZFACE(KLO_FACE-1)=DZFACE(KLO_FACE); DZFACE(KHI_FACE+1)=DZFACE(KHI_FACE)
    ALLOCATE(ZCELL(KSTR:KEND));  ZCELL = 1._EB/GEOMEPS ! Initialize huge.
-   ZCELL(KLO_CELL-1:KHI_FACE+1) = MESHES(NM)%ZC(KLO_CELL-1:KHI_CELL+1)
+   ZCELL(KLO_CELL-1:KHI_CELL+1) = MESHES(NM)%ZC(KLO_CELL-1:KHI_CELL+1)
    ALLOCATE(ZFACE(KSTR:KEND));  ZFACE = 1._EB/GEOMEPS ! Initialize huge.
    ZFACE(KLO_FACE:KHI_FACE) = MESHES(NM)%Z(KLO_FACE:KHI_FACE)
    ZFACE(KLO_FACE-1)        = ZFACE(KLO_FACE) - DZCELL(KLO_FACE+FCELL-1)
@@ -429,10 +432,10 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                IF((IBM_BODINT_PLANE%NSGLS+IBM_BODINT_PLANE%NSEGS+IBM_BODINT_PLANE%NTRIS) .EQ. 0) CYCLE
                
                ! Drop if node locations outside block plane area:
-               IF((X2FACE(X2LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X2AXIS))) .GT. GEOMEPS) CYCLE
-               IF((MINVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X2AXIS))-X2FACE(X2HI)) .GT. GEOMEPS) CYCLE
-               IF((X3FACE(X3LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X3AXIS))) .GT. GEOMEPS) CYCLE
-               IF((MINVAL(IBM_BODINT_PLANE%XYZ(1:IBM_BODINT_PLANE%NNODS,X3AXIS))-X3FACE(X3HI)) .GT. GEOMEPS) CYCLE
+               IF((X2FACE(X2LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(X2AXIS,1:IBM_BODINT_PLANE%NNODS))) .GT. GEOMEPS) CYCLE
+               IF((MINVAL(IBM_BODINT_PLANE%XYZ(X2AXIS,1:IBM_BODINT_PLANE%NNODS))-X2FACE(X2HI)) .GT. GEOMEPS) CYCLE
+               IF((X3FACE(X3LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))) .GT. GEOMEPS) CYCLE
+               IF((MINVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))-X3FACE(X3HI)) .GT. GEOMEPS) CYCLE
                
                ! For plane normal to X1AXIS, shoot rays along X2AXIS on all X3AXIS gridline
                ! locations, get intersection data: Loop x3 axis locations
@@ -518,14 +521,27 @@ LOGICAL, INTENT(IN) :: TRI_ONPLANE_ONLY
 
 ! Local variables:
 INTEGER :: N_VERTS_TOT, N_FACES_TOT
-INTEGER :: IG, IWSEL, IEDGE, INOD, ISGL, NINDTRI
+INTEGER :: IG, IWSEL, IEDGE, INOD, ISGL, ISEG, ITRI, NINDTRI, EDGE_TRI
 REAL(EB):: LEDGE, MAX_LEDGE, DXYZE(MDIM), XYZV(MDIM,NODS_WSEL)
-INTEGER :: WSELEM(NODS_WSEL), IND_P(NODS_WSEL), NTRIS, NSEGS
+INTEGER :: ELEM(NODS_WSEL), WSELEM(NODS_WSEL), IND_P(NODS_WSEL), NTRIS, NSEGS
 REAL(EB):: MINX1V, MAXX1V, DOT1, DOT2, DOT3
 LOGICAL :: OUTPLANE, INTFLG, INLIST
 REAL(EB):: LN1(MDIM,NOD1:NOD2), LN2(MDIM,NOD1:NOD2)
 REAL(EB):: XYZ_INT1(MDIM), XYZ_INT2(MDIM)
-
+INTEGER :: SEG(NOD1:NOD2), EDGES(NOD1:NOD2,3), VEC3(3)
+REAL(EB):: X2X3(IAXIS:JAXIS,NODS_WSEL), AREALOC
+REAL(EB):: XP1(IAXIS:JAXIS), XP2(IAXIS:JAXIS), TX2P(IAXIS:JAXIS), TX3P(IAXIS:JAXIS)
+REAL(EB):: NMTX2P
+INTEGER :: IWSEL1, IWSEL2, ELEM1(NODS_WSEL), ELEM2(NODS_WSEL)
+REAL(EB):: XYZ1(MDIM), NXYZ1(MDIM), NX3P1, N1(IAXIS:JAXIS), NMNL
+REAL(EB):: XYZ2(MDIM), NXYZ2(MDIM), NX3P2, N2(IAXIS:JAXIS)
+REAL(EB):: X3PVERT, PVERT(IAXIS:JAXIS), X3P1, P1CEN(IAXIS:JAXIS), X3P2, P2CEN(IAXIS:JAXIS)
+INTEGER :: VCT(2)
+REAL(EB):: PCT(IAXIS:JAXIS,1:2), V1(IAXIS:JAXIS), V2(IAXIS:JAXIS), CRSSNV, CTST
+REAL(EB):: VEC(IAXIS:JAXIS,1:2)
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: SEGAUX, INDSEGAUX, SEGTYPEAUX
+REAL(EB):: X3_1, X2_1, X3_2, X2_2, SLEN, SBOD
+INTEGER :: ISEG_NEW, NBCROSS
 
 ! Define BODINT_PLANE allocation sizes, hard wired for now:
 ! Maximum number of vertices and elements in BODINT_PLANE:
@@ -605,10 +621,10 @@ ALLOCATE(IBM_BODINT_PLANE%  NBCROSS(IBM_MAX_NSEGS))
 ALLOCATE(IBM_BODINT_PLANE%     SVAR(IBM_MAX_NBCROSS,        IBM_MAX_NSEGS))  ! Here first index is ibcross.
 ALLOCATE(IBM_BODINT_PLANE%  SEGTYPE(NOD1:NOD2,              IBM_MAX_NSEGS))
 
-write(*,*) "size(IBM_BODINT_PLANE%  SEGTYPE) =",     &
-            size(IBM_BODINT_PLANE%  SEGTYPE, dim=1), &
-            size(IBM_BODINT_PLANE%  SEGTYPE, dim=2)
-pause
+! write(*,*) "size(IBM_BODINT_PLANE%  SEGTYPE) =",     &
+!             size(IBM_BODINT_PLANE%  SEGTYPE, dim=1), &
+!             size(IBM_BODINT_PLANE%  SEGTYPE, dim=2)
+! pause
 
 ! Main Loop over Geometries:
 MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
@@ -888,7 +904,7 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
          CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
          
          ! Add index to singles:
-         ! Find if oriented segment is in list:
+         ! Find if single element is in list:
          INLIST = .FALSE.
          DO ISGL=1,IBM_BODINT_PLANE%NSGLS
             IF (IBM_BODINT_PLANE%SGLS(NOD1,ISGL) .EQ. IND_P(NOD1)) THEN
@@ -917,15 +933,530 @@ MAIN_GEOM_LOOP : DO IG=1,N_GEOMETRY
       
       ! Case c: one node is part of the intersection:
       ! Node 1 is in the plane:
+      IF ( (DOT1 .EQ. 0._EB) .AND. ( ((DOT2 .GT. 0._EB) .AND. (DOT3 .LT. 0._EB)) .OR. &
+                                     ((DOT2 .LT. 0._EB) .AND. (DOT3 .GT. 0._EB)) ) ) THEN
+         
+         ! First node is an intersection point:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! Line 2, from node 2 to 3:
+         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD2)
+         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+         
+         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+         
+         !IF(.NOT. INTFLG) THEN
+         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 1."
+         !END IF
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Now add segment:
+         NSEGS = IBM_BODINT_PLANE % NSEGS + 1
+         IF ( DOT2 .GT. 0._EB ) THEN ! Second case, counterclockwise p2 to p1
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         ELSE
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         END IF
+         IBM_BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+         IBM_BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+         
+         CYCLE ! Next WSELEM
       
-      ! WORK HERE:
+      END IF
+      ! Node 2 is in the plane:
+      IF ( (DOT2 .EQ. 0._EB) .AND. ( ((DOT1 .GT. 0._EB) .AND. (DOT3 .LT. 0._EB)) .OR. &
+                                     ((DOT1 .LT. 0._EB) .AND. (DOT3 .GT. 0._EB)) ) ) THEN
+         
+         ! Second node is an intersection point:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! Line 2, from node 1 to 3:
+         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD3)
+         
+         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+         
+         !IF(.NOT. INTFLG) THEN
+         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 2."
+         !END IF
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Now add segment:
+         NSEGS = IBM_BODINT_PLANE % NSEGS + 1
+         IF ( DOT1 .GT. 0._EB ) THEN
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         ELSE
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         END IF
+         IBM_BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+         IBM_BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+         
+         CYCLE ! Next WSELEM
+         
+      END IF
+      ! Node 3 is in the plane:
+      IF ( (DOT3 .EQ. 0._EB) .AND. ( ((DOT1 .GT. 0._EB) .AND. (DOT2 .LT. 0._EB)) .OR. &
+                                     ((DOT1 .LT. 0._EB) .AND. (DOT2 .GT. 0._EB)) ) ) THEN
+         
+         ! Third node is an intersection point:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! Line 2, from node 1 to 2:
+         LN2(IAXIS:KAXIS,NOD1) = XYZV(IAXIS:KAXIS,NOD1)
+         LN2(IAXIS:KAXIS,NOD2) = XYZV(IAXIS:KAXIS,NOD2)
+         
+         CALL LINE_INTERSECT_COORDPLANE(X1AXIS,X1PLN,PLNORMAL,LN2,XYZ_INT2,INTFLG)
+         
+         !IF(.NOT. INTFLG) THEN
+         !  print*, "Error GET_BODINT_PLANE: No intersection on LN2, Case C 3."
+         !END IF
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Now add segment:
+         NSEGS = IBM_BODINT_PLANE % NSEGS + 1
+         IF ( DOT1 .GT. 0._EB ) THEN
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         ELSE
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,NSEGS) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         END IF
+         IBM_BODINT_PLANE%INDSEG(1:4,NSEGS) = (/ 1, IWSEL, 0, IG /)
+         IBM_BODINT_PLANE%SEGTYPE(1:2,NSEGS)= (/ IBM_SOLID, IBM_GASPHASE /)
+         
+         CYCLE ! Next WSELEM
+         
+      END IF
       
-   END DO
- 
+      ! Case D: A triangle segment is in the plane.
+      ! Intersection is line 1-2:
+      IF ( (DOT1 .EQ. 0._EB) .AND. (DOT2 .EQ. 0._EB) ) THEN
+         
+         ! First node:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! Second node:
+         XYZ_INT2 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT2(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Set oriented segment regarding plane:
+         IF ( DOT3 .GT. 0._EB ) THEN
+            SEG(NOD1:NOD2) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         ELSE
+            SEG(NOD1:NOD2) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         END IF
+         ! Find if oriented segment is in list:
+         INLIST = .FALSE.
+         DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+            ! IF ( ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD1)) .AND. &
+            !      ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+            !    INLIST = .TRUE.
+            !    EXIT
+            ! END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD1)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD2)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD1)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT. INLIST) THEN
+            ISEG = IBM_BODINT_PLANE%NSEGS + 1
+            IBM_BODINT_PLANE%NSEGS = ISEG
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) = SEG
+            EDGE_TRI = GEOMETRY(IG)%FACE_EDGES(1,IWSEL) ! 1st edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+            VEC3(1) = GEOMETRY(IG)%EDGE_FACES(1,EDGE_TRI)
+            VEC3(2) = GEOMETRY(IG)%EDGE_FACES(2,EDGE_TRI)
+            VEC3(3) = GEOMETRY(IG)%EDGE_FACES(4,EDGE_TRI)
+            IBM_BODINT_PLANE%INDSEG(1:4,ISEG) = (/ VEC3(1), VEC3(2), VEC3(3), IG /)
+         END IF
+         
+         CYCLE ! Next WSELEM
+         
+      END IF
+      ! Intersection is line 2-3:
+      IF ( (DOT2 .EQ. 0._EB) .AND. (DOT3 .EQ. 0._EB) ) THEN
+         
+         ! Second node:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD2); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! Third node:
+         XYZ_INT2 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT2(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Set oriented segment regarding plane:
+         IF ( DOT1 .GT. 0._EB ) THEN
+            SEG(NOD1:NOD2) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         ELSE
+            SEG(NOD1:NOD2) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         END IF
+         ! Find if oriented segment is in list:
+         INLIST = .FALSE.
+         DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+            ! IF ( ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD1)) .AND. &
+            !      ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+            !    INLIST = .TRUE.
+            !    EXIT
+            ! END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD1)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD2)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD1)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT. INLIST) THEN
+            ISEG = IBM_BODINT_PLANE%NSEGS + 1
+            IBM_BODINT_PLANE%NSEGS = ISEG
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) = SEG
+            EDGE_TRI = GEOMETRY(IG)%FACE_EDGES(2,IWSEL) ! 2nd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+            VEC3(1) = GEOMETRY(IG)%EDGE_FACES(1,EDGE_TRI)
+            VEC3(2) = GEOMETRY(IG)%EDGE_FACES(2,EDGE_TRI)
+            VEC3(3) = GEOMETRY(IG)%EDGE_FACES(4,EDGE_TRI)
+            IBM_BODINT_PLANE%INDSEG(1:4,ISEG) = (/ VEC3(1), VEC3(2), VEC3(3), IG /)
+         END IF
+         
+         CYCLE ! Next WSELEM
+         
+      END IF
+      ! Intersection is line 3-1:
+      IF ( (DOT3 .EQ. 0._EB) .AND. (DOT1 .EQ. 0._EB) ) THEN
+         
+         ! Third node:
+         XYZ_INT1 = XYZV(IAXIS:KAXIS,NOD3); XYZ_INT1(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT1:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT1,IND_P(NOD1))
+         
+         ! First node:
+         XYZ_INT2 = XYZV(IAXIS:KAXIS,NOD1); XYZ_INT2(X1AXIS) = X1PLN
+         
+         ! Index to XYZ_INT2:
+         CALL GET_BODINT_NODE_INDEX(XYZ_INT2,IND_P(NOD2))
+         
+         ! Set oriented segment regarding plane:
+         IF ( DOT2 .GT. 0._EB ) THEN
+            SEG(NOD1:NOD2) = (/ IND_P(NOD1), IND_P(NOD2) /)
+         ELSE
+            SEG(NOD1:NOD2) = (/ IND_P(NOD2), IND_P(NOD1) /)
+         END IF
+         ! Find if oriented segment is in list:
+         INLIST = .FALSE.
+         DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+            ! IF ( ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD1)) .AND. &
+            !      ANY(IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+            !    INLIST = .TRUE.
+            !    EXIT
+            ! END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD1)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD2)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. SEG(NOD2)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. SEG(NOD1)) ) THEN
+               INLIST = .TRUE.
+               EXIT
+            END IF
+         END DO
+         IF (.NOT. INLIST) THEN
+            ISEG = IBM_BODINT_PLANE%NSEGS + 1
+            IBM_BODINT_PLANE%NSEGS = ISEG
+            IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG) = SEG
+            EDGE_TRI = GEOMETRY(IG)%FACE_EDGES(3,IWSEL) ! 3rd edge: Ed1 NOD1-NOD2, Ed2 NOD2-NOD3, Ed3 NOD3-NOD1.
+            VEC3(1) = GEOMETRY(IG)%EDGE_FACES(1,EDGE_TRI)
+            VEC3(2) = GEOMETRY(IG)%EDGE_FACES(2,EDGE_TRI)
+            VEC3(3) = GEOMETRY(IG)%EDGE_FACES(4,EDGE_TRI)
+            IBM_BODINT_PLANE%INDSEG(1:4,ISEG) = (/ VEC3(1), VEC3(2), VEC3(3), IG /)
+         END IF
+         
+         CYCLE ! Next WSELEM
+         
+      END IF
+            
+      ! If you get to this point -> you have a problem:
+      print*, "Error GET_BODINT_PLANE: Missed wet surface Triangle =",IWSEL
+      
+   END DO ! IWSEL
+   
 END DO MAIN_GEOM_LOOP
 
 
-print*, "Up to END of GET_BODINT_PLANE"
+! Next step is to Test triangles sides normals on plane against the obtained 
+! segments normals. If two identical segments found contain oposite
+! normals, drop the segment in IBM_BODINT_PLANE%SEGS:
+IF ( IBM_BODINT_PLANE%NTRIS .GT. 0 ) THEN
+   
+   DO ITRI=1,IBM_BODINT_PLANE%NTRIS
+      
+      ! Triang conectivities:
+      ELEM(NOD1:NOD3) = IBM_BODINT_PLANE%TRIS(NOD1:NOD3,ITRI)
+      
+      ! Coordinates in x2, x3 directions:
+      X2X3(IAXIS,NOD1:NOD3) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,ELEM(NOD1)), &
+                                 IBM_BODINT_PLANE%XYZ(X2AXIS,ELEM(NOD2)), &
+                                 IBM_BODINT_PLANE%XYZ(X2AXIS,ELEM(NOD3)) /)
+      X2X3(JAXIS,NOD1:NOD3) = (/ IBM_BODINT_PLANE%XYZ(X3AXIS,ELEM(NOD1)), &
+                                 IBM_BODINT_PLANE%XYZ(X3AXIS,ELEM(NOD2)), &
+                                 IBM_BODINT_PLANE%XYZ(X3AXIS,ELEM(NOD3)) /)
+      
+      ! Test Area sign, if -ve switch node order:
+      AREALOC = 0.5_EB*(X2X3(IAXIS,NOD1)*X2X3(JAXIS,NOD2) - X2X3(IAXIS,NOD2)*X2X3(JAXIS,NOD1) + &
+                        X2X3(IAXIS,NOD2)*X2X3(JAXIS,NOD3) - X2X3(IAXIS,NOD3)*X2X3(JAXIS,NOD2) + &
+                        X2X3(IAXIS,NOD3)*X2X3(JAXIS,NOD1) - X2X3(IAXIS,NOD1)*X2X3(JAXIS,NOD3))
+      IF (AREALOC .LT. 0._EB) THEN
+         ISEG    = ELEM(3)
+         ELEM(3) = ELEM(2)
+         ELEM(2)  =   ISEG
+      END IF
+      
+      ! Now corresponding segments, ordered normal outside of plane x2-x3.
+      EDGES(NOD1:NOD2,1) = (/ ELEM(1), ELEM(2) /) ! edge 1.
+      EDGES(NOD1:NOD2,2) = (/ ELEM(2), ELEM(3) /) ! edge 2.
+      EDGES(NOD1:NOD2,3) = (/ ELEM(3), ELEM(1) /)
+      
+      ! Now Test against segments, Beast approach:
+      DO IEDGE=1,3
+         DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+            IF ( (IBM_BODINT_PLANE%SEGS(NOD1,ISEG) .EQ. EDGES(NOD2,IEDGE)) .AND. &
+                 (IBM_BODINT_PLANE%SEGS(NOD2,ISEG) .EQ. EDGES(NOD1,IEDGE)) ) THEN ! Edge normals
+                                                                              ! oriented in opposite dirs.
+               ! Set to SOLID SOLID segtype from BODINT_PLANE.SEGS
+               IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG)=(/ IBM_SOLID, IBM_SOLID /)
+               
+            END IF
+         END DO
+      END DO
+      
+   END DO
+END IF
+
+! For segments that are related to 2 Wet Surface triangles, test if they are of type GG or SS:
+DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+    IF (IBM_BODINT_PLANE%INDSEG(1,ISEG) .GT. 1) THEN ! Related to 2 WS triangles:
+       
+       SEG(NOD1:NOD2) = IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+       
+       ! Segment nodes positions:
+       XP1(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/X2AXIS,X3AXIS/) ,SEG(NOD1))
+       XP2(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/X2AXIS,X3AXIS/) ,SEG(NOD2))
+       
+       ! Unit normal versor along x2p (axis directed from NOD2 to NOD1):
+       NMTX2P = SQRT( (XP1(IAXIS)-XP2(IAXIS))**2._EB + (XP1(JAXIS)-XP2(JAXIS))**2._EB )
+       TX2P(IAXIS:JAXIS) = (XP1(IAXIS:JAXIS)-XP2(IAXIS:JAXIS)) * NMTX2P**(-1._EB)
+       ! Versor along x3p.
+       TX3P(IAXIS:JAXIS) = (/ -TX2P(JAXIS), TX2P(IAXIS) /)
+       
+       ! Now related WS triangles centroids:
+       IWSEL1 = IBM_BODINT_PLANE%INDSEG(2,ISEG)
+       IWSEL2 = IBM_BODINT_PLANE%INDSEG(3,ISEG)
+       IG     = IBM_BODINT_PLANE%INDSEG(4,ISEG)
+       
+       ! Centroid of WS elem 1:
+       ELEM1(NOD1:NOD3)  = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL1-1)+1:NODS_WSEL*IWSEL1)
+       XYZ1(IAXIS:KAXIS) = ( GEOMETRY(IG)%VERTS(MDIM*(ELEM1(NOD1)-1)+1:MDIM*ELEM1(NOD1)) + &
+                             GEOMETRY(IG)%VERTS(MDIM*(ELEM1(NOD2)-1)+1:MDIM*ELEM1(NOD2)) + &
+                             GEOMETRY(IG)%VERTS(MDIM*(ELEM1(NOD3)-1)+1:MDIM*ELEM1(NOD3)) ) / 3._EB
+       NXYZ1(IAXIS:KAXIS)= GEOMETRY(IG)%FACE_NORMALS(IAXIS:KAXIS,IWSEL1)
+       ! Normal versor in x3p-x1 direction:  
+       NX3P1 = TX3P(IAXIS)*NXYZ1(X2AXIS) + TX3P(JAXIS)*NXYZ1(X3AXIS) 
+       N1(IAXIS:JAXIS) = (/ NX3P1, NXYZ1(X1AXIS) /)
+       NMNL = SQRT( N1(IAXIS)**2._EB + N1(JAXIS)**2._EB )
+       N1 = N1 * NMNL**(-1._EB) 
+       
+       ! Centroid of WS elem 2:
+       ELEM2(NOD1:NOD3)  = GEOMETRY(IG)%FACES(NODS_WSEL*(IWSEL2-1)+1:NODS_WSEL*IWSEL2)
+       XYZ2(IAXIS:KAXIS) = ( GEOMETRY(IG)%VERTS(MDIM*(ELEM2(NOD1)-1)+1:MDIM*ELEM2(NOD1)) + &
+                             GEOMETRY(IG)%VERTS(MDIM*(ELEM2(NOD2)-1)+1:MDIM*ELEM2(NOD2)) + &
+                             GEOMETRY(IG)%VERTS(MDIM*(ELEM2(NOD3)-1)+1:MDIM*ELEM2(NOD3)) ) / 3._EB
+       NXYZ2(IAXIS:KAXIS)= GEOMETRY(IG)%FACE_NORMALS(IAXIS:KAXIS,IWSEL2)
+       ! Normal versor in x3p-x1 direction:  
+       NX3P2 = TX3P(IAXIS)*NXYZ2(X2AXIS) + TX3P(JAXIS)*NXYZ2(X3AXIS) 
+       N2(IAXIS:JAXIS) = (/ NX3P2, NXYZ2(X1AXIS) /)
+       NMNL = SQRT( N2(IAXIS)**2._EB + N2(JAXIS)**2._EB )
+       N2 = N2 * NMNL**(-1._EB)
+       
+       ! Define points in plane x3p-x1:
+       ! vertex point:
+       X3PVERT = TX3P(IAXIS)*XP1(IAXIS) + TX3P(JAXIS)*XP1(JAXIS)
+       PVERT(IAXIS:JAXIS) = (/ X3PVERT, X1PLN /)
+       ! First triangle centroid:
+       X3P1 = TX3P(IAXIS)*XYZ1(X2AXIS) + TX3P(JAXIS)*XYZ1(X3AXIS)
+       P1CEN(IAXIS:JAXIS) = (/ X3P1, XYZ1(X1AXIS) /)
+       ! Second triangle centroid:
+       X3P2 = TX3P(IAXIS)*XYZ2(X2AXIS) + TX3P(JAXIS)*XYZ2(X3AXIS)
+       P2CEN(IAXIS:JAXIS) = (/ X3P2, XYZ2(X1AXIS) /)
+       
+       VCT(1:2) = 0
+       PCT(IAXIS:JAXIS,1:2) = 0._EB
+       
+       ! Segment on triangle 1:
+       V1(IAXIS:JAXIS) = P1CEN(IAXIS:JAXIS) - PVERT(IAXIS:JAXIS)
+       CRSSNV = N1(IAXIS)*V1(JAXIS) - N1(JAXIS)*V1(IAXIS)
+       IF (CRSSNV .GT. 0._EB) THEN
+           ! v1 stays as is, and is second segment:
+           VEC(IAXIS:JAXIS,2) = V1(IAXIS:JAXIS)
+           PCT(IAXIS:JAXIS,2) = P1CEN(IAXIS:JAXIS)
+           VCT(2) = 1
+       ELSE
+           ! -v1 is the first segment:
+           VEC(IAXIS:JAXIS,1) = -V1(IAXIS:JAXIS)
+           PCT(IAXIS:JAXIS,1) = P1CEN(IAXIS:JAXIS)
+           VCT(1) = 1
+       END IF
+       
+       ! Segment on triangle 2:
+       V2(IAXIS:JAXIS) = P2CEN(IAXIS:JAXIS) - PVERT(IAXIS:JAXIS)
+       CRSSNV = N2(IAXIS)*V2(JAXIS) - N2(JAXIS)*V2(IAXIS)
+       IF (CRSSNV .GT. 0._EB) THEN
+           ! v2 stays as is, and is second segment:
+           VEC(IAXIS:JAXIS,2) = V2(IAXIS:JAXIS)
+           PCT(IAXIS:JAXIS,2) = P2CEN(IAXIS:JAXIS)
+           VCT(2) = 1
+       ELSE
+           ! -v2 is the first segment:
+           VEC(IAXIS:JAXIS,1) = -V2(IAXIS:JAXIS)
+           PCT(IAXIS:JAXIS,1) = P2CEN(IAXIS:JAXIS)
+           VCT(1) = 1
+       END IF
+       
+       IF ( (VCT(1) .EQ. 0) .OR. (VCT(2) .EQ. 0) ) THEN
+          print*, "Error GET_BODINT_PLANE: One component of vct == 0."
+       END IF
+       
+       ! Cross product of v1 and v2 gives magnitude along x2p axis:
+       CTST = VEC(IAXIS,1)*VEC(JAXIS,2) - VEC(JAXIS,1)*VEC(IAXIS,2)
+       
+       ! Now tests:
+       ! Start with SOLID GASPHASE  definition for segtype:
+       IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG) = (/ IBM_SOLID, IBM_GASPHASE /)
+       
+       ! Test for SOLID SOLID condition:
+       IF ( ((PCT(JAXIS,1)-X1PLN) .GT. -GEOMEPS) .AND.  &
+            ((PCT(JAXIS,2)-X1PLN) .GT. -GEOMEPS) .AND. (CTST .LT. GEOMEPS) ) THEN
+           IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG) = (/ IBM_SOLID, IBM_SOLID /)
+           CYCLE
+       ELSEIF(((PCT(JAXIS,1)-X1PLN) .LT. GEOMEPS) .AND. &
+              ((PCT(JAXIS,2)-X1PLN) .LT. GEOMEPS) .AND. (CTST .LT. GEOMEPS) ) THEN
+           IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG) = (/ IBM_SOLID, IBM_SOLID /)
+           CYCLE
+       END IF
+       
+       ! Test for GASPHASE GASPHASE condition:
+       IF ( ((PCT(JAXIS,1)-X1PLN) .GT. GEOMEPS) .AND.  &
+            ((PCT(JAXIS,2)-X1PLN) .GT. GEOMEPS) .AND. (CTST .GT. GEOMEPS) ) THEN
+            IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG) = (/ IBM_GASPHASE, IBM_GASPHASE /)
+            CYCLE
+       ELSEIF(((PCT(1,JAXIS)-X1PLN) .LT. -GEOMEPS) .AND.  &
+              ((PCT(2,JAXIS)-X1PLN) .LT. -GEOMEPS) .AND. (CTST .GT. GEOMEPS) ) THEN
+            IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG) = (/ IBM_GASPHASE, IBM_GASPHASE /)
+            CYCLE
+       END IF
+       
+    END IF
+END DO
+
+
+! For the time being, as IBM_BODINT_PLANE is used to create Cartesian face cut-faces
+! We eliminate from the list the SEGTYPE=[SOLID SOLID] segments:
+ALLOCATE(SEGAUX(NOD1:NOD2,IBM_BODINT_PLANE%NSEGS))
+ALLOCATE(INDSEGAUX(IBM_MAX_WSTRIANG_SEG+2,IBM_BODINT_PLANE%NSEGS))
+ALLOCATE(SEGTYPEAUX(NOD1:NOD2,IBM_BODINT_PLANE%NSEGS))
+
+ISEG_NEW = 0
+DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+    IF( (IBM_BODINT_PLANE%SEGTYPE(NOD1,ISEG) .EQ. IBM_SOLID) .AND. &
+        (IBM_BODINT_PLANE%SEGTYPE(NOD2,ISEG) .EQ. IBM_SOLID) ) CYCLE
+       
+       ISEG_NEW = ISEG_NEW + 1
+       SEGAUX(NOD1:NOD2,ISEG_NEW) = IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+       INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,ISEG_NEW) = &
+          IBM_BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
+       SEGTYPEAUX(NOD1:NOD2,ISEG_NEW) = IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,ISEG)
+END DO
+IBM_BODINT_PLANE%NSEGS = ISEG_NEW
+IBM_BODINT_PLANE%SEGS(NOD1:NOD2,1:ISEG_NEW) = SEGAUX(NOD1:NOD2,1:ISEG_NEW)
+IBM_BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW) = &
+    INDSEGAUX(1:IBM_MAX_WSTRIANG_SEG+2,1:ISEG_NEW)
+IBM_BODINT_PLANE%SEGTYPE(NOD1:NOD2,1:ISEG_NEW) = SEGTYPEAUX(NOD1:NOD2,1:ISEG_NEW)
+
+DEALLOCATE(SEGAUX,INDSEGAUX,SEGTYPEAUX)
+
+
+! Segments Crossings fields: 
+! Initialize nbcross with segment nodes locations:
+IBM_BODINT_PLANE%NBCROSS(1:IBM_BODINT_PLANE%NSEGS)                   =  0._EB
+IBM_BODINT_PLANE%SVAR(1:IBM_MAX_NBCROSS,1:IBM_BODINT_PLANE%NSEGS)    = -1._EB
+
+! Add segment ends as crossings:
+DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+   
+   ! End nodes to cross:
+   SEG(NOD1:NOD2) = IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+   XYZ1(IAXIS:KAXIS) = IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,SEG(NOD1))
+   XYZ2(IAXIS:KAXIS) = IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,SEG(NOD2))
+   
+   ! x2_x3 of segment point 1:
+   X2_1 = XYZ1(X2AXIS); X3_1 = XYZ1(X3AXIS)
+   ! x2_x3 of segment point 2:
+   X2_2 = XYZ2(X2AXIS); X3_2 = XYZ2(X3AXIS)
+   
+   ! Segment length:
+   SLEN = SQRT( (X2_2-X2_1)**2._EB + (X3_2-X3_1)**2._EB )
+   
+   ! First node:
+   SBOD = 0._EB
+   ! Add crossing to BODINT_PLANE:
+   NBCROSS = IBM_BODINT_PLANE%NBCROSS(ISEG) + 1
+   IBM_BODINT_PLANE%NBCROSS(ISEG) = NBCROSS
+   IBM_BODINT_PLANE%SVAR(NBCROSS,ISEG) = SBOD
+   
+   ! Second node:
+   SBOD = SLEN
+   ! Add crossing to BODINT_PLANE:
+   NBCROSS = IBM_BODINT_PLANE%NBCROSS(ISEG) + 1
+   IBM_BODINT_PLANE%NBCROSS(ISEG) = NBCROSS
+   IBM_BODINT_PLANE%SVAR(ISEG,NBCROSS) = SBOD
+ 
+END DO
+
+
+print*, "Up to END of GET_BODINT_PLANE=",X1AXIS,X1PLN
+print*, "NNODS=",IBM_BODINT_PLANE%NNODS
+print*, "NSEGS=",IBM_BODINT_PLANE%NSEGS
+print*, "NSGLS=",IBM_BODINT_PLANE%NSGLS
+print*, "NTRIS=",IBM_BODINT_PLANE%NTRIS
 pause
 
 
@@ -962,7 +1493,7 @@ REAL(EB), INTENT(IN)  :: XYZ(MDIM)
 INTEGER,  INTENT(OUT) :: IND_PI
 
 ! Local variables:
-LOGICAL :: INLIST
+!LOGICAL :: INLIST
 INTEGER :: INOD
 REAL(EB):: NORMPT
 
@@ -1000,12 +1531,41 @@ REAL(EB), INTENT(IN) :: X1PLN,PLNORMAL(MDIM),LNC(MDIM,NOD1:NOD2)
 REAL(EB), INTENT(OUT):: XYZ_INT(MDIM)
 LOGICAL, INTENT(OUT) :: INTFLG
 
+! Local variables:
+REAL(EB) :: DVEC(MDIM), DIRV(MDIM), NMDV, DENOM, PLNEQ, TLINE
 
+! Initialize:
+INTFLG = .FALSE.
+XYZ_INT(IAXIS:KAXIS) = 0._EB 
+
+! Preliminary calculations:
+DVEC(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD2) - LNC(IAXIS:KAXIS,NOD1)
+NMDV = SQRT( DVEC(IAXIS)**2._EB + DVEC(JAXIS)**2._EB + DVEC(KAXIS)**2._EB )
+DIRV = DVEC(IAXIS:KAXIS) * NMDV**(-1._EB)
+DENOM = DIRV(IAXIS)*PLNORMAL(IAXIS) +DIRV(JAXIS)*PLNORMAL(JAXIS) +DIRV(KAXIS)*PLNORMAL(KAXIS) 
+PLNEQ = LNC(IAXIS,NOD1)*PLNORMAL(IAXIS) + &
+        LNC(JAXIS,NOD1)*PLNORMAL(JAXIS) + &
+        LNC(KAXIS,NOD1)*PLNORMAL(KAXIS) - X1PLN
+        
+! Line parallel to plane:
+IF ( ABS(DENOM) .LT. GEOMEPS ) THEN
+   ! Check if seg lies on plane or not.
+   ! Do this by checking if node one of segment is on plane.
+   IF ( ABS(PLNEQ) .LT. GEOMEPS ) THEN
+      XYZ_INT(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD1); XYZ_INT(X1AXIS) = X1PLN
+      INTFLG = .TRUE.
+   END IF
+   RETURN
+END IF
+
+! Non parallel case:
+TLINE = -PLNEQ/DENOM  ! Coordinate along the line LNC.
+XYZ_INT(IAXIS:KAXIS) = LNC(IAXIS:KAXIS,NOD1) + TLINE*DIRV(IAXIS:KAXIS) ! Intersection point.
+XYZ_INT(X1AXIS) = X1PLN ! Force X1AXIS coordinate to be the planes value.
+INTFLG = .TRUE.
 
 RETURN
 END SUBROUTINE LINE_INTERSECT_COORDPLANE
-
-
 
 
 ! ---------------------------- READ_GEOM ----------------------------------------
