@@ -276,6 +276,8 @@ TYPE GEOMETRY_TYPE
    CHARACTER(60) :: BNDC_FILENAME='null', GEOC_FILENAME='null' ! for compatibility with existing FDS code
    REAL(EB) :: OMEGA=0._EB                                     ! for compatibility with existing FDS code
    INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, VOLUS, SUB_GEOMS, SURFS, MATLS
+   INTEGER, ALLOCATABLE, DIMENSION(:,:) :: FACE_EDGES, EDGE_FACES
+   REAL(EB),ALLOCATABLE, DIMENSION(:,:) :: FACE_NORMALS
    REAL(EB) :: XYZ0(3)
    REAL(EB) :: AZIM_BASE, ELEV_BASE, SCALE_BASE(3), XYZ_BASE(3)
    REAL(EB) :: AZIM,      ELEV,      SCALE(3),      XYZ(3)
