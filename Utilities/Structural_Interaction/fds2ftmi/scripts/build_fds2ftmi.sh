@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Firebot variables
-FDS_SVNROOT=/home/jgs/FDS-SMV
 FIREBOT_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
 FDS2FTMI_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi
 OUTPUT_DIR=/home/jgs/FDS-SMV/Utilities/Structural_Interaction/fds2ftmi/scripts/output
@@ -21,57 +20,17 @@ rm *.csv
 cd $FDS2FTMI_DIR/examples/h_profile
 rm *.csv 
 
-function usage {
-echo "build_fds2ftmi.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
-echo "Runs fds2ftmi testing script to run verification cases and build the user guide"
-echo ""
-echo "Options"
-echo "-r - revision_number - run cases using a specific SVN revision number"
-echo "     default: (none, latest SVN HEAD)"
-echo ""
-exit
-}
-
-# Update repository
-SVN_REVISION=''
-while getopts 'hq:r:su:v:y' OPTION
-do
-case $OPTION in
-  h)
-   usage;
-   ;;
-  q)
-   QUEUE="$OPTARG"
-   ;;
-  r)
-   SVN_REVISION="$OPTARG"
-esac
-done
-shift $(($OPTIND-1))
-
-if [[ $SVN_REVISION = "" ]]; then
-   cd $FDS_SVNROOT/FDS_Source
-   svn update >> $OUTPUT_DIR/stage1 2>&1
-   cd $FDS2FTMI_DIR/source
-   svn update >> $OUTPUT_DIR/stage1_ftmi 2>&1
-else
-   cd $FDS_SVNROOT/FDS_Source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
-   cd $FDS2FTMI_DIR/source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1_ftmi 2>&1
-   echo "At revision ${SVN_REVISION}." 
-fi
-
-SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
-echo $SVN_REVISION
+# Get Git Hash
+GIT_HASH=$(shell git describe --long --dirty)
+echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide
 cd $FDS2FTMI_DIR
-sed -i "s:.*SVN Repository Revision.*:SVN Repository Revision ${SVN_REVISION}:" fds2ftmi_user_guide.tex
+sed -i "s:.*Git Hash.*:\\path{%GIT_HASH%}:" fds2ftmi_user_guide.tex
 
 # Print the FDS revision number on python scripts
 cd $FIREBOT_DIR
-sed -i "s:.*SVN=.*:SVN='${SVN_REVISION}':" generate_plots.py
+sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
 
 compile_fds_db()
 {
@@ -290,12 +249,10 @@ pdflatex fds2ftmi_user_guide.tex
 
 # Revert the FDS revision number on User Guide
 cd $FDS2FTMI_DIR
-rm fds2ftmi_user_guide.tex
-svn up -r $SVN_REVISION fds2ftmi_user_guide.tex
+git checkout -- fds2ftmi_user_guide.tex
 
 # Revert the FDS revision number on python scripts
 cd $FIREBOT_DIR
-rm generate_plots.py
-svn up -r $SVN_REVISION generate_plots.py
+git checkout -- generate_plots.py
 
 exit
