@@ -57,7 +57,7 @@ REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST,MED_TAST
 CHARACTER(8) OUTFILE
 CHARACTER(30) VARIABLE_KIND
 REAL MED
-INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE
+INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE,COMEBACK
 
 !REAL(FB) :: tb_init,te_init,te_nmeshes,tb_nmeshes,te_fds2ast,tb_fds2ast
 
@@ -214,19 +214,20 @@ LOOP_FDS2AST:DO P=1,COUNTER
     NX=N(P,2)
     NY=N(P,3)
     NZ=N(P,4)
+    !
+    XS = Xa-(C_SIZE/2)
+    XF = Xa+(C_SIZE/2)
+    YS = Ya-(C_SIZE/2)
+    YF = Ya+(C_SIZE/2)
+    ZS = Za-(C_SIZE/2)
+    ZF = Za+(C_SIZE/2)
          
 !$omp parallel 
 !$omp do
 VARIABLE_NUMBER: DO VAR=BEG_VAR,VARIAB
 ! 500 - Point of the loop in case of the point does not reach a meaning value - SILVA, JC         
-500 CONTINUE
-   XS = Xa-(C_SIZE/2)
-   XF = Xa+(C_SIZE/2)
-   YS = Ya-(C_SIZE/2)
-   YF = Ya+(C_SIZE/2)
-   ZS = Za-(C_SIZE/2)
-   ZF = Za+(C_SIZE/2)
-
+500 CONTINUE   
+COMEBACK=0
 ! SIZE is the lenght of the vectors - SILVA, JC
              SIZE=((TEND-TBEG)/TINT)+1
              ALLOCATE (V_TIME(SIZE))
@@ -565,308 +566,261 @@ IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
         IF (M_AST(1,3).LT.20 .AND. M_AST(1,3).GT.0) THEN
             M_AST(1,3)=20.0
         END IF 
-!        
+!   
        IF (NZ.LT.0) THEN
           IF (M_AST(1,1).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))
+            COMEBACK=1
           ENDIF
         END IF
 !
         IF (NY.LT.0) THEN
           IF (M_AST(1,2).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))
+            COMEBACK=1
           ENDIF
         END IF
 ! 
         IF (NX.LT.0) THEN
           IF (M_AST(1,3).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))      
+            COMEBACK=1      
           ENDIF
         END IF 
 !
        IF (NZ.GT.0) THEN
           IF (M_AST(1,7).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))    
+            COMEBACK=1        
           ENDIF
         END IF
 !
         IF (NY.GT.0) THEN
           IF (M_AST(1,6).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))   
+            COMEBACK=1         
           ENDIF
         END IF
 ! 
         IF (NX.GT.0) THEN
           IF (M_AST(1,5).EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))  
+            COMEBACK=1          
           ENDIF
         END IF
+IF (COMEBACK==1) THEN
+   DEALLOCATE (V_TIME)
+   DEALLOCATE (TAST)
+   DEALLOCATE (M_AST)
+   GOTO 500      
+ENDIF     
 ! 
 C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.20 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ))
-            B=SQRT((M_AST(I,1)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.20) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ))
-            B=SQRT((M_AST(I,7)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.20 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.20 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.20 .AND. &
-        M_AST(1,5).EQ.0 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(1,1).EQ.0 .AND. M_AST(1,2).EQ.0 .AND. M_AST(1,3).EQ.0 .AND. &
-        M_AST(1,5).EQ.20 .AND. M_AST(1,6).EQ.0 .AND. M_AST(1,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ))
+         B=SQRT((M_AST(I,1)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN         
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((M_AST(I,7)*NZ))
+         B=SQRT((M_AST(I,7)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
 !********************************
-        IF (TAST(1).GT.0) THEN
-!            TAST(1)=20.0
-            ELSE 
-            IF (C_SIZE.GE.(2.5*C_S)) THEN
-                WRITE (6,'(F8.3,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3)') C_SIZE,M_AST(1,1),M_AST(1,2),M_AST(1,3),M_AST(1,5), &
-                M_AST(1,6),M_AST(1,7)
-                WRITE (6,'(F8.5,F8.5,F8.5,F8.5,F8.5,F8.5)') NX,NY,NZ
-121             WRITE(6,*) ' WARNING: C_SIZE has reached the maximum for',OUTFILE,'!',C_SIZE
-                WRITE(6,*) ' (1) if you want to ignore this node'
-                WRITE(6,*) ' (2) if you want to stop the code'
-                WRITE(6,*) ' (3) if you want to continue increasing C_SIZE'
-                READ(*,*) WARNING
-                IF (WARNING.EQ.1) THEN
-                    DEALLOCATE (V_TIME)
-                    DEALLOCATE (TAST)
-                    DEALLOCATE (M_AST)
-                    GO TO 100
-                END IF
-                IF (WARNING.EQ.2) STOP
-                IF (WARNING.NE.1 .AND. WARNING.NE.2 .AND. WARNING.NE.3) THEN
-                WRITE(6,*) ' WRONG ANSWER! '
-                GO TO 121
-                END IF
-            END IF
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
-        END IF            
+   IF (TAST(1).GT.0) THEN
+      TAST(1)=20
+   ELSE
+      XS = XS-(0.05*(XF-XS))
+      XF = XF+(0.05*(XF-XS)) 
+      YS = YS-(0.05*(YF-YS))
+      YF = YF+(0.05*(YF-YS)) 
+      ZS = ZS-(0.05*(ZF-ZS))
+      ZF = ZF+(0.05*(ZF-ZS))    
+      DEALLOCATE (V_TIME)
+      DEALLOCATE (TAST)
+      DEALLOCATE (M_AST)
+      GOTO 500
+   END IF  
+   !
 END IF
 !***************************************
 IF (VARIABLE_KIND==' WALL TEMPERATURE             ') THEN
@@ -883,35 +837,8 @@ IF (VARIABLE_KIND==' WALL TEMPERATURE             ') THEN
                 ENDDO
             END IF
 !*************
-        IF (TAST(1).GE.20) THEN
-            TAST(1)=20.0
-        ELSE 
-            IF (C_SIZE.GE.(2.5*C_S)) THEN
-122             WRITE(6,*) ' WARNING: C_SIZE has reached the maximum for',OUTFILE,'!',C_SIZE
-                WRITE(6,*) ' (1) if you want to ignore this node'
-                WRITE(6,*) ' (2) if you want to stop the code'
-                WRITE(6,*) ' (3) if you want to continue increasing C_SIZE'
-                READ(*,*) WARNING
-                IF (WARNING.EQ.1) THEN
-                    DEALLOCATE (V_TIME)
-                    DEALLOCATE (TAST)
-                    DEALLOCATE (M_AST)
-                    GO TO 100
-                END IF
-                IF (WARNING.EQ.2) STOP
-                IF (WARNING.NE.1 .AND. WARNING.NE.2 .AND. WARNING.NE.3) THEN
-                WRITE(6,*) ' WRONG ANSWER! '
-                GO TO 122
-                END IF
-            END IF
-        DEALLOCATE (V_TIME)
-        DEALLOCATE (TAST)
-        DEALLOCATE (M_AST)
-        C_SIZE=C_SIZE*1.1
-        GOTO 500
-        END IF 
 END IF
-
+!************************************************************
 IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
         IF (NZ.GT.0) THEN
             DO I=1,V
@@ -964,250 +891,286 @@ IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
             END DO
         END IF
 !
-C=SQRT((NX**2)+(NY**2)+(NZ**2))
+       IF (NZ.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,1))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))
+            COMEBACK=1
+          ENDIF
+        END IF
 !
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
+        IF (NY.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,2))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))
+            COMEBACK=1
+          ENDIF
         END IF
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
+! 
+        IF (NX.LT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,3))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))            
+            COMEBACK=1
+          ENDIF
+        END IF 
+!
+       IF (NZ.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,7))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))            
+            COMEBACK=1
+          ENDIF
         END IF
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
+!
+        IF (NY.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,6))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))            
+            COMEBACK=1
+          ENDIF
         END IF
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
+! 
+        IF (NX.GT.0) THEN
+        SUM=0.d0
+        DO I=1,V
+          SUM=SUM+ABS(M_AST(I,5))
+        ENDDO
+          IF (SUM.EQ.0) THEN
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))            
+            COMEBACK=1
+          ENDIF
         END IF
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).GT.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ))
-            B=SQRT((M_AST(I,1)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).GT.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ))
-            B=SQRT((M_AST(I,7)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).GT.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).GT.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).GT.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).GT.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            TAST=0.D0
-        END IF
+   IF (COMEBACK==1) THEN
+      DEALLOCATE (V_TIME)
+      DEALLOCATE (TAST)
+      DEALLOCATE (M_AST)
+      GOTO 500      
+   ENDIF       
+!
+   C=SQRT((NX**2)+(NY**2)+(NZ**2))
+!
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ))
+         B=SQRT((M_AST(I,1)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN         
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((M_AST(I,7)*NZ))
+         B=SQRT((M_AST(I,7)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
 !********************************
-        IF (TAST(2).GE.0 .AND. TAST(2).LT.1000) THEN
-            TAST(1)=0.0
-        ELSE 
-            IF (C_SIZE.GE.(2.5*C_S)) THEN
-123             WRITE(6,*) ' WARNING: C_SIZE has reached the maximum for',OUTFILE,'!',C_SIZE
-                WRITE(6,*) ' (1) if you want to ignore this node'
-                WRITE(6,*) ' (2) if you want to stop the code'
-                WRITE(6,*) ' (3) if you want to continue increasing C_SIZE'
-                READ(*,*) WARNING
-                IF (WARNING.EQ.1) THEN
-                    DEALLOCATE (V_TIME)
-                    DEALLOCATE (TAST)
-                    DEALLOCATE (M_AST)
-                    GO TO 100
-                END IF
-                IF (WARNING.EQ.2) STOP
-                IF (WARNING.NE.1 .AND. WARNING.NE.2 .AND. WARNING.NE.3) THEN
-                WRITE(6,*) ' WRONG ANSWER! '
-                GO TO 123
-                END IF
-            END IF
+      IF (TAST(2).GE.0 .AND. TAST(2).LT.1000) THEN
+        TAST(1)=0.0
+      ELSE 
+        XS = XS-(0.05*(XF-XS))
+        XF = XF+(0.05*(XF-XS)) 
+        YS = YS-(0.05*(YF-YS))
+        YF = YF+(0.05*(YF-YS)) 
+        ZS = ZS-(0.05*(ZF-ZS))
+        ZF = ZF+(0.05*(ZF-ZS))     
         DEALLOCATE (V_TIME)
         DEALLOCATE (TAST)
         DEALLOCATE (M_AST)
-        C_SIZE=C_SIZE*1.1
-        GOTO 500
-        END IF
+        GOTO 500  
+      END IF
+!   
 END IF
-
+!***************************************************************
 IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
         IF (NZ.GT.0) THEN
             DO I=1,V
@@ -1266,11 +1229,9 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,1))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))            
+            COMEBACK=1
           ENDIF
         END IF
 !
@@ -1280,11 +1241,9 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,2))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))            
+            COMEBACK=1
           ENDIF
         END IF
 ! 
@@ -1294,11 +1253,9 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,3))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))            
+            COMEBACK=1
           ENDIF
         END IF 
 !
@@ -1308,11 +1265,9 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,7))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))            
+            COMEBACK=1
           ENDIF
         END IF
 !
@@ -1322,11 +1277,9 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,6))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS))            
+            COMEBACK=1
           ENDIF
         END IF
 ! 
@@ -1336,228 +1289,202 @@ IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
           SUM=SUM+ABS(M_AST(I,5))
         ENDDO
           IF (SUM.EQ.0) THEN
-            DEALLOCATE (V_TIME)
-            DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS))            
+            COMEBACK=1
           ENDIF
         END IF
+IF (COMEBACK==1) THEN
+   DEALLOCATE (V_TIME)
+   DEALLOCATE (TAST)
+   DEALLOCATE (M_AST)
+   GOTO 500      
+ENDIF
 !        
 C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).NE.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,1)*NZ))
-            B=SQRT((M_AST(I,1)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF  
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).NE.0) THEN
-            DO I=1,V
-            A=((M_AST(I,7)*NZ))
-            B=SQRT((M_AST(I,7)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN      
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).NE.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((-M_AST(I,2)*NY))
-            B=SQRT((M_AST(I,2)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).NE.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,6)*NY))
-            B=SQRT((M_AST(I,6)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).NE.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN         
-            DO I=1,V
-            A=((-M_AST(I,3)*NX))
-            B=SQRT((M_AST(I,3)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).NE.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            DO I=1,V
-            A=((M_AST(I,5)*NX))
-            B=SQRT((M_AST(I,5)**2))
-            TAST(I)=(A/(B*C))*B
-            END DO
-        END IF
-        IF (M_AST(10,1).EQ.0 .AND. M_AST(10,2).EQ.0 .AND. M_AST(10,3).EQ.0 .AND. &
-        M_AST(10,5).EQ.0 .AND. M_AST(10,6).EQ.0 .AND. M_AST(10,7).EQ.0) THEN
-            TAST=0.D0
-        END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN              
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN      
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,1)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.LT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,1)*NZ))
+         B=SQRT((M_AST(I,1)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN         
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN  
+         DO I=1,V
+         A=((M_AST(I,7)*NZ)+(M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,7)**2)+(M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF  
+     IF (NZ.GT.0 .AND. NY.EQ.0 .AND. NX.EQ.0) THEN 
+         DO I=1,V
+         A=((M_AST(I,7)*NZ))
+         B=SQRT((M_AST(I,7)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.LT.0) THEN 
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,2)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.LT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,2)*NY))
+         B=SQRT((M_AST(I,2)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY)+(M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,6)**2)+(M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.GT.0 .AND. NX.EQ.0) THEN
+         DO I=1,V
+         A=((M_AST(I,6)*NY))
+         B=SQRT((M_AST(I,6)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.LT.0) THEN
+         DO I=1,V
+         A=((-M_AST(I,3)*NX))
+         B=SQRT((M_AST(I,3)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
+     IF (NZ.EQ.0 .AND. NY.EQ.0 .AND. NX.GT.0) THEN
+         DO I=1,V
+         A=((M_AST(I,5)*NX))
+         B=SQRT((M_AST(I,5)**2))
+         TAST(I)=(A/(B*C))*B
+         END DO
+     END IF
 !********************************
         SUM=0.d0
         DO I=1,V
@@ -1565,33 +1492,17 @@ C=SQRT((NX**2)+(NY**2)+(NZ**2))
         ENDDO
         IF (SUM.GT.0) THEN
             TAST(1)=0.0
-        ELSE 
-            IF (C_SIZE.GE.(2.5*C_S)) THEN
-                WRITE (6,'(F8.3,F8.3,F8.3,F8.3,F8.3,F8.3,F8.3)') C_SIZE,M_AST(10,1),M_AST(10,2),M_AST(10,3),M_AST(10,5), &
-                M_AST(10,6),M_AST(10,7)
-                WRITE (6,'(F8.5,F8.5,F8.5,F8.5,F8.5,F8.5)') NX,NY,NZ
-124             WRITE(6,*) ' WARNING: C_SIZE has reached the maximum for',OUTFILE,'!',C_SIZE
-                WRITE(6,*) ' (1) if you want to ignore this node'
-                WRITE(6,*) ' (2) if you want to stop the code'
-                WRITE(6,*) ' (3) if you want to continue increasing C_SIZE'
-                READ(*,*) WARNING
-                IF (WARNING.EQ.1) THEN
-                    DEALLOCATE (V_TIME)
-                    DEALLOCATE (TAST)
-                    DEALLOCATE (M_AST)
-                    GO TO 100
-                END IF
-                IF (WARNING.EQ.2) STOP
-                IF (WARNING.NE.1 .AND. WARNING.NE.2 .AND. WARNING.NE.3) THEN
-                WRITE(6,*) ' WRONG ANSWER! '
-                GO TO 124                
-                END IF
-            END IF
+        ELSE
+            XS = XS-(0.05*(XF-XS))
+            XF = XF+(0.05*(XF-XS)) 
+            YS = YS-(0.05*(YF-YS))
+            YF = YF+(0.05*(YF-YS)) 
+            ZS = ZS-(0.05*(ZF-ZS))
+            ZF = ZF+(0.05*(ZF-ZS))   
             DEALLOCATE (V_TIME)
             DEALLOCATE (TAST)
-            DEALLOCATE (M_AST)
-            C_SIZE=C_SIZE*1.1
-            GOTO 500
+            DEALLOCATE (M_AST)   
+            GOTO 500                 
         END IF 
 END IF
 !CALL CPU_TIME (te_fds2ast)
@@ -1636,10 +1547,12 @@ ELSE
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+ &
+                                                                    (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
 !     IF (N_AVERAGE.NE.0) THEN
 !        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
-!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+ &
+!                                                                      (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
 !     ENDIF
    ENDIF
    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
@@ -1650,10 +1563,12 @@ ELSE
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", I, ",1),", (MED_TAST(I-1)+MED_TAST(I))/2
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", MED_TAST((V-1)/I_AVERAGE)+ & 
+                                                                    (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
 !     IF (N_AVERAGE.NE.0) THEN
 !        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
-!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,H", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", MED_TAST((V-1)/I_AVERAGE)+ &
+!                                                                      (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2
 !     ENDIF
    ENDIF
    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
@@ -1664,10 +1579,12 @@ ELSE
         WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", I, ",1),", ((MED_TAST(I-1)+MED_TAST(I))/2)*1000
      ENDDO
      WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",0),", V_TIME(V)
-     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
+     WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+1, ",1),", (MED_TAST((V-1)/I_AVERAGE)+ &
+                                                                 (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
 !     IF (N_AVERAGE.NE.0) THEN
 !        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",0),", 18000.0
-!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", (MED_TAST((V-1)/I_AVERAGE)+(MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
+!        WRITE (70,'(A,A,A,I8,A,E12.5)') "*set,A", TRIM(OUTFILE), "(", (V-1)/I_AVERAGE+2, ",1),", (MED_TAST((V-1)/I_AVERAGE)+ &
+  !                                                                (MED_TAST((V-1)/I_AVERAGE)-MED_TAST((V-1)/I_AVERAGE-1))/2)*1000
 !     ENDIF
    ENDIF 
 ENDIF 
@@ -1736,10 +1653,29 @@ ELSE IF (T_AVERAGE.NE.0) THEN
 ENDIF    
 !**********************
     IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
-      WRITE (6,'(A, F8.3)') 'Cell_Size  ',C_SIZE
-      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'AST_Matrix ',M_AST(1,1),M_AST(1,2),M_AST(1,3),M_AST(1,5), &
-      M_AST(1,6),M_AST(1,7)
-      WRITE (6,'(A, F8.5, F8.5, F8.5)') 'Normal_Vector',NX,NY,NZ
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Interface point    ', Xa, '        ', Ya, &
+      '        ', Za
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
+      '        ', (ZF-ZS)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'AST Results    ', M_AST(1,3), M_AST(1,5), M_AST(1,2), &
+      M_AST(1,6), M_AST(1,1), M_AST(1,7)
+      IF (VARIABLE==1) WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
+    END IF
+    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
+      '        ', (ZF-ZS)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') ' h  Results    ', M_AST(10,3), M_AST(10,5), M_AST(10,2), &
+      M_AST(10,6), M_AST(10,1), M_AST(10,7)
+      IF (VARIABLE==2) WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
+    END IF    
+    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Interface point', Xa, '        ', Ya, &
+      '        ', Za
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
+      '        ', (ZF-ZS)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'qnet Results   ', M_AST(10,3), M_AST(10,5), M_AST(10,2), &
+      M_AST(10,6), M_AST(10,1), M_AST(10,7)
+      WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
     END IF
     DEALLOCATE (V_TIME)
     DEALLOCATE (TAST)
