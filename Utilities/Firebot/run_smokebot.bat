@@ -53,6 +53,11 @@ goto eof
    set valid=1
    shift
  )
+ if /I "%1" EQU "-email" (
+   set emailto=%2
+   set valid=1
+   shift
+ )
  if /I "%1" EQU "-altemail" (
    set altemail=1
  )
@@ -75,7 +80,8 @@ echo.
 echo -help           - display this message
 echo -cfastrepo name - specify the cfast repo name (default: cfastgitclean) 
 echo -fdsrepo name   - specify the FDS repo name (default: FDS-SMVgitclean) 
-echo -email address  - override "to" email addresses specified in repo 
+echo -altmail        - use an alternate email server
+echo -email address - override "to" email addresses specified in repo 
 exit /b
 
 :eof
