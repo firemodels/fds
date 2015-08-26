@@ -1,3 +1,6 @@
+#ifndef GITHASH_PP
+#define GITHASH_PP "unknown"
+#endif
 MODULE DUMP
  
 ! Create and write ("dump") to various output files
