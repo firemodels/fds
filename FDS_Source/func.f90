@@ -1,3 +1,12 @@
+#ifndef GITHASH_PP
+#define GITHASH_PP "unknown"
+#endif
+#ifndef GITDATE_PP
+#define GITDATE_PP "unknown"
+#endif
+#ifndef BUILDDATE_PP
+#define BUILDDATE_PP "unknown"
+#endif
 MODULE COMP_FUNCTIONS
 
 ! I/O + OS functions
