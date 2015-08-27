@@ -367,12 +367,8 @@ cat << EOF > $scriptfile
 EOF
 
 if [ "$queue" != "none" ] ; then
+if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
 cat << EOF >> $scriptfile
-#PBS -N $JOBPREFIX$TITLE
-#PBS -e $outerr
-#PBS -o $outlog
-#PBS -l nodes=$nodes:ppn=$ppn
-#PBS $walltimestring_pbs
 #SBATCH -J $JOBPREFIX$infile
 #SBATCH $walltimestring_slurm
 #SBATCH --mem-per-cpu=3000
@@ -383,6 +379,19 @@ cat << EOF >> $scriptfile
 #SBATCH --nodes=$nodes
 #SBATCH --cpus-per-task=$nopenmp_threads
 EOF
+else
+cat << EOF >> $scriptfile
+#PBS -N $JOBPREFIX$TITLE
+#PBS -e $outerr
+#PBS -o $outlog
+#PBS -l nodes=$nodes:ppn=$ppn
+EOF
+if [ "$walltimestring_pbs" != "" ] ; then
+cat << EOF >> $scriptfile
+#PBS $walltimestring_pbs
+EOF
+fi
+fi
 fi
 
 cat << EOF >> $scriptfile
