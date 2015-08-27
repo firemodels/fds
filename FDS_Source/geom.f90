@@ -39,7 +39,8 @@ INTEGER,  PARAMETER :: IBM_GASPHASE  = -1
 INTEGER,  PARAMETER :: IBM_CUTCFE    =  0
 INTEGER,  PARAMETER :: IBM_SOLID     =  1
 INTEGER,  PARAMETER :: IBM_INBOUNDARY=  2
-  
+INTEGER,  PARAMETER :: IBM_UNDEFINED =-11
+
 ! Intersection type definition parameters:
 INTEGER,  PARAMETER :: IBM_GG =  1 ! Gas - Gas intersection.
 INTEGER,  PARAMETER :: IBM_SS =  3 ! Solid - Solid intersection.
@@ -157,8 +158,9 @@ REAL(EB), SAVE, ALLOCATABLE, DIMENSION(:,:) :: GEOM_XYZ
 INTEGER, PARAMETER :: IBM_MAXCROSS_X2 = 32
 INTEGER,  SAVE :: IBM_N_CRS
 REAL(EB), SAVE :: IBM_SVAR_CRS(IBM_MAXCROSS_X2)
-INTEGER,  SAVE :: IBM_IS_CRS(1:2,IBM_MAXCROSS_X2)
-REAL(EB), SAVE :: IBM_SEG_TAN(1:2,IBM_MAXCROSS_X2)
+INTEGER,  SAVE :: IBM_IS_CRS(IBM_MAXCROSS_X2)
+INTEGER,  SAVE :: IBM_IS_CRS2(LOW:HIGH,IBM_MAXCROSS_X2)
+REAL(EB), SAVE :: IBM_SEG_TAN(IAXIS:JAXIS,IBM_MAXCROSS_X2)
 INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
 
 ! End Variable declaration for CC_IBM. 
@@ -465,7 +467,8 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                      ENDIF
                   ENDIF
                   
-                  
+                  ! Now for this ray, set vertex types in MESHES(NM)%VERTVAR(:,:,:,IBM_VGSC):
+                  CALL GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK)
                   
                   ! WORK HERE:
                   
@@ -628,7 +631,7 @@ ALLOCATE(IBM_BODINT_PLANE%X2ALIGNED(IBM_MAX_NSEGS))
 ALLOCATE(IBM_BODINT_PLANE%X3ALIGNED(IBM_MAX_NSEGS))
 ALLOCATE(IBM_BODINT_PLANE%  NBCROSS(IBM_MAX_NSEGS))
 ALLOCATE(IBM_BODINT_PLANE%     SVAR(IBM_MAX_NBCROSS,        IBM_MAX_NSEGS))  ! Here first index is ibcross.
-ALLOCATE(IBM_BODINT_PLANE%  SEGTYPE(NOD1:NOD2,              IBM_MAX_NSEGS))
+ALLOCATE(IBM_BODINT_PLANE%  SEGTYPE(LOW:HIGH,              IBM_MAX_NSEGS))
 
 ! write(*,*) "size(IBM_BODINT_PLANE%  SEGTYPE) =",     &
 !             size(IBM_BODINT_PLANE%  SEGTYPE, dim=1), &
@@ -1408,7 +1411,7 @@ ALLOCATE(SEGAUX(NOD1:NOD2,IBM_BODINT_PLANE%NSEGS))
 ALLOCATE(INDSEGAUX(IBM_MAX_WSTRIANG_SEG+2,IBM_BODINT_PLANE%NSEGS))
 ALLOCATE(SEGTYPEAUX(NOD1:NOD2,IBM_BODINT_PLANE%NSEGS))
 
-print*, "IBM_BODINT_PLANE%NSEGS=",IBM_BODINT_PLANE%NSEGS
+!print*, "IBM_BODINT_PLANE%NSEGS=",IBM_BODINT_PLANE%NSEGS
 
 ISEG_NEW = 0
 DO ISEG=1,IBM_BODINT_PLANE%NSEGS
@@ -1467,22 +1470,22 @@ DO ISEG=1,IBM_BODINT_PLANE%NSEGS
  
 ENDDO
 
-
-print*, "Up to END of GET_BODINT_PLANE=",X1AXIS,X1PLN
-print*, "NNODS=",IBM_BODINT_PLANE%NNODS
-DO INOD=1,IBM_BODINT_PLANE%NNODS
-   write(*,'(I3,A,3F16.12)') INOD,", ",IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,INOD)
-END DO
-print*, "NSEGS=",IBM_BODINT_PLANE%NSEGS
-DO ISEG=1,IBM_BODINT_PLANE%NSEGS
-   print*, " ",ISEG,IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
-END DO
-print*, "NSGLS=",IBM_BODINT_PLANE%NSGLS
-DO ISGL=1,IBM_BODINT_PLANE%NSGLS
-   print*, " ",ISGL,IBM_BODINT_PLANE%SGLS(NOD1,ISGL)
-END DO
-print*, "NTRIS=",IBM_BODINT_PLANE%NTRIS
-pause
+! Write out:
+! print*, "Up to END of GET_BODINT_PLANE=",X1AXIS,X1PLN
+! print*, "NNODS=",IBM_BODINT_PLANE%NNODS
+! DO INOD=1,IBM_BODINT_PLANE%NNODS
+!    write(*,'(I3,A,3F16.12)') INOD,", ",IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,INOD)
+! END DO
+! print*, "NSEGS=",IBM_BODINT_PLANE%NSEGS
+! DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+!    print*, " ",ISEG,IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+! END DO
+! print*, "NSGLS=",IBM_BODINT_PLANE%NSGLS
+! DO ISGL=1,IBM_BODINT_PLANE%NSGLS
+!    print*, " ",ISGL,IBM_BODINT_PLANE%SGLS(NOD1,ISGL)
+! END DO
+! print*, "NTRIS=",IBM_BODINT_PLANE%NTRIS
+! pause
 
 
 
@@ -1499,16 +1502,391 @@ IMPLICIT NONE
 INTEGER, INTENT(IN) :: X1AXIS, X2AXIS, X3AXIS
 REAL(EB),INTENT(IN) :: X3RAY
 
+! Local Variables:
+INTEGER :: ISGL, SGL, ISEG, SEG(NOD1:NOD2)
+REAL(EB):: XYZ1(MDIM), XYZ2(MDIM), X2_1, X2_2, X3_1, X3_2, DOT1, DOT2
+REAL(EB):: SVARI, STANI(IAXIS:JAXIS)
+INTEGER :: ICRSI(LOW:HIGH), SCRSI, ISSEG(LOW:HIGH), GAM(LOW:HIGH)
+REAL(EB):: X3MIN, X3MAX, DV12(MDIM), MODTI, NOMLI(IAXIS:JAXIS)
+LOGICAL :: OUTRAY
 
-! WORK HERE:
+INTEGER :: IBM_N_CRS_AUX
+REAL(EB):: IBM_SVAR_CRS_AUX(IBM_MAXCROSS_X2)
+!INTEGER :: IBM_IS_CRS_AUX(IBM_MAXCROSS_X2)
+INTEGER :: IBM_IS_CRS2_AUX(LOW:HIGH,IBM_MAXCROSS_X2)
+REAL(EB):: IBM_SEG_TAN_AUX(IAXIS:JAXIS,IBM_MAXCROSS_X2)
+INTEGER :: IBM_SEG_CRS_AUX(IBM_MAXCROSS_X2)
+INTEGER :: CRS_NUM(IBM_MAXCROSS_X2),IND_CRS(LOW:HIGH,IBM_MAXCROSS_X2)
+INTEGER :: LEFT_MEDIA, NCRS_REMAIN
+INTEGER :: ICRS, IDCR, IND_LEFT, IND_RIGHT
+LOGICAL :: DROP_SS_GG, FOUND_LEFT, NOT_COUNTED(IBM_MAXCROSS_X2)
 
+! Initialize crossings arrays:
+IBM_N_CRS = 0
+IBM_SVAR_CRS = 1._EB / GEOMEPS
+IBM_IS_CRS   = IBM_UNDEFINED
+IBM_IS_CRS2  = IBM_UNDEFINED
+IBM_SEG_TAN  = 0._EB
+IBM_SEG_CRS  = 0
+
+! First Single points:
+! Treat them as [GASPHASE GASPHASE] crossings:
+DO ISGL=1,IBM_BODINT_PLANE%NSGLS
+   
+   SGL = IBM_BODINT_PLANE%SGLS(NOD1,ISGL)
+   XYZ1(IAXIS:KAXIS) = IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,SGL)
+   
+   ! x2-x3 coordinates of point:
+   X2_1 = XYZ1(X2AXIS)
+   X3_1 = XYZ1(X3AXIS)
+   
+   ! Dot product dot(X_1-XRAY,e3)
+   DOT1 = X3_1-X3RAY
+   IF(ABS(DOT1) <= GEOMEPS) DOT1=0._EB
+   
+   IF( ABS(DOT1) == 0._EB ) THEN
+       ! Point 1:
+       SVARI = X2_1
+       ICRSI(LOW:HIGH) = IBM_GASPHASE
+       SCRSI = -ISGL
+       STANI(IAXIS:JAXIS)  = 0._EB
+       
+       ! Insertion sort:
+       CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI) ! Modifies crossings arrays.
+       
+   ENDIF
+   
+ENDDO
+
+! Now Segments:
+SEGMENTS_LOOP : DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+   
+   SEG(NOD1:NOD2)    = IBM_BODINT_PLANE%SEGS(NOD1:NOD2,ISEG)
+   XYZ1(IAXIS:KAXIS) = IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,SEG(NOD1))
+   XYZ2(IAXIS:KAXIS) = IBM_BODINT_PLANE%XYZ(IAXIS:KAXIS,SEG(NOD2))
+   
+   ! x2,x3 coordinates of segment:
+   X2_1 = XYZ1(X2AXIS)
+   X3_1 = XYZ1(X3AXIS) ! Lower index endpoint.
+   X2_2 = XYZ2(X2AXIS)
+   X3_2 = XYZ2(X3AXIS) ! Upper index endpoint.
+   
+   ! Is segment aligned with x3 direction?
+   IBM_BODINT_PLANE%X3ALIGNED(ISEG) = (ABS(X2_2-X2_1) < GEOMEPS)
+   ! Is segment aligned with x2 rays?:
+   IBM_BODINT_PLANE%X2ALIGNED(ISEG) = (ABS(X3_2-X3_1) < GEOMEPS)
+   
+   ! First Test if the whole segment is on one side of the Ray:
+   ! Test segment crosses the ray, or is in geomepsilon proximity
+   ! of it:
+   X3MIN = MIN(X3_1,X3_2)
+   X3MAX = MAX(X3_1,X3_2)
+   OUTRAY=(((X3RAY-X3MAX) > GEOMEPS) .OR. ((X3MIN-X3RAY) > GEOMEPS))
+   
+   IF (OUTRAY) CYCLE
+   
+   DOT1 = X3_1-X3RAY
+   DOT2 = X3_2-X3RAY
+   
+   IF(ABS(DOT1) <= GEOMEPS) DOT1 = 0._EB
+   IF(ABS(DOT2) <= GEOMEPS) DOT2 = 0._EB
+   
+   ! Segment tangent unit vector.
+   DV12(IAXIS:JAXIS) = XYZ2( (/ X2AXIS, X3AXIS /) ) - XYZ1( (/ X2AXIS, X3AXIS /) )
+   MODTI = SQRT( DV12(IAXIS)**2._EB + DV12(JAXIS)**2._EB )
+   STANI(IAXIS:JAXIS)  = DV12(IAXIS:JAXIS) * MODTI**(-1._EB)
+   NOMLI(IAXIS:JAXIS)  = (/ STANI(JAXIS), -STANI(IAXIS) /)
+   ISSEG(LOW:HIGH) = IBM_BODINT_PLANE%SEGTYPE(LOW:HIGH,ISEG)
+   
+   ! For x2, in local x2-x3 coords e2=(1,0):
+   GAM(LOW) = (1 + NINT(SIGN( 1._EB, NOMLI(IAXIS))) ) / 2  !(1+SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
+   GAM(HIGH)= (1 - NINT(SIGN( 1._EB, NOMLI(IAXIS))) ) / 2  !(1-SIGN(DOT_PRODUCT(NOMLI,e2)))/2;
+   
+   ! Test if whole segment is in ray, if so add segment nodes as crossings:
+   IF( (ABS(DOT1)+ABS(DOT2)) == 0._EB ) THEN
+      
+      ! Count both points as crossings:
+      ! Point 1:
+      SVARI = MIN(X2_1,X2_2)
+      ICRSI(LOW:HIGH) = (/ IBM_GASPHASE, IBM_SOLID /)
+      SCRSI = ISEG
+      
+      ! Insertion sort:
+      CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
+      
+      ! Point 2:
+      SVARI = MAX(X2_1,X2_2)
+      ICRSI(LOW:HIGH) = (/ IBM_SOLID, IBM_GASPHASE /)
+      SCRSI = ISEG
+      
+      ! Insertion sort:
+      CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
+         
+      CYCLE
+      
+   ENDIF
+   
+   ! Now nodes individually:
+   IF( ABS(DOT1) == 0._EB ) THEN
+      
+      ! Point 1:
+      SVARI = X2_1
+      
+      ! LOW and HIGH media type, using the segment definition:
+      ICRSI(LOW) = GAM(LOW)*ISSEG(LOW) + GAM(HIGH)*ISSEG(HIGH)
+      ICRSI(HIGH)= GAM(LOW)*ISSEG(HIGH)+ GAM(HIGH)*ISSEG(LOW)
+      
+      SCRSI = ISEG
+      
+      ! Insertion sort:
+      CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
+      
+      CYCLE
+      
+   ENDIF
+   IF( ABS(DOT2) == 0._EB ) THEN
+      
+      ! Point 2:
+      SVARI = X2_2
+      
+      ! LOW and HIGH media type, using the segment definition:
+      ICRSI(LOW) = GAM(LOW)*ISSEG(LOW) + GAM(HIGH)*ISSEG(HIGH)
+      ICRSI(HIGH)= GAM(LOW)*ISSEG(HIGH)+ GAM(HIGH)*ISSEG(LOW)
+      SCRSI = ISEG
+      
+      ! Insertion sort:
+      CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
+      
+      CYCLE
+      
+   ENDIF
+   
+   ! Finally regular case:
+   ! Points 1 on one side of ray, point 2 on the other:
+   ! IF ((DOT1 > 0. .AND. DOT2 < 0.) .OR. (DOT1 < 0. .AND. DOT2 > 0.))
+   IF( DOT1*DOT2 < 0._EB ) THEN
+      
+      ! Intersection Point along segment:
+      !DS    = (X3RAY-X3_1) / (X3_2-X3_1)
+      !SVARI = X2_1 + DS*(X2_2-X2_1)
+      SVARI = X2_1 + (X3RAY-X3_1) * (X2_2-X2_1) / (X3_2-X3_1)
+      
+      ! LOW and HIGH media type, using the segment definition:
+      ICRSI(LOW) = GAM(LOW)*ISSEG(LOW) + GAM(HIGH)*ISSEG(HIGH)
+      ICRSI(HIGH)= GAM(LOW)*ISSEG(HIGH)+ GAM(HIGH)*ISSEG(LOW)
+      SCRSI = ISEG
+      
+      ! Insertion sort:
+      CALL INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
+      
+      CYCLE
+      
+   ENDIF
+   
+   print*, "Error GET_X2INTERSECTIONS: Missed segment=",ISEG
+   
+ENDDO SEGMENTS_LOOP
+
+! Do we have any intersections?
+IF( IBM_N_CRS == 0 ) RETURN
+
+! Once all intersections and corresponding tags have been found, there 
+! might be points that lay on the same x2 location. Intersections type 
+! GG are dropped when other types are present at the same s. The remaining 
+! are reordered such that media continuity is preserved as the ray is 
+! covered for increasing s, by looking at the high side type of the 
+! adjacent intersection point to the left (if the intersection is the one
+! with lowest s, the media to the left is type IBM_GASPHASE). Points of same 
+! type are collapsed. The final unique intersection type is obtained by 
+! using the LOW type of the first intersection and the HIGH type of the 
+! last intersection found at a given s. 
+
+IBM_N_CRS_AUX    = 0
+IBM_SVAR_CRS_AUX = 1._EB/GEOMEPS ! svar = x2_intersection
+IBM_IS_CRS2_AUX  = IBM_UNDEFINED ! Is the intersection an actual GS.
+IBM_SEG_CRS_AUX  = 0             ! Segment containing the crossing.
+IBM_SEG_TAN_AUX  = 0._EB         ! Segment orientation for each intersection.
+
+! Count how many crossings with different SVAR:
+CRS_NUM      = 0
+ICRS         = 1
+CRS_NUM(ICRS)= 1
+IND_CRS      = 0
+IND_CRS(LOW, CRS_NUM(ICRS)) = ICRS-1
+IND_CRS(HIGH,CRS_NUM(ICRS)) = IND_CRS(HIGH,ICRS)+1
+
+DO ICRS=2,IBM_N_CRS
+   IF( ABS(IBM_SVAR_CRS(ICRS)-IBM_SVAR_CRS(ICRS-1)) < GEOMEPS ) THEN
+      CRS_NUM(ICRS) = CRS_NUM(ICRS-1)
+   ELSE
+      CRS_NUM(ICRS) = CRS_NUM(ICRS-1)+1
+      IND_CRS(LOW,CRS_NUM(ICRS)) = ICRS-1
+   ENDIF
+   IND_CRS(HIGH,CRS_NUM(ICRS)) = IND_CRS(HIGH,CRS_NUM(ICRS))+1
+ENDDO
+
+! This is where we merge intersections at same svar location (i.e. same CRS_NUM value):
+! Loop over different crossings:
+LEFT_MEDIA = IBM_GASPHASE
+DO IDCR=1,CRS_NUM(IBM_N_CRS)
+   
+   IBM_N_CRS_AUX = IBM_N_CRS_AUX + 1
+   ! Case of single crossing with new svar:
+   IF( IND_CRS(HIGH,IDCR) == 1 ) THEN
+      
+      ICRS =IND_CRS(LOW,IDCR) + 1
+      
+      IF( IBM_IS_CRS2(LOW,ICRS) /= LEFT_MEDIA ) THEN
+         print*, "Error GET_X2INTERSECTIONS: IS_CRS(LOW,ICRS) ~= LEFT_MEDIA, media continuity problem"
+      ENDIF
+      
+      IBM_SVAR_CRS_AUX(IBM_N_CRS_AUX)             = IBM_SVAR_CRS(ICRS)
+      IBM_IS_CRS2_AUX(LOW:HIGH,IBM_N_CRS_AUX)     = IBM_IS_CRS2(LOW:HIGH,ICRS)
+      IBM_SEG_CRS_AUX(IBM_N_CRS_AUX)              = IBM_SEG_CRS(ICRS)
+      IBM_SEG_TAN_AUX(IAXIS:JAXIS,IBM_N_CRS_AUX)  = IBM_SEG_TAN(IAXIS:JAXIS,ICRS)
+      LEFT_MEDIA = IBM_IS_CRS2(HIGH,ICRS)
+      
+      CYCLE
+      
+   ENDIF
+   
+   ! Case of several crossings with new svar:
+   DROP_SS_GG = .FALSE.
+   DO ICRS=IND_CRS(LOW,IDCR)+1,IND_CRS(LOW,IDCR)+IND_CRS(HIGH,IDCR)
+      IF( IBM_IS_CRS2(LOW,ICRS) /= IBM_IS_CRS2(HIGH,ICRS) ) THEN
+         DROP_SS_GG = .TRUE.
+         EXIT
+      ENDIF
+   ENDDO
+   
+   ! Variables related to new svar crossing:
+   ICRS = IND_CRS(LOW,IDCR) + 1
+   IBM_SVAR_CRS_AUX(IBM_N_CRS_AUX)             = IBM_SVAR_CRS(ICRS)
+   IBM_SEG_CRS_AUX(IBM_N_CRS_AUX)              = IBM_SEG_CRS(ICRS)
+   IBM_SEG_TAN_AUX(IAXIS:JAXIS,IBM_N_CRS_AUX)  = IBM_SEG_TAN(IAXIS:JAXIS,ICRS)
+   
+   ! Now figure out the type of crossing:
+   NOT_COUNTED = .TRUE.
+   NCRS_REMAIN = IND_CRS(HIGH,IDCR)
+   IF(DROP_SS_GG) THEN
+      
+      ! Left Side:
+      FOUND_LEFT = .FALSE.
+      IND_LEFT   = 0
+      IND_RIGHT  = 0
+      
+      DO ICRS=IND_CRS(LOW,IDCR)+1,IND_CRS(LOW,IDCR)+IND_CRS(HIGH,IDCR)
+         ! Case crossing type GG or SS, drop:
+         IF (IBM_IS_CRS2(LOW,ICRS) == IBM_IS_CRS2(HIGH,ICRS)) CYCLE
+         IND_LEFT  =  IND_LEFT + IBM_IS_CRS2(LOW,ICRS)
+         IND_RIGHT = IND_RIGHT + IBM_IS_CRS2(HIGH,ICRS)
+      ENDDO
+      
+      if (IND_LEFT  /= 0) IND_LEFT = SIGN(1,IND_LEFT)
+      if (IND_RIGHT /= 0) IND_RIGHT = SIGN(1,IND_RIGHT)
+      
+      IF (ABS(IND_LEFT)+ABS(IND_RIGHT) == 0) THEN ! Same number of SG and GS crossings, 
+                                                  ! both sides of the crossing
+                                                  ! defined as left_media:
+         IBM_IS_CRS2_AUX(LOW:HIGH,IBM_N_CRS_AUX)     = LEFT_MEDIA
+      ELSEIF(IND_LEFT == LEFT_MEDIA) THEN
+         IBM_IS_CRS2_AUX(LOW:HIGH,IBM_N_CRS_AUX) = (/ IND_LEFT, IND_RIGHT /) ! GS or SG.
+      ELSE
+         print*, "Error GET_X2INTERSECTIONS: DROP_SS_GG = .TRUE., Didn't find left side continuity."
+         print*, "IBM_N_CRS=",IBM_N_CRS,", IDCR=",IDCR
+         print*, ICRS,"IND_LEFT=",IND_LEFT,", IND_RIGHT=",IND_RIGHT
+         print*, "IBM_IS_CRS2(LOW:HIGH,ICRS)",IBM_IS_CRS2(LOW:HIGH,ICRS)
+      ENDIF
+      LEFT_MEDIA = IBM_IS_CRS2_AUX(HIGH,IBM_N_CRS_AUX)
+      
+   ELSE ! Intersections are either GG or SS
+      
+      ! Left side:
+      FOUND_LEFT = .FALSE.
+      DO ICRS=IND_CRS(LOW,IDCR)+1,IND_CRS(LOW,IDCR)+IND_CRS(HIGH,IDCR)
+         
+         ! Case GG or SS with IBM_IS_CRS2(LOW,ICRS) == LEFT_MEDIA:
+         ! This collapses all types SS or GG that have the left side
+         ! type. Note they should all be one type (either GG or SS):
+         IF (IBM_IS_CRS2(LOW,ICRS) == LEFT_MEDIA) THEN
+            IBM_IS_CRS2_AUX(LOW:HIGH,IBM_N_CRS_AUX) = IBM_IS_CRS2(LOW:HIGH,ICRS)
+            NOT_COUNTED(ICRS) = .FALSE.
+            NCRS_REMAIN = NCRS_REMAIN-1
+            FOUND_LEFT = .TRUE.
+         ENDIF
+      ENDDO
+      
+      IF(.NOT.FOUND_LEFT) print*, "Error GET_X2INTERSECTIONS: DROP_SS_GG = .FALSE., Didn't find left side continuity."
+      
+      IF ( NCRS_REMAIN /= 0) print*, "Error GET_X2INTERSECTIONS: DROP_SS_GG = .FALSE., NCRS_REMAIN /= 0."
+      
+      LEFT_MEDIA = IBM_IS_CRS2_AUX(HIGH,IBM_N_CRS_AUX)
+      
+   ENDIF
+   
+ENDDO
+
+! Copy final results:
+IBM_N_CRS    = IBM_N_CRS_AUX
+IBM_SVAR_CRS(1:IBM_MAXCROSS_X2)             = IBM_SVAR_CRS_AUX(1:IBM_MAXCROSS_X2)
+IBM_SEG_CRS(1:IBM_MAXCROSS_X2)              = IBM_SEG_CRS_AUX(1:IBM_MAXCROSS_X2)
+IBM_SEG_TAN(IAXIS:JAXIS,1:IBM_MAXCROSS_X2)  = IBM_SEG_TAN_AUX(IAXIS:JAXIS,1:IBM_MAXCROSS_X2)
+! IBM_IS_CRS2(LOW:HIGH,1:IBM_MAXCROSS_X2) = IBM_IS_CRS2_AUX(LOW:HIGH,1:IBM_MAXCROSS_X2)
+
+DO ICRS=1,IBM_N_CRS
+  IBM_IS_CRS(ICRS) = 2*( IBM_IS_CRS2_AUX(LOW,ICRS) + 1 ) - IBM_IS_CRS2_AUX(HIGH,ICRS)
+ENDDO
+
+
+! Write out:
+! print*, "X3RAY=",X3RAY,", Intersect X2=",IBM_N_CRS
+! DO ICRS=1,IBM_N_CRS
+!    print*, ICRS,", ",IBM_SVAR_CRS(ICRS),", ",IBM_IS_CRS(ICRS)
+! ENDDO
 
 RETURN
 END SUBROUTINE GET_X2INTERSECTIONS
 
 
+! ------------------------- INSERT_RAY_CROSS ------------------------------------
 
+SUBROUTINE INSERT_RAY_CROSS(SVARI,ICRSI,SCRSI,STANI)
 
+REAL(EB), INTENT(IN) :: SVARI, STANI(IAXIS:JAXIS)
+INTEGER,  INTENT(IN) :: ICRSI(LOW:HIGH), SCRSI
+
+! Local Variables:
+INTEGER :: ICRS, IDUM
+
+IBM_N_CRS = IBM_N_CRS + 1
+
+! Test maximum crossings defined:
+! IF ( IBM_N_CRS > IBM_MAXCROSS_X2) THEN
+!    print*, "Error INSERT_RAY_CROSS: IBM_N_CRS > IBM_MAXCROSS_X2."
+! ENDIF
+
+! Add in place, ascending value order:
+DO ICRS=1,IBM_N_CRS ! The updated IBM_N_CRS is for ICRS to reach the 
+                    ! initialization value IBM_SVAR_CRS(ICRS)=1/GEOMEPS.
+   IF( SVARI < IBM_SVAR_CRS(ICRS) ) EXIT
+ENDDO
+
+! Here copy from the back (updated IBM_N_CRS) to the ICRS location:
+! if ICRS=IBM_N_CRS -> nothing gets copied:
+DO IDUM = IBM_N_CRS,ICRS+1,-1
+   IBM_SVAR_CRS(IDUM)           = IBM_SVAR_CRS(IDUM-1)
+   IBM_IS_CRS2(LOW:HIGH,IDUM)   = IBM_IS_CRS2(LOW:HIGH,IDUM-1)
+   IBM_SEG_CRS(IDUM)            = IBM_SEG_CRS(IDUM-1);
+   IBM_SEG_TAN(IAXIS:JAXIS,IDUM)= IBM_SEG_TAN(IAXIS:JAXIS,IDUM-1); 
+ENDDO
+
+IBM_SVAR_CRS(ICRS)             = SVARI              ! x2 location.
+IBM_IS_CRS2(LOW:HIGH,ICRS)     = ICRSI(LOW:HIGH)    ! Does point separate GASPHASE from SOLID?
+IBM_SEG_CRS(ICRS)              = SCRSI              ! Segment on BOINT_PLANE the crossing belongs to.
+IBM_SEG_TAN(IAXIS:JAXIS,ICRS)  = STANI(IAXIS:JAXIS) ! IBM_SEG_TAN might not be needed in new implementation.
+
+RETURN
+END SUBROUTINE INSERT_RAY_CROSS
 
 ! ---------------------- GET_BODINT_NODE_INDEX ----------------------------------
 
@@ -1732,6 +2110,63 @@ ENDDO GEOMETRY_LOOP
 
 RETURN
 END SUBROUTINE IBM_INIT_GEOM
+
+! ------------------------- GET_X2_VERTVAR --------------------------------------
+
+SUBROUTINE GET_X2_VERTVAR(X1AXIS,X2LO,X2HI,NM,I,KK)
+
+INTEGER, INTENT(IN) :: X1AXIS,X2LO,X2HI,NM,I,KK
+
+! Local Variables:
+INTEGER :: ICRS,ICRS1,JSTR,JEND,JJ
+
+! Work By Edge, Only one x1axis=IAXIS needs to be used:
+IF ( X1AXIS == IAXIS ) THEN
+   
+   ! Case of GG, SS points:
+   DO ICRS=1,IBM_N_CRS
+      ! If is_crs(icrs) == GG, SS, SGG see if crossing is
+      ! exactly on a Cartesian cell vertex:
+      SELECT CASE(IBM_IS_CRS(ICRS))
+      CASE(IBM_GG,IBM_SS)
+         
+         ! Optimized and will ONLY work for Uniform Grids:
+         JSTR = MAX(X2LO,   FLOOR((IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO)
+         JEND = MIN(X2HI, CEILING((IBM_SVAR_CRS(ICRS)+GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO)
+         
+         DO JJ=JSTR,JEND
+            ! Crossing on Vertex?
+            IF( ABS(X2FACE(JJ)-IBM_SVAR_CRS(ICRS)) < GEOMEPS ) THEN
+               MESHES(NM)%VERTVAR(I,jj,kk,IBM_VGSC) = IBM_SOLID
+               EXIT
+            ENDIF
+         ENDDO
+      
+      END SELECT
+   ENDDO
+   
+   ! Other cases:
+   DO ICRS=1,IBM_N_CRS-1
+      ! Case GS-SG: All Cartesian vertices are set to IBM_SOLID.
+      IF (IBM_IS_CRS(ICRS) == IBM_GS) THEN
+         ! Find corresponding SG intersection:
+         DO ICRS1=ICRS+1,IBM_N_CRS 
+            IF (IBM_IS_CRS(ICRS1) == IBM_SG) EXIT
+         ENDDO
+         ! Optimized for UG:
+         JSTR = MAX(X2LO, CEILING(( IBM_SVAR_CRS(ICRS)-GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO)
+         JEND = MIN(X2HI,   FLOOR((IBM_SVAR_CRS(ICRS1)+GEOMEPS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO)
+                
+         DO JJ=JSTR,JEND
+            MESHES(NM)%VERTVAR(I,jj,kk,IBM_VGSC) = IBM_SOLID
+         ENDDO
+      ENDIF
+   ENDDO
+   
+ENDIF
+
+RETURN
+END SUBROUTINE GET_X2_VERTVAR
 
 ! ---------------------------- READ_GEOM ----------------------------------------
 
