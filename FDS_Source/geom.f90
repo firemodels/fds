@@ -2098,7 +2098,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%BNDC_FILENAME = BNDC_FILENAME
    G%GEOC_FILENAME = GEOC_FILENAME
    
-   IF (GEOC_FILENAME .NE. 'null' .AND. N_GEOMETRY > 1 ) THEN
+   IF (GEOC_FILENAME/='null' .AND. N_GEOMETRY > 1 ) THEN
       CALL SHUTDOWN('ERROR: only one &GEOM line permitted when defining coupled geometries (the GEOC_FILENAME keyword)')
    ENDIF
       
@@ -2159,7 +2159,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%MATL_ID = MATL_ID
    G%HAVE_MATL = HAVE_MATL
    
-   IF(.NOT.AUTO_TEXTURE.AND.N_VERTS>0)THEN
+   IF (.NOT.AUTO_TEXTURE .AND. N_VERTS>0) THEN
+      
       TXMIN = VERTS(1)
       TXMAX = TXMIN
       TYMIN = VERTS(2)
@@ -2167,10 +2168,10 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       DO I = 1, N_VERTS
          TX = VERTS(3*I-2)
          TY = VERTS(3*I-1)
-         IF(TX<TXMIN)TXMIN=TX
-         IF(TX>TXMAX)TXMAX=TX
-         IF(TY<TYMIN)TYMIN=TY
-         IF(TY>TYMAX)TYMAX=TY
+         IF (TX<TXMIN)TXMIN=TX
+         IF (TX>TXMAX)TXMAX=TX
+         IF (TY<TYMIN)TYMIN=TY
+         IF (TY>TYMAX)TYMAX=TY
       ENDDO
       TEXTURE_ORIGIN(1)=TXMIN
       TEXTURE_ORIGIN(2)=TYMIN
@@ -2281,8 +2282,8 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             DO I = 1, N_FACES-1
                FACEI=>FACES(3*OFACES(I)-2:3*OFACES(I))
                FACEJ=>FACES(3*OFACES(I)+1:3*OFACES(I)+3)
-               IF (FACEI(1)==FACEJ(1).AND.&
-                  MIN(FACEI(2),FACEI(3))==MIN(FACEJ(2),FACEJ(3)).AND.&
+               IF (FACEI(1)==FACEJ(1) .AND. &
+                  MIN(FACEI(2),FACEI(3))==MIN(FACEJ(2),FACEJ(3)) .AND. &
                   MAX(FACEI(2),FACEI(3))==MAX(FACEJ(2),FACEJ(3))) THEN
                   IS_EXTERNAL(OFACES(I))=.FALSE.
                   IS_EXTERNAL(OFACES(I-1))=.FALSE.
@@ -2406,7 +2407,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
    G%XYZ_DOT(1:3) = XYZ_DOT(1:3)
 
    IF (ABS(AZIM_DOT)>TWO_EPSILON_EB .OR. ABS(ELEV_DOT)>TWO_EPSILON_EB .OR. &
-       ANY(ABS(SCALE_DOT(1:3))>TWO_EPSILON_EB) .OR. ANY(ABS(XYZ_DOT(1:3) )>TWO_EPSILON_EB) .OR. GEOC_FILENAME .NE. 'null' ) THEN 
+       ANY(ABS(SCALE_DOT(1:3))>TWO_EPSILON_EB) .OR. ANY(ABS(XYZ_DOT(1:3) )>TWO_EPSILON_EB) .OR. GEOC_FILENAME/='null' ) THEN 
       G%IS_DYNAMIC = .TRUE.
       IS_GEOMETRY_DYNAMIC = .TRUE.
    ELSE
@@ -2477,7 +2478,7 @@ ENDDO READ_GEOM_LOOP
 GEOMETRY_CHANGE_STATE = 0   
 DO I = 1, N_GEOMETRY
    G=>GEOMETRY(I)
-   IF (G%GEOC_FILENAME /= 'null') THEN
+   IF (G%GEOC_FILENAME/='null') THEN
       GEOMETRY_CHANGE_STATE = 2
       EXIT
    ENDIF
@@ -2808,7 +2809,7 @@ IF (RIGHT-LEFT>1) THEN
    I2=NMID+1
    ICOUNT=LEFT
    DO WHILE (I1<=NMID .OR. I2<=RIGHT)
-      IF (I1<=NMID.AND.I2<=RIGHT) THEN
+      IF (I1<=NMID .AND. I2<=RIGHT) THEN
         IF (COMPARE_FACES(ORDER(I1),ORDER(I2))==-1) THEN
            WORK(ICOUNT)=ORDER(I1)
            I1=I1+1
@@ -2816,10 +2817,10 @@ IF (RIGHT-LEFT>1) THEN
            WORK(ICOUNT)=ORDER(I2)
            I2=I2+1
         ENDIF
-      ELSE IF (I1<=NMID.AND.I2>RIGHT) THEN
+      ELSE IF (I1<=NMID .AND. I2>RIGHT) THEN
          WORK(ICOUNT)=ORDER(I1)
          I1=I1+1
-      ELSE IF (I1>NMID.AND.I2<=RIGHT) THEN
+      ELSE IF (I1>NMID .AND. I2<=RIGHT) THEN
          WORK(ICOUNT)=ORDER(I2)
          I2=I2+1
       ENDIF
@@ -3282,7 +3283,7 @@ CHARACTER(30), INTENT(IN) :: ID
 INTEGER :: N
 
 DO N = 1, N_MATL
-   IF (TRIM(MATERIAL(N)%ID) /= TRIM(ID)) CYCLE
+   IF (TRIM(MATERIAL(N)%ID)/=TRIM(ID)) CYCLE
    GET_MATL_INDEX = N
    RETURN
 ENDDO
@@ -3296,7 +3297,7 @@ CHARACTER(30), INTENT(IN) :: ID
 INTEGER :: N
 
 DO N = 1, N_SURF
-   IF (TRIM(SURFACE(N)%ID) /= TRIM(ID)) CYCLE
+   IF (TRIM(SURFACE(N)%ID)/=TRIM(ID)) CYCLE
    GET_SURF_INDEX = N
    RETURN
 ENDDO
@@ -3525,7 +3526,7 @@ OFFSET = 0
 DO I = 1, N_GEOMETRY
    G=>GEOMETRY(I)
 
-   IF (G%IS_DYNAMIC.AND. .NOT.IS_DYNAMIC) CYCLE
+   IF (G%IS_DYNAMIC .AND. .NOT.IS_DYNAMIC) CYCLE
    IF (.NOT.G%IS_DYNAMIC .AND. IS_DYNAMIC) CYCLE
 
    IF (G%COMPONENT_ONLY) CYCLE
@@ -3580,7 +3581,7 @@ G=>GEOMETRY(IGEOM)
      
 IF (G%NSUB_GEOMS==0) RETURN
       
-IF (G%N_VERTS_BASE==0.OR.(G%N_FACES_BASE==0.AND.G%N_VOLUS_BASE==0)) RETURN ! nothing to do if GEOM_IDS geometries are empty
+IF (G%N_VERTS_BASE==0.OR.(G%N_FACES_BASE==0 .AND. G%N_VOLUS_BASE==0)) RETURN ! nothing to do if GEOM_IDS geometries are empty
 
 GIDENTITY = RESHAPE ((/&
                1.0_EB,0.0_EB,0.0_EB,&
@@ -3597,7 +3598,7 @@ DO J = 1, G%NSUB_GEOMS
    NSUB_FACES = GSUB%N_FACES_BASE
    NSUB_VOLUS = GSUB%N_VOLUS_BASE
         
-   IF (NSUB_VERTS==0 .OR. (NSUB_FACES==0.AND.NSUB_VOLUS==0)) CYCLE
+   IF (NSUB_VERTS==0 .OR. (NSUB_FACES==0 .AND. NSUB_VOLUS==0)) CYCLE
 
    DSCALEPTR(1:3) => G%DSCALE(1:3,J)
    CALL SETUP_TRANSFORM(DSCALEPTR,G%DAZIM(J),G%DELEV(J),GIDENTITY,GZERO,M)
@@ -4192,7 +4193,7 @@ G => GEOMETRY(N)
    GEOC_CHECK_LOOP: DO I=1,30
       OPEN(LU_GEOC,FILE=FN,ACTION='READ',FORM='UNFORMATTED')
       READ(LU_GEOC) OWNER_INDEX     ! 1 - written by FEM, 0 - already read by FDS
-      IF (OWNER_INDEX == 1) EXIT GEOC_CHECK_LOOP
+      IF (OWNER_INDEX==1) EXIT GEOC_CHECK_LOOP
 
        CLOSE(LU_GEOC)
        IF (I==1) THEN
@@ -4313,7 +4314,7 @@ FACE_LOOP: DO N=1,N_FACE
                               
                CALL TRI_PLANE_BOX_INTERSECT(NP,PC,V1,V2,V3,BB)
                CALL TRIANGLE_POLYGON_POINTS(IERR2,NXP,XPC,V1,V2,V3,NP,PC,BB)
-               IF (IERR2 == 1)  THEN                  
+               IF (IERR2==1)  THEN                  
                   AREA = POLYGON_AREA(NXP,XPC)
                   IF (AREA > MIN_AREA) THEN
                      
@@ -4583,7 +4584,7 @@ BNDC_LOOP: DO N=1,N_GEOMETRY
          EXIT BNDC_CHECK_LOOP
       ENDIF
       IF (I==30) THEN
-         IF (OWNER_INDEX == 0) THEN
+         IF (OWNER_INDEX==0) THEN
             CALL SHUTDOWN("ERROR: BNDC FILE WAS NOT UPDATED BY STRUCTURE CODE")
          ELSE
             CALL SHUTDOWN("ERROR: TIME MARKS do not match")
@@ -4688,21 +4689,21 @@ IF (MIN(V1(3),V2(3),V3(3))>BB(6)) RETURN
 
 ! Any vertices inside bounding box?
 
-IF ( V1(1)>=BB(1).AND.V1(1)<=BB(2) .AND. &
-     V1(2)>=BB(3).AND.V1(2)<=BB(4) .AND. &
-     V1(3)>=BB(5).AND.V1(3)<=BB(6) ) THEN
+IF ( V1(1)>=BB(1) .AND. V1(1)<=BB(2) .AND. &
+     V1(2)>=BB(3) .AND. V1(2)<=BB(4) .AND. &
+     V1(3)>=BB(5) .AND. V1(3)<=BB(6) ) THEN
    IERR=1
    RETURN
 ENDIF
-IF ( V2(1)>=BB(1).AND.V2(1)<=BB(2) .AND. &
-     V2(2)>=BB(3).AND.V2(2)<=BB(4) .AND. &
-     V2(3)>=BB(5).AND.V2(3)<=BB(6) ) THEN
+IF ( V2(1)>=BB(1) .AND. V2(1)<=BB(2) .AND. &
+     V2(2)>=BB(3) .AND. V2(2)<=BB(4) .AND. &
+     V2(3)>=BB(5) .AND. V2(3)<=BB(6) ) THEN
    IERR=1
    RETURN
 ENDIF
-IF ( V3(1)>=BB(1).AND.V3(1)<=BB(2) .AND. &
-     V3(2)>=BB(3).AND.V3(2)<=BB(4) .AND. &
-     V3(3)>=BB(5).AND.V3(3)<=BB(6) ) THEN
+IF ( V3(1)>=BB(1) .AND. V3(1)<=BB(2) .AND. &
+     V3(2)>=BB(3) .AND. V3(2)<=BB(4) .AND. &
+     V3(3)>=BB(5) .AND. V3(3)<=BB(6) ) THEN
    IERR=1
    RETURN
 ENDIF
@@ -4862,14 +4863,14 @@ POINT_IN_BOX_2D=.FALSE.
 
 SELECT CASE(ABS(IOR))
    CASE(1) ! YZ plane
-      IF ( P(2)>=BB(3).AND.P(2)<=BB(4) .AND. &
-           P(3)>=BB(5).AND.P(3)<=BB(6) ) POINT_IN_BOX_2D=.TRUE.
+      IF ( P(2)>=BB(3) .AND. P(2)<=BB(4) .AND. &
+           P(3)>=BB(5) .AND. P(3)<=BB(6) ) POINT_IN_BOX_2D=.TRUE.
    CASE(2) ! XZ plane
-      IF ( P(1)>=BB(1).AND.P(1)<=BB(2) .AND. &
-           P(3)>=BB(5).AND.P(3)<=BB(6) ) POINT_IN_BOX_2D=.TRUE.
+      IF ( P(1)>=BB(1) .AND. P(1)<=BB(2) .AND. &
+           P(3)>=BB(5) .AND. P(3)<=BB(6) ) POINT_IN_BOX_2D=.TRUE.
    CASE(3) ! XY plane
-      IF ( P(1)>=BB(1).AND.P(1)<=BB(2) .AND. &
-           P(2)>=BB(3).AND.P(2)<=BB(4) ) POINT_IN_BOX_2D=.TRUE.
+      IF ( P(1)>=BB(1) .AND. P(1)<=BB(2) .AND. &
+           P(2)>=BB(3) .AND. P(2)<=BB(4) ) POINT_IN_BOX_2D=.TRUE.
 END SELECT
 
 END FUNCTION POINT_IN_BOX_2D
@@ -5862,9 +5863,9 @@ IMPLICIT NONE
 REAL(EB), INTENT(IN) :: V1(3),BB(6)
 
 POINT_IN_BB=.FALSE.
-IF ( V1(1)>=BB(1).AND.V1(1)<=BB(2) .AND. &
-     V1(2)>=BB(3).AND.V1(2)<=BB(4) .AND. &
-     V1(3)>=BB(5).AND.V1(3)<=BB(6) ) THEN
+IF ( V1(1)>=BB(1) .AND. V1(1)<=BB(2) .AND. &
+     V1(2)>=BB(3) .AND. V1(2)<=BB(4) .AND. &
+     V1(3)>=BB(5) .AND. V1(3)<=BB(6) ) THEN
    POINT_IN_BB=.TRUE.
    RETURN
 ENDIF
