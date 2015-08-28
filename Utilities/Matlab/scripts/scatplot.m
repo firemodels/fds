@@ -139,17 +139,21 @@ for j=2:length(Q);
             
             Measured_Metric(k,:,:)  = Save_Measured_Metric(i,:,:);
             Predicted_Metric(k,:,:) = Save_Predicted_Metric(i,:,:);
+
+            for kk=1:10;
+                for jj=1:10;
+                    if Measured_Metric(k,jj,kk) < Plot_Min; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
+                    if Measured_Metric(k,jj,kk) > Plot_Max; Measured_Metric(k,jj,kk)=0. ; Predicted_Metric(k,jj,kk)=0. ; end
+                end
+            end
+
             Nonzeros_Measured_Metric = nonzeros(Measured_Metric(k,:,:));
             Nonzeros_Predicted_Metric = nonzeros(Predicted_Metric(k,:,:));
             Size_Measured = size(Nonzeros_Measured_Metric);
             Size_Predicted = size(Nonzeros_Predicted_Metric);
+            if Size_Measured(1) == 0 ; k=k-1 ; continue ; end
             Group_Key_Label(k) = Save_Group_Key_Label(i);
-            
-            % Skip case if predicted metric is zero
-            if Size_Predicted(1) == 0
-                display(['Error: Size of predicted metric is zero for scatterplot ', Scatter_Plot_Title, '. Skipping scatterplot.'])
-                continue
-            end
+
             % Check to see if measured and predicted arrays are the same size
             if Size_Measured(1) ~= Size_Predicted(1)
                 display(['Error: Mismatched measured and predicted arrays in scatter plot for scatterplot ', Scatter_Plot_Title, '. Verify that the statistical metrics are being used properly for all cases. Skipping scatterplot.'])
@@ -270,11 +274,11 @@ for j=2:length(Q);
         % Plot diagonal lines
         plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max],'k-')
         if strcmp(Model_Error, 'yes')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1+2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*(1-2*Sigma_E)],'k--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta],'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1+2*Sigma_M)],'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max*delta*(1-2*Sigma_M)],'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(1+2*Sigma_E),'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(1-2*Sigma_E),'k--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta,'r-')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta*(1+2*Sigma_M),'r--')
+            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta*(1-2*Sigma_M),'r--')
         end
         
         % Format the legend and axis labels
