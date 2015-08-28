@@ -3,7 +3,7 @@ MODULE TYPES
 ! Definitions of various derived data types
  
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN, MAX_SPECIES
+USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN, MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2
 
 IMPLICIT NONE
 
@@ -307,6 +307,26 @@ END TYPE VERTEX_TYPE
 
 TYPE(VERTEX_TYPE), TARGET, ALLOCATABLE, DIMENSION(:) :: VERTEX
 
+! --- CC_IBM types:
+! Edge crossings data structure:
+INTEGER, PARAMETER :: IBM_MAXCROSS_EDGE = 10 ! Size definition parameter. Max number of crossings per Cartesian Edge.
+TYPE IBM_EDGECROSS_TYPE
+   INTEGER :: NCROSS   ! Number of BODINT_PLANE segments - Cartesian edge crossings.
+   REAL(EB), DIMENSION(1:IBM_MAXCROSS_EDGE)   ::  SVAR ! Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(1:IBM_MAXCROSS_EDGE)   :: ISVAR ! Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(MAX_DIM+1)             ::   IJK ! [ i j k X2AXIS]
+END TYPE IBM_EDGECROSS_TYPE
+
+! Cartesian Edge Cut-Edges data structure:
+INTEGER, PARAMETER :: IBM_MAXCUTEDGE_EDGE = 10 ! Size definition parameter. Max number of cut edges per Cartesian Edge.
+TYPE IBM_CUTEDGE_TYPE
+   INTEGER :: NVERT, NEDGE, STATUS   ! Local Vertices, cut-edges and status of this Cartesian edge.
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCROSS_EDGE) :: XYZVERT ! Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCROSS_EDGE)   :: CEELEM  ! Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(MAX_DIM+1)                       ::   IJK   ! [ i j k X2AXIS]
+END TYPE IBM_CUTEDGE_TYPE
+
+! -----------------------------------------
 ! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists 
 TYPE LINKED_LIST_TYPE
    INTEGER :: INDEX                           ! data
