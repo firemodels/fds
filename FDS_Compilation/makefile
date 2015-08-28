@@ -422,7 +422,7 @@ gnu_linux : obj = fds_gnu_linux
 gnu_linux : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux_db : FFLAGS = -O0 -g $(GITINFOGNU)
+gnu_linux_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 gnu_linux_db : FCOMPL = gfortran
 gnu_linux_db : FOPENMPFLAGS = -fopenmp
 gnu_linux_db : obj = fds_gnu_linux_db
@@ -436,7 +436,7 @@ gnu_osx : obj     = fds_gnu_osx
 gnu_osx : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx_db : FFLAGS  = -O0 -g $(GITINFOGNU)
+gnu_osx_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 gnu_osx_db : FCOMPL  = gfortran
 gnu_osx_db : FOPENMPFLAGS = -fopenmp
 gnu_osx_db : obj     = fds_gnu_osx_db
