@@ -4217,6 +4217,7 @@ DEVICE_LOOP: DO N=1,N_DEVC
 
    ! Override the evacuation flow field calculation phase geometry changes
 
+   T_TMP = T
    IF (EVACUATION_ONLY(NM) .AND. DV%QUANTITY=='TIME' .AND. DV%SETPOINT<=T_BEGIN) THEN
       IF (EMESH_INDEX(NM)>0) THEN
          VALUE = VALUE - EVAC_DT_FLOWFIELD*EVAC_TIME_ITERATIONS
