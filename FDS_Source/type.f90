@@ -3,7 +3,7 @@ MODULE TYPES
 ! Definitions of various derived data types
  
 USE PRECISION_PARAMETERS
-USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN, MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2
+USE GLOBAL_CONSTANTS, ONLY : NULL_BOUNDARY,NEUMANN, MAX_SPECIES,IAXIS,JAXIS,KAXIS,MAX_DIM,NOD1,NOD2,IBM_MAX_WSTRIANG_SEG
 
 IMPLICIT NONE
 
@@ -321,9 +321,10 @@ END TYPE IBM_EDGECROSS_TYPE
 INTEGER, PARAMETER :: IBM_MAXCUTEDGE_EDGE = 10 ! Size definition parameter. Max number of cut edges per Cartesian Edge.
 TYPE IBM_CUTEDGE_TYPE
    INTEGER :: NVERT, NEDGE, STATUS   ! Local Vertices, cut-edges and status of this Cartesian edge.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCROSS_EDGE) :: XYZVERT ! Locations along x2 axis of NCROSS intersections.
-   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCROSS_EDGE)   :: CEELEM  ! Type of intersection (i.e. SG, GS or GG).
-   INTEGER,  DIMENSION(MAX_DIM+1)                       ::   IJK   ! [ i j k X2AXIS]
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCUTEDGE_EDGE) :: XYZVERT ! Locations along x2 axis of NCROSS intersections.
+   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCUTEDGE_EDGE)   :: CEELEM  ! Type of intersection (i.e. SG, GS or GG).
+   INTEGER,  DIMENSION(MAX_DIM+2)                         ::   IJK   ! [ i j k X2AXIS cetype]
+   INTEGER,  DIMENSION(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCUTEDGE_EDGE) :: INDSEG  ! [ntr tr1 tr2 ibod]
 END TYPE IBM_CUTEDGE_TYPE
 
 ! -----------------------------------------
