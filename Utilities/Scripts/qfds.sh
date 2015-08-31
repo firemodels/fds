@@ -4,6 +4,11 @@ FDSROOT=~/FDS-SMV
 if [ "$FDSSMV" != "" ] ; then
   FDSROOT=$FDSSMV
 fi
+if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
+  walltime=99-99:99:99
+else
+  walltime=999:0:0
+fi
 
 if [ $# -lt 1 ]
 then
@@ -34,7 +39,7 @@ then
   echo " -s   - stop job"
   echo " -S   - run only if number of process is equal to 1"
   echo " -t   - used for timing studies, run a job alone on a node"
-  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: empty string]"
+  echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -v   - list script used to run case to standard output"
   echo "input_file - input file"
   echo ""
@@ -67,10 +72,6 @@ nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
 nopenmp_threads=1
-walltime=
-if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
-  walltime=99-99:99:99
-fi
 use_repository=0
 use_debug=0
 dir=.
