@@ -11881,11 +11881,13 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "HEATONCOLOR\n");
   fprintf(fileout, " %f %f %f\n", heatoncolor[0], heatoncolor[1], heatoncolor[2]);
   fprintf(fileout, "ISOCOLORS\n");
-	fprintf(fileout," %f %f : shininess, transparency\n",iso_shininess, iso_transparency);  
+	fprintf(fileout," %f %f : shininess, default opaqueness\n",iso_shininess, iso_transparency);  
 	fprintf(fileout," %f %f %f : specular\n",iso_specular[0],iso_specular[1],iso_specular[2]);
-  fprintf(fileout," %i\n",MAX_ISO_COLORS);
+  fprintf(fileout," %i : number of levels\n",MAX_ISO_COLORS);
   for(i=0;i<MAX_ISO_COLORS;i++){
-    fprintf(fileout, " %f %f %f %f\n", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2], iso_colors[4*i+3]);
+    fprintf(fileout, " %f %f %f %f", iso_colors[4*i], iso_colors[4*i+1], iso_colors[4*i+2], iso_colors[4*i+3]);
+    if(i==0)fprintf(fileout, " : red, green, blue, alpha (opaqueness)");
+    fprintf(fileout, "\n");
   }
   if(ncolortableinfo>0){
     char percen[2];
