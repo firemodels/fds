@@ -169,6 +169,8 @@ REAL(EB) :: DX2_MIN, DX3_MIN
 LOGICAL :: TRI_ONPLANE_ONLY
 LOGICAL, SAVE :: FIRST_CALL = .TRUE.
 INTEGER :: IBM_CUTCELLS_FOUND_MESH
+INTEGER :: ISEG, ICROSS
+
 
 ! Reset variables:
 IBM_NEDGECROSS = 0
@@ -482,14 +484,28 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
                ! intersections with grid line vertices:
                CALL GET_BODX3_INTERSECTIONS(X2AXIS,X3AXIS,X2LO,X2HI)
                
+               ! DO ISEG=1,IBM_BODINT_PLANE%NSEGS
+               !    print*, ' '
+               !    print*, ISEG,', nbcross=',IBM_BODINT_PLANE%NBCROSS(ISEG)
+               !    DO ICROSS=1,IBM_BODINT_PLANE%NBCROSS(ISEG)
+               !       print*, ISEG,', ibcross=',ICROSS,', ',IBM_BODINT_PLANE%SVAR(ICROSS,ISEG)
+               !    ENDDO
+               ! ENDDO
+               ! print*, "NCUTEDGE=",MESHES(NM)%IBM_NCUTEDGE_MESH
+               ! pause
+               
+               
                ! After these loops all segments should contain points from Node1,
                ! cross 1, cross 2, ..., Node2, in ascending sbod order.
                ! Time to generate the body IBM_INBOUNDARY edges on faces and add
                ! to MESHES(NM)%IBM_CUT_EDGE:
                CALL GET_CARTFACE_CUTEDGES(X1AXIS,X2AXIS,X3AXIS,                   &
                                           XIAXIS,XJAXIS,XKAXIS,NM,                &
-                                          X2LO,X3LO,X3HI,X2LO_CELL,X2HI_CELL,&
+                                          X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL,&
                                           X3LO_CELL,X3HI_CELL,INDX1)
+               !
+               ! print*, "NCUTEDGE 2=",MESHES(NM)%IBM_NCUTEDGE_MESH
+               ! pause
                
             ENDDO ! I index
          ENDDO ! J index
@@ -614,8 +630,8 @@ DO IG=1,N_GEOMETRY
    ENDDO
  
 ENDDO
-IBM_MAX_NBCROSS = 2 * CEILING(MAX_LEDGE/MIN(DX2_MIN, DX3_MIN)) ! Rough estimate. Might need to increase 
-                                                               ! the 2 factor.
+IBM_MAX_NBCROSS = 1 * CEILING(MAX_LEDGE/MIN(DX2_MIN, DX3_MIN)) ! Rough estimate. Might need to increase 
+                                                               ! the 1 factor.
 
 ! Now allocate IBM_BODINT_PLANE:
 IBM_BODINT_PLANE%NNODS = 0
@@ -1481,7 +1497,7 @@ DO ISEG=1,IBM_BODINT_PLANE%NSEGS
    ! Add crossing to BODINT_PLANE:
    NBCROSS = IBM_BODINT_PLANE%NBCROSS(ISEG) + 1
    IBM_BODINT_PLANE%NBCROSS(ISEG) = NBCROSS
-   IBM_BODINT_PLANE%SVAR(ISEG,NBCROSS) = SBOD
+   IBM_BODINT_PLANE%SVAR(NBCROSS,ISEG) = SBOD
  
 ENDDO
 
@@ -2663,19 +2679,19 @@ END SUBROUTINE GET_BODX3_INTERSECTIONS
 
 SUBROUTINE GET_CARTFACE_CUTEDGES(X1AXIS,X2AXIS,X3AXIS,                   &
                                  XIAXIS,XJAXIS,XKAXIS,NM      ,          &
-                                 X2LO,X3LO,X3HI,X2LO_CELL,X2HI_CELL,     &
+                                 X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL,     &
                                  X3LO_CELL,X3HI_CELL,INDX1)
 
 INTEGER,  INTENT(IN) :: X1AXIS,X2AXIS,X3AXIS,XIAXIS,XJAXIS,XKAXIS,NM, &
-                        X2LO,X3LO,X3HI,X2LO_CELL,X2HI_CELL,           &
+                        X2LO,X2HI,X3LO,X3HI,X2LO_CELL,X2HI_CELL,           &
                         X3LO_CELL,X3HI_CELL,INDX1(MAX_DIM)
 
 ! Local Variables:
 REAL(EB) :: XYZ1(MAX_DIM), XYZ2(MAX_DIM), X2_1, X2_2, X3_1, X3_2, SLEN
-REAL(EB) :: STANI(IAXIS:JAXIS), SNORI(IAXIS:JAXIS), X3RAY
-INTEGER  :: ISEG, SEG(NOD1:NOD2), NBCROSS, IEDGE, KK, JJ2, KK2, IPFACE, NPFACE, INOD1, INOD2
+REAL(EB) :: STANI(IAXIS:JAXIS), SNORI(IAXIS:JAXIS), X2RAY, X3RAY
+INTEGER  :: ISEG, SEG(NOD1:NOD2), NBCROSS, IEDGE, JJ, KK, JJ2, KK2, IPFACE, NPFACE, INOD1, INOD2
 LOGICAL  :: ADD2FACES, INRAY, CONDAX
-INTEGER  :: INDSEG(1:IBM_MAX_WSTRIANG_SEG+2), NTRISEG, CETYPE, KK2VEC(LOW_IND:HIGH_IND)
+INTEGER  :: INDSEG(1:IBM_MAX_WSTRIANG_SEG+2), NTRISEG, CETYPE, JJ2VEC(LOW_IND:HIGH_IND), KK2VEC(LOW_IND:HIGH_IND)
 REAL(EB) :: SVAR1, SVAR2, SVAR12, XPOS
 INTEGER  :: INDXI(IAXIS:KAXIS), INDIF, INDJF, INDKF, CEI, NVERT, NEDGE, DIRAXIS
 REAL(EB) :: XYZV1(IAXIS:KAXIS), XYZV1LC(IAXIS:KAXIS)
@@ -2736,10 +2752,10 @@ SEGS_LOOP : DO ISEG=1,IBM_BODINT_PLANE%NSEGS
              KK2VEC(HIGH_IND)= KK + FCELL - 1
          ELSE
              NPFACE = 1
-             if (SNORI(JAXIS) > 0) THEN ! add 1 to index kk+FCELL-1 (i.e. lower face index)
+             if ( SNORI(JAXIS) > 0._EB ) THEN ! add 1 to index kk+FCELL-1 (i.e. lower face index)
                  KK2VEC(LOW_IND) = KK + FCELL
              ELSE
-                 KK2VEC(HIGH_IND)= KK + FCELL - 1
+                 KK2VEC(LOW_IND)= KK + FCELL - 1
              ENDIF
          ENDIF
          
@@ -2773,7 +2789,7 @@ SEGS_LOOP : DO ISEG=1,IBM_BODINT_PLANE%NSEGS
                
                ! Now the face is, FCVAR (x1axis):
                IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) > 0) THEN ! There is already
-                                                                                 ! an entry in CUT_EDGE.
+                                                                                 ! an entry in IBM_CUT_EDGE.
                   CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
                ELSE ! We need a new entry in CUT_EDGE
                   CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
@@ -2797,16 +2813,12 @@ SEGS_LOOP : DO ISEG=1,IBM_BODINT_PLANE%NSEGS
                XYZV1(JAXIS) = XYZV1LC(XJAXIS)
                XYZV1(KAXIS) = XYZV1LC(XKAXIS)
                CALL INSERT_FACE_VERT(XYZV1,NM,CEI,NVERT,INOD1)
-               ![inod1,nvert,CUT_EDGE(cei).XYZvert]=insert_face_vert(xyzv1,...
-               !                                    nvert,CUT_EDGE(cei).XYZvert);
                !                                           xv2                      yv2                     zv2
-               XYZV2LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR2, X3_1+STANI(IAXIS)*SVAR2 /)
+               XYZV2LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR2, X3_1+STANI(JAXIS)*SVAR2 /)
                XYZV2(IAXIS) = XYZV2LC(XIAXIS)
                XYZV2(JAXIS) = XYZV2LC(XJAXIS)
                XYZV2(KAXIS) = XYZV2LC(XKAXIS)
                CALL INSERT_FACE_VERT(XYZV2,NM,CEI,NVERT,INOD2)
-               ![inod2,nvert,CUT_EDGE(cei).XYZvert]=insert_face_vert(xyzv2,...
-               !nvert,CUT_EDGE(cei).XYZvert);
                
                NEDGE = MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
                IF ( NPFACE == 1 ) THEN
@@ -2841,18 +2853,200 @@ SEGS_LOOP : DO ISEG=1,IBM_BODINT_PLANE%NSEGS
    ! Second check if segment geomepsilon aligned with x3:
    ELSEIF(IBM_BODINT_PLANE%X3ALIGNED(ISEG)) THEN
       
+      ! Test if node1 of segment is in geomepsilon vicinity of an x3 ray
+      DO JJ=X2LO,X2HI
+         ! x2 location of ray along x3, on the x2-x3 plane:
+         X2RAY = X2FACE(JJ)
+         IF ( ABS(X2RAY-X2_1) < GEOMEPS ) THEN
+            INRAY = .TRUE.
+            EXIT
+         ENDIF
+      ENDDO
       
-      
-      
-      
+      IF(INRAY) THEN ! Segment in x3 ray defined by x2 face index JJ
+         
+         ! 1. INB cut-edges on top of an x3 gridline, assign to cut-face
+         !    defined by normal out.
+         JJ2VEC(LOW_IND:HIGH_IND) = 0
+         IF (ADD2FACES) THEN
+            NPFACE = 2
+            JJ2VEC(LOW_IND)  = JJ + FCELL
+            JJ2VEC(HIGH_IND) = JJ + FCELL - 1
+         ELSE
+            NPFACE = 1
+            IF( SNORI(IAXIS) > 0._EB ) THEN ! add 1 to index jj+FCELL-1 (i.e. lower face index)
+               JJ2VEC(LOW_IND) = JJ + FCELL
+            ELSE
+               JJ2VEC(LOW_IND) = JJ + FCELL - 1
+            ENDIF
+         ENDIF
+         
+         DO IPFACE=1,NPFACE
+            
+            JJ2 = JJ2VEC(IPFACE)
+            
+            ! Figure out which cut faces the inboundary cut-edges of
+            ! this segment belong to:
+            ! We have NBCROSS-1 INBOUNDARY CUT_EDGEs to generate.
+            DO IEDGE=1,NBCROSS-1
+               
+               ! Location along Segment:
+               SVAR1 = IBM_BODINT_PLANE%SVAR(IEDGE  ,ISEG)
+               SVAR2 = IBM_BODINT_PLANE%SVAR(IEDGE+1,ISEG)
+               ! Location of midpoint of cut-edge:
+               SVAR12 = 0.5_EB * (SVAR1+SVAR2)
+               
+               ! Define Cartesian segment this cut-edge belongs:
+               XPOS = X3_1 + SVAR12*STANI(JAXIS)
+               KK2 = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
+               
+               ! Discard cut-edges on faces laying on x3hi.
+               IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
+               IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
+               
+               ! Face indexes:
+               INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ2, KK2 /) ! Local x1,x2,x3
+               INDIF=INDXI(XIAXIS)
+               INDJF=INDXI(XJAXIS)
+               INDKF=INDXI(XKAXIS)
+               
+               ! Now the face is, FCVAR (x1axis):
+               IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) > 0) THEN ! There is already
+                                                                                 ! an entry in IBM_CUT_EDGE.
+                  CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
+               ELSE ! We need a new entry in CUT_EDGE
+                  CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
+                  MESHES(NM)%IBM_NCUTEDGE_MESH                       = CEI
+                  MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)= CEI
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT   = 0
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT = 0._EB
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE   = 0
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM  = IBM_UNDEFINED
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG  = IBM_UNDEFINED
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = (/ INDIF, INDJF, INDKF, X1AXIS, CETYPE /)
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS  = IBM_INBOUNDCF
+               ENDIF
+               
+               ! Add vertices, non repeated vertex entries at this point.
+               NVERT = MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT
+               ! Define vertices for this segment:                                       
+               !                                           xv1                      yv1                     zv1
+               XYZV1LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR1, X3_1+STANI(JAXIS)*SVAR1 /)
+               XYZV1(IAXIS) = XYZV1LC(XIAXIS)
+               XYZV1(JAXIS) = XYZV1LC(XJAXIS)
+               XYZV1(KAXIS) = XYZV1LC(XKAXIS)
+               CALL INSERT_FACE_VERT(XYZV1,NM,CEI,NVERT,INOD1)
+               !                                           xv2                      yv2                     zv2
+               XYZV2LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR2, X3_1+STANI(JAXIS)*SVAR2 /)
+               XYZV2(IAXIS) = XYZV2LC(XIAXIS)
+               XYZV2(JAXIS) = XYZV2LC(XJAXIS)
+               XYZV2(KAXIS) = XYZV2LC(XKAXIS)
+               CALL INSERT_FACE_VERT(XYZV2,NM,CEI,NVERT,INOD2)
+               
+               NEDGE = MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
+               IF ( NPFACE == 1 ) THEN
+                  MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD1, INOD2 /)
+               ELSE
+                  DIRAXIS = X3AXIS
+                  CONDAX  = (XYZV2(DIRAXIS)-XYZV1(DIRAXIS)) > 0
+                  IF ( JJ2 == JJ+FCELL-1 ) THEN
+                     IF(CONDAX) THEN
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD2, INOD1 /)
+                     ELSE
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD1, INOD2 /)
+                     ENDIF
+                  ELSE
+                     IF(CONDAX) THEN
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD1, INOD2 /)
+                     ELSE
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD2, INOD1 /)
+                     ENDIF
+                  ENDIF
+               ENDIF
+               MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
+                               IBM_BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
+               MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT = NVERT
+               MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE = NEDGE+1
+               
+            ENDDO
+         ENDDO
+         CYCLE ! Skips rest of iseg loop, for this ISEG.
+      ENDIF
       
    ENDIF
-    
+   
+   ! 3. Regular case: INB cut-edge with centroid inside a
+   !    Cartesian face, assign to corresponding FCVAR IBM_IDCE variable.
+   ! This is the most common case, INBOUNDARY edges defined inside x1 faces.
+   ! We have NBCROSS-1 INBOUNDARY CUT_EDGEs to generate.
+   DO IEDGE=1,NBCROSS-1
+      
+      ! Location along Segment:
+      SVAR1 = IBM_BODINT_PLANE%SVAR(IEDGE  ,ISEG)
+      SVAR2 = IBM_BODINT_PLANE%SVAR(IEDGE+1,ISEG)
+      ! Location of midpoint of cut-edge:
+      SVAR12 = 0.5_EB * (SVAR1+SVAR2)
+      
+      ! Define Cartesian face this cut-edge belongs:
+      XPOS = X2_1 + SVAR12*STANI(IAXIS)
+      JJ2  = FLOOR((XPOS-X2FACE(X2LO))/DX2FACE(X2LO)) + X2LO_CELL
+      XPOS = X3_1 + SVAR12*STANI(JAXIS)
+      KK2  = FLOOR((XPOS-X3FACE(X3LO))/DX3FACE(X3LO)) + X3LO_CELL
+      
+      ! Discard cut-edges on faces laying on x2hi and x3hi.
+      IF ((JJ2 < X2LO_CELL) .OR. (JJ2 > X2HI_CELL)) CYCLE
+      IF ((KK2 < X3LO_CELL) .OR. (KK2 > X3HI_CELL)) CYCLE
+      
+      ! Face indexes:
+      INDXI(IAXIS:KAXIS) = (/ INDX1(X1AXIS), JJ2, KK2 /) ! Local x1,x2,x3
+      INDIF=INDXI(XIAXIS)
+      INDJF=INDXI(XJAXIS)
+      INDKF=INDXI(XKAXIS)
+      
+      ! Now the face is, FCVAR (x1axis):
+      IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) > 0) THEN ! There is already
+                                                                        ! an entry in IBM_CUT_EDGE.
+         CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
+      ELSE ! We need a new entry in CUT_EDGE
+         CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
+         MESHES(NM)%IBM_NCUTEDGE_MESH                       = CEI
+         MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)= CEI
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT   = 0
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT = 0._EB
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE   = 0
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM  = IBM_UNDEFINED
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG  = IBM_UNDEFINED
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = (/ INDIF, INDJF, INDKF, X1AXIS, CETYPE /)
+         MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS  = IBM_INBOUNDCF
+      ENDIF
+      
+      ! Add vertices, non repeated vertex entries at this point.
+      NVERT = MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT
+      
+      ! Define vertices for this segment:
+      !                                           xv1                      yv1                     zv1
+      XYZV1LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR1, X3_1+STANI(JAXIS)*SVAR1 /)
+      XYZV1(IAXIS) = XYZV1LC(XIAXIS)
+      XYZV1(JAXIS) = XYZV1LC(XJAXIS)
+      XYZV1(KAXIS) = XYZV1LC(XKAXIS)
+      CALL INSERT_FACE_VERT(XYZV1,NM,CEI,NVERT,INOD1)
+      !                                           xv2                      yv2                     zv2
+      XYZV2LC(IAXIS:KAXIS)= (/ X1FACE(INDX1(X1AXIS)), X2_1+STANI(IAXIS)*SVAR2, X3_1+STANI(JAXIS)*SVAR2 /)
+      XYZV2(IAXIS) = XYZV2LC(XIAXIS)
+      XYZV2(JAXIS) = XYZV2LC(XJAXIS)
+      XYZV2(KAXIS) = XYZV2LC(XKAXIS)
+      CALL INSERT_FACE_VERT(XYZV2,NM,CEI,NVERT,INOD2)
+      
+      NEDGE = MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
+      MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,NEDGE+1) = (/ INOD1, INOD2 /)
+      MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,NEDGE+1) = &
+                      IBM_BODINT_PLANE%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,ISEG)
+      MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT = NVERT
+      MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE = NEDGE+1
+      
+   ENDDO
    
 ENDDO SEGS_LOOP
-
-
-
 
 RETURN
 END SUBROUTINE GET_CARTFACE_CUTEDGES
@@ -2867,7 +3061,23 @@ INTEGER,  INTENT(INOUT):: NVERT
 INTEGER,  INTENT(OUT)  :: INOD
 
 ! Local Variables:
+LOGICAL  :: INLIST
+REAL(EB) :: DV(MAX_DIM)
 
+INLIST = .FALSE.
+DO INOD=1,NVERT
+   DV(IAXIS:KAXIS) = XYZV(IAXIS:KAXIS) - MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,INOD)
+   !IF ( SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB + DV(KAXIS)**2._EB ) < GEOMEPS) THEN
+   IF ( ( ABS(DV(IAXIS)) + ABS(DV(JAXIS)) + ABS(DV(KAXIS)) ) < GEOMEPS) THEN
+      INLIST = .TRUE.
+      EXIT
+   ENDIF
+ENDDO
+IF(.NOT.INLIST) THEN
+   NVERT = NVERT + 1
+   INOD  = NVERT
+   MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,INOD) = XYZV(IAXIS:KAXIS)
+ENDIF
 
 RETURN
 END SUBROUTINE INSERT_FACE_VERT
