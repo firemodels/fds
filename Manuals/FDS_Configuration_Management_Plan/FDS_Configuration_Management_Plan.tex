@@ -159,21 +159,17 @@ the input file containing all the necessary information needed to perform a simu
 
 \section{Version History}
 
-Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and a beta test of version 6 in October 2012.
+Version 1 of FDS was publicly released in February 2000, version 2 in December 2001, version 3 in November 2002, version 4 in July 2004, version 5 in October 2007, and version 6 in October 2013.
 
-Starting with FDS 5, a formal revision management system was implemented to track changes to the FDS source code. The open-source program
-development tools are provided by an Internet-based organization known as Google Code (code.google.com).
+Starting with FDS 5, a formal revision management system was implemented to track changes to the FDS source code. The open-source program development tools are provided by GitHub (https://github.com/).
 
-The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a
-significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelfth maintenance release of 5.2, mostly bug fixes and minor user
-requests.  A Wiki file, located on the FDS/Smokeview web site, maintained by the developers describes the changes made for each release.
+The version number for FDS has three parts.  For example, FDS 5.2.12 indicates that this is FDS 5, the fifth major release. The 2 indicates a significant upgrade (a minor release), but still within the framework of FDS 5.  The 12 indicates the twelfth maintenance release of 5.2, mostly bug fixes and minor user requests.  A Wiki file, located on the FDS/Smokeview web site, maintained by the developers describes the changes made for each release.
 
 
 \section{Model Developers}
 
 
-Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland.
-The developers at NIST and VTT have formed a loose collaboration of interested stakeholders, including:
+Currently, FDS is developed by the NIST Engineering Laboratory, Fire Research Division, in cooperation with VTT Technical Research Centre of Finland. The developers at NIST and VTT have formed a loose collaboration of interested stakeholders, including:
 \begin{itemize}
 \item The various contributors listed at the start of this report,
 \item The Society of Fire Protection Engineers (SFPE) which conducts training classes on the use of FDS,
@@ -181,20 +177,11 @@ The developers at NIST and VTT have formed a loose collaboration of interested s
 \item Some recipients of external grants awarded by the NIST Fire Research Division,
 \item Engineering departments at various universities with a particular emphasis on fire.
 \end{itemize}
-Starting with Version 5, the FDS development team uses an Internet-based development environment called Google Code, a free service of the search
-engine company, Google. Google Code is a widely used service designed to assist open source software development by providing a repository for source
-code, revision control, program distribution, bug tracking, and various other very useful services.
+Starting in 2007 with FDS version 5, the FDS development team adopted GoogleCode, a free Internet service designed to assist open source software development by providing a repository for source code, revision control, program distribution, bug tracking, and various other very useful services. In 2015, Google terminated this service, and provided all of its projects a migration path to GitHub, a similar free service that uses Git, rather than Subversion, as its version control software.
 
-Each member of the FDS development team has an account and password access to the FDS repository. In addition, anonymous access is available to all
-interested users, who can receive the latest versions of the source code, manuals, and other items. Anonymous users simply do not have the power to
-commit changes to any of these items. The power to commit changes to FDS or its manuals can be granted to anyone on a case by case basis.
+Each member of the FDS development team has an account and password access~\footnote{Access to the FDS repository is by means of two-factor identification.} to the FDS repository. In addition, anonymous users can ``fork,'' or copy, the repository and receive the latest versions of the source code, manuals, and other items. These users may make changes to their own copy of the repository and can suggest these changes to the FDS developers by means of a ``pull request.'' If the changes are approved by one of the developers, these changes then merge into the main branch of the repository.
 
-The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under SVN (Subversion)
-control. The figures are either in the form of PDF or png files, depending on whether they are vector or raster format. There are a variety of
-\LaTeX\ packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of
-the manuals are distinguished by SVN number.
-
-
+The FDS manuals are typeset using \LaTeX, specifically, PDF \LaTeX. The \LaTeX\ files are essentially text files that are under version control. The figures are either in the form of PDF or png files, depending on whether they are vector or raster format. There are a variety of \LaTeX\ packages available, including MiKTeX. The FDS developers edit the manuals as part of the day to day upkeep of the model. Different editions of the manuals are distinguished by a specific Git hash tag.
 
 Members of the FDS and Smokeview team share in the development and maintenance responsibilities, which include:
 \begin{enumerate}
@@ -223,41 +210,23 @@ tool to study fundamental fire dynamics and combustion. FDS can be used to model
 \item Sprinkler, heat detector, and smoke detector activation
 \item Sprinkler sprays and suppression by water or other agents
 \end{itemize}
-Although FDS was designed specifically for fire simulations, it can be used for other low-speed fluid flow simulations that do not necessarily
-include fire or thermal effects. To date, about half of the applications of the model have been for design of smoke control systems and
-sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions.
+Although FDS was designed specifically for fire simulations, it can be used for other low-speed fluid flow simulations that do not necessarily include fire or thermal effects. To date, about half of the applications of the model have been for design of smoke control systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions.
 
 
 \section{Input Parameters}
 
-All of the input parameters required by FDS to describe a particular scenario are conveyed via a single text file created by the user. The file
-contains information about the numerical grid, ambient environment, scenario geometry, material properties, combustion kinetics, and desired output
-quantities. The numerical grid consists of one or more rectilinear meshes with (usually) uniform cells. All geometric features of the scenario must
-conform to this numerical grid. Objects smaller than a single grid cell are either approximated as a single blocked cell or cell face, or are rejected. The scenario geometry
-is input as a series of rectangular blocks. Boundary conditions are applied to solid surfaces as rectangular patches. Materials are defined by their
-thermal conductivity, specific heat, density, thickness, and burning behavior. There are various ways that this information is conveyed, depending on
-the desired level of detail.
+All of the input parameters required by FDS to describe a particular scenario are conveyed via a single text file created by the user. The file contains information about the numerical grid, ambient environment, scenario geometry, material properties, combustion kinetics, and desired output quantities. The numerical grid consists of one or more rectilinear meshes with (usually) uniform cells. All geometric features of the scenario must conform to this numerical grid. Objects smaller than a single grid cell are either approximated as a single blocked cell or cell face, or are rejected. The scenario geometry is input as a series of rectangular blocks. Boundary conditions are applied to solid surfaces as rectangular patches. Materials are defined by their thermal conductivity, specific heat, density, thickness, and burning behavior. There are various ways that this information is conveyed, depending on the desired level of detail.
 
-Any simulation of a real fire scenario involves specifying material properties for the walls, floor, ceiling, and furnishings. FDS treats all of
-these objects as multi-layered solids; thus, the physical parameters for many real objects can only be viewed as approximations to the actual
-properties. Describing these materials in the input file is the single most challenging task for the user. Thermal properties such as conductivity,
-specific heat, density, and thickness can be found in various handbooks, or in manufacturers literature, or from bench-scale measurements. The
-burning behavior of materials at different heat fluxes is more difficult to describe, and the properties more difficult to obtain. Even though entire
-books are devoted to the subject~\cite{Babrauskas:2}, it is still difficult to find information on a particular item.
+Any simulation of a real fire scenario involves specifying material properties for the walls, floor, ceiling, and furnishings. FDS treats all of these objects as multi-layered solids; thus, the physical parameters for many real objects can only be viewed as approximations to the actual properties. Describing these materials in the input file is the single most challenging task for the user. Thermal properties such as conductivity, specific heat, density, and thickness can be found in various handbooks, or in manufacturers literature, or from bench-scale measurements. The burning behavior of materials at different heat fluxes is more difficult to describe, and the properties more difficult to obtain. Even though entire books are devoted to the subject~\cite{Babrauskas:2}, it is still difficult to find information on a particular item.
 
-A significant part of the FDS input file directs the code to output various quantities in various ways. Much like in an actual experiment, the user
-must decide before the calculation begins what information to save. There is no way to recover information after the calculation is over if it was
-not requested at the start.
+A significant part of the FDS input file directs the code to output various quantities in various ways. Much like in an actual experiment, the user must decide before the calculation begins what information to save. There is no way to recover information after the calculation is over if it was not requested at the start.
 
 A complete description of the input parameters required by FDS can be found in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 
 \section{Output Quantities}
 
-FDS computes the temperature, density, pressure, velocity, chemical composition, and various other quantities within each numerical grid cell at each discrete time step. There
-are typically hundreds of thousands to millions of grid cells and thousands to hundreds of thousands of time steps. In addition, FDS computes at
-solid surfaces the temperature, heat flux, mass loss rate, and various other quantities. Even though only a small fraction of the computed information can be saved, the output typically
-consists of fairly large data files. Typical output quantities for the gas phase include:
+FDS computes the temperature, density, pressure, velocity, chemical composition, and various other quantities within each numerical grid cell at each discrete time step. There are typically hundreds of thousands to millions of grid cells and thousands to hundreds of thousands of time steps. In addition, FDS computes at solid surfaces the temperature, heat flux, mass loss rate, and various other quantities. Even though only a small fraction of the computed information can be saved, the output typically consists of fairly large data files. Typical output quantities for the gas phase include:
 \begin{itemize}
 \setlength{\itemsep}{0.0in}
 \item Gas temperature
@@ -337,9 +306,9 @@ The central location is known as the {\em Repository}.
 
 \subsection{Project Repository}
 
-FDS and Smokeview make use of Google Code Project Hosting, a free service offered by Google to support software development for open source applications.  Google Code uses the Subversion (SVN) revision management system. Under this system a centralized repository containing all project files resides on a Google Code server. Subversion uses a single integer that identifies the version of the entire repository rather than a specific file (i.e., anytime a change is made to the repository all files are incremented in version number).  A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  Only Team Members described in the previous chapter can commit changes to the repository.
+FDS and Smokeview make use of GitHub, a free service to support software development for open source applications. GitHub uses Git version control software. Under this system a centralized repository containing all project files resides on an external server.   A record of version number when a specific file was last changed is maintained. As an open source program, any individual can obtain a copy of the repository or retrieve specific versions of the repository.  Only Team Members described in the previous chapter can commit changes to the repository. All others must submit a ``pull request.''
 
-The current location of the FDS repository is \href{http://fds-smv.googlecode.com/svn/trunk/}{\textct{http://fds-smv.googlecode.com/svn/trunk/}}. The repository contains the following files:
+The current location of the FDS repository is \href{https://github.com/firemodels/fds-smv}{\textct{https://github.com/firemodels/fds-smv}}. The repository contains the following files:
 \begin{enumerate}
 \item Compiled FDS and Smokeview executables
 \item FDS and Smokeview source code files
@@ -349,19 +318,19 @@ The current location of the FDS repository is \href{http://fds-smv.googlecode.co
 \item Scripts and post-processing utilities used for software testing
 \item Web pages and wikis containing notes and other information
 \end{enumerate}
-In the event of an unexpected change to the Google Code service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site, such as SourceForge. It is expected that if Google decides to end its support for Google Code, it will provide its users with the full history of the project.
+In the event of an unexpected change to the GitHub service and/or the FDS repository, each member of the development team, plus interested third parties, has a copy of the repository on their local computer. At NIST, the staff computers are regularly backed up as well. Thus, there is very little chance that the project repository will be lost. If need be, the files could be moved to another open source software development site. 
 
 \subsection{Version Identification}
 
-At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each release is tagged with a specific version number (e.g., 5.0.1), there may be many commits of source code, documentation, or other files to the SVN repository before a new version is released with an incremented version number.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the SVN revision number of the most recently committed source file. This is accomplished by using source file tagging. In each source file, a series of character parameter strings are defined. For example, near the top of the source file {\ct main.f90} are lines of the form:
+At the start of a simulation, FDS writes header information to the Smokeview output file, FDS output file, and the FDS log file.  This header information contains the version of FDS used to perform that simulation. While each official release of FDS is tagged with a specific version number (e.g., 5.0.1), there may be many commits of source code, documentation, or other files to the FDS repository before a new version is released.  Thus, if a developer or a user who performs their own compilation between baseline releases discovers an error, the version number written to the output files may not be sufficient to identify the specific set of source code files used.  Rather, one would need to know the revision tag of the most recently committed source file. This is accomplished by using source file tagging. When FDS is compiled, the following lines in the main routine ({\ct main.f90}) are updated with the current repository information:
 \begin{lstlisting}
-CHARACTER(255), PARAMETER :: mainid='$Id$'
-CHARACTER(255), PARAMETER :: mainrev='$Revision$'
-CHARACTER(255), PARAMETER :: maindate='$Date$'
+CHARACTER(255), PARAMETER :: GREVISION='$Revision$'
+CHARACTER(255), PARAMETER :: GREVISION_DATE='$RevisionDate: unknown $'
+CHARACTER(255), PARAMETER :: GCOMPILE_DATE='$CompileDate: unknown $'
 \end{lstlisting}
-The lines contain the name of the source file, the version of the file (this reflects only the source file version and not the overall release version number), the date and time of the file version, and the person who checked the file into the repository. Upon compiling, these strings will be stored in the executable file.  The user can search the executable file for strings beginning with \textct{\$Id:}, which results in a list of all source files compiled and their version. Within the SVN archive, any specific version of a source file can be extracted and differences between versions can be determined.
+Upon compiling, these strings will be stored in the executable file. If the person who is compiling the code has changed the source files in any way but not committed them to the repository, the version tag will be appended with the word ``dirty'' to indicate that the code has been altered outside of the repository version control.
 
-Within the source code a series of subroutines were created, one per source file, which parses the \textct{\$Id:} in each file and extracts from it the SVN revision number.  Each of these subroutines is called at the start of an FDS run and the largest (and hence most recent) revision number is determined.  This number is written along with the FDS version number to the output header information.  A user can now identify specifically the source code used for a particular compilation of FDS when reporting an error.
+
 
 
 \section{Development Process}
@@ -382,52 +351,35 @@ There is no formal process by which FDS is updated. Each developer works on vari
 
 \subsection{Creating a Change Request}
 
-Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service provided by Google Code Project Hosting. To submit a new issue to the tracker or to provide follow up comments, the user must sign in using his or her Google account credentials. A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and SVN revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached.
-\begin{figure}[ht!]
-\includegraphics[width=\textwidth]{FIGURES/NewIssue}
-\caption{\bf Screenshot of issue tracker reporting form}
-\label{fig:issueform}
-\end{figure}
-If the issue is opened by a user, it will be given a status of {\em New} until it is reviewed by a developer. This typically takes a few minutes to a few hours, depending on the time of day the issue is reported. If the issue is opened by a developer, the developer can immediately assign a status and an owner.
+Change requests are submitted using the FDS Issue Tracker.  The Issue Tracker is an online service provided by GitHub. A change request is initiated by opening a new issue.  The issue report contains the baseline identification (version number, compile date, and revision number), operating system, and a description of the defect or enhancement request.  Input files or other supporting documentation can be attached. If the issue is opened by a user, it will be given a status of {\em New} until it is reviewed by a developer. This typically takes a few minutes to a few hours, depending on the time of day the issue is reported. If the issue is opened by a developer, the developer can immediately assign a status and an owner.
 
-\subsection{Processing a Change Request}
 
-A change request may be evaluated by any member of the development team. If the request duplicates an existing request, then the issue status is changed to \textct{Duplicate} and the
-requestor is sent the issue number of the existing request.
-
-If the request is for an enhancement to FDS, then the issue type is changed to \textct{Type-Enhancement} and the component type is declared. The request is evaluated for suitability.  If it is a valid enhancement request, then the status is changed to \textct{Accepted}.  If the request is not to be addressed under the next baseline, then the status will be changed to \textct{OnHold}.  If the request is denied, then the status is changed to \textct{WontFix}.  An accepted request will be assigned to a developer.
-
-If the request is identifying a defect in FDS, then the issue type is changed to \textct{Type-Defect} and the component type is declared.  The defect is evaluated for validity.  If insufficient information has been provided in the request, then the status is changed to \textct{MoreInfo} and a description of the additional information required is sent to the requestor.  If the defect is due to user error or is the intended function of FDS, then the status is changed to \textct{Invalid}.  If the defect is valid, then the request reviewer will change the status to \textct{Accepted} and assign the request to a developer.
-
-Once a change request has be addressed by a developer and changes submitted to the repository, the request status is changed to \textct{Fixed}.  Once either the requestor or another developer has verified that the changes address the original request, then the status is changed to \textct{Verified}.
 
 
 \subsection{Committing Changes}
 
-Once a developer has addressed a change request, the modified files are committed to the SVN repository.  A description of the changes will be added to the SVN change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.
+Once a developer has addressed a change request, the modified files are committed to the FDS repository.  A description of the changes will be added to the change log.  This description first identifies the primary component being changed (for example: FDS Source or FDS Documentation).  This component identification will be followed by a brief summary of the changes made.
 
 Changes to the FDS source code and supporting documentation are reviewed by other members of the team. There is no formal system with which changes are reviewed because the frequency of changes makes it impractical. As a general rule, all team members watch for unintentional commits of copyrighted material or algorithms, and also proprietary data or case studies collected from an end user. FDS itself does not include copyrighted or proprietary data, but occasionally this kind of information is submitted by an end user who has submitted a bug report.
 
-\subsection{Change Verification}
 
-Once a change has been committed and the issue tracker updated to reflect that the issue has been \textct{Fixed}, the changes will be verified.  Verification can be done by either the requester of the change or by another developer.  Once the changes have been verified to solve the problem reported in the issue, the issue status will be changed to \textct{Verified}.  At this point the issue is closed.
 
 
 \section{Firebot: Automated Error Checking and Regression Testing}
 
 The FDS and Smokeview source codes undergo an automated build, verification, validation, and regression testing process, which is similar to a continuous integration system that automates the build/testing cycle for a project. This automated process is referred to as Firebot. The Firebot build/test process helps the FDS-SMV development team by performing automatic error checking and collecting performance and accuracy statistics between FDS revisions.
 
-The automated built/test verification process runs on a regular schedule (nightly) to ensure that FDS and Smokeview are free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. The automated build/test validation process runs continuously through the validation suite set-by-set. For future reference, the results of a build/test process are archived and tagged with the SVN revision number that was used.
+The automated built/test verification process runs on a regular schedule (nightly) to ensure that FDS and Smokeview are free of compiler errors, verification errors, or any other errors that would result in a failure during the build/test cycle. The automated build/test validation process runs continuously through the validation suite set-by-set. For future reference, the results of a build/test process are archived and tagged with the appropriate revision number that was used.
 
 Upon completion of the automated build/test process, the results of the build/test process are dispatched to the development team. In the event of a failure, the build/test process continues when possible, and the appropriate error logs are dispatched to the development team. The automated build/test process consists of eight build stages, which are described in the following sections.
 
-\subsection*{Stage 1: SVN checkout of FDS-SMV codebase}
+\subsection*{Stage 1: Checkout of FDS-SMV codebase}
 
-In the first stage, the newest version of the FDS-SMV source code is retrieved from the SVN repository on Google Code. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
+In the first stage, the newest version of the FDS-SMV source code is retrieved from the FDS-SMV repository at GitHub. At this stage, the Firebot script ensures that all temporary files are removed and that a clean copy of the repository is used for the later stages, as if an end user were downloading the repository for the first time.
 
 \subsection*{Stage 2: Compilation of FDS debug versions}
 
-The serial and parallel versions of FDS are compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
+FDS is compiled with debugging flags enabled. This stage allows for errors in the source code to be identified and traced early in the build/test process. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 3: Run verification suite (or validation set) in debug mode}
 
@@ -435,7 +387,7 @@ All of the cases in the verification suite (or validation set) are invoked using
 
 \subsection*{Stage 4: Compilation of FDS release versions}
 
-The serial, MPI, and OpenMP release versions of FDS are compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
+The release version of FDS is compiled. Any compiler warnings are logged at this time, and the build/test process continues after no major compilation errors are found.
 
 \subsection*{Stage 5: Run verification suite (or validation set) in release mode}
 
@@ -464,7 +416,7 @@ The decision to change versions of the software is made by consensus of the deve
 
 New versions of FDS and Smokeview are identified using a specific numbering convention, for example, FDS~5.2.5. The version number consists of three integers separated by periods, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release.  Major releases occur every few years, and as the name implies, significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes indicate whether the changes affect a particular model feature. Maintenance releases are either just bug fixes or the addition of minor enhancements (such as a new output quantity), and should not affect code functionality.
 
-For each release of FDS there is a unique Subversion (SVN) repository revision number associated with it. For example, FDS version 5.3.0 was built from files in the repository at SVN revision number 3193. The wiki, ``FDS Release Notes,'' indicates the SVN revision number of each release. The SVN revision number allows users to checkout or update their local copy of the project files from the repository to the same state as any previous release of the software.
+
 
 \subsection{Testing a New Release}
 
