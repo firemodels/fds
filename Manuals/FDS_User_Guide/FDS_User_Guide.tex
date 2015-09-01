@@ -653,47 +653,18 @@ control functions as described in Section~\ref{info:CTRL}.
 
 \chapter{User Support}
 
-It is not unusual over the course of a
-project to run into various problems, some related to FDS, some related to your computer.
-FDS is an CPU and memory intensive calculation that can push your computer's
-processor and memory to its limits. In fact, there are no hardwired bounds within FDS that
-prevent you from starting a calculation that is too large for your hardware.
-Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require
-weeks or months to complete. It is difficult to predict at the start of a simulation just how long and
-how much memory will be required. Learn how to monitor the resource usage of your computer.
-Start with small calculations and build your way up.
+It is not unusual over the course of a project to run into various problems, some related to FDS, some related to your computer. FDS is an CPU and memory intensive calculation that can push your computer's processor and memory to its limits. In fact, there are no hardwired bounds within FDS that prevent you from starting a calculation that is too large for your hardware. Even if your machine has adequate memory (RAM), you can still easily set up calculations that can require weeks or months to complete. It is difficult to predict at the start of a simulation just how long and how much memory will be required. Learn how to monitor the resource usage of your computer. Start with small calculations and build your way up.
 
-Although many features in FDS are fairly mature, there are many that are not. FDS is used for
-practical engineering applications, but also for research in fire and combustion. As you become
-more familiar with the software, you will inevitably run into areas that are of current research
-interest. Indeed, burning a roomful of ordinary furniture is one of the most challenging applications
-of the model. So be patient, and learn to dissect a given scenario into its constitutive parts.
-For example, do not attempt to simulate a fire spreading through an entire floor of a
-building unless you have simulated the burning of the various combustibles with relatively small calculations.
+Although many features in FDS are fairly mature, there are many that are not. FDS is used for practical engineering applications, but also for research in fire and combustion. As you become more familiar with the software, you will inevitably run into areas that are of current research interest. Indeed, burning a roomful of ordinary furniture is one of the most challenging applications of the model. So be patient, and learn to dissect a given scenario into its constitutive parts. For example, do not attempt to simulate a fire spreading through an entire floor of a building unless you have simulated the burning of the various combustibles with relatively small calculations.
 
-Along with the FDS User's Guide, there are resources available on the Internet.
-These resources include an ``Issue Tracker'' for reporting bugs and requesting new features,
-a ``Discussion Group'' for clarifying questions and discussing more general
-topics rather than just specific problems, and ``Wiki Pages'' that provide supplementary information
-about FDS-SMV development, third-party tools, and other resources.
-Before using these on-line resources, it is important to first try to solve your own
-problems by performing simple test calculations or debugging your input file. The next few sections
-provide a list of error statements and suggestions on how to solve problems.
+Along with the FDS User's Guide, there are resources available on the Internet. These resources include an ``Issue Tracker'' for reporting bugs and requesting new features, a ``Discussion Group'' for clarifying questions and discussing more general topics rather than just specific problems, and ``Wiki Pages'' that provide supplementary information about FDS-SMV development, third-party tools, and other resources. Before using these on-line resources, it is important to first try to solve your own problems by performing simple test calculations or debugging your input file. The next few sections provide a list of error statements and suggestions on how to solve problems.
+
 
 \section{The Version Number}
 
-If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of
-FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the
-third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model.
-Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the
-type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just
-type the executable at the command prompt without an input file, and the relevant information will appear,
-along with a date of compilation (useful to you) and a so-called SVN number (useful to us).  The SVN number refers to
-the Subversion repository number of the source code. It allows us to go back in time and recover the exact source code files
-that were used to build that executable.
+If you encounter problems with FDS, it is crucial that you submit, along with a description of the problem, the FDS version number. Each release of FDS comes with a version number like 5.2.6, where the first number is the {\em major} release, the second is the {\em minor} release, and the third is the {\em maintenance} release. Major releases occur every few years, and as the name implies significantly change the functionality of the model. Minor releases occur every few months, and may cause minor changes in functionality. Release notes can help you decide whether the changes should effect the type of applications that you typically do. Maintenance releases are just bug fixes, and should not affect code functionality. To get the version number, just type the executable at the command prompt without an input file, and the relevant information will appear, along with a date of compilation (useful to you) and a so-called Git hash tag (useful to us).  The Git hash tag refers to the GitHub repository number of the source code. It allows us to go back in time and recover the exact source code files that were used to build that executable.
 
-Get in the habit of checking the version number of your executable, periodically checking for new releases which
-might already have addressed your problem, and telling us what version you are using if you report a problem.
+Get in the habit of checking the version number of your executable, periodically checking for new releases which might already have addressed your problem, and telling us what version you are using if you report a problem.
 
 
 
@@ -719,31 +690,11 @@ forrtl: severe (47): write to READONLY file, unit 8598, file C:\Users\...\
 
 \section{Support Requests and Bug Tracking}
 
-Because FDS development is on-going, problems will inevitably occur
-with various routines and features. The developers need to know if a certain
-feature is not working, and reporting problems is encouraged. However, the
-problem must be clearly identified. The best way to do this is to simplify
-the input file as much as possible so that the bug can be diagnosed
-(i.e., create and submit a minimal working example).
-Also, limit the bug reports to those features that clearly do not work.
-Physical problems such as fires that do not ignite, flames that do not
-spread, etc., may be related to the mesh resolution or scenario
-formulation, and you need to investigate the problem first before
-reporting it. If an error message originates from the operating system as
-opposed to FDS, first investigate some of the more obvious possibilities,
-such as memory size, disk space, etc.
+Because FDS development is on-going, problems will inevitably occur with various routines and features. The developers need to know if a certain feature is not working, and reporting problems is encouraged. However, the problem must be clearly identified. The best way to do this is to simplify the input file as much as possible so that the bug can be diagnosed (i.e., create and submit a minimal working example). Also, limit the bug reports to those features that clearly do not work. Physical problems such as fires that do not ignite, flames that do not spread, etc., may be related to the mesh resolution or scenario formulation, and you need to investigate the problem first before reporting it. If an error message originates from the operating system as opposed to FDS, first investigate some of the more obvious possibilities, such as memory size, disk space, etc.
 
-If that does not solve the problem, report the problem with as much information about the error message and
-circumstances related to the problem. The input file should be simplified
-as much as possible so that the bug occurs early in the calculation.
-Attach the simplified input file if necessary, following the instructions provided at the web site.
-In this way, the developers can quickly run the problematic input file and hopefully diagnose the problem.
+If that does not solve the problem, report the problem with as much information about the error message and circumstances related to the problem. The input file should be simplified as much as possible so that the bug occurs early in the calculation. Attach the simplified input file if necessary, following the instructions provided at the web site. In this way, the developers can quickly run the problematic input file and hopefully diagnose the problem.
 
-Note: Reports of specific bugs, problems, feature requests, and enhancements
-should be posted to the Issue Tracker and not the Discussion Group.
-
-
-
+Note: Reports of specific bugs, problems, feature requests, and enhancements should be posted to the Issue Tracker and not the Discussion Group.
 
 
 
@@ -9790,18 +9741,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \chapter{The FDS/Smokeview Repository}
 
-For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform,
-it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.''
-All project documents are maintained using the online utility \href{http://code.google.com/opensource}{{Google Code Project Hosting}}, a free service offered
-by Google to support software development for open source applications.  Google Code uses the \href{http://subversion.apache.org/}{{Subversion}} (SVN) revision management system.
-Under this system, a centralized repository containing all project files resides on a Google Code server.  Subversion uses a single integer that
-identifies the version of the entire repository rather than of a specific file.
-A record of the version number is maintained that indicates when a specific file was changed, which is referred to as a revision number.
-
-Anyone can obtain a copy of the repository or retrieve a specific revision of the
-repository.  However, only the FDS and Smokeview developers can commit changes to the repository.
-Detailed instructions for checking out the FDS repository can be found at
-\href{http://code.google.com/p/fds-smv/source/checkout}{{http://code.google.com/p/fds-smv/source/checkout}}.
+For those interested in obtaining the FDS and Smokeview source codes, either for development work or simply to compile on a particular platform, it is strongly suggested that you download onto your computer the entire FDS/Smokeview ``Repository.'' All project documents are maintained using the online utility \href{https://github.com/}{{GitHub}}, a free service that supports software development for open source applications.  GitHub uses Git version control software. Under this system, a centralized repository containing all project files resides on a GitHub server.  Anyone can obtain a copy of the repository or retrieve a specific revision of the repository.  However, only the FDS and Smokeview developers can commit changes directly to the repository. Others must submit a ``pull request.'' Detailed instructions for checking out the FDS repository can be found at
+\href{https://github.com/firemodels/fds-smv}{{https://github.com/firemodels/fds-smv}}.
 
 The repository contains the following files:
 \begin{enumerate}
