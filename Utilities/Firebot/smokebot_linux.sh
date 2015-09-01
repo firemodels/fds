@@ -606,7 +606,7 @@ compile_smv_utilities()
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # background:
-   cd $fdsroot/Utilities/background/intel_${platform}_32
+   cd $fdsroot/Utilities/background/intel_${platform}_64
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
@@ -640,7 +640,7 @@ check_smv_utilities()
      if [ -e "$fdsroot/Utilities/smokezip/intel_${platform}_64/smokezip_${platform}_64" ]  && \
         [ -e "$fdsroot/Utilities/smokediff/intel_${platform}_64/smokediff_${platform}_64" ]  && \
         [ -e "$fdsroot/Utilities/wind2fds/intel_${platform}_64/wind2fds_${platform}_64" ]  && \
-        [ -e "$fdsroot/Utilities/background/intel_${platform}_32/background" ]
+        [ -e "$fdsroot/Utilities/background/intel_${platform}_64/background" ]
      then
         stage5pre_success="1"
      else
