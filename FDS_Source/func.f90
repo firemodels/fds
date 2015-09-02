@@ -2084,7 +2084,7 @@ B = MAXVAL(CDF)
 RN = A + (B-A)*RN
  
 CDF_LOOP: DO IT=1,NPTS
-   IF (CDF(IT) > RN) THEN
+   IF (CDF(IT) >= RN) THEN
       CFRAC  = (RN-CDF(IT-1))/(CDF(IT)-CDF(IT-1))
       CHOICE = VAR(IT-1) + (VAR(IT)-VAR(IT-1))*CFRAC  
       EXIT CDF_LOOP
