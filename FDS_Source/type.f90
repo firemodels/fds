@@ -318,14 +318,31 @@ TYPE IBM_EDGECROSS_TYPE
 END TYPE IBM_EDGECROSS_TYPE
 
 ! Cartesian Edge Cut-Edges data structure:
-INTEGER, PARAMETER :: IBM_MAXCUTEDGE_EDGE = 10 ! Size definition parameter. Max number of cut edges per Cartesian Edge.
+INTEGER, PARAMETER :: IBM_MAXVERTS_EDGE  = 10 ! Size definition parameter. Max number of vertices per Cartesian Edge.
+INTEGER, PARAMETER :: IBM_MAXCEELEM_EDGE = 10 ! Size definition parameter. Max number of cut edges per Cartesian Edge.
 TYPE IBM_CUTEDGE_TYPE
-   INTEGER :: NVERT, NEDGE, STATUS   ! Local Vertices, cut-edges and status of this Cartesian edge.
-   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCUTEDGE_EDGE) :: XYZVERT ! Locations along x2 axis of NCROSS intersections.
-   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCUTEDGE_EDGE)   :: CEELEM  ! Type of intersection (i.e. SG, GS or GG).
-   INTEGER,  DIMENSION(MAX_DIM+2)                         ::   IJK   ! [ i j k X2AXIS cetype]
-   INTEGER,  DIMENSION(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCUTEDGE_EDGE) :: INDSEG  ! [ntr tr1 tr2 ibod]
+   INTEGER :: NVERT, NEDGE, STATUS            ! Local Vertices, cut-edges and status of this Cartesian edge.
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_EDGE)           :: XYZVERT  ! Locations of vertices.
+   INTEGER,  DIMENSION(NOD1:NOD2,1:IBM_MAXCEELEM_EDGE)            ::  CEELEM  ! Cut-Edge connectivities.
+   INTEGER,  DIMENSION(MAX_DIM+2)                                 ::     IJK  ! [ i j k X2AXIS cetype]
+   INTEGER,  DIMENSION(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_EDGE) ::  INDSEG  ! [ntr tr1 tr2 ibod]
 END TYPE IBM_CUTEDGE_TYPE
+
+! Cartesian Faces Cut-Faces data structure:
+INTEGER, PARAMETER :: IBM_MAXVERTS_FACE  = 24 ! Size definition parameter. Max number of vertices per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXCEELEM_FACE = IBM_MAXVERTS_FACE ! Size definition parameter. Max segments per face.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_FACE = 10 ! Size definition parameter. Max number of cut faces per Cartesian Face.
+INTEGER, PARAMETER :: IBM_MAXVERT_CUTFACE= 16 ! Size definition parameter.
+TYPE IBM_CUTFACE_TYPE
+   INTEGER :: NVERT, NFACE, STATUS            ! Local Vertices, cut-faces and status of this Cartesian face.
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)           :: XYZVERT  ! Locations of vertices.
+   INTEGER,  DIMENSION(IBM_MAXVERT_CUTFACE,IBM_MAXCFELEM_FACE)    ::  CFELEM  ! Cut-faces connectivities.
+   INTEGER,  DIMENSION(MAX_DIM+1)                                 ::     IJK  ! [ i j k X1AXIS]
+   REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::    AREA  ! Cut-faces areas.
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
+   !Integrals to be used in cut-cell volume and centroid computations.
+   REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
+END TYPE IBM_CUTFACE_TYPE
 
 ! -----------------------------------------
 ! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists 
