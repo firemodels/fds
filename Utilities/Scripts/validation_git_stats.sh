@@ -10,11 +10,13 @@
 # is then included in the FDS Validation Guide.
 
 CURRENT_DIR=`pwd`
-SVNROOT=~/FDS-SMVgitclean
-cd $SVNROOT/Utilities/Scripts
+if [ "$FDSSMV" == "" ] ; then
+   FDSSMV=~/FDS-SMVgitclean
+fi
+cd $FDSSMV/Utilities/Scripts
 
 # Name and location of output .tex file with validation SVN statistics
-OUTPUT_TEX_FILE=$SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex
+OUTPUT_TEX_FILE=$FDSSMV/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_svn_stats.tex
 
 # Table header
 echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
