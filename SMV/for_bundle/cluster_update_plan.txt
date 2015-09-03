@@ -99,8 +99,6 @@ qmgr -c "set queue batch4 resources_default.neednodes=fire70s"
 
 
 
-
-
 This script runs FDS on a Linux cluster using an executable specified 
 on the command line or if the -r option is specified an executable 
 located in the repository. The parallel version of FDS may be run by 
