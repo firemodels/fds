@@ -66,8 +66,6 @@ update ganglia
 
 
 
-
-
 create a queue named batch3
 
 qmgr -c "create queue batch3 queue_type=execution"
