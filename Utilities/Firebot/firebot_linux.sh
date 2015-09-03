@@ -1028,7 +1028,7 @@ archive_validation_stats()
    fi
 }
 
-validation_svn_stats()
+make_validation_git_stats()
 {
    # Output a LaTeX file with a table of the FDS validation sets and their corresponding GIT information
    cd $reponame/Utilities/Scripts
@@ -1327,7 +1327,7 @@ if [ $FIREBOT_MODE == "verification" ] ; then
       run_matlab_validation
       check_matlab_validation
       archive_validation_stats
-      validation_svn_stats
+      make_validation_git_stats
 
    ### Stage 7c ###
       generate_timing_stats
