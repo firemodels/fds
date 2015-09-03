@@ -2564,7 +2564,7 @@ ENDDO REACTION_LOOP
 
 ! Print out information about agglomeration
 
-IF (AGGLOMERATION) THEN
+IF (AGGLOMERATION_INDEX>0) THEN
    WRITE(LU_OUTPUT,'(//A)')    ' Agglomeration Information'   
    WRITE(LU_OUTPUT,'(/A,A)')   '     Agglomerating Species:         ',&
                                      TRIM(SPECIES(SPECIES_MIXTURE(AGGLOMERATION_INDEX)%SINGLE_SPEC_INDEX)%ID)
