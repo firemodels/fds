@@ -5,7 +5,7 @@ set WDIR=$FDSSMV/Validation/Harrison_Spill_Plumes/FDS_Output_Files
 set DDIR=$FDSSMV/Validation/Harrison_Spill_Plumes/Current_Results
 cd $DDIR
 cp *devc.csv  $WDIR
-cp *svn.txt   $WDIR
+cp *git.txt   $WDIR
 cd $WDIR
 
 

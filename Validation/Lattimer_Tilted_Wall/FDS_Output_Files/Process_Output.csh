@@ -5,5 +5,5 @@ set DDIR=$FDSSMV/Validation/Lattimer_Tilted_Wall/Current_Results
 cd $DDIR
 cp *line.csv $WDIR
 cp *devc.csv $WDIR
-cp *svn.txt $WDIR
+cp *git.txt $WDIR
 
