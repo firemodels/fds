@@ -536,13 +536,11 @@ MAIN_MESH_LOOP : DO NM=1,NMESHES
    ! - Load into CUT_FACE <=> FCVAR(i,j,k,IDCF,axis).
    CALL GET_CARTFACE_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
    
-   
    ! Now Define the INBOUNDARY cut-edge inside Cartesian cells:
    CALL GET_CARTCELL_CUTEDGES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
    
-   
    ! 2. INBOUNDARY cut-faces:
-!   CALL GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
+   CALL GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
    
    ! Finally: Definition of cut-cells:
 !   CALL GET_CARTCELL_CUTCELLS(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
@@ -4299,6 +4297,332 @@ ENDDO GEOM_LOOP
 
 RETURN
 END SUBROUTINE GET_CARTCELL_CUTEDGES
+
+! ---------------------- GET_CARTCELL_CUTFACES ----------------------------------
+
+SUBROUTINE GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
+
+ INTEGER, INTENT(IN) :: NM
+ INTEGER, INTENT(IN) :: ISTR, IEND, JSTR, JEND, KSTR, KEND
+
+ ! Local Variables:
+INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
+INTEGER :: I,J,K
+INTEGER :: FSID_XYZ(LOW_IND:HIGH_IND,IAXIS:KAXIS)
+LOGICAL :: OUTCELL1, OUTCELL2
+INTEGER :: X1AXIS, X2AXIS, X3AXIS
+INTEGER :: XIAXIS, XJAXIS, XKAXIS
+INTEGER :: X2LO, X2HI, X3LO, X3HI
+INTEGER :: X2LO_CELL, X2HI_CELL, X3LO_CELL, X3HI_CELL
+REAL(EB), DIMENSION(MAX_DIM) :: PLNORMAL
+INTEGER,  DIMENSION(MAX_DIM) :: IJK
+REAL(EB) :: X1PLN, X3RAY
+REAL(EB) :: DX2_MIN, DX3_MIN
+LOGICAL :: TRI_ONPLANE_ONLY
+
+
+
+! Define which cells are cut-cell, and which are solid:
+ILO = ILO_CELL; IHI = IHI_CELL
+JLO = JLO_CELL; JHI = JHI_CELL
+KLO = KLO_CELL; KHI = KHI_CELL
+! Loop on Cartesian cells, define cut cells and solid cells ISSO:
+DO K=KLO,KHI
+   DO J=JLO,JHI
+      DO I=ILO,IHI
+         
+         ! Face type of bounding Cartesian faces:
+         FSID_XYZ(LOW_IND ,IAXIS) = MESHES(NM)%FCVAR(I-FCELL  ,J,K,IBM_FGSC,IAXIS)
+         FSID_XYZ(HIGH_IND,IAXIS) = MESHES(NM)%FCVAR(I-FCELL+1,J,K,IBM_FGSC,IAXIS)
+         FSID_XYZ(LOW_IND ,JAXIS) = MESHES(NM)%FCVAR(I,J-FCELL  ,K,IBM_FGSC,JAXIS)
+         FSID_XYZ(HIGH_IND,JAXIS) = MESHES(NM)%FCVAR(I,J-FCELL+1,K,IBM_FGSC,JAXIS)
+         FSID_XYZ(LOW_IND ,KAXIS) = MESHES(NM)%FCVAR(I,J,K-FCELL  ,IBM_FGSC,KAXIS)
+         FSID_XYZ(HIGH_IND,KAXIS) = MESHES(NM)%FCVAR(I,J,K-FCELL+1,IBM_FGSC,KAXIS)
+         
+         ! For this cell check if no Cartesian boundary faces are IBM_CUTCFE:
+         ! If outcell1 is true -> All regular faces for this face:
+         OUTCELL1 = (FSID_XYZ(LOW_IND ,IAXIS) /= IBM_CUTCFE) .AND. &
+                    (FSID_XYZ(HIGH_IND,IAXIS) /= IBM_CUTCFE) .AND. &
+                    (FSID_XYZ(LOW_IND ,JAXIS) /= IBM_CUTCFE) .AND. &
+                    (FSID_XYZ(HIGH_IND,JAXIS) /= IBM_CUTCFE) .AND. &
+                    (FSID_XYZ(LOW_IND ,KAXIS) /= IBM_CUTCFE) .AND. &
+                    (FSID_XYZ(HIGH_IND,KAXIS) /= IBM_CUTCFE)
+         
+         ! Test for cell with INB edges:
+         ! If outcell2 is true -> no INB Edges associated with this cell:
+         OUTCELL2 = (MESHES(NM)%CCVAR(I,J,K,IBM_IDCE) <= 0)
+         
+         ! Drop if outcell1 & outcell2
+         IF(OUTCELL1 .AND. OUTCELL2) THEN
+            IF( (FSID_XYZ(LOW_IND ,IAXIS) == IBM_SOLID) .AND. &
+                (FSID_XYZ(HIGH_IND,IAXIS) == IBM_SOLID) .AND. &
+                (FSID_XYZ(LOW_IND ,JAXIS) == IBM_SOLID) .AND. &
+                (FSID_XYZ(HIGH_IND,JAXIS) == IBM_SOLID) .AND. &
+                (FSID_XYZ(LOW_IND ,KAXIS) == IBM_SOLID) .AND. &
+                (FSID_XYZ(HIGH_IND,KAXIS) == IBM_SOLID) ) THEN
+               MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) = IBM_SOLID
+            ENDIF
+            CYCLE
+         ENDIF
+          
+         MESHES(NM)%CCVAR(I,J,K,IBM_CGSC) = IBM_CUTCFE
+         
+      ENDDO
+   ENDDO
+ENDDO
+
+
+! First add edges stemming from triangles laying on gridline planes:
+! Dump triangle aligned segments as cut-cell cut-edges, on face cases:
+! Do Loop for different x1 planes:
+X1AXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
+   
+   SELECT CASE(X1AXIS)
+    CASE(IAXIS)
+       
+       PLNORMAL = (/ 1._EB, 0._EB, 0._EB/)
+       ILO = ILO_FACE;  IHI = IHI_FACE
+       JLO = JLO_FACE;  JHI = JLO_FACE
+       KLO = KLO_FACE;  KHI = KLO_FACE
+       
+       ! x2, x3 axes parameters:
+       X2AXIS = JAXIS; X2LO = JLO_FACE; X2HI = JHI_FACE
+       X3AXIS = KAXIS; X3LO = KLO_FACE; X3HI = KHI_FACE
+       
+       ! location in I,J,K of x2,x2,x3 axes:
+       XIAXIS = IAXIS; XJAXIS = JAXIS; XKAXIS = KAXIS
+       
+       ! Face coordinates in x1,x2,x3 axes:
+       ALLOCATE(X1FACE(ISTR:IEND),DX1FACE(ISTR:IEND))
+       X1FACE = XFACE; DX1FACE = DXFACE
+       ALLOCATE(X2FACE(JSTR:JEND),DX2FACE(JSTR:JEND))
+       X2FACE = YFACE; DX2FACE = DYFACE
+       ALLOCATE(X3FACE(KSTR:KEND),DX3FACE(KSTR:KEND))
+       X3FACE = ZFACE; DX3FACE = DZFACE
+       
+       ! x2 cell center parameters:
+       X2LO_CELL = JLO_CELL; X2HI_CELL = JHI_CELL
+       ALLOCATE(X2CELL(JSTR:JEND),DX2CELL(JSTR:JEND))
+       X2CELL = YCELL; DX2CELL = DYCELL
+       
+       ! x3 cell center parameters:
+       X3LO_CELL = KLO_CELL; X3HI_CELL = KHI_CELL
+       ALLOCATE(X3CELL(KSTR:KEND),DX3CELL(KSTR:KEND))
+       X3CELL = ZCELL; DX3CELL = DZCELL
+       
+    CASE(JAXIS)
+       
+       PLNORMAL = (/ 0._EB, 1._EB, 0._EB/)
+       ILO = ILO_FACE;  IHI = ILO_FACE
+       JLO = JLO_FACE;  JHI = JHI_FACE
+       KLO = KLO_FACE;  KHI = KLO_FACE
+       
+       ! x2, x3 axes parameters:
+       X2AXIS = KAXIS; X2LO = KLO_FACE; X2HI = KHI_FACE
+       X3AXIS = IAXIS; X3LO = ILO_FACE; X3HI = IHI_FACE
+       
+       ! location in I,J,K of x2,x2,x3 axes:
+       XIAXIS = KAXIS; XJAXIS = IAXIS; XKAXIS = JAXIS
+       
+       ! Face coordinates in x1,x2,x3 axes:
+       ALLOCATE(X1FACE(JSTR:JEND),DX1FACE(JSTR:JEND))
+       X1FACE = YFACE; DX1FACE = DYFACE
+       ALLOCATE(X2FACE(KSTR:KEND),DX2FACE(KSTR:KEND))
+       X2FACE = ZFACE; DX2FACE = DZFACE
+       ALLOCATE(X3FACE(ISTR:IEND),DX3FACE(ISTR:IEND))
+       X3FACE = XFACE; DX3FACE = DXFACE
+       
+       ! x2 cell center parameters:
+       X2LO_CELL = KLO_CELL; X2HI_CELL = KHI_CELL
+       ALLOCATE(X2CELL(KSTR:KEND),DX2CELL(KSTR:KEND))
+       X2CELL = ZCELL; DX2CELL = DZCELL
+       
+       ! x3 cell center parameters:
+       X3LO_CELL = ILO_CELL; X3HI_CELL = IHI_CELL
+       ALLOCATE(X3CELL(ISTR:IEND),DX3CELL(ISTR:IEND))
+       X3CELL = XCELL; DX3CELL = DXCELL
+       
+    CASE(KAXIS)
+       
+       PLNORMAL = (/ 0._EB, 0._EB, 1._EB/)
+       ILO = ILO_FACE;  IHI = ILO_FACE
+       JLO = JLO_FACE;  JHI = JLO_FACE
+       KLO = KLO_FACE;  KHI = KHI_FACE
+       
+       ! x2, x3 axes parameters:
+       X2AXIS = IAXIS; X2LO = ILO_FACE; X2HI = IHI_FACE
+       X3AXIS = JAXIS; X3LO = JLO_FACE; X3HI = JHI_FACE
+       
+       ! location in I,J,K of x2,x2,x3 axes:
+       XIAXIS = JAXIS; XJAXIS = KAXIS; XKAXIS = IAXIS
+       
+       ! Face coordinates in x1,x2,x3 axes:
+       ALLOCATE(X1FACE(KSTR:KEND),DX1FACE(KSTR:KEND))
+       X1FACE = ZFACE; DX1FACE = DZFACE
+       ALLOCATE(X2FACE(ISTR:IEND),DX2FACE(ISTR:IEND))
+       X2FACE = XFACE; DX2FACE = DXFACE
+       ALLOCATE(X3FACE(JSTR:JEND),DX3FACE(JSTR:JEND))
+       X3FACE = YFACE; DX3FACE = DYFACE
+       
+       ! x2 cell center parameters:
+       X2LO_CELL = ILO_CELL; X2HI_CELL = IHI_CELL
+       ALLOCATE(X2CELL(ISTR:IEND),DX2CELL(ISTR:IEND))
+       X2CELL = XCELL; DX2CELL = DXCELL
+       
+       ! x3 cell center parameters:
+       X3LO_CELL = JLO_CELL; X3HI_CELL = JHI_CELL
+       ALLOCATE(X3CELL(JSTR:JEND),DX3CELL(JSTR:JEND))
+       X3CELL = YCELL; DX3CELL = DYCELL
+       
+   END SELECT
+   
+   ! Loop Slices:
+   DO K=KLO,KHI
+      DO J=JLO,JHI
+         DO I=ILO,IHI
+            
+            IJK(IAXIS:KAXIS) = (/ I, J, K /)
+            
+            ! Plane:
+            X1PLN = X1FACE(IJK(X1AXIS))
+            
+            ! Get intersection of body on plane defined by X1PLN, normal to X1AXIS:
+            DX2_MIN = MINVAL(DX2CELL(X2LO_CELL:X2HI_CELL))
+            DX3_MIN = MINVAL(DX3CELL(X3LO_CELL:X3HI_CELL))
+            TRI_ONPLANE_ONLY = .TRUE.
+            CALL GET_BODINT_PLANE(X1AXIS,X1PLN,PLNORMAL,X2AXIS,X3AXIS,DX2_MIN,DX3_MIN,TRI_ONPLANE_ONLY)
+            
+            ! Test that there is an intersection:
+            IF((IBM_BODINT_PLANE%NTRIS) == 0) CYCLE
+            
+            ! Drop if node locations outside block plane area:
+            IF((X2FACE(X2LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(X2AXIS,1:IBM_BODINT_PLANE%NNODS))) > GEOMEPS) CYCLE
+            IF((MINVAL(IBM_BODINT_PLANE%XYZ(X2AXIS,1:IBM_BODINT_PLANE%NNODS))-X2FACE(X2HI)) > GEOMEPS) CYCLE
+            IF((X3FACE(X3LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))) > GEOMEPS) CYCLE
+            IF((MINVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))-X3FACE(X3HI)) > GEOMEPS) CYCLE
+            
+            ! ! Triangles inverses:
+            ! DO ITRI=1,IBM_BODINT_PLANE%NTRIS
+            !    
+            !    TRIS(NOD1:NOD3) = IBM_BODINT_PLANE.TRIS(NOD1:NOD3,ITRI)
+            !    
+            !    ! This is local IAXIS:JAXIS
+            !    XYEL(IAXIS:JAXIS,NOD1) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD1)), &
+            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD1))  /)
+            !    XYEL(IAXIS:JAXIS,NOD2) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD2)), &
+            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD2))  /)
+            !    XYEL(IAXIS:JAXIS,NOD3) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD3)), &
+            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD3))  /)
+            !    
+            !    ! Test that x1-x2-x3 obeys right hand rule:
+            !    VAL = (XYEL(IAXIS,NOD2)-XYEL(IAXIS,NOD1)) * (XYEL(JAXIS,NOD3)-XYEL(JAXIS,NOD1))- &
+            !          (XYEL(JAXIS,NOD2)-XYEL(JAXIS,NOD1)) * (XYEL(IAXIS,NOD3)-XYEL(IAXIS,NOD1))
+            !    IBM_BODINT_PLANE%X1NVEC(ITRI) = SIGN(1._EB,VAL)
+            !    
+            !    ! Transformation Matrix for this triangle in x2x3 plane: 
+            !    IF (BODINT_PLANE%X1NVEC(ITRI) < 0._EB) THEN ! Rotate node 2 and 3 locations
+            !       DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)
+            !       XYEL(IAXIS:JAXIS,NOD2) = XYEL(IAXIS:JAXIS,NOD3)
+            !       XYEL(IAXIS:JAXIS,NOD3) = DUMMY(IAXIS:JAXIS)
+            !    ENDIF
+            !    
+            !    ! Inverse of Master to physical triangle transform matrix:
+            !    A_COEF = XYEL(IAXIS,NOD1) - XYEL(IAXIS,NOD3)
+            !    B_COEF = XYEL(IAXIS,NOD2) - XYEL(IAXIS,NOD3)
+            !    C_COEF = XYEL(JAXIS,NOD1) - XYEL(JAXIS,NOD3)
+            !    D_COEF = XYEL(JAXIS,NOD2) - XYEL(JAXIS,NOD3)
+            !    DENOM  = A_COEF * D_COEF - B_COEF * C_COEF
+            !    IBM_BODINT_PLANE%AINV(1,1,ITRI) =  D_COEF / DENOM
+            !    IBM_BODINT_PLANE%AINV(2,1,ITRI) = -C_COEF / DENOM
+            !    IBM_BODINT_PLANE%AINV(1,2,ITRI) = -B_COEF / DENOM
+            !    IBM_BODINT_PLANE%AINV(2,2,ITRI) =  A_COEF / DENOM
+            !    
+            ! ENDDO
+            ! 
+            ! ! There are triangles aligned with this x1pln:
+            ! ! Run by Face:
+            ! ! First solid Faces: x1 Faces, Check where they lay:
+            ! DO KK=X3LO_CELL,X3HI_CELL
+            !    DO JJ=X2LO_CELL,X2HI_CELL
+            !       
+            !       ! Face indexes:
+            !       INDXI(IAXIS:KAXIS) = (/ IJK(X1AXIS), JJ, KK /) ! Local x1,x2,x3
+            !       INDIF = INDXI(XIAXIS)
+            !       INDJF = INDXI(XJAXIS)
+            !       INDKF = INDXI(XKAXIS)
+            !       
+            !       IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,FGSC,X1AXIS) /= IBM_GASPHASE ) THEN
+            !          
+            !          FVERT(IAXIS:JAXIS,NOD1) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL  ) /)
+            !          FVERT(IAXIS:JAXIS,NOD2) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL  ) /)
+            !          FVERT(IAXIS:JAXIS,NOD3) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL+1) /)
+            !          FVERT(IAXIS:JAXIS,NOD4) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL+1) /)
+            !          
+            !          ! Get triangle face intersection:
+            !          CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
+            !          
+            !          ! Triangle - face intersection vertices and edges:
+            !          ![inb_flg,fnvert,XYvert,fnedge,CEELEM,indseg] = ...
+            !          !get_triang_face_int(GEOM,x1axis,x2axis,x3axis,fvert,x1pln,cei);                        %%
+            !          
+            !          ! XYvert to XYZvert:
+            !          IF( INB_FLG ) THEN
+            !             XYZVERTF = 0._EB
+            !             XYZVERTF(X1AXIS,1:FNVERT) = X1PLN
+            !             XYZVERTF(X2AXIS,1:FNVERT) = XYVERT(IAXIS,1:FNVERT)
+            !             XYZVERTF(X3AXIS,1:FNVERT) = XYVERT(JAXIS,1:FNVERT)
+            !             
+            !             ! Here ADD nodes and vertices to what is already
+            !             ! there:
+            !             IF (CEI == 0) THEN ! We need a new entry in CUT_EDGE
+            !                CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
+            !                MESHES(NM)%IBM_NCUTEDGE_MESH = CEI
+            !                MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) = CEI
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = 0
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT= 0._EB
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = 0
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM = IBM_UNDEFINED
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG = IBM_UNDEFINED
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = &
+            !                                     (/ INDIF, INDJF, INDKF, X1AXIS, IBM_GS /)
+            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS = IBM_INBOUNDCF
+            !             ENDIF
+            !             
+            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
+            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+            !                                          XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
+            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+            !                                          CEELEM(NOD1:NOD2,1:FNEDGE)
+            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+            !                                          INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+            !             
+            !          ENDIF
+            !          
+            !       ENDIF
+            !    ENDDO
+            ! ENDDO
+            
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   
+   
+   
+   ! Deallocate local plane arrays:
+   DEALLOCATE(X1FACE,X2FACE,X3FACE,X2CELL,X3CELL)
+   DEALLOCATE(DX1FACE,DX2FACE,DX3FACE,DX2CELL,DX3CELL)
+   
+ENDDO X1AXIS_LOOP
+
+
+!WORK HERE:
+
+
+
+RETURN
+END SUBROUTINE GET_CARTCELL_CUTFACES
 
 ! -------------------------------------------------------------------------------
 ! ---------------------------- READ_GEOM ----------------------------------------
