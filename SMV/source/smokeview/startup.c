@@ -173,6 +173,9 @@ void init_lang(void){
     else if(strcmp(lang_code,"es")==0){
       strcpy(langi->lang_name,_("Spanish"));
     }
+    else if(strcmp(lang_code, "ru")==0){
+      strcpy(langi->lang_name, _("Russian"));
+    }
     else{
       strcpy(langi->lang_name,langi->lang_code);
     }
