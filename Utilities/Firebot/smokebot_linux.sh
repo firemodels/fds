@@ -1066,6 +1066,8 @@ email_build_status()
    echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo ".FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
+   echo ".SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
   if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     cat $GIT_SMVLOG >> $TIME_LOG
   fi
