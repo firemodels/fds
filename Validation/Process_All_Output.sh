@@ -1,7 +1,9 @@
 #!/bin/bash -f
 
-export SVNROOT=`pwd`/..
-export VDIR=$SVNROOT/Validation
+if [ "$FDSSMV" == "" ] ; then
+  export FDSSMV=~/FDS-SMVgitclean
+fi
+export VDIR=$FDSSMV/Validation
 
 # This list of active validation data sets is used by Validationbot
 # to automatically run validation cases on a regular basis.
