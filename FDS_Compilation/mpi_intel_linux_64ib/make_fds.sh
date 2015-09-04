@@ -13,5 +13,5 @@ if [ "$MPIDIST" == "" ]; then
   exit
 fi
 
-echo Building $target 
+echo Building $target with $MPIDIST
 make -j4 VPATH="../../FDS_Source" -f ../makefile $target
