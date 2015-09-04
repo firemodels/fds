@@ -176,15 +176,12 @@ void init_translate(char *bindir, char *tr_name){
 
 /* ------------------ translate ------------------------ */
 
-char *translate(char *string){
-  /*! \fn char *translate(char *string)
-      \brief return the translation of string, return string if translation not found
-  */
+char *translate(char *string,int option){
   int i, len, nchars_before=0, nchars_after=0;
   unsigned int nchars_in=0;
   char *string_before, *string_in, *string_out, *string_after;
 
-  if(tr_otherlang==0)return string;
+  if(tr_otherlang==0||option==0)return string;
 
 
   len = strlen(string);
