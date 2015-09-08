@@ -8,6 +8,7 @@ cd ATF_Corridors;  ./Run_All.sh -y; cd ..
 cd Backward_Facing_Step;  ./Run_All.sh -y; cd ..
 cd CSIRO_Grassland_Fires;  ./Run_All.sh -y; cd ..
 cd FAA_Cargo_Compartments;  ./Run_All.sh -y; cd ..
+cd FM_FPRF_Datacenter;  ./Run_All.sh -y; cd ..
 cd FM_SNL;  ./Run_All.sh -y; cd ..
 cd Harrison_Spill_Plumes;  ./Run_All.sh -y; cd ..
 cd McCaffrey_Plume;  ./Run_All.sh -y; cd ..
