@@ -8390,13 +8390,13 @@ int readini(char *inifile){
   // check if config files read in earlier were modifed later
 
   if(is_file_newer(smvprogini_ptr,INIfile)==1){
-    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,INIfile);
+    PRINTF("*** Warning: The configuration file %s is newer than %s \n\n",smvprogini_ptr,INIfile);
   }
   if(is_file_newer(smvprogini_ptr,caseini_filename)==1){
-    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",smvprogini_ptr,caseini_filename);
+    PRINTF("*** Warning: The configuration file %s is newer than %s \n\n",smvprogini_ptr,caseini_filename);
   }
   if(is_file_newer(INIfile,caseini_filename)==1){
-    PRINTF("*** Warning: The config file,\n  %s, is newer than\n  %s \n\n",INIfile,caseini_filename);
+    PRINTF("*** Warning: The configuration file %s is newer than %s \n\n",INIfile,caseini_filename);
   }
 
   // read in config files if they exist
