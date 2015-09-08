@@ -99,6 +99,8 @@ TYPE BODINT_PLANE_TYPE
    INTEGER,  ALLOCATABLE, DIMENSION(:)   :: NBCROSS   ! Number of crossings per segment with x2,x3 grid lines.
    REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: SVAR   ! Intersections with gridlines for SEGS.
    INTEGER,  ALLOCATABLE, DIMENSION(:,:) :: SEGTYPE   ! Type of SEG based on the media it separates.
+   REAL(EB), ALLOCATABLE, DIMENSION(:)   :: X1NVEC    ! Sign of in-plane triangles normal vectors resp to x1 dir.
+   REAL(EB), ALLOCATABLE, DIMENSION(:,:,:):: AINV     ! Inverse transformation matrix for in-plane triangles.
 END TYPE BODINT_PLANE_TYPE
 
 INTEGER, SAVE :: IBM_MAX_NNODS, IBM_MAX_NSGLS, IBM_MAX_NSEGS, IBM_MAX_NTRIS,       &
@@ -4307,7 +4309,7 @@ SUBROUTINE GET_CARTCELL_CUTFACES(NM,ISTR,IEND,JSTR,JEND,KSTR,KEND)
 
  ! Local Variables:
 INTEGER :: ILO,IHI,JLO,JHI,KLO,KHI
-INTEGER :: I,J,K
+INTEGER :: I,J,K, JJ, KK
 INTEGER :: FSID_XYZ(LOW_IND:HIGH_IND,IAXIS:KAXIS)
 LOGICAL :: OUTCELL1, OUTCELL2
 INTEGER :: X1AXIS, X2AXIS, X3AXIS
@@ -4316,10 +4318,20 @@ INTEGER :: X2LO, X2HI, X3LO, X3HI
 INTEGER :: X2LO_CELL, X2HI_CELL, X3LO_CELL, X3HI_CELL
 REAL(EB), DIMENSION(MAX_DIM) :: PLNORMAL
 INTEGER,  DIMENSION(MAX_DIM) :: IJK
-REAL(EB) :: X1PLN, X3RAY
+REAL(EB) :: X1PLN
 REAL(EB) :: DX2_MIN, DX3_MIN
-LOGICAL :: TRI_ONPLANE_ONLY
-
+LOGICAL  :: TRI_ONPLANE_ONLY
+INTEGER  :: FNVERT, FNEDGE, CEI
+REAL(EB) ::  FVERT(IAXIS:JAXIS,NOD1:NOD4)
+LOGICAL  :: INB_FLG
+INTEGER  :: CEELEM(NOD1:NOD2,1:IBM_MAXCEELEM_FACE)
+INTEGER  :: INDSEG(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_FACE)
+REAL(EB) :: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+INTEGER  :: TRIS(NOD1:NOD3), ITRI
+REAL(EB) :: XYEL(IAXIS:JAXIS,NOD1:NOD3), VAL, DUMMY(IAXIS:JAXIS)
+REAL(EB) :: A_COEF, B_COEF, C_COEF, D_COEF, DENOM
+INTEGER  :: INDXI(IAXIS:KAXIS), INDIF, INDJF, INDKF
+REAL(EB) :: XYZVERTF(IAXIS:KAXIS,1:IBM_MAXVERTS_FACE)
 
 
 ! Define which cells are cut-cell, and which are solid:
@@ -4501,111 +4513,117 @@ X1AXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
             IF((X3FACE(X3LO)-MAXVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))) > GEOMEPS) CYCLE
             IF((MINVAL(IBM_BODINT_PLANE%XYZ(X3AXIS,1:IBM_BODINT_PLANE%NNODS))-X3FACE(X3HI)) > GEOMEPS) CYCLE
             
-            ! ! Triangles inverses:
-            ! DO ITRI=1,IBM_BODINT_PLANE%NTRIS
-            !    
-            !    TRIS(NOD1:NOD3) = IBM_BODINT_PLANE.TRIS(NOD1:NOD3,ITRI)
-            !    
-            !    ! This is local IAXIS:JAXIS
-            !    XYEL(IAXIS:JAXIS,NOD1) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD1)), &
-            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD1))  /)
-            !    XYEL(IAXIS:JAXIS,NOD2) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD2)), &
-            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD2))  /)
-            !    XYEL(IAXIS:JAXIS,NOD3) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD3)), &
-            !                                IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD3))  /)
-            !    
-            !    ! Test that x1-x2-x3 obeys right hand rule:
-            !    VAL = (XYEL(IAXIS,NOD2)-XYEL(IAXIS,NOD1)) * (XYEL(JAXIS,NOD3)-XYEL(JAXIS,NOD1))- &
-            !          (XYEL(JAXIS,NOD2)-XYEL(JAXIS,NOD1)) * (XYEL(IAXIS,NOD3)-XYEL(IAXIS,NOD1))
-            !    IBM_BODINT_PLANE%X1NVEC(ITRI) = SIGN(1._EB,VAL)
-            !    
-            !    ! Transformation Matrix for this triangle in x2x3 plane: 
-            !    IF (BODINT_PLANE%X1NVEC(ITRI) < 0._EB) THEN ! Rotate node 2 and 3 locations
-            !       DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)
-            !       XYEL(IAXIS:JAXIS,NOD2) = XYEL(IAXIS:JAXIS,NOD3)
-            !       XYEL(IAXIS:JAXIS,NOD3) = DUMMY(IAXIS:JAXIS)
-            !    ENDIF
-            !    
-            !    ! Inverse of Master to physical triangle transform matrix:
-            !    A_COEF = XYEL(IAXIS,NOD1) - XYEL(IAXIS,NOD3)
-            !    B_COEF = XYEL(IAXIS,NOD2) - XYEL(IAXIS,NOD3)
-            !    C_COEF = XYEL(JAXIS,NOD1) - XYEL(JAXIS,NOD3)
-            !    D_COEF = XYEL(JAXIS,NOD2) - XYEL(JAXIS,NOD3)
-            !    DENOM  = A_COEF * D_COEF - B_COEF * C_COEF
-            !    IBM_BODINT_PLANE%AINV(1,1,ITRI) =  D_COEF / DENOM
-            !    IBM_BODINT_PLANE%AINV(2,1,ITRI) = -C_COEF / DENOM
-            !    IBM_BODINT_PLANE%AINV(1,2,ITRI) = -B_COEF / DENOM
-            !    IBM_BODINT_PLANE%AINV(2,2,ITRI) =  A_COEF / DENOM
-            !    
-            ! ENDDO
-            ! 
-            ! ! There are triangles aligned with this x1pln:
-            ! ! Run by Face:
-            ! ! First solid Faces: x1 Faces, Check where they lay:
-            ! DO KK=X3LO_CELL,X3HI_CELL
-            !    DO JJ=X2LO_CELL,X2HI_CELL
-            !       
-            !       ! Face indexes:
-            !       INDXI(IAXIS:KAXIS) = (/ IJK(X1AXIS), JJ, KK /) ! Local x1,x2,x3
-            !       INDIF = INDXI(XIAXIS)
-            !       INDJF = INDXI(XJAXIS)
-            !       INDKF = INDXI(XKAXIS)
-            !       
-            !       IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,FGSC,X1AXIS) /= IBM_GASPHASE ) THEN
-            !          
-            !          FVERT(IAXIS:JAXIS,NOD1) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL  ) /)
-            !          FVERT(IAXIS:JAXIS,NOD2) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL  ) /)
-            !          FVERT(IAXIS:JAXIS,NOD3) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL+1) /)
-            !          FVERT(IAXIS:JAXIS,NOD4) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL+1) /)
-            !          
-            !          ! Get triangle face intersection:
-            !          CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
-            !          
-            !          ! Triangle - face intersection vertices and edges:
-            !          ![inb_flg,fnvert,XYvert,fnedge,CEELEM,indseg] = ...
-            !          !get_triang_face_int(GEOM,x1axis,x2axis,x3axis,fvert,x1pln,cei);                        %%
-            !          
-            !          ! XYvert to XYZvert:
-            !          IF( INB_FLG ) THEN
-            !             XYZVERTF = 0._EB
-            !             XYZVERTF(X1AXIS,1:FNVERT) = X1PLN
-            !             XYZVERTF(X2AXIS,1:FNVERT) = XYVERT(IAXIS,1:FNVERT)
-            !             XYZVERTF(X3AXIS,1:FNVERT) = XYVERT(JAXIS,1:FNVERT)
-            !             
-            !             ! Here ADD nodes and vertices to what is already
-            !             ! there:
-            !             IF (CEI == 0) THEN ! We need a new entry in CUT_EDGE
-            !                CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
-            !                MESHES(NM)%IBM_NCUTEDGE_MESH = CEI
-            !                MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) = CEI
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = 0
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT= 0._EB
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = 0
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM = IBM_UNDEFINED
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG = IBM_UNDEFINED
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = &
-            !                                     (/ INDIF, INDJF, INDKF, X1AXIS, IBM_GS /)
-            !                MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS = IBM_INBOUNDCF
-            !             ENDIF
-            !             
-            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
-            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
-            !                                          XYZVERTF(IAXIS:KAXIS,1:FNVERT)
-            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
-            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
-            !                                          CEELEM(NOD1:NOD2,1:FNEDGE)
-            !             MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
-            !                                          INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
-            !             
-            !          ENDIF
-            !          
-            !       ENDIF
-            !    ENDDO
-            ! ENDDO
+            ! Allocate triangles variables:
+            ALLOCATE(IBM_BODINT_PLANE%X1NVEC(1:IBM_BODINT_PLANE%NTRIS),     &
+                     IBM_BODINT_PLANE%AINV(1:2,1:2,1:IBM_BODINT_PLANE%NTRIS))
             
-         ENDDO
-      ENDDO
-   ENDDO
+            ! Triangles inverses:
+            DO ITRI=1,IBM_BODINT_PLANE%NTRIS
+               
+               TRIS(NOD1:NOD3) = IBM_BODINT_PLANE%TRIS(NOD1:NOD3,ITRI)
+               
+               ! This is local IAXIS:JAXIS
+               XYEL(IAXIS:JAXIS,NOD1) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD1)), &
+                                           IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD1))  /)
+               XYEL(IAXIS:JAXIS,NOD2) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD2)), &
+                                           IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD2))  /)
+               XYEL(IAXIS:JAXIS,NOD3) = (/ IBM_BODINT_PLANE%XYZ(X2AXIS,TRIS(NOD3)), &
+                                           IBM_BODINT_PLANE%XYZ(X3AXIS,TRIS(NOD3))  /)
+               
+               ! Test that x1-x2-x3 obeys right hand rule:
+               VAL = (XYEL(IAXIS,NOD2)-XYEL(IAXIS,NOD1)) * (XYEL(JAXIS,NOD3)-XYEL(JAXIS,NOD1))- &
+                     (XYEL(JAXIS,NOD2)-XYEL(JAXIS,NOD1)) * (XYEL(IAXIS,NOD3)-XYEL(IAXIS,NOD1))
+               IBM_BODINT_PLANE%X1NVEC(ITRI) = SIGN(1._EB,VAL)
+               
+               ! Transformation Matrix for this triangle in x2x3 plane: 
+               IF (IBM_BODINT_PLANE%X1NVEC(ITRI) < 0._EB) THEN ! Rotate node 2 and 3 locations
+                  DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)
+                  XYEL(IAXIS:JAXIS,NOD2) = XYEL(IAXIS:JAXIS,NOD3)
+                  XYEL(IAXIS:JAXIS,NOD3) = DUMMY(IAXIS:JAXIS)
+               ENDIF
+               
+               ! Inverse of Master to physical triangle transform matrix:
+               A_COEF = XYEL(IAXIS,NOD1) - XYEL(IAXIS,NOD3)
+               B_COEF = XYEL(IAXIS,NOD2) - XYEL(IAXIS,NOD3)
+               C_COEF = XYEL(JAXIS,NOD1) - XYEL(JAXIS,NOD3)
+               D_COEF = XYEL(JAXIS,NOD2) - XYEL(JAXIS,NOD3)
+               DENOM  = A_COEF * D_COEF - B_COEF * C_COEF
+               IBM_BODINT_PLANE%AINV(1,1,ITRI) =  D_COEF / DENOM
+               IBM_BODINT_PLANE%AINV(2,1,ITRI) = -C_COEF / DENOM
+               IBM_BODINT_PLANE%AINV(1,2,ITRI) = -B_COEF / DENOM
+               IBM_BODINT_PLANE%AINV(2,2,ITRI) =  A_COEF / DENOM
+               
+            ENDDO
+            
+            ! There are triangles aligned with this x1pln:
+            ! Run by Face:
+            ! First solid Faces: x1 Faces, Check where they lay:
+            DO KK=X3LO_CELL,X3HI_CELL
+               DO JJ=X2LO_CELL,X2HI_CELL
+                  
+                  ! Face indexes:
+                  INDXI(IAXIS:KAXIS) = (/ IJK(X1AXIS), JJ, KK /) ! Local x1,x2,x3
+                  INDIF = INDXI(XIAXIS)
+                  INDJF = INDXI(XJAXIS)
+                  INDKF = INDXI(XKAXIS)
+                  
+                  IF (MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_FGSC,X1AXIS) /= IBM_GASPHASE ) THEN
+                     
+                     FVERT(IAXIS:JAXIS,NOD1) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL  ) /)
+                     FVERT(IAXIS:JAXIS,NOD2) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL  ) /)
+                     FVERT(IAXIS:JAXIS,NOD3) = (/ X2FACE(JJ-FCELL+1), X3FACE(KK-FCELL+1) /)
+                     FVERT(IAXIS:JAXIS,NOD4) = (/ X2FACE(JJ-FCELL  ), X3FACE(KK-FCELL+1) /)
+                     
+                     ! Get triangle face intersection:
+                     CEI = MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS)
+                     
+                     ! Triangle - face intersection vertices and edges:
+                     CALL GET_TRIANG_FACE_INT(X1AXIS,X2AXIS,X3AXIS,FVERT,CEI,NM, &
+                                              INB_FLG,FNVERT,XYVERT,FNEDGE,CEELEM,INDSEG)
+                     
+                     ! XYvert to XYZvert:
+                     IF( INB_FLG ) THEN
+                        XYZVERTF = 0._EB
+                        XYZVERTF(X1AXIS,1:FNVERT) = X1PLN
+                        XYZVERTF(X2AXIS,1:FNVERT) = XYVERT(IAXIS,1:FNVERT)
+                        XYZVERTF(X3AXIS,1:FNVERT) = XYVERT(JAXIS,1:FNVERT)
+                        
+                        ! Here ADD nodes and vertices to what is already
+                        ! there:
+                        IF (CEI == 0) THEN ! We need a new entry in CUT_EDGE
+                           CEI      = MESHES(NM)%IBM_NCUTEDGE_MESH + 1
+                           MESHES(NM)%IBM_NCUTEDGE_MESH = CEI
+                           MESHES(NM)%FCVAR(INDIF,INDJF,INDKF,IBM_IDCE,X1AXIS) = CEI
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  = 0
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT= 0._EB
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  = 0
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM = IBM_UNDEFINED
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG = IBM_UNDEFINED
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%IJK(1:MAX_DIM+2) = &
+                                                (/ INDIF, INDJF, INDKF, X1AXIS, IBM_GS /)
+                           MESHES(NM)%IBM_CUT_EDGE(CEI)%STATUS = IBM_INBOUNDCF
+                        ENDIF
+                        
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT  =    FNVERT
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(IAXIS:KAXIS,1:FNVERT) = &
+                                                     XYZVERTF(IAXIS:KAXIS,1:FNVERT)
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE  =    FNEDGE
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:FNEDGE)    = &
+                                                     CEELEM(NOD1:NOD2,1:FNEDGE)
+                        MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE) = &
+                                                     INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:FNEDGE)
+                        
+                     ENDIF
+                     
+                  ENDIF
+               ENDDO
+            ENDDO
+            
+            
+            DEALLOCATE(IBM_BODINT_PLANE%X1NVEC,IBM_BODINT_PLANE%AINV)
+         ENDDO ! I
+      ENDDO ! J
+   ENDDO ! K
    
    
    
@@ -4617,12 +4635,462 @@ X1AXIS_LOOP : DO X1AXIS=IAXIS,KAXIS
 ENDDO X1AXIS_LOOP
 
 
-!WORK HERE:
-
+! Second: Loop over cut-cells: For cut-cell i,j,k,lb
+! - From cut-cell Cartesian faces, figure out INBOUNDCF segments (CUT_EDGE)
+! and the wet surface triangles related to them.
+! - From CCVAR(I,J,K,IBM_IDCE), firgure out INBOUNDCC segments in CUT_EDGE
+! and triangles they belong to.
+! - Working by triangle -> reorient segments using triangle normal outside
+! of body (no disjoint areas are expected)
+! - Load into CUT_FACE <=> CCVAR(I,J,K,IBM_IDCF).
 
 
 RETURN
 END SUBROUTINE GET_CARTCELL_CUTFACES
+
+! ------------------------ GET_TRIANG_FACE_INT ----------------------------------
+
+SUBROUTINE GET_TRIANG_FACE_INT(X1AXIS,X2AXIS,X3AXIS,FVERT,CEI,NM, &
+                               INB_FLG,NVERT,XYVERT,NEDGE,CEELEM,INDSEG)
+
+INTEGER,  INTENT(IN) :: X1AXIS, X2AXIS, X3AXIS, CEI, NM
+REAL(EB), INTENT(IN) :: FVERT(IAXIS:JAXIS,NOD1:NOD4)
+LOGICAL,  INTENT(OUT):: INB_FLG
+INTEGER,  INTENT(OUT):: NVERT,NEDGE,CEELEM(NOD1:NOD2,1:IBM_MAXCEELEM_FACE)
+INTEGER,  INTENT(OUT):: INDSEG(IBM_MAX_WSTRIANG_SEG+2,IBM_MAXCEELEM_FACE)
+REAL(EB), INTENT(OUT):: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+
+! Local Variables:
+REAL(EB) :: X2X3VERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+REAL(EB) :: X2FMIN, X2FMAX, X3FMIN, X3FMAX, DUMMY(IAXIS:JAXIS)
+INTEGER  :: TRI(NOD1:NOD3), ITRI, INOD
+LOGICAL  :: INTEST, OUTX2, OUTX3, OUTFACE, TRUETHAT, XIALIGNED, OUTSEG, SEG_IN_SIDE
+INTEGER  :: XYEL(IAXIS:JAXIS,NOD1:NOD3),TSEGS(NOD1:NOD2,EDG1:EDG3)
+INTEGER, ALLOCATABLE, DIMENSION(:,:) :: FVERT_IN_TRIANG, TRIVERT_IN_FACE
+INTEGER  :: NFVERT, NTVERT, NINTP
+INTEGER  :: TRINODS(IBM_MAXVERTS_FACE)
+REAL(EB) :: ATANTRI(1:IBM_MAXVERTS_FACE+1), ATTRI
+INTEGER  :: II(1:IBM_MAXVERTS_FACE+1), INTP, IINS, IDUM, INP, NINTP_TRI, IPT, JPL, IEDGE, IPF, ISEG
+INTEGER  :: LOCTRI, LOCBOD, EDGETRI(NOD1:NOD2,1:IBM_MAXCEELEM_FACE), VEC3(1:3)
+REAL(EB) :: XY1(IAXIS:JAXIS), XY2(IAXIS:JAXIS), XP1(IAXIS:JAXIS), XP2(IAXIS:JAXIS)
+REAL(EB) :: XP(IAXIS:JAXIS), FD(1:2), VEC(IAXIS:JAXIS)
+INTEGER  :: MYAXIS, XIAXIS, XJAXIS
+REAL(EB) :: XIPLNS(LOW_IND:HIGH_IND), XJPLNS(LOW_IND:HIGH_IND), DOT1, DOT2
+REAL(EB) :: MINXI, MAXXI, MINXJ, MAXXJ, DS, SVARI, XJPLN, XCEN(IAXIS:JAXIS)
+REAL(EB) :: VECS(IAXIS:JAXIS), VECP1(IAXIS:JAXIS), VECP2(IAXIS:JAXIS), CROSSP1, CROSSP2
+LOGICAL  :: INLIST, OUTPLANE1, OUTPLANE2
+INTEGER  :: EDGE_TRI
+
+! Default return values:
+INB_FLG = .FALSE.
+NVERT = 0
+NEDGE = 0
+X2X3VERT = 0._EB
+CEELEM   = IBM_UNDEFINED
+INDSEG   = IBM_UNDEFINED
+IF( CEI /= 0 ) THEN
+   NVERT = MESHES(NM)%IBM_CUT_EDGE(CEI)%NVERT
+   NEDGE = MESHES(NM)%IBM_CUT_EDGE(CEI)%NEDGE
+   
+   X2X3VERT(IAXIS,1:NVERT)   = MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(X2AXIS,1:NVERT)
+   X2X3VERT(JAXIS,1:NVERT)   = MESHES(NM)%IBM_CUT_EDGE(CEI)%XYZVERT(X3AXIS,1:NVERT)
+   
+   CEELEM(NOD1:NOD2,1:NEDGE) = MESHES(NM)%IBM_CUT_EDGE(CEI)%CEELEM(NOD1:NOD2,1:NEDGE)
+   INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE) = &
+   MESHES(NM)%IBM_CUT_EDGE(CEI)%INDSEG(1:IBM_MAX_WSTRIANG_SEG+2,1:NEDGE)
+ENDIF
+XYVERT = X2X3VERT
+
+! Quick discard test:
+X2FMIN = MINVAL(FVERT(IAXIS,NOD1:NOD4)); X2FMAX = MAXVAL(FVERT(IAXIS,NOD1:NOD4))
+X3FMIN = MINVAL(FVERT(JAXIS,NOD1:NOD4)); X3FMAX = MAXVAL(FVERT(JAXIS,NOD1:NOD4))
+
+! Loop in-plane Surface Elements:
+INTEST = .FALSE.
+DO ITRI=1,IBM_BODINT_PLANE%NTRIS
+    ! Elements nodes location, in x2-x3 coordinates:
+    TRI(NOD1:NOD3) = IBM_BODINT_PLANE%TRIS(NOD1:NOD3,ITRI)
+    DO INOD=NOD1,NOD3
+       XYEL(IAXIS:JAXIS,INOD) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) ,TRI(INOD))
+    ENDDO
+    OUTX2= ((X2FMIN-MAXVAL(XYEL(IAXIS,NOD1:NOD3))) > GEOMEPS) .OR. &
+           ((MINVAL(XYEL(IAXIS,NOD1:NOD3))-X2FMAX) > GEOMEPS) ! Triang out of Face in x2 dir
+    OUTX3= ((X3FMIN-MAXVAL(XYEL(JAXIS,NOD1:NOD3))) > GEOMEPS) .OR. &
+           ((MINVAL(XYEL(JAXIS,NOD1:NOD3))-X3FMAX) > GEOMEPS) ! Triang out of Face in x3 dir
+    OUTFACE = OUTX2 .OR. OUTX3
+    IF(.NOT.OUTFACE) THEN
+        INTEST = .TRUE.
+        EXIT
+    ENDIF    
+ENDDO      
+IF(.NOT.INTEST) RETURN
+
+! Now if intest is true figure out if there are triangles-face intersection
+! Polygons:
+NFVERT = 4
+NTVERT = 3
+
+! First Vertices:
+ALLOCATE(FVERT_IN_TRIANG(1:NFVERT,IBM_BODINT_PLANE%NTRIS)); FVERT_IN_TRIANG = 0
+ALLOCATE(TRIVERT_IN_FACE(1:NTVERT,IBM_BODINT_PLANE%NTRIS)); TRIVERT_IN_FACE = 0
+
+NINTP = NVERT
+
+! Loop in-plane Surface Elements:
+DO ITRI=1,IBM_BODINT_PLANE%NTRIS
+   
+   NINTP_TRI =             0
+   TRINODS   = IBM_UNDEFINED
+   
+   ! Elements nodes location, in x2-x3 coordinates:
+   TRI(NOD1:NOD3) = IBM_BODINT_PLANE%TRIS(NOD1:NOD3,ITRI)
+   DO INOD=NOD1,NOD3
+      XYEL(IAXIS:JAXIS,INOD) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) ,TRI(INOD))
+   ENDDO
+   
+   IF (IBM_BODINT_PLANE%X1NVEC(ITRI) < 0) THEN ! ROTATE NODE 2 AND 3 LOCATIONS
+      DUMMY(IAXIS:JAXIS)     = XYEL(IAXIS:JAXIS,NOD2)
+      XYEL(IAXIS:JAXIS,NOD2) = XYEL(IAXIS:JAXIS,NOD3)
+      XYEL(IAXIS:JAXIS,NOD3) = DUMMY(IAXIS:JAXIS)
+      
+      TSEGS(NOD1:NOD2,EDG1) = IBM_BODINT_PLANE%TRIS( (/ 2, 1 /) ,ITRI)
+      TSEGS(NOD1:NOD2,EDG2) = IBM_BODINT_PLANE%TRIS( (/ 3, 2 /) ,ITRI)
+      TSEGS(NOD1:NOD2,EDG3) = IBM_BODINT_PLANE%TRIS( (/ 1, 3 /) ,ITRI)
+   ELSE
+      TSEGS(NOD1:NOD2,EDG1) = IBM_BODINT_PLANE%TRIS( (/ 1, 2 /) ,ITRI)
+      TSEGS(NOD1:NOD2,EDG2) = IBM_BODINT_PLANE%TRIS( (/ 2, 3 /) ,ITRI)
+      TSEGS(NOD1:NOD2,EDG3) = IBM_BODINT_PLANE%TRIS( (/ 3, 1 /) ,ITRI)
+   ENDIF
+    
+   ! a. Test if Triangles vertices Lay on Faces area, including face boundary:
+   DO IPT=1,NTVERT
+      OUTX2= ((X2FMIN-XYEL(IAXIS,IPT)) > GEOMEPS) .OR. &
+             ((XYEL(IAXIS,IPT)-X2FMAX) > GEOMEPS)  ! Triang out of Face in x2 dir
+      OUTX3= ((X3FMIN-XYEL(JAXIS,IPT)) > GEOMEPS) .OR. &
+             ((XYEL(JAXIS,IPT)-X3FMAX) > GEOMEPS)  ! Triang out of Face in x3 dir
+      OUTFACE = OUTX2 .OR. OUTX3
+      
+      IF( OUTFACE ) CYCLE
+      
+      ! Insertion add point to intersection list:
+      XP(IAXIS:JAXIS) = XYEL(IAXIS:JAXIS,IPT)
+      CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+      
+      ! Insert sort node to triangles local list
+      TRUETHAT = .TRUE.
+      DO INP=1,NINTP_TRI
+         IF(TRINODS(INP) == INOD) THEN
+            TRUETHAT = .FALSE.
+            EXIT
+         ENDIF
+      ENDDO
+      IF( TRUETHAT ) THEN ! new inod entry on list
+         NINTP_TRI = NINTP_TRI + 1
+         TRINODS(NINTP_TRI) = INOD
+      ENDIF
+      
+      TRIVERT_IN_FACE(IPT,ITRI) = 1
+      
+   ENDDO
+   
+   ! b. Test if Face vertices lay on triangle, including triangle edges:
+   DO IPF=1,NFVERT
+      ! Transform back to master Element coordinates
+      ! location of point i,j in x2-x3 coordinates:
+      FD(1:2) = (/ FVERT(IAXIS,IPF)-XYEL(IAXIS,NOD3), FVERT(JAXIS,IPF)-XYEL(JAXIS,NOD3) /)
+      ! Here xi in vec(1) and eta in vec(2)
+      VEC(IAXIS) = IBM_BODINT_PLANE%AINV(1,1,ITRI)*FD(1) + IBM_BODINT_PLANE%AINV(1,2,ITRI)*FD(2)
+      VEC(JAXIS) = IBM_BODINT_PLANE%AINV(2,1,ITRI)*FD(1) + IBM_BODINT_PLANE%AINV(2,2,ITRI)*FD(2)
+      
+      ! Test for vertex point within triangle, considers Triangle Edges:
+      IF ( (VEC(IAXIS) >= (0._EB-GEOMEPS)) .AND. &
+           (VEC(JAXIS) >= (0._EB-GEOMEPS)) .AND. &
+           (1._EB-VEC(IAXIS)-VEC(JAXIS) >= (0._EB-GEOMEPS)) ) THEN
+         
+         ! Insertion add point to intersection list:
+         XP(IAXIS:JAXIS) = FVERT(IAXIS:JAXIS,IPF)
+         CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+         
+         ! Insert sort node to triangles local list
+         TRUETHAT = .TRUE.
+         DO INP=1,NINTP_TRI
+            IF(TRINODS(INP) == INOD) THEN
+               TRUETHAT = .FALSE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF( TRUETHAT ) THEN ! new inod entry on list
+            NINTP_TRI = NINTP_TRI + 1
+            TRINODS(NINTP_TRI) = INOD
+         ENDIF
+         
+         FVERT_IN_TRIANG(IPF,ITRI) = 1
+         
+      ENDIF
+   ENDDO
+   
+   ! Now add face edge - triangle edge intersection points: 
+   ! x2 segments:
+   DO MYAXIS=IAXIS,JAXIS
+      SELECT CASE(MYAXIS)
+         CASE(IAXIS)
+            XIAXIS = IAXIS
+            XJAXIS = JAXIS
+            XIPLNS(LOW_IND:HIGH_IND) = (/ X2FMIN, X2FMAX /)
+            XJPLNS(LOW_IND:HIGH_IND) = (/ X3FMIN, X3FMAX /)
+         CASE(JAXIS)
+            XIAXIS = JAXIS
+            XJAXIS = IAXIS
+            XIPLNS(LOW_IND:HIGH_IND) = (/ X3FMIN, X3FMAX /)
+            XJPLNS(LOW_IND:HIGH_IND) = (/ X2FMIN, X2FMAX /)
+      END SELECT
+      
+      DO JPL=LOW_IND,HIGH_IND
+         
+         XJPLN = XJPLNS(JPL)
+         
+         DO IPT=1,NTVERT
+            
+            XY1(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , TSEGS(NOD1,IPT) )
+            XY2(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , TSEGS(NOD2,IPT) )
+            
+            ! Drop if Triangle edge on one side of segment ray:
+            MAXXJ = MAX(XY1(XJAXIS),XY2(XJAXIS))
+            MINXJ = MIN(XY1(XJAXIS),XY2(XJAXIS))
+            OUTPLANE1 = ((XJPLN-MAXXJ) > GEOMEPS) .OR. ((MINXJ-XJPLN) > GEOMEPS)
+            IF( OUTPLANE1 ) CYCLE
+            
+            ! Also drop if Triangle edge ouside of face edge limits:
+            MAXXI = MAX(XY1(XIAXIS),XY2(XIAXIS))
+            MINXI = MIN(XY1(XIAXIS),XY2(XIAXIS))
+            OUTPLANE2 = ((XIPLNS(LOW_IND)-MAXXI) > GEOMEPS) .OR. ((MINXI-XIPLNS(HIGH_IND)) > GEOMEPS)
+            IF( OUTPLANE2 ) CYCLE
+            
+            ! Test if segment aligned with xi
+            XIALIGNED = ((MAXXJ-MINXJ) < GEOMEPS)
+            IF( XIALIGNED ) CYCLE ! Aligned and on top of xjpln: Intersection points already added.
+            
+            ! Drop intersections in triangle segment nodes: already added.
+            ! Compute: dot(plnormal, xyzv - xypl):
+            DOT1 = XY1(XJAXIS) - XJPLN
+            DOT2 = XY2(XJAXIS) - XJPLN
+            
+            IF( ABS(DOT1) <= GEOMEPS ) CYCLE
+            IF( ABS(DOT2) <= GEOMEPS ) CYCLE
+            
+            ! Finally regular case:
+            ! Points 1 on one side of x2 segment, point 2 on the other:
+            !IF ((DOT1 > 0._EB & DOT2 < 0._EB) .OR. (DOT1 < 0._EB & DOT2 > 0._EB))
+            IF ( DOT1*DOT2 < 0._EB ) THEN
+               
+               ! Intersection Point along segment:
+               DS    = (XJPLN-XY1(XJAXIS))/(XY2(XJAXIS)-XY1(XJAXIS))
+               SVARI = XY1(XIAXIS) + DS*(XY2(XIAXIS)-XY1(XIAXIS))
+               
+               OUTSEG= ((XIPLNS(LOW_IND)-SVARI) > -GEOMEPS) .OR. ((SVARI-XIPLNS(HIGH_IND)) > -GEOMEPS)
+               IF( OUTSEG ) CYCLE
+               
+               ! Insertion add point to intersection list:
+               XP(XIAXIS) = SVARI
+               XP(XJAXIS) = XJPLN
+               CALL INSERT_POINT_2D(XP,NINTP,X2X3VERT,INOD)
+               
+               ! Insert sort node to triangles local list
+               TRUETHAT = .TRUE.
+               DO INP=1,NINTP_TRI
+                  IF(TRINODS(INP) == INOD) THEN
+                     TRUETHAT = .FALSE.
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF(TRUETHAT) THEN ! new inod entry on list
+                  NINTP_TRI = NINTP_TRI + 1
+                  TRINODS(NINTP_TRI) = INOD
+               ENDIF
+               CYCLE
+            ENDIF
+         ENDDO
+      ENDDO
+   ENDDO
+   
+   IF( NINTP_TRI == 0 ) CYCLE
+   
+   ! Reorder points given normal on x1 direction:
+   ! Centroid:
+   XCEN(IAXIS:JAXIS) = 0._EB
+   DO INTP=1,NINTP_TRI
+      XCEN(IAXIS:JAXIS) = XCEN(IAXIS:JAXIS) + X2X3VERT(IAXIS:JAXIS,TRINODS(INTP))
+   ENDDO
+   XCEN(IAXIS:JAXIS)= XCEN(IAXIS:JAXIS) * REAL(NINTP_TRI,EB)**(-1._EB)
+   
+   ! ATANTRI(1:NINTP_TRI)) = 0._EB
+   ! DO INTP=1,NINTP_TRI
+   !    ATANTRI(INTP) = ATAN2(X2X3VERT(JAXIS,TRINODS(INTP))-XCEN(JAXIS), &
+   !                          X2X3VERT(IAXIS,TRINODS(INTP))-XCEN(IAXIS)) + PI
+   ! ENDDO
+   ! ! Sort angles in ascending order:
+   ! CALL SORT_1DARRAY(NINTP_TRI,ATANTRI,II)
+   
+   ATANTRI(1:IBM_MAXVERTS_FACE+1) = 1._EB / GEOMEPS
+   II(1:IBM_MAXVERTS_FACE+1) = IBM_UNDEFINED
+   DO INTP=1,NINTP_TRI
+      ATTRI = ATAN2(X2X3VERT(JAXIS,TRINODS(INTP))-XCEN(JAXIS), &
+                    X2X3VERT(IAXIS,TRINODS(INTP))-XCEN(IAXIS)) + PI
+      ! Insertion sort:
+      DO IINS=1,INTP+1
+         IF(ATTRI < ATANTRI(IINS)) EXIT
+      ENDDO
+      ! copy from the back:
+      DO IDUM=INTP+1,IINS+1,-1
+         ATANTRI(IDUM) = ATANTRI(IDUM-1)
+         II(IDUM)      = II(IDUM-1)
+      ENDDO
+      ATANTRI(IINS) = ATTRI
+      II(IINS)      = INTP
+   ENDDO
+      
+   ! Reorder nodes:
+   TRINODS(1:NINTP_TRI) = TRINODS(II(1:NINTP_TRI))
+   
+   ! Define and Insertion add segments to CFELEM, indseg
+   EDGETRI = IBM_UNDEFINED
+   DO IEDGE=1,NINTP_TRI-1
+        EDGETRI(NOD1:NOD2,IEDGE) = (/ TRINODS(IEDGE), TRINODS(IEDGE+1) /)
+   ENDDO
+   EDGETRI(NOD1:NOD2,NINTP_TRI) = (/ TRINODS(NINTP_TRI), TRINODS(1) /)
+   
+   LOCTRI = IBM_BODINT_PLANE%INDTRI(1,ITRI)
+   LOCBOD = IBM_BODINT_PLANE%INDTRI(2,ITRI)
+   
+   DO IEDGE=1,NINTP_TRI
+      
+      IF( EDGETRI(NOD1,IEDGE) == EDGETRI(NOD2,IEDGE) ) CYCLE
+      
+      ! Test if Edge already on list:
+      INLIST = .FALSE.
+      DO ISEG=1,NEDGE
+         
+         IF( (EDGETRI(NOD1,IEDGE) == CEELEM(NOD1,ISEG)) .AND. & ! same inod1
+             (EDGETRI(NOD2,IEDGE) == CEELEM(NOD2,ISEG)) .AND. & ! same inod2
+             (LOCBOD              == INDSEG(4,ISEG)) ) THEN     ! same ibod
+             
+            SELECT CASE(INDSEG(1,ISEG))
+               ! Only one triangle in list:
+               CASE(1)
+                  IF( LOCTRI /= INDSEG(2,ISEG) ) THEN
+                     INDSEG(1,ISEG) = 2
+                     INDSEG(3,ISEG) = LOCTRI ! add triangle 2nd.
+                  ENDIF
+                  INLIST = .TRUE.
+                  EXIT
+               ! Two triangles in list:
+               CASE(2)
+                  IF( (LOCTRI == INDSEG(2,ISEG)) .OR. &
+                      (LOCTRI == INDSEG(3,ISEG)) ) THEN
+                     INLIST = .TRUE.
+                     EXIT
+                  ELSE
+                     PRINT*, "Error in GET_TRIANG_FACE_INT: Triangle not on 2 WS triang list INDSEG."
+                  ENDIF
+            END SELECT
+         ENDIF
+      ENDDO
+      
+      IF( .NOT.INLIST ) THEN ! Edge not in list.
+         NEDGE = NEDGE + 1
+         CEELEM(NOD1:NOD2,NEDGE) =  EDGETRI(NOD1:NOD2,IEDGE)
+         
+         ! Here we have to figure out if segment belongs to a triangles side:
+         SEG_IN_SIDE = .FALSE.
+         DO IPT=1,NTVERT
+            
+            ! Triangle side nodes:
+            XY1(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , TSEGS(NOD1,IPT) )
+            XY2(IAXIS:JAXIS) = IBM_BODINT_PLANE%XYZ( (/ X2AXIS, X3AXIS /) , TSEGS(NOD2,IPT) )
+            
+            ! Segment points:
+            XP1(IAXIS:JAXIS) = X2X3VERT(IAXIS:JAXIS,CEELEM(NOD1,NEDGE))
+            XP2(IAXIS:JAXIS) = X2X3VERT(IAXIS:JAXIS,CEELEM(NOD2,NEDGE))
+            
+            VECS(IAXIS:JAXIS)  = XY2(IAXIS:JAXIS) - XY1(IAXIS:JAXIS)
+            VECP1(IAXIS:JAXIS) = XP1(IAXIS:JAXIS) - XY1(IAXIS:JAXIS)
+            VECP2(IAXIS:JAXIS) = XP2(IAXIS:JAXIS) - XY1(IAXIS:JAXIS)
+            
+            CROSSP1 = ABS(VECS(IAXIS)*VECP1(JAXIS)-VECS(JAXIS)*VECP1(IAXIS))
+            CROSSP2 = ABS(VECS(IAXIS)*VECP2(JAXIS)-VECS(JAXIS)*VECP2(IAXIS))
+            
+            IF( (CROSSP1+CROSSP2) < GEOMEPS ) THEN
+               SEG_IN_SIDE = .TRUE.
+               EXIT
+            ENDIF
+         ENDDO
+         IF( SEG_IN_SIDE ) THEN
+            EDGE_TRI = GEOMETRY(LOCBOD)%FACE_EDGES(IPT,LOCTRI) ! WSTRIED
+            VEC3(1)  = GEOMETRY(LOCBOD)%EDGE_FACES(1,EDGE_TRI) ! WSEDTRI
+            VEC3(2)  = GEOMETRY(LOCBOD)%EDGE_FACES(2,EDGE_TRI)
+            VEC3(3)  = GEOMETRY(LOCBOD)%EDGE_FACES(4,EDGE_TRI)
+            INDSEG(1:4,NEDGE) = (/ VEC3(1), VEC3(2), VEC3(3), LOCBOD /)
+         ELSE
+            INDSEG(1:4,NEDGE) = (/ 1, LOCTRI, 0, LOCBOD /)
+         ENDIF
+      ENDIF
+   ENDDO
+    
+ENDDO
+
+! Populate XYVERT points array:
+XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE) = X2X3VERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+NVERT = NINTP
+IF(NVERT > 0) INB_FLG = .TRUE.
+
+DEALLOCATE(FVERT_IN_TRIANG, TRIVERT_IN_FACE)
+
+RETURN
+END SUBROUTINE GET_TRIANG_FACE_INT
+
+! ------------------------- INSERT_POINT_2D -------------------------------------
+
+SUBROUTINE INSERT_POINT_2D(XP,NVERT,XYVERT,INOD)
+
+REAL(EB), INTENT(IN)    :: XP(IAXIS:JAXIS)
+INTEGER,  INTENT(INOUT) :: NVERT
+REAL(EB), INTENT(INOUT) :: XYVERT(IAXIS:JAXIS,1:IBM_MAXVERTS_FACE)
+INTEGER,  INTENT(OUT)   :: INOD
+
+! Local Variables:
+LOGICAL :: INLIST
+REAL(EB):: DV(IAXIS:JAXIS), DVNORM
+
+INLIST = .FALSE.
+DO INOD=1,NVERT
+   DV(IAXIS:JAXIS) = XP(IAXIS:JAXIS) - XYVERT(IAXIS:JAXIS,INOD)
+   DVNORM = SQRT( DV(IAXIS)**2._EB + DV(JAXIS)**2._EB )
+   IF ( DVNORM < GEOMEPS ) THEN
+      INLIST = .TRUE.
+      EXIT
+   ENDIF
+ENDDO
+IF( .NOT.INLIST ) THEN
+   NVERT = NVERT + 1
+   INOD  = NVERT
+   XYVERT(IAXIS:JAXIS,INOD) = XP(IAXIS:JAXIS)
+ENDIF
+
+RETURN
+END SUBROUTINE INSERT_POINT_2D
+
+! ! --------------------------- SORT_1DARRAY --------------------------------------
+! 
+! SUBROUTINE SORT_1DARRAY(NP,ATANTRI,II)
+! 
+! INTEGER, INTENT(IN)    :: NP
+! REAL(EB),INTENT(INOUT) :: ARR1D(NP)
+! INTEGER, INTENT(OUT)   :: II1D(NP)
+! 
+! 
+! 
+! RETURN
+! END SUBROUTINE SORT_1DARRAY
 
 ! -------------------------------------------------------------------------------
 ! ---------------------------- READ_GEOM ----------------------------------------
