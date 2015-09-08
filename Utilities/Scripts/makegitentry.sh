@@ -8,7 +8,8 @@ gitrev2=`tail -1 $gitrevisions`
 cat $gitrevisions | wc -l > $ncfile 2> /dev/null
 nc=`cat $ncfile`
 if [ "$gitrev" != "" ] ; then
-  gitdate=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//' | git show -s --format=%cD  | head -1 | awk '{print $3,$2",",$4}'`
+  gitrevshort=`echo $gitrev | awk -F - '{print $3}' | sed 's/^.\{1\}//'`
+  gitdate=`git show -s --format=%aD $gitrevshort | head -1 | awk '{print $3,$2",",$4}'`
   if [[ "$nc" -gt 1 ]] ; then
     gitrev=$gitrev-$gitrev2
   fi
