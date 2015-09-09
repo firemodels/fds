@@ -342,6 +342,7 @@ TYPE IBM_CUTFACE_TYPE
    REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCFELEM_FACE)          ::  XYZCEN  ! Cut-faces centroid locations.
    !Integrals to be used in cut-cell volume and centroid computations.
    REAL(EB), DIMENSION(IBM_MAXCFELEM_FACE)                        ::  INXAREA, INXSQAREA, JNYSQAREA, KNZSQAREA
+   INTEGER,  DIMENSION(1:2,1:IBM_MAXCFELEM_FACE)                  ::  BODTRI
 END TYPE IBM_CUTFACE_TYPE
 
 ! -----------------------------------------
