@@ -43,6 +43,7 @@ TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+MANUAL_DIR=~/MANUALS
 UPLOADGUIDES=./fds_guides2GD.sh
 
 if [ "$FDSSMV" == "" ] ; then
@@ -1072,6 +1073,9 @@ check_guide()
       cp $2 /var/www/html/firebot/manuals/
       cp $2 $NEWGUIDE_DIR/.
       chmod 664 $NEWGUIDE_DIR/$2
+   fi
+   if [[ -e $2 ]] ; then
+     cp $2 $MANUAL_DIR/.
    fi
 }
 
