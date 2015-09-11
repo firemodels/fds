@@ -1,5 +1,6 @@
 @echo off
 
+cd FDS6
 IF not EXIST placeholder.txt goto dircheck
 echo ***error: This script is running in the wrong directory.
 pause
@@ -15,87 +16,19 @@ call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS5" >Nul
 call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS5" >Nul
 call "%CD%\set_path.exe" -u -m -b -r "FDS\FDS6" >Nul
 call "%CD%\set_path.exe" -s -m -b -r "FDS\FDS6" >Nul
+call "%CD%\set_path.exe" -s -m -b -r "firemodels\FDS6" >Nul
+call "%CD%\set_path.exe" -s -m -b -r "firemodels\SMV6" >Nul
 
 set SAVECD="%CD%"
 
 cd "%CD%\.."
-set SHORTCUTSDIR=%CD%\shortcuts
+set SMV6=%CD%\SMV6
 
 cd %SAVECD%
 
-:: create shortcuts directory
-
-echo.
-if exist "%SHORTCUTSDIR%" goto existbin
-echo.
-mkdir "%SHORTCUTSDIR%"
-:existbin
-
-echo *** Adding program shortcuts to %SHORTCUTSDIR%
 :: ------------ create aliases ----------------
 
-set tempfile="%TEMP%\fds_tempfile"
 set numcoresfile="%TEMP%\numcoresfile"
-
-:: *** fds5 (32 bit)
-
-set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5.exe"
-set fds5bat="%SHORTCUTSDIR%\fds5.bat"
-
-if exist %fds5exe% (
-  echo @echo off > %tempfile%
-  echo %fds5exe% %%* >> %tempfile%
-  copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
-)
-
-:: *** fds5 (64 bit)
-
-set fds5exe="c:\Program Files\FDS\FDS5\bin\fds5_win_64.exe"
-if exist %fds5exe% (
-  echo @echo off > %tempfile%
-  echo %fds5exe% %%* >> %tempfile%
-  copy %tempfile% "%SHORTCUTSDIR%\fds5.bat" > Nul
-)
-
-:: *** smokeview5
-
-set smv5exe="c:\Program Files\FDS\FDS5\bin\smokeview.exe"
-set smv5bat="%SHORTCUTSDIR%\smokeview5.bat"
-if exist %smv5exe% (
-  echo @echo off > %tempfile%
-  echo %smv5exe% %%* >> %tempfile%
-  copy %tempfile% "%SHORTCUTSDIR%\smokeview5.bat" > Nul
-)
-
-:: *** fds6
-
-echo @echo off > %tempfile%
-echo "%CD%\bin\fds" %%* >> %tempfile%
-copy %tempfile% "%SHORTCUTSDIR%\fds6.bat" > Nul
-
-:: *** fds_mpi
-
-echo @echo off > %tempfile%
-echo "%CD%\bin\fds" %%* >> %tempfile%
-copy %tempfile% "%SHORTCUTSDIR%\fds_mpi.bat" > Nul
-
-:: *** smokeview6
-
-echo @echo off > %tempfile%
-echo "%CD%\bin\smokeview" %%* >> %tempfile%
-copy %tempfile% "%SHORTCUTSDIR%\smokeview6.bat" > Nul
-
-:: *** smokediff6
-
-echo @echo off > %tempfile%
-echo "%CD%\bin\smokediff" %%* >> %tempfile%
-copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokediff6.bat" > Nul
-
-:: *** smokezip6
-
-echo @echo off > %tempfile%
-echo "%CD%\bin\smokezip" %%* >> %tempfile%
-copy %tempfile% %smd6% "%SHORTCUTSDIR%\smokezip6.bat" > Nul
 
 :: ------------ setting up path ------------
 
@@ -105,14 +38,14 @@ echo *** Setting up the PATH variable.
 :: *** c:\...\FDS\FDS6\bin
 call "%CD%\set_path.exe" -s -m -f "%CD%\bin" >Nul
 
-:: *** c:\...\FDS\shortcuts
-call "%CD%\set_path.exe" -s -m -f "%SHORTCUTSDIR%" > Nul
+:: *** c:\...\FDS\SMV6
+call "%CD%\set_path.exe" -s -m -f "%SMV6%" > Nul
 
 :: ------------- file association -------------
 echo.
 echo *** Associating the .smv file extension with smokeview.exe
 
-ftype smvDoc="%CD%\bin\smokeview.exe" "%%1" >Nul
+ftype smvDoc="%SMV6%\smokeview.exe" "%%1" >Nul
 assoc .smv=smvDoc>Nul
 
 :: ------------- remove old executables -------------
@@ -136,7 +69,7 @@ copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDSST
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"           "%FDSSTART%\FDS on the Web\Official Web Site.url" > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"      "%FDSSTART%\FDS on the Web\Issue Tracker.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"               "%FDSSTART%\FDS on the Web\Issue Tracker.url" > Nul
 
 mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Configuration Management Plan.lnk"   /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Configuration_Management_Plan.pdf" /A:C >NUL
@@ -197,13 +130,13 @@ erase /q *.txt
 echo.
 echo *** Setting up Uninstall script.
 echo echo. >> Uninstall\uninstall_base.bat
-echo echo Removing directories, %CD%\bin and %SHORTCUTSDIR%, from the System Path >> Uninstall\uninstall_base.bat
+echo echo Removing directories, %CD%\bin and %SMV6%, from the System Path >> Uninstall\uninstall_base.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SHORTCUTSDIR%" >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%" >> Uninstall\uninstall_base.bat
 
 echo echo. >> Uninstall\uninstall_base.bat
 echo echo Removing %CD% >> Uninstall\uninstall_base.bat
-echo rmdir /s /q "%SHORTCUTSDIR%" >> Uninstall\uninstall_base.bat
+echo rmdir /s /q "%CD%\..\SMV6" >> Uninstall\Uninstall_base.bat
 echo rmdir /s /q "%CD%" >> Uninstall\Uninstall_base.bat
 echo echo *** Uninstall complete >> Uninstall\uninstall_base.bat
 echo pause>Nul >> Uninstall\uninstall_base.bat
@@ -224,5 +157,5 @@ echo *** Press any key to complete the installation.
 pause>NUL
 
 erase "%CD%"\setup_fds_firewall.bat >Nul
-erase "%CD%"\wrapup_fds_install.bat >Nul
+erase "%CD%"\..\wrapup_fds_install.bat >Nul
 
