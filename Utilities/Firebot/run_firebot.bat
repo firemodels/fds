@@ -17,6 +17,8 @@ if x%FDSGIT% == x goto skip_fdsgit
     set fdsrepo=%FDSGIT%
   )
 :skip_fdsgit
+call :normalise %fdsrepo%
+set fdsrepo=%temparg%
 
 set emailto=
 if not x%EMAILGIT% == x (
@@ -120,12 +122,12 @@ echo.
 echo -help           - display this message
 echo -fdsrepo name   - specify the FDS-SMV repository
 echo       (default: %fdsrepo%) 
-echo -altemail        - use an alternate email server
+echo -altemail       - use an alternate email server
 echo -email address  - override "to" email addresses specified in repo 
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
-echo -nomatlab      - do not use matlab
+echo -nomatlab       - do not use matlab
 echo -noupdate       - do not update repository
 exit /b
 
