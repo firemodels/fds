@@ -1,4 +1,4 @@
-&HEAD CHID='compgeom_demo_1', TITLE='Complex Geometry test case 1.' /
+&HEAD CHID='compgeom_demo_1b', TITLE='Complex Geometry test case 1.' /
   
 #&MESH IJK=256,256,256, XB=-2,2,-2,2,0,4 /
 
@@ -7,7 +7,7 @@
 #&MESH IJK=256,128,128, XB=-2,2,-2,0,2,4 /
 #&MESH IJK=256,128,128, XB=-2,2,0,2,2,4 /
 
-&MESH IJK=32,32,32, XB=-2,2,-2,2,0,4 /
+&MESH IJK=64,64,64, XB=-2,2,-2,2,0,4 /
 
 #&MESH IJK=32,16,32, XB=-2,2,-2,0,0,4 /
 #&MESH IJK=32,16,32, XB=-2,2,0,2,0,4 /
