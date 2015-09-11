@@ -75,10 +75,6 @@ REAL(EB), ALLOCATABLE, DIMENSION(:,:,:)   :: REAL_BUFFER_7,REAL_BUFFER_8
 REAL(EB), ALLOCATABLE, DIMENSION(:,:,:,:) :: REAL_BUFFER_9
 LOGICAL, ALLOCATABLE, DIMENSION(:)        :: LOGICAL_BUFFER_1
 
-REAL(EB) :: T_START, T_FINISH
-INTEGER :: SHFT,ARR(1:3)
-
-
 ! Initialize MPI (First executable lines of code)
 
 CALL MPI_INIT_THREAD(REQUIRED,PROVIDED,IERR)
@@ -111,60 +107,19 @@ CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
 CALL READ_DATA
 
-!#define WRITEGEOMFLG 1
-#ifdef WRITEGEOMFLG 
-!#warning "WRITEGEOMFLG DEFINED!"
-write(*,*) 'N_GEOMETRY=',N_GEOMETRY
-write(*,*) 'NVERTS=',GEOMETRY(1)%N_VERTS,GEOMETRY(1)%N_FACES,GEOMETRY(1)%N_VOLUS
-write(*,*) ' '
-write(*,*) 'Size VERTS=',size(GEOMETRY(1)%VERTS,dim=1)
-DO N=1,GEOMETRY(1)%N_VERTS
-   write(*,'(I3,A,3F18.14)') N,'=',GEOMETRY(1)%VERTS(3*(N-1)+1:3*N)
-ENDDO
-write(*,*) ' '
-write(*,*) 'Size FACES=',size(GEOMETRY(1)%FACES,dim=1)
-DO N=1,GEOMETRY(1)%N_FACES
-   write(*,'(I3,A,3I3)') N,'=',GEOMETRY(1)%FACES(3*(N-1)+1:3*N)
-ENDDO
-write(*,*) ' '
-write(*,*) 'Size VOLUS=',size(GEOMETRY(1)%VOLUS,dim=1)
-DO N=1,GEOMETRY(1)%N_VOLUS
-   write(*,'(I3,A,4I3)') N,'=',GEOMETRY(1)%VOLUS(4*(N-1)+1:4*N)
-ENDDO
-write(*,*) 'NMESHES=',NMESHES
-write(*,*) 'MESHES(1)%IBAR=',MESHES(1)%IBAR,MESHES(1)%JBAR,MESHES(1)%KBAR
-write(*,*) 'MESHES(1)%IBP1=',MESHES(1)%IBP1,MESHES(1)%JBP1,MESHES(1)%KBP1
-write(*,*) 'size(MESHES(1)%X)',size(MESHES(1)%X,dim=1)
-write(*,*) 'MESHES(1)%X=',MESHES(1)%X(0:MESHES(1)%IBAR)
-write(*,*) ' '
-write(*,*) 'size(MESHES(1)%XC)',size(MESHES(1)%XC,dim=1)
-write(*,*) 'MESHES(1)%XC=',MESHES(1)%XC(0:MESHES(1)%IBP1)
+! Initial complex geometry CC setup
 
-ARR(1:3) = (/ 1, 2, 3 /)
-write(*,*) 'Shift=',0,", ARR(SHFT)=",ARR
-DO SHFT=1,2
-ARR(1:3)=CSHIFT(ARR,1)
-write(*,*) 'Shift=',SHFT,", ARR(SHFT)=",ARR
-ENDDO
-#endif
-
-
-
-CALL CPU_TIME(T_START)
-IF(CC_IBM) CALL SET_CUTCELLS_3D
-CALL CPU_TIME(T_FINISH)
-print '("Time = ",f6.3," seconds.")',T_FINISH-T_START
-
-
+IF (CC_IBM) CALL SET_CUTCELLS_3D
 
 CALL STOP_CHECK(1)
 
 ! Setup number of OPENMP threads
+
 CALL OPENMP_SET_THREADS
 
 ! Print OPENMP thread status
-CALL OPENMP_PRINT_STATUS
 
+CALL OPENMP_PRINT_STATUS
 
 ! Set up send and receive buffer counts and displacements
 
@@ -192,9 +147,6 @@ IF (SET_UP_ONLY) THEN
    STOP_STATUS = SETUP_ONLY_STOP
    CALL STOP_CHECK(1)
 ENDIF
-
-print*, 'After SET_UP_ONLY'
-pause
 
 ! Allocate various utility arrays
 
@@ -293,15 +245,10 @@ ENDDO
 ! Initialize unstructured geometry
 
 IF (N_FACE>0) THEN
-!   IF (PERIODIC_TEST==101) THEN
-!     CALL SET_CUTCELLS_3D
-!     IBM_STOP_FLAG = 
-!   ELSE  
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       CALL INIT_IBM(0._EB,NM)
    ENDDO
-   
 ENDIF
 
 ! Initialize the flow field with random noise to eliminate false symmetries
