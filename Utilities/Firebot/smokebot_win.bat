@@ -4,24 +4,12 @@ set cfastroot=%~f1
 set cfastbasename=%~n1
 
 set arg2=%2
-set fdsroot=%f2
-set fdsbasename=%n2
+set fdsroot=%~f2
+set fdsbasename=%~n2
 
-set cfastrepoin=%1
-set fdsrepoin=%2
 set noupdate=%3
 set altemail=%4
 set emailto=%5
-
-set fdsrepo=FDS-SMVgitclean
-if NOT "%fdsrepoin%" == "" (
-  set fdsrepo=%fdsrepoin%
-)
-
-set cfastrepo=cfastgitclean
-if NOT "%cfastrepoin%" == "" (
-  set cfastrepo=%cfastrepoin%
-)
 
 ::  set number of OpenMP threads
 
