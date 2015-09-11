@@ -86,8 +86,9 @@ if exist %running% goto skip_running
   erase %running%
   goto end_running
 :skip_running
-  echo smokebot is currently running.
-  echo If this is not the case, erase the file %running%
+  echo ***Error: smokebot is currently running.
+  echo If this is not the case, erase the file:
+  echo %running%
 :end_running
 
 goto eof
@@ -117,6 +118,7 @@ goto eof
    shift
  )
  if /I "%1" EQU "-altemail" (
+   set valid=1
    set altemail=1
  )
  if /I "%1" EQU "-noupdate" (

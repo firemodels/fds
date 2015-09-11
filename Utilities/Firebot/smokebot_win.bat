@@ -87,9 +87,10 @@ if NOT "%emailto%" == "" (
   echo  email: %emailto%
   set mailToSMV=%emailto%
 )
+echo
 echo cfast repo: %cfastroot%
 echo   FDS repo: %fdsroot%
-pause
+echo
 
 :: -------------------------------------------------------------
 ::                           stage 0
