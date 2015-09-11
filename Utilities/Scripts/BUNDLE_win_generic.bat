@@ -1,6 +1,7 @@
 @echo off
 
 set fdsversion=%fds_edition%
+set smvversion=SMV6
 
 set SVNROOT=%svn_root%
 set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
@@ -22,15 +23,18 @@ set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
-set out_bundle=%basedir%\FDS
+
+set out_bundle=%basedir%\firemodels
 set out_bin=%out_bundle%\%fdsversion%\bin
-set out_textures=%out_bin%\textures
 set out_uninstall=%out_bundle%\%fdsversion%\Uninstall
 set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\%fdsversion%\Examples
 set out_examples2=%temp%\Examples2
+
+set out_smv=%out_bundle%\%smvversion%
+set out_textures=%out_smv%\textures
 
 set fds_casessh=%svn_root%\Verification\FDS_Cases.sh
 set fds_casesbat=%svn_root%\Verification\FDS_Cases.bat
@@ -53,6 +57,7 @@ echo.
 mkdir %basedir%
 mkdir %out_bundle%
 mkdir %out_bundle%\%fdsversion%
+mkdir %out_bundle%\%smvversion%
 mkdir %out_bin%
 mkdir %out_textures%
 mkdir %out_doc%
@@ -74,15 +79,14 @@ copy %in_for_bundle%\*.po %out_bin%\.
 CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds.exe
-CALL :COPY  %in_testmpi%\test_mpi.exe  %out_bin%\test_mpi.exe
 
-CALL :COPY  %in_smv%\smokeview_win_%platform%.exe   %out_bin%\smokeview.exe
+CALL :COPY  %in_smv%\smokeview_win_%platform%.exe                                %out_smv%\smokeview.exe
 
-CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_bin%\smokediff.exe
+CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_smv%\smokediff.exe
 
-CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_bin%\smokezip.exe 
+CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
 
-CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_bin%\wind2fds.exe 
+CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
 
 CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
@@ -98,14 +102,14 @@ CALL :COPY  %in_sh2bat%\sh2bat.exe %out_bin%\sh2bat.exe
 echo.
 echo *** Copying auxillary files to the bin directory
 echo.
-CALL :COPY  %in_for_bundle%\objects.svo             %out_bin%\.
-CALL :COPY  %in_for_bundle%\volrender.ssf           %out_bin%\.
+CALL :COPY  %in_for_bundle%\objects.svo            %out_smv%\.
+CALL :COPY  %in_for_bundle%\volrender.ssf          %out_smv%\.
 
 CALL :COPY %in_intel_dll%\LIB64\libiomp5md.dll     %out_bin%\.
-CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_bin%\.
-CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_bin%\.
+CALL :COPY  %in_for_bundle%\pthreadVC2_x64.dll     %out_smv%\.
+CALL :COPY  %in_for_bundle%\glew32_x64.dll         %out_smv%\.
 
-CALL :COPY  %in_for_bundle%\smokeview.ini           %out_bin%\.
+CALL :COPY  %in_for_bundle%\smokeview.ini          %out_smv%\.
 
 echo.
 echo ***Copying textures to the bin\textures directory
@@ -117,7 +121,7 @@ echo.
 echo ***Copying Uninstaller to Uninstall directory
 echo.
 CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall_base.bat"
-CALL :COPY  "%bundleinfo%\uninstall.bat" "%out_uninstall%\uninstall.bat"
+CALL :COPY  "%bundleinfo%\uninstall.bat"     "%out_uninstall%\uninstall.bat"
 echo @echo off > "out_install%\uninstall.vbs"
 
 CALL :COPY  "%bundleinfo%\set_path.exe"      "%out_uninstall%\set_path.exe"
@@ -216,8 +220,8 @@ set gupload=%CD%
 
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
-cd %out_bundle%\%fdsversion%\
-wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * > Nul
+cd %out_bundle%
+wzzip -a -r -xExamples\*.csv -P ..\..\%basename%.zip %fdsversion% %smvversion% > Nul
 
 Rem create an installation file from the zipped bundle directory
 
@@ -229,7 +233,7 @@ cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\FDS\%fdsversion%" -c wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels" -c FDS6\wrapup_fds_install.bat
 
 IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
