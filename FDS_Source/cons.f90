@@ -338,7 +338,7 @@ LOGICAL :: USE_OPENMP               = .FALSE.
 
 INTEGER :: N_CSVF=0
 
-! Complex geometry (experimental)
+! Complex geometry (experimental-OLD)
 
 INTEGER :: IMMERSED_BOUNDARY_METHOD=1,N_GEOM=0,N_VERT=0,N_FACE=0,N_VOLU=0
 INTEGER, PARAMETER :: ICOMPLEX=5
@@ -349,24 +349,8 @@ REAL(EB) :: DT_BNDC=1.E10_EB,DT_GEOC=1.E10_EB
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: FACE_WORK1,FACE_WORK2
 LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debugging)
 
-! HVAC Parameters
-
-INTEGER :: N_DUCTNODES = 0, N_DUCTS = 0, N_FANS = 0, N_FILTERS = 0, N_AIRCOILS = 0,N_NETWORKS=0
-INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE
-REAL(EB) :: HVAC_PRES_RELAX=0.3_EB
-LOGICAL :: HVAC_SOLVE=.FALSE.
-
-! Global array of orientation vectors
-
-REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR
-INTEGER :: N_ORIENTATION_VECTOR
-
-! Special TGA parameters
-
-INTEGER :: TGA_SURF_INDEX=-100,TGA_WALL_INDEX=-100,TGA_PARTICLE_INDEX=-100
-REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
-
-! Complex Geometry parameters:
+! Complex Geometry parameters (experimental-NEW):
+LOGICAL :: CC_IBM=.FALSE.
 INTEGER,  PARAMETER :: LOW_IND   = 1
 INTEGER,  PARAMETER :: HIGH_IND  = 2
 
@@ -388,5 +372,22 @@ INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 16  ! Up to 16 wstriangles related 
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle 
                                                  ! aligned with X1PLN plane.)
+
+! HVAC Parameters
+
+INTEGER :: N_DUCTNODES = 0, N_DUCTS = 0, N_FANS = 0, N_FILTERS = 0, N_AIRCOILS = 0,N_NETWORKS=0
+INTEGER , ALLOCATABLE, DIMENSION(:) :: DUCT_NE,DUCTNODE_NE
+REAL(EB) :: HVAC_PRES_RELAX=0.3_EB
+LOGICAL :: HVAC_SOLVE=.FALSE.
+
+! Global array of orientation vectors
+
+REAL(EB), POINTER, DIMENSION(:,:) :: ORIENTATION_VECTOR
+INTEGER :: N_ORIENTATION_VECTOR
+
+! Special TGA parameters
+
+INTEGER :: TGA_SURF_INDEX=-100,TGA_WALL_INDEX=-100,TGA_PARTICLE_INDEX=-100
+REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
 
 END MODULE GLOBAL_CONSTANTS

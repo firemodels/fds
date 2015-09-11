@@ -345,6 +345,22 @@ TYPE IBM_CUTFACE_TYPE
    INTEGER,  DIMENSION(1:2,1:IBM_MAXCFELEM_FACE)                  ::  BODTRI
 END TYPE IBM_CUTFACE_TYPE
 
+! Cartesian Cells Cut-Cells data structure:
+INTEGER, PARAMETER :: IBM_MAXCCELEM_CELL  =  8 ! Size definition parameter. Max number of cut-cell per cart cell.
+INTEGER, PARAMETER :: IBM_MAXCFELEM_CELL  = 32 ! Size definition parameter. Max number of cut-faces per cart cell.
+INTEGER, PARAMETER :: IBM_MAXVERTS_CELL   = 96
+INTEGER, PARAMETER :: IBM_MAXCEELEM_CELL  = IBM_MAXVERTS_CELL
+INTEGER, PARAMETER :: IBM_MAXCFACE_CUTCELL= 16 ! Size definition parameter.
+INTEGER, PARAMETER :: IBM_NPARAM_CCFACE   =  5 ! [face_type side iaxis cei icf]
+
+TYPE IBM_CUTCELL_TYPE
+   INTEGER :: NCELL
+   INTEGER, DIMENSION(1:IBM_MAXCFACE_CUTCELL+2,IBM_MAXCCELEM_CELL) ::    CCELEM ! Cut-cells faces connectivities in FACE_LIST.
+   INTEGER, DIMENSION(1:IBM_NPARAM_CCFACE,1:IBM_MAXCFELEM_CELL)    :: FACE_LIST ! List of faces, cut-faces.
+   REAL(EB), DIMENSION(IBM_MAXCCELEM_CELL)                         ::    VOLUME ! Cut-cell volumes.
+   REAL(EB), DIMENSION(IAXIS:KAXIS,1:IBM_MAXCCELEM_CELL)           ::    XYZCEN ! Cut-cell centroid locaitons.
+END TYPE IBM_CUTCELL_TYPE
+
 ! -----------------------------------------
 ! http://www.sdsc.edu/~tkaiser/f90.html#Linked lists 
 TYPE LINKED_LIST_TYPE
