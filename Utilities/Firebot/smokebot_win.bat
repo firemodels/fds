@@ -1,9 +1,7 @@
 @echo off
-set arg1=%1
 set cfastroot=%~f1
 set cfastbasename=%~n1
 
-set arg2=%2
 set fdsroot=%~f2
 set fdsbasename=%~n2
 
