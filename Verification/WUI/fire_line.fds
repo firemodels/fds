@@ -1,4 +1,4 @@
-&HEAD CHID='fire_line', TITLE='Test FIRE_LINE keyword,SVN $Revision$' /
+&HEAD CHID='fire_line', TITLE='Test FIRE_LINE keyword,' /
 
 &MESH IJK=50,50,25, XB=0,50,-25,25,0,25 /
 

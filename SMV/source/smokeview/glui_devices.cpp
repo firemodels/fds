@@ -112,16 +112,16 @@ extern "C" void glui_device_setup(int main_window){
     PANEL_objects = glui_device->add_panel("Devices/Objects",false);
 
     PANEL_smvobjects = glui_device->add_panel_to_panel(PANEL_objects,"Objects",true);
-    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
-    CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Outline"),&object_outlines);
-    CHECKBOX_device_orientation=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_("Orientation"),&show_device_orientation,DEVICE_show_orientation,Device_CB);
-    SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
+    SPINNER_sensorrelsize=glui_device->add_spinner_to_panel(PANEL_smvobjects,_d("Scale"),GLUI_SPINNER_FLOAT,&sensorrelsize,DEVICE_sensorsize,Device_CB);
+    CHECKBOX_device_3=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_d("Outline"),&object_outlines);
+    CHECKBOX_device_orientation=glui_device->add_checkbox_to_panel(PANEL_smvobjects,_d("Orientation"),&show_device_orientation,DEVICE_show_orientation,Device_CB);
+    SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_d("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
     SPINNER_orientation_scale->set_float_limits(0.1,10.0);
 
     if(get_num_activedevices()>0||isZoneFireModel==1){
       PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects, "Flow Vectors", true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
-      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Show"),&showvdeviceval);
+      CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_d("Show"),&showvdeviceval);
       PANEL_vector_type=glui_device->add_panel_to_panel(PANEL_velocityvectors,"type",true);
       RADIO_vectortype=glui_device->add_radiogroup_to_panel(PANEL_vector_type,&vectortype);
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
@@ -129,19 +129,19 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
       ROLLOUT_arrow_dimensions=glui_device->add_rollout_to_panel(PANEL_velocityvectors,"dimensions",false);
       PANEL_arrow_base=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"base",true);
-      glui_device->add_spinner_to_panel(PANEL_arrow_base,_("height"),GLUI_SPINNER_FLOAT,&vector_baseheight);
-      glui_device->add_spinner_to_panel(PANEL_arrow_base,_("diameter"),GLUI_SPINNER_FLOAT,&vector_basediameter);
+      glui_device->add_spinner_to_panel(PANEL_arrow_base,_d("height"),GLUI_SPINNER_FLOAT,&vector_baseheight);
+      glui_device->add_spinner_to_panel(PANEL_arrow_base,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_basediameter);
       PANEL_arrow_height=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"height",true);
-      glui_device->add_spinner_to_panel(PANEL_arrow_height,_("height"),GLUI_SPINNER_FLOAT,&vector_headheight);
-      glui_device->add_spinner_to_panel(PANEL_arrow_height,_("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
+      glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("height"),GLUI_SPINNER_FLOAT,&vector_headheight);
+      glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
 #ifdef pp_PILOT
-      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_("Pilot view"),&vispilot);
+      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_d("Pilot view"),&vispilot);
 #endif
 
       PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
 
-      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
-      CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_("Color"),&colordeviceval,COLORDEVICEVALS,Device_CB);
+      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_d("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_d("Color"),&colordeviceval,COLORDEVICEVALS,Device_CB);
       glui_device->add_spinner_to_panel(PANEL_devicevalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
       glui_device->add_spinner_to_panel(PANEL_devicevalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);
 
@@ -159,10 +159,10 @@ extern "C" void glui_device_setup(int main_window){
   PANEL_label3 = glui_device->add_panel("",false);
   glui_device->add_column_to_panel(PANEL_label3,false);
 
-  BUTTON_device_1=glui_device->add_button_to_panel(PANEL_label3,_("Save settings"),SAVE_SETTINGS,Device_CB);
+  BUTTON_device_1=glui_device->add_button_to_panel(PANEL_label3,_d("Save settings"),SAVE_SETTINGS,Device_CB);
   glui_device->add_column_to_panel(PANEL_label3,false);
 
-  BUTTON_device_2=glui_device->add_button_to_panel(PANEL_label3,_("Close"),DEVICE_close,Device_CB);
+  BUTTON_device_2=glui_device->add_button_to_panel(PANEL_label3,_d("Close"),DEVICE_close,Device_CB);
 
   glui_device->set_main_gfx_window( main_window );
 }
