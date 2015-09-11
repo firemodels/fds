@@ -338,7 +338,7 @@ LOGICAL :: USE_OPENMP               = .FALSE.
 
 INTEGER :: N_CSVF=0
 
-! Complex geometry (experimental)
+! Complex geometry (experimental-OLD)
 
 INTEGER :: IMMERSED_BOUNDARY_METHOD=1,N_GEOM=0,N_VERT=0,N_FACE=0,N_VOLU=0
 INTEGER, PARAMETER :: ICOMPLEX=5
@@ -348,6 +348,30 @@ REAL(FB), ALLOCATABLE, DIMENSION(:) :: FB_REAL_FACE_VALS_ARRAY,FB_REAL_VERT_ARRA
 REAL(EB) :: DT_BNDC=1.E10_EB,DT_GEOC=1.E10_EB
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: FACE_WORK1,FACE_WORK2
 LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debugging)
+
+! Complex Geometry parameters (experimental-NEW):
+LOGICAL :: CC_IBM=.FALSE.
+INTEGER,  PARAMETER :: LOW_IND   = 1
+INTEGER,  PARAMETER :: HIGH_IND  = 2
+
+INTEGER,  PARAMETER :: MAX_DIM   = 3 ! Maximum number of spatial dimensions for a problem.
+INTEGER,  PARAMETER :: IAXIS = 1
+INTEGER,  PARAMETER :: JAXIS = 2
+INTEGER,  PARAMETER :: KAXIS = 3
+
+INTEGER, PARAMETER :: NOD1 = 1
+INTEGER, PARAMETER :: NOD2 = 2
+INTEGER, PARAMETER :: NOD3 = 3
+INTEGER, PARAMETER :: NOD4 = 4
+INTEGER, PARAMETER :: EDG1 = 1
+INTEGER, PARAMETER :: EDG2 = 2
+INTEGER, PARAMETER :: EDG3 = 3
+
+! Maximum number of wet surface triangles related to element:
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 16  ! Up to 16 wstriangles related to a wet surface vertex.
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle 
+                                                 ! aligned with X1PLN plane.)
 
 ! HVAC Parameters
 
