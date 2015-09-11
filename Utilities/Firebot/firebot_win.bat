@@ -1,4 +1,4 @@
-@echo off
+ @echo off
 
 set fdsroot=%~f1
 set fdsbasename=%~n1
@@ -13,6 +13,10 @@ if NOT exist %fdsroot% (
   echo smokebot aborted
   exit /b 1
 )
+
+echo.
+echo   FDS repo: %fdsroot%
+echo.
 
 :: -------------------------------------------------------------
 ::                         set environment
