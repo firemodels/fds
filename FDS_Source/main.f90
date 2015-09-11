@@ -147,11 +147,14 @@ ARR(1:3)=CSHIFT(ARR,1)
 write(*,*) 'Shift=',SHFT,", ARR(SHFT)=",ARR
 ENDDO
 #endif
+
+
+
 CALL CPU_TIME(T_START)
-CALL SET_CUTCELLS_3D
+IF(CC_IBM) CALL SET_CUTCELLS_3D
 CALL CPU_TIME(T_FINISH)
 print '("Time = ",f6.3," seconds.")',T_FINISH-T_START
-pause
+
 
 
 CALL STOP_CHECK(1)
@@ -189,6 +192,9 @@ IF (SET_UP_ONLY) THEN
    STOP_STATUS = SETUP_ONLY_STOP
    CALL STOP_CHECK(1)
 ENDIF
+
+print*, 'After SET_UP_ONLY'
+pause
 
 ! Allocate various utility arrays
 
@@ -287,10 +293,15 @@ ENDDO
 ! Initialize unstructured geometry
 
 IF (N_FACE>0) THEN
+!   IF (PERIODIC_TEST==101) THEN
+!     CALL SET_CUTCELLS_3D
+!     IBM_STOP_FLAG = 
+!   ELSE  
    DO NM=1,NMESHES
       IF (PROCESS(NM)/=MYID) CYCLE
       CALL INIT_IBM(0._EB,NM)
    ENDDO
+   
 ENDIF
 
 ! Initialize the flow field with random noise to eliminate false symmetries
