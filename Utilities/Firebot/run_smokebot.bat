@@ -146,7 +146,7 @@ echo -cfastrepo name - specify the cfast repository
 echo       (default: %cfastrepo%) 
 echo -fdsrepo name   - specify the FDS-SMV repository
 echo       (default: %fdsrepo%) 
-echo -altmail        - use an alternate email server
+echo -altemail        - use an alternate email server
 echo -email address  - override "to" email addresses specified in repo 
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
