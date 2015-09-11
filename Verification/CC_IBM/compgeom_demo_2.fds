@@ -1,4 +1,4 @@
-&HEAD CHID='sphere_fire_demo_2', TITLE='Demo of one-way coupling to ANSYS' /
+&HEAD CHID='compgeom_demo_2', TITLE='Demo of one-way coupling to ANSYS' /
   
 &MESH IJK=64,64,64, XB=-2,2,-2,2,0,4 /
 
