@@ -2357,7 +2357,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
 
                   IF (TMP_G_I < 0._EB) THEN
-                     STOP
                      DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
                      N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                      CYCLE TIME_ITERATION_LOOP
