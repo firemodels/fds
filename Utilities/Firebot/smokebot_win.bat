@@ -2,7 +2,9 @@
 
 set cfastrepoin=%1
 set fdsrepoin=%2
-set altmail=%3
+set update=%3
+set altemail=%4
+set emailto=%5
 
 set fdsrepo=FDS-SMVgitclean
 if NOT "%fdsrepoin%" == "" (
@@ -94,6 +96,13 @@ set /p starttime=<%OUTDIR%\starttime.txt
 
 call "%gitroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
 call %gitroot%\Utilities\Firebot\firebot_email_list.bat
+if NOT "%emailto%" == "" (
+  echo  email: %emailto%
+  set mailToSMV=%emailto%
+)
+echo cfast repo: %cfastroot%
+echo   FDS repo: %FDSroot%
+
 
 :: -------------------------------------------------------------
 ::                           stage 0
@@ -178,8 +187,10 @@ if "%cfastbasename%" == "cfastgitclean" (
 
 :: update cfast repository
 
+if %update% == 1 goto skip_update
 echo             updating %cfastbasename% repository
 cd %cfastroot%
+git fetch origin
 git pull  1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
@@ -196,7 +207,9 @@ if "%fdsbasename%" == "FDS-SMVgitclean" (
 :: update FDS/Smokeview repository
 
 echo             updating %fdsbasename% repository
+git fetch origin
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
+:skip_update
 
 git describe --long --dirty > %revisionfilestring%
 set /p revisionstring=<%revisionfilestring%
@@ -362,7 +375,7 @@ call Run_SMV_cases_git %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 cd %gitroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
-call Check_SMV_cases 
+call Check_SMV_cases
 
 :: report errors
 
