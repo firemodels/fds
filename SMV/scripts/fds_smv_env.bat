@@ -1,11 +1,11 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=6.2.1
-set smv_revision=22196
+set smv_version=test
+set smv_revision=59edcfc
 
-set fds_version=test21315
-set fds_revision=21315
+set fds_version=test
+set fds_revision=59edcfc
 
 set fdssmv_major_version=6
 
@@ -27,5 +27,5 @@ set svn_logon=%linux_username%@%linux_hostname%
 
 Rem ----------- for uploading to Bintray -----------------
 
-set bintray_api_key=%userprofile%\bintray_api_key.txt
+set bintray_api_key=%userprofile%\keys\bintray_api_key.txt
 set upload=%svn_root%\Utilities\Scripts\curl
