@@ -220,8 +220,8 @@ set gupload=%CD%
 
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
-cd %out_bundle%
-wzzip -a -r -xExamples\*.csv -P ..\..\%basename%.zip %fdsversion% %smvversion% > Nul
+cd %out_bundle%\%fdsversion%
+wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * ..\%smvversion% > Nul
 
 Rem create an installation file from the zipped bundle directory
 
@@ -233,7 +233,7 @@ cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels" -c FDS6\wrapup_fds_install.bat
+wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
 
 IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
