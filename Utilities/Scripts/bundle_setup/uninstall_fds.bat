@@ -8,11 +8,14 @@ IF %ERRORLEVEL% NEQ 0 (
     pause
     exit
 )
+
+call :is_file_installed cfast
+if not %nothave% == 0 goto skip1
 echo.
 echo *** Removing the association between .smv and Smokeview
-
 assoc .smv=
 ftype smvDoc=
+:skip1
 
 echo. 
 echo *** Removing FDS from the Start menu.

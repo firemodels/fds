@@ -1,12 +1,5 @@
 @echo off
 
-cd FDS6
-IF not EXIST placeholder.txt goto dircheck
-echo ***error: This script is running in the wrong directory.
-pause
-exit
-:dircheck
-
 echo.
 echo *** Wrapping up the FDS and Smokeview installation.
 echo.
@@ -130,16 +123,27 @@ erase /q *.txt
 echo.
 echo *** Setting up Uninstall script.
 echo echo. >> Uninstall\uninstall_base.bat
-echo echo Removing directories, %CD%\bin and %SMV6%, from the System Path >> Uninstall\uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%" >> Uninstall\uninstall_base.bat
 
+:: remove smokeview path and directory
+echo if not %%nothave%% == 0 goto skip2 >> Uninstall\uninstall_base.bat
+echo echo Removing directory, %SMV6%, from the System Path >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%" >> Uninstall\uninstall_base.bat
+echo rmdir /s /q "%CD%\..\SMV6" >> Uninstall\Uninstall_base.bat
+echo :skip2 >> Uninstall\uninstall_base.bat
+
+:: remove FDS path and directory
+echo echo Removing directory, %CD%\bin , from the System Path >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
 echo echo. >> Uninstall\uninstall_base.bat
 echo echo Removing %CD% >> Uninstall\uninstall_base.bat
-echo rmdir /s /q "%CD%\..\SMV6" >> Uninstall\Uninstall_base.bat
 echo rmdir /s /q "%CD%" >> Uninstall\Uninstall_base.bat
+echo pause >> Uninstall\Uninstall_base.bat
+
 echo echo *** Uninstall complete >> Uninstall\uninstall_base.bat
 echo pause>Nul >> Uninstall\uninstall_base.bat
+
+type Uninstall\uninstall_base2.bat >> Uninstall\uninstall_base.bat
+erase Uninstall\uninstall_base2.bat
 
 echo "%CD%\Uninstall\uninstall.vbs" >> Uninstall\uninstall.bat
 echo echo Uninstall complete >> Uninstall\uninstall.bat
