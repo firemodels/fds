@@ -125,7 +125,7 @@ echo *** Setting up Uninstall script.
 echo echo. >> Uninstall\uninstall_base.bat
 
 :: remove smokeview path and directory
-echo if not %%nothave%% == 0 goto skip2 >> Uninstall\uninstall_base.bat
+echo if %%cfastinstalled%% == 1 goto skip2 >> Uninstall\uninstall_base.bat
 echo echo Removing directory, %SMV6%, from the System Path >> Uninstall\uninstall_base.bat
 echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%" >> Uninstall\uninstall_base.bat
 echo rmdir /s /q "%CD%\..\SMV6" >> Uninstall\Uninstall_base.bat
