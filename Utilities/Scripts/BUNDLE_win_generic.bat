@@ -31,15 +31,13 @@ set out_doc=%out_bundle%\%fdsversion%\Documentation
 set out_guides="%out_doc%\Guides_and_Release_Notes"
 set out_web="%out_doc%\FDS_on_the_Web"
 set out_examples=%out_bundle%\%fdsversion%\Examples
-set out_examples2=%temp%\Examples2
+set out_examples2=%svn_root%\Verification
 
 set out_smv=%out_bundle%\%smvversion%
 set out_textures=%out_smv%\textures
 
 set fds_casessh=%svn_root%\Verification\FDS_Cases.sh
 set fds_casesbat=%svn_root%\Verification\FDS_Cases.bat
-set fdsmpi_casessh=%svn_root%\Verification\FDS_MPI_Cases.sh
-set fdsmpi_casesbat=%svn_root%\Verification\FDS_MPI_Cases.bat
 set smv_casessh=%svn_root%\Verification\scripts\SMV_Cases.sh
 set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
 
@@ -121,6 +119,7 @@ echo.
 echo ***Copying Uninstaller to Uninstall directory
 echo.
 CALL :COPY  "%bundleinfo%\uninstall_fds.bat" "%out_uninstall%\uninstall_base.bat"
+CALL :COPY  "%bundleinfo%\uninstall_fds2.bat" "%out_uninstall%\uninstall_base2.bat"
 CALL :COPY  "%bundleinfo%\uninstall.bat"     "%out_uninstall%\uninstall.bat"
 echo @echo off > "out_install%\uninstall.vbs"
 
@@ -177,8 +176,6 @@ CALL :COPY %bundleinfo%\readme_examples.html           "%out_examples%\Examples 
 
 echo.
 echo ***Getting the Verification cases from the repository
-echo.
-svn export --quiet --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification %out_examples2%
 
 set outdir=%out_examples%
 set QFDS=call %copyFDScases%
@@ -188,11 +185,6 @@ set RUNCFAST=call %copyCFASTcases%
 cd %out_examples2%
 %svn_root%\Utilities\Data_processing\sh2bat %fds_casessh% %fds_casesbat%
 call %fds_casesbat%
-
-echo.
-cd %out_examples2%
-%svn_root%\Utilities\Data_processing\sh2bat %fdsmpi_casessh% %fdsmpi_casesbat%
-call %fdsmpi_casesbat%
 
 echo.
 cd %out_examples2%
@@ -236,8 +228,6 @@ if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
 
 IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
-
-rmdir /q /s %out_examples2%
 
 echo.
 echo ***FDS/Smokeview win%platform% bundle built
