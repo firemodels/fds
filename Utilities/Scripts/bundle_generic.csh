@@ -65,7 +65,7 @@ set fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
 set smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
 set copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
 set copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
-set example_tmpdir=/tmp/examples.$$
+set ExamplesDirectory=$fds_smvroot/Verification
 
 cd $uploaddir
 rm -rf $bundlebase
@@ -195,22 +195,25 @@ endif
 
 echo
 echo Getting the FDS release notes from the repository
-svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
+# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
+# need to create FDS release note web page using git rather than svn 
+# svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
+# https://github.com/firemodels/fds-smv/wiki/FDS-Release-Notes
 
 echo 
 echo Converting the FDS release notes from wiki to html format
-$wikify -r $bundle_setup/FDS_Release_Notes.wiki > $bundledir/Documentation/FDS_Release_Notes.html
+# $wikify -r $bundle_setup/FDS_Release_Notes.wiki > $bundledir/Documentation/FDS_Release_Notes.html
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 echo
-echo Copying Smokeview release from  the repository
+echo Copying Smokeview release notes from  the repository
 cp $forbundle/readme.html $bundledir/Documentation/SMV_Release_Notes.html
 
 
 echo Obtaining example files from the repository
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
-svn export -q --force https://fds-smv.googlecode.com/svn/trunk/FDS/trunk/Verification $example_tmpdir
 
-cd $example_tmpdir
+cd $ExamplesDirectory
 setenv OUTDIR $uploaddir/$bundledir/Examples
 setenv QFDS $copyfdscase
 setenv RUNTFDS $copyfdscase
