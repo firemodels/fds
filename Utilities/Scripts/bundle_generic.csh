@@ -195,15 +195,9 @@ endif
 
 echo
 echo Getting the FDS release notes from the repository
-# VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-# need to create FDS release note web page using git rather than svn 
-# svn export --quiet --force http://fds-smv.googlecode.com/svn/wiki/FDS_Release_Notes.wiki $bundle_setup/FDS_Release_Notes.wiki
-# https://github.com/firemodels/fds-smv/wiki/FDS-Release-Notes
 
-echo 
-echo Converting the FDS release notes from wiki to html format
-# $wikify -r $bundle_setup/FDS_Release_Notes.wiki > $bundledir/Documentation/FDS_Release_Notes.html
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+wget https://github.com/firemodels/fds-smv/wiki/FDS-Release-Notes
+mv FDS-Release-Notes $bundledir/Documentation/FDS_Release_Notes.html
 
 echo
 echo Copying Smokeview release notes from  the repository
