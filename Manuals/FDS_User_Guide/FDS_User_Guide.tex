@@ -4455,11 +4455,11 @@ If the gas species is not included in Table~\ref{tab:gasspecies}, then you must 
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of two ways.  First, it can be explicitly defined using {\ct CONDUCTIVITY} (\si{W/(m.K)}) with optional temperature dependence specified using {\ct RAMP\_K}.  Second, it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Diffusivity}
 
-Diffusivity, assumed to be the binary diffusion coefficient between the given species and the background species, can be specified in one of two ways.  First, it can be explicitly defined using {\ct DIFFUSIVITY} (m$^2$/s) with optional temperature dependence by using of {\ct RAMP\_D}.  Second, it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using {\ct MW} and the Lennard-Jones parameters for air.
+Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivty can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using {\ct MW} and the Lennard-Jones parameters for air.
 
 \subsubsection{Enthalpy}
 \label{info:Enthalpy}
@@ -4476,9 +4476,11 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.}).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
+The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}. 
+
 \subsubsection{Viscosity}
 
-The dynamic viscosity of the gas species can either be specified with {\ct VISCOSITY} (with {\ct RAMP\_MU} for temperature dependence), or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
+The dynamic viscosity of the gas species can be specified in one of three ways:  it can be defined as a constant using {\ct VISCOSITY}, it can be defined as a temperature vs. viscosity ramp  using {\ct RAMP\_MU}, or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
 
 \subsubsection{Radiative Properties}
 \label{info:radiative_spec_props}
@@ -8115,7 +8117,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
-{\ct ENTHALPY}                                  & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
+{\ct ENTHALPY}                                  & Section~\ref{info:Enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct EXTINCTION COEFFICIENT}                    & Section~\ref{info:visibility}                 & 1/m            & D,I,P,S      \\ \hline
 {\ct FED}                                       & Section~\ref{info:FED}                        &                & D            \\ \hline
 {\ct FIC}                                       & Section~\ref{info:FED}                        &                & D,S          \\ \hline
@@ -8912,6 +8914,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
+{\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
 {\ct HRRPUA\_SHEET}                             & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^2}   & 200.              \\ \hline
 {\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^3}   & 2500.             \\ \hline
