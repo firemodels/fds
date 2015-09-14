@@ -57,12 +57,12 @@ if exist "%FDSSTART%" rmdir /q /s "%FDSSTART%"
 mkdir "%FDSSTART%"
 
 mkdir "%FDSSTART%\FDS on the Web"
-copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"            "%FDSSTART%\FDS on the Web\Software Updates.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url"       "%FDSSTART%\FDS on the Web\Documentation Updates.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"           "%FDSSTART%\FDS on the Web\Official Web Site.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"            "%FDSSTART%\FDS on the Web\Discussion Group.url" > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"               "%FDSSTART%\FDS on the Web\Issue Tracker.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"      "%FDSSTART%\FDS on the Web\Software Updates.url"      > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url" "%FDSSTART%\FDS on the Web\Documentation Updates.url" > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS on the Web\Official Web Site.url"     > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"         "%FDSSTART%\FDS on the Web\Issue Tracker.url"         > Nul
 
 mkdir "%FDSSTART%\Guides and Release Notes"
 "%CD%\shortcut.exe" /F:"%FDSSTART%\Guides and Release Notes\FDS Configuration Management Plan.lnk"   /T:"%CD%\Documentation\Guides_and_Release_Notes\FDS_Configuration_Management_Plan.pdf" /A:C >NUL
@@ -122,39 +122,39 @@ erase /q *.txt
 
 echo.
 echo *** Setting up Uninstall script.
-echo echo. >> Uninstall\uninstall_base.bat
+echo echo.                                                    >> Uninstall\uninstall_base.bat
 
 :: remove smokeview path and directory
-echo if %%cfastinstalled%% == 1 goto skip2 >> Uninstall\uninstall_base.bat
-echo echo Removing directory, %SMV6%, from the System Path >> Uninstall\uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%" >> Uninstall\uninstall_base.bat
-echo rmdir /s /q "%CD%\..\SMV6" >> Uninstall\Uninstall_base.bat
+echo if %%cfastinstalled%% == 1 goto skip2                    >> Uninstall\uninstall_base.bat
+echo echo Removing directory, %SMV6%, from the System Path    >> Uninstall\uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%SMV6%"     >> Uninstall\uninstall_base.bat
+echo rmdir /s /q "%CD%\..\SMV6"                               >> Uninstall\Uninstall_base.bat
 echo :skip2 >> Uninstall\uninstall_base.bat
 
 :: remove FDS path and directory
 echo echo Removing directory, %CD%\bin , from the System Path >> Uninstall\uninstall_base.bat
-echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin" >> Uninstall\uninstall_base.bat
-echo echo. >> Uninstall\uninstall_base.bat
-echo echo Removing %CD% >> Uninstall\uninstall_base.bat
-echo rmdir /s /q "%CD%" >> Uninstall\Uninstall_base.bat
-echo pause >> Uninstall\Uninstall_base.bat
+echo call "%CD%\Uninstall\set_path.exe" -s -b -r "%CD%\bin"   >> Uninstall\uninstall_base.bat
+echo echo.                                                    >> Uninstall\uninstall_base.bat
+echo echo Removing %CD%                                       >> Uninstall\uninstall_base.bat
+echo rmdir /s /q "%CD%"                                       >> Uninstall\Uninstall_base.bat
+echo pause                                                    >> Uninstall\Uninstall_base.bat
 
-echo echo *** Uninstall complete >> Uninstall\uninstall_base.bat
-echo pause>Nul >> Uninstall\uninstall_base.bat
+echo echo *** Uninstall complete                              >> Uninstall\uninstall_base.bat
+echo pause>Nul                                                >> Uninstall\uninstall_base.bat
 
-type Uninstall\uninstall_base2.bat >> Uninstall\uninstall_base.bat
+type Uninstall\uninstall_base2.bat                            >> Uninstall\uninstall_base.bat
 erase Uninstall\uninstall_base2.bat
 
-echo "%CD%\Uninstall\uninstall.vbs" >> Uninstall\uninstall.bat
-echo echo Uninstall complete >> Uninstall\uninstall.bat
-echo pause >> Uninstall\uninstall.bat
+echo "%CD%\Uninstall\uninstall.vbs"                           >> Uninstall\uninstall.bat
+echo echo Uninstall complete                                  >> Uninstall\uninstall.bat
+echo pause                                                    >> Uninstall\uninstall.bat
 
 set ELEVATE_APP=%CD%\Uninstall\Uninstall_base.bat
 set ELEVATE_PARMS=
-echo Set objShell = CreateObject("Shell.Application") >>Uninstall\uninstall.vbs
-echo Set objWshShell = WScript.CreateObject("WScript.Shell") >>Uninstall\uninstall.vbs
-echo Set objWshProcessEnv = objWshShell.Environment("PROCESS") >>Uninstall\uninstall.vbs
-echo objShell.ShellExecute "%ELEVATE_APP%", "%ELEVATE_PARMS%", "", "runas" >>Uninstall\uninstall.vbs
+echo Set objShell = CreateObject("Shell.Application")                       > Uninstall\uninstall.vbs
+echo Set objWshShell = WScript.CreateObject("WScript.Shell")               >> Uninstall\uninstall.vbs
+echo Set objWshProcessEnv = objWshShell.Environment("PROCESS")             >> Uninstall\uninstall.vbs
+echo objShell.ShellExecute "%ELEVATE_APP%", "%ELEVATE_PARMS%", "", "runas" >> Uninstall\uninstall.vbs
 
 echo.
 echo *** Press any key to complete the installation.
