@@ -41,19 +41,19 @@
 &RAMP ID='FIRERAMP', T=1150., F=0.090 /
 &RAMP ID='FIRERAMP', T=1170., F=0.000 /
 
-&DEVC ID='Slot 5',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.25 / Fire Compartment - SW Corner Thermocouple Tree @ 2.95m From FFL
-&DEVC ID='Slot 6',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.27 / Fire Compartment - SW Corner Thermocouple Tree @ 2.57m From FFL
-&DEVC ID='Slot 8',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.12 / Fire Compartment - SW Corner Thermocouple Tree @ 2.42m From FFL
-&DEVC ID='Slot 9',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.97 / Fire Compartment - SW Corner Thermocouple Tree @ 2.27m From FFL
-&DEVC ID='Slot 10',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.82 / Fire Compartment - SW Corner Thermocouple Tree @ 2.12m From FFL
-&DEVC ID='Slot 11',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.67 / Fire Compartment - SW Corner Thermocouple Tree @ 1.97m From FFL
-&DEVC ID='Slot 12',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.52 / Fire Compartment - SW Corner Thermocouple Tree @ 1.82m From FFL
-&DEVC ID='Slot 13',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.37 / Fire Compartment - SW Corner Thermocouple Tree @ 1.67m From FFL
-&DEVC ID='Slot 14',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.22 / Fire Compartment - SW Corner Thermocouple Tree @ 1.52m From FFL
-&DEVC ID='Slot 15',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.07 / Fire Compartment - SW Corner Thermocouple Tree @ 1.37m From FFL
-&DEVC ID='Slot 16',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.92 / Fire Compartment - SW Corner Thermocouple Tree @ 1.22m From FFL
-&DEVC ID='Slot 17',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.62 / Fire Compartment - SW Corner Thermocouple Tree @ 0.92m From FFL
-&DEVC ID='Slot 18',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.32 / Fire Compartment - SW Corner Thermocouple Tree @ 0.62m From FFL
+&DEVC ID='Slot 5',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.55 / Fire Compartment - SW Corner Thermocouple Tree @ 2.95m From FFL
+&DEVC ID='Slot 6',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.17 / Fire Compartment - SW Corner Thermocouple Tree @ 2.57m From FFL
+&DEVC ID='Slot 8',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.02 / Fire Compartment - SW Corner Thermocouple Tree @ 2.42m From FFL
+&DEVC ID='Slot 9',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.87 / Fire Compartment - SW Corner Thermocouple Tree @ 2.27m From FFL
+&DEVC ID='Slot 10',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.72 / Fire Compartment - SW Corner Thermocouple Tree @ 2.12m From FFL
+&DEVC ID='Slot 11',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.57 / Fire Compartment - SW Corner Thermocouple Tree @ 1.97m From FFL
+&DEVC ID='Slot 12',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.42 / Fire Compartment - SW Corner Thermocouple Tree @ 1.82m From FFL
+&DEVC ID='Slot 13',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.27 / Fire Compartment - SW Corner Thermocouple Tree @ 1.67m From FFL
+&DEVC ID='Slot 14',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.12 / Fire Compartment - SW Corner Thermocouple Tree @ 1.52m From FFL
+&DEVC ID='Slot 15',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.97 / Fire Compartment - SW Corner Thermocouple Tree @ 1.37m From FFL
+&DEVC ID='Slot 16',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.82 / Fire Compartment - SW Corner Thermocouple Tree @ 1.22m From FFL
+&DEVC ID='Slot 17',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.52 / Fire Compartment - SW Corner Thermocouple Tree @ 0.92m From FFL
+&DEVC ID='Slot 18',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.22 / Fire Compartment - SW Corner Thermocouple Tree @ 0.62m From FFL
 &DEVC ID='Slot 19',  QUANTITY='THERMOCOUPLE',    XYZ=13.8,9.8,6.70 / Fire Compartment - East Side Ceiling @ 3.1m From FFL
 &DEVC ID='Slot 21',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,5.65 / Fire Lobby - Lobby Door Thermocouple Tree @ 2.05m From FFL
 &DEVC ID='Slot 22',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,5.25 / Fire Lobby - Lobby Door Thermocouple Tree @ 1.65m From FFL
