@@ -3061,7 +3061,18 @@ DO N=1,N_SPECIES
             H2 = H2 + 0.5_EB*(CP1+CP2)
          ENDDO
          SS%REFERENCE_ENTHALPY = SS%REFERENCE_ENTHALPY - &
-                                 (H1 + (H2-H1)*(SS%REFERENCE_TEMPERATURE-INT(SS%REFERENCE_TEMPERATURE)))         
+                                 (H1 + (H2-H1)*(SS%REFERENCE_TEMPERATURE-INT(SS%REFERENCE_TEMPERATURE)))
+         IF (SS%H_F <= -2.E22) THEN
+            CP2 = EVALUATE_RAMP(1._EB,1._EB,SS%RAMP_CP_INDEX)*1000._EB
+            H2 = SS%REFERENCE_ENTHALPY
+            DO J=1,INT(H_F_REFERENCE_TEMPERATURE)+1
+               H1 = H2
+               CP1 = CP2
+               CP2 = EVALUATE_RAMP(REAL(J,EB),1._EB,SS%RAMP_CP_INDEX)*1000._EB
+               H2 = H2 + 0.5_EB*(CP1+CP2)
+            ENDDO
+            SS%H_F = H1 + (H2-H1)*(H_F_REFERENCE_TEMPERATURE-INT(H_F_REFERENCE_TEMPERATURE))
+         ENDIF
       ENDIF
    ENDIF
 END DO
@@ -3091,7 +3102,18 @@ DO N=1,N_TRACKED_SPECIES
             H2 = H2 + 0.5_EB*(CP1+CP2)
          ENDDO
          SM%REFERENCE_ENTHALPY = SM%REFERENCE_ENTHALPY - &
-                                 (H1 + (H2-H1)*(SM%REFERENCE_TEMPERATURE-INT(SM%REFERENCE_TEMPERATURE)))         
+                                 (H1 + (H2-H1)*(SM%REFERENCE_TEMPERATURE-INT(SM%REFERENCE_TEMPERATURE)))      
+         IF (SM%H_F <= -2.E22) THEN
+            CP2 = EVALUATE_RAMP(1._EB,1._EB,SM%RAMP_CP_INDEX)*1000._EB
+            H2 = SM%REFERENCE_ENTHALPY
+            DO J=1,INT(H_F_REFERENCE_TEMPERATURE)+1
+               H1 = H2
+               CP1 = CP2
+               CP2 = EVALUATE_RAMP(REAL(J,EB),1._EB,SM%RAMP_CP_INDEX)*1000._EB
+               H2 = H2 + 0.5_EB*(CP1+CP2)
+            ENDDO
+            SM%H_F = H1 + (H2-H1)*(H_F_REFERENCE_TEMPERATURE-INT(H_F_REFERENCE_TEMPERATURE))
+         ENDIF         
       ENDIF
    ENDIF
 END DO
