@@ -241,7 +241,8 @@ for i=2:n_plots
                 end
             end
         catch
-            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of analytical/expected/experimental (d1) columns. Skipping case.'])
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
+                '); check syntax of analytical/expected/experimental (d1) columns. Skipping case.'])
             continue
         end
         
@@ -337,7 +338,8 @@ for i=2:n_plots
                 end
             end
         catch
-            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of FDS/model results (d2) columns. Skipping case.'])
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
+                '); check syntax of FDS/model results (d2) columns. Skipping case.'])
             continue
         end
         hold off
@@ -429,7 +431,8 @@ for i=2:n_plots
             display(['Printing plot ',num2str(i),'...'])
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
-            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname, '); check syntax of plot/save settings. Skipping case.'])
+            display(['Error: Problem with dataplot row ', num2str(i), ' (', Dataname,...
+                '); check syntax of plot/save settings. Skipping case.'])
             continue
         end    
         
