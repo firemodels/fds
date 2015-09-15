@@ -298,8 +298,10 @@ text(xt,yt,text_label,'FontName',Font_Name,'FontSize',14,'Interpreter',Font_Inte
 
 plot_style
 
-xlabel(xaxis_label)
-ylabel(yaxis_label)
+xlabel(xaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel(yaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 axis([xmin xmax ymin ymax])
 set(gca,'YTick',ymin:dy:ymax)
 set(gca,'YMinorTick','on')
@@ -319,6 +321,11 @@ legend boxoff
 % add SVN if file is available
 
 addverstr(gca,git_file,'linear')
+
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,plot_file])
