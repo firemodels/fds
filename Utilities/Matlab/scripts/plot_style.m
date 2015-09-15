@@ -2,7 +2,18 @@
 % 7-16-2009
 % plot_style.m
 %
-% Preferred style for FDS and Smokeview plots 
+% Preferred style for FDS and Smokeview plots
+%
+% Usage: When creating a new figure use the following:
+%
+% figure
+% plot_style
+% set(gca,'FontName',Font_Name)
+% set(gca,'FontSize',Label_Font_Size)
+% set(gcf,'Visible',Figure_Visibility);
+% set(gcf,'PaperUnits',Paper_Units);
+% set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+% set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % Font properties
 Font_Name = 'Times';
@@ -41,14 +52,14 @@ Scat_Paper_Width  = 6.0;
 Figure_Visibility = 'on';
 Image_File_Type = '-dpdf';
 
-% Set default figure properties
-set(0,'DefaultAxesUnits',Plot_Units)
-set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(0,'DefaultTextInterpreter',Font_Interpreter)
-set(0,'DefaultAxesFontName',Font_Name)
-set(0,'DefaultLineLineWidth',Line_Width)
-set(0,'DefaultAxesFontSize',Label_Font_Size)
-set(0,'DefaultTextFontSize',Label_Font_Size)
-set(0,'DefaultFigurePaperUnits',Paper_Units);
-set(0,'DefaultFigurePaperSize',[Paper_Width Paper_Height]);
-set(0,'DefaultFigurePaperPosition',[0 0 Paper_Width Paper_Height]);
+% % Set default figure properties
+% set(0,'DefaultAxesUnits',Plot_Units)
+% set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+% set(0,'DefaultTextInterpreter',Font_Interpreter)
+% set(0,'DefaultAxesFontName',Font_Name)
+% set(0,'DefaultLineLineWidth',Line_Width)
+% set(0,'DefaultAxesFontSize',Label_Font_Size)
+% set(0,'DefaultTextFontSize',Label_Font_Size)
+% set(0,'DefaultFigurePaperUnits',Paper_Units);
+% set(0,'DefaultFigurePaperSize',[Paper_Width Paper_Height]);
+% set(0,'DefaultFigurePaperPosition',[0 0 Paper_Width Paper_Height]);
