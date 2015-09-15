@@ -47,17 +47,8 @@ set(hh,'Interpreter',Font_Interpreter,'FontSize',Key_Font_Size)
 
 % add SVN if file is available
 
-SVN_Filename = 'Qs=1_RI=05_git.txt';
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+0.10*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+1.70*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = 'Qs=1_RI=05_git.txt';
+addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 
