@@ -1,6 +1,6 @@
 % McDermott
 % 4-15-15
-% umd_gas_burner
+% umd_line_burner
 
 close all
 clear all
@@ -63,12 +63,12 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 % return
 
 expdir = '../../Validation/UMD_Gas_Burner/Experimental_Data/';
-fdsdir = '../../Validation/UMD_Gas_Burner/Test2/';
+fdsdir = '../../Validation/UMD_Gas_Burner/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Gas_Burner/';
 
 F1 = importdata([fdsdir,'methane_dx_1p25cm_devc.csv'],',',2);
 F2 = importdata([fdsdir,'methane_dx_p625cm_devc.csv'],',',2);
-F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
+%F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
 
 % % oxygen level
 
@@ -78,7 +78,7 @@ F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
 % X_O2 = J1.data(:,2);
 
 % figure
-% plot_style_paper
+% plot_style
 
 % H(1)=plot(t,X_O2,'k-');
 
@@ -113,7 +113,14 @@ ylabel('HRR (kW)')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style_paper
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+Marker_Size = 10;
 
 M1 = importdata([expdir,'Exp_O2_p18_T_z_p125m.csv'],',',1);
 
@@ -126,7 +133,7 @@ H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
 t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
 t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+%t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
 
 C1 = 3;
 ND1 = 40;
@@ -138,10 +145,10 @@ ND2 = 80;
 TG2_p125 = C2:C2+ND2-1;
 TC2_p125 = C2+ND2:C2+2*ND2-1;
 
-C3 = 3;
-ND3 = 160;
-TG3_p125 = C3:C3+ND3-1;
-TC3_p125 = C3+ND3:C3+2*ND3-1;
+% C3 = 3;
+% ND3 = 160;
+% TG3_p125 = C3:C3+ND3-1;
+% TC3_p125 = C3+ND3:C3+2*ND3-1;
 
 % z = 0.125 m
 
@@ -151,12 +158,16 @@ TC1 = mean(F1.data(t1range,TC1_p125),1);
 TG2 = mean(F2.data(t2range,TG2_p125),1);
 TC2 = mean(F2.data(t2range,TC2_p125),1);
 
-TG3 = mean(F3.data(t3range,TG3_p125),1);
-TC3 = mean(F3.data(t3range,TC3_p125),1);
+% TG3 = mean(F3.data(t3range,TG3_p125),1);
+% TC3 = mean(F3.data(t3range,TC3_p125),1);
 
 H(2) = plot(yc1,TC1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
-H(4) = plot(yc3,TC3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+%H(4) = plot(yc3,TC3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+
+% write data to a table file
+Tbl = table([yc1',TC1']);
+writetable(Tbl,[pltdir,'methane_O2_p18_TC_z_p125_table.csv'])
 
 xmin = -0.25;
 xmax = 0.25;
@@ -164,7 +175,7 @@ ymin = 0;
 ymax = 1200;
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,'UMD Gas Burner - CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'UMD Line Burner, CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
 text(xt,yt,'18 % O2, z = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
@@ -172,10 +183,9 @@ text(xt,yt,'18 % O2, z = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Siz
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)')
 ylabel('Thermocouple Temperature ( \circC )')
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
+legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm') %,'FDS 0.3125 cm')
 
-% add SVN if file is available
-
+% add Git revision if file is available
 git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
@@ -187,7 +197,14 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style_paper
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+Marker_Size = 10;
 
 M1 = importdata([expdir,'Exp_O2_p18_T_z_p250m.csv'],',',1);
 
@@ -200,7 +217,7 @@ H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
 t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
 t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+%t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
 
 C1 = 3;
 ND1 = 40;
@@ -212,10 +229,10 @@ ND2 = 80;
 TG2_p250 = C2+3*ND2:C2+4*ND2-1;
 TC2_p250 = C2+4*ND2:C2+5*ND2-1;
 
-C3 = 3;
-ND3 = 160;
-TG3_p250 = C3+3*ND3:C3+4*ND3-1;
-TC3_p250 = C3+4*ND3:C3+5*ND3-1;
+% C3 = 3;
+% ND3 = 160;
+% TG3_p250 = C3+3*ND3:C3+4*ND3-1;
+% TC3_p250 = C3+4*ND3:C3+5*ND3-1;
 
 TG1 = mean(F1.data(t1range,TG1_p250),1);
 TC1 = mean(F1.data(t1range,TC1_p250),1);
@@ -223,12 +240,16 @@ TC1 = mean(F1.data(t1range,TC1_p250),1);
 TG2 = mean(F2.data(t2range,TG2_p250),1);
 TC2 = mean(F2.data(t2range,TC2_p250),1);
 
-TG3 = mean(F3.data(t3range,TG3_p250),1);
-TC3 = mean(F3.data(t3range,TC3_p250),1);
+% TG3 = mean(F3.data(t3range,TG3_p250),1);
+% TC3 = mean(F3.data(t3range,TC3_p250),1);
 
 H(2) = plot(yc1,TC1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
-H(4) = plot(yc3,TC3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+%H(4) = plot(yc3,TC3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+
+% write data to a table file
+Tbl = table([yc1',TC1']);
+writetable(Tbl,[pltdir,'methane_O2_p18_TC_z_p250_table.csv'])
 
 xmin = -0.25;
 xmax = 0.25;
@@ -236,18 +257,17 @@ ymin = 0;
 ymax = 1200;
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,'UMD Gas Burner - CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'UMD Line Burner, CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
-text(xt,yt,'18 % O2, z = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)')
 ylabel('Thermocouple Temperature ( \circC )')
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
+legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm') %,'FDS 0.3125 cm')
 
-% add SVN if file is available
-
+% add Git revision if file is available
 git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
@@ -259,7 +279,14 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_TC_z_p250'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style_paper
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+Marker_Size = 10;
 
 M1 = importdata([expdir,'Exp_O2_p18_O2_z_p125m.csv'],',',1);
 
@@ -272,7 +299,7 @@ H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
 t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
 t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+%t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
 
 C1 = 3;
 ND1 = 40;
@@ -282,19 +309,23 @@ C2 = 3;
 ND2 = 80;
 O22_p125 = C2+2*ND2:C2+3*ND2-1;
 
-C2 = 3;
-ND3 = 160;
-O23_p125 = C3+2*ND3:C3+3*ND3-1;
+% C3 = 3;
+% ND3 = 160;
+% O23_p125 = C3+2*ND3:C3+3*ND3-1;
 
 % z = 0.125 m
 
 O2_1 = mean(F1.data(t1range,O21_p125),1);
 O2_2 = mean(F2.data(t2range,O22_p125),1);
-O2_3 = mean(F3.data(t3range,O23_p125),1);
+%O2_3 = mean(F3.data(t3range,O23_p125),1);
 
 H(2) = plot(yc1,O2_1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,O2_2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
-H(4) = plot(yc3,O2_3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+%H(4) = plot(yc3,O2_3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+
+% write data to a table file
+Tbl = table([yc1',O2_1']);
+writetable(Tbl,[pltdir,'methane_O2_p18_O2_z_p125_table.csv'])
 
 xmin = -0.25;
 xmax = 0.25;
@@ -302,18 +333,17 @@ ymin = 0.05;
 ymax = 0.25;
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,'UMD Gas Burner - CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'UMD Line Burner, CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
-text(xt,yt,'18 % O2, z = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'18 % O2, {\it z} = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)')
 ylabel('O2 (vol frac)')
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','Location','Southwest') %,'FDS 0.3125 cm','Location','Southwest')
 
-% add SVN if file is available
-
+% add Git revision if file is available
 git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
@@ -325,7 +355,14 @@ print(gcf,'-dpdf',[pltdir,'methane_O2_p18_O2_z_p125'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure
-plot_style_paper
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+Marker_Size = 10;
 
 M1 = importdata([expdir,'Exp_O2_p18_O2_z_p250m.csv'],',',1);
 
@@ -338,7 +375,7 @@ H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
 t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
 t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+%t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
 
 C1 = 3;
 ND1 = 40;
@@ -348,19 +385,23 @@ C2 = 3;
 ND2 = 80;
 O22_p250 = C2+5*ND2:C2+6*ND2-1;
 
-C2 = 3;
-ND3 = 160;
-O23_p250 = C3+5*ND3:C3+6*ND3-1;
+% C3 = 3;
+% ND3 = 160;
+% O23_p250 = C3+5*ND3:C3+6*ND3-1;
 
 % z = 0.125 m
 
 O2_1 = mean(F1.data(t1range,O21_p250),1);
 O2_2 = mean(F2.data(t2range,O22_p250),1);
-O2_3 = mean(F3.data(t3range,O23_p250),1);
+%O2_3 = mean(F3.data(t3range,O23_p250),1);
 
 H(2) = plot(yc1,O2_1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,O2_2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
-H(4) = plot(yc3,O2_3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+%H(4) = plot(yc3,O2_3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
+
+% write data to a table file
+Tbl = table([yc1',O2_1']);
+writetable(Tbl,[pltdir,'methane_O2_p18_O2_z_p250_table.csv'])
 
 xmin = -0.25;
 xmax = 0.25;
@@ -368,18 +409,17 @@ ymin = 0.05;
 ymax = 0.25;
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .92*(ymax-ymin);
-text(xt,yt,'UMD Gas Burner - CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'UMD Line Burner, CH4','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 xt = xmin + .03*(xmax-xmin);
 yt = ymin + .84*(ymax-ymin);
-text(xt,yt,'18 % O2, z = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
 xlabel('Position (m)')
 ylabel('O2 (vol frac)')
-legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
+legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','Location','Southwest') %,'FDS 0.3125 cm','Location','Southwest')
 
-% add SVN if file is available
-
+% add Git revision if file is available
 git_file = [fdsdir,'methane_dx_1p25cm_git.txt'];
 addverstr(gca,git_file,'linear')
 
