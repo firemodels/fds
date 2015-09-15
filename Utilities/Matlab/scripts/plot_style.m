@@ -51,15 +51,3 @@ Scat_Paper_Width  = 6.0;
 % Print properties
 Figure_Visibility = 'on';
 Image_File_Type = '-dpdf';
-
-% % Set default figure properties
-% set(0,'DefaultAxesUnits',Plot_Units)
-% set(0,'DefaultAxesPosition',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-% set(0,'DefaultTextInterpreter',Font_Interpreter)
-% set(0,'DefaultAxesFontName',Font_Name)
-% set(0,'DefaultLineLineWidth',Line_Width)
-% set(0,'DefaultAxesFontSize',Label_Font_Size)
-% set(0,'DefaultTextFontSize',Label_Font_Size)
-% set(0,'DefaultFigurePaperUnits',Paper_Units);
-% set(0,'DefaultFigurePaperSize',[Paper_Width Paper_Height]);
-% set(0,'DefaultFigurePaperPosition',[0 0 Paper_Width Paper_Height]);
