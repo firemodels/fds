@@ -3,7 +3,7 @@
 &MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
 
 &TIME T_END=400. / 
-&RADI RADIATIVE_FRACTION=0.33/
+
 &REAC FUEL               = 'N-HEPTANE'
       FYI                = 'Heptane C_7 H_16'
       CO_YIELD           = 0.010
