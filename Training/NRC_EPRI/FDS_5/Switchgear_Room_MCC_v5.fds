@@ -56,6 +56,7 @@ Cabinets
 Fire
 
 &REAC ID='XPE/Neoprene'
+      RADIATIVE_FRACTION=0.53
       C = 3.
       H = 4.5
       OTHER = 0.5
@@ -63,8 +64,6 @@ Fire
       HEAT_OF_COMBUSTION=10300.
       CO_YIELD=0.082
       SOOT_YIELD=0.175 /
-
-&RADI RADIATIVE_FRACTION=0.53 /
 
 &SURF ID      = 'CABINET FIRE'
       COLOR   = 'ORANGE'
