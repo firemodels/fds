@@ -10,9 +10,8 @@
 
 &REAC FUEL='METHANE'           
       FYI='Methane, C H_4'   
-      SOOT_YIELD=0.01 /     
-                             
-&RADI RADIATIVE_FRACTION=0.30 /                           
+      SOOT_YIELD=0.01
+      RADIATIVE_FRACTION=0.30 /                           
 
 &SURF ID='burner', HRRPUA=1222., COLOR='RED', RAMP_Q='burner_ramp' /
 &RAMP ID='burner_ramp',T=  0.,F=0. /

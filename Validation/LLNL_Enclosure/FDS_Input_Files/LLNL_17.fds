@@ -6,7 +6,7 @@
 
 Fire
 
-&RADI RADIATIVE_FRACTION=0.20 /
+
 
 &REAC FUEL='METHANE'
       FYI= 'C_1 H_4'
