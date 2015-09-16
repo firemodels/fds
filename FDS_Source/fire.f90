@@ -27,10 +27,6 @@ IF (INIT_HRRPUV) RETURN
 
 CALL POINT_TO_MESH(NM)
 
-! Upper bounds on local HRR per unit volume
-
-Q_UPPER = HRRPUA_SHEET/CELL_SIZE + HRRPUV_AVERAGE
-
 ! Call combustion ODE solver
 
 CALL COMBUSTION_GENERAL
@@ -290,17 +286,10 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
       Q_SUM = Q_SUM - RHO(I,J,K)*SUM(SPECIES_MIXTURE%H_F*DZZ) ! FDS Tech Guide (5.14)
    ENDIF
    
-   IF (Q_CUM + Q_SUM > Q_UPPER*DT) THEN
-      Q_OUT = Q_UPPER
-      Q_H_CORR(I,J,K) = (Q_H_CUM+Q_H_SUM)*Q_UPPER/(Q_CUM + Q_SUM)
-      ZZ_GET = ZZ_TEMP + (Q_UPPER*DT/(Q_CUM + Q_SUM))*DZZ
-      EXIT INTEGRATION_LOOP
-   ELSE
-      Q_CUM = Q_CUM+Q_SUM
-      Q_OUT = Q_CUM/DT
-      Q_H_CUM = Q_H_CUM+Q_H_SUM
-      Q_H_CORR(I,J,K) = Q_H_CUM/DT
-   ENDIF
+   Q_CUM = Q_CUM+Q_SUM
+   Q_OUT = Q_CUM/DT
+   Q_H_CUM = Q_H_CUM+Q_H_SUM
+   Q_H_CORR(I,J,K) = Q_H_CUM/DT
    
    ! Total Variation (TV) scheme (accelerates integration for finite-rate equilibrium calculations)
    ! See FDS Tech Guide Appendix E
