@@ -19,14 +19,14 @@ cd $FDSSMV/Utilities/Scripts
 OUTPUT_TEX_FILE=$FDSSMV/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
 
 # Table header
-echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
+echo "\begin{longtable}[c]{|l|c|c|c|}" > $OUTPUT_TEX_FILE
 echo "\caption[Validation GIT Statistics]{Validation GIT statistics for all data sets}" >> $OUTPUT_TEX_FILE
 echo "\label{validation_git_stats}" >> $OUTPUT_TEX_FILE
 echo "\\\\ \hline" >> $OUTPUT_TEX_FILE
-echo "Dataset  &  FDS Revision Date  &  FDS Revision String&dummy\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
+echo "Dataset  &  FDS Revision Date  &  FDS Revision String&time (s)\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
 echo "\endfirsthead" >> $OUTPUT_TEX_FILE
 echo "\hline" >> $OUTPUT_TEX_FILE
-echo "Dataset  &  FDS Revision Date  &  FDS Revision String&dummy\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
+echo "Dataset  &  FDS Revision Date  &  FDS Revision String&time (s)\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
 echo "\endhead" >> $OUTPUT_TEX_FILE
 
 ./makegittable.sh >> $OUTPUT_TEX_FILE
