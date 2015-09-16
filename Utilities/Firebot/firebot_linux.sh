@@ -932,13 +932,12 @@ check_matlab_verification()
 {
    # Scan for and report any errors in Matlab scripts
    cd $FIREBOT_RUNDIR
-   if [[ `grep -A 50 "Error" $OUTPUT_DIR/stage7a_verification` == "" ]]
+   if [[ `grep -B 5 -A 50 "Error" $OUTPUT_DIR/stage7a_verification` == "" ]]
    then
       stage7a_success=true
    else
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
-#      grep -A 50 "Error" $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
-      cat $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
+      grep -B 5 -A 50 "Error" $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1000,13 +999,12 @@ check_matlab_validation()
 {
    # Scan for and report any errors in Matlab scripts
    cd $FIREBOT_RUNDIR
-   if [[ `grep -A 50 "Error" $OUTPUT_DIR/stage7b_validation` == "" ]]
+   if [[ `grep -B 5 -A 50 "Error" $OUTPUT_DIR/stage7b_validation` == "" ]]
    then
       stage7b_success=true
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
-#      grep -A 50 "Error" $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
-      cat $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
+      grep -B 5 -A 50 "Error" $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }

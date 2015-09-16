@@ -4,9 +4,8 @@
 
 &TIME T_END=180.0 /
 
-&RADI RADIATIVE_FRACTION = 0.29 /
-
-&REAC FUEL                 = 'PROPANE'			
+&REAC FUEL                 = 'PROPANE'
+      RADIATIVE_FRACTION = 0.29
       FYI                = 'C3H8'
       SOOT_YIELD         = 0.024 /
 
