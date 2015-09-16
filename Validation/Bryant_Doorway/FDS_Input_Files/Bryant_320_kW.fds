@@ -10,7 +10,7 @@
       FYI='Methane, C H_4'                                    
       SOOT_YIELD=0.001 /                 
 
-&RADI RADIATIVE_FRACTION=0.20 /
+
 
 &SURF ID='BURNER', HRRPUA=3556., COLOR='ORANGE' /
 
