@@ -937,7 +937,8 @@ check_matlab_verification()
       stage7a_success=true
    else
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
-      grep -A 50 "Error" $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
+#      grep -A 50 "Error" $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
+      cat $OUTPUT_DIR/stage7a_verification >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1004,7 +1005,8 @@ check_matlab_validation()
       stage7b_success=true
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
-      grep -A 50 "Error" $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
+#      grep -A 50 "Error" $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
+      cat $OUTPUT_DIR/stage7b_validation >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
