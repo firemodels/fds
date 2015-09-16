@@ -4822,19 +4822,6 @@ where
 \end{itemize}
 
 
-\subsection{Special Topic: Reaction Rate Limiters}
-\label{info:REAC_Limiters}
-
-At certain critical points in a calculation, like the moment of ignition, the local reaction rate can be very large due to limitations in the models, long time
-steps, or both. To prevent fictitiously high values of the reaction rate that can lead to numerical instabilities, a limiting value of the heat release rate
-per unit volume is used:
-\be
-   \dq'''_{\si{max}} = \frac{ \hbox{\ct HRRPUA\_SHEET} }{\dx} + \hbox{\ct HRRPUV\_AVERAGE}
-\ee
-where the default values of {\ct HRRPUA\_SHEET} and {\ct HRRPUV\_AVERAGE} are 200 kW/m$^2$ and 2500 kW/m$^3$, respectively. The use of limiting values comes from a scaling analysis of pool fires by Orloff and De Ris~\cite{Orloff:19th_Symposium}.  These parameters may be changed on the {\ct MISC} line.
-
-
-
 
 \clearpage
 
@@ -8916,8 +8903,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
-{\ct HRRPUA\_SHEET}                             & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^2}   & 200.              \\ \hline
-{\ct HRRPUV\_AVERAGE}                           & Real          & Section~\ref{info:REAC_Limiters}                      & \si{kW/m^3}   & 2500.             \\ \hline
 %{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline

@@ -144,11 +144,6 @@ The heat release per unit volume is found by summing the species mass production
 \begin{equation}\label{eq:vol_heat_gen}
 \dot{q}''' \equiv -\displaystyle \sum_{\alpha} \dot{m}_{\alpha}''' \, \Delta h_{{\rm f},\alpha}^0
 \end{equation}
-To maintain code stability, it is sometimes necessary to put an upper bound on the local heat release rate per unit volume. A scaling analysis of pool fires by Orloff and de Ris~\cite{Orloff:19th_Symposium} suggests that the spatial average of the heat release rate of a fire is approximately \SI{1200}{kW/m^3}. FDS uses a less restrictive upper bound on the local heat release rate per unit volume:
-\begin{equation}
-   \dq_{\rm upper}''' = 200/\dx + 2500 \quad \si{kW/m^3}  \label{eq:q_bound}
-\end{equation}
-The value of \SI{200}{kW/m^2} is an empirically derived upper bound on the heat release rate per unit area of flame sheet and $\delta x$ is the characteristic cell size (m).
 
 
 \subsection{Extinction}
