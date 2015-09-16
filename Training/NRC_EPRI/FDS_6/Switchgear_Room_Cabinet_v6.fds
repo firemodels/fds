@@ -118,9 +118,7 @@ Cabinet Fire
                                    SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.5128,
                                    SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=7.9692 /
 
-&REAC ID='PE/PVC', HEAT_OF_COMBUSTION = 20900., SPEC_ID_NU='PE/PVC','AIR','PRODUCTS', NU=-1,-10.0876,1 /
-
-&RADI RADIATIVE_FRACTION = 0.49 /
+&REAC ID='PE/PVC', HEAT_OF_COMBUSTION = 20900., SPEC_ID_NU='PE/PVC','AIR','PRODUCTS', NU=-1,-10.0876,1, RADIATIVE_FRACTION = 0.49 /
 
 &SURF ID            = 'CABINET FIRE'
       COLOR         = 'ORANGE'

@@ -57,13 +57,12 @@ Fire
 
 &REAC FUEL               = 'HYDROCARBON'
       FYI                = 'General Hydrocarbon, C_14 H_30'
+      RADIATIVE_FRACTION=0.34 
       C                  = 14.
       H                  = 30.
       HEAT_OF_COMBUSTION = 46400.
       CO_YIELD           = 0.019
       SOOT_YIELD         = 0.059 /
-
-&RADI RADIATIVE_FRACTION=0.34 /
 
 &SURF ID     = 'OIL FIRE'
       COLOR  = 'ORANGE'

@@ -96,6 +96,7 @@ Cabinets
 Cabinet Fire
 
 &REAC ID                 = 'PE/PVC'
+      RADIATIVE_FRACTION=0.49
       FYI                = 'Assume C_2 H_3.5 Cl_0.5'
       C                  = 2.
       H                  = 3.5
@@ -104,8 +105,6 @@ Cabinet Fire
       HEAT_OF_COMBUSTION = 20900.
       CO_YIELD           = 0.147 /
       SOOT_YIELD         = 0.136 /
-
-&RADI RADIATIVE_FRACTION = 0.49 /
 
 &SURF ID            = 'CABINET FIRE'
       COLOR         = 'ORANGE'
