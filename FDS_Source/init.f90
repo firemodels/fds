@@ -244,6 +244,9 @@ ENDIF
 ! If radiation absorption desired allocate arrays
  
 IF (.NOT.EVACUATION_ONLY(NM)) THEN
+   ALLOCATE(M%CHI_R(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','QR',IZERO)
+   M%CHI_R = 0._EB   
    ALLOCATE(M%QR(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
    CALL ChkMemErr('INIT','QR',IZERO)
    M%QR = 0._EB
