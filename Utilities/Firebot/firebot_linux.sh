@@ -1194,6 +1194,9 @@ email_build_status()
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
+      cd $FIREBOT_RUNDIR
+      $UPLOADGUIDES > /dev/null
+
      # Send email with failure message and warnings, body of email contains appropriate log file
      cat $ERROR_LOG $TIME_LOG | mail -s "[$botuser] $bottype failure and warnings. Version: ${GIT_REVISION}, Branch: $BRANCH." $mailToFDS > /dev/null
 
@@ -1206,6 +1209,9 @@ email_build_status()
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
+      cd $FIREBOT_RUNDIR
+      $UPLOADGUIDES > /dev/null
+
       # Send email with success message, include warnings
       cat $WARNING_LOG $TIME_LOG | mail -s "[$botuser] $bottype success, with warnings. Version: ${GIT_REVISION}, Branch: $BRANCH" $mailToFDS > /dev/null
 
