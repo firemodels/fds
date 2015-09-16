@@ -47,7 +47,7 @@
 &RAMP ID='fire',T=330.,F=0.73 /
 &RAMP ID='fire',T=345.,F=0.00 /
 
-&RADI RADIATIVE_FRACTION=0.4 /
+
 &REAC FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
       SOOT_YIELD=0.015 /

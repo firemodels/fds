@@ -6,9 +6,9 @@
 &DUMP DT_HRR=30.,DT_DEVC=30., SIG_FIGS=4, SIG_FIGS_EXP=2 /
 &ZONE XB=2.7,2.8,0.5,0.6,1.1,1.2 /
 
-&RADI RADIATIVE_FRACTION=0.39 /
 &REAC FUEL='N-HEPTANE'
       FYI='60% Heptane, 40% Toluene, C_7 H_12'
+      RADIATIVE_FRACTION=0.39
       C=7.
       H=12. 
       CO_YIELD=0.042  
