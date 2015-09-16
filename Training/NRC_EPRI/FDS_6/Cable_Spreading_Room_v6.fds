@@ -81,14 +81,13 @@ Cables
 Fire
 
 &REAC ID='Cellulose/Polyethylene'
+      RADIATIVE_FRACTION = 0.4
       C = 4.
       H = 7. 
       O = 2.5
       HEAT_OF_COMBUSTION=30400.
       CO_YIELD=0.014  
       SOOT_YIELD=0.038 /
-
-&RADI RADIATIVE_FRACTION = 0.4 /
 
 &SURF ID     = 'FIRE'
       COLOR  = 'ORANGE'
