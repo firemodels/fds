@@ -3,9 +3,9 @@
 &MESH IJK=35,35,80, XB=-1.50,3.75,-1.50,3.75,0.00,12.00 /
 &TIME T_END=300. /
 
-&RADI RADIATIVE_FRACTION=0.5 /
 
-&REAC FUEL         = 'POLYSTYRENE'
+
+&REAC FUEL         = 'POLYSTYRENE', RADIATIVE_FRACTION=0.5
       FYI        = 'Styrene, C_8 H_8'
       H          = 8.
       C          = 8.

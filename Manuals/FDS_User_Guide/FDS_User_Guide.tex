@@ -384,6 +384,7 @@ Namelist      & FDS 5 Parameter                     & Namelist     & FDS 6 Param
 {\ct PROP}    & {\ct DROPLET\_VELOCITY}             &  {\ct PROP}  & {\ct PARTICLE\_VELOCITY}                    & Section~\ref{info:sprinklers}           \\ \hline
 {\ct PROP}    & {\ct DT\_INSERT}                    &              & New procedure                               & Section~\ref{info:controlling_droplets} \\ \hline
 {\ct RADI}    & {\ct CH4\_BANDS}                    &              & Eliminated                                  &                                         \\ \hline
+{\ct RADI}    & {\ct RADIATIVE\_FRACTION}           &  {\ct REAC}  & {\ct RADIATIVE\_FRACTION} & Section ~\ref{info:CHI_R}   \\ \hline
 {\ct REAC}    & {\ct BOF}                           &  {\ct REAC}  & {\ct A}                                     & Section~\ref{info:finite}               \\ \hline
 {\ct REAC}    & {\ct ID}                            &  {\ct REAC}  & {\ct FUEL}                                  & Section~\ref{info:simple_chemistry}     \\ \hline
 {\ct REAC}    & {\ct MASS\_EXTINCTION\_COEFFICIENT} &  {\ct SPEC}  & {\ct MASS\_EXTINCTION\_COEFFICIENT}         & Section~\ref{info:visibility}           \\ \hline
@@ -5262,12 +5263,13 @@ solver (saving roughly 20 \% in CPU time) by adding the statement
 {\ct RADIATION=.FALSE.} to the {\ct RADI} line.  If burning
 is taking place and radiation is turned off, then the total heat
 release rate is reduced by the {\ct RADIATIVE\_FRACTION}, which is
-also input on the {\ct RADI} line. This radiated energy completely
+an input on the {\ct REAC} line. This radiated energy completely
 disappears from the calculation. For fire scenarios it is not recommended that you turn off the
 radiation transport. This feature is used mainly for diagnostic purposes or when the changes in
 temperature are relatively small.
 
 \subsection{Radiative Fraction}
+\label{info:CHI_R}
 
 The most important radiation parameter is the fraction of energy released from the
 fire as thermal radiation, commonly referred to as the {\em radiative fraction}. It is a function of both the flame temperature
@@ -5277,16 +5279,46 @@ In calculations in which the mesh cells are on the order of a centimeter or
 larger, the temperature near the flame surface cannot be relied upon when
 computing the source term in the radiation transport equation, especially
 because of the $T^4$ dependence.
-As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct RADI} line allows you to specify explicitly the
+As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the
 fraction of the total combustion energy that is released in the form of thermal radiation.
 Some of that energy may be reabsorbed elsewhere, yielding a net radiative
 loss from the fire or compartment that is less than the {\ct RADIATIVE\_FRACTION}, depending mainly on the size of
 the fire and the soot loading. If it is desired to use the radiation transport
 equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero,
 and the source term in the radiative transport equation is then based solely
-on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is
-0.35 for an LES calculation, and zero for DNS.
+on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS. 
 
+\clearpage
+\begin{table}[ht]
+\caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
+\vspace{0.1in}
+\label{tab:chi_r}
+\begin{center}
+\begin{tabular}{|l|c|}
+\hline
+Species                 &   $\chi_R$   \\ \hline \hline
+{\ct ACETONE}            & 0.30 \\ \hline
+{\ct ACETYLENE}          & 0.45 \\ \hline
+{\ct BENZENE}            & 0.45 \\ \hline
+{\ct BUTANE}             & 0.35 \\ \hline
+{\ct DODECANE}           & 0.40 \\ \hline
+{\ct ETHANE}             & 0.25 \\ \hline
+{\ct ETHANOL}            & 0.20 \\ \hline
+{\ct ETHYLENE}           & 0.35 \\ \hline
+{\ct HYDROGEN}           & 0.10 \\ \hline
+{\ct ISOPROPANOL}        & 0.30 \\ \hline
+{\ct METHANE}            & 0.20 \\ \hline
+{\ct METHANOL}           & 0.20 \\ \hline
+{\ct N-DECANE}           & 0.40 \\ \hline
+{\ct N-HEPTANE}          & 0.40 \\ \hline
+{\ct N-HEXANE}           & 0.40 \\ \hline
+{\ct N-OCTANE}           & 0.40 \\ \hline
+{\ct PROPANE}            & 0.30 \\ \hline
+{\ct PROPYLENE}          & 0.35 \\ \hline
+{\ct TOLUENE}            & 0.45 \\ \hline
+All other species        & 0.35 \\ \hline\end{tabular}
+\end{center}
+\end{table}
 
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
@@ -9277,7 +9309,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
 {\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
-{\ct RADIATIVE\_FRACTION}           & Real          & Section~\ref{info:RADI}                   &                   & 0.35              \\ \hline
 {\ct RADTMP                   }     & Real          & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
 {\ct TIME\_STEP\_INCREMENT}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct WIDE\_BAND\_MODEL    }         & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
@@ -9349,6 +9380,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct N\_T}                                & Real        & Section~\ref{info:finite}                 &                   &     \\ \hline
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 %{\ct ODE\_SOLVER}                         & Character   & Section~\ref??}                           &                   &       \\ \hline
+{\ct RADIATIVE\_FRACTION}                  & Real       & Section~\ref{info:CHI_R}                   &                   &                \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline

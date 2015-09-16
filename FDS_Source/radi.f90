@@ -601,7 +601,7 @@ IF (RADIATION) THEN
    CALL RADIATION_FVM(T,NM)
 ELSE
    RADIATION_COMPLETED = .TRUE.
-   IF (N_REACTIONS>0) QR = -RADIATIVE_FRACTION*Q
+   IF (N_REACTIONS>0) QR = -CHI_R*Q
 ENDIF
 
 TUSED(9,NM)=TUSED(9,NM)+SECOND()-TNOW
@@ -808,16 +808,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   KFST4(I,J,K) = KAPPA(I,J,K)*FOUR_SIGMA*TMP(I,J,K)**4
-                  IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) THEN
+                  IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) THEN
                      VOL = R(I)*DX(I)*DY(J)*DZ(K)
-                     RAD_Q_SUM = RAD_Q_SUM + (RADIATIVE_FRACTION*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
+                     RAD_Q_SUM = RAD_Q_SUM + (CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K))*VOL
                      KFST4_SUM = KFST4_SUM + KFST4(I,J,K)*VOL
                   ENDIF
                ENDDO
             ENDDO
          ENDDO
 
-         ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION
+         ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
          IF (KFST4_SUM>TWO_EPSILON_EB) THEN
             RTE_SOURCE_CORRECTION_FACTOR = MAX(1._EB,RAD_Q_SUM/KFST4_SUM)
@@ -825,7 +825,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                DO J=1,JBAR
                   DO I=1,IBAR
                      IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                     IF (RADIATIVE_FRACTION*Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
+                     IF (CHI_R(I,J,K)*Q(I,J,K)>Q_MINIMUM) KFST4(I,J,K) = KFST4(I,J,K)*RTE_SOURCE_CORRECTION_FACTOR
                   ENDDO
                ENDDO
             ENDDO
@@ -839,7 +839,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             DO J=1,JBAR
                DO I=1,IBAR
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-                  KFST4(I,J,K) = RADIATIVE_FRACTION*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K)
+                  KFST4(I,J,K) = CHI_R(I,J,K)*Q(I,J,K)+KAPPA(I,J,K)*UII(I,J,K)
                ENDDO
             ENDDO
          ENDDO
