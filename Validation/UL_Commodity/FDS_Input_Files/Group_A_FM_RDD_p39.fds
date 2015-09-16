@@ -5,7 +5,7 @@
 
 &MISC ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
 
-&RADI RADIATIVE_FRACTION=0.5 /
+
 
 &SPEC ID='WATER VAPOR' /
 
@@ -30,7 +30,7 @@
 &DEVC XYZ=1.425,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
 &DEVC XYZ=2.025,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
 
-&REAC FUEL         = 'POLYSTYRENE'
+&REAC FUEL         = 'POLYSTYRENE', RADIATIVE_FRACTION=0.5
       FYI        = 'Styrene, C_8 H_8'
       H          = 8.
       C          = 8.
