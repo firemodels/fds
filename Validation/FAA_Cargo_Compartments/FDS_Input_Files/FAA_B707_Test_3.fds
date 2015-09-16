@@ -40,9 +40,8 @@
       EMISSIVITY    =  0.8
       CONDUCTIVITY  =  0.1 /
 
-&RADI RADIATIVE_FRACTION=0.55 /
-
 &REAC FUEL ='Mixed Polymers',
+      RADIATIVE_FRACTION=0.55,
       C = 1.           
       H = 12.2           
       HEAT_OF_COMBUSTION = 21000.
