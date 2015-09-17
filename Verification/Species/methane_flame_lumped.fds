@@ -16,8 +16,6 @@ Yields       kg/kg fuel   kg
 &TIME T_END=10.0, DT=0.01 /
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5
 
-&MISC HRRPUV_AVERAGE=1e8/
-
 &OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10 SURF_IDS = 'BURNER','INERT','INERT' /
 &SURF ID = 'BURNER', HRRPUA=625., RAMP_Q = 'HRR' / 
 &RAMP ID = 'HRR' T = 0, F = 1 /
