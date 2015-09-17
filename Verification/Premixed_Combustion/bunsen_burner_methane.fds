@@ -6,7 +6,7 @@
 
 &DUMP NFRAMES=4000/
 
-&MISC DNS=.TRUE., NOISE=.FALSE., HRRPUV_AVERAGE=1e20 /
+&MISC DNS=.TRUE., NOISE=.FALSE. /
 
 &REAC FUEL = 'METHANE'
       RAMP_FS = 'methane flame speed'
