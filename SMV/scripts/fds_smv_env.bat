@@ -12,7 +12,7 @@ set fdssmv_major_version=6
 Rem ---------- FDS-Smokeview repository settings ------------
 
 set fds_edition=FDS6
-set smv_edtion=SMV6
+set smv_edition=SMV6
 set svn_root=%userprofile%\fds-smv
 set svn_drive=c:
 set linux_svn_root=FDS-SMV
