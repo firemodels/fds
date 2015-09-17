@@ -90,13 +90,11 @@ wzzip -a -r -p %zipbase%.zip *
 echo.
 echo ***creating self-extracting archive
 echo.
-::wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
-wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\firemodels\%smv_edition%" -c wrapup_smv_install.bat
+wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\FDS\%fds_edition%\bin" -c wrapup_smv_install.bat
+::wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\firemodels\%smv_edition%" -c wrapup_smv_install.bat
 
 CALL :COPY %zipbase%.exe ..\.
-IF not EXIST "%gupload%" goto skip_gupload
-  CALL :COPY %zipbase%.exe "%gupload%"
-:skip_gupload
+IF EXIST "%gupload%" CALL :COPY %zipbase%.exe "%gupload%"
 
 echo.
 echo ***Smokeview win%platform% test bundle built
