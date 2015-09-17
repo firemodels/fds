@@ -8,8 +8,6 @@ All material properties etc. are completely fabricated.
 
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
 
-&MISC HRRPUV_AVERAGE=1e8/
-
 Fire
 HRR = 100 kW 
 MLR = 0.002 kg/s Methane

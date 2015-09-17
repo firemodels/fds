@@ -5,7 +5,7 @@ CO+0.5*O2->CO2
 
 &HEAD CHID='reactionrate_EDC_flim_2step', TITLE='Fixed_Mixing_Time_Test_Case' /
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
-&MISC GVEC=0.0, 0.0, 0.0, SUPPRESSION=.FALSE., HRRPUV_AVERAGE=1e12/
+&MISC GVEC=0.0, 0.0, 0.0, SUPPRESSION=.FALSE. /
 &TIME T_END=1, DT=0.01 /
 &DUMP MASS_FILE=.TRUE. /
 
