@@ -1889,8 +1889,6 @@ void initvars(void){
 
   svofile_exists=0;
   devicenorm_length = 0.1;
-  ndeviceinfo=0;
-  nobject_defs=0;
   strcpy(object_def_first.label,"first");
   object_def_first.next=&object_def_last;
   object_def_first.prev=NULL;

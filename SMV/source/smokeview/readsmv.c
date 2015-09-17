@@ -7469,6 +7469,8 @@ typedef struct {
 
   update_bound_info();
 
+  update_object_used();
+
   // close .smv file
 
   fclose(stream1);

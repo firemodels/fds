@@ -923,7 +923,7 @@ SVEXTERN supermesh SVDECL(*supermeshinfo,NULL);
 SVEXTERN int SVDECL(nsupermeshinfo,0);
 SVEXTERN mesh SVDECL(*mesh_last,NULL), SVDECL(*loaded_isomesh,NULL);
 SVEXTERN float devicenorm_length;
-SVEXTERN int ndeviceinfo,nvdeviceinfo,ndeviceinfo_exp;
+SVEXTERN int SVDECL(ndeviceinfo,0),nvdeviceinfo,ndeviceinfo_exp;
 SVEXTERN float max_dev_vel;
 SVEXTERN int SVDECL(last_prop_display,-1);
 SVEXTERN int SVDECL(devicetypes_index,0);
@@ -939,7 +939,7 @@ SVEXTERN sv_object SVDECL(*thcp_object_backup,NULL), SVDECL(*missing_device,NULL
 SVEXTERN sv_object object_def_first, object_def_last;
 SVEXTERN char SVDECL(**device_texture_list,NULL);
 SVEXTERN int ndevice_texture_list, SVDECL(*device_texture_list_index,NULL);
-SVEXTERN int nobject_defs;
+SVEXTERN int SVDECL(nobject_defs,0);
 SVEXTERN int svofile_exists;
 SVEXTERN treedata SVDECL(*treeinfo,NULL);
 SVEXTERN terraindata SVDECL(*terraininfo,NULL);
