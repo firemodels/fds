@@ -6481,6 +6481,56 @@ void init_object_defs(void){
   
 }
 
+/* ----------------------- update_object_used ----------------------------- */
+
+void update_object_used(void){
+  int i;
+
+  for(i = 0; i<nobject_defs; i++){
+    sv_object *obj_typei;
+
+    obj_typei = object_defs[i];
+    obj_typei->used_by_device = 0;
+  }
+  for(i = 0; i<ndeviceinfo; i++){
+    devicedata *devicei;
+    propdata *propi;
+    int jj;
+
+    devicei = deviceinfo+i;
+    propi = devicei->prop;
+    if(propi==NULL)continue;
+    for(jj = 0; jj<propi->nsmokeview_ids; jj++){
+      sv_object *objectj;
+
+      objectj = propi->smv_objects[jj];
+      objectj->used_by_device = 1;
+    }
+  }
+  for(i = 0; i<npart5prop; i++){
+    part5prop *partpropi;
+    int j;
+
+    partpropi = part5propinfo+i;
+    for(j = 0; j<npartclassinfo; j++){
+      part5class *partclassj;
+      propdata *propi;
+      int jj;
+
+      if(partpropi->class_present[j]==0)continue;
+      partclassj = partclassinfo+j;
+      propi = partclassj->prop;
+      if(propi==NULL)continue;
+      for(jj = 0; jj<propi->nsmokeview_ids; jj++){
+        sv_object *objectj;
+
+        objectj = propi->smv_objects[jj];
+        objectj->used_by_device = 1;
+      }
+    }
+  }
+}
+
 /* ----------------------- init_avatar ----------------------------- */
 
 void init_avatar(void){
