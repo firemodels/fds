@@ -10,7 +10,7 @@ echo.
 echo Wrapping up 64 bit Smokeview update
 echo.
 
-SMVBINDIR=%CD%
+set SMVBINDIR=%CD%
 
 echo.
 echo Associating the .smv file extension with smokeview.exe
