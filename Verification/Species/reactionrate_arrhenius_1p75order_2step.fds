@@ -5,7 +5,7 @@ CO+0.5O2=CO2
 
 &HEAD CHID='reactionrate_arrhenius_1p75order_2step', TITLE='Finite_Rate_1p75_Order' /
 &MESH IJK=8,8,8, XB=0.0,0.1,0.0,0.1,0.0,0.1 /
-&MISC GVEC=0.0, 0.0, 0.0, INITIAL_UNMIXED_FRACTION=0.0, HRRPUV_AVERAGE=1e8 / 
+&MISC GVEC=0.0, 0.0, 0.0, INITIAL_UNMIXED_FRACTION=0.0 / 
 
 &TIME T_END=10 /
 
