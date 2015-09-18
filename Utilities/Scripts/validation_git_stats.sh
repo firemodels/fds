@@ -23,10 +23,10 @@ echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
 echo "\caption[Validation GIT Statistics]{Validation GIT statistics for all data sets}" >> $OUTPUT_TEX_FILE
 echo "\label{validation_git_stats}" >> $OUTPUT_TEX_FILE
 echo "\\\\ \hline" >> $OUTPUT_TEX_FILE
-echo "Dataset  &  FDS Revision Date  &  FDS Revision String&time (s)\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
+echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
 echo "\endfirsthead" >> $OUTPUT_TEX_FILE
 echo "\hline" >> $OUTPUT_TEX_FILE
-echo "Dataset  &  FDS Revision Date  &  FDS Revision String&time (s)\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
+echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
 echo "\endhead" >> $OUTPUT_TEX_FILE
 
 ./makegittable.sh >> $OUTPUT_TEX_FILE
