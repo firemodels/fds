@@ -8,14 +8,17 @@ set progdesc=%2
 set progdir=%PROGRAMFILES%\firemodels\%prog%
 if NOT exist "%progdir%" mkdir "%progdir%"
 
+echo progdir=%progdir%
+pause
+
+cd %progdir%
 set chooser=%temp%\folder_chooser.exe
 if exist !chooser! del !chooser!
 >"%temp%\c.cs" echo using System;using System.Windows.Forms;
 >>"%temp%\c.cs" echo class dummy{[STAThread]
 >>"%temp%\c.cs" echo public static void Main^(^){
 >>"%temp%\c.cs" echo FolderBrowserDialog f=new FolderBrowserDialog^(^);
->>"%temp%\c.cs" echo f.SelectedPath=@"%progdir%";
->>"%temp%\c.cs" echo f.RootFolder=Environment.SpecialFolder.ProgramFiles;
+>>"%temp%\c.cs" echo f.SelectedPath=System.Environment.CurrentDirectory;
 >>"%temp%\c.cs" echo f.Description="Choose location to install %progdesc%.";
 >>"%temp%\c.cs" echo f.ShowNewFolderButton=true;
 >>"%temp%\c.cs" echo if^(f.ShowDialog^(^)==DialogResult.OK^){Console.Write^(f.SelectedPath^);}}}

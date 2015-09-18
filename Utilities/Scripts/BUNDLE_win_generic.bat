@@ -195,6 +195,9 @@ echo.
 echo ***Copying wrapup scripts for use in final installation
 echo.
 
+CALL :COPY  "%in_for_bundle%\folder_chooser.bat" "%out_bundle%\%fdsversion%\folder_chooser.bat"
+CALL :COPY  "%bundleinfo%\wrapup_fds_installer.bat" "%out_bundle%\%fdsversion%\wrapup_fds_installer.bat"
+
 CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat"
 
 CALL :COPY  "%bundleinfo%\setup_fds_firewall.bat" "%out_bundle%\%fdsversion%\setup_fds_firewall.bat"
@@ -225,7 +228,8 @@ cd %uploads%
 echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %bundleinfo%\message.txt
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
-wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
+wzipse32 %basename%.zip        -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
+::wzipse32 %basename%.zip -setup -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -le -m %bundleinfo%\m_file.txt -t %bundleinfo%\t_file.txt -c wrapup_fds_installer.bat
 
 IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
