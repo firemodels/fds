@@ -13,6 +13,7 @@ CURRENT_DIR=`pwd`
 if [ "$FDSSMV" == "" ] ; then
    FDSSMV=~/FDS-SMVgitclean
 fi
+export FDSSMV
 cd $FDSSMV/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics
