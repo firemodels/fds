@@ -374,7 +374,7 @@ for i=2:n_plots
             end
 
             set(gca,'FontName',Font_Name)
-            set(gca,'FontSize',Label_Font_Size)
+            set(gca,'FontSize',Label_Font_Size) 
 
             if strcmp(Flip_Axis,'no')
                 xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -389,16 +389,19 @@ for i=2:n_plots
                 text(X_Title_Position,Y_Title_Position,...
                     Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
             end
+
             if size(Key_Position)>0
                 legend_handle = legend(K,[parse(d1_Key),parse(d2_Key)],'Location',Key_Position);
-                if strcmp(Key_Position,'EastOutside')
-                   pos = get(legend_handle,'position');
-                   set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
-                end
-                if strcmp(Key_Position,'SouthEastOutside')
-                   pos = get(legend_handle,'position');
-                   set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
-                end
+                % % The latest version of Matlab (R2015b) apparently get this correct, but I will
+                % % leave this commented code for a bit until we are sure this is working on blaze.
+                % if strcmp(Key_Position,'EastOutside')
+                %    pos = get(legend_handle,'position');
+                %    set(legend_handle,'position',[Paper_Width (Plot_Y+(Plot_Height-pos(4))/2) pos(3:4)])
+                % end
+                % if strcmp(Key_Position,'SouthEastOutside')
+                %    pos = get(legend_handle,'position');
+                %    set(legend_handle,'position',[Paper_Width Plot_Y pos(3:4)])
+                % end
                 set(legend_handle,'Interpreter',Font_Interpreter);
                 set(legend_handle,'Fontsize',Key_Font_Size);
                 set(legend_handle,'Box','on');
@@ -427,7 +430,7 @@ for i=2:n_plots
             set(gcf,'Visible',Figure_Visibility);
             set(gcf,'PaperUnits',Paper_Units);
             set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
-            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]); 
+            set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
             display(['Printing plot ',num2str(i),'...'])
             print(gcf,Image_File_Type,[Manuals_Dir,Plot_Filename])
         catch
