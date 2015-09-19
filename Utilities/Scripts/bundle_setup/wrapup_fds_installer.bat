@@ -2,11 +2,12 @@
 echo.
 echo *** Choose FDS6 installation directory
 echo.
-pause
 call folder_chooser FDS6 FDS > %TEMP%\dir.out
 set /p FDSPATH=<%TEMP%\dir.out
 echo FDSPATH=%FDSPATH%
+echo test complete
 pause
+goto eof
 
 echo.
 echo *** Wrapping up the FDS and Smokeview installation.
