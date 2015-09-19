@@ -1,1 +1,1 @@
-Press OK to unpack installation files
+Some introductory text about the installation
