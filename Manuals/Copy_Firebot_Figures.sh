@@ -12,9 +12,17 @@ cp $FBUG/SCRIPT_FIGURES/* $BASEDIR/FDS_User_Guide/SCRIPT_FIGURES/
 echo Users Guide Figures Copied
 
 # Copy Verification Guide Figures
-cp $FBVG/SCRIPT_FIGURES/* $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/
+cp $FBVG/SCRIPT_FIGURES/*.pdf $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
+cp $FBVG/SCRIPT_FIGURES/*.png $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/.
+cp $FBVG/SCRIPT_FIGURES/Scatterplots/*.tex $BASEDIR/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/.
 echo Verification Figures Copied
 
 # Copy Validation Guide Figures
+<<<<<<< HEAD
 cp -R $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/ &> /dev/null
 echo Validation Guide Figures Copied
+=======
+#cp -R $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/ &> /dev/null
+rsync -r --exclude=*.git $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/
+echo Validation Guide Figures Copied
+>>>>>>> firemodels/development
