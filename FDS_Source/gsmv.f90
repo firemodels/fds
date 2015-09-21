@@ -37,7 +37,7 @@ INTEGER, PARAMETER :: MIN_X=0, MAX_X=1, MIN_Y=2, MAX_Y=3, MIN_Z=4, MAX_Z=5
 INTEGER :: I, J
 
 !       6-----------7
-!      /.          /| 
+!      /.          /|
 !    /  .        /  |
 !   4-----------5   |
 !   |   .       |   |
@@ -49,7 +49,7 @@ INTEGER :: I, J
 !   0-----------1
 
 ! BOX_PLANE2VERT(edge,plane)
-DATA ( (BOX_PLANE2VERT(I,J), I=0,3),J=0,5) /& 
+DATA ( (BOX_PLANE2VERT(I,J), I=0,3),J=0,5) /&
   0,2,4,6,&
   1,3,5,7,&
   0,1,4,5,&
@@ -57,10 +57,10 @@ DATA ( (BOX_PLANE2VERT(I,J), I=0,3),J=0,5) /&
   0,1,2,3,&
   4,5,6,7 &
   /
-  
+
 !       ------7------
-!      /.           / 
-!     2 .         3 | 
+!      /.           /
+!     2 .         3 |
 !    /  .        /  |
 !   ------6------   |
 !   |  10       |  11
@@ -79,10 +79,10 @@ DATA ( (BOX_PLANE2EDGE(I,J), I=0,3),J=0,5) /&
   0,1,4,5,&
   2,3,6,7 &
   /
-  
+
 !       6-----7-----7
-!      /.           / 
-!     2 .         3 | 
+!      /.           /
+!     2 .         3 |
 !    /  .        /  |
 !   4-----6-----5   |
 !   |  10       |  11
@@ -96,8 +96,8 @@ DATA ( (BOX_PLANE2EDGE(I,J), I=0,3),J=0,5) /&
 ! edges: 0-bottom left  1-bottom right 2-top left   3-top right
 !        4-bottom front 5-bottom back  6-top front  7-top back
 !        8-front left   9-front right 10-back left 11-back right
-! vertices: 0-bottom left front 1-bottom right front 2-bottom left back 3-bottom right back         
-!           4-top left front    5-top right front    6-top left back    7-top right back         
+! vertices: 0-bottom left front 1-bottom right front 2-bottom left back 3-bottom right back
+!           4-top left front    5-top right front    6-top left back    7-top right back
 
  DATA ( (BOX_EDGE2VERT(I,J), I=0,1), J=0,11) /&
   0,2,  1,3,  4,6,  5,7,&
@@ -115,21 +115,21 @@ DATA ( (BOX_PLANE2EDGE(I,J), I=0,3),J=0,5) /&
 !    /  2       1  \
 !   / .           . \
 !  0-------0---------1
-  
+
 DATA ( (TETRA_PLANE2VERT(I,J), I=0,2),J=0,3) /&
   0,3,1,&
   1,3,2,&
   0,2,3,&
   0,1,2&
   /
-  
+
 DATA ( (TETRA_PLANE2EDGE(I,J), I=0,2),J=0,3) /&
   0,3,4,&
   1,4,5,&
   2,5,3,& !double check (was 2 3 5)
   0,1,2&
   /
-  
+
  DATA ( (TETRA_EDGE2VERT(I,J), I=0,1), J=0,5) /&
   0,1,  1,2,  2,0,&
   0,3,  1,3,  2,3&
@@ -140,7 +140,7 @@ PUBLIC GET_TETRABOX_VOLUME, GET_VERTS, TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERT
 
 CONTAINS
 
-!  ------------------ GET_TETRABOX_VOLUME ------------------------ 
+!  ------------------ GET_TETRABOX_VOLUME ------------------------
 
 SUBROUTINE GET_TETRABOX_VOLUME(BOX_BOUNDS,V0,V1,V2,V3,TETRABOX_VOLUME,AREAS,CENTROID)
 
@@ -189,7 +189,7 @@ CALL GET_POLYHEDRON_VOLUME(VERTS,NVERTS,FACES,NFACES,TETRABOX_VOLUME,CENTROID)
 RETURN
 END SUBROUTINE GET_TETRABOX_VOLUME
 
-!  ------------------ GET_AREAS ------------------------ 
+!  ------------------ GET_AREAS ------------------------
 
 SUBROUTINE GET_AREAS(VERTS,FACES,NFACES,WHICH_SIDE,AREAS)
 INTEGER, INTENT(IN) :: NFACES
@@ -212,14 +212,14 @@ DO I = 0, NFACES-1
    V3(1:3)=>VERTS(3*F(2):3*F(2)+2)
    AREA = TRIANGLE_AREA(V1,V2,V3)
    SIDE = WHICH_SIDE(I) + 1
-   IF (SIDE<=6)AREAS(SIDE) = AREAS(SIDE) + AREA 
+   IF (SIDE<=6)AREAS(SIDE) = AREAS(SIDE) + AREA
 ENDDO
 
 END SUBROUTINE GET_AREAS
 
-!  ------------------ TETRAHEDRON_VOLUME ------------------------ 
+!  ------------------ TETRAHEDRON_VOLUME ------------------------
 
-!              D1 
+!              D1
 !             /|\
 !            / | \
 !           /  |  \
@@ -248,9 +248,9 @@ CALL CROSS_PRODUCT(ACROSSB,AMC, BMC)
 TETRAHEDRON_VOLUME = DOT_PRODUCT(ACROSSB,DMC)/6.0_EB
 END FUNCTION TETRAHEDRON_VOLUME
 
-!  ------------------ TRIANGLE_AREA ------------------------ 
+!  ------------------ TRIANGLE_AREA ------------------------
 
-!              C 
+!              C
 !             / \
 !            /   \
 !           /     \
@@ -278,7 +278,7 @@ CALL CROSS_PRODUCT(ACROSSB,AMC, BMC)
 TRIANGLE_AREA = SQRT(DOT_PRODUCT(ACROSSB,ACROSSB))/2.0_EB
 END FUNCTION TRIANGLE_AREA
 
-!  ------------------ GET_POLYHEDRON_VOLUME ------------------------ 
+!  ------------------ GET_POLYHEDRON_VOLUME ------------------------
 
 SUBROUTINE GET_POLYHEDRON_VOLUME(VERTS,NVERTS,FACES,NFACES,POLYHEDRON_VOLUME,CENTROID)
 
@@ -324,7 +324,7 @@ ENDIF
 
 END SUBROUTINE GET_POLYHEDRON_VOLUME
 
-!  ------------------ GET_VERTS ------------------------ 
+!  ------------------ GET_VERTS ------------------------
 
 SUBROUTINE GET_VERTS(BOX_BOUNDS,VV0,VV1,VV2,VV3,VERTS,NVERTS,FACES,SIDE_INDEX,WHICH_SIDE,NFACES,NSIDES,&
                      BOX_STATE,VERT_STATE,AREAS)
@@ -470,12 +470,12 @@ BOX_STATE(TETRA_STATE(3))=3
 
 ! for each box plane ...
 
-DO BP = 0, 5 
-   V = BOX_PLANE2VERT(0,BP) 
+DO BP = 0, 5
+   V = BOX_PLANE2VERT(0,BP)
    BOXVERT(0:2) => BOX_VERTS(0:2,V)
    BOXNORMAL(0:2) => BOX_NORMALS(0:2,BP)
    B_PLANE_BOUNDS(0:5) => BOX_PLANE_BOUNDS(0:5,BP)
-   
+
    IF (BOX_STATE(BP)/=-1 ) THEN ! this box plane coincides with a tetrahedon plane
                                   ! use a 2D method to find intersections
       TET0(0:2) => TETRA_VERTS(0:2,TETRA_PLANE2VERT(0,BOX_STATE(BP)))
@@ -515,7 +515,7 @@ DO BP = 0, 5
    ENDDO
 
 !  add intersection of box plane edge and tetrahedron plane (if on tetrahedron)
-  
+
    EDGE(0:3) => BOX_PLANE2EDGE(0:3,BP)
    DO BE = 0, 3 ! box plane edges
       E = EDGE(BE)
@@ -552,7 +552,7 @@ DO BP = 0, 5
          NVERTS=NVERTS+1
       ENDIF
    ENDDO
-   
+
    IF (SIDE_N(NSIDES)>0) THEN
       SIDE_INDEX(NSIDES) = BP
       NSIDES = NSIDES + 1
@@ -565,7 +565,7 @@ ENDDO
 DO TP = 0, 3
    IF (TETRA_STATE(TP)/=-1 ) CYCLE ! this tetrahedron plane coincides with a box plane
                                    ! in this case, use a 2D method to find intersections
-   
+
    V = TETRA_PLANE2VERT(0,TP)
    TETRAVERT(0:2) => TETRA_VERTS(0:2,V)
    TETRANORMAL(0:2) => TETRA_NORMALS(0:2,TP)
@@ -591,7 +591,7 @@ DO TP = 0, 3
    ENDDO
 
 !  add intersection of tetrahedron plane edge and box plane (if on box)
-  
+
    EDGE(0:2) => TETRA_PLANE2EDGE(0:2,TP)
    DO TE = 0, 2 ! tetrahedron plane edges
       E = EDGE(TE)
@@ -627,7 +627,7 @@ DO TP = 0, 3
          NVERTS=NVERTS+1
       ENDIF
    ENDDO
-   
+
    IF (SIDE_N(NSIDES)>0) THEN
       SIDE_INDEX(NSIDES) = 6+TP
       NSIDES = NSIDES + 1
@@ -680,14 +680,14 @@ CALL GET_AREAS(VERTS,FACES,NFACES,WHICH_SIDE,AREAS)
 RETURN
 END SUBROUTINE GET_VERTS
 
-!  ------------------ GET_VERTS2D ------------------------ 
+!  ------------------ GET_VERTS2D ------------------------
 
 SUBROUTINE GET_VERTS2D(XB,PLANE_INDEX,VV0,VV1,VV2,VERTS,NVERTS)
 
-! find vertices formed by the intersection of a rectangle and a triangle.  
-! The rectangle and triangle lie in the same plane.  The rectangle sides 
+! find vertices formed by the intersection of a rectangle and a triangle.
+! The rectangle and triangle lie in the same plane.  The rectangle sides
 ! are aligned with the coordinate axes
-!                        2   
+!                        2
 !                       . .
 !                     .   .
 !   2---------------.--3  .
@@ -807,7 +807,7 @@ DO I = 0, 3 ! rectangle edges
          VOUT(0:1)=>VERTS2D(2*NVERTS:2*NVERTS+1)
          VOUT(0:1)=VIN(0:1)
          NVERTS=NVERTS+1
-         
+
          IF (NVERT_SEGS>1) THEN
             VIN(0:1)=>VERT_SEGS(2:3)
             VOUT(0:1)=>VERTS2D(2*NVERTS:2*NVERTS+1)
@@ -834,7 +834,7 @@ ENDDO
 
 END SUBROUTINE GET_VERTS2D
 
-!  ------------------ REMOVE_DEGENERATE_FACES ------------------------ 
+!  ------------------ REMOVE_DEGENERATE_FACES ------------------------
 
 SUBROUTINE REMOVE_DEGENERATE_FACES(N_FACES,MAX_FACES,FACES,WHICH_SIDE)
 INTEGER, INTENT(INOUT) :: N_FACES
@@ -896,7 +896,7 @@ DO WHILE (I<=N_VERTS)
          ! first copy index J -> I in face list
          ! next copy index N_VERTS -> J in face list
          ! finally reduce N_VERTS by 1
-         
+
          DO K = 1, 3*N_FACES
            IF (FACES(K)==J-OFFSET)FACES(K)=I-OFFSET
          ENDDO
@@ -904,7 +904,7 @@ DO WHILE (I<=N_VERTS)
            IF (VOLUS(K)==J-OFFSET)VOLUS(K)=I-OFFSET
          ENDDO
          VJ(1:3)=VERTS(3*N_VERTS-2:3*N_VERTS)
-         
+
          DO K = 1, 3*N_FACES
            IF (FACES(K)==N_VERTS-OFFSET)FACES(K)=J-OFFSET
          ENDDO
@@ -918,9 +918,9 @@ DO WHILE (I<=N_VERTS)
    ENDDO
    I=I+1
 ENDDO
-END SUBROUTINE REMOVE_DUPLICATE_VERTS      
+END SUBROUTINE REMOVE_DUPLICATE_VERTS
 
-!  ------------------ IN_RECTANGLE2D ------------------------ 
+!  ------------------ IN_RECTANGLE2D ------------------------
 
 LOGICAL FUNCTION LINE_SEGMENT_INTERSECT(R0,R1,T0,T1,VERT_SEGS,NVERT_SEGS)
 REAL(EB), INTENT(IN), DIMENSION(0:1) :: R0, R1, T0, T1
@@ -945,7 +945,7 @@ IF (ABS(T0(0)-T1(0))<EPS .AND. ABS(R0(0)-R1(0))<EPS) THEN
    IF (MIN(TYMAX,RYMAX)>MAX(TYMIN,RYMIN)) THEN
       VERT_SEGS(0)=T0(0)
       VERT_SEGS(1)=MIN(TYMAX,RYMAX)
-      
+
       VERT_SEGS(2)=T0(0)
       VERT_SEGS(3)=MAX(TYMIN,RYMIN)
       LINE_SEGMENT_INTERSECT = .TRUE.
@@ -965,7 +965,7 @@ IF (ABS(T0(1)-T1(1))<EPS .AND. ABS(R0(1)-R1(1))<EPS) THEN
    IF (MIN(TXMAX,RXMAX)>MAX(TXMIN,RXMIN)) THEN
       VERT_SEGS(0)=MIN(TXMAX,RXMAX)
       VERT_SEGS(1)=T0(1)
-      
+
       VERT_SEGS(2)=MAX(TXMIN,RXMIN)
       VERT_SEGS(3)=T0(1)
       LINE_SEGMENT_INTERSECT = .TRUE.
@@ -1001,7 +1001,7 @@ NVERT_SEGS=1
 LINE_SEGMENT_INTERSECT = .TRUE.
 END FUNCTION LINE_SEGMENT_INTERSECT
 
-!  ------------------ IN_RECTANGLE2D ------------------------ 
+!  ------------------ IN_RECTANGLE2D ------------------------
 
 LOGICAL FUNCTION IN_RECTANGLE2D(XB,VERT)
 ! tests whether VERT is inside 2d rectangle defined by XB
@@ -1017,7 +1017,7 @@ ENDIF
 
 END FUNCTION IN_RECTANGLE2D
 
-!  ------------------ IN_TRIANGLE2D ------------------------ 
+!  ------------------ IN_TRIANGLE2D ------------------------
 
 LOGICAL FUNCTION IN_TRIANGLE2D(V0,V1,V2,VERT)
 REAL(EB), DIMENSION(0:1), INTENT(IN) :: V0, V1, V2, VERT
@@ -1036,23 +1036,23 @@ IN_TRIANGLE2D=.FALSE.
 
 DV=V1-V0
 DVERT=VERT-V0
-N(0:1)=(/DV(1),-DV(0)/) 
+N(0:1)=(/DV(1),-DV(0)/)
 IF (N(0)*DVERT(0)+N(1)*DVERT(1)>0.0_EB) RETURN
 
 DV=V2-V1
 DVERT=VERT-V1
-N(0:1)=(/DV(1),-DV(0)/) 
+N(0:1)=(/DV(1),-DV(0)/)
 IF (N(0)*DVERT(0)+N(1)*DVERT(1)>0.0_EB) RETURN
 
 DV=V0-V2
 DVERT=VERT-V2
-N(0:1)=(/DV(1),-DV(0)/) 
+N(0:1)=(/DV(1),-DV(0)/)
 IF (N(0)*DVERT(0)+N(1)*DVERT(1)>0.0_EB) RETURN
 
 IN_TRIANGLE2D=.TRUE.
 END FUNCTION IN_TRIANGLE2D
 
-!  ------------------ COMPARE_VERTS ------------------------ 
+!  ------------------ COMPARE_VERTS ------------------------
 
 INTEGER FUNCTION COMPARE_VERTS(A,B,C,N)
 
@@ -1075,7 +1075,7 @@ ELSE
 ENDIF
 END FUNCTION COMPARE_VERTS
 
-!  ------------------ ORDER_VERTS ------------------------ 
+!  ------------------ ORDER_VERTS ------------------------
 
 SUBROUTINE ORDER_VERTS(FACEVERTS,NVERTS,SIDE_INDEX)
 
@@ -1175,7 +1175,7 @@ ENDDO
 
 END SUBROUTINE ORDER_VERTS
 
-!  ------------------ SETUP_VERTS ------------------------ 
+!  ------------------ SETUP_VERTS ------------------------
 
 SUBROUTINE SETUP_VERTS(BOX_BOUNDS,V0,V1,V2,V3)
 REAL(EB), DIMENSION(0:5), INTENT(IN) :: BOX_BOUNDS
@@ -1289,7 +1289,7 @@ TETRA_NORMALS(0:2,3)=VEC_NORMALIZE(VCROSS)
 RETURN
 END SUBROUTINE SETUP_VERTS
 
-!  ------------------ PLANE_EDGE_INTERSECTION ------------------------ 
+!  ------------------ PLANE_EDGE_INTERSECTION ------------------------
 
 INTEGER FUNCTION PLANE_EDGE_INTERSECTION(X0,N0,V0,V1,VERT)
 
@@ -1319,7 +1319,7 @@ ENDIF
 RETURN
 END FUNCTION PLANE_EDGE_INTERSECTION
 
-!  ------------------ BOXPLANE_EDGE_INTERSECTION ------------------------ 
+!  ------------------ BOXPLANE_EDGE_INTERSECTION ------------------------
 
 INTEGER FUNCTION BOXPLANE_EDGE_INTERSECTION(X0,PLANE,V0,V1,VERT)
 
@@ -1355,7 +1355,7 @@ ENDIF
 RETURN
 END FUNCTION BOXPLANE_EDGE_INTERSECTION
 
-!  ------------------ IN_BOX ------------------------ 
+!  ------------------ IN_BOX ------------------------
 
 INTEGER FUNCTION IN_BOX(XYZ, IGNORE_PLANE)
 
@@ -1363,11 +1363,11 @@ INTEGER FUNCTION IN_BOX(XYZ, IGNORE_PLANE)
 
 REAL(EB), INTENT(IN), DIMENSION(0:2) :: XYZ
 INTEGER, INTENT(IN) :: IGNORE_PLANE
-  
+
 INTEGER BP
 REAL(EB), DIMENSION(0:2) :: VECDIFF
 REAL(EB), DIMENSION(:), POINTER :: BOXVERT, BOXNORMAL
-  
+
 IN_BOX=1
 DO BP = 0, 5
    IF (BP==IGNORE_PLANE) CYCLE
@@ -1381,7 +1381,7 @@ DO BP = 0, 5
 ENDDO
 END FUNCTION IN_BOX
 
-!  ------------------ IN_TETRA ------------------------ 
+!  ------------------ IN_TETRA ------------------------
 
 INTEGER FUNCTION IN_TETRA(XYZ, IGNORE_PLANE)
 
@@ -1393,7 +1393,7 @@ REAL(EB), DIMENSION(0:2) :: VECDIFF
 REAL(EB), DIMENSION(:), POINTER :: TETRAVERT, TETRANORMAL
 
 INTEGER :: TP
-  
+
 IN_TETRA=1
 DO TP = 0, 3
    IF (TP==IGNORE_PLANE) CYCLE
@@ -1407,7 +1407,7 @@ DO TP = 0, 3
 ENDDO
 END FUNCTION IN_TETRA
 
-!  ------------------ TEST_IN_TETRA0 ------------------------ 
+!  ------------------ TEST_IN_TETRA0 ------------------------
 
 SUBROUTINE TEST_IN_TETRA0(XYZ, IN_TETRA, TETRA_STATE)
 
@@ -1420,7 +1420,7 @@ REAL(EB), DIMENSION(0:2) :: VECDIFF
 REAL(EB), DIMENSION(:), POINTER :: TETRAVERT, TETRANORMAL
 
 INTEGER :: TP
-  
+
 IN_TETRA=1
 DO TP = 0, 3
    TETRAVERT(0:2) => TETRA_VERTS(0:2,TETRA_PLANE2VERT(0,TP))
@@ -1435,7 +1435,7 @@ DO TP = 0, 3
 ENDDO
 END SUBROUTINE TEST_IN_TETRA0
 
-!  ------------------ VEC_NORMALIZE ------------------------ 
+!  ------------------ VEC_NORMALIZE ------------------------
 
 FUNCTION VEC_NORMALIZE(U)
 
@@ -1456,7 +1456,7 @@ ENDIF
 RETURN
 END FUNCTION VEC_NORMALIZE
 
-!  ------------------ ON_BOX_PLANE ------------------------ 
+!  ------------------ ON_BOX_PLANE ------------------------
 
 INTEGER FUNCTION ON_BOX_PLANE(XB,V1,V2,V3)
 REAL(EB), INTENT(IN) :: XB(6), V1(3), V2(3), V3(3)
@@ -1506,7 +1506,7 @@ ENDIF
 ON_BOX_PLANE=-1
 END FUNCTION ON_BOX_PLANE
 
-!  ------------------ RANK3 ------------------------ 
+!  ------------------ RANK3 ------------------------
 
 SUBROUTINE RANK3(V1,V2,V3,I1,I2,I3)
 INTEGER, INTENT(IN) :: V1, V2, V3
@@ -1518,7 +1518,7 @@ I2 = V1+V2+V3-I1-I3
 
 END SUBROUTINE RANK3
 
-!  ------------------ VOLS2FACES ------------------------ 
+!  ------------------ VOLS2FACES ------------------------
 
 SUBROUTINE VOLS2SURFACE(VOLS,NVOLS,FACES,NFACES)
 
@@ -1540,17 +1540,17 @@ DO I = 1, NVOLS
    FACES(4*I-3,1) = ML
    FACES(4*I-3,2) = MM
    FACES(4*I-3,3) = MU
-   
+
    CALL RANK3(VOLS(I,4),VOLS(I,2),VOLS(I,3),ML,MM,MU)
    FACES(4*I-2,1) = ML
    FACES(4*I-2,2) = MM
    FACES(4*I-2,3) = MU
-   
+
    CALL RANK3(VOLS(I,4),VOLS(I,3),VOLS(I,1),ML,MM,MU)
    FACES(4*I-1,1) = ML
    FACES(4*I-1,2) = MM
    FACES(4*I-1,3) = MU
-   
+
    CALL RANK3(VOLS(I,1),VOLS(I,3),VOLS(I,2),ML,MM,MU)
    FACES(4*I  ,1) = ML
    FACES(4*I  ,2) = MM
@@ -1584,7 +1584,7 @@ NFACES=ITO
 
 END SUBROUTINE VOLS2SURFACE
 
-!  ------------------ FACES2EDGES ------------------------ 
+!  ------------------ FACES2EDGES ------------------------
 
 SUBROUTINE FACES2EDGES(FACES,NFACES,EDGES,NEDGES)
 
@@ -1605,12 +1605,12 @@ DO I = 1, NFACES
    EDGES(3*I-1,2) = MAX(FACES(I,1),FACES(I,3))
    EDGES(3*I  ,1) = MIN(FACES(I,2),FACES(I,3))
    EDGES(3*I  ,2) = MAX(FACES(I,2),FACES(I,3))
-ENDDO   
+ENDDO
 
 ! this sort is o(n**2), replace with an o(n*log(n)) sort once n is "large"
 
 FINISHED=1
-DO WHILE (FINISHED==1) 
+DO WHILE (FINISHED==1)
    DO I = 2, NEDGES
       IF (EDGES(I-1,1)<EDGES(I,1)) CYCLE
       IF (EDGES(I-1,1)==EDGES(I,1) .AND.EDGES(I-1,2)<EDGES(I,2)) CYCLE
@@ -1639,7 +1639,7 @@ NEDGES = ITO
 
 END SUBROUTINE FACES2EDGES
 
-!  ------------------ IN_BOX2 ------------------------ 
+!  ------------------ IN_BOX2 ------------------------
 
 INTEGER FUNCTION IN_BOX2(XB,V)
 REAL(EB) :: XB(6), V(3)
@@ -1653,7 +1653,7 @@ ENDIF
 IN_BOX2=0
 END FUNCTION
 
-!  ------------------ BOXTRIANGLE ------------------------ 
+!  ------------------ BOXTRIANGLE ------------------------
 
 INTEGER FUNCTION BOXTRIANGLE(XB,V1,V2,V3)
 
@@ -1674,11 +1674,11 @@ BOXTRIANGLE=0
 
 END FUNCTION BOXTRIANGLE
 
-!  ------------------ CLASSIFY_GEOM ------------------------ 
+!  ------------------ CLASSIFY_GEOM ------------------------
 
 SUBROUTINE CLASSIFY_GEOM(XGRID,NX,YGRID,NY,ZGRID,NZ,FACES,NFACES,VERTS,NVERTS,GEOM_STATE)
 
-! identify which grid cells are cut cells 
+! identify which grid cells are cut cells
 ! a grid cell is a cut cell if at least on triangle in FACES intersects with the grid cell
 
 INTEGER, INTENT(IN) :: NX, NY, NZ
@@ -1712,7 +1712,7 @@ ENDDO
 
 END SUBROUTINE CLASSIFY_GEOM
 
-!  ------------------ DISTANCE3 ------------------------ 
+!  ------------------ DISTANCE3 ------------------------
 
 REAL(EB) FUNCTION DISTANCE3(V1,V2)
 REAL(EB), INTENT(IN), DIMENSION(3) :: V1, V2
@@ -1724,7 +1724,7 @@ DZ = V1(3)-V2(3)
 DISTANCE3 = SQRT(DX*DX+DY*DY+DZ*DZ)
 END FUNCTION DISTANCE3
 
-!  ------------------ DECIMATE ------------------------ 
+!  ------------------ DECIMATE ------------------------
 
 SUBROUTINE DECIMATE_FB(VERTS, NVERTS, FACES, NFACES, EPS)
 INTEGER, INTENT(INOUT) :: NVERTS, NFACES
@@ -1742,10 +1742,10 @@ VERTS(1:3*NVERTS) = REAL(VERTS_EB(1:3*NVERTS),FB)
 RETURN
 END SUBROUTINE DECIMATE_FB
 
-!  ------------------ DECIMATE ------------------------ 
+!  ------------------ DECIMATE ------------------------
 
 SUBROUTINE DECIMATE(VERTS, NVERTS, FACES, NFACES, EPS)
-! preliminary routine to reduce the size of a geometry by 
+! preliminary routine to reduce the size of a geometry by
 !  1) merging vertices that are "close" together
 !  2) eliminating redundent vertices
 !  2) eliminating "singular" triangles
@@ -1782,7 +1782,7 @@ DO WHILE (HAVE_SMALL .OR. ITER<MAX_ITER) ! iterate until no further changes are 
       D13 = DISTANCE3(V1,V3)
       D23 = DISTANCE3(V2,V3)
       IF (D12>EPS .AND.D13>EPS .AND.D23>EPS) CYCLE ! do not combine verts
-   
+
       HAVE_SMALL = .TRUE.
       FACES_STATE(I) = 0
       IF (D12<EPS .AND.D13>EPS .AND.D23>EPS) THEN ! combine verts 1 and 2
@@ -1842,9 +1842,9 @@ DO WHILE (HAVE_SMALL .OR. ITER<MAX_ITER) ! iterate until no further changes are 
       FACETO(1)=VERT_STATE(FACEFROM(1))
       FACETO(2)=VERT_STATE(FACEFROM(2))
       FACETO(3)=VERT_STATE(FACEFROM(3))
-   ENDDO   
+   ENDDO
    NFACES = ITO
-ENDDO   
+ENDDO
 
 END SUBROUTINE DECIMATE
 
