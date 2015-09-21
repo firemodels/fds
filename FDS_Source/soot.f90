@@ -49,7 +49,7 @@ U_GRAV = 0._EB
 V_GRAV = 0._EB
 W_GRAV = 0._EB
 
-SPEC_LOOP: DO N=1,N_TRACKED_SPECIES   
+SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
    IF (.NOT.SPECIES_MIXTURE(N)%DEPOSITING) CYCLE SPEC_LOOP
 
    GRAV_FAC = SPECIES_MIXTURE(N)%MEAN_DIAMETER**2*SPECIES_MIXTURE(N)%DENSITY_SOLID/18._EB
@@ -90,7 +90,7 @@ SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
             V_GRAV(IIG,JJG-1,KKG) = 0._EB
          CASE (-3)
             W_GRAV(IIG,JJG,KKG)   = 0._EB
-         CASE ( 3)   
+         CASE ( 3)
             W_GRAV(IIG,JJG,KKG-1) = 0._EB
       END SELECT
    ENDDO WALL_LOOP
@@ -110,7 +110,7 @@ SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
    ENDDO
 
 ENDDO SPEC_LOOP
-   
+
 END SUBROUTINE SETTLING_VELOCITY
 
 
@@ -251,7 +251,7 @@ ALLOCATE(A_FAC(N_PARTICLE_BINS))
 ALLOCATE(PARTICLE_RADIUS(1:N_PARTICLE_BINS))
 
 DO I=1,N_PARTICLE_BINS
-   PARTICLE_RADIUS(I) = (BIN_X(I) / FOTHPI / SPECIES(AGGLOMERATION_INDEX)%DENSITY_SOLID)**ONTH  
+   PARTICLE_RADIUS(I) = (BIN_X(I) / FOTHPI / SPECIES(AGGLOMERATION_INDEX)%DENSITY_SOLID)**ONTH
    MOBILITY_FAC(I) = 1._EB/(6._EB*PI*PARTICLE_RADIUS(I))
    A_FAC(I) = SQRT(2._EB*K_BOLTZMANN*BIN_X(I)/PI)
 END DO
@@ -280,7 +280,7 @@ DO I=1,N_PARTICLE_BINS
                BIN_ETA_INDEX(I,II,2) = III
                BIN_ETA(I,II,2) = (PARTICLE_MASS(I,II)-BIN_X(III-1))/(BIN_X(III)-BIN_X(III-1))
                IF (I==II) BIN_ETA(I,II,:) = BIN_ETA(I,II,:) *0.5_EB
-               EXIT BINDO               
+               EXIT BINDO
             ENDIF
          ENDIF
       ENDDO BINDO
@@ -320,7 +320,7 @@ GEOMETRY_LOOP:DO K=1,KBAR
          ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
          TMPG = TMP(I,J,K)
          CALL GET_VISCOSITY(ZZ_GET,MUG,TMPG)
-         MFP = MUG*SQRT(PI/(2._EB*PBAR(K,PRESSURE_ZONE(I,J,K))*RHOG))         
+         MFP = MUG*SQRT(PI/(2._EB*PBAR(K,PRESSURE_ZONE(I,J,K))*RHOG))
          IM1 = MAX(0,I-1)
          JM1 = MAX(0,J-1)
          KM1 = MAX(0,K-1)
@@ -329,7 +329,7 @@ GEOMETRY_LOOP:DO K=1,KBAR
          KM2 = MAX(1,K-1)
          IP1 = MIN(IBAR,I+1)
          JP1 = MIN(JBAR,J+1)
-         KP1 = MIN(KBAR,K+1) 
+         KP1 = MIN(KBAR,K+1)
          DUDX = RDX(I)*(U(I,J,K)-U(IM1,J,K))
          DVDY = RDY(J)*(V(I,J,K)-V(I,JM1,K))
          DWDZ = RDZ(K)*(W(I,J,K)-W(I,J,KM1))
@@ -338,7 +338,7 @@ GEOMETRY_LOOP:DO K=1,KBAR
          S22 = DVDY - ONTHDIV
          S33 = DWDZ - ONTHDIV
          DUDY = 0.25_EB*RDY(J)*(U(I,JP1,K)-U(I,JM2,K)+U(IM1,JP1,K)-U(IM1,JM2,K))
-         DUDZ = 0.25_EB*RDZ(K)*(U(I,J,KP1)-U(I,J,KM2)+U(IM1,J,KP1)-U(IM1,J,KM2)) 
+         DUDZ = 0.25_EB*RDZ(K)*(U(I,J,KP1)-U(I,J,KM2)+U(IM1,J,KP1)-U(IM1,J,KM2))
          DVDX = 0.25_EB*RDX(I)*(V(IP1,J,K)-V(IM2,J,K)+V(IP1,JM1,K)-V(IM2,JM1,K))
          DVDZ = 0.25_EB*RDZ(K)*(V(I,J,KP1)-V(I,J,KM2)+V(I,JM1,KP1)-V(I,JM1,KM2))
          DWDX = 0.25_EB*RDX(I)*(W(IP1,J,K)-W(IM2,J,K)+W(IP1,J,KM1)-W(IM2,J,KM1))
@@ -347,9 +347,9 @@ GEOMETRY_LOOP:DO K=1,KBAR
          S13 = 0.5_EB*(DUDZ+DWDX)
          S23 = 0.5_EB*(DVDZ+DWDY)
          STRAIN_RATE = 2._EB*(S11**2 + S22**2 + S33**2 + 2._EB*(S12**2 + S13**2 + S23**2))
-         
+
          N_I = N0
-         
+
          DO N=1,N_PARTICLE_BINS
             KN=MFP/PARTICLE_RADIUS(N)
             !Verify CN
@@ -357,12 +357,12 @@ GEOMETRY_LOOP:DO K=1,KBAR
             TERMINAL(N) = MOBILITY(N)*GRAV*BIN_X(N)
             AM = A_FAC(N)*SQRT(TMPG)*MOBILITY(N)
             AMT(N) = ((PARTICLE_RADIUS(N)+AM)**3-(PARTICLE_RADIUS(N)**2+AM**2)**1.5_EB)/&
-                     (3._EB*PARTICLE_RADIUS(N)*AM)-PARTICLE_RADIUS(N)            
+                     (3._EB*PARTICLE_RADIUS(N)*AM)-PARTICLE_RADIUS(N)
          ENDDO
          DO N=1,N_PARTICLE_BINS
             DO NN=1,N_PARTICLE_BINS
                IF (NN<N) CYCLE
-               FU1 = FU1_FAC(N,NN)/(SQRT(TMPG)*(MOBILITY(N)+MOBILITY(NN)))         
+               FU1 = FU1_FAC(N,NN)/(SQRT(TMPG)*(MOBILITY(N)+MOBILITY(NN)))
                FU2 = 1._EB+FU2_FAC(N,NN)*SQRT(AMT(NN)**2+AMT(N)**2)
                FU = 1._EB/FU1+1._EB/FU2
                FU = 1._EB/FU
@@ -378,16 +378,16 @@ GEOMETRY_LOOP:DO K=1,KBAR
          DT_SUBSTEP=DT
          DT_SUM = 0._EB
          STEPLOOP: DO WHILE (DT_SUM <DT)
-            N1 = 0._EB            
-            N2 = 0._EB            
-            N3 = 0._EB            
+            N1 = 0._EB
+            N2 = 0._EB
+            N3 = 0._EB
             AGGLOMERATE_LOOP:DO N=1,N_PARTICLE_BINS
                DO NN=N,N_PARTICLE_BINS
                   IF (N0(N)<MIN_AGGLOMERATION .OR. N0(NN)<MIN_AGGLOMERATION) CYCLE
                   !Remove particles that agglomerate
                   N1(N)=N1(N)-PHI(NN,N)*N0(N)*N0(NN)*DT_SUBSTEP
                   IF (NN/=N) N1(NN)=N1(NN)-PHI(NN,N)*N0(N)*N0(NN)*DT_SUBSTEP
-                  ! Create new particles from agglomeration        
+                  ! Create new particles from agglomeration
                   N2(BIN_ETA_INDEX(N,NN,1)) = N2(BIN_ETA_INDEX(N,NN,1)) + BIN_ETA(N,NN,1)*PHI(N,NN)*N0(N)*N0(NN)*DT_SUBSTEP
                   N2(BIN_ETA_INDEX(N,NN,2)) = N2(BIN_ETA_INDEX(N,NN,2)) + BIN_ETA(N,NN,2)*PHI(N,NN)*N0(N)*N0(NN)*DT_SUBSTEP
                ENDDO
@@ -404,11 +404,11 @@ GEOMETRY_LOOP:DO K=1,KBAR
             ENDIF
          END DO STEPLOOP
          N3 = N3*SUM(N_I*BIN_X)/SUM(N3*BIN_X)
-         ZZ(I,J,K,AGGLOMERATION_INDEX:AGGLOMERATION_INDEX+N_PARTICLE_BINS-1) = N3 * BIN_X / RHOG   
+         ZZ(I,J,K,AGGLOMERATION_INDEX:AGGLOMERATION_INDEX+N_PARTICLE_BINS-1) = N3 * BIN_X / RHOG
       ENDDO
-   ENDDO   
+   ENDDO
 ENDDO GEOMETRY_LOOP
-               
+
 END SUBROUTINE CALC_AGGLOMERATION
 
 
@@ -442,12 +442,12 @@ WALL_CELL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       ZZ_GET = 0._EB
       ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
       ZZ_AIR = 1._EB -  MAX(0._EB,SUM(ZZ_GET))
-      IF (ZZ_AIR < 1.E-10_EB) CYCLE WALL_CELL_LOOP      
+      IF (ZZ_AIR < 1.E-10_EB) CYCLE WALL_CELL_LOOP
       CALL GET_MASS_FRACTION(ZZ_GET,O2_INDEX,Y_O2)
       CALL GET_MOLECULAR_WEIGHT(ZZ_GET,MW)
       TSOOT = 0.5_EB*(TMP(IIG,JJG,KKG)+WC%ONE_D%TMP_F)
       RHOG = RHO(IIG,JJG,KKG)
-      VOL = DX(IIG)*RC(IIG)*DY(JJG)*DZ(KKG) 
+      VOL = DX(IIG)*RC(IIG)*DY(JJG)*DZ(KKG)
       DMDT = M_SOOT*Y_O2*MW/RHOG*DM_FAC*EXP(A/TSOOT)
       DM = MIN(M_SOOT,DMDT*DT,Y_O2*RHOG*VOL/MW_O2*SS%MW)
       ZZ(IIG,JJG,KKG,7) = ZZ(IIG,JJG,KKG,7) + DM*DAIR_FAC/(RHOG*VOL)
@@ -461,9 +461,9 @@ WALL_CELL_LOOP: DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                                      DM/WC%AWM_AEROSOL(SS%AWM_INDEX)*WC%AWM_AEROSOL(SM%AWM_INDEX)
          ENDIF
       ENDDO
-      
-      WC%AWM_AEROSOL(SS%AWM_INDEX) = WC%AWM_AEROSOL(SS%AWM_INDEX) - DM      
-      
+
+      WC%AWM_AEROSOL(SS%AWM_INDEX) = WC%AWM_AEROSOL(SS%AWM_INDEX) - DM
+
 ENDDO WALL_CELL_LOOP
 
 END SUBROUTINE SURFACE_OXIDATION

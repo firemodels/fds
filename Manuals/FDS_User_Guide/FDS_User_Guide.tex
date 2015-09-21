@@ -7895,38 +7895,43 @@ To change the precision of the numbers, use {\ct SIG\_FIGS} on the {\ct DUMP} li
 \subsection{\emph{A Posteriori} Mesh Quality Metrics}
 \label{info:meshquality}
 
-The quality of a particular simulation is most directly tied to grid resolution.  Three slice file output quantities are suggested here for measuring errors in the velocity and scalar fields:
-\begin{enumerate}
-\item A model for the fraction of unresolved kinetic energy called the \emph{measure of turbulence resolution} (similar to what is often called the ``Pope criterion'' \cite{Pope:2004}), MTR
-\item A model for the fraction of unresolved scalar energy fluctuations called the \emph{measure of scalar resolution} \cite{Vervisch:2010}, MSR
-\item A \emph{wavelet-based error measure} \cite{McDermott:2010}, WEM
-\end{enumerate}
-Examples:
-\begin{lstlisting}
-&SLCF PBY=0, QUANTITY='TURBULENCE RESOLUTION' /
-&SLCF PBY=0, QUANTITY='SCALAR RESOLUTION', QUANTITY2='MASS FRACTION', SPEC_ID='HELIUM' /
-&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
-\end{lstlisting}
-Note that an additional scalar {\ct QUANTITY2} is required for MSR and WEM.  {\ct QUANTITY2} may be any output quantity appropriate for {\ct SLCF}. Also, {\ct CELL\_CENTERED} is optional for any of the three metrics.
+The quality of a particular simulation is most directly tied to grid resolution.  Three output quantities are discussed here for measuring errors in the velocity and scalar fields.  It should be noted that the link between these metrics and true simulation quality is still in the research phase.  In other words, a good quality score is not sufficient to assure a good simulation (at the present time).
 
 \subsubsection{Measure of Turbulence Resolution}
 
-You may output a scalar quantity which is referred to as the \emph{measure of turbulence resolution}, defined locally as
+A scalar quantity referred to as the \emph{measure of turbulence resolution} \cite{Pope:2004} is defined locally as
 \begin{eqnarray}
-\mbox{MTR}(\mathbf{x},t) = \frac{k_{\rm sgs}}{k_{\rm res} + k_{\rm sgs}}
+M(\mathbf{x}) = \frac{\left\langle k_{\rm sgs} \right\rangle}{\left\langle \mbox{TKE} \right\rangle + \left\langle k_{\rm sgs} \right\rangle}
 \end{eqnarray}
-where the resolved kinetic energy per unit mass is
+where the resolved turbulent kinetic energy per unit mass is
 \vskip-.6cm
 \begin{align}
-k_{\rm res} &= \mbox{$\frac{1}{2}$}\tilde{u}_i \tilde{u}_i
+\mbox{TKE} &= \mbox{$\frac{1}{2}$}(\tilde{u}_i - \left\langle \tilde{u}_i \right\rangle) (\tilde{u}_i - \left\langle \tilde{u}_i \right\rangle)
 \end{align}
-and the subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
+TKE must be output via {\ct DEVC} for each velocity component and its mean:
+
+\begin{lstlisting}
+&DEVC ..., QUANTITY='U-VELOCITY' /
+&DEVC ..., QUANTITY='U-VELOCITY', STATISTICS='MEAN' /
+&DEVC ..., QUANTITY='V-VELOCITY' /
+&DEVC ..., QUANTITY='V-VELOCITY', STATISTICS='MEAN' /
+&DEVC ..., QUANTITY='W-VELOCITY' /
+&DEVC ..., QUANTITY='V-VELOCITY', STATISTICS='MEAN' /
+\end{lstlisting}
+You must post-process these outputs to obtain TKE.
+
+The subgrid kinetic energy is estimated from Deardorff's eddy viscosity model
 \begin{align}
 k_{\rm sgs} &\approx \mbox{$\frac{1}{2}$}(\tilde{u}_i - \hat{\tilde{u}}_i)(\tilde{u}_i - \hat{\tilde{u}}_i) = ( \mu_t/(\rho C_\nu \Delta) )^2
 \end{align}
 Here, $\tilde{u}_i$ is the resolved LES velocity and $\hat{\tilde{u}}_i$ is test filtered at a scale $2\Delta$ where $\Delta$ is the LES filter width (in FDS, $\Delta=\delta x$).  In the bulk flow region, the model for the SGS fluctuations is taken from scale similarity \cite{Bardina:1980}.  Cross-term energy is ignored.  Keep in the mind, however, that the test filter operation is ill-defined near walls, and so FDS employs constant Smagorinsky in these cells to compute the eddy viscosity.
 
-The basic idea behind MTR is to provide an approximation to the Pope criterion \cite{Pope:2004}, $M$, which is easily accessible in Smokeview (the FDS visualization tool).  In Smokeview, you may readily time average MTR in a specified plane.  The time average of MTR is a reasonable estimate of $M$.  The measure falls within the range [0,1], with 0 indicating perfect resolution and 1 indicating poor resolution.  The concept is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
+To output an estimate of the subgrid kinetic energy per unit mass use
+\begin{lstlisting}
+&DEVC ..., QUANTITY='SUBGRID KINETIC ENERGY' /
+\end{lstlisting}
+
+The concept behind the measure of turbulence resolution is illustrated in Figure \ref{fig_mtr}. Notice that on the left the difference between the grid signal and the test signal is very small.  On the right, the grid signal is highly turbulent and the corresponding test signal is much smoother.  We infer then that the flow is under-resolved.
 \begin{figure}[ht]
 \centering
 \begin{tabular}{rl}
@@ -7934,35 +7939,21 @@ The basic idea behind MTR is to provide an approximation to the Pope criterion \
 \includegraphics[width=3.2in]{FIGURES/mtr_unresolved_signal}
 \end{tabular}
 \vskip-0.2cm
-\caption[Examples of the measure of turbulence resolution]{(Left) Resolved signal, MTR is small. (Right) Unresolved signal, MTR is close to unity.}
+\caption[Examples of the measure of turbulence resolution]{(Left) Resolved signal, $M$ is small. (Right) Unresolved signal, $M$ is close to unity.}
 \label{fig_mtr}
 \end{figure}
 
-For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in Ref.~\cite{McDermott:2010}, maintaining mean values of MTR near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
+For the canonical case of isotropic turbulence Pope actually defines LES such that $M<0.2$.  That is, LES requires resolution of 80\% of the kinetic energy in the flow field (because this puts the grid Nyquist limit within the inertial subrange).  The question remains as to whether this critical value is sufficient or necessary for a given engineering problem.  As shown in Ref.~\cite{McDermott:2010}, maintaining mean values of $M$ near 0.2 indeed provides satisfactory results (simulation results within experimental error bounds) for mean velocities and species concentrations in nonreacting, buoyant plumes.
 
-If you wish to output an estimate of the subgrid kinetic energy per unit mass only, this may be done with
-\begin{lstlisting}
-&SLCF PBY=0, QUANTITY='SUBGRID KINETIC ENERGY' /
-\end{lstlisting}
-
-
-\subsubsection{Measure of Scalar Resolution}
-\label{mtr}
-
-The \emph{measure of scalar resolution} is defined locally as
-\begin{eqnarray}
-\mbox{MSR}(\mathbf{x},t) = \frac{T_{\rm sgs}}{T_{\rm res} + T_{\rm sgs}}
-\end{eqnarray}
-where
-\vskip-.6cm
-\begin{eqnarray}
-T_{\rm res} &=& \tilde{\varphi}^2 \\
-T_{\rm sgs} &=& (\tilde{\varphi} - \hat{\tilde{\varphi}})^2
-\end{eqnarray}
-Here again the model for the SGS scalar energy fluctuations is taken from scale similarity \cite{Bardina:1980}.  The field $\hat{\tilde{\varphi}}$ is test filtered at a scale $2\Delta$.  The cross-term energy (i.e., $\langle 2 \tilde{\varphi}\varphi^{\prime} \rangle$, where $\varphi^\prime = \varphi - \tilde{\varphi}$) is ignored, but this does not affect the bounds of the measure.  Further, it can be shown that this term is small if sufficient resolution is used. There is evidence to suggest that the requirements for scalar resolution may be somewhat more stringent than for the velocity field \cite{Vervisch:2010}.  Therefore, currently the best advice is to keep the mean value of MSR less than 0.2.
 
 \subsubsection{Wavelet Error Measure}
 \label{wavelets}
+
+A resolution metric that we call the \emph{wavelet error measure} or WEM may be output using, for example,
+
+\begin{lstlisting}
+&SLCF PBY=0, QUANTITY='WAVELET ERROR', QUANTITY2='HRRPUV' /
+\end{lstlisting}
 
 We begin by providing background on the simple Haar wavelet \cite{Nievergelt:1999}.  For a thorough and more sophisticated review of wavelet methods, the reader is referred to Schneider and Vasilyev \cite{Schneider:2010}.
 
@@ -8012,7 +8003,7 @@ Note that we have arbitrarily scaled the measure so that a step function leads t
 \label{fig_wavelet_transforms}
 \end{figure}
 
-Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$ (note that this limit differs from the upper bound of unity for MTR and MSR).  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
+Looking now at the two plots on the bottom of Figure \ref{fig_wavelet_transforms}, the signal on the left, which may indicate spurious oscillations or unresolved turbulent motion, leads to $\mbox{WEM} = 2$.  Our measure therefore views this situation as the worst case in a sense.  The signal to the lower right is indicative of an extremum, which actually is easily resolved by most centered spatial schemes and results again in $\mbox{WEM}=0$.
 
 In \cite{McDermott:2010}, the time average of WEM was reported for LES of a nonreacting buoyant plume at three grid resolutions.  From this study, the best advice currently is to maintain average values of WEM less than 0.5.
 
@@ -8190,7 +8181,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct RADIATIVE HEAT FLUX GAS}                   & Section~\ref{info:heat_flux}                  & kW/m$^2$       & D            \\ \hline
 {\ct RADIOMETER}                                & Section~\ref{info:heat_flux}                  & kW/m$^2$       & B,D          \\ \hline
 {\ct RELATIVE HUMIDITY}                         & Section~\ref{info:simple_chemistry}           & \%             & D,I,P,S      \\ \hline
-{\ct SCALAR RESOLUTION}$^{*****}$               & Section~\ref{info:meshquality}                &                & S            \\ \hline
 {\ct SENSIBLE ENTHALPY}                         & Section~\ref{info:enthalpy}                   & kJ/m$^3$       & D,I,P,S      \\ \hline
 {\ct SOLID CONDUCTIVITY}                        & Section~\ref{info:DEPTH}                      & \si{W/(m.K)}   & D            \\ \hline
 {\ct SOLID DENSITY}                             & Section~\ref{info:DEPTH}                      & kg/m$^3$       & D            \\ \hline
@@ -8297,6 +8287,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct QSCA}$^{**}$                               & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct QSCA\_Z}$^{*}$                             & Scattering efficiency of droplets                 &                & D,I,P,S      \\ \hline
 {\ct RADIATION LOSS}                            & $\nabla \cdot \bq_r''$                            & kW/m$^3$       & D,I,P,S      \\ \hline
+%{\ct SCALAR RESOLUTION}$^{***}$                 & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 {\ct STRAIN RATE}                               & $2(S_{ij}S_{ij}-1/3(\nabla\cdot\mathbf{u})^2)$    & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE X}                             & $\partial w/\partial y + \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct STRAIN RATE Y}                             & $\partial u/\partial z + \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
@@ -8304,23 +8295,28 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUBGRID KINETIC ENERGY}                    & Section~\ref{info:meshquality}                    & \si{m^2/s^2}   & D,S          \\ \hline
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
+<<<<<<< HEAD
 {\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+=======
+%{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
+{\ct VELOCITY ERROR}                            & Section \ref{info:PRES}                           &                & B            \\ \hline
+>>>>>>> firemodels/development
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
 %{\ct WALL CELL BOUNDARY TYPE}                   & Index of {\ct WC\%BOUNDARY\_TYPE} for debug       &                & B            \\ \hline
 %{\ct WALL CELL THERMAL BOUNDARY TYPE}           & Index of {\ct SF\%THERMAL\_BC\_INDEX} for debug   &                & B            \\ \hline
 {\ct WALL VISCOSITY}                            & Near-wall viscosity, $\mu_w$                      & \si{kg/(m.s)}  & B,D          \\ \hline
-{\ct WAVELET ERROR}$^{*****}$                   & Section~\ref{info:meshquality}                    &                & S            \\ \hline
+{\ct WAVELET ERROR}$^{***}$                     & Section~\ref{info:meshquality}                    &                & S            \\ \hline
 {\ct YPLUS}                                     & Section~\ref{info:yplus}                          &                & B,D          \\ \hline
 \end{longtable}
 
 \noindent
 \begin{tabbing}
-$^{*}$  \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
-$^{**}$                \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
-$^{*****}$ \hspace{0.25in} \=  Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \
+$^{*}$ \hspace{0.25in} \= Quantity requires the specification of a gas species using {\ct SPEC\_ID}. \\
+$^{**}$  \> Quantity requires the specification of a particle name using {\ct PART\_ID}. \\
+$^{***}$ \>  Quantity requires specification of an additional scalar using {\ct QUANTITY2}. \
 \end{tabbing}
 
 \clearpage
