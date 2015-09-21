@@ -1,5 +1,5 @@
 MODULE POIS
- 
+
 ! CODE CONVERTED USING TO_F90 BY ALAN MILLER
 ! DATE: 2006-01-18  TIME: 13:48:46
 
@@ -50,53 +50,53 @@ END IF
 
 IF (LBDCND<0 .OR. LBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 3._EB 
+  SAVE(IERROR) = 3._EB
 END IF
 
 IF (YS>YF) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 4._EB 
+  SAVE(IERROR) = 4._EB
 END IF
 
 IF (M<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 5._EB 
+  SAVE(IERROR) = 5._EB
 END IF
 
 IF (MBDCND<0 .OR. MBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 6._EB 
+  SAVE(IERROR) = 6._EB
 END IF
 
 IF (ZS>ZF) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 7._EB 
+  SAVE(IERROR) = 7._EB
 END IF
 
 IF (N<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 8._EB 
+  SAVE(IERROR) = 8._EB
 END IF
 
 IF (NBDCND<0 .OR. NBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 9._EB 
+  SAVE(IERROR) = 9._EB
 END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 10._EB 
+  SAVE(IERROR) = 10._EB
 END IF
 
 IF (MDIMF<M) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 11._EB 
+  SAVE(IERROR) = 11._EB
 END IF
 
 IF (IERROR/=0) THEN
   RETURN
 ELSE
-  SAVE(1) = 0._EB 
+  SAVE(1) = 0._EB
 END IF
 
 !                               DEFINE GRID PARAMETERS
@@ -164,9 +164,9 @@ CALL S3CFIS(LPEROD,L,MBDCND,M,NBDCND,N,DLZSQR,SAVE(IA),SAVE(IB),  &
 !                               INTERNAL ERROR
 
 IF (IR/=0) THEN
-  SAVE(1) = 99._EB 
+  SAVE(1) = 99._EB
   IERROR = 1
-  
+
   RETURN
 END IF
 
@@ -204,7 +204,7 @@ INTEGER :: L, LP, M, MP, N, NP, IA, IB, IC, ID, IS, K, J, I, ISING
 REAL(EB):: BDXS(MDIMF,*), BDXF(MDIMF,*), BDYS(LDIMF,*), BDYF(LDIMF,*), BDZS(LDIMF,*), BDZF(LDIMF,*), &
            F(LDIMF,MDIMF,*),SAVE(-3:*),W(*),H(0:*), PERTRB
 REAL(EB) :: DX, DY, DZ, ELMBDA, DLYRCP, TWDYSQ, DLZRCP, TWDZSQ, PERT, S1, S3, PRTSAV
- 
+
 
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
@@ -251,7 +251,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (LP==4 .OR. LP==5) THEN
      DO K = 1,N
        DO J = 1,M
@@ -259,7 +259,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (LP==2 .OR. LP==5) THEN
      DO K = 1,N
        DO J = 1,M
@@ -267,7 +267,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (LP==3 .OR. LP==4) THEN
      DO K = 1,N
        DO J = 1,M
@@ -275,9 +275,9 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
-   
+
    IF (MP==2 .OR. MP==3) THEN
      DO K = 1,N
        DO I = 1,L
@@ -285,7 +285,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (MP==4 .OR. MP==5) THEN
      DO K = 1,N
        DO I = 1,L
@@ -293,7 +293,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (MP==2 .OR. MP==5) THEN
      DO K = 1,N
        DO I = 1,L
@@ -301,7 +301,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (MP==3 .OR. MP==4) THEN
      DO K = 1,N
        DO I = 1,L
@@ -309,9 +309,9 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    !                               ENTER BOUNDARY DATA FOR Z-BOUNDARIES
-   
+
    IF (NP==2 .OR. NP==3) THEN
      DO J = 1,M
        DO I = 1,L
@@ -319,7 +319,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (NP==4 .OR. NP==5) THEN
      DO J = 1,M
        DO I = 1,L
@@ -327,7 +327,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (NP==2 .OR. NP==5) THEN
      DO J = 1,M
        DO I = 1,L
@@ -335,7 +335,7 @@ IF (PRES_METHOD /= 'SCARC') THEN
        END DO
      END DO
    END IF
-   
+
    IF (NP==3 .OR. NP==4) THEN
      DO J = 1,M
        DO I = 1,L
@@ -346,8 +346,8 @@ IF (PRES_METHOD /= 'SCARC') THEN
 
 END IF
 
-PERTRB = 0._EB 
-PERT   = 0._EB 
+PERTRB = 0._EB
+PERT   = 0._EB
 ISING = 0
 
 !                               FOR SINGULAR PROBLEMS ADJUST DATA TO
@@ -383,9 +383,9 @@ END SELECT
 IF (ABS(ELMBDA)>=TWO_EPSILON_EB) GO TO 750
 ISING = 1
 660 CONTINUE
-PERT = 0._EB 
+PERT = 0._EB
 DO  I = 1,L
-  W(I) = 0._EB 
+  W(I) = 0._EB
 END DO
 DO  K = 1,N
   DO  J = 1,M
@@ -394,8 +394,8 @@ DO  K = 1,N
     END DO
   END DO
 END DO
-S1 = 0._EB 
-S3 = 0._EB 
+S1 = 0._EB
+S3 = 0._EB
 DO  I = 1,L
   S3 = S3 + H(I)
   S1 = S1 + H(I)*W(I)
@@ -421,9 +421,9 @@ END DO
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
-  
+
   GO TO 800
-  
+
 END IF
 
 PRTSAV = PERT
@@ -437,9 +437,9 @@ CALL S3CFSS(LDIMF,MDIMF,F,SAVE(IS),W)
 
 IF (ISING==1) THEN
   ISING = 2
-  
+
   GO TO 660
-  
+
 END IF
 
 800 CONTINUE
@@ -471,59 +471,59 @@ IERROR = 0
 
 IF (LPEROD/=0 .AND. LPEROD/=1) THEN
   IERROR = 1
-  SAVE(1) = 1._EB 
+  SAVE(1) = 1._EB
 END IF
 
 IF (L<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 2._EB 
+  SAVE(IERROR) = 2._EB
 END IF
 
 IF (MPEROD<0 .AND. MPEROD>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 3._EB 
+  SAVE(IERROR) = 3._EB
 END IF
 
 IF (M<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 4._EB 
+  SAVE(IERROR) = 4._EB
 END IF
 
 IF (NPEROD<0 .AND. NPEROD>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 5._EB 
+  SAVE(IERROR) = 5._EB
 END IF
 
 IF (N<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 6._EB 
+  SAVE(IERROR) = 6._EB
 END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 7._EB 
+  SAVE(IERROR) = 7._EB
 END IF
 
 IF (MDIMF<M) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 8._EB 
+  SAVE(IERROR) = 8._EB
 END IF
 
 IF (LPEROD==0) THEN
   DO  I = 1,L
-    
+
     IF (ABS(A(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(B(I)-B(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(C(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(D(I)-D(1))>=TWO_EPSILON_EB) GO TO 110
-    
+
   END DO
-  
+
   GO TO 120
-  
+
   110     CONTINUE
   IERROR = IERROR + 1
-  SAVE(IERROR) = 9._EB 
+  SAVE(IERROR) = 9._EB
 END IF
 
 120 CONTINUE
@@ -663,132 +663,132 @@ EPS = FSH20S()
 IF (L>1 .AND. LP==1) THEN
   LH = (L+1)/2
   LODD = 1
-  
+
   IF (2*LH==L) LODD = 2
-  C(LH-1) = 0._EB 
-  A(LH) = 0._EB 
+  C(LH-1) = 0._EB
+  A(LH) = 0._EB
   C(LH) = 2._EB*C(LH)
-  
+
   IF (LODD==1) THEN
     B(LH-1) = B(LH-1) - A(LH-1)
     B(L) = B(L) + A(L)
   END IF
-  
+
   IF (LODD==2) A(L) = C(LH)
 END IF
 
 !                               COMPUTE TRANSFORM ROOTS FOR J-DIRECTION
 
 IF (M==1) THEN
-  CFY(1) = 0._EB 
+  CFY(1) = 0._EB
 ELSE
-  
+
   IF (IGRID==1) THEN
     MRDEL = ((MP-1)* (MP-3)* (MP-5))/3
     DEL = PI/ (2._EB* (M+MRDEL))
   ELSE
     DEL = PI/ (2*M)
   END IF
-  
+
   IF (MP==1) THEN
-    CFY(1) = 0._EB 
-    CFY(M) = -4._EB 
+    CFY(1) = 0._EB
+    CFY(M) = -4._EB
     DO J = 2,M - 1,2
       CFY(J) = -4._EB*SIN(J*DEL)**2
       CFY(J+1) = CFY(J)
     END DO
   END IF
-  
+
   IF (MP==2) THEN
     DO J = 1,M
       CFY(J) = -4._EB*SIN(J*DEL)**2
     END DO
   END IF
-  
+
   IF (MP==3 .OR. MP==5) THEN
     DO J = 1,M
       CFY(J) = -4._EB*SIN((J-.5_EB)*DEL)**2
     END DO
   END IF
-  
+
   IF (MP==4) THEN
     DO J = 1,M
       CFY(J) = -4._EB*SIN((J-1)*DEL)**2
     END DO
   END IF
-  
+
 END IF
 
 !                               COMPUTE TRANSFORM ROOTS IN K-DIRECTION
 
 IF (N==1) THEN
-  ZRT(1) = 0._EB 
+  ZRT(1) = 0._EB
 ELSE
-  
+
   IF (IGRID==1) THEN
     NRDEL = ((NP-1)* (NP-3)* (NP-5))/3
     DEL = PI/ (2._EB* (N+NRDEL))
   ELSE
     DEL = PI/ (2*N)
   END IF
-  
+
   IF (NP==1) THEN
-    ZRT(1) = 0._EB 
+    ZRT(1) = 0._EB
     ZRT(N) = -4._EB*C2
     DO K = 2,N - 1,2
       ZRT(K) = -4._EB*C2*SIN(K*DEL)**2
       ZRT(K+1) = ZRT(K)
     END DO
   END IF
-  
+
   IF (NP==2) THEN
     DO K = 1,N
       ZRT(K) = -4._EB*C2*SIN(K*DEL)**2
     END DO
   END IF
-  
+
   IF (NP==3 .OR. NP==5) THEN
     DO K = 1,N
       ZRT(K) = -4._EB*C2*SIN((K-.5_EB)*DEL)**2
     END DO
   END IF
-  
+
   IF (NP==4) THEN
     DO K = 1,N
       ZRT(K) = -4._EB*C2*SIN((K-1)*DEL)**2
     END DO
   END IF
-  
+
 END IF
 
 IF (L>1) THEN
-  
+
 !                               FACTOR M*N TRIDIAGONAL SYSTEMS.
 !                               FIRST, DO THE POSSIBLY SINGULAR
 !                               CASE CORRESPONDING TO J = K = 1.
-  
+
   FCTRD(1,1,1) = 1._EB/ (B(1)+D(1)*CFY(1)+ZRT(1))
   DO  I = 2,L - 1
     FCTRD(I,1,1) = 1._EB/ (B(I)+D(I)*CFY(1)+ZRT(1)- A(I)*C(I-1)*FCTRD(I-1,1,1))
   END DO
-  
+
 !                               IF TRIDIAGONAL SYSTEM
 !                               (...,A(I),B(I),C(I),...) IS SINGULAR
 !                               THEN FCTRD(1,1,L) IS 1._EB/0.  IF
 !                               DENOMINATOR IS WITHIN ROUND-OFF OF 0,
 !                               SET FCTRD(1,1,L) ARBITRARILY
-  
+
   DEN = B(L) + D(L)*CFY(1) + ZRT(1) - A(L)*C(L-1)*FCTRD(L-1,1,1)
   BMAX = ABS(B(1))
   DO  I = 2,L
     BMAX = MAX(BMAX,ABS(B(I)))
   END DO
-  
+
   IF (ABS(DEN/BMAX)<=10._EB *EPS) DEN = BMAX
   FCTRD(L,1,1) = 1._EB/DEN
-  
+
 !                               FACTOR CASES J=1, K=2,...,N.
-  
+
   DO  K = 2,N
     FCTRD(1,K,1) = 1._EB/ (B(1)+D(1)*CFY(1)+ZRT(K))
   END DO
@@ -797,9 +797,9 @@ IF (L>1) THEN
       FCTRD(I,K,1) = 1._EB/ (B(I)+D(I)*CFY(1)+ZRT(K)- A(I)*C(I-1)*FCTRD(I-1,K,1))
     END DO
   END DO
-  
+
 !                               FACTOR CASES K=1, J=2,...,M.
-  
+
   DO  J = 2,M
     FCTRD(1,1,J) = 1._EB/ (B(1)+D(1)*CFY(J)+ZRT(1))
   END DO
@@ -808,9 +808,9 @@ IF (L>1) THEN
       FCTRD(I,1,J) = 1._EB/ (B(I)+D(I)*CFY(J)+ZRT(1)- A(I)*C(I-1)*FCTRD(I-1,1,J))
     END DO
   END DO
-  
+
 !                               FACTOR REMAINING CASES.
-  
+
   DO  K = 2,N
     DO  J = 2,M
       FCTRD(1,K,J) = 1._EB/ (B(1)+D(1)*CFY(J)+ZRT(K))
@@ -830,7 +830,7 @@ END IF
 !                               PRE-PROCESSING COEFFICIENTS IN J
 
 IF (M/=1) THEN
-  
+
   SELECT CASE(IGRID)
   CASE(1)   ; GO TO 440
   CASE(2)   ; GO TO 450
@@ -895,7 +895,7 @@ END IF
 !                               PRE-PROCESSING COEFFICIENTS IN K
 
 IF (N/=1) THEN
-  
+
   SELECT CASE(IGRID)
   CASE(1)   ; GO TO 540
   CASE(2)   ; GO TO 550
@@ -1005,17 +1005,17 @@ IWSZ = IWSY + M + 16
 LDIMFT=L
 
 IF (LDIMF==L .AND. MDIMF==M) THEN
-  
+
 !                               NO HOLES IN DATA ARRAY, SO CALL SOLVER
-  
+
   CALL FSH03S(IGRID,L,LP,M,MP,N,NP,LDIMFC,LDIMFT,F,SAVE(ICFY), SAVE(ICFZ),  &
       W,SAVE(IA),SAVE(IC),SAVE(IFCTRD),SAVE(IWSY), SAVE(IWSZ))
 ELSE
   IF (LDIMF>L .AND. MOD(L,2)==0) LDIMFT=L+1
-  
+
 !                               PACK DATA ARRAY, CALL SOLVER,
 !                               AND THEN UNPACK SOLUTION ARRAY
-  
+
   CALL FSH04S(L,M,N,LDIMF,MDIMF,LDIMFT,F,W)
   CALL FSH03S(IGRID,L,LP,M,MP,N,NP,LDIMFC,LDIMFT,W,SAVE(ICFY),  &
       SAVE(ICFZ),F, SAVE(IA),SAVE(IC),SAVE(IFCTRD),SAVE(IWSY),  &
@@ -1057,26 +1057,26 @@ REAL(EB)   WSAVEZ(N+16)
 REAL(EB)   A(L),C(L),F(LDIMFT,M,N)
 INTEGER :: K, J, IFWRD, I
 
-    
+
 LOGICAL :: DATARY,DATASW
 !                               ZERO OUT BOTTOM PLANE OF ARRAY FT
 
 DO  K=1,N
   DO  J=1,M
-    FT(LDIMFT,J,K)=0._EB 
+    FT(LDIMFT,J,K)=0._EB
   END DO
 END DO
 
 NOCOPY=.TRUE.
 DATARY=.TRUE.
-SCALE=1._EB 
+SCALE=1._EB
 IFWRD = 1
 100 CONTINUE
 
 IF (N/=1) THEN
   TPOSE=.FALSE.
   IF (IFWRD==2) TPOSE=.TRUE.
-  
+
 !                               TRANSFORM IN Z
   IF (DATARY) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,F,FT,CFZ,WSAVEZ)
@@ -1086,7 +1086,7 @@ IF (N/=1) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,FT,F,CFZ,WSAVEZ)
     DATARY=.NOT.OUTARY
   END IF
-  
+
 END IF
 SELECT CASE(IFWRD)
 CASE(1)   ; GO TO 490
@@ -1097,10 +1097,10 @@ END SELECT
 IF (M/=1) THEN
   TPOSE=.TRUE.
   IF (IFWRD==2) TPOSE=.FALSE.
-  
+
 !                               TRANSFORM Y
-  
-  
+
+
   IF (DATARY) THEN
     CALL FSH26S(IGRID,IFWRD,MP,L,M,N,LDIMFT,F,FT,CFY,WSAVEY)
     DATARY=OUTARY
@@ -1108,7 +1108,7 @@ IF (M/=1) THEN
     CALL FSH26S(IGRID,IFWRD,MP,L,M,N,LDIMFT,FT,F,CFY,WSAVEY)
     DATARY=.NOT.OUTARY
   END IF
-  
+
 END IF
 
 SELECT CASE(IFWRD)
@@ -1118,12 +1118,12 @@ END SELECT
 285 CONTINUE
 
 IF (L>1) THEN
-  
+
 !                               SOLVE TRIDIAGONAL SYSTEMS IN X THAT WERE
 !                               PREVIOUSLY FACTORED IN FSH01S
-  
+
 !                               CALL VECTORIZED TRIDIAGONAL SOLVER
-  
+
   DATASW=.FALSE.
   IF (NP==1) DATASW=.NOT.DATASW
   IF (MP==1) DATASW=.NOT.DATASW
@@ -1142,7 +1142,7 @@ IF (L>1) THEN
       CALL FSH06S(L,LP,M*N,LDIMFC,LDIMFT,SCALE,A,C,FT,FT,FCTRD)
     END IF
   END IF
-  
+
 END IF
 
 IFWRD = 2
@@ -1199,7 +1199,7 @@ END DO
 IF (LDIMG>L) THEN
   DO  K=1,N
     DO  J=1,M
-      G(LDIMG,J,K)=0._EB 
+      G(LDIMG,J,K)=0._EB
     END DO
   END DO
 END IF
@@ -1317,7 +1317,7 @@ DO  J = 1,M
 END DO
 
 IF (LP==1) THEN
-  
+
   DO  I=1,LQ
     DO  J=1,M
       FT(I,J)=FT(LH+I,J)+FT(I,J)
@@ -1333,7 +1333,7 @@ IF (LP==1) THEN
       FT(3*LH/2,J)=2._EB*FT(3*LH/2,J)-FT(LH/2,J)
     END DO
   END IF
-  
+
 END IF
 
 RETURN
@@ -1901,10 +1901,10 @@ DO  K1=1,NFM1
     LD = LD+L1
     I = IS
     ARGLD = REAL(LD,EB)*ARGH
-    FI = 0._EB 
+    FI = 0._EB
     DO  II=3,IDO,2
       I = I+2
-      FI = FI+1._EB 
+      FI = FI+1._EB
       ARG = FI*ARGLD
       WA(I-1) = COS(ARG)
       WA(I) = SIN(ARG)
@@ -2441,8 +2441,8 @@ MODM = MOD(M,2)
 103 MP1 = M+1
 MS2 = M/2
 DO  I=1,LDIMX*N
-  XT(I,1) = 0._EB 
-  XT(I,M+1)=0._EB 
+  XT(I,1) = 0._EB
+  XT(I,M+1)=0._EB
 END DO
 !                         ZERO OUT LAST PLANE BECAUSE FOR SINE
 !                         IT DOESN'T GET DONE IN FSH02
@@ -2643,9 +2643,9 @@ INTEGER :: I,K,J
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
 
 IF (TPOSE) THEN
-  
+
 !        RE-ORDER INPUT
-  
+
   DO  K=1,N
     DO  J=1,M
       DO  I=1,L
@@ -2653,9 +2653,9 @@ IF (TPOSE) THEN
       END DO
     END DO
   END DO
-  
+
 !        REAL(EB), PERIODIC TRANSFORM
-  
+
   CALL VRFFTB(LDIMF*N,M,FT,LDIMF*N,F,WSAVE)
   OUTARY=.NOT.OUTARY
   IF (.NOT.NOCOPY) THEN
@@ -2692,13 +2692,13 @@ REAL(EB)   F(LDIMF,N,M)
 !           = .FALSE. IF TRANSFORMING THIRD INDEX
 
 IF (TPOSE) THEN
-  
+
 !        RE-ORDER INPUT
-  
+
   CALL VSRTF1(L,M,N,LDIMF,F,FT)
-  
+
 !        REAL(EB), PERIODIC TRANSFORM
-  
+
   CALL VRFFTF(LDIMF*N,M,FT,LDIMF*N,F,WSAVE)
   OUTARY=.NOT.OUTARY
   IF (.NOT.NOCOPY) THEN
@@ -3278,13 +3278,13 @@ SUBROUTINE VRADF3 (MP,IDO,L1,CC,MDIMC,CH,MDIMCH,WA1,WA2)
 INTEGER                       :: MP, IDO, L1
 INTEGER                   :: MDIMC
 INTEGER                   :: MDIMCH
-REAL(EB)    CH(MDIMCh,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3) 
+REAL(EB)    CH(MDIMCh,IDO,3,L1)  ,CC(MDIMC,IDO,L1,3)
 REAL(EB)  WA1(IDO)
 REAL(EB)   WA2(IDO)
 INTEGER :: I,M,K,IDP2,IC
 REAL(EB) :: ARG,TAUR,TAUI
 
-ARG=2._EB*PI/3._EB 
+ARG=2._EB*PI/3._EB
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
 DO  M=1,MP
@@ -3370,7 +3370,7 @@ IF (IDO > 2) THEN
    DO  M=1,MP
       DO  I=3,IDO,2
          IC = IDP2-I
-         DO  K=1,L1    
+         DO  K=1,L1
             CH(M,I-1,1,K) = ((WA1(I-2)*CC(M,I-1,K,2)+WA1(I-1)*  &
                 CC(M,I,K,2))+(WA3(I-2)*CC(M,I-1,K,4)+WA3(I-1)*  &
                 CC(M,I,K,4)))+(CC(M,I-1,K,1)+(WA2(I-2)*CC(M,I-1,K,3)+  &
@@ -3444,7 +3444,7 @@ REAL(EB)    WA4(IDO)
 INTEGER :: K,M,IDP2,I,IC
 REAL(EB) :: ARG,TR11,TI11,TR12,TI12
 
-ARG=2._EB*PI/5._EB 
+ARG=2._EB*PI/5._EB
 TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
@@ -3573,10 +3573,10 @@ REAL(EB)   C1(MDIMC,IDO,L1,IP)
 REAL(EB)    C2(MDIMC,IDL1,IP)
 REAL(EB)   CH2(MDIMCH,IDL1,IP)
 REAL(EB)    WA(IDO)
-REAL(EB)    CH(MDIMCH,IDO,L1,IP) 
+REAL(EB)    CH(MDIMCH,IDO,L1,IP)
 INTEGER :: IPPH, IPP2, IDP2, NBD, IK, M, J, K, IS, IDIJ, I, JC, L, LC, J2, IC
 REAL(EB) :: TPI, ARG, DCP, DSP, AR1, AI1, AR1H, DC2, DS2, AR2, AI2, AR2H
-    
+
 
 TPI=2._EB*PI
 ARG = TPI/REAL(IP,EB)
@@ -3673,8 +3673,8 @@ END DO
   END DO
 END DO
 
-AR1 = 1._EB 
-AI1 = 0._EB 
+AR1 = 1._EB
+AI1 = 0._EB
 DO  L=2,IPPH
   LC = IPP2-L
   AR1H = DCP*AR1-DSP*AI1
@@ -3919,7 +3919,7 @@ INTEGER                   :: MDIMC
 INTEGER                   :: MDIMCH
 REAL(EB)   CH(MDIMCH,IDO,L1,2)
 REAL(EB) WA1(IDO)
-REAL(EB)    CC(MDIMC,IDO,2,L1) 
+REAL(EB)    CC(MDIMC,IDO,2,L1)
 INTEGER :: I, K, M, IDP2, IC
 
 DO  K=1,L1
@@ -3977,11 +3977,11 @@ INTEGER                   :: MDIMCH
 REAL(EB)   CH(MDIMCH,IDO,L1,3)
 REAL(EB)   WA1(IDO)
 REAL(EB)    WA2(IDO)
-REAL(EB)    CC(MDIMC,IDO,3,L1) 
+REAL(EB)    CC(MDIMC,IDO,3,L1)
 INTEGER :: I, M, K, IDP2, IC
 REAL(EB) :: ARG, TAUR, TAUI
 
-ARG=2._EB*PI/3._EB 
+ARG=2._EB*PI/3._EB
 TAUR=COS(ARG)
 TAUI=SIN(ARG)
 DO  M=1,MP
@@ -4048,7 +4048,7 @@ REAL(EB)     CH(MDIMCH,IDO,L1,4)
 REAL(EB)   WA1(IDO)
 REAL(EB)    WA2(IDO)
 REAL(EB)   WA3(IDO)
-REAL(EB)    CC(MDIMC,IDO,4,L1) 
+REAL(EB)    CC(MDIMC,IDO,4,L1)
 INTEGER :: I, M, K, IDP2, IC
 REAL(EB) :: SQRT2
 
@@ -4133,11 +4133,11 @@ REAL(EB)   WA1(IDO)
 REAL(EB)  WA2(IDO)
 REAL(EB)   WA3(IDO)
 REAL(EB)   WA4(IDO)
-REAL(EB)    CC(MDIMC,IDO,5,L1) 
+REAL(EB)    CC(MDIMC,IDO,5,L1)
 INTEGER :: I, K, M, IDP2, IC
 REAL(EB) :: ARG, TR11, TI11, TR12, TI12
 
-ARG=2._EB*PI/5._EB 
+ARG=2._EB*PI/5._EB
 TR11=COS(ARG)
 TI11=SIN(ARG)
 TR12=COS(2._EB*ARG)
@@ -4317,8 +4317,8 @@ GO TO 116
     END DO
   END DO
 END DO
-116 AR1 = 1._EB 
-AI1 = 0._EB 
+116 AR1 = 1._EB
+AI1 = 0._EB
 DO  L=2,IPPH
   LC = IPP2-L
   AR1H = DCP*AR1-DSP*AI1
@@ -4582,7 +4582,7 @@ IERROR = 0
 
 !MCG  IF (RS<0.0) THEN
 !MCG      IERROR = IERROR + 1
-!MCG      SAVE(IERROR) = 1._EB 
+!MCG      SAVE(IERROR) = 1._EB
 !MCG  END IF
 
 IF (RF<=RS) THEN
@@ -4602,7 +4602,7 @@ END IF
 
 !MCG  IF (RS==0.0 .AND. LBDCND<=4) THEN
 !MCG      IERROR = IERROR + 1
-!MCG      SAVE(IERROR) = 5._EB 
+!MCG      SAVE(IERROR) = 5._EB
 !MCG  END IF
 
 IF (ABS(RS)>=TWO_EPSILON_EB .AND. LBDCND>=5) THEN
@@ -4633,48 +4633,48 @@ END IF
 
 IF (ABS(TF-PI)<=TWO_EPSILON_EB .AND. (MBDCND==2.OR.MBDCND==3.OR. MBDCND==6)) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 11._EB 
+  SAVE(IERROR) = 11._EB
 END IF
 
 IF (PF<=PS) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 12._EB 
+  SAVE(IERROR) = 12._EB
 END IF
 
 IF (N<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 13._EB 
+  SAVE(IERROR) = 13._EB
 END IF
 
 IF (NBDCND<0 .OR. NBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 14._EB 
+  SAVE(IERROR) = 14._EB
 END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 15._EB 
+  SAVE(IERROR) = 15._EB
 END IF
 
 IF (MDIMF<M) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 16._EB 
+  SAVE(IERROR) = 16._EB
 END IF
 
 IF (MBDCND>4 .AND. (NBDCND==1.OR.NBDCND==2.OR. NBDCND==4)) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 17._EB 
+  SAVE(IERROR) = 17._EB
 END IF
 
 IF (LBDCND>4 .AND. .NOT. (MBDCND==3.OR.MBDCND==6.OR.  &
       MBDCND==8.OR.MBDCND==9)) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 18._EB 
+  SAVE(IERROR) = 18._EB
 END IF
 
 IF (LBDCND>4 .AND. .NOT. (NBDCND==0.OR.NBDCND==3)) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 19._EB 
+  SAVE(IERROR) = 19._EB
 END IF
 
 IF (IERROR/=0) THEN
@@ -4686,10 +4686,10 @@ END IF
 !                               DEFINE GRID PARAMETERS
 
 DR = (RF-RS)/FLOAT(L)
-DRBY2 = DR/2._EB 
+DRBY2 = DR/2._EB
 DRSQR = 1._EB/ (DR**2)
 DT = (TF-TS)/FLOAT(M)
-DTBY2 = DT/2._EB 
+DTBY2 = DT/2._EB
 DTSQR = 1._EB/ (DT**2)
 DP = (PF-PS)/FLOAT(N)
 DPSQR = 1._EB/ (DP**2)
@@ -4716,14 +4716,14 @@ DO  I = 1,L
   HXP = .5_EB*(HX(I)+HX(I+1))
 !MCG      RI = RS + (I-.5)*DR
 !MCG      SAVE(IDL+I) = 1._EB/RI**2
-  SAVE(IDL+I) = 1._EB 
+  SAVE(IDL+I) = 1._EB
 !MCG      SAVE(IAL+I) = DRSQR* (RI-DRBY2)**2
 !MCG      SAVE(ICL+I) = DRSQR* (RI+DRBY2)**2
   SAVE(IAL+I) = DRSQR/(HX(I)*HXM)
   SAVE(ICL+I) = DRSQR/(HX(I)*HXP)
   SAVE(IBL+I) = - (SAVE(IAL+I)+SAVE(ICL+I)) + ELMBDA/SAVE(IDL+I)
 !MCG      SAVE(ISL+I) = RI**2
-  SAVE(ISL+I) = 1._EB 
+  SAVE(ISL+I) = 1._EB
 END DO
 
 !                               DEFINE BOUNDARY COEFFICIENTS
@@ -4765,7 +4765,7 @@ DO  J = 1,M
   HYP = .5_EB*(HY(J)+HY(J+1))
 !MCG      TJ = TS + (J-.5)*DT
 !MCG      SAVE(ISM+J) = SIN(TJ)
-  SAVE(ISM+J) = 1._EB 
+  SAVE(ISM+J) = 1._EB
 !MCG      SAVE(IDM+J) = DPSQR/SIN(TJ)**2
   SAVE(IDM+J) = DPSQR
 !MCG      SAVE(IAM+J) = DTSQR*SIN(TJ-DTBY2)/SIN(TJ)
@@ -4819,7 +4819,7 @@ CALL S3CCIS(L,SAVE(IAL+1),SAVE(IBL+1),SAVE(ICL+1), M,SAVE(IAM+1:IAM+M),  &
 !                               INTERNAL ERROR
 
 IF (IERR1/=0) THEN
-  SAVE(1) = 99._EB 
+  SAVE(1) = 99._EB
   IERROR = 1
   RETURN
 END IF
@@ -4833,13 +4833,13 @@ END DO
 
 !                               COMPUTE SCALING FOR SINGULAR PROBLEMS
 
-SUM = 0._EB 
+SUM = 0._EB
 DO  J = 1,M
 !MCG      SUM = SUM + SAVE(ISM+J)
   SUM = SUM + SAVE(ISM+J)*HY(J)
 END DO
 
-S3 = 0._EB 
+S3 = 0._EB
 DO  I = 1,L
 !MCG      S3 = S3 + SAVE(ISL+I)
   S3 = S3 + SAVE(ISL+I)*HX(I)
@@ -4895,7 +4895,7 @@ REAL(EB) HX(0:*)
 REAL(EB) HY(0:*)
 INTEGER :: I, L, LBDCND, M, MBDCND, N, NBDCND, IAL, IBL, ICL, IDL, ISL, IAM, IBM, ICM, IDM, ISM, ISVPS, K, J, ISING
 REAL(EB) :: DR, DT, DP, DPR, DPSQR, ELMBDA, SUM, PERT, PRTSAV, SCAL
- 
+
 !                               CHECK VALUE OF IERROR (=SAVE(1)).
 !                               IF NON-ZERO, RETURN.
 
@@ -5097,7 +5097,7 @@ DO  J = 1,M
 END DO
 590 CONTINUE
 
-PERTRB = 0._EB 
+PERTRB = 0._EB
 ISING = 0
 
 !                               FOR SINGULAR PROBLEMS ADJUST DATA TO
@@ -5141,7 +5141,7 @@ END IF
 ISING = 1
 660 CONTINUE
 DO  I = 1,L
-  W(I) = 0._EB 
+  W(I) = 0._EB
 END DO
 DO  K = 1,N
   DO  J = 1,M
@@ -5152,7 +5152,7 @@ DO  K = 1,N
   END DO
 END DO
 
-SUM = 0._EB 
+SUM = 0._EB
 DO  I = 1,L
 !MCG      SUM = SUM + W(I)*SAVE(ISL+I)
   SUM = SUM + W(I)*SAVE(ISL+I)*HX(I)
@@ -5174,9 +5174,9 @@ END DO
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
-  
+
   GO TO 850
-  
+
 END IF
 
 PRTSAV = PERT
@@ -5203,9 +5203,9 @@ CALL S3CCSS(LDIMF,MDIMF,F,SAVE(ISVPS+1),W)
 
 IF (ISING==1) THEN
   ISING = 2
-  
+
   GO TO 660
-  
+
 END IF
 
 850 CONTINUE
@@ -5242,45 +5242,45 @@ IERROR = 0
 
 IF (L<2) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 1._EB 
+  SAVE(IERROR) = 1._EB
 END IF
 
 IF (M<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 2._EB 
+  SAVE(IERROR) = 2._EB
 END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 3._EB 
+  SAVE(IERROR) = 3._EB
 END IF
 
 DO  J = 2,M
-  
+
   IF (AM(J)*CM(J-1)<0.0_EB) THEN
     IERROR = IERROR + 1
-    SAVE(IERROR) = 5._EB 
-    
+    SAVE(IERROR) = 5._EB
+
     EXIT
-    
+
   END IF
-  
+
 END DO
 110 CONTINUE
 
 IF (MDIMF<M) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 6._EB 
+  SAVE(IERROR) = 6._EB
 END IF
 
 IF (NPEROD<0 .AND. NPEROD>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 7._EB 
+  SAVE(IERROR) = 7._EB
 END IF
 
 IF (N<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 8._EB 
+  SAVE(IERROR) = 8._EB
 END IF
 
 IF (IERROR/=0) THEN
@@ -5375,31 +5375,31 @@ IB = IWSZ + N + 16
 ICF = IB + ((KAPPA-2)*IKPWR+KAPPA+6)*N
 
 IF (LDIMY==L .AND. MDIMY==M) THEN
-  
+
 !                               DATA ARRAY HAS NO HOLES, SO CALL SOLVER
-  
+
   CALL FSH16S(IGRID,L,M,N,NP,SAVE(IAL),SAVE(IBL),SAVE(ICL),  &
       SAVE(IAM),SAVE(ICM),SAVE(ICFZ),SAVE(IWSZ),  &
       SAVE(IB),SAVE(ICF),Y,W,W(1+M),W(1+M+L*M))
-  
+
 ELSE
-  
+
 !                               PACK DATA ARRAY, CALL SOLVER, AND UNPACK
-  
+
   CALL FSH04S(L,M,N,LDIMY,MDIMY,L,Y,W)
-  
+
   IF (N>1) THEN
     LENY = L*M* (N+1)
   ELSE
     LENY = L*M
   END IF
-  
+
   CALL FSH16S(IGRID,L,M,N,NP,SAVE(IAL),SAVE(IBL),SAVE(ICL),  &
       SAVE(IAM),SAVE(ICM),SAVE(ICFZ),SAVE(IWSZ),  &
       SAVE(IB),SAVE(ICF),W,W(1+LENY),W(1+LENY+M),Y)
-  
+
   CALL FSH05S(L,M,N,LDIMY,MDIMY,L,Y,W)
-  
+
 END IF
 
 RETURN
@@ -5443,16 +5443,16 @@ LOGICAL :: DATARY
 
 NOCOPY=.TRUE.
 DATARY=.TRUE.
-SCALE=1._EB 
+SCALE=1._EB
 IFWRD = 1
 TPOSE=.FALSE.
 LDIMFT=L
 100 CONTINUE
 
 IF (N/=1) THEN
-  
+
 !                               TRANSFORM IN Z
-  
+
   IF (DATARY) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,F,FT,CFZ,WSAVEZ)
     DATARY=OUTARY
@@ -5460,7 +5460,7 @@ IF (N/=1) THEN
     CALL FSH26S(IGRID,IFWRD,NP,L,N,M,LDIMFT,FT,F,CFZ,WSAVEZ)
     DATARY=.NOT.OUTARY
   END IF
-  
+
 END IF
 
 IF (IFWRD/=1) GO TO 900
@@ -5564,7 +5564,7 @@ DO  IR = 0,KAPPA - 2
       END DO
     END DO
     IC = IC + NM2
-    
+
     IF (IPI2>NMAX) CYCLE
     IS = IS + NM2
     CALL FSH10S(IPI2,IR,IP2,NP2)
@@ -5584,35 +5584,35 @@ DO  IR = KDO,0,-1
   I2 = 2**IR
   I1 = I2/2
   I4 = I2 + I2
-  
+
   IF (IR==KDO) GO TO 430
-  
+
   IF (IR/=0) GO TO 280
   DO  I = 1,NMAX,2
-    
+
     IF (I/=1) GO TO 230
     DO  J = 1,M
       Y(J,I) = Y(J,I) - CN(I)*Y(J,I+1)
     END DO
-    
+
     CYCLE
-    
+
     230         CONTINUE
     IF (I/=NMAX) GO TO 250
     DO  J = 1,M
       Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1)
     END DO
-    
+
     CYCLE
-    
+
     250         CONTINUE
     DO  J = 1,M
       Y(J,I) = Y(J,I) - AN(I)*Y(J,I-1) - CN(I)*Y(J,I+1)
     END DO
   END DO
-  
+
   GO TO 430
-  
+
   280     CONTINUE
   IS = 0
   DO  I = I2,NMAX,I4
@@ -5620,7 +5620,7 @@ DO  IR = KDO,0,-1
     IPI1 = I + I1
     IMI2 = I - I2
     IPI2 = I + I2
-    
+
     IF (I==I2) GO TO 320
     CALL FSH10S(IMI1,IRM1,IM1,NM1)
     DO  IP = 1,NM1
@@ -5632,7 +5632,7 @@ DO  IR = KDO,0,-1
       END DO
     END DO
     IS = IS + NM1
-    
+
     320         CONTINUE
     IF (IPI2>NMAX) CYCLE
     CALL FSH10S(IPI1,IRM1,IP1,NP1)
@@ -5651,7 +5651,7 @@ DO  IR = KDO,0,-1
   DO  I = I2,NMAX,I4
     IMI1 = I - I1
     IPI1 = I + I1
-    
+
     IF (I==I2) GO TO 390
     CALL FSH10S(IMI1,IRM1,IM1,NM1)
     DO  IP = 1,NM1
@@ -5661,7 +5661,7 @@ DO  IR = KDO,0,-1
     END DO
     IC = IC + NM1
     IS = IS + NM1
-    
+
     390         CONTINUE
     IF (I+I2>NMAX) CYCLE
     CALL FSH10S(IPI1,IRM1,IP1,NP1)
@@ -5738,10 +5738,10 @@ DO  K = 1,IDEG
   Y(K,M) = B(M) - XL(K) - A(M)*D(K,MM1)
 END DO
 DO  K = 1,IDEG
-  
+
 !                               Y(K,M) = CVMGZ(0.,D(K,M)/Y(K,M),Y(K,M))
 !                               ON A CRAY-1
-  
+
   IF (ABS(Y(K,M))>=TWO_EPSILON_EB) Y(K,M) = D(K,M)/Y(K,M)
 END DO
 DO  I = M - 1,1,-1
@@ -5790,9 +5790,9 @@ ML = 4
 IF (ML<M+1) THEN
   KAPPA = KAPPA + 1
   ML = 2*ML
-  
+
   GO TO 110
-  
+
 END IF
 
 IKPWR = 2*ML
@@ -5823,52 +5823,52 @@ ICF = IB + ((KAPPA-2)*IKPWR+KAPPA+6)*N
 !                               AND STORE IN W(1),...,W(N)
 
 IF (N==1) THEN
-  
-  W(1) = 0._EB 
-  
+
+  W(1) = 0._EB
+
 ELSE
-  
+
   IF (IGRID==1) THEN
     NRDEL = ((NP-1)* (NP-3)* (NP-5))/3
     DEL = PI/ (2._EB* (N+NRDEL))
   ELSE
     DEL = PI/ (2*N)
   END IF
-  
+
   IF (NP==1) THEN
-    W(1) = 0._EB 
-    W(N) = -4._EB 
+    W(1) = 0._EB
+    W(N) = -4._EB
     DO K = 2,N - 1,2
       W(K) = -4._EB*SIN(K*DEL)**2
       W(K+1) = W(K)
     END DO
   END IF
-  
+
   IF (NP==2) THEN
     DO K = 1,N
       W(K) = -4._EB*SIN(K*DEL)**2
     END DO
   END IF
-  
+
   IF (NP==3 .OR. NP==5) THEN
     DO K = 1,N
       W(K) = -4._EB*SIN((K-.5_EB)*DEL)**2
     END DO
   END IF
-  
+
   IF (NP==4) THEN
     DO K = 1,N
       W(K) = -4._EB*SIN((K-1)*DEL)**2
     END DO
   END IF
-  
+
 END IF
 
 !                               INITIALIZE FFT TRANSFORMS AND
 !                               PRE-PROCESSING COEFFICIENTS IN K
 
 IF (N/=1) THEN
-  
+
   SELECT CASE(IGRID)
   CASE(1)   ; GO TO 210
   CASE(2)   ; GO TO 220
@@ -5932,30 +5932,30 @@ CALL VSCSQI(N,SAVE(ICFZ),SAVE(ICFZ+N),SAVE(ICFZ+2*N),  &
 END IF
 
 DO  K = 1,N
-  
+
 !                               COMPUTE NEW BM ARRAY AND STORE IN
 !                               W(N+1),...,W(N+M)
   DO  J = 1,M
     W(N+J) = BM(J) + W(K)*DM(J)
   END DO
-  
+
 !                               SUBROUTINE FSH07S COMPUTES THE ROOTS OF
 !                               THE B POLYNOMIALS
-  
+
   CALL FSH07S(IERR1,AM,W(N+1),CM,SAVE(IB),W(M+N+1), W(3*M+N+1))
-  
-  
+
+
   IF (IERR1/=0) THEN
     IERROR = 1
     SAVE(1) = IERR1
     RETURN
   END IF
-  
+
 !                               FSH08S COMPUTES COEFFICIENTS OF PARTIAL
 !                               FRACTION EXPANSIONS
-  
+
   CALL FSH08S(AM,CM,SAVE(IB),SAVE(ICF),W(M+N+1))
-  
+
   IB = IB + (KAPPA-2)*IKPWR + KAPPA + 6
   ICF = ICF + (2*KAPPA-4.5)*IKPWR + KAPPA + 8
 END DO
@@ -6105,7 +6105,7 @@ DO  IR = 0,KAPPA - 2
         COEF(IS),T,T(1,2),T(1,3),T(1,4))
     IS = IS + NM2
     IPI2 = I + I2
-    
+
     IF (IPI2>NMAX) CYCLE
     IPI3 = I + I3
     CALL FSH11S(I,IR,IDXC,NC)
@@ -6125,12 +6125,12 @@ DO  IR = KDO,0,-1
   I2 = 2**IR
   I1 = I2/2
   I4 = I2 + I2
-  
+
   IF (IR==KDO) GO TO 160
-  
+
   IF (IR==0) GO TO 160
   DO  I = I2,NMAX,I4
-    
+
     IF (I==I2) GO TO 140
     IMI1 = I - I1
     CALL FSH09S(I,IR,IDXA,NA)
@@ -6138,7 +6138,7 @@ DO  IR = KDO,0,-1
     CALL FSH12S(IRM1,NA,AN(IDXA),NM1,B(IM1),0,DUM,0,DUM,  &
         COEF(IS),T,T(1,2),T(1,3),T(1,4))
     IS = IS + NM1
-    
+
     140         CONTINUE
     IF (I+I2>NMAX) CYCLE
     IPI1 = I + I1
@@ -6317,17 +6317,17 @@ DO  I = 1,NA
   W1(I) = A(I)
 END DO
 DO  I = NA + 1,M
-  W1(I) = 1._EB 
+  W1(I) = 1._EB
 END DO
 DO  I = NB + 1,M
-  W2(I) = 1._EB 
+  W2(I) = 1._EB
 END DO
 DO  I = NC + 1,M
-  W3(I) = 1._EB 
+  W3(I) = 1._EB
 END DO
-SIGN = 1._EB 
+SIGN = 1._EB
 
-IF (IR==0 .AND. NA==1) SIGN = -1._EB 
+IF (IR==0 .AND. NA==1) SIGN = -1._EB
 DO  K = 1,NC
   DO  I = 1,NB
     W2(I) = C(K) - W4(I)
@@ -6335,7 +6335,7 @@ DO  K = 1,NC
   DO  I = 1,NC
     W3(I) = C(K) - C(I)
   END DO
-  W3(K) = 1._EB 
+  W3(K) = 1._EB
   COEF(K) = SIGN
   DO  I = 1,M
     COEF(K) = COEF(K)*W1(I)*W2(I)/W3(I)
@@ -6390,11 +6390,11 @@ Y = TCOS(I2+J2)
 IF (X<=Y) THEN
   TCOS(J) = X
   J1 = J1 + 1
-  
+
   IF (J1>M1) GO TO 150
-  
+
   GO TO 100
-  
+
 ELSE
   TCOS(J) = Y
   J2 = J2 + 1
@@ -6487,32 +6487,32 @@ E2(N) = 0.0_EB
 DO  L = 1,N
   J = 0
   H = EPS* (ABS(D(L))+SQRT(E2(L)))
-  
+
   IF (B>H) GO TO 110
   B = H
   C = B*B
-  
+
 !            LOOK FOR SMALL SQUARED SUB-DIAGONAL ELEMENT
-  
+
   110     CONTINUE
   DO  M = L,N
-    
+
     IF (E2(M)<=C) GO TO 130
-    
+
 !            E2(N) IS ALWAYS ZERO, SO THERE IS NO EXIT
 !            THROUGH THE BOTTOM OF THE LOOP
-    
+
   END DO
-  
+
   130     CONTINUE
   IF (M==L) GO TO 170
-  
+
   140     CONTINUE
   IF (J==30) GO TO 230
   J = J + 1
-  
+
 !                               FORM SHIFT
-  
+
   L1 = L + 1
   S = SQRT(E2(L))
   G = D(L)
@@ -6520,24 +6520,24 @@ DO  L = 1,N
   R = SQRT(P*P+1.0_EB)
   D(L) = S/ (P+SIGN(R,P))
   H = G - D(L)
-  
+
   DO  I = L1,N
     D(I) = D(I) - H
   END DO
-  
+
   F = F + H
-  
+
 !                               RATIONAL QL TRANSFORMATION
-  
+
   G = D(M)
-  
+
   IF (ABS(G)<=TWO_EPSILON_EB) G = B
   H = G
   S = 0.0_EB
   MML = M - L
-  
+
 !                               FOR I=M-1 STEP -1 UNTIL L DO --
-  
+
   DO  II = 1,MML
     I = M - II
     P = G*H
@@ -6546,38 +6546,38 @@ DO  L = 1,N
     S = E2(I)/R
     D(I+1) = H + S* (H+D(I))
     G = D(I) - E2(I)/G
-    
+
     IF (ABS(G)<=TWO_EPSILON_EB) G = B
     H = G*P/R
   END DO
-  
+
   E2(L) = S*G
   D(L) = H
-  
+
 !                               GUARD AGAINST UNDERFLOWED H
-  
+
   IF (ABS(H)<=TWO_EPSILON_EB) GO TO 170
-  
+
   IF (ABS(E2(L))<=ABS(C/H)) GO TO 170
   E2(L) = H*E2(L)
-  
+
   IF (ABS(E2(L))>=TWO_EPSILON_EB) GO TO 140
   170     CONTINUE
   P = D(L) + F
-  
+
 !                               ORDER EIGENVALUES
-  
+
   IF (L==1) GO TO 190
-  
+
 !                               FOR I=L STEP -1 UNTIL 2 DO --
-  
+
   DO  II = 2,L
     I = L + 2 - II
-    
+
     IF (P>=D(I-1)) GO TO 200
     D(I) = D(I-1)
   END DO
-  
+
   190     CONTINUE
   I = 1
   200     CONTINUE
@@ -6638,43 +6638,43 @@ IERROR = 0
 
 IF (XS>XF) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 1._EB 
+  SAVE(IERROR) = 1._EB
 END IF
 
 IF (L<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 2._EB 
+  SAVE(IERROR) = 2._EB
 END IF
 
 IF (LBDCND<0 .OR. LBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 3._EB 
+  SAVE(IERROR) = 3._EB
 END IF
 
 IF (YS>YF) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 4._EB 
+  SAVE(IERROR) = 4._EB
 END IF
 
 IF (M<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 5._EB 
+  SAVE(IERROR) = 5._EB
 END IF
 
 IF (MBDCND<0 .OR. MBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 6._EB 
+  SAVE(IERROR) = 6._EB
 END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 7._EB 
+  SAVE(IERROR) = 7._EB
 END IF
 
 IF (IERROR/=0) THEN
   RETURN
 ELSE
-  SAVE(1) = 0._EB 
+  SAVE(1) = 0._EB
 END IF
 
 !                               DEFINE GRID PARAMETERS
@@ -6738,9 +6738,9 @@ CALL S2CFIS(LPEROD,L,MBDCND,M,SAVE(IA),SAVE(IB),  &
 !                               INTERNAL ERROR
 
 IF (IR/=0) THEN
-  SAVE(1) = 99._EB 
+  SAVE(1) = 99._EB
   IERROR = 1
-  
+
   RETURN
 END IF
 
@@ -6820,45 +6820,45 @@ IF (PRES_METHOD /= 'SCARC') THEN
        F(1,J) = F(1,J) - 2._EB*BDXS(J)*SAVE(IA)
      END DO
    END IF
-   
+
    IF (LP==4 .OR. LP==5) THEN
      DO J = 1,M
        F(1,J) = F(1,J) + SAVE(IA)*DX*BDXS(J)
      END DO
    END IF
-   
+
    IF (LP==2 .OR. LP==5) THEN
      DO J = 1,M
        F(L,J) = F(L,J) - 2._EB*BDXF(J)*SAVE(ID-1)
      END DO
    END IF
-   
+
    IF (LP==3 .OR. LP==4) THEN
      DO J = 1,M
        F(L,J) = F(L,J) - SAVE(ID-1)*DX*BDXF(J)
      END DO
    END IF
-   
+
    !                               ENTER BOUNDARY DATA FOR Y-BOUNDARIES
-   
+
    IF (MP==2 .OR. MP==3) THEN
      DO I = 1,L
        F(I,1) = F(I,1) - BDYS(I)*TWDYSQ
      END DO
    END IF
-   
+
    IF (MP==4 .OR. MP==5) THEN
      DO I = 1,L
        F(I,1) = F(I,1) + BDYS(I)*DLYRCP
      END DO
    END IF
-   
+
    IF (MP==2 .OR. MP==5) THEN
      DO I = 1,L
        F(I,M) = F(I,M) - BDYF(I)*TWDYSQ
      END DO
    END IF
-   
+
    IF (MP==3 .OR. MP==4) THEN
      DO I = 1,L
        F(I,M) = F(I,M) - BDYF(I)*DLYRCP
@@ -6897,7 +6897,7 @@ END SELECT
 IF (ABS(ELMBDA)>=TWO_EPSILON_EB) GO TO 750
 ISING = 1
 660 CONTINUE
-PERT = 0._EB 
+PERT = 0._EB
 DO  I = 1,L
   W(I) = 0._EB
 END DO
@@ -6930,9 +6930,9 @@ END DO
 
 IF (ISING==2) THEN
   PERTRB = PRTSAV
-  
+
   GO TO 800
-  
+
 END IF
 
 PRTSAV = PERT
@@ -6946,9 +6946,9 @@ CALL S2CFSS(LDIMF,F,SAVE(IS),W)
 
 IF (ISING==1) THEN
   ISING = 2
-  
+
   GO TO 660
-  
+
 END IF
 
 800 CONTINUE
@@ -6983,7 +6983,7 @@ IERROR = 0
 
 IF (LPEROD/=0 .AND. LPEROD/=1) THEN
   IERROR = 1
-  SAVE(1) = 1._EB 
+  SAVE(1) = 1._EB
 END IF
 
 IF (L<3) THEN
@@ -7003,21 +7003,21 @@ END IF
 
 IF (LDIMF<L) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 5._EB 
+  SAVE(IERROR) = 5._EB
 END IF
 
 IF (LPEROD==0) THEN
   DO  I = 1,L
-    
+
     IF (ABS(A(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(B(I)-B(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(C(I)-A(1))>=TWO_EPSILON_EB) GO TO 110
     IF (ABS(D(I)-D(1))>=TWO_EPSILON_EB) GO TO 110
-    
+
   END DO
-  
+
   GO TO 120
-  
+
   110     CONTINUE
   IERROR = IERROR + 1
   SAVE(IERROR) = 6._EB
@@ -7036,7 +7036,7 @@ IF (LDIMF>L .AND. MOD(L,2)==0) LDIMFC=L+1
 IGRID = 2
 N = 1
 NPEROD = 0
-SCAL = 0._EB 
+SCAL = 0._EB
 
 CALL FSH00S(IGRID,LPEROD,L,MPEROD,M,NPEROD,N,LDIMFC, SCAL,A,B,C,D,SAVE)
 
@@ -7115,47 +7115,47 @@ IERROR = 0
 
 IF (RS<0.0_EB) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 1._EB 
+  SAVE(IERROR) = 1._EB
 END IF
 
 IF (RF<=RS) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 2._EB 
+  SAVE(IERROR) = 2._EB
 END IF
 
 IF (L<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 3._EB 
+  SAVE(IERROR) = 3._EB
 END IF
 
 IF (LBDCND<1 .OR. LBDCND>6) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 4._EB 
+  SAVE(IERROR) = 4._EB
 END IF
 
 IF (ABS(RS)<=TWO_EPSILON_EB .AND. LBDCND<=4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 5._EB 
+  SAVE(IERROR) = 5._EB
 END IF
 
 IF (ABS(RS)<=TWO_EPSILON_EB .AND. ABS(XMU)>=TWO_EPSILON_EB) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 6._EB 
+  SAVE(IERROR) = 6._EB
 END IF
 
 IF (ZF<=ZS) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 7._EB 
+  SAVE(IERROR) = 7._EB
 END IF
 
 IF (N<3) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 8._EB 
+  SAVE(IERROR) = 8._EB
 END IF
 
 IF (NBDCND<0 .OR. NBDCND>4) THEN
   IERROR = IERROR + 1
-  SAVE(IERROR) = 9._EB 
+  SAVE(IERROR) = 9._EB
 END IF
 
 IF (LDIMF<L) THEN
@@ -7176,7 +7176,7 @@ DZSQR = 1._EB/ (DZ**2)
 NP = NBDCND + 1
 
 DR = (RF-RS)/FLOAT(L)
-DRBY2 = DR/2._EB 
+DRBY2 = DR/2._EB
 DRSQR = 1._EB/ (DR**2)
 
 !                               ALLOCATE SAVE ARRAY
@@ -7241,9 +7241,9 @@ CALL S2CFIS(1,L,NBDCND,N,SAVE(IA+1),SAVE(IB+1),  &
 !                               INTERNAL ERROR
 
 IF (IR/=0) THEN
-  SAVE(1) = 99._EB 
+  SAVE(1) = 99._EB
   IERROR = 1
-  
+
   RETURN
 END IF
 
@@ -7375,7 +7375,7 @@ IF (NP==3 .OR. NP==4) THEN
   END DO
 END IF
 
-PERTRB = 0._EB 
+PERTRB = 0._EB
 ISING = 0
 
 !                               FOR SINGULAR PROBLEMS ADJUST DATA TO
@@ -7415,15 +7415,15 @@ END IF
 665 CONTINUE
 ISING = 1
 660 CONTINUE
-W(1:L) = 0._EB 
+W(1:L) = 0._EB
 DO K = 1,N
   DO I = 1,L
     W(I) = W(I) + F(I,K)
   END DO
 END DO
 
-S3 = 0._EB 
-S1 = 0._EB 
+S3 = 0._EB
+S1 = 0._EB
 DO I = 1,L
   S3 = S3 + SAVE(IS+I)
   S1 = S1 + W(I)*SAVE(IS+I)
@@ -7458,9 +7458,9 @@ CALL S2CFSS(LDIMF,F,SAVE(ISVPS+1),W)
 
 IF (ISING==1) THEN
   ISING = 2
-  
+
   GO TO 660
-  
+
 END IF
 
 800 CONTINUE
