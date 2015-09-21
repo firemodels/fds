@@ -1,7 +1,7 @@
 MODULE RAD
- 
+
 ! Radiation heat transfer
- 
+
 USE PRECISION_PARAMETERS
 USE GLOBAL_CONSTANTS
 USE MESH_VARIABLES
@@ -11,10 +11,10 @@ IMPLICIT NONE
 PRIVATE
 
 PUBLIC INIT_RADIATION,COMPUTE_RADIATION,BLACKBODY_FRACTION
- 
+
 CONTAINS
- 
- 
+
+
 SUBROUTINE INIT_RADIATION
 
 USE MEMORY_FUNCTIONS, ONLY : CHKMEMERR
@@ -32,12 +32,12 @@ FOUR_SIGMA = 4._EB*SIGMA
 RPI_SIGMA  = RPI*SIGMA
 
 NRA = NUMBER_RADIATION_ANGLES
-NSB = NUMBER_SPECTRAL_BANDS 
- 
+NSB = NUMBER_SPECTRAL_BANDS
+
 ! Set the opening angle of the cylindrical geometry equal to the azimuthal angle
- 
+
 IF (CYLINDRICAL) DPHI0 = PI/REAL(NRP(1))
- 
+
 ALLOCATE(RSA(1:NRA),STAT=IZERO)
 CALL ChkMemErr('RADI','RSA',IZERO)
 ALLOCATE(DLX(1:NRA),STAT=IZERO)
@@ -56,7 +56,7 @@ ALLOCATE(DLM(1:NRA,3),STAT=IZERO)
 CALL ChkMemErr('RADI','DLM',IZERO)
 
 ! Determine mean direction normals and sweeping orders
- 
+
 N = 0
 DO I=1,NRT
    DO J=1,NRP(I)
@@ -93,7 +93,7 @@ DO I=1,NRT
 ENDDO
 
 ! Set (wall normal)*(angle vector) value
- 
+
 DO N = 1,NRA
    DLN( 0,N) = 0._EB !prevent undefined variable errors
    DLN(-1,N) = -DLX(N)
@@ -103,7 +103,7 @@ DO N = 1,NRA
    DLN(-3,N) = -DLZ(N)
    DLN( 3,N) =  DLZ(N)
 ENDDO
- 
+
 ! In axially symmetric case, each angle represents two symmetric angles. So weight the intensities by two.
 
 WEIGH_CYL = 1._EB
@@ -114,7 +114,7 @@ IF (CYLINDRICAL) THEN
 ENDIF
 
 ! Calculate mirroring matrix
- 
+
 N = 0
 DO I=1,NRT
    DO J=1,NRP(I)
@@ -151,7 +151,7 @@ DO I=1,NRT
             IF (IIM==0) IIM = NRT
             IF (JJM==0) JJM = NRP(I)
          ENDIF
- 
+
          NN = 0
          DO II = 1,IIM
             DO JJ = 1,NRP(II)
@@ -163,25 +163,25 @@ DO I=1,NRT
       ENDDO
    ENDDO
 ENDDO
- 
+
 !-----------------------------------------------------
 !
 !            Radiative properties computation
 !
 !-----------------------------------------------------
 
- 
+
 ! General parameters
 
 RTMPMAX = 2470._EB     ! Maximum temperature for property tables
 RTMPMIN = 270._EB      ! Minimum temperature for property tables
-  
+
 ! Setup spectral information
- 
+
 INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
- 
+
    ! Fraction of blackbody emission in a wavelength interval
- 
+
    PLANCK_C2 = 14387.69_EB            ! micron.K
    NLAMBDAT  = 4000
    LTSTEP    = 25.0_EB           ! maximum LAMBDA*T = NLANBDAT*LTSTEP
@@ -201,11 +201,11 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
    ENDDO
 
    BBFRAC =  BBFRAC * 15._EB/PI**4
- 
+
    ! Define band limit wave lengths in micrometers
 
    IF (.NOT.ALLOCATED(WL_LOW).OR. .NOT.ALLOCATED(WL_HIGH)) THEN
- 
+
       ALLOCATE(WL_LOW(1:NSB),STAT=IZERO)
       CALL ChkMemErr('INIT','WL_LOW',IZERO)
       ALLOCATE(WL_HIGH(1:NSB),STAT=IZERO)
@@ -245,7 +245,7 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
                WL_LOW(1:NSB)  = (/ 1.000_EB, 2.632_EB, 3.077_EB, 3.774_EB, 4.878_EB,   8.000_EB /)
                WL_HIGH(1:NSB) = (/ 2.632_EB, 3.077_EB, 3.774_EB, 4.878_EB, 8.000_EB, 200.000_EB /)
          END SELECT
- 
+
       ELSE
 
          ! Use the methane bands if there is no fuel species
@@ -258,7 +258,7 @@ INIT_WIDE_BAND: IF (WIDE_BAND_MODEL) THEN
    ENDIF
 
 ENDIF INIT_WIDE_BAND
- 
+
 !----------------------------------------------------------------------------
 !
 !     Tables for gas phase absorption coefficient
@@ -283,7 +283,7 @@ ENDIF INIT_WIDE_BAND
 !-------------------------------------------------------------------------
 
 MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null')) THEN
-   
+
    ! Check for valid RADCAL species and setup arrays from ZZ to RADCAL_YY
 
    N_RADCAL_ARRAY_SIZE = 0
@@ -400,11 +400,11 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
    BUILD_KAPPA_ARRAY: IF (N_RADCAL_ARRAY_SIZE>0) THEN
 
       KAPPA_ARRAY=.TRUE.
-   
+
       ALLOCATE(Z2RADCAL_SPECIES(N_RADCAL_ARRAY_SIZE,1:N_TRACKED_SPECIES),STAT=IZERO)
       CALL ChkMemErr('RADI','ZZ2RADCAL_SPECIES',IZERO)
       Z2RADCAL_SPECIES = 0._EB
-   
+
       DO NS=1,N_TRACKED_SPECIES
          DO NS2=1,N_SPECIES
             IF (SPECIES(NS2)%RADCAL_INDEX > 0) THEN
@@ -423,9 +423,9 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
       ! Allocate arrays for RadCal
 
       CALL RCALLOC
- 
+
       ! Set the Mean Beam Length to 5 times the smallest cell dimension unless the user desires otherwise
- 
+
       IF (PATH_LENGTH < 0._EB) PATH_LENGTH = MIN( 10._EB , 5._EB*CHARACTERISTIC_CELL_SIZE )
       ALLOCATE(SEGMENT_LENGTH_M(1))
       ALLOCATE(TOTAL_PRESSURE_ATM(1))
@@ -437,7 +437,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
       TWALL = RADTMP
       LAMBDAMIN = -1.1E+4_EB
       LAMBDAMAX = -1.0E+4_EB
- 
+
       ! Using RadCal, create look-up tables for the absorption coefficients for all gas species, mixture fraction or aerosols
 
       ALLOCATE (RADCAL_SPECIES2KAPPA(N_RADCAL_ARRAY_SIZE,0:N_KAPPA_Y,0:N_KAPPA_T,NSB),STAT=IZERO)
@@ -451,7 +451,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
             OMMIN = REAL(NINT(1.E4_EB/WL_HIGH(IBND)),EB)
             OMMAX = REAL(NINT(1.E4_EB/WL_LOW(IBND)),EB)
          ENDIF
-         CALL INIT_RADCAL 
+         CALL INIT_RADCAL
          T_LOOP_Z: DO K = 0,N_KAPPA_T
             TEMP_GAS(1) = RTMPMIN + K*(RTMPMAX-RTMPMIN)/N_KAPPA_T
             ! AMEAN will not be calculated close to RADTMP, where it cannot be solved
@@ -468,7 +468,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                N = 0
                RADCAL_SPECIES_LOOP: DO NS = 1, N_RADCAL_ARRAY_SIZE
                   PARTIAL_PRESSURES_ATM = 0._EB
-                  SELECT CASE(RADCAL_SPECIES_INDEX(NS))                  
+                  SELECT CASE(RADCAL_SPECIES_INDEX(NS))
                      CASE(1) ! CARBON DIOXIDE
                         PARTIAL_PRESSURES_ATM(1,1) = YY/(YY+44._EB*X_N2)
                         PARTIAL_PRESSURES_ATM(14,1) = 1._EB - PARTIAL_PRESSURES_ATM(1,1)
@@ -515,7 +515,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
                      RADCAL_SPECIES2KAPPA(NS,J,K,1) = MIN(AMEAN,AP0)
                   ELSE
                      RADCAL_SPECIES2KAPPA(NS,J,K,IBND) = AP0/BBF
-                  ENDIF   
+                  ENDIF
                END DO RADCAL_SPECIES_LOOP
             ENDDO Y_LOOP_Z
          ENDDO T_LOOP_Z
@@ -528,12 +528,12 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
             RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP,IBND) = 0.5_EB*(RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP-1,IBND)+ &
                                                               RADCAL_SPECIES2KAPPA(:,:,RCT_SKIP+1,IBND))
          ENDIF
-         CALL RCDEALLOC2  ! Deallocate RadCal wavelength dependent arrays         
+         CALL RCDEALLOC2  ! Deallocate RadCal wavelength dependent arrays
       ENDDO BAND_LOOP_Z
       !Adjust values from /cm to /m
       RADCAL_SPECIES2KAPPA =  RADCAL_SPECIES2KAPPA * 100._EB
       CALL RCDEALLOC  ! Deallocate RadCal arrays
-      
+
    ENDIF BUILD_KAPPA_ARRAY
 
    ! Trap any errors
@@ -541,7 +541,7 @@ MAKE_KAPPA_ARRAYS: IF (.NOT.SOLID_PHASE_ONLY .AND. ANY(SPECIES%RADCAL_ID/='null'
    IF (ANY(RADCAL_SPECIES2KAPPA<0._EB)) CALL SHUTDOWN('ERROR: KAPPA < 0 in RADCAL')
 
 ENDIF MAKE_KAPPA_ARRAYS
- 
+
 ! Tables for PARTICLE absorption coefficients
 
 DO IPC=1,N_LAGRANGIAN_CLASSES
@@ -580,20 +580,20 @@ ENDIF
 END SUBROUTINE INIT_RADIATION
 
 
- 
+
 SUBROUTINE COMPUTE_RADIATION(T,NM)
 
 ! Call radiation routine or simply specify the radiative loss
 
 USE MESH_POINTERS
-USE COMP_FUNCTIONS, ONLY : SECOND  
+USE COMP_FUNCTIONS, ONLY : SECOND
 REAL(EB) :: TNOW,T
-INTEGER, INTENT(IN) :: NM 
+INTEGER, INTENT(IN) :: NM
 
 IF (EVACUATION_ONLY(NM)) RETURN
 
 TNOW=SECOND()
- 
+
 CALL POINT_TO_MESH(NM)
 
 IF (RADIATION) THEN
@@ -606,11 +606,11 @@ ENDIF
 
 TUSED(9,NM)=TUSED(9,NM)+SECOND()-TNOW
 
-CONTAINS 
- 
+CONTAINS
+
 SUBROUTINE RADIATION_FVM(T,NM)
 USE MIEV
-USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP 
+USE MATH_FUNCTIONS, ONLY : INTERPOLATE1D, EVALUATE_RAMP
 USE TRAN, ONLY : GET_IJK
 REAL(EB) :: T, RAP, AX, AXU, AXD, AY, AYU, AYD, AZ, VC, RU, RD, RP, &
             ILXU, ILYU, ILZU, QVAL, BBF, BBFA, NCSDROP, RSA_RAT,EFLUX,TYY_FAC, &
@@ -650,12 +650,12 @@ OUTRAD_F => FACE_WORK1
 INRAD_F  => FACE_WORK2
 
 ! Ratio of solid angle, used in scattering
- 
+
 NRA     = NUMBER_RADIATION_ANGLES
 RSA_RAT = 1._EB/(1._EB-1._EB/NRA)
- 
+
 ! Check if it time to update radiation intensity field
- 
+
 IF ( MOD(RAD_CALL_COUNTER,TIME_STEP_INCREMENT)==0 .OR. INITIALIZATION_PHASE .OR. ICYC==1) THEN
    UPDATE_INTENSITY   = .TRUE.
    EXCHANGE_RADIATION = .TRUE.
@@ -681,38 +681,38 @@ IF (UPDATE_INTENSITY) THEN
    ENDDO
    DO IW=1,N_FACE
       FACET(IW)%QRADIN = 0._EB
-   ENDDO   
+   ENDDO
 ENDIF
- 
+
 UPDATE_QRW2 = .FALSE.
 
 ! Loop over spectral bands
 
 BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
-   
+
    KAPPAW = 0._EB
    KFST4  = 0._EB
    KFST4W = 0._EB
    SCAEFF = 0._EB
- 
+
    ! Calculate fraction on ambient black body radiation
- 
+
    IF (NUMBER_SPECTRAL_BANDS==1) THEN
       BBFA = 1._EB
    ELSE
       BBFA = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),TMPA)
-   ENDIF      
+   ENDIF
 
    ! Generate water absorption and scattering coefficients
- 
+
    IF_PARTICLES_INCLUDED: IF (NLP>0 .AND. N_LP_ARRAY_INDICES>0) THEN
 
       IF (NUMBER_SPECTRAL_BANDS==1) THEN
          BBF = 1._EB
       ELSE
          BBF = BLACKBODY_FRACTION(WL_LOW(IBND),WL_HIGH(IBND),RADTMP)
-      ENDIF     
- 
+      ENDIF
+
       PC_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          LPC => LAGRANGIAN_PARTICLE_CLASS(N)
          IF (.NOT.LPC%LIQUID_DROPLET) CYCLE PC_LOOP
@@ -724,12 +724,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                   IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
                   IF (ABS(AVG_DROP_AREA(I,J,K,ARRAY_INDEX))<TWO_EPSILON_EB) CYCLE
                   NCSDROP = AVG_DROP_AREA(I,J,K,ARRAY_INDEX)
-                  CALL INTERPOLATE1D(LPC%R50,LPC%WQABS(:,IBND),AVG_DROP_RAD(I,J,K,ARRAY_INDEX),QVAL) 
+                  CALL INTERPOLATE1D(LPC%R50,LPC%WQABS(:,IBND),AVG_DROP_RAD(I,J,K,ARRAY_INDEX),QVAL)
                   KAPPAW(I,J,K) = KAPPAW(I,J,K) + NCSDROP*QVAL
                   KFST4W(I,J,K) = KFST4W(I,J,K)+ BBF*NCSDROP*QVAL*FOUR_SIGMA*AVG_DROP_TMP(I,J,K,ARRAY_INDEX)**4
                   CALL INTERPOLATE1D(LPC%R50,LPC%WQSCA(:,IBND),AVG_DROP_RAD(I,J,K,ARRAY_INDEX),QVAL)
                   SCAEFF(I,J,K) = SCAEFF(I,J,K) + NCSDROP*QVAL
-               ENDDO 
+               ENDDO
             ENDDO
          ENDDO
       ENDDO PC_LOOP
@@ -739,7 +739,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF IF_PARTICLES_INCLUDED
 
    ! Compute the absorption coefficient, KAPPAW, for a collection of solid particles
-  
+
    IF (NLP>0 .AND. SOLID_PARTICLES) THEN
       DO IP = 1,NLP
          LP => LAGRANGIAN_PARTICLE(IP)
@@ -753,7 +753,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF
 
    ! Compute absorption coefficient KAPPA
- 
+
    KAPPA = KAPPA0
 
    IF (KAPPA_ARRAY) THEN
@@ -802,7 +802,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       RTE_SOURCE_CORRECTION_IF: IF (RTE_SOURCE_CORRECTION) THEN ! default RTE_SOURCE_CORRECTION=.TRUE.
 
          ! Only apply the correction to KFST4 for gray gas model
-         
+
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -834,7 +834,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       ELSE RTE_SOURCE_CORRECTION_IF
 
          ! Use specified radiative fraction
-         
+
          DO K=1,KBAR
             DO J=1,JBAR
                DO I=1,IBAR
@@ -849,13 +849,13 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
    ENDIF WIDE_BAND_MODEL_IF
 
    ! Calculate extinction coefficient
-   
+
    EXTCOE = KAPPA + KAPPAW + SCAEFF*RSA_RAT
 
    ! Update intensity field
- 
+
    INTENSITY_UPDATE: IF (UPDATE_INTENSITY) THEN
- 
+
       IF (WIDE_BAND_MODEL) THEN
          UIIOLD = UIID(:,:,:,IBND)
       ELSE
@@ -864,7 +864,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
       UII = 0._EB
 
       ! Compute boundary condition intensity emissivity*sigma*Tw**4/pi or emissivity*QRADOUT/pi for wall with internal radiation
-      
+
       BBF = 1.0_EB
       DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (WALL(IW)%BOUNDARY_TYPE == OPEN_BOUNDARY) THEN
@@ -888,9 +888,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDIF
          OUTRAD_F(IW) = BBF*RPI*FACET(IW)%QRADOUT
       ENDDO
-      
+
       ! Compute boundary condition term incoming radiation integral
- 
+
       DO IW = 1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
          INRAD_W(IW) = SUM(-DLN(WALL(IW)%ONE_D%IOR,:)*WALL(IW)%ONE_D%ILW(:,IBND), 1, DLN(WALL(IW)%ONE_D%IOR,:)<0._EB)
@@ -904,16 +904,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             IF (DLF<0._EB) INRAD_F(IW) = INRAD_F(IW) - DLF*FACET(IW)%ILW(N,IBND)
          ENDDO
       ENDDO
- 
+
       ! If updating intensities first time, sweep ALL angles
- 
+
       N_UPDATES = 1
       IF (INITIALIZATION_PHASE .OR. ICYC==1) N_UPDATES = ANGLE_INCREMENT
 
       UPDATE_LOOP: DO I_UIID = 1,N_UPDATES
- 
+
          ! Update counters inside the radiation routine
- 
+
          ANGLE_INC_COUNTER = MOD(ANGLE_INC_COUNTER,ANGLE_INCREMENT) + 1
 
          ! If this is the last set of angles to update, indicate that the radiation routine has finished a full update
@@ -931,10 +931,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
             IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY) WALL(IW)%ONE_D%ILW(ANGLE_INC_COUNTER,IBND) = 0._EB
          ENDDO
- 
-         ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle 
+
+         ! Set the bounds and increment for the angleloop. Step downdard because in cylindrical case the Nth angle
          ! boundary condition comes from (N+1)th angle.
-          
+
          NSTART    = NRA - ANGLE_INC_COUNTER + 1
          NEND      = 1
          NSTEP     = -ANGLE_INCREMENT
@@ -942,9 +942,9 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          IL(:,:,:) = BBFA*RPI_SIGMA*TMPA4
 
          ANGLE_LOOP: DO N = NSTART,NEND,NSTEP  ! Sweep through control angles
- 
+
             ! Boundary conditions: Intensities leaving the boundaries.
-            
+
             !$OMP PARALLEL DO PRIVATE(IOR, II, JJ, KK, LL, NOM) SCHEDULE(GUIDED)
             WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
                IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
@@ -955,12 +955,12 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KK  = WALL(IW)%ONE_D%KK
                IF (.NOT.TWO_D .OR. ABS(IOR)/=2) THEN
                   SELECT CASE (WALL(IW)%BOUNDARY_TYPE)
-                     CASE (OPEN_BOUNDARY) 
+                     CASE (OPEN_BOUNDARY)
                         IL(II,JJ,KK) = BBFA*RPI_SIGMA*TMPA4
-                     CASE (MIRROR_BOUNDARY) 
+                     CASE (MIRROR_BOUNDARY)
                         WALL(IW)%ONE_D%ILW(N,IBND) = WALL(IW)%ONE_D%ILW(DLM(N,ABS(IOR)),IBND)
                         IL(II,JJ,KK) = WALL(IW)%ONE_D%ILW(N,IBND)
-                     CASE (INTERPOLATED_BOUNDARY) 
+                     CASE (INTERPOLATED_BOUNDARY)
                         ! IL_R holds the intensities from mesh NOM in the ghost cells of mesh NM.
                         ! IL(II,JJ,KK) is the average of the intensities from the other mesh.
                         NOM = EXTERNAL_WALL(IW)%NOM
@@ -980,7 +980,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
             !$OMP END PARALLEL DO
 
             ! Determine sweep direction in physical space
- 
+
             ISTART = 1
             JSTART = 1
             KSTART = 1
@@ -1017,7 +1017,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                KMIN = KEND
                KMAX = KSTART
             ENDIF
- 
+
             GEOMETRY: IF (CYLINDRICAL) THEN  ! Sweep in axisymmetric geometry
                J = 1
                CKLOOP: DO K=KSTART,KEND,KSTEP
@@ -1077,11 +1077,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                         IW = WALL_INDEX(IC,-KSTEP*3)
                         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY) ILZU = WALL(IW)%ONE_D%ILW(N,IBND)
                      ENDIF
-                     AIU_SUM = AX*ILXU + AZ*ILZU 
+                     AIU_SUM = AX*ILXU + AZ*ILZU
                      A_SUM = AX + AZ
                      RAP = 1._EB/(A_SUM + EXTCOE(I,J,K)*VC*RSA(N))
                      IL(I,J,K) = MAX(0._EB, RAP * (AIU_SUM + VC*RSA(N)*RFPI* &
-                                    (KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) ) 
+                                    (KFST4(I,J,K)+KFST4W(I,J,K) +  RSA_RAT*SCAEFF(I,J,K)*UIIOLD(I,J,K) ) ) )
                      IF (SOLID_PARTICLES) IL_UP(I,J,K) = MAX(0._EB,AIU_SUM/A_SUM)
                   ENDDO I2LOOP
                ENDDO K2LOOP
@@ -1147,11 +1147,11 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                  !$OMP END PARALLEL DO
 
                ENDDO ! IPROP
- 
+
             ENDIF GEOMETRY
 
             ! Copy the Y-downwind intensities to Y-upwind in cylindrical case
- 
+
             IF (CYLINDRICAL) THEN
                J=1
                CKLOOP2: DO K=1,KBAR
@@ -1170,14 +1170,14 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                ENDDO CILOOP2
                ENDDO CKLOOP2
             ENDIF
- 
+
             ! Boundary values: Incoming radiation
-            
+
             !$OMP PARALLEL PRIVATE(IOR, IIG, JJG, KKG)
             !$OMP DO SCHEDULE(GUIDED)
             WALL_LOOP2: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY)   CYCLE WALL_LOOP2     
-               IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY)   CYCLE WALL_LOOP2  
+               IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY)   CYCLE WALL_LOOP2
+               IF (WALL(IW)%BOUNDARY_TYPE==OPEN_BOUNDARY)   CYCLE WALL_LOOP2
                IOR = WALL(IW)%ONE_D%IOR
                IF (TWO_D .AND. .NOT.CYLINDRICAL  .AND. ABS(IOR)==2) CYCLE WALL_LOOP2  ! 2-D non cylindrical
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP2     ! outgoing
@@ -1189,10 +1189,10 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                INRAD_W(IW) = INRAD_W(IW) - DLN(IOR,N) * WALL(IW)%ONE_D%ILW(N,IBND) ! update incoming radiation,step 2
             ENDDO WALL_LOOP2
             !$OMP END DO
- 
+
             !$OMP DO SCHEDULE(GUIDED)
             WALL_LOOP3: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-               IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3 
+               IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY)   CYCLE WALL_LOOP3
                IOR = WALL(IW)%ONE_D%IOR
                IF (DLN(IOR,N)>=0._EB) CYCLE WALL_LOOP3     ! outgoing
                IIG = WALL(IW)%ONE_D%IIG
@@ -1205,16 +1205,16 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
 
 
             ! Calculate integrated intensity UIID
- 
+
             IF (WIDE_BAND_MODEL) THEN
                UIID(:,:,:,IBND) = UIID(:,:,:,IBND) + WEIGH_CYL*RSA(N)*IL
             ELSE
                UIID(:,:,:,ANGLE_INC_COUNTER) = UIID(:,:,:,ANGLE_INC_COUNTER) + WEIGH_CYL*RSA(N)*IL
             ENDIF
- 
+
             ! Interpolate boundary intensities onto other meshes.
             ! IL_S is an array holding the intensities IL of cells just outside of mesh NOM.
- 
+
             INTERPOLATION_LOOP: DO NOM=1,NMESHES
                IF (NM==NOM) CYCLE INTERPOLATION_LOOP
                IF (EVACUATION_ONLY(NOM)) CYCLE INTERPOLATION_LOOP
@@ -1231,7 +1231,7 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
                PARTICLE_RADIATION_LOOP: DO IP=1,NLP
                   LP => LAGRANGIAN_PARTICLE(IP)
                   LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-                  SELECT CASE(LPC%N_ORIENTATION) 
+                  SELECT CASE(LPC%N_ORIENTATION)
                      CASE(0)
                         CYCLE PARTICLE_RADIATION_LOOP
                      CASE(1)
@@ -1249,18 +1249,18 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ENDDO ANGLE_LOOP
 
       ENDDO UPDATE_LOOP
- 
+
       ! Compute incoming flux on walls and particles
 
       DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-         IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE 
-         SF  => SURFACE(WALL(IW)%SURF_INDEX)      
+         IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE
+         SF  => SURFACE(WALL(IW)%SURF_INDEX)
          EFLUX = EVALUATE_RAMP(T,SF%TAU(TIME_EFLUX),SF%RAMP_INDEX(TIME_EFLUX))*SF%EXTERNAL_FLUX
          WALL(IW)%ONE_D%QRADIN  = WALL(IW)%ONE_D%QRADIN + WALL(IW)%ONE_D%EMISSIVITY*(INRAD_W(IW)+BBFA*EFLUX)
-      ENDDO 
-      
+      ENDDO
+
    ENDIF INTENSITY_UPDATE
- 
+
    ! Save source term for the energy equation (QR = -DIV Q)
 
    IF (WIDE_BAND_MODEL) THEN
@@ -1279,9 +1279,9 @@ IF (UPDATE_INTENSITY) THEN
    UII = SUM(UIID, DIM = 4)
 
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE 
+      IF (WALL(IW)%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE
       WALL(IW)%ONE_D%QRADIN  = SUM(WALL(IW)%ONE_D%ILW(1:NUMBER_RADIATION_ANGLES,1:NUMBER_SPECTRAL_BANDS))
-   ENDDO 
+   ENDDO
 
 ENDIF
 
@@ -1315,12 +1315,12 @@ END SUBROUTINE RADIATION_FVM
 
 
 END SUBROUTINE COMPUTE_RADIATION
- 
+
 
 REAL(EB) FUNCTION BLACKBODY_FRACTION(L1,L2,TEMP)
 
 ! Calculates the fraction of black body radiation between wavelengths L1 and L2 (micron) in Temperature TEMP
- 
+
 USE MATH_FUNCTIONS, ONLY: INTERPOLATE1D_UNIFORM
 REAL(EB),INTENT(IN) :: L1,L2,TEMP
 REAL(EB) :: LT1,LT2,BBFLOW,BBFHIGH
@@ -1330,8 +1330,8 @@ CALL INTERPOLATE1D_UNIFORM(LBOUND(BBFRAC,1),BBFRAC,LT1,BBFLOW)
 
 LT2    =   L2 * TEMP/LTSTEP
 CALL INTERPOLATE1D_UNIFORM(LBOUND(BBFRAC,1),BBFRAC,LT2,BBFHIGH)
-      
-BLACKBODY_FRACTION = BBFHIGH - BBFLOW      
+
+BLACKBODY_FRACTION = BBFHIGH - BBFLOW
 
 END FUNCTION BLACKBODY_FRACTION
 
@@ -1359,14 +1359,13 @@ DO N = 1, N_RADCAL_ARRAY_SIZE
       INT_FAC = MAX(0._EB,SCALED_Y_RADCAL_SPECIES*MWA)**0.25_EB
    ENDIF
    LBND = INT(INT_FAC)
-   INT_FAC = INT_FAC - LBND   
+   INT_FAC = INT_FAC - LBND
    LBND = MIN(LBND,N_KAPPA_Y)
    UBND = MIN(LBND+1,N_KAPPA_Y)
    KAPPA_TEMP = RADCAL_SPECIES2KAPPA(N,LBND,TYY,IBND)
    GET_KAPPA = GET_KAPPA + KAPPA_TEMP + INT_FAC*(RADCAL_SPECIES2KAPPA(N,UBND,TYY,IBND)-KAPPA_TEMP)
 ENDDO
 
-END FUNCTION GET_KAPPA 
+END FUNCTION GET_KAPPA
 
 END MODULE RAD
-

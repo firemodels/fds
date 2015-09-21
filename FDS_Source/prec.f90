@@ -1,9 +1,9 @@
 MODULE PRECISION_PARAMETERS
- 
+
 ! Set important parameters having to do with variable precision and array allocations
- 
+
 IMPLICIT NONE
- 
+
 ! Precision of "Four Byte" and "Eight Byte" reals
 
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)

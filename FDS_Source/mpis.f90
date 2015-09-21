@@ -164,7 +164,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        parameter (MPI_ERRORS_ARE_FATAL=3)
        parameter (MPI_ERRORS_RETURN=4)
 
-       integer MPI_INTEGER, MPI_INTEGER1 
+       integer MPI_INTEGER, MPI_INTEGER1
        integer MPI_INTEGER2, MPI_INTEGER4, MPI_INTEGER8
        integer MPI_REAL, MPI_REAL4, MPI_REAL8
        integer MPI_REAL16, MPI_DOUBLE_PRECISION
@@ -180,10 +180,10 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        parameter (MPI_CHARACTER=9)
        parameter (MPI_LOGICAL=10)
        parameter (MPI_INTEGER=11)
-       parameter (MPI_INTEGER1=12) 
+       parameter (MPI_INTEGER1=12)
        parameter (MPI_INTEGER2=13)
-       parameter (MPI_INTEGER4=14) 
-       parameter (MPI_INTEGER8=15)  
+       parameter (MPI_INTEGER4=14)
+       parameter (MPI_INTEGER8=15)
        parameter (MPI_REAL=16)
        parameter (MPI_REAL4=17)
        parameter (MPI_REAL8=18)
@@ -217,7 +217,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
   parameter ( mpi_failure = 1 )
   integer mpi_product
   parameter ( mpi_product = 4 )
-  
+
   integer dummy
   logical dummyl
   character dummyc
@@ -261,21 +261,21 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
     module procedure mpi_recv_init_int0    , mpi_recv_init_int1,    &
                      mpi_recv_init_real0   , mpi_recv_init_real1,   &
                      mpi_recv_init_logical0, mpi_recv_init_logical1,&
-                     mpi_recv_init_char0   , mpi_recv_init_char1   
+                     mpi_recv_init_char0   , mpi_recv_init_char1
   end interface mpi_recv_init
 
   interface mpi_send_init
     module procedure mpi_send_init_int0    , mpi_send_init_int1,    &
                      mpi_send_init_real0   , mpi_send_init_real1,   &
                      mpi_send_init_logical0, mpi_send_init_logical1,&
-                     mpi_send_init_char0   , mpi_send_init_char1   
+                     mpi_send_init_char0   , mpi_send_init_char1
   end interface mpi_send_init
 
   interface mpi_recv
     module procedure mpi_recv_int0    , mpi_recv_int1,    &
                      mpi_recv_real0   , mpi_recv_real1,   &
                      mpi_recv_logical0, mpi_recv_logical1,&
-                     mpi_recv_char0   , mpi_recv_char1   
+                     mpi_recv_char0   , mpi_recv_char1
   end interface mpi_recv
 
   interface mpi_send
@@ -296,7 +296,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
     module procedure mpi_isend_int0    , mpi_isend_int1,     &
                      mpi_isend_real0   , mpi_isend_real1,    &
                      mpi_isend_logical0, mpi_isend_logical1, &
-                     mpi_isend_char0   , mpi_isend_char1   
+                     mpi_isend_char0   , mpi_isend_char1
   end interface mpi_isend
 
   interface mpi_irecv
@@ -464,7 +464,7 @@ subroutine mpi_gatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndispls,
   integer:: recvnode
   integer:: sendtype
   dummyl = data1
-  dummyl = data2(1) 
+  dummyl = data2(1)
   dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
 end subroutine
 subroutine mpi_gatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
@@ -480,7 +480,7 @@ subroutine mpi_gatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndispls,
   integer:: recvnode
   integer:: sendtype
   dummyl = data1
-  dummyl = data2(1,1) 
+  dummyl = data2(1,1)
   dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
 end subroutine
 subroutine mpi_gatherv_logical3 ( data1, nsend, sendtype, data2, nrecv, ndispls, recvtype, recvnode, comm, ierror )
@@ -496,7 +496,7 @@ subroutine mpi_gatherv_logical3 ( data1, nsend, sendtype, data2, nrecv, ndispls,
   integer:: recvnode
   integer:: sendtype
   dummyl = data1
-  dummyl = data2(1,1,1)  
+  dummyl = data2(1,1,1)
   dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + recvnode + comm + ierror
 end subroutine
 
@@ -572,7 +572,7 @@ subroutine mpi_allgather_logical1 ( data1, nsend, sendtype,data2, nrecv, recvtyp
   integer:: recvtype
   integer:: sendtype
   dummyl = data1
-  dummyl = data2(1) 
+  dummyl = data2(1)
   dummy = nsend + sendtype + nrecv + recvtype + comm + ierror
 end subroutine
 subroutine mpi_allgather_logical2 ( data1, nsend, sendtype,data2, nrecv, recvtype, comm, ierror )
@@ -586,7 +586,7 @@ subroutine mpi_allgather_logical2 ( data1, nsend, sendtype,data2, nrecv, recvtyp
   integer:: recvtype
   integer:: sendtype
   dummyl = data1
-  dummyl = data2(1,1) 
+  dummyl = data2(1,1)
   dummy = nsend + sendtype + nrecv + recvtype + comm + ierror
 end subroutine
 
@@ -678,7 +678,7 @@ subroutine mpi_allgatherv_logical1 ( data1, nsend, sendtype, data2, nrecv, ndisp
   integer:: recvtype
   integer:: sendtype
   dummy = data1
-  dummyl = data2(1) 
+  dummyl = data2(1)
   dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + comm + ierror
 end subroutine
 subroutine mpi_allgatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndispls, &
@@ -694,7 +694,7 @@ subroutine mpi_allgatherv_logical2 ( data1, nsend, sendtype, data2, nrecv, ndisp
   integer:: recvtype
   integer:: sendtype
   dummy = data1
-  dummyl = data2(1,1) 
+  dummyl = data2(1,1)
   dummy = nsend + sendtype + nrecv(1) + ndispls(1) + recvtype + comm + ierror
 end subroutine
 
@@ -758,7 +758,7 @@ subroutine mpi_reduce_logical0( data1, data2, n, datatype, operation, receiver, 
   integer:: operation
   integer:: receiver
   dummyl = data1
-  dummyl = data2 
+  dummyl = data2
   dummy = n + datatype + operation + receiver + comm + ierror
 end subroutine
 subroutine mpi_reduce_logical1( data1, data2, n, datatype, operation, receiver, comm, ierror )
@@ -772,7 +772,7 @@ subroutine mpi_reduce_logical1( data1, data2, n, datatype, operation, receiver, 
   integer:: operation
   integer:: receiver
   dummyl = data1
-  dummyl = data2(1) 
+  dummyl = data2(1)
   dummy = n + datatype + operation + receiver + comm + ierror
 end subroutine
 
@@ -1758,7 +1758,7 @@ subroutine mpi_wait ( irequest, istatus, ierror )
   integer ierror
   integer irequest
   integer istatus
-  dummy = irequest + istatus + ierror 
+  dummy = irequest + istatus + ierror
  end subroutine
 
 
@@ -1768,7 +1768,7 @@ function mpi_wtime ( )
   integer count_rate
   real ( kind = 8 ) mpi_wtime
   call system_clock ( count, count_rate, count_max )
-  mpi_wtime = real ( count, kind = 8 ) / real ( count_rate, kind = 8 )  
+  mpi_wtime = real ( count, kind = 8 ) / real ( count_rate, kind = 8 )
 end function
 
 
