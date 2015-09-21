@@ -1626,10 +1626,10 @@ OTHER_MESH_LOOP: DO NOM=1,NMESHES
    KMAX=M2%KBP1
 
    ! DEFINITION NIC_R: (Number of Interpolated Cells -- Receiving) Number of cells in mesh NOM that abut mesh NM.
-   ! DEFINITION IIO_R: Array of length NIC_R of I indices of the abutting (outside) cells 
-   ! DEFINITION JJO_R: Array of length NIC_R of J indices of the abutting (outside) cells 
-   ! DEFINITION KKO_R: Array of length NIC_R of K indices of the abutting (outside) cells 
-   ! DEFINITION IOR_R: Array of length NIC_R of orientation of the external boundary cell 
+   ! DEFINITION IIO_R: Array of length NIC_R of I indices of the abutting (outside) cells
+   ! DEFINITION JJO_R: Array of length NIC_R of J indices of the abutting (outside) cells
+   ! DEFINITION KKO_R: Array of length NIC_R of K indices of the abutting (outside) cells
+   ! DEFINITION IOR_R: Array of length NIC_R of orientation of the external boundary cell
    ! DEFINITION NIC_MIN: For external wall cell IW of mesh NM, the indices of abutting cells start with NIC_MIN and end with NIC_MAX
    ! DEFINITION NIC_MAX: For external wall cell IW of mesh NM, the indices of abutting cells start with NIC_MIN and end with NIC_MAX
 

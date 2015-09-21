@@ -369,7 +369,7 @@ INTEGER, PARAMETER :: EDG3 = 3
 ! Maximum number of wet surface triangles related to element:
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 16  ! Up to 16 wstriangles related to a wet surface vertex.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
-INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle 
+INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
                                                  ! aligned with X1PLN plane.)
 
 ! HVAC Parameters
