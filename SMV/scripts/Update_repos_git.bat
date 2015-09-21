@@ -22,9 +22,11 @@ echo.
 echo Updating the Windows repository, %svn_root%, to the latest revision
 %svn_drive%
 cd %svn_root%
+echo Updating the repo:%svn_root%
 git remote update
 git checkout development
-git pull
+git merge origin/development
+git merge firemodels/development
 
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
