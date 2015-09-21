@@ -97,7 +97,7 @@ SPECIES_LOOP: DO N=0,N_TRACKED_SPECIES
         JJ_0 = JJ_LO + (J-J_LO)*NRY
         DO I = I_LO-1,I_HI !! note: this includes fine mesh boundary
            II_0 = II_LO + (I-I_LO+1)*NRX !!
-                 
+
            FX1(I,J,K,N) = 0._EB
            DO KK = KK_0+1,KK_0+NRZ
               DO JJ = JJ_0+1,JJ_0+NRY
@@ -105,20 +105,20 @@ SPECIES_LOOP: DO N=0,N_TRACKED_SPECIES
               ENDDO
            ENDDO
            FX1(I,J,K,N) = FX1(I,J,K,N)/N2X
-        
+
         ENDDO
      ENDDO
   ENDDO
-  
+
   ! y-direction fluxes
 
   DO K = K_LO,K_HI
      KK_0 = KK_LO + (K-K_LO)*NRZ
      DO J = J_LO-1,J_HI !!
         JJ_0 = JJ_LO + (J-J_LO+1)*NRY !!
-        DO I = I_LO,I_HI 
+        DO I = I_LO,I_HI
            II_0 = II_LO + (I-I_LO)*NRX
-                 
+
            FY1(I,J,K,N) = 0._EB
            DO KK = KK_0+1,KK_0+NRZ
               DO II = II_0+1,II_0+NRX
@@ -126,20 +126,20 @@ SPECIES_LOOP: DO N=0,N_TRACKED_SPECIES
               ENDDO
            ENDDO
            FY1(I,J,K,N) = FY1(I,J,K,N)/N2Y
-        
+
         ENDDO
      ENDDO
   ENDDO
-  
+
   ! z-direction fluxes
 
   DO K = K_LO-1,K_HI !!
      KK_0 = KK_LO + (K-K_LO+1)*NRZ !!
      DO J = J_LO,J_HI
         JJ_0 = JJ_LO + (J-J_LO)*NRY
-        DO I = I_LO,I_HI 
+        DO I = I_LO,I_HI
            II_0 = II_LO + (I-I_LO)*NRX
-                 
+
            FZ1(I,J,K,N) = 0._EB
            DO JJ = JJ_0+1,JJ_0+NRY
               DO II = II_0+1,II_0+NRX
@@ -147,11 +147,11 @@ SPECIES_LOOP: DO N=0,N_TRACKED_SPECIES
               ENDDO
            ENDDO
            FZ1(I,J,K,N) = FZ1(I,J,K,N)/N2Z
-        
+
         ENDDO
      ENDDO
   ENDDO
-  
+
 ENDDO SPECIES_LOOP
 
 END SUBROUTINE SCALARF_EMB
@@ -219,7 +219,7 @@ DO K = K_LO,K_HI
      JJ_0 = JJ_LO + (J-J_LO)*NRY
      DO I = I_LO,I_HI-1 ! excludes boundary values
         II_0 = II_LO + (I-I_LO+1)*NRX
-                 
+
         UU1(I,J,K) = 0._EB
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
@@ -227,20 +227,20 @@ DO K = K_LO,K_HI
            ENDDO
         ENDDO
         UU1(I,J,K) = UU1(I,J,K)/N2X
-        
+
      ENDDO
   ENDDO
 ENDDO
-  
+
 ! V-VELOCITY
 
 DO K = K_LO,K_HI
   KK_0 = KK_LO + (K-K_LO)*NRZ
   DO J = J_LO,J_HI-1 ! excludes boundary values
      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
-     DO I = I_LO,I_HI 
+     DO I = I_LO,I_HI
         II_0 = II_LO + (I-I_LO)*NRX
-                 
+
         VV1(I,J,K) = 0._EB
         DO KK = KK_0+1,KK_0+NRZ
            DO II = II_0+1,II_0+NRX
@@ -248,20 +248,20 @@ DO K = K_LO,K_HI
            ENDDO
         ENDDO
         VV1(I,J,K) = VV1(I,J,K)/N2Y
-        
+
      ENDDO
   ENDDO
 ENDDO
-  
+
 ! W-VELOCITY
 
 DO K = K_LO,K_HI-1 ! excludes boundary values
   KK_0 = KK_LO + (K-K_LO+1)*NRZ
   DO J = J_LO,J_HI
      JJ_0 = JJ_LO + (J-J_LO)*NRY
-     DO I = I_LO,I_HI 
+     DO I = I_LO,I_HI
         II_0 = II_LO + (I-I_LO)*NRX
-                 
+
         WW1(I,J,K) = 0._EB
         DO JJ = JJ_0+1,JJ_0+NRY
            DO II = II_0+1,II_0+NRX
@@ -269,7 +269,7 @@ DO K = K_LO,K_HI-1 ! excludes boundary values
            ENDDO
         ENDDO
         WW1(I,J,K) = WW1(I,J,K)/N2Z
-        
+
      ENDDO
   ENDDO
 ENDDO
@@ -331,19 +331,19 @@ DO K = K_LO,K_HI
      JJ_0 = JJ_LO + (J-J_LO)*NRY
      DO I = I_LO,I_HI
         II_0 = II_LO + (I-I_LO)*NRX
-           
+
         RHO1(I,J,K) = 0._EB
-        
+
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
               DO II = II_0+1,II_0+NRX
-                
+
                  RHO1(I,J,K) = RHO1(I,J,K) + RHO2(II,JJ,KK)*DVRAT
-                    
+
               ENDDO
            ENDDO
         ENDDO
-     
+
      ENDDO
   ENDDO
 ENDDO
@@ -351,28 +351,28 @@ ENDDO
 IF (N_TRACKED_SPECIES>0) THEN
 
   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
-  
+
      DO K = K_LO,K_HI
         KK_0 = KK_LO + (K-K_LO)*NRZ
         DO J = J_LO,J_HI
            JJ_0 = JJ_LO + (J-J_LO)*NRY
            DO I = I_LO,I_HI
               II_0 = II_LO + (I-I_LO)*NRX
-           
+
               ZZ1(I,J,K,N) = 0._EB
-        
+
               DO KK = KK_0+1,KK_0+NRZ
                  DO JJ = JJ_0+1,JJ_0+NRY
                     DO II = II_0+1,II_0+NRX
-                
+
                        ZZ1(I,J,K,N) = ZZ1(I,J,K,N) + RHO2(II,JJ,KK)*ZZ2(II,JJ,KK,N)*DV2
-                    
+
                     ENDDO
                  ENDDO
               ENDDO
-              
+
               ZZ1(I,J,K,N) = ZZ1(I,J,K,N)/(RHO1(I,J,K)*DV1)
-     
+
            ENDDO
         ENDDO
      ENDDO
@@ -426,26 +426,26 @@ ELSEIF (CORRECTOR) THEN
 ENDIF
 
 ! Restrict divergence
-  
+
 DO K = K_LO,K_HI
   KK_0 = KK_LO + (K-K_LO)*NRZ
   DO J = J_LO,J_HI
      JJ_0 = JJ_LO + (J-J_LO)*NRY
      DO I = I_LO,I_HI
         II_0 = II_LO + (I-I_LO)*NRX
-           
+
         DP1(I,J,K) = 0._EB
-        
+
         DO KK = KK_0+1,KK_0+NRZ
            DO JJ = JJ_0+1,JJ_0+NRY
               DO II = II_0+1,II_0+NRX
-                
+
                  DP1(I,J,K) = DP1(I,J,K) + DP2(II,JJ,KK)*DVRAT
-                    
+
               ENDDO
            ENDDO
         ENDDO
-     
+
      ENDDO
   ENDDO
 ENDDO
@@ -646,7 +646,7 @@ IRANK=0
 
 DO ML=MLMAX,MLMIN,-1
   DO NM=1,NMESHES
-  
+
      IF (MESHES(NM)%MESH_LEVEL==ML) THEN
         IRANK=IRANK+1
         MESH_LIST_EMB(IRANK)=NM
@@ -755,10 +755,10 @@ DO K = K_LO,K_HI
            ENDDO
         ENDDO
      ENDIF
-        
+
   ENDDO
 ENDDO
-  
+
 ! V-VELOCITY
 
 DO K = K_LO,K_HI
@@ -778,7 +778,7 @@ DO K = K_LO,K_HI
            ENDDO
         ENDDO
      ENDIF
-        
+
      ! south face
      J = J_LO-1
      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
@@ -791,10 +791,10 @@ DO K = K_LO,K_HI
            ENDDO
         ENDDO
      ENDIF
-        
+
   ENDDO
 ENDDO
-  
+
 ! W-VELOCITY
 
 DO J = J_LO,J_HI
@@ -814,7 +814,7 @@ DO J = J_LO,J_HI
            ENDDO
         ENDDO
      ENDIF
-        
+
      ! bottom face
      K = K_LO-1
      KK_0 = KK_LO + (K-K_LO+1)*NRZ
@@ -827,7 +827,7 @@ DO J = J_LO,J_HI
            ENDDO
         ENDDO
      ENDIF
-        
+
   ENDDO
 ENDDO
 
@@ -886,7 +886,7 @@ VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
       Z2 = M2%ZC(KK)
 
       ! see from which quadrant to grab data
-   
+
       IF (Y2<M1%YC(J)) THEN
          J_LO = J-1
       ELSE
@@ -913,9 +913,9 @@ VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
          Q(0,1) = UU1(I,1,K_LO+1)
          Q(1,1) = UU1(I,1,K_LO+1)
       ENDIF
-   
+
       PROLONG_VEL = INTERP2(Y2,Z2,Q,Y1,Z1)
-   
+
    CASE(2) VEL_INDEX_SELECT
 
       IF (TWO_D) THEN
@@ -925,7 +925,7 @@ VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
 
       X2 = M2%XC(II)
       Z2 = M2%ZC(KK)
-   
+
       IF (X2<M1%XC(I)) THEN
          I_LO = I-1
       ELSE
@@ -944,14 +944,14 @@ VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
       Q(1,0) = VV1(I_LO+1,J,K_LO)
       Q(0,1) = VV1(I_LO,J,K_LO+1)
       Q(1,1) = VV1(I_LO+1,J,K_LO+1)
-   
+
       PROLONG_VEL = INTERP2(X2,Z2,Q,X1,Z1)
-   
+
    CASE(3) VEL_INDEX_SELECT
 
       X2 = M2%XC(II)
       Y2 = M2%YC(JJ)
-   
+
       IF (X2<M1%XC(I)) THEN
          I_LO = I-1
       ELSE
@@ -978,7 +978,7 @@ VEL_INDEX_SELECT: SELECT CASE (VEL_INDEX)
          Q(0,1) = WW1(I_LO,1,K)
          Q(1,1) = WW1(I_LO+1,1,K)
       ENDIF
-   
+
       PROLONG_VEL = INTERP2(X2,Y2,Q,X1,Y1)
 
 END SELECT VEL_INDEX_SELECT
@@ -1102,7 +1102,7 @@ END FUNCTION INTERP2
 !          ENDIF
 !          ICD_SGN = I_SGN*ICD
 !          M2%OME_E(ICD_SGN,IE) =    DUIDXJ(1) -    DUIDXJ(2)
-!          M2%TAU_E(ICD_SGN,IE) = MU_DUIDXJ(1) + MU_DUIDXJ(2)    
+!          M2%TAU_E(ICD_SGN,IE) = MU_DUIDXJ(1) + MU_DUIDXJ(2)
 !       ENDDO ORIENTATION_LOOP
 !    ENDDO SIGN_LOOP
 
@@ -1204,7 +1204,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDIF
-        
+
       ENDDO
    ENDDO
 
@@ -1240,7 +1240,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
                ENDDO
             ENDDO
          ENDIF
-        
+
       ENDDO
    ENDDO
 
@@ -1286,7 +1286,7 @@ SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
-      WC%RHO_F = RHOP2(II,JJ,KK) 
+      WC%RHO_F = RHOP2(II,JJ,KK)
       WC%ZZ_F(N) = ZZP2(II,JJ,KK,N)
    ENDDO FINE_MESH_WALL_LOOP
 
