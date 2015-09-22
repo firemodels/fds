@@ -18,11 +18,7 @@ cp $FBVG/SCRIPT_FIGURES/Scatterplots/*.tex $BASEDIR/FDS_Verification_Guide/SCRIP
 echo Verification Figures Copied
 
 # Copy Validation Guide Figures
-<<<<<<< HEAD
 cp -R $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/ &> /dev/null
-echo Validation Guide Figures Copied
-=======
-#cp -R $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/ &> /dev/null
 rsync -r --exclude=*.git $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/
 echo Validation Guide Figures Copied
->>>>>>> firemodels/development
+
