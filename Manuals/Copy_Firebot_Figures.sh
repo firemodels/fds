@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVgitclean
+export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVgitclean/
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
 export FBUG=$FIREBOTMANS/FDS_User_Guide/
 export FBVG=$FIREBOTMANS/FDS_Verification_Guide/
