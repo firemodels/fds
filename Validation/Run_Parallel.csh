@@ -21,5 +21,6 @@ cd Sandia_Plumes;  ./Run_All.sh -y; cd ..
 cd Smyth_Slot_Burner;  ./Run_All.sh -y; cd ..
 cd Turbulent_Jet;  ./Run_All.sh -y; cd ..
 cd UL_NFPRF;  ./Run_All.sh -y; cd ..
+cd UMD_Line_Burner;  ./Run_All.sh -y; cd ..
 cd USN_Hangars;  ./Run_All.sh -y; cd ..
 cd VTT;  ./Run_All.sh -y; cd ..

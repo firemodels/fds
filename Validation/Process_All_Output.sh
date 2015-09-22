@@ -57,6 +57,7 @@ $VDIR/UL_NFPRF/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NIST_Vents/FDS_Output_Files/Process_Output.csh
 $VDIR/Ulster_SBI/FDS_Output_Files/Process_Output.csh
 $VDIR/UMD_Polymers/FDS_Output_Files/Process_Output.csh
+$VDIR/UMD_Line_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/USCG_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/USN_Hangars/FDS_Output_Files/Process_Output.csh
 $VDIR/Vettori_Flat_Ceiling/FDS_Output_Files/Process_Output.csh
