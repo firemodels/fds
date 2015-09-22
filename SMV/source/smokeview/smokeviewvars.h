@@ -37,7 +37,7 @@ SVEXTERN int SVDECL(show_tetratest_labels, 1);
 SVEXTERN float SVDECL(tetra_line_thickness, 1.0);
 SVEXTERN float SVDECL(tetra_point_size, 1.0);
 SVEXTERN int SVDECL(use_data_extremes, 1);
-SVEXTERN int SVDECL(extreme_data_offset,1), SVDECL(colorbar_offset,0);
+SVEXTERN int SVDECL(extreme_data_offset,1), SVDECL(colorbar_offset,0), SVDECL(colorbarflip,0);
 
 #ifdef INMAIN
 SVEXTERN float gvec[3]={0.0,0.0,-9.8};

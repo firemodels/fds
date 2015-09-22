@@ -2054,6 +2054,9 @@ void keyboard(unsigned char key, int flag){
       edittour=0;
       update_edit_tour();
       break;
+    case ';':
+      ColorBarMenu(COLORBAR_FLIP);
+      break;
   }
 
   skip2=key2-'1'+1;

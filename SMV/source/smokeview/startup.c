@@ -1614,7 +1614,7 @@ void initvars(void){
   rgb_white=NRGB, rgb_yellow=NRGB+1, rgb_blue=NRGB+2, rgb_red=NRGB+3;
   rgb_green=NRGB+4, rgb_magenta=NRGB+5, rgb_cyan=NRGB+6, rgb_black=NRGB+7;
   numColorbars=0;
-  setbw=0,colorbarflip=0;
+  setbw=0;
   setbwSAVE=setbw;
   background_flip=1;
   antialiasflag=1;
