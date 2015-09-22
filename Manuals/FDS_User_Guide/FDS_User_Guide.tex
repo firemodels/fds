@@ -5178,6 +5178,10 @@ This type of reaction can be done by adding {\ct THIRD\_BODY=.TRUE.} to the {\ct
 
 As discussed previously (Section~\ref{info:heat_of_combustion}), energy release is calculated using the net change of species in a time step along with the enthalpy of formation of each species. This approach makes specifying an endothermic reaction, such as the reversible CO$_2$ reaction (R3), no different than typical FDS exothermic combustion reactions.
 
+\section{Special Topic: Chemical Time Integration}
+\label{info:chem_integration}
+A diagnostic tool for the time integration of chemical reactions is the number of subiterations the ODE solver takes for a given FDS timestep. For infinitely fast chemistry the number of {\ct CHEMICAL SUBITERATIONS} should always be 1. For finite rate chemical reactions the number can vary between 1 and the minimum between {\ct MAX\_CHEMISTRY\_ITERATIONS} and the number needed to satisfy the error tolerance of the ODE solver. If the maximum value is reached, the user can increase the number of iterations or decrease reduce the error tolerate constraints of the integrator.
+
 %\paragraph{Remark}
 %A limitation of using finite-rate reactions in an LES calculation is reduced temperature resolution. Finite-rate reactions are temperature dependent and the temperature in a large scale calculation is smeared out over a mesh cell. Setting {\ct TEMPERATURE\_DEPENDENT\_REACTION = .TRUE.} on the {\ct MISC} line will have FDS compute a local cell temperature based on the instantaneous energy release. This temperature is used only as the source temperature in the time integration of the finite-rate reactions. This temperature can be outputted using the {\ct QUANTITY='FLAME TEMPERATURE'}.
 
@@ -8253,9 +8257,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
-{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                        & m$^2$/s        & D,I,S        \\ \hline
+{\ct CHEMICAL SUBITERATIONS}                    & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
+{\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
-{\ct EXTINCTION}                                & Section \ref{info:extinct_out}                    &                & D,S          \\ \hline
+{\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
@@ -8269,10 +8274,10 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
-{\ct NORMALIZED HEATING RATE}                   & Section \ref{info:material_components}            & W/g            & B,D          \\ \hline
-{\ct NORMALIZED HEAT RELEASE RATE}              & Section \ref{info:material_components}            & W/g            & B,D          \\ \hline
-{\ct NORMALIZED MASS}                           & Section \ref{info:material_components}            &                & B,D          \\ \hline
-{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section \ref{info:material_components}            & 1/s            & B,D          \\ \hline
+{\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & B,D          \\ \hline
+{\ct NORMALIZED HEAT RELEASE RATE}              & Section~\ref{info:material_components}            & W/g            & B,D          \\ \hline
+{\ct NORMALIZED MASS}                           & Section~\ref{info:material_components}            &                & B,D          \\ \hline
+{\ct NORMALIZED MASS LOSS RATE}$^{*}$           & Section~\ref{info:material_components}            & 1/s            & B,D          \\ \hline
 {\ct PARTICLE PHASE}                            & Orientation of droplet                            &                & PA           \\ \hline
 {\ct PARTICLE RADIATION LOSS}                   & $\nabla \cdot \bq_r''$ due to Lagrangian particles& kW/m$^3$       & D,I,P,S      \\ \hline
 {\ct PDPA}                                      & Droplet diagnostics                               &                & D            \\ \hline
@@ -8291,7 +8296,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUM LUMPED MASS FRACTIONS}                 & $\sum_i Z_i$ (should be 1)                        &                & D,S          \\ \hline
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
 %{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
-{\ct VELOCITY ERROR}                            & Section \ref{info:PRES}                           &                & B            \\ \hline
+{\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
@@ -8930,7 +8935,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
-{\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:finite}                             &               &  1000             \\ \hline
+{\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:chem_integration}                   &               &  1000             \\ \hline
 {\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                             &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
