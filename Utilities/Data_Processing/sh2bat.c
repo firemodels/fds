@@ -140,9 +140,9 @@ void trim(char *line){
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
-  /*! \fn char *trim_front(char *line)
-      \brief returns a pointer to the first non-blank character in the character string line
-  */
+
+// returns a pointer to the first non-blank character in the character string line
+
   char *c;
 
   for(c=line;c<=line+strlen(line)-1;c++){
