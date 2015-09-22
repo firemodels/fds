@@ -85,5 +85,6 @@ christifire
 pressure_coefficient
 VTT_Sprays
 fm_datacenter_veltest
+umd_line_burner
 
 display('validation scripts completed successfully!')
