@@ -1,3 +1,4 @@
+#include "options.h"
 #include "lint.h"
 
 #include <sys/stat.h>
@@ -6,10 +7,7 @@
 #include <math.h>
 #include "histogram.h"
 #include "pragmas.h"
-
-#ifdef pp_CHECK
 #include "MALLOC.h"
-#endif
 #include "datadefs.h"
 
 /* ------------------ get_histogram_value ------------------------ */
@@ -55,15 +53,42 @@ void init_histogram(histogramdata *histgram){
 
 // initialize histogram data structures
 
-  int i;
+  int i,nbuckets;
 
-  for(i=0;i<NHIST_BUCKETS;i++){
+  nbuckets = NHIST_BUCKETS;
+  histgram->ndim = 1;
+  histgram->nbuckets = nbuckets;
+  for(i = 0; i<nbuckets; i++){
     histgram->buckets[i]=0;
   }
   histgram->defined=0;
   histgram->ntotal=0;
   histgram->valmin=(float)pow(10.0,20.0);
   histgram->valmax=-histgram->valmin;
+  histgram->complete=0;
+}
+
+/* ------------------ init_histogram2d ------------------------ */
+
+void init_histogram2d(histogramdata *histgram, int nx, int ny){
+
+// initialize histogram data structures
+
+  int i, nbuckets;
+
+  nbuckets = nx*ny;
+  histgram->ndim = 2;
+  histgram->nbuckets = nbuckets;
+  NewMemory((void **)&histgram->buckets2, histgram->nbuckets*sizeof(int));
+  for(i = 0; i<nbuckets; i++){
+    histgram->buckets2[i]=0;
+  }
+  histgram->defined=0;
+  histgram->ntotal=0;
+  histgram->valxmin=(float)pow(10.0,20.0);
+  histgram->valxmax=-histgram->valxmin;
+  histgram->valymin=(float)pow(10.0,20.0);
+  histgram->valymax=-histgram->valymin;
   histgram->complete=0;
 }
 
@@ -111,6 +136,23 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
   histgram->valmax=valmax;
   histgram->valmin=valmin;
 }
+
+/* ------------------ copy_uvdata2histogram ------------------------ */
+
+void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata *histgram){
+  int i;
+
+  for(i = 0; i<nvals; i++){
+    float r, theta;
+    float u, v;
+
+    u = uvals[i];
+    v = vvals[i];
+    r = sqrt(u*u+v*v);
+    theta = RAD2DEG*atan2(v, u);
+  }
+}
+
 
 /* ------------------ update_histogram ------------------------ */
 
