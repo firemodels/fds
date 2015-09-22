@@ -23,7 +23,7 @@ call %envfile%
 %svn_drive%
 cd %svn_root%\SMV\for_bundle\uploads
 
-set summary=Smokeview %smv_version% for %platform% (SVN r%smv_revision%)
+set summary=Smokeview %smv_version% for %platform% (GIT r%smv_revision%)
 set exe=smv_%smv_version%_%platform%.sh
 
 echo Uploading %exe%

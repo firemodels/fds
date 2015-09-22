@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 echo Using the environment variables:
 echo.
-echo Using SVN revision %smv_revision% to build a 32 bit OSX version of background
+echo Using GIT revision %smv_revision% to build a 32 bit OSX version of background
 
 %svn_drive%
 cd %svn_root%\smv\scripts
