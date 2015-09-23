@@ -223,8 +223,12 @@ WTC experiments. There was only one measurement of each made near the ceiling of
 \clearpage
 
 
-\section{UMD Line Burner}
+\subsection{UMD Line Burner}
 \label{UMD_Line_Burner_species}
+
+Oxygen concentration measurements were made across the coflow section of the burner.  Fig.~\ref{UMD_Line_Burner_methane_O2_p18_O2} shows mean volume fraction O$_2$ profiles for two heights, $z$, above the burner surface for the experiment with nitrogen dilution of the coflowing air to 18 vol.~\% O$_2$ with methane as fuel.  Notice that the O$_2$ level at the outer edge of the burner is the ambient value of 21 vol.~\%.  Further experimental details may be found in White et al.~\cite{White:2015}.  
+
+FDS simulations are peformed at three grid resolutions corresponding to $W/\delta x = 4, 8, 16$, where $W = 5$ cm is the width of the line burner (see Fig.~\ref{fig:umd_line_burner_plan_view}).  Note that White et al.~\cite{White:2015} report measured global radiant fraction of $\chi_{\si{r}} = 0.18$ for 18 vol.~\% O$_2$ level with methane fuel.  We use this value in the simulations.  Also, because these simulations are well-resolved and we are interested in convergence of the numerical solution, we employ the CHARM flux limiter for scalar transport.  Second-order interpolated boundaries are used at mesh interfaces.  The domain decompositions, in order of increasing grid resolution, use 8, 16, and 128 meshes, respectively.
 
 \begin{figure}[h]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
