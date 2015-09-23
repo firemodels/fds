@@ -10,6 +10,7 @@
 #define NHIST_BUCKETS 100000
 typedef struct {
   int buckets[NHIST_BUCKETS], *buckets2;
+  float *rvals;
   int nbuckets, ndim, defined;
   int nx, ny, ntotal;
   float valmin, valmax;
