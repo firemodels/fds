@@ -346,6 +346,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   else{
     meshi->npatches=0;
     getpatchheader(file,&meshi->npatches,&patchmin,&patchmax);
+    patchmin_global = patchmin;
+    patchmax_global = patchmax;
   }
   if(meshi->npatches>0){
     if(
