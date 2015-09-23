@@ -262,8 +262,13 @@ DO NN=1,N_HVAC_READ
             IF (NODE_DUCT_A(I_DUCTNODE,ND) == 'null') EXIT
             DN%N_DUCTS=ND
          ENDDO
-         IF (DN%N_DUCTS == 1 .AND. .NOT. AMBIENT) THEN
-            WRITE(MESSAGE,'(A,A)') 'ERROR: Non-AMBIENT ductnode must have >=2 ducts. Ductnode ID: ',TRIM(DN%ID)
+         IF (DN%N_DUCTS == 1 .AND. .NOT. AMBIENT .AND. VENT_ID=='null') THEN
+            WRITE(MESSAGE,'(A,A)') 'ERROR: Non-AMBIENT or non VENT-connected ductnode must have >=2 ducts. Ductnode ID: ',&
+                                    TRIM(DN%ID)
+            CALL SHUTDOWN(MESSAGE); RETURN         
+         ENDIF
+         IF (DN%N_DUCTS >= 2 .AND. (AMBIENT .OR. VENT_ID/='null')) THEN
+            WRITE(MESSAGE,'(A,A)') 'ERROR: AMBIENT or VENT-connected ductnode must have 1 duct. Ductnode ID: ',TRIM(DN%ID)
             CALL SHUTDOWN(MESSAGE); RETURN         
          ENDIF
          IF (DN%N_DUCTS == 0) THEN
