@@ -556,6 +556,8 @@ void Get_Part_Bounds(void){
     propi = part5propinfo + i;
 
     NewMemory((void **)&propi->histogram,sizeof(histogramdata));
+    propi->histogram->buckets = NULL;
+    propi->histogram->buckets_2d = NULL;
     init_histogram(propi->histogram);
 
   }
@@ -652,6 +654,8 @@ void Get_Part_Bounds(void){
     propi->setvalmax=1;
     propi->setvalmin=1;
     PRINTF(" %s min: %f max: %f\n",propi->label.shortlabel,propi->valmin,propi->valmax);
+    FREEMEMORY(propi->histogram->buckets);
+    FREEMEMORY(propi->histogram->buckets_2d);
     FREEMEMORY(propi->histogram);
   }
 }

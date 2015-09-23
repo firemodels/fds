@@ -55,6 +55,9 @@ void init_histogram(histogramdata *histogram){
 
   int i,nbuckets;
 
+  if(histogram->buckets == NULL){
+    NewMemory((void **)&histogram->buckets, NHIST_BUCKETS*sizeof(int));
+  }
   nbuckets = NHIST_BUCKETS;
   histogram->ndim = 1;
   histogram->nbuckets = nbuckets;
@@ -195,8 +198,13 @@ void update_histogram(float *vals, int nvals, histogramdata *histogram_to){
   histogramdata histogram_from;
 
   if(nvals<=0)return;
+  histogram_from.buckets = NULL;
+  histogram_from.buckets_2d = NULL;
+  init_histogram(&histogram_from);
+
   copy_data2histogram(vals,nvals,&histogram_from);
   merge_histogram(histogram_to,&histogram_from);
+  FREEMEMORY(histogram_from.buckets);
 }
 
 /* ------------------ update_uvhistogram ------------------------ */
@@ -208,8 +216,13 @@ void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *hi
   histogramdata histogram_from;
 
   if(nvals <= 0)return;
+  histogram_from.buckets = NULL;
+  histogram_from.buckets_2d = NULL;
+  init_histogram2d(&histogram_from, histogram_to->nx, histogram_to->ny);
+
   copy_uvdata2histogram(uvals, vvals, nvals, &histogram_from);
   merge_uvhistogram(histogram_to, &histogram_from);
+  FREEMEMORY(histogram_from.buckets_2d);
 }
 
 /* ------------------ merge_histogram ------------------------ */

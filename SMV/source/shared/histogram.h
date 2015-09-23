@@ -9,7 +9,7 @@
 
 #define NHIST_BUCKETS 100000
 typedef struct {
-  int buckets[NHIST_BUCKETS], *buckets_2d;
+  int *buckets, *buckets_2d;
   float *rvals;
   int nbuckets, ndim, defined;
   int nx, ny, ntotal;
