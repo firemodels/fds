@@ -749,6 +749,12 @@ void usage(char **argv){
 #ifdef pp_DEG
     strcat(label,", pp_DEG");
 #endif
+#ifdef pp_DRAWISO
+    strcat(label, ", pp_DRAWISO");
+#endif
+#ifdef pp_ffmpeg
+    strcat(label, ", pp_ffmpeg");
+#endif
 #ifdef pp_GEOMTEST
     strcat(label,", pp_GEOMTEST");
 #endif
@@ -760,6 +766,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_GPUTHROTTLE
     strcat(label,", pp_GPUTHROTTLE");
+#endif
+#ifdef pp_HAZARD
+    strcat(label, ", pp_HAZARD");
 #endif
 #ifdef pp_INTEL
     strcat(label,", pp_INTEL");
@@ -775,6 +784,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_MEMDEBUG
     strcat(label,", pp_MEMDEBUG");
+#endif
+#ifdef pp_MEMPRINT
+    strcat(label, ", pp_MEMPRINT");
 #endif
 #ifdef pp_memstatus
     strcat(label,", pp_memstatus");
@@ -796,6 +808,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_release
     strcat(label,", pp_release");
+#endif
+#ifdef pp_SETTIME
+    strcat(label, ", pp_SETTIME");
 #endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");

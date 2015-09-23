@@ -141,18 +141,41 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histgram){
 
 void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata *histgram){
   int i;
+  float rmin, rmax;
 
-  for(i = 0; i<nvals; i++){
+  NewMemory((void **)&histgram->rvals,nvals*sizeof(float));
+  for(i = 0; i < nvals; i++){
     float r, theta;
     float u, v;
+    int ix, iy, ixy;
 
     u = uvals[i];
     v = vvals[i];
-    r = sqrt(u*u+v*v);
-    theta = RAD2DEG*atan2(v, u);
+    histgram->rvals[i] = sqrt(u*u + v*v);
   }
-}
 
+  copy_data2histogram(histgram->rvals, nvals, histgram);
+  rmin = histgram->valmin;
+  rmax = histgram->valmax;
+
+  for(i = 0; i < nvals; i++){
+    float r, theta;
+    float u, v;
+    int ix, iy, ixy;
+
+    u = uvals[i];
+    v = vvals[i];
+    r = histgram->rvals[i];
+    ix = 0;
+    if(rmax>rmin)ix = CLAMP(histgram->nx*(r - rmin) / (rmax - rmin),0,histgram->nx-1);
+    theta = RAD2DEG*atan2(v, u);
+    if(theta < 0.0)theta += 360.0;
+    iy = CLAMP(histgram->ny*(theta / 360.0),0,histgram->ny-1);
+    ixy = ix + iy*histgram->nx;
+    histgram->buckets2[ixy]++;
+  }
+  FREEMEMORY(histgram->rvals);
+}
 
 /* ------------------ update_histogram ------------------------ */
 
