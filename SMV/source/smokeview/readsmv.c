@@ -6921,6 +6921,7 @@ typedef struct {
       patchi->geom_vals=NULL;
       patchi->geom_ivals=NULL;
       patchi->geom_nvals=0;
+      patchi->histogram = NULL;
       patchi->blocknumber=blocknumber;
       patchi->seq_id=nn_patch;
       patchi->autoload=0;
@@ -6946,6 +6947,8 @@ typedef struct {
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
+        patchi->histogram->buckets = NULL;
+        patchi->histogram->buckets_2d = NULL;
         init_histogram(patchi->histogram);
         ipatch++;
       }
