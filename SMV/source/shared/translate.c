@@ -24,10 +24,10 @@ int compare_trdata( const void *arg1, const void *arg2 ){
 /* ------------------ parse_lang ------------------------ */
 
 int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
-  /*! \fn int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr)
-      \brief read a po file and put english/foreign language string pairs into
-             the trinfo data structure
-  */
+
+//  read a po file and put english/foreign language string pairs into
+//  the trinfo data structure
+
   FILE *stream;
   trdata *trinfo_local;
   int ntrinfo_local;
@@ -127,9 +127,9 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 /* ------------------ init_translate ------------------------ */
 
 void init_translate(char *bindir, char *tr_name){
-  /*! \fn void init_translate(char *bindir, char *tr_name)
-      \brief initialize po language translation data structures
-  */
+
+//  initialize po language translation data structures
+
   char *LANG;
 
   if(tr_name!=NULL){

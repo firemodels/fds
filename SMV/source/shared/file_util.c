@@ -314,9 +314,9 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
 /* ------------------ can_write_to_dir ------------------------ */
 
 int can_write_to_dir(char *dir){
-  /*! \fn int can_write_to_dir(char *dir)
-      \brief returns 1 if the directory can be written to, 0 otherwise
-  */
+
+// returns 1 if the directory can be written to, 0 otherwise
+
   char *full_name;
   char file_name[256], *file_name_ptr;
   FILE *stream;
@@ -353,9 +353,9 @@ int can_write_to_dir(char *dir){
 /* ------------------ is_file_newer ------------------------ */
 
 int is_file_newer(char *file1, char *file2){
-  /*! \fn int is_file_newer(char *file1, char *file2)
-      \brief returns 1 if file1 is newer than file2, 0 otherwise
-  */
+
+// returns 1 if file1 is newer than file2, 0 otherwise
+
   STRUCTSTAT statbuff1, statbuff2;
   int statfile1, statfile2;
 
@@ -408,9 +408,9 @@ FILE_SIZE get_filesize(const char *filename){
   /* ------------------ file_exists ------------------------ */
 
 int file_exists(char *filename){
-  /*! \fn int file_exists(char *filename)
-      \brief returns 1 if the file filename exists, 0 otherwise
-  */
+
+// returns 1 if the file filename exists, 0 otherwise
+
 #ifdef WIN32
   if(filename==NULL||_access(filename,0)==-1){
     return 0;
@@ -570,9 +570,9 @@ void getfilesizelabel(int size, char *sizelabel){
 /* ------------------ rootdir ------------------------ */
 
 char *getprogdir(char *progname, char **svpath){
-  /*! \fn char *getprogdir(char *progname, char **svpath)
-      \brief returns the directory containing the file progname
-  */
+
+// returns the directory containing the file progname
+
   char *progpath, *lastsep, *smokeviewpath2;
 
   lastsep=strrchr(progname,dirseparator[0]);
@@ -614,9 +614,9 @@ char *getprogdir(char *progname, char **svpath){
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
-  /*! \fn char *lastname(char *argi)
-      \brief returns the file name contained in the full path name argi
-  */
+
+// returns the file name contained in the full path name argi
+
   char *lastdirsep;
   char *dir, *filename, cwdpath[1000];
 
@@ -680,9 +680,9 @@ char *get_zonefilename(char *bufptr){
 /* ------------------ file_modtime ------------------------ */
 
 time_t file_modtime(char *filename){
-  /*! \fn time_t file_modtime(char *filename)
-      \brief returns the modification time of the file named filename
-  */
+
+// returns the modification time of the file named filename
+
   STRUCTSTAT statbuffer;
   time_t return_val;
   int statfile;
@@ -698,9 +698,9 @@ time_t file_modtime(char *filename){
 /* ------------------ which ------------------------ */
 
 char *which(char *progname){
-  /*! \fn char *which(char *progname)
-      \brief returns the PATH directory containing the file progname
-  */
+
+// returns the PATH directory containing the file progname
+
   char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
   char *dir,*returndir;
   char pathsep[2], dirsep[2];

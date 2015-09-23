@@ -38,10 +38,10 @@ float rand_ab(int seed, float minval, float maxval){
 /* ----------------------- fparsecsv ----------------------------- */
 
 void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
-  /*! \fn void fparsecsv(char *buffer, float *vals, int ncols, int *ntokens)
-      \brief copy comma delimited values from buffer into floating point array vals
-       returning number of values found in ntokens
-  */
+
+//  copy comma delimited values from buffer into floating point array vals
+//  returning number of values found in ntokens
+
   int nt=0;
   char *token;
 
@@ -65,10 +65,10 @@ void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
 /* ----------------------- parsecsv ----------------------------- */
 
 void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
-  /*! \fn void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens)
-      \brief copy comma delimited values from buffer into character array tokens
-       returning number of values found in ntokens
-  */
+
+//  copy comma delimited values from buffer into character array tokens
+//  returning number of values found in ntokens
+
   int nt=0;
   int i;
   int lenbuffer;
@@ -95,11 +95,11 @@ void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
 /* ------------------ getrowcols ------------------------ */
 
 int getrowcols(FILE *stream, int *nrows, int *ncols){
-  /*! \fn int getrowcols(FILE *stream, int *nrows, int *ncols)
-      \brief find number of rows (nrows) and number of columns (ncols) in
-       comma delimited file pointed to by stream and returns the length
-       of the longest line
-  */
+
+//  find number of rows (nrows) and number of columns (ncols) in
+//  comma delimited file pointed to by stream and returns the length
+//  of the longest line
+
   int nnrows=0,nncols=1,maxcols=0,linelength=0,maxlinelength=0;
   int inside_quote=0;
 
@@ -147,9 +147,9 @@ void getRevision(char *revision){
 /* ------------------ stripquotes ------------------------ */
 
 void stripquotes(char *buffer){
-  /*! \fn void stripquotes(char *buffer)
-      \brief replaces quotes (") with blanks in the character string buffer
-  */
+
+// replaces quotes (") with blanks in the character string buffer
+
   char *c;
 
   for(c=buffer;c<buffer+strlen(buffer);c++){
@@ -159,9 +159,9 @@ void stripquotes(char *buffer){
 /* ------------------ stripcommas ------------------------ */
 
 void stripcommas(char *buffer){
-  /*! \fn void stripcommas(char *buffer)
-      \brief replaces commas (,) with blanks in the character string buffer
-  */
+
+//  replaces commas (,) with blanks in the character string buffer
+
   char *c;
 
   for(c=buffer;c<buffer+strlen(buffer);c++){
@@ -172,9 +172,9 @@ void stripcommas(char *buffer){
 /* ------------------ randint ------------------------ */
 
 int randint(int min, int max){
-  /*! \fn int randint(int min, int max)
-      \brief returns a random integer inclusively between min and max 
-  */
+
+//  returns a random integer inclusively between min and max
+
   int return_val;
 
   if(min>max){
@@ -189,9 +189,9 @@ int randint(int min, int max){
 /* ------------------ randstr ------------------------ */
 
 char *randstr(char* str, int length){
-  /*! \fn char *randstr(char* str, int length)
-      \brief returns a random character string of length length
-  */
+
+//  returns a random character string of length length
+
     int i;
 
     if(str==NULL||length<=0)return NULL;
@@ -238,9 +238,9 @@ void trim(char *line){
 /* ------------------ trim_front ------------------------ */
 
 char *trim_front(char *line){
-  /*! \fn char *trim_front(char *line)
-      \brief returns a pointer to the first non-blank character in the character string line
-  */
+
+//  returns a random character string of length length
+
   char *c;
 
   for(c=line;c<=line+strlen(line)-1;c++){
@@ -253,9 +253,9 @@ char *trim_front(char *line){
 /* ------------------ trimzeros ------------------------ */
 
 void trimzeros(char *line){
-  /*! \fn void trimzeros(char *line)
-      \brief removes trailing zeros in the floating point number found in line
-  */
+
+//  removes trailing zeros in the floating point number found in line
+
   size_t i,len;
   char *c;
 
@@ -279,9 +279,9 @@ void trimzeros(char *line){
 /* ------------------ trimmzeros ------------------------ */
 
 void trimmzeros(char *line){
-  /*! \fn void trimmzeros(char *line)
-      \brief removes trailing zeros in each floating point number found in line
-  */
+
+//  removes trailing zeros in each floating point number found in line
+
   char linecopy[1024];
   char *token;
 
@@ -300,9 +300,9 @@ void trimmzeros(char *line){
 /* ------------------ STRCMP ------------------------ */
 
 int STRCMP(const char *s1, const char *s2){
-  /*! \fn int STRCMP(const char *s1, const char *s2)
-      \brief same as the standard function, strcmp, but ignores case
-  */
+
+//  same as the standard function, strcmp, but ignores case
+
   while (toupper(*s1) == toupper(*s2++)){
 		if(*s1++ == 0)return (0);
   }
@@ -410,9 +410,9 @@ void num2string(char *string, float tval,float range){
 /* ------------------ trim_string ------------------------ */
 
 char *trim_string(char *buffer){
-  /*! \fn char *trim_string(char *buffer)
-      \brief removes trailing blanks from buffer and returns a pointer to the first non-blank character
-  */
+
+//  removes trailing blanks from buffer and returns a pointer to the first non-blank character
+
   int len;
   char *bufptr;
 
@@ -477,9 +477,9 @@ char *get_chid(char *file, char *buffer){
 /* ------------------ log_base2 ------------------------ */
 
 int log_base2(float xx){
-  /*! \fn int log_base2(float xx)
-      \brief returns the log base 2 of the floating point number xx
-  */
+
+//  returns the log base 2 of the floating point number xx
+
   int r = 0;
   unsigned int x;
 
@@ -494,9 +494,9 @@ int log_base2(float xx){
 /* ------------------ array2string ------------------------ */
 
 void array2string(float *vals, int nvals, char *string){
-  /*! \fn void array2string(float *vals, int nvals, char *string)
-      \brief convert an array of floating point numbers to a character string
-  */
+
+//  convert an array of floating point numbers to a character string
+
   char cval[30];
   int i;
 
@@ -534,9 +534,9 @@ float frexp10(float x, int *exp10){
 /* ------------------ getstring ------------------------ */
 
 char *getstring(char *buffer){
-  /*! \fn *getstring(char *buffer)
-      \brief return pointer to string contained between a pair of double quotes
-  */
+
+//  return pointer to string contained between a pair of double quotes
+
   char *begin,*end;
 
   // if buffer contains msgid "string"
