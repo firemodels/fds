@@ -28,10 +28,10 @@ float get_histogram_value(histogramdata *histogram, float cdf){
   }
   cutoff = cdf*histogram->ntotal;
   count=0;
-  for(i=0;i<NHIST_BUCKETS;i++){
+  for(i=0;i<histogram->nbuckets;i++){
     count+=histogram->buckets[i];
     if(count>cutoff){
-      returnval = histogram->valmin + (float)(i+0.5)*(histogram->valmax-histogram->valmin)/(float)NHIST_BUCKETS;
+      returnval = histogram->valmin + (float)(i+0.5)*(histogram->valmax-histogram->valmin)/(float)histogram->nbuckets;
       return returnval;
     }
   }
@@ -79,9 +79,9 @@ void init_histogram2d(histogramdata *histogram, int nx, int ny){
   nbuckets = nx*ny;
   histogram->ndim = 2;
   histogram->nbuckets = nbuckets;
-  NewMemory((void **)&histogram->buckets2, histogram->nbuckets*sizeof(int));
+  NewMemory((void **)&histogram->buckets_2d, histogram->nbuckets*sizeof(int));
   for(i = 0; i<nbuckets; i++){
-    histogram->buckets2[i]=0;
+    histogram->buckets_2d[i]=0;
   }
   histogram->defined=0;
   histogram->ntotal=0;
@@ -92,18 +92,24 @@ void init_histogram2d(histogramdata *histogram, int nx, int ny){
   histogram->complete=0;
 }
 
+/* ------------------ free_histogram2d ------------------------ */
+
+void free_histogram2d(histogramdata *histogram){
+  FREEMEMORY(histogram->buckets_2d);
+}
+
 /* ------------------ copy_data2histogram ------------------------ */
 
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram){
 
-// copy nvals of the floating point array, vals, into the histogram histogram
+// copy vals into histogram
 
   int i;
   float valmin, valmax;
   float dbucket;
 
   histogram->defined=1;
-  for(i=0;i<NHIST_BUCKETS;i++){
+  for(i=0;i<histogram->nbuckets;i++){
     histogram->buckets[i]=0;
   }
   if(nvals==0){
@@ -117,7 +123,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histogram){
       valmin=MIN(vals[i],valmin);
       valmax=MAX(vals[i],valmax);
     }
-    dbucket=(valmax-valmin)/NHIST_BUCKETS;
+    dbucket=(valmax-valmin)/histogram->nbuckets;
     if(dbucket==0.0){
       histogram->buckets[0]=nvals;
     }
@@ -127,7 +133,7 @@ void copy_data2histogram(float *vals, int nvals, histogramdata *histogram){
 
         ival = (vals[i]-valmin)/dbucket;
         ival=MAX(0,ival);
-        ival=MIN(NHIST_BUCKETS-1,ival);
+        ival=MIN(histogram->nbuckets-1,ival);
         histogram->buckets[ival]++;
       }
     }
@@ -166,85 +172,163 @@ void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata 
     u = uvals[i];
     v = vvals[i];
     r = histogram->rvals[i];
+
     ix = 0;
     if(rmax>rmin)ix = CLAMP(histogram->nx*(r - rmin) / (rmax - rmin),0,histogram->nx-1);
+
     theta = RAD2DEG*atan2(v, u);
     if(theta < 0.0)theta += 360.0;
     iy = CLAMP(histogram->ny*(theta / 360.0),0,histogram->ny-1);
+
     ixy = ix + iy*histogram->nx;
-    histogram->buckets2[ixy]++;
+    histogram->buckets_2d[ixy]++;
   }
   FREEMEMORY(histogram->rvals);
 }
 
 /* ------------------ update_histogram ------------------------ */
 
-void update_histogram(float *vals, int nvals, histogramdata *histogram){
+void update_histogram(float *vals, int nvals, histogramdata *histogram_to){
 
 // merge nvals of the floating point array, vals, into the histogram histogram
 
-  histogramdata histogramval;
+  histogramdata histogram_from;
 
   if(nvals<=0)return;
-  copy_data2histogram(vals,nvals,&histogramval);
-  merge_histogram(histogram,&histogramval);
+  copy_data2histogram(vals,nvals,&histogram_from);
+  merge_histogram(histogram_to,&histogram_from);
+}
+
+/* ------------------ update_uvhistogram ------------------------ */
+
+void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogram_to){
+
+  // merge nvals of the floating point array, vals, into the histogram histogram
+
+  histogramdata histogram_from;
+
+  if(nvals <= 0)return;
+  copy_uvdata2histogram(uvals, vvals, nvals, &histogram_from);
+  merge_uvhistogram(histogram_to, &histogram_from);
 }
 
 /* ------------------ merge_histogram ------------------------ */
 
-void merge_histogram(histogramdata *histogram1, histogramdata *histogram2){
+void merge_histogram(histogramdata *histogram_to, histogramdata *histogram_from){
   
-  // merge histogram histogram2 into histogram1
+  // merge histogram histogram_from into histogram_to
 
   int i;
-  float dbucket1, dbucket2, dbucket_new;
-  int bucket1copy[NHIST_BUCKETS];
+  float dbucket_to, dbucket_from, dbucket_new;
+  int *bucket_to_copy;
   float valmin_new, valmax_new;
 
-  histogram1->defined=1;
-  valmin_new=MIN(histogram1->valmin,histogram2->valmin);
-  valmax_new=MAX(histogram1->valmax,histogram2->valmax);
+  histogram_to->defined=1;
+  valmin_new=MIN(histogram_to->valmin,histogram_from->valmin);
+  valmax_new=MAX(histogram_to->valmax,histogram_from->valmax);
 
-  for(i=0;i<NHIST_BUCKETS;i++){
-    bucket1copy[i]=histogram1->buckets[i];
-    histogram1->buckets[i]=0;
+  NewMemory((void **)&bucket_to_copy,histogram_to->nbuckets*sizeof(int));
+
+  for(i = 0; i<histogram_to->nbuckets; i++){
+    bucket_to_copy[i]=histogram_to->buckets[i];
+    histogram_to->buckets[i]=0;
   }
-  dbucket1 = (histogram1->valmax-histogram1->valmin)/NHIST_BUCKETS;
-  dbucket2 = (histogram2->valmax-histogram2->valmin)/NHIST_BUCKETS;
-  dbucket_new=(valmax_new-valmin_new)/NHIST_BUCKETS;
+  dbucket_to   = (histogram_to->valmax  -histogram_to->valmin  )/  histogram_to->nbuckets;
+  dbucket_from = (histogram_from->valmax-histogram_from->valmin)/histogram_from->nbuckets;
+  dbucket_new=(valmax_new-valmin_new)/histogram_from->nbuckets;
 
   if(dbucket_new==0.0){
-    histogram1->buckets[0]=histogram1->ntotal+histogram2->ntotal;
-    histogram1->ntotal=histogram1->buckets[0];
+    histogram_to->buckets[0]=histogram_to->ntotal+histogram_from->ntotal;
+    histogram_to->ntotal=histogram_to->buckets[0];
   }
   else{
-    for(i=0;i<NHIST_BUCKETS;i++){
+    for(i=0;i<histogram_to->nbuckets;i++){
       float val;
       int ival;
 
-      if(bucket1copy[i]!=0){
-        val = (float)(histogram1->valmin + (float)(i+0.5)*dbucket1);
+      if(bucket_to_copy[i]!=0){
+        val = (float)(histogram_to->valmin + (float)(i+0.5)*dbucket_to);
         valmin_new=MIN(valmin_new,val);
         valmax_new=MAX(valmax_new,val);
         ival = (val-valmin_new)/dbucket_new;
         if(ival<0)ival=0;
-        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
-        histogram1->buckets[ival]+=bucket1copy[i];
+        if(ival>histogram_to->nbuckets - 1)ival = histogram_to->nbuckets - 1;
+        histogram_to->buckets[ival]+=bucket_to_copy[i];
       }
-      if(histogram2->buckets[i]!=0){
-        val = (float)(histogram2->valmin + (i+0.5)*dbucket2);
+      if(histogram_from->buckets[i]!=0){
+        val = (float)(histogram_from->valmin + (i+0.5)*dbucket_from);
         valmin_new=MIN(valmin_new,val);
         valmax_new=MAX(valmax_new,val);
-        ival = (val-valmin_new)/dbucket_new;
-        if(ival<0)ival=0;
-        if(ival>NHIST_BUCKETS-1)ival=NHIST_BUCKETS-1;
-        histogram1->buckets[ival]+=histogram2->buckets[i];
+        ival = CLAMP((val-valmin_new)/dbucket_new,0,histogram_from->nbuckets-1);
+        histogram_to->buckets[ival]+=histogram_from->buckets[i];
       }
     }
   }
-  histogram1->valmin=valmin_new;
-  histogram1->valmax=valmax_new;
-  histogram1->ntotal+=histogram2->ntotal;
+  histogram_to->valmin=valmin_new;
+  histogram_to->valmax=valmax_new;
+  histogram_to->ntotal+=histogram_from->ntotal;
+  FREEMEMORY(bucket_to_copy);
+}
+
+/* ------------------ merge_uvhistogram ------------------------ */
+
+void merge_uvhistogram(histogramdata *histogram_to, histogramdata *histogram_from){
+
+  // merge histogram histogram_from into histogram_to
+
+  int i;
+  float dbucket_to, dbucket_from, dbucket_rnew, dbucket_theta;
+  int *bucket_to_copy;
+  float valmin_new, valmax_new;
+
+  NewMemory((void **)&bucket_to_copy,histogram_to->nbuckets*sizeof(int));
+
+  for(i = 0; i<histogram_to->nbuckets; i++){
+    bucket_to_copy[i]=histogram_to->buckets_2d[i];
+    histogram_to->buckets_2d[i]=0;
+  }
+
+  valmin_new = MIN(histogram_to->valmin, histogram_from->valmin);
+  valmax_new = MAX(histogram_to->valmax, histogram_from->valmax);
+  dbucket_rnew = (valmax_new - valmin_new) / histogram_to->nx;
+
+  dbucket_to = (histogram_to->valmax - histogram_to->valmin)/histogram_to->nx;
+  dbucket_from = (histogram_from->valmax - histogram_from->valmin)/histogram_from->nx;
+  dbucket_theta = 360.0 / histogram_to->ny;
+
+  if(dbucket_rnew==0.0){
+    histogram_to->buckets[0] = histogram_to->ntotal + histogram_from->ntotal;
+  }
+  else{
+    for(i = 0; i < histogram_to->nbuckets; i++){
+      int ir, itheta;
+      float r, theta;
+      int ixy;
+
+      if(bucket_to_copy[i] != 0){
+        itheta = CLAMP(i / histogram_to->nx, 0, histogram_to->ny - 1);
+        theta = (float)(itheta + 0.5)*dbucket_theta;
+        ir = CLAMP(i%histogram_to->nx, 0, histogram_to->nx - 1);
+        r = histogram_to->valmin + (float)(ir + 0.5)*dbucket_to;
+
+        ixy = CLAMP(ir + itheta*histogram_to->nx,0,histogram_to->nbuckets);
+        histogram_to->buckets[ixy] += bucket_to_copy[i];
+      }
+      if(histogram_from->buckets[i] != 0){
+        itheta = CLAMP(i / histogram_from->nx, 0, histogram_from->ny - 1);
+        theta = (float)(itheta + 0.5)*dbucket_theta;
+        ir = CLAMP(i%histogram_from->nx, 0, histogram_from->nx - 1);
+        r = histogram_from->valmin + (float)(ir + 0.5)*dbucket_from;
+
+        ixy = CLAMP(ir + itheta*histogram_from->nx, 0, histogram_from->nbuckets);
+        histogram_to->buckets[ixy] += histogram_from->buckets[i];
+      }
+    }
+  }
+  histogram_to->valmin = valmin_new;
+  histogram_to->valmax = valmax_new;
+  histogram_to->ntotal += histogram_from->ntotal;
+  FREEMEMORY(bucket_to_copy);
 }
 
 #ifdef pp_CHECK

@@ -9,7 +9,7 @@
 
 #define NHIST_BUCKETS 100000
 typedef struct {
-  int buckets[NHIST_BUCKETS], *buckets2;
+  int buckets[NHIST_BUCKETS], *buckets_2d;
   float *rvals;
   int nbuckets, ndim, defined;
   int nx, ny, ntotal;
@@ -23,10 +23,13 @@ typedef struct {
 
 void init_histogram(histogramdata *histogram);
 void init_histogram2d(histogramdata *histogram, int nx, int ny);
+void free_histogram2d(histogramdata *histogram);
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram);
 void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata *histogram);
+void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogramto);
 void update_histogram(float *vals, int nvals, histogramdata *histogram);
-void merge_histogram(histogramdata *histogram1, histogramdata *histogram2);
+void merge_histogram(histogramdata *histogramto, histogramdata *histogramfrom);
+void merge_uvhistogram(histogramdata *histogramto, histogramdata *histogramfrom);
 float get_histogram_value(histogramdata *histogram, float cdf);
 void check_histogram(void);
 void complete_histogram(histogramdata *histogram);
