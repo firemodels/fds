@@ -32,6 +32,7 @@ void init_histogram2d(histogramdata *histogram, int nx, int ny);
 void merge_histogram(histogramdata *histogramto, histogramdata *histogramfrom);
 void merge_uvhistogram(histogramdata *histogramto, histogramdata *histogramfrom);
 void reset_histogram(histogramdata *histogram);
+void reset_histogram2d(histogramdata *histogram);
 void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogramto);
 void update_histogram(float *vals, int nvals, histogramdata *histogram);
 #if pp_CHECK
