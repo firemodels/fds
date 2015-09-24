@@ -210,9 +210,7 @@ void update_patch_bounds(patchdata *patchi){
 
   boundi = &patchi->bounds;
   if(boundi->defined==1)return;
-  full_histogram.buckets = NULL;
-  full_histogram.buckets_2d = NULL;
-  init_histogram(&full_histogram);
+  init_histogram(&full_histogram,NHIST_BUCKETS);
 
   for(j=0;j<npatchinfo;j++){
     patchdata *patchj;
@@ -239,8 +237,7 @@ void update_patch_bounds(patchdata *patchi){
     memcpy(boundj,boundi,sizeof(bounddata));
   }
   writeboundini();
-  FREEMEMORY(full_histogram.buckets);
-  FREEMEMORY(full_histogram.buckets_2d);
+  free_histogram(&full_histogram);
 }
 
 /* ------------------ getBoundaryColors3 ------------------------ */

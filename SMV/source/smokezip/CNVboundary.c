@@ -580,7 +580,7 @@ void update_patch_hist(void){
       patchframesize+=patchi->patchsize[j];
     }
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    init_histogram(patchi->histogram);
+    reset_histogram(patchi->histogram);
     while(error1==0){
       int ndummy;
 

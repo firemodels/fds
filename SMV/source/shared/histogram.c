@@ -47,28 +47,37 @@ void complete_histogram(histogramdata *histogram){
   histogram->complete=1;
 }
 
+
+/* ------------------ reset_histogram ------------------------ */
+
+void reset_histogram(histogramdata *histogram){
+
+  // initialize histogram data structures
+
+  int i, nbuckets;
+
+  for(i = 0; i<histogram->nbuckets; i++){
+    histogram->buckets[i] = 0;
+  }
+  histogram->defined = 0;
+  histogram->ntotal = 0;
+  histogram->valmin = (float)pow(10.0, 20.0);
+  histogram->valmax = -histogram->valmin;
+  histogram->complete = 0;
+}
+
 /* ------------------ init_histogram ------------------------ */
 
-void init_histogram(histogramdata *histogram){
+void init_histogram(histogramdata *histogram, int nbuckets){
 
 // initialize histogram data structures
 
-  int i,nbuckets;
-
-  if(histogram->buckets == NULL){
-    NewMemory((void **)&histogram->buckets, NHIST_BUCKETS*sizeof(int));
-  }
-  nbuckets = NHIST_BUCKETS;
+  histogram->buckets=NULL;
+  histogram->buckets_2d = NULL;
+  NewMemory((void **)&histogram->buckets, nbuckets*sizeof(int));
   histogram->ndim = 1;
   histogram->nbuckets = nbuckets;
-  for(i = 0; i<nbuckets; i++){
-    histogram->buckets[i]=0;
-  }
-  histogram->defined=0;
-  histogram->ntotal=0;
-  histogram->valmin=(float)pow(10.0,20.0);
-  histogram->valmax=-histogram->valmin;
-  histogram->complete=0;
+  reset_histogram(histogram);
 }
 
 /* ------------------ init_histogram2d ------------------------ */
@@ -93,6 +102,12 @@ void init_histogram2d(histogramdata *histogram, int nx, int ny){
   histogram->valymin=(float)pow(10.0,20.0);
   histogram->valymax=-histogram->valymin;
   histogram->complete=0;
+}
+
+/* ------------------ free_histogram ------------------------ */
+
+void free_histogram(histogramdata *histogram){
+  FREEMEMORY(histogram->buckets);
 }
 
 /* ------------------ free_histogram2d ------------------------ */
@@ -198,13 +213,11 @@ void update_histogram(float *vals, int nvals, histogramdata *histogram_to){
   histogramdata histogram_from;
 
   if(nvals<=0)return;
-  histogram_from.buckets = NULL;
-  histogram_from.buckets_2d = NULL;
-  init_histogram(&histogram_from);
+  init_histogram(&histogram_from,NHIST_BUCKETS);
 
   copy_data2histogram(vals,nvals,&histogram_from);
   merge_histogram(histogram_to,&histogram_from);
-  FREEMEMORY(histogram_from.buckets);
+  free_histogram(&histogram_from);
 }
 
 /* ------------------ update_uvhistogram ------------------------ */

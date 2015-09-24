@@ -375,8 +375,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&plot3di->file,(unsigned int)(strlen(full_file)+1));
         for(i = 0; i < 5; i++){
           NewMemory((void **)&plot3di->histogram[i], sizeof(histogramdata));
-          plot3di->histogram[i]->buckets = NULL;
-          plot3di->histogram[i]->buckets_2d = NULL;
+          init_histogram(plot3di->histogram[i],NHIST_BUCKETS);
         }
       
         CheckMemory;
@@ -467,8 +466,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         endian=getendian();
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
-        slicei->histogram->buckets = NULL;
-        slicei->histogram->buckets_2d = NULL;
+        init_histogram(slicei->histogram,NHIST_BUCKETS);
         STRCPY(slicei->file, trim_front(buffer));
         if(readlabels(&slicei->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading SLCF entry\n");
@@ -551,8 +549,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
-        boundaryi->histogram->buckets = NULL;
-        boundaryi->histogram->buckets_2d = NULL;
+        init_histogram(boundaryi->histogram,NHIST_BUCKETS);
         STRCPY(boundaryi->file, trim_front(buffer));
         if(readlabels(&boundaryi->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading BNDF entry\n");
