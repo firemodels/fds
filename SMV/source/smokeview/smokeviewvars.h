@@ -1239,9 +1239,10 @@ SVEXTERN float p3chopmin_temp, p3chopmax_temp;
 SVEXTERN float p3min_temp, p3max_temp;
 
 SVEXTERN smoke3ddata SVDECL(*smoke3dinfo,NULL);
-SVEXTERN int fire_red, fire_green, fire_blue;
-SVEXTERN float SVDECL(smoke_albedo,0.0);
-SVEXTERN float fire_halfdepth;
+SVEXTERN int SVDECL(fire_red,255), SVDECL(fire_green,128), SVDECL(fire_blue,0);
+
+SVEXTERN int SVDECL(smoke_red, 0), SVDECL(smoke_green, 0), SVDECL(smoke_blue, 0);
+SVEXTERN float SVDECL(smoke_albedo, 0.0), SVDECL(fire_halfdepth,2.0);
 
 SVEXTERN int SVDECL(show_firecolormap,0);
 SVEXTERN int SVDECL(firecolormap_type,FIRECOLORMAP_DIRECT),SVDECL(firecolormap_type_save,FIRECOLORMAP_DIRECT);

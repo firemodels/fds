@@ -1900,9 +1900,6 @@ void initvars(void){
  
   showfiles=0;
  
-  fire_red=255, fire_green=128, fire_blue=0;
-  fire_halfdepth=2.0;
-
   smokecullflag=1;
   smokedrawtest=0,smokedrawtest2=0;
   visMAINmenus=0;

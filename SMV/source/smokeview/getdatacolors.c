@@ -1414,9 +1414,9 @@ void Update_Smokecolormap(int option){
   switch(firecolormap_type){
     case FIRECOLORMAP_DIRECT:
       for(n=0;n<icut;n++){
-        rgb_colormap[4*n]=smoke_albedo;
-        rgb_colormap[4*n+1]=smoke_albedo;;
-        rgb_colormap[4*n+2]=smoke_albedo;;
+        rgb_colormap[4*n] = smoke_red;
+        rgb_colormap[4*n+1] = smoke_green;
+        rgb_colormap[4*n+2] = smoke_blue;
         if(alpha[n]==0){
           rgb_colormap[4*n+3]=0.0;
         }

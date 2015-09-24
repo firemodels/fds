@@ -10892,7 +10892,12 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%i %i %i",&fire_red,&fire_green,&fire_blue);
         continue;
       }
-      if(match(buffer,"FIREDEPTH")==1){
+      if(match(buffer, "SMOKECOLOR")==1){
+        if(fgets(buffer, 255, stream)==NULL)break;
+        sscanf(buffer, "%i %i %i", &smoke_red, &smoke_green, &smoke_blue);
+        continue;
+      }
+      if(match(buffer, "FIREDEPTH")==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%f",&fire_halfdepth);
         continue;
@@ -12358,6 +12363,8 @@ void writeini(int flag,char *filename){
     if(show_extreme_mindata == 1 || show_extreme_maxdata == 1)show_extremedata = 1;
     fprintf(fileout, " %i %i %i\n", show_extremedata, show_extreme_mindata, show_extreme_maxdata);
   }
+  fprintf(fileout, "SMOKECOLOR\n");
+  fprintf(fileout, " %i %i %i\n", smoke_red, smoke_green, smoke_blue);
   fprintf(fileout, "SMOKECULL\n");
 #ifdef pp_CULL
   fprintf(fileout," %i\n",cullsmoke);
