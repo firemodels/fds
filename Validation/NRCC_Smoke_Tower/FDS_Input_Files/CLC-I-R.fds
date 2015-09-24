@@ -19,7 +19,7 @@
 
 &REAC FUEL='PROPANE', CO_YIELD=0.005, SOOT_YIELD=0.024/
 
-&OBST XB=13.5,14.1,2.6,8.7,4.1,4.4, SURF_IDS='FIRE','INERT','INERT'/ PROPANE GAS BURNER
+&OBST XB=13.5,14.1,2.6,8.7,4.1,4.4, SURF_IDS='FIRE','Steel','Steel'/ PROPANE GAS BURNER
 
 &SURF ID     = 'FIRE'
       COLOR  = 'RED'
@@ -176,534 +176,6 @@
       MATL_ID(1,1)           ='CERAMIC FIBER',
       THICKNESS(1)           =0.0254/
    
-BUILDING LEAKS - DOOR LEAKS ADAPTED FROM K & M SMOKE MANAGEMENT TABLE 6.2, WITH 6MM LEAKAGE AT DOOR BTM ONLY
-&VENT XB=15.575,15.575,5.25,6.15,0.0,0.1, SURF_ID='Timber Door', ID='D1-A'/ GF Ex 1.8x2.1m Door 1
-&VENT XB=15.7,15.7,5.25,6.15,0.0,0.1,     SURF_ID='Timber Door', ID='D1-B'/ GF Ex 1.8x2.1m Door 1
-VENT XB=11.575,11.575,2.6,3.5,0.0,0.1,   SURF_ID='Timber Door', ID='D2-A'/ GF Int 0.9x2.1m Door 2
-VENT XB=11.7,11.7,2.6,3.5,0.0,0.1,       SURF_ID='Timber Door', ID='D2-B'/ GF Int 0.9x2.1m Door 2
-VENT XB=9.075,9.075,2.6,3.5,0.0,0.1,     SURF_ID='Timber Door', ID='D3-A'/ GF Int 0.9x2.1m Door 3
-VENT XB=9.2,9.2,2.6,3.5,0.0,0.1,         SURF_ID='Timber Door', ID='D3-B'/ GF Int 0.9x2.1m Door 3
-&VENT XB=7.4,8.3,1.2,1.2,0.0,0.1,         SURF_ID='Timber Door', ID='D4-A'/ GF Ex 0.9x2.1m Door 4
-&VENT XB=7.4,8.3,1.325,1.325,0.0,0.1,     SURF_ID='Timber Door', ID='D4-B'/ GF Ex 0.9x2.1m Door 4
-&VENT XB=9.075,9.075,2.6,3.5,7.2,7.3,     SURF_ID='Timber Door', ID='D5-A'/ 2F Int 0.9x2.1m Door 3
-&VENT XB=9.2,9.2,2.6,3.5,7.2,7.3,         SURF_ID='Timber Door', ID='D5-B'/ 2F Int 0.9x2.1m Door 3
-&VENT XB=11.575,11.575,2.6,3.5,12.4,12.5, SURF_ID='Timber Door', ID='D6-A'/ 4F Int 0.9x2.1m Door 2
-&VENT XB=11.7,11.7,2.6,3.5,12.4,12.5,     SURF_ID='Timber Door', ID='D6-B'/ 4F Int 0.9x2.1m Door 2
-&VENT XB=9.075,9.075,2.6,3.5,12.4,12.5,   SURF_ID='Timber Door', ID='D7-A'/ 4F Int 0.9x2.1m Door 3
-&VENT XB=9.2,9.2,2.6,3.5,12.4,12.5,       SURF_ID='Timber Door', ID='D7-B'/ 4F Int 0.9x2.1m Door 3
-&VENT XB=11.575,11.575,2.6,3.5,17.6,17.7, SURF_ID='Timber Door', ID='D8-A'/ 6F Int 0.9x2.1m Door 2
-&VENT XB=11.7,11.7,2.6,3.5,17.6,17.7,     SURF_ID='Timber Door', ID='D8-B'/ 6F Int 0.9x2.1m Door 2
-&VENT XB=9.075,9.075,2.6,3.5,17.6,17.7,   SURF_ID='Timber Door', ID='D9-A'/ 6F Int 0.9x2.1m Door 3
-&VENT XB=9.2,9.2,2.6,3.5,17.6,17.7,       SURF_ID='Timber Door', ID='D9-B'/ 6F Int 0.9x2.1m Door 3
-&VENT XB=9.075,9.075,2.6,3.5,22.8,22.9,   SURF_ID='Timber Door', ID='D10-A'/ 8F Int 0.9x2.1m Door 3
-&VENT XB=9.2,9.2,2.6,3.5,22.8,22.9,       SURF_ID='Timber Door', ID='D10-B'/ 8F Int 0.9x2.1m Door 3
-&HVAC ID='LEAK-D1',  TYPE_ID='LEAK', VENT_ID='D1-A',  VENT2_ID='D1-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-HVAC ID='LEAK-D2',  TYPE_ID='LEAK', VENT_ID='D2-A',  VENT2_ID='D2-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-HVAC ID='LEAK-D3',  TYPE_ID='LEAK', VENT_ID='D3-A',  VENT2_ID='D3-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D4',  TYPE_ID='LEAK', VENT_ID='D4-A',  VENT2_ID='D4-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D5',  TYPE_ID='LEAK', VENT_ID='D5-A',  VENT2_ID='D5-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D6',  TYPE_ID='LEAK', VENT_ID='D6-A',  VENT2_ID='D6-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D7',  TYPE_ID='LEAK', VENT_ID='D7-A',  VENT2_ID='D7-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D8',  TYPE_ID='LEAK', VENT_ID='D8-A',  VENT2_ID='D8-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D9',  TYPE_ID='LEAK', VENT_ID='D9-A',  VENT2_ID='D9-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-D10', TYPE_ID='LEAK', VENT_ID='D10-A', VENT2_ID='D10-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-
-
-BUILDING LEAKS - STAIR SHAFT SUPPLY/EXHAUST VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=4.3,5.5,5.1,5.1,0.1,1.3,   SURF_ID='Steel', ID='V1-A'/ GF Stair Supply 1.2x1.2m Vent 1
-&VENT XB=4.3,5.5,5.3,5.3,0.1,1.3,   SURF_ID='Steel', ID='V1-B'/ GF Stair Supply 1.2x1.2m Vent 1
-&VENT XB=8.5,9.1,5.1,5.1,2.7,3.3,   SURF_ID='Steel', ID='V2-A'/ GF Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,2.7,3.3,   SURF_ID='Steel', ID='V2-B'/ GF Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,2.9,3.5,   SURF_ID='Steel', ID='V3-A'/ GF Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,2.9,3.5,   SURF_ID='Steel', ID='V3-B'/ GF Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,6.3,6.9,   SURF_ID='Steel', ID='V4-A'/ 1F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,6.3,6.9,   SURF_ID='Steel', ID='V4-B'/ 1F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,6.5,7.1,   SURF_ID='Steel', ID='V5-A'/ 1F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,6.5,7.1,   SURF_ID='Steel', ID='V5-B'/ 1F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,8.9,9.5,   SURF_ID='Steel', ID='V6-A'/ 2F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,8.9,9.5,   SURF_ID='Steel', ID='V6-B'/ 2F Stair Exhaust 0.6x0.6m Vent 2   
-&VENT XB=4.3,5.2,5.1,5.1,9.6,10.2,  SURF_ID='Steel', ID='V7-A'/ 2F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,9.6,10.2,  SURF_ID='Steel', ID='V7-B'/ 2F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,11.5,12.1, SURF_ID='Steel', ID='V8-A'/ 3F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,11.5,12.1, SURF_ID='Steel', ID='V8-B'/ 3F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,12.2,12.8, SURF_ID='Steel', ID='V9-A'/ 3F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,12.2,12.8, SURF_ID='Steel', ID='V9-B'/ 3F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,14.1,14.7, SURF_ID='Steel', ID='V10-A'/ 4F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,14.1,14.7, SURF_ID='Steel', ID='V10-B'/ 4F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,14.8,15.4, SURF_ID='Steel', ID='V11-A'/ 4F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,14.8,15.4, SURF_ID='Steel', ID='V11-B'/ 4F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,16.7,17.3, SURF_ID='Steel', ID='V12-A'/ 5F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,16.7,17.3, SURF_ID='Steel', ID='V12-B'/ 5F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,17.4,18.0, SURF_ID='Steel', ID='V13-A'/ 5F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,17.4,18.0, SURF_ID='Steel', ID='V13-B'/ 5F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,19.3,19.9, SURF_ID='Steel', ID='V14-A'/ 6F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,19.3,19.9, SURF_ID='Steel', ID='V14-B'/ 6F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,20.0,20.6, SURF_ID='Steel', ID='V15-A'/ 6F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,20.0,20.6, SURF_ID='Steel', ID='V15-B'/ 6F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,21.9,22.5, SURF_ID='Steel', ID='V16-A'/ 7F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,21.9,22.5, SURF_ID='Steel', ID='V16-B'/ 7F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,22.6,23.2, SURF_ID='Steel', ID='V17-A'/ 7F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=4.3,5.2,5.3,5.3,22.6,23.2, SURF_ID='Steel', ID='V17-B'/ 7F Stair Supply 0.9x0.6m Vent 3
-&VENT XB=8.5,9.1,5.1,5.1,24.5,25.1, SURF_ID='Steel', ID='V18-A'/ 8F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,24.5,25.1, SURF_ID='Steel', ID='V18-B'/ 8F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=4.3,5.2,5.1,5.1,25.2,26.9, SURF_ID='Steel', ID='V19-A'/ 8F Stair Supply 0.9x1.7m Vent 4
-&VENT XB=4.3,5.2,5.3,5.3,25.2,26.9, SURF_ID='Steel', ID='V19-B'/ 8F Stair Supply 0.9x1.7m Vent 4
-&VENT XB=8.5,9.1,5.1,5.1,27.1,27.7, SURF_ID='Steel', ID='V20-A'/ 9F Stair Exhaust 0.6x0.6m Vent 2
-&VENT XB=8.5,9.1,5.3,5.3,27.1,27.7, SURF_ID='Steel', ID='V20-B'/ 9F Stair Exhaust 0.6x0.6m Vent 2
-&HVAC ID='LEAK-V1',  TYPE_ID='LEAK', VENT_ID='V1-A',  VENT2_ID='V1-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0048/ Closed Leak
-&HVAC ID='LEAK-V2',  TYPE_ID='LEAK', VENT_ID='V2-A',  VENT2_ID='V2-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V3',  TYPE_ID='LEAK', VENT_ID='V3-A',  VENT2_ID='V3-B',  LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V4',  TYPE_ID='LEAK', VENT_ID='V4-A',  VENT2_ID='V4-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V5',  TYPE_ID='LEAK', VENT_ID='V5-A',  VENT2_ID='V5-B',  LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V6',  TYPE_ID='LEAK', VENT_ID='V6-A',  VENT2_ID='V6-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V7',  TYPE_ID='LEAK', VENT_ID='V7-A',  VENT2_ID='V7-B',  LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V8',  TYPE_ID='LEAK', VENT_ID='V8-A',  VENT2_ID='V8-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V9',  TYPE_ID='LEAK', VENT_ID='V9-A',  VENT2_ID='V9-B',  LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V10', TYPE_ID='LEAK', VENT_ID='V10-A', VENT2_ID='V10-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V11', TYPE_ID='LEAK', VENT_ID='V11-A', VENT2_ID='V11-B', LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V12', TYPE_ID='LEAK', VENT_ID='V12-A', VENT2_ID='V12-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V13', TYPE_ID='LEAK', VENT_ID='V13-A', VENT2_ID='V13-B', LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V14', TYPE_ID='LEAK', VENT_ID='V14-A', VENT2_ID='V14-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V15', TYPE_ID='LEAK', VENT_ID='V15-A', VENT2_ID='V15-B', LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V16', TYPE_ID='LEAK', VENT_ID='V16-A', VENT2_ID='V16-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V17', TYPE_ID='LEAK', VENT_ID='V17-A', VENT2_ID='V17-B', LEAK_ENTHALPY=.TRUE., AREA=0.003/ Closed Leak
-&HVAC ID='LEAK-V18', TYPE_ID='LEAK', VENT_ID='V18-A', VENT2_ID='V18-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-&HVAC ID='LEAK-V19', TYPE_ID='LEAK', VENT_ID='V19-A', VENT2_ID='V19-B', LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V20', TYPE_ID='LEAK', VENT_ID='V20-A', VENT2_ID='V20-B', LEAK_ENTHALPY=.TRUE., AREA=0.0024/ Closed Leak
-
-
-BUILDING LEAKS - STAIR LOBBY SUPPLY/EXHAUST EXTERNAL VENT WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=9.4,10.4,1.0,1.0,2.2,2.55,   SURF_ID='Steel', ID='V22-A'/ GF Stair Lobby Supply/Extract 1.0x0.35m Vent 22
-&VENT XB=9.4,10.4,2.6,2.6,2.2,2.55,   SURF_ID='Steel', ID='V22-B'/ GF Stair Lobby Supply/Extract 1.0x0.35m Vent 22
-&VENT XB=9.4,10.4,1.0,1.0,6.65,7.0,   SURF_ID='Steel', ID='V23-A'/ 1F Stair Lobby Supply/Extract 1.0x0.35m Vent 23
-&VENT XB=9.4,10.4,2.6,2.6,6.65,7.0,   SURF_ID='Steel', ID='V23-B'/ 1F Stair Lobby Supply/Extract 1.0x0.35m Vent 23
-&VENT XB=9.4,10.4,1.0,1.0,9.25,9.6,   SURF_ID='Steel', ID='V24-A'/ 2F Stair Lobby Supply/Extract 1.0x0.35m Vent 24
-&VENT XB=9.4,10.4,2.6,2.6,9.25,9.6,   SURF_ID='Steel', ID='V24-B'/ 2F Stair Lobby Supply/Extract 1.0x0.35m Vent 24
-&VENT XB=9.4,10.4,1.0,1.0,11.85,12.2, SURF_ID='Steel', ID='V25-A'/ 3F Stair Lobby Supply/Extract 1.0x0.35m Vent 25
-&VENT XB=9.4,10.4,2.6,2.6,11.85,12.2, SURF_ID='Steel', ID='V25-B'/ 3F Stair Lobby Supply/Extract 1.0x0.35m Vent 25
-&VENT XB=9.4,10.4,1.0,1.0,14.45,14.8, SURF_ID='Steel', ID='V26-A'/ 4F Stair Lobby Supply/Extract 1.0x0.35m Vent 26
-&VENT XB=9.4,10.4,2.6,2.6,14.45,14.8, SURF_ID='Steel', ID='V26-B'/ 4F Stair Lobby Supply/Extract 1.0x0.35m Vent 26
-&VENT XB=9.4,10.4,1.0,1.0,17.05,17.4, SURF_ID='Steel', ID='V27-A'/ 5F Stair Lobby Supply/Extract 1.0x0.35m Vent 27
-&VENT XB=9.4,10.4,2.6,2.6,17.05,17.4, SURF_ID='Steel', ID='V27-B'/ 5F Stair Lobby Supply/Extract 1.0x0.35m Vent 27
-&VENT XB=9.4,10.4,1.0,1.0,19.65,20.0, SURF_ID='Steel', ID='V28-A'/ 6F Stair Lobby Supply/Extract 1.0x0.35m Vent 28
-&VENT XB=9.4,10.4,2.6,2.6,19.65,20.0, SURF_ID='Steel', ID='V28-B'/ 6F Stair Lobby Supply/Extract 1.0x0.35m Vent 28
-&VENT XB=9.4,10.4,1.0,1.0,22.25,22.6, SURF_ID='Steel', ID='V29-A'/ 7F Stair Lobby Supply/Extract 1.0x0.35m Vent 29
-&VENT XB=9.4,10.4,2.6,2.6,22.25,22.6, SURF_ID='Steel', ID='V29-B'/ 7F Stair Lobby Supply/Extract 1.0x0.35m Vent 29
-&VENT XB=9.4,10.4,1.0,1.0,24.85,25.2, SURF_ID='Steel', ID='V30-A'/ 8F Stair Lobby Supply/Extract 1.0x0.35m Vent 30
-&VENT XB=9.4,10.4,2.6,2.6,24.85,25.2, SURF_ID='Steel', ID='V30-B'/ 8F Stair Lobby Supply/Extract 1.0x0.35m Vent 30
-&VENT XB=9.4,10.4,1.0,1.0,27.45,27.8, SURF_ID='Steel', ID='V31-A'/ 9F Stair Lobby Supply/Extract 1.0x0.35m Vent 31
-&VENT XB=9.4,10.4,2.6,2.6,27.45,27.8, SURF_ID='Steel', ID='V31-B'/ 9F Stair Lobby Supply/Extract 1.0x0.35m Vent 31
-&HVAC ID='LEAK-V22',  TYPE_ID='LEAK', VENT_ID='V22-A',  VENT2_ID='V22-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V23',  TYPE_ID='LEAK', VENT_ID='V23-A',  VENT2_ID='V23-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V24',  TYPE_ID='LEAK', VENT_ID='V24-A',  VENT2_ID='V24-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V25',  TYPE_ID='LEAK', VENT_ID='V25-A',  VENT2_ID='V25-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V26',  TYPE_ID='LEAK', VENT_ID='V26-A',  VENT2_ID='V26-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V27',  TYPE_ID='LEAK', VENT_ID='V27-A',  VENT2_ID='V27-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V28',  TYPE_ID='LEAK', VENT_ID='V28-A',  VENT2_ID='V28-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V29',  TYPE_ID='LEAK', VENT_ID='V29-A',  VENT2_ID='V29-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V30',  TYPE_ID='LEAK', VENT_ID='V30-A',  VENT2_ID='V30-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V31',  TYPE_ID='LEAK', VENT_ID='V31-A',  VENT2_ID='V31-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-
-
-BUILDING LEAKS - SMOKE SHAFT VENT WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=11.7,11.7,3.9,5.7,2.5,3.3,   SURF_ID='Steel', ID='V32-A'/ GF Smoke Shaft Vent 1.8x0.8m Vent 32
-&VENT XB=11.9,11.9,3.9,5.7,2.5,3.3,   SURF_ID='Steel', ID='V32-B'/ GF Smoke Shaft Vent 1.8x0.8m Vent 32
-&VENT XB=11.7,11.7,3.9,5.7,6.1,6.9,   SURF_ID='Steel', ID='V33-A'/ 1F Smoke Shaft Vent 1.8x0.8m Vent 33
-&VENT XB=11.9,11.9,3.9,5.7,6.1,6.9,   SURF_ID='Steel', ID='V33-B'/ 1F Smoke Shaft Vent 1.8x0.8m Vent 33
-&VENT XB=11.7,11.7,3.9,5.7,8.7,9.5,   SURF_ID='Steel', ID='V34-A'/ 2F Smoke Shaft Vent 1.8x0.8m Vent 34
-&VENT XB=11.9,11.9,3.9,5.7,8.7,9.5,   SURF_ID='Steel', ID='V34-B'/ 2F Smoke Shaft Vent 1.8x0.8m Vent 34
-&VENT XB=11.7,11.7,3.9,5.7,11.3,12.1, SURF_ID='Steel', ID='V35-A'/ 3F Smoke Shaft Vent 1.8x0.8m Vent 35
-&VENT XB=11.9,11.9,3.9,5.7,11.3,12.1, SURF_ID='Steel', ID='V35-B'/ 3F Smoke Shaft Vent 1.8x0.8m Vent 35
-&VENT XB=11.7,11.7,3.9,5.7,13.9,14.7, SURF_ID='Steel', ID='V36-A'/ 4F Smoke Shaft Vent 1.8x0.8m Vent 36
-&VENT XB=11.9,11.9,3.9,5.7,13.9,14.7, SURF_ID='Steel', ID='V36-B'/ 4F Smoke Shaft Vent 1.8x0.8m Vent 36
-&VENT XB=11.7,11.7,3.9,5.7,16.5,17.3, SURF_ID='Steel', ID='V37-A'/ 5F Smoke Shaft Vent 1.8x0.8m Vent 37
-&VENT XB=11.9,11.9,3.9,5.7,16.5,17.3, SURF_ID='Steel', ID='V37-B'/ 5F Smoke Shaft Vent 1.8x0.8m Vent 37
-&VENT XB=11.7,11.7,3.9,5.7,19.1,19.9, SURF_ID='Steel', ID='V38-A'/ 6F Smoke Shaft Vent 1.8x0.8m Vent 38
-&VENT XB=11.9,11.9,3.9,5.7,19.1,19.9, SURF_ID='Steel', ID='V38-B'/ 6F Smoke Shaft Vent 1.8x0.8m Vent 38
-&VENT XB=11.7,11.7,3.9,5.7,21.7,22.5, SURF_ID='Steel', ID='V39-A'/ 7F Smoke Shaft Vent 1.8x0.8m Vent 39
-&VENT XB=11.9,11.9,3.9,5.7,21.7,22.5, SURF_ID='Steel', ID='V39-B'/ 7F Smoke Shaft Vent 1.8x0.8m Vent 39
-&VENT XB=11.7,11.7,3.9,5.7,24.3,25.1, SURF_ID='Steel', ID='V40-A'/ 8F Smoke Shaft Vent 1.8x0.8m Vent 40
-&VENT XB=11.9,11.9,3.9,5.7,24.3,25.1, SURF_ID='Steel', ID='V40-B'/ 8F Smoke Shaft Vent 1.8x0.8m Vent 40
-&VENT XB=11.7,11.7,3.9,5.7,26.9,27.7, SURF_ID='Steel', ID='V41-A'/ 9F Smoke Shaft Vent 1.8x0.8m Vent 41
-&VENT XB=11.9,11.9,3.9,5.7,26.9,27.7, SURF_ID='Steel', ID='V41-B'/ 9F Smoke Shaft Vent 1.8x0.8m Vent 41
-&HVAC ID='LEAK-V32',  TYPE_ID='LEAK', VENT_ID='V32-A',  VENT2_ID='V32-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V33',  TYPE_ID='LEAK', VENT_ID='V33-A',  VENT2_ID='V33-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V34',  TYPE_ID='LEAK', VENT_ID='V34-A',  VENT2_ID='V34-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V35',  TYPE_ID='LEAK', VENT_ID='V35-A',  VENT2_ID='V35-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V36',  TYPE_ID='LEAK', VENT_ID='V36-A',  VENT2_ID='V36-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V37',  TYPE_ID='LEAK', VENT_ID='V37-A',  VENT2_ID='V37-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V38',  TYPE_ID='LEAK', VENT_ID='V38-A',  VENT2_ID='V38-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V39',  TYPE_ID='LEAK', VENT_ID='V39-A',  VENT2_ID='V39-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V40',  TYPE_ID='LEAK', VENT_ID='V40-A',  VENT2_ID='V40-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-&HVAC ID='LEAK-V41',  TYPE_ID='LEAK', VENT_ID='V41-A',  VENT2_ID='V41-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0052/ Closed Leak
-
-
-BUILDING LEAKS - LOBBY SUPPLY SHAFT VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=9.9,10.2,3.7,3.7,3.0,3.3,   SURF_ID='Steel', ID='V42-A'/ GF Smoke Shaft Vent 0.3x0.3m Vent 42
-&VENT XB=9.9,10.2,3.9,3.9,3.0,3.3,   SURF_ID='Steel', ID='V42-B'/ GF Smoke Shaft Vent 0.3x0.3m Vent 42
-&VENT XB=9.9,10.2,5.7,5.7,3.0,3.3,   SURF_ID='Steel', ID='V43-A'/ GF Smoke Shaft Vent 0.3x0.3m Vent 43
-&VENT XB=9.9,10.2,5.9,5.9,3.0,3.3,   SURF_ID='Steel', ID='V43-B'/ GF Smoke Shaft Vent 0.3x0.3m Vent 43
-&VENT XB=9.9,10.2,3.7,3.7,6.6,6.9,   SURF_ID='Steel', ID='V44-A'/ 1F Smoke Shaft Vent 0.3x0.3m Vent 44
-&VENT XB=9.9,10.2,3.9,3.9,6.6,6.9,   SURF_ID='Steel', ID='V44-B'/ 1F Smoke Shaft Vent 0.3x0.3m Vent 44
-&VENT XB=9.9,10.2,5.7,5.7,6.6,6.9,   SURF_ID='Steel', ID='V45-A'/ 1F Smoke Shaft Vent 0.3x0.3m Vent 45
-&VENT XB=9.9,10.2,5.9,5.9,6.6,6.9,   SURF_ID='Steel', ID='V45-B'/ 1F Smoke Shaft Vent 0.3x0.3m Vent 45
-&VENT XB=9.9,10.2,3.7,3.7,9.2,9.5,   SURF_ID='Steel', ID='V46-A'/ 2F Smoke Shaft Vent 0.3x0.3m Vent 46
-&VENT XB=9.9,10.2,3.9,3.9,9.2,9.5,   SURF_ID='Steel', ID='V46-B'/ 2F Smoke Shaft Vent 0.3x0.3m Vent 46
-&VENT XB=9.9,10.2,5.7,5.7,9.2,9.5,   SURF_ID='Steel', ID='V47-A'/ 2F Smoke Shaft Vent 0.3x0.3m Vent 47
-&VENT XB=9.9,10.2,5.9,5.9,9.2,9.5,   SURF_ID='Steel', ID='V47-B'/ 2F Smoke Shaft Vent 0.3x0.3m Vent 47
-&VENT XB=9.9,10.2,3.7,3.7,11.8,12.1, SURF_ID='Steel', ID='V48-A'/ 3F Smoke Shaft Vent 0.3x0.3m Vent 48
-&VENT XB=9.9,10.2,3.9,3.9,11.8,12.1, SURF_ID='Steel', ID='V48-B'/ 3F Smoke Shaft Vent 0.3x0.3m Vent 48
-&VENT XB=9.9,10.2,5.7,5.7,11.8,12.1, SURF_ID='Steel', ID='V49-A'/ 3F Smoke Shaft Vent 0.3x0.3m Vent 49
-&VENT XB=9.9,10.2,5.9,5.9,11.8,12.1, SURF_ID='Steel', ID='V49-B'/ 3F Smoke Shaft Vent 0.3x0.3m Vent 49
-&VENT XB=9.9,10.2,3.7,3.7,14.4,14.7, SURF_ID='Steel', ID='V50-A'/ 4F Smoke Shaft Vent 0.3x0.3m Vent 50
-&VENT XB=9.9,10.2,3.9,3.9,14.4,14.7, SURF_ID='Steel', ID='V50-B'/ 4F Smoke Shaft Vent 0.3x0.3m Vent 50
-&VENT XB=9.9,10.2,5.7,5.7,14.4,14.7, SURF_ID='Steel', ID='V51-A'/ 4F Smoke Shaft Vent 0.3x0.3m Vent 51
-&VENT XB=9.9,10.2,5.9,5.9,14.4,14.7, SURF_ID='Steel', ID='V51-B'/ 4F Smoke Shaft Vent 0.3x0.3m Vent 51
-&VENT XB=9.9,10.2,3.7,3.7,17.0,17.3, SURF_ID='Steel', ID='V52-A'/ 5F Smoke Shaft Vent 0.3x0.3m Vent 52
-&VENT XB=9.9,10.2,3.9,3.9,17.0,17.3, SURF_ID='Steel', ID='V52-B'/ 5F Smoke Shaft Vent 0.3x0.3m Vent 52
-&VENT XB=9.9,10.2,5.7,5.7,17.0,17.3, SURF_ID='Steel', ID='V53-A'/ 5F Smoke Shaft Vent 0.3x0.3m Vent 53
-&VENT XB=9.9,10.2,5.9,5.9,17.0,17.3, SURF_ID='Steel', ID='V53-B'/ 5F Smoke Shaft Vent 0.3x0.3m Vent 53
-&VENT XB=9.9,10.2,3.7,3.7,19.6,19.9, SURF_ID='Steel', ID='V54-A'/ 6F Smoke Shaft Vent 0.3x0.3m Vent 54
-&VENT XB=9.9,10.2,3.9,3.9,19.6,19.9, SURF_ID='Steel', ID='V54-B'/ 6F Smoke Shaft Vent 0.3x0.3m Vent 54
-&VENT XB=9.9,10.2,5.7,5.7,19.6,19.9, SURF_ID='Steel', ID='V55-A'/ 6F Smoke Shaft Vent 0.3x0.3m Vent 55
-&VENT XB=9.9,10.2,5.9,5.9,19.6,19.9, SURF_ID='Steel', ID='V55-B'/ 6F Smoke Shaft Vent 0.3x0.3m Vent 55
-&VENT XB=9.9,10.2,3.7,3.7,22.2,22.5, SURF_ID='Steel', ID='V56-A'/ 7F Smoke Shaft Vent 0.3x0.3m Vent 56
-&VENT XB=9.9,10.2,3.9,3.9,22.2,22.5, SURF_ID='Steel', ID='V56-B'/ 7F Smoke Shaft Vent 0.3x0.3m Vent 56
-&VENT XB=9.9,10.2,5.7,5.7,22.2,22.5, SURF_ID='Steel', ID='V57-A'/ 7F Smoke Shaft Vent 0.3x0.3m Vent 57
-&VENT XB=9.9,10.2,5.9,5.9,22.2,22.5, SURF_ID='Steel', ID='V57-B'/ 7F Smoke Shaft Vent 0.3x0.3m Vent 57
-&VENT XB=9.9,10.2,3.7,3.7,24.8,25.1, SURF_ID='Steel', ID='V58-A'/ 8F Smoke Shaft Vent 0.3x0.3m Vent 58
-&VENT XB=9.9,10.2,3.9,3.9,24.8,25.1, SURF_ID='Steel', ID='V58-B'/ 8F Smoke Shaft Vent 0.3x0.3m Vent 58
-&VENT XB=9.9,10.2,5.7,5.7,24.8,25.1, SURF_ID='Steel', ID='V59-A'/ 8F Smoke Shaft Vent 0.3x0.3m Vent 59
-&VENT XB=9.9,10.2,5.9,5.9,24.8,25.1, SURF_ID='Steel', ID='V59-B'/ 8F Smoke Shaft Vent 0.3x0.3m Vent 59
-&VENT XB=9.9,10.2,3.7,3.7,27.4,27.7, SURF_ID='Steel', ID='V60-A'/ 9F Smoke Shaft Vent 0.3x0.3m Vent 60
-&VENT XB=9.9,10.2,3.9,3.9,27.4,27.7, SURF_ID='Steel', ID='V60-B'/ 9F Smoke Shaft Vent 0.3x0.3m Vent 60
-&VENT XB=9.9,10.2,5.7,5.7,27.4,27.7, SURF_ID='Steel', ID='V61-A'/ 9F Smoke Shaft Vent 0.3x0.3m Vent 61
-&VENT XB=9.9,10.2,5.9,5.9,27.4,27.7, SURF_ID='Steel', ID='V61-B'/ 9F Smoke Shaft Vent 0.3x0.3m Vent 61
-&HVAC ID='LEAK-V42',  TYPE_ID='LEAK', VENT_ID='V42-A',  VENT2_ID='V42-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V43',  TYPE_ID='LEAK', VENT_ID='V43-A',  VENT2_ID='V43-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V44',  TYPE_ID='LEAK', VENT_ID='V44-A',  VENT2_ID='V44-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V45',  TYPE_ID='LEAK', VENT_ID='V45-A',  VENT2_ID='V45-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V46',  TYPE_ID='LEAK', VENT_ID='V46-A',  VENT2_ID='V46-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V47',  TYPE_ID='LEAK', VENT_ID='V47-A',  VENT2_ID='V47-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V48',  TYPE_ID='LEAK', VENT_ID='V48-A',  VENT2_ID='V48-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V49',  TYPE_ID='LEAK', VENT_ID='V49-A',  VENT2_ID='V49-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V50',  TYPE_ID='LEAK', VENT_ID='V50-A',  VENT2_ID='V50-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V51',  TYPE_ID='LEAK', VENT_ID='V51-A',  VENT2_ID='V51-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V52',  TYPE_ID='LEAK', VENT_ID='V52-A',  VENT2_ID='V52-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V53',  TYPE_ID='LEAK', VENT_ID='V53-A',  VENT2_ID='V53-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V54',  TYPE_ID='LEAK', VENT_ID='V54-A',  VENT2_ID='V54-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V55',  TYPE_ID='LEAK', VENT_ID='V55-A',  VENT2_ID='V55-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V56',  TYPE_ID='LEAK', VENT_ID='V56-A',  VENT2_ID='V56-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V57',  TYPE_ID='LEAK', VENT_ID='V57-A',  VENT2_ID='V57-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V58',  TYPE_ID='LEAK', VENT_ID='V58-A',  VENT2_ID='V58-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V59',  TYPE_ID='LEAK', VENT_ID='V59-A',  VENT2_ID='V59-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V60',  TYPE_ID='LEAK', VENT_ID='V60-A',  VENT2_ID='V60-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-&HVAC ID='LEAK-V61',  TYPE_ID='LEAK', VENT_ID='V61-A',  VENT2_ID='V61-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0012/ Closed Leak
-
-
-BUILDING LEAKS - LIFT SHAFT VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-VENT XB=7.45,8.05,8.7,8.7,2.2,2.5,     SURF_ID='Steel', ID='V62-A'/ GF Lift Shaft Vent 0.6x0.3m Vent 62
-VENT XB=7.45,8.05,8.9,8.9,2.2,2.5,     SURF_ID='Steel', ID='V62-B'/ GF Lift Shaft Vent 0.6x0.3m Vent 62
-&VENT XB=7.45,8.05,8.7,8.7,5.8,6.1,     SURF_ID='Steel', ID='V63-A'/ 1F Lift Shaft Vent 0.6x0.3m Vent 63
-&VENT XB=7.45,8.05,8.9,8.9,5.8,6.1,     SURF_ID='Steel', ID='V63-B'/ 1F Lift Shaft Vent 0.6x0.3m Vent 63
-&VENT XB=7.45,8.05,8.7,8.7,8.55,8.85,   SURF_ID='Steel', ID='V64-A'/ 2F Lift Shaft Vent 0.6x0.3m Vent 64
-&VENT XB=7.45,8.05,8.9,8.9,8.55,8.85,   SURF_ID='Steel', ID='V64-B'/ 2F Lift Shaft Vent 0.6x0.3m Vent 64
-&VENT XB=7.45,8.05,8.7,8.7,11.15,11.45, SURF_ID='Steel', ID='V65-A'/ 3F Lift Shaft Vent 0.6x0.3m Vent 65
-&VENT XB=7.45,8.05,8.9,8.9,11.15,11.45, SURF_ID='Steel', ID='V65-B'/ 3F Lift Shaft Vent 0.6x0.3m Vent 65
-&VENT XB=7.45,8.05,8.7,8.7,13.75,14.05, SURF_ID='Steel', ID='V66-A'/ 4F Lift Shaft Vent 0.6x0.3m Vent 66
-&VENT XB=7.45,8.05,8.9,8.9,13.75,14.05, SURF_ID='Steel', ID='V66-B'/ 4F Lift Shaft Vent 0.6x0.3m Vent 66
-&VENT XB=7.45,8.05,8.7,8.7,16.35,16.65, SURF_ID='Steel', ID='V67-A'/ 5F Lift Shaft Vent 0.6x0.3m Vent 67
-&VENT XB=7.45,8.05,8.9,8.9,16.35,16.65, SURF_ID='Steel', ID='V67-B'/ 5F Lift Shaft Vent 0.6x0.3m Vent 67
-&VENT XB=7.45,8.05,8.7,8.7,18.95,19.25, SURF_ID='Steel', ID='V68-A'/ 6F Lift Shaft Vent 0.6x0.3m Vent 68
-&VENT XB=7.45,8.05,8.9,8.9,18.95,19.25, SURF_ID='Steel', ID='V68-B'/ 6F Lift Shaft Vent 0.6x0.3m Vent 68
-&VENT XB=7.45,8.05,8.7,8.7,21.55,21.85, SURF_ID='Steel', ID='V69-A'/ 7F Lift Shaft Vent 0.6x0.3m Vent 69
-&VENT XB=7.45,8.05,8.9,8.9,21.55,21.85, SURF_ID='Steel', ID='V69-B'/ 7F Lift Shaft Vent 0.6x0.3m Vent 69
-&VENT XB=7.45,8.05,8.7,8.7,24.15,24.45, SURF_ID='Steel', ID='V70-A'/ 8F Lift Shaft Vent 0.6x0.3m Vent 70
-&VENT XB=7.45,8.05,8.9,8.9,24.15,24.45, SURF_ID='Steel', ID='V70-B'/ 8F Lift Shaft Vent 0.6x0.3m Vent 70
-&VENT XB=7.45,8.05,8.7,8.7,26.75,27.05, SURF_ID='Steel', ID='V71-A'/ 9F Lift Shaft Vent 0.6x0.3m Vent 71
-&VENT XB=7.45,8.05,8.9,8.9,26.75,27.05, SURF_ID='Steel', ID='V71-B'/ 9F Lift Shaft Vent 0.6x0.3m Vent 71
-HVAC ID='LEAK-V62',  TYPE_ID='LEAK', VENT_ID='V62-A',  VENT2_ID='V62-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V63',  TYPE_ID='LEAK', VENT_ID='V63-A',  VENT2_ID='V63-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V64',  TYPE_ID='LEAK', VENT_ID='V64-A',  VENT2_ID='V64-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V65',  TYPE_ID='LEAK', VENT_ID='V65-A',  VENT2_ID='V65-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V66',  TYPE_ID='LEAK', VENT_ID='V66-A',  VENT2_ID='V66-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V67',  TYPE_ID='LEAK', VENT_ID='V67-A',  VENT2_ID='V67-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V68',  TYPE_ID='LEAK', VENT_ID='V68-A',  VENT2_ID='V68-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V69',  TYPE_ID='LEAK', VENT_ID='V69-A',  VENT2_ID='V69-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V70',  TYPE_ID='LEAK', VENT_ID='V70-A',  VENT2_ID='V70-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-&HVAC ID='LEAK-V71',  TYPE_ID='LEAK', VENT_ID='V71-A',  VENT2_ID='V71-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0018/ Closed Leak
-
-
-BUILDING LEAKS - SERVICE SHAFT VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-VENT XB=4.6,5.8,8.7,8.7,0.1,1.0,    SURF_ID='Steel', ID='V72-A'/ GF Service Shaft Vent 1.2x0.9m Vent 72
-VENT XB=4.6,5.8,8.9,8.9,0.1,1.0,    SURF_ID='Steel', ID='V72-B'/ GF Service Shaft Vent 1.2x0.9m Vent 72
-&VENT XB=4.6,5.8,8.7,8.7,3.7,4.6,    SURF_ID='Steel', ID='V73-A'/ 1F Service Shaft Vent 1.2x0.9m Vent 73
-&VENT XB=4.6,5.8,8.9,8.9,3.7,4.6,    SURF_ID='Steel', ID='V73-B'/ 1F Service Shaft Vent 1.2x0.9m Vent 73
-&VENT XB=4.6,5.8,8.7,8.7,7.3,8.2,    SURF_ID='Steel', ID='V74-A'/ 2F Service Shaft Vent 1.2x0.9m Vent 74
-&VENT XB=4.6,5.8,8.9,8.9,7.3,8.2,    SURF_ID='Steel', ID='V74-B'/ 2F Service Shaft Vent 1.2x0.9m Vent 74
-&VENT XB=4.6,5.8,8.7,8.7,9.9,10.8,   SURF_ID='Steel', ID='V75-A'/ 3F Service Shaft Vent 1.2x0.9m Vent 75
-&VENT XB=4.6,5.8,8.9,8.9,9.9,10.8,   SURF_ID='Steel', ID='V75-B'/ 3F Service Shaft Vent 1.2x0.9m Vent 75
-&VENT XB=4.6,5.8,8.7,8.7,12.5,13.4,  SURF_ID='Steel', ID='V76-A'/ 4F Service Shaft Vent 1.2x0.9m Vent 76
-&VENT XB=4.6,5.8,8.9,8.9,12.5,13.4,  SURF_ID='Steel', ID='V76-B'/ 4F Service Shaft Vent 1.2x0.9m Vent 76
-&VENT XB=4.6,5.8,8.7,8.7,15.1,16.0,  SURF_ID='Steel', ID='V77-A'/ 5F Service Shaft Vent 1.2x0.9m Vent 77
-&VENT XB=4.6,5.8,8.9,8.9,15.1,16.0,  SURF_ID='Steel', ID='V77-B'/ 5F Service Shaft Vent 1.2x0.9m Vent 77
-&VENT XB=4.6,5.8,8.7,8.7,17.7,18.6,  SURF_ID='Steel', ID='V78-A'/ 6F Service Shaft Vent 1.2x0.9m Vent 78
-&VENT XB=4.6,5.8,8.9,8.9,17.7,18.6,  SURF_ID='Steel', ID='V78-B'/ 6F Service Shaft Vent 1.2x0.9m Vent 78
-&VENT XB=4.6,5.8,8.7,8.7,20.3,21.2,  SURF_ID='Steel', ID='V79-A'/ 7F Service Shaft Vent 1.2x0.9m Vent 79
-&VENT XB=4.6,5.8,8.9,8.9,20.3,21.2,  SURF_ID='Steel', ID='V79-B'/ 7F Service Shaft Vent 1.2x0.9m Vent 79
-&VENT XB=4.6,5.8,8.7,8.7,22.9,23.8,  SURF_ID='Steel', ID='V80-A'/ 8F Service Shaft Vent 1.2x0.9m Vent 80
-&VENT XB=4.6,5.8,8.9,8.9,22.9,23.8,  SURF_ID='Steel', ID='V80-B'/ 8F Service Shaft Vent 1.2x0.9m Vent 80
-&VENT XB=4.6,5.8,8.7,8.7,25.5,26.4,  SURF_ID='Steel', ID='V81-A'/ 9F Service Shaft Vent 1.2x0.9m Vent 81
-&VENT XB=4.6,5.8,8.9,8.9,25.5,26.4,  SURF_ID='Steel', ID='V81-B'/ 9F Service Shaft Vent 1.2x0.9m Vent 81
-HVAC ID='LEAK-V72',  TYPE_ID='LEAK', VENT_ID='V72-A',  VENT2_ID='V72-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V73',  TYPE_ID='LEAK', VENT_ID='V73-A',  VENT2_ID='V73-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V74',  TYPE_ID='LEAK', VENT_ID='V74-A',  VENT2_ID='V74-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V75',  TYPE_ID='LEAK', VENT_ID='V75-A',  VENT2_ID='V75-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V76',  TYPE_ID='LEAK', VENT_ID='V76-A',  VENT2_ID='V76-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V77',  TYPE_ID='LEAK', VENT_ID='V77-A',  VENT2_ID='V77-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V78',  TYPE_ID='LEAK', VENT_ID='V78-A',  VENT2_ID='V78-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V79',  TYPE_ID='LEAK', VENT_ID='V79-A',  VENT2_ID='V79-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V80',  TYPE_ID='LEAK', VENT_ID='V80-A',  VENT2_ID='V80-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-&HVAC ID='LEAK-V81',  TYPE_ID='LEAK', VENT_ID='V81-A',  VENT2_ID='V81-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0042/ Closed Leak
-
-
-BUILDING LEAKS - BUILDING SUPPLY SHAFT VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=2.4,2.4,6.875,7.575,2.7,3.3,   SURF_ID='Steel', ID='V82-A'/ GF Building Supply Shaft Vent 0.7x0.6m Vent 82
-&VENT XB=2.6,2.6,6.875,7.575,2.7,3.3,   SURF_ID='Steel', ID='V82-B'/ GF Building Supply Shaft Vent 0.7x0.6m Vent 82
-&VENT XB=2.4,2.4,6.875,7.575,6.3,6.9,   SURF_ID='Steel', ID='V83-A'/ 1F Building Supply Shaft Vent 0.7x0.6m Vent 83
-&VENT XB=2.6,2.6,6.875,7.575,6.3,6.9,   SURF_ID='Steel', ID='V83-B'/ 1F Building Supply Shaft Vent 0.7x0.6m Vent 83
-&VENT XB=2.4,2.4,6.875,7.575,8.9,9.5,   SURF_ID='Steel', ID='V84-A'/ 2F Building Supply Shaft Vent 0.7x0.6m Vent 84
-&VENT XB=2.6,2.6,6.875,7.575,8.9,9.5,   SURF_ID='Steel', ID='V84-B'/ 2F Building Supply Shaft Vent 0.7x0.6m Vent 84
-&VENT XB=2.4,2.4,6.875,7.575,11.5,12.1, SURF_ID='Steel', ID='V85-A'/ 3F Building Supply Shaft Vent 0.7x0.6m Vent 85
-&VENT XB=2.6,2.6,6.875,7.575,11.5,12.1, SURF_ID='Steel', ID='V85-B'/ 3F Building Supply Shaft Vent 0.7x0.6m Vent 85
-&VENT XB=2.4,2.4,6.875,7.575,14.1,14.7, SURF_ID='Steel', ID='V86-A'/ 4F Building Supply Shaft Vent 0.7x0.6m Vent 86
-&VENT XB=2.6,2.6,6.875,7.575,14.1,14.7, SURF_ID='Steel', ID='V86-B'/ 4F Building Supply Shaft Vent 0.7x0.6m Vent 86
-&VENT XB=2.4,2.4,6.875,7.575,16.7,17.3, SURF_ID='Steel', ID='V87-A'/ 5F Building Supply Shaft Vent 0.7x0.6m Vent 87
-&VENT XB=2.6,2.6,6.875,7.575,16.7,17.3, SURF_ID='Steel', ID='V87-B'/ 5F Building Supply Shaft Vent 0.7x0.6m Vent 87
-&VENT XB=2.4,2.4,6.875,7.575,19.3,19.9, SURF_ID='Steel', ID='V88-A'/ 6F Building Supply Shaft Vent 0.7x0.6m Vent 88
-&VENT XB=2.6,2.6,6.875,7.575,19.3,19.9, SURF_ID='Steel', ID='V88-B'/ 6F Building Supply Shaft Vent 0.7x0.6m Vent 88
-&VENT XB=2.4,2.4,6.875,7.575,21.9,22.5, SURF_ID='Steel', ID='V89-A'/ 7F Building Supply Shaft Vent 0.7x0.6m Vent 89
-&VENT XB=2.6,2.6,6.875,7.575,21.9,22.5, SURF_ID='Steel', ID='V89-B'/ 7F Building Supply Shaft Vent 0.7x0.6m Vent 89
-&VENT XB=2.4,2.4,6.875,7.575,24.5,25.1, SURF_ID='Steel', ID='V90-A'/ 8F Building Supply Shaft Vent 0.7x0.6m Vent 90
-&VENT XB=2.6,2.6,6.875,7.575,24.5,25.1, SURF_ID='Steel', ID='V90-B'/ 8F Building Supply Shaft Vent 0.7x0.6m Vent 90
-&VENT XB=2.4,2.4,6.875,7.575,27.1,27.7, SURF_ID='Steel', ID='V91-A'/ 9F Building Supply Shaft Vent 0.7x0.6m Vent 91
-&VENT XB=2.6,2.6,6.875,7.575,27.1,27.7, SURF_ID='Steel', ID='V91-B'/ 9F Building Supply Shaft Vent 0.7x0.6m Vent 91
-&HVAC ID='LEAK-V82',  TYPE_ID='LEAK', VENT_ID='V82-A',  VENT2_ID='V82-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V83',  TYPE_ID='LEAK', VENT_ID='V83-A',  VENT2_ID='V83-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V84',  TYPE_ID='LEAK', VENT_ID='V84-A',  VENT2_ID='V84-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V85',  TYPE_ID='LEAK', VENT_ID='V85-A',  VENT2_ID='V85-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V86',  TYPE_ID='LEAK', VENT_ID='V86-A',  VENT2_ID='V86-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V87',  TYPE_ID='LEAK', VENT_ID='V87-A',  VENT2_ID='V87-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V88',  TYPE_ID='LEAK', VENT_ID='V88-A',  VENT2_ID='V88-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V89',  TYPE_ID='LEAK', VENT_ID='V89-A',  VENT2_ID='V89-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V90',  TYPE_ID='LEAK', VENT_ID='V90-A',  VENT2_ID='V90-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-&HVAC ID='LEAK-V91',  TYPE_ID='LEAK', VENT_ID='V91-A',  VENT2_ID='V91-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0026/ Closed Leak
-
-
-BUILDING LEAKS - BUILDING RETURN/EXHAUST SHAFT VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=2.4,2.4,3.75,5.35,2.2,3.3,   SURF_ID='Steel', ID='V92-A'/ GF Building Return Shaft Vent 1.6x1.1m Vent 92
-&VENT XB=2.6,2.6,3.75,5.35,2.2,3.3,   SURF_ID='Steel', ID='V92-B'/ GF Building Return Shaft Vent 1.6x1.1m Vent 92
-&VENT XB=2.4,2.4,2.8,3.55,2.7,3.3,    SURF_ID='Steel', ID='V93-A'/ GF Building Exhaust Shaft Vent 0.75x0.6m Vent 93
-&VENT XB=2.6,2.6,2.8,3.55,2.7,3.3,    SURF_ID='Steel', ID='V93-B'/ GF Building Exhaust Shaft Vent 0.75x0.6m Vent 93
-&VENT XB=2.4,2.4,3.75,5.35,5.8,6.9,   SURF_ID='Steel', ID='V94-A'/ 1F Building Return Shaft Vent 1.6x1.1m Vent 94
-&VENT XB=2.6,2.6,3.75,5.35,5.8,6.9,   SURF_ID='Steel', ID='V94-B'/ 1F Building Return Shaft Vent 1.6x1.1m Vent 94
-&VENT XB=2.4,2.4,2.8,3.55,6.3,6.9,    SURF_ID='Steel', ID='V95-A'/ 1F Building Exhaust Shaft Vent 0.75x0.6m Vent 95
-&VENT XB=2.6,2.6,2.8,3.55,6.3,6.9,    SURF_ID='Steel', ID='V95-B'/ 1F Building Exhaust Shaft Vent 0.75x0.6m Vent 95
-&VENT XB=2.4,2.4,3.75,5.35,8.4,9.5,   SURF_ID='Steel', ID='V96-A'/ 2F Building Return Shaft Vent 1.6x1.1m Vent 96
-&VENT XB=2.6,2.6,3.75,5.35,8.4,9.5,   SURF_ID='Steel', ID='V96-B'/ 2F Building Return Shaft Vent 1.6x1.1m Vent 96
-&VENT XB=2.4,2.4,2.8,3.55,8.9,9.5,    SURF_ID='Steel', ID='V97-A'/ 2F Building Exhaust Shaft Vent 0.75x0.6m Vent 97
-&VENT XB=2.6,2.6,2.8,3.55,8.9,9.5,    SURF_ID='Steel', ID='V97-B'/ 2F Building Exhaust Shaft Vent 0.75x0.6m Vent 97
-&VENT XB=2.4,2.4,3.75,5.35,11.0,12.1, SURF_ID='Steel', ID='V98-A'/ 3F Building Return Shaft Vent 1.6x1.1m Vent 98
-&VENT XB=2.6,2.6,3.75,5.35,11.0,12.1, SURF_ID='Steel', ID='V98-B'/ 3F Building Return Shaft Vent 1.6x1.1m Vent 98
-&VENT XB=2.4,2.4,2.8,3.55,11.5,12.1,  SURF_ID='Steel', ID='V99-A'/ 3F Building Exhaust Shaft Vent 0.75x0.6m Vent 99
-&VENT XB=2.6,2.6,2.8,3.55,11.5,12.1,  SURF_ID='Steel', ID='V99-B'/ 3F Building Exhaust Shaft Vent 0.75x0.6m Vent 99
-&VENT XB=2.4,2.4,3.75,5.35,13.6,14.7, SURF_ID='Steel', ID='V100-A'/ 4F Building Return Shaft Vent 1.6x1.1m Vent 100
-&VENT XB=2.6,2.6,3.75,5.35,13.6,14.7, SURF_ID='Steel', ID='V100-B'/ 4F Building Return Shaft Vent 1.6x1.1m Vent 100
-&VENT XB=2.4,2.4,2.8,3.55,14.1,14.7,  SURF_ID='Steel', ID='V101-A'/ 4F Building Exhaust Shaft Vent 0.75x0.6m Vent 101
-&VENT XB=2.6,2.6,2.8,3.55,14.1,14.7,  SURF_ID='Steel', ID='V101-B'/ 4F Building Exhaust Shaft Vent 0.75x0.6m Vent 101
-&VENT XB=2.4,2.4,3.75,5.35,16.2,17.3, SURF_ID='Steel', ID='V102-A'/ 5F Building Return Shaft Vent 1.6x1.1m Vent 102
-&VENT XB=2.6,2.6,3.75,5.35,16.2,17.3, SURF_ID='Steel', ID='V102-B'/ 5F Building Return Shaft Vent 1.6x1.1m Vent 102
-&VENT XB=2.4,2.4,2.8,3.55,16.7,17.3,  SURF_ID='Steel', ID='V103-A'/ 5F Building Exhaust Shaft Vent 0.75x0.6m Vent 103
-&VENT XB=2.6,2.6,2.8,3.55,16.7,17.3,  SURF_ID='Steel', ID='V103-B'/ 5F Building Exhaust Shaft Vent 0.75x0.6m Vent 103
-&VENT XB=2.4,2.4,3.75,5.35,18.8,19.9, SURF_ID='Steel', ID='V104-A'/ 6F Building Return Shaft Vent 1.6x1.1m Vent 104
-&VENT XB=2.6,2.6,3.75,5.35,18.8,19.9, SURF_ID='Steel', ID='V104-B'/ 6F Building Return Shaft Vent 1.6x1.1m Vent 104
-&VENT XB=2.4,2.4,2.8,3.55,19.3,19.9,  SURF_ID='Steel', ID='V105-A'/ 6F Building Exhaust Shaft Vent 0.75x0.6m Vent 105
-&VENT XB=2.6,2.6,2.8,3.55,19.3,19.9,  SURF_ID='Steel', ID='V105-B'/ 6F Building Exhaust Shaft Vent 0.75x0.6m Vent 105
-&VENT XB=2.4,2.4,3.75,5.35,21.4,22.5, SURF_ID='Steel', ID='V106-A'/ 7F Building Return Shaft Vent 1.6x1.1m Vent 106
-&VENT XB=2.6,2.6,3.75,5.35,21.4,22.5, SURF_ID='Steel', ID='V106-B'/ 7F Building Return Shaft Vent 1.6x1.1m Vent 106
-&VENT XB=2.4,2.4,2.8,3.55,21.9,22.5,  SURF_ID='Steel', ID='V107-A'/ 7F Building Exhaust Shaft Vent 0.75x0.6m Vent 107
-&VENT XB=2.6,2.6,2.8,3.55,21.9,22.5,  SURF_ID='Steel', ID='V107-B'/ 7F Building Exhaust Shaft Vent 0.75x0.6m Vent 107
-&VENT XB=2.4,2.4,3.75,5.35,24.0,25.1, SURF_ID='Steel', ID='V108-A'/ 8F Building Return Shaft Vent 1.6x1.1m Vent 108
-&VENT XB=2.6,2.6,3.75,5.35,24.0,25.1, SURF_ID='Steel', ID='V108-B'/ 8F Building Return Shaft Vent 1.6x1.1m Vent 108
-&VENT XB=2.4,2.4,2.8,3.55,24.5,25.1,  SURF_ID='Steel', ID='V109-A'/ 8F Building Exhaust Shaft Vent 0.75x0.6m Vent 109
-&VENT XB=2.6,2.6,2.8,3.55,24.5,25.1,  SURF_ID='Steel', ID='V109-B'/ 8F Building Exhaust Shaft Vent 0.75x0.6m Vent 109
-&VENT XB=2.4,2.4,3.75,5.35,26.6,27.7, SURF_ID='Steel', ID='V110-A'/ 9F Building Return Shaft Vent 1.6x1.1m Vent 110
-&VENT XB=2.6,2.6,3.75,5.35,26.6,27.7, SURF_ID='Steel', ID='V110-B'/ 9F Building Return Shaft Vent 1.6x1.1m Vent 110
-&VENT XB=2.4,2.4,2.8,3.55,27.1,27.7,  SURF_ID='Steel', ID='V111-A'/ 9F Building Exhaust Shaft Vent 0.75x0.6m Vent 111
-&VENT XB=2.6,2.6,2.8,3.55,27.1,27.7,  SURF_ID='Steel', ID='V111-B'/ 9F Building Exhaust Shaft Vent 0.75x0.6m Vent 111
-&HVAC ID='LEAK-V92',  TYPE_ID='LEAK', VENT_ID='V92-A',  VENT2_ID='V92-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V93',  TYPE_ID='LEAK', VENT_ID='V93-A',  VENT2_ID='V93-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V94',  TYPE_ID='LEAK', VENT_ID='V94-A',  VENT2_ID='V94-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V95',  TYPE_ID='LEAK', VENT_ID='V95-A',  VENT2_ID='V95-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V96',  TYPE_ID='LEAK', VENT_ID='V96-A',  VENT2_ID='V96-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V97',  TYPE_ID='LEAK', VENT_ID='V97-A',  VENT2_ID='V97-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V98',  TYPE_ID='LEAK', VENT_ID='V98-A',  VENT2_ID='V98-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V99',  TYPE_ID='LEAK', VENT_ID='V99-A',  VENT2_ID='V99-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V100', TYPE_ID='LEAK', VENT_ID='V100-A', VENT2_ID='V100-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V101', TYPE_ID='LEAK', VENT_ID='V101-A', VENT2_ID='V101-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V102', TYPE_ID='LEAK', VENT_ID='V102-A', VENT2_ID='V102-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V103', TYPE_ID='LEAK', VENT_ID='V103-A', VENT2_ID='V103-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V104', TYPE_ID='LEAK', VENT_ID='V104-A', VENT2_ID='V104-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V105', TYPE_ID='LEAK', VENT_ID='V105-A', VENT2_ID='V105-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V106', TYPE_ID='LEAK', VENT_ID='V106-A', VENT2_ID='V106-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V107', TYPE_ID='LEAK', VENT_ID='V107-A', VENT2_ID='V107-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V108', TYPE_ID='LEAK', VENT_ID='V108-A', VENT2_ID='V108-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V109', TYPE_ID='LEAK', VENT_ID='V109-A', VENT2_ID='V109-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-&HVAC ID='LEAK-V110', TYPE_ID='LEAK', VENT_ID='V110-A', VENT2_ID='V110-B', LEAK_ENTHALPY=.TRUE., AREA=0.0054/ Closed Leak
-&HVAC ID='LEAK-V111', TYPE_ID='LEAK', VENT_ID='V111-A', VENT2_ID='V111-B', LEAK_ENTHALPY=.TRUE., AREA=0.0027/ Closed Leak
-
-
-BUILDING LEAKS - EXTERNAL ROOF VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=8.0,8.4,5.3,5.7,27.8,27.8,     SURF_ID='Steel', ID='V21-A'/ Roof Stair Pump 0.4x0.4m Vent 5
-&VENT XB=8.0,8.4,5.3,5.7,28.0,28.0,     SURF_ID='Steel', ID='V21-B'/ Roof Stair Pump 0.4x0.4m Vent 5
-&VENT XB=6.4,9.1,5.9,8.7,27.8,27.8,     SURF_ID='Steel', ID='V112-A'/ Lift Shaft Cover 2.8x2.7m Vent 112
-&VENT XB=6.4,9.1,5.9,8.7,28.0,28.0,     SURF_ID='Steel', ID='V112-B'/ Lift Shaft Cover 2.8x2.7m Vent 112
-&VENT XB=4.2,6.2,5.9,8.7,27.8,27.8,     SURF_ID='Steel', ID='V113-A'/ Service Shaft Cover 2.8x2.0m Vent 113
-&VENT XB=4.2,6.2,5.9,8.7,28.0,28.0,     SURF_ID='Steel', ID='V113-B'/ Service Shaft Cover 2.8x2.0m Vent 113
-&VENT XB=10.4,11.7,3.9,5.7,27.8,27.8,   SURF_ID='Steel', ID='V114-A'/ Smoke Shaft Cover 1.8x1.3m Vent 114
-&VENT XB=10.4,11.7,3.9,5.7,28.0,28.0,   SURF_ID='Steel', ID='V114-B'/ Smoke Shaft Cover 1.8x1.3m Vent 114
-&VENT XB=3.1,3.5,3.775,4.175,27.8,27.8, SURF_ID='Steel', ID='V115-A'/ Roof Building Return/Exhaust Pump 0.4x0.4m Vent 115
-&VENT XB=3.1,3.5,3.775,4.175,28.0,28.0, SURF_ID='Steel', ID='V115-B'/ Roof Building Return/Exhaust Pump 0.4x0.4m Vent 115
-&HVAC ID='LEAK-V21',  TYPE_ID='LEAK', VENT_ID='V21-A',  VENT2_ID='V21-B',  LEAK_ENTHALPY=.TRUE., AREA=0.0016/ Closed Exhaust Leak
-&HVAC ID='LEAK-V112', TYPE_ID='LEAK', VENT_ID='V112-A', VENT2_ID='V112-B', LEAK_ENTHALPY=.TRUE., AREA=0.0110/ Closed Exhaust Leak
-&HVAC ID='LEAK-V113', TYPE_ID='LEAK', VENT_ID='V113-A', VENT2_ID='V113-B', LEAK_ENTHALPY=.TRUE., AREA=0.0096/ Closed Exhaust Leak
-&HVAC ID='LEAK-V114', TYPE_ID='LEAK', VENT_ID='V114-A', VENT2_ID='V114-B', LEAK_ENTHALPY=.TRUE., AREA=0.0062/ Closed Exhaust Leak
-&HVAC ID='LEAK-V115', TYPE_ID='LEAK', VENT_ID='V115-A', VENT2_ID='V115-B', LEAK_ENTHALPY=.TRUE., AREA=0.0016/ Closed Exhaust Leak
-
-
-BUILDING LEAKS - EXTERNAL SLIDING WINDOW VENTS WITH ASSUMED 1MM EDGE LEAK ONLY
-&VENT XB=5.7,7.2,1.0,1.0,0.7,2.2,     SURF_ID='Steel', ID='W1-A'/ GF WEST 1.5x1.5m Window 1
-&VENT XB=5.7,7.2,1.2,1.2,0.7,2.2,     SURF_ID='Steel', ID='W1-B'/ GF WEST 1.5x1.5m Window 1
-&VENT XB=5.7,7.2,10.1,10.1,0.7,2.2,   SURF_ID='Steel', ID='W2-A'/ GF EAST 1.5x1.5m Window 2
-&VENT XB=5.7,7.2,10.3,10.3,0.7,2.2,   SURF_ID='Steel', ID='W2-B'/ GF EAST 1.5x1.5m Window 2
-&VENT XB=1.0,1.0,3.85,4.35,1.7,2.2,   SURF_ID='Steel', ID='W3-A'/ GF NORTH 0.5x0.5m Window 3
-&VENT XB=1.2,1.2,3.85,4.35,1.7,2.2,   SURF_ID='Steel', ID='W3-B'/ GF NORTH 0.5x0.5m Window 3
-&VENT XB=1.0,1.0,6.95,7.45,1.7,2.2,   SURF_ID='Steel', ID='W4-A'/ GF NORTH 0.5x0.5m Window 4
-&VENT XB=1.2,1.2,6.95,7.45,1.7,2.2,   SURF_ID='Steel', ID='W4-B'/ GF NORTH 0.5x0.5m Window 4
-&VENT XB=5.7,7.2,1.0,1.0,4.3,5.8,     SURF_ID='Steel', ID='W5-A'/ 1F WEST 1.5x1.5m Window 5
-&VENT XB=5.7,7.2,1.2,1.2,4.3,5.8,     SURF_ID='Steel', ID='W5-B'/ 1F WEST 1.5x1.5m Window 5
-&VENT XB=5.7,7.2,10.1,10.1,4.3,5.8,   SURF_ID='Steel', ID='W6-A'/ 1F EAST 1.5x1.5m Window 6
-&VENT XB=5.7,7.2,10.3,10.3,4.3,5.8,   SURF_ID='Steel', ID='W6-B'/ 1F EAST 1.5x1.5m Window 6
-&VENT XB=1.0,1.0,3.85,4.35,5.3,5.8,   SURF_ID='Steel', ID='W7-A'/ 1F NORTH 0.5x0.5m Window 7
-&VENT XB=1.2,1.2,3.85,4.35,5.3,5.8,   SURF_ID='Steel', ID='W7-B'/ 1F NORTH 0.5x0.5m Window 7
-&VENT XB=1.0,1.0,6.95,7.45,5.3,5.8,   SURF_ID='Steel', ID='W8-A'/ 1F NORTH 0.5x0.5m Window 8
-&VENT XB=1.2,1.2,6.95,7.45,5.3,5.8,   SURF_ID='Steel', ID='W8-B'/ 1F NORTH 0.5x0.5m Window 8
-&VENT XB=5.7,7.2,1.0,1.0,8.1,9.6,     SURF_ID='Steel', ID='W9-A'/ 2F WEST 1.5x1.5m Window 9
-&VENT XB=5.7,7.2,1.2,1.2,8.1,9.6,     SURF_ID='Steel', ID='W9-B'/ 2F WEST 1.5x1.5m Window 9
-&VENT XB=5.7,7.2,10.1,10.1,8.1,9.6,   SURF_ID='Steel', ID='W10-A'/ 2F EAST 1.5x1.5m Window 10
-&VENT XB=5.7,7.2,10.3,10.3,8.1,9.6,   SURF_ID='Steel', ID='W10-B'/ 2F EAST 1.5x1.5m Window 10
-&VENT XB=1.0,1.0,3.85,4.35,9.1,9.6,   SURF_ID='Steel', ID='W11-A'/ 2F NORTH 0.5x0.5m Window 11
-&VENT XB=1.2,1.2,3.85,4.35,9.1,9.6,   SURF_ID='Steel', ID='W11-B'/ 2F NORTH 0.5x0.5m Window 11
-&VENT XB=1.0,1.0,6.95,7.45,9.1,9.6,   SURF_ID='Steel', ID='W12-A'/ 2F NORTH 0.5x0.5m Window 12
-&VENT XB=1.2,1.2,6.95,7.45,9.1,9.6,   SURF_ID='Steel', ID='W12-B'/ 2F NORTH 0.5x0.5m Window 12
-&VENT XB=5.7,7.2,1.0,1.0,10.7,12.2,   SURF_ID='Steel', ID='W13-A'/ 3F WEST 1.5x1.5m Window 13
-&VENT XB=5.7,7.2,1.2,1.2,10.7,12.2,   SURF_ID='Steel', ID='W13-B'/ 3F WEST 1.5x1.5m Window 13
-&VENT XB=5.7,7.2,10.1,10.1,10.7,12.2, SURF_ID='Steel', ID='W14-A'/ 3F EAST 1.5x1.5m Window 14
-&VENT XB=5.7,7.2,10.3,10.3,10.7,12.2, SURF_ID='Steel', ID='W14-B'/ 3F EAST 1.5x1.5m Window 14
-&VENT XB=1.0,1.0,3.85,4.35,11.7,12.2, SURF_ID='Steel', ID='W15-A'/ 3F NORTH 0.5x0.5m Window 15
-&VENT XB=1.2,1.2,3.85,4.35,11.7,12.2, SURF_ID='Steel', ID='W15-B'/ 3F NORTH 0.5x0.5m Window 15
-&VENT XB=1.0,1.0,6.95,7.45,11.7,12.2, SURF_ID='Steel', ID='W16-A'/ 3F NORTH 0.5x0.5m Window 16
-&VENT XB=1.2,1.2,6.95,7.45,11.7,12.2, SURF_ID='Steel', ID='W16-B'/ 3F NORTH 0.5x0.5m Window 16
-&VENT XB=5.7,7.2,1.0,1.0,13.3,14.8,   SURF_ID='Steel', ID='W17-A'/ 4F WEST 1.5x1.5m Window 17
-&VENT XB=5.7,7.2,1.2,1.2,13.3,14.8,   SURF_ID='Steel', ID='W17-B'/ 4F WEST 1.5x1.5m Window 17
-&VENT XB=5.7,7.2,10.1,10.1,13.3,14.8, SURF_ID='Steel', ID='W18-A'/ 4F EAST 1.5x1.5m Window 18
-&VENT XB=5.7,7.2,10.3,10.3,13.3,14.8, SURF_ID='Steel', ID='W18-B'/ 4F EAST 1.5x1.5m Window 18
-&VENT XB=1.0,1.0,3.85,4.35,14.3,14.8, SURF_ID='Steel', ID='W19-A'/ 4F NORTH 0.5x0.5m Window 19
-&VENT XB=1.2,1.2,3.85,4.35,14.3,14.8, SURF_ID='Steel', ID='W19-B'/ 4F NORTH 0.5x0.5m Window 19
-&VENT XB=1.0,1.0,6.95,7.45,14.3,14.8, SURF_ID='Steel', ID='W20-A'/ 4F NORTH 0.5x0.5m Window 20
-&VENT XB=1.2,1.2,6.95,7.45,14.3,14.8, SURF_ID='Steel', ID='W20-B'/ 4F NORTH 0.5x0.5m Window 20
-&VENT XB=5.7,7.2,1.0,1.0,15.9,17.4,   SURF_ID='Steel', ID='W21-A'/ 5F WEST 1.5x1.5m Window 21
-&VENT XB=5.7,7.2,1.2,1.2,15.9,17.4,   SURF_ID='Steel', ID='W21-B'/ 5F WEST 1.5x1.5m Window 21
-&VENT XB=5.7,7.2,10.1,10.1,15.9,17.4, SURF_ID='Steel', ID='W22-A'/ 5F EAST 1.5x1.5m Window 22
-&VENT XB=5.7,7.2,10.3,10.3,15.9,17.4, SURF_ID='Steel', ID='W22-B'/ 5F EAST 1.5x1.5m Window 22
-&VENT XB=1.0,1.0,3.85,4.35,16.9,17.4, SURF_ID='Steel', ID='W23-A'/ 5F NORTH 0.5x0.5m Window 23
-&VENT XB=1.2,1.2,3.85,4.35,16.9,17.4, SURF_ID='Steel', ID='W23-B'/ 5F NORTH 0.5x0.5m Window 23
-&VENT XB=1.0,1.0,6.95,7.45,16.9,17.4, SURF_ID='Steel', ID='W24-A'/ 5F NORTH 0.5x0.5m Window 24
-&VENT XB=1.2,1.2,6.95,7.45,16.9,17.4, SURF_ID='Steel', ID='W24-B'/ 5F NORTH 0.5x0.5m Window 24
-&VENT XB=5.7,7.2,1.0,1.0,18.5,20.0,   SURF_ID='Steel', ID='W25-A'/ 6F WEST 1.5x1.5m Window 25
-&VENT XB=5.7,7.2,1.2,1.2,18.5,20.0,   SURF_ID='Steel', ID='W25-B'/ 6F WEST 1.5x1.5m Window 25
-&VENT XB=5.7,7.2,10.1,10.1,18.5,20.0, SURF_ID='Steel', ID='W26-A'/ 6F EAST 1.5x1.5m Window 26
-&VENT XB=5.7,7.2,10.3,10.3,18.5,20.0, SURF_ID='Steel', ID='W26-B'/ 6F EAST 1.5x1.5m Window 26
-&VENT XB=1.0,1.0,3.85,4.35,19.5,20.0, SURF_ID='Steel', ID='W27-A'/ 6F NORTH 0.5x0.5m Window 27
-&VENT XB=1.2,1.2,3.85,4.35,19.5,20.0, SURF_ID='Steel', ID='W27-B'/ 6F NORTH 0.5x0.5m Window 27
-&VENT XB=1.0,1.0,6.95,7.45,19.5,20.0, SURF_ID='Steel', ID='W28-A'/ 6F NORTH 0.5x0.5m Window 28
-&VENT XB=1.2,1.2,6.95,7.45,19.5,20.0, SURF_ID='Steel', ID='W28-B'/ 6F NORTH 0.5x0.5m Window 28
-&VENT XB=5.7,7.2,1.0,1.0,21.1,22.6,   SURF_ID='Steel', ID='W29-A'/ 7F WEST 1.5x1.5m Window 29
-&VENT XB=5.7,7.2,1.2,1.2,21.1,22.6,   SURF_ID='Steel', ID='W29-B'/ 7F WEST 1.5x1.5m Window 29
-&VENT XB=5.7,7.2,10.1,10.1,21.1,22.6, SURF_ID='Steel', ID='W30-A'/ 7F EAST 1.5x1.5m Window 30
-&VENT XB=5.7,7.2,10.3,10.3,21.1,22.6, SURF_ID='Steel', ID='W30-B'/ 7F EAST 1.5x1.5m Window 30
-&VENT XB=1.0,1.0,3.85,4.35,22.1,22.6, SURF_ID='Steel', ID='W31-A'/ 7F NORTH 0.5x0.5m Window 31
-&VENT XB=1.2,1.2,3.85,4.35,22.1,22.6, SURF_ID='Steel', ID='W31-B'/ 7F NORTH 0.5x0.5m Window 31
-&VENT XB=1.0,1.0,6.95,7.45,22.1,22.6, SURF_ID='Steel', ID='W32-A'/ 7F NORTH 0.5x0.5m Window 32
-&VENT XB=1.2,1.2,6.95,7.45,22.1,22.6, SURF_ID='Steel', ID='W32-B'/ 7F NORTH 0.5x0.5m Window 32
-&VENT XB=5.7,7.2,1.0,1.0,23.7,25.2,   SURF_ID='Steel', ID='W33-A'/ 8F WEST 1.5x1.5m Window 33
-&VENT XB=5.7,7.2,1.2,1.2,23.7,25.2,   SURF_ID='Steel', ID='W33-B'/ 8F WEST 1.5x1.5m Window 33
-&VENT XB=5.7,7.2,10.1,10.1,23.7,25.2, SURF_ID='Steel', ID='W34-A'/ 8F EAST 1.5x1.5m Window 34
-&VENT XB=5.7,7.2,10.3,10.3,23.7,25.2, SURF_ID='Steel', ID='W34-B'/ 8F EAST 1.5x1.5m Window 34
-&VENT XB=1.0,1.0,3.85,4.35,24.7,25.2, SURF_ID='Steel', ID='W35-A'/ 8F NORTH 0.5x0.5m Window 35
-&VENT XB=1.2,1.2,3.85,4.35,24.7,25.2, SURF_ID='Steel', ID='W35-B'/ 8F NORTH 0.5x0.5m Window 35
-&VENT XB=1.0,1.0,6.95,7.45,24.7,25.2, SURF_ID='Steel', ID='W36-A'/ 8F NORTH 0.5x0.5m Window 36
-&VENT XB=1.2,1.2,6.95,7.45,24.7,25.2, SURF_ID='Steel', ID='W36-B'/ 8F NORTH 0.5x0.5m Window 36
-&VENT XB=5.7,7.2,1.0,1.0,26.3,27.8,   SURF_ID='Steel', ID='W37-A'/ 9F WEST 1.5x1.5m Window 37
-&VENT XB=5.7,7.2,1.2,1.2,26.3,27.8,   SURF_ID='Steel', ID='W37-B'/ 9F WEST 1.5x1.5m Window 37
-&VENT XB=5.7,7.2,10.1,10.1,26.3,27.8, SURF_ID='Steel', ID='W38-A'/ 9F EAST 1.5x1.5m Window 38
-&VENT XB=5.7,7.2,10.3,10.3,26.3,27.8, SURF_ID='Steel', ID='W38-B'/ 9F EAST 1.5x1.5m Window 38
-&VENT XB=1.0,1.0,3.85,4.35,27.3,27.8, SURF_ID='Steel', ID='W39-A'/ 9F NORTH 0.5x0.5m Window 39
-&VENT XB=1.2,1.2,3.85,4.35,27.3,27.8, SURF_ID='Steel', ID='W39-B'/ 9F NORTH 0.5x0.5m Window 39
-&VENT XB=1.0,1.0,6.95,7.45,27.3,27.8, SURF_ID='Steel', ID='W40-A'/ 9F NORTH 0.5x0.5m Window 40
-&VENT XB=1.2,1.2,6.95,7.45,27.3,27.8, SURF_ID='Steel', ID='W40-B'/ 9F NORTH 0.5x0.5m Window 40
-&HVAC ID='LEAK-W1',  TYPE_ID='LEAK', VENT_ID='W1-A',  VENT2_ID='W1-B',  LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W2',  TYPE_ID='LEAK', VENT_ID='W2-A',  VENT2_ID='W2-B',  LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W3',  TYPE_ID='LEAK', VENT_ID='W3-A',  VENT2_ID='W3-B',  LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W4',  TYPE_ID='LEAK', VENT_ID='W4-A',  VENT2_ID='W4-B',  LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W5',  TYPE_ID='LEAK', VENT_ID='W5-A',  VENT2_ID='W5-B',  LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W6',  TYPE_ID='LEAK', VENT_ID='W6-A',  VENT2_ID='W6-B',  LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W7',  TYPE_ID='LEAK', VENT_ID='W7-A',  VENT2_ID='W7-B',  LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W8',  TYPE_ID='LEAK', VENT_ID='W8-A',  VENT2_ID='W8-B',  LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W9',  TYPE_ID='LEAK', VENT_ID='W9-A',  VENT2_ID='W9-B',  LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W10', TYPE_ID='LEAK', VENT_ID='W10-A', VENT2_ID='W10-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W11', TYPE_ID='LEAK', VENT_ID='W11-A', VENT2_ID='W11-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W12', TYPE_ID='LEAK', VENT_ID='W12-A', VENT2_ID='W12-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W13', TYPE_ID='LEAK', VENT_ID='W13-A', VENT2_ID='W13-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W14', TYPE_ID='LEAK', VENT_ID='W14-A', VENT2_ID='W14-B', LEAK_ENTHALPY=.TRUE., AREA=0.096/ Closed Leak + Open Area
-&HVAC ID='LEAK-W15', TYPE_ID='LEAK', VENT_ID='W15-A', VENT2_ID='W15-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W16', TYPE_ID='LEAK', VENT_ID='W16-A', VENT2_ID='W16-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W17', TYPE_ID='LEAK', VENT_ID='W17-A', VENT2_ID='W17-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W18', TYPE_ID='LEAK', VENT_ID='W18-A', VENT2_ID='W18-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W19', TYPE_ID='LEAK', VENT_ID='W19-A', VENT2_ID='W19-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W20', TYPE_ID='LEAK', VENT_ID='W20-A', VENT2_ID='W20-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W21', TYPE_ID='LEAK', VENT_ID='W21-A', VENT2_ID='W21-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W22', TYPE_ID='LEAK', VENT_ID='W22-A', VENT2_ID='W22-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W23', TYPE_ID='LEAK', VENT_ID='W23-A', VENT2_ID='W23-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W24', TYPE_ID='LEAK', VENT_ID='W24-A', VENT2_ID='W24-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W25', TYPE_ID='LEAK', VENT_ID='W25-A', VENT2_ID='W25-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W26', TYPE_ID='LEAK', VENT_ID='W26-A', VENT2_ID='W26-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W27', TYPE_ID='LEAK', VENT_ID='W27-A', VENT2_ID='W27-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W28', TYPE_ID='LEAK', VENT_ID='W28-A', VENT2_ID='W28-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W29', TYPE_ID='LEAK', VENT_ID='W29-A', VENT2_ID='W29-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W30', TYPE_ID='LEAK', VENT_ID='W30-A', VENT2_ID='W30-B', LEAK_ENTHALPY=.TRUE., AREA=0.016/ Closed Leak + Open Area
-&HVAC ID='LEAK-W31', TYPE_ID='LEAK', VENT_ID='W31-A', VENT2_ID='W31-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W32', TYPE_ID='LEAK', VENT_ID='W32-A', VENT2_ID='W32-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W33', TYPE_ID='LEAK', VENT_ID='W33-A', VENT2_ID='W33-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W34', TYPE_ID='LEAK', VENT_ID='W34-A', VENT2_ID='W34-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W35', TYPE_ID='LEAK', VENT_ID='W35-A', VENT2_ID='W35-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W36', TYPE_ID='LEAK', VENT_ID='W36-A', VENT2_ID='W36-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W37', TYPE_ID='LEAK', VENT_ID='W37-A', VENT2_ID='W37-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak 
-&HVAC ID='LEAK-W38', TYPE_ID='LEAK', VENT_ID='W38-A', VENT2_ID='W38-B', LEAK_ENTHALPY=.TRUE., AREA=0.006/ Closed Leak
-&HVAC ID='LEAK-W39', TYPE_ID='LEAK', VENT_ID='W39-A', VENT2_ID='W39-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-&HVAC ID='LEAK-W40', TYPE_ID='LEAK', VENT_ID='W40-A', VENT2_ID='W40-B', LEAK_ENTHALPY=.TRUE., AREA=0.002/ Closed Leak
-
-
 BUILDING GEMOEMTRY
 
 &OBST XB= 2.6,11.7, 2.4, 2.6, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair shaft and external corridor
@@ -739,59 +211,59 @@ BUILDING GEMOEMTRY
 &HOLE XB= 4.2, 6.8, 2.6, 5.1, 8.0,26.0 / Upper stair shaft
 &HOLE XB= 4.2, 7.6, 2.6, 5.1, 1.0, 8.0 / Lower stair shaft
 
-&OBST XB=7.4,8.3,1.2,1.325,0.0,2.1,    SURF_ID='Timber Door'/ GF Door 4 Closed
-&OBST XB=8.3,9.2,2.6,2.725,0.0,2.1,    SURF_ID='Timber Door'/ GF Door 3 Open
-&OBST XB=10.8,11.7,2.6,2.725,0.0,2.1,  SURF_ID='Timber Door'/ GF Door 2 Open
-&OBST XB=14.8,15.7,4.35,4.475,0.0,2.1, SURF_ID='Timber Door'/ GF Door 1 Half Open
-&OBST XB=15.575,15.7,5.25,6.15,0.0,2.1,SURF_ID='Timber Door'/ GF Door 1 Half Closed
-&OBST XB=8.5,9.4,3.4,3.5,3.6,5.7,      SURF_ID='Timber Door'/ 1st Floor Door
-&OBST XB=10.9,11.8,2.6,2.7,3.6,5.7,    SURF_ID='Timber Door'/ 1st Floor Door
-&OBST XB=10.9,11.8,2.6,2.7,7.2,9.3,    SURF_ID='Timber Door'/ 2nd Floor Door
-&OBST XB=9.075,9.2,2.6,3.5,7.2,9.3,    SURF_ID='Timber Door'/ 2nd Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,7.2,9.3,    SURF_ID='Timber Door'/ 2nd floor Door
-&OBST XB=10.9,11.8,9.7,9.8,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Door
-&OBST XB=8.5,9.4,3.4,3.5,9.8,11.9,     SURF_ID='Timber Door'/ 3rd Floor Door
-&OBST XB=11.2,11.3,3.3,3.4,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Part Open Door
-&OBST XB=11.3,11.4,3.1,3.3,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Part Open Door
-&OBST XB=11.4,11.5,2.9,3.1,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Part Open Door
-&OBST XB=11.5,11.6,2.7,2.9,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Part Open Door
-&OBST XB=11.6,11.7,2.6,2.7,9.8,11.9,   SURF_ID='Timber Door'/ 3rd Floor Part Open Door
-&OBST XB=9.075,9.2,2.6,3.5,12.4,14.5,  SURF_ID='Timber Door'/ 4th Floor Door
-&OBST XB=11.575,11.7,2.6,3.5,12.4,14.5,SURF_ID='Timber Door'/ 4th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,12.4,14.5,  SURF_ID='Timber Door'/ 4th Floor Door
-&OBST XB=12.7,12.9,8.7,8.8,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=12.9,13.4,8.6,8.7,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=13.4,13.5,8.5,8.6,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=11.2,11.3,3.3,3.4,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=11.3,11.4,3.1,3.3,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=11.4,11.5,2.9,3.1,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=11.5,11.6,2.7,2.9,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=11.6,11.7,2.6,2.7,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Part Open Door
-&OBST XB=14.5,15.4,5.3,5.4,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Door
-&OBST XB=8.5,9.4,3.4,3.5,15.0,17.1,    SURF_ID='Timber Door'/ 5th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,15.0,17.1,  SURF_ID='Timber Door'/ 5th Floor Door
-&OBST XB=9.075,9.2,2.6,3.5,17.6,19.7,  SURF_ID='Timber Door'/ 6th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,17.6,19.7,  SURF_ID='Timber Door'/ 6th Floor Door
-&OBST XB=11.575,11.7,2.6,3.5,17.6,19.7,SURF_ID='Timber Door'/ 6th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Door
-&OBST XB=8.5,9.4,3.4,3.5,20.2,22.3,    SURF_ID='Timber Door'/ 7th Floor Door
-&OBST XB=11.2,11.3,3.3,3.4,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Part Open Door
-&OBST XB=11.3,11.4,3.1,3.3,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Part Open Door
-&OBST XB=11.4,11.5,2.9,3.1,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Part Open Door
-&OBST XB=11.5,11.6,2.7,2.9,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Part Open Door
-&OBST XB=11.6,11.7,2.6,2.7,20.2,22.3,  SURF_ID='Timber Door'/ 7th Floor Part Open Door
-&OBST XB=9.075,9.2,2.6,3.5,22.8,24.9,  SURF_ID='Timber Door'/ 8th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,22.8,24.9,  SURF_ID='Timber Door'/ 8th Floor Door
-&OBST XB=10.9,11.8,7.7,7.8,22.8,24.9,  SURF_ID='Timber Door'/ 8th Floor Door
-&OBST XB=10.9,11.8,2.6,2.7,22.8,24.9,  SURF_ID='Timber Door'/ 8th Floor Door
-&OBST XB=8.5,9.4,3.4,3.5,25.4,27.5,    SURF_ID='Timber Door'/ 9th Floor Door
-&OBST XB=10.9,11.8,7.7,7.8,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Door
-&OBST XB=10.9,11.8,9.7,9.8,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Door
-&OBST XB=11.2,11.3,3.3,3.4,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Part Open Door
-&OBST XB=11.3,11.4,3.1,3.3,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Part Open Door
-&OBST XB=11.4,11.5,2.9,3.1,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Part Open Door
-&OBST XB=11.5,11.6,2.7,2.9,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Part Open Door
-&OBST XB=11.6,11.7,2.6,2.7,25.4,27.5,  SURF_ID='Timber Door'/ 9th Floor Part Open Door
+&OBST XB=7.4,8.3,1.2,1.325,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door 4 Closed
+&OBST XB=8.3,9.2,2.6,2.725,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door 3 Open
+&OBST XB=10.8,11.7,2.6,2.725,0.0,2.1,  SURF_ID='Timber Door'/ 1st Floor Door 2 Open
+&OBST XB=14.8,15.7,4.35,4.475,0.0,2.1, SURF_ID='Timber Door'/ 1st Floor Door 1 Half Open
+&OBST XB=15.575,15.7,5.25,6.15,0.0,2.1,SURF_ID='Timber Door'/ 1st Floor Door 1 Half Closed
+&OBST XB=8.5,9.4,3.4,3.5,3.6,5.7,      SURF_ID='Timber Door'/ 2nd Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,3.6,5.7,    SURF_ID='Timber Door'/ 2nd Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
+&OBST XB=9.075,9.2,2.6,3.5,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,7.2,9.3,    SURF_ID='Timber Door'/ 3rd floor Door
+&OBST XB=10.9,11.8,9.7,9.8,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,9.8,11.9,     SURF_ID='Timber Door'/ 4th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=9.075,9.2,2.6,3.5,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=11.575,11.7,2.6,3.5,12.4,14.5,SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=12.7,12.9,8.7,8.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=12.9,13.4,8.6,8.7,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=13.4,13.5,8.5,8.6,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.2,11.3,3.3,3.4,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=14.5,15.4,5.3,5.4,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,15.0,17.1,    SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=9.075,9.2,2.6,3.5,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=11.575,11.7,2.6,3.5,17.6,19.7,SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,20.2,22.3,    SURF_ID='Timber Door'/ 8th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=9.075,9.2,2.6,3.5,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,7.7,7.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,25.4,27.5,    SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=10.9,11.8,7.7,7.8,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
 
 &VENT PBZ=0.                          , SURF_ID='Concrete Floor'/ Ground
 &OBST XB= 1.2,15.7, 1.2,10.1, 3.4, 3.6, SURF_ID='Concrete Floor'/ Floor 2
@@ -942,82 +414,108 @@ Upper stairs framing
 &OBST XB=15.4,15.5,2.4,5.3,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
 &OBST XB=15.4,15.5,5.3,6.2,17.1,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
 
-&VENT XB=9.4,9.4,3.5,3.7,3.6,7.0,      SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=9.4,11.7,3.7,3.7,3.6,7.0,     SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=9.4,11.7,2.6,2.6,3.6,7.0,     SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=11.7,11.7,3.5,3.6,3.6,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=11.7,11.7,3.5,3.7,3.6,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=9.4,9.4,2.6,3.5,5.7,7.0,      SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=11.7,11.7,2.6,3.5,5.7,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=9.4,11.7,3.5,3.7,3.6,3.6,     SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=9.4,11.7,2.6,3.7,7.0,7.0,     SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=11.7,11.9,2.6,3.5,3.6,3.6,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Lobby
-&VENT XB=11.9,15.7,1.2,10.1,3.6,3.6,   SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,15.7,10.1,10.1,3.6,7.0,  SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=15.7,15.7,1.2,10.1,3.6,7.0,   SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,15.7,1.2,10.1,7.0,7.0,   SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,11.9,3.5,8.9,3.6,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,11.9,2.6,3.5,5.7,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,11.9,8.9,10.1,4.5,7.0,   SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,15.7,1.2,1.2,3.6,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
-&VENT XB=11.9,11.9,1.2,2.6,3.6,7.0,    SURF_ID='Ceramic Fiber Blanket'/ Ceramic Fiber Lining - Fire Compartment
+&VENT XB= 9.4,11.7, 3.7, 3.7, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 2.6, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 3.7, 3.6, 3.6, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 3.7, 7.0, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB=11.9,15.7, 1.2,10.1, 3.6, 3.6, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7, 1.2,10.1, 7.0, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=15.7,15.7, 1.2,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,11.9, 1.2, 2.6, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,11.9, 3.5,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7,10.1,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7, 1.2, 1.2, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
 
-&OBST XB=13.5,14.1,2.6,8.7,3.6,3.6,    SURF_ID='Steel'/ Propane Burner
-&OBST XB=13.5,14.1,2.6,2.6,3.6,4.4,    SURF_ID='Steel'/ Propane Burner
-&OBST XB=13.5,14.1,8.7,8.7,3.6,4.4,    SURF_ID='Steel'/ Propane Burner
-&OBST XB=13.5,13.5,2.6,8.7,3.6,4.4,    SURF_ID='Steel'/ Propane Burner
-&OBST XB=14.1,14.1,2.6,8.7,3.6,4.4,    SURF_ID='Steel'/ Propane Burner
+&HOLE XB= 9.3,11.7, 8.7, 8.9, 0.0, 3.3 / Floor 1 Door Openings
+&HOLE XB= 9.1, 9.3, 5.9, 8.7, 0.0, 1.3 /
+&HOLE XB= 4.2, 6.2, 8.7, 8.9, 0.0, 1.3 /
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 0.0, 2.1 /
+&HOLE XB= 7.4, 8.3, 1.0, 1.2, 0.0, 2.1 /
+&HOLE XB= 7.4, 8.3, 2.4, 2.6, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 7.6, 8.5, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 2.6, 3.5, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 1.2, 2.4, 0.0, 3.3 /
+&HOLE XB=15.7,15.9, 4.4 ,6.2, 0.0, 2.1 /
 
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 3.6, 5.7 / Floor 2 Door Openings
+&HOLE XB=11.7,11.9, 8.9,10.1, 3.6, 4.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5, 3.6, 5.7 /
 
-WALL OPENINGS
-&HOLE XB=9.3,11.7,8.7,8.9,-0.0128571,3.3,    / GF Wall Opening
-&HOLE XB=9.1,9.3,5.9,8.7,0.1,1.3,            / GF Wall Opening
-&HOLE XB=4.2,6.2,8.7,8.9,0.1,1.3,            / GF Wall Opening
-&HOLE XB=9.2,9.4,2.6,3.5,-0.0128571,2.1,     / GF Door Opening
-&HOLE XB=7.4,8.3,1.0,1.2,-0.0128571,2.1,     / GF Door Opening
-&HOLE XB=7.4,8.3,2.4,2.6,-0.0128571,2.1,     / GF Door Opening
-&HOLE XB=11.7,11.9,7.6,8.5,-0.0128571,2.1,   / GF Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,-0.0128571,2.1,   / GF Door Opening
-&HOLE XB=11.7,11.9,1.2,2.4,-0.0128571,3.3,   / GF Door Opening
-&HOLE XB=15.7,15.9,4.35,6.15,-0.0128571,2.1, / GF Door 1 Opening
-&HOLE XB=9.2,9.4,2.6,3.5,3.6,5.7,            / 1F Door Opening
-&HOLE XB=11.7,11.9,8.9,10.1,3.6,4.5,         / 1F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,3.6,5.7,          / 1F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,7.2,9.3,          / 2F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,7.2,9.3,          / 2F Door Opening
-&HOLE XB=9.4,11.3,2.4,2.6,7.2,9.1,           / 2F Wall Opening
-&HOLE XB=9.2,9.4,2.6,3.5,7.2,9.3,            / 2F Door Opening
-&HOLE XB=9.2,9.4,2.6,3.5,9.8,11.9129,        / 3F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,9.8,11.9129,      / 3F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,9.8,11.9129,      / 3F Door Opening
-HOLE XB=6.4,6.7,10.1,10.3,11.8,12.1,        / 3F Wall Vent - Added to External Vent
-&HOLE XB=9.2,9.4,2.6,3.5,12.4,14.5,          / 4F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,12.4,14.5,        / 4F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,12.4,14.5,        / 4F Door Opening
-&HOLE XB=9.4,11.3,2.4,2.6,12.4,14.3,         / 4F Wall Opening
-&HOLE XB=9.2,9.4,2.6,3.5,14.8,16.9,          / 5F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,15.0,17.1,        / 5F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,15.0,17.1,        / 5F Door Opening
-&HOLE XB=11.7,11.9,1.2,2.4,15.0,17.4,        / 5F Door Opening
-&HOLE XB=9.2,9.4,2.6,3.5,17.6,19.7,          / 6F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,17.6,19.7,        / 6F Door Opening
-&HOLE XB=9.4,11.3,2.4,2.6,17.6,19.5,         / 6F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,17.6,19.7,        / 6F Door Opening
-&HOLE XB=9.2,9.4,2.6,3.5,20.2,22.3,          / 7F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,20.2,22.3,        / 7F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,20.2,22.3,        / 7F Door Opening
-&HOLE XB=11.7,11.9,1.2,2.4,20.2,22.7,        / 7F Door Opening
-HOLE XB=6.8,6.9,10.1,10.3,22.2,22.3,        / 7F Wall Vent - Added to External Vent
-&HOLE XB=9.2,9.4,2.6,3.5,22.8,24.9,          / 8F Door Opening
-&HOLE XB=9.4,11.3,2.4,2.6,22.8,24.7,         / 8F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,22.8,24.9,        / 8F Door Opening
-&HOLE XB=11.7,11.9,6.9,7.8,22.8,24.9,        / 8F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,22.8,24.9,        / 8F Door Opening
-&HOLE XB=9.2,9.4,2.6,3.5,25.3871,27.5,       / 9F Door Opening
-&HOLE XB=11.7,11.9,8.9,9.8,25.3871,27.5,     / 9F Door Opening
-&HOLE XB=11.7,11.9,2.6,3.5,25.3871,27.5,     / 9F Door Opening
-&HOLE XB=11.7,11.9,1.2,2.4,25.3871,27.8,     / 9F Door Opening
-&HOLE XB=11.7,11.9,6.9,7.8,25.3871,27.5,     / 9F Door Opening
+&HOLE XB=11.7,11.9, 2.6, 3.5, 7.2, 9.3 / Floor 3 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8, 7.2, 9.3 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6, 7.2, 9.1 /
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 7.2, 9.3 /
 
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 9.8,11.9 / Floor 4 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5, 9.8,11.9 /
+&HOLE XB=11.7,11.9, 8.9, 9.8, 9.8,11.9 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,12.4,14.5 / Floor 5 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,12.4,14.5 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,12.4,14.5 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6,12.4,14.3 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,15.0,16.9 / Floor 6 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,15.0,17.1 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,15.0,17.1 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,15.0,17.4 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,17.6,19.7 / Floor 7 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8,17.6,19.7 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6,17.6,19.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,17.6,19.7 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,20.2,22.3 / Floor 8 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,20.2,22.3 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,20.2,22.3 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,20.2,22.7 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,22.8,24.9 / Floor 9 Door Openings
+&HOLE XB= 9.4,11.3, 2.4, 2.6,22.8,24.7 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,22.8,24.9 /
+&HOLE XB=11.7,11.9, 6.9, 7.8,22.8,24.9 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,22.8,24.9 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,25.4,27.5 / Floor 10 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8,25.4,27.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,25.4,27.5 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,25.4,27.8 /
+&HOLE XB=11.7,11.9, 6.9, 7.8,25.4,27.5 /
+
+Leakage
+
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 0.7, 2.2, SURF_ID='Steel', ID='W01-E'/ Floor  1 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 4.3, 5.8, SURF_ID='Steel', ID='W02-E'/ Floor  2 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 8.1, 9.6, SURF_ID='Steel', ID='W03-E'/ Floor  3 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,10.7,12.2, SURF_ID='Steel', ID='W04-E'/ Floor  4 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,13.3,14.8, SURF_ID='Steel', ID='W05-E'/ Floor  5 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,15.9,17.4, SURF_ID='Steel', ID='W06-E'/ Floor  6 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,18.5,20.0, SURF_ID='Steel', ID='W07-E'/ Floor  7 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,21.1,22.6, SURF_ID='Steel', ID='W08-E'/ Floor  8 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,23.7,25.2, SURF_ID='Steel', ID='W09-E'/ Floor  9 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,26.3,27.8, SURF_ID='Steel', ID='W10-E'/ Floor 10 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 0.7, 2.2, SURF_ID='Steel', ID='W01-I'/ Floor  1 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 4.3, 5.8, SURF_ID='Steel', ID='W02-I'/ Floor  2 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 8.1, 9.6, SURF_ID='Steel', ID='W03-I'/ Floor  3 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,10.7,12.2, SURF_ID='Steel', ID='W04-I'/ Floor  4 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,13.3,14.8, SURF_ID='Steel', ID='W05-I'/ Floor  5 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,15.9,17.4, SURF_ID='Steel', ID='W06-I'/ Floor  6 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,18.5,20.0, SURF_ID='Steel', ID='W07-I'/ Floor  7 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,21.1,22.6, SURF_ID='Steel', ID='W08-I'/ Floor  8 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,23.7,25.2, SURF_ID='Steel', ID='W09-I'/ Floor  9 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,26.3,27.8, SURF_ID='Steel', ID='W10-I'/ Floor 10 1.5 x 1.5 m Window, Interior
+&HVAC ID='LEAK-W01', TYPE_ID='LEAK', VENT_ID='W01-E',  VENT2_ID='W01-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W02', TYPE_ID='LEAK', VENT_ID='W02-E',  VENT2_ID='W02-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W03', TYPE_ID='LEAK', VENT_ID='W03-E',  VENT2_ID='W03-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W04', TYPE_ID='LEAK', VENT_ID='W04-E',  VENT2_ID='W04-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W05', TYPE_ID='LEAK', VENT_ID='W05-E',  VENT2_ID='W05-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W06', TYPE_ID='LEAK', VENT_ID='W06-E',  VENT2_ID='W06-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W07', TYPE_ID='LEAK', VENT_ID='W07-E',  VENT2_ID='W07-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W08', TYPE_ID='LEAK', VENT_ID='W08-E',  VENT2_ID='W08-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W09', TYPE_ID='LEAK', VENT_ID='W09-E',  VENT2_ID='W09-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+&HVAC ID='LEAK-W10', TYPE_ID='LEAK', VENT_ID='W10-E',  VENT2_ID='W10-I', LEAK_ENTHALPY=.TRUE., AREA=0.039 /
+
+&SLCF PBY=3.2, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=3.2, QUANTITY='PRESSURE' /
 
 &TAIL/
