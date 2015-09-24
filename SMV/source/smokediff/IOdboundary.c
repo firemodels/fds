@@ -235,7 +235,7 @@ void diff_boundaryes(FILE *stream_out){
       valmin=1000000000.0;
       valmax=-valmin;
 
-      init_histogram(boundary1->histogram);
+      reset_histogram(boundary1->histogram);
 
       FORTgetpatchdata(&unit1, &boundary1->npatches, 
         p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &npqq1, &error1);

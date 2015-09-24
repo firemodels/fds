@@ -21,16 +21,20 @@ typedef struct {
 
 //************************** headers ****************************************
 
-void init_histogram(histogramdata *histogram);
-void init_histogram2d(histogramdata *histogram, int nx, int ny);
-void free_histogram2d(histogramdata *histogram);
+void complete_histogram(histogramdata *histogram);
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram);
 void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata *histogram);
-void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogramto);
-void update_histogram(float *vals, int nvals, histogramdata *histogram);
+void free_histogram(histogramdata *histogram);
+void free_histogram2d(histogramdata *histogram);
+float get_histogram_value(histogramdata *histogram, float cdf);
+void init_histogram(histogramdata *histogram, int nbuckets);
+void init_histogram2d(histogramdata *histogram, int nx, int ny);
 void merge_histogram(histogramdata *histogramto, histogramdata *histogramfrom);
 void merge_uvhistogram(histogramdata *histogramto, histogramdata *histogramfrom);
-float get_histogram_value(histogramdata *histogram, float cdf);
+void reset_histogram(histogramdata *histogram);
+void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogramto);
+void update_histogram(float *vals, int nvals, histogramdata *histogram);
+#if pp_CHECK
 void check_histogram(void);
-void complete_histogram(histogramdata *histogram);
+#endif
 #endif
