@@ -275,7 +275,7 @@ void init_volrender(void){
   }
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei;
-    char *shortlabel;
+    char *shortlabel, *longlabel;
     int blocknumber;
     mesh *meshi;
     volrenderdata *vr;
@@ -289,12 +289,13 @@ void init_volrender(void){
     if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
     vr = &(meshi->volrenderinfo);
     shortlabel = slicei->label.shortlabel;
+    longlabel = slicei->label.longlabel;
 
     if(STRCMP(shortlabel,"temp")==0){  
       vr->fireslice=slicei;
      continue;
     }
-    if(STRCMP(shortlabel,"rho_Soot")==0){
+    if(STRCMP(shortlabel, "rho_Soot")==0||(strlen(longlabel)>=12&&strncmp(longlabel, "SOOT DENSITY",12)==0)){
       vr->smokeslice=slicei;
       continue;
     }
