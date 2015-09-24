@@ -580,7 +580,7 @@ void update_patch_hist(void){
       patchframesize+=patchi->patchsize[j];
     }
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    init_histogram(patchi->histogram);
+    reset_histogram(patchi->histogram);
     while(error1==0){
       int ndummy;
 
@@ -679,6 +679,8 @@ void Get_Boundary_Bounds(void){
     patch *patchi;
 
     patchi = patchinfo + i;
+    FREEMEMORY(patchi->histogram->buckets);
+    FREEMEMORY(patchi->histogram->buckets_2d);
     FREEMEMORY(patchi->histogram);
   }
 

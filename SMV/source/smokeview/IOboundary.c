@@ -346,6 +346,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   else{
     meshi->npatches=0;
     getpatchheader(file,&meshi->npatches,&patchmin,&patchmax);
+    patchmin_global = patchmin;
+    patchmax_global = patchmax;
   }
   if(meshi->npatches>0){
     if(
@@ -4147,7 +4149,7 @@ int update_patch_hist(patchdata *patchj){
     FORTopenboundary(patchi->file,&unit1,&patchi->version,&error1,lenfile);
 
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    init_histogram(patchi->histogram);
+    reset_histogram(patchi->histogram);
     error1=0;
     while(error1==0){
       int ndummy;

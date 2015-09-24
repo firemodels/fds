@@ -370,12 +370,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fgets(buffer,255,streamsmv);
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
+        int i;
+        
         NewMemory((void **)&plot3di->file,(unsigned int)(strlen(full_file)+1));
-        NewMemory((void **)&plot3di->histogram[0],sizeof(histogramdata));
-        NewMemory((void **)&plot3di->histogram[1],sizeof(histogramdata));
-        NewMemory((void **)&plot3di->histogram[2],sizeof(histogramdata));
-        NewMemory((void **)&plot3di->histogram[3],sizeof(histogramdata));
-        NewMemory((void **)&plot3di->histogram[4],sizeof(histogramdata));
+        for(i = 0; i < 5; i++){
+          NewMemory((void **)&plot3di->histogram[i], sizeof(histogramdata));
+          init_histogram(plot3di->histogram[i],NHIST_BUCKETS);
+        }
       
         CheckMemory;
         strcpy(plot3di->file,trim_front(buffer));
@@ -465,7 +466,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         endian=getendian();
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
-        STRCPY(slicei->file,trim_front(buffer));
+        init_histogram(slicei->histogram,NHIST_BUCKETS);
+        STRCPY(slicei->file, trim_front(buffer));
         if(readlabels(&slicei->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading SLCF entry\n");
           break;
@@ -547,7 +549,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
-        STRCPY(boundaryi->file,trim_front(buffer));
+        init_histogram(boundaryi->histogram,NHIST_BUCKETS);
+        STRCPY(boundaryi->file, trim_front(buffer));
         if(readlabels(&boundaryi->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading BNDF entry\n");
           break;
