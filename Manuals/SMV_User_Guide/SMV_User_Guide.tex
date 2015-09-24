@@ -434,7 +434,7 @@ determined by using smoke densities computed by FDS.  The fire and
 sprinkler spray transparencies are determined by using a heuristic
 based on heat release rate and water density data, again computed
 by FDS. Various settings for the 3D smoke option may be set using
-the {\em 3D Smoke}\ dialog box found in the {\em Dialogs}\ menu.
+the {\em 3D Smoke}\ dialog box found in the {\em Dialogs$>$Data bounds}\ menu.
 The windows version of Smokeview uses the graphical processing
 unit (GPU) on the video card to perform some of the calculations
 required to visualize smoke.
@@ -570,7 +570,7 @@ an observer as they move through the simulation. One can then see
 the simulation as the observer would. This option is available
 under the {\em Tour}\ menu item. Existing tours may be edited and
 new tours may be created using the {\em Tour}\ dialog box found in
-the {\em Dialogs}\ menu. Tour settings are stored in the local
+the {\em Dialogs$>$View}\ menu. Tour settings are stored in the local
 configuration file (casename.ini).
 
 \subsubsection{Scripting}\ Smokeview may be run in an unattended mode using
@@ -1674,7 +1674,7 @@ the new bounds to take effect.}\ \label{figBOUNDSplot3d}
 \end{figure}
 
 The {\em File/Bounds...}\ dialog box is opened from the {\em
-Dialogs}\ menu. Each file type in Fig. \ref{figBOUNDSplot3d}
+Dialogs>Data bounds}\ menu. Each file type in Fig. \ref{figBOUNDSplot3d}
 (slice, particle, Plot3D, etc.) has a set of {\em radio buttons}\
 for selecting the variable type that data bounds are to be applied
 to. These variable types are determined from the files generated
@@ -2957,7 +2957,7 @@ go towards the front door and then end at the top of the stairs.
 These steps are illustrated in Fig. \ref{figTutorial}.
 
 \begin{enumerate}
-\item Start by clicking the {\em Dialog$>$Tours...}\ menu item
+\item Start by clicking the {\em Dialog$>$View$>$Create/edit tours...}\ menu item
 which opens up the {\em Edit Tours}\ dialog box.
 
 \item  Click on the \frameit{New Tour}\ button in the {\em Edit Tour}\ dialog
@@ -3696,7 +3696,7 @@ Editor}\ dialog box. One may create or edit existing colorbars by specifying a s
 \section{Using the Colorbar Editor}
 \label{section:colorbar}
 The {\em Colorbar Editor}\ dialog box is opened from the {\em
-Dialogs$>$Customize Colorbar}\ menu entry. When this menu item is
+Dialogs$>$View$>$Edit colorbar}\ menu entry. When this menu item is
 selected, a spatial representation of the currently selected
 colorbar is displayed within the Smokeview scene along the {\em
 Colorbar Editor}\ dialog box.  The FDS simulation scene is hidden
@@ -3863,8 +3863,8 @@ to debug FDS input files by making short model runs and observing
 whether blockages, vents and other geometric features of a model
 run are located correctly. Blockages may then be created or
 changed using a text editor and location information provided by
-the {\em Examine Blockages}\ dialog box called from the {\em \tt
-Dialogs}\ menu.
+the {\em Examine geometry}\ dialog box called from the {\em \tt
+Dialogs$>$View$>$Examine geometry}\ menu.
 
 The following is a general procedure for identifying problems in
 FDS input files. Assume that the FDS input data file is named {\tt
@@ -4027,7 +4027,7 @@ or by adding text strings at arbitrary locations and time durations.
 Both of these annotations
 are added with the {\em User Ticks}\ and the {\em User Label}\ dialog
 box respectively.  These dialog boxes are both invoked by selecting the
-{\em Dialogs>Display}\ menu item.
+{\em Dialogs$>$Display}\ menu item.
 
 \section{{\em User Ticks Settings}\ Dialog Box}
 The {\em User Ticks Settings}\ dialog box allows one to place
