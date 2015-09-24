@@ -80,28 +80,42 @@ void init_histogram(histogramdata *histogram, int nbuckets){
   reset_histogram(histogram);
 }
 
+/* ------------------ reset_histogram2d ------------------------ */
+
+void reset_histogram2d(histogramdata *histogram){
+
+  // initialize histogram data structures
+
+  int i;
+
+  for(i = 0; i<histogram->nbuckets; i++){
+    histogram->buckets_2d[i] = 0;
+  }
+  histogram->defined = 0;
+  histogram->ntotal = 0;
+  histogram->valxmin = (float)pow(10.0, 20.0);
+  histogram->valxmax = -histogram->valxmin;
+  histogram->valymin = (float)pow(10.0, 20.0);
+  histogram->valymax = -histogram->valymin;
+  histogram->complete = 0;
+}
+
 /* ------------------ init_histogram2d ------------------------ */
 
 void init_histogram2d(histogramdata *histogram, int nx, int ny){
 
 // initialize histogram data structures
 
-  int i, nbuckets;
+  int nbuckets;
 
+  histogram->buckets = NULL;
+  histogram->buckets_2d = NULL;
   nbuckets = nx*ny;
   histogram->ndim = 2;
   histogram->nbuckets = nbuckets;
+
   NewMemory((void **)&histogram->buckets_2d, histogram->nbuckets*sizeof(int));
-  for(i = 0; i<nbuckets; i++){
-    histogram->buckets_2d[i]=0;
-  }
-  histogram->defined=0;
-  histogram->ntotal=0;
-  histogram->valxmin=(float)pow(10.0,20.0);
-  histogram->valxmax=-histogram->valxmin;
-  histogram->valymin=(float)pow(10.0,20.0);
-  histogram->valymax=-histogram->valymin;
-  histogram->complete=0;
+  reset_histogram2d(histogram);
 }
 
 /* ------------------ free_histogram ------------------------ */
