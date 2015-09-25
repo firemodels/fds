@@ -7,6 +7,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#ifndef UPDATE_SMOKEFIRE_COLORS
+#define UPDATE_SMOKEFIRE_COLORS 54
+#endif
 #define SOOT 1
 #define FIRE 2
 #define WATER 3
