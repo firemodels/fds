@@ -1413,10 +1413,17 @@ void Update_Smokecolormap(int option){
 
   switch(firecolormap_type){
     case FIRECOLORMAP_DIRECT:
-      for(n=0;n<icut;n++){
-        rgb_colormap[4*n] = smoke_red;
-        rgb_colormap[4*n+1] = smoke_green;
-        rgb_colormap[4*n+2] = smoke_blue;
+      for(n=0;n<MAXSMOKERGB;n++){
+        if(n<icut){
+          rgb_colormap[4*n+0] = (float)smoke_red / 255.0;
+          rgb_colormap[4*n+1] = (float)smoke_green / 255.0;
+          rgb_colormap[4*n+2] = (float)smoke_blue / 255.0;
+        }
+        else{
+          rgb_colormap[4*n+0]=(float)fire_red/255.0;
+          rgb_colormap[4*n+1]=(float)fire_green/255.0;
+          rgb_colormap[4*n+2]=(float)fire_blue/255.0;
+        }
         if(alpha[n]==0){
           rgb_colormap[4*n+3]=0.0;
         }
@@ -1424,17 +1431,7 @@ void Update_Smokecolormap(int option){
           rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
-      for(n=icut;n<MAXSMOKERGB;n++){
-        rgb_colormap[4*n]=(float)fire_red/255.0;
-        rgb_colormap[4*n+1]=(float)fire_green/255.0;
-        rgb_colormap[4*n+2]=(float)fire_blue/255.0;
-        if(alpha[n]==0){
-          rgb_colormap[4*n+3]=0.0;
-        }
-        else{
-          rgb_colormap[4*n+3]=transparent_level_local;
-        }
-      }
+      Update_Texturebar();
       break;
     case FIRECOLORMAP_NOCONSTRAINT:
     case FIRECOLORMAP_CONSTRAINT:

@@ -1059,10 +1059,15 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
         float *firesmoke;
 
         if(firecolor!=NULL){
-          firesmoke=rgb_slicesmokecolormap+4*firecolor[j];
+          if(firecolor[j]>i_hrrpuv_cutoff){
+            firesmoke=rgb_slicesmokecolormap+4*firecolor[j];
+          }
+          else{
+            firesmoke=rgb_slicesmokecolormap+4*sootcolor[j];
+          }
         }
         else{
-          firesmoke=rgb_slicesmokecolormap;
+            firesmoke=rgb_slicesmokecolormap+4*sootcolor[j];
         }
         *mergecolor++=255*firesmoke[0];
         *mergecolor++=255*firesmoke[1];
