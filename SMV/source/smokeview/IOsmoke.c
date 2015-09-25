@@ -21,6 +21,7 @@ int cull_count=0;
 #ifdef pp_CULL
 int cullplane_compare( const void *arg1, const void *arg2 );
 #endif
+void Smoke3d_CB(int var);
 
 //              alphaf_out[n]=adjustalpha(ALPHAIN, xyzeyeorig, xp, ASPECTRATIO, NORM, NORMTYPE);
 
@@ -597,6 +598,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif
+  Smoke3d_CB(UPDATE_SMOKEFIRE_COLORS);
   Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -5989,3 +5991,17 @@ void getPixelCount(void){
 #endif
 }
 #endif
+
+/* ------------------ HaveFire ------------------------ */
+
+int HaveFire(void){
+  int i;
+
+  for(i = 0; i<nsmoke3dinfo; i++){
+    smoke3ddata *smoke3di;
+
+    smoke3di = smoke3dinfo+i;
+    if(smoke3di->loaded==1&&smoke3di->type==FIRE)return 1;
+  }
+  return 0;
+}

@@ -1390,7 +1390,9 @@ void Update_Smokecolormap(int option){
   float val, valmin, valmax, valcut;
   int icut;
   float *rgb_colormap;
+  int have_fire;
   
+  have_fire = HaveFire();
   if(option==RENDER_SLICE){
     valmin=global_hrrpuv_min;
     valcut=global_hrrpuv_cutoff;
@@ -1414,7 +1416,7 @@ void Update_Smokecolormap(int option){
   switch(firecolormap_type){
     case FIRECOLORMAP_DIRECT:
       for(n=0;n<MAXSMOKERGB;n++){
-        if(n<icut){
+        if(n<icut||have_fire==0){
           rgb_colormap[4*n+0] = (float)smoke_red / 255.0;
           rgb_colormap[4*n+1] = (float)smoke_green / 255.0;
           rgb_colormap[4*n+2] = (float)smoke_blue / 255.0;

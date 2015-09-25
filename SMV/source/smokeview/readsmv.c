@@ -4214,16 +4214,16 @@ int readsmv(char *file, char *file2){
         }
         if(smoke3di->have_light==1)have_lighting=1;
         if(strncmp(smoke3di->label.shortlabel,"soot",4)==0){
-          smoke3di->type=1;
+          smoke3di->type=SOOT;
         }
         else if(strncmp(smoke3di->label.shortlabel,"hrrpuv",6)==0){
-          smoke3di->type=2;
+          smoke3di->type=FIRE;
         }
         else if(strncmp(smoke3di->label.shortlabel,"water",5)==0){
-          smoke3di->type=3;
+          smoke3di->type=WATER;
         }
         else{
-          smoke3di->type=1;
+          smoke3di->type=SOOT;
         }
       }
       continue;

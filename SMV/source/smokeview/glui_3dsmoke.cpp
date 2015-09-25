@@ -20,6 +20,9 @@ extern "C" void init_volrender_surface(int firstcall);
 #define SMOKE_RED 51
 #define SMOKE_GREEN 52
 #define SMOKE_BLUE 53
+#ifndef UPDATE_SMOKEFIRE_COLORS
+#define UPDATE_SMOKEFIRE_COLORS 54
+#endif
 #define FIRE_HALFDEPTH 4
 #define GLOBAL_FIRE_CUTOFF 15
 #define SMOKE_SHADE 7
@@ -784,6 +787,7 @@ extern "C" void Smoke3d_CB(int var){
     Idle_CB();
     Update_Smokecolormap(smoke_render_option);
     break;
+  case UPDATE_SMOKEFIRE_COLORS:
   case FIRE_RED:
   case FIRE_GREEN:
   case FIRE_BLUE:
