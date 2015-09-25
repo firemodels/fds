@@ -17,9 +17,6 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using GIT revision %smv_revision% to build a test 64 bit Windows Smokeview
 
 %svn_drive%
 cd %svn_root%\smv\Build\intel_win_64
