@@ -412,8 +412,7 @@ void SmokeColorBarMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;
 
-  if(value<0)value=0;
-  if(value>ncolorbars-1)value=ncolorbars-1;
+  value = CLAMP(value, 0, ncolorbars - 1);
   fire_colorbar_index=value;
   fire_colorbar = colorbarinfo + value;
   UpdateRGBColors(COLORBAR_INDEX_NONE);

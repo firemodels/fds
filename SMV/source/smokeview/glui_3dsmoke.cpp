@@ -359,7 +359,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   ROLLOUT_colormap3 = glui_3dsmoke->add_rollout_to_panel(PANEL_colormap,"Color, opacity",false);
 
-  PANEL_colormap3a = glui_3dsmoke->add_panel_to_panel(ROLLOUT_colormap3,"fire");
+  PANEL_colormap3a = glui_3dsmoke->add_panel_to_panel(ROLLOUT_colormap3,"fire",true);
   SPINNER_smoke3d_fire_red=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap3a,_d("red"),GLUI_SPINNER_INT,&fire_red,FIRE_RED,Smoke3d_CB);
   SPINNER_smoke3d_fire_red->set_int_limits(0,255);
   SPINNER_smoke3d_fire_green=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap3a,_d("green"),GLUI_SPINNER_INT,&fire_green,FIRE_GREEN,Smoke3d_CB);
@@ -370,7 +370,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   SPINNER_smoke3d_fire_halfdepth=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap3a,_d("half depth (m)"),GLUI_SPINNER_FLOAT,&fire_halfdepth,FIRE_HALFDEPTH,Smoke3d_CB);
   SPINNER_smoke3d_fire_halfdepth->set_float_limits(0.0,10.0);
 
-  PANEL_colormap3b = glui_3dsmoke->add_panel_to_panel(ROLLOUT_colormap3, "smoke");
+  PANEL_colormap3b = glui_3dsmoke->add_panel_to_panel(ROLLOUT_colormap3, "smoke",true);
   SPINNER_smoke3d_smoke_red = glui_3dsmoke->add_spinner_to_panel(PANEL_colormap3b, _d("red"), GLUI_SPINNER_INT, &smoke_red, SMOKE_RED, Smoke3d_CB);
   SPINNER_smoke3d_smoke_red->set_int_limits(0, 255);
   SPINNER_smoke3d_smoke_green = glui_3dsmoke->add_spinner_to_panel(PANEL_colormap3b, _d("green"), GLUI_SPINNER_INT, &smoke_green, SMOKE_GREEN, Smoke3d_CB);
@@ -742,12 +742,19 @@ extern "C" void Smoke3d_CB(int var){
       LISTBOX_smoke_colorbar->disable();
       ROLLOUT_colormap3->enable();
       ROLLOUT_colormap3->open();
+      PANEL_colormap3a->enable();
+      PANEL_colormap3b->enable();
       SPINNER_smoke3d_fire_red->enable();
       SPINNER_smoke3d_fire_green->enable();
       SPINNER_smoke3d_fire_blue->enable();
+      SPINNER_smoke3d_smoke_red->enable();
+      SPINNER_smoke3d_smoke_green->enable();
+      SPINNER_smoke3d_smoke_blue->enable();
       SPINNER_smoke3d_fire_halfdepth->enable();
 
       fire_colorbar_index_save=fire_colorbar_index;
+      UpdateRGBColors(COLORBAR_INDEX_NONE);
+      Update_Smokecolormap(smoke_render_option);
     }
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
@@ -784,6 +791,7 @@ extern "C" void Smoke3d_CB(int var){
   case SMOKE_SHADE:
     glutPostRedisplay();
     force_redisplay=1;
+    UpdateRGBColors(COLORBAR_INDEX_NONE);
     Update_Smokecolormap(smoke_render_option);
     Idle_CB();
     break;
