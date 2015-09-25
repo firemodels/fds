@@ -7,6 +7,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SOOT 1
+#define FIRE 2
+#define WATER 3
+
 #define NELEV_ZONE 100
 
 #define UPDATE_ISO_OFF 0
