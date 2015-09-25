@@ -1739,13 +1739,13 @@ three different types of contour plots:  shaded, stepped and line
 contours.
 \section{3D Smoke Options}
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=3.61111in]{FIGURES/fig3DSmoke}
+\centerline{\includegraphics[width=3.625in]{FIGURES/fig3DSmoke}
 }\ \caption[Dialog Box for setting slice rendered 3D smoke options]
 {Dialog box for setting slice rendered 3D smoke options.   }
 \label{fig3DSmoke}
 \end{figure}
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=3.97222in]{FIGURES/fig3DSmokeB}
+\centerline{\includegraphics[width=3.958333in]{FIGURES/fig3DSmokeB}
 }\ \caption[Dialog Box for setting volume rendered 3D smoke
 options] {Dialog box for setting volume rendered 3D smoke options.
 }\ \label{fig3DSmokeB}
@@ -1753,10 +1753,8 @@ options] {Dialog box for setting volume rendered 3D smoke options.
 Figures \ref{fig3DSmoke}\ and \ref{fig3DSmokeB}\ show slice and
 volume rendered controls for overriding Smokeview's choice for
 several of the 3D smoke parameters.  The user may specify the
-color of the fire and the gray level of the smoke.  A gray level
-of $n$ where n ranges from 0 to 7 results in a color of
-$(2^n,2^n,2^n)$ where the three components represent red, green
-and blue contributions.  The {\em hrrpuv cutoff}\ input refers to
+color of the fire and smoke.  Red, green and blue levels may be specified ranging between 0 and 255.  
+The {\em hrrpuv cutoff}\ input refers to
 the heat release rate required at a node before Smokeview will
 color the node as fire rather than smoke. The {\em 50\% flame
 depth}\ allows one to specify the transparency or optical thickness
