@@ -136,7 +136,7 @@ DATA ( (TETRA_PLANE2EDGE(I,J), I=0,2),J=0,3) /&
   /
 
 PUBLIC GET_TETRABOX_VOLUME, GET_VERTS, TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS, GET_POLYHEDRON_VOLUME, TEST_IN_TETRA0,&
-       DECIMATE, DECIMATE_FB, IN_TRIANGLE, IS_ACUTE_ANGLE, POLY2TRI
+       DECIMATE, DECIMATE_FB, IN_TRIANGLE, IS_ANGLE_LT_180, POLY2TRI
 
 CONTAINS
 
@@ -1877,7 +1877,15 @@ IF ( VERT(1)<MIN(V1(1),V2(1),V3(1)) .OR. VERT(2)<MIN(V1(2),V2(2),V3(2)).OR.&
 ! V2H = V2 - V1
 ! V3H = V3 - V1
 
-! solve for a and b
+! solution:
+!     | VH_x   V3H_x |     |  V2H_x  V3H_x |
+! a = |              |  /  |               |
+!     | VH_y   VH3_y |     |  V2H_y  VH3_y |
+
+!     | V2H_x  VH_x  |     |  V2H_x  V3H_x |
+! b = |              |  /  |               |
+!     | V2H_y  VH_y  |     |  V2H_y  VH3_y |
+
 
 ! VERT is in triangle if 0<=a<=1 and 0<=b<=1 and 0<=a+b<=1
 
@@ -1899,15 +1907,19 @@ END FUNCTION
 
 !  ------------------ IS_ACUTE_ANGLE ------------------------
 
-LOGICAL FUNCTION IS_ACUTE_ANGLE(V1,V2,V3)
+LOGICAL FUNCTION IS_ANGLE_LT_180(V1,V2,V3)
 
 ! determine whether the angle formed by vertices V1, V2, V3 is acute ( <180.0) or obtuse (>= 180.0)
 
 REAL(EB), INTENT(IN), DIMENSION(2) :: V1, V2, V3
+REAL(EB), DIMENSION(2) :: DV1, DV2, DV1PERP
 
-IS_ACUTE_ANGLE = .TRUE.
-IF ( DOT_PRODUCT(V1-V2,V3-V2) <= 0.0_EB) IS_ACUTE_ANGLE = .FALSE.
-END FUNCTION IS_ACUTE_ANGLE
+IS_ANGLE_LT_180 = .TRUE.
+DV1 = V2 - V1
+DV1PERP = (/-DV1(2),DV1(1)/)
+DV2 = V3 - V2
+IF ( DOT_PRODUCT(DV1PERP,DV2) <= 0.0_EB) IS_ANGLE_LT_180 = .FALSE.
+END FUNCTION IS_ANGLE_LT_180
 
 !  ------------------ POLY2TRI ------------------------
 
@@ -1938,7 +1950,7 @@ DO WHILE (NP >= 3)
       
       IF (NP>3) THEN
          ! reject triangle if angle >= 180.0
-         IF(.NOT.IS_ACUTE_ANGLE(V1,V2,V3))CYCLE LOOP_I
+         IF(.NOT.IS_ANGLE_LT_180(V1,V2,V3))CYCLE LOOP_I
          LOOP_J: DO J = 1, NP
             IF(J>=I.AND.J<=I+2)CYCLE LOOP_J
             VERT => VERTS(2*POLY(J)-1:2*POLY(J))
