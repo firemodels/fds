@@ -1857,7 +1857,7 @@ LOGICAL FUNCTION IN_TRIANGLE(VERT,V1,V2,V3)
 
 REAL(EB), INTENT(IN), DIMENSION(2) :: VERT, V1, V2, V3
 
-REAL(EB), DIMENSION(2) :: VHAT
+REAL(EB), DIMENSION(2) :: VH, V2H, V3H
 REAL(EB) :: DET, A, B
 
 ! reject if VERT is outside the bounding box for V1, V2 and V3
@@ -1866,25 +1866,35 @@ IN_TRIANGLE = .FALSE.
 IF ( VERT(1)<MIN(V1(1),V2(1),V3(1)) .OR. VERT(2)<MIN(V1(2),V2(2),V3(2)).OR.&
      VERT(1)>MAX(V1(1),V2(1),V3(1)) .OR. VERT(2)>MAX(V1(2),V2(2),V3(2))) RETURN
 
-! VERT = V1 + aV2 + bV3
+! VERT = V1 + a(V2-V1) + b(V3-V1)
 
 ! rewrite as
-! ( V2_x   V3_x )  (a)     (  VERT_x - V1_x )
-! (             )  ( )  =  (                )  
-! ( V2_y   V3_y )  (b)     (  VERT_y - V1_y )
+! ( V2H_x   V3H_x )  (a)     (  VH_x )
+! (               )  ( )  =  (       )  
+! ( V2H_y   VH3_y )  (b)     (  VH_y )
+
+! where
+! VH = VERT - V1
+! V2H = V2 - V1
+! V3H = V3 - V1
 
 ! solve for a and b
 
 ! VERT is in triangle if 0<=a<=1 and 0<=b<=1 and 0<=a+b<=1
 
-VHAT = VERT - V1
+ VH = VERT - V1
+V2H = V2 - V1
+V3H = V3 - V1
 
-DET = V2(1)*V3(2) - V2(2)*V3(1)
-A = (VHAT(1)*V3(2) - VHAT(2)*V3(1))/DET
-B = (V2(1)*VHAT(2) - V2(2)*VHAT(1))/DET
+
+DET = V2H(1)*V3H(2) - V2H(2)*V3H(1)
+IF ( DET/=0.0_EB) THEN
+   A = ( VH(1)*V3H(2) -  VH(2)*V3H(1))/DET
+   B = (V2H(1)* VH(2) - V2H(2)* VH(1))/DET
 
 ! reject if VERT is outside of triangle or on its perimeter
-IF(A<=0.0_EB.OR.B<=0.0_EB.OR.A+B>=1.0_EB)RETURN
+   IF(A<=0.0_EB.OR.B<=0.0_EB.OR.A+B>=1.0_EB)RETURN
+ENDIF
 IN_TRIANGLE = .TRUE.
 END FUNCTION
 
