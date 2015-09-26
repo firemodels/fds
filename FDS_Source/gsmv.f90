@@ -1848,4 +1848,110 @@ ENDDO
 
 END SUBROUTINE DECIMATE
 
+
+!  ------------------ IN_TRIANGLE ------------------------
+
+LOGICAL FUNCTION IN_TRIANGLE(VERT,V1,V2,V3)
+
+! determine whether VERT is inside the triangle defined by V1, V2, V3 (in a plane)
+
+REAL(EB), INTENT(IN), DIMENSION(2) :: VERT, V1, V2, V3
+
+REAL(EB), DIMENSION(2) :: VHAT
+REAL(EB) :: DET, A, B
+
+! reject if VERT is outside the bounding box for V1, V2 and V3
+
+IN_TRIANGLE = .FALSE.
+IF ( VERT(1)<MIN(V1(1),V2(1),V3(1)) .OR. VERT(2)<MIN(V1(2),V2(2),V3(2)).OR.&
+     VERT(1)>MAX(V1(1),V2(1),V3(1)) .OR. VERT(2)>MAX(V1(2),V2(2),V3(2))) RETURN
+
+! VERT = V1 + aV2 + bV3
+
+! rewrite as
+! ( V2_x   V3_x )  (a)     (  VERT_x - V1_x )
+! (             )  ( )  =  (                )  
+! ( V2_y   V3_y )  (b)     (  VERT_y - V1_y )
+
+! solve for a and b
+
+! VERT is in triangle if 0<=a<=1 and 0<=b<=1 and 0<=a+b<=1
+
+VHAT = VERT - V1
+
+DET = V2(1)*V3(2) - V2(2)*V3(1)
+A = (VHAT(1)*V3(2) - VHAT(2)*V3(1))/DET
+B = (V2(1)*VHAT(2) - V2(2)*VHAT(1))/DET
+
+! reject if VERT is outside of triangle or on its perimeter
+IF(A<=0.0_EB.OR.B<=0.0_EB.OR.A+B>=1.0_EB)RETURN
+IN_TRIANGLE = .TRUE.
+END FUNCTION
+
+!  ------------------ IS_ACUTE_ANGLE ------------------------
+
+LOGICAL FUNCTION IS_ACUTE_ANGLE(V1,V2,V3)
+
+! determine whether the angle formed by vertices V1, V2, V3 is acute ( <180.0) or obtuse (>= 180.0)
+
+REAL(EB), INTENT(IN), DIMENSION(2) :: V1, V2, V3
+
+IS_ACUTE_ANGLE = .TRUE.
+IF ( DOT_PRODUCT(V1-V2,V3-V2) <= 0.0_EB) IS_ACUTE_ANGLE = .FALSE.
+END FUNCTION IS_ACUTE_ANGLE
+
+!  ------------------ POLY2TRI ------------------------
+
+SUBROUTINE POLY2TRI(VERTS,NVERTS,POLY,NPOLY,TRIS,NTRIS)
+
+! given a list of vertices forming a polygon, create a 2nd list of triangles
+
+INTEGER, INTENT(IN) :: NVERTS, NPOLY
+REAL(EB), INTENT(IN), DIMENSION(2*NVERTS), TARGET :: VERTS
+INTEGER, INTENT(IN), DIMENSION(NPOLY) :: POLY
+INTEGER, INTENT(OUT) :: NTRIS
+INTEGER, INTENT(OUT), DIMENSION(3*(NPOLY-2)) :: TRIS
+REAL(EB), POINTER, DIMENSION(:) :: VERT, V1, V2, V3
+INTEGER, DIMENSION(NPOLY) :: P
+
+INTEGER :: NP, I, J
+
+NP = NPOLY
+P(1:NP) = POLY(1:NPOLY)
+NTRIS = 0
+DO WHILE (NP >= 3)
+   LOOP_I: DO I = 1, NP - 2
+   
+      ! candidate triangle
+      V1 => VERTS(2*P(I  )-1:2*P(I  ))
+      V2 => VERTS(2*P(I+1)-1:2*P(I+1))
+      V3 => VERTS(2*P(I+2)-1:2*P(I+2))
+      
+      IF (NP>3) THEN
+         ! reject triangle if angle >= 180.0
+         IF(.NOT.IS_ACUTE_ANGLE(V1,V2,V3))CYCLE LOOP_I
+         LOOP_J: DO J = 1, NP
+            IF(J>=I.AND.J<=I+2)CYCLE LOOP_J
+            VERT => VERTS(2*POLY(J)-1:2*POLY(J))
+            ! reject triangle if another polygon point is inside this triangle
+            IF (IN_TRIANGLE(VERT,V1,V2,V3)) CYCLE LOOP_I
+         END DO LOOP_J
+      ENDIF
+      ! V1, V2, V3 is a valid triangle - copy triangle into list
+      TRIS(3*NTRIS+1) = P(I)
+      TRIS(3*NTRIS+2) = P(I+1)
+      TRIS(3*NTRIS+3) = P(I+2)
+      NTRIS = NTRIS + 1
+
+      ! reduce polygon list by 1 (take out polygon pt corresponding to V2 )
+      DO J = I + 2, NP
+         P(J-1) = P(J)
+      END DO
+      NP = NP - 1
+      EXIT
+   END DO LOOP_I
+END DO 
+END SUBROUTINE POLY2TRI
+
+
 END MODULE BOXTETRA_ROUTINES
