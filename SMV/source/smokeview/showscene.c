@@ -130,6 +130,10 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       draw_geomtestoutline();
     }
     if(show_cutcells==1)draw_geom_cutcells();
+    if(show_triangletest == 1){
+      CLIP_GEOMETRY;
+      draw_geomtesttriangle();
+    }
 #endif
 
 /* ++++++++++++++++++++++++ draw circular vents +++++++++++++++++++++++++ */
