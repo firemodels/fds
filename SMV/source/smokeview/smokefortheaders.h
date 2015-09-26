@@ -7,6 +7,8 @@
 #define STDCALLF extern void
 #endif
 
+#define FORTget_in_triangle _F(get_in_triangle)
+#define FORTget_is_acute_angle _F(get_is_acute_angle)
 #define FORTtest_in_tetra _F(test_in_tetra)
 #define FORTgetverts _F(getverts2)
 #define FORTgettetravol _F(get_tetrabox_volume_fb)
@@ -37,6 +39,8 @@
 #define FORTgetboundaryheader1 _F(getboundaryheader1)
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
+STDCALLF FORTget_in_triangle(float *vert, float *v1, float *v2, float *v3, int *flag);
+STDCALLF FORTget_is_acute_angle(float *v1, float *v2, float *v3, int *flag);
 STDCALLF FORTtest_in_tetra(float *xyz, int *in_tetra, int *tetra_state);
 STDCALLF FORTgettetravol(float *box_bounds,float *v0,float *v1,float *v2,float *v3,float *tetra_vol,float *areas,float *centroid);
 STDCALLF FORTgetverts(float *box_bounds, float *v0, float *v1, float *v2, float *v3, float *out_verts, 

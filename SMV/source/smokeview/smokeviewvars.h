@@ -83,7 +83,7 @@ SVEXTERN float SVDECL(tour_global_tension,0.0);
 
 SVEXTERN float box_bounds[6],box_bounds2[6],box_translate[3],tetra_vertices[12];
 SVEXTERN int tetrabox_vis[10];
-SVEXTERN int SVDECL(show_geomtest,0);
+SVEXTERN int SVDECL(show_geomtest,0), SVDECL(show_triangletest,0);
 
 SVEXTERN int SVDECL(convert_ini,0);
 SVEXTERN char SVDECL(*ini_from,NULL), SVDECL(*ini_to,NULL);

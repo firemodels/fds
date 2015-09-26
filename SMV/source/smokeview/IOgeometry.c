@@ -1738,7 +1738,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   Update_Framenumber(1);
 }
 
-/* ------------------ draw_geomtest ------------------------ */
+/* ------------------ draw_geomtestclip ------------------------ */
 
 void draw_geomtestclip(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
@@ -1947,7 +1947,7 @@ void draw_geomtestclip(void){
   glDisable(GL_COLOR_MATERIAL);
 }
 
-/* ------------------ draw_geomtest2 ------------------------ */
+/* ------------------ draw_geomtestoutline ------------------------ */
 
 void draw_geomtestoutline(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
@@ -2138,6 +2138,73 @@ void draw_geom_cutcells(void){
       drawbox_outline(x[ii],x[ii+1],y[jj],y[jj+1],z[kk],z[kk+1],foregroundcolor);
     }
   }
+  glPopMatrix();
+}
+
+/* ------------------ draw_geomtesttriangle ------------------------ */
+
+void draw_geomtesttriangle(void){
+  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
+  unsigned char trianglecolor[4] = {0, 0, 255, 255};
+  unsigned char pointincolor[4] = {0, 255, 0, 255};
+  unsigned char pointoutcolor[4] = {255, 0, 0, 255};
+  float *v1, *v2, *v3, *v4;
+  float areas[6], cent_solid[3];
+  int nverts;
+  int faces[600], npolys, nfaces;
+  int which_poly[200];
+  float verts[600];
+  int flag;
+
+  box_state = b_state + 1;
+  v1 = tetra_vertices;
+  v2 = v1 + 3;
+  v3 = v2 + 3;
+  v4 = v3 + 3;
+
+  xmin = box_bounds;
+  xmax = box_bounds + 1;
+  ymin = box_bounds + 2;
+  ymax = box_bounds + 3;
+  zmin = box_bounds + 4;
+  zmax = box_bounds + 5;
+
+  // tetrahedron
+#define EPS 0.02
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+  glTranslatef(-xbar0, -ybar0, -zbar0);
+
+  antialias(ON);
+
+  FORTget_in_triangle(v4, v1, v2, v3, &flag);
+
+  glLineWidth(tetra_line_thickness);
+  glBegin(GL_LINES);
+  glColor3ubv(trianglecolor);
+  glVertex3f(v1[0],v1[1],0.0);
+  glVertex3f(v2[0],v2[1],0.0);
+  
+  glVertex3f(v2[0],v2[1],0.0);
+  glVertex3f(v3[0],v3[1],0.0);
+
+  glVertex3f(v3[0],v3[1],0.0);
+  glVertex3f(v1[0],v1[1],0.0);
+  glEnd();
+  
+  glPointSize(tetra_point_size);
+  glBegin(GL_POINTS);
+  if(flag==1){
+    glColor3ubv(pointincolor);
+  }
+  else{
+    glColor3ubv(pointoutcolor);
+  }
+  glVertex3f(v4[0],v4[1],0.0);
+  glEnd();
+  antialias(OFF);
+
   glPopMatrix();
 }
 

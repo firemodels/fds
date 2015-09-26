@@ -20,11 +20,13 @@ extern "C" void Volume_CB(int var);
 #define SAVE_SETTINGS 33
 #define VISAXISLABELS 34
 #define SHOW_TETRA 35
+#define SHOW_TRIANGLE 36
 
 GLUI_Panel *PANEL_geom_surface=NULL;
 GLUI_Panel *PANEL_geom_interior=NULL;
-GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline;
-GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline;
+GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline=NULL;
+GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline=NULL;
+GLUI_Checkbox *CHECKBOX_geomtest=NULL, *CHECKBOX_triangletest=NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geom1=NULL;
@@ -294,8 +296,9 @@ extern "C" void glui_geometry_setup(int main_window){
   // -------------- Cube/Tetra intersection test -------------------
 
   ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Cube/Tetra intersection test",false);
-  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show intersection region", &show_geomtest, SHOW_TETRA, Volume_CB);
-  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest,"show area labels", &show_tetratest_labels);
+  CHECKBOX_geomtest=glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show tetrahedron", &show_geomtest, SHOW_TETRA, Volume_CB);
+  CHECKBOX_triangletest=glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show triangle test", &show_triangletest, SHOW_TRIANGLE, Volume_CB);
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show area labels", &show_tetratest_labels);
   SPINNER_tetra_line_thickness=glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"line thickness",GLUI_SPINNER_FLOAT,&tetra_line_thickness);
 //  SPINNER_tetra_line_thickness->set_float_limits(1.0, 10.0);
   SPINNER_tetra_point_size = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest, "point size", GLUI_SPINNER_FLOAT, &tetra_point_size);
@@ -386,10 +389,20 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
-    case SHOW_TETRA:
+  case SHOW_TRIANGLE:
+      if(show_triangletest==1){
+        BlockageMenu(visBLOCKHide);
+        VentMenu(HIDE_ALL_VENTS);
+        show_geomtest=0;
+        CHECKBOX_geomtest->set_int_val(0);
+      }
+    break;
+  case SHOW_TETRA:
       if(show_geomtest==1){
         BlockageMenu(visBLOCKHide);
         VentMenu(HIDE_ALL_VENTS);
+        show_triangletest=0;
+        CHECKBOX_triangletest->set_int_val(0);
       }
       break;
     case VOL_BOXTRANSLATE:
