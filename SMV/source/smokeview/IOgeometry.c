@@ -2144,30 +2144,22 @@ void draw_geom_cutcells(void){
 /* ------------------ draw_geomtesttriangle ------------------------ */
 
 void draw_geomtesttriangle(void){
-  float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char trianglecolor[4] = {0, 0, 255, 255};
-  unsigned char pointincolor[4] = {0, 255, 0, 255};
-  unsigned char pointoutcolor[4] = {255, 0, 0, 255};
+  unsigned char incolor[4] = {0, 255, 0, 255};
+  unsigned char outcolor[4] = {255, 0, 0, 255};
   float *v1, *v2, *v3, *v4;
   float areas[6], cent_solid[3];
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
   float verts[600];
-  int flag;
+  int flag,flag2;
 
   box_state = b_state + 1;
   v1 = tetra_vertices;
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
-
-  xmin = box_bounds;
-  xmax = box_bounds + 1;
-  ymin = box_bounds + 2;
-  ymax = box_bounds + 3;
-  zmin = box_bounds + 4;
-  zmax = box_bounds + 5;
 
   // tetrahedron
 #define EPS 0.02
@@ -2179,16 +2171,23 @@ void draw_geomtesttriangle(void){
   antialias(ON);
 
   FORTget_in_triangle(v4, v1, v2, v3, &flag);
+  FORTget_is_angle_lt_180(v1, v2, v3, &flag2);
 
   glLineWidth(tetra_line_thickness);
   glBegin(GL_LINES);
-  glColor3ubv(trianglecolor);
+  if(flag2==1){
+    glColor3ubv(incolor);
+  }
+  else{
+    glColor3ubv(outcolor);
+  }
   glVertex3f(v1[0],v1[1],0.0);
   glVertex3f(v2[0],v2[1],0.0);
   
   glVertex3f(v2[0],v2[1],0.0);
   glVertex3f(v3[0],v3[1],0.0);
 
+  glColor3ubv(trianglecolor);
   glVertex3f(v3[0],v3[1],0.0);
   glVertex3f(v1[0],v1[1],0.0);
   glEnd();
@@ -2196,14 +2195,17 @@ void draw_geomtesttriangle(void){
   glPointSize(tetra_point_size);
   glBegin(GL_POINTS);
   if(flag==1){
-    glColor3ubv(pointincolor);
+    glColor3ubv(incolor);
   }
   else{
-    glColor3ubv(pointoutcolor);
+    glColor3ubv(outcolor);
   }
   glVertex3f(v4[0],v4[1],0.0);
   glEnd();
   antialias(OFF);
+  output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
+  output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
+  output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
 
   glPopMatrix();
 }

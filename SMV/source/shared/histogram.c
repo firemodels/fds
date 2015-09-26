@@ -317,7 +317,7 @@ void merge_uvhistogram(histogramdata *histogram_to, histogramdata *histogram_fro
   // merge histogram histogram_from into histogram_to
 
   int i;
-  float dbucket_to, dbucket_from, dbucket_rnew, dbucket_theta;
+  float dbucket_rnew;
   int *bucket_to_copy;
   float valmin_new, valmax_new;
 
@@ -332,34 +332,23 @@ void merge_uvhistogram(histogramdata *histogram_to, histogramdata *histogram_fro
   valmax_new = MAX(histogram_to->valmax, histogram_from->valmax);
   dbucket_rnew = (valmax_new - valmin_new) / histogram_to->nx;
 
-  dbucket_to = (histogram_to->valmax - histogram_to->valmin)/histogram_to->nx;
-  dbucket_from = (histogram_from->valmax - histogram_from->valmin)/histogram_from->nx;
-  dbucket_theta = 360.0 / histogram_to->ny;
-
   if(dbucket_rnew==0.0){
     histogram_to->buckets[0] = histogram_to->ntotal + histogram_from->ntotal;
   }
   else{
     for(i = 0; i < histogram_to->nbuckets; i++){
       int ir, itheta;
-      float r, theta;
       int ixy;
 
       if(bucket_to_copy[i] != 0){
         itheta = CLAMP(i / histogram_to->nx, 0, histogram_to->ny - 1);
-        theta = (float)(itheta + 0.5)*dbucket_theta;
         ir = CLAMP(i%histogram_to->nx, 0, histogram_to->nx - 1);
-        r = histogram_to->valmin + (float)(ir + 0.5)*dbucket_to;
-
         ixy = CLAMP(ir + itheta*histogram_to->nx,0,histogram_to->nbuckets);
         histogram_to->buckets[ixy] += bucket_to_copy[i];
       }
       if(histogram_from->buckets[i] != 0){
         itheta = CLAMP(i / histogram_from->nx, 0, histogram_from->ny - 1);
-        theta = (float)(itheta + 0.5)*dbucket_theta;
         ir = CLAMP(i%histogram_from->nx, 0, histogram_from->nx - 1);
-        r = histogram_from->valmin + (float)(ir + 0.5)*dbucket_from;
-
         ixy = CLAMP(ir + itheta*histogram_from->nx, 0, histogram_from->nbuckets);
         histogram_to->buckets[ixy] += histogram_from->buckets[i];
       }
