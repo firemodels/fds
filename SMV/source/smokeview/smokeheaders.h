@@ -130,6 +130,7 @@ EXTERNCPP void update_tour_parms(void);
 EXTERNCPP void slerp(float *p0, float *p1, float t, float *pout);
 EXTERNCPP void draw_geomtestclip(void);
 EXTERNCPP void draw_geomtesttriangle(void);
+EXTERNCPP void draw_geomtestpolygon(void);
 EXTERNCPP void draw_geomtestoutline(void);
 EXTERNCPP void draw_geom_cutcells(void);
 EXTERNCPP void VentMenu(int value);

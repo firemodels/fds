@@ -19,10 +19,12 @@ extern "C" void Volume_CB(int var);
 #define RADIO_WALL 32
 #define SAVE_SETTINGS 33
 #define VISAXISLABELS 34
-#define SHOW_TETRA 35
-#define SHOW_TRIANGLE 36
+#define GEOMETRYTEST 35
 
-GLUI_Panel *PANEL_geom_surface=NULL;
+GLUI_RadioGroup *RADIO_geomtest_option = NULL;
+
+GLUI_Panel *PANEL_geom_testoptions = NULL;
+GLUI_Panel *PANEL_geom_surface = NULL;
 GLUI_Panel *PANEL_geom_interior=NULL;
 GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline=NULL;
 GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline=NULL;
@@ -296,8 +298,13 @@ extern "C" void glui_geometry_setup(int main_window){
   // -------------- Cube/Tetra intersection test -------------------
 
   ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Cube/Tetra intersection test",false);
-  CHECKBOX_geomtest=glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show tetrahedron", &show_geomtest, SHOW_TETRA, Volume_CB);
-  CHECKBOX_triangletest=glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show triangle test", &show_triangletest, SHOW_TRIANGLE, Volume_CB);
+  PANEL_geom_testoptions=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"geometry test:");
+  RADIO_geomtest_option = glui_geometry->add_radiogroup_to_panel(PANEL_geom_testoptions, &geomtest_option, GEOMETRYTEST, Volume_CB);
+  glui_geometry->add_radiobutton_to_group(RADIO_geomtest_option, "none");
+  glui_geometry->add_radiobutton_to_group(RADIO_geomtest_option, "triangle");
+  glui_geometry->add_radiobutton_to_group(RADIO_geomtest_option, "polygon");
+  glui_geometry->add_radiobutton_to_group(RADIO_geomtest_option, "tetrahedron");
+
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest, "show area labels", &show_tetratest_labels);
   SPINNER_tetra_line_thickness=glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest,"line thickness",GLUI_SPINNER_FLOAT,&tetra_line_thickness);
 //  SPINNER_tetra_line_thickness->set_float_limits(1.0, 10.0);
@@ -389,54 +396,42 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
-  case SHOW_TRIANGLE:
-      if(show_triangletest==1){
-        BlockageMenu(visBLOCKHide);
-        VentMenu(HIDE_ALL_VENTS);
-        show_geomtest=0;
-        CHECKBOX_geomtest->set_int_val(0);
-      }
+  case GEOMETRYTEST:
+    if(geomtest_option != NO_TEST){
+      BlockageMenu(visBLOCKHide);
+      VentMenu(HIDE_ALL_VENTS);
+    }
+    else{
+      BlockageMenu(visBLOCKAsInput);
+      VentMenu(SHOW_ALL_VENTS);
+    }
     break;
-  case SHOW_TETRA:
-      if(show_geomtest==1){
-        BlockageMenu(visBLOCKHide);
-        VentMenu(HIDE_ALL_VENTS);
-        show_triangletest=0;
-        CHECKBOX_triangletest->set_int_val(0);
+  case VOL_BOXTRANSLATE:
+    box_bounds[0]=box_bounds2[0]+box_translate[0];
+    box_bounds[1]=box_bounds2[1]+box_translate[0];
+    box_bounds[2]=box_bounds2[2]+box_translate[1];
+    box_bounds[3]=box_bounds2[3]+box_translate[1];
+    box_bounds[4]=box_bounds2[4]+box_translate[2];
+    box_bounds[5]=box_bounds2[5]+box_translate[2];
+    update_volbox_controls=1;
+    break;
+  case VOL_TETRA:
+    update_volbox_controls=1;
+    break;
+  case UPDATE_VOLBOX_CONTROLS:
+    update_volbox_controls=0;
+    for(i=0;i<10;i++){
+      if(face_vis[i]!=face_vis_old[i]){
+        face_vis_old[i]=face_vis[i];
       }
-      break;
-    case VOL_BOXTRANSLATE:
-      box_bounds[0]=box_bounds2[0]+box_translate[0];
-      box_bounds[1]=box_bounds2[1]+box_translate[0];
-      box_bounds[2]=box_bounds2[2]+box_translate[1];
-      box_bounds[3]=box_bounds2[3]+box_translate[1];
-      box_bounds[4]=box_bounds2[4]+box_translate[2];
-      box_bounds[5]=box_bounds2[5]+box_translate[2];
-      update_volbox_controls=1;
-      break;
-    case VOL_TETRA:
-      update_volbox_controls=1;
-      break;
-    case UPDATE_VOLBOX_CONTROLS:
-      update_volbox_controls=0;
-      for(i=0;i<10;i++){
-        if(face_vis[i]!=face_vis_old[i]){
-          //if(face_vis[i]==1){
-          //  CHECKBOX_tetrabox_showhide[i]->enable();
-          // }
-          // else{
-          //   CHECKBOX_tetrabox_showhide[i]->disable();
-          // }
-          face_vis_old[i]=face_vis[i];
-        }
-      }
-      break;
-    case VOL_SHOWHIDE:
-      updatemenu=1;
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
+    }
+    break;
+  case VOL_SHOWHIDE:
+    updatemenu=1;
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
   }
 }
 

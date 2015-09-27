@@ -2201,6 +2201,73 @@ void draw_geomtesttriangle(void){
   glPopMatrix();
 }
 
+/* ------------------ draw_geomtestpolygon ------------------------ */
+
+void draw_geomtestpolygon(void){
+  unsigned char trianglecolor[4] = {0, 0, 255, 255};
+  unsigned char incolor[4] = {0, 255, 0, 255};
+  unsigned char outcolor[4] = {255, 0, 0, 255};
+  float *v1, *v2, *v3, *v4;
+  int flag, flag2;
+  float verts[8];
+  int nverts,poly[4], npoly, tris[12], ntris;
+  int i;
+  
+  v1 = tetra_vertices;
+  v2 = v1 + 3;
+  v3 = v2 + 3;
+  v4 = v3 + 3;
+
+  glPushMatrix();
+  glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+  glTranslatef(-xbar0, -ybar0, -zbar0);
+
+  antialias(ON);
+
+  verts[0] = v1[0];
+  verts[1] = v1[1];
+  verts[2] = v2[0];
+  verts[3] = v2[1];
+  verts[4] = v3[0];
+  verts[5] = v3[1];
+  verts[6] = v4[0];
+  verts[7] = v4[1];
+  nverts = 4;
+  poly[0] = 1;
+  poly[1] = 2;
+  poly[2] = 3;
+  poly[3] = 4;
+  npoly = 4;
+
+
+  FORTfpoly2tri(verts, &nverts, poly, &npoly, tris, &ntris);
+  printf("triangles:\n");
+  for(i = 0; i < ntris; i++){
+    printf("%i: %i %i %i\n",i+1, tris[3 * i], tris[3 * i + 1], tris[3 * i + 2]);
+  }
+  printf("\n");
+
+  glLineWidth(tetra_line_thickness);
+  glBegin(GL_LINES);
+  glColor3fv(foregroundcolor);
+  for(i = 0; i < npoly; i++){
+    int ii,iip1;
+
+    ii = poly[i]-1;
+    iip1 = poly[(i + 1) % npoly] - 1;
+    glVertex3f(verts[2 * ii], verts[2 * ii + 1], 0.0);
+    glVertex3f(verts[2 * iip1], verts[2 * iip1 + 1], 0.0);
+  }
+  glEnd();
+  antialias(OFF);
+  output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
+  output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
+  output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
+  output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
+
+  glPopMatrix();
+}
+
 /* ------------------ draw_geomdata_type ------------------------ */
 
 void draw_geomdata_type(patchdata *patchi, int geom_type){

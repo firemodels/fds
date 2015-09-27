@@ -7,6 +7,7 @@
 #define STDCALLF extern void
 #endif
 
+#define FORTfpoly2tri _F(fpoly2tri)
 #define FORTget_in_triangle _F(get_in_triangle)
 #define FORTget_is_angle_lt_180 _F(get_is_angle_lt_180)
 #define FORTtest_in_tetra _F(test_in_tetra)
@@ -39,6 +40,7 @@
 #define FORTgetboundaryheader1 _F(getboundaryheader1)
 #define FORTgetboundaryheader2 _F(getboundaryheader2)
 
+STDCALLF FORTfpoly2tri(float *verts, int *nverts, int *poly, int *npoly, int *tris, int *ntris);
 STDCALLF FORTget_in_triangle(float *vert, float *v1, float *v2, float *v3, int *flag);
 STDCALLF FORTget_is_angle_lt_180(float *v1, float *v2, float *v3, int *flag);
 STDCALLF FORTtest_in_tetra(float *xyz, int *in_tetra, int *tetra_state);
