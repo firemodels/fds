@@ -8614,18 +8614,17 @@ int readini2(char *inifile, int localfile){
         update_gslice=1;
         continue;
       }
-      if(match(buffer,"CUBETETRATEST")==1){
+      if(match(buffer,"GEOMETRYTEST")==1){
         int *v,ii;
         float *b1,*b2,*b3;
 
         v=tetrabox_vis;
         fgets(buffer,255,stream);
-        sscanf(buffer, " %i %i %f %f", &show_geomtest, &show_tetratest_labels, &tetra_line_thickness, &tetra_point_size);
+        sscanf(buffer, " %i %i %f %f", &geomtest_option, &show_tetratest_labels, &tetra_line_thickness, &tetra_point_size);
         fgets(buffer,255,stream);
         sscanf(buffer, " %i %i %i %i %i ", v, v + 1, v + 2, v + 3, v + 4);
         fgets(buffer,255,stream);
         sscanf(buffer," %i %i %i %i %i ",v+5,v+6,v+7,v+8,v+9);
-        ONEORZERO(show_geomtest);
         ONEORZERO(show_tetratest_labels);
         for(ii=0;ii<10;ii++){
           ONEORZERO(v[ii]);
@@ -11415,9 +11414,9 @@ void writeini_local(FILE *fileout){
     int *v;
     float *b1, *b2, *b3;
 
-    fprintf(fileout, "CUBETETRATEST\n");
+    fprintf(fileout, "GEOMETRYTEST\n");
     v = tetrabox_vis;
-    fprintf(fileout, " %i %i %f %f\n", show_geomtest, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
+    fprintf(fileout, " %i %i %f %f\n", geomtest_option, show_tetratest_labels, tetra_line_thickness, tetra_point_size);
     fprintf(fileout, " %i %i %i %i %i\n", v[0], v[1], v[2], v[3], v[4]);
     fprintf(fileout, " %i %i %i %i %i\n", v[5], v[6], v[7], v[8], v[9]);
     b1 = box_bounds2;

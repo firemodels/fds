@@ -2778,7 +2778,7 @@ void UpdateFacelists(void){
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
       if(Clip_Face(&clipinfo,facej)==1)continue;
 
-      if(showedit_dialog==1&&show_geomtest==0&&show_triangletest==0&&j<vent_offset){
+      if(showedit_dialog == 1 && geomtest_option == NO_TEST && j<vent_offset){
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
         if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
         continue;
@@ -3094,7 +3094,7 @@ void drawselect_faces(){
         showtimelist_handle = facei->showtimelist_handle;\
         showtimelist = *showtimelist_handle;\
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;\
-        if(showedit_dialog==0||show_geomtest==1||show_triangletest==1){\
+        if(showedit_dialog==0||geomtest_option!=NO_TEST){\
           new_color=facei->color;\
         }\
         else{\
@@ -3222,7 +3222,7 @@ void draw_faces(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1||show_triangletest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{
@@ -3467,7 +3467,7 @@ void draw_transparent_faces(){
       showtimelist_handle = facei->showtimelist_handle;
       showtimelist = *showtimelist_handle;
       if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-      if(showedit_dialog==0||show_geomtest==1||show_triangletest==1){
+      if(showedit_dialog == 0 || geomtest_option != NO_TEST){
         new_color=facei->color;
       }
       else{
@@ -5256,7 +5256,7 @@ void drawBlockages(int mode, int trans_flag){
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-  if(drawing_smooth==1&&(showedit_dialog==0||show_geomtest==1||show_triangletest==1)){
+  if(drawing_smooth == 1 && (showedit_dialog == 0 || geomtest_option != NO_TEST)){
     if(clip_mode!=CLIP_OFF)glDisable(GL_CULL_FACE);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -5462,7 +5462,7 @@ void draw_facesOLD(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1||show_triangletest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{
@@ -5535,7 +5535,7 @@ void draw_facesOLD(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1||show_triangletest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{

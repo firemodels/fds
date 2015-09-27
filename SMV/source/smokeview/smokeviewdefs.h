@@ -7,6 +7,11 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NO_TEST 0
+#define TRIANGLE_TEST 1
+#define POLYGON_TEST 2
+#define TETRAHEDRON_TEST 3
+
 #ifndef UPDATE_SMOKEFIRE_COLORS
 #define UPDATE_SMOKEFIRE_COLORS 54
 #endif
