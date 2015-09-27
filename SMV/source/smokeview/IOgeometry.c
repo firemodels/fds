@@ -2148,21 +2148,12 @@ void draw_geomtesttriangle(void){
   unsigned char incolor[4] = {0, 255, 0, 255};
   unsigned char outcolor[4] = {255, 0, 0, 255};
   float *v1, *v2, *v3, *v4;
-  float areas[6], cent_solid[3];
-  int nverts;
-  int faces[600], npolys, nfaces;
-  int which_poly[200];
-  float verts[600];
   int flag,flag2;
 
-  box_state = b_state + 1;
   v1 = tetra_vertices;
   v2 = v1 + 3;
   v3 = v2 + 3;
   v4 = v3 + 3;
-
-  // tetrahedron
-#define EPS 0.02
 
   glPushMatrix();
   glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
