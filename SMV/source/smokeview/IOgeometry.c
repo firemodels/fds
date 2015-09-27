@@ -2204,11 +2204,7 @@ void draw_geomtesttriangle(void){
 /* ------------------ draw_geomtestpolygon ------------------------ */
 
 void draw_geomtestpolygon(void){
-  unsigned char trianglecolor[4] = {0, 0, 255, 255};
-  unsigned char incolor[4] = {0, 255, 0, 255};
-  unsigned char outcolor[4] = {255, 0, 0, 255};
   float *v1, *v2, *v3, *v4;
-  int flag, flag2;
   float verts[8];
   int nverts,poly[4], npoly, tris[12], ntris;
   int i;
