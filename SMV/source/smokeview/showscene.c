@@ -126,17 +126,17 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 #ifdef pp_GEOMTEST
     if(geomtest_option == TETRAHEDRON_TEST){
       CLIP_GEOMETRY;
-      draw_geomtestclip();
-      draw_geomtestoutline();
+      draw_test_clip();
+      draw_test_outline();
     }
     if(show_cutcells==1)draw_geom_cutcells();
     if(geomtest_option == TRIANGLE_TEST){
       CLIP_GEOMETRY;
-      draw_geomtesttriangle();
+      draw_test_triangle();
     }
     if(geomtest_option == POLYGON_TEST){
       CLIP_GEOMETRY;
-      draw_geomtestpolygon();
+      draw_test_polygon();
     }
 #endif
 
