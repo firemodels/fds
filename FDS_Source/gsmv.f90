@@ -136,7 +136,7 @@ DATA ( (TETRA_PLANE2EDGE(I,J), I=0,2),J=0,3) /&
   /
 
 PUBLIC GET_TETRABOX_VOLUME, GET_VERTS, TETRAHEDRON_VOLUME, REMOVE_DUPLICATE_VERTS, GET_POLYHEDRON_VOLUME, TEST_IN_TETRA0,&
-       DECIMATE, DECIMATE_FB, IN_TRIANGLE, IS_ANGLE_LT_180, POLY2TRI
+       DECIMATE, DECIMATE_FB, IN_TRIANGLE, IS_ANGLE_GE_180, POLY2TRI
 
 CONTAINS
 
@@ -1907,19 +1907,19 @@ END FUNCTION
 
 !  ------------------ IS_ACUTE_ANGLE ------------------------
 
-LOGICAL FUNCTION IS_ANGLE_LT_180(V1,V2,V3)
+LOGICAL FUNCTION IS_ANGLE_GE_180(V1,V2,V3)
 
 ! determine whether the angle formed by vertices V1, V2, V3 is acute ( <180.0) or obtuse (>= 180.0)
 
 REAL(EB), INTENT(IN), DIMENSION(2) :: V1, V2, V3
 REAL(EB), DIMENSION(2) :: DV1, DV2, DV1PERP
 
-IS_ANGLE_LT_180 = .TRUE.
+IS_ANGLE_GE_180 = .TRUE.
 DV1 = V2 - V1
 DV1PERP = (/-DV1(2),DV1(1)/)
 DV2 = V3 - V2
-IF ( DOT_PRODUCT(DV1PERP,DV2) <= 0.0_EB) IS_ANGLE_LT_180 = .FALSE.
-END FUNCTION IS_ANGLE_LT_180
+IF ( DOT_PRODUCT(DV1PERP,DV2) > 0.0_EB) IS_ANGLE_GE_180 = .FALSE.
+END FUNCTION IS_ANGLE_GE_180
 
 !  ------------------ POLY2TRI ------------------------
 
@@ -1930,18 +1930,19 @@ SUBROUTINE POLY2TRI(VERTS,NVERTS,POLY,NPOLY,TRIS,NTRIS)
 INTEGER, INTENT(IN) :: NVERTS, NPOLY
 REAL(EB), INTENT(IN), DIMENSION(2*NVERTS), TARGET :: VERTS
 INTEGER, INTENT(IN), DIMENSION(NPOLY) :: POLY
+
 INTEGER, INTENT(OUT) :: NTRIS
 INTEGER, INTENT(OUT), DIMENSION(3*(NPOLY-2)) :: TRIS
+
 REAL(EB), POINTER, DIMENSION(:) :: VERT, V1, V2, V3
 INTEGER, DIMENSION(NPOLY) :: P
-
 INTEGER :: NP, I, J, IP
 
 NP = NPOLY
 P(1:NP) = POLY(1:NPOLY)
 NTRIS = 0
 IP = 1
-DO WHILE (NP >= 3 .OR. IP .LE. NPOLY)
+DO WHILE (NP >= 3 .AND. IP .LE. NPOLY)
    LOOP_I: DO I = 1, NP - 2
    
       ! candidate triangle
@@ -1949,23 +1950,23 @@ DO WHILE (NP >= 3 .OR. IP .LE. NPOLY)
       V2 => VERTS(2*P(I+1)-1:2*P(I+1))
       V3 => VERTS(2*P(I+2)-1:2*P(I+2))
       
-      IF (NP>3) THEN
-         ! reject triangle if angle >= 180.0
-         IF(.NOT.IS_ANGLE_LT_180(V1,V2,V3))CYCLE LOOP_I
-         LOOP_J: DO J = 1, NP
-            IF(J>=I.AND.J<=I+2)CYCLE LOOP_J
-            VERT => VERTS(2*POLY(J)-1:2*POLY(J))
-            ! reject triangle if another polygon point is inside this triangle
-            IF (IN_TRIANGLE(VERT,V1,V2,V3)) CYCLE LOOP_I
-         END DO LOOP_J
-      ENDIF
-      ! V1, V2, V3 is a valid triangle - copy triangle into list
+      IF(IS_ANGLE_GE_180(V1,V2,V3))CYCLE LOOP_I ! reject triangle if angle >= 180.0
+      DO J = 1, I-1
+         VERT => VERTS(2*POLY(J)-1:2*POLY(J))        ! reject triangle if another polygon point is inside this triangle
+         IF (IN_TRIANGLE(VERT,V1,V2,V3)) CYCLE LOOP_I
+      END DO
+      ! skip over verts in candidate triangle, ie I, I+1 and I+2
+      DO J = I+3, NP
+         VERT => VERTS(2*POLY(J)-1:2*POLY(J))        ! reject triangle if another polygon point is inside this triangle
+         IF (IN_TRIANGLE(VERT,V1,V2,V3)) CYCLE LOOP_I
+      END DO
+      ! V1, V2, V3 is a valid triangle so copy it into the triangle list
       TRIS(3*NTRIS+1) = P(I)
       TRIS(3*NTRIS+2) = P(I+1)
       TRIS(3*NTRIS+3) = P(I+2)
       NTRIS = NTRIS + 1
 
-      ! reduce polygon list by 1 (take out polygon pt corresponding to V2 )
+      ! reduce polygon count by 1 (take out polygon pt corresponding to V2 )
       DO J = I + 2, NP
          P(J-1) = P(J)
       END DO
