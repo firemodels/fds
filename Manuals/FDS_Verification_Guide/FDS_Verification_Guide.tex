@@ -971,7 +971,7 @@ The mass source terms (which are complex sinusoidal functions) may be obtained f
 Two species transport equations are solved.  The mixture fraction in the manufactured solution is set as component 2 while the background species is set to component 1:
 \begin{align}
 \label{eqn_fds_species_1} \frac{\partial (\rho Z_1)}{\partial t} + \Div(\rho Z_1 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= - \dot{Q}_Z \,\mbox{,}\\
-\label{eqn_fds_species_2} \frac{\partial (\rho Z_2)}{\partial t} + \Div(\rho Z_2 \mathbf{u}) - \Div\left(\rho D \nabla Z_1\right) &= + \dot{Q}_Z \,\mbox{.}
+\label{eqn_fds_species_2} \frac{\partial (\rho Z_2)}{\partial t} + \Div(\rho Z_2 \mathbf{u}) - \Div\left(\rho D \nabla Z_2\right) &= + \dot{Q}_Z \,\mbox{.}
 \end{align}
 The density is obtained via $\rho = (\rho Z)_1 + (\rho Z)_2$.
 
