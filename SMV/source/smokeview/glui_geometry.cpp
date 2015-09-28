@@ -297,7 +297,7 @@ extern "C" void glui_geometry_setup(int main_window){
 
   // -------------- Cube/Tetra intersection test -------------------
 
-  ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Cube/Tetra intersection test",false);
+  ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Geometry tests",false);
   PANEL_geom_testoptions=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"geometry test:");
   RADIO_geomtest_option = glui_geometry->add_radiogroup_to_panel(PANEL_geom_testoptions, &geomtest_option, GEOMETRYTEST, Volume_CB);
   glui_geometry->add_radiobutton_to_group(RADIO_geomtest_option, "none");
