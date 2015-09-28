@@ -2162,15 +2162,15 @@ void draw_geomtesttriangle(void){
   antialias(ON);
 
   FORTget_in_triangle(v4, v1, v2, v3, &flag);
-  FORTget_is_angle_lt_180(v1, v2, v3, &flag2);
+  FORTget_is_angle_ge_180(v1, v2, v3, &flag2);
 
   glLineWidth(tetra_line_thickness);
   glBegin(GL_LINES);
   if(flag2==1){
-    glColor3ubv(incolor);
+    glColor3ubv(outcolor);
   }
   else{
-    glColor3ubv(outcolor);
+    glColor3ubv(incolor);
   }
   glVertex3f(v1[0],v1[1],0.0);
   glVertex3f(v2[0],v2[1],0.0);
