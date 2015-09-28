@@ -311,7 +311,7 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_tetra_point_size = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest, "point size", GLUI_SPINNER_FLOAT, &tetra_point_size);
 //  SPINNER_tetra_point_size->set_float_limits(1.0, 20.0);
 
-  PANEL_geom1 = glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"box bounding planes");
+  PANEL_geom1 = glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"bounding planes");
 
   PANEL_geom1d=glui_geometry->add_panel_to_panel(PANEL_geom1,"",GLUI_PANEL_NONE);
   PANEL_geom1a=glui_geometry->add_panel_to_panel(PANEL_geom1d,"",GLUI_PANEL_NONE);
@@ -333,7 +333,7 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry->add_column_to_panel(PANEL_geom1c,false);
   SPINNER_box_translate[2]=glui_geometry->add_spinner_to_panel(PANEL_geom1c,"z",GLUI_SPINNER_FLOAT,box_translate+2,VOL_BOXTRANSLATE,Volume_CB);
   Volume_CB(VOL_BOXTRANSLATE);
-  PANEL_geom2=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"tetrahedron vertices");
+  PANEL_geom2=glui_geometry->add_panel_to_panel(ROLLOUT_geomtest,"vertices");
   PANEL_geom2a=glui_geometry->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);
   glui_geometry->add_column_to_panel(PANEL_geom2,false);
   PANEL_geom2b=glui_geometry->add_panel_to_panel(PANEL_geom2,"",GLUI_PANEL_NONE);

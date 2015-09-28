@@ -1738,9 +1738,9 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   Update_Framenumber(1);
 }
 
-/* ------------------ draw_geomtestclip ------------------------ */
+/* ------------------ draw_test_clip ------------------------ */
 
-void draw_geomtestclip(void){
+void draw_test_clip(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cube0color[4] ={255,  0,  0,255};
   unsigned char cube1color[4] ={128,  0,  0,255};
@@ -1947,9 +1947,9 @@ void draw_geomtestclip(void){
   glDisable(GL_COLOR_MATERIAL);
 }
 
-/* ------------------ draw_geomtestoutline ------------------------ */
+/* ------------------ draw_test_outline ------------------------ */
 
-void draw_geomtestoutline(void){
+void draw_test_outline(void){
   float *xmin, *xmax, *ymin, *ymax, *zmin, *zmax;
   unsigned char cubecolor[4]={0,0,0,255};
   unsigned char tetracoloroutline[4]={0,0,0,255};
@@ -2141,9 +2141,9 @@ void draw_geom_cutcells(void){
   glPopMatrix();
 }
 
-/* ------------------ draw_geomtesttriangle ------------------------ */
+/* ------------------ draw_test_triangle ------------------------ */
 
-void draw_geomtesttriangle(void){
+void draw_test_triangle(void){
   unsigned char trianglecolor[4] = {0, 0, 255, 255};
   unsigned char incolor[4] = {0, 255, 0, 255};
   unsigned char outcolor[4] = {255, 0, 0, 255};
@@ -2197,13 +2197,14 @@ void draw_geomtesttriangle(void){
   output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
   output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
   output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
+  output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
 
   glPopMatrix();
 }
 
-/* ------------------ draw_geomtestpolygon ------------------------ */
+/* ------------------ draw_test_polygon ------------------------ */
 
-void draw_geomtestpolygon(void){
+void draw_test_polygon(void){
   float *v1, *v2, *v3, *v4;
   float verts[8];
   int nverts,poly[4], npoly, tris[12], ntris;
