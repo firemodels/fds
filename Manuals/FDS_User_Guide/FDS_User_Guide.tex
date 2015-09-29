@@ -3490,11 +3490,12 @@ velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, 
 \end{lstlisting}
 
 \begin{figure}[ht]
-\centering
-\includegraphics[width=3in]{SCRIPT_FIGURES/sem_flat_leddy_p2}
-\includegraphics[width=3in]{SCRIPT_FIGURES/sem_par_leddy_p2}
-\includegraphics[width=3in]{SCRIPT_FIGURES/sem_atm_leddy_p2}
-\includegraphics[width=3in]{SCRIPT_FIGURES/sem_ramp_leddy_p2}
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_flat_leddy_p2} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_par_leddy_p2} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_atm_leddy_p2} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/sem_ramp_leddy_p2}
+\end{tabular*}
 \caption[Synthetic Eddy Method vent profiles]{Synthetic Eddy Method vent profiles: flat (upper left), parabolic (upper right), atmospheric (lower left), and linear ramp (lower right).}
 \label{fig:sem_profiles}
 \end{figure}
@@ -3738,7 +3739,7 @@ a short passageway that draws gases in one side and expels them out the other. T
 
 \begin{figure}[ht!]
 \begin{center}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/jet_fan}
+\includegraphics[width=4.5in]{SCRIPT_FIGURES/jet_fan}
 \caption[Example of a jet fan]{Jet fan with a louvered output {\ct UVW=-1,0,-1}.}
 \label{fig:Jet_Fan}
 \end{center}
@@ -5618,7 +5619,7 @@ The HRR curve for this example is given in Fig.~\ref{spray_burner}.
 
 \begin{figure}[ht]
 \begin{center}
-\includegraphics[width=4.5in]{SCRIPT_FIGURES/spray_burner_HRR}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/spray_burner_HRR}
 \end{center}
 \caption[Results of the {\ct spray\_burner} test case]{Heat Release Rate (HRR) of spray burner test.}
 \label{spray_burner}
@@ -8070,7 +8071,7 @@ bucket_test_1_fds2ascii.csv
 These commands tell {\ct fds2ascii} that you want to convert (binary) boundary file data into a text file. You want to sample every data point within the specified volume, you want only those surfaces that point upwards (+3 orientation), you only want 1 variable (only one is listed anyway and its index is 1 -- that is just the number used to list the available files). The data will be time-averaged, and it will be output to a file listed at the end of the session.
 
 
-
+\clearpage
 
 \section{Summary of Frequently-Used Output Quantities}
 \label{info:outputquantities}
