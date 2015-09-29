@@ -88,26 +88,21 @@ end
 
 figure(1)
 
-xlabel('{\it T/T_0}','fontsize',Label_Font_Size)
-ylabel('{\it y/d}','fontsize',Label_Font_Size)
+xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
 legend(H,legend_entries,'location','southwest')
 legend boxoff
 
-% add SVN if file is available
+Git_Filename = [datadir,'hot_layer_360_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
-SVN_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
-
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_temp_1'])
 
 % compute temperature error at tau(5)
@@ -129,26 +124,23 @@ end
 
 figure(2)
 
-xlabel('{\it v/v_0}','fontsize',Label_Font_Size)
-ylabel('{\it y/d}','fontsize',Label_Font_Size)
+xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-200 0 0 1.2])
 legend(H2,legend_entries,'location','southwest')
 legend boxoff
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datadir,'hot_layer_360_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_vel_1'])
 
 % compute velocity error at tau(5)
@@ -188,26 +180,23 @@ end
 
 figure(3)
 
-xlabel('{\it T/T_0}','fontsize',Label_Font_Size)
-ylabel('{\it y/d}','fontsize',Label_Font_Size)
+xlabel('{\it T/T_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([1 4 0 1.2])
 legend(H3,legend_entries_2,'location','northeast')
 legend boxoff
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datadir,'hot_layer_360_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_temp_2'])
 
 % compute temperature error at tau(10)
@@ -229,26 +218,23 @@ end
 
 figure(4)
 
-xlabel('{\it v/v_0}','fontsize',Label_Font_Size)
-ylabel('{\it y/d}','fontsize',Label_Font_Size)
+xlabel('{\it v/v_0}','fontsize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it y/d}','fontsize',Label_Font_Size,'FontName',Font_Name)
 axis([-60 0 0 1.6])
 legend(H4,legend_entries_2,'location','northwest')
 legend boxoff
 
 % add SVN if file is available
 
-SVN_Filename = [datadir,'hot_layer_360_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datadir,'hot_layer_360_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'hot_layer_vel_2'])
 
 % compute velocity error at tau(10)
