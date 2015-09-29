@@ -21,7 +21,7 @@ OUTPUT_TEX_FILE=$FDSSMV/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots
 
 # Table header
 echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
-echo "\caption[Validation GIT Statistics]{Validation GIT statistics for all data sets}" >> $OUTPUT_TEX_FILE
+echo "\caption[Validation Git Statistics]{Validation Git statistics for all data sets}" >> $OUTPUT_TEX_FILE
 echo "\label{validation_git_stats}" >> $OUTPUT_TEX_FILE
 echo "\\\\ \hline" >> $OUTPUT_TEX_FILE
 echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >> $OUTPUT_TEX_FILE
