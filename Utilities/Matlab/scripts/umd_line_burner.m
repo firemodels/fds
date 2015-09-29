@@ -175,8 +175,8 @@ yt = ymin + .84*(ymax-ymin);
 text(xt,yt,'18 % O2, {\it z} = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
-xlabel('Position (m)')
-ylabel('Thermocouple Temperature ( \circC )')
+xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 lh = legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm');
 set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
@@ -259,8 +259,8 @@ yt = ymin + .84*(ymax-ymin);
 text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
-xlabel('Position (m)')
-ylabel('Thermocouple Temperature ( \circC )')
+xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('Thermocouple Temperature ( \circC )','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm')
 
 % add Git revision if file is available
@@ -336,8 +336,8 @@ yt = ymin + .84*(ymax-ymin);
 text(xt,yt,'18 % O2, {\it z} = 0.125 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
-xlabel('Position (m)')
-ylabel('O2 (vol frac)')
+xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
 
 % add Git revision if file is available
@@ -413,8 +413,8 @@ yt = ymin + .84*(ymax-ymin);
 text(xt,yt,'18 % O2, {\it z} = 0.250 m','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 
 axis([xmin xmax ymin ymax])
-xlabel('Position (m)')
-ylabel('O2 (vol frac)')
+xlabel('Position (m)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
+ylabel('O2 (vol frac)','FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 legend(H,'Exp','FDS 1.25 cm','FDS 0.625 cm','FDS 0.3125 cm','Location','Southwest')
 
 % add Git revision if file is available
