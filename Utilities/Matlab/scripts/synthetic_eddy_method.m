@@ -8,13 +8,14 @@ clear all
 datadir='../../Verification/Turbulence/';
 plotdir='../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 
-plot_style
-
 error_tolerance = 0.01;
 
 % Flat profile
 % ------------
 figure
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 if ~exist([datadir,'sem_flat_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_flat_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -35,8 +36,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([.4 1.2 0 1])
-xlabel('{\it u} (m/s)')
-ylabel('{\it z} (m)')
+xlabel('{\it u} (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it z} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -46,21 +47,15 @@ H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northwest');
-set(h,'Interpreter',Font_Interpreter)
+set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+Git_Filename = [datadir,'sem_flat_leddy_p2_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
-SVN_Filename = [datadir,'sem_flat_leddy_p2_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_flat_leddy_p2'])
@@ -80,6 +75,9 @@ end
 % Parabolic profile
 % -----------------
 figure
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 if ~exist([datadir,'sem_par_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_par_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -102,8 +100,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.2 0 1])
-xlabel('{\it u} (m/s)')
-ylabel('{\itz} (m)')
+xlabel('{\it u} (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\itz} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -113,21 +111,15 @@ H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','west');
-set(h,'Interpreter',Font_Interpreter)
+set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+Git_Filename = [datadir,'sem_par_leddy_p2_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
-SVN_Filename = [datadir,'sem_par_leddy_p2_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_par_leddy_p2'])
@@ -146,6 +138,9 @@ end
 % Atmospheric profile
 % -------------------
 figure
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 if ~exist([datadir,'sem_atm_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_atm_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -168,8 +163,8 @@ plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
 axis([0 1.4 0 1])
-xlabel('{\it u} (m/s)')
-ylabel('{\it z} (m)')
+xlabel('{\it u} (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it z} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -179,21 +174,15 @@ H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northwest');
-set(h,'Interpreter',Font_Interpreter)
+set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+Git_Filename = [datadir,'sem_atm_leddy_p2_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
-SVN_Filename = [datadir,'sem_atm_leddy_p2_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_atm_leddy_p2'])
@@ -212,6 +201,9 @@ end
 % RAMP profile
 % -------------------
 figure
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 if ~exist([datadir,'sem_ramp_leddy_p2_line.csv'])
    display(['Error: File ',[datadir,'sem_ramp_leddy_p2_line.csv'],' does not exist. Skipping case.'])
@@ -238,9 +230,9 @@ H(2)=plot(1.1*uprof,z,'k--');
 plot(0.9*uprof,z,'k--')
 
 H(3)=plot(umean,z,'b>-');
-axis([0 1.75 0 1])
-xlabel('{\it u} (m/s)')
-ylabel('{\it z} (m)')
+axis([0 1.2 0 1])
+xlabel('{\it u} (m/s)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it z} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
 
 k = find(strcmp(M.colheaders,'urms'));
 z = M.data(:,k-1);
@@ -250,21 +242,15 @@ H(4)=plot(umean+urms,z,'r--');
 plot(umean-urms,z,'r--')
 
 h = legend(H,'Prescribed mean','Prescribed rms','FDS mean','FDS rms','location','northeast');
-set(h,'Interpreter',Font_Interpreter)
+set(h,'Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+Git_Filename = [datadir,'sem_ramp_leddy_p2_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
-SVN_Filename = [datadir,'sem_atm_leddy_p2_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 % print to pdf
 print(gcf,'-dpdf',[plotdir,'sem_ramp_leddy_p2'])
