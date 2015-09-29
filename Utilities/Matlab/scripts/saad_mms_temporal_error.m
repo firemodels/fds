@@ -107,67 +107,93 @@ disp(['L2 p Z Saad = ',num2str( p2_Z_saad )])
 disp(['Linf p Z Saad = ',num2str( pinf_Z_saad )])
 disp(' ')
 
-Git_Filename = [datadir,'saad_512_cfl_p0625_git.txt'];
+figure
 plot_style
 
-figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
 plot(x,p_rho)
-xlabel('{\it x} (m)')
-ylabel('{\it p} order density')
+xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it p} order density','FontName',Font_Name,'FontSize',Label_Font_Size)
+Git_Filename = [datadir,'saad_512_cfl_p0625_git.txt'];
 addverstr(gca,Git_Filename,'linear')
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_rho'])
 
 figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+plot_style
+
 plot(x,p_Z)
-xlabel('{\it x} (m)')
-ylabel('{\it p} order mixture fraction')
+xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it p} order mixture fraction','FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_temporal_order_Z'])
 
 figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+plot_style
+
 plot(x,rho,'r--'); hold on
 plot(x,rho_3,'r-')
-xlabel('{\it x} (m)')
-ylabel('density (kg/m^3)')
-legend('initial field','final field','location','northeast')
+xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('density (kg/m^3)','FontName',Font_Name,'FontSize',Label_Font_Size)
+lh=legend('initial field','final field','location','northeast');
+set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_rho'])
 
 figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+plot_style
+
 plot(x,f,'b--'); hold on
 plot(x,Z_3,'b-')
-xlabel('{\it x} (m)')
-ylabel('mixture fraction, {\it Z}')
-legend('initial field','final field','location','northwest')
+xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('mixture fraction, {\it Z}','FontName',Font_Name,'FontSize',Label_Font_Size)
+lh=legend('initial field','final field','location','northwest');
+set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',[plotdir,'saad_Z'])
 
 figure
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+plot_style
+
 plot(x,rho_3-rho_2,'b-'); hold on
 plot(x,rho_2-rho_1,'r-')
-xlabel('{\it x} (m)')
-ylabel('density difference (kg/m^3) ')
-legend('\rho_3-\rho_2','\rho_2-\rho_1','location','northeast')
+xlabel('{\it x} (m)','FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('density difference (kg/m^3) ','FontName',Font_Name,'FontSize',Label_Font_Size)
+lh=legend('\rho_3-\rho_2','\rho_2-\rho_1','location','northeast');
+set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size)
 addverstr(gca,Git_Filename,'linear')
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility)
+set(gcf,'PaperUnits',Paper_Units)
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height])
 print(gcf,'-dpdf',[plotdir,'saad_rho_diff'])
 
