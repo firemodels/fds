@@ -282,17 +282,17 @@ The histograms on the following pages display the distribution of the quantity $
 \be
    \bar{x} = \sum_{i=1}^n x_i  \quad ; \quad \sigma^2 = \frac{1}{n-1}  \sum_{i=1}^n \left( x_i - \bar{x} \right)^2
 \ee
-Spiegelhalter tests the null hypothesis that the sample $x_i$ is taken from a normally distributed population. The test statistic, $\rm S$, is defined:
+Spiegelhalter tests the null hypothesis that the sample $x_i$ is taken from a normally distributed population. The test statistic, $S$, is defined:
 \be
-   {\rm S} = \frac{N-0.73 \, n}{0.9 \, \sqrt{n}}  \quad ; \quad N=\sum_{i=1}^n Z_i^2 \, \ln \, Z_i^2  \quad ; \quad Z_i = \frac{x_i - \bar{x}}{\sigma}
+   S = \frac{N-0.73 \, n}{0.9 \, \sqrt{n}}  \quad ; \quad N=\sum_{i=1}^n Z_i^2 \, \ln \, Z_i^2  \quad ; \quad Z_i = \frac{x_i - \bar{x}}{\sigma}
 \ee
 Under the null hypothesis, the test statistic is normally distributed with mean 0 and standard deviation of 1. If the $p$-value
 \be
-   p = 1 - \left| \erf \left( \frac{{\rm S}}{\sqrt{2}} \right) \right|
+   p = 1 - \left| \erf \left( \frac{S}{\sqrt{2}} \right) \right|
 \ee
 is less than 0.05, the null hypothesis is rejected.
 
-The flaw in most normality tests is that they tend to reject the assumption of normality when the number of samples is relatively large. As can be seen in some of the histograms on the following pages, some fairly ``normal'' looking distributions fail while decidedly non-normal distributions pass. For this reason, the p-value is less important than the qualitative appearance of the histogram. If the histogram exhibits the typical bell-shaped curve, this adds confidence to the statistical treatment of the data. If the histogram is not bell-shaped, this might cast doubt on the statistical treatment for that particular quantity.
+The flaw in most normality tests is that they tend to reject the assumption of normality when the number of samples is relatively large. As can be seen in some of the histograms on the following pages, some fairly ``normal'' looking distributions fail while decidedly non-normal distributions pass. For this reason, the $p$-value is less important than the qualitative appearance of the histogram. If the histogram exhibits the typical bell-shaped curve, this adds confidence to the statistical treatment of the data. If the histogram is not bell-shaped, this might cast doubt on the statistical treatment for that particular quantity.
 
 \IfFileExists{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}{\input{SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}{\typeout{Error: Missing file SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex}}
 
