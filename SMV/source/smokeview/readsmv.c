@@ -11601,6 +11601,7 @@ void writeini_local(FILE *fileout){
     for(i = 0; i < ntours; i++){
       tourdata *touri;
       keyframe *framei;
+      int j;
 
       touri = tourinfo + i;
       if(touri->startup == 1)continue;
@@ -11609,11 +11610,13 @@ void writeini_local(FILE *fileout){
       fprintf(fileout, " %s\n", touri->label);
       fprintf(fileout, " %i %i %f %i %i\n",
         touri->nkeyframes, touri->global_tension_flag, touri->global_tension, touri->glui_avatar_index, touri->display);
-      for(framei = &touri->first_frame; framei != &touri->last_frame; framei = framei->next){
+      
+      framei = &touri->first_frame;
+      for(j = 0; j<touri->nkeyframes; j++){
         char buffer[1024];
         int uselocalspeed = 0;
 
-        if(framei == &touri->first_frame)continue;
+        framei = framei->next;
         sprintf(buffer, "%f %f %f %f ",
           framei->noncon_time,
           DENORMALIZE_X(framei->nodeval.eye[0]),
