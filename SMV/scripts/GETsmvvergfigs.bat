@@ -19,7 +19,7 @@ call %envfile%
 set CURDIR=%CD%
 
 cd %svn_root%\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
-pscp %svn_logon%:/home2/smokevis2/smokebot/FDS-SMV/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/* .
+pscp %svn_logon%:/home2/smokevis2/smokebot/FDS-SMVgitclean/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/* .
 
 cd %CURDIR%
 pause
