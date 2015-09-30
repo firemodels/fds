@@ -44,7 +44,7 @@ UNLOADALL
 LOADFILE
  cfast_test_0001.sf
 LOADFILE
- cfast_test_0002.sf
+ cfast_test_0006.sf
 SETTIMEVAL
  100.000000
 RENDERONCE
