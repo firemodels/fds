@@ -31,24 +31,15 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 axis([0.01 0.2 0.00005 0.01])
 
-xlabel('Grid Spacing, {\it \deltaz} (m)','Interpreter',Font_Interpreter,'Fontname','Times')
+xlabel('Grid Spacing, {\it\deltaz} (m)','Interpreter',Font_Interpreter,'Fontname','Times')
 ylabel('Friction Factor Error')
-h = legend(H,'FDS','O({\it \deltaz})','O({\it \deltaz}^2)','Location','Southeast');
+h = legend(H,'FDS','{\itO}({\it\deltaz})','{\itO}({\it\deltaz}^2)','Location','Southeast');
 set(h,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [dir,'poiseuille_N8_mu025_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [dir,'poiseuille_N8_mu025_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
