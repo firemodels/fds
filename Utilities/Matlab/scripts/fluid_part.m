@@ -135,7 +135,6 @@ H(10)=plot(t_soln,MX(1)*U_soln,'b-');
 H(11)=plot(t_soln,n*pwt*m_p*u_soln,'r-');
 
 axis([min(tx) max(tx) 0 150])
-set(gca,'Position',[Plot_X,Plot_Y,1.5*Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -147,19 +146,9 @@ legend_handle = legend(H(1:11),'FDS fluid U','FDS fluid V','FDS fluid W', ...
               'Analytical fluid','Analytical particle','Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
-
-SVN_Filename = [ddir,'fluid_part_mom_x_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+% add Git revision if file is available
+Git_Filename = [ddir,'fluid_part_mom_x_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 PDF_Paper_Width = 1.5*Paper_Width;
 
@@ -196,7 +185,6 @@ H(7)=plot(ty,V_eq,'g--');
 H(7)=plot(tz,W_eq,'g--');
 
 axis([min(tx) max(tx) 0 10])
-set(gca,'Position',[Plot_X,Plot_Y,1.5*Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
@@ -207,19 +195,9 @@ legend_handle = legend(H(1:7),'FDS fluid U','FDS fluid V','FDS fluid W',...
               'Equilibrium velocity','Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
-
-SVN_Filename = [ddir,'fluid_part_mom_x_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+% add Git revision if file is available
+Git_Filename = [ddir,'fluid_part_mom_x_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 set(gcf,'Visible','on');
 set(gcf,'PaperUnits',Paper_Units);
