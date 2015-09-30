@@ -34,29 +34,22 @@ H(3)=plot(z_40,flux_40,'-go','MarkerSize',Marker_Size);
 H(4)=plot(z_80,flux_80,'-ro','MarkerSize',Marker_Size);
 
 axis([0 1 30 150])
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 text(0.25,140,'Radiative Flux from a Hot Square Plate','FontSize',Label_Font_Size,'FontName',Font_Name)
 
-xlabel('Distance from Plate (m)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
-ylabel('Heat Flux (kW/m^2)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend_handle = legend(H,'analytical','5 cm, 100 angles','2.5 cm, 400 angles','1.25 cm, 1600 angles','Location','East');
+xlabel('Distance from Plate (m)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name);
+ylabel('Heat Flux (kW/m^2)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+legend_handle = legend(H,'analytical','5 cm, 100 angles','2.5 cm, 400 angles','1.25 cm, 1600 angles','Location','SouthWest');
 set(legend_handle,'Interpreter',Font_Interpreter);
-set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'Fontsize',Label_Font_Size);
 set(legend_handle,'Box','on');
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = ['radiating_polygon_square_20_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = ['radiating_polygon_square_20_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
