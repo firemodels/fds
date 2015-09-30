@@ -11228,120 +11228,147 @@ typedef struct {
       continue;
     }
 
-    if(localfile==1&&match(buffer,"TOURS")==1){
-      keyframe *thisframe, *addedframe;
-      tourdata *touri;
-      int glui_avatar_index_local;
+    if(localfile == 1){
+      int tours_flag;
 
-      freetours();
+      tours_flag = 0;
+      if(match(buffer, "TOURS") == 1)tours_flag = 1;
+      if(tours_flag == 1){
+        if(ntours > 0){
+          for(i = 0; i < ntours; i++){
+            tourdata *touri;
 
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ntours);
-      ntours++;
-      if(ntours>0){
-        if(NewMemory( (void **)&tourinfo, ntours*sizeof(tourdata))==0)return 2;
-        for(i=0;i<ntours;i++){
-          tourdata *tourii;
-
-          tourii=tourinfo+i;
-          tourii->path_times=NULL;
-          tourii->pathnodes=NULL;
-        }
-      }
-      ReallocTourMemory();
-      init_circulartour();
-
-      for(i=1;i<ntours;i++){
-        int j;
-
-        touri = tourinfo + i;
-        inittour(touri);
-        fgets(buffer,255,stream);
-        trim(buffer);
-        strcpy(touri->label,trim_front(buffer));
-
-        t_globaltension=touri->global_tension;
-        t_globaltension_flag=touri->global_tension_flag;
-        fgets(buffer,255,stream);
-        glui_avatar_index_local=0;
-        sscanf(buffer,"%i %i %f %i %i",
-          &nkeyframes,&t_globaltension_flag,&t_globaltension,&glui_avatar_index_local,&touri->display2);
-        glui_avatar_index_local=CLAMP(glui_avatar_index_local,0,navatar_types-1);
-        touri->glui_avatar_index=glui_avatar_index_local;
-        if(touri->display2!=1)touri->display2=0;
-        touri->global_tension_flag=t_globaltension_flag;
-        touri->global_tension=t_globaltension;
-        touri->nkeyframes=nkeyframes;
-
-        if(NewMemory( (void **)&touri->keyframe_times, nkeyframes*sizeof(float))==0)return 2;
-        if(NewMemory((void **)&touri->pathnodes,view_ntimes*sizeof(pathdata))==0)return 2;
-        if(NewMemory((void **)&touri->path_times,view_ntimes*sizeof(float))==0)return 2;
-
-        thisframe=&touri->first_frame;
-        for(j=0;j<nkeyframes;j++){
-          VECEQCONS(params,0.0);
-          VECEQCONS(key_view,0.0);
-          key_bank=0.0;
-          key_az_path = 0.0;
-          key_elev_path=0.0;
-          viewtype=0;
-          zzoom=1.0;
-          uselocalspeed=0;
-          fgets(buffer,255,stream);
-
-          sscanf(buffer,"%f %f %f %f %i",
-            &key_time,
-            key_xyz,key_xyz+1,key_xyz+2,
-            &viewtype);
-
-          if(viewtype==0){
-            sscanf(buffer,"%f %f %f %f %i %f %f %f %f %f %f %f %i",
-            &key_time,
-            key_xyz,key_xyz+1,key_xyz+2,
-            &viewtype, &key_az_path, &key_elev_path,&key_bank, 
-            params,params+1,params+2,
-            &zzoom,&uselocalspeed);
+            touri = tourinfo + i;
+            freetour(touri);
           }
-          else{
-            sscanf(buffer,"%f %f %f %f %i %f %f %f %f %f %f %f %i",
-            &key_time,
-            key_xyz,key_xyz+1,key_xyz+2,
-            &viewtype, key_view, key_view+1, key_view+2,
-            params,params+1,params+2,
-            &zzoom,&uselocalspeed);
-          }
-          if(zzoom<0.25)zzoom=0.25;
-          if(zzoom>4.00)zzoom=4.0;
-          addedframe=add_frame(thisframe, key_time, key_xyz, key_az_path, key_elev_path, 
-            key_bank, params, viewtype,zzoom,key_view);
-          thisframe=addedframe;
-          touri->keyframe_times[j]=key_time;
+          FREEMEMORY(tourinfo);
         }
-      }
-      for(i=0;i<ntours;i++){
-        tourdata *tourii;
+        ntours = 0;
 
-        tourii=tourinfo+i;
-        tourii->first_frame.next->prev=&touri->first_frame;
-        tourii->last_frame.prev->next=&touri->last_frame;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &ntours);
+        ntours++;
+        if(ntours > 0){
+          if(NewMemory((void **)&tourinfo, ntours*sizeof(tourdata)) == 0)return 2;
+          for(i = 0; i < ntours; i++){
+            tourdata *touri;
+
+            touri = tourinfo + i;
+            touri->path_times = NULL;
+            touri->pathnodes = NULL;
+          }
+        }
+        ReallocTourMemory();
+        init_circulartour();
+        {
+          keyframe *thisframe, *addedframe;
+          tourdata *touri;
+          int glui_avatar_index_local;
+
+          for(i = 1; i < ntours; i++){
+            int j;
+
+            touri = tourinfo + i;
+            inittour(touri);
+            fgets(buffer, 255, stream);
+            trim(buffer);
+            strcpy(touri->label, trim_front(buffer));
+
+            t_globaltension = touri->global_tension;
+            t_globaltension_flag = touri->global_tension_flag;
+            fgets(buffer, 255, stream);
+            glui_avatar_index_local = 0;
+            sscanf(buffer, "%i %i %f %i %i",
+              &nkeyframes, &t_globaltension_flag, &t_globaltension, &glui_avatar_index_local, &touri->display2);
+            glui_avatar_index_local = CLAMP(glui_avatar_index_local, 0, navatar_types - 1);
+            touri->glui_avatar_index = glui_avatar_index_local;
+            if(touri->display2 != 1)touri->display2 = 0;
+            touri->global_tension_flag = t_globaltension_flag;
+            touri->global_tension = t_globaltension;
+            touri->nkeyframes = nkeyframes;
+
+            if(NewMemory((void **)&touri->keyframe_times, nkeyframes*sizeof(float)) == 0)return 2;
+            if(NewMemory((void **)&touri->pathnodes, view_ntimes*sizeof(pathdata)) == 0)return 2;
+            if(NewMemory((void **)&touri->path_times, view_ntimes*sizeof(float)) == 0)return 2;
+
+            thisframe = &touri->first_frame;
+            for(j = 0; j < nkeyframes; j++){
+              params[0] = 0.0;
+              params[1] = 0.0;
+              params[2] = 0.0;
+              key_view[0] = 0.0;
+              key_view[1] = 0.0;
+              key_view[2] = 0.0;
+              key_bank = 0.0;
+              key_az_path = 0.0;
+              key_elev_path = 0.0;
+              viewtype = 0;
+              zzoom = 1.0;
+              uselocalspeed = 0;
+              fgets(buffer, 255, stream);
+
+              sscanf(buffer, "%f %f %f %f %i",
+                &key_time,
+                key_xyz, key_xyz + 1, key_xyz + 2,
+                &viewtype);
+
+              if(viewtype == 0){
+                sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
+                  &key_time,
+                  key_xyz, key_xyz + 1, key_xyz + 2,
+                  &viewtype, &key_az_path, &key_elev_path, &key_bank,
+                  params, params + 1, params + 2,
+                  &zzoom, &uselocalspeed);
+              }
+              else{
+                sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
+                  &key_time,
+                  key_xyz, key_xyz + 1, key_xyz + 2,
+                  &viewtype, key_view, key_view + 1, key_view + 2,
+                  params, params + 1, params + 2,
+                  &zzoom, &uselocalspeed);
+              }
+              if(zzoom<0.25)zzoom = 0.25;
+              if(zzoom>4.00)zzoom = 4.0;
+              addedframe = add_frame(thisframe, key_time, key_xyz, key_az_path, key_elev_path,
+                key_bank, params, viewtype, zzoom, key_view);
+              thisframe = addedframe;
+              touri->keyframe_times[j] = key_time;
+            }
+          }
+        }
+        if(tours_flag == 1){
+          for(i = 0; i < ntours; i++){
+            tourdata *touri;
+
+            touri = tourinfo + i;
+            touri->first_frame.next->prev = &touri->first_frame;
+            touri->last_frame.prev->next = &touri->last_frame;
+          }
+          updatetourmenulabels();
+          createtourpaths();
+          Update_Times();
+          plotstate = getplotstate(DYNAMIC_PLOTS);
+          selectedtour_index = -1;
+          selected_frame = NULL;
+          selected_tour = NULL;
+          if(viewalltours == 1)TourMenu(MENU_TOUR_SHOWALL);
+        }
+        else{
+          ntours = 0;
+        }
+        strcpy(buffer, "1.00000 1.00000 2.0000 0");
+        trimmzeros(buffer);
+        continue;
       }
-      updatetourmenulabels();
-      createtourpaths();
-      Update_Times();
-      plotstate=getplotstate(DYNAMIC_PLOTS);
-      selectedtour_index=-1;
-      selected_frame=NULL;
-      selected_tour=NULL;
-      if(viewalltours==1)TourMenu(MENU_TOUR_SHOWALL);
-      continue;
+      if(match(buffer, "TOURINDEX")){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &selectedtour_index_ini);
+        if(selectedtour_index_ini < 0)selectedtour_index_ini = -1;
+        update_selectedtour_index = 1;
+      }
     }
-    if(localfile==1&&match(buffer,"TOURINDEX")){
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i",&selectedtour_index_ini);
-      if(selectedtour_index_ini<0)selectedtour_index_ini=-1;
-      update_selectedtour_index=1;
-      continue;
-    }
+    
   }
 
   } 
