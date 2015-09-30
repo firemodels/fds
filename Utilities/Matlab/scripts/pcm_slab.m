@@ -86,23 +86,23 @@ for i_plot=1:2
     close all
     
     plot_style
-    set(gcf,'DefaultLineLineWidth',Line_Width)
     set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
     set(gca,'Units',Plot_Units)
     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
     if i_plot==1
        h=plot(t,xf,'k-',t_fds,dmin,'b--',t_fds,dmax,'r--');
-       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-       ylabel('Phase interface, {\itx}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+       ylabel('Phase interface, {\itx}_f (m)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
        legend('Analytical','FDS min','FDS max','Location','SouthEast')
     else
        h=plot(t,T(:,1),'k-',t,T(:,2),'r-',t,T(:,3),'g-'); hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,2),'kd');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,3),'ro');hold on
        h=plot(M_fds(1:5:nt_fds,1),M_fds(1:5:nt_fds,4),'gs');
-       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-       ylabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)       
+       xlabel('Time (s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+       ylabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
        legend('Analytical 1 cm','Analytical 5 cm','Analytical 10 cm','FDS 1 cm','FDS 5 cm','FDS 10 cm')
     end
     
@@ -110,19 +110,10 @@ for i_plot=1:2
     
     set(gca,'FontName',Font_Name)
     
-    % add SVN if file is available
-    
-    SVN_Filename = ['pcm_slab_git.txt'];
-    addverstr(gca,SVN_Filename,'linear')
-    % if exist(SVN_Filename,'file')
-    %     SVN = importdata(SVN_Filename);
-    %     x_lim = get(gca,'XLim');
-    %     y_lim = get(gca,'YLim');
-    %     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    %     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    %     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-    %         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-    % end
+    % add Git revision if file is available
+  
+    Git_Filename = ['pcm_slab_git.txt'];
+    addverstr(gca,Git_Filename,'linear')
     
     % Create the PDF files
     
