@@ -45,28 +45,22 @@ ycalc(2)=urms;
 
 maxval=ceil(2*urms*100)/100;
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-','LineWidth',1.5);
-hold on
-%axis([0 1000 0 maxval])
+figure
 plot_style
+
+h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-');
+
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-legend('Analytic','FDS','Location','SouthWest')
+xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+legend('Analytic','FDS','Location','SouthEast')
 
-svn_file = '../../Verification/Controls/rms_cov_corr_svn.txt';
-
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+% add Git revision if file is available
+git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -76,7 +70,6 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
 print(gcf,'-dpdf',plotname);
 
-hold off
 clear h
 
 ycalc(1)=uwcov;
@@ -84,26 +77,22 @@ ycalc(2)=uwcov;
 
 maxval=ceil(2*uwcov*100)/100;
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-','LineWidth',1.5);
-hold on
-%axis([0 1000 0 maxval])
+figure
 plot_style
+
+h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-');
+
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-legend('Analytic','FDS','Location','NorthEast')
+xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+legend('Analytic','FDS','Location','SouthEast')
 
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+% add Git revision if file is available
+git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
@@ -113,7 +102,6 @@ set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
 print(gcf,'-dpdf',plotname);
 
-hold off
 clear h
 
 ycalc(1)=uwcorr;
@@ -121,26 +109,22 @@ ycalc(2)=uwcorr;
 
 maxval=ceil(2*uwcorr*100)/100;
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-','LineWidth',1.5);
-hold on
-%axis([0 1000 0 maxval])
+figure
 plot_style
+
+h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-');
+
 set(gca,'Units',Plot_Units)
 set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-legend('Analytic','FDS','Location','NorthEast')
+xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+legend('Analytic','FDS','Location','SouthEast')
 
-if exist(svn_file,'file')
-    SVN = importdata(svn_file);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+% add Git revision if file is available
+git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+addverstr(gca,git_file,'linear')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
