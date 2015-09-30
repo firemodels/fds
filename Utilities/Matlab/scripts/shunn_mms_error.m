@@ -140,10 +140,9 @@ for n=1:length(filename)
 end
 
 plot_style
-set(gca,'Units',Plot_Units)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+%set(gca,'Units',Plot_Units)
+%set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+
 
 hh(1)=loglog(dx,e_r,'ko-');
 hold on
@@ -154,9 +153,13 @@ hh(5)=loglog(dx,dx,'k--');
 hh(6)=loglog(dx,dx.^2,'k-');
 axis([5*10^-4 10^-1 10^-6 10^-1])
 
-xlabel('{\it \Delta x} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('{\it l_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS {\it \rho}','FDS {\it Z}','FDS {\it u}','FDS {\it H}','{\it O(\Delta x)}','{\it O(\Delta x^2)}','location','northwest')
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+
+xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('{\it l_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+lh=legend(hh,'FDS {\it \rho}','FDS {\it Z}','FDS {\it u}','FDS {\it H}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
+set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 legend('boxoff')
 
 % add Git version if file is available
