@@ -1592,8 +1592,8 @@ Figure~\ref{blasius} (left) shows a comparison of the streamwise velocity from F
 where $k$ is the $z$ index. The value $u_k$ represents the FDS result for $u$ at the staggered grid storage location for cell $k$, $u_{{\rm B},k}$ is the dimensional Blasius solution at the corresponding location. The slight departure from second-order accuracy is likely due to numerical issues in representing the singularity in the Blasius solution at the leading edge of the plate as well as errors in the boundary conditions due to truncation of the domain.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_profile} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/blasius_convergence}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_profile} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/blasius_convergence}
    \end{tabular*}
    \caption[Blasius profile and convergence]{(Left) Comparison of theoretical and numerical results for the Blasius velocity profile ($u$ component). (Right) Error between FDS and Blasius solution for $u(z)$ plotted for each grid resolution.}
    \label{blasius}
@@ -1660,8 +1660,8 @@ where $\langle \dot{q}_w^{''} \rangle$, $\rho$, and $c_p$ are the mean heat flux
 As seen in the left side of Fig.~\ref{fig_heated_channel}, the velocity profile shows good agreement with the DNS result. The near-wall temperature profile for each Pr is shown on the right side of Fig.~\ref{fig_heated_channel}. In the log region ($y^+ >30$), FDS overestimates the centerline mean temperature compared to the DNS results at high Pr, but the mean wall heat flux is correct, as indicated by the accurate result of the first off-wall grid value (in the viscous region). The inaccuracy of the temperature profile in the log region points to a need for improvement in the subgrid-scale (SGS) scalar transport model.
 \begin{figure}[ht]
    \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
-      \includegraphics[width=3.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_uplus} &
+      \includegraphics[height=2.2in]{SCRIPT_FIGURES/heated_channel_Tplus}
    \end{tabular*}
    \caption[Mean velocity and temperature profiles for heated channel flow]{\label{fig_heated_channel} Comparison of FDS (lines with squares) with DNS (circles) for heated channel flow. (Left) Wall-normal velocity profile compared to DNS of Moser et al.~\cite{Moser:1999}. (Right) Wall-normal mean profiles of temperature for molecular Prandtl numbers (Pr) = 0.10, 0.71, and 2.0, compared to DNS of Kim and Moin~\cite{Kim:1987}.}
 \end{figure}
