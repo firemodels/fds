@@ -140,9 +140,6 @@ for n=1:length(filename)
 end
 
 plot_style
-%set(gca,'Units',Plot_Units)
-%set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-
 
 hh(1)=loglog(dx,e_r,'ko-');
 hold on
