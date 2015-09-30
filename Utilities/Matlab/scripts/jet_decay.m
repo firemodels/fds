@@ -58,11 +58,12 @@ H(9)=plot(x/h,u_vreman_10/u_0,'r--');
 H(10)=plot(x/h,u_vreman_5/u_0,'r-');
 
 axis([0 25 0.2 1.2])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 set(gca,'XTick',[0 5 10 15 20 25])
 set(gca,'YTick',[0.2 0.4 0.6 0.8 1.0 1.2])
 Paper_Width=1.4*Paper_Width;
 Plot_Width =1.4*Plot_Width;
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 text(1,1.1,'Jet Centerline Velocity Decay','FontSize',Label_Font_Size,'FontName',Font_Name)
 
@@ -75,22 +76,14 @@ legend_handle = legend(H,'analytical, {\it m}=0.12','analytical, {\it m}=0.20',.
                          'Vreman, {\it h/\deltax}=8','Vreman, {\it h/\deltax}=16',...
                          'Location','EastOutside');
 set(legend_handle,'Interpreter',Font_Interpreter);
-set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'FontSize',Label_Font_Size);
+set(legend_handle,'FontName',Font_Name);
 set(legend_handle,'Box','on');
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = ['jet_dsmag_dx5cm_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = ['jet_dsmag_dx5cm_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
