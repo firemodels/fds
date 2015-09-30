@@ -19,5 +19,6 @@ find "Error:" %paper%.err
 
 if exist ..\Bibliography\gitrevision.tex erase ..\Bibliography\gitrevision.tex
 echo %paper% build complete
+pause
 
 
