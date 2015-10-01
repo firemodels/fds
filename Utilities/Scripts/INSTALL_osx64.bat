@@ -3,7 +3,7 @@ Title Install 64 bit Linux bundle
 
 REM Windows batch file to Install 64 bit Linux bundle
 
-set platform=linux64
+set platform=osx64
 
 set envfile=%userprofile%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
