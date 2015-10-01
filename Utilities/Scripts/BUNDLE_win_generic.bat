@@ -72,11 +72,11 @@ echo *** Copying executables and scripts
 echo.
 
 
-copy %in_for_bundle%\*.po %out_bin%\.
+copy %in_for_bundle%\*.po                                                        %out_bin%\.
 
-CALL :COPY %in_for_bundle%\fds_openmp.bat %out_bin%\fds_openmp.bat
+CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe                               %out_bin%\fds.exe
 
-CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe  %out_bin%\fds.exe
+CALL :COPY  %in_testmpi%\test_mpi.exe                                           %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe                                %out_smv%\smokeview.exe
 
@@ -88,7 +88,7 @@ CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe      
 
 CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
-CALL :COPY  %in_background%\intel_win_32\background.exe %out_bin%\background.exe
+CALL :COPY  %in_background%\intel_win_32\background.exe                          %out_bin%\background.exe
 
 CALL :COPY %in_impi%\impi.dll          %out_bin%\impi.dll
 CALL :COPY %in_impi%\mpiexec.hydra.exe %out_bin%\mpiexec.exe
