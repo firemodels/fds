@@ -60,7 +60,7 @@ mkdir "%FDSSTART%\FDS on the Web"
 copy "%CD%\Documentation\FDS_on_the_Web\Software_Updates.url"      "%FDSSTART%\FDS on the Web\Software Updates.url"      > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Documentation_Updates.url" "%FDSSTART%\FDS on the Web\Documentation Updates.url" > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
-copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS on the Web\Official Web Site.url"     > Nul
+copy "%CD%\Documentation\FDS_on_the_Web\Official_Web_Site.url"     "%FDSSTART%\FDS on the Web\FDS Home Page.url"         > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Discussion_Group.url"      "%FDSSTART%\FDS on the Web\Discussion Group.url"      > Nul
 copy "%CD%\Documentation\FDS_on_the_Web\Issue_Tracker.url"         "%FDSSTART%\FDS on the Web\Issue Tracker.url"         > Nul
 
@@ -161,5 +161,5 @@ echo *** Press any key to complete the installation.
 pause>NUL
 
 erase "%CD%"\setup_fds_firewall.bat >Nul
-erase "%CD%"\..\wrapup_fds_install.bat >Nul
+erase wrapup_fds_install.bat >Nul
 
