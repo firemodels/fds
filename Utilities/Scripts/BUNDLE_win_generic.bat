@@ -19,7 +19,7 @@ set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\Data_Processing
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA
+set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
