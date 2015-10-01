@@ -54,8 +54,10 @@ goto:eof
 
 :abort_upload
 echo Error: %exe% does not exist - upload failed.
+pause
 goto:eof
 
 :no_key_file
 echo Error: Bintray API key does not exist in %bintray_api_key% - upload failed.
+pause
 goto:eof
