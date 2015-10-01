@@ -195,7 +195,6 @@ echo.
 echo ***Copying wrapup scripts for use in final installation
 echo.
 
-CALL :COPY  "%in_for_bundle%\folder_chooser.bat" "%out_bundle%\%fdsversion%\folder_chooser.bat"
 CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wrapup_fds_install.bat"
 
 CALL :COPY  "%bundleinfo%\setup_fds_firewall.bat" "%out_bundle%\%fdsversion%\setup_fds_firewall.bat"
