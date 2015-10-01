@@ -157,7 +157,7 @@ echo Set objWshProcessEnv = objWshShell.Environment("PROCESS")             >> Un
 echo objShell.ShellExecute "%ELEVATE_APP%", "%ELEVATE_PARMS%", "", "runas" >> Uninstall\uninstall.vbs
 
 echo.
-echo *** Press any key to complete the installation.
+echo *** Press any key.  Then reboot to complete the installation.  ***
 pause>NUL
 
 erase "%CD%"\setup_fds_firewall.bat >Nul
