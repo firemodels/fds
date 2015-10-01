@@ -194,10 +194,9 @@ cp -r $INTELLIB $bundledir/bin/$DESTLIB
 endif
 
 echo
-echo Getting the FDS release notes from the repository
+echo Copying the FDS release notes from the repository into the installation directory
 
-wget https://github.com/firemodels/fds-smv/wiki/FDS-Release-Notes
-mv FDS-Release-Notes $bundledir/Documentation/FDS_Release_Notes.html
+cp $bundle_setup/FDS_Release_Notes.htm $bundledir/Documentation/FDS_Release_Notes.html
 
 echo
 echo Copying Smokeview release notes from  the repository
