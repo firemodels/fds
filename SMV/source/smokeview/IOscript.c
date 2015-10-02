@@ -420,15 +420,19 @@ void get_xyz(char *buffer,int *ival){
     if(*c!=' '){
       if(*c=='x'||*c=='X'||*c=='1'){
         *ival=1;
-        break;
+        return;
       }
       if(*c=='y'||*c=='Y'||*c=='2'){
         *ival=2;
-        break;
+        return;
       }
       if(*c=='z'||*c=='Z'||*c=='3'){
         *ival=3;
-        break;
+        return;
+      }
+      if(*c == 'a' || *c == 'A' || *c == '0'){
+        *ival = 0;
+        return;
       }
       *ival = 1;
       break;
@@ -763,7 +767,7 @@ int compile_script(char *scriptfile){
           get_xyz(arg1, &scripti->ival);
           sscanf(arg2, "%f", &scripti->fval);
         }
-        scripti->ival = CLAMP(scripti->ival, 1, 3);
+        scripti->ival = CLAMP(scripti->ival, 0, 3);
         break;
 
       case SCRIPT_LOADPLOT3D:
@@ -1160,8 +1164,13 @@ void script_loadslice(scriptdata *scripti){
     if(mslicei->nslices<=0)continue;
     slicei = sliceinfo + mslicei->islices[0];
     if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
-    if(slicei->idir!=scripti->ival)continue;
-    if(ABS(slicei->position_orig - scripti->fval)>slicei->delta_orig)continue;
+    if(scripti->ival==0){
+      if(slicei->volslice==0)continue;
+    }
+    else{
+      if(slicei->idir != scripti->ival)continue;
+      if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
+    }
 
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
