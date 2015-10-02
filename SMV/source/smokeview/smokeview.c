@@ -303,7 +303,7 @@ void parse_commandline(int argc, char **argv){
         ){
         iarg++;
       }
-      if(strncmp(argi,"-convert_ini",12)==0)iarg+=2;
+      if(strncmp(argi,"-convert_ini",12)==0||strncmp(argi, "-update_ssf", 12)==0)iarg += 2;
 
       if(smv_parse==0)continue;
       if(smv_parse==1)break;
@@ -456,10 +456,7 @@ void parse_commandline(int argc, char **argv){
 
   for (i=1;i<argc;i++){
     if(strncmp(argv[i],"-",1)!=0)continue;
-    if(strncmp(argv[i],"-ini",3)==0){
-      writeini(GLOBAL_INI,NULL);
-    }
-    else if(strncmp(argv[i],"-update_bounds",14)==0){
+    if(strncmp(argv[i],"-update_bounds",14)==0){
       use_graphics=0;
       update_bounds=1;
     }
@@ -504,7 +501,21 @@ void parse_commandline(int argc, char **argv){
         convert_ini=1;
       }
     }
-    else if(strncmp(argv[i],"-update_ini",11)==0){
+    else if(strncmp(argv[i], "-update_ssf", 11)==0){
+      char *local_ssf_from = NULL, *local_ssf_to = NULL;
+
+      if(++i<argc)local_ssf_from = argv[i];
+      if(++i<argc)local_ssf_to = argv[i];
+      if(local_ssf_from!=NULL&&local_ssf_to!=NULL){
+        NewMemory((void **)&ssf_from, strlen(local_ssf_from)+1);
+        strcpy(ssf_from, local_ssf_from);
+
+        NewMemory((void **)&ssf_to, strlen(local_ssf_to)+1);
+        strcpy(ssf_to, local_ssf_to);
+        update_ssf = 1;
+      }
+    }
+    else if(strncmp(argv[i], "-update_ini", 11)==0){
       char *local_ini_from=NULL, *local_ini_to=NULL;
 
       if(++i<argc)local_ini_from = argv[i];

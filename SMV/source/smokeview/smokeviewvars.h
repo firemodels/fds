@@ -85,9 +85,11 @@ SVEXTERN float box_bounds[6],box_bounds2[6],box_translate[3],tetra_vertices[12];
 SVEXTERN int tetrabox_vis[10];
 SVEXTERN int SVDECL(geomtest_option,NO_TEST);
 
-SVEXTERN int SVDECL(convert_ini,0);
+SVEXTERN int SVDECL(convert_ini,0), SVDECL(update_ssf,0);
 SVEXTERN char SVDECL(*ini_from,NULL), SVDECL(*ini_to,NULL);
-SVEXTERN int SVDECL(cache_boundarydata,0);
+SVEXTERN char SVDECL(*ssf_from, NULL), SVDECL(*ssf_to, NULL);
+
+SVEXTERN int SVDECL(cache_boundarydata, 0);
 SVEXTERN int SVDECL(tour_antialias,0);
 SVEXTERN int SVDECL(tour_drag,0);
 

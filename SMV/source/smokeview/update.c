@@ -26,7 +26,7 @@ int compare_float( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ update_framenumber ------------------------ */
+/* ------------------ Update_Framenumber ------------------------ */
 
 void Update_Framenumber(int changetime){
   if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
@@ -811,7 +811,65 @@ void Synch_Times(void){
   reset_gltime();
 }
 
-/* ------------------ updatetimes ------------------------ */
+/* ------------------ get_loadfileinfo ------------------------ */
+
+int get_loadfileinfo(FILE *stream, char *filename){
+  int i;
+  char *fileptr;
+
+  trim(filename);
+  fileptr = trim_front(filename);
+  for(i = 0; i<nsliceinfo; i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo+i;
+    if(strcmp(fileptr, slicei->file)==0){
+      fprintf(stream, "LOADSLICE\n");
+      fprintf(stream, " %s\n", slicei->label.longlabel);
+      fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig );
+      return 1;
+    }
+  }
+  return 0;
+}
+
+  /* ------------------ Update_ssf ------------------------ */
+
+void Update_ssf(void){
+  FILE *stream_from, *stream_to;
+
+  if(ssf_from==NULL||ssf_to==NULL)return;
+  stream_from = fopen(ssf_from, "r");
+  if(stream_from==NULL)return;
+
+  stream_to = fopen(ssf_to,"w");
+  if(stream_to==NULL){
+    fclose(stream_from);
+    return;
+  }
+
+  while(!feof(stream_from)){
+    char buffer[255], filename[255];
+
+    CheckMemory;
+    if(fgets(buffer, 255, stream_from)==NULL)break;
+    trim(buffer);
+    if(strlen(buffer)>=8 && strncmp(buffer, "LOADFILE", 8)==0){
+      if(fgets(filename, 255, stream_from)==NULL)break;
+      if(get_loadfileinfo(stream_to,filename)==0){
+        fprintf(stream_to, "%s\n", buffer);
+        fprintf(stream_to, "%s\n", filename);
+      }
+    }
+    else{
+      fprintf(stream_to, "%s\n", buffer);
+    }
+  }
+  fclose(stream_from);
+  fclose(stream_to);
+}
+
+  /* ------------------ Update_Times ------------------------ */
 
 void Update_Times(void){
   int ntimes2;
@@ -1701,7 +1759,7 @@ void reset_itimes0(void){
   }
 }
 
-/* ------------------ updateclipbounds ------------------------ */
+/* ------------------ Update_Clipbounds ------------------------ */
 
 void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
 
@@ -1751,7 +1809,7 @@ void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
   UpdateColorTableList(ncolortableinfo_old);
 }
 
-/* ------------------ updateclip ------------------------ */
+/* ------------------ Update_Clip ------------------------ */
 
 void Update_Clip(int slicedir){
   stepclip_xmin=0; stepclip_ymin=0; stepclip_zmin=0; 
@@ -1895,6 +1953,10 @@ void update_ShowScene(void){
   }
   if(convert_ini == 1){
     writeini(SCRIPT_INI, ini_to);
+    exit(0);
+  }
+  if(update_ssf==1){
+    Update_ssf();
     exit(0);
   }
   Update_Show();
