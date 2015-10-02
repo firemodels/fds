@@ -1084,7 +1084,7 @@ void script_loadiso(scriptdata *scripti){
     isoi = isoinfo + i;
     lencval = strlen(scripti->cval);
     lenlabel = strlen(isoi->surface_label.longlabel);
-    if(lencval<lenlabel){
+    if(lencval<=lenlabel){
       strncpy(label2, isoi->surface_label.longlabel, lencval);
       label2[lencval] = 0;
       if(STRCMP(label2, scripti->cval)==0){
