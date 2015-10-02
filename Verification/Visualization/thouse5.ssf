@@ -493,8 +493,8 @@ LOADINIFILE
 UNLOADALL
 SETVIEWPOINT
  external
-LOADFILE
- thouse5_31_fed.iso
+LOADISO
+ Fractional effective dose: 0.3, 1.0, 3.0
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -526,8 +526,9 @@ SCENECLIP
  1
 SETVIEWPOINT
  upy
-LOADFILE
- thouse5_28_fed.sf
+LOADSLICE
+ Fractional effective dose
+ y 1.6
 SETTIMEVAL
  5.0
 RENDERONCE
