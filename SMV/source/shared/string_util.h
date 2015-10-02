@@ -9,6 +9,9 @@
 #define STRDECL(var,val)  var
 #endif
 
+#define MATCH 1
+#define NOTMATCH 0
+
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {
