@@ -357,56 +357,85 @@ void init_scripti(scriptdata *scripti, int command,char *label){
 int get_script_keyword_index(char *keyword){
   if(keyword==NULL||strlen(keyword)==0)return SCRIPT_UNKNOWN;
 
-  if(match_upper(keyword,"CBARFLIP") == 1)return SCRIPT_CBARFLIP;
-  if(match_upper(keyword,"CBARNORMAL") == 1)return SCRIPT_CBARNORMAL;
-  if(match_upper(keyword,"EXIT") == 1)return SCRIPT_EXIT;
-  if(match_upper(keyword,"KEYBOARD") == 1)return SCRIPT_KEYBOARD;
-  if(match_upper(keyword,"GSLICEORIEN") == 1)return SCRIPT_GSLICEORIEN;
-  if(match_upper(keyword,"GSLICEPOS") == 1)return SCRIPT_GSLICEPOS;
-  if(match_upper(keyword,"GSLICEVIEW") == 1)return SCRIPT_GSLICEVIEW;
-  if(match_upper(keyword,"LOAD3DSMOKE") == 1)return SCRIPT_LOAD3DSMOKE;
-  if(match_upper(keyword,"LOADBOUNDARY") == 1)return SCRIPT_LOADBOUNDARY;
-  if(match_upper(keyword,"LOADFILE") == 1)return SCRIPT_LOADFILE;
-  if(match_upper(keyword,"LABEL") == 1)return SCRIPT_LABEL;
-  if(match_upper(keyword,"LOADINIFILE") == 1)return SCRIPT_LOADINIFILE;
-  if(match_upper(keyword,"LOADISO") == 1)return SCRIPT_LOADISO;
-  if(match_upper(keyword,"LOADPARTICLES") == 1)return SCRIPT_LOADPARTICLES;
-  if(match_upper(keyword,"LOADPLOT3D") == 1)return SCRIPT_LOADPLOT3D;
-  if(match_upper(keyword,"LOADSLICE") == 1)return SCRIPT_LOADSLICE;
-  if(match_upper(keyword,"LOADTOUR") == 1)return SCRIPT_LOADTOUR;
-  if(match_upper(keyword,"LOADVOLSMOKE") == 1)return SCRIPT_LOADVOLSMOKE;
-  if(match_upper(keyword,"LOADVOLSMOKEFRAME") == 1)return SCRIPT_LOADVOLSMOKEFRAME;
-  if(match_upper(keyword,"LOADVFILE") == 1)return SCRIPT_LOADVFILE;
-  if(match_upper(keyword,"LOADVSLICE") == 1)return SCRIPT_LOADVSLICE;
-  if(match_upper(keyword,"MAKEMOVIE") == 1)return SCRIPT_MAKEMOVIE;
-  if(match_upper(keyword,"PARTCLASSCOLOR") == 1)return SCRIPT_PARTCLASSCOLOR;
-  if(match_upper(keyword,"PARTCLASSTYPE") == 1)return SCRIPT_PARTCLASSTYPE;
-  if(match_upper(keyword,"PLOT3DPROPS") == 1)return SCRIPT_PLOT3DPROPS;
-  if(match_upper(keyword,"RENDERALL") == 1)return SCRIPT_RENDERALL;
-  if(match_upper(keyword,"RENDERCLIP") == 1)return SCRIPT_RENDERCLIP;
-  if(match_upper(keyword,"RENDERDIR") == 1)return SCRIPT_RENDERDIR;
-  if(match_upper(keyword,"RENDERTYPE") == 1)return SCRIPT_RENDERTYPE;
-  if(match_upper(keyword,"MOVIETYPE") == 1)return SCRIPT_MOVIETYPE;
-  if(match_upper(keyword, "RENDERSIZE") == 1)return SCRIPT_RENDERSIZE;
-  if(match_upper(keyword,"RENDERDOUBLEONCE") == 1)return SCRIPT_RENDERDOUBLEONCE;
-  if(match_upper(keyword,"RENDERONCE") == 1)return SCRIPT_RENDERONCE;
-  if(match_upper(keyword,"RENDERSTART") == 1)return SCRIPT_RENDERSTART;
-  if(match_upper(keyword,"SCENECLIP") == 1)return SCRIPT_SCENECLIP;
-  if(match_upper(keyword,"SETTOURKEYFRAME") == 1)return SCRIPT_SETTOURKEYFRAME;
-  if(match_upper(keyword,"SETTOURVIEW") == 1)return SCRIPT_SETTOURVIEW;
-  if(match_upper(keyword,"SETTIMEVAL") == 1)return SCRIPT_SETTIMEVAL;
-  if(match_upper(keyword,"SETVIEWPOINT") == 1)return SCRIPT_SETVIEWPOINT;
-  if(match_upper(keyword,"SHOWPLOT3DDATA") == 1)return SCRIPT_SHOWPLOT3DDATA;
-  if(match_upper(keyword,"UNLOADALL") == 1)return SCRIPT_UNLOADALL;
-  if(match_upper(keyword,"UNLOADTOUR") == 1)return SCRIPT_UNLOADTOUR;
-  if(match_upper(keyword,"VOLSMOKERENDERALL") == 1)return SCRIPT_VOLSMOKERENDERALL;
+  if(match_upper(keyword,"CBARFLIP") == MATCH)return SCRIPT_CBARFLIP;
+  if(match_upper(keyword,"CBARNORMAL") == MATCH)return SCRIPT_CBARNORMAL;
+  if(match_upper(keyword,"EXIT") == MATCH)return SCRIPT_EXIT;
+  if(match_upper(keyword,"KEYBOARD") == MATCH)return SCRIPT_KEYBOARD;
+  if(match_upper(keyword,"GSLICEORIEN") == MATCH)return SCRIPT_GSLICEORIEN;
+  if(match_upper(keyword,"GSLICEPOS") == MATCH)return SCRIPT_GSLICEPOS;
+  if(match_upper(keyword,"GSLICEVIEW") == MATCH)return SCRIPT_GSLICEVIEW;
+  if(match_upper(keyword,"LOAD3DSMOKE") == MATCH)return SCRIPT_LOAD3DSMOKE;
+  if(match_upper(keyword,"LOADBOUNDARY") == MATCH)return SCRIPT_LOADBOUNDARY;
+  if(match_upper(keyword,"LOADFILE") == MATCH)return SCRIPT_LOADFILE;
+  if(match_upper(keyword,"LABEL") == MATCH)return SCRIPT_LABEL;
+  if(match_upper(keyword,"LOADINIFILE") == MATCH)return SCRIPT_LOADINIFILE;
+  if(match_upper(keyword,"LOADISO") == MATCH)return SCRIPT_LOADISO;
+  if(match_upper(keyword,"LOADPARTICLES") == MATCH)return SCRIPT_LOADPARTICLES;
+  if(match_upper(keyword,"LOADPLOT3D") == MATCH)return SCRIPT_LOADPLOT3D;
+  if(match_upper(keyword,"LOADSLICE") == MATCH)return SCRIPT_LOADSLICE;
+  if(match_upper(keyword,"LOADTOUR") == MATCH)return SCRIPT_LOADTOUR;
+  if(match_upper(keyword,"LOADVOLSMOKE") == MATCH)return SCRIPT_LOADVOLSMOKE;
+  if(match_upper(keyword,"LOADVOLSMOKEFRAME") == MATCH)return SCRIPT_LOADVOLSMOKEFRAME;
+  if(match_upper(keyword,"LOADVFILE") == MATCH)return SCRIPT_LOADVFILE;
+  if(match_upper(keyword,"LOADVSLICE") == MATCH)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"MAKEMOVIE") == MATCH)return SCRIPT_MAKEMOVIE;
+  if(match_upper(keyword,"PARTCLASSCOLOR") == MATCH)return SCRIPT_PARTCLASSCOLOR;
+  if(match_upper(keyword,"PARTCLASSTYPE") == MATCH)return SCRIPT_PARTCLASSTYPE;
+  if(match_upper(keyword,"PLOT3DPROPS") == MATCH)return SCRIPT_PLOT3DPROPS;
+  if(match_upper(keyword,"RENDERALL") == MATCH)return SCRIPT_RENDERALL;
+  if(match_upper(keyword,"RENDERCLIP") == MATCH)return SCRIPT_RENDERCLIP;
+  if(match_upper(keyword,"RENDERDIR") == MATCH)return SCRIPT_RENDERDIR;
+  if(match_upper(keyword,"RENDERTYPE") == MATCH)return SCRIPT_RENDERTYPE;
+  if(match_upper(keyword,"MOVIETYPE") == MATCH)return SCRIPT_MOVIETYPE;
+  if(match_upper(keyword, "RENDERSIZE") == MATCH)return SCRIPT_RENDERSIZE;
+  if(match_upper(keyword,"RENDERDOUBLEONCE") == MATCH)return SCRIPT_RENDERDOUBLEONCE;
+  if(match_upper(keyword,"RENDERONCE") == MATCH)return SCRIPT_RENDERONCE;
+  if(match_upper(keyword,"RENDERSTART") == MATCH)return SCRIPT_RENDERSTART;
+  if(match_upper(keyword,"SCENECLIP") == MATCH)return SCRIPT_SCENECLIP;
+  if(match_upper(keyword,"SETTOURKEYFRAME") == MATCH)return SCRIPT_SETTOURKEYFRAME;
+  if(match_upper(keyword,"SETTOURVIEW") == MATCH)return SCRIPT_SETTOURVIEW;
+  if(match_upper(keyword,"SETTIMEVAL") == MATCH)return SCRIPT_SETTIMEVAL;
+  if(match_upper(keyword,"SETVIEWPOINT") == MATCH)return SCRIPT_SETVIEWPOINT;
+  if(match_upper(keyword,"SHOWPLOT3DDATA") == MATCH)return SCRIPT_SHOWPLOT3DDATA;
+  if(match_upper(keyword,"UNLOADALL") == MATCH)return SCRIPT_UNLOADALL;
+  if(match_upper(keyword,"UNLOADTOUR") == MATCH)return SCRIPT_UNLOADTOUR;
+  if(match_upper(keyword,"VOLSMOKERENDERALL") == MATCH)return SCRIPT_VOLSMOKERENDERALL;
   if(match_upper(keyword, "ISORENDERALL")==1)return SCRIPT_ISORENDERALL;
   if(match_upper(keyword, "XSCENECLIP")==1)return SCRIPT_XSCENECLIP;
-  if(match_upper(keyword,"YSCENECLIP") == 1)return SCRIPT_YSCENECLIP;
-  if(match_upper(keyword,"ZSCENECLIP") == 1)return SCRIPT_ZSCENECLIP;
+  if(match_upper(keyword,"YSCENECLIP") == MATCH)return SCRIPT_YSCENECLIP;
+  if(match_upper(keyword,"ZSCENECLIP") == MATCH)return SCRIPT_ZSCENECLIP;
 
   return SCRIPT_UNKNOWN;
 }
+
+/* ------------------ script_error_check ------------------------ */
+
+void get_xyz(char *buffer,int *ival){
+  int i;
+
+  for(i=0;i<strlen(buffer);i++){
+    char *c;
+
+    c = buffer+i;
+    if(*c!=' '){
+      if(*c=='x'||*c=='X'||*c=='1'){
+        *ival=1;
+        break;
+      }
+      if(*c=='y'||*c=='Y'||*c=='2'){
+        *ival=2;
+        break;
+      }
+      if(*c=='z'||*c=='Z'||*c=='3'){
+        *ival=3;
+        break;
+      }
+      *ival = 1;
+      break;
+    }
+  }
+}
+
 
 /* ------------------ script_error_check ------------------------ */
 
@@ -673,7 +702,6 @@ int compile_script(char *scriptfile){
       case SCRIPT_KEYBOARD:
       case SCRIPT_LOADFILE:
       case SCRIPT_LOADVFILE:
-      case SCRIPT_LOADBOUNDARY:
       case SCRIPT_PARTCLASSCOLOR:
       case SCRIPT_PARTCLASSTYPE:
       case SCRIPT_LOADTOUR:
@@ -681,6 +709,10 @@ int compile_script(char *scriptfile){
       case SCRIPT_LOADISO:
       case SCRIPT_SETVIEWPOINT:
       case SCRIPT_LABEL:
+        SETcval;
+        break;
+
+      case SCRIPT_LOADBOUNDARY:
         SETcval;
         break;
 
@@ -720,11 +752,18 @@ int compile_script(char *scriptfile){
         SETcval;
 
         SETcval2;
-        cleanbuffer(buffer,buffer2);
+        cleanbuffer(buffer, buffer2);
+        {
+          char *arg1, *arg2, *buffptr;
 
-        sscanf(buffer,"%i %f",&scripti->ival,&scripti->fval);
-        if(scripti->ival<1)scripti->ival=1;
-        if(scripti->ival>3)scripti->ival=3;
+          buffptr = buffer;
+          arg1 = strtok(buffptr, " ");
+          arg2 = strtok(NULL, " ");
+
+          get_xyz(arg1, &scripti->ival);
+          sscanf(arg2, "%f", &scripti->fval);
+        }
+        scripti->ival = CLAMP(scripti->ival, 1, 3);
         break;
 
       case SCRIPT_LOADPLOT3D:
@@ -1088,7 +1127,7 @@ void script_load3dsmoke(scriptdata *scripti){
     smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
-    if(match_upper(smoke3di->label.longlabel,scripti->cval)==1){
+    if(match_upper(smoke3di->label.longlabel,scripti->cval) == MATCH){
       readsmoke3d(i,LOAD,&errorcode);
       if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
         FREEMEMORY(loaded_file);
@@ -1116,16 +1155,13 @@ void script_loadslice(scriptdata *scripti){
     multislicedata *mslicei;
     slicedata *slicei;
     int j;
-    float delta_orig;
 
     mslicei = multisliceinfo + i;
     if(mslicei->nslices<=0)continue;
     slicei = sliceinfo + mslicei->islices[0];
-    if(match_upper(slicei->label.longlabel,scripti->cval)==0)continue;
+    if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
     if(slicei->idir!=scripti->ival)continue;
-    delta_orig = slicei->position_orig - scripti->fval;
-    if(delta_orig<0.0)delta_orig = -delta_orig;
-    if(delta_orig>slicei->delta_orig)continue;
+    if(ABS(slicei->position_orig - scripti->fval)>slicei->delta_orig)continue;
 
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
@@ -1153,7 +1189,7 @@ void script_loadvslice(scriptdata *scripti){
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
     slicei = sliceinfo + mvslicei->ivslices[0];
-    if(match_upper(slicei->label.longlabel,scripti->cval)==0)continue;
+    if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
     if(slicei->idir!=scripti->ival)continue;
     delta_orig = slicei->position_orig - scripti->fval;
     if(delta_orig<0.0)delta_orig = -delta_orig;

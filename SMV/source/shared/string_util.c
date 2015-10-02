@@ -585,10 +585,10 @@ int match(char *buffer, const char *key){
 
   lenkey=strlen(key);
   lenbuffer=strlen(buffer);
-  if(lenbuffer<lenkey)return 0; // buffer shorter than key so no match
-  if(strncmp(buffer,key,lenkey) != 0)return 0; // key doesn't match buffer so no match
-  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return 0;
-  return 1;
+  if(lenbuffer<lenkey)return NOTMATCH; // buffer shorter than key so no match
+  if(strncmp(buffer,key,lenkey) != 0)return NOTMATCH; // key doesn't match buffer so no match
+  if(lenbuffer>lenkey&&!isspace(buffer[lenkey]))return NOTMATCH;
+  return MATCH;
 }
 
 /* ------------------ match_upper ------------------------ */
