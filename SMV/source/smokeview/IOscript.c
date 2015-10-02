@@ -1078,16 +1078,24 @@ void script_loadiso(scriptdata *scripti){
   for(i = 0; i<nisoinfo; i++){
     int errorcode;
     isodata *isoi;
+    char label2[100];
+    int lencval, lenlabel;
 
     isoi = isoinfo + i;
-    if(STRCMP(isoi->surface_label.longlabel,scripti->cval)==0){
-      readiso(isoi->file,i,LOAD,NULL,&errorcode);
-      if(scripti->cval != NULL&&strlen(scripti->cval)>0){
-        FREEMEMORY(loaded_file);
-        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
-        strcpy(loaded_file,scripti->cval);
+    lencval = strlen(scripti->cval);
+    lenlabel = strlen(isoi->surface_label.longlabel);
+    if(lencval<lenlabel){
+      strncpy(label2, isoi->surface_label.longlabel, lencval);
+      label2[lencval] = 0;
+      if(STRCMP(label2, scripti->cval)==0){
+        readiso(isoi->file, i, LOAD, NULL, &errorcode);
+        if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+          FREEMEMORY(loaded_file);
+          NewMemory((void **)&loaded_file, strlen(scripti->cval)+1);
+          strcpy(loaded_file, scripti->cval);
+        }
+        count++;
       }
-      count++;
     }
   }
   if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
