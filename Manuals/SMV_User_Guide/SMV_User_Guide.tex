@@ -3389,12 +3389,21 @@ where
 \item position - position of Plot3D plane
 \end{itemize}
 
-\hitem{LOADISO}Load an iso-surface file of a given type.
+\hitem{LOADISO}Load an iso-surface file for all meshes for a specified type.
 The type is the same as what Smokeview displays in the Load menus for iso-surface files.
 Usage:
 \begin{lstlisting}
 LOADISO
   type (char)
+\end{lstlisting}
+
+\hitem{LOADISOM}Load an iso-surface file for a specified mesh and type.
+The type is the same as what Smokeview displays in the Load menus for iso-surface files.
+Usage:
+\begin{lstlisting}
+LOADISO
+  type (char)
+  mesh number (int)
 \end{lstlisting}
 
 \hitem{LOADSLICE}Load a slice file of a given type.
