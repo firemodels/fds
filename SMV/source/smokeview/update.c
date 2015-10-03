@@ -824,11 +824,26 @@ int get_loadfileinfo(FILE *stream, char *filename){
 
     slicei = sliceinfo+i;
     if(strcmp(fileptr, slicei->file)==0){
+      fprintf(stream, "// LOADFILE\n");
+      fprintf(stream, "//  %s\n", slicei->file);
       fprintf(stream, "LOADSLICE\n");
       fprintf(stream, " %s\n", slicei->label.longlabel);
       fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig );
       return 1;
     }
+  }
+  for(i = 0; i < nisoinfo; i++){
+    isodata *isoi;
+
+    isoi = isoinfo + i;
+    if(strcmp(fileptr, isoi->file) == 0){
+      fprintf(stream, "// LOADFILE\n");
+      fprintf(stream, "//  %s\n", isoi->file);
+      fprintf(stream, "LOADISO\n");
+      fprintf(stream, " %s\n", isoi->surface_label.longlabel);
+      return 1;
+    }
+
   }
   return 0;
 }
