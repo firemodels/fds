@@ -3579,16 +3579,17 @@ void LoadSliceMenu(int value){
   if(value==MENU_DUMMY)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    char *file;
+    slicedata *slicei;
 
-    file = sliceinfo[value].file;
+    slicei = sliceinfo + value;
     if(script_multislice==0&&scriptoutstream!=NULL){
-      fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",file);
+      fprintf(scriptoutstream, "LOADSLICE\n");
+      fprintf(scriptoutstream, " %s\n", slicei->label.longlabel);
+      fprintf(scriptoutstream, " %i %f\n", slicei->idir, slicei->position_orig);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       if(value<nsliceinfo-nfedinfo){
-        readslice(file,value,LOAD,&errorcode);
+        readslice(slicei->file,value,LOAD,&errorcode);
       }
       else{
         readfed(value,LOAD,FED_SLICE,&errorcode);
@@ -3785,8 +3786,9 @@ void LoadIsoMenu(int value){
     ReadIsoFile=1;
     file=isoinfo[value].file;
     if(script_iso==0&&scriptoutstream!=NULL){
-      fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",file);
+      fprintf(scriptoutstream,"LOADISOM\n");
+      fprintf(scriptoutstream, " %s\n", isoinfo[value].surface_label.longlabel);
+      fprintf(scriptoutstream, " %i\n", isoinfo[value].blocknumber+1);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       readiso(file,value,LOAD,NULL,&errorcode);

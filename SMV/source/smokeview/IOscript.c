@@ -102,6 +102,10 @@ void update_menu(void);
 // LOADISO
 //  type (char)
 
+// LOADISOM
+//  mesh number (int)
+//  type (char)
+
 // LOADSLICE
 //  type (char)
 //  1/2/3 (int)  val (float)
@@ -370,6 +374,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"LABEL") == MATCH)return SCRIPT_LABEL;
   if(match_upper(keyword,"LOADINIFILE") == MATCH)return SCRIPT_LOADINIFILE;
   if(match_upper(keyword,"LOADISO") == MATCH)return SCRIPT_LOADISO;
+  if(match_upper(keyword,"LOADISOM") == MATCH)return SCRIPT_LOADISOM;
   if(match_upper(keyword,"LOADPARTICLES") == MATCH)return SCRIPT_LOADPARTICLES;
   if(match_upper(keyword,"LOADPLOT3D") == MATCH)return SCRIPT_LOADPLOT3D;
   if(match_upper(keyword,"LOADSLICE") == MATCH)return SCRIPT_LOADSLICE;
@@ -653,6 +658,14 @@ int compile_script(char *scriptfile){
         first_frame_index=scripti->ival3;
 
         SETcval2;
+        break;
+
+      case SCRIPT_LOADISOM:
+        SETcval;
+        SETcval2;
+        cleanbuffer(buffer,buffer2);
+        scripti->ival=1;
+        sscanf(buffer,"%i",&scripti->ival);
         break;
 
       case SCRIPT_ISORENDERALL:
@@ -1067,7 +1080,7 @@ void script_loadparticles(scriptdata *scripti){
 
 /* ------------------ script_loadiso ------------------------ */
 
-void script_loadiso(scriptdata *scripti){
+void script_loadiso(scriptdata *scripti, int meshnum){
   int i;
   int count=0;
 
@@ -1082,6 +1095,7 @@ void script_loadiso(scriptdata *scripti){
     int lencval, lenlabel;
 
     isoi = isoinfo + i;
+    if(meshnum != -1 && isoi->blocknumber+1 != meshnum)continue;
     lencval = strlen(scripti->cval);
     lenlabel = strlen(isoi->surface_label.longlabel);
     if(lencval<=lenlabel){
@@ -1963,7 +1977,10 @@ int run_script(void){
 #endif
       break;
     case SCRIPT_LOADISO:
-      script_loadiso(scripti);
+      script_loadiso(scripti,-1); // load isosurface for all meshes
+      break;
+    case SCRIPT_LOADISOM:
+      script_loadiso(scripti, scripti->ival); // load isosurface for mesh script->ival
       break;
     case SCRIPT_LOAD3DSMOKE:
       script_load3dsmoke(scripti);
