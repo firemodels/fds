@@ -839,8 +839,23 @@ int get_loadfileinfo(FILE *stream, char *filename){
     if(strcmp(fileptr, isoi->file) == 0){
       fprintf(stream, "// LOADFILE\n");
       fprintf(stream, "//  %s\n", isoi->file);
-      fprintf(stream, "LOADISO\n");
+      fprintf(stream, "LOADISOM\n");
       fprintf(stream, " %s\n", isoi->surface_label.longlabel);
+      fprintf(stream, " %i\n", isoi->blocknumber+1);
+      return 1;
+    }
+
+  }
+  for(i = 0; i < npatchinfo; i++){
+    patchdata *patchi;
+
+    patchi = patchinfo + i;
+    if(strcmp(fileptr, patchi->file) == 0){
+      fprintf(stream, "// LOADFILE\n");
+      fprintf(stream, "//  %s\n", patchi->file);
+      fprintf(stream, "LOADBOUNDARYM\n");
+      fprintf(stream, " %s\n", patchi->label.longlabel);
+      fprintf(stream, " %i\n", patchi->blocknumber+1);
       return 1;
     }
 

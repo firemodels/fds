@@ -3849,8 +3849,11 @@ void LoadPatchMenu(int value){
       patchdata *patchi;
 
       patchi = patchinfo + value;
-      fprintf(scriptoutstream,"LOADFILE\n");
-      fprintf(scriptoutstream," %s\n",patchi->file);
+      fprintf(scriptoutstream,"// LOADFILE\n");
+      fprintf(scriptoutstream,"//  %s\n",patchi->file);
+      fprintf(scriptoutstream, "LOADBOUNDARYM\n");
+      fprintf(scriptoutstream, " %s\n", patchi->label.longlabel);
+      fprintf(scriptoutstream, " %i\n", patchi->blocknumber+1);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       LOCK_COMPRESS
