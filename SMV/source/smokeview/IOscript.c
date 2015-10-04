@@ -114,6 +114,11 @@ void update_menu(void);
 //  type (char)
 //  1/2/3 (int)  val (float)
 
+// LOADSLICEM
+//  type (char)
+//  1/2/3 (int)  val (float)
+//  mesh number (int)
+
 // LOADVSLICE
 //  type (char)
 //  1/2/3 (int)  val (float)
@@ -383,6 +388,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"LOADPARTICLES") == MATCH)return SCRIPT_LOADPARTICLES;
   if(match_upper(keyword,"LOADPLOT3D") == MATCH)return SCRIPT_LOADPLOT3D;
   if(match_upper(keyword,"LOADSLICE") == MATCH)return SCRIPT_LOADSLICE;
+  if(match_upper(keyword,"LOADSLICEM") == MATCH)return SCRIPT_LOADSLICEM;
   if(match_upper(keyword,"LOADTOUR") == MATCH)return SCRIPT_LOADTOUR;
   if(match_upper(keyword,"LOADVOLSMOKE") == MATCH)return SCRIPT_LOADVOLSMOKE;
   if(match_upper(keyword,"LOADVOLSMOKEFRAME") == MATCH)return SCRIPT_LOADVOLSMOKEFRAME;
@@ -818,6 +824,25 @@ int compile_script(char *scriptfile){
         scripti->ival = CLAMP(scripti->ival, 0, 3);
         break;
 
+      case SCRIPT_LOADSLICEM:
+        SETcval;
+
+        SETcval2;
+        cleanbuffer(buffer, buffer2);
+        {
+          char *arg1, *arg2, *buffptr;
+
+          buffptr = buffer;
+          arg1 = strtok(buffptr, " ");
+          arg2 = strtok(NULL, " ");
+
+          get_xyz(arg1, &scripti->ival);
+          sscanf(arg2, "%f", &scripti->fval);
+        }
+        scripti->ival = CLAMP(scripti->ival, 0, 3);
+        SETival2;
+        break;
+
       case SCRIPT_LOADPLOT3D:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -1236,6 +1261,33 @@ void script_loadslice(scriptdata *scripti){
     break;
   }
   if(count==0)fprintf(stderr,"*** Error: Slice files of type %s failed to load\n",scripti->cval);
+}
+
+
+/* ------------------ script_loadslicem ------------------------ */
+
+void script_loadslicem(scriptdata *scripti, int meshnum){
+  int i;
+  int count = 0;
+
+  PRINTF("script: loading slice files of type: %s in mesh %i\n\n", scripti->cval,meshnum);
+
+  for(i = 0; i < nsliceinfo; i++){
+    slicedata *slicei;
+    int j;
+
+    slicei = sliceinfo + i;
+    if(slicei->blocknumber + 1 != meshnum)continue;
+    if(match_upper(slicei->label.longlabel, scripti->cval) == NOTMATCH)continue;
+    if(scripti->ival == 0){
+      if(slicei->volslice == 0)continue;
+    }
+    else{
+      if(slicei->idir != scripti->ival)continue;
+      if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
+    }
+    LoadSliceMenu(i);
+  }
 }
 
 /* ------------------ script_loadvslice ------------------------ */
@@ -1990,7 +2042,7 @@ int run_script(void){
       script_loadboundary(scripti,-1);
       break;
     case SCRIPT_LOADBOUNDARYM:
-      script_loadboundary(scripti,scripti->ival+1);
+      script_loadboundary(scripti,scripti->ival);
       break;
     case SCRIPT_PARTCLASSCOLOR:
       script_partclasscolor(scripti);
@@ -2036,6 +2088,9 @@ int run_script(void){
       break;
     case SCRIPT_LOADSLICE:
       script_loadslice(scripti);
+      break;
+    case SCRIPT_LOADSLICEM:
+      script_loadslicem(scripti, scripti->ival2);
       break;
     case SCRIPT_LOADVSLICE:
       script_loadvslice(scripti);

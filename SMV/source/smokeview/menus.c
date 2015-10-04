@@ -3583,9 +3583,10 @@ void LoadSliceMenu(int value){
 
     slicei = sliceinfo + value;
     if(script_multislice==0&&scriptoutstream!=NULL){
-      fprintf(scriptoutstream, "LOADSLICE\n");
+      fprintf(scriptoutstream, "LOADSLICEM\n");
       fprintf(scriptoutstream, " %s\n", slicei->label.longlabel);
       fprintf(scriptoutstream, " %i %f\n", slicei->idir, slicei->position_orig);
+      fprintf(scriptoutstream, " %i\n", slicei->blocknumber+1);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       if(value<nsliceinfo-nfedinfo){
