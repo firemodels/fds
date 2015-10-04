@@ -826,9 +826,10 @@ int get_loadfileinfo(FILE *stream, char *filename){
     if(strcmp(fileptr, slicei->file)==0){
       fprintf(stream, "// LOADFILE\n");
       fprintf(stream, "//  %s\n", slicei->file);
-      fprintf(stream, "LOADSLICE\n");
+      fprintf(stream, "LOADSLICEM\n");
       fprintf(stream, " %s\n", slicei->label.longlabel);
       fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig );
+      fprintf(stream, " %i\n", slicei->blocknumber+1);
       return 1;
     }
   }
