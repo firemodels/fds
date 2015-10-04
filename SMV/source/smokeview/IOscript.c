@@ -82,6 +82,10 @@ void update_menu(void);
 // LOADBOUNDARY
 //   type (char)
 
+// LOADBOUNDARYM
+//  type (char)
+//  mesh number (int)
+
 // LOAD3DSMOKE
 //  type (char)
 
@@ -103,8 +107,8 @@ void update_menu(void);
 //  type (char)
 
 // LOADISOM
-//  mesh number (int)
 //  type (char)
+//  mesh number (int)
 
 // LOADSLICE
 //  type (char)
@@ -370,6 +374,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"GSLICEVIEW") == MATCH)return SCRIPT_GSLICEVIEW;
   if(match_upper(keyword,"LOAD3DSMOKE") == MATCH)return SCRIPT_LOAD3DSMOKE;
   if(match_upper(keyword,"LOADBOUNDARY") == MATCH)return SCRIPT_LOADBOUNDARY;
+  if(match_upper(keyword,"LOADBOUNDARYM") == MATCH)return SCRIPT_LOADBOUNDARYM;
   if(match_upper(keyword,"LOADFILE") == MATCH)return SCRIPT_LOADFILE;
   if(match_upper(keyword,"LABEL") == MATCH)return SCRIPT_LABEL;
   if(match_upper(keyword,"LOADINIFILE") == MATCH)return SCRIPT_LOADINIFILE;
@@ -413,7 +418,7 @@ int get_script_keyword_index(char *keyword){
   return SCRIPT_UNKNOWN;
 }
 
-/* ------------------ script_error_check ------------------------ */
+/* ------------------ get_xyz ------------------------ */
 
 void get_xyz(char *buffer,int *ival){
   int i;
@@ -470,6 +475,33 @@ if(fgets(buffer2,255,stream)==NULL){\
 }\
 script_error_check(keyword,buffer2);\
 scripti->cval2=script_set_buffer(buffer2)
+
+#define SETfval \
+if(fgets(buffer2,255,stream)==NULL){\
+  scriptEOF=1;\
+  break;\
+}\
+script_error_check(keyword,buffer2);\
+cleanbuffer(buffer,buffer2);\
+sscanf(buffer, "%f", &scripti->fval);
+
+#define SETival \
+if(fgets(buffer2,255,stream)==NULL){\
+  scriptEOF=1;\
+  break;\
+}\
+script_error_check(keyword,buffer2);\
+cleanbuffer(buffer,buffer2);\
+sscanf(buffer, "%i", &scripti->ival);
+
+#define SETival2 \
+if(fgets(buffer2,255,stream)==NULL){\
+  scriptEOF=1;\
+  break;\
+}\
+script_error_check(keyword,buffer2);\
+cleanbuffer(buffer,buffer2);\
+sscanf(buffer, "%i", &scripti->ival2);
 
 /* ------------------ compile_script ------------------------ */
 
@@ -662,10 +694,8 @@ int compile_script(char *scriptfile){
 
       case SCRIPT_LOADISOM:
         SETcval;
-        SETcval2;
-        cleanbuffer(buffer,buffer2);
         scripti->ival=1;
-        sscanf(buffer,"%i",&scripti->ival);
+        SETival;
         break;
 
       case SCRIPT_ISORENDERALL:
@@ -731,6 +761,11 @@ int compile_script(char *scriptfile){
 
       case SCRIPT_LOADBOUNDARY:
         SETcval;
+        break;
+
+      case SCRIPT_LOADBOUNDARYM:
+        SETcval;
+        SETival;
         break;
 
       case SCRIPT_PLOT3DPROPS:
@@ -1263,7 +1298,7 @@ void script_loadtour(scriptdata *scripti){
 
 /* ------------------ script_loadboundary ------------------------ */
 
-void script_loadboundary(scriptdata *scripti){
+void script_loadboundary(scriptdata *scripti, int meshnum){
   int i;
   int errorcode;
   int count=0;
@@ -1275,6 +1310,7 @@ void script_loadboundary(scriptdata *scripti){
     patchdata *patchi;
 
     patchi = patchinfo + i;
+    if(meshnum != -1 && patchi->blocknumber + 1 != meshnum)continue;
     if(strcmp(patchi->label.longlabel,scripti->cval)==0){
       LOCK_COMPRESS
       readpatch(i,LOAD,&errorcode);
@@ -1951,7 +1987,10 @@ int run_script(void){
       script_loadvfile(scripti);
       break;
     case SCRIPT_LOADBOUNDARY:
-      script_loadboundary(scripti);
+      script_loadboundary(scripti,-1);
+      break;
+    case SCRIPT_LOADBOUNDARYM:
+      script_loadboundary(scripti,scripti->ival+1);
       break;
     case SCRIPT_PARTCLASSCOLOR:
       script_partclasscolor(scripti);
