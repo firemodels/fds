@@ -12,156 +12,6 @@
 
 void update_menu(void);
 
-//
-// script commands
-//
-
-// ---------- rendering images -----------
-
-// default image file names are CHID_seq
-//   where CHID is the base file name and seq is the frame number.
-//   Smokeview will automatically add an .jpg or .png extension
-//   depending on what kind of files are rendered.
-
-// RENDERDIR
-//  directory name (char) (where rendered files will go)
-
-// RENDERCLIP
-// flag ) left right bottom top indentations in pixels, clip if flag==1
-
-// RENDERONCE
-// file name base (char) (or blank to use smokeview default)
-
-// RENDERTYPE
-//  jpg or png  (char)
-
-// RENDERSIZE
-// width height (int)
-
-// RENDERDOUBLEONCE
-// file name base (char) (or blank to use smokeview default)
-
-// RENDERALL 
-//  skip (int)
-// file name base (char) (or blank to use smokeview default)
-
-// MOVIETYPE
-//  jpg, png or wmv  (char)
-
-// VOLSMOKERENDERALL 
-//  skip (int) start_frame (int)
-// file name base (char) (or blank to use smokeview default)
-
-// ISORENDERALL 
-//  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
-// file name base (char) (or blank to use smokeview default)
-
-// MAKEMOVIE
-//  movie_name (char)
-//  frame_prefix (char)
-//  framerate (float)
-
-// ---------- loading, unloading files -----------
-//
-//  Use LOADFILE to load a particular file.  Smokeview will figure
-//  out what kind of file it is (3d smoke, slice etc.)  and call the
-//  appropriate routine.
-//
-//  Use other LOAD commands to load files of the specified type for 
-//  all meshes.
-
-// LOADINIFILE 
-//  file (char)
-
-// LOADFILE 
-//  file (char)
-
-// LOADVFILE
-//  file (char)
-
-// LOADBOUNDARY
-//   type (char)
-
-// LOADBOUNDARYM
-//  type (char)
-//  mesh number (int)
-
-// LOAD3DSMOKE
-//  type (char)
-
-// LOADVOLSMOKE
-//  mesh number (-1 for all meshes) (int)  
-
-// LOADVOLSMOKEFRAME
-//  mesh index, frame (int)  
-
-// LOADPARTICLES
-
-// PARTCLASSCOLOR
-//   color (char)
-
-// PARTCLASSTYPE
-//   type (char)
-
-// LOADISO
-//  type (char)
-
-// LOADISOM
-//  type (char)
-//  mesh number (int)
-
-// LOADSLICE
-//  type (char)
-//  1/2/3 (int)  val (float)
-
-// LOADSLICEM
-//  type (char)
-//  1/2/3 (int)  val (float)
-//  mesh number (int)
-
-// LOADVSLICE
-//  type (char)
-//  1/2/3 (int)  val (float)
-
-// LOADPLOT3D
-//  mesh number (int) time (float)
-
-// PLOT3DPROPS
-//  plot3d type (int) showvector (0/1) (int) vector length index (int) plot3d display type (int)
-
-// SHOWPLOT3DDATA
-//  mesh number (int) orientation (int)  value (0/1) (int) position (float)
-
-// UNLOADALL
-
-// ---------- controlling scene -----------
-//
-// tours and viewpoints are referenced using names defined
-// previously in a Smokeview session.  These names are
-// stored in the .ini file.
-
-// LOADTOUR
-//  type (char)
-
-// SETTOURVIEW
-//   viewtype  showpath showtour_locus tension
-
-// SETTOURKEYFRAME
-//  time (float)
-
-// UNLOADTOUR
-
-// SETTIMEVAL
-//  time (float)
-
-// SETVIEWPOINT
-//  viewpoint (char)
-
-// EXIT
-
-// LABEL
-//   text 
-
 /* ------------------ insert_scriptfile ------------------------ */
 
 void get_newscriptfilename(char *newscriptfilename){
@@ -581,15 +431,29 @@ int compile_script(char *scriptfile){
 
     scriptEOF=0;
     switch(keyword_index){
+
+// UNLOADALL
       case SCRIPT_UNLOADALL:
+
+// LOADPARTICLES
       case SCRIPT_LOADPARTICLES:
+
+// CBARFLIP:
       case SCRIPT_CBARFLIP:
+
+// CBARNORMAL:
       case SCRIPT_CBARNORMAL:
         break;
+
+// RENDERSIZE
+// width height (int)
       case SCRIPT_RENDERSIZE:
         SETcval;
         sscanf(buffer2, "%i %i", &scripti->ival, &scripti->ival2);
         break;
+
+// RENDERTYPE
+//  jpg or png  (char)
       case SCRIPT_RENDERTYPE:
         SETcval;
         if(STRCMP(scripti->cval, "PNG") == 0){
@@ -599,6 +463,9 @@ int compile_script(char *scriptfile){
           scripti->ival = JPEG;
         }
         break;
+
+// MOVIETYPE
+//  jpg, png or wmv  (char)
       case SCRIPT_MOVIETYPE:
         SETcval;
         if(STRCMP(scripti->cval, "WMV") == 0){
@@ -611,6 +478,9 @@ int compile_script(char *scriptfile){
           scripti->ival = AVI;
         }
         break;
+
+// RENDERDIR
+//  directory name (char) (where rendered files will go)
       case SCRIPT_RENDERDIR:
         {
         int len;
@@ -640,13 +510,20 @@ int compile_script(char *scriptfile){
         }
         break;
 
+// SCENECLIP
+//  clip mode (int)
       case SCRIPT_SCENECLIP:
+
+// LOADVOLSMOKE
+//  mesh number (-1 for all meshes) (int)  
       case SCRIPT_LOADVOLSMOKE:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%i",&scripti->ival);
         break;
 
+// X/y/ZSCENECLIP
+// imin (int) min (float) imax (int) max (float)
       case SCRIPT_XSCENECLIP:
       case SCRIPT_YSCENECLIP:
       case SCRIPT_ZSCENECLIP:
@@ -654,22 +531,34 @@ int compile_script(char *scriptfile){
         sscanf(buffer2,"%i %f %i %f",&scripti->ival,&scripti->fval,&scripti->ival2,&scripti->fval2);
         break;
 
+// RENDERCLIP
+// flag left right bottom top indentations in pixels, clip if flag==1
       case SCRIPT_RENDERCLIP:
         SETcval;
         sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4, &scripti->ival5);
         break;
 
+// RENDERONCE
+// file name base (char) (or blank to use smokeview default)
       case SCRIPT_RENDERONCE:
+
+// RENDERDOUBLEONCE
+// file name base (char) (or blank to use smokeview default)
       case SCRIPT_RENDERDOUBLEONCE:
         SETcval2;
         break;
 
+// RENDERSTART
+//  start_frame (int) skip_frame (int)      
       case SCRIPT_RENDERSTART:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer2,"%i %i",&scripti->ival,&scripti->ival2);
         break;
 
+// RENDERALL 
+//  skip (int)
+// file name base (char) (or blank to use smokeview default)
       case SCRIPT_RENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -683,6 +572,9 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
+// VOLSMOKERENDERALL 
+//  skip (int) start_frame (int)
+// file name base (char) (or blank to use smokeview default)
       case SCRIPT_VOLSMOKERENDERALL:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -698,12 +590,18 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
+// LOADISOM
+//  type (char)
+//  mesh number (int)
       case SCRIPT_LOADISOM:
         SETcval;
         scripti->ival=1;
         SETival;
         break;
 
+// ISORENDERALL 
+//  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
+// file name base (char) (or blank to use smokeview default)
       case SCRIPT_ISORENDERALL:
         //  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
         //  skip == scripti->ival
@@ -723,6 +621,10 @@ int compile_script(char *scriptfile){
         SETcval2;  //render file base name
         break;
 
+// MAKEMOVIE
+//  movie_name (char)
+//  frame_prefix (char)
+//  framerate (float)
       case SCRIPT_MAKEMOVIE:
         SETcval;
         SETcval2;
@@ -735,6 +637,8 @@ int compile_script(char *scriptfile){
         sscanf(buffer,"%f",&scripti->fval); 
         break;
 
+// LOADINIFILE 
+//  file (char)
       case SCRIPT_LOADINIFILE:
         {
         int len;
@@ -747,33 +651,70 @@ int compile_script(char *scriptfile){
         }
         break;
 
+// EXIT
       case SCRIPT_EXIT:
+
+// UNLOADTOUR
       case SCRIPT_UNLOADTOUR:
         scripti->cval=NULL;
         break;
 
       case SCRIPT_KEYBOARD:
+
+// LOADFILE 
+//  file (char)
       case SCRIPT_LOADFILE:
+
+// LOADVFILE
+//  file (char)
       case SCRIPT_LOADVFILE:
+
+// PARTCLASSCOLOR
+//   color (char)
       case SCRIPT_PARTCLASSCOLOR:
+
+// PARTCLASSTYPE
+//   type (char)
       case SCRIPT_PARTCLASSTYPE:
+
+// LOADTOUR
+//  type (char)
       case SCRIPT_LOADTOUR:
+
+// LOAD3DSMOKE
+//  type (char)
       case SCRIPT_LOAD3DSMOKE:
+
+// LOADISO
+//  type (char)
       case SCRIPT_LOADISO:
+
+// SETVIEWPOINT
+//  viewpoint (char)
       case SCRIPT_SETVIEWPOINT:
+
+// LABEL
+//   text 
       case SCRIPT_LABEL:
         SETcval;
         break;
 
+// LOADBOUNDARY
+//   type (char)
       case SCRIPT_LOADBOUNDARY:
         SETcval;
         break;
 
+// LOADBOUNDARYM
+//  type (char)
+//  mesh number (int)
       case SCRIPT_LOADBOUNDARYM:
         SETcval;
         SETival;
         break;
 
+// PLOT3DPROPS
+//  plot3d type (int) showvector (0/1) (int) vector length index (int) plot3d display type (int)
       case SCRIPT_PLOT3DPROPS:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -790,6 +731,8 @@ int compile_script(char *scriptfile){
         }
         break;
 
+// SHOWPLOT3DDATA
+//  mesh number (int) orientation (int)  value (0/1) (int) position (float)
       case SCRIPT_SHOWPLOT3DDATA:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -799,13 +742,22 @@ int compile_script(char *scriptfile){
         }
         break;
 
+// LOADVOLSMOKEFRAME
+//  mesh index, frame (int)  
       case SCRIPT_LOADVOLSMOKEFRAME:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
         break;
 
+// LOADSLICE
+//  type (char)
+//  1/2/3 (int)  val (float)
       case SCRIPT_LOADSLICE:
+
+// LOADVSLICE
+//  type (char)
+//  1/2/3 (int)  val (float)
       case SCRIPT_LOADVSLICE:
         SETcval;
 
@@ -824,6 +776,10 @@ int compile_script(char *scriptfile){
         scripti->ival = CLAMP(scripti->ival, 0, 3);
         break;
 
+// LOADSLICEM
+//  type (char)
+//  1/2/3 (int)  val (float)
+//  mesh number (int)
       case SCRIPT_LOADSLICEM:
         SETcval;
 
@@ -843,45 +799,57 @@ int compile_script(char *scriptfile){
         SETival2;
         break;
 
+// LOADPLOT3D
+//  mesh number (int) time (float)
       case SCRIPT_LOADPLOT3D:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer," %i %f",&scripti->ival,&scripti->fval);
         break;
 
+// SETTIMEVAL
+//  time (float)
       case SCRIPT_SETTIMEVAL:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%f",&scripti->fval);
         if(scripti->fval<0.0)scripti->fval=0.0;
         break;
+
+// SETTOURVIEW
+//   viewtype  showpath showtour_locus tension
       case SCRIPT_SETTOURVIEW:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->fval);
         break;
+
+// SETTOURKEYFRAME
+//  time (float)
       case SCRIPT_SETTOURKEYFRAME:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer,"%f",&scripti->fval);
         break;
 
-        //    sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
-        //    sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
-        //    sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
-
+// GSLICEVIEW
+// show_gslice (int) show_triangles (int)  show_triangulation (int) show_normals (int)
       case SCRIPT_GSLICEVIEW:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer2,"%i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4);
         break;
 
+// GSLICEPOS
+// x (float) y (float) z (float)
       case SCRIPT_GSLICEPOS:
         SETcval;
         cleanbuffer(buffer,buffer2);
         sscanf(buffer2,"%f %f %f",&scripti->fval,&scripti->fval2,&scripti->fval3);
         break;
 
+// GSLICEORIEN
+// azimuth (float) elevation (float)
       case SCRIPT_GSLICEORIEN:
         SETcval;
         cleanbuffer(buffer,buffer2);
@@ -1268,13 +1236,11 @@ void script_loadslice(scriptdata *scripti){
 
 void script_loadslicem(scriptdata *scripti, int meshnum){
   int i;
-  int count = 0;
 
   PRINTF("script: loading slice files of type: %s in mesh %i\n\n", scripti->cval,meshnum);
 
   for(i = 0; i < nsliceinfo; i++){
     slicedata *slicei;
-    int j;
 
     slicei = sliceinfo + i;
     if(slicei->blocknumber + 1 != meshnum)continue;
