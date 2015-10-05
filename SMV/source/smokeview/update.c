@@ -811,6 +811,31 @@ void Synch_Times(void){
   reset_gltime();
 }
 
+/* ------------------ get_loadvfileinfo ------------------------ */
+
+int get_loadvfileinfo(FILE *stream, char *filename){
+  int i;
+  char *fileptr;
+
+  trim(filename);
+  fileptr = trim_front(filename);
+  for(i = 0; i<nsliceinfo; i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo+i;
+    if(strcmp(fileptr, slicei->file)==0){
+      fprintf(stream, "// LOADVFILE\n");
+      fprintf(stream, "//  %s\n", slicei->file);
+      fprintf(stream, "LOADVSLICEM\n");
+      fprintf(stream, " %s\n", slicei->label.longlabel);
+      fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig);
+      fprintf(stream, " %i\n", slicei->blocknumber+1);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* ------------------ get_loadfileinfo ------------------------ */
 
 int get_loadfileinfo(FILE *stream, char *filename){
@@ -888,6 +913,13 @@ void Update_ssf(void){
     if(strlen(buffer)>=8 && strncmp(buffer, "LOADFILE", 8)==0){
       if(fgets(filename, 255, stream_from)==NULL)break;
       if(get_loadfileinfo(stream_to,filename)==0){
+        fprintf(stream_to, "%s\n", buffer);
+        fprintf(stream_to, "%s\n", filename);
+      }
+    }
+    else if(strlen(buffer)>=9&&strncmp(buffer, "LOADVFILE", 9)==0){
+      if(fgets(filename, 255, stream_from)==NULL)break;
+      if(get_loadvfileinfo(stream_to, filename)==0){
         fprintf(stream_to, "%s\n", buffer);
         fprintf(stream_to, "%s\n", filename);
       }
