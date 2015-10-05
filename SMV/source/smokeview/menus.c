@@ -3055,11 +3055,10 @@ void LoadVSliceMenu(int value){
     vslicei = vsliceinfo + value;
     slicei = vslicei->val;
     if(script_multivslice==0&&slicei!=NULL&&scriptoutstream!=NULL){
-      char *file;
-
-      file=slicei->file;
-      fprintf(scriptoutstream,"LOADVFILE\n");
-      fprintf(scriptoutstream," %s\n",file);
+      fprintf(scriptoutstream,"LOADVSLICEM\n");
+      fprintf(scriptoutstream," %s\n", slicei->label.longlabel);
+      fprintf(scriptoutstream," %i %f\n", slicei->idir, slicei->position_orig);
+      fprintf(scriptoutstream," %i\n", slicei->blocknumber+1);
     }
   }
   else{
