@@ -1133,7 +1133,6 @@ void script_loadslice(scriptdata *scripti){
       if(slicei->idir != scripti->ival)continue;
       if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
     }
-
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
       count++;
@@ -1186,11 +1185,13 @@ void script_loadvslice(scriptdata *scripti){
     if(mvslicei->nvslices<=0)continue;
     slicei = sliceinfo + mvslicei->ivslices[0];
     if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
-    if(slicei->idir!=scripti->ival)continue;
-    delta_orig = slicei->position_orig - scripti->fval;
-    if(delta_orig<0.0)delta_orig = -delta_orig;
-    if(delta_orig>slicei->delta_orig)continue;
-
+    if(scripti->ival == 0){
+      if(slicei->volslice == 0)continue;
+    }
+    else{
+      if(slicei->idir != scripti->ival)continue;
+      if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
+    }
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
       count++;
