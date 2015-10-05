@@ -7251,7 +7251,7 @@ CONTAINS
 
   END SUBROUTINE CLEAN_AFTER_EVACUATE
 !
-  SUBROUTINE EVACUATE_HUMANS(TIN,NM,ICYC)
+  SUBROUTINE EVACUATE_HUMANS(TIN,DT,NM,ICYC)
     IMPLICIT NONE
     !
     ! Calculates the forces on humans and moves them.
@@ -7266,7 +7266,7 @@ CONTAINS
     !   ICYC: Index of the fds fire time step
     !
     ! Passed variables
-    REAL(EB), INTENT(IN) :: TIN
+    REAL(EB), INTENT(IN) :: TIN,DT
     INTEGER, INTENT(IN) :: NM,ICYC
     !
     ! Local variables
