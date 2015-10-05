@@ -255,7 +255,6 @@ EXTERNCPP void init_device_plane(devicedata *devicei);
 EXTERNCPP void draw_devices_val(void);
 EXTERNCPP void getsmokesensors(void);
 EXTERNCPP void add_new_tour(void);
-EXTERNCPP void cleanbuffer(char *buffer, char *buffer2);
 EXTERNCPP void start_script(void);
 EXTERNCPP int run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);

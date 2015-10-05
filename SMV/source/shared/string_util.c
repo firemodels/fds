@@ -696,12 +696,13 @@ int match_wild(char *pTameText, char *pWildText){
 
 /* ----------------------- remove_comment ----------------------------- */
 
-void remove_comment(char *buffer){
+char *remove_comment(char *buffer){
   char *comment;
 
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
-  return;
+  trim(buffer);
+  return trim_front(buffer);
 }
 
 /* ------------------ getPROGversion ------------------------ */

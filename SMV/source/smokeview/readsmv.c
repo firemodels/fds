@@ -10439,8 +10439,7 @@ int readini2(char *inifile, int localfile){
     }
     if(localfile==1&&match(buffer,"SCRIPTFILE")==1){
       if(fgets(buffer2,255,stream)==NULL)break;
-      cleanbuffer(buffer,buffer2);
-      insert_scriptfile(buffer);
+      insert_scriptfile(remove_comment(buffer2));
       updatemenu=1;
       continue;
     }

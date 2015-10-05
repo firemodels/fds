@@ -4910,9 +4910,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       *eof=1;
       break;
     }
-    remove_comment(buffer);
-    trim(buffer);
-    buffer2=trim_front(buffer);
+    buffer2=remove_comment(buffer);
     if(match(buffer2,"OBJECTDEF") == 1||
        match(buffer2,"AVATARDEF") == 1||
        match(buffer2,"NEWFRAME") == 1){
@@ -6014,9 +6012,7 @@ int read_object_defs(char *file){
       if(eof==1||fgets(buffer,255,stream)==NULL)break;
       buffer_ptr=buffer;
     }
-    remove_comment(buffer_ptr);
-    trim(buffer_ptr);
-    trim_buffer=trim_front(buffer_ptr);
+    trim_buffer=remove_comment(buffer_ptr);
     lenbuffer=strlen(buffer_ptr);
     if(lenbuffer<1){
       buffer_ptr=NULL;
@@ -6037,9 +6033,7 @@ int read_object_defs(char *file){
       }  
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
-      remove_comment(buffer);
-      trim(buffer);
-      label = trim_front(buffer);
+      label=remove_comment(buffer);
       temp_object=get_object(label);
       if(temp_object!=NULL){
         free_object(temp_object);
