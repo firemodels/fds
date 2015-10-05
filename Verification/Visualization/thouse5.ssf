@@ -122,7 +122,7 @@ UNLOADALL
 LOADINIFILE
  thouse5_gslice.ini
 LOADVFILE
- thouse5_24.sf
+ thouse5_23.sf
 SETTIMEVAL
  60.000000
 
