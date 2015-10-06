@@ -66,14 +66,18 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
-echo "-f - force repo to be cleaned"
+echo "-f - force repo to be updated and cleaned"
+echo ""
+echo "-h - display this message"
 echo ""
 echo "-m email_address "
 echo ""
-echo "-r - repository location [default: $FDSSMV]"
+echo "-n - do not update/clean repo"
 echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: firebot"
+echo ""
+echo "-r - repository location [default: $FDSSMV]"
 echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
@@ -89,12 +93,6 @@ case $OPTION in
   b)
    BRANCH="$OPTARG"
    ;;
-  m)
-   mailToFDS="$OPTARG"
-   ;;
-  r)
-   FDSSMV="$OPTARG"
-   ;;
   f)
    FORCECLEANREPO=1
    UPDATEREPO=1
@@ -102,11 +100,17 @@ case $OPTION in
   h)
    usage;
    ;;
+  m)
+   mailToFDS="$OPTARG"
+   ;;
   n)
    UPDATEREPO=0
    ;;
   q)
    QUEUE="$OPTARG"
+   ;;
+  r)
+   FDSSMV="$OPTARG"
    ;;
   v)
    FIREBOT_MODE="validation"
