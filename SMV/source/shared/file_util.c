@@ -45,16 +45,17 @@ int PRINTF(const char * format, ...){
   return return_val;
 }
 
-/* ------------------ set_file ------------------------ */
+/* ------------------ set_stdout ------------------------ */
 
 void set_stdout(FILE *stream){
   alt_stdout=stream;
 }
 
-/* ------------------ filecopy ------------------------ */
+#define FILE_BUFFER 1000
 
-#define FILE_BUFFER 1000000
-void filecopy(char *destdir, char *file_in, char *file_out){
+/* ------------------ copyfile ------------------------ */
+
+void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   char buffer[FILE_BUFFER];
   FILE *streamin;
   FILE *streamout;
@@ -73,47 +74,25 @@ void filecopy(char *destdir, char *file_in, char *file_out){
   }
   strcat(full_file_out,file_out);
 
-  streamout=fopen(full_file_out,"rb");
-  if(streamout!=NULL){
-    fprintf(stderr,"*** Warning: will not overwrite %s%s\n",destdir,file_in);
-    fclose(streamout);
-    fclose(streamin);
-    return;
+  if(mode != OVERWRITE_FILE){
+    streamout = fopen(full_file_out, "rb");
+    if(streamout != NULL){
+      fprintf(stderr, "*** Warning: will not overwrite %s%s\n", destdir, file_in);
+      fclose(streamout);
+      fclose(streamin);
+      return;
+    }
   }
-  streamout=fopen(full_file_out,"wb");
-  if(streamout==NULL){
-    fclose(streamin);
-    return;
+  if(mode==REPLACE_FILE||mode==OVERWRITE_FILE){
+    streamout=fopen(full_file_out,"wb");
   }
-  for(;;){
-    int end_of_file;
-       
-    end_of_file=0;
-    chars_in=fread(buffer,1,FILE_BUFFER,streamin);
-    if(chars_in!=FILE_BUFFER)end_of_file=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(end_of_file==1)break;
-  }
-  fclose(streamin);
-  fclose(streamout);
-}
-
-/* ------------------ copyfile ------------------------ */
-
-void copy_file(char *destfile, char *sourcefile, int mode){
-  char buffer[FILE_BUFFER];
-  FILE *streamin, *streamout;
-  size_t chars_in;
-
-  streamin=fopen(sourcefile,"rb");
-  if(streamin==NULL)return;
-
-  if(mode==0){
-    streamout=fopen(destfile,"wb");
+  else if(mode==APPEND_FILE){
+    streamout=fopen(full_file_out,"ab");
   }
   else{
-    streamout=fopen(destfile,"ab");
+    ASSERT(0);
   }
+  
   if(streamout==NULL){
     fclose(streamin);
     return;

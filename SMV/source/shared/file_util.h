@@ -21,12 +21,15 @@ typedef struct {
 #define FTELL(a) ftell(a)
 #endif
 
+#define REPLACE_FILE 0
+#define APPEND_FILE 1
+#define OVERWRITE_FILE 2
+
 EXTERNCPP int FFLUSH(void);
 EXTERNCPP int PRINTF(const char * format, ...);
 EXTERNCPP void set_stdout(FILE *stream);
 EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
-EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
-EXTERNCPP void copy_file(char *destfile, char *sourcefile, int mode);
+EXTERNCPP void copyfile(char *destdir, char *filein, char *fileout, int mode);
 EXTERNCPP char *get_smokezippath(char *progdir);
 EXTERNCPP int have_prog(char *prog);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);

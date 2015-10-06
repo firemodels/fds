@@ -303,7 +303,10 @@ void parse_commandline(int argc, char **argv){
         ){
         iarg++;
       }
-      if(strncmp(argi,"-convert_ini",12)==0||strncmp(argi, "-update_ssf", 12)==0)iarg += 2;
+      if(strncmp(argi, "-convert_ini", 12)==0||
+         strncmp(argi, "-convert_ssf", 12)==0){
+        iarg += 2;
+      }
 
       if(smv_parse==0)continue;
       if(smv_parse==1)break;
@@ -501,7 +504,7 @@ void parse_commandline(int argc, char **argv){
         convert_ini=1;
       }
     }
-    else if(strncmp(argv[i], "-update_ssf", 11)==0){
+    else if(strncmp(argv[i], "-convert_ssf", 12)==0){
       char *local_ssf_from = NULL, *local_ssf_to = NULL;
 
       if(++i<argc)local_ssf_from = argv[i];
@@ -512,8 +515,11 @@ void parse_commandline(int argc, char **argv){
 
         NewMemory((void **)&ssf_to, strlen(local_ssf_to)+1);
         strcpy(ssf_to, local_ssf_to);
-        update_ssf = 1;
+        convert_ssf = 1;
       }
+    }
+    else if(strncmp(argv[i], "-update_ssf", 11)==0){
+      update_ssf = 1;
     }
     else if(strncmp(argv[i], "-update_ini", 11)==0){
       char *local_ini_from=NULL, *local_ini_to=NULL;
@@ -632,6 +638,21 @@ void parse_commandline(int argc, char **argv){
       usage(argv);
       exit(1);
     }
+  }
+  if(update_ssf==1){
+    int len_prefix = 0;
+
+    len_prefix = strlen(fdsprefix);
+
+    FREEMEMORY(ssf_from);
+    NewMemory((void **)&ssf_from, len_prefix+4+1);
+    strcpy(ssf_from, fdsprefix);
+    strcat(ssf_from, ".ssf");
+
+    FREEMEMORY(ssf_to);
+    NewMemory((void **)&ssf_to, len_prefix+4+1);
+    strcpy(ssf_to, fdsprefix);
+    strcat(ssf_to, ".ssf");
   }
   if(make_volrender_script==1){
 

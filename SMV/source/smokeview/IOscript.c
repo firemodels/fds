@@ -1185,19 +1185,20 @@ void script_loadslicem(scriptdata *scripti, int meshnum){
 
 void script_loadvslice(scriptdata *scripti){
   int i;
-  float delta_orig;
   int count=0;
 
   PRINTF("script: loading vector slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
+    vslicedata *vslicei;
     int j;
     slicedata *slicei;
 
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
-    slicei = sliceinfo + mvslicei->ivslices[0];
+    vslicei = vsliceinfo + mvslicei->ivslices[0];
+    slicei = sliceinfo + vslicei->ival;
     if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
     if(scripti->ival == 0){
       if(slicei->volslice == 0)continue;
@@ -1219,19 +1220,20 @@ void script_loadvslice(scriptdata *scripti){
 
 void script_loadvslicem(scriptdata *scripti, int meshnum){
   int i;
-  float delta_orig;
   int count=0;
 
   PRINTF("script: loading vector slice files of type: %s in mesh %i\n\n", scripti->cval,meshnum);
 
   for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
+    vslicedata *vslicei;
     int j;
     slicedata *slicei;
 
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
-    slicei = sliceinfo + mvslicei->ivslices[0];
+    vslicei = vsliceinfo + mvslicei->ivslices[0];
+    slicei = sliceinfo + vslicei->ival;
     if(slicei->blocknumber + 1 != meshnum)continue;
     if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
     if(scripti->ival == 0){
@@ -1247,7 +1249,7 @@ void script_loadvslicem(scriptdata *scripti, int meshnum){
     } 
     break;
   }
-  if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s failed to load\n",scripti->cval);
+  if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s in mesh %i failed to load\n",scripti->cval,meshnum);
 }
 
 /* ------------------ script_loadtour ------------------------ */
