@@ -8,9 +8,13 @@ RENDERDIR
 // render slice files
 
 UNLOADALL
-LOADFILE
- thouse5_01_diff.sf
-KEYBOARD 
+// LOADFILE
+//  thouse5_01_diff.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 1.600000
+ 1
+KEYBOARD
  *
 KEYBOARD
  y
