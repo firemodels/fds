@@ -57,8 +57,7 @@ void set_stdout(FILE *stream){
 
 void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   char buffer[FILE_BUFFER];
-  FILE *streamin;
-  FILE *streamout;
+  FILE *streamin=NULL, *streamout=NULL;
   char *full_file_out=NULL;
   size_t chars_in;
 
@@ -74,16 +73,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   }
   strcat(full_file_out,file_out);
 
-  if(mode != OVERWRITE_FILE){
-    streamout = fopen(full_file_out, "rb");
-    if(streamout != NULL){
-      fprintf(stderr, "*** Warning: will not overwrite %s%s\n", destdir, file_in);
-      fclose(streamout);
-      fclose(streamin);
-      return;
-    }
-  }
-  if(mode==REPLACE_FILE||mode==OVERWRITE_FILE){
+  if(mode==REPLACE_FILE){
     streamout=fopen(full_file_out,"wb");
   }
   else if(mode==APPEND_FILE){
@@ -94,6 +84,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   }
   
   if(streamout==NULL){
+    FREEMEMORY(full_file_out);
     fclose(streamin);
     return;
   }
@@ -107,6 +98,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
     if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
     if(end_of_file==1)break;
   }
+  FREEMEMORY(full_file_out);
   fclose(streamin);
   fclose(streamout);
 }
