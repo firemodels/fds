@@ -457,6 +457,31 @@ Full-Width Styles
   padding: 5px;
 }
 
+#manual_button {
+  width: 550px;
+  padding: auto;
+  padding-left: 20px;
+  text-align: left;
+  color: #fff;
+  background: #ff0000 no-repeat 95% 50%;
+  font-size: 20px;
+  font-weight: none;
+  box-shadow: 0 0 0px rgba(0,0,0,.5);
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+#manual_button a {
+  color: #fff;
+  vertical-align: middle;
+}
+
+#manual_button p {
+  padding: 5px;
+}
+
 #container {
   text-align: justify;
 }
@@ -464,6 +489,64 @@ Full-Width Styles
 #container div {
   display: inline-block;
 }
+
+#fds_manuals a {
+  text-decoration: none;
+  color: #007edf;
+  /*color: #008000;*/
+  text-shadow: none;
+
+  transition: color 0.5s ease;
+  transition: text-shadow 0.5s ease;
+  -webkit-transition: color 0.5s ease;
+  -webkit-transition: text-shadow 0.5s ease;
+  -moz-transition: color 0.5s ease;
+  -moz-transition: text-shadow 0.5s ease;
+  -o-transition: color 0.5s ease;
+  -o-transition: text-shadow 0.5s ease;
+  -ms-transition: color 0.5s ease;
+  -ms-transition: text-shadow 0.5s ease;
+}
+
+#fds_manuals a:hover, a:focus {text-decoration: underline;}
+
+#smv_manuals a {
+  text-decoration: none;
+  color: #ff0000;
+  text-shadow: none;
+
+  transition: color 0.5s ease;
+  transition: text-shadow 0.5s ease;
+  -webkit-transition: color 0.5s ease;
+  -webkit-transition: text-shadow 0.5s ease;
+  -moz-transition: color 0.5s ease;
+  -moz-transition: text-shadow 0.5s ease;
+  -o-transition: color 0.5s ease;
+  -o-transition: text-shadow 0.5s ease;
+  -ms-transition: color 0.5s ease;
+  -ms-transition: text-shadow 0.5s ease;
+}
+
+#smv_manuals a:hover, a:focus {text-decoration: underline;}
+
+#nightly_manuals a {
+  text-decoration: none;
+  color: #666666;
+  text-shadow: none;
+
+  transition: color 0.5s ease;
+  transition: text-shadow 0.5s ease;
+  -webkit-transition: color 0.5s ease;
+  -webkit-transition: text-shadow 0.5s ease;
+  -moz-transition: color 0.5s ease;
+  -moz-transition: text-shadow 0.5s ease;
+  -o-transition: color 0.5s ease;
+  -o-transition: text-shadow 0.5s ease;
+  -ms-transition: color 0.5s ease;
+  -ms-transition: text-shadow 0.5s ease;
+}
+
+#nightly_manuals a:hover, a:focus {text-decoration: underline;}
 
 /*******************************************************************************
 Small Device Styles
