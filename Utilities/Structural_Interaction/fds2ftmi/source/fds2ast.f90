@@ -53,7 +53,7 @@ REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST,MED_TAST
 CHARACTER(8) OUTFILE
 CHARACTER(30) VARIABLE_KIND
 REAL MED
-INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE,COMEBACK
+INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE,COMEBACK,NUM_INT_CSIZE(7),H_NULL(3),N_DIR
 
 ! Set a few default values
 BATCHMODE=0
@@ -171,13 +171,21 @@ LOOP_FDS2AST:DO P=1,COUNTER
    NX=N(P,2)
    NY=N(P,3)
    NZ=N(P,4)
-!
+   IF (ABS(NX)<(MAX(ABS(NY),ABS(NZ))/50)) NX=0
+   IF (ABS(NY)<(MAX(ABS(NX),ABS(NZ))/50)) NY=0
+   IF (ABS(NZ)<(MAX(ABS(NY),ABS(NX))/50)) NZ=0
+   N_DIR=0.D0
+   IF (NX/=0) N_DIR=N_DIR+1
+   IF (NY/=0) N_DIR=N_DIR+1
+   IF (NZ/=0) N_DIR=N_DIR+1
+   !
    XS = Xa-(C_SIZE/2)
    XF = Xa+(C_SIZE/2)
    YS = Ya-(C_SIZE/2)
    YF = Ya+(C_SIZE/2)
    ZS = Za-(C_SIZE/2)
    ZF = Za+(C_SIZE/2)
+   NUM_INT_CSIZE=1
    VARIABLE_NUMBER: DO VAR=BEG_VAR,VARIAB
 !     500 - Point of the loop in case of the point does not reach a meaning value - SILVA, JC         
    500 CONTINUE   
@@ -187,7 +195,9 @@ LOOP_FDS2AST:DO P=1,COUNTER
    ALLOCATE (V_TIME(SIZE))
    ALLOCATE (TAST(SIZE))
    ALLOCATE (M_AST(SIZE,7))
-   IF (VAR==BEG_VAR) VCOUNT=0.0
+   IF (TRIM(BNDF_TEXT(VAR))==' ADIABATIC SURFACE TEMPERATURE') VCOUNT=0.0
+   IF (TRIM(BNDF_TEXT(VAR))==' NET HEAT FLUX                ') VCOUNT=0.0
+   !VCOUNT=0.0
    V_TIME=0.0
    TAST=0.0
    M_AST=0.0
@@ -307,7 +317,15 @@ LOOP_FDS2AST:DO P=1,COUNTER
                            IF (M%Y(J)>YF .OR. M%Y(J)<YS) CYCLE
                            IF (M%Z(K)>ZF .OR. M%Z(K)<ZS) CYCLE
                            M_AST(V,IOR_LOOP)=M_AST(V,IOR_LOOP)+Q(I,J,K,NV)
-                           IF (VAR==BEG_VAR .AND. TIME==TBEG .AND. Q(I,J,K,NV)/=0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                           !IF (TRIM(BNDF_TEXT(VAR))==' HEAT TRANSFER COEFFICIENT    ') THEN
+                           !   IF (TIME==TBEG .AND. Q(I,J,K,NV)==0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                           !ENDIF
+                           IF (TRIM(BNDF_TEXT(VAR))==' ADIABATIC SURFACE TEMPERATURE') THEN
+                              IF (TIME==TBEG .AND. Q(I,J,K,NV)>0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                           ENDIF
+                           IF (TRIM(BNDF_TEXT(VAR))==' NET HEAT FLUX                ') THEN   
+                              IF (TIME==TBEG .AND. Q(I,J,K,NV)/=0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                           ENDIF
                         ENDDO 
                      ENDDO
                   ENDDO
@@ -414,7 +432,6 @@ LOOP_FDS2AST:DO P=1,COUNTER
          END DO
       END IF
 !
-!
       IF (M_AST(2,7)<19 .AND. M_AST(2,7)>0) THEN
          DO I=1,V
             M_AST(I,7)=20.0
@@ -469,6 +486,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
             ZS = ZS-(0.05*(ZF-ZS))
             ZF = ZF+(0.05*(ZF-ZS))
             COMEBACK=1
+            NUM_INT_CSIZE(1)=NUM_INT_CSIZE(1)+1
          ENDIF
       END IF
 !
@@ -477,6 +495,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
             YS = YS-(0.05*(YF-YS))
             YF = YF+(0.05*(YF-YS))
             COMEBACK=1
+            NUM_INT_CSIZE(2)=NUM_INT_CSIZE(2)+1
          ENDIF
       END IF
 ! 
@@ -484,7 +503,8 @@ LOOP_FDS2AST:DO P=1,COUNTER
          IF (M_AST(1,3)==0) THEN
             XS = XS-(0.05*(XF-XS))
             XF = XF+(0.05*(XF-XS))      
-            COMEBACK=1      
+            COMEBACK=1    
+            NUM_INT_CSIZE(3)=NUM_INT_CSIZE(3)+1  
          ENDIF
       END IF 
 !
@@ -492,7 +512,8 @@ LOOP_FDS2AST:DO P=1,COUNTER
          IF (M_AST(1,7)==0) THEN
             ZS = ZS-(0.05*(ZF-ZS))
             ZF = ZF+(0.05*(ZF-ZS))    
-            COMEBACK=1        
+            COMEBACK=1       
+            NUM_INT_CSIZE(7)=NUM_INT_CSIZE(7)+1 
          ENDIF
       END IF
 !
@@ -501,6 +522,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
             YS = YS-(0.05*(YF-YS))
             YF = YF+(0.05*(YF-YS))   
             COMEBACK=1         
+            NUM_INT_CSIZE(6)=NUM_INT_CSIZE(6)+1
          ENDIF
       END IF
 ! 
@@ -509,8 +531,19 @@ LOOP_FDS2AST:DO P=1,COUNTER
             XS = XS-(0.05*(XF-XS))
             XF = XF+(0.05*(XF-XS))  
             COMEBACK=1          
+            NUM_INT_CSIZE(5)=NUM_INT_CSIZE(5)+1
          ENDIF
       END IF
+!
+      IF (MAX(NUM_INT_CSIZE(1),NUM_INT_CSIZE(2),NUM_INT_CSIZE(3),NUM_INT_CSIZE(5),NUM_INT_CSIZE(6),NUM_INT_CSIZE(7))>=5) THEN
+         XS = XS-(0.05*(XF-XS))
+         XF = XF+(0.05*(XF-XS)) 
+         YS = YS-(0.05*(YF-YS))
+         YF = YF+(0.05*(YF-YS))
+         ZS = ZS-(0.05*(ZF-ZS))
+         ZF = ZF+(0.05*(ZF-ZS))  
+      ENDIF                 
+!                    
       IF (COMEBACK==1) THEN
          DEALLOCATE (V_TIME)
          DEALLOCATE (TAST)
@@ -735,7 +768,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
       END IF
    END IF
 !************************************************************
-   IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
+   IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN     
       IF (NZ>0) THEN
          DO I=1,V
             M_AST(I,1)=0.D0
@@ -787,16 +820,13 @@ LOOP_FDS2AST:DO P=1,COUNTER
          END DO
       END IF
 !
+      H_NULL=0.d0
       IF (NZ<0) THEN
          SUM=0.d0
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,1))
          ENDDO
-         IF (SUM==0) THEN
-            ZS = ZS-(0.05*(ZF-ZS))
-            ZF = ZF+(0.05*(ZF-ZS))
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(3)=1
       END IF
 !
       IF (NY<0) THEN
@@ -804,11 +834,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,2))
          ENDDO
-         IF (SUM==0) THEN
-            YS = YS-(0.05*(YF-YS))
-            YF = YF+(0.05*(YF-YS))
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(2)=1
       END IF
 ! 
       IF (NX<0) THEN
@@ -816,11 +842,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,3))
          ENDDO
-         IF (SUM==0) THEN
-            XS = XS-(0.05*(XF-XS))
-            XF = XF+(0.05*(XF-XS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(1)=1
       END IF 
 !
       IF (NZ>0) THEN
@@ -828,11 +850,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,7))
          ENDDO
-         IF (SUM==0) THEN
-            ZS = ZS-(0.05*(ZF-ZS))
-            ZF = ZF+(0.05*(ZF-ZS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(3)=1
       END IF
 !
       IF (NY>0) THEN
@@ -840,11 +858,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,6))
          ENDDO
-         IF (SUM==0) THEN
-            YS = YS-(0.05*(YF-YS))
-            YF = YF+(0.05*(YF-YS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(2)=1
       END IF
 ! 
       IF (NX>0) THEN
@@ -852,18 +866,18 @@ LOOP_FDS2AST:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,5))
          ENDDO
-         IF (SUM==0) THEN
-            XS = XS-(0.05*(XF-XS))
-            XF = XF+(0.05*(XF-XS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(1)=1
       END IF
-      IF (COMEBACK==1) THEN
-         DEALLOCATE (V_TIME)
-         DEALLOCATE (TAST)
-         DEALLOCATE (M_AST)
-         GOTO 500      
-      ENDIF       
+!
+      IF (NZ/=0 .AND. H_NULL(3)==1) COMEBACK=COMEBACK+1
+      IF (NY/=0 .AND. H_NULL(2)==1) COMEBACK=COMEBACK+1
+      IF (NX/=0 .AND. H_NULL(1)==1) COMEBACK=COMEBACK+1
+      IF (COMEBACK==N_DIR) THEN
+         DO I=1,V
+            TAST(I)=0.d0
+         END DO
+         GOTO 600      
+      ENDIF          
 !
       C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
@@ -1052,17 +1066,17 @@ LOOP_FDS2AST:DO P=1,COUNTER
 !********************************
       IF (TAST(2)>=0 .AND. TAST(2)<1000) THEN
          TAST(1)=0.0
-      ELSE 
-         XS = XS-(0.05*(XF-XS))
-         XF = XF+(0.05*(XF-XS)) 
-         YS = YS-(0.05*(YF-YS))
-         YF = YF+(0.05*(YF-YS)) 
-         ZS = ZS-(0.05*(ZF-ZS))
-         ZF = ZF+(0.05*(ZF-ZS))     
-         DEALLOCATE (V_TIME)
-         DEALLOCATE (TAST)
-         DEALLOCATE (M_AST)
-         GOTO 500  
+!      ELSE 
+!         XS = XS-(0.05*(XF-XS))
+!         XF = XF+(0.05*(XF-XS)) 
+!         YS = YS-(0.05*(YF-YS))
+!         YF = YF+(0.05*(YF-YS)) 
+!         ZS = ZS-(0.05*(ZF-ZS))
+!         ZF = ZF+(0.05*(ZF-ZS))     
+!         DEALLOCATE (V_TIME)
+!         DEALLOCATE (TAST)
+!         DEALLOCATE (M_AST)
+!         GOTO 500  
       END IF
 !   
    END IF
@@ -1404,6 +1418,7 @@ LOOP_FDS2AST:DO P=1,COUNTER
    END IF
 !
 !*** Set an time averaged function to represent the evaluation of the variables (T_AVERAGE)
+   600 CONTINUE
    IF (T_AVERAGE==0) THEN
       DO I=1,V
          IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN
@@ -1523,24 +1538,24 @@ LOOP_FDS2AST:DO P=1,COUNTER
       '        ', Za
       WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
       '        ', (ZF-ZS)
-      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'AST Results    ', M_AST(1,3), M_AST(1,5), M_AST(1,2), &
-      M_AST(1,6), M_AST(1,1), M_AST(1,7)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'AST Results    ', M_AST(5,3), M_AST(5,5), M_AST(5,2), &
+      M_AST(5,6), M_AST(5,1), M_AST(5,7)
       IF (VARIABLE==1) WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
    END IF
    IF (VARIABLE_KIND==' HEAT TRANSFER COEFFICIENT    ') THEN
       WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
       '        ', (ZF-ZS)
-      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') ' h  Results    ', M_AST(10,3), M_AST(10,5), M_AST(10,2), &
-      M_AST(10,6), M_AST(10,1), M_AST(10,7)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') ' h  Results    ', M_AST(5,3), M_AST(5,5), M_AST(5,2), &
+      M_AST(5,6), M_AST(5,1), M_AST(5,7)
       IF (VARIABLE==2) WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
    END IF    
    IF (VARIABLE_KIND==' NET HEAT FLUX                ') THEN
-      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Interface point', Xa, '        ', Ya, &
+      WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Interface point    ', Xa, '        ', Ya, &
       '        ', Za
       WRITE (6,'(A, F8.3, A, F8.3, A, F8.3)') 'Cell dimension     ', (XF-XS), '        ', (YF-YS), &
       '        ', (ZF-ZS)
-      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'qnet Results   ', M_AST(10,3), M_AST(10,5), M_AST(10,2), &
-      M_AST(10,6), M_AST(10,1), M_AST(10,7)
+      WRITE (6,'(A, F8.3, F8.3, F8.3, F8.3, F8.3, F8.3)') 'qnet Results   ', M_AST(5,3), M_AST(5,5), M_AST(5,2), &
+      M_AST(5,6), M_AST(5,1), M_AST(5,7)
       WRITE (6,'(A, F8.5, A, F8.5, A, F8.5)') 'Normal_Vector       ',NX, '        ', NY, '        ', NZ
    END IF
    DEALLOCATE (V_TIME)
