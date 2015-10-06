@@ -5,7 +5,7 @@ SETVIEWPOINT
 SETVIEWPOINT
  drawcone
 RENDERONCE
-drawcone 
+drawcone
 SETVIEWPOINT
  drawcube
 RENDERONCE
@@ -21,7 +21,7 @@ drawcdisk
 SETVIEWPOINT
  drawhexdisk
 RENDERONCE
-drawhexdisk 
+drawhexdisk
 SETVIEWPOINT
  drawnotchplate
 RENDERONCE

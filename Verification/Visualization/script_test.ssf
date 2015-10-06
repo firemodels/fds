@@ -6,8 +6,12 @@ LOADINIFILE
  script_test.ini
 SETVIEWPOINT
  left
-LOADFILE
- script_test_05.sf
+// LOADFILE
+//  script_test_05.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
 SETTIMEVAL
  5.012974
 RENDERONCE
