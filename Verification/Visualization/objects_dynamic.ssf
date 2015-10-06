@@ -3,11 +3,11 @@ RENDERDIR
 SETVIEWPOINT
  tsphere
 RENDERONCE
- tsphere 
+ tsphere
 SETVIEWPOINT
  ball
 RENDERONCE
- ball 
+ ball
 SETVIEWPOINT
  tube
 RENDERONCE
