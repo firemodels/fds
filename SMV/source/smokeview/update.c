@@ -828,7 +828,12 @@ int get_loadvfileinfo(FILE *stream, char *filename){
       fprintf(stream, "//  %s\n", slicei->file);
       fprintf(stream, "LOADVSLICEM\n");
       fprintf(stream, " %s\n", slicei->label.longlabel);
-      fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig);
+      if(slicei->volslice==1){
+        fprintf(stream, " %i %f\n", 0, slicei->position_orig);
+      }
+      else{
+        fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig);
+      }
       fprintf(stream, " %i\n", slicei->blocknumber+1);
       return 1;
     }
@@ -853,7 +858,12 @@ int get_loadfileinfo(FILE *stream, char *filename){
       fprintf(stream, "//  %s\n", slicei->file);
       fprintf(stream, "LOADSLICEM\n");
       fprintf(stream, " %s\n", slicei->label.longlabel);
-      fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig );
+      if(slicei->volslice==1){
+        fprintf(stream, " %i %f\n", 0, slicei->position_orig);
+      }
+      else{
+        fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig);
+      }
       fprintf(stream, " %i\n", slicei->blocknumber+1);
       return 1;
     }
@@ -894,16 +904,17 @@ int get_loadfileinfo(FILE *stream, char *filename){
 void Convert_ssf(void){
   FILE *stream_from, *stream_to;
   int outeqin = 0;
-#define LENTEMP L_tmpnam
+#define LENTEMP 20
   char tempfile[LENTEMP+1];
+  char *template = "tempssf";
 
   if(ssf_from==NULL||ssf_to==NULL)return;
   stream_from = fopen(ssf_from, "r");
   if(stream_from==NULL)return;
 
   if(strcmp(ssf_from, ssf_to)==0){
-    //randstr(tempfile, LENTEMP);
-    tmpnam(tempfile);
+    strcpy(tempfile, template);
+    if(randstr(tempfile+strlen(template), LENTEMP-strlen(template))==NULL||strlen(tempfile)==0)return;
     stream_to = fopen(tempfile, "w");
     outeqin = 1;
   }
@@ -942,11 +953,10 @@ void Convert_ssf(void){
   fclose(stream_from);
   fclose(stream_to);
   if(outeqin == 1){
-    char *fromfile, *tofile;
+    char *tofile;
 
-    fromfile = tempfile;
     tofile = ssf_from;
-    copyfile(".",fromfile,tofile,OVERWRITE_FILE);
+    copyfile(".",tempfile,tofile,OVERWRITE_FILE);
     unlink(tempfile);
   }
 }
