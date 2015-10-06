@@ -53,7 +53,7 @@ REAL, ALLOCATABLE, DIMENSION(:) :: V_TIME,TAST,MED_TAST
 CHARACTER(8) OUTFILE
 CHARACTER(30) VARIABLE_KIND
 REAL MED
-INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE,COMEBACK
+INTEGER N_AVERAGE,T_AVERAGE,I_AVERAGE,COMEBACK,NUM_INT_CSIZE(7),H_NULL(3),N_DIR
 
 ! Set a few default values
 BATCHMODE=0
@@ -313,7 +313,9 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
                         IF (M%Y(J)>YF .OR. M%Y(J)<YS) CYCLE
                         IF (M%Z(K)>ZF .OR. M%Z(K)<ZS) CYCLE
                         M_AST(V,IOR_LOOP)=M_AST(V,IOR_LOOP)+Q(I,J,K,NV)
-                        IF (VAR==1 .AND. TIME==TBEG .AND. Q(I,J,K,NV)>0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                        IF (TRIM(BNDF_TEXT(VAR))==' ADIABATIC SURFACE TEMPERATURE') THEN
+                           IF (TIME==TBEG .AND. Q(I,J,K,NV)>0) VCOUNT(IOR_LOOP)=VCOUNT(IOR_LOOP)+1
+                        ENDIF
                      ENDDO 
                   ENDDO
                ENDDO
@@ -478,6 +480,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
             ZS = ZS-(0.05*(ZF-ZS))
             ZF = ZF+(0.05*(ZF-ZS))
             COMEBACK=1
+            NUM_INT_CSIZE(1)=NUM_INT_CSIZE(1)+1
          ENDIF
       END IF
 !
@@ -486,6 +489,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
             YS = YS-(0.05*(YF-YS))
             YF = YF+(0.05*(YF-YS))
             COMEBACK=1
+            NUM_INT_CSIZE(2)=NUM_INT_CSIZE(2)+1
          ENDIF
       END IF
 ! 
@@ -493,7 +497,8 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          IF (M_AST(1,3)==0) THEN
             XS = XS-(0.05*(XF-XS))
             XF = XF+(0.05*(XF-XS))      
-            COMEBACK=1      
+            COMEBACK=1    
+            NUM_INT_CSIZE(3)=NUM_INT_CSIZE(3)+1  
          ENDIF
       END IF 
 !
@@ -501,7 +506,8 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          IF (M_AST(1,7)==0) THEN
             ZS = ZS-(0.05*(ZF-ZS))
             ZF = ZF+(0.05*(ZF-ZS))    
-            COMEBACK=1        
+            COMEBACK=1       
+            NUM_INT_CSIZE(7)=NUM_INT_CSIZE(7)+1 
          ENDIF
       END IF
 !
@@ -510,6 +516,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
             YS = YS-(0.05*(YF-YS))
             YF = YF+(0.05*(YF-YS))   
             COMEBACK=1         
+            NUM_INT_CSIZE(6)=NUM_INT_CSIZE(6)+1
          ENDIF
       END IF
 ! 
@@ -518,15 +525,26 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
             XS = XS-(0.05*(XF-XS))
             XF = XF+(0.05*(XF-XS))  
             COMEBACK=1          
+            NUM_INT_CSIZE(5)=NUM_INT_CSIZE(5)+1
          ENDIF
       END IF
+!
+      IF (MAX(NUM_INT_CSIZE(1),NUM_INT_CSIZE(2),NUM_INT_CSIZE(3),NUM_INT_CSIZE(5),NUM_INT_CSIZE(6),NUM_INT_CSIZE(7))>=5) THEN
+         XS = XS-(0.05*(XF-XS))
+         XF = XF+(0.05*(XF-XS)) 
+         YS = YS-(0.05*(YF-YS))
+         YF = YF+(0.05*(YF-YS))
+         ZS = ZS-(0.05*(ZF-ZS))
+         ZF = ZF+(0.05*(ZF-ZS))  
+      ENDIF                 
+!                    
       IF (COMEBACK==1) THEN
          DEALLOCATE (V_TIME)
          DEALLOCATE (TAST)
          DEALLOCATE (M_AST)
          GOTO 500      
-      ENDIF     
-! 
+      ENDIF 
+!      
       C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
       IF (NZ<0 .AND. NY<0 .AND. NX<0) THEN      
@@ -781,16 +799,13 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          END DO
       END IF
 !
+      H_NULL=0.d0
       IF (NZ<0) THEN
          SUM=0.d0
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,1))
          ENDDO
-         IF (SUM==0) THEN
-            ZS = ZS-(0.05*(ZF-ZS))
-            ZF = ZF+(0.05*(ZF-ZS))
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(3)=1
       END IF
 !
       IF (NY<0) THEN
@@ -798,11 +813,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,2))
          ENDDO
-         IF (SUM==0) THEN
-            YS = YS-(0.05*(YF-YS))
-            YF = YF+(0.05*(YF-YS))
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(2)=1
       END IF
 ! 
       IF (NX<0) THEN
@@ -810,11 +821,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,3))
          ENDDO
-         IF (SUM==0) THEN
-            XS = XS-(0.05*(XF-XS))
-            XF = XF+(0.05*(XF-XS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(1)=1
       END IF 
 !
       IF (NZ>0) THEN
@@ -822,11 +829,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,7))
          ENDDO
-         IF (SUM==0) THEN
-            ZS = ZS-(0.05*(ZF-ZS))
-            ZF = ZF+(0.05*(ZF-ZS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(3)=1
       END IF
 !
       IF (NY>0) THEN
@@ -834,11 +837,7 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,6))
          ENDDO
-         IF (SUM==0) THEN
-            YS = YS-(0.05*(YF-YS))
-            YF = YF+(0.05*(YF-YS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(2)=1
       END IF
 ! 
       IF (NX>0) THEN
@@ -846,18 +845,18 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
          DO I=1,V
             SUM=SUM+ABS(M_AST(I,5))
          ENDDO
-         IF (SUM==0) THEN
-            XS = XS-(0.05*(XF-XS))
-            XF = XF+(0.05*(XF-XS))            
-            COMEBACK=1
-         ENDIF
+         IF (SUM==0) H_NULL(1)=1
       END IF
-      IF (COMEBACK==1) THEN
-         DEALLOCATE (V_TIME)
-         DEALLOCATE (TAST)
-         DEALLOCATE (M_AST)
-         GOTO 500      
-      ENDIF       
+!
+      IF (NZ/=0 .AND. H_NULL(3)==1) COMEBACK=COMEBACK+1
+      IF (NY/=0 .AND. H_NULL(2)==1) COMEBACK=COMEBACK+1
+      IF (NX/=0 .AND. H_NULL(1)==1) COMEBACK=COMEBACK+1
+      IF (COMEBACK==N_DIR) THEN
+         DO I=1,V
+            TAST(I)=0.d0
+         END DO
+         GOTO 600      
+      ENDIF          
 !
       C=SQRT((NX**2)+(NY**2)+(NZ**2))
 !
@@ -1046,21 +1045,22 @@ LOOP_FDS2LS_DYNA:DO P=1,COUNTER
 !********************************
       IF (TAST(2)>=0 .AND. TAST(2)<1000) THEN
          TAST(1)=0.0
-      ELSE 
-         XS = XS-(0.05*(XF-XS))
-         XF = XF+(0.05*(XF-XS)) 
-         YS = YS-(0.05*(YF-YS))
-         YF = YF+(0.05*(YF-YS)) 
-         ZS = ZS-(0.05*(ZF-ZS))
-         ZF = ZF+(0.05*(ZF-ZS))     
-         DEALLOCATE (V_TIME)
-         DEALLOCATE (TAST)
-         DEALLOCATE (M_AST)
-         GOTO 500  
+!      ELSE 
+!         XS = XS-(0.05*(XF-XS))
+!         XF = XF+(0.05*(XF-XS)) 
+!         YS = YS-(0.05*(YF-YS))
+!         YF = YF+(0.05*(YF-YS)) 
+!         ZS = ZS-(0.05*(ZF-ZS))
+!         ZF = ZF+(0.05*(ZF-ZS))     
+!         DEALLOCATE (V_TIME)
+!         DEALLOCATE (TAST)
+!         DEALLOCATE (M_AST)
+!         GOTO 500  
       END IF
 !   
    END IF
 !****************
+   600 CONTINUE
    WRITE (70,'(A)') "*DEFINE_CURVE"
    WRITE (70,'(I8,A)') CURVE, ", 0,1.0, 1.0, , , "
    IF (VARIABLE_KIND==' ADIABATIC SURFACE TEMPERATURE') THEN

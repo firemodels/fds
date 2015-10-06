@@ -12,7 +12,7 @@ from matplotlib import rcParams
 from scipy import integrate
 
 # Getting SVN number 
-GIT=''
+GIT=
 
 # Help to find the fonts properly!
 # You can find the list of fonts installed on the system with:
@@ -69,7 +69,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Temperature ($^{\circ}$C)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 0.2, 465, 'Surface Temperature (simple_panel_hot)')
-plt.text( 6.6, 505, GIT, fontdict=font3)
+plt.text( 7.5, 507, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/simple_panel_hot'+'_ts'+'.pdf',format='pdf')
 close()
 
@@ -99,7 +99,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Temperature ($^{\circ}$C)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 0.4, 590, 'Adiabatic Surface Temperature (simple_panel_hot)')
-plt.text( 6.6, 765, GIT, fontdict=font3)
+plt.text( 7.5, 764, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/simple_panel_hot'+'_ast'+'.pdf',format='pdf')
 close()
 
@@ -137,7 +137,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Temperature ($^{\circ}$C)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 3, 40, 'Surface Temperature (h_profile)')
-plt.text( 40, 760, GIT, fontdict=font3)
+plt.text( 45, 760, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/h_profile'+'_ts'+'.pdf',format='pdf')
 close()
 
@@ -165,7 +165,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Displacement (cm)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 2, 1.83, 'Displacement in x axis (h_profile)')
-plt.text( 40, 2.02, GIT, fontdict=font3)
+plt.text( 45, 2.02, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/h_profile'+'_dx'+'.pdf',format='pdf')
 close()
 
@@ -191,7 +191,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Displacement (cm)', fontdict=font1)
 plt.legend(numpoints=1,loc=7, prop=font2)
 plt.text( 5, -0.01, 'Displacement in y axis (h_profile)')
-plt.text( 40, 0.308, GIT, fontdict=font3)
+plt.text( 45, 0.308, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/h_profile'+'_dy'+'.pdf',format='pdf')
 close()
 
