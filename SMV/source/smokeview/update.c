@@ -811,6 +811,31 @@ void Synch_Times(void){
   reset_gltime();
 }
 
+/* ------------------ get_loadvfileinfo ------------------------ */
+
+int get_loadvfileinfo(FILE *stream, char *filename){
+  int i;
+  char *fileptr;
+
+  trim(filename);
+  fileptr = trim_front(filename);
+  for(i = 0; i<nsliceinfo; i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo+i;
+    if(strcmp(fileptr, slicei->file)==0){
+      fprintf(stream, "// LOADVFILE\n");
+      fprintf(stream, "//  %s\n", slicei->file);
+      fprintf(stream, "LOADVSLICEM\n");
+      fprintf(stream, " %s\n", slicei->label.longlabel);
+      fprintf(stream, " %i %f\n", slicei->idir, slicei->position_orig);
+      fprintf(stream, " %i\n", slicei->blocknumber+1);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 /* ------------------ get_loadfileinfo ------------------------ */
 
 int get_loadfileinfo(FILE *stream, char *filename){
@@ -864,16 +889,27 @@ int get_loadfileinfo(FILE *stream, char *filename){
   return 0;
 }
 
-  /* ------------------ Update_ssf ------------------------ */
+  /* ------------------ Convert_ssf ------------------------ */
 
-void Update_ssf(void){
+void Convert_ssf(void){
   FILE *stream_from, *stream_to;
+  int outeqin = 0;
+#define LENTEMP L_tmpnam
+  char tempfile[LENTEMP+1];
 
   if(ssf_from==NULL||ssf_to==NULL)return;
   stream_from = fopen(ssf_from, "r");
   if(stream_from==NULL)return;
 
-  stream_to = fopen(ssf_to,"w");
+  if(strcmp(ssf_from, ssf_to)==0){
+    //randstr(tempfile, LENTEMP);
+    tmpnam(tempfile);
+    stream_to = fopen(tempfile, "w");
+    outeqin = 1;
+  }
+  else{
+    stream_to = fopen(ssf_to, "w");
+  }
   if(stream_to==NULL){
     fclose(stream_from);
     return;
@@ -892,12 +928,27 @@ void Update_ssf(void){
         fprintf(stream_to, "%s\n", filename);
       }
     }
+    else if(strlen(buffer)>=9&&strncmp(buffer, "LOADVFILE", 9)==0){
+      if(fgets(filename, 255, stream_from)==NULL)break;
+      if(get_loadvfileinfo(stream_to, filename)==0){
+        fprintf(stream_to, "%s\n", buffer);
+        fprintf(stream_to, "%s\n", filename);
+      }
+    }
     else{
       fprintf(stream_to, "%s\n", buffer);
     }
   }
   fclose(stream_from);
   fclose(stream_to);
+  if(outeqin == 1){
+    char *fromfile, *tofile;
+
+    fromfile = tempfile;
+    tofile = ssf_from;
+    copyfile(".",fromfile,tofile,OVERWRITE_FILE);
+    unlink(tempfile);
+  }
 }
 
   /* ------------------ Update_Times ------------------------ */
@@ -1986,8 +2037,8 @@ void update_ShowScene(void){
     writeini(SCRIPT_INI, ini_to);
     exit(0);
   }
-  if(update_ssf==1){
-    Update_ssf();
+  if(convert_ssf==1||update_ssf==1){
+    Convert_ssf();
     exit(0);
   }
   Update_Show();

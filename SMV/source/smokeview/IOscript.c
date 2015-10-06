@@ -231,6 +231,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"LOADVOLSMOKEFRAME") == MATCH)return SCRIPT_LOADVOLSMOKEFRAME;
   if(match_upper(keyword,"LOADVFILE") == MATCH)return SCRIPT_LOADVFILE;
   if(match_upper(keyword,"LOADVSLICE") == MATCH)return SCRIPT_LOADVSLICE;
+  if(match_upper(keyword,"LOADVSLICEM") == MATCH)return SCRIPT_LOADVSLICEM;
   if(match_upper(keyword,"MAKEMOVIE") == MATCH)return SCRIPT_MAKEMOVIE;
   if(match_upper(keyword,"PARTCLASSCOLOR") == MATCH)return SCRIPT_PARTCLASSCOLOR;
   if(match_upper(keyword,"PARTCLASSTYPE") == MATCH)return SCRIPT_PARTCLASSTYPE;
@@ -707,6 +708,19 @@ int compile_script(char *scriptfile){
         scripti->ival = CLAMP(scripti->ival, 0, 3);
         break;
 
+// LOADVSLICEM
+//  type (char)
+//  1/2/3 (int)  val (float)
+//  mesh number (int)
+      case SCRIPT_LOADVSLICEM:
+        SETcval;
+
+        SETbuffer;
+        sscanf(buffer, "%i %f", &scripti->ival, &scripti->fval);
+        scripti->ival = CLAMP(scripti->ival, 0, 3);
+        SETival2;
+        break;
+        
 // LOADSLICEM
 //  type (char)
 //  1/2/3 (int)  val (float)
@@ -1133,7 +1147,6 @@ void script_loadslice(scriptdata *scripti){
       if(slicei->idir != scripti->ival)continue;
       if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
     }
-
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
       count++;
@@ -1172,25 +1185,28 @@ void script_loadslicem(scriptdata *scripti, int meshnum){
 
 void script_loadvslice(scriptdata *scripti){
   int i;
-  float delta_orig;
   int count=0;
 
   PRINTF("script: loading vector slice files of type: %s\n\n",scripti->cval);
 
   for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
+    vslicedata *vslicei;
     int j;
     slicedata *slicei;
 
     mvslicei = multivsliceinfo + i;
     if(mvslicei->nvslices<=0)continue;
-    slicei = sliceinfo + mvslicei->ivslices[0];
+    vslicei = vsliceinfo + mvslicei->ivslices[0];
+    slicei = sliceinfo + vslicei->ival;
     if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
-    if(slicei->idir!=scripti->ival)continue;
-    delta_orig = slicei->position_orig - scripti->fval;
-    if(delta_orig<0.0)delta_orig = -delta_orig;
-    if(delta_orig>slicei->delta_orig)continue;
-
+    if(scripti->ival == 0){
+      if(slicei->volslice == 0)continue;
+    }
+    else{
+      if(slicei->idir != scripti->ival)continue;
+      if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
+    }
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
       count++;
@@ -1198,6 +1214,42 @@ void script_loadvslice(scriptdata *scripti){
     break;
   }
   if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s failed to load\n",scripti->cval);
+}
+
+/* ------------------ script_loadvslicem ------------------------ */
+
+void script_loadvslicem(scriptdata *scripti, int meshnum){
+  int i;
+  int count=0;
+
+  PRINTF("script: loading vector slice files of type: %s in mesh %i\n\n", scripti->cval,meshnum);
+
+  for(i=0;i<nmultivsliceinfo;i++){
+    multivslicedata *mvslicei;
+    vslicedata *vslicei;
+    int j;
+    slicedata *slicei;
+
+    mvslicei = multivsliceinfo + i;
+    if(mvslicei->nvslices<=0)continue;
+    vslicei = vsliceinfo + mvslicei->ivslices[0];
+    slicei = sliceinfo + vslicei->ival;
+    if(slicei->blocknumber + 1 != meshnum)continue;
+    if(match_upper(slicei->label.longlabel,scripti->cval) == NOTMATCH)continue;
+    if(scripti->ival == 0){
+      if(slicei->volslice == 0)continue;
+    }
+    else{
+      if(slicei->idir != scripti->ival)continue;
+      if(ABS(slicei->position_orig - scripti->fval) > slicei->delta_orig)continue;
+    }
+    for(j=0;j<mvslicei->nvslices;j++){
+      LoadVSliceMenu(mvslicei->ivslices[j]);
+      count++;
+    } 
+    break;
+  }
+  if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s in mesh %i failed to load\n",scripti->cval,meshnum);
 }
 
 /* ------------------ script_loadtour ------------------------ */
@@ -1972,6 +2024,9 @@ int run_script(void){
       break;
     case SCRIPT_LOADVSLICE:
       script_loadvslice(scripti);
+      break;
+    case SCRIPT_LOADVSLICEM:
+      script_loadvslicem(scripti,scripti->ival2);
       break;
     case SCRIPT_LOADPLOT3D:
       script_loadplot3d(scripti);
