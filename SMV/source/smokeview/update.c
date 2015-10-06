@@ -889,16 +889,27 @@ int get_loadfileinfo(FILE *stream, char *filename){
   return 0;
 }
 
-  /* ------------------ Update_ssf ------------------------ */
+  /* ------------------ Convert_ssf ------------------------ */
 
-void Update_ssf(void){
+void Convert_ssf(void){
   FILE *stream_from, *stream_to;
+  int outeqin = 0;
+#define LENTEMP L_tmpnam
+  char tempfile[LENTEMP+1];
 
   if(ssf_from==NULL||ssf_to==NULL)return;
   stream_from = fopen(ssf_from, "r");
   if(stream_from==NULL)return;
 
-  stream_to = fopen(ssf_to,"w");
+  if(strcmp(ssf_from, ssf_to)==0){
+    //randstr(tempfile, LENTEMP);
+    tmpnam(tempfile);
+    stream_to = fopen(tempfile, "w");
+    outeqin = 1;
+  }
+  else{
+    stream_to = fopen(ssf_to, "w");
+  }
   if(stream_to==NULL){
     fclose(stream_from);
     return;
@@ -930,6 +941,14 @@ void Update_ssf(void){
   }
   fclose(stream_from);
   fclose(stream_to);
+  if(outeqin == 1){
+    char *fromfile, *tofile;
+
+    fromfile = tempfile;
+    tofile = ssf_from;
+    copyfile(".",fromfile,tofile,OVERWRITE_FILE);
+    unlink(tempfile);
+  }
 }
 
   /* ------------------ Update_Times ------------------------ */
@@ -2018,8 +2037,8 @@ void update_ShowScene(void){
     writeini(SCRIPT_INI, ini_to);
     exit(0);
   }
-  if(update_ssf==1){
-    Update_ssf();
+  if(convert_ssf==1||update_ssf==1){
+    Convert_ssf();
     exit(0);
   }
   Update_Show();

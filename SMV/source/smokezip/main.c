@@ -472,9 +472,9 @@ int main(int argc, char **argv){
 
   if(GLOBcleanfiles==0&&GLOBdestdir!=NULL){
     PRINTF("Copying .smv, .ini and .end files to %s directory\n",GLOBdestdir);
-    filecopy(GLOBdestdir,smvfile,smvfilebase);
-    filecopy(GLOBdestdir,inifile,inifilebase);
-    filecopy(GLOBdestdir,GLOBendianfile,GLOBendianfilebase);
+    copyfile(GLOBdestdir,smvfile,smvfilebase,REPLACE_FILE);
+    copyfile(GLOBdestdir,inifile,inifilebase,REPLACE_FILE);
+    copyfile(GLOBdestdir,GLOBendianfile,GLOBendianfilebase,REPLACE_FILE);
   }
   if(GLOBcleanfiles==1&&GLOBfilesremoved==0){
     PRINTF("No compressed files were removed\n");
@@ -519,10 +519,10 @@ void makesvd(char *in_dir, char *smvfile){
   strcpy(svd,".svd");
 
   if(in_dir==NULL){
-    filecopy(".",smvfile,file_out);
+    copyfile(".",smvfile,file_out,REPLACE_FILE);
   }
   else{
-    filecopy(in_dir,smvfile,file_out);
+    copyfile(in_dir,smvfile,file_out,REPLACE_FILE);
   }
 
 }
