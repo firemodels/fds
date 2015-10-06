@@ -97,7 +97,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
     fclose(streamin);
     return;
   }
-  PRINTF("  Copying %s to %s\n",sourcefile,destfile);
+  PRINTF("  Copying file %s to %s\n",file_in,file_out);
   for(;;){
     int end_of_file;
        
