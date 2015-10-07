@@ -9447,11 +9447,7 @@ int readini2(char *inifile, int localfile){
         }
       }
       if(strcmp(buffer2,"")!=0){
-        char *buffer2ptr;
-
         trim(buffer2);
-        buffer2ptr=trim_front(buffer2);
-        if(strcmp(buffer2ptr,"FED")==0)ini_fed=1;
         for(i=0;i<nslice2;i++){
           if(strcmp(slicebounds[i].datalabel,buffer2)!=0)continue;
           slicebounds[i].setvalmin=setvalmin;
