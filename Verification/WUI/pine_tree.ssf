@@ -25,8 +25,11 @@ SETTIMEVAL
 RENDERONCE
  pine_tree_part_040
 UNLOADALL
-LOADFILE
- pine_tree.prt5_temp.tiso
+// LOADFILE
+//  pine_tree.prt5_temp.tiso
+LOADISOM
+ particle boundary: 0.5  (Colored by: PARTICLE TEMPERATURE)
+ 1
 SETTIMEVAL
  0.000000
 RENDERONCE
@@ -48,4 +51,4 @@ SETTIMEVAL
 RENDERONCE
  pine_tree_partiso_040
 
- 
+
