@@ -22,7 +22,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-set mandir=%userprofile%\FDS-SMVclean\Manuals
+set mandir=%userprofile%\FDS-SMV\Manuals
 set todir=%userprofile%\FIRE-LOCAL\reports\fds_manuals
 
 echo copying SMV_User_Guide.pdf
