@@ -78,6 +78,7 @@ SVEXTERN int SVDECL(show_geometry_interior_outline,0);
 SVEXTERN int SVDECL(show_slices_and_vectors,0);
 SVEXTERN int SVDECL(vispilot,0);
 SVEXTERN int SVDECL(compute_fed,0);
+SVEXTERN int SVDECL(is_fed_colorbar, 0);
 SVEXTERN int SVDECL(tour_global_tension_flag,1);
 SVEXTERN float SVDECL(tour_global_tension,0.0);
 
@@ -133,7 +134,7 @@ SVEXTERN int colorbar_label_width;
 SVEXTERN int timebar_left_width, timebar_right_width;
 SVEXTERN int SVDECL(h_space,2), SVDECL(v_space,2);
 SVEXTERN portdata VP_fullscreen, VP_title, VP_timebar, VP_colorbar, VP_scene, VP_info;
-SVEXTERN int SVDECL(ini_fed,0),SVDECL(in_external,0);
+SVEXTERN int SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, SVDECL(*LABEL_global_ptr,NULL), LABEL_default;
 

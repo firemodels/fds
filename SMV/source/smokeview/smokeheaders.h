@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
 EXTERNCPP int HaveFire(void);
 EXTERNCPP void update_object_used(void);
 EXTERNCPP void UpdateColorTableList(int ncolortableinfo_old);

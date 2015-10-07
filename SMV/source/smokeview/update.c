@@ -956,7 +956,7 @@ void Convert_ssf(void){
     char *tofile;
 
     tofile = ssf_from;
-    copyfile(".",tempfile,tofile,OVERWRITE_FILE);
+    copyfile(".",tempfile,tofile,REPLACE_FILE);
     unlink(tempfile);
   }
 }
@@ -2076,7 +2076,7 @@ void update_Display(void){
     cb = getcolorbar(colorbarname);
     if(cb != NULL){
       colorbartype = cb - colorbarinfo;
-      current_colorbar = cb;
+      UpdateCurrentColorbar(cb);
       if(colorbartype != colorbartype_default){
         colorbartype_ini = colorbartype;
       }

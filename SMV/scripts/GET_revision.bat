@@ -1,6 +1,8 @@
 @echo off
 
-Rem Windows batch file for creating Smokeview User guide figures
+Rem  Windows batch file to build a test Smokeview for Windows 64
+
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -16,11 +18,7 @@ goto:eof
 
 call %envfile%
 
-echo Commit Smokview manuals to the FIRE-LOCAL repository
-echo press any key to continue
-pause > NUL
-
 %svn_drive%
-cd %userprofile%\FIRE-LOCAL\reports\fds_manuals
-svn update
-svn ci -m "guides: update smokeview guides"
+cd %svn_root%
+git describe --long --dirty
+pause

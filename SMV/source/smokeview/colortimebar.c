@@ -130,7 +130,7 @@ void addcolorbar(int icolorbar){
   ncolorbars++;
   CheckMemory;
   ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
-  current_colorbar = colorbarinfo + colorbartype;
+  UpdateCurrentColorbar(colorbarinfo + colorbartype);
 
   cb_from = colorbarinfo + icolorbar;
   CheckMemory;
@@ -351,6 +351,33 @@ colorbardata *getcolorbar(char *label){
   return NULL;
 }
 
+/* ------------------ UpdateCurrentColorbar ------------------------ */
+#define FILEUPDATE 6
+void UpdateCurrentColorbar(colorbardata *cb){
+  int jj=0,fed_loaded=0;
+  
+  current_colorbar = cb;
+  if(current_colorbar != NULL&&strcmp(current_colorbar->label, "FED") == 0){
+    is_fed_colorbar = 1;
+  }
+  else{
+    is_fed_colorbar = 0;
+  }
+  for(jj=0;jj<nslice_loaded;jj++){
+    slicedata *slicej;
+    int j;
+      
+    j = slice_loaded_list[jj];
+    slicej = sliceinfo + j;
+    if(slicej->display==0)continue;
+    if(slicej->is_fed==1){
+      fed_loaded=1;
+      break;
+    }
+  }
+  if(is_fed_colorbar==1&&fed_loaded==1)Slice_CB(FILEUPDATE);
+}
+
 /* ------------------ remapcolorbar ------------------------ */
 
 void remapcolorbar(colorbardata *cbi){
@@ -513,7 +540,7 @@ void initdefaultcolorbars(void){
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
   NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
-  current_colorbar = colorbarinfo + colorbartype;
+  UpdateCurrentColorbar(colorbarinfo + colorbartype);
 
 
   // rainbow colorbar
