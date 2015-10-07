@@ -37,7 +37,7 @@
 <tr><td valign=top>
 
 <p><table border=on>
-<tr><th colspan=3>Full Debug</th><th colspan=3>Incremental Test</th></tr>
+<tr><th colspan=3>Debug</th><th colspan=3>Incremental Test</th></tr>
 <tr><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
 <tr>
 <td align=center><a href="scripts/BUILDdebugsmvwin64.bat">Build</a></td>
@@ -50,7 +50,7 @@
 
 <tr><td valign=top>
 <p><table border=on>
-<tr><th colspan=3>Full Test</th><th colspan=3>Full Release</th></tr>
+<tr><th colspan=3>Test</th><th colspan=3>Release</th></tr>
 <tr>
 <th>Windows</th><th align=center>Linux</th><th align=center>OSX</th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
@@ -131,9 +131,13 @@
 </tr>
 </table>
 
-<h3>Guides</h3>
+<h3>Verification</h3>
+<ul>
+<li><a href="scripts/RUNwindowssmokebot.bat">Run windows Smokebot</a>
+</ul>
+
 <p><table border=on>
-<tr><th>Technical</th><th>User</th><th>Verification</th></tr>
+<tr><th>Technical</th><th>User</th><th>Verification</th><th>Web Summary</th></tr>
 <tr align=center>
 <td></td>
 <td><a href="scripts/GETsmvugfigs.bat">Get images</a></td>
@@ -145,29 +149,16 @@
 <td><a href="scripts/BUILDsmvvg.bat">Build</a></td>
 </tr>
 <tr align=center>
-<td><a href="scripts/View_SMV_UG.bat">View</a></td>
 <td><a href="scripts/View_SMV_TG.bat">View</a></td>
+<td><a href="scripts/View_SMV_UG.bat">View</a></td>
 <td><a href="scripts/View_SMV_VG.bat">View</a></td>
+<td><a href="scripts/VIEW_localimages.bat">View</a></td>
 </tr>
 </table>
-
-
-<h3>Verification</h3>
 <ul>
-<li><a href="scripts/RUNwindowssmokebot.bat">Run windows Smokebot</a>
-<li>
-View:
-<a href="scripts/View_SMV_UG.bat">UG</a>,
-<a href="scripts/View_SMV_TG.bat">TG</a>,
-<a href="scripts/View_SMV_VG.bat">VG</a>,
-<a href="scripts/VIEW_localimages.bat">summary</a>
-
-<li><a href="scripts/COPY_smv_guides.bat">Copy</a> guides from Windows Smokebot to FIRE-LOCAL and <a href="scripts/COMMIT_firelocal_pdfs.bat">Commit</a>
-<li>Download
-<a href="../SMV/scripts/GETsmvugfigs.bat">User guide images</a>, 
-<a href="../SMV/scripts/GETsmvvergfigs.bat">Verification guide images</a>
-from Linux Smokebot
+<li><a href="scripts/COPY_smv_guides.bat">Copy</a> guides to FIRE-LOCAL and commit
 </ul>
+
 
 
 <h3>Other</h3>
