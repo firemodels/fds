@@ -1499,7 +1499,7 @@ void initvars(void){
   showgluitrainer=0;
   colorbartype=0;
   colorbartype_ini=-1;
-  current_colorbar=colorbarinfo;
+  UpdateCurrentColorbar(colorbarinfo);
   colorbartype_save=colorbartype;
   colorbartype_default=colorbartype;
   colorbarpoint=0;

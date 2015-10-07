@@ -23,7 +23,6 @@ typedef struct {
 
 #define REPLACE_FILE 0
 #define APPEND_FILE 1
-#define OVERWRITE_FILE 2
 
 EXTERNCPP int FFLUSH(void);
 EXTERNCPP int PRINTF(const char * format, ...);
