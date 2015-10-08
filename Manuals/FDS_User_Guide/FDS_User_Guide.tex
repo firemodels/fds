@@ -1247,9 +1247,9 @@ calculation. It is better to assess the quality of the mesh in terms
 of this non-dimensional parameter, rather than an absolute mesh cell size.
 For example, a cell size of 10~cm may be ``adequate,'' in some sense,
 for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
-U.S. Nuclear Regulatory Commission~\cite{NUREG_1824_Sup_1}, the $D^*/\dx$ values ranged from 4 to 16.}.
+sizable fire, but may not be appropriate to study a very small, smoldering source.
 
+The FDS Validation Guide~\cite{FDS_Validation_Guide} contains a table of the values of $D^*/\dx$ used in the simulation of the validation experiments. The table is near the end of the chapter that describes all the experiments. These values range over two orders of magnitude and were chosen based on a grid resolution study and the particular attributes of the given fire scenario. It would be inappropriate to take any of these values as an ``acceptable'' minimum. 
 
 There are a number of special output quantities that provide local measures of grid resolution. See Section~\ref{info:meshquality} for details.
 
@@ -2274,7 +2274,7 @@ MATL\_ID}.  For example, the input file entries:
 \end{lstlisting}
 
 \noindent
-define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
+define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
 
 \clearpage
 
@@ -2548,7 +2548,7 @@ properties (via the {\ct MATL\_ID} keyword).
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
 
-If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
+If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='SYMMETRIC'/
@@ -2559,7 +2559,7 @@ If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
 
-For example, take the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
+For example, take the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='NON-SYMMETRIC'/
@@ -3987,7 +3987,7 @@ Note, for this approach it is not required that one have pressure zones defined;
 
 This example involves a small compartment that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.
 A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.
-Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.
+Eventually the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.
 Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.
 
 \begin{figure}[ht]
@@ -4710,7 +4710,7 @@ See Section~\ref{info:heat_of_combustion} for more details on the heat of combus
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
-In this case, the fuel is not predefined.  Therefore, either the the {\ct FORMULA} or the atom counts must be defined.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
+In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} or the atom counts must be defined.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
 
 When simple chemistry is being used, FDS will automatically create three lumped species: {\ct AIR}, {\ct FUEL}, and {\ct PRODUCTS}.  The actual name of the fuel species will be the name given on the {\ct REAC} line (for example {\ct MY FUEL} in the last sample above). FDS creates these lumped species in the same manner as you would in an input file.  FDS first defines the primitive species and then defines the lumped species. In essence FDS internally creates input lines like those shown in Example 2 of Section~\ref{info:lumped}. This means when doing simple chemistry, that even though you did not explicitly define oxygen in the input file, you can request an output for oxygen since it was implicitly defined by FDS.
 
@@ -5190,7 +5190,7 @@ A diagnostic tool for the time integration of chemical reactions is the number o
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
 
-It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, {\ct TURBULENT\_DEPOSITION}, and {\ct GRAVITATIONAL\_SETTLING} on the {\ct MISC} line. The {\ct GRAVITATIONAL\_SETTLING} parameter involves the downward movement of aerosols in the gas phase whereas well as the {\ct GRAVITATIONAL\_DEPOSITION} parameter is for the deposition of aerosols to upward-facing surfaces due to gravity.  The deposition velocity at the wall can be outputted using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}.
+It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, {\ct TURBULENT\_DEPOSITION}, and {\ct GRAVITATIONAL\_SETTLING} on the {\ct MISC} line. {\ct GRAVITATIONAL\_SETTLING} controls the downward movement of aerosols in the gas phase, whereas {\ct GRAVITATIONAL\_DEPOSITION} controls the deposition of aerosols onto upward-facing surfaces due to gravity.  The deposition velocity at the wall can be output using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}.
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -6447,7 +6447,7 @@ The simplest example of a device is just a timer:
 \end{lstlisting}
 Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example, if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
-When using a {\ct DEVC} output to control FDS, the instantaneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
+When using a {\ct DEVC} output to control FDS, the instantaneous value of the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
 \be
 \bar{x}^n=\bar{x}^{n-1} \; \mbox{\ct SMOOTHING\_FACTOR} + x^n \; (1-\mbox{\ct SMOOTHING\_FACTOR})
 \ee
