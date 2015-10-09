@@ -27,11 +27,12 @@ REAL(EB) :: B_ROTH,BETA_OP_ROTH,C_ROTH,E_ROTH
 
 CONTAINS
 
-SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,NM)
+SUBROUTINE BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
 !
 ! Issues:
 ! 1. Are SF%VEG_FUEL_FLUX_L and SF%VEG_MOIST_FLUX_L needed in linear degradation model?
-REAL(EB) :: DT_BC,RDT_BC,T
+REAL(EB) :: DT_BC,RDT_BC
+REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 INTEGER  ::  IW
 INTEGER  ::  I,IIG,JJG,KKG
@@ -66,7 +67,7 @@ L_PYR_VEG = 416000._EB !J/kg Morvan
 !L_PYR_VEG = 2640000._EB !J/kg Drysdale,Doug Fir
 RL_PYR_VEG = 1._EB/L_PYR_VEG
 !DT_BC     = T - VEG_CLOCK_BC
-DT_BC     = MESHES(NM)%DT
+DT_BC     = DT
 RDT_BC    = 1.0_EB/DT_BC
 
 IF (N_REACTIONS>0) I_FUEL = REACTION(1)%FUEL_SMIX_INDEX
@@ -1004,12 +1005,12 @@ END SUBROUTINE INITIALIZE_LEVEL_SET_FIRESPREAD
 
 ! ************************************************************************************************
 ! ************************************************************************************************
-SUBROUTINE LEVEL_SET_FIRESPREAD(T_CFD,NM)
+SUBROUTINE LEVEL_SET_FIRESPREAD(T_CFD,DT,NM)
 ! ************************************************************************************************
 ! ************************************************************************************************
 !
 INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: T_CFD
+REAL(EB), INTENT(IN) :: T_CFD,DT
 INTEGER :: J_FLANK,I,IIG,IW,J,JJG,KKG
 INTEGER :: IDUM,JDUM,KDUM,KWIND
 LOGICAL :: IGNITION = .FALSE.
@@ -1032,7 +1033,7 @@ J_FLANK          = 1
 ROS_FLANK1       = 0._EB
 
 IF (VEG_LEVEL_SET_COUPLED) THEN
- DT_LS   = MESHES(NM)%DT
+ DT_LS   = DT
  TIME_LS = T_CFD
  T_FINAL = TIME_LS + DT_LS
 ENDIF
