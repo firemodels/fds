@@ -581,9 +581,8 @@ MAIN_LOOP: DO
                                 MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
       ENDIF
 
-      DT = MINVAL(DT_NEW)
-
       IF (ANY(CHANGE_TIME_STEP_INDEX==-1)) THEN  ! If the time step was reduced, CYCLE CHANGE_TIME_STEP_LOOP
+         DT = MINVAL(DT_NEW)
          FIRST_PASS = .FALSE.
       ELSE  ! exit the loop and if the time step is to be increased, this will occur at the next time step.
          EXIT CHANGE_TIME_STEP_LOOP
