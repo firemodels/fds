@@ -8671,8 +8671,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i %i %i %i %i",
-        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot);
+      sscanf(buffer," %i %i %i %i %i %i %i %i",
+        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot,&showdevicetype,&showdeviceunit);
       devicetypes_index=CLAMP(devicetypes_index,0,ndevicetypes-1);
       update_glui_devices();
       continue;
@@ -11589,7 +11589,7 @@ void writeini_local(FILE *fileout){
     }
   }
   fprintf(fileout, "SHOWDEVICEVALS\n");
-  fprintf(fileout, " %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot);
+  fprintf(fileout, " %i %i %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot, showdevicetype,showdeviceunit);
   fprintf(fileout, "SHOWMISSINGOBJECTS\n");
   fprintf(fileout, " %i\n", show_missing_objects);
   for(i = ntickinfo_smv; i < ntickinfo; i++){
