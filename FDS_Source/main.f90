@@ -2853,7 +2853,12 @@ ENDIF IF_DUMP_HRR
 ! Dump unstructured geometry and boundary element info
 
 IF (N_FACE>0 .AND. T>=GEOM_CLOCK) THEN
-   IF (MYID==0) CALL DUMP_GEOM(T)
+   IF (MYID==0) THEN
+      CALL DUMP_GEOM(T)
+      IF (GEOM_DIAG) THEN
+         CALL DUMP_GEOM_DIAG(T)
+      ENDIF
+   ENDIF
    GEOM_CLOCK = GEOM_CLOCK + DT_GEOM
 ENDIF
 
