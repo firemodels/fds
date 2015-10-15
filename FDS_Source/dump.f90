@@ -2415,18 +2415,21 @@ WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 IF (APPEND) RETURN
  
-MESH_LOOP: DO NM=1,NMESHES
-   M => MESHES(NM)
-   WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
-   WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
-ENDDO MESH_LOOP
+IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
+   MESH_LOOP: DO NM=1,NMESHES
+      M => MESHES(NM)
+      WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
+      WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
+   ENDDO MESH_LOOP
+ENDIF
+
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
@@ -2461,6 +2464,7 @@ DO NN=1,N_SPECIES
 ENDDO
 
 ! Print out information about species
+
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
@@ -3201,20 +3205,35 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
+CHARACTER(80) :: SIMPLE_OUTPUT
 CHARACTER(LABEL_LENGTH) :: DATE
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
-CALL GET_DATE(DATE)
 
 IF (T<=0.0001) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSEIF (T>0.0001 .AND. T <=0.001) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSEIF (T>0.001 .AND. T<=0.01) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSE
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ENDIF
+
+! Write simple output string to .err file
+
+WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT)
+
+! Write simple output string to .out file if the diagnostics are suppressed.
+
+IF (SUPPRESS_DIAGNOSTICS) THEN
+   WRITE(LU_OUTPUT,'(A)') TRIM(SIMPLE_OUTPUT)
+   RETURN
+ENDIF
+
+! Detailed diagnostics
+
+CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
