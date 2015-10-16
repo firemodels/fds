@@ -4146,6 +4146,9 @@ void ImmersedMenu(int value){
     case 6:
       sort_embedded_geometry=1-sort_embedded_geometry;
       break;
+    case 13:
+      show_geometry_diagnostics = 1 - show_geometry_diagnostics;
+      break;
     case GEOMETRY_HIDE:
       if(showtrisurface==0&&showtrioutline==0){
         showtrisurface=1;
@@ -5043,7 +5046,15 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Smooth normal"),4);
   }
-  if(hilight_skinny==1){
+  if(ngeomdiaginfo>0){
+    if(show_geometry_diagnostics == 1){
+      glutAddMenuEntry(_(" *Show geometry diagnostics"), 13);
+    }
+    else{
+      glutAddMenuEntry(_(" Show geometry diagnostics"), 13);
+    }
+  }
+  if(hilight_skinny == 1){
     glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
   }
   else{

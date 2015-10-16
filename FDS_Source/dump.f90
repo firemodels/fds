@@ -7010,7 +7010,7 @@ SUBROUTINE DUMP_GEOM_DIAG(STIME)
 
 ! dummy example - 1 triangle   
    NVERTS = 3
-   NTRIANGLES = 3
+   NTRIANGLES = 1
    NVERTDATA = 0
    NTRIDATA = 1
    VERTS(1:9)=(/0.0_FB,0.0_FB,0.0_FB,1.0_FB,0.0_FB,0.0_FB,1.0_FB,0.0_FB,1.0_FB/)

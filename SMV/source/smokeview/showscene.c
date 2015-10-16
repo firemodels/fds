@@ -302,7 +302,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_geom(DRAW_OPAQUE,GEOM_DYNAMIC);
   }
 
-/* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
+  /* ++++++++++++++++++++++++ draw diagnostic geometry +++++++++++++++++++++++++ */
+
+  if(show_geometry_diagnostics==1){
+    CLIP_GEOMETRY;
+    draw_geomdiag();
+  }
+  
+  /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
   if(showshooter!=0&&shooter_active==1){
     CLIP_VALS;

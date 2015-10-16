@@ -20,6 +20,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(ngeomdiaginfo, 0), SVDECL(show_geometry_diagnostics,0);
+SVEXTERN geomdiagdata SVDECL(*geomdiaginfo,NULL);
 SVEXTERN int SVDECL(zone_rho, 1);
 SVEXTERN int SVDECL(visventslab, 0), SVDECL(visventprofile,1);
 SVEXTERN int SVDECL(update_readiso_geom_wrapup, UPDATE_ISO_OFF);
