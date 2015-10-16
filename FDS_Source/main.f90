@@ -417,6 +417,8 @@ ENDDO
 ! Start the clock for time stepping
 
 WALL_CLOCK_START_ITERATIONS = WALL_CLOCK_TIME()
+TUSED = 0._EB
+TUSED(1,:) = SECOND()
 
 ! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
 
