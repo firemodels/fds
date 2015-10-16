@@ -3235,6 +3235,15 @@ ENDIF
 
 CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
+IF (T<=0.0001) THEN
+   WRITE(LU_OUTPUT,150) DT,T
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(LU_OUTPUT,151) DT,T
+ELSEIF (T>0.001 .AND. T <=0.01) THEN
+   WRITE(LU_OUTPUT,152) DT,T
+ELSE
+   WRITE(LU_OUTPUT,153) DT,T
+ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
    II = VELOCITY_ERROR_MAX_I(NM)
@@ -3258,15 +3267,7 @@ DO NM=1,NMESHES
    IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
    IF (T_ACCUM(NM)>=60._EB .AND. T_ACCUM(NM)<3600._EB) WRITE(LU_OUTPUT,112) T_PER_STEP(NM),T_ACCUM(NM)/60._EB
    IF (T_ACCUM(NM)>=3600._EB)  WRITE(LU_OUTPUT,113) T_PER_STEP(NM),T_ACCUM(NM)/3600._EB
-   IF (T<=0.0001) THEN
-      WRITE(LU_OUTPUT,150) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSEIF (T>0.0001 .AND. T <=0.001) THEN
-      WRITE(LU_OUTPUT,151) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSEIF (T>0.001 .AND. T <=0.01) THEN
-      WRITE(LU_OUTPUT,152) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSE
-      WRITE(LU_OUTPUT,153) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ENDIF
+   WRITE(LU_OUTPUT,154) M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
    IF (ABS(M%RESMAX)>1.E-8_EB)  WRITE(LU_OUTPUT,133) M%RESMAX,M%IRM,M%JRM,M%KRM
    IF (ABS(M%POIS_PTB)>1.E-10_EB)  WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Pert. : ',M%POIS_PTB
    IF (CHECK_POISSON) WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Error : ',M%POIS_ERR
@@ -3283,22 +3284,13 @@ WRITE(LU_OUTPUT,*)
 110 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' s')
 112 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' min')
 113 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' hr')
-150 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.5,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-151 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.4,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-152 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.3,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-153 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.2,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+150 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.5,' s')
+151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
+152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
+153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
+154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+           6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+           6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
 230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
