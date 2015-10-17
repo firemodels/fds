@@ -2830,7 +2830,8 @@ INTEGER :: NM,DISP
 
 TNOW = SECOND()
 
-IF (ICYC>-EVAC_TIME_ITERATIONS .AND. ICYC < 1) RETURN ! No dumps at the evacuation initialization phase
+!need to fix following line to make sure RETURN's only occur for evac cases (issue 2965)
+!IF (ICYC>-EVAC_TIME_ITERATIONS .AND. ICYC < 1) RETURN ! No dumps at the evacuation initialization phase
 
 ! Dump out HRR info  after first "gathering" data to node 0
 
