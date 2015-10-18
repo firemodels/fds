@@ -8704,7 +8704,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"GEOMDIAGS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i",&structured_isopen,&unstructured_isopen);
+      sscanf(buffer," %i %i %i",&structured_isopen,&unstructured_isopen,&show_geometry_diagnostics);
       continue;
     }
     if(match(buffer,"SHOWTRIANGLECOUNT")==1){
@@ -12135,7 +12135,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "FRAMERATEVALUE\n");
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
-  fprintf(fileout, " %i %i\n", structured_isopen, unstructured_isopen);
+  fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
   fprintf(fileout, "GVERSION\n");
   fprintf(fileout, " %i\n", gversion);
   fprintf(fileout, "ISOTRAN2\n");
