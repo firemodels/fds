@@ -3205,7 +3205,7 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
-CHARACTER(80) :: SIMPLE_OUTPUT
+CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
@@ -3220,9 +3220,21 @@ ELSE
    WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ENDIF
 
+! Simple output without DT for .err file
+
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSE
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ENDIF
+
 ! Write simple output string to .err file
 
-WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT)
+WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
 
 ! Write simple output string to .out file if the diagnostics are suppressed.
 
