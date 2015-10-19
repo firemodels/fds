@@ -3561,7 +3561,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 
 \begin{description}
-\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, {\ct FAN}, {\ct FILTER}, or {\ct AIRCOIL}.
+\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, {\ct FAN}, {\ct FILTER}, {\ct AIRCOIL}, or {\ct LEAK} (see ~Section~\ref{info:local_leakage}).
 \item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -3969,7 +3969,7 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for each {\ct VENT} is not {\ct 'HVAC'}, instead it must correspond to a {\ct SURF} input. Wall heat transfer will used the properties of  the {\ct SURF}..
+The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to either a {\ct SURF} input. Wall heat transfer will computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
