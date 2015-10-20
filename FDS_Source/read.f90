@@ -10478,7 +10478,7 @@ SUBROUTINE SET_CTRL_DEFAULTS
    ID            = 'null'
    LATCH         = .TRUE.
    INITIAL_STATE = .FALSE.
-   SETPOINT      = 1000000._EB
+   SETPOINT      = 1.E30_EB
    DELAY         = 0._EB
    CYCLE_TIME    = 1000000._EB
    CYCLES        = 1
