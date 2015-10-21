@@ -1532,10 +1532,6 @@ BC_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    END SELECT
 ENDDO BC_LOOP
 
-! temporary debug
-
-IF (EMBEDDED_MESH) DP = 0._EB
-
 ! Compute time derivative of the divergence, dD/dt
 
 TRUE_PROJECTION: IF (PROJECTION) THEN
