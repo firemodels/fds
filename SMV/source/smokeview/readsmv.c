@@ -2295,6 +2295,9 @@ int readsmv(char *file, char *file2){
   navatar_colors=0;
   FREEMEMORY(avatar_colors);
 
+  FREEMEMORY(geomdiaginfo);
+  ngeomdiaginfo = 0;
+
   FREEMEMORY(treeinfo);
   ntreeinfo=0;
   for(i=0;i<nterraininfo;i++){
@@ -2714,7 +2717,11 @@ int readsmv(char *file, char *file2){
       ncsvinfo+=nfiles;
       continue;
     }
-    if(match(buffer,"GEOM") == 1){
+    if(match(buffer, "GEOMDIAG") == 1){
+      ngeomdiaginfo++;
+      continue;
+    }
+    if(match(buffer, "GEOM") == 1){
       ngeominfo++;
       continue;
     }
@@ -3294,6 +3301,11 @@ int readsmv(char *file, char *file2){
     npropinfo=1;
   }
 
+  if(ngeomdiaginfo > 0){
+    NewMemory((void **)&geomdiaginfo, ngeomdiaginfo*sizeof(geomdiagdata));
+    ngeomdiaginfo = 0;
+  }
+
 /* 
    ************************************************************************
    ************************ start of pass 2 ********************************* 
@@ -3434,6 +3446,37 @@ int readsmv(char *file, char *file2){
     }
 
     /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ GEOMDIAG ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+    if(match(buffer, "GEOMDIAG") == 1){
+      geomdiagdata *geomdiagi;
+      char *buffptr;
+
+      geomdiagi = geomdiaginfo + ngeomdiaginfo;
+      ngeomdiaginfo++;
+
+      fgets(buffer, 255, stream);
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      NewMemory((void **)&geomdiagi->geomfile, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geomfile, buffptr);
+
+      NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
+      init_geom(geomdiagi->geom);
+
+      NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geom->file, buffptr);
+
+      fgets(buffer, 255, stream);
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      NewMemory((void **)&geomdiagi->geomdatafile, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geomdatafile, buffptr);
+    }
+
+  /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++ GEOM ++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -8661,7 +8704,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"GEOMDIAGS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i",&structured_isopen,&unstructured_isopen);
+      sscanf(buffer," %i %i %i",&structured_isopen,&unstructured_isopen,&show_geometry_diagnostics);
       continue;
     }
     if(match(buffer,"SHOWTRIANGLECOUNT")==1){
@@ -8671,8 +8714,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i %i %i %i %i",
-        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot);
+      sscanf(buffer," %i %i %i %i %i %i %i %i",
+        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot,&showdevicetype,&showdeviceunit);
       devicetypes_index=CLAMP(devicetypes_index,0,ndevicetypes-1);
       update_glui_devices();
       continue;
@@ -11589,7 +11632,7 @@ void writeini_local(FILE *fileout){
     }
   }
   fprintf(fileout, "SHOWDEVICEVALS\n");
-  fprintf(fileout, " %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot);
+  fprintf(fileout, " %i %i %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot, showdevicetype,showdeviceunit);
   fprintf(fileout, "SHOWMISSINGOBJECTS\n");
   fprintf(fileout, " %i\n", show_missing_objects);
   for(i = ntickinfo_smv; i < ntickinfo; i++){
@@ -12092,7 +12135,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "FRAMERATEVALUE\n");
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
-  fprintf(fileout, " %i %i\n", structured_isopen, unstructured_isopen);
+  fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
   fprintf(fileout, "GVERSION\n");
   fprintf(fileout, " %i\n", gversion);
   fprintf(fileout, "ISOTRAN2\n");

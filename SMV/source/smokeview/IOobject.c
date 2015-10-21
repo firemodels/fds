@@ -663,9 +663,9 @@ unsigned char *get_device_color(devicedata *devicei, unsigned char *colorval,flo
   return colorval;
 }
 
-/* ----------------------- output_device_val ----------------------------- */
+/* ----------------------- Output_Device_Val ----------------------------- */
 
-void output_device_val(devicedata *devicei){
+void Output_Device_Val(devicedata *devicei){
   char label[1000];
   float val;
   int valid;
@@ -675,6 +675,7 @@ void output_device_val(devicedata *devicei){
   if(valid==1){
     f_units *unitclass;
     char *unit;
+    char valuelabel[100];
 
     unitclass = get_unit_class(devicei->unit);
     unit=devicei->unit;
@@ -687,7 +688,15 @@ void output_device_val(devicedata *devicei){
       unit_type = unitclass->unitclass;
       val = getunitval(unit_type, val);
     }
-    sprintf(label,"%s: %.1f %s",devicei->quantity,val,unit);
+    strcpy(label, "");
+    sprintf(valuelabel, "%.1f",val);
+    if(showdevicetype == 1){
+      strcat(label, devicei->quantity);
+      strcat(label, " ");
+    }
+    strcat(label, valuelabel);
+    strcat(label, " ");
+    if(showdeviceunit == 1)strcat(label, unit);
     output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
   else{
@@ -1006,7 +1015,7 @@ void draw_devices(void){
       type=devicei->type2;
       if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
       if(vistype==1){
-        output_device_val(devicei);
+        Output_Device_Val(devicei);
       }
     }
     if(drawobjects_as_vectors==0){
