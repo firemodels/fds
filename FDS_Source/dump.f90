@@ -16,7 +16,7 @@ USE DEVICE_VARIABLES
 USE CONTROL_VARIABLES
 USE OUTPUT_DATA
 USE SOOT_ROUTINES
-USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM, WRITE_GEOM_ALL
+USE COMPLEX_GEOMETRY, ONLY : WRITE_GEOM, WRITE_GEOM_ALL, WRITE_GEOM_DATA
 USE TYPES
 
 IMPLICIT NONE
@@ -52,7 +52,7 @@ PUBLIC ASSIGN_FILE_NAMES,INITIALIZE_GLOBAL_DUMPS,INITIALIZE_MESH_DUMPS,WRITE_STA
        TIMINGS,FLUSH_GLOBAL_BUFFERS,FLUSH_EVACUATION_BUFFERS,FLUSH_LOCAL_BUFFERS,READ_RESTART,WRITE_DIAGNOSTICS, &
        WRITE_SMOKEVIEW_FILE,DUMP_MESH_OUTPUTS,UPDATE_GLOBAL_OUTPUTS,DUMP_DEVICES,DUMP_HRR,DUMP_MASS, DUMP_CONTROLS,&
        INITIALIZE_DIAGNOSTIC_FILE,&
-       DUMP_UVW,DUMP_BNDC,DUMP_BNDE,DUMP_GEOM
+       DUMP_UVW,DUMP_BNDC,DUMP_BNDE,DUMP_GEOM,DUMP_GEOM_DIAG
        
 
 CONTAINS
@@ -71,7 +71,7 @@ CALL UPDATE_HRR(DT,NM)
 CALL UPDATE_MASS(DT,NM)
 CALL UPDATE_DEVICES(T,DT,NM)
 
-TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
+T_USED(7) = T_USED(7) + SECOND() - TNOW
 END SUBROUTINE UPDATE_GLOBAL_OUTPUTS
 
 
@@ -221,7 +221,7 @@ ELSE
 
 ENDIF EVACUATION_DUMP
 
-TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
+T_USED(7) = T_USED(7) + SECOND() - TNOW
 END SUBROUTINE DUMP_MESH_OUTPUTS
 
 
@@ -246,6 +246,10 @@ FN_END = TRIM(CHID)//'.end'
 ! GIT ID file
 
 FN_GIT = TRIM(CHID)//'_git.txt'
+
+! CPU (timings) file
+
+FN_CPU = TRIM(CHID)//'_cpu.csv'
 
 ! Smokeview File
 
@@ -504,6 +508,12 @@ IF (N_FACE>0 .OR. N_GEOMETRY>0) THEN
       WRITE(FN_GEOM(N),'(A,A,I2.2,A)') TRIM(CHID),'_',N,'.ge'
    ENDDO
 ENDIF
+IF (GEOM_DIAG) THEN
+   LU_GEOM_DIAG(1) = GET_FILE_NUMBER()
+   LU_GEOM_DIAG(2) = GET_FILE_NUMBER()
+   WRITE(FN_GEOM_DIAG(1),'(A,A,I2.2,A)') TRIM(CHID),'_DIAG',N,'.ge'
+   WRITE(FN_GEOM_DIAG(2),'(A,A,I2.2,A)') TRIM(CHID),'_DIAG',N,'.be'
+ENDIF
 
 ! TGA output
 
@@ -748,7 +758,7 @@ UNSTRUCTURED_GEOMETRY: IF (N_FACE>0 .AND.N_GEOMETRY==0) THEN ! don't do anything
    ENDDO
 ENDIF UNSTRUCTURED_GEOMETRY
 
-TUSED(7,:) = TUSED(7,:) + SECOND() - TNOW
+T_USED(7) = T_USED(7) + SECOND() - TNOW
 END SUBROUTINE INITIALIZE_GLOBAL_DUMPS
  
  
@@ -1222,7 +1232,7 @@ PROF_LOOP: DO N=1,N_PROF
    ENDIF
 ENDDO PROF_LOOP
 
-TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
+T_USED(7) = T_USED(7) + SECOND() - TNOW
 END SUBROUTINE INITIALIZE_MESH_DUMPS
  
  
@@ -1435,7 +1445,15 @@ IF (N_GEOMETRY>0) THEN
       ENDDO
    ENDIF
 ENDIF
- 
+
+! Write out info about geometry diagnostic file
+
+IF (GEOM_DIAG) THEN
+   WRITE(LU_SMV,'(/A)') 'GEOMDIAG'
+   WRITE(LU_SMV,'(1X,A)') FN_GEOM_DIAG(1)
+   WRITE(LU_SMV,'(1X,A)') FN_GEOM_DIAG(2)
+ENDIF
+
 ! Write out info about particle types
 
 EVAC_ONLY3: IF (.NOT. ALL(EVACUATION_ONLY)) THEN
@@ -2401,18 +2419,21 @@ WRITE(LU_OUTPUT,'(A,A/)')     ' Job ID string    : ',TRIM(CHID)
  
 IF (APPEND) RETURN
  
-MESH_LOOP: DO NM=1,NMESHES
-   M => MESHES(NM)
-   WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
-   WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
-   WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
-   WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
-ENDDO MESH_LOOP
+IF (.NOT.SUPPRESS_DIAGNOSTICS) THEN
+   MESH_LOOP: DO NM=1,NMESHES
+      M => MESHES(NM)
+      WRITE(LU_OUTPUT,'(/A,I5/)') ' Grid Dimensions, Mesh ',NM
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the X Direction      ',M%IBAR
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Y Direction      ',M%JBAR
+      WRITE(LU_OUTPUT,'(A,I8)')     '   Cells in the Z Direction      ',M%KBAR
+      WRITE(LU_OUTPUT,'(//A,I5/)')' Physical Dimensions, Mesh ',NM
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Length (m)                  ',M%XF-M%XS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Width  (m)                  ',M%YF-M%YS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Height (m)                  ',M%ZF-M%ZS
+      WRITE(LU_OUTPUT,'(A,F10.3)')  '   Initial Time Step (s)       ',DT
+   ENDDO MESH_LOOP
+ENDIF
+
 WRITE(LU_OUTPUT,'(//A/)')     ' Miscellaneous Parameters'
 IF (ABS(TIME_SHRINK_FACTOR -1._EB)>SPACING(1._EB)) &
 WRITE(LU_OUTPUT,'(A,F8.1)')   '   Time Shrink Factor (s/s)      ',TIME_SHRINK_FACTOR
@@ -2447,6 +2468,7 @@ DO NN=1,N_SPECIES
 ENDDO
 
 ! Print out information about species
+
 WRITE(LU_OUTPUT,'(//A)') ' Primitive Species Information'
 SPEC_LOOP: DO N=1,N_SPECIES
    SS => SPECIES(N)
@@ -2462,7 +2484,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
    IF (SS%H_F == -2.E23_EB) THEN
       WRITE(LU_OUTPUT,'(A,A)')    '   Enthalpy of Formation (J/kg)     ','not specified'
    ELSE
-      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F*1.E6_EB/SPECIES(N)%MW
+      WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F
    ENDIF
 ENDDO SPEC_LOOP
 
@@ -3187,21 +3209,57 @@ SUBROUTINE WRITE_DIAGNOSTICS(T,DT)
 USE SCRC, ONLY: SCARC_CAPPA, SCARC_ITERATIONS, SCARC_RESIDUAL
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER :: NM,II,JJ,KK
+CHARACTER(80) :: SIMPLE_OUTPUT,SIMPLE_OUTPUT_ERR
 CHARACTER(LABEL_LENGTH) :: DATE
 
 IF (ICYC==1) WRITE(LU_OUTPUT,100)
-CALL GET_DATE(DATE)
 
 IF (T<=0.0001) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.5,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSEIF (T>0.0001 .AND. T <=0.001) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.4,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSEIF (T>0.001 .AND. T<=0.01) THEN
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.3,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ELSE
-   WRITE(LU_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,',    Simulation Time:',T,' s'
+   WRITE(SIMPLE_OUTPUT,'(1X,A,I7,A,F10.2,A,F8.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s, Step Size:',DT,' s'
 ENDIF
+
+! Simple output without DT for .err file
+
+IF (T<=0.0001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.5,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.4,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSEIF (T>0.001 .AND. T<=0.01) THEN
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.3,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ELSE
+   WRITE(SIMPLE_OUTPUT_ERR,'(1X,A,I7,A,F10.2,A)')  'Time Step:',ICYC,', Simulation Time:',T,' s'
+ENDIF
+
+! Write simple output string to .err file
+
+WRITE(LU_ERR,'(A)') TRIM(SIMPLE_OUTPUT_ERR)
+
+! Write simple output string to .out file if the diagnostics are suppressed.
+
+IF (SUPPRESS_DIAGNOSTICS) THEN
+   WRITE(LU_OUTPUT,'(A)') TRIM(SIMPLE_OUTPUT)
+   RETURN
+ENDIF
+
+! Detailed diagnostics
+
+CALL GET_DATE(DATE)
 WRITE(LU_OUTPUT,'(7X,A,I7,3X,A)') 'Time Step ',ICYC,TRIM(DATE)
+IF (T<=0.0001) THEN
+   WRITE(LU_OUTPUT,150) DT,T
+ELSEIF (T>0.0001 .AND. T <=0.001) THEN
+   WRITE(LU_OUTPUT,151) DT,T
+ELSEIF (T>0.001 .AND. T <=0.01) THEN
+   WRITE(LU_OUTPUT,152) DT,T
+ELSE
+   WRITE(LU_OUTPUT,153) DT,T
+ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
    II = VELOCITY_ERROR_MAX_I(NM)
@@ -3222,18 +3280,7 @@ DO NM=1,NMESHES
    IF (EVACUATION_ONLY(NM)) CYCLE
    IF (NMESHES>1) WRITE(LU_OUTPUT,'(6X,A,I4)') ' Mesh ',NM
    M => MESHES(NM)
-   IF (T_ACCUM(NM)<60._EB) WRITE(LU_OUTPUT,110) T_PER_STEP(NM),T_ACCUM(NM)
-   IF (T_ACCUM(NM)>=60._EB .AND. T_ACCUM(NM)<3600._EB) WRITE(LU_OUTPUT,112) T_PER_STEP(NM),T_ACCUM(NM)/60._EB
-   IF (T_ACCUM(NM)>=3600._EB)  WRITE(LU_OUTPUT,113) T_PER_STEP(NM),T_ACCUM(NM)/3600._EB
-   IF (T<=0.0001) THEN
-      WRITE(LU_OUTPUT,150) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSEIF (T>0.0001 .AND. T <=0.001) THEN
-      WRITE(LU_OUTPUT,151) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSEIF (T>0.001 .AND. T <=0.01) THEN
-      WRITE(LU_OUTPUT,152) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ELSE
-      WRITE(LU_OUTPUT,153) DT,T, M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
-   ENDIF
+   WRITE(LU_OUTPUT,154) M%CFL,M%ICFL,M%JCFL,M%KCFL, M%DIVMX,M%IMX,M%JMX,M%KMX, M%DIVMN,M%IMN,M%JMN,M%KMN
    IF (ABS(M%RESMAX)>1.E-8_EB)  WRITE(LU_OUTPUT,133) M%RESMAX,M%IRM,M%JRM,M%KRM
    IF (ABS(M%POIS_PTB)>1.E-10_EB)  WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Pert. : ',M%POIS_PTB
    IF (CHECK_POISSON) WRITE(LU_OUTPUT,'(A,E9.2)') '       Poisson Error : ',M%POIS_ERR
@@ -3250,22 +3297,13 @@ WRITE(LU_OUTPUT,*)
 110 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' s')
 112 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' min')
 113 FORMAT(6X,' CPU/step:  ',E12.3,' s, Total CPU:  ',F10.2,' hr')
-150 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.5,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-151 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.4,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-152 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.3,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-153 FORMAT(6X,' Time step: ',E12.3,' s, Total time: ',F10.2,' s'/ &
-        6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-        6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
+150 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.5,' s')
+151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
+152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
+153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
+154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+           6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
+           6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
 133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
 230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
@@ -4795,12 +4833,6 @@ IND_SELECT: SELECT CASE(IND)
          ENDIF
       ENDIF
       
-   CASE(39)  ! CPU TIME PER STEP
-      IF (INITIALIZATION_PHASE) THEN
-         GAS_PHASE_OUTPUT_RES = 0._EB
-      ELSE
-         GAS_PHASE_OUTPUT_RES = T_PER_STEP(NM)
-      ENDIF
    CASE(40)  ! TIME
       GAS_PHASE_OUTPUT_RES = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
    CASE(41)  ! TIME STEP
@@ -4814,7 +4846,7 @@ IND_SELECT: SELECT CASE(IND)
          GAS_PHASE_OUTPUT_RES = WALL_CLOCK_TIME() - WALL_CLOCK_START_ITERATIONS
       ENDIF
    CASE(44)  ! CPU TIME
-      GAS_PHASE_OUTPUT_RES = SECOND() - TUSED(1,NM)
+      GAS_PHASE_OUTPUT_RES = SECOND() - T_USED(1)
    CASE(45)  ! ITERATION
       GAS_PHASE_OUTPUT_RES = ICYC
       
@@ -5217,8 +5249,7 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = ZETA_SOURCE_TERM(II,JJ,KK)
 
    CASE(138) ! HRRPUV REAC
-      GAS_PHASE_OUTPUT_RES = -REAC_SOURCE_TERM(II,JJ,KK,REACTION(REAC_INDEX)%FUEL_SMIX_INDEX)*&
-                             REACTION(REAC_INDEX)%HEAT_OF_COMBUSTION/1000._EB
+      GAS_PHASE_OUTPUT_RES = Q_REAC(II,JJ,KK,REAC_INDEX)/1000._EB
 
    CASE(154:155) ! TRANSMISSION, PATH OBSCURATION
       EXT_COEF   = 0._EB
@@ -6966,6 +6997,25 @@ CALL WRITE_GEOM(STIME)
 
 END SUBROUTINE DUMP_GEOM
 
+SUBROUTINE DUMP_GEOM_DIAG(STIME)
+   REAL(EB), INTENT(IN) :: STIME
+
+   REAL(FB) :: VERTS(9), VERTDATA(3), TRIDATA(1)
+   INTEGER :: TRIANGLES(3), NVERTS, NTRIANGLES, NVERTDATA, NTRIDATA
+
+! for now only output diagnostic data once at the beginning of a simulation
+   IF(ABS(STIME-T_BEGIN)<TWO_EPSILON_EB)RETURN
+
+! dummy example - 1 triangle   
+   NVERTS = 3
+   NTRIANGLES = 1
+   NVERTDATA = 0
+   NTRIDATA = 1
+   VERTS(1:9)=(/0.0_FB,0.0_FB,0.0_FB,1.0_FB,0.0_FB,0.0_FB,1.0_FB,0.0_FB,1.0_FB/)
+   TRIANGLES(1:3)=(/1,2,3/)
+   TRIDATA(1) = 1.0_FB
+   CALL WRITE_GEOM_DATA(VERTS, NVERTS, TRIANGLES, NTRIANGLES, VERTDATA, NVERTDATA, TRIDATA, NTRIDATA)
+END SUBROUTINE DUMP_GEOM_DIAG
 
 SUBROUTINE DUMP_BNDF_TO_SLCF(T,NM)
 
@@ -7204,14 +7254,12 @@ SUBROUTINE TIMINGS
 ! Print out detector activation times and subroutine CPU usage
  
 USE COMP_FUNCTIONS, ONLY: WALL_CLOCK_TIME
-REAL(EB) :: TPCNT(N_TIMERS_DIM)
-CHARACTER(6) :: NAME(N_TIMERS_DIM)
-INTEGER :: NM,I,N
+INTEGER :: I,N
 TYPE(CONTROL_TYPE), POINTER :: CF=>NULL()
 
 ! Print out detector times
  
-IF (N_DEVC > 0) THEN
+IF (MYID==0 .AND. N_DEVC > 0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' DEVICE Activation Times'
    DO N=1,N_DEVC
       DV => DEVICE(N)
@@ -7221,7 +7269,7 @@ IF (N_DEVC > 0) THEN
    ENDDO
 ENDIF
 
-IF (N_CTRL > 0) THEN
+IF (MYID==0 .AND. N_CTRL > 0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' CONTROL Activation Times'
    DO N=1,N_CTRL
       CF => CONTROL(N)
@@ -7232,64 +7280,20 @@ ENDIF
 
 ! Printout subroutine timings
  
-NAME     = 'null'
-NAME(1)  = 'MAIN'
-NAME(2)  = 'DIVG'
-NAME(3)  = 'MASS'
-NAME(4)  = 'VELO'
-NAME(5)  = 'PRES'
-NAME(6)  = 'WALL'
-NAME(7)  = 'DUMP'
-NAME(8)  = 'PART'
-NAME(9)  = 'RADI'
-NAME(10) = 'FIRE'
-NAME(11) = 'COMM'
-NAME(12) = 'EVAC'
-NAME(13) = ' FOR'
-NAME(14) = ' P2P'
-NAME(15) = ' MOV'
-NAME(16) = 'HVAC'
-! Additional timings
-NAME(17) = 'MEX2'
-NAME(18) = 'MEX3'
-NAME(19) = 'MEX4'
-NAME(20) = 'MEX5'
-NAME(21) = 'MEX6'
+IF (MYID==0) THEN
+   OPEN(LU_CPU,FILE=FN_CPU,FORM='FORMATTED',STATUS='REPLACE')
+   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,EVAC,HVAC,Total T_USED (s)'
+ELSE
+   OPEN(LU_CPU,FILE=FN_CPU,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
+ENDIF
 
-DO NM=1,NMESHES
-   DO I=1,N_TIMERS_DIM
-      TPCNT(I) = 100._EB*TUSED(I,NM)/TUSED(1,NM)
-   ENDDO
-   IF(EVACUATION_SKIP(NM)) CYCLE
-   IF (EVACUATION_ONLY(NM)) THEN
-      IF (HVAC_SOLVE) THEN
-         WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS_HVAC)
-         WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') 'SubTot',SUM(TUSED(2:N_TIMERS_HVAC-3,NM)),SUM(TPCNT(2:N_TIMERS_HVAC-3))
-      ELSE
-         WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS_EVAC)
-         WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') 'SubTot',SUM(TUSED(2:N_TIMERS_EVAC-3,NM)),SUM(TPCNT(2:N_TIMERS_EVAC-3))
-      ENDIF
-   ELSE
-      IF(HVAC_SOLVE) THEN
-         WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS_FDS)
-         WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') NAME(16),TUSED(16,NM),TPCNT(16)
-         WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') 'SubTot',SUM(TUSED(2:N_TIMERS_FDS,NM))+TUSED(16,NM),SUM(TPCNT(2:N_TIMERS_FDS))+TPCNT(16)
-      ELSE
-         WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=1,N_TIMERS_FDS)
-         WRITE(LU_OUTPUT,'(7X,A6,2F11.2)') 'SubTot',SUM(TUSED(2:N_TIMERS_FDS,NM)),SUM(TPCNT(2:N_TIMERS_FDS))
-      ENDIF
-   ENDIF 
-   !WRITE(LU_OUTPUT,443) NM,(NAME(I),TUSED(I,NM),TPCNT(I),I=16,N_TIMERS_DIM)
-ENDDO
+WRITE(LU_CPU,'(I4,14(",",ES10.3))') MYID,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS))
  
-443 FORMAT(//' CPU Time Usage, Mesh ',I3// &
-         '                 CPU (s)        %  '/ &
-         '       ----------------------------'/ &
-         (7X,A6,2F11.2))
- 
-WALL_CLOCK_END = WALL_CLOCK_TIME()
-WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
-WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+IF (MYID==0) THEN
+   WALL_CLOCK_END = WALL_CLOCK_TIME()
+   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
+   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
+ENDIF
 
 END SUBROUTINE TIMINGS
 

@@ -1,0 +1,22 @@
+&HEAD CHID='geom_elev' /
+
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+&SURF ID='surf2',RGB=0,255,0 /
+&SURF ID='surf3',RGB=0,0,255 /
+
+***AZIMUTHAL TEST
+
+&GEOM ID='geom1',
+        VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+        FACES=1,2,3,ELEV=0,XYZ0=0.0,0.0,1.0,SURF_ID='surf1'/
+
+
+&GEOM ID='geom2',
+        VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+        FACES=1,2,3,ELEV=45,XYZ0=0.0,0.0,1.0,SURF_ID='surf2'/
+
+&GEOM ID='geom3',
+        VERTS=0.0,0.0,1.0,1.0,0.0,1.0,1.0,1.0,1.0,
+        FACES=1,2,3,ELEV=90,XYZ0=0.0,0.0,1.0,SURF_ID='surf3'/
