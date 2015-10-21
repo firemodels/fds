@@ -93,5 +93,6 @@ hot_layer_collapse
 radiating_polygon
 saad_mms_temporal_error
 shunn_mms_temporal_error
+scaling_tests
 
 display('verification scripts completed successfully!')

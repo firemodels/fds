@@ -6582,7 +6582,7 @@ CONTAINS
     END DO EVAC_CLASS_LOOP ! ipc, number of evac-lines
 
     WRITE (LU_EVACOUT,fmt='(a,f8.2,a,i0,a,i0/)') ' EVAC: Time ', 0.0_EB,' mesh ',nm,' number of humans ',n_humans
-    TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+SECOND()-TNOW
     !
   END SUBROUTINE INITIALIZE_EVACUATION
 
@@ -6605,6 +6605,8 @@ CONTAINS
     !
     IF (.NOT.ANY(EVACUATION_ONLY)) RETURN
     IF (STOP_STATUS > 0) RETURN
+
+    TNOW=SECOND()
 
     !
     ilh_dim = ilh           ! lonely humans dimension
@@ -6655,7 +6657,6 @@ CONTAINS
        N_CHANGE_TRIALS = 0 ! Count the initialization Nash equilibrium iterations
        I_CHANGE_OLD    = -1
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EMESH_INDEX(NOM)>0) ) CYCLE
-       TNOW=SECOND()
        M => MESHES(NOM)
        GROUP_LIST(:)%GROUP_SIZE  = 0
        GROUP_LIST(:)%GROUP_X = 0.0_EB
@@ -6775,7 +6776,6 @@ CONTAINS
        IF (ABS(FAC_DOOR_QUEUE) >= TWO_EPSILON_EB) WRITE(LU_EVACOUT,FMT='(A,F14.2,A,I8)') &
             ' INIT: Changes per agent ', REAL(N_CHANGE_DOORS,EB)/REAL(M%N_HUMANS,EB), &
             ', Nash iterations', N_CHANGE_TRIALS/M%N_HUMANS
-       TUSED(12,NOM)=TUSED(12,NOM)+SECOND()-TNOW
     END DO                  ! 1, NMESHES
 
     WRITE (LU_EVACOUT,FMT='(/A)') ' EVAC: Initial positions of the agents'
@@ -6786,7 +6786,6 @@ CONTAINS
     I_EGRID = 0
     DO NOM = 1, NMESHES
        IF ( .NOT.(EVACUATION_ONLY(NOM) .AND. EMESH_INDEX(NOM)>0) ) CYCLE
-       TNOW=SECOND()
        M => MESHES(NOM)
        I_EGRID = I_EGRID + 1
        DO I = 1, M%N_HUMANS
@@ -6827,10 +6826,10 @@ CONTAINS
                HR%X, HR%Y, HR%Z, HR%TPRE, HR%TDET,2.0_EB*HR%RADIUS, &
                HR%SPEED, HR%TAU, HR%GROUP_ID, HR%I_FFIELD, HR%COLOR_INDEX
        END DO
-       TUSED(12,NOM)=TUSED(12,NOM)+SECOND()-TNOW
     END DO
     WRITE (LU_EVACOUT,FMT='(/)')
 
+    T_USED(12)=T_USED(12)+SECOND()-TNOW
   END SUBROUTINE INIT_EVAC_GROUPS
 !
   SUBROUTINE EVAC_MESH_EXCHANGE(T,T_SAVE,I_MODE, ICYC, EXCHANGE_EVACUATION, MODE)
@@ -6886,6 +6885,8 @@ CONTAINS
     !                 GOTO 2. (TIME POINTS)
     !
     ! Update interval (seconds) fire ==> evac information
+  
+    TNOW = SECOND()
     DT_SAVE = 2.0_EB
     IOS = 0
     L_USE_FED  = .FALSE.
@@ -6945,7 +6946,6 @@ CONTAINS
        MESH_LOOP: DO NM=1,NMESHES
           IF ( .NOT.(EVACUATION_ONLY(NM) .AND. EMESH_INDEX(NM)>0) ) CYCLE
           !
-          TNOW=SECOND()
           CALL POINT_TO_MESH(NM)
           IF (L_FED_SAVE) THEN
              IBAR_TMP = IBAR
@@ -7004,7 +7004,6 @@ CONTAINS
              END DO     ! J=1,JBAR
           END DO       ! I=1,IBAR
 
-          TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
        END DO MESH_LOOP
 
        ! Next loop interpolates fire mesh (soot+fed) into human_grids and
@@ -7167,6 +7166,7 @@ CONTAINS
        T_SAVE = 1.0E15
     END IF
 
+    T_USED(12) = T_USED(12) + SECOND() - TNOW
   END SUBROUTINE EVAC_MESH_EXCHANGE
 !
   SUBROUTINE PREPARE_TO_EVACUATE(ICYC)
@@ -7316,7 +7316,7 @@ CONTAINS
     REAL(EB) :: HERDING_LIST_P2PMAX, R_HERD_HR, DOT_HERD_HR
     !
     REAL(EB) :: D_HUMANS_MIN, D_WALLS_MIN
-    REAL(EB) :: TNOW, TNOW13, TNOW14, TNOW15
+    REAL(EB) :: TNOW
     !
     LOGICAL :: NM_STRS_MESH
     REAL(EB), DIMENSION(N_SECTORS+1) :: SUM_SUUNTA, U_THETA, V_THETA, COS_THETA, SIN_THETA, THETAS
@@ -7998,7 +7998,6 @@ CONTAINS
        ! (The 'dissipative' self-driving force contribution to the velocities is updated self-consistently,
        ! but the other terms are not.)
        ! ========================================================
-       TNOW15=SECOND()
        D_HUMANS_MIN = HUGE(D_HUMANS_MIN)
        D_WALLS_MIN  = HUGE(D_WALLS_MIN)
        IF (C_HAWK >= 0.0_EB) N_HawkDoveCount(:,I_EGRID) = 0
@@ -8644,7 +8643,6 @@ CONTAINS
        DTSP_NEW = MIN(DTSP_NEW, EVAC_DT_MAX)
 
        SPEED_MAX  = 0.0_EB
-       TUSED(15,NM)=TUSED(15,NM)+SECOND()-TNOW15  ! CPU timing
 
        ! ================================================
        ! Prepare to calculate the new forces, initialize different variables and arrays for the step 3 of
@@ -8746,7 +8744,6 @@ CONTAINS
        ! ========================================================
        ! Step (3) of SC-VV starts here: Calculate new forces
        ! ========================================================
-       TNOW13=SECOND()
        EVAC_FORCE_LOOP: DO I=1,N_HUMANS
           HR => HUMAN(I)
           IF (HR%IEL > 0) THEN
@@ -9156,7 +9153,6 @@ CONTAINS
           P2P_U      = 0.0_EB
           P2P_V      = 0.0_EB
           P2P_TORQUE = 0.0_EB
-          TNOW14=SECOND()   ! PERSON-PERSON FORCE LOOP TIMING
           ! ========================================================
           ! Collision avoidance (incl. counterflow)
           ! ========================================================
@@ -9573,7 +9569,6 @@ CONTAINS
                 !END IF
              END IF
           END IF Hawk_Dove_Game2
-          TUSED(14,NM)=TUSED(14,NM)+SECOND()-TNOW14
           ! ========================================================
           ! Person-person interaction forces ends here
           ! ========================================================
@@ -10180,7 +10175,6 @@ CONTAINS
           END IF
 
        END DO EVAC_FORCE_LOOP
-       TUSED(13,NM)=TUSED(13,NM)+SECOND()-TNOW13
        DEALLOCATE(BLOCK_LIST)
        DEALLOCATE(BLOCK_GRID)
        ! ========================================================
@@ -10200,7 +10194,7 @@ CONTAINS
     ! ========================================================
     ! Evacuation routine ends here
     ! ========================================================
-    TUSED(12,NM)=TUSED(12,NM)+SECOND()-TNOW
+    T_USED(12)=T_USED(12)+SECOND()-TNOW
 
   CONTAINS
 
@@ -14990,7 +14984,7 @@ CONTAINS
     END DO HUMAN_CLASS_LOOP
 
     !
-    TUSED(7,NM) = TUSED(7,NM) + SECOND() - TNOW
+    T_USED(12) = T_USED(12) + SECOND() - TNOW
   END SUBROUTINE DUMP_EVAC
 !
   FUNCTION GaussRand( gmean, gtheta, gcutmult )
