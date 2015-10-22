@@ -93,5 +93,6 @@ hot_layer_collapse
 radiating_polygon
 saad_mms_temporal_error
 shunn_mms_temporal_error
+hrrpuv_reac_output
 
 display('verification scripts completed successfully!')
