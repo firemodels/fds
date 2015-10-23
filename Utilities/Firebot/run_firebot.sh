@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 running=bot_running
 if [ -e bot_running ] ; then
   echo Firebot is already running.
@@ -67,7 +67,7 @@ case $OPTION  in
    UPDATEREPO=1
    ;;
   v)
-   RUNFIREBOT=
+   RUNFIREBOT=0
    ;;
 esac
 done
@@ -77,17 +77,19 @@ if [[ "$EMAIL" != "" ]]; then
   EMAIL="-m $EMAIL"
 fi
 if [[ "$UPDATEREPO" == "1" ]]; then
-    UPDATE=-u
+   UPDATE=-u
    cd $reponame
-   git remote update
-   git checkout $BRANCH
-   git merge origin/$BRANCH
-   cd Utilities/Firebot
-   FIREBOTDIR=`pwd`
-   if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
-     cp $botscript $CURDIR/.
-   fi
-   cd $CURDIR
+   if [[ "$RUNFIREBOT" == "1" ]]; then
+     git remote update
+     git checkout $BRANCH
+     git merge origin/$BRANCH
+     cd Utilities/Firebot
+     FIREBOTDIR=`pwd`
+     if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
+       cp $botscript $CURDIR/.
+     fi
+     cd $CURDIR
+  fi
 fi
 if [[ "$CLEANREPO" == "1" ]]; then
   CLEAN=-c
