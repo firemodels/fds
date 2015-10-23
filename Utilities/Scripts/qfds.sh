@@ -204,6 +204,10 @@ TITLE="$infile"
 
 # define number of nodes
 
+if test $nmpi_processes_per_node -gt $ncores ; then
+  nmpi_processes_per_node=$ncores
+fi
+
 if test $nmpi_processes_per_node = -1 ; then
   if test $nmpi_processes -gt 1 ; then
     nmpi_processes_per_node=2
