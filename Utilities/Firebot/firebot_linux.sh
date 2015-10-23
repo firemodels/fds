@@ -33,18 +33,18 @@ if [ "$platform" == "linux" ] ; then
 fi
 
 # Additional definitions
+QUEUE=firebot
 BRANCH=development
-FORCECLEANREPO=0
-UPDATEREPO=1
-FIREBOT_RUNDIR=~/firebotgit
+CLEANREPO=0
+UPDATEREPO=0
+FIREBOT_RUNDIR=.
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
 HISTORY_DIR="$FIREBOT_RUNDIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-MANUAL_DIR=~/MANUALS
-UPLOADGUIDES=./fds_guides2GD.sh
+UPLOADGUIDES=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
 
 if [ "$FDSSMV" == "" ] ; then
   FDSSMV=~/FDS-SMVgitclean
@@ -66,18 +66,18 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo ""
-echo "-f - force repo to be updated and cleaned"
+echo "-c - clean repo"
 echo ""
 echo "-h - display this message"
 echo ""
 echo "-m email_address "
 echo ""
-echo "-n - do not update/clean repo"
-echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
-echo "     default: firebot"
+echo "     default: $QUEUE"
 echo ""
 echo "-r - repository location [default: $FDSSMV]"
+echo ""
+echo "-u - update repo"
 echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
@@ -85,17 +85,15 @@ echo ""
 exit
 }
 
-QUEUE=firebot
 GIT_REVISION=
-while getopts 'b:fhm:nq:r:v:' OPTION
+while getopts 'b:cfhm:nq:r:uv:' OPTION
 do
 case $OPTION in
   b)
    BRANCH="$OPTARG"
    ;;
-  f)
-   FORCECLEANREPO=1
-   UPDATEREPO=1
+  c)
+   CLEANREPO=1
    ;;
   h)
    usage;
@@ -103,14 +101,14 @@ case $OPTION in
   m)
    mailToFDS="$OPTARG"
    ;;
-  n)
-   UPDATEREPO=0
-   ;;
   q)
    QUEUE="$OPTARG"
    ;;
   r)
    FDSSMV="$OPTARG"
+   ;;
+  u)
+   UPDATEREPO=1
    ;;
   v)
    FIREBOT_MODE="validation"
@@ -127,21 +125,6 @@ shift $(($OPTIND-1))
 export FDSSMV
 FIREBOT_HOME_DIR=$(dirname "${FDSSMV}")
 FDS_GITBASE=`basename $FDSSMV`
-
-#  ====================
-#  = End user warning =
-#  ====================
-
-if [[ "$FDS_GITBASE" == "FDS-SMVgitclean" ]]; then
-      # Continue along
-      :
-   else
-      if [[ "$FORCECLEANREPO" == "0" ]]; then
-         UPDATEREPO=0 
-      fi
-
-fi
-
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
@@ -232,7 +215,7 @@ clean_git_repo()
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $FDSSMV
-      if [[ "$UPDATEREPO" == "1" ]] ; then
+      if [[ "$CLEANREPO" == "1" ]] ; then
 # remove unversioned files
         git clean -dxf &> /dev/null
 # revert to last revision
@@ -1078,9 +1061,6 @@ check_guide()
       cp $2 $NEWGUIDE_DIR/.
       chmod 664 $NEWGUIDE_DIR/$2
    fi
-   if [[ -e $2 ]] ; then
-     cp $2 $MANUAL_DIR/.
-   fi
 }
 
 make_fds_user_guide()
@@ -1274,7 +1254,7 @@ fi
 
 # clean debug stage
 cd $FDSSMV
-if [[ "$UPDATEREPO" == "1" ]] ; then
+if [[ "$CLEANREPO" == "1" ]] ; then
    git clean -dxf &> /dev/null
 fi
 
