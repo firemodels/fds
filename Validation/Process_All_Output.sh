@@ -33,6 +33,7 @@ $VDIR/LEMTA_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
+$VDIR/MPI_Scaling_Tests/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_Douglas_Firs/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_FSE_2008/FDS_Output_Files/Process_Output.csh
