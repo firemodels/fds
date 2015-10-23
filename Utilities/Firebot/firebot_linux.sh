@@ -127,7 +127,6 @@ export FDSSMV
 FIREBOT_HOME_DIR=$(dirname "${FDSSMV}")
 FDS_GITBASE=`basename $FDSSMV`
 UPLOADGUIDES=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
-exit
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
