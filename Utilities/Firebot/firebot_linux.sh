@@ -16,6 +16,15 @@
 # Firebot mode (verification or validation); default mode: verification
 FIREBOT_MODE="verification"
 
+# define run directories
+FIREBOT_RUNDIR=`pwd`
+OUTPUT_DIR="$FIREBOT_RUNDIR/output"
+HISTORY_DIR="$FIREBOT_RUNDIR/history"
+TIME_LOG=$OUTPUT_DIR/timings
+ERROR_LOG=$OUTPUT_DIR/errors
+WARNING_LOG=$OUTPUT_DIR/warnings
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+
 # Change to home directory
 cd
 FIREBOT_HOME_DIR="`pwd`"
@@ -37,14 +46,6 @@ QUEUE=firebot
 BRANCH=development
 CLEANREPO=0
 UPDATEREPO=0
-FIREBOT_RUNDIR=.
-OUTPUT_DIR="$FIREBOT_RUNDIR/output"
-HISTORY_DIR="$FIREBOT_RUNDIR/history"
-TIME_LOG=$OUTPUT_DIR/timings
-ERROR_LOG=$OUTPUT_DIR/errors
-WARNING_LOG=$OUTPUT_DIR/warnings
-NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-UPLOADGUIDES=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
 
 if [ "$FDSSMV" == "" ] ; then
   FDSSMV=~/FDS-SMVgitclean
@@ -125,6 +126,8 @@ shift $(($OPTIND-1))
 export FDSSMV
 FIREBOT_HOME_DIR=$(dirname "${FDSSMV}")
 FDS_GITBASE=`basename $FDSSMV`
+UPLOADGUIDES=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
+exit
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
