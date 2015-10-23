@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 running=bot_running
 if [ -e bot_running ] ; then
   echo Firebot is already running.
