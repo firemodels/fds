@@ -4,7 +4,8 @@
 ::  (all command arguments are optional)
 
 set altemail=0
-set update=1
+set clean=0
+set update=0
 set stopscript=0
 
 set cfastrepo=%userprofile%\cfastgitclean
@@ -82,7 +83,7 @@ if exist %running% goto skip_running
 :: run smokebot
 
   echo 1 > %running%
-  call smokebot_win.bat %cfastrepo% %fdsrepo% %update% %altemail% %emailto%
+  call smokebot_win.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
   erase %running%
   goto end_running
 :skip_running
@@ -121,9 +122,18 @@ goto eof
    set valid=1
    set altemail=1
  )
- if /I "%1" EQU "-noupdate" (
+ if /I "%1" EQU "-bot" (
    set valid=1
-   set update=0
+   set clean=1
+   set update=1
+ )
+ if /I "%1" EQU "-clean" (
+   set valid=1
+   set clean=1
+ )
+ if /I "%1" EQU "-update" (
+   set valid=1
+   set update=1
  )
  shift
  if %valid% == 0 (
@@ -146,12 +156,14 @@ echo -cfastrepo name - specify the cfast repository
 echo       (default: %cfastrepo%) 
 echo -fdsrepo name   - specify the FDS-SMV repository
 echo       (default: %fdsrepo%) 
-echo -altemail        - use an alternate email server
+echo -altemail       - use an alternate email server
 echo -email address  - override "to" email addresses specified in repo 
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
-echo -noupdate       - do not update repository
+echo -bot            - clean and update repository
+echo -clean          - clean repository
+echo -update         - update repository
 exit /b
 
 :normalise
