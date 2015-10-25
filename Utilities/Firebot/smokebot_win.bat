@@ -90,6 +90,10 @@ echo.
 echo    cfast repo: %cfastroot%
 echo      FDS repo: %fdsroot%
 echo run directory: %CURDIR%
+if %update% == 1 echo updating repo: yes
+if %update% == 0 echo updating repo: no
+if %clean% == 1 echo cleaning repo: yes
+if %clean% == 0 echo cleaning repo: no
 echo.
 
 :: -------------------------------------------------------------
@@ -165,7 +169,7 @@ echo. 1> %OUTDIR%\stage0.txt 2>&1
 :: clean cfast repository
 
 cd %cfastroot%
-if "%clean%" == 0 goto skip_clean1
+if %clean% == 0 goto skip_clean1
    echo             reverting %cfastbasename% repository
    cd %cfastroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
@@ -175,7 +179,7 @@ if "%clean%" == 0 goto skip_clean1
 
 :: update cfast repository
 
-if "%update%" == 0 goto skip_update1
+if %update% == 0 goto skip_update1
   echo             updating %cfastbasename% repository
   cd %cfastroot%
   git fetch origin
@@ -184,7 +188,7 @@ if "%update%" == 0 goto skip_update1
 
 :: clean FDS/Smokeview repository
 
-if "%clean%" == 0 goto skip_clean2
+if %clean% == 0 goto skip_clean2
    echo             reverting %fdsbasename% repository
    cd %fdsroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
@@ -194,7 +198,7 @@ if "%clean%" == 0 goto skip_clean2
 
 :: update FDS/Smokeview repository
 
-if "%update%" == 0 goto skip_update2
+if %update% == 0 goto skip_update2
   cd %fdsroot%
   echo             updating %fdsbasename% repository
   git fetch origin
