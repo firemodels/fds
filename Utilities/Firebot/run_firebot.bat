@@ -1,10 +1,11 @@
 @echo off
 :: usage: 
-::  run_firebot -fdsrepo name -altemail -email address -nomatlab -noupdate
+::  run_firebot -fdsrepo name -altemail -email address -nomatlab -update -clean  
 ::  (all command arguments are optional)
 
 set altemail=0
-set update=1
+set update=0
+set clean=0
 set usematlab=1
 set stopscript=0
 
@@ -61,7 +62,7 @@ if exist %running% goto skip_running
 :: run firebot
 
   echo 1 > %running%
-  call firebot_win.bat %fdsrepo% %update% %altemail% %usematlab% %emailto%
+  call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %emailto%
   erase %running%
   goto end_running
 :skip_running
@@ -95,9 +96,18 @@ goto eof
    set valid=1
    set altemail=1
  )
- if /I "%1" EQU "-noupdate" (
+ if /I "%1" EQU "-bot" (
    set valid=1
-   set update=0
+   set clean=1
+   set update=1
+ )
+ if /I "%1" EQU "-clean" (
+   set valid=1
+   set clean=1
+ )
+ if /I "%1" EQU "-update" (
+   set valid=1
+   set update=1
  )
  if /I "%1" EQU "-nomatlab" (
    set valid=1
@@ -128,7 +138,9 @@ if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
 echo -nomatlab       - do not use matlab
-echo -noupdate       - do not update repository
+echo -bot            - clean and update repository
+echo -clean          - clean repository
+echo -update         - update repository
 exit /b
 
 :normalise
