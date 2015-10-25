@@ -170,7 +170,7 @@ echo. 1> %OUTDIR%\stage0.txt 2>&1
 
 cd %cfastroot%
 if %clean% == 0 goto skip_clean1
-   echo             reverting %cfastbasename% repository
+   echo             cleaning %cfastbasename% repository
    cd %cfastroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
    git add . 1>> %OUTDIR%\stage0.txt 2>&1
@@ -189,7 +189,7 @@ if %update% == 0 goto skip_update1
 :: clean FDS/Smokeview repository
 
 if %clean% == 0 goto skip_clean2
-   echo             reverting %fdsbasename% repository
+   echo             cleaning %fdsbasename% repository
    cd %fdsroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
    git add . 1>> %OUTDIR%\stage0.txt 2>&1
