@@ -1171,7 +1171,15 @@ void script_loadslicem(scriptdata *scripti, int meshnum){
     if(slicei->blocknumber + 1 != meshnum)continue;
     if(match_upper(slicei->label.longlabel, scripti->cval) == NOTMATCH)continue;
     if(scripti->ival == 0){
+      int *min, *max;
+      mesh *meshi;
+
       if(slicei->volslice == 0)continue;
+      min = slicei->ijk_min;
+      max = slicei->ijk_max;
+      if(min[0] != 0 || min[1] != 0 || min[2] != 0)continue;
+      meshi = meshinfo + slicei->blocknumber;
+      if(max[0] != meshi->ibar || max[1] != meshi->jbar || max[2] != meshi->kbar)continue;
     }
     else{
       if(slicei->idir != scripti->ival)continue;

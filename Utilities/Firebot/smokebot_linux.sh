@@ -1,11 +1,8 @@
 #!/bin/bash
 
 # Smokebot
-# This script is a simplified version of Kris Overholt's firebot script.
-# It runs the smokeview verification suite (not FDS) on the latest
-# revision of the repository.  It does not erase files that are not
-# in the repository.  This allows one to test working files before they
-# have been committed.  
+# This script is derived from Kris Overholt's firebot script. 
+# It tests smokeview by running the smokeview verification suite
 
 #  ===================
 #  = Input variables =
@@ -22,7 +19,8 @@ RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 TESTFLAG=
-FORCECLEANREPO=0
+CLEANREPO=0
+UPDATEREPO=0
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -43,7 +41,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:fmo:q:r:st' OPTION
+while getopts 'ab:cmo:q:r:stu' OPTION
 do
 case $OPTION in
   a)
@@ -52,8 +50,8 @@ case $OPTION in
   b)
    BRANCH="$OPTARG"
    ;;
-  f)
-   FORCECLEANREPO=1
+  c)
+   CLEANREPO=1
    ;;
   m)
    MAKEMOVIES="1"
@@ -75,24 +73,14 @@ case $OPTION in
   t)
    TESTFLAG="-t"
    ;;
+  u)
+   UPDATEREPO=1
+   ;;
 esac
 done
 shift $(($OPTIND-1))
 
 FDS_GITBASE=`basename $reponame`
-
-if [[ "$FDS_GITbase" == "FDS-SMVgitclean" ]]; then
-      # Continue along
-      :
-   else
-      if [[ "$FORCECLEANREPO" == "0" ]]; then
-         echo "Error: Smokebot needs to remove all unversioned files in $FDS_GITbase."
-         echo "To allow this, re-run using the -f option."
-         echo "Terminating smokebot."
-         exit
-      fi
-
-fi
 
 DB=_db
 IB=
@@ -194,8 +182,10 @@ run_auto()
   else
      BRANCH=$CURRENT_BRANCH
   fi
-  echo Pulling latest revision of branch $BRANCH.
-  git pull 
+  if [[ "$UPDATE" == "1" ]] ; then
+    echo Update the branch $BRANCH.
+    git pull 
+  fi
 
 # get info for smokeview
   cd $SMV_SOURCE
@@ -322,21 +312,23 @@ update_and_compile_cfast()
    if [ -e "$cfastroot" ]
    # If yes, then update the CFAST repository and compile CFAST
    then
-      echo "Updating and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
-      cd $cfastroot
-      git clean -dxf > /dev/null
-      git add . > /dev/null
-      git reset --hard HEAD > /dev/null
+      if [ "$CLEANREPO" == "1" ]; then
+        echo "Cleaning cfast repo:" > $OUTPUT_DIR/stage0_cfast
+        cd $cfastroot
+        git clean -dxf > /dev/null
+        git add . > /dev/null
+        git reset --hard HEAD > /dev/null
+      fi
 
       # Update to latest GIT revision
-      git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
-      
-   # If no, then checkout the CFAST repository and compile CFAST
+      if [ "$UPDATEREPO" == "1" ]; then
+        echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
+        git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
+      fi
    else
-      echo "Downloading and compiling CFAST:" > $OUTPUT_DIR/stage0_cfast
-      cd $SMV_HOME_DIR
-
-      git clone git@github.com:firemodels/cfast.git $cfastbase >> $OUTPUT_DIR/stage0_cfast 2>&1
+      echo "The cfast repo $cfastroot does not exist"
+      echo "Aborting  smokebot"
+      exit
    fi
     # Build CFAST
     cd $cfastroot/CFAST/intel_${platform}_64
@@ -367,16 +359,16 @@ clean_git_repo()
    # Check to see if FDS repository exists
    if [ -e "$fdsroot" ]
    then
-      cd $fdsroot
-      git clean -dxf > /dev/null
-      git add . > /dev/null
-      git reset --hard HEAD > /dev/null
-   # If not, create FDS repository and checkout
-     dummy=true
+      if [ "$CLEANREPO" == "1" ]; then
+        cd $fdsroot
+        git clean -dxf > /dev/null
+        git add . > /dev/null
+        git reset --hard HEAD > /dev/null
+      fi
    else
-      echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
-      cd $SMOKEBOT_HOME_DIR
-      git clone git@github.com:firemodels/fds-smv.git $FDS_GITbase >> $OUTPUT_DIR/stage1 2>&1
+      echo "The FDS repository $fdsroot does not exist." >> $OUTPUT_DIR/stage1 2>&1
+      echo "Aborting smokebot" >> $OUTPUT_DIR/stage1 2>&1
+      exit
    fi
 }
 
@@ -387,7 +379,8 @@ do_git_checkout()
    CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
    if [[ "$BRANCH" != "" ]] ; then
      if [[ `git branch | grep $BRANCH` == "" ]] ; then 
-        echo "Error: the branch $BRANCH does not exist. Terminating script."
+        echo "Error: the branch $BRANCH does not exist."
+        echo "Aborting smokebot"
         exit
      fi
      if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
@@ -397,8 +390,10 @@ do_git_checkout()
    else
       BRANCH=$CURRENT_BRANCH
    fi
-   echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-   git pull >> $OUTPUT_DIR/stage1 2>&1
+   if [ "$UPDATEREPO" == "1" ]; then
+     echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+     git pull >> $OUTPUT_DIR/stage1 2>&1
+   fi
    GIT_REVISION=`git describe --long --dirty`
 }
 
@@ -486,8 +481,10 @@ run_verification_cases_debug()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   cd $fdsroot/Verification
-   git clean -dxf > /dev/null
+   if [ "$CLEANREPO" == "1" ]; then
+     cd $fdsroot/Verification
+     git clean -dxf > /dev/null
+   fi
 
    #  =====================
    #  = Run all SMV cases =
@@ -699,8 +696,10 @@ run_verification_cases_release()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   cd $fdsroot/Verification
-   git clean -dxf > /dev/null
+   if [ "$CLEANREPO" == "1" ]; then
+     cd $fdsroot/Verification
+     git clean -dxf > /dev/null
+   fi
 
    # Start running all SMV verification cases
    cd $fdsroot/Verification/scripts
