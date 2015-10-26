@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 running=bot_running
 
@@ -12,12 +12,13 @@ FDS_GITbase=FDS-SMVgitclean
 BRANCH=development
 botscript=smokebot_linux.sh
 RUNAUTO=
+CLEANREPO=
 UPDATEREPO=
 QUEUE=
 RUNSMOKEBOT=1
 fopt=
 mopt=
-while getopts 'ab:d:fmq:r:uv' OPTION
+while getopts 'ab:cd:fmq:r:uv' OPTION
 do
 case $OPTION  in
   a)
@@ -25,6 +26,9 @@ case $OPTION  in
    ;;
   b)
    BRANCH="$OPTARG"
+   ;;
+  c)
+   CLEANREPO=-c
    ;;
   f)
    fopt="-f"
@@ -36,7 +40,7 @@ case $OPTION  in
    reponame="$OPTARG"
    ;;
   u)
-   UPDATEREPO=1
+   UPDATEREPO=-u
    ;;
   v)
    RUNSMOKEBOT=
@@ -59,7 +63,7 @@ if [[ "$QUEUE" != "" ]]; then
 fi 
 reponame="-r $reponame"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
-  if [[ "$UPDATEREPO" == "1" ]]; then
+  if [[ "$UPDATEREPO" == "-u" ]]; then
      cd ~/$FDS_GITBASE
      git remote update
      git checkout $BRANCH
@@ -71,8 +75,8 @@ fi
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
+  ./$botscript $RUNAUTO $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $fopt $mopt "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $BRANCH $reponame $QUEUE $fopt $mopt "$@"
+  echo ./$botscript $RUNAUTO $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $fopt $mopt "$@"
 fi
