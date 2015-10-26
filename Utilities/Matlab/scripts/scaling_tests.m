@@ -18,32 +18,52 @@ M(6) = importdata([FDS_Output_Files,'strong_scaling_test_192_cpu.csv'],',',1);
 M(7) = importdata([FDS_Output_Files,'strong_scaling_test_288_cpu.csv'],',',1);
 
 r = [1 8 32 64 96 192 288];
+r2 = [.1 8 32 64 96 192 1000];
 
-for i=1:7
-   t(i) = M(i).data(1,15)/M(1).data(1,15);
-   t2(i) = 1./r(i);
+for j=1:15
+   for i=1:7
+      t(i,j) = M(i).data(1,j)/M(1).data(1,15);
+      t2(i) = 1./r2(i);
+   end
 end
 
 plot_style
 
-H(1) = loglog(r,t,'ko'); hold on
-H(2) = loglog(r,t2,'k--'); 
+H1(1) = loglog(r2,2*t2,'k:'); hold on
+H1(2) = loglog(r2,t2,'k:'); hold on
+H1(3) = loglog(r2,t2/2,'k:'); hold on
+H1(4) = loglog(r2,t2/4,'k:'); hold on
+H1(5) = loglog(r2,t2/8,'k:'); hold on
+H1(6) = loglog(r2,t2/16,'k:'); hold on
+H1(7) = loglog(r2,t2/32,'k:'); hold on
+
+H(1) = loglog(r,t(:,15),'k-o'); 
+H(2) = loglog(r,t(:,3),'r-o'); 
+H(3) = loglog(r,t(:,4),'b-o'); 
+H(4) = loglog(r,t(:,5),'m-o'); 
+H(5) = loglog(r,t(:,6),'c-o'); 
+H(6) = loglog(r,t(:,12),'g-+'); 
+H(7) = loglog(r,t(:,9),'y-o'); 
+H(8) = loglog(r,t(:,10),'k-s'); 
  
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Relative CPU Time','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-Min_Ind = 1;
-Max_Ind = 300;
-Min_Dep = 0.001;
+Min_Ind = 0.9;
+Max_Ind = 1200;
+Min_Dep = 0.0001;
 Max_Dep = 1.;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
+set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
 Title_Position(1) = 0.60;
 Title_Position(2) = 0.90;
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
 Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
 text(X_Title_Position,Y_Title_Position,'Strong Scaling Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-legend(H,'FDS','Ideal','Location','Southwest')
+legend_handle = legend(H,'Total','DIVG','MASS','VELO','PRES','COMM','PART','RADI','Location','Southwest');
+set(legend_handle,'Interpreter',Font_Interpreter);
+set(legend_handle,'Fontsize',Key_Font_Size);
 
 git_file = [FDS_Output_Files,'strong_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'loglog')
@@ -86,11 +106,12 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('Efficiency','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-Min_Ind = 1;
-Max_Ind = 300;
+Min_Ind = 0.9;
+Max_Ind = 1200;
 Min_Dep = 0.0;
 Max_Dep = 1.2;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
+set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
 Title_Position(1) = 0.60;
 Title_Position(2) = 0.90;
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
