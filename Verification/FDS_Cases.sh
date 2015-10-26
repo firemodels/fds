@@ -288,6 +288,7 @@ $QFDS -d Species soot_gravitational_settling.fds
 $QFDS -d Species soot_gravitational_settling_2.fds
 $QFDS -d Species hrrpuv_reac_single.fds
 $QFDS -d Species hrrpuv_reac_parallel.fds
+$QFDS -d Species hrrpuv_reac_parallel_2.fds
 $QFDS -d Species hrrpuv_reac_series.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
