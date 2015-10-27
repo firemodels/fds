@@ -39,7 +39,7 @@ UPDATE=
 CLEAN=
 RUNFIREBOT=1
 EMAIL=
-while getopts 'b:hm:q:nr:uv' OPTION
+while getopts 'b:chm:q:nr:uv' OPTION
 do
 case $OPTION  in
   b)
@@ -54,11 +54,11 @@ case $OPTION  in
   m)
    EMAIL="$OPTARG"
    ;;
-  n)
-   UPDATEREPO=0
-   ;;
   q)
    QUEUE="$OPTARG"
+   ;;
+  n)
+   UPDATEREPO=0
    ;;
   r)
    reponame="$OPTARG"
