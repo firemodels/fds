@@ -1,7 +1,7 @@
-&HEAD CHID='strong_scaling_test_096', TITLE='General purpose input file to test FDS timings' /
+&HEAD CHID='strong_scaling_test_432', TITLE='General purpose input file to test FDS timings' /
 
-&MULT ID='mesh multiplier', DX=0.6, DY=0.2, DZ=0.3, I_UPPER=2, J_UPPER=7, K_UPPER=3 /
-&MESH IJK=60,20,30, XB=0.0,0.6,0.0,0.2,0.0,0.3, MULT_ID='mesh multiplier' /
+&MULT ID='mesh multiplier', DX=0.2, DY=0.2, DZ=0.2, I_UPPER=8, J_UPPER=7, K_UPPER=5 /
+&MESH IJK=20,20,20, XB=0.0,0.2,0.0,0.2,0.0,0.2, MULT_ID='mesh multiplier' /
 
 &TIME T_END=0.2, DT=0.002 /
 
