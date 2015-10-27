@@ -1,12 +1,13 @@
- @echo off
+@echo off
 
 set fdsroot=%~f1
 set fdsbasename=%~n1
 
-set update=%2
-set altemail=%3
-set usematlab=%4
-set emailto=%5
+set clean=%2
+set update=%3
+set altemail=%4
+set usematlab=%5
+set emailto=%6
 
 if NOT exist %fdsroot% (
   echo ***Error: the repository %fdsroot% does not exist
@@ -14,8 +15,15 @@ if NOT exist %fdsroot% (
   exit /b 1
 )
 
+set CURDIR=%CD%
+
 echo.
-echo   FDS repo: %fdsroot%
+echo      FDS repo: %fdsroot%
+echo run directory: %CURDIR%
+if %clean% == 1 echo cleaning repo: yes
+if %clean% == 0 echo cleaning repo: no
+if %update% == 1 echo updating repo: yes
+if %update% == 0 echo updating repo: no
 echo.
 
 :: -------------------------------------------------------------
@@ -29,8 +37,6 @@ set OMP_NUM_THREADS=1
 :: -------------------------------------------------------------
 ::                         setup environment
 :: -------------------------------------------------------------
-
-set CURDIR=%CD%
 
 if not exist output mkdir output
 if not exist history mkdir history
@@ -166,23 +172,22 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
-if %update == 0 skip_update
-if "%fdsbasename%" == "FDS-SMVgitclean" (
-   echo             reverting %fdsbasename% repository
+if %clean% == 0 skip_clean1
+   echo             cleaning %fdsbasename% repository
    cd %fdsroot%
    git clean -dxf 1> Nul 2>&1
    git add . 1> Nul 2>&1
    git reset --hard HEAD 1> Nul 2>&1
-
-)
+:skip_clean1
 
 :: update FDS/Smokeview repository
 
+if %update% == 0 skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
 git fetch origin
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
-:skip_update
+:skip_update1
 
 cd %fdsroot%
 git describe --long --dirty > %revisionfilestring%
@@ -303,6 +308,11 @@ echo             release mode
 :: run cases
 
 cd %fdsroot%\Verification\
+if %clean% == 0 skip_clean2
+   echo             cleaning Verification directory
+   git clean -dxf 1> Nul 2>&1
+:skip_clean2
+
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases

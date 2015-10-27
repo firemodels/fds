@@ -286,6 +286,11 @@ $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
 $QFDS -d Species soot_gravitational_settling.fds
 $QFDS -d Species soot_gravitational_settling_2.fds
+$QFDS -d Species hrrpuv_reac_single.fds
+$QFDS -d Species hrrpuv_reac_parallel.fds
+$QFDS -d Species hrrpuv_reac_parallel_2.fds
+$QFDS -d Species hrrpuv_reac_series.fds
+$QFDS -d Species ramp_chi_r.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
