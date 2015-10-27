@@ -87,7 +87,7 @@ exit
 }
 
 GIT_REVISION=
-while getopts 'b:cfhm:nq:r:uv:' OPTION
+while getopts 'b:chm:q:r:uv:' OPTION
 do
 case $OPTION in
   b)
