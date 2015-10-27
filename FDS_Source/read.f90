@@ -3801,7 +3801,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          IF (SMF%VOLUME_FRACTION(NS)>0._EB .AND. .NOT. SPECIES(NS)%EXPLICIT_H_F) LISTED_FUEL=.FALSE.
       ENDDO
    ENDIF
-   WRITE(*,*) LISTED_FUEL,SMF%H_F
    ! Heat of Combustion calculation
    HOC_IF: IF (RN%HEAT_OF_COMBUSTION > -1.E21) THEN ! User specified heat of combustion
       IF (SIMPLE_CHEMISTRY) THEN
