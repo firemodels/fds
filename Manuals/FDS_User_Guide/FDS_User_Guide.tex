@@ -632,13 +632,13 @@ There are two basic approaches to assessing the efficiency or scalability of an 
 \be
    E_{\rm w} = \frac{t_1}{t_N}
 \ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes).
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node. 
 
 The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
 \be
    E_{\rm s} =  \frac{t_1}{N \; t_N}
 \ee
-Figure~\ref{fig:scaling_tests} shows the results of a weak and strong scaling study. In the weak study, meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288. The efficiency of the resulting simulations is plotted at left. In the strong study, a single mesh of dimension 180 by 160 by 80 is divided into a range of smaller meshes, with the smallest partitioning being 288 meshes of dimension 20 by 20 by 20. The resulting decrease in CPU time is shown in the plot. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes).
+In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 80 is divided into a range of smaller meshes, with the smallest partitioning being 288 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
 \begin{figure}[!ht]
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
@@ -648,8 +648,17 @@ Figure~\ref{fig:scaling_tests} shows the results of a weak and strong scaling st
 
 
 \section{Monitoring Progress}
+\label{info:monitoring_progress}
 
-Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually. To stop a calculation before its scheduled time, either kill the process, or preferably create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
+Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
+
+By default, the diagnostics in the {\ct CHID.out} file are verbose.  When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
+\begin{lstlisting}
+&DUMP SUPPRESS_DIAGNOSTICS=.TRUE. /
+\end{lstlisting}
+Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY\_ERROR'}, if necessary.
+
+To stop a calculation before its scheduled time, either kill the process, or preferably create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
 
 Since calculations can be hours or days long, there is a restart feature in FDS. Details of how to use this feature are given in Section~\ref{info:restart}. Briefly, specify at the beginning of calculation how often a ``restart'' file should be saved. Should something happen to disrupt the calculation, like a power outage, the calculation can be restarted from the time the last restart file was saved.
 
@@ -8602,6 +8611,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
