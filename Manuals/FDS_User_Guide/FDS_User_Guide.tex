@@ -192,27 +192,14 @@ Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusett
 
 \chapter{Introduction}
 
-The software described in this document, Fire Dynamics Simulator (FDS), is a computational
-fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
-Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow
-with an emphasis on smoke and heat transport from fires.
-The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
-Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
+The software described in this document, Fire Dynamics Simulator (FDS), is a computational fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow with an emphasis on smoke and heat transport from fires. The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
 
-Smokeview is a separate visualization program that is used to display the
-results of an FDS simulation.
-A detailed description of Smokeview is found in
-a separate User's Guide~\cite{Smokeview_Users_Guide}.
+Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate User's Guide~\cite{Smokeview_Users_Guide}.
 
 
 \section{Features of FDS}
 
-The first version of FDS was publicly released in February 2000.
-To date, about half of the applications of the model have been for design of smoke
-handling systems and sprinkler/detector activation studies. The other half consist of
-residential and industrial fire reconstructions. Throughout its development, FDS has
-been aimed at solving practical fire problems in fire protection engineering, while
-at the same time providing a tool to study fundamental fire dynamics and combustion.
+The first version of FDS was publicly released in February 2000. To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions. Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
 \item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. LES is the default mode of operation.
@@ -229,9 +216,7 @@ at the same time providing a tool to study fundamental fire dynamics and combust
 
 Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~5.
 
-\vspace{\baselineskip}
-
-\noindent {\bf Hydrodynamics and Turbulence}
+\subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
    \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
@@ -242,7 +227,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
    \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents.
    \end{itemize}
 
-\noindent {\bf Species and Combustion}
+\subsubsection{Species and Combustion}
 
     \begin{itemize}
     \item Custom species mixtures (``lumped species'') can be defined with the input group SPEC.
@@ -252,7 +237,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
     \item There are an increased number of predefined species that now include liquid properties.
     \end{itemize}
 
-\noindent {\bf Lagrangian Particles}
+\subsubsection{Lagrangian Particles}
 
     \begin{itemize}
     \item The functionality of Lagrangian particles has expanded to include the same heat transfer and pyrolysis models that apply to solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface.
@@ -261,41 +246,41 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
     \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles.
     \end{itemize}
 
-\noindent {\bf Solid Phase Heat Transfer and Pyrolysis}
+\subsubsection{Solid Phase Heat Transfer and Pyrolysis}
 
     \begin{itemize}
     \item The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.
     \item The pyrolysis model allows for the surface to shrink or swell, based on the specified material densities.
     \end{itemize}
 
-\noindent {\bf HVAC}
+\subsubsection{HVAC}
 
    \begin{itemize}
     \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems.
     \item HVAC is now functional with MPI.
     \end{itemize}
 
-\noindent {\bf Radiation}
+\subsubsection{Radiation}
 
     \begin{itemize}
     \item RadCal database has been extended to include additional fuel species.
     \item In cells with heat release, the emission term is based on a corrected $\sigma \, T^4$ such that when this term is integrated over the flame volume the specified radiative fraction (default 0.35) is recovered. This differs from FDS~5 and earlier where the radiative fraction times the heat release rate was applied locally as the emission term.
     \end{itemize}
 
-\noindent {\bf Multi-Mesh Computations}
+\subsubsection{Multi-Mesh Computations}
 
     \begin{itemize}
     \item By default, FDS now iterates pressure and velocity at mesh and solid boundaries. You can control the error tolerance and maximum number of iterations via parameters on the {\ct PRES} line.
     \end{itemize}
 
-\noindent {\bf Control Functions}
+\subsubsection{Control Functions}
 
     \begin{itemize}
     \item {\ct CTRL} functions have been extended to include math operations.
     \item The evaluation of {\ct RAMP}s and {\ct DEVC}s can be stopped, freezing their value, based upon the activation of a device or control function.
     \end{itemize}
 
-\noindent {\bf Devices and Output}
+\subsubsection{Devices and Output}
 
     \begin{itemize}
     \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads.
@@ -320,8 +305,7 @@ in FDS 6 are:
 \item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form ${\rm A} \; + \; {\rm B} \rightarrow {\rm C}$ and {\ct INITIAL\_UNMIXED\_FRACTION=0}.
 \item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
 \item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
-\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
-{\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
+\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with {\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
 \item The output quantity {\ct 'SOOT VOLUME FRACTION'} is now {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID} to identify the name of the species.
 \end{itemize}
 
@@ -433,8 +417,13 @@ This guide describes how to obtain FDS and Smokeview and how to use FDS. A separ
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
 
-Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: \\
-\href{http://www.nist.gov/el/fire\_research/fds\_smokeview.cfm}{{\ct http://www.nist.gov/el/fire\_research/fds\_smokeview.cfm}} \\
+Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: 
+
+\begin{center}
+\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}} 
+\end{center}
+
+\noindent
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac~OS~X, and Linux.
 
 If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other place so that it is not overwritten during the updated installation.
@@ -442,7 +431,7 @@ If you ever want to keep an older version of FDS and Smokeview, copy the install
 
 \section{Computer Hardware Requirements}
 
-FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently. The system should have a fast CPU, and at least 2~GB RAM. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
+The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 4~GB RAM per processor. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
@@ -632,7 +621,7 @@ There are two basic approaches to assessing the efficiency or scalability of an 
 \be
    E_{\rm w} = \frac{t_1}{t_N}
 \ee
-where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node. 
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
 
 The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
 \be
