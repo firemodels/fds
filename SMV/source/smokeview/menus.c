@@ -5033,7 +5033,6 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Sort faces"),6);
   }
-#ifdef pp_BETA
   if(showtrinormal==1){
     glutAddMenuEntry(_(" *Show normal"),3);
   }
@@ -5060,7 +5059,6 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Hilight skinny triangles"),5);
   }
-#endif
 
 /* --------------------------------blockage menu -------------------------- */
   CREATEMENU(blockagemenu,BlockageMenu);
