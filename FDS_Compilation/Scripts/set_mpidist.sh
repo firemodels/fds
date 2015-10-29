@@ -6,8 +6,8 @@ export MPIDIST=$1
 
 if [[ "$MPIDIST" == "" ]]; then
   echo "*** Warning: the MPI distribution location is not defined."
-  echo "Make sure MPIDISTETH and/or MPIDISTIB variables are defined"
-  echo "in your startup file"
+  echo "Make sure the MPIDIST_ETH and/or MPIDIST_IB environment"
+  echo "variables are defined in your startup file"
   exit
 fi
 
