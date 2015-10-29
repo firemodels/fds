@@ -287,11 +287,17 @@ fi
 
 cat << EOF >> $INSTALLER
 mpipath=
+mpipatheth=
+mpipathib=
 if [ -d /shared/openmpi_64 ] ; then
-   mpipath=/shared/openmpi_64
+   mpipatheth=/shared/openmpi_64
+   mpipath=\$MPIDISTETH
+   mpipath2=\\\$MPIDISTETH
 fi
 if [ -d /shared/openmpi_64ib ] ; then
-   mpipath=/shared/openmpi_64ib
+   mpipathib=/shared/openmpi_64ib
+   mpipath=\$MPIDISTIB
+   mpipath2=\\\$MPIDISTIB
 fi
 
 #--- do we want to proceed
@@ -402,10 +408,12 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" > \$BASHSTARTUP
-  echo "#FDS " >> \$BASHSTARTUP
-  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" | grep -v MPIDISTETH | grep -v MPIDISTIB > \$BASHSTARTUP
+  echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
+  echo "export MPIDISTETH=\$mpipatheth"                       >> \$BASHSTARTUP
+  echo "export MPIDISTIB=\$mpipathib"                         >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath2"                      >> \$BASHSTARTUP
+  echo "# --------------------------------------------"       >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -417,10 +425,12 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" > \$BASHSTARTUP
-  echo "#FDS " >> \$BASHSTARTUP
-  echo "#FDS Setting the environment for FDS and Smokeview. "   >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds \$mpipath" >> \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" | grep -v MPIDISTETH | grep -v MPIDISTIB > \$BASHSTARTUP
+  echo "#FDS environment -----------------------" >> \$BASHSTARTUP
+  echo "export MPIDISTETH=\$mpipatheth"           >> \$BASHSTARTUP
+  echo "export MPIDISTIB=\$mpipathib"             >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
+  echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
   rm \$BASHSTARTUP
 EOF
