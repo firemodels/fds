@@ -27,7 +27,7 @@ EXTERNCPP void update_device_size(void);
 EXTERNCPP void update_Display(void);
 EXTERNCPP void update_ShowScene(void);
 EXTERNCPP void update_gvec_down(int gvec_down_local);
-EXTERNCPP void drawaxis(void);
+EXTERNCPP void DrawGravityAxis(void);
 EXTERNCPP void xyz2azelev(float *xyz,float *azimuth, float *elevation);
 EXTERNCPP void get_geom_dialog_state(void);
 EXTERNCPP void update_device_orientation(void);
