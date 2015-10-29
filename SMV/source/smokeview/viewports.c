@@ -960,16 +960,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     glTranslatef(xcen,ycen,zcen);
 
     // rotate scene
-    {
-      float u[3], axis[3], angle;
-
-      u[0]=0.0;
-      u[1]=0.0;
-      u[2]=1.0;
-      rotateu2v(user_zaxis,u,axis,&angle);//xx
-      glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-      glRotatef(zaxis_angles[2],u[0],u[1],u[2]);
-    }
     if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);
     }
@@ -979,7 +969,17 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       }
       glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
-    
+    {
+      float u[3], axis[3], angle;
+
+      u[0] = 0.0;
+      u[1] = 0.0;
+      u[2] = 1.0;
+      rotateu2v(user_zaxis, u, axis, &angle);
+      glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+      glRotatef(zaxis_angles[2], u[0], u[1], u[2]);
+    }
+
     glTranslatef(-xcen,-ycen,-zcen);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
