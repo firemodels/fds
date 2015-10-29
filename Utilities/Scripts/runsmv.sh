@@ -4,10 +4,9 @@ FED=
 MOVIE=
 RUNSCRIPT=
 ssffile=
-WFDSCASE="no"
 TIMEOPTION=
 
-while getopts 'd:fmtw' OPTION
+while getopts 'd:fmt' OPTION
 do
 case $OPTION in
   d)
@@ -21,9 +20,6 @@ case $OPTION in
    ;;
   t)
    TIMEOPTION=-time
-   ;;
-  w)
-   WFDSCASE="y"
    ;;
 esac
 done
@@ -51,32 +47,23 @@ scriptfile=$scratchdir/script.$$
 
 notfound=`$SMV -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ];  then
-  echo "*** Error (fatal): The program $SMV is not available. Run aborted."
+  echo "*** Error: The program $SMV is not available. Run aborted."
   exit
 fi
-
 if ! [ -d $fulldir ]; then
-  echo "*** Error (fatal): The directory $fulldir does not exist. Run aborted."
+  echo "*** Error: The directory $fulldir does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fulldir/$in.smv ]; then
-  if [ "$WFDSCASE" == "n" ]; then
-    echo "*** Error (fatal): The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
-  else
-    echo "Warning: The smokeview file, $fulldir/$in.smv, does not exist."
-  fi
+  echo "*** Error: The smokeview file, $fulldir/$in.smv, does not exist. Run aborted."
   exit
 fi
 if ! [ -e $fulldir/$ssffile ]; then
-  if [ "$WFDSCASE" == "n" ]; then
-    echo "*** Error (fatal): The smokeview script file, $fulldir/$ssffile, does not exist. Run aborted."
-  else
-    echo "Warning: The smokeview script file, $fulldir/$ssffile, does not exist."
-  fi
+  echo "*** Error: The smokeview script file, $fulldir/$ssffile, does not exist. Run aborted."
   exit
 fi
 
-source ~/.bashrc_fds default
+#source ~/.bashrc_fds default
 cd $fulldir
 echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
 $SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in
