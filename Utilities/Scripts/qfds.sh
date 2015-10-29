@@ -231,8 +231,9 @@ fi
 # in benchmark mode run a case "alone" on one node
 
 if [ "$benchmark" == "yes" ]; then
-  nodes=1
+  let "nodes=($nmpi_processes-1)/$ncores+1"
   ppn=$ncores
+  nmpi_processes_per_node=$ncores
 fi
 
 # default: Use mpirun option to bind processes to socket (for MPI).
