@@ -4,7 +4,7 @@ dir=`pwd`
 target=${dir##*/}
 
 source $IFORT_COMPILER/bin/compilervars.sh $platform
-source ../Scripts/set_mpidist.sh /shared/openmpi_64
+source ../Scripts/set_mpidist.sh $MPIDISTETH
 if [ "$MPIDIST" == "" ]; then
   exit
 fi

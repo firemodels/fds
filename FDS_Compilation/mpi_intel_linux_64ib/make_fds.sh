@@ -4,10 +4,7 @@ dir=`pwd`
 target=${dir##*/}
 
 source $IFORT_COMPILER/bin/compilervars.sh $platform
-if [[ $MPIDIST != *ib ]] ; then
-# define MPIDIST
-source ../Scripts/set_mpidist.sh /shared/openmpi_64ib
-fi
+source ../Scripts/set_mpidist.sh $MPIDISTIB
 if [ "$MPIDIST" == "" ]; then
 # if MPIDIST was not defined above, abort
   exit
