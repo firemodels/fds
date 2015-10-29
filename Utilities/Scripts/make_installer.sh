@@ -291,13 +291,13 @@ mpipatheth=
 mpipathib=
 if [ -d /shared/openmpi_64 ] ; then
    mpipatheth=/shared/openmpi_64
-   mpipath=\$MPIDISTETH
-   mpipath2=\\\$MPIDISTETH
+   mpipath=\$MPIDIST_ETH
+   mpipath2=\\\$MPIDIST_ETH
 fi
 if [ -d /shared/openmpi_64ib ] ; then
    mpipathib=/shared/openmpi_64ib
-   mpipath=\$MPIDISTIB
-   mpipath2=\\\$MPIDISTIB
+   mpipath=\$MPIDIST_IB
+   mpipath2=\\\$MPIDIST_IB
 fi
 
 #--- do we want to proceed
@@ -408,12 +408,12 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bash_profile_temp_\$\$
   cd \$THISDIR
   echo "Updating .bash_profile"
-  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" | grep -v MPIDISTETH | grep -v MPIDISTIB > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bash_profile | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS environment -----------------------------" >> \$BASHSTARTUP
-  echo "export MPIDISTETH=\$mpipatheth"                       >> \$BASHSTARTUP
-  echo "export MPIDISTIB=\$mpipathib"                         >> \$BASHSTARTUP
-  echo "source ~/.bashrc_fds \$mpipath2"                      >> \$BASHSTARTUP
-  echo "# --------------------------------------------"       >> \$BASHSTARTUP
+  echo "export MPIDIST_ETH=\$mpipatheth"                >> \$BASHSTARTUP
+  echo "export MPIDIST_IB=\$mpipathib"                  >> \$BASHSTARTUP
+  echo "source ~/.bashrc_fds \$mpipath2"                >> \$BASHSTARTUP
+  echo "# --------------------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bash_profile
   rm \$BASHSTARTUP
 EOF
@@ -425,10 +425,10 @@ cat << EOF >> $INSTALLER
   BASHSTARTUP=/tmp/.bashrc_temp_\$\$
   cd \$THISDIR
   echo "Updating .bashrc"
-  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" | grep -v MPIDISTETH | grep -v MPIDISTIB > \$BASHSTARTUP
+  grep -v bashrc_fds ~/.bashrc | grep -v "#FDS" | grep -v MPIDIST_ETH | grep -v MPIDIST_IB > \$BASHSTARTUP
   echo "#FDS environment -----------------------" >> \$BASHSTARTUP
-  echo "export MPIDISTETH=\$mpipatheth"           >> \$BASHSTARTUP
-  echo "export MPIDISTIB=\$mpipathib"             >> \$BASHSTARTUP
+  echo "export MPIDIST_ETH=\$mpipatheth"          >> \$BASHSTARTUP
+  echo "export MPIDIST_IB=\$mpipathib"            >> \$BASHSTARTUP
   echo "source ~/.bashrc_fds \$mpipath2"          >> \$BASHSTARTUP
   echo "#FDS -----------------------------------" >> \$BASHSTARTUP
   cp \$BASHSTARTUP ~/.bashrc
