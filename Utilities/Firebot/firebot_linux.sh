@@ -448,7 +448,7 @@ check_current_utilization()
 run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
-   cd $FDSSMV/Verification
+   cd $FDSSMV/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
@@ -710,7 +710,7 @@ run_verification_cases_release()
 {
    # Start running all FDS verification cases
 
-   cd $FDSSMV/Verification
+   cd $FDSSMV/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
@@ -839,7 +839,7 @@ check_compile_smv()
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
-   cd $FDSSMV/Verification
+   cd $FDSSMV/Verification/scripts
    ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
 }
 
