@@ -36,7 +36,7 @@ export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
 export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
 export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
-QFDS=$SVNROOT/Utilities/Scripts/bundle_setup/qfds.sh
+QFDS=$SVNROOT/Utilities/Scripts/qfds.sh
 
 export BASEDIR=`pwd`
 
@@ -67,7 +67,7 @@ MKMOVIE()
   cd $VDIR
 
 # generate movie frames
-  $RUNSMV -m $CASEDIR $BASEFILE
+  $RUNSMV -m -d $CASEDIR $BASEFILE
 
   cd $FRAMEDIR
 
@@ -86,7 +86,7 @@ cd $VDIR
 $QFDS -r -d Visualization -q terminal version2.fds
 
 cd $VDIR
-$RUNSMV -t Visualization version2
+$RUNSMV -t -d Visualization version2
 
 # The -m option assumes that a script
 # named casename_movies.ssf exists for each 
@@ -96,7 +96,7 @@ $RUNSMV -t Visualization version2
 cd $VDIR
 
 # generate movie frames
-$RUNSMV -m Visualization plume5c
+$RUNSMV -m -d Visualization plume5c
 
 cd $INDIR
 
@@ -124,7 +124,7 @@ $MAKEMOVIE -o $OUTDIR  -m plume5c_part plume5c_part  > /dev/null
 cd $VDIR
 
 # generate movie frames
-$RUNSMV -m Visualization thouse5
+$RUNSMV -m -d Visualization thouse5
 
 cd $INDIR
 
