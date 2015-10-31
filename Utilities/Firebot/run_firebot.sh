@@ -1,6 +1,6 @@
 #!/bin/bash
-running=bot_running
-if [ -e bot_running ] ; then
+running=firebot_running
+if [ -e $running ] ; then
   echo Firebot is already running.
   echo Erase the file $running if this is not the case.
   exit
@@ -26,6 +26,7 @@ echo "     default: $QUEUE"
 echo ""
 echo "-r - repository location [default: $reponame]"
 echo "-u - update repo"
+echo "-U - upload guides (only by user firebot)"
 echo "-v - show options used to run firebot"
 exit
 }
@@ -39,7 +40,8 @@ UPDATE=
 CLEAN=
 RUNFIREBOT=1
 EMAIL=
-while getopts 'b:chm:q:nr:uv' OPTION
+UPLOADGUIDES=
+while getopts 'b:chm:q:nr:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -65,6 +67,9 @@ case $OPTION  in
    ;;
   u)
    UPDATEREPO=1
+   ;;
+  U)
+   UPLOADGUIDES=-U
    ;;
   v)
    RUNFIREBOT=0
@@ -99,8 +104,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $UPLOADGUIDES $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $UPLOADGUIDES $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
 fi
 rm $running

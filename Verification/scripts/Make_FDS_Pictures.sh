@@ -18,6 +18,7 @@ echo "-X - do not start / stop separate X-server"
 exit
 }
 
+CURDIR=`pwd`
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
   PLATFORM=osx
@@ -64,14 +65,14 @@ esac
 done
 shift $(($OPTIND-1))
 
-export SVNROOT=`pwd`/..
+export SVNROOT=`pwd`/../..
 if [ "$SMV_PATH" == "" ]; then
   SMV_PATH=$SVNROOT/SMV/Build/intel_$PLATFORM$SIZE
 fi
 export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
-export BASEDIR=`pwd`
+export BASEDIR=`pwd`/..
 
 echo "erasing SCRIPT_FIGURES png files"
 rm -f $SVNROOT/Manuals/FDS_Configuration_Management_Plan/SCRIPT_FIGURES/*.png
@@ -83,10 +84,11 @@ rm -f $SVNROOT/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi
+cd $SVNROOT/Verification
 ./FDS_Pictures.sh
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/Utilities/Scripts/stopXserver.sh 2>/dev/null
 fi
-
+cd $CURDIR
 echo FDS pictures created.
 
