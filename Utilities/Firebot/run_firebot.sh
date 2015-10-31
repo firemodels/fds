@@ -1,6 +1,6 @@
 #!/bin/bash
-running=bot_running
-if [ -e bot_running ] ; then
+running=firebot_running
+if [ -e $running ] ; then
   echo Firebot is already running.
   echo Erase the file $running if this is not the case.
   exit
