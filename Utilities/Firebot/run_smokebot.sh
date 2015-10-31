@@ -1,6 +1,5 @@
- #!/bin/bash
-
-running=bot_running
+#!/bin/bash
+running=smokebot_running
 
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
@@ -50,7 +49,7 @@ done
 shift $(($OPTIND-1))
 
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
-  if [ -e bot_running ] ; then
+  if [ -e $running ] ; then
     echo Smokebot is already running.
     echo Erase the file $running if this is not the case.
     exit
