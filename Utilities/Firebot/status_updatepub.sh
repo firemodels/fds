@@ -4,7 +4,7 @@ firebotdir=~/firebotgit
 old=$firebotdir/history/old
 new=$firebotdir/history/new
 newpage=$firebotdir/history/newpage
-running=$firebotdir/bot_running
+running=$firebotdir/firebot_running
 curdir=`pwd`
 
 # don't update status page if firebot is running
