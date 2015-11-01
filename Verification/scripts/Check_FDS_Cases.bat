@@ -4,6 +4,7 @@
 :: $Revision$
 :: $Author$
 
+cd ..
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
