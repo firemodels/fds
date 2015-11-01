@@ -23,7 +23,6 @@ HISTORY_DIR="$FIREBOT_RUNDIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
-NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 
 # Change to home directory
 cd
@@ -80,14 +79,17 @@ echo "-r - repository location [default: $FDSSMV]"
 echo ""
 echo "-u - update repo"
 echo ""
+echo "-U - upload guides"
+echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
 echo ""
 exit
 }
 
+UPLOADGUIDES=0
 GIT_REVISION=
-while getopts 'b:chm:q:r:uv:' OPTION
+while getopts 'b:chm:q:r:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -111,6 +113,9 @@ case $OPTION in
   u)
    UPDATEREPO=1
    ;;
+  U)
+   UPLOADGUIDES=1
+   ;;
   v)
    FIREBOT_MODE="validation"
    QUEUE=batch
@@ -126,7 +131,7 @@ shift $(($OPTIND-1))
 export FDSSMV
 FIREBOT_HOME_DIR=$(dirname "${FDSSMV}")
 FDS_GITBASE=`basename $FDSSMV`
-UPLOADGUIDES=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
+UploadGuides=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
@@ -195,8 +200,6 @@ clean_firebot_metafiles()
    MKDIR $HISTORY_DIR &> /dev/null
    MKDIR $OUTPUT_DIR &> /dev/null
    rm -rf $OUTPUT_DIR/* &> /dev/null
-   MKDIR $NEWGUIDE_DIR &> /dev/null
-   chmod 775 $NEWGUIDE_DIR
 }
 
 #  ========================
@@ -1059,9 +1062,9 @@ check_guide()
    else
       # Guide built successfully; there were no errors/warnings
       # Copy guide to Firebot's local website
-      cp $2 /var/www/html/firebot/manuals/
-      cp $2 $NEWGUIDE_DIR/.
-      chmod 664 $NEWGUIDE_DIR/$2
+      if [[ "$UPLOADGUIDES" == "1" ]]; then
+        cp $2 /var/www/html/firebot/manuals/
+      fi
    fi
 }
 
@@ -1209,7 +1212,9 @@ email_build_status()
    fi
 
 #  upload guides to a google drive directory
-  $UPLOADGUIDES > /dev/null
+if [[ "$UPLOADGUIDES" == "1" ]]; then
+  $UploadGuides > /dev/null
+fi
 }
 
 #  ============================

@@ -8,6 +8,7 @@ echo.
 echo erasing Verification scripted figures generated previously
 erase ..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\*.png
 
+cd ..
 set BASEDIR=%CD%\
 set RUNSMV=call "%BASEDIR%\scripts\runsmv.bat"
 set SMOKEVIEW=smokeview
@@ -16,5 +17,5 @@ set SMOKEVIEW=smokeview
 
 call FDS_Pictures.bat
 
-cd %BASEDIR%\Verification
+cd %BASEDIR%
 erase FDS_Pictures.bat
