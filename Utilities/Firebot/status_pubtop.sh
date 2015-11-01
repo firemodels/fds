@@ -9,6 +9,8 @@ cat << EOF
 <h2>FDS Automatic Verification Summary Page</h2>
 
 <hr align='left'>
+<h3>FDS/Smokeview Manuals</h3>
+<a href="http://goo.gl/n1Q3WH">Manuals</a>
 
 <h3>Firebot Status</h3>
 
