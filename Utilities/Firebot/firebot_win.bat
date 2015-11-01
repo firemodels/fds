@@ -289,14 +289,14 @@ echo             debug mode
 
 :: run cases
 
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Check_FDS_cases 
 
 :: report errors
@@ -313,13 +313,14 @@ if %clean% == 0 skip_clean2
    git clean -dxf 1> Nul 2>&1
 :skip_clean2
 
+cd %fdsroot%\Verification\scripts
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Check_FDS_cases
 
 :: report errors
@@ -345,7 +346,7 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making pictures
 echo             FDS verification cases
 
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
 
 if %have_matlab%==0 goto skip_matlabplots
