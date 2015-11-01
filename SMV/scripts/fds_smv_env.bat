@@ -2,12 +2,13 @@
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
 set smv_version=test
-set smv_revision=59edcfc
+set smv_revision=5df6b6e
 
 set fds_version=test
 set fds_revision=59edcfc
 
 set fdssmv_major_version=6
+set smvdate="30-Sep-2015"
 
 Rem ---------- FDS-Smokeview repository settings ------------
 
