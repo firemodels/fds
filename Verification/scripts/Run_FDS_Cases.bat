@@ -13,6 +13,8 @@ if "%rundebug%" == "1" (
 
 :: setup environment variables
 
+set CURDIR="%CD%"
+cd ..
 set BASEDIR="%CD%"
 cd ..
 set SVNROOT="%CD%"
