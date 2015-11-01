@@ -25,6 +25,27 @@
 
 -->
 
+<li>6.3.1 - (build: Git-r1-276-91df0ac) November 1, 2015</li>
+
+<ol>
+
+<li>usability: add back smooth normal option -
+     (<a href="https://github.com/firemodels/fds-smv/issues/2994">Issue 2994</a>)
+<li>usability: add option to hide object type and unit when displaying object values
+<li>usability: add LOADSLICEM and LOADBOUNDARYM script keywords for loading a slice and boundary file respectively
+for a specified mesh
+<li>usability: add option to LOADSLICE script keyword to load 3d slice files (by specifying direction 0)
+<li>usability: for LOADSLICE script command interpret x, y, z (in addition to 1, 2, 3) as slice directions
+<li>fix: fix problems with scene rotation when case has a gravity vector -
+     (<a href="https://github.com/firemodels/fds-smv/issues/3001">Issue 3001</a>)
+<li>fix: fix problem with LOADSLICEM script command ( force 3D slices loaded to be for entire mesh)
+<li>fix: corrections to FED bound computation
+<li>fix: make correction to file copy routine
+<li>fix: correction to code that implements the LOADVSLICE and LOADSLICE script keywords
+<li>fix: fix problem with parsing LOADISO script keyword
+</ol>
+
+
 <li>6.3.0 - (build: Git-r1-12-gf7f4148) October 1, 2015</li>
 
 <ol>
