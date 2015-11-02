@@ -21,6 +21,7 @@ RUN_OPENMP=
 TESTFLAG=
 CLEANREPO=0
 UPDATEREPO=0
+SSH=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -41,7 +42,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:cmo:q:r:stu' OPTION
+while getopts 'ab:cmo:q:r:sS:tu' OPTION
 do
 case $OPTION in
   a)
@@ -69,6 +70,9 @@ case $OPTION in
    ;;
   s)
    RUNDEBUG="0"
+   ;;
+  S)
+   SSH="ssh $OPTARG "
    ;;
   t)
    TESTFLAG="-t"
@@ -795,8 +799,13 @@ check_compile_smv_db()
 make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
+   if [ "$SSH" == "" ]; then
    cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
+   else
+   $SSH \( cd $fdsroot/Verification/scripts \; \
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
+   fi
 }
 
 check_smv_pictures_db()
@@ -878,8 +887,13 @@ check_compile_smv()
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
+   if [ "$SSH" == "" ]; then
    cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
+   else
+   $SSH \( cd $fdsroot/Verification/scripts \; \
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
+   fi
 }
 
 check_smv_pictures()
