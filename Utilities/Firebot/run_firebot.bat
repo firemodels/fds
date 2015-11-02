@@ -42,7 +42,7 @@ set curdir=%temparg%
 call :normalise %fdsrepo%\Utilities\Firebot
 set fdsbotdir=%temparg%
 
-set running=%curdir%\bot.running
+set running=%curdir%\firebot.running
 
 if exist %running% goto skip_running
 
@@ -63,7 +63,7 @@ if exist %running% goto skip_running
 
   echo 1 > %running%
   call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %emailto%
-  erase %running%
+  if exist %running% erase %running%
   goto end_running
 :skip_running
   echo ***Error: firebot is currently running.
