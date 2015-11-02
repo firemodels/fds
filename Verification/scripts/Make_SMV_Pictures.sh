@@ -11,7 +11,6 @@ echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
-echo "-S host - make pictures on host"
 exit
 }
 
@@ -39,9 +38,8 @@ TEST=
 use_installed="0"
 RUN_SMV=1
 RUN_GEOM=0
-SSH=
 
-while getopts 'dghis:S:t' OPTION
+while getopts 'dghis:t' OPTION
 do
 case $OPTION  in
   d)
@@ -67,9 +65,6 @@ case $OPTION  in
    else
      SIZE=_32
    fi
-  ;;
-  S)
-  SSH="ssh $OPTARG "
   ;;
 esac
 done
@@ -175,21 +170,12 @@ if [ "$RUN_SMV" == "1" ] ; then
 
 # precompute FED slices
 
-  if [ "$SSH" == "" ]; then
   source $STARTX 2>/dev/null
   $QFDS -f -d Visualization plume5c
   $QFDS -f -d Visualization plume5cdelta
   $QFDS -f -d Visualization thouse5
   $QFDS -f -d Visualization thouse5delta
   source $STOPX 2>/dev/null
-  else
-  $SSH \( cd $SVNROOT/Verification \; source $STARTX 2>/dev/null \; \
-  $QFDS -f -d Visualization plume5c \; \
-  $QFDS -f -d Visualization plume5cdelta \; \ 
-  $QFDS -f -d Visualization thouse5 \; \
-  $QFDS -f -d Visualization thouse5delta \; \
-  source $STOPX 2>/dev/null \)
-  fi
 
 # difference plume5c and thouse5
 
@@ -212,7 +198,6 @@ if [ "$RUN_SMV" == "1" ] ; then
   cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
   cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
  
-  if [ "$SSH" == "" ]; then
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
@@ -220,15 +205,6 @@ if [ "$RUN_SMV" == "1" ] ; then
   scripts/SMV_DIFF_Cases.sh
   cd $CURDIDR
   source $STOPX
-  else
-  $SSH \( source $STARTX \; \
-  cd $SVNROOT/Verification \; \
-  scripts/SMV_Cases.sh \; \
-  cd $SVNROOT/Verification \; \
-  scripts/SMV_DIFF_Cases.sh \; \
-  cd $CURDIDR \; \
-  source $STOPX \)
-  fi
 
 # copy generated images to web summary directory
 
@@ -241,15 +217,8 @@ fi
 # generate geometry images
 
 if [ "$RUN_GEOM" == "1" ] ; then
-  if [ "$SSH" == "" ]; then
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_geom_Cases.sh
   source $STOPX
-  else
-  $SSH \( source $STARTX \; \
-  cd $SVNROOT/Verification \; \
-  scripts/SMV_geom_Cases.sh \; \
-  source $STOPX \)
-  fi
 fi
