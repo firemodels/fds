@@ -4,7 +4,7 @@ while getopts 'S:' OPTION
 do
 case $OPTION  in
   S)
-   SSH="ssh $OPTARG"
+   SSH="ssh $OPTARG "
    ;;
 esac
 done
@@ -28,8 +28,6 @@ GETNEWPORT ()
 }
 
 XVFB="$SSH Xvfb"
-echo XVFB=$XVFB
-exit
 echo setting up graphics environment
 GETNEWPORT 
 if [ "`uname`" == "Darwin" ]; then
