@@ -1,15 +1,4 @@
 #!/bin/bash
-SSH=
-while getopts 'S:' OPTION
-do
-case $OPTION  in
-  S)
-   SSH="ssh $OPTARG "
-   ;;
-esac
-done
-shift $(($OPTIND-1))
-
 lockfile=/tmp/startXlock
 GETNEWPORT () 
 {
@@ -27,7 +16,7 @@ GETNEWPORT ()
   done
 }
 
-XVFB="$SSH Xvfb"
+XVFB=Xvfb
 echo setting up graphics environment
 GETNEWPORT 
 if [ "`uname`" == "Darwin" ]; then
