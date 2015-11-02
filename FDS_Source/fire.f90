@@ -242,11 +242,9 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
       CASE (EXPLICIT_EULER) ! Simple chemistry
 
-         DO SR=0,N_SERIES_REACTIONS
-            CALL FIRE_FORWARD_EULER(ZZ_MIXED_NEW,ZETA,ZZ_MIXED,ZETA_0,DT_SUB,TMP_MIXED,TMP_UNMIXED,RHO_HAT,ZZ_UNMIXED,&
-                                    CELL_MASS,TAU_MIX,PBAR_0,DELTA,VEL_RMS,EXTINCT,Q_REAC_TEMP)
-            ZZ_MIXED = ZZ_MIXED_NEW
-         ENDDO
+         CALL FIRE_FORWARD_EULER(ZZ_MIXED_NEW,ZETA,ZZ_MIXED,ZETA_0,DT_SUB,TMP_MIXED,TMP_UNMIXED,RHO_HAT,ZZ_UNMIXED,&
+                                 CELL_MASS,TAU_MIX,PBAR_0,DELTA,VEL_RMS,EXTINCT,Q_REAC_TEMP)
+         ZZ_MIXED = ZZ_MIXED_NEW
          IF (TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
 
       CASE (RK2_RICHARDSON) ! Finite-rate (or mixed finite-rate/fast) chemistry
@@ -284,15 +282,13 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
    ENDIF
 
    ! Compute heat release rate
-   
-   Q_SUM = 0._EB
-   Q_H_SUM = 0._EB
+  
    DZZ = ZZ_GET-ZZ_TEMP
    IF (MAXVAL(ABS(DZZ)) > TWO_EPSILON_EB) THEN
       CALL GET_ENTHALPY(DZZ,H1,H_F_REFERENCE_TEMPERATURE)
       CALL GET_ENTHALPY(DZZ,H2,TMP(I,J,K))
-      Q_H_SUM =  Q_H_SUM - RHO(I,J,K)*(H2-H1) ! Correction factor to account for temperature dependence of H_F
-      Q_SUM = Q_SUM - RHO(I,J,K)*SUM(SPECIES_MIXTURE%H_F*DZZ) ! FDS Tech Guide (5.14)
+      Q_H_SUM =  - RHO(I,J,K)*(H2-H1) ! Correction factor to account for temperature dependence of H_F
+      Q_SUM = - RHO(I,J,K)*SUM(SPECIES_MIXTURE%H_F*DZZ) ! FDS Tech Guide (5.14)
    ENDIF
    
    Q_CUM = Q_CUM+Q_SUM
