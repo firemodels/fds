@@ -12,6 +12,10 @@ esac
 #shift
 done
 
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
+
 if [ "$size" != "32" ]; then
   size=64
 fi
@@ -31,6 +35,7 @@ export SVNROOT=`pwd`
 cd $CURDIR
 
 export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
+export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
 export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
@@ -83,7 +88,7 @@ source $STARTX
 # create version string
 
 cd $VDIR
-$QFDS -r -d Visualization -q terminal version2.fds
+$QFDS -e $FDSEXE -d Visualization -q terminal version2.fds
 
 cd $VDIR
 $RUNSMV -t -d Visualization version2
