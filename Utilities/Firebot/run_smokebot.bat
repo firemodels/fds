@@ -63,7 +63,7 @@ if %fdsrepo% == none goto skip_fdsrepo2
   set fdsrepo=%temparg%
 :skip_fdsrepo2
 
-set running=%curdir%\bot.running
+set running=%curdir%\smokebot.running
 
 if exist %running% goto skip_running
 
@@ -84,7 +84,7 @@ if exist %running% goto skip_running
 
   echo 1 > %running%
   call smokebot_win.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
-  erase %running%
+  if exist %running% erase %running%
   goto end_running
 :skip_running
   echo ***Error: smokebot is currently running.
