@@ -13,6 +13,7 @@ echo "-h - display this message"
 echo "-p path - specify path of the smokeview executable"
 echo "-r - use release version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
+echo "-S host - make pictures on host"
 echo "-t - use test version of smokeview"
 echo "-X - do not start / stop separate X-server"
 exit
@@ -31,8 +32,9 @@ DEBUG=
 TEST=
 SMV_PATH=""
 START_X=yes
+SSH=
 
-while getopts 'dhp:rs:tX' OPTION
+while getopts 'dhp:rs:S:tX' OPTION
 do
 case $OPTION  in
   d)
@@ -55,6 +57,9 @@ case $OPTION  in
      SIZE=_32
    fi
   ;;
+  S)
+   SSH="ssh $OPTARG"
+   ;;
   t)
    TEST=_test
   ;;
