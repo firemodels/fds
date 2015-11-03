@@ -30,7 +30,7 @@ WEBHOSTNAME=$SMOKEBOT_HOSTNAME
 fi
 
 if [[ "$IFORT_COMPILER" != "" ]] ; then
-  source $IFORT_COMPILER/bin/compilervars.sh intel64
+  source $IFORT_COMPILER/bin/compilervars.sh
 fi 
 notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ "$notfound" == "1" ] ; then
