@@ -1031,19 +1031,24 @@ archive_timing_stats()
 
 check_guide()
 {
+   stage=$1
+   directory=$2
+   document=$3
+   label=$4
+
    # Scan and report any errors in build process for guides
    SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
+   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
    then
       if [ -d $SMOKEBOT_MANDIR ] ; then
-        cp $2 $SMOKEBOT_MANDIR/.
+        cp $directory/$document $SMOKEBOT_MANDIR/.
       fi
       if [ -d $SMV_Summary/manuals ] ; then
-        cp $2 $SMV_Summary/manuals/.
+        cp $directory/$document $SMV_Summary/manuals/.
       fi
-      cp $2 $NEWGUIDE_DIR/.
-      chmod 664 $NEWGUIDE_DIR/$2
+      cp $directory/$document $NEWGUIDE_DIR/.
+      chmod 664 $NEWGUIDE_DIR/$document
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
@@ -1052,14 +1057,14 @@ check_guide()
    fi
 
    # Check for LaTeX warnings (undefined references or duplicate labels)
-   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${1}` == "" ]]
+   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${stage}` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 8 warnings:" >> $WARNING_LOG
-      echo $3 >> $WARNING_LOG
-      grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
+      echo $label >> $WARNING_LOG
+      grep -E "undefined|multiply defined|multiply-defined" -I $stage >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1075,7 +1080,7 @@ make_guide()
    ./make_guide.sh &> $OUTPUT_DIR/stage8_$document
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_$document $directory/$document.pdf $label
+   check_guide $OUTPUT_DIR/stage8_$document $directory $document.pdf $label
 }
 
 #  =====================================================
