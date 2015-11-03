@@ -22,6 +22,7 @@ TESTFLAG=
 CLEANREPO=0
 UPDATEREPO=0
 SSH=
+MAILTO=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -42,7 +43,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:cmo:q:r:sS:tu' OPTION
+while getopts 'ab:cm:Mo:q:r:sS:tu' OPTION
 do
 case $OPTION in
   a)
@@ -55,6 +56,9 @@ case $OPTION in
    CLEANREPO=1
    ;;
   m)
+   MAILTO="$OPTARG"
+   ;;
+  M)
    MAKEMOVIES="1"
    ;;
   o)
@@ -136,6 +140,9 @@ source $SMOKEBOT_DIR/firebot_email_list.sh
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
   mailTo=$mailToFDS
+fi
+if [[ "$MAILTO" != "" ]]; then
+  mailTo=$MAILTO
 fi
 
 JOBPREFIX=SB_
