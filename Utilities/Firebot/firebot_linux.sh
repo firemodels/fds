@@ -23,6 +23,7 @@ HISTORY_DIR="$FIREBOT_RUNDIR/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
@@ -1208,7 +1209,7 @@ email_build_status()
 
 #  upload guides to a google drive directory
 if [[ "$UPLOADGUIDES" == "1" ]]; then
-  $UploadGuides > /dev/null
+  $UploadGuides $NEWGUIDE_DIR > /dev/null
 fi
 }
 
