@@ -8,9 +8,21 @@
 #  = Input variables =
 #  ===================
 
-FDS_GITbase=FDS-SMVgitclean
-reponame=~/$FDS_GITbase
-cfastbase=cfastgitclean
+# define run directories
+SMOKEBOT_RUNDIR=`pwd`
+OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
+HISTORY_DIR="$SMOKEBOT_RUNDIR/history"
+TIME_LOG=$OUTPUT_DIR/timings
+ERROR_LOG=$OUTPUT_DIR/errors
+WARNING_LOG=$OUTPUT_DIR/warnings
+GUIDE_DIR=$OUTPUT_DIR/guides
+STAGE_STATUS=$OUTPUT_DIR/stage_status
+NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+
+# define repo names (default)
+fdsroot=~/FDS-SMVgitclean
+cfastroot=~/cfastgitclean
+
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
 RUNAUTO=
@@ -23,6 +35,7 @@ CLEANREPO=0
 UPDATEREPO=0
 SSH=
 MAILTO=
+UPLOADGUIDES=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -43,7 +56,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:cm:Mo:q:r:sS:tu' OPTION
+while getopts 'ab:C:cm:Mo:q:r:sS:tuU' OPTION
 do
 case $OPTION in
   a)
@@ -51,6 +64,9 @@ case $OPTION in
    ;;
   b)
    BRANCH="$OPTARG"
+   ;;
+  C)
+   cfastroot="$OPTARG"
    ;;
   c)
    CLEANREPO=1
@@ -70,7 +86,7 @@ case $OPTION in
    SMOKEBOT_QUEUE="$OPTARG"
    ;;
   r)
-   reponame="$OPTARG"
+   fdsroot="$OPTARG"
    ;;
   s)
    RUNDEBUG="0"
@@ -81,14 +97,15 @@ case $OPTION in
   t)
    TESTFLAG="-t"
    ;;
+  U)
+   UPLOADGUIDES=1
+   ;;
   u)
    UPDATEREPO=1
    ;;
 esac
 done
 shift $(($OPTIND-1))
-
-FDS_GITBASE=`basename $reponame`
 
 DB=_db
 IB=
@@ -106,25 +123,16 @@ fi
 export platform
 
 cd
-SMOKEBOT_HOME_DIR="`pwd`"
-SMOKEBOT_DIR="$SMOKEBOT_HOME_DIR/smokebotgit"
-OUTPUT_DIR="$SMOKEBOT_DIR/output"
 
-export fdsroot="$SMOKEBOT_HOME_DIR/$FDS_GITbase"
-cfastroot="$SMOKEBOT_HOME_DIR/$cfastbase"
+export fdsroot
+export cfastroot
 
 export SMV_Summary="$fdsroot/Manuals/SMV_Summary"
 
-ERROR_LOG=$OUTPUT_DIR/errors
-TIME_LOG=$OUTPUT_DIR/timings
-WARNING_LOG=$OUTPUT_DIR/warnings
-GUIDE_DIR=$SMOKEBOT_DIR/guides
-STAGE_STATUS=$OUTPUT_DIR/stage_status
 SMV_VG_GUIDE=$fdsroot/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsroot/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$fdsroot/Manuals/FDS_User_Guide/geom_notes.pdf
-NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-UPLOADGUIDES=./smv_guides2GD.sh
+UploadGuides=$fdsroot/Utilities/Firebot/smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -135,7 +143,7 @@ if [ -e $FDS_STATUS_FILE ] ; then
 fi
 
 # Load mailing list for status report
-source $SMOKEBOT_DIR/firebot_email_list.sh
+source $SMOKEBOT_RUNDIR/firebot_email_list.sh
 
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
@@ -295,8 +303,8 @@ clean_smokebot_history()
 {
    
    # Clean Smokebot metafiles
-   MKDIR $SMOKEBOT_DIR > /dev/null
-   cd $SMOKEBOT_DIR
+   MKDIR $SMOKEBOT_RUNDIR > /dev/null
+   cd $SMOKEBOT_RUNDIR
    MKDIR guides > /dev/null
    MKDIR history > /dev/null
    MKDIR output > /dev/null
@@ -850,7 +858,7 @@ make_smv_pictures_db()
 check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6b` == "" ]]
    then
       stage6b_success=true
@@ -863,7 +871,7 @@ check_smv_pictures_db()
    fi
 
    # Scan for and report any warnings in make SMV pictures process
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6b` == "" ]]
    then
       # Continue along
@@ -945,7 +953,7 @@ make_smv_pictures()
 check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6d` == "" ]]
    then
       stage6d_success=true
@@ -970,7 +978,7 @@ make_smv_movies()
 
 check_smv_movies()
 {
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6e` == "" ]]
    then
       stage6e_success=true
@@ -983,7 +991,7 @@ check_smv_movies()
    fi
 
    # Scan for and report any warnings in make SMV pictures process
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6d` == "" ]]
    then
       # Continue along
@@ -1018,28 +1026,35 @@ generate_timing_stats()
 archive_timing_stats()
 {
    cd $fdsroot/Utilities/Scripts
-   cp fds_timing_stats.csv "$SMOKEBOT_DIR/history/${GIT_REVISION}_timing.csv"
+   cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
-#  ==================================
-#  = Stage 8 - Build FDS-SMV Guides =
-#  ==================================
+#  ===================================
+#  = Stage 8 - Build smokview guides =
+#  ===================================
 
 check_guide()
 {
+   stage=$1
+   directory=$2
+   document=$3
+   label=$4
+
    # Scan and report any errors in build process for guides
    SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
-   cd $SMOKEBOT_DIR
-   if [[ `grep "! LaTeX Error:" -I $1` == "" ]]
+   cd $SMOKEBOT_RUNDIR
+   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
    then
+      if [ "$UPLOADGUIDES" == "1" ]; then
       if [ -d $SMOKEBOT_MANDIR ] ; then
-        cp $2 $SMOKEBOT_MANDIR/.
+        cp $directory/$document $SMOKEBOT_MANDIR/.
+      fi
       fi
       if [ -d $SMV_Summary/manuals ] ; then
-        cp $2 $SMV_Summary/manuals/.
+        cp $directory/$document $SMV_Summary/manuals/.
       fi
-      cp $2 $NEWGUIDE_DIR/.
-      chmod 664 $NEWGUIDE_DIR/$2
+      cp $directory/$document $NEWGUIDE_DIR/.
+      chmod 664 $NEWGUIDE_DIR/$document
    else
       echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
@@ -1048,14 +1063,14 @@ check_guide()
    fi
 
    # Check for LaTeX warnings (undefined references or duplicate labels)
-   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${1}` == "" ]]
+   if [[ `grep -E "undefined|multiply defined|multiply-defined" -I ${stage}` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 8 warnings:" >> $WARNING_LOG
-      echo $3 >> $WARNING_LOG
-      grep -E "undefined|multiply defined|multiply-defined" -I $1 >> $WARNING_LOG
+      echo $label >> $WARNING_LOG
+      grep -E "undefined|multiply defined|multiply-defined" -I $stage >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -1071,7 +1086,7 @@ make_guide()
    ./make_guide.sh &> $OUTPUT_DIR/stage8_$document
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_$document $directory/$document.pdf $label
+   check_guide $OUTPUT_DIR/stage8_$document $directory $document.pdf $label
 }
 
 #  =====================================================
@@ -1080,33 +1095,33 @@ make_guide()
 
 save_build_status()
 {
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUNDIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      cat "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
-     cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_errors.txt"
+     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
      touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
-      cat $ERROR_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_errors.txt"
+      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
       touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
-      cat $WARNING_LOG > "$SMOKEBOT_DIR/history/${GIT_REVISION}_warnings.txt"
+      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
       touch output/status_warnings
 
    # No errors or warnings
    else
-      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$SMOKEBOT_DIR/history/${GIT_REVISION}.txt"
+      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       touch output/status_success
    fi
 }
@@ -1134,7 +1149,7 @@ email_build_status()
     cat $GIT_FDSLOG >> $TIME_LOG
   fi
    echo "----------------------------------------------" >> $TIME_LOG
-   cd $SMOKEBOT_DIR
+   cd $SMOKEBOT_RUnDIR
    # Check for warnings and errors
    echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
    echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
@@ -1159,8 +1174,10 @@ email_build_status()
    # No errors or warnings
    else
 # upload guides to a google drive directory
-      cd $SMOKEBOT_DIR
-      $UPLOADGUIDES  > /dev/null
+      if [ "$UPLOADGUIDES" == "1" ];then
+        cd $SMOKEBOT_RUNDIR
+        $UploadGuides $NEWGUIDE_DIR > /dev/null
+      fi
 
       # Send success message with links to nightly manuals
       cat $TIME_LOG | mail -s "smokebot build success on ${hostname}! Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
