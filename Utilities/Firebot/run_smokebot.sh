@@ -23,6 +23,7 @@ RUNSMOKEBOT=1
 MOVIE=
 SSH=
 MAILTO=
+UPLOAD=
 
 function usage {
 echo "run_smokebot.sh -a -b branch_name -c -h -m email_address -r repo location -S host -u -v"
@@ -40,11 +41,12 @@ echo "-M  - make movies"
 echo "-r - FDS-SMV repository location [default: $FDSREPO]"
 echo "-S host - generate images on host"
 echo "-u - update repo"
+echo "-U - upload guides"
 echo "-v - show options used to run smokebot"
 exit
 }
 
-while getopts 'ab:C:cd:hm:Mq:r:S:uv' OPTION
+while getopts 'ab:C:cd:hm:Mq:r:S:uUv' OPTION
 do
 case $OPTION  in
   a)
@@ -81,6 +83,9 @@ case $OPTION  in
   u)
    UPDATEREPO=-u
    ;;
+  U)
+   UPLOAD="-U"
+   ;;
   v)
    RUNSMOKEBOT=
    ;;
@@ -111,8 +116,8 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $MAILTO $MOVIE "$@"
+  ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $MAILTO $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
 fi
