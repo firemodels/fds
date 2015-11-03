@@ -290,6 +290,7 @@ $QFDS -d Species hrrpuv_reac_single.fds
 $QFDS -d Species hrrpuv_reac_parallel.fds
 $QFDS -d Species hrrpuv_reac_parallel_2.fds
 $QFDS -d Species hrrpuv_reac_series.fds
+$QFDS -d Species hrrpuv_reac_soot.fds
 $QFDS -d Species ramp_chi_r.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
