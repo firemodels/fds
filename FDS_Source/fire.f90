@@ -252,8 +252,6 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
          ZZ_MIXED = ZZ_MIXED_NEW
          IF (SIMPLE_CHEMISTRY .AND. TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
 
-         print *,TIME_ITER,Q_REAC_SUB
-
       CASE (RK2_RICHARDSON) ! Finite-rate (or mixed finite-rate/fast) chemistry
 
          ERR_TOL = RICHARDSON_ERROR_TOLERANCE
@@ -292,6 +290,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
    IF (OUTPUT_CHEM_IT) THEN
       CHEM_SUBIT(I,J,K) = ITER
    ENDIF
+   Q_REAC_SUM = Q_REAC_SUM + Q_REAC_SUB
 
    ! Total Variation (TV) scheme (accelerates integration for finite-rate equilibrium calculations)
    ! See FDS Tech Guide Appendix E
@@ -349,7 +348,7 @@ ENDIF
 ! Store special diagnostic quantities
 
 IF (REAC_SOURCE_CHECK) THEN
-   REAC_SOURCE_TERM(I,J,K,:) = RHO(I,J,K)*(ZZ_GET-ZZ_UNMIXED)/DT
+   REAC_SOURCE_TERM(I,J,K,:) = RHO(I,J,K)*(ZZ_GET-ZZ_0)/DT
    Q_REAC(I,J,K,:) = Q_REAC_SUM/CELL_VOLUME/DT
 ENDIF
 
@@ -469,7 +468,7 @@ DO N=1,N_INC
    CALL FIRE_FORWARD_EULER(ZZ_2,ZZ_1,ZZ_UNMIXED,ZETA_2,ZETA_1,DT_LOC,TMP_MIXED,TMP_UNMIXED,RHO_HAT,CELL_MASS,TAU_MIX,&
                            PBAR_0,DELTA,VEL_RMS,EXTINCT,Q_REAC_2)
    ZZ_OUT = 0.5_EB*(ZZ_0 + ZZ_2)
-   Q_REAC_OUT = Q_REAC_OUT + 0.5_EB*(Q_REAC_1+Q_REAC_2) ! DT_LOC applied in FIRE_FORWARD_EULER
+   Q_REAC_OUT = Q_REAC_OUT + 0.5_EB*(Q_REAC_1+Q_REAC_2)
    ZZ_0 = ZZ_OUT
    ZETA_OUT = ZETA_1
    ZETA_0 = ZETA_OUT
