@@ -1,13 +1,17 @@
 #!/bin/bash
 running=smokebot_running
 
+CURDIR=`pwd`
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
 fi
+if [ -e .fds_git ]; then
+  cd ../..
+  reponame=`pwd`
+  cd $CURDIR
+fi
 
-CURDIR=`pwd`
-FDS_GITbase=FDS-SMVgitclean
 BRANCH=development
 botscript=smokebot_linux.sh
 RUNAUTO=
