@@ -35,26 +35,7 @@ do
    WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$i" | awk -F' ' '{print $(NF)}'`
 
    # Grep for CPU time and units
-   CPU_TIME_VALUE=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $(NF-1)}'`
-   CPU_TIME_UNITS=`grep -H "Total CPU:" "$i" | tail -n 1 | awk -F' ' '{print $NF}'`
-
-   # Keep seconds as is
-   if [[ $CPU_TIME_UNITS = 's' ]]
-   then
-      CPU_TIME=$CPU_TIME_VALUE
-   fi
-
-   # Convert min to s
-   if [[ $CPU_TIME_UNITS = 'min' ]]
-   then
-      CPU_TIME=`echo "$CPU_TIME_VALUE*60" | bc`
-   fi
-
-   # Convert hr to s
-   if [[ $CPU_TIME_UNITS = 'hr' ]]
-   then
-      CPU_TIME=`echo "$CPU_TIME_VALUE*3600" | bc`
-   fi
+   CPU_TIME=`grep -H "Total Elapsed" "$i" | tail -n 1 | awk -F' ' '{print $(NF)}'`
 
    # Grep for number of cells in each dimension
    X_CELLS=`grep -H "Cells in the X" "$i" | awk -F' ' '{print $NF}'`
