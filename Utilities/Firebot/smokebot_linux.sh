@@ -21,7 +21,7 @@ NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 
 # define repo names (default)
 fdsroot=~/FDS-SMVgitclean
-cfastroot~/cfastgitclean
+cfastroot=~/cfastgitclean
 
 SMOKEBOT_QUEUE=smokebot
 MAKEMOVIES=
