@@ -24,10 +24,6 @@ TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 
-# Change to home directory
-cd
-FIREBOT_HOME_DIR="`pwd`"
-
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
   platform="osx"
@@ -46,8 +42,9 @@ BRANCH=development
 CLEANREPO=0
 UPDATEREPO=0
 
-if [ "$FDSSMV" == "" ] ; then
-  FDSSMV=~/FDS-SMVgitclean
+reponame=$FDSSMV
+if [ "$reponame" == "" ] ; then
+  reponame=~/FDS-SMVgitclean
 fi
 
 DB=_db
@@ -75,7 +72,7 @@ echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo ""
-echo "-r - repository location [default: $FDSSMV]"
+echo "-r - repository location [default: $reponame]"
 echo ""
 echo "-u - update repo"
 echo ""
@@ -108,7 +105,7 @@ case $OPTION in
    QUEUE="$OPTARG"
    ;;
   r)
-   FDSSMV="$OPTARG"
+   reponame="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
@@ -128,10 +125,8 @@ esac
 done
 shift $(($OPTIND-1))
 
-export FDSSMV
-FIREBOT_HOME_DIR=$(dirname "${FDSSMV}")
-FDS_GITBASE=`basename $FDSSMV`
-UploadGuides=$FDSSMV/Utilities/Firebot/fds_guides2GD.sh
+export reponame 
+UploadGuides=$reponame/Utilities/Firebot/fds_guides2GD.sh
 
 #  =============================================
 #  = Firebot timing and notification mechanism =
@@ -189,7 +184,7 @@ check_time_limit()
 
 set_files_world_readable()
 {
-   cd $FDSSMV
+   cd $reponame
    chmod -R go+r *
 }
 
@@ -215,11 +210,11 @@ clean_firebot_metafiles()
 clean_git_repo()
 {
    # Check to see if FDS repository exists
-   if [ -e "$FDSSMV" ]
+   if [ -e "$reponame" ]
    # If yes, clean FDS repository
    then
       # Revert and clean up temporary unversioned and modified versioned repository files
-      cd $FDSSMV
+      cd $reponame
       if [[ "$CLEANREPO" == "1" ]] ; then
 # remove unversioned files
         git clean -dxf &> /dev/null
@@ -229,15 +224,15 @@ clean_git_repo()
       fi
    # If not, create FDS repository and checkout
    else
-      echo "Downloading FDS repository:" >> $OUTPUT_DIR/stage1 2>&1
-      cd $FIREBOT_HOME_DIR
-      git clone git@github.com:firemodels/fds-smv.git $FDS_GITBASE >> $OUTPUT_DIR/stage1 2>&1
+      echo "firebot repo $reponame does not exist" >> $OUTPUT_DIR/stage1 2>&1
+      echo "firebot run aborted." >> $OUTPUT_DIR/stage1 2>&1
+      cd $FIREBOT_RUNDIR
    fi
 }
 
 do_git_checkout()
 {
-   cd $FDSSMV
+   cd $reponame
    # If an GIT revision string is specified, then get that revision
    echo "Checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
    CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
@@ -283,7 +278,7 @@ do_git_checkout()
 
 check_git_checkout()
 {
-   cd $FDSSMV
+   cd $reponame
    # Check for GIT errors
    stage1_success=true
 }
@@ -300,7 +295,7 @@ archive_compiler_version()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDSSMV/FDS_Compilation/intel_${platform}_64_db
+   cd $reponame/FDS_Compilation/intel_${platform}_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -308,7 +303,7 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDSSMV/FDS_Compilation/intel_${platform}_64_db
+   cd $reponame/FDS_Compilation/intel_${platform}_64_db
    if [ -e "fds_intel_${platform}_64_db" ]
    then
       stage2a_success=true
@@ -333,14 +328,14 @@ check_compile_fds_db()
 inspect_fds_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
-   cd $FDSSMV/Utilities/Scripts
+   cd $reponame/Utilities/Scripts
    ./inspect_openmp.sh &> $OUTPUT_DIR/stage2a_inspect
 }
 
 check_inspect_fds_db()
 {
    # Scan for errors in thread checking results
-   cd $FDSSMV/Utilities/Scripts
+   cd $reponame/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
       if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_RUNDIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
@@ -363,7 +358,7 @@ check_inspect_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
-   cd $FDSSMV/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   cd $reponame/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
 }
@@ -371,7 +366,7 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $FDSSMV/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   cd $reponame/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
    if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ]
    then
       stage2b_success=true
@@ -400,9 +395,9 @@ check_compile_fds_mpi_db()
 
 generate_validation_set_list()
 {
-   cd $FDSSMV/Validation
+   cd $reponame/Validation
 
-   # List and sort the oldest validation sets in the $FDSSMV/Validation/Process_All_Output.sh script
+   # List and sort the oldest validation sets in the $reponame/Validation/Process_All_Output.sh script
    # based on the modification date of $VDIR/FDS_Output_Files. The result is an array of the validation
    # sets ordered from oldest to newest.
 #   VALIDATION_SETS=(`grep '$VDIR' Process_All_Output.sh | grep -v "#" | xargs -n 1 dirname | xargs -n 1 dirname | xargs -n 1 basename | xargs -i svn info {}/FDS_Output_Files | awk '{if($0 != ""){ if(s){s=s"*"$0}else{s=$0}}else{ print s"*";s=""}}END{print s"*"}' | sort -t* -k9 | cut -d '*' -f1 | cut -d ' ' -f2 | xargs -n 1 dirname`)
@@ -451,7 +446,7 @@ check_current_utilization()
 run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
-   cd $FDSSMV/Verification/scripts
+   cd $reponame/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
@@ -461,7 +456,7 @@ run_verification_cases_debug()
    wait_cases_debug_end 'verification'
 
    # Remove all .stop files from Verification directories (recursively)
-   cd $FDSSMV/Verification
+   cd $reponame/Verification
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -481,7 +476,7 @@ run_validation_cases_debug()
          break
       fi
 
-      cd $FDSSMV/Validation/"$SET"
+      cd $reponame/Validation/"$SET"
 
       # Submit FDS validation cases and wait for them to start
       echo "Running FDS validation cases for ${SET}:" >> $OUTPUT_DIR/stage3
@@ -503,7 +498,7 @@ run_validation_cases_debug()
 
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
-      cd $FDSSMV/Validation/"$SET"
+      cd $reponame/Validation/"$SET"
       ./Run_All.sh -b -s >> $OUTPUT_DIR/stage3 2>&1
       echo "" >> $OUTPUT_DIR/stage3 2>&1
    done
@@ -517,7 +512,7 @@ run_validation_cases_debug()
    #  ======================
 
    # Remove all .stop files from Validation directories (recursively)
-   cd $FDSSMV/Validation
+   cd $reponame/Validation
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -547,7 +542,7 @@ check_cases_debug()
 # copy casename.err to casename.err_stage3 for any cases that had errors
       echo "#/bin/bash" > $OUTPUT_DIR/stage3_filelist
       grep err $OUTPUT_DIR/stage3_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage3_filelist
-      cd $FDSSMV/Verification
+      cd $reponame/Verification
       source $OUTPUT_DIR/stage3_filelist
 
       # If errors encountered in validation mode, then email status and exit
@@ -566,7 +561,7 @@ check_cases_debug()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDSSMV/FDS_Compilation/intel_${platform}_64
+   cd $reponame/FDS_Compilation/intel_${platform}_64
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -574,7 +569,7 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDSSMV/FDS_Compilation/intel_${platform}_64
+   cd $reponame/FDS_Compilation/intel_${platform}_64
    if [ -e "fds_intel_${platform}_64" ]
    then
       stage4a_success=true
@@ -604,7 +599,7 @@ check_compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS MPI
-   cd $FDSSMV/FDS_Compilation/mpi_intel_${platform}_64$IB
+   cd $reponame/FDS_Compilation/mpi_intel_${platform}_64$IB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
 }
@@ -612,7 +607,7 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS MPI compilation
-   cd $FDSSMV/FDS_Compilation/mpi_intel_${platform}_64$IB
+   cd $reponame/FDS_Compilation/mpi_intel_${platform}_64$IB
    if [ -e "fds_mpi_intel_${platform}_64$IB" ]
    then
       stage4b_success=true
@@ -643,7 +638,7 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
-   cd $FDSSMV/SMV/Build/LIBS/lib_${platform}_intel_64
+   cd $reponame/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
@@ -702,7 +697,7 @@ wait_cases_release_end()
       TIME_LIMIT_STAGE="5"
       check_time_limit
       if [ $FIREBOT_MODE == "validation" ] ; then
-         check_cases_release $FDSSMV/Validation 'validation'
+         check_cases_release $reponame/Validation 'validation'
          sleep 300
       fi
       sleep 60
@@ -713,7 +708,7 @@ run_verification_cases_release()
 {
    # Start running all FDS verification cases
 
-   cd $FDSSMV/Verification/scripts
+   cd $reponame/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
@@ -731,7 +726,7 @@ run_validation_cases_release()
 
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
-      cd $FDSSMV/Validation/"$SET"
+      cd $reponame/Validation/"$SET"
 
       # Start running FDS validation cases
       echo "Running FDS validation cases:" >> $OUTPUT_DIR/stage5
@@ -750,12 +745,12 @@ commit_validation_results()
    for SET in ${CURRENT_VALIDATION_SETS[*]}
    do
       # Copy new FDS files from Current_Results to FDS_Output_Files using Process_Output.csh script for the validation set
-      cd $FDSSMV/Validation/"$SET"/FDS_Output_Files
+      cd $reponame/Validation/"$SET"/FDS_Output_Files
       ./Process_Output.csh
    done
 
    # cd to GIT root
-   cd $FDSSMV
+   cd $reponame
 
    # Commit new validation results
    svn commit -m "Validationbot: Update validation results for: ${CURRENT_VALIDATION_SETS[*]}" &> /dev/null
@@ -768,14 +763,14 @@ commit_validation_results()
 compile_smv_db()
 {
    # Clean and compile SMV debug
-   cd $FDSSMV/SMV/Build/intel_${platform}_64
+   cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
 }
 
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
-   cd $FDSSMV/SMV/Build/intel_${platform}_64
+   cd $reponame/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64_db" ]
    then
       stage6a_success=true
@@ -805,14 +800,14 @@ check_compile_smv_db()
 compile_smv()
 {
    # Clean and compile SMV
-   cd $FDSSMV/SMV/Build/intel_${platform}_64
+   cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv.sh &> $OUTPUT_DIR/stage6c
 }
 
 check_compile_smv()
 {
    # Check for errors in SMV release compilation
-   cd $FDSSMV/SMV/Build/intel_${platform}_64
+   cd $reponame/SMV/Build/intel_${platform}_64
    if [ -e "smokeview_${platform}_64" ]
    then
       stage6c_success=true
@@ -842,7 +837,7 @@ check_compile_smv()
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
-   cd $FDSSMV/Verification/scripts
+   cd $reponame/Verification/scripts
    ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
 }
 
@@ -883,7 +878,7 @@ check_fds_pictures()
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license
 }
 
@@ -916,7 +911,7 @@ check_matlab_license_server()
 run_matlab_verification()
 {
    # Run Matlab plotting script
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification
 }
 
@@ -937,7 +932,7 @@ check_matlab_verification()
 check_verification_stats()
 {
    # Check for existence of verification statistics output file
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
    if [ -e "FDS_verification_scatterplot_output.csv" ]
    then
       # Continue along
@@ -950,7 +945,7 @@ check_verification_stats()
    fi
 
    # Scan for and report warnings for any verification cases that are outside of their specified error tolerance
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
    if [[ `grep "Out of Tolerance" FDS_verification_scatterplot_output.csv` == "" ]]
    then
       # Continue along
@@ -983,7 +978,7 @@ check_verification_stats()
 run_matlab_validation()
 {
    # Run Matlab plotting script
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation
 }
 
@@ -1003,10 +998,10 @@ check_matlab_validation()
 
 archive_validation_stats()
 {
-   cd $FDSSMV/Utilities/Matlab
+   cd $reponame/Utilities/Matlab
 
    STATS_FILE_BASENAME=FDS_validation_scatterplot_output
-   CURRENT_STATS_FILE=$FDSSMV/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
+   CURRENT_STATS_FILE=$reponame/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
 
    if [ -e ${CURRENT_STATS_FILE} ]
    then
@@ -1024,7 +1019,7 @@ archive_validation_stats()
 make_validation_git_stats()
 {
    # Output a LaTeX file with a table of the FDS validation sets and their corresponding GIT information
-   cd $FDSSMV/Utilities/Scripts
+   cd $reponame/Utilities/Scripts
    ./validation_git_stats.sh
 }
 
@@ -1034,13 +1029,13 @@ make_validation_git_stats()
 
 generate_timing_stats()
 {
-   cd $FDSSMV/Utilities/Scripts
+   cd $reponame/Utilities/Scripts
    ./fds_timing_stats.sh
 }
 
 archive_timing_stats()
 {
-   cd $FDSSMV/Utilities/Scripts
+   cd $reponame/Utilities/Scripts
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
@@ -1070,57 +1065,57 @@ check_guide()
 
 make_fds_user_guide()
 {
-   cd $FDSSMV/Manuals/FDS_User_Guide
+   cd $reponame/Manuals/FDS_User_Guide
 
    # Build FDS User Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_user_guide $FDSSMV/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_user_guide $reponame/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
 }
 
 make_fds_technical_guide()
 {
-   cd $FDSSMV/Manuals/FDS_Technical_Reference_Guide
+   cd $reponame/Manuals/FDS_Technical_Reference_Guide
 
    # Build FDS Technical Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $FDSSMV/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $reponame/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
 }
 
 make_fds_verification_guide()
 {
-   cd $FDSSMV/Manuals/FDS_Verification_Guide
+   cd $reponame/Manuals/FDS_Verification_Guide
 
    # Build FDS Verification Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $FDSSMV/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $reponame/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
 }
 
 make_fds_validation_guide()
 {
-   cd $FDSSMV/Manuals/FDS_Validation_Guide
+   cd $reponame/Manuals/FDS_Validation_Guide
 
    # Build FDS Validation Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $FDSSMV/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $reponame/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
 }
 
 make_fds_configuration_management_plan()
 {
-   cd $FDSSMV/Manuals/FDS_Configuration_Management_Plan
+   cd $reponame/Manuals/FDS_Configuration_Management_Plan
 
    # Build FDS Configuration Management Plan
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $FDSSMV/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
+   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $reponame/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
 }
 
 #  =====================================================
@@ -1252,15 +1247,15 @@ fi
 # Depends on successful FDS debug compile
 if [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_debug
-   check_cases_debug $FDSSMV/Verification 'verification'
+   check_cases_debug $reponame/Verification 'verification'
 
 elif [[ $stage2a_success && $stage2b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_debug
-   check_cases_debug $FDSSMV/Validation 'validation'
+   check_cases_debug $reponame/Validation 'validation'
 fi
 
 # clean debug stage
-cd $FDSSMV
+cd $reponame
 if [[ "$CLEANREPO" == "1" ]] ; then
    git clean -dxf &> /dev/null
 fi
@@ -1284,11 +1279,11 @@ fi
 # Depends on successful FDS compile
 if [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "verification" ]] ; then
    run_verification_cases_release
-   check_cases_release $FDSSMV/Verification 'verification'
+   check_cases_release $reponame/Verification 'verification'
 
 elif [[ $stage4a_success && $stage4b_success && $FIREBOT_MODE == "validation" ]] ; then
    run_validation_cases_release
-   check_cases_release $FDSSMV/Validation 'validation'
+   check_cases_release $reponame/Validation 'validation'
 fi
 
 # Depends on successful run of validation cases in debug and release mode
