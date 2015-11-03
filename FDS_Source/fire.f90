@@ -250,7 +250,9 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
                                  CELL_MASS,TAU_MIX,PBAR_0,DELTA,VEL_RMS,EXTINCT,Q_REAC_SUB,TIME_ITER)
          ZETA_0 = ZETA
          ZZ_MIXED = ZZ_MIXED_NEW
-         IF (SIMPLE_CHEMISTRY .AND. TIME_ITER > 1) CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
+         IF (SIMPLE_CHEMISTRY .AND. N_FIXED_CHEMISTRY_SUBSTEPS<0 .AND. TIME_ITER > 1) THEN
+            CALL SHUTDOWN('ERROR: Error in Simple Chemistry')
+         ENDIF
 
       CASE (RK2_RICHARDSON) ! Finite-rate (or mixed finite-rate/fast) chemistry
 
