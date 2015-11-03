@@ -15,9 +15,30 @@ CLEANREPO=
 UPDATEREPO=
 QUEUE=
 RUNSMOKEBOT=1
-fopt=
-mopt=
-while getopts 'ab:cd:fmq:r:uv' OPTION
+MOVIE=
+SSH=
+MAILTO=
+
+function usage {
+echo "run_smokebot.sh -a -b branch_name -c -h -m email_address -r repo location -S host -u -v"
+echo "Run smokebot_linux.sh V&V testing script"
+echo ""
+echo "Options:"
+echo "-a - run automatically if FDS or smokeview source has changed"
+echo "-b - branch_name - run smokebot using the branch branch_name [default: $BRANCH]"
+echo "-c - clean repo"
+echo "-h - display this message"
+echo "-m email_address"
+echo "-q queue"
+echo "-M  - make movies"
+echo "-r - repository location [default: $reponame]"
+echo "-S host - generate images on host"
+echo "-u - update repo"
+echo "-v - show options used to run smokebot"
+exit
+}
+
+while getopts 'ab:cd:hm:Mq:r:S:uv' OPTION
 do
 case $OPTION  in
   a)
@@ -29,14 +50,24 @@ case $OPTION  in
   c)
    CLEANREPO=-c
    ;;
-  f)
-   fopt="-f"
+  h)
+   usage
+   exit
    ;;
   m)
-   mopt="-m"
+   MAILTO="-m $OPTARG"
+   ;;
+  M)
+   MOVIE="-M"
+   ;;
+  q)
+   QUEUE="-q $OPTARG"
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  S)
+   SSH="-S $OPTARG"
    ;;
   u)
    UPDATEREPO=-u
@@ -57,9 +88,6 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
 fi
 
 FDS_GITBASE=`basename $reponame`
-if [[ "$QUEUE" != "" ]]; then
-   QUEUE="-q $QUEUE"
-fi 
 reponame="-r $reponame"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [[ "$UPDATEREPO" == "-u" ]]; then
@@ -74,8 +102,8 @@ fi
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $fopt $mopt "$@"
+  ./$botscript $RUNAUTO $SSH $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $MAILTO $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $fopt $mopt "$@"
+  echo ./$botscript $RUNAUTO $SSH $BRANCH $reponame $CLEANREPO $UPDATEREPO $QUEUE $MAILTO $MOVIE "$@"
 fi

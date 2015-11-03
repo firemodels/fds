@@ -21,6 +21,8 @@ RUN_OPENMP=
 TESTFLAG=
 CLEANREPO=0
 UPDATEREPO=0
+SSH=
+MAILTO=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -41,7 +43,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:cmo:q:r:stu' OPTION
+while getopts 'ab:cm:Mo:q:r:sS:tu' OPTION
 do
 case $OPTION in
   a)
@@ -54,6 +56,9 @@ case $OPTION in
    CLEANREPO=1
    ;;
   m)
+   MAILTO="$OPTARG"
+   ;;
+  M)
    MAKEMOVIES="1"
    ;;
   o)
@@ -69,6 +74,9 @@ case $OPTION in
    ;;
   s)
    RUNDEBUG="0"
+   ;;
+  S)
+   SSH="ssh $OPTARG "
    ;;
   t)
    TESTFLAG="-t"
@@ -132,6 +140,9 @@ source $SMOKEBOT_DIR/firebot_email_list.sh
 mailTo=$mailToSMV
 if [[ "$LAST_FDS_FAILED" == "1" ]] ; then
   mailTo=$mailToFDS
+fi
+if [[ "$MAILTO" != "" ]]; then
+  mailTo=$MAILTO
 fi
 
 JOBPREFIX=SB_
@@ -582,7 +593,7 @@ compile_smv_utilities()
 {
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
-
+   if [ "$SSH" == "" ] ; then 
    # smokeview libraries
    cd $fdsroot/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -614,6 +625,31 @@ compile_smv_utilities()
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   else
+   $SSH \( \
+   cd $fdsroot/SMV/Build/LIBS/lib_${platform}_intel_64 \; \
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/smokezip/intel_${platform}_64 \; \
+   rm -f *.o smokezip_${platform}_64 \; \
+   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/smokediff/intel_${platform}_64 \; \
+   rm -f *.o smokediff_${platform}_64 \; \
+   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/background/intel_${platform}_64 \; \
+   rm -f *.o background \; \
+   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/wind2fds/intel_${platform}_64 \; \
+   rm -f *.o wind2fds_${platform}_64 \; \
+   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
+   fi
    else
    echo "Warning: smokeview and utilities not built - C compiler not available" >> $OUTPUT_DIR/stage5pre 2>&1
    fi
@@ -753,10 +789,17 @@ check_verification_cases_release()
 compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
+   if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
    cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   else
+   $SSH \(
+   cd $fdsroot/SMV/Build/intel_${platform}_64 \; \
+   rm -f smokeview_${platform}_64_db \; \
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   fi
    fi
 }
 
@@ -795,8 +838,13 @@ check_compile_smv_db()
 make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
+   if [ "$SSH" == "" ]; then
    cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
+   else
+   $SSH \( cd $fdsroot/Verification/scripts \; \
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
+   fi
 }
 
 check_smv_pictures_db()
@@ -835,10 +883,17 @@ check_smv_pictures_db()
 compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
+   if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
    cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
+   else
+   $SSH \( \
+   cd $fdsroot/SMV/Build/intel_${platform}_64 \; \
+   rm -f smokeview_${platform}_64 \; \
+   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c \)
+   fi
    fi
 }
 
@@ -878,8 +933,13 @@ check_compile_smv()
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
+   if [ "$SSH" == "" ]; then
    cd $fdsroot/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
+   else
+   $SSH \( cd $fdsroot/Verification/scripts \; \
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
+   fi
 }
 
 check_smv_pictures()
