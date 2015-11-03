@@ -2,7 +2,7 @@
 
 &MESH IJK = 40,50,50, XB = -.35,.35,-.475,.475,-.03,.97 /
 
-&TIME T_BEGIN=0., T_END = 2.0 /
+&TIME T_END = 2.0 /
 
 &DUMP DT_DEVC = 0.1 /
 
