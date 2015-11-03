@@ -35,6 +35,7 @@ CLEANREPO=0
 UPDATEREPO=0
 SSH=
 MAILTO=
+UPLOAD=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -55,7 +56,7 @@ else
   USEINSTALL2=
 fi
 
-while getopts 'ab:C:cm:Mo:q:r:sS:tu' OPTION
+while getopts 'ab:C:cm:Mo:q:r:sS:tuU' OPTION
 do
 case $OPTION in
   a)
@@ -95,6 +96,9 @@ case $OPTION in
    ;;
   t)
    TESTFLAG="-t"
+   ;;
+  U)
+   UPLOAD=1
    ;;
   u)
    UPDATEREPO=1
@@ -1168,8 +1172,10 @@ email_build_status()
    # No errors or warnings
    else
 # upload guides to a google drive directory
-      cd $SMOKEBOT_RUNDIR
-      $UPLOADGUIDES  > /dev/null
+      if [ "$UPLOAD" == "1" ];then
+        cd $SMOKEBOT_RUNDIR
+        $UPLOADGUIDES $NEWGUIDE_DIR > /dev/null
+      fi
 
       # Send success message with links to nightly manuals
       cat $TIME_LOG | mail -s "smokebot build success on ${hostname}! Version: ${GIT_REVISION}, Branch: $BRANCH." $mailTo > /dev/null
