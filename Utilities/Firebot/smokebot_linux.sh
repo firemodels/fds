@@ -35,7 +35,7 @@ CLEANREPO=0
 UPDATEREPO=0
 SSH=
 MAILTO=
-UPLOAD=
+UPLOADGUIDES=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -98,7 +98,7 @@ case $OPTION in
    TESTFLAG="-t"
    ;;
   U)
-   UPLOAD=1
+   UPLOADGUIDES=1
    ;;
   u)
    UPDATEREPO=1
@@ -132,7 +132,7 @@ export SMV_Summary="$fdsroot/Manuals/SMV_Summary"
 SMV_VG_GUIDE=$fdsroot/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsroot/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$fdsroot/Manuals/FDS_User_Guide/geom_notes.pdf
-UPLOADGUIDES=$fdsroot/Utilities/Firebot/smv_guides2GD.sh
+UploadGuides=$fdsroot/Utilities/Firebot/smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -1029,9 +1029,9 @@ archive_timing_stats()
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
-#  ==================================
-#  = Stage 8 - Build FDS-SMV Guides =
-#  ==================================
+#  ===================================
+#  = Stage 8 - Build smokview guides =
+#  ===================================
 
 check_guide()
 {
@@ -1045,8 +1045,10 @@ check_guide()
    cd $SMOKEBOT_RUNDIR
    if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
    then
+      if [ "$UPLOADGUIDES" == "1" ]; then
       if [ -d $SMOKEBOT_MANDIR ] ; then
         cp $directory/$document $SMOKEBOT_MANDIR/.
+      fi
       fi
       if [ -d $SMV_Summary/manuals ] ; then
         cp $directory/$document $SMV_Summary/manuals/.
@@ -1172,9 +1174,9 @@ email_build_status()
    # No errors or warnings
    else
 # upload guides to a google drive directory
-      if [ "$UPLOAD" == "1" ];then
+      if [ "$UPLOADGUIDES" == "1" ];then
         cd $SMOKEBOT_RUNDIR
-        $UPLOADGUIDES $NEWGUIDE_DIR > /dev/null
+        $UploadGuides $NEWGUIDE_DIR > /dev/null
       fi
 
       # Send success message with links to nightly manuals
