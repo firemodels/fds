@@ -593,7 +593,7 @@ compile_smv_utilities()
 {
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
-
+   if [ "$SSH" == "" ] ; then 
    # smokeview libraries
    cd $fdsroot/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -625,6 +625,31 @@ compile_smv_utilities()
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   else
+   $SSH \( \
+   cd $fdsroot/SMV/Build/LIBS/lib_${platform}_intel_64 \; \
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/smokezip/intel_${platform}_64 \; \
+   rm -f *.o smokezip_${platform}_64 \; \
+   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/smokediff/intel_${platform}_64 \; \
+   rm -f *.o smokediff_${platform}_64 \; \
+   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/background/intel_${platform}_64 \; \
+   rm -f *.o background \; \
+   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   cd $fdsroot/Utilities/wind2fds/intel_${platform}_64 \; \
+   rm -f *.o wind2fds_${platform}_64 \; \
+   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
+   fi
    else
    echo "Warning: smokeview and utilities not built - C compiler not available" >> $OUTPUT_DIR/stage5pre 2>&1
    fi
@@ -764,10 +789,17 @@ check_verification_cases_release()
 compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
+   if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
    cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   else
+   $SSH \(
+   cd $fdsroot/SMV/Build/intel_${platform}_64 \; \
+   rm -f smokeview_${platform}_64_db \; \
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   fi
    fi
 }
 
@@ -851,10 +883,17 @@ check_smv_pictures_db()
 compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
+   if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
    cd $fdsroot/SMV/Build/intel_${platform}_64
    rm -f smokeview_${platform}_64
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
+   else
+   $SSH \( \
+   cd $fdsroot/SMV/Build/intel_${platform}_64 \; \
+   rm -f smokeview_${platform}_64 \; \
+   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c \)
+   fi
    fi
 }
 
