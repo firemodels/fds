@@ -35,7 +35,7 @@ CLEANREPO=0
 UPDATEREPO=0
 SSH=
 MAILTO=
-UPLOADGUIDES=
+UPLOADRESULTS=
 
 WEBHOSTNAME=blaze.nist.gov
 if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
@@ -98,7 +98,7 @@ case $OPTION in
    TESTFLAG="-t"
    ;;
   U)
-   UPLOADGUIDES=1
+   UPLOADRESULTS=1
    ;;
   u)
    UPDATEREPO=1
@@ -128,6 +128,8 @@ export fdsroot
 export cfastroot
 
 export SMV_Summary="$fdsroot/Manuals/SMV_Summary"
+WEBFROMDIR="$fdsroot/Manuals/SMV_Summary"
+WEBTODIR=/var/www/html/VV/SMV2
 
 SMV_VG_GUIDE=$fdsroot/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsroot/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
@@ -992,14 +994,26 @@ check_smv_movies()
 
    # Scan for and report any warnings in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6d` == "" ]]
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6e` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 6d - Make SMV pictures (release mode):" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6d >> $WARNING_LOG
+      echo "Warnings from Stage 6e - Make SMV movies (release mode):" >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage6e >> $WARNING_LOG
       echo "" >> $WARNING_LOG
+   fi
+   if [ "$UPLOADRESULTS" == "1" ]; then
+     if [ -d "$WEBTODIR" ]; then
+       if [ -d "$WEBFROMDIR" ]; then 
+         CURDIR=`pwd`
+         cd $WEBTODIR
+         rm -rf *
+         cd $WEBFROM
+         cp -r * $WEBTODIR/.
+         cd $CURDIR
+       fi
+     fi
    fi
 
 }
@@ -1045,7 +1059,7 @@ check_guide()
    cd $SMOKEBOT_RUNDIR
    if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
    then
-      if [ "$UPLOADGUIDES" == "1" ]; then
+      if [ "$UPLOADRESULTS" == "1" ]; then
       if [ -d $SMOKEBOT_MANDIR ] ; then
         cp $directory/$document $SMOKEBOT_MANDIR/.
       fi
@@ -1139,6 +1153,9 @@ email_build_status()
    echo ".         stop: $stop_time " >> $TIME_LOG
    echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+if [ "$MAKEMOVIES" == "1" ]; then
+   echo ".  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
+fi
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
    echo ".FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
    echo ".SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
@@ -1174,7 +1191,7 @@ email_build_status()
    # No errors or warnings
    else
 # upload guides to a google drive directory
-      if [ "$UPLOADGUIDES" == "1" ];then
+      if [ "$UPLOADRESULTS" == "1" ];then
         cd $SMOKEBOT_RUNDIR
         $UploadGuides $NEWGUIDE_DIR > /dev/null
       fi
