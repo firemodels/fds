@@ -655,7 +655,6 @@ compile_smv_utilities()
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    cd $fdsroot/Utilities/wind2fds/intel_${platform}_64 \; \
-   rm -f *.o wind2fds_${platform}_64 \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
@@ -853,7 +852,7 @@ make_smv_pictures_db()
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
    else
    $SSH \( cd $fdsroot/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
    fi
 }
 
@@ -948,7 +947,7 @@ make_smv_pictures()
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
    else
    $SSH \( cd $fdsroot/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
    fi
 }
 
