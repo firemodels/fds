@@ -1157,8 +1157,10 @@ if [ "$MAKEMOVIES" == "1" ]; then
    echo ".  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
 fi
    echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+if [ "$RUNAUTO" != "" ]; then
    echo ".FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
    echo ".SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
+fi
   if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     cat $GIT_SMVLOG >> $TIME_LOG
   fi
@@ -1166,7 +1168,7 @@ fi
     cat $GIT_FDSLOG >> $TIME_LOG
   fi
    echo "----------------------------------------------" >> $TIME_LOG
-   cd $SMOKEBOT_RUnDIR
+   cd $SMOKEBOT_RUNDIR
    # Check for warnings and errors
    echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
    echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
