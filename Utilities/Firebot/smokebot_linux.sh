@@ -655,7 +655,6 @@ compile_smv_utilities()
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    cd $fdsroot/Utilities/wind2fds/intel_${platform}_64 \; \
-   rm -f *.o wind2fds_${platform}_64 \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
