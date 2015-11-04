@@ -853,7 +853,7 @@ make_smv_pictures_db()
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
    else
    $SSH \( cd $fdsroot/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
    fi
 }
 
@@ -948,7 +948,7 @@ make_smv_pictures()
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
    else
    $SSH \( cd $fdsroot/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
    fi
 }
 
