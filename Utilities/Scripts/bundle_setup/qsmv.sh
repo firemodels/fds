@@ -170,7 +170,7 @@ fi
 
 scriptfile=/tmp/script.$$
 cat << EOF > $scriptfile
-#!/bin/bash -f
+#!/bin/bash
 #PBS -N $TITLE
 #PBS -e $out
 #PBS -o $outlog
