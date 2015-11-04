@@ -372,7 +372,7 @@ if [[ "\\\$MPIDIST" == *ib ]] ; then
 fi
 export MPIDIST FDSNETWORK
 
-# Update LD_LIBRARY_PATH and PATH
+# Update $LDLIBPATH and PATH
 
 $LDLIBPATH=\\\$FDSBINDIR/LIB64:\\\$$LDLIBPATH
 PATH=\\\$FDSBINDIR:\\\$PATH
