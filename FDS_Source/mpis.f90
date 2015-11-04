@@ -81,6 +81,7 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        integer MPI_REQUEST_NULL, MPI_OP_NULL, MPI_ERRHANDLER_NULL
        integer MPI_INFO_NULL
 
+       parameter (MPI_MAX_LIBRARY_VERSION_STRING=10)
        parameter (MPI_GROUP_NULL=-1)
        parameter (MPI_COMM_NULL=-1)
        parameter (MPI_DATATYPE_NULL=-1)
@@ -1677,6 +1678,24 @@ end subroutine
 
 
 subroutine mpi_get_processor_name(pname, pnamelen, ierror)
+  character(*) :: pname
+  integer pnamelen
+  integer ierror
+  pname = 'null'
+  dummy = pnamelen + ierror
+end subroutine
+
+
+subroutine mpi_get_version(mpiversion, mpisubversion, ierror)
+  integer mpiversion, mpisubversion
+  integer ierror
+  mpiversion = 1
+  mpisubversion = 1
+  dummy = mpiversion + mpisubversion + ierror
+end subroutine
+
+
+subroutine mpi_get_library_version(pname, pnamelen, ierror)
   character(*) :: pname
   integer pnamelen
   integer ierror
