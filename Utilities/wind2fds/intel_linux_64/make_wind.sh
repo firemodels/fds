@@ -1,4 +1,4 @@
-#!/bin/bash -f
+#!/bin/bash
 source $IFORT_COMPILER/bin/compilervars.sh intel64
 
 rm -f *.o
