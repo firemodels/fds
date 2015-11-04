@@ -6,9 +6,8 @@ MOVIE=
 RUNSCRIPT=
 ssffile=
 TIMEOPTION=
-SSH=
 
-while getopts 'd:fmtS:' OPTION
+while getopts 'd:fmt' OPTION
 do
 case $OPTION in
   d)
@@ -19,9 +18,6 @@ case $OPTION in
    ;;
   m)
    MOVIE="y"
-   ;;
-  S)
-   SSH="$OPTARG"
    ;;
   t)
    TIMEOPTION=-time
@@ -70,9 +66,5 @@ fi
 
 #source ~/.bashrc_fds default
 cd $fulldir
-echo $SSH $SMV $FED $SMVBINDIR $RUNSCRIPT $in
-if [ "$SSH" == "" ]; then
+echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
 $SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in
-else
-$SSH \( cd $fulldir \; $SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in \)
-fi

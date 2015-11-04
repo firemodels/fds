@@ -1,25 +1,10 @@
 #!/bin/bash
 
-size=64
-
-while getopts 'p:' OPTION
-do
-case $OPTION in
-  p)
-   size="$OPTARG"
-   ;;
-esac
-#shift
-done
-
+size=_64
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
 IB=ib
-
-if [ "$size" != "32" ]; then
-  size=64
 fi
-size=_$size
 
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
@@ -29,19 +14,18 @@ else
 fi
 
 CURDIR=`pwd`
-export SVNROOT=`pwd`/..
-cd $SVNROOT
-export SVNROOT=`pwd`
+cd ..
+GITROOT=`pwd`
 cd $CURDIR
 
-export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
-export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
-export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
-export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
-export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
-export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
-export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
-QFDS=$SVNROOT/Utilities/Scripts/qfds.sh
+export SMV=$GITROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
+FDSEXE=$GITROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
+RUNSMV="$GITROOT/Utilities/Scripts/runsmv.sh"
+export SMVBINDIR="-bindir $GITROOT/SMV/for_bundle"
+MAKEMOVIE=$GITROOT/Utilities/Scripts/make_movie.sh
+STARTX=$GITROOT/Utilities/Scripts/startXserver.sh
+STOPX=$GITROOT/Utilities/Scripts/stopXserver.sh
+QFDS=$GITROOT/Utilities/Scripts/qfds.sh
 
 export BASEDIR=`pwd`
 
@@ -52,10 +36,10 @@ fi
 
 underscore=_
 mov=.m1v
-VDIR=$SVNROOT/Verification
-INDIR=$SVNROOT/Verification/Visualization/frames
-WUIINDIR=$SVNROOT/Verification/WUI/frames
-export OUTDIR=$SVNROOT/Manuals/SMV_Summary/movies
+VDIR=$GITROOT/Verification
+INDIR=$GITROOT/Verification/Visualization/frames
+WUIINDIR=$GITROOT/Verification/WUI/frames
+OUTDIR=$GITROOT/Manuals/SMV_Summary/movies
 
 rm -f $INDIR/*.png
 rm -f $WUIINDIR/*.png
