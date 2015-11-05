@@ -4,7 +4,6 @@ LIB_DIR = $(BUILD_DIR)/LIBS
 INC2_DIR = -I $(SOURCE_DIR)/include2 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 INC_DIR =  -I $(SOURCE_DIR)/include  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 FILTERC =
-FILTERF =
 
 VPATH = $(SOURCE_DIR)/wind2fds $(SOURCE_DIR)/shared 
 bin = .
@@ -32,19 +31,12 @@ no_target:
 	@echo \******** You did not specify a make target \********
 	@echo Use one of targets found in the Makefile
 
-.SUFFIXES: .F90 .c .obj .o .f90 .cpp
+.SUFFIXES: .c .obj .o .cpp
 
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
-.F90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-.f90.obj:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-.f90.o:
-	$(FC) -c $(FFLAGS) $(FILTERF) $<
-
 
 
 # ********  rules for each platform supported *************
@@ -54,10 +46,8 @@ no_target:
 #  64 bit windows
 
 intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D X64 -D pp_WIN_INTEL $(GITHASH)
-intel_win_64 : FFLAGS    = -Od /nologo -fpp -D pp_cvf -D X64 /iface:stdref
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
-intel_win_64 : FC        = ifort
 intel_win_64 : exe       = wind2fds_win_64.exe
 
 intel_win_64 : $(objwin)
