@@ -26,6 +26,19 @@ if ~exist([ddir,'fluid_part_mom_z_devc.csv'])
     skip_case = 1;
 end
 
+if ~exist([ddir,'fluid_part_mom_x.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_x.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([ddir,'fluid_part_mom_y.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_y.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+if ~exist([ddir,'fluid_part_mom_z.prt5'])
+    display(['Error: File ' [ddir,'fluid_part_mom_z.prt5'] ' does not exist. Skipping case.'])
+    skip_case = 1;
+end
+
 if skip_case
     return
 end
