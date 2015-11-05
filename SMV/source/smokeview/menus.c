@@ -7406,13 +7406,17 @@ updatemenu=0;
     char menulabel[1024];
 
 #ifdef BIT64
-    sprintf(menulabel,"  Smokeview (64 bit) revision: %s",revision_smv);
+    sprintf(menulabel,"  Smokeview (64 bit) build: %s",smv_githash);
 #else
-    sprintf(menulabel,"  Smokeview (32 bit) revision: %s",revision_smv);
+    sprintf(menulabel,"  Smokeview (32 bit) build: %s",smv_githash);
 #endif
     glutAddMenuEntry(menulabel,1);
-    if(revision_fds>0){
-      sprintf(menulabel,"  FDS revision:%i",revision_fds);
+    if(fds_version!=NULL){
+      sprintf(menulabel, "  FDS version: %s", fds_version);
+      glutAddMenuEntry(menulabel, 1);
+    }
+    if(fds_githash!=NULL){
+      sprintf(menulabel,"  FDS build: %s",fds_githash);
       glutAddMenuEntry(menulabel,1);
     }
 #ifdef pp_GPU

@@ -674,17 +674,17 @@ void parse_commandline(int argc, char **argv){
 
 void display_version_info(void){
     char version[256];
-    char revision[256];
+    char githash[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     PRINTF("\n");
     PRINTF("%s\n\n",TITLERELEASE);
     PRINTF("Version: %s\n",version);
 #ifdef BIT64
-    PRINTF("Smokeview (64 bit) Build: %s\n",revision);
+    PRINTF("Smokeview (64 bit) Build: %s\n",githash);
 #else
-    PRINTF("Smokeview (32 bit) Build: %s\n",revision);
+    PRINTF("Smokeview (32 bit) Build: %s\n",githash);
 #endif
 #ifdef WIN32
 #ifdef X64
@@ -717,8 +717,8 @@ void display_version_info(void){
     PRINTF("Platform: LINUX64\n");
 #endif
     PRINTF("Build Date: %s\n",__DATE__);
-    if(revision_fds>0){
-      PRINTF("FDS Build: %i\n",revision_fds);
+    if(fds_version!=NULL){
+      PRINTF("FDS Build: %s\n",fds_githash);
     }
     if(smokeviewpath!=NULL){
       PRINTF("Smokeview path: %s\n",smokeviewpath);
