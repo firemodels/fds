@@ -634,10 +634,17 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   else
+   $SSH \( cd $reponame/SMV/Build/LIBS/lib_${platform}_intel_64 \; \
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \)
+   fi
 }
 
 check_smv_utilities()
@@ -759,8 +766,13 @@ commit_validation_results()
 compile_smv_db()
 {
    # Clean and compile SMV debug
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   else
+   $SSH \( cd $reponame/SMV/Build/intel_${platform}_64 \; \
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   fi
 }
 
 check_compile_smv_db()
@@ -796,8 +808,13 @@ check_compile_smv_db()
 compile_smv()
 {
    # Clean and compile SMV
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv.sh &> $OUTPUT_DIR/stage6c
+   else
+   $SSH \( cd $reponame/SMV/Build/intel_${platform}_64 \; \
+   ./make_smv.sh &> $OUTPUT_DIR/stage6c \)
+   fi
 }
 
 check_compile_smv()
@@ -833,8 +850,13 @@ check_compile_smv()
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
+   if [ "$SSH" == "" ]; then
    cd $reponame/Verification/scripts
    ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
+   else
+   $SSH \( cd $reponame/Verification/scripts \; \
+   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e \)
+   fi
 }
 
 check_fds_pictures()
@@ -874,8 +896,13 @@ check_fds_pictures()
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
+   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license
+   else
+   $SSH \( cd $reponame/Utilities/Matlab \; \
+   matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license \)
+   fi
 }
 
 scan_matlab_license_test()
@@ -907,8 +934,13 @@ check_matlab_license_server()
 run_matlab_verification()
 {
    # Run Matlab plotting script
+   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification
+   else
+   $SSH \( cd $reponame/Utilities/Matlab \; \
+   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification\)
+   fi
 }
 
 check_matlab_verification()
@@ -974,8 +1006,13 @@ check_verification_stats()
 run_matlab_validation()
 {
    # Run Matlab plotting script
+   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation
+   else
+   $SSH \( cd $reponame/Utilities/Matlab \; \
+   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation\)
+   fi
 }
 
 check_matlab_validation()
