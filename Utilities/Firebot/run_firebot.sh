@@ -6,11 +6,18 @@ if [ -e $running ] ; then
   exit
 fi
 
+CURDIR=`pwd`
 QUEUE=firebot
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
 fi
+if [ -e .fds_git ]; then
+  cd ../..
+  reponame=`pwd`
+  cd $CURDIR
+fi
+
 
 function usage {
 echo "Verification and validation testing script for FDS"
@@ -30,7 +37,6 @@ echo "-v - show options used to run firebot"
 exit
 }
 
-CURDIR=`pwd`
 BRANCH=development
 botscript=firebot_linux.sh
 UPDATEREPO=
