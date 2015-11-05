@@ -5,144 +5,155 @@
 close all
 clear all
 
-addpath('../../Verification/Controls');
+datadir='../../Verification/Controls/';
 
 % load experimental data and FDS prediction
-fds_data = csvread('rms_cov_corr_devc.csv',2);
 
-startrow=500/0.02+1;
-endrow=size(fds_data,1);
+filename = [datadir,'rms_cov_corr_devc.csv'];
 
-umean=mean(fds_data(startrow:endrow,2));
-wmean=mean(fds_data(startrow:endrow,3));
+if ~exist(filename) % skip_case_if
 
-udiff=fds_data(startrow:endrow,2)-umean;
-wdiff=fds_data(startrow:endrow,3)-wmean;
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
 
-udiff2=udiff;
-wdiff2=wdiff;
-uwcova=udiff;
-for i=1:endrow-startrow+1
-    udiff2(i)=udiff(i)*udiff(i);
-    wdiff2(i)=wdiff(i)*wdiff(i);
-    uwcova(i)=udiff(i)*wdiff(i);
-    drawnow;
-end
+else
 
-urms=sqrt(mean(udiff2));
-wrms=sqrt(mean(wdiff2));
-uwcov=mean(uwcova);
-uwcorr=uwcov/urms/wrms;
+    fds_data = csvread([datadir,'rms_cov_corr_devc.csv'],2);
 
-urms_fds=fds_data(endrow,4);
-uwcov_fds=fds_data(endrow,5);
-uwcorr_fds=fds_data(endrow,6);
+    startrow=500/0.02+1;
+    endrow=size(fds_data,1);
 
-xcalc(1)=0;
-xcalc(2)=1000;
-ycalc(1)=urms;
-ycalc(2)=urms;
+    umean=mean(fds_data(startrow:endrow,2));
+    wmean=mean(fds_data(startrow:endrow,3));
 
-maxval=ceil(2*urms*100)/100;
+    udiff=fds_data(startrow:endrow,2)-umean;
+    wdiff=fds_data(startrow:endrow,3)-wmean;
 
-figure
-plot_style
+    udiff2=udiff;
+    wdiff2=wdiff;
+    uwcova=udiff;
+    for i=1:endrow-startrow+1
+        udiff2(i)=udiff(i)*udiff(i);
+        wdiff2(i)=wdiff(i)*wdiff(i);
+        uwcova(i)=udiff(i)*wdiff(i);
+        drawnow;
+    end
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-');
+    urms=sqrt(mean(udiff2));
+    wrms=sqrt(mean(wdiff2));
+    uwcov=mean(uwcova);
+    uwcorr=uwcov/urms/wrms;
 
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-legend('Analytic','FDS','Location','SouthEast')
+    urms_fds=fds_data(endrow,4);
+    uwcov_fds=fds_data(endrow,5);
+    uwcorr_fds=fds_data(endrow,6);
 
-% add Git revision if file is available
-git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
-addverstr(gca,git_file,'linear')
+    xcalc(1)=0;
+    xcalc(2)=1000;
+    ycalc(1)=urms;
+    ycalc(2)=urms;
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
-print(gcf,'-dpdf',plotname);
+    maxval=ceil(2*urms*100)/100;
 
-clear h
+    figure
+    plot_style
 
-ycalc(1)=uwcov;
-ycalc(2)=uwcov;
+    h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,4),'k-');
 
-maxval=ceil(2*uwcov*100)/100;
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    legend('Analytic','FDS','Location','SouthEast')
 
-figure
-plot_style
+    % add Git revision if file is available
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    addverstr(gca,git_file,'linear')
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-');
+    % print to pdf
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
+    print(gcf,'-dpdf',plotname);
 
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-legend('Analytic','FDS','Location','SouthEast')
+    clear h
 
-% add Git revision if file is available
-git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
-addverstr(gca,git_file,'linear')
+    ycalc(1)=uwcov;
+    ycalc(2)=uwcov;
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
-print(gcf,'-dpdf',plotname);
+    maxval=ceil(2*uwcov*100)/100;
 
-clear h
+    figure
+    plot_style
 
-ycalc(1)=uwcorr;
-ycalc(2)=uwcorr;
+    h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,5),'k-');
 
-maxval=ceil(2*uwcorr*100)/100;
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    legend('Analytic','FDS','Location','SouthEast')
 
-figure
-plot_style
+    % add Git revision if file is available
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    addverstr(gca,git_file,'linear')
 
-h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-');
+    % print to pdf
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
+    print(gcf,'-dpdf',plotname);
 
-set(gca,'Units',Plot_Units)
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
-xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-legend('Analytic','FDS','Location','SouthEast')
+    clear h
 
-% add Git revision if file is available
-git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
-addverstr(gca,git_file,'linear')
+    ycalc(1)=uwcorr;
+    ycalc(2)=uwcorr;
 
-% print to pdf
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
-print(gcf,'-dpdf',plotname);
+    maxval=ceil(2*uwcorr*100)/100;
 
-clear h
+    figure
+    plot_style
 
-% check errors
-if abs((urms-urms_fds)/urms) > 0.001
-   display(['Matlab Warning: urms in rms_cov_corr is out of tolerance.'])
-end
-if abs((uwcov-uwcov_fds)/urms) > 0.001
-   display(['Matlab Warning: uwcov in rms_cov_corr is out of tolerance.'])
-end
-if abs((uwcorr-uwcorr_fds)/urms) > 0.001
-   display(['Matlab Warning: uwcorr in rms_cov_corr is out of tolerance.'])
-end
+    h=plot(xcalc,ycalc,'r-',fds_data(:,1),fds_data(:,6),'k-');
+
+    set(gca,'Units',Plot_Units)
+    set(gca,'FontName',Font_Name)
+    set(gca,'FontSize',Label_Font_Size)
+    set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+    xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    legend('Analytic','FDS','Location','SouthEast')
+
+    % add Git revision if file is available
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    addverstr(gca,git_file,'linear')
+
+    % print to pdf
+    set(gcf,'Visible',Figure_Visibility);
+    set(gcf,'PaperUnits',Paper_Units);
+    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
+    print(gcf,'-dpdf',plotname);
+
+    clear h
+
+    % check errors
+    if abs((urms-urms_fds)/urms) > 0.001
+       display(['Matlab Warning: urms in rms_cov_corr is out of tolerance.'])
+    end
+    if abs((uwcov-uwcov_fds)/urms) > 0.001
+       display(['Matlab Warning: uwcov in rms_cov_corr is out of tolerance.'])
+    end
+    if abs((uwcorr-uwcorr_fds)/urms) > 0.001
+       display(['Matlab Warning: uwcorr in rms_cov_corr is out of tolerance.'])
+    end
+
+end % skip_case_if
