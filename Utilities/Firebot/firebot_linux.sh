@@ -896,13 +896,8 @@ check_fds_pictures()
 run_matlab_license_test()
 {
    # Run simple test to see if Matlab license is available
-   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license
-   else
-   $SSH \( cd $reponame/Utilities/Matlab \; \
-   matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license \)
-   fi
 }
 
 scan_matlab_license_test()
@@ -934,13 +929,8 @@ check_matlab_license_server()
 run_matlab_verification()
 {
    # Run Matlab plotting script
-   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification
-   else
-   $SSH \( cd $reponame/Utilities/Matlab \; \
-   matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification\)
-   fi
 }
 
 check_matlab_verification()
@@ -1006,13 +996,8 @@ check_verification_stats()
 run_matlab_validation()
 {
    # Run Matlab plotting script
-   if [ "$SSH" == "" ]; then
    cd $reponame/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation
-   else
-   $SSH \( cd $reponame/Utilities/Matlab \; \
-   matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation\)
-   fi
 }
 
 check_matlab_validation()
