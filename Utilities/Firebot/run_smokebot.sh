@@ -26,8 +26,7 @@ MAILTO=
 UPLOAD=
 
 function usage {
-echo "run_smokebot.sh -a -b branch_name -c -h -m email_address -r repo location -S host -u -v"
-echo "Run smokebot_linux.sh V&V testing script"
+echo "Verification and validation testing script for smokeview"
 echo ""
 echo "Options:"
 echo "-a - run automatically if FDS or smokeview source has changed"

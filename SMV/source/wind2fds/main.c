@@ -485,14 +485,14 @@ int main(int argc, char **argv){
 
 void usage(char *prog){
   char prog_version[100];
-  char revision[100];
+  char githash[100];
   char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getRevision(revision);    // get revision
+  getGitHash(githash);    // get githash
 
   printf("\n");
-  printf("wind2fds %s(%s) - %s\n",prog_version,revision,__DATE__);
+  printf("wind2fds %s(%s) - %s\n",prog_version,githash,__DATE__);
   printf("  Convert spreadsheets containing wind data to files compatible with Smokeview:\n\n");
   printf("  %s",get_basefilename(buffer,prog));
   printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
@@ -516,13 +516,13 @@ void usage(char *prog){
 
 void version(char *prog){
     char version_local[100];
-    char revision[100];
+    char githash[100];
 
     getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     printf("\n");
     printf("%s\n\n",prog);
     printf("Version: %s\n",version_local);
-    printf("Build: %s\n",revision);
+    printf("Build: %s\n",githash);
     printf("Compile Date: %s\n",__DATE__);
 }

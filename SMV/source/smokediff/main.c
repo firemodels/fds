@@ -8,7 +8,7 @@
 #include "MALLOC.h"
 
 //dummy change to bump version number to 1.0.10
-//dummy change to force revision change
+//dummy change to force githash change
 
 /* ------------------ main ------------------------ */
 
@@ -262,14 +262,14 @@ int main(int argc, char **argv){
 
 void usage(void){
   char smv_version[100];
-  char revision[100];
+  char githash[100];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getRevision(revision);    // get revision
+  getGitHash(githash);    // get githash
 
   PRINTF("\n");
   PRINTF("  smokediff [options] smv_case1 smv_case2\n");
-  PRINTF("    version: %s (revision %s) - %s\n\n",smv_version,revision,__DATE__);
+  PRINTF("    version: %s (githash %s) - %s\n\n",smv_version,githash,__DATE__);
 
   PRINTF("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
   PRINTF("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");

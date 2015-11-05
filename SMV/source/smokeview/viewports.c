@@ -761,7 +761,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     char label[256];
     int smv_top, smv_top2, fds_top;
 
-    if(revision_fds>0){
+    if(fds_githash!=NULL){
       fds_top=textdown;
       smv_top=fds_top+VP_title.text_height+v_space;
       smv_top2=smv_top+VP_title.text_height+v_space;
@@ -772,13 +772,13 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     }
     outputText(left,smv_top2,TITLE);
 #ifdef BIT64
-    sprintf(label,"Smokeview (64 bit) revision: %s",revision_smv);
+    sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
 #else
-    sprintf(label,"Smokeview (32 bit) revision: %s",revision_smv);
+    sprintf(label,"Smokeview (32 bit) build: %s",smv_githash);
 #endif
     outputText(left,smv_top,label);
-    if(revision_fds>0){
-      sprintf(label,"FDS revision:%i",revision_fds);
+    if(fds_githash!=NULL){
+      sprintf(label,"FDS build:%s",fds_githash);
       outputText(left,fds_top,label);
     }
   }

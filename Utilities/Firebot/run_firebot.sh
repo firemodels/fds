@@ -6,15 +6,21 @@ if [ -e $running ] ; then
   exit
 fi
 
+CURDIR=`pwd`
 QUEUE=firebot
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
 fi
+if [ -e .fds_git ]; then
+  cd ../..
+  reponame=`pwd`
+  cd $CURDIR
+fi
+
 
 function usage {
-echo "run_firebot.sh [ -b branch_name -c -h -m email_address -r repo location -u -v]"
-echo "Run Firebot V&V testing script"
+echo "Verification and validation testing script for FDS"
 echo ""
 echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
@@ -23,15 +29,14 @@ echo "-h - display this message"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
-echo ""
 echo "-r - repository location [default: $reponame]"
+echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides (only by user firebot)"
 echo "-v - show options used to run firebot"
 exit
 }
 
-CURDIR=`pwd`
 BRANCH=development
 botscript=firebot_linux.sh
 UPDATEREPO=
@@ -41,7 +46,8 @@ CLEAN=
 RUNFIREBOT=1
 EMAIL=
 UPLOADGUIDES=
-while getopts 'b:chm:q:nr:uUv' OPTION
+SSH=
+while getopts 'b:chm:q:nr:S:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -64,6 +70,9 @@ case $OPTION  in
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  S)
+   SSH="-S $OPTARG"
    ;;
   u)
    UPDATEREPO=1
@@ -104,8 +113,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $UPLOADGUIDES $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $UPLOADGUIDES $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
 fi
 rm $running
