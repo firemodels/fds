@@ -5,13 +5,23 @@
 close all
 clear all
 
-addpath ../../Verification/Radiation/
+datadir='../../Verification/Radiation/';
+
+skip_case=false;
+
+if ~exist([datadir,'radiating_polygon_square_20_line.csv']); skip_case=true; end
+if ~exist([datadir,'radiating_polygon_square_40_line.csv']); skip_case=true; end
+if ~exist([datadir,'radiating_polygon_square_80_line.csv']); skip_case=true; end
+
+if skip_case % skip_case_if
+    display(['Error: Files for radiating_polygon_square do not exist. Skipping case.'])
+else
 
 % gather FDS results
 
-M = importdata('radiating_polygon_square_20_line.csv',',',2); z_20 = 1-M.data(:,1); flux_20 = M.data(:,2);
-M = importdata('radiating_polygon_square_40_line.csv',',',2); z_40 = 1-M.data(:,1); flux_40 = M.data(:,2);
-M = importdata('radiating_polygon_square_80_line.csv',',',2); z_80 = 1-M.data(:,1); flux_80 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_20_line.csv'],',',2); z_20 = 1-M.data(:,1); flux_20 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_40_line.csv'],',',2); z_40 = 1-M.data(:,1); flux_40 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_80_line.csv'],',',2); z_80 = 1-M.data(:,1); flux_80 = M.data(:,2);
 
 % analytical solution (Siegel and Howell, 2nd ed., appendix
 
@@ -48,7 +58,7 @@ set(legend_handle,'Box','on');
 
 % add Git revision if file is available
 
-Git_Filename = ['radiating_polygon_square_20_git.txt'];
+Git_Filename = [datadir,'radiating_polygon_square_20_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
@@ -59,4 +69,4 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiating_polygon_square'])
 
-
+end % skip_case_if
