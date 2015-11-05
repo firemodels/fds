@@ -1313,8 +1313,9 @@ ENDIF
  
 ! Record the version and endian-ness in .smv file
  
-WRITE(LU_SMV,'(/A)') 'VERSION'
-WRITE(LU_SMV,'(F5.1,2X,A)') VERSION_NUMBER,TRIM(VERSION_STRING)
+WRITE(LU_SMV,'(/A)') 'FDSVERSION'
+WRITE(LU_SMV,'(A)') TRIM(VERSION_STRING)
+WRITE(LU_SMV,'(A)') TRIM(GITHASH_PP)
 
 ! Write out the GIT number and revision date to a file
 
