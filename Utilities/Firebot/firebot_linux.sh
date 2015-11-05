@@ -58,36 +58,28 @@ fi
 source $FIREBOT_RUNDIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -b branch -f -n -q queue_name -r repo -v max_validation_processes ]"
-echo "Runs Firebot V&V testing script"
+echo "Verification and validation testing script for FDS"
 echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
-echo ""
 echo "-c - clean repo"
-echo ""
 echo "-h - display this message"
-echo ""
 echo "-m email_address "
-echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
-echo ""
 echo "-r - repository location [default: $reponame]"
-echo ""
+echo "-S host - generate images on host"
 echo "-u - update repo"
-echo ""
 echo "-U - upload guides"
-echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
-echo ""
 exit
 }
 
 UPLOADGUIDES=0
 GIT_REVISION=
-while getopts 'b:chm:q:r:uUv:' OPTION
+SSH=
+while getopts 'b:chm:q:r:S:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -107,6 +99,9 @@ case $OPTION in
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  S)
+   SSH="$OPTARG"
    ;;
   u)
    UPDATEREPO=1
