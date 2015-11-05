@@ -101,7 +101,7 @@ case $OPTION in
    reponame="$OPTARG"
    ;;
   S)
-   SSH="$OPTARG"
+   SSH="ssh $OPTARG "
    ;;
   u)
    UPDATEREPO=1
