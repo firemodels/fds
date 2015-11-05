@@ -23,7 +23,7 @@ echo Verification Figures Copied
 rsync -r --exclude=*.git $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/
 echo Validation Guide Figures Copied
 
-# # Copy Verification Results
-# rsync -v -r --include '*/' --include '*.csv' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
-# echo Verification Results Copied
+# Copy Verification Results
+#rsync -v -r --include '*/' --include '*.csv' --include '*.prt5' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
+#echo Verification Results Copied
 
