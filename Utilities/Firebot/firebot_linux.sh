@@ -58,36 +58,28 @@ fi
 source $FIREBOT_RUNDIR/firebot_email_list.sh
 
 function usage {
-echo "firebot.sh [ -b branch -f -n -q queue_name -r repo -v max_validation_processes ]"
-echo "Runs Firebot V&V testing script"
+echo "Verification and validation testing script for FDS"
 echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
-echo ""
 echo "-c - clean repo"
-echo ""
 echo "-h - display this message"
-echo ""
 echo "-m email_address "
-echo ""
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
-echo ""
 echo "-r - repository location [default: $reponame]"
-echo ""
+echo "-S host - generate images on host"
 echo "-u - update repo"
-echo ""
 echo "-U - upload guides"
-echo ""
 echo "-v n - run Firebot in validation mode with a specified number of maximum processes dedicated to validation"
 echo "     default: (none)"
-echo ""
 exit
 }
 
 UPLOADGUIDES=0
 GIT_REVISION=
-while getopts 'b:chm:q:r:uUv:' OPTION
+SSH=
+while getopts 'b:chm:q:r:S:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -107,6 +99,9 @@ case $OPTION in
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  S)
+   SSH="ssh $OPTARG "
    ;;
   u)
    UPDATEREPO=1
@@ -639,10 +634,17 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/LIBS/lib_${platform}_intel_64
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   else
+   $SSH \( cd $reponame/SMV/Build/LIBS/lib_${platform}_intel_64 \; \
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \)
+   fi
 }
 
 check_smv_utilities()
@@ -764,8 +766,13 @@ commit_validation_results()
 compile_smv_db()
 {
    # Clean and compile SMV debug
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   else
+   $SSH \( cd $reponame/SMV/Build/intel_${platform}_64 \; \
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   fi
 }
 
 check_compile_smv_db()
@@ -801,8 +808,13 @@ check_compile_smv_db()
 compile_smv()
 {
    # Clean and compile SMV
+   if [ "$SSH" == "" ]; then
    cd $reponame/SMV/Build/intel_${platform}_64
    ./make_smv.sh &> $OUTPUT_DIR/stage6c
+   else
+   $SSH \( cd $reponame/SMV/Build/intel_${platform}_64 \; \
+   ./make_smv.sh &> $OUTPUT_DIR/stage6c \)
+   fi
 }
 
 check_compile_smv()
@@ -838,8 +850,13 @@ check_compile_smv()
 make_fds_pictures()
 {
    # Run Make FDS Pictures script
+   if [ "$SSH" == "" ]; then
    cd $reponame/Verification/scripts
    ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
+   else
+   $SSH \( cd $reponame/Verification/scripts \; \
+   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e \)
+   fi
 }
 
 check_fds_pictures()
