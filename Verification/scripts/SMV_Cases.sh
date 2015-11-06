@@ -10,7 +10,7 @@ $QFDS -d Visualization objects_dynamic.fds
 $QFDS -d Visualization objects_elem.fds
 $QFDS -d Visualization objects_static.fds
 $QFDS -d Visualization plume5c.fds
-$QFDS -p 8 -d Visualization mplume5c8.fds
+#$QFDS -p 8 -d Visualization mplume5c8.fds
 $QFDS -d Visualization plume5cdelta.fds
 $QFDS -d Visualization plumeiso.fds
 $QFDS -d Visualization plume5c_bounddef.fds
