@@ -402,7 +402,10 @@ CALL WRITE_STRINGS
 
 ! Check for evacuation initialization stop
 
-IF (ANY(EVACUATION_ONLY)) CALL STOP_CHECK(1)
+IF (ANY(EVACUATION_ONLY)) THEN
+   CALL STOP_CHECK(1)
+   IF (.NOT.RESTART) ICYC = -EVAC_TIME_ITERATIONS
+END IF
 
 ! Sprinkler piping calculation
 
@@ -2800,8 +2803,7 @@ INTEGER :: NM,DISP
 
 TNOW = SECOND()
 
-!need to fix following line to make sure RETURN's only occur for evac cases (issue 2965)
-!IF (ICYC>-EVAC_TIME_ITERATIONS .AND. ICYC < 1) RETURN ! No dumps at the evacuation initialization phase
+IF (ANY(EVACUATION_ONLY) .AND. (ICYC<1 .AND. T>T_BEGIN)) RETURN ! No dumps at the evacuation initialization phase
 
 ! Dump out HRR info  after first "gathering" data to node 0
 
