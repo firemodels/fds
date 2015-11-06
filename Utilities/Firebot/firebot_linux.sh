@@ -101,7 +101,7 @@ case $OPTION in
    reponame="$OPTARG"
    ;;
   S)
-   SSH="ssh $OPTARG "
+   SSH="$OPTARG "
    ;;
   u)
    UPDATEREPO=1
@@ -120,6 +120,16 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$SSH" != "" ]; then
+  sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
+  if [ "$sshok" != "ok" ]; then
+    echo unable to make an ssh connection to $SSH
+    echo firebot aborted
+    exit
+  fi
+  SSH="ssh $SSH "
+fi
 
 export reponame 
 UploadGuides=$reponame/Utilities/Firebot/fds_guides2GD.sh
