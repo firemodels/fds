@@ -172,7 +172,7 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
-if %clean% == 0 skip_clean1
+if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
    cd %fdsroot%
    git clean -dxf 1> Nul 2>&1
@@ -182,7 +182,7 @@ if %clean% == 0 skip_clean1
 
 :: update FDS/Smokeview repository
 
-if %update% == 0 skip_update1
+if %update% == 0 goto skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
 git fetch origin
@@ -308,7 +308,7 @@ echo             release mode
 :: run cases
 
 cd %fdsroot%\Verification\
-if %clean% == 0 skip_clean2
+if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
    git clean -dxf 1> Nul 2>&1
 :skip_clean2
