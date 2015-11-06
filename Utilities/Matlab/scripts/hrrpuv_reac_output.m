@@ -376,63 +376,63 @@ else
 
     % check errors
     err = abs(q_soot(end)-(q1(end)+q2(end)))/abs(q_soot(end));
-    if err > 0.005
+    if err > 1e-6
        display(['Matlab Warning: hrrpuv_reac_soot is out of tolerance. Error = ',num2str(err)])
     end
 
 end % skip_case_if
 
-% arrhenius reaction zeroth order
+% % arrhenius reaction zeroth order
 
-filename = [datadir,'hrrpuv_reac_arrhenius_devc.csv'];
+% filename = [datadir,'hrrpuv_reac_arrhenius_devc.csv'];
 
-if ~exist(filename) % skip_case_if
+% if ~exist(filename) % skip_case_if
 
-    display(['Error: File ' filename ' does not exist. Skipping case.'])
+%     display(['Error: File ' filename ' does not exist. Skipping case.'])
 
-else
+% else
 
-    M = importdata(filename,',',2);
+%     M = importdata(filename,',',2);
 
-    t_arrhenius = M.data(:,1);
-    q_arrhenius = M.data(:,2);
-    q1 = M.data(:,3);
+%     t_arrhenius = M.data(:,1);
+%     q_arrhenius = M.data(:,2);
+%     q1 = M.data(:,3);
 
-    figure
-    plot_style
-    clear hh
-    hh(1)=plot(t_arrhenius,q_arrhenius,'ko'); hold on
-    hh(2)=plot(t_arrhenius,q1,'b+--');
+%     figure
+%     plot_style
+%     clear hh
+%     hh(1)=plot(t_arrhenius,q_arrhenius,'ko'); hold on
+%     hh(2)=plot(t_arrhenius,q1,'b+--');
 
-    %axis([0 10 0 1000])
+%     %axis([0 10 0 1000])
 
-    set(gca,'FontName',Font_Name)
-    set(gca,'FontSize',Title_Font_Size)
+%     set(gca,'FontName',Font_Name)
+%     set(gca,'FontSize',Title_Font_Size)
 
-    xlabel('{\it t} (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-    ylabel('{\it q} (kW/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-    lh=legend(hh,'HRRPUV','{\it q} R1','location','northeast');
-    set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-    legend('boxoff')
+%     xlabel('{\it t} (s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+%     ylabel('{\it q} (kW/m^3)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+%     lh=legend(hh,'HRRPUV','{\it q} R1','location','northeast');
+%     set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+%     legend('boxoff')
 
-    % add Git version if file is available
+%     % add Git version if file is available
 
-    Git_Filename = [datadir,'hrrpuv_reac_arrhenius_git.txt'];
-    addverstr(gca,Git_Filename,'linear')
+%     Git_Filename = [datadir,'hrrpuv_reac_arrhenius_git.txt'];
+%     addverstr(gca,Git_Filename,'linear')
 
-    % print to pdf
-    set(gcf,'PaperUnits',Paper_Units);
-    set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-    set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hrrpuv_reac_arrhenius')
+%     % print to pdf
+%     set(gcf,'PaperUnits',Paper_Units);
+%     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+%     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+%     print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hrrpuv_reac_arrhenius')
 
-    % check errors
-    err = max(abs(q_arrhenius-q1))/max(abs(q_arrhenius));
-    if err > 1e-6
-       display(['Matlab Warning: hrrpuv_reac_arrhenius is out of tolerance. Error = ',num2str(err)])
-    end
+%     % check errors
+%     err = max(abs(q_arrhenius-q1))/max(abs(q_arrhenius));
+%     if err > 1e-6
+%        display(['Matlab Warning: hrrpuv_reac_arrhenius is out of tolerance. Error = ',num2str(err)])
+%     end
 
-end % skip_case_if
+% end % skip_case_if
 
 % % compare total heat release curves (debug)
 
