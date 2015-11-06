@@ -137,7 +137,7 @@ cd
 export fdsroot
 export cfastroot
 
-export SMV_Summary="$fdsroot/Manuals/SMV_Summary"
+export SMV_SUMMARY="$fdsroot/Manuals/SMV_Summary"
 WEBFROMDIR="$fdsroot/Manuals/SMV_Summary"
 WEBTODIR=/var/www/html/VV/SMV2
 
@@ -1018,7 +1018,7 @@ check_smv_movies()
          CURDIR=`pwd`
          cd $WEBTODIR
          rm -rf *
-         cd $WEBFROM
+         cd $WEBFROMDIR
          cp -r * $WEBTODIR/.
          cd $CURDIR
        fi
@@ -1073,8 +1073,8 @@ check_guide()
         cp $directory/$document $SMOKEBOT_MANDIR/.
       fi
       fi
-      if [ -d $SMV_Summary/manuals ] ; then
-        cp $directory/$document $SMV_Summary/manuals/.
+      if [ -d $SMV_SUMMARY/manuals ] ; then
+        cp $directory/$document $SMV_SUMMARY/manuals/.
       fi
       cp $directory/$document $NEWGUIDE_DIR/.
       chmod 664 $NEWGUIDE_DIR/$document
@@ -1157,18 +1157,18 @@ email_build_status()
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "----------------------------------------------" > $TIME_LOG
-   echo ".         host: $hostname " >> $TIME_LOG
-   echo ".        start: $start_time " >> $TIME_LOG
-   echo ".         stop: $stop_time " >> $TIME_LOG
-   echo ".    run cases: $DIFF_RUNCASES" >> $TIME_LOG
-   echo ".make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+   echo "         host: $hostname " >> $TIME_LOG
+   echo "        start: $start_time " >> $TIME_LOG
+   echo "         stop: $stop_time " >> $TIME_LOG
+   echo "    run cases: $DIFF_RUNCASES" >> $TIME_LOG
+   echo "make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
 if [ "$MAKEMOVIES" == "1" ]; then
-   echo ".  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
+   echo "  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
 fi
-   echo ".        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo "        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
 if [ "$RUNAUTO" != "" ]; then
-   echo ".FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
-   echo ".SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
+   echo "FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
+   echo "SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
 fi
   if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     cat $GIT_SMVLOG >> $TIME_LOG
@@ -1178,10 +1178,13 @@ fi
   fi
    echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_RUNDIR
+   if [ "$UPLOADRESULTS" == "1" ]; then
    # Check for warnings and errors
-   echo "Nightly Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo "Nightly Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+   echo "Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo "Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+   echo "Manuals   (local):  $SMV_SUMMARY/manuals" >> $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
+   fi
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
