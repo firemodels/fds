@@ -92,7 +92,7 @@ case $OPTION in
    RUNDEBUG="0"
    ;;
   S)
-   SSH="ssh $OPTARG "
+   SSH="$OPTARG"
    ;;
   t)
    TESTFLAG="-t"
@@ -106,6 +106,16 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$SSH" != "" ]; then
+  sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
+  if [ "$sshok" != "ok" ]; then
+    echo unable to make an ssh connection to $SSH
+    echo smokebot aborted
+    exit
+  fi
+  SSH="ssh $SSH "
+fi
 
 DB=_db
 IB=
