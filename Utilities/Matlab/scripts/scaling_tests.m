@@ -45,6 +45,7 @@ H(4) = loglog(r,t(:,5),'m-o');
 H(5) = loglog(r,t(:,6),'c-o'); 
 H(6) = loglog(r,t(:,12),'g-o'); 
 H(7) = loglog(r,t(:,10),'y-o'); 
+H(8) = loglog(r,t(:,2),'k-s'); 
  
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
@@ -56,12 +57,12 @@ Min_Dep = 0.0001;
 Max_Dep = 1.;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
-Title_Position(1) = 0.60;
-Title_Position(2) = 0.90;
+Title_Position(1) = 0.40;
+Title_Position(2) = 0.95;
 X_Title_Position = 10^(log10(Min_Ind)+Title_Position(1)*(log10(Max_Ind)-log10(Min_Ind)));
 Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Min_Dep)));
 text(X_Title_Position,Y_Title_Position,'Strong Scaling Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-legend_handle = legend(H,'Total','DIVG','MASS','VELO','PRES','COMM','RADI','Location','Southwest');
+legend_handle = legend(H,'Total','DIVG','MASS','VELO','PRES','COMM','RADI','MAIN','Location','NorthEast');
 set(legend_handle,'Interpreter',Font_Interpreter);
 set(legend_handle,'Fontsize',Key_Font_Size);
 
@@ -89,10 +90,11 @@ M(7)  = importdata([FDS_Output_Files,'weak_scaling_test_064_cpu.csv'],',',1);
 M(8)  = importdata([FDS_Output_Files,'weak_scaling_test_128_cpu.csv'],',',1);
 M(9)  = importdata([FDS_Output_Files,'weak_scaling_test_192_cpu.csv'],',',1);
 M(10) = importdata([FDS_Output_Files,'weak_scaling_test_288_cpu.csv'],',',1);
+M(11) = importdata([FDS_Output_Files,'weak_scaling_test_432_cpu.csv'],',',1);
 
-r = [1 2 4 8 16 32 64 128 192 288];
+r = [1 2 4 8 16 32 64 128 192 288 432];
 
-for i=1:10
+for i=1:11
    t(i) = M(1).data(1,15)/M(i).data(1,15);
    t2(i) = 1.;
 end
