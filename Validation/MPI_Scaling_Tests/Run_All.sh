@@ -5,6 +5,7 @@
 export SVNROOT=`pwd`/../..
 source $SVNROOT/Validation/Common_Run_All.sh
 
+$QFDS $DEBUG $QUEUE -p 432 -n 12 -d $INDIR weak_scaling_test_432.fds
 $QFDS $DEBUG $QUEUE -p 288 -n 12 -d $INDIR weak_scaling_test_288.fds
 $QFDS $DEBUG $QUEUE -p 192 -n 12 -d $INDIR weak_scaling_test_192.fds
 $QFDS $DEBUG $QUEUE -p 128 -n 12 -d $INDIR weak_scaling_test_128.fds
