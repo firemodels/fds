@@ -211,7 +211,7 @@ echo             parallel debug
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1> %OUTDIR%\makefdsd.log 2>&1
+call make_fds bot 1> %OUTDIR%\makefdsd.log 2>&1
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debug compilation"
 
@@ -219,7 +219,7 @@ echo             parallel release
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makefdsr.log 2>&1
+call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makefdsr.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
 
@@ -232,13 +232,13 @@ echo Stage 2 - Building Smokeview
 echo             libs
 
 cd %fdsroot%\SMV\Build\LIBS\lib_win_intel_64
-call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
+call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64_db 1> %OUTDIR%\makesmvd.log 2>&1
+call make_smv_db bot 1> %OUTDIR%\makesmvd.log 2>&1
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug compilation"
 
@@ -246,7 +246,7 @@ echo             release
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmvr.log 2>&1
+call make_smv bot 1> %OUTDIR%\makesmvr.log 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\makesmvr.log|| aexit /b 1
 call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
@@ -266,9 +266,9 @@ call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/
 
 if %have_icc% == 1 (
   echo             background
-  cd %fdsroot%\Utilities\background\intel_win_32
+  cd %fdsroot%\Utilities\background\intel_win_64
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_32 1> %OUTDIR%\makebackground.log 2>&1
+  call make_background bot 1> %OUTDIR%\makebackground.log 2>&1
   call :does_file_exist background.exe %OUTDIR%\makebackground.log
   call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
 ) else (
