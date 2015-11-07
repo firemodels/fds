@@ -5,7 +5,6 @@
 #endif
 
 void version(void);
-int getGitHash(char *svn);
 char *hostlistfile;
 char *host;
 #ifdef pp_LINUX
