@@ -24,6 +24,7 @@ MOVIE=
 SSH=
 MAILTO=
 UPLOAD=
+FORCE=
 
 function usage {
 echo "Verification and validation testing script for smokeview"
@@ -33,6 +34,7 @@ echo "-a - run automatically if FDS or smokeview source has changed"
 echo "-b - branch_name - run smokebot using the branch branch_name [default: $BRANCH]"
 echo "-c - clean repo"
 echo "-C - cfast repository location [default: $CFASTREPO]"
+echo "-f - force smokebot run"
 echo "-h - display this message"
 echo "-m email_address"
 echo "-q queue"
@@ -45,7 +47,7 @@ echo "-v - show options used to run smokebot"
 exit
 }
 
-while getopts 'ab:C:cd:hm:Mq:r:S:uUv' OPTION
+while getopts 'ab:C:cd:fhm:Mq:r:S:uUv' OPTION
 do
 case $OPTION  in
   a)
@@ -59,6 +61,9 @@ case $OPTION  in
    ;;
   C)
    CFASTREPO="-C $OPTARG"
+   ;;
+  f)
+   FORCE=1
    ;;
   h)
    usage
@@ -93,10 +98,13 @@ done
 shift $(($OPTIND-1))
 
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
-  if [ -e $running ] ; then
-    echo Smokebot is already running.
-    echo Erase the file $running if this is not the case.
-    exit
+  if [ "$FORCE" == "" ]; then
+    if [ -e $running ] ; then
+      echo Smokebot is already running.
+      echo Erase the file $running if this is not the case
+      echo or rerun using the -f option.
+      exit
+    fi
   fi
 fi
 
