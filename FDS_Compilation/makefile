@@ -246,7 +246,7 @@ mpi_intel_linux_64ib_db : setup $(obj_mpi)
 
 # OSX   
 
-intel_osx_64 : FFLAGS = -m64 -O2 -ipo $(GITINFO) 
+intel_osx_64 : FFLAGS = -m64 -O2 $(GITINFO) 
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64 : FCOMPL = ifort
@@ -262,7 +262,7 @@ intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo $(GITINFO) 
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 $(GITINFO) 
 mpi_intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 mpi_intel_osx_64 : FCOMPL = mpifort
