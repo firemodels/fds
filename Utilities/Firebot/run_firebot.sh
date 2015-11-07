@@ -1,10 +1,5 @@
 #!/bin/bash
 running=firebot_running
-if [ -e $running ] ; then
-  echo Firebot is already running.
-  echo Erase the file $running if this is not the case.
-  exit
-fi
 
 CURDIR=`pwd`
 QUEUE=firebot
@@ -25,6 +20,7 @@ echo ""
 echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
+echo "-f - force firebot run"
 echo "-h - display this message"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
@@ -47,7 +43,8 @@ RUNFIREBOT=1
 EMAIL=
 UPLOADGUIDES=
 SSH=
-while getopts 'b:chm:q:nr:S:uUv' OPTION
+FORCE=
+while getopts 'b:cfhm:q:nr:S:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -55,6 +52,9 @@ case $OPTION  in
    ;;
   c)
    CLEANREPO=1
+   ;;
+  f)
+   FORCE=1
    ;;
   h)
    usage;
@@ -87,6 +87,14 @@ esac
 done
 shift $(($OPTIND-1))
 
+if [ -e $running ] ; then
+  if [ "$FORCE" == ""] ; then
+    echo Firebot is already running.
+    echo Erase the file $running if this is not the case
+    echo or rerun using the -f option.
+    exit
+  fi
+fi
 if [[ "$EMAIL" != "" ]]; then
   EMAIL="-m $EMAIL"
 fi
