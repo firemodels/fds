@@ -99,8 +99,6 @@ if NOT "%emailto%" == "" (
 
 echo Stage 0 - Preliminaries
 
-:: check if compilers are present
-
 echo. > %errorlog%
 echo. > %warninglog%
 echo. > %stagestatus%
@@ -116,9 +114,9 @@ type %scratchfile% | find /i /c "not recognized" > %counta%
 set /p nothave_ifort=<%counta%
 set have_ifort=1
 if %nothave_ifort% == 1 (
-  echo "***Fatal error: Fortran compiler not present"
+  echo             Fortran not found
+  echo "           firebot aborted"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
-  echo "firebot run aborted"
   call :output_abort_message
   exit /b 1
 )
@@ -129,9 +127,11 @@ type %scratchfile% | find /i /c "not recognized" > %countb%
 set /p nothave_icc=<%countb%
 if %nothave_icc% == 1 (
   set have_icc=0
-  echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
+  echo             C compiler not found - looking for Smokeview
+  call :is_file_installed smokeview|| exit /b 1
+  echo             found smokeview
 ) else (
-  echo             found C/C++
+  echo             found C
 )
 
 if NOT exist %emailexe% (
@@ -141,22 +141,17 @@ if NOT exist %emailexe% (
   echo             found mailsend
 )
 
-call :is_file_installed pdflatex|| exit /b 1
-echo             found pdflatex
-
-call :is_file_installed grep|| exit /b 1
-echo             found grep
-
-call :is_file_installed sed|| exit /b 1
-echo             found sed
-
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
 call :is_file_installed git|| exit /b 1
 echo             found git
 
-::*** looking for matlab
+call :is_file_installed grep|| exit /b 1
+echo             found grep
+
+call :is_file_installed make|| exit /b 1
+echo             found make
 
 where matlab 2>&1 | find /i /c "Could not find" > %OUTDIR%\stage_count0a.txt
 set /p nothavematlab=<%OUTDIR%\stage_count0a.txt
@@ -167,6 +162,12 @@ if %nothavematlab% == 0 (
 if %nothavematlab% == 1 (
   echo             matlab not found - VV and User guides will not be built
 )
+
+call :is_file_installed pdflatex|| exit /b 1
+echo             found pdflatex
+
+call :is_file_installed sed|| exit /b 1
+echo             found sed
 
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
