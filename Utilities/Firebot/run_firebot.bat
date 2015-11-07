@@ -8,6 +8,7 @@ set update=0
 set clean=0
 set usematlab=1
 set stopscript=0
+set force=0
 
 set fdsrepo=%userprofile%\FDS-SMVgitclean
 if exist .fds_git (
@@ -32,6 +33,10 @@ set stopscript=0
 call :getopts %*
 if %stopscript% == 1 (
   exit /b
+)
+
+if %force% == 1 (
+  if exist %running% erase %running%
 )
 
 :: normalize directory paths
@@ -67,8 +72,9 @@ if exist %running% goto skip_running
   goto end_running
 :skip_running
   echo ***Error: firebot is currently running.
-  echo If this is not the case, erase the file:
-  echo %running%
+  echo           If this is not the case, erase the file:
+  echo           %running%
+  echo           or rerun using the -force option
 :end_running
 
 goto eof
@@ -109,6 +115,10 @@ goto eof
    set valid=1
    set update=1
  )
+ if /I "%1" EQU "-force" (
+   set valid=1
+   set force=1
+ )
  if /I "%1" EQU "-nomatlab" (
    set valid=1
    set usematlab=0
@@ -137,6 +147,7 @@ echo -email address  - override "to" email addresses specified in repo
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
+echo -force          - force firebot to run
 echo -nomatlab       - do not use matlab
 echo -bot            - clean and update repository
 echo -clean          - clean repository
