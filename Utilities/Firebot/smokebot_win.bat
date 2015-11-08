@@ -266,7 +266,7 @@ echo Stage 2 - Building Smokeview
 echo             libs
 
 cd %fdsroot%\SMV\Build\LIBS\lib_win_intel_64
-call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
+call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
