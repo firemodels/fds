@@ -272,7 +272,7 @@ echo             debug
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
-call make_smv_db bot 1>> %OUTDIR%\stage2a.txt 2>&1
+call make_smv_db -r bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
@@ -281,7 +281,7 @@ echo             release
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> %OUTDIR%\stage2b.txt 2>&1
-call make_smv bot 1>> %OUTDIR%\stage2b.txt 2>&1
+call make_smv -r bot 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\stage2b.txt|| aexit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
