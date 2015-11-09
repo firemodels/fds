@@ -65,7 +65,7 @@ else
     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it u} rms (m/s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    legend('Analytic','FDS','Location','SouthEast')
+    legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
     git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
@@ -97,7 +97,7 @@ else
     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} covariance (m^2/s^2)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    legend('Analytic','FDS','Location','SouthEast')
+    legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
     git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
@@ -129,7 +129,7 @@ else
     set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
     xlabel('Time(s)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     ylabel('{\it uw} cross correlation','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
-    legend('Analytic','FDS','Location','SouthEast')
+    legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
     git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
