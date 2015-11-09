@@ -7,7 +7,8 @@ set clean=%2
 set update=%3
 set altemail=%4
 set usematlab=%5
-set emailto=%6
+set installed=%6
+set emailto=%7
 
 if NOT exist %fdsroot% (
   echo ***Error: the repository %fdsroot% does not exist
@@ -109,6 +110,7 @@ echo             found get_time
 call :GET_TIME TIME_beg
 call :GET_TIME PRELIM_beg
 
+:: looking for Fortran
 ifort 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %counta%
 set /p nothave_ifort=<%counta%
@@ -122,6 +124,10 @@ if %nothave_ifort% == 1 (
 )
 echo             found Fortran
 
+:: if -installed option is used use installed smokeview
+::    otherwise look for C to build smokeview and
+::    use installed smokeview if C not found
+if %installed% == 1 goto else1
 icl 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %countb%
 set /p nothave_icc=<%countb%
@@ -129,11 +135,20 @@ if %nothave_icc% == 1 (
   set have_icc=0
   echo             C compiler not found - looking for Smokeview
   call :is_file_installed smokeview|| exit /b 1
+  set smokeview=smokeview
   echo             found smokeview
 ) else (
   echo             found C
 )
+goto endif1
+:else1
+  set have_icc=0
+  call :is_file_installed smokeview|| exit /b 1
+  set smokeview=smokeview
+  echo             found smokeview
+:endif1
 
+:: looking  for email
 if NOT exist %emailexe% (
   echo ***Warning: email client not found.   
   echo             firebot messages will only be sent to the console.
@@ -228,6 +243,8 @@ call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel rele
 ::                           stage 2
 :: -------------------------------------------------------------
 
+if %installed% == 1 goto skip_build_cstuff
+if %have_icc% == 0 goto skip_build_cstuff
 echo Stage 2 - Building Smokeview
 
 echo             libs
@@ -251,6 +268,8 @@ call make_smv -r bot 1> %OUTDIR%\makesmvr.log 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\makesmvr.log|| aexit /b 1
 call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
+set smokeview=%fdsroot%\SMV\Build\intel_win_64\smokeview_win_64.exe
+:skip_build_cstuff
 
 :: -------------------------------------------------------------
 ::                           stage 3
@@ -348,7 +367,7 @@ echo Stage 5 - Making pictures
 echo             FDS verification cases
 
 cd %fdsroot%\Verification\scripts
-call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
+call MAKE_FDS_pictures %smokeview% 1> %OUTDIR%\stage5.txt 2>&1
 
 if %have_matlab%==0 goto skip_matlabplots
 echo             matlab verification plots
