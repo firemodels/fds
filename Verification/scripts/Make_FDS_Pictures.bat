@@ -1,5 +1,11 @@
 @echo off
 
+if "x%1" == "x" goto else1
+set SMOKEVIEW=%1
+:else1
+set SMOKEVIEW=smokeview
+:endif1
+
 cd ..
 set BASEDIR=%CD%\
 
@@ -16,7 +22,6 @@ set SVNROOT=%CD%
 
 cd %BASEDIR%
 set RUNSMV=call "%BASEDIR%\scripts\runsmv.bat"
-set SMOKEVIEW=smokeview
 
 call ..\Utilities\Data_Processing\sh2bat FDS_Pictures.sh FDS_Pictures.bat
 
