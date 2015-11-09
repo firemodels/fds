@@ -9,6 +9,7 @@ set clean=0
 set usematlab=1
 set stopscript=0
 set force=0
+set installed=0
 
 set fdsrepo=%userprofile%\FDS-SMVgitclean
 if exist .fds_git (
@@ -68,7 +69,7 @@ echo  444
 :: run firebot
 
   echo 1 > %running%
-  call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %emailto%
+  call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %installed% %emailto%
   if exist %running% erase %running%
   goto end_running
 :skip_running
@@ -112,6 +113,10 @@ goto eof
    set valid=1
    set clean=1
  )
+ if /I "%1" EQU "-installed" (
+   set valid=1
+   set installed=1
+ )
  if /I "%1" EQU "-update" (
    set valid=1
    set update=1
@@ -152,6 +157,7 @@ echo -force          - force firebot to run
 echo -nomatlab       - do not use matlab
 echo -bot            - clean and update repository
 echo -clean          - clean repository
+echo -installed      - use installed smokeview
 echo -update         - update repository
 exit /b
 
