@@ -1,5 +1,5 @@
  @echo off
-release=%1
+set release=%1
 set from=%2
 
 :: setup compiler environment
