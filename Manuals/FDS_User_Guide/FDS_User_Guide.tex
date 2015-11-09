@@ -559,13 +559,13 @@ The files needed to run an MPI calculation across a Windows domain network are b
 
 To run the MPI version of FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
 
-First inntall the FDS-SMV package on all of the machines you plan to use. The new version of FDS will overwrite all existing versions unless they are moved or renamed.
+First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
 
 If you wish to run FDS on more than one core on a single machine, then type the following command:
 \begin{lstlisting}
 mpiexec -n 4 fds job_name.fds
 \end{lstlisting}
-where 4 indicates that 4 FDS processes will be created. Note that as a default each FDS process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine 
+where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine 
 
 If you wish to run FDS on more than one machine, the following steps should be taken:
 
