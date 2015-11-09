@@ -7,7 +7,7 @@ if x%from% == xbot goto skip1
 call ..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 :skip1
 
-if "%release%" NEQ "-t" goto endif
+if "%release%" == "-r" goto endif
   set SMV_TESTFLAG=-D pp_BETA
   set SMV_TESTSTRING=test_
 :endif
