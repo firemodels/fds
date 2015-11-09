@@ -11,6 +11,8 @@ set SMV_TESTFLAG=
 set SMV_TESTSTRING=
 
 Title Building Smokeview for 64 bit Windows
+set SMV_TESTFLAG=
+set SMV_TESTSTRING=
 if "%release%" == "-r" goto endif
   Title Building Test Smokeview for 64 bit Windows
   set SMV_TESTFLAG=-D pp_BETA
