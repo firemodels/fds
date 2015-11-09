@@ -35,9 +35,9 @@ if %stopscript% == 1 (
   exit /b
 )
 
-if %force% == 1 (
+if %force% == 0 goto skip_force
   if exist %running% erase %running%
-)
+:skip_force
 
 :: normalize directory paths
 
@@ -64,6 +64,7 @@ if exist %running% goto skip_running
     cd %curdir%
     :no_update
 
+echo  444
 :: run firebot
 
   echo 1 > %running%
