@@ -1169,6 +1169,8 @@ fi
 if [ "$RUNAUTO" != "" ]; then
    echo "FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
    echo "SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
+else
+   echo "SMV revisions: $THIS_SMVREVISION" >> $TIME_LOG
 fi
   if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
     cat $GIT_SMVLOG >> $TIME_LOG
