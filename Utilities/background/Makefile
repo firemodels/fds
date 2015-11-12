@@ -45,6 +45,16 @@ intel_win_32 : exe       = background.exe
 intel_win_32 : $(objwin)
 	$(CC) -o $(bin)/$(exe) $(objwin) 
 
+# ------------- Win 64 ----------------
+#  64 bit windows
+
+intel_win_64 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared $(GITINFO)
+intel_win_64 : CC        = icl
+intel_win_64 : exe       = background.exe
+
+intel_win_64 : $(objwin)
+	$(CC) -o $(bin)/$(exe) $(objwin) 
+
 # ------------- Linux 32 ----------------
 #  32 bit linux
 

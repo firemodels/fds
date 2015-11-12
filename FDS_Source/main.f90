@@ -98,7 +98,7 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB
 
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') 'FDS 6.3.0'
+WRITE(VERSION_STRING,'(A)') 'FDS 6.3.1'
 
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
@@ -402,7 +402,10 @@ CALL WRITE_STRINGS
 
 ! Check for evacuation initialization stop
 
-IF (ANY(EVACUATION_ONLY)) CALL STOP_CHECK(1)
+IF (ANY(EVACUATION_ONLY)) THEN
+   CALL STOP_CHECK(1)
+   IF (.NOT.RESTART) ICYC = -EVAC_TIME_ITERATIONS
+END IF
 
 ! Sprinkler piping calculation
 
@@ -421,13 +424,11 @@ T_USED(1) = SECOND()
 
 ! Level Set model for firespread in vegetation (currently uses constant wind: does not need CFD computations).
 
-IF (WFDS_BNDRYFUEL) THEN
-   IF (VEG_LEVEL_SET_UNCOUPLED .OR. VEG_LEVEL_SET_COUPLED) CALL INITIALIZE_LEVEL_SET_FIRESPREAD(1)
-   IF (VEG_LEVEL_SET_UNCOUPLED) THEN
-      CALL LEVEL_SET_FIRESPREAD(T,DT,1)
-      STOP_STATUS = LEVELSET_STOP
-      CALL STOP_CHECK(1)
-   ENDIF
+IF (VEG_LEVEL_SET_UNCOUPLED .OR. VEG_LEVEL_SET_COUPLED) CALL INITIALIZE_LEVEL_SET_FIRESPREAD(1)
+IF (VEG_LEVEL_SET_UNCOUPLED) THEN
+   CALL LEVEL_SET_FIRESPREAD(T,DT,1)
+   STOP_STATUS = LEVELSET_STOP
+   CALL STOP_CHECK(1)
 ENDIF
 
 ! This ends the initialization part of the program
@@ -782,7 +783,7 @@ ENDDO MAIN_LOOP
 
 T_USED(1) = SECOND() - T_USED(1) - SUM(T_USED(2:N_TIMERS))
 
-DO N=0,N_MPI_PROCESSES
+DO N=0,N_MPI_PROCESSES-1
    IF (N==MYID) CALL TIMINGS
    CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
 ENDDO
@@ -1212,7 +1213,7 @@ CHARACTER(255) :: MESSAGE
 LOGICAL :: OPN
 
 IF (USE_MPI) THEN
-   WRITE(LU_ERR,'(A,I4,A)') 'MPI process ',MYID,' has completed'
+   WRITE(LU_ERR,'(A,I6,A)') 'MPI process ',MYID,' has completed'
    CALL MPI_BARRIER(MPI_COMM_WORLD,IERR)
    CALL MPI_FINALIZE(IERR)
 ENDIF
@@ -2651,7 +2652,7 @@ DO WHILE(.NOT.FLAG)
    CALL MPI_TESTALL(NR,RR(1:NR),FLAG,MPI_STATUSES_IGNORE,IERR)
    WAIT_TIME = MPI_WTIME() - START_TIME
    IF (WAIT_TIME>MPI_TIMEOUT) THEN
-      WRITE(LU_ERR,'(A,A,I3,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
+      WRITE(LU_ERR,'(A,A,I6,A,A)') TRIM(RNAME),' timed out for MPI process ',MYID,' running on ',PNAME(1:PNAMELEN)
       CALL MPI_ABORT(MPI_COMM_WORLD,0,IERR)
    ENDIF
 ENDDO
@@ -2802,8 +2803,7 @@ INTEGER :: NM,DISP
 
 TNOW = SECOND()
 
-!need to fix following line to make sure RETURN's only occur for evac cases (issue 2965)
-!IF (ICYC>-EVAC_TIME_ITERATIONS .AND. ICYC < 1) RETURN ! No dumps at the evacuation initialization phase
+IF (ANY(EVACUATION_ONLY) .AND. (ICYC<1 .AND. T>T_BEGIN)) RETURN ! No dumps at the evacuation initialization phase
 
 ! Dump out HRR info  after first "gathering" data to node 0
 

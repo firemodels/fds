@@ -7,7 +7,8 @@ set clean=%2
 set update=%3
 set altemail=%4
 set usematlab=%5
-set emailto=%6
+set installed=%6
+set emailto=%7
 
 if NOT exist %fdsroot% (
   echo ***Error: the repository %fdsroot% does not exist
@@ -99,8 +100,6 @@ if NOT "%emailto%" == "" (
 
 echo Stage 0 - Preliminaries
 
-:: check if compilers are present
-
 echo. > %errorlog%
 echo. > %warninglog%
 echo. > %stagestatus%
@@ -111,29 +110,45 @@ echo             found get_time
 call :GET_TIME TIME_beg
 call :GET_TIME PRELIM_beg
 
+:: looking for Fortran
 ifort 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %counta%
 set /p nothave_ifort=<%counta%
 set have_ifort=1
 if %nothave_ifort% == 1 (
-  echo "***Fatal error: Fortran compiler not present"
+  echo             Fortran not found
+  echo "           firebot aborted"
   echo "***Fatal error: Fortran compiler not present" > %errorlog%
-  echo "firebot run aborted"
   call :output_abort_message
   exit /b 1
 )
 echo             found Fortran
 
+:: if -installed option is used use installed smokeview
+::    otherwise look for C to build smokeview and
+::    use installed smokeview if C not found
+if %installed% == 1 goto else1
 icl 1> %scratchfile% 2>&1
 type %scratchfile% | find /i /c "not recognized" > %countb%
 set /p nothave_icc=<%countb%
 if %nothave_icc% == 1 (
   set have_icc=0
-  echo "***Warning: C/C++ compiler not found - using installed Smokeview to generate images"
+  echo             C compiler not found - looking for Smokeview
+  call :is_file_installed smokeview|| exit /b 1
+  set smokeview=smokeview
+  echo             found smokeview
 ) else (
-  echo             found C/C++
+  echo             found C
 )
+goto endif1
+:else1
+  set have_icc=0
+  call :is_file_installed smokeview|| exit /b 1
+  set smokeview=smokeview
+  echo             found smokeview
+:endif1
 
+:: looking  for email
 if NOT exist %emailexe% (
   echo ***Warning: email client not found.   
   echo             firebot messages will only be sent to the console.
@@ -141,22 +156,17 @@ if NOT exist %emailexe% (
   echo             found mailsend
 )
 
-call :is_file_installed pdflatex|| exit /b 1
-echo             found pdflatex
-
-call :is_file_installed grep|| exit /b 1
-echo             found grep
-
-call :is_file_installed sed|| exit /b 1
-echo             found sed
-
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
 call :is_file_installed git|| exit /b 1
 echo             found git
 
-::*** looking for matlab
+call :is_file_installed grep|| exit /b 1
+echo             found grep
+
+call :is_file_installed make|| exit /b 1
+echo             found make
 
 where matlab 2>&1 | find /i /c "Could not find" > %OUTDIR%\stage_count0a.txt
 set /p nothavematlab=<%OUTDIR%\stage_count0a.txt
@@ -168,11 +178,17 @@ if %nothavematlab% == 1 (
   echo             matlab not found - VV and User guides will not be built
 )
 
+call :is_file_installed pdflatex|| exit /b 1
+echo             found pdflatex
+
+call :is_file_installed sed|| exit /b 1
+echo             found sed
+
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 :: revert FDS/Smokeview repository
 
-if %clean% == 0 skip_clean1
+if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
    cd %fdsroot%
    git clean -dxf 1> Nul 2>&1
@@ -182,7 +198,7 @@ if %clean% == 0 skip_clean1
 
 :: update FDS/Smokeview repository
 
-if %update% == 0 skip_update1
+if %update% == 0 goto skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
 git fetch origin
@@ -211,7 +227,7 @@ echo             parallel debug
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1> %OUTDIR%\makefdsd.log 2>&1
+call make_fds bot 1> %OUTDIR%\makefdsd.log 2>&1
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debug compilation"
 
@@ -219,7 +235,7 @@ echo             parallel release
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1> %OUTDIR%\makefdsr.log 2>&1
+call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\makefdsr.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
 
@@ -227,18 +243,20 @@ call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel rele
 ::                           stage 2
 :: -------------------------------------------------------------
 
+if %installed% == 1 goto skip_build_cstuff
+if %have_icc% == 0 goto skip_build_cstuff
 echo Stage 2 - Building Smokeview
 
 echo             libs
 
 cd %fdsroot%\SMV\Build\LIBS\lib_win_intel_64
-call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
+call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64_db 1> %OUTDIR%\makesmvd.log 2>&1
+call make_smv_db -r bot 1> %OUTDIR%\makesmvd.log 2>&1
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug compilation"
 
@@ -246,10 +264,12 @@ echo             release
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> Nul 2>&1
-make -f ..\Makefile intel_win_64 1> %OUTDIR%\makesmvr.log 2>&1
+call make_smv -r bot 1> %OUTDIR%\makesmvr.log 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\makesmvr.log|| aexit /b 1
 call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
+set smokeview=%fdsroot%\SMV\Build\intel_win_64\smokeview_win_64.exe
+:skip_build_cstuff
 
 :: -------------------------------------------------------------
 ::                           stage 3
@@ -266,9 +286,9 @@ call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/
 
 if %have_icc% == 1 (
   echo             background
-  cd %fdsroot%\Utilities\background\intel_win_32
+  cd %fdsroot%\Utilities\background\intel_win_64
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  make -f ..\Makefile intel_win_32 1> %OUTDIR%\makebackground.log 2>&1
+  call make_background bot 1> %OUTDIR%\makebackground.log 2>&1
   call :does_file_exist background.exe %OUTDIR%\makebackground.log
   call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
 ) else (
@@ -289,14 +309,14 @@ echo             debug mode
 
 :: run cases
 
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Check_FDS_cases 
 
 :: report errors
@@ -308,18 +328,19 @@ echo             release mode
 :: run cases
 
 cd %fdsroot%\Verification\
-if %clean% == 0 skip_clean2
+if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
    git clean -dxf 1> Nul 2>&1
 :skip_clean2
 
+cd %fdsroot%\Verification\scripts
 call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\
+cd %fdsroot%\Verification\scripts
 call Check_FDS_cases
 
 :: report errors
@@ -345,8 +366,8 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making pictures
 echo             FDS verification cases
 
-cd %fdsroot%\Verification\
-call MAKE_FDS_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
+cd %fdsroot%\Verification\scripts
+call MAKE_FDS_pictures %smokeview% 1> %OUTDIR%\stage5.txt 2>&1
 
 if %have_matlab%==0 goto skip_matlabplots
 echo             matlab verification plots

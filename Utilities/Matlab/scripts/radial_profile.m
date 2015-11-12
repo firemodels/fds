@@ -298,8 +298,8 @@ text(xt,yt,text_label,'FontName',Font_Name,'FontSize',14,'Interpreter',Font_Inte
 
 plot_style
 
-xlabel(xaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel(yaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+xlabel(xaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+ylabel(yaxis_label,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 axis([xmin xmax ymin ymax])
@@ -318,7 +318,7 @@ if nfds==5; h = legend(H,exp_label,fds_label1,fds_label2,fds_label3,fds_label4,f
 set(h,'Interpreter',Font_Interpreter)
 legend boxoff
 
-% add SVN if file is available
+% add Git revision if file is available
 
 addverstr(gca,git_file,'linear')
 
