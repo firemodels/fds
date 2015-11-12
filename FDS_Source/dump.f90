@@ -2550,6 +2550,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    IF (RN%FYI/='null') WRITE(LU_OUTPUT,'(/3X,A)') TRIM(RN%FYI)
    IF (RN%ID/='null')  WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reaction ID:  ', TRIM(RN%ID)
    IF (RN%REVERSE)     WRITE(LU_OUTPUT,'(/3X,A,A)')   'Reverse Reaction of ID:  ', TRIM(RN%FWD_ID)
+   IF (RN%ALT_INDEX>0) WRITE(LU_OUTPUT,'(/3X,A,A)')   'Alternate Reaction of ID:  ', TRIM(RN%ALT_REAC_ID)
 
    WRITE(LU_OUTPUT,'(/3X,A)')     'Fuel                                           Heat of Combustion (kJ/kg)'
    WRITE(LU_OUTPUT,'(3X,A,1X,F12.4)') RN%FUEL,RN%HEAT_OF_COMBUSTION/1000._EB
