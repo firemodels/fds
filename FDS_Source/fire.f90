@@ -274,7 +274,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
       CASE (RK2_RICHARDSON) ! Finite-rate (or mixed finite-rate/fast) chemistry
 
-         ! May be used with N_FIXED_CHEMISTRY_SUBSTEPS, but default mode is to used error estimator and variable DT_SUB
+         ! May be used with N_FIXED_CHEMISTRY_SUBSTEPS, but default mode is to use error estimator and variable DT_SUB
 
          ERR_TOL = RICHARDSON_ERROR_TOLERANCE
          RICH_EX_LOOP: DO RICH_ITER = 1,RICH_ITER_MAX
