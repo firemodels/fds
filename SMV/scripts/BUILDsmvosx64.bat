@@ -22,12 +22,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
+cd %svn_root%\SMV\scripts
 set version=%smv_version%_%smv_revision%
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
-set bindir=FDS-SMV/SMV/bin
+set scriptdir=%linux_svn_root%/SMV/scripts
 
 plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmvosx64.sh
 

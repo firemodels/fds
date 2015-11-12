@@ -5173,26 +5173,35 @@ int get_tick_dir(float *mm){
 
 /* ------------------ drawaxis ------------------------ */
 
-void drawaxis(void){
+void DrawGravityAxis(void){
   glLineWidth(linewidth);
   glBegin(GL_LINES);
+
+  // x axis
   glColor3f(0.0,0.0,1.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0+0.5);
   
+  // y axis
   glColor3f(0.0,1.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0+0.5,zbar/2.0);
   
+  // z axis
   glColor3f(1.0,0.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0+0.5,ybar/2.0,zbar/2.0);
 
+  // gravity vector
   glColor3fv(foregroundcolor);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0+gvecunit[0],ybar/2.0+gvecunit[1],zbar/2.0+gvecunit[2]);
 
   glEnd();
+  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0, zbar / 2.0 + 0.5, "x");
+  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0 + 0.5, zbar / 2.0, "y");
+  output3Text(foregroundcolor, xbar / 2.0 + 0.5, ybar / 2.0, zbar / 2.0, "x");
+  output3Text(foregroundcolor, xbar / 2.0 + gvecunit[0], ybar / 2.0 + gvecunit[1], zbar / 2.0 + gvecunit[2], "g");
 }
 
 /* ------------------ drawticks ------------------------ */

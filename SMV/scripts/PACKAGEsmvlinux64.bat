@@ -27,15 +27,15 @@ cd %svn_root%\smv\scripts
 set version=%smv_version%
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle/uploads
+set bundledir=FDS-SMV/SMV/uploads
 
 echo making 64 bit Linux distribution archive
 plink %svn_logon% %scriptdir%/MAKEdistgen.csh %version% linux 64 %linux_hostname% %fds_edition%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_%version%_linux64.sh ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_%version%_linux64.sh ..\uploads\.
 
-echo copying ..\for_bundle\uploads\smv_%version%_linux64.sh to %gupload%
-copy ..\for_bundle\uploads\smv_%version%_linux64.sh "%gupload%"
+echo copying ..\uploads\smv_%version%_linux64.sh to %gupload%
+copy ..\uploads\smv_%version%_linux64.sh "%gupload%"
 
 pause

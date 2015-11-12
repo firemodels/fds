@@ -23,10 +23,6 @@ call %envfile%
 
 cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
-set uploaddir=FDS-SMV/SMV/for_bundle/uploads
-set smvdir=smv_%smv_version%_osx64.sh
-
 echo updating 64 bit smokeview
-plink %svn_logon% %linux_svn_root%/SMV/for_bundle/uploads/%exe% y
+plink %svn_logon% %linux_svn_root%/SMV/uploads/%exe% y
 pause

@@ -11,6 +11,7 @@ resource_manager=
 walltime=
 errfileoption=
 RUNOPTION=
+CURDIR=`pwd`
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -43,7 +44,7 @@ echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
-export SVNROOT=`pwd`/..
+export SVNROOT=`pwd`/../..
 
 while getopts 'c:dEhMm:o:q:r:Ssw:' OPTION
 do
@@ -117,7 +118,8 @@ fi
 export BASEDIR=`pwd`
 
 export QFDS="$QFDSSH $walltime $errfileoption -n $nthreads -e $FDSMPI $queue" 
-    ./FDS_Cases.sh
+cd ..
+./FDS_Cases.sh
+cd $CURDIR
 
 echo FDS cases submitted
-

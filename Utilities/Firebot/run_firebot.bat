@@ -8,6 +8,8 @@ set update=0
 set clean=0
 set usematlab=1
 set stopscript=0
+set force=0
+set installed=0
 
 set fdsrepo=%userprofile%\FDS-SMVgitclean
 if exist .fds_git (
@@ -34,6 +36,10 @@ if %stopscript% == 1 (
   exit /b
 )
 
+if %force% == 0 goto skip_force
+  if exist %running% erase %running%
+:skip_force
+
 :: normalize directory paths
 
 call :normalise %CD% curdir
@@ -42,7 +48,7 @@ set curdir=%temparg%
 call :normalise %fdsrepo%\Utilities\Firebot
 set fdsbotdir=%temparg%
 
-set running=%curdir%\bot.running
+set running=%curdir%\firebot.running
 
 if exist %running% goto skip_running
 
@@ -59,16 +65,18 @@ if exist %running% goto skip_running
     cd %curdir%
     :no_update
 
+echo  444
 :: run firebot
 
   echo 1 > %running%
-  call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %emailto%
-  erase %running%
+  call firebot_win.bat %fdsrepo% %clean% %update% %altemail% %usematlab% %installed% %emailto%
+  if exist %running% erase %running%
   goto end_running
 :skip_running
   echo ***Error: firebot is currently running.
-  echo If this is not the case, erase the file:
-  echo %running%
+  echo           If this is not the case, erase the file:
+  echo           %running%
+  echo           or rerun using the -force option
 :end_running
 
 goto eof
@@ -105,9 +113,17 @@ goto eof
    set valid=1
    set clean=1
  )
+ if /I "%1" EQU "-installed" (
+   set valid=1
+   set installed=1
+ )
  if /I "%1" EQU "-update" (
    set valid=1
    set update=1
+ )
+ if /I "%1" EQU "-force" (
+   set valid=1
+   set force=1
  )
  if /I "%1" EQU "-nomatlab" (
    set valid=1
@@ -137,9 +153,11 @@ echo -email address  - override "to" email addresses specified in repo
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
+echo -force          - force firebot to run
 echo -nomatlab       - do not use matlab
 echo -bot            - clean and update repository
 echo -clean          - clean repository
+echo -installed      - use installed smokeview
 echo -update         - update repository
 exit /b
 

@@ -7,6 +7,7 @@ set altemail=0
 set clean=0
 set update=0
 set stopscript=0
+set force=0
 
 set cfastrepo=%userprofile%\cfastgitclean
 if x%CFASTGIT% == x goto skip_cfastgit
@@ -63,9 +64,11 @@ if %fdsrepo% == none goto skip_fdsrepo2
   set fdsrepo=%temparg%
 :skip_fdsrepo2
 
-set running=%curdir%\bot.running
+set running=%curdir%\smokebot.running
 
+if "%force%" EQU "1" goto skip_runtest
 if exist %running% goto skip_running
+:skip_runtest
 
 :: get latest smokebot
 
@@ -84,12 +87,13 @@ if exist %running% goto skip_running
 
   echo 1 > %running%
   call smokebot_win.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
-  erase %running%
+  if exist %running% erase %running%
   goto end_running
 :skip_running
   echo ***Error: smokebot is currently running.
   echo If this is not the case, erase the file:
   echo %running%
+  echo or use the -force option
 :end_running
 
 goto eof
@@ -98,26 +102,6 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
- if /I "%1" EQU "-help" (
-   call :usage
-   set stopscript=1
-   exit /b
- )
- if /I "%1" EQU "-cfastrepo" (
-   set cfastrepo=%2
-   set valid=1
-   shift
- )
- if /I "%1" EQU "-fdsrepo" (
-   set fdsrepo=%2
-   set valid=1
-   shift
- )
- if /I "%1" EQU "-email" (
-   set emailto=%2
-   set valid=1
-   shift
- )
  if /I "%1" EQU "-altemail" (
    set valid=1
    set altemail=1
@@ -127,9 +111,33 @@ goto eof
    set clean=1
    set update=1
  )
+ if /I "%1" EQU "-cfastrepo" (
+   set cfastrepo=%2
+   set valid=1
+   shift
+ )
  if /I "%1" EQU "-clean" (
    set valid=1
    set clean=1
+ )
+ if /I "%1" EQU "-email" (
+   set emailto=%2
+   set valid=1
+   shift
+ )
+ if /I "%1" EQU "-fdsrepo" (
+   set fdsrepo=%2
+   set valid=1
+   shift
+ )
+ if /I "%1" EQU "-force" (
+   set valid=1
+   set force=1
+ )
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
  )
  if /I "%1" EQU "-update" (
    set valid=1

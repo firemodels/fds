@@ -2674,12 +2674,12 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer,"GVEC") == 1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",gvec,gvec+1,gvec+2);
-      gvecunit[0]=gvec[0];
-      gvecunit[1]=gvec[1];
-      gvecunit[2]=gvec[2];
+      sscanf(buffer,"%f %f %f",gvecphys,gvecphys+1,gvecphys+2);
+      gvecunit[0]=gvecphys[0];
+      gvecunit[1]=gvecphys[1];
+      gvecunit[2]=gvecphys[2];
       NORMALIZE3(gvecunit);
-      if(NORM3(gvec)>0.0){
+      if(NORM3(gvecphys)>0.0){
         have_gvec=1;
         update_have_gvec=1;
       }
@@ -2830,13 +2830,39 @@ int readsmv(char *file, char *file2){
       }
       continue;
     }
-    if(match(buffer,"REVISION")==1){
-      revision_fds=-1;
+    if(match(buffer,"FDSVERSION")==1){
+      int lenbuffer;
+      char *buffptr;
+      
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
-      sscanf(buffer,"%i",&revision_fds);
-      if(revision_fds<0)revision_fds=-1;
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      lenbuffer = strlen(buffptr);
+      if(lenbuffer>0){
+        NewMemory((void **)&fds_version,lenbuffer+1);
+        strcpy(fds_version,buffer);
+      }
+      else{
+        NewMemory((void **)&fds_version,7+1);
+        strcpy(fds_version,"unknown");
+      }
+
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      lenbuffer = strlen(buffptr);
+      if(lenbuffer>0){
+        NewMemory((void **)&fds_githash,lenbuffer+1);
+        strcpy(fds_githash,buffer);
+      }
+      else{
+        NewMemory((void **)&fds_githash,7+1);
+        strcpy(fds_githash,"unknown");
+      }
       continue;
     }
     if(match(buffer,"TOFFSET")==1){
@@ -3026,8 +3052,16 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
-  if(nisoinfo>0&&nmeshes>0)nisos_per_mesh = nisoinfo / nmeshes;
-  if(ncsvinfo > 0){
+ if(fds_version==NULL){
+   NewMemory((void **)&fds_version,7+1);
+   strcpy(fds_version,"unknown");
+ }
+ if(fds_githash==NULL){
+   NewMemory((void **)&fds_githash,7+1);
+   strcpy(fds_githash,"unknown");
+ }
+ if(nisoinfo>0&&nmeshes>0)nisos_per_mesh = nisoinfo / nmeshes;
+ if(ncsvinfo > 0){
    NewMemory((void **)&csvinfo,ncsvinfo*sizeof(csvdata));
    ncsvinfo=0;
  }
@@ -12516,18 +12550,21 @@ void writeini(int flag,char *filename){
 
   {
     char version[256];
-    char revision[256];
+    char githash[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     fprintf(fileout,"\n\n");
     fprintf(fileout,"# FDS/Smokeview Environment\n");
     fprintf(fileout,"# -------------------------\n\n");
     fprintf(fileout,"# Smokeview Version: %s\n",version);
-    fprintf(fileout,"# Smokeview Revision Number: %s\n",revision);
+    fprintf(fileout,"# Smokeview Build: %s\n",githash);
     fprintf(fileout,"# Smokeview Build Date: %s\n",__DATE__);
-    if(revision_fds>0){
-      fprintf(fileout,"# FDS Build: %i\n",revision_fds);
+    if(fds_version!=NULL){
+      fprintf(fileout,"# FDS Version: %s\n",fds_version);
+    }
+    if(fds_githash!=NULL){
+      fprintf(fileout, "# FDS Build: %s\n", fds_githash);
     }
 #ifdef X64
     fprintf(fileout,"# Platform: WIN64\n");

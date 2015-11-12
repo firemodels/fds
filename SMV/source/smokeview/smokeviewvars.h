@@ -42,10 +42,10 @@ SVEXTERN int SVDECL(use_data_extremes, 1);
 SVEXTERN int SVDECL(extreme_data_offset,1), SVDECL(colorbar_offset,0), SVDECL(colorbarflip,0);
 
 #ifdef INMAIN
-SVEXTERN float gvec[3]={0.0,0.0,-9.8};
+SVEXTERN float gvecphys[3]={0.0,0.0,-9.8};
 SVEXTERN float gvecunit[3]={0.0,0.0,-1.0};
 #else
-SVEXTERN float gvec[3];
+SVEXTERN float gvecphys[3];
 SVEXTERN float gvecunit[3];
 #endif
 SVEXTERN int SVDECL(update_have_gvec,0),SVDECL(gvec_down,1),SVDECL(have_gvec,0),SVDECL(changed_zaxis,0),SVDECL(showgravity,0);
@@ -745,8 +745,8 @@ SVEXTERN vslicedata SVDECL(*vd_shown,NULL);
 SVEXTERN int SVDECL(show_all_slices,1);
 SVEXTERN int SVDECL(autoterrain,0),SVDECL(manual_terrain,0);
 SVEXTERN float zterrain_max, zterrain_min;
-SVEXTERN int revision_fds;
-SVEXTERN char revision_smv[256];
+SVEXTERN char SVDECL(*fds_version, NULL), SVDECL(*fds_githash, NULL);
+SVEXTERN char smv_githash[256];
 SVEXTERN int SVDECL(visMeshlabel,1);
 SVEXTERN int SVDECL(visOpenVents,1),SVDECL(visDummyVents,1),SVDECL(visOtherVents,1),SVDECL(visOtherVentsSAVE,1),SVDECL(visCircularVents,VENT_CIRCLE);
 SVEXTERN int SVDECL(visOpenVentsAsOutline,0);
