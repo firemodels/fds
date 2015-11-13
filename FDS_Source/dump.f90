@@ -2566,7 +2566,7 @@ REACTION_LOOP: DO N=1,N_REACTIONS
    WRITE(LU_OUTPUT,'(/3X,A)')     'Tracked (Lumped) Species'
    WRITE(LU_OUTPUT,'(3X,A)')      'Species ID                                                 Stoich. Coeff.'
    DO NN=1,N_TRACKED_SPECIES
-      IF (ABS(RN%NU(NN)) <=TWO_EPSILON_EB) CYCLE
+      IF (ABS(RN%NU(NN)) < TWO_EPSILON_EB) CYCLE
       IF (ABS(RN%NU(NN)) < 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,F12.6)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
       IF (ABS(RN%NU(NN)) > 10000._EB) WRITE(LU_OUTPUT,'(3X,A,1X,E12.5)') SPECIES_MIXTURE(NN)%ID,RN%NU(NN) 
    ENDDO
