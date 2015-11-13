@@ -21,6 +21,7 @@ then
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
   echo " -b     - use debug version of FDS"
+  echo " -B     - location of background program"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
   echo " -E     - redirect stderr to a file if the 'none' queue is used"
@@ -88,11 +89,14 @@ nosocket=
 
 # read in parameters from command line
 
-while getopts 'bcd:Ee:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
+while getopts 'bB:cd:Ee:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
 do
 case $OPTION  in
   b)
    use_debug=1
+   ;;
+  B)
+   BACKGROUND="$OPTARG"
    ;;
   c)
    strip_extension=1
@@ -341,15 +345,16 @@ if [ "$queue" == "none" ]; then
   if [ "$BACKGROUND" == "" ]; then
     BACKGROUND=background
   fi
-  QSUB="$BACKGROUND -u 75 -d 10 "
-  background=yes;
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$showinput" == "0" ]; then
     if [ "$notfound" == "1" ];  then
-      echo "The program $BACKGROUND (background) is not available. Run aborted"
+      echo "The program $BACKGROUND was not found."
+      echo "Install FDS which has the background utility."
+      echo "Run aborted"
       exit
     fi
   fi
+  QSUB="$BACKGROUND -u 75 -d 10 "
 fi
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then

@@ -12,6 +12,7 @@ walltime=
 errfileoption=
 RUNOPTION=
 CURDIR=`pwd`
+BACKGROUND=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -44,7 +45,9 @@ echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
-export SVNROOT=`pwd`/../..
+cd ../..
+export SVNROOT=`pwd`
+cd $CURDIR
 
 while getopts 'c:dEhMm:o:q:r:Ssw:' OPTION
 do
@@ -90,10 +93,8 @@ size=_64
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
   PLATFORM=osx$size
-  PLATFORM2=osx_32
 else
   PLATFORM=linux$size
-  PLATFORM2=linux_32
 fi
 
 IB=
@@ -101,7 +102,6 @@ if [ "$FDSNETWORK" == "infiniband" ]; then
   IB=ib
 fi
 
-export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
 export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
@@ -112,12 +112,15 @@ else
    export RESOURCE_MANAGER="PBS"
 fi
 if [ "$queue" != "" ]; then
+   if [ "$queue" == "none" ]; then
+      BACKGROUND="-B background"
+   fi
    queue="-q $queue"
 fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $walltime $errfileoption -n $nthreads -e $FDSMPI $queue" 
+export QFDS="$QFDSSH $BACKGROUND $walltime $errfileoption -n $nthreads -e $FDSMPI $queue" 
 cd ..
 ./FDS_Cases.sh
 cd $CURDIR
