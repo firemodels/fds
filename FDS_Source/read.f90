@@ -1694,6 +1694,7 @@ IF (FDS5_OPTIONS) THEN
    CFL_VELOCITY_NORM = 3
    CONSTANT_SPECIFIC_HEAT_RATIO = .TRUE.
    MAX_PRESSURE_ITERATIONS = 1 ! see PRES
+   EXTINCTION_MODEL = 'EXTINCTION 1'
 ENDIF
 
 ! Re-read the line to pick up any user-specified options
@@ -3568,10 +3569,10 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ALLOCATE(RN%NU_MW_O_MW_F(1:N_TRACKED_SPECIES))
    ALLOCATE(RN%SPEC_ID_N_S(1:N_SPECIES))
    ALLOCATE(RN%N_S(1:N_SPECIES))
-   RN%SPEC_ID_NU = 'null'
+   RN%SPEC_ID_NU  = 'null'
    RN%SPEC_ID_N_S = 'null'
-   RN%NU      = 0._EB
-   RN%N_S     = -999._EB
+   RN%NU          = 0._EB
+   RN%N_S         = -999._EB
 
    ! Transfer SPEC_ID_NU, SPEC_ID_N, NU, and N_S that were indexed by the order they were read in
    ! to now be indexed by the SMIX or SPEC index
