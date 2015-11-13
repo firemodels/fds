@@ -44,7 +44,9 @@ echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
-export SVNROOT=`pwd`/../..
+cd ../..
+export SVNROOT=`pwd`
+cd $CURDIR
 
 while getopts 'c:dEhMm:o:q:r:Ssw:' OPTION
 do
