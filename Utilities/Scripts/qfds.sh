@@ -69,7 +69,6 @@ fi
 queue=batch
 stopjob=0
 
-BACKGROUND=
 nmpi_processes=1
 nmpi_processes_per_node=-1
 max_processes_per_node=1
@@ -349,9 +348,8 @@ if [ "$queue" == "none" ]; then
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$showinput" == "0" ]; then
     if [ "$notfound" == "1" ];  then
-      echo "The program $BACKGROUND is not available."
-      echo "Install FDS which has the background utility or build"
-      echo "background found in the FDS-SMV repository"
+      echo "The program $BACKGROUND was not found."
+      echo "Install FDS which has the background utility."
       echo "Run aborted"
       exit
     fi
