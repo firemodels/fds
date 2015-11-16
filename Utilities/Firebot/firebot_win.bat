@@ -191,7 +191,7 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
    cd %fdsroot%
-   git clean -dxf 1> Nul 2>&1
+   git clean -dxf -e win32_local 1> Nul 2>&1
    git add . 1> Nul 2>&1
    git reset --hard HEAD 1> Nul 2>&1
 :skip_clean1
@@ -330,7 +330,7 @@ echo             release mode
 cd %fdsroot%\Verification\
 if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
-   git clean -dxf 1> Nul 2>&1
+   git clean -dxf -e win32_local 1> Nul 2>&1
 :skip_clean2
 
 cd %fdsroot%\Verification\scripts
