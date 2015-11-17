@@ -237,7 +237,7 @@ void COLORBAR_CB(int var){
   case COLORBAR_COLORINDEX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
-      current_colorbar=cbi;
+      UpdateCurrentColorbar(cbi);
       
       cbi->index_node[colorbarpoint]=cb_colorindex;
 
@@ -375,7 +375,7 @@ void COLORBAR_CB(int var){
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     addcolorbar(colorbartype);
     colorbartype=ncolorbars-1;
-    current_colorbar=colorbarinfo + colorbartype;
+    UpdateCurrentColorbar(colorbarinfo + colorbartype);
     update_colorbar_splits(current_colorbar);
     cbi = colorbarinfo + colorbartype;  //addcolorbar resizes (and possibly moves) colorbarinfo
     LISTBOX_colorbar->add_item(colorbartype,cbi->label);

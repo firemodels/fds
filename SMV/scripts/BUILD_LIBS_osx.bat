@@ -18,10 +18,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
+cd %svn_root%\SMV\scripts
 
-set scriptdir=FDS-SMV/Utilities/Scripts
-set LIBDIR=FDS-SMV/SMV/Build/LIBS
+set scriptdir=%linux_svn_root%/Utilities/Scripts
+set LIBDIR=%linux_svn_root%/SMV/Build/LIBS
 
 plink %svn_logon% %scriptdir%/ssh_command2.csh %osx_hostname% %LIBDIR%/lib_osx_intel_64 makelibs.sh
 

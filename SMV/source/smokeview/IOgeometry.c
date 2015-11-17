@@ -181,6 +181,37 @@ void get_faceinfo(void){
   }
 }
 
+/* ------------------ draw_geomdiag ------------------------ */
+
+void draw_geomdiag(void){
+  int i;
+
+    glPushMatrix();
+    glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+    glTranslatef(-xbar0, -ybar0, -zbar0);
+    glBegin(GL_TRIANGLES);
+    for(i = 0; i < ngeomdiaginfo; i++){
+      geomdiagdata *geomdiagi;
+      geomlistdata *geomframe;
+      int ntriangles;
+      int j;
+
+      geomdiagi = geomdiaginfo + i;
+      geomframe = geomdiagi->geom->geomlistinfo_0;
+      ntriangles = geomframe->ntriangles;
+      for(j = 0; j < ntriangles; j++){
+        triangle *trianglej;
+
+        trianglej = geomframe->triangles + j;
+        glVertex3fv(trianglej->points[0]->xyz);
+        glVertex3fv(trianglej->points[1]->xyz);
+        glVertex3fv(trianglej->points[2]->xyz);
+      }
+    }
+    glEnd();
+    glPopMatrix();
+}
+
 /* ------------------ draw_geom ------------------------ */
 
 void draw_geom(int flag, int geomtype){
@@ -1141,6 +1172,12 @@ void read_all_geom(void){
 
     geomi = geominfo + i;
     read_geom(geomi,LOAD,GEOM_NORMAL,NULL,&errorcode);
+  }
+  for(i = 0; i < ngeomdiaginfo; i++){
+    geomdiagdata *geomdiagi;
+
+    geomdiagi = geomdiaginfo + i;
+    read_geom(geomdiagi->geom, LOAD, GEOM_NORMAL, NULL, &errorcode);
   }
 }
 

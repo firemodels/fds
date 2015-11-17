@@ -508,9 +508,9 @@ extern "C" void glui_motion_setup(int main_window){
   if(have_gvec==1&&changed_zaxis==0){
     float vv[3];
 
-    vv[0]=-gvec[0];
-    vv[1]=-gvec[1];
-    vv[2]=-gvec[2];
+    vv[0]=-gvecphys[0];
+    vv[1]=-gvecphys[1];
+    vv[2]=-gvecphys[2];
     xyz2azelev(vv,zaxis_angles,zaxis_angles+1);
   }
   SPINNER_zaxis_angles[0] = glui_motion->add_spinner_to_panel(PANEL_change_zaxis,"azimuth:",GLUI_SPINNER_FLOAT,zaxis_angles,CHANGE_ZAXIS,Motion_CB);
@@ -1291,9 +1291,9 @@ extern "C" void Motion_CB(int var){
       if(gvec_down==1){
         float vv[3];
 
-        vv[0]=-gvec[0];
-        vv[1]=-gvec[1];
-        vv[2]=-gvec[2];
+        vv[0] = -gvecphys[0];
+        vv[1] = -gvecphys[1];
+        vv[2] = -gvecphys[2];
         xyz2azelev(vv,zaxis_angles,zaxis_angles+1);
         update_zaxis_angles();
         {

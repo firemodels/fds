@@ -1,5 +1,6 @@
 @echo off
 set OPTS=i
+set arg1=%1
 
 set LIBDIR=%CD%
 set SRCDIR=%LIBDIR%\..\..\..\source
@@ -39,8 +40,9 @@ cd %SRCDIR%\pthreads
 call makelib %OPTS%
 copy libpthreads.lib %LIBDIR%\pthreads.lib
 
-
 cd %LIBDIR%
 
 echo library builds complete
+if x%arg1% == xbot goto skip1
 pause
+:skip1

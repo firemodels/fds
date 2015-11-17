@@ -69,7 +69,9 @@ GLUI_Checkbox *CHECKBOX_device_1=NULL;
 GLUI_Checkbox *CHECKBOX_device_2=NULL;
 GLUI_Checkbox *CHECKBOX_device_3=NULL;
 GLUI_Checkbox *CHECKBOX_device_4=NULL;
-GLUI_Checkbox *CHECKBOX_device_orientation=NULL;
+GLUI_Checkbox *CHECKBOX_device_5=NULL;
+GLUI_Checkbox *CHECKBOX_device_6=NULL;
+GLUI_Checkbox *CHECKBOX_device_orientation = NULL;
 
 void Device_CB(int var);
 
@@ -140,7 +142,9 @@ extern "C" void glui_device_setup(int main_window){
 
       PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
 
-      CHECKBOX_device_2=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_d("Show values"),&showdeviceval,SHOWDEVICEVALS,Device_CB);
+      CHECKBOX_device_2 = glui_device->add_checkbox_to_panel(PANEL_devicevalues, _d("Values"), &showdeviceval, SHOWDEVICEVALS, Device_CB);
+      CHECKBOX_device_5 = glui_device->add_checkbox_to_panel(PANEL_devicevalues, _d("Type"), &showdevicetype, SHOWDEVICEVALS, Device_CB);
+      CHECKBOX_device_6 = glui_device->add_checkbox_to_panel(PANEL_devicevalues, _d("Unit"), &showdeviceunit, SHOWDEVICEVALS, Device_CB);
       CHECKBOX_device_4=glui_device->add_checkbox_to_panel(PANEL_devicevalues,_d("Color"),&colordeviceval,COLORDEVICEVALS,Device_CB);
       glui_device->add_spinner_to_panel(PANEL_devicevalues,"min",GLUI_SPINNER_FLOAT,&device_valmin);
       glui_device->add_spinner_to_panel(PANEL_devicevalues,"max",GLUI_SPINNER_FLOAT,&device_valmax);

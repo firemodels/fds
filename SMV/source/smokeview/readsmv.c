@@ -2295,6 +2295,9 @@ int readsmv(char *file, char *file2){
   navatar_colors=0;
   FREEMEMORY(avatar_colors);
 
+  FREEMEMORY(geomdiaginfo);
+  ngeomdiaginfo = 0;
+
   FREEMEMORY(treeinfo);
   ntreeinfo=0;
   for(i=0;i<nterraininfo;i++){
@@ -2671,12 +2674,12 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer,"GVEC") == 1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",gvec,gvec+1,gvec+2);
-      gvecunit[0]=gvec[0];
-      gvecunit[1]=gvec[1];
-      gvecunit[2]=gvec[2];
+      sscanf(buffer,"%f %f %f",gvecphys,gvecphys+1,gvecphys+2);
+      gvecunit[0]=gvecphys[0];
+      gvecunit[1]=gvecphys[1];
+      gvecunit[2]=gvecphys[2];
       NORMALIZE3(gvecunit);
-      if(NORM3(gvec)>0.0){
+      if(NORM3(gvecphys)>0.0){
         have_gvec=1;
         update_have_gvec=1;
       }
@@ -2714,7 +2717,11 @@ int readsmv(char *file, char *file2){
       ncsvinfo+=nfiles;
       continue;
     }
-    if(match(buffer,"GEOM") == 1){
+    if(match(buffer, "GEOMDIAG") == 1){
+      ngeomdiaginfo++;
+      continue;
+    }
+    if(match(buffer, "GEOM") == 1){
       ngeominfo++;
       continue;
     }
@@ -2823,13 +2830,39 @@ int readsmv(char *file, char *file2){
       }
       continue;
     }
-    if(match(buffer,"REVISION")==1){
-      revision_fds=-1;
+    if(match(buffer,"FDSVERSION")==1){
+      int lenbuffer;
+      char *buffptr;
+      
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
-      sscanf(buffer,"%i",&revision_fds);
-      if(revision_fds<0)revision_fds=-1;
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      lenbuffer = strlen(buffptr);
+      if(lenbuffer>0){
+        NewMemory((void **)&fds_version,lenbuffer+1);
+        strcpy(fds_version,buffer);
+      }
+      else{
+        NewMemory((void **)&fds_version,7+1);
+        strcpy(fds_version,"unknown");
+      }
+
+      if(fgets(buffer,255,stream)==NULL){
+        BREAK;
+      }
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      lenbuffer = strlen(buffptr);
+      if(lenbuffer>0){
+        NewMemory((void **)&fds_githash,lenbuffer+1);
+        strcpy(fds_githash,buffer);
+      }
+      else{
+        NewMemory((void **)&fds_githash,7+1);
+        strcpy(fds_githash,"unknown");
+      }
       continue;
     }
     if(match(buffer,"TOFFSET")==1){
@@ -3019,8 +3052,16 @@ int readsmv(char *file, char *file2){
    ************************************************************************
  */
 
-  if(nisoinfo>0&&nmeshes>0)nisos_per_mesh = nisoinfo / nmeshes;
-  if(ncsvinfo > 0){
+ if(fds_version==NULL){
+   NewMemory((void **)&fds_version,7+1);
+   strcpy(fds_version,"unknown");
+ }
+ if(fds_githash==NULL){
+   NewMemory((void **)&fds_githash,7+1);
+   strcpy(fds_githash,"unknown");
+ }
+ if(nisoinfo>0&&nmeshes>0)nisos_per_mesh = nisoinfo / nmeshes;
+ if(ncsvinfo > 0){
    NewMemory((void **)&csvinfo,ncsvinfo*sizeof(csvdata));
    ncsvinfo=0;
  }
@@ -3294,6 +3335,11 @@ int readsmv(char *file, char *file2){
     npropinfo=1;
   }
 
+  if(ngeomdiaginfo > 0){
+    NewMemory((void **)&geomdiaginfo, ngeomdiaginfo*sizeof(geomdiagdata));
+    ngeomdiaginfo = 0;
+  }
+
 /* 
    ************************************************************************
    ************************ start of pass 2 ********************************* 
@@ -3434,6 +3480,37 @@ int readsmv(char *file, char *file2){
     }
 
     /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ GEOMDIAG ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+    if(match(buffer, "GEOMDIAG") == 1){
+      geomdiagdata *geomdiagi;
+      char *buffptr;
+
+      geomdiagi = geomdiaginfo + ngeomdiaginfo;
+      ngeomdiaginfo++;
+
+      fgets(buffer, 255, stream);
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      NewMemory((void **)&geomdiagi->geomfile, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geomfile, buffptr);
+
+      NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
+      init_geom(geomdiagi->geom);
+
+      NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geom->file, buffptr);
+
+      fgets(buffer, 255, stream);
+      trim(buffer);
+      buffptr = trim_front(buffer);
+      NewMemory((void **)&geomdiagi->geomdatafile, strlen(buffptr) + 1);
+      strcpy(geomdiagi->geomdatafile, buffptr);
+    }
+
+  /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++ GEOM ++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -8661,7 +8738,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"GEOMDIAGS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i",&structured_isopen,&unstructured_isopen);
+      sscanf(buffer," %i %i %i",&structured_isopen,&unstructured_isopen,&show_geometry_diagnostics);
       continue;
     }
     if(match(buffer,"SHOWTRIANGLECOUNT")==1){
@@ -8671,8 +8748,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWDEVICEVALS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer," %i %i %i %i %i %i",
-        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot);
+      sscanf(buffer," %i %i %i %i %i %i %i %i",
+        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot,&showdevicetype,&showdeviceunit);
       devicetypes_index=CLAMP(devicetypes_index,0,ndevicetypes-1);
       update_glui_devices();
       continue;
@@ -9447,11 +9524,7 @@ int readini2(char *inifile, int localfile){
         }
       }
       if(strcmp(buffer2,"")!=0){
-        char *buffer2ptr;
-
         trim(buffer2);
-        buffer2ptr=trim_front(buffer2);
-        if(strcmp(buffer2ptr,"FED")==0)ini_fed=1;
         for(i=0;i<nslice2;i++){
           if(strcmp(slicebounds[i].datalabel,buffer2)!=0)continue;
           slicebounds[i].setvalmin=setvalmin;
@@ -11593,7 +11666,7 @@ void writeini_local(FILE *fileout){
     }
   }
   fprintf(fileout, "SHOWDEVICEVALS\n");
-  fprintf(fileout, " %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot);
+  fprintf(fileout, " %i %i %i %i %i %i %i %i\n", showdeviceval, showvdeviceval, devicetypes_index, colordeviceval, vectortype, vispilot, showdevicetype,showdeviceunit);
   fprintf(fileout, "SHOWMISSINGOBJECTS\n");
   fprintf(fileout, " %i\n", show_missing_objects);
   for(i = ntickinfo_smv; i < ntickinfo; i++){
@@ -12096,7 +12169,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "FRAMERATEVALUE\n");
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
-  fprintf(fileout, " %i %i\n", structured_isopen, unstructured_isopen);
+  fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
   fprintf(fileout, "GVERSION\n");
   fprintf(fileout, " %i\n", gversion);
   fprintf(fileout, "ISOTRAN2\n");
@@ -12477,18 +12550,21 @@ void writeini(int flag,char *filename){
 
   {
     char version[256];
-    char revision[256];
+    char githash[256];
 
     getPROGversion(version);
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     fprintf(fileout,"\n\n");
     fprintf(fileout,"# FDS/Smokeview Environment\n");
     fprintf(fileout,"# -------------------------\n\n");
     fprintf(fileout,"# Smokeview Version: %s\n",version);
-    fprintf(fileout,"# Smokeview Revision Number: %s\n",revision);
+    fprintf(fileout,"# Smokeview Build: %s\n",githash);
     fprintf(fileout,"# Smokeview Build Date: %s\n",__DATE__);
-    if(revision_fds>0){
-      fprintf(fileout,"# FDS Build: %i\n",revision_fds);
+    if(fds_version!=NULL){
+      fprintf(fileout,"# FDS Version: %s\n",fds_version);
+    }
+    if(fds_githash!=NULL){
+      fprintf(fileout, "# FDS Build: %s\n", fds_githash);
     }
 #ifdef X64
     fprintf(fileout,"# Platform: WIN64\n");

@@ -172,19 +172,10 @@ set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);
@@ -219,19 +210,10 @@ set(legend_handle,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [data_dir,'compression_wave_FL0_16_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 set(gcf,'PaperUnits',Paper_Units);

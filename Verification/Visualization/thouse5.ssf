@@ -47,7 +47,7 @@ LOADSLICE
  TEMPERATURE
  2 1.6
  thouse5_01.sf
-KEYBOARD 
+KEYBOARD
  *
 KEYBOARD
  y
@@ -121,8 +121,12 @@ LABEL
 UNLOADALL
 LOADINIFILE
  thouse5_gslice.ini
-LOADVFILE
- thouse5_23.sf
+// LOADVFILE
+//  thouse5_23.sf
+LOADVSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
 SETTIMEVAL
  60.000000
 
@@ -334,7 +338,7 @@ LABEL
   render two left/right stereo images
 
 LOADINIFILE
- thouse5_lr_stereo.ini 
+ thouse5_lr_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -346,7 +350,7 @@ LABEL
   render two stereo images
 
 LOADINIFILE
- thouse5_rc_stereo.ini 
+ thouse5_rc_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -358,7 +362,7 @@ LABEL
   render two stereo images
 
 LOADINIFILE
- thouse5_rb_stereo.ini 
+ thouse5_rb_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -442,7 +446,7 @@ SHOWPLOT3DDATA
 PLOT3DPROPS
  1 0 4 1
 RENDERONCE
-thouse5_plot3d_val 
+thouse5_plot3d_val
 
 SHOWPLOT3DDATA
  1 1 1 0 5.866670
@@ -550,7 +554,7 @@ RENDERONCE
 
 LABEL
   render chopped slice file (ceiling jet)
-  
+
 LOADINIFILE
  thouse5_cjet.ini
 UNLOADALL

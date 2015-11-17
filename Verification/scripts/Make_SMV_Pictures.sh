@@ -73,7 +73,6 @@ shift $(($OPTIND-1))
 
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE
-IPLATFORM=intel64
 CURDIR=`pwd`
 cd ../..
 export SVNROOT=`pwd`
@@ -139,7 +138,7 @@ rm -f background.help
 rm -f wind2fds.help
 
 rm -f $SUMMARY/images/*.png
-source ~/.bashrc_fds $IPLATFORM
+source ~/.bashrc_fds
 
 $SMV -help > smokeview.help
 $SMOKEZIP -help > smokezip.help
@@ -198,11 +197,10 @@ if [ "$RUN_SMV" == "1" ] ; then
   cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
   cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
   cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
-  
+ 
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
-
   cd $SVNROOT/Verification
   scripts/SMV_DIFF_Cases.sh
   cd $CURDIDR
@@ -224,4 +222,3 @@ if [ "$RUN_GEOM" == "1" ] ; then
   scripts/SMV_geom_Cases.sh
   source $STOPX
 fi
-

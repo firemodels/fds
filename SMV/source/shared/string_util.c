@@ -125,21 +125,21 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
-/* ------------------ getRevision ------------------------ */
+/* ------------------ getGitHash ------------------------ */
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
 #endif
-void getRevision(char *revision){
+void getGitHash(char *githash){
   char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
   trim(rev);
   beg = trim_front(rev);
   if(strlen(beg)>0){
-    strcpy(revision,beg);
+    strcpy(githash,beg);
   }
   else{
-    strcpy(revision,"unknown");
+    strcpy(githash,"unknown");
   }
 }
 
