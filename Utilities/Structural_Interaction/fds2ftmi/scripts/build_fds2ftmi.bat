@@ -1,18 +1,18 @@
 
 :: Firebot variables
-set FIREBOT_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/fds2ftmi/scripts
-set FDS2FTMI_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/fds2ftmi
+set FIREBOT_DIR=%FDS_GITROOT%/Utilities/Structural_Interaction/fds2ftmi/scripts
+set FDS2FTMI_DIR=%FDS_GITROOT%/Utilities/Structural_Interaction/fds2ftmi
 set OUTPUT_DIR=%FDS2FTMI_DIR%/scripts/output
 set ERROR_LOG=%OUTPUT_DIR%/errors
 set WARNING_LOG=%OUTPUT_DIR%/warnings
 
 :: Get Git Hash
-for /f "delims=" %%i in ('git describe --long --dirty') do set GIT_HASH=%%i 
+for /f "delims=" %%i in ('git describe --long') do set GIT_HASH=%%i 
 echo %GIT_HASH%
 
 :: Clean outputs
 cd %FIREBOT_DIR%
-echo Y | del output
+echo Y | rmdir output
 
 :: Create output dir
 mkdir output
@@ -22,9 +22,11 @@ cd %FDS2FTMI_DIR%/examples/simple_panel_hot
 del *.csv 
 cd %FDS2FTMI_DIR%/examples/h_profile
 del *.csv 
+cd %FIREBOT_DIR%/SCRIPT_FIGURES
+del *.pdf
 
 :: Compile fds_win_64
-cd %FDS_SVNROOT%/FDS_Compilation/intel_win_64
+cd %FDS_GITROOT%/FDS_Compilation/intel_win_64
 echo Y | make_fds.bat
 
 :: Compile fds2ftmi_win_64
@@ -33,7 +35,7 @@ echo Y | make_fds2ascii.bat
 
 :: Print the FDS revision number on User Guide
 cd %FDS2FTMI_DIR%
-sed -i "s:.*Git Hash.*:\\path{%GIT_HASH%}:" fds2ftmi_user_guide.tex
+sed -i "s:.*Git Hash.*:%GIT_HASH%:" fds2ftmi_user_guide.tex
 
 :: Print the FDS revision number on python scripts
 cd %FIREBOT_DIR%

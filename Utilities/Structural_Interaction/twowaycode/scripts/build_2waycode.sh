@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Firebot variables
-FDS_SVNROOT=/home/jgs/FDS-SMV
 FIREBOT_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/twowaycode/scripts
 TWOWAY_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/twowaycode
 OUTPUT_DIR=/home/jgs/FDS-SMV/Utilities/Structural_Interaction/twowaycode/scripts/output
@@ -19,57 +18,17 @@ mkdir output
 cd $TWOWAY_DIR/examples/simply_beam
 rm *.csv 
 
-function usage {
-echo "build_2waycode.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
-echo "Runs testing script for 2waycode"
-echo ""
-echo "Options"
-echo "-r - revision_number - run cases using a specific SVN revision number"
-echo "     default: (none, latest SVN HEAD)"
-echo ""
-exit
-}
-
-# Update repository
-SVN_REVISION=''
-while getopts 'hq:r:su:v:y' OPTION
-do
-case $OPTION in
-  h)
-   usage;
-   ;;
-  q)
-   QUEUE="$OPTARG"
-   ;;
-  r)
-   SVN_REVISION="$OPTARG"
-esac
-done
-shift $(($OPTIND-1))
-
-if [[ $SVN_REVISION = "" ]]; then
-   cd $FDS_SVNROOT/FDS_Source
-   svn update >> $OUTPUT_DIR/stage1 2>&1
-   cd $TWOWAY_DIR/source
-   svn update >> $OUTPUT_DIR/stage1_twowaycode 2>&1
-else
-   cd $FDS_SVNROOT/FDS_Source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
-   cd $TWOWAY_DIR/source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1_twowaycode 2>&1
-   echo "At revision ${SVN_REVISION}." 
-fi
-
-SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
-echo $SVN_REVISION
+# Get Git Hash
+GIT_HASH=$(shell git describe --long --dirty)
+echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide
 cd $TWOWAY_DIR
-sed -i "s:.*SVN Repository Revision.*:SVN Repository Revision ${SVN_REVISION}:" twowaycode_user_guide.tex
+sed -i "s:.*Git Hash.*:\\path{%GIT_HASH%}:" twowaycode_user_guide.tex
 
 # Print the FDS revision number on python scripts
 cd $FIREBOT_DIR
-sed -i "s:.*SVN=.*:SVN='${SVN_REVISION}':" generate_plots.py
+sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
 
 compile_fds_db()
 {
@@ -287,12 +246,10 @@ pdflatex twowaycode_user_guide.tex
 
 # Revert the FDS revision number on User Guide
 cd $TWOWAY_DIR
-rm twowaycode_user_guide.tex
-svn up -r $SVN_REVISION twowaycode_user_guide.tex
+git checkout -- twowaycode_user_guide.tex
 
 # Revert the FDS revision number on python scripts
 cd $FIREBOT_DIR
-rm generate_plots.py
-svn up -r $SVN_REVISION generate_plots.py
+git checkout -- generate_plots.py
 
 exit

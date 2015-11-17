@@ -5,9 +5,10 @@ set cfastbasename=%~n1
 set fdsroot=%~f2
 set fdsbasename=%~n2
 
-set noupdate=%3
-set altemail=%4
-set emailto=%5
+set clean=%3
+set update=%4
+set altemail=%5
+set emailto=%6
 
 ::  set number of OpenMP threads
 
@@ -86,8 +87,13 @@ if NOT "%emailto%" == "" (
   set mailToSMV=%emailto%
 )
 echo.
-echo cfast repo: %cfastroot%
-echo   FDS repo: %fdsroot%
+echo    cfast repo: %cfastroot%
+echo      FDS repo: %fdsroot%
+echo run directory: %CURDIR%
+if %update% == 1 echo updating repo: yes
+if %update% == 0 echo updating repo: no
+if %clean% == 1 echo cleaning repo: yes
+if %clean% == 0 echo cleaning repo: no
 echo.
 
 :: -------------------------------------------------------------
@@ -160,44 +166,44 @@ echo             found git
 
 echo. 1> %OUTDIR%\stage0.txt 2>&1
 
-:: revert and update repos VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-:: revert cfast repository
+:: clean cfast repository
 
-if %noupdate% == 0 goto skip_update
 cd %cfastroot%
-if "%cfastbasename%" == "cfastgitclean" (
-   echo             reverting %cfastbasename% repository
+if %clean% == 0 goto skip_clean1
+   echo             cleaning %cfastbasename% repository
    cd %cfastroot%
    git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
    git add . 1>> %OUTDIR%\stage0.txt 2>&1
    git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
-)
+:skip_clean1
 
 :: update cfast repository
 
-echo             updating %cfastbasename% repository
-cd %cfastroot%
-git fetch origin
-git pull  1>> %OUTDIR%\stage0.txt 2>&1
+if %update% == 0 goto skip_update1
+  echo             updating %cfastbasename% repository
+  cd %cfastroot%
+  git fetch origin
+  git pull  1>> %OUTDIR%\stage0.txt 2>&1
+:skip_update1
 
-:: revert FDS/Smokeview repository
+:: clean FDS/Smokeview repository
 
-cd %fdsroot%
-if "%fdsbasename%" == "FDS-SMVgitclean" (
-   echo             reverting %fdsbasename% repository
+if %clean% == 0 goto skip_clean2
+   echo             cleaning %fdsbasename% repository
    cd %fdsroot%
-   git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
+   git clean -dxf -e win32_local 1>> %OUTDIR%\stage0.txt 2>&1
    git add . 1>> %OUTDIR%\stage0.txt 2>&1
    git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
-)
+:skip_clean2
 
 :: update FDS/Smokeview repository
 
-echo             updating %fdsbasename% repository
-git fetch origin
-git pull 1>> %OUTDIR%\stage0.txt 2>&1
-:skip_update
-:: revert and update repos ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+if %update% == 0 goto skip_update2
+  cd %fdsroot%
+  echo             updating %fdsbasename% repository
+  git fetch origin
+  git pull 1>> %OUTDIR%\stage0.txt 2>&1
+:skip_update2
 
 cd %fdsroot%
 git describe --long --dirty > %revisionfilestring%
@@ -216,7 +222,7 @@ set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 echo             building cfast
 cd %cfastroot%\CFAST\intel_win_64
 erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
-make VPATH="../Source:../Include" INCLUDE="../Include" -f ..\makefile intel_win_64 1>> %OUTDIR%\stage0.txt 2>&1
+call make_cfast bot 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast7_win_64.exe %OUTDIR%\stage0.txt|| exit /b 1
 
 call :GET_DURATION PRELIM %PRELIM_beg%
@@ -233,7 +239,7 @@ echo             parallel debug
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\stage1b.txt 2>&1
+call make_fds bot ..\makefile mpi_intel_win_64_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64_db.exe %OUTDIR%\stage1b.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
@@ -242,7 +248,7 @@ echo             parallel release
 
 cd %fdsroot%\FDS_Compilation\mpi_intel_win_64
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
-make VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64  1>> %OUTDIR%\stage1d.txt 2>&1
+call make_fds bot  1>> %OUTDIR%\stage1d.txt 2>&1
 
 call :does_file_exist fds_mpi_win_64.exe %OUTDIR%\stage1d.txt|| exit /b 1
 call :find_fds_warnings "warning" %OUTDIR%\stage1d.txt "Stage 1d"
@@ -260,13 +266,13 @@ echo Stage 2 - Building Smokeview
 echo             libs
 
 cd %fdsroot%\SMV\Build\LIBS\lib_win_intel_64
-call makelibs2 1>> %OUTDIR%\stage2a.txt 2>&1
+call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod *.exe smokeview_win_64_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
-make -f ..\Makefile intel_win_64_db 1>> %OUTDIR%\stage2a.txt 2>&1
+call make_smv_db -r bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 call :does_file_exist smokeview_win_64_db.exe %OUTDIR%\stage2a.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
@@ -275,7 +281,7 @@ echo             release
 
 cd %fdsroot%\SMV\Build\intel_win_64
 erase *.obj *.mod smokeview_win_64.exe 1> %OUTDIR%\stage2b.txt 2>&1
-make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage2b.txt 2>&1
+call make_smv -r bot 1>> %OUTDIR%\stage2b.txt 2>&1
 
 call :does_file_exist smokeview_win_64.exe %OUTDIR%\stage2b.txt|| aexit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
@@ -294,27 +300,27 @@ call :does_file_exist fds2ascii_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
   echo             background
-  cd %fdsroot%\Utilities\background\intel_win_32
+  cd %fdsroot%\Utilities\background\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  make -f ..\Makefile intel_win_32 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_background bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist background.exe %OUTDIR%\stage3.txt
 
   echo             smokediff
   cd %fdsroot%\Utilities\smokediff\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_diff bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokediff_win_64.exe %OUTDIR%\stage3.txt
 
   echo             smokezip
   cd %fdsroot%\Utilities\smokezip\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_zip bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokezip_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 
   echo             wind2fds
   cd %fdsroot%\Utilities\wind2fds\intel_win_64
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  make -f ..\Makefile intel_win_64 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_wind bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win_64.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
   call :is_file_installed background|| exit /b 1

@@ -1,21 +1,10 @@
 #!/bin/bash
 
-size=64
-
-while getopts 'p:' OPTION
-do
-case $OPTION in
-  p)
-   size="$OPTARG"
-   ;;
-esac
-#shift
-done
-
-if [ "$size" != "32" ]; then
-  size=64
+size=_64
+IB=
+if [ "$FDSNETWORK" == "infiniband" ] ; then
+IB=ib
 fi
-size=_$size
 
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
@@ -25,18 +14,18 @@ else
 fi
 
 CURDIR=`pwd`
-export SVNROOT=`pwd`/..
-cd $SVNROOT
-export SVNROOT=`pwd`
+cd ..
+GITROOT=`pwd`
 cd $CURDIR
 
-export SMV=$SVNROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
-export RUNSMV="$SVNROOT/Utilities/Scripts/runsmv.sh"
-export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
-export MAKEMOVIE=$SVNROOT/Utilities/Scripts/make_movie.sh
-export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
-export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
-QFDS=$SVNROOT/Utilities/Scripts/bundle_setup/qfds.sh
+export SMV=$GITROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
+FDSEXE=$GITROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
+RUNSMV="$GITROOT/Utilities/Scripts/runsmv.sh"
+export SMVBINDIR="-bindir $GITROOT/SMV/for_bundle"
+MAKEMOVIE=$GITROOT/Utilities/Scripts/make_movie.sh
+STARTX=$GITROOT/Utilities/Scripts/startXserver.sh
+STOPX=$GITROOT/Utilities/Scripts/stopXserver.sh
+QFDS=$GITROOT/Utilities/Scripts/qfds.sh
 
 export BASEDIR=`pwd`
 
@@ -47,10 +36,10 @@ fi
 
 underscore=_
 mov=.m1v
-VDIR=$SVNROOT/Verification
-INDIR=$SVNROOT/Verification/Visualization/frames
-WUIINDIR=$SVNROOT/Verification/WUI/frames
-export OUTDIR=$SVNROOT/Manuals/SMV_Summary/movies
+VDIR=$GITROOT/Verification
+INDIR=$GITROOT/Verification/Visualization/frames
+WUIINDIR=$GITROOT/Verification/WUI/frames
+OUTDIR=$GITROOT/Manuals/SMV_Summary/movies
 
 rm -f $INDIR/*.png
 rm -f $WUIINDIR/*.png
@@ -67,7 +56,7 @@ MKMOVIE()
   cd $VDIR
 
 # generate movie frames
-  $RUNSMV -m $CASEDIR $BASEFILE
+  $RUNSMV -m -d $CASEDIR $BASEFILE
 
   cd $FRAMEDIR
 
@@ -83,10 +72,10 @@ source $STARTX
 # create version string
 
 cd $VDIR
-$QFDS -r -d Visualization -q terminal version2.fds
+$QFDS -e $FDSEXE -d Visualization -q terminal version2.fds
 
 cd $VDIR
-$RUNSMV -t Visualization version2
+$RUNSMV -t -d Visualization version2
 
 # The -m option assumes that a script
 # named casename_movies.ssf exists for each 
@@ -96,7 +85,7 @@ $RUNSMV -t Visualization version2
 cd $VDIR
 
 # generate movie frames
-$RUNSMV -m Visualization plume5c
+$RUNSMV -m -d Visualization plume5c
 
 cd $INDIR
 
@@ -124,7 +113,7 @@ $MAKEMOVIE -o $OUTDIR  -m plume5c_part plume5c_part  > /dev/null
 cd $VDIR
 
 # generate movie frames
-$RUNSMV -m Visualization thouse5
+$RUNSMV -m -d Visualization thouse5
 
 cd $INDIR
 

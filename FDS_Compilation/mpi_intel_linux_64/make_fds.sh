@@ -4,7 +4,8 @@ dir=`pwd`
 target=${dir##*/}
 
 source $IFORT_COMPILER/bin/compilervars.sh $platform
-source ../Scripts/set_mpidist.sh $MPIDIST
+source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
+
 if [ "$MPIDIST" == "" ]; then
   exit
 fi

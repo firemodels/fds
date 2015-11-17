@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Firebot variables
-FIREBOT_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
-FDS2FTMI_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi
+FIREBOT_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
+FDS2FTMI_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi
 OUTPUT_DIR=/home/jgs/FDS-SMV/Utilities/Structural_Interaction/fds2ftmi/scripts/output
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -21,12 +21,12 @@ cd $FDS2FTMI_DIR/examples/h_profile
 rm *.csv 
 
 # Get Git Hash
-GIT_HASH=$(shell git describe --long --dirty)
+GIT_HASH=$(shell git describe --long)
 echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide
 cd $FDS2FTMI_DIR
-sed -i "s:.*Git Hash.*:\\path{%GIT_HASH%}:" fds2ftmi_user_guide.tex
+sed -i "s:.*Git Hash.*:%GIT_HASH%:" fds2ftmi_user_guide.tex
 
 # Print the FDS revision number on python scripts
 cd $FIREBOT_DIR
@@ -35,7 +35,7 @@ sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -43,7 +43,7 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
       stage2a_success=true
@@ -67,7 +67,7 @@ check_compile_fds_db()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -75,7 +75,7 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
       stage4a_success=true
@@ -102,7 +102,7 @@ check_compile_fds()
 compile_fds2ftmi_db()
 {
    # Clean and compile FDS2ftmi debug
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage2a_ftmi
 }
@@ -110,7 +110,7 @@ compile_fds2ftmi_db()
 check_compile_fds2ftmi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
    if [ -e "fds2ftmi_linux_64_db" ]
    then
       stage2a_ftmi_success=true
@@ -136,7 +136,7 @@ check_compile_fds2ftmi_db()
 compile_fds2ftmi()
 {
    # Clean and compile FDS2ftmi debug
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
    make -f ../makefile clean &> /dev/null
    ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage4a_ftmi
 }
@@ -144,7 +144,7 @@ compile_fds2ftmi()
 check_compile_fds2ftmi()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
    if [ -e "fds2ftmi_linux_64" ]
    then
       stage4a_ftmi_success=true
@@ -171,7 +171,7 @@ check_compile_fds2ftmi()
 run_ansys_license_test()
 {
    # Run simple test to see if ansys license is available
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
    ansys150 -j lic_test <lic_test.ans> $OUTPUT_DIR/stage7_ansys_license
    rm lic_test.db
    rm lic_test.err

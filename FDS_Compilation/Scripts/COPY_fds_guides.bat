@@ -23,7 +23,7 @@ call %envfile%
 echo.
 echo ---downloading guides
 echo.
-set manualdir=/home2/smokevis2/firebot/FDS-SMV/Manuals
+set manualdir=/home2/smokevis2/firebot/FDS-SMVgitclean/Manuals
 set firelocaldir="%userprofile%"\FIRE-LOCAL\reports\fds_manuals
 
 pscp %svn_logon%:%manualdir%/FDS_User_Guide/FDS_User_Guide.pdf  %firelocaldir%\.
