@@ -4,8 +4,10 @@
 ::  (all command arguments are optional)
 
 set altemail=0
-set update=1
+set clean=0
+set update=0
 set stopscript=0
+set force=0
 
 set cfastrepo=%userprofile%\cfastgitclean
 if x%CFASTGIT% == x goto skip_cfastgit
@@ -62,9 +64,11 @@ if %fdsrepo% == none goto skip_fdsrepo2
   set fdsrepo=%temparg%
 :skip_fdsrepo2
 
-set running=%curdir%\bot.running
+set running=%curdir%\smokebot.running
 
+if "%force%" EQU "1" goto skip_runtest
 if exist %running% goto skip_running
+:skip_runtest
 
 :: get latest smokebot
 
@@ -82,13 +86,14 @@ if exist %running% goto skip_running
 :: run smokebot
 
   echo 1 > %running%
-  call smokebot_win.bat %cfastrepo% %fdsrepo% %update% %altemail% %emailto%
-  erase %running%
+  call smokebot_win.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
+  if exist %running% erase %running%
   goto end_running
 :skip_running
   echo ***Error: smokebot is currently running.
   echo If this is not the case, erase the file:
   echo %running%
+  echo or use the -force option
 :end_running
 
 goto eof
@@ -97,13 +102,26 @@ goto eof
  if (%1)==() exit /b
  set valid=0
  set arg=%1
- if /I "%1" EQU "-help" (
-   call :usage
-   set stopscript=1
-   exit /b
+ if /I "%1" EQU "-altemail" (
+   set valid=1
+   set altemail=1
+ )
+ if /I "%1" EQU "-bot" (
+   set valid=1
+   set clean=1
+   set update=1
  )
  if /I "%1" EQU "-cfastrepo" (
    set cfastrepo=%2
+   set valid=1
+   shift
+ )
+ if /I "%1" EQU "-clean" (
+   set valid=1
+   set clean=1
+ )
+ if /I "%1" EQU "-email" (
+   set emailto=%2
    set valid=1
    shift
  )
@@ -112,18 +130,18 @@ goto eof
    set valid=1
    shift
  )
- if /I "%1" EQU "-email" (
-   set emailto=%2
+ if /I "%1" EQU "-force" (
    set valid=1
-   shift
+   set force=1
  )
- if /I "%1" EQU "-altemail" (
-   set valid=1
-   set altemail=1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
  )
- if /I "%1" EQU "-noupdate" (
+ if /I "%1" EQU "-update" (
    set valid=1
-   set update=0
+   set update=1
  )
  shift
  if %valid% == 0 (
@@ -146,12 +164,14 @@ echo -cfastrepo name - specify the cfast repository
 echo       (default: %cfastrepo%) 
 echo -fdsrepo name   - specify the FDS-SMV repository
 echo       (default: %fdsrepo%) 
-echo -altemail        - use an alternate email server
+echo -altemail       - use an alternate email server
 echo -email address  - override "to" email addresses specified in repo 
 if "%emailto%" NEQ "" (
 echo       (default: %emailto%^)
 )
-echo -noupdate       - do not update repository
+echo -bot            - clean and update repository
+echo -clean          - clean repository
+echo -update         - update repository
 exit /b
 
 :normalise

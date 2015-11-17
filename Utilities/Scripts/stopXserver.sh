@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo shutting down graphics environment
 sleep 8
 if [ "`uname`" == "Darwin" ]; then

@@ -114,9 +114,6 @@ scp -q $fdshost\:$wind2fdsroot/$wind2fdsdir/$wind2fds $bundledir/bin/$wind2fdsou
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
-echo copying fds_openmp.sh from $forbundle
-cp $forbundle/fds_openmp.sh $bundledir/bin/.
-
 if ($PLATFORM == "LINUX64") then
    set ostype=LINUX
 endif

@@ -133,6 +133,7 @@ for i=2:n_plots
     
     if itest && (dtest || otest)
 
+        close all
         figure
         
         define_drow_variables
