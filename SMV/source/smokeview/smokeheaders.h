@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
 EXTERNCPP int HaveFire(void);
 EXTERNCPP void update_object_used(void);
 EXTERNCPP void UpdateColorTableList(int ncolortableinfo_old);
@@ -26,7 +27,7 @@ EXTERNCPP void update_device_size(void);
 EXTERNCPP void update_Display(void);
 EXTERNCPP void update_ShowScene(void);
 EXTERNCPP void update_gvec_down(int gvec_down_local);
-EXTERNCPP void drawaxis(void);
+EXTERNCPP void DrawGravityAxis(void);
 EXTERNCPP void xyz2azelev(float *xyz,float *azimuth, float *elevation);
 EXTERNCPP void get_geom_dialog_state(void);
 EXTERNCPP void update_device_orientation(void);
@@ -214,6 +215,7 @@ EXTERNCPP void setup_device_data(void);
 EXTERNCPP void read_device_header(char *file, devicedata *devices, int ndevices);
 EXTERNCPP void parse_device_keyword(FILE *stream, devicedata *devicei);
 EXTERNCPP void draw_geom(int flag,int frameflag);
+EXTERNCPP void draw_geomdiag(void);
 EXTERNCPP void getzonesizecsv(int *nzone_times, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
 EXTERNCPP void getzoneventbounds(void);
 EXTERNCPP void remove_dup_blockages(void);

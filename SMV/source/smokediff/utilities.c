@@ -32,14 +32,14 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
 
 void version(void){
     char smv_version[100];
-    char revision[100];
+    char githash[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     PRINTF("\n");
     PRINTF("Smokediff\n\n");
     PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",revision);
+    PRINTF("Build: %s\n",githash);
     PRINTF("Compile Date: %s\n",__DATE__);
 #ifdef X64
     PRINTF("Platform: WIN64\n");

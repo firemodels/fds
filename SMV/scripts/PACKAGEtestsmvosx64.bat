@@ -27,15 +27,15 @@ set gupload=%CD%
 cd %svn_root%\smv\scripts
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle/uploads
+set bundledir=FDS-SMV/SMV/uploads
 
 echo making OSX test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname%
 
 echo downloading OSX test distribution archive
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\for_bundle\uploads\.
+pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\uploads\.
 
-echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.sh to %gupload%
-copy ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.sh "%gupload%"
+echo copying ..\uploads\smv_test_%smv_revision%_osx64.sh to %gupload%
+copy ..\uploads\smv_test_%smv_revision%_osx64.sh "%gupload%"
 
 pause

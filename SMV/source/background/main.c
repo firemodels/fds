@@ -295,14 +295,14 @@ int main(int argc, char **argv){
 
 void usage(char *prog){
   char prog_version[100];
-  char revision[100];
+  char githash[100];
   char pp[] = "%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getRevision(revision);    // get revision
+  getGitHash(githash);    // get githash
 
   printf("\n");
-  printf("background %s(%s) - %s\n",prog_version,revision,__DATE__);
+  printf("background %s(%s) - %s\n",prog_version,githash,__DATE__);
   printf("  Runs a program in the background when resources are available\n\nUsage:\n\n");
   printf("  %s",prog);
   printf(" [-d delay time (s) -h -u max_usage -v] prog [arguments]\n\n");
@@ -634,13 +634,13 @@ unsigned char cpuusage(){
 
 void version(void){
     char smv_version[100];
-    char revision[100];
+    char githash[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
+    getGitHash(githash);    // get githash
     printf("\n");
     printf("background\n\n");
     printf("Version: %s\n",smv_version);
-    printf("Build: %s\n",revision);
+    printf("Build: %s\n",githash);
     printf("Compile Date: %s\n",__DATE__);
 }

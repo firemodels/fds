@@ -724,7 +724,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       colorbartype=cb-colorbarinfo;
       set_colorbar_list_index(colorbartype);
       Slice_CB(COLORBAR_LIST2);
-      current_colorbar=cb;
+      UpdateCurrentColorbar(cb);
     }
   }
   PRINTF("completed\n");
@@ -1428,7 +1428,7 @@ void updateslicebounds(void){
     for(jj=0;jj<nslice_loaded;jj++){
       j = slice_loaded_list[jj];
       if(sliceinfo[j].type!=i)continue;
-      if(ini_fed==0&&sliceinfo[j].is_fed==1){
+      if(is_fed_colorbar==1&&sliceinfo[j].is_fed==1){
         slicebounds[i].setvalmin=SET_MIN;
         slicebounds[i].valmin=0.0;
       }
@@ -1452,7 +1452,7 @@ void updateslicebounds(void){
     for(jj=0;jj<nslice_loaded;jj++){
       j = slice_loaded_list[jj];
       if(sliceinfo[j].type!=i)continue;
-      if(ini_fed==0&&sliceinfo[j].is_fed==1){
+      if(is_fed_colorbar==1&&sliceinfo[j].is_fed==1){
         slicebounds[i].setvalmax=SET_MAX;
         slicebounds[i].valmax=3.0;
       }

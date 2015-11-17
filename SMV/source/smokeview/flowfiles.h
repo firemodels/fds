@@ -95,6 +95,13 @@ typedef struct {
   geomobjdata *geomobjinfo;
 } geomdata;
 
+/* --------------------------  geomdiagdata ------------------------------------ */
+
+typedef struct {
+  char *geomfile, *geomdatafile;
+  geomdata *geom;
+} geomdiagdata;
+
 /* --------------------------  bounddata ------------------------------------ */
 
 typedef struct {

@@ -192,27 +192,14 @@ Christopher Wood                        & FireLink, LLC, Tewksbury, Massachusett
 
 \chapter{Introduction}
 
-The software described in this document, Fire Dynamics Simulator (FDS), is a computational
-fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the
-Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow
-with an emphasis on smoke and heat transport from fires.
-The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
-Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
+The software described in this document, Fire Dynamics Simulator (FDS), is a computational fluid dynamics (CFD) model of fire-driven fluid flow. FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed (Ma < 0.3), thermally-driven flow with an emphasis on smoke and heat transport from fires. The formulation of the equations and the numerical algorithm are contained in the FDS Technical Reference Guide~\cite{FDS_Math_Guide}. Verification and Validation of the model are discussed in the FDS Verification~\cite{FDS_Verification_Guide} and Validation~\cite{FDS_Validation_Guide} Guides.
 
-Smokeview is a separate visualization program that is used to display the
-results of an FDS simulation.
-A detailed description of Smokeview is found in
-a separate User's Guide~\cite{Smokeview_Users_Guide}.
+Smokeview is a separate visualization program that is used to display the results of an FDS simulation. A detailed description of Smokeview is found in a separate User's Guide~\cite{Smokeview_Users_Guide}.
 
 
 \section{Features of FDS}
 
-The first version of FDS was publicly released in February 2000.
-To date, about half of the applications of the model have been for design of smoke
-handling systems and sprinkler/detector activation studies. The other half consist of
-residential and industrial fire reconstructions. Throughout its development, FDS has
-been aimed at solving practical fire problems in fire protection engineering, while
-at the same time providing a tool to study fundamental fire dynamics and combustion.
+The first version of FDS was publicly released in February 2000. To date, about half of the applications of the model have been for design of smoke handling systems and sprinkler/detector activation studies. The other half consist of residential and industrial fire reconstructions. Throughout its development, FDS has been aimed at solving practical fire problems in fire protection engineering, while at the same time providing a tool to study fundamental fire dynamics and combustion.
 
 \begin{description}
 \item[Hydrodynamic Model] FDS solves numerically a form of the Navier-Stokes equations appropriate for low-speed, thermally-driven flow with an emphasis on smoke and heat transport from fires. The core algorithm is an explicit predictor-corrector scheme, second order accurate in space and time. Turbulence is treated by means of Large Eddy Simulation (LES). It is possible to perform a Direct Numerical Simulation (DNS) if the underlying numerical mesh is fine enough. LES is the default mode of operation.
@@ -229,9 +216,7 @@ at the same time providing a tool to study fundamental fire dynamics and combust
 
 Many of the changes in FDS~6 are improvements to the various sub-models that do not affect the basic structure or parameters of the input file. Most of the changes listed below do not require additional input parameters beyond those used in FDS~5.
 
-\vspace{\baselineskip}
-
-\noindent {\bf Hydrodynamics and Turbulence}
+\subsubsection{Hydrodynamics and Turbulence}
 
    \begin{itemize}
    \item Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.
@@ -242,7 +227,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
    \item Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents.
    \end{itemize}
 
-\noindent {\bf Species and Combustion}
+\subsubsection{Species and Combustion}
 
     \begin{itemize}
     \item Custom species mixtures (``lumped species'') can be defined with the input group SPEC.
@@ -252,7 +237,7 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
     \item There are an increased number of predefined species that now include liquid properties.
     \end{itemize}
 
-\noindent {\bf Lagrangian Particles}
+\subsubsection{Lagrangian Particles}
 
     \begin{itemize}
     \item The functionality of Lagrangian particles has expanded to include the same heat transfer and pyrolysis models that apply to solid walls. In other words, you can now assign a set of surface properties to planar, cylindrical, or spherical particles much like you would for a solid surface.
@@ -261,41 +246,41 @@ Many of the changes in FDS~6 are improvements to the various sub-models that do 
     \item Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles.
     \end{itemize}
 
-\noindent {\bf Solid Phase Heat Transfer and Pyrolysis}
+\subsubsection{Solid Phase Heat Transfer and Pyrolysis}
 
     \begin{itemize}
     \item The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.
     \item The pyrolysis model allows for the surface to shrink or swell, based on the specified material densities.
     \end{itemize}
 
-\noindent {\bf HVAC}
+\subsubsection{HVAC}
 
    \begin{itemize}
     \item Filters, louvered vents, and heating/cooling capability has been added for HVAC systems.
     \item HVAC is now functional with MPI.
     \end{itemize}
 
-\noindent {\bf Radiation}
+\subsubsection{Radiation}
 
     \begin{itemize}
     \item RadCal database has been extended to include additional fuel species.
     \item In cells with heat release, the emission term is based on a corrected $\sigma \, T^4$ such that when this term is integrated over the flame volume the specified radiative fraction (default 0.35) is recovered. This differs from FDS~5 and earlier where the radiative fraction times the heat release rate was applied locally as the emission term.
     \end{itemize}
 
-\noindent {\bf Multi-Mesh Computations}
+\subsubsection{Multi-Mesh Computations}
 
     \begin{itemize}
     \item By default, FDS now iterates pressure and velocity at mesh and solid boundaries. You can control the error tolerance and maximum number of iterations via parameters on the {\ct PRES} line.
     \end{itemize}
 
-\noindent {\bf Control Functions}
+\subsubsection{Control Functions}
 
     \begin{itemize}
     \item {\ct CTRL} functions have been extended to include math operations.
     \item The evaluation of {\ct RAMP}s and {\ct DEVC}s can be stopped, freezing their value, based upon the activation of a device or control function.
     \end{itemize}
 
-\noindent {\bf Devices and Output}
+\subsubsection{Devices and Output}
 
     \begin{itemize}
     \item Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads.
@@ -320,8 +305,7 @@ in FDS 6 are:
 \item The output quantity {\ct 'MIXTURE\_FRACTION'} has been replaced with {\ct 'MIXTURE FRACTION'} and is only usable if there is a single {\ct REAC} input of the form ${\rm A} \; + \; {\rm B} \rightarrow {\rm C}$ and {\ct INITIAL\_UNMIXED\_FRACTION=0}.
 \item There is no longer a {\ct STATE\_FILE} because there is no longer a simple mixture fraction model.
 \item {\ct PRESSURE\_CORRECTION} has been eliminated. See Section~\ref{info:PRES} for ways to improve the performance of the pressure solver.
-\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with
-{\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
+\item Species mass and volume fraction outputs are no longer invoked using {\ct QUANTITY='species name'}. Use {\ct QUANTITY='MASS FRACTION'} or {\ct QUANTITY='VOLUME FRACTION'} along with {\ct SPEC\_ID} instead.  Also note that all predefined species (Table~\ref{tab:gasspecies}) are now referenced with all uppercase letters.
 \item The output quantity {\ct 'SOOT VOLUME FRACTION'} is now {\ct 'AEROSOL VOLUME FRACTION'} along with {\ct SPEC\_ID} to identify the name of the species.
 \end{itemize}
 
@@ -433,8 +417,13 @@ This guide describes how to obtain FDS and Smokeview and how to use FDS. A separ
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
 
-Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: \\
-\href{http://www.nist.gov/el/fire\_research/fds\_smokeview.cfm}{{\ct http://www.nist.gov/el/fire\_research/fds\_smokeview.cfm}} \\
+Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: 
+
+\begin{center}
+\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}} 
+\end{center}
+
+\noindent
 The typical FDS/Smokeview distribution consists of an installation package or compressed archive, which is available for MS Windows, Mac~OS~X, and Linux.
 
 If you ever want to keep an older version of FDS and Smokeview, copy the installation directory to some other place so that it is not overwritten during the updated installation.
@@ -442,7 +431,7 @@ If you ever want to keep an older version of FDS and Smokeview, copy the install
 
 \section{Computer Hardware Requirements}
 
-FDS requires a fast CPU\footnote{Central Processing Unit} and a substantial amount of random-access memory (RAM) to run efficiently. The system should have a fast CPU, and at least 2~GB RAM. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
+The only hard requirement to run the compiled versions of FDS and Smokeview is a 64~bit Windows, Linux, or Mac OS X operating system. The single computer or compute cluster ought to have fast processors (CPUs), and at least 4~GB RAM per processor. The CPU speed will determine how long the computation will take to finish, while the amount of RAM will determine how many mesh cells can be held in memory. A large hard drive is required to store the output of the calculations. It is not unusual for the output of a single calculation to consume more than 1~GB of storage space.
 
 Most computers purchased within the past few years are adequate for running Smokeview with the caveat that additional memory (RAM) should be purchased to bring the memory size up to at least 2~GB. This is so the computer can display results without ``swapping'' to disk. For Smokeview it is also important to obtain a fast graphics card for the PC used to display the results of the FDS computations.
 
@@ -494,7 +483,7 @@ To confirm the speedup for the OpenMP version of the code, a series of test case
 
 \begin{figure}[ht!]
 \centering
-\includegraphics[width=4.0in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
 \caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 processors, and each processor has 4 cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
@@ -569,9 +558,18 @@ There are different implementations of MPI, much like there are different Fortra
 The files needed to run an MPI calculation across a Windows domain network are bundled in with the FDS download. There is no need to install Intel MPI or its redistributable libraries. The following procedure is intended for a Windows domain network; that is, a network where user accounts are centrally managed such that any user can log in to any machine using the same credentials.
 
 To run the MPI version of FDS, you need to have administrator privileges on the machine that launches the job, but not necessarily on the machines that run the job. We have designed the FDS installation script to set up the necessary firewall exceptions and system environment variables automatically so that you need only install FDS as you normally would to make this work. You do not have to download and install the MPI software separately. Everything you need is in the FDS installation package.
-\begin{enumerate}
-\item Install the FDS-SMV package on all of the machines you plan to use. The new version of FDS will overwrite all existing versions unless they are moved or renamed.
 
+First, uninstall the FDS-SMV package on all of the machines you plan to use. The new version will overwrite all existing versions unless they are moved or renamed.
+
+If you wish to run FDS on more than one core on a single machine, then type the following command:
+\begin{lstlisting}
+mpiexec -n 4 fds job_name.fds
+\end{lstlisting}
+where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine 
+
+If you wish to run FDS on more than one machine, the following steps should be taken:
+
+\begin{enumerate}
 \item Open up a command prompt by right-clicking on the command prompt icon and choosing ``Run as administrator''. Type the following command:
 
     {\ct mpiexec -hosts 2 <my\_machine> 1 <other\_machine> 1 test\_mpi}
@@ -624,30 +622,45 @@ mpiexec -hosts 2 m1 1 m2 1 -wdir \\...\... -env OMP_NUM_THREADS 4 fds job\_name.
 \end{lstlisting}
 The use of OpenMP in this instance will probably speed the calculation by a factor of 2, but now you will be using 8 cores rather than 2. It might be better to divide the computational domain into 8 meshes and simply use MPI to process them. This all depends on your particular OS, hardware, network traffic, and so on. You should choose a good test case and try different meshing and parallel processing strategies to see what is best for you.
 
+\subsection{Efficiency of an MPI Calculation}
+
+At the end of a calculation, FDS prints out a file called {\ct CHID\_cpu.csv} that records the amount of CPU time that each MPI process spends in the major routines. For example, the column header {\ct VELO} stands for all the subroutines related to computing the flow velocity; {\ct MASS} stands for all the subroutines related to computing the species mass fractions and density. The column header {\ct MAIN} represents all of the CPU time that is not explicitly accounted for; that is, time spend in the main control loop. Ideally, this ought to be a few percent of the overall CPU time usage.
+
+There are two basic approaches to assessing the efficiency or scalability of an MPI (parallel) computation. The first is known as ``weak scaling,'' in which the amount of work done by each MPI process stays the same and additional processes are added to solve a larger problem. For example, if you are simulating the flow of air over a patch of terrain, and you keep adding more and more meshes of the same physical and numerical dimension, assigning each new mesh to its own MPI process, so as to simulate a larger and larger patch of terrain, then you would expect that the overall time of the simulation would not increase significantly with each additional mesh. The efficiency of such a calculation is given by the following expression:
+\be
+   E_{\rm w} = \frac{t_1}{t_N}
+\ee
+where $t_1$ is the CPU time for the case with 1 mesh (MPI process), and $t_N$ is the CPU time for the case with $N$ meshes (MPI processes). The left hand plot of Fig.~\ref{fig:scaling_tests} shows the results of a weak scaling study of FDS. Meshes with dimension 50 by 50 by 50 are lined up side by side, ranging from 1 to 288 meshes. Ideally, the CPU time ought to be about the same for all cases, because each MPI process is doing the same amount of work. Only mesh to mesh communication should lead to inefficiencies. However, notice in the figure that the efficiency of the 1, 2, 4, and 8 mesh cases is greater than those with more MPI processes. The reason for this is that on most compute clusters, each node has multiple cores, and typically jobs run faster when a node is less than completely full. These test cases were run at NIST, where there is a compute cluster with 8 cores per node, and one with 12 cores per node.
+
+The second way to assess MPI efficiency is known as ``strong scaling.'' Here, you simulate a given scenario on a single mesh, and then you divide the mesh so that the cell size and the overall number of cells does not change. Ideally, if you divide a given mesh into two and run the case with two MPI processes instead of one, you would expect your computation time to decrease by a factor of two. But as you increase the number of MPI processes, you increase the amount of communication required among the processes. You also increase the overall number of boundary cells to compute, even though the overall number of gas phase cells remains the same. The efficiency of such a set of calculations is given by:
+\be
+   E_{\rm s} =  \frac{t_1}{N \; t_N}
+\ee
+In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 80 is divided into a range of smaller meshes, with the smallest partitioning being 288 meshes of dimension 20 by 20 by 20. The resulting decrease in the CPU time of the entire calculation and the major subroutines is shown in the right hand plot of Fig.~\ref{fig:scaling_tests}. Ideally, the CPU time should be inversely proportional to the number of meshes (MPI processes); that is, the relative CPU times ought to follow the black dotted lines. The one notable exception to this rule is for ``COMM'' or COMMunications. This curve represents the time spent in communicating information across the network.
+\begin{figure}[!ht]
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/weak_scaling_test}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/strong_scaling_test}
+\caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
+\label{fig:scaling_tests}
+\end{figure}
+
 
 \section{Monitoring Progress}
+\label{info:monitoring_progress}
 
-Diagnostics for a given calculation are written into a file called {\ct CHID.out}.
-The CPU usage and simulation time are written here, so you can see how
-far along the program has progressed. At any time during a calculation,
-Smokeview can be run and the progress can be checked visually.
-To stop a calculation before its scheduled time, either
-kill the process, or preferably create a file in the same directory as
-the output files called {\ct CHID.stop}. The existence of this
-file stops the program gracefully, causing it to dump out the
-latest flow variables for viewing in Smokeview.
+Diagnostics for a given calculation are written into a file called {\ct CHID.out}. The current simulation time and time step is written here, so you can see how far along the program has progressed. At any time during a calculation, Smokeview can be run and the progress can be checked visually.
 
-Since calculations can be hours or days long, there is a restart
-feature in FDS. Details of how to use this feature
-are given in Section~\ref{info:restart}. Briefly, specify at the
-beginning of calculation how often a ``restart'' file should be saved.
-Should something happen to disrupt the calculation, like a power
-outage, the calculation can be restarted from the time the last restart
-file was saved.
+By default, the diagnostics in the {\ct CHID.out} file are verbose.  When running large MPI jobs it may be advantageous to quiet this output, which is all written by MPI process 0.  To do this, add
+\begin{lstlisting}
+&DUMP SUPPRESS_DIAGNOSTICS=.TRUE. /
+\end{lstlisting}
+Be aware the output file will not monitor mesh boundary velocity errors in this case; it will echo only the simulation time and time step.  You could still output a {\ct BNDF} of {\ct QUANTITY='VELOCITY\_ERROR'}, if necessary.
 
-It is also possible to control the stop time and the dumping of restart files by using
-control functions as described in Section~\ref{info:CTRL}.
+To stop a calculation before its scheduled time, either kill the process, or preferably create a file in the same directory as the output files called {\ct CHID.stop}. The existence of this file stops the program gracefully, causing it to dump out the latest flow variables for viewing in Smokeview.
 
+Since calculations can be hours or days long, there is a restart feature in FDS. Details of how to use this feature are given in Section~\ref{info:restart}. Briefly, specify at the beginning of calculation how often a ``restart'' file should be saved. Should something happen to disrupt the calculation, like a power outage, the calculation can be restarted from the time the last restart file was saved.
+
+It is also possible to control the stop time and the dumping of restart files by using control functions as described in Section~\ref{info:CTRL}.
 
 
 
@@ -1115,10 +1128,6 @@ The following rules of thumb should also be followed when setting up a multiple 
 Experiment with different mesh configurations using relatively coarse mesh cells to ensure that information is being transferred properly from mesh to mesh. There are two issues of concern. First, does it appear that the flow is being badly affected by the mesh boundary? If so, try to move the mesh boundaries away from areas of activity. Second, is there too much of a jump in cell size from one mesh to another? If so, consider whether the loss of information moving from a fine to a coarse mesh is tolerable.
 
 
-\subsubsection{Efficiency of an MPI Calculation}
-
-When running a case with multiple meshes using MPI, the efficiency of the calculation can be checked as follows: (1) Let the program run several hundred time steps, (2) Calculate the difference in wall clock time between two 100 iteration print outs in the file {\ct CHID.out} (see Section~\ref{out:file}). Divide the time difference by 100. This is the average elapsed wall clock time per time step, (3) Look at the {\ct CPU/step} for each mesh. The largest value should be less than, but close to, the average elapsed wall clock time. The efficiency of the MPI calculation is the maximum {\ct CPU/step} divided by the average wall clock time per step. If this number is between 90~\% and 100~\%, the MPI code is working well.
-
 
 
 \subsection{Mesh Stretching: The \texorpdfstring{{\tt TRNX}}{TRNX}, \texorpdfstring{{\tt TRNY}}{TRNY} and \texorpdfstring{{\tt TRNZ}}{TRNZ} Namelist Groups (Table \ref{tbl:TRNX})}
@@ -1247,9 +1256,9 @@ calculation. It is better to assess the quality of the mesh in terms
 of this non-dimensional parameter, rather than an absolute mesh cell size.
 For example, a cell size of 10~cm may be ``adequate,'' in some sense,
 for evaluating the spread of smoke and heat through a building from a
-sizable fire, but may not be appropriate to study a very small, smoldering source\footnote{For the validation study sponsored by the
-U.S. Nuclear Regulatory Commission~\cite{NUREG_1824_Sup_1}, the $D^*/\dx$ values ranged from 4 to 16.}.
+sizable fire, but may not be appropriate to study a very small, smoldering source.
 
+The FDS Validation Guide~\cite{FDS_Validation_Guide} contains a table of the values of $D^*/\dx$ used in the simulation of the validation experiments. The table is near the end of the chapter that describes all the experiments. These values range over two orders of magnitude and were chosen based on a grid resolution study and the particular attributes of the given fire scenario. It would be inappropriate to take any of these values as an ``acceptable'' minimum.
 
 There are a number of special output quantities that provide local measures of grid resolution. See Section~\ref{info:meshquality} for details.
 
@@ -2274,7 +2283,7 @@ MATL\_ID}.  For example, the input file entries:
 \end{lstlisting}
 
 \noindent
-define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
+define a brick wall that is 4.9~m long, 1~m high, and 20~cm thick. Note that the thickness of the wall indicated by the {\ct OBST} line is independent of the {\ct THICKNESS} specified by the {\ct SURF} line.  The {\ct OBST} line defines the geometry of the obstruction (i.e., how the obstruction is seen by the flow solver).  The {\ct SURF} line defines the heat transfer characteristics of the obstruction (i.e., how the obstruction is seen by the 1D solid phase solver).  This allows an obstruction to snap to the local grid but still have the heat transfer solution reflect the actual thickness.
 
 \clearpage
 
@@ -2548,7 +2557,7 @@ properties (via the {\ct MATL\_ID} keyword).
 \subsection{Walls with Different Materials Front and Back}
 \label{info:EXPOSED}
 
-If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
+If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i.e., the obstruction is not at the edge of the domain) and you apply the attribute {\ct BACKING='EXPOSED'}, then FDS calculates the heat conduction through the entire {\ct THICKNESS}, and it uses the gas phase temperature and heat flux on the front and back sides for boundary conditions. A redundant calculation is performed on the opposite side of the obstruction.  FDS always applies a {\ct SURF} to an obstruction by having the first layer be the exposed surface of the face and the last layer as the opposite face.  Take for example the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be the last {\ct MATERIAL A}.  On the +x side the {\ct SURF} will be applied in the same manner.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='SYMMETRIC'/
@@ -2559,7 +2568,7 @@ If you have an {\ct OBST} that is one cell thick with gas cells on both sides (i
       THICKNESS(1:3)     = 0.1,0.2,0.1 /
 \end{lstlisting}
 
-For example, take the {\ct SURF} definition below and assume the the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
+For example, take the {\ct SURF} definition below and assume that the grid spacing is 10 cm.  On the -x side of the {\ct OBST}, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  On the +x side, the {\ct SURF} will be applied in the same manner, layer 1 will be {\ct MATERIAL A}, layer 2 will be {\ct MATERIAL B}, and layer 3 will be {\ct MATERIAL C}.  This means that both sides of the {\ct OBST} will compute heat transfer assuming {\ct MATERIAL A} is the first layer.
 
 \begin{lstlisting}
 &OBST XB=0.1,0.2,...., SURF_ID='NON-SYMMETRIC'/
@@ -3540,6 +3549,7 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.  
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
@@ -3561,7 +3571,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 
 
 \begin{description}
-\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, {\ct FAN}, {\ct FILTER}, or {\ct AIRCOIL}.
+\item[{\ct TYPE\_ID}] is a character string that indicates the type of component that the namelist group is defining.   {\ct TYPE\_ID} can be {\ct DUCT}, {\ct NODE}, {\ct FAN}, {\ct FILTER}, {\ct AIRCOIL}, or {\ct LEAK} (see ~Section~\ref{info:local_leakage}).
 \item[{\ct ID}] is a character string giving a name to the component.  The name must be unique amongst all other components of that type; however, the same name can be given to components of different types (i.e., a duct and a node can have the same name but two ducts cannot).
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
@@ -3969,7 +3979,7 @@ FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be in
 \subsubsection{Localized Leakage}
 \label{info:local_leakage}
 
-The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for each {\ct VENT} is not {\ct 'HVAC'}.
+The local leakage approach is intended to represent leakage through a specific crack. For example, a cracked open door might have a opening that is too small to resolve with the grid.  One would; however, still want to capture the fact that hot gases could escape the top of the crack and cold gases enter the bottom. The local leakage approach uses the local pressure rather than just the zone pressure. Therefore, one can define multiple leakage paths for different windows, over the height of a door, or over the height of a tall stairwell where stack effect might be important. To use this approach two {\ct VENT} inputs are linked via an {\ct HVAC} input with {\ct TYPE\_ID='LEAK'}. In the example below a 0.001 m$^2$ leakage path is created between the {\ct VENT} with {\ct ID='VENT 1'} and the {\ct VENT} with {\ct ID='VENT 2'}. Note that the {\ct SURF\_ID} for a {\ct VENT} with localized leakage is not {\ct 'HVAC'}. The input must correspond to a {\ct SURF} input. Wall heat transfer will computed based upon the inputs on the referenced {\ct SURF} input.
 \begin{lstlisting}
 &VENT XB=...,SURF_ID='SURF 1',ID='VENT 1'/
 &VENT XB=...,SURF_ID='SURF 2',ID='VENT 2'/
@@ -3987,7 +3997,7 @@ Note, for this approach it is not required that one have pressure zones defined;
 
 This example involves a small compartment that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.
 A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.
-Eventually the the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.
+Eventually the pressure rise inside the compartment exceeds the maximum pressure of the fan, at which point the compartment begins to exhaust from both the fan and the leakage.
 Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.
 
 \begin{figure}[ht]
@@ -4478,7 +4488,7 @@ If no inputs for enthalpy are provided, then the specific heat of the gas will b
 \ee
 The ratio of specific heats, {\ct GAMMA}, is 1.4 by default and can be changed on the {\ct MISC} line. If you want all the gas specific heats to follow this relation, set {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO=.TRUE.} on the {\ct MISC} line (note: this option also requires {\ct STRATIFICATION=.FALSE.}).  In this case the {\ct REFERENCE\_ENTHALPY} will be assumed to be 0 kJ/kg at a {\ct REFERENCE\_TEMPERATURE} of 0 K.
 
-The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}. 
+The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\_FORMATION} on the {\ct SPEC} line with a reference temperature for all species given by {\ct H\_F\_REFERENCE\_TEMPERATURE} on the {\ct MISC} line (default is 25~$^\circ$C). Note that {\ct ENTHALPY\_OF\_FORMATION} will override any value given for {\ct REFERENCE\_ENTHALPY}.
 
 \subsubsection{Viscosity}
 
@@ -4710,7 +4720,7 @@ See Section~\ref{info:heat_of_combustion} for more details on the heat of combus
       FORMULA            = 'C3H8O3N4'
       HEAT_OF_COMBUSTION = 46124. /
 \end{lstlisting}
-In this case, the fuel is not predefined.  Therefore, either the the {\ct FORMULA} or the atom counts must be defined.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
+In this case, the fuel is not predefined.  Therefore, either the {\ct FORMULA} or the atom counts must be defined.  This input defined the {\ct FORMULA}. In this case, the heat of combustion is known and specified; however, if it weren't FDS would compute it using {\ct EPUMO2} and the fuel chemistry. Note that simple chemistry can also be used for cases where the fuel is a lumped species so long as the defining primitive species contain only C, H, N, and O atoms. An example can be found in Section \ref{info:Complex_Fuel}.
 
 When simple chemistry is being used, FDS will automatically create three lumped species: {\ct AIR}, {\ct FUEL}, and {\ct PRODUCTS}.  The actual name of the fuel species will be the name given on the {\ct REAC} line (for example {\ct MY FUEL} in the last sample above). FDS creates these lumped species in the same manner as you would in an input file.  FDS first defines the primitive species and then defines the lumped species. In essence FDS internally creates input lines like those shown in Example 2 of Section~\ref{info:lumped}. This means when doing simple chemistry, that even though you did not explicitly define oxygen in the input file, you can request an output for oxygen since it was implicitly defined by FDS.
 
@@ -5190,7 +5200,7 @@ A diagnostic tool for the time integration of chemical reactions is the number o
 \section{Special Topic: Aerosol Deposition}
 \label{info:deposition}
 
-It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, {\ct TURBULENT\_DEPOSITION}, and {\ct GRAVITATIONAL\_SETTLING} on the {\ct MISC} line. The {\ct GRAVITATIONAL\_SETTLING} parameter involves the downward movement of aerosols in the gas phase whereas well as the {\ct GRAVITATIONAL\_DEPOSITION} parameter is for the deposition of aerosols to upward-facing surfaces due to gravity.  The deposition velocity at the wall can be outputted using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}.
+It is possible within FDS to model the deposition of smoke and aerosols onto solid surfaces. The aerosol deposition model is invoked by defining a species with the parameter {\ct AEROSOL=.TRUE.} on the {\ct SPEC} line along with the parameters {\ct DENSITY\_SOLID}, {\ct CONDUCTIVITY\_SOLID}, and {\ct MEAN\_DIAMETER}. By default, with {\ct AEROSOL=.TRUE.}, FDS will compute all of the aerosol deposition mechanisms discussed in the Technical Reference Guide~\cite{FDS_Math_Guide}. For diagnostic purposes, each deposition mechanism can be selectively disabled by using the logical parameters {\ct GRAVITATIONAL\_DEPOSITION}, {\ct THERMOPHORETIC\_DEPOSITION}, {\ct TURBULENT\_DEPOSITION}, and {\ct GRAVITATIONAL\_SETTLING} on the {\ct MISC} line. {\ct GRAVITATIONAL\_SETTLING} controls the downward movement of aerosols in the gas phase, whereas {\ct GRAVITATIONAL\_DEPOSITION} controls the deposition of aerosols onto upward-facing surfaces due to gravity.  The deposition velocity at the wall can be output using {\ct QUANTITY='DEPOSITION VELOCITY'} for a wall cell with {\ct DEVC} or {\ct BNDF}.
 
 \subsection{Example Case: Soot Deposition from a Propane Flame}
 
@@ -6447,7 +6457,7 @@ The simplest example of a device is just a timer:
 \end{lstlisting}
 Anything associated with the device via the parameter, {\ct DEVC\_ID='my clock'}, will change its state at 30~s. For example, if the text were added to an {\ct OBST} line, that obstruction would change from its {\ct INITIAL\_STATE} of {\ct .FALSE.} to {\ct .TRUE.} after 30~s. In other words, it would be created at 30~s instead of at the start of the simulation. This is a simple way to open a door or window.
 
-When using a {\ct DEVC} output to control FDS, the instantaneous value of the the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
+When using a {\ct DEVC} output to control FDS, the instantaneous value of the {\ct DEVC} is used.  For some {\ct QUANTITY} types, such as {\ct TEMPERATURE}, this output can be very noisy.  To prevent a spurious spike from causing a state change of the {\ct DEVC} you can specify the parameter {\ct SMOOTHING\_FACTOR}.  This is a parameter that can vary between 0 and 1.  It performs an exponential smoothing of the {\ct DEVC} output as follows:
 \be
 \bar{x}^n=\bar{x}^{n-1} \; \mbox{\ct SMOOTHING\_FACTOR} + x^n \; (1-\mbox{\ct SMOOTHING\_FACTOR})
 \ee
@@ -7454,12 +7464,16 @@ The following example is used to write out a histogram of droplet size using 20 
 
 
 
-\subsection{Interfacing with Structural Models}
+\subsection{Adiabatic Surface Temperature}
 \label{info:AST}
 
-FDS solves a one-dimensional heat conduction equation for each boundary cell marking the interface between gas and solid, assuming that material properties for the material layer(s) are provided. The results can be transferred (via either {\ct DEVC} or {\ct BNDF} output) to other models that predict the mechanical response of the walls or structure. For many applications, the 1-D solution of the heat conduction equation is adequate, but in situations where it is not, another approach can be followed. FDS includes a calculation of the Adiabatic Surface Temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the following equation can be solved via a simple iterative technique to determine an effective gas temperature, $T_{\hbox{\tiny AST}}$: \be \dot{q}_{\rm r}'' + \dot{q}_{\rm c}'' = \epsilon \sigma \, \left( T_{\hbox{\tiny AST}}^4 - T_{\rm w}^4 \right) + h (T_{\hbox{\tiny AST}} - T_{\rm w})  \ee The sum $\dot{q}_{\rm r}'' + \dot{q}_{\rm c}''$ is the {\em net} heat flux onto the solid surface, whose temperature is $T_{\rm w}$. The heat fluxes and surface temperature are computed in FDS, and they are inter-dependent. The computed wall temperature affects the net heat flux and vice versa. However, because FDS only computes the solution to the 1-D heat conduction equation in the solid, it may be prone to error if lateral heat conduction within the solid is significant. Thus, in some scenarios neither the FDS-predicted heat fluxes or the surface temperature can be used as an accurate indicator of the thermal insult from the hot, smokey gases onto solid objects.
+FDS solves a one-dimensional heat conduction equation for each boundary cell marking the interface between gas and solid, assuming that material properties for the material layer(s) are provided. The results can be transferred (via either {\ct DEVC} or {\ct BNDF} output) to other models that predict the mechanical response of the walls or structure. For many applications, the 1-D solution of the heat conduction equation is adequate, but in situations where it is not, another approach can be followed. FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the following equation can be solved for $T_{\hbox{\tiny AST}}$ using an analytical solution given by Malendowski~\cite{Malendowski:FSJ}:
+\be
+   \epsilon \, \left( \dq_{\rm inc}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm g} - T_{\hbox{\tiny AST}}) = 0
+\ee
+where, $\dot{q}_{\rm inc}''$ is the {\em incident} heat flux onto the solid surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm g}$ is the surrounding gas temperature.
 
-Of course, both the heat fluxes, $\dot{q}_{\rm r}''$ and $\dot{q}_{\rm c}''$, and the surface temperature, $T_{\rm w}$ can be passed from FDS to the other model, and suitable corrections can be made based on a presumably more accurate prediction of the solid temperature.  Alternatively, the single quantity, $T_{\hbox{\tiny AST}}$, can be transferred, as this is the temperature that the solid surface effectively ``sees.'' It represents the gas phase thermal environment, however complicated, but it does not carry along the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
+The usefulness of the AST is that it represents an effective gas temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
 
 
 \subsection{Useful Solid Phase Outputs}
@@ -7873,7 +7887,6 @@ There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the p
 \begin{description}
 \item[{\ct 'ACTUATED SPRINKLERS'}] Number of activated sprinklers.
 \item[{\ct 'CPU TIME'}] Elapsed CPU time since the start of the simulation, in seconds.
-\item[{\ct 'CPU TIME PER STEP'}] CPU time per time step, in seconds, for the {\ct MESH} in which the {\ct DEVC} is located.
 \item[{\ct 'ITERATION'}] Number of time steps completed at the given time of the simulation.
 \item[{\ct 'NUMBER OF PARTICLES'}] Number of Lagrangian particles for the {\ct MESH} in which the {\ct DEVC} is located.
 \item[{\ct 'TIME STEP'}] Duration of a simulation time step, $\delta t$, in seconds.
@@ -7883,7 +7896,7 @@ There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the p
 In addition, the following flags can be useful in monitoring the performance of an MPI calculation. They are typically used for debugging.
 \begin{description}
 \item[{\ct VELOCITY\_ERROR\_FILE}] If set to {\ct .TRUE.} on the {\ct DUMP} line, this parameter will cause FDS to create a file with a time history of the maximum error associated with the normal component of velocity at solid or interpolated boundaries.
-\item[{\ct MPI\_TIMEOUT}] The amount of time, in seconds, to wait for messages sent via MPI (Message Passing Interface) before timing out. This parameter is set on the {\ct MISC} line. The default value is 10~s. This parameter is only useful in forcing a job with deadlocked messages to finish and print out information about the lost message.
+\item[{\ct MPI\_TIMEOUT}] The amount of time, in seconds, to wait for messages sent via MPI (Message Passing Interface) before timing out. This parameter is set on the {\ct MISC} line. The default value is 10~s. This parameter is only useful in forcing a job with deadlocked messages to finish and print out information about the lost message. It is very unlikely to solve a deadlock problem.
 \end{description}
 
 
@@ -8132,7 +8145,6 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct CPUA}$^{**}$                               & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPUA\_Z}$^{*}$                             & Section~\ref{info:part_output}                & kW/m$^2$       & B,D          \\ \hline
 {\ct CPU TIME}                                  & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
-{\ct CPU TIME PER STEP}                         & Section~\ref{info:TIMING}                     & s              & D            \\ \hline
 {\ct DENSITY}                                   & $\rho$ or $\rho Y_\alpha$ with {\ct SPEC\_ID} & kg/m$^3$       & D,I,P,S      \\ \hline
 {\ct DEPOSITION VELOCITY}                       & Section~\ref{info:deposition}                 & m/s            & B,D          \\ \hline
 {\ct DIVERGENCE}                                & $\nabla \cdot \bu$                            & 1/s            & D,I,P,S      \\ \hline
@@ -8268,15 +8280,16 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct EXTINCTION}                                & Section~\ref{info:extinct_out}                    &                & D,S          \\ \hline
 %{\ct FLAME TEMPERATURE}                         & Section \ref{info:finite}                         & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct F\_X, F\_Y, F\_Z}                          & Momentum terms, $F_x$, $F_y$, $F_z$               & m/s$^2$        & D,I,P,S      \\ \hline
+{\ct GAS DENSITY}                               & Gas Density near wall                             & \si{kg/m^3}    & B,D          \\ \hline
 {\ct GAS TEMPERATURE}                           & Gas Temperature near wall                         & $^\circ$C      & B,D          \\ \hline
 {\ct H}                                         & $\cH=|\bu|^2/2 + \tp/\rho    $                    & (m/s)$^2$      & D,I,P,S      \\ \hline
-{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m$^2$.K)} & B,D        \\ \hline
+{\ct HEAT TRANSFER COEFFICIENT}                 & Convective heat transfer                          & \si{W/(m^2.K)} & B,D          \\ \hline
 {\ct HRRPUL}                                    & $\int \dq''' \, \d x \, \d y$                     & kW/m           & D            \\ \hline
 {\ct INTEGRATED INTENSITY}                      & $U=\int I \, \d \bs$                              & kW/m$^2$       & D,I,P,S      \\ \hline
 {\ct KINETIC ENERGY}                            & $(u^2+v^2+w^2)/2$                                 & (m/s)$^2$      & D,I,P,S      \\ \hline
 {\ct KOLMOGOROV LENGTH SCALE}                   & Section \ref{info:meshquality}                    & m              & D,I,P,S      \\ \hline
 {\ct MACH NUMBER}                               & $|\bu|/\sqrt{(R/\overline{W}) T \gamma}$          &                & S,D          \\ \hline
-{\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m$^2$.s)} & B,D       \\ \hline
+{\ct MASS FLUX WALL CELL}                       & $\rho u_n$ at a wall cell face                    & \si{kg/(m^2.s)} & B,D         \\ \hline
 {\ct MAXIMUM VELOCITY ERROR}                    & Section \ref{info:PRES}                           & m/s            & D            \\ \hline
 {\ct MIXING TIME}                               & Combustion mixing time                            & s              & D,I,P,S      \\ \hline
 {\ct NORMALIZED HEATING RATE}                   & Section~\ref{info:material_components}            & W/g            & B,D          \\ \hline
@@ -8598,6 +8611,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SMOKE3D\_QUANTITY}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct SMOKE3D\_SPEC\_ID}             & Character    & Section~\ref{info:SMOKE3D}             &           &                                \\ \hline
 {\ct STATUS\_FILES}                 & Logical      & Section~\ref{info:DUMP}                &           & {\ct .FALSE.}                  \\ \hline
+{\ct SUPPRESS\_DIAGNOSTICS}         & Logical      & Section~\ref{info:monitoring_progress} &           & {\ct .FALSE.}                  \\ \hline
 {\ct UVW\_TIMER}                    & Real Vector (10)  & Section~\ref{info:velo_restart}   &  s        &                                \\ \hline
 {\ct VELOCITY\_ERROR\_FILE}         & Logical      & Section~\ref{info:TIMING}              &           & {\ct .FALSE.}                  \\ \hline
 {\ct WRITE\_XYZ}                    & Logical      & Section~\ref{info:PL3D}                &           & {\ct .FALSE.}                  \\ \hline
@@ -8921,6 +8935,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
+{\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                           & s             &                   \\ \hline
 {\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:mean_forcing}                       & s             & 1.E10             \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -8941,10 +8956,11 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
 {\ct MAX\_CHEMISTRY\_ITERATIONS}                & Integer       & Section~\ref{info:chem_integration}                   &               &  1000             \\ \hline
-{\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                             &               &  200              \\ \hline
+{\ct MAX\_LEAK\_PATHS}                          & Integer       & Section~\ref{info:Leaks}                              &               &  200              \\ \hline
 {\ct MAXIMUM\_VISIBILITY}                       & Real          & Section~\ref{info:visibility}                         &  m            &  30               \\ \hline
 {\ct MEAN\_FORCING(3)}                          & Logical       & Section~\ref{info:mean_forcing}                       &               & {\ct .FALSE.}     \\ \hline
 {\ct MPI\_TIMEOUT}                              & Real          & Section~\ref{info:TIMING}                             &  s            & 10.               \\ \hline
+%{\ct N\_FIXED\_CHEMISTRY\_SUBSTEPS}             & Integer       & DT\_SUB = DT/N\_FIXED\_CHEMISTRY\_SUBSTEPS            &               & -1                \\ \hline
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline

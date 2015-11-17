@@ -501,7 +501,7 @@ void ColorBarMenu(int value){
   if(value>=0){
     colorbartype=value;
     selectedcolorbar_index2=colorbartype;
-    current_colorbar=colorbarinfo+colorbartype;
+    UpdateCurrentColorbar(colorbarinfo+colorbartype);
     update_colorbar_type();
     update_colorbar_list2();
     if(colorbartype == bw_colorbar_index){
@@ -4146,6 +4146,9 @@ void ImmersedMenu(int value){
     case 6:
       sort_embedded_geometry=1-sort_embedded_geometry;
       break;
+    case 13:
+      show_geometry_diagnostics = 1 - show_geometry_diagnostics;
+      break;
     case GEOMETRY_HIDE:
       if(showtrisurface==0&&showtrioutline==0){
         showtrisurface=1;
@@ -5030,7 +5033,6 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Sort faces"),6);
   }
-#ifdef pp_BETA
   if(showtrinormal==1){
     glutAddMenuEntry(_(" *Show normal"),3);
   }
@@ -5043,13 +5045,20 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Smooth normal"),4);
   }
-  if(hilight_skinny==1){
+  if(ngeomdiaginfo>0){
+    if(show_geometry_diagnostics == 1){
+      glutAddMenuEntry(_(" *Show geometry diagnostics"), 13);
+    }
+    else{
+      glutAddMenuEntry(_(" Show geometry diagnostics"), 13);
+    }
+  }
+  if(hilight_skinny == 1){
     glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
   }
   else{
     glutAddMenuEntry(_(" Hilight skinny triangles"),5);
   }
-#endif
 
 /* --------------------------------blockage menu -------------------------- */
   CREATEMENU(blockagemenu,BlockageMenu);
@@ -7397,13 +7406,17 @@ updatemenu=0;
     char menulabel[1024];
 
 #ifdef BIT64
-    sprintf(menulabel,"  Smokeview (64 bit) revision: %s",revision_smv);
+    sprintf(menulabel,"  Smokeview (64 bit) build: %s",smv_githash);
 #else
-    sprintf(menulabel,"  Smokeview (32 bit) revision: %s",revision_smv);
+    sprintf(menulabel,"  Smokeview (32 bit) build: %s",smv_githash);
 #endif
     glutAddMenuEntry(menulabel,1);
-    if(revision_fds>0){
-      sprintf(menulabel,"  FDS revision:%i",revision_fds);
+    if(fds_version!=NULL){
+      sprintf(menulabel, "  FDS version: %s", fds_version);
+      glutAddMenuEntry(menulabel, 1);
+    }
+    if(fds_githash!=NULL){
+      sprintf(menulabel,"  FDS build: %s",fds_githash);
       glutAddMenuEntry(menulabel,1);
     }
 #ifdef pp_GPU

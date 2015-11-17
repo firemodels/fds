@@ -1296,8 +1296,7 @@ void initvars(void){
   navatar_colors=0;
   avatar_colors=NULL;
   view_from_selected_avatar=0;
-  revision_fds=-1;
-  getRevision(revision_smv);
+  getGitHash(smv_githash);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1499,7 +1498,7 @@ void initvars(void){
   showgluitrainer=0;
   colorbartype=0;
   colorbartype_ini=-1;
-  current_colorbar=colorbarinfo;
+  UpdateCurrentColorbar(colorbarinfo);
   colorbartype_save=colorbartype;
   colorbartype_default=colorbartype;
   colorbarpoint=0;
@@ -1923,7 +1922,7 @@ void initvars(void){
     char version[100];
     char svn_version[100];
 
-    getRevision(svn_version);    // get revision
+    getGitHash(svn_version);    // get githash
 
 // construct string of the form:
 //   5.x.y_#

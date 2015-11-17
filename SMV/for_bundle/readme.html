@@ -13,7 +13,7 @@
 <ul>
 
 <li><a href="http://firemodels.github.io/fds-smv/downloads.html">Downloads</a><br>
-<li><a href="http://fire.nist.gov/fds/documentation.html">Documentation</a><br>
+<li><a href="http://firemodels.github.io/fds-smv/manuals.html">Documentation</a><br>
 <li><a href="http://htmlpreview.github.com/?https://github.com/firemodels/fds-smv/blob/development/SMV/for_bundle/readme.html">Smokeview release notes (this page)</a>
 </ul>
 
@@ -24,6 +24,32 @@
     comment
 
 -->
+
+<li>6.3.2 - (build: Git-r3-1-g22e7f5a) November 8, 2015</li>
+<ol>
+usability: output FDS version and githash used to run the case that is visualized
+</ol>
+
+<li>6.3.1 - (build: Git-r2-2-gc6a4a6d) November 1, 2015</li>
+
+<ol>
+
+<li>usability: add back smooth normal option -
+     (<a href="https://github.com/firemodels/fds-smv/issues/2994">Issue 2994</a>)
+<li>usability: add option to hide object type and unit when displaying object values
+<li>usability: add LOADSLICEM and LOADBOUNDARYM script keywords for loading a slice and boundary file respectively
+for a specified mesh
+<li>usability: add option to LOADSLICE script keyword to load 3d slice files (by specifying direction 0)
+<li>usability: for LOADSLICE script command interpret x, y, z (in addition to 1, 2, 3) as slice directions
+<li>fix: fix problems with scene rotation when case has a gravity vector -
+     (<a href="https://github.com/firemodels/fds-smv/issues/3001">Issue 3001</a>)
+<li>fix: fix problem with LOADSLICEM script command ( force 3D slices loaded to be for entire mesh)
+<li>fix: corrections to FED bound computation
+<li>fix: make correction to file copy routine
+<li>fix: correction to code that implements the LOADVSLICE and LOADSLICE script keywords
+<li>fix: fix problem with parsing LOADISO script keyword
+</ol>
+
 
 <li>6.3.0 - (build: Git-r1-12-gf7f4148) October 1, 2015</li>
 

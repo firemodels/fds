@@ -9,7 +9,7 @@
 #include "MALLOC.h"
 
 //dummy change to bump version number to 1.4.8
-//dummy change to force revision update
+//dummy change to force githash update
 
 /* ------------------ main ------------------------ */
 
@@ -532,13 +532,13 @@ void makesvd(char *in_dir, char *smvfile){
 void usage(char *prog){
   char smv_version[100];
   char buffer[1000];
-  char revision[256];
+  char githash[256];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getRevision(revision);    // get revision
+  getGitHash(githash);    // get githash
 
   PRINTF("\n");
-  PRINTF("  smokezip %s(%s) - %s\n\n",smv_version,revision,__DATE__);
+  PRINTF("  smokezip %s(%s) - %s\n\n",smv_version,githash,__DATE__);
   PRINTF("  Compress FDS data files\n\n");
   PRINTF("  %s [options] casename\n\n",get_basefilename(buffer,prog));
   PRINTF("  casename - Smokeview .smv file for case to be compressed\n\n");

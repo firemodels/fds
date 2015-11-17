@@ -761,7 +761,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     char label[256];
     int smv_top, smv_top2, fds_top;
 
-    if(revision_fds>0){
+    if(fds_githash!=NULL){
       fds_top=textdown;
       smv_top=fds_top+VP_title.text_height+v_space;
       smv_top2=smv_top+VP_title.text_height+v_space;
@@ -772,13 +772,13 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
     }
     outputText(left,smv_top2,TITLE);
 #ifdef BIT64
-    sprintf(label,"Smokeview (64 bit) revision: %s",revision_smv);
+    sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
 #else
-    sprintf(label,"Smokeview (32 bit) revision: %s",revision_smv);
+    sprintf(label,"Smokeview (32 bit) build: %s",smv_githash);
 #endif
     outputText(left,smv_top,label);
-    if(revision_fds>0){
-      sprintf(label,"FDS revision:%i",revision_fds);
+    if(fds_githash!=NULL){
+      sprintf(label,"FDS build:%s",fds_githash);
       outputText(left,fds_top,label);
     }
   }
@@ -960,16 +960,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     glTranslatef(xcen,ycen,zcen);
 
     // rotate scene
-    {
-      float u[3], axis[3], angle;
-
-      u[0]=0.0;
-      u[1]=0.0;
-      u[2]=1.0;
-      rotateu2v(user_zaxis,u,axis,&angle);//xx
-      glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-      glRotatef(zaxis_angles[2],u[0],u[1],u[2]);
-    }
     if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);
     }
@@ -979,7 +969,17 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       }
       glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
-    
+    {
+      float u[3], axis[3], angle;
+
+      u[0] = 0.0;
+      u[1] = 0.0;
+      u[2] = 1.0;
+      rotateu2v(user_zaxis, u, axis, &angle);
+      glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+      glRotatef(zaxis_angles[2], u[0], u[1], u[2]);
+    }
+
     glTranslatef(-xcen,-ycen,-zcen);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
