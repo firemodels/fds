@@ -2,6 +2,7 @@
 
 export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVgitclean/
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
+export FIREBOTVER=$FIREBOTROOT/Verification/
 export FBUG=$FIREBOTMANS/FDS_User_Guide/
 export FBVG=$FIREBOTMANS/FDS_Verification_Guide/
 export FBVAL=$FIREBOTMANS/FDS_Validation_Guide/
@@ -21,3 +22,8 @@ echo Verification Figures Copied
 #cp -R $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/ &> /dev/null
 rsync -r --exclude=*.git $FBVAL/SCRIPT_FIGURES/* $BASEDIR/FDS_Validation_Guide/SCRIPT_FIGURES/
 echo Validation Guide Figures Copied
+
+# Copy Verification Results
+#rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --include '*.prt5' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
+#echo Verification Results Copied
+

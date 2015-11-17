@@ -56,41 +56,61 @@ fclose(fid);
 
 % normalize and overwrite the FDS results for random_walk_1
 
-M = importdata([datadir,'random_walk_1_line.csv'],',',2);
-npv_z = M.data(:,find(strcmp(M.colheaders,'npv-z')));
-dz = (max(npv_z)-min(npv_z))/(length(npv_z)-1);
-npv = M.data(:,find(strcmp(M.colheaders,'npv')));
-nt = sum(npv);
+filename = [datadir,'random_walk_1_line.csv'];
 
-fid = fopen([datadir,'random_walk_1.csv'],'wt','n');
-fprintf(fid,'%s, %s\n','m',' ');
-fprintf(fid,'%s, %s\n','npv-z','npv');
-for i=1:numel(npv_z)
-    fprintf(fid,'%f, %f\n',npv_z(i),npv(i)/nt/dz);
+if ~exist(filename) % skip_case_if
+
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
+
+else
+
+    M = importdata([datadir,'random_walk_1_line.csv'],',',2);
+    npv_z = M.data(:,find(strcmp(M.colheaders,'npv-z')));
+    dz = (max(npv_z)-min(npv_z))/(length(npv_z)-1);
+    npv = M.data(:,find(strcmp(M.colheaders,'npv')));
+    nt = sum(npv);
+
+    fid = fopen([datadir,'random_walk_1.csv'],'wt','n');
+    fprintf(fid,'%s, %s\n','m',' ');
+    fprintf(fid,'%s, %s\n','npv-z','npv');
+    for i=1:numel(npv_z)
+        fprintf(fid,'%f, %f\n',npv_z(i),npv(i)/nt/dz);
+    end
+    fclose(fid);
+
+    % figure(1)
+    % plot(npv_z,npv/nt/dz,'k-')
+
 end
-fclose(fid);
-
-% figure(1)
-% plot(npv_z,npv/nt/dz,'k-')
 
 % normalize and overwrite the FDS results for random_walk_2
 
-M = importdata([datadir,'random_walk_2_line.csv'],',',2);
-npv_z = M.data(:,find(strcmp(M.colheaders,'npv-z')));
-dz = (max(npv_z)-min(npv_z))/(length(npv_z)-1);
-npv = M.data(:,find(strcmp(M.colheaders,'npv')));
-nt = sum(npv);
+filename = [datadir,'random_walk_2_line.csv'];
 
-fid = fopen([datadir,'random_walk_2.csv'],'wt','n');
-fprintf(fid,'%s, %s\n','m',' ');
-fprintf(fid,'%s, %s\n','npv-z','npv');
-for i=1:numel(npv_z)
-    fprintf(fid,'%f, %f\n',npv_z(i),npv(i)/nt/dz);
+if ~exist(filename) % skip_case_if
+
+    display(['Error: File ' filename ' does not exist. Skipping case.'])
+
+else
+
+    M = importdata([datadir,'random_walk_2_line.csv'],',',2);
+    npv_z = M.data(:,find(strcmp(M.colheaders,'npv-z')));
+    dz = (max(npv_z)-min(npv_z))/(length(npv_z)-1);
+    npv = M.data(:,find(strcmp(M.colheaders,'npv')));
+    nt = sum(npv);
+
+    fid = fopen([datadir,'random_walk_2.csv'],'wt','n');
+    fprintf(fid,'%s, %s\n','m',' ');
+    fprintf(fid,'%s, %s\n','npv-z','npv');
+    for i=1:numel(npv_z)
+        fprintf(fid,'%f, %f\n',npv_z(i),npv(i)/nt/dz);
+    end
+    fclose(fid);
+
+    % figure(2)
+    % plot(npv_z,npv/nt/dz,'k-')
+
 end
-fclose(fid);
-
-% figure(2)
-% plot(npv_z,npv/nt/dz,'k-')
 
 
 

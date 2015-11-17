@@ -41,7 +41,7 @@ set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
 set CFASTEXE=%CFASTROOT%\CFAST\intel_win_64\cfast7_win_64.exe
 set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
 
-set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_32\background.exe
+set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_64\background.exe
 
 :: Run jobs in background (or not)
 
