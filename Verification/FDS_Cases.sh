@@ -286,6 +286,15 @@ $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
 $QFDS -d Species soot_gravitational_settling.fds
 $QFDS -d Species soot_gravitational_settling_2.fds
+$QFDS -d Species hrrpuv_reac_simple.fds
+$QFDS -d Species hrrpuv_reac_extinction.fds
+$QFDS -d Species hrrpuv_reac_single.fds
+$QFDS -d Species hrrpuv_reac_parallel.fds
+$QFDS -d Species hrrpuv_reac_parallel_2.fds
+$QFDS -d Species hrrpuv_reac_series.fds
+$QFDS -d Species hrrpuv_reac_soot.fds
+$QFDS -d Species hrrpuv_reac_arrhenius.fds
+$QFDS -d Species ramp_chi_r.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
@@ -414,37 +423,37 @@ $QFDS -d WUI pine_needles.fds
 $QFDS -d WUI random_walk_1.fds
 $QFDS -d WUI random_walk_2.fds
 
-$QFDS -p 4 -t -d Adaptive_Mesh_Refinement random_meshes.fds
+$QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 
-#$QFDS -p 3 -t -d Evacuation evac_smv_testcase1.fds
+#$QFDS -t -p 3 -d Evacuation evac_smv_testcase1.fds
 
-$QFDS -p 8 -t -d Fires circular_burner.fds
+$QFDS -t -p 8 -d Fires circular_burner.fds
 
-$QFDS -p 5 -t -d Flowfields simple_duct.fds
-$QFDS -p 5 -t -d Flowfields simple_duct_2.fds
-$QFDS -p 8 -t -d Flowfields symmetry_test_mpi.fds
+$QFDS -t -p 5 -d Flowfields simple_duct.fds
+$QFDS -t -p 5 -d Flowfields simple_duct_2.fds
+$QFDS -t -p 8 -d Flowfields symmetry_test_mpi.fds
 
-$QFDS -p 4 -t -d Heat_Transfer back_wall_test.fds
+$QFDS -t -p 4 -d Heat_Transfer back_wall_test.fds
 
-$QFDS -p 4 -t -d Pressure_Solver dancing_eddies_tight.fds
-$QFDS -p 4 -t -d Pressure_Solver dancing_eddies_tight_overlap.fds
-$QFDS -p 4 -t -d Pressure_Solver dancing_eddies_default.fds
-$QFDS -p 8 -t -d Pressure_Solver duct_flow.fds
-$QFDS -p 5 -t -d Pressure_Solver hallways.fds
-$QFDS -p 8 -t -d Pressure_Solver scarc2d_bicg_8mesh.fds
-$QFDS -p 8 -t -d Pressure_Solver scarc2d_fft_8mesh.fds
-$QFDS -p 8 -t -d Pressure_Solver scarc2d_cg_8mesh.fds
-$QFDS -p 8 -t -d Pressure_Solver scarc2d_gmg_8mesh.fds
+$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight.fds
+$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
+$QFDS -t -p 4 -d Pressure_Solver dancing_eddies_default.fds
+$QFDS -t -p 8 -d Pressure_Solver duct_flow.fds
+$QFDS -t -p 5 -d Pressure_Solver hallways.fds
+$QFDS -t -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
+$QFDS -t -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
+$QFDS -t -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
+$QFDS -t -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
 
-$QFDS -p 4 -t -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
-$QFDS -p 4 -t -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
-$QFDS -p 4 -t -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
-$QFDS -p 4 -t -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
-$QFDS -p 4 -t -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
+$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
+$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
+$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_128.fds
+$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_256.fds
+$QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_512.fds
 
-$QFDS -p 4 -t -d WRF wrf_time_ramp.fds
-$QFDS -p 4 -t -d WRF wrf_prof_ramp.fds
-$QFDS -p 4 -t -d WRF wrf_time_prof_ramp.fds
+$QFDS -t -p 4 -d WRF wrf_time_ramp.fds
+$QFDS -t -p 4 -d WRF wrf_prof_ramp.fds
+$QFDS -t -p 4 -d WRF wrf_time_prof_ramp.fds
 
 $QFDS -t -o 1 -d Timing_Benchmarks openmp_test64a.fds
 $QFDS -t -o 2 -d Timing_Benchmarks openmp_test64b.fds

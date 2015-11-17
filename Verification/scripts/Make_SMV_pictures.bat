@@ -21,7 +21,7 @@ if "%size%" == "" (
   set SMOKEVIEW=smokeview
   set WIND2FDS=wind2fds
 ) else (
-  set BACKGROUND=%SVNROOT%\Utilities\background\intel_win_32\background.exe
+  set BACKGROUND=%SVNROOT%\Utilities\background\intel_win_64\background.exe
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%size%\smokediff_win_%size%.exe
   set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%size%\smokezip_win_%size%.exe

@@ -6,6 +6,10 @@
    set dir=%2
    shift
  )
+ if /I "%1" EQU "-p" (
+   set nprocs=%2
+   shift
+ )
  set infile=%1
  shift
 if not (%1)==() goto GETOPTS

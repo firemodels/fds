@@ -1,7 +1,7 @@
 
 :: Firebot variables
-set FIREBOT_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/twowaycode/scripts
-set TWOWAY_DIR=%FDS_SVNROOT%/Utilities/Structural_Interaction/twowaycode
+set FIREBOT_DIR=%FDS_GITROOT%/Utilities/Structural_Interaction/twowaycode/scripts
+set TWOWAY_DIR=%FDS_GITROOT%/Utilities/Structural_Interaction/twowaycode
 set OUTPUT_DIR=%TWOWAY_DIR%/scripts/output
 set ERROR_LOG=%OUTPUT_DIR%/errors
 set WARNING_LOG=%OUTPUT_DIR%/warnings
@@ -12,7 +12,7 @@ echo %GIT_HASH%
 
 :: Clean outputs
 cd %FIREBOT_DIR%
-echo Y | del output
+echo Y | rmdir output
 
 :: Create output dir
 mkdir output
@@ -20,10 +20,12 @@ mkdir output
 :: Clean previous results
 cd %TWOWAY_DIR%/examples/simply_beam
 del *.csv 
+cd %FIREBOT_DIR%/SCRIPT_FIGURES
+del *.pdf
 
 :: Compile fds_win_64
- cd %FDS_SVNROOT%/FDS_Compilation/intel_win_64
- echo Y | make_fds.bat
+cd %FDS_GITROOT%/FDS_Compilation/intel_win_64
+echo Y | make_fds.bat
 
 :: Compile twowaycode_win_64
 cd %TWOWAY_DIR%/intel_win_64
