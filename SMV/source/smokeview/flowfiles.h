@@ -1387,7 +1387,7 @@ typedef struct {
   float *color;
   float vdata[NELEV_ZONE];
   int itempdata[NELEV_ZONE];
-  int vent_orien, vent_type, face;
+  int vent_type, vertical_vent_type, face;
 } zvent;
 
 /* --------------------------  firedata ------------------------------------ */
