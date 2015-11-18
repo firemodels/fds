@@ -216,7 +216,7 @@ EXTERNCPP void read_device_header(char *file, devicedata *devices, int ndevices)
 EXTERNCPP void parse_device_keyword(FILE *stream, devicedata *devicei);
 EXTERNCPP void draw_geom(int flag,int frameflag);
 EXTERNCPP void draw_geomdiag(void);
-EXTERNCPP void getzonesizecsv(int *nzone_times, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *error);
+EXTERNCPP void getzonesizecsv(int *nzone_times, int *nroom2, int *nfires, int *nzhvents, int *nzvvents, int *nzmvents, int *error);
 EXTERNCPP void getzoneventbounds(void);
 EXTERNCPP void remove_dup_blockages(void);
 EXTERNCPP void Sort_Iso_Triangles(float *mm);
