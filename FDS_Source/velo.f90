@@ -2073,6 +2073,9 @@ EDGE_LOOP: DO IE=1,N_EDGES
                SF=>SURFACE(MAX(SURF_INDEXM,SURF_INDEXP))
             ENDIF
             VELOCITY_BC_INDEX = SF%VELOCITY_BC_INDEX
+            IF (WCM%VENT_INDEX==WCP%VENT_INDEX) THEN
+               IF(VENTS(WCM%VENT_INDEX)%NODE_INDEX>0 .AND. WCM%ONE_D%UW >= 0._EB) VELOCITY_BC_INDEX=FREE_SLIP_BC
+            ENDIF
 
             ! Compute the viscosity in the two adjacent gas cells
 
