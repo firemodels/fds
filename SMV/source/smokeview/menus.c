@@ -5856,7 +5856,7 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
-      if(have_hventslab_flow==0){
+      if(have_ventslab_flow==0){
         if(visVentFlow==1){
           glutAddMenuEntry(_("*Vent flow - velocity profile"), MENU_ZONE_VENTS);
         }

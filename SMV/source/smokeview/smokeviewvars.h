@@ -413,7 +413,7 @@ SVEXTERN float SVDECL(*zonerhol, NULL), SVDECL(*zonerhou, NULL);
 SVEXTERN float SVDECL(*zoneqfire,NULL), SVDECL(*zonefheight,NULL), SVDECL(*zonefbase,NULL), SVDECL(*zonefdiam,NULL);
 SVEXTERN float SVDECL(*zoneodl,NULL), SVDECL(*zoneodu,NULL), SVDECL(*zonehvents,NULL), SVDECL(*zonevvents,NULL);
 SVEXTERN float SVDECL(maxslabflow, 0.0);
-SVEXTERN int SVDECL(have_hventslab_flow,0);
+SVEXTERN int SVDECL(have_ventslab_flow,0);
 SVEXTERN float SVDECL(*zoneslab_T, NULL), SVDECL(*zoneslab_F, NULL), SVDECL(*zoneslab_YB, NULL), SVDECL(*zoneslab_YT, NULL);
 SVEXTERN int SVDECL(*zoneslab_n, NULL);
 SVEXTERN int SVDECL(zonecsv, 0), SVDECL(nzvents, 0), SVDECL(nzhvents, 0), SVDECL(nzvvents, 0), SVDECL(nzmvents, 0);
