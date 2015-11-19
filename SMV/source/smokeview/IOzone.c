@@ -109,15 +109,15 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
 void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local, 
                     float *zone_times_local, float *zoneqfire_local, float *zonefheight_local, float *zonefbase_local, float *zonefdiam_local,
                     float *zonepr_local, float *zoneylay_local,  float *zonetl_local, float *zonetu_local, float *zonerhol_local, float *zonerhou_local,
-                    float **zoneodlptr, float **zoneoduptr, float *zonevents_local, float *zonevvents_local,
+                    float **zoneodlptr, float **zoneoduptr, float *zonevents_local,
                     int *zoneslab_n_local, float *zoneslab_T_local, float *zoneslab_F_local, float *zoneslab_YB_local, float *zoneslab_YT_local,
                     int *error){
-  int i,ii,iif, use_od=1, iihv, iivv;
+  int i, ii, iif, use_od = 1, iihv;
   devicedata **zoneqfire_devs=NULL;
   devicedata **zonepr_devs=NULL, **zoneylay_devs=NULL, **zonetl_devs=NULL, **zonetu_devs=NULL, **zoneodl_devs=NULL, **zoneodu_devs=NULL;
   devicedata **zonerhol_devs = NULL, **zonerhou_devs = NULL;
   devicedata **zonefheight_devs=NULL, **zonefbase_devs=NULL, **zonefarea_devs=NULL;
-  devicedata **zonevents_devs=NULL, **zonevvents_devs=NULL;
+  devicedata **zonevents_devs=NULL;
   devicedata **zoneslab_n_devs = NULL, **zoneslab_T_devs = NULL, **zoneslab_F_devs = NULL, **zoneslab_YB_devs = NULL, **zoneslab_YT_devs = NULL;
   float *zoneodl_local, *zoneodu_local;
   float *times_local;
@@ -152,8 +152,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
     NewMemory((void **)&zoneslab_YB_devs, MAX_HSLABS*ntotalvents*sizeof(devicedata *));
     NewMemory((void **)&zoneslab_YT_devs, MAX_HSLABS*ntotalvents*sizeof(devicedata *));
   }
-
-  if(nzvvents>0)zonevvents_devs = zonevents_devs+nzhvents;
 
   for(i=0;i<nrooms_local;i++){
     char label[100];
@@ -406,7 +404,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   ii=0;
   iif=0;
   iihv=0;
-  iivv=0;
   times_local = zonepr_devs[0]->times;
 
   maxslabflow = 0.0;
@@ -462,12 +459,21 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
       zonefbase_local[iif]=zonefbase_devs[j]->vals[i];
       iif++;
     }
-    for(ivent=0;ivent<nzhvents;ivent++){
-      int islab;
+    for(ivent=0;ivent<nzhvents+nzvvents;ivent++){
+      int islab, max_slabs;
 
       zonevents_local[iihv] = zonevents_devs[ivent]->vals[i];
+      if(ivent<nzhvents){
+        max_slabs = MAX_HSLABS;
+      }
+      else if(ivent>=nzhvents&&i<nzhvents+nzvvents){
+        max_slabs = MAX_VSLABS;
+      }
+      else{
+        max_slabs = MAX_MSLABS;
+      }
       if(zoneslab_n_devs[ivent]!=NULL)zoneslab_n_local[iihv] = (int)(zoneslab_n_devs[ivent]->vals[i]+0.1);
-      for(islab = 0; islab<MAX_HSLABS; islab++){
+      for(islab = 0; islab<max_slabs; islab++){
         int idev, ival;
 
         idev = MAX_HSLABS * ivent + islab;
@@ -491,10 +497,6 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
         if(zoneslab_YT_devs[idev]!=NULL)zoneslab_YT_local[ival] = zoneslab_YT_devs[idev]->vals[i];
       }
       iihv++;
-    }
-    for(j=0;j<nzvvents;j++){
-      zonevvents_local[iivv] = zonevvents_devs[j]->vals[i];
-      iivv++;
     }
   }
 }
@@ -632,8 +634,7 @@ void readzone(int ifile, int flag, int *errorcode){
   zonei = zoneinfo + ifile;
   file = zonei->file;
   if(zonei->loaded==0&&flag==UNLOAD)return;
-  FREEMEMORY(zonehvents);
-  FREEMEMORY(zonevvents);
+  FREEMEMORY(zonevents);
   FREEMEMORY(zone_times);
   FREEMEMORY(zoneylay);
   FREEMEMORY(zonetl);
@@ -740,7 +741,7 @@ void readzone(int ifile, int flag, int *errorcode){
         return;
       }
     }
-    FREEMEMORY(zonehvents);
+    FREEMEMORY(zonevents);
     FREEMEMORY(zoneslab_n);
     FREEMEMORY(zoneslab_T);
     FREEMEMORY(zoneslab_F);
@@ -750,16 +751,14 @@ void readzone(int ifile, int flag, int *errorcode){
       int ntotalvents;
 
       ntotalvents = nzhvents+nzvvents;
-      NewMemory((void **)&zonehvents,  nzone_times*ntotalvents*sizeof(float));
+      NewMemory((void **)&zonevents,   nzone_times*ntotalvents*sizeof(float));
       NewMemory((void **)&zoneslab_n,  nzone_times*ntotalvents*sizeof(int));
       NewMemory((void **)&zoneslab_T,  nzone_times*ntotalvents*MAX_HSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_YT, nzone_times*ntotalvents*MAX_HSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_F,  nzone_times*ntotalvents*MAX_HSLABS*sizeof(float));
       NewMemory((void **)&zoneslab_YB, nzone_times*ntotalvents*MAX_HSLABS*sizeof(float));
     }
-    if(nzvvents>0){
-      zonevvents = zonehvents+nzhvents;
-    }
+
     FREEMEMORY(zoneqfire);
     FREEMEMORY(zonefheight);
     FREEMEMORY(zonefdiam);
@@ -790,7 +789,7 @@ void readzone(int ifile, int flag, int *errorcode){
   CheckMemory;
   if(zonei->csv==1){
     getzonedatacsv(nzone_times,nrooms,  nfires, zone_times,zoneqfire, zonefheight, zonefbase, zonefdiam,
-                   zonepr,zoneylay,zonetl,zonetu,zonerhol,zonerhou,&zoneodl,&zoneodu, zonehvents, zonevvents, 
+                   zonepr,zoneylay,zonetl,zonetu,zonerhol,zonerhou,&zoneodl,&zoneodu, zonevents,
                    zoneslab_n, zoneslab_T, zoneslab_F, zoneslab_YB, zoneslab_YT,
                    &error);
   }
@@ -876,6 +875,7 @@ void fill_zonedata(int izone_index){
   roomdata *roomi;
   int *zoneslab_n0;
   float *zoneslab_T0, *zoneslab_F0, *zoneslab_YB0, *zoneslab_YT0;
+  int ntotal_vents;
 
   float gamma = 1.4;
   float CP=1012.0;
@@ -890,15 +890,16 @@ void fill_zonedata(int izone_index){
     rhol0 = zonerhol+izone_index*nrooms;
     rhou0 = zonerhou+izone_index*nrooms;
   }
-  hvent0 = zonehvents + izone_index*nzhvents;
-  zoneslab_n0  = zoneslab_n  + izone_index*nzhvents;
-  zoneslab_T0  = zoneslab_T  + izone_index*MAX_HSLABS*nzhvents;
-  zoneslab_F0  = zoneslab_F  + izone_index*MAX_HSLABS*nzhvents;
-  zoneslab_YB0 = zoneslab_YB + izone_index*MAX_HSLABS*nzhvents;
-  zoneslab_YT0 = zoneslab_YT + izone_index*MAX_HSLABS*nzhvents;
+  ntotal_vents = nzhvents+nzvvents;
+  hvent0 = zonevents+izone_index*ntotal_vents;
+  zoneslab_n0  = zoneslab_n  + izone_index*ntotal_vents;
+  zoneslab_T0  = zoneslab_T  + izone_index*MAX_HSLABS*ntotal_vents;
+  zoneslab_F0  = zoneslab_F  + izone_index*MAX_HSLABS*ntotal_vents;
+  zoneslab_YB0 = zoneslab_YB + izone_index*MAX_HSLABS*ntotal_vents;
+  zoneslab_YT0 = zoneslab_YT + izone_index*MAX_HSLABS*ntotal_vents;
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
-  for(ivent=0;ivent<nzhvents;ivent++){
+  for(ivent=0;ivent<nzhvents+nzvvents;ivent++){
     zvent *zventi;
     int islab;
 
@@ -1330,7 +1331,7 @@ void drawventdataSLAB(void){
 
     zvi = zventinfo+i;
 
-    if(zvi->vent_type==HVAC_VENT)continue;
+    if(zvi->vent_type==HVAC_VENT||zvi->vent_type==VFLOW_VENT)continue;
     idir = zvi->dir;
     x1 = (zvi->x1+zvi->x2)/2.0;
     yy = zvi->yy;
