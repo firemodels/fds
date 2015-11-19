@@ -2038,24 +2038,24 @@ void update_mesh_coords(void){
     zvi = zventinfo + n;
 
     switch(zvi->dir){
-    case 1:
-    case 3:
+    case FRONT_WALL:
+    case BACK_WALL:
       zvi->x1 = NORMALIZE_X(zvi->x1);
       zvi->x2 = NORMALIZE_X(zvi->x2);
       zvi->z1 = NORMALIZE_Z(zvi->z1);
       zvi->z2 = NORMALIZE_Z(zvi->z2);
       zvi->yy = NORMALIZE_Y(zvi->yy);
       break;
-    case 2:
-    case 4:
+    case RIGHT_WALL:
+    case LEFT_WALL:
       zvi->x1 = NORMALIZE_Y(zvi->x1);
       zvi->x2 = NORMALIZE_Y(zvi->x2);
       zvi->z1 = NORMALIZE_Z(zvi->z1);
       zvi->z2 = NORMALIZE_Z(zvi->z2);
       zvi->yy = NORMALIZE_X(zvi->yy);
       break;
-    case 5:
-    case 6:
+    case BOTTOM_WALL:
+    case TOP_WALL:
       zvi->x1 = NORMALIZE_X(zvi->x1);
       zvi->x2 = NORMALIZE_X(zvi->x2);
       zvi->y1 = NORMALIZE_Y(zvi->y1);
@@ -5347,22 +5347,22 @@ int readsmv(char *file, char *file2){
         zvi->z2=roomi->z0+top;
         zvi->face=face;
         switch(face){
-        case 1:
+        case FRONT_WALL:
           zvi->yy=roomi->y0;
           zvi->x1=roomi->x0+ventoffset;
           zvi->x2=roomi->x0+ventoffset+width;
           break;
-        case 2:
+        case RIGHT_WALL:
           zvi->yy=roomi->x1;
           zvi->x1=roomi->y0+ventoffset;
           zvi->x2=roomi->y0+ventoffset+width;
           break;
-        case 3:
+        case BACK_WALL:
           zvi->yy=roomi->y1;
           zvi->x1=roomi->x0+ventoffset;
           zvi->x2=roomi->x0+ventoffset+width;
           break;
-        case 4:
+        case LEFT_WALL:
           zvi->yy=roomi->x0;
           zvi->x1=roomi->y0+ventoffset;
           zvi->x2=roomi->y0+ventoffset+width;

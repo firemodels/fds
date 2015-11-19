@@ -1219,7 +1219,7 @@ void drawventdataPROFILE(void){
 
       dy1 = factor*zvi->area_fraction*zvi->vdata[j];
       dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
-      if(idir==1||idir==4){
+      if(idir==FRONT_WALL||idir==LEFT_WALL){
         dy1=-dy1;
         dy2=-dy2;
       }
