@@ -2037,25 +2037,25 @@ void update_mesh_coords(void){
 
     zvi = zventinfo + n;
 
-    switch(zvi->dir){
-    case 1:
-    case 3:
+    switch(zvi->wall){
+    case FRONT_WALL:
+    case BACK_WALL:
       zvi->x1 = NORMALIZE_X(zvi->x1);
       zvi->x2 = NORMALIZE_X(zvi->x2);
       zvi->z1 = NORMALIZE_Z(zvi->z1);
       zvi->z2 = NORMALIZE_Z(zvi->z2);
       zvi->yy = NORMALIZE_Y(zvi->yy);
       break;
-    case 2:
-    case 4:
+    case RIGHT_WALL:
+    case LEFT_WALL:
       zvi->x1 = NORMALIZE_Y(zvi->x1);
       zvi->x2 = NORMALIZE_Y(zvi->x2);
       zvi->z1 = NORMALIZE_Z(zvi->z1);
       zvi->z2 = NORMALIZE_Z(zvi->z2);
       zvi->yy = NORMALIZE_X(zvi->yy);
       break;
-    case 5:
-    case 6:
+    case BOTTOM_WALL:
+    case TOP_WALL:
       zvi->x1 = NORMALIZE_X(zvi->x1);
       zvi->x2 = NORMALIZE_X(zvi->x2);
       zvi->y1 = NORMALIZE_Y(zvi->y1);
@@ -3284,6 +3284,7 @@ int readsmv(char *file, char *file2){
   nzvents=0;
   nzhvents=0;
   nzvvents=0;
+  nzmvents = 0;
 
   FREEMEMORY(textureinfo);
   FREEMEMORY(surfinfo);
@@ -5304,20 +5305,20 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"VENTGEOM")==1||match(buffer,"VFLOWGEOM")==1||match(buffer,"HVACGEOM")==1){
-      int zonevent_orien=HFLOW_VENT;
-      int hvent_type=0;
+      int vent_type=HFLOW_VENT;
+      int vertical_vent_type=0;
       zvent *zvi;
       float vent_area;
-      int roomfrom, roomto, face;
+      int roomfrom, roomto, wall;
       roomdata *roomi;
       float color[4];
       float width,ventoffset,bottom,top;
 
       nzvents++;
       zvi = zventinfo + nzvents - 1;
-      if(match(buffer,"VFLOWGEOM")==1)zonevent_orien=VFLOW_VENT;
-      if(match(buffer,"HVACGEOM")==1)zonevent_orien=HVAC_VENT;
-      zvi->vent_orien=zonevent_orien;
+      if(match(buffer,"VFLOWGEOM")==1)vent_type=VFLOW_VENT;
+      if(match(buffer,"HVACGEOM")==1)vent_type=HVAC_VENT;
+      zvi->vent_type=vent_type;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
       }
@@ -5325,10 +5326,10 @@ int readsmv(char *file, char *file2){
       color[1]=0.0;
       color[2]=1.0;
       color[3]=1.0;
-      if(zonevent_orien==HFLOW_VENT||zonevent_orien==HVAC_VENT){
+      if(vent_type==HFLOW_VENT){
         nzhvents++;
         sscanf(buffer,"%i %i %i %f %f %f %f %f %f %f",
-          &roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top,
+          &roomfrom,&roomto, &wall,&width,&ventoffset,&bottom,&top,
           color,color+1,color+2
           );
 
@@ -5341,27 +5342,26 @@ int readsmv(char *file, char *file2){
         if(roomto<1||roomto>nrooms)roomto=nrooms+1;
         zvi->room2=roominfo+roomto-1;
 
-        zvi->dir=face;
+        zvi->wall=wall;
         zvi->z1=roomi->z0+bottom;
         zvi->z2=roomi->z0+top;
-        zvi->face=face;
-        switch(face){
-        case 1:
+        switch(wall){
+        case FRONT_WALL:
           zvi->yy=roomi->y0;
           zvi->x1=roomi->x0+ventoffset;
           zvi->x2=roomi->x0+ventoffset+width;
           break;
-        case 2:
+        case RIGHT_WALL:
           zvi->yy=roomi->x1;
           zvi->x1=roomi->y0+ventoffset;
           zvi->x2=roomi->y0+ventoffset+width;
           break;
-        case 3:
+        case BACK_WALL:
           zvi->yy=roomi->y1;
           zvi->x1=roomi->x0+ventoffset;
           zvi->x2=roomi->x0+ventoffset+width;
           break;
-        case 4:
+        case LEFT_WALL:
           zvi->yy=roomi->x0;
           zvi->x1=roomi->y0+ventoffset;
           zvi->x2=roomi->y0+ventoffset+width;
@@ -5370,17 +5370,17 @@ int readsmv(char *file, char *file2){
           ASSERT(FFALSE);
         }
       }
-      else if(zonevent_orien==VFLOW_VENT){
+      else if(vent_type==VFLOW_VENT){
         float ventside;
         float xcen, ycen;
         int r_from, r_to;
 
         nzvvents++;
         sscanf(buffer,"%i %i %i %f %i %f %f %f",
-          &r_from,&r_to,&face,&vent_area,&hvent_type,
+          &r_from,&r_to,&wall,&vent_area,&vertical_vent_type,
           color,color+1,color+2
           );
-        zvi->dir=face;
+        zvi->wall=wall;
         roomfrom=r_from;
         roomto=r_to;
         if(roomfrom<1||roomfrom>nrooms){
@@ -5395,13 +5395,13 @@ int readsmv(char *file, char *file2){
         ventside=sqrt(vent_area);
         xcen = (roomi->x0+roomi->x1)/2.0;
         ycen = (roomi->y0+roomi->y1)/2.0;
-        if(face==5){
+        if(wall==BOTTOM_WALL){
           zvi->zz=roomi->z0;
         }
         else{
           zvi->zz=roomi->z1;
         }
-        switch(hvent_type){
+        switch(vertical_vent_type){
         case 1:
         case 2:
           zvi->x1=xcen-ventside/2.0;
@@ -5414,11 +5414,42 @@ int readsmv(char *file, char *file2){
           break;
         }
 
-        zvi->vent_type=hvent_type;
+        zvi->vertical_vent_type=vertical_vent_type;
         zvi->area=vent_area;
-        zvi->face=face;
       }
-      zvi->color=getcolorptr(color);
+      else if(vent_type==HVAC_VENT){
+        float xyz[6];
+        float dxyz[3];
+
+        nzmvents++;
+        sscanf(buffer, "%i %f %f %f %f %f %f %f %f %f",
+          &roomfrom, xyz,xyz+1,xyz+2,xyz+3,xyz+4,xyz+5,
+          color, color+1, color+2
+          );
+
+        if(roomfrom<1||roomfrom>nrooms)roomfrom = nrooms+1;
+        roomi = roominfo+roomfrom-1;
+        zvi->room1 = roomi;
+        zvi->x1 = roomi->x0 + xyz[0];
+        zvi->x2 = roomi->x0 + xyz[1];
+        zvi->y1 = roomi->y0 + xyz[2];
+        zvi->y2 = roomi->y0 + xyz[3];
+        zvi->z1 = roomi->z0 + xyz[4];
+        zvi->z2 = roomi->z0 + xyz[5];
+        dxyz[0] = ABS(xyz[0] - xyz[1]);
+        dxyz[1] = ABS(xyz[2] - xyz[3]);
+        dxyz[2] = ABS(xyz[4] - xyz[5]);
+        if(dxyz[0] < MIN(dxyz[1], dxyz[2])){
+          zvi->dir = XDIR;
+        }
+        else if(dxyz[1] < MIN(dxyz[0], dxyz[2])){
+          zvi->dir = YDIR;
+        }
+        else{
+          zvi->dir = ZDIR;
+        }
+      }
+      zvi->color = getcolorptr(color);
       CheckMemory;
       continue;
     }

@@ -32,7 +32,9 @@ void _Sniff_Errors(char *whereat);
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
 
-#define MAXSLABS 10
+#define MAX_HSLABS 10
+#define MAX_VSLABS 2
+#define MAX_MSLABS 2
 
 #define MAKE_MOVIE 28
 
@@ -238,11 +240,6 @@ void _Sniff_Errors(char *whereat);
 
 #define SCRIPT_UNKNOWN -1
 
-#define DIRX 1
-#define DIRY 2
-#define DIRZ 3
-#define ISO 4
-
 #define PROJECTION 24
 
 #define PARTICLES 0
@@ -411,6 +408,7 @@ void _Sniff_Errors(char *whereat);
 #define XDIR 0
 #define YDIR 1
 #define ZDIR 2
+#define ISO 4
 
 #define NTARGTIMES 100
 
