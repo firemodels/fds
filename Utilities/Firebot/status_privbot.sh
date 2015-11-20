@@ -2,8 +2,8 @@
 cat << EOF
 <br><br>
 <hr align='left'><br>
-<i>Status last updated: `date`</i><br><br><br>
-
+<em>Updated at: `date`</em><br>
+<em>Updated by: Utilities/Firebot/status_updatepriv.sh</em>
 </body>
 </html>
 EOF
