@@ -3039,7 +3039,7 @@ int readsmv(char *file, char *file2){
       ntarginfo++;
       continue;
     }
-    if(match(buffer,"VENTGEOM") == 1||match(buffer,"VFLOWGEOM")==1||match(buffer,"HVACGEOM")==1){
+    if(match(buffer, "VENTGEOM")==1||match(buffer, "HFLOWGEOM")==1||match(buffer, "VFLOWGEOM")==1||match(buffer, "MFLOWGEOM")==1){
       nzvents++;
       continue;
     }
@@ -5301,10 +5301,10 @@ int readsmv(char *file, char *file2){
     }
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ VENTGEOM ++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ HFLOWGEOM+++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"VENTGEOM")==1||match(buffer,"VFLOWGEOM")==1||match(buffer,"HVACGEOM")==1){
+    if(match(buffer, "VENTGEOM")==1||match(buffer, "HFLOWGEOM")==1||match(buffer, "VFLOWGEOM")==1||match(buffer, "MFLOWGEOM")==1){
       int vent_type=HFLOW_VENT;
       int vertical_vent_type=0;
       zvent *zvi;
@@ -5317,7 +5317,7 @@ int readsmv(char *file, char *file2){
       nzvents++;
       zvi = zventinfo + nzvents - 1;
       if(match(buffer,"VFLOWGEOM")==1)vent_type=VFLOW_VENT;
-      if(match(buffer,"HVACGEOM")==1)vent_type=HVAC_VENT;
+      if(match(buffer,"MFLOWGEOM")==1)vent_type=MFLOW_VENT;
       zvi->vent_type=vent_type;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
@@ -5417,7 +5417,7 @@ int readsmv(char *file, char *file2){
         zvi->vertical_vent_type=vertical_vent_type;
         zvi->area=vent_area;
       }
-      else if(vent_type==HVAC_VENT){
+      else if(vent_type==MFLOW_VENT){
         float xyz[6];
         float dxyz[3];
 
@@ -5440,13 +5440,26 @@ int readsmv(char *file, char *file2){
         dxyz[1] = ABS(xyz[2] - xyz[3]);
         dxyz[2] = ABS(xyz[4] - xyz[5]);
         if(dxyz[0] < MIN(dxyz[1], dxyz[2])){
-          zvi->dir = XDIR;
+          zvi->wall = LEFT_WALL;
         }
         else if(dxyz[1] < MIN(dxyz[0], dxyz[2])){
-          zvi->dir = YDIR;
+          zvi->wall = FRONT_WALL;
         }
         else{
-          zvi->dir = ZDIR;
+          zvi->wall = BOTTOM_WALL;
+        }
+        switch(zvi->wall){
+        case LEFT_WALL:
+          zvi->yy = roomi->x0+xyz[0];
+          break;
+        case FRONT_WALL:
+          zvi->yy = roomi->y0+xyz[2];
+          break;
+        case BOTTOM_WALL:
+          zvi->zz = roomi->z0+xyz[4];
+          break;
+        default:
+          ASSERT(FFALSE);
         }
       }
       zvi->color = getcolorptr(color);

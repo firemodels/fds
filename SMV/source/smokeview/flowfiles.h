@@ -1377,7 +1377,7 @@ typedef struct {
 
 typedef struct {
   float x1,x2,y1,y2,z1,z2,yy,zz;
-  int wall,dir;
+  int wall;
   float vmin, vmax;
   float g_vmin, g_vmax;
   roomdata *room1, *room2;
