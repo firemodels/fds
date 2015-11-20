@@ -353,13 +353,13 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   visGrid=0;
   meshi->visInteriorPatches=0;
   if(visx_all==1){
-    updateshowstep(1,DIRX);
+    updateshowstep(1,XDIR);
   }
   if(visy_all==1){
-    updateshowstep(1,DIRY);
+    updateshowstep(1,YDIR);
   }
   if(visz_all==1){
-    updateshowstep(1,DIRZ);
+    updateshowstep(1,ZDIR);
   }
   if(visiso==1){
     updatesurface();
