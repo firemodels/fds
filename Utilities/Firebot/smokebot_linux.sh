@@ -148,6 +148,7 @@ UploadGuides=$fdsroot/Utilities/Firebot/smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
+THIS_CFAST_FAILED=0
 FDS_STATUS_FILE=$fdsroot/FDS_status
 LAST_FDS_FAILED=0
 if [ -e $FDS_STATUS_FILE ] ; then
@@ -377,6 +378,7 @@ update_and_compile_cfast()
       echo "CFAST failed to compile" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage0_cfast >> $ERROR_LOG
       echo "" >> $ERROR_LOG
+      THIS_CFAST_FAILED=1
    fi
 
 }
@@ -1153,6 +1155,9 @@ email_build_status()
 {
    if [[ "$THIS_FDS_FAILED" == "1" ]] ; then
      mailTo="$mailToFDS"
+   fi
+   if [[ "$THIS_CFAST_FAILED" == "1" ]] ; then
+     mailTo="$mailToCFAST"
    fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
