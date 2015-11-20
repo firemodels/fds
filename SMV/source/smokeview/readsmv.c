@@ -2037,7 +2037,7 @@ void update_mesh_coords(void){
 
     zvi = zventinfo + n;
 
-    switch(zvi->dir){
+    switch(zvi->wall){
     case FRONT_WALL:
     case BACK_WALL:
       zvi->x1 = NORMALIZE_X(zvi->x1);
@@ -5309,7 +5309,7 @@ int readsmv(char *file, char *file2){
       int vertical_vent_type=0;
       zvent *zvi;
       float vent_area;
-      int roomfrom, roomto, face;
+      int roomfrom, roomto, wall;
       roomdata *roomi;
       float color[4];
       float width,ventoffset,bottom,top;
@@ -5329,7 +5329,7 @@ int readsmv(char *file, char *file2){
       if(vent_type==HFLOW_VENT){
         nzhvents++;
         sscanf(buffer,"%i %i %i %f %f %f %f %f %f %f",
-          &roomfrom,&roomto, &face,&width,&ventoffset,&bottom,&top,
+          &roomfrom,&roomto, &wall,&width,&ventoffset,&bottom,&top,
           color,color+1,color+2
           );
 
@@ -5342,11 +5342,10 @@ int readsmv(char *file, char *file2){
         if(roomto<1||roomto>nrooms)roomto=nrooms+1;
         zvi->room2=roominfo+roomto-1;
 
-        zvi->dir=face;
+        zvi->wall=wall;
         zvi->z1=roomi->z0+bottom;
         zvi->z2=roomi->z0+top;
-        zvi->face=face;
-        switch(face){
+        switch(wall){
         case FRONT_WALL:
           zvi->yy=roomi->y0;
           zvi->x1=roomi->x0+ventoffset;
@@ -5378,10 +5377,10 @@ int readsmv(char *file, char *file2){
 
         nzvvents++;
         sscanf(buffer,"%i %i %i %f %i %f %f %f",
-          &r_from,&r_to,&face,&vent_area,&vertical_vent_type,
+          &r_from,&r_to,&wall,&vent_area,&vertical_vent_type,
           color,color+1,color+2
           );
-        zvi->dir=face;
+        zvi->wall=wall;
         roomfrom=r_from;
         roomto=r_to;
         if(roomfrom<1||roomfrom>nrooms){
@@ -5396,7 +5395,7 @@ int readsmv(char *file, char *file2){
         ventside=sqrt(vent_area);
         xcen = (roomi->x0+roomi->x1)/2.0;
         ycen = (roomi->y0+roomi->y1)/2.0;
-        if(face==5){
+        if(wall==BOTTOM_WALL){
           zvi->zz=roomi->z0;
         }
         else{
@@ -5417,10 +5416,10 @@ int readsmv(char *file, char *file2){
 
         zvi->vertical_vent_type=vertical_vent_type;
         zvi->area=vent_area;
-        zvi->face=face;
       }
       else if(vent_type==HVAC_VENT){
         float xyz[6];
+        float dxyz[3];
 
         nzmvents++;
         sscanf(buffer, "%i %f %f %f %f %f %f %f %f %f",
@@ -5431,6 +5430,24 @@ int readsmv(char *file, char *file2){
         if(roomfrom<1||roomfrom>nrooms)roomfrom = nrooms+1;
         roomi = roominfo+roomfrom-1;
         zvi->room1 = roomi;
+        zvi->x1 = roomi->x0 + xyz[0];
+        zvi->x2 = roomi->x0 + xyz[1];
+        zvi->y1 = roomi->y0 + xyz[2];
+        zvi->y2 = roomi->y0 + xyz[3];
+        zvi->z1 = roomi->z0 + xyz[4];
+        zvi->z2 = roomi->z0 + xyz[5];
+        dxyz[0] = ABS(xyz[0] - xyz[1]);
+        dxyz[1] = ABS(xyz[2] - xyz[3]);
+        dxyz[2] = ABS(xyz[4] - xyz[5]);
+        if(dxyz[0] < MIN(dxyz[1], dxyz[2])){
+          zvi->dir = XDIR;
+        }
+        else if(dxyz[1] < MIN(dxyz[0], dxyz[2])){
+          zvi->dir = YDIR;
+        }
+        else{
+          zvi->dir = ZDIR;
+        }
       }
       zvi->color = getcolorptr(color);
       CheckMemory;

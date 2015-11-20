@@ -1026,7 +1026,6 @@ void drawroomgeom(void){
   float xroom0, yroom0, zroom0, xroom, yroom, zroom;
   float x1,x2,yy1,yy2,z1,z2;
   int i;
-  int idir;
   float yy,zz;
 
   fill_zonedata(izone);
@@ -1108,14 +1107,13 @@ void drawroomgeom(void){
       zvi = zventinfo + i;
 
       glColor4fv(zvi->color);
-      idir=zvi->dir;
       x1=zvi->x1;
       x2=zvi->x2;
       z1=zvi->z1;
       z2=zvi->z2;
       yy=zvi->yy;
       glBegin(GL_LINE_LOOP);
-      switch(idir){
+      switch(zvi->wall){
       case FRONT_WALL:
       case BACK_WALL:
         glVertex3f(x1,yy,z1);
@@ -1197,7 +1195,6 @@ void getzoneventbounds(void){
 void drawventdataPROFILE(void){
   float factor;
   int i;
-  int idir;
   float x1, yy;
 
   if(visVentFlow==0)return;
@@ -1229,7 +1226,6 @@ void drawventdataPROFILE(void){
     for(j=0;j<NELEV_ZONE;j++){
       yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
-    idir=zvi->dir;
     x1=(zvi->x1+zvi->x2)/2.0;
     yy=zvi->yy;
     glBegin(GL_QUADS);
@@ -1238,14 +1234,14 @@ void drawventdataPROFILE(void){
 
       dy1 = factor*zvi->area_fraction*zvi->vdata[j];
       dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
-      if(idir==FRONT_WALL||idir==LEFT_WALL){
+      if(zvi->wall==FRONT_WALL||zvi->wall==LEFT_WALL){
         dy1=-dy1;
         dy2=-dy2;
       }
       vcolor1=rgb_full[zvi->itempdata[j]];
       vcolor2=rgb_full[zvi->itempdata[j+1]];
       vcolor2=vcolor1;
-      switch(idir){
+      switch(zvi->wall){
       case LEFT_WALL:
       case RIGHT_WALL:
         if(dy1*dy2>=0.0){
@@ -1317,7 +1313,6 @@ void drawventdataPROFILE(void){
 
 void drawventdataSLAB(void){
   int i;
-  int idir;
   float x1, yy;
 
   if(visVentFlow==0)return;
@@ -1332,7 +1327,6 @@ void drawventdataSLAB(void){
     zvi = zventinfo+i;
 
     if(zvi->vent_type==HVAC_VENT||zvi->vent_type==VFLOW_VENT)continue;
-    idir = zvi->dir;
     x1 = (zvi->x1+zvi->x2)/2.0;
     yy = zvi->yy;
 
@@ -1351,7 +1345,7 @@ void drawventdataSLAB(void){
       glColor3fv(tcolor);
 
       dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
-      switch(idir){
+      switch(zvi->wall){
       case BOTTOM_WALL:
       case TOP_WALL:
         break;

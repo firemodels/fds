@@ -213,16 +213,16 @@ void StaticVariableMenu(int value){
   }
   updatesurface();
   if(visx_all==1){
-    updateshowstep(1,DIRX);
+    updateshowstep(1,XDIR);
   }
   if(visy_all==1){
-    updateshowstep(1,DIRY);
+    updateshowstep(1,YDIR);
   }
   if(visz_all==1){
-    updateshowstep(1,DIRZ);
+    updateshowstep(1,ZDIR);
   }
   if(visx_all==0&&visy_all==0&&visz_all==0){
-    updateshowstep(1,DIRY);
+    updateshowstep(1,YDIR);
   }
   updateallplotslices();
   updatemenu=1;  
@@ -236,13 +236,13 @@ void IsoVariableMenu(int value){
   if(ReadPlot3dFile==1){
     plotn=value;
     if(visx_all==1){
-      updateshowstep(1,DIRX);
+      updateshowstep(1,XDIR);
     }
     if(visy_all==1){
-      updateshowstep(1,DIRY);
+      updateshowstep(1,YDIR);
     }
     if(visz_all==1){
-      updateshowstep(1,DIRZ);
+      updateshowstep(1,ZDIR);
     }
     updateshowstep(1,ISO);
     updatesurface();
