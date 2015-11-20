@@ -1145,7 +1145,8 @@ make_fds_configuration_management_plan()
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_configuration_management_plan
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $reponame/Manuals/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf 'FDS Configuration Management Plan'
+   # note: script that uploads pdf to google doens't like the name so it has been shortened to FDS_Config_Management_Plan
+   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $reponame/Manuals/FDS_Configuration_Management_Plan/FDS_Config_Management_Plan.pdf 'FDS Configuration Management Plan'
 }
 
 #  =====================================================
