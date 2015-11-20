@@ -201,6 +201,7 @@ clean_firebot_metafiles()
    MKDIR $HISTORY_DIR &> /dev/null
    MKDIR $OUTPUT_DIR &> /dev/null
    rm -rf $OUTPUT_DIR/* &> /dev/null
+   MKDIR $NEWGUIDE_DIR &> /dev/null
 }
 
 #  ========================
@@ -1087,6 +1088,7 @@ check_guide()
       # Copy guide to Firebot's local website
       if [[ "$UPLOADGUIDES" == "1" ]]; then
         cp $2 /var/www/html/firebot/manuals/
+        cp $2 $NEWGUIDE_DIR/.
       fi
    fi
 }
