@@ -1170,7 +1170,7 @@ void getzoneventbounds(void){
       float yelev[NELEV_ZONE];
 
       zvi = zventinfo + i;
-      if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==HVAC_VENT)continue;
+      if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
       for(j=0;j<NELEV_ZONE;j++){
         yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
       }
@@ -1184,7 +1184,7 @@ void getzoneventbounds(void){
     zvent *zvi;
 
     zvi = zventinfo + i;
-    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==HVAC_VENT)continue;
+    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
     zone_maxventflow = MAX(ABS(zvi->g_vmin),zone_maxventflow);
     zone_maxventflow = MAX(ABS(zvi->g_vmax),zone_maxventflow);
   }
@@ -1207,7 +1207,7 @@ void drawventdataPROFILE(void){
     float yelev[NELEV_ZONE];
 
     zvi = zventinfo + i;
-    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==HVAC_VENT)continue;
+    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
       yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
@@ -1222,7 +1222,7 @@ void drawventdataPROFILE(void){
 
     zvi = zventinfo + i;
 
-    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==HVAC_VENT)continue;
+    if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
       yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
     }
@@ -1326,7 +1326,7 @@ void drawventdataSLAB(void){
 
     zvi = zventinfo+i;
 
-    if(zvi->vent_type==HVAC_VENT||zvi->vent_type==VFLOW_VENT)continue;
+    if(zvi->vent_type==MFLOW_VENT||zvi->vent_type==VFLOW_VENT)continue;
     x1 = (zvi->x1+zvi->x2)/2.0;
     yy = zvi->yy;
 

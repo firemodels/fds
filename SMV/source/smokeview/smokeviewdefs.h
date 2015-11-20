@@ -71,7 +71,7 @@ void _Sniff_Errors(char *whereat);
 
 #define HFLOW_VENT 0
 #define VFLOW_VENT 1
-#define HVAC_VENT 2
+#define MFLOW_VENT 2
 
 #define CLIP_ON_DENORMAL 2
 #define CLIP_ON 1
