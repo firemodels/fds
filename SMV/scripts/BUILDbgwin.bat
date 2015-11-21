@@ -20,7 +20,7 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\Utilities\background\intel_win_32
+cd %svn_root%\Utilities\background\intel_win_64
 erase *.obj
 call make_background.bat
 pause
