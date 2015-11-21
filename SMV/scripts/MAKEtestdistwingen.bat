@@ -57,7 +57,7 @@ CALL :COPY  ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform
 
 CALL :COPY  ..\..\Utilities\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
 
-CALL :COPY  ..\..\Utilities\background\intel_win_32\background.exe %smvdir%\background.exe
+CALL :COPY  ..\..\Utilities\background\intel_win_64\background.exe %smvdir%\background.exe
 
 echo bundleinfo=%bundleinfo%
 CALL :COPY ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.exe
