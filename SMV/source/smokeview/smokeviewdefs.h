@@ -383,6 +383,13 @@ void _Sniff_Errors(char *whereat);
 #define BOTTOM_WALL 5
 #define TOP_WALL 6
 
+#define XLEFT -1
+#define XRIGHT 1
+#define YFRONT -2
+#define YBACK 2
+#define ZBOTTOM -3
+#define ZTOP 3
+
 #define IMIN 0
 #define IMAX 1
 #define JMIN 2

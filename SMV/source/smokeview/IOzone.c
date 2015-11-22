@@ -550,13 +550,12 @@ void getzonesmokedir(float *mm){
 
     for(i=-3;i<=3;i++){
       if(i==0)continue;
-      ii = i;
-      if(i<0)ii=-i;
+      ii = ABS(i);
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
       switch(ii){
-      case 1:
+      case XRIGHT:
         if(i<0){
           norm[0]=-1.0;
           eyedir[0]=roomj->x0;
@@ -568,7 +567,7 @@ void getzonesmokedir(float *mm){
         eyedir[1]=roomj->y0+roomj->dy/2.0;
         eyedir[2]=roomj->z0+roomj->dz/2.0;
         break;
-      case 2:
+      case YBACK:
         eyedir[0]=roomj->x0+roomj->dx/2.0;
         if(i<0){
           norm[1]=-1.0;
@@ -580,7 +579,7 @@ void getzonesmokedir(float *mm){
         }
         eyedir[2]=roomj->z0+roomj->dz/2.0;
         break;
-      case 3:
+      case ZTOP:
         eyedir[0]=roomj->x0+roomj->dx/2.0;
         eyedir[1]=roomj->y0+roomj->dy/2.0;
         if(i<0){
@@ -1027,10 +1026,7 @@ void get_zoneventvel(float *yy, int n, roomdata *r1, roomdata *r2, float *vdata,
 /* ------------------ drawroomgeom ------------------------ */
 
 void drawroomgeom(void){
-  float xroom0, yroom0, zroom0, xroom, yroom, zroom;
-  float x1,x2,yy1,yy2,z1,z2;
   int i;
-  float yy,zz;
 
   fill_zonedata(izone);
 
@@ -1041,6 +1037,7 @@ void drawroomgeom(void){
 
   for(i=0;i<nrooms;i++){
     roomdata *roomi;
+    float xroom0, yroom0, zroom0, xroom, yroom, zroom;
 
     if(zone_highlight==1&&zone_highlight_room==i){
       glEnd();
@@ -1107,43 +1104,60 @@ void drawroomgeom(void){
     glLineWidth(ventlinewidth);
     for(i=0;i<nzvents;i++){
       zvent *zvi;
+      float x1, x2, y1, y2, z1, z2;
 
       zvi = zventinfo + i;
 
       glColor4fv(zvi->color);
-      x1=zvi->x1;
-      x2=zvi->x2;
-      z1=zvi->z1;
-      z2=zvi->z2;
-      yy=zvi->yy;
+      x1=zvi->x0;
+      x2=zvi->x1;
+      y1 = zvi->y0;
+      y2 = zvi->y1;
+      z1 = zvi->z0;
+      z2=zvi->z1;
       glBegin(GL_LINE_LOOP);
       switch(zvi->wall){
-      case FRONT_WALL:
-      case BACK_WALL:
-        glVertex3f(x1,yy,z1);
-        glVertex3f(x2,yy,z1);
-        glVertex3f(x2,yy,z2);
-        glVertex3f(x1,yy,z2);
-        glVertex3f(x1,yy,z1);
+      case LEFT_WALL:
+        glVertex3f(x1, y1, z1);
+        glVertex3f(x1, y2, z1);
+        glVertex3f(x1, y2, z2);
+        glVertex3f(x1, y1, z2);
+        glVertex3f(x1, y1, z1);
         break;
       case RIGHT_WALL:
-      case LEFT_WALL:
-        glVertex3f(yy,x1,z1);
-        glVertex3f(yy,x2,z1);
-        glVertex3f(yy,x2,z2);
-        glVertex3f(yy,x1,z2);
-        glVertex3f(yy,x1,z1);
+        glVertex3f(x2, y1, z1);
+        glVertex3f(x2, y2, z1);
+        glVertex3f(x2, y2, z2);
+        glVertex3f(x2, y1, z2);
+        glVertex3f(x2, y1, z1);
+        break;
+      case FRONT_WALL:
+        glVertex3f(x1, y1, z1);
+        glVertex3f(x2, y1, z1);
+        glVertex3f(x2, y1, z2);
+        glVertex3f(x1, y1, z2);
+        glVertex3f(x1, y1, z1);
+        break;
+      case BACK_WALL:
+        glVertex3f(x1,y2,z1);
+        glVertex3f(x2,y2,z1);
+        glVertex3f(x2,y2,z2);
+        glVertex3f(x1,y2,z2);
+        glVertex3f(x1,y2,z1);
         break;
       case BOTTOM_WALL:
+        glVertex3f(x1,y1,z1);
+        glVertex3f(x2,y1,z1);
+        glVertex3f(x2,y2,z1);
+        glVertex3f(x1,y2,z1);
+        glVertex3f(x1,y1,z1);
+        break;
       case TOP_WALL:
-        yy1=zvi->y1;
-        yy2=zvi->y2;
-        zz=zvi->zz;
-        glVertex3f(x1,yy1,zz);
-        glVertex3f(x2,yy1,zz);
-        glVertex3f(x2,yy2,zz);
-        glVertex3f(x1,yy2,zz);
-        glVertex3f(x1,yy1,zz);
+        glVertex3f(x1,y1,z2);
+        glVertex3f(x2,y1,z2);
+        glVertex3f(x2,y2,z2);
+        glVertex3f(x1,y2,z2);
+        glVertex3f(x1,y1,z2);
         break;
       default:
         ASSERT(FFALSE);
@@ -1171,14 +1185,14 @@ void getzoneventbounds(void){
     for(i=0;i<nzvents;i++){
       int j;
       zvent *zvi;
-      float yelev[NELEV_ZONE];
+      float zelev[NELEV_ZONE];
 
       zvi = zventinfo + i;
       if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
       for(j=0;j<NELEV_ZONE;j++){
-        yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
+        zelev[j]=(zvi->z0*(NELEV_ZONE-1-j)+zvi->z1*j)/(float)(NELEV_ZONE-1);
       }
-      get_zoneventvel(yelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
+      get_zoneventvel(zelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
       zvi->g_vmin = MIN(zvi->vmin,zvi->g_vmin);
       zvi->g_vmax = MAX(zvi->vmax,zvi->g_vmax);
     }
@@ -1199,7 +1213,6 @@ void getzoneventbounds(void){
 void drawventdataPROFILE(void){
   float factor;
   int i;
-  float x1, yy;
 
   if(visVentFlow==0)return;
 
@@ -1208,39 +1221,56 @@ void drawventdataPROFILE(void){
   for(i=0;i<nzvents;i++){
     int j;
     zvent *zvi;
-    float yelev[NELEV_ZONE];
+    float zelev[NELEV_ZONE];
 
     zvi = zventinfo + i;
     if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
-      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
+      zelev[j]=(zvi->z0*(NELEV_ZONE-1-j)+zvi->z1*j)/(float)(NELEV_ZONE-1);
     }
-    get_zoneventvel(yelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
+    get_zoneventvel(zelev, NELEV_ZONE, zvi->room1, zvi->room2, zvi->vdata, &zvi->vmin, &zvi->vmax, zvi->itempdata);
   }
   factor = 0.1*zone_ventfactor/zone_maxventflow;
   for(i=0;i<nzvents;i++){
     zvent *zvi;
     int j;
-    float yelev[NELEV_ZONE];
+    float zelev[NELEV_ZONE];
     float *vcolor1,*vcolor2;
+    float xmid, ymid;
 
     zvi = zventinfo + i;
 
     if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
     for(j=0;j<NELEV_ZONE;j++){
-      yelev[j]=(zvi->z1*(NELEV_ZONE-1-j)+zvi->z2*j)/(float)(NELEV_ZONE-1);
+      zelev[j]=(zvi->z0*(NELEV_ZONE-1-j)+zvi->z1*j)/(float)(NELEV_ZONE-1);
     }
-    x1=(zvi->x1+zvi->x2)/2.0;
-    yy=zvi->yy;
+    xmid = (zvi->x0 + zvi->x1)/2.0;
+    ymid = (zvi->y0 + zvi->y1)/2.0;
     glBegin(GL_QUADS);
     for(j=0;j<NELEV_ZONE-1;j++){
-      float dy1,dy2;
+      float dvent1,dvent2;
+      float xwall, ywall;
 
-      dy1 = factor*zvi->area_fraction*zvi->vdata[j];
-      dy2 = factor*zvi->area_fraction*zvi->vdata[j+1];
+      switch(zvi->wall){
+      case LEFT_WALL:
+        xwall = zvi->x0;
+        break;
+      case RIGHT_WALL:
+        xwall = zvi->x1;
+        break;
+      case FRONT_WALL:
+        ywall = zvi->y0;
+        break;
+      case BACK_WALL:
+        ywall = zvi->y1;
+        break;
+      }
+      dvent1 = factor*zvi->area_fraction*zvi->vdata[j];
+      dvent2 = factor*zvi->area_fraction*zvi->vdata[j+1];
+      
       if(zvi->wall==FRONT_WALL||zvi->wall==LEFT_WALL){
-        dy1=-dy1;
-        dy2=-dy2;
+        dvent1=-dvent1;
+        dvent2=-dvent2;
       }
       vcolor1=rgb_full[zvi->itempdata[j]];
       vcolor2=rgb_full[zvi->itempdata[j+1]];
@@ -1248,58 +1278,58 @@ void drawventdataPROFILE(void){
       switch(zvi->wall){
       case LEFT_WALL:
       case RIGHT_WALL:
-        if(dy1*dy2>=0.0){
+        if(dvent1*dvent2>=0.0){
           glColor3fv(vcolor1);
-          glVertex3f(yy,    x1,yelev[j]);
-          glVertex3f(yy+dy1,x1,yelev[j]);
+          glVertex3f(xwall,       ymid,zelev[j]);
+          glVertex3f(xwall+dvent1,ymid,zelev[j]);
      
           glColor3fv(vcolor2);
-          glVertex3f(yy+dy2,x1,yelev[j+1]);
-          glVertex3f(yy,    x1,yelev[j+1]);
+          glVertex3f(xwall+dvent2,ymid,zelev[j+1]);
+          glVertex3f(xwall,       ymid,zelev[j+1]);
         }
         else{
-          float dyy;
+          float dvent;
 
-          dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
+          dvent =  dvent1*(zelev[j+1]-zelev[j])/(dvent2-dvent1);
           glColor3fv(vcolor1);
-          glVertex3f(yy,    x1,yelev[j]);
-          glVertex3f(yy+dy1,x1,yelev[j]);
-          glVertex3f(yy,    x1,dyy);
-          glVertex3f(yy,x1,dyy);
+          glVertex3f(xwall,          ymid, zelev[j]);
+          glVertex3f(xwall + dvent1, ymid, zelev[j]);
+          glVertex3f(xwall,          ymid, zelev[j] - dvent);
+          glVertex3f(xwall,          ymid, zelev[j] - dvent);
 
           glColor3fv(vcolor2);
-          glVertex3f(yy,    x1,dyy);
-          glVertex3f(yy,    x1,dyy);
-          glVertex3f(yy+dy2,x1,yelev[j+1]);
-          glVertex3f(yy,    x1,yelev[j+1]);
+          glVertex3f(xwall,          ymid, zelev[j] - dvent);
+          glVertex3f(xwall,          ymid, zelev[j] - dvent);
+          glVertex3f(xwall + dvent2, ymid, zelev[j + 1]);
+          glVertex3f(xwall,          ymid, zelev[j + 1]);
         }
         break;
       case BACK_WALL:
       case FRONT_WALL:
-        if(dy1*dy2>=0.0){
+        if(dvent1*dvent2>=0.0){
           glColor3fv(vcolor1);
-          glVertex3f(x1,yy,    yelev[j]);
-          glVertex3f(x1,yy+dy1,yelev[j]);
+          glVertex3f(xmid, ywall,          zelev[j]);
+          glVertex3f(xmid, ywall + dvent1, zelev[j]);
 
           glColor3fv(vcolor2);
-          glVertex3f(x1,yy+dy2,yelev[j+1]);
-          glVertex3f(x1,yy,    yelev[j+1]);
+          glVertex3f(xmid, ywall + dvent2, zelev[j + 1]);
+          glVertex3f(xmid, ywall,          zelev[j + 1]);
         }
         else{
-          float dyy;
+          float dvent;
 
-          dyy =  yelev[j] - dy1*(yelev[j+1]-yelev[j])/(dy2-dy1);
+          dvent =  dvent1*(zelev[j+1]-zelev[j])/(dvent2-dvent1);
           glColor3fv(vcolor1);
-          glVertex3f(x1,yy,    yelev[j]);
-          glVertex3f(x1,yy+dy1,yelev[j]);
-          glVertex3f(x1,yy,dyy);
-          glVertex3f(x1,yy,dyy);
+          glVertex3f(xmid, ywall,          zelev[j]);
+          glVertex3f(xmid, ywall + dvent1, zelev[j]);
+          glVertex3f(xmid, ywall,          zelev[j] - dvent);
+          glVertex3f(xmid, ywall,          zelev[j] - dvent);
 
           glColor3fv(vcolor2);
-          glVertex3f(x1,yy,dyy);
-          glVertex3f(x1,yy,dyy);
-          glVertex3f(x1,yy+dy2,yelev[j+1]);
-          glVertex3f(x1,yy,    yelev[j+1]);
+          glVertex3f(xmid, ywall,          zelev[j] - dvent);
+          glVertex3f(xmid, ywall,          zelev[j] - dvent);
+          glVertex3f(xmid, ywall + dvent2, zelev[j + 1]);
+          glVertex3f(xmid, ywall,          zelev[j + 1]);
         }
         break;
       default:
@@ -1317,7 +1347,6 @@ void drawventdataPROFILE(void){
 
 void drawventdataSLAB(void){
   int i;
-  float x1, yy,zz, y1, z1;
 
   if(visVentFlow==0)return;
 
@@ -1325,24 +1354,20 @@ void drawventdataSLAB(void){
 
   for(i = 0; i<nzvents; i++){
     zvent *zvi;
-    float *slab_vel;
     int islab;
+    float xmid, ymid;
 
     zvi = zventinfo+i;
 
     if(visventslab!=1&&zvi->vent_type==HFLOW_VENT)continue;
-    x1 = (zvi->x1+zvi->x2)/2.0;
-    y1 = (zvi->y1+zvi->y2) / 2.0;
-    z1 = (zvi->z1+zvi->z2) / 2.0;
-    yy = zvi->yy;
-    zz = zvi->zz;
+    xmid = (zvi->x0+zvi->x1)/2.0;
+    ymid = (zvi->y0+zvi->y1)/2.0;
 
-    slab_vel = zvi->slab_vel;
     glBegin(GL_QUADS);
     for(islab = 0; islab<zvi->nslab;islab++){
       float slab_bot, slab_top, tslab, *tcolor;
       int itslab;
-      float dyy,dzz;
+      float dvent;
 
       slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
       slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
@@ -1351,44 +1376,49 @@ void drawventdataSLAB(void){
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 
-      dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
-      dzz = dyy;
+      dvent = 0.1*zone_ventfactor*zvi->slab_vel[islab] / maxslabflow;
       switch(zvi->wall){
       case LEFT_WALL:
-        glVertex3f(yy,     x1, slab_bot);
-        glVertex3f(yy-dyy, x1, slab_bot);
+        glVertex3f(zvi->x0,         ymid, slab_bot);
+        glVertex3f(zvi->x0 - dvent, ymid, slab_bot);
 
-        glVertex3f(yy-dyy, x1, slab_top);
-        glVertex3f(yy,     x1, slab_top);
+        glVertex3f(zvi->x0 - dvent, ymid, slab_top);
+        glVertex3f(zvi->x0,         ymid, slab_top);
         break;
       case RIGHT_WALL:
-        glVertex3f(yy,     x1, slab_bot);
-        glVertex3f(yy+dyy, x1, slab_bot);
+        glVertex3f(zvi->x1,         ymid, slab_bot);
+        glVertex3f(zvi->x1 + dvent, ymid, slab_bot);
 
-        glVertex3f(yy+dyy, x1, slab_top);
-        glVertex3f(yy,     x1, slab_top);
+        glVertex3f(zvi->x1 + dvent, ymid, slab_top);
+        glVertex3f(zvi->x1,         ymid, slab_top);
         break;
       case FRONT_WALL:
-        glVertex3f(x1,     yy, slab_bot);
-        glVertex3f(x1, yy-dyy, slab_bot);
+        glVertex3f(xmid, zvi->y0,         slab_bot);
+        glVertex3f(xmid, zvi->y0 - dvent, slab_bot);
 
-        glVertex3f(x1, yy-dyy, slab_top);
-        glVertex3f(x1,     yy, slab_top);
+        glVertex3f(xmid, zvi->y0 - dvent, slab_top);
+        glVertex3f(xmid, zvi->y0,         slab_top);
         break;
       case BACK_WALL:
-        glVertex3f(x1,     yy, slab_bot);
-        glVertex3f(x1, yy+dyy, slab_bot);
+        glVertex3f(xmid, zvi->y1,         slab_bot);
+        glVertex3f(xmid, zvi->y1 + dvent, slab_bot);
 
-        glVertex3f(x1, yy+dyy, slab_top);
-        glVertex3f(x1,     yy, slab_top);
+        glVertex3f(xmid, zvi->y1 + dvent, slab_top);
+        glVertex3f(xmid, zvi->y1, slab_top);
         break;
       case BOTTOM_WALL:
-      case TOP_WALL:
-        glVertex3f(zvi->x1, y1, zz      );
-        glVertex3f(zvi->x2, y1, zz      );
+        glVertex3f(zvi->x0, ymid, zvi->z0);
+        glVertex3f(zvi->x1, ymid, zvi->z0);
 
-        glVertex3f(zvi->x2, y1, zz + dzz);
-        glVertex3f(zvi->x1, y1, zz + dzz);
+        glVertex3f(zvi->x1, ymid, zvi->z0 + dvent);
+        glVertex3f(zvi->x0, ymid, zvi->z0 + dvent);
+        break;
+      case TOP_WALL:
+        glVertex3f(zvi->x0, ymid, zvi->z1);
+        glVertex3f(zvi->x1, ymid, zvi->z1);
+
+        glVertex3f(zvi->x1, ymid, zvi->z1 + dvent);
+        glVertex3f(zvi->x0, ymid, zvi->z1 + dvent);
         break;
       default:
         ASSERT(FFALSE);
@@ -1555,8 +1585,8 @@ void drawzonesmokeGPU(roomdata *roomi){
     glBegin(GL_TRIANGLES);
 
     switch(iwall){
-      case 1:
-      case -1:
+      case XLEFT:
+      case XRIGHT:
         dy = roomi->dy/(NCOLS_GPU-1);
         dz = roomi->dz/(NROWS_GPU-1);
         if(iwall<0){
@@ -1582,8 +1612,8 @@ void drawzonesmokeGPU(roomdata *roomi){
           }
         }
         break;
-      case 2:
-      case -2:
+      case YBACK:
+      case YFRONT:
         dx = roomi->dx/(NCOLS_GPU-1);
         dz = roomi->dz/(NROWS_GPU-1);
         if(iwall<0){
@@ -1620,8 +1650,8 @@ void drawzonesmokeGPU(roomdata *roomi){
           }
         }
         break;
-      case 3:
-      case -3:
+      case ZBOTTOM:
+      case ZTOP:
         dx = roomi->dx/(NCOLS_GPU-1);
         dy = roomi->dy/(NROWS_GPU-1);
         if(iwall<0){
@@ -1685,8 +1715,8 @@ void drawzonesmoke(roomdata *roomi){
     if(roomi->drawsides[iwall+3]==0)continue;
 
     switch(iwall){
-      case 1:
-      case -1:
+      case XLEFT:
+      case XRIGHT:
         dy = roomi->dy/(NCOLS-1);
         dz = roomi->dz/(NROWS-1);
         if(iwall<0){
@@ -1706,8 +1736,8 @@ void drawzonesmoke(roomdata *roomi){
           }
         }
         break;
-      case 2:
-      case -2:
+      case YBACK:
+      case YFRONT:
         dx = roomi->dx/(NCOLS-1);
         dz = roomi->dz/(NROWS-1);
         if(iwall<0){
@@ -1727,8 +1757,8 @@ void drawzonesmoke(roomdata *roomi){
           }
         }
         break;
-      case 3:
-      case -3:
+      case ZBOTTOM:
+      case ZTOP:
         dx = roomi->dx/(NCOLS-1);
         dy = roomi->dy/(NROWS-1);
         if(iwall<0){
