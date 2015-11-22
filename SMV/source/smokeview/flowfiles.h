@@ -1376,18 +1376,18 @@ typedef struct {
 /* --------------------------  zvent ------------------------------------ */
 
 typedef struct {
-  float x1,x2,y1,y2,z1,z2,yy,zz;
-  int wall;
+  int wall, nslab;
+  float x0, y0, z0;
+  float x1, y1, z1;
   float vmin, vmax;
   float g_vmin, g_vmax;
   roomdata *room1, *room2;
   float area, area_fraction;
   float slab_bot[MAX_HSLABS], slab_top[MAX_HSLABS], slab_vel[MAX_HSLABS], slab_temp[MAX_HSLABS];
-  int nslab;
   float *color;
   float vdata[NELEV_ZONE];
   int itempdata[NELEV_ZONE];
-  int vent_type, vertical_vent_type, flow_direction;
+  int vent_type, vertical_vent_type;
 } zvent;
 
 /* --------------------------  firedata ------------------------------------ */
