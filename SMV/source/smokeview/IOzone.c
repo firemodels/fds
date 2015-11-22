@@ -1317,7 +1317,7 @@ void drawventdataPROFILE(void){
 
 void drawventdataSLAB(void){
   int i;
-  float x1, yy;
+  float x1, yy,zz, y1, z1;
 
   if(visVentFlow==0)return;
 
@@ -1330,16 +1330,19 @@ void drawventdataSLAB(void){
 
     zvi = zventinfo+i;
 
-    if(zvi->vent_type==MFLOW_VENT||zvi->vent_type==VFLOW_VENT)continue;
+    if(visventslab!=1&&zvi->vent_type==HFLOW_VENT)continue;
     x1 = (zvi->x1+zvi->x2)/2.0;
+    y1 = (zvi->y1+zvi->y2) / 2.0;
+    z1 = (zvi->z1+zvi->z2) / 2.0;
     yy = zvi->yy;
+    zz = zvi->zz;
 
     slab_vel = zvi->slab_vel;
     glBegin(GL_QUADS);
     for(islab = 0; islab<zvi->nslab;islab++){
       float slab_bot, slab_top, tslab, *tcolor;
       int itslab;
-      float dyy;
+      float dyy,dzz;
 
       slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
       slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
@@ -1349,10 +1352,8 @@ void drawventdataSLAB(void){
       glColor3fv(tcolor);
 
       dyy = 0.1*zone_ventfactor*slab_vel[islab] / maxslabflow;
+      dzz = dyy;
       switch(zvi->wall){
-      case BOTTOM_WALL:
-      case TOP_WALL:
-        break;
       case LEFT_WALL:
         glVertex3f(yy,     x1, slab_bot);
         glVertex3f(yy-dyy, x1, slab_bot);
@@ -1381,6 +1382,14 @@ void drawventdataSLAB(void){
         glVertex3f(x1, yy+dyy, slab_top);
         glVertex3f(x1,     yy, slab_top);
         break;
+      case BOTTOM_WALL:
+      case TOP_WALL:
+        glVertex3f(zvi->x1, y1, zz      );
+        glVertex3f(zvi->x2, y1, zz      );
+
+        glVertex3f(zvi->x2, y1, zz + dzz);
+        glVertex3f(zvi->x1, y1, zz + dzz);
+        break;
       default:
         ASSERT(FFALSE);
         break;
@@ -1394,10 +1403,8 @@ void drawventdataSLAB(void){
 /* ------------------ drawventdata ------------------------ */
 
 void drawventdata(void){
-  if(have_ventslab_flow==1&&visventslab==1){
-    drawventdataSLAB();
-  }
-  else{
+  if(have_ventslab_flow==1)drawventdataSLAB();
+  if(have_ventslab_flow!=1||visventslab!=1){
     drawventdataPROFILE();
   }
 }
