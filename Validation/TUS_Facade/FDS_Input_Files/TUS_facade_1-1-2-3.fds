@@ -219,27 +219,27 @@ ASTM C-182
 Gas temperatures at facade
 
 Line a
-&DEVC 	XYZ=1.1,-0.25,1.75,	PROP_ID = 'TC', ID='TC_I23' / 
-&DEVC 	XYZ=1.1,-0.25,2.6,	PROP_ID = 'TC', ID='TC_I20' / 
-&DEVC 	XYZ=1.1,-0.25,2.9,	PROP_ID = 'TC', ID='TC_I17' /
-&DEVC 	XYZ=1.1,-0.25,3.2,	PROP_ID = 'TC', ID='TC_I14' /
-&DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_I3' / 
+&DEVC 	XYZ=1.1,-0.25,1.75,	PROP_ID = 'TC', ID='TC_23' / 
+&DEVC 	XYZ=1.1,-0.25,2.6,	PROP_ID = 'TC', ID='TC_20' / 
+&DEVC 	XYZ=1.1,-0.25,2.9,	PROP_ID = 'TC', ID='TC_17' /
+&DEVC 	XYZ=1.1,-0.25,3.2,	PROP_ID = 'TC', ID='TC_14' /
+&DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_3' / 
 
 Line b
-&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_I22' / 
-&DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_I19' / 
-&DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_I16' / 
-&DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_I13' / 
-&DEVC 	XYZ=2.0,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_I11' / 
-&DEVC 	XYZ=2.0,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_I2' / 
+&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' / 
+&DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_19' / 
+&DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_16' / 
+&DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_13' / 
+&DEVC 	XYZ=2.0,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_11' / 
+&DEVC 	XYZ=2.0,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_2' / 
 
 Line c
-&DEVC 	XYZ=2.9,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_I21' / 
-&DEVC 	XYZ=2.9,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_I18' / 
-&DEVC 	XYZ=2.9,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_I15' / 
-&DEVC 	XYZ=2.9,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_I12' / 
-&DEVC 	XYZ=2.9,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_I10' / 
-&DEVC 	XYZ=2.9,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_I1' / 
+&DEVC 	XYZ=2.9,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_21' / 
+&DEVC 	XYZ=2.9,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_18' / 
+&DEVC 	XYZ=2.9,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_15' / 
+&DEVC 	XYZ=2.9,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_12' / 
+&DEVC 	XYZ=2.9,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_10' / 
+&DEVC 	XYZ=2.9,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_1' / 
 
 Gauge Heat fluxes
 Line a
@@ -284,18 +284,18 @@ DEVC 	XYZ=2.9,-0.25,5.7, 	QUANTITY='TEMPERATURE', ID='TC_1' /
 
 Temperature inside chamber
 POLE_A
-&DEVC XYZ=0.1,0.1,0.22, 	PROP_ID = 'TC2' ID='TC_I32'/
-&DEVC XYZ=0.1,0.1,0.43, 	PROP_ID = 'TC2', ID='TC_I31'/
-&DEVC XYZ=0.1,0.1,0.855, 	PROP_ID = 'TC2', ID='TC_I30'/
-&DEVC XYZ=0.1,0.1,1.28, 	PROP_ID = 'TC2', ID='TC_I29'/
-&DEVC XYZ=0.1,0.1,1.49, 	PROP_ID = 'TC2', ID='TC_I28'/
+&DEVC XYZ=0.1,0.1,0.22, 	PROP_ID = 'TC2' ID='TC_32'/
+&DEVC XYZ=0.1,0.1,0.43, 	PROP_ID = 'TC2', ID='TC_31'/
+&DEVC XYZ=0.1,0.1,0.855, 	PROP_ID = 'TC2', ID='TC_30'/
+&DEVC XYZ=0.1,0.1,1.28, 	PROP_ID = 'TC2', ID='TC_29'/
+&DEVC XYZ=0.1,0.1,1.49, 	PROP_ID = 'TC2', ID='TC_28'/
 
 POLE_B
-&DEVC XYZ=2.9,4.2,0.22, 	PROP_ID = 'TC2', ID='TC_I37'/
-&DEVC XYZ=2.9,4.2,0.43, 	PROP_ID = 'TC2', ID='TC_I36'/
-&DEVC XYZ=2.9,4.2,0.855, 	PROP_ID = 'TC2', ID='TC_I35'/
-&DEVC XYZ=2.9,4.2,1.28, 	PROP_ID = 'TC2', ID='TC_I34'/
-&DEVC XYZ=2.9,4.2,1.49, 	PROP_ID = 'TC2', ID='TC_I33'/
+&DEVC XYZ=2.9,4.2,0.22, 	PROP_ID = 'TC2', ID='TC_37'/
+&DEVC XYZ=2.9,4.2,0.43, 	PROP_ID = 'TC2', ID='TC_36'/
+&DEVC XYZ=2.9,4.2,0.855, 	PROP_ID = 'TC2', ID='TC_35'/
+&DEVC XYZ=2.9,4.2,1.28, 	PROP_ID = 'TC2', ID='TC_34'/
+&DEVC XYZ=2.9,4.2,1.49, 	PROP_ID = 'TC2', ID='TC_33'/
 
 &DEVC QUANTITY='TIME',ID='TIMER', SETPOINT=1950.0, XYZ=0.0,0.0,0.0, INITIAL_STATE =.TRUE./
 
