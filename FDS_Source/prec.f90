@@ -21,7 +21,7 @@ INTEGER, PARAMETER :: MAX_SPECIES=20
 ! Hardwired bounds for surface and material arrays
 
 INTEGER, PARAMETER :: MAX_LAYERS=20, MAX_MATERIALS=20, MAX_MATERIALS_TOTAL=400, MAX_REACTIONS=10, MAX_STEPS=20
-INTEGER, PARAMETER :: MAX_NUMBER_SPECTRAL_BANDS=9, MAX_HEATING_RATES=10
+INTEGER, PARAMETER :: MAX_NUMBER_SPECTRAL_BANDS=9
 
 ! Hardwired number of parameters that can be passed to Smokeview to describe a drawn object or device
 
