@@ -1332,8 +1332,8 @@ void drawventdataSLAB(void){
 
     if(visventslab!=1&&zvi->vent_type==HFLOW_VENT)continue;
     x1 = (zvi->x1+zvi->x2)/2.0;
-    y1 = (zvi->y1+zvi->y2) / 2.0;
-    z1 = (zvi->z1+zvi->z2) / 2.0;
+    y1 = (zvi->y1+zvi->y2)/2.0;
+    z1 = (zvi->z1+zvi->z2)/2.0;
     yy = zvi->yy;
     zz = zvi->zz;
 
