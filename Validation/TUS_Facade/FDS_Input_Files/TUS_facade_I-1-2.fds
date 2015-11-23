@@ -24,7 +24,7 @@ Fire mesh(es).
     DT_SLCF	= 1.0,
     DT_BNDF	= 1.0,
     DT_PL3D	= 6000.0,
-    DT_DEVC   	= 1.0,
+    DT_DEVC   	= 10.0,
     DT_ISOF	= 1000000.0 /
 
 -------------------------------FIRE SOURCE----------------------------------
@@ -215,23 +215,21 @@ Line a
 &DEVC 	XYZ=1.1,-0.25,2.6,	PROP_ID = 'TC', ID='TC_20' / 
 &DEVC 	XYZ=1.1,-0.25,2.9,	PROP_ID = 'TC', ID='TC_17' /
 &DEVC 	XYZ=1.1,-0.25,3.2,	PROP_ID = 'TC', ID='TC_14' /
-&DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_3' / 
+&DEVC 	XYZ=1.1,-0.25,5.6, 	PROP_ID = 'TC', ID='TC_3' / 
 
 Line b
 &DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' / 
 &DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_19' / 
 &DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_16' / 
 &DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_13' / 
-&DEVC 	XYZ=2.0,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_11' / 
-&DEVC 	XYZ=2.0,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_2' / 
+&DEVC 	XYZ=2.0,-0.25,5.6, 	PROP_ID = 'TC', ID='TC_2' / 
 
 Line c
 &DEVC 	XYZ=2.9,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_21' / 
 &DEVC 	XYZ=2.9,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_18' / 
 &DEVC 	XYZ=2.9,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_15' / 
 &DEVC 	XYZ=2.9,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_12' / 
-&DEVC 	XYZ=2.9,-0.25,3.7, 	PROP_ID = 'TC', ID='TC_10' / 
-&DEVC 	XYZ=2.9,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_1' / 
+&DEVC 	XYZ=2.9,-0.25,5.6, 	PROP_ID = 'TC', ID='TC_1' / 
 
 Gauge Heat fluxes
 Line a
@@ -249,30 +247,6 @@ Line c
 &DEVC XYZ=2.9,-0.2,2.9, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_6', IOR = -2 / 
 &DEVC XYZ=2.9,-0.2,3.2, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_3', IOR = -2 / 
 &DEVC XYZ=2.9,-0.2,3.7, 	QUANTITY = 'GAUGE HEAT FLUX', ID='HF_1', IOR = -2 / 
-
-Gas Temperatures (unused)
-Line a
-DEVC 	XYZ=1.1,-0.25,1.7, 	QUANTITY='TEMPERATURE', ID='TC_23' /
-DEVC 	XYZ=1.1,-0.25,2.6, 	QUANTITY='TEMPERATURE', ID='TC_20' /
-DEVC 	XYZ=1.1,-0.25,2.9, 	QUANTITY='TEMPERATURE', ID='TC_17' /
-DEVC 	XYZ=1.1,-0.25,3.2, 	QUANTITY='TEMPERATURE', ID='TC_14' /
-DEVC 	XYZ=1.1,-0.25,5.7, 	QUANTITY='TEMPERATURE', ID='TC_3' /
-
-Line b
-DEVC 	XYZ=2.0,-0.25,1.7, 	QUANTITY='TEMPERATURE', ID='TC_22' /
-DEVC 	XYZ=2.0,-0.25,2.6, 	QUANTITY='TEMPERATURE', ID='TC_19' /
-DEVC 	XYZ=2.0,-0.25,2.9, 	QUANTITY='TEMPERATURE', ID='TC_16' /
-DEVC 	XYZ=2.0,-0.25,3.2, 	QUANTITY='TEMPERATURE', ID='TC_13' /
-DEVC 	XYZ=2.0,-0.25,3.7, 	QUANTITY='TEMPERATURE', ID='TC_11' /
-DEVC 	XYZ=2.0,-0.25,5.7, 	QUANTITY='TEMPERATURE', ID='TC_2' /
-
-Line c
-DEVC 	XYZ=2.9,-0.25,1.7, 	QUANTITY='TEMPERATURE', ID='TC_21' /
-DEVC 	XYZ=2.9,-0.25,2.6, 	QUANTITY='TEMPERATURE', ID='TC_18' /
-DEVC 	XYZ=2.9,-0.25,2.9, 	QUANTITY='TEMPERATURE', ID='TC_15' /
-DEVC 	XYZ=2.9,-0.25,3.2, 	QUANTITY='TEMPERATURE', ID='TC_12' /
-DEVC 	XYZ=2.9,-0.25,3.7, 	QUANTITY='TEMPERATURE', ID='TC_10' /
-DEVC 	XYZ=2.9,-0.25,5.7, 	QUANTITY='TEMPERATURE', ID='TC_1' /
 
 Temperature inside chamber
 POLE_A
