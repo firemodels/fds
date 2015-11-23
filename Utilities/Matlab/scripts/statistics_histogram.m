@@ -61,6 +61,5 @@ if strcmp(Stats_Output, 'Validation')
         end
     catch
         display(['Error: Problem with histogram routine for scatter plot ', Scatter_Plot_Title, '; Skipping histogram.'])
-        continue
     end
 end
