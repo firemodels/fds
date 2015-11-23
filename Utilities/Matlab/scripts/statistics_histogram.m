@@ -12,7 +12,7 @@ if strcmp(Stats_Output, 'Validation')
     try
         ln_M_E = log(Predicted_Values)-log(Measured_Values);
         % Normality test (requires at least 4 observations)
-         if length(ln_M_E) >= 4
+        if length(ln_M_E) >= 4
 
             pval = spiegel_test(ln_M_E);
 
@@ -61,6 +61,5 @@ if strcmp(Stats_Output, 'Validation')
         end
     catch
         display(['Error: Problem with histogram routine for scatter plot ', Scatter_Plot_Title, '; Skipping histogram.'])
-%        continue
     end
 end
