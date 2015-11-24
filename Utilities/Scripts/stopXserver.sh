@@ -10,4 +10,3 @@ if [ "`uname`" == "Darwin" ]; then
 else
   kill $SMV_ID
 fi
-
