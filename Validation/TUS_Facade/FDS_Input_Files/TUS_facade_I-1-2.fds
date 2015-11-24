@@ -29,10 +29,14 @@ Fire mesh(es).
 
 -------------------------------FIRE SOURCE----------------------------------
 
-&REAC FUEL = 'PROPANE', SOOT_YIELD=0.015, RADIATIVE_FRACTION = 0.20/
+&REAC FUEL = 'PROPANE', SOOT_YIELD=0.015, CO_YIELD=0.015, RADIATIVE_FRACTION = 0.20/
 
 ISO max 5.6 MW
-&SURF ID='BURNER', HRRPUA=1261.261, RAMP_Q='fireramp', MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025, TMP_FRONT = 300.0 /
+&SURF ID='BURNER',
+      HRRPUA=1261.261,
+      RAMP_Q='fireramp',
+      MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
+      
 &RAMP ID='fireramp', T=0.0, F=0.0 /
 &RAMP ID='fireramp', T=1.0, F=0.5 /
 &RAMP ID='fireramp', T=300.0, F=0.5 /
@@ -126,12 +130,6 @@ According to EN 1094-4:1995
 ------------------------------------------SURFACE PROPERTIES-------------------------------------
 
 
-&SURF ID='BLANKET',
-      COLOR = 'SILVER',
-      MATL_ID = 'CERAMIC_FIBRE_BOARD',
-      STRETCH_FACTOR = 2,
-      THICKNESS = 0.05 /
-
 &SURF ID='PIPE',
       COLOR = 'RED',
       MATL_ID = 'STEEL',
@@ -141,7 +139,7 @@ According to EN 1094-4:1995
 &SURF ID='CEILING',
       COLOR = 'SILVER',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006,
       BACKING = 'VOID'/
 
@@ -155,7 +153,7 @@ According to EN 1094-4:1995
 &SURF ID='WALL',
       COLOR = 'SILVER',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006,
       BACKING = 'VOID',
       DEFAULT=.TRUE./
@@ -163,13 +161,13 @@ According to EN 1094-4:1995
 &SURF ID='FRONTWALL',
       COLOR = 'SILVER',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006 /
 
 &SURF ID='FACADE',COLOR = 'SILVER',
-      MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL','CALSIUM_SILICATE_BOARD',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','CALSIUM_SILICATE_BOARD',
       STRETCH_FACTOR   = 2,2,2,
-      THICKNESS = 0.05,0.006,0.088 /
+      THICKNESS = 0.025,0.025 /
 
 
 -------------------------------------------GEOMETRY-------------------------------------------------
@@ -182,9 +180,10 @@ According to EN 1094-4:1995
 
 &HOLE	XB = 0.8,1.3, 4.2,4.5, 0.325,0.925	/
 
+&OBST	XB = -0.1,4.3, -0.2,0.0, -0.1,1.8,
+	SURF_ID6 = 'WALL','WALL','FACADE','FRONTWALL'				/ 	Facade SPECIMEN(lower part)
+&OBST	XB = 0.0,4.3, -0.2,-0.1, 1.8,6.0,	SURF_ID = 'FACADE'		/ 	Facade SPECIMEN(upper part)
 
-&OBST	XB = -0.1,4.3, -0.2,0.0, -0.1,1.8,	SURF_ID6 = 'FRONTWALL','FACADE'	/ 	Facade SPECIMEN(lower part)
-&OBST	XB = 0.0,4.3, -0.2,-0.1, 1.8,6.0,	SURF_ID = 'FACADE'		/ 	Facade SPECIMEN(upper part)																												
 &HOLE 	XB = 1.0,3.0, -0.2,0.1, 0.5,1.7 				/ 	Window opening on facade
 &OBST	XB = 3.05,3.15, -1.4,-0.2, 0.0,6.0,	SURF_ID = 'FACADE'	/ 	Side wall(wing)
 
