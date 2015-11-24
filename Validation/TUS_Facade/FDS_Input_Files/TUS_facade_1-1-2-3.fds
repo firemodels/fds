@@ -30,10 +30,14 @@ Fire mesh(es).
 
 -------------------------------FIRE SOURCE----------------------------------
 
-&REAC FUEL = 'PROPANE', SOOT_YIELD=0.015, RADIATIVE_FRACTION = 0.20/
+&REAC FUEL = 'PROPANE', SOOT_YIELD=0.015, CO_YIELD=0.015, RADIATIVE_FRACTION = 0.20 /
 
 ISO max 5.6 MW
-&SURF ID='BURNER', HRRPUA=1261.261, RAMP_Q='fireramp', MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025, TMP_FRONT = 300.0 /
+&SURF ID='BURNER',
+      HRRPUA=1261.261,
+      RAMP_Q='fireramp',
+      MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
+      
 &RAMP ID='fireramp', T=0.0, F=0.0 /
 &RAMP ID='fireramp', T=1.0, F=0.25 /
 &RAMP ID='fireramp', T=300.0, F=0.25 /
@@ -70,10 +74,8 @@ EN1992-1-2 values for normal weight concrete
 
 EUROCODE 1993-1-2:1995  &3.4.1.3 carbon steel
 &MATL ID = 'STEEL'
-      EMISSIVITY = 0.9														
-      DENSITY = 7850.														
-      CONDUCTIVITY_RAMP = 'c-steel'														
-      SPECIFIC_HEAT_RAMP= 's-steel'/
+      EMISSIVITY = 0.9													      DENSITY = 7850.													      CONDUCTIVITY_RAMP = 'c-steel'											      SPECIFIC_HEAT_RAMP= 's-steel'/
+      
 &RAMP ID = 'c-steel', T = 0., F = 53.3/
 &RAMP ID = 'c-steel', T = 800., F = 27.3/
 &RAMP ID = 'c-steel', T = 1200., F = 27.3/
@@ -97,21 +99,19 @@ EUROCODE 1993-1-2:1995  &3.4.1.3 carbon steel
 
 ISOWOOL 1260
 &MATL ID = 'CERAMIC_FIBRE_BLANKET'
-      EMISSIVITY = 0.9														
-      DENSITY = 100.														
-      CONDUCTIVITY_RAMP = 'c-ceramic'														
+      EMISSIVITY = 0.9	
+      DENSITY = 100.		
+      CONDUCTIVITY_RAMP = 'c-ceramic'				
       SPECIFIC_HEAT= 1.0/
+      
 &RAMP ID = 'c-ceramic', T = 0., F = 0.1/
 &RAMP ID = 'c-ceramic', T = 600., F = 0.15/
 &RAMP ID = 'c-ceramic', T = 800., F = 0.22/
 	
 ISOURU BOARD 1260
 http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
-&MATL ID = 'CERAMIC_FIBRE_BOARD'														
-      EMISSIVITY = 0.9														
-      DENSITY = 250.														
-      CONDUCTIVITY_RAMP = 'c-board'														
-      SPECIFIC_HEAT= 1.0/
+&MATL ID = 'CERAMIC_FIBRE_BOARD'											      EMISSIVITY = 0.9													      DENSITY = 250.													      CONDUCTIVITY_RAMP = 'c-board'											      SPECIFIC_HEAT= 1.0/
+
 &RAMP ID = 'c-board', T = 0., F = 0.07/	  
 &RAMP ID = 'c-board', T = 400., F = 0.07/
 &RAMP ID = 'c-board', T = 600., F = 0.12/
@@ -119,11 +119,8 @@ http://isolite.co.jp/info/ceramicfiber/seihin2-6/index.html
 &RAMP ID = 'c-board', T = 1000., F = 0.23/
 
 According to EN 1094-4:1995
-&MATL ID = 'CALSIUM_SILICATE_BOARD'														
-      EMISSIVITY = 0.9														
-      DENSITY = 225.														
-      CONDUCTIVITY= 0.21														
-      SPECIFIC_HEAT= 0.84/
+&MATL ID = 'CALSIUM_SILICATE_BOARD'											      EMISSIVITY = 0.9													      DENSITY = 225.													      CONDUCTIVITY= 0.21												      SPECIFIC_HEAT= 0.84/
+
 ASTM C-182
 &RAMP ID = 'c-calsium', T = 0., F = 0.08/
 &RAMP ID = 'c-calsium', T = 200., F = 0.08/
@@ -132,12 +129,6 @@ ASTM C-182
 &RAMP ID = 'c-calsium', T = 800., F = 0.14/
 
 ------------------------------------------SURFACE PROPERTIES-------------------------------------
-
-&SURF ID='BLANKET',
-      COLOR = 'SILVER',
-      MATL_ID = 'CERAMIC_FIBRE_BOARD',
-      STRETCH_FACTOR = 2,
-      THICKNESS = 0.05 /
 
 &SURF ID='PIPE',
       COLOR = 'RED',
@@ -148,12 +139,12 @@ ASTM C-182
 &SURF ID='CEILING',
       COLOR = 'SILVER',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006,
       BACKING = 'VOID'/
 
 &SURF ID='FLOOR',
-      COLOR = 'GRAY',
+      COLOR = 'GRAY 30',
       MATL_ID = 'CERAMIC_FIBRE_BLANKET','CERAMIC_FIBRE_BOARD','STEEL',
       STRETCH_FACTOR = 2,2,2,
       THICKNESS = 0.025,0.05,0.006,
@@ -162,23 +153,26 @@ ASTM C-182
 &SURF ID='WALL',
       COLOR = 'SILVER',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006,
       BACKING = 'VOID',
       DEFAULT=.TRUE./
 
 &SURF ID='FRONTWALL',
-      COLOR = 'SILVER',
+      COLOR = 'GRAY 70',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
-      STRETCH_FACTOR = 2,2,
+      STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006 /
 
-&SURF ID='FACADE',COLOR = 'SILVER',
-      MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL','CALSIUM_SILICATE_BOARD',
+&SURF ID='FACADE',
+      COLOR = 'GRAY 60',
+      MATL_ID = 'CERAMIC_FIBRE_BOARD','CALSIUM_SILICATE_BOARD',
       STRETCH_FACTOR   = 2,2,2,
-      THICKNESS = 0.05,0.006,0.088 /
+      THICKNESS = 0.025,0.025 /
 
 -------------------------------------------GEOMETRY-------------------------------------------------
+
+Static objects
 
 &VENT 	MB = 'ZMIN',					SURF_ID = 'FLOOR'	/	Floor
 &VENT	MB = 'ZMAX', MESH_ID='m1',			SURF_ID = 'CEILING'	/ 	Ceiling
@@ -186,13 +180,9 @@ ASTM C-182
 &VENT	MB = 'XMAX', MESH_ID='m1',			SURF_ID = 'WALL'	/ 	Wall 2(side right)
 &OBST	XB = -0.1,3.1, 4.3,4.4, -0.1,1.8,		SURF_ID = 'WALL'	/ 	Wall 2(back)
 
-&HOLE	XB = 0.1,0.6, 4.2,4.5, 0.325,0.925, DEVC_ID = 'TIMER'	/			Rear side openings 1
-&HOLE	XB = 0.8,1.3, 4.2,4.5, 0.325,0.925, DEVC_ID = 'TIMER'	/			Rear side openings 2
-&HOLE	XB = 1.6,2.1, 4.2,4.5, 0.325,0.925		/			 	Rear side openings 3
-&HOLE	XB = 2.4,2.9, 4.2,4.5, 0.325,0.925		/			 	Rear side openings 4
-
-&OBST	XB = -0.1,4.3, -0.2,0.0, -0.1,1.8,		SURF_ID6 = 'FRONTWALL','FACADE'	/ 	Facade SPECIMEN(lower part)
-&OBST	XB = 0.0,4.3, -0.2,-0.1, 1.8,6.0,		SURF_ID = 'FACADE'		/ 	Facade SPECIMEN(upper part)																												
+&OBST	XB = -0.1,4.3, -0.2,0.0, -0.1,1.8,
+	SURF_ID6 = 'WALL','WALL','FACADE','FRONTWALL'				/ 	Facade SPECIMEN(lower part)
+&OBST	XB = 0.0,4.3, -0.2,-0.1, 1.8,6.0,		SURF_ID = 'FACADE'	/ 	Facade SPECIMEN(upper part)																												
 &HOLE 	XB = 1.0,3.0, -0.2,0.1, 0.5,1.7 					/ 	Window opening on facade
 &OBST	XB = 3.05,3.15, -1.4,-0.2, 0.0,6.0,		SURF_ID = 'FACADE'	/ 	Side wall(wing)
 
@@ -205,6 +195,14 @@ ASTM C-182
 &VENT	MB='XMIN', MESH_ID ='m3',			SURF_ID = 'OPEN'	/ left
 &VENT	MB='XMAX', MESH_ID ='m3',			SURF_ID = 'OPEN'	/ right
 &VENT	MB='ZMAX', MESH_ID ='m3',			SURF_ID = 'OPEN'	/ above				
+
+Time dependent objects
+
+&HOLE	XB = 0.1,0.6, 4.2,4.5, 0.325,0.925, DEVC_ID = 'TIMER'	/			Rear side openings 1
+&HOLE	XB = 0.8,1.3, 4.2,4.5, 0.325,0.925, DEVC_ID = 'TIMER'	/			Rear side openings 2
+&HOLE	XB = 1.6,2.1, 4.2,4.5, 0.325,0.925		/			 	Rear side openings 3
+&HOLE	XB = 2.4,2.9, 4.2,4.5, 0.325,0.925		/			 	Rear side openings 4
+
 
 -----------------------------------------------MEASURING-------------------------------------------------
 
@@ -226,7 +224,7 @@ Line a
 &DEVC 	XYZ=1.1,-0.25,5.7, 	PROP_ID = 'TC', ID='TC_3' / 
 
 Line b
-&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' / 
+&DEVC 	XYZ=2.0,-0.25,1.75, 	PROP_ID = 'TC', ID='TC_22' / This may be functioning wrong.
 &DEVC 	XYZ=2.0,-0.25,2.6, 	PROP_ID = 'TC', ID='TC_19' / 
 &DEVC 	XYZ=2.0,-0.25,2.9, 	PROP_ID = 'TC', ID='TC_16' / 
 &DEVC 	XYZ=2.0,-0.25,3.2, 	PROP_ID = 'TC', ID='TC_13' / 
