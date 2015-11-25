@@ -2375,7 +2375,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
    CALL FED_PROPS(SS%PROP_ID,SS%FLD_LETHAL_DOSE,SS%FIC_CONCENTRATION)
 
    IF (SS%H_F > -1.E23_EB) SS%EXPLICIT_H_F=.TRUE.
-   
+
    IF (SS%SPECIFIC_HEAT > 0._EB) THEN
       ! H_F overrides REFERENCE_ENTHALPY
       IF (ENTHALPY_OF_FORMATION > -1.E23_EB) THEN
@@ -2387,7 +2387,7 @@ PRIMITIVE_SPEC_READ_LOOP: DO WHILE (N_SPEC_READ < N_SPEC_READ_2 .OR. N < N_SPECI
    ENDIF
 
    IF (SS%RAMP_CP/='null' .AND. SS%REFERENCE_ENTHALPY < -1.E20_EB) SS%REFERENCE_ENTHALPY = 0._EB
-   
+
    IF (TRIM(SS%FORMULA)=='null') WRITE(SS%FORMULA,'(A,I0)') 'SPEC_',N
 
    ! For simple chemistry Determine if the species is the one specified on the REAC line(s)
@@ -3837,7 +3837,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ! Find heat of formation of lumped fuel to satisfy specified heat of combustion
       IF (REDEFINE_H_F(RN%FUEL_SMIX_INDEX)) THEN
          WRITE(MESSAGE,'(A,I0,A)') 'WARNING: H_F for FUEL for REACtion ',NR,' was redefined multiple times.'
-         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)      
+         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
       ENDIF
       REDEFINE_H_F(RN%FUEL_SMIX_INDEX) = .TRUE.
       SMF%H_F = RN%HEAT_OF_COMBUSTION * RN%NU(RN%FUEL_SMIX_INDEX) * SMF%MW * 0.001_EB
@@ -3848,7 +3848,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
       ENDDO
       SMF%H_F = SMF%H_F/ (RN%NU(RN%FUEL_SMIX_INDEX) * SMF%MW * 0.001_EB)
       IF (SMF%SINGLE_SPEC_INDEX>0) SPECIES(SMF%SINGLE_SPEC_INDEX)%H_F = SMF%H_F / SMF%MW*1000._EB
-      
+
    ELSE HOC_IF ! Heat of combustion not specified
       IF (SIMPLE_CHEMISTRY) THEN ! Calculate heat of combustion based oxygen consumption
          IF (RN%EPUMO2 > 0._EB .AND. .NOT. LISTED_FUEL ) THEN
@@ -5879,7 +5879,7 @@ READ_SURF_LOOP: DO N=0,N_SURF
    COMPUTE_EMISSIVITY_BACK = .FALSE.
    IF (SF%EMISSIVITY<0._EB) COMPUTE_EMISSIVITY      = .TRUE.
    IF (SF%EMISSIVITY<0._EB) COMPUTE_EMISSIVITY_BACK = .TRUE.
-      
+
    SF%N_LAYERS = 0
    N_LIST = 0
    NAME_LIST = 'null'
