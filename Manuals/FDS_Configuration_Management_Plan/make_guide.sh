@@ -42,4 +42,5 @@ if [[ $clean_build == 0 ]]
       :
    else
       echo "FDS Configuration Management Plan built successfully!"
+      cp FDS_Configuration_Management_Plan.pdf FDS_Config_Management_Plan.pdf
 fi    

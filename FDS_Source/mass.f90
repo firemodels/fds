@@ -228,7 +228,7 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
 
-   IF (ALL(CHANGE_TIME_STEP_INDEX>-1)) THEN
+   IF (FIRST_PASS) THEN
       ! This IF is required because DEL_RHO_D_DEL_Z is updated to the next time level in divg within
       ! the CHANGE_TIME_STEP loop in main while we are determining the appropriate stable DT.
       IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_SETTLING) CALL SETTLING_VELOCITY(NM)
