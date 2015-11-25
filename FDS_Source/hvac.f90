@@ -618,7 +618,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
                ENDIF
-               IF (DN%READ_IN .AND. MESHES(NM)%VENTS(NV)%SURF_INDEX /= HVAC_IN_SURF_INDEX) THEN
+               IF (DN%READ_IN .AND. MESHES(NM)%VENTS(NV)%SURF_INDEX /= HVAC_SURF_INDEX) THEN
                   WRITE(MESSAGE,'(A,A)') 'ERROR: DUCTNODE attached to VENT without SURF_ID HVAC for VENT ID ',&
                                           TRIM(MESHES(NM)%VENTS(NV)%ID)
                   CALL SHUTDOWN(MESSAGE); RETURN
