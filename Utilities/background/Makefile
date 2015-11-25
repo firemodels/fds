@@ -35,16 +35,6 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-# ------------- Win 32 ----------------
-#  32 bit windows
-
-intel_win_32 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared $(GITINFO)
-intel_win_32 : CC        = icl
-intel_win_32 : exe       = background.exe
-
-intel_win_32 : $(objwin)
-	$(CC) -o $(bin)/$(exe) $(objwin) 
-
 # ------------- Win 64 ----------------
 #  64 bit windows
 
@@ -54,16 +44,6 @@ intel_win_64 : exe       = background.exe
 
 intel_win_64 : $(objwin)
 	$(CC) -o $(bin)/$(exe) $(objwin) 
-
-# ------------- Linux 32 ----------------
-#  32 bit linux
-
-intel_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX $(GITINFO)
-intel_linux_32 : CC        = icc
-intel_linux_32 : exe       = background
-
-intel_linux_32 : $(obj)
-	$(CC) -o $(bin)/$(exe) $(obj) 
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
@@ -75,33 +55,33 @@ intel_linux_64 : exe       = background
 intel_linux_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) $(obj) 
 
-# ------------- gcc Linux 32 ----------------
+# ------------- gcc Linux 64 ----------------
 
-gcc_linux_32 : CFLAGS    = -O2 -m32 -D pp_LINUX $(GITINFO)
-gcc_linux_32 : CC        = gcc
-gcc_linux_32 : exe       = background
+gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX $(GITINFO)
+gcc_linux_64 : CC        = gcc
+gcc_linux_64 : exe       = background
 
-gcc_linux_32 : $(obj)
-	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
+gcc_linux_64: $(obj)
+	$(CC) -m64 -o $(bin)/$(exe) $(obj) -lm
 
-# ------------- OSX 32 ----------------
-#  32 bit osx
+# ------------- OSX 64 ----------------
+#  64 bit osx
 
-intel_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX $(GITINFO)
-intel_osx_32 : CC        = icc
-intel_osx_32 : exe       = background
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
+intel_osx_64 : CC        = icc
+intel_osx_64 : exe       = background
 
-intel_osx_32 : $(obj)
-	$(CC) -o $(bin)/$(exe) -m32 $(obj) 
+intel_osx_64 : $(obj)
+	$(CC) -o $(bin)/$(exe) -m64 $(obj) 
 
 # ------------- gcc OSX 32 ----------------
 
-gcc_osx_32 : CFLAGS    = -O2 -m32 -D pp_OSX $(GITINFO)
-gcc_osx_32 : CC        = gcc
-gcc_osx_32 : exe       = background
+gcc_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
+gcc_osx_64 : CC        = gcc
+gcc_osx_64 : exe       = background
 
-gcc_osx_32 : $(obj)
-	$(CC) -m32 -o $(bin)/$(exe) $(obj) -lm
+gcc_osx_64 : $(obj)
+	$(CC) -m64 -o $(bin)/$(exe) $(obj) -lm
 
 #-------------- compile sring_util.c so revision strings are updated -----------
 
