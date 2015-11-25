@@ -32,7 +32,9 @@ void _Sniff_Errors(char *whereat);
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
 
-#define MAXSLABS 10
+#define MAX_HSLABS 10
+#define MAX_VSLABS 2
+#define MAX_MSLABS 2
 
 #define MAKE_MOVIE 28
 
@@ -69,7 +71,7 @@ void _Sniff_Errors(char *whereat);
 
 #define HFLOW_VENT 0
 #define VFLOW_VENT 1
-#define HVAC_VENT 2
+#define MFLOW_VENT 2
 
 #define CLIP_ON_DENORMAL 2
 #define CLIP_ON 1
@@ -238,11 +240,6 @@ void _Sniff_Errors(char *whereat);
 
 #define SCRIPT_UNKNOWN -1
 
-#define DIRX 1
-#define DIRY 2
-#define DIRZ 3
-#define ISO 4
-
 #define PROJECTION 24
 
 #define PARTICLES 0
@@ -386,6 +383,13 @@ void _Sniff_Errors(char *whereat);
 #define BOTTOM_WALL 5
 #define TOP_WALL 6
 
+#define XLEFT -1
+#define XRIGHT 1
+#define YFRONT -2
+#define YBACK 2
+#define ZBOTTOM -3
+#define ZTOP 3
+
 #define IMIN 0
 #define IMAX 1
 #define JMIN 2
@@ -411,6 +415,7 @@ void _Sniff_Errors(char *whereat);
 #define XDIR 0
 #define YDIR 1
 #define ZDIR 2
+#define ISO 4
 
 #define NTARGTIMES 100
 

@@ -191,7 +191,7 @@ if %update% == 0 goto skip_update1
 if %clean% == 0 goto skip_clean2
    echo             cleaning %fdsbasename% repository
    cd %fdsroot%
-   git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
+   git clean -dxf -e win32_local 1>> %OUTDIR%\stage0.txt 2>&1
    git add . 1>> %OUTDIR%\stage0.txt 2>&1
    git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
 :skip_clean2
