@@ -458,6 +458,14 @@ EVACUATION_ZONE_LOOP: DO N=1,N_ZONE
    ENDDO
 ENDDO EVACUATION_ZONE_LOOP
 
+! Allocate local auto-ignition temperature
+
+IF (REIGNITION_MODEL) THEN
+   ALLOCATE(M%AIT(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
+   CALL ChkMemErr('INIT','AIT',IZERO)
+   M%AIT = 1.E20_EB
+ENDIF
+
 ! Over-ride default ambient conditions with user-prescribed INITializations
 
 DO N=1,N_INIT
@@ -475,6 +483,7 @@ DO N=1,N_INIT
                IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
                IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
                M%Q(I,J,K) = IN%HRRPUV
+               M%AIT(I,J,K) = IN%AIT
             ENDIF
          ENDDO
       ENDDO
@@ -851,16 +860,13 @@ ENDDO OBST_LOOP_2
 ! Allocate local auto-ignition temperature
 
 IF (REIGNITION_MODEL) THEN
-   ALLOCATE(M%AIT(0:IBP1,0:JBP1,0:KBP1),STAT=IZERO)
-   CALL ChkMemErr('INIT','AIT',IZERO)
-   M%AIT = 1.E20_EB
    DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       WC=>M%WALL(IW)
       SF=>SURFACE(WC%SURF_INDEX)
       IIG = WC%ONE_D%IIG
       JJG = WC%ONE_D%JJG
       KKG = WC%ONE_D%KKG
-      IF (SF%AUTO_IGNITION_TEMPERATURE>0._EB) M%AIT(IIG,JJG,KKG) = SF%AUTO_IGNITION_TEMPERATURE
+      IF (SF%AUTO_IGNITION_TEMPERATURE<1.E20_EB) M%AIT(IIG,JJG,KKG) = SF%AUTO_IGNITION_TEMPERATURE
    ENDDO
 ENDIF
 
