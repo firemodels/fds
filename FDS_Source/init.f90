@@ -483,7 +483,7 @@ DO N=1,N_INIT
                IF (IN%ADJUST_DENSITY)     M%RHO(I,J,K) = M%RHO(I,J,K)*M%P_0(K)/P_INF
                IF (IN%ADJUST_TEMPERATURE) M%TMP(I,J,K) = M%TMP(I,J,K)*M%P_0(K)/P_INF
                M%Q(I,J,K) = IN%HRRPUV
-               M%AIT(I,J,K) = IN%AIT
+               IF (REIGNITION_MODEL) M%AIT(I,J,K) = IN%AIT
             ENDIF
          ENDDO
       ENDDO
