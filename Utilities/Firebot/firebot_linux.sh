@@ -131,6 +131,13 @@ if [ "$SSH" != "" ]; then
   SSH="ssh $SSH "
 fi
 
+QSTAT=qstat
+WHOAMI=`whoami`
+if [ "$QUEUE" == "none" ]; then
+   QSTAT="ps -el"
+   WHOAMI=`id -u`
+fi
+
 export reponame 
 UploadGuides=$reponame/Utilities/Firebot/fds_guides2GD.sh
 
@@ -263,7 +270,7 @@ do_git_checkout()
      fi
      if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
         echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-        git checkout $BRANCH
+        git checkout $BRANCH &> /dev/null
      fi
    else
       BRANCH=$CURRENT_BRANCH
@@ -436,11 +443,20 @@ wait_cases_debug_start()
    done
 }
 
+AWK ()
+{
+if [ "$QUEUE" == "none" ]; then
+awk '{print $1}'
+else
+awk '{print $3}'
+fi
+}
+
 wait_cases_debug_end()
 {
    # Scans qstat and waits for cases to end
-   while [[ `qstat | awk '{print $3}' | grep $(whoami)` != '' ]]; do
-      JOBS_REMAINING=`qstat | awk '{print $3}' | grep $(whoami) | wc -l`
+   while [[ `$QSTAT | AWK | grep -v grep | grep ${WHOAMI}` != '' ]]; do
+      JOBS_REMAINING=`$QSTAT | AWK  | grep -v grep | grep ${WHOAMI) | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage3
       TIME_LIMIT_STAGE="3"
       check_time_limit
@@ -509,7 +525,9 @@ run_validation_cases_debug()
    done
 
    # Wait for validation cases to start
-   wait_cases_debug_start 'validation'
+   if [ "$QUEUE" != "none" ]; then
+     wait_cases_debug_start 'validation'
+   fi
    sleep 300
 
    #  ==================
@@ -718,8 +736,8 @@ check_cases_release()
 wait_cases_release_end()
 {
    # Scans qstat and waits for cases to end
-   while [[ `qstat | awk '{print $3}' | grep $(whoami) ` != '' ]]; do
-      JOBS_REMAINING=`qstat | awk '{print $3}' | grep $(whoami) | wc -l`
+   while [[ `$QSTAT | AWK | grep -v grep | grep ${WHOAMI} ` != '' ]]; do
+      JOBS_REMAINING=`$QSTAT | AWK | grep -v grep | grep ${WHOAMI} | wc -l`
       echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage5
       TIME_LIMIT_STAGE="5"
       check_time_limit
