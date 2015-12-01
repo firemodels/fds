@@ -26,6 +26,7 @@ echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo "-r - repository location [default: $reponame]"
+echo "-s - skip matlab and build document stages"
 echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides (only by user firebot)"
@@ -44,7 +45,8 @@ EMAIL=
 UPLOADGUIDES=
 SSH=
 FORCE=
-while getopts 'b:cfhm:q:nr:S:uUv' OPTION
+SKIP=
+while getopts 'b:cfhm:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -70,6 +72,9 @@ case $OPTION  in
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  s)
+   SKIP=-s
    ;;
   S)
    SSH="-S $OPTARG"
@@ -121,8 +126,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIP $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIP $reponame $EMAIL "$@"
 fi
 rm $running
