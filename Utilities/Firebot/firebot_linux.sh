@@ -194,6 +194,17 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
+clean_repo()
+{
+  curdir=`pwd`
+  dir=$1
+  cd $dir
+  git clean -dxf &> /dev/null
+  git add . &> /dev/null
+  git reset --hard HEAD &> /dev/null
+  cd $curdir
+}
+
 clean_firebot_metafiles()
 {
    cd $FIREBOT_RUNDIR
@@ -223,16 +234,18 @@ clean_git_repo()
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $reponame
       if [[ "$CLEANREPO" == "1" ]] ; then
-# remove unversioned files
-        git clean -dxf &> /dev/null
-# revert to last revision
-        git add . &> /dev/null
-        git reset --hard HEAD &> /dev/null
+         clean_repo $reponame/Verification
+         clean_repo $reponame/Validation
+         clean_repo $reponame/SMV
+         clean_repo $reponame/FDS_Source
+         clean_repo $reponame/FDS_Compilation
+         clean_repo $reponame/Manuals
       fi
    # If not, create FDS repository and checkout
    else
       echo "firebot repo $reponame does not exist" >> $OUTPUT_DIR/stage1 2>&1
       echo "firebot run aborted." >> $OUTPUT_DIR/stage1 2>&1
+      exit
       cd $FIREBOT_RUNDIR
    fi
 }
@@ -1290,7 +1303,8 @@ fi
 # clean debug stage
 cd $reponame
 if [[ "$CLEANREPO" == "1" ]] ; then
-   git clean -dxf &> /dev/null
+   clean_repo $reponame/Verification
+   clean_repo $reponame/Validation
 fi
 
 ### Stage 4a ###
