@@ -102,9 +102,9 @@ if [[ "$UPDATEREPO" == "1" ]]; then
    UPDATE=-u
    cd $reponame
    if [[ "$RUNFIREBOT" == "1" ]]; then
-     git remote update
-     git checkout $BRANCH
-     git merge origin/$BRANCH
+     git remote update &> /dev/null
+     git checkout $BRANCH &> /dev/null
+     git merge origin/$BRANCH &> /dev/null
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
