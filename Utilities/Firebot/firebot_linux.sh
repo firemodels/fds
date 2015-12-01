@@ -1376,7 +1376,7 @@ if [ $FIREBOT_MODE == "verification" ] ; then
       check_fds_pictures
    fi
 
-   if [ $platform == "linux" ] ; then
+   if [ $skipmatlab == "1" ] ; then
    ### Stage 7a ###
       check_matlab_license_server
       run_matlab_verification
