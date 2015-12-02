@@ -45,7 +45,7 @@ EMAIL=
 UPLOADGUIDES=
 SSH=
 FORCE=
-SKIP=
+SKIPMATLAB=
 while getopts 'b:cfhm:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
@@ -74,7 +74,7 @@ case $OPTION  in
    reponame="$OPTARG"
    ;;
   s)
-   SKIP=-s
+   SKIPMATLAB=-s
    ;;
   S)
    SSH="-S $OPTARG"
@@ -126,8 +126,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIP $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIP $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 fi
 rm $running
