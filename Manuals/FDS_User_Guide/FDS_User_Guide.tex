@@ -4453,7 +4453,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct OXYGEN ATOM}        & 15.999400  & O                & 2.66     & 92.1     &          &                            \\ \hline
 {\ct PROPANE}            & 44.095620  & C$_3$H$_8$       & 5.118    & 237.1    &  Y       &  {\ct PROPANE}             \\ \hline
 {\ct PROPYLENE}          & 42.079740  & C$_3$H$_6$       & 4.678    & 298.9    &  Y       &  {\ct PROPYLENE}           \\ \hline
-{\ct SOOT}               & 12.010700  & C$_{0.9}$H$_{0.1}$ & 3.798    & 71.4     &          &  {\ct SOOT}                \\ \hline
+{\ct SOOT}               & 10.910420  & C$_{0.9}$H$_{0.1}$ & 3.798    & 71.4     &          &  {\ct SOOT}                \\ \hline
 {\ct SULFUR DIOXIDE}     & 64.063800  & SO$_2$           & 4.112    & 335.4    &  Y       &                            \\ \hline
 {\ct SULFUR HEXAFLUORIDE}& 146.055419 & SF$_6$           & 5.128    & 146.0    &          &                            \\ \hline
 {\ct TOLUENE}            & 92.138420  & C$_6$H$_5$CH$_3$ & 5.698    & 480.0    &  Y       &  {\ct TOLUENE}             \\ \hline
@@ -4690,10 +4690,7 @@ This input is not needed if {\ct FORMULA} is specified or if the {\ct FUEL} is i
 simple chemistry model is applied. (Default 0.)
 \item[{\ct SOOT\_YIELD}] The fraction of fuel mass converted into smoke particulate, $y_{\rm s}$.
 Note that this parameter is only appropriate when the simple chemistry model is applied.  (Default 0.)
-\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.
-For all other types of {\ct REAC} inputs the species {\ct SOOT} is assumed to be pure carbon unless a {\ct FORMULA} is provided (Section~\ref{info:FORMULA}).
-Note that this parameter is only appropriate when the simple chemistry model is applied.
-(Default 0.1 - equivalent to the input {\ct FORMULA='C0.9H0.1'} for other {\ct REAC} types)
+\item[{\ct SOOT\_H\_FRACTION}] The fraction of the atoms in the soot that are hydrogen.  The default value is 0.1, equivalent to the input {\ct FORMULA='C0.9H0.1'} (Section~\ref{info:FORMULA}). Note that this parameter is only appropriate when the simple chemistry model is applied.
 \item[{\ct FUEL\_RADCAL\_ID}] RadCal species to be used for the fuel.  The default is the default RadCal species for the fuel species or {\ct 'METHANE'} if there is no species default. See Section~\ref{info:RadCal_fuelspecies} for details.
 \end{description}
 The ambient mass fractions for the constituents of air are specified on {\ct MISC} using the inputs:
