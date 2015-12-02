@@ -42,6 +42,7 @@ QUEUE=firebot
 BRANCH=development
 CLEANREPO=0
 UPDATEREPO=0
+JOBPREFIX=FB_
 
 reponame=$FDSSMV
 if [ "$reponame" == "" ] ; then
@@ -129,13 +130,6 @@ if [ "$SSH" != "" ]; then
     exit
   fi
   SSH="ssh $SSH "
-fi
-
-QSTAT=qstat
-WHOAMI=`whoami`
-if [ "$QUEUE" == "none" ]; then
-   QSTAT="ps -el"
-   WHOAMI=`id -u`
 fi
 
 export reponame 
@@ -443,25 +437,27 @@ wait_cases_debug_start()
    done
 }
 
-AWK ()
-{
-if [ "$QUEUE" == "none" ]; then
-awk '{print $1}'
-else
-awk '{print $3}'
-fi
-}
-
 wait_cases_debug_end()
 {
-   # Scans qstat and waits for cases to end
-   while [[ `$QSTAT | AWK | grep -v grep | grep ${WHOAMI}` != '' ]]; do
-      JOBS_REMAINING=`$QSTAT | AWK  | grep -v grep | grep ${WHOAMI) | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage3
-      TIME_LIMIT_STAGE="3"
-      check_time_limit
-      sleep 30
-   done
+   # Scans job queue and waits for cases to end
+   if [[ "$QUEUE" == "none" ]]
+   then
+     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3a
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
+   else
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage3
+        TIME_LIMIT_STAGE="3"
+        check_time_limit
+        sleep 30
+     done
+   fi
 }
 
 check_current_utilization()
@@ -485,7 +481,7 @@ run_verification_cases_debug()
    cd $reponame/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
-   ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE >> $OUTPUT_DIR/stage3 2>&1
+   ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
    echo "" >> $OUTPUT_DIR/stage3 2>&1
 
    # Wait for all verification cases to end
@@ -736,17 +732,28 @@ check_cases_release()
 wait_cases_release_end()
 {
    # Scans qstat and waits for cases to end
-   while [[ `$QSTAT | AWK | grep -v grep | grep ${WHOAMI} ` != '' ]]; do
-      JOBS_REMAINING=`$QSTAT | AWK | grep -v grep | grep ${WHOAMI} | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage5
-      TIME_LIMIT_STAGE="5"
-      check_time_limit
-      if [ $FIREBOT_MODE == "validation" ] ; then
-         check_cases_release $reponame/Validation 'validation'
-         sleep 300
-      fi
-      sleep 60
-   done
+   if [[ "$QUEUE" == "none" ]]
+   then
+     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage5
+        TIME_LIMIT_STAGE="5"
+        check_time_limit
+        sleep 60
+     done
+   else
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage5
+        TIME_LIMIT_STAGE="5"
+        check_time_limit
+        if [ $FIREBOT_MODE == "validation" ] ; then
+           check_cases_release $reponame/Validation 'validation'
+           sleep 300
+        fi
+        sleep 60
+     done
+   fi
 }
 
 run_verification_cases_release()
@@ -756,7 +763,7 @@ run_verification_cases_release()
    cd $reponame/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
-   ./Run_FDS_Cases.sh -o 1 -q $QUEUE >> $OUTPUT_DIR/stage5 2>&1
+   ./Run_FDS_Cases.sh -o 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
    echo "" >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
