@@ -250,20 +250,19 @@ CASE(.TRUE.) PREDICTOR_STEP
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      UN = UVW_SAVE(IW)
+      SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT; CYCLE WALL_LOOP
+         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+      END SELECT
+      
       SELECT CASE(IOR)
-         CASE( 1)
-            UU(IIG-1,JJG,KKG) = UN
-         CASE(-1)
-            UU(IIG,JJG,KKG)   = UN
-         CASE( 2)
-            VV(IIG,JJG-1,KKG) = UN
-         CASE(-2)
-            VV(IIG,JJG,KKG)   = UN
-         CASE( 3)
-            WW(IIG,JJG,KKG-1) = UN
-         CASE(-3)
-            WW(IIG,JJG,KKG)   = UN
+         CASE( 1); UU(IIG-1,JJG,KKG) = UN
+         CASE(-1); UU(IIG,JJG,KKG)   = UN
+         CASE( 2); VV(IIG,JJG-1,KKG) = UN
+         CASE(-2); VV(IIG,JJG,KKG)   = UN
+         CASE( 3); WW(IIG,JJG,KKG-1) = UN
+         CASE(-3); WW(IIG,JJG,KKG)   = UN
       END SELECT
    ENDDO WALL_LOOP
 
@@ -383,20 +382,19 @@ CASE(.FALSE.) PREDICTOR_STEP
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      UN = UVW_SAVE(IW)
+      SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT; CYCLE WALL_LOOP_2
+         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+      END SELECT
+      
       SELECT CASE(IOR)
-         CASE( 1)
-            UU(IIG-1,JJG,KKG) = UN
-         CASE(-1)
-            UU(IIG,JJG,KKG)   = UN
-         CASE( 2)
-            VV(IIG,JJG-1,KKG) = UN
-         CASE(-2)
-            VV(IIG,JJG,KKG)   = UN
-         CASE( 3)
-            WW(IIG,JJG,KKG-1) = UN
-         CASE(-3)
-            WW(IIG,JJG,KKG)   = UN
+         CASE( 1); UU(IIG-1,JJG,KKG) = UN
+         CASE(-1); UU(IIG,JJG,KKG)   = UN
+         CASE( 2); VV(IIG,JJG-1,KKG) = UN
+         CASE(-2); VV(IIG,JJG,KKG)   = UN
+         CASE( 3); WW(IIG,JJG,KKG-1) = UN
+         CASE(-3); WW(IIG,JJG,KKG)   = UN
       END SELECT
    ENDDO WALL_LOOP_2
 
