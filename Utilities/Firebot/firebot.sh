@@ -60,6 +60,7 @@ echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo "-r - repository location [default: $reponame]"
+echo "-s - skip matlab and document building stages"
 echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides"
@@ -69,7 +70,8 @@ exit
 UPLOADGUIDES=0
 GIT_REVISION=
 SSH=
-while getopts 'b:chm:q:r:S:uUv:' OPTION
+SKIPMATLAB=
+while getopts 'b:chm:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -89,6 +91,9 @@ case $OPTION in
    ;;
   r)
    reponame="$OPTARG"
+   ;;
+  s)
+   SKIPMATLAB=1
    ;;
   S)
    SSH="$OPTARG "
@@ -1302,7 +1307,7 @@ if [[ $stage6c_success ]] ; then
    check_fds_pictures
 fi
 
-if [ $skipmatlab == "1" ] ; then
+if [ "$SKIPMATLAB" == "" ] ; then
 ### Stage 7a ###
    check_matlab_license_server
    run_matlab_verification
