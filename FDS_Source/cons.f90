@@ -219,7 +219,7 @@ REAL(EB) :: UVW_CLOCK_CBC(1:4)=(/0._EB,0.28_EB,0.67_EB,1.E10_EB/),TURB_INIT_CLOC
 
 ! Miscellaneous mesh dimensions
 
-REAL(EB) :: CHARACTERISTIC_CELL_SIZE
+REAL(EB) :: CHARACTERISTIC_CELL_SIZE=1.E6_EB
 
 ! Logical units and output file names
 
