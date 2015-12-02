@@ -35,7 +35,7 @@ exit
 }
 
 BRANCH=development
-botscript=firebot_linux.sh
+botscript=firebot.sh
 UPDATEREPO=
 CLEANREPO=0
 UPDATE=
