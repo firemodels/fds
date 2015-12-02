@@ -370,7 +370,7 @@ ENDIF
 
 ! Reaction rate-weighted radiative fraction
 
-IF (SUM(Q_REAC_SUM)>0._EB) THEN
+IF (SUM(Q_REAC_SUM)>TWO_EPSILON_EB) THEN
    CHI_R_SUM=0._EB
    DO NR=1,N_REACTIONS
       RN=>REACTION(NR)
@@ -379,6 +379,7 @@ IF (SUM(Q_REAC_SUM)>0._EB) THEN
    ENDDO
    CHI_R(I,J,K) = CHI_R_SUM/(SUM(Q_REAC_SUM))
 ENDIF
+CHI_R(I,J,K) = MAX(CHI_R_MIN,MIN(CHI_R_MAX,CHI_R(I,J,K)))
 
 ! Store special diagnostic quantities
 
