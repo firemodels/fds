@@ -117,6 +117,50 @@ STOP_STATUS = SETUP_STOP
 END SUBROUTINE SHUTDOWN
 
 
+SUBROUTINE SYSTEM_MEM_USAGE(VALUE_RSS)
+
+! This routine returns the memory used by the given process at the time of the call. It only works on a Linux machine because
+! it searches for the system file called '/proc/PID/status' and reads the VmRSS value (kB).
+! The DEVC output QUANTITY 'RAM' outputs this value in units of MB. 
+! Normally, this routine just returns 0 because it is non-standard Fortran and we have disconnected the GETPID call. 
+! To invoke it, uncomment the GETPID statement, and the 'USE IFPORT' statement if compiling with Intel Fortran.
+
+!USE IFPORT  ! Intel Fortran extension library. This is needed for GETPID.
+INTEGER, INTENT(OUT) :: VALUE_RSS
+CHARACTER(200):: FILENAME=' '
+CHARACTER(80) :: LINE
+CHARACTER(8)  :: PID_CHAR=' '
+INTEGER :: PID
+LOGICAL :: IFXST
+
+VALUE_RSS=0  ! return zero if the memory file is not found
+
+PID = 0 
+!PID = GETPID() ! GETPID is non-standard Fortran. Leave it commented out for the moment.
+
+WRITE(PID_CHAR,'(I8)') PID
+FILENAME = '/proc/'//TRIM(ADJUSTL(PID_CHAR))//'/status'
+
+INQUIRE(FILE=FILENAME,EXIST=IFXST)
+IF (.NOT.IFXST) then
+   WRITE (*,*) 'WARNING: Memory system file does not exist'
+  RETURN
+ENDIF
+
+OPEN(1000,FILE=FILENAME,ACTION='READ')
+DO
+   READ (1000,'(A)',END=120) LINE
+   IF (LINE(1:6)=='VmRSS:') THEN
+      READ (LINE(7:),*) VALUE_RSS
+      EXIT
+   ENDIF
+ENDDO
+120 CONTINUE
+CLOSE(1000)
+
+END SUBROUTINE SYSTEM_MEM_USAGE
+
+
 SUBROUTINE GET_INPUT_FILE ! Read the argument after the command
 USE GLOBAL_CONSTANTS, ONLY: FN_INPUT
 IF (FN_INPUT=='null') CALL GET_COMMAND_ARGUMENT(1,FN_INPUT)
