@@ -3,7 +3,7 @@
 # This script runs the FDS Verification Cases on a linux machine with
 # a batch queuing system
 
-queue=batch
+QUEUE=batch
 DEBUG=
 IB=
 nthreads=1
@@ -13,6 +13,7 @@ errfileoption=
 RUNOPTION=
 CURDIR=`pwd`
 BACKGROUND=
+JOBPREFIX=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
@@ -27,6 +28,7 @@ echo "Options"
 echo "-d - use debug version of FDS"
 echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-h - display this message"
+echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-M - run only cases that use multiple processes"
@@ -49,7 +51,7 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'c:dEhMm:o:q:r:Ssw:' OPTION
+while getopts 'c:dEhj:Mm:o:q:r:Ssw:' OPTION
 do
 case $OPTION in
   d)
@@ -61,6 +63,9 @@ case $OPTION in
   h)
    usage;
    ;;
+  j)
+   JOBPREFIX="-j $OPTARG"
+   ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
@@ -71,7 +76,7 @@ case $OPTION in
    nthreads="$OPTARG"
    ;;
   q)
-   queue="$OPTARG"
+   QUEUE="$OPTARG"
    ;;
   r)
    resource_manager="$OPTARG"
@@ -111,16 +116,17 @@ if [ "$resource_manager" == "SLURM" ]; then
 else
    export RESOURCE_MANAGER="PBS"
 fi
-if [ "$queue" != "" ]; then
-   if [ "$queue" == "none" ]; then
+if [ "$QUEUE" != "" ]; then
+   if [ "$QUEUE" == "none" ]; then
       BACKGROUND="-B background"
+      JOBPREFIX=
    fi
-   queue="-q $queue"
+   QUEUE="-q $QUEUE"
 fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $walltime $errfileoption -n $nthreads -e $FDSMPI $queue" 
+export QFDS="$QFDSSH $BACKGROUND $walltime $errfileoption -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
 cd ..
 ./FDS_Cases.sh
 cd $CURDIR
