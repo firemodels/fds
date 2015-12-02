@@ -14,7 +14,7 @@ fi
 CFASTREPO=~/cfastgitclean
 
 BRANCH=development
-botscript=smokebot_linux.sh
+botscript=smokebot.sh
 RUNAUTO=
 CLEANREPO=
 UPDATEREPO=
