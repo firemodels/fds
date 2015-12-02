@@ -29,6 +29,7 @@ echo "-d - use debug version of FDS"
 echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
+echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
 echo "-M - run only cases using multiple processes"
@@ -96,7 +97,7 @@ case $OPTION in
    RUNOPTION="-M"
    ;;
   j)
-   JOBPREFIX="$OPTARG"
+   JOBPREFIX="-j $OPTARG"
    ;;
   o)
    nthreads="$OPTARG"
@@ -140,9 +141,6 @@ else
   PLATFORM=linux$size
   PLATFORM2=linux_32
   PLATFORM3=linux_64
-fi
-if [ "$JOBPREFIX" != "" ]; then
-  JOBPREFIX="-j $JOBPREFIX"
 fi
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
