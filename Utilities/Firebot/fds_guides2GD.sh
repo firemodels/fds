@@ -33,11 +33,11 @@ UPLOADFIGURES ()
 }
 
 if [ -e $GDRIVE ] ; then
-#  UPLOADGUIDE FDS_Config_Management_Plan
-#  UPLOADGUIDE FDS_Technical_Reference_Guide
-#  UPLOADGUIDE FDS_User_Guide
-#  UPLOADGUIDE FDS_Validation_Guide
-#  UPLOADGUIDE FDS_Verification_Guide
+  UPLOADGUIDE FDS_Config_Management_Plan
+  UPLOADGUIDE FDS_Technical_Reference_Guide
+  UPLOADGUIDE FDS_User_Guide
+  UPLOADGUIDE FDS_Validation_Guide
+  UPLOADGUIDE FDS_Verification_Guide
   UPLOADFIGURES FDS_Technical_Reference_Guide FDS_TG
   UPLOADFIGURES FDS_User_Guide FDS_UG
   UPLOADFIGURES FDS_Validation_Guide FDS_VALG
