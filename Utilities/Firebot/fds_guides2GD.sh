@@ -18,11 +18,11 @@ UPLOADGUIDE ()
 }
 UPLOADFIGURES ()
 {
-  cd $MANDIR
+  cd $MANDIR/SCRIPT_FIGURES
   DIRECTORY=$1
-  tarfile=$DIRECTORY.tar
-  cd $DIRECTORY/SCRIPT_FIGURES
-  tar cvf $tarfile .
+  tarfile=${DIRECTORY}_figures.tar
+  tar cvf ../$tarfile .
+  cd ..
   gzip $tarfile
   $GDRIVE list  | grep $tarfile.gz | awk '{ system("~/bin/gdrive delete -i " $1)} '
   $GDRIVE upload -p $PARENT_ID -f $tarfile.gz
