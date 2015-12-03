@@ -1225,7 +1225,7 @@ email_build_status()
 
 #  upload guides to a google drive directory
 if [[ "$UPLOADGUIDES" == "1" ]]; then
-  $UploadGuides $NEWGUIDE_DIR > /dev/null
+  $UploadGuides $NEWGUIDE_DIR $reponame/Manuals &> /dev/null
 fi
 }
 
