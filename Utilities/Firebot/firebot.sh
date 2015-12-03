@@ -329,8 +329,8 @@ check_compile_fds_db()
 inspect_fds_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
-   cd $reponame/Utilities/Scripts
-   ./inspect_openmp.sh &> $OUTPUT_DIR/stage2a_inspect
+   cd $reponame/Verification/Thread_Check/
+   $reponame/Utilities/Scripts/inspect_openmp.sh  -r $reponame thread_check.fds &> $OUTPUT_DIR/stage2a_inspect
 }
 
 check_inspect_fds_db()
