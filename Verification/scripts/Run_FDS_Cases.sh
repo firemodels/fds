@@ -9,7 +9,6 @@ IB=
 nthreads=1
 resource_manager=
 walltime=
-errfileoption=
 RUNOPTION=
 CURDIR=`pwd`
 BACKGROUND=
@@ -26,7 +25,6 @@ echo "Runs FDS verification suite"
 echo ""
 echo "Options"
 echo "-d - use debug version of FDS"
-echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-h - display this message"
 echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
@@ -51,14 +49,11 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'c:dEhj:Mm:o:q:r:Ssw:' OPTION
+while getopts 'c:dhj:Mm:o:q:r:Ssw:' OPTION
 do
 case $OPTION in
   d)
    DEBUG=_db
-   ;;
-  E)
-   errfileoption="-E"
    ;;
   h)
    usage;
@@ -126,7 +121,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $walltime $errfileoption -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
+export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
 cd ..
 ./FDS_Cases.sh
 cd $CURDIR
