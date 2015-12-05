@@ -15,7 +15,6 @@ JOBPREFIX=
 # not running any mpi cases now
 RUN_MPI=0
 STOPFDS=
-errfileoption=
 RUNOPTION=
 CFASTREPO=cfastgitclean
 
@@ -26,7 +25,6 @@ echo ""
 echo "Options"
 echo "-c - cfast repo directory"
 echo "-d - use debug version of FDS"
-echo "-E - redirect stderr to a file if the 'none' queue is used"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
 echo "-j - job prefix"
@@ -69,7 +67,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'c:dEghj:Mm:o:p:q:rSsu' OPTION
+while getopts 'c:dghj:Mm:o:p:q:rSsu' OPTION
 do
 case $OPTION in
   c)
@@ -78,9 +76,6 @@ case $OPTION in
   d)
    DEBUG=_db
    FDS_DEBUG=1
-   ;;
-  E)
-   errfileoption="-E"
    ;;
   g)
    RUN_SMV=0
@@ -160,7 +155,7 @@ export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_inte
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export CFAST=~/$CFASTREPO/CFAST/intel_$PLATFORM/cfast7_$PLATFORM
-QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION $errfileoption"
+QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION
 
 SMVUGDIR=$SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES
 SMVVGDIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
