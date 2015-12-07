@@ -74,14 +74,13 @@ intel_osx_64 : exe       = background
 intel_osx_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m64 $(obj) 
 
-# ------------- gcc OSX 32 ----------------
-
+# ------------- gcc OSX 64 ----------------
 gnu_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
 gnu_osx_64 : CC        = gcc
 gnu_osx_64 : exe       = background
 
 gnu_osx_64 : $(obj)
-	$(CC) -m64 -o $(bin)/$(exe) $(obj) -lm
+	$(CC) -m64 -o $(bin)/$(exe) $(obj)  -lm
 
 #-------------- compile sring_util.c so revision strings are updated -----------
 
