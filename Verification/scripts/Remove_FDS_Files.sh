@@ -16,13 +16,13 @@ shift $(($OPTIND-1))
 
 case=$1
 cd $DIR
-rm -f $case*.s3d >& /dev/null
-rm -f $case*.sf >& /dev/null
-rm -f $case*.bf >& /dev/null
-rm -f $case*.iso >& /dev/null
-rm -f $case*.sz >& /dev/null
-rm -f $case*.csv >& /dev/null
-rm -f $case*.q >& /dev/null
-rm -f $case*.restart /dev/null
-rm -f $case*.out /dev/null
-rm -f $case*.err /dev/null
+rm -f $case*.s3d
+rm -f $case*.sf
+rm -f $case*.bf
+rm -f $case*.iso
+rm -f $case*.sz
+rm -f $case*.csv
+rm -f $case*.q
+rm -f $case*.restart
+rm -f $case*.out
+rm -f $case*.err
