@@ -258,7 +258,7 @@ gnu_osx : FC        = gfortran
 gnu_osx : exe       = smokeview_gnu_64
 
 gnu_osx : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/gcc/x86_64-apple-darwin10/4.6.2 -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/ -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 
