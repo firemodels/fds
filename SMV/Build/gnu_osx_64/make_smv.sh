@@ -1,3 +1,3 @@
 #!/bin/bash
 rm -rf *.o *.mod
-make -f ../Makefile gcc_osx
+make -f ../Makefile gnu_osx_64

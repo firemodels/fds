@@ -1,3 +1,3 @@
 #!/bin/bash
 rm -rf *.o *.mod
-eval make -f ../Makefile gcc_linux
+eval make -f ../Makefile gcc_linux_64
