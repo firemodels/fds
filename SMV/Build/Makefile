@@ -189,17 +189,30 @@ intel_linux_64_profile : exe       = smokeview_linux_64p
 intel_linux_64_profile : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS) -p
 
-# ------------- gnu_linux ----------------
+# ------------- gnu_linux_64_db ----------------
 
-gnu_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_linux : CFLAGS    = -O0 -m64 -D pp_LINUX64
-gnu_linux : LFLAGS    = -m64
-gnu_linux : CC        = gcc
-gnu_linux : CPP       = g++
-gnu_linux : FC        = gfortran
-gnu_linux : exe       = smokeview_gnu_$(SMV_TESTSTRING)64
+gnu_linux_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gnu_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gnu_linux_64_db : LFLAGS    = -m64
+gnu_linux_64_db : CC        = gcc
+gnu_linux_64_db : CPP       = g++
+gnu_linux_64_db : FC        = gfortran
+gnu_linux_64_db : exe       = smokeview_gnu_$(SMV_TESTSTRING)64
 
-gnu_linux : $(obj)
+gnu_linux_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+
+# ------------- gnu_linux_64 ----------------
+
+gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gnu_linux_64 : LFLAGS    = -m64
+gnu_linux_64 : CC        = gcc
+gnu_linux_64 : CPP       = g++
+gnu_linux_64 : FC        = gfortran
+gnu_linux_64 : exe       = smokeview_gnu_$(SMV_TESTSTRING)64
+
+gnu_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -247,18 +260,31 @@ intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILE
 intel_osx_64_db : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
-# ------------- gnu_osx ----------------
+# ------------- gnu_osx_64_db ----------------
 
-gnu_osx : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
-gnu_osx : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
-gnu_osx : LFLAGS    = -m64 -framework OpenGL -framework GLUT
-gnu_osx : CC        = gcc
-gnu_osx : CPP       = g++
-gnu_osx : FC        = gfortran
-gnu_osx : exe       = smokeview_gnu_64
+gnu_osx_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
+gnu_osx_64_db : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
+gnu_osx_64_db : LFLAGS    = -m64 -framework OpenGL -framework GLUT
+gnu_osx_64_db : CC        = gcc
+gnu_osx_64_db : CPP       = g++
+gnu_osx_64_db : FC        = gfortran
+gnu_osx_64_db : exe       = smokeview_osx_64_db
 
-gnu_osx : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/gcc/x86_64-apple-darwin10/4.6.2 -lgfortran
+gnu_osx_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/ -lgfortran
+
+# ------------- gnu_osx_64 ----------------
+
+gnu_osx_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
+gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
+gnu_osx_64 : LFLAGS    = -m64 -framework OpenGL -framework GLUT
+gnu_osx_64 : CC        = gcc
+gnu_osx_64 : CPP       = g++
+gnu_osx_64 : FC        = gfortran
+gnu_osx_64 : exe       = smokeview_osx_64
+
+gnu_osx_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/ -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 
