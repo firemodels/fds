@@ -1,3 +1,3 @@
 #!/bin/bash
 rm -f *.o
-make -f ../Makefile gcc_osx_64
+make -f ../Makefile gnu_osx_64
