@@ -365,7 +365,7 @@ DZZ = ZZ_GET-ZZ_0
 IF (MAXVAL(ABS(DZZ)) > TWO_EPSILON_EB) THEN
    CALL GET_ENTHALPY(DZZ,H1,H_F_REFERENCE_TEMPERATURE)
    CALL GET_ENTHALPY(DZZ,H2,TMP(I,J,K))
-   Q_H_CORR(I,J,K) =  -RHO(I,J,K)*(H2-H1)/DT ! Correction factor to account for temperature dependence of H_F
+   Q_H_CORR(I,J,K) = -RHO(I,J,K)*(H2-H1)/DT ! Correction factor to account for temperature dependence of H_F
    Q_OUT = -RHO(I,J,K)*SUM(SPECIES_MIXTURE%H_F*DZZ)/DT ! FDS Tech Guide (5.14)
 ENDIF
 
