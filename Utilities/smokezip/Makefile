@@ -79,7 +79,7 @@ gnu_linux_64 : $(obj)
 #  gnu linux
 
 gnu_osx_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_OSX64 $(GITINFO)
+gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_LINUX64 -D pp_OSX $(GITINFO)
 gnu_osx_64 : LFLAGS    = -m64
 gnu_osx_64 : CC        = gcc
 gnu_osx_64 : CPP       = g++
@@ -87,7 +87,7 @@ gnu_osx_64 : FC        = gfortran
 gnu_osx_64 : exe       = smokezip_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L/usr/local/lib/gcc/5 -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
 
 
 # ------------- Linux 64 ----------------
