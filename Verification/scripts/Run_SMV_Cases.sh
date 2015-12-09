@@ -16,7 +16,8 @@ JOBPREFIX=
 RUN_MPI=0
 STOPFDS=
 RUNOPTION=
-CFASTREPO=cfastgitclean
+CFASTREPO=~/cfastgitclean
+COMPILER="intel"
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue -s ]"
@@ -27,6 +28,7 @@ echo "-c - cfast repo directory"
 echo "-d - use debug version of FDS"
 echo "-g - run only geometry cases"
 echo "-h - display this message"
+echo "-I - compiler (intel or gnu)"
 echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
@@ -67,7 +69,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'c:dghj:Mm:o:p:q:rSsu' OPTION
+while getopts 'c:dghI:j:Mm:o:p:q:rSsu' OPTION
 do
 case $OPTION in
   c)
@@ -84,6 +86,9 @@ case $OPTION in
    ;;
   h)
    usage;
+   ;;
+  I)
+   COMPILER="$OPTARG"
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
@@ -130,12 +135,8 @@ size=_64
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
   PLATFORM=osx$size
-  PLATFORM2=osx_32
-  PLATFORM3=osx_64
 else
   PLATFORM=linux$size
-  PLATFORM2=linux_32
-  PLATFORM3=linux_64
 fi
 IB=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -146,14 +147,14 @@ if [ "$use_installed" == "1" ] ; then
   export WIND2FDS=wind2fds
   export BACKGROUND=background
 else
-  export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$PLATFORM/wind2fds_$PLATFORM
-  export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM2/background
+  export WIND2FDS=$SVNROOT/Utilities/wind2fds/${COMPILER}_$PLATFORM/wind2fds_$PLATFORM
+  export BACKGROUND=$SVNROOT/Utilities/background/${COMPILER}_$PLATFORM/background
 fi
-export GEOM=$SVNROOT/SMV/source/geomtest/intel_$PLATFORM/geomtest
-export FDSEXE=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
+export GEOM=$SVNROOT/SMV/source/geomtest/${COMPILER}_$PLATFORM/geomtest
+export FDSEXE=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
-export CFAST=~/$CFASTREPO/CFAST/intel_$PLATFORM/cfast7_$PLATFORM
+export FDSMPI=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
+export CFAST=$CFASTREPO/CFAST/${COMPILER}_$PLATFORM/cfast7_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 # Set queue to submit cases to

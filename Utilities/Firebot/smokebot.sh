@@ -43,20 +43,6 @@ if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
 WEBHOSTNAME=$SMOKEBOT_HOSTNAME
 fi
 
-if [[ "$IFORT_COMPILER" != "" ]] ; then
-  source $IFORT_COMPILER/bin/compilervars.sh intel64
-fi 
-notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
-if [ "$notfound" == "1" ] ; then
-  export haveCC="0"
-  USEINSTALL="-i"
-  USEINSTALL2="-u"
-else
-  export haveCC="1"
-  USEINSTALL=
-  USEINSTALL2=
-fi
-
 while getopts 'ab:C:cI:m:Mo:q:r:sS:tuU' OPTION
 do
 case $OPTION in
@@ -110,6 +96,24 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$COMPILER" == "intel" ]; then
+if [[ "$IFORT_COMPILER" != "" ]] ; then
+  source $IFORT_COMPILER/bin/compilervars.sh intel64
+fi 
+notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+else
+notfound=`gcc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+fi
+if [ "$notfound" == "1" ] ; then
+  export haveCC="0"
+  USEINSTALL="-i"
+  USEINSTALL2="-u"
+else
+  export haveCC="1"
+  USEINSTALL=
+  USEINSTALL2=
+fi
 
 if [ "$SSH" != "" ]; then
   sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
@@ -531,7 +535,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -765,7 +769,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -1162,6 +1166,9 @@ email_build_status()
    fi
    if [[ "$THIS_CFAST_FAILED" == "1" ]] ; then
      mailTo="$mailToCFAST"
+   fi
+   if [[ "$MAILTO" != "" ]] ; then
+     mailTo="$MAILTO"
    fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
