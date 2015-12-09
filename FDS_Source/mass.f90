@@ -286,6 +286,10 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
+   ! Add gas production source term
+
+   IF (N_LP_ARRAY_INDICES>0) ZZS = ZZS + DT*M_DOT_PPP
+
    ! Manufactured solution
 
    IF (PERIODIC_TEST==7) THEN
@@ -313,6 +317,7 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+!!!rhos(41,1,31) = rhos(41,1,31) + dt*10.*rhoa
 
    ! Check mass density for positivity
 
@@ -421,6 +426,10 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
+   ! Add gas production source term
+
+   IF (N_LP_ARRAY_INDICES>0) ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
+
    ! Manufactured solution
 
    IF (PERIODIC_TEST==7) THEN
@@ -448,6 +457,7 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+!!!rho(41,1,31) = rho(41,1,31) + 0.5*dt*10.*rhoa
 
    ! Check mass density for positivity
 
