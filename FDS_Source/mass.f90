@@ -190,7 +190,7 @@ SUBROUTINE DENSITY(T,DT,NM)
 
 USE COMP_FUNCTIONS, ONLY: SECOND,SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT
-USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
+USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,EVACUATION_ONLY, &
                             PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,T_USED
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z,VD2D_MMS_Z_SRC
 USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
@@ -411,7 +411,7 @@ CASE(.FALSE.) PREDICTOR_STEP
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
 
-               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N)) - .5_EB*DT*RHS
+               ZZ(I,J,K,N) = .5_EB*( RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*RHS )
             ENDDO
          ENDDO
       ENDDO
@@ -772,6 +772,112 @@ ELSE WIND_DIRECTION_IF
 ENDIF WIND_DIRECTION_IF
 
 END FUNCTION SCALAR_FACE_VALUE
+
+
+REAL(EB) FUNCTION SCALAR_FACE_VALUE_NEW(A,U,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(3),U(4)
+INTEGER, INTENT(IN) :: LIMITER
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
+
+! This function is identical to the original SCALAR_FACE_VALUE except
+! that we only use 2nd order limiters if the upwind velocity is the
+! same sign as the local face velocity.
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+!
+! CENTRAL_LIMITER  = 0
+! GODUNOV_LIMITER  = 1
+! SUPERBEE_LIMITER = 2
+! MINMOD_LIMITER   = 3
+! CHARM_LIMITER    = 4
+! MP5_LIMITER      = 5
+!
+!                    location of face
+!
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!               A(1)        A(2)        A(3)
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A(2)>0._EB) THEN
+
+   ! the flow is left to right
+
+   IF (A(1)>0._EB) THEN
+      DU_UP = U(2)-U(1)
+   ELSE
+      DU_UP = 0._EB
+   ENDIF
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE_NEW = U(2)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(1)-U(2),U(1:4)/)
+         SCALAR_FACE_VALUE_NEW = MP5(V)
+   END SELECT
+
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+
+   IF (A(3)<0._EB) THEN
+      DU_UP = U(4)-U(3)
+   ELSE
+      DU_UP = 0._EB
+   ENDIF
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE_NEW = U(3)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
+         SCALAR_FACE_VALUE_NEW = MP5(V)
+    END SELECT
+
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_VALUE_NEW
 
 
 REAL(EB) FUNCTION MP5(V)
