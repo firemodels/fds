@@ -62,7 +62,7 @@ case $OPTION  in
    CLEANREPO=-c
    ;;
   C)
-   CFASTREPO="-C $OPTARG"
+   CFASTREPO="$OPTARG"
    ;;
   I)
    COMPILER="$OPTARG"
