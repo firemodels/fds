@@ -535,7 +535,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -769,7 +769,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
-   ./Run_SMV_Cases.sh $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
