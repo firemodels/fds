@@ -1167,6 +1167,9 @@ email_build_status()
    if [[ "$THIS_CFAST_FAILED" == "1" ]] ; then
      mailTo="$mailToCFAST"
    fi
+   if [[ "$MAILTO" != "" ]] ; then
+     mailTo="$MAILTO"
+   fi
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "----------------------------------------------" > $TIME_LOG
