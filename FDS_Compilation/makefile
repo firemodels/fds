@@ -426,49 +426,49 @@ gnu_win_64_db : $(obj_serial)
 gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
 gnu_linux_64 : FCOMPL = gfortran
 gnu_linux_64 : FOPENMPFLAGS = -fopenmp
-gnu_linux_64 : obj = fds_gnu_linux
+gnu_linux_64 : obj = fds_linux_64
 gnu_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 gnu_linux_64_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 gnu_linux_64_db : FCOMPL = gfortran
 gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
-gnu_linux_64_db : obj = fds_gnu_linux_db
+gnu_linux_64_db : obj = fds_linux_64_db
 gnu_linux_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 gnu_osx_64_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
 gnu_osx_64_db : FCOMPL  = gfortran
 gnu_osx_64_db : FOPENMPFLAGS = -fopenmp
-gnu_osx_64_db : obj     = fds_gnu_osx_db
+gnu_osx_64_db : obj     = fds_osx_64_db
 gnu_osx_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
 mpi_gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_linux_64 : FCOMPL = mpifort
 mpi_gnu_linux_64 : FOPENMPFLAGS = 
-mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux
+mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
 mpi_gnu_linux_64 : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 mpi_gnu_linux_64_db : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_linux_64_db : FCOMPL = mpifort
 mpi_gnu_linux_64_db : FOPENMPFLAGS = 
-mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux
+mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
 mpi_gnu_linux_64_db : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 mpi_gnu_osx_64 : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_osx_64 : FCOMPL = mpifort
 mpi_gnu_osx_64 : FOPENMPFLAGS = 
-mpi_gnu_osx_64 : obj = fds_mpi_gnu_osx
+mpi_gnu_osx_64 : obj = fds_mpi_gnu_osx_64
 mpi_gnu_osx_64 : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 mpi_gnu_osx_64_db : FFLAGS = -O2 $(GITINFOGNU)
 mpi_gnu_osx_64_db : FCOMPL = mpifort
 mpi_gnu_osx_64_db : FOPENMPFLAGS = 
-mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx
+mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
 mpi_gnu_osx_64_db : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
