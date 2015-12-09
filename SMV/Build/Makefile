@@ -20,7 +20,6 @@ else
 endif
 GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
-
 #----------------------------------------------------------------------------
 # Should not need to edit lines below except to add or 'debug' target entries
 
@@ -271,7 +270,7 @@ gnu_osx_64_db : FC        = gfortran
 gnu_osx_64_db : exe       = smokeview_osx_64_db
 
 gnu_osx_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/ -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
 
 # ------------- gnu_osx_64 ----------------
 
@@ -284,7 +283,7 @@ gnu_osx_64 : FC        = gfortran
 gnu_osx_64 : exe       = smokeview_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/ -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 
