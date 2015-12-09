@@ -197,7 +197,7 @@ gnu_linux_64_db : LFLAGS    = -m64
 gnu_linux_64_db : CC        = gcc
 gnu_linux_64_db : CPP       = g++
 gnu_linux_64_db : FC        = gfortran
-gnu_linux_64_db : exe       = smokeview_gnu_$(SMV_TESTSTRING)64
+gnu_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64_db : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
@@ -210,7 +210,7 @@ gnu_linux_64 : LFLAGS    = -m64
 gnu_linux_64 : CC        = gcc
 gnu_linux_64 : CPP       = g++
 gnu_linux_64 : FC        = gfortran
-gnu_linux_64 : exe       = smokeview_gnu_$(SMV_TESTSTRING)64
+gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
