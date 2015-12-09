@@ -423,46 +423,46 @@ gnu_win_64_db : obj = fds_gnu_win_64
 gnu_win_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
-gnu_linux : FCOMPL = gfortran
-gnu_linux : FOPENMPFLAGS = -fopenmp
-gnu_linux : obj = fds_gnu_linux
-gnu_linux : $(obj_serial)
+gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
+gnu_linux_64 : FCOMPL = gfortran
+gnu_linux_64 : FOPENMPFLAGS = -fopenmp
+gnu_linux_64 : obj = fds_gnu_linux
+gnu_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
-gnu_linux_db : FCOMPL = gfortran
-gnu_linux_db : FOPENMPFLAGS = -fopenmp
-gnu_linux_db : obj = fds_gnu_linux_db
-gnu_linux_db : $(obj_serial)
+gnu_linux_64_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
+gnu_linux_64_db : FCOMPL = gfortran
+gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
+gnu_linux_64_db : obj = fds_gnu_linux_db
+gnu_linux_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx : FFLAGS  = -O2 $(GITINFOGNU)
-gnu_osx : FCOMPL  = gfortran
-gnu_osx : FOPENMPFLAGS = -fopenmp
-gnu_osx : obj     = fds_gnu_osx
-gnu_osx : $(obj_serial)
+gnu_osx_64 : FFLAGS  = -O2 $(GITINFOGNU)
+gnu_osx_64 : FCOMPL  = gfortran
+gnu_osx_64 : FOPENMPFLAGS = -fopenmp
+gnu_osx_64 : obj     = fds_gnu_osx
+gnu_osx_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
-gnu_osx_db : FCOMPL  = gfortran
-gnu_osx_db : FOPENMPFLAGS = -fopenmp
-gnu_osx_db : obj     = fds_gnu_osx_db
-gnu_osx_db : $(obj_serial)
+gnu_osx_64_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
+gnu_osx_64_db : FCOMPL  = gfortran
+gnu_osx_64_db : FOPENMPFLAGS = -fopenmp
+gnu_osx_64_db : obj     = fds_gnu_osx_db
+gnu_osx_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
-mpi_gnu_linux : FCOMPL = mpifort
-mpi_gnu_linux : FOPENMPFLAGS = 
-mpi_gnu_linux : obj = fds_mpi_gnu_linux
-mpi_gnu_linux : setup $(obj_mpi) 
+mpi_gnu_64_linux : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_64_linux : FCOMPL = mpifort
+mpi_gnu_64_linux : FOPENMPFLAGS = 
+mpi_gnu_64_linux : obj = fds_mpi_gnu_linux
+mpi_gnu_64_linux : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
-mpi_gnu_osx : FFLAGS = -O2 $(GITINFOGNU)
-mpi_gnu_osx : FCOMPL = mpif90
-mpi_gnu_osx : FOPENMPFLAGS = 
-mpi_gnu_osx : obj = fds_mpi_gnu_osx
-mpi_gnu_osx : setup $(obj_mpi) 
+mpi_gnu_64_osx : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_64_osx : FCOMPL = mpif90
+mpi_gnu_64_osx : FOPENMPFLAGS = 
+mpi_gnu_64_osx : obj = fds_mpi_gnu_osx
+mpi_gnu_64_osx : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 
