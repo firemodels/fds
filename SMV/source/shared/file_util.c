@@ -7,6 +7,9 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef pp_OSX
+#include <unistd.h>
+#endif
 #include <math.h>
 #ifdef WIN32
 #include <io.h>
