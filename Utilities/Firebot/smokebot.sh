@@ -43,20 +43,6 @@ if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
 WEBHOSTNAME=$SMOKEBOT_HOSTNAME
 fi
 
-if [[ "$IFORT_COMPILER" != "" ]] ; then
-  source $IFORT_COMPILER/bin/compilervars.sh intel64
-fi 
-notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
-if [ "$notfound" == "1" ] ; then
-  export haveCC="0"
-  USEINSTALL="-i"
-  USEINSTALL2="-u"
-else
-  export haveCC="1"
-  USEINSTALL=
-  USEINSTALL2=
-fi
-
 while getopts 'ab:C:cI:m:Mo:q:r:sS:tuU' OPTION
 do
 case $OPTION in
@@ -110,6 +96,24 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+if [ "$COMPILER" == "intel" ]; then
+if [[ "$IFORT_COMPILER" != "" ]] ; then
+  source $IFORT_COMPILER/bin/compilervars.sh intel64
+fi 
+notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+else
+notfound=`gcc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+fi
+if [ "$notfound" == "1" ] ; then
+  export haveCC="0"
+  USEINSTALL="-i"
+  USEINSTALL2="-u"
+else
+  export haveCC="1"
+  USEINSTALL=
+  USEINSTALL2=
+fi
 
 if [ "$SSH" != "" ]; then
   sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
