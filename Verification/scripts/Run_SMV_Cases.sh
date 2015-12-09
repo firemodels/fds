@@ -16,7 +16,7 @@ JOBPREFIX=
 RUN_MPI=0
 STOPFDS=
 RUNOPTION=
-CFASTREPO=cfastgitclean
+CFASTREPO=~/cfastgitclean
 COMPILER="intel"
 
 function usage {
@@ -154,7 +154,7 @@ export GEOM=$SVNROOT/SMV/source/geomtest/${COMPILER}_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
-export CFAST=~/$CFASTREPO/CFAST/${COMPILER}_$PLATFORM/cfast7_$PLATFORM
+export CFAST=$CFASTREPO/CFAST/${COMPILER}_$PLATFORM/cfast7_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 # Set queue to submit cases to
