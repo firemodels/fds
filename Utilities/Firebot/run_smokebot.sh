@@ -121,7 +121,11 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
      git remote update
      git checkout $BRANCH
      git pull
-     cp Utilities/Firebot/$botscript $CURDIR/.
+     cd Utilities/Firebot
+     FIREBOTDIR=`pwd`
+     if [ "$FIREBOTDIR" != "$CURDIR" ]; then
+       cp $botscript $CURDIR/.
+     fi
      cd $CURDIR
   fi
 fi
