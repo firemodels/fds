@@ -2520,10 +2520,10 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)               
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)/SPECIES_MIXTURE(N)%MW
 ENDDO   
  
 ! Print out Stoichiometric parameters for reactions
@@ -5632,9 +5632,13 @@ IND_SELECT: SELECT CASE(IND)
       GAS_PHASE_OUTPUT_RES = CHI_R(II,JJ,KK)
    CASE(503) ! AUTO IGNITION TEMPERATURE
       IF (REIGNITION_MODEL) THEN
-         GAS_PHASE_OUTPUT_RES = MIN( AIT(II,JJ,KK)-TMPM, REACTION(1)%AUTO_IGNITION_TEMPERATURE-TMPM )
+         IF (AIT(II,JJ,KK) < 1.E10_EB) THEN
+            GAS_PHASE_OUTPUT_RES = AIT(II,JJ,KK)-TMPM
+         ELSE
+            GAS_PHASE_OUTPUT_RES = REACTION(1)%AUTO_IGNITION_TEMPERATURE-TMPM
+         ENDIF
       ELSE
-         GAS_PHASE_OUTPUT_RES = MIN( 1.E20_EB,           REACTION(1)%AUTO_IGNITION_TEMPERATURE-TMPM )
+         GAS_PHASE_OUTPUT_RES = REACTION(1)%AUTO_IGNITION_TEMPERATURE-TMPM
       ENDIF
 
 END SELECT IND_SELECT
