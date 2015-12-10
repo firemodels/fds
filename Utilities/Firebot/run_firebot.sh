@@ -1,5 +1,8 @@
 #!/bin/bash
-running=firebot_running
+if [ ! -d ~/.fdssmvgit ] ; then
+  mkdir ~/.fdssmvgit
+fi
+running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 QUEUE=firebot
