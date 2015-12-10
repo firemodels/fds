@@ -2520,10 +2520,10 @@ DO N=1,N_TRACKED_SPECIES
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', CP_Z( 500,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', CP_Z(1000,N)
    WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', CP_Z(1500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)
-   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)               
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '   Diff. Coeff. (m^2/s) Ambient (293 K): ', D_Z(ITMP,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                  500 K: ', D_Z( 500,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1000 K: ', D_Z(1000,N)/SPECIES_MIXTURE(N)%MW
+   WRITE(LU_OUTPUT,'(A,ES9.2)')  '                                 1500 K: ', D_Z(1500,N)/SPECIES_MIXTURE(N)%MW
 ENDDO   
  
 ! Print out Stoichiometric parameters for reactions

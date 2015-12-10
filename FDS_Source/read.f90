@@ -3161,9 +3161,9 @@ TABLE_LOOP: DO J=1,5000
    DO N=1,N_TRACKED_SPECIES
       IF (SPECIES_MIXTURE(N)%REFERENCE_ENTHALPY < -1.E20_EB) SPECIES_MIXTURE(N)%REFERENCE_ENTHALPY = SUM(Z2Y(:,N) * H_TMP(:))
       IF (D_TMP_Z(N) > 0._EB) THEN
-         D_Z(J,N)= D_TMP_Z(N)
+         D_Z(J,N) = D_TMP_Z(N)
       ELSE
-         D_Z(J,N)  = SPECIES_MIXTURE(N)%MW*SUM(Z2Y(:,N)*D_TMP(:))
+         D_Z(J,N) = SPECIES_MIXTURE(N)%MW*SUM(Z2Y(:,N)*D_TMP(:))
       ENDIF
       IF (CP_TMP_Z(N) > 0._EB) THEN
          CP_Z(J,N) = CP_TMP_Z(N)
