@@ -252,6 +252,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
       SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT; CYCLE WALL_LOOP
+         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
          CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
          CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
       END SELECT
@@ -386,6 +387,7 @@ CASE(.FALSE.) PREDICTOR_STEP
 
       SELECT CASE(WC%BOUNDARY_TYPE)
          CASE DEFAULT; CYCLE WALL_LOOP_2
+         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
          CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
          CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
       END SELECT
