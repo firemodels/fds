@@ -7,6 +7,8 @@
 #  = Input variables =
 #  ===================
 
+size=_64
+
 # define run directories
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
@@ -296,7 +298,7 @@ archive_compiler_version()
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $fdsrepo/FDS_Compilation/intel_${platform}_64_db
+   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -304,8 +306,8 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $fdsrepo/FDS_Compilation/intel_${platform}_64_db
-   if [ -e "fds_intel_${platform}_64_db" ]
+   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}_db
+   if [ -e "fds_intel_${platform}${size}_db" ]
    then
       stage2a_success=true
    else
@@ -359,7 +361,7 @@ check_inspect_fds_db()
 compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
-   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
+   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB$DB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
 }
@@ -367,8 +369,8 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}_64$IB$DB
-   if [ -e "fds_mpi_intel_${platform}_64$IB$DB" ]
+   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB$DB
+   if [ -e "fds_mpi_intel_${platform}${size}$IB$DB" ]
    then
       stage2b_success=true
    else
@@ -557,7 +559,7 @@ check_cases_debug()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $fdsrepo/FDS_Compilation/intel_${platform}_64
+   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -565,8 +567,8 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $fdsrepo/FDS_Compilation/intel_${platform}_64
-   if [ -e "fds_intel_${platform}_64" ]
+   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}
+   if [ -e "fds_intel_${platform}${size}" ]
    then
       stage4a_success=true
    else
@@ -595,7 +597,7 @@ check_compile_fds()
 compile_fds_mpi()
 {
    # Clean and compile FDS MPI
-   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}_64$IB
+   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
 }
@@ -603,8 +605,8 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS MPI compilation
-   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}_64$IB
-   if [ -e "fds_mpi_intel_${platform}_64$IB" ]
+   cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB
+   if [ -e "fds_mpi_intel_${platform}${size}$IB" ]
    then
       stage4b_success=true
    else
@@ -635,12 +637,12 @@ compile_smv_utilities()
 {  
    # smokeview libraries
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel_64
+   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    else
-   $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel_64 \; \
+   $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \)
@@ -765,10 +767,10 @@ compile_smv_db()
 {
    # Clean and compile SMV debug
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}_64
+   cd $fdsrepo/SMV/Build/intel_${platform}${size}
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}_64 \; \
+   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
    fi
 }
@@ -776,8 +778,8 @@ compile_smv_db()
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
-   cd $fdsrepo/SMV/Build/intel_${platform}_64
-   if [ -e "smokeview_${platform}_64_db" ]
+   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage6a_success=true
    else
@@ -807,10 +809,10 @@ compile_smv()
 {
    # Clean and compile SMV
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}_64
+   cd $fdsrepo/SMV/Build/intel_${platform}${size}
    ./make_smv.sh &> $OUTPUT_DIR/stage6c
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}_64 \; \
+   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
    ./make_smv.sh &> $OUTPUT_DIR/stage6c \)
    fi
 }
@@ -818,8 +820,8 @@ compile_smv()
 check_compile_smv()
 {
    # Check for errors in SMV release compilation
-   cd $fdsrepo/SMV/Build/intel_${platform}_64
-   if [ -e "smokeview_${platform}_64" ]
+   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   if [ -e "smokeview_${platform}${size}" ]
    then
       stage6c_success=true
    else
