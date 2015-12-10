@@ -316,7 +316,6 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-!!!rhos(41,1,31) = rhos(41,1,31) + dt*10.*rhoa
 
    ! Check mass density for positivity
 
