@@ -8,6 +8,7 @@
 #  = Input variables =
 #  ===================
 
+size=_64
 # define run directories
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
@@ -371,14 +372,14 @@ update_and_compile_cfast()
       exit
    fi
     # Build CFAST
-    cd $cfastrepo/CFAST/${COMPILER}_${platform}_64
-    rm -f cfast7_${platform}_64
+    cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+    rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
 
    # Check for errors in CFAST compilation
-   cd $cfastrepo/CFAST/${COMPILER}_${platform}_64
-   if [ -e "cfast7_${platform}_64" ]
+   cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+   if [ -e "cfast7_${platform}${size}" ]
    then
       stage0_success=true
    else
@@ -452,8 +453,8 @@ check_git_checkout()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}_64$IB$DB
-   rm -f fds_mpi_${COMPILER}_${platform}_64$IB$DB
+   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
+   rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
 }
@@ -461,8 +462,8 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}_64$IB$DB
-   if [ -e "fds_mpi_${COMPILER}_${platform}_64$IB$DB" ]
+   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
+   if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ]
    then
       stage2b_success=true
    else
@@ -482,7 +483,7 @@ check_compile_fds_mpi_db()
       grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
-      if [ -e "fds_mpi_${COMPILER}_${platform}_64$IB$DB" ] ; then
+      if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ] ; then
         THIS_FDS_FAILED=1
       fi
    fi
@@ -583,8 +584,8 @@ check_verification_cases_debug()
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}_64$IB
-   rm -f fds_mpi_${COMPILER}_${platform}_64$IB
+   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
+   rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4b
 }
@@ -592,8 +593,8 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS compilation
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}_64$IB
-   if [ -e "fds_mpi_${COMPILER}_${platform}_64$IB" ]
+   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
+   if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB" ]
    then
       stage4b_success=true
    else
@@ -625,56 +626,56 @@ compile_smv_utilities()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
    # smokeview libraries
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}_64
+   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
 
    # smokezip:
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}_64
-   rm -f *.o smokezip_${platform}_64
+   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
+   rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # smokediff:
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}_64
-   rm -f *.o smokediff_${platform}_64
+   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
+   rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # background:
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}_64
+   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
    
   # wind2fds:
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}_64
-   rm -f *.o wind2fds_${platform}_64
+   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
+   rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}_64 \; \
+   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}_64 \; \
-   rm -f *.o smokezip_${platform}_64 \; \
+   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size} \; \
+   rm -f *.o smokezip_${platform}${size} \; \
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}_64 \; \
-   rm -f *.o smokediff_${platform}_64 \; \
+   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size} \; \
+   rm -f *.o smokediff_${platform}${size} \; \
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}_64 \; \
+   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size} \; \
    rm -f *.o background \; \
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}_64 \; \
+   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size} \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
@@ -699,10 +700,10 @@ check_smv_utilities()
    if [ "$haveCC" == "1" ] ; then
      # Check for errors in SMV utilities compilation
      cd $fdsrepo
-     if [ -e "$fdsrepo/Utilities/smokezip/${COMPILER}_${platform}_64/smokezip_${platform}_64" ]  && \
-        [ -e "$fdsrepo/Utilities/smokediff/${COMPILER}_${platform}_64/smokediff_${platform}_64" ]  && \
-        [ -e "$fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}_64/wind2fds_${platform}_64" ]  && \
-        [ -e "$fdsrepo/Utilities/background/${COMPILER}_${platform}_64/background" ]
+     if [ -e "$fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}/smokezip_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}/smokediff_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/Utilities/background/${COMPILER}_${platform}${size}/background" ]
      then
         stage5pre_success="1"
      else
@@ -820,13 +821,13 @@ compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64
-   rm -f smokeview_${platform}_64_db
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
    else
    $SSH \(
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64 \; \
-   rm -f smokeview_${platform}_64_db \; \
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   rm -f smokeview_${platform}${size}_db \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
    fi
    fi
@@ -836,8 +837,8 @@ check_compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64
-   if [ -e "smokeview_${platform}_64_db" ]
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage6a_success=true
    else
@@ -914,13 +915,13 @@ compile_smv()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64
-   rm -f smokeview_${platform}_64
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64 \; \
-   rm -f smokeview_${platform}_64 \; \
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   rm -f smokeview_${platform}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c \)
    fi
    fi
@@ -930,13 +931,13 @@ check_compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}_64
-   if [ -e "smokeview_${platform}_64" ]
+   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   if [ -e "smokeview_${platform}${size}" ]
    then
       stage6c_success=true
    else
       echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
-      echo "The program smokeview_${platform}_64 does not exist."
+      echo "The program smokeview_${platform}${size} does not exist."
       cat $OUTPUT_DIR/stage6c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
