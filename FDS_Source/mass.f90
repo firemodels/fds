@@ -255,7 +255,7 @@ CASE(.TRUE.) PREDICTOR_STEP
          CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
          CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
       END SELECT
-      
+
       SELECT CASE(IOR)
          CASE( 1); UU(IIG-1,JJG,KKG) = UN
          CASE(-1); UU(IIG,JJG,KKG)   = UN
@@ -389,7 +389,7 @@ CASE(.FALSE.) PREDICTOR_STEP
          CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
          CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
       END SELECT
-      
+
       SELECT CASE(IOR)
          CASE( 1); UU(IIG-1,JJG,KKG) = UN
          CASE(-1); UU(IIG,JJG,KKG)   = UN
@@ -452,7 +452,6 @@ CASE(.FALSE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
-!!!rho(41,1,31) = rho(41,1,31) + 0.5*dt*10.*rhoa
 
    ! Check mass density for positivity
 
