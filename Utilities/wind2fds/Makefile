@@ -70,7 +70,7 @@ gnu_linux_64 : $(obj)
 gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_OSX $(GITHASH)
 gnu_osx_64 : CC        = gcc
 gnu_osx_64 : CPP       = g++
-gnu_osx_64 : exe       = wind2fds_linux_64
+gnu_osx_64 : exe       = wind2fds_osx_64
 
 gnu_osx_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)
