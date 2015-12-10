@@ -1253,11 +1253,11 @@ ELSE PREDICT_NORMALS
    DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       WC => WALL(IW)
       IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-            SF => SURFACE(WC%SURF_INDEX)
-            IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
-                SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
-                WC%NODE_INDEX > 0                        .OR. &
-                ANY(SF%LEAK_PATH>0._EB)) CYCLE
+         SF => SURFACE(WC%SURF_INDEX)
+         IF (SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .OR. &
+             SF%SPECIES_BC_INDEX==INTERPOLATED_BC     .OR. &
+             WC%NODE_INDEX > 0                        .OR. &
+             ANY(SF%LEAK_PATH>0._EB)) CYCLE
       ENDIF
       WC%ONE_D%UW = WC%ONE_D%UWS
    ENDDO
