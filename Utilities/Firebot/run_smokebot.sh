@@ -1,5 +1,8 @@
 #!/bin/bash
-running=smokebot_running
+if [ ! -d ~/.fdssmvgit ] ; then
+  mkdir ~/.fdssmvgit
+fi
+running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 FDSREPO=~/FDS-SMVgitclean
