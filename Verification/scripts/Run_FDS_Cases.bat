@@ -11,6 +11,8 @@ if "%rundebug%" == "1" (
   set DEBUG=
 )
 
+set size=_64
+
 :: setup environment variables
 
 set CURDIR="%CD%"
@@ -40,9 +42,9 @@ set RUNTFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 :: program locations
 
-set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_64\background.exe
-set FDSBASE=fds_mpi_win_64%DEBUG%.exe
-set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
+set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
+set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
 set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
 
 :: ---------- Ensure that various programs exists
