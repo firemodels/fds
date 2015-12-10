@@ -89,7 +89,7 @@ else
   export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
   export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
   export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
-  export BACKGROUND=$SVNROOT/Utilities/background/intel_$PLATFORM\_32/background
+  export BACKGROUND=$SVNROOT/Utilities/background/intel_$VERSION2/background
 fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"

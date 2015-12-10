@@ -2237,6 +2237,7 @@ int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
+  int have_zonevents,nzventsnew=0;
   int unit_start=20;
   devicedata *devicecopy;
   int do_pass4=0;
@@ -3012,6 +3013,10 @@ int readsmv(char *file, char *file2){
       nzvents++;
       continue;
     }
+    if(match(buffer, "HVENTGEOM")==1||match(buffer, "VVENTGEOM")==1||match(buffer, "MVENTGEOM")==1){
+      nzventsnew++;
+      continue;
+    }
 
   }
 
@@ -3247,6 +3252,7 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&zoneinfo,nzoneinfo*sizeof(zonedata))==0)return 2;
   }
   FREEMEMORY(zventinfo);
+  if(nzventsnew>0)nzvents=nzventsnew;
   if(nzvents>0){
     if(NewMemory((void **)&zventinfo,nzvents*sizeof(zvent))==0)return 2;
   }
@@ -5273,10 +5279,17 @@ int readsmv(char *file, char *file2){
     ++++++++++++++ HFLOWGEOM/VHFLOWGEOM/MFLOWGEOM +++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer, "VENTGEOM")==1||
+    have_zonevents=0;
+    if(nzventsnew==0&&(
+       match(buffer, "VENTGEOM")==1||
        match(buffer, "HFLOWGEOM")==1||
        match(buffer, "VFLOWGEOM")==1||
-       match(buffer, "MFLOWGEOM")==1){
+       match(buffer, "MFLOWGEOM")==1))have_zonevents=1;
+    if(nzventsnew>0&&(
+       match(buffer, "HVENTGEOM")==1||
+       match(buffer, "VVENTGEOM")==1||
+       match(buffer, "MVENTGEOM")==1))have_zonevents=1;
+    if(have_zonevents==1){
       int vent_type=HFLOW_VENT;
       int vertical_vent_type=0;
       zvent *zvi;
@@ -5288,8 +5301,8 @@ int readsmv(char *file, char *file2){
 
       nzvents++;
       zvi = zventinfo + nzvents - 1;
-      if(match(buffer,"VFLOWGEOM")==1)vent_type=VFLOW_VENT;
-      if(match(buffer,"MFLOWGEOM")==1)vent_type=MFLOW_VENT;
+      if(match(buffer,"VFLOWGEOM")==1||match(buffer,"VVENTGEOM")==1)vent_type=VFLOW_VENT;
+      if(match(buffer,"MFLOWGEOM")==1||match(buffer,"MVENTGEOM")==1)vent_type=MFLOW_VENT;
       zvi->vent_type=vent_type;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
