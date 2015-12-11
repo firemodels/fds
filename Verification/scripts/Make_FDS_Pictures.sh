@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script generates SMV pictures from the
+# This script generates smokeview pictures from the
 # FDS Verification Cases on a Linux or OS X machine
 
 function usage {
@@ -19,6 +19,8 @@ echo "-X - do not start / stop separate X-server"
 exit
 }
 
+prog=$0
+progname=${prog##*/}
 CURDIR=`pwd`
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
@@ -95,5 +97,4 @@ if [ "$START_X" == "yes" ]; then
   source $SVNROOT/Utilities/Scripts/stopXserver.sh 2>/dev/null
 fi
 cd $CURDIR
-echo FDS pictures created.
-
+echo $progname complete

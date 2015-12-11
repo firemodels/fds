@@ -53,15 +53,26 @@ intel_win_64 : exe       = wind2fds_win_64.exe
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib
 
-# ------------- gcc Linux 64 ----------------
-#  64 bit gcc linux
+# ------------- gnu Linux 64 ----------------
+#  64 bit gnu linux
 
-gcc_linux_64 : CFLAGS    = -O0 -m64 $(GITHASH)
-gcc_linux_64 : CC        = gcc
-gcc_linux_64 : CPP       = g++
-gcc_linux_64 : exe       = wind2fds_linux_64
+gnu_linux_64 : CFLAGS    = -O0 -m64 $(GITHASH)
+gnu_linux_64 : CC        = gcc
+gnu_linux_64 : CPP       = g++
+gnu_linux_64 : exe       = wind2fds_linux_64
 
-gcc_linux_64 : $(obj)
+gnu_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj)
+
+# ------------- gnu OSX 64 ----------------
+#  64 bit gnu linux
+
+gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_OSX $(GITHASH)
+gnu_osx_64 : CC        = gcc
+gnu_osx_64 : CPP       = g++
+gnu_osx_64 : exe       = wind2fds_osx_64
+
+gnu_osx_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj)
 
 # ------------- Linux 64 ----------------
