@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 echo Using the environment variables:
 echo.
-echo Using GIT revision %smv_revision% to build a 32 bit Linux version of background
+echo Using GIT revision %smv_revision% to build a Linux version of background
 
 %svn_drive%
 cd %svn_root%\smv\scripts
@@ -29,7 +29,7 @@ set scriptdir=FDS-SMV/SMV/scripts
 set bundledir=FDS-SMV/SMV/for_bundle
 set bindir=FDS-SMV/SMV/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEbglinux.csh %linux_svn_root%
+plink %svn_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEbglinux.csh %linux_svn_root%
 
 echo.
 echo compilation complete
