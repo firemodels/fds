@@ -23,11 +23,9 @@ call %envfile%
 cd %svn_root%\smv\scripts
 set version=%smv_version%_%smv_revision%
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
-set bindir=FDS-SMV/SMV/bin
+set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEsmvlinux64.sh
+plink %svn_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEsmvlinux64.sh %linux_svn_root%
 
 echo.
 echo compilation complete

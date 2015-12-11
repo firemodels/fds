@@ -19,17 +19,15 @@ goto:eof
 call %envfile%
 echo Using the environment variables:
 echo.
-echo Using GIT revision %smv_revision% to build a 32 bit OSX version of background
+echo Using GIT revision %smv_revision% to build an OSX version of background
 
 %svn_drive%
 cd %svn_root%\smv\scripts
 set version=%smv_version%_%smv_revision%
 
 set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
-set bindir=FDS-SMV/SMV/bin
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEbgosx.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEbgosx.csh %linux_svn_root%
 
 echo.
 echo compilation complete
