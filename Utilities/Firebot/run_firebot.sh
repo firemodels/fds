@@ -1,5 +1,8 @@
 #!/bin/bash
-running=firebot_running
+if [ ! -d ~/.fdssmvgit ] ; then
+  mkdir ~/.fdssmvgit
+fi
+running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 QUEUE=firebot
@@ -26,6 +29,7 @@ echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo "-r - repository location [default: $reponame]"
+echo "-s - skip matlab and build document stages"
 echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides (only by user firebot)"
@@ -34,7 +38,7 @@ exit
 }
 
 BRANCH=development
-botscript=firebot_linux.sh
+botscript=firebot.sh
 UPDATEREPO=
 CLEANREPO=0
 UPDATE=
@@ -44,7 +48,8 @@ EMAIL=
 UPLOADGUIDES=
 SSH=
 FORCE=
-while getopts 'b:cfhm:q:nr:S:uUv' OPTION
+SKIPMATLAB=
+while getopts 'b:cfhm:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -71,6 +76,9 @@ case $OPTION  in
   r)
    reponame="$OPTARG"
    ;;
+  s)
+   SKIPMATLAB=-s
+   ;;
   S)
    SSH="-S $OPTARG"
    ;;
@@ -88,7 +96,7 @@ done
 shift $(($OPTIND-1))
 
 if [ -e $running ] ; then
-  if [ "$FORCE" == ""] ; then
+  if [ "$FORCE" == "" ] ; then
     echo Firebot is already running.
     echo Erase the file $running if this is not the case
     echo or rerun using the -f option.
@@ -102,9 +110,9 @@ if [[ "$UPDATEREPO" == "1" ]]; then
    UPDATE=-u
    cd $reponame
    if [[ "$RUNFIREBOT" == "1" ]]; then
-     git remote update
-     git checkout $BRANCH
-     git merge origin/$BRANCH
+     git remote update &> /dev/null
+     git checkout $BRANCH &> /dev/null
+     git merge origin/$BRANCH &> /dev/null
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
@@ -121,8 +129,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 fi
 rm $running
