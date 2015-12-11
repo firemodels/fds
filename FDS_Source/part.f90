@@ -627,7 +627,7 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
 INTEGER :: I,ND,N_INSERT,I1,J1,K1,I2,J2,K2,MOD_N_INSERT,N,N_PARTICLES_INSERT
-REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,LP_X,LP_Y,LP_Z
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
@@ -683,7 +683,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       CASE('CONE')
          INSERT_VOLUME = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
          INPUT_VOLUME  = INSERT_VOLUME
-      CASE('RING')
+      CASE('RING','LINE')
          INSERT_VOLUME = 0._EB
          INPUT_VOLUME  = 0._EB
    END SELECT
@@ -709,21 +709,11 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       ALLOCATE(LP_INDEX_LOOKUP(N_PARTICLES_INSERT))
       LP_INDEX_LOOKUP = 0
 
+      ! Loop through the particles to be inserted, getting their position and then setting up array space.
+
+      N_INSERT = 0
+
       INSERT_PARTICLE_LOOP: DO I=1,N_PARTICLES_INSERT
-
-         IF (NLP+1>MAXIMUM_PARTICLES) THEN
-            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
-            IF (I>1) LP_INDEX_LOOKUP(I-1) = NEW_LP_INDEX
-         ELSE
-            NLP = NLP+1
-         ENDIF
-         LP_INDEX_LOOKUP(I) = NLP
-
-         PARTICLE_TAG = PARTICLE_TAG + NMESHES
-         CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,&
-                               TAG=PARTICLE_TAG,NEW_TAG=.TRUE.)
-         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
-         LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 
          ! Get particle coordinates by randomly choosing within the designated volume
 
@@ -732,29 +722,66 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             N = N + 1
             SELECT CASE(IN%SHAPE)
                CASE('BLOCK')
-                  CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
+                  CALL RANDOM_RECTANGLE(LP_X,LP_Y,LP_Z,X1,X2,Y1,Y2,Z1,Z2)
                CASE('CONE')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   Z0 = IN%Z1
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   HH = IN%Z2-IN%Z1
-                  CALL RANDOM_CONE(NM,LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH)
+                  CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH)
                CASE('RING')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   RR = 0.5_EB*(IN%X2-IN%X1)
-                  LP%Z = IN%Z1
-                  CALL RANDOM_RING(NM,LP%X,LP%Y,X0,Y0,RR)
+                  LP_Z = IN%Z1
+                  CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+               CASE('LINE')
+                  LP_X = IN%X1 + (I-1)*IN%DX
+                  LP_Y = IN%Y1 + (I-1)*IN%DY
+                  LP_Z = IN%Z1 + (I-1)*IN%DZ
             END SELECT
-            CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-            LP%X = LP%X + (I-1)*IN%DX
-            LP%Y = LP%Y + (I-1)*IN%DY
-            LP%Z = LP%Z + (I-1)*IN%DZ
+
+            ! Reject particles that are not in the current mesh.
+
+            IF (LP_X<XS .OR. LP_X>XF .OR. LP_Y<YS .OR. LP_Y>YF .OR. LP_Z<ZS .OR. LP_Z>ZF) CYCLE INSERT_PARTICLE_LOOP
+
+            ! Get mesh indices for particle. If the particle is in a solid cell, get another random point. If the particle
+            ! is a member of a line of points and this point is SOLID, just skip it.
+
+            CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
+
+            IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
             IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
+
             ! If cannot find non-solid grid cell, stop searching
+
             IF (N>10000) EXIT CHOOSE_XYZ_LOOP
+
          ENDDO CHOOSE_XYZ_LOOP
+
+         N_INSERT = N_INSERT + 1
+
+         ! Allocate space for the particle in the appropriate array
+
+         IF (NLP+1>MAXIMUM_PARTICLES) THEN
+            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
+            IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
+         ELSE
+            NLP = NLP+1
+         ENDIF
+         LP_INDEX_LOOKUP(N_INSERT) = NLP
+
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,&
+                               TAG=PARTICLE_TAG,NEW_TAG=.TRUE.)
+         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+         LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
+         LP%X = LP_X
+         LP%Y = LP_Y
+         LP%Z = LP_Z
+
+         ! Initialize particle properties
 
          CALL VOLUME_INIT_PARTICLE(I)
 
@@ -762,8 +789,6 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          LP => LAGRANGIAN_PARTICLE(NLP)
 
       ENDDO INSERT_PARTICLE_LOOP
-
-      N_INSERT = N_PARTICLES_INSERT
 
    ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
 
@@ -2245,7 +2270,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
                            H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DZ_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
 
-! Compute the total amount of heat extracted from the gas, wall and radiative fields
+            ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
@@ -2415,7 +2440,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             RHO_INTERIM(II,JJ,KK) = M_GAS_NEW*RVC
             ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES) = ZZ_GET2(1:N_TRACKED_SPECIES)
-         !  CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET2,RSUM(II,JJ,KK))
             TMP_INTERIM(II,JJ,KK) = TMP_G_NEW
 
             ! Compute contribution to the divergence
@@ -2474,8 +2498,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    ENDDO PARTICLE_LOOP
 
 ENDDO SPECIES_LOOP
-
-TMP = MIN(TMPMAX,MAX(TMPMIN,TMP))
 
 ! Second loop is for summing the part quantities
 
