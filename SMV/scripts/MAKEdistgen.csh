@@ -2,9 +2,9 @@
 set version=$1
 set platform=$2
 set size=$3
-set SVNROOT=FDS-SMV
 set HOST=$4
 set FDS_EDITION=$5
+set SVNROOT=$6
 
 set platformsize=${platform}_$size
 set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_32
@@ -16,7 +16,7 @@ set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
 set UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
 
-cd $FORBUNDLE/uploads
+cd ~/$SVNROOT/SMV/uploads
 
 rm -rf $DIR
 mkdir -p $DIR

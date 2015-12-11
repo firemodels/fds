@@ -23,7 +23,10 @@ call %envfile%
 
 cd %svn_root%\smv\scripts
 
+set exe=smv_test_%smv_revision%_osx64.sh
+
 echo updating 64 bit smokeview
-plink %svn_logon% %linux_svn_root%/SMV/uploads/%exe% y
+plink %svn_logon% %linux_svn_root%/SMV/scripts/ssh_command2.sh %osx_hostname% %linux_svn_root%/Utilities/uploads %exe% y
+
 
 pause
