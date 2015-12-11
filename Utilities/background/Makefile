@@ -55,13 +55,13 @@ intel_linux_64 : exe       = background
 intel_linux_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) $(obj) 
 
-# ------------- gcc Linux 64 ----------------
+# ------------- gnu Linux 64 ----------------
 
-gcc_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX $(GITINFO)
-gcc_linux_64 : CC        = gcc
-gcc_linux_64 : exe       = background
+gnu_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX $(GITINFO)
+gnu_linux_64 : CC        = gcc
+gnu_linux_64 : exe       = background
 
-gcc_linux_64: $(obj)
+gnu_linux_64: $(obj)
 	$(CC) -m64 -o $(bin)/$(exe) $(obj) -lm
 
 # ------------- OSX 64 ----------------
@@ -74,14 +74,13 @@ intel_osx_64 : exe       = background
 intel_osx_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m64 $(obj) 
 
-# ------------- gcc OSX 32 ----------------
+# ------------- gcc OSX 64 ----------------
+gnu_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
+gnu_osx_64 : CC        = gcc
+gnu_osx_64 : exe       = background
 
-gcc_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
-gcc_osx_64 : CC        = gcc
-gcc_osx_64 : exe       = background
-
-gcc_osx_64 : $(obj)
-	$(CC) -m64 -o $(bin)/$(exe) $(obj) -lm
+gnu_osx_64 : $(obj)
+	$(CC) -m64 -o $(bin)/$(exe) $(obj)  -lm
 
 #-------------- compile sring_util.c so revision strings are updated -----------
 

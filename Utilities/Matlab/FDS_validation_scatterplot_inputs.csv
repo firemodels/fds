@@ -33,3 +33,4 @@ Low Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Tempera
 Low Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0,5,0.03 0.95,SouthEast,1,11,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Low_Heat_Flux
 Low Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),0,20,0.03 0.95,SouthEast,1,7,yes,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Low_Surface_Temperature
 Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),0,100,0.03 0.95,SouthEast,1,20,no,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Obscuration
+Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0,0.2,0.03 0.95,SouthEast,1,8,no,linear,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Convective_Heat_Flux

@@ -35,15 +35,26 @@ intel_win_64 : exe       = fds2ascii_win_64.exe
 intel_win_64 : $(objwin)
 	$(FC) -o $(bin)/$(exe) $(objwin)
 
-# ------------- gcc 64 ----------------
+# ------------- gnu linux 64 ----------------
 #  64 bit gcc linux
 
-gcc_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4
-gcc_linux_64 : FC        = gfortran
-gcc_linux_64 : exe       = fds2ascii_linux_64
+gnu_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4
+gnu_linux_64 : FC        = gfortran
+gnu_linux_64 : exe       = fds2ascii_linux_64
 
-gcc_linux_64 : $(obj)
+gnu_linux_64 : $(obj)
 	$(FC) -o $(bin)/$(exe) $(obj)
+
+# ------------- gnu osx 64 ----------------
+#  64 bit gcc linux
+
+gnu_osx_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4
+gnu_osx_64 : FC        = gfortran
+gnu_osx_64 : exe       = fds2ascii_osx_64
+
+gnu_osx_64 : $(obj)
+	$(FC) -o $(bin)/$(exe) $(obj)
+
 
 
 # ------------- Linux 64 ----------------

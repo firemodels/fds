@@ -2,6 +2,8 @@
 
 set rundebug=%1
 
+set size=_64
+
 set svn_drive=c:
 if "%rundebug%" == "1" (
 set DEBUG=_db
@@ -36,12 +38,12 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
-set FDSBASE=fds_mpi_win_64%DEBUG%.exe
-set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win_64%DEBUG%\%FDSBASE%
-set CFASTEXE=%CFAST%\CFAST\intel_win_64\cfast7_win_64.exe
-set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win_64\wind2fds_win_64.exe
+set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
+set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set CFASTEXE=%CFAST%\CFAST\intel_win%size%\cfast7_win%size%.exe
+set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 
-set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win_64\background.exe
+set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
 
 :: Run jobs in background (or not)
 
