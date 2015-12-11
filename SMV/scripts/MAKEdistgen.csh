@@ -2,9 +2,9 @@
 set version=$1
 set platform=$2
 set size=$3
-set SVNROOT=FDS-SMV
 set HOST=$4
 set FDS_EDITION=$5
+set SVNROOT=$6
 
 set platformsize=${platform}_$size
 set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_32
