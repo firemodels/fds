@@ -2,15 +2,16 @@
 
 Grid cell size: dx = dy = dz = 0.1 m
 
-Combustion chamber 4.3m x 3.0m x 1,7m
+Combustion chamber 4.0m x 4.0m x 1,7m
 Facade test specimen 5.7m high, 3.0m wide (main wall)
 Facade test specimen 5.7m high, 1.2m wide (side wall)
 Opening 1.2m high, 2.0m wide
 
 Fire mesh(es).
-&MESH ID = 'm1', IJK=30,43,17, XB= 0.0,3.0, 0.0,4.3, 0.0,1.7 / Room
-&MESH ID = 'm2', IJK=30,10,17, XB= 0.0,3.0, 4.3,5.3, 0.0,1.7 / Rear area
-&MESH ID = 'm3', IJK=35,30,60, XB= 0.0,3.5, -3.0,0.0, 0.0,6.0 /Front wall + side wall
+&MESH ID = 'm1', IJK=40,45,18, XB= 0.0,4.0, -0.1, 4.1, 0.0,1.8 / Room
+&MESH ID = 'm2', IJK=40,10,18, XB= 0.0,4.0,  4.1, 5.1, 0.0,1.8 / Rear area
+&MESH ID = 'm3', IJK=35,30,60, XB= 0.0,3.5, -3.0,-0.1, 0.0,6.0 /Front wall + side wall
+
 
 &MISC TMPA=40.0/
 
@@ -32,50 +33,39 @@ Fire mesh(es).
 
 ISO max 5.6 MW
 &SURF ID='BURNER',
-      HRRPUA=1261.261,
+      HRRPUA=3783.8
       RAMP_Q='fireramp',
       MATL_ID = 'CALSIUM_SILICATE_BOARD', COLOR='RASPBERRY', THICKNESS = 0.025 /
       
 &RAMP ID='fireramp', T=0.0, F=0.0 /
-&RAMP ID='fireramp', T=1.0, F=0.125 /
+&RAMP ID='fireramp', T=10.0, F=0.125 /
 &RAMP ID='fireramp', T=300.0, F=0.125 /
-&RAMP ID='fireramp', T=301.0, F=0.0 /
-&RAMP ID='fireramp', T=900.0, F=0.0 /
-&RAMP ID='fireramp', T=901.0, F=0.25 /
+&RAMP ID='fireramp', T=320.0, F=0.0 /
+&RAMP ID='fireramp', T=910.0, F=0.0 /
+&RAMP ID='fireramp', T=940.0, F=0.25 /
 &RAMP ID='fireramp', T=1200.0, F=0.25 /
-&RAMP ID='fireramp', T=1201.0, F=0.0 /
+&RAMP ID='fireramp', T=1220.0, F=0.0 /
 &RAMP ID='fireramp', T=1800.0, F=0.0 /
-&RAMP ID='fireramp', T=1801.0, F=0.5 /
+&RAMP ID='fireramp', T=1820.0, F=0.5 /
 &RAMP ID='fireramp', T=2100.0, F=0.5 /
-&RAMP ID='fireramp', T=2101.0, F=0.0 /
+&RAMP ID='fireramp', T=2120.0, F=0.0 /
 &RAMP ID='fireramp', T=2700.0, F=0.0 /
 
-&OBST XB= 0.3,0.4, 0.3,4.0, 0.0,0.1, SURF_ID='PIPE' /
-&OBST XB= 1.0,1.1, 0.3,4.0, 0.0,0.1, SURF_ID='PIPE' /
-&OBST XB= 1.8,1.9, 0.3,4.0, 0.0,0.1, SURF_ID='PIPE' /
-&OBST XB= 2.6,2.7, 0.3,4.0, 0.0,0.1, SURF_ID='PIPE' /	
-&VENT XB= 0.3,0.4, 0.3,4.0, 0.1,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.0,1.1, 0.3,4.0, 0.1,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.8,1.9, 0.3,4.0, 0.1,0.1, SURF_ID='BURNER' /
-&VENT XB= 2.6,2.7, 0.3,4.0, 0.1,0.1, SURF_ID='BURNER' /	
-&VENT XB= 0.3,0.3, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.0,1.0, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.8,1.8, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 2.6,2.6, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /	
-&VENT XB= 0.4,0.4, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.1,1.1, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 1.9,1.9, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /
-&VENT XB= 2.7,2.7, 0.3,4.0, 0.0,0.1, SURF_ID='BURNER' /	
+Burner area 4 = 0.1 x 3.7 m = 1.48 m2
+Nominal HRR = 5.6 MW
+HRRPUA = 3783.8 kW/m2
+
+&OBST XB= 0.5,0.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 1.5,1.6, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 2.4,2.5, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
+&OBST XB= 3.3,3.4, 0.2,3.9, 0.0,0.2, SURF_IDS='BURNER','PIPE','PIPE' /
 
 ------------------------------MATERIALS-------------------------------
 EN1992-1-2 values for normal weight concrete
 
 EUROCODE 1993-1-2:1995  &3.4.1.3 carbon steel
 &MATL ID = 'STEEL'
-      EMISSIVITY = 0.9														
-      DENSITY = 7850.														
-      CONDUCTIVITY_RAMP = 'c-steel'														
-      SPECIFIC_HEAT_RAMP= 's-steel'/
+      EMISSIVITY = 0.9													      DENSITY = 7850.													      CONDUCTIVITY_RAMP = 'c-steel'											      SPECIFIC_HEAT_RAMP= 's-steel'/
 &RAMP ID = 'c-steel', T = 0., F = 53.3/
 &RAMP ID = 'c-steel', T = 800., F = 27.3/
 &RAMP ID = 'c-steel', T = 1200., F = 27.3/
@@ -130,15 +120,7 @@ According to EN 1094-4:1995
       CONDUCTIVITY= 0.21
       SPECIFIC_HEAT= 0.84/
 
-ASTM C-182
-&RAMP ID = 'c-calsium', T = 0., F = 0.08/
-&RAMP ID = 'c-calsium', T = 200., F = 0.08/
-&RAMP ID = 'c-calsium', T = 400., F = 0.1/
-&RAMP ID = 'c-calsium', T = 600., F = 0.12/
-&RAMP ID = 'c-calsium', T = 800., F = 0.14/
-
 ------------------------------------------SURFACE PROPERTIES-------------------------------------
-
 
 &SURF ID='PIPE',
       COLOR = 'RED',
@@ -154,7 +136,7 @@ ASTM C-182
       BACKING = 'VOID'/
 
 &SURF ID='FLOOR',
-      COLOR = 'GRAY',
+      COLOR = 'GRAY 30',
       MATL_ID = 'CERAMIC_FIBRE_BLANKET','CERAMIC_FIBRE_BOARD','STEEL',
       STRETCH_FACTOR = 2,2,2,
       THICKNESS = 0.025,0.05,0.006,
@@ -169,12 +151,13 @@ ASTM C-182
       DEFAULT=.TRUE./
 
 &SURF ID='FRONTWALL',
-      COLOR = 'SILVER',
+      COLOR = 'GRAY 70',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','STEEL',
       STRETCH_FACTOR = 1.5,2,
       THICKNESS = 0.05,0.006 /
 
-&SURF ID='FACADE',COLOR = 'SILVER',
+&SURF ID='FACADE',
+      COLOR = 'GRAY 60',
       MATL_ID = 'CERAMIC_FIBRE_BOARD','CALSIUM_SILICATE_BOARD',
       STRETCH_FACTOR   = 2,2,2,
       THICKNESS = 0.025,0.025 /
@@ -182,11 +165,12 @@ ASTM C-182
 -------------------------------------------GEOMETRY-------------------------------------------------
 
 Static objects
-&VENT 	MB = 'ZMIN',				SURF_ID = 'FLOOR'	/	Floor
-&VENT	MB = 'ZMAX', MESH_ID='m1',		SURF_ID = 'CEILING'	/ 	Ceiling
-&VENT	MB = 'XMIN', MESH_ID='m1',		SURF_ID = 'WALL'	/ 	Wall 1(side left)
-&VENT	MB = 'XMAX', MESH_ID='m1',		SURF_ID = 'WALL'	/ 	Wall 2(side right)
-&OBST	XB = -0.1,3.1, 4.3,4.4, -0.1,1.8,	SURF_ID = 'WALL'	/ 	Wall 2(back)
+
+&VENT 	MB = 'ZMIN',					SURF_ID = 'FLOOR'	/	Floor
+&OBST	XB = 0.0,4.0,-0.1,4.1,1.7,1.8 COLOR='INVISIBLE'	SURF_ID = 'CEILING'	/ 	Ceiling
+&VENT	MB = 'XMIN', MESH_ID='m1',			SURF_ID = 'WALL'	/ 	Wall 1(side left)
+&VENT	MB = 'XMAX', MESH_ID='m1',			SURF_ID = 'WALL'	/ 	Wall 2(side right)
+&OBST	XB = -0.1,4.2, 4.0,4.1, -0.1,1.8,		SURF_ID = 'WALL'	/ 	Wall 2(back)
 
 &OBST	XB = -0.1,4.3, -0.2,0.0, -0.1,1.8,
 	SURF_ID6 = 'WALL','WALL','FACADE','FRONTWALL'				/ 	Facade SPECIMEN(lower part)
@@ -265,17 +249,18 @@ Line c
 
 Temperature inside chamber
 POLE_A
-&DEVC XYZ=0.1,0.1,0.22, 	PROP_ID = 'TC2' , ID='TC_32'/
-&DEVC XYZ=0.1,0.1,0.43, 	PROP_ID = 'TC2' , ID='TC_31'/
-&DEVC XYZ=0.1,0.1,0.855, 	PROP_ID = 'TC2' , ID='TC_30'/
-&DEVC XYZ=0.1,0.1,1.28, 	PROP_ID = 'TC2' , ID='TC_29'/
-&DEVC XYZ=0.1,0.1,1.49, 	PROP_ID = 'TC2' , ID='TC_28'/
+&DEVC XYZ=0.09,0.09,0.22, 	PROP_ID = 'TC2', ID='TC_32'/
+&DEVC XYZ=0.09,0.09,0.43, 	PROP_ID = 'TC2', ID='TC_31'/
+&DEVC XYZ=0.09,0.09,0.855, 	PROP_ID = 'TC2', ID='TC_30'/
+&DEVC XYZ=0.09,0.09,1.28, 	PROP_ID = 'TC2', ID='TC_29'/
+&DEVC XYZ=0.09,0.09,1.49, 	PROP_ID = 'TC2', ID='TC_28'/
+
 POLE_B
-&DEVC XYZ=2.9,4.2,0.22, 	PROP_ID = 'TC2' , ID='TC_37'/
-&DEVC XYZ=2.9,4.2,0.43, 	PROP_ID = 'TC2' , ID='TC_36'/
-&DEVC XYZ=2.9,4.2,0.855, 	PROP_ID = 'TC2' , ID='TC_35'/
-&DEVC XYZ=2.9,4.2,1.28, 	PROP_ID = 'TC2' , ID='TC_34'/
-&DEVC XYZ=2.9,4.2,1.49, 	PROP_ID = 'TC2' , ID='TC_33'/
+&DEVC XYZ=3.91,3.91,0.22, 	PROP_ID = 'TC2', ID='TC_37'/
+&DEVC XYZ=3.91,3.91,0.43, 	PROP_ID = 'TC2', ID='TC_36'/
+&DEVC XYZ=3.91,3.91,0.855, 	PROP_ID = 'TC2', ID='TC_35'/
+&DEVC XYZ=3.91,3.91,1.28, 	PROP_ID = 'TC2', ID='TC_34'/
+&DEVC XYZ=3.91,3.91,1.49, 	PROP_ID = 'TC2', ID='TC_33'/
 
 BNDF QUANTITY = 'GAUGE HEAT FLUX'/
 BNDF QUANTITY = 'WALL TEMPERATURE'/
