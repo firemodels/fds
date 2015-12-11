@@ -1412,8 +1412,8 @@ void drawventdataSLAB(void){
         glVertex3f(zvi->x0, ymid, zvi->z0);
         glVertex3f(zvi->x1, ymid, zvi->z0);
 
-        glVertex3f(zvi->x1, ymid, zvi->z0 + dvent);
-        glVertex3f(zvi->x0, ymid, zvi->z0 + dvent);
+        glVertex3f(zvi->x1, ymid, zvi->z0 - dvent);
+        glVertex3f(zvi->x0, ymid, zvi->z0 - dvent);
         break;
       case TOP_WALL:
         glVertex3f(zvi->x0, ymid, zvi->z1);
