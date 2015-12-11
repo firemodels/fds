@@ -30,7 +30,7 @@ set scriptdir=FDS-SMV/SMV/scripts
 set bundledir=FDS-SMV/SMV/uploads
 
 echo making 64 bit Linux test distribution archive
-plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision%
+plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision% %linux_svn_root%
 
 echo downloading Linux Smokeview files
 pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\uploads\.
