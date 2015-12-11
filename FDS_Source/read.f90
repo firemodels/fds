@@ -9478,14 +9478,17 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
       CALL SET_INIT_DEFAULTS
       DV => DEVICE(INIT_RESERVED(N-N_INIT_READ)%DEVC_INDEX)
-      XYZ(1) = DV%X
-      XYZ(2) = DV%Y
-      XYZ(3) = DV%Z
       DX = INIT_RESERVED(N-N_INIT_READ)%DX
       DY = INIT_RESERVED(N-N_INIT_READ)%DY
       DZ = INIT_RESERVED(N-N_INIT_READ)%DZ
       WRITE(PART_ID,'(A,I3.3)') 'RESERVED TARGET PARTICLE',N-N_INIT_READ
       N_PARTICLES = INIT_RESERVED(N-N_INIT_READ)%N_PARTICLES
+      XB(1) = DV%X
+      XB(2) = DV%X + (N_PARTICLES-1)*DX
+      XB(3) = DV%Y
+      XB(4) = DV%Y + (N_PARTICLES-1)*DY
+      XB(5) = DV%Z
+      XB(6) = DV%Z + (N_PARTICLES-1)*DZ
       ID = DV%ID
    ENDIF
 
@@ -9496,6 +9499,10 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       XB(3:4) = XYZ(2)
       XB(5:6) = XYZ(3)
    ENDIF
+
+   ! If an offset has been specified, set the SHAPE to LINE.
+
+   IF (DX>0._EB .OR. DY>0._EB .OR. DZ>0._EB) SHAPE = 'LINE'
 
    ! Create a box around a CONE
 
