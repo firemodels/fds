@@ -5430,14 +5430,31 @@ int readsmv(char *file, char *file2){
         dxyz[0] = ABS(xyz[0] - xyz[1]);
         dxyz[1] = ABS(xyz[2] - xyz[3]);
         dxyz[2] = ABS(xyz[4] - xyz[5]);
+        // see which side of room vent is closest too
         if(dxyz[0] < MIN(dxyz[1], dxyz[2])){
-          zvi->wall = LEFT_WALL;
+          if(ABS(zvi->x0-roomi->x0)<ABS(zvi->x0-roomi->x1)){
+            zvi->wall = LEFT_WALL;
+          }
+          else{
+            zvi->wall = RIGHT_WALL;
+          }
         }
         else if(dxyz[1] < MIN(dxyz[0], dxyz[2])){
-          zvi->wall = FRONT_WALL;
+          if(ABS(zvi->y0-roomi->y0)<ABS(zvi->y0-roomi->y1)){
+            zvi->wall = FRONT_WALL;
+          }
+          else{
+            zvi->wall = BACK_WALL;
+          }
         }
         else{
           zvi->wall = BOTTOM_WALL;
+          if(ABS(zvi->z0-roomi->z0)<ABS(zvi->z0-roomi->z1)){
+            zvi->wall = BOTTOM_WALL;
+          }
+          else{
+            zvi->wall = TOP_WALL;
+          }
         }
       }
       zvi->color = getcolorptr(color);
