@@ -36,9 +36,12 @@
 #define MENU_ZONE_VERTICAL 2
 #define MENU_ZONE_LAYERHIDE 4
 #define MENU_ZONE_VENTS 14
-#define MENU_ZONE_FIRES 15
-#define MENU_ZONE_VENT_SLAB 16
-#define MENU_ZONE_VENT_PROFILE 17
+#define MENU_ZONE_HVENTS 15
+#define MENU_ZONE_VVENTS 16
+#define MENU_ZONE_MVENTS 17
+#define MENU_ZONE_FIRES 18
+#define MENU_ZONE_VENT_SLAB 19
+#define MENU_ZONE_VENT_PROFILE 20
 
 #define MENU_SHOWSLICE_INBLOCKAGE -11
 #define MENU_SHOWSLICE_SLICEANDVECTORS -15
@@ -4479,26 +4482,56 @@ void ZoneShowMenu(int value){
     break;
   case MENU_ZONE_VENTS:
     visVentFlow=1-visVentFlow;
+    if(visVentFlow==1){
+      visVentHFlow=1;
+      visVentVFlow=1;
+      visVentMFlow=1;
+    }
+    else{
+      visVentHFlow=0;
+      visVentVFlow=0;
+      visVentMFlow=0;
+    }
+    break;
+#define VISVENTFLOW     if((nzhvents>0&&visVentHFlow==1)||(nzvvents>0&&visVentVFlow==1)||(nzmvents>0&&visVentMFlow==1)){\
+      visVentFlow = 1;\
+    }\
+    else{\
+      visVentFlow = 0;\
+    }
+  case MENU_ZONE_HVENTS:
+    visVentHFlow = 1-visVentHFlow;
+    VISVENTFLOW;
+    break;
+  case MENU_ZONE_VVENTS:
+    visVentVFlow = 1-visVentVFlow;
+    VISVENTFLOW;
+    break;
+  case MENU_ZONE_MVENTS:
+    visVentMFlow = 1-visVentMFlow;
+    VISVENTFLOW;
     break;
   case MENU_ZONE_VENT_SLAB:
     visventslab = 1 - visventslab;
     if(visventslab==1)visventprofile=0;
     if(visventprofile==1||visventslab==1){
-      visVentFlow=1;
+      visVentHFlow=1;
     }
     else{
-      visVentFlow=0;
+      visVentHFlow=0;
     }
+    VISVENTFLOW;
     break;
   case MENU_ZONE_VENT_PROFILE:
     visventprofile = 1 - visventprofile;
     if(visventprofile==1)visventslab=0;
     if(visventprofile==1||visventslab==1){
-      visVentFlow=1;
+      visVentHFlow=1;
     }
     else{
-      visVentFlow=0;
+      visVentHFlow=0;
     }
+    VISVENTFLOW;
     break;
   case MENU_ZONE_FIRES:
     viszonefire=1-viszonefire;
@@ -5856,27 +5889,56 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
-      if(have_ventslab_flow==0){
-        if(visVentFlow==1){
-          glutAddMenuEntry(_("*Vent flow - velocity profile"), MENU_ZONE_VENTS);
-        }
-        else{
-          glutAddMenuEntry(_("Vent flow - velocity profile"), MENU_ZONE_VENTS);
-        }
+      if(visVentFlow==1){
+        glutAddMenuEntry(_("*Vent flow"), MENU_ZONE_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Vent flow"), MENU_DUMMY);
-        if(visventslab==1){
-          glutAddMenuEntry(_("   *mass slab flow"), MENU_ZONE_VENT_SLAB);
+        glutAddMenuEntry(_("Vent flow"), MENU_ZONE_VENTS);
+      }
+      if(nzhvents>0){
+        if(visVentHFlow==1){
+          glutAddMenuEntry(_("   *Horizontal"), MENU_ZONE_HVENTS);
         }
         else{
-          glutAddMenuEntry(_("   mass slab flow"), MENU_ZONE_VENT_SLAB);
+          glutAddMenuEntry(_("   Horizontal"), MENU_ZONE_HVENTS);
         }
-        if(visventprofile==1){
-          glutAddMenuEntry(_("   *velocity profile"), MENU_ZONE_VENT_PROFILE);
+        if(have_ventslab_flow==0){
+          if(visventprofile==1){
+            glutAddMenuEntry(_("      *velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+          else{
+            glutAddMenuEntry(_("      velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
         }
         else{
-          glutAddMenuEntry(_("   velocity profile"), MENU_ZONE_VENT_PROFILE);
+          if(visventslab==1){
+            glutAddMenuEntry(_("      *mass slab"), MENU_ZONE_VENT_SLAB);
+          }
+          else{
+            glutAddMenuEntry(_("      mass slab"), MENU_ZONE_VENT_SLAB);
+          }
+          if(visventprofile==1){
+            glutAddMenuEntry(_("      *velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+          else{
+            glutAddMenuEntry(_("      velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+        }
+      }
+      if(nzvvents>0){
+        if(visVentVFlow==1){
+          glutAddMenuEntry(_("   *Vertical"), MENU_ZONE_VVENTS);
+        }
+        else{
+          glutAddMenuEntry(_("   Vertical"), MENU_ZONE_VVENTS);
+        }
+      }
+      if(nzmvents>0){
+        if(visVentMFlow==1){
+          glutAddMenuEntry(_("   *Mechancial"), MENU_ZONE_MVENTS);
+        }
+        else{
+          glutAddMenuEntry(_("   Mechancial"), MENU_ZONE_MVENTS);
         }
       }
     }

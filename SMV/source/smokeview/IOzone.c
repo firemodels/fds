@@ -1214,7 +1214,7 @@ void drawventdataPROFILE(void){
   float factor;
   int i;
 
-  if(visVentFlow==0)return;
+  if(visVentHFlow==0||visventprofile==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -1348,7 +1348,7 @@ void drawventdataPROFILE(void){
 void drawventdataSLAB(void){
   int i;
 
-  if(visVentFlow==0)return;
+  if(visVentHFlow==0&&visVentVFlow&&visVentMFlow==0)return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
@@ -1359,7 +1359,9 @@ void drawventdataSLAB(void){
 
     zvi = zventinfo+i;
 
-    if(visventslab!=1&&zvi->vent_type==HFLOW_VENT)continue;
+    if((visVentHFlow==0||visventslab!=1)&&zvi->vent_type==HFLOW_VENT)continue;
+    if(visVentVFlow==0&&zvi->vent_type==VFLOW_VENT)continue;
+    if(visVentMFlow==0&&zvi->vent_type==MFLOW_VENT)continue;
     xmid = (zvi->x0+zvi->x1)/2.0;
     ymid = (zvi->y0+zvi->y1)/2.0;
 
