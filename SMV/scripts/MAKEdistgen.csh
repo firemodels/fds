@@ -16,7 +16,7 @@ set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
 set UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
 
-cd $FORBUNDLE/uploads
+cd ~/$SVNROOT/SMV/uploads
 
 rm -rf $DIR
 mkdir -p $DIR
