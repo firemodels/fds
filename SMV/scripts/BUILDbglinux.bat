@@ -25,9 +25,7 @@ echo Using GIT revision %smv_revision% to build a Linux version of background
 cd %svn_root%\smv\scripts
 set version=%smv_version%_%smv_revision%
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle
-set bindir=FDS-SMV/SMV/bin
+set scriptdir=%linux_svn_root%/SMV/scripts
 
 plink %svn_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEbglinux.csh %linux_svn_root%
 

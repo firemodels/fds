@@ -22,7 +22,7 @@ echo Building Linux version of fds2ascii
 %svn_drive%
 cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
+set scriptdir=%linux_svn_root%/SMV/scripts
 
 plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEf2aosx.csh %smv_revision%
 
