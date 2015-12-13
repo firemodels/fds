@@ -1,9 +1,6 @@
 @echo off
 Title Building Smokezip for 64 bit Windows
 
-
-Rem  Windows batch file to copy smokediffset SVNROOT=~/FDS-SMV
-
 Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat

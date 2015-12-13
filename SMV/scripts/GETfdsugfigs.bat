@@ -19,7 +19,7 @@ call %envfile%
 set CURDIR=%CD%
 
 cd %svn_root%\Manuals\FDS_User_Guide\SCRIPT_FIGURES
-pscp %svn_logon%:/home2/smokevis2/firebot/FDS-SMVgitclean/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
+pscp %svn_logon%:%firebotrepo%/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
 
 cd %CURDIR%
 pause
