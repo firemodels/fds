@@ -26,8 +26,8 @@ set gupload=%CD%
 
 cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/uploads
+set scriptdir=%linux_svn_root%/SMV/scripts
+set bundledir=%linux_svn_root%/SMV/uploads
 
 echo making 64 bit Linux test distribution archive
 plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision% %linux_svn_root%
