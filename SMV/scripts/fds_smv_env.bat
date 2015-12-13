@@ -20,6 +20,7 @@ set svn_drive=c:
 set linux_svn_root=FDS-SMV
 set firebotrepo=/home2/smokevis2/firebot/FDS-SMVgitclean
 set smokebotrepo=/home2/smokevis2/smokebot/FDS-SMVgitclean
+set fdswikirepo=%userprofile%\FDS-SMVwikis
 
 Rem ---------- User/Host names -----------------
 
