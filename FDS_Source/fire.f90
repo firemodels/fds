@@ -95,14 +95,12 @@ DO K=1,KBAR
          ! Update RSUM and ZZ
          DZZ_IF: IF ( ANY(ABS(DZZ) > TWO_EPSILON_EB) ) THEN
             IF (ABS(Q(I,J,K)) > TWO_EPSILON_EB) Q_EXISTS = .TRUE.
-            CP_IF: IF (.NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
                ! Divergence term
                DO N=1,N_TRACKED_SPECIES
                   SM => SPECIES_MIXTURE(N)
                   D_SOURCE(I,J,K) = D_SOURCE(I,J,K) + SM%RCON/RSUM(I,J,K)*DZZ(N)/DT
-                  M_DOT_PPP(I,J,K,N) = RHO(I,J,K)*DZZ(N)/DT
+                  M_DOT_PPP(I,J,K,N) = M_DOT_PPP(I,J,K,N) + RHO(I,J,K)*DZZ(N)/DT
                ENDDO
-            ENDIF CP_IF
          ENDIF DZZ_IF
       ENDDO ILOOP
    ENDDO
