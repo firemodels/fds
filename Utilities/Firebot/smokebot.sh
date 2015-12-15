@@ -388,7 +388,7 @@ update_cfast()
         git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
         updateclean="1"
       fi
-      if [ "$updateclean" == "1" ]; then
+      if [ "$updateclean" == "" ]; then
          echo "   not cleaned or updated"
       fi 
    else
@@ -477,7 +477,7 @@ do_git_checkout()
      git pull >> $OUTPUT_DIR/stage1 2>&1
      updateclean="1"
    fi
-   if [ "$updateclean" == "1" ]; then
+   if [ "$updateclean" == "" ]; then
       echo "   not cleaned or updated"
    fi 
    GIT_REVISION=`git describe --long --dirty`
