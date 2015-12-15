@@ -364,20 +364,21 @@ clean_smokebot_history()
 #  = Stage 0 - External dependencies =
 #  ===================================
 
-update_and_compile_cfast()
+update_cfast()
 {
    cd $SMOKEBOT_HOME_DIR
 
    # Check to see if CFAST repository exists
-   if [ -e "$cfastrepo" ]
+   updateclean=
    echo "cfast repo"
    # If yes, then update the CFAST repository and compile CFAST
-   then
+   if [ -e "$cfastrepo" ] ; then
       if [ "$CLEANREPO" == "1" ]; then
         echo "   cleaning"
         echo "Cleaning cfast repo:" > $OUTPUT_DIR/stage0_cfast
         cd $cfastrepo
         clean_repo $cfastrepo
+        updateclean="1"
       fi
 
       # Update to latest GIT revision
@@ -385,14 +386,26 @@ update_and_compile_cfast()
         echo "   updating"
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
         git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
+        updateclean="1"
       fi
+      if [ "$updateclean" == "1" ]; then
+         echo "   not cleaned or updated"
+      fi 
    else
       echo "The cfast repo $cfastrepo does not exist"
       echo "Aborting  smokebot"
       exit
    fi
+
+}
+
+compile_cfast()
+{
+   cd $SMOKEBOT_HOME_DIR
+
     # Build CFAST
     echo "Building cfast"
+    echo "   release"
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
@@ -410,7 +423,6 @@ update_and_compile_cfast()
       echo "" >> $ERROR_LOG
       THIS_CFAST_FAILED=1
    fi
-
 }
 
 #  ============================
@@ -420,6 +432,7 @@ update_and_compile_cfast()
 clean_git_repo()
 {
    # Check to see if FDS repository exists
+   updateclean=
    if [ -e "$fdsrepo" ]
    then
       echo FDS-SMV repo
@@ -431,6 +444,7 @@ clean_git_repo()
         clean_repo $fdsrepo/FDS_Source
         clean_repo $fdsrepo/FDS_Compilation
         clean_repo $fdsrepo/Manuals
+        updateclean="1"
       fi
    else
       echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage1 2>&1
@@ -461,7 +475,11 @@ do_git_checkout()
      echo "   updating"
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
      git pull >> $OUTPUT_DIR/stage1 2>&1
+     updateclean="1"
    fi
+   if [ "$updateclean" == "1" ]; then
+      echo "   not cleaned or updated"
+   fi 
    GIT_REVISION=`git describe --long --dirty`
 }
 
@@ -1303,7 +1321,7 @@ start_time=`date`
 clean_smokebot_history
 
 ### Stage 0 ###
-update_and_compile_cfast
+update_cfast
 
 ### Stage 1 ###
 clean_git_repo
@@ -1315,6 +1333,7 @@ echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
 ### Stage 2b ###
 BUILDFDS_beg=`GET_TIME`
+compile_cfast
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
