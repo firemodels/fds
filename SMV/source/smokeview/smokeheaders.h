@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void draw_geomdata(int flag, patchdata *patchi, int geom_type);
 EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
 EXTERNCPP int HaveFire(void);
 EXTERNCPP void update_object_used(void);
@@ -511,7 +512,7 @@ EXTERNCPP void drawgslice_dataGPU(slicedata *slicei);
 EXTERNCPP void drawvgslice_data(vslicedata *vslicei);
 EXTERNCPP void drawgslice_data(slicedata *slicei);
 EXTERNCPP void drawgslice_outline(void);
-EXTERNCPP void drawpatch_frame(void);
+EXTERNCPP void drawpatch_frame(int flag);
 EXTERNCPP void Motion_CB(int var);
 EXTERNCPP void init_slice3d_texture(mesh *meshi);
 
@@ -817,8 +818,6 @@ EXTERNCPP void readcad2geom(cadgeom *cd);
 EXTERNCPP void readcadgeom(cadgeom *cd);
 EXTERNCPP void drawcadgeom(const cadgeom *cd);
 EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
-
-EXTERNCPP void draw_geomdata(patchdata *patchi);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local);

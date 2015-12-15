@@ -1301,7 +1301,7 @@ typedef struct {
   geomdata *geominfo;
   //int *patchsize;
   int version;
-  int filetype;
+  int filetype, slice;
   int type;
   int inuse,inuse_getbounds;
   int unit_start;
