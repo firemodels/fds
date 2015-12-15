@@ -841,9 +841,6 @@ void usage(char **argv){
 #ifdef pp_release
     strcat(label,", pp_release");
 #endif
-#ifdef pp_SETTIME
-    strcat(label, ", pp_SETTIME");
-#endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
 #endif
