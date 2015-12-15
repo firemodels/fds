@@ -1,7 +1,7 @@
 @echo off
-Title Install 64 bit Linux bundle
+Title Install 64 bit OSX bundle
 
-REM Windows batch file to Install 64 bit Linux bundle
+:: Windows batch file to Install 64 bit OSX bundle
 
 set platform=osx64
 
@@ -21,5 +21,5 @@ call %envfile%
 
 set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.sh
 
-plink %svn_logon% %linux_svn_root%/SMV/scripts/ssh_command2.sh %osx_hostname% FDS-SMV/Utilities/uploads %exe% y
+plink %svn_logon% %linux_svn_root%/SMV/scripts/ssh_command2.sh %osx_hostname% %linux_svn_root%/Utilities/uploads %exe% y
 pause
