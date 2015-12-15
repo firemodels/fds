@@ -12612,28 +12612,11 @@ void writeini(int flag,char *filename){
     if(fds_githash!=NULL){
       fprintf(fileout, "# FDS Build: %s\n", fds_githash);
     }
-#ifdef X64
     fprintf(fileout,"# Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    fprintf(fileout,"# Platform: WIN32\n");
-#endif
-#endif
-#ifndef pp_OSX64
 #ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
     PRINTF("Platform: OSX64\n");
 #endif
-#ifndef pp_LINUX64
 #ifdef pp_LINUX
-    fprintf(fileout,"# Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
     fprintf(fileout,"# Platform: LINUX64\n");
 #endif
 

@@ -771,11 +771,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
       smv_top2=smv_top+VP_title.text_height+v_space;
     }
     outputText(left,smv_top2,TITLE);
-#ifdef BIT64
     sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
-#else
-    sprintf(label,"Smokeview (32 bit) build: %s",smv_githash);
-#endif
     outputText(left,smv_top,label);
     if(fds_githash!=NULL){
       sprintf(label,"FDS build:%s",fds_githash);

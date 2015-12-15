@@ -7473,11 +7473,7 @@ updatemenu=0;
 #endif
     char menulabel[1024];
 
-#ifdef BIT64
     sprintf(menulabel,"  Smokeview (64 bit) build: %s",smv_githash);
-#else
-    sprintf(menulabel,"  Smokeview (32 bit) build: %s",smv_githash);
-#endif
     glutAddMenuEntry(menulabel,1);
     if(fds_version!=NULL){
       sprintf(menulabel, "  FDS version: %s", fds_version);

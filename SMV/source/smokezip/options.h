@@ -46,14 +46,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#ifdef pp_LINUX64
-#define pp_LINUX
-#endif
-
-#ifdef pp_OSX64
-#define pp_OSX
-#endif
-
 //#define pp_KDTEST
 #define pp_PART
 #ifndef pp_OSX
@@ -92,37 +84,17 @@
 #define PROGVERSION "1.4.8"
 #endif
 
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
 
-#ifdef pp_LINUX64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 #define LINT long int
-#ifdef X64
 #undef LINT
 #ifdef WIN32
 #define LINT __int64
 #else
 #define LINT long long int
 #endif
-#endif
 
-#ifdef X64
 #define STRUCTSTAT struct __stat64
 #define STAT _stat64
-#else
-#define STRUCTSTAT struct stat
-#define STAT stat
-#endif
 #endif

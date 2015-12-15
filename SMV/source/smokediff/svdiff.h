@@ -19,29 +19,10 @@
 #define STDCALLF extern void
 #endif
 
-#ifdef X64
 #define STRUCTSTAT struct __stat64
 #define STAT _stat64
-#else
-#define STRUCTSTAT struct stat
-#define STAT stat
-#endif
 
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_LINUX64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 //************************** data structures ****************************************
 
