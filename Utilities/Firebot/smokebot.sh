@@ -143,9 +143,9 @@ export platform
 
 echo ""
 echo "Preliminaries:"
-echo "    running in : $SMOKEBOT_RUNDIR"
-echo "   FDS-SMV repo: $fdsrepo"
-echo "     cfast repo: $cfastrepo"
+echo "  running in: $SMOKEBOT_RUNDIR"
+echo "FDS-SMV repo: $fdsrepo"
+echo "  cfast repo: $cfastrepo"
 echo ""
 
 cd
@@ -370,7 +370,7 @@ update_and_compile_cfast()
 
    # Check to see if CFAST repository exists
    if [ -e "$cfastrepo" ]
-   echo "Cfast repo"
+   echo "cfast repo"
    # If yes, then update the CFAST repository and compile CFAST
    then
       if [ "$CLEANREPO" == "1" ]; then
@@ -422,7 +422,7 @@ clean_git_repo()
    # Check to see if FDS repository exists
    if [ -e "$fdsrepo" ]
    then
-      echo FDS repo
+      echo FDS-SMV repo
       if [ "$CLEANREPO" == "1" ]; then
         cd $fdsrepo
         echo "   cleaning"
@@ -551,6 +551,7 @@ run_verification_cases_debug()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
+   echo "Running verification cases"
    if [ "$CLEANREPO" == "1" ]; then
      echo "   cleaning"
      cd $fdsrepo/Verification
@@ -653,7 +654,7 @@ check_compile_fds_mpi()
 
 compile_smv_utilities()
 {
-   echo "Building utilities"
+   echo "Building smokeview utilities"
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
@@ -1393,8 +1394,9 @@ fi
 MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4b_success && $stage6d_success ]] ; then
    echo Making guides
-   echo "   user"
+#   echo "   geometry notes"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
+   echo "   user"
   make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
    echo "   technical"
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
