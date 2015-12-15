@@ -91,9 +91,13 @@
 #define STAT _stat64
 
 #define LINT long int
+#ifdef X64
 #undef LINT
 #ifdef WIN32
 #define LINT __int64
+#else
+#define LINT long long int
+#endif
 #endif
 
 //*** turn off features on the Mac that don't work there

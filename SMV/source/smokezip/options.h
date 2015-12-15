@@ -88,11 +88,13 @@
 #define FILE_SIZE unsigned long long
 
 #define LINT long int
+#ifdef X64
 #undef LINT
 #ifdef WIN32
 #define LINT __int64
 #else
 #define LINT long long int
+#endif
 #endif
 
 #ifdef X64
