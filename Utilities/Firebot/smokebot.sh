@@ -1242,11 +1242,12 @@ email_build_status()
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "----------------------------------------------" > $TIME_LOG
-   echo "         host: $hostname " >> $TIME_LOG
-   echo "        start: $start_time " >> $TIME_LOG
-   echo "         stop: $stop_time " >> $TIME_LOG
-   echo "    run cases: $DIFF_RUNCASES" >> $TIME_LOG
-   echo "make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+   echo "          host: $hostname " >> $TIME_LOG
+   echo "         start: $start_time " >> $TIME_LOG
+   echo "          stop: $stop_time " >> $TIME_LOG
+   echo "build software: $DIFF_BUILDSOFTWARE" >> $TIME_LOG
+   echo "     run cases: $DIFF_RUNCASES" >> $TIME_LOG
+   echo " make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
 if [ "$MAKEMOVIES" == "1" ]; then
    echo "  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
 fi
@@ -1332,7 +1333,7 @@ DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
 echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
 ### Stage 2b ###
-BUILDFDS_beg=`GET_TIME`
+BUILDSOFTWARE_beg=`GET_TIME`
 compile_cfast
 compile_fds_mpi_db
 check_compile_fds_mpi_db
@@ -1343,17 +1344,13 @@ if [[ $stage2b_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
 fi
-BUILDFDS_end=`GET_TIME`
-DIFF_BUILDFDS=`GET_DURATION $BUILDFDS_beg $BUILDFDS_end`
-echo "Build FDS: $DIFF_BUILDFDS" >> $STAGE_STATUS
 
 ### Stage 5pre ###
-SMVUTILSpre_beg=`GET_TIME`
 compile_smv_utilities
 check_smv_utilities
-SMVUTILSpre_end=`GET_TIME`
-DIFF_SMVUTILSpre=`GET_DURATION $SMVUTILSpre_beg $SMVUTILSpre_end`
-echo "Build SMV Utilities: $DIFF_SMVUTILSpre" >> $STAGE_STATUS
+BUILDSOFTWARE_end=`GET_TIME`
+DIFF_BUILDSOFTWARE=`GET_DURATION $BUILDSOFTWARE_beg $BUILDSOFTWARE_end`
+echo "Build Software: $DIFF_BUILDSOFTWARE" >> $STAGE_STATUS
 
 ### Stage 3 ###
 RUNCASES_beg=`GET_TIME`
