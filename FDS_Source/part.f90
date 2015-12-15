@@ -1162,27 +1162,12 @@ ENDDO
 
 ! Return if there are no particles in this mesh
 
-IF (MESHES(NM)%NLP==0) THEN
-   IF (CORRECTOR .AND. CALC_D_LAGRANGIAN) THEN
-      D_LAGRANGIAN = 0._EB
-      M_DOT_PPP    = 0._EB
-      CALC_D_LAGRANGIAN=.FALSE.
-   ENDIF
-   RETURN
-ENDIF
+IF (MESHES(NM)%NLP==0) RETURN
 
 ! Set the CPU timer and point to the current mesh variables
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-
-! Zero out the contribution by lagrangian particles to divergence
-
-IF (N_LP_ARRAY_INDICES>0 .AND. CORRECTOR) THEN
-   D_LAGRANGIAN = 0._EB
-   M_DOT_PPP    = 0._EB
-   CALC_D_LAGRANGIAN=.FALSE.
-ENDIF
 
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
@@ -2449,10 +2434,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
             DELTA_H_G = H_S_B - H_S
-            D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
-                                   + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
+            D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
             M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
-            CALC_D_LAGRANGIAN = .TRUE.
 
             ! Add energy losses and gains to overall energy budget array
 
