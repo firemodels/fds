@@ -227,7 +227,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_in
 
   if(update_readiso_geom_wrapup==UPDATE_ISO_OFF)update_readiso_geom_wrapup=UPDATE_ISO_ONE_NOW;
   if(update_readiso_geom_wrapup==UPDATE_ISO_START_ALL)update_readiso_geom_wrapup=UPDATE_ISO_ALL_NOW;
-#ifdef MEMPRINT
+#ifdef pp_MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif

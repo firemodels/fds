@@ -602,17 +602,8 @@ void createtourpaths(void){
         keyj->d_xyz_view[2]=0.0;
       }
       else{
-#ifdef xxx
-        float del1, del2;
-#endif
         float sfactor, dfactor;
 
-#ifdef xxx
-        del1 = thiskey->nodeval.time - lastkey->nodeval.time;
-        del2 = nextkey->nodeval.time - thiskey->nodeval.time;
-        sfactor = 2*del2/(del1 + del2);
-        dfactor = 2*del1/(del1 + del2);
-#endif
         sfactor = 1.0;
         dfactor = 1.0;
 
