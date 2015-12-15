@@ -141,6 +141,12 @@ then
 fi
 export platform
 
+echo ""
+echo "Preliminaries:"
+echo "    running in : $SMOKEBOT_RUNDIR"
+echo "   FDS-SMV repo: $fdsrepo"
+echo "     cfast repo: $cfastrepo"
+
 cd
 
 export fdsrepo
@@ -354,6 +360,7 @@ update_and_compile_cfast()
    # If yes, then update the CFAST repository and compile CFAST
    then
       if [ "$CLEANREPO" == "1" ]; then
+        echo "Cleaning cfast repo"
         echo "Cleaning cfast repo:" > $OUTPUT_DIR/stage0_cfast
         cd $cfastrepo
         git clean -dxf > /dev/null
@@ -363,6 +370,7 @@ update_and_compile_cfast()
 
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
+        echo "Updating cfast repo"
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
         git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
       fi
@@ -372,6 +380,7 @@ update_and_compile_cfast()
       exit
    fi
     # Build CFAST
+    echo "building cfast"
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
@@ -403,6 +412,7 @@ clean_git_repo()
    then
       if [ "$CLEANREPO" == "1" ]; then
         cd $fdsrepo
+        echo "cleaning fds repo"
         git clean -dxf > /dev/null
         git add . > /dev/null
         git reset --hard HEAD > /dev/null
@@ -433,6 +443,7 @@ do_git_checkout()
       BRANCH=$CURRENT_BRANCH
    fi
    if [ "$UPDATEREPO" == "1" ]; then
+     echo "updating FDS repo"
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
      git pull >> $OUTPUT_DIR/stage1 2>&1
    fi
@@ -453,6 +464,7 @@ check_git_checkout()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
+   echo "Building debug FDS"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
@@ -524,6 +536,7 @@ run_verification_cases_debug()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
+     echo "cleaning verification cases"
      cd $fdsrepo/Verification
      git clean -dxf > /dev/null
    fi
@@ -532,6 +545,7 @@ run_verification_cases_debug()
    #  = Run all SMV cases =
    #  =====================
 
+   echo "Running cases - debug"
    cd $fdsrepo/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
@@ -584,6 +598,7 @@ check_verification_cases_debug()
 compile_fds_mpi()
 {
    # Clean and compile FDS
+   echo "Building fds - release"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
@@ -622,15 +637,18 @@ check_compile_fds_mpi()
 
 compile_smv_utilities()
 {
+   echo "Building smokeview utilities"
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
    # smokeview libraries
+   echo "   libraries"
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
 
    # smokezip:
+   echo "   smokezip"
    cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -638,19 +656,22 @@ compile_smv_utilities()
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # smokediff:
+   echo "   smokediff"
    cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
-   # background:
+   # background
+   echo "   background"
    cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
    
   # wind2fds:
+   echo "   wind2fds"
    cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -763,10 +784,11 @@ run_verification_cases_release()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
+     echo cleaning verification cases
      cd $fdsrepo/Verification
      git clean -dxf > /dev/null
    fi
-
+   echo Running verification cases
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
@@ -821,6 +843,7 @@ compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
+   echo Building smokeview - debug
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
@@ -869,6 +892,7 @@ make_smv_pictures_db()
 {
    # Run Make SMV Pictures script (debug mode)
    if [ "$SSH" == "" ]; then
+   echo "making smokeview images"
    cd $fdsrepo/Verification/scripts
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
    else
@@ -915,6 +939,7 @@ compile_smv()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
+   echo build smokeview release
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
@@ -964,6 +989,7 @@ make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
    if [ "$SSH" == "" ]; then
+   echo make smokeview images 
    cd $fdsrepo/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
    else
@@ -1001,6 +1027,7 @@ make_smv_movies()
 check_smv_movies()
 {
    cd $SMOKEBOT_RUNDIR
+   echo make smokeview movies
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6e` == "" ]]
    then
       stage6e_success=true
@@ -1346,6 +1373,8 @@ fi
 ### Stage 8 ###
 MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4b_success && $stage6d_success ]] ; then
+   echo making guides
+   echo "   user guide"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
   make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'

@@ -26,7 +26,7 @@ call %envfile%
 
 echo.
 echo Updating wiki repo
-cd %userprofile%\FDS-SMVwikis
+cd %fdswikirepo%
 git remote update
 git merge origin/master
 
@@ -34,5 +34,5 @@ echo.
 echo Converting the FDS release notes from wiki to html format
 
 cd %svn_root%\Utilities\Scripts\bundle_setup
-pandoc -o FDS_Release_Notes.htm %userprofile%\FDS-SMVwikis\FDS-Release-Notes.md
+pandoc -o FDS_Release_Notes.htm %fdswikirepo%\FDS-Release-Notes.md
 pause
