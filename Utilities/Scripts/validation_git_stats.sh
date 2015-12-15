@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# validation_git_stats.sh
-# Kristopher Overholt
-# 1/15/2014
-
 # This script outputs a LaTeX file with a table of the FDS validation
 # sets and their corresponding GIT information (i.e., when the FDS
 # output files were last commited to the repository). This table
@@ -14,6 +10,17 @@ if [ "$FDSSMV" == "" ] ; then
    FDSSMV=~/FDS-SMVgitclean
 fi
 export FDSSMV
+
+while getopts 'r:' OPTION
+do
+case $OPTION  in
+  r)
+   FDSSMV="$OPTARG"
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+
 cd $FDSSMV/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics

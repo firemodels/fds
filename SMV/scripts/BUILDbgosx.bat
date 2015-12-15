@@ -25,7 +25,7 @@ echo Using GIT revision %smv_revision% to build an OSX version of background
 cd %svn_root%\smv\scripts
 set version=%smv_version%_%smv_revision%
 
-set scriptdir=FDS-SMV/SMV/scripts
+set scriptdir=%linux_svn_root%/SMV/scripts
 
 plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEbgosx.csh %linux_svn_root%
 
