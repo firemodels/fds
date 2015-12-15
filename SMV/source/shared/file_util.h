@@ -8,8 +8,13 @@ typedef struct {
   int type;
 } filelistdata;
 
+#ifdef X64
 #define FSEEK(a,b,c) _fseeki64(a,b,c)
 #define FTELL(a) _ftelli64(a)
+#else
+#define FSEEK(a,b,c) fseeko(a,b,c)
+#define FTELL(a) ftello(a)
+#endif
 
 #define REPLACE_FILE 0
 #define APPEND_FILE 1
