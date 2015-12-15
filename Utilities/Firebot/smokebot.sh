@@ -800,8 +800,6 @@ run_verification_cases_release()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
-   echo ""
-   echo Verification cases
    if [ "$CLEANREPO" == "1" ]; then
      echo "   cleaning"
      cd $fdsrepo/Verification
@@ -924,6 +922,7 @@ make_smv_pictures_db()
 check_smv_pictures_db()
 {
    # Scan and report any errors in make SMV pictures process
+   echo "   checking"
    cd $SMOKEBOT_RUNDIR
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6b` == "" ]]
    then
@@ -1022,6 +1021,7 @@ check_smv_pictures()
 {
    # Scan and report any errors in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
+   echo "   checking"
    if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6d` == "" ]]
    then
       stage6d_success=true
@@ -1091,6 +1091,8 @@ check_smv_movies()
 
 generate_timing_stats()
 {
+   echo "Timing stats"
+   echo "   generating"
    cd $fdsrepo/Verification/scripts/
    export QFDS="$fdsrepo/Verification/scripts/copyout.sh"
    export RUNCFAST="$fdsrepo/Verification/scripts/copyout.sh"
@@ -1106,6 +1108,7 @@ generate_timing_stats()
 
 archive_timing_stats()
 {
+   echo "   archiving"
    cd $fdsrepo/Utilities/Scripts
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
