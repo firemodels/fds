@@ -146,6 +146,7 @@ echo "Preliminaries:"
 echo "    running in : $SMOKEBOT_RUNDIR"
 echo "   FDS-SMV repo: $fdsrepo"
 echo "     cfast repo: $cfastrepo"
+echo ""
 
 cd
 
@@ -327,6 +328,18 @@ set_files_world_readable()
    chmod -R go+r *
 }
 
+clean_repo()
+{
+  curdir=`pwd`
+  dir=$1
+  cd $dir
+  git clean -dxf &> /dev/null
+  git add . &> /dev/null
+  git reset --hard HEAD &> /dev/null
+  cd $curdir
+}
+
+
 clean_smokebot_history()
 {
    
@@ -357,20 +370,19 @@ update_and_compile_cfast()
 
    # Check to see if CFAST repository exists
    if [ -e "$cfastrepo" ]
+   echo "Cfast repo"
    # If yes, then update the CFAST repository and compile CFAST
    then
       if [ "$CLEANREPO" == "1" ]; then
-        echo "Cleaning cfast repo"
+        echo "   cleaning"
         echo "Cleaning cfast repo:" > $OUTPUT_DIR/stage0_cfast
         cd $cfastrepo
-        git clean -dxf > /dev/null
-        git add . > /dev/null
-        git reset --hard HEAD > /dev/null
+        clean_repo $cfastrepo
       fi
 
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
-        echo "Updating cfast repo"
+        echo "   updating"
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
         git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
       fi
@@ -380,7 +392,7 @@ update_and_compile_cfast()
       exit
    fi
     # Build CFAST
-    echo "building cfast"
+    echo "Building cfast"
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
@@ -410,12 +422,15 @@ clean_git_repo()
    # Check to see if FDS repository exists
    if [ -e "$fdsrepo" ]
    then
+      echo FDS repo
       if [ "$CLEANREPO" == "1" ]; then
         cd $fdsrepo
-        echo "cleaning fds repo"
-        git clean -dxf > /dev/null
-        git add . > /dev/null
-        git reset --hard HEAD > /dev/null
+        echo "   cleaning"
+        clean_repo $fdsrepo/Verification
+        clean_repo $fdsrepo/SMV
+        clean_repo $fdsrepo/FDS_Source
+        clean_repo $fdsrepo/FDS_Compilation
+        clean_repo $fdsrepo/Manuals
       fi
    else
       echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage1 2>&1
@@ -443,7 +458,7 @@ do_git_checkout()
       BRANCH=$CURRENT_BRANCH
    fi
    if [ "$UPDATEREPO" == "1" ]; then
-     echo "updating FDS repo"
+     echo "   updating"
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
      git pull >> $OUTPUT_DIR/stage1 2>&1
    fi
@@ -464,7 +479,8 @@ check_git_checkout()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   echo "Building debug FDS"
+   echo "Building FDS"
+   echo "   debug"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
@@ -536,16 +552,16 @@ run_verification_cases_debug()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
-     echo "cleaning verification cases"
+     echo "   cleaning"
      cd $fdsrepo/Verification
-     git clean -dxf > /dev/null
+     clean_repo $fdsrepo/Verification
    fi
 
    #  =====================
    #  = Run all SMV cases =
    #  =====================
 
-   echo "Running cases - debug"
+   echo "   debug"
    cd $fdsrepo/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
@@ -598,7 +614,7 @@ check_verification_cases_debug()
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   echo "Building fds - release"
+   echo "   release"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
@@ -637,7 +653,7 @@ check_compile_fds_mpi()
 
 compile_smv_utilities()
 {
-   echo "Building smokeview utilities"
+   echo "Building utilities"
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
@@ -783,12 +799,14 @@ run_verification_cases_release()
    #  ======================
 
    # Remove all .stop and .err files from Verification directories (recursively)
+   echo ""
+   echo Verification cases
    if [ "$CLEANREPO" == "1" ]; then
-     echo cleaning verification cases
+     echo "   cleaning"
      cd $fdsrepo/Verification
-     git clean -dxf > /dev/null
+     clean_repo $fdsrepo/Verification
    fi
-   echo Running verification cases
+   echo "   release"
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
@@ -843,7 +861,8 @@ compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
-   echo Building smokeview - debug
+   echo Building smokeview
+   echo "   debug"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
@@ -939,7 +958,7 @@ compile_smv()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
-   echo build smokeview release
+   echo "   release"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
@@ -988,8 +1007,8 @@ check_compile_smv()
 make_smv_pictures()
 {
    # Run Make SMV Pictures script (release mode)
+   echo Generating images 
    if [ "$SSH" == "" ]; then
-   echo make smokeview images 
    cd $fdsrepo/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
    else
@@ -1373,11 +1392,13 @@ fi
 ### Stage 8 ###
 MAKEGUIDES_beg=`GET_TIME`
 if [[ $stage4b_success && $stage6d_success ]] ; then
-   echo making guides
-   echo "   user guide"
+   echo Making guides
+   echo "   user"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
   make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
+   echo "   technical"
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
+   echo "   verification"
   make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
 fi
 MAKEGUIDES_end=`GET_TIME`
