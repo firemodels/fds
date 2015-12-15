@@ -2981,7 +2981,7 @@ int readsmv(char *file, char *file2){
       do_pass4=1;
       continue;
     }
-    if(match(buffer,"BNDF") == 1|| match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
+    if(match(buffer, "BNDF") == 1 || match(buffer, "BNDC") == 1 || match(buffer, "BNDE") == 1 || match(buffer, "BNDS") == 1){
       npatchinfo++;
       continue;
     }
@@ -6939,7 +6939,7 @@ typedef struct {
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF") == 1||match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
+    if(match(buffer, "BNDF") == 1 || match(buffer, "BNDC") == 1 || match(buffer, "BNDE") == 1 || match(buffer, "BNDS")==1){
       patchdata *patchi;
       int version;
       int blocknumber;
@@ -6968,7 +6968,8 @@ typedef struct {
       patchi = patchinfo + ipatch;
 
       patchi->version=version;
-  
+      strcpy(patchi->scale, "");
+
       patchi->filetype=0;
       if(match(buffer,"BNDC") == 1){
         patchi->filetype=1;
@@ -6976,6 +6977,11 @@ typedef struct {
       }
       if(match(buffer,"BNDE") == 1){
         patchi->filetype=2;
+        patchi->slice = 0;
+      }
+      if(match(buffer, "BNDS") == 1){
+        patchi->filetype = 2;
+        patchi->slice = 1;
       }
 
       if(fgets(buffer,255,stream)==NULL){

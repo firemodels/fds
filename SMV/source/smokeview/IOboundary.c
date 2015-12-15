@@ -2318,7 +2318,7 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
 
 /* ------------------ drawpatch_frame ------------------------ */
 
-void drawpatch_frame(void){
+void drawpatch_frame(int flag){
   mesh *meshi;
   int i;
 
@@ -2326,10 +2326,22 @@ void drawpatch_frame(void){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(patchi->filetype!=2)continue;
-    if(patchi->loaded==0||patchi->display==0)continue;
-    draw_geomdata(patchi); 
+    if(patchi->filetype == 2 && patchi->loaded == 1 && patchi->display == 1){
+      if(flag == DRAW_OPAQUE){
+        if(patchi->slice == 0){
+          draw_geomdata(flag, patchi, GEOM_STATIC);
+          draw_geomdata(flag, patchi, GEOM_DYNAMIC);
+        }
+      }
+      else{
+        if(patchi->slice == 1){
+          draw_geomdata(flag, patchi, GEOM_STATIC);
+          draw_geomdata(flag, patchi, GEOM_DYNAMIC);
+        }
+      }
+    }
   }
+  if(flag == DRAW_TRANSPARENT)return;
   for(i=0;i<nmeshes;i++){
     meshi=meshinfo+i;
     if(meshi->npatches>0){
