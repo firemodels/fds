@@ -3474,7 +3474,7 @@ int readsmv(char *file, char *file2){
       strcpy(geomdiagi->geomfile, buffptr);
 
       NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
-      init_geom(geomdiagi->geom);
+      init_geom(geomdiagi->geom,NODATA);
 
       NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
       strcpy(geomdiagi->geom->file, buffptr);
@@ -3508,7 +3508,7 @@ int readsmv(char *file, char *file2){
         sscanf(buff2,"%i",&ngeomobjinfo);
       }
 
-      init_geom(geomi);
+      init_geom(geomi,NODATA);
 
       fgets(buffer,255,stream);
       trim(buffer);
@@ -7029,6 +7029,7 @@ typedef struct {
           geomi = geominfo + igeom;
           if(strcmp(geomi->file,patchi->geomfile)==0){
             patchi->geominfo=geomi;
+            geomi->hasdata = HASDATA;
             break;
           }
         }
@@ -7149,7 +7150,7 @@ typedef struct {
       NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
       nmemory_ids++;
       isoi->geominfo->memory_id=nmemory_ids;
-      init_geom(isoi->geominfo);
+      init_geom(isoi->geominfo,HASDATA);
 
       bufferptr=trim_string(buffer);
 

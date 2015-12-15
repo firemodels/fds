@@ -2622,7 +2622,7 @@ void Sort_Embedded_Geometry(float *mm){
 
 /* ------------------ init_geom ------------------------ */
 
-void init_geom(geomdata *geomi){
+void init_geom(geomdata *geomi,int hasdata){
   geomi->file=NULL;
   geomi->display=0;
   geomi->loaded=0;
@@ -2638,5 +2638,6 @@ void init_geom(geomdata *geomi){
   geomi->int_vals=NULL;
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
+  geomi->hasdata = hasdata;
 }
 

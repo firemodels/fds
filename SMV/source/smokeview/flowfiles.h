@@ -85,6 +85,7 @@ typedef struct {
   char *file;
   int memory_id;
   int loaded, display;
+  int hasdata;
   struct _surfdata *surf;
   geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   float *float_vals;

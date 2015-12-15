@@ -98,8 +98,8 @@ extern "C" void update_visaxislabels(void){
 extern "C" void update_geometry_controls(void){
   if(CHECKBOX_surface_solid!=NULL)CHECKBOX_surface_solid->set_int_val(showtrisurface);
   if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(showtrioutline);
-  if(CHECKBOX_interior_solid!=NULL)CHECKBOX_surface_solid->set_int_val(show_geometry_interior_solid);
-  if(CHECKBOX_interior_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_geometry_interior_outline);
+  if(CHECKBOX_interior_solid!=NULL)CHECKBOX_interior_solid->set_int_val(show_geometry_interior_solid);
+  if(CHECKBOX_interior_outline!=NULL)CHECKBOX_interior_outline->set_int_val(show_geometry_interior_outline);
 }
 
 /* ------------------ get_geom_dialog_state ------------------------ */
