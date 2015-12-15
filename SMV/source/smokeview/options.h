@@ -87,8 +87,13 @@
 
 #define FILE_SIZE unsigned long long
 
+#ifdef X64
 #define STRUCTSTAT struct __stat64
 #define STAT _stat64
+#else
+#define STRUCTSTAT struct stat
+#define STAT stat
+#endif
 
 #define LINT long int
 #ifdef X64
