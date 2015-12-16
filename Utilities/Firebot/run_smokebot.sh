@@ -110,9 +110,8 @@ COMPILER="-I $COMPILER"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [ "$FORCE" == "" ]; then
     if [ -e $running ] ; then
-      echo Smokebot is already running.
-      echo Erase the file $running if this is not the case
-      echo or rerun using the -f option.
+      echo Smokebot or firebot are already running.
+      echo "Re-run using the -f option if this is not the case."
       exit
     fi
   fi
