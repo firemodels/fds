@@ -282,7 +282,7 @@ do_git_checkout()
    fi
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    if [[ "$UPDATEREPO" == "1" ]] ; then
-      echo Updating FDS-SMV repo
+      echo Updating repo
       git pull >> $OUTPUT_DIR/stage1 2>&1
    fi
    GIT_REVISION=`git describe --long --dirty`
