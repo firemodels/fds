@@ -627,7 +627,7 @@ SUBROUTINE VOLUME_PARTICLE_INSERT
 ! Loop over all INIT lines and look for particles inserted within a specified volume
 
 INTEGER :: I,ND,N_INSERT,I1,J1,K1,I2,J2,K2,MOD_N_INSERT,N,N_PARTICLES_INSERT
-REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME
+REAL(EB) :: XC1,XC2,YC1,YC2,ZC1,ZC2,X0,Y0,Z0,RR,HH,INSERT_VOLUME,INPUT_VOLUME,LP_X,LP_Y,LP_Z
 
 VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
@@ -683,7 +683,7 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       CASE('CONE')
          INSERT_VOLUME = PI*(0.5_EB*(IN%X2-IN%X1))**2*(IN%Z2-IN%Z1)/3._EB
          INPUT_VOLUME  = INSERT_VOLUME
-      CASE('RING')
+      CASE('RING','LINE')
          INSERT_VOLUME = 0._EB
          INPUT_VOLUME  = 0._EB
    END SELECT
@@ -709,21 +709,11 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
       ALLOCATE(LP_INDEX_LOOKUP(N_PARTICLES_INSERT))
       LP_INDEX_LOOKUP = 0
 
+      ! Loop through the particles to be inserted, getting their position and then setting up array space.
+
+      N_INSERT = 0
+
       INSERT_PARTICLE_LOOP: DO I=1,N_PARTICLES_INSERT
-
-         IF (NLP+1>MAXIMUM_PARTICLES) THEN
-            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
-            IF (I>1) LP_INDEX_LOOKUP(I-1) = NEW_LP_INDEX
-         ELSE
-            NLP = NLP+1
-         ENDIF
-         LP_INDEX_LOOKUP(I) = NLP
-
-         PARTICLE_TAG = PARTICLE_TAG + NMESHES
-         CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,&
-                               TAG=PARTICLE_TAG,NEW_TAG=.TRUE.)
-         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
-         LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
 
          ! Get particle coordinates by randomly choosing within the designated volume
 
@@ -732,29 +722,66 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
             N = N + 1
             SELECT CASE(IN%SHAPE)
                CASE('BLOCK')
-                  CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,X1,X2,Y1,Y2,Z1,Z2)
+                  CALL RANDOM_RECTANGLE(LP_X,LP_Y,LP_Z,X1,X2,Y1,Y2,Z1,Z2)
                CASE('CONE')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   Z0 = IN%Z1
                   RR = 0.5_EB*(IN%X2-IN%X1)
                   HH = IN%Z2-IN%Z1
-                  CALL RANDOM_CONE(NM,LP%X,LP%Y,LP%Z,X0,Y0,Z0,RR,HH)
+                  CALL RANDOM_CONE(NM,LP_X,LP_Y,LP_Z,X0,Y0,Z0,RR,HH)
                CASE('RING')
                   X0 = 0.5_EB*(IN%X1+IN%X2)
                   Y0 = 0.5_EB*(IN%Y1+IN%Y2)
                   RR = 0.5_EB*(IN%X2-IN%X1)
-                  LP%Z = IN%Z1
-                  CALL RANDOM_RING(NM,LP%X,LP%Y,X0,Y0,RR)
+                  LP_Z = IN%Z1
+                  CALL RANDOM_RING(NM,LP_X,LP_Y,X0,Y0,RR)
+               CASE('LINE')
+                  LP_X = IN%X1 + (I-1)*IN%DX
+                  LP_Y = IN%Y1 + (I-1)*IN%DY
+                  LP_Z = IN%Z1 + (I-1)*IN%DZ
             END SELECT
-            CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-            LP%X = LP%X + (I-1)*IN%DX
-            LP%Y = LP%Y + (I-1)*IN%DY
-            LP%Z = LP%Z + (I-1)*IN%DZ
+
+            ! Reject particles that are not in the current mesh.
+
+            IF (LP_X<XS .OR. LP_X>XF .OR. LP_Y<YS .OR. LP_Y>YF .OR. LP_Z<ZS .OR. LP_Z>ZF) CYCLE INSERT_PARTICLE_LOOP
+
+            ! Get mesh indices for particle. If the particle is in a solid cell, get another random point. If the particle
+            ! is a member of a line of points and this point is SOLID, just skip it.
+
+            CALL GET_IJK(LP_X,LP_Y,LP_Z,NM,XI,YJ,ZK,II,JJ,KK)
+
+            IF (SOLID(CELL_INDEX(II,JJ,KK)) .AND. IN%SHAPE=='LINE') CYCLE INSERT_PARTICLE_LOOP
             IF (.NOT.SOLID(CELL_INDEX(II,JJ,KK))) EXIT CHOOSE_XYZ_LOOP
+
             ! If cannot find non-solid grid cell, stop searching
+
             IF (N>10000) EXIT CHOOSE_XYZ_LOOP
+
          ENDDO CHOOSE_XYZ_LOOP
+
+         N_INSERT = N_INSERT + 1
+
+         ! Allocate space for the particle in the appropriate array
+
+         IF (NLP+1>MAXIMUM_PARTICLES) THEN
+            CALL REMOVE_OLDEST_PARTICLE(NM,ILPC,NLP,NEW_LP_INDEX)
+            IF (N_INSERT>1) LP_INDEX_LOOKUP(N_INSERT-1) = NEW_LP_INDEX
+         ELSE
+            NLP = NLP+1
+         ENDIF
+         LP_INDEX_LOOKUP(N_INSERT) = NLP
+
+         PARTICLE_TAG = PARTICLE_TAG + NMESHES
+         CALL ALLOCATE_STORAGE(NM,LAGRANGIAN_PARTICLE_CLASS(ILPC)%SURF_INDEX,LPC_INDEX=ILPC,LP_INDEX=NLP,&
+                               TAG=PARTICLE_TAG,NEW_TAG=.TRUE.)
+         LAGRANGIAN_PARTICLE => MESHES(NM)%LAGRANGIAN_PARTICLE
+         LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
+         LP%X = LP_X
+         LP%Y = LP_Y
+         LP%Z = LP_Z
+
+         ! Initialize particle properties
 
          CALL VOLUME_INIT_PARTICLE(I)
 
@@ -762,8 +789,6 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          LP => LAGRANGIAN_PARTICLE(NLP)
 
       ENDDO INSERT_PARTICLE_LOOP
-
-      N_INSERT = N_PARTICLES_INSERT
 
    ELSEIF (IN%N_PARTICLES_PER_CELL > 0) THEN TOTAL_OR_PER_CELL
 
@@ -807,18 +832,18 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
                   ! Get particle coordinates by randomly choosing within the designated volume
 
-                  XC1 = MAX(X1,X(II-1))
-                  YC1 = MAX(Y1,Y(JJ-1))
-                  ZC1 = MAX(Z1,Z(KK-1))
-                  XC2 = MIN(X2,X(II))
-                  YC2 = MIN(Y2,Y(JJ))
-                  ZC2 = MIN(Z2,Z(KK))
 
                   IF (IN%CELL_CENTERED) THEN
-                     LP%X = 0.5_EB*(XC1+XC2)
-                     LP%Y = 0.5_EB*(YC1+YC2)
-                     LP%Z = 0.5_EB*(ZC1+ZC2)
+                     LP%X = 0.5_EB*(X(II-1)+X(II))
+                     LP%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
+                     LP%Z = 0.5_EB*(Z(KK-1)+Z(KK))
                   ELSE
+                     XC1 = MAX(X1,X(II-1))
+                     YC1 = MAX(Y1,Y(JJ-1))
+                     ZC1 = MAX(Z1,Z(KK-1))
+                     XC2 = MIN(X2,X(II))
+                     YC2 = MIN(Y2,Y(JJ))
+                     ZC2 = MIN(Z2,Z(KK))
                      CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                   ENDIF
 
@@ -1137,25 +1162,12 @@ ENDDO
 
 ! Return if there are no particles in this mesh
 
-IF (MESHES(NM)%NLP==0) THEN
-   IF (CORRECTOR .AND. CALC_D_LAGRANGIAN) THEN
-      D_LAGRANGIAN = 0._EB
-      CALC_D_LAGRANGIAN=.FALSE.
-   ENDIF
-   RETURN
-ENDIF
+IF (MESHES(NM)%NLP==0) RETURN
 
 ! Set the CPU timer and point to the current mesh variables
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-
-! Zero out the contribution by lagrangian particles to divergence
-
-IF (N_LP_ARRAY_INDICES>0 .AND. CORRECTOR) THEN
-   D_LAGRANGIAN = 0._EB
-   CALC_D_LAGRANGIAN=.FALSE.
-ENDIF
 
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
@@ -1934,7 +1946,8 @@ USE COMP_FUNCTIONS, ONLY: SHUTDOWN
 USE OUTPUT_DATA, ONLY: M_DOT,Q_DOT
 USE TRAN, ONLY: GET_IJK
 REAL(EB), POINTER, DIMENSION(:,:,:) :: DROP_DEN=>NULL(),DROP_RAD=>NULL(),DROP_TMP=>NULL(),MVAP_TOT=>NULL(),DROP_AREA=>NULL(),&
-                                       DROP_DEN_ALL=>NULL()
+                                       DROP_DEN_ALL=>NULL(),RHO_INTERIM=>NULL(),TMP_INTERIM=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ_INTERIM=>NULL()
 REAL(EB), POINTER, DIMENSION(:) :: FILM_THICKNESS=>NULL(),WALL_QCONF=>NULL()
 REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             RVC,WGT,Q_CON_GAS,Q_CON_WALL,Q_RAD,H_HEAT,H_MASS,SH_FAC_GAS,SH_FAC_WALL,NU_FAC_GAS,NU_FAC_WALL, &
@@ -2000,6 +2013,12 @@ IF (N_LP_ARRAY_INDICES>0) THEN
       WALL(IW)%LP_CPUA  = RUN_AVG_FAC*WALL(IW)%LP_CPUA
       WALL(IW)%LP_MPUA  = RUN_AVG_FAC*WALL(IW)%LP_MPUA
    ENDDO
+ENDIF
+
+IF (ANY(LAGRANGIAN_PARTICLE_CLASS(:)%LIQUID_DROPLET)) THEN
+   RHO_INTERIM => WORK1 ; RHO_INTERIM = RHO
+   TMP_INTERIM => WORK2 ; TMP_INTERIM = TMP
+   ZZ_INTERIM  => SCALAR_WORK1 ; ZZ_INTERIM = ZZ
 ENDIF
 
 ! Loop over all types of evaporative species
@@ -2069,7 +2088,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
          KILL_RADIUS_CHECK: IF (LP%ONE_D%X(1)>LPC%KILL_RADIUS) THEN
 
-            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(II,JJ,KK,1:N_TRACKED_SPECIES)
+            ZZ_GET(1:N_TRACKED_SPECIES) = ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES)
             CALL GET_MASS_FRACTION_ALL(ZZ_GET,Y_ALL)
             MW_GAS = 0._EB
             IF (ABS(Y_ALL(Y_INDEX)-1._EB) > TWO_EPSILON_EB) THEN
@@ -2108,8 +2127,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Gas conditions
 
-            TMP_G  = TMP(II,JJ,KK)
-            RHO_G  = RHO(II,JJ,KK)
+            TMP_G  = TMP_INTERIM(II,JJ,KK)
+            RHO_G  = RHO_INTERIM(II,JJ,KK)
             D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
             M_GAS  = RHO_G/RVC
@@ -2236,7 +2255,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                            A_DROP*(H_HEAT*(TMP_G   -0.5_EB*TMP_DROP) + H_WALL*(TMP_WALL-0.5_EB*TMP_DROP) -  &
                            H_MASS*RHO_G*H_V*(Y_DROP-0.5_EB*DZ_DTMP_DROP*TMP_DROP-Y_GAS))/(M_DROP*C_DROP)) ) / DENOM
 
-! Compute the total amount of heat extracted from the gas, wall and radiative fields
+            ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
             Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
             Q_CON_GAS  = DT_SUBSTEP*A_DROP*H_HEAT*(TMP_G   -0.5_EB*(TMP_DROP+TMP_DROP_NEW))
@@ -2404,10 +2423,9 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Update gas cell density, temperature, and mass fractions
 
-            RHO(II,JJ,KK) = M_GAS_NEW*RVC
-            ZZ(II,JJ,KK,1:N_TRACKED_SPECIES) = ZZ_GET2(1:N_TRACKED_SPECIES)
-            CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET2,RSUM(II,JJ,KK))
-            TMP(II,JJ,KK) = TMP_G_NEW
+            RHO_INTERIM(II,JJ,KK) = M_GAS_NEW*RVC
+            ZZ_INTERIM(II,JJ,KK,1:N_TRACKED_SPECIES) = ZZ_GET2(1:N_TRACKED_SPECIES)
+            TMP_INTERIM(II,JJ,KK) = TMP_G_NEW
 
             ! Compute contribution to the divergence
 
@@ -2416,9 +2434,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
             DELTA_H_G = H_S_B - H_S
-            D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
-                                   + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
-            CALC_D_LAGRANGIAN = .TRUE.
+            D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
+            M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
 
             ! Add energy losses and gains to overall energy budget array
 
@@ -2464,8 +2481,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    ENDDO PARTICLE_LOOP
 
 ENDDO SPECIES_LOOP
-
-TMP = MIN(TMPMAX,MAX(TMPMIN,TMP))
 
 ! Second loop is for summing the part quantities
 

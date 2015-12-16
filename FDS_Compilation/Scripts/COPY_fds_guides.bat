@@ -1,7 +1,5 @@
 @echo off
 
-Rem  Windows batch file to create an achive for a 64 bit Linux smokeview
-
 Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
@@ -23,7 +21,7 @@ call %envfile%
 echo.
 echo ---downloading guides
 echo.
-set manualdir=/home2/smokevis2/firebot/FDS-SMVgitclean/Manuals
+set manualdir=%firebotrepo%/Manuals
 set firelocaldir="%userprofile%"\FIRE-LOCAL\reports\fds_manuals
 
 pscp %svn_logon%:%manualdir%/FDS_User_Guide/FDS_User_Guide.pdf  %firelocaldir%\.
