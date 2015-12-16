@@ -467,7 +467,8 @@ run_verification_cases_debug()
    # Start running all FDS verification cases in delayed stop debug mode
    cd $fdsrepo/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
-   echo Running debug verification cases
+   echo Running FDS Verification Cases
+   echo "   debug
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
    ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
    echo "" >> $OUTPUT_DIR/stage3 2>&1
@@ -674,7 +675,7 @@ run_verification_cases_release()
 {
    # Start running all FDS verification cases
 
-   echo "Running verification cases - release"
+   echo "   release"
    cd $fdsrepo/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
@@ -1224,7 +1225,7 @@ fi
 # clean debug stage
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
-   echo cleaning repo
+   echo "   cleaning repo"
    clean_repo $fdsrepo/Verification
    clean_repo $fdsrepo/Validation
 fi
