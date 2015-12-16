@@ -41,28 +41,11 @@ void version(void){
     PRINTF("Version: %s\n",smv_version);
     PRINTF("Build: %s\n",githash);
     PRINTF("Compile Date: %s\n",__DATE__);
-#ifdef X64
     PRINTF("Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    PRINTF("Platform: WIN32\n");
-#endif
-#endif
-#ifndef pp_OSX64
 #ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
     PRINTF("Platform: OSX64\n");
 #endif
-#ifndef pp_LINUX64
 #ifdef pp_LINUX
-    PRINTF("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
     PRINTF("Platform: LINUX64\n");
 #endif
 

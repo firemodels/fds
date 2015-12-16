@@ -4066,6 +4066,12 @@ void VentMenu(int value){
 #define GEOMETRY_DUPLICATES 10
 #define GEOMETRY_HIDE 7
 #define GEOMETRY_TETRA_HIDE 11
+#define GEOMETRY_SHOWNORMAL 3
+#define GEOMETRY_SORTFACES 6
+#define GEOMETRY_SMOOTHNORMAL 4
+#define GEOMETRY_SHOWDIAGNOSTICS 13
+#define GEOMETRY_HILIGHTSKINNY 5
+
 void ImmersedMenu(int value){
   updatemenu=1;
   switch(value){
@@ -4137,19 +4143,19 @@ void ImmersedMenu(int value){
         showtrioutline=1;
       }
       break;
-    case 3:
+    case GEOMETRY_SHOWNORMAL:
       showtrinormal=1-showtrinormal;
       break;
-    case 4:
+    case GEOMETRY_SMOOTHNORMAL:
       smoothtrinormal=1-smoothtrinormal;
       break;
-    case 5:
+    case GEOMETRY_HILIGHTSKINNY:
       hilight_skinny = 1 - hilight_skinny;
       break;
-    case 6:
+    case GEOMETRY_SORTFACES:
       sort_embedded_geometry=1-sort_embedded_geometry;
       break;
-    case 13:
+    case GEOMETRY_SHOWDIAGNOSTICS:
       show_geometry_diagnostics = 1 - show_geometry_diagnostics;
       break;
     case GEOMETRY_HIDE:
@@ -5061,36 +5067,36 @@ updatemenu=0;
     }
   }
   if(sort_embedded_geometry==1){
-    glutAddMenuEntry(_(" *Sort faces"),6);
+    glutAddMenuEntry(_(" *Sort faces"), GEOMETRY_SORTFACES);
   }
   else{
-    glutAddMenuEntry(_(" Sort faces"),6);
+    glutAddMenuEntry(_(" Sort faces"), GEOMETRY_SORTFACES);
   }
   if(showtrinormal==1){
-    glutAddMenuEntry(_(" *Show normal"),3);
+    glutAddMenuEntry(_(" *Show normal"), GEOMETRY_SHOWNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Show normal"),3);
+    glutAddMenuEntry(_(" Show normal"), GEOMETRY_SHOWNORMAL);
   }
   if(smoothtrinormal==1){
-    glutAddMenuEntry(_(" *Smooth normal"),4);
+    glutAddMenuEntry(_(" *Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Smooth normal"),4);
+    glutAddMenuEntry(_(" Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   if(ngeomdiaginfo>0){
     if(show_geometry_diagnostics == 1){
-      glutAddMenuEntry(_(" *Show geometry diagnostics"), 13);
+      glutAddMenuEntry(_(" *Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
     else{
-      glutAddMenuEntry(_(" Show geometry diagnostics"), 13);
+      glutAddMenuEntry(_(" Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
   }
   if(hilight_skinny == 1){
-    glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
+    glutAddMenuEntry(_(" *Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
   }
   else{
-    glutAddMenuEntry(_(" Hilight skinny triangles"),5);
+    glutAddMenuEntry(_(" Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
   }
 
 /* --------------------------------blockage menu -------------------------- */
@@ -7467,11 +7473,7 @@ updatemenu=0;
 #endif
     char menulabel[1024];
 
-#ifdef BIT64
     sprintf(menulabel,"  Smokeview (64 bit) build: %s",smv_githash);
-#else
-    sprintf(menulabel,"  Smokeview (32 bit) build: %s",smv_githash);
-#endif
     glutAddMenuEntry(menulabel,1);
     if(fds_version!=NULL){
       sprintf(menulabel, "  FDS version: %s", fds_version);

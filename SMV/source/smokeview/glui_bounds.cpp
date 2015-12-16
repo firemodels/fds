@@ -1317,10 +1317,8 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"Unlimited");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"1 GB");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"2 GB");
-  #ifdef BIT64
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"4 GB");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"8 GB");
-  #endif
 #endif
 
   glui_bounds->add_button(_d("Save settings"), SAVE_SETTINGS, Bounds_DLG_CB);

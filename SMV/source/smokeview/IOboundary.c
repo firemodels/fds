@@ -291,7 +291,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
     if(enableflag==1)enable_boundary_glui();
     updatemenu=1;
-#ifdef _MEMPRINT
+#ifdef pp_MEMPRINT
     PRINTF("After boundary file unload: \n");
     PrintMemoryInfo;
 #endif
