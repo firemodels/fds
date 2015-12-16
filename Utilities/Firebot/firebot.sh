@@ -125,8 +125,8 @@ UploadGuides=$fdsrepo/Utilities/Firebot/fds_guides2GD.sh
 
 echo ""
 echo "Preliminaries:"
-echo "  running in: $FIREBOT_RUNDIR"
-echo "FDS-SMV repo: $fdsrepo"
+echo "     running in: $FIREBOT_RUNDIR"
+echo "   FDS-SMV repo: $fdsrepo"
 echo ""
 
 
