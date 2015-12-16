@@ -1190,6 +1190,7 @@ archive_compiler_version
 
 ### Stage 2a ###
 echo Building
+echo "   FDS"
 #compile_fds_db
 #check_compile_fds_db
 inspect_fds_db
