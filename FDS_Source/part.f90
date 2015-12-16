@@ -832,18 +832,18 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
                   ! Get particle coordinates by randomly choosing within the designated volume
 
-                  XC1 = MAX(X1,X(II-1))
-                  YC1 = MAX(Y1,Y(JJ-1))
-                  ZC1 = MAX(Z1,Z(KK-1))
-                  XC2 = MIN(X2,X(II))
-                  YC2 = MIN(Y2,Y(JJ))
-                  ZC2 = MIN(Z2,Z(KK))
 
                   IF (IN%CELL_CENTERED) THEN
-                     LP%X = 0.5_EB*(XC1+XC2)
-                     LP%Y = 0.5_EB*(YC1+YC2)
-                     LP%Z = 0.5_EB*(ZC1+ZC2)
+                     LP%X = 0.5_EB*(X(II-1)+X(II))
+                     LP%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
+                     LP%Z = 0.5_EB*(Z(KK-1)+Z(KK))
                   ELSE
+                     XC1 = MAX(X1,X(II-1))
+                     YC1 = MAX(Y1,Y(JJ-1))
+                     ZC1 = MAX(Z1,Z(KK-1))
+                     XC2 = MIN(X2,X(II))
+                     YC2 = MIN(Y2,Y(JJ))
+                     ZC2 = MIN(Z2,Z(KK))
                      CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                   ENDIF
 
