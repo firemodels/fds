@@ -85,6 +85,7 @@ typedef struct {
   char *file;
   int memory_id;
   int loaded, display;
+  int hasdata;
   struct _surfdata *surf;
   geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   float *float_vals;
@@ -1301,7 +1302,7 @@ typedef struct {
   geomdata *geominfo;
   //int *patchsize;
   int version;
-  int filetype;
+  int filetype, slice;
   int type;
   int inuse,inuse_getbounds;
   int unit_start;

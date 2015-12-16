@@ -718,7 +718,6 @@ void set_memcheck(int index){
   case 2:
     MMmaxmemory=2000000000;
     break;
-#ifdef BIT64
   case 3:
     MMmaxmemory=4000000000;
     break;
@@ -728,7 +727,6 @@ void set_memcheck(int index){
   default:
     ASSERT(0);
     break;
-#endif
   }
 }
 

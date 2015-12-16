@@ -20,7 +20,6 @@ else
 endif
 GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
-
 #----------------------------------------------------------------------------
 # Should not need to edit lines below except to add or 'debug' target entries
 
@@ -152,7 +151,7 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
@@ -165,7 +164,7 @@ intel_linux_64 : $(obj)
 # ------------- intel_linux_64_db ----------------
 
 intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -fpp -D pp_noappend -stand:f08
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
@@ -179,7 +178,7 @@ intel_linux_64_db : $(obj)
 # ------------- intel_linux_64_profile ----------------
 
 intel_linux_64_profile : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_noappend -p
-intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX64 -D pp_INTEL -p $(GITINFO)
+intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX -D pp_INTEL -p $(GITINFO)
 intel_linux_64_profile : LFLAGS    = -m64 -static-intel
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
@@ -189,18 +188,31 @@ intel_linux_64_profile : exe       = smokeview_linux_64p
 intel_linux_64_profile : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS) -p
 
-# ------------- gcc_linux ----------------
+# ------------- gnu_linux_64_db ----------------
 
-gcc_linux : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gcc_linux : CFLAGS    = -O0 -m64 -D pp_LINUX64
-gcc_linux : LFLAGS    = -m64
-gcc_linux : CC        = gcc
-gcc_linux : CPP       = g++
-gcc_linux : FC        = gfortran
-gcc_linux : exe       = smokeview_gcc_$(SMV_TESTSTRING)64
+gnu_linux_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gnu_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX
+gnu_linux_64_db : LFLAGS    = -m64
+gnu_linux_64_db : CC        = gcc
+gnu_linux_64_db : CPP       = g++
+gnu_linux_64_db : FC        = gfortran
+gnu_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
-gcc_linux : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gcc_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+gnu_linux_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+
+# ------------- gnu_linux_64 ----------------
+
+gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
+gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX
+gnu_linux_64 : LFLAGS    = -m64
+gnu_linux_64 : CC        = gcc
+gnu_linux_64 : CPP       = g++
+gnu_linux_64 : FC        = gfortran
+gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
+
+gnu_linux_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -210,8 +222,8 @@ OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libim
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
@@ -223,8 +235,8 @@ intel_osx_64 : $(obj)
 
 # ------------- intel_osx_64_fg ----------------
 
-intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
+intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64_fg : LFLAGS    = -m64 -static-intel -framework OpenGL -L/shared/freeglut/lib -lglut -mmacosx-version-min=10.4
 intel_osx_64_fg : CC        = icc 
 intel_osx_64_fg : CPP       = icpc
@@ -236,8 +248,8 @@ intel_osx_64_fg : $(obj)
 
 # ------------- intel_osx_64_db ----------------
 
-intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4 -stand:f08
-intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4 -stand:f08
+intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64_db : CC        = icc 
 intel_osx_64_db : CPP       = icpc
@@ -247,18 +259,31 @@ intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILE
 intel_osx_64_db : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
-# ------------- gcc_osx ----------------
+# ------------- gnu_osx_64_db ----------------
 
-gcc_osx : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
-gcc_osx : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
-gcc_osx : LFLAGS    = -m64 -framework OpenGL -framework GLUT
-gcc_osx : CC        = gcc
-gcc_osx : CPP       = g++
-gcc_osx : FC        = gfortran
-gcc_osx : exe       = smokeview_gcc_64
+gnu_osx_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
+gnu_osx_64_db : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
+gnu_osx_64_db : LFLAGS    = -m64 -framework OpenGL -framework GLUT
+gnu_osx_64_db : CC        = gcc
+gnu_osx_64_db : CPP       = g++
+gnu_osx_64_db : FC        = gfortran
+gnu_osx_64_db : exe       = smokeview_osx_64_db
 
-gcc_osx : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gcc_64 $(SMV_LIBS) -L/usr/local/gfortran/lib/gcc/x86_64-apple-darwin10/4.6.2 -lgfortran
+gnu_osx_64_db : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
+
+# ------------- gnu_osx_64 ----------------
+
+gnu_osx_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form
+gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_OSX -Wno-write-strings
+gnu_osx_64 : LFLAGS    = -m64 -framework OpenGL -framework GLUT
+gnu_osx_64 : CC        = gcc
+gnu_osx_64 : CPP       = g++
+gnu_osx_64 : FC        = gfortran
+gnu_osx_64 : exe       = smokeview_osx_64
+
+gnu_osx_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 

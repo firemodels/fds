@@ -36,9 +36,12 @@
 #define MENU_ZONE_VERTICAL 2
 #define MENU_ZONE_LAYERHIDE 4
 #define MENU_ZONE_VENTS 14
-#define MENU_ZONE_FIRES 15
-#define MENU_ZONE_VENT_SLAB 16
-#define MENU_ZONE_VENT_PROFILE 17
+#define MENU_ZONE_HVENTS 15
+#define MENU_ZONE_VVENTS 16
+#define MENU_ZONE_MVENTS 17
+#define MENU_ZONE_FIRES 18
+#define MENU_ZONE_VENT_SLAB 19
+#define MENU_ZONE_VENT_PROFILE 20
 
 #define MENU_SHOWSLICE_INBLOCKAGE -11
 #define MENU_SHOWSLICE_SLICEANDVECTORS -15
@@ -4063,6 +4066,12 @@ void VentMenu(int value){
 #define GEOMETRY_DUPLICATES 10
 #define GEOMETRY_HIDE 7
 #define GEOMETRY_TETRA_HIDE 11
+#define GEOMETRY_SHOWNORMAL 3
+#define GEOMETRY_SORTFACES 6
+#define GEOMETRY_SMOOTHNORMAL 4
+#define GEOMETRY_SHOWDIAGNOSTICS 13
+#define GEOMETRY_HILIGHTSKINNY 5
+
 void ImmersedMenu(int value){
   updatemenu=1;
   switch(value){
@@ -4134,19 +4143,19 @@ void ImmersedMenu(int value){
         showtrioutline=1;
       }
       break;
-    case 3:
+    case GEOMETRY_SHOWNORMAL:
       showtrinormal=1-showtrinormal;
       break;
-    case 4:
+    case GEOMETRY_SMOOTHNORMAL:
       smoothtrinormal=1-smoothtrinormal;
       break;
-    case 5:
+    case GEOMETRY_HILIGHTSKINNY:
       hilight_skinny = 1 - hilight_skinny;
       break;
-    case 6:
+    case GEOMETRY_SORTFACES:
       sort_embedded_geometry=1-sort_embedded_geometry;
       break;
-    case 13:
+    case GEOMETRY_SHOWDIAGNOSTICS:
       show_geometry_diagnostics = 1 - show_geometry_diagnostics;
       break;
     case GEOMETRY_HIDE:
@@ -4479,26 +4488,56 @@ void ZoneShowMenu(int value){
     break;
   case MENU_ZONE_VENTS:
     visVentFlow=1-visVentFlow;
+    if(visVentFlow==1){
+      visVentHFlow=1;
+      visVentVFlow=1;
+      visVentMFlow=1;
+    }
+    else{
+      visVentHFlow=0;
+      visVentVFlow=0;
+      visVentMFlow=0;
+    }
+    break;
+#define VISVENTFLOW     if((nzhvents>0&&visVentHFlow==1)||(nzvvents>0&&visVentVFlow==1)||(nzmvents>0&&visVentMFlow==1)){\
+      visVentFlow = 1;\
+    }\
+    else{\
+      visVentFlow = 0;\
+    }
+  case MENU_ZONE_HVENTS:
+    visVentHFlow = 1-visVentHFlow;
+    VISVENTFLOW;
+    break;
+  case MENU_ZONE_VVENTS:
+    visVentVFlow = 1-visVentVFlow;
+    VISVENTFLOW;
+    break;
+  case MENU_ZONE_MVENTS:
+    visVentMFlow = 1-visVentMFlow;
+    VISVENTFLOW;
     break;
   case MENU_ZONE_VENT_SLAB:
     visventslab = 1 - visventslab;
     if(visventslab==1)visventprofile=0;
     if(visventprofile==1||visventslab==1){
-      visVentFlow=1;
+      visVentHFlow=1;
     }
     else{
-      visVentFlow=0;
+      visVentHFlow=0;
     }
+    VISVENTFLOW;
     break;
   case MENU_ZONE_VENT_PROFILE:
     visventprofile = 1 - visventprofile;
     if(visventprofile==1)visventslab=0;
     if(visventprofile==1||visventslab==1){
-      visVentFlow=1;
+      visVentHFlow=1;
     }
     else{
-      visVentFlow=0;
+      visVentHFlow=0;
     }
+    VISVENTFLOW;
     break;
   case MENU_ZONE_FIRES:
     viszonefire=1-viszonefire;
@@ -5028,36 +5067,36 @@ updatemenu=0;
     }
   }
   if(sort_embedded_geometry==1){
-    glutAddMenuEntry(_(" *Sort faces"),6);
+    glutAddMenuEntry(_(" *Sort faces"), GEOMETRY_SORTFACES);
   }
   else{
-    glutAddMenuEntry(_(" Sort faces"),6);
+    glutAddMenuEntry(_(" Sort faces"), GEOMETRY_SORTFACES);
   }
   if(showtrinormal==1){
-    glutAddMenuEntry(_(" *Show normal"),3);
+    glutAddMenuEntry(_(" *Show normal"), GEOMETRY_SHOWNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Show normal"),3);
+    glutAddMenuEntry(_(" Show normal"), GEOMETRY_SHOWNORMAL);
   }
   if(smoothtrinormal==1){
-    glutAddMenuEntry(_(" *Smooth normal"),4);
+    glutAddMenuEntry(_(" *Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Smooth normal"),4);
+    glutAddMenuEntry(_(" Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   if(ngeomdiaginfo>0){
     if(show_geometry_diagnostics == 1){
-      glutAddMenuEntry(_(" *Show geometry diagnostics"), 13);
+      glutAddMenuEntry(_(" *Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
     else{
-      glutAddMenuEntry(_(" Show geometry diagnostics"), 13);
+      glutAddMenuEntry(_(" Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
   }
   if(hilight_skinny == 1){
-    glutAddMenuEntry(_(" *Hilight skinny triangles"),5);
+    glutAddMenuEntry(_(" *Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
   }
   else{
-    glutAddMenuEntry(_(" Hilight skinny triangles"),5);
+    glutAddMenuEntry(_(" Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
   }
 
 /* --------------------------------blockage menu -------------------------- */
@@ -5856,27 +5895,56 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"), MENU_ZONE_LAYERHIDE);
     }
     if(nzvents>0){
-      if(have_ventslab_flow==0){
-        if(visVentFlow==1){
-          glutAddMenuEntry(_("*Vent flow - velocity profile"), MENU_ZONE_VENTS);
-        }
-        else{
-          glutAddMenuEntry(_("Vent flow - velocity profile"), MENU_ZONE_VENTS);
-        }
+      if(visVentFlow==1){
+        glutAddMenuEntry(_("*Vent flow"), MENU_ZONE_VENTS);
       }
       else{
-        glutAddMenuEntry(_("Vent flow"), MENU_DUMMY);
-        if(visventslab==1){
-          glutAddMenuEntry(_("   *mass slab flow"), MENU_ZONE_VENT_SLAB);
+        glutAddMenuEntry(_("Vent flow"), MENU_ZONE_VENTS);
+      }
+      if(nzhvents>0){
+        if(visVentHFlow==1){
+          glutAddMenuEntry(_("   *Horizontal"), MENU_ZONE_HVENTS);
         }
         else{
-          glutAddMenuEntry(_("   mass slab flow"), MENU_ZONE_VENT_SLAB);
+          glutAddMenuEntry(_("   Horizontal"), MENU_ZONE_HVENTS);
         }
-        if(visventprofile==1){
-          glutAddMenuEntry(_("   *velocity profile"), MENU_ZONE_VENT_PROFILE);
+        if(have_ventslab_flow==0){
+          if(visventprofile==1){
+            glutAddMenuEntry(_("      *velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+          else{
+            glutAddMenuEntry(_("      velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
         }
         else{
-          glutAddMenuEntry(_("   velocity profile"), MENU_ZONE_VENT_PROFILE);
+          if(visventslab==1){
+            glutAddMenuEntry(_("      *mass slab"), MENU_ZONE_VENT_SLAB);
+          }
+          else{
+            glutAddMenuEntry(_("      mass slab"), MENU_ZONE_VENT_SLAB);
+          }
+          if(visventprofile==1){
+            glutAddMenuEntry(_("      *velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+          else{
+            glutAddMenuEntry(_("      velocity profile"), MENU_ZONE_VENT_PROFILE);
+          }
+        }
+      }
+      if(nzvvents>0){
+        if(visVentVFlow==1){
+          glutAddMenuEntry(_("   *Vertical"), MENU_ZONE_VVENTS);
+        }
+        else{
+          glutAddMenuEntry(_("   Vertical"), MENU_ZONE_VVENTS);
+        }
+      }
+      if(nzmvents>0){
+        if(visVentMFlow==1){
+          glutAddMenuEntry(_("   *Mechancial"), MENU_ZONE_MVENTS);
+        }
+        else{
+          glutAddMenuEntry(_("   Mechancial"), MENU_ZONE_MVENTS);
         }
       }
     }
@@ -7405,11 +7473,7 @@ updatemenu=0;
 #endif
     char menulabel[1024];
 
-#ifdef BIT64
     sprintf(menulabel,"  Smokeview (64 bit) build: %s",smv_githash);
-#else
-    sprintf(menulabel,"  Smokeview (32 bit) build: %s",smv_githash);
-#endif
     glutAddMenuEntry(menulabel,1);
     if(fds_version!=NULL){
       sprintf(menulabel, "  FDS version: %s", fds_version);

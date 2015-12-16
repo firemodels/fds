@@ -1,5 +1,8 @@
 #!/bin/bash
-running=smokebot_running
+if [ ! -d ~/.fdssmvgit ] ; then
+  mkdir ~/.fdssmvgit
+fi
+running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 FDSREPO=~/FDS-SMVgitclean
@@ -25,6 +28,7 @@ SSH=
 MAILTO=
 UPLOAD=
 FORCE=
+COMPILER=intel
 
 function usage {
 echo "Verification and validation testing script for smokeview"
@@ -36,6 +40,7 @@ echo "-c - clean repo"
 echo "-C - cfast repository location [default: $CFASTREPO]"
 echo "-f - force smokebot run"
 echo "-h - display this message"
+echo "-I - specify compiler (intel or gnu)"
 echo "-m email_address"
 echo "-q queue"
 echo "-M  - make movies"
@@ -47,7 +52,7 @@ echo "-v - show options used to run smokebot"
 exit
 }
 
-while getopts 'ab:C:cd:fhm:Mq:r:S:uUv' OPTION
+while getopts 'ab:C:cd:fhI:m:Mq:r:S:uUv' OPTION
 do
 case $OPTION  in
   a)
@@ -60,7 +65,10 @@ case $OPTION  in
    CLEANREPO=-c
    ;;
   C)
-   CFASTREPO="-C $OPTARG"
+   CFASTREPO="$OPTARG"
+   ;;
+  I)
+   COMPILER="$OPTARG"
    ;;
   f)
    FORCE=1
@@ -97,12 +105,13 @@ esac
 done
 shift $(($OPTIND-1))
 
+COMPILER="-I $COMPILER"
+
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [ "$FORCE" == "" ]; then
     if [ -e $running ] ; then
-      echo Smokebot is already running.
-      echo Erase the file $running if this is not the case
-      echo or rerun using the -f option.
+      echo Smokebot or firebot are already running.
+      echo "Re-run using the -f option if this is not the case."
       exit
     fi
   fi
@@ -114,7 +123,11 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
      git remote update
      git checkout $BRANCH
      git pull
-     cp Utilities/Firebot/$botscript $CURDIR/.
+     cd Utilities/Firebot
+     FIREBOTDIR=`pwd`
+     if [ "$FIREBOTDIR" != "$CURDIR" ]; then
+       cp $botscript $CURDIR/.
+     fi
      cd $CURDIR
   fi
 fi
@@ -123,8 +136,8 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
 fi

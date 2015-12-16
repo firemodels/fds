@@ -359,27 +359,3 @@ void merge_uvhistogram(histogramdata *histogram_to, histogramdata *histogram_fro
   histogram_to->ntotal += histogram_from->ntotal;
   FREEMEMORY(bucket_to_copy);
 }
-
-#ifdef pp_CHECK
-/* ------------------ check_histogram ------------------------ */
-
-void check_histogram(void){
-#define NVALS 1000000
-  float *vals;
-  int i;
-  histogramdata histogram;
-  float v01, v50, v99;
-
-  NewMemory((void **)&vals,NVALS*sizeof(float));
-
-  for(i=0;i<NVALS;i++){
-    vals[i]=10.0*rand()/(float)RAND_MAX;
-  }
-  vals2histogram(vals,NVALS,&histogram);
-  v01=get_histogram_value(&histogram, .01);
-  v50=get_histogram_value(&histogram, .50);
-  v99=get_histogram_value(&histogram, .99);
-  FREEMEMORY(vals);
-
-}
-#endif

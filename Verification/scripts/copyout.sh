@@ -16,11 +16,11 @@ done
 shift $(($OPTIND-1))
 
 
-outdir=$FDS_SVNROOT/Verification/scripts/Outfiles
+outdir=$fdsrepo/Verification/scripts/Outfiles
 in=$1
 infile=${in%.*}
 
-fulldir=$FDS_SVNROOT/Verification/$DIR
+fulldir=$fdsrepo/Verification/$DIR
 outfile=$infile.out
 
 # ensure that various files and directories exist

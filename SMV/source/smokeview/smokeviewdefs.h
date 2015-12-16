@@ -7,6 +7,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NODATA 0
+#define HASDATA 1
+
 #define NO_TEST 0
 #define TRIANGLE_TEST 1
 #define POLYGON_TEST 2

@@ -2237,6 +2237,7 @@ int readsmv(char *file, char *file2){
 
 /* read the .smv file */
 
+  int have_zonevents,nzventsnew=0;
   int unit_start=20;
   devicedata *devicecopy;
   int do_pass4=0;
@@ -2705,7 +2706,7 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"ALBEDO") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&smoke_albedo);
-      smoke_albedo=0.0;
+      smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
       continue;
     }
     if(match(buffer,"AVATAR_COLOR") == 1){
@@ -2980,7 +2981,7 @@ int readsmv(char *file, char *file2){
       do_pass4=1;
       continue;
     }
-    if(match(buffer,"BNDF") == 1|| match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
+    if(match(buffer, "BNDF") == 1 || match(buffer, "BNDC") == 1 || match(buffer, "BNDE") == 1 || match(buffer, "BNDS") == 1){
       npatchinfo++;
       continue;
     }
@@ -3010,6 +3011,10 @@ int readsmv(char *file, char *file2){
     }
     if(match(buffer, "VENTGEOM")==1||match(buffer, "HFLOWGEOM")==1||match(buffer, "VFLOWGEOM")==1||match(buffer, "MFLOWGEOM")==1){
       nzvents++;
+      continue;
+    }
+    if(match(buffer, "HVENTGEOM")==1||match(buffer, "VVENTGEOM")==1||match(buffer, "MVENTGEOM")==1){
+      nzventsnew++;
       continue;
     }
 
@@ -3247,6 +3252,7 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&zoneinfo,nzoneinfo*sizeof(zonedata))==0)return 2;
   }
   FREEMEMORY(zventinfo);
+  if(nzventsnew>0)nzvents=nzventsnew;
   if(nzvents>0){
     if(NewMemory((void **)&zventinfo,nzvents*sizeof(zvent))==0)return 2;
   }
@@ -3468,7 +3474,7 @@ int readsmv(char *file, char *file2){
       strcpy(geomdiagi->geomfile, buffptr);
 
       NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
-      init_geom(geomdiagi->geom);
+      init_geom(geomdiagi->geom,NODATA);
 
       NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
       strcpy(geomdiagi->geom->file, buffptr);
@@ -3502,7 +3508,7 @@ int readsmv(char *file, char *file2){
         sscanf(buff2,"%i",&ngeomobjinfo);
       }
 
-      init_geom(geomi);
+      init_geom(geomi,NODATA);
 
       fgets(buffer,255,stream);
       trim(buffer);
@@ -5273,10 +5279,17 @@ int readsmv(char *file, char *file2){
     ++++++++++++++ HFLOWGEOM/VHFLOWGEOM/MFLOWGEOM +++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer, "VENTGEOM")==1||
+    have_zonevents=0;
+    if(nzventsnew==0&&(
+       match(buffer, "VENTGEOM")==1||
        match(buffer, "HFLOWGEOM")==1||
        match(buffer, "VFLOWGEOM")==1||
-       match(buffer, "MFLOWGEOM")==1){
+       match(buffer, "MFLOWGEOM")==1))have_zonevents=1;
+    if(nzventsnew>0&&(
+       match(buffer, "HVENTGEOM")==1||
+       match(buffer, "VVENTGEOM")==1||
+       match(buffer, "MVENTGEOM")==1))have_zonevents=1;
+    if(have_zonevents==1){
       int vent_type=HFLOW_VENT;
       int vertical_vent_type=0;
       zvent *zvi;
@@ -5288,8 +5301,8 @@ int readsmv(char *file, char *file2){
 
       nzvents++;
       zvi = zventinfo + nzvents - 1;
-      if(match(buffer,"VFLOWGEOM")==1)vent_type=VFLOW_VENT;
-      if(match(buffer,"MFLOWGEOM")==1)vent_type=MFLOW_VENT;
+      if(match(buffer,"VFLOWGEOM")==1||match(buffer,"VVENTGEOM")==1)vent_type=VFLOW_VENT;
+      if(match(buffer,"MFLOWGEOM")==1||match(buffer,"MVENTGEOM")==1)vent_type=MFLOW_VENT;
       zvi->vent_type=vent_type;
       if(fgets(buffer,255,stream)==NULL){
         BREAK;
@@ -5417,14 +5430,31 @@ int readsmv(char *file, char *file2){
         dxyz[0] = ABS(xyz[0] - xyz[1]);
         dxyz[1] = ABS(xyz[2] - xyz[3]);
         dxyz[2] = ABS(xyz[4] - xyz[5]);
+        // see which side of room vent is closest too
         if(dxyz[0] < MIN(dxyz[1], dxyz[2])){
-          zvi->wall = LEFT_WALL;
+          if(ABS(zvi->x0-roomi->x0)<ABS(zvi->x0-roomi->x1)){
+            zvi->wall = LEFT_WALL;
+          }
+          else{
+            zvi->wall = RIGHT_WALL;
+          }
         }
         else if(dxyz[1] < MIN(dxyz[0], dxyz[2])){
-          zvi->wall = FRONT_WALL;
+          if(ABS(zvi->y0-roomi->y0)<ABS(zvi->y0-roomi->y1)){
+            zvi->wall = FRONT_WALL;
+          }
+          else{
+            zvi->wall = BACK_WALL;
+          }
         }
         else{
           zvi->wall = BOTTOM_WALL;
+          if(ABS(zvi->z0-roomi->z0)<ABS(zvi->z0-roomi->z1)){
+            zvi->wall = BOTTOM_WALL;
+          }
+          else{
+            zvi->wall = TOP_WALL;
+          }
         }
       }
       zvi->color = getcolorptr(color);
@@ -6909,7 +6939,7 @@ typedef struct {
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF") == 1||match(buffer,"BNDC") == 1||match(buffer,"BNDE") == 1){
+    if(match(buffer, "BNDF") == 1 || match(buffer, "BNDC") == 1 || match(buffer, "BNDE") == 1 || match(buffer, "BNDS")==1){
       patchdata *patchi;
       int version;
       int blocknumber;
@@ -6938,7 +6968,8 @@ typedef struct {
       patchi = patchinfo + ipatch;
 
       patchi->version=version;
-  
+      strcpy(patchi->scale, "");
+
       patchi->filetype=0;
       if(match(buffer,"BNDC") == 1){
         patchi->filetype=1;
@@ -6946,6 +6977,11 @@ typedef struct {
       }
       if(match(buffer,"BNDE") == 1){
         patchi->filetype=2;
+        patchi->slice = 0;
+      }
+      if(match(buffer, "BNDS") == 1){
+        patchi->filetype = 2;
+        patchi->slice = 1;
       }
 
       if(fgets(buffer,255,stream)==NULL){
@@ -6993,6 +7029,7 @@ typedef struct {
           geomi = geominfo + igeom;
           if(strcmp(geomi->file,patchi->geomfile)==0){
             patchi->geominfo=geomi;
+            geomi->hasdata = HASDATA;
             break;
           }
         }
@@ -7113,7 +7150,7 @@ typedef struct {
       NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
       nmemory_ids++;
       isoi->geominfo->memory_id=nmemory_ids;
-      init_geom(isoi->geominfo);
+      init_geom(isoi->geominfo,HASDATA);
 
       bufferptr=trim_string(buffer);
 
@@ -10015,7 +10052,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "SHOWVENTFLOW") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i", &visVentFlow,&visventslab,&visventprofile);
+      sscanf(buffer, "%i %i %i %i %i", &visVentHFlow,&visventslab,&visventprofile,&visVentVFlow,&visVentMFlow);
       continue;
     }
     if(match(buffer, "SHOWVENTS") == 1){
@@ -10950,7 +10987,7 @@ int readini2(char *inifile, int localfile){
       if(match(buffer,"SMOKEALBEDO")==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%f",&smoke_albedo);
-        smoke_albedo=0.0;
+        smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
         continue;
       }
       if(match(buffer,"SMOKETHICK")==1){
@@ -12314,7 +12351,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRIANGLECOUNT\n");
   fprintf(fileout, " %i\n", show_triangle_count);
   fprintf(fileout, "SHOWVENTFLOW\n");
-  fprintf(fileout, " %i %i %i\n", visVentFlow,visventslab,visventprofile);
+  fprintf(fileout, " %i %i %i %i %i\n", visVentHFlow, visventslab, visventprofile, visVentVFlow, visVentMFlow);
   fprintf(fileout, "SHOWVENTS\n");
   fprintf(fileout, " %i\n", visVents);
   fprintf(fileout, "SHOWWALLS\n");
@@ -12575,28 +12612,11 @@ void writeini(int flag,char *filename){
     if(fds_githash!=NULL){
       fprintf(fileout, "# FDS Build: %s\n", fds_githash);
     }
-#ifdef X64
     fprintf(fileout,"# Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    fprintf(fileout,"# Platform: WIN32\n");
-#endif
-#endif
-#ifndef pp_OSX64
 #ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
     PRINTF("Platform: OSX64\n");
 #endif
-#ifndef pp_LINUX64
 #ifdef pp_LINUX
-    fprintf(fileout,"# Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
     fprintf(fileout,"# Platform: LINUX64\n");
 #endif
 

@@ -35,7 +35,4 @@ void reset_histogram(histogramdata *histogram);
 void reset_histogram2d(histogramdata *histogram);
 void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *histogramto);
 void update_histogram(float *vals, int nvals, histogramdata *histogram);
-#ifdef pp_CHECK
-void check_histogram(void);
-#endif
 #endif

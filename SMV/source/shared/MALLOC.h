@@ -29,11 +29,7 @@ typedef char bbyte;
 #endif
 
 #ifdef pp_MEMDEBUG
-#ifdef BIT64
 #define MMsize unsigned long long
-#else
-#define MMsize unsigned int
-#endif
 #endif
 
 typedef struct {

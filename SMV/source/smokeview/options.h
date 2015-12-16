@@ -47,7 +47,6 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
-#define pp_SETTIME
 #define pp_PILOT
 #define pp_GEOMTEST
 #define pp_HAZARD
@@ -86,38 +85,7 @@
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set platform defines VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-#ifdef pp_LINUX64
-#define pp_LINUX
-#endif
-
-#ifdef pp_OSX64
-#define pp_OSX
-#endif
-
-//*** turn on BIT64 if compiled on a 64 bit platform
-
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_LINUX64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_OSX64
-#undef pp_OSX
-#define pp_OSX
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 #ifdef X64
 #define STRUCTSTAT struct __stat64
