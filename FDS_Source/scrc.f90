@@ -13991,7 +13991,7 @@ SELECT CASE(TYPE_CASE)
           ENDDO
       ENDDO
 
-     !< u-Geschwindigkeit, fl�chenzentriert
+     !< u-Geschwindigkeit, flaechenzentriert
      DO K=1,KBAR
         DO J=1,JBAR
            DO I=0,IBAR

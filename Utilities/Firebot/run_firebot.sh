@@ -1,5 +1,8 @@
 #!/bin/bash
-running=firebot_running
+if [ ! -d ~/.fdssmvgit ] ; then
+  mkdir ~/.fdssmvgit
+fi
+running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 QUEUE=firebot
@@ -93,10 +96,10 @@ done
 shift $(($OPTIND-1))
 
 if [ -e $running ] ; then
-  if [ "$FORCE" == ""] ; then
+  if [ "$FORCE" == "" ] ; then
     echo Firebot is already running.
-    echo Erase the file $running if this is not the case
-    echo or rerun using the -f option.
+    echo Firebot or smokebot are already running.
+    echo "Re-run using the -f option if this is not the case."
     exit
   fi
 fi

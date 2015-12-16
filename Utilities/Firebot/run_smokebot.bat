@@ -78,7 +78,7 @@ if exist %running% goto skip_running
     git fetch origin
     git pull 1> Nul 2>&1
     if not %fdsbotdir% == %curdir% (
-      copy %fdsbotdir%\smokebot_win.bat %curdir%
+      copy %fdsbotdir%\smokebot.bat %curdir%
     )
     cd %curdir%
     :no_update
@@ -86,7 +86,7 @@ if exist %running% goto skip_running
 :: run smokebot
 
   echo 1 > %running%
-  call smokebot_win.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
+  call smokebot.bat %cfastrepo% %fdsrepo% %clean% %update% %altemail% %emailto%
   if exist %running% erase %running%
   goto end_running
 :skip_running
