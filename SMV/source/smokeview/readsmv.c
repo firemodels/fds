@@ -2706,7 +2706,7 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"ALBEDO") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f",&smoke_albedo);
-      smoke_albedo=0.0;
+      smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
       continue;
     }
     if(match(buffer,"AVATAR_COLOR") == 1){
@@ -10987,7 +10987,7 @@ int readini2(char *inifile, int localfile){
       if(match(buffer,"SMOKEALBEDO")==1){
         if(fgets(buffer,255,stream)==NULL)break;
         sscanf(buffer,"%f",&smoke_albedo);
-        smoke_albedo=0.0;
+        smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
         continue;
       }
       if(match(buffer,"SMOKETHICK")==1){

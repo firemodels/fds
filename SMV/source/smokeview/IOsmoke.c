@@ -1060,27 +1060,21 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
       for(j=0;j<smoke3di->nchars_uncompressed;j++){
         float *firesmoke;
 
-        if(firecolor!=NULL){
-          if(firecolor[j]>i_hrrpuv_cutoff){
-            firesmoke=rgb_slicesmokecolormap+4*firecolor[j];
-          }
-          else{
-            firesmoke=rgb_slicesmokecolormap+4*sootcolor[j];
-          }
-        }
-        else{
-            firesmoke=rgb_slicesmokecolormap+4*sootcolor[j];
-        }
-        *mergecolor++=255*firesmoke[0];
-        *mergecolor++=255*firesmoke[1];
-        *mergecolor++=255*firesmoke[2];
-        mergecolor++;
         if(firecolor!=NULL&&firecolor[j]>i_hrrpuv_cutoff){
+          firesmoke=rgb_slicesmokecolormap+4*firecolor[j];
+          *mergecolor++ = 255*firesmoke[0];
+          *mergecolor++ = 255*firesmoke[1];
+          *mergecolor++ = 255*firesmoke[2];
           *mergealpha++=fire_alpha;
         }
         else{
+          firesmoke=rgb_slicesmokecolormap+4*sootcolor[j];
+          *mergecolor++ = 255*smoke_albedo;
+          *mergecolor++ = 255*smoke_albedo;
+          *mergecolor++ = 255*smoke_albedo;
           *mergealpha++=(sootcolor[j]>>smoke3d_thick);
         }
+        mergecolor++;
       }
       continue;
     }
@@ -3017,7 +3011,8 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
   glUniform1f(GPU_hrrpuv_max_smv,hrrpuv_max_smv);
   glUniform1f(GPU_hrrpuv_cutoff,global_hrrpuv_cutoff);
-  glUniform1f(GPU_fire_alpha,smoke3di->fire_alpha);
+  glUniform1f(GPU_fire_alpha, smoke3di->fire_alpha);
+  glUniform1f(GPU_smoke_albedo, smoke_albedo);
 
   transparenton();
   switch(ssmokedir){
@@ -4218,8 +4213,9 @@ void drawsmoke3dCULL(void){
       glUniform1f(GPU_smoke3d_rthick,smoke3d_rthick);
       glUniform1f(GPU_hrrpuv_max_smv,hrrpuv_max_smv);
       glUniform1f(GPU_hrrpuv_cutoff,global_hrrpuv_cutoff);
-      glUniform1f(GPU_aspectratio,aspectratio);
+      glUniform1f(GPU_aspectratio, aspectratio);
       glUniform1f(GPU_fire_alpha,smoke3di->fire_alpha);
+      glUniform1f(GPU_smoke_albedo, smoke_albedo);
 
       glBegin(GL_TRIANGLES);
     }
