@@ -1191,18 +1191,12 @@ archive_compiler_version
 ### Stage 2a ###
 echo Building
 echo "   FDS"
-#compile_fds_db
-#check_compile_fds_db
 inspect_fds_db
 check_inspect_fds_db
 
 ### Stage 2b ###
 compile_fds_mpi_db
 check_compile_fds_mpi_db
-
-### Stage 4a ###
-#compile_fds
-#check_compile_fds
 
 ### Stage 4b ###
 compile_fds_mpi
@@ -1222,7 +1216,6 @@ check_compile_smv
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
-#if [[ $stage2a_success && $stage2b_success ]] ; then
 if [[ $stage2b_success ]] ; then
    run_verification_cases_debug
    check_cases_debug $fdsrepo/Verification 'verification'
@@ -1238,7 +1231,6 @@ fi
 
 ### Stage 5 ###
 # Depends on successful FDS compile
-#if [[ $stage4a_success && $stage4b_success ]] ; then
 if [[ $stage4b_success ]] ; then
    run_verification_cases_release
    check_cases_release $fdsrepo/Verification 'verification'
