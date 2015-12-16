@@ -197,7 +197,8 @@ clean_repo()
 
 clean_firebot_metafiles()
 {
-   echo Cleaning firebot run directory
+   echo Cleaning 
+   echo "   firebot run directory"
    cd $FIREBOT_RUNDIR
    MKDIR guides &> /dev/null
    MKDIR $HISTORY_DIR &> /dev/null
@@ -225,7 +226,7 @@ clean_git_repo()
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $fdsrepo
       if [[ "$CLEANREPO" == "1" ]] ; then
-         echo Cleaning FDS-SMV repo
+         echo "   FDS-SMV repo"
          clean_repo $fdsrepo/Verification
          clean_repo $fdsrepo/Validation
          clean_repo $fdsrepo/SMV
@@ -1188,8 +1189,9 @@ check_git_checkout
 archive_compiler_version
 
 ### Stage 2a ###
-compile_fds_db
-check_compile_fds_db
+echo Building
+#compile_fds_db
+#check_compile_fds_db
 inspect_fds_db
 check_inspect_fds_db
 
@@ -1198,8 +1200,8 @@ compile_fds_mpi_db
 check_compile_fds_mpi_db
 
 ### Stage 4a ###
-compile_fds
-check_compile_fds
+#compile_fds
+#check_compile_fds
 
 ### Stage 4b ###
 compile_fds_mpi
@@ -1219,7 +1221,8 @@ check_compile_smv
 
 ### Stage 3 ###
 # Depends on successful FDS debug compile
-if [[ $stage2a_success && $stage2b_success ]] ; then
+#if [[ $stage2a_success && $stage2b_success ]] ; then
+if [[ $stage2b_success ]] ; then
    run_verification_cases_debug
    check_cases_debug $fdsrepo/Verification 'verification'
 fi
@@ -1234,7 +1237,8 @@ fi
 
 ### Stage 5 ###
 # Depends on successful FDS compile
-if [[ $stage4a_success && $stage4b_success ]] ; then
+#if [[ $stage4a_success && $stage4b_success ]] ; then
+if [[ $stage4b_success ]] ; then
    run_verification_cases_release
    check_cases_release $fdsrepo/Verification 'verification'
 fi
