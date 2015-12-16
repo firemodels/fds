@@ -198,7 +198,7 @@ clean_repo()
 clean_firebot_metafiles()
 {
    echo Cleaning 
-   echo "   firebot run directory"
+   echo "   run directory"
    cd $FIREBOT_RUNDIR
    MKDIR guides &> /dev/null
    MKDIR $HISTORY_DIR &> /dev/null
@@ -226,7 +226,7 @@ clean_git_repo()
       # Revert and clean up temporary unversioned and modified versioned repository files
       cd $fdsrepo
       if [[ "$CLEANREPO" == "1" ]] ; then
-         echo "   FDS-SMV repo"
+         echo "   repo"
          clean_repo $fdsrepo/Verification
          clean_repo $fdsrepo/Validation
          clean_repo $fdsrepo/SMV
