@@ -1926,6 +1926,58 @@ int new_multi_slice(slicedata *sdold,slicedata *sd){
   return 0;
 }
 
+/* ------------------ getgsliceparams ------------------------ */
+
+void getgsliceparams(void){
+  int i;
+
+  for(i = 0; i < npatchinfo;i++){
+    int ii1, ii2, jj1, jj2, kk1, kk2;
+    patchdata *patchi;
+    mesh *meshi;
+
+    patchi = patchinfo + i;
+    meshi = meshinfo + patchi->blocknumber;
+    strcpy(patchi->gslicedir, "");
+    if(patchi->filetype != PATCH_GEOMETRYSLICE)continue;
+    ii1 = patchi->ijk[0];
+    ii2 = patchi->ijk[1];
+    jj1 = patchi->ijk[2];
+    jj2 = patchi->ijk[3];
+    kk1 = patchi->ijk[4];
+    kk2 = patchi->ijk[5];
+    if(ii1 >= 0 && ii2 >= 0 && jj1 >= 0 && jj2 >= 0 && kk1 >= 0 && kk2 >= 0){
+      float pos;
+
+      if(ABS(ii1 - ii2) < MIN(ABS(jj1 - jj2), ABS(kk1 - kk2))){
+        float *xp, position;
+
+        xp = meshi->xplt_orig;
+        ii2=MAX(ii1-1,0);
+        position = (xp[ii1] + xp[ii2]) / 2.0;
+        sprintf(patchi->gslicedir, "X=%f", position);
+      }
+      else if(ABS(jj1 - jj2) < MIN(ABS(ii1 - ii2), ABS(kk1 - kk2))){
+        float *yp, position;
+
+        yp = meshi->yplt_orig;
+        jj2=MAX(jj1-1,0);
+        position = (yp[jj1] + yp[jj2]) / 2.0;
+        sprintf(patchi->gslicedir, "Y=%f", position);
+      }
+      else{
+        float *zp, position;
+
+        zp = meshi->zplt_orig;
+        kk2=MAX(kk1-1,0);
+        position = (zp[kk1] + zp[kk2]) / 2.0;
+        sprintf(patchi->gslicedir, "Z=%f", position);
+      }
+    }
+  }
+
+}
+
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){

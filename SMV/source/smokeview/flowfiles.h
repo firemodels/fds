@@ -1326,6 +1326,8 @@ typedef struct {
   flowlabels label;
   char scale[31];
   char menulabel[128];
+  char gslicedir[50];
+  int ijk[6];
   int extreme_min, extreme_max;
   time_t modtime;
   histogramdata *histogram;
