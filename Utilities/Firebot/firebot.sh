@@ -500,7 +500,7 @@ check_cases_debug()
       grep -rI 'STOP: Numerical' * >> $OUTPUT_DIR/stage3_errors
       grep -rI -A 20 forrtl * >> $OUTPUT_DIR/stage3_errors
       
-      echo "Errors from Stage 3 - Run ${2} cases (debug mode):" >> $ERROR_LOG
+      echo "Errors from Stage 3 - Run ${2} cases - debug mode:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
 
@@ -642,7 +642,7 @@ check_cases_release()
       grep -rI 'STOP: Numerical' * >> $OUTPUT_DIR/stage5_errors
       grep -rI -A 20 forrtl * >> $OUTPUT_DIR/stage5_errors
       
-      echo "Errors from Stage 5 - Run ${2} cases (release mode):" >> $ERROR_LOG
+      echo "Errors from Stage 5 - Run ${2} cases - release mode:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage5_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
