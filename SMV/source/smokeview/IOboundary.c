@@ -1134,7 +1134,7 @@ void readpatch(int ifile, int load_flag, int *errorcode){
   patchdata *patchi;
 
   patchi = patchinfo + ifile;
-  if(patchi->filetype==2){
+  if(patchi->filetype==PATCH_GEOMETRYSLICE){
     ASSERT(ifile>=0&&ifile<ngeominfo);
     read_geomdata(ifile,load_flag,errorcode);
   }
@@ -2326,7 +2326,7 @@ void drawpatch_frame(int flag){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(patchi->filetype == 2 && patchi->loaded == 1 && patchi->display == 1){
+    if(patchi->filetype == PATCH_GEOMETRYSLICE && patchi->loaded == 1 && patchi->display == 1){
       if(flag == DRAW_OPAQUE){
         if(patchi->slice == 0){
           draw_geomdata(flag, patchi, GEOM_STATIC);
@@ -2355,27 +2355,27 @@ void drawpatch_frame(int flag){
         if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
         if(usetexturebar!=0){
           if(vis_threshold==1&&do_threshold==1){
-            if(patchi->filetype==1){
+            if(patchi->filetype==PATCH_CELLCENTERED){
               drawpatch_threshold_cellcenter(meshi);
             }
-            else if(patchi->filetype==0){
+            else if(patchi->filetype==PATCH_NODECENTERED){
               drawpatch_texture_threshold(meshi);
             }
           }
           else{
-            if(patchi->filetype==1){
+            if(patchi->filetype==PATCH_CELLCENTERED){
               drawpatch_cellcenter(meshi);
             }
-            else if(patchi->filetype==0){
+            else if(patchi->filetype==PATCH_NODECENTERED){
               drawpatch_texture(meshi);
             }
           }
         }
         else{
-          if(patchi->filetype==1){
+          if(patchi->filetype==PATCH_CELLCENTERED){
             drawpatch_cellcenter(meshi);
           }
-          else if(patchi->filetype==0){
+          else if(patchi->filetype==PATCH_NODECENTERED){
             drawpatch(meshi);
           }
         }
@@ -3730,6 +3730,12 @@ void updatepatchmenulabels(void){
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,label);
       }
+      if(patchi->filetype == PATCH_GEOMETRYSLICE){
+        if(strlen(patchi->gslicedir) != 0){
+          STRCAT(patchi->menulabel, ", ");
+          STRCAT(patchi->menulabel, patchi->gslicedir);
+        }
+      }
       if(STAT(patchi->comp_file,&statbuffer)==0){
         patchi->file=patchi->comp_file;
         patchi->compression_type=1;
@@ -4109,7 +4115,7 @@ int update_patch_hist(patchdata *patchj){
     time_t modtime;
 
     patchi = patchinfo + i;
-    if(patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->filetype==2)continue;
+    if(patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->filetype==PATCH_GEOMETRYSLICE)continue;
     modtime=file_modtime(patchi->file);
     if(modtime>patchi->modtime){
       patchi->modtime=modtime;

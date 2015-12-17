@@ -176,7 +176,7 @@ void Update_Framenumber(int changetime){
         patchdata *patchi;
 
         patchi = patchinfo + i;
-        if(patchi->filetype!=2||patchi->geom_times==NULL||patchi->geom_timeslist==NULL)continue;
+        if(patchi->filetype!=PATCH_GEOMETRYSLICE||patchi->geom_times==NULL||patchi->geom_timeslist==NULL)continue;
         patchi->geom_itime=patchi->geom_timeslist[itimes];
         patchi->geom_ival_static = patchi->geom_ivals_static[patchi->geom_itime];
         patchi->geom_ival_dynamic = patchi->geom_ivals_dynamic[patchi->geom_itime];
@@ -189,7 +189,7 @@ void Update_Framenumber(int changetime){
 
         meshi = meshinfo+i;
         patchi=patchinfo + meshi->patchfilenum;
-        if(patchi->filetype==2||meshi->patch_times==NULL||meshi->patch_timeslist==NULL)continue;
+        if(patchi->filetype==PATCH_GEOMETRYSLICE||meshi->patch_times==NULL||meshi->patch_timeslist==NULL)continue;
         meshi->patch_itime=meshi->patch_timeslist[itimes];
         if(patchi->compression_type==0){
           meshi->cpatchval_iframe = meshi->cpatchval + meshi->patch_itime*meshi->npatchsize;
@@ -485,7 +485,7 @@ void Update_Show(void){
 
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
-      if(patchi->filetype!=2||patchi->display==0||patchi->type!=ipatchtype)continue;
+      if(patchi->filetype!=PATCH_GEOMETRYSLICE||patchi->display==0||patchi->type!=ipatchtype)continue;
       patchembedded=1;
     }
   }
@@ -762,7 +762,7 @@ void Synch_Times(void){
 
       patchi = patchinfo + j;
       if(patchi->loaded==0)continue;
-      if(patchi->filetype!=2)continue;
+      if(patchi->filetype != PATCH_GEOMETRYSLICE)continue;
       patchi->geom_timeslist[n]=get_itime(n,patchi->geom_timeslist,patchi->geom_times,patchi->ngeom_times);
     }
     for(j=0;j<nmeshes;j++){
@@ -772,7 +772,7 @@ void Synch_Times(void){
       meshi=meshinfo+j;
       if(meshi->patchfilenum<0||meshi->patch_times==NULL)continue;
       patchi=patchinfo+meshi->patchfilenum;
-      if(patchi->filetype==2)continue;
+      if(patchi->filetype==PATCH_GEOMETRYSLICE)continue;
       meshi->patch_timeslist[n]=get_itime(n,meshi->patch_timeslist,meshi->patch_times,meshi->npatch_times);
     }
 
@@ -1026,7 +1026,7 @@ void Update_Times(void){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(patchi->loaded==1&&patchi->filetype==2){
+    if(patchi->loaded==1&&patchi->filetype==PATCH_GEOMETRYSLICE){
       nglobal_times+=patchi->ngeom_times;
     }
   }
@@ -1039,7 +1039,7 @@ void Update_Times(void){
     filenum =meshi->patchfilenum;
     if(filenum!=-1){
       patchi=patchinfo+filenum;
-      if(patchi->loaded==1&&patchi->filetype!=2){
+      if(patchi->loaded==1&&patchi->filetype!=PATCH_GEOMETRYSLICE){
         nglobal_times+=meshi->npatch_times;
       }
     }
@@ -1212,7 +1212,7 @@ void Update_Times(void){
     int n;
 
     patchi = patchinfo + i;
-    if(patchi->loaded==1&&patchi->filetype==2){
+    if(patchi->loaded==1&&patchi->filetype==PATCH_GEOMETRYSLICE){
       for(n=0;n<patchi->ngeom_times;n++){
         float t_diff;
 
@@ -1233,7 +1233,7 @@ void Update_Times(void){
     filenum=meshi->patchfilenum;
     if(filenum!=-1){
       patchi = patchinfo + filenum;
-      if(patchi->loaded==1&&patchi->filetype!=2){
+      if(patchi->loaded==1&&patchi->filetype!=PATCH_GEOMETRYSLICE){
         int n;
 
         for(n=0;n<meshi->npatch_times;n++){
@@ -1475,7 +1475,7 @@ void Update_Times(void){
 
     patchi = patchinfo + i;
     FREEMEMORY(patchi->geom_timeslist);
-    if(patchi->filetype!=2)continue;
+    if(patchi->filetype!=PATCH_GEOMETRYSLICE)continue;
     if(patchi->geom_times==NULL)continue;
     if(nglobal_times>0)NewMemory((void **)&patchi->geom_timeslist,nglobal_times*sizeof(int));
   }
