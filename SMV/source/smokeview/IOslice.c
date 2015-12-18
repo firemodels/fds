@@ -1947,8 +1947,6 @@ void getgsliceparams(void){
     kk1 = patchi->ijk[4];
     kk2 = patchi->ijk[5];
     if(ii1 >= 0 && ii2 >= 0 && jj1 >= 0 && jj2 >= 0 && kk1 >= 0 && kk2 >= 0){
-      float pos;
-
       if(ABS(ii1 - ii2) < MIN(ABS(jj1 - jj2), ABS(kk1 - kk2))){
         float *xp, position;
 
