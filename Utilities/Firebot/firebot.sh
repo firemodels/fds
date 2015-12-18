@@ -838,20 +838,26 @@ scan_matlab_license_test()
    if [[ `grep "License checkout failed" $OUTPUT_DIR/stage7_matlab_license` == "" ]]
    then
       # Continue along
-      :
+      matlab_success=true
    else
       TIME_LIMIT_STAGE="7"
       check_time_limit
-      # Wait 5 minutes until retry
+      matlab_success=false
       sleep 300
-      check_matlab_license_server
    fi
 }
 
 check_matlab_license_server()
 {
-   run_matlab_license_test
-   scan_matlab_license_test
+   for i in 1 2 3
+   do
+      run_matlab_license_test
+      scan_matlab_license_test
+      if [ $matlab_success == true ]; then
+         break
+      fi
+      sleep 300
+   done
 }
 
 #  ============================================================
@@ -1247,16 +1253,20 @@ fi
 if [ "$SKIPMATLAB" == "" ] ; then
 ### Stage 7a ###
    check_matlab_license_server
-   run_matlab_verification
-   check_matlab_verification
-   check_verification_stats
+   if [ $matlab_success == true ];
+     run_matlab_verification
+     check_matlab_verification
+     check_verification_stats
+   fi
 
 ### Stage 7b ###
    check_matlab_license_server
-   run_matlab_validation
-   check_matlab_validation
-   archive_validation_stats
-   make_validation_git_stats
+   if [ $matlab_success == true ];
+     run_matlab_validation
+     check_matlab_validation
+     archive_validation_stats
+     make_validation_git_stats
+   fi
 
 ### Stage 7c ###
    generate_timing_stats
