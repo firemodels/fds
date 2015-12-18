@@ -130,12 +130,12 @@ Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times
    \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( 1/\rho\right) = \frac{1}{\rho} \Big[ (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau \Big] \label{momeqnoncon}
 \ee
 The term $\bof_\text{b}$ represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}. It is convenient to write Eq.~(\ref{momeqnoncon}) in the form:
-\be 
-   \dod{\bu}{t} + \bF + \nabla \cH = 0  
+\be
+   \dod{\bu}{t} + \bF + \nabla \cH = 0
 \ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
-\be 
-   \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2} 
+\be
+   \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2}
 \ee
 Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
 
@@ -173,8 +173,8 @@ The net contribution from thermal radiation in the energy equation is defined by
     U(\bx) = \int_{4\pi} \, I(\bx,\bs') \, d\bs'  \label{simple_rte}
 \ee
 where $\kappa(\bx)$ is the absorption coefficient, $I_b(\bx)$ is the source term, and $I(\bx,\bs)$ is the solution of the radiation transport equation (RTE) for a non-scattering gray gas:
-\be   
-   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \label{bandRTE1} 
+\be
+   \bs \cdot \nabla I(\bx,\bs) = \kappa(\bx) \; \left[ I_{\rm b}(\bx) - I(\bx,\bs) \right] \label{bandRTE1}
 \ee
 In practical simulations, the spectral dependence of $I$, $I_b$, and $\kappa$ cannot be resolved accurately, nor do we have reliable data for non-ideal fuels typical of real fires. While FDS does have an option to divide the radiation spectrum into a relatively small number of bands and solve a separate RTE for each band, it is usually not necessary because in real fires, soot is the dominant source and sink of thermal radiation and is not particulary sensitive to wavelength. The mean absorption coefficient, $\kappa$, is a function of species composition and temperature. Its values are obtained from a narrow-band model called RadCal~\cite{RadCal}.
 
@@ -207,8 +207,8 @@ The basic procedure is as follows:
 
 \begin{enumerate}
 \item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. The species mass density is estimated by
-\be \frac{(\rho Z)_\alpha^*- \rho^n Z_\alpha^n}{\dt} + \nabla\!\cdot \rho^n \, Z_\alpha^n \, \bu^n = \nabla\!\cdot (\rho^n D_\alpha^n \nabla Z_\alpha^n) \ee
-The asterisk denotes a first order accurate estimate at the next time step.  Note that only transport is updated at this point; the source term is time-split, as discussed below.
+\be \frac{(\rho Z)_\alpha^*- \rho^n Z_\alpha^n}{\dt} + \nabla\!\cdot \rho^n \, Z_\alpha^n \, \bu^n = \nabla\!\cdot (\rho^n D_\alpha^n \nabla Z_\alpha^n) + \dot{m}_\alpha'''(\rho^n) \ee
+The asterisk denotes a first order accurate estimate at the next time step. Note that the mass source term, $\dot{m}_\alpha'''(\rho^n)$, is computed in the previous time step using the corrected value of the density and species mass fractions.
 
 \item Compute the density from $\rho^* = \sum_\alpha (\rho Z_\alpha)^*$ and mass fractions from $Z_\alpha^* = (\rho Z)_\alpha^*/\rho^*$.
 
@@ -238,22 +238,17 @@ If the stability criterion is satisfied, the procedure continues to the correcto
 
 \item Correct the transported species mass densities at the next time step.
 \be
-\frac{(\rho Z_\alpha)^{**} - \ha \left(\rho^n Z_\alpha^n + \rho^* Z_\alpha^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* Z_\alpha^* \bu^* =
-\nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*)
+\frac{(\rho Z_\alpha)^{n+1} - \ha \left(\rho^n Z_\alpha^n + \rho^* Z_\alpha^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* Z_\alpha^* \bu^* =
+\nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*) + \dot{m}_\alpha'''(\rho^n)
 \ee
 
-The background pressure is corrected similarly.  The double asterisk $(\;)^{**}$ indicates a value that has been corrected for transport but has not yet been updated from chemistry or bulk mass source terms.
+The background pressure is corrected similarly. Note that the mass source term is the same as that added in the predictor step. It is only computed once per time step.
 
-\item Compute the density $\rho^{**} = \sum_\alpha (\rho Z_\alpha)^{**}$ and mass fractions $Z_\alpha^{**} = (\rho Z_\alpha)^{**}/\rho^{**}$.
+\item Compute the density $\rho^{n+1} = \sum_\alpha (\rho Z_\alpha)^{n+1}$ and mass fractions $Z_\alpha^{n+1} = (\rho Z_\alpha)^{n+1}/\rho^{n+1}$.
 
-\item Compute the temperature, $T^{**}$, from the equation of state.
+\item Compute the temperature, $T^{n+1}$, from the equation of state.
 
-\item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are applied to the scalars (for both chemical reactions and Lagrangian particles).  The source terms are evaluated using the results from the corrected scalar transport scheme.  For example,
-\be
-\frac{(\rho Z_\alpha)_{ijk}^{n+1}-(\rho Z_\alpha)_{ijk}^{**}}{\dt} =  \dm_{\alpha,ijk}'''(\mathbf{Z}^{**},T^{**})
-\ee
-
-\item With the updated density and composition, compute the final temperature, $T^{n+1}$, from the equation of state.
+\item \emph{Time splitting for mass source terms}. After the corrector step for the transport scheme, source terms are computed and stored.  The source terms are evaluated using the results from the corrected scalar transport scheme. The source terms include the heat release rate per unit volume, $\dot{q}'''$, the net absorption/emittance of thermal radiation, $\nabla \cdot \dot{\bq}''$, and the mass species source terms, $\dot{m}_\alpha'''$. In addition, the terms in the divergence expression, Eq.~(\ref{eqn_div_1}), involving the source terms are computed and stored. All of these quantities are computed at this point in the time step and applied in both the predictor and corrector steps of the following time step.
 
 \item \label{step_cor_div} Compute the divergence, $(\nabla\!\cdot \bu)^{n+1}$, from the corrected thermodynamic quantities.
 
