@@ -1947,33 +1947,28 @@ void getgsliceparams(void){
     kk1 = patchi->ijk[4];
     kk2 = patchi->ijk[5];
     if(ii1 >= 0 && ii2 >= 0 && jj1 >= 0 && jj2 >= 0 && kk1 >= 0 && kk2 >= 0){
-      if(ABS(ii1 - ii2) < MIN(ABS(jj1 - jj2), ABS(kk1 - kk2))){
-        float *xp, position;
+      float *grid, position;
 
-        xp = meshi->xplt_orig;
+      if(ABS(ii1 - ii2) < MIN(ABS(jj1 - jj2), ABS(kk1 - kk2))){
+        grid = meshi->xplt_orig;
         ii2=MAX(ii1-1,0);
-        position = (xp[ii1] + xp[ii2]) / 2.0;
+        position = (grid[ii1] + grid[ii2]) / 2.0;
         sprintf(patchi->gslicedir, "X=%f", position);
       }
       else if(ABS(jj1 - jj2) < MIN(ABS(ii1 - ii2), ABS(kk1 - kk2))){
-        float *yp, position;
-
-        yp = meshi->yplt_orig;
+        grid = meshi->yplt_orig;
         jj2=MAX(jj1-1,0);
-        position = (yp[jj1] + yp[jj2]) / 2.0;
+        position = (grid[jj1] + grid[jj2]) / 2.0;
         sprintf(patchi->gslicedir, "Y=%f", position);
       }
       else{
-        float *zp, position;
-
-        zp = meshi->zplt_orig;
+        grid = meshi->zplt_orig;
         kk2=MAX(kk1-1,0);
-        position = (zp[kk1] + zp[kk2]) / 2.0;
+        position = (grid[kk1] + grid[kk2]) / 2.0;
         sprintf(patchi->gslicedir, "Z=%f", position);
       }
     }
   }
-
 }
 
 /* ------------------ getsliceparams ------------------------ */
