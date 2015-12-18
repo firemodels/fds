@@ -24,7 +24,6 @@ UPDATEREPO=
 RUNSMOKEBOT=1
 MOVIE=
 SSH=
-MAILTO=
 UPLOAD=
 FORCE=
 COMPILER=intel
@@ -48,7 +47,11 @@ echo "-C - cfast repository location [default: $CFASTREPO]"
 echo "-f - force smokebot run"
 echo "-h - display this message"
 echo "-I compiler - intel or gnu [default: $COMPILER]"
+if [ "$EMAIL" != "" ]; then
+echo "-m email_address - [default: $EMAIL]"
+else
 echo "-m email_address"
+fi
 echo "-q queue [default: $QUEUE]"
 echo "-M  - make movies"
 echo "-r - FDS-SMV repository location [default: $FDSREPO]"
@@ -85,7 +88,7 @@ case $OPTION  in
    exit
    ;;
   m)
-   MAILTO="-m $OPTARG"
+   EMAIL="-m $OPTARG"
    ;;
   M)
    MOVIE="-M"
@@ -143,8 +146,8 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
 fi
