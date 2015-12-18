@@ -999,7 +999,7 @@ void Get_Slice_Bounds(void){
 
 }
 
-/* ------------------ Get_Slice_Bounds ------------------------ */
+/* ------------------ getsliceparms_c ------------------------ */
 
 void getsliceparms_c(char *file, int *ni, int *nj, int *nk){
     int skip,ijkbar[6];

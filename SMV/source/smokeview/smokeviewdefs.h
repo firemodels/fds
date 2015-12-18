@@ -7,6 +7,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define PATCH_NODECENTERED 0
+#define PATCH_CELLCENTERED 1
+#define PATCH_GEOMETRYSLICE 2
+
 #define NODATA 0
 #define HASDATA 1
 
