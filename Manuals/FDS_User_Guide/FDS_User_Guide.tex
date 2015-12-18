@@ -417,10 +417,10 @@ This guide describes how to obtain FDS and Smokeview and how to use FDS. A separ
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
 
-Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: 
+Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page:
 
 \begin{center}
-\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}} 
+\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}}
 \end{center}
 
 \noindent
@@ -565,7 +565,7 @@ If you wish to run FDS on more than one core on a single machine, then type the 
 \begin{lstlisting}
 mpiexec -n 4 fds job_name.fds
 \end{lstlisting}
-where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine 
+where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine
 
 If you wish to run FDS on more than one machine, the following steps should be taken:
 
@@ -1622,11 +1622,9 @@ Currently, the default behavior in FDS is to revert to first-order upwinding at 
 \section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
 \label{info:INIT}
 
-Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is
-assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
-decrease is not noticed in most building scale calculations, but it is important in large outdoor
-simulations. There are some scenarios for which it is convenient to change the ambient conditions within some
-rectangular region of the domain.
+Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}. 
+
+Note that the rectangular regions defined by {\ct INIT} may overlap, but in such cases, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
 \subsection*{Species}
 
@@ -3549,7 +3547,7 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.  
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
