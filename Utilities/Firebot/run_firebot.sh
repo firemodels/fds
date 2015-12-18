@@ -32,7 +32,11 @@ echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
 echo "-f - force firebot run"
 echo "-h - display this message"
+if [ "$EMAIL" != "" ]; then
+echo "-m email_address [default: $EMAIL]"
+else
 echo "-m email_address "
+fi
 echo "-q queue - specify queue [default: $QUEUE]"
 echo "-r - repository location [default: $reponame]"
 echo "-s - skip matlab and build document stages"
@@ -50,7 +54,6 @@ CLEANREPO=0
 UPDATE=
 CLEAN=
 RUNFIREBOT=1
-EMAIL=
 UPLOADGUIDES=
 SSH=
 FORCE=
