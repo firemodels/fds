@@ -1967,6 +1967,7 @@ void getgsliceparams(void){
         position = (grid[kk1] + grid[kk2]) / 2.0;
         sprintf(patchi->gslicedir, "Z=%f", position);
       }
+      trimzeros(patchi->gslicedir);
     }
   }
 }

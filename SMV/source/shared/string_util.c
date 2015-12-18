@@ -249,31 +249,25 @@ char *trim_front(char *line){
   return line;
 }
 
-
 /* ------------------ trimzeros ------------------------ */
 
 void trimzeros(char *line){
-
-//  removes trailing zeros in the floating point number found in line
-
-  size_t i,len;
   char *c;
 
-  len = strlen(line);
-  c = line + len-1;
-  for(i=len-1;i>0;i--){
-    if(*c=='0'){
-      c--;
-      if(*c=='.'){
-        line[i+1]='\0';
-        return;
-      }
-      continue;
+  //  removes trailing zeros in the floating point number found in line
+
+  for(c = line+strlen(line)-1; c>line; c--){
+    if(c[0]=='0'&&c[-1]=='.'){
+      c[0] = '\0';
+      return;
     }
-    line[i+1]='\0';
-    return;
+    if(c[0]!='0'){
+      c[1] = '\0';
+      return;
+    }
+    // if we got here then c[0]==0 and c[-1]!=. so continue and look for another '0'
   }
-  line[0]='\0';
+  line[0] = '\0';
 }
 
 /* ------------------ trimmzeros ------------------------ */
