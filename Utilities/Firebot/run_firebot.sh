@@ -5,7 +5,6 @@ fi
 running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
-QUEUE=firebot
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
@@ -15,6 +14,14 @@ if [ -e .fds_git ]; then
   reponame=`pwd`
   cd $CURDIR
 fi
+
+# checking to see if a queing system is available
+QUEUE=firebot
+notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
+if [ $notfound -eq 1 ] ; then
+  QUEUE=none
+fi
+
 
 
 function usage {
@@ -26,8 +33,7 @@ echo "-c - clean repo"
 echo "-f - force firebot run"
 echo "-h - display this message"
 echo "-m email_address "
-echo "-q - queue_name - run cases using the queue queue_name"
-echo "     default: $QUEUE"
+echo "-q queue - specify queue [default: $QUEUE]"
 echo "-r - repository location [default: $reponame]"
 echo "-s - skip matlab and build document stages"
 echo "-S host - generate images on host"
