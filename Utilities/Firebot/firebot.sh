@@ -1253,7 +1253,7 @@ fi
 if [ "$SKIPMATLAB" == "" ] ; then
 ### Stage 7a ###
    check_matlab_license_server
-   if [ $matlab_success == true ];
+   if [ $matlab_success == true ]; then
      run_matlab_verification
      check_matlab_verification
      check_verification_stats
@@ -1261,7 +1261,7 @@ if [ "$SKIPMATLAB" == "" ] ; then
 
 ### Stage 7b ###
    check_matlab_license_server
-   if [ $matlab_success == true ];
+   if [ $matlab_success == true ]; then
      run_matlab_validation
      check_matlab_validation
      archive_validation_stats
