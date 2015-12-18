@@ -21,14 +21,20 @@ botscript=smokebot.sh
 RUNAUTO=
 CLEANREPO=
 UPDATEREPO=
-QUEUE=
 RUNSMOKEBOT=1
 MOVIE=
 SSH=
-MAILTO=
 UPLOAD=
 FORCE=
 COMPILER=intel
+
+# checking to see if a queing system is available
+QUEUE=smokebot
+notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
+if [ $notfound -eq 1 ] ; then
+  QUEUE=none
+fi
+
 
 function usage {
 echo "Verification and validation testing script for smokeview"
@@ -40,9 +46,13 @@ echo "-c - clean repo"
 echo "-C - cfast repository location [default: $CFASTREPO]"
 echo "-f - force smokebot run"
 echo "-h - display this message"
-echo "-I - specify compiler (intel or gnu)"
+echo "-I compiler - intel or gnu [default: $COMPILER]"
+if [ "$EMAIL" != "" ]; then
+echo "-m email_address - [default: $EMAIL]"
+else
 echo "-m email_address"
-echo "-q queue"
+fi
+echo "-q queue [default: $QUEUE]"
 echo "-M  - make movies"
 echo "-r - FDS-SMV repository location [default: $FDSREPO]"
 echo "-S host - generate images on host"
@@ -78,7 +88,7 @@ case $OPTION  in
    exit
    ;;
   m)
-   MAILTO="-m $OPTARG"
+   EMAIL="-m $OPTARG"
    ;;
   M)
    MOVIE="-M"
@@ -136,8 +146,8 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
 fi
