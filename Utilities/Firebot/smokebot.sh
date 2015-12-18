@@ -1245,13 +1245,15 @@ email_build_status()
    echo "          host: $hostname " >> $TIME_LOG
    echo "         start: $start_time " >> $TIME_LOG
    echo "          stop: $stop_time " >> $TIME_LOG
+   echo "         setup: $DIFF_PRELIM" >> $TIME_LOG
    echo "build software: $DIFF_BUILDSOFTWARE" >> $TIME_LOG
    echo "     run cases: $DIFF_RUNCASES" >> $TIME_LOG
    echo " make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
 if [ "$MAKEMOVIES" == "1" ]; then
-   echo "  make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
+   echo "   make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
 fi
-   echo "        total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo "   make guides: $DIFF_MAKEGUIDES" >> $TIME_LOG
+   echo "         total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
 if [ "$RUNAUTO" != "" ]; then
    echo "FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
    echo "SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
