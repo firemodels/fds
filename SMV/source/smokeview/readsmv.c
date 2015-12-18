@@ -6969,19 +6969,32 @@ typedef struct {
 
       patchi->version=version;
       strcpy(patchi->scale, "");
-
-      patchi->filetype=0;
+      patchi->filetype = PATCH_NODECENTERED;
       if(match(buffer,"BNDC") == 1){
-        patchi->filetype=1;
+        patchi->filetype = PATCH_CELLCENTERED;
         cellcenter_bound_active=1;
       }
       if(match(buffer,"BNDE") == 1){
-        patchi->filetype=2;
+        patchi->filetype=PATCH_GEOMETRYSLICE;
         patchi->slice = 0;
       }
       if(match(buffer, "BNDS") == 1){
-        patchi->filetype = 2;
+        char *sliceparms;
+
+        patchi->filetype = PATCH_GEOMETRYSLICE;
         patchi->slice = 1;
+        sliceparms = strchr(buffer, '&');
+
+        if(sliceparms != NULL){
+          int ijk[6],j;
+
+          sliceparms++;
+          sliceparms[-1] = 0;
+          sscanf(sliceparms, "%i %i %i %i %i %i", ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5);
+          for(j=0;j<6;j++){
+            patchi->ijk[j]=ijk[j];
+          }
+        }
       }
 
       if(fgets(buffer,255,stream)==NULL){
@@ -7013,7 +7026,7 @@ typedef struct {
 
       patchi->geomfile=NULL;
       patchi->geominfo=NULL;
-      if(patchi->filetype==2){
+      if(patchi->filetype==PATCH_GEOMETRYSLICE){
         int igeom;
 
         if(fgets(buffer,255,stream)==NULL){
@@ -7060,13 +7073,13 @@ typedef struct {
       patchi->chopmax=0.0;
       meshinfo[blocknumber].patchfilenum=-1;
       if(STAT(patchi->file,&statbuffer)==0){
-        if(patchi->filetype==1){
+        if(patchi->filetype==PATCH_CELLCENTERED){
           if(readlabels_cellcenter(&patchi->label,stream)==2)return 2;
         }
-        else if(patchi->filetype==0){
+        else if(patchi->filetype==PATCH_NODECENTERED){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
-        else if(patchi->filetype==2){
+        else if(patchi->filetype==PATCH_GEOMETRYSLICE){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
@@ -7560,6 +7573,7 @@ typedef struct {
   update_plotxyz_all();
 
   updatevslices();
+  getgsliceparams();
   
   active_smokesensors=0;
   for(i=0;i<ndeviceinfo;i++){

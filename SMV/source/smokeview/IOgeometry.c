@@ -1686,7 +1686,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   // vals_1, ... vals_ndyamic
 
   patchi = patchinfo + ifile;
-  if(patchi->filetype!=2)return;
+  if(patchi->filetype!=PATCH_GEOMETRYSLICE)return;
   file = patchi->file;
 
   patchi->loaded=0;
@@ -2321,7 +2321,7 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
     float *color;
 
     geomi = patchi->geominfo;
-    if(geomi->display==0||geomi->loaded==0)continue;
+    if(geomi==NULL||geomi->display==0||geomi->loaded==0)continue;
     if(geom_type==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }

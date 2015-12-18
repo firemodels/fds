@@ -594,6 +594,7 @@ EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);
 
 EXTERNCPP int ifsmoothblock(void);
 EXTERNCPP void updatevslices(void);
+EXTERNCPP void getgsliceparams(void);
 EXTERNCPP void updatepartmenulabels(void);
 EXTERNCPP void updateisomenulabels(void);
 EXTERNCPP void updatepatchmenulabels(void);
