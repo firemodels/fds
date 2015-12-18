@@ -120,9 +120,9 @@ fi
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [[ "$UPDATEREPO" == "-u" ]]; then
      cd $FDSREPO
-     git remote update
-     git checkout $BRANCH
-     git pull
+     git remote update &> /dev/null
+     git checkout $BRANCH &> /dev/null
+     git pull &> /dev/null
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [ "$FIREBOTDIR" != "$CURDIR" ]; then

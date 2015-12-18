@@ -61,6 +61,10 @@ $QFDS -d Flowfields blasius_64.fds
 $QFDS -d Flowfields mwtest_cfl.fds
 $QFDS -d Flowfields mass_heat_wall_device_test.fds
 $QFDS -d Flowfields mass_heat_wall_device_test_2.fds
+$QFDS -d Flowfields particle_offgas_1.fds
+$QFDS -d Flowfields particle_offgas_2.fds
+$QFDS -d Flowfields particle_offgas_3.fds
+$QFDS -d Flowfields particle_offgas_4.fds
 $QFDS -d Flowfields species_conservation_1.fds
 $QFDS -d Flowfields species_conservation_2.fds
 $QFDS -d Flowfields species_conservation_3.fds
