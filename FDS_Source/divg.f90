@@ -565,23 +565,11 @@ ENDIF CONST_GAMMA_IF_2
 
 ! Add contribution of reactions
 
-IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+IF (N_REACTIONS > 0 .OR. N_LP_ARRAY_INDICES>0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of evaporating particles
-
-IF (CALC_D_LAGRANGIAN) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + D_SOURCE(I,J,K)
          ENDDO
       ENDDO
    ENDDO
