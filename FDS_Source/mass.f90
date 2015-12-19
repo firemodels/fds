@@ -288,7 +288,7 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    ! Add gas production source term
 
-   IF (N_LP_ARRAY_INDICES>0) ZZS = ZZS + DT*M_DOT_PPP
+   IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0) ZZS = ZZS + DT*M_DOT_PPP
 
    ! Manufactured solution
 
@@ -425,7 +425,11 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    ! Add gas production source term
 
-   IF (N_LP_ARRAY_INDICES>0) ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
+   IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0) THEN
+      ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
+      M_DOT_PPP = 0._EB
+      D_SOURCE  = 0._EB
+   ENDIF
 
    ! Manufactured solution
 

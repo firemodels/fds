@@ -1762,6 +1762,37 @@ Propane is injected into a 4~m cube with 1~m$^2$ vents on all six faces.  The ma
 \label{species_conservation}
 \end{figure}
 
+\subsection{Checking the Equation of State (\texorpdfstring{\textct{particle\_offgas}}{particle\_offgas})}
+
+The ``particle offgas'' cases include 100 randomly distributed Lagrangian particles that inject different gas species into an open domain initially filled with air. The aim of these cases is to test whether the gas temperature is maintained at ambient (20~$^\circ$C) in the gas injection cases, and whether the minimum temperature remains at ambient in the cases where fuel is injected and burned.
+
+\subsubsection{Case 1: Lagrangian Particles Blowing Air}
+
+In this case, each particle injects air into the domain, and air is the background species. The temperature is not expected to rise above or drop below ambient, as shown in the upper left of Fig.~\ref{particle_offgas_plots}.
+
+\subsubsection{Case 2: Lagrangian Particles Blowing Carbon Dioxide}
+
+In this case, each particle injects CO$_2$ into the domain, and air is the background species. The temperature is not expected to rise above or drop below ambient, as shown in the upper right of Fig.~\ref{particle_offgas_plots}.
+
+\subsubsection{Case 3: Lagrangian Particles Blowing Propane that Combusts}
+
+In this case, each particle injects propane into the domain, and air is the background species. Combustion is expected, but the gas temperature is not expected to drop below ambient, as shown in the lower left of Fig.~\ref{particle_offgas_plots}.
+
+\subsubsection{Case 4: A Small Solid Obstruction Blowing Propane that Combusts}
+
+In this case, the particles are replaced by a small, solid block blowing propane. Combustion is expected, but the gas temperature is not expected to drop below ambient, as shown in the lower right of Fig.~\ref{particle_offgas_plots}.
+
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_2} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_3} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/particle_offgas_4}
+\end{tabular*}
+\caption[The \textct{particle\_offgas} test cases]{Results of the \textct{particle\_offgas} test cases. Upper left, Case 1: minimum and maximum temperature when air only is injected. Upper right, Case~2: min/max temperature when carbon dioxide is injected into air. Lower left, Case~3: minimum temperature when propane gas is injected and burned. Lower right, Case~4: minimum temperature when propane gas is injected from a solid block and burned. }
+\label{particle_offgas_plots}
+\end{figure}
+
 
 \subsection{Realizability of Species Mass Fractions (\texorpdfstring{\textct{realizable\_mass\_fractions}}{realizable\_mass\_fractions})}
 
