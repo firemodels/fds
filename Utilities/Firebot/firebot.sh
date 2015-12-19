@@ -303,51 +303,15 @@ archive_compiler_version()
 }
 
 #  ============================================
-#  = Stage 2a - Compile and inspect FDS debug =
+#  = Stage 2a - inspect FDS debug =
 #  ============================================
-
-compile_fds_db()
-{
-   # Clean and compile FDS debug
-   echo Building
-   echo "   FDS"
-   echo "      serial debug"
-   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}_db
-   make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage2a
-}
-
-check_compile_fds_db()
-{
-   # Check for errors in FDS debug compilation
-   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}_db
-   if [ -e "fds_intel_${platform}${size}_db" ]
-   then
-      stage2a_success=true
-   else
-      echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2a` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 2a - Compile and inspect FDS debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2a >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
 
 inspect_fds_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
    echo "      inspection"
    cd $fdsrepo/Verification/Thread_Check/
-   $fdsrepo/Utilities/Scripts/inspect_openmp.sh  -r $fdsrepo thread_check.fds &> $OUTPUT_DIR/stage2a_inspect
+   $fdsrepo/Utilities/Scripts/inspect_openmp.sh  -r $fdsrepo thread_check.fds &> $OUTPUT_DIR/stage2a
 }
 
 check_inspect_fds_db()
@@ -355,13 +319,13 @@ check_inspect_fds_db()
    # Scan for errors in thread checking results
    cd $fdsrepo/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
-      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_RUNDIR}/output/stage2a_inspect | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
+      if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_RUNDIR}/output/stage2a | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
-      cat ${FIREBOT_RUNDIR}/output/stage2a_inspect >> $ERROR_LOG
+      cat ${FIREBOT_RUNDIR}/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
       echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
@@ -409,7 +373,7 @@ check_compile_fds_mpi_db()
 }
 
 #  ===============================================================
-#  = Stage 3 - Run verification or validation cases (debug mode) =
+#  = Stage 4 - Run verification or validation cases (debug mode) =
 #  ===============================================================
 
 wait_cases_debug_start()
@@ -417,7 +381,7 @@ wait_cases_debug_start()
    # Scans qstat and waits for cases to start
    while [[ `qstat | awk '{print $3 $5}' | grep $(whoami) | grep Q` != '' ]]; do
       JOBS_REMAINING=`qstat | awk '{print $3 $5}' | grep $(whoami) | grep Q | wc -l`
-      echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $OUTPUT_DIR/stage3
+      echo "Waiting for ${JOBS_REMAINING} ${1} cases to start." >> $OUTPUT_DIR/stage4
       TIME_LIMIT_STAGE="3"
       check_time_limit
       sleep 30
@@ -431,7 +395,7 @@ wait_cases_debug_end()
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3a
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage4
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -439,7 +403,7 @@ wait_cases_debug_end()
    else
      while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage3
+        echo "Waiting for ${JOBS_REMAINING} ${1} cases to complete." >> $OUTPUT_DIR/stage4
         TIME_LIMIT_STAGE="3"
         check_time_limit
         sleep 30
@@ -512,47 +476,8 @@ check_cases_debug()
    fi
 }
 
-#  ==================================
-#  = Stage 4a - Compile FDS release =
-#  ==================================
-
-compile_fds()
-{
-   # Clean and compile FDS
-   echo "      serial release"
-   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}
-   make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage4a
-}
-
-check_compile_fds()
-{
-   # Check for errors in FDS compilation
-   cd $fdsrepo/FDS_Compilation/intel_${platform}${size}
-   if [ -e "fds_intel_${platform}${size}" ]
-   then
-      stage4a_success=true
-   else
-      echo "Errors from Stage 4a - Compile FDS release:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4a >> $ERROR_LOG
-      echo "" >> $ERROR_LOG
-   fi
-
-   # Check for compiler warnings/remarks
-   # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4a | grep -v atom | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
-   then
-      # Continue along
-      :
-   else
-      echo "Warnings from Stage 4a - Compile FDS release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4a | grep -v atom | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
-      echo "" >> $WARNING_LOG
-   fi
-}
-
 #  ======================================
-#  = Stage 4b - Compile FDS MPI release =
+#  = Stage 2c - Compile FDS MPI release =
 #  ======================================
 
 compile_fds_mpi()
@@ -561,7 +486,7 @@ compile_fds_mpi()
    echo "      MPI release"
    cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB
    make -f ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage4b
+   ./make_fds.sh &> $OUTPUT_DIR/stage2c
 }
 
 check_compile_fds_mpi()
@@ -570,29 +495,29 @@ check_compile_fds_mpi()
    cd $fdsrepo/FDS_Compilation/mpi_intel_${platform}${size}$IB
    if [ -e "fds_mpi_intel_${platform}${size}$IB" ]
    then
-      stage4b_success=true
+      stage2c_success=true
    else
-      echo "Errors from Stage 4b - Compile FDS MPI release:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
+      echo "Errors from Stage 2c - Compile FDS MPI release:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4b | grep -v atom | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2c | grep -v atom | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 4b - Compile FDS MPI release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage4b | grep -v atom | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
+      echo "Warnings from Stage 2c - Compile FDS MPI release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage2c | grep -v atom | grep -v 'feupdateenv is not implemented' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ======================================
-#  = Stage 5pre - Compile SMV utilities =
+#  = Stage 3a - Compile SMV utilities =
 #  ======================================
 
 compile_smv_utilities()
@@ -602,21 +527,21 @@ compile_smv_utilities()
    echo "      libraries"
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size}
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
+   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
+   echo "" >> $OUTPUT_DIR/stage3a 2>&1
    else
    $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size} \; \
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \)
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
    fi
 }
 
 check_smv_utilities()
 {
    # nothing to check
-   stage5pre_success=true
+   stage3a_success=true
 }
 
 #  =================================================================
@@ -687,7 +612,7 @@ run_verification_cases_release()
 }
 
 #  ================================
-#  = Stage 6a - Compile SMV debug =
+#  = Stage 3b - Compile SMV debug =
 #  ================================
 
 compile_smv_db()
@@ -696,10 +621,10 @@ compile_smv_db()
    echo "      debug"
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage3b
    else
    $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage3b \)
    fi
 }
 
@@ -709,28 +634,28 @@ check_compile_smv_db()
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
-      stage6a_success=true
+      stage3b_success=true
    else
-      echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6a >> $ERROR_LOG
+      echo "Errors from Stage 3b - Compile SMV debug:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage3b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 6a - Compile SMV debug:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "Warnings from Stage 3b - Compile SMV debug:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ==================================
-#  = Stage 6c - Compile SMV release =
+#  = Stage 3c - Compile SMV release =
 #  ==================================
 
 compile_smv()
@@ -739,10 +664,10 @@ compile_smv()
    echo "      release"
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
-   ./make_smv.sh &> $OUTPUT_DIR/stage6c
+   ./make_smv.sh &> $OUTPUT_DIR/stage3c
    else
    $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
-   ./make_smv.sh &> $OUTPUT_DIR/stage6c \)
+   ./make_smv.sh &> $OUTPUT_DIR/stage3c \)
    fi
 }
 
@@ -752,28 +677,28 @@ check_compile_smv()
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
-      stage6c_success=true
+      stage3c_success=true
    else
-      echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6c >> $ERROR_LOG
+      echo "Errors from Stage 3c - Compile SMV release:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage3c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 6c - Compile SMV release:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      echo "Warnings from Stage 3c - Compile SMV release:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ================================
-#  = Stage 6e - Make FDS pictures =
+#  = Stage 6 - Make FDS pictures =
 #  ================================
 
 make_fds_pictures()
@@ -782,10 +707,10 @@ make_fds_pictures()
    echo Generating FDS images
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/Verification/scripts
-   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e
+   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6e \)
+   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6 \)
    fi
 }
 
@@ -793,26 +718,26 @@ check_fds_pictures()
 {
    # Scan for and report any errors in make FDS pictures process
    cd $FIREBOT_RUNDIR
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6e` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6` == "" ]]
    then
-      stage6e_success=true
+      stage6_success=true
    else
-      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6e > $OUTPUT_DIR/stage6e_errors
+      grep -I -E -A 5 -B 5 "Segmentation|Error" $OUTPUT_DIR/stage6 > $OUTPUT_DIR/stage6_errors
       
-      echo "Errors from Stage 6e - Make FDS pictures:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6e_errors >> $ERROR_LOG
+      echo "Errors from Stage 6 - Make FDS pictures:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage6_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Scan for and report any warnings in make FDS pictures process
    cd $FIREBOT_RUNDIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6e` == "" ]]
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Warnings from Stage 6e - Make FDS pictures:" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6e >> $WARNING_LOG
+      echo "Warnings from Stage 6 - Make FDS pictures:" >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage6 >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -838,20 +763,26 @@ scan_matlab_license_test()
    if [[ `grep "License checkout failed" $OUTPUT_DIR/stage7_matlab_license` == "" ]]
    then
       # Continue along
-      :
+      matlab_success=true
    else
       TIME_LIMIT_STAGE="7"
       check_time_limit
-      # Wait 5 minutes until retry
+      matlab_success=false
       sleep 300
-      check_matlab_license_server
    fi
 }
 
 check_matlab_license_server()
 {
-   run_matlab_license_test
-   scan_matlab_license_test
+   for i in 1 2 3
+   do
+      run_matlab_license_test
+      scan_matlab_license_test
+      if [ $matlab_success == true ]; then
+         break
+      fi
+      sleep 300
+   done
 }
 
 #  ============================================================
@@ -1199,23 +1130,23 @@ check_inspect_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
-### Stage 4b ###
+### Stage 2c ###
 compile_fds_mpi
 check_compile_fds_mpi
 
-### Stage 5pre ###
+### Stage 3a ###
 compile_smv_utilities
 check_smv_utilities
 
-### Stage 6a ###
+### Stage 3b ###
 compile_smv_db
 check_compile_smv_db
 
-### Stage 6c ###
+### Stage 3c ###
 compile_smv
 check_compile_smv
 
-### Stage 3 ###
+### Stage 4 ###
 # Depends on successful FDS debug compile
 if [[ $stage2b_success ]] ; then
    run_verification_cases_debug
@@ -1232,14 +1163,14 @@ fi
 
 ### Stage 5 ###
 # Depends on successful FDS compile
-if [[ $stage4b_success ]] ; then
+if [[ $stage2c_success ]] ; then
    run_verification_cases_release
    check_cases_release $fdsrepo/Verification 'verification'
 fi
 
-### Stage 6e ###
+### Stage 6 ###
 # Depends on successful SMV compile
-if [[ $stage6c_success ]] ; then
+if [[ $stage3c_success ]] ; then
    make_fds_pictures
    check_fds_pictures
 fi
@@ -1247,16 +1178,20 @@ fi
 if [ "$SKIPMATLAB" == "" ] ; then
 ### Stage 7a ###
    check_matlab_license_server
-   run_matlab_verification
-   check_matlab_verification
-   check_verification_stats
+   if [ $matlab_success == true ]; then
+     run_matlab_verification
+     check_matlab_verification
+     check_verification_stats
+   fi
 
 ### Stage 7b ###
    check_matlab_license_server
-   run_matlab_validation
-   check_matlab_validation
-   archive_validation_stats
-   make_validation_git_stats
+   if [ $matlab_success == true ]; then
+     run_matlab_validation
+     check_matlab_validation
+     archive_validation_stats
+     make_validation_git_stats
+   fi
 
 ### Stage 7c ###
    generate_timing_stats
