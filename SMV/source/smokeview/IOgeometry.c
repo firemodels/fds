@@ -683,7 +683,7 @@ void draw_geom(int flag, int geomtype){
 
 /* ------------------ update_triangles ------------------------ */
 
-void update_triangles(void){
+void update_triangles(int flag){
   int j, ii, ntimes;
 
   for(j=0;j<ngeominfoptrs;j++){
@@ -807,7 +807,12 @@ void update_triangles(void){
     point **surface_points = NULL;
     int *match_points = NULL;
 
-    ntimes = geominfoptrs[0]->ntimes;
+    if(flag == GEOM_STATIC){
+      ntimes = 0;
+    }
+    else{
+      ntimes = geominfoptrs[0]->ntimes;
+    }
     for(ii = -1; ii<ntimes; ii++){
       int nsurface_points;
 
