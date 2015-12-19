@@ -354,7 +354,7 @@ void draw_geom(int flag, int geomtype){
     float *color;
 
     geomi = geominfoptrs[i];
-    if(geomi->loaded==0||geomi->display==0||geomi->display==HASDATA)continue;
+    if(geomi->loaded==0||geomi->display==0)continue;
     if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
