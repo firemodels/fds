@@ -1817,14 +1817,6 @@ BNDE_FILE_LOOP: DO N=1,N_BNDE
 ENDDO BNDE_FILE_LOOP
 
 
-! Write GEOM info for unformatted, time-dependent geometry file
-
-IF (N_FACE>0) THEN
-   WRITE(LU_SMV,'(/A)') 'GEOM'
-   WRITE(LU_SMV,'(1X,A)') FN_GEOM(1)
-ENDIF
-
-
 ! Write out VERTEX info
 
 WRITE(LU_SMV,'(/A)') 'VERT'
