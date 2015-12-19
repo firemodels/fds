@@ -479,14 +479,20 @@ void Update_Show(void){
         break;
       }
     }
-    patchembedded=0;
+    for(i = 0; i < ngeominfo; i++){
+      geomdata *geomi;
+
+      geomi = geominfo + i;
+      geomi->patchactive = 0;
+    }
     for(ii=0;ii<npatch_loaded;ii++){
       patchdata *patchi;
 
       i = patch_loaded_list[ii];
       patchi=patchinfo+i;
-      if(patchi->filetype!=PATCH_GEOMETRYSLICE||patchi->display==0||patchi->type!=ipatchtype)continue;
-      patchembedded=1;
+      if(patchi->geominfo!=NULL&&patchi->display == 1 && patchi->type == ipatchtype){
+        patchi->geominfo->patchactive = 1;
+      }
     }
   }
   partflag=0;
