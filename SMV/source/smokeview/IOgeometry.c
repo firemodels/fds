@@ -233,7 +233,7 @@ void draw_geom(int flag, int geomtype){
     tris=transparent_triangles;
   }
 
-  if(ntris>0&&patchembedded==0&&showtrisurface==1&&geomtype==GEOM_STATIC){
+  if(ntris>0&&showtrisurface==1&&geomtype==GEOM_STATIC){
     float *color;
 
 
@@ -354,7 +354,7 @@ void draw_geom(int flag, int geomtype){
     float *color;
 
     geomi = geominfoptrs[i];
-    if(geomi->loaded==0||geomi->display==0)continue;
+    if(geomi->loaded==0||geomi->display==0||geomi->display==HASDATA)continue;
     if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
@@ -683,7 +683,7 @@ void draw_geom(int flag, int geomtype){
 
 /* ------------------ update_triangles ------------------------ */
 
-void update_triangles(void){
+void update_triangles(int flag){
   int j, ii, ntimes;
 
   for(j=0;j<ngeominfoptrs;j++){
@@ -807,7 +807,12 @@ void update_triangles(void){
     point **surface_points = NULL;
     int *match_points = NULL;
 
-    ntimes = geominfoptrs[0]->ntimes;
+    if(flag == GEOM_STATIC){
+      ntimes = 0;
+    }
+    else{
+      ntimes = geominfoptrs[0]->ntimes;
+    }
     for(ii = -1; ii<ntimes; ii++){
       int nsurface_points;
 
@@ -2525,6 +2530,7 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
+    if(geomi->hasdata == HASDATA||geomi->patchactive==1)continue;
     for(itime=0;itime<2;itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
@@ -2587,6 +2593,7 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
+    if(geomi->hasdata == HASDATA||geomi->patchactive==1)continue;
     for(itime=0;itime<2;itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;

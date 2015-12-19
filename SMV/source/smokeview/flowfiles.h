@@ -91,6 +91,7 @@ typedef struct {
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
+  int patchactive;
   int ntimes,itime,*timeslist;
   int ngeomobjinfo;
   geomobjdata *geomobjinfo;
