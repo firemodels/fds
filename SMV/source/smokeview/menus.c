@@ -576,7 +576,7 @@ void IsoShowMenu(int value){
 
   switch(value){
   case  MENU_ISOSHOW_SMOOTH:
-    smoothtrinormal=1-smoothtrinormal;
+    smooth_iso_normal=1-smooth_iso_normal;
     break;
   case MENU_ISOSHOW_NORMALS:
     show_iso_normal = 1 - show_iso_normal;
@@ -4147,7 +4147,7 @@ void ImmersedMenu(int value){
       show_iso_normal=1-show_iso_normal;
       break;
     case GEOMETRY_SMOOTHNORMAL:
-      smoothtrinormal=1-smoothtrinormal;
+      smooth_iso_normal=1-smooth_iso_normal;
       break;
     case GEOMETRY_HILIGHTSKINNY:
       hilight_skinny = 1 - hilight_skinny;
@@ -5078,7 +5078,7 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_(" Show normal"), GEOMETRY_SHOWNORMAL);
   }
-  if(smoothtrinormal==1){
+  if(smooth_iso_normal==1){
     glutAddMenuEntry(_(" *Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   else{
@@ -6488,8 +6488,8 @@ updatemenu=0;
         glutAddSubMenu(levellabel,isolevelmenu);
       }
       if(niso_compressed==0){
-        if(smoothtrinormal == 1)glutAddMenuEntry(_("*Smooth"), MENU_ISOSHOW_SMOOTH);
-        if(smoothtrinormal == 0)glutAddMenuEntry(_("Smooth"), MENU_ISOSHOW_SMOOTH);
+        if(smooth_iso_normal == 1)glutAddMenuEntry(_("*Smooth"), MENU_ISOSHOW_SMOOTH);
+        if(smooth_iso_normal == 0)glutAddMenuEntry(_("Smooth"), MENU_ISOSHOW_SMOOTH);
       }
       if(show_iso_normal == 1)glutAddMenuEntry(_("*Show normals"), MENU_ISOSHOW_NORMALS);
       if(show_iso_normal == 0)glutAddMenuEntry(_("Show normals"), MENU_ISOSHOW_NORMALS);

@@ -984,7 +984,7 @@ extern "C" void glui_bounds_setup(int main_window){
 #ifdef pp_BETA 
     CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
 #endif
-    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
+    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Smooth isosurfaces"), &smooth_iso_normal, SMOOTH_SURFACES, Slice_CB);
 
     ROLLOUT_iso_color = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Color/transparency", false, ISO_ROLLOUT_COLOR, Iso_Rollout_CB);
     ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_color, ISO_ROLLOUT_COLOR);
@@ -2746,7 +2746,7 @@ extern "C" void Slice_CB(int var){
       break;
 #ifdef pp_BETA
     case SMOOTH_SURFACES:
-      CHECKBOX_smooth2->set_int_val(smoothtrinormal);
+      CHECKBOX_smooth2->set_int_val(smooth_iso_normal);
       break;
     case SORT_SURFACES:
       sort_embedded_geometry=sort_iso_triangles;

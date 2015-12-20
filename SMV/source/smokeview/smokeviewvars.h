@@ -207,7 +207,7 @@ SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(show_volsmoke_moving,0);
 SVEXTERN int SVDECL(freeze_volsmoke,0);
 SVEXTERN int SVDECL(show_iso_solid,1),SVDECL(show_iso_outline,1),SVDECL(show_iso_points,0);
-SVEXTERN int SVDECL(show_iso_normal,0),SVDECL(showpointnormal,0),SVDECL(smoothtrinormal,1);
+SVEXTERN int SVDECL(show_iso_normal,0),SVDECL(smooth_iso_normal,1);
 SVEXTERN geomlistdata SVDECL(*geomlistinfo,NULL);
 SVEXTERN int SVDECL(have_volcompressed,0);
 SVEXTERN int SVDECL(glui_load_volcompressed,0),SVDECL(load_volcompressed,0);

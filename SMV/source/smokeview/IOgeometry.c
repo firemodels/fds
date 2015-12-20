@@ -275,7 +275,7 @@ void draw_geom(int flag, int geomtype){
         last_color=color;
         last_transparent_level=transparent_level_local;
       }
-      if(smoothtrinormal==0){
+      if(smooth_iso_normal==0){
         glNormal3fv(trianglei->tri_norm);
         for(j=0;j<3;j++){
           point *pointj;
@@ -570,7 +570,7 @@ void draw_geom(int flag, int geomtype){
     // draw geometry normal vectors
 
     if(show_iso_normal==1){
-      if(ntris>0&&smoothtrinormal==0){  // draw faceted normals
+      if(ntris>0&&smooth_iso_normal==0){  // draw faceted normals
         glPushMatrix();
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -631,7 +631,7 @@ void draw_geom(int flag, int geomtype){
         glEnd();
         glPopMatrix();
       }
-      if(npoints>0&&smoothtrinormal==1){ // draw smooth normals
+      if(npoints>0&&smooth_iso_normal==1){ // draw smooth normals
         glPushMatrix();
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
         glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -2359,7 +2359,7 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
     glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
     glBegin(GL_TRIANGLES);
-    if(smoothtrinormal==0){
+    if(smooth_iso_normal==0){
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
         float *xyznorm;

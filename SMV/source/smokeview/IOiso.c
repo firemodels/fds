@@ -1239,7 +1239,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         vv3[k]=xyzmin[k]+SCALE2FDSL(v3[k]/65535.);
       }
 
-      if(smoothtrinormal==1){
+      if(smooth_iso_normal==1){
         norm1 = vertexnorm+i1;
         norm2 = vertexnorm+i2;
         norm3 = vertexnorm+i3;
