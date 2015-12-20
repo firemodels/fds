@@ -355,7 +355,7 @@ void draw_geom(int flag, int geomtype){
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
-    if(geomi->geomtype!=GEOM_GEOM)continue;
+    if(geomi->geomtype!=GEOM_GEOM&&geomi->geomtype!=GEOM_ISO)continue;
     if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
@@ -696,6 +696,7 @@ void update_triangles(int flag){
 
     geomi = geominfoptrs[j];
     if(geomi->loaded==0||geomi->display==0)continue;
+    if(geomi->geomtype != GEOM_GEOM&&geomi->geomtype!=GEOM_ISO)continue;
 
     iend = geomi->ntimes;
     if(geomi->currentframe != NULL)iend = 1;
@@ -826,7 +827,7 @@ void update_triangles(int flag){
         geomdata *geomj;
 
         geomj = geominfoptrs[j];
-        if(geomj->geomtype != GEOM_GEOM)continue;
+        if(geomj->geomtype != GEOM_GEOM&&geomj->geomtype!=GEOM_ISO)continue;
         geomlisti = geomj->geomlistinfo+ii;
         for(i = 0; i<geomlisti->npoints; i++){
           point *pointi;
@@ -853,7 +854,7 @@ void update_triangles(int flag){
           geomdata *geomj;
 
           geomj = geominfoptrs[j];
-          if(geomj->geomtype != GEOM_GEOM)continue;
+          if(geomj->geomtype != GEOM_GEOM&&geomj->geomtype != GEOM_ISO)continue;
           geomlisti = geomj->geomlistinfo + ii;
           for(i = 0; i<geomlisti->npoints; i++){
             point *pointi;
@@ -2520,15 +2521,15 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
 
 void Sort_Embedded_Geometry(float *mm){
   int i;
-  int count_transparent,count_all;
+  int count_transparent,count_opaque;
   int itime;
   int *showlevels=NULL;
 
   CheckMemory;
   count_transparent=0;
-  count_all=0;
+  count_opaque=0;
   ntransparent_triangles=count_transparent;
-  nopaque_triangles=count_all-count_transparent;
+  nopaque_triangles=count_opaque;
   if(loaded_isomesh!=NULL)showlevels=loaded_isomesh->showlevels;
 
   for(i=0;i<ngeominfoptrs;i++){
@@ -2537,7 +2538,7 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    if(geomi->geomtype != GEOM_GEOM||geomi->patchactive == 1)continue;
+    if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)||geomi->patchactive == 1)continue;
     for(itime=0;itime<2;itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
@@ -2547,7 +2548,6 @@ void Sort_Embedded_Geometry(float *mm){
         if(geomi->currentframe!=NULL)geomlisti=geomi->currentframe;
       }
 
-      count_all+=geomlisti->ntriangles;
       if(use_transparency_data==0)continue;
       for(j=0;j<geomlisti->ntriangles;j++){
         triangle *tri;
@@ -2555,16 +2555,23 @@ void Sort_Embedded_Geometry(float *mm){
         float *xyz1, *xyz2, *xyz3;
         float xyzeye[3];
         int isurf;
+        int is_opaque;
 
+        is_opaque=0;
         tri = geomlisti->triangles + j;
-        if(hilight_skinny==1&&tri->skinny==1)continue;
-        if(tri->surf->transparent_level>=1.0)continue;
+        if(hilight_skinny==1&&tri->skinny==1)is_opaque=1;
+        if(tri->surf->transparent_level>=1.0)is_opaque=1;
         isurf=tri->surf-surfinfo-nsurfinfo-1;
         if((showlevels!=NULL&&showlevels[isurf]==0)||tri->surf->transparent_level<=0.0){
-          count_all--;
           continue;
         }
-        count_transparent++;
+        if(is_opaque==1){
+          count_opaque++;
+          continue;
+        }
+        else{
+          count_transparent++;
+        }
         if(sort_embedded_geometry==0)continue;
         xyz1 = tri->points[0]->xyz;
         xyz2 = tri->points[1]->xyz;
@@ -2585,22 +2592,23 @@ void Sort_Embedded_Geometry(float *mm){
     }
   }
   CheckMemory;
-  if(count_all==0)return;
+  if(count_transparent==0&&count_opaque==0)return;
   FREEMEMORY(alltriangles);
-  NewMemory((void **)&alltriangles,count_all*sizeof(triangle **));
+  NewMemory((void **)&alltriangles,(count_opaque+count_transparent)*sizeof(triangle **));
   transparent_triangles=alltriangles;
   opaque_triangles=alltriangles+count_transparent;
   ntransparent_triangles=count_transparent;
-  nopaque_triangles=count_all-count_transparent;
+  nopaque_triangles=count_opaque;
+  
   count_transparent=0;
-  count_all=0;
+  count_opaque=0;
   for(i=0;i<ngeominfoptrs;i++){
     geomlistdata *geomlisti;
     int j;
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    if(geomi->geomtype != GEOM_GEOM ||geomi->patchactive == 1)continue;
+    if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)||geomi->patchactive == 1)continue;
     for(itime = 0; itime<2; itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
@@ -2610,18 +2618,22 @@ void Sort_Embedded_Geometry(float *mm){
         if(geomi->currentframe!=NULL)geomlisti = geomi->currentframe;
       }
 
+      if(use_transparency_data==0)continue;
       for(j=0;j<geomlisti->ntriangles;j++){
         triangle *tri;
         int isurf;
+        int is_opaque;
 
+        is_opaque=0;
         tri = geomlisti->triangles + j;
-
+        if(hilight_skinny==1&&tri->skinny==1)is_opaque=1;
+        if(tri->surf->transparent_level>=1.0)is_opaque=1;
         isurf=tri->surf-surfinfo-nsurfinfo-1;
-        if(showlevels!=NULL&&showlevels[isurf]==0){
+        if((showlevels!=NULL&&showlevels[isurf]==0)||tri->surf->transparent_level<=0.0){
           continue;
         }
-        if(use_transparency_data==0||(hilight_skinny==1&&tri->skinny==1)||tri->surf->transparent_level>=1.0){
-          opaque_triangles[count_all++]=tri;
+        if(is_opaque==1){
+          opaque_triangles[count_opaque++]=tri;
         }
         else{
           transparent_triangles[count_transparent++]=tri;
@@ -2629,6 +2641,8 @@ void Sort_Embedded_Geometry(float *mm){
       }
     }
   }
+  ntransparent_triangles = count_transparent;
+  nopaque_triangles = count_opaque;
   if(sort_embedded_geometry==1&&ntransparent_triangles>0){
     qsort((isotri **)transparent_triangles,(size_t)ntransparent_triangles,sizeof(triangle **),compare_transparent_triangles);
   }

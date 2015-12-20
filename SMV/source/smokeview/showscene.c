@@ -300,6 +300,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     CLIP_GEOMETRY;
     draw_geom(DRAW_OPAQUE,GEOM_STATIC);
     draw_geom(DRAW_OPAQUE,GEOM_DYNAMIC);
+    SNIFF_ERRORS("draw_geom");
   }
 
   /* ++++++++++++++++++++++++ draw diagnostic geometry +++++++++++++++++++++++++ */
@@ -307,6 +308,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(show_geometry_diagnostics==1){
     CLIP_GEOMETRY;
     draw_geomdiag();
+    SNIFF_ERRORS("draw_geomdiag");
   }
   
   /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
@@ -314,6 +316,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(showshooter!=0&&shooter_active==1){
     CLIP_VALS;
     draw_shooter();
+    SNIFF_ERRORS("draw_shooter");
   }
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
