@@ -2563,13 +2563,13 @@ void ShowHideSortGeometry(float *mm){
           if(hilight_skinny == 1 && tri->skinny == 1)is_opaque = 1;
           if(tri->surf->transparent_level >= 1.0)is_opaque = 1;
           isurf = tri->surf - surfinfo - nsurfinfo - 1;
-          if((showlevels != NULL&&showlevels[isurf] == 0) || tri->surf->transparent_level <= 0.0){
+          if((geomi->geomtype==GEOM_ISO&&showlevels != NULL&&showlevels[isurf] == 0) || tri->surf->transparent_level <= 0.0){
             continue;
           }
           if(is_opaque == 1){
             if(iter==1)opaque_triangles[count_opaque] = tri;
             count_opaque++;
-            continue;
+            if(iter==0)continue;
           }
           else{
             if(iter==1)transparent_triangles[count_transparent] = tri;
