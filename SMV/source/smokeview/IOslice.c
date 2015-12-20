@@ -1939,7 +1939,7 @@ void getgsliceparams(void){
     patchi = patchinfo + i;
     meshi = meshinfo + patchi->blocknumber;
     strcpy(patchi->gslicedir, "");
-    if(patchi->filetype != PATCH_GEOMETRYSLICE)continue;
+    if(patchi->filetype != PATCH_GEOMETRY)continue;
     ii1 = patchi->ijk[0];
     ii2 = patchi->ijk[1];
     jj1 = patchi->ijk[2];

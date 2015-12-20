@@ -257,11 +257,7 @@ void trimzeros(char *line){
   //  removes trailing zeros in the floating point number found in line
 
   for(c = line+strlen(line)-1; c>line; c--){
-    if(c[0]=='0'&&c[-1]=='.'){
-      c[0] = '\0';
-      return;
-    }
-    if(c[0]!='0'){
+    if(c[0]=='0'&&c[-1]=='.'||c[0]!='0'){
       c[1] = '\0';
       return;
     }

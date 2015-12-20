@@ -788,12 +788,6 @@ void unloadiso(mesh *meshi){
   return;
 }
 
-/* ------------------ drawiso_geom ------------------------ */
-
-void drawiso_geom(int tranflag){
-  draw_geom(tranflag,1);
-}
-
 /* ------------------ drawiso ------------------------ */
 
 void drawiso_orig(int tranflag){

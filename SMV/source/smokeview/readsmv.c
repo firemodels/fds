@@ -3474,7 +3474,7 @@ int readsmv(char *file, char *file2){
       strcpy(geomdiagi->geomfile, buffptr);
 
       NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
-      init_geom(geomdiagi->geom,NODATA);
+      init_geom(geomdiagi->geom,GEOM_GEOM);
 
       NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
       strcpy(geomdiagi->geom->file, buffptr);
@@ -3508,7 +3508,7 @@ int readsmv(char *file, char *file2){
         sscanf(buff2,"%i",&ngeomobjinfo);
       }
 
-      init_geom(geomi,NODATA);
+      init_geom(geomi,GEOM_GEOM);
 
       fgets(buffer,255,stream);
       trim(buffer);
@@ -6975,13 +6975,13 @@ typedef struct {
         cellcenter_bound_active=1;
       }
       if(match(buffer,"BNDE") == 1){
-        patchi->filetype=PATCH_GEOMETRYSLICE;
+        patchi->filetype=PATCH_GEOMETRY;
         patchi->slice = 0;
       }
       if(match(buffer, "BNDS") == 1){
         char *sliceparms;
 
-        patchi->filetype = PATCH_GEOMETRYSLICE;
+        patchi->filetype = PATCH_GEOMETRY;
         patchi->slice = 1;
         sliceparms = strchr(buffer, '&');
 
@@ -7026,7 +7026,7 @@ typedef struct {
 
       patchi->geomfile=NULL;
       patchi->geominfo=NULL;
-      if(patchi->filetype==PATCH_GEOMETRYSLICE){
+      if(patchi->filetype==PATCH_GEOMETRY){
         int igeom;
 
         if(fgets(buffer,255,stream)==NULL){
@@ -7042,7 +7042,12 @@ typedef struct {
           geomi = geominfo + igeom;
           if(strcmp(geomi->file,patchi->geomfile)==0){
             patchi->geominfo=geomi;
-            geomi->hasdata = HASDATA;
+            if(patchi->slice == 0){
+              geomi->geomtype = GEOM_BOUNDARY;
+            }
+            else{
+              geomi->geomtype = GEOM_SLICE;
+            }
             break;
           }
         }
@@ -7079,7 +7084,7 @@ typedef struct {
         else if(patchi->filetype==PATCH_NODECENTERED){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
-        else if(patchi->filetype==PATCH_GEOMETRYSLICE){
+        else if(patchi->filetype==PATCH_GEOMETRY){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         NewMemory((void **)&patchi->histogram,sizeof(histogramdata));
@@ -7163,7 +7168,7 @@ typedef struct {
       NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
       nmemory_ids++;
       isoi->geominfo->memory_id=nmemory_ids;
-      init_geom(isoi->geominfo,HASDATA);
+      init_geom(isoi->geominfo,GEOM_ISO);
 
       bufferptr=trim_string(buffer);
 

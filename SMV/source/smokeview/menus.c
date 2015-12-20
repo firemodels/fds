@@ -5035,13 +5035,13 @@ updatemenu=0;
   else{
     glutAddMenuEntry(_("   Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
-  if(showtrisurface==1){
+  if(showtrisurface==1&&showtrioutline==0){
     glutAddMenuEntry(_("   *Solid only"),GEOMETRY_SOLID);
   }
   else{
     glutAddMenuEntry(_("   Solid only"),GEOMETRY_SOLID);
   }
-  if(showtrioutline==1){
+  if(showtrioutline==1&&showtrisurface==0){
     glutAddMenuEntry(_("   *Outline only"),GEOMETRY_OUTLINE);
   }
   else{
