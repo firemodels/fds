@@ -79,6 +79,9 @@
    QUANTITIES(1:3)='U-VELOCITY','V-VELOCITY','W-VELOCITY'
    SAMPLING_FACTOR=10 /  Description of massless tracer particles. Apply at a
                                                              solid surface with the PART_ID='tracers'
+
+&ISOF QUANTITY='TEMPERATURE',VALUE(1)=100.0 /  Show 3D contours of temperature at 100 C
+
  Y slices
 
 &SLCF PBY=0.75,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE. /
