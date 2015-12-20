@@ -9017,8 +9017,10 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
+      int dummy;
+
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i",&show_iso_solid,&show_iso_outline,&show_iso_points,&show_iso_normal,&smooth_iso_normal);
+      sscanf(buffer,"%i %i %i %i %i %i",&show_iso_solid,&show_iso_outline,&show_iso_points,&show_iso_normal,&dummy,&smooth_iso_normal);
       ONEORZERO(show_iso_solid);
       ONEORZERO(show_iso_outline);
       ONEORZERO(show_iso_points);
@@ -12361,7 +12363,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRACERSALWAYS\n");
   fprintf(fileout, " %i\n", show_tracers_always);
   fprintf(fileout, "SHOWTRIANGLES\n");
-  fprintf(fileout, " %i %i %i %i %i\n", show_iso_solid, show_iso_outline, show_iso_points, show_iso_normal, smooth_iso_normal);
+  fprintf(fileout, " %i %i %i %i 1 %i\n", show_iso_solid, show_iso_outline, show_iso_points, show_iso_normal, smooth_iso_normal);
   fprintf(fileout, "SHOWTRANSPARENT\n");
   fprintf(fileout, " %i\n", visTransparentBlockage);
   fprintf(fileout, "SHOWTRANSPARENTVENTS\n");
