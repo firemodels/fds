@@ -2749,7 +2749,7 @@ extern "C" void Slice_CB(int var){
       CHECKBOX_smooth2->set_int_val(smooth_iso_normal);
       break;
     case SORT_SURFACES:
-      sort_embedded_geometry=sort_iso_triangles;
+      sort_geometry=sort_iso_triangles;
       for(i=nsurfinfo;i<nsurfinfo+MAX_ISO_COLORS+1;i++){
         surfdata *surfi;
 

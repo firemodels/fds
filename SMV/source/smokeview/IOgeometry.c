@@ -2451,9 +2451,9 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
 
 }
 
-/* ------------------ compare_transparent_triangles ------------------------ */
+/* ------------------ CompareTransparentTriangles ------------------------ */
 
-int compare_transparent_triangles( const void *arg1, const void *arg2 ){
+int CompareTransparentTriangles(const void *arg1, const void *arg2){
   triangle *tri, *trj;
 
   tri = *(triangle **)arg1; 
@@ -2517,134 +2517,97 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
   }
 }
 
-/* ------------------ sort_triangles ------------------------ */
+/* ------------------ ShowHideSortGeometry ------------------------ */
 
-void Sort_Embedded_Geometry(float *mm){
+void ShowHideSortGeometry(float *mm){
   int i;
   int count_transparent,count_opaque;
   int itime;
   int *showlevels=NULL;
+  int iter;
 
-  CheckMemory;
-  count_transparent=0;
-  count_opaque=0;
-  ntransparent_triangles=count_transparent;
-  nopaque_triangles=count_opaque;
   if(loaded_isomesh!=NULL)showlevels=loaded_isomesh->showlevels;
 
-  for(i=0;i<ngeominfoptrs;i++){
-    geomlistdata *geomlisti;
-    int j;
-    geomdata *geomi;
+  for(iter = 0; iter < 2; iter++){
+    CheckMemory;
+    count_transparent = 0;
+    count_opaque = 0;
+    ntransparent_triangles = count_transparent;
+    nopaque_triangles = count_opaque;
+    for(i = 0; i < ngeominfoptrs; i++){
+      geomlistdata *geomlisti;
+      int j;
+      geomdata *geomi;
 
-    geomi = geominfoptrs[i];
-    if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)||geomi->patchactive == 1)continue;
-    for(itime=0;itime<2;itime++){
-      if(itime==0){
-        geomlisti = geomi->geomlistinfo-1;
-      }
-      else{
-        geomlisti = geomi->geomlistinfo+geomi->itime;
-        if(geomi->currentframe!=NULL)geomlisti=geomi->currentframe;
-      }
-
-      if(use_transparency_data==0)continue;
-      for(j=0;j<geomlisti->ntriangles;j++){
-        triangle *tri;
-        float xyz[3];
-        float *xyz1, *xyz2, *xyz3;
-        float xyzeye[3];
-        int isurf;
-        int is_opaque;
-
-        is_opaque=0;
-        tri = geomlisti->triangles + j;
-        if(hilight_skinny==1&&tri->skinny==1)is_opaque=1;
-        if(tri->surf->transparent_level>=1.0)is_opaque=1;
-        isurf=tri->surf-surfinfo-nsurfinfo-1;
-        if((showlevels!=NULL&&showlevels[isurf]==0)||tri->surf->transparent_level<=0.0){
-          continue;
-        }
-        if(is_opaque==1){
-          count_opaque++;
-          continue;
+      geomi = geominfoptrs[i];
+      if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO) || geomi->patchactive == 1)continue;
+      for(itime = 0; itime < 2; itime++){
+        if(itime == 0){
+          geomlisti = geomi->geomlistinfo - 1;
         }
         else{
-          count_transparent++;
+          geomlisti = geomi->geomlistinfo + geomi->itime;
+          if(geomi->currentframe != NULL)geomlisti = geomi->currentframe;
         }
-        if(sort_embedded_geometry==0)continue;
-        xyz1 = tri->points[0]->xyz;
-        xyz2 = tri->points[1]->xyz;
-        xyz3 = tri->points[2]->xyz;
-        xyz[0] = NORMALIZE_X((xyz1[0]+xyz2[0]+xyz3[0])/3.0);
-        xyz[1] = NORMALIZE_Y((xyz1[1]+xyz2[1]+xyz3[1])/3.0);
-        xyz[2] = NORMALIZE_Z((xyz1[2]+xyz2[2]+xyz3[2])/3.0);
 
-        xyzeye[0] = mm[0]*xyz[0] + mm[4]*xyz[1] +   mm[8]*xyz[2] + mm[12];
-        xyzeye[1] = mm[1]*xyz[0] + mm[5]*xyz[1] +   mm[9]*xyz[2] + mm[13];
-        xyzeye[2] = mm[2]*xyz[0] + mm[6]*xyz[1] +  mm[10]*xyz[2] + mm[14];
-        xyzeye[0]/=mscale[0];
-        xyzeye[1]/=mscale[1];
-        xyzeye[2]/=mscale[2];
-        tri->distance=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
-        CheckMemory;
+        for(j = 0; j < geomlisti->ntriangles; j++){
+          triangle *tri;
+          float xyz[3];
+          float *xyz1, *xyz2, *xyz3;
+          float xyzeye[3];
+          int isurf;
+          int is_opaque;
+
+          is_opaque = 0;
+          tri = geomlisti->triangles + j;
+          if(hilight_skinny == 1 && tri->skinny == 1)is_opaque = 1;
+          if(tri->surf->transparent_level >= 1.0)is_opaque = 1;
+          isurf = tri->surf - surfinfo - nsurfinfo - 1;
+          if((showlevels != NULL&&showlevels[isurf] == 0) || tri->surf->transparent_level <= 0.0){
+            continue;
+          }
+          if(is_opaque == 1){
+            if(iter==1)opaque_triangles[count_opaque] = tri;
+            count_opaque++;
+            continue;
+          }
+          else{
+            if(iter==1)transparent_triangles[count_transparent] = tri;
+            count_transparent++;
+          }
+          if(iter==0&&sort_geometry == 1){
+            xyz1 = tri->points[0]->xyz;
+            xyz2 = tri->points[1]->xyz;
+            xyz3 = tri->points[2]->xyz;
+            xyz[0] = NORMALIZE_X((xyz1[0] + xyz2[0] + xyz3[0]) / 3.0);
+            xyz[1] = NORMALIZE_Y((xyz1[1] + xyz2[1] + xyz3[1]) / 3.0);
+            xyz[2] = NORMALIZE_Z((xyz1[2] + xyz2[2] + xyz3[2]) / 3.0);
+
+            xyzeye[0] = mm[0] * xyz[0] + mm[4] * xyz[1] + mm[8] * xyz[2] + mm[12];
+            xyzeye[1] = mm[1] * xyz[0] + mm[5] * xyz[1] + mm[9] * xyz[2] + mm[13];
+            xyzeye[2] = mm[2] * xyz[0] + mm[6] * xyz[1] + mm[10] * xyz[2] + mm[14];
+            xyzeye[0] /= mscale[0];
+            xyzeye[1] /= mscale[1];
+            xyzeye[2] /= mscale[2];
+            tri->distance = xyzeye[0] * xyzeye[0] + xyzeye[1] * xyzeye[1] + xyzeye[2] * xyzeye[2];
+            CheckMemory;
+          }
+        }
       }
     }
-  }
-  CheckMemory;
-  if(count_transparent==0&&count_opaque==0)return;
-  FREEMEMORY(alltriangles);
-  NewMemory((void **)&alltriangles,(count_opaque+count_transparent)*sizeof(triangle **));
-  transparent_triangles=alltriangles;
-  opaque_triangles=alltriangles+count_transparent;
-  ntransparent_triangles=count_transparent;
-  nopaque_triangles=count_opaque;
-  
-  count_transparent=0;
-  count_opaque=0;
-  for(i=0;i<ngeominfoptrs;i++){
-    geomlistdata *geomlisti;
-    int j;
-    geomdata *geomi;
-
-    geomi = geominfoptrs[i];
-    if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)||geomi->patchactive == 1)continue;
-    for(itime = 0; itime<2; itime++){
-      if(itime==0){
-        geomlisti = geomi->geomlistinfo-1;
-      }
-      else{
-        geomlisti = geomi->geomlistinfo+geomi->itime;
-        if(geomi->currentframe!=NULL)geomlisti = geomi->currentframe;
-      }
-
-      if(use_transparency_data==0)continue;
-      for(j=0;j<geomlisti->ntriangles;j++){
-        triangle *tri;
-        int isurf;
-        int is_opaque;
-
-        is_opaque=0;
-        tri = geomlisti->triangles + j;
-        if(hilight_skinny==1&&tri->skinny==1)is_opaque=1;
-        if(tri->surf->transparent_level>=1.0)is_opaque=1;
-        isurf=tri->surf-surfinfo-nsurfinfo-1;
-        if((showlevels!=NULL&&showlevels[isurf]==0)||tri->surf->transparent_level<=0.0){
-          continue;
-        }
-        if(is_opaque==1){
-          opaque_triangles[count_opaque++]=tri;
-        }
-        else{
-          transparent_triangles[count_transparent++]=tri;
-        }
-      }
+    if(iter == 0){
+      CheckMemory;
+      if(count_transparent == 0 && count_opaque == 0)return;
+      FREEMEMORY(alltriangles);
+      NewMemory((void **)&alltriangles, (count_opaque + count_transparent)*sizeof(triangle **));
+      transparent_triangles = alltriangles;
+      opaque_triangles = alltriangles + count_transparent;
     }
   }
   ntransparent_triangles = count_transparent;
   nopaque_triangles = count_opaque;
-  if(sort_embedded_geometry==1&&ntransparent_triangles>0){
-    qsort((isotri **)transparent_triangles,(size_t)ntransparent_triangles,sizeof(triangle **),compare_transparent_triangles);
+  if(sort_geometry==1&&ntransparent_triangles>0){
+    qsort((isotri **)transparent_triangles, (size_t)ntransparent_triangles, sizeof(triangle **), CompareTransparentTriangles);
   }
 }
 

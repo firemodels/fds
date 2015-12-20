@@ -227,7 +227,7 @@ SVEXTERN int SVDECL(showdevicetype,1), SVDECL(showdeviceunit,1);
 SVEXTERN float SVDECL(device_valmin,0.0), SVDECL(device_valmax,1.0);
 SVEXTERN devicedata SVDECL(**devicetypes,NULL);
 SVEXTERN int SVDECL(ndevicetypes,0);
-SVEXTERN int SVDECL(sort_embedded_geometry,1),SVDECL(sort_transparent_faces,0);
+SVEXTERN int SVDECL(sort_geometry,1),SVDECL(sort_transparent_faces,0);
 SVEXTERN isotri SVDECL(***iso_trans_list,NULL),SVDECL(***iso_opaques_list,NULL);
 SVEXTERN int SVDECL(*niso_trans_list,NULL),SVDECL(*niso_opaques_list,NULL);
 SVEXTERN int SVDECL(niso_timesteps,0);

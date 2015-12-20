@@ -4153,7 +4153,7 @@ void ImmersedMenu(int value){
       hilight_skinny = 1 - hilight_skinny;
       break;
     case GEOMETRY_SORTFACES:
-      sort_embedded_geometry=1-sort_embedded_geometry;
+      sort_geometry=1-sort_geometry;
       break;
     case GEOMETRY_SHOWDIAGNOSTICS:
       show_geometry_diagnostics = 1 - show_geometry_diagnostics;
@@ -5066,7 +5066,7 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"),GEOMETRY_TETRA_HIDE);
     }
   }
-  if(sort_embedded_geometry==1){
+  if(sort_geometry==1){
     glutAddMenuEntry(_(" *Sort faces"), GEOMETRY_SORTFACES);
   }
   else{
