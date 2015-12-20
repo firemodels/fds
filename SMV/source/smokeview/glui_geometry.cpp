@@ -96,8 +96,8 @@ extern "C" void update_visaxislabels(void){
 /* ------------------ update_geometry_controls ------------------------ */
 
 extern "C" void update_geometry_controls(void){
-  if(CHECKBOX_surface_solid!=NULL)CHECKBOX_surface_solid->set_int_val(showtrisurface);
-  if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(showtrioutline);
+  if(CHECKBOX_surface_solid!=NULL)CHECKBOX_surface_solid->set_int_val(show_iso_solid);
+  if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_iso_outline);
   if(CHECKBOX_interior_solid!=NULL)CHECKBOX_interior_solid->set_int_val(show_geometry_interior_solid);
   if(CHECKBOX_interior_outline!=NULL)CHECKBOX_interior_outline->set_int_val(show_geometry_interior_outline);
 }
@@ -287,8 +287,8 @@ extern "C" void glui_geometry_setup(int main_window){
   }
   PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured,"",GLUI_PANEL_NONE);
   PANEL_surface = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"surface");
-  CHECKBOX_surface_solid=glui_geometry->add_checkbox_to_panel(PANEL_surface,"solid",&showtrisurface,VOL_SHOWHIDE,Volume_CB);
-  CHECKBOX_surface_outline=glui_geometry->add_checkbox_to_panel(PANEL_surface,"outline",&showtrioutline,VOL_SHOWHIDE,Volume_CB);
+  CHECKBOX_surface_solid=glui_geometry->add_checkbox_to_panel(PANEL_surface,"solid",&show_iso_solid,VOL_SHOWHIDE,Volume_CB);
+  CHECKBOX_surface_outline=glui_geometry->add_checkbox_to_panel(PANEL_surface,"outline",&show_iso_outline,VOL_SHOWHIDE,Volume_CB);
 
   glui_geometry->add_column_to_panel(PANEL_geom_showhide,false);
   PANEL_interior = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"interior");

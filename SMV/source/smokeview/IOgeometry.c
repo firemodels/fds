@@ -233,7 +233,7 @@ void draw_geom(int flag, int geomtype){
     tris=transparent_triangles;
   }
 
-  if(ntris>0&&showtrisurface==1&&geomtype==GEOM_STATIC){
+  if(ntris>0&&show_iso_solid==1&&geomtype==GEOM_STATIC){
     float *color;
 
 
@@ -502,7 +502,7 @@ void draw_geom(int flag, int geomtype){
     // draw geometry (faces) outline
 
     last_color=NULL;
-    if(ntris>0&&showtrioutline==1){
+    if(ntris>0&&show_iso_outline==1){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -522,7 +522,7 @@ void draw_geom(int flag, int geomtype){
         xyzptr[1] = trianglei->points[1]->xyz;
         xyzptr[2] = trianglei->points[2]->xyz;
 
-        if(showtrisurface==1){
+        if(show_iso_solid==1){
           color = black;
         }
         else{
@@ -546,7 +546,7 @@ void draw_geom(int flag, int geomtype){
     // draw geometry points
 
     last_color=NULL;
-    if(showtripoints==1&&geomlisti->npoints>0){
+    if(show_iso_points==1&&geomlisti->npoints>0){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -569,7 +569,7 @@ void draw_geom(int flag, int geomtype){
 
     // draw geometry normal vectors
 
-    if(showtrinormal==1){
+    if(show_iso_normal==1){
       if(ntris>0&&smoothtrinormal==0){  // draw faceted normals
         glPushMatrix();
         glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));

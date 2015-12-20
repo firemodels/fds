@@ -1219,7 +1219,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     glPopMatrix();
   }
 
-  if(showtrinormal==1){
+  if(show_iso_normal==1){
 
     glPushMatrix();
     antialias(ON);
