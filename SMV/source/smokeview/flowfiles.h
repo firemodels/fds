@@ -83,17 +83,14 @@ typedef struct {
 
 typedef struct {
   char *file;
-  int memory_id;
-  int loaded, display;
-  int hasdata;
-  struct _surfdata *surf;
-  geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
+  int memory_id, loaded, display;
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
-  int patchactive;
   int ntimes,itime,*timeslist;
-  int ngeomobjinfo;
+  int ngeomobjinfo, geomtype, patchactive;
+  struct _surfdata *surf;
+  geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   geomobjdata *geomobjinfo;
 } geomdata;
 

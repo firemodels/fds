@@ -1134,7 +1134,7 @@ void readpatch(int ifile, int load_flag, int *errorcode){
   patchdata *patchi;
 
   patchi = patchinfo + ifile;
-  if(patchi->filetype==PATCH_GEOMETRYSLICE){
+  if(patchi->filetype==PATCH_GEOMETRY){
     ASSERT(ifile>=0&&ifile<ngeominfo);
     read_geomdata(ifile,load_flag,errorcode);
   }
@@ -2326,7 +2326,7 @@ void drawpatch_frame(int flag){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(patchi->filetype == PATCH_GEOMETRYSLICE && patchi->loaded == 1 && patchi->display == 1){
+    if(patchi->filetype == PATCH_GEOMETRY && patchi->loaded == 1 && patchi->display == 1){
       if(flag == DRAW_OPAQUE){
         if(patchi->slice == 0){
           draw_geomdata(flag, patchi, GEOM_STATIC);
@@ -3730,7 +3730,7 @@ void updatepatchmenulabels(void){
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,label);
       }
-      if(patchi->filetype == PATCH_GEOMETRYSLICE){
+      if(patchi->filetype == PATCH_GEOMETRY){
         if(strlen(patchi->gslicedir) != 0){
           STRCAT(patchi->menulabel, ", ");
           STRCAT(patchi->menulabel, patchi->gslicedir);
@@ -4115,7 +4115,7 @@ int update_patch_hist(patchdata *patchj){
     time_t modtime;
 
     patchi = patchinfo + i;
-    if(patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->filetype==PATCH_GEOMETRYSLICE)continue;
+    if(patchi->type!=patchj->type||patchi->filetype!=patchj->filetype||patchi->filetype==PATCH_GEOMETRY)continue;
     modtime=file_modtime(patchi->file);
     if(modtime>patchi->modtime){
       patchi->modtime=modtime;

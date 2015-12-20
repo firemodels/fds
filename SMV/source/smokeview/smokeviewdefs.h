@@ -7,9 +7,14 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define GEOM_GEOM 0
+#define GEOM_ISO 1
+#define GEOM_BOUNDARY 2
+#define GEOM_SLICE 3
+
 #define PATCH_NODECENTERED 0
 #define PATCH_CELLCENTERED 1
-#define PATCH_GEOMETRYSLICE 2
+#define PATCH_GEOMETRY 2
 
 #define NODATA 0
 #define HASDATA 1
@@ -144,9 +149,6 @@ void _Sniff_Errors(char *whereat);
 #define FROM_SCRIPT 2
 
 #define STEPS_PER_DEG 10.0
-
-#define GEOM_NORMAL 0
-#define GEOM_ISO 1
 
 #define FED_SLICE 0
 #define FED_ISO 1

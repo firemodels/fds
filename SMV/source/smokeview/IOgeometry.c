@@ -355,6 +355,7 @@ void draw_geom(int flag, int geomtype){
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
+    if(geomi->geomtype!=GEOM_GEOM)continue;
     if(geomtype==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
@@ -822,8 +823,11 @@ void update_triangles(int flag){
       for(j = 0; j<ngeominfoptrs; j++){
         geomlistdata *geomlisti;
         int  i;
+        geomdata *geomj;
 
-        geomlisti = geominfoptrs[j]->geomlistinfo+ii;
+        geomj = geominfoptrs[j];
+        if(geomj->geomtype != GEOM_GEOM)continue;
+        geomlisti = geomj->geomlistinfo+ii;
         for(i = 0; i<geomlisti->npoints; i++){
           point *pointi;
 
@@ -846,8 +850,11 @@ void update_triangles(int flag){
         for(j = 0; j<ngeominfoptrs; j++){
           geomlistdata *geomlisti;
           int  i;
+          geomdata *geomj;
 
-          geomlisti = geominfoptrs[j]->geomlistinfo+ii;
+          geomj = geominfoptrs[j];
+          if(geomj->geomtype != GEOM_GEOM)continue;
+          geomlisti = geomj->geomlistinfo + ii;
           for(i = 0; i<geomlisti->npoints; i++){
             point *pointi;
 
@@ -1175,13 +1182,13 @@ void read_all_geom(void){
     geomdata *geomi;
 
     geomi = geominfo + i;
-    read_geom(geomi,LOAD,GEOM_NORMAL,NULL,&errorcode);
+    read_geom(geomi,LOAD,GEOM_GEOM,NULL,&errorcode);
   }
   for(i = 0; i < ngeomdiaginfo; i++){
     geomdiagdata *geomdiagi;
 
     geomdiagi = geomdiaginfo + i;
-    read_geom(geomdiagi->geom, LOAD, GEOM_NORMAL, NULL, &errorcode);
+    read_geom(geomdiagi->geom, LOAD, GEOM_GEOM, NULL, &errorcode);
   }
 }
 
@@ -1691,7 +1698,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   // vals_1, ... vals_ndyamic
 
   patchi = patchinfo + ifile;
-  if(patchi->filetype!=PATCH_GEOMETRYSLICE)return;
+  if(patchi->filetype!=PATCH_GEOMETRY)return;
   file = patchi->file;
 
   patchi->loaded=0;
@@ -2530,7 +2537,7 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    if(geomi->hasdata == HASDATA||geomi->patchactive==1)continue;
+    if(geomi->geomtype != GEOM_GEOM||geomi->patchactive == 1)continue;
     for(itime=0;itime<2;itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
@@ -2593,8 +2600,8 @@ void Sort_Embedded_Geometry(float *mm){
     geomdata *geomi;
 
     geomi = geominfoptrs[i];
-    if(geomi->hasdata == HASDATA||geomi->patchactive==1)continue;
-    for(itime=0;itime<2;itime++){
+    if(geomi->geomtype != GEOM_GEOM ||geomi->patchactive == 1)continue;
+    for(itime = 0; itime<2; itime++){
       if(itime==0){
         geomlisti = geomi->geomlistinfo-1;
       }
@@ -2629,7 +2636,7 @@ void Sort_Embedded_Geometry(float *mm){
 
 /* ------------------ init_geom ------------------------ */
 
-void init_geom(geomdata *geomi,int hasdata){
+void init_geom(geomdata *geomi,int geomtype){
   geomi->file=NULL;
   geomi->display=0;
   geomi->loaded=0;
@@ -2645,6 +2652,6 @@ void init_geom(geomdata *geomi,int hasdata){
   geomi->int_vals=NULL;
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
-  geomi->hasdata = hasdata;
+  geomi->geomtype = geomtype;
 }
 
