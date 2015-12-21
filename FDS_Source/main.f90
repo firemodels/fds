@@ -3127,6 +3127,7 @@ IF (ICYC < 1) DT = EVAC_DT
 IF (ICYC < 1) DT_NEW = DT_EVAC
 IF (ICYC == 1) DT = DT_EVAC ! Initial fire dt that was read in
 IF (ICYC == 1) T  = T_BEGIN ! Initial fire t  that was read in
+IF (ICYC == 1) T_EVAC = T_BEGIN - 0.1_EB*MIN(EVAC_DT_FLOWFIELD,EVAC_DT_STEADY_STATE)
 IF (ICYC > 0) T_FIRE  = T
 IF (ICYC > 0) EVAC_DT = DT
 
