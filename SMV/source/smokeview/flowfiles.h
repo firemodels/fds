@@ -89,7 +89,7 @@ typedef struct {
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
   int ntimes,itime,*timeslist;
-  int ngeomobjinfo, geomtype, patchactive;
+  int ngeomobjinfo, geomtype, patchactive, fdsblock;
   struct _surfdata *surf;
   geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   geomobjdata *geomobjinfo;

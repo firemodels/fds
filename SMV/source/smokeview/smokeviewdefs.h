@@ -7,10 +7,12 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NOT_FDSBLOCK 0
+#define FDSBLOCK 1
+
 #define GEOM_GEOM 0
 #define GEOM_ISO 1
-#define GEOM_BOUNDARY 2
-#define GEOM_SLICE 3
+#define GEOM_SLICE 2
 
 #define PATCH_NODECENTERED 0
 #define PATCH_CELLCENTERED 1

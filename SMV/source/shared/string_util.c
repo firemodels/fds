@@ -126,6 +126,7 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
 }
 
 /* ------------------ getGitHash ------------------------ */
+
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
 #endif
@@ -218,9 +219,9 @@ void trim_commas(char *line){
 /* ------------------ trim ------------------------ */
 
 void trim(char *line){
-  /*! \fn void trim(char *line)
-      \brief removes trailing white space from the character string line
-  */
+  
+  //  removes trailing white space from the character string line
+
   char *c;
   size_t len;
 
@@ -239,7 +240,7 @@ void trim(char *line){
 
 char *trim_front(char *line){
 
-//  returns a random character string of length length
+//  returns first non-blank character at the begininn of line
 
   char *c;
 
@@ -960,7 +961,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ daytime2sec ------------------------ */
+/* ------------------ date2day ------------------------ */
 
 unsigned int date2day(char *tokenorig){
   // mm/dd/yyyy -> days after 1/1/2000

@@ -3474,7 +3474,7 @@ int readsmv(char *file, char *file2){
       strcpy(geomdiagi->geomfile, buffptr);
 
       NewMemory((void **)&geomdiagi->geom, sizeof(geomdata));
-      init_geom(geomdiagi->geom,GEOM_GEOM);
+      init_geom(geomdiagi->geom,GEOM_GEOM,NOT_FDSBLOCK);
 
       NewMemory((void **)&geomdiagi->geom->file, strlen(buffptr) + 1);
       strcpy(geomdiagi->geom->file, buffptr);
@@ -3508,7 +3508,7 @@ int readsmv(char *file, char *file2){
         sscanf(buff2,"%i",&ngeomobjinfo);
       }
 
-      init_geom(geomi,GEOM_GEOM);
+      init_geom(geomi,GEOM_GEOM,FDSBLOCK);
 
       fgets(buffer,255,stream);
       trim(buffer);
@@ -7043,10 +7043,12 @@ typedef struct {
           if(strcmp(geomi->file,patchi->geomfile)==0){
             patchi->geominfo=geomi;
             if(patchi->slice == 0){
-              geomi->geomtype = GEOM_BOUNDARY;
+              geomi->geomtype = GEOM_GEOM;
+              geomi->fdsblock = FDSBLOCK;
             }
             else{
               geomi->geomtype = GEOM_SLICE;
+              geomi->fdsblock = NOT_FDSBLOCK;
             }
             break;
           }
@@ -7168,7 +7170,7 @@ typedef struct {
       NewMemory((void **)&isoi->geominfo,sizeof(geomdata));
       nmemory_ids++;
       isoi->geominfo->memory_id=nmemory_ids;
-      init_geom(isoi->geominfo,GEOM_ISO);
+      init_geom(isoi->geominfo,GEOM_ISO,NOT_FDSBLOCK);
 
       bufferptr=trim_string(buffer);
 
