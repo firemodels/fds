@@ -9017,20 +9017,21 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
+      int dummy;
+
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i %i",&showtrisurface,&showtrioutline,&showtripoints,&showtrinormal,&showpointnormal,&smoothtrinormal);
-      ONEORZERO(showtrisurface);
-      ONEORZERO(showtrioutline);
-      ONEORZERO(showtripoints);
-      ONEORZERO(showtrinormal);
-      ONEORZERO(showpointnormal);
-      ONEORZERO(smoothtrinormal);
+      sscanf(buffer,"%i %i %i %i %i %i",&show_iso_solid,&show_iso_outline,&show_iso_points,&show_iso_normal,&dummy,&smooth_iso_normal);
+      ONEORZERO(show_iso_solid);
+      ONEORZERO(show_iso_outline);
+      ONEORZERO(show_iso_points);
+      ONEORZERO(show_iso_normal);
+      ONEORZERO(smooth_iso_normal);
 #ifdef pp_BETA
-      ONEORZERO(showtrinormal);
+      ONEORZERO(show_iso_normal);
 #else
-      showtrinormal=0;
+      show_iso_normal=0;
 #endif
-      visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
+      visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
       continue;
     }
     if(match(buffer,"SHOWSTREAK")==1){
@@ -10515,17 +10516,17 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWISONORMALS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&showtrinormal);
-      if(showtrinormal!=1)showtrinormal=0;
+      sscanf(buffer,"%i",&show_iso_normal);
+      if(show_iso_normal!=1)show_iso_normal=0;
       continue;
     }
     if(match(buffer,"SHOWISO")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&visAIso);
       visAIso&=7;
-      showtrisurface=(visAIso&1)/1;
-      showtrioutline=(visAIso&2)/2;
-      showtripoints=(visAIso&4)/4;
+      show_iso_solid=(visAIso&1)/1;
+      show_iso_outline=(visAIso&2)/2;
+      show_iso_points=(visAIso&4)/4;
       continue;
     }
     if(trainer_mode==0&&windowresized==0){
@@ -12322,7 +12323,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWISO\n");
   fprintf(fileout, " %i\n", visAIso);
   fprintf(fileout, "SHOWISONORMALS\n");
-  fprintf(fileout, " %i\n", showtrinormal);
+  fprintf(fileout, " %i\n", show_iso_normal);
   fprintf(fileout, "SHOWLABELS\n");
   fprintf(fileout, " %i\n", visLabels);
 #ifdef pp_memstatus
@@ -12362,7 +12363,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRACERSALWAYS\n");
   fprintf(fileout, " %i\n", show_tracers_always);
   fprintf(fileout, "SHOWTRIANGLES\n");
-  fprintf(fileout, " %i %i %i %i %i %i\n", showtrisurface, showtrioutline, showtripoints, showtrinormal, showpointnormal, smoothtrinormal);
+  fprintf(fileout, " %i %i %i %i 1 %i\n", show_iso_solid, show_iso_outline, show_iso_points, show_iso_normal, smooth_iso_normal);
   fprintf(fileout, "SHOWTRANSPARENT\n");
   fprintf(fileout, " %i\n", visTransparentBlockage);
   fprintf(fileout, "SHOWTRANSPARENTVENTS\n");

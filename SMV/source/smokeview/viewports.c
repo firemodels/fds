@@ -1020,7 +1020,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     FREEMEMORY(geominfoptrs);
     ngeominfoptrs=0;
     GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
-    if(ngeominfoptrs>0)Sort_Embedded_Geometry(modelview_scratch);
+    if(ngeominfoptrs>0)ShowHideSortGeometry(modelview_scratch);
     if(showiso==1&&sort_iso_triangles==1&&niso_trans>0)Sort_Iso_Triangles(modelview_scratch);
 
     glScalef(mscale[0],mscale[1],mscale[2]);

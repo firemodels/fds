@@ -576,18 +576,18 @@ void IsoShowMenu(int value){
 
   switch(value){
   case  MENU_ISOSHOW_SMOOTH:
-    smoothtrinormal=1-smoothtrinormal;
+    smooth_iso_normal=1-smooth_iso_normal;
     break;
   case MENU_ISOSHOW_NORMALS:
-    showtrinormal = 1 - showtrinormal;
+    show_iso_normal = 1 - show_iso_normal;
     break;
   case MENU_ISOSHOW_SOLID:
   case MENU_ISOSHOW_OUTLINE:
   case MENU_ISOSHOW_POINTS:
-    if(value == MENU_ISOSHOW_SOLID)showtrisurface=1-showtrisurface;
-    if(value == MENU_ISOSHOW_OUTLINE)showtrioutline = 1 - showtrioutline;
-    if(value == MENU_ISOSHOW_POINTS)showtripoints = 1 - showtripoints;
-    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
+    if(value == MENU_ISOSHOW_SOLID)show_iso_solid=1-show_iso_solid;
+    if(value == MENU_ISOSHOW_OUTLINE)show_iso_outline = 1 - show_iso_outline;
+    if(value == MENU_ISOSHOW_POINTS)show_iso_points = 1 - show_iso_points;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
     if(visAIso!=0){
       plotstate=DYNAMIC_PLOTS;
     }
@@ -640,19 +640,19 @@ void IsoShowMenu(int value){
     surfinfo[nsurfinfo+1+loaded_isomesh->nisolevels-1].transparent_level=1.0;
     break;
    case MENU_ISOSHOW_HIDEALL:
-    showtrisurface=0;
-    showtrioutline=0;
-    showtripoints=0;
-    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
+    show_iso_solid=0;
+    show_iso_outline=0;
+    show_iso_points=0;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=0;
     }
     break;
    case MENU_ISOSHOW_SHOWALL:
-    showtrisurface=1;
-    showtrioutline=0;
-    showtripoints=0;
-    visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
+    show_iso_solid=1;
+    show_iso_outline=0;
+    show_iso_points=0;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=1;
     }
@@ -4098,73 +4098,73 @@ void ImmersedMenu(int value){
       }
       break;
     case GEOMETRY_SOLIDOUTLINE:
-      if(showtrisurface==1&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
+      if(show_geom_solid==1&&show_geom_outline==1){
+        show_geom_solid=1;
+        show_geom_outline=0;
       }
       else{
-        showtrisurface=1;
-        showtrioutline=1;
+        show_geom_solid=1;
+        show_geom_outline=1;
       }
       break;
     case GEOMETRY_SOLID:
-      if(showtrisurface==1&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
+      if(show_geom_solid==1&&show_geom_outline==1){
+        show_geom_solid=1;
+        show_geom_outline=0;
       }
-      else if(showtrisurface==1&&showtrioutline==0){
-        showtrisurface=0;
-        showtrioutline=1;
+      else if(show_geom_solid==1&&show_geom_outline==0){
+        show_geom_solid=0;
+        show_geom_outline=1;
       }
-      else if(showtrisurface==0&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
+      else if(show_geom_solid==0&&show_geom_outline==1){
+        show_geom_solid=1;
+        show_geom_outline=0;
       }
       else{
-        showtrisurface=1;
-        showtrioutline=0;
+        show_geom_solid=1;
+        show_geom_outline=0;
       }
       break;
     case GEOMETRY_OUTLINE:
-      if(showtrisurface==1&&showtrioutline==1){
-        showtrisurface=0;
-        showtrioutline=1;
+      if(show_geom_solid==1&&show_geom_outline==1){
+        show_geom_solid=0;
+        show_geom_outline=1;
       }
-      else if(showtrisurface==1&&showtrioutline==0){
-        showtrisurface=0;
-        showtrioutline=1;
+      else if(show_geom_solid==1&&show_geom_outline==0){
+        show_geom_solid=0;
+        show_geom_outline=1;
       }
-      else if(showtrisurface==0&&showtrioutline==1){
-        showtrisurface=1;
-        showtrioutline=0;
+      else if(show_geom_solid==0&&show_geom_outline==1){
+        show_geom_solid=1;
+        show_geom_outline=0;
       }
       else{
-        showtrisurface=0;
-        showtrioutline=1;
+        show_geom_solid=0;
+        show_geom_outline=1;
       }
       break;
     case GEOMETRY_SHOWNORMAL:
-      showtrinormal=1-showtrinormal;
+      show_geom_normal=1-show_geom_normal;
       break;
     case GEOMETRY_SMOOTHNORMAL:
-      smoothtrinormal=1-smoothtrinormal;
+      smooth_geom_normal=1-smooth_geom_normal;
       break;
     case GEOMETRY_HILIGHTSKINNY:
       hilight_skinny = 1 - hilight_skinny;
       break;
     case GEOMETRY_SORTFACES:
-      sort_embedded_geometry=1-sort_embedded_geometry;
+      sort_geometry=1-sort_geometry;
       break;
     case GEOMETRY_SHOWDIAGNOSTICS:
       show_geometry_diagnostics = 1 - show_geometry_diagnostics;
       break;
     case GEOMETRY_HIDE:
-      if(showtrisurface==0&&showtrioutline==0){
-        showtrisurface=1;
+      if(show_geom_solid==0&&show_geom_outline==0){
+        show_geom_solid=1;
       }
       else{
-        showtrisurface=0;
-        showtrioutline=0;
+        show_geom_solid=0;
+        show_geom_outline=0;
       }
       break;
     case MENU_DUMMY:
@@ -4175,7 +4175,6 @@ void ImmersedMenu(int value){
   }
   update_geometry_controls();
 
-  visAIso=showtrisurface*1+showtrioutline*2+showtripoints*4;
   glutPostRedisplay();
 }
 
@@ -5029,25 +5028,25 @@ updatemenu=0;
   CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
   glutAddMenuEntry("Surface",MENU_DUMMY);
-  if(showtrisurface==1&&showtrioutline==1){
+  if(show_geom_solid==1&&show_geom_outline==1){
     glutAddMenuEntry(_("   *Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
   else{
     glutAddMenuEntry(_("   Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
-  if(showtrisurface==1&&showtrioutline==0){
+  if(show_geom_solid==1&&show_geom_outline==0){
     glutAddMenuEntry(_("   *Solid only"),GEOMETRY_SOLID);
   }
   else{
     glutAddMenuEntry(_("   Solid only"),GEOMETRY_SOLID);
   }
-  if(showtrioutline==1&&showtrisurface==0){
+  if(show_geom_outline==1&&show_geom_solid==0){
     glutAddMenuEntry(_("   *Outline only"),GEOMETRY_OUTLINE);
   }
   else{
     glutAddMenuEntry(_("   Outline only"),GEOMETRY_OUTLINE);
   }
-  if(showtrisurface==0&&showtrioutline==0){
+  if(show_geom_solid==0&&show_geom_outline==0){
     glutAddMenuEntry(_("   *Hide"),GEOMETRY_HIDE);
   }
   else{
@@ -5066,19 +5065,19 @@ updatemenu=0;
       glutAddMenuEntry(_("   Hide"),GEOMETRY_TETRA_HIDE);
     }
   }
-  if(sort_embedded_geometry==1){
+  if(sort_geometry==1){
     glutAddMenuEntry(_(" *Sort faces"), GEOMETRY_SORTFACES);
   }
   else{
     glutAddMenuEntry(_(" Sort faces"), GEOMETRY_SORTFACES);
   }
-  if(showtrinormal==1){
+  if(show_geom_normal==1){
     glutAddMenuEntry(_(" *Show normal"), GEOMETRY_SHOWNORMAL);
   }
   else{
     glutAddMenuEntry(_(" Show normal"), GEOMETRY_SHOWNORMAL);
   }
-  if(smoothtrinormal==1){
+  if(smooth_geom_normal==1){
     glutAddMenuEntry(_(" *Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   else{
@@ -6488,11 +6487,11 @@ updatemenu=0;
         glutAddSubMenu(levellabel,isolevelmenu);
       }
       if(niso_compressed==0){
-        if(smoothtrinormal == 1)glutAddMenuEntry(_("*Smooth"), MENU_ISOSHOW_SMOOTH);
-        if(smoothtrinormal == 0)glutAddMenuEntry(_("Smooth"), MENU_ISOSHOW_SMOOTH);
+        if(smooth_iso_normal == 1)glutAddMenuEntry(_("*Smooth"), MENU_ISOSHOW_SMOOTH);
+        if(smooth_iso_normal == 0)glutAddMenuEntry(_("Smooth"), MENU_ISOSHOW_SMOOTH);
       }
-      if(showtrinormal == 1)glutAddMenuEntry(_("*Show normals"), MENU_ISOSHOW_NORMALS);
-      if(showtrinormal == 0)glutAddMenuEntry(_("Show normals"), MENU_ISOSHOW_NORMALS);
+      if(show_iso_normal == 1)glutAddMenuEntry(_("*Show normals"), MENU_ISOSHOW_NORMALS);
+      if(show_iso_normal == 0)glutAddMenuEntry(_("Show normals"), MENU_ISOSHOW_NORMALS);
     }
   }
 

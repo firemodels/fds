@@ -485,7 +485,7 @@ EXTERNCPP void destroyshellmenus(void);
 EXTERNCPP void update_smoke3dflags(void);
 EXTERNCPP void mergesmoke3dcolors(smoke3ddata *smoke3dset);
 EXTERNCPP void setsmokecolorflags(void);
-EXTERNCPP void Sort_Embedded_Geometry(float *mm);
+EXTERNCPP void ShowHideSortGeometry(float *mm);
 EXTERNCPP void Sort_Transparent_Faces(float *mm);
 EXTERNCPP void getsmokedir(float *mm);
 EXTERNCPP void get_vdevice_vel(float time, vdevicedata *vdevicei, float *vel, float *angle, float *dvel, float *dangle, int *valid_vel);
