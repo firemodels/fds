@@ -2557,7 +2557,7 @@ void ShowHideSortGeometry(float *mm){
       geomdata *geomi;
 
       geomi = geominfoptrs[i];
-      if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO) || geomi->patchactive == 1)continue;
+      if( (geomi->fdsblock == NOT_FDSBLOCK && geomi->geomtype!=GEOM_ISO)|| geomi->patchactive == 1)continue;
       for(itime = 0; itime < 2; itime++){
         if(itime == 0){
           geomlisti = geomi->geomlistinfo - 1;
@@ -2636,7 +2636,7 @@ void ShowHideSortGeometry(float *mm){
 
 /* ------------------ init_geom ------------------------ */
 
-void init_geom(geomdata *geomi,int geomtype){
+void init_geom(geomdata *geomi,int geomtype, int fdsblock){
   geomi->file=NULL;
   geomi->display=0;
   geomi->loaded=0;
@@ -2653,5 +2653,6 @@ void init_geom(geomdata *geomi,int geomtype){
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
   geomi->geomtype = geomtype;
+  geomi->fdsblock = fdsblock;
 }
 
