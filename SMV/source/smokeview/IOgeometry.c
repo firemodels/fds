@@ -214,7 +214,7 @@ void draw_geomdiag(void){
 
 /* ------------------ draw_geom ------------------------ */
 
-void draw_geom(int flag, int geomtype){
+void draw_geom(int flag, int timestate){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
@@ -233,7 +233,7 @@ void draw_geom(int flag, int geomtype){
     tris=transparent_triangles;
   }
 
-  if(ntris>0&&show_iso_solid==1&&geomtype==GEOM_STATIC){
+  if(ntris>0&&timestate==GEOM_STATIC){
     float *color;
 
 
@@ -260,6 +260,9 @@ void draw_geom(int flag, int geomtype){
       int  j;
 
       trianglei = tris[i];
+      if(trianglei->geomtype == GEOM_GEOM&&show_geom_solid == 0)continue;
+      if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
+      
       ti = trianglei->textureinfo;
       if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
@@ -275,7 +278,8 @@ void draw_geom(int flag, int geomtype){
         last_color=color;
         last_transparent_level=transparent_level_local;
       }
-      if(smooth_iso_normal==0){
+      if((trianglei->geomtype == GEOM_GEOM&&smooth_geom_normal == 0) ||
+         (trianglei->geomtype == GEOM_ISO &&smooth_iso_normal == 0)){
         glNormal3fv(trianglei->tri_norm);
         for(j=0;j<3;j++){
           point *pointj;
@@ -310,6 +314,9 @@ void draw_geom(int flag, int geomtype){
         int j;
 
         trianglei = tris[i];
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
+      
         texti = trianglei->textureinfo;
         if(texti==NULL||texti->loaded!=1)continue;
         if(lasttexture!=texti){
@@ -356,7 +363,7 @@ void draw_geom(int flag, int geomtype){
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
     if(geomi->geomtype!=GEOM_GEOM&&geomi->geomtype!=GEOM_ISO)continue;
-    if(geomtype==GEOM_STATIC){
+    if(timestate==GEOM_STATIC){
       geomlisti = geomi->geomlistinfo-1;
     }
     else{
@@ -502,7 +509,7 @@ void draw_geom(int flag, int geomtype){
     // draw geometry (faces) outline
 
     last_color=NULL;
-    if(ntris>0&&show_iso_outline==1){
+    if(ntris>0){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -514,7 +521,9 @@ void draw_geom(int flag, int geomtype){
         triangle *trianglei;
 
         trianglei = geomlisti->triangles+j;
-       
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_ISO&&show_iso_outline == 0)continue;
+
         xyznorm=trianglei->tri_norm;
         glNormal3fv(xyznorm);
 
@@ -546,7 +555,7 @@ void draw_geom(int flag, int geomtype){
     // draw geometry points
 
     last_color=NULL;
-    if(show_iso_points==1&&geomlisti->npoints>0){
+    if(geomlisti->npoints>0){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -556,6 +565,8 @@ void draw_geom(int flag, int geomtype){
         point *pointi;
 
         pointi = geomlisti->points+j;
+        if(pointi->geomtype == GEOM_GEOM&&show_geom_points == 0)continue;
+        if(pointi->geomtype == GEOM_ISO&&show_iso_points == 0)continue;
         color = pointi->triangles[0]->surf->color;
         if(last_color!=color){
           glColor3fv(color);
@@ -569,115 +580,121 @@ void draw_geom(int flag, int geomtype){
 
     // draw geometry normal vectors
 
-    if(show_iso_normal==1){
-      if(ntris>0&&smooth_iso_normal==0){  // draw faceted normals
-        glPushMatrix();
-        glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-        glTranslatef(-xbar0,-ybar0,-zbar0);
-        glBegin(GL_LINES);
-        glColor3fv(blue);
-        for(j=0;j<ntris;j++){
-          float *p1, *p2, *p3;
-          float *xyznorm;
-          triangle *trianglei;
-          float xyz1[3], xyz2[3];
+    if(ntris>0){  // draw faceted normals
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glBegin(GL_LINES);
+      glColor3fv(blue);
+      for(j=0;j<ntris;j++){
+        float *p1, *p2, *p3;
+        float *xyznorm;
+        triangle *trianglei;
+        float xyz1[3], xyz2[3];
 
-          trianglei = geomlisti->triangles+j;
+        trianglei = geomlisti->triangles+j;
+        if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
+        if(trianglei->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==1))continue;
        
-          xyznorm=trianglei->tri_norm;
+        xyznorm=trianglei->tri_norm;
 
-          p1 = trianglei->points[0]->xyz;
-          p2 = trianglei->points[1]->xyz;
-          p3 = trianglei->points[2]->xyz;
+        p1 = trianglei->points[0]->xyz;
+        p2 = trianglei->points[1]->xyz;
+        p3 = trianglei->points[2]->xyz;
 
-          xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
-          xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
-          xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+        xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
+        xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
+        xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
+        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          glVertex3fv(xyz1);
-          glVertex3fv(xyz2);
-        }
-        glEnd();
+        glVertex3fv(xyz1);
+        glVertex3fv(xyz2);
+      }
+      glEnd();
         
-        glPointSize(6.0);  // draw points at end of vector
-        glBegin(GL_POINTS);
-        glColor3fv(blue);
-        for(j=0;j<ntris;j++){
-          float *p1, *p2, *p3;
-          float *xyznorm;
-          triangle *trianglei;
-          float xyz1[3], xyz2[3];
+      glPointSize(6.0);  // draw points at end of vector
+      glBegin(GL_POINTS);
+      glColor3fv(blue);
+      for(j=0;j<ntris;j++){
+        float *p1, *p2, *p3;
+        float *xyznorm;
+        triangle *trianglei;
+        float xyz1[3], xyz2[3];
 
-          trianglei = geomlisti->triangles+j;
+        trianglei = geomlisti->triangles+j;
+        if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
+        if(trianglei->geomtype == GEOM_ISO&&(show_iso_normal == 0||smooth_iso_normal==1))continue;
        
-          xyznorm=trianglei->tri_norm;
+        xyznorm=trianglei->tri_norm;
 
-          p1 = trianglei->points[0]->xyz;
-          p2 = trianglei->points[1]->xyz;
-          p3 = trianglei->points[2]->xyz;
+        p1 = trianglei->points[0]->xyz;
+        p2 = trianglei->points[1]->xyz;
+        p3 = trianglei->points[2]->xyz;
 
-          xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
-          xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
-          xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+        xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
+        xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
+        xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
+        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          glVertex3fv(xyz2);
-        }
-        glEnd();
-        glPopMatrix();
+        glVertex3fv(xyz2);
       }
-      if(npoints>0&&smooth_iso_normal==1){ // draw smooth normals
-        glPushMatrix();
-        glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-        glTranslatef(-xbar0,-ybar0,-zbar0);
-        glBegin(GL_LINES);
-        color = black;
-        glColor3fv(color);
-        for(j=0;j<npoints;j++){
-          float *xyznorm;
-          point *pointi;
-          float *xyz1, xyz2[3];
+      glEnd();
+      glPopMatrix();
+    }
+    if(npoints>0){ // draw smooth normals
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
+      glTranslatef(-xbar0,-ybar0,-zbar0);
+      glBegin(GL_LINES);
+      color = black;
+      glColor3fv(color);
+      for(j=0;j<npoints;j++){
+        float *xyznorm;
+        point *pointi;
+        float *xyz1, xyz2[3];
 
-          pointi = geomlisti->points+j;
-          xyznorm = pointi->point_norm;       
-          xyz1 = pointi->xyz;
+        pointi = geomlisti->points+j;
+        if(pointi->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==0))continue;
+        if(pointi->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==0))continue;
+        xyznorm = pointi->point_norm;       
+        xyz1 = pointi->xyz;
 
-          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
 
-          glVertex3fv(xyz1);
-          glVertex3fv(xyz2);
-        }
-        glEnd();
-
-        glPointSize(6.0);  // draw points at end of vector
-        glBegin(GL_POINTS);
-        color = black;
-        glColor3fv(color);
-        for(j=0;j<npoints;j++){
-          float *xyznorm;
-          point *pointi;
-          float *xyz1, xyz2[3];
-
-          pointi = geomlisti->points+j;
-          xyznorm = pointi->point_norm;       
-          xyz1 = pointi->xyz;
-
-          xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-          xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-          xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
-
-          glVertex3fv(xyz2);
-        }
-        glEnd();
-        glPopMatrix();
+        glVertex3fv(xyz1);
+        glVertex3fv(xyz2);
       }
+      glEnd();
+
+      glPointSize(6.0);  // draw points at end of vector
+      glBegin(GL_POINTS);
+      color = black;
+      glColor3fv(color);
+      for(j=0;j<npoints;j++){
+        float *xyznorm;
+        point *pointi;
+        float *xyz1, xyz2[3];
+
+        pointi = geomlisti->points+j;
+        if(pointi->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 0))continue;
+        if(pointi->geomtype == GEOM_ISO  && (show_iso_normal == 0 || smooth_iso_normal == 0))continue;
+        xyznorm = pointi->point_norm;
+        xyz1 = pointi->xyz;
+
+        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+
+        glVertex3fv(xyz2);
+      }
+      glEnd();
+      glPopMatrix();
     }
   }
 }
@@ -2565,6 +2582,12 @@ void ShowHideSortGeometry(float *mm){
           isurf = tri->surf - surfinfo - nsurfinfo - 1;
           if((geomi->geomtype==GEOM_ISO&&showlevels != NULL&&showlevels[isurf] == 0) || tri->surf->transparent_level <= 0.0){
             continue;
+          }
+          if(iter == 1){
+             tri->geomtype = geomi->geomtype;
+             tri->points[0]->geomtype = geomi->geomtype;
+             tri->points[1]->geomtype = geomi->geomtype;
+             tri->points[2]->geomtype = geomi->geomtype;
           }
           if(is_opaque == 1){
             if(iter==1)opaque_triangles[count_opaque] = tri;
