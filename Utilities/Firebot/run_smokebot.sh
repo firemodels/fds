@@ -88,13 +88,13 @@ case $OPTION  in
    exit
    ;;
   m)
-   EMAIL="-m $OPTARG"
+   EMAIL="$OPTARG"
    ;;
   M)
    MOVIE="-M"
    ;;
   q)
-   QUEUE="-q $OPTARG"
+   QUEUE="$OPTARG"
    ;;
   r)
    FDSREPO="$OPTARG"
@@ -125,6 +125,12 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
       exit
     fi
   fi
+fi
+
+QUEUE="-q $QUEUE"
+
+if [ "$EMAIL" != "" ]; then
+  EMAIL="-m $EMAIL"
 fi
 
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
