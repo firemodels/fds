@@ -2567,6 +2567,46 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
 
+
+\clearpage
+
+\section{Reaction Mechanisms (\textct{hrrpuv\_reac})}
+\label{hrrpuv_reac}
+
+\subsubsection{Arrhenius Reaction (\textct{hrrpuv\_reac\_arrhenius})}
+
+\subsubsection{Reaction with Extinction (\textct{hrrpuv\_reac\_extinction})}
+
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel})}
+
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel\_2})}
+
+\subsubsection{Series Reactions (\textct{hrrpuv\_reac\_series})}
+
+\subsubsection{Simple Reaction (\textct{hrrpuv\_reac\_simple})}
+
+\subsubsection{Single Reaction (\textct{hrrpuv\_reac\_single})}
+
+\subsubsection{Soot Production (\textct{hrrpuv\_reac\_soot})}
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_arrhenius} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_extinction} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel_2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_series} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_simple} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_single} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_soot}
+\end{tabular*}
+\caption[Results of the {\ct hrrpuv\_reac} test cases]{Heat release rate per unit volume for the various {\ct hrrpuv\_reac} test cases.}
+\label{hrrpuv_reac_figures}
+\end{figure}
+
+
+
 \clearpage
 
 \section{Mixture Fraction (\textct{burke\_schumann})}
@@ -2588,24 +2628,26 @@ Y_{\rm F} &= 0 \\
 Y_{\rm O} &= 1- \frac{f}{f_{\rm stoich}} \\
 Y_{\rm P} &= \frac{f}{f_{\rm stoich}}
 \end{align}
-Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations.
-\begin{figure}
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
-\caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{Lumped species mass fractions as a function of mixture fraction.}
-\label{fig:burke_schumann_spec}
-\end{figure}
-The state relation for temperature is given by:
+Figure~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations. The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
 T = T_0 +  (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
 \end{equation}
 The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.  The FDS result is shown in Fig.~\ref{fig:burke_schumann_temp}.
-\begin{figure}
+
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
-\caption[Mixture fraction state relation for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec} 
+\caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{(Left) Lumped species mass fractions as a function of mixture fraction.}
+\label{fig:burke_schumann_spec}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_temp}
+\caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
+
 
 
 \clearpage
