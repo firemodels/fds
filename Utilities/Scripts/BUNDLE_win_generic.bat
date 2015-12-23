@@ -88,7 +88,7 @@ CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe      
 
 CALL :COPY  %in_fds2ascii%\intel_win_%platform%\fds2ascii_win_%platform%.exe     %out_bin%\fds2ascii.exe
 
-CALL :COPY  %in_background%\intel_win_32\background.exe                          %out_bin%\background.exe
+CALL :COPY  %in_background%\intel_win_64\background.exe                          %out_bin%\background.exe
 
 CALL :COPY %in_impi%\impi.dll          %out_bin%\impi.dll
 CALL :COPY %in_impi%\mpiexec.hydra.exe %out_bin%\mpiexec.exe
