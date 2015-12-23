@@ -2570,41 +2570,56 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 
 \clearpage
 
-\section{Reaction Mechanisms (\textct{hrrpuv\_reac})}
+\section{Heat Release Rates from Reaction Mechanisms (\textct{hrrpuv\_reac})}
 \label{hrrpuv_reac}
 
-\subsubsection{Arrhenius Reaction (\textct{hrrpuv\_reac\_arrhenius})}
+One of the most important quantities computed in FDS is the heat release rate per unit volume (HRRPUV), $\dot{q}^{\ppp}$.  HRRPUV shows up in the energy equation and hence the expression for the velocity divergence (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The value of $\dot{q}^{\ppp}$ within a computation cell can be computed two ways, which should be equivalent.  The first is to use individual species heats of formation times the respective chemical production rates:
+\begin{equation}
+\label{eq:qdotppp}
+\dot{q}^{\ppp} = - \sum_\alpha \dot{m}_\alpha^{\ppp} \, \Delta h_{{\rm f},\alpha}^\circ
+\end{equation}
+Note that Eq.~(\ref{eq:qdotppp}) is what is ultimately used in the FDS divergence expression.
 
-\subsubsection{Reaction with Extinction (\textct{hrrpuv\_reac\_extinction})}
+The second is to sum the individual reaction rates  times their respective heats of combustion, which are precomputed in the read routines in FDS:
+\begin{equation}
+\label{eq:qdotppp2}
+\dot{q}^{\ppp} = \sum_i r_{{\rm F},i}^\prime \, \Delta H_{{\rm c},i}
+\end{equation}
+Here F denotes the fuel for reaction $i$.
 
-\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel})}
+In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:qdotppp2}) for a series of cases with different reaction mechanisms.  This test series is meant to touch various pathways through the chemistry ODE solver involving mixing, fast and slow chemistry, extinction, and series and parallel reactions.  The result are presented in Fig.~\ref{hrrpuv_reac_figures}.  The measure of correctness is that the black dots (hrrpuv), taken from Eq.~(\ref{eq:qdotppp}), exactly match with the sum of the individual reaction HRR curves denoted by the solid black line, Eq.~(\ref{eq:qdotppp2}). Below we briefly describe the key features of each case.
 
-\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel\_2})}
+\subsubsection{Single Reaction (\textct{hrrpuv\_reac\_single})} This is a single reaction with specified lumped species without extinction.
 
-\subsubsection{Series Reactions (\textct{hrrpuv\_reac\_series})}
+\subsubsection{Series Reactions (\textct{hrrpuv\_reac\_series})} This is a set of series reactions with primitive species.
 
-\subsubsection{Simple Reaction (\textct{hrrpuv\_reac\_simple})}
+\subsubsection{Simple Reaction (\textct{hrrpuv\_reac\_simple})} This is FDS Simple Chemistry integrated using two Forward Euler substeps.
 
-\subsubsection{Single Reaction (\textct{hrrpuv\_reac\_single})}
+\subsubsection{Reaction with Extinction (\textct{hrrpuv\_reac\_extinction})} This is a single reaction with specified lumped species with extinction.
 
-\subsubsection{Soot Production (\textct{hrrpuv\_reac\_soot})}
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel})} This is a set of parallel reactions with two fuels going to one set of products.
+
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel\_2})} This is a set of parallel reactions with one fuel going to two products.
+
+\subsubsection{Arrhenius Reaction (\textct{hrrpuv\_reac\_arrhenius})} This is simple Arrhenius rate law using the default ODE integrator for finite-rate chemistry, which is RK4.
+
+\subsubsection{Soot Production (\textct{hrrpuv\_reac\_soot})} This example combines a fast reaction for the primary reaction with finite-rate chemistry for the soot oxidation reaction.
 
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_arrhenius} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_single} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_series} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_simple} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_extinction} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel_2} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_series} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_simple} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_single} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_arrhenius} &
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_soot}
 \end{tabular*}
 \caption[Results of the {\ct hrrpuv\_reac} test cases]{Heat release rate per unit volume for the various {\ct hrrpuv\_reac} test cases.}
 \label{hrrpuv_reac_figures}
 \end{figure}
-
 
 
 \clearpage
