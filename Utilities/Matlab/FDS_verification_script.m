@@ -22,20 +22,20 @@ clear all
 
 addpath 'scripts'
 
-% % Scripts to run prior to dataplot
+% Scripts to run prior to dataplot
 
-% radiation_box
-% radiation_plane_layer
-% ns2d
-% vort2d
-% wall_internal_radiation
-% ashrae_7
-% flame_species
-% EDC_species
-% cat_propane_depo
-% burke_schumann
-% convective_cooling_convergence
-% random_walk_soln
+radiation_box
+radiation_plane_layer
+ns2d
+vort2d
+wall_internal_radiation
+ashrae_7
+flame_species
+EDC_species
+cat_propane_depo
+burke_schumann
+convective_cooling_convergence
+random_walk_soln
 
 % Dataplot and scatplot options
 
@@ -57,7 +57,7 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, 102:109);
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
@@ -67,32 +67,32 @@ scatplot(saved_data, drange, ...
          'NRC_Options', NRC_Options, ...
          'Append_To_Scatterplot_Title', Append_To_Scatterplot_Title)
 
-% % Special cases
+% Special cases
  
-% turb_model
-% jet_decay
-% wall_model
-% pyrolysis
-% birch_tga
-% water_ice_water
-% pcm_slab
-% pulsating
-% compression_wave
-% plate_view_factor
-% terminal_velocity_convergence
-% flat_fire_comparison
-% fluid_part
-% extinction
-% fan_curve
-% mesh_transformation
-% synthetic_eddy_method
-% shunn_mms_error
-% openmp_timing_benchmarks
-% rms_cov_corr
-% hot_layer_collapse
-% radiating_polygon
-% saad_mms_temporal_error
-% shunn_mms_temporal_error
-% scaling_tests
+turb_model
+jet_decay
+wall_model
+pyrolysis
+birch_tga
+water_ice_water
+pcm_slab
+pulsating
+compression_wave
+plate_view_factor
+terminal_velocity_convergence
+flat_fire_comparison
+fluid_part
+extinction
+fan_curve
+mesh_transformation
+synthetic_eddy_method
+shunn_mms_error
+openmp_timing_benchmarks
+rms_cov_corr
+hot_layer_collapse
+radiating_polygon
+saad_mms_temporal_error
+shunn_mms_temporal_error
+scaling_tests
 
 display('verification scripts completed successfully!')
