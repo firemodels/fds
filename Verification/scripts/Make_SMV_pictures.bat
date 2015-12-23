@@ -21,7 +21,7 @@ if "%size%" == "" (
   set SMOKEVIEW=smokeview
   set WIND2FDS=wind2fds
 ) else (
-  set BACKGROUND=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
+  set BACKGROUND=%SVNROOT%\Utilities\background\intel_win_%size%\background.exe
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%size%\smokediff_win_%size%.exe
   set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%size%\smokezip_win_%size%.exe
@@ -171,7 +171,7 @@ goto eof
 :: -----------------------------------------
 
   set program=%1
-  %program% -help 1>> %SCRIPT_DIR%\exist.txt 2>&1
+  %program% -help 1> %SCRIPT_DIR%\exist.txt 2>&1
   type %SCRIPT_DIR%\exist.txt | find /i /c "not recognized" > %SCRIPT_DIR%\count.txt
   set /p nothave=<%SCRIPT_DIR%\count.txt
   if %nothave% == 1 (
