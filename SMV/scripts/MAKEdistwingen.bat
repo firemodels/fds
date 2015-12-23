@@ -32,7 +32,7 @@ set bundledir=%svn_root%\smv\for_bundle
 set smvbuild=%svn_root%\SMV\Build\%BUILDDIR%
 set svzipbuild=%svn_root%\Utilities\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\Utilities\smokediff\%BUILDDIR%
-set bgbuild=%svn_root%\Utilities\background\intel_win_32
+set bgbuild=%svn_root%\Utilities\background\intel_win_64
 set sh2bat=%svn_root%\Utilities\Data_Processing
 set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 

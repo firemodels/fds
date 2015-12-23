@@ -1,6 +1,6 @@
 @echo off
 
-Rem  Windows batch file to build a 32 bit OSX version of background
+Rem  Windows batch file to build an OSX version of background
 
 Rem setup environment variables (defining where repository resides etc) 
 

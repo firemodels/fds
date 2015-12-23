@@ -4,7 +4,7 @@ set REMOTESVNROOT=FDS-SMV
 set OSXHOST=$2
 set SVNROOT=~/$3
 
-set BACKGROUNDDIR=$REMOTESVNROOT/Utilities/background/intel_osx_32
+set BACKGROUNDDIR=$REMOTESVNROOT/Utilities/background/intel_osx_64
 set SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
 set SMZDIR=$REMOTESVNROOT/Utilities/smokezip/intel_osx_64
 set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_64
