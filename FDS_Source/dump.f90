@@ -948,12 +948,12 @@ DO N=1,M%N_SLCF
    
    ! write out slice file info to the .smv file
 
-      IF(SL%GEOMETRY)THEN
-        IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
-      ELSE
+      IF(SL%SLICETYPE=='STRUCTURED')THEN
         IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
+      ELSE
+        IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       ENDIF
-      IF (SL%GEOMETRY)THEN
+      IF (SL%SLICETYPE/='STRUCTURED')THEN
          M%N_STRINGS = M%N_STRINGS + 1
          WRITE(M%STRING(M%N_STRINGS),'(A,1x,I6)') 'GEOM',0
          M%N_STRINGS = M%N_STRINGS + 1
@@ -965,15 +965,15 @@ DO N=1,M%N_SLCF
       ELSE
          SLICELABEL=SLICEPARMS
       ENDIF
-      IF (SL%GEOMETRY)THEN
-         WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'BNDS',NM,TRIM(SLICELABEL)
-      ELSE
+      IF (SL%SLICETYPE=='STRUCTURED')THEN
          IF (.NOT.SL%TERRAIN_SLICE.AND..NOT.SL%CELL_CENTERED) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCF',NM,TRIM(SLICELABEL)
          ENDIF
          IF (SL%CELL_CENTERED) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCC',NM,TRIM(SLICELABEL)
          ENDIF
+      ELSE
+         WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'BNDS',NM,TRIM(SLICELABEL)
       ENDIF
       IF (SL%TERRAIN_SLICE)THEN
         IF (SL%FIRE_LINE) THEN
@@ -984,7 +984,7 @@ DO N=1,M%N_SLCF
       ENDIF
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF(N,NM))
-      IF (SL%GEOMETRY)THEN
+      IF (SL%SLICETYPE/='STRUCTURED')THEN
          M%N_STRINGS = M%N_STRINGS + 1
          WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF_GEOM(N,NM))
       ENDIF
@@ -3596,27 +3596,21 @@ END SUBROUTINE DUMP_SMOKE3D
 
 ! ---------------------------- GETSLICEDIR ----------------------------------------
 
-SUBROUTINE GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,ISLICE)
+SUBROUTINE GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
 INTEGER, INTENT(IN) :: I1, I2, J1, J2, K1, K2
-INTEGER, INTENT(OUT) :: DIR, ISLICE
+INTEGER, INTENT(OUT) :: DIR, SLICE
 
-IF(I1==I2)THEN
-   DIR=1
-   ISLICE = I1
-   RETURN
-ENDIF
-IF(J1==J2)THEN
-   DIR=2
-   ISLICE = J1
-   RETURN
-ENDIF
-IF(K1==K2)THEN
+IF(ABS(K1-K2)<MAX(ABS(I1-I2),ABS(J1-J2)))THEN
    DIR=3
-   ISLICE = K1
-   RETURN
+   SLICE = K1
+ELSE IF(ABS(J1-J2)<MAX(ABS(I1-I2),ABS(K1-K2)))THEN
+   DIR=2
+   SLICE = J1
+ELSE
+   DIR=1
+   SLICE = I1
 ENDIF
-DIR=1
-ISLICE=I1
+RETURN
 
 END SUBROUTINE GETSLICEDIR
 
@@ -3627,32 +3621,212 @@ INTEGER, INTENT(IN) :: I, J, NI
 IJK = I + (J-1)*NI
 END FUNCTION IJK
 
+! ---------------------------- GET_GEOMSIZES ----------------------------------------
+
+SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+
+! determine NVERTS and NFACES for one of the following cases
+!
+! EXCLUDEGEOMETRY - slice file geometry that ignores immersed geometric objects .  This case visually is identical
+!                   to a "regular" slice file
+! INCLUDEGEOMETRY - slice file geometry that incorporates geometric objects.  If there are no immersed objects present
+!                   then this case is equivalent to the 'EXCLUDEGEOMETRY' case
+! CUTCELLS - slice file geometry that only includes cutcells, ie faces adjacent to immersed objects
+
+   CHARACTER(*), INTENT(IN) :: SLICETYPE
+   INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
+   INTEGER, INTENT(OUT) :: NVERTS, NFACES
+   
+   INTEGER :: DIR,SLICE
+
+   NVERTS=0
+   NFACES=0
+   IF(SLICETYPE=='EXCLUDEGEOM')THEN
+      CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+      IF(DIR==1)THEN
+        NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
+        NFACES = 2*(J2 - J1)*(K2 - K1)
+      ELSE IF(DIR==2)THEN
+        NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
+        NFACES = 2*(I2 - I1)*(K2 - K1)
+      ELSE
+        NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
+        NFACES = 2*(I2 - I1)*(J2 - J1)
+      ENDIF
+   ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+   ELSE IF(SLICETYPE=='CUTCELLS')THEN
+   ENDIF
+END SUBROUTINE GET_GEOMSIZES
+
+! ---------------------------- GET_GEOMINFO ----------------------------------------
+
+ SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES)
+
+ ! generate VERTS(1:3*NVERTS) and FACES(1:3*NFACES) arrays
+ 
+   CHARACTER(*), INTENT(IN) :: SLICETYPE
+   INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
+   INTEGER, INTENT(IN) :: NVERTS, NFACES
+   INTEGER, INTENT(OUT), DIMENSION(3*NFACES) :: FACES
+   REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS) :: VERTS
+   
+   INTEGER :: DIR, SLICE
+   INTEGER :: NI, NJ, NK
+   REAL(FB) :: XMID, YMID, ZMID
+   INTEGER :: I, J, K
+   INTEGER IFACE, IVERT
+   
+   IF(SLICETYPE=='EXCLUDEGEOM')THEN
+      NI = I2 + 1 - I1
+      NJ = J2 + 1 - J1
+      NK = K2 + 1 - K1
+      CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+      IVERT = 0
+      IFACE = 0
+      IF(DIR==1)THEN
+         XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I = SLICE,SLICE
+                  VERTS(IVERT+1) = XMID
+                  VERTS(IVERT+2) = YPLT(J)
+                  VERTS(IVERT+3) = ZPLT(K)
+                  IVERT = IVERT + 3
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO J=1,NJ-1
+               FACES(IFACE+1) = IJK(  J,  K,NJ)
+               FACES(IFACE+2) = IJK(J+1,  K,NJ)
+               FACES(IFACE+3) = IJK(J+1,K+1,NJ)
+               FACES(IFACE+4) = IJK(  J,  K,NJ)
+               FACES(IFACE+5) = IJK(J+1,K+1,NJ)
+               FACES(IFACE+6) = IJK(  J,K+1,NJ)
+               IFACE = IFACE + 6
+            END DO
+         END DO
+      ELSE IF(DIR==2)THEN
+         YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
+         DO K=K1,K2
+            DO J=SLICE,SLICE
+               DO I = I1,I2
+                  VERTS(IVERT+1) = XPLT(I)
+                  VERTS(IVERT+2) = YMID
+                  VERTS(IVERT+3) = ZPLT(K)
+                  IVERT = IVERT + 3
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO I=1,NI-1
+               FACES(IFACE+1) = IJK(  I,  K,NI)
+               FACES(IFACE+2) = IJK(I+1,  K,NI)
+               FACES(IFACE+3) = IJK(I+1,K+1,NI)
+               FACES(IFACE+4) = IJK(  I,  K,NI)
+               FACES(IFACE+5) = IJK(I+1,K+1,NI)
+               FACES(IFACE+6) = IJK(  I,K+1,NI)
+               IFACE = IFACE + 6
+            END DO
+         END DO
+      ELSE
+         ZMID = (ZPLT(SLICE)+ZPLT(SLICE-1))/2.0_FB
+         DO K=SLICE,SLICE
+            DO J=J1,J2
+               DO I = I1,I2
+                  VERTS(IVERT+1) = XPLT(I)
+                  VERTS(IVERT+2) = ZPLT(J)
+                  VERTS(IVERT+3) = ZMID
+                  IVERT = IVERT + 3
+               END DO
+            END DO
+         END DO
+         DO J=1,NJ-1
+            DO I=1,NI-1
+               FACES(IFACE+1) = IJK(  I,  J,NI)
+               FACES(IFACE+2) = IJK(I+1,  J,NI)
+               FACES(IFACE+3) = IJK(I+1,J+1,NI)
+               FACES(IFACE+4) = IJK(  I,  J,NI)
+               FACES(IFACE+5) = IJK(I+1,J+1,NI)
+               FACES(IFACE+6) = IJK(  I,J+1,NI)
+               IFACE = IFACE + 6
+            END DO
+         END DO
+      ENDIF
+   ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+   ELSE IF(SLICETYPE=='CUTCELLS')THEN
+   ENDIF
+END SUBROUTINE GET_GEOMINFO
+
+! ---------------------------- GET_GEOMVALS ----------------------------------------
+
+SUBROUTINE GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
+
+! copy data from QQ array into VALS(1:NFACES)
+
+INTEGER, INTENT(IN) :: I1, I2, J1, J2, K1, K2
+INTEGER, INTENT(IN) :: NFACES
+CHARACTER(*), INTENT(IN) :: SLICETYPE
+REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
+
+INTEGER :: DIR, SLICE, IVAL
+INTEGER :: I,J,K
+
+CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+IF(SLICETYPE=='EXCLUDEGEOM')THEN
+   IVAL = 0
+   IF(DIR==1)THEN
+      DO K = K1+1, K2
+         DO J = J1+1, J2
+            VALS(IVAL+1) = QQ(SLICE,J,K,1)
+            VALS(IVAL+2) = QQ(SLICE,J,K,1)
+            IVAL = IVAL + 2
+         END DO
+      END DO
+   ELSE IF(DIR==2)THEN
+      DO K = K1+1, K2
+         DO I = I1+1, I2
+            VALS(IVAL+1) = QQ(I,SLICE,K,1)
+            VALS(IVAL+2) = QQ(I,SLICE,K,1)
+            IVAL = IVAL + 2
+         END DO
+      END DO
+   ELSE
+      DO J = J1+1, J2
+         DO I = I1+1, I2
+            VALS(IVAL+1) = QQ(I,J,SLICE,1)
+            VALS(IVAL+2) = QQ(I,J,SLICE,1)
+            IVAL = IVAL + 2
+         END DO
+      END DO
+   ENDIF
+ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+ELSE IF(SLICETYPE=='CUTCELLS')THEN
+ENDIF
+END SUBROUTINE GET_GEOMVALS
+
 ! ---------------------------- DUMP_SLICE_GEOM ----------------------------------------
 
-SUBROUTINE DUMP_SLICE_GEOM(FUNIT,HEADER,STIME,I1,I2,J1,J2,K1,K2)
+SUBROUTINE DUMP_SLICE_GEOM(FUNIT,SLICETYPE,HEADER,STIME,I1,I2,J1,J2,K1,K2)
+CHARACTER(*), INTENT(IN) :: SLICETYPE
 INTEGER, INTENT(IN) :: FUNIT, HEADER, I1, I2, J1, J2, K1, K2
 REAL(FB) :: STIME
 
-INTEGER :: DIR, SLICE
-INTEGER :: I, J, K
+INTEGER :: I
 INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, FIRST_FRAME_STATIC=1, NVOLS=0, VERSION=2
-INTEGER :: NVERTS, NFACES, NI, NJ, NK
-REAL(FB), PARAMETER :: ZERO=0.0_FB
-REAL(FB) :: XMID, YMID, ZMID
+INTEGER :: NVERTS, NFACES
+REAL(FB), PARAMETER :: ZERO_FLOAT=0.0_FB
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
+INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES
 
-CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-NI = I2 + 1 - I1
-NJ = J2 + 1 - J1
-NK = K2 + 1 - K1
-IF(DIR==1)THEN
-  NVERTS = NJ*NK
-  NFACES = 2*(NJ-1)*(NK-1)
-ELSE IF(DIR==2)THEN
-  NVERTS = NI*NK
-  NFACES = 2*(NI-1)*(NK-1)
+CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+IF(NVERTS>0.AND.NFACES>0)THEN
+   ALLOCATE(VERTS(3*NVERTS))
+   ALLOCATE(FACES(3*NFACES))
+   CALL GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES)
 ELSE
-  NVERTS = NI*NJ
-  NFACES = 2*(NI-1)*(NJ-1)
+   NVERTS=0
+   NFACES=0
 ENDIF
 
 IF (HEADER==1) THEN
@@ -3664,49 +3838,39 @@ WRITE(FUNIT) STIME
 WRITE(FUNIT) NVERTS, NFACES, NVOLS
 
 IF(NVERTS>0.AND.NFACES>0)THEN
-   IF(DIR==1)THEN
-      XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
-      WRITE(FUNIT)((( XMID ,YPLT(J),ZPLT(K),I=SLICE,SLICE),J=J1,J2),K=K1,K2 )
-      WRITE(FUNIT)(( IJK(J,K,NJ),IJK(J+1,K,NJ),IJK(J+1,K+1,NJ),IJK(J,K,NJ),IJK(J+1,K+1,NJ),IJK(J,K+1,NJ),J=1,NJ-1),K=1,NK-1 )
-   ELSE IF(DIR==2)THEN
-      YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
-      WRITE(FUNIT)((( XPLT(I),YMID,ZPLT(K),I=I1,I2),J=SLICE,SLICE),K=K1,K2 )
-      WRITE(FUNIT)(( IJK(I,K,NI),IJK(I+1,K,NI),IJK(I+1,K+1,NI),IJK(I,K,NI),IJK(I+1,K+1,NI),IJK(I,K+1,NI),I=1,NI-1),K=1,NK-1 )
-   ELSE
-      ZMID = (ZPLT(SLICE)+ZPLT(SLICE-1))/2.0_FB
-      WRITE(FUNIT)((( XPLT(I),YPLT(J),ZMID,I=I1,I2),J=J1,J2),K=SLICE,SLICE )
-      WRITE(FUNIT)(( IJK(I,J,NI),IJK(I+1,J,NI),IJK(I+1,J+1,NI),IJK(I,J,NI),IJK(I+1,J+1,NI),IJK(I,J+1,NI),I=1,NI-1),J=1,NJ-1 )
-   ENDIF
-  WRITE(FUNIT) (ZERO_INTEGER,I=1,NFACES)   ! placeholders for now
-  WRITE(FUNIT) (ZERO,ZERO,   I=1,3*NFACES) ! placeholders for now
+   WRITE(FUNIT) (VERTS(I),I=1,3*NVERTS)
+   WRITE(FUNIT) (FACES(I),I=1,3*NFACES)
+   WRITE(FUNIT) (ZERO_INTEGER,I=1,NFACES)   ! placeholders for now
+   WRITE(FUNIT) (ZERO_FLOAT,ZERO_FLOAT,   I=1,3*NFACES) ! placeholders for now
 ENDIF
 
-WRITE(FUNIT) ZERO
+WRITE(FUNIT) ZERO_FLOAT
 WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER
+IF(NVERTS>0.AND.NFACES>0)THEN
+      DEALLOCATE(VERTS)
+      DEALLOCATE(FACES)
+ENDIF      
 END SUBROUTINE DUMP_SLICE_GEOM
 
 ! ---------------------------- DUMP_SLICE_GEOM_DATA ----------------------------------------
 
-SUBROUTINE DUMP_SLICE_GEOM_DATA(FUNIT,HEADER,STIME,I1,I2,J1,J2,K1,K2)
+SUBROUTINE DUMP_SLICE_GEOM_DATA(FUNIT,SLICETYPE,HEADER,STIME,I1,I2,J1,J2,K1,K2)
+CHARACTER(*), INTENT(IN) :: SLICETYPE
 INTEGER, INTENT(IN) :: FUNIT, HEADER, I1, I2, J1, J2, K1, K2
 REAL(FB), INTENT(IN) :: STIME
 
-INTEGER :: DIR, SLICE
 INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, VERSION=2
-INTEGER :: NFACES, NI, NJ, NK
-INTEGER I, J, K
+INTEGER :: NVERTS,NFACES
+INTEGER I
+REAL(FB), ALLOCATABLE, DIMENSION(:) :: VALS
 
-CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-
-NI = I2 + 1 - I1
-NJ = J2 + 1 - J1
-NK = K2 + 1 - K1
-IF(DIR==1)THEN
-  NFACES = 2*(NJ-1)*(NK-1)
-ELSE IF(DIR==2)THEN
-  NFACES = 2*(NI-1)*(NK-1)
+CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+IF(NVERTS>0.AND.NFACES>0)THEN
+   ALLOCATE(VALS(NFACES))
+   CALL GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
 ELSE
-  NFACES = 2*(NI-1)*(NJ-1)
+   NVERTS=0
+   NFACES=0
 ENDIF
 
 IF (HEADER==1) THEN
@@ -3715,14 +3879,9 @@ IF (HEADER==1) THEN
 ENDIF
 WRITE(FUNIT) STIME
 WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER, NFACES
-IF (NFACES>0) THEN
-   IF(DIR==1)THEN
-      WRITE(FUNIT) (((QQ(I,J,K,1),QQ(I,J,K,1),I=SLICE,SLICE),J=J1+1,J2),K=K1+1,K2)
-   ELSE IF(DIR==2)THEN
-      WRITE(FUNIT) (((QQ(I,J,K,1),QQ(I,J,K,1),I=I1+1,I2),J=SLICE,SLICE),K=K1+1,K2)
-   ELSE
-      WRITE(FUNIT) (((QQ(I,J,K,1),QQ(I,J,K,1),I=I1+1,I2),J=J1+1,J2),K=SLICE,SLICE)
-   ENDIF
+IF(NVERTS>0.AND.NFACES>0)THEN
+   WRITE(FUNIT) (VALS(I),I=1,NFACES)
+   DEALLOCATE(VALS)
 ENDIF
 
 END SUBROUTINE
@@ -3999,7 +4158,7 @@ QUANTITY_LOOP: DO IQ=1,NQT
  
    IF (.NOT.PLOT3D) THEN
       SL => SLICE(IQ)
-      IF (.NOT. SL%GEOMETRY) THEN ! write out slice file using original slice file format
+      IF (SL%SLICETYPE=='STRUCTURED') THEN ! write out slice file using original slice file format
          STIME = T_BEGIN + (T-T_BEGIN)*TIME_SHRINK_FACTOR
          OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
          WRITE(LU_SLCF(IQ,NM)) STIME
@@ -4008,18 +4167,18 @@ QUANTITY_LOOP: DO IQ=1,NQT
       ELSE
       ! write geometry for slice file
          IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB) THEN
-         ! geometry and data file first time step
+         ! geometry and data file at first time step
             OPEN(LU_SLCF_GEOM(IQ,NM),FILE=FN_SLCF_GEOM(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-            CALL DUMP_SLICE_GEOM(LU_SLCF_GEOM(IQ,NM),1,STIME,I1,I2,J1,J2,K1,K2)
+            CALL DUMP_SLICE_GEOM(LU_SLCF_GEOM(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2)
             CLOSE(LU_SLCF_GEOM(IQ,NM))
             
             OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='REPLACE')
-            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),1,STIME,I1,I2,J1,J2,K1,K2)
+            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),SL%SLICETYPE,1,STIME,I1,I2,J1,J2,K1,K2)
             CLOSE(LU_SLCF(IQ,NM))
          ELSE         
-         ! ata file subsequent time steps
+         ! data file at subsequent time steps
             OPEN(LU_SLCF(IQ,NM),FILE=FN_SLCF(IQ,NM),FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
-            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),0,STIME,I1,I2,J1,J2,K1,K2)
+            CALL DUMP_SLICE_GEOM_DATA(LU_SLCF(IQ,NM),SL%SLICETYPE,0,STIME,I1,I2,J1,J2,K1,K2)
             CLOSE(LU_SLCF(IQ,NM))
          ENDIF
       ENDIF
