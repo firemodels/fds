@@ -1622,7 +1622,7 @@ Currently, the default behavior in FDS is to revert to first-order upwinding at 
 \section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
 \label{info:INIT}
 
-Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}. 
+Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}.
 
 Note that the rectangular regions defined by {\ct INIT} may overlap, but in such cases, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
@@ -3334,53 +3334,35 @@ model the entire HVAC system, read Section~\ref{info:HVAC}.
 \section{Simple Vents, Fans and Heaters}
 \label{info:Velocity_BC}
 
-The ventilation system of individual compartments within a building is described using
-velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
-be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
-surface. However, there are various other facets of velocity boundary conditions that are described below.
+The ventilation system of individual compartments within a building is described using velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid surface. However, there are various other facets of velocity boundary conditions that are described below.
 
 \subsection{Simple Supply and Exhaust Vents}
 
-The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate
-a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
-The normal component of velocity is usually specified directly via the parameter
-{\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
-computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
-domain, i.e., an exhaust vent. For example, the lines
-
+The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate a {\ct SURF\_ID} with some form of specified velocity or volume flow rate. The normal component of velocity is usually specified directly via the parameter {\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the domain, i.e., an exhaust vent. For example, the lines
 \begin{lstlisting}
 &SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
 &VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
 \end{lstlisting}
-
-\noindent
-create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
-realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
-orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
-In this example the {\ct VENT} may not be exactly
-0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
-{\ct VOLUME\_FLOW} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLOW}
-should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
-with a {\ct VOLUME\_FLOW} prescribed can be invoked by either a
-{\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
-velocity on the face or faces of the obstruction will be given by the specified
-{\ct VOLUME\_FLOW} divided by the area of that particular face. For example:
-
+create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the realignment of the {\ct VENT} onto the FDS mesh. Regardless of the orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}. In this example the {\ct VENT} may not be exactly 0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then {\ct VOLUME\_FLOW} can be prescribed instead of {\ct VEL}. The units are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLOW} should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF} with a {\ct VOLUME\_FLOW} prescribed can be invoked by either a {\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting velocity on the face or faces of the obstruction will be given by the specified {\ct VOLUME\_FLOW} divided by the area of that particular face. For example:
 \begin{lstlisting}
 &SURF ID='SUPPLY', VOLUME_FLOW=-5.0, COLOR='GREEN' /
 &OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
 \end{lstlisting}
+dictates that the forward $x$-facing surface of the obstruction is to have a velocity equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the computational domain.
 
-\noindent
-dictates that the forward $x$-facing surface of the obstruction is to have a velocity
-equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
-computational domain.
+Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flux is desired. 
 
+Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the specified {\ct VOLUME\_FLOW} will be recomputed in each mesh so that the desired volume flow is achieved. This was not the case in FDS version 6.3 and earlier. The sample cases called {\ct volume\_flow\_1.fds} and {\ct volume\_flow\_2.fds} in the {\ct Flowfields} folder demonstrate that a {\ct VENT} or an {\ct OBST} can be divided among several meshes. In both cases, air is drawn from a 1~m by 1~m by 1~m box at a rate of 0.01~m$^3$/s. These cases also ensure that the {\ct VENT} or {\ct OBST} need not be aligned with the mesh to yield the desired flow rate. Figure~\ref{volume_flow} displays the volume flow drawn though an {\ct OPEN} boundary on an opposite face of the box with either a {\ct VENT} (left) or {\ct OBST} (right) with a specified volume flow.
 
-Note that either {\ct VEL} or {\ct VOLUME\_FLOW} should be prescribed,
-not both.  The choice depends on whether an exact velocity is desired at a
-given vent, or whether the given volume flux is desired.
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_2} 
+\end{tabular*}
+\caption[Results of the {\ct volume\_flow} test cases]{Flow rate of air drawn through a unit cube via a {\ct VENT} (left) and {\ct OBST} (right) with specified {\ct VOLUME\_FLOW}.}
+\label{volume_flow}
+\end{figure}
+
 
 
 \subsection{Total Mass Flux}
@@ -3393,19 +3375,12 @@ Most often, you specify a simple supply or exhaust vent by setting either a norm
 \subsection{Heaters}
 
 You can create a simple heating vent by changing the temperature of the incoming air
-
 \begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
 \end{lstlisting}
+The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
 
-\noindent
-The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
-air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
-suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
-
-Note that if {\ct HRRPUA} or solid phase reaction parameters are
-specified, no velocity should be prescribed. The combustible gases
-are ejected at a velocity computed by FDS.
+Note that if {\ct HRRPUA} or solid phase reaction parameters are specified, no velocity should be prescribed. The combustible gases are ejected at a velocity computed by FDS.
 
 
 
@@ -3413,28 +3388,13 @@ are ejected at a velocity computed by FDS.
 
 \label{info:louvers}
 
-Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
-incoming air stream.
-It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow.
-The normal component is specified with {\ct VEL} as described above. The tangential is prescribed
-via a pair of real numbers {\ct VEL\_T} representing the desired tangential
-velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
-
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
 \begin{lstlisting}
 &SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
 \end{lstlisting}
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 1.2~m/s and a tangential velocity of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either the $y$ or $z$ direction, depending on what the normal direction is.
 
-\noindent
-is a boundary condition for a louvered vent that pushes air into the
-space with a normal velocity of 1.2~m/s and a tangential velocity
-of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
-the $y$ or $z$ direction, depending on what the normal direction is.
-
-In cases of limited mesh resolution, it may not be possible to describe a louvered vent or
-slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the
-opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the
-{\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
-directions.
+In cases of limited mesh resolution, it may not be possible to describe a louvered vent or slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
 
 If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for details on how to specify the louver.
 
@@ -3443,7 +3403,6 @@ If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for d
 \label{info:vel_grad}
 
 It is sometimes desirable to specify a Neumann boundary condition (specified gradient) for the velocity in the direction normal to the boundary.  For example, the following allows inflow and outflow along the top of the domain, but $\partial w/\partial z = 0$.  Note that {\ct FREE\_SLIP=.TRUE.} only sets $\partial u/\partial z=0$ and $\partial v/\partial z=0$.
-
 \begin{lstlisting}
 &SURF ID = 'sky', COLOR = 'INVISIBLE', VEL_GRAD=0., FREE_SLIP=.TRUE. /
 &VENT MB='ZMAX', SURF_ID='sky' /
