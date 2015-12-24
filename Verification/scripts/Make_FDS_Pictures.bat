@@ -1,5 +1,7 @@
 @echo off
 
+set curdir=%CD%
+
 if "x%1" == "x" goto else1
 set SMOKEVIEW=%1
 :else1
@@ -29,3 +31,4 @@ call FDS_Pictures.bat
 
 cd %BASEDIR%
 erase FDS_Pictures.bat
+cd %curdir%
