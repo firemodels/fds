@@ -1,25 +1,27 @@
 @echo off
 
-set rundebug=%1
-
 set size=_64
-
 set svn_drive=c:
-if "%rundebug%" == "1" (
-set DEBUG=_db
-) else (
 set DEBUG=
-)
-
 set SCRIPT_DIR=%CD%
+set runonlygeom=0
+
+set curdir=%CD%
 cd %CD%\..
 set BASEDIR=%CD%
 
 cd %BASEDIR%\..\
 set SVNROOT=%CD%
 
-cd %SVNROOT%\..\cfastclean\
+cd %SVNROOT%\..\cfastgitclean\
 set CFAST=%CD%
+
+set stopscript=0
+call :getopts %*
+cd %curdir%
+if %stopscript% == 1 (
+  exit /b
+)
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 set WAIT_FILE=%SCRIPT_DIR%\wait.txt
@@ -106,7 +108,9 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-call %SCRIPT_DIR%\SMV_Cases.bat
+if %runonlygeom% == "0" (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+)
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
 
 :: run cases
@@ -115,7 +119,9 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-call %SCRIPT_DIR%\SMV_Cases.bat
+if %runonlygeom% == "0" (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+)
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
 call :wait_until_finished
 
@@ -157,4 +163,50 @@ exit /b
   )
   exit /b 0
 
+:getopts
+ if (%1)==() exit /b
+ set valid=0
+ set arg=%1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+ if /I "%1" EQU "-debug" (
+   set valid=1
+   set DEBUG=_db
+ )
+ if /I "%1" EQU "-cfastrepo" (
+   set valid=1
+   set CFAST=%2
+   shift
+ )
+ if /I "%1" EQU "-geom" (
+   set valid=1
+   set runonlygeom=1
+ )
+ shift
+ if %valid% == 0 (
+   echo.
+   echo ***Error: the input argument %arg% is invalid
+   echo.
+   echo Usage:
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+if not (%1)==() goto getopts
+exit /b
+
+:usage  
+echo Run_SMV_Cases [options]
+echo. 
+echo -help  - display this message
+echo -cfastrepo - specify cfast repo location [default: %CFAST%]
+echo -debug - run with debug FDS
+echo -geom  - run only geom cases
+exit /b
+
+
 :eof
+cd %curdir%

@@ -348,7 +348,7 @@ echo             debug mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases_git %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
@@ -365,7 +365,7 @@ echo             release mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases_git %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
@@ -388,7 +388,7 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making Smokeview pictures
 
 cd %fdsroot%\Verification\scripts
-call MAKE_SMV_pictures 64 1> %OUTDIR%\stage5.txt 2>&1
+call MAKE_SMV_pictures 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
