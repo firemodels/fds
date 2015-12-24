@@ -60,8 +60,6 @@ if "%altemail%" == "1" (
   )
 )
 
-set release=0
-set debug=1
 set errorlog=%OUTDIR%\firebot_errors.txt
 set timefile=%OUTDIR%\time.txt
 set datefile=%OUTDIR%\date.txt
@@ -312,7 +310,7 @@ echo             debug mode
 :: run cases
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
@@ -336,7 +334,7 @@ if %clean% == 0 goto skip_clean2
 :skip_clean2
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
