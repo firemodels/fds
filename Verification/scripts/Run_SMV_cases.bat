@@ -209,3 +209,4 @@ exit /b
 
 
 :eof
+cd %curdir%

@@ -1,5 +1,6 @@
 @echo off
 
+set curdir=%CD%
 set size=_64
 set svn_drive=c:
 set DEBUG=
@@ -238,3 +239,4 @@ echo -geom  - run only geom cases
 exit /b
   
 :eof
+cd %curdir%
