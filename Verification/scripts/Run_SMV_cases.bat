@@ -5,6 +5,7 @@ set svn_drive=c:
 set DEBUG=
 set SCRIPT_DIR=%CD%
 set runonlygeom=0
+set rundebug=0
 
 set curdir=%CD%
 cd %CD%\..
@@ -108,7 +109,7 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-if %runonlygeom% == "0" (
+if %runonlygeom% == 0 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
@@ -119,7 +120,7 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-if %runonlygeom% == "0" (
+if %runonlygeom% == 0 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
 call %SCRIPT_DIR%\SMV_geom_Cases.bat
@@ -175,6 +176,7 @@ exit /b
  if /I "%1" EQU "-debug" (
    set valid=1
    set DEBUG=_db
+   set rundebug=1
  )
  if /I "%1" EQU "-cfastrepo" (
    set valid=1
