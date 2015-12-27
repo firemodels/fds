@@ -1061,7 +1061,29 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \end{figure}
 
 \subsection{geom\_slice.fds}
-Figure \ref{fig:geom_slice} tests the generation of a slice file using the geometry file format.
+The slice file in Figure \ref{fig:geom_slice} was generated using the {\tt SLICETYPE}\ keyword on a {\tt \&SLCF}\ namelist statement as in
+{\footnotesize
+\begin{verbatim}
+&SLCF PBY=0.75,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE., SLICETYPE='EXCLUDEGEOM' /.
+\end{verbatim}
+}
+
+\noindent The {\tt SLICETYPE}\ keyword is used to specify the type of slice generated.  For example, a slice consisting of only cutcells, a slice  including the effects of immersed geometry, a slice ignoring immersed geometry and a slice output using the original slice file format.  These choices are documented in Table \ref{table:slicetype}.
+
+\begin{table}
+\caption{Description of {\tt SLICETYPE}\ values used on a {\tt \&SLCF}\ namelist statement }
+\begin{tabular}{|l|l|}
+  \hline
+Keyword& Description\\
+\hline
+STRUCTURED&generate slice using original  file format\\
+CUTCELL&output only triangle faces associated with  cutcells\\
+INCLUDEGEOM&include immersed geometry when generating a slice file\\
+EXCLUDEGEOM&ignore immersed geometry when generating a slice file\\
+\hline
+\end{tabular}
+\label{table:slicetype}
+\end{table}
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1071,7 +1093,7 @@ Figure \ref{fig:geom_slice} tests the generation of a slice file using the geome
  \SI{0.0}{s}&\SI{20.0}{s}
   \end{tabular}
 \end{center}
- \caption{Slice file generated using the geometry file format Case: geom\_slice.fds}
+ \caption{Slice file generated using the geometry file format Case: geom\_slice.fds.  The two triangles are an immersed object with boundary file temperature data displayed on its surface.}
 \label{fig:geom_slice}
 \end{figure}
 
