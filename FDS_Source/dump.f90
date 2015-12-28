@@ -949,11 +949,9 @@ DO N=1,M%N_SLCF
    ! write out slice file info to the .smv file
 
       IF(SL%SLICETYPE=='STRUCTURED')THEN
-        IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
+         IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       ELSE
-        IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
-      ENDIF
-      IF (SL%SLICETYPE/='STRUCTURED')THEN
+         IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
          M%N_STRINGS = M%N_STRINGS + 1
          WRITE(M%STRING(M%N_STRINGS),'(A,1x,I6)') 'GEOM',0
          M%N_STRINGS = M%N_STRINGS + 1
@@ -3623,7 +3621,7 @@ END FUNCTION IJK
 
 ! ---------------------------- GET_GEOMSIZES ----------------------------------------
 
-SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+RECURSIVE SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
 
 ! determine NVERTS and NFACES for one of the following cases
 !
@@ -3655,12 +3653,14 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
       ENDIF
    ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
    ELSE IF(SLICETYPE=='CUTCELLS')THEN
+   ELSE IF(SLICETYPE=='TESTGEOM')THEN
+      CALL GET_GEOMSIZES('EXCLUDEGEOM',I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
    ENDIF
 END SUBROUTINE GET_GEOMSIZES
 
 ! ---------------------------- GET_GEOMINFO ----------------------------------------
 
- SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES)
+ RECURSIVE SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES)
 
  ! generate VERTS(1:3*NVERTS) and FACES(1:3*NFACES) arrays
  
@@ -3688,22 +3688,25 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=K1,K2
             DO J=J1,J2
                DO I = SLICE,SLICE
-                  VERTS(IVERT+1) = XMID
-                  VERTS(IVERT+2) = YPLT(J)
-                  VERTS(IVERT+3) = ZPLT(K)
-                  IVERT = IVERT + 3
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XMID
+                  VERTS(3*IVERT-1) = YPLT(J)
+                  VERTS(3*IVERT)   = ZPLT(K)
                END DO
             END DO
          END DO
          DO K=1,NK-1
             DO J=1,NJ-1
-               FACES(IFACE+1) = IJK(  J,  K,NJ)
-               FACES(IFACE+2) = IJK(J+1,  K,NJ)
-               FACES(IFACE+3) = IJK(J+1,K+1,NJ)
-               FACES(IFACE+4) = IJK(  J,  K,NJ)
-               FACES(IFACE+5) = IJK(J+1,K+1,NJ)
-               FACES(IFACE+6) = IJK(  J,K+1,NJ)
-               IFACE = IFACE + 6
+               
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
+               FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
+               
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
+               FACES(3*IFACE)   = IJK(  J,K+1,NJ)
             END DO
          END DO
       ELSE IF(DIR==2)THEN
@@ -3711,22 +3714,24 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=K1,K2
             DO J=SLICE,SLICE
                DO I = I1,I2
-                  VERTS(IVERT+1) = XPLT(I)
-                  VERTS(IVERT+2) = YMID
-                  VERTS(IVERT+3) = ZPLT(K)
-                  IVERT = IVERT + 3
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = YMID
+                  VERTS(3*IVERT)   = ZPLT(K)
                END DO
             END DO
          END DO
          DO K=1,NK-1
             DO I=1,NI-1
-               FACES(IFACE+1) = IJK(  I,  K,NI)
-               FACES(IFACE+2) = IJK(I+1,  K,NI)
-               FACES(IFACE+3) = IJK(I+1,K+1,NI)
-               FACES(IFACE+4) = IJK(  I,  K,NI)
-               FACES(IFACE+5) = IJK(I+1,K+1,NI)
-               FACES(IFACE+6) = IJK(  I,K+1,NI)
-               IFACE = IFACE + 6
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  K,NI)
+               FACES(3*IFACE)   = IJK(I+1,K+1,NI)
+               
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
+               FACES(3*IFACE)   = IJK(  I,K+1,NI)
             END DO
          END DO
       ELSE
@@ -3734,33 +3739,37 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=SLICE,SLICE
             DO J=J1,J2
                DO I = I1,I2
-                  VERTS(IVERT+1) = XPLT(I)
-                  VERTS(IVERT+2) = ZPLT(J)
-                  VERTS(IVERT+3) = ZMID
-                  IVERT = IVERT + 3
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT)   = ZMID
                END DO
             END DO
          END DO
          DO J=1,NJ-1
             DO I=1,NI-1
-               FACES(IFACE+1) = IJK(  I,  J,NI)
-               FACES(IFACE+2) = IJK(I+1,  J,NI)
-               FACES(IFACE+3) = IJK(I+1,J+1,NI)
-               FACES(IFACE+4) = IJK(  I,  J,NI)
-               FACES(IFACE+5) = IJK(I+1,J+1,NI)
-               FACES(IFACE+6) = IJK(  I,J+1,NI)
-               IFACE = IFACE + 6
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  J,NI)
+               FACES(3*IFACE)   = IJK(I+1,J+1,NI)
+               
+               IFACE = IFACE + 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
+               FACES(3*IFACE)   = IJK(  I,J+1,NI)
             END DO
          END DO
       ENDIF
    ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
    ELSE IF(SLICETYPE=='CUTCELLS')THEN
+   ELSE IF(SLICETYPE=='TESTGEOM')THEN
+      CALL GET_GEOMINFO('EXCLUDEGEOM',I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES)
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
 ! ---------------------------- GET_GEOMVALS ----------------------------------------
 
-SUBROUTINE GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
+RECURSIVE SUBROUTINE GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
 
 ! copy data from QQ array into VALS(1:NFACES)
 
@@ -3769,39 +3778,47 @@ INTEGER, INTENT(IN) :: NFACES
 CHARACTER(*), INTENT(IN) :: SLICETYPE
 REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
 
-INTEGER :: DIR, SLICE, IVAL
+INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
 IF(SLICETYPE=='EXCLUDEGEOM')THEN
-   IVAL = 0
+   IFACE = 0
    IF(DIR==1)THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            VALS(IVAL+1) = QQ(SLICE,J,K,1)
-            VALS(IVAL+2) = QQ(SLICE,J,K,1)
-            IVAL = IVAL + 2
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(SLICE,J,K,1)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(SLICE,J,K,1)
          END DO
       END DO
    ELSE IF(DIR==2)THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            VALS(IVAL+1) = QQ(I,SLICE,K,1)
-            VALS(IVAL+2) = QQ(I,SLICE,K,1)
-            IVAL = IVAL + 2
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,SLICE,K,1)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,SLICE,K,1)
          END DO
       END DO
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            VALS(IVAL+1) = QQ(I,J,SLICE,1)
-            VALS(IVAL+2) = QQ(I,J,SLICE,1)
-            IVAL = IVAL + 2
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,J,SLICE,1)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,J,SLICE,1)
          END DO
       END DO
    ENDIF
 ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
 ELSE IF(SLICETYPE=='CUTCELLS')THEN
+ELSE IF(SLICETYPE=='TESTGEOM')THEN
+   CALL GET_GEOMVALS('EXCLUDEGEOM',I1, I2, J1, J2, K1, K2,NFACES,VALS)
 ENDIF
 END SUBROUTINE GET_GEOMVALS
 
