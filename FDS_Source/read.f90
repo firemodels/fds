@@ -10751,6 +10751,10 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
 
+   ! Only process the device if it belongs to the current MPI process.
+
+   IF (PROCESS(DV%MESH)/=MYID) CYCLE PROC_DEVC_LOOP
+
    ! Check for HVAC outputs with no HVAC inputs
 
    IF ((DV%DUCT_ID/='null' .OR. DV%NODE_ID(1)/='null') .AND. .NOT. HVAC_SOLVE) THEN
