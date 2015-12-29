@@ -517,6 +517,8 @@ void _Sniff_Errors(char *whereat);
 #define SOLIDpatchmenu -10
 #define OUTLINEpatchmenu -11
 #define POINTSpatchmenu -12
+#define INSOLIDpatchmenu -13
+#define INGASpatchmenu -14
 
 
 #define INTERIORwall 0
