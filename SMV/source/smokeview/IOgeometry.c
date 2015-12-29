@@ -1477,6 +1477,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
 
         surfi=surfinfo + surf_ind[ii]+offset;
         triangles[ii].surf=surfi;
+        triangles[ii].in_solid = surf_ind[ii];
         triangles[ii].textureinfo=surfi->textureinfo;
       }
 
@@ -2392,6 +2393,8 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
           color_index = ivals[j];
           color = rgb_patch + 4 * color_index;
           if(patchi->slice == 1){
+            if(trianglei->in_solid==1&&show_patch_insolid==0)continue;
+            if(trianglei->in_solid==0&&show_patch_ingas==0)continue;
             glColor4f(color[0], color[1], color[2], transparent_level);
           }
           else{
@@ -2425,6 +2428,8 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
           color_index = ivals[j];
           color = rgb_patch + 4 * color_index;
           if(patchi->slice == 1){
+            if(trianglei->in_solid==1&&show_patch_insolid==0)continue;
+            if(trianglei->in_solid==0&&show_patch_ingas==0)continue;
             glColor4f(color[0], color[1], color[2], transparent_level);
           }
           else{
@@ -2497,6 +2502,10 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
           int color_index;
 
           trianglei = geomlisti->triangles + j;
+          if(patchi->slice==1){
+            if(trianglei->in_solid==1&&show_patch_insolid==0)continue;
+            if(trianglei->in_solid==0&&show_patch_ingas==0)continue;
+          }
 
           color_index = ivals[j];
           color = rgb_patch + 4 * color_index;
@@ -2554,6 +2563,10 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
 
         trianglei = geomlisti->triangles + j;
 
+        if(patchi->slice==1){
+          if(trianglei->in_solid==1&&show_patch_insolid==0)continue;
+          if(trianglei->in_solid==0&&show_patch_ingas==0)continue;
+        }
         if(show_patch_solid == 1||show_patch_outline==1){
           glColor4fv(foregroundcolor);
         }
