@@ -514,6 +514,10 @@ void _Sniff_Errors(char *whereat);
 #define UPwallmenu -7
 #define DOWNwallmenu -8
 #define DUMMYwallmenu -9
+#define SOLIDpatchmenu -10
+#define OUTLINEpatchmenu -11
+#define POINTSpatchmenu -12
+
 
 #define INTERIORwall 0
 #define FRONTwall 1
