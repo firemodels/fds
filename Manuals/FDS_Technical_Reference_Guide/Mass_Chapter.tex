@@ -26,14 +26,14 @@ into a ``background'' component and a perturbation. It is assumed that
 the background component of pressure can differ from compartment to compartment. If
 a volume within the computational domain is isolated from other volumes, except via leak paths or ventilation ducts, it is referred to as a ``pressure zone'' and assigned its own background pressure. The pressure field within the $m$th zone, for example, is a linear combination
 of its background component and the flow-induced perturbation:
-\be 
-   p(\bx,t) = \bp_m(z,t) + \tp(\bx,t) 
+\be
+   p(\bx,t) = \bp_m(z,t) + \tp(\bx,t)
 \ee
 Note that the background pressure is a function of $z$, the vertical spatial coordinate, and the time, $t$. For most compartment fire applications, $\bp_m$ changes very little with height or time. However, for scenarios where a fire increases the pressure in a closed compartment, or where the HVAC system affects the pressure, or when the height of the domain is significant, $\bp_m$ takes these effects into account~\cite{Baum:5}. The ambient pressure field is denoted $\bp_0(z)$. Note that the subscript 0 denotes the exterior of the computational domain, not time 0. This is the assumed atmospheric pressure stratification that serves as both the initial and boundary condition for the governing equations.
 
 The purpose of decomposing the pressure is that for low Mach number flows, it can be assumed that the temperature and density are inversely proportional, and thus the equation of state (in the $m$th pressure zone) can be approximated as
-\be 
-   \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state} 
+\be
+   \bp_m  =  \rho T \R \sum_\alpha \frac{Z_\alpha}{W_\alpha} = \frac{\rho T \R}{ \bW }  \label{state}
 \ee
 Recall from Section~\ref{sec_lumped_species} that $Z_\alpha$ is the mass fraction of lumped species $\alpha$. The pressure, $p$, in the state and energy equations is replaced by the background pressure $\bp_m$ to filter out sound waves that travel at speeds that are much faster than typical flow speeds expected in fire applications. The low Mach number assumption serves two purposes. First, the filtering of acoustic waves means that the time step in the numerical algorithm is bound only by the flow speed as opposed to the speed of sound, and second, the modified state equation leads to a reduction in the number of dependent variables in the system of equations by one. The energy equation (\ref{energy}) is not explicitly solved; rather, its source terms are included in the expression for the flow divergence, to be discussed later in the chapter.  When the velocity field satisfies the specified thermodynamic divergence, the conservative form of the sensible enthalpy equation is satisfied by construction.
 
@@ -57,20 +57,18 @@ It can then be shown that for $\Gamma \ne 0$ the pressure stratification becomes
 The species transport equations are solved using a predictor-corrector scheme. Advection terms are written in flux divergence (conservative) form. In the predictor step, the mass density in cell $ijk$ at time level $n+1$ is estimated based on information at the $n$th level:
 \be  \frac{(\rho Z_\alpha)_{ijk}^{*}-(\rho Z_\alpha)_{ijk}^n}{\dt}
   + \nabla\!\cdot(\overline{\rho Z_\alpha}^{\rm FL} \mathbf{u})_{ijk}^n
-  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n
+  = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^n + \left( \dot{m}'''_\alpha + \dot{m}'''_{\rm b,\alpha} \right)_{ijk}^n
 \ee
-The quantity $\overline{\rho Z_\alpha}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}.
+The quantity $\overline{\rho Z_\alpha}^{\rm FL}$ indicates a \emph{flux limiter} applied to the cell face value, as discussed below in Section \ref{sec_flux_limiters}. The mass source terms due to chemistry, evaporation, or pyrolysis are computed at the end of the previous time step and used in both the predictor and corrector steps. The mean chemical source term, $\dm_{\alpha}'''$, is discussed in Chapter~\ref{combustionsection}.  The bulk subgrid source term, $\dm_{\rm b,\alpha}'''$, is discussed in Chapters~\ref{chapter:solid_phase} and \ref{chapter:lagrangian_particles} on solid phase pyrolysis and Lagrangian particles, respectively.
 
 In DNS mode, the molecular diffusivity is based on mixture-averaged binary Fickian diffusion.  In LES mode (default) the diffusivity is taken from the molecular and turbulent viscosities divided by the turbulent Schmidt number.  That is, to save cost we approximate the molecular plus turbulent diffusivity by $(\mu + \mu_t)/\mbox{Sc}_t$.   The turbulent Schmidt number is constant with default value $\mbox{Sc}_t = 0.5$.  The model for the turbulent viscosity $\mu_t$ is discussed in Section \ref{section:turbulent_viscosity}.  Optionally, in LES mode, by setting \textct{RESEARCH\_MODE=.TRUE.} on \textct{MISC}, the molecular and turbulent transport coefficients are treated separately, $\rho D_\alpha + \mu_t/\mbox{Sc}_t$ (at added cost).  The same applies for the thermal diffusivity.
 
 The corrector step is as follows:
-\be \frac{(\rho Z_\alpha)_{ijk}^{**}-\ha\left[(\rho Z_\alpha)_{ijk}^n
+\be \frac{(\rho Z_\alpha)_{ijk}^{n+1}-\ha\left[(\rho Z_\alpha)_{ijk}^n
     +(\rho Z_\alpha)_{ijk}^{*}\right]} {\ha \dt}
     + \nabla\!\cdot(\overline{\rho Z_\alpha}^{\rm FL} \mathbf{u})_{ijk}^*
-    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*}
+    = \nabla\!\cdot (\rho D_\alpha \nabla Z_\alpha)_{ijk}^{*} + \left( \dot{m}'''_\alpha + \dot{m}'''_{\rm b,\alpha} \right)_{ijk}^n
 \ee
-
-Mass source terms due to chemistry, evaporation, or pyrolysis are time split and applied after the corrector step (see Section \ref{sec_time_splitting}).  If no source terms are present, then $(\rho Z_\alpha)_{ijk}^{n+1} = (\rho Z_\alpha)_{ijk}^{**}$.
 
 
 \subsection{Flux Limiters}
@@ -220,14 +218,17 @@ P = \frac{1}{\overline{p}_m} - \frac{1}{\rho c_p T}
 and
 \begin{align}
 \label{eqn_fdsD1}
-D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp + \dot{q}_{\rm r}^\ppp - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_{\rm s}) + w \rho_0 g_z\right] \notag\\
-&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{\rm s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) +\dot{m}_\alpha^\tripleprime + \dot{m}_{\rm b,\alpha}^\tripleprime \bigg]
+D &= \frac{1}{\rho c_p T}\left[ \dot{q}^\ppp + \dot{q}_{\rm b}^\ppp + \dot{q}_{\rm r}^\ppp - \Div \dot{\mathbf{q}}^\pp - \mathbf{u} \cdot\nabla (\rho h_{\rm s}) + w \rho_0 g_z\right] \notag\\[.1in]
+&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{h_{\rm s,\alpha}}{c_p T} \right) \bigg[ \Div (\rho D_\alpha \nabla Y_\alpha) - \mathbf{u} \cdot \nabla (\rho Y_\alpha) +\dot{m}_\alpha^\tripleprime  \bigg] \notag \\[.1in]
+&+ \frac{1}{\rho} \sum_\alpha \left(\frac{\overline{W}}{W_\alpha} - \frac{\int_{T_{\rm b}}^T c_{p,\alpha}(T') \, {\rm d}T'}{c_p T} \right) \, \dot{m}_{\rm b,\alpha}^\tripleprime
 \end{align}
 
 \subsection{Mass and Energy Source Terms}
 \label{div_source_terms}
 
 The volumetric source terms in the divergence expression require extended discussion.  The heat release rate per unit volume, $\dq'''$, and the mass generation rate of species $\alpha$ per unit volume, $\dot{m}_\alpha'''$, are detailed in Chapter~\ref{chapter:combustion}, Combustion. The radiative source, $\dq_{\rm r}'''$, is discussed in Chapter~\ref{chapter:radiation}, Thermal Radiation.  The bulk heat source from Lagrangian particles, $\dq_{\rm b}'''$, which accounts for convective heat transfer and radiative absorption, is discussed in Chapter~\ref{chapter:lagrangian_particles}, Lagrangian Particles.  The bulk mass source from Lagrangian particles, $\dot{m}_{\rm b,\alpha}'''$, is also found in Chapter~\ref{chapter:lagrangian_particles}.
+
+The source terms are computed in the corrector stage of the time step, following the update of the density and species mass fractions. The terms in Eq.~(\ref{eqn_fdsD1}) involving $\dq_{\rm b}'''$, $\dot{m}_\alpha'''$, and $\dot{m}_{\rm b,\alpha}'''$ are stored in an array called {\ct D\_SOURCE} and applied in the construction of the divergence expression required for the corrected update of the velocity.
 
 \subsection{Diffusion Terms}
 \label{div_discret}
