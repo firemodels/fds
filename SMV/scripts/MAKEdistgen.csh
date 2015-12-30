@@ -7,7 +7,7 @@ set FDS_EDITION=$5
 set SVNROOT=$6
 
 set platformsize=${platform}_$size
-set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_32
+set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_64
 set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
 set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_$platformsize
 set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize

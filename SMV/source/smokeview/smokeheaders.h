@@ -824,7 +824,7 @@ EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local);
 EXTERNCPP void read_all_geom(void);
 EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *geom_frame_index, int *errorcode);
-EXTERNCPP void init_geom(geomdata *geomi, int hasdata);
+EXTERNCPP void init_geom(geomdata *geomi, int hasdata, int fdsblock);
 EXTERNCPP void read_geomdata(int ifile, int load_flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
 EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);

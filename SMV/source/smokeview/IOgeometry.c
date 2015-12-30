@@ -1477,6 +1477,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
 
         surfi=surfinfo + surf_ind[ii]+offset;
         triangles[ii].surf=surfi;
+        triangles[ii].insolid = surf_ind[ii];
         triangles[ii].textureinfo=surfi->textureinfo;
       }
 
@@ -2343,127 +2344,251 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
   else{
     ivals = patchi->geom_ival_dynamic;
   }
-  for(i=0;i<1;i++){
-    geomdata *geomi;
-    geomlistdata *geomlisti;
-    int ntris;
-    int j;
-    float *color;
+  if(show_patch_solid == 1){
+    for(i = 0; i < 1; i++){
+      geomdata *geomi;
+      geomlistdata *geomlisti;
+      int ntris;
+      int j;
+      float *color;
 
-    geomi = patchi->geominfo;
-    if(geomi==NULL||geomi->display==0||geomi->loaded==0)continue;
-    if(geom_type==GEOM_STATIC){
-      geomlisti = geomi->geomlistinfo-1;
-    }
-    else{
-      geomlisti = geomi->geomlistinfo+geomi->itime;
-    }
+      geomi = patchi->geominfo;
+      if(geomi == NULL || geomi->display == 0 || geomi->loaded == 0)continue;
+      if(geom_type == GEOM_STATIC){
+        geomlisti = geomi->geomlistinfo - 1;
+      }
+      else{
+        geomlisti = geomi->geomlistinfo + geomi->itime;
+      }
 
-    ntris = geomlisti->ntriangles;
-    if(ntris==0)continue;
+      ntris = geomlisti->ntriangles;
+      if(ntris == 0)continue;
 
-    if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1&&patchi->slice==1)transparenton();
+      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)transparenton();
 
-    glEnable(GL_NORMALIZE);
-    glShadeModel(GL_SMOOTH);
-    if(patchi->slice==0)glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
-    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-    glEnable(GL_COLOR_MATERIAL);
+      glEnable(GL_NORMALIZE);
+      glShadeModel(GL_SMOOTH);
+      if(patchi->slice == 0)glEnable(GL_LIGHTING);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, iso_specular);
+      glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, iso_shininess);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, block_ambient2);
+      glEnable(GL_COLOR_MATERIAL);
 
-    glPushMatrix();
-    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-    glTranslatef(-xbar0,-ybar0,-zbar0);
-    glBegin(GL_TRIANGLES);
-    if(smooth_iso_normal==0){
-      for(j=0;j<ntris;j++){
-        float *xyzptr[3];
-        float *xyznorm;
-        triangle *trianglei;
-        int color_index;
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+      glTranslatef(-xbar0, -ybar0, -zbar0);
+      glBegin(GL_TRIANGLES);
+      if(smooth_iso_normal == 0){
+        for(j = 0; j < ntris; j++){
+          float *xyzptr[3];
+          float *xyznorm;
+          triangle *trianglei;
+          int color_index;
 
-        trianglei = geomlisti->triangles+j;
-       
-        xyznorm=trianglei->tri_norm;
-        glNormal3fv(xyznorm);
+          trianglei = geomlisti->triangles + j;
 
-        color_index = ivals[j];
-        color=rgb_patch+4*color_index;
-        if(patchi->slice == 1){
-          glColor4f(color[0],color[1],color[2],transparent_level);
-        }
-        else{
-          glColor3fv(color);
-        }
+          xyznorm = trianglei->tri_norm;
+          glNormal3fv(xyznorm);
 
-        xyzptr[0] = trianglei->points[0]->xyz;
-        xyzptr[1] = trianglei->points[1]->xyz;
-        xyzptr[2] = trianglei->points[2]->xyz;
+          color_index = ivals[j];
+          color = rgb_patch + 4 * color_index;
+          if(patchi->slice == 1){
+            if(trianglei->insolid==1&&show_patch_insolid==0)continue;
+            if(trianglei->insolid==0&&show_patch_ingas==0)continue;
+            glColor4f(color[0], color[1], color[2], transparent_level);
+          }
+          else{
+            glColor3fv(color);
+          }
 
-        glVertex3fv(xyzptr[0]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[2]);
+          xyzptr[0] = trianglei->points[0]->xyz;
+          xyzptr[1] = trianglei->points[1]->xyz;
+          xyzptr[2] = trianglei->points[2]->xyz;
 
-        if(patchi->slice==1){
           glVertex3fv(xyzptr[0]);
-          glVertex3fv(xyzptr[2]);
           glVertex3fv(xyzptr[1]);
+          glVertex3fv(xyzptr[2]);
+
+          if(patchi->slice == 1){
+            glVertex3fv(xyzptr[0]);
+            glVertex3fv(xyzptr[2]);
+            glVertex3fv(xyzptr[1]);
+          }
         }
       }
-    }
-    else{
-      for(j=0;j<ntris;j++){
-        float *xyzptr[3];
-        float *xyznorm[3];
-        triangle *trianglei;
-        int color_index;
+      else{
+        for(j = 0; j < ntris; j++){
+          float *xyzptr[3];
+          float *xyznorm[3];
+          triangle *trianglei;
+          int color_index;
 
-        trianglei = geomlisti->triangles+j;
-       
-        color_index = ivals[j];
-        color=rgb_patch+4*color_index;
-        if(patchi->slice == 1){
-          glColor4f(color[0], color[1], color[2], transparent_level);
-        }
-        else{
-          glColor3fv(color);
-        }
+          trianglei = geomlisti->triangles + j;
 
-        xyzptr[0] = trianglei->points[0]->xyz;
-        xyzptr[1] = trianglei->points[1]->xyz;
-        xyzptr[2] = trianglei->points[2]->xyz;
+          color_index = ivals[j];
+          color = rgb_patch + 4 * color_index;
+          if(patchi->slice == 1){
+            if(trianglei->insolid==1&&show_patch_insolid==0)continue;
+            if(trianglei->insolid==0&&show_patch_ingas==0)continue;
+            glColor4f(color[0], color[1], color[2], transparent_level);
+          }
+          else{
+            glColor3fv(color);
+          }
 
-        xyznorm[0] = trianglei->points[0]->point_norm;
-        xyznorm[1] = trianglei->points[1]->point_norm;
-        xyznorm[2] = trianglei->points[2]->point_norm;
+          xyzptr[0] = trianglei->points[0]->xyz;
+          xyzptr[1] = trianglei->points[1]->xyz;
+          xyzptr[2] = trianglei->points[2]->xyz;
 
-        glNormal3fv(xyznorm[0]);
-        glVertex3fv(xyzptr[0]);
+          xyznorm[0] = trianglei->points[0]->point_norm;
+          xyznorm[1] = trianglei->points[1]->point_norm;
+          xyznorm[2] = trianglei->points[2]->point_norm;
 
-        glNormal3fv(xyznorm[1]);
-        glVertex3fv(xyzptr[1]);
-
-        glNormal3fv(xyznorm[2]);
-        glVertex3fv(xyzptr[2]);
-
-        if(patchi->slice==1){
           glNormal3fv(xyznorm[0]);
           glVertex3fv(xyzptr[0]);
 
           glNormal3fv(xyznorm[1]);
-          glVertex3fv(xyzptr[2]);
+          glVertex3fv(xyzptr[1]);
 
           glNormal3fv(xyznorm[2]);
-          glVertex3fv(xyzptr[1]);
+          glVertex3fv(xyzptr[2]);
+
+          if(patchi->slice == 1){
+            glNormal3fv(xyznorm[0]);
+            glVertex3fv(xyzptr[0]);
+
+            glNormal3fv(xyznorm[1]);
+            glVertex3fv(xyzptr[2]);
+
+            glNormal3fv(xyznorm[2]);
+            glVertex3fv(xyzptr[1]);
+          }
         }
       }
+      glEnd();
+      glPopMatrix();
+      glDisable(GL_COLOR_MATERIAL);
+      if(patchi->slice == 0)glDisable(GL_LIGHTING);
+      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)transparentoff();
     }
-    glEnd();
-    glPopMatrix();
-    glDisable(GL_COLOR_MATERIAL);
-    if(patchi->slice==0)glDisable(GL_LIGHTING);
-    if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1&&patchi->slice==1)transparentoff();
+  }
+  if(show_patch_outline == 1){
+    for(i = 0; i < 1; i++){
+      geomdata *geomi;
+      geomlistdata *geomlisti;
+      int ntris;
+      int j;
+      float *color;
+
+      geomi = patchi->geominfo;
+      if(geomi == NULL || geomi->display == 0 || geomi->loaded == 0)continue;
+      if(geom_type == GEOM_STATIC){
+        geomlisti = geomi->geomlistinfo - 1;
+      }
+      else{
+        geomlisti = geomi->geomlistinfo + geomi->itime;
+      }
+
+      ntris = geomlisti->ntriangles;
+      if(ntris == 0)continue;
+
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+      glTranslatef(-xbar0, -ybar0, -zbar0);
+      glBegin(GL_LINES);
+        for(j = 0; j < ntris; j++){
+          float *xyzptr[3];
+          triangle *trianglei;
+          int color_index;
+
+          trianglei = geomlisti->triangles + j;
+          if(patchi->slice==1){
+            if(trianglei->insolid==1&&show_patch_insolid==0)continue;
+            if(trianglei->insolid==0&&show_patch_ingas==0)continue;
+          }
+
+          color_index = ivals[j];
+          color = rgb_patch + 4 * color_index;
+          if(show_patch_solid == 1){
+            glColor4fv(foregroundcolor);
+          }
+          else{
+            glColor3fv(color);
+          }
+
+          xyzptr[0] = trianglei->points[0]->xyz;
+          xyzptr[1] = trianglei->points[1]->xyz;
+          xyzptr[2] = trianglei->points[2]->xyz;
+
+          glVertex3fv(xyzptr[0]);
+          glVertex3fv(xyzptr[1]);
+
+          glVertex3fv(xyzptr[1]);
+          glVertex3fv(xyzptr[2]);
+
+          glVertex3fv(xyzptr[2]);
+          glVertex3fv(xyzptr[0]);
+        }
+      glEnd();
+      glPopMatrix();
+    }
+  }
+  if(show_patch_points == 1){
+    for(i = 0; i < 1; i++){
+      geomdata *geomi;
+      geomlistdata *geomlisti;
+      int ntris;
+      int j;
+      float *color;
+
+      geomi = patchi->geominfo;
+      if(geomi == NULL || geomi->display == 0 || geomi->loaded == 0)continue;
+      if(geom_type == GEOM_STATIC){
+        geomlisti = geomi->geomlistinfo - 1;
+      }
+      else{
+        geomlisti = geomi->geomlistinfo + geomi->itime;
+      }
+
+      ntris = geomlisti->ntriangles;
+      if(ntris == 0)continue;
+
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+      glTranslatef(-xbar0, -ybar0, -zbar0);
+      glBegin(GL_POINTS);
+      for(j = 0; j < ntris; j++){
+        float *xyzptr[3];
+        triangle *trianglei;
+
+        trianglei = geomlisti->triangles + j;
+
+        if(patchi->slice==1){
+          if(trianglei->insolid==1&&show_patch_insolid==0)continue;
+          if(trianglei->insolid==0&&show_patch_ingas==0)continue;
+        }
+        if(show_patch_solid == 1||show_patch_outline==1){
+          glColor4fv(foregroundcolor);
+        }
+        else{
+          int color_index;
+
+          color_index = ivals[j];
+          color = rgb_patch + 4 * color_index;
+          glColor3fv(color);
+        }
+
+        xyzptr[0] = trianglei->points[0]->xyz;
+        xyzptr[1] = trianglei->points[1]->xyz;
+        xyzptr[2] = trianglei->points[2]->xyz;
+
+        glVertex3fv(xyzptr[0]);
+        glVertex3fv(xyzptr[1]);
+        glVertex3fv(xyzptr[2]);
+      }
+      glEnd();
+      glPopMatrix();
+    }
   }
 
 }
@@ -2557,7 +2682,7 @@ void ShowHideSortGeometry(float *mm){
       geomdata *geomi;
 
       geomi = geominfoptrs[i];
-      if((geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO) || geomi->patchactive == 1)continue;
+      if( (geomi->fdsblock == NOT_FDSBLOCK && geomi->geomtype!=GEOM_ISO)|| geomi->patchactive == 1)continue;
       for(itime = 0; itime < 2; itime++){
         if(itime == 0){
           geomlisti = geomi->geomlistinfo - 1;
@@ -2636,7 +2761,7 @@ void ShowHideSortGeometry(float *mm){
 
 /* ------------------ init_geom ------------------------ */
 
-void init_geom(geomdata *geomi,int geomtype){
+void init_geom(geomdata *geomi,int geomtype, int fdsblock){
   geomi->file=NULL;
   geomi->display=0;
   geomi->loaded=0;
@@ -2653,5 +2778,6 @@ void init_geom(geomdata *geomi,int geomtype){
   geomi->nfloat_vals=0;
   geomi->nint_vals=0;
   geomi->geomtype = geomtype;
+  geomi->fdsblock = fdsblock;
 }
 

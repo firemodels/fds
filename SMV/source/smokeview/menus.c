@@ -3976,6 +3976,21 @@ void ShowPatchMenu(int value){
         }
       }
     }
+    else if(value == SOLIDpatchmenu){
+      show_patch_solid = 1 - show_patch_solid;
+    }
+    else if(value == OUTLINEpatchmenu){
+      show_patch_outline = 1 - show_patch_outline;
+    }
+    else if(value == POINTSpatchmenu){
+      show_patch_points = 1 - show_patch_points;
+    }
+    else if(value==INSOLIDpatchmenu){
+      show_patch_insolid = 1-show_patch_insolid;
+    }
+    else if(value==INGASpatchmenu){
+      show_patch_ingas = 1-show_patch_ingas;
+    }
     else if(value!=DUMMYwallmenu){
       int n;
 
@@ -4927,6 +4942,8 @@ updatemenu=0;
 
 /* --------------------------------patch menu -------------------------- */
   if(npatchinfo>0){
+    int npatchslice = 0;
+
     CREATEMENU(showpatchmenu,ShowPatchMenu);
     npatchloaded=0;
     {
@@ -4941,6 +4958,7 @@ updatemenu=0;
         patchi = patchinfo+i;
         if(patchi->loaded==0)continue;
         npatchloaded++;
+        if(patchi->slice == 1)npatchslice++;
         if(patchi->display==1&&patchi->type==ipatchtype){
           STRCPY(menulabel,"*");
           STRCAT(menulabel,patchi->menulabel);
@@ -4957,6 +4975,40 @@ updatemenu=0;
             local_do_threshold=1;
           }
         }
+      }
+      if(npatchslice>0){
+        glutAddMenuEntry("Geometry slice data", DUMMYwallmenu);
+        if(show_patch_solid==1){
+          glutAddMenuEntry("  *solid", SOLIDpatchmenu);
+        }
+        else{
+          glutAddMenuEntry("  solid", SOLIDpatchmenu);
+        }
+        if(show_patch_outline==1){
+          glutAddMenuEntry("  *outline", OUTLINEpatchmenu);
+        }
+        else{
+          glutAddMenuEntry("  outline", OUTLINEpatchmenu);
+        }
+        if(show_patch_points==1){
+          glutAddMenuEntry("  *points", POINTSpatchmenu);
+        }
+        else{
+          glutAddMenuEntry("  points", POINTSpatchmenu);
+        }
+        glutAddMenuEntry("-", DUMMYwallmenu);
+        if(show_patch_insolid==1){
+          glutAddMenuEntry("  *in solid", INSOLIDpatchmenu);
+        }
+        else{
+          glutAddMenuEntry("  in solid", INSOLIDpatchmenu);
+        }
+      }
+      if(show_patch_ingas==1){
+        glutAddMenuEntry("  *in gas", INGASpatchmenu);
+      }
+      else{
+        glutAddMenuEntry("  in gas", INGASpatchmenu);
       }
       if(activate_threshold==1&&local_do_threshold==1){
         glutAddMenuEntry("-",DUMMYwallmenu);

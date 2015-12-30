@@ -1,6 +1,6 @@
 @echo off
 
-::  Windows batch file to build a 32 bit Linux version of background
+::  Windows batch file to build a Linux version of background
 
 :: setup environment variables (defining where repository resides etc) 
 
