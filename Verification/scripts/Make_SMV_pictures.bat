@@ -1,7 +1,20 @@
 @echo off
 
-set size=%1
-set runonlygeom=%2
+set curdir=%CD%
+set size=_64
+set svn_drive=c:
+set DEBUG=
+set SCRIPT_DIR=%CD%
+set runonlygeom=0
+set useinstalled=0
+
+set stopscript=0
+call :getopts %*
+cd %curdir%
+if %stopscript% == 1 (
+  exit /b
+)
+
 
 echo Creating figures for the Smokeview User's and Verification guides
 
@@ -14,7 +27,7 @@ set BASEDIR=%CD%
 cd %BASEDIR%\..\
 set SVNROOT=%CD%
 
-if "%size%" == "" (
+if %useinstalled% == 1 (
   set BACKGROUND="background"
   set SMOKEDIFF=smokediff
   set SMOKEZIP=smokezip
@@ -22,10 +35,10 @@ if "%size%" == "" (
   set WIND2FDS=wind2fds
 ) else (
   set BACKGROUND=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
-  set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win_%size%\smokediff_win_%size%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
-  set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win_%size%\smokezip_win_%size%.exe
-  set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win_%size%\wind2fds_win_%size%.exe
+  set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win%size%\smokediff_win%size%.exe
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%size%.exe -bindir %SVNROOT%\SMV\for_bundle
+  set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win%size%\smokezip_win%size%.exe
+  set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 )
 
 call :is_file_installed %BACKGROUND%|| exit /b 1
@@ -171,7 +184,7 @@ goto eof
 :: -----------------------------------------
 
   set program=%1
-  %program% -help 1>> %SCRIPT_DIR%\exist.txt 2>&1
+  %program% -help 1> %SCRIPT_DIR%\exist.txt 2>&1
   type %SCRIPT_DIR%\exist.txt | find /i /c "not recognized" > %SCRIPT_DIR%\count.txt
   set /p nothave=<%SCRIPT_DIR%\count.txt
   if %nothave% == 1 (
@@ -182,4 +195,48 @@ goto eof
   echo %program% exists
   exit /b 0
 
+:getopts
+ if (%1)==() exit /b
+ set valid=0
+ set arg=%1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+ if /I "%1" EQU "-debug" (
+   set valid=1
+   set DEBUG=_db
+ )
+ if /I "%1" EQU "-geom" (
+   set valid=1
+   set runonlygeom=1
+ )
+ if /I "%1" EQU "-useinstalled" (
+   set valid=1
+   set useinstalled=1
+ )
+ shift
+ if %valid% == 0 (
+   echo.
+   echo ***Error: the input argument %arg% is invalid
+   echo.
+   echo Usage:
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+if not (%1)==() goto getopts
+exit /b
+
+:usage  
+echo Run_SMV_Cases [options]
+echo. 
+echo -help  - display this message
+echo -debug - run with debug FDS
+echo -useinstalled - use installed Smokeview
+echo -geom  - run only geom cases
+exit /b
+  
 :eof
+cd %curdir%

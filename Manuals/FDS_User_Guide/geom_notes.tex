@@ -1060,6 +1060,44 @@ GEOM_IDS(4)='blade3',DAZIM(4)=270.0,
 \label{fig:geom_time4}
 \end{figure}
 
+\subsection{geom\_slice.fds}
+The slice file in Figure \ref{fig:geom_slice} was generated using the {\tt SLICETYPE}\ keyword on a {\tt \&SLCF}\ namelist statement as in
+{\footnotesize
+\begin{verbatim}
+&SLCF PBY=0.75,QUANTITY='TEMPERATURE',CELL_CENTERED=.TRUE., SLICETYPE='EXCLUDEGEOM' /.
+\end{verbatim}
+}
+
+\noindent The {\tt SLICETYPE}\ keyword is used to specify the type of slice generated.  For example, a slice consisting of only cutcells, a slice  including the effects of immersed geometry, a slice ignoring immersed geometry and a slice output using the original slice file format.  These choices are documented in Table \ref{table:slicetype}.
+
+\begin{table}
+\caption{Description of {\tt SLICETYPE}\ values used on a {\tt \&SLCF}\ namelist statement }
+\begin{tabular}{|l|l|}
+  \hline
+Keyword& Description\\
+\hline
+STRUCTURED&generate slice using original  file format\\
+CUTCELL&output only triangle faces associated with  cutcells\\
+INCLUDEGEOM&include immersed geometry when generating a slice file\\
+EXCLUDEGEOM&ignore immersed geometry when generating a slice file\\
+\hline
+\end{tabular}
+\label{table:slicetype}
+\end{table}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{cc}
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_slice_slice_000}&
+ \includegraphics[width=3.0in]{SCRIPT_FIGURES/geom_slice_slice_020}\\
+ \SI{0.0}{s}&\SI{20.0}{s}
+  \end{tabular}
+\end{center}
+ \caption{Slice file generated using the geometry file format Case: geom\_slice.fds.  The two triangles are an immersed object with boundary file temperature data displayed on its surface.}
+\label{fig:geom_slice}
+\end{figure}
+
+
 \subsection{geom\_sphere2.fds}
 Figure \ref{fig:geom_sphere2b} tests motion of a scaled,  moving, rotating sphere. The sphere was scaled using {\ct SCALE=0.6,0.4,0.2}\, placed initially at the righ side of the domain using {\ct XYZ=10.0,0.5,1.0}, translated to the left and down using {\ct XYZ\_DOT=-0.01,0.0,-0.001} and rotated using {\ct GROTATE\_DOT=0.36}.  The axis of rotation was specified using {\ct GAXIS=0.0,1.0,0.0}.
 
@@ -1433,11 +1471,11 @@ The following parameters are used in defining the type (or status) of cell or ce
   \item \texttt{INTEGER, PARAMETER :: IGSC = 1} such that: \\
            - \texttt{CCVAR(I,J,K,IGSC) == GASPHASE} is a regular \texttt{GASPHASE} cell. \\
            - \texttt{CCVAR(I,J,K,IGSC) == CUTCF} is a cut-cell, i.e. cell transversed by the solid wet surface. \\
-           - \texttt{CCVAR(I,J,K,IGSC) == SOLID} is a regular cell immersed completely in the solid region. 
-           
+           - \texttt{CCVAR(I,J,K,IGSC) == SOLID} is a regular cell immersed completely in the solid region.
+
   \item \texttt{ICVAR} can take other values (2, 3,... to be added later) to map unknowns to \texttt{CUT\_CELL} data, linear systems, etc.
-  
-  
+
+
 \end{itemize}
 %
 - \textit{Face-centered} variables for face-type identification, generating data necessary for matrix and vector building (face based),  etc.:  \\
@@ -1448,11 +1486,11 @@ The following parameters are used in defining the type (or status) of cell or ce
   \item \texttt{INTEGER, PARAMETER :: FGSC = 1} such that: \\
            - \texttt{FCVAR(I,J,K,FGSC) == GASPHASE} is a regular \texttt{GASPHASE} face. \\
            - \texttt{FCVAR(I,J,K,FGSC) == CUTCF} is a cut-face, i.e. face transversed by the solid wet surface. \\
-           - \texttt{FCVAR(I,J,K,FGSC) == SOLID} is a regular face immersed completely in the solid region. 
-           
+           - \texttt{FCVAR(I,J,K,FGSC) == SOLID} is a regular face immersed completely in the solid region.
+
   \item \texttt{FCVAR} can take other values (2,3,... to be added later) to map face indexes to \texttt{CUT\_FACE} data, etc.
-  
-  
+
+
 \end{itemize}
 %
 These variables are defined by mesh, so they can be included as \texttt{ALLOCATABLE} in the \texttt{TYPE\_MESH}, and be allocated if using CCIBM.
@@ -1465,22 +1503,22 @@ These variables are defined by mesh, so they can be included as \texttt{ALLOCATA
 \begin{itemize}
 
   \item  \texttt{CUT\_FACE(icf).XYZVERT}: $x,y,z$ coordinates of cut-face \textit{icf} vertex points. They are composed of intersection points between solid and Cartesian cell faces, and cell or facet vertices. These can be stored on a Global array as discussed with Glenn, and \texttt{XYZVERT} can be replaced by an index vector. They are used to define geometric data and also for plotting purposes (would be used in SMV).
-  
+
   \item  \texttt{CUT\_FACE(icf).XYZCEN}: $x,y,z$ coordinates of cut-face \textit{icf} area centroid.
-  
+
   \item  \texttt{CUT\_FACE(icf).STATUS}: can be \texttt{GASPHASE} or \texttt{INBOUNDARY}.
-  
+
   \item  \texttt{CUT\_FACE(icf).IJK}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, \texttt{ijk} denotes the Cartesian grid \textit{face} the cut-face belongs to. If  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY},  \texttt{ijk} denotes the Cartesian grid \textit{cell} this cut-face belongs to.
-  
+
   \item  \texttt{CUT\_FACE(icf).AXIS}: If \texttt{CUT\_FACE(icf).STATUS == GASPHASE}, this face is normal to which axis? \texttt{AXIS} can be \texttt{== IAXIS=1} for x-faces, \texttt{== JAXIS=2} for y-faces and \texttt{== KAXIS=3} for z-faces.  \texttt{CUT\_FACE(icf).STATUS == INBOUNDARY}, then  \texttt{AXIS} is zero.
-   
-  \item \texttt{CUT\_FACE(icf).NIJK}: normal unit vector to the cut-face. If \texttt{CUT\_FACE(icf).AXIS == IAXIS} then \texttt{NIJK=[1. 0. 0.]}, if 
+
+  \item \texttt{CUT\_FACE(icf).NIJK}: normal unit vector to the cut-face. If \texttt{CUT\_FACE(icf).AXIS == IAXIS} then \texttt{NIJK=[1. 0. 0.]}, if
   \texttt{CUT\_FACE(icf).AXIS == JAXIS} then \texttt{NIJK=[0. 1. 0.]}, \texttt{CUT\_FACE(icf).AXIS == KAXIS} then  \texttt{NIJK=[0. 0. 1.]}. If \texttt{CUT\_FACE(icf).AXIS == 0},  \texttt{NIJK} is the normal outside of the body for that \texttt{INBOUNDARY} cut-face.
-  
-  \item \texttt{CUT\_FACE(icf).BCTYPE(1:NSCALARS)}: boundary condition type, integer that for \texttt{INBOUNDARY} cut-faces, specifies the type of boundary condition imposed for scalars (i.e. constant mass flux, wall, etc.). 
-  
+
+  \item \texttt{CUT\_FACE(icf).BCTYPE(1:NSCALARS)}: boundary condition type, integer that for \texttt{INBOUNDARY} cut-faces, specifies the type of boundary condition imposed for scalars (i.e. constant mass flux, wall, etc.).
+
   \item \texttt{CUT\_FACE(icf).BCVAL(1:NSCALARS)}: mean boundary condition value assigned for this \texttt{INBOUNDARY} cut-face, for each scalar.
-  
+
 \end{itemize}
 %
 Some of the data here is redundant and won't need to be filled up. Now, as in this construct cut faces can be either \texttt{GASPHASE} or \texttt{INBOUNDARY}, we might want to separate these in two structs (i.e. CUT\_FACE\_GP and CUT\_FACE\_BD) to avoid conditionals on cut-face loops.
@@ -1491,17 +1529,17 @@ Some of the data here is redundant and won't need to be filled up. Now, as in th
 \begin{itemize}
 
   \item \texttt{CUT\_CELL(icc).vol}: cut-cell volume.
-  
+
   \item \texttt{CUT\_CELL(icc).XYZCEN}:  $x,y,z$ coordinates of cut-cell \textit{icc} volume centroid.
-  
+
   \item \texttt{CUT\_CELL(icc).NCFACES}: number of faces in the \texttt{CUT\_FACE} data structure.
-  
+
   \item \texttt{CUT\_CELL(icc).CFACES}: index vector to location of cut-faces in \texttt{CUT\_FACE} data structure.
-  
+
   \item \texttt{CUT\_CELL(icc).IJK}: denotes the Cartesian grid \textit{cell} this cut-cell belongs to.
-  
+
   \item \texttt{CUT\_CELL(icc).HINTFLG}: Integer flag that denotes if the pressure $H$ needs to be interpolated to the \texttt{CUT\_CELL(icc).XYZCEN} from the \texttt{GASPHASE} surroundings, and type of interpolation to perform.
-  
+
 \end{itemize}
 %
 Other fields will need to be incorporated to this data structure. Among them an unknown number for scalar and possibly the pressure H, if pressure is dealt with using the unstructured scheme.
@@ -1563,7 +1601,7 @@ We modify the previously derived types keeping the data already defined and need
 \indent   REAL(EB), DIMENSION(NDIM) :: XYZCEN                                 ! cut-face centroid coords \\
 \indent   INTEGER :: NVERTEX, STATUS, IJK, AXIS, BCTYPE(NSCALARS)            \\
 \indent   ! Vertex coordinates, to be allocated (NDIM,NVERTEX) \\
-\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZVERT \\         
+\indent   REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: XYZVERT \\
 \indent   REAL(EB) :: BCVAL(NSCALARS) \\
 \noindent END TYPE CUTFACE\_LINKED\_LIST\_TYPE \\
 \end{myfont}
@@ -1601,7 +1639,7 @@ Then we would define: \\
 \noindent TYPE(CUTCELL\_LINKED\_LIST\_TYPE), POINTER :: CUT\_CELL\_LL \\
 \end{myfont}
 
-From my understanding on linked lists, using a \texttt{CUTCELL\_CUTFACES\_LIST} for each cut-cell defined in \texttt{CUT\_FACE\_LL, CUT\_CELL\_LL} and also for some \texttt{FACET} would mean we have to replicate cut-face data at least 3 times? Cut-faces stored on the different lists would be individualized by their global cut-face \texttt{INDEX}. This seems convoluted and prone to bugs. 
+From my understanding on linked lists, using a \texttt{CUTCELL\_CUTFACES\_LIST} for each cut-cell defined in \texttt{CUT\_FACE\_LL, CUT\_CELL\_LL} and also for some \texttt{FACET} would mean we have to replicate cut-face data at least 3 times? Cut-faces stored on the different lists would be individualized by their global cut-face \texttt{INDEX}. This seems convoluted and prone to bugs.
 The other option is to use the \texttt{CUT\_FACE\_LL} linked list to generate an allocatable data structure \texttt{CUT\_FACE} with same fields, and define also \texttt{CUT\_CELL} in the same manner. The \texttt{CUT\_CELL} data structure size can be estimated from the beginning knowing the number of Cartesian cells that are cut. Then, \texttt{FACET} would have an allocatable index array to the \texttt{CUT\_FACE} data structure.
 
 \textit{We need to discuss this..}
