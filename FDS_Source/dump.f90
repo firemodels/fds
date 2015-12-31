@@ -355,7 +355,7 @@ ALLOCATE(FN_BNDE(N_BNDE))
 ALLOCATE(LU_BNDE(N_BNDE))
 ALLOCATE(FN_BNDF(N_BNDF,NMESHES))
 ALLOCATE(LU_BNDF(N_BNDF,NMESHES))
-IF(TERRAIN_CASE)THEN
+IF (TERRAIN_CASE) THEN
   ALLOCATE(FN_BNDF_SLCF(N_BNDF,NMESHES))
   ALLOCATE(LU_BNDF_SLCF(N_BNDF,NMESHES))
 ENDIF
@@ -449,7 +449,7 @@ MESH_LOOP: DO NM=1,NMESHES
 
    ! Boundary Files mapped to slice files for terrain cases
 
-   IF(TERRAIN_CASE) THEN
+   IF (TERRAIN_CASE) THEN
       DO N=1,N_BNDF
          LU_BNDF_SLCF(N,NM) = GET_FILE_NUMBER()
          IF (NMESHES>1) THEN
@@ -900,7 +900,7 @@ SMOKE3D_INITIALIZATION: IF (SMOKE3D .AND..NOT.EVACUATION_ONLY(NM)) THEN
          OPEN(ABS(LU_SMOKE3D(4,NM)),FILE=FN_SMOKE3D(4,NM),FORM='FORMATTED',STATUS='REPLACE')
          IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
          M%N_STRINGS = M%N_STRINGS + 1
-         IF(USE_HRRPUV_MAX_SMV==1)THEN
+         IF (USE_HRRPUV_MAX_SMV==1) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,1X,E13.6)') 'VSMOKF3D',NM,HRRPUV_MAX_SMV
          ELSE
             WRITE(M%STRING(M%N_STRINGS),'(A,I6)') 'SMOKF3D',NM
@@ -948,7 +948,7 @@ DO N=1,M%N_SLCF
    
    ! write out slice file info to the .smv file
 
-      IF(SL%SLICETYPE=='STRUCTURED')THEN
+      IF (SL%SLICETYPE=='STRUCTURED') THEN
          IF (M%N_STRINGS+5>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
       ELSE
          IF (M%N_STRINGS+8>M%N_STRINGS_MAX) CALL RE_ALLOCATE_STRINGS(NM)
@@ -963,7 +963,7 @@ DO N=1,M%N_SLCF
       ELSE
          SLICELABEL=SLICEPARMS
       ENDIF
-      IF (SL%SLICETYPE=='STRUCTURED')THEN
+      IF (SL%SLICETYPE=='STRUCTURED') THEN
          IF (.NOT.SL%TERRAIN_SLICE.AND..NOT.SL%CELL_CENTERED) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCF',NM,TRIM(SLICELABEL)
          ENDIF
@@ -973,7 +973,7 @@ DO N=1,M%N_SLCF
       ELSE
          WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'BNDS',NM,TRIM(SLICELABEL)
       ENDIF
-      IF (SL%TERRAIN_SLICE)THEN
+      IF (SL%TERRAIN_SLICE) THEN
         IF (SL%FIRE_LINE) THEN
            WRITE(M%STRING(M%N_STRINGS),'(A,I6,F10.4,A)') 'SLFL',NM,SL%SLICE_AGL,TRIM(SLICEPARMS)
         ELSE
@@ -982,7 +982,7 @@ DO N=1,M%N_SLCF
       ENDIF
       M%N_STRINGS = M%N_STRINGS + 1
       WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF(N,NM))
-      IF (SL%SLICETYPE/='STRUCTURED')THEN
+      IF (SL%SLICETYPE/='STRUCTURED') THEN
          M%N_STRINGS = M%N_STRINGS + 1
          WRITE(M%STRING(M%N_STRINGS),'(1X,A)') TRIM(FN_SLCF_GEOM(N,NM))
       ENDIF
@@ -1498,7 +1498,7 @@ EVAC_ONLY4: IF (ANY(EVACUATION_ONLY)) THEN
       ENDDO
    ENDDO
    EVAC_DO1: DO NN=1,EVAC_N_QUANTITIES
-      IF(OUTPUT_QUANTITY(EVAC_QUANTITIES_INDEX(NN))%NAME=='HUMAN_COLOR') THEN
+      IF (OUTPUT_QUANTITY(EVAC_QUANTITIES_INDEX(NN))%NAME=='HUMAN_COLOR') THEN
          WRITE(LU_SMV,'(/A)') 'AVATAR_COLOR'
          WRITE(LU_SMV,'(I4)') EVAC_AVATAR_NCOLOR
          DO N=1,EVAC_AVATAR_NCOLOR
@@ -2014,7 +2014,7 @@ MESH_LOOP: DO NM=1,NMESHES
    WRITE(LU_SMV,*) M%N_OBST
    DO N=1,M%N_OBST
       OB=>M%OBSTRUCTION(N)
-      IF(OB%PROP_ID=='null')THEN
+      IF (OB%PROP_ID=='null') THEN
          TEMPCHAR=' '
       ELSE
          TEMPCHAR=' % '//OB%PROP_ID
@@ -2031,8 +2031,8 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,M%N_OBST
       OB=>M%OBSTRUCTION(N)
       TYPE_INDICATOR=OB%TYPE_INDICATOR
-      IF(TERRAIN_CASE.AND..NOT.OB%NOTERRAIN)THEN
-         IF(TYPE_INDICATOR.GT.0)THEN
+      IF (TERRAIN_CASE.AND..NOT.OB%NOTERRAIN) THEN
+         IF (TYPE_INDICATOR.GT.0) THEN
             TYPE_INDICATOR=TYPE_INDICATOR+8
          ELSE
             TYPE_INDICATOR=8
@@ -2486,7 +2486,7 @@ WRITE(LU_OUTPUT,'(//A)') ' Tracked (Lumped) Species Information'
 DO N=1,N_TRACKED_SPECIES
    SM=>SPECIES_MIXTURE(N)
    WRITE(LU_OUTPUT,'(/3X,A)') TRIM(SM%ID)
-   IF(N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
+   IF (N==0) WRITE(LU_OUTPUT,'( 3X,A)') 'Background Species'
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SM%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SM%MW*P_INF/(TMPA*R0)
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Initial Mass Fraction            ',SM%ZZ0
@@ -2783,7 +2783,7 @@ IF (N_DEVC>0) THEN
          WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Species: ',TRIM(SPECIES(DV%Y_INDEX)%ID)
-      ELSEIF(DV%Z_INDEX>=0) THEN
+      ELSEIF (DV%Z_INDEX>=0) THEN
          WRITE(LU_OUTPUT,'(I6,A,3F9.2,A,A,A,A,A,A,A,A)') N,' Coords:',DV%X,DV%Y,DV%Z, &
             ', Make: ',TRIM(PROPERTY(DV%PROP_INDEX)%ID), ', ID: ',TRIM(DV%ID), ', Quantity: ',TRIM(DV%QUANTITY), &
             ', Species: ',TRIM(SPECIES_MIXTURE(DV%Z_INDEX)%ID)         
@@ -3596,10 +3596,10 @@ SUBROUTINE GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
 INTEGER, INTENT(IN) :: I1, I2, J1, J2, K1, K2
 INTEGER, INTENT(OUT) :: DIR, SLICE
 
-IF(ABS(K1-K2)<MIN(ABS(I1-I2),ABS(J1-J2)))THEN
+IF (ABS(K1-K2)<MIN(ABS(I1-I2),ABS(J1-J2))) THEN
    DIR=3
    SLICE = K1
-ELSE IF(ABS(J1-J2)<MIN(ABS(I1-I2),ABS(K1-K2)))THEN
+ELSE IF (ABS(J1-J2)<MIN(ABS(I1-I2),ABS(K1-K2))) THEN
    DIR=2
    SLICE = J1
 ELSE
@@ -3642,42 +3642,42 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
 
    NVERTS=0
    NFACES=0
-   IF(SLICETYPE=='IGNORE_GEOM')THEN
+   IF (SLICETYPE=='IGNORE_GEOM') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-      IF(DIR==1)THEN
+      IF (DIR==1) THEN
         NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
         NFACES = 2*(J2 - J1)*(K2 - K1)
-      ELSE IF(DIR==2)THEN
+      ELSE IF (DIR==2) THEN
         NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
         NFACES = 2*(I2 - I1)*(K2 - K1)
       ELSE
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
         NFACES = 2*(I2 - I1)*(J2 - J1)
       ENDIF
-   ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
-   ELSE IF(SLICETYPE=='CUTCELLS')THEN
-   ELSE IF(SLICETYPE=='IGNORE_OBST')THEN
+   ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
+   ELSE IF (SLICETYPE=='CUTCELLS') THEN
+   ELSE IF (SLICETYPE=='IGNORE_OBST') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-      IF(DIR==1)THEN
+      IF (DIR==1) THEN
          NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
          NFACES = 0
          DO K = K1+1, K2
             DO J = J1+1, J2
-               IF(.NOT.SOLID(CELL_INDEX(SLICE,J,K)))NFACES = NFACES + 2
+               IF (.NOT.SOLID(CELL_INDEX(SLICE,J,K))) NFACES = NFACES + 2
             END DO
          END DO
-      ELSE IF(DIR==2)THEN
+      ELSE IF (DIR==2) THEN
         NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
          DO K = K1+1, K2
             DO I = I1+1, I2
-               IF(.NOT.SOLID(CELL_INDEX(I,SLICE,K)))NFACES = NFACES + 2
+               IF (.NOT.SOLID(CELL_INDEX(I,SLICE,K))) NFACES = NFACES + 2
             END DO
          END DO
       ELSE
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
          DO I = I1+1, I2
             DO J = J1+1, J2
-               IF(.NOT.SOLID(CELL_INDEX(I,J,SLICE)))NFACES = NFACES + 2
+               IF (.NOT.SOLID(CELL_INDEX(I,J,SLICE))) NFACES = NFACES + 2
             END DO
          END DO
       ENDIF
@@ -3705,14 +3705,14 @@ END SUBROUTINE GET_GEOMSIZES
    LOGICAL IS_SOLID
    
    LOCATIONS = 0 ! for now, assume triangles are in gas and tag with 0
-   IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
+   IF (SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST') THEN
       NI = I2 + 1 - I1
       NJ = J2 + 1 - J1
       NK = K2 + 1 - K1
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IVERT = 0
       IFACE = 0
-      IF(DIR==1)THEN
+      IF (DIR==1) THEN
          XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
          DO K=K1,K2
             DO J=J1,J2
@@ -3728,21 +3728,22 @@ END SUBROUTINE GET_GEOMSIZES
             DO J=1,NJ-1
                
                IS_SOLID = SOLID(CELL_INDEX(SLICE,J+J1,K+K1))
-               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE ! skip over any triangles in obstacles for the IGNORE_OBST case
+                ! skip over any triangles in obstacles for the IGNORE_OBST case
+               IF ( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID ) CYCLE
                IFACE = IFACE + 1
-               IF(IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
                
                IFACE = IFACE + 1
-               IF(IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                FACES(3*IFACE)   = IJK(  J,K+1,NJ)
             END DO
          END DO
-      ELSE IF(DIR==2)THEN
+      ELSE IF (DIR==2) THEN
          YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
          DO K=K1,K2
             DO J=SLICE,SLICE
@@ -3757,15 +3758,15 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=1,NK-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,SLICE,K+K1))
-               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE
+               IF ( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID ) CYCLE
                IFACE = IFACE + 1
-               IF(IS_SOLID)LOCATIONS(IFACE) = 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                FACES(3*IFACE)   = IJK(I+1,K+1,NI)
                
                IFACE = IFACE + 1
-               IF(IS_SOLID)LOCATIONS(IFACE) = 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
                FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -3786,23 +3787,23 @@ END SUBROUTINE GET_GEOMSIZES
          DO J=1,NJ-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,J+J1,SLICE))
-               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE
+               IF ( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID ) CYCLE
                IFACE = IFACE + 1
-               IF(IS_SOLID) LOCATIONS(IFACE) = 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  J,NI)
                FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                FACES(3*IFACE)   = IJK(I+1,J+1,NI)
                
                IFACE = IFACE + 1
-               IF(IS_SOLID) LOCATIONS(IFACE) = 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  J,NI)
                FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                FACES(3*IFACE)   = IJK(  I,J+1,NI)
             END DO
          END DO
       ENDIF
-   ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
-   ELSE IF(SLICETYPE=='CUTCELLS')THEN
+   ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
+   ELSE IF (SLICETYPE=='CUTCELLS') THEN
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
@@ -3821,12 +3822,13 @@ INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
+IF (SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST') THEN
    IFACE = 0
-   IF(DIR==1)THEN
+   IF (DIR==1) THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(SLICE,J,K)))CYCLE ! skip triangles inside obstacles for the IGNORE_OBST case
+            ! skip triangles inside obstacles for the IGNORE_OBST case
+            IF (SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(SLICE,J,K))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(SLICE,J,K,1)
             
@@ -3834,10 +3836,10 @@ IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
             VALS(IFACE) = QQ(SLICE,J,K,1)
          END DO
       END DO
-   ELSE IF(DIR==2)THEN
+   ELSE IF (DIR==2) THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,SLICE,K)))CYCLE
+            IF (SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,SLICE,K))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(I,SLICE,K,1)
             
@@ -3848,7 +3850,7 @@ IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,J,SLICE)))CYCLE
+            IF (SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,J,SLICE))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(I,J,SLICE,1)
             
@@ -3857,8 +3859,8 @@ IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
          END DO
       END DO
    ENDIF
-ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
-ELSE IF(SLICETYPE=='CUTCELLS')THEN
+ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
+ELSE IF (SLICETYPE=='CUTCELLS') THEN
 ENDIF
 END SUBROUTINE GET_GEOMVALS
 
@@ -3877,7 +3879,7 @@ REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, LOCATIONS
 
 CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
-IF(NVERTS>0.AND.NFACES>0)THEN
+IF (NVERTS>0.AND.NFACES>0) THEN
    ALLOCATE(VERTS(3*NVERTS))
    ALLOCATE(FACES(3*NFACES))
    ALLOCATE(LOCATIONS(NFACES))
@@ -3895,7 +3897,7 @@ ENDIF
 WRITE(FUNIT) STIME
 WRITE(FUNIT) NVERTS, NFACES, NVOLS
 
-IF(NVERTS>0.AND.NFACES>0)THEN
+IF (NVERTS>0.AND.NFACES>0) THEN
    WRITE(FUNIT) (VERTS(I),I=1,3*NVERTS)
    WRITE(FUNIT) (FACES(I),I=1,3*NFACES)
    WRITE(FUNIT) (LOCATIONS(I),I=1,NFACES)   ! placeholders for now
@@ -3904,7 +3906,7 @@ ENDIF
 
 WRITE(FUNIT) ZERO_FLOAT
 WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER
-IF(NVERTS>0.AND.NFACES>0)THEN
+IF (NVERTS>0.AND.NFACES>0) THEN
       DEALLOCATE(VERTS)
       DEALLOCATE(FACES)
       DEALLOCATE(LOCATIONS)
@@ -3924,7 +3926,7 @@ INTEGER I
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VALS
 
 CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
-IF(NVERTS>0.AND.NFACES>0)THEN
+IF (NVERTS>0.AND.NFACES>0) THEN
    ALLOCATE(VALS(NFACES))
    CALL GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
 ELSE
@@ -3938,7 +3940,7 @@ IF (HEADER==1) THEN
 ENDIF
 WRITE(FUNIT) STIME
 WRITE(FUNIT) ZERO_INTEGER, ZERO_INTEGER, ZERO_INTEGER, NFACES
-IF(NVERTS>0.AND.NFACES>0)THEN
+IF (NVERTS>0.AND.NFACES>0) THEN
    WRITE(FUNIT) (VALS(I),I=1,NFACES)
    DEALLOCATE(VALS)
 ENDIF
@@ -5816,7 +5818,7 @@ IND_SELECT: SELECT CASE(IND)
             END SELECT
             ! Compute numerator and denumerator
             DV%PDPA_NUMER = DV%PDPA_NUMER + LP%PWT*(2._EB*MAXVAL(LP%ONE_D%X))**PY%PDPA_M * VEL
-            IF(PY%PDPA_HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%PDPA_HISTOGRAM_NBINS,PY%PDPA_HISTOGRAM_LIMITS &
+            IF (PY%PDPA_HISTOGRAM)  CALL UPDATE_HISTOGRAM(PY%PDPA_HISTOGRAM_NBINS,PY%PDPA_HISTOGRAM_LIMITS &
                                               ,DV%PDPA_HISTOGRAM_COUNTS,&
                                               (2._EB*MAXVAL(LP%ONE_D%X))**PY%PDPA_M * VEL,&
                                               LP%PWT*MAXVAL(LP%ONE_D%X)**PY%PDPA_N)
@@ -6601,15 +6603,15 @@ IF (N_PDPA_HISTOGRAM>0) THEN
    NN=0
    DO N=1,N_DEVC
       DV=>DEVICE(N)
-      IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
-         IF(NN>0) THEN
+      IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
+         IF (NN>0) THEN
             WRITE(LU_HISTOGRAM,'(A)',ADVANCE="NO") ',D_'//TRIM(DV%ID)//','//TRIM(DV%ID)
          ELSE
             WRITE(LU_HISTOGRAM,'(A)',ADVANCE="NO") 'D_'//TRIM(DV%ID)//','//TRIM(DV%ID)
          ENDIF
         NN=NN+1
         CONST(NN)=SUM(DV%PDPA_HISTOGRAM_COUNTS(:))
-        IF(CONST(NN)<=0._EB) CONST(NN)=1._EB
+        IF (CONST(NN)<=0._EB) CONST(NN)=1._EB
       ENDIF
    ENDDO
    WRITE(LU_HISTOGRAM,'(A)') ""
@@ -6618,25 +6620,25 @@ IF (N_PDPA_HISTOGRAM>0) THEN
       NN=0
       DO J=1,N_DEVC
          DV=>DEVICE(J)
-         IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
+         IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM .AND. DV%OUTPUT) THEN
             NN=NN+1
-            IF(NN>1) THEN
+            IF (NN>1) THEN
                WRITE(TCFORM,'(5A)') "(',',",FMT_R,",',',",FMT_R,")"
             ELSE
                WRITE(TCFORM,'(5A)') "(",FMT_R,",',',",FMT_R,")"
             ENDIF
             DD=(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_LIMITS(2)-PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_LIMITS(1))/ &
                 PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS
-            IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS>=I) THEN
+            IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS>=I) THEN
                DI=(I-0.5_EB)*DD
-               IF(PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_CUMULATIVE) THEN
+               IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_CUMULATIVE) THEN
                   CUMSUM(NN)=CUMSUM(NN)+DV%PDPA_HISTOGRAM_COUNTS(I)*DD
                ELSE
                   CUMSUM(NN)=DV%PDPA_HISTOGRAM_COUNTS(I)
                ENDIF
                WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI*1E6_EB,CUMSUM(NN)/CONST(NN)/DD
             ELSE
-               IF(NN>1) THEN
+               IF (NN>1) THEN
                   WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ",,"
                ELSE
                   WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ","
@@ -7197,7 +7199,7 @@ BNDC_LOOP: DO N=1,1 ! placeholder for multiple boundary files
 
    WRITE(LU_BNDC) STIME
    WRITE(LU_BNDC) 0,0,0,N_FACE
-   IF(N_FACE>0) THEN
+   IF (N_FACE>0) THEN
       !WRITE(LU_BNDC) (REAL(GEOM_OUTPUT(4,I),FB),I=1,N_FACE) ! index 4 is gas temperature
       !the following only works for a single mesh NM=1 and a single particle per facet
       ! 4 is gas temperature
@@ -7259,7 +7261,7 @@ SUBROUTINE DUMP_GEOM_DIAG(STIME)
    INTEGER :: TRIANGLES(3), NVERTS, NTRIANGLES, NVERTDATA, NTRIDATA
 
 ! for now only output diagnostic data once at the beginning of a simulation
-   IF(ABS(STIME-T_BEGIN)<TWO_EPSILON_EB)RETURN
+   IF (ABS(STIME-T_BEGIN)<TWO_EPSILON_EB)RETURN
 
 ! dummy example - 1 triangle   
    NVERTS = 3
@@ -7346,23 +7348,23 @@ FLOOP: DO NF=1,N_BNDF
       DO J=0,JBAR
          DO I=0,IBAR
             ISUM=0
-            IF(I/=0.AND.J/=0)THEN
+            IF (I/=0.AND.J/=0) THEN
               PPN(I,J) = PPN(I,J) + PP(I,J)
               ISUM = ISUM + 1
             ENDIF
-            IF(I/=IBAR.AND.J/=0)THEN
+            IF (I/=IBAR.AND.J/=0) THEN
               PPN(I,J) = PPN(I,J) + PP(I+1,J)
               ISUM = ISUM + 1
             ENDIF
-            IF(I/=0.AND.J/=JBAR)THEN
+            IF (I/=0.AND.J/=JBAR) THEN
               PPN(I,J) = PPN(I,J) + PP(I,J+1)
               ISUM = ISUM + 1
             ENDIF
-            IF(I/=IBAR.AND.J/=JBAR)THEN
+            IF (I/=IBAR.AND.J/=JBAR) THEN
               PPN(I,J) = PPN(I,J) + PP(I+1,J+1)
               ISUM = ISUM + 1
             ENDIF
-            IF(ISUM>0)THEN
+            IF (ISUM>0) THEN
               PPN(I,J)=PPN(I,J)/ISUM
             ELSE
               PPN(I,J)=PP(I,J)
@@ -7487,7 +7489,7 @@ DO N=1,N_BNDF
    IF (OPN) FLUSH(LU_BNDF(N,NM))
 ENDDO
 
-IF(TERRAIN_CASE)THEN
+IF (TERRAIN_CASE) THEN
    DO N=1,N_BNDF
       INQUIRE(UNIT=LU_BNDF_SLCF(N,NM),OPENED=OPN)
       IF (OPN) FLUSH(LU_BNDF_SLCF(N,NM))
