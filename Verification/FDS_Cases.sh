@@ -40,6 +40,9 @@ $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
 $QFDS -d Fires HoC_NonIdeal.fds
+$QFDS -d Fires tmp_lower_limit_simple.fds
+$QFDS -d Fires tmp_lower_limit_default.fds
+$QFDS -d Fires tmp_lower_limit_dt_p001.fds
 
 $QFDS -d Flowfields divergence_test.fds
 $QFDS -d Flowfields cyl_test_1.fds
