@@ -3623,11 +3623,15 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
 
 ! determine NVERTS and NFACES for one of the following cases
 !
-! EXCLUDEGEOMETRY - slice file geometry that ignores immersed geometric objects .  This case visually is identical
-!                   to a "regular" slice file
-! INCLUDEGEOMETRY - slice file geometry that incorporates geometric objects.  If there are no immersed objects present
-!                   then this case is equivalent to the 'EXCLUDEGEOMETRY' case
-! CUTCELLS - slice file geometry that only includes cutcells, ie faces adjacent to immersed objects
+! IGNORE_OBST  - slice file geometry that ignores obstacles.  Data for regions inside obstacles are
+!              not included in the geometry data file
+! IGNORE_GEOM  - slice file geometry that ignores immersed geometric objects .  Both data inside and outside
+!              of obstacle regions are included in the geometry data file.  Triangles inside obstacle
+!              regions are tagged with a 0, triangles outside of obstacle regions (the gas ) are tagged
+!              with a 1 . Smokeview uses this information to show/hide these two regions 
+! INCLUDE_GEOM - slice file geometry that incorporates geometric objects.  If there are no immersed
+!               objects present then this case should be equivalent to the 'IGNORE_GEOM' case
+! CUTCELLS    - slice file geometry that only includes cutcells, ie faces adjacent to immersed objects
 
    CHARACTER(*), INTENT(IN) :: SLICETYPE
    INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
@@ -3638,7 +3642,7 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
 
    NVERTS=0
    NFACES=0
-   IF(SLICETYPE=='EXCLUDEGEOM')THEN
+   IF(SLICETYPE=='IGNORE_GEOM')THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF(DIR==1)THEN
         NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
@@ -3650,9 +3654,9 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
         NFACES = 2*(I2 - I1)*(J2 - J1)
       ENDIF
-   ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+   ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
    ELSE IF(SLICETYPE=='CUTCELLS')THEN
-   ELSE IF(SLICETYPE=='TESTGEOM')THEN
+   ELSE IF(SLICETYPE=='IGNORE_OBST')THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF(DIR==1)THEN
          NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
@@ -3700,8 +3704,8 @@ END SUBROUTINE GET_GEOMSIZES
    INTEGER IFACE, IVERT
    LOGICAL IS_SOLID
    
-   LOCATIONS = 0
-   IF(SLICETYPE=='EXCLUDEGEOM'.OR.SLICETYPE=='TESTGEOM')THEN
+   LOCATIONS = 0 ! assume cells are gas and tag with 0
+   IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
       NI = I2 + 1 - I1
       NJ = J2 + 1 - J1
       NK = K2 + 1 - K1
@@ -3724,19 +3728,18 @@ END SUBROUTINE GET_GEOMSIZES
             DO J=1,NJ-1
                
                IS_SOLID = SOLID(CELL_INDEX(SLICE,J+J1,K+K1))
-               IF( SLICETYPE=='EXCLUDEGEOM'.OR..NOT.IS_SOLID )THEN
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID)LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  J,  K,NJ)
-                  FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
-                  FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
+               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE ! skip over obstacles for IGNORE_OBST case
+               IFACE = IFACE + 1
+               IF(IS_SOLID)LOCATIONS(IFACE) = 1  ! tag a solid cell with 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
+               FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
                
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID)LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  J,  K,NJ)
-                  FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
-                  FACES(3*IFACE)   = IJK(  J,K+1,NJ)
-               ENDIF
+               IFACE = IFACE + 1
+               IF(IS_SOLID)LOCATIONS(IFACE) = 1  ! tag a solid cell with 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
+               FACES(3*IFACE)   = IJK(  J,K+1,NJ)
             END DO
          END DO
       ELSE IF(DIR==2)THEN
@@ -3754,19 +3757,18 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=1,NK-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,SLICE,K+K1))
-               IF( SLICETYPE=='EXCLUDEGEOM'.OR..NOT.IS_SOLID )THEN
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID)LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  I,  K,NI)
-                  FACES(3*IFACE-1) = IJK(I+1,  K,NI)
-                  FACES(3*IFACE)   = IJK(I+1,K+1,NI)
+               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE
+               IFACE = IFACE + 1
+               IF(IS_SOLID)LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  K,NI)
+               FACES(3*IFACE)   = IJK(I+1,K+1,NI)
                
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID)LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  I,  K,NI)
-                  FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
-                  FACES(3*IFACE)   = IJK(  I,K+1,NI)
-               ENDIF
+               IFACE = IFACE + 1
+               IF(IS_SOLID)LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
+               FACES(3*IFACE)   = IJK(  I,K+1,NI)
             END DO
          END DO
       ELSE
@@ -3784,23 +3786,22 @@ END SUBROUTINE GET_GEOMSIZES
          DO J=1,NJ-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,J+J1,SLICE))
-               IF(SLICETYPE=='EXCLUDEGEOM'.OR..NOT.IS_SOLID)THEN
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID) LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  I,  J,NI)
-                  FACES(3*IFACE-1) = IJK(I+1,  J,NI)
-                  FACES(3*IFACE)   = IJK(I+1,J+1,NI)
+               IF( SLICETYPE=='IGNORE_OBST'.AND.IS_SOLID )CYCLE
+               IFACE = IFACE + 1
+               IF(IS_SOLID) LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  J,NI)
+               FACES(3*IFACE)   = IJK(I+1,J+1,NI)
                
-                  IFACE = IFACE + 1
-                  IF(IS_SOLID) LOCATIONS(IFACE) = 1
-                  FACES(3*IFACE-2) = IJK(  I,  J,NI)
-                  FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
-                  FACES(3*IFACE)   = IJK(  I,J+1,NI)
-               ENDIF
+               IFACE = IFACE + 1
+               IF(IS_SOLID) LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
+               FACES(3*IFACE)   = IJK(  I,J+1,NI)
             END DO
          END DO
       ENDIF
-   ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+   ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
    ELSE IF(SLICETYPE=='CUTCELLS')THEN
    ENDIF
 END SUBROUTINE GET_GEOMINFO
@@ -3820,46 +3821,43 @@ INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-IF(SLICETYPE=='EXCLUDEGEOM'.OR.SLICETYPE=='TESTGEOM')THEN
+IF(SLICETYPE=='IGNORE_GEOM'.OR.SLICETYPE=='IGNORE_OBST')THEN
    IFACE = 0
    IF(DIR==1)THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            IF(SLICETYPE=='EXCLUDEGEOM'.OR..NOT.SOLID(CELL_INDEX(SLICE,J,K)))THEN
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(SLICE,J,K,1)
+            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(SLICE,J,K)))CYCLE
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(SLICE,J,K,1)
             
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(SLICE,J,K,1)
-            ENDIF
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(SLICE,J,K,1)
          END DO
       END DO
    ELSE IF(DIR==2)THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            IF(SLICETYPE=='EXCLUDEGEOM'.OR..NOT.SOLID(CELL_INDEX(I,SLICE,K)))THEN
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,SLICE,K,1)
+            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,SLICE,K)))CYCLE
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,SLICE,K,1)
             
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,SLICE,K,1)
-            ENDIF
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,SLICE,K,1)
          END DO
       END DO
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            IF(SLICETYPE=='EXCLUDEGEOM'.OR..NOT.SOLID(CELL_INDEX(I,J,SLICE)))THEN
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,J,SLICE,1)
+            IF(SLICETYPE=='IGNORE_OBST'.AND.SOLID(CELL_INDEX(I,J,SLICE)))CYCLE
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,J,SLICE,1)
             
-               IFACE = IFACE + 1
-               VALS(IFACE) = QQ(I,J,SLICE,1)
-            ENDIF
+            IFACE = IFACE + 1
+            VALS(IFACE) = QQ(I,J,SLICE,1)
          END DO
       END DO
    ENDIF
-ELSE IF(SLICETYPE=='INCLUDEGEOM')THEN
+ELSE IF(SLICETYPE=='INCLUDE_GEOM')THEN
 ELSE IF(SLICETYPE=='CUTCELLS')THEN
 ENDIF
 END SUBROUTINE GET_GEOMVALS
