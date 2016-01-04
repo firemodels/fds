@@ -820,7 +820,8 @@ BAND_LOOP: DO IBND = 1,NUMBER_SPECTRAL_BANDS
          ! Correct the source term in the RTE based on user-specified RADIATIVE_FRACTION on REAC
 
          IF (KFST4_SUM>TWO_EPSILON_EB) THEN
-            RTE_SOURCE_CORRECTION_FACTOR = MAX(1._EB,RAD_Q_SUM/KFST4_SUM)
+            ! For RTE_CORRECTION _FACTOR, 1 is a theoretical lower limit, 10 is an ad hoc upper limit
+            RTE_SOURCE_CORRECTION_FACTOR = MIN(10._EB,MAX(1._EB,RAD_Q_SUM/KFST4_SUM))
             DO K=1,KBAR
                DO J=1,JBAR
                   DO I=1,IBAR
