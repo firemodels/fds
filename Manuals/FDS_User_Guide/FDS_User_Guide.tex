@@ -3350,14 +3350,14 @@ create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an 
 \end{lstlisting}
 dictates that the forward $x$-facing surface of the obstruction is to have a velocity equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the computational domain.
 
-Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flux is desired. 
+Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flux is desired.
 
 Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the specified {\ct VOLUME\_FLOW} will be recomputed in each mesh so that the desired volume flow is achieved. This was not the case in FDS version 6.3 and earlier. The sample cases called {\ct volume\_flow\_1.fds} and {\ct volume\_flow\_2.fds} in the {\ct Flowfields} folder demonstrate that a {\ct VENT} or an {\ct OBST} can be divided among several meshes. In both cases, air is drawn from a 1~m by 1~m by 1~m box at a rate of 0.01~m$^3$/s. These cases also ensure that the {\ct VENT} or {\ct OBST} need not be aligned with the mesh to yield the desired flow rate. Figure~\ref{volume_flow} displays the volume flow drawn though an {\ct OPEN} boundary on an opposite face of the box with either a {\ct VENT} (left) or {\ct OBST} (right) with a specified volume flow.
 
 \begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_1} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_2} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_2}
 \end{tabular*}
 \caption[Results of the {\ct volume\_flow} test cases]{Flow rate of air drawn through a unit cube via a {\ct VENT} (left) and {\ct OBST} (right) with specified {\ct VOLUME\_FLOW}.}
 \label{volume_flow}
@@ -7829,9 +7829,9 @@ with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the
 
 There are several outputs that report the enthalpy of the gas mixture. First, the {\ct 'SPECIFIC ENTHALPY'} and the {\ct 'SPECIFIC SENSIBLE ENTHALPY'} are defined:
 \be
-   h = h^0 + \int_0^{T'} c_p \, \d T'  \quad ; \quad h_{\rm s} = \int_0^{T'} c_p \, \d T'
+   h(T) = \Delta h^\circ_{\rm f} + \int_{T_{\rm ref}}^{T} c_p(T') \, \d T'  \quad ; \quad h_{\rm s}(T) = \int_{T_{\rm ref}}^{T} c_p(T') \, \d T'
 \ee
-Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_{\rm s}=\rho h_{\rm s}$, respectively, in units of kJ/m$^3$.
+Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct 'SENSIBLE ENTHALPY'} are $\rho h$ and $\rho h_{\rm s}$, respectively, in units of kJ/m$^3$.
 
 
 \subsection{Computer Performance}
@@ -7840,10 +7840,12 @@ Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTH
 There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the performance of your computer:
 \begin{description}
 \item[{\ct 'ACTUATED SPRINKLERS'}] Number of activated sprinklers.
+\item[{\ct 'CFL MAX'}] The maximum value of the CFL (Courant-Friedrichs-Lewy) number, the primary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the CFL number remains within the range of 0.8 to 1.0. If you want to see the CFL number in each grid cell, use a slice ({\ct SLCF}) file with {\ct QUANTITY='CFL'} and {\ct CELL\_CENTERED=.TRUE.}.
 \item[{\ct 'CPU TIME'}] Elapsed CPU time since the start of the simulation, in seconds.
 \item[{\ct 'ITERATION'}] Number of time steps completed at the given time of the simulation.
 \item[{\ct 'NUMBER OF PARTICLES'}] Number of Lagrangian particles for the {\ct MESH} in which the {\ct DEVC} is located.
 \item[{\ct 'TIME STEP'}] Duration of a simulation time step, $\delta t$, in seconds.
+\item[{\ct 'VN MAX'}] The maximum value of the VN (Von Neumann) number, a secondary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the VN number remains below 1. If you want to see the VN number in each grid cell, use a slice ({\ct SLCF}) file with {\ct QUANTITY='VN'} and {\ct CELL\_CENTERED=.TRUE.}.
 \item[{\ct 'WALL CLOCK TIME'}] Elapsed wall clock time since the start of the simulation, in seconds.
 \item[{\ct 'WALL CLOCK TIME ITERATIONS'}] Elapsed wall clock time since the start of the time stepping loop, in seconds.
 \end{description}
@@ -8228,6 +8230,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
+{\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
+{\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct CHEMICAL SUBITERATIONS}                    & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
@@ -8269,6 +8273,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
 %{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+{\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
+{\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
