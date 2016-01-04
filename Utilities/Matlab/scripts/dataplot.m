@@ -278,7 +278,6 @@ for i=2:n_plots
 
                 M_Ind = M(indices,d2_Ind_Col);
                 M_Dep = sum(M(indices,d2_Dep_Col),2);
-                clear d2_Dep_Col
 
                 if strcmp(Metric,'max')
                     Save_Predicted_Metric(i,j,1) = max(M_Dep)-d2_Initial_Value;
@@ -336,6 +335,9 @@ for i=2:n_plots
 
                 % Plots
                 indices = find(d2_Start<=M(:,d2_Ind_Col) & M(:,d2_Ind_Col)<=d2_End);
+                M_Ind = M(indices,d2_Ind_Col);
+                M_Dep = sum(M(indices,d2_Dep_Col),2);
+                clear d2_Ind_Col, d2_Dep_Col;
                 if strcmp(Flip_Axis,'no')
                     X = M_Ind/Scale_Ind;
                     Y = M_Dep/Scale_Dep;
