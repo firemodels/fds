@@ -779,9 +779,9 @@ ENDDO MAIN_LOOP
 !                                                     END OF TIME STEPPING LOOP
 !***********************************************************************************************************************************
 
-! Print out total elapased time
+! Print out total elapased time to the .out file
 
-IF (N==MYID) CALL TIMINGS
+IF (MYID==0) CALL TIMINGS
 IF (PRES_METHOD == 'SCARC') CALL SCARC_TIMINGS
 
 ! Finish unstructured geometry
