@@ -181,7 +181,7 @@ ELSE
          IF (PROF_CLOCK(NM)>=T) EXIT
       ENDDO
    ENDIF
-   IF ((T>=CORE_CLOCK(NM) .OR. STOP_STATUS==USER_STOP) .AND. RADIATION_COMPLETED) THEN
+   IF ((T>=CORE_CLOCK(NM) .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR. RADIATION_COMPLETED)) THEN
       CALL DUMP_CORE(T,DT,NM)
       CORE_CLOCK(NM) = CORE_CLOCK(NM) + DT_RESTART
    ENDIF
@@ -7513,15 +7513,15 @@ END SUBROUTINE FLUSH_LOCAL_BUFFERS
 
 SUBROUTINE TIMINGS
 
-! Print out detector activation times and subroutine CPU usage
+! Print out detector activation times and total elapsed time into .out file.
  
 USE COMP_FUNCTIONS, ONLY: WALL_CLOCK_TIME
-INTEGER :: I,N
+INTEGER :: N
 TYPE(CONTROL_TYPE), POINTER :: CF=>NULL()
 
-! Print out detector times
+! Print out detector and control activation times
  
-IF (MYID==0 .AND. N_DEVC > 0) THEN
+IF (N_DEVC > 0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' DEVICE Activation Times'
    DO N=1,N_DEVC
       DV => DEVICE(N)
@@ -7531,7 +7531,7 @@ IF (MYID==0 .AND. N_DEVC > 0) THEN
    ENDDO
 ENDIF
 
-IF (MYID==0 .AND. N_CTRL > 0) THEN
+IF (N_CTRL > 0) THEN
    WRITE(LU_OUTPUT,'(//A/)')   ' CONTROL Activation Times'
    DO N=1,N_CTRL
       CF => CONTROL(N)
@@ -7540,23 +7540,11 @@ IF (MYID==0 .AND. N_CTRL > 0) THEN
    ENDDO
 ENDIF
 
-! Printout subroutine timings
+! Printout elapsed wall clock time
  
-IF (MYID==0) THEN
-   OPEN(LU_CPU,FILE=FN_CPU,FORM='FORMATTED',STATUS='REPLACE')
-   WRITE(LU_CPU,'(A)') 'Rank,MAIN,DIVG,MASS,VELO,PRES,WALL,DUMP,PART,RADI,FIRE,COMM,EVAC,HVAC,Total T_USED (s)'
-ELSE
-   OPEN(LU_CPU,FILE=FN_CPU,FORM='FORMATTED',STATUS='OLD',POSITION='APPEND')
-ENDIF
-
-WRITE(LU_CPU,'(I4,14(",",ES10.3))') MYID,(T_USED(I),I=1,N_TIMERS),SUM(T_USED(1:N_TIMERS))
-CLOSE(LU_CPU)
- 
-IF (MYID==0) THEN
-   WALL_CLOCK_END = WALL_CLOCK_TIME()
-   WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
-   WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
-ENDIF
+WALL_CLOCK_END = WALL_CLOCK_TIME()
+WRITE(LU_OUTPUT,'(//A,F12.3)') ' Time Stepping Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START_ITERATIONS
+WRITE(LU_OUTPUT,'(  A,F12.3)') ' Total Elapsed Wall Clock Time (s): ',WALL_CLOCK_END-WALL_CLOCK_START
 
 END SUBROUTINE TIMINGS
 
