@@ -675,10 +675,10 @@ char *which(char *progname){
 
 // returns the PATH directory containing the file progname
 
-  char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
-  char *dir,*returndir;
+  char *pathlist, *pathlistcopy, fullprogname[4096], prognamecopy[4096];
+  char *dir,*pathentry;
   char pathsep[2], dirsep[2];
-  int lendir;
+  int lendir,lenpath;
 #ifdef WIN32
   int lenprog;
   const char *ext;
@@ -693,41 +693,46 @@ char *which(char *progname){
 #endif
 
   if(progname==NULL)return NULL;
-  strcpy(prog,progname);
-  progname=prog;
+  strcpy(prognamecopy,progname);
 
-  pathlistptr=getenv("PATH");
-  if(pathlistptr==NULL)return NULL;
-  strcpy(pathlist,pathlistptr);
+  pathlist=getenv("PATH");
+  if(pathlist==NULL)return NULL;
+  
+  lenpath = strlen(pathlist);
+  NewMemory((void **)&pathlistcopy, (unsigned int)(lenpath+1));
+  
+  strcpy(pathlistcopy,pathlist);
   
 #ifdef WIN32
-  lenprog=strlen(prog);
-  ext=progname+lenprog-4;
+  lenprog=strlen(prognamecopy);
+  ext=prognamecopy+lenprog-4;
   if(lenprog<=4||STRCMP(ext,".exe")!=0){
-    strcat(progname,".exe");
+    strcat(prognamecopy,".exe");
   }
 #endif
         
-  dir=strtok(pathlist,pathsep);
+  dir=strtok(pathlistcopy,pathsep);
   while(dir!=NULL){
-    strcpy(fullpath,dir);
-    strcat(fullpath,dirsep);
-    strcat(fullpath,prog);
-    if(file_exists(fullpath)==1){
+    strcpy(fullprogname,dir);
+    strcat(fullprogname,dirsep);
+    strcat(fullprogname,prognamecopy);
+    if(file_exists(fullprogname)==1){
       lendir=strlen(dir);
       if(lendir<=0)continue;
-      NewMemory((void **)&returndir,(unsigned int)(lendir+2));
-      strcpy(returndir,dir);
-      strcat(returndir,dirsep);
+      NewMemory((void **)&pathentry,(unsigned int)(lendir+2));
+      strcpy(pathentry,dir);
+      strcat(pathentry,dirsep);
 #ifdef pp_BETA
-      PRINTF("Using %s in %s\n\n",prog,dir);
+      PRINTF("Using %s in %s\n\n",prognamecopy,dir);
 #endif
-      return returndir;
+      FREEMEMORY(pathlistcopy);
+      return pathentry;
     }
     dir=strtok(NULL,pathsep);
   }
 #ifdef pp_BETA
-  fprintf(stderr,"*** Error: %s not found in any path directory\n",prog);
+  fprintf(stderr,"*** Error: %s not found in any path directory\n",prognamecopy);
 #endif
+  FREEMEMORY(pathlistcopy);
   return NULL;
 }
