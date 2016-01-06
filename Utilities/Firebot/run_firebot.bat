@@ -65,7 +65,6 @@ if exist %running% goto skip_running
     cd %curdir%
     :no_update
 
-echo  444
 :: run firebot
 
   echo 1 > %running%
