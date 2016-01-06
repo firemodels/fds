@@ -404,7 +404,7 @@ int file_exists(char *filename){
 #endif
 }
 
-/* ------------------ get_filelist ------------------------ */
+/* ------------------ free_filelist ------------------------ */
 
 void free_filelist(filelistdata *filelist, int *nfilelist){
   int i;
@@ -416,7 +416,7 @@ void free_filelist(filelistdata *filelist, int *nfilelist){
   *nfilelist=0;
 }
 
-  /* ------------------ get_filelist ------------------------ */
+  /* ------------------ get_nfilelist ------------------------ */
 
 int get_nfilelist(const char *path, char *key){
   struct dirent *entry;
@@ -541,7 +541,7 @@ void getfilesizelabel(int size, char *sizelabel){
   }
 }
 
-/* ------------------ rootdir ------------------------ */
+/* ------------------ getprogdir ------------------------ */
 
 char *getprogdir(char *progname, char **svpath){
 
@@ -675,14 +675,9 @@ char *which(char *progname){
 
 // returns the PATH directory containing the file progname
 
-  char *pathlist, *pathlistcopy, fullprogname[4096], prognamecopy[4096];
+  char *pathlist, *pathlistcopy, *fullprogname, *prognamecopy;
   char *dir,*pathentry;
   char pathsep[2], dirsep[2];
-  int lendir,lenpath;
-#ifdef WIN32
-  int lenprog;
-  const char *ext;
-#endif
 
 #ifdef WIN32
   strcpy(pathsep,";");
@@ -692,47 +687,44 @@ char *which(char *progname){
   strcpy(dirsep,"/");
 #endif
 
-  if(progname==NULL)return NULL;
-  strcpy(prognamecopy,progname);
+  pathlist = getenv("PATH");
+  if(pathlist==NULL||strlen(pathlist)==0||progname==NULL||strlen(progname)==0)return NULL;
 
-  pathlist=getenv("PATH");
-  if(pathlist==NULL)return NULL;
-  
-  lenpath = strlen(pathlist);
-  NewMemory((void **)&pathlistcopy, (unsigned int)(lenpath+1));
-  
-  strcpy(pathlistcopy,pathlist);
-  
+  NewMemory((void **)&prognamecopy, (unsigned int)(strlen(progname)+4+1));
+  strcpy(prognamecopy, progname);
+
+  NewMemory((void **)&pathlistcopy, (unsigned int)(strlen(pathlist)+1));
+  strcpy(pathlistcopy, pathlist);
+
 #ifdef WIN32
-  lenprog=strlen(prognamecopy);
-  ext=prognamecopy+lenprog-4;
-  if(lenprog<=4||STRCMP(ext,".exe")!=0){
-    strcat(prognamecopy,".exe");
+  {
+    const char *ext;
+
+    ext = prognamecopy+strlen(progname)-4;
+    if(strlen(progname)<=4||STRCMP(ext,".exe")!=0)strcat(prognamecopy, ".exe");
   }
 #endif
+
+  NewMemory((void **)&fullprogname, (unsigned int)(strlen(progname)+4+strlen(dirsep)+strlen(pathlist)+1));
         
   dir=strtok(pathlistcopy,pathsep);
-  while(dir!=NULL){
+  while(dir!=NULL&&strlen(dir)>0){
     strcpy(fullprogname,dir);
     strcat(fullprogname,dirsep);
     strcat(fullprogname,prognamecopy);
     if(file_exists(fullprogname)==1){
-      lendir=strlen(dir);
-      if(lendir<=0)continue;
-      NewMemory((void **)&pathentry,(unsigned int)(lendir+2));
+      NewMemory((void **)&pathentry,(unsigned int)(strlen(dir)+2));
       strcpy(pathentry,dir);
       strcat(pathentry,dirsep);
-#ifdef pp_BETA
-      PRINTF("Using %s in %s\n\n",prognamecopy,dir);
-#endif
       FREEMEMORY(pathlistcopy);
+      FREEMEMORY(fullprogname);
+      FREEMEMORY(prognamecopy);
       return pathentry;
     }
     dir=strtok(NULL,pathsep);
   }
-#ifdef pp_BETA
-  fprintf(stderr,"*** Error: %s not found in any path directory\n",prognamecopy);
-#endif
   FREEMEMORY(pathlistcopy);
+  FREEMEMORY(fullprogname);
+  FREEMEMORY(prognamecopy);
   return NULL;
 }
