@@ -172,10 +172,7 @@ echo. 1> %OUTDIR%\stage0.txt 2>&1
 cd %cfastroot%
 if %clean% == 0 goto skip_clean1
    echo             cleaning %cfastbasename% repository
-   cd %cfastroot%
-   git clean -dxf 1>> %OUTDIR%\stage0.txt 2>&1
-   git add . 1>> %OUTDIR%\stage0.txt 2>&1
-   git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
+   call :git_clean %cfastroot%
 :skip_clean1
 
 :: update cfast repository
@@ -191,10 +188,13 @@ if %update% == 0 goto skip_update1
 
 if %clean% == 0 goto skip_clean2
    echo             cleaning %fdsbasename% repository
-   cd %fdsroot%
-   git clean -dxf -e win32_local 1>> %OUTDIR%\stage0.txt 2>&1
-   git add . 1>> %OUTDIR%\stage0.txt 2>&1
-   git reset --hard HEAD 1>> %OUTDIR%\stage0.txt 2>&1
+   call :git_clean %fdsroot%\Verification
+   call :git_clean %fdsroot%\SMV\source
+   call :git_clean %fdsroot%\SMV\Build
+   call :git_clean %fdsroot%\FDS_Source
+   call :git_clean %fdsroot%\FDS_Compilation
+   call :git_clean %fdsroot%\Manuals
+
 :skip_clean2
 
 :: update FDS/Smokeview repository
@@ -616,6 +616,18 @@ if %nwarnings% GTR 0 (
   set havewarnings=1
 )
 exit /b
+
+:: -------------------------------------------------------------
+ :git_clean
+:: -------------------------------------------------------------
+
+set gitcleandir=%1
+cd %gitcleandir%
+git clean -dxf 1>> Nul 2>&1
+git add . 1>> Nul 2>&1
+git reset --hard HEAD 1>> Nul 2>&1
+exit /b
+
 
 :: -------------------------------------------------------------
  :build_guide
