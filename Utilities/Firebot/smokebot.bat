@@ -189,7 +189,8 @@ if %update% == 0 goto skip_update1
 if %clean% == 0 goto skip_clean2
    echo             cleaning %fdsbasename% repository
    call :git_clean %fdsroot%\Verification
-   call :git_clean %fdsroot%\SMV
+   call :git_clean %fdsroot%\SMV\source
+   call :git_clean %fdsroot%\SMV\Build
    call :git_clean %fdsroot%\FDS_Source
    call :git_clean %fdsroot%\FDS_Compilation
    call :git_clean %fdsroot%\Manuals
