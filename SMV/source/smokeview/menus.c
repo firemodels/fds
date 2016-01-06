@@ -1634,6 +1634,9 @@ void ParticleShowMenu(int value){
 /* ------------------ FrameRateMenu ------------------------ */
 
 //void keyboard(unsigned char key, int x, int y);
+#define MENU_FRAMERATE_Realtime 2001
+#define MENU_FRAMERATE_2xRealtime 2002
+#define MENU_FRAMERATE_4xRealtime 2004
 
 void FrameRateMenu(int value){
   updateUpdateFrameRateMenu=0;
@@ -1641,18 +1644,18 @@ void FrameRateMenu(int value){
   frameinterval=1;
   if(value > 0){
     switch(value){
-    case 2001:
+    case MENU_FRAMERATE_Realtime:
       if(nglobal_times>0){
         if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       }
       realtime_flag=1;
       break;
-    case 2002:
+    case MENU_FRAMERATE_2xRealtime:
       if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 2.0;
       realtime_flag=2;
       break;
-    case 2004:
+    case MENU_FRAMERATE_4xRealtime:
       if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 4.0;
       realtime_flag=4;
@@ -1868,21 +1871,27 @@ void TextureShowMenu(int value){
 }
 
 /* ------------------ Plot3DShowMenu ------------------------ */
+#define MENU_PLOT3D_Z 1
+#define MENU_PLOT3D_Y 2
+#define MENU_PLOT3D_X 3
+#define MENU_PLOT3D_CONT 4
+#define MENU_PLOT3D_SHOWALL 5
+#define MENU_PLOT3D_HIDEALL 6
 
 void Plot3DShowMenu(int value){
   int i;
 
   switch(value){
-    case 1:
+  case MENU_PLOT3D_Z:
       visz_all=1-visz_all;
       break;
-    case 2:
+  case MENU_PLOT3D_Y:
       visy_all=1-visy_all;
       break;
-    case 3:
+  case MENU_PLOT3D_X:
       visx_all=1-visx_all;
       break;
-    case 4:
+  case MENU_PLOT3D_CONT:
       switch(contour_type){
         case SHADED_CONTOURS:
           contour_type=STEPPED_CONTOURS;
@@ -1896,12 +1905,12 @@ void Plot3DShowMenu(int value){
           break;
       }
       break;
-    case 5:
+  case MENU_PLOT3D_SHOWALL:
       visx_all=1;
       visy_all=1;
       visz_all=1;
       break;
-    case 6:
+  case MENU_PLOT3D_HIDEALL:
       visx_all=0;
       visy_all=0;
       visz_all=0;
@@ -4565,13 +4574,19 @@ void ZoneShowMenu(int value){
 
 /* ------------------ GeometryMenu ------------------------ */
 
+#define GEOM_Vents 15
+#define GEOM_Outline 3
+#define GEOM_TriangleCount 14
+#define GEOM_ShowAll 11
+#define GEOM_HideAll 13
+
 void GeometryMenu(int value){
 
   switch(value){
-  case 14:
+  case GEOM_TriangleCount:
     show_triangle_count=1-show_triangle_count;
     break;
-  case 3:
+  case GEOM_Outline:
     if(isZoneFireModel==0)visFrame=1-visFrame;
     break;
   case 5:
@@ -4610,7 +4625,7 @@ void GeometryMenu(int value){
     }
     Update_Glui_Wui();
     break;
-  case 11:
+  case GEOM_ShowAll:
     if(isZoneFireModel)visFrame=1;
     /*
     visFloor=1;
@@ -4620,7 +4635,7 @@ void GeometryMenu(int value){
     visVents=1;
     BlockageMenu(visBLOCKAsInput);
     break;
-  case 13:
+  case GEOM_HideAll:
     visFrame=0;
     visFloor=0;
     visWalls=0;
@@ -4629,7 +4644,7 @@ void GeometryMenu(int value){
     visGrid=0;
     BlockageMenu(visBLOCKHide);
     break;
-  case 15:
+  case GEOM_Vents:
     visVents=1-visVents;
     break;
   default:
@@ -5467,21 +5482,21 @@ updatemenu=0;
   if(nplot3dinfo>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
     glutAddSubMenu(_("Solution variable"),staticvariablemenu);
-    if(visz_all==1)glutAddMenuEntry(_("*xy plane"),1);
-    if(visz_all==0)glutAddMenuEntry(_("xy plane"),1);
-    if(visy_all==1)glutAddMenuEntry(_("*xz plane"),2);
-    if(visy_all==0)glutAddMenuEntry(_("xz plane"),2);
-    if(visx_all==1)glutAddMenuEntry(_("*yz plane"),3);
-    if(visx_all==0)glutAddMenuEntry(_("yz plane"),3);
+    if(visz_all==1)glutAddMenuEntry(_("*xy plane"), MENU_PLOT3D_Z);
+    if(visz_all==0)glutAddMenuEntry(_("xy plane"), MENU_PLOT3D_Z);
+    if(visy_all==1)glutAddMenuEntry(_("*xz plane"), MENU_PLOT3D_Y);
+    if(visy_all==0)glutAddMenuEntry(_("xz plane"), MENU_PLOT3D_Y);
+    if(visx_all==1)glutAddMenuEntry(_("*yz plane"), MENU_PLOT3D_X);
+    if(visx_all==0)glutAddMenuEntry(_("yz plane"), MENU_PLOT3D_X);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
     if(contour_type==SHADED_CONTOURS){
-      glutAddMenuEntry(_("*Continuous contours"),4);
+      glutAddMenuEntry(_("*Continuous contours"), MENU_PLOT3D_CONT);
     }
     if(contour_type!=SHADED_CONTOURS){
-      glutAddMenuEntry(_("Continuous contours"),4);
+      glutAddMenuEntry(_("Continuous contours"), MENU_PLOT3D_CONT);
     }
-    glutAddMenuEntry(_("Show all planes"),5);
-    glutAddMenuEntry(_("Hide all planes"),6);
+    glutAddMenuEntry(_("Show all planes"), MENU_PLOT3D_SHOWALL);
+    glutAddMenuEntry(_("Hide all planes"), MENU_PLOT3D_HIDEALL);
 
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
@@ -5782,26 +5797,26 @@ updatemenu=0;
   if(get_total_vents()>0)glutAddSubMenu(_("Surfaces"), ventmenu);
   if(nzvents > 0){
     if(visVents == 1){
-      glutAddMenuEntry(_("*Vents"), 15);
+      glutAddMenuEntry(_("*Vents"), GEOM_Vents);
     }
     else{
-      glutAddMenuEntry(_("Vents"), 15);
+      glutAddMenuEntry(_("Vents"), GEOM_Vents);
     }
   }
   if(ntotal_blockages>0 || isZoneFireModel == 1){
     glutAddSubMenu(_("Grid"),gridslicemenu);
   }
   if(isZoneFireModel==0){
-    if(visFrame==1)glutAddMenuEntry(_("*Outline"),3);
-    if(visFrame==0)glutAddMenuEntry(_("Outline"),3);
+    if(visFrame==1)glutAddMenuEntry(_("*Outline"), GEOM_Outline);
+    if(visFrame==0)glutAddMenuEntry(_("Outline"), GEOM_Outline);
   }
   else{
     visFrame=0;
   }
-  if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"),14);
-  if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"),14);
-  glutAddMenuEntry(_("Show all"),11);
-  glutAddMenuEntry(_("Hide all"),13);
+  if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"), GEOM_TriangleCount);
+  if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"), GEOM_TriangleCount);
+  glutAddMenuEntry(_("Show all"), GEOM_ShowAll);
+  glutAddMenuEntry(_("Hide all"), GEOM_HideAll);
 
 /* --------------------------------label menu -------------------------- */
 
@@ -7205,12 +7220,12 @@ updatemenu=0;
   if(frameratevalue!=15)glutAddMenuEntry("15 FPS",15);
   if(frameratevalue==30)glutAddMenuEntry("*30 FPS",30);
   if(frameratevalue!=30)glutAddMenuEntry("30 FPS",30);
-  if(frameratevalue==2001)glutAddMenuEntry(_("*Real time"),2001);
-  if(frameratevalue!=2001)glutAddMenuEntry(_("Real time"),2001);
-  if(frameratevalue==2002)glutAddMenuEntry(_("*2 x Real time"),2002);
-  if(frameratevalue!=2002)glutAddMenuEntry(_("2 x Real time"),2002);
-  if(frameratevalue==2004)glutAddMenuEntry(_("*4 x Real time"),2004);
-  if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"),2004);
+  if(frameratevalue==2001)glutAddMenuEntry(_("*Real time"),MENU_FRAMERATE_Realtime);
+  if(frameratevalue!=2001)glutAddMenuEntry(_("Real time"), MENU_FRAMERATE_Realtime);
+  if(frameratevalue==2002)glutAddMenuEntry(_("*2 x Real time"), MENU_FRAMERATE_2xRealtime);
+  if(frameratevalue!=2002)glutAddMenuEntry(_("2 x Real time"), MENU_FRAMERATE_2xRealtime);
+  if(frameratevalue==2004)glutAddMenuEntry(_("*4 x Real time"), MENU_FRAMERATE_4xRealtime);
+  if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"), MENU_FRAMERATE_4xRealtime);
   if(frameratevalue!=1000)glutAddMenuEntry(_("Unlimited"),1000);
   if(frameratevalue==1000)glutAddMenuEntry(_("*Unlimited"),1000);
   if(frameratevalue<0){
