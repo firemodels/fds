@@ -106,9 +106,8 @@ shift $(($OPTIND-1))
 
 if [ -e $running ] ; then
   if [ "$FORCE" == "" ] ; then
-    echo Firebot is already running.
-    echo Firebot or smokebot are already running.
-    echo "Re-run using the -f option if this is not the case."
+    echo Firebot or smokebot are already running. If this
+    echo "is not the case re-run using the -f option."
     exit
   fi
 fi
