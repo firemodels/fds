@@ -190,10 +190,12 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
-   cd %fdsroot%
-   git clean -dxf -e win32_local 1> Nul 2>&1
-   git add . 1> Nul 2>&1
-   git reset --hard HEAD 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
+   call :git_clean %fdsroot%\SMV\source
+   call :git_clean %fdsroot%\SMV\Build
+   call :git_clean %fdsroot%\FDS_Source
+   call :git_clean %fdsroot%\FDS_Compilation
+   call :git_clean %fdsroot%\Manuals
 :skip_clean1
 
 :: update FDS/Smokeview repository
@@ -201,6 +203,7 @@ if %clean% == 0 goto skip_clean1
 if %update% == 0 goto skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
+
 git fetch origin
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 :skip_update1
@@ -330,7 +333,7 @@ echo             release mode
 cd %fdsroot%\Verification\
 if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
-   git clean -dxf -e win32_local 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
 :skip_clean2
 
 cd %fdsroot%\Verification\scripts
@@ -622,6 +625,17 @@ if %nerrors% GTR 0 (
   set haveerrors=1
   set haveerrors_now=1
 )
+exit /b
+
+:: -------------------------------------------------------------
+ :git_clean
+:: -------------------------------------------------------------
+
+set gitcleandir=%1
+cd %gitcleandir%
+git clean -dxf 1>> Nul 2>&1
+git add . 1>> Nul 2>&1
+git reset --hard HEAD 1>> Nul 2>&1
 exit /b
 
 :: -------------------------------------------------------------

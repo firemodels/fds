@@ -1054,7 +1054,7 @@ Notes: An unspecified value will result in the default number of threads (see \r
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
-Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line.
+Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct .FALSE.}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information that is printed to the diagnostic output files. By default, its value is {\ct .TRUE.} for MPI jobs involving 50 or less processes, and {\ct .FALSE.} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -8541,6 +8541,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 %{\ct DT\_BNDE}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & 1000000                        \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &  s        & $\Delta t${\ct /2}             \\ \hline
@@ -8604,7 +8605,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\newpage
 \section{\texorpdfstring{{\tt HOLE}}{HOLE} (Obstruction Cutout Parameters)}
 
 
@@ -8968,6 +8968,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
+{\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.5               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.4               \\ \hline
@@ -9064,7 +9065,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\newpage
 \section{\texorpdfstring{{\tt PART}}{PART} (Lagrangian Particles/Droplets)}
 
 
@@ -9759,13 +9759,13 @@ The Wiki Pages are particularly useful in describing the details of how you go a
 \chapter{Compiling FDS}
 \label{info:compilation}
 
-If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2003 compliant compiler is required.
+If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2008 compliant compiler is required.
 
 \section{FDS Source Code}
 
-Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2003 edition). A {\ct makefile} is available in the FDS-SMV Repository that contains platform specific options for compilation. Note the following:
+Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2008 edition). A {\ct makefile} is available in the FDS-SMV Repository that contains platform specific options for compilation. Note the following:
 \begin{itemize}
-\item The source code consists entirely of Fortran 90 statements organized into about 30 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
+\item The source code consists entirely of Fortran statements organized into about 35 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item For the non-MPI version of FDS, compile with {\ct mpis.f90}.
 \item The MPI version of FDS uses {\ct mpip.f90} instead of {\ct mpis.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the FDS-SMV website, along with links to the necessary organizations who have developed free MPI libraries.
 \end{itemize}
@@ -9778,36 +9778,41 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
-cons.f90   & Global arrays and constants \\ \hline
-ctrl.f90   & Definitions and routines for control functions \\ \hline
-data.f90   & Data for output quantities and thermophysical properties\\ \hline
-devc.f90   & Derived type definitions and constants for devices \\ \hline
-divg.f90   & Compute the flow divergence \\ \hline
-dump.f90   & Output data dumps into files \\ \hline
-evac.f90   & Egress computations (future capability) \\ \hline
-fire.f90   & Combustion routines \\ \hline
-func.f90   & Global functions and subroutines \\ \hline
-geom.f90   & Routines supporting complex, unstructured geometry (under development) \\ \hline
-ieva.f90   & Support routines for evac.f90 \\ \hline
-init.f90   & Initialize variables and Poisson solver \\ \hline
-irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
-main.f90   & Main program \\ \hline
-mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
-mesh.f90   & Arrays and constants associated with each mesh \\ \hline
-mpip.f90   & MPI ``include'' statement for MPI compilation \\ \hline
-mpis.f90   & ``Dummy'' Fortran/MPI bindings for non-MPI compilation \\ \hline
-part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
-pois.f90   & Poisson (pressure) solver \\ \hline
-prec.f90   & Specification of numerical precision \\ \hline
-pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
-radi.f90   & Radiation solver  \\ \hline
-read.f90   & Read input parameters \\ \hline
-smvv.f90   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
-turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
-type.f90   & Derived type definitions \\ \hline
-vege.f90   & Experimental vegetation model \\ \hline
-velo.f90   & Momentum equations \\ \hline
-wall.f90   & Wall boundary conditions \\ \hline
+{\ct cons.f90}   & Global arrays and constants \\ \hline
+{\ct ctrl.f90}   & Definitions and routines for control functions \\ \hline
+{\ct data.f90}   & Data for output quantities and thermophysical properties\\ \hline
+{\ct devc.f90}   & Derived type definitions and constants for devices \\ \hline
+{\ct divg.f90}   & Compute the flow divergence \\ \hline
+{\ct dump.f90}   & Output data dumps into files \\ \hline
+{\ct evac.f90}   & Egress computations (future capability) \\ \hline
+{\ct fire.f90}   & Combustion routines \\ \hline
+{\ct func.f90}   & Global functions and subroutines \\ \hline
+{\ct geom.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct gsmv.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
+{\ct ieva.f90}   & Support routines for evac.f90 \\ \hline
+{\ct init.f90}   & Initialize variables and Poisson solver \\ \hline
+{\ct irad.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
+{\ct main.f90}   & Main program \\ \hline
+{\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
+{\ct mesh.f90}   & Arrays and constants associated with each mesh \\ \hline
+{\ct mpip.f90}   & MPI ``include'' statement for MPI compilation \\ \hline
+{\ct mpis.f90}   & ``Dummy'' Fortran/MPI bindings for non-MPI compilation \\ \hline
+{\ct part.f90}   & Lagrangian particle transport and sprinkler activation \\ \hline
+{\ct pois.f90}   & Poisson (pressure) solver \\ \hline
+{\ct prec.f90}   & Specification of numerical precision \\ \hline
+{\ct pres.f90}   & Spatial discretization of pressure (Poisson) equation \\ \hline
+{\ct radi.f90}   & Radiation solver  \\ \hline
+{\ct read.f90}   & Read input parameters \\ \hline
+{\ct samr.f90}   & Simplified Adaptive Mesh Refinement (under development) \\ \hline
+{\ct scrc.f90}   & Alternative pressure solver (under development) \\ \hline
+{\ct smvv.f90}   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
+{\ct soot.f90}   & Soot agglomeration and aerosol deposition \\ \hline
+{\ct turb.f90}   & Turbulence models and manufactured solutions \\ \hline
+{\ct type.f90}   & Derived type definitions \\ \hline
+{\ct vege.f90}   & Experimental vegetation model \\ \hline
+{\ct velo.f90}   & Momentum equations \\ \hline
+{\ct wall.f90}   & Wall boundary conditions \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -9825,24 +9830,21 @@ The output from the code consists of the file {\ct CHID.out}, plus various data 
 
 The file {\ct CHID.out} contains diagnostic output, including an accounting of various important quantities, including CPU usage. Typically, diagnostic information is printed out every 100 time steps as follows:
 \begin{lstlisting}
-Time Step   74700   June 11, 2013  12:51:00
-Pressure Iterations:      2
-Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  93  72  39)
-----------------------------------------------
-CPU/step:     3.550 s, Total CPU:     82.39 hr
-Time step:  0.01105 s, Total time:   845.26 s
-Max CFL number:  0.84E+00 at ( 93, 72, 33)
-Max divergence:  0.81E+01 at ( 94, 72,  4)
-Min divergence: -0.36E+01 at ( 94, 73, 26)
-No. of Lagrangian Particles:        110940
-Total Heat Release Rate:           4258.043 kW
-Radiation Loss to Boundaries:      -595.837 kW
+Time Step  137431   December 27, 2015  00:29:49
+Step Size:    0.563E-01 s, Total Time:    1800.04 s
+Pressure Iterations:      1
+Maximum Velocity Error:  0.30E-01 on Mesh   1 at (   0  44   3)
+---------------------------------------------------------------
+Max CFL number:  0.94E+00 at (  1, 46,  1)
+Max divergence:  0.13E+00 at ( 66, 12,  1)
+Min divergence: -0.20E+00 at ( 66, 13,  1)
+Max VN number:   0.51E+00 at (  1, 25, 18)
+No. of Lagrangian Particles:            27
+Radiation Loss to Boundaries:        13.830 kW
 \end{lstlisting}
-The {\ct Time Step} indicates the total number of iterations. The date and time indicate the current wall clock time. The {\ct Pressure Iterations} are the number of iterations of the pressure solver for the corrector (second) half of the time step. The pressure solver iterations are designed to minimize the error in the normal component of velocity at solid walls or the interface of two meshes. The {\ct Maximum Velocity Error} indicates this error and in which grid cell it occurs. The quantity {\ct CPU/step} is the amount of CPU time required to complete a time step for that mesh; {\ct Total CPU} is the amount of CPU time elapsed since the start of the run; {\ct Time step} is the time step size for the given mesh; {\ct Total time} is the time of the simulation; {\ct Max/Min divergence} is the max/min value of the function $\nabla \cdot \bu$ and is used as a diagnostic when the flow is incompressible (i.e., no heating); and {\ct Max CFL number} is the maximum value of the CFL number. The {\ct No. of Lagrangian Particles} refers to the number of particles in the current mesh. The {\ct Radiation Loss to Boundaries} is the amount of energy that is being radiated to the boundaries. As compartments heat up, the energy lost to the boundaries can grow to be an appreciable fraction of the {\ct Total Heat Release Rate}.
+The {\ct Time Step} indicates the total number of iterations. The date and time indicate the current wall clock time. The {\ct STEP SIZE} indicates the size of the numerical time step. The {\ct Total Time} indicates the total simulation time calculated up to that point. The {\ct Pressure Iterations} are the number of iterations of the pressure solver for the corrector (second) half of the time step. The pressure solver iterations are designed to minimize the error in the normal component of velocity at solid walls or the interface of two meshes. The {\ct Maximum Velocity Error} indicates this error and in which grid cell it occurs.  {\ct Max/Min divergence} is the max/min value of the function $\nabla \cdot \bu$ and is used as a diagnostic when the flow is incompressible (i.e., no heating); {\ct Max CFL number} is the maximum value of the CFL number, the primary time step constraint; {\ct Max VN number} is the maximum value of the Von Neumann number, the secondary time step constraint. The {\ct No. of Lagrangian Particles} refers to the number of particles in the current mesh. The {\ct Radiation Loss to Boundaries} is the amount of energy that is being radiated to the boundaries. As compartments heat up, the energy lost to the boundaries can grow to be an appreciable fraction of the {\ct Total Heat Release Rate}.
 
-Following the completion of a successful run, a summary of the CPU
-usage per subroutine is listed. This is useful in determining where
-most of the computational effort is being placed.
+Following the completion of a successful run, a summary of the CPU usage per subroutine is listed in the file called {\ct CHID\_cpu.csv} (Section~\ref{out:CPU}). This is useful in determining where most of the computational effort is being placed.
 
 \section{Heat Release Rate and Related Quantities}
 
@@ -9888,6 +9890,20 @@ T(1) , -001   , 001    , ... , -001
 \end{lstlisting}
 where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
+\section{CPU Usage Data}
+\label{out:CPU}
+
+The file called {\ct CHID\_cpu.csv} records the amount of CPU time for each of the MPI processes.
+\begin{lstlisting}
+Rank,MAIN,DIVG, ... , Total T_USED (s)
+    0, 2.052E+00, 1.058E+01, ... , 5.143+01
+    1, 2.432E+00, 1.062E+01, ... , 5.123+01
+            .
+            .
+\end{lstlisting}
+where {\ct Rank} is the number of the MPI process (starting at 0), {\ct MAIN}, {\ct DIVG}, and so on, are major routines, and {\ct 'Total T\_USED (s)'} is the total CPU time consumed by that particular MPI process. Typically, the total time is similar. The time spent in {\ct MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in {\ct MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for {\ct MAIN}, then that process is working on the core routines while the other processes sit idle in {\ct MAIN}.
+
+The {\ct CHID\_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set {\ct DT\_CPU} on the {\ct DUMP} line. Its default value is very large, meaning that by default, the CPU information is only printed at the end of the simulation.
 
 \section{Gas Mass Data}
 
