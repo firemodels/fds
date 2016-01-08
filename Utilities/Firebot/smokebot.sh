@@ -404,7 +404,8 @@ compile_cfast()
    cd $SMOKEBOT_HOME_DIR
 
     # Build CFAST
-    echo "Building cfast"
+    echo "Building"
+    echo "   cfast"
     echo "   release"
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
@@ -497,8 +498,8 @@ check_git_checkout()
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   echo "Building FDS"
-   echo "   debug"
+   echo "   FDS"
+   echo "      debug"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
@@ -633,7 +634,7 @@ check_verification_cases_debug()
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   echo "   release"
+   echo "      release"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
@@ -672,18 +673,18 @@ check_compile_fds_mpi()
 
 compile_smv_utilities()
 {
-   echo "Building smokeview utilities"
+   echo "   smokeview utilities"
    echo "" > $OUTPUT_DIR/stage5pre
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
    # smokeview libraries
-   echo "   libraries"
+   echo "      libraries"
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
 
    # smokezip:
-   echo "   smokezip"
+   echo "      smokezip"
    cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -691,7 +692,7 @@ compile_smv_utilities()
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # smokediff:
-   echo "   smokediff"
+   echo "      smokediff"
    cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -699,14 +700,14 @@ compile_smv_utilities()
    echo "" >> $OUTPUT_DIR/stage5pre 2>&1
    
    # background
-   echo "   background"
+   echo "      background"
    cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
    
   # wind2fds:
-   echo "   wind2fds"
+   echo "      wind2fds"
    cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
@@ -819,7 +820,7 @@ run_verification_cases_release()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
-     echo "   cleaning"
+     echo "   clean"
      cd $fdsrepo/Verification
      clean_repo $fdsrepo/Verification
    fi
@@ -878,8 +879,8 @@ compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
-   echo Building smokeview
-   echo "   debug"
+   echo "   smokeview"
+   echo "      debug"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
@@ -976,7 +977,7 @@ compile_smv()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
-   echo "   release"
+   echo "      release"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
@@ -1354,6 +1355,18 @@ BUILDSOFTWARE_end=`GET_TIME`
 DIFF_BUILDSOFTWARE=`GET_DURATION $BUILDSOFTWARE_beg $BUILDSOFTWARE_end`
 echo "Build Software: $DIFF_BUILDSOFTWARE" >> $STAGE_STATUS
 
+### Stage 6a ###
+BUILDSMV_beg=`GET_TIME`
+compile_smv_db
+check_compile_smv_db
+
+### Stage 6c ###
+compile_smv
+check_compile_smv
+BUILDSMV_end=`GET_TIME`
+DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
+echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
+
 ### Stage 3 ###
 RUNCASES_beg=`GET_TIME`
 if [[ $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
@@ -1369,18 +1382,6 @@ fi
 RUNCASES_end=`GET_TIME`
 DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
 echo "Run cases: $DIFF_RUNCASES" >> $STAGE_STATUS
-
-### Stage 6a ###
-BUILDSMV_beg=`GET_TIME`
-compile_smv_db
-check_compile_smv_db
-
-### Stage 6c ###
-compile_smv
-check_compile_smv
-BUILDSMV_end=`GET_TIME`
-DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
-echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
 
 ### Stage 6d ###
 MAKEPICTURES_beg=`GET_TIME`
