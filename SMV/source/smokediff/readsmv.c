@@ -153,7 +153,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       meshi->zplt=zp;
 
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"GRID\n%s\n",buffer);
       }
       
@@ -172,7 +172,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fgets(buffer,255,streamsmv);
       sscanf(buffer,"%f %f %f %f %f %f",&meshi->xbar0,&meshi->xbar,&meshi->ybar0,&meshi->ybar,&meshi->zbar0,&meshi->zbar);
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"PDIM\n%s\n",buffer);
       }
       continue;
@@ -188,7 +188,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       mesh *meshi;
 
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrnx++;
@@ -199,21 +199,21 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       ibar=meshi->ibar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=ibar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,xpltcopy);
@@ -234,7 +234,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       mesh *meshi;
 
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrny++;
@@ -244,21 +244,21 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       jbar=meshi->jbar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=jbar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,ypltcopy);
@@ -278,7 +278,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       mesh *meshi;
 
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrnz++;
@@ -288,21 +288,21 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       kbar=meshi->kbar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim(buffer);
+        trim_back(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=kbar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim(buffer);
+          trim_back(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,zpltcopy);
@@ -319,7 +319,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(fgets(buffer,255,streamsmv)==NULL)break;
       len=strlen(buffer);
       buffer[len-1]='\0';
-      trim(buffer);
+      trim_back(buffer);
       fullfile(endian_filename,smvcase->dir,buffer);
       ENDIANfile = fopen(endian_filename,"rb");
       if(ENDIANfile!=NULL){
@@ -364,7 +364,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       plot3di = plot3dinfo + iplot3d;
       plot3di->plot3dmesh=plot3dmesh;
       plot3di->time=time_local;
-      trim(buffer);
+      trim_back(buffer);
       strcpy(plot3di->keyword,buffer);
 
       fgets(buffer,255,streamsmv);
@@ -433,7 +433,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       slicemesh = smvcase->meshinfo+meshnumber-1;
       slicei->slicemesh = slicemesh;
-      trim(buffer);
+      trim_back(buffer);
 
       strcpy(slicei->keyword,buffer);
 
@@ -453,7 +453,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       slicei->version=version_local;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
@@ -527,7 +527,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       boundarymesh = smvcase->meshinfo+meshnumber-1;
       boundaryi->boundarymesh = boundarymesh;
-      trim(buffer);
+      trim_back(buffer);
 
       strcpy(boundaryi->keyword,buffer);
 
@@ -541,7 +541,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       }
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
@@ -659,7 +659,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       continue;
     }
     if(stream_out!=NULL){
-      trim(buffer);
+      trim_back(buffer);
       fprintf(stream_out,"%s\n",buffer);
     }
     continue;
