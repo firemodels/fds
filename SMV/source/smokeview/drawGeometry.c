@@ -1366,7 +1366,7 @@ void readcadgeom(cadgeom *cd){
     fclose(stream);
     return;
   }
-  trim(buffer);
+  trim_back(buffer);
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
     fclose(stream);
@@ -1556,7 +1556,7 @@ void readcad2geom(cadgeom *cd){
     if(rrgb[0]<0.0||rrgb[1]<0.0||rrgb[2]<0.0)rrgb[3]=1.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
-    trim(buffer);
+    trim_back(buffer);
     len=strlen(buffer);
 
     texti = &cdi->textureinfo;
@@ -6004,7 +6004,7 @@ void getobstlabels(const char *filein){
     obstlabel++;
     lenlabel=strlen(obstlabel);
     obstlabel=trim_front(obstlabel);
-    trim(obstlabel);
+    trim_back(obstlabel);
     lenlabel=strlen(obstlabel);
     if(lenlabel>0){
       NewMemory((void **)&obstlabels[fdsobstcount-1],(unsigned int)(lenlabel+1));

@@ -5903,7 +5903,7 @@ void output_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim(flabel);
+    trim_back(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
@@ -5978,7 +5978,7 @@ void init_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim(flabel);
+    trim_back(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
