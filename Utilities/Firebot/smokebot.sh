@@ -382,8 +382,8 @@ update_cfast()
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
         echo "   updating"
-        echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
-        git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
+        echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0a
+        git pull >> $OUTPUT_DIR/stage0a 2>&1
         updateclean="1"
       fi
       if [ "$updateclean" == "" ]; then
@@ -407,7 +407,7 @@ compile_cfast()
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
-    ./make_cfast.sh >> $OUTPUT_DIR/stage1_cfast 2>&1
+    ./make_cfast.sh >> $OUTPUT_DIR/stage1a 2>&1
 
    # Check for errors in CFAST compilation
    cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
@@ -417,7 +417,7 @@ compile_cfast()
    else
       echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
       echo "CFAST failed to compile" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage1_cfast >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage1a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_CFAST_FAILED=1
    fi
@@ -445,8 +445,8 @@ clean_FDS_repo()
         updateclean="1"
       fi
    else
-      echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage0_FDS 2>&1
-      echo "Aborting smokebot" >> $OUTPUT_DIR/stage0_FDS 2>&1
+      echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage0b 2>&1
+      echo "Aborting smokebot" >> $OUTPUT_DIR/stage0b 2>&1
       exit
    fi
 }
@@ -463,7 +463,7 @@ do_FDS_checkout()
         exit
      fi
      if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage0_FDS 2>&1
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
         git checkout $BRANCH
      fi
    else
@@ -471,8 +471,8 @@ do_FDS_checkout()
    fi
    if [ "$UPDATEREPO" == "1" ]; then
      echo "   updating"
-     echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0_FDS 2>&1
-     git pull >> $OUTPUT_DIR/stage0_FDS 2>&1
+     echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
+     git pull >> $OUTPUT_DIR/stage0b 2>&1
      updateclean="1"
    fi
    if [ "$updateclean" == "" ]; then
@@ -485,7 +485,7 @@ check_FDS_checkout()
 {
    cd $fdsrepo
    # Check for GIT errors
-   stage0_FDS_success=true
+   stage0b_success=true
 }
 
 #  ==================================
