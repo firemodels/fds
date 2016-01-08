@@ -106,7 +106,7 @@ int main(int argc, char **argv){
       char *beg;
 
       fgets(buffer,sizeof(buffer),stream);
-      trim(buffer);
+      trim_back(buffer);
       beg=strstr(buffer,"msgid");
       if(beg!=NULL&&beg==buffer){
         printf("%s\n",buffer);
