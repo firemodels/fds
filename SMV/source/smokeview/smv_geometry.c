@@ -246,7 +246,7 @@ float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){
   return zval;
 }
 
-/* ------------------ compare_float ------------------------ */
+/* ------------------ compare_floats ------------------------ */
 
 int compare_floats( const void *arg1, const void *arg2 ){
   float x, y;
@@ -302,7 +302,7 @@ int closest_nodeindex(float val,float *vals,int nvals, float eps){
   return nvals-1;
 }
 
-/* ------------------ update_plot_alls ------------------------ */
+/* ------------------ update_plotxyz_all ------------------------ */
 
 void update_plotxyz_all(void){
   int i;
@@ -753,7 +753,7 @@ void getinverse(float *m, float *mi){
   vi[2]=-(mi[2]*v[0]+mi[6]*v[1]+mi[10]*v[2])*vi[3];
 }
 
-/* ------------------ compareisonodes ------------------------ */
+/* ------------------ compare_volfacelistdata ------------------------ */
 
 int compare_volfacelistdata( const void *arg1, const void *arg2 ){
   volfacelistdata *vi, *vj;
@@ -1418,7 +1418,7 @@ float getblockage_distance(float x, float y, float z){
   return -1.0;
 }
 
-/* ------------------ init_blockdist  ------------------------ */
+/* ------------------ init_blockage_distance  ------------------------ */
 
 void init_blockage_distance(void){
   int ig,jg;

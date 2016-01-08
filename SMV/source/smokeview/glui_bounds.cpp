@@ -1922,7 +1922,7 @@ extern "C"  void glui_script_disable(void){
       break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);
-      trim(label);
+      trim_back(label);
       name = trim_front(label);
       set_renderlabel=0;
       if(name!=NULL&&strlen(name)!=strlen(script_renderdir)){
@@ -1967,7 +1967,7 @@ extern "C"  void glui_script_disable(void){
     {
       char *suffix;
 
-      trim(script_renderfilesuffix);
+      trim_back(script_renderfilesuffix);
       suffix = trim_front(script_renderfilesuffix);
       strcpy(script_renderfile,"");
       if(strlen(suffix)>0){
@@ -2051,7 +2051,7 @@ extern "C"  void glui_script_disable(void){
     case SCRIPT_EDIT_INI:
       strcpy(label,_d("Save "));
       strcat(label,fdsprefix);
-      trim(script_inifile_suffix);
+      trim_back(script_inifile_suffix);
       if(strlen(script_inifile_suffix)>0){
         strcat(label,"_");
         strcat(label,script_inifile_suffix);

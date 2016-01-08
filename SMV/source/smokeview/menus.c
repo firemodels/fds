@@ -2170,7 +2170,7 @@ void ScriptMenu(int value){
         {
           char *renderdir;
 
-          trim(script_renderdir);
+          trim_back(script_renderdir);
           renderdir = trim_front(script_renderdir);
           if(strlen(renderdir)>0&&strcmp(renderdir,".")!=0){
             fprintf(scriptoutstream,"RENDERDIR\n");

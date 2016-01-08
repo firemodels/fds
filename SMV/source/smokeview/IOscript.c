@@ -188,7 +188,7 @@ void free_script(void){
 void init_scripti(scriptdata *scripti, int command,char *label){
   char *label2;
 
-  trim(label);
+  trim_back(label);
   label2 = trim_front(label);
   strcpy(scripti->command_label,label2);
   scripti->command=command;

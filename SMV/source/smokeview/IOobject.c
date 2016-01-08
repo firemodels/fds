@@ -4243,7 +4243,7 @@ sv_object *get_SVOBJECT_type(char *olabel,sv_object *default_object){
   if(olabel==NULL)return default_object;
   strcpy(label,olabel);
   labelptr=label;
-  trim(label);
+  trim_back(label);
   labelptr = trim_front(label);
   if(strlen(labelptr)==0)return default_object;
   for(i=0;i<nobject_defs;i++){
@@ -4265,7 +4265,7 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
   if(olabel==NULL)return default_object;
   strcpy(label,olabel);
   labelptr=label;
-  trim(label);
+  trim_back(label);
   labelptr = trim_front(label);
   if(strlen(labelptr)==0)return default_object;
   object_start = object_def_first.next;
@@ -4912,7 +4912,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   *eof = 0;
 
   frame->error=0;
-  trim(buffer);
+  trim_back(buffer);
   strcpy(object_buffer,buffer);
   while(stream!=NULL&&!feof(stream)){
     if(fgets(buffer,255,stream)==NULL){
@@ -5083,7 +5083,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
             quoted_string++;
             len=strlen(quoted_string);
             if(quoted_string[len-1]=='"')quoted_string[len-1]=' ';
-            trim(quoted_string);
+            trim_back(quoted_string);
             quoted_string=trim_front(quoted_string);
             strcpy(toki->default_string,quoted_string);
             quoted_string=strstr(quoted_string,"t%");
@@ -5129,7 +5129,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       }
       lenstr=strlen(sptr);
       if(sptr[lenstr-1]=='"')sptr[lenstr-1]=' ';
-      trim(sptr);
+      trim_back(sptr);
       sptr=trim_front(sptr);
       strcpy(toki->string,sptr);
     }
@@ -5238,7 +5238,7 @@ void rewind_device_file(FILE *stream){
   fgets(buffer,buffer_len,stream);
   comma=strchr(buffer,',');
   if(comma!=NULL)*comma=0;
-  trim(buffer);
+  trim_back(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     rewind(stream);
     return;
@@ -5247,7 +5247,7 @@ void rewind_device_file(FILE *stream){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
     if(comma!=NULL)*comma=0;
-    trim(buffer);
+    trim_back(buffer);
     if(strcmp(buffer,"//DATA")==0){
       found_data=1;
       break;
@@ -5272,7 +5272,7 @@ int get_ndevices(char *file){
   fgets(buffer,buffer_len,stream);
   comma=strchr(buffer,',');
   if(comma!=NULL)*comma=0;
-  trim(buffer);
+  trim_back(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     fclose(stream);
     return 0;
@@ -5282,7 +5282,7 @@ int get_ndevices(char *file){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
     if(comma!=NULL)*comma=0;
-    trim(buffer);
+    trim_back(buffer);
     if(strcmp(buffer,"//DATA")==0){
       break;
     }
@@ -5312,7 +5312,7 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
     if(comma!=NULL)*comma=0;
-    trim(buffer);
+    trim_back(buffer);
     if(strcmp(buffer,"//DATA")==0){
       break;
     }
@@ -5436,7 +5436,7 @@ void setup_zone_devs(void){
     for(j=0;j<ntokens;j++){
       devicedata *devi;
 
-      trim(devclabels[j]);
+      trim_back(devclabels[j]);
       devclabels[j]=trim_front(devclabels[j]);
       devi = getdevice(devclabels[j],-1);
       if(devi!=NULL)devi->in_zone_csv=1;
@@ -5521,14 +5521,14 @@ void read_device_data(char *file, int filetype, int loadstatus){
   fgets(buffer,buffer_len,stream);
   parsecsv(buffer,devcunits,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
-    trim(devcunits[i]);
+    trim_back(devcunits[i]);
     devcunits[i]=trim_front(devcunits[i]);
   }
 
   fgets(buffer2,buffer_len,stream);
   parsecsv(buffer2,devclabels,ncols,&ntokens);
   for(i=0;i<ntokens;i++){
-    trim(devclabels[i]);
+    trim_back(devclabels[i]);
     devclabels[i]=trim_front(devclabels[i]);
   }
 
@@ -6199,7 +6199,7 @@ char *get_device_label(char *buffer){
   label_present[0]=0;
   label_present++;
   label_present=trim_front(label_present);
-  trim(label_present);
+  trim_back(label_present);
   if(strlen(label_present)==0)return NULL;
   return label_present;
 }
