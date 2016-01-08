@@ -25,12 +25,12 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
 
       ndevices++;
       fgets(buffer,255,stream);
-      trim(buffer);
+      trim_back(buffer);
       front = trim_front(buffer);
       percen = strchr(front,'%');
       if(percen!=NULL){
         *percen=0;
-        trim(front);
+        trim_back(front);
       }
       if(STRCMP(front,"CANOPY")==0)ncanopies++;
     }
@@ -52,12 +52,12 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
 
       count++;
       fgets(buffer,255,stream);
-      trim(buffer);
+      trim_back(buffer);
       front = trim_front(buffer);
       percen = strchr(front,'%');
       if(percen!=NULL){
         *percen=0;
-        trim(front);
+        trim_back(front);
       }
       centerptr[0]=0.0;
       centerptr[1]=0.0;
