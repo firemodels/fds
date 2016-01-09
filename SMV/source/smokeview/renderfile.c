@@ -10,10 +10,10 @@
 #include GLUT_H
 #include "gd.h"
 
-/* ------------------ does_movie_exist ------------------------ */
-
 #define RENDER_TYPE 0
 #define RENDER_START 3
+
+/* ------------------ does_movie_exist ------------------------ */
 
 int does_movie_exist(char *mov_name, char *moviefile){
   char *movie;
@@ -516,8 +516,6 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   PRINTF(" Completed\n");
   return 0;
 }
-
-
 
 /* ------------------ SVimage2file ------------------------ */
 

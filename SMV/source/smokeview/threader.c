@@ -92,7 +92,7 @@ void *mt_update_smooth_blockages(void *arg){
 }
 #endif
 
-/* ------------------ system ------------------------ */
+/* ------------------ mt_psystem ------------------------ */
 
 #ifdef pp_THREAD
 void *mt_psystem(void *arg){
@@ -151,7 +151,7 @@ int Update_Bounds(void){
   return 1;
 }
 
-/* ------------------ Update_All_Patch_Bounds ------------------------ */
+/* ------------------ Update_All_Patch_Bounds_mt ------------------------ */
 
 #ifdef pp_THREAD
 void *Update_All_Patch_Bounds_mt(void *arg){
