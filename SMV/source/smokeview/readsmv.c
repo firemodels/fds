@@ -1370,7 +1370,7 @@ void init_textures(void){
   PRINTF("     Surface texture loading completed\n");
 }
 
-/* ------------------ update_bounds ------------------------ */
+/* ------------------ update_bound_info ------------------------ */
 
 void update_bound_info(void){
   int i,n;

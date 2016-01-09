@@ -723,7 +723,7 @@ int getpart5nframes(partdata *parti){
   return nframes_all;
 }
 
-/* ------------------ get_partframes ------------------------ */
+/* ------------------ get_min_partframes ------------------------ */
 
 int get_min_partframes(void){
   int i;
@@ -2057,9 +2057,6 @@ void drawPart(const partdata *parti){
   }
 
   glEnd();
-
-
-
 }
 
 /* ------------------ drawStaticPart ------------------------ */
@@ -2178,6 +2175,4 @@ void updatepartmenulabels(void){
       }
     } 
   }
-
-
 }

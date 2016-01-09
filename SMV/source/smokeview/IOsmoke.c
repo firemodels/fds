@@ -712,7 +712,9 @@ void setsmokecolorflags(void){
     }
   }
 }
+
 /* ------------------ getsmoke3d_sizes ------------------------ */
+
 int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **timelist_found, int **use_smokeframe,
                       int *nchars_smoke_uncompressed, 
                       int **nchars_smoke_compressed_found,

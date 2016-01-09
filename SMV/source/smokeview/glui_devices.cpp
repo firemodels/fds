@@ -184,7 +184,7 @@ extern "C" void show_glui_device(void){
   if(glui_device!=NULL)glui_device->show();
 }
 
-/* ------------------ Device_CB ------------------------ */
+/* ------------------ Open_CB ------------------------ */
 
 void Open_CB(int var){
   int i;

@@ -12,7 +12,7 @@
 
 void update_menu(void);
 
-/* ------------------ insert_scriptfile ------------------------ */
+/* ------------------ get_newscriptfilename ------------------------ */
 
 void get_newscriptfilename(char *newscriptfilename){
   char buffer[1024];
@@ -55,7 +55,7 @@ char *get_scriptfilename(int id){
   return NULL;
 }
 
-/* ------------------ get_scriptfilename ------------------------ */
+/* ------------------ get_inifilename ------------------------ */
 
 char *get_inifilename(int id){
   inifiledata *inifile;
@@ -202,7 +202,7 @@ void init_scripti(scriptdata *scripti, int command,char *label){
   scripti->ival5=0;
 }
 
-/* ------------------ init_script_keyword ------------------------ */
+/* ------------------ get_script_keyword_index ------------------------ */
 
 int get_script_keyword_index(char *keyword){
   if(keyword==NULL||strlen(keyword)==0)return SCRIPT_UNKNOWN;
@@ -293,7 +293,6 @@ void get_xyz(char *buffer,int *ival){
     }
   }
 }
-
 
 /* ------------------ script_error_check ------------------------ */
 
@@ -789,14 +788,14 @@ int compile_script(char *scriptfile){
   return return_val;
 }
 
-/* ------------------ run_renderstart ------------------------ */
+/* ------------------ script_renderstart ------------------------ */
 
 void script_renderstart(scriptdata *scripti){
   script_startframe=scripti->ival;
   script_skipframe=scripti->ival2;
 }
 
-/* ------------------ run_renderall ------------------------ */
+/* ------------------ script_renderall ------------------------ */
 
 void script_renderall(scriptdata *scripti){
   int skip_local;
@@ -981,7 +980,8 @@ void script_isorenderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
-/* ------------------ run_makemovie ------------------------ */
+/* ------------------ script_makemovie ------------------------ */
+
 void script_makemovie(scriptdata *scripti){
   strcpy(movie_name, scripti->cval);
   strcpy(render_file_base,scripti->cval2);

@@ -1848,7 +1848,7 @@ void updatevslicemenulabels(void){
   }
 }
 
-/* ------------------ hide_slice ------------------------ */
+/* ------------------ hide_slice2 ------------------------ */
 
 int hide_slice2(slicedata *sdi,slicedata *sdj){
   float delta_orig;
@@ -2936,7 +2936,7 @@ int getvsliceindex(const vslicedata *vd){
   return -1;
 }
 
-/* ------------------ getvsliceindex ------------------------ */
+/* ------------------ getvslicetype ------------------------ */
 
 int getvslicetype(const vslicedata *vd){
   int j;
@@ -4318,7 +4318,7 @@ void drawvolslice_terrain(const slicedata *sd){
 
 }
 
-/* ------------------ drawvolslice ------------------------ */
+/* ------------------ drawvolslice_cellcenter ------------------------ */
 
 void drawvolslice_cellcenter(const slicedata *sd){
   float *xplt, *yplt, *zplt;
@@ -5872,7 +5872,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   }
 }
 
-/* ------------------ output_slicedata ------------------------ */
+/* ------------------ output_Slicedata ------------------------ */
 
 void output_Slicedata(void){
   FILE *fileout;
@@ -5954,7 +5954,7 @@ void output_Slicedata(void){
   }
 }
 
-/* ------------------ init_slicedata ------------------------ */
+/* ------------------ init_Slicedata ------------------------ */
 
 void init_Slicedata(void){
   FILE *fileout;
@@ -6104,7 +6104,7 @@ int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_
 }
 
 
-/* ------------------ getsliceheader ------------------------ */
+/* ------------------ getsliceheader0 ------------------------ */
 
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *jj1, int *j2, int *k1, int *k2, int *slice3d){
   FILE *stream;
@@ -6303,7 +6303,8 @@ int getslicezlibdata(char *file,
   // time, compressed frame size                        for each frame
   // compressed buffer
 
-/* ------------------ getslicecompressdata ------------------------ */
+/* ------------------ makeslicesizefile ------------------------ */
+
 int makeslicesizefile(char *file, char *sizefile, int compression_type){
   int endian_fromfile;
   float minmax[2];
@@ -6489,7 +6490,7 @@ void remove_vslice_loadstack(int vsliceindex){
   }
 }
 
-/* ------------------ last_slice_loadstack ------------------------ */
+/* ------------------ last_vslice_loadstack ------------------------ */
 
 int last_vslice_loadstack(void){
   int return_val;

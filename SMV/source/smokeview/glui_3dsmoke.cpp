@@ -605,7 +605,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   Smoke3d_CB(SMOKE_OPTIONS);
 }
 
-/* ------------------ 3dsmoke_CB ------------------------ */
+/* ------------------ Smoke3d_CB ------------------------ */
 
 extern "C" void Smoke3d_CB(int var){
   int i;

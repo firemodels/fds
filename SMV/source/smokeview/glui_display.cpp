@@ -914,7 +914,6 @@ extern "C" void Labels_CB(int var){
   }
 }
 
-
 /* ------------------ set_labels_controls ------------------------ */
 
   extern "C" void set_labels_controls(){

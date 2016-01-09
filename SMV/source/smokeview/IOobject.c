@@ -574,8 +574,6 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
   }
 }
 
-/* ----------------------- get_devices_val ----------------------------- */
-
 #define IN_INTERVAL(IVAL) \
   if(time_local>=times_local[(IVAL)]&&time_local<=times_local[(IVAL)+1]){\
     if(time_local-times_local[(IVAL)]<times_local[(IVAL)+1]-time_local){\
@@ -589,6 +587,8 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
     devicei->ival=(IVAL);\
     return devicei->val;\
   }
+
+/* ----------------------- get_devices_val ----------------------------- */
 
 float get_device_val(float time_local, devicedata *devicei, int *valid){
   int nvals;
@@ -1975,7 +1975,7 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
   }
 }
 
-/* ----------------------- drawsphere ----------------------------- */
+/* ----------------------- drawsphereseg ----------------------------- */
 
 void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
   int i, j;
@@ -2385,7 +2385,7 @@ void drawpoint(unsigned char *rgbcolor){
 }
 
 
-/* ----------------------- drawfilledrectangle ----------------------------- */
+/* ----------------------- drawrectangle ----------------------------- */
 
 void drawrectangle(float width,float height, unsigned char *rgbcolor){
   glBegin(GL_LINE_LOOP);
@@ -2781,7 +2781,7 @@ void drawcubec(float size, unsigned char *rgbcolor){
 
 }
 
-/* ----------------------- drawcube ----------------------------- */
+/* ----------------------- drawtriblock ----------------------------- */
 
 void drawtriblock(float s, float h, unsigned char *rgbcolor){
   float sd2;
@@ -3071,7 +3071,7 @@ void drawvent(float width, float height, unsigned char *rgbcolor){
 
 }
 
-/* ----------------------- drawcube ----------------------------- */
+/* ----------------------- drawsquare ----------------------------- */
 
 void drawsquare(float size, unsigned char *rgbcolor){
   float s2;
@@ -3582,7 +3582,7 @@ void drawcdisk(float diameter, float height, unsigned char *rgbcolor){
   }
 }
 
-/* ----------------------- drawhexdisk ----------------------------- */
+/* ----------------------- drawpolydisk ----------------------------- */
 
 void drawpolydisk(int nsides, float diameter, float height, unsigned char *rgbcolor){
   int i;
@@ -4280,7 +4280,7 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
   return default_object;
 }
 
-/* ----------------------- initcircle ----------------------------- */
+/* ----------------------- Init_Circle ----------------------------- */
 
 void Init_Circle(unsigned int npoints, circdata *circinfo){
   float drad;
@@ -4308,7 +4308,7 @@ void Init_Circle(unsigned int npoints, circdata *circinfo){
   circinfo->ncirc=npoints;
 }
 
-/* ----------------------- initspheresegs ----------------------------- */
+/* ----------------------- Init_Sphere ----------------------------- */
 
 void Init_Sphere(int nlat, int nlong){
   float dlat, dlong;
@@ -4428,7 +4428,7 @@ sv_object *init_SVOBJECT2(char *label, char *commandsoff, char *commandson, int 
   return object;
 }
 
-/* ----------------------- gettoken ----------------------------- */
+/* ----------------------- get_token_id ----------------------------- */
 
 int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int *use_displaylist){
 
@@ -4877,7 +4877,7 @@ int get_token_loc(char *var,sv_object_frame *frame){
   return -1;
 }
 
-/* ----------------------- get_token_loc ----------------------------- */
+/* ----------------------- get_token_ptr ----------------------------- */
 
 tokendata *get_token_ptr(char *var,sv_object_frame *frame){
   int i;
@@ -6481,7 +6481,6 @@ void init_object_defs(void){
     evac_token=get_token_ptr("HZ",obj_frame);
     evac_tokens[n++]=evac_token;
   }
-  
 }
 
 /* ----------------------- update_object_used ----------------------------- */
@@ -6583,7 +6582,7 @@ float dist(float p1[3], float p2[3]){
   return sqrt(dx*dx+dy*dy+dz*dz);
 }
 
-/* ----------------------- init_avatar ----------------------------- */
+/* ----------------------- get_point2box_dist ----------------------------- */
 
 float get_point2box_dist(float boxmin[3], float boxmax[3], float p1[3], float p2orig[3]){
   int i;

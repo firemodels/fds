@@ -1456,7 +1456,6 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
       glui_bounds->add_button_to_panel(PANEL_e,_d("Update"),CHOPUPDATE,FILE_CB);
     }
   }
-
 }
 
 /* ------------------ PLOT3D_CB ------------------------ */
@@ -1671,7 +1670,7 @@ extern "C" void update_glui_isotype(void){
 }
 
 
-/* ------------------ update_glui_isotype ------------------------ */
+/* ------------------ update_glui_plot3dtype ------------------------ */
 
 extern "C" void update_glui_plot3dtype(void){
   RADIO_plot3d_isotype->set_int_val(p3dsurfacetype);
@@ -2619,7 +2618,7 @@ void Time_CB(int var){
   }
 }
 
-/* ------------------ SLICE_CB ------------------------ */
+/* ------------------ Slice_CB ------------------------ */
 
 extern "C" void Slice_CB(int var){
   int error,i;
@@ -3073,7 +3072,7 @@ void Bounds_DLG_CB(int var){
   }
 }
 
-/* ------------------ show_glui ------------------------ */
+/* ------------------ show_glui_bounds ------------------------ */
 
 extern "C" void show_glui_bounds(int menu_id){
   int islice, ipatch;
@@ -3610,6 +3609,3 @@ extern "C" void update_showhidebuttons(void){
     if(RADIO_showhide != NULL)RADIO_showhide->enable();
   }
 }
-
-
-
