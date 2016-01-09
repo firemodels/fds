@@ -160,7 +160,7 @@ EXTERNCPP void define_volsmoke_textures(void);
 EXTERNCPP void set_colorbar_list_index(int val);
 EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);
-EXTERNCPP void Get_VP_info(void);
+EXTERNCPP void get_viewport_info(void);
 
 EXTERNCPP void scale_2dfont(void);
 EXTERNCPP void scale_3dfont(void);

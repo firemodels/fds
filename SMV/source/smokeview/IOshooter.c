@@ -38,7 +38,7 @@ int  allocate_shooter(void){
 
 }
 
-/* ------------------ get_vel ------------------------ */
+/* ------------------ get_shooter_vel ------------------------ */
 
 void get_shooter_vel(float *uvw, float *xyz){
   float factor;

@@ -6,6 +6,42 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
+/* ------------------ compress_svzip2 ------------------------ */
+
+void compress_svzip2(void){
+  char shellcommand[1024];
+
+  PRINTF("Compressing...\n");
+  compress_onoff(OFF);
+
+  writeini(LOCAL_INI, NULL);
+
+  // surround smokezip path name with "'s so that the system call can handle imbedded blanks
+
+  strcpy(shellcommand, "\"");
+  strcat(shellcommand, smokezippath);
+  strcat(shellcommand, "\" ");
+  if(overwrite_all == 1){
+    strcat(shellcommand, " -f ");
+  }
+  if(erase_all == 1){
+    strcat(shellcommand, " -c ");
+  }
+  if(compress_autoloaded == 1){
+    strcat(shellcommand, " -auto ");
+  }
+  strcat(shellcommand, " ");
+  strcat(shellcommand, smv_filename);
+
+  PRINTF("Executing shell command: %s\n", shellcommand);
+  system(shellcommand);
+  updatesmoke3dmenulabels();
+  updatepatchmenulabels();
+  compress_onoff(ON);
+  updatemenu = 1;
+  PRINTF("Compression completed\n");
+}
+
 /* ------------------ init_all_threads ------------------------ */
 
 void init_multi_threading(void){
@@ -56,7 +92,7 @@ void *mt_update_smooth_blockages(void *arg){
 }
 #endif
 
-/* ------------------ system ------------------------ */
+/* ------------------ mt_psystem ------------------------ */
 
 #ifdef pp_THREAD
 void *mt_psystem(void *arg){
@@ -115,7 +151,7 @@ int Update_Bounds(void){
   return 1;
 }
 
-/* ------------------ Update_All_Patch_Bounds ------------------------ */
+/* ------------------ Update_All_Patch_Bounds_mt ------------------------ */
 
 #ifdef pp_THREAD
 void *Update_All_Patch_Bounds_mt(void *arg){

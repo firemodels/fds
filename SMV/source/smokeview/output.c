@@ -256,7 +256,6 @@ void drawLabels(void){
   glPopMatrix();
 }
 
-
 /* ------------------ LABEL_Next ------------------------ */
 
 labeldata *LABEL_Next(labeldata *label){

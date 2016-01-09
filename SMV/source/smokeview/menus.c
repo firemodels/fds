@@ -561,7 +561,6 @@ void Smoke3DShowMenu(int value){
       smoke3di->display = 1 - smoke3di->display;
     }
   }
-
 }
 
 /* ------------------ IsoShowMenu ------------------------ */
@@ -992,7 +991,6 @@ void ViewpointMenu(int value){
 }
 
 /* ------------------ DialogMenu ------------------------ */
-
 
 void DialogMenu(int value){
   glutPostRedisplay();
@@ -1631,12 +1629,11 @@ void ParticleShowMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ FrameRateMenu ------------------------ */
-
-//void keyboard(unsigned char key, int x, int y);
 #define MENU_FRAMERATE_Realtime 2001
 #define MENU_FRAMERATE_2xRealtime 2002
 #define MENU_FRAMERATE_4xRealtime 2004
+
+/* ------------------ FrameRateMenu ------------------------ */
 
 void FrameRateMenu(int value){
   updateUpdateFrameRateMenu=0;
@@ -1780,7 +1777,6 @@ void HelpMenu(int value){
   }
 }
 
-
 /* ------------------ VectorSkipMenu ------------------------ */
 
 void VectorSkipMenu(int value){
@@ -1870,13 +1866,14 @@ void TextureShowMenu(int value){
 
 }
 
-/* ------------------ Plot3DShowMenu ------------------------ */
 #define MENU_PLOT3D_Z 1
 #define MENU_PLOT3D_Y 2
 #define MENU_PLOT3D_X 3
 #define MENU_PLOT3D_CONT 4
 #define MENU_PLOT3D_SHOWALL 5
 #define MENU_PLOT3D_HIDEALL 6
+
+/* ------------------ Plot3DShowMenu ------------------------ */
 
 void Plot3DShowMenu(int value){
   int i;
@@ -2427,7 +2424,6 @@ void LoadUnloadMenu(int value){
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
-
 /* ------------------ ShowTourMenu ------------------------ */
 
 void ShowTourMenu(int value){
@@ -2590,7 +2586,7 @@ void SetTour(tourdata *thetour){
   TourMenu(tournumber);
 }
 
-/* ------------------ targetMenu ------------------------ */
+/* ------------------ TargetMenu ------------------------ */
 
 void TargetMenu(int value){
   int errorcode,i;
@@ -3145,7 +3141,6 @@ void UnloadMultiVSliceMenu(int value){
   }
 }
 
-
 /* ------------------ UnLoadMultiSliceMenu ------------------------ */
 
 void UnloadMultiSliceMenu(int value){
@@ -3162,7 +3157,6 @@ void UnloadMultiSliceMenu(int value){
     UnloadSliceMenu(UNLOAD_ALL);
   }
 }
-
 
 /* ------------------ ShowVolSmoke3DMenu ------------------------ */
 
@@ -3425,7 +3419,7 @@ int AnySlices(char *type){
   return 0;
 }
 
-/* ------------------ LoadAllSlices ------------------------ */
+/* ------------------ HideAllSlices ------------------------ */
 
 void HideAllSlices(void){
   int i;
@@ -4078,9 +4072,6 @@ void VentMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
 }
-
-
-/* ------------------ ImmersedMenu ------------------------ */
 #define GEOMETRY_SOLID 0
 #define GEOMETRY_OUTLINE 1
 #define GEOMETRY_SOLIDOUTLINE 2
@@ -4095,6 +4086,8 @@ void VentMenu(int value){
 #define GEOMETRY_SMOOTHNORMAL 4
 #define GEOMETRY_SHOWDIAGNOSTICS 13
 #define GEOMETRY_HILIGHTSKINNY 5
+
+/* ------------------ ImmersedMenu ------------------------ */
 
 void ImmersedMenu(int value){
   updatemenu=1;
@@ -4385,7 +4378,6 @@ void TitleMenu(int value){
   }
 }
 
-
 /* ------------------ PropMenu ------------------------ */
 
 void PropMenu(int value){
@@ -4572,13 +4564,13 @@ void ZoneShowMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ GeometryMenu ------------------------ */
-
 #define GEOM_Vents 15
 #define GEOM_Outline 3
 #define GEOM_TriangleCount 14
 #define GEOM_ShowAll 11
 #define GEOM_HideAll 13
+
+/* ------------------ GeometryMenu ------------------------ */
 
 void GeometryMenu(int value){
 
@@ -4683,7 +4675,7 @@ void MENU_vslice(int vec_type){
   }
 }
 
-/* ------------------ get_total_active_devices ------------------------ */
+/* ------------------ get_num_activedevices ------------------------ */
 
 int get_num_activedevices(void){
   int num_activedevices = 0;

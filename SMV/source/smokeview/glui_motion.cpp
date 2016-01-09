@@ -251,7 +251,7 @@ void update_zaxis_angles(void){
   SPINNER_zaxis_angles[1]->set_float_val(zaxis_angles[1]);
 }
 
-/* ------------------ update_gvec ------------------------ */
+/* ------------------ update_gvec_down ------------------------ */
 
 void update_gvec_down(int gvec_down_local){
   gvec_down = gvec_down_local;
@@ -376,7 +376,7 @@ extern "C" void update_cursor_checkbox(void){
   CHECKBOX_cursor_blockpath->set_int_val(cursorPlot3D);
 }
 
-/* ------------------ update_view_list ------------------------ */
+/* ------------------ update_view_gluilist ------------------------ */
 
 extern "C" void update_view_gluilist(void){
   camera *ca;

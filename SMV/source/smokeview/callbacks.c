@@ -430,7 +430,7 @@ void mouse_select_device(int button, int state, int x, int y){
   }
 }
 
-/* ------------------ select_avatar ------------------------ */
+/* ------------------ mouse_select_avatar ------------------------ */
 
 void mouse_select_avatar(int button, int state, int x, int y){
   int val;
@@ -774,7 +774,7 @@ void update_mouseinfo(int flag, int xm, int ym){
   camera_current->quat_defined=1;
 }
 
-/* ------------------ mouse ------------------------ */
+/* ------------------ mouse_CB ------------------------ */
 
 void mouse_CB(int button, int state, int xm, int ym){
   float *eye_xyz;
@@ -919,7 +919,7 @@ void Colorbar_Drag(int xm, int ym){
   }
 }
 
-/* ------------------ drag_colorsplit ------------------------ */
+/* ------------------ Colorbar_SplitDrag ------------------------ */
 
 void Colorbar_SplitDrag(int xm, int ym){
   int colorbar_index;
@@ -939,7 +939,7 @@ void Colorbar_SplitDrag(int xm, int ym){
   }
 }
 
-/* ------------------ timebar_drag ------------------------ */
+/* ------------------ Timebar_Drag ------------------------ */
 
 void Timebar_Drag(int xm, int ym){
   if(nglobal_times>0){
@@ -1194,7 +1194,7 @@ int throttle_gpu(void){
   return 0;
 }
 
-/* ------------------ motion ------------------------ */
+/* ------------------ motion_CB ------------------------ */
 
 void motion_CB(int xm, int ym){
 
@@ -2129,7 +2129,7 @@ void keyboard(unsigned char key, int flag){
   if(iplot_state!=0)updateplotslice(iplot_state);
 }
 
-/* ------------------ keyboard ------------------------ */
+/* ------------------ keyboard_CB ------------------------ */
 
 void keyboard_CB(unsigned char key, int x, int y){
   keyboard(key,FROM_CALLBACK);
@@ -2213,13 +2213,13 @@ void handleiso(void){
     return;
 }
 
-/* ------------------ specialkeyoard ------------------------ */
+/* ------------------ specialkeyboard_up_CB ------------------------ */
 
 void specialkeyboard_up_CB(int key, int x, int y){
   resetclock=1;
 }
 
-/* ------------------ specialkeyoard ------------------------ */
+/* ------------------ specialkeyboard_CB ------------------------ */
 
 void specialkeyboard_CB(int key, int x, int y){
 
@@ -2671,7 +2671,7 @@ void reset_gltime(void){
   }
 }
 
-/* ------------------ update_currentmesh ------------------------ */
+/* ------------------ update_current_mesh ------------------------ */
 
 void update_current_mesh(mesh *meshi){
   current_mesh=meshi;
@@ -2903,7 +2903,7 @@ void DoScript(void){
   }
 }
 
-/* ------------------ Display ------------------------ */
+/* ------------------ Display_CB ------------------------ */
 
 void Display_CB(void){
   int dostereo;
