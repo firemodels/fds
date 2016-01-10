@@ -312,27 +312,13 @@ buffptr = remove_comment(buffer); \
 buffptr = trim_front(buffptr); \
 script_error_check(keyword, buffptr)
 
-#ifdef pp_DEG
 #define SETcval \
 SETbuffer;\
 scripti->cval=get_pointer(buffptr)
-#else
-#define SETcval \
-SETbuffer; \
-removeDEG(buffptr); \
-scripti->cval = get_pointer(buffptr)
-#endif
 
-#ifdef pp_DEG
 #define SETcval2 \
 SETbuffer;\
 scripti->cval2 = get_pointer(buffptr)
-#else
-#define SETcval2 \
-SETbuffer; \
-removeDEG(buffptr); \
-scripti->cval2 = get_pointer(buffptr)
-#endif
 
 #define SETfval \
 SETbuffer;\
@@ -354,12 +340,14 @@ void removeDEG(char *string){
 
   if(string == NULL)return;
   for(i = 0,ii=0; i < strlen(string);i++){
-    if(string[i] == 176)continue;
+    unsigned char c;
+
+    c = (unsigned char)string[i];
+    if(c == 176)continue;
     string[ii] = string[i];
     ii++;
   }
   string[ii] = 0;
-
 }
 #endif
 
@@ -593,7 +581,10 @@ int compile_script(char *scriptfile){
 //  mesh number (int)
       case SCRIPT_LOADISOM:
         SETcval;
-        scripti->ival=1;
+#ifndef pp_DEG        
+        removeDEG(scripti->cval);
+#endif        
+        scripti->ival = 1;
         SETival;
         break;
 
