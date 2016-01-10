@@ -1199,30 +1199,30 @@ save_build_status()
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-     cat "" >> $ERROR_LOG
+     echo "***Warnings:" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
+     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH."
      echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-     touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
+      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH."
       echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-      touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
+      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings."
       echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
-      touch output/status_warnings
 
    # No errors or warnings
    else
+      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests."
       echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
-      touch output/status_success
    fi
 }
 
