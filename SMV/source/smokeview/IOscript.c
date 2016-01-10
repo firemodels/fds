@@ -328,6 +328,7 @@ scripti->cval = get_pointer(buffptr)
 SETbuffer;\
 scripti->cval2 = get_pointer(buffptr)
 #else
+#define SETcval2 \
 SETbuffer; \
 removeDEG(buffptr); \
 scripti->cval2 = get_pointer(buffptr)
@@ -348,7 +349,7 @@ sscanf(buffptr, "%i", &scripti->ival2)
 #ifndef pp_DEG
 /* ------------------ removeDEG ------------------------ */
 
-void removeDEG(chare *string){
+void removeDEG(char *string){
   int i,ii;
 
   if(string == NULL)return;
