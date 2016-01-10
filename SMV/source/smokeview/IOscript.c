@@ -312,13 +312,26 @@ buffptr = remove_comment(buffer); \
 buffptr = trim_front(buffptr); \
 script_error_check(keyword, buffptr)
 
+#ifdef pp_DEG
 #define SETcval \
 SETbuffer;\
 scripti->cval=get_pointer(buffptr)
+#else
+#define SETcval \
+SETbuffer; \
+removeDEG(buffptr); \
+scripti->cval = get_pointer(buffptr)
+#endif
 
+#ifdef pp_DEG
 #define SETcval2 \
 SETbuffer;\
 scripti->cval2 = get_pointer(buffptr)
+#else
+SETbuffer; \
+removeDEG(buffptr); \
+scripti->cval2 = get_pointer(buffptr)
+#endif
 
 #define SETfval \
 SETbuffer;\
@@ -331,6 +344,23 @@ sscanf(buffptr, "%i", &scripti->ival)
 #define SETival2 \
 SETbuffer;\
 sscanf(buffptr, "%i", &scripti->ival2)
+
+#ifndef pp_DEG
+/* ------------------ removeDEG ------------------------ */
+
+void removeDEG(chare *string){
+  int i,ii;
+
+  if(string == NULL)return;
+  for(i = 0,ii=0; i < strlen(string);i++){
+    if(string[i] == 176)continue;
+    string[ii] = string[i];
+    ii++;
+  }
+  string[ii] = 0;
+
+}
+#endif
 
 /* ------------------ compile_script ------------------------ */
 
