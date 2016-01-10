@@ -1409,6 +1409,8 @@ if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
    echo "   verification"
   make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+else
+   echo Errors found, not building guides
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
@@ -1419,6 +1421,10 @@ DIFF_SCRIPT_TIME=`GET_DURATION $SCRIPT_TIME_beg $SCRIPT_TIME_end`
 echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 
 ### Report results ###
+echo Reporting results
+echo "   making all files readable"
 set_files_world_readable
+echo "   saving build status"
 save_build_status
+echo "   email results"
 email_build_status
