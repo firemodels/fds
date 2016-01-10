@@ -762,7 +762,7 @@ check_smv_utilities()
         stage2a_success="1"
      else
         stage2a_success="0"
-        echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
+        echo "Errors from Stage 2a - Compile SMV utilities:" >> $ERROR_LOG
         cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
         echo "" >> $ERROR_LOG
      fi
@@ -774,7 +774,7 @@ check_smv_utilities()
      is_file_installed wind2fds
      is_file_installed background
      if [ "$stage2a_success" == "0" ] ; then
-        echo "Errors from Stage 5pre - Smokeview and utilities:" >> $ERROR_LOG
+        echo "Errors from Stage 2a - Smokeview and utilities:" >> $ERROR_LOG
         stage2a_success="1"
         cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
         echo "" >> $ERROR_LOG
@@ -850,7 +850,7 @@ check_verification_cases_release()
       grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
       grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
 
-      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
+      echo "Errors from Stage 3b - Run verification cases (release mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage3b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
@@ -899,7 +899,7 @@ check_compile_smv_db()
    then
       stage2b_success=true
    else
-      echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
+      echo "Errors from Stage 2b - Compile SMV debug:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage2b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -946,7 +946,7 @@ check_smv_pictures_db()
    else
       cp $OUTPUT_DIR/stage4a $OUTPUT_DIR/stage4a_errors
 
-      echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
+      echo "Errors from Stage 4a - Make SMV pictures (debug mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage4a_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -996,7 +996,7 @@ check_compile_smv()
    then
       stage2c_smv_success=true
    else
-      echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
+      echo "Errors from Stage 2c - Compile SMV release:" >> $ERROR_LOG
       echo "The program smokeview_${platform}${size} does not exist."
       cat $OUTPUT_DIR/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
@@ -1044,7 +1044,7 @@ check_smv_pictures()
    else
       cp $OUTPUT_DIR/stage4b  $OUTPUT_DIR/stage4b_errors
 
-      echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
+      echo "Errors from Stage 4b - Make SMV pictures (release mode):" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -1070,7 +1070,7 @@ check_smv_movies()
    else
       cp $OUTPUT_DIR/stage4c  $OUTPUT_DIR/stage4c_errors
 
-      echo "Errors from Stage 6e - Make SMV movies " >> $ERROR_LOG
+      echo "Errors from Stage 4c - Make SMV movies " >> $ERROR_LOG
       cat $OUTPUT_DIR/stage4c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -1130,7 +1130,7 @@ archive_timing_stats()
 }
 
 #  ===================================
-#  = Stage 8 - Build smokview guides =
+#  = Stage 5 - Build smokview guides =
 #  ===================================
 
 check_guide()
@@ -1156,7 +1156,7 @@ check_guide()
       cp $directory/$document $NEWGUIDE_DIR/.
       chmod 664 $NEWGUIDE_DIR/$document
    else
-      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      echo "Errors from Stage 5 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
       grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
@@ -1168,7 +1168,7 @@ check_guide()
       # Continue along
       :
    else
-      echo "Stage 8 warnings:" >> $WARNING_LOG
+      echo "Stage 5 warnings:" >> $WARNING_LOG
       echo $label >> $WARNING_LOG
       grep -E "undefined|multiply defined|multiply-defined" -I $stage >> $WARNING_LOG
       echo "" >> $WARNING_LOG
@@ -1199,30 +1199,30 @@ save_build_status()
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-     cat "" >> $ERROR_LOG
+     echo "***Warnings:" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
+     echo "   build failure and warnings for version: ${GIT_REVISION}, branch: $BRANCH."
      echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-     touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
+      echo "   build failure for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-      touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
+      echo "   build success with warnings for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
-      touch output/status_warnings
 
    # No errors or warnings
    else
+      echo "   build success for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
-      touch output/status_success
    fi
 }
 
@@ -1409,6 +1409,8 @@ if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
    echo "   verification"
   make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+else
+   echo Errors found, not building guides
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
@@ -1419,6 +1421,8 @@ DIFF_SCRIPT_TIME=`GET_DURATION $SCRIPT_TIME_beg $SCRIPT_TIME_end`
 echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 
 ### Report results ###
+echo Reporting results
 set_files_world_readable
 save_build_status
+echo "   emailing results"
 email_build_status
