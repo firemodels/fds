@@ -1201,27 +1201,27 @@ save_build_status()
    then
      echo "***Warnings:" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH."
+     echo "   build failure and warnings for version: ${GIT_REVISION}, branch: $BRANCH."
      echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH."
+      echo "   build failure for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings."
+      echo "   build success with warnings for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests."
+      echo "   build success for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
@@ -1422,9 +1422,7 @@ echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 
 ### Report results ###
 echo Reporting results
-echo "   making all files readable"
 set_files_world_readable
-echo "   saving build status"
 save_build_status
-echo "   email results"
+echo "   emailing results"
 email_build_status
