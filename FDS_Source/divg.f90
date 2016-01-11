@@ -477,7 +477,7 @@ CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
             DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                        (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                        (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -489,7 +489,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
             DELKDELT = &
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                  (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -565,23 +565,11 @@ ENDIF CONST_GAMMA_IF_2
 
 ! Add contribution of reactions
 
-IF (N_REACTIONS > 0 .AND. .NOT.CONSTANT_SPECIFIC_HEAT_RATIO) THEN
+IF (N_REACTIONS > 0 .OR. N_LP_ARRAY_INDICES>0) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_REACTION(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-ENDIF
-
-! Add contribution of evaporating particles
-
-IF (CALC_D_LAGRANGIAN) THEN
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            DP(I,J,K) = DP(I,J,K) + D_LAGRANGIAN(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + D_SOURCE(I,J,K)
          ENDDO
       ENDDO
    ENDDO

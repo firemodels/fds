@@ -78,7 +78,7 @@ gnu_osx_64 : $(obj)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX64 $(GITHASH)
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX $(GITHASH)
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icc
 intel_linux_64 : exe       = wind2fds_linux_64
@@ -89,7 +89,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX64 $(GITHASH)
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITHASH)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
 intel_osx_64 : exe       = wind2fds_osx_64

@@ -60,8 +60,6 @@ if "%altemail%" == "1" (
   )
 )
 
-set release=0
-set debug=1
 set errorlog=%OUTDIR%\firebot_errors.txt
 set timefile=%OUTDIR%\time.txt
 set datefile=%OUTDIR%\date.txt
@@ -192,10 +190,12 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
-   cd %fdsroot%
-   git clean -dxf -e win32_local 1> Nul 2>&1
-   git add . 1> Nul 2>&1
-   git reset --hard HEAD 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
+   call :git_clean %fdsroot%\SMV\source
+   call :git_clean %fdsroot%\SMV\Build
+   call :git_clean %fdsroot%\FDS_Source
+   call :git_clean %fdsroot%\FDS_Compilation
+   call :git_clean %fdsroot%\Manuals
 :skip_clean1
 
 :: update FDS/Smokeview repository
@@ -203,6 +203,7 @@ if %clean% == 0 goto skip_clean1
 if %update% == 0 goto skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
+
 git fetch origin
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 :skip_update1
@@ -312,7 +313,7 @@ echo             debug mode
 :: run cases
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
@@ -332,11 +333,11 @@ echo             release mode
 cd %fdsroot%\Verification\
 if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
-   git clean -dxf -e win32_local 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
 :skip_clean2
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
@@ -624,6 +625,17 @@ if %nerrors% GTR 0 (
   set haveerrors=1
   set haveerrors_now=1
 )
+exit /b
+
+:: -------------------------------------------------------------
+ :git_clean
+:: -------------------------------------------------------------
+
+set gitcleandir=%1
+cd %gitcleandir%
+git clean -dxf 1>> Nul 2>&1
+git add . 1>> Nul 2>&1
+git reset --hard HEAD 1>> Nul 2>&1
 exit /b
 
 :: -------------------------------------------------------------

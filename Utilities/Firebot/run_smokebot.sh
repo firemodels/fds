@@ -21,14 +21,20 @@ botscript=smokebot.sh
 RUNAUTO=
 CLEANREPO=
 UPDATEREPO=
-QUEUE=
 RUNSMOKEBOT=1
 MOVIE=
 SSH=
-MAILTO=
 UPLOAD=
 FORCE=
 COMPILER=intel
+
+# checking to see if a queing system is available
+QUEUE=smokebot
+notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
+if [ $notfound -eq 1 ] ; then
+  QUEUE=none
+fi
+
 
 function usage {
 echo "Verification and validation testing script for smokeview"
@@ -40,9 +46,13 @@ echo "-c - clean repo"
 echo "-C - cfast repository location [default: $CFASTREPO]"
 echo "-f - force smokebot run"
 echo "-h - display this message"
-echo "-I - specify compiler (intel or gnu)"
+echo "-I compiler - intel or gnu [default: $COMPILER]"
+if [ "$EMAIL" != "" ]; then
+echo "-m email_address - [default: $EMAIL]"
+else
 echo "-m email_address"
-echo "-q queue"
+fi
+echo "-q queue [default: $QUEUE]"
 echo "-M  - make movies"
 echo "-r - FDS-SMV repository location [default: $FDSREPO]"
 echo "-S host - generate images on host"
@@ -78,13 +88,13 @@ case $OPTION  in
    exit
    ;;
   m)
-   MAILTO="-m $OPTARG"
+   EMAIL="$OPTARG"
    ;;
   M)
    MOVIE="-M"
    ;;
   q)
-   QUEUE="-q $OPTARG"
+   QUEUE="$OPTARG"
    ;;
   r)
    FDSREPO="$OPTARG"
@@ -110,20 +120,25 @@ COMPILER="-I $COMPILER"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [ "$FORCE" == "" ]; then
     if [ -e $running ] ; then
-      echo Smokebot is already running.
-      echo Erase the file $running if this is not the case
-      echo or rerun using the -f option.
+      echo Smokebot or firebot are already running.
+      echo "Re-run using the -f option if this is not the case."
       exit
     fi
   fi
 fi
 
+QUEUE="-q $QUEUE"
+
+if [ "$EMAIL" != "" ]; then
+  EMAIL="-m $EMAIL"
+fi
+
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   if [[ "$UPDATEREPO" == "-u" ]]; then
      cd $FDSREPO
-     git remote update
-     git checkout $BRANCH
-     git pull
+     git remote update &> /dev/null
+     git checkout $BRANCH &> /dev/null
+     git pull &> /dev/null
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [ "$FIREBOTDIR" != "$CURDIR" ]; then
@@ -137,8 +152,8 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $MAILTO $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
 fi

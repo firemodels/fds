@@ -6,7 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 
-void trim(char *line);
+void trim_back(char *line);
 void usage(char *prog);
 char *trim_front(char *line);
 
@@ -70,7 +70,7 @@ int main(int argc, char **argv){
   fprintf(streamout,"@echo off\n");
   for(;;){
     if(fgets(buffer,1024,streamin)==NULL)break;
-    trim(buffer);
+    trim_back(buffer);
     if(strlen(buffer)==0){
       fprintf(streamout,"\n");
       continue;
@@ -95,7 +95,7 @@ int main(int argc, char **argv){
       data = comm_end+1;
       *comm_end=0;
 
-      trim(data);
+      trim_back(data);
       fprintf(streamout,"%s%s%s %s\n","%",comm_beg,"%",data);
       continue;
 
@@ -118,7 +118,7 @@ void usage(char *prog){
 
 /* ------------------ trim ------------------------ */
 
-void trim(char *line){
+void trim_back(char *line){
   char *blank=" ";
   const char *c;
   const char *lf="\n";
