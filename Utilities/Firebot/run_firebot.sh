@@ -5,7 +5,6 @@ fi
 running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
-QUEUE=firebot
 reponame=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
@@ -16,6 +15,14 @@ if [ -e .fds_git ]; then
   cd $CURDIR
 fi
 
+# checking to see if a queing system is available
+QUEUE=firebot
+notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
+if [ $notfound -eq 1 ] ; then
+  QUEUE=none
+fi
+
+
 
 function usage {
 echo "Verification and validation testing script for FDS"
@@ -25,9 +32,12 @@ echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
 echo "-f - force firebot run"
 echo "-h - display this message"
+if [ "$EMAIL" != "" ]; then
+echo "-m email_address [default: $EMAIL]"
+else
 echo "-m email_address "
-echo "-q - queue_name - run cases using the queue queue_name"
-echo "     default: $QUEUE"
+fi
+echo "-q queue - specify queue [default: $QUEUE]"
 echo "-r - repository location [default: $reponame]"
 echo "-s - skip matlab and build document stages"
 echo "-S host - generate images on host"
@@ -44,7 +54,6 @@ CLEANREPO=0
 UPDATE=
 CLEAN=
 RUNFIREBOT=1
-EMAIL=
 UPLOADGUIDES=
 SSH=
 FORCE=
@@ -97,9 +106,8 @@ shift $(($OPTIND-1))
 
 if [ -e $running ] ; then
   if [ "$FORCE" == "" ] ; then
-    echo Firebot is already running.
-    echo Erase the file $running if this is not the case
-    echo or rerun using the -f option.
+    echo Firebot or smokebot are already running. If this
+    echo "is not the case re-run using the -f option."
     exit
   fi
 fi

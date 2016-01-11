@@ -3,7 +3,7 @@
 
 &HEAD CHID='reactionrate_series_reaction', TITLE='Species Reactions' /
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
-&TIME T_END=0.5 DT=0.5  /
+&TIME T_END=1.0 DT=0.5  /
 &MISC INITIAL_UNMIXED_FRACTION = 0.0, SUPPRESSION=.FALSE. /
 &DUMP MASS_FILE=.TRUE./
 

@@ -6,6 +6,7 @@ GITROOT=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   GITROOT=$FDSSMV
 fi
+
 RESULT_DIR=$GITROOT/Utilities/Scripts/inspect_openmp_ti3
 REPORT_TYPE=problems
 showinput=
@@ -37,6 +38,7 @@ case $OPTION in
    ;;
   r)
    GITROOT="$OPTARG"
+   RESULT_DIR=$GITROOT/Utilities/Scripts/inspect_openmp_ti3
    ;;
   R)
    REPORT_TYPE="$OPTARG"

@@ -1,0 +1,29 @@
+&HEAD CHID = 'tmp_lower_limit_simple' TITLE = 'Test lower temperature limit remains at 20 C' /
+
+&MESH IJK = 40,1,50, XB = -0.40,0.40, -0.04,0.04, -0.02,0.98 /
+
+&TIME T_END = 1 /
+
+&MISC STRATIFICATION = .FALSE. /
+
+&RADI RADIATION = .FALSE. /
+
+&REAC FUEL = 'METHANE' /
+
+&SURF ID = 'FUEL PORT', COLOR = 'RED',
+      MASS_FLUX(1) = 0.04, SPEC_ID(1) = 'METHANE' /
+
+&VENT XB = -0.025, 0.025, -0.5,0.5, -0.020,-0.020, SURF_ID = 'FUEL PORT' /
+
+&VENT MB = 'XMIN', SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX', SURF_ID = 'OPEN' /
+&VENT MB = 'ZMAX', SURF_ID = 'OPEN' /
+
+&SLCF PBY = 0, QUANTITY = 'VELOCITY', VECTOR=.TRUE,             CELL_CENTERED = .TRUE. /
+&SLCF PBY = 0, QUANTITY = 'TEMPERATURE',                        CELL_CENTERED = .TRUE. /
+&SLCF PBY = 0, QUANTITY = 'DIVERGENCE',                         CELL_CENTERED = .TRUE. /
+&SLCF PBY = 0, QUANTITY = 'MASS FRACTION', SPEC_ID = 'METHANE', CELL_CENTERED = .TRUE. /
+
+&DEVC XB = -0.40,0.40, -0.04,0.04, -0.02,0.98, QUANTITY = 'TEMPERATURE', STATISTICS = 'MIN', ID='minT' /
+
+&TAIL /

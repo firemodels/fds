@@ -1,17 +1,17 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
+set curdir=%CD%
+set DEBUG=
+set rundebug=0
+set size=_64
 
-set rundebug=%1
-if "%rundebug%" == "1" (
-  set DEBUG=_db
-) else (
-  set DEBUG=
+set stopscript=0
+call :getopts %*
+cd %curdir%
+if %stopscript% == 1 (
+  exit /b
 )
 
-set size=_64
 
 :: setup environment variables
 
@@ -120,6 +120,39 @@ exit /b
   )
   exit /b 0
 
+:getopts
+ if (%1)==() exit /b
+ set valid=0
+ set arg=%1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+ if /I "%1" EQU "-debug" (
+   set valid=1
+   set rundebug=1
+   set DEBUG=_db
+ )
+ shift
+ if %valid% == 0 (
+   echo.
+   echo ***Error: the input argument %arg% is invalid
+   echo.
+   echo Usage:
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+if not (%1)==() goto getopts
+exit /b
+
+:usage  
+echo Run_FDS_Cases [options]
+echo. 
+echo -help  - display this message
+echo -debug - run cases using debug version of FDS
+exit /b
 
 :eof
 echo "FDS test cases end" >> %TIME_FILE%
