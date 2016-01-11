@@ -349,6 +349,7 @@ if [ "$queue" == "none" ]; then
       exit
     fi
   fi
+  MPIRUN=
   QSUB="$BACKGROUND -u 75 -d 10 "
 fi
 
