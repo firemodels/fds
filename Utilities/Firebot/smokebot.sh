@@ -489,7 +489,7 @@ check_FDS_checkout()
 }
 
 #  ==================================
-#  = Stage 2a/b - Compile FDS debug =
+#  = Stage 1a/b - Compile FDS debug =
 #  ==================================
 
 compile_fds_mpi_db()
@@ -511,20 +511,20 @@ check_compile_fds_mpi_db()
    then
       stage1b_fdsdb_success=true
    else
-      echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
+      echo "Errors from Stage 1b - Compile FDS MPI debug:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage1b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
 
    # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b| grep -v 'find atom' | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 2b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
+      echo "Stage 1b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b | grep -v 'find atom' | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ] ; then
@@ -625,7 +625,7 @@ check_verification_cases_debug()
 }
 
 #  ====================================
-#  = Stage 4a/b - Compile FDS release =
+#  = Stage 1c - Compile FDS release =
 #  ====================================
 
 compile_fds_mpi()
@@ -646,26 +646,26 @@ check_compile_fds_mpi()
    then
       stage1c_fdsrel_success=true
    else
-      echo "Errors from Stage 4b - Compile FDS release:" >> $ERROR_LOG
+      echo "Errors from Stage 1c - Compile FDS release:" >> $ERROR_LOG
       cat $OUTPUT_DIR/stage1c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'find atom' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 4b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      echo "Stage 1c warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'find atom' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ======================================
-#  = Stage 5pre - Compile SMV utilities =
+#  = Stage 2a - Compile SMV utilities =
 #  ======================================
 
 compile_smv_utilities()
@@ -783,7 +783,7 @@ check_smv_utilities()
 }
 
 #  ===================================================
-#  = Stage 5 - Run verification cases (release mode) =
+#  = Stage 3 - Run verification cases (release mode) =
 #  ===================================================
 
 wait_verification_cases_release_end()
@@ -861,14 +861,14 @@ check_verification_cases_release()
    then
       no_warnings=true
    else
-      echo "Stage 5 warnings:" >> $WARNING_LOG
+      echo "Stage 3b warnings:" >> $WARNING_LOG
       grep 'Warning' -rI $OUTPUT_DIR/stage3b >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ================================
-#  = Stage 6a - Compile SMV debug =
+#  = Stage 2b - Compile SMV debug =
 #  ================================
 
 compile_smv_db()
@@ -919,7 +919,7 @@ check_compile_smv_db()
 }
 
 #  =============================================
-#  = Stage 6b - Make SMV pictures (debug mode) =
+#  = Stage 4a - Make SMV pictures (debug mode) =
 #  =============================================
 
 make_smv_pictures_db()
@@ -966,7 +966,7 @@ check_smv_pictures_db()
 }
 
 #  ==================================
-#  = Stage 6c - Compile SMV release =
+#  = Stage 2c - Compile SMV release =
 #  ==================================
 
 compile_smv()
@@ -1017,7 +1017,7 @@ check_compile_smv()
 }
 
 #  ===============================================
-#  = Stage 6d - Make SMV pictures (release mode) =
+#  = Stage 4 - Make SMV pictures (release mode) =
 #  ===============================================
 
 make_smv_pictures()
@@ -1026,10 +1026,10 @@ make_smv_pictures()
    echo Generating images 
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/Verification/scripts
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4b
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4b \)
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4 \)
    fi
 }
 
@@ -1038,20 +1038,20 @@ check_smv_pictures()
    # Scan and report any errors in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
    echo "   checking"
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4b` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4` == "" ]]
    then
-      stage4b_smvpics_success=true
+      stage4_smvpics_success=true
    else
-      cp $OUTPUT_DIR/stage4b  $OUTPUT_DIR/stage4b_errors
+      cp $OUTPUT_DIR/stage4  $OUTPUT_DIR/stage4_errors
 
-      echo "Errors from Stage 4b - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
+      echo "Errors from Stage 4 - Make SMV pictures (release mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
 
 #  ===============================================
-#  = Stage 6e - Make SMV movies (release mode) =
+#  = Stage 4c - Make SMV movies (release mode) =
 #  ===============================================
 
 make_smv_movies()
@@ -1102,7 +1102,7 @@ check_smv_movies()
 }
 
 #  ======================================
-#  = Stage 7 - FDS run time statistics =
+#  = FDS run time statistics =
 #  ======================================
 
 generate_timing_stats()
@@ -1399,7 +1399,7 @@ fi
 
 ### Stage 5 build documents ###
 MAKEGUIDES_beg=`GET_TIME`
-if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
+if [[ $stage1c_fdsrel_success && $stage4_smvpics_success ]] ; then
    echo Making guides
 #   echo "   geometry notes"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
