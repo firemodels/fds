@@ -392,7 +392,6 @@ void drawtours(void){
         break;
     }
   }
-
 }
 
 /* ------------------ drawcir ------------------------ */
@@ -440,7 +439,6 @@ void drawselect_tours(void){
   }
   glEnd();
 }
-
 
 /* ------------------ createtourpaths ------------------------ */
 
@@ -602,17 +600,8 @@ void createtourpaths(void){
         keyj->d_xyz_view[2]=0.0;
       }
       else{
-#ifdef xxx
-        float del1, del2;
-#endif
         float sfactor, dfactor;
 
-#ifdef xxx
-        del1 = thiskey->nodeval.time - lastkey->nodeval.time;
-        del2 = nextkey->nodeval.time - thiskey->nodeval.time;
-        sfactor = 2*del2/(del1 + del2);
-        dfactor = 2*del1/(del1 + del2);
-#endif
         sfactor = 1.0;
         dfactor = 1.0;
 
@@ -977,6 +966,7 @@ void defaulttour(void){
 }
 
 /* ------------------ addframe ------------------------ */
+
 keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az_path, float elev_path, float bank, float params[3],
                     int viewtype,float zoom_local,float view[3]){
   keyframe *frame,*framen;
@@ -1022,7 +1012,7 @@ keyframe *add_frame(keyframe *framei, float time_local, float *eye, float key_az
   return frame;
 }
 
-/* ------------------ deleteframe ------------------------ */
+/* ------------------ delete_frame ------------------------ */
 
 keyframe *delete_frame(keyframe *frame){
   keyframe *prev, *next;

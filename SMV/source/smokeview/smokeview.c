@@ -14,7 +14,7 @@
 #include <direct.h>
 #endif
 
-/* ------------------ snifferrors ------------------------ */
+/* ------------------ _Sniff_Errors ------------------------ */
 
 void _Sniff_Errors(char *whereat){
   int error;
@@ -112,7 +112,7 @@ void transparentoff(void){
   glDisable(GL_BLEND);
 }
 
-/* ------------------ smv2quat ------------------------ */
+/* ------------------ camera2quat ------------------------ */
 
 void camera2quat(camera *ca, float *quat, float *rotation){
   if(ca->quat_defined==1){
@@ -670,7 +670,7 @@ void parse_commandline(int argc, char **argv){
 #endif
 }
 
-/* ------------------ version ------------------------ */
+/* ------------------ display_version_info ------------------------ */
 
 void display_version_info(void){
     char version[256];
@@ -681,17 +681,9 @@ void display_version_info(void){
     PRINTF("\n");
     PRINTF("%s\n\n",TITLERELEASE);
     PRINTF("Version: %s\n",version);
-#ifdef BIT64
     PRINTF("Smokeview (64 bit) Build: %s\n",githash);
-#else
-    PRINTF("Smokeview (32 bit) Build: %s\n",githash);
-#endif
 #ifdef WIN32
-#ifdef X64
     PRINTF("Platform: WIN64 ");
-#else
-    PRINTF("Platform: WIN32 ");
-#endif
 #ifdef pp_INTEL
     PRINTF(" (Intel C/C++)\n");
 #else
@@ -700,20 +692,10 @@ void display_version_info(void){
 #endif
 #endif
 #endif
-#ifndef pp_OSX64
 #ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
     PRINTF("Platform: OSX64\n");
 #endif
-#ifndef pp_LINUX64
 #ifdef pp_LINUX
-    PRINTF("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
     PRINTF("Platform: LINUX64\n");
 #endif
     PRINTF("Build Date: %s\n",__DATE__);
@@ -811,9 +793,6 @@ void usage(char **argv){
 #ifdef pp_LINUX
     strcat(label,", pp_LINUX");
 #endif
-#ifdef pp_LINUX64
-    strcat(label,", pp_LINUX64");
-#endif
 #ifdef pp_MEMDEBUG
     strcat(label,", pp_MEMDEBUG");
 #endif
@@ -832,26 +811,17 @@ void usage(char **argv){
 #ifdef pp_OSX
     strcat(label,", pp_OSX");
 #endif
-#ifdef pp_OSX64
-    strcat(label,", pp_OSX64");
-#endif
 #ifdef pp_PILOT
     strcat(label,", pp_PILOT");
 #endif
 #ifdef pp_release
     strcat(label,", pp_release");
 #endif
-#ifdef pp_SETTIME
-    strcat(label, ", pp_SETTIME");
-#endif
 #ifdef pp_THREAD
     strcat(label,", pp_THREAD");
 #endif
 #ifdef WIN32
     strcat(label,", WIN32");
-#endif
-#ifdef X64
-    strcat(label,", X64");
 #endif
     PRINTF("  \n");
     PRINTF("%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));

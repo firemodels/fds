@@ -504,7 +504,6 @@ int setVolSmokeShaders(){
 
   if(error_code!=1)return error_code;
   return error_code;
-
 }
 
 /* ------------------ setSmokeShaders ------------------------ */
@@ -523,7 +522,7 @@ int setSmokeShaders(){
   const GLchar *VertexShaderSource[]={
     "uniform sampler1D smokecolormap;"
     "uniform float hrrpuv_max_smv, hrrpuv_cutoff;"
-    "uniform float aspectratio, smoke3d_rthick, fire_alpha;"
+    "uniform float aspectratio, smoke3d_rthick, fire_alpha, smoke_albedo;"
     "uniform int have_smoke, adjustalphaflag;"
 
     "attribute float hrr, smoke_alpha;"
@@ -557,16 +556,15 @@ int setSmokeShaders(){
     "  }"
     "  hrrlocal=(hrr/254.0)*hrrpuv_max_smv;"
     "  if(hrrlocal>hrrpuv_cutoff){"
-    "    colorindex=0.51+(hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff);"
+    "    colorindex=0.51+((hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff))/2.0;"
     "    colorindex=clamp(colorindex,0.5,1.0);"
     "    alpha=fire_alpha/255.0;"
+    "    hrrcolor = texture1D(smokecolormap,colorindex);"
+    "    newcolor=vec4(vec3(hrrcolor),alpha);"
     "  }"
     "  else{"
-    "    colorindex=hrrlocal/hrrpuv_cutoff;"
-    "    colorindex=clamp(colorindex,0.0,0.49);"
+    "    newcolor=vec4(smoke_albedo,smoke_albedo,smoke_albedo,alpha);"
     "  }"
-    "  hrrcolor = texture1D(smokecolormap,colorindex);"
-    "  newcolor=vec4(vec3(hrrcolor),alpha);"
     "  gl_Position = ftransform();"
     "}"
 };
@@ -624,6 +622,8 @@ int setSmokeShaders(){
   GPU_have_smoke =     glGetUniformLocation(p_smoke,"have_smoke");
   GPU_aspectratio =    glGetUniformLocation(p_smoke,"aspectratio");
   GPU_adjustalphaflag =glGetUniformLocation(p_smoke,"adjustalphaflag");
+  GPU_smoke_albedo = glGetUniformLocation(p_smoke, "smoke_albedo");
+
   GPU_hrr =            glGetAttribLocation(p_smoke,"hrr");
   GPU_smokealpha =     glGetAttribLocation(p_smoke,"smoke_alpha");
   return error_code;
@@ -631,7 +631,7 @@ int setSmokeShaders(){
 }
 
 
-/* ------------------ LoadZoneSmokeShaders ------------------------ */
+/* ------------------ Load3DSliceShaders ------------------------ */
 
 void Load3DSliceShaders(void){
   glUseProgramObjectARB(p_3dslice);
@@ -785,4 +785,3 @@ void printInfoLog(GLhandleARB obj){
   }
 }
 #endif
-

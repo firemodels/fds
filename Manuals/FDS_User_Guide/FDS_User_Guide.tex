@@ -417,10 +417,10 @@ This guide describes how to obtain FDS and Smokeview and how to use FDS. A separ
 \section{How to Acquire FDS and Smokeview}
 \label{info:acquire}
 
-Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page: 
+Detailed instructions on how to download executables, manuals, source-code and related utilities, can be found at the project home page:
 
 \begin{center}
-\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}} 
+\href{http://firemodels.github.io/fds-smv/}{{\ct http://firemodels.github.io/fds-smv/}}
 \end{center}
 
 \noindent
@@ -565,7 +565,7 @@ If you wish to run FDS on more than one core on a single machine, then type the 
 \begin{lstlisting}
 mpiexec -n 4 fds job_name.fds
 \end{lstlisting}
-where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine 
+where 4 indicates the number of processes that will be created.  Note that as a default each process will use 4 OpenMP threads. It is advisable to set the environmental variable {\ct OMP\_NUM\_THREADS} so that the total number of threads ({\ct n $\times$ OMP\_NUM\_THREADS}) is less than or equal to the total number of cores on the machine
 
 If you wish to run FDS on more than one machine, the following steps should be taken:
 
@@ -1041,7 +1041,7 @@ Usually in a MPI calculation, each mesh is assigned its own process, and each pr
 \end{lstlisting}
 The parameter {\ct MPI\_PROCESS} instructs FDS to assign that particular mesh to the given process. In this case, only four processes are to be started, numbered 0 through 3. Note that the processes need to be invoked in ascending order, starting with 0. Why would you do this? Suppose you only have four processors available for this job. By starting only four processes instead of six, you can save time because `mesh2' and `mesh3' can communicate directly with each other without having to transmit data using MPI calls over the network. Same goes for `mesh5' and `mesh6'. In essence, it is as if these mesh pairs are neighbors and need not send mail to each other via the postal system. The letters can just be walked next door.
 
-Additioally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
+Additionally to the mesh assignment to individual MPI processes, the number of OpenMP threads for each MPI process may be specified. The parameter {\ct N\_THREADS} instructs FDS to set this number of threads and must be consistent for all meshes on the same MPI process, but may vary between them:
 \begin{lstlisting}
 &MESH ID='mesh1', IJK=..., XB=..., MPI_PROCESS=0 /
 &MESH ID='mesh2', IJK=..., XB=..., MPI_PROCESS=1, N_THREADS=2 /
@@ -1054,7 +1054,7 @@ Notes: An unspecified value will result in the default number of threads (see \r
 
 For cases involving many meshes, you might want to assign them colors using either the character string {\ct COLOR} or the integer triplet {\ct RGB}. You may also want to consider using the multiplying feature to easily create a 3-D array of meshes. See Section~\ref{info:MULT} for details.
 
-Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line.
+Some parallel computing environments do not have a centralized file system, in which case FDS must write the output files for each process to a separate disk. If your computing cluster does not have a {\ct SHARED\_FILE\_SYSTEM}, then set this parameter to {\ct .FALSE.} on the {\ct MISC} line. This parameter is also handy for MPI jobs involving hundreds or thousands of processes, in which case writing a single Smokeview file is time-consuming. When {\ct SHARED\_FILE\_SYSTEM} is set to {\ct .FALSE.}, the file that Smokeview reads is broken into pieces, one for each MPI process. By doing this, you avoid serially writing to the Smokeview file. One other useful parameter for larger MPI jobs is called {\ct VERBOSE} on the {\ct MISC} line. This logical parameter suppresses information that is printed to the diagnostic output files. By default, its value is {\ct .TRUE.} for MPI jobs involving 50 or less processes, and {\ct .FALSE.} for larger jobs.
 
 
 \subsection{Mesh Alignment}
@@ -1622,11 +1622,9 @@ Currently, the default behavior in FDS is to revert to first-order upwinding at 
 \section{Initial Conditions: The \texorpdfstring{{\tt INIT}}{INIT} Namelist Group (Table \ref{tbl:INIT})}
 \label{info:INIT}
 
-Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is
-assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This
-decrease is not noticed in most building scale calculations, but it is important in large outdoor
-simulations. There are some scenarios for which it is convenient to change the ambient conditions within some
-rectangular region of the domain.
+Usually, an FDS simulation begins at time $t=0$ with ambient conditions. The air temperature is assumed constant with height, and the density and pressure decrease with height (the $z$ direction). This decrease is not noticed in most building scale calculations, but it is important in large outdoor simulations. There are some scenarios for which it is convenient to change the ambient conditions within some rectangular region of the domain using the namelist keyword {\ct INIT}.
+
+Note that the rectangular regions defined by {\ct INIT} may overlap, but in such cases, it is the second of the overlapping regions that takes precedence, including default conditions. That is, it is possible to overwrite the initial conditions explicitly specified by the first {\ct INIT} line with the default initial conditions implied by the second {\ct INIT} line.
 
 \subsection*{Species}
 
@@ -3336,53 +3334,35 @@ model the entire HVAC system, read Section~\ref{info:HVAC}.
 \section{Simple Vents, Fans and Heaters}
 \label{info:Velocity_BC}
 
-The ventilation system of individual compartments within a building is described using
-velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can
-be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid
-surface. However, there are various other facets of velocity boundary conditions that are described below.
+The ventilation system of individual compartments within a building is described using velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid surface. However, there are various other facets of velocity boundary conditions that are described below.
 
 \subsection{Simple Supply and Exhaust Vents}
 
-The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate
-a {\ct SURF\_ID} with some form of specified velocity or volume flow rate.
-The normal component of velocity is usually specified directly via the parameter
-{\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the
-computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the
-domain, i.e., an exhaust vent. For example, the lines
-
+The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate a {\ct SURF\_ID} with some form of specified velocity or volume flow rate. The normal component of velocity is usually specified directly via the parameter {\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the domain, i.e., an exhaust vent. For example, the lines
 \begin{lstlisting}
 &SURF ID='SUPPLY', VEL=-1.2, COLOR='BLUE' /
 &VENT XB=5.0,5.0,1.0,1.4,2.0,2.4, SURF_ID='SUPPLY' /
 \end{lstlisting}
-
-\noindent
-create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the
-realignment of the {\ct VENT} onto the FDS mesh. Regardless of the
-orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}.
-In this example the {\ct VENT} may not be exactly
-0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then
-{\ct VOLUME\_FLOW} can be prescribed instead of {\ct VEL}. The units
-are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLOW}
-should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF}
-with a {\ct VOLUME\_FLOW} prescribed can be invoked by either a
-{\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting
-velocity on the face or faces of the obstruction will be given by the specified
-{\ct VOLUME\_FLOW} divided by the area of that particular face. For example:
-
+create a {\ct VENT} that {\em supplies} air at a velocity of 1.2~m/s through an area of nominally 0.16~m$^2$, depending on the realignment of the {\ct VENT} onto the FDS mesh. Regardless of the orientation of the plane $x=5$, the flow will be directed {\em into} the room because of the sign of {\ct VEL}. In this example the {\ct VENT} may not be exactly 0.16~m$^2$ in area because it may not align exactly with the computational mesh. If this is the case then {\ct VOLUME\_FLOW} can be prescribed instead of {\ct VEL}. The units are m$^3$/s. If the flow is entering the computational domain, {\ct VOLUME\_FLOW} should be a negative number, the same convention as for {\ct VEL}. Note that a {\ct SURF} with a {\ct VOLUME\_FLOW} prescribed can be invoked by either a {\ct VENT} or an {\ct OBST}, but be aware that in the latter case, the resulting velocity on the face or faces of the obstruction will be given by the specified {\ct VOLUME\_FLOW} divided by the area of that particular face. For example:
 \begin{lstlisting}
 &SURF ID='SUPPLY', VOLUME_FLOW=-5.0, COLOR='GREEN' /
 &OBST XB=..., SURF_ID6='BRICK','SUPPLY','BRICK','BRICK','BRICK','BRICK' /
 \end{lstlisting}
+dictates that the forward $x$-facing surface of the obstruction is to have a velocity equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the computational domain.
 
-\noindent
-dictates that the forward $x$-facing surface of the obstruction is to have a velocity
-equal to 5~m$^3$/s divided by the area of the face (as approximated within FDS) flowing into the
-computational domain.
+Note that {\ct VEL} and {\ct VOLUME\_FLOW} should not be specified on the same {\ct SURF} line.  The choice depends on whether an exact velocity is desired at a given vent, or whether the given volume flux is desired.
 
+Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the specified {\ct VOLUME\_FLOW} will be recomputed in each mesh so that the desired volume flow is achieved. This was not the case in FDS version 6.3 and earlier. The sample cases called {\ct volume\_flow\_1.fds} and {\ct volume\_flow\_2.fds} in the {\ct Flowfields} folder demonstrate that a {\ct VENT} or an {\ct OBST} can be divided among several meshes. In both cases, air is drawn from a 1~m by 1~m by 1~m box at a rate of 0.01~m$^3$/s. These cases also ensure that the {\ct VENT} or {\ct OBST} need not be aligned with the mesh to yield the desired flow rate. Figure~\ref{volume_flow} displays the volume flow drawn though an {\ct OPEN} boundary on an opposite face of the box with either a {\ct VENT} (left) or {\ct OBST} (right) with a specified volume flow.
 
-Note that either {\ct VEL} or {\ct VOLUME\_FLOW} should be prescribed,
-not both.  The choice depends on whether an exact velocity is desired at a
-given vent, or whether the given volume flux is desired.
+\begin{figure}[!ht]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_1} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/volume_flow_2}
+\end{tabular*}
+\caption[Results of the {\ct volume\_flow} test cases]{Flow rate of air drawn through a unit cube via a {\ct VENT} (left) and {\ct OBST} (right) with specified {\ct VOLUME\_FLOW}.}
+\label{volume_flow}
+\end{figure}
+
 
 
 \subsection{Total Mass Flux}
@@ -3395,19 +3375,12 @@ Most often, you specify a simple supply or exhaust vent by setting either a norm
 \subsection{Heaters}
 
 You can create a simple heating vent by changing the temperature of the incoming air
-
 \begin{lstlisting}
 &SURF ID='BLOWER', VEL=-1.2, TMP_FRONT=50. /
 \end{lstlisting}
+The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
 
-\noindent
-The {\ct VENT} with {\ct SURF\_ID='BLOWER'} would blow 50~$^\circ$C
-air at 1.2 m/s into the flow domain. Making {\ct VEL} positive would
-suck air out, in which case {\ct TMP\_FRONT} would not be necessary.
-
-Note that if {\ct HRRPUA} or solid phase reaction parameters are
-specified, no velocity should be prescribed. The combustible gases
-are ejected at a velocity computed by FDS.
+Note that if {\ct HRRPUA} or solid phase reaction parameters are specified, no velocity should be prescribed. The combustible gases are ejected at a velocity computed by FDS.
 
 
 
@@ -3415,28 +3388,13 @@ are ejected at a velocity computed by FDS.
 
 \label{info:louvers}
 
-Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the
-incoming air stream.
-It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow.
-The normal component is specified with {\ct VEL} as described above. The tangential is prescribed
-via a pair of real numbers {\ct VEL\_T} representing the desired tangential
-velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
-
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
 \begin{lstlisting}
 &SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
 \end{lstlisting}
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 1.2~m/s and a tangential velocity of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either the $y$ or $z$ direction, depending on what the normal direction is.
 
-\noindent
-is a boundary condition for a louvered vent that pushes air into the
-space with a normal velocity of 1.2~m/s and a tangential velocity
-of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either
-the $y$ or $z$ direction, depending on what the normal direction is.
-
-In cases of limited mesh resolution, it may not be possible to describe a louvered vent or
-slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the
-opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the
-{\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral
-directions.
+In cases of limited mesh resolution, it may not be possible to describe a louvered vent or slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
 
 If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for details on how to specify the louver.
 
@@ -3445,7 +3403,6 @@ If the louvered vent is part of an HVAC system, see \ref{info:HVAClouvers} for d
 \label{info:vel_grad}
 
 It is sometimes desirable to specify a Neumann boundary condition (specified gradient) for the velocity in the direction normal to the boundary.  For example, the following allows inflow and outflow along the top of the domain, but $\partial w/\partial z = 0$.  Note that {\ct FREE\_SLIP=.TRUE.} only sets $\partial u/\partial z=0$ and $\partial v/\partial z=0$.
-
 \begin{lstlisting}
 &SURF ID = 'sky', COLOR = 'INVISIBLE', VEL_GRAD=0., FREE_SLIP=.TRUE. /
 &VENT MB='ZMAX', SURF_ID='sky' /
@@ -3549,7 +3506,7 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.  
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
@@ -7872,9 +7829,9 @@ with measurements. For Plot3D files, add {\ct PLOT3D\_VELO\_INDEX(N)=...} to the
 
 There are several outputs that report the enthalpy of the gas mixture. First, the {\ct 'SPECIFIC ENTHALPY'} and the {\ct 'SPECIFIC SENSIBLE ENTHALPY'} are defined:
 \be
-   h = h^0 + \int_0^{T'} c_p \, \d T'  \quad ; \quad h_{\rm s} = \int_0^{T'} c_p \, \d T'
+   h(T) = \Delta h^\circ_{\rm f} + \int_{T_{\rm ref}}^{T} c_p(T') \, \d T'  \quad ; \quad h_{\rm s}(T) = \int_{T_{\rm ref}}^{T} c_p(T') \, \d T'
 \ee
-Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTHALPY'} are $H=\rho h$ and $H_{\rm s}=\rho h_{\rm s}$, respectively, in units of kJ/m$^3$.
+Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct 'SENSIBLE ENTHALPY'} are $\rho h$ and $\rho h_{\rm s}$, respectively, in units of kJ/m$^3$.
 
 
 \subsection{Computer Performance}
@@ -7883,10 +7840,12 @@ Both have units of kJ/kg. The quantities {\ct 'ENTHALPY'} and {\ct SPECIFIC ENTH
 There are several useful {\ct DEVC} {\ct QUANTITY}'s that can help monitor the performance of your computer:
 \begin{description}
 \item[{\ct 'ACTUATED SPRINKLERS'}] Number of activated sprinklers.
+\item[{\ct 'CFL MAX'}] The maximum value of the CFL (Courant-Friedrichs-Lewy) number, the primary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the CFL number remains within the range of 0.8 to 1.0. If you want to see the CFL number in each grid cell, use a slice ({\ct SLCF}) file with {\ct QUANTITY='CFL'} and {\ct CELL\_CENTERED=.TRUE.}.
 \item[{\ct 'CPU TIME'}] Elapsed CPU time since the start of the simulation, in seconds.
 \item[{\ct 'ITERATION'}] Number of time steps completed at the given time of the simulation.
 \item[{\ct 'NUMBER OF PARTICLES'}] Number of Lagrangian particles for the {\ct MESH} in which the {\ct DEVC} is located.
 \item[{\ct 'TIME STEP'}] Duration of a simulation time step, $\delta t$, in seconds.
+\item[{\ct 'VN MAX'}] The maximum value of the VN (Von Neumann) number, a secondary constraint on the time step, for the mesh in which the device is located. By default, the time step is chosen so that the VN number remains below 1. If you want to see the VN number in each grid cell, use a slice ({\ct SLCF}) file with {\ct QUANTITY='VN'} and {\ct CELL\_CENTERED=.TRUE.}.
 \item[{\ct 'WALL CLOCK TIME'}] Elapsed wall clock time since the start of the simulation, in seconds.
 \item[{\ct 'WALL CLOCK TIME ITERATIONS'}] Elapsed wall clock time since the start of the time stepping loop, in seconds.
 \end{description}
@@ -8271,6 +8230,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct CELL U}                                    & $(u_{i,j,k}+u_{i-1,j,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL V}                                    & $(v_{i,j,k}+v_{i,j-1,k})/2$                       & m/s            & D,I,S        \\ \hline
 {\ct CELL W}                                    & $(w_{i,j,k}+w_{i,j,k-1})/2$                       & m/s            & D,I,S        \\ \hline
+{\ct CFL}                                       & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
+{\ct CFL MAX}                                   & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct CHEMICAL SUBITERATIONS}                    & Section~\ref{info:chem_integration}               &                & D,S          \\ \hline
 {\ct DIFFUSIVITY}$^{*}$                         & Species diffusivity                               & m$^2$/s        & D,I,S        \\ \hline
 {\ct EMISSIVITY}                                & Surface emissivity (usually constant)             &                & B,D          \\ \hline
@@ -8312,6 +8273,8 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct SUM PRIMITIVE MASS FRACTIONS}              & $\sum_\alpha Y_\alpha$ (should be 1)              &                & D,S          \\ \hline
 %{\ct TURBULENCE RESOLUTION}                     & Section~\ref{info:meshquality}                    &                & D,S          \\ \hline
 {\ct VELOCITY ERROR}                            & Section~\ref{info:PRES}                           &                & B            \\ \hline
+{\ct VN}                                        & Section~\ref{info:TIMING}                         &                & D,I,P,S      \\ \hline
+{\ct VN MAX}                                    & Section~\ref{info:TIMING}                         &                & D            \\ \hline
 {\ct VORTICITY X}                               & $\partial w/\partial y - \partial v/\partial z$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Y}                               & $\partial u/\partial z - \partial w/\partial x$   & 1/s            & D,I,P,S      \\ \hline
 {\ct VORTICITY Z}                               & $\partial v/\partial x - \partial u/\partial y$   & 1/s            & D,I,P,S      \\ \hline
@@ -8578,6 +8541,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct DEVC\_COLUMN\_LIMIT}           & Integer      & Section~\ref{info:out:DEVC}            &           & 254                            \\ \hline
 %{\ct DT\_BNDE}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
 {\ct DT\_BNDF}                      & Real         & Section~\ref{info:DUMP}                &  s        & $2\,\Delta t${\ct /NFRAMES}    \\ \hline
+{\ct DT\_CPU}                       & Real         & Section~\ref{out:CPU}                  &  s        & 1000000                        \\ \hline
 {\ct DT\_CTRL}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC}                      & Real         & Section~\ref{info:DUMP}                &  s        & $\Delta t${\ct /NFRAMES}       \\ \hline
 {\ct DT\_DEVC\_LINE}                & Real         & Section~\ref{info:line_file}           &  s        & $\Delta t${\ct /2}             \\ \hline
@@ -8641,7 +8605,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\newpage
 \section{\texorpdfstring{{\tt HOLE}}{HOLE} (Obstruction Cutout Parameters)}
 
 
@@ -9005,6 +8968,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 %{\ct USE\_NEW\_CHECK\_MASS\_FRACTION            & Logical       & New strategy for clipping ZZ                          &               & {\ct .FALSE.}     \\ \hline
 %{\ct UVW\_FILE}                                 & Character     & See FDS Verification Guide                            &               &                   \\ \hline
 %{\ct VEG\_LEVEL\_SET                            & Logical       & See Wildland Fire User's Guide                        &               & {\ct .FALSE.}     \\ \hline
+{\ct VERBOSE}                                   & Logical       & Section~\ref{info:multimesh}                          &               &                   \\ \hline
 {\ct VISIBILITY\_FACTOR}                        & Real          & Section~\ref{info:visibility}                         &               & 3                 \\ \hline
 {\ct VN\_MAX}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.5               \\ \hline
 {\ct VN\_MIN}                                   & Real          & Section~\ref{info:CFL}                                &               & 0.4               \\ \hline
@@ -9101,7 +9065,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \vspace{\baselineskip}
 
 
-\newpage
 \section{\texorpdfstring{{\tt PART}}{PART} (Lagrangian Particles/Droplets)}
 
 
@@ -9796,13 +9759,13 @@ The Wiki Pages are particularly useful in describing the details of how you go a
 \chapter{Compiling FDS}
 \label{info:compilation}
 
-If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2003 compliant compiler is required.
+If a compiled version of FDS exists for the machine on which the calculation is to be run and no changes have been made to the original source code, there is no need to re-compile the code. For example, the file {\ct fds.exe} is the compiled program for a Windows-based PC; thus PC users do not need a Fortran compiler and do not need to compile the source code. For machines for which an executable has not been compiled, you must compile the code. A Fortran 2008 compliant compiler is required.
 
 \section{FDS Source Code}
 
-Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2003 edition). A {\ct makefile} is available in the FDS-SMV Repository that contains platform specific options for compilation. Note the following:
+Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Files with the ``.f90'' suffix contain free-form Fortran~90 instructions conforming to the ANSI and ISO standards (2008 edition). A {\ct makefile} is available in the FDS-SMV Repository that contains platform specific options for compilation. Note the following:
 \begin{itemize}
-\item The source code consists entirely of Fortran 90 statements organized into about 30 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
+\item The source code consists entirely of Fortran statements organized into about 35 files. Some compilers have a standard optimization level, plus various degrees of ``aggressive'' optimization. Be cautious in using the highest levels of optimization.
 \item For the non-MPI version of FDS, compile with {\ct mpis.f90}.
 \item The MPI version of FDS uses {\ct mpip.f90} instead of {\ct mpis.f90}, plus additional MPI libraries need to be installed. More details on MPI can be found at the FDS-SMV website, along with links to the necessary organizations who have developed free MPI libraries.
 \end{itemize}
@@ -9815,36 +9778,41 @@ Table~\ref{tab:sourcefiles} lists the files that make up the FDS source code. Fi
 \begin{tabular}{|l|l|}
 \hline
 File Name  & Description  \\ \hline \hline
-cons.f90   & Global arrays and constants \\ \hline
-ctrl.f90   & Definitions and routines for control functions \\ \hline
-data.f90   & Data for output quantities and thermophysical properties\\ \hline
-devc.f90   & Derived type definitions and constants for devices \\ \hline
-divg.f90   & Compute the flow divergence \\ \hline
-dump.f90   & Output data dumps into files \\ \hline
-evac.f90   & Egress computations (future capability) \\ \hline
-fire.f90   & Combustion routines \\ \hline
-func.f90   & Global functions and subroutines \\ \hline
-geom.f90   & Routines supporting complex, unstructured geometry (under development) \\ \hline
-ieva.f90   & Support routines for evac.f90 \\ \hline
-init.f90   & Initialize variables and Poisson solver \\ \hline
-irad.f90   & Functions needed for radiation solver, including RadCal \\ \hline
-main.f90   & Main program \\ \hline
-mass.f90   & Mass equation(s) and thermal boundary conditions \\ \hline
-mesh.f90   & Arrays and constants associated with each mesh \\ \hline
-mpip.f90   & MPI ``include'' statement for MPI compilation \\ \hline
-mpis.f90   & ``Dummy'' Fortran/MPI bindings for non-MPI compilation \\ \hline
-part.f90   & Lagrangian particle transport and sprinkler activation \\ \hline
-pois.f90   & Poisson (pressure) solver \\ \hline
-prec.f90   & Specification of numerical precision \\ \hline
-pres.f90   & Spatial discretization of pressure (Poisson) equation \\ \hline
-radi.f90   & Radiation solver  \\ \hline
-read.f90   & Read input parameters \\ \hline
-smvv.f90   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
-turb.f90   & Experimental routines, mostly involving the turbulence model \\ \hline
-type.f90   & Derived type definitions \\ \hline
-vege.f90   & Experimental vegetation model \\ \hline
-velo.f90   & Momentum equations \\ \hline
-wall.f90   & Wall boundary conditions \\ \hline
+{\ct cons.f90}   & Global arrays and constants \\ \hline
+{\ct ctrl.f90}   & Definitions and routines for control functions \\ \hline
+{\ct data.f90}   & Data for output quantities and thermophysical properties\\ \hline
+{\ct devc.f90}   & Derived type definitions and constants for devices \\ \hline
+{\ct divg.f90}   & Compute the flow divergence \\ \hline
+{\ct dump.f90}   & Output data dumps into files \\ \hline
+{\ct evac.f90}   & Egress computations (future capability) \\ \hline
+{\ct fire.f90}   & Combustion routines \\ \hline
+{\ct func.f90}   & Global functions and subroutines \\ \hline
+{\ct geom.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct gsmv.f90}   & Routines supporting complex, unstructured geometry (under development) \\ \hline
+{\ct hvac.f90}   & Heating, Ventilation, and Air Conditioning \\ \hline
+{\ct ieva.f90}   & Support routines for evac.f90 \\ \hline
+{\ct init.f90}   & Initialize variables and Poisson solver \\ \hline
+{\ct irad.f90}   & Functions needed for radiation solver, including RadCal \\ \hline
+{\ct main.f90}   & Main program \\ \hline
+{\ct mass.f90}   & Mass equation(s) and thermal boundary conditions \\ \hline
+{\ct mesh.f90}   & Arrays and constants associated with each mesh \\ \hline
+{\ct mpip.f90}   & MPI ``include'' statement for MPI compilation \\ \hline
+{\ct mpis.f90}   & ``Dummy'' Fortran/MPI bindings for non-MPI compilation \\ \hline
+{\ct part.f90}   & Lagrangian particle transport and sprinkler activation \\ \hline
+{\ct pois.f90}   & Poisson (pressure) solver \\ \hline
+{\ct prec.f90}   & Specification of numerical precision \\ \hline
+{\ct pres.f90}   & Spatial discretization of pressure (Poisson) equation \\ \hline
+{\ct radi.f90}   & Radiation solver  \\ \hline
+{\ct read.f90}   & Read input parameters \\ \hline
+{\ct samr.f90}   & Simplified Adaptive Mesh Refinement (under development) \\ \hline
+{\ct scrc.f90}   & Alternative pressure solver (under development) \\ \hline
+{\ct smvv.f90}   & Routines for computing and outputting 3D smoke and isosurfaces \\ \hline
+{\ct soot.f90}   & Soot agglomeration and aerosol deposition \\ \hline
+{\ct turb.f90}   & Turbulence models and manufactured solutions \\ \hline
+{\ct type.f90}   & Derived type definitions \\ \hline
+{\ct vege.f90}   & Experimental vegetation model \\ \hline
+{\ct velo.f90}   & Momentum equations \\ \hline
+{\ct wall.f90}   & Wall boundary conditions \\ \hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -9862,24 +9830,21 @@ The output from the code consists of the file {\ct CHID.out}, plus various data 
 
 The file {\ct CHID.out} contains diagnostic output, including an accounting of various important quantities, including CPU usage. Typically, diagnostic information is printed out every 100 time steps as follows:
 \begin{lstlisting}
-Time Step   74700   June 11, 2013  12:51:00
-Pressure Iterations:      2
-Maximum Velocity Error:  0.29E-01 on Mesh   1 at (  93  72  39)
-----------------------------------------------
-CPU/step:     3.550 s, Total CPU:     82.39 hr
-Time step:  0.01105 s, Total time:   845.26 s
-Max CFL number:  0.84E+00 at ( 93, 72, 33)
-Max divergence:  0.81E+01 at ( 94, 72,  4)
-Min divergence: -0.36E+01 at ( 94, 73, 26)
-No. of Lagrangian Particles:        110940
-Total Heat Release Rate:           4258.043 kW
-Radiation Loss to Boundaries:      -595.837 kW
+Time Step  137431   December 27, 2015  00:29:49
+Step Size:    0.563E-01 s, Total Time:    1800.04 s
+Pressure Iterations:      1
+Maximum Velocity Error:  0.30E-01 on Mesh   1 at (   0  44   3)
+---------------------------------------------------------------
+Max CFL number:  0.94E+00 at (  1, 46,  1)
+Max divergence:  0.13E+00 at ( 66, 12,  1)
+Min divergence: -0.20E+00 at ( 66, 13,  1)
+Max VN number:   0.51E+00 at (  1, 25, 18)
+No. of Lagrangian Particles:            27
+Radiation Loss to Boundaries:        13.830 kW
 \end{lstlisting}
-The {\ct Time Step} indicates the total number of iterations. The date and time indicate the current wall clock time. The {\ct Pressure Iterations} are the number of iterations of the pressure solver for the corrector (second) half of the time step. The pressure solver iterations are designed to minimize the error in the normal component of velocity at solid walls or the interface of two meshes. The {\ct Maximum Velocity Error} indicates this error and in which grid cell it occurs. The quantity {\ct CPU/step} is the amount of CPU time required to complete a time step for that mesh; {\ct Total CPU} is the amount of CPU time elapsed since the start of the run; {\ct Time step} is the time step size for the given mesh; {\ct Total time} is the time of the simulation; {\ct Max/Min divergence} is the max/min value of the function $\nabla \cdot \bu$ and is used as a diagnostic when the flow is incompressible (i.e., no heating); and {\ct Max CFL number} is the maximum value of the CFL number. The {\ct No. of Lagrangian Particles} refers to the number of particles in the current mesh. The {\ct Radiation Loss to Boundaries} is the amount of energy that is being radiated to the boundaries. As compartments heat up, the energy lost to the boundaries can grow to be an appreciable fraction of the {\ct Total Heat Release Rate}.
+The {\ct Time Step} indicates the total number of iterations. The date and time indicate the current wall clock time. The {\ct STEP SIZE} indicates the size of the numerical time step. The {\ct Total Time} indicates the total simulation time calculated up to that point. The {\ct Pressure Iterations} are the number of iterations of the pressure solver for the corrector (second) half of the time step. The pressure solver iterations are designed to minimize the error in the normal component of velocity at solid walls or the interface of two meshes. The {\ct Maximum Velocity Error} indicates this error and in which grid cell it occurs.  {\ct Max/Min divergence} is the max/min value of the function $\nabla \cdot \bu$ and is used as a diagnostic when the flow is incompressible (i.e., no heating); {\ct Max CFL number} is the maximum value of the CFL number, the primary time step constraint; {\ct Max VN number} is the maximum value of the Von Neumann number, the secondary time step constraint. The {\ct No. of Lagrangian Particles} refers to the number of particles in the current mesh. The {\ct Radiation Loss to Boundaries} is the amount of energy that is being radiated to the boundaries. As compartments heat up, the energy lost to the boundaries can grow to be an appreciable fraction of the {\ct Total Heat Release Rate}.
 
-Following the completion of a successful run, a summary of the CPU
-usage per subroutine is listed. This is useful in determining where
-most of the computational effort is being placed.
+Following the completion of a successful run, a summary of the CPU usage per subroutine is listed in the file called {\ct CHID\_cpu.csv} (Section~\ref{out:CPU}). This is useful in determining where most of the computational effort is being placed.
 
 \section{Heat Release Rate and Related Quantities}
 
@@ -9925,6 +9890,20 @@ T(1) , -001   , 001    , ... , -001
 \end{lstlisting}
 where {\ct N\_CTRL} is the number of controllers, {\ct ID(I)} is the user-defined ID of the {\ct I}th control function, and plus or minus 1's represent the state {\ct -1 = .FALSE. and +1 = .TRUE.} of the {\ct I}th control function at the particular time. The files can be imported into Microsoft Excel or almost any other spread sheet program. If the number of columns exceeds 256, the file will automatically be split into smaller files.
 
+\section{CPU Usage Data}
+\label{out:CPU}
+
+The file called {\ct CHID\_cpu.csv} records the amount of CPU time for each of the MPI processes.
+\begin{lstlisting}
+Rank,MAIN,DIVG, ... , Total T_USED (s)
+    0, 2.052E+00, 1.058E+01, ... , 5.143+01
+    1, 2.432E+00, 1.062E+01, ... , 5.123+01
+            .
+            .
+\end{lstlisting}
+where {\ct Rank} is the number of the MPI process (starting at 0), {\ct MAIN}, {\ct DIVG}, and so on, are major routines, and {\ct 'Total T\_USED (s)'} is the total CPU time consumed by that particular MPI process. Typically, the total time is similar. The time spent in {\ct MAIN} is essentially overhead -- time spent {\em not} working on the calculation. If you want to know if your work load is balanced, take a look at the time spent in {\ct MAIN}. It should be similar for all MPI processes. If one of the MPI processes has a noticeably smaller value for {\ct MAIN}, then that process is working on the core routines while the other processes sit idle in {\ct MAIN}.
+
+The {\ct CHID\_cpu.csv} file is printed out at the end of the simulation. To force it to be printed out periodically during the simulation, set {\ct DT\_CPU} on the {\ct DUMP} line. Its default value is very large, meaning that by default, the CPU information is only printed at the end of the simulation.
 
 \section{Gas Mass Data}
 

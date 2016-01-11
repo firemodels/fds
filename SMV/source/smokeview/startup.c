@@ -151,7 +151,7 @@ void init_lang(void){
     filelisti = filelistinfo + i;
     file=filelisti->file;
     if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
-    trim(file);
+    trim_back(file);
     file=trim_front(file);
     len=strlen(file);
     langi->file=file;
@@ -934,7 +934,7 @@ void InitOpenGL(void){
     }
   }
 
- /* ------------------ get_startup_smoke3d ------------------------ */
+ /* ------------------ get_startup_smoke ------------------------ */
 
   void get_startup_smoke(int seq_id){
     int i;

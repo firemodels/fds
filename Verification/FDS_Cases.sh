@@ -40,6 +40,9 @@ $QFDS -d Fires fire_whirl_pool.fds
 $QFDS -d Fires spray_burner.fds
 $QFDS -d Fires HoC_Ideal.fds
 $QFDS -d Fires HoC_NonIdeal.fds
+$QFDS -d Fires tmp_lower_limit_simple.fds
+$QFDS -d Fires tmp_lower_limit_default.fds
+$QFDS -d Fires tmp_lower_limit_dt_p001.fds
 
 $QFDS -d Flowfields divergence_test.fds
 $QFDS -d Flowfields cyl_test_1.fds
@@ -61,6 +64,10 @@ $QFDS -d Flowfields blasius_64.fds
 $QFDS -d Flowfields mwtest_cfl.fds
 $QFDS -d Flowfields mass_heat_wall_device_test.fds
 $QFDS -d Flowfields mass_heat_wall_device_test_2.fds
+$QFDS -d Flowfields particle_offgas_1.fds
+$QFDS -d Flowfields particle_offgas_2.fds
+$QFDS -d Flowfields particle_offgas_3.fds
+$QFDS -d Flowfields particle_offgas_4.fds
 $QFDS -d Flowfields species_conservation_1.fds
 $QFDS -d Flowfields species_conservation_2.fds
 $QFDS -d Flowfields species_conservation_3.fds
@@ -432,6 +439,8 @@ $QFDS -t -p 8 -d Fires circular_burner.fds
 $QFDS -t -p 5 -d Flowfields simple_duct.fds
 $QFDS -t -p 5 -d Flowfields simple_duct_2.fds
 $QFDS -t -p 8 -d Flowfields symmetry_test_mpi.fds
+$QFDS -t -p 8 -d Flowfields volume_flow_1.fds
+$QFDS -t -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -t -p 4 -d Heat_Transfer back_wall_test.fds
 

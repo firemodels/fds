@@ -7,6 +7,20 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define NOT_FDSBLOCK 0
+#define FDSBLOCK 1
+
+#define GEOM_GEOM 0
+#define GEOM_ISO 1
+#define GEOM_SLICE 2
+
+#define PATCH_NODECENTERED 0
+#define PATCH_CELLCENTERED 1
+#define PATCH_GEOMETRY 2
+
+#define NODATA 0
+#define HASDATA 1
+
 #define NO_TEST 0
 #define TRIANGLE_TEST 1
 #define POLYGON_TEST 2
@@ -137,9 +151,6 @@ void _Sniff_Errors(char *whereat);
 #define FROM_SCRIPT 2
 
 #define STEPS_PER_DEG 10.0
-
-#define GEOM_NORMAL 0
-#define GEOM_ISO 1
 
 #define FED_SLICE 0
 #define FED_ISO 1
@@ -503,6 +514,12 @@ void _Sniff_Errors(char *whereat);
 #define UPwallmenu -7
 #define DOWNwallmenu -8
 #define DUMMYwallmenu -9
+#define SOLIDpatchmenu -10
+#define OUTLINEpatchmenu -11
+#define POINTSpatchmenu -12
+#define INSOLIDpatchmenu -13
+#define INGASpatchmenu -14
+
 
 #define INTERIORwall 0
 #define FRONTwall 1

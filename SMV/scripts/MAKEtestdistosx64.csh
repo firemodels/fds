@@ -1,10 +1,10 @@
 #!/bin/csh -f
 set revision=$1
-set SVNROOT=~/FDS-SMV
 set REMOTESVNROOT=FDS-SMV
 set OSXHOST=$2
+set SVNROOT=~/$3
 
-set BACKGROUNDDIR=$REMOTESVNROOT/Utilities/background/intel_osx_32
+set BACKGROUNDDIR=$REMOTESVNROOT/Utilities/background/intel_osx_64
 set SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
 set SMZDIR=$REMOTESVNROOT/Utilities/smokezip/intel_osx_64
 set SMDDIR=$REMOTESVNROOT/Utilities/smokediff/intel_osx_64
@@ -13,7 +13,7 @@ set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set OSXDIR=smv_test\_$revision\_osx64
 set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
-cd $FORBUNDLE/uploads
+cd $SVNROOT/SMV/uploads
 
 rm -rf $OSXDIR
 mkdir -p $OSXDIR

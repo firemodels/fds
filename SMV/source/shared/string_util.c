@@ -57,7 +57,7 @@ void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
     }
     nt++;
     token=strtok(NULL,",");
-    if(token!=NULL)trim(token);
+    if(token!=NULL)trim_back(token);
   }
   *ntokens=nt;
 }
@@ -126,6 +126,7 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
 }
 
 /* ------------------ getGitHash ------------------------ */
+
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
 #endif
@@ -133,7 +134,7 @@ void getGitHash(char *githash){
   char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
-  trim(rev);
+  trim_back(rev);
   beg = trim_front(rev);
   if(strlen(beg)>0){
     strcpy(githash,beg);
@@ -217,10 +218,10 @@ void trim_commas(char *line){
 
 /* ------------------ trim ------------------------ */
 
-void trim(char *line){
-  /*! \fn void trim(char *line)
-      \brief removes trailing white space from the character string line
-  */
+void trim_back(char *line){
+  
+  //  removes trailing white space from the character string line
+
   char *c;
   size_t len;
 
@@ -239,7 +240,7 @@ void trim(char *line){
 
 char *trim_front(char *line){
 
-//  returns a random character string of length length
+//  returns first non-blank character at the begininn of line
 
   char *c;
 
@@ -249,31 +250,21 @@ char *trim_front(char *line){
   return line;
 }
 
-
 /* ------------------ trimzeros ------------------------ */
 
 void trimzeros(char *line){
-
-//  removes trailing zeros in the floating point number found in line
-
-  size_t i,len;
   char *c;
 
-  len = strlen(line);
-  c = line + len-1;
-  for(i=len-1;i>0;i--){
-    if(*c=='0'){
-      c--;
-      if(*c=='.'){
-        line[i+1]='\0';
-        return;
-      }
-      continue;
+  //  removes trailing zeros in the floating point number found in line
+
+  for(c = line+strlen(line)-1; c>line; c--){
+    if(c[0]=='0'&&c[-1]=='.'||c[0]!='0'){
+      c[1] = '\0';
+      return;
     }
-    line[i+1]='\0';
-    return;
+    // if we got here then c[0]==0 and c[-1]!=. so continue and look for another '0'
   }
-  line[0]='\0';
+  line[0] = '\0';
 }
 
 /* ------------------ trimmzeros ------------------------ */
@@ -285,7 +276,7 @@ void trimmzeros(char *line){
   char linecopy[1024];
   char *token;
 
-  trim(line);
+  trim_back(line);
   strcpy(linecopy,line);
   token=strtok(linecopy," ");
   strcpy(line,"");
@@ -407,21 +398,15 @@ void num2string(char *string, float tval,float range){
   if(strlen(string)>9)fprintf(stderr,"***fatal error - overwriting string\n");
 }
 
-/* ------------------ trim_string ------------------------ */
+/* ------------------ trim_frontback ------------------------ */
 
-char *trim_string(char *buffer){
+char *trim_frontback(char *buffer){
 
 //  removes trailing blanks from buffer and returns a pointer to the first non-blank character
 
-  int len;
-  char *bufptr;
-
   if(buffer==NULL)return NULL;
-  len=strlen(buffer);
-  buffer[len-1]='\0';
-  bufptr=trim_front(buffer);
-  trim(bufptr);
-  return bufptr;
+  trim_back(buffer);
+  return trim_front(buffer);
 }
 
 /* ------------------ get_chid ------------------------ */
@@ -548,7 +533,7 @@ char *getstring(char *buffer){
   end=strrchr(begin,'"');
   if(end==NULL)return NULL;
   end[0]=0;
-  trim(begin);
+  trim_back(begin);
   begin = trim_front(begin);
   if(strlen(begin)>0)return begin;
   return NULL;
@@ -572,7 +557,7 @@ char *time2timelabel(float sv_time, float dt, char *timelabel){
     sprintf(timelabel,"%4.1f",sv_time);
   }
   trimzeros(timelabel);
-  trim(timelabel);
+  trim_back(timelabel);
   timelabelptr=trim_front(timelabel);
   return timelabelptr;
 }
@@ -599,7 +584,7 @@ int match_upper(char *buffer, const char *key){
   size_t i;
 
   lenkey=strlen(key);
-  trim(buffer);
+  trim_back(buffer);
   lenbuffer=strlen(buffer);
 
   if(lenbuffer<lenkey)return 0;
@@ -701,7 +686,7 @@ char *remove_comment(char *buffer){
 
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
-  trim(buffer);
+  trim_back(buffer);
   return trim_front(buffer);
 }
 
@@ -806,7 +791,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -819,7 +804,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -831,7 +816,7 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -865,7 +850,7 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+15))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -878,7 +863,7 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -890,7 +875,7 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -924,7 +909,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+9))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -937,7 +922,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -949,7 +934,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   len=strlen(buffer2);
   buffer2[len-1]='\0';
   buffer=trim_front(buffer2);
-  trim(buffer);
+  trim_back(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -970,7 +955,7 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ daytime2sec ------------------------ */
+/* ------------------ date2day ------------------------ */
 
 unsigned int date2day(char *tokenorig){
   // mm/dd/yyyy -> days after 1/1/2000

@@ -37,6 +37,7 @@ typedef struct {
   float xyz[3],point_norm[3],texture_xy[3];
   int itriangle,ntriangles,nused;
   unsigned char on_mesh_boundary;
+  int geomtype;
   struct _triangle **triangles;
 } point;
 
@@ -47,7 +48,7 @@ typedef struct _triangle {
   float distance, *color, tpoints[6], tri_norm[3];
   struct _texturedata *textureinfo;
   struct _surfdata *surf;
-  int vert_index[3], interior;
+  int vert_index[3], interior, geomtype, insolid;
   point *points[3];
 } triangle;
 
@@ -83,15 +84,14 @@ typedef struct {
 
 typedef struct {
   char *file;
-  int memory_id;
-  int loaded, display;
-  struct _surfdata *surf;
-  geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
+  int memory_id, loaded, display;
   float *float_vals;
   int *int_vals, nfloat_vals, nint_vals;
   float *times;
   int ntimes,itime,*timeslist;
-  int ngeomobjinfo;
+  int ngeomobjinfo, geomtype, patchactive, fdsblock;
+  struct _surfdata *surf;
+  geomlistdata *geomlistinfo,*geomlistinfo_0, *currentframe;
   geomobjdata *geomobjinfo;
 } geomdata;
 
@@ -1301,7 +1301,7 @@ typedef struct {
   geomdata *geominfo;
   //int *patchsize;
   int version;
-  int filetype;
+  int filetype, slice;
   int type;
   int inuse,inuse_getbounds;
   int unit_start;
@@ -1325,6 +1325,8 @@ typedef struct {
   flowlabels label;
   char scale[31];
   char menulabel[128];
+  char gslicedir[50];
+  int ijk[6];
   int extreme_min, extreme_max;
   time_t modtime;
   histogramdata *histogram;

@@ -27,7 +27,7 @@ set version=%smv_version%_%smv_revision%
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmvosx64.sh
+plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEsmvosx64.sh %linux_svn_root%
 
 echo.
 echo compilation complete

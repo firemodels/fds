@@ -538,7 +538,7 @@ void DrawCircVentsExactOutline(int option){
   }
 }
 
-/* ------------------ DrawCircVentsExact ------------------------ */
+/* ------------------ DrawCircVents ------------------------ */
 
 void DrawCircVents(int option){
   if(option==VENT_HIDE)return;
@@ -1349,7 +1349,6 @@ void calcQuadNormal(float *xyz, float *out){
 
 }
 
-
 /* ------------------ readcadgeom ------------------------ */
 
 void readcadgeom(cadgeom *cd){
@@ -1366,7 +1365,7 @@ void readcadgeom(cadgeom *cd){
     fclose(stream);
     return;
   }
-  trim(buffer);
+  trim_back(buffer);
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
     fclose(stream);
@@ -1556,7 +1555,7 @@ void readcad2geom(cadgeom *cd){
     if(rrgb[0]<0.0||rrgb[1]<0.0||rrgb[2]<0.0)rrgb[3]=1.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
-    trim(buffer);
+    trim_back(buffer);
     len=strlen(buffer);
 
     texti = &cdi->textureinfo;
@@ -1952,7 +1951,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   }
 }
 
-/* ------------------ updatefaces ------------------------ */
+/* ------------------ UpdateFaces ------------------------ */
 
 void UpdateFaces(void){
   int i;
@@ -2555,7 +2554,7 @@ void set_cull_vis(void){
   }
 }
 
-/* ------------------ comparesinglefaces ------------------------ */
+/* ------------------ comparesinglefaces0 ------------------------ */
 
 int comparesinglefaces0( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
@@ -3115,7 +3114,7 @@ void drawselect_faces(){
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices+9);
 
-/* ------------------ drawfaces ------------------------ */
+/* ------------------ draw_faces ------------------------ */
 
 void draw_faces(){
   float *new_color,*old_color=NULL;
@@ -3388,7 +3387,7 @@ void draw_faces(){
   }
 }
 
-/* ------------------ compareisonodes ------------------------ */
+/* ------------------ comparetransparentfaces ------------------------ */
 
 int comparetransparentfaces( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
@@ -3422,8 +3421,6 @@ void Sort_Transparent_Faces(float *mm){
     facei->dist2eye=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
   }
   qsort((facedata **)face_transparent,(size_t)nface_transparent,sizeof(facedata *),comparetransparentfaces);
-
-
 }
 
 /* ------------------ draw_transparent_faces ------------------------ */
@@ -3580,7 +3577,6 @@ void draw_transparent_faces(){
 
 void UpdateHiddenFaces(){
   int i;
-
 
   updatehiddenfaces=0;
   if(hide_overlaps!=0)PRINTF("  identifying hidden faces -");
@@ -3769,7 +3765,6 @@ void update_selectblocks(void){
   nselectblocks=ntotal;
 }
 
-
 /* ------------------ update_selectfaces ------------------------ */
 
 void update_selectfaces(void){
@@ -3932,7 +3927,7 @@ int isblockagevisible(blockagedata *bc, float local_time){
 }
 
 
-/* ------------------ getsmoothblockparams ------------------------ */
+/* ------------------ getsmoothblockparms ------------------------ */
 
 void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
   int i;
@@ -4432,7 +4427,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
   return;
 }
 
-/* ------------------ update_demo ------------------------ */
+/* ------------------ init_demo ------------------------ */
 
 void init_demo(float rad, int nlat, int nlong){
   int i,j;
@@ -4495,7 +4490,7 @@ void calcNormal4(const float *v1,
 
 }
 
-/* ------------------ draw_demo ------------------------ */
+/* ------------------ draw_demo2 ------------------------ */
 
 void draw_demo2(int option){
       demo_mode++;
@@ -4512,6 +4507,9 @@ void draw_demo2(int option){
       glVertex3f(1.0,0.3,0.0);
       glEnd();
 }
+
+/* ------------------ draw_demo ------------------------ */
+
 void draw_demo(int nlat, int nlong){
   int i, j;
   extern float *sphere_xyz;
@@ -4664,7 +4662,7 @@ void draw_demo(int nlat, int nlong){
   }
 }
 
-/* ------------------ innitticks ------------------------ */
+/* ------------------ init_user_ticks ------------------------ */
 
 void init_user_ticks(void){
   int i;
@@ -4704,7 +4702,7 @@ void init_user_ticks(void){
 
 }
 
-/* ------------------ drawticks ------------------------ */
+/* ------------------ draw_user_ticks ------------------------ */
 
 void draw_user_ticks(void){
   int i;
@@ -5095,8 +5093,7 @@ void draw_user_ticks(void){
   glPopMatrix();
 }
 
-
-/* ------------------ getdir ------------------------ */
+/* ------------------ get_tick_dir ------------------------ */
 
 int get_tick_dir(float *mm){
     /*
@@ -5170,8 +5167,7 @@ int get_tick_dir(float *mm){
   return iminangle;
 }
 
-
-/* ------------------ drawaxis ------------------------ */
+/* ------------------ DrawGravityAxis ------------------------ */
 
 void DrawGravityAxis(void){
   glLineWidth(linewidth);
@@ -5432,7 +5428,7 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
   }
 }
 
-/* ------------------ drawfacesBAK ------------------------ */
+/* ------------------ draw_facesOLD ------------------------ */
 
 void draw_facesOLD(){
   float *new_color,*old_color=NULL;
@@ -5717,7 +5713,6 @@ void draw_facesOLD(){
   if(show_triangle_count==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
 }
 
-
 /* ------------------ initcullgeom ------------------------ */
 
 void initcullgeom(int cullgeomflag){
@@ -5958,7 +5953,7 @@ void remove_dup_blockages(void){
   updatefacelists=1;
 }
 
-/* ------------------ getlabels ------------------------ */
+/* ------------------ getobstlabels ------------------------ */
 
 void getobstlabels(const char *filein){
 
@@ -6004,7 +5999,7 @@ void getobstlabels(const char *filein){
     obstlabel++;
     lenlabel=strlen(obstlabel);
     obstlabel=trim_front(obstlabel);
-    trim(obstlabel);
+    trim_back(obstlabel);
     lenlabel=strlen(obstlabel);
     if(lenlabel>0){
       NewMemory((void **)&obstlabels[fdsobstcount-1],(unsigned int)(lenlabel+1));

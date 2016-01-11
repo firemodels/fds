@@ -41,9 +41,9 @@ int getStringWidth(char *string){
   return length;
 }
 
-/* ------------------------ GetVP_info ------------------------- */
+/* ------------------------ get_viewport_info ------------------------- */
 
-void Get_VP_info(void){
+void get_viewport_info(void){
   int doit;
   float text_height;
   float text_width;
@@ -286,7 +286,7 @@ int SUB_portortho(int quad,
 }
 
 
-/* ------------------------ SUB_portortho ------------------------- */
+/* ------------------------ SUB_portortho2 ------------------------- */
 
 int SUB_portortho2(int quad, 
                   portdata *p,
@@ -634,7 +634,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ------------------------ TIME BAR Viewport ------------------------- */
+/* ------------------------ TIMEBAR_viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #ifdef pp_memstatus
@@ -725,7 +725,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #endif
 }
 
-/* --------------------- COLOR BAR Viewport ------------------------- */
+/* --------------------- COLORBAR_viewport ------------------------- */
 
 void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   if(SUB_portortho2(quad,&VP_colorbar,screen_left, screen_down)==0)return;
@@ -736,7 +736,7 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   drawColorBars();
 }
 
-    /* -------------------------- TITLE Viewport -------------------------- */
+    /* -------------------------- TITLE_viewport -------------------------- */
 
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
@@ -771,11 +771,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
       smv_top2=smv_top+VP_title.text_height+v_space;
     }
     outputText(left,smv_top2,TITLE);
-#ifdef BIT64
     sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
-#else
-    sprintf(label,"Smokeview (32 bit) build: %s",smv_githash);
-#endif
     outputText(left,smv_top,label);
     if(fds_githash!=NULL){
       sprintf(label,"FDS build:%s",fds_githash);
@@ -1024,7 +1020,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     FREEMEMORY(geominfoptrs);
     ngeominfoptrs=0;
     GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
-    if(ngeominfoptrs>0)Sort_Embedded_Geometry(modelview_scratch);
+    if(ngeominfoptrs>0)ShowHideSortGeometry(modelview_scratch);
     if(showiso==1&&sort_iso_triangles==1&&niso_trans>0)Sort_Iso_Triangles(modelview_scratch);
 
     glScalef(mscale[0],mscale[1],mscale[2]);

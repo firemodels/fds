@@ -1,8 +1,8 @@
 #!/bin/csh -f
 set revision=$1
-set SVNROOT=~/FDS-SMV
+set SVNROOT=~/$2
 
-set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_linux_32
+set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_linux_64
 set SMVDIR=$SVNROOT/SMV/Build/intel_linux_64
 set SMZDIR=$SVNROOT/Utilities/smokezip/intel_linux_64
 set SMDDIR=$SVNROOT/Utilities/smokediff/intel_linux_64
@@ -11,7 +11,7 @@ set FORBUNDLE=$SVNROOT/SMV/for_bundle
 set LINUXDIR=smv_test\_$revision\_linux64
 set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
-cd $FORBUNDLE/uploads
+cd $SVNROOT/SMV/uploads
 
 rm -rf $LINUXDIR
 mkdir -p $LINUXDIR

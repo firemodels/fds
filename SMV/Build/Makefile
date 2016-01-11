@@ -1,6 +1,3 @@
-# $Date$ 
-# $Revision$
-# $Author$
 
 #*** Smokeview, VMakefile ***
 
@@ -41,7 +38,7 @@ obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_w
       IOobject.o IOtour.o glui_display.o glui_tour.o getdatacolors.o smokeview.o\
       output.o renderfile.o isobox.o getdatabounds.o readsmv.o scontour2d.o\
       glui_3dsmoke.o glui_clip.o glui_stereo.o glui_geometry.o glui_motion.o\
-      glui_bounds.o dmalloc.o interp.o assert.o compress3dc.o\
+      glui_bounds.o dmalloc.o interp.o assert.o \
       compress.o IOvolsmoke.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o\
       IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o\
       glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
@@ -151,7 +148,7 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
-intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc 
 intel_linux_64 : CPP       = icpc
@@ -164,7 +161,7 @@ intel_linux_64 : $(obj)
 # ------------- intel_linux_64_db ----------------
 
 intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -fpp -D pp_noappend -stand:f08
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX64 -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
@@ -178,7 +175,7 @@ intel_linux_64_db : $(obj)
 # ------------- intel_linux_64_profile ----------------
 
 intel_linux_64_profile : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_noappend -p
-intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX64 -D pp_INTEL -p $(GITINFO)
+intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX -D pp_INTEL -p $(GITINFO)
 intel_linux_64_profile : LFLAGS    = -m64 -static-intel
 intel_linux_64_profile : CC        = icc 
 intel_linux_64_profile : CPP       = icpc
@@ -191,7 +188,7 @@ intel_linux_64_profile : $(obj)
 # ------------- gnu_linux_64_db ----------------
 
 gnu_linux_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gnu_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX
 gnu_linux_64_db : LFLAGS    = -m64
 gnu_linux_64_db : CC        = gcc
 gnu_linux_64_db : CPP       = g++
@@ -204,7 +201,7 @@ gnu_linux_64_db : $(obj)
 # ------------- gnu_linux_64 ----------------
 
 gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX64
+gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX
 gnu_linux_64 : LFLAGS    = -m64
 gnu_linux_64 : CC        = gcc
 gnu_linux_64 : CPP       = g++
@@ -222,8 +219,8 @@ OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libim
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
+intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc 
 intel_osx_64 : CPP       = icpc
@@ -235,8 +232,8 @@ intel_osx_64 : $(obj)
 
 # ------------- intel_osx_64_fg ----------------
 
-intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4
-intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
+intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64_fg : LFLAGS    = -m64 -static-intel -framework OpenGL -L/shared/freeglut/lib -lglut -mmacosx-version-min=10.4
 intel_osx_64_fg : CC        = icc 
 intel_osx_64_fg : CPP       = icpc
@@ -248,8 +245,8 @@ intel_osx_64_fg : $(obj)
 
 # ------------- intel_osx_64_db ----------------
 
-intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX64 -mmacosx-version-min=10.4 -stand:f08
-intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX64  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4 -stand:f08
+intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64_db : CC        = icc 
 intel_osx_64_db : CPP       = icpc

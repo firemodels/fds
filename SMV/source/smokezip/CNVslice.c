@@ -53,7 +53,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   strcpy(filetype,"");
   shortlabel=slicei->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
@@ -313,7 +313,7 @@ int convert_slice(slice *slicei, int *thread_index){
   strcpy(filetype,"");
   shortlabel=slicei->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
@@ -426,7 +426,7 @@ int convert_slice(slice *slicei, int *thread_index){
   strcpy(units,"");
   unit=slicei->label.unit;
   if(strlen(unit)>0)strcat(units,unit);
-  trim(units);
+  trim_back(units);
   sprintf(cval,"%f",slicei->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
@@ -999,7 +999,7 @@ void Get_Slice_Bounds(void){
 
 }
 
-/* ------------------ Get_Slice_Bounds ------------------------ */
+/* ------------------ getsliceparms_c ------------------------ */
 
 void getsliceparms_c(char *file, int *ni, int *nj, int *nk){
     int skip,ijkbar[6];

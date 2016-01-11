@@ -154,7 +154,7 @@ void readiso_geom_wrapup(void){
   update_readiso_geom_wrapup=UPDATE_ISO_OFF;
   ngeominfoptrs = 0;
   GetGeomInfoPtrs(&geominfoptrs, &ngeominfoptrs);
-  update_triangles();
+  update_triangles(GEOM_DYNAMIC);
 
   Update_Times();
   get_faceinfo();
@@ -227,7 +227,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_in
 
   if(update_readiso_geom_wrapup==UPDATE_ISO_OFF)update_readiso_geom_wrapup=UPDATE_ISO_ONE_NOW;
   if(update_readiso_geom_wrapup==UPDATE_ISO_START_ALL)update_readiso_geom_wrapup=UPDATE_ISO_ALL_NOW;
-#ifdef MEMPRINT
+#ifdef pp_MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
 #endif
@@ -788,13 +788,7 @@ void unloadiso(mesh *meshi){
   return;
 }
 
-/* ------------------ drawiso_geom ------------------------ */
-
-void drawiso_geom(int tranflag){
-  draw_geom(tranflag,1);
-}
-
-/* ------------------ drawiso ------------------------ */
+/* ------------------ drawiso_orig ------------------------ */
 
 void drawiso_orig(int tranflag){
   int i;
@@ -1225,7 +1219,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     glPopMatrix();
   }
 
-  if(showtrinormal==1){
+  if(show_iso_normal==1){
 
     glPushMatrix();
     antialias(ON);
@@ -1245,7 +1239,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         vv3[k]=xyzmin[k]+SCALE2FDSL(v3[k]/65535.);
       }
 
-      if(smoothtrinormal==1){
+      if(smooth_iso_normal==1){
         norm1 = vertexnorm+i1;
         norm2 = vertexnorm+i2;
         norm3 = vertexnorm+i3;
@@ -1284,7 +1278,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   }
 }
 
-/* ------------------ updateslicetypes ------------------------ */
+/* ------------------ updateisotypes ------------------------ */
 
 void updateisotypes(void){
   int i;
@@ -1558,7 +1552,7 @@ void sync_isobounds(int isottype){
   }
 }
 
-/* ------------------ compareisonodes ------------------------ */
+/* ------------------ compare_iso_triangles ------------------------ */
 
 int compare_iso_triangles( const void *arg1, const void *arg2 ){
   isotri *trii, *trij;
@@ -1576,7 +1570,7 @@ int compare_iso_triangles( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ sort_triangles ------------------------ */
+/* ------------------ Sort_Iso_Triangles ------------------------ */
 
 void Sort_Iso_Triangles(float *mm){
   int itri;
@@ -1639,7 +1633,7 @@ void Sort_Iso_Triangles(float *mm){
   if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
 }
 
-/* ------------------ update_isotri_list ------------------------ */
+/* ------------------ Update_Isotris ------------------------ */
 
 void Update_Isotris(int flag){
   int itri;

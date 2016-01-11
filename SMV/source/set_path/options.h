@@ -15,18 +15,7 @@
 
 int reg_path(int setget, int pathtype, char *path);
 
-//*** turn on BIT64 if compiled on a 64 bit platform
-
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 #ifdef CPP
 #define CCC "C"

@@ -283,9 +283,9 @@ GLUI_Checkbox *CHECKBOX_show_slices_and_vectors=NULL;
 GLUI_Checkbox *CHECKBOX_cache_boundarydata=NULL;
 GLUI_Checkbox *CHECKBOX_showpatch_both=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
-GLUI_Checkbox *CHECKBOX_showtrisurface=NULL;
-GLUI_Checkbox *CHECKBOX_showtrioutline=NULL;
-GLUI_Checkbox *CHECKBOX_showtripoints=NULL;
+GLUI_Checkbox *CHECKBOX_show_iso_solid=NULL;
+GLUI_Checkbox *CHECKBOX_show_iso_outline=NULL;
+GLUI_Checkbox *CHECKBOX_show_iso_points=NULL;
 GLUI_Checkbox *CHECKBOX_defer=NULL;
 GLUI_Checkbox *CHECKBOX_script_step=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
@@ -976,15 +976,15 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_isolinewidth = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _d("Line width"), GLUI_SPINNER_FLOAT, &isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0, 10.0);
 
-    visAIso = showtrisurface*1+showtrioutline*2+showtripoints*4;
-    CHECKBOX_showtrisurface = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &showtrisurface, ISO_SURFACE, Iso_CB);
-    CHECKBOX_showtrioutline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &showtrioutline, ISO_OUTLINE, Iso_CB);
-    CHECKBOX_showtripoints = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &showtripoints, ISO_POINTS, Iso_CB);
+    visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    CHECKBOX_show_iso_solid = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &show_iso_solid, ISO_SURFACE, Iso_CB);
+    CHECKBOX_show_iso_outline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &show_iso_outline, ISO_OUTLINE, Iso_CB);
+    CHECKBOX_show_iso_points = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_points, ISO_POINTS, Iso_CB);
 
 #ifdef pp_BETA 
     CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
 #endif
-    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Smooth isosurfaces"), &smoothtrinormal, SMOOTH_SURFACES, Slice_CB);
+    CHECKBOX_smooth2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Smooth isosurfaces"), &smooth_iso_normal, SMOOTH_SURFACES, Slice_CB);
 
     ROLLOUT_iso_color = glui_bounds->add_rollout_to_panel(ROLLOUT_iso, "Color/transparency", false, ISO_ROLLOUT_COLOR, Iso_Rollout_CB);
     ADDPROCINFO(isoprocinfo, nisoprocinfo, ROLLOUT_iso_color, ISO_ROLLOUT_COLOR);
@@ -1317,10 +1317,8 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"Unlimited");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"1 GB");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"2 GB");
-  #ifdef BIT64
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"4 GB");
   glui_bounds->add_radiobutton_to_group(RADIO_memcheck,"8 GB");
-  #endif
 #endif
 
   glui_bounds->add_button(_d("Save settings"), SAVE_SETTINGS, Bounds_DLG_CB);
@@ -1458,7 +1456,6 @@ void boundmenu(GLUI_Rollout **bound_rollout,GLUI_Rollout **chop_rollout, GLUI_Pa
       glui_bounds->add_button_to_panel(PANEL_e,_d("Update"),CHOPUPDATE,FILE_CB);
     }
   }
-
 }
 
 /* ------------------ PLOT3D_CB ------------------------ */
@@ -1667,13 +1664,13 @@ extern "C" void updatetracers(void){
 /* ------------------ update_glui_isotype ------------------------ */
 
 extern "C" void update_glui_isotype(void){
-  CHECKBOX_showtrisurface->set_int_val(visAIso&1);
-  CHECKBOX_showtrioutline->set_int_val((visAIso&2)/2);
-  CHECKBOX_showtripoints->set_int_val((visAIso&4)/4);
+  CHECKBOX_show_iso_solid->set_int_val(visAIso&1);
+  CHECKBOX_show_iso_outline->set_int_val((visAIso&2)/2);
+  CHECKBOX_show_iso_points->set_int_val((visAIso&4)/4);
 }
 
 
-/* ------------------ update_glui_isotype ------------------------ */
+/* ------------------ update_glui_plot3dtype ------------------------ */
 
 extern "C" void update_glui_plot3dtype(void){
   RADIO_plot3d_isotype->set_int_val(p3dsurfacetype);
@@ -1845,7 +1842,7 @@ extern "C" void Iso_CB(int var){
   case ISO_SURFACE:
   case  ISO_OUTLINE:
   case ISO_POINTS:
-    visAIso= 1*showtrisurface + 2*showtrioutline + 4*showtripoints;
+    visAIso= 1*show_iso_solid + 2*show_iso_outline + 4*show_iso_points;
     updatemenu=1;
     break;
   default:
@@ -1924,7 +1921,7 @@ extern "C"  void glui_script_disable(void){
       break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);
-      trim(label);
+      trim_back(label);
       name = trim_front(label);
       set_renderlabel=0;
       if(name!=NULL&&strlen(name)!=strlen(script_renderdir)){
@@ -1969,7 +1966,7 @@ extern "C"  void glui_script_disable(void){
     {
       char *suffix;
 
-      trim(script_renderfilesuffix);
+      trim_back(script_renderfilesuffix);
       suffix = trim_front(script_renderfilesuffix);
       strcpy(script_renderfile,"");
       if(strlen(suffix)>0){
@@ -2053,7 +2050,7 @@ extern "C"  void glui_script_disable(void){
     case SCRIPT_EDIT_INI:
       strcpy(label,_d("Save "));
       strcat(label,fdsprefix);
-      trim(script_inifile_suffix);
+      trim_back(script_inifile_suffix);
       if(strlen(script_inifile_suffix)>0){
         strcat(label,"_");
         strcat(label,script_inifile_suffix);
@@ -2621,7 +2618,7 @@ void Time_CB(int var){
   }
 }
 
-/* ------------------ SLICE_CB ------------------------ */
+/* ------------------ Slice_CB ------------------------ */
 
 extern "C" void Slice_CB(int var){
   int error,i;
@@ -2748,10 +2745,10 @@ extern "C" void Slice_CB(int var){
       break;
 #ifdef pp_BETA
     case SMOOTH_SURFACES:
-      CHECKBOX_smooth2->set_int_val(smoothtrinormal);
+      CHECKBOX_smooth2->set_int_val(smooth_iso_normal);
       break;
     case SORT_SURFACES:
-      sort_embedded_geometry=sort_iso_triangles;
+      sort_geometry=sort_iso_triangles;
       for(i=nsurfinfo;i<nsurfinfo+MAX_ISO_COLORS+1;i++){
         surfdata *surfi;
 
@@ -3075,7 +3072,7 @@ void Bounds_DLG_CB(int var){
   }
 }
 
-/* ------------------ show_glui ------------------------ */
+/* ------------------ show_glui_bounds ------------------------ */
 
 extern "C" void show_glui_bounds(int menu_id){
   int islice, ipatch;
@@ -3612,6 +3609,3 @@ extern "C" void update_showhidebuttons(void){
     if(RADIO_showhide != NULL)RADIO_showhide->enable();
   }
 }
-
-
-

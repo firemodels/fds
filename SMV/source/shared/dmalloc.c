@@ -17,6 +17,8 @@ static blockinfo *GetBlockInfo(bbyte *pb);
 
 #ifdef WIN32
 
+/* ------------------ memusage ------------------------ */
+
 // return memory usage between 0% and 100%
 
 int memusage(void){
@@ -64,7 +66,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 #endif
 #endif
 
-/* ------------------ initMM ------------------------ */
+/* ------------------ initMALLOC ------------------------ */
 
 void initMALLOC(void){
   
@@ -718,7 +720,6 @@ void set_memcheck(int index){
   case 2:
     MMmaxmemory=2000000000;
     break;
-#ifdef BIT64
   case 3:
     MMmaxmemory=4000000000;
     break;
@@ -728,7 +729,6 @@ void set_memcheck(int index){
   default:
     ASSERT(0);
     break;
-#endif
   }
 }
 

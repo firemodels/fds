@@ -10,12 +10,7 @@ IF "%1" NEQ "g" SET COMPILER2=icl
 IF "%1" EQU "m" SET COMPILER=cl
 IF "%1" EQU "m" SET COMPILER2=cl
 
-SET SIZE=-m64
-SET SIZE2=intel64
 SET MSCOMPILER=x86_amd64
-
-IF "%COMPILER%" == "icl" SET SIZE=
-IF "%COMPILER%" == "cl" SET SIZE=
 
 IF "%COMPILER%" NEQ "cl" GOTO MSenvexist
 

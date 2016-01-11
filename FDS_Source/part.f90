@@ -832,18 +832,18 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
                   ! Get particle coordinates by randomly choosing within the designated volume
 
-                  XC1 = MAX(X1,X(II-1))
-                  YC1 = MAX(Y1,Y(JJ-1))
-                  ZC1 = MAX(Z1,Z(KK-1))
-                  XC2 = MIN(X2,X(II))
-                  YC2 = MIN(Y2,Y(JJ))
-                  ZC2 = MIN(Z2,Z(KK))
 
                   IF (IN%CELL_CENTERED) THEN
-                     LP%X = 0.5_EB*(XC1+XC2)
-                     LP%Y = 0.5_EB*(YC1+YC2)
-                     LP%Z = 0.5_EB*(ZC1+ZC2)
+                     LP%X = 0.5_EB*(X(II-1)+X(II))
+                     LP%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
+                     LP%Z = 0.5_EB*(Z(KK-1)+Z(KK))
                   ELSE
+                     XC1 = MAX(X1,X(II-1))
+                     YC1 = MAX(Y1,Y(JJ-1))
+                     ZC1 = MAX(Z1,Z(KK-1))
+                     XC2 = MIN(X2,X(II))
+                     YC2 = MIN(Y2,Y(JJ))
+                     ZC2 = MIN(Z2,Z(KK))
                      CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                   ENDIF
 
@@ -1162,27 +1162,12 @@ ENDDO
 
 ! Return if there are no particles in this mesh
 
-IF (MESHES(NM)%NLP==0) THEN
-   IF (CORRECTOR .AND. CALC_D_LAGRANGIAN) THEN
-      D_LAGRANGIAN = 0._EB
-      M_DOT_PPP    = 0._EB
-      CALC_D_LAGRANGIAN=.FALSE.
-   ENDIF
-   RETURN
-ENDIF
+IF (MESHES(NM)%NLP==0) RETURN
 
 ! Set the CPU timer and point to the current mesh variables
 
 TNOW=SECOND()
 CALL POINT_TO_MESH(NM)
-
-! Zero out the contribution by lagrangian particles to divergence
-
-IF (N_LP_ARRAY_INDICES>0 .AND. CORRECTOR) THEN
-   D_LAGRANGIAN = 0._EB
-   M_DOT_PPP    = 0._EB
-   CALC_D_LAGRANGIAN=.FALSE.
-ENDIF
 
 ! Move the PARTICLEs/particles, then compute mass and energy transfer, then add PARTICLE momentum to gas
 
@@ -2449,10 +2434,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S_B,TMP_DROP)
             CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,TMP_G)
             DELTA_H_G = H_S_B - H_S
-            D_LAGRANGIAN(II,JJ,KK) = D_LAGRANGIAN(II,JJ,KK) &
-                                   + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
+            D_SOURCE(II,JJ,KK) = D_SOURCE(II,JJ,KK) + (MW_RATIO*M_VAP/M_GAS + (M_VAP*DELTA_H_G - Q_CON_GAS)/H_G_OLD) * WGT / DT
             M_DOT_PPP(II,JJ,KK,Z_INDEX) = M_DOT_PPP(II,JJ,KK,Z_INDEX) + M_VAP*RVC*WGT/DT
-            CALC_D_LAGRANGIAN = .TRUE.
 
             ! Add energy losses and gains to overall energy budget array
 

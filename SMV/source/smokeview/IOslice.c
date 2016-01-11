@@ -1848,7 +1848,7 @@ void updatevslicemenulabels(void){
   }
 }
 
-/* ------------------ hide_slice ------------------------ */
+/* ------------------ hide_slice2 ------------------------ */
 
 int hide_slice2(slicedata *sdi,slicedata *sdj){
   float delta_orig;
@@ -1924,6 +1924,52 @@ int new_multi_slice(slicedata *sdold,slicedata *sd){
     }
   }
   return 0;
+}
+
+/* ------------------ getgsliceparams ------------------------ */
+
+void getgsliceparams(void){
+  int i;
+
+  for(i = 0; i < npatchinfo;i++){
+    int ii1, ii2, jj1, jj2, kk1, kk2;
+    patchdata *patchi;
+    mesh *meshi;
+
+    patchi = patchinfo + i;
+    meshi = meshinfo + patchi->blocknumber;
+    strcpy(patchi->gslicedir, "");
+    if(patchi->filetype != PATCH_GEOMETRY)continue;
+    ii1 = patchi->ijk[0];
+    ii2 = patchi->ijk[1];
+    jj1 = patchi->ijk[2];
+    jj2 = patchi->ijk[3];
+    kk1 = patchi->ijk[4];
+    kk2 = patchi->ijk[5];
+    if(ii1 >= 0 && ii2 >= 0 && jj1 >= 0 && jj2 >= 0 && kk1 >= 0 && kk2 >= 0){
+      float *grid, position;
+
+      if(ABS(ii1 - ii2) < MIN(ABS(jj1 - jj2), ABS(kk1 - kk2))){
+        grid = meshi->xplt_orig;
+        ii2=MAX(ii1-1,0);
+        position = (grid[ii1] + grid[ii2]) / 2.0;
+        sprintf(patchi->gslicedir, "X=%f", position);
+      }
+      else if(ABS(jj1 - jj2) < MIN(ABS(ii1 - ii2), ABS(kk1 - kk2))){
+        grid = meshi->yplt_orig;
+        jj2=MAX(jj1-1,0);
+        position = (grid[jj1] + grid[jj2]) / 2.0;
+        sprintf(patchi->gslicedir, "Y=%f", position);
+      }
+      else{
+        grid = meshi->zplt_orig;
+        kk2=MAX(kk1-1,0);
+        position = (grid[kk1] + grid[kk2]) / 2.0;
+        sprintf(patchi->gslicedir, "Z=%f", position);
+      }
+      trimzeros(patchi->gslicedir);
+    }
+  }
 }
 
 /* ------------------ getsliceparams ------------------------ */
@@ -2890,7 +2936,7 @@ int getvsliceindex(const vslicedata *vd){
   return -1;
 }
 
-/* ------------------ getvsliceindex ------------------------ */
+/* ------------------ getvslicetype ------------------------ */
 
 int getvslicetype(const vslicedata *vd){
   int j;
@@ -4272,7 +4318,7 @@ void drawvolslice_terrain(const slicedata *sd){
 
 }
 
-/* ------------------ drawvolslice ------------------------ */
+/* ------------------ drawvolslice_cellcenter ------------------------ */
 
 void drawvolslice_cellcenter(const slicedata *sd){
   float *xplt, *yplt, *zplt;
@@ -5826,7 +5872,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   }
 }
 
-/* ------------------ output_slicedata ------------------------ */
+/* ------------------ output_Slicedata ------------------------ */
 
 void output_Slicedata(void){
   FILE *fileout;
@@ -5857,7 +5903,7 @@ void output_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim(flabel);
+    trim_back(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
@@ -5908,7 +5954,7 @@ void output_Slicedata(void){
   }
 }
 
-/* ------------------ init_slicedata ------------------------ */
+/* ------------------ init_Slicedata ------------------------ */
 
 void init_Slicedata(void){
   FILE *fileout;
@@ -5932,7 +5978,7 @@ void init_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim(flabel);
+    trim_back(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
@@ -6058,7 +6104,7 @@ int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_
 }
 
 
-/* ------------------ getsliceheader ------------------------ */
+/* ------------------ getsliceheader0 ------------------------ */
 
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *jj1, int *j2, int *k1, int *k2, int *slice3d){
   FILE *stream;
@@ -6257,7 +6303,8 @@ int getslicezlibdata(char *file,
   // time, compressed frame size                        for each frame
   // compressed buffer
 
-/* ------------------ getslicecompressdata ------------------------ */
+/* ------------------ makeslicesizefile ------------------------ */
+
 int makeslicesizefile(char *file, char *sizefile, int compression_type){
   int endian_fromfile;
   float minmax[2];
@@ -6443,7 +6490,7 @@ void remove_vslice_loadstack(int vsliceindex){
   }
 }
 
-/* ------------------ last_slice_loadstack ------------------------ */
+/* ------------------ last_vslice_loadstack ------------------------ */
 
 int last_vslice_loadstack(void){
   int return_val;

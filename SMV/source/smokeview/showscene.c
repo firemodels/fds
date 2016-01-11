@@ -32,7 +32,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode == DRAWSCENE){
-    Get_VP_info();
+    get_viewport_info();
 
     if(clip_rendered_scene == 1){
       CLIP_viewport(quad, s_left, s_down);
@@ -300,6 +300,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     CLIP_GEOMETRY;
     draw_geom(DRAW_OPAQUE,GEOM_STATIC);
     draw_geom(DRAW_OPAQUE,GEOM_DYNAMIC);
+    SNIFF_ERRORS("draw_geom");
   }
 
   /* ++++++++++++++++++++++++ draw diagnostic geometry +++++++++++++++++++++++++ */
@@ -307,6 +308,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(show_geometry_diagnostics==1){
     CLIP_GEOMETRY;
     draw_geomdiag();
+    SNIFF_ERRORS("draw_geomdiag");
   }
   
   /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
@@ -314,6 +316,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(showshooter!=0&&shooter_active==1){
     CLIP_VALS;
     draw_shooter();
+    SNIFF_ERRORS("draw_shooter");
   }
 
 /* ++++++++++++++++++++++++ draw terrain +++++++++++++++++++++++++ */
@@ -389,7 +392,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(showpatch==1){
     CLIP_VALS;
-    drawpatch_frame();
+    drawpatch_frame(DRAW_OPAQUE);
   }
 
 /* ++++++++++++++++++++++++ draw labels +++++++++++++++++++++++++ */
@@ -475,6 +478,13 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     SNIFF_ERRORS("after drawroomdata");
   }
 
+  /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
+
+  if(showpatch == 1){
+    CLIP_VALS;
+    drawpatch_frame(DRAW_TRANSPARENT);
+  }
+  
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
