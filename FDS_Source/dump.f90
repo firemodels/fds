@@ -247,10 +247,6 @@ FN_END = TRIM(CHID)//'.end'
 
 FN_GIT = TRIM(CHID)//'_git.txt'
 
-! CPU (timings) file
-
-FN_CPU = TRIM(CHID)//'_cpu.csv'
-
 ! Smokeview File
 
 FN_SMV = TRIM(CHID)//'.smv'
