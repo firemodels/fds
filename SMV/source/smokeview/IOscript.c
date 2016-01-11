@@ -12,7 +12,7 @@
 
 void update_menu(void);
 
-/* ------------------ insert_scriptfile ------------------------ */
+/* ------------------ get_newscriptfilename ------------------------ */
 
 void get_newscriptfilename(char *newscriptfilename){
   char buffer[1024];
@@ -55,7 +55,7 @@ char *get_scriptfilename(int id){
   return NULL;
 }
 
-/* ------------------ get_scriptfilename ------------------------ */
+/* ------------------ get_inifilename ------------------------ */
 
 char *get_inifilename(int id){
   inifiledata *inifile;
@@ -188,7 +188,7 @@ void free_script(void){
 void init_scripti(scriptdata *scripti, int command,char *label){
   char *label2;
 
-  trim(label);
+  trim_back(label);
   label2 = trim_front(label);
   strcpy(scripti->command_label,label2);
   scripti->command=command;
@@ -202,7 +202,7 @@ void init_scripti(scriptdata *scripti, int command,char *label){
   scripti->ival5=0;
 }
 
-/* ------------------ init_script_keyword ------------------------ */
+/* ------------------ get_script_keyword_index ------------------------ */
 
 int get_script_keyword_index(char *keyword){
   if(keyword==NULL||strlen(keyword)==0)return SCRIPT_UNKNOWN;
@@ -294,7 +294,6 @@ void get_xyz(char *buffer,int *ival){
   }
 }
 
-
 /* ------------------ script_error_check ------------------------ */
 
 void script_error_check(char *keyword, char *data){
@@ -332,6 +331,25 @@ sscanf(buffptr, "%i", &scripti->ival)
 #define SETival2 \
 SETbuffer;\
 sscanf(buffptr, "%i", &scripti->ival2)
+
+#ifndef pp_DEG
+/* ------------------ removeDEG ------------------------ */
+
+void removeDEG(char *string){
+  int i,ii;
+
+  if(string == NULL)return;
+  for(i = 0,ii=0; i < strlen(string);i++){
+    unsigned char c;
+
+    c = (unsigned char)string[i];
+    if(c == 176)continue;
+    string[ii] = string[i];
+    ii++;
+  }
+  string[ii] = 0;
+}
+#endif
 
 /* ------------------ compile_script ------------------------ */
 
@@ -563,7 +581,10 @@ int compile_script(char *scriptfile){
 //  mesh number (int)
       case SCRIPT_LOADISOM:
         SETcval;
-        scripti->ival=1;
+#ifndef pp_DEG        
+        removeDEG(scripti->cval);
+#endif        
+        scripti->ival = 1;
         SETival;
         break;
 
@@ -789,14 +810,14 @@ int compile_script(char *scriptfile){
   return return_val;
 }
 
-/* ------------------ run_renderstart ------------------------ */
+/* ------------------ script_renderstart ------------------------ */
 
 void script_renderstart(scriptdata *scripti){
   script_startframe=scripti->ival;
   script_skipframe=scripti->ival2;
 }
 
-/* ------------------ run_renderall ------------------------ */
+/* ------------------ script_renderall ------------------------ */
 
 void script_renderall(scriptdata *scripti){
   int skip_local;
@@ -981,7 +1002,8 @@ void script_isorenderall(scriptdata *scripti){
   RenderMenu(skip_local);
 }
 
-/* ------------------ run_makemovie ------------------------ */
+/* ------------------ script_makemovie ------------------------ */
+
 void script_makemovie(scriptdata *scripti){
   strcpy(movie_name, scripti->cval);
   strcpy(render_file_base,scripti->cval2);

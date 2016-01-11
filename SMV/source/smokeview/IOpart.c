@@ -685,8 +685,8 @@ int getpart5nframes(partdata *parti){
         int lenreg, lensize, error;
         int angle_flag=0;
 
-        trim(reg_file);
-        trim(size_file);
+        trim_back(reg_file);
+        trim_back(size_file);
         lenreg=strlen(reg_file);
         lensize=strlen(size_file);
         if(parti->evac==1){
@@ -723,7 +723,7 @@ int getpart5nframes(partdata *parti){
   return nframes_all;
 }
 
-/* ------------------ get_partframes ------------------------ */
+/* ------------------ get_min_partframes ------------------------ */
 
 int get_min_partframes(void){
   int i;
@@ -780,8 +780,8 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
         int lenreg, lensize, error;
         int angle_flag=0;
 
-        trim(reg_file);
-        trim(size_file);
+        trim_back(reg_file);
+        trim_back(size_file);
         lenreg=strlen(reg_file);
         lensize=strlen(size_file);
         if(parti->evac==1){
@@ -2057,9 +2057,6 @@ void drawPart(const partdata *parti){
   }
 
   glEnd();
-
-
-
 }
 
 /* ------------------ drawStaticPart ------------------------ */
@@ -2178,6 +2175,4 @@ void updatepartmenulabels(void){
       }
     } 
   }
-
-
 }

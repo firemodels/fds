@@ -64,7 +64,7 @@ GLUI_Button *BUTTON_wui_1=NULL;
 GLUI_Button *BUTTON_wui_2=NULL;
 
 
-/* ------------------ update_glui_wui ------------------------ */
+/* ------------------ Update_Glui_Wui ------------------------ */
 
 extern "C" void Update_Glui_Wui(void){
   if(RADIO_terrain_type!=NULL){
