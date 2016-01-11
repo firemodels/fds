@@ -375,8 +375,6 @@ update_cfast()
    if [ -e "$cfastrepo" ] ; then
       if [ "$CLEANREPO" == "1" ]; then
         echo "   cleaning"
-        echo "Cleaning cfast repo:" > $OUTPUT_DIR/stage0_cfast
-        cd $cfastrepo
         clean_repo $cfastrepo
         updateclean="1"
       fi
@@ -384,8 +382,8 @@ update_cfast()
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
         echo "   updating"
-        echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0_cfast
-        git pull >> $OUTPUT_DIR/stage0_cfast 2>&1
+        echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0a
+        git pull >> $OUTPUT_DIR/stage0a 2>&1
         updateclean="1"
       fi
       if [ "$updateclean" == "" ]; then
@@ -404,12 +402,12 @@ compile_cfast()
    cd $SMOKEBOT_HOME_DIR
 
     # Build CFAST
-    echo "Building cfast"
-    echo "   release"
+    echo "Building"
+    echo "   cfast release"
     cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
-    ./make_cfast.sh >> $OUTPUT_DIR/stage0_cfast 2>&1
+    ./make_cfast.sh >> $OUTPUT_DIR/stage1a 2>&1
 
    # Check for errors in CFAST compilation
    cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
@@ -419,7 +417,7 @@ compile_cfast()
    else
       echo "Errors from Stage 0 - CFAST:" >> $ERROR_LOG
       echo "CFAST failed to compile" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage0_cfast >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage1a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_CFAST_FAILED=1
    fi
@@ -429,7 +427,7 @@ compile_cfast()
 #  = Stage 1 - GIT operations =
 #  ============================
 
-clean_git_repo()
+clean_FDS_repo()
 {
    # Check to see if FDS repository exists
    updateclean=
@@ -447,13 +445,13 @@ clean_git_repo()
         updateclean="1"
       fi
    else
-      echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage1 2>&1
-      echo "Aborting smokebot" >> $OUTPUT_DIR/stage1 2>&1
+      echo "The FDS repository $fdsrepo does not exist." >> $OUTPUT_DIR/stage0b 2>&1
+      echo "Aborting smokebot" >> $OUTPUT_DIR/stage0b 2>&1
       exit
    fi
 }
 
-do_git_checkout()
+do_FDS_checkout()
 {
    cd $fdsrepo
 
@@ -465,7 +463,7 @@ do_git_checkout()
         exit
      fi
      if [[ "$BRANCH" != "$CURRENT_BRANCH" ]] ; then
-        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
+        echo "Checking out branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
         git checkout $BRANCH
      fi
    else
@@ -473,8 +471,8 @@ do_git_checkout()
    fi
    if [ "$UPDATEREPO" == "1" ]; then
      echo "   updating"
-     echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
-     git pull >> $OUTPUT_DIR/stage1 2>&1
+     echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
+     git pull >> $OUTPUT_DIR/stage0b 2>&1
      updateclean="1"
    fi
    if [ "$updateclean" == "" ]; then
@@ -483,26 +481,26 @@ do_git_checkout()
    GIT_REVISION=`git describe --long --dirty`
 }
 
-check_git_checkout()
+check_FDS_checkout()
 {
    cd $fdsrepo
    # Check for GIT errors
-   stage1_success=true
+   stage0b_success=true
 }
 
 #  ==================================
-#  = Stage 2a/b - Compile FDS debug =
+#  = Stage 1a/b - Compile FDS debug =
 #  ==================================
 
 compile_fds_mpi_db()
 {
    # Clean and compile mpi FDS debug
-   echo "Building FDS"
-   echo "   debug"
+   echo "   FDS"
+   echo "      debug"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage2b
+   ./make_fds.sh &> $OUTPUT_DIR/stage1b
 }
 
 check_compile_fds_mpi_db()
@@ -511,22 +509,22 @@ check_compile_fds_mpi_db()
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
    if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ]
    then
-      stage2b_success=true
+      stage1b_fdsdb_success=true
    else
-      echo "Errors from Stage 2b - Compile FDS MPI debug:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage2b >> $ERROR_LOG
+      echo "Errors from Stage 1b - Compile FDS MPI debug:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage1b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
 
    # Check for compiler warnings/remarks
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2b| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b| grep -v 'find atom' | grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 2b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2b | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
+      echo "Stage 1b warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1b | grep -v 'find atom' | grep -v 'feupdateenv is not implemented'>> $WARNING_LOG
       echo "" >> $WARNING_LOG
    # if the executable does not exist then an email has already been sent
       if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ] ; then
@@ -627,17 +625,17 @@ check_verification_cases_debug()
 }
 
 #  ====================================
-#  = Stage 4a/b - Compile FDS release =
+#  = Stage 1c - Compile FDS release =
 #  ====================================
 
 compile_fds_mpi()
 {
    # Clean and compile FDS
-   echo "   release"
+   echo "      release"
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
-   ./make_fds.sh &> $OUTPUT_DIR/stage4b
+   ./make_fds.sh &> $OUTPUT_DIR/stage1c
 }
 
 check_compile_fds_mpi()
@@ -646,98 +644,98 @@ check_compile_fds_mpi()
    cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
    if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB" ]
    then
-      stage4b_success=true
+      stage1c_fdsrel_success=true
    else
-      echo "Errors from Stage 4b - Compile FDS release:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
+      echo "Errors from Stage 1c - Compile FDS release:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage1c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # 'performing multi-file optimizations' and 'generating object file' are part of a normal compile
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'find atom' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented'` == "" ]]
    then
       # Continue along
       :
    else
-      echo "Stage 4b warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage4b | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
+      echo "Stage 1c warnings:" >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage1c | grep -v 'find atom' | grep -v 'performing multi-file optimizations' | grep -v 'generating object file'| grep -v 'feupdateenv is not implemented' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ======================================
-#  = Stage 5pre - Compile SMV utilities =
+#  = Stage 2a - Compile SMV utilities =
 #  ======================================
 
 compile_smv_utilities()
 {
-   echo "Building smokeview utilities"
-   echo "" > $OUTPUT_DIR/stage5pre
+   echo "   smokeview utilities"
+   echo "" > $OUTPUT_DIR/stage2a
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then 
    # smokeview libraries
-   echo "   libraries"
+   echo "      libraries"
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size}
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1
+   ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1
 
    # smokezip:
-   echo "   smokezip"
+   echo "      smokezip"
    cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
-   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # smokediff:
-   echo "   smokediff"
+   echo "      smokediff"
    cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
-   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # background
-   echo "   background"
+   echo "      background"
    cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
    rm -f *.o background
-   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1
    
   # wind2fds:
-   echo "   wind2fds"
+   echo "      wind2fds"
    cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
-   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1
-   ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1
+   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1
    else
    $SSH \( \
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size} \; \
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./makelibs.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokezip_${platform}${size} \; \
-   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./make_zip.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokediff_${platform}${size} \; \
-   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./make_diff.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size} \; \
    rm -f *.o background \; \
-   echo 'Compiling background:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./make_background.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
+   echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size} \; \
-   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   ./make_wind.sh >> $OUTPUT_DIR/stage5pre 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage5pre 2>&1  \)
+   echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   echo "" >> $OUTPUT_DIR/stage2a 2>&1  \)
    fi
    else
-   echo "Warning: smokeview and utilities not built - C compiler not available" >> $OUTPUT_DIR/stage5pre 2>&1
+   echo "Warning: smokeview and utilities not built - C compiler not available" >> $OUTPUT_DIR/stage2a 2>&1
    fi
 }
 
@@ -746,8 +744,8 @@ is_file_installed()
   program=$1
   notfound=`$program -help | tail -1 | grep "not found" | wc -l`
   if [ "$notfound" == "1" ] ; then
-    stage5pre_success="0"
-    echo "***error: $program not installed" >> $OUTPUT_DIR/stage5pre
+    stage2a_success="0"
+    echo "***error: $program not installed" >> $OUTPUT_DIR/stage2a
   fi
 }
 
@@ -761,31 +759,31 @@ check_smv_utilities()
         [ -e "$fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
         [ -e "$fdsrepo/Utilities/background/${COMPILER}_${platform}${size}/background" ]
      then
-        stage5pre_success="1"
+        stage2a_success="1"
      else
-        stage5pre_success="0"
-        echo "Errors from Stage 5pre - Compile SMV utilities:" >> $ERROR_LOG
-        cat $OUTPUT_DIR/stage5pre >> $ERROR_LOG
+        stage2a_success="0"
+        echo "Errors from Stage 2a - Compile SMV utilities:" >> $ERROR_LOG
+        cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
         echo "" >> $ERROR_LOG
      fi
    else
-     stage5pre_success="1"
+     stage2a_success="1"
      is_file_installed smokeview
      is_file_installed smokezip
      is_file_installed smokediff
      is_file_installed wind2fds
      is_file_installed background
-     if [ "$stage5pre_success" == "0" ] ; then
-        echo "Errors from Stage 5pre - Smokeview and utilities:" >> $ERROR_LOG
-        stage5pre_success="1"
-        cat $OUTPUT_DIR/stage5pre >> $ERROR_LOG
+     if [ "$stage2a_success" == "0" ] ; then
+        echo "Errors from Stage 2a - Smokeview and utilities:" >> $ERROR_LOG
+        stage2a_success="1"
+        cat $OUTPUT_DIR/stage2a >> $ERROR_LOG
         echo "" >> $ERROR_LOG
      fi
    fi
 }
 
 #  ===================================================
-#  = Stage 5 - Run verification cases (release mode) =
+#  = Stage 3 - Run verification cases (release mode) =
 #  ===================================================
 
 wait_verification_cases_release_end()
@@ -795,7 +793,7 @@ wait_verification_cases_release_end()
    then
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage5
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
         TIME_LIMIT_STAGE="5"
         check_time_limit
         sleep 60
@@ -803,7 +801,7 @@ wait_verification_cases_release_end()
    else
      while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
         JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
-        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage5
+        echo "Waiting for ${JOBS_REMAINING} verification cases to complete." >> $OUTPUT_DIR/stage3b
         TIME_LIMIT_STAGE="5"
         check_time_limit
         sleep 60
@@ -819,15 +817,15 @@ run_verification_cases_release()
 
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
-     echo "   cleaning"
+     echo "   clean"
      cd $fdsrepo/Verification
      clean_repo $fdsrepo/Verification
    fi
    echo "   release"
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
-   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage5 2>&1
-   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
+   echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -838,39 +836,39 @@ check_verification_cases_release()
    # Scan and report any errors in FDS verification cases
    cd $fdsrepo/Verification
 
-   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage5` == "" ]] && \
+   if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
       [[ `grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
       [[ `grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
       [[ `grep -rIi  -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]]
    then
-      stage5_success=true
+      stage3b_success=true
    else
-      grep -rIi 'Run aborted' $OUTPUT_DIR/stage5 > $OUTPUT_DIR/stage5_errors
-      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
-      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage5_errors
+      grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b > $OUTPUT_DIR/stage3b_errors
+      grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rI 'ERROR:' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rIi 'STOP: Numerical' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
+      grep -rIi -A 20 'forrtl' Visualization/* WUI/* Immersed_Boundary_Method/* >> $OUTPUT_DIR/stage3b_errors
 
-      echo "Errors from Stage 5 - Run verification cases (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage5_errors >> $ERROR_LOG
+      echo "Errors from Stage 3b - Run verification cases (release mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage3b_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
       THIS_FDS_FAILED=1
    fi
 
       
-   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage5` == "" ]] 
+   if [[ `grep 'Warning' -rI $OUTPUT_DIR/stage3b` == "" ]] 
    then
       no_warnings=true
    else
-      echo "Stage 5 warnings:" >> $WARNING_LOG
-      grep 'Warning' -rI $OUTPUT_DIR/stage5 >> $WARNING_LOG
+      echo "Stage 3b warnings:" >> $WARNING_LOG
+      grep 'Warning' -rI $OUTPUT_DIR/stage3b >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
 
 #  ================================
-#  = Stage 6a - Compile SMV debug =
+#  = Stage 2b - Compile SMV debug =
 #  ================================
 
 compile_smv_db()
@@ -878,16 +876,16 @@ compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV debug
-   echo Building smokeview
-   echo "   debug"
+   echo "   smokeview"
+   echo "      debug"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size}_db \; \
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage6a \)
+   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
    fi
    fi
 }
@@ -899,29 +897,29 @@ check_compile_smv_db()
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
-      stage6a_success=true
+      stage2b_success=true
    else
-      echo "Errors from Stage 6a - Compile SMV debug:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6a >> $ERROR_LOG
+      echo "Errors from Stage 2b - Compile SMV debug:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage2b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6a warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage6a | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
    fi
 }
 
 #  =============================================
-#  = Stage 6b - Make SMV pictures (debug mode) =
+#  = Stage 4a - Make SMV pictures (debug mode) =
 #  =============================================
 
 make_smv_pictures_db()
@@ -930,10 +928,10 @@ make_smv_pictures_db()
    if [ "$SSH" == "" ]; then
    echo "making smokeview images"
    cd $fdsrepo/Verification/scripts
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6b
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4a
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6b \)
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4a \)
    fi
 }
 
@@ -942,33 +940,33 @@ check_smv_pictures_db()
    # Scan and report any errors in make SMV pictures process
    echo "   checking"
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6b` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4a` == "" ]]
    then
-      stage6b_success=true
+      stage4a_success=true
    else
-      cp $OUTPUT_DIR/stage6b $OUTPUT_DIR/stage6b_errors
+      cp $OUTPUT_DIR/stage4a $OUTPUT_DIR/stage4a_errors
 
-      echo "Errors from Stage 6b - Make SMV pictures (debug mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6b_errors >> $ERROR_LOG
+      echo "Errors from Stage 4a - Make SMV pictures (debug mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4a_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Scan for and report any warnings in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6b` == "" ]]
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage4a` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 6b - Make SMV pictures (debug mode):" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6b >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 
 }
 
 #  ==================================
-#  = Stage 6c - Compile SMV release =
+#  = Stage 2c - Compile SMV release =
 #  ==================================
 
 compile_smv()
@@ -976,15 +974,15 @@ compile_smv()
    if [ "$haveCC" == "1" ] ; then
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
-   echo "   release"
+   echo "      release"
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
-   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c
+   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size} \; \
-   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage6c \)
+   ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
    fi
 }
@@ -996,30 +994,30 @@ check_compile_smv()
    cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
-      stage6c_success=true
+      stage2c_smv_success=true
    else
-      echo "Errors from Stage 6c - Compile SMV release:" >> $ERROR_LOG
+      echo "Errors from Stage 2c - Compile SMV release:" >> $ERROR_LOG
       echo "The program smokeview_${platform}${size} does not exist."
-      cat $OUTPUT_DIR/stage6c >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Check for compiler warnings/remarks
    # grep -v 'feupdateenv ...' ignores a known FDS MPI compiler warning (http://software.intel.com/en-us/forums/showthread.php?t=62806)
-   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
+   if [[ `grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked'` == "" ]]
    then
       # Continue along
       :
    else
       echo "Stage 6c warnings:" >> $WARNING_LOG
-      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage6c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
+      grep -A 5 -E 'warning|remark' $OUTPUT_DIR/stage2c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
    fi
 }
 
 #  ===============================================
-#  = Stage 6d - Make SMV pictures (release mode) =
+#  = Stage 4 - Make SMV pictures (release mode) =
 #  ===============================================
 
 make_smv_pictures()
@@ -1028,10 +1026,10 @@ make_smv_pictures()
    echo Generating images 
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/Verification/scripts
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage6d
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage6d \)
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4 \)
    fi
 }
 
@@ -1040,52 +1038,52 @@ check_smv_pictures()
    # Scan and report any errors in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
    echo "   checking"
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6d` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4` == "" ]]
    then
-      stage6d_success=true
+      stage4_smvpics_success=true
    else
-      cp $OUTPUT_DIR/stage6d  $OUTPUT_DIR/stage6d_errors
+      cp $OUTPUT_DIR/stage4  $OUTPUT_DIR/stage4_errors
 
-      echo "Errors from Stage 6d - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6d >> $ERROR_LOG
+      echo "Errors from Stage 4 - Make SMV pictures (release mode):" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
 
 #  ===============================================
-#  = Stage 6e - Make SMV movies (release mode) =
+#  = Stage 4c - Make SMV movies (release mode) =
 #  ===============================================
 
 make_smv_movies()
 {
    cd $fdsrepo/Verification
-   scripts/Make_SMV_Movies.sh 2>&1  &> $OUTPUT_DIR/stage6e
+   scripts/Make_SMV_Movies.sh 2>&1  &> $OUTPUT_DIR/stage4c
 }
 
 check_smv_movies()
 {
    cd $SMOKEBOT_RUNDIR
    echo make smokeview movies
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage6e` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4c` == "" ]]
    then
-      stage6e_success=true
+      stage4c_success=true
    else
-      cp $OUTPUT_DIR/stage6e  $OUTPUT_DIR/stage6e_errors
+      cp $OUTPUT_DIR/stage4c  $OUTPUT_DIR/stage4c_errors
 
-      echo "Errors from Stage 6e - Make SMV movies " >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage6e >> $ERROR_LOG
+      echo "Errors from Stage 4c - Make SMV movies " >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 
    # Scan for and report any warnings in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage6e` == "" ]]
+   if [[ `grep -I -E "Warning" $OUTPUT_DIR/stage4c` == "" ]]
    then
       # Continue along
       :
    else
       echo "Warnings from Stage 6e - Make SMV movies (release mode):" >> $WARNING_LOG
-      grep -I -E "Warning" $OUTPUT_DIR/stage6e >> $WARNING_LOG
+      grep -I -E "Warning" $OUTPUT_DIR/stage4c >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
    if [ "$UPLOADRESULTS" == "1" ]; then
@@ -1104,7 +1102,7 @@ check_smv_movies()
 }
 
 #  ======================================
-#  = Stage 7 - FDS run time statistics =
+#  = FDS run time statistics =
 #  ======================================
 
 generate_timing_stats()
@@ -1132,7 +1130,7 @@ archive_timing_stats()
 }
 
 #  ===================================
-#  = Stage 8 - Build smokview guides =
+#  = Stage 5 - Build smokview guides =
 #  ===================================
 
 check_guide()
@@ -1158,7 +1156,7 @@ check_guide()
       cp $directory/$document $NEWGUIDE_DIR/.
       chmod 664 $NEWGUIDE_DIR/$document
    else
-      echo "Errors from Stage 8 - Build FDS-SMV Guides:" >> $ERROR_LOG
+      echo "Errors from Stage 5 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
       grep "! LaTeX Error:" -I $1 >> $ERROR_LOG
       echo "" >> $ERROR_LOG
@@ -1170,7 +1168,7 @@ check_guide()
       # Continue along
       :
    else
-      echo "Stage 8 warnings:" >> $WARNING_LOG
+      echo "Stage 5 warnings:" >> $WARNING_LOG
       echo $label >> $WARNING_LOG
       grep -E "undefined|multiply defined|multiply-defined" -I $stage >> $WARNING_LOG
       echo "" >> $WARNING_LOG
@@ -1185,10 +1183,10 @@ make_guide()
 
    cd $directory
   
-   ./make_guide.sh &> $OUTPUT_DIR/stage8_$document
+   ./make_guide.sh &> $OUTPUT_DIR/stage5_$document
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_$document $directory $document.pdf $label
+   check_guide $OUTPUT_DIR/stage5_$document $directory $document.pdf $label
 }
 
 #  =====================================================
@@ -1201,30 +1199,30 @@ save_build_status()
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
-     cat "" >> $ERROR_LOG
+     echo "***Warnings:" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
+     echo "   build failure and warnings for version: ${GIT_REVISION}, branch: $BRANCH."
      echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-     touch output/status_errors_and_warnings
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
+      echo "   build failure for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
-      touch output/status_errors
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
+      echo "   build success with warnings for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
-      touch output/status_warnings
 
    # No errors or warnings
    else
+      echo "   build success for version: ${GIT_REVISION}, branch: $BRANCH."
       echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
-      touch output/status_success
    fi
 }
 
@@ -1323,46 +1321,48 @@ hostname=`hostname`
 start_time=`date`
 clean_smokebot_history
 
-### Stage 0 ###
+### Stage 0 repo operatoins ###
 update_cfast
 
-### Stage 1 ###
-clean_git_repo
-do_git_checkout
-check_git_checkout
+clean_FDS_repo
+do_FDS_checkout
+check_FDS_checkout
 PRELIM_end=`GET_TIME`
 DIFF_PRELIM=`GET_DURATION $PRELIM_beg $PRELIM_end`
 echo "Preliminary: $DIFF_PRELIM" >> $STAGE_STATUS
 
-### Stage 2b ###
+### Stage 1 build cfast and FDS ###
 BUILDSOFTWARE_beg=`GET_TIME`
 compile_cfast
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
-### Stage 4b ###
-stage4_beg=`GET_TIME`
-if [[ $stage2b_success ]] ; then
+if [[ $stage1b_fdsdb_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
 fi
 
-### Stage 5pre ###
+### Stage 2 build smokeview ###
 compile_smv_utilities
 check_smv_utilities
+
+compile_smv_db
+check_compile_smv_db
+
+compile_smv
+check_compile_smv
 BUILDSOFTWARE_end=`GET_TIME`
 DIFF_BUILDSOFTWARE=`GET_DURATION $BUILDSOFTWARE_beg $BUILDSOFTWARE_end`
 echo "Build Software: $DIFF_BUILDSOFTWARE" >> $STAGE_STATUS
 
-### Stage 3 ###
+### Stage 3 run verification cases ###
 RUNCASES_beg=`GET_TIME`
-if [[ $stage2b_success && "$RUNDEBUG" == "1" ]] ; then
+if [[ $stage1b_fdsdb_success && "$RUNDEBUG" == "1" ]] ; then
    run_verification_cases_debug
    check_verification_cases_debug
 fi
 
-### Stage 5 ###
-if [[ $stage4b_success ]] ; then
+if [[ $stage1c_fdsrel_success ]] ; then
    run_verification_cases_release
    check_verification_cases_release
 fi
@@ -1370,21 +1370,9 @@ RUNCASES_end=`GET_TIME`
 DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
 echo "Run cases: $DIFF_RUNCASES" >> $STAGE_STATUS
 
-### Stage 6a ###
-BUILDSMV_beg=`GET_TIME`
-compile_smv_db
-check_compile_smv_db
-
-### Stage 6c ###
-compile_smv
-check_compile_smv
-BUILDSMV_end=`GET_TIME`
-DIFF_BUILDSMV=`GET_DURATION $BUILDSMV_beg $BUILDSMV_end`
-echo "Build SMV: $DIFF_BUILDSMV" >> $STAGE_STATUS
-
-### Stage 6d ###
+### Stage 4 generate images ###
 MAKEPICTURES_beg=`GET_TIME`
-if [[ $stage4b_success && $stage6c_success ]] ; then
+if [[ $stage1c_fdsrel_success && $stage2c_smv_success ]] ; then
   make_smv_pictures
   check_smv_pictures
 fi
@@ -1392,7 +1380,6 @@ MAKEPICTURES_end=`GET_TIME`
 DIFF_MAKEPICTURES=`GET_DURATION $MAKEPICTURES_beg $MAKEPICTURES_end`
 echo "Make pictures: $DIFF_MAKEPICTURES" >> $STAGE_STATUS
 
-### Stage 6e ###
 if [ "$MAKEMOVIES" == "1" ]
 then
   MAKEMOVIES_beg=`GET_TIME`
@@ -1405,15 +1392,14 @@ then
   echo "Make movies: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
 fi
 
-### Stage 7 ###
-if [[ $stage4b_success ]] ; then
+if [[ $stage1c_fdsrel_success ]] ; then
   generate_timing_stats
   archive_timing_stats
 fi
 
-### Stage 8 ###
+### Stage 5 build documents ###
 MAKEGUIDES_beg=`GET_TIME`
-if [[ $stage4b_success && $stage6d_success ]] ; then
+if [[ $stage1c_fdsrel_success && $stage4_smvpics_success ]] ; then
    echo Making guides
 #   echo "   geometry notes"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
@@ -1423,6 +1409,8 @@ if [[ $stage4b_success && $stage6d_success ]] ; then
   make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
    echo "   verification"
   make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+else
+   echo Errors found, not building guides
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
@@ -1433,6 +1421,8 @@ DIFF_SCRIPT_TIME=`GET_DURATION $SCRIPT_TIME_beg $SCRIPT_TIME_end`
 echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 
 ### Report results ###
+echo Reporting results
 set_files_world_readable
 save_build_status
+echo "   emailing results"
 email_build_status

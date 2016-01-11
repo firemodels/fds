@@ -433,9 +433,9 @@ run_verification_cases_debug()
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo Running FDS Verification Cases
    echo "   debug"
-   echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage3
-   ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3 2>&1
-   echo "" >> $OUTPUT_DIR/stage3 2>&1
+   echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage4
+   ./Run_FDS_Cases.sh -o 1 -d -m 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage4 2>&1
+   echo "" >> $OUTPUT_DIR/stage4 2>&1
 
    # Wait for all verification cases to end
    wait_cases_debug_end 'verification'
@@ -450,29 +450,29 @@ check_cases_debug()
    # Scan for and report any errors in FDS cases
    cd $1
 
-   if [[ `grep -rI 'Run aborted' ${FIREBOT_RUNDIR}/output/stage3` == "" ]] && \
+   if [[ `grep -rI 'Run aborted' ${FIREBOT_RUNDIR}/output/stage4` == "" ]] && \
       [[ `grep -rI Segmentation *` == "" ]] && \
       [[ `grep -rI ERROR: *` == "" ]] && \
       [[ `grep -rI 'STOP: Numerical' *` == "" ]] && \
       [[ `grep -rI -A 20 forrtl *` == "" ]]
    then
-      stage3_success=true
+      stage4_success=true
    else
-      grep -rI 'Run aborted' $OUTPUT_DIR/stage3 >> $OUTPUT_DIR/stage3_errors
-      grep -rI Segmentation * >> $OUTPUT_DIR/stage3_errors
-      grep -rI ERROR: * >> $OUTPUT_DIR/stage3_errors
-      grep -rI 'STOP: Numerical' * >> $OUTPUT_DIR/stage3_errors
-      grep -rI -A 20 forrtl * >> $OUTPUT_DIR/stage3_errors
+      grep -rI 'Run aborted' $OUTPUT_DIR/stage4 >> $OUTPUT_DIR/stage4_errors
+      grep -rI Segmentation * >> $OUTPUT_DIR/stage4_errors
+      grep -rI ERROR: * >> $OUTPUT_DIR/stage4_errors
+      grep -rI 'STOP: Numerical' * >> $OUTPUT_DIR/stage4_errors
+      grep -rI -A 20 forrtl * >> $OUTPUT_DIR/stage4_errors
       
-      echo "Errors from Stage 3 - Run ${2} cases - debug mode:" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage3_errors >> $ERROR_LOG
+      echo "Errors from Stage 4 - Run ${2} cases - debug mode:" >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4_errors >> $ERROR_LOG
       echo "" >> $ERROR_LOG
 
-# copy casename.err to casename.err_stage3 for any cases that had errors
-      echo "#/bin/bash" > $OUTPUT_DIR/stage3_filelist
-      grep err $OUTPUT_DIR/stage3_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage3_filelist
+# copy casename.err to casename.err_stage4 for any cases that had errors
+      echo "#/bin/bash" > $OUTPUT_DIR/stage4_filelist
+      grep err $OUTPUT_DIR/stage4_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage4_filelist
       cd $fdsrepo/Verification
-      source $OUTPUT_DIR/stage3_filelist
+      source $OUTPUT_DIR/stage4_filelist
    fi
 }
 
