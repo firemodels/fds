@@ -332,6 +332,25 @@ sscanf(buffptr, "%i", &scripti->ival)
 SETbuffer;\
 sscanf(buffptr, "%i", &scripti->ival2)
 
+#ifndef pp_DEG
+/* ------------------ removeDEG ------------------------ */
+
+void removeDEG(char *string){
+  int i,ii;
+
+  if(string == NULL)return;
+  for(i = 0,ii=0; i < strlen(string);i++){
+    unsigned char c;
+
+    c = (unsigned char)string[i];
+    if(c == 176)continue;
+    string[ii] = string[i];
+    ii++;
+  }
+  string[ii] = 0;
+}
+#endif
+
 /* ------------------ compile_script ------------------------ */
 
 int compile_script(char *scriptfile){
@@ -562,7 +581,10 @@ int compile_script(char *scriptfile){
 //  mesh number (int)
       case SCRIPT_LOADISOM:
         SETcval;
-        scripti->ival=1;
+#ifndef pp_DEG        
+        removeDEG(scripti->cval);
+#endif        
+        scripti->ival = 1;
         SETival;
         break;
 
