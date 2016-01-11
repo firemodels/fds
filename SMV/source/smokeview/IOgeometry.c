@@ -119,7 +119,7 @@ float get_minangle(triangle *trii){
   return minangle;
 }
 
-/* ------------------ draw_faceinfo ------------------------ */
+/* ------------------ get_faceinfo ------------------------ */
 
 void get_faceinfo(void){
   int i;

@@ -14,7 +14,7 @@
 #include <direct.h>
 #endif
 
-/* ------------------ snifferrors ------------------------ */
+/* ------------------ _Sniff_Errors ------------------------ */
 
 void _Sniff_Errors(char *whereat){
   int error;
@@ -112,7 +112,7 @@ void transparentoff(void){
   glDisable(GL_BLEND);
 }
 
-/* ------------------ smv2quat ------------------------ */
+/* ------------------ camera2quat ------------------------ */
 
 void camera2quat(camera *ca, float *quat, float *rotation){
   if(ca->quat_defined==1){
@@ -670,7 +670,7 @@ void parse_commandline(int argc, char **argv){
 #endif
 }
 
-/* ------------------ version ------------------------ */
+/* ------------------ display_version_info ------------------------ */
 
 void display_version_info(void){
     char version[256];

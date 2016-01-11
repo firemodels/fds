@@ -59,7 +59,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
 }
 
 
-/* ------------------ adjustpart5bounds ------------------------ */
+/* ------------------ adjustpart5chops ------------------------ */
 
 void adjustpart5chops(partdata *parti){
   int i;
@@ -402,10 +402,9 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
     if(axislabels_smooth==1&&setpmin!=SET_MIN&&setpmax!=SET_MAX){
       smoothlabel(pmin,pmax,nrgb);
     }
-
 }
 
-/* ------------------ getzonebounds ------------------------ */
+/* ------------------ getzoneglobalbounds ------------------------ */
 
 void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float *pglobalmax)
 {
@@ -442,5 +441,4 @@ void smoothlabel(float *a, float *b, int n){
 
   *a = factor*(int)(*a/factor+half);
   *b = *a + (n-2)*delta;
-
 }

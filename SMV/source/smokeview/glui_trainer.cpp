@@ -141,7 +141,6 @@ extern "C" void update_trainer_moves(void){
     TRANSLATE_az_elev->set_speed(180.0/(float)screenHeight);
     TRANSLATE_az_elev->set_y(*elev);
   }
-
 }
 
 /* ------------------ glui_trainer_setup ------------------------ */

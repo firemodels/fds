@@ -182,7 +182,7 @@ char *get_filename(char *temp_dir, char *file, int flag){
   char *file_out=NULL;
   FILE *stream=NULL;
 
-  trim(file);
+  trim_back(file);
   file2=trim_front(file);
   if(flag==0){
     stream=fopen(file2,"r");
@@ -207,7 +207,7 @@ char *get_filename(char *temp_dir, char *file, int flag){
 void fullfile(char *file_out, char *dir, char *file){
   char *file2;
 
-  trim(file);
+  trim_back(file);
   file2=trim_front(file);
   strcpy(file_out,"");
   if(dir!=NULL)strcat(file_out,dir);
@@ -271,7 +271,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   char filename_buffer[1024], *file1_noext;
 
-  trim(file1);
+  trim_back(file1);
   strcpy(filename_buffer,trim_front(file1));
   file1_noext=strstr(filename_buffer,ext);
   strcpy(outfile,"");

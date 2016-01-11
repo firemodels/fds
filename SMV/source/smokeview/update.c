@@ -823,7 +823,7 @@ int get_loadvfileinfo(FILE *stream, char *filename){
   int i;
   char *fileptr;
 
-  trim(filename);
+  trim_back(filename);
   fileptr = trim_front(filename);
   for(i = 0; i<nsliceinfo; i++){
     slicedata *slicei;
@@ -853,7 +853,7 @@ int get_loadfileinfo(FILE *stream, char *filename){
   int i;
   char *fileptr;
 
-  trim(filename);
+  trim_back(filename);
   fileptr = trim_front(filename);
   for(i = 0; i<nsliceinfo; i++){
     slicedata *slicei;
@@ -937,7 +937,7 @@ void Convert_ssf(void){
 
     CheckMemory;
     if(fgets(buffer, 255, stream_from)==NULL)break;
-    trim(buffer);
+    trim_back(buffer);
     if(strlen(buffer)>=8 && strncmp(buffer, "LOADFILE", 8)==0){
       if(fgets(filename, 255, stream_from)==NULL)break;
       if(get_loadfileinfo(stream_to,filename)==0){

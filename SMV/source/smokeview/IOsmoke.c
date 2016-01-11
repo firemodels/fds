@@ -564,7 +564,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       complevel/=10.0;
       if(complevel<0.0)complevel=-complevel;
       sprintf(compstring," compression ratio: %.1f",complevel);
-      trim(compstring);
+      trim_back(compstring);
       trimzeros(compstring);
       PRINTF("%s\n",compstring);
     }
@@ -712,7 +712,9 @@ void setsmokecolorflags(void){
     }
   }
 }
+
 /* ------------------ getsmoke3d_sizes ------------------------ */
+
 int getsmoke3d_sizes(int fortran_skip,char *smokefile, int version, float **timelist_found, int **use_smokeframe,
                       int *nchars_smoke_uncompressed, 
                       int **nchars_smoke_compressed_found,
@@ -4058,7 +4060,7 @@ int init_cull_exts(void){
     err=0;
   }
   else{
-    trim(version_label);
+    trim_back(version_label);
     PRINTF("Smokeview is running on a system using OpenGL %s\n",version_label2);
     PRINTF("Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
     cullsmoke=0;
