@@ -405,7 +405,8 @@ cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 
 cd $fulldir
-echo Start time: \`date\`
+echo
+echo \`date\`
 echo Running $infile on \`hostname\`
 echo Directory: \`pwd\`
 $MPIRUN $exe $in $OUT2ERROR
