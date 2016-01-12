@@ -1,4 +1,5 @@
 #include "options.h"
+#ifdef pp_TARGET
 #include <stdio.h>  
 #include <stdlib.h>
 #include GLUT_H
@@ -445,6 +446,7 @@ void drawTargets(void){
     }
   }
 }
+#endif
 
 
 

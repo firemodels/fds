@@ -34,6 +34,87 @@ propdata *get_prop_id(char *prop_id);
 void init_evac_prop(void);
 void init_prop(propdata *propi, int nsmokeview_ids, char *label);
 
+/* ------------------ readhrr ------------------------ */
+#define LENBUFFER 1024
+void readhrr(int flag, int *errorcode){
+  FILE *HRRFILE;
+  int ntimeshrr, nfirst;
+  char buffer[LENBUFFER];
+  float *hrrtime, *hrrval;
+  int display = 0;
+  int ntimes_saved;
+
+  *errorcode = 0;
+  if(hrrinfo!=NULL){
+    display = hrrinfo->display;
+    FREEMEMORY(hrrinfo->times_csv);
+    FREEMEMORY(hrrinfo->times);
+    FREEMEMORY(hrrinfo->hrrval_csv);
+    FREEMEMORY(hrrinfo->hrrval);
+    FREEMEMORY(hrrinfo->timeslist);
+  }
+  FREEMEMORY(hrrinfo);
+  if(flag==UNLOAD)return;
+
+  NewMemory((void **)&hrrinfo, sizeof(hrrdata));
+  hrrinfo->file = hrr_csv_filename;
+  hrrinfo->times_csv = NULL;
+  hrrinfo->times = NULL;
+  hrrinfo->timeslist = NULL;
+  hrrinfo->hrrval_csv = NULL;
+  hrrinfo->hrrval = NULL;
+  hrrinfo->ntimes_csv = 0;
+  hrrinfo->loaded = 1;
+  hrrinfo->display = display;
+  hrrinfo->itime = 0;
+
+  HRRFILE = fopen(hrrinfo->file, "r");
+  if(HRRFILE==NULL){
+    readhrr(UNLOAD, errorcode);
+    return;
+  }
+
+
+  // size data
+
+  ntimeshrr = 0;
+  nfirst = -1;
+  while(!feof(HRRFILE)){
+    if(fgets(buffer, LENBUFFER, HRRFILE)==NULL)break;
+    if(nfirst==-1&&strstr(buffer, ".")!=NULL)nfirst = ntimeshrr;
+    ntimeshrr++;
+  }
+  ntimes_saved = ntimeshrr;
+  ntimeshrr -= nfirst;
+
+  rewind(HRRFILE);
+  NewMemory((void **)&hrrinfo->times_csv, ntimeshrr*sizeof(float));
+  NewMemory((void **)&hrrinfo->hrrval_csv, ntimeshrr*sizeof(float));
+
+  // read data
+
+  hrrtime = hrrinfo->times_csv;
+  hrrval = hrrinfo->hrrval_csv;
+  ntimeshrr = 0;
+
+  // read no more than the number of lines found during first pass
+
+  while(ntimeshrr<ntimes_saved&&!feof(HRRFILE)){
+    if(fgets(buffer, LENBUFFER, HRRFILE)==NULL)break;
+    if(ntimeshrr<nfirst){
+      ntimeshrr++;
+      continue;
+    }
+    stripcommas(buffer);
+    sscanf(buffer, "%f %f", hrrtime, hrrval);
+    hrrtime++;
+    hrrval++;
+    ntimeshrr++;
+  }
+  hrrinfo->ntimes_csv = ntimeshrr-nfirst;
+  fclose(HRRFILE);
+}
+
 /* ------------------ init_default_prop ------------------------ */
 
 void init_default_prop(void){
@@ -2471,7 +2552,9 @@ int readsmv(char *file, char *file2){
   }
   npartinfo=0;
 
+#ifdef pp_TARGET
   ntarginfo=0;
+#endif
 
   FREEMEMORY(surfinfo);
 
@@ -3002,6 +3085,7 @@ int readsmv(char *file, char *file2){
       nzoneinfo++;
       continue;
     }
+#ifdef pp_TARGET
     if(
       match(buffer,"TARG") ==1||
       match(buffer,"FTARG")==1
@@ -3009,6 +3093,7 @@ int readsmv(char *file, char *file2){
       ntarginfo++;
       continue;
     }
+#endif
     if(match(buffer, "VENTGEOM")==1||match(buffer, "HFLOWGEOM")==1||match(buffer, "VFLOWGEOM")==1||match(buffer, "MFLOWGEOM")==1){
       nzvents++;
       continue;
@@ -3179,10 +3264,12 @@ int readsmv(char *file, char *file2){
     if(NewMemory((void **)&partinfo,npartinfo*sizeof(partdata))==0)return 2;
   }
 
+#ifdef pp_TARGET
   FREEMEMORY(targinfo);
   if(ntarginfo!=0){
     if(NewMemory((void **)&targinfo,ntarginfo*sizeof(targ))==0)return 2;
   }
+#endif
 
   FREEMEMORY(vsliceinfo);
   FREEMEMORY(sliceinfo);
@@ -4382,7 +4469,7 @@ int readsmv(char *file, char *file2){
     }
   /*
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ MATL ++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MATERIAL  +++++++++++++++++++++++++
     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"MATERIAL") ==1){
@@ -4740,7 +4827,7 @@ int readsmv(char *file, char *file2){
     }
     /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++ CELLSTATE ++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++ CUTCELLS ++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"CUTCELLS") == 1){
@@ -5499,7 +5586,6 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"PDIM") == 1){
       mesh *meshi;
       float *meshrgb;
-      int nn;
 
       ipdim++;
       meshi=meshinfo+ipdim-1;
@@ -5526,17 +5612,23 @@ int readsmv(char *file, char *file2){
       meshi->zcen =(zbar+zbar0)/2.0;
       initBoxClipInfo(&(meshi->box_clipinfo),xbar0,xbar,ybar0,ybar,zbar0,zbar);
       if(ntrnx==0){
-        for(nn=0;nn<=meshi->ibar;nn++){
-          meshi->xplt[nn]=xbar0+(float)nn*(xbar-xbar0)/(float)meshi->ibar;
+        int nn;
+
+        for(nn = 0; nn<=meshi->ibar; nn++){
+          meshi->xplt[nn] = xbar0+(float)nn*(xbar-xbar0)/(float)meshi->ibar;
         }
       }
       if(ntrny==0){
-        for(nn=0;nn<=meshi->jbar;nn++){
-          meshi->yplt[nn]=ybar0+(float)nn*(ybar-ybar0)/(float)meshi->jbar;
+        int nn;
+
+        for(nn = 0; nn<=meshi->jbar; nn++){
+          meshi->yplt[nn] = ybar0+(float)nn*(ybar-ybar0)/(float)meshi->jbar;
         }
       }
       if(ntrnz==0){
-        for(nn=0;nn<=meshi->kbar;nn++){
+        int nn;
+
+        for(nn = 0; nn<=meshi->kbar; nn++){
           meshi->zplt[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)meshi->kbar;
         }
       }
@@ -5652,7 +5744,12 @@ typedef struct {
       }
       continue;
     }
-    if(match(buffer,"TREESTATE") ==1){
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ TREESTATE ++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+    if(match(buffer, "TREESTATE")==1){
       int tree_index, tree_state;
       float tree_time;
       treedata *treei;
@@ -6576,6 +6673,7 @@ typedef struct {
       }
       continue;
     }
+#ifdef pp_TARGET
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ TARG ++++++++++++++++++++++++++++++
@@ -6616,6 +6714,8 @@ typedef struct {
       }
       continue;
     }
+#endif
+
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SYST ++++++++++++++++++++++++++++++
@@ -7362,7 +7462,13 @@ typedef struct {
     }
     if(strncmp(buffer," ",1)==0||buffer[0]==0)continue;
 
-    if(match(buffer,"MINMAXBNDF") == 1){
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MINMAXBNDF +++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+
+    if(match(buffer, "MINMAXBNDF")==1){
       char *file_ptr, file2_local[1024];
       float valmin, valmax;
       float percentile_min, percentile_max;
@@ -7388,7 +7494,12 @@ typedef struct {
       }
       continue;
     }
-    if(match(buffer,"MINMAXSLCF") == 1){
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ MINMAXSLCF +++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+    if(match(buffer, "MINMAXSLCF")==1){
       char *file_ptr, file2_local[1024];
       float valmin, valmax;
       float percentile_min, percentile_max;
@@ -7414,7 +7525,12 @@ typedef struct {
       }
       continue;
     }
-    if(match(buffer,"OBST") == 1&&autoterrain==1){
+    /*
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    ++++++++++++++++++++++ OBST +++++++++++++++++++++++++++++++++
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    */
+    if(match(buffer, "OBST")==1&&autoterrain==1){
       mesh *meshi;
       int nxcell;
       int n_blocks;
@@ -7486,7 +7602,7 @@ typedef struct {
   update_isocolors();
   CheckMemory;
 
-  //remove_dup_blockages(); //xxx remove_dup
+  //remove_dup_blockages(); 
   initcullgeom(cullgeom);
   init_evac_prop();
 

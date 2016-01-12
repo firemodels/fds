@@ -118,10 +118,12 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
 
+#ifdef pp_TARGET
     if(showtarget==1){
       CLIP_VALS;
       drawTargets();
     }
+#endif
 
 #ifdef pp_GEOMTEST
     if(geomtest_option == TETRAHEDRON_TEST){
