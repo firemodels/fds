@@ -928,7 +928,8 @@ make_smv_pictures_db()
    if [ "$SSH" == "" ]; then
    echo "making smokeview images"
    cd $fdsrepo/Verification/scripts
-   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4a
+   ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 &> $OUTPUT_DIR/stage4a_orig
+   grep -v FreeFontPath $OUTPUT_DIR/stage4a_orig > $OUTPUT_DIR/stage4a
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4a \)
@@ -1026,10 +1027,11 @@ make_smv_pictures()
    echo Generating images 
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/Verification/scripts
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 | grep -v FreeFontPath &> $OUTPUT_DIR/stage4
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 &> $OUTPUT_DIR/stage4b_orig
+   grep -v FreeFontPath $OUTPUT_DIR/stage4b_orig &> $OUTPUT_DIR/stage4b
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4 \)
+   ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4b \)
    fi
 }
 
@@ -1038,14 +1040,14 @@ check_smv_pictures()
    # Scan and report any errors in make SMV pictures process
    cd $SMOKEBOT_RUNDIR
    echo "   checking"
-   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4` == "" ]]
+   if [[ `grep -I -E "Segmentation|Error" $OUTPUT_DIR/stage4b` == "" ]]
    then
-      stage4_smvpics_success=true
+      stage4b_smvpics_success=true
    else
-      cp $OUTPUT_DIR/stage4  $OUTPUT_DIR/stage4_errors
+      cp $OUTPUT_DIR/stage4b  $OUTPUT_DIR/stage4b_errors
 
       echo "Errors from Stage 4 - Make SMV pictures (release mode):" >> $ERROR_LOG
-      cat $OUTPUT_DIR/stage4 >> $ERROR_LOG
+      cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -1399,7 +1401,7 @@ fi
 
 ### Stage 5 build documents ###
 MAKEGUIDES_beg=`GET_TIME`
-if [[ $stage1c_fdsrel_success && $stage4_smvpics_success ]] ; then
+if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
    echo Making guides
 #   echo "   geometry notes"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
