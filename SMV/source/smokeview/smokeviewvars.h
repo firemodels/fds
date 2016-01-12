@@ -694,12 +694,6 @@ SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
 SVEXTERN int SVDECL(nOBST,0),SVDECL(nVENT,0),SVDECL(nCVENT,0),SVDECL(ncvents,0),noffset;
 SVEXTERN int visLabels;
-#ifdef pp_TARGET
-SVEXTERN int ntargtimes;
-SVEXTERN int visTarg, ReadTargFile;
-SVEXTERN int showtarget;
-SVEXTERN int SVDECL(ntarginfo, 0);
-#endif
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
 SVEXTERN int nglobal_times, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;

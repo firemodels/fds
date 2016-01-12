@@ -851,11 +851,6 @@ EXTERNCPP void smoothlabel(float *min, float *max, int n);
 EXTERNCPP int readsmv(char *file, char *file2);
 EXTERNCPP void readsmv_dynamic(char *file);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
-#ifdef pp_TARGET
-EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP int gettargetposition(int itarget, float time, float *x, float *y, float *z);
-EXTERNCPP void readtarget2(const char *file, int ifile, int flag, int *errorcode);
-#endif
 EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, char *string);
 EXTERNCPP void outputText(float x, float y, char *string);

@@ -2552,15 +2552,10 @@ int readsmv(char *file, char *file2){
   }
   npartinfo=0;
 
-#ifdef pp_TARGET
-  ntarginfo=0;
-#endif
-
-  FREEMEMORY(surfinfo);
-
 
   //*** free slice data
 
+  FREEMEMORY(surfinfo);
   if(nsliceinfo>0){
     for(i=0;i<nsliceinfo;i++){
       slicedata *sd;
@@ -3085,15 +3080,6 @@ int readsmv(char *file, char *file2){
       nzoneinfo++;
       continue;
     }
-#ifdef pp_TARGET
-    if(
-      match(buffer,"TARG") ==1||
-      match(buffer,"FTARG")==1
-      ){
-      ntarginfo++;
-      continue;
-    }
-#endif
     if(match(buffer, "VENTGEOM")==1||match(buffer, "HFLOWGEOM")==1||match(buffer, "VFLOWGEOM")==1||match(buffer, "MFLOWGEOM")==1){
       nzvents++;
       continue;
@@ -3263,13 +3249,6 @@ int readsmv(char *file, char *file2){
   if(npartinfo!=0){
     if(NewMemory((void **)&partinfo,npartinfo*sizeof(partdata))==0)return 2;
   }
-
-#ifdef pp_TARGET
-  FREEMEMORY(targinfo);
-  if(ntarginfo!=0){
-    if(NewMemory((void **)&targinfo,ntarginfo*sizeof(targ))==0)return 2;
-  }
-#endif
 
   FREEMEMORY(vsliceinfo);
   FREEMEMORY(sliceinfo);
@@ -6673,49 +6652,6 @@ typedef struct {
       }
       continue;
     }
-#ifdef pp_TARGET
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ TARG ++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-    if(
-      match(buffer,"TARG") == 1||
-      match(buffer,"FTARG") == 1
-      ){
-      size_t len;
-      STRUCTSTAT statbuffer;
-      
-      targinfo[itarg].type=1;
-      if(match(buffer,"FTARG")==1)targinfo[itarg].type=2;
-
-      if(fgets(buffer,255,stream)==NULL){
-        ntarginfo--;
-        BREAK;
-      }
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim_back(buffer);
-      len=strlen(buffer);
-      targinfo[itarg].loaded=0;
-      targinfo[itarg].display=0;
-      if(NewMemory((void **)&targinfo[itarg].file,(unsigned int)(len+1))==0)return 2;
-      STRCPY(targinfo[itarg].file,buffer);
-      if(target_filename!=NULL){
-        FREEMEMORY(target_filename);
-        if(NewMemory((void **)&target_filename,(unsigned int)(len+1))==0)return 2;
-        STRCPY(target_filename,buffer);
-      }
-      if(STAT(buffer,&statbuffer)==0){
-        itarg++;
-      }
-      else{
-        ntarginfo--;
-      }
-      continue;
-    }
-#endif
-
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ SYST ++++++++++++++++++++++++++++++

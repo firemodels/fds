@@ -68,9 +68,6 @@
 #define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
-#ifdef pp_TARGET
-#define MENU_SHOWHIDE_TARGET 2
-#endif
 #define MENU_SHOWHIDE_EVAC 13
 #define MENU_SHOWHIDE_PRINT 16
 #define MENU_SHOWHIDE_PARTICLES 1
@@ -948,11 +945,6 @@ void ShowHideMenu(int value){
     }
     Update_Times();
     break;
-#ifdef pp_TARGET
-    case MENU_SHOWHIDE_TARGET:
-    visTarg=1-visTarg;
-    break;
-#endif
   case MENU_SHOWHIDE_SENSOR:
     visSensor=1-visSensor;
     break;
@@ -2589,26 +2581,6 @@ void SetTour(tourdata *thetour){
   tournumber = thetour - tourinfo;
   TourMenu(tournumber);
 }
-
-#ifdef pp_TARGET
-/* ------------------ TargetMenu ------------------------ */
-
-void TargetMenu(int value){
-  int errorcode,i;
-  if(value>=0){
-    readtarget(targinfo[value].file,value,LOAD,&errorcode);
-  }
-  else{
-    if(value==-1){
-      for(i=0;i<ntarginfo;i++){
-        readtarget("",i,UNLOAD,&errorcode);
-      }
-    }
-  }
-  updatemenu=1;  
-  glutPostRedisplay();
-}
-#endif
 
 /* ------------------ EvacMenu ------------------------ */
 
@@ -7124,13 +7096,6 @@ updatemenu=0;
     showhide_data = 1;
     glutAddSubMenu(_("Zone"), zoneshowmenu);
   }
-#ifdef pp_TARGET
-  if(ReadTargFile==1){
-    showhide_data = 1;
-    if(showtarget==1)glutAddMenuEntry(_("*Targets"), MENU_SHOWHIDE_TARGET);
-    if(showtarget==0)glutAddMenuEntry(_("Targets"), MENU_SHOWHIDE_TARGET);
-  }
-#endif
   if(nobject_defs>0){
     int num_activedevices=0;
 
@@ -7735,26 +7700,6 @@ updatemenu=0;
   glutAddSubMenu(_("Shortcuts"),keyboardhelpmenu);
   glutAddSubMenu(_("Mouse"),mousehelpmenu);
   glutAddSubMenu(_("About"),aboutmenu);
-
-#ifdef pp_TARGET
-  /* -------------------------------- target menu -------------------------- */
-
-  if(ntarginfo>0){
-    CREATEMENU(targetmenu,TargetMenu);
-    for(i=0;i<ntarginfo;i++){
-      char menulabel[1024];
-
-      if(targfilenum==i){
-        STRCPY(menulabel,"*");
-        STRCAT(menulabel,targinfo[i].file);  
-      }
-      else{STRCPY(menulabel,targinfo[i].file);}
-      glutAddMenuEntry(menulabel,i);
-    }
-    glutAddMenuEntry(_("Unload"),-1);
-    CheckMemory;
-  }
-#endif
 
   /* --------------------------------particle menu -------------------------- */
 
@@ -9267,12 +9212,6 @@ updatemenu=0;
         }
       }
       if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
-#ifdef pp_TARGET
-      if(ntarginfo>0){
-        strcpy(loadmenulabel,"Target file");
-        glutAddSubMenu(loadmenulabel,targetmenu);
-      }
-#endif
       if(nzoneinfo>0){
         strcpy(loadmenulabel,"Zone fire file");
         glutAddSubMenu(loadmenulabel,zonemenu);
