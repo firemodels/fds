@@ -40,7 +40,7 @@ obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_w
       glui_3dsmoke.o glui_clip.o glui_stereo.o glui_geometry.o glui_motion.o\
       glui_bounds.o dmalloc.o interp.o assert.o \
       compress.o IOvolsmoke.o IOsmoke.o IOplot3d.o IOslice.o IOboundary.o\
-      IOpart.o IOzone.o IOiso.o IOtarget.o callbacks.o drawGeometry.o\
+      IOpart.o IOzone.o IOiso.o callbacks.o drawGeometry.o\
       glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
       shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o\
       smv_geometry.o geometry.o showscene.o fdsmodules.o\
