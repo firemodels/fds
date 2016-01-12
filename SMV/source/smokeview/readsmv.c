@@ -2334,7 +2334,6 @@ int readsmv(char *file, char *file2){
   int ismoke3d=0,ismoke3dcount=1,igrid,ioffset;
   int itrnx, itrny, itrnz, ipdim, iobst, ivent, icvent;
   int ibartemp=2, jbartemp=2, kbartemp=2;
-  int  itarg=0;
 
   int setGRID=0;
   int  i;
