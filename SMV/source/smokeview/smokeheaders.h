@@ -843,9 +843,7 @@ EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readfed(int ifile, int flag, int file_type, int *errorcode);
 EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
-EXTERNCPP void readtarget2(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 
 EXTERNCPP void InitMenus(int unload);
@@ -853,7 +851,6 @@ EXTERNCPP void smoothlabel(float *min, float *max, int n);
 EXTERNCPP int readsmv(char *file, char *file2);
 EXTERNCPP void readsmv_dynamic(char *file);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
-EXTERNCPP int gettargetposition(int itarget, float time, float *x, float *y, float *z);
 EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, char *string);
 EXTERNCPP void outputText(float x, float y, char *string);
