@@ -407,7 +407,7 @@ export OMP_NUM_THREADS=$nopenmp_threads
 cd $fulldir
 echo
 echo \`date\`
-echo Input file: $infile 
+echo Input file: $in
 echo Directory: \`pwd\`
 echo Host: \`hostname\`
 $MPIRUN $exe $in $OUT2ERROR
