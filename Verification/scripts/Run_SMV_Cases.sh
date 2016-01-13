@@ -18,6 +18,25 @@ STOPFDS=
 RUNOPTION=
 CFASTREPO=~/cfastgitclean
 COMPILER="intel"
+WAIT=0
+
+wait_cases_end()
+{
+   if [[ "$QUEUE" == "none" ]]
+   then
+     while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
+        JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} cases to complete."
+        sleep 60
+     done
+   else
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
+        echo "Waiting for ${JOBS_REMAINING} cases to complete." 
+        sleep 60
+     done
+   fi
+}
 
 function usage {
 echo "Run_SMV_Cases.sh [-d -h -m max_iterations -o nthreads -p -q queue -s ]"
@@ -44,6 +63,7 @@ echo "-r - run only regular smokeview cases"
 echo "-s - stop FDS runs"
 echo "-S - run only cases using a single process"
 echo "-u - use installed versions of utilities background and wind2fds"
+echo "-w - wait for cases to complete before returning"
 exit
 }
 
@@ -69,7 +89,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'c:dghI:j:Mm:o:p:q:rSsu' OPTION
+while getopts 'c:dghI:j:Mm:o:p:q:rSsuw' OPTION
 do
 case $OPTION in
   c)
@@ -123,6 +143,9 @@ case $OPTION in
    ;;
   u)
    use_installed="1"
+   ;;
+  w)
+   WAIT="1"
    ;;
 esac
 #shift
@@ -208,6 +231,9 @@ if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification
   export QFDS="$QFDSSH -e $FDSMPI $QUEUE $STOPFDS $JOBPREFIX"
   scripts/SMV_MPI_Cases.sh
+fi
+if [ "$WAIT" == "1" ] ; then
+  wait_cases_end
 fi
 
 echo FDS cases submitted
