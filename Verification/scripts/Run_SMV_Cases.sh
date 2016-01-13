@@ -12,6 +12,7 @@ nthreads=1
 RUN_SMV=1
 RUN_GEOM=1
 JOBPREFIX=
+JOBPREF=
 # not running any mpi cases now
 RUN_MPI=0
 STOPFDS=
@@ -27,13 +28,13 @@ wait_cases_end()
      while [[ `ps -u $USER -f | fgrep .fds | grep -v grep` != '' ]]; do
         JOBS_REMAINING=`ps -u $USER -f | fgrep .fds | grep -v grep | wc -l`
         echo "Waiting for ${JOBS_REMAINING} cases to complete."
-        sleep 60
+        sleep 15
      done
    else
-     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX` != '' ]]; do
-        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREFIX | wc -l`
+     while [[ `qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREF` != '' ]]; do
+        JOBS_REMAINING=`qstat -a | awk '{print $2 $4}' | grep $(whoami) | grep $JOBPREF | wc -l`
         echo "Waiting for ${JOBS_REMAINING} cases to complete." 
-        sleep 60
+        sleep 15
      done
    fi
 }
@@ -118,6 +119,7 @@ case $OPTION in
    ;;
   j)
    JOBPREFIX="-j $OPTARG"
+   JOBPREF="$OPTARG"
    ;;
   o)
    nthreads="$OPTARG"
