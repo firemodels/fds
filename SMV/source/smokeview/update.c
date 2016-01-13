@@ -254,7 +254,6 @@ void Update_Show(void){
   showshooter=0;
   showevac=0;
   showevac_colorbar=0;
-  showtarget=0;
   show3dsmoke=0;
   smoke3dflag=0;
   showtours=0;
@@ -535,8 +534,7 @@ void Update_Show(void){
     shooter_flag==1||
     smoke3dflag==1|| showtours==1 || evacflag==1||
     (ReadZoneFile==1&&visZone==1&&visTimeZone==1)||
-    (ReadTargFile==1&&visTarg==1)
-    ||showterrain==1||showvolrender==1
+    showterrain==1||showvolrender==1
     )
     )showtime=1;
   if(plotstate==DYNAMIC_PLOTS&&ReadIsoFile==1&&visAIso!=0&&isoflag==1)showtime2=1;
@@ -576,7 +574,6 @@ void Update_Show(void){
     if(ReadIsoFile==1&&visAIso!=0){
       showiso=1;
     }
-    if(ReadTargFile==1&&visTarg==1)showtarget=1;
     if(shooter_flag==1)showshooter=1;
   }
   if(showsmoke==1||showevac==1||showpatch==1||showslice==1||showvslice==1||showzone==1||showiso==1||showevac==1)RenderTime=1;
@@ -714,12 +711,6 @@ void Synch_Times(void){
       parti=partinfo+j;
       if(parti->loaded==0)continue;
       parti->timeslist[n]=get_itime(n,parti->timeslist,parti->times,parti->ntimes);
-    }
-
-    /* synchronize target times */
-
-    if(ntarginfo>0){
-      targtimeslist[n]=get_itime(n,targtimeslist,targtimes,ntargtimes);
     }
 
   /* synchronize shooter times */
@@ -1025,9 +1016,6 @@ void Update_Times(void){
       nglobal_times+=sd->ntimes;
     }
   }
-  if(ReadTargFile==1&&visTarg==1){
-    nglobal_times+=ntargtimes;
-  }
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
 
@@ -1200,19 +1188,6 @@ void Update_Times(void){
     }
   }
 
-  if(ReadTargFile==1&&visTarg==1){
-    int n;
-
-    for(n=0;n<ntargtimes;n++){
-      float t_diff;
-
-      *timescopy++=targtimes[n];
-      t_diff = timescopy[-1]-timescopy[-2];
-      if(n>0&&t_diff<dt_MIN&&t_diff>0.0){
-        dt_MIN=t_diff;
-      }
-    }
-  }
   for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
     int n;
@@ -1756,13 +1731,6 @@ int getplotstate(int choice){
 
         zonei = zoneinfo + i;
         if(zonei->loaded==0||zonei->display==0)continue;
-        return DYNAMIC_PLOTS;
-      }
-      for(i=0;i<ntarginfo;i++){
-        targ *targi;
-
-        targi = targinfo + i;
-        if(targi->loaded==0||targi->display==0)continue;
         return DYNAMIC_PLOTS;
       }
       for(i=0;i<ntours;i++){

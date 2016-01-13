@@ -1442,7 +1442,6 @@ void initvars(void){
 
   editwindow_status=-1;
   startup_pass=1;
-  ntargtimes=500;
 
   slicefilenumber=0;
   exportdata=0;
@@ -1510,9 +1509,6 @@ void initvars(void){
   test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
-  visTarg = 0;
-  ReadTargFile=0;
-  showtarget=0;
   visAIso=1;
   surfincrement=0,visiso=0;
   isotest=0;
@@ -1529,7 +1525,6 @@ void initvars(void){
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   noffset=0;
   visLabels=0;
-  ntarginfo=0;
   showallslicevectors=0;
   framerate=-1.0;
   itimes=0, itimeold=-999, seqnum=0,RenderTime=0; RenderTimeOld=0; itime_save=-1;
