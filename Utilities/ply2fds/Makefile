@@ -37,42 +37,36 @@ no_target:
 # ********  rules for each platform supported *************
 
 intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D PTW32_STATIC_LIB -D X64 -D pp_WIN_INTEL $(GITINFO)
-intel_win_64 : FFLAGS    = -Od /nologo -fpp -D pp_cvf -D X64 /iface:stdref /fpscomp:general
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
-intel_win_64 : FC        = ifort
-intel_win_64 : exe       = smokezip_win_64.exe
+intel_win_64 : exe       = ply2fds_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib $(LIB_DIR)/lib_win_intel_64/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin)
 
 # ------------- gnu Linux ----------------
 #  gnu linux
 
-gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
 gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX $(GITINFO)
 gnu_linux_64 : LFLAGS    = -m64
 gnu_linux_64 : CC        = gcc
 gnu_linux_64 : CPP       = g++
-gnu_linux_64 : FC        = gfortran
-gnu_linux_64 : exe       = smokezip_linux_64
+gnu_linux_64 : exe       = ply2fds_linux_64
 
 gnu_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS)
 
 # ------------- gnu OSX ----------------
 #  gnu linux
 
-gnu_osx_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
 gnu_osx_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D pp_OSX $(GITINFO)
 gnu_osx_64 : LFLAGS    = -m64
 gnu_osx_64 : CC        = gcc
 gnu_osx_64 : CPP       = g++
-gnu_osx_64 : FC        = gfortran
-gnu_osx_64 : exe       = smokezip_osx_64
+gnu_osx_64 : exe       = ply2fds_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L/usr/local/lib/gcc/5 -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS)
 
 
 # ------------- Linux 64 ----------------
@@ -94,7 +88,7 @@ intel_linux_64 : $(obj)
 intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icc
-intel_osx_64 : exe       = smokezip_osx_64
+intel_osx_64 : exe       = ply2fds_osx_64
 
 intel_osx_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) -m64 $(obj)  
