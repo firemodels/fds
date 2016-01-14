@@ -62,7 +62,7 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 
 % return
 
-expdir = '../../Validation/UMD_Line_Burner/Experimental_Data/';
+expdir = '../../Validation/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
 fdsdir = '../../Validation/UMD_Line_Burner/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
@@ -116,10 +116,10 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_T_z_p125m.csv'],',',1);
+M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-T1 = M1.data(:,find(strcmp(M1.colheaders,'T (C)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_125')));
+T1 = M1.data(:,find(strcmp(M1.colheaders,'TC_125')));
 
 H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
@@ -181,10 +181,10 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_T_z_p250m.csv'],',',1);
+M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-T1 = M1.data(:,find(strcmp(M1.colheaders,'T (C)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_250')));
+T1 = M1.data(:,find(strcmp(M1.colheaders,'TC_250')));
 
 H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
@@ -245,10 +245,10 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_O2_z_p125m.csv'],',',1);
+M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-O21 = M1.data(:,find(strcmp(M1.colheaders,'O2 (vol frac)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_125')));
+O21 = M1.data(:,find(strcmp(M1.colheaders,'XO2_125')));
 
 H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
@@ -309,10 +309,10 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_O2_z_p250m.csv'],',',1);
+M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-O21 = M1.data(:,find(strcmp(M1.colheaders,'O2 (vol frac)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_250')));
+O21 = M1.data(:,find(strcmp(M1.colheaders,'XO2_250')));
 
 H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
