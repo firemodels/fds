@@ -8222,6 +8222,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT}$^{**}$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^{*}$                              & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
+%{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
@@ -8711,33 +8712,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}            & Logical           & Section~\ref{info:initial_droplets}           &               & {\ct .FALSE.} \\ \hline
-{\ct CTRL\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct DENSITY}                   & Real              & Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
-{\ct DEVC\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct DIAMETER}                  & Real              & Section~\ref{info:initial_droplets}           & $\mu$m        &               \\ \hline
-{\ct DT\_INSERT}                & Real              & Section~\ref{info:initial_droplets}           & s             &               \\ \hline
-{\ct DX}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct DY}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct DZ}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct HEIGHT}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
-{\ct HRRPUV}                    & Real              & Section~\ref{info:INIT}                       & kW/m$^3$      &               \\ \hline
-{\ct ID}                        & Character         & Section~\ref{info:PART_SURF}                  &               &               \\ \hline
-{\ct MASS\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & kg/kg         & Ambient       \\ \hline
-{\ct MASS\_PER\_TIME}           & Real              & Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real              & Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
-{\ct MULT\_ID }                 & Character         & Section~\ref{info:MULT}                       &               &               \\ \hline
-{\ct N\_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
-{\ct N\_PARTICLES\_PER\_CELL}   & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
-{\ct PART\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct PARTICLE\_WEIGHT\_FACTOR}  & Real              & Section~\ref{info:initial_droplets}           &               & 1.            \\ \hline
-{\ct RADIUS}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
-{\ct SHAPE}                     & Character         & Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
-{\ct SPEC\_ID(N)}               & Character Array   & Section~\ref{info:INIT}                       &               &               \\ \hline
-{\ct TEMPERATURE}               & Real              & Section~\ref{info:INIT}                       & $^\circ$C     & {\ct TMPA}    \\ \hline
-{\ct UVW(3)}                    & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s           & 0.            \\ \hline
-{\ct XB(6)}                     & Real Sextuplet    & Section~\ref{info:INIT}                       & m             &               \\ \hline
-{\ct XYZ(3)}                    & Real Triplet      & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
+%{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Auto-ignition temperature                     & \si{\degree C} & {-273.15}     \\ \hline
+{\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
+{\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
+{\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
+{\ct DT\_INSERT}                  & Real              & Section~\ref{info:initial_droplets}           & s              &               \\ \hline
+{\ct DX}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct DY}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct DZ}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct HEIGHT}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct HRRPUV}                      & Real              & Section~\ref{info:INIT}                       & \si{kW/m^3}    &               \\ \hline
+{\ct ID}                          & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
+{\ct MASS\_FRACTION(N)}           & Real Array        & Section~\ref{info:INIT}                       & kg/kg          & Ambient       \\ \hline
+{\ct MASS\_PER\_TIME}             & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
+{\ct MASS\_PER\_VOLUME}           & Real              & Section~\ref{info:initial_droplets}           & \si{kg/m^3}    & 1             \\ \hline
+{\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
+{\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
+{\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
+{\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
+{\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
+{\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
+{\ct XYZ(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
 
