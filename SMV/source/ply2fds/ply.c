@@ -3137,7 +3137,12 @@ void *get_new_props_ply(PlyFile *ply)
   }
 
   /* in case we need a random choice */
+ 
+#ifdef WIN32
+  random_pick = (int) floor (rules->nprops * ((double)rand() / RAND_MAX) );
+#else
   random_pick = (int) floor (rules->nprops * drand48());
+#endif
 
   /* calculate the combination for each "other" property of the element */
 
