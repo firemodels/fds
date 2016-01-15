@@ -1,4 +1,4 @@
-&HEAD CHID='methane_dx_p3125cm', TITLE='UMD Line Burner, dx = 0.3125 cm, D/dx = 16', with REIGNITION_MODEL /
+&HEAD CHID='methane_dx_p3125cm', TITLE='UMD Line Burner, dx = 0.3125 cm, D/dx = 16, with REIGNITION_MODEL' /
 
 &MULT ID='m1', DX=0.2125,DY=0.15,DZ=0.15, I_UPPER=3,J_UPPER=3,K_UPPER=7 / 128 meshes
 &MESH IJK=68,48,48, XB=-0.425,-.2125,-0.3,-.15,-0.0125,0.1375, MULT_ID='m1' /
