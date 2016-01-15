@@ -1065,14 +1065,14 @@ static PlyOtherProp *get_other_properties(
   /* create structure for describing other_props */
   other = (PlyOtherProp *) myalloc (sizeof (PlyOtherProp));
   other->name = strdup (elem->name);
-#if 0
+//#if 0
   if (elem->other_offset == NO_OTHER_PROPS) {
     other->size = 0;
     other->props = NULL;
     other->nprops = 0;
     return (other);
   }
-#endif
+//#endif
   other->size = elem->other_size;
   other->props = (PlyProperty **) myalloc (sizeof(PlyProperty) * elem->nprops);
   
