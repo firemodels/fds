@@ -2651,7 +2651,7 @@ The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the 
 
 \begin{figure}[!ht]
 \centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec} 
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
 \caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{(Left) Lumped species mass fractions as a function of mixture fraction.}
 \label{fig:burke_schumann_spec}
 \end{figure}
@@ -3731,7 +3731,9 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \subsection{Mesh Screen in a Duct (\texorpdfstring\textct{screen\_drag}{screen\_drag})}
 
 These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
-\be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen} \ee
+\be  
+   \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen} 
+\ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
@@ -3740,6 +3742,23 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 \caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.}
 \label{screen_drag_plots}
 \end{figure}
+
+\subsection{Flow through Porous Media (\texorpdfstring\textct{porous\_media}{porous\_media})}
+
+This case involves a 2~m long duct with a 0.5~m by 0.5~m cross section and 1~m/s flow. A 2.5~cm block of rigid aluminum foam is positioned in the duct. The pressure drop induced by the foam is expected to be:
+\be
+   \Delta \hbox{P} = \delta \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right)
+\ee
+where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate directions. The block thickness $\delta=0.025$~m, the velocity $u=1$~m/s, the air density $\rho=1.2$~kg/m$^3$, and the air viscosity $\mu=1.8 \times 10^{-5}$~kg/m/s. Comparisons of computed and analytical results are shown in Fig.~\ref{porous_media_plot}.
+
+\begin{figure}[ht]
+%\includegraphics[width=3.2in]{SCRIPT_FIGURES/porous_media}
+\caption[Results of the \textct{porous\_media} test case]{Pressure drop caused by a block of aluminum foam.}
+\label{porous_media_plot}
+\end{figure}
+
+
+
 
 \subsection{Particle Terminal Velocity (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
 
