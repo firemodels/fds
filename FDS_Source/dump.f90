@@ -3652,6 +3652,30 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
       ENDIF
    ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
    ELSE IF (SLICETYPE=='CUTCELLS') THEN
+      CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+      IF (DIR==1) THEN
+         NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
+         NFACES = 0
+         DO K = K1+1, K2
+            DO J = J1+1, J2
+               NFACES = NFACES + 2
+            END DO
+         END DO
+      ELSE IF (DIR==2) THEN
+        NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
+         DO K = K1+1, K2
+            DO I = I1+1, I2
+               NFACES = NFACES + 2
+            END DO
+         END DO
+      ELSE
+        NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
+         DO I = I1+1, I2
+            DO J = J1+1, J2
+               NFACES = NFACES + 2
+            END DO
+         END DO
+      ENDIF
    ELSE IF (SLICETYPE=='IGNORE_OBST') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF (DIR==1) THEN
@@ -3800,6 +3824,99 @@ END SUBROUTINE GET_GEOMSIZES
       ENDIF
    ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
    ELSE IF (SLICETYPE=='CUTCELLS') THEN
+      NI = I2 + 1 - I1
+      NJ = J2 + 1 - J1
+      NK = K2 + 1 - K1
+      CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+      IVERT = 0
+      IFACE = 0
+      IF (DIR==1) THEN
+         XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I = SLICE,SLICE
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XMID
+                  VERTS(3*IVERT-1) = YPLT(J)
+                  VERTS(3*IVERT)   = ZPLT(K)
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO J=1,NJ-1
+               
+               IS_SOLID = .FALSE.
+                ! skip over any triangles in obstacles for the IGNORE_OBST case
+               IFACE = IFACE + 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
+               FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
+               
+               IFACE = IFACE + 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+               FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+               FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
+               FACES(3*IFACE)   = IJK(  J,K+1,NJ)
+            END DO
+         END DO
+      ELSE IF (DIR==2) THEN
+         YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
+         DO K=K1,K2
+            DO J=SLICE,SLICE
+               DO I = I1,I2
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = YMID
+                  VERTS(3*IVERT)   = ZPLT(K)
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO I=1,NI-1
+               IS_SOLID = .FALSE.
+               IFACE = IFACE + 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  K,NI)
+               FACES(3*IFACE)   = IJK(I+1,K+1,NI)
+               
+               IFACE = IFACE + 1
+               IF (IS_SOLID)LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  K,NI)
+               FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
+               FACES(3*IFACE)   = IJK(  I,K+1,NI)
+            END DO
+         END DO
+      ELSE
+         ZMID = (ZPLT(SLICE)+ZPLT(SLICE-1))/2.0_FB
+         DO K=SLICE,SLICE
+            DO J=J1,J2
+               DO I = I1,I2
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT)   = ZMID
+               END DO
+            END DO
+         END DO
+         DO J=1,NJ-1
+            DO I=1,NI-1
+               IS_SOLID = .FALSE.
+               IFACE = IFACE + 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,  J,NI)
+               FACES(3*IFACE)   = IJK(I+1,J+1,NI)
+               
+               IFACE = IFACE + 1
+               IF (IS_SOLID) LOCATIONS(IFACE) = 1
+               FACES(3*IFACE-2) = IJK(  I,  J,NI)
+               FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
+               FACES(3*IFACE)   = IJK(  I,J+1,NI)
+            END DO
+         END DO
+      ENDIF
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
@@ -3816,6 +3933,9 @@ REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
 
 INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
+INTEGER :: IBM_FGSC_TEMP
+
+IBM_FGSC_TEMP = 1
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
 IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
@@ -3857,6 +3977,38 @@ IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
    ENDIF
 ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
 ELSE IF (SLICETYPE=='CUTCELLS') THEN
+   IFACE = 0
+   IF (DIR==1) THEN
+      DO K = K1+1, K2
+         DO J = J1+1, J2
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,IAXIS,IBM_FGSC_TEMP)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,IAXIS,IBM_FGSC_TEMP)
+         END DO
+      END DO
+   ELSE IF (DIR==2) THEN
+      DO K = K1+1, K2
+         DO I = I1+1, I2
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,JAXIS,IBM_FGSC_TEMP)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,JAXIS,IBM_FGSC_TEMP)
+         END DO
+      END DO
+   ELSE
+      DO J = J1+1, J2
+         DO I = I1+1, I2
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,KAXIS,IBM_FGSC_TEMP)
+            
+            IFACE = IFACE + 1
+            VALS(IFACE) = FCVAR(I,J,K,KAXIS,IBM_FGSC_TEMP)
+         END DO
+      END DO
+   ENDIF
 ENDIF
 END SUBROUTINE GET_GEOMVALS
 
