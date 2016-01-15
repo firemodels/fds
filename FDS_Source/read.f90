@@ -604,7 +604,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Mesh Geometry and Name
 
-            WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+            WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
             IF (ID/='null') MESH_NAME(NM) = ID
 
             ! Process Physical Coordinates
@@ -806,7 +806,7 @@ LOOP_EMESHES: DO N = 1, NEVAC_MESHES
 
    ! Mesh Geometry and Name
 
-   WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+   WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
    IF (ID/='null') MESH_NAME(NM) = ID
 
    Z_MID = 0.5_EB*(MESHES(I_MAIN_EVAC_MESH)%ZS + MESHES(I_MAIN_EVAC_MESH)%ZF)
@@ -937,7 +937,7 @@ LOOP_STAIRS: DO N = 1, N_STRS
 
    ! Mesh Geometry and Name
 
-   WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+   WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
    IF (ID/='null') MESH_NAME(NM) = ID
 
    M%XS    = EMESH_STAIRS(N)%XB(1)
