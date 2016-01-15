@@ -1,19 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ply.h"
 
 /* ------------------ usage ------------------------ */
 
 void usage(void){
   printf(" ply2fds filename.ply\n\n");
   printf(" -h - display this message\n");
+  printf(" -i - output plyfile info\n");
+}
+
+/* ------------------ get_ply_info ------------------------ */
+
+void get_ply_info(char *plyfile){
 }
 
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
   int i;
-  char *filebase=NULL;
+  char *plyfile=NULL;
+  int GETINFO = 0;
 
   if(argc==1){
     usage();
@@ -32,6 +40,9 @@ int main(int argc, char **argv){
         usage();
         return 1;
         break;
+      case 'i':
+        GETINFO = 1;
+        break;
       default:
         usage();
         return 1;
@@ -39,14 +50,17 @@ int main(int argc, char **argv){
       }
     }
     else{
-      if(filebase==NULL){
-        filebase = argv[i];
+      if(plyfile==NULL){
+        plyfile = argv[i];
       }
     }
   }
-  if(filebase==NULL){
+  if(plyfile==NULL){
     usage();
     return 1;
   }
-
+  if(GETINFO==1){
+    get_ply_info(plyfile);
+    return 0;
+  }
 }
