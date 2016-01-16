@@ -3982,30 +3982,30 @@ ELSE IF (SLICETYPE=='CUTCELLS') THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,IAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC_TEMP,IAXIS)
             
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,IAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC_TEMP,IAXIS)
          END DO
       END DO
    ELSE IF (DIR==2) THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,JAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC_TEMP,JAXIS)
             
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,JAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC_TEMP,JAXIS)
          END DO
       END DO
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,KAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC_TEMP,KAXIS)
             
             IFACE = IFACE + 1
-            VALS(IFACE) = FCVAR(I,J,K,KAXIS,IBM_FGSC_TEMP)
+            VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC_TEMP,KAXIS)
          END DO
       END DO
    ENDIF
