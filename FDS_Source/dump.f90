@@ -3637,6 +3637,7 @@ USE COMPLEX_GEOMETRY
    INTEGER :: DIR,SLICE
    INTEGER :: I, J, K
    INTEGER :: ICF, IFACE, NVF
+   LOGICAL DOIT
 
    NVERTS=0
    NFACES=0
@@ -3662,7 +3663,11 @@ USE COMPLEX_GEOMETRY
          NFACES = 0
          DO K = K1+1, K2
             DO J = J1+1, J2
-               IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) DOIT=.TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
@@ -3678,7 +3683,11 @@ USE COMPLEX_GEOMETRY
         NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
          DO K = K1+1, K2
             DO I = I1+1, I2
-               IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
@@ -3694,7 +3703,11 @@ USE COMPLEX_GEOMETRY
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
          DO I = I1+1, I2
             DO J = J1+1, J2
-               IF ( FCVAR(I,J,SLICE,IBM_FGSC,kAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,J,SLICE,IBM_FGSC,kAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
@@ -3758,6 +3771,7 @@ USE COMPLEX_GEOMETRY
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
    LOGICAL IS_SOLID
    INTEGER :: ICF, NVF, IVCF, IV
+   LOGICAL DOIT
    
    LOCATIONS = 0 ! for now, assume triangles are in gas and tag with 0
    IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
@@ -3881,7 +3895,11 @@ USE COMPLEX_GEOMETRY
          END DO
          DO K=1,NK-1
             DO J=1,NJ-1
-               IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS)                  
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
@@ -3901,17 +3919,20 @@ USE COMPLEX_GEOMETRY
                   ENDDO
                ELSE
 
-                ! skip over any triangles in obstacles for the IGNORE_OBST case
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                   FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
                
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                   FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -3932,7 +3953,11 @@ USE COMPLEX_GEOMETRY
          END DO
          DO K=1,NK-1
             DO I=1,NI-1
-               IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
@@ -3954,14 +3979,18 @@ USE COMPLEX_GEOMETRY
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                   FACES(3*IFACE)   = IJK(I+1,K+1,NI)
                
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                   FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -3982,7 +4011,11 @@ USE COMPLEX_GEOMETRY
          END DO
          DO J=1,NJ-1
             DO I=1,NI-1
-               IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
+               DOIT = .FALSE.
+               IF (CC_IBM) THEN
+                  IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+               ENDIF
+               IF (DOIT) THEN
                   ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
@@ -4003,14 +4036,18 @@ USE COMPLEX_GEOMETRY
                ELSE
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                   FACES(3*IFACE)   = IJK(I+1,J+1,NI)
                
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
-                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  IF (CC_IBM) THEN
+                     IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  ENDIF
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                   FACES(3*IFACE)   = IJK(  I,J+1,NI)
@@ -4035,6 +4072,7 @@ REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
 
 INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
+LOGICAL DOIT
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
 IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
@@ -4080,39 +4118,51 @@ ELSE IF (SLICETYPE=='CUTCELLS') THEN
    IF (DIR==1) THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+            DOIT = .FALSE.
+            IF (CC_IBM) THEN
+               IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+            ENDIF
+            IF (DOIT) THEN
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
             ENDIF
          END DO
       END DO
    ELSE IF (DIR==2) THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+            DOIT = .FALSE.
+            IF (CC_IBM) THEN
+               IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+            ENDIF
+            IF (DOIT) THEN
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
             ENDIF
          END DO
       END DO
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
+            DOIT = .FALSE.
+            IF (CC_IBM) THEN
+               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) DOIT = .TRUE.
+            ENDIF
+            IF (DOIT) THEN
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+               IF (CC_IBM) VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
             ENDIF
          END DO
       END DO
