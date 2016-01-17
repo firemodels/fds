@@ -3859,7 +3859,7 @@ USE COMPLEX_GEOMETRY
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZMID
                END DO
             END DO
@@ -3955,7 +3955,7 @@ USE COMPLEX_GEOMETRY
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZMID
                END DO
             END DO
@@ -4091,7 +4091,7 @@ USE COMPLEX_GEOMETRY
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZMID
                END DO
             END DO
