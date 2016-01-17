@@ -4000,8 +4000,6 @@ USE COMPLEX_GEOMETRY
          END DO
          DO K=1,NK-1
             DO J=1,NJ-1
-               
-               IS_SOLID = .FALSE.
                IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS)                  
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
@@ -4014,6 +4012,7 @@ USE COMPLEX_GEOMETRY
                      ENDDO
                      DO IVCF = 1, NVF-2
                         IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
                         FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
                         FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
                         FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1 
@@ -4023,13 +4022,15 @@ USE COMPLEX_GEOMETRY
 
                 ! skip over any triangles in obstacles for the IGNORE_OBST case
                   IFACE = IFACE + 1
-                  IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
                   FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
                
                   IFACE = IFACE + 1
-                  IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  J,  K,NJ)
                   FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
                   FACES(3*IFACE)   = IJK(  J,K+1,NJ)
@@ -4050,7 +4051,6 @@ USE COMPLEX_GEOMETRY
          END DO
          DO K=1,NK-1
             DO I=1,NI-1
-               IS_SOLID = .FALSE.
                IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
@@ -4064,6 +4064,7 @@ USE COMPLEX_GEOMETRY
                      ENDDO
                      DO IVCF = 1, NVF-2
                         IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
                         FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
                         FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
                         FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1 
@@ -4071,13 +4072,15 @@ USE COMPLEX_GEOMETRY
                   ENDDO
                ELSE
                   IFACE = IFACE + 1
-                  IF (IS_SOLID)LOCATIONS(IFACE) = 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  K,NI)
                   FACES(3*IFACE)   = IJK(I+1,K+1,NI)
                
                   IFACE = IFACE + 1
-                  IF (IS_SOLID)LOCATIONS(IFACE) = 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  I,  K,NI)
                   FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
                   FACES(3*IFACE)   = IJK(  I,K+1,NI)
@@ -4111,6 +4114,7 @@ USE COMPLEX_GEOMETRY
                      ENDDO
                      DO IVCF = 1, NVF-2
                         IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
                         FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
                         FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
                         FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1 
@@ -4118,13 +4122,15 @@ USE COMPLEX_GEOMETRY
                   ENDDO
                ELSE
                   IFACE = IFACE + 1
-                  IF (IS_SOLID) LOCATIONS(IFACE) = 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,  J,NI)
                   FACES(3*IFACE)   = IJK(I+1,J+1,NI)
                
                   IFACE = IFACE + 1
-                  IF (IS_SOLID) LOCATIONS(IFACE) = 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
                   FACES(3*IFACE-2) = IJK(  I,  J,NI)
                   FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
                   FACES(3*IFACE)   = IJK(  I,J+1,NI)
