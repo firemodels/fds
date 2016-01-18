@@ -3701,7 +3701,7 @@ USE COMPLEX_GEOMETRY
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
          DO I = I1+1, I2
             DO J = J1+1, J2
-               IF (FCVAR(I,J,SLICE,IBM_FGSC,kAXIS) == IBM_CUTCFE) THEN
+               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
                   ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
@@ -3764,7 +3764,7 @@ USE COMPLEX_GEOMETRY
    INTEGER :: I, J, K
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
    LOGICAL IS_SOLID
-   INTEGER :: ICF, NVF, IVCF, IV
+   INTEGER :: ICF, NVF, IVCF
    
    CHARACTER(LEN=100) :: SLICETYPE_LOCAL
 
@@ -3902,8 +3902,7 @@ USE COMPLEX_GEOMETRY
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        IV = 3*IVERTCUT-2
-                        VERTS(IV:IV+2) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
                      ENDDO
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
@@ -3955,9 +3954,7 @@ USE COMPLEX_GEOMETRY
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        IV = 3*IVERTCUT-2
-                        VERTS(IV:IV+2) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
-!                        WRITE(0,*)"VERTS",I,K,VERTS(IV:IV+2)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
                      ENDDO
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
@@ -4005,8 +4002,7 @@ USE COMPLEX_GEOMETRY
                      DO IVCF=1,NVF
                         IVERTCUT = IVERTCUT + 1
                         IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
-                        IV = 3*IVERTCUT-2
-                        VERTS(IV:IV+2) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
                      ENDDO
                      DO IVCF = 1, NVF-2 ! for now assume face is convex
                         IFACECUT = IFACECUT + 1
