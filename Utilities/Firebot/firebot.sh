@@ -125,19 +125,20 @@ if [ "$COMPILER" == "intel" ]; then
 else
    notfound=`gcc -help 2>&1 | tail -1 | grep "not found" | wc -l`
 fi
-if [ "$notfound" == "1" ] ; then
-  export haveCC="0"
+if [ $notfound == 1 ] ; then
   USEINSTALL="-r"
 fi
 
 notfound=
 if [ "$USEINSTALL" != "" ]; then
    notfound=`smokeview -v 2>&1 | tail -1 | grep "not found" | wc -l`
-   if [ "$notfound" == "1" ] ; then
+   if [ $notfound == 1 ]; then
+      echo "Error: smokeview not found. firebot aborted."
       echo "Error: smokeview not found. firebot aborted." >> $OUTPUT_DIR/stage1 2>&1
       exit
    fi
 fi
+exit
 
 if [ "$SSH" != "" ]; then
   sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
