@@ -76,7 +76,7 @@ UPLOADGUIDES=0
 GIT_REVISION=
 SSH=
 SKIPMATLAB=
-while getopts 'b:chm:q:r:sS:uUv:' OPTION
+while getopts 'b:chim:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -116,6 +116,7 @@ esac
 done
 shift $(($OPTIND-1))
 
+notfound=
 if [ "$COMPILER" == "intel" ]; then
    if [[ "$IFORT_COMPILER" != "" ]] ; then
       source $IFORT_COMPILER/bin/compilervars.sh intel64
@@ -128,13 +129,14 @@ if [ "$notfound" == "1" ] ; then
   export haveCC="0"
   USEINSTALL="-r"
 fi
+
+notfound=
 if [ "$USEINSTALL" != "" ]; then
    notfound=`smokeview -v 2>&1 | tail -1 | grep "not found" | wc -l`
    if [ "$notfound" == "1" ] ; then
       echo "Error: smokeview not found. firebot aborted." >> $OUTPUT_DIR/stage1 2>&1
       exit
    fi
-   echo smokeview found
 fi
 
 if [ "$SSH" != "" ]; then
