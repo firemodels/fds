@@ -566,6 +566,7 @@ compile_smv_utilities()
    ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
    fi
+   echo "   Smokeview - using installed smokeview"
    fi
 }
 
