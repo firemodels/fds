@@ -3972,7 +3972,10 @@ void ShowPatchMenu(int value){
     else if(value==INGASpatchmenu){
       show_patch_ingas = 1-show_patch_ingas;
     }
-    else if(value!=DUMMYwallmenu){
+    else if(value == INCUTCELLpatchmenu){
+      show_patch_incutcell = 1 - show_patch_incutcell;
+    }
+    else if(value != DUMMYwallmenu){
       int n;
 
       value = -(value+2); /* map xxxwallmenu to xxxwall */
@@ -4995,7 +4998,13 @@ updatemenu=0;
       else{
         glutAddMenuEntry("  in gas", INGASpatchmenu);
       }
-      if(activate_threshold==1&&local_do_threshold==1){
+      if(show_patch_incutcell == 1){
+        glutAddMenuEntry("  *in cutcell", INCUTCELLpatchmenu);
+      }
+      else{
+        glutAddMenuEntry("  in cutcell", INCUTCELLpatchmenu);
+      }
+      if(activate_threshold == 1 && local_do_threshold == 1){
         glutAddMenuEntry("-",DUMMYwallmenu);
         if(vis_threshold==1)glutAddMenuEntry("*char",SHOW_CHAR);
         if(vis_threshold==0)glutAddMenuEntry("char",SHOW_CHAR);
