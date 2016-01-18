@@ -3914,7 +3914,6 @@ USE COMPLEX_GEOMETRY
                      ENDDO
                   ENDDO
                ELSE
-
                   IFACE = IFACE + 1
                   LOCATIONS(IFACE) = 0
                   IF (CC_IBM) THEN
@@ -4053,6 +4052,8 @@ REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
 INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
 CHARACTER(LEN=100) :: SLICETYPE_LOCAL
+INTEGER :: CELLTYPE
+INTEGER :: ICF, NVF, IFACECF, IVCF, IFACECUT
 
 ! only generate CUTCELLS slice files if the immersed geometry option is turned on
 
@@ -4100,42 +4101,70 @@ IF (SLICETYPE_LOCAL=='IGNORE_GEOM' .OR. SLICETYPE_LOCAL=='IGNORE_OBST') THEN
 ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
 ELSE IF (SLICETYPE_LOCAL=='CUTCELLS') THEN
    IFACE = 0
+   IFACECUT=NFACES-NFACES_CUTCELLS
    IF (DIR==1) THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+            CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS)                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+               VALS(IFACE) = CELLTYPE
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+               VALS(IFACE) = CELLTYPE
             ENDIF
          END DO
       END DO
    ELSE IF (DIR==2) THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+            CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+               VALS(IFACE) = CELLTYPE
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+               VALS(IFACE) = CELLTYPE
             ENDIF
          END DO
       END DO
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
+            CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
             ELSE
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+               VALS(IFACE) = CELLTYPE
             
                IFACE = IFACE + 1
-               VALS(IFACE) = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+               VALS(IFACE) = CELLTYPE
             ENDIF
          END DO
       END DO
