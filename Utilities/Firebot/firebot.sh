@@ -138,7 +138,6 @@ if [ "$USEINSTALL" != "" ]; then
       exit
    fi
 fi
-exit
 
 if [ "$SSH" != "" ]; then
   sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
