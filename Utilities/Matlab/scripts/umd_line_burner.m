@@ -68,7 +68,7 @@ pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
 F1 = importdata([fdsdir,'methane_dx_1p25cm_line.csv'],',',2);
 F2 = importdata([fdsdir,'methane_dx_p625cm_line.csv'],',',2);
-F3 = importdata([fdsdir,'methane_dx_p625cm_line.csv'],',',2);
+F3 = importdata([fdsdir,'methane_dx_p3125cm_line.csv'],',',2);
 
 % % oxygen level
 
