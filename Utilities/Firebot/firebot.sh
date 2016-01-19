@@ -294,7 +294,7 @@ do_git_checkout()
      echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage1 2>&1
-     git submodules update --recursive >> $OUTPUT_DIR/stage1 2>&1
+     git submodule update --recursive >> $OUTPUT_DIR/stage1 2>&1
    fi
 
    echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
