@@ -31,6 +31,8 @@ if [ "$platform" == "linux" ] ; then
 fi
 
 # Additional definitions
+USEINSTALL=
+COMPILER=intel
 QUEUE=firebot
 BRANCH=development
 CLEANREPO=0
@@ -58,6 +60,7 @@ echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo "-c - clean repo"
 echo "-h - display this message"
+echo "-i - use installed version of smokeview"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
@@ -73,7 +76,7 @@ UPLOADGUIDES=0
 GIT_REVISION=
 SSH=
 SKIPMATLAB=
-while getopts 'b:chm:q:r:sS:uUv:' OPTION
+while getopts 'b:chim:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -84,6 +87,9 @@ case $OPTION in
    ;;
   h)
    usage;
+   ;;
+  i)
+   USEINSTALL="-r"
    ;;
   m)
    mailToFDS="$OPTARG"
@@ -109,6 +115,29 @@ case $OPTION in
 esac
 done
 shift $(($OPTIND-1))
+
+notfound=
+if [ "$COMPILER" == "intel" ]; then
+   if [[ "$IFORT_COMPILER" != "" ]] ; then
+      source $IFORT_COMPILER/bin/compilervars.sh intel64
+   fi
+   notfound=`icc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+else
+   notfound=`gcc -help 2>&1 | tail -1 | grep "not found" | wc -l`
+fi
+if [ $notfound == 1 ] ; then
+  USEINSTALL="-r"
+fi
+
+notfound=
+if [ "$USEINSTALL" != "" ]; then
+   notfound=`smokeview -v 2>&1 | tail -1 | grep "not found" | wc -l`
+   if [ $notfound == 1 ]; then
+      echo "Error: smokeview not found. firebot aborted."
+      echo "Error: smokeview not found. firebot aborted." >> $OUTPUT_DIR/stage1 2>&1
+      exit
+   fi
+fi
 
 if [ "$SSH" != "" ]; then
   sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
@@ -523,6 +552,7 @@ check_compile_fds_mpi()
 compile_smv_utilities()
 {  
    # smokeview libraries
+   if [ "$USEINSTALL" == "" ]; then
    echo "   Smokeview"
    echo "      libraries"
    if [ "$SSH" == "" ]; then
@@ -535,6 +565,8 @@ compile_smv_utilities()
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
+   fi
+   echo "   Smokeview - using installed smokeview"
    fi
 }
 
@@ -618,6 +650,7 @@ run_verification_cases_release()
 compile_smv_db()
 {
    # Clean and compile SMV debug
+   if [ "$USEINSTALL" == "" ]; then
    echo "      debug"
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
@@ -626,11 +659,13 @@ compile_smv_db()
    $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage3b \)
    fi
+   fi
 }
 
 check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
+   if [ "$USEINSTALL" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
@@ -652,6 +687,9 @@ check_compile_smv_db()
       grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3b | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
+   else
+      stage3b_success=true
+   fi
 }
 
 #  ==================================
@@ -661,6 +699,7 @@ check_compile_smv_db()
 compile_smv()
 {
    # Clean and compile SMV
+   if [ "$USEINSTALL" == "" ]; then
    echo "      release"
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
@@ -669,11 +708,13 @@ compile_smv()
    $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
    ./make_smv.sh &> $OUTPUT_DIR/stage3c \)
    fi
+   fi
 }
 
 check_compile_smv()
 {
    # Check for errors in SMV release compilation
+   if [ "$USEINSTALL" == "" ]; then
    cd $fdsrepo/SMV/Build/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
@@ -695,6 +736,8 @@ check_compile_smv()
       grep -A 5 -E 'warning|remark' ${FIREBOT_RUNDIR}/output/stage3c | grep -v 'feupdateenv is not implemented' | grep -v 'lcilkrts linked' >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
+   stage3c_success=true
+   fi
 }
 
 #  ================================
@@ -707,10 +750,10 @@ make_fds_pictures()
    echo Generating FDS images
    if [ "$SSH" == "" ]; then
    cd $fdsrepo/Verification/scripts
-   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6
+   ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6
    else
    $SSH \( cd $fdsrepo/Verification/scripts \; \
-   ./Make_FDS_Pictures.sh &> $OUTPUT_DIR/stage6 \)
+   ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6 \)
    fi
 }
 
