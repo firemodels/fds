@@ -780,6 +780,9 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
          LP%X = LP_X
          LP%Y = LP_Y
          LP%Z = LP_Z
+         LP%DX = DX(II)
+         LP%DY = DY(JJ)
+         LP%DZ = DZ(KK)
 
          ! Initialize particle properties
 
@@ -832,18 +835,21 @@ VOLUME_INSERT_LOOP: DO IB=1,N_INIT
 
                   ! Get particle coordinates by randomly choosing within the designated volume
 
+                  XC1 = MAX(X1,X(II-1))
+                  YC1 = MAX(Y1,Y(JJ-1))
+                  ZC1 = MAX(Z1,Z(KK-1))
+                  XC2 = MIN(X2,X(II))
+                  YC2 = MIN(Y2,Y(JJ))
+                  ZC2 = MIN(Z2,Z(KK))
+                  LP%DX = XC2 - XC1
+                  LP%DY = YC2 - YC1
+                  LP%DZ = ZC2 - ZC1
 
                   IF (IN%CELL_CENTERED) THEN
                      LP%X = 0.5_EB*(X(II-1)+X(II))
                      LP%Y = 0.5_EB*(Y(JJ-1)+Y(JJ))
                      LP%Z = 0.5_EB*(Z(KK-1)+Z(KK))
                   ELSE
-                     XC1 = MAX(X1,X(II-1))
-                     YC1 = MAX(Y1,Y(JJ-1))
-                     ZC1 = MAX(Z1,Z(KK-1))
-                     XC2 = MIN(X2,X(II))
-                     YC2 = MIN(Y2,Y(JJ))
-                     ZC2 = MIN(Z2,Z(KK))
                      CALL RANDOM_RECTANGLE(LP%X,LP%Y,LP%Z,XC1,XC2,YC1,YC2,ZC1,ZC2)
                   ENDIF
 
@@ -1021,7 +1027,7 @@ IF (LPC%SOLID_PARTICLE) THEN
          END SELECT
       CASE (POROUS_DRAG)
          MPUA = 0._EB
-         LP_VOLUME = LPC%POROUS_VOLUME_FRACTION*DX(II)*DY(JJ)*DZ(KK)
+         LP_VOLUME = LPC%POROUS_VOLUME_FRACTION*LP%DX*LP%DY*LP%DZ
          SELECT CASE (SF%GEOMETRY)
             CASE (SURF_CARTESIAN)
                LP%ONE_D%AREA = LP_VOLUME/SF%THICKNESS
@@ -1878,9 +1884,9 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          Y_TERM = LPC%DRAG_COEFFICIENT * RHO_G /SQRT(LPC%PERMEABILITY)*QREL
          K_TERM = MU_AIR/LPC%PERMEABILITY
          SFAC = 1._EB/RHO_G
-         LP%ACCEL_X = -(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
-         LP%ACCEL_Y = -(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
-         LP%ACCEL_Z = -(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
+         LP%ACCEL_X = -(LP%DX/DX(IIG))*(K_TERM(1)+Y_TERM(1))*UBAR*SFAC
+         LP%ACCEL_Y = -(LP%DY/DY(JJG))*(K_TERM(2)+Y_TERM(2))*VBAR*SFAC
+         LP%ACCEL_Z = -(LP%DZ/DZ(KKG))*(K_TERM(3)+Y_TERM(3))*WBAR*SFAC
    END SELECT
 ENDIF PARTICLE_NON_STATIC_IF
 
