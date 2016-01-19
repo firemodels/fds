@@ -3665,7 +3665,7 @@ USE COMPLEX_GEOMETRY
          DO K = K1+1, K2
             DO J = J1+1, J2
                IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS) ! a cutcell so count number of faces         
+                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! a cutcell so count number of faces         
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -3681,7 +3681,7 @@ USE COMPLEX_GEOMETRY
          DO K = K1+1, K2
             DO I = I1+1, I2
                IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)                  
+                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -3697,7 +3697,7 @@ USE COMPLEX_GEOMETRY
          DO I = I1+1, I2
             DO J = J1+1, J2
                IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
+                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
                   DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
                      NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
@@ -3844,7 +3844,7 @@ USE COMPLEX_GEOMETRY
       IVERT = 0
       IFACE = 0
       IF (DIR==1) THEN
-         XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
+         XMID = XPLT(SLICE)
          DO K=K1,K2
             DO J=J1,J2
                DO I = SLICE,SLICE
@@ -3858,7 +3858,7 @@ USE COMPLEX_GEOMETRY
          DO K=1,NK-1
             DO J=1,NJ-1
                IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS) ! store cutcell faces and vertices                 
+                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices  
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      DO IVCF=1,NVF
@@ -3894,7 +3894,7 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE IF (DIR==2) THEN
-         YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
+         YMID = YPLT(SLICE)
          DO K=K1,K2
             DO J=SLICE,SLICE
                DO I = I1,I2
@@ -3908,7 +3908,7 @@ USE COMPLEX_GEOMETRY
          DO K=1,NK-1
             DO I=1,NI-1
                IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)
+                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      DO IVCF=1,NVF
@@ -3942,7 +3942,7 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE
-         ZMID = (ZPLT(SLICE)+ZPLT(SLICE-1))/2.0_FB
+         ZMID = ZPLT(SLICE)
          DO K=SLICE,SLICE
             DO J=J1,J2
                DO I = I1,I2
@@ -3956,7 +3956,7 @@ USE COMPLEX_GEOMETRY
          DO J=1,NJ-1
             DO I=1,NI-1
                IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
-                  ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
+                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
                   DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                      NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                      DO IVCF=1,NVF
@@ -4056,7 +4056,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
          DO J = J1+1, J2
             CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(SLICE,J,K,IBM_IDCE,IAXIS) ! is a cut cell                  
+               ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! is a cut cell                  
                DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                   NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
@@ -4078,7 +4078,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
          DO I = I1+1, I2
             CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,SLICE,K,IBM_IDCE,JAXIS)                  
+               ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)                  
                DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                   NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
@@ -4100,7 +4100,7 @@ ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
          DO I = I1+1, I2
             CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
             IF (CELLTYPE == IBM_CUTCFE) THEN
-               ICF = FCVAR(I,J,SLICE,IBM_IDCE,KAXIS)                  
+               ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
                DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
                   NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
                   DO IVCF = 1, NVF-2 ! for now assume face is convex
