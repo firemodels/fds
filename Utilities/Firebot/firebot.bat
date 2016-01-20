@@ -82,7 +82,6 @@ set have_icc=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%fdsroot%\Utilities\get_time\intel_win%size%\get_time.exe
-set runbatchexe=%fdsroot%\SMV\source\runbatch\intel_win%size%\runbatch.exe
 
 call :get_datetime startdate starttime
 

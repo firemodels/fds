@@ -74,7 +74,6 @@ set haveCC=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
 set gettimeexe=%fdsroot%\Utilities\get_time\intel_win%size%\get_time.exe
-set runbatchexe=%fdsroot%\SMV\source\runbatch\intel_win%size%\runbatch.exe
 
 date /t > %OUTDIR%\starttime.txt
 set /p startdate=<%OUTDIR%\starttime.txt
