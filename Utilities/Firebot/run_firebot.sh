@@ -32,6 +32,7 @@ echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
 echo "-f - force firebot run"
 echo "-h - display this message"
+echo "-i - use installed version of smokeview"
 if [ "$EMAIL" != "" ]; then
 echo "-m email_address [default: $EMAIL]"
 else
@@ -47,6 +48,7 @@ echo "-v - show options used to run firebot"
 exit
 }
 
+USEINSTALL=
 BRANCH=development
 botscript=firebot.sh
 UPDATEREPO=
@@ -58,7 +60,7 @@ UPLOADGUIDES=
 SSH=
 FORCE=
 SKIPMATLAB=
-while getopts 'b:cfhm:q:nr:sS:uUv' OPTION
+while getopts 'b:cfhim:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -72,6 +74,9 @@ case $OPTION  in
    ;;
   h)
    usage;
+   ;;
+  i)
+   USEINSTALL="-i"
    ;;
   m)
    EMAIL="$OPTARG"
@@ -106,9 +111,8 @@ shift $(($OPTIND-1))
 
 if [ -e $running ] ; then
   if [ "$FORCE" == "" ] ; then
-    echo Firebot is already running.
-    echo Firebot or smokebot are already running.
-    echo "Re-run using the -f option if this is not the case."
+    echo Firebot or smokebot are already running. If this
+    echo "is not the case re-run using the -f option."
     exit
   fi
 fi
@@ -138,8 +142,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
 fi
 rm $running
