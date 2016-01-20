@@ -1,8 +1,8 @@
 @echo off
 Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=6.3.2
-set smv_revision=3988zc8
+set smv_version=6.3.3
+set smv_revision=9379bf1
 
 set fds_version=6.3.1
 set fds_revision=59edcfc
@@ -25,7 +25,7 @@ set fdswikirepo=%userprofile%\FDS-SMVwikis
 Rem ---------- User/Host names -----------------
 
 set linux_hostname=blaze.nist.gov
-set osx_hostname=floga.el.nist.gov
+set osx_hostname=bluesky.el.nist.gov
 
 set linux_username=%username%
 set svn_logon=%linux_username%@%linux_hostname%
@@ -33,4 +33,4 @@ set svn_logon=%linux_username%@%linux_hostname%
 Rem ----------- for uploading to Bintray -----------------
 
 set bintray_api_key=%userprofile%\keys\bintray_api_key.txt
-set upload=%svn_root%\Utilities\Scripts\curl
+set upload=%userprofile%\FIRE-LOCAL\repo_exes\curl
