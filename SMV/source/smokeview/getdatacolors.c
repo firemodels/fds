@@ -902,7 +902,7 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 }
 
-/* ------------------ getDataColors ------------------------ */
+/* ------------------ getPlot3DColors ------------------------ */
 
 void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax, 
               int ndatalevel, int nlevel,
@@ -1207,7 +1207,7 @@ void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
 }
 
 
-/* ------------------ getIsoLabelels ------------------------ */
+/* ------------------ getIsoLabels ------------------------ */
 
 void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256){

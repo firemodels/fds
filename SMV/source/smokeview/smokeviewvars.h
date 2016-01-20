@@ -208,7 +208,7 @@ SVEXTERN int SVDECL(show_volsmoke_moving,0);
 SVEXTERN int SVDECL(freeze_volsmoke,0);
 SVEXTERN int SVDECL(show_iso_solid,1),SVDECL(show_iso_outline,1),SVDECL(show_iso_points,0);
 SVEXTERN int SVDECL(show_patch_solid, 1), SVDECL(show_patch_outline, 0), SVDECL(show_patch_points, 0);
-SVEXTERN int SVDECL(show_patch_ingas, 1), SVDECL(show_patch_insolid, 1);
+SVEXTERN int SVDECL(show_patch_ingas, 1), SVDECL(show_patch_insolid, 1), SVDECL(show_patch_incutcell, 1);
 SVEXTERN int SVDECL(show_iso_normal, 0), SVDECL(smooth_iso_normal, 1);
 SVEXTERN int SVDECL(show_geom_solid, 1), SVDECL(show_geom_outline, 1), SVDECL(show_geom_points, 0);
 SVEXTERN int SVDECL(show_geom_normal, 0), SVDECL(smooth_geom_normal, 1);
@@ -587,7 +587,6 @@ SVEXTERN int SVDECL(cache_qdata,1);
 
 SVEXTERN int editwindow_status;
 SVEXTERN int startup_pass;
-SVEXTERN int ntargtimes;
 
 SVEXTERN int slicefilenumber;
 SVEXTERN int exportdata;
@@ -678,8 +677,6 @@ SVEXTERN int colorbarpoint;
 SVEXTERN int vectorspresent;
 SVEXTERN int SVDECL(colorbar_hidescene,0);
 
-SVEXTERN int visTarg, ReadTargFile;
-SVEXTERN int showtarget;
 SVEXTERN int visAIso;
 SVEXTERN int surfincrement,visiso;
 SVEXTERN int  isotest;
@@ -697,7 +694,6 @@ SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;
 SVEXTERN int SVDECL(nOBST,0),SVDECL(nVENT,0),SVDECL(nCVENT,0),SVDECL(ncvents,0),noffset;
 SVEXTERN int visLabels;
-SVEXTERN int SVDECL(ntarginfo,0);
 SVEXTERN int showallslicevectors;
 SVEXTERN float framerate;
 SVEXTERN int nglobal_times, SVDECL(ntimes_old,0), itimes, itime_save, itimeold, seqnum,RenderTime,RenderTimeOld;

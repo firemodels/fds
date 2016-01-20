@@ -10,16 +10,16 @@
 #include GLUT_H
 #include "gd.h"
 
-/* ------------------ does_movie_exist ------------------------ */
-
 #define RENDER_TYPE 0
 #define RENDER_START 3
+
+/* ------------------ does_movie_exist ------------------------ */
 
 int does_movie_exist(char *mov_name, char *moviefile){
   char *movie;
 
   if(mov_name == NULL || strlen(mov_name) < 1)return 0;
-  trim(mov_name);
+  trim_back(mov_name);
   movie = trim_front(mov_name);
   strcpy(moviefile, movie);
   strcat(moviefile, ".mp4");
@@ -48,7 +48,7 @@ void PlayMovie(void){
 char *get_moviefile_path(char *moviefile_path){
   char moviefile[1024], *movie;
 
-  trim(movie_name);
+  trim_back(movie_name);
   movie = trim_front(movie_name);
   strcpy(moviefile, movie);
   strcat(moviefile, movie_ext);
@@ -516,8 +516,6 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   PRINTF(" Completed\n");
   return 0;
 }
-
-
 
 /* ------------------ SVimage2file ------------------------ */
 

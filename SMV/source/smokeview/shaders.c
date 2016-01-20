@@ -504,7 +504,6 @@ int setVolSmokeShaders(){
 
   if(error_code!=1)return error_code;
   return error_code;
-
 }
 
 /* ------------------ setSmokeShaders ------------------------ */
@@ -632,7 +631,7 @@ int setSmokeShaders(){
 }
 
 
-/* ------------------ LoadZoneSmokeShaders ------------------------ */
+/* ------------------ Load3DSliceShaders ------------------------ */
 
 void Load3DSliceShaders(void){
   glUseProgramObjectARB(p_3dslice);
@@ -786,4 +785,3 @@ void printInfoLog(GLhandleARB obj){
   }
 }
 #endif
-

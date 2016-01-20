@@ -184,7 +184,7 @@ extern "C" void show_glui_device(void){
   if(glui_device!=NULL)glui_device->show();
 }
 
-/* ------------------ Device_CB ------------------------ */
+/* ------------------ Open_CB ------------------------ */
 
 void Open_CB(int var){
   int i;
@@ -236,7 +236,7 @@ void Open_CB(int var){
       break;
     case OPEN_APPLY_FILTER:
       strcpy(gluiopen_filter2,gluiopen_filter);
-      trim(gluiopen_filter2);
+      trim_back(gluiopen_filter2);
       open_filter_ptr = trim_front(gluiopen_filter2);
       EDIT_filter->set_text(open_filter_ptr);
       Open_CB(OPEN_UPDATE_LIST);

@@ -228,7 +228,7 @@ void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
   }
 }
 
-/* ------------------ Init_Units ------------------------ */
+/* ------------------ InitUnits ------------------------ */
 
 void InitUnits(void){
   int i;

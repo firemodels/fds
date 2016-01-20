@@ -788,7 +788,7 @@ void unloadiso(mesh *meshi){
   return;
 }
 
-/* ------------------ drawiso ------------------------ */
+/* ------------------ drawiso_orig ------------------------ */
 
 void drawiso_orig(int tranflag){
   int i;
@@ -1278,7 +1278,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   }
 }
 
-/* ------------------ updateslicetypes ------------------------ */
+/* ------------------ updateisotypes ------------------------ */
 
 void updateisotypes(void){
   int i;
@@ -1552,7 +1552,7 @@ void sync_isobounds(int isottype){
   }
 }
 
-/* ------------------ compareisonodes ------------------------ */
+/* ------------------ compare_iso_triangles ------------------------ */
 
 int compare_iso_triangles( const void *arg1, const void *arg2 ){
   isotri *trii, *trij;
@@ -1570,7 +1570,7 @@ int compare_iso_triangles( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ sort_triangles ------------------------ */
+/* ------------------ Sort_Iso_Triangles ------------------------ */
 
 void Sort_Iso_Triangles(float *mm){
   int itri;
@@ -1633,7 +1633,7 @@ void Sort_Iso_Triangles(float *mm){
   if(dosort==1)qsort((isotri **)iso_trans,(size_t)niso_trans,sizeof(isotri **),compare_iso_triangles);
 }
 
-/* ------------------ update_isotri_list ------------------------ */
+/* ------------------ Update_Isotris ------------------------ */
 
 void Update_Isotris(int flag){
   int itri;

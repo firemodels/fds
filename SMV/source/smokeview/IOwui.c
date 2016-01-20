@@ -106,7 +106,7 @@ void drawtrees(void){
 
 }
 
-/* ------------------ get_zcell ------------------------ */
+/* ------------------ get_zcell_val ------------------------ */
 
 float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int *loc){
   int imesh;
@@ -689,7 +689,7 @@ void drawterrain(terraindata *terri, int only_geom){
 
 }
 
-/* ------------------ drawterrain ------------------------ */
+/* ------------------ drawterrain_texture ------------------------ */
 
 void drawterrain_texture(terraindata *terri, int only_geom){
   float *znode;
@@ -945,8 +945,6 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   fclose(WUIFILE);
 
   return 0;
-
-
 }
 
 /* ------------------ getterrain_data ------------------------ */
@@ -1029,8 +1027,6 @@ int getterrain_data(char *file,terraindata *terri){
   FREEMEMORY(cellindex_buffer);
   FREEMEMORY(cellstate_buffer);
   return 0;
-
-
 }
 
 /* ------------------ init_terraincell ------------------------ */

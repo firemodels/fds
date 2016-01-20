@@ -59,7 +59,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key!=NULL&&key==buf)ntrinfo_local++;
@@ -85,7 +85,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key==NULL||key!=buf)continue;
@@ -105,7 +105,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
       doit=0;
       if(fgets(buffer,1000,stream)==NULL)break;
       buf=trim_front(buffer);
-      trim(buf);
+      trim_back(buf);
       if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)doit=1;
     }
     value = getstring(buf+6);

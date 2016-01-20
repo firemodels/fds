@@ -87,13 +87,13 @@ extern "C" void update_colorbar_list(void){
   LISTBOX_colorbar->set_int_val(selectedcolorbar_index);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_type ------------------------ */
 
 extern "C" void update_colorbar_type(void){
   LISTBOX_colorbar->set_int_val(colorbartype);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_label ------------------------ */
 
 extern "C" void update_colorbar_label(void){
   EDITTEXT_colorbar_label->set_text(colorbar_label);

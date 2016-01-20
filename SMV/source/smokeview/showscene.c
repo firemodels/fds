@@ -32,7 +32,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode == DRAWSCENE){
-    Get_VP_info();
+    get_viewport_info();
 
     if(clip_rendered_scene == 1){
       CLIP_viewport(quad, s_left, s_down);
@@ -116,12 +116,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       drawevac_frame();
     }
 
-/* ++++++++++++++++++++++++ draw targets +++++++++++++++++++++++++ */
-
-    if(showtarget==1){
-      CLIP_VALS;
-      drawTargets();
-    }
+/* ++++++++++++++++++++++++ draw test geometry +++++++++++++++++++++++++ */
 
 #ifdef pp_GEOMTEST
     if(geomtest_option == TETRAHEDRON_TEST){

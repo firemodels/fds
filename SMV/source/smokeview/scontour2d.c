@@ -706,7 +706,7 @@ void GetContourAreas(const contour *ci){
   }
 }
 
-/*  ------------------ drawcontours ------------------------ */
+/*  ------------------ DrawContours ------------------------ */
 
 void DrawContours(const contour *ci){
   int nlevels, n, npolys, *polysize, ipoly, j, nnodes;

@@ -68,7 +68,6 @@
 #define MENU_SIZEPRESERVING -105
 #define MENU_DUMMY -999
 
-#define MENU_SHOWHIDE_TARGET 2
 #define MENU_SHOWHIDE_EVAC 13
 #define MENU_SHOWHIDE_PRINT 16
 #define MENU_SHOWHIDE_PARTICLES 1
@@ -561,7 +560,6 @@ void Smoke3DShowMenu(int value){
       smoke3di->display = 1 - smoke3di->display;
     }
   }
-
 }
 
 /* ------------------ IsoShowMenu ------------------------ */
@@ -947,9 +945,6 @@ void ShowHideMenu(int value){
     }
     Update_Times();
     break;
-    case MENU_SHOWHIDE_TARGET:
-    visTarg=1-visTarg;
-    break;
   case MENU_SHOWHIDE_SENSOR:
     visSensor=1-visSensor;
     break;
@@ -992,7 +987,6 @@ void ViewpointMenu(int value){
 }
 
 /* ------------------ DialogMenu ------------------------ */
-
 
 void DialogMenu(int value){
   glutPostRedisplay();
@@ -1631,9 +1625,11 @@ void ParticleShowMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ FrameRateMenu ------------------------ */
+#define MENU_FRAMERATE_Realtime 2001
+#define MENU_FRAMERATE_2xRealtime 2002
+#define MENU_FRAMERATE_4xRealtime 2004
 
-//void keyboard(unsigned char key, int x, int y);
+/* ------------------ FrameRateMenu ------------------------ */
 
 void FrameRateMenu(int value){
   updateUpdateFrameRateMenu=0;
@@ -1641,18 +1637,18 @@ void FrameRateMenu(int value){
   frameinterval=1;
   if(value > 0){
     switch(value){
-    case 2001:
+    case MENU_FRAMERATE_Realtime:
       if(nglobal_times>0){
         if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       }
       realtime_flag=1;
       break;
-    case 2002:
+    case MENU_FRAMERATE_2xRealtime:
       if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 2.0;
       realtime_flag=2;
       break;
-    case 2004:
+    case MENU_FRAMERATE_4xRealtime:
       if(global_times!=NULL)frameinterval=1000.*(global_times[nglobal_times-1]-global_times[0])/nglobal_times;
       frameinterval /= 4.0;
       realtime_flag=4;
@@ -1777,7 +1773,6 @@ void HelpMenu(int value){
   }
 }
 
-
 /* ------------------ VectorSkipMenu ------------------------ */
 
 void VectorSkipMenu(int value){
@@ -1867,22 +1862,29 @@ void TextureShowMenu(int value){
 
 }
 
+#define MENU_PLOT3D_Z 1
+#define MENU_PLOT3D_Y 2
+#define MENU_PLOT3D_X 3
+#define MENU_PLOT3D_CONT 4
+#define MENU_PLOT3D_SHOWALL 5
+#define MENU_PLOT3D_HIDEALL 6
+
 /* ------------------ Plot3DShowMenu ------------------------ */
 
 void Plot3DShowMenu(int value){
   int i;
 
   switch(value){
-    case 1:
+  case MENU_PLOT3D_Z:
       visz_all=1-visz_all;
       break;
-    case 2:
+  case MENU_PLOT3D_Y:
       visy_all=1-visy_all;
       break;
-    case 3:
+  case MENU_PLOT3D_X:
       visx_all=1-visx_all;
       break;
-    case 4:
+  case MENU_PLOT3D_CONT:
       switch(contour_type){
         case SHADED_CONTOURS:
           contour_type=STEPPED_CONTOURS;
@@ -1896,12 +1898,12 @@ void Plot3DShowMenu(int value){
           break;
       }
       break;
-    case 5:
+  case MENU_PLOT3D_SHOWALL:
       visx_all=1;
       visy_all=1;
       visz_all=1;
       break;
-    case 6:
+  case MENU_PLOT3D_HIDEALL:
       visx_all=0;
       visy_all=0;
       visz_all=0;
@@ -2161,7 +2163,7 @@ void ScriptMenu(int value){
         {
           char *renderdir;
 
-          trim(script_renderdir);
+          trim_back(script_renderdir);
           renderdir = trim_front(script_renderdir);
           if(strlen(renderdir)>0&&strcmp(renderdir,".")!=0){
             fprintf(scriptoutstream,"RENDERDIR\n");
@@ -2418,7 +2420,6 @@ void LoadUnloadMenu(int value){
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
-
 /* ------------------ ShowTourMenu ------------------------ */
 
 void ShowTourMenu(int value){
@@ -2579,24 +2580,6 @@ void SetTour(tourdata *thetour){
   if(thetour==NULL)return;
   tournumber = thetour - tourinfo;
   TourMenu(tournumber);
-}
-
-/* ------------------ targetMenu ------------------------ */
-
-void TargetMenu(int value){
-  int errorcode,i;
-  if(value>=0){
-    readtarget(targinfo[value].file,value,LOAD,&errorcode);
-  }
-  else{
-    if(value==-1){
-      for(i=0;i<ntarginfo;i++){
-        readtarget("",i,UNLOAD,&errorcode);
-      }
-    }
-  }
-  updatemenu=1;  
-  glutPostRedisplay();
 }
 
 /* ------------------ EvacMenu ------------------------ */
@@ -3136,7 +3119,6 @@ void UnloadMultiVSliceMenu(int value){
   }
 }
 
-
 /* ------------------ UnLoadMultiSliceMenu ------------------------ */
 
 void UnloadMultiSliceMenu(int value){
@@ -3153,7 +3135,6 @@ void UnloadMultiSliceMenu(int value){
     UnloadSliceMenu(UNLOAD_ALL);
   }
 }
-
 
 /* ------------------ ShowVolSmoke3DMenu ------------------------ */
 
@@ -3416,7 +3397,7 @@ int AnySlices(char *type){
   return 0;
 }
 
-/* ------------------ LoadAllSlices ------------------------ */
+/* ------------------ HideAllSlices ------------------------ */
 
 void HideAllSlices(void){
   int i;
@@ -3991,7 +3972,10 @@ void ShowPatchMenu(int value){
     else if(value==INGASpatchmenu){
       show_patch_ingas = 1-show_patch_ingas;
     }
-    else if(value!=DUMMYwallmenu){
+    else if(value == INCUTCELLpatchmenu){
+      show_patch_incutcell = 1 - show_patch_incutcell;
+    }
+    else if(value != DUMMYwallmenu){
       int n;
 
       value = -(value+2); /* map xxxwallmenu to xxxwall */
@@ -4069,9 +4053,6 @@ void VentMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
 }
-
-
-/* ------------------ ImmersedMenu ------------------------ */
 #define GEOMETRY_SOLID 0
 #define GEOMETRY_OUTLINE 1
 #define GEOMETRY_SOLIDOUTLINE 2
@@ -4086,6 +4067,8 @@ void VentMenu(int value){
 #define GEOMETRY_SMOOTHNORMAL 4
 #define GEOMETRY_SHOWDIAGNOSTICS 13
 #define GEOMETRY_HILIGHTSKINNY 5
+
+/* ------------------ ImmersedMenu ------------------------ */
 
 void ImmersedMenu(int value){
   updatemenu=1;
@@ -4376,7 +4359,6 @@ void TitleMenu(int value){
   }
 }
 
-
 /* ------------------ PropMenu ------------------------ */
 
 void PropMenu(int value){
@@ -4563,15 +4545,21 @@ void ZoneShowMenu(int value){
   glutPostRedisplay();
 }
 
+#define GEOM_Vents 15
+#define GEOM_Outline 3
+#define GEOM_TriangleCount 14
+#define GEOM_ShowAll 11
+#define GEOM_HideAll 13
+
 /* ------------------ GeometryMenu ------------------------ */
 
 void GeometryMenu(int value){
 
   switch(value){
-  case 14:
+  case GEOM_TriangleCount:
     show_triangle_count=1-show_triangle_count;
     break;
-  case 3:
+  case GEOM_Outline:
     if(isZoneFireModel==0)visFrame=1-visFrame;
     break;
   case 5:
@@ -4610,7 +4598,7 @@ void GeometryMenu(int value){
     }
     Update_Glui_Wui();
     break;
-  case 11:
+  case GEOM_ShowAll:
     if(isZoneFireModel)visFrame=1;
     /*
     visFloor=1;
@@ -4620,7 +4608,7 @@ void GeometryMenu(int value){
     visVents=1;
     BlockageMenu(visBLOCKAsInput);
     break;
-  case 13:
+  case GEOM_HideAll:
     visFrame=0;
     visFloor=0;
     visWalls=0;
@@ -4629,7 +4617,7 @@ void GeometryMenu(int value){
     visGrid=0;
     BlockageMenu(visBLOCKHide);
     break;
-  case 15:
+  case GEOM_Vents:
     visVents=1-visVents;
     break;
   default:
@@ -4668,7 +4656,7 @@ void MENU_vslice(int vec_type){
   }
 }
 
-/* ------------------ get_total_active_devices ------------------------ */
+/* ------------------ get_num_activedevices ------------------------ */
 
 int get_num_activedevices(void){
   int num_activedevices = 0;
@@ -4751,7 +4739,7 @@ static int *particlepropshowsubmenu=NULL;
 static int particlestreakshowmenu=0;
 static int tourmenu=0;
 static int avatartourmenu=0,avatarevacmenu=0;
-static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0,targetmenu=0;
+static int trainerviewmenu=0,mainmenu=0,zoneshowmenu=0,particleshowmenu=0,evacshowmenu=0;
 static int showobjectsmenu=0,spheresegmentmenu=0,propmenu=0;
 static int unloadplot3dmenu=0, unloadpatchmenu=0, unloadisomenu=0;
 static int showmultislicemenu=0;
@@ -5010,7 +4998,13 @@ updatemenu=0;
       else{
         glutAddMenuEntry("  in gas", INGASpatchmenu);
       }
-      if(activate_threshold==1&&local_do_threshold==1){
+      if(show_patch_incutcell == 1){
+        glutAddMenuEntry("  *in cutcell", INCUTCELLpatchmenu);
+      }
+      else{
+        glutAddMenuEntry("  in cutcell", INCUTCELLpatchmenu);
+      }
+      if(activate_threshold == 1 && local_do_threshold == 1){
         glutAddMenuEntry("-",DUMMYwallmenu);
         if(vis_threshold==1)glutAddMenuEntry("*char",SHOW_CHAR);
         if(vis_threshold==0)glutAddMenuEntry("char",SHOW_CHAR);
@@ -5467,21 +5461,21 @@ updatemenu=0;
   if(nplot3dinfo>0){
     CREATEMENU(staticslicemenu,Plot3DShowMenu);
     glutAddSubMenu(_("Solution variable"),staticvariablemenu);
-    if(visz_all==1)glutAddMenuEntry(_("*xy plane"),1);
-    if(visz_all==0)glutAddMenuEntry(_("xy plane"),1);
-    if(visy_all==1)glutAddMenuEntry(_("*xz plane"),2);
-    if(visy_all==0)glutAddMenuEntry(_("xz plane"),2);
-    if(visx_all==1)glutAddMenuEntry(_("*yz plane"),3);
-    if(visx_all==0)glutAddMenuEntry(_("yz plane"),3);
+    if(visz_all==1)glutAddMenuEntry(_("*xy plane"), MENU_PLOT3D_Z);
+    if(visz_all==0)glutAddMenuEntry(_("xy plane"), MENU_PLOT3D_Z);
+    if(visy_all==1)glutAddMenuEntry(_("*xz plane"), MENU_PLOT3D_Y);
+    if(visy_all==0)glutAddMenuEntry(_("xz plane"), MENU_PLOT3D_Y);
+    if(visx_all==1)glutAddMenuEntry(_("*yz plane"), MENU_PLOT3D_X);
+    if(visx_all==0)glutAddMenuEntry(_("yz plane"), MENU_PLOT3D_X);
     if(vectorspresent==1)glutAddSubMenu(_("Flow vectors"),vectorskipmenu);
     if(contour_type==SHADED_CONTOURS){
-      glutAddMenuEntry(_("*Continuous contours"),4);
+      glutAddMenuEntry(_("*Continuous contours"), MENU_PLOT3D_CONT);
     }
     if(contour_type!=SHADED_CONTOURS){
-      glutAddMenuEntry(_("Continuous contours"),4);
+      glutAddMenuEntry(_("Continuous contours"), MENU_PLOT3D_CONT);
     }
-    glutAddMenuEntry(_("Show all planes"),5);
-    glutAddMenuEntry(_("Hide all planes"),6);
+    glutAddMenuEntry(_("Show all planes"), MENU_PLOT3D_SHOWALL);
+    glutAddMenuEntry(_("Hide all planes"), MENU_PLOT3D_HIDEALL);
 
     CREATEMENU(plot3dshowmenu,Plot3DShowMenu);
     if(nplot3dloaded>0){
@@ -5782,26 +5776,26 @@ updatemenu=0;
   if(get_total_vents()>0)glutAddSubMenu(_("Surfaces"), ventmenu);
   if(nzvents > 0){
     if(visVents == 1){
-      glutAddMenuEntry(_("*Vents"), 15);
+      glutAddMenuEntry(_("*Vents"), GEOM_Vents);
     }
     else{
-      glutAddMenuEntry(_("Vents"), 15);
+      glutAddMenuEntry(_("Vents"), GEOM_Vents);
     }
   }
   if(ntotal_blockages>0 || isZoneFireModel == 1){
     glutAddSubMenu(_("Grid"),gridslicemenu);
   }
   if(isZoneFireModel==0){
-    if(visFrame==1)glutAddMenuEntry(_("*Outline"),3);
-    if(visFrame==0)glutAddMenuEntry(_("Outline"),3);
+    if(visFrame==1)glutAddMenuEntry(_("*Outline"), GEOM_Outline);
+    if(visFrame==0)glutAddMenuEntry(_("Outline"), GEOM_Outline);
   }
   else{
     visFrame=0;
   }
-  if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"),14);
-  if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"),14);
-  glutAddMenuEntry(_("Show all"),11);
-  glutAddMenuEntry(_("Hide all"),13);
+  if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"), GEOM_TriangleCount);
+  if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"), GEOM_TriangleCount);
+  glutAddMenuEntry(_("Show all"), GEOM_ShowAll);
+  glutAddMenuEntry(_("Hide all"), GEOM_HideAll);
 
 /* --------------------------------label menu -------------------------- */
 
@@ -7111,11 +7105,6 @@ updatemenu=0;
     showhide_data = 1;
     glutAddSubMenu(_("Zone"), zoneshowmenu);
   }
-  if(ReadTargFile==1){
-    showhide_data = 1;
-    if(showtarget==1)glutAddMenuEntry(_("*Targets"), MENU_SHOWHIDE_TARGET);
-    if(showtarget==0)glutAddMenuEntry(_("Targets"), MENU_SHOWHIDE_TARGET);
-  }
   if(nobject_defs>0){
     int num_activedevices=0;
 
@@ -7205,12 +7194,12 @@ updatemenu=0;
   if(frameratevalue!=15)glutAddMenuEntry("15 FPS",15);
   if(frameratevalue==30)glutAddMenuEntry("*30 FPS",30);
   if(frameratevalue!=30)glutAddMenuEntry("30 FPS",30);
-  if(frameratevalue==2001)glutAddMenuEntry(_("*Real time"),2001);
-  if(frameratevalue!=2001)glutAddMenuEntry(_("Real time"),2001);
-  if(frameratevalue==2002)glutAddMenuEntry(_("*2 x Real time"),2002);
-  if(frameratevalue!=2002)glutAddMenuEntry(_("2 x Real time"),2002);
-  if(frameratevalue==2004)glutAddMenuEntry(_("*4 x Real time"),2004);
-  if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"),2004);
+  if(frameratevalue==2001)glutAddMenuEntry(_("*Real time"),MENU_FRAMERATE_Realtime);
+  if(frameratevalue!=2001)glutAddMenuEntry(_("Real time"), MENU_FRAMERATE_Realtime);
+  if(frameratevalue==2002)glutAddMenuEntry(_("*2 x Real time"), MENU_FRAMERATE_2xRealtime);
+  if(frameratevalue!=2002)glutAddMenuEntry(_("2 x Real time"), MENU_FRAMERATE_2xRealtime);
+  if(frameratevalue==2004)glutAddMenuEntry(_("*4 x Real time"), MENU_FRAMERATE_4xRealtime);
+  if(frameratevalue!=2004)glutAddMenuEntry(_("4 x Real time"), MENU_FRAMERATE_4xRealtime);
   if(frameratevalue!=1000)glutAddMenuEntry(_("Unlimited"),1000);
   if(frameratevalue==1000)glutAddMenuEntry(_("*Unlimited"),1000);
   if(frameratevalue<0){
@@ -7720,24 +7709,6 @@ updatemenu=0;
   glutAddSubMenu(_("Shortcuts"),keyboardhelpmenu);
   glutAddSubMenu(_("Mouse"),mousehelpmenu);
   glutAddSubMenu(_("About"),aboutmenu);
-
-  /* -------------------------------- target menu -------------------------- */
-
-  if(ntarginfo>0){
-    CREATEMENU(targetmenu,TargetMenu);
-    for(i=0;i<ntarginfo;i++){
-      char menulabel[1024];
-
-      if(targfilenum==i){
-        STRCPY(menulabel,"*");
-        STRCAT(menulabel,targinfo[i].file);  
-      }
-      else{STRCPY(menulabel,targinfo[i].file);}
-      glutAddMenuEntry(menulabel,i);
-    }
-    glutAddMenuEntry(_("Unload"),-1);
-    CheckMemory;
-  }
 
   /* --------------------------------particle menu -------------------------- */
 
@@ -9250,10 +9221,6 @@ updatemenu=0;
         }
       }
       if(nplot3dinfo>0)glutAddSubMenu("Plot3d file",loadplot3dmenu);
-      if(ntarginfo>0){
-        strcpy(loadmenulabel,"Target file");
-        glutAddSubMenu(loadmenulabel,targetmenu);
-      }
       if(nzoneinfo>0){
         strcpy(loadmenulabel,"Zone fire file");
         glutAddSubMenu(loadmenulabel,zonemenu);

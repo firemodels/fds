@@ -151,7 +151,7 @@ void init_lang(void){
     filelisti = filelistinfo + i;
     file=filelisti->file;
     if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
-    trim(file);
+    trim_back(file);
     file=trim_front(file);
     len=strlen(file);
     langi->file=file;
@@ -934,7 +934,7 @@ void InitOpenGL(void){
     }
   }
 
- /* ------------------ get_startup_smoke3d ------------------------ */
+ /* ------------------ get_startup_smoke ------------------------ */
 
   void get_startup_smoke(int seq_id){
     int i;
@@ -1442,7 +1442,6 @@ void initvars(void){
 
   editwindow_status=-1;
   startup_pass=1;
-  ntargtimes=500;
 
   slicefilenumber=0;
   exportdata=0;
@@ -1510,9 +1509,6 @@ void initvars(void){
   test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
-  visTarg = 0;
-  ReadTargFile=0;
-  showtarget=0;
   visAIso=1;
   surfincrement=0,visiso=0;
   isotest=0;
@@ -1529,7 +1525,6 @@ void initvars(void){
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   noffset=0;
   visLabels=0;
-  ntarginfo=0;
   showallslicevectors=0;
   framerate=-1.0;
   itimes=0, itimeold=-999, seqnum=0,RenderTime=0; RenderTimeOld=0; itime_save=-1;

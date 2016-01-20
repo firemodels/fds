@@ -36,7 +36,7 @@ float vol_tetra(float *a, float *b, float *c, float *d){
   return ABS(volume);
 }
 
-/* ------------------ vol_hexa ------------------------ */
+/* ------------------ vol_penta ------------------------ */
 
 float vol_penta(float *a, float *b, float *c, float *d, float *e, float *f){
   float vol1, vol2, vol3;
@@ -1183,6 +1183,7 @@ int MergeIsosurface(isosurface *to_surface, isosurface *from_surface){
     from_surface->triangles,from_surface->ntriangles);
   return return_val;
 }
+
 /* ------------------ UpdateIsosurface ------------------------ */
 
 int UpdateIsosurface(isosurface *surface, 
@@ -1518,7 +1519,7 @@ int GetNormalSurface(isosurface *surfacedata){
 
 }
 
-/* ------------------ isoheader ------------------------ */
+/* ------------------ CCisoheader ------------------------ */
 
 void CCisoheader(char *isofile, 
                  char *isolonglabel, char *isoshortlabel, char *isounits,
@@ -1549,7 +1550,7 @@ void CCisoheader(char *isofile,
 }
 
 
-/* ------------------ isotheader ------------------------ */
+/* ------------------ CCtisoheader ------------------------ */
 
 void CCtisoheader(char *isofile, 
                  char *isolonglabel, char *isoshortlabel, char *isounits,
@@ -1802,8 +1803,6 @@ float get_tri_area(int *edgelist, float *xyz){
   return 0.5*NORM3(vcross);
 }
 
-/* ------------------ get_iso_level_area_tetra ------------------------ */
-
 #define FACTOR(ii,v0,v1,x0,x1) \
   if(v0*v1<0.0){\
     factor2=-v0/(v1-v0);\
@@ -1811,7 +1810,10 @@ float get_tri_area(int *edgelist, float *xyz){
     xyziso[1+3*ii]=MIX(factor2,(x1)[1],(x0)[1]);\
     xyziso[2+3*ii]=MIX(factor2,(x1)[2],(x0)[2]);\
   }
-float get_iso_level_area_tetra(float level, 
+
+/* ------------------ get_iso_level_area_tetra ------------------------ */
+
+float get_iso_level_area_tetra(float level,
                                float v0, float v1, float v2, float v3, 
                                float *xyz0, float *xyz1, float *xyz2, float *xyz3){
   float area, vals2[4],factor2,xyziso[18];
@@ -1866,7 +1868,7 @@ float get_iso_level_area_tetra(float level,
   return area;
 }
 
-/* ------------------ get_iso_level_area_tetra ------------------------ */
+/* ------------------ get_iso_level_area_cube ------------------------ */
 
 float get_iso_level_area_cube(float level, float *vals, float *xyz){
   float area=0.0;

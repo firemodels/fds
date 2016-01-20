@@ -27,7 +27,7 @@ int gettokens(char *tokens, char **tokenptrs){
     token=strtok(NULL,",");
   }
   for(i=0;i<ntokenptrs;i++){
-    trim(tokenptrs[i]);
+    trim_back(tokenptrs[i]);
     tokenptrs[i]=trim_front(tokenptrs[i]);
   }
   return ntokenptrs;

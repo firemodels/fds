@@ -2,6 +2,7 @@
 
 set curdir=%CD%
 set DEBUG=
+set rundebug=0
 set size=_64
 
 set stopscript=0
@@ -130,6 +131,7 @@ exit /b
  )
  if /I "%1" EQU "-debug" (
    set valid=1
+   set rundebug=1
    set DEBUG=_db
  )
  shift

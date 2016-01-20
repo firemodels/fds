@@ -196,7 +196,7 @@ int main(int argc, char **argv){
         char *hostname;
 
         if(fgets(buffer,255,stream)==NULL)break;
-        trim(buffer);
+        trim_back(buffer);
         hostname=malloc(strlen(buffer)+1);
         strcpy(hostname,buffer);
         hd->hostname=hostname;

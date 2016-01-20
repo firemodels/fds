@@ -104,6 +104,7 @@ void getzonesizecsv(int *nzone_times_local, int *nroom, int *nfires_local, int *
         return;\
       }\
       zonedev->in_zone_csv = 1
+
 /* ------------------ getzonedatacsv ------------------------ */
 
 void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local, 
@@ -501,7 +502,7 @@ void getzonedatacsv(int nzone_times_local, int nrooms_local, int nfires_local,
   }
 }
 
-/* ------------------ getsmokedir ------------------------ */
+/* ------------------ getzonesmokedir ------------------------ */
 
 void getzonesmokedir(float *mm){
     /*
@@ -1340,7 +1341,6 @@ void drawventdataPROFILE(void){
     glEnd();
   }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
-
 }
 
 /* ------------------ drawventdataSLAB ------------------------ */
@@ -2026,6 +2026,5 @@ void DrawFirePlume(float diameter, float height, float maxheight){
     drawtrunccone(dlower2,dupper2,dupper1/2.0,firecolor);
     glPopMatrix();
   }
-
 }
 

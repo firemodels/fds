@@ -160,7 +160,7 @@ EXTERNCPP void define_volsmoke_textures(void);
 EXTERNCPP void set_colorbar_list_index(int val);
 EXTERNCPP int get_colorbar_list_index(void);
 EXTERNCPP int get_colorbar_index(int flag, int x, int y);
-EXTERNCPP void Get_VP_info(void);
+EXTERNCPP void get_viewport_info(void);
 
 EXTERNCPP void scale_2dfont(void);
 EXTERNCPP void scale_3dfont(void);
@@ -843,9 +843,7 @@ EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readfed(int ifile, int flag, int file_type, int *errorcode);
 EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void readtarget(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
-EXTERNCPP void readtarget2(const char *file, int ifile, int flag, int *errorcode);
 EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 
 EXTERNCPP void InitMenus(int unload);
@@ -853,7 +851,6 @@ EXTERNCPP void smoothlabel(float *min, float *max, int n);
 EXTERNCPP int readsmv(char *file, char *file2);
 EXTERNCPP void readsmv_dynamic(char *file);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
-EXTERNCPP int gettargetposition(int itarget, float time, float *x, float *y, float *z);
 EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, char *string);
 EXTERNCPP void outputText(float x, float y, char *string);

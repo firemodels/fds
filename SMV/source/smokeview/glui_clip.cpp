@@ -170,7 +170,6 @@ extern "C" void show_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->show();
 }
 
-
 /* ------------------ Update_Glui_Clip ------------------------ */
 
 extern "C" void Update_Glui_Clip(void){

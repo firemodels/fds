@@ -27,7 +27,7 @@ int plot3dcompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ readplot  ------------------------ */
+/* ------------------ readplot3d  ------------------------ */
 
 void readplot3d(char *file, int ifile, int flag, int *errorcode){
   int n, nn, ntotal, i, nnn;
@@ -1793,6 +1793,7 @@ void updateshowstep(int val, int slicedir){
 }
 
 /* ------------------ drawgrid ------------------------ */
+
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawgrid(const mesh *meshi){
   int i, j, k;
@@ -1919,8 +1920,6 @@ void updateplot3dmenulabels(void){
       }
     } 
   }
-
-
 }
 
 /* ------------------ plot3dlistcompare  ------------------------ */

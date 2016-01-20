@@ -44,7 +44,7 @@ EXTERNCPP void stripcommas(char *buffer);
 EXTERNCPP int getrowcols(FILE *stream, int *nrows, int *ncols);
 
 EXTERNCPP char *remove_comment(char *buffer);
-EXTERNCPP void trim(char *line);
+EXTERNCPP void trim_back(char *line);
 EXTERNCPP void trim_commas(char *line);
 EXTERNCPP char *trim_front(char *line);
 EXTERNCPP void trimzeros(char *line);
@@ -54,7 +54,7 @@ EXTERNCPP char *STRSTR(char *c, const char *key);
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval,float range);
-EXTERNCPP char *trim_string(char *buffer);
+EXTERNCPP char *trim_frontback(char *buffer);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
 EXTERNCPP char *get_chid(char *file, char *buffer);
 #ifdef pp_GPU

@@ -282,7 +282,7 @@ int readsmv(char *smvfile){
 
       GLOBendf=1;
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       strcpy(GLOBendianfilebase,buffer);
       FREEMEMORY(GLOBendianfile);
       if(GLOBsourcedir==NULL){
@@ -343,7 +343,7 @@ int readsmv(char *smvfile){
     if(match(buffer,"SYST") == 1){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       GLOBsyst=1;
-      trim(buffer);
+      trim_back(buffer);
       if(match(buffer,"SGI") == 1||match(buffer,"AIX")==1){
         if(getendian()==0){
           endianswitch=1;
@@ -396,7 +396,7 @@ int readsmv(char *smvfile){
       smoke3di->smokemesh=meshinfo + ioffset - 1;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       buffer2=trim_front(buffer);
       filelen=strlen(buffer2);
       if(GLOBsourcedir!=NULL){
@@ -417,7 +417,7 @@ int readsmv(char *smvfile){
         smoke3di->filesize=filesize;
         if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
         buffer2 = trim_front(buffer);
-        trim(buffer2);
+        trim_back(buffer2);
         if(strcmp(buffer2,"HRRPUV")==0){
           smoke3di->is_soot=0;
         }
@@ -449,7 +449,7 @@ int readsmv(char *smvfile){
       fgets(buffer,BUFFERSIZE,streamsmv);
       percen=strchr(buffer,'%');
       if(percen!=NULL)percen=0;
-      trim(buffer);
+      trim_back(buffer);
       NewMemory((void **)&partclassi->name,strlen(buffer)+1);
       strcpy(partclassi->name,buffer);
 
@@ -519,7 +519,7 @@ int readsmv(char *smvfile){
       parti->inuse_part2iso=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
@@ -587,7 +587,7 @@ int readsmv(char *smvfile){
       patchi->version=version_local;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
@@ -711,7 +711,7 @@ int readsmv(char *smvfile){
       }
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
@@ -784,7 +784,7 @@ int readsmv(char *smvfile){
       plot3di->compressed=0;
 
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
-      trim(buffer);
+      trim_back(buffer);
       buffer2=trim_front(buffer);
       if(strlen(buffer2)==0)break;
       if(getfileinfo(buffer2,GLOBsourcedir,&filesize)==0){
@@ -946,7 +946,7 @@ void readini2(char *inifile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setslicemin,&slicemin,&setslicemax,&slicemax,buffer2);
       type_buffer=trim_front(buffer2);
-      trim(type_buffer);
+      trim_back(type_buffer);
       slicei=getslice(type_buffer);
       if(slicei!=NULL){
         slicei->setvalmax=setslicemax;
@@ -996,7 +996,7 @@ void readini2(char *inifile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setchopslicemin,&chopslicemin,&setchopslicemax,&chopslicemax,buffer2);
       type_buffer=trim_front(buffer2);
-      trim(type_buffer);
+      trim_back(type_buffer);
       slicei=getslice(type_buffer);
       if(slicei!=NULL){
         slicei->setchopvalmax=setchopslicemax;
@@ -1014,7 +1014,7 @@ void readini2(char *inifile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setpatchmin,&patchmin,&setpatchmax,&patchmax,buffer2);
       type_buffer=trim_front(buffer2);
-      trim(type_buffer);
+      trim_back(type_buffer);
       patchi=getpatch(type_buffer);
       if(patchi!=NULL){
         patchi->setvalmax=setpatchmax;
@@ -1053,7 +1053,7 @@ void readini2(char *inifile){
       strcpy(buffer2,"");
       sscanf(buffer,"%i %f %i %f %s",&setpartmin,&partmin,&setpartmax,&partmax,buffer2);
       type_buffer=trim_front(buffer2);
-      trim(type_buffer);
+      trim_back(type_buffer);
       partpropi=getpartprop(type_buffer);
       if(partpropi!=NULL){
         partpropi->setvalmax=setpartmax;

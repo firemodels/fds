@@ -17,7 +17,7 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Building Linux version of fds2ascii
+echo Building OSX version of fds2ascii
 
 %svn_drive%
 cd %svn_root%\smv\scripts
