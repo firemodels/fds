@@ -11,6 +11,8 @@ set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
 set in_intel_dll=%svn_root%\..\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
+set in_setpath=%svn_root%\Utilities\set_path\intel_win_64
+set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
 set in_smokediff=%svn_root%\Utilities\smokediff
 set in_smokezip=%svn_root%\Utilities\smokezip
 set in_wind2fds=%svn_root%\Utilities\wind2fds
@@ -123,7 +125,7 @@ CALL :COPY  "%bundleinfo%\uninstall_fds2.bat" "%out_uninstall%\uninstall_base2.b
 CALL :COPY  "%bundleinfo%\uninstall.bat"     "%out_uninstall%\uninstall.bat"
 echo @echo off > "out_install%\uninstall.vbs"
 
-CALL :COPY  "%bundleinfo%\set_path.exe"      "%out_uninstall%\set_path.exe"
+CALL :COPY  "%in_setpath%\set_path64.exe"      "%out_uninstall%\set_path.exe"
 
 echo.
 echo ***Copying FDS Documentation
@@ -199,9 +201,9 @@ CALL :COPY  "%bundleinfo%\wrapup_fds_install.bat" "%out_bundle%\%fdsversion%\wra
 
 CALL :COPY  "%bundleinfo%\setup_fds_firewall.bat" "%out_bundle%\%fdsversion%\setup_fds_firewall.bat"
 
-CALL :COPY  "%bundleinfo%\shortcut.exe"           "%out_bundle%\%fdsversion%\shortcut.exe"
+CALL :COPY  "%in_shortcut%\shortcut.exe"           "%out_bundle%\%fdsversion%\shortcut.exe"
 
-CALL :COPY  "%bundleinfo%\set_path.exe"           "%out_bundle%\%fdsversion%\set_path.exe"
+CALL :COPY  "%in_setpath%\set_path64.exe"           "%out_bundle%\%fdsversion%\set_path.exe"
 
 echo.
 echo ***Compressing FDS/Smokeview distribution
