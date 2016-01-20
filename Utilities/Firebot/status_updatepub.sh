@@ -1,6 +1,6 @@
 #!/bin/bash
 repo=~/FDS-SMVgitweb
-firebotdir=~/firebotgit
+firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
 old=$firebotdir/history/old
 new=$firebotdir/history/new
 newpage=$firebotdir/history/newpage
