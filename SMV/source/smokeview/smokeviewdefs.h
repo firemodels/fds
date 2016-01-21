@@ -129,6 +129,10 @@ void _Sniff_Errors(char *whereat);
 #define SOLIDGAS 1
 #define GASSOLID 1
 
+#define IN_GAS 0
+#define IN_SOLID 1
+#define IN_CUTCELL 2
+
 #define EMBED_YES 0
 #define EMBED_NO  1
 
@@ -519,6 +523,7 @@ void _Sniff_Errors(char *whereat);
 #define POINTSpatchmenu -12
 #define INSOLIDpatchmenu -13
 #define INGASpatchmenu -14
+#define INCUTCELLpatchmenu -15
 
 
 #define INTERIORwall 0

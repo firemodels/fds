@@ -60,7 +60,7 @@ CALL :COPY  ..\..\Utilities\wind2fds\intel_win_%platform%\wind2fds_win_%platform
 CALL :COPY  ..\..\Utilities\background\intel_win_64\background.exe %smvdir%\background.exe
 
 echo bundleinfo=%bundleinfo%
-CALL :COPY ..\..\Utilities\Scripts\bundle_setup\set_path.exe %smvdir%\set_path.exe
+CALL :COPY  ..\..\Utilities\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
 
 CALL :COPY objects.svo %smvdir%\.
 

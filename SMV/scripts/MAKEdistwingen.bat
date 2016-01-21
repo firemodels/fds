@@ -49,7 +49,7 @@ echo.
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
-CALL :COPY  ..\..\Utilities\Scripts\bundle_setup\set_path.exe "%smvdir%\set_path.exe"
+CALL :COPY  ..\..\Utilities\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
 
 CALL :COPY  %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe
 
