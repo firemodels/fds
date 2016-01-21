@@ -4463,9 +4463,9 @@ QUANTITY_LOOP: DO IQ=1,NQT
    ! Special terrain-following slice
 
    IF (AGL_TERRAIN_SLICE .OR. CC_SLICE) THEN
-      DO K=K1,K2
-         DO J=J1,J2
-            DO I=I1,I2
+      DO K=KK1,KK2
+         DO J=JJ1,JJ2
+            DO I=II1,II2
                QQ(I,J,K,IQQ) = QUANTITY(I,J,K)
             ENDDO
          ENDDO
