@@ -80,6 +80,7 @@ DO I=1,NRT
          DLY(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  +COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLB(N) =  (-SIN(DPHI0/2.)*(SIN(PHIUP)-SIN(PHILOW))  -COS(DPHI0/2.)*(COS(PHILOW)-COS(PHIUP)))*F_THETA
          DLZ(N)    = 0.5_EB*(PHIUP-PHILOW)   * ((SIN(THETAUP))**2-(SIN(THETALOW))**2)
+         IF (N==1000000) WRITE(LU_ERR,'(A)') 'This line should never get executed. It is here only to prevent optimization.'
       ELSEIF (TWO_D) THEN
          DLX(N) = (SIN(PHIUP)-SIN(PHILOW))*F_THETA
          DLY(N) = 0._EB
