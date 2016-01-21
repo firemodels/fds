@@ -62,17 +62,17 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 
 % return
 
-expdir = '../../Validation/UMD_Line_Burner/Experimental_Data/';
+expdir = '../../Validation/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
 fdsdir = '../../Validation/UMD_Line_Burner/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
-F1 = importdata([fdsdir,'methane_dx_1p25cm_devc.csv'],',',2);
-F2 = importdata([fdsdir,'methane_dx_p625cm_devc.csv'],',',2);
-F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
+F1 = importdata([fdsdir,'methane_dx_1p25cm_line.csv'],',',2);
+F2 = importdata([fdsdir,'methane_dx_p625cm_line.csv'],',',2);
+F3 = importdata([fdsdir,'methane_dx_p3125cm_line.csv'],',',2);
 
 % % oxygen level
 
-% % J1 = importdata([fdsdir,'methane_extinction_dx_1p25cm_devc.csv'],',',2);
+% % J1 = importdata([fdsdir,'methane_dx_1p25cm_devc.csv'],',',2);
 
 % t = J1.data(:,1);
 % X_O2 = J1.data(:,2);
@@ -85,7 +85,7 @@ F3 = importdata([fdsdir,'methane_dx_p3125cm_devc.csv'],',',2);
 % xlabel('Time (s)')
 % ylabel('O2 (vol frac)')
 
-% print(gcf,'-dpdf',[pltdir,'umd_gas_burner_O2'])
+% print(gcf,'-dpdf',[pltdir,'umd_line_burner_O2'])
 
 % return
 
@@ -116,44 +116,23 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_T_z_p125m.csv'],',',1);
+M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-T1 = M1.data(:,find(strcmp(M1.colheaders,'T (C)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_125')));
+T1 = M1.data(:,find(strcmp(M1.colheaders,'TC_125')));
 
 H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
-% find 18 % O2 time block
-
-t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
-t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
-
-C1 = 3;
-ND1 = 40;
-TG1_p125 = C1:C1+ND1-1;
-TC1_p125 = C1+ND1:C1+2*ND1-1;
-
-C2 = 3;
-ND2 = 80;
-TG2_p125 = C2:C2+ND2-1;
-TC2_p125 = C2+ND2:C2+2*ND2-1;
-
-C3 = 3;
-ND3 = 160;
-TG3_p125 = C3:C3+ND3-1;
-TC3_p125 = C3+ND3:C3+2*ND3-1;
-
 % z = 0.125 m
 
-TG1 = mean(F1.data(t1range,TG1_p125),1);
-TC1 = mean(F1.data(t1range,TC1_p125),1);
+yc1 = F1.data(:,find(strcmp(F1.colheaders,'TC_125-y')));
+TC1 = F1.data(:,find(strcmp(F1.colheaders,'TC_125')));
 
-TG2 = mean(F2.data(t2range,TG2_p125),1);
-TC2 = mean(F2.data(t2range,TC2_p125),1);
+yc2 = F2.data(:,find(strcmp(F2.colheaders,'TC_125-y')));
+TC2 = F2.data(:,find(strcmp(F2.colheaders,'TC_125')));
 
-TG3 = mean(F3.data(t3range,TG3_p125),1);
-TC3 = mean(F3.data(t3range,TC3_p125),1);
+yc3 = F3.data(:,find(strcmp(F3.colheaders,'TC_125-y')));
+TC3 = F3.data(:,find(strcmp(F3.colheaders,'TC_125')));
 
 H(2) = plot(yc1,TC1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width); % dx = 0.625 cm
@@ -202,45 +181,26 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_T_z_p250m.csv'],',',1);
+M1 = importdata([expdir,'TC_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-T1 = M1.data(:,find(strcmp(M1.colheaders,'T (C)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_250')));
+T1 = M1.data(:,find(strcmp(M1.colheaders,'TC_250')));
 
 H(1)=plot(y1,T1,'ksq','MarkerSize',Marker_Size); hold on
 
-% find 18 % O2 time block
+% z = 0.250 m
 
-t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
-t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+yc1 = F1.data(:,find(strcmp(F1.colheaders,'TC_250-y')));
+TC1 = F1.data(:,find(strcmp(F1.colheaders,'TC_250')));
 
-C1 = 3;
-ND1 = 40;
-TG1_p250 = C1+3*ND1:C1+4*ND1-1;
-TC1_p250 = C1+4*ND1:C1+5*ND1-1;
+yc2 = F2.data(:,find(strcmp(F2.colheaders,'TC_250-y')));
+TC2 = F2.data(:,find(strcmp(F2.colheaders,'TC_250')));
 
-C2 = 3;
-ND2 = 80;
-TG2_p250 = C2+3*ND2:C2+4*ND2-1;
-TC2_p250 = C2+4*ND2:C2+5*ND2-1;
-
-C3 = 3;
-ND3 = 160;
-TG3_p250 = C3+3*ND3:C3+4*ND3-1;
-TC3_p250 = C3+4*ND3:C3+5*ND3-1;
-
-TG1 = mean(F1.data(t1range,TG1_p250),1);
-TC1 = mean(F1.data(t1range,TC1_p250),1);
-
-TG2 = mean(F2.data(t2range,TG2_p250),1);
-TC2 = mean(F2.data(t2range,TC2_p250),1);
-
-TG3 = mean(F3.data(t3range,TG3_p250),1);
-TC3 = mean(F3.data(t3range,TC3_p250),1);
+yc3 = F3.data(:,find(strcmp(F3.colheaders,'TC_250-y')));
+TC3 = F3.data(:,find(strcmp(F3.colheaders,'TC_250')));
 
 H(2) = plot(yc1,TC1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
-H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm
+H(3) = plot(yc2,TC2,'m--','LineWidth',Line_Width); % dx = 0.625 cm
 H(4) = plot(yc3,TC3,'b-','LineWidth',Line_Width);  % dx = 0.3125 cm
 
 % % write data to a table file
@@ -285,36 +245,23 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_O2_z_p125m.csv'],',',1);
+M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-O21 = M1.data(:,find(strcmp(M1.colheaders,'O2 (vol frac)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_125')));
+O21 = M1.data(:,find(strcmp(M1.colheaders,'XO2_125')));
 
 H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
-% find 18 % O2 time block
-
-t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
-t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
-
-C1 = 3;
-ND1 = 40;
-O21_p125 = C1+2*ND1:C1+3*ND1-1;
-
-C2 = 3;
-ND2 = 80;
-O22_p125 = C2+2*ND2:C2+3*ND2-1;
-
-C3 = 3;
-ND3 = 160;
-O23_p125 = C3+2*ND3:C3+3*ND3-1;
-
 % z = 0.125 m
 
-O2_1 = mean(F1.data(t1range,O21_p125),1);
-O2_2 = mean(F2.data(t2range,O22_p125),1);
-O2_3 = mean(F3.data(t3range,O23_p125),1);
+yc1 = F1.data(:,find(strcmp(F1.colheaders,'XO2_125-y')));
+O2_1 = F1.data(:,find(strcmp(F1.colheaders,'XO2_125')));
+
+yc2 = F2.data(:,find(strcmp(F2.colheaders,'XO2_125-y')));
+O2_2 = F2.data(:,find(strcmp(F2.colheaders,'XO2_125')));
+
+yc3 = F3.data(:,find(strcmp(F3.colheaders,'XO2_125-y')));
+O2_3 = F3.data(:,find(strcmp(F3.colheaders,'XO2_125')));
 
 H(2) = plot(yc1,O2_1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,O2_2,'m--','LineWidth',Line_Width); % dx = 0.625 cm
@@ -362,36 +309,23 @@ figure
 plot_style
 Marker_Size = 10;
 
-M1 = importdata([expdir,'Exp_O2_p18_O2_z_p250m.csv'],',',1);
+M1 = importdata([expdir,'O2_Data.csv'],',',1);
 
-y1 = M1.data(:,find(strcmp(M1.colheaders,'y (m)')));
-O21 = M1.data(:,find(strcmp(M1.colheaders,'O2 (vol frac)')));
+y1 = M1.data(:,find(strcmp(M1.colheaders,'x_250')));
+O21 = M1.data(:,find(strcmp(M1.colheaders,'XO2_250')));
 
 H(1)=plot(y1,O21,'ko','MarkerSize',Marker_Size); hold on
 
-% find 18 % O2 time block
+% z = 0.250 m
 
-t1 = F1.data(:,1); t1range = find(t1>=30 & t1<=40);
-t2 = F2.data(:,1); t2range = find(t2>=30 & t2<=40);
-t3 = F3.data(:,1); t3range = find(t3>=30 & t3<=40);
+yc1 = F1.data(:,find(strcmp(F1.colheaders,'XO2_250-y')));
+O2_1 = F1.data(:,find(strcmp(F1.colheaders,'XO2_250')));
 
-C1 = 3;
-ND1 = 40;
-O21_p250 = C1+5*ND1:C1+6*ND1-1;
+yc2 = F2.data(:,find(strcmp(F2.colheaders,'XO2_250-y')));
+O2_2 = F2.data(:,find(strcmp(F2.colheaders,'XO2_250')));
 
-C2 = 3;
-ND2 = 80;
-O22_p250 = C2+5*ND2:C2+6*ND2-1;
-
-C3 = 3;
-ND3 = 160;
-O23_p250 = C3+5*ND3:C3+6*ND3-1;
-
-% z = 0.125 m
-
-O2_1 = mean(F1.data(t1range,O21_p250),1);
-O2_2 = mean(F2.data(t2range,O22_p250),1);
-O2_3 = mean(F3.data(t3range,O23_p250),1);
+yc3 = F3.data(:,find(strcmp(F3.colheaders,'XO2_250-y')));
+O2_3 = F3.data(:,find(strcmp(F3.colheaders,'XO2_250')));
 
 H(2) = plot(yc1,O2_1,'r-.','LineWidth',Line_Width); % dx = 1.25 cm
 H(3) = plot(yc2,O2_2,'m--','LineWidth',Line_Width);  % dx = 0.625 cm

@@ -5779,22 +5779,28 @@ The amount expected on the floor is approximately 0.024~kg.
 \subsection{Porous Media}
 \label{info:porous_media}
 
-A 3-D array of particles can be used to represent the drag exerted by flow through a porous media as in the following example:
+A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example:
 \begin{lstlisting}
-&INIT N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., PART_ID='FILTER',
-      XB=1.0,1.2,0.0,1.0,0.0,1.0/
-&PART ID='FILTER', DRAG_LAW='POROUS MEDIA', STATIC=.TRUE., SURF_ID='FILTER',
-      DRAG_COEFFICIENT=0.02,0.02,0.02, PERMEABILITY = 2.E-2,2.E-6,2.E-6,
-      POROUS_VOLUME_FRACTION=0.5 /
-&SURF ID='FILTER', THICKNESS=0.00015, GEOMETRY='CYLINDRICAL',
-      MATL_ID='PAPER' /
-&MATL ID='PAPER', DENSITY=900., CONDUCTIVITY=0.05, SPECIFIC_HEAT=1.3 /
+&SURF ID='LIGAMENT', MATL_ID='ALUMINUM ALLOY', THICKNESS=7.3E-5,  
+      GEOMETRY='CYLINDRICAL', HEAT_TRANSFER_COEFFICIENT=10. /
+&MATL ID='ALUMINUM ALLOY', DENSITY=2690., CONDUCTIVITY=218., SPECIFIC_HEAT=0.9 /
+&PART ID='FOAM', DRAG_LAW='POROUS MEDIA', SURF_ID='LIGAMENT', 
+      POROUS_VOLUME_FRACTION=0.12, STATIC=.TRUE., 
+      DRAG_COEFFICIENT=0.1,0.1,0.1, PERMEABILITY=1.0E-7,1.E-7,1.E-7 /
+&INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., 
+      PART_ID='FOAM' /
 \end{lstlisting}
-The {\ct INIT} line designates the volume of the porous media using the sextuplet {\ct XB}. A single particle is inserted into each cell by specifying the parameter {\ct N\_PARTICLES\_PER\_CELL=1}.  The particles are be defined with a {\ct SURF\_ID} containing the material properties of the screen.  A special drag law for porous mdeia is specified via the {\ct DRAG\_LAW}.  In the example, a paper filter with a 40~\% free area and an 0.0003~m wire diameter is placed normal to the $x$-axis.  Note that the {\ct LENGTH} parameter on the {\ct SURF} line will be computed automatically so the volume fraction of the grid cell occupied by the filter matches {\ct POROUS\_VOLUME\_FRACTION}. The pressure drop through the media is given by
+These lines are a model of aluminum foam. The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell.
+
+The {\ct PART} line provides information about the particles. The {\ct DRAG\_LAW} indicates a special empirical model for the porous media. This model states that the pressure drop through the media is given by
 \be
-   \Delta p =  \Delta x \; \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
+   \Delta p =  \delta \, \left(\frac{\mu}{K} u + \rho \frac{Y}{\sqrt{K}} u^2 \right)
 \ee
-where $\Delta x$ is the grid size, $\mu$ is the viscosity of the gas, $u$ is the velocity, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in m$^2$, and $Y$ is an inertial term specified using {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all axes.  In this example the filter is non-isotropic with different losses in each direction.
+where $\delta$ is the thickness of the foam block in the flow direction, $\mu$ is the viscosity of the gas, $u$ is the velocity component in the flow direction, $\rho$ is the density of the gas, $K$ is the {\ct PERMEABILITY} in units of m$^2$, and $Y$ is a dimensionless inertial term that you specify using the parameter {\ct DRAG\_COEFFICIENT}.  When using the porous media model the {\ct PERMEABILITY} and {\ct DRAG\_COEFFICIENT} must be specified for all three directions.
+
+The {\ct INIT} line designates the volume occupied by the porous media using the sextuplet {\ct XB}. A single particle is inserted into the center of each cell occupied by the foam by specifying the parameters {\ct N\_PARTICLES\_PER\_CELL=1} and {\ct CELL\_CENTERED=.TRUE.}.
+
+A sample calculation involving porous media is contained in the folder {\ct Sprinklers\_and\_Sprays}. The input file is called {\ct porous\_media.fds}.
 
 \subsection{Screens}
 \label{info:particle_screen}
@@ -8222,6 +8228,7 @@ be found in Volume~1 of the FDS Technical Reference Guide~\cite{FDS_Math_Guide}.
 {\ct ADT}$^{**}$                                & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct ADT\_Z}$^{*}$                              & Average Droplet Temperature                       & $^\circ$C      & D,I,P,S      \\ \hline
 {\ct C\_SMAG}                                   & Smagorinsky coefficient                           &                & D,I,P,S      \\ \hline
+%{\ct AUTO IGNITION TEMPERATURE}                 & Auto-ignition temperature                         & $^\circ$C      & D,S          \\ \hline
 {\ct CABLE TEMPERATURE}                         & Inner temperature of cable                        & $^\circ$C      & D            \\ \hline
 {\ct CELL INDEX I}                              & Mesh cell index in x                              &                & D,S          \\ \hline
 {\ct CELL INDEX J}                              & Mesh cell index in y                              &                & D,S          \\ \hline
@@ -8711,33 +8718,34 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct INIT} (Initial Conditions)} \\
 \hline \hline
 \endhead
-{\ct CELL\_CENTERED}            & Logical           & Section~\ref{info:initial_droplets}           &               & {\ct .FALSE.} \\ \hline
-{\ct CTRL\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct DENSITY}                   & Real              & Section~\ref{info:INIT}                       & kg/m$^3$      & Ambient       \\ \hline
-{\ct DEVC\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct DIAMETER}                  & Real              & Section~\ref{info:initial_droplets}           & $\mu$m        &               \\ \hline
-{\ct DT\_INSERT}                & Real              & Section~\ref{info:initial_droplets}           & s             &               \\ \hline
-{\ct DX}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct DY}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct DZ}                        & Real              & Section~\ref{info:initial_droplets}           & m             & 0.            \\ \hline
-{\ct HEIGHT}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
-{\ct HRRPUV}                    & Real              & Section~\ref{info:INIT}                       & kW/m$^3$      &               \\ \hline
-{\ct ID}                        & Character         & Section~\ref{info:PART_SURF}                  &               &               \\ \hline
-{\ct MASS\_FRACTION(N)}         & Real Array        & Section~\ref{info:INIT}                       & kg/kg         & Ambient       \\ \hline
-{\ct MASS\_PER\_TIME}           & Real              & Section~\ref{info:initial_droplets}           & kg/s          &               \\ \hline
-{\ct MASS\_PER\_VOLUME}         & Real              & Section~\ref{info:initial_droplets}           & kg/m$^3$      & 1             \\ \hline
-{\ct MULT\_ID }                 & Character         & Section~\ref{info:MULT}                       &               &               \\ \hline
-{\ct N\_PARTICLES}              & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
-{\ct N\_PARTICLES\_PER\_CELL}   & Integer           & Section~\ref{info:initial_droplets}           &               & 0             \\ \hline
-{\ct PART\_ID}                  & Character         & Section~\ref{info:initial_droplets}           &               &               \\ \hline
-{\ct PARTICLE\_WEIGHT\_FACTOR}  & Real              & Section~\ref{info:initial_droplets}           &               & 1.            \\ \hline
-{\ct RADIUS}                    & Real              & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
-{\ct SHAPE}                     & Character         & Section~\ref{info:initial_droplets}           &               & {\ct 'BLOCK'} \\ \hline
-{\ct SPEC\_ID(N)}               & Character Array   & Section~\ref{info:INIT}                       &               &               \\ \hline
-{\ct TEMPERATURE}               & Real              & Section~\ref{info:INIT}                       & $^\circ$C     & {\ct TMPA}    \\ \hline
-{\ct UVW(3)}                    & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s           & 0.            \\ \hline
-{\ct XB(6)}                     & Real Sextuplet    & Section~\ref{info:INIT}                       & m             &               \\ \hline
-{\ct XYZ(3)}                    & Real Triplet      & Section~\ref{info:initial_droplets}           & m             &               \\ \hline
+%{\ct AUTO\_IGNITION\_TEMPERATURE} & Real              & Auto-ignition temperature                     & \si{\degree C} & {-273.15}     \\ \hline
+{\ct CELL\_CENTERED}              & Logical           & Section~\ref{info:initial_droplets}           &                & {\ct .FALSE.} \\ \hline
+{\ct CTRL\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct DENSITY}                     & Real              & Section~\ref{info:INIT}                       & kg/m$^3$       & Ambient       \\ \hline
+{\ct DEVC\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct DIAMETER}                    & Real              & Section~\ref{info:initial_droplets}           & \si{\micro m}  &               \\ \hline
+{\ct DT\_INSERT}                  & Real              & Section~\ref{info:initial_droplets}           & s              &               \\ \hline
+{\ct DX}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct DY}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct DZ}                          & Real              & Section~\ref{info:initial_droplets}           & m              & 0.            \\ \hline
+{\ct HEIGHT}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct HRRPUV}                      & Real              & Section~\ref{info:INIT}                       & \si{kW/m^3}    &               \\ \hline
+{\ct ID}                          & Character         & Section~\ref{info:PART_SURF}                  &                &               \\ \hline
+{\ct MASS\_FRACTION(N)}           & Real Array        & Section~\ref{info:INIT}                       & kg/kg          & Ambient       \\ \hline
+{\ct MASS\_PER\_TIME}             & Real              & Section~\ref{info:initial_droplets}           & kg/s           &               \\ \hline
+{\ct MASS\_PER\_VOLUME}           & Real              & Section~\ref{info:initial_droplets}           & \si{kg/m^3}    & 1             \\ \hline
+{\ct MULT\_ID }                   & Character         & Section~\ref{info:MULT}                       &                &               \\ \hline
+{\ct N\_PARTICLES}                & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct N\_PARTICLES\_PER\_CELL}     & Integer           & Section~\ref{info:initial_droplets}           &                & 0             \\ \hline
+{\ct PART\_ID}                    & Character         & Section~\ref{info:initial_droplets}           &                &               \\ \hline
+{\ct PARTICLE\_WEIGHT\_FACTOR}    & Real              & Section~\ref{info:initial_droplets}           &                & 1.            \\ \hline
+{\ct RADIUS}                      & Real              & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
+{\ct SHAPE}                       & Character         & Section~\ref{info:initial_droplets}           &                & {\ct 'BLOCK'} \\ \hline
+{\ct SPEC\_ID(N)}                 & Character Array   & Section~\ref{info:INIT}                       &                &               \\ \hline
+{\ct TEMPERATURE}                 & Real              & Section~\ref{info:INIT}                       & \si{\degree C} & {\ct TMPA}    \\ \hline
+{\ct UVW(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m/s            & 0.            \\ \hline
+{\ct XB(6)}                       & Real Sextuplet    & Section~\ref{info:INIT}                       & m              &               \\ \hline
+{\ct XYZ(3)}                      & Real Triplet      & Section~\ref{info:initial_droplets}           & m              &               \\ \hline
 \end{longtable}
 
 
