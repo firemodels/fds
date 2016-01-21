@@ -604,7 +604,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Mesh Geometry and Name
 
-            WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+            WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
             IF (ID/='null') MESH_NAME(NM) = ID
 
             ! Process Physical Coordinates
@@ -806,7 +806,7 @@ LOOP_EMESHES: DO N = 1, NEVAC_MESHES
 
    ! Mesh Geometry and Name
 
-   WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+   WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
    IF (ID/='null') MESH_NAME(NM) = ID
 
    Z_MID = 0.5_EB*(MESHES(I_MAIN_EVAC_MESH)%ZS + MESHES(I_MAIN_EVAC_MESH)%ZF)
@@ -937,7 +937,7 @@ LOOP_STAIRS: DO N = 1, N_STRS
 
    ! Mesh Geometry and Name
 
-   WRITE(MESH_NAME(NM),'(A,I3)') 'MESH',NM
+   WRITE(MESH_NAME(NM),'(A,I7.7)') 'MESH_',NM
    IF (ID/='null') MESH_NAME(NM) = ID
 
    M%XS    = EMESH_STAIRS(N)%XB(1)
@@ -11422,7 +11422,12 @@ MESH_LOOP: DO NM=1,NMESHES
          N = N + 1
          SL=>SLICE(N)
          SL%ID = ID
-         SL%SLICETYPE = TRIM(SLICETYPE)
+         SLICETYPE = TRIM(SLICETYPE)
+        ! IF( SLICETYPE .NE. 'STRUCTURED' .AND. SLICETYPE .NE. 'IGNORE_GEOM'.AND. SLICETYPE .NE. 'INCLUDE_GEOM' ) THEN
+        !    MESSAGE=TRIM("Error: On SLCF, SLICETYPE must be STRUCTURED, IGNORE_GEOM or INCLUDE_GEOM")
+        !    CALL SHUTDOWN(MESSAGE) ; RETURN
+        ! ENDIF
+         SL%SLICETYPE = SLICETYPE
          IF (CELL_CENTERED .AND. NITER==1) THEN ! scalar raw data
             DO I=1,IBAR
                IF ( ABS(XB(1)-XC(I)) < 0.5_EB*DX(I) + TOL ) SL%I1 = I

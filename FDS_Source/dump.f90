@@ -3615,30 +3615,37 @@ END FUNCTION IJK
 
 ! ---------------------------- GET_GEOMSIZES ----------------------------------------
 
-SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
+USE COMPLEX_GEOMETRY
 
 ! determine NVERTS and NFACES for one of the following cases
 !
-! IGNORE_OBST  - create a slice file geometry that skips any triangles inside obstacles.  Data for any triangles
-!                inside obstacles are not included in the geometry data file
-! IGNORE_GEOM  - creates a slice file geometry that ignores immersed geometric objects .  Both data inside and outside
-!                of obstacle regions are included in the geometry data file.  Triangles inside obstacle
-!                regions are tagged with a 0, triangles outside of obstacle regions (the gas ) are tagged
-!                with a 1 . Smokeview uses this information to show/hide these two regions 
-! INCLUDE_GEOM - slice file geometry that incorporates geometric objects.  If there are no immersed
-!                objects present then this case should be equivalent to the 'IGNORE_GEOM' case
-! CUTCELLS     - slice file geometry that only includes cutcells, ie faces adjacent to immersed objects
+! IGNORE_GEOM  - creates a slice file geometry file that ignores immersed geometric objects .  Triangles inside obstacle
+!                regions (a solid) are tagged with a 1, triangles outside of obstacle regions (the gas) are tagged
+!                with a 0 . Smokeview uses this information to show/hide these two regions 
+! INCLUDE_GEOM - creates a slice file geometry file that accounts for immersed geometric objects .  If there are no immersed
+!                objects present then this slice type is equivalent to the 'IGNORE_GEOM' case.  Triangles completely inside a
+!                solid are tagged with a 1, triangles completely in the gas are tagged with a 0 and triangles in a cutcell are
+!                with a tagged 2.  As with the IGNORE_GEOM type, Smokeview uses this information to show/hide these regions 
 
    CHARACTER(*), INTENT(IN) :: SLICETYPE
    INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
-   INTEGER, INTENT(OUT) :: NVERTS, NFACES
+   INTEGER, INTENT(OUT) :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
    
    INTEGER :: DIR,SLICE
    INTEGER :: I, J, K
+   INTEGER :: ICF, IFACE, NVF
 
+   CHARACTER(LEN=100) :: SLICETYPE_LOCAL
+
+   SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
+   IF (SLICETYPE=='INCLUDE_GEOM' .AND. .NOT.CC_IBM) SLICETYPE_LOCAL='IGNORE_GEOM'
+   
    NVERTS=0
    NFACES=0
-   IF (SLICETYPE=='IGNORE_GEOM') THEN
+   NVERTS_CUTCELLS=0
+   NFACES_CUTCELLS=0
+   IF (SLICETYPE_LOCAL=='IGNORE_GEOM') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF (DIR==1) THEN
         NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
@@ -3650,45 +3657,73 @@ SUBROUTINE GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
         NFACES = 2*(I2 - I1)*(J2 - J1)
       ENDIF
-   ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
-   ELSE IF (SLICETYPE=='CUTCELLS') THEN
-   ELSE IF (SLICETYPE=='IGNORE_OBST') THEN
+   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
       CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
       IF (DIR==1) THEN
          NVERTS = (J2 + 1 - J1)*(K2 + 1 - K1)
          NFACES = 0
          DO K = K1+1, K2
             DO J = J1+1, J2
-               IF (.NOT.SOLID(CELL_INDEX(SLICE,J,K))) NFACES = NFACES + 2
+               IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! a cutcell so count number of faces         
+                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                     NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                     NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                  ENDDO
+               ELSE 
+                  NFACES = NFACES + 2 ! a gas or solid cell so add 2 to the number of faces
+               ENDIF
             END DO
          END DO
       ELSE IF (DIR==2) THEN
         NVERTS = (I2 + 1 - I1)*(K2 + 1 - K1)
          DO K = K1+1, K2
             DO I = I1+1, I2
-               IF (.NOT.SOLID(CELL_INDEX(I,SLICE,K))) NFACES = NFACES + 2
+               IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)                  
+                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                     NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                     NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                  ENDDO
+               ELSE
+                  NFACES = NFACES + 2
+               ENDIF
             END DO
          END DO
       ELSE
         NVERTS = (I2 + 1 - I1)*(J2 + 1 - J1)
          DO I = I1+1, I2
             DO J = J1+1, J2
-               IF (.NOT.SOLID(CELL_INDEX(I,J,SLICE))) NFACES = NFACES + 2
+               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
+                  DO IFACE=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACE)
+                     NFACES_CUTCELLS = NFACES_CUTCELLS + NVF - 2
+                     NVERTS_CUTCELLS = NVERTS_CUTCELLS + NVF
+                  ENDDO
+               ELSE
+                  NFACES = NFACES + 2
+               ENDIF
             END DO
          END DO
       ENDIF
    ENDIF
+   NFACES = NFACES + NFACES_CUTCELLS
+   NVERTS = NVERTS + NVERTS_CUTCELLS
 END SUBROUTINE GET_GEOMSIZES
 
 ! ---------------------------- GET_GEOMINFO ----------------------------------------
 
- SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES,LOCATIONS)
+SUBROUTINE GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS,VERTS,FACES,LOCATIONS)
+USE COMPLEX_GEOMETRY
 
  ! generate VERTS(1:3*NVERTS) and FACES(1:3*NFACES) arrays
  
    CHARACTER(*), INTENT(IN) :: SLICETYPE
    INTEGER, INTENT(IN) :: I1,I2,J1,J2,K1,K2
-   INTEGER, INTENT(IN) :: NVERTS, NFACES
+   INTEGER, INTENT(IN) :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
    INTEGER, INTENT(OUT), DIMENSION(3*NFACES) :: FACES
    INTEGER, INTENT(OUT), DIMENSION(NFACES) :: LOCATIONS
    REAL(FB), INTENT(OUT), DIMENSION(3*NVERTS) :: VERTS
@@ -3697,11 +3732,17 @@ END SUBROUTINE GET_GEOMSIZES
    INTEGER :: NI, NJ, NK
    REAL(FB) :: XMID, YMID, ZMID
    INTEGER :: I, J, K
-   INTEGER IFACE, IVERT
+   INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
    LOGICAL IS_SOLID
+   INTEGER :: ICF, NVF, IVCF
    
-   LOCATIONS = 0 ! for now, assume triangles are in gas and tag with 0
-   IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
+   CHARACTER(LEN=100) :: SLICETYPE_LOCAL
+
+   SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
+   IF (SLICETYPE=='INCLUDE_GEOM' .AND. .NOT.CC_IBM) SLICETYPE_LOCAL='IGNORE_GEOM'
+
+   LOCATIONS = 0 ! initially assume triangles are in gas and tag with 0
+   IF (SLICETYPE_LOCAL=='IGNORE_GEOM') THEN
       NI = I2 + 1 - I1
       NJ = J2 + 1 - J1
       NK = K2 + 1 - K1
@@ -3722,10 +3763,7 @@ END SUBROUTINE GET_GEOMSIZES
          END DO
          DO K=1,NK-1
             DO J=1,NJ-1
-               
                IS_SOLID = SOLID(CELL_INDEX(SLICE,J+J1,K+K1))
-                ! skip over any triangles in obstacles for the IGNORE_OBST case
-               IF ( SLICETYPE=='IGNORE_OBST' .AND. IS_SOLID ) CYCLE
                IFACE = IFACE + 1
                IF (IS_SOLID)LOCATIONS(IFACE) = 1  ! triangle is in a solid so tag with 1
                FACES(3*IFACE-2) = IJK(  J,  K,NJ)
@@ -3754,7 +3792,6 @@ END SUBROUTINE GET_GEOMSIZES
          DO K=1,NK-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,SLICE,K+K1))
-               IF ( SLICETYPE=='IGNORE_OBST' .AND. IS_SOLID ) CYCLE
                IFACE = IFACE + 1
                IF (IS_SOLID)LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  K,NI)
@@ -3775,7 +3812,7 @@ END SUBROUTINE GET_GEOMSIZES
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = ZPLT(J)
+                  VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZMID
                END DO
             END DO
@@ -3783,7 +3820,6 @@ END SUBROUTINE GET_GEOMSIZES
          DO J=1,NJ-1
             DO I=1,NI-1
                IS_SOLID = SOLID(CELL_INDEX(I+I1,J+J1,SLICE))
-               IF ( SLICETYPE=='IGNORE_OBST' .AND. IS_SOLID ) CYCLE
                IFACE = IFACE + 1
                IF (IS_SOLID) LOCATIONS(IFACE) = 1
                FACES(3*IFACE-2) = IJK(  I,  J,NI)
@@ -3798,33 +3834,192 @@ END SUBROUTINE GET_GEOMSIZES
             END DO
          END DO
       ENDIF
-   ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
-   ELSE IF (SLICETYPE=='CUTCELLS') THEN
+   ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
+      IVERTCUT=NVERTS-NVERTS_CUTCELLS ! start cutcell counters after 'regular' cells
+      IFACECUT=NFACES-NFACES_CUTCELLS
+      NI = I2 + 1 - I1
+      NJ = J2 + 1 - J1
+      NK = K2 + 1 - K1
+      CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
+      IVERT = 0
+      IFACE = 0
+      IF (DIR==1) THEN
+         XMID = XPLT(SLICE)
+         DO K=K1,K2
+            DO J=J1,J2
+               DO I = SLICE,SLICE
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XMID
+                  VERTS(3*IVERT-1) = YPLT(J)
+                  VERTS(3*IVERT)   = ZPLT(K)
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO J=1,NJ-1
+               IF (FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! store cutcell faces and vertices  
+                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     DO IVCF=1,NVF
+                        IVERTCUT = IVERTCUT + 1
+                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
+                     ENDDO
+                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                        ! vertex indices 1, 2, ..., NVF
+                        ! faces (1,2,3), (1,3,4), ..., (1,NVF-1,NVF)
+                        IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
+                        FACES(3*IFACECUT-2) = (IVERTCUT-NVF)+1
+                        FACES(3*IFACECUT-1) = (IVERTCUT-NVF)+1+IVCF
+                        FACES(3*IFACECUT)   = (IVERTCUT-NVF)+2+IVCF 
+                     ENDDO
+                  ENDDO
+               ELSE
+                  IFACE = IFACE + 1 ! store solid and gas faces and vertices (2 faces per cell)
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+                  FACES(3*IFACE-1) = IJK(J+1,  K,NJ)
+                  FACES(3*IFACE)   = IJK(J+1,K+1,NJ)
+               
+                  IFACE = IFACE + 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(SLICE,J,K,IBM_FGSC,IAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  J,  K,NJ)
+                  FACES(3*IFACE-1) = IJK(J+1,K+1,NJ)
+                  FACES(3*IFACE)   = IJK(  J,K+1,NJ)
+               ENDIF
+            END DO
+         END DO
+      ELSE IF (DIR==2) THEN
+         YMID = YPLT(SLICE)
+         DO K=K1,K2
+            DO J=SLICE,SLICE
+               DO I = I1,I2
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = YMID
+                  VERTS(3*IVERT)   = ZPLT(K)
+               END DO
+            END DO
+         END DO
+         DO K=1,NK-1
+            DO I=1,NI-1
+               IF (FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)
+                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     DO IVCF=1,NVF
+                        IVERTCUT = IVERTCUT + 1
+                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
+                     ENDDO
+                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                        IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
+                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1 
+                     ENDDO
+                  ENDDO
+               ELSE
+                  IFACE = IFACE + 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  I,  K,NI)
+                  FACES(3*IFACE-1) = IJK(I+1,  K,NI)
+                  FACES(3*IFACE)   = IJK(I+1,K+1,NI)
+               
+                  IFACE = IFACE + 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,SLICE,K,IBM_FGSC,JAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  I,  K,NI)
+                  FACES(3*IFACE-1) = IJK(I+1,K+1,NI)
+                  FACES(3*IFACE)   = IJK(  I,K+1,NI)
+               ENDIF
+            END DO
+         END DO
+      ELSE
+         ZMID = ZPLT(SLICE)
+         DO K=SLICE,SLICE
+            DO J=J1,J2
+               DO I = I1,I2
+                  IVERT = IVERT + 1
+                  VERTS(3*IVERT-2) = XPLT(I)
+                  VERTS(3*IVERT-1) = YPLT(J)
+                  VERTS(3*IVERT)   = ZMID
+               END DO
+            END DO
+         END DO
+         DO J=1,NJ-1
+            DO I=1,NI-1
+               IF (FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_CUTCFE) THEN
+                  ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
+                  DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                     NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                     DO IVCF=1,NVF
+                        IVERTCUT = IVERTCUT + 1
+                        IVERTCF=IBM_CUT_FACE(ICF)%CFELEM(IVCF+1,IFACECF)
+                        VERTS(3*IVERTCUT-2:3*IVERTCUT) = IBM_CUT_FACE(ICF)%XYZVERT(1:3,IVERTCF)
+                     ENDDO
+                     DO IVCF = 1, NVF-2 ! for now assume face is convex
+                        IFACECUT = IFACECUT + 1
+                        LOCATIONS(IFACECUT) = 2
+                        FACES(3*IFACECUT-2) = IVERTCUT-NVF+1
+                        FACES(3*IFACECUT-1) = IVERTCUT-NVF+1+IVCF
+                        FACES(3*IFACECUT)   = IVERTCUT-NVF+1+IVCF+1 
+                     ENDDO
+                  ENDDO
+               ELSE
+                  IFACE = IFACE + 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  I,  J,NI)
+                  FACES(3*IFACE-1) = IJK(I+1,  J,NI)
+                  FACES(3*IFACE)   = IJK(I+1,J+1,NI)
+               
+                  IFACE = IFACE + 1
+                  LOCATIONS(IFACE) = 0
+                  IF ( FCVAR(I,J,SLICE,IBM_FGSC,KAXIS) == IBM_SOLID) LOCATIONS(IFACE)=1
+                  FACES(3*IFACE-2) = IJK(  I,  J,NI)
+                  FACES(3*IFACE-1) = IJK(I+1,J+1,NI)
+                  FACES(3*IFACE)   = IJK(  I,J+1,NI)
+               ENDIF
+            END DO
+         END DO
+      ENDIF
    ENDIF
 END SUBROUTINE GET_GEOMINFO
 
 ! ---------------------------- GET_GEOMVALS ----------------------------------------
 
-SUBROUTINE GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
+SUBROUTINE GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES, NFACES_CUTCELLS, VALS)
+USE COMPLEX_GEOMETRY
 
 ! copy data from QQ array into VALS(1:NFACES)
 
 INTEGER, INTENT(IN) :: I1, I2, J1, J2, K1, K2
-INTEGER, INTENT(IN) :: NFACES
+INTEGER, INTENT(IN) :: NFACES, NFACES_CUTCELLS
 CHARACTER(*), INTENT(IN) :: SLICETYPE
 REAL(FB), INTENT(OUT), DIMENSION(NFACES) :: VALS
 
 INTEGER :: DIR, SLICE, IFACE
 INTEGER :: I,J,K
+CHARACTER(LEN=100) :: SLICETYPE_LOCAL
+INTEGER :: CELLTYPE
+INTEGER :: ICF, NVF, IFACECF, IVCF, IFACECUT
+
+SLICETYPE_LOCAL=TRIM(SLICETYPE) ! only generate CUTCELLS slice files if the immersed geometry option is turned on
+IF (SLICETYPE=='INCLUDE_GEOM' .AND. .NOT.CC_IBM) SLICETYPE_LOCAL='IGNORE_GEOM'
 
 CALL GETSLICEDIR(I1,I2,J1,J2,K1,K2,DIR,SLICE)
-IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
+IF (SLICETYPE_LOCAL=='IGNORE_GEOM') THEN
    IFACE = 0
    IF (DIR==1) THEN
       DO K = K1+1, K2
          DO J = J1+1, J2
-            ! skip triangles inside obstacles for the IGNORE_OBST case
-            IF (SLICETYPE=='IGNORE_OBST' .AND. SOLID(CELL_INDEX(SLICE,J,K))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(SLICE,J,K,1)
             
@@ -3835,7 +4030,6 @@ IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
    ELSE IF (DIR==2) THEN
       DO K = K1+1, K2
          DO I = I1+1, I2
-            IF (SLICETYPE=='IGNORE_OBST' .AND. SOLID(CELL_INDEX(I,SLICE,K))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(I,SLICE,K,1)
             
@@ -3846,7 +4040,6 @@ IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
    ELSE
       DO J = J1+1, J2
          DO I = I1+1, I2
-            IF (SLICETYPE=='IGNORE_OBST' .AND. SOLID(CELL_INDEX(I,J,SLICE))) CYCLE
             IFACE = IFACE + 1
             VALS(IFACE) = QQ(I,J,SLICE,1)
             
@@ -3855,8 +4048,76 @@ IF (SLICETYPE=='IGNORE_GEOM' .OR. SLICETYPE=='IGNORE_OBST') THEN
          END DO
       END DO
    ENDIF
-ELSE IF (SLICETYPE=='INCLUDE_GEOM') THEN
-ELSE IF (SLICETYPE=='CUTCELLS') THEN
+ELSE IF (SLICETYPE_LOCAL=='INCLUDE_GEOM') THEN
+   IFACE = 0
+   IFACECUT=NFACES-NFACES_CUTCELLS  ! start cutcell counter after 'regular' cells
+   IF (DIR==1) THEN
+      DO K = K1+1, K2
+         DO J = J1+1, J2
+            CELLTYPE = FCVAR(SLICE,J,K,IBM_FGSC,IAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(SLICE,J,K,IBM_IDCF,IAXIS) ! is a cut cell                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
+            ELSE
+               IFACE = IFACE + 1  ! is a solid or gas cell
+               VALS(IFACE) = CELLTYPE
+            
+               IFACE = IFACE + 1
+               VALS(IFACE) = CELLTYPE
+            ENDIF
+         END DO
+      END DO
+   ELSE IF (DIR==2) THEN
+      DO K = K1+1, K2
+         DO I = I1+1, I2
+            CELLTYPE = FCVAR(I,SLICE,K,IBM_FGSC,JAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(I,SLICE,K,IBM_IDCF,JAXIS)                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
+            ELSE
+               IFACE = IFACE + 1
+               VALS(IFACE) = CELLTYPE
+            
+               IFACE = IFACE + 1
+               VALS(IFACE) = CELLTYPE
+            ENDIF
+         END DO
+      END DO
+   ELSE
+      DO J = J1+1, J2
+         DO I = I1+1, I2
+            CELLTYPE = FCVAR(I,J,SLICE,IBM_FGSC,KAXIS)
+            IF (CELLTYPE == IBM_CUTCFE) THEN
+               ICF = FCVAR(I,J,SLICE,IBM_IDCF,KAXIS)                  
+               DO IFACECF=1,IBM_CUT_FACE(ICF)%NFACE
+                  NVF=IBM_CUT_FACE(ICF)%CFELEM(1,IFACECF)
+                  DO IVCF = 1, NVF-2 ! for now assume face is convex
+                     IFACECUT = IFACECUT + 1
+                     VALS(IFACECUT) = CELLTYPE
+                  ENDDO
+               ENDDO
+            ELSE
+               IFACE = IFACE + 1
+               VALS(IFACE) = CELLTYPE
+            
+               IFACE = IFACE + 1
+               VALS(IFACE) = CELLTYPE
+            ENDIF
+         END DO
+      END DO
+   ENDIF
 ENDIF
 END SUBROUTINE GET_GEOMVALS
 
@@ -3869,17 +4130,17 @@ REAL(FB) :: STIME
 
 INTEGER :: I
 INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, FIRST_FRAME_STATIC=1, NVOLS=0, VERSION=2
-INTEGER :: NVERTS, NFACES
+INTEGER :: NVERTS, NVERTS_CUTCELLS, NFACES, NFACES_CUTCELLS
 REAL(FB), PARAMETER :: ZERO_FLOAT=0.0_FB
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VERTS
 INTEGER, ALLOCATABLE, DIMENSION(:) :: FACES, LOCATIONS
 
-CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
 IF (NVERTS>0 .AND. NFACES>0) THEN
    ALLOCATE(VERTS(3*NVERTS))
    ALLOCATE(FACES(3*NFACES))
    ALLOCATE(LOCATIONS(NFACES))
-   CALL GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES,VERTS,FACES,LOCATIONS)
+   CALL GET_GEOMINFO(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS,VERTS,FACES,LOCATIONS)
 ELSE
    NVERTS=0
    NFACES=0
@@ -3917,14 +4178,14 @@ INTEGER, INTENT(IN) :: FUNIT, HEADER, I1, I2, J1, J2, K1, K2
 REAL(FB), INTENT(IN) :: STIME
 
 INTEGER, PARAMETER :: ONE_INTEGER=1, ZERO_INTEGER=0, VERSION=2
-INTEGER :: NVERTS,NFACES
+INTEGER :: NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS
 INTEGER I
 REAL(FB), ALLOCATABLE, DIMENSION(:) :: VALS
 
-CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NFACES)
+CALL GET_GEOMSIZES(SLICETYPE,I1,I2,J1,J2,K1,K2,NVERTS,NVERTS_CUTCELLS,NFACES,NFACES_CUTCELLS)
 IF (NVERTS>0 .AND. NFACES>0) THEN
    ALLOCATE(VALS(NFACES))
-   CALL GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,VALS)
+   CALL GET_GEOMVALS(SLICETYPE,I1, I2, J1, J2, K1, K2,NFACES,NFACES_CUTCELLS,VALS)
 ELSE
    NVERTS=0
    NFACES=0
