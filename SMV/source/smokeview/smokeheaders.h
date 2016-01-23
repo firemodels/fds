@@ -715,7 +715,7 @@ EXTERNCPP void setslicecolors(float slicemin, float slicemax, slicedata *sd, int
 EXTERNCPP void setisocolors(float isomin, float isomax, isodata *sd, int *errorcode);
 EXTERNCPP void drawvolslice_terrain(const slicedata *sd);
 EXTERNCPP void drawvolslice_texture(const slicedata *sd);
-EXTERNCPP void drawvolslice_cellcenter(const slicedata *sd);
+EXTERNCPP void drawvolslice_cellfacecenter(const slicedata *sd, int flag);
 EXTERNCPP int new_multi_slice(slicedata *sdold,slicedata *sd);
 EXTERNCPP int hide_slice2(slicedata *sdi,slicedata *sdj);
 EXTERNCPP void drawvolslice(const slicedata *sd);
@@ -737,8 +737,6 @@ EXTERNCPP void drawventdataSLAB(void);
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void RenderFrame(int view_mode);
-EXTERNCPP int readlabels_terrain(flowlabels *label, FILE *stream);
-EXTERNCPP int readlabels_cellcenter(flowlabels *label, FILE *stream);
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
