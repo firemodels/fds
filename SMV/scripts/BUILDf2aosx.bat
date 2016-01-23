@@ -24,7 +24,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEf2aosx.csh %smv_revision%
+plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEf2aosx.sh %osx_svn_root%
 
 echo.
 echo compilation complete

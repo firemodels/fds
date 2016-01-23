@@ -23,11 +23,8 @@ echo ---------------------------------------------
 echo Building 64 bit Windows versions of fds2ascii
 echo ---------------------------------------------
 
-cd %svn_root%\Utilities\fds2ascii\intel_win_64
-call %svn_root%\Utilities\Scripts\setup_intel_compilers.bat
-
 Title Building fds2ascii for 64 bit Windows
 
 erase *.obj *.exe
-ifort -o fds2ascii_win_64.exe -O2 ..\..\Data_processing\fds2ascii.f90
+call make_fds2ascii
 pause
