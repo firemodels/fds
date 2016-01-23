@@ -26,5 +26,6 @@ echo ---------------------------------------------
 Title Building fds2ascii for 64 bit Windows
 
 erase *.obj *.exe
+cd %svn_root%\Utilities\fds2ascii\intel_win_64
 call make_fds2ascii
 pause
