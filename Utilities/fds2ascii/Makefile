@@ -61,7 +61,7 @@ intel_win_64 : $(objwin)
 # ------------- gnu linux 64 ----------------
 #  64 bit gcc linux
 
-gnu_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFO)
+gnu_linux_64 : FFLAGS    = -O0 -m64 -ffree-form -frecord-marker=4  $(GITINFOGNU)
 gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = fds2ascii_linux_64
 
