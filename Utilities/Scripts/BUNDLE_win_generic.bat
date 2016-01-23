@@ -20,7 +20,7 @@ set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
-set in_sh2bat=%svn_root%\Utilities\Data_Processing
+set in_sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
 set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2
 
 set uploads=%svn_root%\Utilities\uploads
@@ -185,12 +185,12 @@ set RUNTFDS=call %copyFDScases%
 set RUNCFAST=call %copyCFASTcases%
 
 cd %out_examples2%
-%svn_root%\Utilities\Data_processing\sh2bat %fds_casessh% %fds_casesbat%
+%in_sh2bat%\sh2bat %fds_casessh% %fds_casesbat%
 call %fds_casesbat%
 
 echo.
 cd %out_examples2%
-%svn_root%\Utilities\Data_processing\sh2bat %smv_casessh% %smv_casesbat%
+%in_sh2bat%\sh2bat %smv_casessh% %smv_casesbat%
 call %smv_casesbat%
 
 echo.
