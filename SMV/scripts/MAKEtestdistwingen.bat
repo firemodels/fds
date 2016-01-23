@@ -26,7 +26,7 @@ set platform=%1
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
 set smvdir=%svn_root%\SMV\uploads\%zipbase%
-set sh2bat=%svn_root%\Utilities\Data_Processing
+set sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
 
 cd "%svn_root%\..\Google Drive\SMV_Test_Versions
 set gupload=%CD%

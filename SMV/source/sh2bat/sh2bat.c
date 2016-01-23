@@ -1,14 +1,41 @@
+#define INMAIN
 // convert the Linux/OSX script containing a list FDS cases 
 // to an equivalent Windows bat version 
-
+#include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "string_util.h"
 
-void trim_back(char *line);
-void usage(char *prog);
-char *trim_front(char *line);
+
+/* ------------------ version ------------------------ */
+
+void version(char *prog){
+  char githash[256];
+
+  getGitHash(githash);    // get githash
+
+  fprintf(stderr, "\n%s\n\n", prog);
+  fprintf(stderr, "Version: %s\n",PROGVERSION);
+  fprintf(stderr, "Build: %s\n", githash);
+  fprintf(stderr, "Build Date: %s\n", __DATE__);
+}
+
+/* ------------------ usage ------------------------ */
+
+void usage(char *prog){
+ char githash[256];
+
+  getGitHash(githash);    // get githash
+
+  fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
+  fprintf(stderr, "convert a bash script to a windows batch file\n\n");
+  fprintf(stderr, "Usage: %s file_in file_out\n\n",prog);
+  fprintf(stderr, " convert the Linux/OSX script file file_in to an equivalent windows batch\n");
+  fprintf(stderr, " file file_out by ignoring lines beginning with # and converting variables\n");
+  fprintf(stderr, " such as $var to %svar%s\n", "%", "%");
+}
 
 /* ------------------ main ------------------------ */
 
@@ -32,6 +59,10 @@ int main(int argc, char **argv){
       switch(arg[1]){
       case 'h':
         usage(prog);
+        exit(1);
+        break;
+      case 'v':
+        version(prog);
         exit(1);
         break;
       default:
@@ -102,51 +133,4 @@ int main(int argc, char **argv){
     }
     fprintf(streamout,"%s\n",buffer);
   }
-}
-
-/* ------------------ usage ------------------------ */
-
-void usage(char *prog){
-  char RUNFDS[32];
-
-  strcpy(RUNFDS,"%RUNFDS%");
-  fprintf(stderr,"%s file_in file_out\n\n",prog);
-  fprintf(stderr,"  convert the Linux/OSX script file file_in to a windows bat file equivalent by\n");
-  fprintf(stderr,"  ignoring lines beginning with the comment character # and converting \n");
-  fprintf(stderr,"  the Linux/OSX symbol $RUNFDS to the DOS symbol %s\n",RUNFDS);
-}
-
-/* ------------------ trim ------------------------ */
-
-void trim_back(char *line){
-  char *blank=" ";
-  const char *c;
-  const char *lf="\n";
-  unsigned int len;
-  unsigned int i;
-  len = strlen(line);
-  c = line+len-1;
-  for(i=0; i<len; i++){
-    if(strncmp(c,blank,1)!=0&&strncmp(c,lf,1)!=0){
-      c++; 
-      line[c-line]='\0';
-      return;
-    }
-    c--;
-  }
-  *line='\0';
-}
-
-/* ------------------ trim_front ------------------------ */
-
-char *trim_front(char *line){
-
-// returns a pointer to the first non-blank character in the character string line
-
-  char *c;
-
-  for(c=line;c<=line+strlen(line)-1;c++){
-    if(!isspace(*c))return c;
-  }
-  return line;
 }
