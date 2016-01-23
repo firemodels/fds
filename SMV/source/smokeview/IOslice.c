@@ -511,7 +511,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
       fed_frame[i]=0.0;
     }
     if(AREA_STREAM!=NULL){
-      if(fed_slice->slicetype==SLICE_CENTER){
+      if(fed_slice->slicetype==SLICE_CELL_CENTER){
         float areas[5];
 
         GetCellAreas(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, nlevels, areas);
@@ -599,7 +599,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
       // compute fed areas 
 
-        if(fed_slice->slicetype==SLICE_CENTER){
+        if(fed_slice->slicetype==SLICE_CELL_CENTER){
           float areas[5];
 
           GetCellAreas(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, nlevels, areas);
@@ -1280,7 +1280,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   }
   CheckMemory;
 
-  if(sd->slicetype==SLICE_CENTER){
+  if(sd->slicetype==SLICE_CELL_CENTER){
     usetexturebar=0;
   }
   sd->loaded=1;
@@ -1661,7 +1661,7 @@ void update_slice_menu_show(void){
     sd = sliceinfo + i;
     slicemesh = meshinfo + sd->blocknumber;
     sd->menu_show=1;
-    if(sd->slicetype==SLICE_CENTER){
+    if(sd->slicetype==SLICE_CELL_CENTER){
       flowlabels *label;
 
       label = &sd->label;
@@ -2087,7 +2087,7 @@ void getsliceparams(void){
         ){
         sd->idir=1;
         position = meshi->xplt_orig[is1];
-        if(sd->slicetype==SLICE_CENTER){
+        if(sd->slicetype==SLICE_CELL_CENTER){
           float *xp;
 
           is2=is1-1;
@@ -2111,7 +2111,7 @@ void getsliceparams(void){
       if(sd->js1==sd->js2){
         sd->idir=2;
         position = meshi->yplt_orig[js1];
-        if(sd->slicetype==SLICE_CENTER){
+        if(sd->slicetype==SLICE_CELL_CENTER){
           float *yp;
 
           js2=js1-1;
@@ -2130,7 +2130,7 @@ void getsliceparams(void){
       if(sd->ks1==sd->ks2){
         sd->idir=3;
         position = meshi->zplt_orig[ks1];
-        if(sd->slicetype==SLICE_CENTER){
+        if(sd->slicetype==SLICE_CELL_CENTER){
           float *zp;
 
           ks2=ks1-1;
@@ -2337,15 +2337,15 @@ void update_fedinfo(void){
     fedi->fed_index=-1;
     fedi->loaded=0;
     fedi->display=0;
-    if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
-    if(slicei->slicetype==SLICE_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
+    if(slicei->slicetype!=SLICE_CELL_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION")!=0)continue;
+    if(slicei->slicetype==SLICE_CELL_CENTER&&strcmp(slicei->label.longlabel,"CARBON DIOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
     fedi->co2_index=i;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
-      if(slicei->slicetype==SLICE_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
+      if(slicei->slicetype!=SLICE_CELL_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype==SLICE_CELL_CENTER&&strcmp(slicej->label.longlabel,"CARBON MONOXIDE VOLUME FRACTION(cell centered)")!=0)continue;
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
@@ -2358,8 +2358,8 @@ void update_fedinfo(void){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(slicei->slicetype!=SLICE_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
-      if(slicei->slicetype==SLICE_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION(cell centered)")!=0)continue;
+      if(slicei->slicetype!=SLICE_CELL_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION")!=0)continue;
+      if(slicei->slicetype==SLICE_CELL_CENTER&&strcmp(slicej->label.longlabel,"OXYGEN VOLUME FRACTION(cell centered)")!=0)continue;
       if(slicei->blocknumber!=slicej->blocknumber)continue;
       if(slicei->is1!=slicej->is1||slicei->is2!=slicej->is2)continue;
       if(slicei->js1!=slicej->js1||slicei->js2!=slicej->js2)continue;
@@ -2435,7 +2435,7 @@ void update_fedinfo(void){
     sd->is_fed=1;
     sd->fedptr=fedi;
     sd->slicetype=co2->slicetype;
-    if(sd->slicetype==SLICE_CENTER){
+    if(sd->slicetype==SLICE_CELL_CENTER){
       setlabels(&(sd->label),"Fractional effective dose(cell centered)","FED"," ");
     }
     else{
@@ -2606,12 +2606,12 @@ void updatevslices(void){
     vd->ival=i;
     vd->type=sliceinfo[i].type;
     vd->slicetype=sliceinfo[i].slicetype;
-    if(vd->slicetype==SLICE_CENTER){
+    if(vd->slicetype==SLICE_CELL_CENTER){
       for(j=0;j<nsliceinfo;j++){
         slicedata *sdj;
 
         sdj = sliceinfo+j;
-        if(sdj->slicetype!=SLICE_CENTER)continue;
+        if(sdj->slicetype!=SLICE_CELL_CENTER)continue;
         if(sdi->blocknumber!=sdj->blocknumber)continue;
         if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
         if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
@@ -2625,7 +2625,7 @@ void updatevslices(void){
         slicedata *sdj;
 
         sdj = sliceinfo+j;
-        if(sdj->slicetype==SLICE_CENTER)continue;
+        if(sdj->slicetype==SLICE_CELL_CENTER)continue;
         if(sdi->blocknumber!=sdj->blocknumber)continue;
         if(sdi->is1!=sdj->is1||sdi->is2!=sdj->is2||sdi->js1!=sdj->js1)continue;
         if(sdi->js2!=sdj->js2||sdi->ks1!=sdj->ks1||sdi->ks2!=sdj->ks2)continue;
@@ -2733,8 +2733,8 @@ void updatevslices(void){
       if(slicej->idir<1)continue;
       if(slicej->volslice==1)continue;
       if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
-      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||
-        slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
+      if(slicej->slicetype==SLICE_CELL_CENTER&&slicei->slicetype!=SLICE_CELL_CENTER||
+        slicej->slicetype!=SLICE_CELL_CENTER&&slicei->slicetype==SLICE_CELL_CENTER)continue;
       mvslicei->ndirxyz[slicej->idir]++;
     }
   }
@@ -3125,9 +3125,9 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
           // 0 blocked
           // 1 partially blocked
           // 2 unblocked
-          if(sd->slicetype==SLICE_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
-          if(sd->slicetype!=SLICE_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==SOLID)continue;
-          if(sd->slicetype==SLICE_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==EMBED_YES)continue;
+          if(sd->slicetype==SLICE_CELL_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
+          if(sd->slicetype!=SLICE_CELL_CENTER&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==SOLID)continue;
+          if(sd->slicetype==SLICE_CELL_CENTER&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==EMBED_YES)continue;
           if(first==1){
             *pmin=pdata[n];
             *pmax=pdata[n];
@@ -3167,7 +3167,7 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
       kkmax=0;
     }
   }
-  if(sd->slicetype==SLICE_CENTER){
+  if(sd->slicetype==SLICE_CELL_CENTER){
     PRINTF(" global min (slice file): %f cell=(%i,%i,%i)\n",*pmin,iimin,jjmin,kkmin);
     PRINTF(" global max (slice file): %f cell=(%i,%i,%i)\n",*pmax,iimax,jjmax,kkmax);
   }
@@ -3286,7 +3286,7 @@ void drawslice_frame(){
         continue;
       }
       switch(sd->slicetype){
-        case SLICE_NODE:
+        case SLICE_NODE_CENTER:
           if(usetexturebar!=0){
             drawvolslice_texture(sd);
             SNIFF_ERRORS("after drawvolslice_texture");
@@ -3316,9 +3316,13 @@ void drawslice_frame(){
           }
 #endif
           break;
-        case SLICE_CENTER:
-          drawvolslice_cellcenter(sd);
-          SNIFF_ERRORS("after drawvolslice_cellcenter");
+        case SLICE_CELL_CENTER:
+          drawvolslice_cellfacecenter(sd,SLICE_CELL_CENTER);
+          SNIFF_ERRORS("after drawvolslice_cellfacecenter SLICE_CELL_CENTER");
+          break;
+        case SLICE_FACE_CENTER:
+          drawvolslice_cellfacecenter(sd,SLICE_FACE_CENTER);
+          SNIFF_ERRORS("after drawvolslice_cellfacecenter SLICE_FACE_CENTER");
           break;
         case SLICE_TERRAIN:
           drawvolslice_terrain(sd);
@@ -3404,7 +3408,7 @@ void drawvslice_frame(void){
     if(vd->slicetype==SLICE_TERRAIN){
       drawvvolslice_terrain(vd);
     }
-    else if(vd->slicetype==SLICE_CENTER){
+    else if(vd->slicetype==SLICE_CELL_CENTER){
         drawvvolslice_cellcenter(vd);
     }
     else{
@@ -4318,9 +4322,9 @@ void drawvolslice_terrain(const slicedata *sd){
 
 }
 
-/* ------------------ drawvolslice_cellcenter ------------------------ */
+/* ------------------ drawvolslice_cellfacecenter ------------------------ */
 
-void drawvolslice_cellcenter(const slicedata *sd){
+void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
   float *xplt, *yplt, *zplt;
   int plotx, ploty, plotz;
   int ibar,jbar;
@@ -4369,7 +4373,18 @@ void drawvolslice_cellcenter(const slicedata *sd){
     int maxj;
     int j;
 
-    constval = (xplt[plotx]+xplt[plotx-1])/2.0;
+    switch(flag){
+    case SLICE_CELL_CENTER:
+      constval = (xplt[plotx] + xplt[plotx - 1]) / 2.0;
+      break;
+    case SLICE_FACE_CENTER:
+      constval = xplt[plotx - 1];
+      break;
+    default:
+      constval = (xplt[plotx] + xplt[plotx - 1]) / 2.0;
+      ASSERT(FFALSE);
+      break;
+    }
     glBegin(GL_TRIANGLES);
     maxj = sd->js2;
     if(sd->js1+1>maxj){
@@ -4388,7 +4403,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
         int i33;
         float z1,z3;
 
-        if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
+        if(sd->slicetype!=SLICE_CELL_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(plotx,j,k)]==EMBED_YES)continue;
 
         index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
@@ -4425,7 +4440,7 @@ void drawvolslice_cellcenter(const slicedata *sd){
           int index_cell;
           float z1, z3;
 
-          if(sd->slicetype!=SLICE_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
+          if(sd->slicetype!=SLICE_CELL_CENTER&&show_slice_in_obst==0&&iblank_cell[IJKCELL(plotx-1,j,k)]!=GAS)continue;
           if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJKCELL(plotx,j,k)]==EMBED_YES)continue;
           z1 = zplt[k];
           z3 = zplt[k+1];
@@ -4446,7 +4461,18 @@ void drawvolslice_cellcenter(const slicedata *sd){
     int i;
     int maxi;
 
-    constval = (yplt[ploty]+yplt[ploty-1])/2.0;
+    switch(flag){
+    case SLICE_CELL_CENTER:
+      constval = (yplt[ploty] + yplt[ploty - 1]) / 2.0;
+      break;
+    case SLICE_FACE_CENTER:
+      constval = yplt[ploty - 1];
+      break;
+    default:
+      constval = (yplt[ploty] + yplt[ploty - 1]) / 2.0;
+      ASSERT(FFALSE);
+      break;
+    }
     glBegin(GL_TRIANGLES);
     maxi = sd->is1+sd->nslicei-1;
     if(sd->is1+1>maxi){
@@ -4520,7 +4546,18 @@ void drawvolslice_cellcenter(const slicedata *sd){
     int i;
     int maxi;
 
-    constval = (zplt[plotz]+zplt[plotz-1])/2.0;
+    switch(flag){
+    case SLICE_CELL_CENTER:
+      constval = (zplt[plotz] + zplt[plotz - 1]) / 2.0;
+      break;
+    case SLICE_FACE_CENTER:
+      constval = zplt[plotz - 1];
+      break;
+    default:
+      constval = (zplt[plotz] + zplt[plotz - 1]) / 2.0;
+      ASSERT(FFALSE);
+      break;
+    }
     glBegin(GL_TRIANGLES);
     maxi = sd->is1+sd->nslicei-1;
     if(sd->is1+1>maxi){
@@ -6535,8 +6572,8 @@ void update_slicedir_count(void){
       if(slicej->idir<1)continue;
       if(slicej->volslice==1)continue;
       if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
-      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||
-        slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
+      if(slicej->slicetype==SLICE_CELL_CENTER&&slicei->slicetype!=SLICE_CELL_CENTER||
+        slicej->slicetype!=SLICE_CELL_CENTER&&slicei->slicetype==SLICE_CELL_CENTER)continue;
       mslicei->ndirxyz[slicej->idir]++;
     }
   }
@@ -6561,7 +6598,7 @@ void update_slicedir_count(void){
 	    if(slicej->volslice==1)continue;
       if(strcmp(slicej->label.longlabel,slicei->label.longlabel)!=0)continue;
 	    //if(slicej->cellcenter!=slicei->cellcenter)continue;
-      if(slicej->slicetype==SLICE_CENTER&&slicei->slicetype!=SLICE_CENTER||slicej->slicetype!=SLICE_CENTER&&slicei->slicetype==SLICE_CENTER)continue;
+      if(slicej->slicetype==SLICE_CELL_CENTER&&slicei->slicetype!=SLICE_CELL_CENTER||slicej->slicetype!=SLICE_CELL_CENTER&&slicei->slicetype==SLICE_CELL_CENTER)continue;
       slicei->ndirxyz[slicej->idir]++;
   	}
   }

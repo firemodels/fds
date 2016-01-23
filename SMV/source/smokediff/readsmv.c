@@ -38,7 +38,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(
       match(buffer,"SLCF") == 1||
       match(buffer,"SLCC") == 1||
-      match(buffer,"SLFL") == 1||
+      match(buffer, "SLCD") == 1 ||
+      match(buffer, "SLFL") == 1 ||
       match(buffer,"SLCT") == 1
       ){
       nsliceinfo++;
@@ -413,7 +414,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(
       match(buffer,"SLCF") == 1||
       match(buffer,"SLCC") == 1||
-      match(buffer,"SLFL") == 1||
+      match(buffer, "SLCD") == 1 ||
+      match(buffer, "SLFL") == 1 ||
       match(buffer,"SLCT") == 1)
     {
       int version_local=0;
@@ -440,8 +442,8 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(match(buffer,"SLCF") == 1){
         slicei->slicetype=1;
       }
-      if(match(buffer,"SLCC") == 1){
-        slicei->slicetype=2;
+      if(match(buffer,"SLCC") == 1||match(buffer, "SLCD") == 1){
+          slicei->slicetype = 2;
       }
       if(match(buffer,"SLFL") == 1){
         slicei->slicetype=3;

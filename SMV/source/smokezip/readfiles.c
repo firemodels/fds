@@ -101,7 +101,8 @@ int readsmv(char *smvfile){
     if(
       match(buffer,"SLCF") == 1||
       match(buffer,"SLCC") == 1||
-      match(buffer,"SLFL") == 1||
+      match(buffer, "SLCD") == 1 ||
+      match(buffer, "SLFL") == 1 ||
       match(buffer,"SLCT") == 1
       ){
       nsliceinfo++;
@@ -664,7 +665,8 @@ int readsmv(char *smvfile){
     if(
       match(buffer,"SLCF") == 1||
       match(buffer,"SLCC") == 1||
-      match(buffer,"SLFL") == 1||
+      match(buffer, "SLCD") == 1 ||
+      match(buffer, "SLFL") == 1 ||
       match(buffer,"SLCT") == 1)
     {
       int version_local=0,dummy;

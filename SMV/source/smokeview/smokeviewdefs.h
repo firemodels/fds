@@ -14,8 +14,8 @@ void _Sniff_Errors(char *whereat);
 #define GEOM_ISO 1
 #define GEOM_SLICE 2
 
-#define PATCH_NODECENTERED 0
-#define PATCH_CELLCENTERED 1
+#define PATCH_NODE_CENTER 0
+#define PATCH_CELL_CENTER 1
 #define PATCH_GEOMETRY 2
 
 #define NODATA 0
@@ -163,10 +163,11 @@ void _Sniff_Errors(char *whereat);
 #define RLE 0
 #define ZLIB 1
 
-#define SLICE_NODE 1
-#define SLICE_CENTER 2
+#define SLICE_NODE_CENTER 1
+#define SLICE_CELL_CENTER 2
 #define SLICE_FIRELINE 3
 #define SLICE_TERRAIN 4
+#define SLICE_FACE_CENTER 5
 
 #define TERRAIN_3D 0
 #define TERRAIN_2D_STEPPED 1

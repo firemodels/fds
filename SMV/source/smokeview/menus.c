@@ -8221,7 +8221,7 @@ updatemenu=0;
             STRCPY(mlabel,sd->label.longlabel);
             if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
               sprintf(mlabel2,"*** Evac type %i meshes ***",sd->mesh_type);
-              if(sd->slicetype==SLICE_CENTER){
+              if(sd->slicetype==SLICE_CELL_CENTER){
                 flowlabels *label;
 
                 label = &sd->label;
@@ -8231,7 +8231,7 @@ updatemenu=0;
               }
               glutAddMenuEntry(mlabel2,MENU_DUMMY);
             }
-            if(sd->slicetype==SLICE_CENTER){
+            if(sd->slicetype==SLICE_CELL_CENTER){
               flowlabels *label;
 
               label = &sd->label;
