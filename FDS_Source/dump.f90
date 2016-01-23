@@ -966,6 +966,9 @@ DO N=1,M%N_SLCF
          IF (SL%CELL_CENTERED) THEN
             WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCC',NM,TRIM(SLICELABEL)
          ENDIF
+         IF (SL%FACE_CENTERED) THEN
+            WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'SLCD',NM,TRIM(SLICELABEL)
+         ENDIF
       ELSE
          WRITE(M%STRING(M%N_STRINGS),'(A,I6,A)') 'BNDS',NM,TRIM(SLICELABEL)
       ENDIF
@@ -3730,7 +3733,6 @@ USE COMPLEX_GEOMETRY
    
    INTEGER :: DIR, SLICE
    INTEGER :: NI, NJ, NK
-   REAL(FB) :: XMID, YMID, ZMID
    INTEGER :: I, J, K
    INTEGER IFACE, IVERT, IVERTCUT, IFACECUT, IVERTCF, IFACECF
    LOGICAL IS_SOLID
@@ -3750,12 +3752,11 @@ USE COMPLEX_GEOMETRY
       IVERT = 0
       IFACE = 0
       IF (DIR==1) THEN
-         XMID = (XPLT(SLICE)+XPLT(SLICE-1))/2.0_FB
          DO K=K1,K2
             DO J=J1,J2
                DO I = SLICE,SLICE
                   IVERT = IVERT + 1
-                  VERTS(3*IVERT-2) = XMID
+                  VERTS(3*IVERT-2) = XPLT(SLICE)
                   VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZPLT(K)
                END DO
@@ -3778,13 +3779,12 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE IF (DIR==2) THEN
-         YMID = (YPLT(SLICE)+YPLT(SLICE-1))/2.0_FB
          DO K=K1,K2
             DO J=SLICE,SLICE
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = YMID
+                  VERTS(3*IVERT-1) = YPLT(SLICE)
                   VERTS(3*IVERT)   = ZPLT(K)
                END DO
             END DO
@@ -3806,14 +3806,13 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE
-         ZMID = (ZPLT(SLICE)+ZPLT(SLICE-1))/2.0_FB
          DO K=SLICE,SLICE
             DO J=J1,J2
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
                   VERTS(3*IVERT-1) = YPLT(J)
-                  VERTS(3*IVERT)   = ZMID
+                  VERTS(3*IVERT)   = ZPLT(SLICE)
                END DO
             END DO
          END DO
@@ -3844,12 +3843,11 @@ USE COMPLEX_GEOMETRY
       IVERT = 0
       IFACE = 0
       IF (DIR==1) THEN
-         XMID = XPLT(SLICE)
          DO K=K1,K2
             DO J=J1,J2
                DO I = SLICE,SLICE
                   IVERT = IVERT + 1
-                  VERTS(3*IVERT-2) = XMID
+                  VERTS(3*IVERT-2) = XPLT(SLICE)
                   VERTS(3*IVERT-1) = YPLT(J)
                   VERTS(3*IVERT)   = ZPLT(K)
                END DO
@@ -3894,13 +3892,12 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE IF (DIR==2) THEN
-         YMID = YPLT(SLICE)
          DO K=K1,K2
             DO J=SLICE,SLICE
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
-                  VERTS(3*IVERT-1) = YMID
+                  VERTS(3*IVERT-1) = YPLT(SLICE)
                   VERTS(3*IVERT)   = ZPLT(K)
                END DO
             END DO
@@ -3942,14 +3939,13 @@ USE COMPLEX_GEOMETRY
             END DO
          END DO
       ELSE
-         ZMID = ZPLT(SLICE)
          DO K=SLICE,SLICE
             DO J=J1,J2
                DO I = I1,I2
                   IVERT = IVERT + 1
                   VERTS(3*IVERT-2) = XPLT(I)
                   VERTS(3*IVERT-1) = YPLT(J)
-                  VERTS(3*IVERT)   = ZMID
+                  VERTS(3*IVERT)   = ZPLT(SLICE)
                END DO
             END DO
          END DO
@@ -4221,7 +4217,7 @@ INTEGER :: KTS,NTSL
 REAL(EB), POINTER, DIMENSION(:,:,:) :: C=>NULL(),B=>NULL(),S=>NULL(),QUANTITY=>NULL()
 REAL(FB) :: ZERO,STIME
 LOGICAL :: P_FLUX,PLOT3D,SLCF3D
-LOGICAL :: AGL_TERRAIN_SLICE,CC_SLICE
+LOGICAL :: AGL_TERRAIN_SLICE,CC_CELL_CENTERED,CC_FACE_CENTERED
 
 ! Return if there are no slices to process and this is not a Plot3D dump
 
@@ -4358,7 +4354,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
       K1  = 0
       K2  = KBAR
       AGL_TERRAIN_SLICE = .FALSE.
-      CC_SLICE = .FALSE.
+      CC_CELL_CENTERED = .FALSE.
+      CC_FACE_CENTERED = .FALSE.
    ELSE
       SL => SLICE(IQ)
       IND  = SL%INDEX
@@ -4376,7 +4373,8 @@ QUANTITY_LOOP: DO IQ=1,NQT
       K1  = SL%K1
       K2  = SL%K2
       AGL_TERRAIN_SLICE = SL%TERRAIN_SLICE
-      CC_SLICE = SL%CELL_CENTERED
+      CC_CELL_CENTERED = SL%CELL_CENTERED
+      CC_FACE_CENTERED = SL%FACE_CENTERED
       IF ((I2-I1>0 .AND. J2-J1>0 .AND. K2-K1>0)  .AND. .NOT.SLCF3D) CYCLE QUANTITY_LOOP
       IF ((I2-I1==0 .OR. J2-J1==0 .OR. K2-K1==0) .AND.      SLCF3D) CYCLE QUANTITY_LOOP
    ENDIF
@@ -4432,7 +4430,10 @@ QUANTITY_LOOP: DO IQ=1,NQT
       IQQ = 1
    ENDIF
 
-   IF (.NOT.AGL_TERRAIN_SLICE .AND. .NOT.CC_SLICE) THEN
+   IF (.NOT.AGL_TERRAIN_SLICE .AND. .NOT.CC_CELL_CENTERED .AND. .NOT.CC_FACE_CENTERED) THEN
+
+  ! node centered slice
+
      DO K=K1,K2
         DO J=J1,J2
            DO I=I1,I2
@@ -4458,11 +4459,10 @@ QUANTITY_LOOP: DO IQ=1,NQT
            ENDDO
         ENDDO
      ENDDO
-   ENDIF
 
-   ! Special terrain-following slice
+   !  or cell centered or terrain-following (treated as cell centered) slice
 
-   IF (AGL_TERRAIN_SLICE .OR. CC_SLICE) THEN
+   ELSE IF (AGL_TERRAIN_SLICE .OR. CC_CELL_CENTERED) THEN
       DO K=KK1,KK2
          DO J=JJ1,JJ2
             DO I=II1,II2
@@ -4470,8 +4470,22 @@ QUANTITY_LOOP: DO IQ=1,NQT
             ENDDO
          ENDDO
       ENDDO
+
+   ELSE
+
+   ! face centered slice
+
+      DO K=KK1,KK2
+         DO J=JJ1,JJ2
+            DO I=II1,II2
+            !xxx need to change the following code to use face centered interpolation
+            ! (perhaps copy some variant of node centered interpolation code above)
+               QQ(I,J,K,IQQ) = QUANTITY(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
    ENDIF
- 
+   
    ! Dump out the slice file to a .sf file
  
    IF (.NOT.PLOT3D) THEN
