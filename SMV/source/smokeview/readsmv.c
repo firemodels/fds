@@ -3022,7 +3022,8 @@ int readsmv(char *file, char *file2){
     }
     if( (match(buffer,"SLCF") == 1)||
         (match(buffer,"SLCC") == 1)||
-        (match(buffer,"SLFL") == 1)||
+        (match(buffer, "SLCD") == 1) ||
+        (match(buffer, "SLFL") == 1) ||
         (match(buffer,"SLCT") == 1)
       ){
       nsliceinfo++;
@@ -6748,10 +6749,11 @@ typedef struct {
   */
     if( (match(buffer,"SLCF") == 1)||
         (match(buffer,"SLCC") == 1)||
-        (match(buffer,"SLFL") == 1)||
+        (match(buffer, "SLCD") == 1) ||
+        (match(buffer, "SLFL") == 1) ||
         (match(buffer,"SLCT") == 1)
       ){
-      int terrain=0, cellcenter=0, fire_line=0;
+      int terrain=0, cellcenter=0, facecenter=0, fire_line=0;
       float above_ground_level=0.0;
       slicedata *sd;
       char *slicelabelptr, slicelabel[256];
@@ -6787,8 +6789,12 @@ typedef struct {
         fire_line=1;
       }
       if(match(buffer,"SLCC") == 1){
-        cellcenter_slice_active=1;
+        cellcenter_slice_active = 1;
         cellcenter=1;
+      }
+      if(match(buffer, "SLCD") == 1){
+        facecenter_slice_active = 1;
+        facecenter = 1;
       }
       trim_back(buffer);
       len=strlen(buffer);
@@ -6818,13 +6824,16 @@ typedef struct {
       sd->comp_file=NULL;
       sd->vol_file=NULL;
       sd->slicelabel=NULL;
-      sd->slicetype=SLICE_NODE;
+      sd->slicetype=SLICE_NODE_CENTER;
       if(terrain==1){
         sd->slicetype=SLICE_TERRAIN;
       }
       if(fire_line==1)sd->slicetype=SLICE_FIRELINE;
       if(cellcenter==1){
-        sd->slicetype=SLICE_CENTER;
+        sd->slicetype=SLICE_CELL_CENTER;
+      }
+      if(facecenter == 1){
+        sd->slicetype = SLICE_FACE_CENTER;
       }
 
       if(nslicefiles>100&&(islicecount%100==1||nslicefiles==islicecount)){
@@ -6870,8 +6879,11 @@ typedef struct {
       if(sd->slicetype==SLICE_TERRAIN){
         if(readlabels_terrain(&sd->label,stream)==2)return 2;
       }
-      else if(sd->slicetype==SLICE_CENTER){
+      else if(sd->slicetype==SLICE_CELL_CENTER){
         if(readlabels_cellcenter(&sd->label,stream)==2)return 2;
+      }
+      else if(sd->slicetype == SLICE_FACE_CENTER){
+        if(readlabels_facecenter(&sd->label, stream) == 2)return 2;
       }
       else{
         if(readlabels(&sd->label,stream)==2)return 2;
@@ -7004,9 +7016,9 @@ typedef struct {
 
       patchi->version=version;
       strcpy(patchi->scale, "");
-      patchi->filetype = PATCH_NODECENTERED;
+      patchi->filetype = PATCH_NODE_CENTER;
       if(match(buffer,"BNDC") == 1){
-        patchi->filetype = PATCH_CELLCENTERED;
+        patchi->filetype = PATCH_CELL_CENTER;
         cellcenter_bound_active=1;
       }
       if(match(buffer,"BNDE") == 1){
@@ -7115,10 +7127,10 @@ typedef struct {
       patchi->chopmax=0.0;
       meshinfo[blocknumber].patchfilenum=-1;
       if(STAT(patchi->file,&statbuffer)==0){
-        if(patchi->filetype==PATCH_CELLCENTERED){
+        if(patchi->filetype==PATCH_CELL_CENTER){
           if(readlabels_cellcenter(&patchi->label,stream)==2)return 2;
         }
-        else if(patchi->filetype==PATCH_NODECENTERED){
+        else if(patchi->filetype==PATCH_NODE_CENTER){
           if(readlabels(&patchi->label,stream)==2)return 2;
         }
         else if(patchi->filetype==PATCH_GEOMETRY){

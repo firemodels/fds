@@ -837,6 +837,65 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
+/* ------------------ readlabels_facecenter ------------------------ */
+
+int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
+  char buffer2[255], *buffer;
+  size_t len;
+
+  if(fgets(buffer2, 255, stream) == NULL){
+    strcpy(buffer2, "*");
+  }
+
+  len = strlen(buffer2);
+  buffer2[len - 1] = '\0';
+  buffer = trim_front(buffer2);
+  trim_back(buffer);
+  len = strlen(buffer);
+  if(NewMemory((void **)&flowlabel->longlabel, (unsigned int)(len + 1 + 15)) == 0)return 2;
+  STRCPY(flowlabel->longlabel, buffer);
+  STRCAT(flowlabel->longlabel, "(face centered)");
+
+  if(fgets(buffer2, 255, stream) == NULL){
+    strcpy(buffer2, "**");
+  }
+
+  len = strlen(buffer2);
+  buffer2[len - 1] = '\0';
+  buffer = trim_front(buffer2);
+  trim_back(buffer);
+  len = strlen(buffer);
+  if(NewMemory((void **)&flowlabel->shortlabel, (unsigned int)(len + 1)) == 0)return 2;
+  STRCPY(flowlabel->shortlabel, buffer);
+
+  if(fgets(buffer2, 255, stream) == NULL){
+    strcpy(buffer2, "***");
+  }
+
+  len = strlen(buffer2);
+  buffer2[len - 1] = '\0';
+  buffer = trim_front(buffer2);
+  trim_back(buffer);
+  len = strlen(buffer) + 1;// allow room for deg C symbol in case it is present
+  if(NewMemory((void *)&flowlabel->unit, (unsigned int)(len + 1)) == 0)return 2;
+#ifdef pp_DEG
+  if(strlen(buffer) == 1 && strcmp(buffer, "C") == 0){
+    unsigned char *unit;
+
+    unit = (unsigned char *)flowlabel->unit;
+    unit[0] = 176;
+    unit[1] = 'C';
+    unit[2] = '\0';
+  }
+  else{
+    STRCPY(flowlabel->unit, buffer);
+  }
+#else
+  STRCPY(flowlabel->unit, buffer);
+#endif
+  return 0;
+}
+
 /* ------------------ readlabels_cellcenter ------------------------ */
 
 int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){

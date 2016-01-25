@@ -2562,27 +2562,27 @@ void drawpatch_frame(int flag){
         if(patchi->loaded==0||patchi->display==0||patchi->type!=ipatchtype)continue;
         if(usetexturebar!=0){
           if(vis_threshold==1&&do_threshold==1){
-            if(patchi->filetype==PATCH_CELLCENTERED){
+            if(patchi->filetype==PATCH_CELL_CENTER){
               drawpatch_threshold_cellcenter(meshi);
             }
-            else if(patchi->filetype==PATCH_NODECENTERED){
+            else if(patchi->filetype==PATCH_NODE_CENTER){
               drawpatch_texture_threshold(meshi);
             }
           }
           else{
-            if(patchi->filetype==PATCH_CELLCENTERED){
+            if(patchi->filetype==PATCH_CELL_CENTER){
               drawpatch_cellcenter(meshi);
             }
-            else if(patchi->filetype==PATCH_NODECENTERED){
+            else if(patchi->filetype==PATCH_NODE_CENTER){
               drawpatch_texture(meshi);
             }
           }
         }
         else{
-          if(patchi->filetype==PATCH_CELLCENTERED){
+          if(patchi->filetype==PATCH_CELL_CENTER){
             drawpatch_cellcenter(meshi);
           }
-          else if(patchi->filetype==PATCH_NODECENTERED){
+          else if(patchi->filetype==PATCH_NODE_CENTER){
             drawpatch(meshi);
           }
         }

@@ -40,7 +40,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   firedata_local = meshi->volrenderinfo.firedataptr;
   slicetype = meshi->volrenderinfo.smokeslice->slicetype;
 
-  if(slicetype==SLICE_NODE){
+  if(slicetype==SLICE_NODE_CENTER){
     xplt = meshi->xplt_cen;
     yplt = meshi->yplt_cen;
     zplt = meshi->zplt_cen;
@@ -83,7 +83,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   if(firedata_local!=NULL){
     float dtemp;
 
-    if(slicetype==SLICE_NODE){
+    if(slicetype==SLICE_NODE_CENTER){
       ijk = IJKNODE(i,j,k);
 
       dx = (xyz[0] - xplt[i])/dxbar;
@@ -136,7 +136,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     *smoke_color=getcolorptr(black);
   }
   if(smokedata_local!=NULL){
-    if(slicetype==SLICE_NODE){
+    if(slicetype==SLICE_NODE_CENTER){
       vv = smokedata_local + ijk;
       val000 = vv[0]; // i,j,k
       val100 = vv[1]; // i+1,j,k
