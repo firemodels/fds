@@ -60,7 +60,7 @@ set QFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
 set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
-set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
 
 :: erase summary images
 
