@@ -11,6 +11,7 @@ echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
+echo "-W - only generate WUI case images"
 exit
 }
 
@@ -38,8 +39,9 @@ TEST=
 use_installed="0"
 RUN_SMV=1
 RUN_GEOM=0
+RUN_WUI=1
 
-while getopts 'dghis:t' OPTION
+while getopts 'dghis:tW' OPTION
 do
 case $OPTION  in
   d)
@@ -187,17 +189,6 @@ if [ "$RUN_SMV" == "1" ] ; then
 
   echo Generating images
 
-# copy wui error image in case wfds does not exist
-
-  FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
-  TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_000.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_010.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_020.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
- 
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
@@ -216,9 +207,15 @@ fi
 
 # generate geometry images
 
+if [ "$RUN_WUI" == "1" ] ; then
+  source $STARTX
+  cd $SVNROOT/Verification
+  scripts/WUI_Cases.sh
+  source $STOPX
+fi
 if [ "$RUN_GEOM" == "1" ] ; then
   source $STARTX
   cd $SVNROOT/Verification
-  scripts/SMV_geom_Cases.sh
+  scripts/GEOM_Cases.sh
   source $STOPX
 fi
