@@ -83,14 +83,16 @@ cd %SVNROOT%\Verification\WUI
 %WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_data1d.csv
 
 cd %SCRIPT_DIR%
-echo creating FDS case list from SMV_Cases.sh
 if %runsmvcases% == 1 (
+  echo creating case list from SMV_Cases.sh
   %SH2BAT% SMV_Cases.sh SMV_Cases.bat
 )
 if %rungeomcases% == 1 (
+  echo creating case list from GEOM_Cases.sh
   %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
 )
 if %runwuicases% == 1 (
+  echo creating case list from WUI_Cases.sh
   %SH2BAT% WUI_Cases.sh WUI_Cases.bat
 )
 
