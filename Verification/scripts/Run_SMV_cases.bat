@@ -4,7 +4,9 @@ set size=_64
 set svn_drive=c:
 set DEBUG=
 set SCRIPT_DIR=%CD%
-set runonlygeom=0
+set rungeomcases=1
+set runwuicases=1
+set runsmvcases=1
 set rundebug=0
 
 set curdir=%CD%
@@ -82,8 +84,15 @@ cd %SVNROOT%\Verification\WUI
 
 cd %SCRIPT_DIR%
 echo creating FDS case list from SMV_Cases.sh
-%SH2BAT% SMV_Cases.sh SMV_Cases.bat
-%SH2BAT% SMV_geom_Cases.sh SMV_geom_Cases.bat
+if %runsmvcases% == 1 (
+  %SH2BAT% SMV_Cases.sh SMV_Cases.bat
+)
+if %rungeomcases% == 1 (
+  %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  %SH2BAT% WUI_Cases.sh WUI_Cases.bat
+)
 
 cd %BASEDIR%
 
@@ -109,10 +118,15 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-if %runonlygeom% == 0 (
+if %runsmvcases% == 1 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 
 :: run cases
 
@@ -120,10 +134,15 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-if %runonlygeom% == 0 (
+if %runsmvcases% == 1 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 call :wait_until_finished
 
 cd %BASEDIR%
@@ -185,7 +204,15 @@ exit /b
  )
  if /I "%1" EQU "-geom" (
    set valid=1
-   set runonlygeom=1
+   set runwuicases=0
+   set runsmvcases=0
+   set rungeomcases=1
+ )
+ if /I "%1" EQU "-wui" (
+   set valid=1
+   set runwuicases=1
+   set runsmvcases=0
+   set rungeomcases=0
  )
  shift
  if %valid% == 0 (
