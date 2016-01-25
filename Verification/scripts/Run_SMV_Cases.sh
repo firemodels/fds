@@ -11,6 +11,7 @@ FDS_DEBUG=0
 nthreads=1
 RUN_SMV=1
 RUN_GEOM=1
+RUN_WUI=1
 JOBPREFIX=
 JOBPREF=
 # not running any mpi cases now
@@ -65,6 +66,7 @@ echo "-s - stop FDS runs"
 echo "-S - run only cases using a single process"
 echo "-u - use installed versions of utilities background and wind2fds"
 echo "-w - wait for cases to complete before returning"
+echo "-W - run only WUI cases"
 exit
 }
 
@@ -90,7 +92,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'c:dghI:j:Mm:o:p:q:rSsuw' OPTION
+while getopts 'c:dghI:j:Mm:o:p:q:rSsuWw' OPTION
 do
 case $OPTION in
   c)
@@ -104,6 +106,7 @@ case $OPTION in
    RUN_SMV=0
    RUN_MPI=0
    RUN_GEOM=1
+   RUN_WUI=0
    ;;
   h)
    usage;
@@ -148,6 +151,12 @@ case $OPTION in
    ;;
   w)
    WAIT="1"
+   ;;
+  W)
+   RUN_SMV=0
+   RUN_MPI=0
+   RUN_GEOM=0
+   RUN_WUI=1
    ;;
 esac
 #shift
@@ -200,6 +209,8 @@ if [[ ! $stop_cases ]] ; then
   export QFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
+  scripts/GEOM_Cases.sh
+  scripts/WUI_Cases.sh
   echo "FDS/CFAST output files removed"
 fi
 
@@ -213,11 +224,12 @@ echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 if [[ ! $stop_cases ]] ; then
   if [ "$FDS_DEBUG" == "0" ] ; then
-
-    is_file_installed $WIND2FDS
-    cd $SVNROOT/Verification/WUI
-    echo Converting wind data
-    $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
+    if [ "$RUN_WUI" == "1" ] ; then
+      is_file_installed $WIND2FDS
+      cd $SVNROOT/Verification/WUI
+      echo Converting wind data
+      $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
+    fi
   fi
 fi
 
@@ -227,7 +239,11 @@ if [ "$RUN_SMV" == "1" ] ; then
 fi
 if [ "$RUN_GEOM" == "1" ] ; then
   cd $SVNROOT/Verification
-  scripts/SMV_geom_Cases.sh
+  scripts/GEOM_Cases.sh
+fi
+if [ "$RUN_WUI" == "1" ] ; then
+  cd $SVNROOT/Verification
+  scripts/WUI_Cases.sh
 fi
 if [ "$RUN_MPI" == "1" ] ; then
   cd $SVNROOT/Verification

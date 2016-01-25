@@ -5,7 +5,9 @@ set size=_64
 set svn_drive=c:
 set DEBUG=
 set SCRIPT_DIR=%CD%
-set runonlygeom=0
+set runsmvcases=1
+set rungeomcases=1
+set runwuicases=1
 set useinstalled=0
 
 set stopscript=0
@@ -58,7 +60,7 @@ set QFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
 set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
-set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
 
 :: erase summary images
 
@@ -110,19 +112,26 @@ echo erasing Smokeview Verification guide scripted figures
 erase *.png
 
 echo.
-echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 
 cd %SCRIPT_DIR%
-%SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
-%SH2BAT% SMV_geom_Cases.sh SMV_geom_Pictures_Cases.bat
-%SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
+if %runsmvcases% == 1 (
+  echo creating case list from SMV_Cases.sh
+  %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
+  %SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
+)
+if %rungeomcases% == 1 (
+  echo creating case list from GEOM_Cases.sh
+  %SH2BAT% GEOM_Cases.sh GEOM_Pictures_Cases.bat
+)
+if %runwuicases% == 1 (
+  echo creating case list from WUI_Cases.sh
+  %SH2BAT% WUI_Cases.sh WUI_Pictures_Cases.bat
+)
 
 echo.
 echo converting plume5c particles to an isosurface
 
-if "%runonlygeom%" == "1" (
-  echo.
-) else (
+if %runsmvcases% == 1 (
   cd %SVNROOT%\Verification\Visualization
   %SMOKEZIP% -f -part2iso plumeiso
 
@@ -146,18 +155,20 @@ if "%runonlygeom%" == "1" (
 echo.
 echo Generating images
 
-if "%runonlygeom%" == "1" (
-  cd %BASEDIR%
-  call %SCRIPT_DIR%\SMV_geom_Pictures_Cases.bat
-) else (
+if "%runsmvcases%" == "1" (
   cd %BASEDIR%
   call %SCRIPT_DIR%\SMV_Pictures_Cases.bat
 
   cd %BASEDIR%
-  call %SCRIPT_DIR%\SMV_geom_Pictures_Cases.bat
-
-  cd %BASEDIR%
   call %SCRIPT_DIR%\SMV_DIFF_Pictures_Cases.bat
+)
+if "%rungeomcases%" == "1" (
+  cd %BASEDIR%
+  call %SCRIPT_DIR%\GEOM_Pictures_Cases.bat
+)
+if "%runwuicases%" == "1" (
+  cd %BASEDIR%
+  call %SCRIPT_DIR%\WUI_Pictures_Cases.bat
 )
 
 :: copy images to summary directory
@@ -210,7 +221,15 @@ goto eof
  )
  if /I "%1" EQU "-geom" (
    set valid=1
-   set runonlygeom=1
+   set runsmvcases=0
+   set rungeomcases=1
+   set runwuicases=0
+ )
+ if /I "%1" EQU "-wui" (
+   set valid=1
+   set runsmvcases=0
+   set rungeomcases=0
+   set runwuicases=1
  )
  if /I "%1" EQU "-useinstalled" (
    set valid=1
@@ -236,6 +255,7 @@ echo -help  - display this message
 echo -debug - run with debug FDS
 echo -useinstalled - use installed Smokeview
 echo -geom  - run only geom cases
+echo -wui   - run only W cases
 exit /b
   
 :eof

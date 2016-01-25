@@ -40,7 +40,7 @@ no_target:
 intel_win_64 : CFLAGS    = -D WIN32 -O2 /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
-intel_win_64 : exe       = sh2bat.exe
+intel_win_64 : exe       = sh2bat_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CPP) -o $(bin)/$(exe) $(objwin)
