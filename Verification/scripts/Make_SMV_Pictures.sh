@@ -50,6 +50,7 @@ case $OPTION  in
   g)
    RUN_SMV=0
    RUN_GEOM=1
+   RUN_WUI=0
    ;;
   h)
    usage;
@@ -68,6 +69,11 @@ case $OPTION  in
      SIZE=_32
    fi
   ;;
+  W)
+   RUN_SMV=0
+   RUN_GEOM=0
+   RUN_WUI=1
+   ;;
 esac
 done
 shift $(($OPTIND-1))
