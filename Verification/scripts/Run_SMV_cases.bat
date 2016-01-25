@@ -234,6 +234,7 @@ echo -help  - display this message
 echo -cfastrepo - specify cfast repo location [default: %CFAST%]
 echo -debug - run with debug FDS
 echo -geom  - run only geom cases
+echo -wui   - run only WUI cases
 exit /b
 
 
