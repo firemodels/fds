@@ -112,17 +112,19 @@ echo erasing Smokeview Verification guide scripted figures
 erase *.png
 
 echo.
-echo converting SMV_Cases.sh case list to SMV_Pictures_Cases.bat
 
 cd %SCRIPT_DIR%
 if %runsmvcases% == 1 (
+  echo creating case list from SMV_Cases.sh
   %SH2BAT% SMV_Cases.sh SMV_Pictures_Cases.bat
   %SH2BAT% SMV_DIFF_Cases.sh SMV_DIFF_Pictures_Cases.bat
 )
 if %rungeomcases% == 1 (
+  echo creating case list from GEOM_Cases.sh
   %SH2BAT% GEOM_Cases.sh GEOM_Pictures_Cases.bat
 )
 if %runwuicases% == 1 (
+  echo creating case list from WUI_Cases.sh
   %SH2BAT% WUI_Cases.sh WUI_Pictures_Cases.bat
 )
 
