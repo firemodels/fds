@@ -66,7 +66,7 @@ call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
 
-set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
 call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.
