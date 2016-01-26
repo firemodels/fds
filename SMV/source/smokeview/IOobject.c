@@ -785,6 +785,7 @@ void draw_devices(void){
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showvdeviceval==1&&nvdeviceinfo>0){
     unsigned char arrow_color[4];
     float arrow_color_float[4];
+    int j;
 
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -801,144 +802,149 @@ void draw_devices(void){
     arrow_color[2]=255*foregroundcolor[2];
     arrow_color[3]=255;
     glColor3ubv(arrow_color);
-    for(i=0;i<nvdeviceinfo;i++){
-      vdevicedata *vdevi;
-      devicedata *devicei;
-      float vel[3], angle, dvel, dangle;
-      float *xyz;
-      int j;
-      int velocity_type;
+    for(j = 0; j < ntreedeviceinfo; j++){
+      treedevicedata *treei;
 
-      vdevi = vdeviceinfo + i;
-      devicei = vdevi->colordev;
-      if(devicei==NULL)continue;
-      if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
-      if(colordeviceval==1){
-        int type,vistype=0;
+      treei = treedeviceinfo + j;
+      for(i = treei->first; i <= treei->last; i++){
+        vdevicedata *vdevi;
+        devicedata *devicei;
+        float vel[3], angle, dvel, dangle;
+        float *xyz;
+        int j;
+        int velocity_type;
 
-        type=devicei->type2;
-        if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
-        if(vistype==1){
-          unsigned char color[4], *colorptr;
+        vdevi = vdevices_sorted[i];
+        devicei = vdevi->colordev;
+        if(devicei == NULL)continue;
+        if(vdevi->unique == 0)continue;
+        xyz = vdevi->valdev->xyz;
+        get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
+        if(colordeviceval == 1){
+          int type, vistype = 0;
 
-          colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
-          if(colorptr!=NULL){
-            arrow_color[0]=colorptr[0];
-            arrow_color[1]=colorptr[1];
-            arrow_color[2]=colorptr[2];
-            arrow_color[3]=255;
+          type = devicei->type2;
+          if(type >= 0 && type < ndevicetypes)vistype = devicetypes[type]->type2vis;
+          if(vistype == 1){
+            unsigned char color[4], *colorptr;
+
+            colorptr = get_device_color(devicei, color, device_valmin, device_valmax);
+            if(colorptr != NULL){
+              arrow_color[0] = colorptr[0];
+              arrow_color[1] = colorptr[1];
+              arrow_color[2] = colorptr[2];
+              arrow_color[3] = 255;
+            }
+            else{
+              arrow_color[0] = 255 * foregroundcolor[0];
+              arrow_color[1] = 255 * foregroundcolor[1];
+              arrow_color[2] = 255 * foregroundcolor[2];
+              arrow_color[3] = 255;
+            }
+            glColor3ubv(arrow_color);
+          }
+        }
+        arrow_color_float[0] = (float)arrow_color[0] / 255.0;
+        arrow_color_float[1] = (float)arrow_color[1] / 255.0;
+        arrow_color_float[2] = (float)arrow_color[2] / 255.0;
+        arrow_color_float[3] = (float)arrow_color[3] / 255.0;
+        if(velocity_type == VEL_CARTESIAN){
+          float dxyz[3], vec0[3] = {0.0, 0.0, 0.0}, zvec[3] = {0.0, 0.0, 1.0};
+          float axis[3], speed;
+          int state = 0;
+
+          for(j = 0; j < 3; j++){
+            dxyz[j] = 0.5*SCALE2FDS(vel[j]) / max_dev_vel;
+          }
+          speed = sqrt(dxyz[0] * dxyz[0] + dxyz[1] * dxyz[1] + dxyz[2] * dxyz[2]);
+
+          rotateu2v(zvec, dxyz, axis, &angle);
+          glPushMatrix();
+          glTranslatef(xyz[0], xyz[1], xyz[2]);
+          glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+          if(vectortype == 0){
+            glScalef(1.0, 1.0, vector_baseheight*speed);
+            glColor3ubv(arrow_color);
+            glBegin(GL_LINES);
+            glVertex3fv(vec0);
+            glVertex3fv(zvec);
+            glEnd();
+            glBegin(GL_POINTS);
+            glVertex3fv(zvec);
+            glEnd();
+          }
+          else if(vectortype == 1){
+            glPushMatrix();
+            glScalef(1.0, 1.0, speed*vector_baseheight);
+            drawdisk(vector_basediameter, 1.0, arrow_color);
+            glPopMatrix();
+            glTranslatef(0.0, 0.0, speed*vector_baseheight);
+            drawcone(vector_headdiameter, vector_headheight, arrow_color);
           }
           else{
-            arrow_color[0]=255*foregroundcolor[0];
-            arrow_color[1]=255*foregroundcolor[1];
-            arrow_color[2]=255*foregroundcolor[2];
-            arrow_color[3]=255;
+            drawobjects_as_vectors = 1;
+            glScalef(sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight);
+            draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
           }
-          glColor3ubv(arrow_color);
-        }
-      }
-      arrow_color_float[0] = (float)arrow_color[0]/255.0;
-      arrow_color_float[1] = (float)arrow_color[1]/255.0;
-      arrow_color_float[2] = (float)arrow_color[2]/255.0;
-      arrow_color_float[3] = (float)arrow_color[3]/255.0;
-      if(velocity_type==VEL_CARTESIAN){
-        float dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
-        float axis[3], speed;
-        int state=0;
-
-        for(j=0;j<3;j++){
-          dxyz[j] = 0.5*SCALE2FDS(vel[j])/max_dev_vel;
-        }
-        speed = sqrt(dxyz[0]*dxyz[0]+dxyz[1]*dxyz[1]+dxyz[2]*dxyz[2]);
-
-        rotateu2v(zvec, dxyz, axis, &angle);
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-        if(vectortype==0){
-          glScalef(1.0,1.0,vector_baseheight*speed);
-          glColor3ubv(arrow_color);
-          glBegin(GL_LINES);
-          glVertex3fv(vec0);
-          glVertex3fv(zvec);
-          glEnd();
-          glBegin(GL_POINTS);
-          glVertex3fv(zvec);
-          glEnd();
-        }
-        else if(vectortype==1){
-          glPushMatrix();
-          glScalef(1.0,1.0,speed*vector_baseheight);
-          drawdisk(vector_basediameter,1.0,arrow_color);
-          glPopMatrix();
-          glTranslatef(0.0,0.0,speed*vector_baseheight);
-          drawcone(vector_headdiameter,vector_headheight,arrow_color);
-        }
-        else{
-          drawobjects_as_vectors=1;
-          glScalef(sensorrelsize*vector_baseheight,sensorrelsize*vector_baseheight,sensorrelsize*vector_baseheight);
-          draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color_float,1);
-        }
-        glPopMatrix();
-      }
-      if(velocity_type==VEL_POLAR){
-        if(vectortype == 0){
-          float vv;
-          float anglemin, anglemax, rmin, rmax;
-
-          vv = SCALE2FDS(vel[0]) / max_dev_vel;
-          glPushMatrix();
-          glTranslatef(xyz[0], xyz[1], xyz[2]);
-          glRotatef(-angle, 0.0, 0.0, 1.0);
-          glRotatef(90.0, 1.0, 0.0, 0.0);
-          glColor3ubv(arrow_color);
-          glBegin(GL_LINES);
-          glVertex3f(0.0, 0.0, 0.0);
-          glVertex3f(0.0, 0.0, vv);
-          glEnd();
           glPopMatrix();
         }
-        else if(vectortype == 1){
-          float vv;
-          float anglemin, anglemax, rmin, rmax;
+        if(velocity_type == VEL_POLAR){
+          if(vectortype == 0){
+            float vv;
+            float anglemin, anglemax, rmin, rmax;
 
-          vv = SCALE2FDS(vel[0]) / max_dev_vel;
-          glPushMatrix();
-          glTranslatef(xyz[0], xyz[1], xyz[2]);
-          glRotatef(-angle, 0.0, 0.0, 1.0);
-          glRotatef(90.0, 1.0, 0.0, 0.0);
-          glColor3ubv(arrow_color);
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glColor3ubv(arrow_color);
+            glBegin(GL_LINES);
+            glVertex3f(0.0, 0.0, 0.0);
+            glVertex3f(0.0, 0.0, vv);
+            glEnd();
+            glPopMatrix();
+          }
+          else if(vectortype == 1){
+            float vv;
+            float anglemin, anglemax, rmin, rmax;
 
-          glPushMatrix();
-          glScalef(1.0, 1.0, vv*vector_baseheight);
-          drawdisk(vector_basediameter*xyzmaxdiff/10.0, 1.0, arrow_color);
-          glPopMatrix();
-          glTranslatef(0.0, 0.0, vv*vector_baseheight);
-          drawcone(vector_headdiameter*xyzmaxdiff/10.0, vector_headheight*xyzmaxdiff/10.0, arrow_color);
-          glPopMatrix();
-        }
-        else{
-          float vv;
-          float anglemin, anglemax, rmin, rmax;
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glColor3ubv(arrow_color);
 
-          vv = SCALE2FDS(vel[0]) / max_dev_vel;
-          glPushMatrix();
-          glTranslatef(xyz[0], xyz[1], xyz[2]);
-          glRotatef(-angle, 0.0, 0.0, 1.0);
-          glRotatef(90.0, 1.0, 0.0, 0.0);
-          glPushMatrix();
-          glScalef(1.0, 1.0, vv*vector_baseheight);
-          drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
-          glPopMatrix();
+            glPushMatrix();
+            glScalef(1.0, 1.0, vv*vector_baseheight);
+            drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
+            glPopMatrix();
+            glTranslatef(0.0, 0.0, vv*vector_baseheight);
+            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headheight*xyzmaxdiff / 10.0, arrow_color);
+            glPopMatrix();
+          }
+          else{
+            float vv;
+            float anglemin, anglemax, rmin, rmax;
 
-          anglemin = -dangle*DEG2RAD;
-          anglemax = -dangle*DEG2RAD;
-          rmin = MAX(vv - dvel, 0.0);
-          rmax = vv + dvel;
-          drawsphereseg(anglemin, anglemax, rmin, rmax);
-          glPopMatrix();
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glPushMatrix();
+            glScalef(1.0, 1.0, vv*vector_baseheight);
+            drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
+            glPopMatrix();
+
+            anglemin = -dangle*DEG2RAD;
+            anglemax = -dangle*DEG2RAD;
+            rmin = MAX(vv - dvel, 0.0);
+            rmax = vv + dvel;
+            drawsphereseg(anglemin, anglemax, rmin, rmax);
+            glPopMatrix();
+          }
         }
       }
     }
@@ -5367,9 +5373,9 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
 
 #define EPSDEV 0.01
 
-/* ------------------ comparevdevices ------------------------ */
+/* ------------------ comparev2devices ------------------------ */
 
-int comparevdevices( const void *arg1, const void *arg2 ){
+int comparev2devices(const void *arg1, const void *arg2){
   vdevicedata *vdevi, *vdevj;
   float *xyzi, *xyzj;
 
@@ -5377,12 +5383,29 @@ int comparevdevices( const void *arg1, const void *arg2 ){
   vdevj = *(vdevicedata **)arg2;
   xyzi = vdevi->valdev->xyz;
   xyzj = vdevj->valdev->xyz;
-  if(xyzi[0]<xyzj[0]-EPSDEV)return -1;
-  if(xyzi[0]>xyzj[0]+EPSDEV)return 1;
-  if(xyzi[1]<xyzj[1]-EPSDEV)return -1;
-  if(xyzi[1]>xyzj[1]+EPSDEV)return 1;
-  if(xyzi[2]<xyzj[2]-EPSDEV)return -1;
-  if(xyzi[2]>xyzj[2]+EPSDEV)return 1;
+  if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+  if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+  if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+  if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+  return 0;
+}
+
+/* ------------------ comparev3devices ------------------------ */
+
+int comparev3devices( const void *arg1, const void *arg2 ){
+  vdevicedata *vdevi, *vdevj;
+  float *xyzi, *xyzj;
+
+  vdevi = *(vdevicedata **)arg1;
+  vdevj = *(vdevicedata **)arg2;
+  xyzi = vdevi->valdev->xyz;
+  xyzj = vdevj->valdev->xyz;
+  if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+  if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+  if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+  if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+  if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+  if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
   return 0;
 }
 
@@ -5394,51 +5417,30 @@ void setup_tree_devices(void){
 
   if(nvdeviceinfo==0)return;
   if(ntreedeviceinfo>0){
-    for(i=0;i<ntreedeviceinfo;i++){
-      treei = treedeviceinfo + i;
-      FREEMEMORY(treei->vdevices);
-    }
     FREEMEMORY(treedeviceinfo);
+    ntreedeviceinfo=0;
   }
 
-  qsort((vdevicedata **)vdeviceptrinfo,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparevdevices);
+  qsort((vdevicedata **)vdevices_sorted,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparev3devices);
 
-  NewMemory((void **)&treedeviceinfo,nvdeviceinfo*sizeof(treedevicedata));
+  ntreedeviceinfo = 1;
+  for(i = 1; i < nvdeviceinfo; i++){
+    if(comparev2devices(vdevices_sorted+i, vdevices_sorted+i-1) != 0)ntreedeviceinfo++;
+  }
+
+  NewMemory((void **)&treedeviceinfo,ntreedeviceinfo*sizeof(treedevicedata));
+
+  ntreedeviceinfo = 1;
   treei = treedeviceinfo;
-  nvdevices=1;
-  for(i=1;i<nvdeviceinfo;i++){
-    float *xyzi, *xyzj;
-
-    xyzi = vdeviceptrinfo[i]->valdev->xyz;
-    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
-    if(ABS(xyzi[0]-xyzj[0])<EPSDEV&&ABS(xyzi[1]-xyzj[1])<EPSDEV){
-      nvdevices++;
-      continue;
+  treei->first = 0;
+  for(i = 1; i < nvdeviceinfo; i++){
+    if(comparev2devices(vdevices_sorted + i, vdevices_sorted + i - 1) != 0){
+      treei->last = i-1;
+      ntreedeviceinfo++;
+      treei = treedeviceinfo + ntreedeviceinfo;
     }
-    treei->nvdevices=nvdevices;
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
-    treei++;
-    nvdevices=1;
   }
-  treei->nvdevices=nvdevices;
-  if(nvdevices>0){
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
-  }
-  nvdevices=0;
-  treei=treedeviceinfo;
-  treei->vdevices[nvdevices++]=vdeviceptrinfo[0];
-  for(i=1;i<nvdeviceinfo;i++){
-    float *xyzi, *xyzj;
-
-    xyzi = vdeviceptrinfo[i]->valdev->xyz;
-    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
-    if(ABS(xyzi[0]-xyzj[0])>=EPSDEV||ABS(xyzi[1]-xyzj[1])>=EPSDEV){
-      nvdevices=0;
-      treei++;
-    }
-    treei->vdevices[nvdevices++]=vdeviceptrinfo[i];
-  }
-  ntreedeviceinfo = treei - treedeviceinfo + 1;
+  treei->last = nvdeviceinfo - 1;
 }
 
 /* ----------------------- setup_zone_devs ----------------------------- */
@@ -5738,8 +5740,8 @@ void setup_device_data(void){
   if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
-  FREEMEMORY(vdeviceptrinfo);
-  NewMemory((void **)&vdeviceptrinfo,ndeviceinfo*sizeof(vdevicedata *));
+  FREEMEMORY(vdevices_sorted);
+  NewMemory((void **)&vdevices_sorted,ndeviceinfo*sizeof(vdevicedata *));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
@@ -5951,7 +5953,7 @@ void setup_device_data(void){
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
   for(i=0;i<nvdeviceinfo;i++){
-    vdeviceptrinfo[i] = vdeviceinfo + i;
+    vdevices_sorted[i] = vdeviceinfo + i;
   }
 
   setup_tree_devices();
