@@ -863,12 +863,14 @@ void draw_devices(void){
           }
           speed = sqrt(dxyz[0] * dxyz[0] + dxyz[1] * dxyz[1] + dxyz[2] * dxyz[2]);
 
-          rotateu2v(zvec, dxyz, axis, &angle);
-          glPushMatrix();
-          glTranslatef(xyz[0], xyz[1], xyz[2]);
-          glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
           switch(vectortype){
+          case VECTOR_PROFILE:
+            break;
           case VECTOR_LINE:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             glScalef(1.0, 1.0, vector_baseheight*speed);
             glColor3ubv(arrow_color);
             glBegin(GL_LINES);
@@ -878,33 +880,119 @@ void draw_devices(void){
             glBegin(GL_POINTS);
             glVertex3fv(zvec);
             glEnd();
+            glPopMatrix();
             break;
           case VECTOR_ARROW:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             glPushMatrix();
             glScalef(1.0, 1.0, speed*vector_baseheight);
             drawdisk(vector_basediameter, 1.0, arrow_color);
             glPopMatrix();
             glTranslatef(0.0, 0.0, speed*vector_baseheight);
             drawcone(vector_headdiameter, vector_headheight, arrow_color);
+            glPopMatrix();
             break;
           case VECTOR_OBJECT:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             drawobjects_as_vectors = 1;
             glScalef(sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight);
             draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
-            break;
-          case VECTOR_PROFILE:
+            glPopMatrix();
             break;
           default:
             ASSERT(FFALSE);
             break;
           }
-          glPopMatrix();
         }
         if(velocity_type == VEL_POLAR){
           float vv;
+          float xyz1_old[3], xyz2_old[3];
+          float xyz1_new[3], xyz2_new[3];
+          unsigned char arrow_color_old[4];
           float anglemin, anglemax, rmin, rmax;
 
+
           switch(vectortype){
+          case VECTOR_PROFILE:
+//            cos(-alpha)  -sin(-alpha)  0
+//  rot(z) =  sin(-alpha)   cos(-alpha)  0
+//                0            0       1
+
+//            1   0        0             1 0  0
+//  rot(x) =  0 cos(90) -sin(90)    =    1 0 -1
+//            0 sin(90)  cos(90)         0 1  0
+
+//                   cos(alpha)  0  -sin(alpha)
+// rot(z)*rot(x) =  -sin(alpha)  0  -cos(alpha)
+//                        0      1        0
+
+// rot(z)*rot(x)*(0,0,vv) = (-sin(alpha)*vv,-cos(alpha)*vv,0)
+
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            xyz2_new[0] = xyz[0] - sin(angle*DEG2RAD)*vv;
+            xyz2_new[1] = xyz[1] - cos(angle*DEG2RAD)*vv;
+            xyz2_new[2] = xyz[2];
+            xyz1_new[0] = xyz[0];
+            xyz1_new[1] = xyz[1];
+            xyz1_new[2] = xyz[2];
+            if(i == treei->first){
+              xyz1_old[0]=xyz1_new[0];
+              xyz1_old[1]=xyz1_new[1];
+              xyz1_old[2]=xyz1_new[2];
+              xyz2_old[0]=xyz2_new[0];
+              xyz2_old[1]=xyz2_new[1];
+              xyz2_old[2]=xyz2_new[2];
+              arrow_color_old[0]=arrow_color[0];
+              arrow_color_old[1]=arrow_color[1];
+              arrow_color_old[2]=arrow_color[2];
+              arrow_color_old[3]=arrow_color[3];
+              continue;
+            }
+            glBegin(GL_TRIANGLES);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glVertex3fv(xyz2_old);
+            glColor3ubv(arrow_color);
+            glVertex3fv(xyz2_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color);
+            glVertex3fv(xyz2_new);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz2_old);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color);
+            glVertex3fv(xyz2_new);
+            glVertex3fv(xyz1_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color);
+            glVertex3fv(xyz1_new);
+            glVertex3fv(xyz2_new);
+
+            glEnd();
+
+            xyz1_old[0]=xyz1_new[0];
+            xyz1_old[1]=xyz1_new[1];
+            xyz1_old[2]=xyz1_new[2];
+            xyz2_old[0]=xyz2_new[0];
+            xyz2_old[1]=xyz2_new[1];
+            xyz2_old[2]=xyz2_new[2];
+            arrow_color_old[0]=arrow_color[0];
+            arrow_color_old[1]=arrow_color[1];
+            arrow_color_old[2]=arrow_color[2];
+            arrow_color_old[3]=arrow_color[3];
+            break;
           case VECTOR_LINE:
             vv = SCALE2FDS(vel[0]) / max_dev_vel;
             glPushMatrix();
@@ -951,8 +1039,6 @@ void draw_devices(void){
             rmax = vv + dvel;
             drawsphereseg(anglemin, anglemax, rmin, rmax);
             glPopMatrix();
-          case VECTOR_PROFILE:
-            break;
           default:
             ASSERT(FFALSE);
             break;
