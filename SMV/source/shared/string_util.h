@@ -9,6 +9,11 @@
 #define STRDECL(var,val)  var
 #endif
 
+#ifdef __MINGW32__
+#include <stdio.h>
+#include "options.h"
+#endif
+
 #define MATCH 1
 #define NOTMATCH 0
 
