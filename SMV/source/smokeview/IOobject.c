@@ -11,6 +11,11 @@
 #define VEL_CARTESIAN 1
 #define VEL_POLAR 2
 
+#define VECTOR_LINE 0
+#define VECTOR_ARROW 1
+#define VECTOR_OBJECT 2
+#define VECTOR_PROFILE 3
+
 #define CIRCLE_SEGS 12
 
 #define SV_TRANSLATE  100
@@ -862,7 +867,8 @@ void draw_devices(void){
           glPushMatrix();
           glTranslatef(xyz[0], xyz[1], xyz[2]);
           glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
-          if(vectortype == 0){
+          switch(vectortype){
+          case VECTOR_LINE:
             glScalef(1.0, 1.0, vector_baseheight*speed);
             glColor3ubv(arrow_color);
             glBegin(GL_LINES);
@@ -872,27 +878,34 @@ void draw_devices(void){
             glBegin(GL_POINTS);
             glVertex3fv(zvec);
             glEnd();
-          }
-          else if(vectortype == 1){
+            break;
+          case VECTOR_ARROW:
             glPushMatrix();
             glScalef(1.0, 1.0, speed*vector_baseheight);
             drawdisk(vector_basediameter, 1.0, arrow_color);
             glPopMatrix();
             glTranslatef(0.0, 0.0, speed*vector_baseheight);
             drawcone(vector_headdiameter, vector_headheight, arrow_color);
-          }
-          else{
+            break;
+          case VECTOR_OBJECT:
             drawobjects_as_vectors = 1;
             glScalef(sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight);
             draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
+            break;
+          case VECTOR_PROFILE:
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
           }
           glPopMatrix();
         }
         if(velocity_type == VEL_POLAR){
-          if(vectortype == 0){
-            float vv;
-            float anglemin, anglemax, rmin, rmax;
+          float vv;
+          float anglemin, anglemax, rmin, rmax;
 
+          switch(vectortype){
+          case VECTOR_LINE:
             vv = SCALE2FDS(vel[0]) / max_dev_vel;
             glPushMatrix();
             glTranslatef(xyz[0], xyz[1], xyz[2]);
@@ -904,11 +917,8 @@ void draw_devices(void){
             glVertex3f(0.0, 0.0, vv);
             glEnd();
             glPopMatrix();
-          }
-          else if(vectortype == 1){
-            float vv;
-            float anglemin, anglemax, rmin, rmax;
-
+            break;
+          case VECTOR_ARROW:
             vv = SCALE2FDS(vel[0]) / max_dev_vel;
             glPushMatrix();
             glTranslatef(xyz[0], xyz[1], xyz[2]);
@@ -923,11 +933,8 @@ void draw_devices(void){
             glTranslatef(0.0, 0.0, vv*vector_baseheight);
             drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headheight*xyzmaxdiff / 10.0, arrow_color);
             glPopMatrix();
-          }
-          else{
-            float vv;
-            float anglemin, anglemax, rmin, rmax;
-
+            break;
+          case VECTOR_OBJECT:
             vv = SCALE2FDS(vel[0]) / max_dev_vel;
             glPushMatrix();
             glTranslatef(xyz[0], xyz[1], xyz[2]);
@@ -944,6 +951,11 @@ void draw_devices(void){
             rmax = vv + dvel;
             drawsphereseg(anglemin, anglemax, rmin, rmax);
             glPopMatrix();
+          case VECTOR_PROFILE:
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
           }
         }
       }
