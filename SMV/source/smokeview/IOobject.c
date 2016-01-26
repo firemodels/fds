@@ -736,8 +736,8 @@ void draw_pilot(void){
       vdevicedata *vdevi;
       float *xyz;
       int k;
-      float angledir[8]={0.0,45.0,90.0,135.0,180.0,225.0,270.0,315.0};
       pilotdata *piloti;
+      float dangle;
 
       vdevi = vdeviceinfo + i;
       if(vdevi->unique==0)continue;
@@ -745,10 +745,11 @@ void draw_pilot(void){
 
       piloti = &(vdevi->pilotinfo);
 
-      for(k=0;k<8;k++){
+      dangle = 360.0 / (float)piloti->nbuckets;
+      for(k=0;k<piloti->nbuckets;k++){
         glPushMatrix();
         glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(180.0-angledir[k],0.0,0.0,1.0);
+        glRotatef(180.0-(float)k*dangle,0.0,0.0,1.0);
         glBegin(GL_LINES);
         glVertex3f(0.0,0.0,0.0);
         glVertex3f(0.0,SCALE2FDS(piloti->fraction[k]),0.0);
@@ -5900,6 +5901,104 @@ int is_dup_device_label(int index, int direction){
   return 0;
 }
 
+/* ----------------------- setup_pilot_data ----------------------------- */
+
+#ifdef pp_PILOT
+void setup_pilot_data(int nbuckets){
+  int i;
+  float dangle;
+
+  dangle = 360.0 / (float)nbuckets;
+
+  for(i = 0; i < nvdeviceinfo; i++){
+    vdevicedata *vdevicei;
+    devicedata *udev, *vdev, *wdev;
+    devicedata *angledev, *veldev;
+    int j, ibucket;
+    pilotdata *piloti,*pilotii;
+
+    vdevicei = vdeviceinfo + i;
+    udev = vdevicei->udev;
+    vdev = vdevicei->vdev;
+    wdev = vdevicei->wdev;
+    angledev = vdevicei->angledev;
+    veldev = vdevicei->veldev;
+
+    piloti = &(vdevicei->pilotinfo);
+    {
+       float *vel, *fraction;
+
+       vel = piloti->vel;
+       fraction = piloti->fraction;
+       vel = piloti->vel;
+       FREEMEMORY(fraction);
+       FREEMEMORY(vel);
+       NewMemory((void **)&fraction, nbuckets*sizeof(float));
+       NewMemory((void **)&vel, nbuckets*sizeof(float));
+       piloti->vel = vel;
+       piloti->fraction = fraction;
+       piloti->nbuckets = nbuckets;
+    }
+
+    for(j = 0; j < nbuckets; j++){
+      piloti->fraction[j] = 0.0;
+      piloti->vel[j] = 0.0;
+    }
+    piloti->total = 0;
+    if(udev != NULL&&vdev != NULL){
+      int nvals;
+
+      nvals = MIN(udev->nvals, vdev->nvals);
+      nvals = MIN(nvals, wdev->nvals);
+      for(j = 0; j<nvals; j++){
+        float uval, vval, wval = 0.0, vel, veluv, angle;
+
+        uval = udev->vals[j];
+        vval = vdev->vals[j];
+        if(wdev != NULL)wval = wdev->vals[j];
+        vel = sqrt(uval*uval + vval*vval + wval*wval);
+        veluv = sqrt(uval*uval + vval*vval);
+        if(veluv>0.0){
+          angle = fmod(180.0 + atan2(vval, uval)*RAD2DEG + dangle/2.0, 360.0);
+          ibucket = CLAMP(angle / dangle, 0, nbuckets-1);
+          piloti->fraction[ibucket]++;
+          piloti->vel[ibucket] += vel;
+        }
+      }
+    }
+    else if(angledev != NULL&&veldev != NULL){
+      int nvals;
+
+      nvals = MIN(angledev->nvals, veldev->nvals);
+      for(j = 0; j < nvals; j++){
+        float vel, angle;
+
+        angle = angledev->vals[j];
+        vel = veldev->vals[j];
+        angle = fmod(angle + dangle/2.0, 360.0);
+        ibucket = CLAMP(angle / dangle, 0, nbuckets-1);
+        piloti->fraction[ibucket]++;
+        piloti->vel[ibucket] += vel;
+      }
+    }
+    else{
+      continue;
+    }
+    for(j = 0; j<nbuckets; j++){
+      piloti->total += piloti->fraction[j];
+      if(piloti->fraction[j]>0.0){
+        piloti->vel[j] /= piloti->fraction[j];
+      }
+    }
+    if(piloti->total > 0){
+      for(j = 0; j < nbuckets; j++){
+        piloti->fraction[j] /= piloti->total;
+      }
+    }
+  }
+}
+#endif
+
 /* ----------------------- setup_device_data ----------------------------- */
 
 void setup_device_data(void){
@@ -5934,6 +6033,11 @@ void setup_device_data(void){
     vdevi->sd_angledev=NULL;
     vdevi->sd_veldev=NULL;
     vdevi->colordev=NULL;
+#ifdef pp_PILOT
+    vdevi->pilotinfo.vel=NULL;
+    vdevi->pilotinfo.fraction=NULL;
+    vdevi->pilotinfo.nbuckets=0;
+#endif    
 
     devj = get_device(xyzval,"VELOCITY",CSV_EXP);
     if(devj!=NULL){
@@ -6133,73 +6237,7 @@ void setup_device_data(void){
 
   // convert velocities to pilot chart format
 #ifdef pp_PILOT
-  for(i=0;i<nvdeviceinfo;i++){
-    vdevicedata *vdevicei;
-    devicedata *udev, *vdev, *wdev;
-    devicedata *angledev, *veldev;
-    int j,n,ibucket;
-    pilotdata *piloti;
-
-    vdevicei = vdeviceinfo + i;
-    udev = vdevicei->udev;
-    vdev = vdevicei->vdev;
-    wdev = vdevicei->wdev;
-    angledev = vdevicei->angledev;
-    veldev = vdevicei->veldev;
-
-    piloti = &(vdevicei->pilotinfo);
-    for(j=0;j<8;j++){
-      piloti->fraction[j]=0.0;
-      piloti->vel[j]=0.0;
-    }
-    piloti->total=0;
-    if(udev!=NULL&&vdev!=NULL){
-      n=MIN(udev->nvals,vdev->nvals);
-      n=MIN(n,wdev->nvals);
-      for(j=0;j<n;j++){
-        float uval, vval, wval=0.0, vel, veluv, angle;
-
-        uval = udev->vals[j];
-        vval = vdev->vals[j];
-        if(wdev!=NULL)wval = wdev->vals[j];
-        vel = sqrt(uval*uval+vval*vval+wval*wval);
-        veluv = sqrt(uval*uval+vval*vval);
-        if(veluv>0.0){
-          angle = fmod(180.0+atan2(vval,uval)*RAD2DEG+22.5,360.0);
-          ibucket=CLAMP(angle/45.0,0,7);
-          piloti->fraction[ibucket]++;
-          piloti->vel[ibucket]+=vel;
-        }
-      }
-    }
-    else if(angledev!=NULL&&veldev!=NULL){
-      n=MIN(angledev->nvals,veldev->nvals);
-      for(j=0;j<n;j++){
-        float vel, angle;
-
-        angle = angledev->vals[j];
-        vel = veldev->vals[j];
-        angle = fmod(angle+22.5,360.0);
-        ibucket=CLAMP(angle/45.0,0,7);
-        piloti->fraction[ibucket]++;
-        piloti->vel[ibucket]+=vel;
-      }
-    }
-    else{
-      continue;
-    }
-    for(j=0;j<8;j++){
-      piloti->total+=piloti->fraction[j];
-      if(piloti->fraction[j]>0.0){
-        piloti->vel[j]/=piloti->fraction[j];
-      }
-    }
-    if(piloti->total>0){
-      for(j=0;j<8;j++){
-        piloti->fraction[j]/=piloti->total;
-      }
-    }
-  }
+  setup_pilot_data(npilot_buckets);
 #endif
 
   FREEMEMORY(vals);

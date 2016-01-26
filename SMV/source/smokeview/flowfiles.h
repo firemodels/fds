@@ -894,8 +894,8 @@ typedef struct _device{
 /* --------------------------  pilot ------------------------------------ */
 
 typedef struct {
-  float total;
-  float fraction[8],vel[8];
+  int nbuckets;
+  float total, *fraction,*vel;
 } pilotdata;
 #endif
 

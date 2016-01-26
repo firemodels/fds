@@ -20,6 +20,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+#ifdef pp_PILOT
+SVEXTERN int SVDECL(npilot_buckets, 8);
+#endif
 SVEXTERN int SVDECL(ngeomdiaginfo, 0), SVDECL(show_geometry_diagnostics,0);
 SVEXTERN geomdiagdata SVDECL(*geomdiaginfo,NULL);
 SVEXTERN int SVDECL(zone_rho, 1);
