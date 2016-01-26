@@ -859,7 +859,6 @@ void draw_devices(void){
         if(velocity_type == VEL_CARTESIAN){
           float xyz1_old[3], xyz2_old[3];
           float xyz1_new[3], xyz2_new[3];
-          float vv;
           unsigned char arrow_color_old[4], *arrow_color_new;
           float dxyz[3], vec0[3] = {0.0, 0.0, 0.0}, zvec[3] = {0.0, 0.0, 1.0};
           float axis[3], speed;
@@ -5584,7 +5583,7 @@ int comparev3devices( const void *arg1, const void *arg2 ){
 /* ----------------------- setup_tree_devices ----------------------------- */
 
 void setup_tree_devices(void){
-  int i,nvdevices;
+  int i;
   treedevicedata *treei;
 
   if(nvdeviceinfo==0)return;
