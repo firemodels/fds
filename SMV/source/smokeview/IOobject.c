@@ -7,6 +7,10 @@
 #include "datadefs.h"
 #include "smokeviewvars.h"
 
+#define VEL_INVALID 0
+#define VEL_CARTESIAN 1
+#define VEL_POLAR 2
+
 #define CIRCLE_SEGS 12
 
 #define SV_TRANSLATE  100
@@ -523,7 +527,7 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
+void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *velocity_type){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   devicedata *udev, *vdev, *wdev;
   int validu=1,validv=1,validw=1;
@@ -532,7 +536,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
   vdev = vdevicei->vdev;
   wdev = vdevicei->wdev;
 
-  *valid_vel=0;
+  *velocity_type=VEL_INVALID;
   if(udev!=NULL){
     uvel=get_device_val(time_local,udev,&validu);
   }
@@ -546,7 +550,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
     vel[0]=uvel;
     vel[1]=vvel;
     vel[2]=wvel;
-    *valid_vel=1;
+    *velocity_type=VEL_CARTESIAN;
   }
   if(vdevicei->veldev!=NULL&&vdevicei->angledev!=NULL){
     float  velocity,  ang;
@@ -569,7 +573,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
       dvel[0]=dvelocity;
       angle_local[0]=ang;
       dangle[0]=dang;
-      *valid_vel=2;
+      *velocity_type=VEL_POLAR;
     }
   }
 }
@@ -839,7 +843,7 @@ void draw_devices(void){
       arrow_color_float[1] = (float)arrow_color[1]/255.0;
       arrow_color_float[2] = (float)arrow_color[2]/255.0;
       arrow_color_float[3] = (float)arrow_color[3]/255.0;
-      if(velocity_type==1){
+      if(velocity_type==VEL_CARTESIAN){
         float dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
         float axis[3], speed;
         int state=0;
@@ -855,6 +859,7 @@ void draw_devices(void){
         glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
         if(vectortype==0){
           glScalef(1.0,1.0,vector_baseheight*speed);
+          glColor3ubv(arrow_color);
           glBegin(GL_LINES);
           glVertex3fv(vec0);
           glVertex3fv(zvec);
@@ -878,27 +883,63 @@ void draw_devices(void){
         }
         glPopMatrix();
       }
-      if(velocity_type==2){
-        float vv;
-        float anglemin, anglemax, rmin, rmax;
+      if(velocity_type==VEL_POLAR){
+        if(vectortype == 0){
+          float vv;
+          float anglemin, anglemax, rmin, rmax;
 
-        vv=SCALE2FDS(vel[0])/max_dev_vel;
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(-angle,0.0,0.0,1.0);
-        glRotatef(90.0,1.0,0.0,0.0);
-        glColor3f(0.0,0.0,0.0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(0.0,0.0,vv);
-        glEnd();
+          vv = SCALE2FDS(vel[0]) / max_dev_vel;
+          glPushMatrix();
+          glTranslatef(xyz[0], xyz[1], xyz[2]);
+          glRotatef(-angle, 0.0, 0.0, 1.0);
+          glRotatef(90.0, 1.0, 0.0, 0.0);
+          glColor3ubv(arrow_color);
+          glBegin(GL_LINES);
+          glVertex3f(0.0, 0.0, 0.0);
+          glVertex3f(0.0, 0.0, vv);
+          glEnd();
+          glPopMatrix();
+        }
+        else if(vectortype == 1){
+          float vv;
+          float anglemin, anglemax, rmin, rmax;
 
-        anglemin=-dangle*DEG2RAD;
-        anglemax=-dangle*DEG2RAD;
-        rmin=MAX(vv-dvel,0.0);
-        rmax=vv+dvel;
-        drawsphereseg(anglemin,anglemax,rmin,rmax);
-        glPopMatrix();
+          vv = SCALE2FDS(vel[0]) / max_dev_vel;
+          glPushMatrix();
+          glTranslatef(xyz[0], xyz[1], xyz[2]);
+          glRotatef(-angle, 0.0, 0.0, 1.0);
+          glRotatef(90.0, 1.0, 0.0, 0.0);
+          glColor3ubv(arrow_color);
+
+          glPushMatrix();
+          glScalef(1.0, 1.0, vv*vector_baseheight);
+          drawdisk(vector_basediameter*xyzmaxdiff/10.0, 1.0, arrow_color);
+          glPopMatrix();
+          glTranslatef(0.0, 0.0, vv*vector_baseheight);
+          drawcone(vector_headdiameter*xyzmaxdiff/10.0, vector_headheight*xyzmaxdiff/10.0, arrow_color);
+          glPopMatrix();
+        }
+        else{
+          float vv;
+          float anglemin, anglemax, rmin, rmax;
+
+          vv = SCALE2FDS(vel[0]) / max_dev_vel;
+          glPushMatrix();
+          glTranslatef(xyz[0], xyz[1], xyz[2]);
+          glRotatef(-angle, 0.0, 0.0, 1.0);
+          glRotatef(90.0, 1.0, 0.0, 0.0);
+          glPushMatrix();
+          glScalef(1.0, 1.0, vv*vector_baseheight);
+          drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
+          glPopMatrix();
+
+          anglemin = -dangle*DEG2RAD;
+          anglemax = -dangle*DEG2RAD;
+          rmin = MAX(vv - dvel, 0.0);
+          rmax = vv + dvel;
+          drawsphereseg(anglemin, anglemax, rmin, rmax);
+          glPopMatrix();
+        }
       }
     }
     glPopMatrix();
