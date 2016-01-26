@@ -765,10 +765,12 @@ void draw_pilot(void){
 /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
-  int i;
   int drawobjects_as_vectors;
+  int ii;
 
   if(select_device==0||show_mode!=SELECTOBJECT){
+    int i;
+    
     for(i=0;i<ndeviceinfo;i++){
       devicedata *devicei;
 
@@ -809,14 +811,15 @@ void draw_devices(void){
     glColor3ubv(arrow_color);
     for(j = 0; j < ntreedeviceinfo; j++){
       treedevicedata *treei;
+      int i,first;
 
       treei = treedeviceinfo + j;
+      first = 1;
       for(i = treei->first; i <= treei->last; i++){
         vdevicedata *vdevi;
         devicedata *devicei;
         float vel[3], angle, dvel, dangle;
         float *xyz;
-        int j;
         int velocity_type;
 
         vdevi = vdevices_sorted[i];
@@ -854,17 +857,75 @@ void draw_devices(void){
         arrow_color_float[2] = (float)arrow_color[2] / 255.0;
         arrow_color_float[3] = (float)arrow_color[3] / 255.0;
         if(velocity_type == VEL_CARTESIAN){
+          float xyz1_old[3], xyz2_old[3];
+          float xyz1_new[3], xyz2_new[3];
+          float vv;
+          unsigned char arrow_color_old[4], *arrow_color_new;
           float dxyz[3], vec0[3] = {0.0, 0.0, 0.0}, zvec[3] = {0.0, 0.0, 1.0};
           float axis[3], speed;
           int state = 0;
+          int jj;
 
-          for(j = 0; j < 3; j++){
-            dxyz[j] = 0.5*SCALE2FDS(vel[j]) / max_dev_vel;
+          for(jj = 0; jj < 3; jj++){
+            dxyz[jj] = 0.5*SCALE2FDS(vel[jj]) / max_dev_vel;
           }
           speed = sqrt(dxyz[0] * dxyz[0] + dxyz[1] * dxyz[1] + dxyz[2] * dxyz[2]);
 
           switch(vectortype){
           case VECTOR_PROFILE:
+            xyz2_new[0] = xyz[0] + dxyz[0];
+            xyz2_new[1] = xyz[1] + dxyz[1];
+            xyz2_new[2] = xyz[2] + dxyz[2];
+
+            xyz1_new[0] = xyz[0];
+            xyz1_new[1] = xyz[1];
+            xyz1_new[2] = xyz[2];
+
+            arrow_color_new = arrow_color;
+            if(first==1){
+              first = 0;
+              memcpy(xyz1_old, xyz1_new, 3 * sizeof(float));
+              memcpy(xyz2_old, xyz2_new, 3 * sizeof(float));
+              memcpy(arrow_color_old, arrow_color_new, 4 * sizeof(unsigned char));
+              continue;
+            }
+
+            //  draw triangles for following rectangle
+
+            //   xyz1_new---------xyz2_new
+            //      |       /       |
+            //   xyz1_old---------xyz2_old
+            glBegin(GL_TRIANGLES);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glVertex3fv(xyz2_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz2_old);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glVertex3fv(xyz1_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz1_new);
+            glVertex3fv(xyz2_new);
+
+            glEnd();
+
+            memcpy(xyz1_old, xyz1_new, 3 * sizeof(float));
+            memcpy(xyz2_old, xyz2_new, 3 * sizeof(float));
+            memcpy(arrow_color_old, arrow_color_new, 4 * sizeof(unsigned char));
             break;
           case VECTOR_LINE:
             rotateu2v(zvec, dxyz, axis, &angle);
@@ -914,7 +975,7 @@ void draw_devices(void){
           float vv;
           float xyz1_old[3], xyz2_old[3];
           float xyz1_new[3], xyz2_new[3];
-          unsigned char arrow_color_old[4];
+          unsigned char arrow_color_old[4], *arrow_color_new;
           float anglemin, anglemax, rmin, rmax;
 
 
@@ -938,45 +999,56 @@ void draw_devices(void){
             xyz2_new[0] = xyz[0] - sin(angle*DEG2RAD)*vv;
             xyz2_new[1] = xyz[1] - cos(angle*DEG2RAD)*vv;
             xyz2_new[2] = xyz[2];
+
             xyz1_new[0] = xyz[0];
             xyz1_new[1] = xyz[1];
             xyz1_new[2] = xyz[2];
+
+            arrow_color_new = arrow_color;
             if(i == treei->first){
               xyz1_old[0]=xyz1_new[0];
               xyz1_old[1]=xyz1_new[1];
               xyz1_old[2]=xyz1_new[2];
+
               xyz2_old[0]=xyz2_new[0];
               xyz2_old[1]=xyz2_new[1];
               xyz2_old[2]=xyz2_new[2];
-              arrow_color_old[0]=arrow_color[0];
-              arrow_color_old[1]=arrow_color[1];
-              arrow_color_old[2]=arrow_color[2];
-              arrow_color_old[3]=arrow_color[3];
+
+              arrow_color_old[0] = arrow_color_new[0];
+              arrow_color_old[1] = arrow_color_new[1];
+              arrow_color_old[2] = arrow_color_new[2];
+              arrow_color_old[3] = arrow_color_new[3];
               continue;
             }
+
+            //  draw triangles for following rectangle
+
+            //   xyz1_new---------xyz2_new
+            //      |       /       |
+            //   xyz1_old---------xyz2_old
             glBegin(GL_TRIANGLES);
             glColor3ubv(arrow_color_old);
             glVertex3fv(xyz1_old);
             glVertex3fv(xyz2_old);
-            glColor3ubv(arrow_color);
+            glColor3ubv(arrow_color_new);
             glVertex3fv(xyz2_new);
 
             glColor3ubv(arrow_color_old);
             glVertex3fv(xyz1_old);
-            glColor3ubv(arrow_color);
+            glColor3ubv(arrow_color_new);
             glVertex3fv(xyz2_new);
             glColor3ubv(arrow_color_old);
             glVertex3fv(xyz2_old);
 
             glColor3ubv(arrow_color_old);
             glVertex3fv(xyz1_old);
-            glColor3ubv(arrow_color);
+            glColor3ubv(arrow_color_new);
             glVertex3fv(xyz2_new);
             glVertex3fv(xyz1_new);
 
             glColor3ubv(arrow_color_old);
             glVertex3fv(xyz1_old);
-            glColor3ubv(arrow_color);
+            glColor3ubv(arrow_color_new);
             glVertex3fv(xyz1_new);
             glVertex3fv(xyz2_new);
 
@@ -985,9 +1057,11 @@ void draw_devices(void){
             xyz1_old[0]=xyz1_new[0];
             xyz1_old[1]=xyz1_new[1];
             xyz1_old[2]=xyz1_new[2];
+
             xyz2_old[0]=xyz2_new[0];
             xyz2_old[1]=xyz2_new[1];
             xyz2_old[2]=xyz2_new[2];
+
             arrow_color_old[0]=arrow_color[0];
             arrow_color_old[1]=arrow_color[1];
             arrow_color_old[2]=arrow_color[2];
@@ -1054,7 +1128,7 @@ void draw_devices(void){
   glPushAttrib(GL_POINT_BIT|GL_LINE_BIT);
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  for(i=0;i<ndeviceinfo;i++){
+  for(ii=0;ii<ndeviceinfo;ii++){
     devicedata *devicei;
     int tagval;
     int save_use_displaylist;
@@ -1063,7 +1137,7 @@ void draw_devices(void){
     float dpsi;
     float *xyz;
 
-    devicei = deviceinfo + i;
+    devicei = deviceinfo + ii;
     prop=devicei->prop;
 
     if(devicei->object->visible==0||(devicei->prop!=NULL&&devicei->prop->smv_object->visible==0))continue;
@@ -1072,7 +1146,7 @@ void draw_devices(void){
     if(devicei->in_zone_csv==1)continue;
     if(isZoneFireModel==1&&STRCMP(devicei->label,"TIME")==0)continue;
     save_use_displaylist=devicei->object->use_displaylist;
-    tagval=i+1;
+    tagval=ii+1;
     if(select_device==1&&show_mode==SELECTOBJECT){
 
       select_device_color[0]=tagval>>(ngreenbits+nbluebits);
@@ -5534,8 +5608,9 @@ void setup_tree_devices(void){
   for(i = 1; i < nvdeviceinfo; i++){
     if(comparev2devices(vdevices_sorted + i, vdevices_sorted + i - 1) != 0){
       treei->last = i-1;
-      ntreedeviceinfo++;
       treei = treedeviceinfo + ntreedeviceinfo;
+      treei->first = i;
+      ntreedeviceinfo++;
     }
   }
   treei->last = nvdeviceinfo - 1;
