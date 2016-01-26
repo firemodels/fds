@@ -129,7 +129,8 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"line");
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"arrow");
       glui_device->add_radiobutton_to_group(RADIO_vectortype,"object");
-      ROLLOUT_arrow_dimensions=glui_device->add_rollout_to_panel(PANEL_velocityvectors,"dimensions",false);
+      glui_device->add_radiobutton_to_group(RADIO_vectortype, "profile");
+      ROLLOUT_arrow_dimensions = glui_device->add_rollout_to_panel(PANEL_velocityvectors, "dimensions", false);
       PANEL_arrow_base=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"base",true);
       glui_device->add_spinner_to_panel(PANEL_arrow_base,_d("height"),GLUI_SPINNER_FLOAT,&vector_baseheight);
       glui_device->add_spinner_to_panel(PANEL_arrow_base,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_basediameter);

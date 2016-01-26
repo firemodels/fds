@@ -302,3 +302,11 @@ string_util.o:	.FORCE
 string_util.obj:	.FORCE
 
 .FORCE:
+
+# *** Object Dependencies ***
+
+getsmv.o : fdsmodules.o
+getdata.o : gsmv.o fdsmodules.o
+
+getsmv.obj : fdsmodules.obj
+getdata.obj : gsmv.obj fdsmodules.obj
