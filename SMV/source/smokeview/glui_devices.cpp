@@ -15,6 +15,7 @@
 #define SAVE_SETTINGS 99
 #define DEVICE_close 3
 #define DEVICE_show_orientation 4
+#define DEVICE_NBUCKETS 5
 
 #define OPEN_UP 0
 #define OPEN_DOWN 1
@@ -61,6 +62,9 @@ GLUI_EditText *EDIT_filter=NULL;
 
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Spinner *SPINNER_orientation_scale=NULL;
+#ifdef pp_PILOT
+GLUI_Spinner *SPINNER_npilot_buckets = NULL;
+#endif
 
 GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_RadioGroup *RADIO_vectortype=NULL;
@@ -139,6 +143,8 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
 #ifdef pp_PILOT
       glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_d("Pilot view"),&vispilot);
+      SPINNER_npilot_buckets = glui_device->add_spinner_to_panel(PANEL_velocityvectors,_d("number of partitions"),GLUI_SPINNER_INT,&npilot_buckets,DEVICE_NBUCKETS,Device_CB);
+      SPINNER_npilot_buckets->set_int_limits(3, 72, GLUI_LIMIT_CLAMP);
 #endif
 
       PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
@@ -290,6 +296,11 @@ void Device_CB(int var){
 
   updatemenu=1;
   switch(var){
+#ifdef pp_PILOT
+  case DEVICE_NBUCKETS:
+    setup_pilot_data(npilot_buckets);
+    break;
+#endif
   case DEVICE_show_orientation:
     updatemenu=1;
     break;
