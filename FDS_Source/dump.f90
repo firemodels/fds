@@ -1386,6 +1386,14 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'ALBEDO'
 WRITE(LU_SMV,'(F13.5)') SMOKE_ALBEDO
 
+! Write out direction angle of true north North with respect to the y axis
+! this is intended for outdoor cases derived from map data
+
+IF (NORTH>-185.0_EB) THEN
+   WRITE(LU_SMV,'(/A)') 'NORTH'
+   WRITE(LU_SMV,'(F13.5)') NORTH
+ENDIF
+
 ! Write out GVEC
 
 WRITE(LU_SMV,'(/A)') 'GVEC'
