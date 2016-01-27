@@ -717,7 +717,7 @@ void Output_Device_Val(devicedata *devicei){
 /* ----------------------- draw_pilot ----------------------------- */
 
 #ifdef pp_PILOT
-void draw_pilot(void){
+void draw_pilot1(void){
   int i;
 
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&vispilot==1&&nvdeviceinfo>0){
@@ -759,6 +759,70 @@ void draw_pilot(void){
     }
     glPopMatrix();
     glDisable(GL_LIGHTING);
+  }
+}
+
+/* ----------------------- draw_pilot2 ----------------------------- */
+
+void draw_pilot2(void){
+  int i;
+
+  if(showtime == 1 && itimes >= 0 && itimes<nglobal_times&&vispilot == 1 && nvdeviceinfo>0){
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glPushMatrix();
+    glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+    glTranslatef(-xbar0, -ybar0, -zbar0);
+    glColor3fv(foregroundcolor);
+    glLineWidth(vectorlinewidth);
+    for(i = 0; i < nvdeviceinfo; i++){
+      vdevicedata *vdevi;
+      float *xyz;
+      int k;
+      pilotdata *piloti;
+      float dangle;
+
+      vdevi = vdeviceinfo + i;
+      if(vdevi->unique == 0)continue;
+      xyz = vdevi->valdev->xyz;
+
+      piloti = &(vdevi->pilotinfo);
+
+      dangle = 360.0 / (float)piloti->nbuckets;
+      glBegin(GL_LINES);
+      for(k = 0; k < piloti->nbuckets; k++){
+        float angle, cosang, sinang;
+
+        angle = (float)k*dangle-180.0;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0], xyz[1], xyz[2]);
+        glVertex3f(xyz[0] + SCALE2FDS(piloti->fraction[k])*sinang, xyz[1] + SCALE2FDS(piloti->fraction[k])*cosang, xyz[2]);
+      }
+      glEnd();
+    }
+    glPopMatrix();
+    glDisable(GL_LIGHTING);
+  }
+}
+
+/* ----------------------- draw_pilot ----------------------------- */
+
+void draw_pilot(void){
+  switch(pilot_viewtype){
+  case 0:
+    draw_pilot1();
+    break;
+  case 1:
+    draw_pilot2();
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
   }
 }
 #endif

@@ -53,9 +53,12 @@ GLUI_Panel *PANEL_devicevalues=NULL;
 GLUI_Panel *PANEL_smvobjects=NULL;
 GLUI_Panel *PANEL_devicevis=NULL;
 GLUI_Panel *PANEL_label3=NULL;
-GLUI_Rollout *ROLLOUT_arrow_dimensions=NULL;
 GLUI_Panel *PANEL_vector_type=NULL;
 
+GLUI_Rollout *ROLLOUT_arrow_dimensions = NULL;
+#ifdef pp_PILOT
+GLUI_Rollout *ROLLOUT_pilot = NULL;
+#endif
 GLUI_Listbox *LIST_open=NULL;
 
 GLUI_EditText *EDIT_filter=NULL;
@@ -68,6 +71,9 @@ GLUI_Spinner *SPINNER_npilot_buckets = NULL;
 
 GLUI_RadioGroup *RADIO_devicetypes=NULL;
 GLUI_RadioGroup *RADIO_vectortype=NULL;
+#ifdef pp_PILOT
+GLUI_RadioGroup *RADIO_pilottype=NULL;
+#endif
 
 GLUI_Checkbox *CHECKBOX_device_1=NULL;
 GLUI_Checkbox *CHECKBOX_device_2=NULL;
@@ -142,9 +148,13 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("height"),GLUI_SPINNER_FLOAT,&vector_headheight);
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
 #ifdef pp_PILOT
-      glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_d("Pilot view"),&vispilot);
-      SPINNER_npilot_buckets = glui_device->add_spinner_to_panel(PANEL_velocityvectors,_d("number of partitions"),GLUI_SPINNER_INT,&npilot_buckets,DEVICE_NBUCKETS,Device_CB);
+      ROLLOUT_pilot = glui_device->add_rollout_to_panel(PANEL_velocityvectors, "Pilot view", false);
+      glui_device->add_checkbox_to_panel(ROLLOUT_pilot, _d("show"), &vispilot);
+      SPINNER_npilot_buckets = glui_device->add_spinner_to_panel(ROLLOUT_pilot, _d("segments"), GLUI_SPINNER_INT, &npilot_buckets, DEVICE_NBUCKETS, Device_CB);
       SPINNER_npilot_buckets->set_int_limits(3, 72, GLUI_LIMIT_CLAMP);
+      RADIO_pilottype=glui_device->add_radiogroup_to_panel(ROLLOUT_pilot,&pilot_viewtype);
+      glui_device->add_radiobutton_to_group(RADIO_pilottype,"type 1");
+      glui_device->add_radiobutton_to_group(RADIO_pilottype,"type 2");
 #endif
 
       PANEL_devicevalues = glui_device->add_panel_to_panel(PANEL_objects,"Device values",true);
