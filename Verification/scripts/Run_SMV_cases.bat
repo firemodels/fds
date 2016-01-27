@@ -4,7 +4,9 @@ set size=_64
 set svn_drive=c:
 set DEBUG=
 set SCRIPT_DIR=%CD%
-set runonlygeom=0
+set rungeomcases=1
+set runwuicases=1
+set runsmvcases=1
 set rundebug=0
 
 set curdir=%CD%
@@ -64,7 +66,7 @@ call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
 
-set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
 call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.
@@ -81,9 +83,18 @@ cd %SVNROOT%\Verification\WUI
 %WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_data1d.csv
 
 cd %SCRIPT_DIR%
-echo creating FDS case list from SMV_Cases.sh
-%SH2BAT% SMV_Cases.sh SMV_Cases.bat
-%SH2BAT% SMV_geom_Cases.sh SMV_geom_Cases.bat
+if %runsmvcases% == 1 (
+  echo creating case list from SMV_Cases.sh
+  %SH2BAT% SMV_Cases.sh SMV_Cases.bat
+)
+if %rungeomcases% == 1 (
+  echo creating case list from GEOM_Cases.sh
+  %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  echo creating case list from WUI_Cases.sh
+  %SH2BAT% WUI_Cases.sh WUI_Cases.bat
+)
 
 cd %BASEDIR%
 
@@ -109,10 +120,15 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-if %runonlygeom% == 0 (
+if %runsmvcases% == 1 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 
 :: run cases
 
@@ -120,10 +136,15 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-if %runonlygeom% == 0 (
+if %runsmvcases% == 1 (
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 call :wait_until_finished
 
 cd %BASEDIR%
@@ -185,7 +206,15 @@ exit /b
  )
  if /I "%1" EQU "-geom" (
    set valid=1
-   set runonlygeom=1
+   set runwuicases=0
+   set runsmvcases=0
+   set rungeomcases=1
+ )
+ if /I "%1" EQU "-wui" (
+   set valid=1
+   set runwuicases=1
+   set runsmvcases=0
+   set rungeomcases=0
  )
  shift
  if %valid% == 0 (
@@ -207,6 +236,7 @@ echo -help  - display this message
 echo -cfastrepo - specify cfast repo location [default: %CFAST%]
 echo -debug - run with debug FDS
 echo -geom  - run only geom cases
+echo -wui   - run only WUI cases
 exit /b
 
 
