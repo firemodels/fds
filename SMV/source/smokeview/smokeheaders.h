@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void drawnorth(void);
 EXTERNCPP void draw_geomdata(int flag, patchdata *patchi, int geom_type);
 EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
 EXTERNCPP int HaveFire(void);

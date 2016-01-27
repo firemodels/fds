@@ -28,7 +28,22 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
 void drawcone(float d1, float height, float *rgbcolor);
 void drawdisk(float diameter, float height, float *rgbcolor);
 
-    /*
+
+/* ------------------ drawnorth ------------------------ */
+
+void drawnorth(void){
+  glPushMatrix();
+  glTranslatef(northangle_position[0], northangle_position[1], northangle_position[2]);
+  glRotatef(-northangle, 0.0, 0.0, 1.0);
+  glBegin(GL_LINES);
+  glColor3fv(foregroundcolor);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.1, 0.0);
+  glEnd();
+  glPopMatrix();
+}
+
+  /*
 typedef struct {
   float xyz[3];
   float trunk_diam;

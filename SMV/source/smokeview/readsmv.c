@@ -2786,7 +2786,14 @@ int readsmv(char *file, char *file2){
       smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
       continue;
     }
-    if(match(buffer,"AVATAR_COLOR") == 1){
+    if(match(buffer, "NORTHANGLE")==1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f", &northangle);
+      northangle = CLAMP(northangle, -180.0, 180.0);
+      have_northangle = 1;
+      continue;
+    }
+    if(match(buffer,"AVATAR_COLOR")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&navatar_colors);
       if(navatar_colors<0)navatar_colors=0;
@@ -8860,7 +8867,14 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
-    if(match(buffer,"ZAXISANGLES")==1){
+    if(match(buffer, "NORTHANGLE")==1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i", &vis_northangle);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f", northangle_position, northangle_position+1, northangle_position+2);
+      continue;
+    }
+    if(match(buffer, "ZAXISANGLES")==1){
       fgets(buffer,255,stream);
       sscanf(buffer," %f %f %f ",zaxis_angles,zaxis_angles+1,zaxis_angles+2);
       changed_zaxis=1;
@@ -12325,6 +12339,9 @@ void writeini(int flag,char *filename){
       fprintf(fileout," %i\n",meshi->blockvis);
     }
   }
+  fprintf(fileout, "NORTHANGLE\n");
+  fprintf(fileout, " %i\n", vis_northangle);
+  fprintf(fileout, " %f %f %f\n", northangle_position[0], northangle_position[1], northangle_position[2]);
   fprintf(fileout, "OFFSETSLICE\n");
   fprintf(fileout, " %i\n", offset_slice);
   fprintf(fileout, "OUTLINEMODE\n");
