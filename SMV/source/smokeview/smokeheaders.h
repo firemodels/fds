@@ -123,6 +123,7 @@ EXTERNCPP void getsliceparams2(void);
 
 #ifdef pp_PILOT
 EXTERNCPP void draw_pilot(void);
+EXTERNCPP void setup_pilot_data(int nbuckets);
 #endif
 EXTERNCPP void DefineAllFEDs(void);
 EXTERNCPP void update_tour_state(void);
