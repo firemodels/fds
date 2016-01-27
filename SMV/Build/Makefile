@@ -4,9 +4,9 @@
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
 
 SOURCE_DIR = ../../source/
-SMV_TESTFLAG = 
+SMV_TESTFLAG =
 SMV_TESTSTRING =
-SMV_PROFILEFLAG = 
+SMV_PROFILEFLAG =
 SMV_PROFILESTRING =
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
@@ -97,7 +97,7 @@ SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR
 ms_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
 ms_win_64 : FFLAGS    = -O2 /iface:stdref /fpp
 ms_win_64 : CFLAGS    = -O1 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
-ms_win_64 : LFLAGS    = /F32768000 
+ms_win_64 : LFLAGS    = /F32768000
 ms_win_64 : CC        = cl
 ms_win_64 : CPP       = cl
 ms_win_64 : FC        = ifort
@@ -126,9 +126,9 @@ intel_win_64_db : $(objwin)
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
-intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32 /fpscomp:general 
+intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32 /fpscomp:general
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
-intel_win_64 : LFLAGS    = /F32768000 
+intel_win_64 : LFLAGS    = /F32768000
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : FC        = ifort
@@ -150,7 +150,7 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_linux_64 : LFLAGS    = -m64 -static-intel
-intel_linux_64 : CC        = icc 
+intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
@@ -177,7 +177,7 @@ intel_linux_64_db : $(obj)
 intel_linux_64_profile : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_noappend -p
 intel_linux_64_profile : CFLAGS    = -O0 -m64 -static-intel -D pp_LINUX -D pp_INTEL -p $(GITINFO)
 intel_linux_64_profile : LFLAGS    = -m64 -static-intel
-intel_linux_64_profile : CC        = icc 
+intel_linux_64_profile : CC        = icc
 intel_linux_64_profile : CPP       = icpc
 intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
@@ -211,6 +211,27 @@ gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 gnu_linux_64 : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
 
+# ------------- mingw_win_64 ----------------
+
+MINGWIN_LIBDIR_64 = $(LIB_DIR)/lib_win_mingw_64
+MINGSMV_LIBS_64 = $(MINGWIN_LIBDIR_64)/libglui.a $(MINGWIN_LIBDIR_64)/libgd.a \
+	$(MINGWIN_LIBDIR_64)/libjpeg.a $(MINGWIN_LIBDIR_64)/libpng.a \
+	$(MINGWIN_LIBDIR_64)/libz.a $(MINGWIN_LIBDIR_64)/libglutwin.a
+
+mingw_win_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend \
+						       -ffree-form -frecord-marker=4 -fno-underscoring
+mingw_win_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D GLEW_STATIC
+mingw_win_64 : LFLAGS    = -m64
+mingw_win_64 : CC        = gcc
+mingw_win_64 : CPP       = g++
+mingw_win_64 : FC        = gfortran
+mingw_win_64 : exe       = smokeview_mingw_$(SMV_TESTSTRING)64
+
+mingw_win_64 : $(obj)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(MINGWIN_LIBDIR_64) \
+		$(MINGSMV_LIBS_64) -lgfortran -lm -lopengl32 -lglu32 \
+		-lgdi32 -lwinmm -lcomdlg32 -lpthread
+
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -222,7 +243,7 @@ OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libim
 intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
 intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
-intel_osx_64 : CC        = icc 
+intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
@@ -230,25 +251,12 @@ intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING
 intel_osx_64 : $(obj)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
 
-# ------------- intel_osx_64_fg ----------------
-
-intel_osx_64_fg : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
-intel_osx_64_fg : CFLAGS    = -O0 -m64 -I /shared/freeglut/include -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
-intel_osx_64_fg : LFLAGS    = -m64 -static-intel -framework OpenGL -L/shared/freeglut/lib -lglut -mmacosx-version-min=10.4
-intel_osx_64_fg : CC        = icc 
-intel_osx_64_fg : CPP       = icpc
-intel_osx_64_fg : FC        = ifort
-intel_osx_64_fg : exe       = smokeview_osx_$(SMV_TESTSTRING)64_fg $(SMV_PROFILESTRING)
-
-intel_osx_64_fg : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
-
 # ------------- intel_osx_64_db ----------------
 
 intel_osx_64_db : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4 -stand:f08
 intel_osx_64_db : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_osx_64_db : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
-intel_osx_64_db : CC        = icc 
+intel_osx_64_db : CC        = icc
 intel_osx_64_db : CPP       = icpc
 intel_osx_64_db : FC        = ifort
 intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILESTRING)
@@ -294,3 +302,11 @@ string_util.o:	.FORCE
 string_util.obj:	.FORCE
 
 .FORCE:
+
+# *** Object Dependencies ***
+
+getsmv.o : fdsmodules.o
+getdata.o : gsmv.o fdsmodules.o
+
+getsmv.obj : fdsmodules.obj
+getdata.obj : gsmv.obj fdsmodules.obj

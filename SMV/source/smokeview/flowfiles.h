@@ -913,8 +913,7 @@ typedef struct _vdevicedata {
 /* --------------------------  treedevice ------------------------------------ */
 
 typedef struct {
-  int nvdevices;
-  vdevicedata **vdevices;
+  int first, last;
 } treedevicedata;
 
 /* --------------------------  camviewdata ------------------------------------ */
