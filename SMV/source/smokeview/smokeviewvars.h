@@ -20,6 +20,13 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+#ifdef INMAIN
+SVEXTERN float northangle_position[3] = {0.0, 0.0, 0.1};
+#else
+SVEXTERN float northangle_position[3];
+#endif
+SVEXTERN float SVDECL(northangle, 0.0);
+SVEXTERN int SVDECL(vis_northangle, 0), SVDECL(have_northangle,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(npilot_buckets, 8);
 SVEXTERN int SVDECL(pilot_viewtype, 0);
