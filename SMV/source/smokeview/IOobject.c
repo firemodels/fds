@@ -720,19 +720,19 @@ void Output_Device_Val(devicedata *devicei){
 void draw_pilot1(void){
   int i;
 
-  if(showtime==1&&itimes>=0&&itimes<nglobal_times&&vispilot==1&&nvdeviceinfo>0){
+  if(showtime == 1 && itimes >= 0 && itimes<nglobal_times&&vispilot == 1 && nvdeviceinfo>0){
     glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glEnable(GL_COLOR_MATERIAL);
 
     glPushMatrix();
-    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-    glTranslatef(-xbar0,-ybar0,-zbar0);
+    glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+    glTranslatef(-xbar0, -ybar0, -zbar0);
     glColor3fv(foregroundcolor);
     glLineWidth(vectorlinewidth);
-    for(i=0;i<nvdeviceinfo;i++){
+    for(i = 0; i < nvdeviceinfo; i++){
       vdevicedata *vdevi;
       float *xyz;
       int k;
@@ -740,22 +740,23 @@ void draw_pilot1(void){
       float dangle;
 
       vdevi = vdeviceinfo + i;
-      if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;
+      if(vdevi->unique == 0)continue;
+      xyz = vdevi->valdev->xyz;
 
       piloti = &(vdevi->pilotinfo);
 
       dangle = 360.0 / (float)piloti->nbuckets;
-      for(k=0;k<piloti->nbuckets;k++){
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(180.0-(float)k*dangle,0.0,0.0,1.0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(0.0,SCALE2FDS(piloti->fraction[k]),0.0);
-        glEnd();
-        glPopMatrix();
+      glBegin(GL_LINES);
+      for(k = 0; k < piloti->nbuckets; k++){
+        float angle, cosang, sinang;
+
+        angle = (float)k*dangle;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0], xyz[1], xyz[2]);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[k])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[k])*sinang, xyz[2]);
       }
+      glEnd();
     }
     glPopMatrix();
     glDisable(GL_LIGHTING);
@@ -796,12 +797,20 @@ void draw_pilot2(void){
       glBegin(GL_LINES);
       for(k = 0; k < piloti->nbuckets; k++){
         float angle, cosang, sinang;
+        int kk;
 
-        angle = (float)k*dangle-180.0;
+        kk = k;
+        angle = (float)kk*dangle;
         cosang = cos(DEG2RAD*angle);
         sinang = sin(DEG2RAD*angle);
-        glVertex3f(xyz[0], xyz[1], xyz[2]);
-        glVertex3f(xyz[0] + SCALE2FDS(piloti->fraction[k])*sinang, xyz[1] + SCALE2FDS(piloti->fraction[k])*cosang, xyz[2]);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[kk])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[kk])*sinang, xyz[2]);
+     
+        kk = k+1;
+        if(kk == piloti->nbuckets - 1)kk = 0;
+        angle = (float)kk*dangle;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[kk])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[kk])*sinang, xyz[2]);
       }
       glEnd();
     }
