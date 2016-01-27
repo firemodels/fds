@@ -1928,7 +1928,11 @@ SMOKE3D_QUANTITY   = 'null'
 SMOKE3D_SPEC_ID    = 'null'
 SIG_FIGS           = 8
 SIG_FIGS_EXP       = 3
-SUPPRESS_DIAGNOSTICS = .FALSE.
+IF (NMESHES>32) THEN
+   SUPPRESS_DIAGNOSTICS = .TRUE.
+ELSE
+   SUPPRESS_DIAGNOSTICS = .FALSE.
+ENDIF
 UVW_TIMER          = 1.E10_EB
 
 DT_GEOM      =  1._EB
@@ -10769,10 +10773,6 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    DV => DEVICE(N)
 
-   ! Only process the device if it belongs to the current MPI process.
-
-   IF (PROCESS(DV%MESH)/=MYID) CYCLE PROC_DEVC_LOOP
-
    ! Check for HVAC outputs with no HVAC inputs
 
    IF ((DV%DUCT_ID/='null' .OR. DV%NODE_ID(1)/='null') .AND. .NOT. HVAC_SOLVE) THEN
@@ -10859,6 +10859,16 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    ENDIF QUANTITY_IF
 
+   ! Even if the device is not in a mesh that is handled by the current MPI process, assign its unit.
+
+   DV%OUTPUT_INDEX     = QUANTITY_INDEX
+   DV%QUANTITY         = OUTPUT_QUANTITY(QUANTITY_INDEX)%NAME
+   IF (DV%UNITS=='null') DV%UNITS = OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%UNITS
+
+   ! Only process the device if it belongs to the current MPI process.
+
+   IF (PROCESS(DV%MESH)/=MYID) CYCLE PROC_DEVC_LOOP
+
    ! Assign properties to the DEVICE array
 
    M  => MESHES(DV%MESH)
@@ -10867,10 +10877,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
    DV%I                = MAX( 1 , MIN( M%IBAR , FLOOR(GINV(DV%X-M%XS,1,DV%MESH)*M%RDXI)  +1 ) )
    DV%J                = MAX( 1 , MIN( M%JBAR , FLOOR(GINV(DV%Y-M%YS,2,DV%MESH)*M%RDETA) +1 ) )
    DV%K                = MAX( 1 , MIN( M%KBAR , FLOOR(GINV(DV%Z-M%ZS,3,DV%MESH)*M%RDZETA)+1 ) )
-   DV%OUTPUT_INDEX     = QUANTITY_INDEX
-   IF (DV%UNITS=='null') DV%UNITS = OUTPUT_QUANTITY(DV%OUTPUT_INDEX)%UNITS
    DV%CTRL_INDEX       = 0
-   DV%QUANTITY         = OUTPUT_QUANTITY(QUANTITY_INDEX)%NAME
    DV%T                = T_BEGIN
    DV%TMP_L            = TMPA
    DV%TI_VALUE         = 0._EB
