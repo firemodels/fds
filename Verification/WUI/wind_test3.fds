@@ -1,4 +1,4 @@
-&HEAD CHID='wind_test3', TITLE='Simple hill case with boundary fuel' /
+&HEAD CHID='wind_test3', TITLE='Simple hill case with devices to visualize velocity profiles' /
 &MISC U0=3,TERRAIN_CASE=.TRUE./ 
 &TIME T_END=60 / 
 
@@ -107,12 +107,11 @@ cMESH IJK=50,50,25, XB=0,50,-25,25,0,25 /
 
 -- Device files (gas phase point measurements)
 
-c&DEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='U-VELOCITY' /
-c&DEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='V-VELOCITY' /
-c&DEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='W-VELOCITY' /
+cDEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='U-VELOCITY' /
+cDEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='V-VELOCITY' /
+cDEVC XYZ=10,10,-15,0,25,POINTS=26,QUANTITY='W-VELOCITY' /
 
-Comment: propose we replace the following 78 DEVC lines with
-Comment  the above 3 lines
+! propose we replace the following 78 DEVC lines with the above 3 lines (or some variant)
 
 &DEVC XYZ=10,-15,0,QUANTITY='U-VELOCITY' /
 &DEVC XYZ=10,-15,0,QUANTITY='V-VELOCITY' /
