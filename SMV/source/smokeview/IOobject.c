@@ -5637,10 +5637,26 @@ int comparev2devices(const void *arg1, const void *arg2){
   xyzj = vdevj->vdeviceinfo->valdev->xyz;
   if(diri - dirj < 0)return -1;
   if(diri - dirj > 0)return 1;
-  if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
-  if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
-  if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
-  if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+    break;
+  }
   return 0;
 }
 
@@ -5659,12 +5675,32 @@ int comparev3devices( const void *arg1, const void *arg2 ){
   xyzj = vdevj->vdeviceinfo->valdev->xyz;
   if(diri - dirj < 0)return -1;
   if(diri - dirj > 0)return 1;
-  if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
-  if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
-  if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
-  if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
-  if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
-  if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    break;
+  }
   return 0;
 }
 
@@ -5680,10 +5716,10 @@ void setup_tree_devices(void){
     ntreedeviceinfo=0;
   }
 
-  qsort((vdevicedata **)vdevices_sorted,(size_t)nvdeviceinfo,sizeof(vdevicesortdata),comparev3devices);
+  qsort((vdevicedata **)vdevices_sorted,3*(size_t)nvdeviceinfo,sizeof(vdevicesortdata),comparev3devices);
 
   ntreedeviceinfo = 1;
-  for(i = 1; i < nvdeviceinfo; i++){
+  for(i = 1; i < 3*nvdeviceinfo; i++){
     if(comparev2devices(vdevices_sorted+i, vdevices_sorted+i-1) != 0)ntreedeviceinfo++;
   }
 
@@ -5692,7 +5728,7 @@ void setup_tree_devices(void){
   ntreedeviceinfo = 1;
   treei = treedeviceinfo;
   treei->first = 0;
-  for(i = 1; i < nvdeviceinfo; i++){
+  for(i = 1; i < 3*nvdeviceinfo; i++){
     if(comparev2devices(vdevices_sorted + i, vdevices_sorted + i - 1) != 0){
       treei->last = i-1;
       treei = treedeviceinfo + ntreedeviceinfo;
@@ -5700,7 +5736,7 @@ void setup_tree_devices(void){
       ntreedeviceinfo++;
     }
   }
-  treei->last = nvdeviceinfo - 1;
+  treei->last = 3*nvdeviceinfo - 1;
 }
 
 /* ----------------------- setup_zone_devs ----------------------------- */
@@ -6099,7 +6135,7 @@ void setup_device_data(void){
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
   FREEMEMORY(vdevices_sorted);
-  NewMemory((void **)&vdevices_sorted,ndeviceinfo*sizeof(vdevicesortdata));
+  NewMemory((void **)&vdevices_sorted,3*ndeviceinfo*sizeof(vdevicesortdata));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
@@ -6319,6 +6355,14 @@ void setup_device_data(void){
     vdevicesortdata *vdevsorti;
 
     vdevsorti = vdevices_sorted + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 0;
+
+    vdevsorti = vdevices_sorted + nvdeviceinfo + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 1;
+
+    vdevsorti = vdevices_sorted + 2*nvdeviceinfo + i;
     vdevsorti->vdeviceinfo = vdeviceinfo + i;
     vdevsorti->dir = 2;
   }
