@@ -947,7 +947,7 @@ SVEXTERN int SVDECL(devicetypes_index,0);
 SVEXTERN devicedata SVDECL(*deviceinfo,NULL);
 SVEXTERN vdevicedata SVDECL(*vdeviceinfo, NULL);
 SVEXTERN vdevicesortdata SVDECL(*vdevices_sorted, NULL);
-SVEXTERN int SVDECL(ntreedeviceinfo,0);
+SVEXTERN int SVDECL(ntreedeviceinfo, 0), SVDECL(mintreesize, 3);
 SVEXTERN treedevicedata SVDECL(*treedeviceinfo,NULL);
 SVEXTERN int show_smokesensors,active_smokesensors,test_smokesensors;
 SVEXTERN float smoke3d_cvis;

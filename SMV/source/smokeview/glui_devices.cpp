@@ -65,6 +65,7 @@ GLUI_EditText *EDIT_filter=NULL;
 
 GLUI_Spinner *SPINNER_sensorrelsize=NULL;
 GLUI_Spinner *SPINNER_orientation_scale=NULL;
+GLUI_Spinner *SPINNER_mintreesize = NULL;
 #ifdef pp_PILOT
 GLUI_Spinner *SPINNER_npilot_buckets = NULL;
 #endif
@@ -147,6 +148,9 @@ extern "C" void glui_device_setup(int main_window){
       PANEL_arrow_height=glui_device->add_panel_to_panel(ROLLOUT_arrow_dimensions,"height",true);
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("height"),GLUI_SPINNER_FLOAT,&vector_headheight);
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
+      if(ntreedeviceinfo>0){
+        SPINNER_mintreesize = glui_device->add_spinner_to_panel(PANEL_velocityvectors, _d("min tree size"), GLUI_SPINNER_INT, &mintreesize);
+      }
 #ifdef pp_PILOT
       ROLLOUT_pilot = glui_device->add_rollout_to_panel(PANEL_velocityvectors, "Pilot view", false);
       glui_device->add_checkbox_to_panel(ROLLOUT_pilot, _d("show"), &vispilot);

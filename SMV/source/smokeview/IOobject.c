@@ -888,6 +888,7 @@ void draw_devices(void){
       int i,first;
 
       treei = treedeviceinfo + j;
+      if(treei->last + 1 - treei->first < mintreesize)continue;
       first = 1;
       for(i = treei->first; i <= treei->last; i++){
         vdevicedata *vdevi;
