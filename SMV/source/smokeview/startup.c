@@ -8,6 +8,7 @@
 
 #include "smokeviewvars.h"
 #include "update.h"
+#include "lua_api.h"
 
 /* ------------------ Init ------------------------ */
 
@@ -282,6 +283,42 @@ int setup_case(int argc, char **argv){
   }
   return 0;
 }
+
+/* ------------------ load_script ------------------------ */
+// There are two options for scripting, Lua and SSF. Which is run is set here
+// based on the commandline arguments. If either (exclusive) of these values
+// are set to true, then that script will run from within the display callback
+// (Display_CB, in callbacks.c). These two loading routines are included to
+// load the scripts early in the piece, before the display callback.
+// Both runluascript and runscript are global.
+int load_script() {
+    if (runluascript == 1 && runscript == 1) {
+        fprintf(stderr, "Both a Lua script and an SSF script cannot be run "
+                        "simultaneously\n");
+        exit(1);
+    }
+    if (runluascript == 1) {
+      // Load the Lua script in order for it to be run later.
+      if (loadLuaScript() != LUA_OK) {
+          fprintf(stderr, "There was an error loading the script, and so it "
+                          "will not run. Running smokeview normally.");
+          runluascript = 0; // set this to false so that the smokeview no longer
+                           // tries to run the script as it failed to load
+      }
+    }
+    if (runscript == 1) {
+      // Load the ssf script in order for it to be run later
+      // This still uses the Lua interpreter
+      if (loadSSFScript() != LUA_OK) {
+          fprintf(stderr, "There was an error loading the script, and so it "
+                          "will not run. Running smokeview normally.");
+          runscript = 0; // set this to false so that the smokeview no longer
+                           // tries to run the script as it failed to load
+      }
+    }
+    return 1;
+}
+
 
 /* ------------------ setup_glut ------------------------ */
 
@@ -2207,5 +2244,3 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
   *argv_sv=aargv;
 #endif
 }
-
-

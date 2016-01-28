@@ -44,12 +44,14 @@ obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_w
       glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
       shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o\
       smv_geometry.o geometry.o showscene.o fdsmodules.o\
-      gsmv.o getdata.o getsizes.o glew.o
+      gsmv.o getdata.o getsizes.o glew.o c_api.o lua_api.o
 objwin = $(obj:.o=.obj)
 
 # include file directory locations (should be the same for all builds)
 
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(INC_DIR)/zlib
+INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd \
+	  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew \
+	  -I $(INC_DIR)/zlib -I $(SOURCE_DIR)/lua-5.3.1/src
 
 # libraries used by smokeview
 
@@ -216,19 +218,29 @@ gnu_linux_64 : $(obj)
 MINGWIN_LIBDIR_64 = $(LIB_DIR)/lib_win_mingw_64
 MINGSMV_LIBS_64 = $(MINGWIN_LIBDIR_64)/libglui.a $(MINGWIN_LIBDIR_64)/libgd.a \
 	$(MINGWIN_LIBDIR_64)/libjpeg.a $(MINGWIN_LIBDIR_64)/libpng.a \
-	$(MINGWIN_LIBDIR_64)/libz.a $(MINGWIN_LIBDIR_64)/libglutwin.a
+	$(MINGWIN_LIBDIR_64)/libz.a $(MINGWIN_LIBDIR_64)/libglutwin.a \
+	$(MINGWIN_LIBDIR_64)/lua53.dll
+	
+SMVLUACORE_DIR = $(SOURCE_DIR)/smvluacore
+SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
+	$(SMVLUACORE_DIR)/ssfparser.lua $(SMVLUACORE_DIR)/ssfcommands.lua \
+	$(SMVLUACORE_DIR)/clipping.lua
+
+smvluacore: $(SMVLUACORE_FILES)
+	cp $^ .
 
 mingw_win_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend \
 						       -ffree-form -frecord-marker=4 -fno-underscoring
 mingw_win_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D GLEW_STATIC
-mingw_win_64 : LFLAGS    = -m64
+mingw_win_64 : LFLAGS    = -m64 -static-libgcc -static-libstdc++
 mingw_win_64 : CC        = gcc
 mingw_win_64 : CPP       = g++
 mingw_win_64 : FC        = gfortran
 mingw_win_64 : exe       = smokeview_mingw_$(SMV_TESTSTRING)64
 
-mingw_win_64 : $(obj)
+mingw_win_64 : $(obj) smvluacore
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(MINGWIN_LIBDIR_64) \
+		-I ../../source/lua-5.3.1/src \
 		$(MINGSMV_LIBS_64) -lgfortran -lm -lopengl32 -lglu32 \
 		-lgdi32 -lwinmm -lcomdlg32 -lpthread
 

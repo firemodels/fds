@@ -35,3 +35,14 @@ cp libpng.a $LIBDIR/.
 cd $SRCDIR/zlib114
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
+
+# Lua
+cd $SRCDIR/lua-5.3.1
+export TARGET=mingw
+./makelib.sh $OPTS
+cp src/lua53.dll $LIBDIR/.
+
+# LPEG
+cd $SRCDIR/lpeg-1.0.0
+./makelib.sh $OPTS
+cp lpeg.dll $LIBDIR/.
