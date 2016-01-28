@@ -8915,7 +8915,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "DEVICEVECTORDIMENSIONS") == 1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",&vector_baseheight,&vector_basediameter,&vector_headheight,&vector_headdiameter);
+      sscanf(buffer,"%f %f %f %f",&vector_baselength,&vector_basediameter,&vector_headlength,&vector_headdiameter);
       continue;
     }
     if(match(buffer,"DEVICEBOUNDS")==1){
@@ -11681,7 +11681,7 @@ void writeini_local(FILE *fileout){
     fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
   }
   fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
-  fprintf(fileout, "%f %f %f %f\n", vector_baseheight, vector_basediameter, vector_headheight, vector_headdiameter);
+  fprintf(fileout, "%f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
   fprintf(fileout, "DEVICEBOUNDS\n");
   fprintf(fileout, " %f %f\n", device_valmin, device_valmax);
   fprintf(fileout, "DEVICEORIENTATION\n");

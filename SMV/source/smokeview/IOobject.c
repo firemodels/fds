@@ -1017,7 +1017,7 @@ void draw_devices(void){
             glPushMatrix();
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
-            glScalef(1.0, 1.0, vector_baseheight*speed);
+            glScalef(1.0, 1.0, vector_baselength*speed);
             glColor3ubv(arrow_color);
             glBegin(GL_LINES);
             glVertex3fv(vec0);
@@ -1034,11 +1034,11 @@ void draw_devices(void){
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             glPushMatrix();
-            glScalef(1.0, 1.0, speed*vector_baseheight);
+            glScalef(1.0, 1.0, speed*vector_baselength);
             drawdisk(vector_basediameter, 1.0, arrow_color);
             glPopMatrix();
-            glTranslatef(0.0, 0.0, speed*vector_baseheight);
-            drawcone(vector_headdiameter, vector_headheight, arrow_color);
+            glTranslatef(0.0, 0.0, speed*vector_baselength);
+            drawcone(vector_headdiameter, vector_headlength, arrow_color);
             glPopMatrix();
             break;
           case VECTOR_OBJECT:
@@ -1047,7 +1047,7 @@ void draw_devices(void){
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             drawobjects_as_vectors = 1;
-            glScalef(sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight);
+            glScalef(sensorrelsize*vector_baselength, sensorrelsize*vector_baselength, sensorrelsize*vector_baselength);
             draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
             glPopMatrix();
             break;
@@ -1174,11 +1174,11 @@ void draw_devices(void){
             glColor3ubv(arrow_color);
 
             glPushMatrix();
-            glScalef(1.0, 1.0, vv*vector_baseheight);
+            glScalef(1.0, 1.0, vv*vector_baselength);
             drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
             glPopMatrix();
-            glTranslatef(0.0, 0.0, vv*vector_baseheight);
-            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headheight*xyzmaxdiff / 10.0, arrow_color);
+            glTranslatef(0.0, 0.0, vv*vector_baselength);
+            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headlength*xyzmaxdiff / 10.0, arrow_color);
             glPopMatrix();
             break;
           case VECTOR_OBJECT:
@@ -1188,7 +1188,7 @@ void draw_devices(void){
             glRotatef(-angle, 0.0, 0.0, 1.0);
             glRotatef(90.0, 1.0, 0.0, 0.0);
             glPushMatrix();
-            glScalef(1.0, 1.0, vv*vector_baseheight);
+            glScalef(1.0, 1.0, vv*vector_baselength);
             drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
             glPopMatrix();
 
