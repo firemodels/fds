@@ -334,6 +334,9 @@ void LabelMenu(int value){
     visAvailmemory=0;
 #endif
     break;
+   case MENU_LABEL_northangle:
+     vis_northangle = 1-vis_northangle;
+     break;
    case MENU_LABEL_axis:
     visaxislabels = 1 - visaxislabels;
     update_visaxislabels();
@@ -5810,6 +5813,10 @@ updatemenu=0;
 
   if(visaxislabels == 1)glutAddMenuEntry(_("*Axis"), MENU_LABEL_axis);
   if(visaxislabels == 0)glutAddMenuEntry(_("Axis"), MENU_LABEL_axis);
+  if(have_northangle==1){
+    if(vis_northangle==1)glutAddMenuEntry(_("*North"), MENU_LABEL_northangle);
+    if(vis_northangle==0)glutAddMenuEntry(_("North"), MENU_LABEL_northangle);
+  }
   if(ntickinfo>0){
     if(visFDSticks == 0)glutAddMenuEntry(_("FDS generated ticks"), MENU_LABEL_fdsticks);
     if(visFDSticks == 1)glutAddMenuEntry(_("*FDS generated ticks"), MENU_LABEL_fdsticks);

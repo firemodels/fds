@@ -94,6 +94,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     glPointSize((float)1.0);
 
 
+    /* ++++++++++++++++++++++++ draw north  +++++++++++++++++++++++++ */
+
+    if(vis_northangle==1){
+      CLIP_GEOMETRY;
+      drawnorth();
+      SNIFF_ERRORS("after drawnorth");
+    }
+
     /* ++++++++++++++++++++++++ draw trees +++++++++++++++++++++++++ */
 
     if(ntreeinfo>0){

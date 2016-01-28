@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void drawnorth(void);
 EXTERNCPP void draw_geomdata(int flag, patchdata *patchi, int geom_type);
 EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
 EXTERNCPP int HaveFire(void);
@@ -123,6 +124,7 @@ EXTERNCPP void getsliceparams2(void);
 
 #ifdef pp_PILOT
 EXTERNCPP void draw_pilot(void);
+EXTERNCPP void setup_pilot_data(int nbuckets);
 #endif
 EXTERNCPP void DefineAllFEDs(void);
 EXTERNCPP void update_tour_state(void);

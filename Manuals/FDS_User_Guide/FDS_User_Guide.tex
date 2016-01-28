@@ -5781,13 +5781,13 @@ The amount expected on the floor is approximately 0.024~kg.
 
 A 3-D array of particles can be used to represent the drag exerted by porous media, as in the following example:
 \begin{lstlisting}
-&SURF ID='LIGAMENT', MATL_ID='ALUMINUM ALLOY', THICKNESS=7.3E-5,  
+&SURF ID='LIGAMENT', MATL_ID='ALUMINUM ALLOY', THICKNESS=7.3E-5,
       GEOMETRY='CYLINDRICAL', HEAT_TRANSFER_COEFFICIENT=10. /
 &MATL ID='ALUMINUM ALLOY', DENSITY=2690., CONDUCTIVITY=218., SPECIFIC_HEAT=0.9 /
-&PART ID='FOAM', DRAG_LAW='POROUS MEDIA', SURF_ID='LIGAMENT', 
-      POROUS_VOLUME_FRACTION=0.12, STATIC=.TRUE., 
+&PART ID='FOAM', DRAG_LAW='POROUS MEDIA', SURF_ID='LIGAMENT',
+      POROUS_VOLUME_FRACTION=0.12, STATIC=.TRUE.,
       DRAG_COEFFICIENT=0.1,0.1,0.1, PERMEABILITY=1.0E-7,1.E-7,1.E-7 /
-&INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE., 
+&INIT XB=1.010,1.095,0.0,0.5,0.0,0.5, N_PARTICLES_PER_CELL=1, CELL_CENTERED=.TRUE.,
       PART_ID='FOAM' /
 \end{lstlisting}
 These lines are a model of aluminum foam. The basic geometry of the foam ligaments is defined with the {\ct SURF} line. It is assumed that the ligaments are made of an aluminum alloy whose properties are given on the {\ct MATL} line. The radius of the assumed cylindrical ligament is indicated by the {\ct THICKNESS}. Note that the {\ct LENGTH} of the cylinder which is normally required on the {\ct SURF} line is computed automatically so that the volume fraction of the grid cell occupied by the foam, specified by {\ct POROUS\_VOLUME\_FRACTION} on the {\ct PART} line, is achieved. In a sense, the foam is modeled by a long cylinder chopped up into small pieces and represented by a single particle in each grid cell.
@@ -8932,6 +8932,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct NOISE}                                     & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct NOISE\_VELOCITY}                           & Real          & Section~\ref{info:MISC_Basics}                        &  m/s          & 0.005             \\ \hline
 {\ct NO\_EVACUATION}                            & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
+%{\ct NORTHANGLE}                                & Real          &                                                       &\si{\degree}   & {\ct -190.0}      \\ \hline
 {\ct OVERWRITE}                                 & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .TRUE.}      \\ \hline
 {\ct PARTICLE\_CFL}                             & Logical       & Section~\ref{info:PART_Stability}                     &               & {\ct .FALSE.}     \\ \hline
 {\ct PARTICLE\_CFL\_MAX}                        & Real          & Section~\ref{info:PART_Stability}                     &               & 1.0               \\ \hline
