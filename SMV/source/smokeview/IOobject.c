@@ -895,8 +895,12 @@ void draw_devices(void){
         float vel[3], angle, dvel, dangle;
         float *xyz;
         int velocity_type;
+        vdevicesortdata *vdevsorti;
 
-        vdevi = vdevices_sorted[i];
+        vdevsorti = vdevices_sorted + i;
+        if(vdevsorti->dir!=2)continue;
+
+        vdevi = vdevsorti->vdeviceinfo;
         devicei = vdevi->colordev;
         if(devicei == NULL)continue;
         if(vdevi->unique == 0)continue;
@@ -5621,13 +5625,18 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
 /* ------------------ comparev2devices ------------------------ */
 
 int comparev2devices(const void *arg1, const void *arg2){
-  vdevicedata *vdevi, *vdevj;
+  vdevicesortdata *vdevi, *vdevj;
   float *xyzi, *xyzj;
+  int diri, dirj;
 
-  vdevi = *(vdevicedata **)arg1;
-  vdevj = *(vdevicedata **)arg2;
-  xyzi = vdevi->valdev->xyz;
-  xyzj = vdevj->valdev->xyz;
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
   if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
   if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
   if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
@@ -5638,13 +5647,18 @@ int comparev2devices(const void *arg1, const void *arg2){
 /* ------------------ comparev3devices ------------------------ */
 
 int comparev3devices( const void *arg1, const void *arg2 ){
-  vdevicedata *vdevi, *vdevj;
+  vdevicesortdata *vdevi, *vdevj;
   float *xyzi, *xyzj;
+  int diri, dirj;
 
-  vdevi = *(vdevicedata **)arg1;
-  vdevj = *(vdevicedata **)arg2;
-  xyzi = vdevi->valdev->xyz;
-  xyzj = vdevj->valdev->xyz;
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
   if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
   if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
   if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
@@ -5666,7 +5680,7 @@ void setup_tree_devices(void){
     ntreedeviceinfo=0;
   }
 
-  qsort((vdevicedata **)vdevices_sorted,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparev3devices);
+  qsort((vdevicedata **)vdevices_sorted,(size_t)nvdeviceinfo,sizeof(vdevicesortdata),comparev3devices);
 
   ntreedeviceinfo = 1;
   for(i = 1; i < nvdeviceinfo; i++){
@@ -6085,7 +6099,7 @@ void setup_device_data(void){
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
   FREEMEMORY(vdevices_sorted);
-  NewMemory((void **)&vdevices_sorted,ndeviceinfo*sizeof(vdevicedata *));
+  NewMemory((void **)&vdevices_sorted,ndeviceinfo*sizeof(vdevicesortdata));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
@@ -6302,7 +6316,11 @@ void setup_device_data(void){
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
   for(i=0;i<nvdeviceinfo;i++){
-    vdevices_sorted[i] = vdeviceinfo + i;
+    vdevicesortdata *vdevsorti;
+
+    vdevsorti = vdevices_sorted + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 2;
   }
 
   setup_tree_devices();
