@@ -20,6 +20,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(vis_xtree, 0), SVDECL(vis_ytree, 0), SVDECL(vis_ztree, 1);
+SVEXTERN int SVDECL(max_device_tree,0);
 #ifdef INMAIN
 SVEXTERN float northangle_position[3] = {0.0, 0.0, 0.1};
 #else

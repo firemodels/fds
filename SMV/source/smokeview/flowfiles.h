@@ -921,7 +921,7 @@ typedef struct {
 /* --------------------------  treedevicedata ------------------------------------ */
 
 typedef struct {
-  int first, last;
+  int first, last, n;
 } treedevicedata;
 
 /* --------------------------  camviewdata ------------------------------------ */

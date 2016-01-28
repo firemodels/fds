@@ -83,6 +83,9 @@ GLUI_Checkbox *CHECKBOX_device_4=NULL;
 GLUI_Checkbox *CHECKBOX_device_5=NULL;
 GLUI_Checkbox *CHECKBOX_device_6=NULL;
 GLUI_Checkbox *CHECKBOX_device_orientation = NULL;
+GLUI_Checkbox *CHECKBOX_vis_xtree = NULL;
+GLUI_Checkbox *CHECKBOX_vis_ytree = NULL;
+GLUI_Checkbox *CHECKBOX_vis_ztree = NULL;
 
 void Device_CB(int var);
 
@@ -150,6 +153,10 @@ extern "C" void glui_device_setup(int main_window){
       glui_device->add_spinner_to_panel(PANEL_arrow_height,_d("diameter"),GLUI_SPINNER_FLOAT,&vector_headdiameter);
       if(ntreedeviceinfo>0){
         SPINNER_mintreesize = glui_device->add_spinner_to_panel(PANEL_velocityvectors, _d("min tree size"), GLUI_SPINNER_INT, &mintreesize);
+        SPINNER_mintreesize->set_int_limits(2, MAX(2,max_device_tree));
+        CHECKBOX_vis_xtree = glui_device->add_checkbox_to_panel(PANEL_velocityvectors, _d("Show x tree"), &vis_xtree);
+        CHECKBOX_vis_ytree = glui_device->add_checkbox_to_panel(PANEL_velocityvectors, _d("Show y tree"), &vis_ytree);
+        CHECKBOX_vis_ztree = glui_device->add_checkbox_to_panel(PANEL_velocityvectors, _d("Show z tree"), &vis_ztree);
       }
 #ifdef pp_PILOT
       ROLLOUT_pilot = glui_device->add_rollout_to_panel(PANEL_velocityvectors, "Pilot view", false);

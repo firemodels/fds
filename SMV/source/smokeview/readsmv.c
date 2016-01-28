@@ -8874,7 +8874,16 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer, " %f %f %f", northangle_position, northangle_position+1, northangle_position+2);
       continue;
     }
-    if(match(buffer, "ZAXISANGLES")==1){
+    if(match(buffer, "TREEPARMS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i", &mintreesize, &vis_xtree, &vis_ytree, &vis_ztree);
+      mintreesize = MAX(mintreesize, 2);
+      vis_xtree = CLAMP(vis_xtree, 0, 1);
+      vis_ytree = CLAMP(vis_ytree, 0, 1);
+      vis_ztree = CLAMP(vis_ztree, 0, 1);
+      continue;
+    }
+    if(match(buffer, "ZAXISANGLES") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer," %f %f %f ",zaxis_angles,zaxis_angles+1,zaxis_angles+2);
       changed_zaxis=1;
@@ -12486,6 +12495,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", trainerview);
   fprintf(fileout, "TRANSPARENT\n");
   fprintf(fileout, " %i %f\n", use_transparency_data, transparent_level);
+  fprintf(fileout, "TREEPARMS\n");
+  fprintf(fileout, " %i %i %i %i\n", mintreesize,vis_xtree,vis_ytree,vis_ztree);
   fprintf(fileout, "TWOSIDEDVENTS\n");
   fprintf(fileout, " %i %i\n", show_bothsides_int, show_bothsides_ext);
   fprintf(fileout, "VECTORSKIP\n");

@@ -888,7 +888,7 @@ void draw_devices(void){
       int i,first;
 
       treei = treedeviceinfo + j;
-      if(treei->last + 1 - treei->first < mintreesize)continue;
+      if(vectortype==VECTOR_PROFILE&&treei->n<mintreesize)continue;
       first = 1;
       for(i = treei->first; i <= treei->last; i++){
         vdevicedata *vdevi;
@@ -899,7 +899,14 @@ void draw_devices(void){
         vdevicesortdata *vdevsorti;
 
         vdevsorti = vdevices_sorted + i;
-        if(vdevsorti->dir!=2)continue;
+        if(vectortype == VECTOR_PROFILE){
+          if(vdevsorti->dir == 0 && vis_xtree == 0)continue;
+          if(vdevsorti->dir == 1 && vis_ytree == 0)continue;
+          if(vdevsorti->dir == 2 && vis_ztree == 0)continue;
+        }
+        else{
+          if(vdevsorti->dir != 2)continue;
+        }
 
         vdevi = vdevsorti->vdeviceinfo;
         devicei = vdevi->colordev;
@@ -5738,6 +5745,26 @@ void setup_tree_devices(void){
     }
   }
   treei->last = 3*nvdeviceinfo - 1;
+
+  max_device_tree=0;
+  for(i = 0; i < ntreedeviceinfo; i++){
+    treedevicedata *treei;
+    int j, n;
+
+    treei = treedeviceinfo + i;
+    n = 0;
+    for(j = treei->first; j <= treei->last; j++){
+      vdevicedata *vdevi;
+      vdevicesortdata *vdevsorti;
+      devicedata *devicei;
+
+      vdevsorti = vdevices_sorted + j;
+      vdevi = vdevsorti->vdeviceinfo;
+      if(vdevi->unique != 0)n++;
+    }
+    treei->n = n;
+    max_device_tree=MAX(max_device_tree,n);
+  }
 }
 
 /* ----------------------- setup_zone_devs ----------------------------- */
