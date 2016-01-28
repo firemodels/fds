@@ -888,6 +888,7 @@ void draw_devices(void){
       int i,first;
 
       treei = treedeviceinfo + j;
+      if(vectortype==VECTOR_PROFILE&&treei->n<mintreesize)continue;
       first = 1;
       for(i = treei->first; i <= treei->last; i++){
         vdevicedata *vdevi;
@@ -895,8 +896,19 @@ void draw_devices(void){
         float vel[3], angle, dvel, dangle;
         float *xyz;
         int velocity_type;
+        vdevicesortdata *vdevsorti;
 
-        vdevi = vdevices_sorted[i];
+        vdevsorti = vdevices_sorted + i;
+        if(vectortype == VECTOR_PROFILE){
+          if(vdevsorti->dir == 0 && vis_xtree == 0)continue;
+          if(vdevsorti->dir == 1 && vis_ytree == 0)continue;
+          if(vdevsorti->dir == 2 && vis_ztree == 0)continue;
+        }
+        else{
+          if(vdevsorti->dir != 2)continue;
+        }
+
+        vdevi = vdevsorti->vdeviceinfo;
         devicei = vdevi->colordev;
         if(devicei == NULL)continue;
         if(vdevi->unique == 0)continue;
@@ -1005,7 +1017,7 @@ void draw_devices(void){
             glPushMatrix();
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
-            glScalef(1.0, 1.0, vector_baseheight*speed);
+            glScalef(1.0, 1.0, vector_baselength*speed);
             glColor3ubv(arrow_color);
             glBegin(GL_LINES);
             glVertex3fv(vec0);
@@ -1022,11 +1034,11 @@ void draw_devices(void){
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             glPushMatrix();
-            glScalef(1.0, 1.0, speed*vector_baseheight);
+            glScalef(1.0, 1.0, speed*vector_baselength);
             drawdisk(vector_basediameter, 1.0, arrow_color);
             glPopMatrix();
-            glTranslatef(0.0, 0.0, speed*vector_baseheight);
-            drawcone(vector_headdiameter, vector_headheight, arrow_color);
+            glTranslatef(0.0, 0.0, speed*vector_baselength);
+            drawcone(vector_headdiameter, vector_headlength, arrow_color);
             glPopMatrix();
             break;
           case VECTOR_OBJECT:
@@ -1035,7 +1047,7 @@ void draw_devices(void){
             glTranslatef(xyz[0], xyz[1], xyz[2]);
             glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
             drawobjects_as_vectors = 1;
-            glScalef(sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight, sensorrelsize*vector_baseheight);
+            glScalef(sensorrelsize*vector_baselength, sensorrelsize*vector_baselength, sensorrelsize*vector_baselength);
             draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
             glPopMatrix();
             break;
@@ -1162,11 +1174,11 @@ void draw_devices(void){
             glColor3ubv(arrow_color);
 
             glPushMatrix();
-            glScalef(1.0, 1.0, vv*vector_baseheight);
+            glScalef(1.0, 1.0, vv*vector_baselength);
             drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
             glPopMatrix();
-            glTranslatef(0.0, 0.0, vv*vector_baseheight);
-            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headheight*xyzmaxdiff / 10.0, arrow_color);
+            glTranslatef(0.0, 0.0, vv*vector_baselength);
+            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headlength*xyzmaxdiff / 10.0, arrow_color);
             glPopMatrix();
             break;
           case VECTOR_OBJECT:
@@ -1176,7 +1188,7 @@ void draw_devices(void){
             glRotatef(-angle, 0.0, 0.0, 1.0);
             glRotatef(90.0, 1.0, 0.0, 0.0);
             glPushMatrix();
-            glScalef(1.0, 1.0, vv*vector_baseheight);
+            glScalef(1.0, 1.0, vv*vector_baselength);
             drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
             glPopMatrix();
 
@@ -5621,36 +5633,82 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
 /* ------------------ comparev2devices ------------------------ */
 
 int comparev2devices(const void *arg1, const void *arg2){
-  vdevicedata *vdevi, *vdevj;
+  vdevicesortdata *vdevi, *vdevj;
   float *xyzi, *xyzj;
+  int diri, dirj;
 
-  vdevi = *(vdevicedata **)arg1;
-  vdevj = *(vdevicedata **)arg2;
-  xyzi = vdevi->valdev->xyz;
-  xyzj = vdevj->valdev->xyz;
-  if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
-  if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
-  if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
-  if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+    break;
+  }
   return 0;
 }
 
 /* ------------------ comparev3devices ------------------------ */
 
 int comparev3devices( const void *arg1, const void *arg2 ){
-  vdevicedata *vdevi, *vdevj;
+  vdevicesortdata *vdevi, *vdevj;
   float *xyzi, *xyzj;
+  int diri, dirj;
 
-  vdevi = *(vdevicedata **)arg1;
-  vdevj = *(vdevicedata **)arg2;
-  xyzi = vdevi->valdev->xyz;
-  xyzj = vdevj->valdev->xyz;
-  if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
-  if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
-  if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
-  if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
-  if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
-  if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    break;
+  }
   return 0;
 }
 
@@ -5666,10 +5724,10 @@ void setup_tree_devices(void){
     ntreedeviceinfo=0;
   }
 
-  qsort((vdevicedata **)vdevices_sorted,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparev3devices);
+  qsort((vdevicedata **)vdevices_sorted,3*(size_t)nvdeviceinfo,sizeof(vdevicesortdata),comparev3devices);
 
   ntreedeviceinfo = 1;
-  for(i = 1; i < nvdeviceinfo; i++){
+  for(i = 1; i < 3*nvdeviceinfo; i++){
     if(comparev2devices(vdevices_sorted+i, vdevices_sorted+i-1) != 0)ntreedeviceinfo++;
   }
 
@@ -5678,7 +5736,7 @@ void setup_tree_devices(void){
   ntreedeviceinfo = 1;
   treei = treedeviceinfo;
   treei->first = 0;
-  for(i = 1; i < nvdeviceinfo; i++){
+  for(i = 1; i < 3*nvdeviceinfo; i++){
     if(comparev2devices(vdevices_sorted + i, vdevices_sorted + i - 1) != 0){
       treei->last = i-1;
       treei = treedeviceinfo + ntreedeviceinfo;
@@ -5686,7 +5744,27 @@ void setup_tree_devices(void){
       ntreedeviceinfo++;
     }
   }
-  treei->last = nvdeviceinfo - 1;
+  treei->last = 3*nvdeviceinfo - 1;
+
+  max_device_tree=0;
+  for(i = 0; i < ntreedeviceinfo; i++){
+    treedevicedata *treei;
+    int j, n;
+
+    treei = treedeviceinfo + i;
+    n = 0;
+    for(j = treei->first; j <= treei->last; j++){
+      vdevicedata *vdevi;
+      vdevicesortdata *vdevsorti;
+      devicedata *devicei;
+
+      vdevsorti = vdevices_sorted + j;
+      vdevi = vdevsorti->vdeviceinfo;
+      if(vdevi->unique != 0)n++;
+    }
+    treei->n = n;
+    max_device_tree=MAX(max_device_tree,n);
+  }
 }
 
 /* ----------------------- setup_zone_devs ----------------------------- */
@@ -6085,7 +6163,7 @@ void setup_device_data(void){
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
   FREEMEMORY(vdevices_sorted);
-  NewMemory((void **)&vdevices_sorted,ndeviceinfo*sizeof(vdevicedata *));
+  NewMemory((void **)&vdevices_sorted,3*ndeviceinfo*sizeof(vdevicesortdata));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
@@ -6302,7 +6380,19 @@ void setup_device_data(void){
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
   for(i=0;i<nvdeviceinfo;i++){
-    vdevices_sorted[i] = vdeviceinfo + i;
+    vdevicesortdata *vdevsorti;
+
+    vdevsorti = vdevices_sorted + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 0;
+
+    vdevsorti = vdevices_sorted + nvdeviceinfo + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 1;
+
+    vdevsorti = vdevices_sorted + 2*nvdeviceinfo + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 2;
   }
 
   setup_tree_devices();

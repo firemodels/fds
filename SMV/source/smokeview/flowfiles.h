@@ -910,10 +910,18 @@ typedef struct _vdevicedata {
   devicedata *udev,*vdev,*wdev,*valdev,*colordev,*veldev,*angledev,*sd_veldev,*sd_angledev;
 } vdevicedata;
 
-/* --------------------------  treedevice ------------------------------------ */
+
+/* --------------------------  vdevicesortdata ------------------------------------ */
 
 typedef struct {
-  int first, last;
+  int dir;
+  vdevicedata *vdeviceinfo;
+} vdevicesortdata;
+
+/* --------------------------  treedevicedata ------------------------------------ */
+
+typedef struct {
+  int first, last, n;
 } treedevicedata;
 
 /* --------------------------  camviewdata ------------------------------------ */

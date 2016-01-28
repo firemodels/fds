@@ -20,6 +20,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(vis_xtree, 0), SVDECL(vis_ytree, 0), SVDECL(vis_ztree, 1);
+SVEXTERN int SVDECL(max_device_tree,0);
 #ifdef INMAIN
 SVEXTERN float northangle_position[3] = {0.0, 0.0, 0.1};
 #else
@@ -812,9 +814,9 @@ SVEXTERN int SVDECL(clip_rendered_scene,0);
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
 SVEXTERN float SVDECL(sensorrelsize,1.0),SVDECL(sensorrelsizeMIN,0.0);
-SVEXTERN float SVDECL(vector_baseheight,1.0);
+SVEXTERN float SVDECL(vector_baselength,1.0);
 SVEXTERN float SVDECL(vector_basediameter,0.1);
-SVEXTERN float SVDECL(vector_headheight,0.2);
+SVEXTERN float SVDECL(vector_headlength,0.2);
 SVEXTERN float SVDECL(vector_headdiameter,0.2);
 
 SVEXTERN float linewidth, ventlinewidth, highlight_linewidth,solidlinewidth;
@@ -945,8 +947,9 @@ SVEXTERN float max_dev_vel;
 SVEXTERN int SVDECL(last_prop_display,-1);
 SVEXTERN int SVDECL(devicetypes_index,0);
 SVEXTERN devicedata SVDECL(*deviceinfo,NULL);
-SVEXTERN vdevicedata SVDECL(*vdeviceinfo,NULL),SVDECL(**vdevices_sorted,NULL);
-SVEXTERN int SVDECL(ntreedeviceinfo,0);
+SVEXTERN vdevicedata SVDECL(*vdeviceinfo, NULL);
+SVEXTERN vdevicesortdata SVDECL(*vdevices_sorted, NULL);
+SVEXTERN int SVDECL(ntreedeviceinfo, 0), SVDECL(mintreesize, 3);
 SVEXTERN treedevicedata SVDECL(*treedeviceinfo,NULL);
 SVEXTERN int show_smokesensors,active_smokesensors,test_smokesensors;
 SVEXTERN float smoke3d_cvis;
