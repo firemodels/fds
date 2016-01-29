@@ -6816,7 +6816,7 @@ There are occasions where you may want the value of a {\ct RAMP} to stop updatin
 \label{freeze_hrr}
 \end{figure}
 
-It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a timestep.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next timestep.
+It should be noted that devices are updated sequentially in the order that they are listed in the input file and that devices in different meshes do not share values until the end of a time step.  This means that if the device being frozen is on a different mesh or is listed before the device that freezes it, it will not be frozen until the next time step.
 
 \clearpage
 
@@ -6827,20 +6827,9 @@ It should be noted that devices are updated sequentially in the order that they 
 \chapter{Output}
 \label{info:outputdata}
 
-FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and
-rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in
-the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
+FDS has various types of output files that store computed data. Some of the files are in binary format and intended to be read and rendered by Smokeview. Some of the files are just comma-delimited text files. It is important to remember that you must explicitly declare in the input file most of the FDS output data. A considerable amount of the input file is usually devoted to this.
 
-To visualize the flow patterns better, save planar
-slices of data, either in the gas or solid phases, by using the
-{\ct SLCF} (SLiCe File) or {\ct BNDF} (BouNDary File) namelist group.
-Both of these output formats permit you to animate these quantities in
-time. For static pictures of the flow field, use the Plot3D output, a format that is used by many CFD programs as a simple
-way to store specified quantities over the entire mesh at one instant in time.
-Finally, tracer particles can be injected into the flow field from
-vents or obstacles, and then viewed in Smokeview. Use the {\ct PART}
-namelist group to control the injection rate, sampling rate and other
-parameters associated with particles.
+To visualize the flow patterns better, save planar slices of data, either in the gas or solid phases, by using the {\ct SLCF} (SLiCe File) or {\ct BNDF} (BouNDary File) namelist group. Both of these output formats permit you to animate these quantities in time. For static pictures of the flow field, use the Plot3D output, a format that is used by many CFD programs as a simple way to store specified quantities over the entire mesh at one instant in time. Finally, tracer particles can be injected into the flow field from vents or obstacles, and then viewed in Smokeview. Use the {\ct PART} namelist group to control the injection rate, sampling rate and other parameters associated with particles.
 
 
 \section{Output Control Parameters: The \texorpdfstring{{\tt DUMP}}{DUMP} Namelist Group}
@@ -6867,78 +6856,54 @@ Every device {\ct DEVC} contains a {\ct QUANTITY} that it monitors. Usually this
 \subsection{Single Point Output}
 
 If you just want to record the time history of the temperature at a given point, add the line:
-
 \begin{lstlisting}
 &DEVC XYZ=6.7,2.9,2.1, QUANTITY='TEMPERATURE', ID='T-1' /
 \end{lstlisting}
-
-\noindent
-and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file.
-FDS reports the value of the {\ct QUANTITY} in the cell where the point {\ct XYZ} is located.
+and a column will be added to the output file {\ct CHID\_devc.csv} under the label {\ct 'T-1'}. In this case, the {\ct ID} has no other role than as a column label in the output file. FDS reports the value of the {\ct QUANTITY} in the cell where the point {\ct XYZ} is located.
 
 \subsubsection{Devices on Solid Surfaces}
 
-When prescribing a solid phase quantity, be sure to position the
-device at a solid surface. It is not always obvious where the
-solid surface is since the mesh does not always align with the input obstruction
-locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included
-when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in
-Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point
-on the surface.
-If the orientation of the solid surface is in the
-positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions.
-For example, the line
-
+When prescribing a solid phase quantity, be sure to position the device at a solid surface. It is not always obvious where the solid surface is since the mesh does not always align with the input obstruction locations. To help locate the appropriate surface, the parameter {\ct IOR} {\em must} be included when designating a solid phase quantity, except when using the {\ct STATISTICS} feature described in Section~\ref{info:statistics} in which case the output quantity is not associated with just a single point on the surface. If the orientation of the solid surface is in the positive $x$ direction, set {\ct IOR=1}. If it is in the negative $x$ direction, set {\ct IOR=-1}, and so for the $y$ and $z$ directions. For example, the line
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
-
-\noindent
-designates the surface temperature of a wall facing the negative $y$
-direction. There are still instances where FDS cannot
-determine which solid surface is being designated, in which case an
-error message appears in the diagnostic output file.
-Re-position the probe and try again.
+designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the probe and try again.
 
 \subsubsection{Integrated Quantities}
 
-In addition to point measurements, the {\ct DEVC} group can be used
-to report integrated quantities (See Table~\ref{tab:output}).
-For example, you may want to know the mass flow out of a door or window.
-To report this, add the line
-
+In addition to point measurements, the {\ct DEVC} group can be used to report integrated quantities (See Table~\ref{tab:output}). For example, you may want to know the mass flow out of a door or window. To report this, add the line
 \begin{lstlisting}
 &DEVC XB=0.3,0.5,2.1,2.5,3.0,3.0, QUANTITY='MASS FLOW', ID='whatever' /
 \end{lstlisting}
-
-\noindent
-Note that in this case, a plane is specified rather than
-a point. The sextuplet {\ct XB} is used for this purpose. Notice when a
-flow is desired, two of the six coordinates need to be the same. Another
-{\ct QUANTITY}, {\ct HRR}, can be used to compute the total heat release
-rate within a subset of the domain. In this case, the sextuplet
-{\ct XB} ought to define a volume rather than a plane. Specification of
-the plane or volume over which the integration is to take place can only
-be done using {\ct XB} -- avoid planes or volumes
-that cross multiple mesh boundaries. FDS has to decide which mesh to
-use in the integration, and it chooses the finest mesh overlapping
-the centroid of the designated plane or volume.
+Note that in this case, a plane is specified rather than a point. The sextuplet {\ct XB} is used for this purpose. Notice when a flow is desired, two of the six coordinates need to be the same. Another {\ct QUANTITY}, {\ct HRR}, can be used to compute the total heat release rate within a subset of the domain. In this case, the sextuplet {\ct XB} ought to define a volume rather than a plane. Specification of the plane or volume over which the integration is to take place can only be done using {\ct XB} -- avoid planes or volumes that cross multiple mesh boundaries. FDS has to decide which mesh to use in the integration, and it chooses the finest mesh overlapping the centroid of the designated plane or volume.
 
 
 
 \subsection{Linear Array of Point Devices}
 \label{info:line_file}
 
-You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the
-sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$ as follows:
+You can use a single {\ct DEVC} line to specify a linear array of devices. By adding the parameter {\ct POINTS} and using the sextuple coordinate array {\ct XB}, you can direct FDS to create a line of devices from $(x_1,y_1,z_1)$ to $(x_2,y_2,z_2)$. There are two options.
 
+\subsubsection{Steady-State Profile}
+
+Sometimes it is convenient to calculate a steady-state profile. For example, the vertical velocity profile along the centerline of a doorway can be recorded with the following line of input:
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='TEMPERATURE', ID='TC Tree', POINTS=20 /
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20 /
 \end{lstlisting}
-
-\noindent This feature is convenient for recording time-averaged profiles. In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
+In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
 
 A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
+
+\subsubsection{Time-Varying Profile}
+
+If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}. 
+\begin{lstlisting}
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20, 
+      TIME_HISTORY=.TRUE. /
+\end{lstlisting}
+This directs FDS to just add 20 devices to the on-going list, saving you from having to write 20 {\ct DEVC} lines. The {\ct ID} for each device will be {\ct 'vel-01'}, {\ct 'vel-02'}, etc.
+
+
 
 \subsubsection{Single-Point Statistics}
 
@@ -6991,52 +6956,25 @@ where now {\ct XYZ} and {\ct IOR} refer to the coordinates and orientation of th
 \label{info:PROF}
 
 FDS uses a fine one-dimensional mesh at each boundary cell to compute heat transfer within a solid. Use the {\ct PROF} output to record the properties of the solid over the entire thickness. The parameters (Table~\ref{tbl:PROF}) to specify a given {\ct PROF}ile are similar to those used to specify a surface quantity in the {\ct DEVC} group. {\ct XYZ} designates the triplet of coordinates, {\ct QUANTITY} is the physical quantity to monitor, {\ct IOR} the orientation, and {\ct ID} an identifying character string. Here is an example of how you would use this feature to get a time history of temperature profiles within a given solid obstruction:
-
 \begin{lstlisting}
 &PROF XYZ=..., QUANTITY='TEMPERATURE', ID='T-1', IOR=3 /
 \end{lstlisting}
-
-\noindent
-Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components
-({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
+Other possible quantities are the total density of the wall ({\ct QUANTITY = 'DENSITY'}) or densities of solid material components ({\ct QUANTITY = '[MATL\_ID]'}), where {\ct MATL\_ID} is the name of the material. Each {\ct PROF} line creates a separate file. The format of the file produced by each {\ct PROF} line includes the node coordinates and specified quantity every {\ct DT\_PROF}~s. However, if you specify {\ct FORMAT\_INDEX=2} on the {\ct PROF} line, the resulting file will contain columns containing only the final set of node coordinates and quantity values. This is handy for displaying a steady-state temperature profile.
 
 
 
 \section{Animated Planar Slices: The \texorpdfstring{{\tt SLCF}}{SLCF} Namelist Group}
 \label{info:SLCF}
 
-The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF})
-allows you to record various gas phase quantities
-at more than a single point. A ``slice'' refers to a subset of the whole domain. It can be a line,
-plane, or volume, depending on the values of {\ct XB}.
-The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane.
-{\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with
-the possibility that 0, 2, or 4 out of the 6 values be the same to
-indicate a volume, plane or line, respectively. A handy trick is to
-specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired
-that the entire plane $y=5.3$ slicing through the domain be saved.
-{\ct PBX} and {\ct PBZ} control planes perpendicular to the
-$x$ and $z$ axes, respectively.
+The {\ct SLCF} (``slice file'') namelist group parameters (Table~\ref{tbl:SLCF}) allows you to record various gas phase quantities at more than a single point. A ``slice'' refers to a subset of the whole domain. It can be a line, plane, or volume, depending on the values of {\ct XB}. The sextuplet {\ct XB} indicates the boundaries of the ``slice'' plane. {\ct XB} is prescribed as in the {\ct OBST} or {\ct VENT} groups, with the possibility that 0, 2, or 4 out of the 6 values be the same to indicate a volume, plane or line, respectively. A handy trick is to specify, for example, {\ct PBY=5.3} instead of {\ct XB} if it is desired that the entire plane $y=5.3$ slicing through the domain be saved. {\ct PBX} and {\ct PBZ} control planes perpendicular to the $x$ and $z$ axes, respectively.
 
-By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation. You can control the frequency of output with {\ct DT\_SLCF} on the {\ct DUMP} line.
-If the ``slice'' is a 3-D volume, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}.  You may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  Note that 3-D slice files can become extremely large if {\ct DT\_SL3D} is small.
+By default, 1-D and 2-D slice files are saved {\ct NFRAMES} times per simulation. You can control the frequency of output with {\ct DT\_SLCF} on the {\ct DUMP} line. If the ``slice'' is a 3-D volume, then its output frequency is controlled by the parameter {\ct DT\_SL3D}.  By default, FDS sets {\ct DT\_SL3D=(T\_END-T\_BEGIN)/5}.  You may specify a different value of {\ct DT\_SL3D} on {\ct DUMP}.  Note that 3-D slice files can become extremely large if {\ct DT\_SL3D} is small.
 
-Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF}
-entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity
-component slices will be created.
+Animated vectors can be created in Smokeview if a given {\ct SLCF} line has the attribute {\ct VECTOR=.TRUE.} If two {\ct SLCF} entries are in the same plane, then only one of the lines needs to have {\ct VECTOR=.TRUE.} Otherwise, a redundant set of velocity component slices will be created.
 
-Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they
-are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
-set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this
-feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this
-feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, etc.
+Normally, FDS averages slice file data at cell corners. For example, gas temperatures are computed at cell centers, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics because it enables you to visualize the values that FDS actually computes. Note also that this feature should only be used for scalar quantities that are computed at cell centers, like temperatures, mass fractions, etc.
 
-Slice file information is recorded in files (See Section~\ref{out:SLCF})
-labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file.
-A short Fortran program {\ct fds2ascii.f90} produces a text file from a line,
-plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
-
-
+Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file. A short Fortran program {\ct fds2ascii.f90} produces a text file from a line, plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
 
 
@@ -7044,30 +6982,9 @@ plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
 \label{info:BNDF}
 
-The {\ct BNDF} (``boundary file'') namelist group parameters allows you
-to record surface quantities at all solid obstructions. As with
-the {\ct SLCF} group, each quantity is prescribed with a separate
-{\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}.
-No physical coordinates need be specified, however, just {\ct QUANTITY}.
-See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via
-the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line
-to tell FDS where to find the necessary extra information.
+The {\ct BNDF} (``boundary file'') namelist group parameters allows you to record surface quantities at all solid obstructions. As with the {\ct SLCF} group, each quantity is prescribed with a separate {\ct BNDF} line, and the output files are of the form {\ct CHID\_$n$.bf}. No physical coordinates need be specified, however, just {\ct QUANTITY}. See Table \ref{tab:output}. For certain output quantities, additional parameters need to be specified via the {\ct PROP} namelist group. In such cases, add the character string, {\ct PROP\_ID}, to the {\ct BNDF} line to tell FDS where to find the necessary extra information.
 
-Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very
-large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line.
-One way to reduce the size of the output file is to turn off the
-drawing of boundary information on desired obstructions. On any given
-{\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included,
-the obstruction is not colored. To turn off all boundary drawing,
-set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual
-obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on
-the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled
-via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on).
-
-Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they
-are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening,
-set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this
-feature is mainly useful for diagnostics.
+Note that {\ct BNDF} files (Section~\ref{out:BNDF}) can become very large, so be careful in prescribing the time interval, {\ct DT\_BNDF} on the {\ct DUMP} line. One way to reduce the size of the output file is to turn off the drawing of boundary information on desired obstructions. On any given {\ct OBST} line, if the string {\ct BNDF\_OBST=.FALSE.} is included, the obstruction is not colored. To turn off all boundary drawing, set {\ct BNDF\_DEFAULT=.FALSE.} on the {\ct MISC} line. Then individual obstructions can be turned back on with {\ct BNDF\_OBST=.TRUE.} on the appropriate {\ct OBST} line. Individual faces of a given obstruction can be controlled via {\ct BNDF\_FACE(IOR)}, where {\ct IOR} is the index of orientation (+1 for the positive $x$ direction, -1 for negative, and so on). Normally, FDS averages boundary file data at cell corners. For example, surface temperatures are computed at the center of each surface cell, but they are linearly interpolated to cell corners and output to a file that is read by Smokeview. To prevent this from happening, set {\ct CELL\_CENTERED=.TRUE.} on the {\ct BNDF} line. This forces FDS to output the actual cell-centered data with no averaging. Note that this feature is mainly useful for diagnostics.
 
 Sometimes it is useful to render the {\ct QUANTITY} integrated over time. For example, a heat flux in units of kW/m$^2$ can be integrated in time producing the total energy absorbed by the surface in units of kJ/m$^2$. To do this, set {\ct STATISTICS} equal to {\ct 'TIME INTEGRAL'} on the {\ct BNDF} line. Note that there are no other options for {\ct STATISTICS} on a {\ct BNDF} line.
 
@@ -8518,6 +8435,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct SPEC\_ID}              & Character       & Section~\ref{info:outputquantities}                             &       &               \\ \hline
 {\ct SURF\_ID}              & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline
 {\ct TIME\_AVERAGED}        & Logical         & Section~\ref{info:out:DEVC}                                     &       &  {\ct .TRUE.} \\ \hline
+{\ct TIME\_HISTORY}         & Logical         & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct TRIP\_DIRECTION}       & Integer         & Section~\ref{info:basic_control}                                &       &  1            \\ \hline
 {\ct UNITS}                 & Character       & Section~\ref{info:out:DEVC}                                     &       &               \\ \hline
 {\ct VELO\_INDEX}           & Integer         & Section~\ref{info:velocity}                                     &       &  0            \\ \hline
