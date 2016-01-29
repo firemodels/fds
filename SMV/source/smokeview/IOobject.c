@@ -5756,7 +5756,6 @@ void setup_tree_devices(void){
     for(j = treei->first; j <= treei->last; j++){
       vdevicedata *vdevi;
       vdevicesortdata *vdevsorti;
-      devicedata *devicei;
 
       vdevsorti = vdevices_sorted + j;
       vdevi = vdevsorti->vdeviceinfo;
