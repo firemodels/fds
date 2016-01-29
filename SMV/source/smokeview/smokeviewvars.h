@@ -1025,6 +1025,7 @@ SVEXTERN int SVDECL(nscriptinfo,0);
 SVEXTERN scriptfiledata SVDECL(*script_recording,NULL);
 SVEXTERN int SVDECL(runscript,0), SVDECL(noexit,0);
 SVEXTERN int SVDECL(runluascript,0);
+SVEXTERN int SVDECL(exit_on_script_crash,0);
 SVEXTERN int SVDECL(script_multislice,0), SVDECL(script_multivslice,0), SVDECL(script_iso,0);
 SVEXTERN FILE SVDECL(*scriptoutstream,NULL);
 SVEXTERN char SVDECL(*log_filename,NULL);

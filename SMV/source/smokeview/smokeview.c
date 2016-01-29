@@ -587,6 +587,10 @@ void parse_commandline(int argc, char **argv){
       from_commandline=1;
       runluascript=1;
     }
+    else if(strncmp(argv[i],"-killscript",11)==0){
+      from_commandline=1;
+      exit_on_script_crash=1;
+    }
     else if(strncmp(argv[i],"-skipframe",10)==0){
       from_commandline=1;
       ++i;
@@ -737,8 +741,9 @@ void usage(char **argv){
   PRINTF("%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
   PRINTF("%s\n",_(" -ng_ini        - No graphics version of -ini."));
   PRINTF("%s\n",_(" -runscript     - run the script file casename.ssf"));
-  PRINTF("%s\n",_(" -runluascript     - run the lua script file casename.lua"));
+  PRINTF("%s\n",_(" -runluascript  - run the lua script file casename.lua"));
   PRINTF("%s\n",_(" -script scriptfile - run the script file scriptfile"));
+  PRINTF("%s\n",_(" -killscript    - exit smokeview (with an error code) if the script fails"));
   PRINTF("%s\n",_(" -skipframe n   - render every n frames"));
   PRINTF("%s\n",_(" -startframe n  - start rendering at frame n"));
   PRINTF("%s\n",_(" -stereo        - activate stereo mode"));

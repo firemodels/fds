@@ -85,9 +85,9 @@ int lua_settourkeyframe(lua_State *L) {
   Trigger the display callback.
 */
 int lua_displayCB(lua_State *L) {
-    //runluascript=0;
+    // runluascript=0;
     Display_CB();
-    //runluascript=1;
+    // runluascript=1;
 }
 
 /*
@@ -1023,7 +1023,7 @@ int loadSSFScript() {
 }
 
 int yieldOrOkSSF = LUA_YIELD;
-void runSSFScript() {
+int runSSFScript() {
     if (yieldOrOkSSF == LUA_YIELD) {
       printf("running ssf script\n");
       yieldOrOkSSF = lua_resume(L,NULL,0);
@@ -1058,11 +1058,12 @@ void runSSFScript() {
       lua_close(L);
       glutIdleFunc(NULL);
     }
+    return yieldOrOkSSF;
 }
 
 
 int yieldOrOk = LUA_YIELD;
-void runLuaScript() {
+int runLuaScript() {
   if (yieldOrOk == LUA_YIELD) {
     printf("running lua script\n");
     yieldOrOk = lua_resume(L,NULL,0);
@@ -1097,4 +1098,5 @@ void runLuaScript() {
     lua_close(L);
     glutIdleFunc(NULL);
   }
+  return yieldOrOk;
 }

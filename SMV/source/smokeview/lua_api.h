@@ -4,9 +4,9 @@ int lua_render(lua_State  *L);
 void initLua();
 
 int loadLuaScript();
-void runLuaScript();
+int runLuaScript();
 int loadSSFScript();
-void runSSFScript();
+int runSSFScript();
 
 void runScriptString(char *string);
 int lua_get_sliceinfo(lua_State *L);

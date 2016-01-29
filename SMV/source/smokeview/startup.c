@@ -301,9 +301,13 @@ int load_script() {
       // Load the Lua script in order for it to be run later.
       if (loadLuaScript() != LUA_OK) {
           fprintf(stderr, "There was an error loading the script, and so it "
-                          "will not run. Running smokeview normally.");
+                          "will not run.\n");
+          if (exit_on_script_crash) {
+              exit(1); // exit with an error code
+          }
           runluascript = 0; // set this to false so that the smokeview no longer
                            // tries to run the script as it failed to load
+          fprintf(stderr, "Running smokeview normally.\n");
       }
     }
     if (runscript == 1) {
@@ -311,9 +315,13 @@ int load_script() {
       // This still uses the Lua interpreter
       if (loadSSFScript() != LUA_OK) {
           fprintf(stderr, "There was an error loading the script, and so it "
-                          "will not run. Running smokeview normally.");
-          runscript = 0; // set this to false so that the smokeview no longer
+                          "will not run.\n");
+          if (exit_on_script_crash) {
+              exit(1); // exit with an error code
+          }
+          runluascript = 0; // set this to false so that the smokeview no longer
                            // tries to run the script as it failed to load
+          fprintf(stderr, "Running smokeview normally.\n");
       }
     }
     return 1;

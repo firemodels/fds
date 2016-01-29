@@ -223,7 +223,12 @@ void RenderFrame(int view_mode, char *basename){
   char renderfile_path[2048]; // the full path of the rendered image
   int woffset=0,hoffset=0;
   int screenH;
-  strcpy(renderfile_dir, script_dir_path);
+
+  if(script_dir_path != NULL){
+      strcpy(renderfile_dir, script_dir_path);
+  } else {
+      strcpy(renderfile_dir, ".");
+  }
 
 #ifdef WIN32
   SetThreadExecutionState(ES_DISPLAY_REQUIRED); // reset display idle timer to prevent screen saver from activating
@@ -231,7 +236,6 @@ void RenderFrame(int view_mode, char *basename){
 
   screenH = screenHeight;
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
-
   // construct filename for image to be rendered
   form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
                 woffset, hoffset, screenH, basename);

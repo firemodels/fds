@@ -2835,7 +2835,9 @@ void DoScriptLua(void) {
     runluascript = 0;
     PRINTF("running lua script section\n");
     fflush(stdout);
-    runLuaScript();
+    if(runLuaScript() != LUA_OK && exit_on_script_crash) {
+        exit(1);
+    }
   }
 }
 
@@ -2846,7 +2848,9 @@ void DoScript(void){
       runscript = 0;
       PRINTF("running ssf script instruction\n");
       fflush(stdout);
-      runSSFScript();
+      if(runSSFScript() != LUA_OK && exit_on_script_crash) {
+          exit(1);
+      }
     }
 }
 
