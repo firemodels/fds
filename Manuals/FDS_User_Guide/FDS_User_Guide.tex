@@ -1361,6 +1361,12 @@ If multiple meshes are involved, it is assumed that the {\ct CSVF} lines are pro
 It is recommended that you also specify {\ct PROJECTION=.TRUE.} on {\ct MISC} if the specified velocity field does not satisfy the divergence constraint to machine precision on a staggered grid (this may not even be true if an analytical solution to the Navier-Stokes equations is sampled at the staggered velocity component locations).
 
 
+\subsection{Special Topic: Turning off the Flow Field}
+\label{info:freeze_velocity}
+
+For certain types of diagnostic tests, it is useful to turn off the velocity field and exercise some other aspect of the model, like radiation of particle transport. To do this, set {\ct FREEZE\_VELOCITY=.TRUE.} on the {\ct MISC} line.
+
+
 \subsection{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
@@ -8903,7 +8909,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
-{\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                           & s             &                   \\ \hline
+{\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
 {\ct DT\_MEAN\_FORCING}                         & Real          & Section~\ref{info:mean_forcing}                       & s             & 1.E10             \\ \hline
 {\ct EVACUATION\_DRILL}                         & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
 {\ct EVACUATION\_MC\_MODE}                      & Logical       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & {\ct .FALSE.}     \\ \hline
@@ -8911,7 +8917,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct EVAC\_TIME\_ITERATIONS}                    & Integer       & Reference~\cite{FDS_Evac_Users_Guide}                 &               & 50                \\ \hline
 {\ct FLUX\_LIMITER}                             & Integer       & Section~\ref{info:flux_limiters}                      &               & 2                 \\ \hline
 {\ct FORCE\_VECTOR(3)}                          & Real          & Section~\ref{info:force_vector}                       &               & 0.                \\ \hline
-%{\ct FREEZE\_VELOCITY}                          & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
+{\ct FREEZE\_VELOCITY}                          & Logical       & Section~\ref{info:freeze_velocity}                    &               & {\ct .FALSE.}     \\ \hline
 {\ct GAMMA}                                     & Real          & Section~\ref{gas_species_props}                       &               & 1.4               \\ \hline
 {\ct GRAVITATIONAL\_DEPOSITION}                 & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
@@ -8956,7 +8962,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
 {\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-{\ct SECOND\_ORDER\_INTERPOLATED\_BOUNDARY}     & Logical       & Section~\ref{info:flux_limiters}                      &               & {\ct .FALSE.}     \\ \hline
+{\ct \footnotesize SECOND\_ORDER\_INTERPOLATED\_BOUNDARY}     & Logical       & Section~\ref{info:flux_limiters}                      &               & {\ct .FALSE.}     \\ \hline
 %{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT}        & Logical       & Section~\ref{info:PART}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
