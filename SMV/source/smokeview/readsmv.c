@@ -1036,7 +1036,12 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
     strcpy(devicei->quantity,tok2);
   }
 
-  strcpy(devicei->label,tok1);
+  if(strlen(tok1)>=4&&strncmp(tok1, "null",4)==0){
+    strcpy(devicei->label, "null");
+  }
+  else{
+    strcpy(devicei->label, tok1);
+  }
   devicei->object = get_SVOBJECT_type(tok1,missing_device);
   if(devicei->object==missing_device&&tok3!=NULL){
     devicei->object = get_SVOBJECT_type(tok3,missing_device);
