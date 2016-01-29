@@ -894,8 +894,8 @@ typedef struct _device{
 /* --------------------------  pilot ------------------------------------ */
 
 typedef struct {
-  float total;
-  float fraction[8],vel[8];
+  int nbuckets;
+  float total, *fraction,*vel;
 } pilotdata;
 #endif
 
@@ -910,11 +910,18 @@ typedef struct _vdevicedata {
   devicedata *udev,*vdev,*wdev,*valdev,*colordev,*veldev,*angledev,*sd_veldev,*sd_angledev;
 } vdevicedata;
 
-/* --------------------------  treedevice ------------------------------------ */
+
+/* --------------------------  vdevicesortdata ------------------------------------ */
 
 typedef struct {
-  int nvdevices;
-  vdevicedata **vdevices;
+  int dir;
+  vdevicedata *vdeviceinfo;
+} vdevicesortdata;
+
+/* --------------------------  treedevicedata ------------------------------------ */
+
+typedef struct {
+  int first, last, n;
 } treedevicedata;
 
 /* --------------------------  camviewdata ------------------------------------ */

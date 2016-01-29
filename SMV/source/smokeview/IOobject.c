@@ -7,6 +7,15 @@
 #include "datadefs.h"
 #include "smokeviewvars.h"
 
+#define VEL_INVALID 0
+#define VEL_CARTESIAN 1
+#define VEL_POLAR 2
+
+#define VECTOR_LINE 0
+#define VECTOR_ARROW 1
+#define VECTOR_OBJECT 2
+#define VECTOR_PROFILE 3
+
 #define CIRCLE_SEGS 12
 
 #define SV_TRANSLATE  100
@@ -523,7 +532,7 @@ void draw_devices_val(void){
 
 /* ----------------------- get_vdevice_vel ----------------------------- */
 
-void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *valid_vel){
+void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float *angle_local, float *dvel, float *dangle, int *velocity_type){
   float uvel=0.0, vvel=0.0, wvel=0.0;
   devicedata *udev, *vdev, *wdev;
   int validu=1,validv=1,validw=1;
@@ -532,7 +541,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
   vdev = vdevicei->vdev;
   wdev = vdevicei->wdev;
 
-  *valid_vel=0;
+  *velocity_type=VEL_INVALID;
   if(udev!=NULL){
     uvel=get_device_val(time_local,udev,&validu);
   }
@@ -546,7 +555,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
     vel[0]=uvel;
     vel[1]=vvel;
     vel[2]=wvel;
-    *valid_vel=1;
+    *velocity_type=VEL_CARTESIAN;
   }
   if(vdevicei->veldev!=NULL&&vdevicei->angledev!=NULL){
     float  velocity,  ang;
@@ -569,7 +578,7 @@ void get_vdevice_vel(float time_local, vdevicedata *vdevicei, float *vel, float 
       dvel[0]=dvelocity;
       angle_local[0]=ang;
       dangle[0]=dang;
-      *valid_vel=2;
+      *velocity_type=VEL_POLAR;
     }
   }
 }
@@ -708,47 +717,121 @@ void Output_Device_Val(devicedata *devicei){
 /* ----------------------- draw_pilot ----------------------------- */
 
 #ifdef pp_PILOT
-void draw_pilot(void){
+void draw_pilot1(void){
   int i;
 
-  if(showtime==1&&itimes>=0&&itimes<nglobal_times&&vispilot==1&&nvdeviceinfo>0){
+  if(showtime == 1 && itimes >= 0 && itimes<nglobal_times&&vispilot == 1 && nvdeviceinfo>0){
     glEnable(GL_LIGHTING);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
-    glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,specular);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
     glEnable(GL_COLOR_MATERIAL);
 
     glPushMatrix();
-    glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-    glTranslatef(-xbar0,-ybar0,-zbar0);
+    glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+    glTranslatef(-xbar0, -ybar0, -zbar0);
     glColor3fv(foregroundcolor);
     glLineWidth(vectorlinewidth);
-    for(i=0;i<nvdeviceinfo;i++){
+    for(i = 0; i < nvdeviceinfo; i++){
       vdevicedata *vdevi;
       float *xyz;
       int k;
-      float angledir[8]={0.0,45.0,90.0,135.0,180.0,225.0,270.0,315.0};
       pilotdata *piloti;
+      float dangle;
 
       vdevi = vdeviceinfo + i;
-      if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;
+      if(vdevi->unique == 0)continue;
+      xyz = vdevi->valdev->xyz;
 
       piloti = &(vdevi->pilotinfo);
 
-      for(k=0;k<8;k++){
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(180.0-angledir[k],0.0,0.0,1.0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(0.0,SCALE2FDS(piloti->fraction[k]),0.0);
-        glEnd();
-        glPopMatrix();
+      dangle = 360.0 / (float)piloti->nbuckets;
+      glBegin(GL_LINES);
+      for(k = 0; k < piloti->nbuckets; k++){
+        float angle, cosang, sinang;
+
+        angle = (float)k*dangle;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0], xyz[1], xyz[2]);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[k])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[k])*sinang, xyz[2]);
       }
+      glEnd();
     }
     glPopMatrix();
     glDisable(GL_LIGHTING);
+  }
+}
+
+/* ----------------------- draw_pilot2 ----------------------------- */
+
+void draw_pilot2(void){
+  int i;
+
+  if(showtime == 1 && itimes >= 0 && itimes<nglobal_times&&vispilot == 1 && nvdeviceinfo>0){
+    glEnable(GL_LIGHTING);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &block_shininess);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, block_ambient2);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glPushMatrix();
+    glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+    glTranslatef(-xbar0, -ybar0, -zbar0);
+    glColor3fv(foregroundcolor);
+    glLineWidth(vectorlinewidth);
+    for(i = 0; i < nvdeviceinfo; i++){
+      vdevicedata *vdevi;
+      float *xyz;
+      int k;
+      pilotdata *piloti;
+      float dangle;
+
+      vdevi = vdeviceinfo + i;
+      if(vdevi->unique == 0)continue;
+      xyz = vdevi->valdev->xyz;
+
+      piloti = &(vdevi->pilotinfo);
+
+      dangle = 360.0 / (float)piloti->nbuckets;
+      glBegin(GL_LINES);
+      for(k = 0; k < piloti->nbuckets; k++){
+        float angle, cosang, sinang;
+        int kk;
+
+        kk = k;
+        angle = (float)kk*dangle;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[kk])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[kk])*sinang, xyz[2]);
+     
+        kk = k+1;
+        if(kk == piloti->nbuckets - 1)kk = 0;
+        angle = (float)kk*dangle;
+        cosang = cos(DEG2RAD*angle);
+        sinang = sin(DEG2RAD*angle);
+        glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[kk])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[kk])*sinang, xyz[2]);
+      }
+      glEnd();
+    }
+    glPopMatrix();
+    glDisable(GL_LIGHTING);
+  }
+}
+
+/* ----------------------- draw_pilot ----------------------------- */
+
+void draw_pilot(void){
+  switch(pilot_viewtype){
+  case 0:
+    draw_pilot1();
+    break;
+  case 1:
+    draw_pilot2();
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
   }
 }
 #endif
@@ -756,10 +839,12 @@ void draw_pilot(void){
 /* ----------------------- draw_devices ----------------------------- */
 
 void draw_devices(void){
-  int i;
   int drawobjects_as_vectors;
+  int ii;
 
   if(select_device==0||show_mode!=SELECTOBJECT){
+    int i;
+    
     for(i=0;i<ndeviceinfo;i++){
       devicedata *devicei;
 
@@ -781,6 +866,7 @@ void draw_devices(void){
   if(showtime==1&&itimes>=0&&itimes<nglobal_times&&showvdeviceval==1&&nvdeviceinfo>0){
     unsigned char arrow_color[4];
     float arrow_color_float[4];
+    int j;
 
     glEnable(GL_LIGHTING);
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -797,108 +883,326 @@ void draw_devices(void){
     arrow_color[2]=255*foregroundcolor[2];
     arrow_color[3]=255;
     glColor3ubv(arrow_color);
-    for(i=0;i<nvdeviceinfo;i++){
-      vdevicedata *vdevi;
-      devicedata *devicei;
-      float vel[3], angle, dvel, dangle;
-      float *xyz;
-      int j;
-      int velocity_type;
+    for(j = 0; j < ntreedeviceinfo; j++){
+      treedevicedata *treei;
+      int i,first;
 
-      vdevi = vdeviceinfo + i;
-      devicei = vdevi->colordev;
-      if(devicei==NULL)continue;
-      if(vdevi->unique==0)continue;
-      xyz=vdevi->valdev->xyz;
-      get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
-      if(colordeviceval==1){
-        int type,vistype=0;
+      treei = treedeviceinfo + j;
+      if(vectortype==VECTOR_PROFILE&&treei->n<mintreesize)continue;
+      first = 1;
+      for(i = treei->first; i <= treei->last; i++){
+        vdevicedata *vdevi;
+        devicedata *devicei;
+        float vel[3], angle, dvel, dangle;
+        float *xyz;
+        int velocity_type;
+        vdevicesortdata *vdevsorti;
 
-        type=devicei->type2;
-        if(type>=0&&type<ndevicetypes)vistype=devicetypes[type]->type2vis;
-        if(vistype==1){
-          unsigned char color[4], *colorptr;
-
-          colorptr=get_device_color(devicei,color,device_valmin,device_valmax);
-          if(colorptr!=NULL){
-            arrow_color[0]=colorptr[0];
-            arrow_color[1]=colorptr[1];
-            arrow_color[2]=colorptr[2];
-            arrow_color[3]=255;
-          }
-          else{
-            arrow_color[0]=255*foregroundcolor[0];
-            arrow_color[1]=255*foregroundcolor[1];
-            arrow_color[2]=255*foregroundcolor[2];
-            arrow_color[3]=255;
-          }
-          glColor3ubv(arrow_color);
-        }
-      }
-      arrow_color_float[0] = (float)arrow_color[0]/255.0;
-      arrow_color_float[1] = (float)arrow_color[1]/255.0;
-      arrow_color_float[2] = (float)arrow_color[2]/255.0;
-      arrow_color_float[3] = (float)arrow_color[3]/255.0;
-      if(velocity_type==1){
-        float dxyz[3], vec0[3]={0.0,0.0,0.0},zvec[3]={0.0,0.0,1.0};
-        float axis[3], speed;
-        int state=0;
-
-        for(j=0;j<3;j++){
-          dxyz[j] = 0.5*SCALE2FDS(vel[j])/max_dev_vel;
-        }
-        speed = sqrt(dxyz[0]*dxyz[0]+dxyz[1]*dxyz[1]+dxyz[2]*dxyz[2]);
-
-        rotateu2v(zvec, dxyz, axis, &angle);
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-        if(vectortype==0){
-          glScalef(1.0,1.0,vector_baseheight*speed);
-          glBegin(GL_LINES);
-          glVertex3fv(vec0);
-          glVertex3fv(zvec);
-          glEnd();
-          glBegin(GL_POINTS);
-          glVertex3fv(zvec);
-          glEnd();
-        }
-        else if(vectortype==1){
-          glPushMatrix();
-          glScalef(1.0,1.0,speed*vector_baseheight);
-          drawdisk(vector_basediameter,1.0,arrow_color);
-          glPopMatrix();
-          glTranslatef(0.0,0.0,speed*vector_baseheight);
-          drawcone(vector_headdiameter,vector_headheight,arrow_color);
+        vdevsorti = vdevices_sorted + i;
+        if(vectortype == VECTOR_PROFILE){
+          if(vdevsorti->dir == 0 && vis_xtree == 0)continue;
+          if(vdevsorti->dir == 1 && vis_ytree == 0)continue;
+          if(vdevsorti->dir == 2 && vis_ztree == 0)continue;
         }
         else{
-          drawobjects_as_vectors=1;
-          glScalef(sensorrelsize*vector_baseheight,sensorrelsize*vector_baseheight,sensorrelsize*vector_baseheight);
-          draw_SVOBJECT(devicei->object,state,devicei->prop,0,arrow_color_float,1);
+          if(vdevsorti->dir != 2)continue;
         }
-        glPopMatrix();
-      }
-      if(velocity_type==2){
-        float vv;
-        float anglemin, anglemax, rmin, rmax;
 
-        vv=SCALE2FDS(vel[0])/max_dev_vel;
-        glPushMatrix();
-        glTranslatef(xyz[0],xyz[1],xyz[2]);
-        glRotatef(-angle,0.0,0.0,1.0);
-        glRotatef(90.0,1.0,0.0,0.0);
-        glColor3f(0.0,0.0,0.0);
-        glBegin(GL_LINES);
-        glVertex3f(0.0,0.0,0.0);
-        glVertex3f(0.0,0.0,vv);
-        glEnd();
+        vdevi = vdevsorti->vdeviceinfo;
+        devicei = vdevi->colordev;
+        if(devicei == NULL)continue;
+        if(vdevi->unique == 0)continue;
+        xyz = vdevi->valdev->xyz;
+        get_vdevice_vel(global_times[itimes], vdevi, vel, &angle, &dvel, &dangle, &velocity_type);
+        if(colordeviceval == 1){
+          int type, vistype = 0;
 
-        anglemin=-dangle*DEG2RAD;
-        anglemax=-dangle*DEG2RAD;
-        rmin=MAX(vv-dvel,0.0);
-        rmax=vv+dvel;
-        drawsphereseg(anglemin,anglemax,rmin,rmax);
-        glPopMatrix();
+          type = devicei->type2;
+          if(type >= 0 && type < ndevicetypes)vistype = devicetypes[type]->type2vis;
+          if(vistype == 1){
+            unsigned char color[4], *colorptr;
+
+            colorptr = get_device_color(devicei, color, device_valmin, device_valmax);
+            if(colorptr != NULL){
+              arrow_color[0] = colorptr[0];
+              arrow_color[1] = colorptr[1];
+              arrow_color[2] = colorptr[2];
+              arrow_color[3] = 255;
+            }
+            else{
+              arrow_color[0] = 255 * foregroundcolor[0];
+              arrow_color[1] = 255 * foregroundcolor[1];
+              arrow_color[2] = 255 * foregroundcolor[2];
+              arrow_color[3] = 255;
+            }
+            glColor3ubv(arrow_color);
+          }
+        }
+        arrow_color_float[0] = (float)arrow_color[0] / 255.0;
+        arrow_color_float[1] = (float)arrow_color[1] / 255.0;
+        arrow_color_float[2] = (float)arrow_color[2] / 255.0;
+        arrow_color_float[3] = (float)arrow_color[3] / 255.0;
+        if(velocity_type == VEL_CARTESIAN){
+          float xyz1_old[3], xyz2_old[3];
+          float xyz1_new[3], xyz2_new[3];
+          unsigned char arrow_color_old[4], *arrow_color_new;
+          float dxyz[3], vec0[3] = {0.0, 0.0, 0.0}, zvec[3] = {0.0, 0.0, 1.0};
+          float axis[3], speed;
+          int state = 0;
+          int jj;
+
+          for(jj = 0; jj < 3; jj++){
+            dxyz[jj] = 0.5*SCALE2FDS(vel[jj]) / max_dev_vel;
+          }
+          speed = sqrt(dxyz[0] * dxyz[0] + dxyz[1] * dxyz[1] + dxyz[2] * dxyz[2]);
+
+          switch(vectortype){
+          case VECTOR_PROFILE:
+            xyz2_new[0] = xyz[0] + dxyz[0];
+            xyz2_new[1] = xyz[1] + dxyz[1];
+            xyz2_new[2] = xyz[2] + dxyz[2];
+
+            xyz1_new[0] = xyz[0];
+            xyz1_new[1] = xyz[1];
+            xyz1_new[2] = xyz[2];
+
+            arrow_color_new = arrow_color;
+            if(first==1){
+              first = 0;
+              memcpy(xyz1_old, xyz1_new, 3 * sizeof(float));
+              memcpy(xyz2_old, xyz2_new, 3 * sizeof(float));
+              memcpy(arrow_color_old, arrow_color_new, 4 * sizeof(unsigned char));
+              continue;
+            }
+
+            //  draw triangles for following rectangle
+
+            //   xyz1_new---------xyz2_new
+            //      |       /       |
+            //   xyz1_old---------xyz2_old
+            glBegin(GL_TRIANGLES);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glVertex3fv(xyz2_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz2_old);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glVertex3fv(xyz1_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz1_new);
+            glVertex3fv(xyz2_new);
+
+            glEnd();
+
+            memcpy(xyz1_old, xyz1_new, 3 * sizeof(float));
+            memcpy(xyz2_old, xyz2_new, 3 * sizeof(float));
+            memcpy(arrow_color_old, arrow_color_new, 4 * sizeof(unsigned char));
+            break;
+          case VECTOR_LINE:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+            glScalef(1.0, 1.0, vector_baselength*speed);
+            glColor3ubv(arrow_color);
+            glBegin(GL_LINES);
+            glVertex3fv(vec0);
+            glVertex3fv(zvec);
+            glEnd();
+            glBegin(GL_POINTS);
+            glVertex3fv(zvec);
+            glEnd();
+            glPopMatrix();
+            break;
+          case VECTOR_ARROW:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+            glPushMatrix();
+            glScalef(1.0, 1.0, speed*vector_baselength);
+            drawdisk(vector_basediameter, 1.0, arrow_color);
+            glPopMatrix();
+            glTranslatef(0.0, 0.0, speed*vector_baselength);
+            drawcone(vector_headdiameter, vector_headlength, arrow_color);
+            glPopMatrix();
+            break;
+          case VECTOR_OBJECT:
+            rotateu2v(zvec, dxyz, axis, &angle);
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+            drawobjects_as_vectors = 1;
+            glScalef(sensorrelsize*vector_baselength, sensorrelsize*vector_baselength, sensorrelsize*vector_baselength);
+            draw_SVOBJECT(devicei->object, state, devicei->prop, 0, arrow_color_float, 1);
+            glPopMatrix();
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+          }
+        }
+        if(velocity_type == VEL_POLAR){
+          float vv;
+          float xyz1_old[3], xyz2_old[3];
+          float xyz1_new[3], xyz2_new[3];
+          unsigned char arrow_color_old[4], *arrow_color_new;
+          float anglemin, anglemax, rmin, rmax;
+
+
+          switch(vectortype){
+          case VECTOR_PROFILE:
+//            cos(-alpha)  -sin(-alpha)  0
+//  rot(z) =  sin(-alpha)   cos(-alpha)  0
+//                0            0       1
+
+//            1   0        0             1 0  0
+//  rot(x) =  0 cos(90) -sin(90)    =    1 0 -1
+//            0 sin(90)  cos(90)         0 1  0
+
+//                   cos(alpha)  0  -sin(alpha)
+// rot(z)*rot(x) =  -sin(alpha)  0  -cos(alpha)
+//                        0      1        0
+
+// rot(z)*rot(x)*(0,0,vv) = (-sin(alpha)*vv,-cos(alpha)*vv,0)
+
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            xyz2_new[0] = xyz[0] - sin(angle*DEG2RAD)*vv;
+            xyz2_new[1] = xyz[1] - cos(angle*DEG2RAD)*vv;
+            xyz2_new[2] = xyz[2];
+
+            xyz1_new[0] = xyz[0];
+            xyz1_new[1] = xyz[1];
+            xyz1_new[2] = xyz[2];
+
+            arrow_color_new = arrow_color;
+            if(i == treei->first){
+              xyz1_old[0]=xyz1_new[0];
+              xyz1_old[1]=xyz1_new[1];
+              xyz1_old[2]=xyz1_new[2];
+
+              xyz2_old[0]=xyz2_new[0];
+              xyz2_old[1]=xyz2_new[1];
+              xyz2_old[2]=xyz2_new[2];
+
+              arrow_color_old[0] = arrow_color_new[0];
+              arrow_color_old[1] = arrow_color_new[1];
+              arrow_color_old[2] = arrow_color_new[2];
+              arrow_color_old[3] = arrow_color_new[3];
+              continue;
+            }
+
+            //  draw triangles for following rectangle
+
+            //   xyz1_new---------xyz2_new
+            //      |       /       |
+            //   xyz1_old---------xyz2_old
+            glBegin(GL_TRIANGLES);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glVertex3fv(xyz2_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz2_old);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz2_new);
+            glVertex3fv(xyz1_new);
+
+            glColor3ubv(arrow_color_old);
+            glVertex3fv(xyz1_old);
+            glColor3ubv(arrow_color_new);
+            glVertex3fv(xyz1_new);
+            glVertex3fv(xyz2_new);
+
+            glEnd();
+
+            xyz1_old[0]=xyz1_new[0];
+            xyz1_old[1]=xyz1_new[1];
+            xyz1_old[2]=xyz1_new[2];
+
+            xyz2_old[0]=xyz2_new[0];
+            xyz2_old[1]=xyz2_new[1];
+            xyz2_old[2]=xyz2_new[2];
+
+            arrow_color_old[0]=arrow_color[0];
+            arrow_color_old[1]=arrow_color[1];
+            arrow_color_old[2]=arrow_color[2];
+            arrow_color_old[3]=arrow_color[3];
+            break;
+          case VECTOR_LINE:
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glColor3ubv(arrow_color);
+            glBegin(GL_LINES);
+            glVertex3f(0.0, 0.0, 0.0);
+            glVertex3f(0.0, 0.0, vv);
+            glEnd();
+            glPopMatrix();
+            break;
+          case VECTOR_ARROW:
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glColor3ubv(arrow_color);
+
+            glPushMatrix();
+            glScalef(1.0, 1.0, vv*vector_baselength);
+            drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
+            glPopMatrix();
+            glTranslatef(0.0, 0.0, vv*vector_baselength);
+            drawcone(vector_headdiameter*xyzmaxdiff / 10.0, vector_headlength*xyzmaxdiff / 10.0, arrow_color);
+            glPopMatrix();
+            break;
+          case VECTOR_OBJECT:
+            vv = SCALE2FDS(vel[0]) / max_dev_vel;
+            glPushMatrix();
+            glTranslatef(xyz[0], xyz[1], xyz[2]);
+            glRotatef(-angle, 0.0, 0.0, 1.0);
+            glRotatef(90.0, 1.0, 0.0, 0.0);
+            glPushMatrix();
+            glScalef(1.0, 1.0, vv*vector_baselength);
+            drawdisk(vector_basediameter*xyzmaxdiff / 10.0, 1.0, arrow_color);
+            glPopMatrix();
+
+            anglemin = -dangle*DEG2RAD;
+            anglemax = -dangle*DEG2RAD;
+            rmin = MAX(vv - dvel, 0.0);
+            rmax = vv + dvel;
+            drawsphereseg(anglemin, anglemax, rmin, rmax);
+            glPopMatrix();
+          default:
+            ASSERT(FFALSE);
+            break;
+          }
+        }
       }
     }
     glPopMatrix();
@@ -909,7 +1213,7 @@ void draw_devices(void){
   glPushAttrib(GL_POINT_BIT|GL_LINE_BIT);
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  for(i=0;i<ndeviceinfo;i++){
+  for(ii=0;ii<ndeviceinfo;ii++){
     devicedata *devicei;
     int tagval;
     int save_use_displaylist;
@@ -918,7 +1222,7 @@ void draw_devices(void){
     float dpsi;
     float *xyz;
 
-    devicei = deviceinfo + i;
+    devicei = deviceinfo + ii;
     prop=devicei->prop;
 
     if(devicei->object->visible==0||(devicei->prop!=NULL&&devicei->prop->smv_object->visible==0))continue;
@@ -927,7 +1231,7 @@ void draw_devices(void){
     if(devicei->in_zone_csv==1)continue;
     if(isZoneFireModel==1&&STRCMP(devicei->label,"TIME")==0)continue;
     save_use_displaylist=devicei->object->use_displaylist;
-    tagval=i+1;
+    tagval=ii+1;
     if(select_device==1&&show_mode==SELECTOBJECT){
 
       select_device_color[0]=tagval>>(ngreenbits+nbluebits);
@@ -5326,78 +5630,140 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
 
 #define EPSDEV 0.01
 
-/* ------------------ comparevdevices ------------------------ */
+/* ------------------ comparev2devices ------------------------ */
 
-int comparevdevices( const void *arg1, const void *arg2 ){
-  vdevicedata *vdevi, *vdevj;
+int comparev2devices(const void *arg1, const void *arg2){
+  vdevicesortdata *vdevi, *vdevj;
   float *xyzi, *xyzj;
+  int diri, dirj;
 
-  vdevi = *(vdevicedata **)arg1;
-  vdevj = *(vdevicedata **)arg2;
-  xyzi = vdevi->valdev->xyz;
-  xyzj = vdevj->valdev->xyz;
-  if(xyzi[0]<xyzj[0]-EPSDEV)return -1;
-  if(xyzi[0]>xyzj[0]+EPSDEV)return 1;
-  if(xyzi[1]<xyzj[1]-EPSDEV)return -1;
-  if(xyzi[1]>xyzj[1]+EPSDEV)return 1;
-  if(xyzi[2]<xyzj[2]-EPSDEV)return -1;
-  if(xyzi[2]>xyzj[2]+EPSDEV)return 1;
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
+    break;
+  }
+  return 0;
+}
+
+/* ------------------ comparev3devices ------------------------ */
+
+int comparev3devices( const void *arg1, const void *arg2 ){
+  vdevicesortdata *vdevi, *vdevj;
+  float *xyzi, *xyzj;
+  int diri, dirj;
+
+  vdevi = (vdevicesortdata *)arg1;
+  vdevj = (vdevicesortdata *)arg2;
+  diri = vdevi->dir;
+  dirj = vdevj->dir;
+  xyzi = vdevi->vdeviceinfo->valdev->xyz;
+  xyzj = vdevj->vdeviceinfo->valdev->xyz;
+  if(diri - dirj < 0)return -1;
+  if(diri - dirj > 0)return 1;
+  switch(diri){
+  case 0:
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    break;
+  case 1:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    break;
+  case 2:
+    if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
+    if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
+    if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
+    if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
+    if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
+    if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    break;
+  }
   return 0;
 }
 
 /* ----------------------- setup_tree_devices ----------------------------- */
 
 void setup_tree_devices(void){
-  int i,nvdevices;
+  int i;
   treedevicedata *treei;
 
   if(nvdeviceinfo==0)return;
   if(ntreedeviceinfo>0){
-    for(i=0;i<ntreedeviceinfo;i++){
-      treei = treedeviceinfo + i;
-      FREEMEMORY(treei->vdevices);
-    }
     FREEMEMORY(treedeviceinfo);
+    ntreedeviceinfo=0;
   }
 
-  qsort((vdevicedata **)vdeviceptrinfo,(size_t)nvdeviceinfo,sizeof(vdevicedata *),comparevdevices);
+  qsort((vdevicedata **)vdevices_sorted,3*(size_t)nvdeviceinfo,sizeof(vdevicesortdata),comparev3devices);
 
-  NewMemory((void **)&treedeviceinfo,nvdeviceinfo*sizeof(treedevicedata));
+  ntreedeviceinfo = 1;
+  for(i = 1; i < 3*nvdeviceinfo; i++){
+    if(comparev2devices(vdevices_sorted+i, vdevices_sorted+i-1) != 0)ntreedeviceinfo++;
+  }
+
+  NewMemory((void **)&treedeviceinfo,ntreedeviceinfo*sizeof(treedevicedata));
+
+  ntreedeviceinfo = 1;
   treei = treedeviceinfo;
-  nvdevices=1;
-  for(i=1;i<nvdeviceinfo;i++){
-    float *xyzi, *xyzj;
-
-    xyzi = vdeviceptrinfo[i]->valdev->xyz;
-    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
-    if(ABS(xyzi[0]-xyzj[0])<EPSDEV&&ABS(xyzi[1]-xyzj[1])<EPSDEV){
-      nvdevices++;
-      continue;
+  treei->first = 0;
+  for(i = 1; i < 3*nvdeviceinfo; i++){
+    if(comparev2devices(vdevices_sorted + i, vdevices_sorted + i - 1) != 0){
+      treei->last = i-1;
+      treei = treedeviceinfo + ntreedeviceinfo;
+      treei->first = i;
+      ntreedeviceinfo++;
     }
-    treei->nvdevices=nvdevices;
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
-    treei++;
-    nvdevices=1;
   }
-  treei->nvdevices=nvdevices;
-  if(nvdevices>0){
-    NewMemory((void **)&treei->vdevices,nvdevices*sizeof(vdevicedata **));
-  }
-  nvdevices=0;
-  treei=treedeviceinfo;
-  treei->vdevices[nvdevices++]=vdeviceptrinfo[0];
-  for(i=1;i<nvdeviceinfo;i++){
-    float *xyzi, *xyzj;
+  treei->last = 3*nvdeviceinfo - 1;
 
-    xyzi = vdeviceptrinfo[i]->valdev->xyz;
-    xyzj = vdeviceptrinfo[i-1]->valdev->xyz;
-    if(ABS(xyzi[0]-xyzj[0])>=EPSDEV||ABS(xyzi[1]-xyzj[1])>=EPSDEV){
-      nvdevices=0;
-      treei++;
+  max_device_tree=0;
+  for(i = 0; i < ntreedeviceinfo; i++){
+    treedevicedata *treei;
+    int j, n;
+
+    treei = treedeviceinfo + i;
+    n = 0;
+    for(j = treei->first; j <= treei->last; j++){
+      vdevicedata *vdevi;
+      vdevicesortdata *vdevsorti;
+
+      vdevsorti = vdevices_sorted + j;
+      vdevi = vdevsorti->vdeviceinfo;
+      if(vdevi->unique != 0)n++;
     }
-    treei->vdevices[nvdevices++]=vdeviceptrinfo[i];
+    treei->n = n;
+    max_device_tree=MAX(max_device_tree,n);
   }
-  ntreedeviceinfo = treei - treedeviceinfo + 1;
 }
 
 /* ----------------------- setup_zone_devs ----------------------------- */
@@ -5685,6 +6051,104 @@ int is_dup_device_label(int index, int direction){
   return 0;
 }
 
+/* ----------------------- setup_pilot_data ----------------------------- */
+
+#ifdef pp_PILOT
+void setup_pilot_data(int nbuckets){
+  int i;
+  float dangle;
+
+  dangle = 360.0 / (float)nbuckets;
+
+  for(i = 0; i < nvdeviceinfo; i++){
+    vdevicedata *vdevicei;
+    devicedata *udev, *vdev, *wdev;
+    devicedata *angledev, *veldev;
+    int j, ibucket;
+    pilotdata *piloti,*pilotii;
+
+    vdevicei = vdeviceinfo + i;
+    udev = vdevicei->udev;
+    vdev = vdevicei->vdev;
+    wdev = vdevicei->wdev;
+    angledev = vdevicei->angledev;
+    veldev = vdevicei->veldev;
+
+    piloti = &(vdevicei->pilotinfo);
+    {
+       float *vel, *fraction;
+
+       vel = piloti->vel;
+       fraction = piloti->fraction;
+       vel = piloti->vel;
+       FREEMEMORY(fraction);
+       FREEMEMORY(vel);
+       NewMemory((void **)&fraction, nbuckets*sizeof(float));
+       NewMemory((void **)&vel, nbuckets*sizeof(float));
+       piloti->vel = vel;
+       piloti->fraction = fraction;
+       piloti->nbuckets = nbuckets;
+    }
+
+    for(j = 0; j < nbuckets; j++){
+      piloti->fraction[j] = 0.0;
+      piloti->vel[j] = 0.0;
+    }
+    piloti->total = 0;
+    if(udev != NULL&&vdev != NULL){
+      int nvals;
+
+      nvals = MIN(udev->nvals, vdev->nvals);
+      nvals = MIN(nvals, wdev->nvals);
+      for(j = 0; j<nvals; j++){
+        float uval, vval, wval = 0.0, vel, veluv, angle;
+
+        uval = udev->vals[j];
+        vval = vdev->vals[j];
+        if(wdev != NULL)wval = wdev->vals[j];
+        vel = sqrt(uval*uval + vval*vval + wval*wval);
+        veluv = sqrt(uval*uval + vval*vval);
+        if(veluv>0.0){
+          angle = fmod(180.0 + atan2(vval, uval)*RAD2DEG + dangle/2.0, 360.0);
+          ibucket = CLAMP(angle / dangle, 0, nbuckets-1);
+          piloti->fraction[ibucket]++;
+          piloti->vel[ibucket] += vel;
+        }
+      }
+    }
+    else if(angledev != NULL&&veldev != NULL){
+      int nvals;
+
+      nvals = MIN(angledev->nvals, veldev->nvals);
+      for(j = 0; j < nvals; j++){
+        float vel, angle;
+
+        angle = angledev->vals[j];
+        vel = veldev->vals[j];
+        angle = fmod(angle + dangle/2.0, 360.0);
+        ibucket = CLAMP(angle / dangle, 0, nbuckets-1);
+        piloti->fraction[ibucket]++;
+        piloti->vel[ibucket] += vel;
+      }
+    }
+    else{
+      continue;
+    }
+    for(j = 0; j<nbuckets; j++){
+      piloti->total += piloti->fraction[j];
+      if(piloti->fraction[j]>0.0){
+        piloti->vel[j] /= piloti->fraction[j];
+      }
+    }
+    if(piloti->total > 0){
+      for(j = 0; j < nbuckets; j++){
+        piloti->fraction[j] /= piloti->total;
+      }
+    }
+  }
+}
+#endif
+
 /* ----------------------- setup_device_data ----------------------------- */
 
 void setup_device_data(void){
@@ -5697,8 +6161,8 @@ void setup_device_data(void){
   if(ndeviceinfo==0)return;
   FREEMEMORY(vdeviceinfo);
   NewMemory((void **)&vdeviceinfo,ndeviceinfo*sizeof(vdevicedata));
-  FREEMEMORY(vdeviceptrinfo);
-  NewMemory((void **)&vdeviceptrinfo,ndeviceinfo*sizeof(vdevicedata *));
+  FREEMEMORY(vdevices_sorted);
+  NewMemory((void **)&vdevices_sorted,3*ndeviceinfo*sizeof(vdevicesortdata));
   nvdeviceinfo=0;
   for(i=0;i<ndeviceinfo;i++){
     vdevicedata *vdevi;
@@ -5719,6 +6183,11 @@ void setup_device_data(void){
     vdevi->sd_angledev=NULL;
     vdevi->sd_veldev=NULL;
     vdevi->colordev=NULL;
+#ifdef pp_PILOT
+    vdevi->pilotinfo.vel=NULL;
+    vdevi->pilotinfo.fraction=NULL;
+    vdevi->pilotinfo.nbuckets=0;
+#endif    
 
     devj = get_device(xyzval,"VELOCITY",CSV_EXP);
     if(devj!=NULL){
@@ -5910,7 +6379,19 @@ void setup_device_data(void){
     if(ndevicetypes>0)devicetypes[0]->type2vis=1;
   }
   for(i=0;i<nvdeviceinfo;i++){
-    vdeviceptrinfo[i] = vdeviceinfo + i;
+    vdevicesortdata *vdevsorti;
+
+    vdevsorti = vdevices_sorted + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 0;
+
+    vdevsorti = vdevices_sorted + nvdeviceinfo + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 1;
+
+    vdevsorti = vdevices_sorted + 2*nvdeviceinfo + i;
+    vdevsorti->vdeviceinfo = vdeviceinfo + i;
+    vdevsorti->dir = 2;
   }
 
   setup_tree_devices();
@@ -5918,73 +6399,7 @@ void setup_device_data(void){
 
   // convert velocities to pilot chart format
 #ifdef pp_PILOT
-  for(i=0;i<nvdeviceinfo;i++){
-    vdevicedata *vdevicei;
-    devicedata *udev, *vdev, *wdev;
-    devicedata *angledev, *veldev;
-    int j,n,ibucket;
-    pilotdata *piloti;
-
-    vdevicei = vdeviceinfo + i;
-    udev = vdevicei->udev;
-    vdev = vdevicei->vdev;
-    wdev = vdevicei->wdev;
-    angledev = vdevicei->angledev;
-    veldev = vdevicei->veldev;
-
-    piloti = &(vdevicei->pilotinfo);
-    for(j=0;j<8;j++){
-      piloti->fraction[j]=0.0;
-      piloti->vel[j]=0.0;
-    }
-    piloti->total=0;
-    if(udev!=NULL&&vdev!=NULL){
-      n=MIN(udev->nvals,vdev->nvals);
-      n=MIN(n,wdev->nvals);
-      for(j=0;j<n;j++){
-        float uval, vval, wval=0.0, vel, veluv, angle;
-
-        uval = udev->vals[j];
-        vval = vdev->vals[j];
-        if(wdev!=NULL)wval = wdev->vals[j];
-        vel = sqrt(uval*uval+vval*vval+wval*wval);
-        veluv = sqrt(uval*uval+vval*vval);
-        if(veluv>0.0){
-          angle = fmod(180.0+atan2(vval,uval)*RAD2DEG+22.5,360.0);
-          ibucket=CLAMP(angle/45.0,0,7);
-          piloti->fraction[ibucket]++;
-          piloti->vel[ibucket]+=vel;
-        }
-      }
-    }
-    else if(angledev!=NULL&&veldev!=NULL){
-      n=MIN(angledev->nvals,veldev->nvals);
-      for(j=0;j<n;j++){
-        float vel, angle;
-
-        angle = angledev->vals[j];
-        vel = veldev->vals[j];
-        angle = fmod(angle+22.5,360.0);
-        ibucket=CLAMP(angle/45.0,0,7);
-        piloti->fraction[ibucket]++;
-        piloti->vel[ibucket]+=vel;
-      }
-    }
-    else{
-      continue;
-    }
-    for(j=0;j<8;j++){
-      piloti->total+=piloti->fraction[j];
-      if(piloti->fraction[j]>0.0){
-        piloti->vel[j]/=piloti->fraction[j];
-      }
-    }
-    if(piloti->total>0){
-      for(j=0;j<8;j++){
-        piloti->fraction[j]/=piloti->total;
-      }
-    }
-  }
+  setup_pilot_data(npilot_buckets);
 #endif
 
   FREEMEMORY(vals);
