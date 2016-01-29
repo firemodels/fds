@@ -19,7 +19,9 @@ _view = {
             end
         },
         index = {
-            get = nil,
+            get = function ()
+                return getcolorbarindex()
+            end,
             set = function (v)
                 setcolorbarindex(v)
             end
@@ -57,3 +59,8 @@ local colorbar_mt = {
    end
 }
 setmetatable(view.colorbar, colorbar_mt)
+
+window = {}
+window.size = function(width, height)
+    setwindowsize(width, height)
+end

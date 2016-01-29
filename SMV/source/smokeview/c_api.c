@@ -221,7 +221,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
 
 /* ------------------ loadfile ------------------------ */
 
-void loadfile(const char *filename) {
+int loadfile(const char *filename) {
   int i;
   int errorcode;
 
@@ -242,7 +242,7 @@ void loadfile(const char *filename) {
       else{
         readfed(i,LOAD,FED_SLICE,&errorcode);
       }
-      return;
+      return errorcode;
     }
   }
   for(i=0;i<npatchinfo;i++){
@@ -251,7 +251,7 @@ void loadfile(const char *filename) {
     patchi = patchinfo + i;
     if(strcmp(patchi->file,filename)==0){
       readpatch(i,LOAD,&errorcode);
-      return;
+      return errorcode;
     }
   }
   npartframes_max=get_min_partframes();
@@ -261,7 +261,7 @@ void loadfile(const char *filename) {
     parti = partinfo + i;
     if(strcmp(parti->file,filename)==0){
       readpart(parti->file,i,LOAD,&errorcode);
-      return;
+      return errorcode;
     }
   }
   for(i=0;i<nisoinfo;i++){
@@ -270,7 +270,7 @@ void loadfile(const char *filename) {
     isoi = isoinfo + i;
     if(strcmp(isoi->file,filename)==0){
       readiso(isoi->file,i,LOAD,NULL,&errorcode);
-      return;
+      return errorcode;
     }
   }
   for(i=0;i<nsmoke3dinfo;i++){
@@ -279,7 +279,7 @@ void loadfile(const char *filename) {
     smoke3di = smoke3dinfo + i;
     if(strcmp(smoke3di->file,filename)==0){
       readsmoke3d(i,LOAD,&errorcode);
-      return;
+      return errorcode;
     }
   }
   for(i=0;i<nzoneinfo;i++){
@@ -288,7 +288,7 @@ void loadfile(const char *filename) {
     zonei = zoneinfo + i;
     if(strcmp(zonei->file,filename)==0){
       readzone(i,LOAD,&errorcode);
-      return;
+      return errorcode;
     }
   }
   for(i=0;i<nplot3dinfo;i++){
@@ -299,11 +299,12 @@ void loadfile(const char *filename) {
       ReadPlot3dFile=1;
       readplot3d(plot3di->file,i,LOAD,&errorcode);
       update_menu();
-      return;
+      return errorcode;
     }
   }
 
   fprintf(stderr,"*** Error: file %s failed to load\n",filename);
+  return 1;
 }
 
 /* ------------------ loadinifile ------------------------ */
@@ -318,9 +319,8 @@ void loadinifile(const char *filepath){
 
 /* ------------------ loadvfile ------------------------ */
 
-void loadvfile(const char *filepath){
+int loadvfile(const char *filepath){
   int i;
-
   FREEMEMORY(loaded_file);
   PRINTF("loading vector slice file %s\n\n",filepath);
   for(i=0;i<nvsliceinfo;i++){
@@ -336,11 +336,11 @@ void loadvfile(const char *filepath){
         NewMemory((void **)&loaded_file,strlen(filepath)+1);
         strcpy(loaded_file,filepath);
       }
-      return;
+      return 0;
     }
   }
   fprintf(stderr,"*** Error: Vector slice file %s was not loaded\n",filepath);
-
+  return 1;
 }
 
 /* ------------------ loadboundaryfile ------------------------ */
@@ -1249,6 +1249,11 @@ void setrenderdir(const char *dir) {
 /* ------------------ setcolorbarindex ------------------------ */
 void setcolorbarindex(int chosen_index) {
 	UpdateRGBColors(chosen_index);
+}
+
+/* ------------------ setcolorbarindex ------------------------ */
+int getcolorbarindex() {
+	return global_colorbar_index;
 }
 
 /* ------------------ setwindowsize ------------------------ */

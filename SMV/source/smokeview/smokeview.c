@@ -296,6 +296,7 @@ void parse_commandline(int argc, char **argv){
         strncmp(argi,"-lang",5)==0||
 #endif        
         strncmp(argi,"-script",7)==0||
+        strncmp(argi,"-luascript",10)==0||
         strncmp(argi,"-startframe",11)==0||
         strncmp(argi,"-skipframe",10)==0||
         strncmp(argi,"-bindir",7)==0||
@@ -581,10 +582,12 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;
+      strcpy(script_filename, "");
       runscript=1;
     }
     else if(strncmp(argv[i],"-runluascript",13)==0){
       from_commandline=1;
+      strcpy(luascript_filename, "");
       runluascript=1;
     }
     else if(strncmp(argv[i],"-killscript",11)==0){
@@ -620,6 +623,14 @@ void parse_commandline(int argc, char **argv){
         sfd = insert_scriptfile(scriptbuffer);
         if(sfd!=NULL)default_script=sfd;
         runscript=1;
+      }
+    }
+    else if(strncmp(argv[i],"-luascript",10)==0){
+      from_commandline=1;
+      ++i;
+      if(i<argc){
+        strncpy(luascript_filename,argv[i],1024);
+        runluascript=1;
       }
     }
     else if(strncmp(argv[i],"-noexit",7)==0){

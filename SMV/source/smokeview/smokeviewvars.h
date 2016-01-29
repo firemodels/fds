@@ -1132,6 +1132,7 @@ SVEXTERN char script_inifile_suffix[1024], vol_prefix[1024];
 SVEXTERN char script_renderdir[1024], script_renderfilesuffix[1024], script_renderfile[1024];
 SVEXTERN inifiledata first_inifile, last_inifile;
 SVEXTERN char script_filename[1024];
+SVEXTERN char luascript_filename[1024];
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;
 SVEXTERN int smoothing_blocks;

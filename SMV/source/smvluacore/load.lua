@@ -10,11 +10,13 @@ function loadnamedslice(name)
 end
 
 function load.datafile(filename)
-    loaddatafile(filename)
+    local errorcode = loaddatafile(filename)
+    assert(errorcode == 0, string.format("loaddatafile errorcode: %d\n",errorcode))
 end
 
 function load.vdatafile(filename)
-    loadvdatafile(filename)
+    local errorcode = loadvdatafile(filename)
+    assert(errorcode == 0, string.format("loadvdatafile errorcode: %d\n",errorcode))
 end
 
 function unload.all()

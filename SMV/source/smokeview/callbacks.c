@@ -2831,11 +2831,13 @@ int DoStereo(void){
 
 /* ------------------ DoScriptLua ------------------------ */
 void DoScriptLua(void) {
+  int script_return_code;
   if(runluascript == 1) {
     runluascript = 0;
     PRINTF("running lua script section\n");
     fflush(stdout);
-    if(runLuaScript() != LUA_OK && exit_on_script_crash) {
+    script_return_code = runLuaScript();
+    if(script_return_code != LUA_OK && script_return_code != LUA_YIELD && exit_on_script_crash) {
         exit(1);
     }
   }
@@ -2844,11 +2846,13 @@ void DoScriptLua(void) {
 /* ------------------ DoScript ------------------------ */
 
 void DoScript(void){
+  int script_return_code;
   if(runscript == 1) {
       runscript = 0;
       PRINTF("running ssf script instruction\n");
       fflush(stdout);
-      if(runSSFScript() != LUA_OK && exit_on_script_crash) {
+      script_return_code = runSSFScript();
+      if(script_return_code != LUA_OK && script_return_code != LUA_YIELD && exit_on_script_crash) {
           exit(1);
       }
     }

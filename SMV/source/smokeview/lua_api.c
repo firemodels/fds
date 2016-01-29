@@ -156,8 +156,9 @@ int lua_settime(lua_State *L) {
 */
 int lua_loaddatafile(lua_State *L) {
 	const char *filename = lua_tostring(L, 1);
-	loadfile(filename);
-	return 0;
+	int return_value = loadfile(filename);
+    lua_pushnumber(L, return_value);
+	return 1;
 }
 
 /*
@@ -171,8 +172,9 @@ int lua_loadinifile(lua_State *L) {
 
 int lua_loadvdatafile(lua_State *L) {
 	const char *filename = lua_tostring(L, 1);
-	loadvfile(filename);
-	return 0;
+	int return_value = loadvfile(filename);
+    lua_pushnumber(L, return_value);
+	return 1;
 }
 
 int lua_loadboundaryfile(lua_State *L) {
@@ -279,7 +281,6 @@ int lua_loadnamedslice(lua_State *L) {
 
 int lua_get_global_times(lua_State *L) {
     PRINTF("lua: initialising global time table\n");
-    fprintf(stderr, "lua: %d entries\n", nglobal_times);
     lua_createtable(L, 0, nglobal_times);
     for (int i; i < nglobal_times; i++) {
         lua_pushnumber(L, i);
@@ -306,7 +307,6 @@ int lua_get_meshes(lua_State *L) {
     int entries = nmeshes;
     mesh *infotable = meshinfo;
     PRINTF("lua: initialising mesh table\n");
-    fprintf(stderr, "lua: %d entries\n", entries);
     lua_createtable(L, 0, entries);
     for (int i; i < entries; i++) {
         lua_pushnumber(L, i);
@@ -335,7 +335,6 @@ int lua_get_devices(lua_State *L) {
     int entries = ndeviceinfo;
     devicedata *infotable = deviceinfo;
     PRINTF("lua: initialising device table\n");
-    fprintf(stderr, "lua: %d entries\n", entries);
     lua_createtable(L, 0, entries);
     for (int i; i < entries; i++) {
         lua_pushnumber(L, i);
@@ -442,7 +441,6 @@ int lua_initsmvproginfo(lua_State *L) {
 
 int lua_get_sliceinfo(lua_State *L) {
     PRINTF("lua: initialising slice table\n");
-    fprintf(stderr, "lua: %d entries\n", nsliceinfo);
     lua_createtable(L, 0, nsliceinfo);
     for (int i; i < nsliceinfo; i++) {
         lua_pushnumber(L, i);
@@ -463,7 +461,6 @@ int lua_get_sliceinfo(lua_State *L) {
 
 int lua_get_csvinfo(lua_State *L) {
     PRINTF("lua: initialising csv table\n");
-    fprintf(stderr, "lua: %d entries\n", nsliceinfo);
     lua_createtable(L, 0, ncsvinfo);
     for (int i; i < ncsvinfo; i++) {
         lua_pushnumber(L, i);
@@ -660,6 +657,12 @@ int lua_setcolorbarindex(lua_State *L) {
     return 0;
 }
 
+int lua_getcolorbarindex(lua_State *L) {
+    int index = getcolorbarindex();
+    lua_pushnumber(L, index);
+    return 1;
+}
+
 int lua_settimebarvisibility(lua_State *L) {
     int setting = lua_tonumber(L, 1);
     settimebarvisibility(setting);
@@ -818,6 +821,7 @@ void initLua() {
 	lua_register(L, "setgridvisibility", lua_setgridvisibility);
 	lua_register(L, "setgridparms", lua_setgridparms);
 	lua_register(L, "setcolorbarindex", lua_setcolorbarindex);
+	lua_register(L, "getcolorbarindex", lua_getcolorbarindex);
 
     lua_register(L, "settimebarvisibility", lua_settimebarvisibility);
     lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);
@@ -914,9 +918,13 @@ void runScriptString(char *string) {
 }
 
 int loadLuaScript() {
-	char filename[1024];
-	strcpy(filename, fdsprefix);
-	strcat(filename, ".lua");
+    char filename[1024];
+    if (strlen(luascript_filename) == 0) {
+        strncpy(filename, fdsprefix, 1020);
+        strcat(filename, ".lua");
+    } else {
+        strncpy(filename, luascript_filename, 1024);
+    }
 	printf("scriptfile: %s\n", filename);
     // The display callback needs to be run once initially.
     // PROBLEM: the display CB does not work without a loaded case.
@@ -969,8 +977,12 @@ int loadLuaScript() {
 
 int loadSSFScript() {
 	char filename[1024];
-	strcpy(filename, fdsprefix);
-	strcat(filename, ".ssf");
+    if (strlen(script_filename) == 0) {
+        strncpy(filename, fdsprefix, 1020);
+        strcat(filename, ".ssf");
+    } else {
+        strncpy(filename, script_filename, 1024);
+    }
 	printf("scriptfile: %s\n", filename);
     // The display callback needs to be run once initially.
     // PROBLEM: the display CB does not work without a loaded case.
