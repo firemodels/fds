@@ -1120,7 +1120,7 @@ generate_timing_stats()
 
    cd $fdsrepo/Verification
    scripts/SMV_Cases.sh
-   scripts/SMV_geom_Cases.sh
+   scripts/GEOM_Cases.sh
 
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot

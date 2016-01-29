@@ -42,6 +42,8 @@ set fds_casessh=%svn_root%\Verification\FDS_Cases.sh
 set fds_casesbat=%svn_root%\Verification\FDS_Cases.bat
 set smv_casessh=%svn_root%\Verification\scripts\SMV_Cases.sh
 set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
+set wui_casessh=%svn_root%\Verification\scripts\WUI_Cases.sh
+set wui_casesbat=%svn_root%\Verification\scripts\WUI_Cases.bat
 
 set copyFDScases=%svn_root%\Utilities\Scripts\copyFDScases.bat
 set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
@@ -192,6 +194,8 @@ echo.
 cd %out_examples2%
 %in_sh2bat%\sh2bat %smv_casessh% %smv_casesbat%
 call %smv_casesbat%
+%in_sh2bat%\sh2bat %wui_casessh% %wui_casesbat%
+call %wui_casesbat%
 
 echo.
 echo ***Copying wrapup scripts for use in final installation
