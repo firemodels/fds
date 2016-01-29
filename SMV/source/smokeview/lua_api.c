@@ -175,9 +175,9 @@ int lua_loadvdatafile(lua_State *L) {
 	return 0;
 }
 
-int lua_loadboundary(lua_State *L) {
+int lua_loadboundaryfile(lua_State *L) {
     const char *filename = lua_tostring(L, 1);
-	loadboundary(filename);
+	loadboundaryfile(filename);
 	return 0;
 }
 
@@ -390,6 +390,43 @@ int lua_initsmvdata(lua_State *L) {
     return 0;
 }
 
+int lua_initsmvproginfo(lua_State *L) {
+    char version[256];
+    char githash[256];
+    
+    getPROGversion(version);
+    getGitHash(githash);
+    
+    lua_createtable(L, 0, 8);
+    
+    lua_pushstring(L, version);
+    lua_setfield(L, -2, "version");
+    
+    lua_pushstring(L, githash);
+    lua_setfield(L, -2, "githash");
+    
+    lua_pushstring(L, TITLERELEASE);
+    lua_setfield(L, -2, "titlerelease");
+    
+    lua_pushstring(L, __DATE__);
+    lua_setfield(L, -2, "builddate");
+    
+    lua_pushstring(L, fds_githash);
+    lua_setfield(L, -2, "fdsgithash");
+    
+    lua_pushstring(L, smokeviewpath);
+    lua_setfield(L, -2, "smokeviewpath");
+    
+    lua_pushstring(L, smokezippath);
+    lua_setfield(L, -2, "smokezippath");
+    
+    lua_pushstring(L, texturedir);
+    lua_setfield(L, -2, "texturedir");
+    
+    lua_setglobal(L, "smokeviewProgram");
+    return 0;
+}
+
 /*
   Load data about smokeview itself into the lua interpreter.
 */
@@ -570,12 +607,6 @@ int lua_setviewpoint(lua_State *L) {
 	return 0;
 }
 
-int lua_set_sceneclip(lua_State *L) {
-    int mode = lua_tonumber(L, 1);
-    set_sceneclip(mode);
-    return 0;
-}
-
 int lua_exit_smokeview(lua_State  *L) {
 	exit_smokeview();
 	return 0;
@@ -734,6 +765,8 @@ void initLua() {
 	L = luaL_newstate();
 
 	luaL_openlibs(L);
+    
+    lua_initsmvproginfo(L);
 
     lua_register(L, "set_slice_bound_min", lua_set_slice_bound_min);
     lua_register(L, "set_slice_bound_max", lua_set_slice_bound_max);
@@ -756,7 +789,7 @@ void initLua() {
 	lua_register(L, "loaddatafile", lua_loaddatafile);
     lua_register(L, "loadinifile", lua_loadinifile);
     lua_register(L, "loadvdatafile", lua_loadvdatafile);
-    lua_register(L, "loadboundary", lua_loadboundary);
+    lua_register(L, "loadboundaryfile", lua_loadboundaryfile);
     lua_register(L, "label", lua_label);
 	lua_register(L, "load3dsmoke", lua_load3dsmoke);
 	lua_register(L, "loadvolsmoke", lua_loadvolsmoke);
@@ -778,7 +811,6 @@ void initLua() {
     lua_register(L, "unloadtour", lua_unloadtour);
 	lua_register(L, "setrenderdir", lua_setrenderdir);
 	lua_register(L, "setviewpoint", lua_setviewpoint);
-    lua_register(L, "set_sceneclip", lua_set_sceneclip);
 	lua_register(L, "exit", lua_exit_smokeview);
     lua_register(L, "getcolorbarflip", lua_getcolorbarflip);
 	lua_register(L, "setcolorbarflip", lua_setcolorbarflip);

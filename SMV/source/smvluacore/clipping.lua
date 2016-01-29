@@ -1,9 +1,9 @@
 
 
 
-clip = {}
+clipping = {}
 
-_clip = {
+_clipping = {
     mode = {
         get = function ()
             return getclippingmode()
@@ -13,17 +13,17 @@ _clip = {
         end
     },
     set = function(xMin, xMax, yMin, yMax, zMin, zMax)
-        clip.x.set(xMin, xMax)
-        clip.y.set(yMin, yMax)
-        clip.z.set(zMin, zMax)
+        clipping.x.set(xMin, xMax)
+        clipping.y.set(yMin, yMax)
+        clipping.z.set(zMin, zMax)
     end
 }
 
 -- the real table value
-clip._x = {
+clipping._x = {
    set = function (min, max)
-       clip.x.max = min
-       clip.x.max = max
+       clipping.x.max = min
+       clipping.x.max = max
    end,
    min = {
        set = function (v)
@@ -43,28 +43,28 @@ clip._x = {
    }
 
 }
-clip.x = {} -- the proxy
+clipping.x = {} -- the proxy
 local x_mt = {
    -- get method
    __index = function (t,k)
-       if type(clip._x[k]) == "function" then
-           return clip._x[k]
+       if type(clipping._x[k]) == "function" then
+           return clipping._x[k]
        else
-           return clip._x[k].get()
+           return clipping._x[k].get()
        end
    end,
    -- set method
    __newindex = function (t,k,v)
-       clip._x[k].set(v)
+       clipping._x[k].set(v)
    end
 }
-setmetatable(clip.x, x_mt)
+setmetatable(clipping.x, x_mt)
 
 -- the real table value
-clip._y = {
+clipping._y = {
    set = function (min, max)
-       clip.y.max = min
-       clip.y.max = max
+       clipping.y.max = min
+       clipping.y.max = max
    end,
    min = {
        set = function (v)
@@ -84,28 +84,28 @@ clip._y = {
    }
 
 }
-clip.y = {} -- the proxy
+clipping.y = {} -- the proxy
 local y_mt = {
    -- get method
    __index = function (t,k)
-       if type(clip._y[k]) == "function" then
-           return clip._y[k]
+       if type(clipping._y[k]) == "function" then
+           return clipping._y[k]
        else
-           return clip._y[k].get()
+           return clipping._y[k].get()
        end
    end,
    -- set method
    __newindex = function (t,k,v)
-       clip._y[k].set(v)
+       clipping._y[k].set(v)
    end
 }
-setmetatable(clip.y, y_mt)
+setmetatable(clipping.y, y_mt)
 
 -- the real table value
-clip._z = {
+clipping._z = {
    set = function (min, max)
-       clip.z.max = min
-       clip.z.max = max
+       clipping.z.max = min
+       clipping.z.max = max
    end,
    min = {
        set = function (v)
@@ -125,38 +125,38 @@ clip._z = {
    }
 
 }
-clip.z = {} -- the proxy
+clipping.z = {} -- the proxy
 local z_mt = {
    -- get method
    __index = function (t,k)
-       if type(clip._z[k]) == "function" then
-           return clip._z[k]
+       if type(clipping._z[k]) == "function" then
+           return clipping._z[k]
        else
-           return clip._z[k].get()
+           return clipping._z[k].get()
        end
    end,
    -- set method
    __newindex = function (t,k,v)
-       clip._z[k].set(v)
+       clipping._z[k].set(v)
    end
 }
-setmetatable(clip.z, z_mt)
+setmetatable(clipping.z, z_mt)
 
-local clip_mt = {
+local clipping_mt = {
     -- get method
     __index = function (t,k)
-        if type(_clip[k]) == "function" then
-            return _clip[k]
+        if type(_clipping[k]) == "function" then
+            return _clipping[k]
         else
-            return _clip[k].get()
+            return _clipping[k].get()
         end
     end,
     -- set method
     __newindex = function (t,k,v)
-        print("_clip", _clip)
+        print("_clipping", _clipping)
         print("k", k)
-        print("_clip[k]", _clip[k])
-        return _clip[k].set(v)
+        print("_clipping[k]", _clipping[k])
+        return _clipping[k].set(v)
     end
 }
-setmetatable(clip, clip_mt)
+setmetatable(clipping, clipping_mt)

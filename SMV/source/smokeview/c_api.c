@@ -343,9 +343,9 @@ void loadvfile(const char *filepath){
 
 }
 
-/* ------------------ loadboundary ------------------------ */
+/* ------------------ loadboundaryfile ------------------------ */
 
-void loadboundary(const char *filepath){
+void loadboundaryfile(const char *filepath){
   int i;
   int errorcode;
   int count=0;
@@ -1159,11 +1159,6 @@ void setviewpoint(const char *viewpoint){
     }
   }
   if(count==0)fprintf(stderr,"*** Error: The viewpoint %s was not found\n",viewpoint);
-}
-
-void set_sceneclip(int mode) {
-    clip_mode=mode;
-    updatefacelists=1;
 }
 
 void set_clipping_mode(int mode) {
