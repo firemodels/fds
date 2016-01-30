@@ -1,5 +1,5 @@
-render = {}
-function _render(...)
+render = {movie = {}}
+function _renderF(...)
     local fstArg = select(1,...)
     if (...) == nil then renderC(...)
     elseif type(fstArg) == "string" then
@@ -25,13 +25,76 @@ function _render(...)
     -- TODO: return information about the file produced or something
 end
 
-render_mt = {
-    __call = function (t,...)
-        return _render(...)
-    end
+_render = {
+    type = {
+        get = function ()
+            return get_rendertype()
+        end,
+        set = function(v)
+            assert(v == "JPG" or v == "PNG", v .. " is not a valid render type."
+                   .. " Please choose from JPG or PNG")
+            return rendertype(v)
+        end
+    },
+    movie = {
+        type = {
+            get = function ()
+                return get_movietype()
+            end,
+            set = function (v)
+                assert(v == "WMV" or v == "MP4" or v == "AVI",
+                       v .. " is not a valid render type. Please choose from "
+                       .. "WMV, MP4, or AVI")
+                return set_movietype(v)
+            end
+        }
+    },
+    dir = {
+        get = function ()
+            return getrenderdir();
+        end,
+        set = function(v)
+            return setrenderdir(v)
+        end
+    }
 }
-
+local render_mt = {
+    __call = function (t,...)
+        return _renderF(...)
+    end,
+   -- get method
+   __index = function (t,k)
+       if type(_render[k]) == "function" then
+           return _render[k]
+       else
+           return _render[k].get()
+       end
+   end,
+   -- set method
+   __newindex = function (t,k,v)
+       _render[k].set(v)
+   end
+}
 setmetatable(render, render_mt)
+
+local movie_mt = {
+    __call = function (t,...)
+        return makemovie(...)
+    end,
+   -- get method
+   __index = function (t,k)
+       if type(_render.movie[k]) == "function" then
+           return _render.movie[k]
+       else
+           return _render.movie[k].get()
+       end
+   end,
+   -- set method
+   __newindex = function (t,k,v)
+       _render.movie[k].set(v)
+   end
+}
+setmetatable(render.movie, movie_mt)
 
 function renderstart(startframe, skipframe)
     render_startframe = startframe

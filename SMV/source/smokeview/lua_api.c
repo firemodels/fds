@@ -122,7 +122,7 @@ int lua_tempyieldscript(lua_State *L) {
 
 int lua_getframe(lua_State *L) {
     int framenumber = getframe();
-    lua_pushnumber(L, framenumber);
+    lua_pushinteger(L, framenumber);
     return 1;
 }
 
@@ -525,10 +525,45 @@ int lua_rendertype(lua_State *L) {
     return 0;
 }
 
-int lua_movietype(lua_State *L) {
+int lua_get_rendertype(lua_State *L) {
+    int render_type = get_rendertype();
+    switch (render_type) {
+        case JPEG:
+            lua_pushstring(L, "JPG");
+            break;
+        case PNG:
+            lua_pushstring(L, "PNG");
+            break;
+        default:
+            lua_pushstring(L, NULL);
+            break;
+    }
+    return 1; 
+}
+
+int lua_set_movietype(lua_State *L) {
     const char *type = lua_tostring(L, 1);
-    movietype(type);
+    set_movietype(type);
     return 0;
+}
+
+int lua_get_movietype(lua_State *L) {
+    int movie_type = get_movietype();
+    switch (movie_type) {
+        case WMV:
+            lua_pushstring(L, "WMV");
+            break;
+        case MP4:
+            lua_pushstring(L, "MP4");
+            break;
+        case AVI:
+            lua_pushstring(L, "AVI");
+            break;
+        default:
+            lua_pushstring(L, NULL);
+            break;
+    }
+    return 1; 
 }
 
 int lua_makemovie(lua_State *L) {
@@ -540,8 +575,9 @@ int lua_makemovie(lua_State *L) {
 
 int lua_loadtour(lua_State *L) {
 	const char *name = lua_tostring(L, 1);
-	loadtour(name);
-	return 0;
+	int error_code = loadtour(name);
+    lua_pushnumber(L, error_code);
+	return 1;
 }
 
 int lua_loadparticles(lua_State *L) {
@@ -592,16 +628,25 @@ int lua_unloadtour(lua_State *L) {
 
 int lua_setrenderdir(lua_State *L) {
 	const char *dir = lua_tostring(L, 1);
-    printf("lua_api: setting renderdir to: %s\n", dir);
 	setrenderdir(dir);
-    printf("lua_api: renderdir set to: %s\n", script_dir_path);
 	return 0;
+}
+
+int lua_getrenderdir(lua_State *L) {
+	lua_pushstring(L, script_dir_path);
+	return 1;
 }
 
 int lua_setviewpoint(lua_State *L) {
 	const char *viewpoint = lua_tostring(L, 1);
-	setviewpoint(viewpoint);
-	return 0;
+	int errorcode = setviewpoint(viewpoint);
+    lua_pushnumber(L, errorcode);
+	return 1;
+}
+
+int lua_getviewpoint(lua_State *L) {
+    lua_pushstring(L, camera_current->name);
+	return 1;
 }
 
 int lua_exit_smokeview(lua_State  *L) {
@@ -664,9 +709,14 @@ int lua_getcolorbarindex(lua_State *L) {
 }
 
 int lua_settimebarvisibility(lua_State *L) {
-    int setting = lua_tonumber(L, 1);
+    int setting = lua_toboolean(L, 1);
     settimebarvisibility(setting);
     return 0;
+}
+
+int lua_gettimebarvisibility(lua_State *L) {
+    lua_pushboolean(L, visTimebar);
+    return 1;
 }
 
 int lua_toggletimebarvisibility(lua_State *L) {
@@ -798,7 +848,9 @@ void initLua() {
 	lua_register(L, "loadvolsmoke", lua_loadvolsmoke);
 	lua_register(L, "loadvolsmokeframe", lua_loadvolsmokeframe);
     lua_register(L, "rendertype", lua_rendertype);
-    lua_register(L, "movietype", lua_movietype);
+    lua_register(L, "get_rendertype", lua_get_rendertype);
+    lua_register(L, "set_movietype", lua_set_movietype);
+    lua_register(L, "get_movietype", lua_get_movietype);
 	lua_register(L, "makemovie", lua_makemovie);
 	lua_register(L, "loadtour", lua_loadtour);
 	lua_register(L, "loadparticles", lua_loadparticles);
@@ -813,7 +865,9 @@ void initLua() {
 	lua_register(L, "unloadall", lua_unloadall);
     lua_register(L, "unloadtour", lua_unloadtour);
 	lua_register(L, "setrenderdir", lua_setrenderdir);
+	lua_register(L, "getrenderdir", lua_getrenderdir);
 	lua_register(L, "setviewpoint", lua_setviewpoint);
+	lua_register(L, "getviewpoint", lua_getviewpoint);
 	lua_register(L, "exit", lua_exit_smokeview);
     lua_register(L, "getcolorbarflip", lua_getcolorbarflip);
 	lua_register(L, "setcolorbarflip", lua_setcolorbarflip);
@@ -824,6 +878,7 @@ void initLua() {
 	lua_register(L, "getcolorbarindex", lua_getcolorbarindex);
 
     lua_register(L, "settimebarvisibility", lua_settimebarvisibility);
+    lua_register(L, "gettimebarvisibility", lua_gettimebarvisibility);
     lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);
 
     lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);

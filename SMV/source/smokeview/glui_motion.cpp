@@ -234,7 +234,9 @@ void enable_disable_makemovie(int onoff){
 
 void update_movie_type(int type){
   moviefiletype = type;
-  RADIO_movie_type->set_int_val(moviefiletype);
+  // if ffmpeg is not present then this GUI element is not created, so we must
+  // check for this before trying to update it.
+  if(have_ffmpeg == 1)RADIO_movie_type->set_int_val(moviefiletype);
 }
 
 /* ------------------ update_render_type ------------------------ */

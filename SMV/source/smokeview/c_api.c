@@ -557,6 +557,10 @@ void settimebarvisibility(int setting) {
   if(visTimebar==1)PRINTF("Time bar visible\n");
 }
 
+int gettimebarvisibility() {
+    return visTimebar;
+}
+
 void toggletimebarvisibility() {
   visTimebar = 1 - visTimebar;
   if(visTimebar==0)PRINTF("Time bar hidden\n");
@@ -683,7 +687,11 @@ void rendertype(const char *type) {
     }
 }
 
-void movietype(const char *type) {
+int get_rendertype() {
+    return renderfiletype;
+}
+
+void set_movietype(const char *type) {
     if(STRCMP(type, "WMV") == 0){
       update_movie_type(WMV);
     }
@@ -695,6 +703,10 @@ void movietype(const char *type) {
     }
 }
 
+int get_movietype() {
+    return moviefiletype;
+}
+
 void makemovie(const char *name, const char *base, float framerate) {
     strcpy(movie_name, name);
     strcpy(render_file_base, base);
@@ -704,10 +716,10 @@ void makemovie(const char *name, const char *base, float framerate) {
 
 /* ------------------ script_loadtour ------------------------ */
 
-void loadtour(const char *tourname) {
+int loadtour(const char *tourname) {
   int i;
   int count=0;
-
+  int errorcode = 0;
   PRINTF("loading tour %s\n\n", tourname);
 
   for(i=0;i<ntours;i++){
@@ -723,10 +735,14 @@ void loadtour(const char *tourname) {
     }
   }
 
-  if(count==0)fprintf(stderr,"*** Error: The tour %s failed to load\n",
+  if(count==0) {
+      fprintf(stderr,"*** Error: The tour %s failed to load\n",
                       tourname);
+      errorcode = 1;
+  }
   force_redisplay=1;
   updatemenu=1;
+  return errorcode;
 }
 
 /* ------------------ loadparticles ------------------------ */
@@ -1146,19 +1162,25 @@ void exit_smokeview() {
 
 /* ------------------ setviewpoint ------------------------ */
 
-void setviewpoint(const char *viewpoint){
+int setviewpoint(const char *viewpoint){
   camera *ca;
   int count=0;
-
+  int errorcode = 0;
   PRINTF("setting viewpoint to %s\n\n",viewpoint);
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(viewpoint,ca->name)==0){
       ResetMenu(ca->view_id);
       count++;
+      fprintf(stderr, "Setting viewpoint set to %s\n", ca->name);
       break;
     }
   }
-  if(count==0)fprintf(stderr,"*** Error: The viewpoint %s was not found\n",viewpoint);
+  if(count==0){
+      errorcode = 1;
+      fprintf(stderr,"*** Error: The viewpoint %s was not found\n",viewpoint);
+  }
+  fprintf(stderr, "Viewpoint set to %s\n", camera_current->name);
+  return errorcode;
 }
 
 void set_clipping_mode(int mode) {

@@ -26,6 +26,16 @@ _view = {
                 setcolorbarindex(v)
             end
         }
+    },
+    viewpoint = {
+        get = function ()
+            return getviewpoint()
+        end,
+        set = function (v)
+            local errorcode = setviewpoint(v)
+            assert(errorcode == 0, string.format("setviewpoint errorcode: %d\n",errorcode))
+            return errorcode
+        end
     }
 }
 local view_mt = {
@@ -39,6 +49,7 @@ local view_mt = {
    end,
    -- set method
    __newindex = function (t,k,v)
+       assert(_view[k], "_view." .. tostring(k) .. " does not exist.")
        _view[k].set(v)
    end
 }

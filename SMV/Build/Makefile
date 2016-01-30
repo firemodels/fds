@@ -226,7 +226,8 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 	$(SMVLUACORE_DIR)/ssfparser.lua $(SMVLUACORE_DIR)/ssfcommands.lua \
 	$(SMVLUACORE_DIR)/clipping.lua $(SMVLUACORE_DIR)/bounds.lua \
 	$(SMVLUACORE_DIR)/render.lua $(SMVLUACORE_DIR)/load.lua \
-	$(SMVLUACORE_DIR)/view.lua $(MINGWIN_LIBDIR_64)/lpeg.dll
+	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua \
+	$(MINGWIN_LIBDIR_64)/lpeg.dll
 
 smvluacore: $(SMVLUACORE_FILES)
 	cp $^ .
