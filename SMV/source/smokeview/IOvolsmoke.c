@@ -1296,7 +1296,9 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
   ni = meshi->ibar;
   nj = meshi->jbar;
   nk = meshi->kbar;
-  glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+  if(meshi->f_iblank_cell!=NULL){
+    glTexSubImage3D(GL_TEXTURE_3D, 0, ijk_offset[0], ijk_offset[1], ijk_offset[2], ni, nj, nk, GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+  }
 
   glActiveTexture(GL_TEXTURE0);
 }
