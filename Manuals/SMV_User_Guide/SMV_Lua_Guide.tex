@@ -66,8 +66,9 @@
 \function{load.smv}{filepath}{errorcode}{Load an smv file from \argu{filepath}.}
 \function{load.tour}{string name}{}{}
 % \val{nmeshes}{int}{no set}{} just overload the # operator for these
-\val{meshes}{[mesh]}{no set}{}
 \val{model.chid}{string}{readonly}{}
+\val{model.meshes}{[mesh]}{no set}{}
+\val{model.slices}{[slice]}{no set}{}
 \val{partclasscolor}{string}{}{}
 \val{partclasstype}{string}{}{}
 \function{plot3dprops}{int variable\_index, bool showvector, int vector\_length\_index, int display\_type, float vector\_length}{}{}
@@ -78,11 +79,10 @@
 \function{render.movie}{string name, string base, float framerate}{}{}
 \val{render.movie.type}{string type}{}{}
 % \val{nslices}{int}{no set}{} just overload the # operator for these
-\val{slices}{[slice]}{no set}{}
 \function{settourview}{int edittourArg, int mode, bool show\_tourlocusArg,float tour\_global\_tensionArg}{}{}
 \function{tempyieldscript}{float}{}{}
 \val{tour.keyframe}{float}{}{}
-\function{time}{float}{}{}
+\val{time}{float}{}{}
 \val{timebar.visibility}{int}{}{}
 \function{timebar.visibility.toggle}{}{}{}
 \val{smokeviewEmbedded}{bool}{readonly}{}
@@ -97,6 +97,6 @@
 \function{window.hide}{}{}{}
 \function{window.size}{}{}{}
 \val{window.size.width}{int}{}{}
-\val{window.size.width}{int}{}{}
+\val{window.size.height}{int}{}{}
 \function{yieldscript}{}{}{}
 \end{document}
