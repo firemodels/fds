@@ -8,7 +8,7 @@ visdir=$reporoot/Verification/Visualization
 if [ "`uname`" == "Darwin" ]; then
   SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $reporoot/SMV/Build/intel_osx_64/smokeview_osx_64"
 else
-  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $reporoot/SMV/Build/intel_linux_64/smv_intel_linux_64"
+  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $reporoot/SMV/Build/intel_linux_64/smokeview_linux_64"
 fi
 cd $visdir
 $SMV -s plume5c2.ssf plume5c
