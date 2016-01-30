@@ -5520,7 +5520,7 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
 devicedata *getdevice(char *label,int index){
   int i;
 
-  if(strcmp(label,"null")==0&&index>=0&&index<ndeviceinfo){
+  if(strlen(label)>=4&&strncmp(label,"null",4)==0&&index>=0&&index<ndeviceinfo){
     return deviceinfo + index;
   }
   for(i=0;i<ndeviceinfo;i++){
