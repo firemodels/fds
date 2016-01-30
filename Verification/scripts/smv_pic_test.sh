@@ -37,8 +37,10 @@ cd $curdir
 
 # check to see if image exists
 if [ -e $testimage ]; then
-  echo The image `pwd`/$testimage has been created
+  echo ""
+  echo "*** Success! The image $testimage was created."
 else
-  echo test image creation failed
+  echo ""
+  echo "*** Failure.  The image $testimage was not created."
 fi
 cd $curdir
