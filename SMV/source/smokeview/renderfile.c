@@ -10,14 +10,6 @@
 #include GLUT_H
 #include "gd.h"
 
-#if defined(WIN32)
-#include <windows.h>
-#elif defined(_MINGW32_)
-#include <sys/stat.h>
-#else
-#include <sys/stat.h>
-#endif
-
 #define RENDER_TYPE 0
 #define RENDER_START 3
 
@@ -169,7 +161,7 @@ void Render(int view_mode){
        ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
        ){
        render_frame[itimes]++;
-       RenderFrame(view_mode, NULL);
+       RenderFrame(view_mode);
      }
      else{
        ASSERT(RenderSkip>0);
@@ -178,7 +170,7 @@ void Render(int view_mode){
      }
     }
     if(touring == 1 && nglobal_times == 0){
-      if(rendertourcount % RenderSkip == 0)RenderFrame(view_mode, NULL);
+      if(rendertourcount % RenderSkip == 0)RenderFrame(view_mode);
       rendertourcount++;
       if(nglobal_times>0)tourangle_global += (float)(2.0*PI/((float)nglobal_times/(float)RenderSkip));
       if(nglobal_times==0)tourangle_global += (float)(2.0*PI/((float)maxtourframes/(float)RenderSkip));
@@ -195,7 +187,7 @@ void Render(int view_mode){
   }
 
   if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
-    if(render_multi==0)RenderFrame(view_mode, NULL); 
+    if(render_multi==0)RenderFrame(view_mode); 
     RenderOnceNow=0;
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
@@ -210,25 +202,14 @@ void Render(int view_mode){
   }
 }
 
-char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
-                   char *renderfile_path, int woffset, int hoffset, int screenH,
-                   char *basename);
   /* ------------------ RenderFrame ------------------------ */
-// The second argument to RenderFrame is the name that should be given to the
-// rendered file. If basename == NULL, then a default filename is formed based
-// on the chosen frame and rendering options.
-void RenderFrame(int view_mode, char *basename){
-  char renderfile_name[1024]; // the name the file (including extension)
-  char renderfile_dir[1024]; // the directory into which the image will be rendered
-  char renderfile_path[2048]; // the full path of the rendered image
+
+void RenderFrame(int view_mode){
+  char renderfile_name[1024], renderfile_dir[1024], renderfile_full[1024], renderfile_suffix[1024], *renderfile_ext;
+  char *renderfile_dir_ptr=NULL;
+  int use_scriptfile;
   int woffset=0,hoffset=0;
   int screenH;
-
-  if(script_dir_path != NULL){
-      strcpy(renderfile_dir, script_dir_path);
-  } else {
-      strcpy(renderfile_dir, ".");
-  }
 
 #ifdef WIN32
   SetThreadExecutionState(ES_DISPLAY_REQUIRED); // reset display idle timer to prevent screen saver from activating
@@ -236,100 +217,187 @@ void RenderFrame(int view_mode, char *basename){
 
   screenH = screenHeight;
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
-  // construct filename for image to be rendered
-  form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
-                woffset, hoffset, screenH, basename);
-                
-  printf("renderfile_name: %s\n", renderfile_name);
+
+// construct filename for image to be rendered
+
+  strcpy(renderfile_dir,"");
+  strcpy(renderfile_suffix,"");
+  use_scriptfile=0;
+
+  // filename base
+
+  if(current_script_command==NULL){
+    strcpy(renderfile_name,render_file_base);
+  }
+  else{
+    char suffix[20];
+
+    if(
+      (current_script_command->command==SCRIPT_RENDERONCE||
+       current_script_command->command==SCRIPT_RENDERALL||
+       current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+       current_script_command->command==SCRIPT_ISORENDERALL
+       )&&
+       current_script_command->cval2!=NULL
+       ){
+        strcpy(renderfile_name,current_script_command->cval2);
+        use_scriptfile=1;
+    }
+    else{
+      strcpy(renderfile_name,fdsprefix);
+    }
+    if(script_dir_path!=NULL&&strlen(script_dir_path)>0){
+      if(strlen(script_dir_path)==2&&script_dir_path[0]=='.'&&script_dir_path[1]==dirseparator[0]){
+      }
+      else{
+        strcpy(renderfile_dir,script_dir_path);
+        renderfile_dir_ptr=renderfile_dir;
+      }
+    }
+    strcpy(suffix,"");
+    switch(view_mode){
+    case VIEW_LEFT:
+      if(showstereo==STEREO_LR){
+        strcat(suffix,"_L");
+      }
+      break;
+    case VIEW_RIGHT:
+      if(showstereo==STEREO_LR){
+        strcat(suffix,"_R");
+      }
+      break;
+    case VIEW_CENTER:
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+    strcat(renderfile_suffix,suffix);
+  }
+  
+  // directory
+
+  if(can_write_to_dir(renderfile_dir)==0){
+    if(can_write_to_dir(smokeviewtempdir)==1){
+      strcpy(renderfile_dir,smokeviewtempdir);
+    }
+    else{
+      fprintf(stderr,"*** Error: unable to output render file\n");
+      return;
+    }
+  }
+
+  // filename suffix
+
+  if(use_scriptfile==0||
+    (current_script_command!=NULL&&
+    (current_script_command->command==SCRIPT_RENDERALL||
+     current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+     current_script_command->command==SCRIPT_ISORENDERALL
+     ))){
+    int image_num;
+    char suffix[20];
+
+    strcpy(renderfile_suffix,"_");
+    if(RenderTime==0){
+      image_num=seqnum;
+    }
+    else{
+      if(skip_render_frames==1){
+        image_num=itimes;
+      }
+      else{
+        image_num=itimes/RenderSkip;
+      }
+    }
+    if(renderfilelabel==0||RenderTime==0){
+      float time_local;
+      int code;
+
+      if(RenderTime==0){
+        sprintf(suffix,"s%04i",image_num);
+      }
+      else{
+        sprintf(suffix,"%04i",image_num);
+      }
+      code = getplot3dtime(&time_local);
+      if(code==1&&renderfilelabel==1){
+        char timelabel_local[20], *timelabelptr, dt=1.0;
+  
+        timelabelptr = time2timelabel(time_local,dt,timelabel_local);
+        strcat(suffix,"_");
+        strcat(suffix,timelabelptr);
+        strcat(suffix,"s");
+      }
+    }
+    else{
+      float time_local;
+      char timelabel_local[20], *timelabelptr;
+      float dt;
+
+      time_local = global_times[itimes];
+      dt = global_times[1]-global_times[0];
+      if(dt<0.0)dt=-dt;
+      timelabelptr = time2timelabel(time_local,dt,timelabel_local);
+      strcpy(suffix,timelabelptr);
+      strcat(suffix,"s");
+    }
+    switch(view_mode){
+    case VIEW_CENTER:
+      if(RenderTime==0)seqnum++;
+      break;
+    case VIEW_LEFT:
+        if(showstereo==STEREO_LR){
+          strcat(suffix,"_L");
+        }
+      break;
+    case VIEW_RIGHT:
+      if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
+        strcat(suffix,"_R");
+      }
+      if(RenderTime==0)seqnum++;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+    }
+    strcat(renderfile_suffix,suffix);
+  }
+
+  if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+    hoffset=screenHeight/4;
+    screenH = screenHeight/2;
+    if(view_mode==VIEW_RIGHT)woffset=screenWidth;
+  }
+
+  // filename extension
+
+  switch(renderfiletype){
+  case 0:
+    renderfile_ext=ext_png;
+    break;
+  case 1:
+    renderfile_ext=ext_jpg;
+    break;
+  default:
+    renderfiletype=2;
+    renderfile_ext=ext_png;
+    break;
+  }
+
+  // form full filename from parts
+
+  strcpy(renderfile_full,renderfile_name);
+  if(strlen(renderfile_suffix)>0)strcat(renderfile_full,renderfile_suffix);
+  strcat(renderfile_full,renderfile_ext);
+
   // render image
-  SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
+
+  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
 }
-
-// construct filepath for image to be renderd
-char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
-                   char *renderfile_path, int woffset, int hoffset, int screenH,
-                   char *basename) {
-    
-    // char renderfile_ext[4]; // does not include the '.'
-    char suffix[20];
-    char* renderfile_ext;
-    char* view_suffix;
-    
-    // determine the extension to be used, and set renderfile_ext to it
-    switch(renderfiletype) {
-        case 0:
-            renderfile_ext = ext_png;
-            break;
-        case 1:
-            renderfile_ext = ext_jpg;
-            break;
-        default:
-            renderfiletype = 2;
-            renderfile_ext = ext_png;
-            break;
-    }
-    
-    // if the basename has not been specified, use a predefined method to
-    // determine the filename
-    if(basename == NULL) {
-        printf("basename is null\n");
-        
-        
-        switch(view_mode) {
-            case VIEW_LEFT:
-                if(showstereo==STEREO_LR){
-                    view_suffix = "_L";
-                }
-                break;
-            case VIEW_RIGHT:
-                if(showstereo==STEREO_LR){
-                    view_suffix = "_R";
-                }
-                break;
-            case VIEW_CENTER:
-                view_suffix = "";
-                break;
-            default:
-                ASSERT(FFALSE);
-                break;
-        }
-        
-        if(can_write_to_dir(renderfile_dir)==0){
-            printf("Creating directory: %s\n", renderfile_dir);
-            
-// #if defined(WIN32)
-//             CreateDirectory (renderfile_dir, NULL);
-// #elif defined(_MINGW32_)
-//             CreateDirectory (renderfile_dir, NULL);
-// #else
-//             mkdir(renderfile_dir, 0700);
-// #endif
-            // TODO: ensure this can be made cross-platform
-            if (strlen(renderfile_dir)>0) {
-                printf("making dir: %s", renderfile_dir);
-                mkdir(renderfile_dir);
-            }
-        }
-        if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
-          hoffset=screenHeight/4;
-          screenH = screenHeight/2;
-          if(view_mode==VIEW_RIGHT)woffset=screenWidth;
-        }
-
-        snprintf(renderfile_name, 1024,
-                  "%s%s%s",
-                  fdsprefix, view_suffix, renderfile_ext);
-        printf("directory is: %s\n", renderfile_dir);
-        printf("filename is: %s\n", renderfile_name);
-    } else {
-        snprintf(renderfile_name, 1024, "%s%s", basename, renderfile_ext);
-    }
-    return renderfile_name;
-}
-
 
 /* ------------------ getscreenbuffer --------- */
 
@@ -452,7 +520,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 /* ------------------ SVimage2file ------------------------ */
 
 int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int hoffset, int height){
-    printf("svimage2file: %s\n", RENDERfilename);
+
   FILE *RENDERfile;
   char *renderfile=NULL;
   GLubyte *OpenGLimage, *p;

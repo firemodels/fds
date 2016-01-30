@@ -8,7 +8,9 @@
 
 #include "smokeviewvars.h"
 #include "update.h"
+#ifdef LUA_SCRIPTING
 #include "lua_api.h"
+#endif
 
 /* ------------------ Init ------------------------ */
 
@@ -284,6 +286,7 @@ int setup_case(int argc, char **argv){
   return 0;
 }
 
+#ifdef LUA_SCRIPTING
 /* ------------------ load_script ------------------------ */
 // There are two options for scripting, Lua and SSF. Which is run is set here
 // based on the commandline arguments. If either (exclusive) of these values
@@ -326,7 +329,7 @@ int load_script() {
     }
     return 1;
 }
-
+#endif
 
 /* ------------------ setup_glut ------------------------ */
 

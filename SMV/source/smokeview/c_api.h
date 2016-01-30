@@ -85,3 +85,8 @@ void set_sceneclip_z(int clipMin, float min, int clipMax, float max);
 void set_sceneclip_z_min(int flag, float value);
 void set_sceneclip_z_max(int flag, float value);
 void set_clipping_mode(int mode);
+
+void RenderFrameLua(int view_mode, char *basename);
+char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
+                   char *renderfile_path, int woffset, int hoffset, int screenH,
+                   char *basename);

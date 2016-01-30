@@ -8,8 +8,10 @@
 #include "string_util.h"
 #include "smokeviewvars.h"
 
+#ifdef LUA_SCRIPTING
 #include "c_api.h"
 #include "lua_api.h"
+#endif
 
 //  version 6.3.3
 
@@ -47,9 +49,10 @@ int main(int argc, char **argv){
   display_version_info();
   setup_glut(argc,argv_sv);
 
+#ifdef LUA_SCRIPTING
   // Initialise the lua interpreter, it does not take control at this point
   initLua();
-
+#endif
   return_code=setup_case(argc,argv_sv);
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
@@ -57,8 +60,10 @@ int main(int argc, char **argv){
     readini(ini_from);
   }
 
+#ifdef LUA_SCRIPTING
   // Load a script if necessary (from startup.c)
   load_script();
+#endif
 
   glutMainLoop();
   return 0;

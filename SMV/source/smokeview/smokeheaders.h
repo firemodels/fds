@@ -738,7 +738,11 @@ EXTERNCPP void drawventdataPROFILE(void);
 EXTERNCPP void drawventdataSLAB(void);
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
+#ifdef LUA__SCRIPTING
 EXTERNCPP void RenderFrame(int view_mode, char *basename);
+#else
+EXTERNCPP void RenderFrame(int view_mode);
+#endif
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
@@ -806,7 +810,9 @@ EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *s
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval, float range);
 EXTERNCPP int setup_case(int argc, char **argv);
+#ifdef LUA_SCRIPTING
 EXTERNCPP int load_script(void);
+#endif
 EXTERNCPP int get_min_partframes(void);
 EXTERNCPP int Update_Bounds(void);
 

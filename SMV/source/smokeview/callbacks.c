@@ -10,7 +10,9 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
+#ifdef LUA_SCRIPTING
 #include "lua_api.h"
+#endif
 
 #undef pp_GPU_CULL_STATE
 #ifdef pp_GPU
@@ -2829,6 +2831,7 @@ int DoStereo(void){
   return return_code;
 }
 
+#ifdef LUA_SCRIPTING
 /* ------------------ DoScriptLua ------------------------ */
 void DoScriptLua(void) {
   int script_return_code;
@@ -2842,9 +2845,10 @@ void DoScriptLua(void) {
     }
   }
 }
+#endif
 
 /* ------------------ DoScript ------------------------ */
-
+#ifdef LUA_SCRIPTING
 void DoScript(void){
   int script_return_code;
   if(runscript == 1) {
@@ -2857,6 +2861,81 @@ void DoScript(void){
       }
     }
 }
+#else
+void DoScript(void){
+  if(runscript==1&&default_script!=NULL){
+    ScriptMenu(default_script->id);
+    runscript=2;
+  }
+  script_render_flag=0;
+  if(nscriptinfo>0&&current_script_command!=NULL&&(script_step==0||(script_step==1&&script_step_now==1))){
+    script_step_now=0;
+#ifndef WIN32    
+    if(file_exists(stop_filename)){
+      fprintf(stderr,"*** Warning: stop file found.  Remove before running smokeview script\n");
+      exit(0);
+    }
+#endif    
+    if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
+      if(current_script_command->exit==0){
+        RenderState(RENDER_ON);
+      }
+      else{
+        RenderState(RENDER_OFF);
+        current_script_command->first=1;
+        current_script_command->exit=0;
+      }
+    }
+    if(current_script_command->command==SCRIPT_ISORENDERALL){\
+      if(current_script_command->exit==0){
+        RenderState(RENDER_ON);
+      }
+      else{
+        RenderState(RENDER_OFF);
+        current_script_command->first=1;
+        current_script_command->exit=0;
+      }
+    }
+    if(render_state==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
+      current_script_command++;
+      script_render_flag=run_script();
+      if(runscript==2&&noexit==0&&current_script_command==NULL){
+        exit(0);
+      }
+      if(current_script_command==NULL){
+        glui_script_enable();
+      }
+    }
+    else{
+      if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
+        int remove_frame;
+  
+        script_loadvolsmokeframe2();
+        remove_frame=current_script_command->remove_frame;
+        if(remove_frame>=0){
+          unload_volsmoke_frame_allmeshes(remove_frame);
+        }
+      }
+      if(current_script_command->command==SCRIPT_ISORENDERALL){
+        int remove_frame;
+
+        script_loadisoframe2(current_script_command);
+        remove_frame = current_script_command->remove_frame;
+        if(remove_frame>=0){
+          //unload_volsmoke_frame_allmeshes(remove_frame);
+        }
+      }
+    }
+    glutPostRedisplay();
+  }
+  else{
+    first_frame_index=0;
+    skip_render_frames=0;
+    script_startframe=-1;
+    script_skipframe=-1;
+  }
+}
+#endif
 
 /* ------------------ Display_CB ------------------------ */
 
@@ -2865,7 +2944,9 @@ void Display_CB(void){
 
   renderdoublenow=0;
   DoScript();
+#ifdef LUA_SCRIPTING
   DoScriptLua();
+#endif
   update_Display();
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(showstereo==STEREO_NONE){

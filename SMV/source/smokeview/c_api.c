@@ -404,8 +404,131 @@ void render(const char *filename) {
     //runluascript=1;
     //strcpy(render_file_base,filename);
     printf("basename(c): %s\n", filename);
-	RenderFrame(VIEW_CENTER, filename);
+	RenderFrameLua(VIEW_CENTER, filename);
 }
+
+
+// construct filepath for image to be renderd
+char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
+                   char *renderfile_path, int woffset, int hoffset, int screenH,
+                   char *basename) {
+    
+    // char renderfile_ext[4]; // does not include the '.'
+    char suffix[20];
+    char* renderfile_ext;
+    char* view_suffix;
+    
+    // determine the extension to be used, and set renderfile_ext to it
+    switch(renderfiletype) {
+        case 0:
+            renderfile_ext = ext_png;
+            break;
+        case 1:
+            renderfile_ext = ext_jpg;
+            break;
+        default:
+            renderfiletype = 2;
+            renderfile_ext = ext_png;
+            break;
+    }
+    
+    // if the basename has not been specified, use a predefined method to
+    // determine the filename
+    if(basename == NULL) {
+        printf("basename is null\n");
+        
+        
+        switch(view_mode) {
+            case VIEW_LEFT:
+                if(showstereo==STEREO_LR){
+                    view_suffix = "_L";
+                }
+                break;
+            case VIEW_RIGHT:
+                if(showstereo==STEREO_LR){
+                    view_suffix = "_R";
+                }
+                break;
+            case VIEW_CENTER:
+                view_suffix = "";
+                break;
+            default:
+                ASSERT(FFALSE);
+                break;
+        }
+        
+        if(can_write_to_dir(renderfile_dir)==0){
+            printf("Creating directory: %s\n", renderfile_dir);
+            
+// #if defined(WIN32)
+//             CreateDirectory (renderfile_dir, NULL);
+// #elif defined(_MINGW32_)
+//             CreateDirectory (renderfile_dir, NULL);
+// #else
+//             mkdir(renderfile_dir, 0700);
+// #endif
+            // TODO: ensure this can be made cross-platform
+            if (strlen(renderfile_dir)>0) {
+                printf("making dir: %s", renderfile_dir);
+                mkdir(renderfile_dir);
+            }
+        }
+        if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+          hoffset=screenHeight/4;
+          screenH = screenHeight/2;
+          if(view_mode==VIEW_RIGHT)woffset=screenWidth;
+        }
+
+        snprintf(renderfile_name, 1024,
+                  "%s%s%s",
+                  fdsprefix, view_suffix, renderfile_ext);
+        printf("directory is: %s\n", renderfile_dir);
+        printf("filename is: %s\n", renderfile_name);
+    } else {
+        snprintf(renderfile_name, 1024, "%s%s", basename, renderfile_ext);
+    }
+    return renderfile_name;
+}
+
+// This is function fulfills the exact same purpose as the original RenderFrame
+// function, except that it takes a second argument, basename. This could be
+// be used as a drop in replacement as long as all existing calls are modified
+// to use basename = NULL.
+  /* ------------------ RenderFrameLua ------------------------ */
+// The second argument to RenderFrameLua is the name that should be given to the
+// rendered file. If basename == NULL, then a default filename is formed based
+// on the chosen frame and rendering options.
+void RenderFrameLua(int view_mode, char *basename) {
+  char renderfile_name[1024]; // the name the file (including extension)
+  char renderfile_dir[1024]; // the directory into which the image will be rendered
+  char renderfile_path[2048]; // the full path of the rendered image
+  int woffset=0,hoffset=0;
+  int screenH;
+
+  if(script_dir_path != NULL){
+      strcpy(renderfile_dir, script_dir_path);
+  } else {
+      strcpy(renderfile_dir, ".");
+  }
+
+#ifdef WIN32
+  SetThreadExecutionState(ES_DISPLAY_REQUIRED); // reset display idle timer to prevent screen saver from activating
+#endif
+
+  screenH = screenHeight;
+  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
+  // construct filename for image to be rendered
+  form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
+                woffset, hoffset, screenH, basename);
+                
+  printf("renderfile_name: %s\n", renderfile_name);
+  // render image
+  SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
+  if(RenderTime==1&&output_slicedata==1){
+    output_Slicedata();
+  }
+}
+
 
 /* ------------------ settourkeyframe ------------------------ */
 

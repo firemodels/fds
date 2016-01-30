@@ -36,13 +36,13 @@ cd $SRCDIR/zlib114
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
 
-# Lua
+# Lua # Lua interpreter
 cd $SRCDIR/lua-5.3.1
 export TARGET=mingw
 ./makelib.sh $OPTS
 cp src/lua53.dll $LIBDIR/.
 
-# LPEG
+# LPEG # Lua parsing libarary to parse SSF files
 cd $SRCDIR/lpeg-1.0.0
 ./makelib.sh $OPTS
 cp lpeg.dll $LIBDIR/.

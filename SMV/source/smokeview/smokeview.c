@@ -296,7 +296,9 @@ void parse_commandline(int argc, char **argv){
         strncmp(argi,"-lang",5)==0||
 #endif        
         strncmp(argi,"-script",7)==0||
+#ifdef LUA_SCRIPTING
         strncmp(argi,"-luascript",10)==0||
+#endif
         strncmp(argi,"-startframe",11)==0||
         strncmp(argi,"-skipframe",10)==0||
         strncmp(argi,"-bindir",7)==0||
@@ -582,9 +584,12 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;
+#ifdef LUA_SCRIPTING
       strcpy(script_filename, "");
+#endif
       runscript=1;
     }
+#ifdef LUA_SCRIPTING
     else if(strncmp(argv[i],"-runluascript",13)==0){
       from_commandline=1;
       strcpy(luascript_filename, "");
@@ -594,6 +599,7 @@ void parse_commandline(int argc, char **argv){
       from_commandline=1;
       exit_on_script_crash=1;
     }
+#endif
     else if(strncmp(argv[i],"-skipframe",10)==0){
       from_commandline=1;
       ++i;
@@ -625,6 +631,7 @@ void parse_commandline(int argc, char **argv){
         runscript=1;
       }
     }
+#ifdef LUA_SCRIPTING
     else if(strncmp(argv[i],"-luascript",10)==0){
       from_commandline=1;
       ++i;
@@ -633,6 +640,7 @@ void parse_commandline(int argc, char **argv){
         runluascript=1;
       }
     }
+#endif
     else if(strncmp(argv[i],"-noexit",7)==0){
       noexit=1;
     }
@@ -752,9 +760,12 @@ void usage(char **argv){
   PRINTF("%s\n",_(" -ini           - output default smokeview parameters to smokeview.ini"));
   PRINTF("%s\n",_(" -ng_ini        - No graphics version of -ini."));
   PRINTF("%s\n",_(" -runscript     - run the script file casename.ssf"));
-  PRINTF("%s\n",_(" -runluascript  - run the lua script file casename.lua"));
   PRINTF("%s\n",_(" -script scriptfile - run the script file scriptfile"));
+#ifdef LUA_SCRIPTING
+  PRINTF("%s\n",_(" -runluascript  - run the lua script file casename.lua"));
+  PRINTF("%s\n",_(" -luascript scriptfile - run the Lua script file scriptfile"));
   PRINTF("%s\n",_(" -killscript    - exit smokeview (with an error code) if the script fails"));
+#endif
   PRINTF("%s\n",_(" -skipframe n   - render every n frames"));
   PRINTF("%s\n",_(" -startframe n  - start rendering at frame n"));
   PRINTF("%s\n",_(" -stereo        - activate stereo mode"));
