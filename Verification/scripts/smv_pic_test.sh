@@ -1,11 +1,15 @@
 #!/bin/bash
-testimage=plume5c_test.png
 curdir=`pwd`
+testimage=plume5c_test.png
 rm -f $testimage
 cd ../..
 reporoot=`pwd`
 visdir=$reporoot/Verification/Visualization
-SMV=$repo/Utilties/runsmv.sh
+if [ "`uname`" == "Darwin" ]; then
+  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $reporoot/SMV/Build/intel_osx_64/smokeview_osx_64"
+else
+  SMV="$reporoot/Utilities/Scripts/smokeview.sh -e $reporoot/SMV/Build/intel_linux_64/smv_intel_linux_64"
+fi
 cd $visdir
 $SMV -s plume5c2.ssf plume5c
 cd $curdir
@@ -14,4 +18,4 @@ if [ -e $testimage ]; then
 else
   echo test image creation failed
 fi
-
+cd $curdir
