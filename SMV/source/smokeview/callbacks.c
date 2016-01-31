@@ -10,7 +10,7 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 #include "lua_api.h"
 #endif
 
@@ -2831,7 +2831,7 @@ int DoStereo(void){
   return return_code;
 }
 
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 /* ------------------ DoScriptLua ------------------------ */
 void DoScriptLua(void) {
   int script_return_code;
@@ -2848,7 +2848,7 @@ void DoScriptLua(void) {
 #endif
 
 /* ------------------ DoScript ------------------------ */
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 void DoScript(void){
   int script_return_code;
   if(runscript == 1) {
@@ -2944,7 +2944,7 @@ void Display_CB(void){
 
   renderdoublenow=0;
   DoScript();
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
   DoScriptLua();
 #endif
   update_Display();

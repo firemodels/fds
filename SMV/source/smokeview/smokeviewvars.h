@@ -1038,7 +1038,7 @@ SVEXTERN char SVDECL(*script_dir_path,NULL);
 SVEXTERN int SVDECL(nscriptinfo,0);
 SVEXTERN scriptfiledata SVDECL(*script_recording,NULL);
 SVEXTERN int SVDECL(runscript,0), SVDECL(noexit,0);
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 SVEXTERN int SVDECL(runluascript,0);
 SVEXTERN int SVDECL(exit_on_script_crash,0);
 #endif
@@ -1134,7 +1134,7 @@ SVEXTERN char script_inifile_suffix[1024], vol_prefix[1024];
 SVEXTERN char script_renderdir[1024], script_renderfilesuffix[1024], script_renderfile[1024];
 SVEXTERN inifiledata first_inifile, last_inifile;
 SVEXTERN char script_filename[1024];
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 SVEXTERN char luascript_filename[1024];
 #endif
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;

@@ -8,7 +8,7 @@
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 #include "c_api.h"
 #include "lua_api.h"
 #endif
@@ -49,7 +49,7 @@ int main(int argc, char **argv){
   display_version_info();
   setup_glut(argc,argv_sv);
 
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
   // Initialise the lua interpreter, it does not take control at this point
   initLua();
 #endif
@@ -60,7 +60,7 @@ int main(int argc, char **argv){
     readini(ini_from);
   }
 
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
   // Load a script if necessary (from startup.c)
   load_script();
 #endif

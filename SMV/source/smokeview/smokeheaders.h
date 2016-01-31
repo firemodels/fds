@@ -810,7 +810,7 @@ EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *s
 EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale, float range);
 EXTERNCPP void num2string(char *string, float tval, float range);
 EXTERNCPP int setup_case(int argc, char **argv);
-#ifdef LUA_SCRIPTING
+#ifdef pp_LUA
 EXTERNCPP int load_script(void);
 #endif
 EXTERNCPP int get_min_partframes(void);
