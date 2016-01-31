@@ -295,11 +295,25 @@ test("loaded file test", function()
 end)
 display_test_results(tests)
 function mkMovie()
+    -- this is a very quick hack of a sript as a demonstration
+    -- depends on ffmpeg and 
+    -- it currently saves to disk, but it should be possible to directly stream
+    -- the images to ffmpeg
+    local f = assert(io.popen("uname", r))
+    local sys = assert(f:read('*a'))
+    f:close()
+    local sep
+    if sys == "Linux" then sep = "/"
+    else sep = "\\"
+    end
+    os.execute("mkdir renders" .. sep .. "tempslice")
+    os.execute("mkdir renders" .. sep .. "smoke")
+    os.execute("mkdir renders" .. sep .. "combined")
     render.type = "PNG"
     unload.all()
     view.viewpoint = "n"
     timebar.visibility = true
-    local movframes = 1000
+    local movframes = 500
     load.datafile("room_fire_01.sf")
     render.dir = "renders/tempslice"
     rendermany(0,movframes,1,function() return tostring(view.framenumber) end)

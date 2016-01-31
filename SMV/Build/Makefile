@@ -69,7 +69,7 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua
 	
 smvluacore: $(SMVLUACORE_FILES)
-	cp $^ .
+	cp $(SMVLUACORE_FILES) . # cannot use $^ here
 
 # libraries used by smokeview
 
@@ -227,7 +227,7 @@ gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX
 ifeq ($(LUA_SCRIPTING),true)
 gnu_linux_64 : CFLAGS    += -D pp_LUA
 gnu_linux_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.a
-gnu_linux_64 : SMVLUACORE_DIR += $(LIB_DIR_PLAT)/lpeg.so
+gnu_linux_64 : SMVLUACORE_FILES += $(LIB_DIR_PLAT)/lpeg.so
 endif
 gnu_linux_64 : LFLAGS    = -m64
 gnu_linux_64 : CC        = gcc
@@ -236,7 +236,9 @@ gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS) $(if ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
+		$(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS) \
+		$(if ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
 
 # ------------- mingw_win_64 ----------------
 
@@ -247,11 +249,11 @@ mingw_win_64 : LIBS_PLAT = $(LIB_DIR_PLAT)/libglui.a \
 	$(LIB_DIR_PLAT)/libglutwin.a
 mingw_win_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend \
 						       -ffree-form -frecord-marker=4 -fno-underscoring
-mingw_win_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D GLEW_STATIC
+mingw_win_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D GLEW_STATIC -D MINGW
 ifeq ($(LUA_SCRIPTING),true)
 mingw_win_64 : CFLAGS    += -D pp_LUA
 mingw_win_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.dll
-mingw_win_64 : SMVLUACORE_DIR += $(LIB_DIR_PLAT)/lpeg.dll
+mingw_win_64 : SMVLUACORE_FILES += $(LIB_DIR_PLAT)/lpeg.dll
 endif
 mingw_win_64 : LFLAGS    = -m64 -static-libgcc -static-libstdc++
 mingw_win_64 : CC        = gcc
@@ -264,6 +266,7 @@ mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 		$(($(LUA_SCRIPTING),true),-I ../../source/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
 		-lgdi32 -lwinmm -lcomdlg32 -lpthread
+	echo $(SMVLUACORE_FILES)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
