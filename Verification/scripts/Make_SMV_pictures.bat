@@ -254,8 +254,8 @@ echo.
 echo -help  - display this message
 echo -debug - run with debug FDS
 echo -useinstalled - use installed Smokeview
-echo -geom  - run only geom cases
-echo -wui   - run only W cases
+echo -geom  - run only geometry cases
+echo -wui   - run only Wui cases
 exit /b
   
 :eof
