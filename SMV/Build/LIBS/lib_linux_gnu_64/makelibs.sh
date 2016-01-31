@@ -39,9 +39,10 @@ cp libz.a $LIBDIR/.
 cd $SRCDIR/lua-5.3.1
 export TARGET=linux
 ./makelib.sh $OPTS
-cp src/lua53.so $LIBDIR/.
+cp src/liblua.a $LIBDIR/.
 
 # LPEG # Lua parsing libarary to parse SSF files
 cd $SRCDIR/lpeg-1.0.0
+export TARGET=linux
 ./makelib.sh $OPTS
 cp lpeg.so $LIBDIR/.

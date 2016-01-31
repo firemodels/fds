@@ -470,7 +470,11 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
             // TODO: ensure this can be made cross-platform
             if (strlen(renderfile_dir)>0) {
                 printf("making dir: %s", renderfile_dir);
+#ifdef pp_LINUX
+                mkdir(renderfile_dir, 0755);
+#else
                 mkdir(renderfile_dir);
+#endif
             }
         }
         if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){

@@ -32,16 +32,19 @@ FILES = lpvm.o lpcap.o lptree.o lpcode.o lpprint.o
 DLLFLAGS = -shared -fPIC
 # DLLFLAGS =
 
-# For Linux or MingW
-posix:
+linux:
+	make lpeg.so "DLLFLAGS = -shared -fPIC"
+mingw:
 	make lpeg$(DLLEXT)  "DLLFLAGS = -shared -fPIC"
 
 # For Mac OS
 macosx:
 	make lpeg.so "DLLFLAGS = -bundle -undefined dynamic_lookup"
 
-lpeg$(DLLEXT): $(FILES)
-	$(CC) $(DLLFLAGS) $(FILES) -o $@ -L /d/lua-5.3.1/install/lib -llua53 #../../Build/LIBS/lib_mingw_gcc_64/liblua.a
+lpeg.dll: $(FILES)
+	$(CC) $(DLLFLAGS) $(FILES) -o $@ -L ../lua-5.3.1/src -llua53
+lpeg.so: $(FILES)
+	$(CC) $(DLLFLAGS) $(FILES) -o $@ -L ../lua-5.3.1/src
 
 $(FILES): makefile
 

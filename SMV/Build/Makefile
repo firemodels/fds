@@ -226,7 +226,7 @@ gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -f
 gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX
 ifeq ($(LUA_SCRIPTING),true)
 gnu_linux_64 : CFLAGS    += -D pp_LUA
-gnu_linux_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.so
+gnu_linux_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.a
 gnu_linux_64 : SMVLUACORE_DIR += $(LIB_DIR_PLAT)/lpeg.so
 endif
 gnu_linux_64 : LFLAGS    = -m64
@@ -235,8 +235,8 @@ gnu_linux_64 : CPP       = g++
 gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
-gnu_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+gnu_linux_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS) $(if ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
 
 # ------------- mingw_win_64 ----------------
 
@@ -259,7 +259,7 @@ mingw_win_64 : CPP       = g++
 mingw_win_64 : FC        = gfortran
 mingw_win_64 : exe       = smokeview_mingw_$(SMV_TESTSTRING)64
 
-mingw_win_64 : $(obj) $(($(LUA_SCRIPTING),true),smvluacore)
+mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
 		$(($(LUA_SCRIPTING),true),-I ../../source/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
