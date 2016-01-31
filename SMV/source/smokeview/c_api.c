@@ -470,10 +470,10 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
             // TODO: ensure this can be made cross-platform
             if (strlen(renderfile_dir)>0) {
                 printf("making dir: %s", renderfile_dir);
-#ifdef pp_LINUX
-                mkdir(renderfile_dir, 0755);
-#else
+#ifdef MINGW
                 mkdir(renderfile_dir);
+#else defined(pp_LINUX)
+                mkdir(renderfile_dir, 0755);
 #endif
             }
         }
