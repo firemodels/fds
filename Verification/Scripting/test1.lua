@@ -262,7 +262,7 @@ test("loaded file test", function()
         render.type = "qwerr"
     end)
     test("render.movie", function()
-        render.movie("testname", "testbase", 30)
+        -- render.movie("testname", "testbase", 30)
     end)
     test("render.movie.type get/set", function()
         test("set", function() render.movie.type = "MP4" end)
@@ -291,8 +291,41 @@ test("loaded file test", function()
         for key,value in pairs(model.slices) do print(key,value.label) end
         for key,value in pairs(model.slices) do print(key,value.file) end
     end)
+    
 end)
 display_test_results(tests)
+function mkMovie()
+    render.type = "PNG"
+    unload.all()
+    view.viewpoint = "n"
+    timebar.visibility = true
+    local movframes = 1000
+    load.datafile("room_fire_01.sf")
+    render.dir = "renders/tempslice"
+    rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
+    unload.all()
+    render.dir ="renders/smoke"
+    load.datafile("room_fire_01.s3d")
+    rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
+    io.stderr:write("rendering complete\n")
+    for i=0,movframes,1 do
+        os.execute(string.format(
+            "montage"
+            .. " renders/tempslice/%d.png"
+            .. " renders/smoke/%d.png"
+            .. " -tile 2x1"
+            .. " -geometry +0+0"
+            .. " renders/combined/%d.png"
+            , i, i, i))
+    end 
+    os.execute(string.format(
+        "ffmpeg"
+        .. " -y"
+        .. " -r 15"
+        .. " -i renders/combined/%%d.png"
+        .. " renders/testMovie.mp4"))
+end
+pcall(mkMovie)
 exit()
 camera_mod_elev(45)
 camera_mod_az(45)
