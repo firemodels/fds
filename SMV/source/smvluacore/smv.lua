@@ -11,7 +11,7 @@ require "tour"
 render_startframe = 0
 render_skipframe = 1
 
-smv.getfinalframe = get_nglobal_times
+smv.getfinalframe = get_nglobal_times-1
 getfinalframe = smv.getfinalframe
 
 function smv.settimeend()
