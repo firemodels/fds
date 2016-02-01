@@ -2229,7 +2229,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
     case 0:
       returnval=0;
       break;
-    case 1:
+    case XDIR:
       if(world_eyepos[0]<xyzmaxi[0]){
         returnval=1;
       }
@@ -2237,7 +2237,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -1:
+    case XDIRNEG:
       if(world_eyepos[0]<xyzmaxj[0]){
         returnval=-1;
       }
@@ -2245,7 +2245,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=1;
       }
       break;
-    case 2:
+    case YDIR:
       if(world_eyepos[1]<xyzmaxi[1]){
         returnval=1;
       }
@@ -2253,7 +2253,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -2:
+    case YDIRNEG:
       if(world_eyepos[1]<xyzmaxj[1]){
         returnval=-1;
       }
@@ -2261,7 +2261,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=1;
       }
       break;
-    case 3:
+    case ZDIR:
       if(world_eyepos[2]<xyzmaxi[2]){
         returnval=1;
       }
@@ -2269,7 +2269,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -3:
+    case ZDIRNEG:
       if(world_eyepos[2]<xyzmaxj[2]){
         returnval=-1;
       }

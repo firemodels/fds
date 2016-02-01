@@ -955,13 +955,12 @@ void getvolsmokedir(float *mm){
 
     for(i=-3;i<=3;i++){
       if(i==0)continue;
-      ii = i;
-      if(i<0)ii=-i;
+      ii = ABS(i);
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
       switch(ii){
-      case 1:
+      case XDIR:
         if(i<0){
           norm[0]=-1.0;
           eyedir[0]=x0;
@@ -973,7 +972,7 @@ void getvolsmokedir(float *mm){
         eyedir[1]=ycen;
         eyedir[2]=zcen;
         break;
-      case 2:
+      case YDIR:
         eyedir[0]=xcen;
         if(i<0){
           norm[1]=-1.0;
@@ -985,7 +984,7 @@ void getvolsmokedir(float *mm){
         }
         eyedir[2]=zcen;
         break;
-      case 3:
+      case ZDIR:
         eyedir[0]=xcen;
         eyedir[1]=ycen;
         if(i<0){
@@ -1159,21 +1158,20 @@ void getsmokedir(float *mm){
 
     for(i=-9;i<=9;i++){
       if(i==0)continue;
-      ii = i;
-      if(i<0)ii=-i;
+      ii = ABS(i);
       norm[0]=0.0;
       norm[1]=0.0;
       norm[2]=0.0;
       switch(ii){
-      case 1:
+      case XDIR:
         if(i<0)norm[0]=-1.0;
         if(i>0)norm[0]=1.0;
         break;
-      case 2:
+      case YDIR:
         if(i<0)norm[1]=-1.0;
         if(i>0)norm[1]=1.0;
         break;
-      case 3:
+      case ZDIR:
         if(i<0)norm[2]=-1.0;
         if(i>0)norm[2]=1.0;
         break;

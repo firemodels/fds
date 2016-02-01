@@ -1511,10 +1511,10 @@ extern "C" void PLOT3D_CB(int var){
   case SETCHOPMINVAL:
     updatechopcolors();
     switch(setp3chopmin_temp){
-      case 0:
+      case DISABLE:
         EDIT_p3_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_p3_chopmin->enable();
         break;
       default:
@@ -1525,10 +1525,10 @@ extern "C" void PLOT3D_CB(int var){
   case SETCHOPMAXVAL:
     updatechopcolors();
     switch(setp3chopmax_temp){
-      case 0:
+      case DISABLE:
         EDIT_p3_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_p3_chopmax->enable();
         break;
       default:
@@ -2118,10 +2118,10 @@ void Bound_CB(int var){
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmin){
-      case 0:
+      case DISABLE:
       EDIT_patch_chopmin->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_patch_chopmin->enable();
       break;
     default:
@@ -2134,10 +2134,10 @@ void Bound_CB(int var){
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmax){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmax->enable();
         break;
       default:
@@ -2187,10 +2187,10 @@ void Bound_CB(int var){
     if(CHECKBOX_patch_setchopmax!=NULL)CHECKBOX_patch_setchopmax->set_int_val(setpatchchopmax);
 
     switch(setpatchchopmin){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmin->enable();
         break;
       default:
@@ -2198,10 +2198,10 @@ void Bound_CB(int var){
         break;
     }
     switch(setpatchchopmax){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmax->enable();
         break;
       default:
@@ -2466,10 +2466,10 @@ void PART_CB(int var){
     prop_new->chopmin=partchopmin;
     updatechopcolors();
     switch(setpartchopmin){
-      case 0:
+      case DISABLE:
       EDIT_part_chopmin->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_part_chopmin->enable();
       break;
     default:
@@ -2482,10 +2482,10 @@ void PART_CB(int var){
     prop_new->chopmax=partchopmax;
     updatechopcolors();
     switch(setpartchopmax){
-      case 0:
+      case DISABLE:
       EDIT_part_chopmax->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_part_chopmax->enable();
       break;
     default:
@@ -2819,10 +2819,10 @@ extern "C" void Slice_CB(int var){
     updatechopcolors();
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     switch(setslicechopmin){
-      case 0:
+      case DISABLE:
         EDIT_slice_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_slice_chopmin->enable();
         break;
       default:

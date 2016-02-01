@@ -28,13 +28,13 @@ int get_index(float x, int dir, float *plotxyz, int nplotxyz){
   float min_val,vali;
 
   switch(dir){
-    case 1:
+    case XDIR:
       x=NORMALIZE_X(x);
       break;
-    case 2:
+    case YDIR:
       x=NORMALIZE_Y(x);
       break;
-    case 3:
+    case ZDIR:
       x=NORMALIZE_X(x);
       break;
     default:

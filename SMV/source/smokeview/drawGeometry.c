@@ -790,7 +790,7 @@ void SetCVentDirs(void){
       switch(dir){
         int ventdir;
 
-      case 1:
+      case XDIR:
         if(cvi->imin==0){
           orien=1;
         }
@@ -837,7 +837,7 @@ void SetCVentDirs(void){
         }
         cvi->dir=ventdir;
         break;
-      case 2:
+      case YDIR:
         if(cvi->jmin==0){
           orien=1;
         }
@@ -884,7 +884,7 @@ void SetCVentDirs(void){
         }
         cvi->dir=ventdir;
         break;
-      case 3:
+      case ZDIR:
         if(cvi->kmin==0){
           orien=1;
         }
@@ -1102,7 +1102,7 @@ void SetVentDirs(void){
       orien=0;
 
       switch(dir){
-      case 1:
+      case XDIR:
         vi->dir2=1;
         offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
         if(vi->imin==0){
@@ -1152,7 +1152,7 @@ void SetVentDirs(void){
           vi->xvent2 += voffset;
         }
         break;
-      case 2:
+      case YDIR:
         vi->dir2=2;
         offset=ventoffset_factor*(yplttemp[1]-yplttemp[0]);
         if(vi->jmin==0){
@@ -1202,7 +1202,7 @@ void SetVentDirs(void){
           vi->yvent2 += voffset;
         }
         break;
-      case 3:
+      case ZDIR:
         vi->dir2=3;
         offset=ventoffset_factor*(zplttemp[1]-zplttemp[0]);
         if(vi->kmin==0){
@@ -5125,21 +5125,20 @@ int get_tick_dir(float *mm){
 
   for(i=-3;i<=3;i++){
     if(i==0)continue;
-    ii = i;
-    if(i<0)ii=-i;
+    ii = ABS(i);
     norm[0]=0.0;
     norm[1]=0.0;
     norm[2]=0.0;
     switch(ii){
-    case 1:
+    case XDIR:
       if(i<0)norm[1]=-1.0;
       if(i>0)norm[1]=1.0;
       break;
-    case 2:
+    case YDIR:
       if(i<0)norm[0]=-1.0;
       if(i>0)norm[0]=1.0;
       break;
-    case 3:
+    case ZDIR:
       if(i<0)norm[2]=-1.0;
       if(i>0)norm[2]=1.0;
       break;

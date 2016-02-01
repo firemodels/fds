@@ -7,6 +7,20 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define UNCOMPRESSED 0
+#define UNCOMPRESSED_BYFRAME 1
+#define COMPRESSED 2
+
+#define DISABLE 0
+#define ENABLE 1
+
+#define XWALLMIN -1
+#define XWALLMAX 1
+#define YWALLMIN -2
+#define YWALLMAX 2
+#define ZWALLMIN -3
+#define ZWALLMAX 3
+
 #define NOT_FDSBLOCK 0
 #define FDSBLOCK 1
 
@@ -431,6 +445,9 @@ void _Sniff_Errors(char *whereat);
 #define XDIR 1
 #define YDIR 2
 #define ZDIR 3
+#define XDIRNEG -1
+#define YDIRNEG -2
+#define ZDIRNEG -3
 #define ISO 4
 
 #define NTARGTIMES 100
