@@ -306,6 +306,7 @@ function mkMovie()
     if sys == "Linux" then sep = "/"
     else sep = "\\"
     end
+    os.execute("mkdir renders")
     os.execute("mkdir renders" .. sep .. "tempslice")
     os.execute("mkdir renders" .. sep .. "smoke")
     os.execute("mkdir renders" .. sep .. "combined")
