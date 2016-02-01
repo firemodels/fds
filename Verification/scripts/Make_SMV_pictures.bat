@@ -4,12 +4,12 @@ set curdir=%CD%
 set size=_64
 set svn_drive=c:
 set DEBUG=
+set TEST=
 set SCRIPT_DIR=%CD%
 set runsmvcases=1
 set rungeomcases=1
 set runwuicases=1
 set useinstalled=0
-set usetest=0
 
 set stopscript=0
 call :getopts %*
@@ -39,12 +39,9 @@ if %useinstalled% == 1 (
 ) else (
   set BACKGROUND=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win%size%\smokediff_win%size%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%size%.exe -bindir %SVNROOT%\SMV\for_bundle
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%TEST%%size%%DEBUG%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win%size%\smokezip_win%size%.exe
   set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
-)
-if %usetest% == 1 (
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win_test%size%.exe -bindir %SVNROOT%\SMV\for_bundle
 )
 
 call :is_file_installed %SMOKEVIEW%|| exit /b 1
@@ -235,11 +232,11 @@ goto eof
    set rungeomcases=0
    set runwuicases=1
  )
- if /I "%1" EQU "-usetest" (
+ if /I "%1" EQU "-test" (
    set valid=1
-   set usetest=1
+   set TEST=_test
  )
- if /I "%1" EQU "-useinstalled" (
+ if /I "%1" EQU "-installed" (
    set valid=1
    set useinstalled=1
  )
@@ -260,9 +257,9 @@ exit /b
 echo Run_SMV_Cases [options]
 echo. 
 echo -help  - display this message
-echo -debug - run with debug FDS
-echo -useinstalled - use installed Smokeview
-echo -usetest - use test Smokeview
+echo -debug - run with debug Smokeview
+echo -installed - use installed Smokeview
+echo -test - use test Smokeview
 echo -geom  - run only geometry cases
 echo -wui   - run only Wui cases
 exit /b
