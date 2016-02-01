@@ -2,11 +2,11 @@ print("Running script for " .. fdsprefix .. ".")
 --hidewindow()
 print("Date: " .. os.date("%c"))
 smv = require "smv"
-ssf = require "ssf"
-ssfparser = require "ssfparser"
+-- ssf = require "ssf"
+-- ssfparser = require "ssfparser"
 string = require "string"
 
-initsmvdata()
+--initsmvdata()
 redWrite = function(...)
     io.stderr:write("\27[31m")
     io.stderr:write(...)
@@ -303,7 +303,13 @@ function mkMovie()
     local sys = assert(f:read('*a'))
     f:close()
     local sep
-    if sys == "Linux" then sep = "/"
+    print(sys)
+    load.datafile("room_fire_01.sf")
+    load.datafile("room_fire_01.s3d")
+    render("load test")
+    unload.all()
+    print("done test load")
+    if string.find(sys, "Linux") then sep = "/"
     else sep = "\\"
     end
     os.execute("mkdir renders")
@@ -321,6 +327,7 @@ function mkMovie()
     unload.all()
     render.dir ="renders/smoke"
     load.datafile("room_fire_01.s3d")
+    print("done load")
     rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
     io.stderr:write("rendering complete\n")
     for i=0,movframes,1 do
@@ -340,6 +347,7 @@ function mkMovie()
         .. " -i renders/combined/%%d.png"
         .. " renders/testMovie.mp4"))
 end
+print("using mkMoview")
 pcall(mkMovie)
 exit()
 camera_mod_elev(45)
