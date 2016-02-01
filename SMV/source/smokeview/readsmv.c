@@ -1036,7 +1036,12 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
     strcpy(devicei->quantity,tok2);
   }
 
-  strcpy(devicei->label,tok1);
+  if(strlen(tok1)>=4&&strncmp(tok1, "null",4)==0){
+    strcpy(devicei->label, "null");
+  }
+  else{
+    strcpy(devicei->label, tok1);
+  }
   devicei->object = get_SVOBJECT_type(tok1,missing_device);
   if(devicei->object==missing_device&&tok3!=NULL){
     devicei->object = get_SVOBJECT_type(tok3,missing_device);
@@ -8874,7 +8879,16 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer, " %f %f %f", northangle_position, northangle_position+1, northangle_position+2);
       continue;
     }
-    if(match(buffer, "ZAXISANGLES")==1){
+    if(match(buffer, "TREEPARMS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i", &mintreesize, &vis_xtree, &vis_ytree, &vis_ztree);
+      mintreesize = MAX(mintreesize, 2);
+      vis_xtree = CLAMP(vis_xtree, 0, 1);
+      vis_ytree = CLAMP(vis_ytree, 0, 1);
+      vis_ztree = CLAMP(vis_ztree, 0, 1);
+      continue;
+    }
+    if(match(buffer, "ZAXISANGLES") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer," %f %f %f ",zaxis_angles,zaxis_angles+1,zaxis_angles+2);
       changed_zaxis=1;
@@ -8906,7 +8920,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "DEVICEVECTORDIMENSIONS") == 1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",&vector_baseheight,&vector_basediameter,&vector_headheight,&vector_headdiameter);
+      sscanf(buffer,"%f %f %f %f",&vector_baselength,&vector_basediameter,&vector_headlength,&vector_headdiameter);
       continue;
     }
     if(match(buffer,"DEVICEBOUNDS")==1){
@@ -11672,7 +11686,7 @@ void writeini_local(FILE *fileout){
     fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
   }
   fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
-  fprintf(fileout, "%f %f %f %f\n", vector_baseheight, vector_basediameter, vector_headheight, vector_headdiameter);
+  fprintf(fileout, "%f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
   fprintf(fileout, "DEVICEBOUNDS\n");
   fprintf(fileout, " %f %f\n", device_valmin, device_valmax);
   fprintf(fileout, "DEVICEORIENTATION\n");
@@ -12486,6 +12500,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", trainerview);
   fprintf(fileout, "TRANSPARENT\n");
   fprintf(fileout, " %i %f\n", use_transparency_data, transparent_level);
+  fprintf(fileout, "TREEPARMS\n");
+  fprintf(fileout, " %i %i %i %i\n", mintreesize,vis_xtree,vis_ytree,vis_ztree);
   fprintf(fileout, "TWOSIDEDVENTS\n");
   fprintf(fileout, " %i %i\n", show_bothsides_int, show_bothsides_ext);
   fprintf(fileout, "VECTORSKIP\n");
