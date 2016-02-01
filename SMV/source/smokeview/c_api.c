@@ -278,7 +278,9 @@ int loadfile(const char *filename) {
 
     smoke3di = smoke3dinfo + i;
     if(strcmp(smoke3di->file,filename)==0){
+      PRINTF("loading smoke3d file:  %s\n", filename);
       readsmoke3d(i,LOAD,&errorcode);
+      PRINTF("loading complete:  %d\n", errorcode);
       return errorcode;
     }
   }

@@ -323,6 +323,7 @@ int lua_get_meshes(lua_State *L) {
 
         lua_settable(L, -3);
     }
+    PRINTF("lua: done initialising mesh table\n");
     return 1;
 }
 
