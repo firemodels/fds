@@ -61,16 +61,31 @@ void camera_set_view_id(int view_id);
 //void viewpoint_set_viewdir(float xcen, float ycen, float zcen);
 
 void camera_mod_eyex(float delta);
-void camera_set_eyex(float eyex);
 void camera_mod_eyey(float delta);
-void camera_set_eyey(float eyey);
 void camera_mod_eyez(float delta);
+
+void camera_set_eyex(float eyex);
+void camera_set_eyey(float eyey);
 void camera_set_eyez(float eyez);
+
+float camera_get_eyex();
+float camera_get_eyey();
+float camera_get_eyez();
 
 void camera_mod_az(float delta);
 void camera_set_az(float az);
+float camera_get_az();
 void camera_mod_elev(float delta);
 void camera_set_elev(float elev);
+float camera_get_elev();
+
+void camera_set_viewdir(float xcen, float ycen, float zcen);
+float camera_get_xcen();
+float camera_get_ycen();
+float camera_get_zcen();
+void camera_set_xcen(float xcen);
+void camera_set_ycen(float ycen);
+void camera_set_zcen(float zcen);
 
 void camera_toggle_projection_type();
 void camera_set_projection_type(int projection_type);

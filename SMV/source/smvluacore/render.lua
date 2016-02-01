@@ -33,7 +33,7 @@ _render = {
         set = function(v)
             assert(v == "JPG" or v == "PNG", v .. " is not a valid render type."
                    .. " Please choose from JPG or PNG")
-            return rendertype(v)
+            return set_rendertype(v)
         end
     },
     movie = {

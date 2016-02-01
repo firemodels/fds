@@ -1,7 +1,7 @@
 
 load  = {}
 unload = {}
-function loadnamedslice(name)
+function load.namedslice(name)
     for key,value in pairs(sliceinfo) do
         if (value.label == name) then
             loaddatafile(value.file)

@@ -11,23 +11,34 @@
 #include "lua_api.h"
 
 #include GLUT_H
-//#include "smokeheaders.h"
+
 lua_State* L;
 int lua_displayCB(lua_State *L);
 
+/*
+  Load a .smv file. This is currently not used as it is dependent on Smokeview
+  being able to run without a .smv file loaded.
+*/
 int lua_loadsmvall(lua_State *L) {
+    // The first argument is taken from the stack as a string.
     const char *filepath = lua_tostring(L, 1);
     printf("lua_loadsmvall filepath: %s\n");
+    // The function from the C api is called using this string.
     loadsmvall(filepath);
+    // 0 arguments are returned.
     return 0;
 }
 
+/*
+  Set render clipping.
+*/
 int lua_renderclip(lua_State *L) {
     int flag = lua_toboolean(L, 1);
     int left = lua_tonumber(L, 2);
     int right = lua_tonumber(L, 3);
     int bottom = lua_tonumber(L, 4);
     int top = lua_tonumber(L, 5);
+    return 0;
 }
 
 /*
@@ -88,18 +99,19 @@ int lua_displayCB(lua_State *L) {
     // runluascript=0;
     Display_CB();
     // runluascript=1;
+    return 0;
 }
 
 /*
   Hide the smokeview window. This should not currently be used as it prevents
   the display callback being called, and therefore the script will not
-  continue.
+  continue (the script is called as part of the display callback).
 */
 int lua_hidewindow(lua_State *L) {
-  printf("hiding window\n");
-  glutHideWindow();
-  //once we hide the window the display callback is never called
-	return 0;
+    printf("hiding window\n");
+    glutHideWindow();
+    //once we hide the window the display callback is never called
+    return 0;
 }
 
 /*
@@ -108,21 +120,30 @@ int lua_hidewindow(lua_State *L) {
   renderings).
 */
 int lua_yieldscript(lua_State *L) {
-  printf("yielding\n");
-  lua_yield(L, 0 /*zero results*/);
-	return 0;
+    printf("yielding\n");
+    lua_yield(L, 0 /*zero results*/);
+    return 0;
 }
 
+/*
+  As with lua_yieldscript, but immediately resumes the script after letting the
+  display callback run.
+*/
 int lua_tempyieldscript(lua_State *L) {
-  printf("tempyielding\n");
-  runluascript=1;
-  lua_yield(L, 0 /*zero results*/);
-	return 0;
+    printf("tempyielding\n");
+    runluascript=1;
+    lua_yield(L, 0 /*zero results*/);
+    return 0;
 }
 
+/*
+  Return the current frame number which Smokeivew has loaded.
+*/
 int lua_getframe(lua_State *L) {
     int framenumber = getframe();
+    // Push a return value to the Lua stack.
     lua_pushinteger(L, framenumber);
+    // Tell Lua that there is a single return value left on the stack.
     return 1;
 }
 
@@ -136,11 +157,15 @@ int lua_setframe(lua_State *L) {
   return 0;
 }
 
+/*
+  Get the time value of the currently loaded frame.
+*/
 int lua_gettime(lua_State *L) {
     float time = gettime();
     lua_pushnumber(L, time);
     return 1;
 }
+
 /*
   Shift to the closest frame to given a time value.
 */
@@ -152,7 +177,7 @@ int lua_settime(lua_State *L) {
 }
 
 /*
-  Load an FDS data file.
+  Load an FDS data file directly (i.e. as a filepath).
 */
 int lua_loaddatafile(lua_State *L) {
 	const char *filename = lua_tostring(L, 1);
@@ -162,7 +187,7 @@ int lua_loaddatafile(lua_State *L) {
 }
 
 /*
-  Load a Smokeview config (.ini) file
+  Load a Smokeview config (.ini) file.
 */
 int lua_loadinifile(lua_State *L) {
 	const char *filename = lua_tostring(L, 1);
@@ -170,6 +195,10 @@ int lua_loadinifile(lua_State *L) {
 	return 0;
 }
 
+/*
+  Load an FDS vector data file directly (i.e. as a filepath). This function
+  handles the loading of any additional data files necessary to display vectors.
+*/
 int lua_loadvdatafile(lua_State *L) {
 	const char *filename = lua_tostring(L, 1);
 	int return_value = loadvfile(filename);
@@ -177,18 +206,30 @@ int lua_loadvdatafile(lua_State *L) {
 	return 1;
 }
 
+/*
+  Load an FDS boundary file directly (i.e. as a filepath). This is equivalent
+  to lua_loadfile, but specialised for boundary files. This is included to
+  reflect the underlying code.
+*/
 int lua_loadboundaryfile(lua_State *L) {
     const char *filename = lua_tostring(L, 1);
 	loadboundaryfile(filename);
 	return 0;
 }
 
+/*
+  Print a label to stdout.
+*/
 int lua_label(lua_State *L) {
     const char *thelabel = lua_tostring(L, 1);
     label(thelabel);
     return 0;
 }
 
+/*
+  Load a slice file given the type of slice, the axis along which it exists and
+  its position along this axis.
+*/
 int lua_loadslice(lua_State *L) {
 	const char *type = lua_tostring(L, 1);
 	int axis = lua_tonumber(L, 2);
@@ -197,6 +238,15 @@ int lua_loadslice(lua_State *L) {
 	return 0;
 }
 
+/*
+  Set the clipping mode, which determines which parts of the model are clipped
+  (based on the set clipping values). This function takes an int, which is one
+  of:
+    0: No clipping.
+    1: Clip blockages and data.
+    2: Clip blockages.
+    3: Clip data.
+*/
 int lua_set_clipping_mode(lua_State *L) {
     int mode = lua_tonumber(L, 1);
     set_clipping_mode(mode);
@@ -271,14 +321,12 @@ int lua_set_sceneclip_z_max(lua_State *L) {
     set_sceneclip_z_max(flag, value);
     return 0;
 }
-int lua_loadnamedslice(lua_State *L) {
-  // load all the slices that match the name
-	const char *name = lua_tostring(L, 1);
-  // TODO: implement this logic in lua
-	//loadslice(type, axis, distance);
-	return 0;
-}
 
+/*
+  Return a table (an array) of the times available in Smokeview. They key of the
+  table is an int representing the frame number, and the value of the table is
+  a float representing the time.
+*/
 int lua_get_global_times(lua_State *L) {
     PRINTF("lua: initialising global time table\n");
     lua_createtable(L, 0, nglobal_times);
@@ -291,18 +339,26 @@ int lua_get_global_times(lua_State *L) {
 }
 
 /*
-  Get the number of frames.
+  Get the number of (global) frames available to smokeview.
 */
 int lua_get_nglobal_times(lua_State *L) {
     lua_pushnumber(L, nglobal_times);
     return 1;
 }
 
+/*
+  Get the number of meshes in the loaded model.
+*/
 int lua_get_nmeshes(lua_State *L) {
     lua_pushnumber(L, nmeshes);
     return 1;
 }
 
+/*
+  Build a Lua table with information on the meshes of the model. The key of the
+  table is the mesh number.
+*/
+// TODO: provide more information via this interface.
 int lua_get_meshes(lua_State *L) {
     int entries = nmeshes;
     mesh *infotable = meshinfo;
@@ -324,14 +380,21 @@ int lua_get_meshes(lua_State *L) {
         lua_settable(L, -3);
     }
     PRINTF("lua: done initialising mesh table\n");
+    // Leaves one returned value on the stack, the mesh table.
     return 1;
 }
 
+/*
+  Get the number of meshes in the loaded model.
+*/
 int lua_get_ndevices(lua_State *L) {
     lua_pushnumber(L, ndeviceinfo);
     return 1;
 }
 
+/*
+  Build a Lua table with information on the devices of the model.
+*/
 int lua_get_devices(lua_State *L) {
     int entries = ndeviceinfo;
     devicedata *infotable = deviceinfo;
@@ -348,19 +411,20 @@ int lua_get_devices(lua_State *L) {
     }
     return 1;
 }
-// int lua_get_nfiles(lua_State *L) {
-//     lua_pushnumber(L, nfiles);
-//     return 1;
-// }
 
+/*
+  Get the number of CSV files available to the model.
+*/
 int lua_get_ncsvinfo(lua_State*L) {
     lua_pushnumber(L, ncsvinfo);
     return 1;
 }
 
-
 /*
-    Load data about the loaded module into the lua interpreter.
+  Load data about the loaded module into the lua interpreter.
+  This initsmvdata is necessary to bring some data into the Lua interpreter
+  from the model. This is included here rather than doing in the Smokeview
+  code to increase separation. This will likely be removed in future versions.
 */
 // TODO: Consider converting most of these to userdata, rather than copying them
 // into the lua interpreter.
@@ -390,6 +454,9 @@ int lua_initsmvdata(lua_State *L) {
     return 0;
 }
 
+/*
+  As with lua_initsmvdata(), but for information relating to Smokeview itself.
+*/
 int lua_initsmvproginfo(lua_State *L) {
     char version[256];
     char githash[256];
@@ -428,18 +495,9 @@ int lua_initsmvproginfo(lua_State *L) {
 }
 
 /*
-  Load data about smokeview itself into the lua interpreter.
+  Build a Lua table with information on the slices of the model.
 */
-// int lua_initsmvprops(lua_State *L) {
-//     lua_get_langlist(L);
-//     lua_setglobal(L, "langlist");
-//     lua_get_sliceinfo(L);
-//     lua_setglobal(L, "sliceinfo");
-//     lua_get_csvinfo(L);
-//     lua_setglobal(L, "csvinfo");
-//     return 0;
-// }
-
+// TODO: provide more information via this interface.
 int lua_get_sliceinfo(lua_State *L) {
     PRINTF("lua: initialising slice table\n");
     lua_createtable(L, 0, nsliceinfo);
@@ -460,6 +518,10 @@ int lua_get_sliceinfo(lua_State *L) {
     return 1;
 }
 
+/*
+  Build a Lua table with information on the CSV files available to the model.
+*/
+// TODO: provide more information via this interface.
 int lua_get_csvinfo(lua_State *L) {
     PRINTF("lua: initialising csv table\n");
     lua_createtable(L, 0, ncsvinfo);
@@ -520,7 +582,13 @@ int lua_loadvolsmokeframe(lua_State *L) {
 	return 0;
 }
 
-int lua_rendertype(lua_State *L) {
+/*
+  Set the format of images which will be exported. The value should be a string.
+  The acceptable values are:
+    "JPG"
+    "PNG"
+*/
+int lua_set_rendertype(lua_State *L) {
     const char *type = lua_tostring(L, 1);
     rendertype(type);
     return 0;
@@ -542,6 +610,13 @@ int lua_get_rendertype(lua_State *L) {
     return 1; 
 }
 
+/*
+  Set the format of movies which will be exported. The value should be a string.
+  The acceptable values are:
+    "WMV"
+    "MP4"
+    "AVI"
+*/
 int lua_set_movietype(lua_State *L) {
     const char *type = lua_tostring(L, 1);
     set_movietype(type);
@@ -773,6 +848,11 @@ int lua_camera_set_az(lua_State *L) {
     return 0;
 }
 
+int lua_camera_get_az(lua_State *L) {
+    lua_pushnumber(L, camera_get_az());
+    return 1;
+}
+
 int lua_camera_mod_elev(lua_State *L) {
     float delta = lua_tonumber(L, 1);
     camera_mod_elev(delta);
@@ -785,10 +865,96 @@ int lua_camera_set_elev(lua_State *L) {
     return 0;
 }
 
+int lua_camera_get_elev(lua_State *L) {
+    lua_pushnumber(L, camera_get_elev());
+    return 1;
+}
+// int lua_camera_get_projection_type(lua_State *L) {
+//     float projection_type = camera_get_projection_type();
+//     lua_pushnumber(L, projection_type);
+//     return 1;
+// }
 int lua_camera_set_projection_type(lua_State *L) {
     float projection_type = lua_tonumber(L, 1);
     camera_set_projection_type(projection_type);
     return 0;
+}
+
+int lua_camera_get_rotation_type(lua_State *L) {
+    float rotation_type = camera_get_rotation_type();
+    lua_pushnumber(L, rotation_type);
+    return 1;
+}
+
+int lua_camera_get_rotation_index(lua_State *L) {
+    float rotation_index = camera_get_rotation_index();
+    lua_pushnumber(L, rotation_index);
+    return 1;
+}
+
+int lua_camera_set_rotation_type(lua_State *L) {
+    float rotation_type = lua_tonumber(L, 1);
+    camera_set_rotation_type(rotation_type);
+    return 0;
+}
+
+int lua_camera_get_zoom(lua_State *L) {
+    lua_pushnumber(L, zoom);
+    return 1;
+}
+
+int lua_camera_set_zoom(lua_State *L) {
+    float x = lua_tonumber(L, 1);
+    zoom = x;
+    return 0;
+}
+
+int lua_camera_get_eyex(lua_State *L) {
+    float eyex = camera_get_eyex();
+    lua_pushnumber(L, eyex);
+    return 1;
+}
+
+int lua_camera_get_eyey(lua_State *L) {
+    float eyey = camera_get_eyex();
+    lua_pushnumber(L, eyey);
+    return 1;
+}
+
+int lua_camera_get_eyez(lua_State *L) {
+    float eyez = camera_get_eyez();
+    lua_pushnumber(L, eyez);
+    return 1;
+}
+int lua_camera_set_viewdir(lua_State *L) {
+    float xcen = lua_tonumber(L, 1);
+    float ycen = lua_tonumber(L, 2);
+    float zcen = lua_tonumber(L, 3);
+    printf("lua_api: Setting viewDir to %f %f %f\n", xcen, ycen, zcen);
+    camera_set_viewdir(xcen, ycen, zcen);
+    return 0;
+}
+
+int lua_camera_get_viewdir(lua_State *L) {
+    float xcen = camera_get_xcen();
+    float ycen = camera_get_ycen();
+    float zcen = camera_get_zcen();
+
+    lua_createtable(L, 0, 3);
+    
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, xcen);
+    lua_settable(L, -3);
+    
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, ycen);
+    lua_settable(L, -3);
+    
+    lua_pushstring(L, "z");
+    lua_pushnumber(L, zcen);
+    lua_settable(L, -3);
+
+    return 1;
 }
 
 int lua_set_slice_bound_min(lua_State *L) {
@@ -848,7 +1014,7 @@ void initLua() {
 	lua_register(L, "load3dsmoke", lua_load3dsmoke);
 	lua_register(L, "loadvolsmoke", lua_loadvolsmoke);
 	lua_register(L, "loadvolsmokeframe", lua_loadvolsmokeframe);
-    lua_register(L, "rendertype", lua_rendertype);
+    lua_register(L, "set_rendertype", lua_set_rendertype);
     lua_register(L, "get_rendertype", lua_get_rendertype);
     lua_register(L, "set_movietype", lua_set_movietype);
     lua_register(L, "get_movietype", lua_get_movietype);
@@ -860,7 +1026,7 @@ void initLua() {
 	lua_register(L, "plot3dprops", lua_plot3dprops);
     lua_register(L, "loadplot3d", lua_loadplot3d);
 	lua_register(L, "loadslice", lua_loadslice);
-    lua_register(L, "loadnamedslice", lua_loadnamedslice);
+    // lua_register(L, "loadnamedslice", lua_loadnamedslice);
 	lua_register(L, "loadvslice", lua_loadvslice);
 	lua_register(L, "loadiso", lua_loadiso);
 	lua_register(L, "unloadall", lua_unloadall);
@@ -883,19 +1049,36 @@ void initLua() {
     lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);
 
     lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
-    lua_register(L, "camera_set_eyex", lua_camera_mod_eyex);
+    lua_register(L, "camera_set_eyex", lua_camera_set_eyex);
+    lua_register(L, "camera_get_eyex", lua_camera_get_eyex);
 
     lua_register(L, "camera_mod_eyey", lua_camera_mod_eyey);
-    lua_register(L, "camera_set_eyey", lua_camera_mod_eyey);
+    lua_register(L, "camera_set_eyey", lua_camera_set_eyey);
+    lua_register(L, "camera_get_eyey", lua_camera_get_eyey);
 
     lua_register(L, "camera_mod_eyez", lua_camera_mod_eyez);
-    lua_register(L, "camera_set_eyez", lua_camera_mod_eyez);
+    lua_register(L, "camera_set_eyez", lua_camera_set_eyez);
+    lua_register(L, "camera_get_eyez", lua_camera_get_eyez);
 
     lua_register(L, "camera_mod_az", lua_camera_mod_az);
     lua_register(L, "camera_set_az", lua_camera_set_az);
+    lua_register(L, "camera_get_az", lua_camera_get_az);
     lua_register(L, "camera_mod_elev", lua_camera_mod_elev);
     lua_register(L, "camera_set_elev", lua_camera_set_elev);
+    lua_register(L, "camera_get_elev", lua_camera_get_elev);
+    
+    lua_register(L, "camera_set_viewdir", lua_camera_set_viewdir);
+    lua_register(L, "camera_get_viewdir", lua_camera_get_viewdir);
+    
+    lua_register(L, "camera_get_zoom", lua_camera_get_zoom);
+    lua_register(L, "camera_set_zoom", lua_camera_set_zoom);
 
+    lua_register(L, "camera_get_rotation_type"
+        , lua_camera_get_rotation_type);
+        lua_register(L, "camera_get_rotation_index"
+            , lua_camera_get_rotation_index);
+    lua_register(L, "camera_set_rotation_type"
+        , lua_camera_set_rotation_type);
     lua_register(L, "camera_set_projection_type"
         , lua_camera_set_projection_type);
 

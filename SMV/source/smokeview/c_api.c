@@ -1458,26 +1458,73 @@ int getcolorbarflip(int flip) {
 
 // Camera API
 // These function live-modify the current view by modifying "camera_current".
-void camera_set_eyeview(int eyeview) {
-  camera_current->rotation_type = eyeview;
+// int camera_get_projection_type() {
+//   return camera_current->rotation_type;
+// }
+void camera_set_rotation_type(int rotation_type) {
+  camera_current->rotation_type = rotation_type;
+}
+
+int camera_get_rotation_type() {
+  return camera_current->rotation_type;
 }
 
 void camera_set_rotation_index(int rotation_index) {
   camera_current->rotation_index = rotation_index;
 }
-/*
-void camera_set_viewdir(float xcen, float ycen, float zcen) {
-  viewpoint_set_xcen(xcen);
-  viewpoint_set_ycen(ycen);
-  viewpoint_set_zcen(zcen);
+
+int camera_get_rotation_index() {
+  return camera_current->rotation_index;
 }
-*/
+
+
+void camera_set_viewdir(float xcen, float ycen, float zcen) {
+  printf("c_api: Setting viewDir to %f %f %f\n", xcen, ycen, zcen);
+  camera_current->xcen = xcen;
+  camera_current->ycen = ycen;
+  camera_current->zcen = zcen;
+  // camera_set_xcen(xcen);
+  // camera_set_ycen(ycen);
+  // camera_set_zcen(zcen);
+}
+
+// xcen
+void camera_set_xcen(float xcen) {
+  printf("Setting xcen to %f\n", xcen);
+  camera_current->xcen = xcen;
+}
+float camera_get_xcen() {
+  return camera_current->xcen;
+}
+
+// ycen
+void camera_set_ycen(float ycen) {
+  printf("Setting ycen to %f\n", ycen);
+  camera_current->ycen = ycen;
+}
+float camera_get_ycen() {
+  return camera_current->ycen;
+}
+
+// zcen
+void camera_set_zcen(float zcen) {
+  printf("Setting zcen to %f\n", zcen);
+  camera_current->zcen = zcen;
+}
+float camera_get_zcen() {
+  return camera_current->zcen;
+}
+
 // eyex
 void camera_mod_eyex(float delta) {
   camera_current->eye[0] = camera_current->eye[0] + delta;
 }
 void camera_set_eyex(float eyex) {
   camera_current->eye[0] = eyex;
+}
+
+float camera_get_eyex() {
+  return camera_current->eye[0];
 }
 
 // eyey
@@ -1487,6 +1534,9 @@ void camera_mod_eyey(float delta) {
 void camera_set_eyey(float eyey) {
   camera_current->eye[1] = eyey;
 }
+float camera_get_eyey() {
+  return camera_current->eye[1];
+}
 
 // eyez
 void camera_mod_eyez(float delta) {
@@ -1494,6 +1544,9 @@ void camera_mod_eyez(float delta) {
 }
 void camera_set_eyez(float eyez) {
   camera_current->eye[2] = eyez;
+}
+float camera_get_eyez() {
+  return camera_current->eye[2];
 }
 
 // azimuth
@@ -1503,6 +1556,9 @@ void camera_mod_az(float delta) {
 void camera_set_az(float az) {
   camera_current->az_elev[0] = az;
 }
+float camera_get_az() {
+  return camera_current->az_elev[0];
+}
 
 // elevation
 void camera_mod_elev(float delta) {
@@ -1510,6 +1566,9 @@ void camera_mod_elev(float delta) {
 }
 void camera_set_elev(float elev) {
   camera_current->az_elev[1] = elev;
+}
+float camera_get_elev() {
+  return camera_current->az_elev[1];
 }
 
 // projection_type
