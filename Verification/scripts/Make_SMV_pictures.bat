@@ -142,11 +142,11 @@ if %runsmvcases% == 1 (
   echo.
   echo differencing plume5c and plume5cdelta
 
-  %SMOKEDIFF% plume5c plume5cdelta
+  %SMOKEDIFF% -np plume5c plume5cdelta
 
   echo.
   echo differencing thouse5 and thouse5delta
-  %SMOKEDIFF% thouse5 thouse5delta
+  %SMOKEDIFF% -np thouse5 thouse5delta
 
   echo.
   echo converting tree_one particles to an isosurface
