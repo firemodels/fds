@@ -428,9 +428,9 @@ void _Sniff_Errors(char *whereat);
 #define STRETCH_BLACK 1
 #define STRETCH_WHITE 2
 
-#define XDIR 0
-#define YDIR 1
-#define ZDIR 2
+#define XDIR 1
+#define YDIR 2
+#define ZDIR 3
 #define ISO 4
 
 #define NTARGTIMES 100
@@ -616,10 +616,6 @@ void _Sniff_Errors(char *whereat);
 
 #define ON 1
 #define OFF 0
-
-#define X_SLICE 1
-#define Y_SLICE 2
-#define Z_SLICE 3
 
 #define DIALOG_3DSMOKE 20
 #define DIALOG_BOUNDS 14

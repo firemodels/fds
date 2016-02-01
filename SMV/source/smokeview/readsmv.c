@@ -8400,7 +8400,7 @@ void initmesh(mesh *meshi){
   meshi->dyz=1.0;
   meshi->label=NULL;
   meshi->mxpatch_frames=0;
-  meshi->slicedir=2;
+  meshi->slicedir=YDIR;
   meshi->visInteriorPatches=0;
   meshi->plot3dfilenum=-1;
   meshi->patchfilenum=-1;
