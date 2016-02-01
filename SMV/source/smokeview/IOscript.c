@@ -1402,9 +1402,9 @@ void script_plot3dprops(scriptdata *scripti){
       gbi = meshinfo + i;
       if(gbi->plot3dfilenum==-1)continue;
       update_current_mesh(gbi);
-      updateplotslice(X_SLICE);
-      updateplotslice(Y_SLICE);
-      updateplotslice(Z_SLICE);
+      updateplotslice(XDIR);
+      updateplotslice(YDIR);
+      updateplotslice(ZDIR);
     }
     update_current_mesh(gbsave);
   }
@@ -1424,9 +1424,7 @@ void script_showplot3ddata(scriptdata *scripti){
   meshi = meshinfo + imesh;
   update_current_mesh(meshi);
 
-  dir = scripti->ival2;
-  if(dir<1)dir=1;
-  if(dir>4)dir=4;
+  dir = CLAMP(scripti->ival2,XDIR,ISO);
 
   plotn=scripti->ival3;
 
@@ -1434,25 +1432,25 @@ void script_showplot3ddata(scriptdata *scripti){
   val = scripti->fval;
 
   switch(dir){
-    case 1:
+    case XDIR:
       visx_all=showhide;
-      iplotx_all=get_index(val,1,plotx_all,nplotx_all);
+      iplotx_all=get_index(val,XDIR,plotx_all,nplotx_all);
       next_xindex(1,0);
       next_xindex(-1,0);
       break;
-    case 2:
+    case YDIR:
       visy_all=showhide;
-      iploty_all=get_index(val,2,ploty_all,nploty_all);
+      iploty_all=get_index(val,YDIR,ploty_all,nploty_all);
       next_yindex(1,0);
       next_yindex(-1,0);
       break;
-    case 3:
+    case ZDIR:
       visz_all=showhide;
-      iplotz_all=get_index(val,3,plotz_all,nplotz_all);
+      iplotz_all=get_index(val,ZDIR,plotz_all,nplotz_all);
       next_zindex(1,0);
       next_zindex(-1,0);
       break;
-    case 4:
+    case ISO:
       isolevel=scripti->ival5;
       plotiso[plotn-1]=isolevel;
       updateshowstep(showhide,ISO);

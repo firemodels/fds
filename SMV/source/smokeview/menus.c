@@ -249,9 +249,9 @@ void IsoVariableMenu(int value){
     updateshowstep(1,ISO);
     updatesurface();
     plotstate=STATIC_PLOTS;
-    updateplotslice(X_SLICE);
-    updateplotslice(Y_SLICE);
-    updateplotslice(Z_SLICE);
+    updateplotslice(XDIR);
+    updateplotslice(YDIR);
+    updateplotslice(ZDIR);
     updatemenu=1;  
     glutPostRedisplay();
     updateplot3dlistindex();
