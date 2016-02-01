@@ -6,7 +6,10 @@ smv = require "smv"
 -- ssfparser = require "ssfparser"
 string = require "string"
 
---initsmvdata()
+-- this initsmvdata is necessary to bring some data into the Lua interpreter
+-- from the model. This is included here rather than doing in the Smokeview
+-- code to increase separation. This will likely be removed in future versions.
+initsmvdata()
 redWrite = function(...)
     io.stderr:write("\27[31m")
     io.stderr:write(...)
@@ -396,3 +399,31 @@ print(sliceinfo)
 for key,value in pairs(sliceinfo) do print(key,value.label) end
 print("Script for " .. fdsprefix .. " complete.")
 exit()
+oc = {
+    rotationType = 0,
+    rotationIndex = 20,
+    viewId = 0,
+    eyePos = {x = 0.194911, y = -0.574832, z = 0.017699},
+    zoom =  1.0,
+    -- zoomIndex = 2,
+    viewAngle = 0, -- &camera_ini->view_angle
+    directionAngle = 0, -- azimuth &camera_ini->azimuth
+    elevationAngle = 0, -- elevation &camera_ini->elevation
+    projectionType = 0,
+    -- &camera_ini->xcen, ycen, zen
+    viewDir  = {x = 0.144911, y = 0.500000, z = 0.017699},
+    zAngle = {az = 62.000000, elev = 38.000000},
+    transformMatrix = nil,
+    -- transformMatrix = {
+    --      1.000000 0.000000 0.000000 0.000000
+    --      0.000000 1.000000 0.000000 0.000000
+    --      0.000000 0.000000 1.000000 0.000000
+    --      0.000000 0.000000 0.000000 1.000000
+    -- },
+    clipping = nil
+    -- clipping = {
+    --     x = {min = nil, max = nil},
+    --     y = {min = nil, max = nil},
+    --     z = {min = nil, max = nil}
+    -- }
+}
