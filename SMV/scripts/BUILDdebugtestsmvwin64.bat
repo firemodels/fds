@@ -23,7 +23,7 @@ echo Using GIT revision %smv_revision% to build a debug 64 bit Windows Smokeview
 %svn_drive%
 
 cd %svn_root%\SMV\Build\intel_win_64
-call make_smv_db -r
+call make_smv_db -t
 
 echo.
 echo compilation complete

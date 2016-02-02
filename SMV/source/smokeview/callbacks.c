@@ -1361,9 +1361,9 @@ void keyboard(unsigned char key, int flag){
           gbi = meshinfo + i;
           if(gbi->plot3dfilenum==-1)continue;
           update_current_mesh(gbi);
-          updateplotslice(X_SLICE);
-          updateplotslice(Y_SLICE);
-          updateplotslice(Z_SLICE);
+          updateplotslice(XDIR);
+          updateplotslice(YDIR);
+          updateplotslice(ZDIR);
         }
         update_current_mesh(gbsave);
       }
@@ -2108,21 +2108,21 @@ void keyboard(unsigned char key, int flag){
     return;
   }
   switch(iplot_state){
-    case 1:
+    case XDIR:
       next_xindex(skip_global*FlowDir,0);
       break;
     case 0:
-    case 2:
+    case YDIR:
       next_yindex(skip_global*FlowDir,0);
       break;
-    case 3:
+    case ZDIR:
       next_zindex(skip_global*FlowDir,0);
       break;
     default:
       ASSERT(FFALSE);
       break;
   }
-  if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==4){
+  if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==ISO){
     plotiso[plotn-1] += FlowDir; 
     updatesurface(); 
   }
@@ -2272,43 +2272,43 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_LEFT:
     visx_all=1;
     next_xindex(-1,0);
-    iplot_state=1;
+    iplot_state=XDIR;
     break;
   case GLUT_KEY_RIGHT:
     visx_all=1;
     next_xindex(1,0);
-    iplot_state=1;
+    iplot_state=XDIR;
     break;
   case GLUT_KEY_DOWN:
     visy_all=1;
     next_yindex(-1,0);
-    iplot_state=2;
+    iplot_state=YDIR;
     break;
   case GLUT_KEY_UP:
     visy_all=1;
     next_yindex(1,0);
-    iplot_state=2;
+    iplot_state=YDIR;
     break;
   case GLUT_KEY_PAGE_DOWN:
     visz_all=1;
     next_zindex(-1,0);
-    iplot_state=3;
+    iplot_state=ZDIR;
     break;
   case GLUT_KEY_PAGE_UP:
     visz_all=1;
     next_zindex(1,0);
-    iplot_state=3;
+    iplot_state=ZDIR;
     break;
   case GLUT_KEY_HOME:
     switch(iplot_state){
       case 0:
-      case 1:
+      case XDIR:
         next_xindex(0,-1);
         break;
-      case 2:
+      case YDIR:
         next_yindex(0,-1);
         break;
-      case 3:
+      case ZDIR:
         next_zindex(0,-1);
         break;
       default:
@@ -2319,13 +2319,13 @@ void handle_plot3d_keys(int  key){
   case GLUT_KEY_END:
     switch(iplot_state){
       case 0:
-      case 1:
+      case XDIR:
         next_xindex(0,1);
         break;
-      case 2:
+      case YDIR:
         next_yindex(0,1);
         break;
-      case 3:
+      case ZDIR:
         next_zindex(0,1);
         break;
       default:

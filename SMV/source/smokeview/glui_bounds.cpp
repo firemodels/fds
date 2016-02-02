@@ -1501,9 +1501,9 @@ extern "C" void PLOT3D_CB(int var){
     PLOT3D_CB(UPDATE_VECTOR);
     break;
   case UPDATE_VECTOR:
-    updateplotslice(X_SLICE);
-    updateplotslice(Y_SLICE);
-    updateplotslice(Z_SLICE);
+    updateplotslice(XDIR);
+    updateplotslice(YDIR);
+    updateplotslice(ZDIR);
     break;
   case CHOPUPDATE:
     updatechopcolors();
