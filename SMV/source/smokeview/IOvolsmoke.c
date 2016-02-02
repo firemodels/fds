@@ -413,32 +413,32 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
       }
     }
     switch(iwall_min){
-      case -1:
+      case XWALLMIN:
         vert_end[0] = boxmin[0];
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case 1:
+      case XWALLMAX:
         vert_end[0] = boxmax[0];
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case -2:
+      case YWALLMIN:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = boxmin[1];
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case 2:
+      case YWALLMAX:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = boxmax[1];
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case -3:
+      case ZWALLMIN:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = boxmin[2];
         break;
-      case 3:
+      case ZWALLMAX:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = boxmax[2];
@@ -580,8 +580,8 @@ void compute_all_smokecolors(void){
       xyz = xyzarray;
       if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
       switch(iwall){
-        case 1:
-        case -1:
+        case XWALLMIN:
+        case XWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_yz0;
             xyz[0] = meshi->x0;
@@ -612,8 +612,8 @@ void compute_all_smokecolors(void){
             }
           }
           break;
-        case 2:
-        case -2:
+        case YWALLMIN:
+        case YWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_xz0;
             xyz[1] = meshi->y0;
@@ -644,8 +644,8 @@ void compute_all_smokecolors(void){
             }
           }
           break;
-        case 3:
-        case -3:
+        case ZWALLMIN:
+        case ZWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_xy0;
             xyz[2]=meshi->z0;
@@ -712,8 +712,8 @@ void drawsmoke3dVOLdebug(void){
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           x[0] = meshi->x0;
           x[1] = x[0];
@@ -728,8 +728,8 @@ void drawsmoke3dVOLdebug(void){
         z[1] = zplt[kbar];
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(iwall<0){
           y[0] = meshi->y0;
           y[1] = y[0];
@@ -744,8 +744,8 @@ void drawsmoke3dVOLdebug(void){
         z[1] = zplt[kbar];
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(iwall<0){
           z[0] = meshi->z0;
           z[1] = z[0];
@@ -789,8 +789,8 @@ void drawsmoke3dVOLdebug(void){
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           x[0] = meshi->x0;
           glColor3f(1.0,0.0,0.0);
@@ -808,8 +808,8 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[0],y[1],z[0]);
         glVertex3f(x[0],y[0],z[1]);
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(iwall<0){
           y[0] = meshi->y0;
           glColor3f(1.0,0.0,0.0);
@@ -827,8 +827,8 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[0],y[0],z[1]);
         glVertex3f(x[1],y[0],z[0]);
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(iwall<0){
           z[0] = meshi->z0;
           glColor3f(1.0,0.0,0.0);
@@ -890,8 +890,8 @@ void drawsmoke3dVOL(void){
 
     glBegin(GL_TRIANGLES);
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           xx = meshi->x0;
           smokecolor = vr->smokecolor_yz0;
@@ -985,8 +985,8 @@ void drawsmoke3dVOL(void){
          smokecolor+=4;
         }
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         n00 = 0;
         n01 = 4;
         n10 = 4*(kbar+1);
@@ -1079,8 +1079,8 @@ void drawsmoke3dVOL(void){
           smokecolor+=4;
         }
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         n00 = 0;
         n01 = 4;
         n10 = 4*(jbar+1);
@@ -1510,8 +1510,8 @@ void drawsmoke3dGPUVOL(void){
     glBegin(GL_TRIANGLES);
 
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(xx,yy1,z1);
           glVertex3f(xx,yy2,z1);
@@ -1531,8 +1531,8 @@ void drawsmoke3dGPUVOL(void){
           glVertex3f(xx,yy2,z2);
         }
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(x1,yy,z1);
           glVertex3f(x2,yy,z2);
@@ -1552,8 +1552,8 @@ void drawsmoke3dGPUVOL(void){
           glVertex3f(x1,yy,z2);
         }
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(x1,yy1,zz);
           glVertex3f(x2,yy1,zz);

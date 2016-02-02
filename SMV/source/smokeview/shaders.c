@@ -12,7 +12,8 @@
 GLhandleARB p_smoke, p_3dslice, p_zonesmoke, p_volsmoke;
 
 void printInfoLog(GLhandleARB obj);
-
+#define LINK_BAD 0
+#define LINK_GOOD 1
 /* ------------------ setZoneSmokeShaders ------------------------ */
 
 int setZoneSmokeShaders(){
@@ -135,10 +136,10 @@ int setZoneSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -228,10 +229,10 @@ int set3DSliceShaders(void){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -463,10 +464,10 @@ int setVolSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -601,10 +602,10 @@ int setSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:

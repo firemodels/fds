@@ -8428,13 +8428,13 @@ updatemenu=0;
             smoke3di=smoke3dinfo + i;
             if(smoke3di->loaded==0)continue;
             switch(smoke3di->type){
-            case 1:
+            case SOOT:
               nsootloaded++;
               break;
-            case 2:
+            case FIRE:
               nhrrloaded++;
               break;
-            case 3:
+            case WATER:
               nwaterloaded++;
               break;
             default:

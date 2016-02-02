@@ -2229,7 +2229,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
     case 0:
       returnval=0;
       break;
-    case 1:
+    case XDIR:
       if(world_eyepos[0]<xyzmaxi[0]){
         returnval=1;
       }
@@ -2237,7 +2237,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -1:
+    case XDIRNEG:
       if(world_eyepos[0]<xyzmaxj[0]){
         returnval=-1;
       }
@@ -2245,7 +2245,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=1;
       }
       break;
-    case 2:
+    case YDIR:
       if(world_eyepos[1]<xyzmaxi[1]){
         returnval=1;
       }
@@ -2253,7 +2253,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -2:
+    case YDIRNEG:
       if(world_eyepos[1]<xyzmaxj[1]){
         returnval=-1;
       }
@@ -2261,7 +2261,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=1;
       }
       break;
-    case 3:
+    case ZDIR:
       if(world_eyepos[2]<xyzmaxi[2]){
         returnval=1;
       }
@@ -2269,7 +2269,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
         returnval=-1;
       }
       break;
-    case -3:
+    case ZDIRNEG:
       if(world_eyepos[2]<xyzmaxj[2]){
         returnval=-1;
       }
@@ -6401,37 +6401,37 @@ typedef struct {
           case DOWN_Y+6:
             jv2=jv1;
             if(nn>=nvents+6)vi->dir=UP_Y;
-            vi->dir2=2;
+            vi->dir2=YDIR;
             break;
           case UP_X:
           case UP_X+6:
             iv1=iv2;
             if(nn>=nvents+6)vi->dir=DOWN_X;
-            vi->dir2=1;
+            vi->dir2=XDIR;
             break;
           case UP_Y:
           case UP_Y+6:
             jv1=jv2;
             if(nn>=nvents+6)vi->dir=DOWN_Y;
-            vi->dir2=2;
+            vi->dir2=YDIR;
             break;
           case DOWN_X:
           case DOWN_X+6:
             iv2=iv1;
             if(nn>=nvents+6)vi->dir=UP_X;
-            vi->dir2=1;
+            vi->dir2=XDIR;
             break;
           case DOWN_Z:
           case DOWN_Z+6:
             kv2=kv1;
             if(nn>=nvents+6)vi->dir=UP_Z;
-            vi->dir2=3;
+            vi->dir2=ZDIR;
             break;
           case UP_Z:
           case UP_Z+6:
             kv1=kv2;
             if(nn>=nvents+6)vi->dir=DOWN_Z;
-            vi->dir2=3;
+            vi->dir2=ZDIR;
             break;
           default:
             ASSERT(FFALSE);

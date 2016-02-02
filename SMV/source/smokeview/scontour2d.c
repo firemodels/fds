@@ -724,7 +724,7 @@ void DrawContours(const contour *ci){
     polysize=ci->polysize[n];
     npolysv=ci->npolys;
     npolys=npolysv[n];
-    if(ci->idir==1){
+    if(ci->idir==XDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         glBegin(GL_POLYGON);
@@ -734,7 +734,7 @@ void DrawContours(const contour *ci){
         glEnd();
       }
     }
-    else if(ci->idir==2){
+    else if(ci->idir==YDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         nnodes=polysize[ipoly];
@@ -745,7 +745,7 @@ void DrawContours(const contour *ci){
         glEnd();
       }
     }
-    else if(ci->idir==3){
+    else if(ci->idir==ZDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         glBegin(GL_POLYGON);
@@ -777,7 +777,7 @@ void DrawLineContours(const contour *ci, float linewidth){
     xline=ci->xlines[n];
     yline=ci->ylines[n];
     nlinepts=ci->nlines[n];
-    if(ci->idir==1){
+    if(ci->idir==XDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);
@@ -786,7 +786,7 @@ void DrawLineContours(const contour *ci, float linewidth){
       }
       glEnd();
     }
-    else if(ci->idir==2){
+    else if(ci->idir==YDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);
@@ -795,7 +795,7 @@ void DrawLineContours(const contour *ci, float linewidth){
       }
       glEnd();
     }
-    else if(ci->idir==3){
+    else if(ci->idir==ZDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);

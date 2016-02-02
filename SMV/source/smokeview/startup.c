@@ -1407,7 +1407,6 @@ void initvars(void){
   stretch_var_white=0; 
   move_var=0;
 
-  showhide_option=0;
   snifferrornumber=0;
   xyz_dir=0;
   which_face=2;
@@ -1457,7 +1456,6 @@ void initvars(void){
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
   setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX;
-  loadpatchbysteps=0;
   settargetmin=0, settargetmax=0;
   setpartchopmin=0, setpartchopmax=0;
   partchopmin=1.0,  partchopmax=0.;

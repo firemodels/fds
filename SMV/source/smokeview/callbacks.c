@@ -28,13 +28,13 @@ int get_index(float x, int dir, float *plotxyz, int nplotxyz){
   float min_val,vali;
 
   switch(dir){
-    case 1:
+    case XDIR:
       x=NORMALIZE_X(x);
       break;
-    case 2:
+    case YDIR:
       x=NORMALIZE_Y(x);
       break;
-    case 3:
+    case ZDIR:
       x=NORMALIZE_X(x);
       break;
     default:
@@ -349,15 +349,15 @@ void mouse_edit_blockage(int button, int state, int x, int y){
     switch(sd->dir){
       case DOWN_X:
       case UP_X:
-        xyz_dir=0;
+        xyz_dir=XDIR;
         break;
       case DOWN_Y:
       case UP_Y:
-        xyz_dir=1;
+        xyz_dir=YDIR;
         break;
       case DOWN_Z:
       case UP_Z:
-        xyz_dir=2;
+        xyz_dir=ZDIR;
         break;
       default:
         ASSERT(FFALSE);
