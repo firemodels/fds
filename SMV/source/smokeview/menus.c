@@ -2423,17 +2423,6 @@ void LoadUnloadMenu(int value){
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
-/* ------------------ ShowTourMenu ------------------------ */
-
-void ShowTourMenu(int value){
-}
-
-
-/* ------------------ AvatarTourMenu ------------------------ */
-
-void AvatarTourMenu(int value){
-}
-
 void AvatarEvacMenu(int value){
   if(value==MENU_DUMMY)return;
   iavatar_evac=value;
@@ -2458,7 +2447,7 @@ void TourMenu(int value){
     add_new_tour();
     DialogMenu(DIALOG_TOUR);
     break;
-  case -13:               
+  case MENU_TOUR_CLEARALL:               
     for(i=0;i<ntours;i++){  // clear all tours
       touri = tourinfo + i;
       touri->display=touri->display2;
@@ -2491,7 +2480,7 @@ void TourMenu(int value){
     }
     DialogMenu(DIALOG_TOUR);
     break;
-  case -4:
+  case MENU_TOUR_SHOWDIALOG:
     edittour=1-edittour;
     if(edittour==1&&showtour_dialog==0){
       show_glui_tour();
@@ -2508,26 +2497,13 @@ void TourMenu(int value){
     viewtourfrompath = 1 - viewtourfrompath;
     if(viewtourfrompath==0)ResetView(RESTORE_EXTERIOR_VIEW);
     break;
-  case -6:
-    tour_constant_vel=1-tour_constant_vel;
-    createtourpaths();
-    Update_Times();
-    break;
-  case -1:
+  case MENU_TOUR_DEFAULT:
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       touri->display=0;
     }
     ResetView(RESTORE_EXTERIOR_VIEW);
     defaulttour();
-    break;
-  case -11: // bird's eye
-    break;
-  case -21:
-    tourlocus_type=0;
-    break;
-  case -22:
-    tourlocus_type=1;
     break;
   default: 
     if(value<-22){
@@ -6868,11 +6844,11 @@ updatemenu=0;
       if(viewtourfrompath==1)strcat(menulabel,"*");
       strcat(menulabel,"View from ");
       strcat(menulabel,tourinfo[selectedtour_index].label);
-      glutAddMenuEntry(menulabel,-5);
+      glutAddMenuEntry(menulabel,MENU_TOUR_VIEWFROMROUTE);
     }
     glutAddMenuEntry("-",MENU_DUMMY);
-    glutAddMenuEntry(_("Show all"),-3);
-    glutAddMenuEntry(_("Hide all"),-2);
+    glutAddMenuEntry(_("Show all"),MENU_TOUR_SHOWALL);
+    glutAddMenuEntry(_("Hide all"),MENU_TOUR_MANUAL);
   }
 
  /* --------------------------------Show Volume smoke menu -------------------------- */
