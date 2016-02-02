@@ -329,7 +329,11 @@ extern "C" void gluiIdleNULL(void){
 
 extern "C" void reset_glui_view(int ival){
   ASSERT(ival>=0);
+#ifdef pp_LUA
+  LIST_viewpoints->set_int_val(ival);
+#else
   if(ival!=old_listview)LIST_viewpoints->set_int_val(ival);
+#endif
   selected_view=ival;
   BUTTON_replace_view->enable();
   Viewpoint_CB(RESTORE_VIEW);

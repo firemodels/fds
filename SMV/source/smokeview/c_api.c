@@ -1300,7 +1300,6 @@ int setviewpoint(const char *viewpoint){
     if(strcmp(viewpoint,ca->name)==0){
       ResetMenu(ca->view_id);
       count++;
-      fprintf(stderr, "Setting viewpoint set to %s\n", ca->name);
       break;
     }
   }

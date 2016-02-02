@@ -509,9 +509,20 @@ int lua_get_sliceinfo(lua_State *L) {
             lua_pushstring(L, sliceinfo[i].slicelabel);
             lua_setfield(L, -2, "label");
         }
+        
+        if(sliceinfo[i].label.longlabel != NULL) {
+            lua_pushstring(L, sliceinfo[i].label.longlabel);
+            lua_setfield(L, -2, "longlabel");
+        }
 
         lua_pushstring(L, sliceinfo[i].file);
         lua_setfield(L, -2, "file");
+        
+        lua_pushnumber(L, sliceinfo[i].slicetype);
+        lua_setfield(L, -2, "slicetype");
+        
+        lua_pushnumber(L, sliceinfo[i].idir);
+        lua_setfield(L, -2, "idir");
 
         lua_settable(L, -3);
     }

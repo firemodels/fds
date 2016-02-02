@@ -9,6 +9,10 @@ function load.namedslice(name)
     end
 end
 
+function load.slice(...)
+    return loadslice(...)
+end
+
 function load.datafile(filename)
     local errorcode = loaddatafile(filename)
     if errorcode == 1 then
