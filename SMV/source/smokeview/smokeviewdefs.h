@@ -7,6 +7,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SHOWALL_FILES 0
+#define SHOWONLY_FILE 1
+#define HIDEALL_FILES 2
+
 #define UNCOMPRESSED 0
 #define UNCOMPRESSED_BYFRAME 1
 #define COMPRESSED 2

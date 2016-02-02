@@ -2176,11 +2176,11 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     if(t_height==0.0)t_height=1.0;
     if(bc!=NULL){
       switch(bc->useblockcolor){
-      case 1:
+      case TTRUE:
         faceptr->color=bc->color;
         faceptr->transparent=bc->transparent;
         break;
-      case 0:
+      case FFALSE:
         if(bc->surf[j]==surfacedefault){
          // faceptr->color=block_ambient2;
           faceptr->color=surfacedefault->color;  /* fix ?? */
@@ -4734,14 +4734,14 @@ void draw_user_ticks(void){
     show_tick_y=0;
     show_tick_z=0;
     switch(user_tick_option){
-      case -1:
+      case XDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_x = 1;
         show_tick_z = 1;
         break;
-      case 1:
+      case XDIR:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_max[1];
         step[1] = -step[1];
@@ -4749,14 +4749,14 @@ void draw_user_ticks(void){
         show_tick_x = 1;
         show_tick_z = 1;
         break;
-      case -2:
+      case YDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_y = 1;
         show_tick_z = 1;
         break;
-      case 2:
+      case YDIR:
         tick_origin[0] = user_tick_max[0];
         step[0] = -step[0];
         tick_origin[1] = user_tick_origin[1];
@@ -4764,14 +4764,14 @@ void draw_user_ticks(void){
         show_tick_y = 1;
         show_tick_z = 1;
         break;
-      case -3:
+      case ZDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_x = 1;
         show_tick_y = 1;
         break;
-      case 3:
+      case ZDIR:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_max[2];
@@ -4833,7 +4833,7 @@ void draw_user_ticks(void){
         )continue;
       xyz[1]=tick_origin[1];
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
@@ -4868,7 +4868,7 @@ void draw_user_ticks(void){
           )continue;
         xyz[1]=tick_origin[1];
         xyz[2]=tick_origin[2];
-        if(user_tick_option==3){
+        if(user_tick_option==ZDIR){
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[2]=xyz[2];
@@ -4891,7 +4891,7 @@ void draw_user_ticks(void){
       if((step[0]>0.0&&xyz[0]>user_tick_max[0])||(step[0]<0.0&&xyz[0]<user_tick_min[0]))continue;
       xyz[1]=tick_origin[1];
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
@@ -4923,7 +4923,7 @@ void draw_user_ticks(void){
         (step[1]<0.0&&xyz[1]<user_tick_min[1])
         )continue;
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
@@ -4958,7 +4958,7 @@ void draw_user_ticks(void){
           (step[1]<0.0&&xyz[1]<user_tick_min[1])
           )continue;
         xyz[2]=tick_origin[2];
-        if(user_tick_option==3){
+        if(user_tick_option==ZDIR){
           xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[1]=xyz[1];
           xyz2[2]=xyz[2];
@@ -4985,7 +4985,7 @@ void draw_user_ticks(void){
         )continue;
       xyz[2]=tick_origin[2];
       xyz2[0]=xyz[0];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
@@ -5016,7 +5016,7 @@ void draw_user_ticks(void){
         (step[2]>0.0&&xyz[2]>user_tick_max[2])||
         (step[2]<0.0&&xyz[2]<user_tick_min[2])
         )continue;
-      if(user_tick_option==2){
+      if(user_tick_option==YDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
       }
@@ -5050,7 +5050,7 @@ void draw_user_ticks(void){
           (step[2]>0.0&&xyz[2]>user_tick_max[2])||
           (step[2]<0.0&&xyz[2]<user_tick_min[2])
           )continue;
-        if(user_tick_option==2){
+        if(user_tick_option==YDIR){
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
         }
@@ -5075,7 +5075,7 @@ void draw_user_ticks(void){
         (step[2]>0.0&&xyz[2]>user_tick_max[2])||
         (step[2]<0.0&&xyz[2]<user_tick_min[2])
         )continue;
-      if(user_tick_option==2){
+      if(user_tick_option==YDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
