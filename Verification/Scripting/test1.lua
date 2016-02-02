@@ -113,9 +113,8 @@ end)
 
 -- load each different type of data file
 test("load slice file", function() load.datafile("room_fire_02.sf") end)
--- disabled this test for speed
--- test("load boundary file", function() load.datafile("room_fire_01.bf") end)
--- test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
+test("load boundary file", function() load.datafile("room_fire_01.bf") end)
+test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
 testException("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.zs") end)
 test("load particle file", function() load.datafile("room_fire.prt5") end)
 testException("load non-existant file", function() load.datafile("abcdefg.hi") end)
@@ -166,6 +165,17 @@ test("no loaded file tests", function()
     -- test with an existing viewpoint
     test("view.viewpoint", function()
         local x = "internal"
+        test("set", function() view.viewpoint = x end)
+        -- tempyieldscript()
+        displayCB()
+        test("get", function() return view.viewpoint end)
+        test("equal", function()
+            assert(view.viewpoint == x, "get does not match set\n get is: "
+                   .. tostring(view.viewpoint) .. "\n  set is: " .. tostring(x))
+        end)
+    end)
+    test("view.viewpoint2", function()
+        local x = "external"
         test("set", function() view.viewpoint = x end)
         tempyieldscript()
         test("get", function() return view.viewpoint end)
@@ -238,13 +248,15 @@ end)
 test("loaded file test", function()
     test("pre-reqs", function() load.datafile("room_fire_01.sf") end)
     test("load.tour", function() load.tour("Circular") end)
-    test("tour.keyframe", function()
-        test("set", function() tour.keyframe = 5 end)
-        test("get", function() return tour.keyframe end)
-        test("equal", function()
-            assert(tour.keyframe == 5, "get does not match set")
-        end)
-    end)
+    -- The tour tests are currently disabled as I am unsure of the exact
+    -- required behaviour.
+    -- test("tour.keyframe", function()
+    --     test("set", function() tour.keyframe = 5 end)
+    --     test("get", function() return tour.keyframe end)
+    --     test("equal", function()
+    --         assert(tour.keyframe == 5, "get does not match set")
+    --     end)
+    -- end)
     -- test("tour.view", function()
     --     test("set", function() tour.keyframe = 5 end)
     --     test("get", function() return tour.keyframe end)
@@ -300,8 +312,9 @@ display_test_results(tests)
 function mkMovie()
     -- this is a very quick hack of a sript as a demonstration
     -- depends on ffmpeg and 
-    -- it currently saves to disk, but it should be possible to directly stream
-    -- the images to ffmpeg
+    -- it currently needs to save to disk in order to combine the two different
+    -- data sets from Smokeview, however, it is possible to stream images
+    -- directly to ffmpeg.
     local f = assert(io.popen("uname", r))
     local sys = assert(f:read('*a'))
     f:close()
@@ -321,7 +334,21 @@ function mkMovie()
     os.execute("mkdir renders" .. sep .. "combined")
     render.type = "PNG"
     unload.all()
-    view.viewpoint = "n"
+    local cam = {
+        rotationType = 1,
+        eyePos = {x = 0.481481, y = -1.278639, z = 0.222222},
+        zoom =  1.0,
+        viewAngle = 0,
+        directionAngle = 0,
+        elevationAngle = 0,
+        projectionType = 0,
+        viewDir  = {x = 0.481481, y = 0.500000, z = 0.222222},
+        zAngle = {az = -50, elev = 55},
+        transformMatrix = nil,
+        clipping = nil
+    }
+    camera.print(cam)
+    camera.set(cam)
     timebar.visibility = true
     local movframes = 500
     load.datafile("room_fire_01.sf")
@@ -333,7 +360,9 @@ function mkMovie()
     print("done load")
     rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
     io.stderr:write("rendering complete\n")
+    io.stderr:write("combining frames\n")
     for i=0,movframes,1 do
+        io.stderr:write(string.format("combining frame %d\n",i))
         os.execute(string.format(
             "montage"
             .. " renders/tempslice/%d.png"
@@ -350,67 +379,20 @@ function mkMovie()
         .. " -i renders/combined/%%d.png"
         .. " renders/testMovie.mp4"))
 end
-print("using mkMoview")
 pcall(mkMovie)
 exit()
-camera_mod_elev(45)
-camera_mod_az(45)
-camera_mod_az(-90)
-settime(15.0)
--- yieldscript()
-displayCB()
-print("render14")
-render()
-camera_set_elev(90)
-camera_set_az(0)
-camera_set_projection_type(1)
-camera_set_eyey(-3.078639)
-render()
-print("unloadall")
--- unloadall();
---loaddatavfile("room_fire_02.sf")
-print("settime")
--- loaddatafile("room_fire_01.bf")
-settime(20.0)
-setframe(68)
-render()
-setframe(71)
-settimebarvisibility(0)
-camera_mod_eyex(0.1)
--- print("setrenderdir")
--- print("Current Script Directory: ")
---print(current_script_dir)
---print("Current Render Directory: ")
---print(current_render_dir)
--- yieldscript()
-displayCB()
-render()
-print_times()
-print("oh, here")
-nframes = get_nglobal_times()
-for i=0,nframes,1 do
-    setframe(i)
-    render()
-end
-print("nframes: " .. nframes)
-
-initsliceinfo()
-print(sliceinfo)
-for key,value in pairs(sliceinfo) do print(key,value.label) end
-print("Script for " .. fdsprefix .. " complete.")
-exit()
+-- this is an example of the format for the camera specification
 oc = {
     rotationType = 0,
-    rotationIndex = 20,
+    -- rotationIndex = 20,
     viewId = 0,
     eyePos = {x = 0.194911, y = -0.574832, z = 0.017699},
     zoom =  1.0,
     -- zoomIndex = 2,
-    viewAngle = 0, -- &camera_ini->view_angle
+    viewAngle = 0,
     directionAngle = 0, -- azimuth &camera_ini->azimuth
     elevationAngle = 0, -- elevation &camera_ini->elevation
     projectionType = 0,
-    -- &camera_ini->xcen, ycen, zen
     viewDir  = {x = 0.144911, y = 0.500000, z = 0.017699},
     zAngle = {az = 62.000000, elev = 38.000000},
     transformMatrix = nil,
@@ -422,6 +404,7 @@ oc = {
     -- },
     clipping = nil
     -- clipping = {
+    --     mode = 0,
     --     x = {min = nil, max = nil},
     --     y = {min = nil, max = nil},
     --     z = {min = nil, max = nil}
