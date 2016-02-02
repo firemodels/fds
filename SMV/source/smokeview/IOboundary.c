@@ -273,13 +273,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(j1 == bc->ijk[JMIN] && j2 == bc->ijk[JMAX] &&
         k1 == bc->ijk[KMIN] && k2 == bc->ijk[KMAX]){
-        if(i1 == bc->ijk[IMIN] && patchdir == -1){
+        if(i1 == bc->ijk[IMIN] && patchdir == XDIRNEG){
           bc->patchvis[0] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(-1);
         }
-        if(i1 == bc->ijk[IMAX] && patchdir == 1){
+        if(i1 == bc->ijk[IMAX] && patchdir == XDIR){
           bc->patchvis[1] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -293,13 +293,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(i1 == bc->ijk[IMIN] && i2 == bc->ijk[IMAX] &&
         k1 == bc->ijk[KMIN] && k2 == bc->ijk[KMAX]){
-        if(j1 == bc->ijk[JMIN] && patchdir == -2){
+        if(j1 == bc->ijk[JMIN] && patchdir == YDIRNEG){
           bc->patchvis[2] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(2);
         }
-        if(j1 == bc->ijk[JMAX] && patchdir == 2){
+        if(j1 == bc->ijk[JMAX] && patchdir == YDIR){
           bc->patchvis[3] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -313,13 +313,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(i1 == bc->ijk[IMIN] && i2 == bc->ijk[IMAX] &&
         j1 == bc->ijk[JMIN] && j2 == bc->ijk[JMAX]){
-        if(k1 == bc->ijk[KMIN] && patchdir == -3){
+        if(k1 == bc->ijk[KMIN] && patchdir == ZDIRNEG){
           bc->patchvis[4] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(-3);
         }
-        if(k1 == bc->ijk[KMAX] && patchdir == 3){
+        if(k1 == bc->ijk[KMAX] && patchdir == ZDIR){
           bc->patchvis[5] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -696,7 +696,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       patchdir=meshi->patchdir[n];
       getpatchface2dir(meshi,i1,i2,j1,j2,k1,k2,patchdir,
         meshi->blockonpatch+n,meshi->meshonpatch+n);
-      if(meshi->patchdir[n]==2||meshi->patchdir[n]==-2){
+      if(meshi->patchdir[n]==YDIR||meshi->patchdir[n]==YDIRNEG){
         meshi->patchdir[n]=-meshi->patchdir[n];
       }
     }
@@ -1929,13 +1929,13 @@ void drawpatch_texture(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:
@@ -2913,13 +2913,13 @@ void drawpatch(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.00,0.0,-dboundz);
             break;
           default:
@@ -3261,13 +3261,13 @@ void drawpatch_cellcenter(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:

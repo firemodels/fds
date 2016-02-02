@@ -1867,15 +1867,15 @@ int hide_slice2(slicedata *sdi,slicedata *sdj){
   dx = MIN(sdi->xmax,sdj->xmax) - MAX(sdi->xmin,sdj->xmin);
   dy = MIN(sdi->ymax,sdj->ymax) - MAX(sdi->ymin,sdj->ymin);
   dz = MIN(sdi->zmax,sdj->zmax) - MAX(sdi->zmin,sdj->zmin);
-  if(sdi->idir==1){
+  if(sdi->idir==XDIR){
     dx=1.0;
     aslice=(sdi->ymax-sdi->ymin)*(sdi->zmax-sdi->zmin);
   }
-  if(sdi->idir==2){
+  if(sdi->idir==YDIR){
     dy=1.0;
     aslice=(sdi->xmax-sdi->xmin)*(sdi->zmax-sdi->zmin);
   }
-  if(sdi->idir==3){
+  if(sdi->idir==ZDIR){
     dz=1.0;
     aslice=(sdi->xmax-sdi->xmin)*(sdi->ymax-sdi->ymin);
   }
@@ -3877,7 +3877,7 @@ void drawvolslice_texture(const slicedata *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
 
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -3936,7 +3936,7 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
    int maxi;
    
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -3997,7 +3997,7 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
    int maxi;
    
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
@@ -4117,7 +4117,7 @@ void drawvolslice_terrain(const slicedata *sd){
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -4176,7 +4176,7 @@ void drawvolslice_terrain(const slicedata *sd){
     }
     glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -4237,7 +4237,7 @@ void drawvolslice_terrain(const slicedata *sd){
     }
     glEnd();
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
     float z11, z31, z13, z33, zmid;
     int maxi;
     float *znode, zoffset;
@@ -4368,7 +4368,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(use_transparency_data==1)transparenton();
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     float constval;
     int maxj;
     int j;
@@ -4456,7 +4456,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
       }
     }
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
     float constval;
     int i;
     int maxi;
@@ -4541,7 +4541,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
       }
     }
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
     float constval;
     int i;
     int maxi;
@@ -4679,7 +4679,7 @@ void drawvolslice(const slicedata *sd){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(use_transparency_data==1)transparenton();
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
    int maxj;
 
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -4731,7 +4731,7 @@ void drawvolslice(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
    int maxi;
 
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -4786,7 +4786,7 @@ void drawvolslice(const slicedata *sd){
    glEnd();
   }
   // i*nj*nk + j*nk + k
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
    int maxi;
 
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
@@ -4888,7 +4888,7 @@ void drawvvolslice(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
@@ -4963,7 +4963,7 @@ void drawvvolslice(const vslicedata *vd){
    glEnd();
    SNIFF_ERRORS("after drawvvolslice:points dir=1");
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
@@ -5039,7 +5039,7 @@ void drawvvolslice(const vslicedata *vd){
    glEnd();
    SNIFF_ERRORS("after drawvvolslice:points dir=2");
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     int maxi;
 
     constval = zplttemp[plotz]+offset_slice*sd->sliceoffset;
@@ -5148,7 +5148,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int j;
     int maxj;
     float xhalf;
@@ -5305,7 +5305,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
       }
     }
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
     float yhalf;
 
@@ -5467,7 +5467,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
       }
     }
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     int maxi;
     float zhalf;
 
@@ -5684,7 +5684,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
@@ -5747,7 +5747,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
     glEnd();
     SNIFF_ERRORS("after drawvvolslice_terrain:points dir=1");
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
@@ -5813,7 +5813,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
     glEnd();
     SNIFF_ERRORS("after drawvvolslice_terrain:points dir=2");
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     float zmax;
     int maxi;
 
