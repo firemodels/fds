@@ -672,11 +672,15 @@ void _Sniff_Errors(char *whereat);
 
 #define UPDATE_PROJECTION -2
 
-#define MENU_TOUR_EDIT -14
-#define MENU_TOUR_NEW -12
+#define MENU_TOUR_DEFAULT -1
 #define MENU_TOUR_MANUAL -2
 #define MENU_TOUR_SHOWALL -3
+#define MENU_TOUR_SHOWDIALOG -4
 #define MENU_TOUR_VIEWFROMROUTE -5
+#define MENU_TOUR_NEW -12
+#define MENU_TOUR_CLEARALL -13
+#define MENU_TOUR_EDIT -14
+
 
 #define MENU_TEXTURE_SHOWALL -1
 
