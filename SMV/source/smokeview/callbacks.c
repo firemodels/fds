@@ -349,15 +349,15 @@ void mouse_edit_blockage(int button, int state, int x, int y){
     switch(sd->dir){
       case DOWN_X:
       case UP_X:
-        xyz_dir=0;
+        xyz_dir=XDIR;
         break;
       case DOWN_Y:
       case UP_Y:
-        xyz_dir=1;
+        xyz_dir=YDIR;
         break;
       case DOWN_Z:
       case UP_Z:
-        xyz_dir=2;
+        xyz_dir=ZDIR;
         break;
       default:
         ASSERT(FFALSE);

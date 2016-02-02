@@ -770,9 +770,9 @@ void SetCVentDirs(void){
       boxmax = cvi->boxmax;
 
       dir=0;
-      if(cvi->imin==cvi->imax)dir=1;
-      if(cvi->jmin==cvi->jmax)dir=2;
-      if(cvi->kmin==cvi->kmax)dir=3;
+      if(cvi->imin==cvi->imax)dir=XDIR;
+      if(cvi->jmin==cvi->jmax)dir=YDIR;
+      if(cvi->kmin==cvi->kmax)dir=ZDIR;
       orien=0;
 
       boxmin[0]=cvi->xmin;
@@ -1096,14 +1096,14 @@ void SetVentDirs(void){
       vi=meshi->ventinfo+iv;
 
       dir=0;
-      if(vi->imin==vi->imax)dir=1;
-      if(vi->jmin==vi->jmax)dir=2;
-      if(vi->kmin==vi->kmax)dir=3;
+      if(vi->imin==vi->imax)dir=XDIR;
+      if(vi->jmin==vi->jmax)dir=YDIR;
+      if(vi->kmin==vi->kmax)dir=ZDIR;
       orien=0;
 
       switch(dir){
       case XDIR:
-        vi->dir2=1;
+        vi->dir2=XDIR;
         offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
         if(vi->imin==0){
           orien=1;
@@ -1153,7 +1153,7 @@ void SetVentDirs(void){
         }
         break;
       case YDIR:
-        vi->dir2=2;
+        vi->dir2=YDIR;
         offset=ventoffset_factor*(yplttemp[1]-yplttemp[0]);
         if(vi->jmin==0){
           orien=1;
@@ -1203,7 +1203,7 @@ void SetVentDirs(void){
         }
         break;
       case ZDIR:
-        vi->dir2=3;
+        vi->dir2=ZDIR;
         offset=ventoffset_factor*(zplttemp[1]-zplttemp[0]);
         if(vi->kmin==0){
           orien=1;
