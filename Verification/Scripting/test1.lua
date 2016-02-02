@@ -311,7 +311,7 @@ end)
 display_test_results(tests)
 function mkMovie()
     -- this is a very quick hack of a sript as a demonstration
-    -- depends on ffmpeg and 
+    -- depends on ffmpeg and ImageMagick
     -- it currently needs to save to disk in order to combine the two different
     -- data sets from Smokeview, however, it is possible to stream images
     -- directly to ffmpeg.
