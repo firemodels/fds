@@ -11,6 +11,8 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
+#include "c_api.h"
+
 int set_slice_bound_min(const char *slice_type, int set, float value) {
 	int i;
     for(i = 0; i < nslice2; i++) {
@@ -416,12 +418,12 @@ void render(const char *filename) {
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                    char *renderfile_path, int woffset, int hoffset, int screenH,
                    char *basename) {
-    
+
     // char renderfile_ext[4]; // does not include the '.'
     char suffix[20];
     char* renderfile_ext;
     char* view_suffix;
-    
+
     // determine the extension to be used, and set renderfile_ext to it
     switch(renderfiletype) {
         case 0:
@@ -435,13 +437,13 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
             renderfile_ext = ext_png;
             break;
     }
-    
+
     // if the basename has not been specified, use a predefined method to
     // determine the filename
     if(basename == NULL) {
         printf("basename is null\n");
-        
-        
+
+
         switch(view_mode) {
             case VIEW_LEFT:
                 if(showstereo==STEREO_LR){
@@ -460,10 +462,10 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                 ASSERT(FFALSE);
                 break;
         }
-        
+
         if(can_write_to_dir(renderfile_dir)==0){
             printf("Creating directory: %s\n", renderfile_dir);
-            
+
 // #if defined(WIN32)
 //             CreateDirectory (renderfile_dir, NULL);
 // #elif defined(_MINGW32_)
@@ -528,7 +530,7 @@ void RenderFrameLua(int view_mode, char *basename) {
   // construct filename for image to be rendered
   form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
                 woffset, hoffset, screenH, basename);
-                
+
   printf("renderfile_name: %s\n", renderfile_name);
   // render image
   SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
@@ -1459,9 +1461,6 @@ int getcolorbarflip(int flip) {
 
 // Camera API
 // These function live-modify the current view by modifying "camera_current".
-// int camera_get_projection_type() {
-//   return camera_current->rotation_type;
-// }
 void camera_set_rotation_type(int rotation_type) {
   camera_current->rotation_type = rotation_type;
 }
@@ -1580,4 +1579,7 @@ void camera_set_projection_type(int projection_type) {
   camera_current->projection_type = projection_type;
   // 1 is orthogonal
   // 0 is perspective
+}
+int camera_get_projection_type() {
+  return camera_current->projection_type;
 }

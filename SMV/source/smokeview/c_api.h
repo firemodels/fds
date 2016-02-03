@@ -4,6 +4,7 @@ int set_slice_bound_max(const char *slice_type, int set, float value);
 void printsliceinfo();
 
 int loadsmvall(const char *input_filepath);
+int loadsmv(char *input_filename, char *input_filename_ext);
 void renderclip(int flag, int left, int right, int bottom, int top);
 void render(const char *filename);
 void gsliceview(int data, int show_triangles, int show_triangulation,
@@ -20,6 +21,7 @@ void settime(float timeval);
 int loadfile(const char *filename);
 void loadinifile(const char *filepath);
 int loadvfile(const char *filepath);
+void loadboundaryfile(const char *filepath);
 void loadboundary(const char *filepath);
 void label(const char *label);
 void load3dsmoke(const char *smoke_type);
@@ -57,6 +59,11 @@ void setcolorbarindex(int chosen_index);
 int getcolorbarindex();
 void camera_set_eyeview(int eyeview);
 void camera_set_rotation_index(int rotation_index);
+int camera_get_rotation_index();
+
+void camera_set_rotation_type(int rotation_type);
+int camera_get_rotation_type();
+
 void camera_set_view_id(int view_id);
 //void viewpoint_set_viewdir(float xcen, float ycen, float zcen);
 
@@ -89,6 +96,7 @@ void camera_set_zcen(float zcen);
 
 void camera_toggle_projection_type();
 void camera_set_projection_type(int projection_type);
+int camera_get_projection_type();
 
 void set_sceneclip_x(int clipMin, float min, int clipMax, float max);
 void set_sceneclip_x_min(int flag, float value);
@@ -105,3 +113,6 @@ void RenderFrameLua(int view_mode, char *basename);
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                    char *renderfile_path, int woffset, int hoffset, int screenH,
                    char *basename);
+
+int parse_smv_filepath(char *smv_filepath, char *fdsprefix,
+                       char *input_filename_ext);
