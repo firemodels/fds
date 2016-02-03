@@ -4,6 +4,7 @@ set curdir=%CD%
 set size=_64
 set svn_drive=c:
 set DEBUG=
+set TEST=
 set SCRIPT_DIR=%CD%
 set runsmvcases=1
 set rungeomcases=1
@@ -38,15 +39,15 @@ if %useinstalled% == 1 (
 ) else (
   set BACKGROUND=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
   set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win%size%\smokediff_win%size%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%size%.exe -bindir %SVNROOT%\SMV\for_bundle
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%TEST%%size%%DEBUG%.exe -bindir %SVNROOT%\SMV\for_bundle
   set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win%size%\smokezip_win%size%.exe
   set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 )
 
-call :is_file_installed %BACKGROUND%|| exit /b 1
-call :is_file_installed %SMOKEDIFF%|| exit /b 1
 call :is_file_installed %SMOKEVIEW%|| exit /b 1
+call :is_file_installed %SMOKEDIFF%|| exit /b 1
 call :is_file_installed %SMOKEZIP%|| exit /b 1
+call :is_file_installed %BACKGROUND%|| exit /b 1
 
 set vis="%SVNROOT%\Verification\Visualization"
 set wui="%SVNROOT%\Verification\Wui"
@@ -138,11 +139,11 @@ if %runsmvcases% == 1 (
   echo.
   echo differencing plume5c and plume5cdelta
 
-  %SMOKEDIFF% plume5c plume5cdelta
+  %SMOKEDIFF% -np plume5c plume5cdelta
 
   echo.
   echo differencing thouse5 and thouse5delta
-  %SMOKEDIFF% thouse5 thouse5delta
+  %SMOKEDIFF% -np thouse5 thouse5delta
 
   echo.
   echo converting tree_one particles to an isosurface
@@ -231,7 +232,11 @@ goto eof
    set rungeomcases=0
    set runwuicases=1
  )
- if /I "%1" EQU "-useinstalled" (
+ if /I "%1" EQU "-test" (
+   set valid=1
+   set TEST=_test
+ )
+ if /I "%1" EQU "-installed" (
    set valid=1
    set useinstalled=1
  )
@@ -252,10 +257,11 @@ exit /b
 echo Run_SMV_Cases [options]
 echo. 
 echo -help  - display this message
-echo -debug - run with debug FDS
-echo -useinstalled - use installed Smokeview
-echo -geom  - run only geom cases
-echo -wui   - run only W cases
+echo -debug - run with debug Smokeview
+echo -installed - use installed Smokeview
+echo -test - use test Smokeview
+echo -geom  - run only geometry cases
+echo -wui   - run only Wui cases
 exit /b
   
 :eof
