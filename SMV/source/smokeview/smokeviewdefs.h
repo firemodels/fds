@@ -7,6 +7,12 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SMOKESENSORS_HIDDEN 0
+#define SMOKESENSORS_0255 1
+#define SMOKESENSORS_01 2
+#define SMOKESENSORS_SCALED 3
+#define SMOKESENSORS_0INF 4
+
 #define TOURINDEX_ALL  -3
 #define TOURINDEX_MANUAL -1
 #define TOURINDEX_DEFAULT -4

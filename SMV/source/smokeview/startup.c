@@ -1502,7 +1502,6 @@ void initvars(void){
 
   smokediff=0;
   smoke3d_cvis=1.0;
-  show_smokesensors=1;
   test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
@@ -1829,7 +1828,6 @@ void initvars(void){
   view_ntimes=1000;
   glui_avatar_index=0;
   iavatar_evac=0;
-  update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
   visFDSticks=0;

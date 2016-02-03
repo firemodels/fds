@@ -585,7 +585,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
     }
   }
 
-  if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=0){
+  if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN){
     int idev;
 
     for(idev=0;idev<ndeviceinfo;idev++){
