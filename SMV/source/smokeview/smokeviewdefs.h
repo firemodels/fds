@@ -7,6 +7,10 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define TOURINDEX_ALL  -3
+#define TOURINDEX_MANUAL -1
+#define TOURINDEX_DEFAULT -4
+
 #define SURFACE_HIDDEN 0
 #define SURFACE_SOLID 1
 #define SURFACE_OUTLINE 2

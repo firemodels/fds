@@ -1827,7 +1827,6 @@ void initvars(void){
   tour_constant_vel=0;
   tour_bias=0.0,tour_continuity=0.0;
   view_ntimes=1000;
-  ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
   glui_avatar_index=0;
   iavatar_evac=0;
   update_selectedtour_index=0;

@@ -573,11 +573,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     Smoke3d_CB(START_FRAME);
     Smoke3d_CB(SKIP_FRAME);
     if(ntours > 0){
-      selectedtour_index = -1;
-      selectedtour_index_old = -1;
+      selectedtour_index = TOURINDEX_MANUAL;
+      selectedtour_index_old = TOURINDEX_MANUAL;
       LISTBOX_VOL_tour = glui_3dsmoke->add_listbox_to_panel(PANEL_generate_images, "Tour:", &selectedtour_index, VOL_TOUR_LIST, Smoke3d_CB);
 
-      LISTBOX_VOL_tour->add_item(-1, "Manual");
+      LISTBOX_VOL_tour->add_item(TOURINDEX_MANUAL, "Manual");
       LISTBOX_VOL_tour->add_item(-999, "-");
       for(i = 0; i < ntours; i++){
         tourdata *touri;
