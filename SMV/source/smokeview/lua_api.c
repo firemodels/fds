@@ -460,36 +460,36 @@ int lua_initsmvdata(lua_State *L) {
 int lua_initsmvproginfo(lua_State *L) {
     char version[256];
     char githash[256];
-    
+
     getPROGversion(version);
     getGitHash(githash);
-    
+
     lua_createtable(L, 0, 8);
-    
+
     lua_pushstring(L, version);
     lua_setfield(L, -2, "version");
-    
+
     lua_pushstring(L, githash);
     lua_setfield(L, -2, "githash");
-    
+
     lua_pushstring(L, TITLERELEASE);
     lua_setfield(L, -2, "titlerelease");
-    
+
     lua_pushstring(L, __DATE__);
     lua_setfield(L, -2, "builddate");
-    
+
     lua_pushstring(L, fds_githash);
     lua_setfield(L, -2, "fdsgithash");
-    
+
     lua_pushstring(L, smokeviewpath);
     lua_setfield(L, -2, "smokeviewpath");
-    
+
     lua_pushstring(L, smokezippath);
     lua_setfield(L, -2, "smokezippath");
-    
+
     lua_pushstring(L, texturedir);
     lua_setfield(L, -2, "texturedir");
-    
+
     lua_setglobal(L, "smokeviewProgram");
     return 0;
 }
@@ -503,13 +503,13 @@ int lua_get_sliceinfo(lua_State *L) {
     lua_createtable(L, 0, nsliceinfo);
     for (int i; i < nsliceinfo; i++) {
         lua_pushnumber(L, i);
-        lua_createtable(L, 0, 2);
+        lua_createtable(L, 0, 12);
 
         if(sliceinfo[i].slicelabel != NULL) {
             lua_pushstring(L, sliceinfo[i].slicelabel);
             lua_setfield(L, -2, "label");
         }
-        
+
         if(sliceinfo[i].label.longlabel != NULL) {
             lua_pushstring(L, sliceinfo[i].label.longlabel);
             lua_setfield(L, -2, "longlabel");
@@ -517,12 +517,37 @@ int lua_get_sliceinfo(lua_State *L) {
 
         lua_pushstring(L, sliceinfo[i].file);
         lua_setfield(L, -2, "file");
-        
+
         lua_pushnumber(L, sliceinfo[i].slicetype);
         lua_setfield(L, -2, "slicetype");
-        
+
         lua_pushnumber(L, sliceinfo[i].idir);
         lua_setfield(L, -2, "idir");
+
+        lua_pushnumber(L, sliceinfo[i].sliceoffset);
+        lua_setfield(L, -2, "sliceoffset");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_min[0]);
+        lua_setfield(L, -2, "imin");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_max[0]);
+        lua_setfield(L, -2, "imax");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_min[1]);
+        lua_setfield(L, -2, "jmin");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_max[1]);
+        lua_setfield(L, -2, "jmax");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_min[2]);
+        lua_setfield(L, -2, "kmin");
+
+        lua_pushnumber(L, sliceinfo[i].ijk_max[2]);
+        lua_setfield(L, -2, "kmax");
+
+
+        lua_pushstring(L, sliceinfo[i].slicedir);
+        lua_setfield(L, -2, "slicedir");
 
         lua_settable(L, -3);
     }
@@ -618,7 +643,7 @@ int lua_get_rendertype(lua_State *L) {
             lua_pushstring(L, NULL);
             break;
     }
-    return 1; 
+    return 1;
 }
 
 /*
@@ -650,7 +675,7 @@ int lua_get_movietype(lua_State *L) {
             lua_pushstring(L, NULL);
             break;
     }
-    return 1; 
+    return 1;
 }
 
 int lua_makemovie(lua_State *L) {
@@ -880,11 +905,11 @@ int lua_camera_get_elev(lua_State *L) {
     lua_pushnumber(L, camera_get_elev());
     return 1;
 }
-// int lua_camera_get_projection_type(lua_State *L) {
-//     float projection_type = camera_get_projection_type();
-//     lua_pushnumber(L, projection_type);
-//     return 1;
-// }
+int lua_camera_get_projection_type(lua_State *L) {
+    float projection_type = camera_get_projection_type();
+    lua_pushnumber(L, projection_type);
+    return 1;
+}
 int lua_camera_set_projection_type(lua_State *L) {
     float projection_type = lua_tonumber(L, 1);
     camera_set_projection_type(projection_type);
@@ -952,15 +977,15 @@ int lua_camera_get_viewdir(lua_State *L) {
     float zcen = camera_get_zcen();
 
     lua_createtable(L, 0, 3);
-    
+
     lua_pushstring(L, "x");
     lua_pushnumber(L, xcen);
     lua_settable(L, -3);
-    
+
     lua_pushstring(L, "y");
     lua_pushnumber(L, ycen);
     lua_settable(L, -3);
-    
+
     lua_pushstring(L, "z");
     lua_pushnumber(L, zcen);
     lua_settable(L, -3);
@@ -996,7 +1021,7 @@ void initLua() {
 	L = luaL_newstate();
 
 	luaL_openlibs(L);
-    
+
     lua_initsmvproginfo(L);
 
     lua_register(L, "set_slice_bound_min", lua_set_slice_bound_min);
@@ -1077,10 +1102,10 @@ void initLua() {
     lua_register(L, "camera_mod_elev", lua_camera_mod_elev);
     lua_register(L, "camera_set_elev", lua_camera_set_elev);
     lua_register(L, "camera_get_elev", lua_camera_get_elev);
-    
+
     lua_register(L, "camera_set_viewdir", lua_camera_set_viewdir);
     lua_register(L, "camera_get_viewdir", lua_camera_get_viewdir);
-    
+
     lua_register(L, "camera_get_zoom", lua_camera_get_zoom);
     lua_register(L, "camera_set_zoom", lua_camera_set_zoom);
 
@@ -1090,6 +1115,8 @@ void initLua() {
             , lua_camera_get_rotation_index);
     lua_register(L, "camera_set_rotation_type"
         , lua_camera_set_rotation_type);
+    lua_register(L, "camera_get_projection_type"
+        , lua_camera_get_projection_type);
     lua_register(L, "camera_set_projection_type"
         , lua_camera_set_projection_type);
 
