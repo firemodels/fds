@@ -16,21 +16,31 @@
 #include <direct.h>
 #endif
 
+#define MENU_PARTICLE_UNLOAD -1
+#define MENU_PARTICLE_DUMMY -2
+#define MENU_PARTICLE_ALLMESHES -11
+
+#define MENU_UNLOADEVAC_UNLOADALL -1
+
+#define MENU_UNLOADPARTICLE_UNLOADALL -1
+
+#define MENU_AVATAR_DEFINED -1
+
 #define MENU_PARTSHOW_PARTICLES 1
-#define MENU_PARTSHOW_STATIC 5
 #define MENU_PARTSHOW_DROPLETS 2
 #define MENU_PARTSHOW_SHOWALL 3
 #define MENU_PARTSHOW_HIDEALL 4
+#define MENU_PARTSHOW_STATIC 5
 
 #define MENU_PROP_DUMMY -1
-#define MENU_PROP_HIDEPART -4
 #define MENU_PROP_SHOWALL -2
 #define MENU_PROP_HIDEALL -3
-#define MENU_PROP_TRACERS -6
+#define MENU_PROP_HIDEPART -4
 #define MENU_PROP_HIDEAVATAR -5
+#define MENU_PROP_TRACERS -6
 
-#define MENU_STREAK_HEAD -3
 #define MENU_STREAK_HIDE -2
+#define MENU_STREAK_HEAD -3
 
 #define MENU_VECTOR_SHOW -2
 
@@ -6778,10 +6788,10 @@ updatemenu=0;
   CREATEMENU(avatarevacmenu,AvatarEvacMenu);
   if(navatar_types>0){
     if(iavatar_evac==-1){
-      glutAddMenuEntry(_("*Defined in evac file"),-1);
+      glutAddMenuEntry(_("*Defined in evac file"),MENU_AVATAR_DEFINED);
     }
     else{
-      glutAddMenuEntry(_("Defined in evac file"),-1);
+      glutAddMenuEntry(_("Defined in evac file"),MENU_AVATAR_DEFINED);
     }
     glutAddMenuEntry("-",MENU_DUMMY);
     for(i=0;i<navatar_types;i++){
@@ -7734,7 +7744,8 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     }
-    glutAddMenuEntry(_("Unload all"),-1);
+
+    glutAddMenuEntry(_("Unload all"),MENU_UNLOADPARTICLE_UNLOADALL);
 
     if(nmeshes==1){
       CREATEMENU(particlemenu,ParticleMenu);
@@ -7770,12 +7781,12 @@ updatemenu=0;
             strcpy(menulabel,_("Particles"));
             strcat(menulabel," - ");
             strcat(menulabel,_("All meshes"));
-            glutAddMenuEntry(menulabel,-11);
+            glutAddMenuEntry(menulabel,MENU_PARTICLE_ALLMESHES);
             strcpy(menulabel,_("Particles"));
             strcat(menulabel," - ");
             strcat(menulabel,_("Single mesh"));
             glutAddSubMenu(menulabel,particlesubmenu);
-            glutAddMenuEntry("-",-2);
+            glutAddMenuEntry("-",MENU_PARTICLE_DUMMY);
           }
           else{
             for(i=0;i<npartinfo;i++){
@@ -7804,14 +7815,14 @@ updatemenu=0;
             strcat(menulabel," - ");
             strcat(menulabel,_("Single mesh"));
             glutAddSubMenu(menulabel,particlesubmenu);
-            if(atleastone==1)glutAddMenuEntry("-",-2);
+            if(atleastone==1)glutAddMenuEntry("-",MENU_PARTICLE_DUMMY);
           }
         }
       }
     }
 
     if(npartloaded<=1){
-      glutAddMenuEntry(_("Unload"),-1);
+      glutAddMenuEntry(_("Unload"),MENU_PARTICLE_UNLOAD);
     }
      else{
        glutAddSubMenu(_("Unload"),unloadpartmenu);
@@ -7833,7 +7844,7 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     }
-    glutAddMenuEntry(_("Unload all"),-1);
+    glutAddMenuEntry(_("Unload all"),MENU_UNLOADEVAC_UNLOADALL);
 
     CREATEMENU(evacmenu,EvacMenu);
     {
