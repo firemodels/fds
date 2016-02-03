@@ -17,6 +17,7 @@
 
 #define GAS 1
 #define SOLID 0
+#define UNCOMPRESSED 0
 
 /* ------------------ vol_tetra ------------------------ */
 
@@ -1355,7 +1356,7 @@ int ResizeSurface(isosurface *surfacedata, int incvert, int inctriangles, int in
 /* ------------------ InitIsosurface ------------------------ */
 
 void InitIsosurface(isosurface *surfacedata, float level, float *color,int colorindex){
-  surfacedata->compression_type=0;
+  surfacedata->compression_type=UNCOMPRESSED;
   surfacedata->level = level;
   surfacedata->color = color;
   surfacedata->colorindex=colorindex;

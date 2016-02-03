@@ -173,7 +173,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   windex = plot3dinfo[ifile].w;
   if(uindex!=-1||vindex!=-1||windex!=-1)numplot3dvars=plot3dinfo[ifile].nvars;
 
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     if(NewMemory((void **)&meshi->qdata,numplot3dvars*ntotal*sizeof(float))==0){
       *errorcode=1;
       readplot3d("",ifile,UNLOAD,&error);
@@ -208,7 +208,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   plot3dfilelen = strlen(file);
   PRINTF("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&isotest,plot3dfilelen);
   }
   if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(unsigned char))==0){
@@ -216,7 +216,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     readplot3d("",ifile,UNLOAD,&error);
     return;
   }
-  if(p->compression_type==1){
+  if(p->compression_type==COMPRESSED_ZLIB){
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
@@ -226,7 +226,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   meshi->udata=NULL;
   meshi->vdata=NULL;
   meshi->wdata=NULL;
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     if(uindex!=-1||vindex!=-1||windex!=-1){
       vectorspresent=1;
       p->nvars=mxplot3dvars;
@@ -388,7 +388,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
-  if(p->compression_type==1||cache_qdata==0){
+  if(p->compression_type==COMPRESSED_ZLIB||cache_qdata==0){
     cache_qdata=0;
     FREEMEMORY(meshi->qdata);
   }
