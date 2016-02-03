@@ -12,7 +12,8 @@
 #include "IOvolsmoke.h"
 
 int set_slice_bound_min(const char *slice_type, int set, float value) {
-    for(int i = 0; i < nslice2; i++) {
+	int i;
+    for(i = 0; i < nslice2; i++) {
         printf("setting %s min bound ", slice_type);
         if(set) {printf("ON");} else {printf("OFF");}
         printf(" with value of %f\n", value);
@@ -26,7 +27,8 @@ int set_slice_bound_min(const char *slice_type, int set, float value) {
 }
 
 int set_slice_bound_max(const char *slice_type, int set, float value) {
-    for(int i = 0; i < nslice2; i++) {
+	int i;
+    for(i = 0; i < nslice2; i++) {
         printf("setting %s max bound ", slice_type);
         if(set) {printf("ON");} else {printf("OFF");}
         printf(" with value of %f\n", value);

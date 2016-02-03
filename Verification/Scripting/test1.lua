@@ -1,6 +1,8 @@
 print("Running script for " .. fdsprefix .. ".")
 --hidewindow()
 print("Date: " .. os.date("%c"))
+package.path=package.path .. ";" .. "../../SMV/Build/gnu_linux_64/?.lua"
+print(package.path)
 smv = require "smv"
 -- ssf = require "ssf"
 -- ssfparser = require "ssfparser"
@@ -387,7 +389,7 @@ function mkMovie()
         .. " -i renders/combined/%%d.png"
         .. " renders/testMovie.mp4"))
 end
-pcall(mkMovie)
+mkMovie()
 exit()
 -- this is an example of the format for the camera specification
 oc = {

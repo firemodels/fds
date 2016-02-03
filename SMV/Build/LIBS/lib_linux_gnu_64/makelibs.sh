@@ -36,10 +36,10 @@ cd $SRCDIR/zlib114
 cp libz.a $LIBDIR/.
 
 # Lua # Lua interpreter
-cd $SRCDIR/lua-5.3.1
-export TARGET=linux
+cd $SRCDIR/lua-5.3.1/src
+export TARGET=liblua.a
 ./makelib.sh $OPTS
-cp src/liblua.a $LIBDIR/.
+cp liblua.a $LIBDIR/.
 
 # LPEG # Lua parsing libarary to parse SSF files
 cd $SRCDIR/lpeg-1.0.0
