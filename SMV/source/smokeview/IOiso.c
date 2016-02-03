@@ -1059,7 +1059,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   nvertices=asurface->nvertices;
   ntriangles=asurface->ntriangles/3;
   if(ntriangles==0)return;
-  if(surfacetype==1||surfacetype==-1){
+  if(surfacetype==SURFACE_SOLID||surfacetype==-1){
     float rgbtemp[4];
     float *col;
 
@@ -1102,12 +1102,12 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     iso_specular[3] = 1.0;
     if(asurface->cullfaces==1)glDisable(GL_CULL_FACE);
     glPushAttrib(GL_LIGHTING_BIT);
-    if(surfacetype==1){
+    if(surfacetype==SURFACE_SOLID){
       glEnable(GL_LIGHTING);
       glEnable(GL_COLOR_MATERIAL);
     }
     glBegin(GL_TRIANGLES);
-    if(surfacetype==1){
+    if(surfacetype==SURFACE_SOLID){
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,asurface->color);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
     }
@@ -1155,7 +1155,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     }
     glEnd();
     if(asurface->cullfaces==1)glEnable(GL_CULL_FACE);
-    if(surfacetype==1){
+    if(surfacetype==SURFACE_SOLID){
       glDisable(GL_COLOR_MATERIAL);
       glDisable(GL_LIGHTING);
     }
@@ -1164,7 +1164,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     if(transparenton_flag==1)transparentoff();  
   }
 
-  if(surfacetype==2){
+  if(surfacetype==SURFACE_OUTLINE){
     glPushMatrix();
     antialias(ON);
     glLineWidth(line_width);
@@ -1196,7 +1196,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     glPopMatrix();
   }
 
-  if(surfacetype==3){
+  if(surfacetype==SURFACE_POINTS){
     glPushMatrix();
     antialias(ON);
     glPointSize(plot3dpointsize);

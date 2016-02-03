@@ -7,6 +7,11 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SURFACE_HIDDEN 0
+#define SURFACE_SOLID 1
+#define SURFACE_OUTLINE 2
+#define SURFACE_POINTS 3
+
 #define SHOWALL_FILES 0
 #define SHOWONLY_FILE 1
 #define HIDEALL_FILES 2

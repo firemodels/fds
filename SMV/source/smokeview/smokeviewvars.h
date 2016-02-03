@@ -660,7 +660,8 @@ SVEXTERN int visaxislabels;
 SVEXTERN int numplot3dvars;
 SVEXTERN int SVDECL(skip_global,1);
 SVEXTERN int p3dsurfacesmooth;
-SVEXTERN int p3dsurfacetype;
+SVEXTERN int SVDECL(p3dsurfacetype,SURFACE_SOLID);
+
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;

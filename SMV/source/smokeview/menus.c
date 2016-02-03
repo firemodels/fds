@@ -1683,17 +1683,17 @@ void IsoSurfaceTypeMenu(int value){
     switch(value){
     case 0:
       p3dsurfacesmooth=1;
-      p3dsurfacetype=1;
+      p3dsurfacetype=SURFACE_SOLID;
       break;
     case 1:
       p3dsurfacesmooth=0;
-      p3dsurfacetype=1;
+      p3dsurfacetype=SURFACE_SOLID;
       break;
     case 2:
-      p3dsurfacetype=2;
+      p3dsurfacetype=SURFACE_OUTLINE;
       break;
     case 3:
-      p3dsurfacetype=3;
+      p3dsurfacetype=SURFACE_POINTS;
       break;
     default:
       ASSERT(FFALSE);
@@ -5366,22 +5366,22 @@ updatemenu=0;
 /* --------------------------------iso surface menu -------------------------- */
   if(nplot3dinfo>0){
     CREATEMENU(isosurfacetypemenu,IsoSurfaceTypeMenu);
-    if(p3dsurfacesmooth==1&&p3dsurfacetype==1){
+    if(p3dsurfacesmooth==1&&p3dsurfacetype==SURFACE_SOLID){
       glutAddMenuEntry(_("*Smooth"),0);
     }
      else{
        glutAddMenuEntry(_("Smooth"),0);
      }
-     if(p3dsurfacesmooth==0&&p3dsurfacetype==1){
+     if(p3dsurfacesmooth==0&&p3dsurfacetype==SURFACE_SOLID){
        glutAddMenuEntry(_("*Facets"),1);
      }
     else{
       glutAddMenuEntry(_("Facets"),1);
     }
-    if(p3dsurfacetype==2)glutAddMenuEntry(_("*Triangles"),2);
-    if(p3dsurfacetype!=2)glutAddMenuEntry(_("Triangles"),2);
-    if(p3dsurfacetype==3)glutAddMenuEntry(_("*Points"),3);
-    if(p3dsurfacetype!=3)glutAddMenuEntry(_("Points"),3);
+    if(p3dsurfacetype==SURFACE_OUTLINE)glutAddMenuEntry(_("*Triangles"),SURFACE_OUTLINE);
+    if(p3dsurfacetype!=SURFACE_OUTLINE)glutAddMenuEntry(_("Triangles"),SURFACE_OUTLINE);
+    if(p3dsurfacetype == SURFACE_POINTS)glutAddMenuEntry(_("*Points"), SURFACE_POINTS);
+    if(p3dsurfacetype != SURFACE_POINTS)glutAddMenuEntry(_("Points"), SURFACE_POINTS);
 
     CREATEMENU(isosurfacemenu,IsoSurfaceMenu);
     glutAddSubMenu(_("Solution variable"),isovariablemenu);

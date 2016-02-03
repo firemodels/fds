@@ -1154,7 +1154,6 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_radiobutton_to_group(RADIO_plot3d_isotype,_d("Points"));
     RADIOBUTTON_plot3d_iso_hidden->disable();
 
-
     p3min_temp=p3min[0];
     p3max_temp=p3max[0];
     p3chopmin_temp=p3chopmin[0];
