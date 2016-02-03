@@ -1483,7 +1483,6 @@ void initvars(void){
   visaxislabels=0;
   numplot3dvars=0;
   p3dsurfacesmooth=1;
-  p3dsurfacetype=1;
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
