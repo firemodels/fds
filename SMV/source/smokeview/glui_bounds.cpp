@@ -1154,7 +1154,6 @@ extern "C" void glui_bounds_setup(int main_window){
     glui_bounds->add_radiobutton_to_group(RADIO_plot3d_isotype,_d("Points"));
     RADIOBUTTON_plot3d_iso_hidden->disable();
 
-
     p3min_temp=p3min[0];
     p3max_temp=p3max[0];
     p3chopmin_temp=p3chopmin[0];
@@ -1511,10 +1510,10 @@ extern "C" void PLOT3D_CB(int var){
   case SETCHOPMINVAL:
     updatechopcolors();
     switch(setp3chopmin_temp){
-      case 0:
+      case DISABLE:
         EDIT_p3_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_p3_chopmin->enable();
         break;
       default:
@@ -1525,10 +1524,10 @@ extern "C" void PLOT3D_CB(int var){
   case SETCHOPMAXVAL:
     updatechopcolors();
     switch(setp3chopmax_temp){
-      case 0:
+      case DISABLE:
         EDIT_p3_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_p3_chopmax->enable();
         break;
       default:
@@ -2118,10 +2117,10 @@ void Bound_CB(int var){
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmin){
-      case 0:
+      case DISABLE:
       EDIT_patch_chopmin->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_patch_chopmin->enable();
       break;
     default:
@@ -2134,10 +2133,10 @@ void Bound_CB(int var){
     updatechopcolors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmax){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmax->enable();
         break;
       default:
@@ -2187,10 +2186,10 @@ void Bound_CB(int var){
     if(CHECKBOX_patch_setchopmax!=NULL)CHECKBOX_patch_setchopmax->set_int_val(setpatchchopmax);
 
     switch(setpatchchopmin){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmin->enable();
         break;
       default:
@@ -2198,10 +2197,10 @@ void Bound_CB(int var){
         break;
     }
     switch(setpatchchopmax){
-      case 0:
+      case DISABLE:
         EDIT_patch_chopmax->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_patch_chopmax->enable();
         break;
       default:
@@ -2466,10 +2465,10 @@ void PART_CB(int var){
     prop_new->chopmin=partchopmin;
     updatechopcolors();
     switch(setpartchopmin){
-      case 0:
+      case DISABLE:
       EDIT_part_chopmin->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_part_chopmin->enable();
       break;
     default:
@@ -2482,10 +2481,10 @@ void PART_CB(int var){
     prop_new->chopmax=partchopmax;
     updatechopcolors();
     switch(setpartchopmax){
-      case 0:
+      case DISABLE:
       EDIT_part_chopmax->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_part_chopmax->enable();
       break;
     default:
@@ -2819,10 +2818,10 @@ extern "C" void Slice_CB(int var){
     updatechopcolors();
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     switch(setslicechopmin){
-      case 0:
+      case DISABLE:
         EDIT_slice_chopmin->disable();
         break;
-      case 1:
+      case ENABLE:
         EDIT_slice_chopmin->enable();
         break;
       default:
@@ -2834,10 +2833,10 @@ extern "C" void Slice_CB(int var){
     updatechopcolors();
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     switch(setslicechopmax){
-      case 0:
+      case DISABLE:
       EDIT_slice_chopmax->disable();
       break;
-      case 1:
+      case ENABLE:
       EDIT_slice_chopmax->enable();
       break;
     default:
@@ -3286,11 +3285,11 @@ extern "C" void FileShow_CB(int var){
   switch(var){
   case  FILESHOW_plot3d:
     switch(showhide_option){
-    case 0:
-    case 1:
+    case SHOWALL_FILES:
+    case SHOWONLY_FILE:
       Plot3DShowMenu(SHOWALL_PLOT3D);
       break;
-    case 2:
+    case HIDEALL_FILES:
       Plot3DShowMenu(HIDEALL_PLOT3D);
       break;
     default:
@@ -3300,10 +3299,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case FILESHOW_evac:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       EvacShowMenu(SHOWALL_EVAC);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       EvacShowMenu(SHOWALL_EVAC);
       if(npartloaded != 0)ParticleShowMenu(HIDEALL_PARTICLE);
       if(nsmoke3dloaded != 0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
@@ -3312,7 +3311,7 @@ extern "C" void FileShow_CB(int var){
       if(nvsliceloaded != 0)ShowVSliceMenu(HIDEALL_VSLICE);
       if(npatchloaded != 0)ShowPatchMenu(HIDEALL_BOUNDARY);
       break;
-    case 2:
+    case HIDEALL_FILES:
       EvacShowMenu(HIDEALL_EVAC);
       break;
     default:
@@ -3322,10 +3321,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_particle:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       ParticleShowMenu(SHOWALL_PARTICLE);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       ParticleShowMenu(SHOWALL_PARTICLE);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(nsmoke3dloaded != 0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
@@ -3334,7 +3333,7 @@ extern "C" void FileShow_CB(int var){
       if(nvsliceloaded != 0)ShowVSliceMenu(HIDEALL_VSLICE);
       if(npatchloaded != 0)ShowPatchMenu(HIDEALL_BOUNDARY);
       break;
-    case 2:
+    case HIDEALL_FILES:
       ParticleShowMenu(HIDEALL_PARTICLE);
       break;
     default:
@@ -3344,10 +3343,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_slice:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       ShowHideSliceMenu(SHOWALL_SLICE);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       ShowHideSliceMenu(SHOWALL_SLICE);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(nvsliceloaded != 0)ShowVSliceMenu(HIDEALL_VSLICE);
@@ -3356,7 +3355,7 @@ extern "C" void FileShow_CB(int var){
       if(nisoloaded != 0)IsoShowMenu(HIDEALL_ISO);
       if(npartloaded != 0)ParticleShowMenu(HIDEALL_PARTICLE);
       break;
-    case 2:
+    case HIDEALL_FILES:
       ShowHideSliceMenu(HIDEALL_SLICE);
       break;
     default:
@@ -3366,10 +3365,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_vslice:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       ShowVSliceMenu(SHOWALL_VSLICE);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       ShowVSliceMenu(SHOWALL_VSLICE);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(npatchloaded != 0)ShowPatchMenu(HIDEALL_BOUNDARY);
@@ -3378,7 +3377,7 @@ extern "C" void FileShow_CB(int var){
       if(npartloaded != 0)ParticleShowMenu(HIDEALL_PARTICLE);
       if(nsliceloaded != 0)ShowHideSliceMenu(HIDEALL_SLICE);
       break;
-    case 2:
+    case HIDEALL_FILES:
       ShowHideSliceMenu(HIDEALL_SLICE);
       break;
     default:
@@ -3388,10 +3387,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_boundary:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       ShowPatchMenu(SHOWALL_BOUNDARY);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       ShowPatchMenu(SHOWALL_BOUNDARY);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(nsmoke3dloaded != 0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
@@ -3400,7 +3399,7 @@ extern "C" void FileShow_CB(int var){
       if(nsliceloaded != 0)ShowHideSliceMenu(HIDEALL_SLICE);
       if(nisoloaded != 0)IsoShowMenu(HIDEALL_ISO);
       break;
-    case 2:
+    case HIDEALL_FILES:
       ShowPatchMenu(HIDEALL_BOUNDARY);
       break;
     default:
@@ -3410,10 +3409,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_3dsmoke:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       Smoke3DShowMenu(SHOWALL_SMOKE3D);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       Smoke3DShowMenu(SHOWALL_SMOKE3D);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(npatchloaded != 0)ShowPatchMenu(HIDEALL_BOUNDARY);
@@ -3422,7 +3421,7 @@ extern "C" void FileShow_CB(int var){
       if(nsliceloaded != 0)ShowHideSliceMenu(HIDEALL_SLICE);
       if(nisoloaded != 0)IsoShowMenu(HIDEALL_ISO);
       break;
-    case 2:
+    case HIDEALL_FILES:
       Smoke3DShowMenu(HIDEALL_SMOKE3D);
       break;
     default:
@@ -3432,10 +3431,10 @@ extern "C" void FileShow_CB(int var){
     break;
   case  FILESHOW_isosurface:
     switch(showhide_option){
-    case 0:
+    case SHOWALL_FILES:
       IsoShowMenu(SHOWALL_ISO);
       break;
-    case 1:
+    case SHOWONLY_FILE:
       IsoShowMenu(SHOWALL_ISO);
       if(nevacloaded != 0)EvacShowMenu(HIDEALL_EVAC);
       if(nsmoke3dloaded != 0)Smoke3DShowMenu(HIDEALL_SMOKE3D);
@@ -3444,7 +3443,7 @@ extern "C" void FileShow_CB(int var){
       if(nvsliceloaded != 0)ShowVSliceMenu(HIDEALL_VSLICE);
       if(nsliceloaded != 0)ShowHideSliceMenu(HIDEALL_SLICE);
       break;
-    case 2:
+    case HIDEALL_FILES:
       IsoShowMenu(HIDEALL_ISO);
       break;
     default:

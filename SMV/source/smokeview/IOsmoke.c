@@ -648,15 +648,15 @@ void setsmokecolorflags(void){
     if(smoke3di->loaded==0)continue;
 
     switch(smoke3di->type){
-    case 1:
+    case SOOT:
       smoke3di->soot_color=smoke3di->smokeframe_in;
       smoke3di->soot_index=i;
       break;
-    case 2:
+    case FIRE:
       smoke3di->hrrpuv_color=smoke3di->smokeframe_in;
       smoke3di->hrrpuv_index=i;
       break;
-    case 3:
+    case WATER:
       smoke3di->water_color=smoke3di->smokeframe_in;
       smoke3di->water_index=i;
       break;
@@ -680,15 +680,15 @@ void setsmokecolorflags(void){
       if(smoke3di->ks2!=smoke3dj->ks2)continue;
 
       switch(smoke3dj->type){
-      case 1:
+      case SOOT:
         smoke3di->soot_color=smoke3dj->smokeframe_in;
         smoke3di->soot_index=j;
         break;
-      case 2:
+      case FIRE:
         smoke3di->hrrpuv_color=smoke3dj->smokeframe_in;
         smoke3di->hrrpuv_index=j;
         break;
-      case 3:
+      case WATER:
         smoke3di->water_color=smoke3dj->smokeframe_in;
         smoke3di->water_index=j;
         break;
@@ -980,16 +980,16 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
     if(smoke3di->loaded==0||smoke3di->display==0)continue;
     smoke_soot=NULL;
     switch(smoke3di->type){
-    case 1:
+    case SOOT:
       smoke3di->d_display=1;
       break;
-    case 2:
+    case FIRE:
       if(smoke3di->soot_index!=-1)smoke_soot=smoke3dinfo + smoke3di->soot_index;
       if(smoke3di->soot_loaded==0||(smoke_soot!=NULL&&smoke_soot->display==0)){
         smoke3di->d_display=1;
       }
       break;
-    case 3:
+    case WATER:
       if(smoke3di->soot_loaded==0&&smoke3di->hrrpuv_loaded==0){
         smoke3di->d_display=1;
       }

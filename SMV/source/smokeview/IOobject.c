@@ -900,12 +900,12 @@ void draw_devices(void){
 
         vdevsorti = vdevices_sorted + i;
         if(vectortype == VECTOR_PROFILE){
-          if(vdevsorti->dir == 0 && vis_xtree == 0)continue;
-          if(vdevsorti->dir == 1 && vis_ytree == 0)continue;
-          if(vdevsorti->dir == 2 && vis_ztree == 0)continue;
+          if(vdevsorti->dir == XDIR && vis_xtree == 0)continue;
+          if(vdevsorti->dir == YDIR && vis_ytree == 0)continue;
+          if(vdevsorti->dir == ZDIR && vis_ztree == 0)continue;
         }
         else{
-          if(vdevsorti->dir != 2)continue;
+          if(vdevsorti->dir != ZDIR)continue;
         }
 
         vdevi = vdevsorti->vdeviceinfo;
@@ -5646,19 +5646,19 @@ int comparev2devices(const void *arg1, const void *arg2){
   if(diri - dirj < 0)return -1;
   if(diri - dirj > 0)return 1;
   switch(diri){
-  case 0:
+  case XDIR:
     if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
     if(xyzi[1] - xyzj[1]>EPSDEV)return 1;
     if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
     if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
     break;
-  case 1:
+  case YDIR:
     if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
     if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
     if(xyzi[2] - xyzj[2]<-EPSDEV)return -1;
     if(xyzi[2] - xyzj[2]>+EPSDEV)return 1;
     break;
-  case 2:
+  case ZDIR:
     if(xyzi[0] - xyzj[0]<-EPSDEV)return -1;
     if(xyzi[0] - xyzj[0]>EPSDEV)return 1;
     if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
@@ -5684,7 +5684,7 @@ int comparev3devices( const void *arg1, const void *arg2 ){
   if(diri - dirj < 0)return -1;
   if(diri - dirj > 0)return 1;
   switch(diri){
-  case 0:
+  case XDIR:
     if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
     if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
     if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
@@ -5692,7 +5692,7 @@ int comparev3devices( const void *arg1, const void *arg2 ){
     if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
     if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
     break;
-  case 1:
+  case YDIR:
     if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
     if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
     if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
@@ -5700,7 +5700,7 @@ int comparev3devices( const void *arg1, const void *arg2 ){
     if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
     if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
     break;
-  case 2:
+  case ZDIR:
     if(xyzi[0]-xyzj[0]<-EPSDEV)return -1;
     if(xyzi[0]-xyzj[0]>EPSDEV)return 1;
     if(xyzi[1]-xyzj[1]<-EPSDEV)return -1;
@@ -6383,15 +6383,15 @@ void setup_device_data(void){
 
     vdevsorti = vdevices_sorted + i;
     vdevsorti->vdeviceinfo = vdeviceinfo + i;
-    vdevsorti->dir = 0;
+    vdevsorti->dir = XDIR;
 
     vdevsorti = vdevices_sorted + nvdeviceinfo + i;
     vdevsorti->vdeviceinfo = vdeviceinfo + i;
-    vdevsorti->dir = 1;
+    vdevsorti->dir = YDIR;
 
     vdevsorti = vdevices_sorted + 2*nvdeviceinfo + i;
     vdevsorti->vdeviceinfo = vdeviceinfo + i;
-    vdevsorti->dir = 2;
+    vdevsorti->dir = ZDIR;
   }
 
   setup_tree_devices();

@@ -518,7 +518,7 @@ void TOUR_CB(int var){
     break;
   case SHOWTOURROUTE:
     edittour = 1 - edittour;
-    TOURMENU(-4);
+    TOURMENU(MENU_TOUR_SHOWDIALOG);
     update_tourcontrols();
     TOUR_CB(VIEW1);
     updatemenu=0;
@@ -537,7 +537,7 @@ void TOUR_CB(int var){
       CHECKBOX_snap->set_int_val(keyframe_snap);
     }
     viewtourfrompath = 1 - viewtourfrompath;
-    TOURMENU(-5);
+    TOURMENU(MENU_TOUR_VIEWFROMROUTE);
     break;
   case VIEW2:
     viewtype1=1-viewtype2;
@@ -792,15 +792,15 @@ void TOUR_CB(int var){
     }
     switch(selectedtour_index){
     case -3:
-      TOURMENU(-3); // show all tours
+      TOURMENU(MENU_TOUR_SHOWALL); // show all tours
       set_glui_keyframe();
       break;
     case -1:
       edittour=0;
-      TOURMENU(-13);  // reset tour vis to ini values
+      TOURMENU(MENU_TOUR_CLEARALL);  // reset tour vis to ini values
       break;
     case -4:
-      TOURMENU(-1);  // default tour
+      TOURMENU(MENU_TOUR_DEFAULT);  // default tour
       break;
     default:
       selected_tour=tourinfo + selectedtour_index;

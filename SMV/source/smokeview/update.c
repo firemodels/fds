@@ -191,7 +191,7 @@ void Update_Framenumber(int changetime){
         patchi=patchinfo + meshi->patchfilenum;
         if(patchi->filetype==PATCH_GEOMETRY||meshi->patch_times==NULL||meshi->patch_timeslist==NULL)continue;
         meshi->patch_itime=meshi->patch_timeslist[itimes];
-        if(patchi->compression_type==0){
+        if(patchi->compression_type==UNCOMPRESSED){
           meshi->cpatchval_iframe = meshi->cpatchval + meshi->patch_itime*meshi->npatchsize;
         }
         else{

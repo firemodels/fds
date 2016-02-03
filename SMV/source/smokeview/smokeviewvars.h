@@ -551,7 +551,7 @@ SVEXTERN int SVDECL(itourknots,-1);
 SVEXTERN int stretch_var_black, stretch_var_white, move_var;
 
 SVEXTERN int SVDECL(research_mode,0);
-SVEXTERN int showhide_option;
+SVEXTERN int SVDECL(showhide_option,SHOWALL_FILES);
 SVEXTERN int snifferrornumber;
 SVEXTERN int xyz_dir;
 SVEXTERN int which_face;
@@ -622,7 +622,7 @@ SVEXTERN float slice_line_contour_max;
 SVEXTERN int slice_line_contour_num;
 SVEXTERN int setpartmin_old, setpartmax_old;
 SVEXTERN int setpatchmin, setpatchmax, SVDECL(setzonemin,GLOBAL_MIN), SVDECL(setzonemax,GLOBAL_MAX);
-SVEXTERN int loadpatchbysteps;
+SVEXTERN int SVDECL(loadpatchbysteps,UNCOMPRESSED );
 SVEXTERN int settargetmin, settargetmax;
 SVEXTERN int setpartchopmin, setpartchopmax;
 SVEXTERN int SVDECL(setslicechopmin,0), SVDECL(setslicechopmax,0);
@@ -660,7 +660,8 @@ SVEXTERN int visaxislabels;
 SVEXTERN int numplot3dvars;
 SVEXTERN int SVDECL(skip_global,1);
 SVEXTERN int p3dsurfacesmooth;
-SVEXTERN int p3dsurfacetype;
+SVEXTERN int SVDECL(p3dsurfacetype,SURFACE_SOLID);
+
 SVEXTERN int parttype;
 SVEXTERN int allexterior,showexterior;
 SVEXTERN int allinterior;

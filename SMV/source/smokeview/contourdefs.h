@@ -17,6 +17,16 @@
 #define GET_NODE_AREAS 2
 #define DATA_FORTRAN 0
 #define DATA_C 1
+
+#ifndef XDIR
+#define XDIR 1
+#endif
+#ifndef YDIR
+#define YDIR 2
+#endif
+#ifndef ZDIR
+#define ZDIR 3
+#endif
 typedef struct {
   float *levels,*areas;
   int nlevels, *nnodes, *npolys, *nlines;

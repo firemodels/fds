@@ -561,6 +561,11 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Associate the MESH with the PROCESS
 
+            IF (MYID==CURRENT_MPI_PROCESS) THEN
+               LOWER_MESH_INDEX = MIN(LOWER_MESH_INDEX,NM)
+               UPPER_MESH_INDEX = MAX(UPPER_MESH_INDEX,NM)
+            ENDIF
+
             PROCESS(NM) = CURRENT_MPI_PROCESS
             IF (MYID==0 .AND. USE_MPI .AND. VERBOSE) &
                WRITE(LU_ERR,'(A,I6,A,I6)') ' Mesh ',NM,' is assigned to MPI Process ',PROCESS(NM)

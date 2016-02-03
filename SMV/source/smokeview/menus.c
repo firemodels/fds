@@ -1683,17 +1683,17 @@ void IsoSurfaceTypeMenu(int value){
     switch(value){
     case 0:
       p3dsurfacesmooth=1;
-      p3dsurfacetype=1;
+      p3dsurfacetype=SURFACE_SOLID;
       break;
     case 1:
       p3dsurfacesmooth=0;
-      p3dsurfacetype=1;
+      p3dsurfacetype=SURFACE_SOLID;
       break;
     case 2:
-      p3dsurfacetype=2;
+      p3dsurfacetype=SURFACE_OUTLINE;
       break;
     case 3:
-      p3dsurfacetype=3;
+      p3dsurfacetype=SURFACE_POINTS;
       break;
     default:
       ASSERT(FFALSE);
@@ -2423,17 +2423,6 @@ void LoadUnloadMenu(int value){
   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 }
 
-/* ------------------ ShowTourMenu ------------------------ */
-
-void ShowTourMenu(int value){
-}
-
-
-/* ------------------ AvatarTourMenu ------------------------ */
-
-void AvatarTourMenu(int value){
-}
-
 void AvatarEvacMenu(int value){
   if(value==MENU_DUMMY)return;
   iavatar_evac=value;
@@ -2458,7 +2447,7 @@ void TourMenu(int value){
     add_new_tour();
     DialogMenu(DIALOG_TOUR);
     break;
-  case -13:               
+  case MENU_TOUR_CLEARALL:               
     for(i=0;i<ntours;i++){  // clear all tours
       touri = tourinfo + i;
       touri->display=touri->display2;
@@ -2491,7 +2480,7 @@ void TourMenu(int value){
     }
     DialogMenu(DIALOG_TOUR);
     break;
-  case -4:
+  case MENU_TOUR_SHOWDIALOG:
     edittour=1-edittour;
     if(edittour==1&&showtour_dialog==0){
       show_glui_tour();
@@ -2508,26 +2497,13 @@ void TourMenu(int value){
     viewtourfrompath = 1 - viewtourfrompath;
     if(viewtourfrompath==0)ResetView(RESTORE_EXTERIOR_VIEW);
     break;
-  case -6:
-    tour_constant_vel=1-tour_constant_vel;
-    createtourpaths();
-    Update_Times();
-    break;
-  case -1:
+  case MENU_TOUR_DEFAULT:
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       touri->display=0;
     }
     ResetView(RESTORE_EXTERIOR_VIEW);
     defaulttour();
-    break;
-  case -11: // bird's eye
-    break;
-  case -21:
-    tourlocus_type=0;
-    break;
-  case -22:
-    tourlocus_type=1;
     break;
   default: 
     if(value<-22){
@@ -5390,22 +5366,22 @@ updatemenu=0;
 /* --------------------------------iso surface menu -------------------------- */
   if(nplot3dinfo>0){
     CREATEMENU(isosurfacetypemenu,IsoSurfaceTypeMenu);
-    if(p3dsurfacesmooth==1&&p3dsurfacetype==1){
+    if(p3dsurfacesmooth==1&&p3dsurfacetype==SURFACE_SOLID){
       glutAddMenuEntry(_("*Smooth"),0);
     }
      else{
        glutAddMenuEntry(_("Smooth"),0);
      }
-     if(p3dsurfacesmooth==0&&p3dsurfacetype==1){
+     if(p3dsurfacesmooth==0&&p3dsurfacetype==SURFACE_SOLID){
        glutAddMenuEntry(_("*Facets"),1);
      }
     else{
       glutAddMenuEntry(_("Facets"),1);
     }
-    if(p3dsurfacetype==2)glutAddMenuEntry(_("*Triangles"),2);
-    if(p3dsurfacetype!=2)glutAddMenuEntry(_("Triangles"),2);
-    if(p3dsurfacetype==3)glutAddMenuEntry(_("*Points"),3);
-    if(p3dsurfacetype!=3)glutAddMenuEntry(_("Points"),3);
+    if(p3dsurfacetype==SURFACE_OUTLINE)glutAddMenuEntry(_("*Triangles"),SURFACE_OUTLINE);
+    if(p3dsurfacetype!=SURFACE_OUTLINE)glutAddMenuEntry(_("Triangles"),SURFACE_OUTLINE);
+    if(p3dsurfacetype == SURFACE_POINTS)glutAddMenuEntry(_("*Points"), SURFACE_POINTS);
+    if(p3dsurfacetype != SURFACE_POINTS)glutAddMenuEntry(_("Points"), SURFACE_POINTS);
 
     CREATEMENU(isosurfacemenu,IsoSurfaceMenu);
     glutAddSubMenu(_("Solution variable"),isovariablemenu);
@@ -6868,11 +6844,11 @@ updatemenu=0;
       if(viewtourfrompath==1)strcat(menulabel,"*");
       strcat(menulabel,"View from ");
       strcat(menulabel,tourinfo[selectedtour_index].label);
-      glutAddMenuEntry(menulabel,-5);
+      glutAddMenuEntry(menulabel,MENU_TOUR_VIEWFROMROUTE);
     }
     glutAddMenuEntry("-",MENU_DUMMY);
-    glutAddMenuEntry(_("Show all"),-3);
-    glutAddMenuEntry(_("Hide all"),-2);
+    glutAddMenuEntry(_("Show all"),MENU_TOUR_SHOWALL);
+    glutAddMenuEntry(_("Hide all"),MENU_TOUR_MANUAL);
   }
 
  /* --------------------------------Show Volume smoke menu -------------------------- */
@@ -8428,13 +8404,13 @@ updatemenu=0;
             smoke3di=smoke3dinfo + i;
             if(smoke3di->loaded==0)continue;
             switch(smoke3di->type){
-            case 1:
+            case SOOT:
               nsootloaded++;
               break;
-            case 2:
+            case FIRE:
               nhrrloaded++;
               break;
-            case 3:
+            case WATER:
               nwaterloaded++;
               break;
             default:
