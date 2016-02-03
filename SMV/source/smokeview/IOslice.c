@@ -6343,7 +6343,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   float time_local;
   int ncompressed;
   int count;
-  size_t returncode;
 
   stream=FOPEN(file,"rb");
   if(stream==NULL)return 0;
