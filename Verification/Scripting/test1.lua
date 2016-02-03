@@ -107,7 +107,7 @@ test("print smokeview info", function()
     io.write(string.format("Smokeview Path: %s\n", smokeviewProgram.smokeviewpath))
     io.write(string.format("Smokezip Path: %s\n", smokeviewProgram.smokezippath))
     io.write(string.format("Texture Directory: %s\n", smokeviewProgram.texturedir))
-    
+
 end)
 -- print information on the model
 
@@ -243,7 +243,7 @@ test("no loaded file tests", function()
     end)
 end)
 
-    
+
 -- the following tests depend on data being loaded
 test("loaded file test", function()
     test("pre-reqs", function() load.datafile("room_fire_01.sf") end)
@@ -286,6 +286,14 @@ test("loaded file test", function()
             assert(render.movie.type == "MP4", "get does not match set")
         end)
     end)
+    test("projectiontype get/set 1", function()
+        local x = 0
+        test("set", function() camera_set_projection_type(x) end)
+        test("get", function() return render.movie.type end)
+        test("equal", function()
+            assert(render.movie.type == x, "get does not match set")
+        end)
+    end)
     testException("render.movie.type invalid", function()
         render.movie.type = "qwer"
     end)
@@ -306,7 +314,7 @@ test("loaded file test", function()
         for key,value in pairs(model.slices) do print(key,value.label) end
         for key,value in pairs(model.slices) do print(key,value.file) end
     end)
-    
+
 end)
 display_test_results(tests)
 function mkMovie()
@@ -371,7 +379,7 @@ function mkMovie()
             .. " -geometry +0+0"
             .. " renders/combined/%d.png"
             , i, i, i))
-    end 
+    end
     os.execute(string.format(
         "ffmpeg"
         .. " -y"
