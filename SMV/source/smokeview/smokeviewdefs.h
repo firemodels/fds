@@ -11,9 +11,12 @@ void _Sniff_Errors(char *whereat);
 #define SHOWONLY_FILE 1
 #define HIDEALL_FILES 2
 
-#define UNCOMPRESSED 0
+#define UNCOMPRESSED_ALLFRAMES 0
 #define UNCOMPRESSED_BYFRAME 1
-#define COMPRESSED 2
+#define COMPRESSED_ALLFRAMES 2
+
+#define UNCOMPRESSED 0
+#define COMPRESSED_ZLIB 1
 
 #define DISABLE 0
 #define ENABLE 1

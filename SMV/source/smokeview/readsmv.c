@@ -725,15 +725,15 @@ void readsmv_dynamic(char *file){
       STRCAT(plot3di->comp_file,".svz");
 
       if(file_exists(plot3di->comp_file)==1){
-        plot3di->compression_type=1;
+        plot3di->compression_type=COMPRESSED_ZLIB;
         plot3di->file=plot3di->comp_file;
       }
       else{
-        plot3di->compression_type=0;
+        plot3di->compression_type=UNCOMPRESSED;
         plot3di->file=plot3di->reg_file;
       }
       //disable compression for now
-      plot3di->compression_type=0;
+      plot3di->compression_type=UNCOMPRESSED;
       plot3di->file=plot3di->reg_file;
 
       if(file_exists(plot3di->file)==0){
@@ -6568,11 +6568,11 @@ typedef struct {
       STRCAT(parti->comp_file,".svz");
 
       if(STAT(parti->comp_file,&statbuffer)==0){
-        parti->compression_type=1;
+        parti->compression_type=COMPRESSED_ZLIB;
         parti->file=parti->comp_file;
       }
       else{
-        parti->compression_type=0;
+        parti->compression_type=UNCOMPRESSED;
         if(STAT(parti->reg_file,&statbuffer)==0){
           parti->file=parti->reg_file;
         }
@@ -6583,7 +6583,7 @@ typedef struct {
           parti->file=NULL;
         }
       }
-      parti->compression_type=0;
+      parti->compression_type=UNCOMPRESSED;
       parti->sort_tags_loaded=0;
       parti->loaded=0;
       parti->display=0;
@@ -6879,12 +6879,12 @@ typedef struct {
       NewMemory((void **)&sd->comp_file,(unsigned int)(len+4+1));
       STRCPY(sd->comp_file,buffer2);
 
-      sd->compression_type=0;
+      sd->compression_type=UNCOMPRESSED;
       if(has_comp==1){
-        sd->compression_type=1;
+        sd->compression_type=COMPRESSED_ZLIB;
         sd->file=sd->comp_file;
       }
-      if(sd->compression_type==0){
+      if(sd->compression_type==UNCOMPRESSED){
         sd->file=sd->reg_file;
       }
 
@@ -7075,11 +7075,11 @@ typedef struct {
 //      STRCAT(patchi->size_file,".szz"); when we actully use file check both .sz and .szz extensions
 
       if(STAT(patchi->comp_file,&statbuffer)==0){
-        patchi->compression_type=1;
+        patchi->compression_type=COMPRESSED_ZLIB;
         patchi->file=patchi->comp_file;
       }
       else{
-        patchi->compression_type=0;
+        patchi->compression_type=UNCOMPRESSED;
         patchi->file=patchi->reg_file;
       }
 
