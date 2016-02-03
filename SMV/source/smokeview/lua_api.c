@@ -1017,13 +1017,32 @@ int lua_set_slice_bound_max(lua_State *L) {
     return 0;
 }
 
+void addLuaPaths() {
+    // load table onto stack
+    lua_getglobal(L, "package");
+    int t = lua_getfield(L, -1, "path");
+    const char *oldPath = lua_tostring(L, -1);
+    int newLength = strlen(oldPath) + 1 + 3*strlen(smokeview_bindir) + 16 +1;
+    char newPath[newLength];
+    strcpy(newPath, oldPath);
+    strcat(newPath,";");
+    strcat(newPath,smokeview_bindir);
+    strcat(newPath,"?.lua;");
+    strcat(newPath,smokeview_bindir);
+    strcat(newPath,"?.dll;");
+    strcat(newPath,smokeview_bindir);
+    strcat(newPath,"?.so");
+    lua_pushstring(L, newPath);
+    lua_setfield(L, -3, "path");
+    return;
+}
+
 void initLua() {
 	L = luaL_newstate();
 
 	luaL_openlibs(L);
-
     lua_initsmvproginfo(L);
-
+    addLuaPaths();
     lua_register(L, "set_slice_bound_min", lua_set_slice_bound_min);
     lua_register(L, "set_slice_bound_max", lua_set_slice_bound_max);
     lua_register(L, "loadsmvall", lua_loadsmvall);
