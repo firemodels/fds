@@ -16,6 +16,29 @@
 #include <direct.h>
 #endif
 
+#define MENU_PARTSHOW_PARTICLES 1
+#define MENU_PARTSHOW_STATIC 5
+#define MENU_PARTSHOW_DROPLETS 2
+#define MENU_PARTSHOW_SHOWALL 3
+#define MENU_PARTSHOW_HIDEALL 4
+
+#define MENU_PROP_DUMMY -1
+#define MENU_PROP_HIDEPART -4
+#define MENU_PROP_SHOWALL -2
+#define MENU_PROP_HIDEALL -3
+#define MENU_PROP_TRACERS -6
+#define MENU_PROP_HIDEAVATAR -5
+
+#define MENU_STREAK_HEAD -3
+#define MENU_STREAK_HIDE -2
+
+#define MENU_VECTOR_SHOW -2
+
+#define MENU_SURFACE_SMOOTH 0
+#define MENU_SURFACE_FACET 1
+#define MENU_SURFACE_OUTLINE 2
+#define MENU_SURFACE_POINTS 3
+
 #define MENU_ISOSHOW_SHOWALL 99
 #define MENU_ISOSHOW_HIDEALL 98
 #define MENU_ISOSHOW_ALLSOLID 94
@@ -1527,7 +1550,7 @@ void ParticleShowMenu(int value){
   }
   if(plotstate==DYNAMIC_PLOTS){
     switch(value){
-      case 1:
+      case MENU_PARTSHOW_PARTICLES:
         if(visSmokePart==2){
           visSmokePart=0;
         }
@@ -1535,10 +1558,10 @@ void ParticleShowMenu(int value){
           visSmokePart=2;
         }
         break;
-      case 2: 
+      case MENU_PARTSHOW_DROPLETS: 
         visSprinkPart = 1 - visSprinkPart; 
         break;
-      case 3: 
+      case MENU_PARTSHOW_SHOWALL: 
         visSprinkPart=1; 
         visSmokePart=2; 
         visStaticSmoke=1; 
@@ -1548,10 +1571,10 @@ void ParticleShowMenu(int value){
           parti->display=1;
         }
         break;
-      case 5: 
+      case MENU_PARTSHOW_STATIC: 
         visStaticSmoke = 1 - visStaticSmoke; 
         break;
-      case 4: 
+      case MENU_PARTSHOW_HIDEALL: 
         visSprinkPart=0; 
         visSmokePart=0; 
         visStaticSmoke=0;
@@ -1681,18 +1704,18 @@ void FrameRateMenu(int value){
 void IsoSurfaceTypeMenu(int value){
   if(ReadPlot3dFile==1){
     switch(value){
-    case 0:
+    case MENU_SURFACE_SMOOTH:
       p3dsurfacesmooth=1;
       p3dsurfacetype=SURFACE_SOLID;
       break;
-    case 1:
+    case MENU_SURFACE_FACET:
       p3dsurfacesmooth=0;
       p3dsurfacetype=SURFACE_SOLID;
       break;
-    case 2:
+    case MENU_SURFACE_OUTLINE:
       p3dsurfacetype=SURFACE_OUTLINE;
       break;
-    case 3:
+    case MENU_SURFACE_POINTS:
       p3dsurfacetype=SURFACE_POINTS;
       break;
     default:
@@ -1780,7 +1803,7 @@ void HelpMenu(int value){
 
 void VectorSkipMenu(int value){
   if(value==-1)return; /* dummy label in menu */
-  if(value==-2){       /* toggle vector visibility */
+  if(value==MENU_VECTOR_SHOW){       /* toggle vector visibility */
     visVector=1-visVector;
     if(vectorspresent==0)visVector=0;
     updatemenu=1;  
@@ -1828,7 +1851,7 @@ void TextureShowMenu(int value){
       }
       showall_textures=1;
       break;
-    case -2:
+    case MENU_TEXTURE_HIDEALL:
       for(i=0;i<ntextures;i++){
         texti = textureinfo + i;
         if(texti->loaded==0||texti->used==0)continue;
@@ -2649,11 +2672,11 @@ void ParticleStreakShowMenu(int value){
   float rvalue;
 
   if(value==-1)return;
-  if(value==-2){
+  if(value==MENU_STREAK_HIDE){
     streak5show=0;
     streak5step=0;
   }
-  else if(value==-3){
+  else if(value==MENU_STREAK_HEAD){
     showstreakhead=1-showstreakhead;
   }
   else{
@@ -2683,7 +2706,7 @@ void ParticlePropShowMenu(int value){
   propvalue = (-value)/10000-1;
   value = -((-value)%10000);
 
-  if(value==-1)return;
+  if(value==MENU_PROP_DUMMY)return;
 
   if(value>=0){
     int iprop;
@@ -2715,7 +2738,7 @@ void ParticlePropShowMenu(int value){
     partunitlabel=propi->label->unit;
     partscale=propi->scale;
   }
-  else if(value==-2){
+  else if(value==MENU_PROP_SHOWALL){
     if(current_property!=NULL){
       unsigned char *vis;
       int i;
@@ -2726,7 +2749,7 @@ void ParticlePropShowMenu(int value){
       }
     }
   }
-  else if(value==-3){
+  else if(value==MENU_PROP_HIDEALL){
     if(current_property!=NULL){
       unsigned char *vis;
       int i;
@@ -2738,7 +2761,7 @@ void ParticlePropShowMenu(int value){
     }
 
   }
-  else if(value==-4){
+  else if(value==MENU_PROP_HIDEPART){
     int i;
     int unhide=1;
 
@@ -2755,7 +2778,7 @@ void ParticlePropShowMenu(int value){
       ParticlePropShowMenu(last_prop_display);
     }
   }
-  else if(value==-5){
+  else if(value==MENU_PROP_HIDEAVATAR){
     int i;
 
     for(i=0;i<npart5prop;i++){
@@ -2767,7 +2790,7 @@ void ParticlePropShowMenu(int value){
     part5show=0;
     parttype=0;
   }
-  else if(value==-6){
+  else if(value==MENU_PROP_TRACERS){
     show_tracers_always=1-show_tracers_always;
     updatetracers();
   }
@@ -5367,16 +5390,16 @@ updatemenu=0;
   if(nplot3dinfo>0){
     CREATEMENU(isosurfacetypemenu,IsoSurfaceTypeMenu);
     if(p3dsurfacesmooth==1&&p3dsurfacetype==SURFACE_SOLID){
-      glutAddMenuEntry(_("*Smooth"),0);
+      glutAddMenuEntry(_("*Smooth"),MENU_SURFACE_SMOOTH);
     }
      else{
-       glutAddMenuEntry(_("Smooth"),0);
+       glutAddMenuEntry(_("Smooth"),MENU_SURFACE_SMOOTH);
      }
      if(p3dsurfacesmooth==0&&p3dsurfacetype==SURFACE_SOLID){
-       glutAddMenuEntry(_("*Facets"),1);
+       glutAddMenuEntry(_("*Facets"),MENU_SURFACE_FACET);
      }
     else{
-      glutAddMenuEntry(_("Facets"),1);
+      glutAddMenuEntry(_("Facets"),MENU_SURFACE_FACET);
     }
     if(p3dsurfacetype==SURFACE_OUTLINE)glutAddMenuEntry(_("*Triangles"),SURFACE_OUTLINE);
     if(p3dsurfacetype!=SURFACE_OUTLINE)glutAddMenuEntry(_("Triangles"),SURFACE_OUTLINE);
@@ -5394,8 +5417,8 @@ updatemenu=0;
 
   if(nplot3dinfo>0){
     CREATEMENU(vectorskipmenu,VectorSkipMenu);
-    if(visVector==1)glutAddMenuEntry(_("*Show"),-2);
-    if(visVector!=1)glutAddMenuEntry(_("Show"),-2);
+    if(visVector==1)glutAddMenuEntry(_("*Show"),MENU_VECTOR_SHOW);
+    if(visVector!=1)glutAddMenuEntry(_("Show"),MENU_VECTOR_SHOW);
     glutAddMenuEntry(_("Frequency:"),-1);
     if(vectorskip==1)glutAddMenuEntry(_("*All"),1);
     if(vectorskip!=1)glutAddMenuEntry(_("All"),1);
@@ -5431,8 +5454,8 @@ updatemenu=0;
     }
     if(ntextures_used>1){
       glutAddMenuEntry("-",MENU_DUMMY);
-      glutAddMenuEntry(_("Show all"),-1);
-      glutAddMenuEntry(_("Hide all"),-2);
+      glutAddMenuEntry(_("Show all"),MENU_TEXTURE_SHOWALL);
+      glutAddMenuEntry(_("Hide all"),MENU_TEXTURE_HIDEALL);
     }
   }
 
@@ -6011,12 +6034,12 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",-1);
     if(showstreakhead==1){
-      glutAddMenuEntry(_("*Particle head"),-3);
+      glutAddMenuEntry(_("*Particle head"),MENU_STREAK_HEAD);
     }
     else{
-      glutAddMenuEntry(_("Particle head"),-3);
+      glutAddMenuEntry(_("Particle head"),MENU_STREAK_HEAD);
     }
-    glutAddMenuEntry(_("Hide"),-2);
+    glutAddMenuEntry(_("Hide"),MENU_STREAK_HIDE);
 
 // allocate memory for particle property sub-menus
 
@@ -6125,7 +6148,7 @@ updatemenu=0;
 
     CREATEMENU(particlepropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      glutAddMenuEntry(_("Color with:"),-1);
+      glutAddMenuEntry(_("Color with:"),MENU_PROP_DUMMY);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
         char menulabel[1024];
@@ -6141,12 +6164,12 @@ updatemenu=0;
         strcat(menulabel,propi->label->longlabel);
         glutAddMenuEntry(menulabel,i);
       }
-    
-      if(part5show==0)glutAddMenuEntry(_("  *Hide"),-4);
-      if(part5show==1)glutAddMenuEntry(_("  Hide"),-4);
-      glutAddMenuEntry("-",-1);
 
-      glutAddMenuEntry(_("Draw"),-1);
+      if(part5show==0)glutAddMenuEntry(_("  *Hide"), MENU_PROP_HIDEPART);
+      if(part5show==1)glutAddMenuEntry(_("  Hide"), MENU_PROP_HIDEPART);
+      glutAddMenuEntry("-",MENU_PROP_DUMMY);
+
+      glutAddMenuEntry(_("Draw"),MENU_PROP_DUMMY);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -6174,24 +6197,24 @@ updatemenu=0;
       }
 
       if(ntypes>1){
-        glutAddMenuEntry(_("  Show all"),-2);
-        glutAddMenuEntry(_("  Hide all"),-3);
+        glutAddMenuEntry(_("  Show all"),MENU_PROP_SHOWALL);
+        glutAddMenuEntry(_("  Hide all"),MENU_PROP_HIDEALL);
       }
-      glutAddMenuEntry("-",-1);
+      glutAddMenuEntry("-",MENU_PROP_DUMMY);
       if(streak5show==1){
         glutAddSubMenu(_("*Streaks"),particlestreakshowmenu);
       }
       else{
         glutAddSubMenu(_("Streaks"),particlestreakshowmenu);
       }
-      glutAddMenuEntry("-",-1);
-      if(show_tracers_always==0)glutAddMenuEntry(_("Show tracers always"),-6);
-      if(show_tracers_always==1)glutAddMenuEntry(_("*Show tracers always"),-6);
+      glutAddMenuEntry("-",MENU_PROP_DUMMY);
+      if(show_tracers_always==0)glutAddMenuEntry(_("Show tracers always"),MENU_PROP_TRACERS);
+      if(show_tracers_always==1)glutAddMenuEntry(_("*Show tracers always"), MENU_PROP_TRACERS);
     }
 
     CREATEMENU(humanpropshowmenu,ParticlePropShowMenu);
     if(npart5prop>=0){
-      glutAddMenuEntry(_("Color with:"),-1);
+      glutAddMenuEntry(_("Color with:"),MENU_PROP_DUMMY);
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
         char menulabel[1024];
@@ -6208,10 +6231,10 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,i);
       }
     
-      if(part5show==0)glutAddMenuEntry(_("  *Hide"),-5);
-      if(part5show==1)glutAddMenuEntry(_("  Hide"),-5);
-      glutAddMenuEntry("-",-1);
-      glutAddMenuEntry(_("Draw"),-1);
+      if(part5show==0)glutAddMenuEntry(_("  *Hide"),MENU_PROP_HIDEAVATAR);
+      if(part5show==1)glutAddMenuEntry(_("  Hide"), MENU_PROP_HIDEAVATAR);
+      glutAddMenuEntry("-",MENU_PROP_DUMMY);
+      glutAddMenuEntry(_("Draw"),MENU_PROP_DUMMY);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
         part5prop *propi;
@@ -6239,10 +6262,10 @@ updatemenu=0;
         //break;
       }
       if(ntypes>1){
-        glutAddMenuEntry(_("  Show all"),-2);
-        glutAddMenuEntry(_("  Hide all"),-3);
+        glutAddMenuEntry(_("  Show all"),MENU_PROP_SHOWALL);
+        glutAddMenuEntry(_("  Hide all"),MENU_PROP_HIDEALL);
       }
-      glutAddMenuEntry("-",-1);
+      glutAddMenuEntry("-",MENU_PROP_DUMMY);
       if(streak5show==1){
         glutAddSubMenu(_("  *Streaks"),particlestreakshowmenu);
       }
@@ -6272,28 +6295,29 @@ updatemenu=0;
       STRCAT(menulabel,parti->menulabel);
       glutAddMenuEntry(menulabel,-1-i);
     }
+
     glutAddMenuEntry("-",MENU_DUMMY);
     if(plotstate==DYNAMIC_PLOTS&&visSmokePart!=0){
-      if(visSmokePart==2)glutAddMenuEntry(_("*Particles"),1);
-      if(visSmokePart==1)glutAddMenuEntry(_("#Particles"),1);
+      if(visSmokePart==2)glutAddMenuEntry(_("*Particles"),MENU_PARTSHOW_PARTICLES);
+      if(visSmokePart==1)glutAddMenuEntry(_("#Particles"), MENU_PARTSHOW_PARTICLES);
     }
     else{
-      glutAddMenuEntry(_("Particles"),1);
+      glutAddMenuEntry(_("Particles"), MENU_PARTSHOW_PARTICLES);
     }
     if(staticframe0==1){
       if(visStaticSmoke==1){
-        glutAddMenuEntry(_("*Particles (static)"),5);
+        glutAddMenuEntry(_("*Particles (static)"), MENU_PARTSHOW_STATIC);
       }
       else{
-        glutAddMenuEntry(_("Particles (static)"),5);
+        glutAddMenuEntry(_("Particles (static)"), MENU_PARTSHOW_STATIC);
       }
     }
     if(havesprinkpart==1){
       if(plotstate==DYNAMIC_PLOTS&&visSprinkPart==1){
-        glutAddMenuEntry(_("*Droplets"),2);
+        glutAddMenuEntry(_("*Droplets"), MENU_PARTSHOW_DROPLETS);
       }
       else{
-        glutAddMenuEntry(_("Droplets"),2);
+        glutAddMenuEntry(_("Droplets"), MENU_PARTSHOW_DROPLETS);
       }
     }
     showall=0;
@@ -6303,10 +6327,10 @@ updatemenu=0;
     }
     glutAddMenuEntry("-",MENU_DUMMY);
     if(showall==1){
-      glutAddMenuEntry(_("*Show all"),3);
+      glutAddMenuEntry(_("*Show all"), MENU_PARTSHOW_SHOWALL);
     }
     else{
-      glutAddMenuEntry(_("Show all"),3);
+      glutAddMenuEntry(_("Show all"), MENU_PARTSHOW_SHOWALL);
     }
     if(plotstate==DYNAMIC_PLOTS){
       int hideall;
@@ -6316,10 +6340,10 @@ updatemenu=0;
       if(havesprinkpart==1&&visSprinkPart==1)hideall=0;
       if(staticframe0==1&&visStaticSmoke==1)hideall=0;
       if(hideall==1){
-        glutAddMenuEntry(_("*Hide all"),4);
+        glutAddMenuEntry(_("*Hide all"), MENU_PARTSHOW_HIDEALL);
       }
       else{
-        glutAddMenuEntry(_("Hide all"),4);
+        glutAddMenuEntry(_("Hide all"), MENU_PARTSHOW_HIDEALL);
       }
     }
   }
@@ -6345,9 +6369,9 @@ updatemenu=0;
       glutAddMenuEntry(menulabel,-1-i);
     }
     glutAddMenuEntry("-",MENU_DUMMY);
-    glutAddMenuEntry(_("Show all"),3);
+    glutAddMenuEntry(_("Show all"), MENU_PARTSHOW_SHOWALL);
     if(plotstate==DYNAMIC_PLOTS){
-      glutAddMenuEntry(_("Hide all"),4);
+      glutAddMenuEntry(_("Hide all"), MENU_PARTSHOW_HIDEALL);
     }
   }
 

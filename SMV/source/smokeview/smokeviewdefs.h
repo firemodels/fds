@@ -699,21 +699,10 @@ void _Sniff_Errors(char *whereat);
 #define MENU_TOUR_CLEARALL -13
 #define MENU_TOUR_EDIT -14
 
-
 #define MENU_TEXTURE_SHOWALL -1
+#define MENU_TEXTURE_HIDEALL -2
 
 #define MENU_SHOWHIDE_FLIP 15
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 
