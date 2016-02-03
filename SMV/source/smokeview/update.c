@@ -191,7 +191,7 @@ void Update_Framenumber(int changetime){
         patchi=patchinfo + meshi->patchfilenum;
         if(patchi->filetype==PATCH_GEOMETRY||meshi->patch_times==NULL||meshi->patch_timeslist==NULL)continue;
         meshi->patch_itime=meshi->patch_timeslist[itimes];
-        if(patchi->compression_type==0){
+        if(patchi->compression_type==UNCOMPRESSED){
           meshi->cpatchval_iframe = meshi->cpatchval + meshi->patch_itime*meshi->npatchsize;
         }
         else{
@@ -1875,53 +1875,6 @@ void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
   UpdateColorTableList(ncolortableinfo_old);
 }
 
-/* ------------------ Update_Clip ------------------------ */
-
-void Update_Clip(int slicedir){
-  stepclip_xmin=0; stepclip_ymin=0; stepclip_zmin=0; 
-  stepclip_xmax=0; stepclip_ymax=0; stepclip_zmax=0;
-  switch(slicedir){
-  case 1:
-    clipinfo.clip_xmin = 1 - clipinfo.clip_xmin;
-    if(clipinfo.clip_xmin==1)PRINTF("clip x on\n");
-    if(clipinfo.clip_xmin==0)PRINTF("clip x off\n");
-    if(clipinfo.clip_xmin==1)stepclip_xmin=1;
-    break;
-  case 2:
-    clipinfo.clip_ymin = 1 - clipinfo.clip_ymin;
-    if(clipinfo.clip_ymin==1)PRINTF("clip y on\n");
-    if(clipinfo.clip_ymin==0)PRINTF("clip y off\n");
-    if(clipinfo.clip_ymin==1)stepclip_ymin=1;
-    break;
-  case 3:
-    clipinfo.clip_zmin = 1 - clipinfo.clip_zmin;
-    if(clipinfo.clip_zmin==1)PRINTF("clip z on\n");
-    if(clipinfo.clip_zmin==0)PRINTF("clip z off\n");
-    if(clipinfo.clip_zmin==1)stepclip_zmin=1;
-    break;
-  case -1:
-    clipinfo.clip_xmax = 1 - clipinfo.clip_xmax;
-    if(clipinfo.clip_xmax==1)PRINTF("clip X on\n");
-    if(clipinfo.clip_xmax==0)PRINTF("clip X off\n");
-    if(clipinfo.clip_xmax==1)stepclip_xmax=1;
-    break;
-  case -2:
-    clipinfo.clip_ymax = 1 - clipinfo.clip_ymax;
-    if(clipinfo.clip_ymax==1)PRINTF("clip Y on\n");
-    if(clipinfo.clip_ymax==0)PRINTF("clip Y off\n");
-    if(clipinfo.clip_ymax==1)stepclip_ymax=1;
-    break;
-  case -3:
-    clipinfo.clip_zmax = 1 - clipinfo.clip_zmax;
-    if(clipinfo.clip_zmax==1)PRINTF("clip Z on\n");
-    if(clipinfo.clip_zmax==0)PRINTF("clip Z off\n");
-    if(clipinfo.clip_zmax==1)stepclip_zmax=1;
-    break;
-  default:
-    ASSERT(FFALSE);
-    break;
-  }
-}
 
 /* ------------------ update_smoothblockage_info ------------------------ */
 

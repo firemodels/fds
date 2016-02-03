@@ -74,7 +74,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
 #define GET_VAL(U,VAL,n) \
          VAL=0.0;           \
          if(U!=NULL){       \
-           if(U->compression_type==1){\
+           if(U->compression_type==COMPRESSED_ZLIB){\
              VAL = U->qval256[U->iqsliceframe[(n)]];\
            }                                  \
            else{                              \
@@ -82,14 +82,14 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
            }                                  \
          }
 
-#define GET_VAL_N(U,n)  ( (U)==NULL ? 0.0 : ( (U)->compression_type==1 ? (U)->qval256[(U)->iqsliceframe[(n)]] : (U)->qslice[(n)] )  )
+#define GET_VAL_N(U,n)  ( (U)==NULL ? 0.0 : ( (U)->compression_type==COMPRESSED_ZLIB ? (U)->qval256[(U)->iqsliceframe[(n)]] : (U)->qslice[(n)] )  )
 
 #define GET_VEC_DXYZ(U,DU,n) \
          if(U==NULL){       \
            DU=0.0;           \
          }\
          else{\
-           if(U->compression_type==1){\
+           if(U->compression_type==COMPRESSED_ZLIB){\
              DU=U->qval256[U->iqsliceframe[(n)]];\
            }                                  \
            else{                              \
@@ -103,7 +103,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
            DU=0.0;\
          }\
          else{       \
-           if(U->compression_type==1){\
+           if(U->compression_type==COMPRESSED_ZLIB){\
              DU=U->qval256[(int)(f1*U->iqsliceframe[n1]+f2*U->iqsliceframe[n2])];\
            }                                  \
            else{                              \
@@ -144,13 +144,13 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
   }
   slicefilelen = strlen(sd->file);
   if(frame_index_local==first_frame_index){
-    if(sd->compression_type==0){
+    if(sd->compression_type==UNCOMPRESSED){
 
       FORTgetslicesizes(sd->file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
-    else if(sd->compression_type==1){
+    else if(sd->compression_type==COMPRESSED_ZLIB){
       if(
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
@@ -347,19 +347,19 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   nxy = nx*ny;
 
   switch(fed_slice->idir){
-    case 1:
+    case XDIR:
       xgrid = meshi->yplt;
       ygrid = meshi->zplt;
       nxdata = co->js2 + 1 - co->js1;
       nydata = co->ks2 + 1 - co->ks1;
       break;
-    case 2:
+    case YDIR:
       xgrid = meshi->xplt;
       ygrid = meshi->zplt;
       nxdata = co->is2 + 1 - co->is1;
       nydata = co->ks2 + 1 - co->ks1;
       break;
-    case 3:
+    case ZDIR:
       xgrid = meshi->xplt;
       ygrid = meshi->yplt;
       nxdata = co->is2 + 1 - co->is1;
@@ -408,21 +408,21 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
     NewMemory((void **)&iblank,nxdata*nydata*sizeof(char));
     switch(fed_slice->idir){
-      case 1:
+      case XDIR:
         for(j=0;j<nxdata-1;j++){
           for(k=0;k<nydata-1;k++){
             iblank[j+k*(nxdata-1)]=meshi->c_iblank_x[IJKNODE(fed_slice->is1,fed_slice->js1+j,fed_slice->ks1+k)];
           }
         }
         break;
-      case 2:
+      case YDIR:
         for(i=0;i<nxdata-1;i++){
           for(k=0;k<nydata-1;k++){
             iblank[i+k*(nxdata-1)]=meshi->c_iblank_y[IJKNODE(fed_slice->is1+i,fed_slice->js1,fed_slice->ks1+k)];
           }
         }
         break;
-      case 3:
+      case ZDIR:
         for(i=0;i<nxdata-1;i++){
           for(j=0;j<nydata-1;j++){
             iblank[i+j*(nxdata-1)]=meshi->c_iblank_z[IJKNODE(fed_slice->is1+i,fed_slice->js1+j,fed_slice->ks1)];
@@ -1039,7 +1039,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
           vd->display=0;
         }
       }
-      if(sd->compression_type==0){
+      if(sd->compression_type==UNCOMPRESSED){
         updateslicebounds();
         list_slice_index=islicetype;
         setslicebounds(islicetype);
@@ -1067,12 +1067,12 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     file_size=get_filesize(file);
 
     slicefilelen = strlen(file);
-    if(sd->compression_type==0){
+    if(sd->compression_type==UNCOMPRESSED){
       FORTgetslicesizes(file, &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sliceframestep,&error,
         &settmin_s, &settmax_s, &tmin_s, &tmax_s, &headersize, &framesize,
         slicefilelen);
     }
-    else if(sd->compression_type==1){
+    else if(sd->compression_type==COMPRESSED_ZLIB){
       if(
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
@@ -1091,7 +1091,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       *errorcode=1;
       return;
     }
-    if(settmax_s==0&&settmin_s==0&&sd->compression_type==0){
+    if(settmax_s==0&&settmin_s==0&&sd->compression_type==UNCOMPRESSED){
       if(framesize <= 0){
         fprintf(stderr,"*** Error: frame size is 0 in slice file %s . \n",file);
         error = 1;
@@ -1109,7 +1109,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     PRINTF("Loading slice data: %s\n",file);
     MEMSTATUS(1,&availmemory,NULL,NULL);
     local_starttime = glutGet(GLUT_ELAPSED_TIME);
-    if(sd->compression_type==1){
+    if(sd->compression_type==COMPRESSED_ZLIB){
       char *datafile;
 
       if(NewMemory((void **)&sd->qslicedata_compressed,sd->ncompressed)==0||
@@ -1166,8 +1166,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       show_slice_average=1;
 
       if(
-        sd->compression_type==1||
-        sd->compression_type==2||
+        sd->compression_type==COMPRESSED_ZLIB||
         average_slice_data(sd->qslicedata,sd->qslicedata,ndata,data_per_timestep,sd->times,ntimes_local,slice_average_interval)==1
         ){
         show_slice_average=0; // averaging failed
@@ -1195,7 +1194,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->sliceoffset=0.0;
 
     switch(sd->idir){
-     case 1:
+     case XDIR:
       offset=sliceoffset_factor*(xplt_local[1]-xplt_local[0]);
       if(inblockage(meshi,xslicemid-offset,yslicemid,zslicemid)==1){
         sd->sliceoffset=offset;
@@ -1206,7 +1205,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       sd->nslicex=sd->js2+1-sd->js1;
       sd->nslicey=sd->ks2+1-sd->ks1;
       break;
-     case 2:
+     case YDIR:
       offset = sliceoffset_factor*(yplt_local[1]-yplt_local[0]);
       if(inblockage(meshi,xslicemid,yslicemid-offset,zslicemid)==1){
         sd->sliceoffset=offset;
@@ -1217,7 +1216,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       sd->nslicex=sd->is2+1-sd->is1;
       sd->nslicey=sd->ks2+1-sd->ks1;
       break;
-     case 3:
+     case ZDIR:
       offset=sliceoffset_factor*(zplt_local[1]-zplt_local[0]);
       if(inblockage(meshi,xslicemid,yslicemid,zslicemid-offset)==1){
         sd->sliceoffset=offset;
@@ -1235,7 +1234,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
     sd->nsliceii = sd->nslicei*sd->nslicej*sd->nslicek;
     sd->nslicetotal=sd->ntimes*sd->nsliceii;
-    if(sd->compression_type==1||sd->compression_type==2){
+    if(sd->compression_type==COMPRESSED_ZLIB){
       if(NewMemory((void **)&sd->slicecomplevel,sd->nsliceii*sizeof(unsigned char))==0){
         readslice("",ifile,UNLOAD,&error);
         *errorcode=1;
@@ -1251,7 +1250,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     }
 
 #ifdef pp_MEMDEBUG
-    if(sd->compression_type==0){
+    if(sd->compression_type==UNCOMPRESSED){
       ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
     }
 #endif
@@ -1259,7 +1258,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
 
  // convert slice data into color indices
 
-  if(sd->compression_type==0){
+  if(sd->compression_type==UNCOMPRESSED){
     getslicedatabounds(sd,&qmin,&qmax);
   }
   else{
@@ -1268,7 +1267,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   }
   sd->globalmin=qmin;
   sd->globalmax=qmax;
-  if(sd->compression_type==0){
+  if(sd->compression_type==UNCOMPRESSED){
     adjustslicebounds(sd,&qmin,&qmax);
   }
   sd->valmin=qmin;
@@ -1291,7 +1290,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   Update_Times();
   CheckMemory;
 
-  if(sd->compression_type==0){
+  if(sd->compression_type==UNCOMPRESSED){
     updateslicebounds();
     updateallslicecolors(islicetype,errorcode);
     list_slice_index=islicetype;
@@ -1311,7 +1310,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   updateglui();
   CheckMemory;
 #ifdef pp_MEMDEBUG
-  if(sd->compression_type==0){
+  if(sd->compression_type==UNCOMPRESSED){
     ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes));
   }
   CheckMemory;
@@ -1723,11 +1722,8 @@ void updateslicemenulabels(void){
       STRCAT(sd->menulabel,", ");
       STRCAT(sd->menulabel,sd->file);
     }
-    if(sd->compression_type==1){
+    if(sd->compression_type==COMPRESSED_ZLIB){
       STRCAT(sd->menulabel," (ZLIB)");
-    }
-    else if(sd->compression_type==2){
-      STRCAT(sd->menulabel," (RLE)");
     }
     for(i=1;i<nsliceinfo;i++){
       mesh *meshi;
@@ -1764,11 +1760,8 @@ void updateslicemenulabels(void){
         STRCAT(sd->menulabel,", ");
         STRCAT(sd->menulabel,sd->file);
       }
-      if(sd->compression_type==1){
+      if(sd->compression_type==COMPRESSED_ZLIB){
         STRCAT(sd->menulabel," (ZLIB)");
-      }
-      else if(sd->compression_type==2){
-        STRCAT(sd->menulabel," (RLE)");
       }
     } 
     for(i=0;i<nsliceinfo;i++){
@@ -1867,15 +1860,15 @@ int hide_slice2(slicedata *sdi,slicedata *sdj){
   dx = MIN(sdi->xmax,sdj->xmax) - MAX(sdi->xmin,sdj->xmin);
   dy = MIN(sdi->ymax,sdj->ymax) - MAX(sdi->ymin,sdj->ymin);
   dz = MIN(sdi->zmax,sdj->zmax) - MAX(sdi->zmin,sdj->zmin);
-  if(sdi->idir==1){
+  if(sdi->idir==XDIR){
     dx=1.0;
     aslice=(sdi->ymax-sdi->ymin)*(sdi->zmax-sdi->zmin);
   }
-  if(sdi->idir==2){
+  if(sdi->idir==YDIR){
     dy=1.0;
     aslice=(sdi->xmax-sdi->xmin)*(sdi->zmax-sdi->zmin);
   }
-  if(sdi->idir==3){
+  if(sdi->idir==ZDIR){
     dz=1.0;
     aslice=(sdi->xmax-sdi->xmin)*(sdi->ymax-sdi->ymin);
   }
@@ -2009,7 +2002,7 @@ void getsliceparams(void){
 
     file = sd->file;
     lenfile = strlen(file);
-    if(sd->compression_type==0){
+    if(sd->compression_type==UNCOMPRESSED){
       int doit_anyway;
       
       doit_anyway=0;
@@ -2039,7 +2032,7 @@ void getsliceparams(void){
         if(stream!=NULL&&doit_anyway==0)fprintf(stream,"%i %i %i %i %i %i %i %i %i %i %i\n",sd->seq_id,is1,is2,js1,js2,ks1,ks2,ni,nj,nk,sd->volslice);
       }
     }
-    else if(sd->compression_type==1){
+    else if(sd->compression_type==COMPRESSED_ZLIB){
       error=0;
       if(getsliceheader0(sd->comp_file,sd->size_file,sd->compression_type,&is1,&is2,&js1,&js2,&ks1,&ks2, &sd->volslice)==0)error=1;
       ni = is2 + 1 - is1;
@@ -2833,13 +2826,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
     nz = kbar + 1;
 
     switch(sd->idir){
-      case 1:
+      case XDIR:
       constval = xplt[sd->is1]+offset_slice*sd->sliceoffset;
       break;
-      case 2:
+      case YDIR:
       constval = yplt[sd->js1]+offset_slice*sd->sliceoffset;
       break;
-      case 3:
+      case ZDIR:
       constval = zplt[sd->ks1]+offset_slice*sd->sliceoffset;
       break;
       default:
@@ -2864,13 +2857,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       if(slice_contour_type==SLICE_LINE_CONTOUR){
         PRINTF("updating line contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
-          case 1:
+          case XDIR:
             getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
             break;
-          case 2:
+          case YDIR:
             getlinecontours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
           break;
-          case 3:
+          case ZDIR:
             getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
           break;
           default:
@@ -2881,13 +2874,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
       else{
         PRINTF("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
-          case 1:
+          case XDIR:
             getcontours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
-          case 2:
+          case YDIR:
             getcontours(xplt,zplt,ibar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
-          case 3:
+          case ZDIR:
             getcontours(xplt,yplt,ibar+1,jbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
           default:
@@ -3258,7 +3251,7 @@ void drawslice_frame(){
       if(sd->type!=islicetype)continue;
       if((showvslice==0||show_slices_and_vectors==0)&&sd->display==0)continue;
       if(sd->times[0]>global_times[itimes])continue;
-      if(sd->compression_type==1||sd->compression_type==2){
+      if(sd->compression_type==COMPRESSED_ZLIB){
         uncompress_slicedataframe(sd,sd->itime);
         sd->iqsliceframe=sd->slicecomplevel;
       }
@@ -3268,7 +3261,7 @@ void drawslice_frame(){
       }
       sd->qsliceframe=NULL;
 #ifdef pp_MEMDEBUG
-      if(sd->compression_type==0){
+      if(sd->compression_type==UNCOMPRESSED){
         ASSERT(ValidPointer(sd->qslicedata,sizeof(float)*sd->nslicetotal));
       }
 #endif
@@ -3354,7 +3347,7 @@ void drawvslice_frame(void){
     if(u==NULL&&v==NULL&&w==NULL)continue;
     if(sliceinfo[vd->ival].times[0]>global_times[itimes])continue;
 #define VAL val
-    if(VAL->compression_type==1){
+    if(VAL->compression_type==COMPRESSED_ZLIB){
       uncompress_slicedataframe(VAL,VAL->itime);
       VAL->iqsliceframe=VAL->slicecomplevel;
     }
@@ -3365,7 +3358,7 @@ void drawvslice_frame(void){
 #undef VAL
 #define VAL u
     if(VAL!=NULL){
-      if(VAL->compression_type==1){
+      if(VAL->compression_type==COMPRESSED_ZLIB){
         uncompress_slicedataframe(VAL,VAL->itime);
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
@@ -3376,7 +3369,7 @@ void drawvslice_frame(void){
 #undef VAL
 #define VAL v
     if(VAL!=NULL){
-      if(VAL->compression_type==1){
+      if(VAL->compression_type==COMPRESSED_ZLIB){
         uncompress_slicedataframe(VAL,VAL->itime);
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
@@ -3387,7 +3380,7 @@ void drawvslice_frame(void){
 #undef VAL
 #define VAL w
     if(VAL!=NULL){
-      if(VAL->compression_type==1){
+      if(VAL->compression_type==COMPRESSED_ZLIB){
         uncompress_slicedataframe(VAL,VAL->itime);
         VAL->iqsliceframe=VAL->slicecomplevel;
       }
@@ -3395,13 +3388,13 @@ void drawvslice_frame(void){
         if(VAL!=NULL)VAL->iqsliceframe = VAL->slicelevel + VAL->itime*VAL->nsliceii;
       }
     }
-    if(u!=NULL&&u->compression_type==0){
+    if(u!=NULL&&u->compression_type==UNCOMPRESSED){
       u->qslice = u->qslicedata + u->itime*u->nsliceii;
     }
-    if(v!=NULL&&v->compression_type==0){
+    if(v!=NULL&&v->compression_type==UNCOMPRESSED){
       v->qslice = v->qslicedata + v->itime*v->nsliceii;
     }
-    if(w!=NULL&&w->compression_type==0){
+    if(w!=NULL&&w->compression_type==UNCOMPRESSED){
       w->qslice = w->qslicedata + w->itime*w->nsliceii;
     }
 
@@ -3877,7 +3870,7 @@ void drawvolslice_texture(const slicedata *sd){
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
 
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -3936,7 +3929,7 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
    int maxi;
    
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -3997,7 +3990,7 @@ void drawvolslice_texture(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
    int maxi;
    
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
@@ -4117,7 +4110,7 @@ void drawvolslice_terrain(const slicedata *sd){
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -4176,7 +4169,7 @@ void drawvolslice_terrain(const slicedata *sd){
     }
     glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -4237,7 +4230,7 @@ void drawvolslice_terrain(const slicedata *sd){
     }
     glEnd();
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
     float z11, z31, z13, z33, zmid;
     int maxi;
     float *znode, zoffset;
@@ -4368,7 +4361,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(use_transparency_data==1)transparenton();
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     float constval;
     int maxj;
     int j;
@@ -4456,7 +4449,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
       }
     }
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
     float constval;
     int i;
     int maxi;
@@ -4541,7 +4534,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
       }
     }
   }
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
     float constval;
     int i;
     int maxi;
@@ -4679,7 +4672,7 @@ void drawvolslice(const slicedata *sd){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   if(use_transparency_data==1)transparenton();
-  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==1)){
+  if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
    int maxj;
 
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
@@ -4731,7 +4724,7 @@ void drawvolslice(const slicedata *sd){
    }
    glEnd();
   }
-  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==2)){
+  if((sd->volslice==1&&ploty>=0&&visy_all==1)||(sd->volslice==0&&sd->idir==YDIR)){
    int maxi;
 
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
@@ -4786,7 +4779,7 @@ void drawvolslice(const slicedata *sd){
    glEnd();
   }
   // i*nj*nk + j*nk + k
-  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==3)){
+  if((sd->volslice==1&&plotz>=0&&visz_all==1)||(sd->volslice==0&&sd->idir==ZDIR)){
    int maxi;
 
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
@@ -4888,7 +4881,7 @@ void drawvvolslice(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
@@ -4963,7 +4956,7 @@ void drawvvolslice(const vslicedata *vd){
    glEnd();
    SNIFF_ERRORS("after drawvvolslice:points dir=1");
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
@@ -5039,7 +5032,7 @@ void drawvvolslice(const vslicedata *vd){
    glEnd();
    SNIFF_ERRORS("after drawvvolslice:points dir=2");
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     int maxi;
 
     constval = zplttemp[plotz]+offset_slice*sd->sliceoffset;
@@ -5148,7 +5141,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int j;
     int maxj;
     float xhalf;
@@ -5305,7 +5298,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
       }
     }
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
     float yhalf;
 
@@ -5467,7 +5460,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
       }
     }
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     int maxi;
     float zhalf;
 
@@ -5684,7 +5677,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   u = vd->u;
   v = vd->v;
   w = vd->w;
-  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==1)){
+  if((vd->volslice==1&&plotx>=0&&visx_all==1)||(vd->volslice==0&&sd->idir==XDIR)){
     int maxj;
 
     constval = xplttemp[plotx]+offset_slice*sd->sliceoffset;
@@ -5747,7 +5740,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
     glEnd();
     SNIFF_ERRORS("after drawvvolslice_terrain:points dir=1");
   }
-  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==2)){
+  if((vd->volslice==1&&ploty>=0&&visy_all==1)||(vd->volslice==0&&sd->idir==YDIR)){
     int maxi;
 
     constval = yplttemp[ploty]+offset_slice*sd->sliceoffset;
@@ -5813,7 +5806,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
     glEnd();
     SNIFF_ERRORS("after drawvvolslice_terrain:points dir=2");
   }
-  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==3)){
+  if((vd->volslice==1&&plotz>=0&&visz_all==1)||(vd->volslice==0&&sd->idir==ZDIR)){
     float zmax;
     int maxi;
 
@@ -5948,7 +5941,7 @@ void output_Slicedata(void){
     if(fileout==NULL)continue;
     if(global_times!=NULL)fprintf(fileout,"%f\n",global_times[itimes]);
     switch(sd->idir){
-      case 1:
+      case XDIR:
         fprintf(fileout,"%i,%i\n",sd->ks2+1-sd->ks1,sd->js2+1-sd->js1);
         for(row=sd->ks1; row<=sd->ks2; row++){
           for(col=sd->js1; col<=sd->js2; col++){
@@ -5959,7 +5952,7 @@ void output_Slicedata(void){
           fprintf(fileout,"\n");
         }
        break;
-      case 2:
+      case YDIR:
         fprintf(fileout,"%i, %i \n",sd->ks2+1-sd->ks1,sd->is2+1-sd->is1);
         for(row=sd->ks1; row<=sd->ks2; row++){
           for(col=sd->is1; col<=sd->is2; col++){
@@ -5970,7 +5963,7 @@ void output_Slicedata(void){
           fprintf(fileout,"\n");
         }
        break;
-      case 3:
+      case ZDIR:
         fprintf(fileout,"%i, %i \n",sd->js2+1-sd->js1,sd->is2+1-sd->is1);
         for(row=sd->js1; row<=sd->js2; row++){
           for(col=sd->is1; col<=sd->is2; col++){
@@ -6035,7 +6028,7 @@ void init_Slicedata(void){
 
 
     switch(sd->idir){
-    case 1:
+    case XDIR:
       fprintf(fileout,"%i\n",sd->ks2+1-sd->ks1);
       for(k=sd->ks1;k<=sd->ks2;k++){
         if(k!=sd->ks2)fprintf(fileout,"%f, ",zplt[k]);
@@ -6049,7 +6042,7 @@ void init_Slicedata(void){
       }
       fprintf(fileout,"\n");
       break;
-    case 2:
+    case YDIR:
       fprintf(fileout,"%i\n",sd->ks2+1-sd->ks1);
       for(k=sd->ks1;k<=sd->ks2;k++){
         if(k!=sd->ks2)fprintf(fileout,"%f, ",zplt[k]);
@@ -6063,7 +6056,7 @@ void init_Slicedata(void){
       }
       fprintf(fileout,"\n");
       break;
-    case 3:
+    case ZDIR:
       fprintf(fileout,"%i\n",sd->js2+1-sd->js1);
       for(j=sd->js1;j<=sd->js2;j++){
         if(j!=sd->js2)fprintf(fileout,"%f, ",yplt[j]);
@@ -6209,7 +6202,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 
     if(fgets(buffer,255,stream)==NULL)break;
     sscanf(buffer,"%f %i %i",&time_local,&ncompressed_zlib, &ncompressed_rle);
-    if(compression_type==1){
+    if(compression_type==COMPRESSED_ZLIB){
       ncompressed=ncompressed_zlib;
     }
     else{
@@ -6350,7 +6343,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   float time_local;
   int ncompressed;
   int count;
-  size_t returncode;
 
   stream=FOPEN(file,"rb");
   if(stream==NULL)return 0;
@@ -6362,7 +6354,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
     return 0;
   }
   count=0;
-  if(compression_type==1){
+  if(compression_type==COMPRESSED_ZLIB){
     fread(&endian_fromfile,4,1,stream);
     FSEEK(stream,12,SEEK_CUR);
     fread(minmax,4,2,stream);
@@ -6391,31 +6383,6 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   //  compressed frame size                        for each frame
   // compressed buffer
 
-  if(compression_type==2){
-    int one;
-
-    FSEEK(stream,4,SEEK_CUR);fread(&one,4,1,stream);FSEEK(stream,4,SEEK_CUR);
-    
-    endianswitch=0;
-    if(one!=1)endianswitch=1;
-
-    FSEEK(stream,4*4,SEEK_CUR);
-    FORTRLESLICEREAD(minmax,2);
-    FORTRLESLICEREAD(ijkbar,6);
-    fprintf(sizestream,"%i %i %i %i %i %i\n",ijkbar[0],ijkbar[1],ijkbar[2],ijkbar[3],ijkbar[4],ijkbar[5]);
-    fprintf(sizestream,"%f %f\n",minmax[0],minmax[1]);
-    count=2;
-    while(!feof(stream)){
-      FORTRLESLICEREAD(&time_local,1);
-      if(returncode==0)break;
-      FORTRLESLICEREAD(&ncompressed,1);
-      if(returncode==0)break;
-      returncode=FSEEK(stream,8+ncompressed,SEEK_CUR);
-      if(returncode!=0)break;
-      fprintf(sizestream,"%f %i %i\n",time_local,0,ncompressed);
-      count++;
-    }
-  }
   fclose(stream);
   fclose(sizestream);
   return count;
@@ -6433,13 +6400,9 @@ void uncompress_slicedataframe(slicedata *sd,int iframe_local){
   countin = sd->compindex[iframe_local].size;
   countout=sd->nsliceii;
 
-  if(sd->compression_type==1){
+  if(sd->compression_type==COMPRESSED_ZLIB){
     uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
   }
-  else if(sd->compression_type==2){
-    irle(compressed_data, countin, sd->slicecomplevel);
-  }
-
 }
 
 /* ------------------ getsliceval ------------------------ */

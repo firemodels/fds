@@ -7,6 +7,32 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SURFACE_HIDDEN 0
+#define SURFACE_SOLID 1
+#define SURFACE_OUTLINE 2
+#define SURFACE_POINTS 3
+
+#define SHOWALL_FILES 0
+#define SHOWONLY_FILE 1
+#define HIDEALL_FILES 2
+
+#define UNCOMPRESSED_ALLFRAMES 0
+#define UNCOMPRESSED_BYFRAME 1
+#define COMPRESSED_ALLFRAMES 2
+
+#define UNCOMPRESSED 0
+#define COMPRESSED_ZLIB 1
+
+#define DISABLE 0
+#define ENABLE 1
+
+#define XWALLMIN -1
+#define XWALLMAX 1
+#define YWALLMIN -2
+#define YWALLMAX 2
+#define ZWALLMIN -3
+#define ZWALLMAX 3
+
 #define NOT_FDSBLOCK 0
 #define FDSBLOCK 1
 
@@ -428,9 +454,12 @@ void _Sniff_Errors(char *whereat);
 #define STRETCH_BLACK 1
 #define STRETCH_WHITE 2
 
-#define XDIR 0
-#define YDIR 1
-#define ZDIR 2
+#define XDIR 1
+#define YDIR 2
+#define ZDIR 3
+#define XDIRNEG -1
+#define YDIRNEG -2
+#define ZDIRNEG -3
 #define ISO 4
 
 #define NTARGTIMES 100
@@ -617,10 +646,6 @@ void _Sniff_Errors(char *whereat);
 #define ON 1
 #define OFF 0
 
-#define X_SLICE 1
-#define Y_SLICE 2
-#define Z_SLICE 3
-
 #define DIALOG_3DSMOKE 20
 #define DIALOG_BOUNDS 14
 #define DIALOG_CLIP 18
@@ -655,11 +680,15 @@ void _Sniff_Errors(char *whereat);
 
 #define UPDATE_PROJECTION -2
 
-#define MENU_TOUR_EDIT -14
-#define MENU_TOUR_NEW -12
+#define MENU_TOUR_DEFAULT -1
 #define MENU_TOUR_MANUAL -2
 #define MENU_TOUR_SHOWALL -3
+#define MENU_TOUR_SHOWDIALOG -4
 #define MENU_TOUR_VIEWFROMROUTE -5
+#define MENU_TOUR_NEW -12
+#define MENU_TOUR_CLEARALL -13
+#define MENU_TOUR_EDIT -14
+
 
 #define MENU_TEXTURE_SHOWALL -1
 

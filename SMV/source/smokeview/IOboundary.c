@@ -273,13 +273,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(j1 == bc->ijk[JMIN] && j2 == bc->ijk[JMAX] &&
         k1 == bc->ijk[KMIN] && k2 == bc->ijk[KMAX]){
-        if(i1 == bc->ijk[IMIN] && patchdir == -1){
+        if(i1 == bc->ijk[IMIN] && patchdir == XDIRNEG){
           bc->patchvis[0] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(-1);
         }
-        if(i1 == bc->ijk[IMAX] && patchdir == 1){
+        if(i1 == bc->ijk[IMAX] && patchdir == XDIR){
           bc->patchvis[1] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -293,13 +293,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(i1 == bc->ijk[IMIN] && i2 == bc->ijk[IMAX] &&
         k1 == bc->ijk[KMIN] && k2 == bc->ijk[KMAX]){
-        if(j1 == bc->ijk[JMIN] && patchdir == -2){
+        if(j1 == bc->ijk[JMIN] && patchdir == YDIRNEG){
           bc->patchvis[2] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(2);
         }
-        if(j1 == bc->ijk[JMAX] && patchdir == 2){
+        if(j1 == bc->ijk[JMAX] && patchdir == YDIR){
           bc->patchvis[3] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -313,13 +313,13 @@ int getpatchface2dir(mesh *meshi, int i1, int i2, int j1, int j2, int k1, int k2
       bc = meshi->blockageinfoptrs[i];
       if(i1 == bc->ijk[IMIN] && i2 == bc->ijk[IMAX] &&
         j1 == bc->ijk[JMIN] && j2 == bc->ijk[JMAX]){
-        if(k1 == bc->ijk[KMIN] && patchdir == -3){
+        if(k1 == bc->ijk[KMIN] && patchdir == ZDIRNEG){
           bc->patchvis[4] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
           return(-3);
         }
-        if(k1 == bc->ijk[KMAX] && patchdir == 3){
+        if(k1 == bc->ijk[KMAX] && patchdir == ZDIR){
           bc->patchvis[5] = 0;
           *blockonpatch = i;
           *meshonpatch = meshi;
@@ -491,7 +491,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       patchdata *patchii;
 
       patchii = patchinfo + i;
-      if(patchii->loaded==1&&patchii->compression_type==1){
+      if(patchii->loaded==1&&patchii->compression_type==COMPRESSED_ZLIB){
         enableflag=0;
         break;
       }
@@ -538,7 +538,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   lenfile = strlen(file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
-  if(patchi->compression_type==0){
+  if(patchi->compression_type==UNCOMPRESSED){
     FILE_SIZE labellen=LABELLEN;
     char patchlonglabel[31], patchshortlabel[31], patchunit[31];
 
@@ -574,7 +574,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
        NewMemory((void **)&meshi->patchcol    ,sizeof(int)*meshi->npatches)==0||
        NewMemory((void **)&meshi->blockstart  ,sizeof(int)*(1+meshi->npatches))==0){
       *errorcode=1;
-      if(patchi->compression_type==0){
+      if(patchi->compression_type==UNCOMPRESSED){
         FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
@@ -582,7 +582,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     }
   }
 
-  if(patchi->compression_type==0){
+  if(patchi->compression_type==UNCOMPRESSED){
     FORTgetpatchsizes2(&file_unit,&patchi->version,
       &meshi->npatches,&meshi->npatchsize,
       meshi->pi1,meshi->pi2,meshi->pj1,meshi->pj2,meshi->pk1,meshi->pk2,meshi->patchdir,
@@ -593,7 +593,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     //  1 - load uncompressed data set one frame at a time
     //  2 - load compressed data set
 
-    loadpatchbysteps=0;
+    loadpatchbysteps=UNCOMPRESSED_ALLFRAMES;
     if(flag==LOAD){
       mxpatch_frames = MAXFRAMES+51;
       statfile=STAT(file,&statbuffer);
@@ -612,7 +612,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   one time step at a time rather than for all time steps.
   */
 
-      if(statfile==0&&setpatchmin==1&&setpatchmax==1&&cache_boundarydata==0)loadpatchbysteps=1;
+      if(statfile==0&&setpatchmin==1&&setpatchmax==1&&cache_boundarydata==0)loadpatchbysteps=UNCOMPRESSED_BYFRAME;
     }
   }
   else{
@@ -637,7 +637,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       nnsize += (ii2+1-ii1)*(jj2+1-jj1)*(kk2+1-kk1);
     }
     meshi->npatchsize=nnsize;
-    loadpatchbysteps=2;
+    loadpatchbysteps=COMPRESSED_ALLFRAMES;
   }
 
   if(meshi->npatchsize>0){
@@ -650,7 +650,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       *errorcode=1;
       patchi->loaded=0;
       patchi->display=0;
-      if(patchi->compression_type==0){
+      if(patchi->compression_type==UNCOMPRESSED){
         FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
@@ -696,7 +696,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       patchdir=meshi->patchdir[n];
       getpatchface2dir(meshi,i1,i2,j1,j2,k1,k2,patchdir,
         meshi->blockonpatch+n,meshi->meshonpatch+n);
-      if(meshi->patchdir[n]==2||meshi->patchdir[n]==-2){
+      if(meshi->patchdir[n]==YDIR||meshi->patchdir[n]==YDIRNEG){
         meshi->patchdir[n]=-meshi->patchdir[n];
       }
     }
@@ -707,27 +707,27 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     ig_factor=0.03;
     
     switch(meshi->patchdir[n]){
-    case -1:
+    case XDIRNEG:
       meshi->patch_surfindex[n]=0;
       dxx = -meshi->xplt[1]*ig_factor;
       break;
-    case 1:
+    case XDIR:
       meshi->patch_surfindex[n]=1;
       dxx = meshi->xplt[1]*ig_factor;
       break;
-    case -2:
+    case YDIRNEG:
       meshi->patch_surfindex[n]=2;
       dyy = meshi->yplt[1]*ig_factor;
       break;
-    case 2:
+    case YDIR:
       meshi->patch_surfindex[n]=3;
       dyy = -meshi->yplt[1]*ig_factor;
       break;
-    case -3:
+    case ZDIRNEG:
       meshi->patch_surfindex[n]=4;
       dzz = -meshi->zplt[1]*ig_factor;
       break;
-    case 3:
+    case ZDIR:
       meshi->patch_surfindex[n]=5;
       dzz = meshi->zplt[1]*ig_factor;
       break;
@@ -1029,7 +1029,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   meshi->patchval = NULL;
   switch(loadpatchbysteps){
-  case 0:
+  case UNCOMPRESSED_ALLFRAMES:
     while(meshi->patchval==NULL&&mxpatch_frames>100){
       mxpatch_frames-=50;
       meshi->mxpatch_frames=mxpatch_frames;
@@ -1039,7 +1039,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       NewMemory((void **)&meshi->patchval,sizeof(float)*mxpatch_frames*meshi->npatchsize);
     }
     break;
-  case 1:
+  case UNCOMPRESSED_BYFRAME:
     npatchvals = meshi->npatchsize*meshi->mxpatch_frames;
     if(
       NewMemory((void **)&meshi->patchval,sizeof(float)*meshi->npatchsize)==0||
@@ -1050,7 +1050,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       return;
     }
     break;
-  case 2:
+  case COMPRESSED_ALLFRAMES:
     getpatchsizeinfo(patchi, &mxpatch_frames, &ncompressed_buffer);
     NewMemory((void **)&meshi->cpatchval_zlib,sizeof(unsigned char)*ncompressed_buffer);
     NewMemory((void **)&meshi->cpatchval_iframe_zlib,sizeof(unsigned char)*meshi->npatchsize);
@@ -1065,13 +1065,11 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   NewMemory((void **)&meshi->zipsize,sizeof(unsigned int)*mxpatch_frames);
   if(meshi->patch_times==NULL){
     *errorcode=1;
-    if(patchi->compression_type!=2){
-      FORTclosefortranfile(&file_unit);
-    }
+    FORTclosefortranfile(&file_unit);
     readpatch(ifile,UNLOAD,&error);
     return;
   }
-  if(loadpatchbysteps==2){
+  if(loadpatchbysteps==COMPRESSED_ALLFRAMES){
     getpatchdata_zlib(patchi,meshi->cpatchval_zlib,ncompressed_buffer,
       meshi->patch_times,meshi->zipoffset,meshi->zipsize,mxpatch_frames);
     meshi->npatch_times=mxpatch_frames;
@@ -1089,17 +1087,17 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   file_size=get_filesize(file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
   for (ii=0;ii<mxpatch_frames;){
-    if(loadpatchbysteps==1){
+    if(loadpatchbysteps==UNCOMPRESSED_BYFRAME){
       meshi->patchval_iframe = meshi->patchval;
       meshi->cpatchval_iframe = meshi->cpatchval + ii*meshi->npatchsize;
     }
-    else if(loadpatchbysteps==0){
+    else if(loadpatchbysteps==UNCOMPRESSED_ALLFRAMES){
       meshi->patchval_iframe = meshi->patchval + ii*meshi->npatchsize;
     }
     meshi->patch_timesi = meshi->patch_times + ii;
 
     error=0;
-    if(loadpatchbysteps==0||loadpatchbysteps==1){
+    if(loadpatchbysteps==UNCOMPRESSED_ALLFRAMES||loadpatchbysteps==UNCOMPRESSED_BYFRAME){
       for (n=0;n<boundframestep;n++){
         if(error==0){
           int npatchval_iframe;
@@ -1126,7 +1124,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       {
 
         nn=0;
-        if(loadpatchbysteps==2)uncompress_patchdataframe(meshi,ii);
+        if(loadpatchbysteps==COMPRESSED_ALLFRAMES)uncompress_patchdataframe(meshi,ii);
         for(n=0;n<meshi->npatches;n++){
           mesh *meshblock;
           float dval;
@@ -1138,15 +1136,15 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           ASSERT((iblock!=-1&&meshblock!=NULL)||(iblock==-1&&meshblock==NULL));
           if(iblock!=-1&&meshblock!=NULL){
             switch(loadpatchbysteps){
-            case 0:
-            case 1:
+            case UNCOMPRESSED_ALLFRAMES:
+            case UNCOMPRESSED_BYFRAME:
               for(j=0;j<nsize;j++){
                 if(meshi->thresholdtime[nn+j]<0.0&&meshi->patchval_iframe[nn+j]>=temp_threshold){
                   meshi->thresholdtime[nn+j]=meshi->patch_times[ii];
                 }
               }
               break;
-            case 2:
+            case COMPRESSED_ALLFRAMES:
               dval = (patchmax-patchmin)/255.0;
               for(j=0;j<nsize;j++){
                 float val;
@@ -1168,7 +1166,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
         }
       }
     }
-    if(loadpatchbysteps==1){
+    if(loadpatchbysteps==UNCOMPRESSED_BYFRAME){
       getBoundaryColors2(
         meshi->patchval_iframe, meshi->npatchsize, meshi->cpatchval_iframe, 
                  setpatchmin,&patchmin, setpatchmax,&patchmax, 
@@ -1181,8 +1179,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     if(settmax_b!=0&&*meshi->patch_timesi>tmax_b)break;
 
     switch(loadpatchbysteps){
-      case 0:
-      case 1:
+      case UNCOMPRESSED_ALLFRAMES:
+      case UNCOMPRESSED_BYFRAME:
         if(!(settmin_b!=0&&*meshi->patch_timesi<tmin_b)){
           PRINTF("boundary time=%.2f\n",*meshi->patch_timesi);
 
@@ -1204,7 +1202,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
           ii++;
         }
         break;
-      case 2:
+      case COMPRESSED_ALLFRAMES:
         ii++;
         break;
     }
@@ -1214,7 +1212,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   
   /* convert patch values into integers pointing to an rgb color table */
 
-  if(loadpatchbysteps==0){
+  if(loadpatchbysteps==UNCOMPRESSED_ALLFRAMES){
     if(output_patchdata==1){
       output_Patchdata(patchcsvfile,patchi->file,meshi);
     }
@@ -1230,7 +1228,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   PRINTF("computing boundary color levels \n");
   if(NewMemory((void **)&colorlabelpatch,MAXRGB*sizeof(char *))==0){
     *errorcode=1;
-    if(loadpatchbysteps!=2){
+    if(loadpatchbysteps!=COMPRESSED_ALLFRAMES){
       FORTclosefortranfile(&file_unit);
     }
     readpatch(ifile,UNLOAD,&error);
@@ -1242,7 +1240,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   for(n=0;n<nrgb;n++){
     if(NewMemory((void **)&colorlabelpatch[n],11)==0){
       *errorcode=1;
-      if(loadpatchbysteps!=2){
+      if(loadpatchbysteps!=COMPRESSED_ALLFRAMES){
         FORTclosefortranfile(&file_unit);
       }
       readpatch(ifile,UNLOAD,&error);
@@ -1254,19 +1252,19 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   patchi->loaded=1;
   ipatchtype=getpatchtype(patchi);
   switch(loadpatchbysteps){
-  case 0:
+  case UNCOMPRESSED_ALLFRAMES:
     getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval, 
       setpatchmin,&patchmin, setpatchmax,&patchmax, 
       &patchmin_global, &patchmax_global,
       nrgb, colorlabelpatch,patchscale,boundarylevels256,
       &patchi->extreme_min,&patchi->extreme_max);
     break;
-  case 1:
+  case UNCOMPRESSED_BYFRAME:
     getBoundaryLabels(
       patchmin, patchmax, 
       colorlabelpatch,patchscale,boundarylevels256,nrgb);
     break;
-  case 2:
+  case COMPRESSED_ALLFRAMES:
     getBoundaryLabels(
       patchmin, patchmax, 
       colorlabelpatch,patchscale,boundarylevels256,nrgb);
@@ -1307,7 +1305,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   allexterior = 1-allexterior;
   ShowPatchMenu(EXTERIORwallmenu);
   plotstate=getplotstate(DYNAMIC_PLOTS);
-  if(patchi->compression_type==1)disable_boundary_glui();
+  if(patchi->compression_type==COMPRESSED_ZLIB)disable_boundary_glui();
   Update_Times();
   update_unit_defs();
   updatechopcolors();
@@ -1426,21 +1424,21 @@ int nodeinvent(const mesh *meshi, int i,int j,int k, int dir,int option){
     vi = meshi->ventinfo+ii;
     if(vi->hideboundary==1){
       switch(dir){
-      case 1:
+      case XDIR:
         if(vi->imin==i&&i==vi->imax&&
            vi->jmin <j&&j <vi->jmax&&
            vi->kmin <k&&k <vi->kmax){
           return 0;
         }
         break;
-      case 2:
+      case YDIR:
         if(vi->jmin==j&&j==vi->jmax&&
            vi->imin <i&&i <vi->imax&&
            vi->kmin <k&&k <vi->kmax){
           return 0;
         }
         break;
-      case 3:
+      case ZDIR:
         if(vi->kmin==k&&k==vi->kmax&&
            vi->imin <i&&i <vi->imax&&
            vi->jmin <j&&j <vi->jmax){
@@ -1476,7 +1474,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
     switch(dir){
       int i, j, k;
 
-    case 1:
+    case XDIR:
       if(vi->imin!=i1)continue;
       if(vi->jmax<j1)continue;
       if(vi->jmin>j2)continue;
@@ -1499,7 +1497,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
         }
       }
       break;
-    case 2:
+    case YDIR:
       if(vi->jmin!=j1)continue;
       if(vi->imax<i1)continue;
       if(vi->imin>i2)continue;
@@ -1522,7 +1520,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
         }
       }
       break;
-    case 3:
+    case ZDIR:
       if(vi->kmin!=k1)continue;
       if(vi->imax<i1)continue;
       if(vi->imin>i2)continue;
@@ -1553,7 +1551,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
   switch(dir){
     int i, j, k;
 
-  case 1:
+  case XDIR:
     for(k=k1;k<=k2;k++){
       for(j=j1;j<=j2;j++){
         int iii,imesh,iblockage;
@@ -1564,7 +1562,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
       }
     }
     break;
-  case 2:
+  case YDIR:
     for(k=k1;k<=k2;k++){
       for(i=i1;i<=i2;i++){
         int iii,imesh,iblockage;
@@ -1582,7 +1580,7 @@ void nodein_extvent(int ipatch, int *patchblank, const mesh *meshi,
       }
     }
     break;
-  case 3:
+  case ZDIR:
     for(j=j1;j<=j2;j++){
       for(i=i1;i<=i2;i++){
         int iii,imesh,iblockage;
@@ -1715,11 +1713,11 @@ void drawpatch_texture(const mesh *meshi){
   patchblank=meshi->patchblank;
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe;
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
@@ -1838,13 +1836,13 @@ void drawpatch_texture(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case 1:
+          case XDIR:
             glTranslatef(dboundx,0.0,0.0);
             break;
-          case 2:
+          case YDIR:
             glTranslatef(0.0,-dboundy,0.0);
             break;
-          case 3:
+          case ZDIR:
             glTranslatef(0.00,0.0,dboundz);
             break;
           default:
@@ -1929,13 +1927,13 @@ void drawpatch_texture(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:
@@ -2034,11 +2032,11 @@ void drawpatch_texture_threshold(const mesh *meshi){
   patchblank=meshi->patchblank;
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe;
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
@@ -2346,10 +2344,10 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   patchblank=meshi->patchblank;
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
@@ -2639,11 +2637,11 @@ void drawpatch(const mesh *meshi){
   patchblank=meshi->patchblank;
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe;
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
@@ -2790,13 +2788,13 @@ void drawpatch(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case 1:
+          case XDIR:
             glTranslatef(dboundx,0.0,0.0);
             break;
-          case 2:
+          case YDIR:
             glTranslatef(0.0,-dboundy,0.0);
             break;
-          case 3:
+          case ZDIR:
             glTranslatef(0.00,0.0,dboundz);
             break;
           default:
@@ -2913,13 +2911,13 @@ void drawpatch(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.00,0.0,-dboundz);
             break;
           default:
@@ -3055,11 +3053,11 @@ void drawpatch_cellcenter(const mesh *meshi){
   patchi=patchinfo+meshi->patchfilenum;
 
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe;
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     cpatchval_iframe=meshi->cpatchval_iframe_zlib;
     break;
@@ -3171,13 +3169,13 @@ void drawpatch_cellcenter(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case 1:
+          case XDIR:
             glTranslatef(dboundx,0.0,0.0);
             break;
-          case 2:
+          case YDIR:
             glTranslatef(0.0,-dboundy,0.0);
             break;
-          case 3:
+          case ZDIR:
             glTranslatef(0.0,0.0,dboundz);
             break;
           default:
@@ -3261,13 +3259,13 @@ void drawpatch_cellcenter(const mesh *meshi){
       if(hidepatchsurface==0){
         glPushMatrix();
         switch(meshi->patchdir[n]){
-          case -1:
+          case XDIRNEG:
             glTranslatef(-dboundx,0.0,0.0);
             break;
-          case -2:
+          case YDIRNEG:
             glTranslatef(0.0,dboundy,0.0);
             break;
-          case -3:
+          case ZDIRNEG:
             glTranslatef(0.0,0.0,-dboundz);
             break;
           default:
@@ -3359,10 +3357,10 @@ void drawonlythreshold(const mesh *meshi){
   patchblank=meshi->patchblank;
   patchi=patchinfo+meshi->patchfilenum;
   switch(patchi->compression_type){
-  case 0:
+  case UNCOMPRESSED:
     ASSERT(meshi->cpatchval_iframe!=NULL);
     break;
-  case 1:
+  case COMPRESSED_ZLIB:
     ASSERT(meshi->cpatchval_iframe_zlib!=NULL);
     break;
   default:
@@ -3731,17 +3729,17 @@ void updatepatchmenulabels(void){
       }
       if(STAT(patchi->comp_file,&statbuffer)==0){
         patchi->file=patchi->comp_file;
-        patchi->compression_type=1;
+        patchi->compression_type=COMPRESSED_ZLIB;
       }
       else{
         patchi->file=patchi->reg_file;
-        patchi->compression_type=0;
+        patchi->compression_type=UNCOMPRESSED;
       }
       if(showfiles==1){
         STRCAT(patchi->menulabel,", ");
         STRCAT(patchi->menulabel,patchi->file);
       }
-      if(patchi->compression_type==1){
+      if(patchi->compression_type==COMPRESSED_ZLIB){
         STRCAT(patchi->menulabel," (ZLIB)");
       }
     } 

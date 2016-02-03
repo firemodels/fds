@@ -173,7 +173,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   windex = plot3dinfo[ifile].w;
   if(uindex!=-1||vindex!=-1||windex!=-1)numplot3dvars=plot3dinfo[ifile].nvars;
 
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     if(NewMemory((void **)&meshi->qdata,numplot3dvars*ntotal*sizeof(float))==0){
       *errorcode=1;
       readplot3d("",ifile,UNLOAD,&error);
@@ -208,7 +208,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   plot3dfilelen = strlen(file);
   PRINTF("Loading plot3d data: %s\n",file);
   local_starttime = glutGet(GLUT_ELAPSED_TIME);
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     FORTgetplot3dq(file,&nx,&ny,&nz,meshi->qdata,&error,&isotest,plot3dfilelen);
   }
   if(NewMemory((void **)&meshi->iqdata,numplot3dvars*ntotal*sizeof(unsigned char))==0){
@@ -216,7 +216,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     readplot3d("",ifile,UNLOAD,&error);
     return;
   }
-  if(p->compression_type==1){
+  if(p->compression_type==COMPRESSED_ZLIB){
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
   delta_time = (local_stoptime-local_starttime)/1000.0;
@@ -226,7 +226,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   meshi->udata=NULL;
   meshi->vdata=NULL;
   meshi->wdata=NULL;
-  if(p->compression_type==0){
+  if(p->compression_type==UNCOMPRESSED){
     if(uindex!=-1||vindex!=-1||windex!=-1){
       vectorspresent=1;
       p->nvars=mxplot3dvars;
@@ -347,9 +347,9 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     if(gbi->plot3dfilenum==-1)continue;
     if(speedmax<gbi->plot3d_speedmax)speedmax=gbi->plot3d_speedmax;
   }
-  updateplotslice(X_SLICE);
-  updateplotslice(Y_SLICE);
-  updateplotslice(Z_SLICE);
+  updateplotslice(XDIR);
+  updateplotslice(YDIR);
+  updateplotslice(ZDIR);
   visGrid=0;
   meshi->visInteriorPatches=0;
   if(visx_all==1){
@@ -388,7 +388,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     PRINTF(" %.1f MB downloaded in %.2f s (overhead: %.2f s)",
     (float)file_size/1000000.,delta_time,delta_time0-delta_time);
   }
-  if(p->compression_type==1||cache_qdata==0){
+  if(p->compression_type==COMPRESSED_ZLIB||cache_qdata==0){
     cache_qdata=0;
     FREEMEMORY(meshi->qdata);
   }
@@ -515,11 +515,11 @@ void drawplot3d_texture(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
-        updateplotslice(X_SLICE);
+        updateplotslice(XDIR);
       }
       if(plotx>ibar){
         plotx=0;
-        updateplotslice(X_SLICE);
+        updateplotslice(XDIR);
       }
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
@@ -729,11 +729,11 @@ void drawplot3d_texture(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){
         plotz=kbar;
-        updateplotslice(Z_SLICE);
+        updateplotslice(ZDIR);
       }
       if(plotz>kbar){
         plotz=0;
-        updateplotslice(Z_SLICE);
+        updateplotslice(ZDIR);
       }
       glBegin(GL_TRIANGLES);
       for(i=0; i<ibar; i++){
@@ -950,11 +950,11 @@ void drawplot3d(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotx<0){
         plotx=ibar;
-        updateplotslice(X_SLICE);
+        updateplotslice(XDIR);
       }
       if(plotx>ibar){
         plotx=0;
-        updateplotslice(X_SLICE);
+        updateplotslice(XDIR);
       }
       glBegin(GL_TRIANGLES);
       for(j=0; j<jbar; j++){
@@ -1164,11 +1164,11 @@ void drawplot3d(mesh *meshi){
     if(visVector==0&&contour_type!=STEPPED_CONTOURS){
       if(plotz<0){
         plotz=kbar;
-        updateplotslice(Z_SLICE);
+        updateplotslice(ZDIR);
       }
       if(plotz>kbar){
         plotz=0;
-        updateplotslice(Z_SLICE);
+        updateplotslice(ZDIR);
       }
       glBegin(GL_TRIANGLES);
       for(i=0; i<ibar; i++){
@@ -1349,9 +1349,9 @@ void updatesurface(void){
 /* ------------------ updateallplotslices ------------------------ */
 
 void updateallplotslices(void){
-  if(visx_all==1)updateplotslice(X_SLICE);
-  if(visy_all==1)updateplotslice(Y_SLICE);
-  if(visz_all==1)updateplotslice(Z_SLICE);
+  if(visx_all==1)updateplotslice(XDIR);
+  if(visy_all==1)updateplotslice(YDIR);
+  if(visz_all==1)updateplotslice(ZDIR);
 }
 
 /* ------------------ get_plot3d_index ------------------------ */
@@ -1362,15 +1362,15 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
   float *xyz;
 
   switch(dir){
-    case 1:
+    case XDIR:
       xyz = meshi->xplt_orig;
       nvals = meshi->ibar;
       break;
-    case 2:
+    case YDIR:
       xyz = meshi->yplt_orig;
       nvals = meshi->jbar;
       break;
-    case 3:
+    case ZDIR:
       xyz = meshi->zplt_orig;
       nvals = meshi->kbar;
       break;
@@ -1581,7 +1581,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
   if(setp3max[plotn-1]==CHOP_MAX)maxfill=0;
 
   if(ReadPlot3dFile!=1)return;
-  if(plotx>=0&&slicedir==1){
+  if(plotx>=0&&slicedir==XDIR){
     float *yzcolorf;
     float *yzcolort;
     unsigned char *yzcolor;
@@ -1630,7 +1630,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     getcontours(yplt,zplt,jbar+1,kbar+1,yzcolorfbase, iblank_yz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour1ptr);
     FREEMEMORY(iblank_yz);
   }
-  else if(ploty>=0&&slicedir==2){
+  else if(ploty>=0&&slicedir==YDIR){
     float *xzcolorf;
     float *xzcolort;
     unsigned char *xzcolor;
@@ -1677,7 +1677,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     getcontours(xplt,zplt,ibar+1,kbar+1,xzcolorfbase, iblank_xz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour2ptr);
     FREEMEMORY(iblank_xz);
   }
-  else if(plotz>=0&&slicedir==3){
+  else if(plotz>=0&&slicedir==ZDIR){
     float *xycolorf;
     float *xycolort;
     unsigned char *xycolor;
@@ -1733,16 +1733,16 @@ void updateshowstep(int val, int slicedir){
   if(ReadPlot3dFile==0&&visGrid==0&&ReadVolSlice==0)return;
   current_mesh->slicedir=slicedir;
   switch(slicedir){
-  case 1:
+  case XDIR:
     if(visx_all!=val)updatemenu=1;
     break;
-  case 2:
+  case YDIR:
     if(visy_all!=val)updatemenu=1;
     break;
-  case 3:
+  case ZDIR:
     if(visz_all!=val)updatemenu=1;
     break;
-  case 4:
+  case ISO:
     if(ReadPlot3dFile==1){
       if(visiso!=val)updatemenu=1;
       visiso = val;
@@ -1785,9 +1785,9 @@ void updateshowstep(int val, int slicedir){
       zmax2 = meshi->zplt[meshi->kbar];
 
 
-      if(slicedir==1&&(xmax-MESHEPS<xmin2||xmax2-MESHEPS<xmin))continue;
-      if(slicedir==2&&(ymax-MESHEPS<ymin2||ymax2-MESHEPS<ymin))continue;
-      if(slicedir==3&&(zmax-MESHEPS<zmin2||zmax2-MESHEPS<zmin))continue;
+      if(slicedir==XDIR&&(xmax-MESHEPS<xmin2||xmax2-MESHEPS<xmin))continue;
+      if(slicedir==YDIR&&(ymax-MESHEPS<ymin2||ymax2-MESHEPS<ymin))continue;
+      if(slicedir==ZDIR&&(zmax-MESHEPS<zmin2||zmax2-MESHEPS<zmin))continue;
     }
   }
 }

@@ -1455,7 +1455,6 @@ void initvars(void){
   stretch_var_white=0; 
   move_var=0;
 
-  showhide_option=0;
   snifferrornumber=0;
   xyz_dir=0;
   which_face=2;
@@ -1505,7 +1504,6 @@ void initvars(void){
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
   setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX;
-  loadpatchbysteps=0;
   settargetmin=0, settargetmax=0;
   setpartchopmin=0, setpartchopmax=0;
   partchopmin=1.0,  partchopmax=0.;
@@ -1533,7 +1531,6 @@ void initvars(void){
   visaxislabels=0;
   numplot3dvars=0;
   p3dsurfacesmooth=1;
-  p3dsurfacetype=1;
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
