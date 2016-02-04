@@ -1,8 +1,9 @@
 @echo off
 :: usage: 
-::  update_submodules -fdsrepo reponame -help
+::  update_submodules -repo reponame -help
 ::  (all command arguments are optional)
 
+set curdir=%CD%
 set fdsrepo=%userprofile%\FDS-SMVgitclean
 if x%FDSGIT% == x goto skip_fdsgit
   if EXIST %FDSGIT% (
@@ -10,13 +11,19 @@ if x%FDSGIT% == x goto skip_fdsgit
   )
 :skip_fdsgit
 
+cd ..\..
+if EXIST .gitmodules (
+  set fdsrepo=%CD%
+)
+cd %curdir%
+  
+
 set stopscript=0
 call :getopts %*
 if %stopscript% == 1 (
   exit /b
 )
 
-set curdir=%CD%
 cd %fdsrepo%
 echo updating submodules in %fdsrepo%
 git submodule foreach git remote update 
