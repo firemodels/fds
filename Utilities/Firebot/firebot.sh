@@ -295,7 +295,7 @@ do_git_checkout()
      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage1 2>&1
      git submodule foreach git remote update >> $OUTPUT_DIR/stage1 2>&1
-     git submodule foreach git origin/master >> $OUTPUT_DIR/stage1 2>&1
+     git submodule foreach git merge origin/master >> $OUTPUT_DIR/stage1 2>&1
    fi
 
    echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
