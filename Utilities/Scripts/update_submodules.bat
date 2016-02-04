@@ -54,7 +54,12 @@ exit /b
 
 :usage  
 echo update_submodules [options]
-echo update submodules contained in a git repo
+echo update submodules contained in a git repo.
+echo This batch file assumes that the command
+echo.
+echo git submodule update --init --recursive
+echo.
+echo was run initially to set up the submodule.
 echo. 
 echo -help           - display this message
 echo -repo name   - specify the git repository
