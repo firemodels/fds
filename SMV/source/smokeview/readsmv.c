@@ -11580,7 +11580,7 @@ typedef struct {
           createtourpaths();
           Update_Times();
           plotstate = getplotstate(DYNAMIC_PLOTS);
-          selectedtour_index = -1;
+          selectedtour_index = TOURINDEX_MANUAL;
           selected_frame = NULL;
           selected_tour = NULL;
           if(viewalltours == 1)TourMenu(MENU_TOUR_SHOWALL);

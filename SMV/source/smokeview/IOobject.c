@@ -464,7 +464,7 @@ void draw_devices_val(void){
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  if(active_smokesensors==1&&show_smokesensors!=0){
+  if(active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN){
     getdevice_screencoords();
   }
   for(i=0;i<ndeviceinfo;i++){
@@ -473,7 +473,7 @@ void draw_devices_val(void){
     if(devicei->object->visible==0)continue;
     xyz = devicei->xyz;
     xyznorm = devicei->xyznorm;
-    if(active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0){
+    if(active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN&&STRCMP(devicei->object->label,"smokesensor")==0){
       char label[256];
       float val;
       int ival;
@@ -483,16 +483,16 @@ void draw_devices_val(void){
         doit=1;
       }
       switch(show_smokesensors){
-        case 1:
+        case SMOKESENSORS_0255:
           sprintf(label,"%i",devicei->visval);
           break;
-        case 2:
+        case SMOKESENSORS_01:
           val = devicei->visval/255.0;
           sprintf(label,"%.2f",val);
           trimzeros(label);
           break;
-        case 3:
-        case 4:
+        case SMOKESENSORS_SCALED:
+        case SMOKESENSORS_0INF:
           ival = devicei->visval;
           if(ival==255){
             strcpy(label,"Inf");
@@ -1270,7 +1270,7 @@ void draw_devices(void){
       glPopMatrix();
     }
     dpsi=0.0;
-    if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
+    if((active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN&&STRCMP(devicei->object->label,"smokesensor")==0)||
        STRCMP(devicei->object->label,"thermocouple")==0
       ){
       float *xyznorm;

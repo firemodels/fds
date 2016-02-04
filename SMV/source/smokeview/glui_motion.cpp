@@ -47,6 +47,7 @@
 #define GSLICE_NORMAL 27
 #define PLAY_MOVIE 29
 #define MOVIE_NAME 30
+#define CLOSE_MOTION 1
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -234,14 +235,14 @@ void enable_disable_makemovie(int onoff){
 
 void update_movie_type(int type){
   moviefiletype = type;
-  RADIO_movie_type->set_int_val(moviefiletype);
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
   renderfiletype = type;
-  RADIO_render_type->set_int_val(renderfiletype);
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -1422,7 +1423,7 @@ extern "C" void show_glui_motion(int menu_id){
 
 void Motion_DLG_CB(int var){
   switch(var){
-  case 1:
+  case CLOSE_MOTION:
     if(glui_motion!=NULL)glui_motion->hide();
     updatemenu=1;
     break;
