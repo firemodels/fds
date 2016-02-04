@@ -5,7 +5,12 @@ if [ "$FDSSMV" != "" ] ; then
   FDSREPO=$FDSSMV
 fi
 function usage {
-echo "update submodules in a git repo"
+echo "update submodules in a git repo. This script assumes"
+echo "that the command"
+echo ""
+echo "git submodule update --init --recursive"
+echo ""
+echo "was run initially to set up the submodule."
 echo ""
 echo "Options:"
 echo "-h - display this message"
