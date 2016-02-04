@@ -179,11 +179,11 @@ extern "C" void glui_tour_setup(int main_window){
   PANEL_tour4 = glui_tour->add_panel_to_panel(ROLLOUT_tour,"",GLUI_PANEL_NONE);
 
   if(ntours>0){
-    selectedtour_index=-1;
-    selectedtour_index_old=-1;
+    selectedtour_index = TOURINDEX_MANUAL;
+    selectedtour_index_old = TOURINDEX_MANUAL;
     LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_tour4,"",&selectedtour_index,TOUR_LIST,TOUR_CB);
 
-    LISTBOX_tour->add_item(-1,"Manual");
+    LISTBOX_tour->add_item(TOURINDEX_MANUAL, "Manual");
     LISTBOX_tour->add_item(-999,"-");
     for(i=0;i<ntours;i++){
       tourdata *touri;
@@ -786,20 +786,20 @@ void TOUR_CB(int var){
   case TOUR_LIST:
     if(selectedtour_index==-999){
       selectedtour_index=selectedtour_index_old;
-      if(selectedtour_index==-999)selectedtour_index=-1;
+      if(selectedtour_index==-999)selectedtour_index = TOURINDEX_MANUAL;
       TOUR_CB(TOUR_LIST);
       return;
     }
     switch(selectedtour_index){
-    case -3:
+    case TOURINDEX_ALL:
       TOURMENU(MENU_TOUR_SHOWALL); // show all tours
       set_glui_keyframe();
       break;
-    case -1:
+    case TOURINDEX_MANUAL:
       edittour=0;
       TOURMENU(MENU_TOUR_CLEARALL);  // reset tour vis to ini values
       break;
-    case -4:
+    case TOURINDEX_DEFAULT:
       TOURMENU(MENU_TOUR_DEFAULT);  // default tour
       break;
     default:
@@ -984,7 +984,7 @@ extern "C" void update_tourcontrols(void){
     CHECKBOX_showtour_locus->enable();
   }
   else{
-    selectedtour_index = -1;
+    selectedtour_index = TOURINDEX_MANUAL;
     LISTBOX_tour->set_int_val(selectedtour_index);
     LISTBOX_avatar->disable();
     CHECKBOX_showtour_locus->disable();

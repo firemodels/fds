@@ -221,7 +221,7 @@ extern "C" void create_vol_tourlist(void){
       LISTBOX_VOL_tour->add_item(i,"error");
     }
   }
-  if(selectedtour_index>=-1&&selectedtour_index<ntours){
+  if(selectedtour_index>=TOURINDEX_MANUAL&&selectedtour_index<ntours){
     LISTBOX_VOL_tour->set_int_val(selectedtour_index);
   }
 }
@@ -353,11 +353,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   if(active_smokesensors==1){
     PANEL_smokesensor = glui_3dsmoke->add_panel_to_panel(PANEL_overall,_d("Visibility"));
     RADIO_smokesensors = glui_3dsmoke->add_radiogroup_to_panel(PANEL_smokesensor,&show_smokesensors);
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Hidden"));
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Grey (0-255)"));
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,"I/I0 (0.0-1.0)");
-    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Scaled optical depth (SCD)"));
-    glui_3dsmoke->add_statictext_to_panel(PANEL_smokesensor,"SCD=C/K=C*L/Ln(I/I0) (0-Inf)");
+    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Hidden"));                     // SMOKESENSORS_HIDDEN
+    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Grey (0-255)"));               // SMOKESENSORS_0255
+    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,"I/I0 (0.0-1.0)");                 // SMOKESENSORS_01P0
+    glui_3dsmoke->add_radiobutton_to_group(RADIO_smokesensors,_d("Scaled optical depth (SCD)")); // SMOKESENSORS_SCALED
+    glui_3dsmoke->add_statictext_to_panel(PANEL_smokesensor,"SCD=C/K=C*L/Ln(I/I0) (0-Inf)");     // SMOKESENSORS_0INF
     SPINNER_cvis=glui_3dsmoke->add_spinner_to_panel(PANEL_smokesensor,"C",GLUI_SPINNER_FLOAT,&smoke3d_cvis);
     SPINNER_cvis->set_float_limits(1.0,20.0);
 #ifdef _DEBUG
@@ -573,11 +573,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     Smoke3d_CB(START_FRAME);
     Smoke3d_CB(SKIP_FRAME);
     if(ntours > 0){
-      selectedtour_index = -1;
-      selectedtour_index_old = -1;
+      selectedtour_index = TOURINDEX_MANUAL;
+      selectedtour_index_old = TOURINDEX_MANUAL;
       LISTBOX_VOL_tour = glui_3dsmoke->add_listbox_to_panel(PANEL_generate_images, "Tour:", &selectedtour_index, VOL_TOUR_LIST, Smoke3d_CB);
 
-      LISTBOX_VOL_tour->add_item(-1, "Manual");
+      LISTBOX_VOL_tour->add_item(TOURINDEX_MANUAL, "Manual");
       LISTBOX_VOL_tour->add_item(-999, "-");
       for(i = 0; i < ntours; i++){
         tourdata *touri;
