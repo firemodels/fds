@@ -1008,9 +1008,9 @@ void plot3dprops(int variable_index, int showvector, int vector_length_index,
       gbi = meshinfo + i;
       if(gbi->plot3dfilenum==-1)continue;
       update_current_mesh(gbi);
-      updateplotslice(X_SLICE);
-      updateplotslice(Y_SLICE);
-      updateplotslice(Z_SLICE);
+      updateplotslice(XDIR);
+      updateplotslice(YDIR);
+      updateplotslice(ZDIR);
     }
     update_current_mesh(gbsave);
   }
