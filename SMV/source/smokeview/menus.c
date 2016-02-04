@@ -16,6 +16,12 @@
 #include <direct.h>
 #endif
 
+#define MENU_OPTION_TRAINERMENU 2
+
+#define MENU_UPDATEBOUNDS -3
+
+#define MENU_DUMMY3 -2
+
 #define MENU_ERASECOMPRESS 1
 #define MENU_OVERWRITECOMPRESS 2
 #define MENU_COMPRESSNOW 3
@@ -1292,7 +1298,7 @@ void OptionMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;  
   glutPostRedisplay();
-  if(value==2){
+  if(value == MENU_OPTION_TRAINERMENU){
     trainer_mode=1;
     if(showtrainer_dialog==0){
       show_glui_trainer();
@@ -3810,7 +3816,7 @@ void LoadIsoMenu(int value){
   int ii;
   isodata *isoii, *isoi;
 
-  if(value==-2)return;
+  if(value==MENU_DUMMY3)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     char *file;
@@ -3917,7 +3923,7 @@ void LoadPatchMenu(int value){
     force_redisplay=1;
     Update_Framenumber(0);
   }
-  else if(value==-3){
+  else if(value==MENU_UPDATEBOUNDS){
     Update_All_Patch_Bounds();
   }
   else{
@@ -7536,26 +7542,26 @@ updatemenu=0;
   glutAddSubMenu(_("Render"),rendermenu);
   glutAddSubMenu(_("Tours"),tourmenu);
   if(showfontmenu==1)glutAddSubMenu(_("Font"),fontmenu);
-  if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),2);
+  if(trainer_active==1)glutAddMenuEntry(_("Trainer menu"),MENU_OPTION_TRAINERMENU);
 
 /* -------------------------------- about menu -------------------------- */
 
   CREATEMENU(disclaimermenu,AboutMenu);
-  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",1);
-  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",1);
-  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",1);
-  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",1);
-  glutAddMenuEntry("particular application; for any conclusions drawn from the results",1); 
-  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",1); 
-  glutAddMenuEntry("analysis performed using this tools.",1);
-  glutAddMenuEntry("",1);
-  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",1);
-  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",1);
-  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",1);
-  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",1);
-  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",1);
-  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",1);
-  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",1);
+  glutAddMenuEntry("The US Department of Commerce makes no warranty, expressed or",MENU_DUMMY);
+  glutAddMenuEntry("implied, to users of Smokeview, and accepts no responsibility",MENU_DUMMY);
+  glutAddMenuEntry("for its use. Users of Smokeview assume sole responsibility under",MENU_DUMMY);
+  glutAddMenuEntry("Federal law for determining the appropriateness of its use in any",MENU_DUMMY);
+  glutAddMenuEntry("particular application; for any conclusions drawn from the results",MENU_DUMMY); 
+  glutAddMenuEntry("of its use; and for any actions taken or not taken as a result of",MENU_DUMMY); 
+  glutAddMenuEntry("analysis performed using this tools.",MENU_DUMMY);
+  glutAddMenuEntry("",MENU_DUMMY);
+  glutAddMenuEntry("Smokeview and the companion program FDS is intended for use only",MENU_DUMMY);
+  glutAddMenuEntry("by those competent in the fields of fluid dynamics, thermodynamics,",MENU_DUMMY);
+  glutAddMenuEntry("combustion, and heat transfer, and is intended only to supplement",MENU_DUMMY);
+  glutAddMenuEntry("the informed judgment of the qualified user. These software packages",MENU_DUMMY);
+  glutAddMenuEntry("may or may not have predictive capability when applied to a specific",MENU_DUMMY);
+  glutAddMenuEntry("set of factual circumstances.  Lack of accurate predictions could lead",MENU_DUMMY);
+  glutAddMenuEntry("to erroneous conclusions with regard to fire safety.  All results",MENU_DUMMY);
   glutAddMenuEntry("should be evaluated by an informed user.",1);
 
 /* -------------------------------- about menu -------------------------- */
@@ -8583,7 +8589,7 @@ updatemenu=0;
                 glutAddMenuEntry(menulabel,-useitem-10);
               }
             }
-            glutAddMenuEntry("-",-2);
+            glutAddMenuEntry("-",MENU_DUMMY3);
           }
           if(nmeshes>1){
             if(n_soot_menu>0)glutAddSubMenu(_("SOOT MASS FRACTION - single mesh"),loadsmoke3dsootmenu);
@@ -8609,10 +8615,10 @@ updatemenu=0;
         plot3di = plot3dinfo + i;
         if(ii==0){
           strcpy(menulabel,plot3di->longlabel);
-          glutAddMenuEntry(menulabel,997);
+          glutAddMenuEntry(menulabel,MENU_PLOT3D_DUMMY);
         }
         if(ii!=0&&strcmp(plot3di->longlabel,plot3dinfo[plot3dorderindex[ii-1]].longlabel)!=0){
-          glutAddMenuEntry(plot3di->longlabel,997);
+          glutAddMenuEntry(plot3di->longlabel,MENU_PLOT3D_DUMMY);
         }
         if(plot3di->loaded==0)continue;
         STRCPY(menulabel,plot3dinfo[i].menulabel);  
@@ -8679,7 +8685,7 @@ updatemenu=0;
         plot3di = plot3dinfo + i;
         if(ii==0){
           strcpy(menulabel,plot3di->longlabel);
-          glutAddMenuEntry(menulabel,997);
+          glutAddMenuEntry(menulabel,MENU_PLOT3D_DUMMY);
           sprintf(menulabel,"  %f",plot3di->time);
           trimzeros(menulabel);
           strcat(menulabel," s");
@@ -8702,7 +8708,7 @@ updatemenu=0;
           plot3di = plot3dinfo + i;
           plot3dim1 = plot3dinfo + im1;
           if(strcmp(plot3di->longlabel,plot3dim1->longlabel)!=0){
-            glutAddMenuEntry(plot3di->longlabel,997);
+            glutAddMenuEntry(plot3di->longlabel,MENU_PLOT3D_DUMMY);
           }
           if(ABS(plot3di->time-plot3dim1->time)>0.1){
             sprintf(menulabel,"  %f",plot3di->time);
@@ -8816,7 +8822,7 @@ updatemenu=0;
               glutAddMenuEntry(menulabel,-useitem-10);
             }
           }
-          glutAddMenuEntry("-",-2);
+          glutAddMenuEntry("-",MENU_DUMMY3);
           for(ii=0;ii<npatchinfo;ii++){
             patchdata *patch1, *patch2;
 
@@ -8842,8 +8848,8 @@ updatemenu=0;
           }
         }
       }
-      glutAddMenuEntry("-",-2);
-      glutAddMenuEntry(_("Update bounds"),-3);
+      glutAddMenuEntry("-",MENU_DUMMY3);
+      glutAddMenuEntry(_("Update bounds"),MENU_UPDATEBOUNDS);
       if(npatchloaded>1){
         glutAddSubMenu(_("Unload"),unloadpatchmenu);
       }
@@ -8933,7 +8939,7 @@ updatemenu=0;
               glutAddMenuEntry(menulabel,-useitem-10);
             }
           }
-          glutAddMenuEntry("-",-2);
+          glutAddMenuEntry("-",MENU_DUMMY3);
 
           for(ii=0;ii<nisoinfo;ii++){
             isodata *iso1, *iso2;
