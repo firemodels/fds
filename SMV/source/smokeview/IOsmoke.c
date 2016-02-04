@@ -618,6 +618,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   PRINTF("After 3D Smoke load: \n");
   PrintMemoryInfo;
 #endif
+  *errorcode = 0;
 }
 
 /* ------------------ setsmokecolorflags ------------------------ */

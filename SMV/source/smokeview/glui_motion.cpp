@@ -235,14 +235,14 @@ void enable_disable_makemovie(int onoff){
 
 void update_movie_type(int type){
   moviefiletype = type;
-  RADIO_movie_type->set_int_val(moviefiletype);
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
   renderfiletype = type;
-  RADIO_render_type->set_int_val(renderfiletype);
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
