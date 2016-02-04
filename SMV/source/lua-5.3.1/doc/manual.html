@@ -976,7 +976,7 @@ consider the following code:
        print("foo", a)
        return coroutine.yield(2*a)
      end
-     
+
      co = coroutine.create(function (a,b)
            print("co-body", a, b)
            local r = foo(a+1)
@@ -985,7 +985,7 @@ consider the following code:
            print("co-body", r, s)
            return b, "end"
      end)
-     
+
      print("main", coroutine.resume(co, 1, 10))
      print("main", coroutine.resume(co, "r"))
      print("main", coroutine.resume(co, "x", "y"))
@@ -1072,7 +1072,7 @@ Lua is a case-sensitive language:
 <code>and</code> is a reserved word, but <code>And</code> and <code>AND</code>
 are two different, valid names.
 As a convention,
-programs should avoid creating 
+programs should avoid creating
 names that start with an underscore followed by
 one or more uppercase letters (such as <a href="#pdf-_VERSION"><code>_VERSION</code></a>).
 
@@ -1141,8 +1141,8 @@ enclosed by <em>long brackets</em>.
 We define an <em>opening long bracket of level <em>n</em></em> as an opening
 square bracket followed by <em>n</em> equal signs followed by another
 opening square bracket.
-So, an opening long bracket of level&nbsp;0 is written as <code>[[</code>, 
-an opening long bracket of level&nbsp;1 is written as <code>[=[</code>, 
+So, an opening long bracket of level&nbsp;0 is written as <code>[[</code>,
+an opening long bracket of level&nbsp;1 is written as <code>[=[</code>,
 and so on.
 A <em>closing long bracket</em> is defined similarly;
 for instance,
@@ -1200,7 +1200,7 @@ which start with <code>0x</code> or <code>0X</code>.
 Hexadecimal constants also accept an optional fractional part
 plus an optional binary exponent,
 marked by a letter '<code>p</code>' or '<code>P</code>'.
-A numeric constant with a fractional dot or an exponent 
+A numeric constant with a fractional dot or an exponent
 denotes a float;
 otherwise it denotes an integer.
 Examples of valid integer constants are
@@ -1336,7 +1336,7 @@ The grammar could see it in two ways:
 
 <pre>
      a = b + c(print or io.write)('done')
-     
+
      a = b + c; (print or io.write)('done')
 </pre><p>
 The current parser always sees such constructions
@@ -1824,7 +1824,7 @@ Here are some examples:
      a,b = ...          -- a gets the first vararg parameter, b gets
                         -- the second (both a and b can get nil if there
                         -- is no corresponding vararg parameter)
-     
+
      a,b,c = x, f()     -- f() is adjusted to 2 results
      a,b,c = f()        -- f() is adjusted to 3 results
      return f()         -- returns all results from f()
@@ -1883,7 +1883,7 @@ so that it works for non-integer exponents too.
 
 
 <p>
-Floor division (<code>//</code>) is a division 
+Floor division (<code>//</code>) is a division
 that rounds the quotient towards minus infinity,
 that is, the floor of the division of its operands.
 
@@ -1945,7 +1945,7 @@ this is called the <em>usual rule</em>.
 The C API also converts both integers to floats and
 floats to integers, as needed.
 Moreover, string concatenation accepts numbers as arguments,
-besides strings. 
+besides strings.
 
 
 <p>
@@ -2428,13 +2428,13 @@ to the vararg expression:
 
 <pre>
      CALL            PARAMETERS
-     
+
      f(3)             a=3, b=nil
      f(3, 4)          a=3, b=4
      f(3, 4, 5)       a=3, b=4
      f(r(), 10)       a=1, b=10
      f(r())           a=1, b=2
-     
+
      g(3)             a=3, b=nil, ... --&gt;  (nothing)
      g(3, 4)          a=3, b=4,   ... --&gt;  (nothing)
      g(3, 4, 5, 8)    a=3, b=4,   ... --&gt;  5  8
@@ -2873,7 +2873,7 @@ First, we can rewrite our function like here:
      int k (lua_State *L, int status, lua_KContext ctx) {
        ...  /* code 2 */
      }
-     
+
      int original_function (lua_State *L) {
        ...     /* code 1 */
        return k(L, lua_pcall(L, n, m, h), ctx);
@@ -8300,21 +8300,21 @@ Here are some examples:
 <pre>
      x = string.gsub("hello world", "(%w+)", "%1 %1")
      --&gt; x="hello hello world world"
-     
+
      x = string.gsub("hello world", "%w+", "%0 %0", 1)
      --&gt; x="hello hello world"
-     
+
      x = string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
      --&gt; x="world hello Lua from"
-     
+
      x = string.gsub("home = $HOME, user = $USER", "%$(%w+)", os.getenv)
      --&gt; x="home = /home/roberto, user = roberto"
-     
+
      x = string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
            return load(s)()
          end)
      --&gt; x="4+5 = 9"
-     
+
      local t = {name="lua", version="5.3"}
      x = string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
      --&gt; x="lua-5.3.tar.gz"
@@ -8365,7 +8365,7 @@ its default value is&nbsp;1 and can be negative.
 <p>
 Returns a binary string containing the values <code>v1</code>, <code>v2</code>, etc.
 packed (that is, serialized in binary form)
-according to the format string <code>fmt</code> (see <a href="#6.4.2">&sect;6.4.2</a>). 
+according to the format string <code>fmt</code> (see <a href="#6.4.2">&sect;6.4.2</a>).
 
 
 
@@ -8820,7 +8820,7 @@ Returns the number of UTF-8 characters in string <code>s</code>
 that start between positions <code>i</code> and <code>j</code> (both inclusive).
 The default for <code>i</code> is 1 and for <code>j</code> is -1.
 If it finds any invalid byte sequence,
-returns a false value plus the position of the first invalid byte. 
+returns a false value plus the position of the first invalid byte.
 
 
 
@@ -9218,7 +9218,7 @@ Converts the angle <code>x</code> from degrees to radians.
 <p>
 When called without arguments,
 returns a pseudo-random float with uniform distribution
-in the range  <em>[0,1)</em>.  
+in the range  <em>[0,1)</em>.
 When called with two integers <code>m</code> and <code>n</code>,
 <code>math.random</code> returns a pseudo-random integer
 with uniform distribution in the range <em>[m, n]</em>.
@@ -10138,7 +10138,7 @@ and raises an error when called with a level out of range.
 
 
 <p>
-Variable names starting with '<code>(</code>' (open parenthesis) 
+Variable names starting with '<code>(</code>' (open parenthesis)
 represent variables with no known names
 (internal variables such as loop control variables,
 and variables from chunks saved without debug information).
@@ -10183,7 +10183,7 @@ The function returns <b>nil</b> if there is no upvalue with the given index.
 
 
 <p>
-Variable names starting with '<code>(</code>' (open parenthesis) 
+Variable names starting with '<code>(</code>' (open parenthesis)
 represent variables with no known names
 (variables from chunks saved without debug information).
 
@@ -10395,7 +10395,7 @@ and as <code>lua -</code> otherwise.
 
 
 <p>
-When called without option <code>-E</code>, 
+When called without option <code>-E</code>,
 the interpreter checks for an environment variable <a name="pdf-LUA_INIT_5_3"><code>LUA_INIT_5_3</code></a>
 (or <a name="pdf-LUA_INIT"><code>LUA_INIT</code></a> if the versioned name is not defined)
 before running any argument.
@@ -10479,7 +10479,7 @@ by issuing a different prompt.
 <p>
 In case of unprotected errors in the script,
 the interpreter reports the error to the standard error stream.
-If the error object is not a string but 
+If the error object is not a string but
 has a metamethod <code>__tostring</code>,
 the interpreter calls this metamethod to produce the final message.
 Otherwise, the interpreter converts the error object to a string
@@ -10724,21 +10724,21 @@ and LiteralString, see <a href="#3.1">&sect;3.1</a>.)
 
 	block ::= {stat} [retstat]
 
-	stat ::=  &lsquo;<b>;</b>&rsquo; | 
-		 varlist &lsquo;<b>=</b>&rsquo; explist | 
-		 functioncall | 
-		 label | 
-		 <b>break</b> | 
-		 <b>goto</b> Name | 
-		 <b>do</b> block <b>end</b> | 
-		 <b>while</b> exp <b>do</b> block <b>end</b> | 
-		 <b>repeat</b> block <b>until</b> exp | 
-		 <b>if</b> exp <b>then</b> block {<b>elseif</b> exp <b>then</b> block} [<b>else</b> block] <b>end</b> | 
-		 <b>for</b> Name &lsquo;<b>=</b>&rsquo; exp &lsquo;<b>,</b>&rsquo; exp [&lsquo;<b>,</b>&rsquo; exp] <b>do</b> block <b>end</b> | 
-		 <b>for</b> namelist <b>in</b> explist <b>do</b> block <b>end</b> | 
-		 <b>function</b> funcname funcbody | 
-		 <b>local</b> <b>function</b> Name funcbody | 
-		 <b>local</b> namelist [&lsquo;<b>=</b>&rsquo; explist] 
+	stat ::=  &lsquo;<b>;</b>&rsquo; |
+		 varlist &lsquo;<b>=</b>&rsquo; explist |
+		 functioncall |
+		 label |
+		 <b>break</b> |
+		 <b>goto</b> Name |
+		 <b>do</b> block <b>end</b> |
+		 <b>while</b> exp <b>do</b> block <b>end</b> |
+		 <b>repeat</b> block <b>until</b> exp |
+		 <b>if</b> exp <b>then</b> block {<b>elseif</b> exp <b>then</b> block} [<b>else</b> block] <b>end</b> |
+		 <b>for</b> Name &lsquo;<b>=</b>&rsquo; exp &lsquo;<b>,</b>&rsquo; exp [&lsquo;<b>,</b>&rsquo; exp] <b>do</b> block <b>end</b> |
+		 <b>for</b> namelist <b>in</b> explist <b>do</b> block <b>end</b> |
+		 <b>function</b> funcname funcbody |
+		 <b>local</b> <b>function</b> Name funcbody |
+		 <b>local</b> namelist [&lsquo;<b>=</b>&rsquo; explist]
 
 	retstat ::= <b>return</b> [explist] [&lsquo;<b>;</b>&rsquo;]
 
@@ -10748,20 +10748,20 @@ and LiteralString, see <a href="#3.1">&sect;3.1</a>.)
 
 	varlist ::= var {&lsquo;<b>,</b>&rsquo; var}
 
-	var ::=  Name | prefixexp &lsquo;<b>[</b>&rsquo; exp &lsquo;<b>]</b>&rsquo; | prefixexp &lsquo;<b>.</b>&rsquo; Name 
+	var ::=  Name | prefixexp &lsquo;<b>[</b>&rsquo; exp &lsquo;<b>]</b>&rsquo; | prefixexp &lsquo;<b>.</b>&rsquo; Name
 
 	namelist ::= Name {&lsquo;<b>,</b>&rsquo; Name}
 
 	explist ::= exp {&lsquo;<b>,</b>&rsquo; exp}
 
-	exp ::=  <b>nil</b> | <b>false</b> | <b>true</b> | Numeral | LiteralString | &lsquo;<b>...</b>&rsquo; | functiondef | 
-		 prefixexp | tableconstructor | exp binop exp | unop exp 
+	exp ::=  <b>nil</b> | <b>false</b> | <b>true</b> | Numeral | LiteralString | &lsquo;<b>...</b>&rsquo; | functiondef |
+		 prefixexp | tableconstructor | exp binop exp | unop exp
 
 	prefixexp ::= var | functioncall | &lsquo;<b>(</b>&rsquo; exp &lsquo;<b>)</b>&rsquo;
 
-	functioncall ::=  prefixexp args | prefixexp &lsquo;<b>:</b>&rsquo; Name args 
+	functioncall ::=  prefixexp args | prefixexp &lsquo;<b>:</b>&rsquo; Name args
 
-	args ::=  &lsquo;<b>(</b>&rsquo; [explist] &lsquo;<b>)</b>&rsquo; | tableconstructor | LiteralString 
+	args ::=  &lsquo;<b>(</b>&rsquo; [explist] &lsquo;<b>)</b>&rsquo; | tableconstructor | LiteralString
 
 	functiondef ::= <b>function</b> funcbody
 
@@ -10777,9 +10777,9 @@ and LiteralString, see <a href="#3.1">&sect;3.1</a>.)
 
 	fieldsep ::= &lsquo;<b>,</b>&rsquo; | &lsquo;<b>;</b>&rsquo;
 
-	binop ::=  &lsquo;<b>+</b>&rsquo; | &lsquo;<b>-</b>&rsquo; | &lsquo;<b>*</b>&rsquo; | &lsquo;<b>/</b>&rsquo; | &lsquo;<b>//</b>&rsquo; | &lsquo;<b>^</b>&rsquo; | &lsquo;<b>%</b>&rsquo; | 
-		 &lsquo;<b>&amp;</b>&rsquo; | &lsquo;<b>~</b>&rsquo; | &lsquo;<b>|</b>&rsquo; | &lsquo;<b>&gt;&gt;</b>&rsquo; | &lsquo;<b>&lt;&lt;</b>&rsquo; | &lsquo;<b>..</b>&rsquo; | 
-		 &lsquo;<b>&lt;</b>&rsquo; | &lsquo;<b>&lt;=</b>&rsquo; | &lsquo;<b>&gt;</b>&rsquo; | &lsquo;<b>&gt;=</b>&rsquo; | &lsquo;<b>==</b>&rsquo; | &lsquo;<b>~=</b>&rsquo; | 
+	binop ::=  &lsquo;<b>+</b>&rsquo; | &lsquo;<b>-</b>&rsquo; | &lsquo;<b>*</b>&rsquo; | &lsquo;<b>/</b>&rsquo; | &lsquo;<b>//</b>&rsquo; | &lsquo;<b>^</b>&rsquo; | &lsquo;<b>%</b>&rsquo; |
+		 &lsquo;<b>&amp;</b>&rsquo; | &lsquo;<b>~</b>&rsquo; | &lsquo;<b>|</b>&rsquo; | &lsquo;<b>&gt;&gt;</b>&rsquo; | &lsquo;<b>&lt;&lt;</b>&rsquo; | &lsquo;<b>..</b>&rsquo; |
+		 &lsquo;<b>&lt;</b>&rsquo; | &lsquo;<b>&lt;=</b>&rsquo; | &lsquo;<b>&gt;</b>&rsquo; | &lsquo;<b>&gt;=</b>&rsquo; | &lsquo;<b>==</b>&rsquo; | &lsquo;<b>~=</b>&rsquo; |
 		 <b>and</b> | <b>or</b>
 
 	unop ::= &lsquo;<b>-</b>&rsquo; | <b>not</b> | &lsquo;<b>#</b>&rsquo; | &lsquo;<b>~</b>&rsquo;
@@ -10804,4 +10804,3 @@ Last change: revised for Lua 5.3.1
 -->
 
 </body></html>
-

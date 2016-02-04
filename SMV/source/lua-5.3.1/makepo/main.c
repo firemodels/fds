@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "string_util.h"
-     
+
 int add_msgstring=0;
 int add_comments=0;
 void usage(char *prog);
@@ -69,7 +69,7 @@ int main(int argc, char **argv){
       beg+=2;
       for(beg2=beg+1;beg2<buffer+sizeof(buffer);beg2++){
         char c;
-   
+
         c = *beg2;
         if((c<'a'||c>'z')&&(c<'A'||c>'Z')){
           if((c=='1'||c=='2'||c=='3')&&(*(beg2+1)=='D'||*(beg2+1)=='d')){
@@ -90,7 +90,7 @@ int main(int argc, char **argv){
         len=strlen(beg);
         for(i=len-2;i>=0;i--){
           char c;
-   
+
           c = beg[i];
           if((c<'a'||c>'z')&&(c<'A'||c>'Z'))continue;
           beg[i+1]='"';
@@ -129,5 +129,3 @@ void usage(char *prog){
   printf("MSGSTR \"\"\n");
   printf("is also output\n");
 }
-
-
