@@ -16,6 +16,13 @@
 #include <direct.h>
 #endif
 
+#define MENU_READINI 1
+#define MENU_WRITEINI 2
+#define MENU_WRITECASEINI 3
+#define MENU_READSVO 4
+
+#define MENU_DUMMY2 -1
+
 #define MENU_PLOT3D_DUMMY 997
 #define MENU_PLOT3D_Z 1
 #define MENU_PLOT3D_Y 2
@@ -2129,21 +2136,21 @@ void IniSubMenu(int value){
   }
 }
 
-/* ------------------ SmokeviewiniMenu ------------------------ */
+/* ------------------ SmokeviewIniMenu ------------------------ */
 
-void SmokeviewiniMenu(int value){
+void SmokeviewIniMenu(int value){
   switch(value){
-  case 1:
+  case MENU_READINI:
     readini(NULL);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
-  case 2:
+  case MENU_WRITEINI:
     writeini(GLOBAL_INI,NULL);
     break;
-  case 3:
+  case MENU_WRITECASEINI:
     writeini(LOCAL_INI,NULL);
     break;
-  case 4:
+  case MENU_READSVO:
     init_object_defs();
     break;
   case MENU_DUMMY:
@@ -5611,7 +5618,7 @@ updatemenu=0;
     glutAddMenuEntry(_("As rectangle"), MENU_VENT_RECTANGLE);
     glutAddMenuEntry(_("*Hide"), MENU_VENT_CIRCLEHIDE);
   }
-  glutAddMenuEntry("-",-1);
+  glutAddMenuEntry("-",MENU_DUMMY2);
   if(circle_outline == 1)glutAddMenuEntry("*Outline", MENU_VENT_CIRCLEOUTLINE);
   if(circle_outline == 0)glutAddMenuEntry("Outline", MENU_VENT_CIRCLEOUTLINE);
   
@@ -5647,7 +5654,7 @@ updatemenu=0;
     else{
       glutAddMenuEntry(_("Hide all"),HIDE_ALL_VENTS);
     }
-    glutAddMenuEntry("-",-1);
+    glutAddMenuEntry("-",MENU_DUMMY2);
     if(nopenvents_nonoutline>0){
       if(visOpenVentsAsOutline == 1)glutAddMenuEntry(_("*Open vents as outlines"), MENU_VENT_OUTLINE);
       if(visOpenVentsAsOutline == 0)glutAddMenuEntry(_("Open vents as outlines"), MENU_VENT_OUTLINE);
@@ -6067,7 +6074,7 @@ updatemenu=0;
         glutAddMenuEntry(streaklabel,iii);
       }
     }
-    glutAddMenuEntry("-",-1);
+    glutAddMenuEntry("-",MENU_DUMMY2);
     if(showstreakhead==1){
       glutAddMenuEntry(_("*Particle head"),MENU_STREAK_HEAD);
     }
@@ -7423,14 +7430,14 @@ updatemenu=0;
   glutAddMenuEntry(_("Motion...  ALT m"),DIALOG_MOTION);
   glutAddMenuEntry(_("Viewpoints... ALT g"),DIALOG_VIEW);
 
-  glutAddMenuEntry("-",-1);
+  glutAddMenuEntry("-",MENU_DUMMY2);
 
   glutAddSubMenu(_("Data"), datadialogmenu);
   glutAddSubMenu(_("Files"), filesdialogmenu);
   glutAddSubMenu(_("View"), viewdialogmenu);
   glutAddSubMenu(_("Window"), windowdialogmenu);
 
-  glutAddMenuEntry("-",-1);
+  glutAddMenuEntry("-",MENU_DUMMY2);
   glutAddMenuEntry(_("Close all dialogs  ALT x"),DIALOG_HIDEALL);
 
   /* -------------------------------- font menu -------------------------- */
@@ -8605,7 +8612,7 @@ updatemenu=0;
         STRCPY(menulabel,plot3dinfo[i].menulabel);  
         glutAddMenuEntry(menulabel,i);
       }
-      glutAddMenuEntry("Unload all",-1);
+      glutAddMenuEntry("Unload all",UNLOAD_ALL);
 
 
       
@@ -8714,7 +8721,7 @@ updatemenu=0;
         glutAddSubMenu(_("Unload"),unloadplot3dmenu);
       }
       else{
-       glutAddMenuEntry(_("Unload"),-1);
+       glutAddMenuEntry(_("Unload"),UNLOAD_ALL);
       }
     }
 
@@ -9034,9 +9041,7 @@ updatemenu=0;
 
 /* --------------------------------smokeviewini menu -------------------------- */
 
-    CREATEMENU(smokeviewinimenu,SmokeviewiniMenu);
-
-
+    CREATEMENU(smokeviewinimenu,SmokeviewIniMenu);
    {
     inifiledata *inifile;
     int n_inifiles;
@@ -9049,7 +9054,7 @@ updatemenu=0;
     }
     if( n_inifiles>0||file_exists(INIfile)==1||file_exists(caseini_filename)==1||file_exists(smokeviewini)==1){
       if(n_inifiles==0){
-        glutAddMenuEntry(_("Read ini files"),1);
+        glutAddMenuEntry(_("Read ini files"),MENU_READINI);
       }
       else{
         glutAddSubMenu(_("Read ini files"),inisubmenu);
@@ -9057,7 +9062,7 @@ updatemenu=0;
     }
   }
 
-    glutAddMenuEntry(_(WRITEINIfile),2);
+    glutAddMenuEntry(_(WRITEINIfile),MENU_WRITEINI);
 
     {
       char caselabel[255];
@@ -9066,12 +9071,12 @@ updatemenu=0;
       STRCAT(caselabel," ");
       STRCAT(caselabel,caseini_filename);
 
-      glutAddMenuEntry(caselabel,3);
+      glutAddMenuEntry(caselabel,MENU_WRITECASEINI);
     }
 
     if(ndeviceinfo>0){
       glutAddMenuEntry("-",MENU_DUMMY);
-      glutAddMenuEntry(_("Read .svo files"),4);
+      glutAddMenuEntry(_("Read .svo files"),MENU_READSVO);
     }
 
     CREATEMENU(reloadmenu,ReloadMenu);
