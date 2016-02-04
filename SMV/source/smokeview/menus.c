@@ -16,6 +16,9 @@
 #include <direct.h>
 #endif
 
+#define MENU_TRAINER_CLEAR 998
+#define MENU_MAIN_QUIT 3
+
 #define MENU_READINI 1
 #define MENU_WRITEINI 2
 #define MENU_WRITECASEINI 3
@@ -240,7 +243,7 @@ void TrainerViewMenu(int value){
     ShowAllSlices("OXYGEN","OXYGEN VOLUME FRACTION");
     trainerload_old=3;
     break;
-  case 998: // unload
+  case MENU_TRAINER_CLEAR: // unload
     LoadUnloadMenu(UNLOADALL);
     trainerload=0;
     trainerload_old=0;
@@ -256,14 +259,11 @@ void TrainerViewMenu(int value){
 
 void MainMenu(int value){
 
-  if(value==3){
+  if(value==MENU_MAIN_QUIT){
     if(scriptoutstream!=NULL){
       ScriptMenu(SCRIPT_STOP_RECORDING);
     }
     exit(0);
-  }
-  if(value==1){
-    defaulttour();
   }
   if(value==MENU_MAIN_TRAINERTOGGLE){
     trainer_mode=1-trainer_mode;
@@ -1939,6 +1939,7 @@ void TextureShowMenu(int value){
 void Plot3DShowMenu(int value){
   int i;
 
+  if(value==MENU_PLOT3D_DUMMY)return;
   switch(value){
   case MENU_PLOT3D_Z:
       visz_all=1-visz_all;
@@ -1973,10 +1974,6 @@ void Plot3DShowMenu(int value){
       visy_all=0;
       visz_all=0;
       plotstate=DYNAMIC_PLOTS;
-      break;
-   case 7:
-      visVector=1-visVector;
-      if(vectorspresent==0)visVector=0;
       break;
    case HIDEALL_PLOT3D:
      for(i=0;i<nplot3dinfo;i++){
@@ -3766,7 +3763,7 @@ void LoadPlot3dMenu(int value){
   int errorcode;
   int i;
 
-  if(value==997)return;
+  if(value==MENU_PLOT3D_DUMMY)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     char *plot3dfile;
@@ -5532,10 +5529,12 @@ updatemenu=0;
         i=plot3dorderindex[ii];
         plot3di = plot3dinfo + i;
         if(ii==0){
-          glutAddMenuEntry(plot3di->longlabel,997);
+          glutAddMenuEntry(plot3di->longlabel, MENU_PLOT3D_DUMMY);
         }
-        if(ii!=0&&strcmp(plot3di->longlabel,plot3dinfo[plot3dorderindex[ii-1]].longlabel)!=0){
-          glutAddMenuEntry(plot3di->longlabel,997);
+        else{
+          if(strcmp(plot3di->longlabel, plot3dinfo[plot3dorderindex[ii - 1]].longlabel) != 0){
+            glutAddMenuEntry(plot3di->longlabel, MENU_PLOT3D_DUMMY);
+          }
         }
         if(plot3di->loaded==0)continue;
         if(plotstate==STATIC_PLOTS&&plot3di->display==1){
@@ -5548,11 +5547,11 @@ updatemenu=0;
         glutAddMenuEntry(menulabel,1000+i);
       }
       if(nplot3dloaded>1){
-        glutAddMenuEntry("-",997);
+        glutAddMenuEntry("-",MENU_PLOT3D_DUMMY);
         glutAddMenuEntry(_("Show all PLOT3D files"),SHOWALL_PLOT3D);
         glutAddMenuEntry(_("Hide all PLOT3D files"),HIDEALL_PLOT3D);
       }
-      glutAddMenuEntry("-",997);
+      glutAddMenuEntry("-",MENU_PLOT3D_DUMMY);
     }
     glutAddSubMenu(_("2D contours"),staticslicemenu);
     if(cache_qdata==1){
@@ -9317,7 +9316,7 @@ updatemenu=0;
         if(trainerload==3)glutAddMenuEntry(_("*Oxygen"),MENU_TRAINER_oxy);
         if(trainerload!=3)glutAddMenuEntry(_("Oxygen"),MENU_TRAINER_oxy);
       }
-      glutAddMenuEntry(_("Clear"),998);
+      glutAddMenuEntry(_("Clear"),MENU_TRAINER_CLEAR);
     }
 
     CREATEMENU(mainmenu,MainMenu);
@@ -9327,7 +9326,7 @@ updatemenu=0;
       glutAddSubMenu(_("Options"),optionmenu);
       glutAddSubMenu(_("Dialogs"),dialogmenu);
       glutAddSubMenu(_("Help"),helpmenu);
-      glutAddMenuEntry(_("Quit"),3);
+      glutAddMenuEntry(_("Quit"),MENU_MAIN_QUIT);
     }
     if(trainer_active==1){
       if(trainer_mode==1){
