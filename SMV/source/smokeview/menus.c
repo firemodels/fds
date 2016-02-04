@@ -16,9 +16,15 @@
 #include <direct.h>
 #endif
 
+#define MENU_ERASECOMPRESS 1
+#define MENU_OVERWRITECOMPRESS 2
+#define MENU_COMPRESSNOW 3
+#define MENU_COMPRESSAUTOLOAD 4
+
 #define MENU_TRAINER_CLEAR 998
 #define MENU_MAIN_QUIT 3
 
+#define MENU_READCASEINI -1
 #define MENU_READINI 1
 #define MENU_WRITEINI 2
 #define MENU_WRITECASEINI 3
@@ -2081,27 +2087,28 @@ void GridSliceMenu(int value){
 }
 
 #ifdef pp_COMPRESS
+
 /* ------------------ CompressMenu ------------------------ */
 
 void CompressMenu(int value){
   if(value==MENU_DUMMY)return;
   switch(value){
-  case 1:
+  case MENU_ERASECOMPRESS:
     erase_all=1;
     overwrite_all=0;
     update_overwrite();
     compress_svzip();
     break;
-  case 2:
+  case MENU_OVERWRITECOMPRESS:
     erase_all=0;
     overwrite_all=1-overwrite_all;
     update_overwrite();
     break;
-  case 3:
+  case MENU_COMPRESSNOW:
     erase_all=0;
     compress_svzip();
     break;
-  case 4:
+  case MENU_COMPRESSAUTOLOAD:
     compress_autoloaded=1-compress_autoloaded;
     update_overwrite();
     break;
@@ -2117,7 +2124,7 @@ void CompressMenu(int value){
 /* ------------------ IniSubMenu ------------------------ */
 
 void IniSubMenu(int value){
-  if(value==-1){
+  if(value==MENU_READCASEINI){
     readini(NULL);
   }
   else{
@@ -8992,24 +8999,24 @@ updatemenu=0;
 /* -------------------------------- compress menu -------------------------- */
 
 #ifdef pp_COMPRESS
-  if(smokezippath!=NULL&&(npatchinfo>0||nsmoke3dinfo>0||nsliceinfo>0)){
+    if(smokezippath != NULL && (npatchinfo > 0 || nsmoke3dinfo > 0 || nsliceinfo > 0)){
     CREATEMENU(compressmenu,CompressMenu);
     glutAddMenuEntry(_("Compression options"),MENU_DUMMY);  // -c
     if(overwrite_all==1){
-      glutAddMenuEntry(_("  *Overwrite compressed files"),2);  // -f
+      glutAddMenuEntry(_("  *Overwrite compressed files"),MENU_OVERWRITECOMPRESS);  // -f
     }
     else{
-      glutAddMenuEntry(_("  Overwrite compressed files"),2);  // -f
+      glutAddMenuEntry(_("  Overwrite compressed files"),MENU_OVERWRITECOMPRESS);  // -f
     }
     if(compress_autoloaded==1){
-      glutAddMenuEntry(_("  *Compress only autoloaded files"),4);  // -f
+      glutAddMenuEntry(_("  *Compress only autoloaded files"),MENU_COMPRESSAUTOLOAD);  // -f
     }
     else{
-      glutAddMenuEntry(_("  Compress only autoloaded files"),4);  // -f
+      glutAddMenuEntry(_("  Compress only autoloaded files"),MENU_COMPRESSAUTOLOAD);  // -f
     }
     glutAddMenuEntry("-",MENU_DUMMY);  // -c
-    glutAddMenuEntry(_("Compress now"),3);
-    glutAddMenuEntry(_("Erase compressed files"),1);  // -c
+    glutAddMenuEntry(_("Compress now"),MENU_COMPRESSNOW);
+    glutAddMenuEntry(_("Erase compressed files"),MENU_ERASECOMPRESS);  // -c
   }
 #endif
 
@@ -9028,7 +9035,7 @@ updatemenu=0;
     if(n_inifiles>0){
       CREATEMENU(inisubmenu,IniSubMenu);
       if(caseini_filename!=NULL&&file_exists(caseini_filename)==1){
-        glutAddMenuEntry(caseini_filename,-1);
+        glutAddMenuEntry(caseini_filename,MENU_READCASEINI);
       }
       for(inifile=first_inifile.next;inifile->next!=NULL;inifile=inifile->next){
         if(inifile->file!=NULL&&file_exists(inifile->file)==1){
