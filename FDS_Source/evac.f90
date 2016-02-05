@@ -1950,7 +1950,6 @@ CONTAINS
             CASE Default
                CONTINUE
             END SELECT
-            DIA_MEAN = 0.51_EB
          END IF
 
          !
@@ -8295,7 +8294,7 @@ CONTAINS
              FAC_V0_DOWN = ESS%FAC_V0_DOWN
              FAC_V0_HORI = ESS%FAC_V0_HORI
              IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI >= TWO_EPSILON_EB) THEN
-                FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI
              END IF
              IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP >= TWO_EPSILON_EB) THEN
                 IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
