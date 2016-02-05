@@ -1200,7 +1200,7 @@ typedef struct _multislicedata {
   int seq_id, autoload;
   int loaded,display,type;
   int ndirxyz[4];
-  int nslices;
+  int nslices,nslices_orig;
   int *islices;
   float *contour_areas;
   int *contour_areas_percen;
