@@ -396,6 +396,7 @@ void parse_commandline(int argc, char **argv){
         default_script = insert_scriptfile(scriptbuffer);
       }
     }
+#ifdef pp_LUA
     {
       char luascriptbuffer[1024];
 
@@ -405,6 +406,7 @@ void parse_commandline(int argc, char **argv){
         default_luascript = insert_luascriptfile(luascriptbuffer);
       }
     }
+#endif
   }
   if(smv_filename!=NULL){
     STRUCTSTAT statbuffer;
