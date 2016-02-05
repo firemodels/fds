@@ -7,6 +7,16 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SMOKESENSORS_HIDDEN 0
+#define SMOKESENSORS_0255 1
+#define SMOKESENSORS_01 2
+#define SMOKESENSORS_SCALED 3
+#define SMOKESENSORS_0INF 4
+
+#define TOURINDEX_ALL  -3
+#define TOURINDEX_MANUAL -1
+#define TOURINDEX_DEFAULT -4
+
 #define SURFACE_HIDDEN 0
 #define SURFACE_SOLID 1
 #define SURFACE_OUTLINE 2
@@ -689,21 +699,10 @@ void _Sniff_Errors(char *whereat);
 #define MENU_TOUR_CLEARALL -13
 #define MENU_TOUR_EDIT -14
 
-
 #define MENU_TEXTURE_SHOWALL -1
+#define MENU_TEXTURE_HIDEALL -2
 
 #define MENU_SHOWHIDE_FLIP 15
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 

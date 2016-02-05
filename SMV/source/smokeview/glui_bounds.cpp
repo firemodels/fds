@@ -117,7 +117,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define SETZONEVALMAX 53
 
 #define SAVE_SETTINGS 99
-#define CLOSE 98
+#define CLOSE_BOUNDS 98
 #define COMPRESS_FILES 97
 #define OVERWRITE 96
 #define COMPRESS_AUTOLOADED 91
@@ -1321,7 +1321,7 @@ extern "C" void glui_bounds_setup(int main_window){
 #endif
 
   glui_bounds->add_button(_d("Save settings"), SAVE_SETTINGS, Bounds_DLG_CB);
-  glui_bounds->add_button(_d("Close"), CLOSE, Bounds_DLG_CB);
+  glui_bounds->add_button(_d("Close"), CLOSE_BOUNDS, Bounds_DLG_CB);
 
   glui_bounds->set_main_gfx_window( main_window );
 }
@@ -3055,7 +3055,7 @@ extern "C" void updateglui(void){
 
 void Bounds_DLG_CB(int var){
   switch(var){
-  case CLOSE:
+  case CLOSE_BOUNDS:
     glui_bounds->hide();
     updatemenu=1;
     break;

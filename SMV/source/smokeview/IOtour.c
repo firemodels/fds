@@ -168,7 +168,7 @@ void drawtours(void){
     /* path line (selected)*/
 
     tour_sel = tourinfo + selectedtour_index;
-    if(selectedtour_index!=-1&&tour_sel->display==1&&tour_sel->nkeyframes>1){
+    if(selectedtour_index!=TOURINDEX_MANUAL&&tour_sel->display==1&&tour_sel->nkeyframes>1){
       int j;
       tourdata *touri;
 
@@ -217,7 +217,7 @@ void drawtours(void){
 
     /* selected path - non-selected keyframe knots */
 
-    if(selectedtour_index!=-1&&selected_tour->display==1){
+    if(selectedtour_index!=TOURINDEX_MANUAL&&selected_tour->display==1){
       int j;
 
       glColor3fv(tourcol_selectedpathlineknots);
@@ -960,8 +960,8 @@ void defaulttour(void){
   eyez0 = eye_xyz[2];
   selected_tour=NULL;
   selected_frame=NULL;
-  selectedtour_index=-1;
-  selectedtour_index_old=-1;
+  selectedtour_index = TOURINDEX_MANUAL;
+  selectedtour_index_old = TOURINDEX_MANUAL;
 
 }
 
@@ -1281,8 +1281,8 @@ void setup_tour(void){
     createtourpaths();
     Update_Times();
     plotstate=getplotstate(DYNAMIC_PLOTS);
-    selectedtour_index=-1;
-    selectedtour_index=-1;
+    selectedtour_index = TOURINDEX_MANUAL;
+    selectedtour_index = TOURINDEX_MANUAL;
     selected_frame=NULL;
     selected_tour=NULL;
     if(viewalltours==1)TourMenu(MENU_TOUR_SHOWALL);
