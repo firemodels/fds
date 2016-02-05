@@ -4059,7 +4059,7 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_x!=NULL&&c_iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -4118,7 +4118,7 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_y!=NULL&&c_iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -4180,7 +4180,7 @@ void drawvolslice_texture(const slicedata *sd){
 
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(show_slice_in_obst==0&&c_iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_z!=NULL&&c_iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
