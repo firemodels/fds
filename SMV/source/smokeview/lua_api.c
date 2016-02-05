@@ -380,7 +380,8 @@ int lua_set_sceneclip_z_max(lua_State *L) {
 int lua_get_global_times(lua_State *L) {
     PRINTF("lua: initialising global time table\n");
     lua_createtable(L, 0, nglobal_times);
-    for (int i; i < nglobal_times; i++) {
+	int i;
+    for (i = 0; i < nglobal_times; i++) {
         lua_pushnumber(L, i);
         lua_pushnumber(L, global_times[i]);
         lua_settable(L, -3);
@@ -414,7 +415,8 @@ int lua_get_meshes(lua_State *L) {
     mesh *infotable = meshinfo;
     PRINTF("lua: initialising mesh table\n");
     lua_createtable(L, 0, entries);
-    for (int i; i < entries; i++) {
+	int i;
+    for (i = 0; i < entries; i++) {
         lua_pushnumber(L, i);
         lua_createtable(L, 0, 2);
 
@@ -450,7 +452,8 @@ int lua_get_devices(lua_State *L) {
     devicedata *infotable = deviceinfo;
     PRINTF("lua: initialising device table\n");
     lua_createtable(L, 0, entries);
-    for (int i; i < entries; i++) {
+	int i;
+    for (i = 0; i < entries; i++) {
         lua_pushnumber(L, i);
         lua_createtable(L, 0, 2);
 
@@ -551,7 +554,8 @@ int lua_initsmvproginfo(lua_State *L) {
 int lua_get_sliceinfo(lua_State *L) {
     PRINTF("lua: initialising slice table\n");
     lua_createtable(L, 0, nsliceinfo);
-    for (int i; i < nsliceinfo; i++) {
+	int i;
+    for (i = 0; i < nsliceinfo; i++) {
         lua_pushnumber(L, i);
         lua_createtable(L, 0, 12);
 
@@ -611,7 +615,8 @@ int lua_get_sliceinfo(lua_State *L) {
 int lua_get_csvinfo(lua_State *L) {
     PRINTF("lua: initialising csv table\n");
     lua_createtable(L, 0, ncsvinfo);
-    for (int i; i < ncsvinfo; i++) {
+	int i;
+    for (i = 0; i < ncsvinfo; i++) {
         lua_pushnumber(L, i);
         lua_createtable(L, 0, 4);
 
