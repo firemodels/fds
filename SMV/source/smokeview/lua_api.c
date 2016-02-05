@@ -15,6 +15,54 @@
 lua_State* L;
 int lua_displayCB(lua_State *L);
 
+/* ------------------ load_script ------------------------ */
+// There are two options for scripting, Lua and SSF. Which is run is set here
+// based on the commandline arguments. If either (exclusive) of these values
+// are set to true, then that script will run from within the display callback
+// (Display_CB, in callbacks.c). These two loading routines are included to
+// load the scripts early in the piece, before the display callback.
+// Both runluascript and runscript are global.
+int load_script(char *filename) {
+    fprintf(stderr, "load_script: %s\n", filename);
+    if (runluascript == 1 && runscript == 1) {
+        fprintf(stderr, "Both a Lua script and an SSF script cannot be run "
+                        "simultaneously\n");
+        exit(1);
+    }
+    if (runluascript == 1) {
+      // Load the Lua script in order for it to be run later.
+      if (loadLuaScript(filename) != LUA_OK) {
+          fprintf(stderr, "There was an error loading the script, and so it "
+                          "will not run.\n");
+          if (exit_on_script_crash) {
+              exit(1); // exit with an error code
+          }
+          runluascript = 0; // set this to false so that the smokeview no longer
+                           // tries to run the script as it failed to load
+          fprintf(stderr, "Running smokeview normally.\n");
+      } else {
+        fprintf(stderr, "%s successfully loaded\n", filename);
+      }
+    }
+#ifdef pp_LUA_SSF
+    if (runscript == 1) {
+      // Load the ssf script in order for it to be run later
+      // This still uses the Lua interpreter
+      if (loadSSFScript(filename) != LUA_OK) {
+          fprintf(stderr, "There was an error loading the script, and so it "
+                          "will not run.\n");
+          if (exit_on_script_crash) {
+              exit(1); // exit with an error code
+          }
+          runluascript = 0; // set this to false so that the smokeview no longer
+                           // tries to run the script as it failed to load
+          fprintf(stderr, "Running smokeview normally.\n");
+      }
+    }
+#endif
+    return 1;
+}
+
 /*
   Load a .smv file. This is currently not used as it is dependent on Smokeview
   being able to run without a .smv file loaded.
@@ -97,7 +145,9 @@ int lua_settourkeyframe(lua_State *L) {
 */
 int lua_displayCB(lua_State *L) {
     // runluascript=0;
+    fprintf(stderr, "calling lua_displayCB\n");
     Display_CB();
+    fprintf(stderr, "called lua_displayCB\n");
     // runluascript=1;
     return 0;
 }
@@ -1017,23 +1067,38 @@ int lua_set_slice_bound_max(lua_State *L) {
     return 0;
 }
 
+// add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
-    // load table onto stack
+    // package.path is a path variable where Lua scripts and modules may be
+    // found, typiclly text based files with the .lua extension.
     lua_getglobal(L, "package");
-    int t = lua_getfield(L, -1, "path");
+    int pathType = lua_getfield(L, -1, "path");
     const char *oldPath = lua_tostring(L, -1);
-    int newLength = strlen(oldPath) + 1 + 3*strlen(smokeview_bindir) + 16 +1;
+    int newLength = strlen(oldPath) + 1 + strlen(smokeview_bindir) + 5 +1;
     char newPath[newLength];
     strcpy(newPath, oldPath);
     strcat(newPath,";");
     strcat(newPath,smokeview_bindir);
-    strcat(newPath,"?.lua;");
-    strcat(newPath,smokeview_bindir);
-    strcat(newPath,"?.dll;");
-    strcat(newPath,smokeview_bindir);
-    strcat(newPath,"?.so");
+    strcat(newPath,"?.lua");
     lua_pushstring(L, newPath);
     lua_setfield(L, -3, "path");
+    lua_pop(L, 1); // pop the now redundant "path" variable from the stack
+
+    // package.cpath is a path variable where Lua modules may be found,
+    // typically binary (C based) files such as .dll or .so.
+    int cpathType = lua_getfield(L, -1, "cpath");
+    const char *oldCPath = lua_tostring(L, -1);
+    int newLengthC = strlen(oldCPath) + 1 + 2*strlen(smokeview_bindir) + 10 +1;
+    char newCPath[newLengthC];
+    strcpy(newCPath, oldCPath);
+    strcat(newCPath,";");
+    strcat(newCPath,smokeview_bindir);
+    strcat(newCPath,"?.dll;");
+    strcat(newCPath,smokeview_bindir);
+    strcat(newCPath,"?.so");
+    lua_pushstring(L, newCPath);
+    lua_setfield(L, -3, "cpath");
+    lua_pop(L, 1); // pop the now redundant "cpath" variable from the stack
     return;
 }
 
@@ -1213,25 +1278,21 @@ void runScriptString(char *string) {
 //  return 0;
 }
 
-int loadLuaScript() {
-    char filename[1024];
-    if (strlen(luascript_filename) == 0) {
-        strncpy(filename, fdsprefix, 1020);
-        strcat(filename, ".lua");
-    } else {
-        strncpy(filename, luascript_filename, 1024);
-    }
+int loadLuaScript(char *filename) {
 	printf("scriptfile: %s\n", filename);
     // The display callback needs to be run once initially.
     // PROBLEM: the display CB does not work without a loaded case.
     runluascript=0;
     lua_displayCB(L);
     runluascript=1;
+    fprintf(stderr, "back here\n");
     printf("loading: %s\n", filename);
     const char *err_msg;
     lua_Debug info;
     int level = 0;
+    fprintf(stderr, "about to load\n");
     int return_code = luaL_loadfile(L, filename);
+    fprintf(stderr, "loaded\n");
     switch (return_code) {
         case LUA_OK:
             printf("%s loaded ok\n", filename);
@@ -1271,14 +1332,14 @@ int loadLuaScript() {
     return return_code;
 }
 
-int loadSSFScript() {
-	char filename[1024];
-    if (strlen(script_filename) == 0) {
-        strncpy(filename, fdsprefix, 1020);
-        strcat(filename, ".ssf");
-    } else {
-        strncpy(filename, script_filename, 1024);
-    }
+int loadSSFScript(char *filename) {
+	// char filename[1024];
+  //   if (strlen(script_filename) == 0) {
+  //       strncpy(filename, fdsprefix, 1020);
+  //       strcat(filename, ".ssf");
+  //   } else {
+  //       strncpy(filename, script_filename, 1024);
+  //   }
 	printf("scriptfile: %s\n", filename);
     // The display callback needs to be run once initially.
     // PROBLEM: the display CB does not work without a loaded case.

@@ -162,6 +162,16 @@ typedef struct _scriptfiledata {
   char *file;
 } scriptfiledata;
 
+/* --------------------------  scriptfiledata ------------------------------------ */
+
+#ifdef pp_LUA
+typedef struct _luascriptfiledata {
+  struct _luascriptfiledata *prev, *next;
+  int id;
+  char *file;
+} luascriptfiledata;
+#endif
+
 /* --------------------------  scriptdata ------------------------------------ */
 
 typedef struct {
@@ -289,8 +299,8 @@ typedef struct _matldata {
 
 typedef struct _surfdata {
   char *surfacelabel,*texturefile;
-  int type; /* 
-               0 - regular block non-textured 
+  int type; /*
+               0 - regular block non-textured
                1 - regular block textured
                2 - outline
                3 - smoothed block
@@ -501,7 +511,7 @@ typedef struct _isodata {
   char *reg_file, *size_file;
   short *normaltable;
   int memory_id;
-  int nnormaltable; 
+  int nnormaltable;
   char *file,*tfile;
   int dataflag,geomflag;
   int is_fed;
@@ -614,7 +624,7 @@ typedef struct _mesh {
   unsigned char *is_block_terrain;
   unsigned char *iqdata;
   float *qdata, *udata, *vdata, *wdata;
-  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase; 
+  unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase;
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase;
   float *yzcolortbase, *xzcolortbase, *xycolortbase;
   float *dx_xy, *dy_xy, *dz_xy;

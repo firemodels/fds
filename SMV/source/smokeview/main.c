@@ -60,11 +60,6 @@ int main(int argc, char **argv){
     readini(ini_from);
   }
 
-#ifdef pp_LUA
-  // Load a script if necessary (from startup.c)
-  load_script();
-#endif
-
   glutMainLoop();
   return 0;
-}	 
+}

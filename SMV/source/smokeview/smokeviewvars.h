@@ -896,7 +896,7 @@ SVEXTERN float foregroundbasecolor[4];
 SVEXTERN float foregroundcolor[4];
 SVEXTERN float boundcolor[4];
 SVEXTERN float timebarcolor[4];
- 
+
 SVEXTERN float redcolor[4];
 
 SVEXTERN int loadfiles_at_startup;
@@ -1034,6 +1034,10 @@ SVEXTERN char SVDECL(*smv_filename,NULL),SVDECL(*fed_filename,NULL),fed_filename
 SVEXTERN char SVDECL(*sliceinfo_filename,NULL);
 SVEXTERN char SVDECL(*database_filename,NULL),SVDECL(*smokeview_bindir,NULL),SVDECL(*iso_filename,NULL);
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, SVDECL(*default_script,NULL);
+#ifdef pp_LUA
+SVEXTERN luascriptfiledata first_luascriptfile, last_luascriptfile, SVDECL(*default_luascript,NULL);
+SVEXTERN int SVDECL(luascript_loaded,0);
+#endif
 SVEXTERN scriptdata SVDECL(*scriptinfo,NULL), SVDECL(*current_script_command,NULL);
 SVEXTERN char SVDECL(*script_dir_path,NULL);
 SVEXTERN int SVDECL(nscriptinfo,0);
@@ -1340,18 +1344,18 @@ SVEXTERN int SVDECL(hidepatchsurface,0);
   {1.000000, 0.000000, 0.000000}
 };
   SVEXTERN float bw_baseBASE[MAXRGB][4]={
-  {1,            1,                1},           
+  {1,            1,                1},
   {0.909090909,  0.909090909,      0.909090909},
-  {0.818181818,  0.818181818,      0.818181818}, 
-  {0.727272727,  0.727272727,      0.727272727}, 
-  {0.636363636,  0.636363636,      0.636363636}, 
-  {0.545454545,  0.545454545,      0.545454545}, 
-  {0.454545455,  0.454545455,      0.454545455}, 
-  {0.363636364,  0.363636364,      0.363636364}, 
-  {0.272727273,  0.272727273,      0.272727273}, 
-  {0.181818182,  0.181818182,      0.181818182}, 
-  {0.090909091,  0.090909091,      0.090909091}, 
-  {  0,            0,                0}         
+  {0.818181818,  0.818181818,      0.818181818},
+  {0.727272727,  0.727272727,      0.727272727},
+  {0.636363636,  0.636363636,      0.636363636},
+  {0.545454545,  0.545454545,      0.545454545},
+  {0.454545455,  0.454545455,      0.454545455},
+  {0.363636364,  0.363636364,      0.363636364},
+  {0.272727273,  0.272727273,      0.272727273},
+  {0.181818182,  0.181818182,      0.181818182},
+  {0.090909091,  0.090909091,      0.090909091},
+  {  0,            0,                0}
 };
   SVEXTERN float rgb2BASE[MAXRGB][3]={
   {1.0f, 1.0f, 1.0f}, /* white */

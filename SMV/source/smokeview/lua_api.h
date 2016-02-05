@@ -3,9 +3,10 @@
 int lua_render(lua_State  *L);
 void initLua();
 
-int loadLuaScript();
+int load_script(char *filename);
+int loadLuaScript(char *filename);
 int runLuaScript();
-int loadSSFScript();
+int loadSSFScript(char *filename);
 int runSSFScript();
 
 void runScriptString(char *string);

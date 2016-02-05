@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -33,13 +33,13 @@ void _Sniff_Errors(char *whereat){
 
 void updateLights(float *pos1, float *pos2){
   int i;
-  GLfloat ambientlight2[4], diffuselight2[4];  
+  GLfloat ambientlight2[4], diffuselight2[4];
   int lightCount;
   float div;
-        
+
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, lightmodel_localviewer == 0? GL_FALSE : GL_TRUE);
   glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, lightmodel_separatespecularcolor == 0? GL_SINGLE_COLOR : GL_SEPARATE_SPECULAR_COLOR);
-  
+
   lightCount = 0;
   if(light_enabled0){
     ++lightCount;
@@ -48,14 +48,14 @@ void updateLights(float *pos1, float *pos2){
     ++lightCount;
   }
 
-  div = lightCount > 0? 1.0f/(float)lightCount : 1.0f;  
+  div = lightCount > 0? 1.0f/(float)lightCount : 1.0f;
   for(i=0;i<3;i++){
     ambientlight2[i]=ambientlight[i]*div;
     diffuselight2[i]=diffuselight[i]*div;
   }
   ambientlight2[3]=1.0;
   diffuselight2[3]=1.0;
-  if(light_enabled0){  
+  if(light_enabled0){
     glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
     glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
     if(pos1!=NULL)glLightfv(GL_LIGHT0,GL_POSITION,pos1);
@@ -65,7 +65,7 @@ void updateLights(float *pos1, float *pos2){
     glDisable(GL_LIGHT0);
   }
 
-  if(light_enabled1){  
+  if(light_enabled1){
     glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
     glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
     if(pos2!=NULL)glLightfv(GL_LIGHT1,GL_POSITION,pos2);
@@ -190,7 +190,7 @@ void ResetView(int option){
     float azimuth, elevation,axis[3];
     float quat_temp[4];
     float x, y, z;
-   
+
     azimuth = camera_current->az_elev[0]*DEG2RAD;
     elevation = camera_current->az_elev[1]*DEG2RAD;
 
@@ -250,7 +250,7 @@ void init_volrender_script(char *prefix, char *tour_label, int startframe, int s
     runscript=1;
     fclose(script_stream);
   }
-} 
+}
 
 /* ------------------ parse_commandline ------------------------ */
 
@@ -292,9 +292,9 @@ void parse_commandline(int argc, char **argv){
       if(
         strncmp(argi,"-points",7)==0||
         strncmp(argi,"-frames",7)==0||
-#ifdef pp_LANG        
+#ifdef pp_LANG
         strncmp(argi,"-lang",5)==0||
-#endif        
+#endif
         strncmp(argi,"-script",7)==0||
 #ifdef pp_LUA
         strncmp(argi,"-luascript",10)==0||
@@ -396,6 +396,15 @@ void parse_commandline(int argc, char **argv){
         default_script = insert_scriptfile(scriptbuffer);
       }
     }
+    {
+      char luascriptbuffer[1024];
+
+      STRCPY(luascriptbuffer,fdsprefix);
+      STRCAT(luascriptbuffer,".lua");
+      if(default_luascript==NULL&&STAT(luascriptbuffer,&statbuffer)==0){
+        default_luascript = insert_luascriptfile(luascriptbuffer);
+      }
+    }
   }
   if(smv_filename!=NULL){
     STRUCTSTAT statbuffer;
@@ -424,7 +433,7 @@ void parse_commandline(int argc, char **argv){
     STRCAT(sliceinfo_filename,"_slice.info");
   }
 
-  // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
+  // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file
   // to the end of the .smv file creating a new .smv file.  Then read in that .smv file.
 
   {
@@ -492,7 +501,7 @@ void parse_commandline(int argc, char **argv){
         show_lang_menu=1;
       }
     }
-#endif    
+#endif
     else if(strncmp(argv[i],"-convert_ini",12)==0){
       char *local_ini_from=NULL, *local_ini_to=NULL;
 
@@ -501,7 +510,7 @@ void parse_commandline(int argc, char **argv){
       if(local_ini_from!=NULL&&local_ini_to!=NULL){
         NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
         strcpy(ini_from,local_ini_from);
-        
+
         NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
         strcpy(ini_to,local_ini_to);
         convert_ini=1;
@@ -532,7 +541,7 @@ void parse_commandline(int argc, char **argv){
       if(local_ini_from!=NULL){
         NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
         strcpy(ini_from,local_ini_from);
-        
+
         NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
         strcpy(ini_to,local_ini_to);
         convert_ini=1;
@@ -593,6 +602,8 @@ void parse_commandline(int argc, char **argv){
     else if(strncmp(argv[i],"-runluascript",13)==0){
       from_commandline=1;
       strcpy(luascript_filename, "");
+      strncpy(luascript_filename, fdsprefix, 1020);
+      strcat(luascript_filename, ".lua");
       runluascript=1;
     }
     else if(strncmp(argv[i],"-killscript",11)==0){
