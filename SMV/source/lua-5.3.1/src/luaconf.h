@@ -41,7 +41,7 @@
 ** Define it if you want Lua to avoid the use of a few C99 features
 ** or Windows-specific features on Windows.
 */
-/* #define LUA_USE_C89 */
+#define LUA_USE_C89
 
 
 /*
