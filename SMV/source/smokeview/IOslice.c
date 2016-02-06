@@ -1985,7 +1985,7 @@ int is_slice_duplicate(multislicedata *mslicei, int ii){
     float *xyzminj, *xyzmaxj;
 
     slicej = sliceinfo + mslicei->islices[jj];
-    if(slicej==slicei||slicej->dup==1)continue;
+    if(slicej==slicei||slicej->skip==1)continue;
     xyzminj = slicej->xyz_min;
     xyzmaxj = slicej->xyz_max;
     if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
@@ -2017,7 +2017,7 @@ int is_vectorslice_duplicate(multivslicedata *mvslicei, int i){
 
     vslicej = vsliceinfo + mvslicei->ivslices[jj];
     slicej = sliceinfo + vslicej->ival;
-    if(slicej==slicei||slicej->dup==1)continue;
+    if(slicej==slicei||slicej->skip==1)continue;
     xyzminj = slicej->xyz_min;
     xyzmaxj = slicej->xyz_max;
     if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
@@ -2033,12 +2033,6 @@ int is_vectorslice_duplicate(multivslicedata *mvslicei, int i){
 void update_slicedups(void){
   int i;
   
-  for(i=0;i<nsliceinfo;i++){
-    slicedata *slicei;
-
-    slicei = sliceinfo + i;
-    slicei->mslice=NULL;
-  }//slice test
   for(i=0;i<nmultisliceinfo;i++){
     int ii;
     multislicedata *mslicei;
@@ -2048,7 +2042,7 @@ void update_slicedups(void){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      slicei->dup=0;
+      slicei->skip=0;
     }
   }
   // look for duplicate slices
@@ -2061,43 +2055,35 @@ void update_slicedups(void){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      slicei->dup = is_slice_duplicate(mslicei,ii);
-    }
-  }
-  // only keep slices in a multislice that are not duplicates of earlier slices (in that multi slice)
-  for(i = 0; i < nmultisliceinfo; i++){
-    int ii;
-    multislicedata *mslicei;
-    int iii;
-
-    mslicei = multisliceinfo + i;
-    iii = 0;
-    for(ii = 0; ii < mslicei->nslices_orig; ii++){
-      slicedata *slicei;
-
-      slicei = sliceinfo + mslicei->islices[ii];
-      if(slicei->dup == 0){
-        mslicei->islices[iii] = mslicei->islices[ii];
-        iii++;
-      }
-    }
-    mslicei->nslices = iii;
-  }
-  for(i = 0; i<nmultisliceinfo; i++){
-    int ii;
-    multislicedata *mslicei;
-
-    mslicei = multisliceinfo + i;
-    mslicei->contour_areas=NULL;
-    for(ii=0;ii<mslicei->nslices;ii++){
-      slicedata *slicei;
-
-      slicei = sliceinfo + mslicei->islices[ii];
-     // ASSERT(slicei->mslice==NULL);
-      slicei->mslice=mslicei;
+      slicei->skip = is_slice_duplicate(mslicei,ii);
     }
   }
 }
+
+/* ------------------ update_vslicedups ------------------------ */
+
+void update_vslicedups(void){
+  int ii;
+  
+  for(ii=0;ii<nvsliceinfo;ii++){
+    vslicedata *vslicei;
+
+    vslicei = vsliceinfo + ii;
+    vslicei->skip = 0;
+  }
+  for(ii = 0; ii < nmultivsliceinfo; ii++){
+    multivslicedata *mvslicei;
+    int i;
+
+    mvslicei = multivsliceinfo + ii;
+    for(i = 0; i < mvslicei->nvslices; i++){
+      vslicedata *vslicei;
+
+      vslicei = vsliceinfo + mvslicei->ivslices[i];
+      vslicei->skip = is_vectorslice_duplicate(mvslicei,i);
+    }
+  }
+ }
 #endif
 /* ------------------ getsliceparams ------------------------ */
 
@@ -2379,9 +2365,29 @@ void getsliceparams(void){
       }
     }
   }
+  for(i = 0; i < nsliceinfo; i++){
+    slicedata *slicei;
+
+    slicei = sliceinfo + i;
+    slicei->mslice = NULL;
+  }
 #ifdef pp_SLICEDUP
   update_slicedups();
 #endif
+  for(i = 0; i < nmultisliceinfo; i++){
+    int ii;
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    mslicei->contour_areas = NULL;
+    for(ii = 0; ii < mslicei->nslices; ii++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + mslicei->islices[ii];
+      ASSERT(slicei->mslice == NULL);
+      slicei->mslice = mslicei;
+    }
+  }
   updateslicemenulabels();
   update_slicedir_count();
 }
@@ -2815,55 +2821,14 @@ void updatevslices(void){
       if(vslicei->ival>=0)seq_id = sliceval->seq_id;
       vslicei->seq_id=seq_id;
       vslicei->autoload=0;
+      vslicei->skip = 0;
     }
   }
 
-    // look for duplicate vector slices
-
-  for(ii = 0; ii < nmultivsliceinfo; ii++){
-    multivslicedata *mvslicei;
-
-    mvslicei = multivsliceinfo + ii;
-    for(i = 0; i < mvslicei->nvslices; i++){
-      vslicedata *vslicei;
-
-      vslicei = vsliceinfo + mvslicei->ivslices[i];
-      vslicei->dup = 0;
-    }
-  }
 #ifdef pp_SLICEDUP
-  for(ii = 0; ii < nmultivsliceinfo; ii++){
-    multivslicedata *mvslicei;
-
-    mvslicei = multivsliceinfo + ii;
-    for(i = 0; i < mvslicei->nvslices; i++){
-      vslicedata *vslicei;
-
-      vslicei = vsliceinfo + mvslicei->ivslices[i];
-      vslicei->dup = is_vectorslice_duplicate(mvslicei,i);
-    }
-  }
+  update_vslicedups();
 #endif
 
-    // eliminate duplicate vector slices
-
-  for(ii = 0; ii < nmultivsliceinfo; ii++){
-    multivslicedata *mvslicei;
-    int iii;
-
-    mvslicei = multivsliceinfo + ii;
-    iii = 0;
-    for(i = 0; i < mvslicei->nvslices; i++){
-      vslicedata *vslicei;
-
-      vslicei = vsliceinfo + mvslicei->ivslices[i];
-      if(vslicei->dup==0){
-        mvslicei->ivslices[iii] = mvslicei->ivslices[i];
-        iii++;
-      }
-    }
-    mvslicei->nvslices=iii;
-  }
   for(i = 0; i<nmultivsliceinfo; i++){
     multivslicedata *mvslicei;
 

@@ -1150,7 +1150,7 @@ typedef struct _slicedata {
   int blocknumber;
   int firstshort;
   int vec_comp;
-  int dup;
+  int skip;
   int setvalmin, setvalmax;
   float valmin, valmax;
   float globalmin, globalmax;
@@ -1248,7 +1248,7 @@ typedef struct {
   slicedata *u,*v,*w,*val;
   int volslice;
   int iu, iv, iw, ival;
-  int dup;
+  int skip;
   int loaded,display;
   float valmin, valmax;
   int type,vec_type;
