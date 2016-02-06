@@ -8872,11 +8872,13 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
+#ifdef pp_DUP
     if(match(buffer, "SLICEDUP") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %i %i", &slicedup_option,&vectorslicedup_option);
       continue;
     }
+#endif
     if(match(buffer, "NORTHANGLE") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %i", &vis_northangle);
@@ -12479,8 +12481,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", visWalls);
   fprintf(fileout, "SKIPEMBEDSLICE\n");
   fprintf(fileout, " %i\n", skip_slice_in_embedded_mesh);
+#ifdef pp_SLICEUP
   fprintf(fileout, "SLICEDUP\n");
   fprintf(fileout, " %i %i\n", slicedup_option, vectorslicedup_option);
+#endif
   fprintf(fileout, "SMOKESENSORS\n");
   fprintf(fileout, " %i %i\n", show_smokesensors, test_smokesensors);
   fprintf(fileout, "SMOOTHBLOCKSOLID\n");
