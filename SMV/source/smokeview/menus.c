@@ -8118,10 +8118,7 @@ updatemenu=0;
         }
       }
       if(nmultivsliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
-      if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
-      if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
 #ifdef pp_SLICEDUP        
-      glutAddMenuEntry("-", MENU_DUMMY);
       glutAddMenuEntry("Duplicate vector slices", MENU_DUMMY);
       if(vectorslicedup_option == SLICEDUP_KEEPALL){
         glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
@@ -8144,6 +8141,8 @@ updatemenu=0;
       glutAddMenuEntry("-", MENU_DUMMY);
 #endif        
 
+      if(showallslicevectors == 0)glutAddMenuEntry(_("Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
+      if(showallslicevectors == 1)glutAddMenuEntry(_("*Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
       if(nmultisliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadmultivslicemenu);
       }
