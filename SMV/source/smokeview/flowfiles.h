@@ -648,6 +648,7 @@ typedef struct _mesh {
   int smokedir,smokedir_old;
   float dx, dy, dz, dxy,dxz,dyz;
   float norm[3];
+  float dplane_min[4], dplane_max[4];
 
   int *patchtype;
   int *patchdir,*patch_surfindex;
@@ -1189,7 +1190,7 @@ typedef struct _slicedata {
   int type;
   int vloaded;
   int reload;
-  float delta_orig;
+  float delta_orig, dplane_min, dplane_max;
   int extreme_min, extreme_max;
 } slicedata;
 

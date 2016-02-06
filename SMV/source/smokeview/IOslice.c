@@ -1989,8 +1989,8 @@ int is_slice_duplicate(multislicedata *mslicei, int ii){
     xyzminj = slicej->xyz_min;
     xyzmaxj = slicej->xyz_max;
     if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
-      if(slicedup_option==SLICEDUP_KEEPFINE  &&slicei->delta_orig>slicej->delta_orig-SLICEEPS)return 1;
-      if(slicedup_option==SLICEDUP_KEEPCOARSE&&slicei->delta_orig<slicej->delta_orig+SLICEEPS)return 1;
+      if(slicedup_option==SLICEDUP_KEEPFINE  &&slicei->dplane_min>slicej->dplane_min-SLICEEPS)return 1;
+      if(slicedup_option==SLICEDUP_KEEPCOARSE&&slicei->dplane_max<slicej->dplane_max+SLICEEPS)return 1;
     }
   }
   return 0;
@@ -2021,8 +2021,8 @@ int is_vectorslice_duplicate(multivslicedata *mvslicei, int i){
     xyzminj = slicej->xyz_min;
     xyzmaxj = slicej->xyz_max;
     if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
-      if(vectorslicedup_option==SLICEDUP_KEEPFINE  &&slicei->delta_orig>slicej->delta_orig-SLICEEPS)return 1;
-      if(vectorslicedup_option==SLICEDUP_KEEPCOARSE&&slicei->delta_orig<slicej->delta_orig+SLICEEPS)return 1;
+      if(vectorslicedup_option==SLICEDUP_KEEPFINE  &&slicei->dplane_min>slicej->dplane_min-SLICEEPS)return 1;
+      if(vectorslicedup_option==SLICEDUP_KEEPCOARSE&&slicei->dplane_max<slicej->dplane_max+SLICEEPS)return 1;
     }
   }
   return 0;
@@ -2175,29 +2175,29 @@ void getsliceparams(void){
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
+    mesh *meshi;
 
     sd = sliceinfo + i;
-    is1=sd->is1;
+    meshi = meshinfo + sd->blocknumber;
+
+    is1 = sd->is1;
     is2=sd->is2;
     js1=sd->js1;
     js2=sd->js2;
     ks1=sd->ks1;
     ks2=sd->ks2;
     if(error==0){
-      int iblock;
-      mesh *meshi;
       float position;
 
-
       sd->idir=-1;
-      iblock = sd->blocknumber;
-      meshi = meshinfo + iblock;
 
       strcpy(sd->slicedir,"");
       position=-999.0;
-      if(sd->is1==sd->is2
-        ||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)
-        ){
+      if(sd->is1==sd->is2||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)){
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+
         sd->idir=1;
         position = meshi->xplt_orig[is1];
         if(sd->slicetype==SLICE_CELL_CENTER){
@@ -2215,14 +2215,24 @@ void getsliceparams(void){
           sd->delta_orig=(meshi->xplt_orig[is1+1]-meshi->xplt_orig[is1])/2.0;
         }
         if(sd->volslice==0){
-          sprintf(sd->slicedir,"X=%f",position);
+          sd->dplane_min = meshi->dplane_min[1];
+          sd->dplane_max = meshi->dplane_max[1];
+          sprintf(sd->slicedir, "X=%f", position);
         }
         else{
-          sprintf(sd->slicedir,"3D slice");
+          sd->dplane_min = meshi->dplane_min[0];
+          sd->dplane_max = meshi->dplane_max[0];
+          sprintf(sd->slicedir, "3D slice");
         }
       }
       if(sd->js1==sd->js2){
-        sd->idir=2;
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+        sd->dplane_min = meshi->dplane_min[2];
+        sd->dplane_max = meshi->dplane_max[2];
+
+        sd->idir = 2;
         position = meshi->yplt_orig[js1];
         if(sd->slicetype==SLICE_CELL_CENTER){
           float *yp;
@@ -2241,7 +2251,13 @@ void getsliceparams(void){
         sprintf(sd->slicedir,"Y=%f",position);
       }
       if(sd->ks1==sd->ks2){
-        sd->idir=3;
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+        sd->dplane_min = meshi->dplane_min[3];
+        sd->dplane_max = meshi->dplane_max[3];
+
+        sd->idir = 3;
         position = meshi->zplt_orig[ks1];
         if(sd->slicetype==SLICE_CELL_CENTER){
           float *zp;
@@ -2270,10 +2286,8 @@ void getsliceparams(void){
     }
     {
       float *xplt, *yplt, *zplt;
-      mesh *meshi;
       float *xyz_min, *xyz_max;
 
-      meshi = meshinfo + sd->blocknumber;
       sd->mesh_type=meshi->mesh_type;
       xplt = meshi->xplt;
       yplt = meshi->yplt;
@@ -2370,6 +2384,7 @@ void getsliceparams(void){
 
     slicei = sliceinfo + i;
     slicei->mslice = NULL;
+    slicei->skip = 0;
   }
 #ifdef pp_SLICEDUP
   update_slicedups();

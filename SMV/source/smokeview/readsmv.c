@@ -1907,6 +1907,7 @@ void update_mesh_coords(void){
     float *xplt, *yplt, *zplt;
     int j,k;
     float dx, dy, dz;
+    float *dplane_min, *dplane_max;
 
     meshi=meshinfo+igrid;
     ibar=meshi->ibar; 
@@ -1973,6 +1974,18 @@ void update_mesh_coords(void){
     dy = yplt[1]-yplt[0];
     dz = zplt[1]-zplt[0];
     meshi->dcell = sqrt(dx*dx+dy*dy+dz*dz);
+
+    dplane_min = meshi->dplane_min;
+    dplane_min[0] = MIN(MIN(dx, dy), dz);
+    dplane_min[1] = MIN(dy, dz);
+    dplane_min[2] = MIN(dx, dz);
+    dplane_min[3] = MIN(dx, dy);
+
+    dplane_max = meshi->dplane_max;
+    dplane_max[0] = MAX(MAX(dx, dy), dz);
+    dplane_max[1] = MAX(dy, dz);
+    dplane_max[2] = MAX(dx, dz);
+    dplane_max[3] = MAX(dx, dy);
 
     face_centers = meshi->face_centers;
     for(j=0;j<6;j++){
