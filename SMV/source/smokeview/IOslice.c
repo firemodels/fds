@@ -1969,10 +1969,7 @@ void getgsliceparams(void){
 
 /* ------------------ is_slice_duplicate ------------------------ */
 
-//#define SLICEDUP_KEEPALL 0
-//#define SLICEDUP_KEEPFINE 1
-//#define SLICEDUP_KEEPCOARSE 2
-// slicedup_option
+#ifdef pp_SLICEDUP
 #define SLICEEPS 0.001
 int is_slice_duplicate(multislicedata *mslicei, int ii){
   int jj;
@@ -2076,7 +2073,6 @@ void update_slicedups(void){
     mslicei = multisliceinfo + i;
     iii = 0;
     for(ii = 0; ii < mslicei->nslices_orig; ii++){
-      int jj;
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
@@ -2102,7 +2098,7 @@ void update_slicedups(void){
     }
   }
 }
-
+#endif
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){
@@ -2383,7 +2379,9 @@ void getsliceparams(void){
       }
     }
   }
+#ifdef pp_SLICEDUP
   update_slicedups();
+#endif
   updateslicemenulabels();
   update_slicedir_count();
 }
@@ -2833,6 +2831,7 @@ void updatevslices(void){
       vslicei->dup = 0;
     }
   }
+#ifdef pp_SLICEDUP
   for(ii = 0; ii < nmultivsliceinfo; ii++){
     multivslicedata *mvslicei;
 
@@ -2844,6 +2843,7 @@ void updatevslices(void){
       vslicei->dup = is_vectorslice_duplicate(mvslicei,i);
     }
   }
+#endif
 
     // eliminate duplicate vector slices
 
