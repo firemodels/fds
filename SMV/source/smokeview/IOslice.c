@@ -2691,7 +2691,7 @@ void update_fedinfo(void){
 /* ------------------ updatevslices ------------------------ */
 
 void updatevslices(void){
-  int i,ii;
+  int i;
 
   PRINTF("  updating vector slices\n");
   getsliceparams();
