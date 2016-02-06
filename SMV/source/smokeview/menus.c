@@ -16,6 +16,10 @@
 #include <direct.h>
 #endif
 
+#define MENU_KEEP_ALL -2
+#define MENU_KEEP_FINE -3
+#define MENU_KEEP_COARSE -4
+
 #define MENU_OPTION_TRAINERMENU 2
 
 #define MENU_UPDATEBOUNDS -3
@@ -191,6 +195,10 @@ void LoadVolSmoke3DMenu(int value);
 void update_script_step(void);
 #define ISO_COLORS 4
 void Iso_CB(int var);
+void update_slicedups(void);
+void update_vslicedups(void);
+void UnloadVSliceMenu(int value);
+
 
 #ifdef WIN32
 
@@ -3672,12 +3680,6 @@ void LoadMultiVSliceMenu(int value){
   multivslicedata *mvslicei;
 
   if(value==MENU_DUMMY)return;
-  if(value==-20){
-    showallslicevectors=1-showallslicevectors;
-    updatemenu=1;  
-    glutPostRedisplay();
-    return;
-  }
   if(value>=0){
     mvslicei = multivsliceinfo + value;
     if(scriptoutstream!=NULL){
@@ -3693,13 +3695,60 @@ void LoadMultiVSliceMenu(int value){
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       for(i=0;i<mvslicei->nvslices;i++){
-        LoadVSliceMenu(mvslicei->ivslices[i]);
+        vslicedata *vslicei;
+
+        vslicei = vsliceinfo + mvslicei->ivslices[i];
+        if(vslicei->skip==0&&vslicei->loaded==0)LoadVSliceMenu(mvslicei->ivslices[i]);
+        if(vslicei->skip==1&&vslicei->loaded==1)UnloadVSliceMenu(mvslicei->ivslices[i]);
       }
     }
     script_multivslice=0;
   }
   else{
-    LoadVSliceMenu(UNLOAD_ALL);
+    switch(value){
+      case -20:
+        showallslicevectors=1-showallslicevectors;
+        updatemenu=1;  
+        glutPostRedisplay();
+        return;
+        break;
+
+      case UNLOAD_ALL:
+        LoadVSliceMenu(UNLOAD_ALL);
+        break;
+
+#ifdef pp_SLICEDUP
+      case MENU_KEEP_ALL:
+      if(vectorslicedup_option!=SLICEDUP_KEEPALL){
+        vectorslicedup_option = SLICEDUP_KEEPALL;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_vslicedups();
+      }
+      break;
+
+      case  MENU_KEEP_COARSE:
+      if(vectorslicedup_option!=SLICEDUP_KEEPCOARSE){
+        vectorslicedup_option = SLICEDUP_KEEPCOARSE;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_vslicedups();
+      }
+      break;
+
+      case MENU_KEEP_FINE:
+      if(vectorslicedup_option!=SLICEDUP_KEEPFINE){
+        vectorslicedup_option = SLICEDUP_KEEPFINE;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_vslicedups();
+      }
+      break;
+#endif      
+        default:
+        ASSERT(FFALSE);
+        break;
+    }
   }
 }
 
@@ -3726,7 +3775,11 @@ void LoadMultiSliceMenu(int value){
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       for(i=0;i<mslicei->nslices;i++){
-        LoadSliceMenu(mslicei->islices[i]);
+        slicedata *slicei;
+
+        slicei = sliceinfo + mslicei->islices[i];
+        if(slicei->skip==0&&slicei->loaded==0)LoadSliceMenu(mslicei->islices[i]);
+        if(slicei->skip==1&&slicei->loaded==1)UnloadSliceMenu(mslicei->islices[i]);
       }
       if(mslicei->nslices>0&&mslicei->islices[0]>=nsliceinfo-nfedinfo){
         output_mfed_csv(mslicei);
@@ -3734,11 +3787,44 @@ void LoadMultiSliceMenu(int value){
     }
     script_multislice=0;
   }
-  else if(value==UNLOAD_ALL){
-    LoadSliceMenu(UNLOAD_ALL);
-  }
   else{
-    ASSERT(FFALSE);
+    switch(value){
+      case UNLOAD_ALL:
+      LoadSliceMenu(UNLOAD_ALL);
+      break;
+#ifdef pp_SLICEDUP
+      case MENU_KEEP_ALL:
+      if(slicedup_option!=SLICEDUP_KEEPALL){
+        slicedup_option = SLICEDUP_KEEPALL;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_slicedups();
+      }
+      break;
+
+      case  MENU_KEEP_COARSE:
+      if(slicedup_option!=SLICEDUP_KEEPCOARSE){
+        slicedup_option = SLICEDUP_KEEPCOARSE;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_slicedups();
+      }
+      break;
+
+      case MENU_KEEP_FINE:
+      if(slicedup_option!=SLICEDUP_KEEPFINE){
+        slicedup_option = SLICEDUP_KEEPFINE;
+        updatemenu = 1;
+        glutPostRedisplay();
+        update_slicedups();
+      }
+      break;
+#endif      
+
+      default:
+      ASSERT(FFALSE);
+      break;
+    }
   }
 }
 
@@ -8032,8 +8118,32 @@ updatemenu=0;
         }
       }
       if(nmultivsliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
-      if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"), MENU_LOADVSLICE_SHOWALL);
-      if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"), MENU_LOADVSLICE_SHOWALL);
+      if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
+      if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
+#ifdef pp_SLICEDUP        
+      glutAddMenuEntry("-", MENU_DUMMY);
+      glutAddMenuEntry("Duplicate vector slices", MENU_DUMMY);
+      if(vectorslicedup_option == SLICEDUP_KEEPALL){
+        glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+      }
+      else{
+        glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
+      }
+      if(vectorslicedup_option == SLICEDUP_KEEPFINE){
+        glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
+      }
+      else{
+        glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
+      }
+      if(vectorslicedup_option == SLICEDUP_KEEPCOARSE){
+        glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
+      }
+      else{
+        glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
+      }
+      glutAddMenuEntry("-", MENU_DUMMY);
+#endif        
+
       if(nmultisliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadmultivslicemenu);
       }
@@ -8157,8 +8267,8 @@ updatemenu=0;
       }
     } 
     if(nvsliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
-    if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice entries"), MENU_LOADVSLICE_SHOWALL);
-    if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice entries"), MENU_LOADVSLICE_SHOWALL);
+    if(showallslicevectors==0)glutAddMenuEntry(_("Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
+    if(showallslicevectors==1)glutAddMenuEntry(_("*Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
     if(nvsliceloaded>1){
       glutAddSubMenu(_("Unload"),unloadvslicemenu);
     }
@@ -8307,6 +8417,28 @@ updatemenu=0;
           }
         }
         if(nmultisliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
+#ifdef pp_SLICEDUP        
+        glutAddMenuEntry("Duplicate slices", MENU_DUMMY);
+        if(slicedup_option==SLICEDUP_KEEPALL){
+          glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+        }
+        else{
+          glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
+        }
+        if(slicedup_option==SLICEDUP_KEEPFINE){
+          glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
+        }
+        else{
+          glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
+        }
+        if(slicedup_option==SLICEDUP_KEEPCOARSE){
+          glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
+        }
+        else{
+          glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
+        }
+        glutAddMenuEntry("-", MENU_DUMMY);
+#endif        
         if(nmultisliceloaded>1){
           glutAddSubMenu(_("Unload"),unloadmultislicemenu);
         }

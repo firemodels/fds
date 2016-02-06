@@ -1150,6 +1150,7 @@ typedef struct _slicedata {
   int blocknumber;
   int firstshort;
   int vec_comp;
+  int skip;
   int setvalmin, setvalmax;
   float valmin, valmax;
   float globalmin, globalmax;
@@ -1199,7 +1200,7 @@ typedef struct _multislicedata {
   int seq_id, autoload;
   int loaded,display,type;
   int ndirxyz[4];
-  int nslices;
+  int nslices,nslices_orig;
   int *islices;
   float *contour_areas;
   int *contour_areas_percen;
@@ -1247,6 +1248,7 @@ typedef struct {
   slicedata *u,*v,*w,*val;
   int volslice;
   int iu, iv, iw, ival;
+  int skip;
   int loaded,display;
   float valmin, valmax;
   int type,vec_type;

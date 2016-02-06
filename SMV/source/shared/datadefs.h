@@ -131,6 +131,14 @@
 #define DOT4SKIP(x,ix,y,iy) ((x)[0]*(y)[0]+(x)[ix]*(y)[iy]+(x)[2*ix]*(y)[2*iy]+(x)[3*ix]*(y)[3*iy])
 #endif
 
+#ifndef MAXDIFF2
+#define MAXDIFF2(x,y) MAX(ABS(x[0]-y[0]),ABS(x[1]-y[1]))  
+#endif
+
+#ifndef MAXDIFF3
+#define MAXDIFF3(x,y) MAX(  MAXDIFF2(x,y),ABS(x[2]-y[2])  )  
+#endif
+
 #ifndef NORM3
 #define NORM3(x) sqrt((x)[0]*(x)[0]+(x)[1]*(x)[1]+(x)[2]*(x)[2])
 #endif
