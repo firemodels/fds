@@ -1244,10 +1244,8 @@ extern "C" void glui_bounds_setup(int main_window){
       &slicechopmin, &slicechopmax,
       UPDATE_BOUNDS,DONT_TRUNCATE_BOUNDS,
       Slice_CB);
-    SPINNER_transparent_level=glui_bounds->add_spinner_to_panel(ROLLOUT_slice,_d("Transparent level"),GLUI_SPINNER_FLOAT,&transparent_level,TRANSPARENTLEVEL,Slice_CB);
-    SPINNER_transparent_level->set_float_limits(0.0,1.0);
 
-    ROLLOUT_slice_average=glui_bounds->add_rollout_to_panel(ROLLOUT_slice,_d("Average"),false,SLICE_AVERAGE_ROLLOUT,Slice_Rollout_CB);
+    ROLLOUT_slice_average=glui_bounds->add_rollout_to_panel(ROLLOUT_slice,_d("Average data"),false,SLICE_AVERAGE_ROLLOUT,Slice_Rollout_CB);
     ADDPROCINFO(sliceprocinfo, nsliceprocinfo, ROLLOUT_slice_average, SLICE_AVERAGE_ROLLOUT);
 
     CHECKBOX_average_slice=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice_average,_d("Average slice data"),&slice_average_flag);
@@ -1317,6 +1315,10 @@ extern "C" void glui_bounds_setup(int main_window){
       glui_bounds->add_radiobutton_to_group(RADIO_vectorslicedup, _d("Keep coarse"));
     }
 #endif
+
+    SPINNER_transparent_level = glui_bounds->add_spinner_to_panel(ROLLOUT_slice, _d("Transparent level"), GLUI_SPINNER_FLOAT, &transparent_level, TRANSPARENTLEVEL, Slice_CB);
+    SPINNER_transparent_level->set_float_limits(0.0, 1.0);
+
     if(nfedinfo>0){
       glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,"Regenerate FED data",&regenerate_fed);
     }
