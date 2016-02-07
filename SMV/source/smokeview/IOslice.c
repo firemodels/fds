@@ -1559,7 +1559,7 @@ void updateallslicecolors(int slicetype, int *errorcode){
 
 int slicecompare( const void *arg1, const void *arg2 ){
   slicedata *slicei, *slicej;
-  float delta_orig;
+  float slice_eps, delta_slice;
 
   slicei = sliceinfo + *(int *)arg1;
   slicej = sliceinfo + *(int *)arg2;
@@ -1570,8 +1570,6 @@ int slicecompare( const void *arg1, const void *arg2 ){
   if(slicei->mesh_type>slicej->mesh_type)return 1;
   if(slicei->slicetype<slicej->slicetype)return -1;
   if(slicei->slicetype>slicej->slicetype)return 1;
-
-  delta_orig = MAX(slicei->delta_orig,slicej->delta_orig);
 
   if( strncmp(slicei->label.longlabel,"VE",2)==0){
     if(
@@ -1596,8 +1594,12 @@ int slicecompare( const void *arg1, const void *arg2 ){
 
   if(slicei->idir<slicej->idir)return -1;
   if(slicei->idir>slicej->idir)return 1;
-  if(slicei->position_orig+delta_orig<slicej->position_orig)return -1;
-  if(slicei->position_orig-delta_orig>slicej->position_orig)return 1;
+
+  slice_eps = MAX(slicei->delta_orig, slicej->delta_orig);
+  delta_slice = slicei->position_orig - slicej->position_orig;
+
+  if(delta_slice < -slice_eps)return -1;
+  if(delta_slice >  slice_eps)return 1;
   if(slicei->blocknumber<slicej->blocknumber)return -1;
   if(slicei->blocknumber>slicej->blocknumber)return 1;
   return 0;
@@ -1965,6 +1967,124 @@ void getgsliceparams(void){
   }
 }
 
+/* ------------------ is_slice_duplicate ------------------------ */
+
+#ifdef pp_SLICEDUP
+#define SLICEEPS 0.001
+int is_slice_duplicate(multislicedata *mslicei, int ii){
+  int jj;
+  float *xyzmini, *xyzmaxi;
+  slicedata *slicei;
+
+  if(slicedup_option==SLICEDUP_KEEPALL)return 0;
+  slicei = sliceinfo+mslicei->islices[ii];
+  xyzmini = slicei->xyz_min;
+  xyzmaxi = slicei->xyz_max;
+  for(jj=0;jj<mslicei->nslices;jj++){ // identify duplicate slices
+    slicedata *slicej;
+    float *xyzminj, *xyzmaxj;
+
+    slicej = sliceinfo + mslicei->islices[jj];
+    if(slicej==slicei||slicej->skip==1)continue;
+    xyzminj = slicej->xyz_min;
+    xyzmaxj = slicej->xyz_max;
+    if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
+      if(slicedup_option==SLICEDUP_KEEPFINE  &&slicei->dplane_min>slicej->dplane_min-SLICEEPS)return 1;
+      if(slicedup_option==SLICEDUP_KEEPCOARSE&&slicei->dplane_max<slicej->dplane_max+SLICEEPS)return 1;
+    }
+  }
+  return 0;
+}
+
+/* ------------------ is_vectorslice_duplicate ------------------------ */
+
+int is_vectorslice_duplicate(multivslicedata *mvslicei, int i){
+  int jj;
+  float *xyzmini, *xyzmaxi;
+  slicedata *slicei;
+  vslicedata *vslicei;
+
+
+  if(vectorslicedup_option==SLICEDUP_KEEPALL)return 0;
+  vslicei = vsliceinfo + mvslicei->ivslices[i];
+  slicei = sliceinfo + vslicei->ival;
+  xyzmini = slicei->xyz_min;
+  xyzmaxi = slicei->xyz_max;
+  for(jj=0;jj<mvslicei->nvslices;jj++){ // identify duplicate slices
+    vslicedata *vslicej;
+    slicedata *slicej;
+    float *xyzminj, *xyzmaxj;
+
+    vslicej = vsliceinfo + mvslicei->ivslices[jj];
+    slicej = sliceinfo + vslicej->ival;
+    if(slicej==slicei||slicej->skip==1)continue;
+    xyzminj = slicej->xyz_min;
+    xyzmaxj = slicej->xyz_max;
+    if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
+      if(vectorslicedup_option==SLICEDUP_KEEPFINE  &&slicei->dplane_min>slicej->dplane_min-SLICEEPS)return 1;
+      if(vectorslicedup_option==SLICEDUP_KEEPCOARSE&&slicei->dplane_max<slicej->dplane_max+SLICEEPS)return 1;
+    }
+  }
+  return 0;
+}
+
+/* ------------------ update_slicedups ------------------------ */
+
+void update_slicedups(void){
+  int i;
+  
+  for(i=0;i<nmultisliceinfo;i++){
+    int ii;
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    for(ii=0;ii<mslicei->nslices;ii++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + mslicei->islices[ii];
+      slicei->skip=0;
+    }
+  }
+  // look for duplicate slices
+  for(i=0;i<nmultisliceinfo;i++){
+    int ii;
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    for(ii=0;ii<mslicei->nslices;ii++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + mslicei->islices[ii];
+      slicei->skip = is_slice_duplicate(mslicei,ii);
+    }
+  }
+}
+
+/* ------------------ update_vslicedups ------------------------ */
+
+void update_vslicedups(void){
+  int ii;
+  
+  for(ii=0;ii<nvsliceinfo;ii++){
+    vslicedata *vslicei;
+
+    vslicei = vsliceinfo + ii;
+    vslicei->skip = 0;
+  }
+  for(ii = 0; ii < nmultivsliceinfo; ii++){
+    multivslicedata *mvslicei;
+    int i;
+
+    mvslicei = multivsliceinfo + ii;
+    for(i = 0; i < mvslicei->nvslices; i++){
+      vslicedata *vslicei;
+
+      vslicei = vsliceinfo + mvslicei->ivslices[i];
+      vslicei->skip = is_vectorslice_duplicate(mvslicei,i);
+    }
+  }
+ }
+#endif
 /* ------------------ getsliceparams ------------------------ */
 
 void getsliceparams(void){
@@ -2055,29 +2175,29 @@ void getsliceparams(void){
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
+    mesh *meshi;
 
     sd = sliceinfo + i;
-    is1=sd->is1;
+    meshi = meshinfo + sd->blocknumber;
+
+    is1 = sd->is1;
     is2=sd->is2;
     js1=sd->js1;
     js2=sd->js2;
     ks1=sd->ks1;
     ks2=sd->ks2;
     if(error==0){
-      int iblock;
-      mesh *meshi;
       float position;
 
-
       sd->idir=-1;
-      iblock = sd->blocknumber;
-      meshi = meshinfo + iblock;
 
       strcpy(sd->slicedir,"");
       position=-999.0;
-      if(sd->is1==sd->is2
-        ||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)
-        ){
+      if(sd->is1==sd->is2||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)){
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+
         sd->idir=1;
         position = meshi->xplt_orig[is1];
         if(sd->slicetype==SLICE_CELL_CENTER){
@@ -2095,14 +2215,24 @@ void getsliceparams(void){
           sd->delta_orig=(meshi->xplt_orig[is1+1]-meshi->xplt_orig[is1])/2.0;
         }
         if(sd->volslice==0){
-          sprintf(sd->slicedir,"X=%f",position);
+          sd->dplane_min = meshi->dplane_min[1];
+          sd->dplane_max = meshi->dplane_max[1];
+          sprintf(sd->slicedir, "X=%f", position);
         }
         else{
-          sprintf(sd->slicedir,"3D slice");
+          sd->dplane_min = meshi->dplane_min[0];
+          sd->dplane_max = meshi->dplane_max[0];
+          sprintf(sd->slicedir, "3D slice");
         }
       }
       if(sd->js1==sd->js2){
-        sd->idir=2;
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+        sd->dplane_min = meshi->dplane_min[2];
+        sd->dplane_max = meshi->dplane_max[2];
+
+        sd->idir = 2;
         position = meshi->yplt_orig[js1];
         if(sd->slicetype==SLICE_CELL_CENTER){
           float *yp;
@@ -2121,7 +2251,13 @@ void getsliceparams(void){
         sprintf(sd->slicedir,"Y=%f",position);
       }
       if(sd->ks1==sd->ks2){
-        sd->idir=3;
+        mesh *meshi;
+
+        meshi = meshinfo + sd->blocknumber;
+        sd->dplane_min = meshi->dplane_min[3];
+        sd->dplane_max = meshi->dplane_max[3];
+
+        sd->idir = 3;
         position = meshi->zplt_orig[ks1];
         if(sd->slicetype==SLICE_CELL_CENTER){
           float *zp;
@@ -2150,10 +2286,8 @@ void getsliceparams(void){
     }
     {
       float *xplt, *yplt, *zplt;
-      mesh *meshi;
       float *xyz_min, *xyz_max;
 
-      meshi = meshinfo + sd->blocknumber;
       sd->mesh_type=meshi->mesh_type;
       xplt = meshi->xplt;
       yplt = meshi->yplt;
@@ -2244,24 +2378,28 @@ void getsliceparams(void){
       }
     }
   }
-  for(i=0;i<nsliceinfo;i++){
+  for(i = 0; i < nsliceinfo; i++){
     slicedata *slicei;
 
     slicei = sliceinfo + i;
-    slicei->mslice=NULL;
+    slicei->mslice = NULL;
+    slicei->skip = 0;
   }
-  for(i=0;i<nmultisliceinfo;i++){
+#ifdef pp_SLICEDUP
+  update_slicedups();
+#endif
+  for(i = 0; i < nmultisliceinfo; i++){
     int ii;
     multislicedata *mslicei;
 
     mslicei = multisliceinfo + i;
-    mslicei->contour_areas=NULL;
-    for(ii=0;ii<mslicei->nslices;ii++){
+    mslicei->contour_areas = NULL;
+    for(ii = 0; ii < mslicei->nslices; ii++){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      ASSERT(slicei->mslice==NULL);
-      slicei->mslice=mslicei;
+      ASSERT(slicei->mslice == NULL);
+      slicei->mslice = mslicei;
     }
   }
   updateslicemenulabels();
@@ -2697,9 +2835,15 @@ void updatevslices(void){
       if(vslicei->ival>=0)seq_id = sliceval->seq_id;
       vslicei->seq_id=seq_id;
       vslicei->autoload=0;
+      vslicei->skip = 0;
     }
   }
-  for(i=0;i<nmultivsliceinfo;i++){
+
+#ifdef pp_SLICEDUP
+  update_vslicedups();
+#endif
+
+  for(i = 0; i<nmultivsliceinfo; i++){
     multivslicedata *mvslicei;
 
     mvslicei = multivsliceinfo + i;
@@ -3894,7 +4038,7 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_x!=NULL&&c_iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -3953,7 +4097,7 @@ void drawvolslice_texture(const slicedata *sd){
        float rmid, zmid;
 
        n++; n2++; 
-       if(show_slice_in_obst==0&&c_iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_y!=NULL&&c_iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -4015,7 +4159,7 @@ void drawvolslice_texture(const slicedata *sd){
 
         n+=sd->nslicek; 
        n2+=sd->nslicek; 
-       if(show_slice_in_obst==0&&c_iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+       if(show_slice_in_obst==0&&c_iblank_z!=NULL&&c_iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
        if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
        r11 = (float)sd->iqsliceframe[n]/255.0;
        r31 = (float)sd->iqsliceframe[n2]/255.0;
