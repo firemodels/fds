@@ -3724,6 +3724,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3733,6 +3734,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3742,6 +3744,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 #endif      
@@ -3799,6 +3802,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3808,6 +3812,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3817,6 +3822,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 #endif      
