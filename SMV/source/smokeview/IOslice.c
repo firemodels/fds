@@ -2038,7 +2038,7 @@ void update_slicedups(void){
     multislicedata *mslicei;
 
     mslicei = multisliceinfo + i;
-    for(ii=0;ii<mslicei->nslices_orig;ii++){
+    for(ii=0;ii<mslicei->nslices;ii++){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
@@ -2051,7 +2051,7 @@ void update_slicedups(void){
     multislicedata *mslicei;
 
     mslicei = multisliceinfo + i;
-    for(ii=0;ii<mslicei->nslices_orig;ii++){
+    for(ii=0;ii<mslicei->nslices;ii++){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
@@ -2375,7 +2375,6 @@ void getsliceparams(void){
         }
         mslicei->nslices++;
         mslicei->islices[mslicei->nslices-1]=sliceorderindex[i];
-        mslicei->nslices_orig = mslicei->nslices;
       }
     }
   }
