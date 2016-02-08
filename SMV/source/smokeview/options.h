@@ -39,6 +39,7 @@
 #define pp_THREAD
 #define pp_LANG
 #define pp_DEG
+#define pp_SLICEDUP
 
 #define _CRT_SECURE_NO_DEPRECATE
 

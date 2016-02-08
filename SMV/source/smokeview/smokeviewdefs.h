@@ -7,6 +7,12 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#ifdef pp_SLICEDUP
+#define SLICEDUP_KEEPALL 0
+#define SLICEDUP_KEEPFINE 1
+#define SLICEDUP_KEEPCOARSE 2
+#endif
+
 #define SMOKESENSORS_HIDDEN 0
 #define SMOKESENSORS_0255 1
 #define SMOKESENSORS_01 2
