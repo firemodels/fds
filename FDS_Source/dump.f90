@@ -1386,6 +1386,15 @@ ENDIF
 WRITE(LU_SMV,'(/A)') 'ALBEDO'
 WRITE(LU_SMV,'(F13.5)') SMOKE_ALBEDO
 
+! Write out smokeview IBLANK parameter
+
+WRITE(LU_SMV,'(/A)') 'IBLANK'
+IF (IBLANK_SMV) THEN
+   WRITE(LU_SMV,'(1X,I1)') 1
+ELSE
+   WRITE(LU_SMV,'(1X,I1)') 0
+ENDIF
+
 ! Write out direction angle of true north North with respect to the y axis
 ! this is intended for outdoor cases derived from map data
 
