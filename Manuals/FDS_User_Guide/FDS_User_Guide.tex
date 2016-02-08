@@ -6896,9 +6896,9 @@ A single ``line'' file can hold more than a single line of data. By default, the
 
 \subsubsection{Time-Varying Profile}
 
-If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}. 
+If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}.
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20, 
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
       TIME_HISTORY=.TRUE. /
 \end{lstlisting}
 This directs FDS to just add 20 devices to the on-going list, saving you from having to write 20 {\ct DEVC} lines. The {\ct ID} for each device will be {\ct 'vel-01'}, {\ct 'vel-02'}, etc.
@@ -8843,7 +8843,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
 {\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.               \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
-%{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
+{\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0              \\ \hline
+%{\ct IBLANK\_SMV}                        & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
