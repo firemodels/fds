@@ -3724,6 +3724,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3733,6 +3734,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3742,6 +3744,7 @@ void LoadMultiVSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_vslicedups();
+        update_slicedup_dialog();
       }
       break;
 #endif      
@@ -3799,6 +3802,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3808,6 +3812,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 
@@ -3817,6 +3822,7 @@ void LoadMultiSliceMenu(int value){
         updatemenu = 1;
         glutPostRedisplay();
         update_slicedups();
+        update_slicedup_dialog();
       }
       break;
 #endif      
@@ -8118,27 +8124,29 @@ updatemenu=0;
         }
       }
       if(nmultivsliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
-#ifdef pp_SLICEDUP        
-      glutAddMenuEntry("Duplicate vector slices", MENU_DUMMY);
-      if(vectorslicedup_option == SLICEDUP_KEEPALL){
-        glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+#ifdef pp_SLICEDUP   
+      if(nslicedups > 0){
+        glutAddMenuEntry("Duplicate vector slices", MENU_DUMMY);
+        if(vectorslicedup_option == SLICEDUP_KEEPALL){
+          glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+        }
+        else{
+          glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
+        }
+        if(vectorslicedup_option == SLICEDUP_KEEPFINE){
+          glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
+        }
+        else{
+          glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
+        }
+        if(vectorslicedup_option == SLICEDUP_KEEPCOARSE){
+          glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
+        }
+        else{
+          glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
+        }
+        glutAddMenuEntry("-", MENU_DUMMY);
       }
-      else{
-        glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
-      }
-      if(vectorslicedup_option == SLICEDUP_KEEPFINE){
-        glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
-      }
-      else{
-        glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
-      }
-      if(vectorslicedup_option == SLICEDUP_KEEPCOARSE){
-        glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
-      }
-      else{
-        glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
-      }
-      glutAddMenuEntry("-", MENU_DUMMY);
 #endif        
 
       if(showallslicevectors == 0)glutAddMenuEntry(_("Show all vector slice menu entries"), MENU_LOADVSLICE_SHOWALL);
@@ -8417,26 +8425,28 @@ updatemenu=0;
         }
         if(nmultisliceinfo>0)glutAddMenuEntry("-",MENU_DUMMY);
 #ifdef pp_SLICEDUP        
-        glutAddMenuEntry("Duplicate slices", MENU_DUMMY);
-        if(slicedup_option==SLICEDUP_KEEPALL){
-          glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+        if(nslicedups > 0){
+          glutAddMenuEntry("Duplicate slices", MENU_DUMMY);
+          if(slicedup_option == SLICEDUP_KEEPALL){
+            glutAddMenuEntry("  *keep all", MENU_KEEP_ALL);
+          }
+          else{
+            glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
+          }
+          if(slicedup_option == SLICEDUP_KEEPFINE){
+            glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
+          }
+          else{
+            glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
+          }
+          if(slicedup_option == SLICEDUP_KEEPCOARSE){
+            glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
+          }
+          else{
+            glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
+          }
+          glutAddMenuEntry("-", MENU_DUMMY);
         }
-        else{
-          glutAddMenuEntry("  keep all", MENU_KEEP_ALL);
-        }
-        if(slicedup_option==SLICEDUP_KEEPFINE){
-          glutAddMenuEntry("  *keep fine", MENU_KEEP_FINE);
-        }
-        else{
-          glutAddMenuEntry("  keep fine", MENU_KEEP_FINE);
-        }
-        if(slicedup_option==SLICEDUP_KEEPCOARSE){
-          glutAddMenuEntry("  *keep coarse", MENU_KEEP_COARSE);
-        }
-        else{
-          glutAddMenuEntry("  keep coarse", MENU_KEEP_COARSE);
-        }
-        glutAddMenuEntry("-", MENU_DUMMY);
 #endif        
         if(nmultisliceloaded>1){
           glutAddSubMenu(_("Unload"),unloadmultislicemenu);

@@ -1971,12 +1971,14 @@ void getgsliceparams(void){
 
 #ifdef pp_SLICEDUP
 #define SLICEEPS 0.001
-int is_slice_duplicate(multislicedata *mslicei, int ii){
+#define COUNT_DUPLICATES 1
+#define FIND_DUPLICATES 0
+int is_slice_duplicate(multislicedata *mslicei, int ii, int flag){
   int jj;
   float *xyzmini, *xyzmaxi;
   slicedata *slicei;
 
-  if(slicedup_option==SLICEDUP_KEEPALL)return 0;
+  if(flag==FIND_DUPLICATES&&slicedup_option==SLICEDUP_KEEPALL)return 0;
   slicei = sliceinfo+mslicei->islices[ii];
   xyzmini = slicei->xyz_min;
   xyzmaxi = slicei->xyz_max;
@@ -1989,6 +1991,7 @@ int is_slice_duplicate(multislicedata *mslicei, int ii){
     xyzminj = slicej->xyz_min;
     xyzmaxj = slicej->xyz_max;
     if(MAXDIFF3(xyzmini, xyzminj) < SLICEEPS&&MAXDIFF3(xyzmaxi, xyzmaxj) < SLICEEPS){
+      if(flag == COUNT_DUPLICATES)return 1;
       if(slicedup_option==SLICEDUP_KEEPFINE  &&slicei->dplane_min>slicej->dplane_min-SLICEEPS)return 1;
       if(slicedup_option==SLICEDUP_KEEPCOARSE&&slicei->dplane_max<slicej->dplane_max+SLICEEPS)return 1;
     }
@@ -2028,6 +2031,27 @@ int is_vectorslice_duplicate(multivslicedata *mvslicei, int i){
   return 0;
 }
 
+/* ------------------ count_slicedups ------------------------ */
+
+int count_slicedups(void){
+  int i, count;
+
+  count = 0;
+  for(i = 0; i < nmultisliceinfo; i++){
+    int ii;
+    multislicedata *mslicei;
+
+    mslicei = multisliceinfo + i;
+    for(ii = 0; ii < mslicei->nslices; ii++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + mslicei->islices[ii];
+      count += is_slice_duplicate(mslicei, ii, COUNT_DUPLICATES);
+    }
+  }
+  return count;
+}
+
 /* ------------------ update_slicedups ------------------------ */
 
 void update_slicedups(void){
@@ -2055,7 +2079,7 @@ void update_slicedups(void){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      slicei->skip = is_slice_duplicate(mslicei,ii);
+      slicei->skip = is_slice_duplicate(mslicei,ii, FIND_DUPLICATES);
     }
   }
 }
@@ -2387,6 +2411,7 @@ void getsliceparams(void){
   }
 #ifdef pp_SLICEDUP
   update_slicedups();
+  nslicedups = count_slicedups();
 #endif
   for(i = 0; i < nmultisliceinfo; i++){
     int ii;
