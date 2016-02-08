@@ -1,6 +1,9 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+#ifdef pp_SLICEDUP
+EXTERNCPP void update_slicedup_dialog(void);
+#endif
 EXTERNCPP void drawnorth(void);
 EXTERNCPP void draw_geomdata(int flag, patchdata *patchi, int geom_type);
 EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
