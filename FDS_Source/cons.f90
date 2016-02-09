@@ -395,6 +395,6 @@ REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
 
 ! Parameter passed to smokeview (in .smv file) to control generation of blockage location data structures
 
-LOGICAL :: IBLANK_SMV=.FALSE.
+LOGICAL :: IBLANK_SMV=.TRUE.
 
 END MODULE GLOBAL_CONSTANTS
