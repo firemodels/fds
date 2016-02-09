@@ -3927,6 +3927,9 @@ where $\Delta p$ is the pressure difference between the adjacent compartments (i
 $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
 to be 1.
 
+In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM E-779 will provide two additional datapoints to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{ref}$ respectively where $A_L$ is given by {\ct LEAK\_AREA}.
+\be  A_{L,new} = A_L \left( \frac{\Delta p}{\Delta p_{ref}} \right)^n \ee
+
 Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone~1 to Zone~0 requires the attribute
 {\ct LEAK\_PATH=1,0}, meaning that the leak between Zones~1 and 0 is uniformly distributed
 over solids defined with:
@@ -9657,6 +9660,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ID}                    & Character         & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT(N)} & Real              & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real              & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
 {\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}
