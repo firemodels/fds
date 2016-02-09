@@ -390,4 +390,8 @@ INTEGER :: N_ORIENTATION_VECTOR
 INTEGER :: TGA_SURF_INDEX=-100,TGA_WALL_INDEX=-100,TGA_PARTICLE_INDEX=-100
 REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
 
+! parameter passed to smokeview (in .smv file) to control generation of blockage location data structures
+
+LOGICAL :: IBLANK_SMV=.TRUE.
+
 END MODULE GLOBAL_CONSTANTS
