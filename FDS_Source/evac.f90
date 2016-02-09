@@ -6033,9 +6033,9 @@ CONTAINS
           MESH_LOOP: DO NOM = 1, NMESHES
              IF (.NOT. EVACUATION_ONLY(NOM)) THEN
                 M => MESHES(NOM)
-                IF ( X1 >= M%XS .AND. X1 <= M%XF .AND. &
-                     Y1 >= M%YS .AND. Y1 <= M%YF .AND. &
-                     Z1 >= M%ZS .AND. Z1 <= M%ZF) THEN
+                IF ( X1 >= M%XS .AND. X1 < M%XF .AND. &
+                     Y1 >= M%YS .AND. Y1 < M%YF .AND. &
+                     Z1 >= M%ZS .AND. Z1 < M%ZF) THEN
                    II = FLOOR( M%CELLSI(FLOOR((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
                    JJ = FLOOR( M%CELLSJ(FLOOR((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
                    KK = FLOOR( M%CELLSK(FLOOR((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
