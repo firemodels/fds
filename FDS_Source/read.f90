@@ -10882,7 +10882,7 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
 
    ! Only process the device if it belongs to the current MPI process.
 
-   IF (PROCESS(DV%MESH)/=MYID) CYCLE PROC_DEVC_LOOP
+ ! IF (PROCESS(DV%MESH)/=MYID) CYCLE PROC_DEVC_LOOP
 
    ! Assign properties to the DEVICE array
 
@@ -11050,9 +11050,11 @@ PROC_DEVC_LOOP: DO N=1,N_DEVC
                XX1 = DX
                YY1 = DY
                ZZ1 = DZ
-               IF (I/=DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1))
-               IF (J/=DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1))
-               IF (K/=DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1))
+               IF (PROCESS(DV%MESH)==MYID) THEN
+                  IF (I/=DV%I_PATH(NN-1)) XX1 = XX-M%X(DV%I_PATH(NN-1))
+                  IF (J/=DV%J_PATH(NN-1)) YY1 = YY-M%Y(DV%J_PATH(NN-1))
+                  IF (K/=DV%K_PATH(NN-1)) ZZ1 = ZZ-M%Z(DV%K_PATH(NN-1))
+               ENDIF
                DV%D_PATH(NN)   = SCANDISTANCE - SQRT(XX1**2+YY1**2+ZZ1**2)
                DV%D_PATH(NN-1) = DV%D_PATH(NN-1) + SCANDISTANCE - DV%D_PATH(NN)
             ENDIF
