@@ -2739,8 +2739,10 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer, "IBLANK")==1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i", &use_iblank);
-      use_iblank = CLAMP(use_iblank, 0, 1);
+      if(iblank_set_on_commandline==0){
+        sscanf(buffer, "%i", &use_iblank);
+        use_iblank = CLAMP(use_iblank, 0, 1);
+      }
       continue;
     }
     if(match(buffer,"GVEC") == 1){
