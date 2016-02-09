@@ -7694,10 +7694,7 @@ typedef struct {
     }
   }
 
-
-  makeiblank();
-  makeiblank_carve();
-  makeiblank_smoke3d();
+  makeiblank_all();
   SetVentDirs();
   SetCVentDirs();
   UpdateFaces();

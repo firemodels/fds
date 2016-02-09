@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void makeiblank_all(void);
 #ifdef pp_SLICEDUP
 EXTERNCPP void update_slicedup_dialog(void);
 #endif

@@ -34,6 +34,9 @@ void mt_read_volsmoke_allframes_allmeshes2(void);
 
 #ifndef CPP
 #ifdef pp_THREAD
+#ifdef pp_IBLANKTHREAD
+MT_EXTERN pthread_t makeiblank_thread_id;
+#endif
 MT_EXTERN pthread_mutex_t mutexVOLLOAD;
 MT_EXTERN pthread_mutex_t mutexCOMPRESS;
 MT_EXTERN pthread_t smooth_block_thread_id;

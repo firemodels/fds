@@ -92,6 +92,23 @@ void *mt_update_smooth_blockages(void *arg){
 }
 #endif
 
+// ************** multi threaded blank creation **********************
+
+/* ------------------ mt_makeiblank ------------------------ */
+#ifdef pp_THREAD
+#ifdef pp_IBLANKTHREAD
+void *mt_makeiblank(void *arg){
+
+  PRINTF("Creating blanking arrays in the background\n");
+  makeiblank_all();
+  updateblank = 1;
+  pthread_exit(NULL);
+  return NULL;
+}
+#endif
+#endif
+
+
 /* ------------------ mt_psystem ------------------------ */
 
 #ifdef pp_THREAD
@@ -121,6 +138,28 @@ void psystem(char *commandline){
 #else
 void psytem(char *commandline){
   system(commandline)
+}
+#endif
+
+/* ------------------ makeiblank_all ------------------------ */
+
+#ifdef pp_THREAD
+#ifdef pp_IBLANKTHREAD
+void makeiblank_all(void){
+  pthread_create(&makeiblank_thread_id, NULL, mt_makeiblank, NULL);
+}
+#else
+void makeiblank_all(void){
+  makeiblank();
+  makeiblank_carve();
+  makeiblank_smoke3d();
+}
+#endif
+#else
+void makeiblank_all(void){
+  makeiblank();
+  makeiblank_carve();
+  makeiblank_smoke3d();
 }
 #endif
 
