@@ -348,7 +348,8 @@ REAL(EB) :: DT_BNDC=1.E10_EB,DT_GEOC=1.E10_EB
 REAL(EB), ALLOCATABLE, TARGET, DIMENSION(:) :: FACE_WORK1,FACE_WORK2
 LOGICAL :: CUTCELLS ! if true call routine for generating cutcell list (for debugging)
 
-! Complex Geometry parameters (experimental-NEW):
+! Complex Geometry parameters (experimental-NEW)
+
 LOGICAL :: CC_IBM=.FALSE.
 INTEGER,  PARAMETER :: LOW_IND   = 1
 INTEGER,  PARAMETER :: HIGH_IND  = 2
@@ -366,7 +367,8 @@ INTEGER, PARAMETER :: EDG1 = 1
 INTEGER, PARAMETER :: EDG2 = 2
 INTEGER, PARAMETER :: EDG3 = 3
 
-! Maximum number of wet surface triangles related to element:
+! Maximum number of wet surface triangles related to element
+
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SGL = 16  ! Up to 16 wstriangles related to a wet surface vertex.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_SEG =  2  ! Up to two wstriangles related to a segment.
 INTEGER, PARAMETER :: IBM_MAX_WSTRIANG_TRI =  1  ! Up to 1 wstriangle per BODINT_PLANE triangle (i.e. surface triangle
@@ -390,8 +392,8 @@ INTEGER :: N_ORIENTATION_VECTOR
 INTEGER :: TGA_SURF_INDEX=-100,TGA_WALL_INDEX=-100,TGA_PARTICLE_INDEX=-100
 REAL(EB) :: TGA_HEATING_RATE=5._EB,TGA_FINAL_TEMPERATURE=800._EB
 
-! parameter passed to smokeview (in .smv file) to control generation of blockage location data structures
+! Parameter passed to smokeview (in .smv file) to control generation of blockage location data structures
 
-LOGICAL :: IBLANK_SMV=.TRUE.
+LOGICAL :: IBLANK_SMV=.FALSE.
 
 END MODULE GLOBAL_CONSTANTS
