@@ -53,11 +53,6 @@
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
-// #define pp_IBLANKTHREAD // test iblank computation in background
-#endif
-
-#ifdef pp_IBLANKTHREAD // if pp_IBLANKTHREAD is set then pp_THREAD has to be set
-#define pp_THREAD
 #endif
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -48,9 +48,7 @@ void init_multi_threading(void){
 #ifdef pp_THREAD
   pthread_mutex_init(&mutexCOMPRESS,NULL);
   pthread_mutex_init(&mutexVOLLOAD,NULL);
-#ifdef pp_IBLANKTHREAD
   pthread_mutex_init(&mutexIBLANK, NULL);
-#endif
 #endif
 }
 
@@ -99,7 +97,6 @@ void *mt_update_smooth_blockages(void *arg){
 
 /* ------------------ mt_makeiblank ------------------------ */
 #ifdef pp_THREAD
-#ifdef pp_IBLANKTHREAD
 void *mt_makeiblank(void *arg){
 
   PRINTF("Creating blanking arrays in the background\n");
@@ -108,7 +105,6 @@ void *mt_makeiblank(void *arg){
   pthread_exit(NULL);
   return NULL;
 }
-#endif
 #endif
 
 
@@ -147,16 +143,9 @@ void psytem(char *commandline){
 /* ------------------ makeiblank_all ------------------------ */
 
 #ifdef pp_THREAD
-#ifdef pp_IBLANKTHREAD
 void makeiblank_all(void){
   pthread_create(&makeiblank_thread_id, NULL, mt_makeiblank, NULL);
 }
-#else
-void makeiblank_all(void){
-  makeiblank();
-  SetCVentDirs();
-}
-#endif
 #else
 void makeiblank_all(void){
   makeiblank();
