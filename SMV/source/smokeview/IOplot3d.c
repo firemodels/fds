@@ -1594,7 +1594,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dz_yzcopy=dz_yz;
     iblank_yz=NULL;
     if(use_iblank==1){
-      NewMemory((void **)&iblank_yz,jbar*kbar*sizeof(char));
+      NewMemory((void **)&iblank_yz,(jbar+1)*(kbar+1)*sizeof(char));
       for(j=0;j<jbar;j++){
         for(k=0;k<kbar;k++){
           iblank_yz[k+j*kbar]=c_iblank_x[IJKNODE(plotx,j,k)];
@@ -1643,7 +1643,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dz_xzcopy=dz_xz;
     iblank_xz=NULL;
     if(use_iblank==1){
-      NewMemory((void **)&iblank_xz,ibar*kbar*sizeof(char));
+      NewMemory((void **)&iblank_xz,(ibar+1)*(kbar+1)*sizeof(char));
       for(i=0;i<ibar;i++){
         for(k=0;k<kbar;k++){
           iblank_xz[k+i*kbar]=c_iblank_y[IJKNODE(i,ploty,k)];
@@ -1690,7 +1690,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dz_xycopy=dz_xy;
     iblank_xy=NULL;
     if(use_iblank==1){
-      NewMemory((void **)&iblank_xy,ibar*jbar*sizeof(char));
+      NewMemory((void **)&iblank_xy,(ibar+1)*(jbar+1)*sizeof(char));
       for(i=0;i<ibar;i++){
         for(j=0;j<jbar;j++){
           iblank_xy[j+i*jbar]=c_iblank_z[IJKNODE(i,j,plotz)];
