@@ -145,9 +145,7 @@ int lua_settourkeyframe(lua_State *L) {
 */
 int lua_displayCB(lua_State *L) {
     // runluascript=0;
-    fprintf(stderr, "calling lua_displayCB\n");
     Display_CB();
-    fprintf(stderr, "called lua_displayCB\n");
     // runluascript=1;
     return 0;
 }
@@ -1290,14 +1288,11 @@ int loadLuaScript(char *filename) {
     runluascript=0;
     lua_displayCB(L);
     runluascript=1;
-    fprintf(stderr, "back here\n");
     printf("loading: %s\n", filename);
     const char *err_msg;
     lua_Debug info;
     int level = 0;
-    fprintf(stderr, "about to load\n");
     int return_code = luaL_loadfile(L, filename);
-    fprintf(stderr, "loaded\n");
     switch (return_code) {
         case LUA_OK:
             printf("%s loaded ok\n", filename);
