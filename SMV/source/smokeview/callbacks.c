@@ -2836,7 +2836,6 @@ void DoScript(void){
   }
   script_render_flag=0;
   if(nscriptinfo>0&&current_script_command!=NULL&&(script_step==0||(script_step==1&&script_step_now==1))){
-    JOIN_IBLANK
     script_step_now=0;
 #ifndef WIN32    
     if(file_exists(stop_filename)){
