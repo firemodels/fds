@@ -1669,7 +1669,8 @@ int makeiblank(void){
 
     meshi = meshinfo+ig;
 
-    printf("  mesh %i of %i\n", ig + 1, nmeshes);
+    if(meshi->nbptrs==0)continue;
+    printf("  mesh %i of %i (%i blockages)\n", ig + 1, nmeshes,meshi->nbptrs);
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;

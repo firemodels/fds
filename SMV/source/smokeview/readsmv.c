@@ -4295,13 +4295,8 @@ int readsmv(char *file, char *file2){
         
         smoke3di = smoke3dinfo + ismoke3d;
     
-        if(nsmoke3dinfo>50&&(ismoke3d%10==0||ismoke3d==nsmoke3dinfo-1)){
-          if(ismoke3dcount==11){
-            PRINTF("     examining %i'th 3D smoke file\n",ismoke3dcount);
-          }
-          else{
-            PRINTF("     examining %i'st 3D smoke file\n",ismoke3dcount);
-          }
+        if(nsmoke3dinfo>50&&(ismoke3d%100==0||ismoke3d==nsmoke3dinfo-1)){
+          PRINTF("     examining %i'st 3D smoke file\n",ismoke3dcount);
         }
         ismoke3dcount++;
 
