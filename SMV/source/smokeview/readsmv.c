@@ -2739,8 +2739,10 @@ int readsmv(char *file, char *file2){
 
     if(match(buffer, "IBLANK")==1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i", &use_iblank);
-      use_iblank = CLAMP(use_iblank, 0, 1);
+      if(iblank_set_on_commandline==0){
+        sscanf(buffer, "%i", &use_iblank);
+        use_iblank = CLAMP(use_iblank, 0, 1);
+      }
       continue;
     }
     if(match(buffer,"GVEC") == 1){
@@ -7692,12 +7694,10 @@ typedef struct {
     }
   }
 
-
-  makeiblank();
   makeiblank_carve();
   makeiblank_smoke3d();
+  makeiblank_all();
   SetVentDirs();
-  SetCVentDirs();
   UpdateFaces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
@@ -8538,11 +8538,24 @@ void initmesh(mesh *meshi){
   meshi->xplt_orig=NULL;
   meshi->yplt_orig=NULL;
   meshi->zplt_orig=NULL;
+
   meshi->f_iblank_cell=NULL;
   meshi->c_iblank_cell=NULL;
   meshi->c_iblank_x=NULL;
   meshi->c_iblank_y=NULL;
   meshi->c_iblank_z=NULL;
+  meshi->c_iblank_node = NULL;
+  meshi->c_iblank_embed=NULL;
+  meshi->block_zdist=NULL;
+
+  meshi->f_iblank_cell0 = NULL;
+  meshi->c_iblank_cell0 = NULL;
+  meshi->c_iblank_x0 = NULL;
+  meshi->c_iblank_y0 = NULL;
+  meshi->c_iblank_z0 = NULL;
+  meshi->c_iblank_node0 = NULL;
+  meshi->c_iblank_embed0=NULL;
+  meshi->block_zdist0=NULL;
 
   meshi->xyz_bar[XXX]=1.0;
   meshi->xyz_bar0[XXX]=0.0;
@@ -8562,7 +8575,6 @@ void initmesh(mesh *meshi){
   meshi->plotz=1;
 
   meshi->boxoffset=0.0;
-  meshi->c_iblank_node=NULL;
   meshi->ventinfo=NULL;
   meshi->cventinfo=NULL;
   meshi->select_min=0;

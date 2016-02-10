@@ -16,6 +16,8 @@
 #include <direct.h>
 #endif
 
+#define MENU_SMOKE3D_IBLANK -2
+
 #define MENU_KEEP_ALL -2
 #define MENU_KEEP_FINE -3
 #define MENU_KEEP_COARSE -4
@@ -3402,10 +3404,13 @@ void LoadSmoke3DMenu(int value){
       readsmoke3d(value,LOAD,&errorcode);
     }
   }
-  else if(value==-1){
+  else if(value==UNLOAD_ALL){
     for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
+  }
+  else if(value==MENU_SMOKE3D_IBLANK){
+    update_makeiblank_smoke3d = 1;
   }
   else if(value==-9){
     if(scriptoutstream==NULL||defer_file_loading==0){
@@ -3415,6 +3420,7 @@ void LoadSmoke3DMenu(int value){
         readsmoke3d(i,LOAD,&errorcode);
       }
     }
+    ASSERT(FFALSE); // check to see if this code segment is used
   }
   else if(value<=-10){
     value = -(value + 10);
@@ -8737,6 +8743,11 @@ updatemenu=0;
             if(n_hrr_menu>0)glutAddSubMenu(_("HRRPUV - single mesh"),loadsmoke3dhrrmenu);
             if(n_water_menu>0)glutAddSubMenu(_("Water - single mesh"),loadsmoke3dwatermenu);
           }
+        }
+        if(use_iblank==0){
+          glutAddMenuEntry("-", MENU_DUMMY3);
+          glutAddMenuEntry(_("Initialize smoke blockage info"), MENU_SMOKE3D_IBLANK);
+          if(nsmoke3dloaded>=1)glutAddMenuEntry("-", MENU_DUMMY3);
         }
         if(nsmoke3dloaded==1)glutAddMenuEntry(_("Unload"),UNLOAD_ALL);
         if(nsmoke3dloaded>1)glutAddSubMenu(_("Unload"),unloadsmoke3dmenu);

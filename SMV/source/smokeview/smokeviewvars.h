@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(cvents_defined, 0);
 #ifdef pp_SLICEDUP
 SVEXTERN int SVDECL(slicedup_option , SLICEDUP_KEEPFINE);
 SVEXTERN int SVDECL(vectorslicedup_option, SLICEDUP_KEEPALL);
@@ -1129,7 +1130,7 @@ SVEXTERN int SVDECL(have_extreme_mindata,0), SVDECL(have_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata,0), SVDECL(show_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata_save,0), SVDECL(show_extreme_maxdata_save,0);
 
-SVEXTERN int SVDECL(use_iblank,1),arg_iblank;
+SVEXTERN int SVDECL(use_iblank,1),SVDECL(iblank_set_on_commandline,0);
 
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024], vol_prefix[1024];

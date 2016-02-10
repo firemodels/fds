@@ -541,7 +541,7 @@ void DrawCircVentsExactOutline(int option){
 /* ------------------ DrawCircVents ------------------------ */
 
 void DrawCircVents(int option){
-  if(option==VENT_HIDE)return;
+  if(option==VENT_HIDE||cvents_defined==0)return;
   if(blocklocation==BLOCKlocation_grid&&visCircularVents!=VENT_RECTANGLE){
     if(circle_outline==0)DrawCircVentsApproxSolid(option);
     if(circle_outline==1)DrawCircVentsApproxOutline(option);
@@ -1058,6 +1058,21 @@ void SetCVentDirs(void){
     }
   }
 
+  LOCK_IBLANK
+  for(ii = 0; ii < nmeshes; ii++){
+    mesh *meshi;
+    int iv;
+
+    meshi = meshinfo + ii;
+    for(iv = 0; iv < meshi->ncvents; iv++){
+      cventdata *cvi;
+
+      cvi = meshi->cventinfo + iv;
+      cvi->blank = cvi->blank0;
+    }
+  }
+  cvents_defined = 1;
+  UNLOCK_IBLANK
 }
 
 /* ------------------ SetVentDirs ------------------------ */
