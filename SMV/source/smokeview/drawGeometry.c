@@ -1058,7 +1058,7 @@ void SetCVentDirs(void){
     }
   }
 
-  LOCK_IBLANK;
+  LOCK_IBLANK
   for(ii = 0; ii < nmeshes; ii++){
     mesh *meshi;
     int iv;
@@ -1072,7 +1072,7 @@ void SetCVentDirs(void){
     }
   }
   cvents_defined = 1;
-  UNLOCK_IBLANK;
+  UNLOCK_IBLANK
 }
 
 /* ------------------ SetVentDirs ------------------------ */

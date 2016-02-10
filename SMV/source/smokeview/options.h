@@ -56,6 +56,10 @@
 // #define pp_IBLANKTHREAD // test iblank computation in background
 #endif
 
+#ifdef pp_IBLANKTHREAD // if pp_IBLANKTHREAD is set then pp_THREAD has to be set
+#define pp_THREAD
+#endif
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #ifdef _DEBUG  // comment the following line when debugging REALLY large cases (to avoid memory checks)

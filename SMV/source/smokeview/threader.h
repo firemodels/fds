@@ -15,27 +15,24 @@
 // setup LOCKS
 
 #ifdef pp_THREAD
-#define LOCK_COMPRESS pthread_mutex_lock(&mutexCOMPRESS);
-#define UNLOCK_COMPRESS pthread_mutex_unlock(&mutexCOMPRESS);
-#define LOCK_VOLLOAD pthread_mutex_lock(&mutexVOLLOAD);
-#define UNLOCK_VOLLOAD pthread_mutex_unlock(&mutexVOLLOAD);
-#ifdef pp_IBLANKTHREAD
+  #define LOCK_COMPRESS pthread_mutex_lock(&mutexCOMPRESS);
+  #define UNLOCK_COMPRESS pthread_mutex_unlock(&mutexCOMPRESS);
+  #define LOCK_VOLLOAD pthread_mutex_lock(&mutexVOLLOAD);
+  #define UNLOCK_VOLLOAD pthread_mutex_unlock(&mutexVOLLOAD);
+#else
+  #define LOCK_COMPRESS
+  #define UNLOCK_COMPRESS
+  #define LOCK_VOLLOAD
+  #define UNLOCK_VOLLOAD
+#endif
+#ifdef pp_IBLANKTHREAD // note: pp_THREAD  is set if pp_IBLANKTHREAD is set
 #define LOCK_IBLANK pthread_mutex_lock(&mutexIBLANK);
 #define UNLOCK_IBLANK pthread_mutex_unlock(&mutexIBLANK);
-#endif
+#define JOIN_IBLANK pthread_join(makeiblank_thread_id,NULL);
 #else
-#define LOCK_COMPRESS
-#define UNLOCK_COMPRESS
-#define LOCK_VOLLOAD
-#define UNLOCK_VOLLOAD
-#ifdef pp_IBLANKTHREAD
 #define LOCK_IBLANK
 #define UNLOCK_IBLANK
-#endif
-#endif
-#ifndef pp_IBLANKTHREAD
-#define LOCK_IBLANK
-#define UNLOCK_IBLANK
+#define JOIN_IBLANK
 #endif
 
 #ifdef pp_THREAD

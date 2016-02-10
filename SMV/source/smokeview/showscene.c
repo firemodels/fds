@@ -20,7 +20,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   CheckMemory;
 
-  LOCK_IBLANK;
+  LOCK_IBLANK
   show_mode = mode;
 
   UNCLIP;
@@ -82,7 +82,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
  /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
 
   SNIFF_ERRORS("end of loop");
-  UNLOCK_IBLANK;
+  UNLOCK_IBLANK
 }
 
   /* ------------------ ShowScene2 ------------------------ */
