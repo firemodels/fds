@@ -407,25 +407,36 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     float total,fareas[4];
 
     NewMemory((void **)&iblank,nxdata*nydata*sizeof(char));
+    for(j = 0; j<nxdata-1; j++){
+      for(k = 0; k<nydata-1; k++){
+        iblank[j+k*(nxdata-1)] = 0;
+      }
+    }
     switch(fed_slice->idir){
       case XDIR:
-        for(j=0;j<nxdata-1;j++){
-          for(k=0;k<nydata-1;k++){
-            iblank[j+k*(nxdata-1)]=meshi->c_iblank_x[IJKNODE(fed_slice->is1,fed_slice->js1+j,fed_slice->ks1+k)];
+        if(meshi->c_iblank_x!=NULL){
+          for(j = 0; j<nxdata-1; j++){
+            for(k = 0; k<nydata-1; k++){
+              iblank[j+k*(nxdata-1)] = meshi->c_iblank_x[IJKNODE(fed_slice->is1, fed_slice->js1+j, fed_slice->ks1+k)];
+            }
           }
         }
         break;
       case YDIR:
-        for(i=0;i<nxdata-1;i++){
-          for(k=0;k<nydata-1;k++){
-            iblank[i+k*(nxdata-1)]=meshi->c_iblank_y[IJKNODE(fed_slice->is1+i,fed_slice->js1,fed_slice->ks1+k)];
+        if(meshi->c_iblank_y!=NULL){
+          for(i = 0; i<nxdata-1; i++){
+            for(k = 0; k<nydata-1; k++){
+              iblank[i+k*(nxdata-1)] = meshi->c_iblank_y[IJKNODE(fed_slice->is1+i, fed_slice->js1, fed_slice->ks1+k)];
+            }
           }
         }
         break;
       case ZDIR:
-        for(i=0;i<nxdata-1;i++){
-          for(j=0;j<nydata-1;j++){
-            iblank[i+j*(nxdata-1)]=meshi->c_iblank_z[IJKNODE(fed_slice->is1+i,fed_slice->js1+j,fed_slice->ks1)];
+        if(meshi->c_iblank_z!=NULL){
+          for(i = 0; i<nxdata-1; i++){
+            for(j = 0; j<nydata-1; j++){
+              iblank[i+j*(nxdata-1)] = meshi->c_iblank_z[IJKNODE(fed_slice->is1+i, fed_slice->js1+j, fed_slice->ks1)];
+            }
           }
         }
         break;
@@ -4303,7 +4314,7 @@ void drawvolslice_terrain(const slicedata *sd){
         float rmid, zmid;
 
         n++; n2++; 
-        if(iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
+        if(iblank_x!=NULL&&iblank_x[IJK(plotx,j,k)]!=GASGAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(plotx,j,k)]==EMBED_YES)continue;
         r11 = (float)sd->iqsliceframe[n]/255.0;
         r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -4362,7 +4373,7 @@ void drawvolslice_terrain(const slicedata *sd){
         float rmid, zmid;
 
         n++; n2++; 
-        if(iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
+        if(iblank_y!=NULL&&iblank_y[IJK(i,ploty,k)]!=GASGAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,ploty,k)]==EMBED_YES)continue;
         r11 = (float)sd->iqsliceframe[n]/255.0;
         r31 = (float)sd->iqsliceframe[n2]/255.0;
@@ -4428,7 +4439,7 @@ void drawvolslice_terrain(const slicedata *sd){
         z33 = znode[IJ2(i+1,j+1)] + zoffset;
         zmid = (z11 + z31 + z13 + z33)/4.0;
 
-        if(iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
+        if(iblank_z!=NULL&&iblank_z[IJK(i,j,plotz)]!=GASGAS)continue;
         if(skip_slice_in_embedded_mesh==1&&iblank_embed!=NULL&&iblank_embed[IJK(i,j,plotz)]==EMBED_YES)continue;
 
         n11=(i-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek;
