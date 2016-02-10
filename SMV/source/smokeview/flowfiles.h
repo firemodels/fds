@@ -190,11 +190,11 @@ typedef struct {
 typedef struct {
   char label[1024], *label_ptr ;        // menu label
   int nnodes,nodehilight,nsplits;
-  unsigned char rgb_node[3*256];
-  unsigned char alpha[256];
-  unsigned char index_node[256];  // colorbar index
-  unsigned char splits[256];
-  float colorbar[3*256];
+  unsigned char rgb_node[3*1024];
+  unsigned char alpha[1024];
+  unsigned char index_node[1024];  // colorbar index
+  unsigned char splits[1024];
+  float colorbar[3*1024];
 } colorbardata;
 
 /* --------------------------  colortabledata ------------------------------------ */
