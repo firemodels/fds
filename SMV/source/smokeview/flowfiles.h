@@ -434,7 +434,7 @@ typedef struct _cventdata {
   int dir,type,colorindex,cvent_id,isOpenvent;
   float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
-  unsigned char *blank;
+  unsigned char *blank0, *blank;
   int   imin, imax, jmin, jmax, kmin, kmax;
   int useventcolor,hideboundary;
   float origin[3], radius;
@@ -600,10 +600,17 @@ typedef struct _mesh {
   int plotx, ploty, plotz;
   int slicedir;
   int plotn;
-  char *c_iblank_node,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
+
+  char *c_iblank_node0, *c_iblank_cell0, *c_iblank_x0, *c_iblank_y0, *c_iblank_z0;
+  float *f_iblank_cell0;
+  char *c_iblank_embed0;
+  float *block_zdist0;
+
+  char *c_iblank_node, *c_iblank_cell, *c_iblank_x, *c_iblank_y, *c_iblank_z;
   float *f_iblank_cell;
   char *c_iblank_embed;
   float *block_zdist;
+
   int zdist_flag;
   unsigned char *iblank_smoke3d;
   int iblank_smoke3d_defined;

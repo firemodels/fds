@@ -48,6 +48,9 @@ void init_multi_threading(void){
 #ifdef pp_THREAD
   pthread_mutex_init(&mutexCOMPRESS,NULL);
   pthread_mutex_init(&mutexVOLLOAD,NULL);
+#ifdef pp_IBLANKTHREAD
+  pthread_mutex_init(&mutexIBLANK, NULL);
+#endif
 #endif
 }
 
@@ -100,8 +103,8 @@ void *mt_update_smooth_blockages(void *arg){
 void *mt_makeiblank(void *arg){
 
   PRINTF("Creating blanking arrays in the background\n");
-  makeiblank_all();
-  updateblank = 1;
+  makeiblank();
+  SetCVentDirs();
   pthread_exit(NULL);
   return NULL;
 }
@@ -151,15 +154,13 @@ void makeiblank_all(void){
 #else
 void makeiblank_all(void){
   makeiblank();
-  makeiblank_carve();
-  makeiblank_smoke3d();
+  SetCVentDirs();
 }
 #endif
 #else
 void makeiblank_all(void){
   makeiblank();
-  makeiblank_carve();
-  makeiblank_smoke3d();
+  SetCVentDirs();
 }
 #endif
 

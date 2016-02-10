@@ -1682,12 +1682,12 @@ int makeiblank(void){
     if(NewMemory((void **)&c_iblank_y,ijksize*sizeof(char))==0)return 1;
     if(NewMemory((void **)&c_iblank_z,ijksize*sizeof(char))==0)return 1;
 
-    meshi->c_iblank_node=iblank_node;
-    meshi->c_iblank_cell=iblank_cell;
-    meshi->f_iblank_cell=fblank_cell;
-    meshi->c_iblank_x=c_iblank_x;
-    meshi->c_iblank_y=c_iblank_y;
-    meshi->c_iblank_z=c_iblank_z;
+    meshi->c_iblank_node0=iblank_node;
+    meshi->c_iblank_cell0=iblank_cell;
+    meshi->f_iblank_cell0=fblank_cell;
+    meshi->c_iblank_x0=c_iblank_x;
+    meshi->c_iblank_y0=c_iblank_y;
+    meshi->c_iblank_z0=c_iblank_z;
 
     for(i=0;i<ibar*jbar*kbar;i++){
       iblank_cell[i]=GAS;
@@ -1834,6 +1834,20 @@ int makeiblank(void){
     }
   }
   //init_blockage_distance();
+  LOCK_IBLANK;
+  for(ig = 0; ig < nmeshes; ig++){
+    mesh *meshi;
+
+    meshi = meshinfo + ig;
+    meshi->c_iblank_node = meshi->c_iblank_node0;
+    meshi->c_iblank_cell = meshi->c_iblank_cell0;
+    meshi->f_iblank_cell = meshi->f_iblank_cell0;
+    meshi->c_iblank_x = meshi->c_iblank_x0;
+    meshi->c_iblank_y = meshi->c_iblank_y0;
+    meshi->c_iblank_z = meshi->c_iblank_z0;
+  }
+  UNLOCK_IBLANK;
+
   PRINTF("  blanking array initialization completed\n");
   return 0;
 }

@@ -19,11 +19,23 @@
 #define UNLOCK_COMPRESS pthread_mutex_unlock(&mutexCOMPRESS);
 #define LOCK_VOLLOAD pthread_mutex_lock(&mutexVOLLOAD);
 #define UNLOCK_VOLLOAD pthread_mutex_unlock(&mutexVOLLOAD);
+#ifdef pp_IBLANKTHREAD
+#define LOCK_IBLANK pthread_mutex_lock(&mutexIBLANK);
+#define UNLOCK_IBLANK pthread_mutex_unlock(&mutexIBLANK);
+#endif
 #else
 #define LOCK_COMPRESS
 #define UNLOCK_COMPRESS
 #define LOCK_VOLLOAD
 #define UNLOCK_VOLLOAD
+#ifdef pp_IBLANKTHREAD
+#define LOCK_IBLANK
+#define UNLOCK_IBLANK
+#endif
+#endif
+#ifndef pp_IBLANKTHREAD
+#define LOCK_IBLANK
+#define UNLOCK_IBLANK
 #endif
 
 #ifdef pp_THREAD
@@ -36,6 +48,7 @@ void mt_read_volsmoke_allframes_allmeshes2(void);
 #ifdef pp_THREAD
 #ifdef pp_IBLANKTHREAD
 MT_EXTERN pthread_t makeiblank_thread_id;
+MT_EXTERN pthread_mutex_t mutexIBLANK;
 #endif
 MT_EXTERN pthread_mutex_t mutexVOLLOAD;
 MT_EXTERN pthread_mutex_t mutexCOMPRESS;
