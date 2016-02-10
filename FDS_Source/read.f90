@@ -4110,7 +4110,6 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
    IF (COLOR /= 'null') CALL COLOR2RGB(RGB,COLOR)
 
    ! Determine if the SPEC_ID is OK
-
    LPC%SPEC_ID = SPEC_ID
    IF (LPC%LIQUID_DROPLET) THEN
       DO NN=1,N_TRACKED_SPECIES
@@ -4129,7 +4128,6 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ELSE
          LPC%Y_INDEX = SPECIES_MIXTURE(LPC%Z_INDEX)%SINGLE_SPEC_INDEX
-         TMPMIN = MIN(TMPMIN,SPECIES(LPC%Y_INDEX)%TMP_MELT)
       ENDIF
       IF (SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID > 0._EB) LPC%DENSITY=SPECIES(LPC%Y_INDEX)%DENSITY_LIQUID
    ENDIF
@@ -4490,17 +4488,36 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                CALL JANAF_TABLE_LIQUID (J,CPBAR,H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%PROP_ID,LPC%FUEL,DENSITY)
                IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
                IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
+               IF (SS%TMP_V < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a TMP_V'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
+               IF (SS%TMP_MELT < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a TMP_MELT'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
                IF (LPC%DENSITY < 0._EB) LPC%DENSITY = DENSITY
                IF (LPC%DENSITY < 0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                LPC%FTPR = FOTH*PI*LPC%DENSITY
-               IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
             ENDIF
          ELSE
             CALL JANAF_TABLE_LIQUID (J,SS%C_P_L(J),H_V,H_L,TMP_REF,TMP_MELT,TMP_V,SS%ID,LPC%FUEL,DENSITY)
             IF (J==1) THEN
+               IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
+               IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
+               IF (SS%TMP_V < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a TMP_V'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+               IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
+               IF (SS%TMP_MELT < 0._EB) THEN
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a TMP_MELT'
+                  CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
                IF (LPC%DENSITY < 0._EB) LPC%DENSITY = DENSITY
                IF (LPC%DENSITY < 0._EB) THEN
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a density'
@@ -4511,9 +4528,6 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                   WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires CP, H_V, TMP_MELT, TMP_V, and T_REF'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
-               IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
-               IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
-               IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
                SS%H_L(J) = H_L + SS%C_P_L(J)
             ELSE
                SS%H_L(J) = SS%H_L(J-1) + 0.5_EB*(SS%C_P_L(J)+SS%C_P_L(J-1))
@@ -4560,6 +4574,8 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
 ! Adjust the evaporation rate of fuel PARTICLEs to account for difference in HoC.
 
    IF (LPC%HEAT_OF_COMBUSTION > 0._EB) LPC%ADJUST_EVAPORATION = LPC%HEAT_OF_COMBUSTION/REACTION(1)%HEAT_OF_COMBUSTION
+
+   TMPMIN = MIN(TMPMIN,SS%TMP_MELT)
 
 ENDDO PART_LOOP
 
