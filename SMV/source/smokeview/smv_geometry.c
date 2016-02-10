@@ -1660,7 +1660,7 @@ int makeiblank(void){
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
     mesh *meshi;
-    int nx, ny, nxy;
+    int nx, ny, nxy, ibarjbar;
     int ibar,jbar,kbar;
     float *fblank_cell=NULL;
     char *iblank_node=NULL,*iblank_cell=NULL,*c_iblank_x=NULL,*c_iblank_y=NULL,*c_iblank_z=NULL;
@@ -1669,7 +1669,8 @@ int makeiblank(void){
 
     meshi = meshinfo+ig;
 
-    printf("  mesh %i of %i\n", ig + 1, nmeshes);
+    if(meshi->nbptrs==0)continue;
+    printf("  mesh %i of %i (%i blockages)\n", ig + 1, nmeshes,meshi->nbptrs);
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;
@@ -1702,6 +1703,7 @@ int makeiblank(void){
     nx = ibar+1;
     ny = jbar+1;
     nxy = nx*ny;
+    ibarjbar = ibar*jbar;
 
     for(ii=0;ii<meshi->nbptrs;ii++){
       blockagedata *bc;
@@ -1731,7 +1733,7 @@ int makeiblank(void){
           //#define IJKNODE(i,j,k) ((i)+(j)*nx+(k)*nxy)
           //#define IJKCELL(i,j,k) ((i)+ (j)*ibar+(k)*ibar*jbar)
           ijk = IJKCELL(-1, j - 1, k - 1);
-          ijknode = IJKNODE(i, j, k);
+          ijknode = IJKNODE(0, j, k);
           for(i = 0; i < ibar + 1; i++){
             int test;
             int ijk2;
@@ -1749,7 +1751,7 @@ int makeiblank(void){
 //            if(i != ibar&&j != jbar&&k != 0)       test += iblank_cell[IJKCELL(    i,     j, k - 1)];
             if(i != ibar&&j != jbar&&k != 0)       test += iblank_cell[ijk+1+ibar];
 
-            ijk2 = ijk + ibar*jbar;
+            ijk2 = ijk + ibarjbar;
             //            if(i != 0 && j != 0 && k != kbar)      test += iblank_cell[IJKCELL(i - 1, j - 1,     k)];
             if(i != 0 && j != 0 && k != kbar)      test += iblank_cell[ijk2];
 
@@ -1821,12 +1823,12 @@ int makeiblank(void){
 //        c_iblank_z[IJKNODE(i,j,0)]=2*iblank_cell[IJKCELL(i,j,0)];
         c_iblank_z[ijknode]=2*iblank_cell[ijkcell];
         for(k=1;k<kbar;k++){
-          ijkcell+=ibar*jbar;
+          ijkcell+=ibarjbar;
           ijknode+=nxy;
 //          c_iblank_z[IJKNODE(i,j,k)]=iblank_cell[IJKCELL(i,j,k-1)]+iblank_cell[IJKCELL(i,j,k)];
           c_iblank_z[ijknode]=iblank_cell[ijkcell-ibar*jbar]+iblank_cell[ijkcell];
         }
-        ijkcell+=ibar*jbar;
+        ijkcell+=ibarjbar;
         ijknode+=nxy;
 //        c_iblank_z[IJKNODE(i,j,kbar)]=2*iblank_cell[IJKCELL(i,j,kbar-1)];
         c_iblank_z[ijknode]=2*iblank_cell[ijkcell-ibar*jbar];

@@ -40,6 +40,7 @@
 #define pp_LANG
 #define pp_DEG
 #define pp_SLICEDUP
+//#define pp_THEADIBLANK
 
 #define _CRT_SECURE_NO_DEPRECATE
 
