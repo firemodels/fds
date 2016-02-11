@@ -213,9 +213,6 @@ echo.
 echo ***Compressing FDS/Smokeview distribution
 echo.
 
-cd "%svn_root%\..\Google Drive\Bundle_Versions"
-set gupload=%CD%
-
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%
@@ -232,8 +229,6 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
-
-IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
 echo.
 echo ***FDS/Smokeview win%platform% bundle built
