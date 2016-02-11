@@ -39,8 +39,8 @@ setup_win:
 
 #Compiler Rules
 
-impi_intel_win: MPILIB = "C:\Program Files (x86)\IntelSWTools\mpi\5.1.1.110\intel64\lib\impi.lib"
-impi_intel_win: MPIINCLUDE = "C:\Program Files (x86)\IntelSWTools\mpi\5.1.1.110\intel64\include"
+impi_intel_win: MPILIB = "$(I_MPI_ROOT)\intel64\lib\impi.lib"
+impi_intel_win: MPIINCLUDE = "$(I_MPI_ROOT)\intel64\include"
 impi_intel_win: FFLAGS = /Qipo /O2 /I$(MPIINCLUDE)
 impi_intel_win: FCOMPL = mpiifort
 impi_intel_win: obj = test_mpi
