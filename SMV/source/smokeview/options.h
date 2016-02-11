@@ -36,13 +36,13 @@
 #endif
 
 #define pp_DRAWISO
-#define pp_THREAD
 #define pp_LANG
 #define pp_DEG
 #define pp_SLICEDUP
-#define pp_THREADIBLANK // test iblank computation in background
 
-#ifdef pp_THREADIBLANK // if pp_THREADIBLANK is set then pp_THREAD has to be set
+#define pp_THREAD
+#define pp_THREADIBLANK // test iblank computation in background.
+#ifdef pp_THREADIBLANK  // if pp_THREADIBLANK is set then pp_THREAD also has to be set
 #define pp_THREAD
 #endif
 
