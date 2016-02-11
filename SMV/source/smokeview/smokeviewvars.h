@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(update_setvents, 0);
 SVEXTERN int SVDECL(cvents_defined, 0);
 #ifdef pp_SLICEDUP
 SVEXTERN int SVDECL(slicedup_option , SLICEDUP_KEEPFINE);

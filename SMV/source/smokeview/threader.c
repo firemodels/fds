@@ -105,6 +105,9 @@ void *mt_makeiblank(void *arg){
   PRINTF("Creating blanking arrays in the background\n");
   makeiblank();
   SetCVentDirs();
+  LOCK_IBLANK
+  update_setvents = 1;
+  UNLOCK_IBLANK
   pthread_exit(NULL);
   return NULL;
 }
@@ -155,12 +158,14 @@ void makeiblank_all(void){
 void makeiblank_all(void){
   makeiblank();
   SetCVentDirs();
+  update_setvents=1;
 }
 #endif
 #else
 void makeiblank_all(void){
   makeiblank();
   SetCVentDirs();
+  update_set_vents=1;
 }
 #endif
 
