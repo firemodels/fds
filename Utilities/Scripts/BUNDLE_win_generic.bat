@@ -8,8 +8,8 @@ set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
-set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
-set in_intel_dll=%svn_root%\..\FIRE-LOCAL\LIBS\WINDOWS
+set in_pdf=%userprofile%\FIRE-LOCAL\reports\fds_manuals\
+set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_setpath=%svn_root%\Utilities\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
@@ -21,7 +21,7 @@ set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2
+set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
