@@ -3912,33 +3912,24 @@ entirely surrounded by solid obstructions. For example, the interior of a closed
 \subsubsection{Pressure Zone Leakage}
 \label{info:zone_leakage}
 
-The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface it is leaking out of. With this approach the zone pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path.
-
-The first step in this approach is to define pressure zones and the leakage areas between them.  This is done on the input lines defining the individual pressure {\ct ZONE}s:
+The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface. With this approach the pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path. The first step is to define pressure zones, leakage areas, and a description of the surfaces through which leaking occurs:
 \begin{lstlisting}
 &ZONE XB=..., LEAK_AREA(0)=0.0001 /
 &ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
+&SURF ID='LEAKY EXTERIOR WALL',..., LEAK_PATH=1,0 /
+&SURF ID='LEAKY INTERIOR WALL',..., LEAK_PATH=1,2 /
 \end{lstlisting}
-The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
+The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid ostructions where the leakage is applied need not form a boundary between the two zones.
 
-The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
-\be  \dot{V}_{\rm leak} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
-$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1.
+The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
+\be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
+where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be 1.
 
-In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM E-779 will provide two additional datapoints to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{ref}$ respectively where $A_L$ is given by {\ct LEAK\_AREA}.
-\be  A_{L,new} = A_L \left( \frac{\Delta p}{\Delta p_{ref}} \right)^n \ee
-
-Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone~1 to Zone~0 requires the attribute
-{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones~1 and 0 is uniformly distributed
-over solids defined with:
-\begin{lstlisting}
-&SURF ID='whatever',..., LEAK_PATH=1,0 /
-\end{lstlisting}
-Likewise, the boundaries of Zone~1 and Zone~2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the two zones. The leakage is spread over the surfaces that have a specified {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
-
-The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone~A with Zone~B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
+In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
+ 
+The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
 FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be increased if needed by the parameter {\ct MAX\_LEAK\_PATHS} on the {\ct MISC} line.
 
