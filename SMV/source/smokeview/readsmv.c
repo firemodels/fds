@@ -7692,7 +7692,7 @@ typedef struct {
   makeiblank_carve();
   makeiblank_smoke3d();
   makeiblank_all();
-#ifdef pp_IBLANKTHREAD
+#ifdef pp_THREADIBLANK
   if(runscript == 1){
     JOIN_IBLANK
   }
