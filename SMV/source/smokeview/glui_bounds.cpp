@@ -2674,6 +2674,7 @@ extern "C" void Slice_CB(int var){
   int error,i;
   int ii;
   slicedata *sd;
+  int last_slice;
 
   updatemenu=1;
   if(var==DATA_transparent){
@@ -3024,12 +3025,23 @@ extern "C" void Slice_CB(int var){
     SPINNER_line_contour_num->set_int_val(slice_line_contour_num);
     break;
   case FILEUPDATE:
-    for(ii=0;ii<nslice_loaded;ii++){
-      i = slice_loaded_list[ii];
-      sd = sliceinfo + i;
-      if(sd->type!=islicetype)continue;
-      readslice("",i, RESETBOUNDS, &error);
-    }
+      for(ii = nslice_loaded - 1; ii >= 0; ii--){
+        i = slice_loaded_list[ii];
+        sd = sliceinfo + i;
+        if(sd->type != islicetype)continue;
+        last_slice = i;
+        break;
+      }
+      for(ii = 0; ii < nslice_loaded; ii++){
+        int set_slicecolor;
+
+        i = slice_loaded_list[ii];
+        sd = sliceinfo + i;
+        if(sd->type != islicetype)continue;
+        set_slicecolor = DEFER_SLICECOLOR;
+        if(i == last_slice)set_slicecolor = SET_SLICECOLOR;
+        readslice("", i, RESETBOUNDS, set_slicecolor, &error);
+      }
     break;
   case FILERELOAD:
     Slice_CB(FILEUPDATE);

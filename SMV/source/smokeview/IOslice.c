@@ -136,7 +136,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
   int error;
 
   sd = sliceinfo + sd_index;
-  if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,&error);
+  if(sd->loaded==1)readslice(sd->file,sd_index,UNLOAD,SET_SLICECOLOR,&error);
   if(flag==UNLOAD){
     FREEMEMORY(sd->qslicedata);
     FREEMEMORY(sd->times);
@@ -155,7 +155,7 @@ int Creadslice_frame(int frame_index_local,int sd_index,int flag){
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
                        &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
-        readslice("",sd_index,UNLOAD,&error);
+        readslice("",sd_index,UNLOAD,SET_SLICECOLOR,&error);
         return -1;
       }
     }
@@ -371,7 +371,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   }
 
   if(file_type==FED_SLICE){
-    readslice(fed_slice->file,fedi->fed_index,UNLOAD,&error_local);
+    readslice(fed_slice->file,fedi->fed_index,UNLOAD,SET_SLICECOLOR,&error_local);
   }
   else if(file_type==FED_ISO){
     readiso_orig(fed_iso->file,file_index,UNLOAD,&error_local);
@@ -720,7 +720,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
     Creadslice_frame(0,fedi->co_index,UNLOAD);
   }
   if(file_type==FED_SLICE){
-    readslice(fed_slice->file,fedi->fed_index,flag,&error_local);
+    readslice(fed_slice->file,fedi->fed_index,flag,SET_SLICECOLOR,&error_local);
   }
   else{
     readiso_orig(fed_iso->file,file_index,flag,&error_local);
@@ -763,7 +763,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
       u = sliceinfo + vd->iu;
       display=u->display;
-      if(u->loaded==1)readslice(u->file,vd->iu,UNLOAD,errorcode);
+      if(u->loaded==1)readslice(u->file,vd->iu,UNLOAD,SET_SLICECOLOR,errorcode);
       u->display=display;
       u->vloaded=0;
     }
@@ -772,7 +772,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
       v = sliceinfo + vd->iv;
       display=v->display;
-      if(v->loaded==1)readslice(v->file,vd->iv,UNLOAD,errorcode);
+      if(v->loaded==1)readslice(v->file,vd->iv,UNLOAD,SET_SLICECOLOR,errorcode);
       v->display=display;
       v->vloaded=0;
     }
@@ -781,7 +781,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
       w = sliceinfo + vd->iw;
       display=w->display;
-      if(w->loaded==1)readslice(w->file,vd->iw,UNLOAD,errorcode);
+      if(w->loaded==1)readslice(w->file,vd->iw,UNLOAD,SET_SLICECOLOR,errorcode);
       w->display=display;
       w->vloaded=0;
     }
@@ -790,7 +790,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
       val = sliceinfo + vd->ival;
       display=val->display;
-      if(val->loaded==1)readslice(val->file,vd->ival,UNLOAD,errorcode);
+      if(val->loaded==1)readslice(val->file,vd->ival,UNLOAD,SET_SLICECOLOR,errorcode);
       val->display=display;
       val->vloaded=0;
     }
@@ -807,7 +807,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
     u = sliceinfo + vd->iu;
     vd->u=u;
-    readslice(u->file,vd->iu,LOAD,errorcode);
+    readslice(u->file,vd->iu,LOAD,SET_SLICECOLOR,errorcode);
     if(*errorcode!=0){
       vd->loaded=1;
       fprintf(stderr,"*** Error: unable to load U velocity vector components in %s . Vector load aborted\n",u->file);
@@ -826,7 +826,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
     v = sliceinfo + vd->iv;
     vd->v=v;
-    readslice(v->file,vd->iv,LOAD,errorcode);
+    readslice(v->file,vd->iv,LOAD,SET_SLICECOLOR,errorcode);
     if(*errorcode!=0){
       fprintf(stderr,"*** Error: unable to load V velocity vector components in %s . Vector load aborted\n",v->file);
       vd->loaded=1;
@@ -846,7 +846,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
     w = sliceinfo + vd->iw;
     vd->w=w;
-    readslice(w->file,vd->iw,LOAD,errorcode);
+    readslice(w->file,vd->iw,LOAD,SET_SLICECOLOR,errorcode);
     if(*errorcode!=0){
       fprintf(stderr,"*** Error: unable to load W velocity vector components in %s . Vector load aborted\n",w->file);
       vd->loaded=1;
@@ -867,7 +867,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
     val = sliceinfo + vd->ival;
     vd->val=val;
-    readslice(val->file,vd->ival,LOAD,errorcode);
+    readslice(val->file,vd->ival,LOAD,SET_SLICECOLOR,errorcode);
     if(*errorcode!=0){
       fprintf(stderr,"*** Error: unable to load vector values in %s . Vector load aborted\n",val->file);
       vd->loaded=1;
@@ -930,7 +930,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
 
 /* ------------------ readslice ------------------------ */
 
-void readslice(char *file, int ifile, int flag, int *errorcode){
+void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorcode){
   FILE_SIZE slicefilelen;
   float *xplt_local, *yplt_local, *zplt_local;
   int blocknumber;
@@ -1050,14 +1050,16 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
           vd->display=0;
         }
       }
-      if(sd->compression_type==UNCOMPRESSED){
-        updateslicebounds();
-        list_slice_index=islicetype;
-        setslicebounds(islicetype);
-        updateallslicecolors(islicetype,errorcode);
-      }
-      else{
-        updateallslicelabels(islicetype,errorcode);
+      if(use_set_slicecolor==0||set_slicecolor == SET_SLICECOLOR){
+        if(sd->compression_type == UNCOMPRESSED){
+          updateslicebounds();
+          list_slice_index = islicetype;
+          setslicebounds(islicetype);
+          updateallslicecolors(islicetype, errorcode);
+        }
+        else{
+          updateallslicelabels(islicetype, errorcode);
+        }
       }
 
       updateglui();
@@ -1088,7 +1090,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
         getsliceheader(sd->comp_file,sd->size_file,sd->compression_type,
                        sliceframestep,settmin_s,settmax_s,tmin_s,tmax_s,
                        &sd->nslicei, &sd->nslicej, &sd->nslicek, &sd->ntimes, &sd->ncompressed, &sd->valmin, &sd->valmax)==0){
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
         return;
       }
@@ -1098,7 +1100,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       ReadVolSlice=1;
     }
     if(error!=0){
-      readslice("",ifile,UNLOAD,&error);
+      readslice("",ifile,UNLOAD,set_slicecolor,&error);
       *errorcode=1;
       return;
     }
@@ -1113,7 +1115,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       }
     }
     if(error!=0||sd->ntimes<1){
-      readslice("",ifile,UNLOAD,&error);
+      readslice("",ifile,UNLOAD,set_slicecolor,&error);
       *errorcode=1;
       return;
     }
@@ -1127,7 +1129,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
          NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0||
          NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->ntimes))==0
          ){
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
         return;
       }
@@ -1135,7 +1137,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       if(getslicecompresseddata(datafile,
         settmin_s,settmax_s,tmin_s,tmax_s,sd->ncompressed,sliceframestep,sd->ntimes,
         sd->times,sd->qslicedata_compressed,sd->compindex,&sd->globalmin,&sd->globalmax)==0){
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
         return;
       }
@@ -1147,7 +1149,7 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
       if(NewMemory((void **)&sd->qslicedata,sizeof(float)*sd->nslicei*sd->nslicej*sd->nslicek*sd->ntimes)==0||
          NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0){
         *errorcode=1;
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         return;
       }
 #ifdef pp_MEMDEBUG      
@@ -1247,14 +1249,14 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
     sd->nslicetotal=sd->ntimes*sd->nsliceii;
     if(sd->compression_type==COMPRESSED_ZLIB){
       if(NewMemory((void **)&sd->slicecomplevel,sd->nsliceii*sizeof(unsigned char))==0){
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
         return;
       }
     }
     else{
       if(NewMemory((void **)&sd->slicelevel,sd->nslicetotal*sizeof(int))==0){
-        readslice("",ifile,UNLOAD,&error);
+        readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
         return;
       }
@@ -1301,16 +1303,18 @@ void readslice(char *file, int ifile, int flag, int *errorcode){
   Update_Times();
   CheckMemory;
 
-  if(sd->compression_type==UNCOMPRESSED){
-    updateslicebounds();
-    updateallslicecolors(islicetype,errorcode);
-    list_slice_index=islicetype;
-    setslicebounds(islicetype);
-  }
-  else{
-    slicebounds[islicetype].valmin_data=qmin;
-    slicebounds[islicetype].valmax_data=qmax;
-    updateallslicelabels(islicetype,errorcode);
+  if(use_set_slicecolor==0||set_slicecolor == SET_SLICECOLOR){
+    if(sd->compression_type == UNCOMPRESSED){
+      updateslicebounds();
+      updateallslicecolors(islicetype, errorcode);
+      list_slice_index = islicetype;
+      setslicebounds(islicetype);
+    }
+    else{
+      slicebounds[islicetype].valmin_data = qmin;
+      slicebounds[islicetype].valmax_data = qmax;
+      updateallslicelabels(islicetype, errorcode);
+    }
   }
   CheckMemory;
 
