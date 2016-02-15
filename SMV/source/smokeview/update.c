@@ -1989,6 +1989,12 @@ void update_ShowScene(void){
 
 void update_Display(void){
 
+  LOCK_IBLANK
+  if(update_setvents==1){
+    SetVentDirs();
+    update_setvents=0;
+  }
+  UNLOCK_IBLANK
   if(update_have_gvec == 1){
     update_have_gvec = 0;
     update_gvec_down(1);

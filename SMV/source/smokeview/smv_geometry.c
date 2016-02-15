@@ -1670,7 +1670,9 @@ int makeiblank(void){
     meshi = meshinfo+ig;
 
     if(meshi->nbptrs==0)continue;
-    printf("  mesh %i of %i (%i blockages)\n", ig + 1, nmeshes,meshi->nbptrs);
+#ifdef pp_BETA
+    printf("    mesh %i of %i (%i blockages)\n", ig + 1, nmeshes,meshi->nbptrs);
+#endif
     ibar = meshi->ibar;
     jbar = meshi->jbar;
     kbar = meshi->kbar;

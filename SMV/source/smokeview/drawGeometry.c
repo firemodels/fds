@@ -1134,7 +1134,7 @@ void SetVentDirs(void){
             for(k=vi->kmin;k<=MIN(vi->kmax,kbar-1);k++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i-1,j,k)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1163,8 +1163,8 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->xvent1 += voffset;
-          vi->xvent2 += voffset;
+          vi->xvent1 = vi->xvent1_orig+voffset;
+          vi->xvent2 = vi->xvent2_orig+voffset;
         }
         break;
       case YDIR:
@@ -1184,7 +1184,7 @@ void SetVentDirs(void){
             for(k=vi->kmin;MIN(k<=vi->kmax,kbar-1);k++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i,j-1,k)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1213,8 +1213,8 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->yvent1 += voffset;
-          vi->yvent2 += voffset;
+          vi->yvent1 = vi->yvent1_orig+voffset;
+          vi->yvent2 = vi->yvent2_orig+voffset;
         }
         break;
       case ZDIR:
@@ -1234,7 +1234,7 @@ void SetVentDirs(void){
             for(j=vi->jmin;j<=MIN(vi->jmax,jbar-1);j++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i,j,k-1)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1263,8 +1263,8 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->zvent1 += voffset;
-          vi->zvent2 += voffset;
+          vi->zvent1 = vi->zvent1_orig+voffset;
+          vi->zvent2 = vi->zvent2_orig+voffset;
         }
         break;
       default:

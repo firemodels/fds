@@ -452,6 +452,9 @@ typedef struct _ventdata {
   int dir,dir2,vent_id;
   int useventcolor;
   int isOpenvent;
+  float xvent1_orig, xvent2_orig;
+  float yvent1_orig, yvent2_orig;
+  float zvent1_orig, zvent2_orig;
   float xvent1, xvent2;
   float yvent1, yvent2;
   float zvent1, zvent2;

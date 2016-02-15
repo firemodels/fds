@@ -7,6 +7,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define SET_SLICECOLOR 0
+#define DEFER_SLICECOLOR 1
+
 #ifdef pp_SLICEDUP
 #define SLICEDUP_KEEPALL 0
 #define SLICEDUP_KEEPFINE 1

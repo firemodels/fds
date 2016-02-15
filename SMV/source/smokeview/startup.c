@@ -1055,13 +1055,28 @@ void InitOpenGL(void){
       }
     }
     // note:  only slices that are NOT a part of a vector slice will be loaded here
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
+    {
+      int last_slice;
 
-      slicei = sliceinfo + i;
-      if(slicei->autoload==0&&slicei->loaded==1)readslice(slicei->file,i,UNLOAD,&errorcode);
-      if(slicei->autoload==1&&slicei->loaded==0){
-        readslice(slicei->file,i,LOAD,&errorcode);
+      last_slice = nsliceinfo - 1;
+      for(i = nsliceinfo-1; i >=0; i--){
+        slicedata *slicei;
+
+        slicei = sliceinfo + i;
+        if((slicei->autoload == 0 && slicei->loaded == 1)||(slicei->autoload == 1 && slicei->loaded == 0)){
+          last_slice = i;
+          break;
+        }
+      }
+      for(i = 0; i < nsliceinfo; i++){
+        slicedata *slicei;
+        int set_slicecolor;
+
+        slicei = sliceinfo + i;
+        set_slicecolor = DEFER_SLICECOLOR;
+        if(i == last_slice)set_slicecolor = SET_SLICECOLOR;
+        if(slicei->autoload == 0 && slicei->loaded == 1)readslice(slicei->file, i, UNLOAD, set_slicecolor,&errorcode);
+        if(slicei->autoload == 1 && slicei->loaded == 0)readslice(slicei->file, i, LOAD, set_slicecolor, &errorcode);
       }
     }
     for(i=0;i<nterraininfo;i++){
@@ -1069,7 +1084,7 @@ void InitOpenGL(void){
 
       terri = terraininfo + i;
       if(terri->autoload==0&&terri->loaded==1)readterrain(terri->file,i,UNLOAD,&errorcode);
-      if(terri->autoload==1&&terri->loaded==0)readslice(terri->file,i,LOAD,&errorcode);
+      if(terri->autoload==1&&terri->loaded==0)readterrain(terri->file,i,LOAD,&errorcode);
     }
     for(i=0;i<nsmoke3dinfo;i++){
       smoke3ddata *smoke3di;

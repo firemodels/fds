@@ -22,6 +22,8 @@
 #define MENU_KEEP_FINE -3
 #define MENU_KEEP_COARSE -4
 
+#define MENU_SLICECOLORDEFER -5
+
 #define MENU_OPTION_TRAINERMENU 2
 
 #define MENU_UPDATEBOUNDS -3
@@ -2362,10 +2364,13 @@ void LoadUnloadMenu(int value){
     if(nvolrenderinfo>0){
       LoadVolSmoke3DMenu(UNLOAD_ALL);
     }
-    for(i=0;i<nsliceinfo;i++){
-      readslice("",i,UNLOAD,&errorcode);
+    for(i = 0; i < nsliceinfo; i++){
+      slicedata *slicei;
+
+      slicei = sliceinfo + i;
+      readslice(slicei->file, i, UNLOAD, DEFER_SLICECOLOR,&errorcode);
     }
-    for(i=0;i<nplot3dinfo;i++){
+    for(i = 0; i<nplot3dinfo; i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
     for(i=0;i<npatchinfo;i++){
@@ -2390,6 +2395,8 @@ void LoadUnloadMenu(int value){
     glutPostRedisplay();
   }
   if(value==RELOADALL){
+    int last_slice_loaded;
+
     LOCK_COMPRESS
     readsmv_dynamic(smv_filename);
     if(hrr_csv_filename!=NULL){
@@ -2409,13 +2416,30 @@ void LoadUnloadMenu(int value){
         readvslice(i,LOAD,&errorcode);
       }
     }
-    for(ii=0;ii<nslice_loaded;ii++){
+    if(nslice_loaded>1)last_slice_loaded = slice_loaded_list[nslice_loaded-1];
+    for(ii = nslice_loaded - 1; i>=0; ii--){
       slicedata *slicei;
+
+
+      i = slice_loaded_list[ii];
+      slicei = sliceinfo + i;
+      if(slicei->reload == 1){
+        last_slice_loaded = i;
+        break;
+      }
+    }
+    for(ii = 0; ii<nslice_loaded; ii++){
+      slicedata *slicei;
+
 
       i = slice_loaded_list[ii];
       slicei = sliceinfo + i;
       if(slicei->reload==1){
-        readslice(slicei->file,i,LOAD,&errorcode);
+        int set_slicecolor;
+
+        set_slicecolor = DEFER_SLICECOLOR;
+        if(i == last_slice_loaded)set_slicecolor = SET_SLICECOLOR;
+        readslice(slicei->file,i,LOAD,set_slicecolor,&errorcode);
       }
     }
     islicetype=islicetype_save;
@@ -3144,12 +3168,12 @@ void UnloadSliceMenu(int value){
   updatemenu=1;  
   glutPostRedisplay();
   if(value>=0){
-    readslice("",value,UNLOAD,&errorcode);
+    readslice("",value,UNLOAD,SET_SLICECOLOR,&errorcode);
   }
   else{
     if(value==UNLOAD_ALL){
       for(i=0;i<nsliceinfo;i++){
-        readslice("",i,UNLOAD,&errorcode);
+        readslice("",i,UNLOAD,DEFER_SLICECOLOR,&errorcode);
       }
     }
     else if(value==UNLOAD_LAST){
@@ -3157,7 +3181,7 @@ void UnloadSliceMenu(int value){
 
       unload_index=last_slice_loadstack();
       if(unload_index>=0&&unload_index<nsliceinfo){
-        readslice("",unload_index,UNLOAD,&errorcode);
+        readslice("",unload_index,UNLOAD,SET_SLICECOLOR,&errorcode);
       }
     }
   }
@@ -3638,7 +3662,11 @@ void LoadSliceMenu(int value){
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       if(value<nsliceinfo-nfedinfo){
-        readslice(slicei->file,value,LOAD,&errorcode);
+        int set_slicecolor;
+
+        set_slicecolor=SET_SLICECOLOR;
+        if(global_set_slicecolor!=-1)set_slicecolor=global_set_slicecolor;
+        readslice(slicei->file,value,LOAD,set_slicecolor,&errorcode);
       }
       else{
         readfed(value,LOAD,FED_SLICE,&errorcode);
@@ -3648,7 +3676,7 @@ void LoadSliceMenu(int value){
   else{
     if(value==UNLOAD_ALL){
       for(i=0;i<nsliceinfo;i++){
-        readslice("",i,UNLOAD,&errorcode);
+        readslice("",i,UNLOAD,DEFER_SLICECOLOR,&errorcode);
       }
     }
     else{
@@ -3656,6 +3684,7 @@ void LoadSliceMenu(int value){
       char *submenulabel;
       slicedata *slicei;
       int dir;
+      int last_slice;
 
       value = -(1000 + value);
       submenutype=value/4;
@@ -3663,14 +3692,28 @@ void LoadSliceMenu(int value){
       submenutype=subslice_menuindex[submenutype];
       slicei = sliceinfo + submenutype;
       submenulabel = slicei->label.longlabel;
-      for(i=0;i<nsliceinfo;i++){
+      last_slice = nsliceinfo - 1;
+      for(i = nsliceinfo-1; i>=0; i--){
         char *longlabel;
+
+        slicei = sliceinfo + i;
+        longlabel = slicei->label.longlabel;
+        if(strcmp(longlabel, submenulabel) != 0)continue;
+        if(dir != 0 && dir != slicei->idir)continue;
+        last_slice = i;
+        break;
+      }
+      for(i = 0; i<nsliceinfo; i++){
+        char *longlabel;
+        int set_slicecolor;
 
         slicei = sliceinfo + i;
         longlabel = slicei->label.longlabel;
         if(strcmp(longlabel,submenulabel)!=0)continue;
         if(dir!=0&&dir!=slicei->idir)continue;
-        readslice(slicei->file,i,LOAD,&errorcode);
+        set_slicecolor = DEFER_SLICECOLOR;
+        if(i == last_slice)set_slicecolor = SET_SLICECOLOR;
+        readslice(slicei->file,i,LOAD,set_slicecolor,&errorcode);
       }
     }
   }
@@ -3754,7 +3797,7 @@ void LoadMultiVSliceMenu(int value){
       }
       break;
 #endif      
-        default:
+      default:
         ASSERT(FFALSE);
         break;
     }
@@ -3783,13 +3826,28 @@ void LoadMultiSliceMenu(int value){
       }
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
-      for(i=0;i<mslicei->nslices;i++){
+      int last_slice; 
+
+      last_slice = mslicei->nslices - 1;
+      for(i = mslicei->nslices-1; i >=0; i--){
         slicedata *slicei;
 
         slicei = sliceinfo + mslicei->islices[i];
+        if(slicei->skip == 0 && slicei->loaded == 0 || slicei->skip == 1 && slicei->loaded == 1){
+          last_slice = i;
+          break;
+        }
+      }
+      for(i = 0; i<mslicei->nslices; i++){
+        slicedata *slicei;
+
+        slicei = sliceinfo + mslicei->islices[i];
+        global_set_slicecolor = DEFER_SLICECOLOR;
+        if(last_slice == i)global_set_slicecolor = SET_SLICECOLOR;
         if(slicei->skip==0&&slicei->loaded==0)LoadSliceMenu(mslicei->islices[i]);
         if(slicei->skip==1&&slicei->loaded==1)UnloadSliceMenu(mslicei->islices[i]);
       }
+      global_set_slicecolor=-1;
       if(mslicei->nslices>0&&mslicei->islices[0]>=nsliceinfo-nfedinfo){
         output_mfed_csv(mslicei);
       }
@@ -3832,7 +3890,10 @@ void LoadMultiSliceMenu(int value){
       }
       break;
 #endif      
-
+      case MENU_SLICECOLORDEFER:
+        use_set_slicecolor = 1 - use_set_slicecolor;
+        updatemenu = 1;
+        break;
       default:
       ASSERT(FFALSE);
       break;
@@ -8454,6 +8515,12 @@ updatemenu=0;
           glutAddMenuEntry("-", MENU_DUMMY);
         }
 #endif        
+        if(use_set_slicecolor==1){
+          glutAddMenuEntry("  *defer slice coloring", MENU_SLICECOLORDEFER);
+        }
+        else{
+          glutAddMenuEntry("  defer slice coloring", MENU_SLICECOLORDEFER);
+        }
         if(nmultisliceloaded>1){
           glutAddSubMenu(_("Unload"),unloadmultislicemenu);
         }

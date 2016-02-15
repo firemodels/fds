@@ -6465,6 +6465,12 @@ typedef struct {
         vi->yvent2 = yplttemp[jv2]; 
         vi->zvent1 = zplttemp[kv1]; 
         vi->zvent2 = zplttemp[kv2];
+        vi->xvent1_orig = xplttemp[iv1];
+        vi->xvent2_orig = xplttemp[iv2];
+        vi->yvent1_orig = yplttemp[jv1];
+        vi->yvent2_orig = yplttemp[jv2];
+        vi->zvent1_orig = zplttemp[kv1];
+        vi->zvent2_orig = zplttemp[kv2];
         vi->imin = iv1;
         vi->imax = iv2;
         vi->jmin = jv1;
@@ -7692,7 +7698,14 @@ typedef struct {
   makeiblank_carve();
   makeiblank_smoke3d();
   makeiblank_all();
+#ifdef pp_THREADIBLANK
+  if(runscript == 1){
+    JOIN_IBLANK
+  }
+#endif
+  LOCK_IBLANK
   SetVentDirs();
+  UNLOCK_IBLANK
   UpdateFaces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
