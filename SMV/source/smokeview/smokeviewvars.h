@@ -20,7 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN int SVDECL(update_setvents, 0), SVDECL(global_set_slicecolor, -1);
+SVEXTERN int SVDECL(update_setvents, 0);
 #ifdef pp_SLICECOLORDEFER
 SVEXTERN int SVDECL(use_set_slicecolor, 1);
 #else

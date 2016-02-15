@@ -6977,6 +6977,7 @@ typedef struct {
       sd->autoload=0;
       sd->display=0;
       sd->loaded=0;
+      sd->loading = 0;
       sd->qslicedata=NULL;
       sd->compindex=NULL;
       sd->slicecomplevel=NULL;
@@ -7235,6 +7236,7 @@ typedef struct {
       isoi->autoload=0;
       isoi->blocknumber=blocknumber;
       isoi->loaded=0;
+      isoi->loading = 0;
       isoi->display=0;
       isoi->dataflag=dataflag;
       isoi->geomflag=geomflag;

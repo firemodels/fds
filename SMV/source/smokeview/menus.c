@@ -3643,6 +3643,31 @@ void DefineAllFEDs(void){
   exit(0);
 }
 
+/* ------------------ LoadSlicei ------------------------ */
+
+void LoadSlicei(int set_slicecolor, int value){
+  slicedata *slicei;
+  int errorcode;
+
+  slicei = sliceinfo + value;
+  slicei->loading=1;
+  if(script_multislice == 0 && scriptoutstream != NULL){
+    fprintf(scriptoutstream, "LOADSLICEM\n");
+    fprintf(scriptoutstream, " %s\n", slicei->label.longlabel);
+    fprintf(scriptoutstream, " %i %f\n", slicei->idir, slicei->position_orig);
+    fprintf(scriptoutstream, " %i\n", slicei->blocknumber + 1);
+  }
+  if(scriptoutstream == NULL || defer_file_loading == 0){
+    if(value < nsliceinfo - nfedinfo){
+      readslice(slicei->file, value, LOAD, set_slicecolor, &errorcode);
+    }
+    else{
+      readfed(value, LOAD, FED_SLICE, &errorcode);
+    }
+  }
+  slicei->loading=0;
+}
+
 /* ------------------ LoadSliceMenu ------------------------ */
 
 void LoadSliceMenu(int value){
@@ -3651,27 +3676,7 @@ void LoadSliceMenu(int value){
   if(value==MENU_DUMMY)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    slicedata *slicei;
-
-    slicei = sliceinfo + value;
-    if(script_multislice==0&&scriptoutstream!=NULL){
-      fprintf(scriptoutstream, "LOADSLICEM\n");
-      fprintf(scriptoutstream, " %s\n", slicei->label.longlabel);
-      fprintf(scriptoutstream, " %i %f\n", slicei->idir, slicei->position_orig);
-      fprintf(scriptoutstream, " %i\n", slicei->blocknumber+1);
-    }
-    if(scriptoutstream==NULL||defer_file_loading==0){
-      if(value<nsliceinfo-nfedinfo){
-        int set_slicecolor;
-
-        set_slicecolor=SET_SLICECOLOR;
-        if(global_set_slicecolor!=-1)set_slicecolor=global_set_slicecolor;
-        readslice(slicei->file,value,LOAD,set_slicecolor,&errorcode);
-      }
-      else{
-        readfed(value,LOAD,FED_SLICE,&errorcode);
-      }
-    }
+    LoadSlicei(SET_SLICECOLOR,value);
   }
   else{
     if(value==UNLOAD_ALL){
@@ -3804,6 +3809,23 @@ void LoadMultiVSliceMenu(int value){
   }
 }
 
+/* ------------------ LoadAllMSlices ------------------------ */
+
+void LoadAllMSlices(int last_slice, multislicedata *mslicei){
+  int i;
+
+  for(i = 0; i < mslicei->nslices; i++){
+    slicedata *slicei;
+    int set_slicecolor;
+
+    slicei = sliceinfo + mslicei->islices[i];
+    set_slicecolor = DEFER_SLICECOLOR;
+    if(last_slice == i)set_slicecolor = SET_SLICECOLOR;
+    if(slicei->skip == 0 && slicei->loaded == 0){
+      LoadSlicei(set_slicecolor,mslicei->islices[i]);
+    }
+  }
+}
 
 /* ------------------ LoadMultiSliceMenu ------------------------ */
 
@@ -3833,21 +3855,18 @@ void LoadMultiSliceMenu(int value){
         slicedata *slicei;
 
         slicei = sliceinfo + mslicei->islices[i];
-        if(slicei->skip == 0 && slicei->loaded == 0 || slicei->skip == 1 && slicei->loaded == 1){
+        if(slicei->skip == 0 && slicei->loaded == 0){
           last_slice = i;
           break;
         }
       }
-      for(i = 0; i<mslicei->nslices; i++){
+      for(i = 0; i < mslicei->nslices; i++){
         slicedata *slicei;
 
         slicei = sliceinfo + mslicei->islices[i];
-        global_set_slicecolor = DEFER_SLICECOLOR;
-        if(last_slice == i)global_set_slicecolor = SET_SLICECOLOR;
-        if(slicei->skip==0&&slicei->loaded==0)LoadSliceMenu(mslicei->islices[i]);
-        if(slicei->skip==1&&slicei->loaded==1)UnloadSliceMenu(mslicei->islices[i]);
+        if(slicei->skip == 1 && slicei->loaded == 1)UnloadSliceMenu(mslicei->islices[i]);
       }
-      global_set_slicecolor=-1;
+      LoadAllMSlices(last_slice,mslicei);
       if(mslicei->nslices>0&&mslicei->islices[0]>=nsliceinfo-nfedinfo){
         output_mfed_csv(mslicei);
       }
@@ -3967,52 +3986,75 @@ void LoadPlot3dMenu(int value){
   glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
 }
 
+/* ------------------ LoadIsoi ------------------------ */
+
+void LoadIsoi(int value){
+  char *file;
+  isodata *isoi;
+  int errorcode;
+
+  ReadIsoFile=1;
+  isoi = isoinfo + value;
+  file=isoi->file;
+  isoi->loading=1;
+  if(script_iso==0&&scriptoutstream!=NULL){
+    fprintf(scriptoutstream,"LOADISOM\n");
+    fprintf(scriptoutstream, " %s\n", isoi->surface_label.longlabel);
+    fprintf(scriptoutstream, " %i\n", isoi->blocknumber+1);
+  }
+  if(scriptoutstream==NULL||defer_file_loading==0){
+    readiso(file,value,LOAD,NULL,&errorcode);
+    if(update_readiso_geom_wrapup == UPDATE_ISO_ONE_NOW)readiso_geom_wrapup();
+  }
+  isoi->loading=0;
+}
+
+  /* ------------------ LoadAllIsos ------------------------ */
+
+void LoadAllIsos(int iso_type){
+  int i;
+
+  for(i = 0; i < nisoinfo; i++){
+    isodata *isoi;
+
+    isoi = isoinfo + i;
+    if(iso_type == isoi->type)LoadIsoi(i);
+  }
+}
+
 /* ------------------ LoadIsoMenu ------------------------ */
 
 void LoadIsoMenu(int value){
   int errorcode;
   int i;
   int ii;
-  isodata *isoii, *isoi;
 
   if(value==MENU_DUMMY3)return;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    char *file;
-
-    ReadIsoFile=1;
-    file=isoinfo[value].file;
-    if(script_iso==0&&scriptoutstream!=NULL){
-      fprintf(scriptoutstream,"LOADISOM\n");
-      fprintf(scriptoutstream, " %s\n", isoinfo[value].surface_label.longlabel);
-      fprintf(scriptoutstream, " %i\n", isoinfo[value].blocknumber+1);
-    }
-    if(scriptoutstream==NULL||defer_file_loading==0){
-      readiso(file,value,LOAD,NULL,&errorcode);
-      if(update_readiso_geom_wrapup == UPDATE_ISO_ONE_NOW)readiso_geom_wrapup();
-    }
+    LoadIsoi(value);
   }
   if(value==-1){
     for(i=0;i<nisoinfo;i++){
-      isoii = isoinfo + i;
-      if(isoii->loaded==1)readiso("",i,UNLOAD,NULL,&errorcode);
+      isodata *isoi;
+
+      isoi = isoinfo + i;
+      if(isoi->loaded==1)readiso("",i,UNLOAD,NULL,&errorcode);
     }
   }
   if(value<=-10){
+    isodata *isoi;
+
     ii = -(value + 10);
-    isoii = isoinfo + ii;
+    isoi = isoinfo + ii;
     if(scriptoutstream!=NULL){
       script_iso=1;
       fprintf(scriptoutstream,"LOADISO\n");
-      fprintf(scriptoutstream," %s\n",isoii->surface_label.longlabel);
+      fprintf(scriptoutstream," %s\n",isoi->surface_label.longlabel);
     }
     if(scriptoutstream==NULL||defer_file_loading==0){
       update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
-      for(i=0;i<nisoinfo;i++){
-        isoi = isoinfo + i;
-        if(isoii->type!=isoi->type)continue;
-        LoadIsoMenu(i);
-      }
+      LoadAllIsos(isoi->type);
       if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
       update_readiso_geom_wrapup = UPDATE_ISO_OFF;
     }
