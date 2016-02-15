@@ -181,20 +181,23 @@ void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata 
   int i;
   float rmin, rmax;
 
-  NewMemory((void **)&histogram->rvals,nvals*sizeof(float));
-  for(i = 0; i < nvals; i++){
+  if(nvals<=0)return;
+
+  rmin = sqrt(uvals[0]*uvals[0]+vvals[0]*vvals[0]);
+  rmax = rmin;
+ 
+  for(i = 1; i < nvals; i++){
     float r, theta;
     float u, v;
     int ix, iy, ixy;
 
     u = uvals[i];
     v = vvals[i];
-    histogram->rvals[i] = sqrt(u*u + v*v);
+    r = sqrt(u*u + v*v);
+    rmin = MIN(rmin,r);
+    rmax = MAX(rmax,r);
   }
 
-  copy_data2histogram(histogram->rvals, nvals, histogram);
-  rmin = histogram->valmin;
-  rmax = histogram->valmax;
 
   for(i = 0; i < nvals; i++){
     float r, theta;
@@ -203,19 +206,19 @@ void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, histogramdata 
 
     u = uvals[i];
     v = vvals[i];
-    r = histogram->rvals[i];
+    r = sqrt(u*u + v*v);
 
     ix = 0;
     if(rmax>rmin)ix = CLAMP(histogram->nx*(r - rmin) / (rmax - rmin),0,histogram->nx-1);
 
     theta = RAD2DEG*atan2(v, u);
     if(theta < 0.0)theta += 360.0;
+    theta = CLAMP(theta,0.0,360.0);
     iy = CLAMP(histogram->ny*(theta / 360.0),0,histogram->ny-1);
 
     ixy = ix + iy*histogram->nx;
     histogram->buckets_2d[ixy]++;
   }
-  FREEMEMORY(histogram->rvals);
 }
 
 /* ------------------ update_histogram ------------------------ */
@@ -242,7 +245,7 @@ void update_uvhistogram(float *uvals, float *vvals, int nvals, histogramdata *hi
 
   histogramdata histogram_from;
 
-  if(nvals <= 0)return;
+  if(nvals <= 0||uvals==NULL||vvals==NULL||histogram_to==NULL)return;
   histogram_from.buckets = NULL;
   histogram_from.buckets_2d = NULL;
   init_histogram2d(&histogram_from, histogram_to->nx, histogram_to->ny);
