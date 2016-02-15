@@ -8,8 +8,8 @@ set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
-set in_pdf=%svn_root%\..\FIRE-LOCAL\reports\fds_manuals\
-set in_intel_dll=%svn_root%\..\FIRE-LOCAL\LIBS\WINDOWS
+set in_pdf=%userprofile%\FIRE-LOCAL\reports\fds_manuals\
+set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_setpath=%svn_root%\Utilities\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
@@ -21,7 +21,7 @@ set in_background=%svn_root%\Utilities\background
 set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
-set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2
+set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
 set uploads=%svn_root%\Utilities\uploads
 set basedir=%uploads%\%basename%
@@ -213,9 +213,6 @@ echo.
 echo ***Compressing FDS/Smokeview distribution
 echo.
 
-cd "%svn_root%\..\Google Drive\Bundle_Versions"
-set gupload=%CD%
-
 cd %uploads%
 if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%
@@ -232,8 +229,6 @@ echo Setup is about to install FDS %fds_version% and Smokeview %smv_version% > %
 echo Press Setup to begin installation. > %bundleinfo%\main.txt
 if exist %basename%.exe erase %basename%.exe
 wzipse32 %basename%.zip -runasadmin -a %bundleinfo%\about.txt -st"FDS %fds_version% Smokeview %smv_version% Setup" -d "c:\Program Files\firemodels\FDS6" -c wrapup_fds_install.bat
-
-IF EXIST "%gupload%" CALL :COPY %basename%.exe "%gupload%"
 
 echo.
 echo ***FDS/Smokeview win%platform% bundle built
