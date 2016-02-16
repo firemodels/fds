@@ -1,5 +1,1 @@
-<<<<<<< HEAD
 Git-r6-590-g0e39913
-=======
-Git-r6-26-g022fdde
->>>>>>> firemodels/development
