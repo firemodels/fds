@@ -516,7 +516,7 @@ typedef struct _isodata {
   int firstshort;
   flowlabels surface_label, color_label;
   geomdata *geominfo;
-  int blocknumber,display,loaded;
+  int blocknumber,display,loaded,loading;
   float tmin,tmax;
   float valmin_data, valmax_data;
   int extreme_min, extreme_max;
@@ -905,6 +905,7 @@ typedef struct _device{
 /* --------------------------  pilot ------------------------------------ */
 
 typedef struct {
+  histogramdata histogram;
   int nbuckets;
   float total, *fraction,*vel;
 } pilotdata;
@@ -1154,7 +1155,7 @@ typedef struct _slicedata {
   float *constant_color;
   float qval256[256];
   char slicedir[50];
-  int loaded, display;
+  int loaded, loading, display;
   int loaded_save, display_save;
   int num_memblocks;
   float position_orig;

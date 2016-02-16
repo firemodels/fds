@@ -1038,7 +1038,7 @@ void InitOpenGL(void){
       isodata *isoi;
 
       isoi = isoinfo + i;
-      if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,NULL,&errorcode);
+      if(isoi->autoload==0&&isoi->loaded==1)readiso(isoi->file,i,UNLOAD,NULL,&errorcode);
       if(isoi->autoload == 1){
         readiso(isoi->file, i, LOAD,NULL, &errorcode);
       }

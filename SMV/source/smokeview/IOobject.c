@@ -6054,12 +6054,15 @@ int is_dup_device_label(int index, int direction){
 /* ----------------------- setup_pilot_data ----------------------------- */
 
 #ifdef pp_PILOT
+#ifdef pp_WINDROSE
+void setup_pilot_data(int nbuckets, int nr, int ntheta, int flag){
+#else
 void setup_pilot_data(int nbuckets){
+#endif
   int i;
   float dangle;
 
   dangle = 360.0 / (float)nbuckets;
-
   for(i = 0; i < nvdeviceinfo; i++){
     vdevicedata *vdevicei;
     devicedata *udev, *vdev, *wdev;
@@ -6115,6 +6118,20 @@ void setup_pilot_data(int nbuckets){
           piloti->vel[ibucket] += vel;
         }
       }
+#ifdef pp_WINDROSE
+      {
+        float rmin, rmax;
+        histogramdata *histogram;
+
+        histogram = &(piloti->histogram);
+        if(flag != FIRST_TIME){
+          free_histogram2d(histogram);
+        }
+        init_histogram2d(histogram, nr, ntheta);
+        get_2dminmax(udev->vals, vdev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        copy_uvdata2histogram(udev->vals,vdev->vals,nvals,rmin,rmax,histogram);
+      }
+#endif
     }
     else if(angledev != NULL&&veldev != NULL){
       int nvals;
@@ -6130,6 +6147,20 @@ void setup_pilot_data(int nbuckets){
         piloti->fraction[ibucket]++;
         piloti->vel[ibucket] += vel;
       }
+#ifdef pp_WINDROSE
+      {
+        float rmin, rmax;
+        histogramdata *histogram;
+
+        histogram = &(piloti->histogram);
+        if(flag != FIRST_TIME){
+          free_histogram2d(histogram);
+        }
+        init_histogram2d(histogram, nr, ntheta);
+        get_polarminmax(veldev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        copy_polardata2histogram(veldev->vals,angledev->vals,nvals,rmin,rmax,histogram);
+      }
+#endif
     }
     else{
       continue;
@@ -6399,7 +6430,11 @@ void setup_device_data(void){
 
   // convert velocities to pilot chart format
 #ifdef pp_PILOT
+#ifdef pp_WINDROSE
+  setup_pilot_data(npilot_buckets,npilot_nr,npilot_ntheta,FIRST_TIME);
+#else
   setup_pilot_data(npilot_buckets);
+#endif
 #endif
 
   FREEMEMORY(vals);

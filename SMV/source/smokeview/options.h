@@ -47,7 +47,6 @@
 #define pp_THREAD
 #endif
 
-
 #define _CRT_SECURE_NO_DEPRECATE
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,6 +55,7 @@
 
 #ifdef pp_BETA
 #define pp_PILOT
+//#define pp_WINDROSE  2d histogram, variation of pilot ddata
 #define pp_GEOMTEST
 #define pp_HAZARD
 //#define pp_GPUDEPTH
