@@ -25,16 +25,18 @@
 
 -->
 
-<li>6.3.4 - (build: xxx) Feb yy, 2016</li>
+<li>6.3.4 - (build: xxx) Feb 16, 2016</li>
 <ol>
 <li>enhancement: add velocity profile visualization for FDS generated device data
 <li>enhancement: add option to show/hide cutcell faces when displaying geometry slice files
-<li>usability: parse IBLANK_SMV value sent from FDS
+<li>usability: speed up multiple slice file loading by deferring bound computation and
+color setting until all slices are loaded
+<li>usability: improve visualization of large cases by speeding up data structure initialization
 <li>usability: add dialog box widgets for selecting which slices to display when they coincide
-<li> fix: trap for some NULL pointers when -noblank option is invoked -
-addresses issue 3444
-<li>fixes: use a couple of fixes identified by Jake O'Shannessy in pull request 3439
-<li>code cleanup: improve readability of menu routines
+<li> fix: check for NULL pointers when -noblank option is invoked -
+     (<a href="https://github.com/firemodels/fds-smv/issues/3444">Issue 3444</a>)
+<li>fixes: implement fixes identified in pull request 3439
+<li>code cleanup: improve menu routine readability
 </ol>
 
 <li>6.3.3 - (build: Git-r6-0-g9379bf1) January 5, 2016</li>
