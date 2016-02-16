@@ -7,6 +7,9 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define FIRST_TIME 1
+#define NOT_FIRST_TIME 2
+
 #define SET_SLICECOLOR 0
 #define DEFER_SLICECOLOR 1
 

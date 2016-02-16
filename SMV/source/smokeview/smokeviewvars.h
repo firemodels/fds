@@ -43,6 +43,10 @@ SVEXTERN float SVDECL(northangle, 0.0);
 SVEXTERN int SVDECL(vis_northangle, 0), SVDECL(have_northangle,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(npilot_buckets, 8);
+#ifdef pp_WINDROSE
+SVEXTERN int SVDECL(npilot_nr, 8);
+SVEXTERN int SVDECL(npilot_ntheta, 12);
+#endif
 SVEXTERN int SVDECL(pilot_viewtype, 0);
 #endif
 SVEXTERN int SVDECL(ngeomdiaginfo, 0), SVDECL(show_geometry_diagnostics,0);

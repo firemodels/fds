@@ -905,6 +905,7 @@ typedef struct _device{
 /* --------------------------  pilot ------------------------------------ */
 
 typedef struct {
+  histogramdata histogram;
   int nbuckets;
   float total, *fraction,*vel;
 } pilotdata;
