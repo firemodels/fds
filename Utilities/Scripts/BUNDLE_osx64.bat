@@ -19,12 +19,12 @@ Rem location of batch files used to set up Intel compilation environment
 call %envfile%
 
 set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx64
-plink %svn_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.csh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
+plink %osx_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.csh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
 
 set manifest=%svn_root%\Utilities\uploads\manifest_osx_64.html
 echo Downloading manifest
 erase %manifest%
-pscp %svn_logon%:manifest_osx_64.html %manifest%
+pscp %osx_logon%:manifest_osx_64.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
