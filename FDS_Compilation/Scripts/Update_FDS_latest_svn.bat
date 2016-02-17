@@ -33,6 +33,6 @@ plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% %linu
 
 echo.
 echo Updating %linux_fdsdir% in the OSX repository on %osx_hostname% to the latest revision
-plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% %osx_hostname%
+plink %osx_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_fdsdir% %osx_hostname%
 
 pause
