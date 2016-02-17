@@ -30,10 +30,10 @@ set scriptdir=%linux_svn_root%/SMV/scripts
 set bundledir=%linux_svn_root%/SMV/uploads
 
 echo making 64 bit Linux test distribution archive
-plink %svn_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision% %linux_svn_root%
+plink %linux_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision% %linux_svn_root%
 
 echo downloading Linux Smokeview files
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\uploads\.
+pscp %linux_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\uploads\.
 
 echo copying ..\uploads\smv_test_%smv_revision%_linux64.sh to %gupload%
 copy ..\uploads\smv_test_%smv_revision%_linux64.sh "%gupload%"

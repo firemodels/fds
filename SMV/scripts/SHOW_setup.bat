@@ -48,7 +48,8 @@ echo.
 echo linux_hostname=%linux_hostname%
 echo osx_hostname=%osx_hostname%
 echo linux_username=%linux_username%
-echo svn_logon=%svn_logon%
+echo linux_logon=%linux_logon%
+echo osx_logon=%osx_logon%
 
 echo.
 echo Press any key to continue
