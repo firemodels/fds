@@ -27,11 +27,11 @@ mkdir %fdsrootdir%
 
 echo.
 echo moving 64 bit OSX fds files to an interim directory
-plink %svn_logon% %scriptdir%/bundle_osx_64.csh %linux_svn_root% %linux_svn_root%
+plink %osx_logon% %scriptdir%/bundle_osx_64.csh %linux_svn_root% %linux_svn_root%
 
 echo.
 echo downloading 64 bit OSX fds files
-pscp %svn_logon%:%scriptdir%/uploads/fds_intel_osx_64 %fdsrootdir%\fds_intel_osx_64
+pscp %osx_logon%:%scriptdir%/uploads/fds_intel_osx_64 %fdsrootdir%\fds_intel_osx_64
 Rem pscp %svn_logon%:%scriptdir%/uploads/fds_mpi_intel_osx_64 %fdsrootdir%\fds_mpi_intel_osx_64
 
 echo.
