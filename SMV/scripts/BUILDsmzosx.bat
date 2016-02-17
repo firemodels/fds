@@ -25,7 +25,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmzosx.csh %smv_revision%
+plink %osx_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmzosx.csh %smv_revision%
 
 echo.
 echo compilation complete

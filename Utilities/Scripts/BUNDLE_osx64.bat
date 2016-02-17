@@ -29,6 +29,6 @@ start explorer %manifest%
 
 echo Downloading compressed archive to:
 echo   %svn_root%\Utilities\uploads\%bundledir%.sh
-pscp %svn_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
+pscp %osx_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
 
 pause
