@@ -644,6 +644,17 @@ In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 
 \label{fig:scaling_tests}
 \end{figure}
 
+\subsection{Running Very Large Jobs}
+
+Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one to one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
+\begin{enumerate}
+\item Use MPI only. OpenMP will probably not speed up the run time appreciably, and it will consume cores that could be put to better use running more MPI processes.
+\item For jobs using thousands of meshes/processes, add the parameter {\ct SHARED\_FILE\_SYSTEM=.FALSE.} to the {\ct MISC} line. This directs FDS to break up the Smokeview ({\ct .smv}) file according to MPI process. This will greatly speed up the preliminary part of the simulation because the Smokeview file is written serially, not in parallel. For a modest number of meshes, this serial write is not a problem, but for thousands of meshes, the initialization routines can take hours. When the job completes, you can reconstruct the Smokeview file by appending the numbered files, {\ct CHID\_n.smv}, to the main Smokeview file, {\ct CHID.smv}.
+\item Set {\ct DT\_CPU} to some convenient time interval on the {\ct DUMP} line. This parameter directs FDS to periodically write out a file ({\ct CHID\_cpu.csv}) that records the wall clock time that each MPI process consumes in the major subroutines. This can help you determine if any of the MPI processes spend an inordinate amount of time idling. 
+\item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly. 
+\item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until you reach a point where the increased number of meshes/processes does not provide a significant speed up. 
+\end{enumerate}
+
 
 \section{Monitoring Progress}
 \label{info:monitoring_progress}
@@ -3928,7 +3939,7 @@ where $\Delta p$ is the pressure difference between the adjacent compartments (i
 In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
 \be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
 By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
- 
+
 The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
 FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be increased if needed by the parameter {\ct MAX\_LEAK\_PATHS} on the {\ct MISC} line.
