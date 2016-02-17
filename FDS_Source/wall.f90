@@ -934,7 +934,7 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
 
       ! If the current time is before the "activation" time, T_IGN, apply simple BCs and get out
 
-      IF (T < T_IGN) THEN
+      IF (T < T_IGN .OR. INITIALIZATION_PHASE) THEN
          IF (.NOT.SOLID(CELL_INDEX(IIG,JJG,KKG)) .AND. PRESENT(WALL_INDEX)) THEN
             WC%ZZ_F(1:N_TRACKED_SPECIES) = ZZP(IIG,JJG,KKG,1:N_TRACKED_SPECIES)
          ENDIF
