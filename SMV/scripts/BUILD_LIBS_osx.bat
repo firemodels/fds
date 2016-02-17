@@ -23,7 +23,7 @@ cd %svn_root%\SMV\scripts
 set scriptdir=%linux_svn_root%/Utilities/Scripts
 set LIBDIR=%linux_svn_root%/SMV/Build/LIBS
 
-plink %svn_logon% %scriptdir%/ssh_command2.csh %osx_hostname% %LIBDIR%/lib_osx_intel_64 makelibs.sh
+plink %osx_logon% %scriptdir%/ssh_command2.csh %osx_hostname% %LIBDIR%/lib_osx_intel_64 makelibs.sh
 
 echo.
 echo build complete

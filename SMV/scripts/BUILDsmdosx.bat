@@ -25,7 +25,7 @@ cd %svn_root%\smv\scripts
 set scriptdir=%linux_svn_root%/SMV/scripts
 echo Building OSX version of smokediff
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmdosx.csh
+plink %osx_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEsmdosx.csh
 
 echo.
 echo compilation complete
