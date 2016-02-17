@@ -32,11 +32,11 @@ set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.
-echo Updating the Linux repository, %linux_svn_root%, on %linux_hostname% to the latest revision
+echo Updating the Linux GIT repository, %linux_svn_root%, on %linux_hostname% to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %linux_hostname%
 
 echo.
-echo Updating the OSX repository, %linux_svn_root%, on %osx_hostname% to the latest revision
+echo Updating the OSX GIT repository, %linux_svn_root%, on %osx_hostname% to the latest revision
 plink %svn_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %osx_hostname%
 
 pause
