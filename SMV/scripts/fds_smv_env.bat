@@ -24,8 +24,6 @@ set fdswikirepo=%userprofile%\FDS-SMVwikis
 
 :: ---------- User/Host names -----------------
 
-set svn_logon=%linux_username%@%linux_hostname%
-
 set linux_hostname=blaze.nist.gov
 set linux_username=%username%
 set linux_logon=%linux_username%@%linux_hostname%
@@ -33,6 +31,8 @@ set linux_logon=%linux_username%@%linux_hostname%
 set osx_hostname=192.168.1.5
 set osx_username=%username%
 set osx_logon=%osx_username%@%osx_hostname%
+
+set svn_logon=%linux_username%@%linux_hostname%
 
 :: ----------- for uploading to Bintray -----------------
 
