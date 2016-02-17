@@ -26,7 +26,7 @@ cd %svn_root%\smv\scripts
 set exe=smv_test_%smv_revision%_linux64.sh
 
 echo updating 64 bit test smokeview
-plink %svn_logon% %linux_svn_root%/SMV/uploads/%exe% y
+plink %linux_logon% %linux_svn_root%/SMV/uploads/%exe% y
 
 
 pause
