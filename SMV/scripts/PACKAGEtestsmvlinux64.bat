@@ -1,5 +1,5 @@
 @echo off
-Title Packaging test Smokeview for 64 bit Linux
+Title Building 64 bit linux test Smokeview bundle
 
 Rem  Windows batch file to create an achive for a 64 bit Linux test smokeview
 
@@ -21,9 +21,6 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
@@ -34,8 +31,5 @@ plink %linux_logon% %scriptdir%/MAKEtestdistlinux64.csh %smv_revision% %linux_sv
 
 echo downloading Linux Smokeview files
 pscp %linux_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\uploads\.
-
-echo copying ..\uploads\smv_test_%smv_revision%_linux64.sh to %gupload%
-copy ..\uploads\smv_test_%smv_revision%_linux64.sh "%gupload%"
 
 pause

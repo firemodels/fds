@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit Linux background
 
 ::  Windows batch file to build a Linux version of background
 
