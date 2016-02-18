@@ -20,9 +20,6 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\smv\scripts
 set version=%smv_version%
 
@@ -34,8 +31,5 @@ plink %linux_logon% %scriptdir%/MAKEdistgen.csh %version% linux 64 %linux_hostna
 
 echo downloading Linux Smokeview files
 pscp %linux_logon%:%bundledir%/smv_%version%_linux64.sh ..\uploads\.
-
-echo copying ..\uploads\smv_%version%_linux64.sh to %gupload%
-copy ..\uploads\smv_%version%_linux64.sh "%gupload%"
 
 pause

@@ -28,9 +28,6 @@ set zipbase=smv_%version%_win%platform%
 set smvdir=%svn_root%\SMV\uploads\%zipbase%
 set sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\SMV\for_bundle
 
 echo.
@@ -93,9 +90,6 @@ echo.
 wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\firemodels\%smv_edition%" -c wrapup_smv_install.bat
 
 CALL :COPY %zipbase%.exe ..\.
-IF not EXIST "%gupload%" goto skip_gupload
-  CALL :COPY %zipbase%.exe "%gupload%"
-:skip_gupload
 
 echo.
 echo ***Smokeview win%platform% test bundle built

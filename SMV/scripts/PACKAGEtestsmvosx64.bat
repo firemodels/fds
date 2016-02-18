@@ -21,9 +21,6 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
@@ -34,8 +31,5 @@ plink %osx_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname
 
 echo downloading OSX test distribution archive
 pscp %osx_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\uploads\.
-
-echo copying ..\uploads\smv_test_%smv_revision%_osx64.sh to %gupload%
-copy ..\uploads\smv_test_%smv_revision%_osx64.sh "%gupload%"
 
 pause
