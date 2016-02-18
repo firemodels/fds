@@ -9,20 +9,18 @@
 
 <h3>Preliminaries</h3>
 <ul>
-<li>Update version info in 
-<a href="scripts/EDIT_options.bat">options.h</a>, <a href="scripts/EDIT_main.bat">main.c</a>, then commit.
 <li><a href="scripts/EDIT_setup.bat">Update</a> configuration file.
+<li><a href="scripts/EDIT_options.bat">Update</a> smokeview version string.
+<li><a href="scripts/GET_smvlog.bat">Copy</a> smokeview log entries into the release notes (from <a href="scripts/EDIT_setup.bat">smvdate</a> in config file).
+<li><a href="scripts/EDIT_release_notes.bat">Edit release notes</a>
+<li><a href="scripts/VIEW_release_notes.bat">View release notes</a>
+<li>Get Smokeview <a href="scripts/GET_smvtest_version.bat">test version,</a> <a href="scripts/GET_smv_version.bat">release version</a>
+</ul>
+<h4>Repo</h4>
+<ul>
 <li>Update <a href="scripts/Update_windows_repos_gitlatest.bat">windows</a>, <a href="scripts/Update_repos_gitlatest.bat">all</a> repositories.
-<li>Update <a href="scripts/Update_windows_repos_githash.bat">windows</a>, <a href="scripts/Update_repos_githash.bat">all</a> repositories to git hash/tag specified in configuration file.
-<li><a href="scripts/EDIT_release_notes.bat">Update</a>, 
-<a href="scripts/VIEW_release_notes.bat">view</a> 
-release notes, then commit.
-<li><a href="scripts/GET_smvlog.bat">Copy</a> smokeview's git log entries to the release notes.<br>
-The log entries are copied from the date, smvdate, specified in the <a href="scripts/EDIT_setup.bat">configuration file</a>
-<li>Get Smokeview 
-<a href="scripts/GET_smvtest_version.bat">test version,</a>
-<a href="scripts/GET_smv_version.bat">release version</a>
-<li>Get <a href="scripts/GET_revision.bat">repo git hash</a>
+<li>Update <a href="scripts/Update_windows_repos_githash.bat">windows</a>, <a href="scripts/Update_repos_githash.bat">all</a> repositories to git hash specified in configuration file.
+<li>Get <a href="scripts/GET_revision.bat">git hash</a>
 </ul>
 
 <h3>Libraries</h3>
