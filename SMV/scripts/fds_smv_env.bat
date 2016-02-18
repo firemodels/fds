@@ -8,7 +8,11 @@ set fds_version=test
 set fds_revision=59edcfc
 
 set fdssmv_major_version=6
+
+:: used to retrieve smokeview release notes
 set smvdate="1-Nov-2015"
+
+:: used to checkout a particular revision
 set githash=5c2cfb1
 
 :: ---------- FDS-Smokeview repository settings ------------
@@ -31,5 +35,3 @@ set linux_logon=%linux_username%@%linux_hostname%
 set osx_hostname=bluesky.el.nist.gov
 set osx_username=%username%
 set osx_logon=%osx_username%@%osx_hostname%
-
-set svn_logon=%linux_username%@%linux_hostname%
