@@ -1,8 +1,8 @@
 @echo off
 
-Title Install FDS and Smokeview for 64 bit Windows
+Title Install 64 bit Windows bundle
 
-Rem Windows batch file to upload 64 bit windows bundle to the google download site
+Rem Windows batch file to install 64 bit windows bundle
 
 set envfile="%userprofile%\fds_smv_env.bat"
 IF EXIST %envfile% GOTO endif_envexist
