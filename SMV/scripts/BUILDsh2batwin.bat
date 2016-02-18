@@ -1,5 +1,5 @@
 @echo off
-Title Building Smokediff for 64 bit Windows
+Title Building sh2bat for 64 bit Windows
 
 Rem setup environment variables (defining where repository resides etc) 
 

@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit Windows background
 
 Rem setup environment variables (defining where repository resides etc) 
 

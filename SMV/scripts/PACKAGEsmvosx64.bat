@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX release Smokeview bundle
 
 Rem  Windows batch file to create an OSX achive for an OSX smokeview
 

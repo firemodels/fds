@@ -1,5 +1,5 @@
 @echo off
-Title Packaging test Smokeview for 64 bit Linux
+Title Installing 64 bit Linux release Smokeview
 
 Rem  Windows batch file to create an achive for a 64 bit Linux test smokeview
 

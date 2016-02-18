@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX fds2ascii
 
 Rem  Windows batch file to build a release Smokeview for Linux 32.
 

@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit Linux release Smokeview bundle
 
 Rem  Windows batch file to create an achive for a 64 bit Linux smokeview
 

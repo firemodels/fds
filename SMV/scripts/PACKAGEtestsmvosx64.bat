@@ -1,5 +1,5 @@
 @echo off
-Title Packaging test Smokeview for 64 bit OSX
+Title Building 64 bit OSX test Smokeview bundle
 
 Rem  Windows batch file to create an OSX achive for an OSX test smokeview
 
