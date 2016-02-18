@@ -10,16 +10,9 @@
 <h3>Preliminaries</h3>
 <ul>
 <li><a href="scripts/EDIT_setup.bat">Update</a> configuration file.
-<li><a href="scripts/EDIT_options.bat">Update</a> smokeview version string.
-<li><a href="scripts/GET_smvlog.bat">Copy</a> smokeview log entries into the release notes (from <a href="scripts/EDIT_setup.bat">smvdate</a> in config file).
-<li><a href="scripts/EDIT_release_notes.bat">Edit release notes</a>
-<li><a href="scripts/VIEW_release_notes.bat">View release notes</a>
-<li>Get Smokeview <a href="scripts/GET_smvtest_version.bat">test version,</a> <a href="scripts/GET_smv_version.bat">release version</a>
-</ul>
-<h4>Repo</h4>
-<ul>
-<li>Update <a href="scripts/Update_windows_repos_gitlatest.bat">windows</a>, <a href="scripts/Update_repos_gitlatest.bat">all</a> repositories.
-<li>Update <a href="scripts/Update_windows_repos_githash.bat">windows</a>, <a href="scripts/Update_repos_githash.bat">all</a> repositories to git hash specified in configuration file.
+<li>Update repos: <a href="scripts/Update_repos_gitlatest.bat">latest revision</a>, <a href="scripts/Update_repos_githash.bat">hash specified</a> in config file.
+<li><a href="scripts/GET_smvlog.bat">Update</a>, <a href="scripts/EDIT_release_notes.bat">edit</a>, <a href="scripts/VIEW_release_notes.bat">view</a> release notes.<br>
+release notes updated from date given by <a href="scripts/EDIT_setup.bat">smvdate</a> in config file.
 <li>Get <a href="scripts/GET_revision.bat">git hash</a>
 </ul>
 
@@ -81,10 +74,11 @@
 <td align=center><a href="scripts/INSTALLsmvlinux64.bat">Install</a></td>
 <td align=center><a href="scripts/INSTALLsmvosx64.bat">Install</a></td>
 </tr>
+<tr><td align=center COLSPAN=3><a href="scripts/GET_smvtest_version.bat">Revision</a></td>
+<td align=center COLSPAN=3><a href="scripts/GET_smv_version.bat">Revision</a></td></tr>
 <tr><td align=center COLSPAN=3><a href="scripts/UPLOADsmv2google.bat">Upload to google drive</a></td>
 <td align=center COLSPAN=3><a href="scripts/UPLOADsmv2git.bat">Upload to git</a></td></tr>
 </table>
-
 
 <h3>Utilities</h3>
 <p><table border=on>
@@ -163,12 +157,10 @@
 <h3>Other</h3>
 <ul>
 <li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page. 
-<li><a href="scripts/EDIT_setup.bat">Edit</a> configuration file. 
-<li><a href="scripts/COPYhome2config.bat">configuration file ===>> FDS-SMV.</a>
-<li><a href="scripts/COPYconfig2home.bat">configuration file <<=== FDS-SMV.</a>
+<li><a href="scripts/COPYhome2config.bat">configuration file ===>> repo.</a>
+<li><a href="scripts/COPYconfig2home.bat">configuration file <<=== repo.</a>
 <li><a href="scripts/TEST_setup.bat">Test</a> settings and build/bundle environment. 
 <li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>.
-<li><a href="https://bintray.com/nist-fire-research/releases/SMV">Downloads</a>.
 </ul>
 
 <p><hr>
