@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX release Smokeview bundle
 
 Rem  Windows batch file to create an OSX achive for an OSX smokeview
 
@@ -20,9 +21,6 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\smv\scripts
 set version=%smv_version%
 
@@ -34,8 +32,5 @@ plink %osx_logon% %scriptdir%/MAKEdistgen.csh %version% osx 64 %osx_hostname% %f
 
 echo downloading 64 bit Smokeview OSX distribution archive
 pscp %osx_logon%:%bundledir%/smv_%version%_osx64.sh ..\uploads\.
-
-echo copying ..\uploads\smv_%version%_osx64.sh to %gupload%
-copy ..\uploads\smv_%version%_osx64.sh "%gupload%"
 
 pause

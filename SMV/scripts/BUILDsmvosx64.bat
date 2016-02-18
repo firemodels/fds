@@ -1,5 +1,5 @@
 @echo off
-Title Building Smokeview for 64 bit OSX
+Title Building relase Smokeview for 64 bit OSX
 
 Rem  Windows batch file to build Smokeview for all platforms.
 Rem  This script builds LInux and OSX Smokeview's by doing a

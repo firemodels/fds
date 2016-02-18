@@ -1,5 +1,5 @@
 @echo off
-Title Building Smokeview for 64 bit Windows
+Title Building release Smokeview for 64 bit Windows
 
 Rem  Windows batch file to build a release Smokeview for Windows 64.
 

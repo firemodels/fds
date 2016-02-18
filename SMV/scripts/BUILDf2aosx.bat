@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX fds2ascii
 
 ::  Windows batch file to build Linux version of smokezip
 

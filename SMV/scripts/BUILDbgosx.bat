@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX background
 
 Rem  Windows batch file to build an OSX version of background
 
