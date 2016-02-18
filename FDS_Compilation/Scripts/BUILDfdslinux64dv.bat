@@ -1,5 +1,5 @@
 @echo off
-Title Building Parallel FDS for 64 bit Linux
+Title Building dv FDS for 64 bit Linux
 
 Rem Batch file used to build a 32 bit version of FDS
 
