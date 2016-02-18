@@ -140,7 +140,7 @@ for i=1:length(input_file) % input_file loop
                 end
             end
         end
-        tmph(i) = (1./(z_h-zint(i)))*i1;
+        tmph(i) = max(tmpl(i),(1./(z_h-zint(i)))*i1);
 
         fprintf(fout,'%f, %f, %f, %f\n',t(i),zint(i),tmpl(i)-273,tmph(i)-273);
 

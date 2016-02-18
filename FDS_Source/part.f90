@@ -2123,6 +2123,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
                CALL SHUTDOWN(MESSAGE)
+               RETURN
             ENDIF
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
@@ -2349,6 +2350,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
+                     RETURN
                   ENDIF
                   CYCLE TIME_ITERATION_LOOP
                ENDIF
@@ -2362,6 +2364,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
+                     RETURN
                   ENDIF
                   CYCLE TIME_ITERATION_LOOP
                ENDIF
@@ -2423,6 +2426,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                   CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
+                  RETURN
                ENDIF
                CYCLE TIME_ITERATION_LOOP
             ENDIF

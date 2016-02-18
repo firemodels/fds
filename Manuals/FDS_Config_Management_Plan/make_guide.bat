@@ -1,5 +1,5 @@
 @echo off
-set paper=FDS_Configuration_Management_Plan
+set paper=FDS_Config_Management_Plan
 
 git describe --long --dirty > gitinfo.txt
 set /p gitrevision=<gitinfo.txt
