@@ -1,5 +1,5 @@
 @echo off
-Title Building Parallel FDS for 64 bit OSX
+Title Building Parallel debug FDS for 64 bit OSX
 
 Rem Batch file used to build a 64 bit version of FDS
 
