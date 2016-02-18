@@ -2,7 +2,7 @@
 :: ------ FDS/Smokeview version and revision numbers ---------
 
 set smv_version=6.3.4
-set smv_revision=b22a887
+set smv_revision=5c664c0
 
 set fds_version=test
 set fds_revision=59edcfc
@@ -28,13 +28,8 @@ set linux_hostname=blaze.nist.gov
 set linux_username=%username%
 set linux_logon=%linux_username%@%linux_hostname%
 
-set osx_hostname=192.168.1.5
+set osx_hostname=bluesky.el.nist.gov
 set osx_username=%username%
 set osx_logon=%osx_username%@%osx_hostname%
 
 set svn_logon=%linux_username%@%linux_hostname%
-
-:: ----------- for uploading to Bintray -----------------
-
-set bintray_api_key=%userprofile%\keys\bintray_api_key.txt
-set upload=%userprofile%\FIRE-LOCAL\repo_exes\curl
