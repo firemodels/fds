@@ -135,7 +135,7 @@ echo.
 
 CALL :COPY  "%bundleinfo%\FDS_Release_Notes.htm" "%out_guides%\FDS_Release_Notes.htm"
 
-CALL :COPY  %in_pdf%\FDS_Configuration_Management_Plan.pdf %out_guides%\.
+CALL :COPY  %in_pdf%\FDS_Config_Management_Plan.pdf %out_guides%\.
 
 CALL :COPY  %in_pdf%\FDS_User_Guide.pdf %out_guides%\.
 
