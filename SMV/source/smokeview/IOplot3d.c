@@ -1593,7 +1593,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dy_yzcopy=dy_yz;
     dz_yzcopy=dz_yz;
     iblank_yz=NULL;
-    if(use_iblank==1){
+    if(use_iblank==1&&c_iblank_x!=NULL){
       NewMemory((void **)&iblank_yz,(jbar+1)*(kbar+1)*sizeof(char));
       for(j=0;j<jbar;j++){
         for(k=0;k<kbar;k++){
@@ -1642,7 +1642,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dy_xzcopy=dy_xz;
     dz_xzcopy=dz_xz;
     iblank_xz=NULL;
-    if(use_iblank==1){
+    if(use_iblank==1&&c_iblank_y!=NULL){
       NewMemory((void **)&iblank_xz,(ibar+1)*(kbar+1)*sizeof(char));
       for(i=0;i<ibar;i++){
         for(k=0;k<kbar;k++){
@@ -1689,7 +1689,7 @@ void updateplotslice_mesh(mesh *mesh_in, int slicedir){
     dy_xycopy=dy_xy;
     dz_xycopy=dz_xy;
     iblank_xy=NULL;
-    if(use_iblank==1){
+    if(use_iblank==1&&c_iblank_z!=NULL){
       NewMemory((void **)&iblank_xy,(ibar+1)*(jbar+1)*sizeof(char));
       for(i=0;i<ibar;i++){
         for(j=0;j<jbar;j++){

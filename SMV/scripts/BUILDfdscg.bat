@@ -24,7 +24,7 @@ call %envfile%
 
 set CURDIR=%CD%
 
-cd %svn_root%\Manuals\FDS_Configuration_Management_Plan\
+cd %svn_root%\Manuals\FDS_Config_Management_Plan\
 call make_guide
 
 cd %CURDIR%

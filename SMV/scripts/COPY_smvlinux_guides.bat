@@ -21,13 +21,11 @@ call %envfile%
 echo.
 echo ---downloading guides
 echo.
-set manualdir=%firebotrepo%/Manuals
+set manualdir=%smokebotrepo%/Manuals
 set firelocaldir="%userprofile%"\FIRE-LOCAL\reports\fds_manuals
 
-pscp %linux_logon%:%manualdir%/FDS_User_Guide/FDS_User_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Verification_Guide/FDS_Verification_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Validation_Guide/FDS_Validation_Guide.pdf %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf %firelocaldir%\.
+pscp %linux_logon%:%manualdir%/SMV_User_Guide/SMV_User_Guide.pdf  %firelocaldir%\.
+pscp %linux_logon%:%manualdir%/SMV_Verification_Guide/SMV_Verification_Guide.pdf  %firelocaldir%\.
+pscp %linux_logon%:%manualdir%/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf  %firelocaldir%\.
 
 pause

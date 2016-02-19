@@ -10546,7 +10546,7 @@ int readini2(char *inifile, int localfile){
       contour_type=CLAMP(contour_type,0,2);
       continue;
     }
-    if(match(buffer,"P3VIEW")==1){
+    if(localfile==1&&match(buffer, "P3VIEW")==1){
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
 
@@ -11849,7 +11849,13 @@ void writeini_local(FILE *fileout){
       fprintf(fileout, " %s\n", file);
     }
   }
+  fprintf(fileout, "P3VIEW\n");
+  for(i = 0; i<nmeshes; i++){
+    mesh *meshi;
 
+    meshi = meshinfo+i;
+    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
+  }
   fprintf(fileout, "SHOOTER\n");
   fprintf(fileout, " %f %f %f\n", shooter_xyz[0], shooter_xyz[1], shooter_xyz[2]);
   fprintf(fileout, " %f %f %f\n", shooter_dxyz[0], shooter_dxyz[1], shooter_dxyz[2]);
@@ -12412,13 +12418,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", p3dsurfacetype);
   fprintf(fileout, "P3DSURFACESMOOTH\n");
   fprintf(fileout, " %i\n", p3dsurfacesmooth);
-  fprintf(fileout, "P3VIEW\n");
-  for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
-  }
   fprintf(fileout, "PROJECTION\n");
   fprintf(fileout, " %i\n", projection_type);
   fprintf(fileout, "SBATSTART\n");
