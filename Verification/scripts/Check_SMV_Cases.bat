@@ -1,9 +1,5 @@
 @echo off
 
-:: $Date$ 
-:: $Revision$
-:: $Author$
-
 set SCRIPT_DIR=%CD%
 cd ..
 set BASEDIR="%CD%"
@@ -15,9 +11,6 @@ set QFDS=call %SVNROOT%\Utilities\Scripts\checkfds.bat
 set RUNCFAST=call %SVNROOT%\Utilities\Scripts\checkcfast.bat
 set RUNTFDS=call %SVNROOT%\Utilities\Scripts\checkfds.bat
 
-if "%runonlygeom%" == "1" (
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-) else (
-  call %SCRIPT_DIR%\SMV_Cases.bat
-  call %SCRIPT_DIR%\SMV_geom_Cases.bat
-)
+call %SCRIPT_DIR%\SMV_Cases.bat
+call %SCRIPT_DIR%\GEOM_Cases.bat
+call %SCRIPT_DIR%\WUI_Cases.bat
