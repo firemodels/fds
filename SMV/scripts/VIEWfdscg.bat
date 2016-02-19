@@ -18,7 +18,7 @@ call %envfile%
 
 set CURDIR=%CD%
 
-cd %svn_root%\Manuals\FDS_Configuration_Management_Plan\
-start acrobat FDS_Configuration_Management_Plan.pdf
+cd %svn_root%\Manuals\FDS_Config_Management_Plan\
+start acrobat FDS_Config_Management_Plan.pdf
 
 cd %CURDIR%
