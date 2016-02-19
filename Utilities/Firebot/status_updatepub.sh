@@ -1,8 +1,8 @@
 #!/bin/bash
 repo=~/FDS-SMVgitweb
 firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
-old=$firebotdir/history/old
-new=$firebotdir/history/new
+old=~/.firebot/old
+new=~/.firebot/new
 newpage=$firebotdir/history/newpage
 running=$firebotdir/firebot_running
 curdir=`pwd`
@@ -13,9 +13,11 @@ if [ -e $running ] ; then
   exit
 fi
 ./status2html.sh  > $new
-ndiff=`diff $old $new|wc -l`
-if [ "$ndiff" == "0" ] ; then
-exit
+if [ -e $old ]; then
+  ndiff=`diff $old $new|wc -l`
+  if [ "$ndiff" == "0" ] ; then
+    exit
+  fi
 fi
 ./status_pubtop.sh > $newpage
 ./status2html.sh >> $newpage
@@ -23,7 +25,7 @@ fi
 cp $new $old
 cd $repo
 git remote update
-git pull
+git merge origin/gh-pages
 cp $newpage firebot_status.html
 git add firebot_status.html
 git commit -m "firebot: update firebot status page `date`"
