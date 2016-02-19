@@ -295,7 +295,7 @@ echo Stage 3 - Building FDS/Smokeview utilities
 echo             fds2ascii
 cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
-ifort -o fds2ascii_win%size%.exe /nologo ..\..\Data_processing\fds2ascii.f90  1>> %OUTDIR%\stage3.txt 2>&1
+call make_fds2ascii  1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
