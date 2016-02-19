@@ -8,5 +8,6 @@ source $SVNROOT/Validation/Common_Run_All.sh
 $QFDS $DEBUG -p 8 $QUEUE -d $INDIR Smyth_Slot_Burner.fds
 #$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Smyth_Slot_Burner_WD.fds
 #$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Smyth_Slot_Burner_Andersen.fds
+#$QFDS $DEBUG -p 32 $QUEUE -d $INDIR Smyth_Slot_Burner_Fast_Chem.fds
 
 echo FDS cases submitted
