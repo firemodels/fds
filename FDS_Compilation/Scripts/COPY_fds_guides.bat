@@ -28,6 +28,6 @@ pscp %linux_logon%:%manualdir%/FDS_User_Guide/FDS_User_Guide.pdf  %firelocaldir%
 pscp %linux_logon%:%manualdir%/FDS_Verification_Guide/FDS_Verification_Guide.pdf  %firelocaldir%\.
 pscp %linux_logon%:%manualdir%/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf  %firelocaldir%\.
 pscp %linux_logon%:%manualdir%/FDS_Validation_Guide/FDS_Validation_Guide.pdf %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Configuration_Management_Plan/FDS_Configuration_Management_Plan.pdf %firelocaldir%\.
+pscp %linux_logon%:%manualdir%/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf %firelocaldir%\.
 
 pause
