@@ -2417,7 +2417,7 @@ void LoadUnloadMenu(int value){
       }
     }
     if(nslice_loaded>1)last_slice_loaded = slice_loaded_list[nslice_loaded-1];
-    for(ii = nslice_loaded - 1; i>=0; ii--){
+    for(ii = nslice_loaded - 1; ii>=0; ii--){
       slicedata *slicei;
 
 
