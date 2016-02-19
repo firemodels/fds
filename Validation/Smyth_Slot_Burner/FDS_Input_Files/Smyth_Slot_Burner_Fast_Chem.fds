@@ -1,4 +1,4 @@
-&HEAD CHID='Smyth_Slot_Burner_WD',TITLE='Smyth Methane Slot Burner with Westbrook-Dryer (1981) reduced mechanism' /
+&HEAD CHID='Smyth_Slot_Burner_Fast_Chem',TITLE='Smyth Methane Slot Burner with multi-step fast chemistry' /
 
 MULT ID='mesh array', DX=0.016,DZ=0.012, I_UPPER= 1,K_UPPER=3 / 8 mesh
 MESH XB=0.0,0.016,0.0,0.00025,-0.003,0.009, IJK=64,1,48, MULT_ID='mesh array' /
@@ -10,7 +10,6 @@ MESH XB=0.0,0.016,0.0,0.00025,-0.003,0.009, IJK=64,1,48, MULT_ID='mesh array' /
 
 &MISC TMPA=25.,
       DNS=.TRUE.,
-      RICHARDSON_ERROR_TOLERANCE = 1e-9,
       SECOND_ORDER_INTERPOLATED_BOUNDARY=.TRUE. /
 
 &SURF ID='AIR', VEL=-0.23884, TAU_V=0.10, TMP_FRONT=55., COLOR='BLUE'/
@@ -34,23 +33,9 @@ MESH XB=0.0,0.016,0.0,0.00025,-0.003,0.009, IJK=64,1,48, MULT_ID='mesh array' /
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 3.98e14
-      E = 1.704e5
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
-      SPEC_ID_N_S='OXYGEN','CARBON MONOXIDE','WATER VAPOR'
-      N_S = 0.25,1,0.5
-      RADIATIVE_FRACTION=0.20/
- 
-&REAC ID = 'R3'
-      FUEL = 'CARBON DIOXIDE'
-      A = 5.0e8
-      E = 1.704e5
-      SPEC_ID_NU= 'CARBON DIOXIDE','OXYGEN','CARBON MONOXIDE'
-      NU= -1,0.5,1
-      SPEC_ID_N_S='CARBON DIOXIDE'
-      N_S = 1
-      RADIATIVE_FRACTION=0./
+      RADIATIVE_FRACTION=0.20 /
 
 &OBST XB=-0.005,-0.004,-0.0205, 0.0205,-0.003,0.000, SURF_ID='STEEL' / Burner slots
 &OBST XB= 0.004, 0.005,-0.0205, 0.0205,-0.003,-0.0005, SURF_ID='STEEL2' /
