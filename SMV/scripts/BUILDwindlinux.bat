@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit Linux fds2ascii
 
 Rem  Windows batch file to build a release Smokeview for Linux 32.
 
@@ -23,7 +24,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEwindlinux.csh 
+plink %linux_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEwindlinux.csh 
 
 echo.
 echo compilation complete

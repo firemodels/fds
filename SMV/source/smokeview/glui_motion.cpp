@@ -47,6 +47,7 @@
 #define GSLICE_NORMAL 27
 #define PLAY_MOVIE 29
 #define MOVIE_NAME 30
+#define CLOSE_MOTION 1
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -62,8 +63,8 @@
 #define WINDOW_ROLLOUT 2
 #define SCALING_ROLLOUT 3
 #define RENDER_ROLLOUT 4
-#define TRANSLATEROTATE_ROLLOUT 5  
-#define ROTATION_ROLLOUT 6  
+#define TRANSLATEROTATE_ROLLOUT 5
+#define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
 
@@ -208,7 +209,7 @@ void update_render_start_button(void){
 
 void enable_disable_playmovie(void){
   char moviefile_path[1024];
- 
+
   if(file_exists(get_moviefile_path(moviefile_path)) == 1&&play_movie_now==1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
@@ -234,16 +235,14 @@ void enable_disable_makemovie(int onoff){
 
 void update_movie_type(int type){
   moviefiletype = type;
-  // if ffmpeg is not present then this GUI element is not created, so we must
-  // check for this before trying to update it.
-  if(have_ffmpeg == 1)RADIO_movie_type->set_int_val(moviefiletype);
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
   renderfiletype = type;
-  RADIO_render_type->set_int_val(renderfiletype);
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -305,7 +304,7 @@ extern "C" void update_rotation_type(int val){
 extern "C" void update_glui_set_view_xyz(float *xyz){
   if(xyz==NULL)return;
   if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z==NULL)return;
-  
+
   DENORMALIZE_XYZ(set_view_xyz,xyz);
 
   SPINNER_set_view_x->set_float_val(set_view_xyz[0]);
@@ -451,7 +450,7 @@ extern "C" void glui_motion_setup(int main_window){
   ROTATE_eye_z=glui_motion->add_translation_to_panel(PANEL_rotate,_d("View"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,Motion_CB);
   ROTATE_eye_z->set_speed(180.0/(float)screenWidth);
   ROTATE_eye_z->disable();
- 
+
   ROLLOUT_rotation_type = glui_motion->add_rollout_to_panel(PANEL_motion,_d("Specify Rotation"),false,ROTATION_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_rotation_type, ROTATION_ROLLOUT);
 
@@ -553,7 +552,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_center_y->set_float_limits(ybar0,DENORMALIZE_Y(ybar),GLUI_LIMIT_CLAMP);
   SPINNER_gslice_center_z->set_float_limits(zbar0,DENORMALIZE_Z(zbar),GLUI_LIMIT_CLAMP);
   Gslice_CB(GSLICE_TRANSLATE);
-  
+
   PANEL_gslice_normal = glui_motion->add_panel_to_panel(ROLLOUT_gslice,_d("normal"),true);
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,Gslice_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,Gslice_CB);
@@ -564,7 +563,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangle outline",&show_gslice_triangles);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangulation",&show_gslice_triangulation);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"plane normal",&show_gslice_normal);
-  
+
   PANEL_viewA = glui_motion->add_panel(_d("View"), true);
   ROLLOUT_viewpoints = glui_motion->add_rollout_to_panel(PANEL_viewA,_d("Viewpoints"), false,VIEWPOINTS_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_viewpoints,VIEWPOINTS_ROLLOUT);
@@ -709,7 +708,7 @@ extern "C" void glui_motion_setup(int main_window){
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
-    glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);    
+    glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
       BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play Movie", PLAY_MOVIE, Render_CB);
@@ -867,8 +866,8 @@ void update_rotation_index(int val){
 
   az_elev = camera_current->az_elev;
 
-  az_elev[0]=0.; 
-  az_elev[1]=0.; 
+  az_elev[0]=0.;
+  az_elev[1]=0.;
 
   camera_current->azimuth=0.0;
 
@@ -1264,7 +1263,7 @@ extern "C" void Motion_CB(int var){
       ASSERT(FFALSE);
       break;
   }
-  
+
   dx = d_eye_xyz[0];
   dy = d_eye_xyz[1];
   if(var==EYE_ROTATE){
@@ -1428,7 +1427,7 @@ extern "C" void show_glui_motion(int menu_id){
 
 void Motion_DLG_CB(int var){
   switch(var){
-  case 1:
+  case CLOSE_MOTION:
     if(glui_motion!=NULL)glui_motion->hide();
     updatemenu=1;
     break;

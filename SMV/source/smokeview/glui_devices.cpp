@@ -323,7 +323,11 @@ void Device_CB(int var){
   switch(var){
 #ifdef pp_PILOT
   case DEVICE_NBUCKETS:
+#ifdef pp_WINDROSE
+    setup_pilot_data(npilot_buckets,npilot_nr,npilot_ntheta,NOT_FIRST_TIME);
+#else
     setup_pilot_data(npilot_buckets);
+#endif
     break;
 #endif
   case DEVICE_show_orientation:

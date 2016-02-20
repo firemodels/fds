@@ -216,7 +216,7 @@ void FreeAllMemory(int memory_id){
     }
 #ifdef _DEBUG
     count++;
-    if(count % 1000 == 0)printf("unloading %i blocks out of %i %i\n", count2, count,nblocks);
+    if(count % 1000 == 0&&count2!=0)printf("unloading %i blocks out of %i\n", count2, nblocks);
 #endif
     thisptr = nextptr;
   }

@@ -463,6 +463,19 @@ If you are new to FDS and Smokeview, it is strongly suggested that you start wit
 
 Sample input files are included as part of the standard installation. A good case for a first time user is located in the subfolder called {\ct Fires} within the folder called {\ct Examples}. Find the file called \linebreak[4]{\ct simple\_test.fds} and copy it to a folder on your computer that is not within the installation folder. The reason for doing this is to avoid cluttering up the installation folder with a lot of output files. Follow the instructions in Section~\ref{single_mesh} to run this simple single mesh case. The simulation should only take a few minutes. Once the simulation is completed, use Smokeview to examine the output. In this way, you will quickly learn the basics of running and analyzing simulations.
 
+\section{A Brief Primer on Computer Hardware}
+
+The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575. 
+\begin{description}
+\item[Cores:] Recent developments in computational architecture can lead to confusion concerning what a microprocessor is. Since the advent of multi-core technology, such as dual-cores and quad-cores, the term ``processor'' has been used to describe a logical execution unit or a physical chip. A multi-core chip may have several cores. With the advent of multi-core technology, the term ``processor'' has become context-sensitive, and is largely ambiguous when describing large multi-core systems. Essentially a core comprises a logical execution unit containing an L1 cache and functional units. Cores are able to independently execute programs or threads. Supercomputers are listed as having thousands of cores.
+\item[Chips:] A chip refers to a physical integrated circuit (IC) on a computer. A chip in the context of this document refers to an execution unit that can be single- or multi-core technology.
+\item[Sockets:] The socket refers to a physical connector on a computer motherboard that accepts a single physical chip. Many motherboards can have multiple sockets that can in turn accept multi-core chips.
+\item[Processes:] A process is an independent program running on a computer. A process has a full stack of memory associated for its own use, and does not depend on another process for execution. MPI (Message Passing Interface) processes are true processes because they can run on independent machines or the same machine.
+\item[Threads:] A thread is essentially a process that does not have a full stack of memory associated for it. The thread is tied to a parent process, and is merely an offshoot of execution. Typically thread processes must run on the same computer, but can execute simultaneously on separate cores of the same node. OpenMP parallelism uses threads for child processes.
+\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time. 
+\item[N-ways:] Multi-core compute nodes can be described by the number of execution units, or cores. A computer with 8 cores would be described as an 8-way node. This machine can have 8 independent processes running simultaneously. A 32-core system would be called a 32-way node.
+\item[Processors:] As explained above, a processor could describe either a single execution core or a single physical multi-core chip. The context of use will define the meaning of the term.
+\end{description}
 
 \section{Starting an FDS Calculation}
 
@@ -475,7 +488,7 @@ MPI and OpenMP can also be used together. For example, 4 MPI processes can be as
 \subsection{Single or Multiple Mesh Simulation with OpenMP Parallel Processing}
 \label{single_mesh}
 
-If your simulation involves only one mesh, you can only run it on one computer, but you can exploit its multiple processors or cores using OpenMP. When you install FDS, it will query your computer to determine the number of available cores. By default, FDS will use approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. The way to do this depends on the operating system and will be explained below.
+If your simulation involves only one mesh, you can only run it on one computer, but you can exploit its multiple processors or cores using OpenMP. When you install FDS, it will query your computer to determine the number of available cores. By default, FDS will use approximately half of the available cores\footnote{To determine the number of cores used by OpenMP, just type {\ct fds} at the command prompt.} on a single computer. This is done for two reasons: (1) so as not to take over your entire machine when you run a simulation, and (2) because using all cores for a single simulation may not minimize the run time. OpenMP works best when exploiting multiple (logical) cores associated with a single (physical) processor or ``socket''.  For example, if your computer has two processors, each with 4 cores, it may not be worthwhile to use all 8 cores in an OpenMP simulation. You need to experiment with your own machine to determine the strategy that is best for you. To change the number of cores that are available for a given FDS simulation, you can set an environment variable called {\ct OMP\_NUM\_THREADS}. The way to do this depends on the operating system and will be explained below.
 
 When the job is started, FDS will print the number of cores that will be used for that job. Note that this setting only applies until you log out or restart your machine. To set the default value of available cores upon startup, the {\ct OMP\_NUM\_THREADS} environment variable can also be set in the startup configuration scripts on the machine. Refer to the documentation for your operating system for more information on how to configure environment variables upon startup.
 
@@ -484,7 +497,7 @@ To confirm the speedup for the OpenMP version of the code, a series of test case
 \begin{figure}[ht!]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/openmp_timing_benchmarks}
-\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 processors, and each processor has 4 cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
+\caption[OpenMP timing study]{Benchmark timing comparison for the OpenMP test cases. The computer that ran these jobs has 2 (physical) sockets, and each socket has 4 (logical) cores. This explains the decrease in efficiency beyond 4 OpenMP threads.}
 \label{fig:openmp_timing_benchmarks}
 \end{figure}
 Details of how to run the simulation are included below for the different operating systems are as follows:
@@ -538,18 +551,13 @@ the Windows Task Manager or by executing the ``top'' command on a Linux/Unix mac
 
 Also note that FDS refers to its meshes by the numbers 1, 2, 3, and so on, whereas MPI refers to its processes by the numbers 0, 1, 2, and so on. Thus, Mesh~1 is assigned to Process~0; Mesh~2 to Process~1, and so on. You do not explicitly number the meshes or the processes yourself, but error statements from FDS or from MPI might refer to the meshes or processes by number. As an example, if a FDS case with five meshes, the first printout (usually to the screen unless otherwise directed) is:
 \begin{lstlisting}
-Process  0 of  4 is running on fire61
-Process  1 of  4 is running on fire62
-Process  2 of  4 is running on fire63
-Process  3 of  4 is running on fire64
-Process  4 of  4 is running on fire65
-Mesh   1 is assigned to Process   0
-Mesh   2 is assigned to Process   1
-Mesh   3 is assigned to Process   2
-Mesh   4 is assigned to Process   3
-Mesh   5 is assigned to Process   4
+Mesh   1 is assigned to MPI Process   0
+Mesh   2 is assigned to MPI Process   1
+Mesh   3 is assigned to MPI Process   2
+Mesh   4 is assigned to MPI Process   3
+Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
-This means that 5 processes (numbered 0 to 4) have started on the computers named fire61, fire62, etc., and that each mesh is being computed as an individual process on the individual computers. Each computer has its own memory (RAM), and MPI is the protocol by which information is passed from process to process during the calculation. Note that these computers may have multiple processors, and each processor may have multiple ``cores.'' You have control over how many processes get assigned to each computer, but you may or may not have control over how the processes are handled by a given computer. That depends on the operating system and the particular version of MPI. For example, the computer named fire62 happens to have two quad-core processors, and all five meshes could have been assigned to run as five individual processes all on fire62. Whether or not this is the best strategy depends on the OS and the hardware configuration.
+This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer. 
 
 There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X and Linux, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
 
@@ -643,6 +651,17 @@ In the strong study demonstrated here, a single mesh of dimension 180 by 160 by 
 \caption[MPI scaling study]{Example of a weak (left) and strong (right) scaling study.}
 \label{fig:scaling_tests}
 \end{figure}
+
+\subsection{Running Very Large Jobs}
+
+Most FDS simulations reported in the literature use one to several dozen meshes, and MPI is the method of choice to parallelize these jobs. Usually the meshes are mapped to MPI processes in a one to one manner and the meshes contain a comparable number of grid cells. However, it is possible to run FDS jobs that involve thousands of meshes. In 2016, the FDS developers at NIST were given access to the Oak Ridge Leadership Computing Facility at Oak Ridge National Laboratory in Tennessee. The facility provides users access to compute clusters with very large numbers of processors connected via a high speed network. FDS simulations were performed using up to approximately 10,000 MPI processes. If you have access to facilities such as this one, here are a few pointers:
+\begin{enumerate}
+\item Use MPI only. OpenMP will probably not speed up the run time appreciably, and it will consume cores that could be put to better use running more MPI processes.
+\item For jobs using thousands of meshes/processes, add the parameter {\ct SHARED\_FILE\_SYSTEM=.FALSE.} to the {\ct MISC} line. This directs FDS to break up the Smokeview ({\ct .smv}) file according to MPI process. This will greatly speed up the preliminary part of the simulation because the Smokeview file is written serially, not in parallel. For a modest number of meshes, this serial write is not a problem, but for thousands of meshes, the initialization routines can take hours. When the job completes, you can reconstruct the Smokeview file by appending the numbered files, {\ct CHID\_n.smv}, to the main Smokeview file, {\ct CHID.smv}.
+\item Set {\ct DT\_CPU} to some convenient time interval on the {\ct DUMP} line. This parameter directs FDS to periodically write out a file ({\ct CHID\_cpu.csv}) that records the wall clock time that each MPI process consumes in the major subroutines. This can help you determine if any of the MPI processes spend an inordinate amount of time idling.
+\item Run your job for a short amount of time to estimate the time required for the full job. Most large compute clusters will limit you to a certain amount of wall clock time, after which your job is simply stopped. If you have to use the restart feature in FDS, practice first with a short job to make sure that the job can be continued properly.
+\item Do a strong scaling study for your particular case. That is, run the job a fixed number of time steps with the least number of meshes that can fit within the machine's memory. Then divide the mesh by factors of 2, 4, or 8 until you reach a point where the increased number of meshes/processes does not provide a significant speed up.
+\end{enumerate}
 
 
 \section{Monitoring Progress}
@@ -3912,30 +3931,24 @@ entirely surrounded by solid obstructions. For example, the interior of a closed
 \subsubsection{Pressure Zone Leakage}
 \label{info:zone_leakage}
 
-The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface it is leaking out of. With this approach the zone pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path.
-
-The first step in this approach is to define pressure zones and the leakage areas between them.  This is done on the input lines defining the individual pressure {\ct ZONE}s:
+The pressure zone leakage approach is intended to capture the bulk leakage that occurs through walls. This approach assumes that the amount of leaking gas is very small and that it will exchange sufficient heat as it moves through a wall to be at the same temperature as the wall surface. With this approach the pressure between the source and destination zones is used to compute a leakage flow via the HVAC model. That flow is then uniformly imposed over all surfaces designated as part of the leakage path. The first step is to define pressure zones, leakage areas, and a description of the surfaces through which leaking occurs:
 \begin{lstlisting}
 &ZONE XB=..., LEAK_AREA(0)=0.0001 /
 &ZONE XB=..., LEAK_AREA(1)=0.0002, LEAK_AREA(0)=0.0003 /
+&SURF ID='LEAKY EXTERIOR WALL',..., LEAK_PATH=1,0 /
+&SURF ID='LEAKY INTERIOR WALL',..., LEAK_PATH=1,2 /
 \end{lstlisting}
-The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur.
+The first line designates a region of the computational domain to be Pressure Zone~1. Note that the order of the {\ct ZONE} lines is important; that is, the order implicitly defines Zone~1, Zone~2, etc. Zone 0 is by default the ambient pressure exterior. In this example, a leak exists between Zone~1 and the exterior Zone~0, and the area of the leak is 0.0001~m$^2$ (1 cm by 1 cm hole, for example). Zone~2 leaks to Zone~1 (and vice versa) with a leak area of 0.0002~m$^2$. Zone~2 also leaks to the outside with an area of 0.0003~m$^2$. Note that zones need not be physically connected for a leak to occur, but in each zone, except for the exterior, there must be some surface with a designated {\ct LEAK\_PATH}. Here, in Zones~1 and 2 there are surfaces defined by both {\ct 'LEAKY EXTERIOR WALL'} and {\ct 'LEAKY INTERIOR WALL'} so as to provide a surface over which to apply the leakage. Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant, and the solid ostructions where the leakage is applied need not form a boundary between the two zones.
 
-The volume flow, $\dot{V}$, through a leak of area $A_L$ is given by
-\be  \dot{V}_{\rm leak} = A_L \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
-where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and
-$\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed
-to be 1.
+The volume flow, $\dot{V}$, through a leak of area $A_{\rm L}$ is given by
+\be  \dot{V}_{\rm leak} = A_{\rm L} \; \hbox{sign} (\Delta p) \; \sqrt{2 \frac{ | \Delta p |}{\rho_\infty}} \ee
+where $\Delta p$ is the pressure difference between the adjacent compartments (in units of Pa) and $\rho_\infty$ is the ambient density (in units of kg/m$^3$). The discharge coefficient normally seen in this type of formula is assumed to be 1.
 
-Within FDS, leakage flows are handled by the HVAC solver.  A leak between two zones is considered to be a pair of HVAC {\ct VENT}s connected by a duct with a loss coefficient of 1.  To specify a leak between two zones, a solid surface in each of the zones must be given the attribute {\ct LEAK\_PATH}.  Leakage is uniformly distributed over all of the solid surfaces assigned the {\ct LEAK\_PATH}.  In the above example, the leakage from Zone~1 to Zone~0 requires the attribute
-{\ct LEAK\_PATH=1,0}, meaning that the leak between Zones~1 and 0 is uniformly distributed
-over solids defined with:
-\begin{lstlisting}
-&SURF ID='whatever',..., LEAK_PATH=1,0 /
-\end{lstlisting}
-Likewise, the boundaries of Zone~1 and Zone~2 must include solids whose {\ct SURF} properties include the parameter {\ct LEAK\_PATH=1,2}, but these solids need not form a boundary between the two zones. The leakage is spread over the surfaces that have a specified {\ct LEAK\_PATH}. The order of the two pressure zones designated by {\ct LEAK\_PATH} is unimportant.
+In a typical building as the interior pressure rises, the leakage area will grow as small gaps, cracks, and other leakage paths open up. Leakage tests performed according to test standards such as ASTM~E~779 provide two additional data points to quantify this behavior. These are the {\ct LEAK\_PRESSURE\_EXPONENT} and the {\ct LEAK\_REFERENCE\_PRESSURE}. The use of these additional inputs are shown in the equation below as $n$ and $\Delta p_{\rm ref}$ respectively where $A_{\rm L,ref}$ is given by {\ct LEAK\_AREA}.
+\be  A_{\rm L} = A_{\rm L,ref} \left( \frac{\Delta p}{\Delta p_{\rm ref}} \right)^{n-0.5} \ee
+By default, $n=0.5$ and $\Delta p_{\rm ref}=4$~Pa, meaning that the leak area will not change with pressure unless you specify an exponent other than 0.5.
 
-The HVAC output quantities can be used to determine the leakage flows.  FDS give the duct connecting Zone~A with Zone~B the name {\ct 'LEAK A B'} and the duct nodes will be named {\ct 'LEAK A B'} for the Zone A side of the leak and {\ct 'LEAK B A'} for the Zone B side of the leak.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
+The HVAC output quantities can be used to determine the leakage flows. FDS names the duct connecting Zone~A with Zone~B {\ct 'LEAK A B'} and the duct nodes {\ct 'LEAK A B'} for the Zone~A side of the leak and {\ct 'LEAK B A'} for the Zone~B side.  Note that for the duct names, FDS will use the lower numbered zone as Zone~A.
 
 FDS is limited by default to a maximum of 200 {\ct ZONE} inputs.  This can be increased if needed by the parameter {\ct MAX\_LEAK\_PATHS} on the {\ct MISC} line.
 
@@ -6896,9 +6909,9 @@ A single ``line'' file can hold more than a single line of data. By default, the
 
 \subsubsection{Time-Varying Profile}
 
-If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}. 
+If you do not want a steady-state profile, but rather you just want to specify an array of evenly spaced devices, you can use a similar input line, except with the additional attribute {\ct TIME\_HISTORY}.
 \begin{lstlisting}
-&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20, 
+&DEVC XB=X1,X2,Y1,Y2,Z1,Z2, QUANTITY='U-VELOCITY', ID='vel', POINTS=20,
       TIME_HISTORY=.TRUE. /
 \end{lstlisting}
 This directs FDS to just add 20 devices to the on-going list, saving you from having to write 20 {\ct DEVC} lines. The {\ct ID} for each device will be {\ct 'vel-01'}, {\ct 'vel-02'}, etc.
@@ -6976,7 +6989,7 @@ Normally, FDS averages slice file data at cell corners. For example, gas tempera
 
 Slice file information is recorded in files (See Section~\ref{out:SLCF}) labeled {\ct CHID\_$n$.sf}, where $n$ is the index of the slice file. A short Fortran program {\ct fds2ascii.f90} produces a text file from a line, plane or volume of data. See Section~\ref{info:fds2ascii} for more details.
 
-
+By default, Smokeview will blank slice file data inside obstructions.  However, this is expensive to load at startup in Smokeview for large cases.  If you wish Smokeview not to store this blanking array, set {\ct IBLANK\_SMV=.FALSE.} on {\ct MISC}.  Another option is to run Smokeview from the command line and to add {\ct -noblank} as an option.
 
 
 \section{Animated Boundary Quantities: The \texorpdfstring{{\tt BNDF}}{BNDF} Namelist Group}
@@ -8805,7 +8818,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct MISC} (Miscellaneous Parameters)} \\
 \hline \hline
 \endhead
-%{\ct AL2O3}                                     & Logical       &                                                       &               & {\ct .FALSE.}    \\ \hline
+%{\ct AEROSOL\_AL2O3}                                     & Logical       &                                                       &               & {\ct .FALSE.}    \\ \hline
 {\ct \footnotesize ALLOW\_SURFACE\_PARTICLES}   & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .TRUE.}      \\ \hline
 {\ct \footnotesize ALLOW\_UNDERSIDE\_PARTICLES} & Logical       & Section~\ref{info:surface_droplets}                   &               & {\ct .FALSE.}     \\ \hline
 {\ct \footnotesize ASSUMED\_GAS\_TEMPERATURE}   & Real          & Section~\ref{solid_phase_verification}                & $^\circ$C     &                   \\ \hline
@@ -8841,9 +8854,9 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct GRAVITATIONAL\_SETTLING}                   & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct GROUND\_LEVEL}                             & Real          & Section~\ref{info:stratification}                     & m             & 0.                \\ \hline
 {\ct GVEC}                                      & Real triplet  & Section~\ref{info:GVEC}                               & \si{m/s^2}    & 0,0,-9.81         \\ \hline
-{\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.               \\ \hline
+{\ct H\_F\_REFERENCE\_TEMPERATURE}              & Real          & Section~\ref{info:enthalpy}                           &  \si{\degree C} & 25.             \\ \hline
 {\ct HUMIDITY}                                  & Real          & Section~\ref{info:humidity}                           & \%            & 40.               \\ \hline
-%{\ct IMMERSED\_BOUNDARY\_METHOD}                & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
+{\ct IBLANK\_SMV}                               & Logical       & Section~\ref{info:SLCF}                               &               & {\ct .TRUE.}      \\ \hline
 {\ct INITIAL\_UNMIXED\_FRACTION}                & Real          & Section~\ref{info:turbulent_combustion}               &               & 1.0               \\ \hline
 %{\ct KINETIC\_ENERGY\_SOURCE}                   & Logical       &                                                       &               & {\ct .FALSE.}     \\ \hline
 {\ct LAPSE\_RATE}                               & Real          & Section~\ref{info:stratification}                     & \si{\degree C/m} & 0              \\ \hline
@@ -9657,6 +9670,8 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ID}                    & Character         & Section~\ref{info:ZONE_Basics}     &        &               \\ \hline
 {\ct LEAK\_AREA(N)}         & Real              & Section~\ref{info:Leaks}           & m$^2$  & 0             \\ \hline
+{\ct LEAK\_PRESSURE\_EXPONENT(N)} & Real              & Section~\ref{info:Leaks}           &        & 0.5           \\ \hline
+{\ct LEAK\_REFERENCE\_PRESSURE(N)} & Real              & Section~\ref{info:Leaks}           & Pa     & 4             \\ \hline
 {\ct PERIODIC}              & Logical           & Section~\ref{info:ZONE_Basics}     &        & {\ct .FALSE.} \\ \hline
 {\ct XB(6)}                 & Real Sextuplet    & Section~\ref{info:ZONE_Basics}     & m      &               \\ \hline
 \end{longtable}

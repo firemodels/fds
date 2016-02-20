@@ -42,7 +42,7 @@ part5prop *getpartprop(char *string){
   return NULL;
 }
 
-/* ------------------ compress_patches ------------------------ */
+/* ------------------ compress_parts ------------------------ */
 
 void compress_parts(void *arg){
   int i;
@@ -85,7 +85,7 @@ void compress_parts(void *arg){
   }
 }
 
-/* ------------------ compress_patches ------------------------ */
+/* ------------------ compress_part2iso ------------------------ */
 
 void *convert_parts2iso(void *arg){
   int i;

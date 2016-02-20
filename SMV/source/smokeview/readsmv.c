@@ -1907,6 +1907,7 @@ void update_mesh_coords(void){
     float *xplt, *yplt, *zplt;
     int j,k;
     float dx, dy, dz;
+    float *dplane_min, *dplane_max;
 
     meshi=meshinfo+igrid;
     ibar=meshi->ibar; 
@@ -1973,6 +1974,18 @@ void update_mesh_coords(void){
     dy = yplt[1]-yplt[0];
     dz = zplt[1]-zplt[0];
     meshi->dcell = sqrt(dx*dx+dy*dy+dz*dz);
+
+    dplane_min = meshi->dplane_min;
+    dplane_min[0] = MIN(MIN(dx, dy), dz);
+    dplane_min[1] = MIN(dy, dz);
+    dplane_min[2] = MIN(dx, dz);
+    dplane_min[3] = MIN(dx, dy);
+
+    dplane_max = meshi->dplane_max;
+    dplane_max[0] = MAX(MAX(dx, dy), dz);
+    dplane_max[1] = MAX(dy, dz);
+    dplane_max[2] = MAX(dx, dz);
+    dplane_max[3] = MAX(dx, dy);
 
     face_centers = meshi->face_centers;
     for(j=0;j<6;j++){
@@ -2724,6 +2737,14 @@ int readsmv(char *file, char *file2){
     */
 
 
+    if(match(buffer, "IBLANK")==1){
+      fgets(buffer, 255, stream);
+      if(iblank_set_on_commandline==0){
+        sscanf(buffer, "%i", &use_iblank);
+        use_iblank = CLAMP(use_iblank, 0, 1);
+      }
+      continue;
+    }
     if(match(buffer,"GVEC") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",gvecphys,gvecphys+1,gvecphys+2);
@@ -4274,13 +4295,8 @@ int readsmv(char *file, char *file2){
         
         smoke3di = smoke3dinfo + ismoke3d;
     
-        if(nsmoke3dinfo>50&&(ismoke3d%10==0||ismoke3d==nsmoke3dinfo-1)){
-          if(ismoke3dcount==11){
-            PRINTF("     examining %i'th 3D smoke file\n",ismoke3dcount);
-          }
-          else{
-            PRINTF("     examining %i'st 3D smoke file\n",ismoke3dcount);
-          }
+        if(nsmoke3dinfo>50&&(ismoke3d%100==0||ismoke3d==nsmoke3dinfo-1)){
+          PRINTF("     examining %i'st 3D smoke file\n",ismoke3dcount);
         }
         ismoke3dcount++;
 
@@ -6449,6 +6465,12 @@ typedef struct {
         vi->yvent2 = yplttemp[jv2]; 
         vi->zvent1 = zplttemp[kv1]; 
         vi->zvent2 = zplttemp[kv2];
+        vi->xvent1_orig = xplttemp[iv1];
+        vi->xvent2_orig = xplttemp[iv2];
+        vi->yvent1_orig = yplttemp[jv1];
+        vi->yvent2_orig = yplttemp[jv2];
+        vi->zvent1_orig = zplttemp[kv1];
+        vi->zvent2_orig = zplttemp[kv2];
         vi->imin = iv1;
         vi->imax = iv2;
         vi->jmin = jv1;
@@ -6955,6 +6977,7 @@ typedef struct {
       sd->autoload=0;
       sd->display=0;
       sd->loaded=0;
+      sd->loading = 0;
       sd->qslicedata=NULL;
       sd->compindex=NULL;
       sd->slicecomplevel=NULL;
@@ -7213,6 +7236,7 @@ typedef struct {
       isoi->autoload=0;
       isoi->blocknumber=blocknumber;
       isoi->loaded=0;
+      isoi->loading = 0;
       isoi->display=0;
       isoi->dataflag=dataflag;
       isoi->geomflag=geomflag;
@@ -7673,12 +7697,17 @@ typedef struct {
     }
   }
 
-
-  makeiblank();
   makeiblank_carve();
   makeiblank_smoke3d();
+  makeiblank_all();
+#ifdef pp_THREADIBLANK
+  if(runscript == 1){
+    JOIN_IBLANK
+  }
+#endif
+  LOCK_IBLANK
   SetVentDirs();
-  SetCVentDirs();
+  UNLOCK_IBLANK
   UpdateFaces();
 
   xcenGLOBAL=xbar/2.0;  ycenGLOBAL=ybar/2.0; zcenGLOBAL=zbar/2.0;
@@ -8519,11 +8548,24 @@ void initmesh(mesh *meshi){
   meshi->xplt_orig=NULL;
   meshi->yplt_orig=NULL;
   meshi->zplt_orig=NULL;
+
   meshi->f_iblank_cell=NULL;
   meshi->c_iblank_cell=NULL;
   meshi->c_iblank_x=NULL;
   meshi->c_iblank_y=NULL;
   meshi->c_iblank_z=NULL;
+  meshi->c_iblank_node = NULL;
+  meshi->c_iblank_embed=NULL;
+  meshi->block_zdist=NULL;
+
+  meshi->f_iblank_cell0 = NULL;
+  meshi->c_iblank_cell0 = NULL;
+  meshi->c_iblank_x0 = NULL;
+  meshi->c_iblank_y0 = NULL;
+  meshi->c_iblank_z0 = NULL;
+  meshi->c_iblank_node0 = NULL;
+  meshi->c_iblank_embed0=NULL;
+  meshi->block_zdist0=NULL;
 
   meshi->xyz_bar[XXX]=1.0;
   meshi->xyz_bar0[XXX]=0.0;
@@ -8543,7 +8585,6 @@ void initmesh(mesh *meshi){
   meshi->plotz=1;
 
   meshi->boxoffset=0.0;
-  meshi->c_iblank_node=NULL;
   meshi->ventinfo=NULL;
   meshi->cventinfo=NULL;
   meshi->select_min=0;
@@ -8872,7 +8913,14 @@ int readini2(char *inifile, int localfile){
         continue;
       }
     }
-    if(match(buffer, "NORTHANGLE")==1){
+#ifdef pp_DUP
+    if(match(buffer, "SLICEDUP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i", &slicedup_option,&vectorslicedup_option);
+      continue;
+    }
+#endif
+    if(match(buffer, "NORTHANGLE") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %i", &vis_northangle);
       fgets(buffer, 255, stream);
@@ -10498,7 +10546,7 @@ int readini2(char *inifile, int localfile){
       contour_type=CLAMP(contour_type,0,2);
       continue;
     }
-    if(match(buffer,"P3VIEW")==1){
+    if(localfile==1&&match(buffer, "P3VIEW")==1){
       for(i=0;i<nmeshes;i++){
         mesh *meshi;
 
@@ -11580,7 +11628,7 @@ typedef struct {
           createtourpaths();
           Update_Times();
           plotstate = getplotstate(DYNAMIC_PLOTS);
-          selectedtour_index = -1;
+          selectedtour_index = TOURINDEX_MANUAL;
           selected_frame = NULL;
           selected_tour = NULL;
           if(viewalltours == 1)TourMenu(MENU_TOUR_SHOWALL);
@@ -11801,7 +11849,13 @@ void writeini_local(FILE *fileout){
       fprintf(fileout, " %s\n", file);
     }
   }
+  fprintf(fileout, "P3VIEW\n");
+  for(i = 0; i<nmeshes; i++){
+    mesh *meshi;
 
+    meshi = meshinfo+i;
+    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
+  }
   fprintf(fileout, "SHOOTER\n");
   fprintf(fileout, " %f %f %f\n", shooter_xyz[0], shooter_xyz[1], shooter_xyz[2]);
   fprintf(fileout, " %f %f %f\n", shooter_dxyz[0], shooter_dxyz[1], shooter_dxyz[2]);
@@ -12364,13 +12418,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", p3dsurfacetype);
   fprintf(fileout, "P3DSURFACESMOOTH\n");
   fprintf(fileout, " %i\n", p3dsurfacesmooth);
-  fprintf(fileout, "P3VIEW\n");
-  for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
-  }
   fprintf(fileout, "PROJECTION\n");
   fprintf(fileout, " %i\n", projection_type);
   fprintf(fileout, "SBATSTART\n");
@@ -12474,6 +12521,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", visWalls);
   fprintf(fileout, "SKIPEMBEDSLICE\n");
   fprintf(fileout, " %i\n", skip_slice_in_embedded_mesh);
+#ifdef pp_SLICEUP
+  fprintf(fileout, "SLICEDUP\n");
+  fprintf(fileout, " %i %i\n", slicedup_option, vectorslicedup_option);
+#endif
   fprintf(fileout, "SMOKESENSORS\n");
   fprintf(fileout, " %i %i\n", show_smokesensors, test_smokesensors);
   fprintf(fileout, "SMOOTHBLOCKSOLID\n");

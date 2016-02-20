@@ -1,4 +1,5 @@
 @echo off
+Title Installing 64 bit Windows test Smokeview
 
 Rem Windows batch file to upload Smokeview test files to
 Rem the download site.  This script assume that the Windows

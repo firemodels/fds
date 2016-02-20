@@ -1,5 +1,5 @@
 @echo off
-Title Building Parallel FDS for 64 bit OSX
+Title Building Parallel debug FDS for 64 bit OSX
 
 Rem Batch file used to build a 64 bit version of FDS
 
@@ -23,6 +23,6 @@ set target=mpi_intel_osx_64_db
 set fdsdir=%linux_svn_root%/FDS_Compilation/mpi_intel_osx_64_db
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.sh %target% %fdsdir% %osx_hostname%
+plink %osx_logon% %scriptdir%/MAKEfdsweb.sh %linux_svn_root% mpi_intel_osx_64_db
 
 pause

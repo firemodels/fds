@@ -39,8 +39,8 @@ set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
+cd "%svn_root%\SMV\uploads
+set upload=%CD%
 
 cd %bundledir%
 echo.
@@ -100,9 +100,9 @@ wzipse32 %zipbase%.zip -runasadmin -d "C:\Program Files\firemodels\%smv_edition%
 CALL :COPY  %zipbase%.exe ..\.
 
 echo.
-echo ***copying %zipbase%.exe to %gupload%
+echo ***copying %zipbase%.exe to %upload%
 echo.
-CALL :COPY  %zipbase%.exe "%gupload%"
+CALL :COPY  %zipbase%.exe "%upload%"
 
 echo.
 echo ***Smokeview win%platform% bundle built

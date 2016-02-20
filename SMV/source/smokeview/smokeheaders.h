@@ -1,6 +1,10 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void makeiblank_all(void);
+#ifdef pp_SLICEDUP
+EXTERNCPP void update_slicedup_dialog(void);
+#endif
 EXTERNCPP void drawnorth(void);
 EXTERNCPP void draw_geomdata(int flag, patchdata *patchi, int geom_type);
 EXTERNCPP void UpdateCurrentColorbar(colorbardata *cb);
@@ -124,7 +128,11 @@ EXTERNCPP void getsliceparams2(void);
 
 #ifdef pp_PILOT
 EXTERNCPP void draw_pilot(void);
+#ifdef pp_WINDROSE
+EXTERNCPP void setup_pilot_data(int nbuckets, int nr, int ntheta, int flag);
+#else
 EXTERNCPP void setup_pilot_data(int nbuckets);
+#endif
 #endif
 EXTERNCPP void DefineAllFEDs(void);
 EXTERNCPP void update_tour_state(void);
@@ -849,7 +857,7 @@ EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       int **nchars_compressed_full,
                       int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readfed(int ifile, int flag, int file_type, int *errorcode);
-EXTERNCPP void readslice(char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorcode);
 EXTERNCPP void update_smooth_blockages(void);
 EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 

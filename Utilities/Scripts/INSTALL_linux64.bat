@@ -21,5 +21,5 @@ call %envfile%
 
 set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.sh
 
-plink %svn_logon% %linux_svn_root%/Utilities/uploads/%exe% y
+plink %linux_logon% %linux_svn_root%/Utilities/uploads/%exe% y
 pause

@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX fds2ascii
 
 ::  Windows batch file to build Linux version of smokezip
 
@@ -24,7 +25,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEf2aosx.sh %linux_svn_root%
+plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEf2aosx.sh %linux_svn_root%
 
 echo.
 echo compilation complete

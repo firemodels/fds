@@ -200,11 +200,11 @@ typedef struct {
 typedef struct {
   char label[1024], *label_ptr ;        // menu label
   int nnodes,nodehilight,nsplits;
-  unsigned char rgb_node[3*256];
-  unsigned char alpha[256];
-  unsigned char index_node[256];  // colorbar index
-  unsigned char splits[256];
-  float colorbar[3*256];
+  unsigned char rgb_node[3*1024];
+  unsigned char alpha[1024];
+  unsigned char index_node[1024];  // colorbar index
+  unsigned char splits[1024];
+  float colorbar[3*1024];
 } colorbardata;
 
 /* --------------------------  colortabledata ------------------------------------ */
@@ -444,7 +444,7 @@ typedef struct _cventdata {
   int dir,type,colorindex,cvent_id,isOpenvent;
   float boxmin[3], boxmax[3], texture_origin[3];
   float xmin, xmax, ymin, ymax, zmin, zmax;
-  unsigned char *blank;
+  unsigned char *blank0, *blank;
   int   imin, imax, jmin, jmax, kmin, kmax;
   int useventcolor,hideboundary;
   float origin[3], radius;
@@ -462,6 +462,9 @@ typedef struct _ventdata {
   int dir,dir2,vent_id;
   int useventcolor;
   int isOpenvent;
+  float xvent1_orig, xvent2_orig;
+  float yvent1_orig, yvent2_orig;
+  float zvent1_orig, zvent2_orig;
   float xvent1, xvent2;
   float yvent1, yvent2;
   float zvent1, zvent2;
@@ -523,7 +526,7 @@ typedef struct _isodata {
   int firstshort;
   flowlabels surface_label, color_label;
   geomdata *geominfo;
-  int blocknumber,display,loaded;
+  int blocknumber,display,loaded,loading;
   float tmin,tmax;
   float valmin_data, valmax_data;
   int extreme_min, extreme_max;
@@ -610,10 +613,17 @@ typedef struct _mesh {
   int plotx, ploty, plotz;
   int slicedir;
   int plotn;
-  char *c_iblank_node,*c_iblank_cell,*c_iblank_x,*c_iblank_y,*c_iblank_z;
+
+  char *c_iblank_node0, *c_iblank_cell0, *c_iblank_x0, *c_iblank_y0, *c_iblank_z0;
+  float *f_iblank_cell0;
+  char *c_iblank_embed0;
+  float *block_zdist0;
+
+  char *c_iblank_node, *c_iblank_cell, *c_iblank_x, *c_iblank_y, *c_iblank_z;
   float *f_iblank_cell;
   char *c_iblank_embed;
   float *block_zdist;
+
   int zdist_flag;
   unsigned char *iblank_smoke3d;
   int iblank_smoke3d_defined;
@@ -658,6 +668,7 @@ typedef struct _mesh {
   int smokedir,smokedir_old;
   float dx, dy, dz, dxy,dxz,dyz;
   float norm[3];
+  float dplane_min[4], dplane_max[4];
 
   int *patchtype;
   int *patchdir,*patch_surfindex;
@@ -904,6 +915,7 @@ typedef struct _device{
 /* --------------------------  pilot ------------------------------------ */
 
 typedef struct {
+  histogramdata histogram;
   int nbuckets;
   float total, *fraction,*vel;
 } pilotdata;
@@ -1153,13 +1165,14 @@ typedef struct _slicedata {
   float *constant_color;
   float qval256[256];
   char slicedir[50];
-  int loaded, display;
+  int loaded, loading, display;
   int loaded_save, display_save;
   int num_memblocks;
   float position_orig;
   int blocknumber;
   int firstshort;
   int vec_comp;
+  int skip;
   int setvalmin, setvalmax;
   float valmin, valmax;
   float globalmin, globalmax;
@@ -1198,7 +1211,7 @@ typedef struct _slicedata {
   int type;
   int vloaded;
   int reload;
-  float delta_orig;
+  float delta_orig, dplane_min, dplane_max;
   int extreme_min, extreme_max;
 } slicedata;
 
@@ -1257,6 +1270,7 @@ typedef struct {
   slicedata *u,*v,*w,*val;
   int volslice;
   int iu, iv, iw, ival;
+  int skip;
   int loaded,display;
   float valmin, valmax;
   int type,vec_type;

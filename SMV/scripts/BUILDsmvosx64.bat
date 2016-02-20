@@ -1,5 +1,5 @@
 @echo off
-Title Building Smokeview for 64 bit OSX
+Title Building relase Smokeview for 64 bit OSX
 
 Rem  Windows batch file to build Smokeview for all platforms.
 Rem  This script builds LInux and OSX Smokeview's by doing a
@@ -27,7 +27,7 @@ set version=%smv_version%_%smv_revision%
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEsmvosx64.sh %linux_svn_root%
+plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEsmvosx64.sh %linux_svn_root%
 
 echo.
 echo compilation complete

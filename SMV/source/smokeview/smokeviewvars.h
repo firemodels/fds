@@ -20,6 +20,18 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(update_setvents, 0);
+#ifdef pp_SLICECOLORDEFER
+SVEXTERN int SVDECL(use_set_slicecolor, 1);
+#else
+SVEXTERN int SVDECL(use_set_slicecolor, 0);
+#endif
+SVEXTERN int SVDECL(cvents_defined, 0);
+#ifdef pp_SLICEDUP
+SVEXTERN int SVDECL(slicedup_option , SLICEDUP_KEEPFINE);
+SVEXTERN int SVDECL(vectorslicedup_option, SLICEDUP_KEEPALL);
+SVEXTERN int SVDECL(nslicedups, 0);
+#endif
 SVEXTERN int SVDECL(vis_xtree, 0), SVDECL(vis_ytree, 0), SVDECL(vis_ztree, 1);
 SVEXTERN int SVDECL(max_device_tree,0);
 #ifdef INMAIN
@@ -31,6 +43,10 @@ SVEXTERN float SVDECL(northangle, 0.0);
 SVEXTERN int SVDECL(vis_northangle, 0), SVDECL(have_northangle,0);
 #ifdef pp_PILOT
 SVEXTERN int SVDECL(npilot_buckets, 8);
+#ifdef pp_WINDROSE
+SVEXTERN int SVDECL(npilot_nr, 8);
+SVEXTERN int SVDECL(npilot_ntheta, 12);
+#endif
 SVEXTERN int SVDECL(pilot_viewtype, 0);
 #endif
 SVEXTERN int SVDECL(ngeomdiaginfo, 0), SVDECL(show_geometry_diagnostics,0);
@@ -952,7 +968,7 @@ SVEXTERN vdevicedata SVDECL(*vdeviceinfo, NULL);
 SVEXTERN vdevicesortdata SVDECL(*vdevices_sorted, NULL);
 SVEXTERN int SVDECL(ntreedeviceinfo, 0), SVDECL(mintreesize, 3);
 SVEXTERN treedevicedata SVDECL(*treedeviceinfo,NULL);
-SVEXTERN int show_smokesensors,active_smokesensors,test_smokesensors;
+SVEXTERN int SVDECL(show_smokesensors,SMOKESENSORS_0255),active_smokesensors,test_smokesensors;
 SVEXTERN float smoke3d_cvis;
 SVEXTERN sv_object SVDECL(**object_defs,NULL), SVDECL(*heat_detector_object_backup,NULL), SVDECL(*target_object_backup,NULL);
 SVEXTERN sv_object SVDECL(*sprinkler_upright_object_backup,NULL), SVDECL(*smoke_detector_object_backup,NULL);
@@ -1132,7 +1148,7 @@ SVEXTERN int SVDECL(have_extreme_mindata,0), SVDECL(have_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata,0), SVDECL(show_extreme_maxdata,0);
 SVEXTERN int SVDECL(show_extreme_mindata_save,0), SVDECL(show_extreme_maxdata_save,0);
 
-SVEXTERN int SVDECL(use_iblank,1),arg_iblank;
+SVEXTERN int SVDECL(use_iblank,1),SVDECL(iblank_set_on_commandline,0);
 
 SVEXTERN int script_index, ini_index;
 SVEXTERN char script_inifile_suffix[1024], vol_prefix[1024];
@@ -1191,9 +1207,12 @@ SVEXTERN float view_tstart, view_tstop;
 SVEXTERN int tour_constant_vel;
 SVEXTERN float tour_bias,tour_continuity;
 SVEXTERN int view_ntimes;
-SVEXTERN int ntours,selectedtour_index,selectedtour_index_old,selectedtour_index_ini;
-SVEXTERN int update_selectedtour_index;
+
+SVEXTERN int SVDECL(ntours, 0);
+SVEXTERN int SVDECL(selectedtour_index, TOURINDEX_MANUAL), SVDECL(selectedtour_index_old, TOURINDEX_MANUAL), SVDECL(selectedtour_index_ini, TOURINDEX_MANUAL);
+SVEXTERN int SVDECL(update_selectedtour_index,0);
 SVEXTERN int viewtourfrompath,viewalltours,viewanytours,edittour;
+
 SVEXTERN selectdata SVDECL(*selectfaceinfo,NULL);
 SVEXTERN blockagedata SVDECL(**selectblockinfo,NULL);
 SVEXTERN tickdata SVDECL(*tickinfo,NULL);

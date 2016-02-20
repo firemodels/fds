@@ -1,5 +1,5 @@
 @echo off
-Title Packaging test Smokeview for 64 bit Linux
+Title Installing 64 bit OSX test Smokeview
 
 Rem  Windows batch file to create an achive for a 64 bit Linux test smokeview
 
@@ -26,6 +26,6 @@ cd %svn_root%\smv\scripts
 set exe=smv_test_%smv_revision%_osx64.sh
 
 echo installing 64 bit smokeview
-plink %svn_logon% %linux_svn_root%/SMV/scripts/ssh_command2.sh %osx_hostname% %linux_svn_root%/SMV/uploads %exe% y
+plink %osx_logon% %linux_svn_root%/SMV/scripts/ssh_command2.sh %osx_hostname% %linux_svn_root%/SMV/uploads %exe% y
 
 pause

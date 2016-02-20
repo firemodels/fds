@@ -2126,9 +2126,13 @@ void keyboard(unsigned char key, int flag){
       ASSERT(FFALSE);
       break;
   }
-  if(ReadPlot3dFile==1&&visiso !=0 && current_mesh->slicedir==ISO){
-    plotiso[plotn-1] += FlowDir;
-    updatesurface();
+  if(ReadPlot3dFile==1){
+    plotstate = getplotstate(STATIC_PLOTS);
+    if(visiso!=0&&current_mesh->slicedir==ISO){
+      plotiso[plotn-1] += FlowDir;
+      updatesurface();
+    }
+    glutPostRedisplay();
   }
   if(iplot_state!=0)updateplotslice(iplot_state);
 }

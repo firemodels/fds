@@ -1,5 +1,5 @@
 @echo off
-Title Building Parallel FDS for 64 bit Linux
+Title Building dv FDS for 64 bit Linux
 
 Rem Batch file used to build a 32 bit version of FDS
 
@@ -23,6 +23,6 @@ set target=intel_linux_64_dv
 set fdsdir=%linux_svn_root%/FDS_Compilation/intel_linux_64_dv
 set scriptdir=%linux_svn_root%/FDS_Compilation/Scripts
 
-plink %svn_logon% %scriptdir%/MAKE_fds_onhost.sh %target% %fdsdir% %linux_hostname%
+plink %linux_logon% %scriptdir%/MAKE_fds_onhost.sh %target% %fdsdir% %linux_hostname%
 
 pause

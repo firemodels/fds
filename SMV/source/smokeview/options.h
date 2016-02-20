@@ -19,7 +19,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.3.3"
+#define PROGVERSION "6.3.4"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
@@ -36,9 +36,16 @@
 #endif
 
 #define pp_DRAWISO
-#define pp_THREAD
 #define pp_LANG
 #define pp_DEG
+#define pp_SLICEDUP
+#define pp_SLICECOLORDEFER
+
+#define pp_THREAD
+#define pp_THREADIBLANK // test iblank computation in background.
+#ifdef pp_THREADIBLANK  // if pp_THREADIBLANK is set then pp_THREAD also has to be set
+#define pp_THREAD
+#endif
 
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -48,6 +55,7 @@
 
 #ifdef pp_BETA
 #define pp_PILOT
+//#define pp_WINDROSE  2d histogram, variation of pilot ddata
 #define pp_GEOMTEST
 #define pp_HAZARD
 //#define pp_GPUDEPTH

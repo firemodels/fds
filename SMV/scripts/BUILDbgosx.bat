@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit OSX background
 
 Rem  Windows batch file to build an OSX version of background
 
@@ -27,7 +28,9 @@ set version=%smv_version%_%smv_revision%
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %svn_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEbgosx.csh %linux_svn_root%
+echo plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEbgosx.csh %linux_svn_root%
+
+plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEbgosx.csh %linux_svn_root%
 
 echo.
 echo compilation complete

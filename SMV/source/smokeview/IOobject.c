@@ -464,7 +464,7 @@ void draw_devices_val(void){
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  if(active_smokesensors==1&&show_smokesensors!=0){
+  if(active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN){
     getdevice_screencoords();
   }
   for(i=0;i<ndeviceinfo;i++){
@@ -473,7 +473,7 @@ void draw_devices_val(void){
     if(devicei->object->visible==0)continue;
     xyz = devicei->xyz;
     xyznorm = devicei->xyznorm;
-    if(active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0){
+    if(active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN&&STRCMP(devicei->object->label,"smokesensor")==0){
       char label[256];
       float val;
       int ival;
@@ -483,16 +483,16 @@ void draw_devices_val(void){
         doit=1;
       }
       switch(show_smokesensors){
-        case 1:
+        case SMOKESENSORS_0255:
           sprintf(label,"%i",devicei->visval);
           break;
-        case 2:
+        case SMOKESENSORS_01:
           val = devicei->visval/255.0;
           sprintf(label,"%.2f",val);
           trimzeros(label);
           break;
-        case 3:
-        case 4:
+        case SMOKESENSORS_SCALED:
+        case SMOKESENSORS_0INF:
           ival = devicei->visval;
           if(ival==255){
             strcpy(label,"Inf");
@@ -1270,7 +1270,7 @@ void draw_devices(void){
       glPopMatrix();
     }
     dpsi=0.0;
-    if((active_smokesensors==1&&show_smokesensors!=0&&STRCMP(devicei->object->label,"smokesensor")==0)||
+    if((active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN&&STRCMP(devicei->object->label,"smokesensor")==0)||
        STRCMP(devicei->object->label,"thermocouple")==0
       ){
       float *xyznorm;
@@ -6054,12 +6054,15 @@ int is_dup_device_label(int index, int direction){
 /* ----------------------- setup_pilot_data ----------------------------- */
 
 #ifdef pp_PILOT
+#ifdef pp_WINDROSE
+void setup_pilot_data(int nbuckets, int nr, int ntheta, int flag){
+#else
 void setup_pilot_data(int nbuckets){
+#endif
   int i;
   float dangle;
 
   dangle = 360.0 / (float)nbuckets;
-
   for(i = 0; i < nvdeviceinfo; i++){
     vdevicedata *vdevicei;
     devicedata *udev, *vdev, *wdev;
@@ -6115,6 +6118,20 @@ void setup_pilot_data(int nbuckets){
           piloti->vel[ibucket] += vel;
         }
       }
+#ifdef pp_WINDROSE
+      {
+        float rmin, rmax;
+        histogramdata *histogram;
+
+        histogram = &(piloti->histogram);
+        if(flag != FIRST_TIME){
+          free_histogram2d(histogram);
+        }
+        init_histogram2d(histogram, nr, ntheta);
+        get_2dminmax(udev->vals, vdev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        copy_uvdata2histogram(udev->vals,vdev->vals,nvals,rmin,rmax,histogram);
+      }
+#endif
     }
     else if(angledev != NULL&&veldev != NULL){
       int nvals;
@@ -6130,6 +6147,20 @@ void setup_pilot_data(int nbuckets){
         piloti->fraction[ibucket]++;
         piloti->vel[ibucket] += vel;
       }
+#ifdef pp_WINDROSE
+      {
+        float rmin, rmax;
+        histogramdata *histogram;
+
+        histogram = &(piloti->histogram);
+        if(flag != FIRST_TIME){
+          free_histogram2d(histogram);
+        }
+        init_histogram2d(histogram, nr, ntheta);
+        get_polarminmax(veldev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        copy_polardata2histogram(veldev->vals,angledev->vals,nvals,rmin,rmax,histogram);
+      }
+#endif
     }
     else{
       continue;
@@ -6399,7 +6430,11 @@ void setup_device_data(void){
 
   // convert velocities to pilot chart format
 #ifdef pp_PILOT
+#ifdef pp_WINDROSE
+  setup_pilot_data(npilot_buckets,npilot_nr,npilot_ntheta,FIRST_TIME);
+#else
   setup_pilot_data(npilot_buckets);
+#endif
 #endif
 
   FREEMEMORY(vals);

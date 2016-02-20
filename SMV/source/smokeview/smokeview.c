@@ -565,14 +565,14 @@ void parse_commandline(int argc, char **argv){
       exit(0);
     }
     else if(strncmp(argv[i],"-noblank",8)==0){
-      arg_iblank=1;
+      iblank_set_on_commandline=1;
       use_iblank=0;
     }
     else if(strncmp(argv[i],"-fed",4)==0){
       compute_fed=1;
     }
     else if(strncmp(argv[i],"-blank",6)==0){
-      arg_iblank=1;
+      iblank_set_on_commandline=1;
       use_iblank=1;
     }
     else if(strncmp(argv[i],"-gversion",9)==0){

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # The Firebot script is part of an automated continuous integration system.
-# Consult the FDS Configuration Management Plan for more information.
+# Consult the FDS Config Management Plan for more information.
 
 #  ===================
 #  = Input variables =
@@ -294,7 +294,8 @@ do_git_checkout()
      echo "Fetching origin." >> $OUTPUT_DIR/stage1 2>&1
      git fetch origin >> $OUTPUT_DIR/stage1 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage1 2>&1
-     git submodule update --recursive >> $OUTPUT_DIR/stage1 2>&1
+     git submodule foreach git remote update >> $OUTPUT_DIR/stage1 2>&1
+     git submodule foreach git merge origin/master >> $OUTPUT_DIR/stage1 2>&1
    fi
 
    echo "Re-checking out latest revision." >> $OUTPUT_DIR/stage1 2>&1
@@ -1043,17 +1044,17 @@ make_fds_validation_guide()
    check_guide $OUTPUT_DIR/stage8_fds_validation_guide $fdsrepo/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
 }
 
-make_fds_configuration_management_plan()
+make_fds_Config_management_plan()
 {
-   cd $fdsrepo/Manuals/FDS_Configuration_Management_Plan
+   cd $fdsrepo/Manuals/FDS_Config_Management_Plan
 
-   echo "   configuration management guide"
-   # Build FDS Configuration Management Plan
-   ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_configuration_management_plan
+   echo "   Config management guide"
+   # Build FDS Config Management Plan
+   ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_Config_management_plan
 
    # Check guide for completion and copy to website if successful
    # note: script that uploads pdf to google doens't like the name so it has been shortened to FDS_Config_Management_Plan
-   check_guide $OUTPUT_DIR/stage8_fds_configuration_management_plan $fdsrepo/Manuals/FDS_Configuration_Management_Plan/FDS_Config_Management_Plan.pdf 'FDS Configuration Management Plan'
+   check_guide $OUTPUT_DIR/stage8_fds_Config_management_plan $fdsrepo/Manuals/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf 'FDS Config Management Plan'
 }
 
 #  =====================================================
@@ -1247,7 +1248,7 @@ if [ "$SKIPMATLAB" == "" ] ; then
    make_fds_verification_guide
    make_fds_technical_guide
    make_fds_validation_guide
-   make_fds_configuration_management_plan
+   make_fds_Config_management_plan
 fi
 
 ### Wrap up and report results ###
