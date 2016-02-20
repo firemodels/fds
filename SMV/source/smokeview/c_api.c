@@ -241,7 +241,7 @@ int loadfile(const char *filename) {
     sd = sliceinfo + i;
     if(strcmp(sd->file,filename)==0){
       if(i<nsliceinfo-nfedinfo){
-        readslice(sd->file,i,LOAD,&errorcode);
+        readslice(sd->file,i,LOAD,SET_SLICECOLOR,&errorcode);
       }
       else{
         readfed(i,LOAD,FED_SLICE,&errorcode);
@@ -1212,12 +1212,12 @@ void unloadslice(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readslice("",value,UNLOAD,&errorcode);
+    readslice("",value,UNLOAD,SET_SLICECOLOR,&errorcode);
   }
   else{
     if(value==UNLOAD_ALL){
       for(i=0;i<nsliceinfo;i++){
-        readslice("",i,UNLOAD,&errorcode);
+        readslice("",i,UNLOAD,SET_SLICECOLOR,&errorcode);
       }
     }
     else if(value==UNLOAD_LAST){
@@ -1225,7 +1225,7 @@ void unloadslice(int value){
 
       unload_index=last_slice_loadstack();
       if(unload_index>=0&&unload_index<nsliceinfo){
-        readslice("",unload_index,UNLOAD,&errorcode);
+        readslice("",unload_index,UNLOAD,SET_SLICECOLOR,&errorcode);
       }
     }
   }
@@ -1257,7 +1257,7 @@ void unloadall() {
       LoadVolSmoke3DMenu(UNLOAD_ALL);
     }
     for(i=0;i<nsliceinfo;i++){
-      readslice("",i,UNLOAD,&errorcode);
+      readslice("",i,UNLOAD,SET_SLICECOLOR,&errorcode);
     }
     for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
