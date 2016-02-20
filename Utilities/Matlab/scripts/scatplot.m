@@ -277,8 +277,10 @@ for j=2:length(Q);
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(1+2*Sigma_E),'k--')
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(1-2*Sigma_E),'k--')
             plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta,'r-')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta*(1+2*Sigma_M),'r--')
-            plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*delta*(1-2*Sigma_M),'r--')
+            if delta > 2*Sigma_M
+               plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(delta+2*Sigma_M),'r--')
+               plot([Plot_Min,Plot_Max],[Plot_Min,Plot_Max]*(delta-2*Sigma_M),'r--')
+            end
         end
         
         % Format the legend and axis labels

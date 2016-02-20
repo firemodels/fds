@@ -642,15 +642,13 @@ TCW4IN              & 0.05      & 0.07      & 3.83      \\ \hline
 
 \subsection{Summary of Wall, Ceiling, and Floor Temperature Predictions}
 \label{Surface Temperature}
-\label{Low Surface Temperature}
 
 Figure~\ref{Summary_Surface_Temperature} summarizes the temperature predictions for walls, ceilings, and floors.
 
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature} \\
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Low_Surface_Temperature}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature} 
 \end{tabular}
 \end{center}
 \caption[Summary of compartment surface temperature predictions]
@@ -1234,27 +1232,6 @@ In addition to the steel structural elments, five cylinders (``slugs'') of nicke
 
 \clearpage
 
-\subsection{Summary of Target Temperature Predictions}
-\label{Target Temperature}
-
-
-\begin{figure}[h!]
-\begin{center}
-\begin{tabular}{c}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature}
-\end{tabular}
-\end{center}
-\caption[Summary of target temperature predictions]
-{Summary of target temperature predictions.}
-\end{figure}
-
-\clearpage
-
-
-\section{Special Targets: Electrical Cables}
-
-A common ``target'' in industrial fire simulations are electrical cables because often these cables supply power or control fire protection or other safety related equipment. Often the objective of the simulation is to determine the time to electrical failure, which involves computing the time at which the inner temperature of the cable reaches an experimentally determined ``failure'' temperature where the cable is no longer able to conduct current as designed. The model does not distinguish between various modes of failure. It is purely a thermal model.
-
 
 \subsection{CAROLFIRE Experiments}
 
@@ -1442,26 +1419,27 @@ For the PRISME Door experiments, the temperatures of surrogate cables were predi
 
 \clearpage
 
-\subsection{Summary of THIEF Cable Temperature Predictions}
-\label{THIEF Temperature}
+\subsection{Summary of Target Temperature Predictions}
+\label{Target Temperature}
 
 
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_THIEF_Temperature}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature}
 \end{tabular}
 \end{center}
-\caption[Summary of THIEF cable temperature predictions]
-{Summary of THIEF cable temperature predictions.}
+\caption[Summary of target temperature predictions]
+{Summary of target temperature predictions.}
 \end{figure}
 
 \clearpage
 
+
 \subsection{Time to Failure}
 \label{Cable Failure Time}
 
-In addition to comparing the peak temperature predictions and measurements for electrical cables, it is also useful to consider the uncertainty in predicting the time to cable failure. Obviously, the two quantities are related, but from a practical standpoint, it is the time to failure that is of interest in these types of analyses. Figure~\ref{Cable_Failure_Time_Summary_Plot} displays results for both the CAROLFIRE and PRISME experiments.
+In addition to comparing the peak temperature predictions and measurements for electrical cables, it is also useful to consider the uncertainty in predicting the time to cable failure. Obviously, the two quantities are related, but from a practical standpoint, it is the time to failure that is of interest in these types of analyses. Figure~\ref{Cable_Failure_Time_Summary_Plot} displays results for the CAROLFIRE experiments.
 
 \begin{figure}[h!]
 \begin{center}
