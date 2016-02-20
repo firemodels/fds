@@ -76,6 +76,7 @@ $QFDS -d Flowfields hot_layer_360.fds
 $QFDS -d Flowfields realizable_mass_fractions.fds
 $QFDS -d Flowfields mean_forcing_hole.fds
 
+$QFDS -d Heat_Transfer adiabatic_con_flux.fds
 $QFDS -d Heat_Transfer adiabatic_net_flux.fds
 $QFDS -d Heat_Transfer convective_cooling.fds
 $QFDS -d Heat_Transfer convective_cooling_p1.fds

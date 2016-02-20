@@ -2123,6 +2123,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
                CALL SHUTDOWN(MESSAGE)
+               RETURN
             ENDIF
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L,1),SS%C_P_L,TMP_DROP,C_DROP)
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP,H_L)
@@ -2133,7 +2134,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Gas conditions
 
-            TMP_G  = TMP_INTERIM(II,JJ,KK)
+            TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
             D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
@@ -2349,6 +2350,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      CALL SHUTDOWN('Numerical instability in particle energy transport, Y_EQUIL < Y_GAS_NEW')
+                     RETURN
                   ENDIF
                   CYCLE TIME_ITERATION_LOOP
                ENDIF
@@ -2362,6 +2364,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                   IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                      CALL SHUTDOWN('Numerical instability in particle energy transport, Y_GAS_NEW > Y_EQUIL')
+                     RETURN
                   ENDIF
                   CYCLE TIME_ITERATION_LOOP
                ENDIF
@@ -2423,6 +2426,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                N_SUBSTEPS = NINT(DT/DT_SUBSTEP)
                IF (DT_SUBSTEP <= 0.00001_EB*DT) THEN
                   CALL SHUTDOWN('Numerical instability in particle energy transport, TMP_G')
+                  RETURN
                ENDIF
                CYCLE TIME_ITERATION_LOOP
             ENDIF
@@ -2566,7 +2570,7 @@ SUM_PART_QUANTITIES: IF (N_LP_ARRAY_INDICES > 0) THEN
       AVG_DROP_RAD(:,:,:,LPC%ARRAY_INDEX ) = DROP_RAD
       AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = RUN_AVG_FAC*AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) + OMRAF*DROP_TMP
       IF (LPC%Y_INDEX>0) THEN
-         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%MELTING_TEMPERATURE,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
+         AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(SPECIES(LPC%Y_INDEX)%TMP_MELT,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
       ELSE
          AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ) = MAX(TMPM,AVG_DROP_TMP(:,:,:,LPC%ARRAY_INDEX ))
       ENDIF

@@ -3127,6 +3127,33 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \end{figure}
 
 
+\clearpage
+
+\section{Specified Heat Flux Boundary Conditions (\texorpdfstring{\textct{adiabatic\_xxx\_flux}}{adiabatic\_xxx\_flux})}
+
+There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \textct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \textct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
+\be 
+   \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
+\ee
+where $\dot{Q}=16$~kW, $\gamma=1.4$, and $V=8$~m$^3$. After 30~s, the pressure rise, $p$, is expected to be 24~kPa (left, Fig.~\ref{adiabatic_flux}). The expected temperature rise, $\Delta T$, is found by solving the energy conservation equation:
+\be
+   \dot{Q} \, \Delta t = c_p \, \rho \, V \, \Delta T - V \, \Delta p
+\ee 
+as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_pres} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_temp} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_pres} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp} 
+\end{tabular*}
+\caption[The \textct{adiabatic\_con\_flux} and \textct{adiabatic\_net\_flux} test cases]{Pressure and average temperature of a small compartment with specified heat flux boundary conditions.}
+\label{adiabatic_flux}
+\end{figure}
+
+
 
 
 \chapter{Pyrolysis}
@@ -3747,9 +3774,9 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 
 This case involves a 2~m long duct with a 0.5~m by 0.5~m cross section and 1~m/s flow in the $x$ direction. An 8.5~cm thick block of rigid aluminum foam is positioned in the duct. The pressure drop induced by the foam is expected to be approximately:
 \be
-   \Delta \hbox{P} \approx \delta \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right)
+   \Delta p \approx \delta \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right)
 \ee
-where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate directions. The block thickness $\delta=0.085$~m, the velocity $u=1$~m/s, the air density $\rho=1.2$~kg/m$^3$, and the air viscosity $\mu=1.8 \times 10^{-5}$~kg/m/s. Comparisons of computed and analytical results for three different grid resolutions are shown in Fig.~\ref{porous_media_plot}. The computed pressure drop does not match the expected result because the air velocity is not necessarily 1~m/s inside the block, in particular for the finest grid resolution (pres\_3).
+where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate directions. The block thickness $\delta=0.085$~m, the velocity $u=1$~m/s, the air density $\rho=1.2$~kg/m$^3$, and the air viscosity $\mu=1.8 \times 10^{-5}$~kg/m/s. Comparisons of computed and analytical results for three different grid resolutions (1 corresponds to low resolution, 2 medium, 3 fine) are shown in Fig.~\ref{porous_media_plot}. The computed pressure drop does not match the expected result because the air velocity is not necessarily 1~m/s inside the block, in particular for the finest grid resolution (pres\_3).
 
 \begin{figure}[ht]
 \centering

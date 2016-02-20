@@ -1950,7 +1950,6 @@ CONTAINS
             CASE Default
                CONTINUE
             END SELECT
-            DIA_MEAN = 0.51_EB
          END IF
 
          !
@@ -6034,9 +6033,9 @@ CONTAINS
           MESH_LOOP: DO NOM = 1, NMESHES
              IF (.NOT. EVACUATION_ONLY(NOM)) THEN
                 M => MESHES(NOM)
-                IF ( X1 >= M%XS .AND. X1 <= M%XF .AND. &
-                     Y1 >= M%YS .AND. Y1 <= M%YF .AND. &
-                     Z1 >= M%ZS .AND. Z1 <= M%ZF) THEN
+                IF ( X1 >= M%XS .AND. X1 < M%XF .AND. &
+                     Y1 >= M%YS .AND. Y1 < M%YF .AND. &
+                     Z1 >= M%ZS .AND. Z1 < M%ZF) THEN
                    II = FLOOR( M%CELLSI(FLOOR((X1-M%XS)*M%RDXINT)) + 1.0_EB  )
                    JJ = FLOOR( M%CELLSJ(FLOOR((Y1-M%YS)*M%RDYINT)) + 1.0_EB  )
                    KK = FLOOR( M%CELLSK(FLOOR((Z1-M%ZS)*M%RDZINT)) + 1.0_EB  )
@@ -8295,7 +8294,7 @@ CONTAINS
              FAC_V0_DOWN = ESS%FAC_V0_DOWN
              FAC_V0_HORI = ESS%FAC_V0_HORI
              IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI >= TWO_EPSILON_EB) THEN
-                FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP
+                FAC_V0_HORI = EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_HORI
              END IF
              IF (EVAC_PERSON_CLASSES(HR%IPC)%FAC_V0_UP >= TWO_EPSILON_EB) THEN
                 IF ((ESS%H - ESS%H0) <= -TWO_EPSILON_EB) THEN
@@ -15840,7 +15839,7 @@ CONTAINS
           IEL    = HR%IEL
           Speed  = HR%Speed
           DO i = 1, N_DOORS
-             IF ( EVAC_DOORS(i)%IMESH == nm_tmp) THEN
+             IF ( EVAC_DOORS(i)%IMESH == nm_tmp .AND. .NOT.(TRIM(EVAC_DOORS(i)%TO_NODE)==TRIM(EVAC_DOORS(i)%ID))) THEN
                 Is_Visible_Door(i) = .TRUE.
                 IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
@@ -15866,7 +15865,7 @@ CONTAINS
           IEL    = Group_List(j)%IEL
           Speed  = Group_List(j)%Speed
           DO i = 1, N_DOORS
-             IF ( EVAC_DOORS(i)%IMESH == nm_tmp) THEN
+             IF ( EVAC_DOORS(i)%IMESH == nm_tmp .AND. .NOT.(TRIM(EVAC_DOORS(i)%TO_NODE)==TRIM(EVAC_DOORS(i)%ID))) THEN
                 Is_Visible_Door(i) = .TRUE.
                 IF (EVAC_DOORS(i)%KNOWN_DOOR) Is_Known_Door(i) = .TRUE.
                 IF (imode == 0) CYCLE   ! Initialization call
@@ -15977,7 +15976,7 @@ CONTAINS
        IEL    = ABS(HR%IEL)
        Speed  = HR%Speed
        DO i = 1, N_DOORS
-          IF ( EVAC_DOORS(i)%IMESH == nm_tmp) THEN
+          IF ( EVAC_DOORS(i)%IMESH == nm_tmp .AND. .NOT.(TRIM(EVAC_DOORS(i)%TO_NODE)==TRIM(EVAC_DOORS(i)%ID))) THEN
              Is_Visible_Door(i) = .TRUE.
           END IF
        END DO
@@ -16019,6 +16018,34 @@ CONTAINS
     END IF   ! Is the agent from an entr or from an evac line
     ! Now Is_Visible_Door means that on the same floor.
     ! Now Is_Know_Door means: known + correct floor
+
+    ! Check that the known/visible doors are in the correct evacuation zone.
+    ! The U_EVAC and V_EVAC is set to zero outside the zone of the door/exit.
+    ! Agent is at the cell II,JJ, check the flow field at this cell.
+    ! This check is done for actual evacuation movement. The initial selection of the
+    ! doors might not be nice, if one has many evacuation zones in one evacuation mesh.
+    ! (At the initialization phase, the u_evac,v_evac information is not up to date.)
+    IF (ICYC>0) THEN
+       II = FLOOR(CELLSI(FLOOR((HR%X-XS)*RDXINT)) + 1.0_EB)
+       JJ = FLOOR(CELLSJ(FLOOR((HR%Y-YS)*RDYINT)) + 1.0_EB)
+       DO I = 1, N_DOORS
+          IF (.NOT.(Is_Visible_Door(i))) CYCLE
+          JJ_NOW = EVAC_DOORS(I)%I_EMESH_EXITS
+          IF (ABS(EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)**2+EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)**2)==0.0_EB) THEN
+             Is_Known_Door(I) = .FALSE.
+             Is_Visible_Door(I) = .FALSE.
+          END IF
+       END DO
+       DO I = 1, N_EXITS
+          IF(EVAC_EXITS(I)%COUNT_ONLY) CYCLE
+          IF (.NOT.(Is_Visible_Door(N_DOORS+i))) CYCLE
+          JJ_NOW = EVAC_EXITS(I)%I_EMESH_EXITS
+          IF (ABS(EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)**2+EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)**2)==0.0_EB) THEN
+             Is_Known_Door(N_DOORS+I) = .FALSE.
+             Is_Visible_Door(N_DOORS+I) = .FALSE.
+          END IF
+       END DO
+    END IF
 
     ! Agent types: 1 rational agents, 2 known doors, 3 herding, 0 main evac ff
     IF (I_Agent_Type == 0) THEN  ! main evac ff (or evac/entr line ff)
@@ -16182,30 +16209,6 @@ CONTAINS
     ! is set to be known.
     IF (ABS(HR%I_Target)>0 .AND. .NOT.(ANY(Is_Visible_Door) .OR. ANY(Is_Known_Door))) &
          Is_Known_Door(ABS(HR%I_Target)) = .TRUE.
-
-    ! Check that the known/visible doors are in the correct evacuation zone.
-    ! The U_EVAC and V_EVAC is set to zero outside the zone of the door/exit.
-    ! Agent is at the cell II,JJ, check the flow field at this cell.
-    ! This check is done for actual evacuation movement. The initial selection of the
-    ! doors might not be nice, if one has many evacuation zones in one evacuation mesh.
-    ! (At the initialization phase, the u_evac,v_evac information is not up to date.)
-    IF (ICYC>0) THEN
-       II = FLOOR(CELLSI(FLOOR((HR%X-XS)*RDXINT)) + 1.0_EB)
-       JJ = FLOOR(CELLSJ(FLOOR((HR%Y-YS)*RDYINT)) + 1.0_EB)
-       DO I = 1, N_DOORS
-          JJ_NOW = EVAC_DOORS(I)%I_EMESH_EXITS
-          IF (ABS(EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)**2+EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)**2)==0.0_EB) THEN
-             Is_Known_Door(I) = .FALSE.
-          END IF
-       END DO
-       DO I = 1, N_EXITS
-          IF(EVAC_EXITS(I)%COUNT_ONLY) CYCLE
-          JJ_NOW = EVAC_EXITS(I)%I_EMESH_EXITS
-          IF (ABS(EMESH_EXITS(JJ_NOW)%U_EVAC(II,JJ)**2+EMESH_EXITS(JJ_NOW)%V_EVAC(II,JJ)**2)==0.0_EB) THEN
-             Is_Known_Door(N_DOORS+I) = .FALSE.
-          END IF
-       END DO
-    END IF
 
 
     IF (ANY(Is_Known_Door) .OR. ANY(Is_Visible_Door)) THEN
