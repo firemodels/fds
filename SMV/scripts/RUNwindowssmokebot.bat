@@ -21,7 +21,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %userprofile%\SMOKEBOT
-call smokebot.lnk 1 1
+cd %svn_root%\Utilities\Firebot
+call run_smokebot
 
 pause
