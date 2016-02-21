@@ -475,7 +475,7 @@ do_FDS_checkout()
      git pull >> $OUTPUT_DIR/stage0b 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage0b 2>&1
      git submodule foreach git remote update >> $OUTPUT_DIR/stage0b 2>&1
-     git submodule foreach git git merge origin/master  >> $OUTPUT_DIR/stage0b 2>&1
+     git submodule foreach git merge origin/master  >> $OUTPUT_DIR/stage0b 2>&1
      updateclean="1"
    fi
    if [ "$updateclean" == "" ]; then
