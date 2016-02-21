@@ -201,7 +201,7 @@ gnu_linux_64_db : $(obj)
 # ------------- gnu_linux_64 ----------------
 
 gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX
+gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -Wno-write-strings
 gnu_linux_64 : LFLAGS    = -m64
 gnu_linux_64 : CC        = gcc
 gnu_linux_64 : CPP       = g++
