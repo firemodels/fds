@@ -19,22 +19,22 @@ Rem location of batch files used to set up Intel compilation environment
 call %envfile%
 
 echo.
-echo -----------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------
 echo Updating the Windows repository FIRE-LOCAL to the latest revision
 %svn_drive%
-cd FIRE-LOCAL
+cd %userprofile%\FIRE-LOCAL
 git remote update
 git merge origin/master
 
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 
 echo.
-echo -----------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------
 echo Updating the Linux GIT repository FIRE-LOCAL on %linux_hostname% to the latest revision
 plink %linux_logon% %scriptdir%/UPDATE_repo.sh  FIRE-LOCAL
 
 echo.
-echo -----------------------------------------------------------------------------------
+echo ------------------------------------------------------------------------
 echo Updating the OSX GIT repository FIRE-LOCAL on %osx_hostname% to the latest revision
 plink %osx_logon% %scriptdir%/UPDATE_repo.sh  FIRE-LOCAL
 
