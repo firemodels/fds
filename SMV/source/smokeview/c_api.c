@@ -481,6 +481,9 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 #elif defined(pp_LINUX)
                 mkdir(renderfile_dir, 0755);
 #endif
+#ifdef pp_OSX
+                mkdir(renderfile_dir, 0755);
+#endif
             }
         }
         if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){

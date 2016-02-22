@@ -72,7 +72,7 @@ int load_script(char *filename) {
 int lua_loadsmvall(lua_State *L) {
     // The first argument is taken from the stack as a string.
     const char *filepath = lua_tostring(L, 1);
-    printf("lua_loadsmvall filepath: %s\n");
+    printf("lua_loadsmvall filepath: %s\n",filepath);
     // The function from the C api is called using this string.
     loadsmvall(filepath);
     // 0 arguments are returned.
