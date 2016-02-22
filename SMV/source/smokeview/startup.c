@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -8,6 +8,9 @@
 
 #include "smokeviewvars.h"
 #include "update.h"
+#ifdef pp_LUA
+#include "lua_api.h"
+#endif
 
 /* ------------------ Init ------------------------ */
 
@@ -96,7 +99,7 @@ void Init(void){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
   glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
-  glShadeModel(GL_SMOOTH); 
+  glShadeModel(GL_SMOOTH);
   glDisable(GL_DITHER);
 
   thistime=0;
@@ -191,11 +194,11 @@ int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
-  /* 
+  /*
   warning: the following line was commented out!! (perhaps it broke something)
      this line is necessary in order to define smv_filename and trainer_filename
   */
- // parse_commandlines(argc, argv); 
+ // parse_commandlines(argc, argv);
   return_code=-1;
   if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
@@ -298,7 +301,7 @@ void setup_glut(int argc, char **argv){
   NewMemory((void **)&smokeviewini,    (unsigned int)(strlen(smokeview_bindir)+14));
   STRCPY(smokeviewini,smokeview_bindir);
   STRCAT(smokeviewini,"smokeview.ini");
-  
+
   startup_pass=2;
 
   smoketempdir=getenv("SVTEMPDIR");
@@ -363,7 +366,7 @@ void setup_glut(int argc, char **argv){
 
       TRAINER_WIDTH=300;
       scrW = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
-      scrH = glutGet(GLUT_SCREEN_HEIGHT)-50; 
+      scrH = glutGet(GLUT_SCREEN_HEIGHT)-50;
       setScreenSize(&scrW,&scrH);
       max_screenWidth = screenWidth;
       max_screenHeight = screenHeight;
@@ -397,7 +400,7 @@ int get_opengl_version(char *version_label){
   char version_label2[256];
   int i;
   int major=0, minor=0, subminor=0;
-  
+
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
     PRINTF("*** Warning: GL_VERSION string is NULL\n");
@@ -424,7 +427,7 @@ void InitOpenGL(void){
   int err;
 
   PRINTF("%s",_("Initializing OpenGL\n"));
-  
+
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
     type |= GLUT_DOUBLE;
@@ -481,7 +484,7 @@ void InitOpenGL(void){
 
   opengl_version = get_opengl_version(opengl_version_label);
 
-  err=0;  
+  err=0;
  #ifdef pp_GPU
   err=glewInit();
   if(err==GLEW_OK){
@@ -524,7 +527,7 @@ void InitOpenGL(void){
 
   light_position0[0]=1.0f;
   light_position0[1]=1.0f;
-  light_position0[2]=4.0f; 
+  light_position0[2]=4.0f;
   light_position0[3]=0.f;
 
   light_position1[0]=-1.0f;
@@ -536,7 +539,7 @@ void InitOpenGL(void){
   updateLights(light_position0,light_position1);
 
   {
-    glGetIntegerv(GL_RED_BITS,&nredbits);    
+    glGetIntegerv(GL_RED_BITS,&nredbits);
     glGetIntegerv(GL_GREEN_BITS,&ngreenbits);
     glGetIntegerv(GL_BLUE_BITS,&nbluebits);
 
@@ -840,7 +843,7 @@ void InitOpenGL(void){
         mslicei = multisliceinfo + i;
         if(mslicei->loaded==1)fprintf(fileout," %i\n",i);
      }
-   }   
+   }
 
    // startup smoke
 
@@ -1164,7 +1167,7 @@ void initvars(void){
 #else
   strcpy(degC,"C");
 #endif
-  
+
 #ifdef pp_DEG
   degF[0]=176; // deg symbol (small superscript 0)
   degF[1]='F';
@@ -1188,7 +1191,7 @@ void initvars(void){
 
   {
     labeldata *gl;
-  
+
     gl=&LABEL_default;
     gl->rgb[0]=0;
     gl->rgb[1]=0;
@@ -1243,7 +1246,7 @@ void initvars(void){
   block_ambient_orig[2] = 0.4;
   block_ambient_orig[3] = 1.0;
   block_ambient2=getcolorptr(block_ambient_orig);
-  
+
   block_specular_orig[0] = 0.0;
   block_specular_orig[1] = 0.0;
   block_specular_orig[2] = 0.0;
@@ -1261,6 +1264,16 @@ void initvars(void){
   last_scriptfile.id=-1;
   last_scriptfile.prev=&first_scriptfile;
   last_scriptfile.next=NULL;
+
+#ifdef pp_LUA
+  first_luascriptfile.id=-1;
+  first_luascriptfile.prev=NULL;
+  first_luascriptfile.next=&last_luascriptfile;
+
+  last_luascriptfile.id=-1;
+  last_luascriptfile.prev=&first_luascriptfile;
+  last_luascriptfile.next=NULL;
+#endif
 
   first_inifile.id=-1;
   first_inifile.prev=NULL;
@@ -1294,11 +1307,11 @@ void initvars(void){
   shooter_uvw[2]=0.0;
   vis_slice_contours=0;
   update_slicecontours=0;
-  
+
   partfacedir[0]=0.0;
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
-  
+
   sb_atstart=1;
   select_device=0;
   selected_device_tag=-1;
@@ -1417,8 +1430,8 @@ void initvars(void){
   show_transparent_vents=1;
   maxtourframes=500;
   blockageSelect=0;
-  stretch_var_black=0; 
-  stretch_var_white=0; 
+  stretch_var_black=0;
+  stretch_var_white=0;
   move_var=0;
 
   snifferrornumber=0;
@@ -1568,7 +1581,7 @@ void initvars(void){
   vertical_factor=1.0;
   terrain_rgba_zmin[0]=90;
   terrain_rgba_zmin[1]=50;
-  terrain_rgba_zmin[2]=50; 
+  terrain_rgba_zmin[2]=50;
 
   terrain_rgba_zmax[0]=200;
   terrain_rgba_zmax[1]=200;
@@ -1600,7 +1613,7 @@ void initvars(void){
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;
-  
+
   partpointsize=4.0,vectorpointsize=3.0,streaklinewidth=1.0;
   isopointsize=4.0;
   isolinewidth=2.0;
@@ -1654,8 +1667,8 @@ void initvars(void){
   sensorcolor[1]=1.0;
   sensorcolor[2]=0.0;
   sensorcolor[3]=1.0;
-  
-  
+
+
   sensornormcolor[0]=1.0;
   sensornormcolor[1]=1.0;
   sensornormcolor[2]=0.0;
@@ -1712,7 +1725,7 @@ void initvars(void){
   timebarcolor[1]=0.6;
   timebarcolor[2]=0.6;
   timebarcolor[3]=1.0;
- 
+
   redcolor[0]=1.0;
   redcolor[1]=0.0;
   redcolor[2]=0.0;
@@ -1899,9 +1912,9 @@ void initvars(void){
   object_def_last.next=NULL;
   object_def_last.prev=&object_def_first;
   object_defs=NULL;
- 
+
   showfiles=0;
- 
+
   smokecullflag=1;
   smokedrawtest=0,smokedrawtest2=0;
   visMAINmenus=0;
@@ -2037,7 +2050,7 @@ void initvars(void){
 
   videoSTEREO=0;
   fzero=0.25;
- 
+
 
   strcpy(blank_global,"");
 
@@ -2070,23 +2083,23 @@ void initvars(void){
   iso_colors[16] = 0.00;
   iso_colors[17] = 0.718750;
   iso_colors[18] = 1.00;
-  
+
   iso_colors[20] = 0.00;
   iso_colors[21] = 1.0;
   iso_colors[22] = 0.5625;
-  
+
   iso_colors[24] = 0.17185;
   iso_colors[25] = 1.0;
   iso_colors[26] = 0.0;
-  
+
   iso_colors[28] = 0.890625;
   iso_colors[29] = 1.0;
   iso_colors[30] = 0.0;
-  
+
   iso_colors[32] = 1.0;
   iso_colors[33] = 0.380952;
   iso_colors[34] = 0.0;
-  
+
   iso_colors[36] = 1.0;
   iso_colors[37] = 0.0;
   iso_colors[38] = 0.0;
@@ -2123,7 +2136,7 @@ void initvars(void){
     colortabledata *cti;
 
     NewMemory((void **)&colortableinfo, ncolortableinfo*sizeof(colortabledata));
-    
+
     cti = colortableinfo+0;
     cti->color[0] = 210;
     cti->color[1] = 180;
@@ -2154,13 +2167,13 @@ void initvars(void){
   memcpy(bw_base,bw_baseBASE,MAXRGB*4*sizeof(float));
   memcpy(rgb2,rgb2BASE,MAXRGB*3*sizeof(float));
   memcpy(bw_base,bw_baseBASE,MAXRGB*4*sizeof(float));
-  
+
   nrgb2=8;
 
   ncamera_list=0,i_view_list=1,init_camera_list_flag=1;
   camera_max_id=2;
   startup=0,startup_view_ini=1,selected_view=-999;
-  
+
 
   {
     int iii;
@@ -2215,5 +2228,3 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
   *argv_sv=aargv;
 #endif
 }
-
-

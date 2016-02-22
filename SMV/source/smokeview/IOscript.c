@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -137,6 +137,43 @@ scriptfiledata *insert_scriptfile(char *file){
   }
   return thisptr;
 }
+
+/* ------------------ insert_luascriptfile ------------------------ */
+
+#ifdef pp_LUA
+luascriptfiledata *insert_luascriptfile(char *file){
+  luascriptfiledata *thisptr,*prevptr,*nextptr;
+  int len;
+  luascriptfiledata *luascriptfile;
+  int idmax=-1;
+
+  for(luascriptfile=first_luascriptfile.next;luascriptfile->next!=NULL;luascriptfile=luascriptfile->next){
+    if(luascriptfile->id>idmax)idmax=luascriptfile->id;
+    if(luascriptfile->file==NULL)continue;
+    if(strcmp(file,luascriptfile->file)==0)return luascriptfile;
+  }
+
+  NewMemory((void **)&thisptr,sizeof(luascriptfiledata));
+  nextptr = &last_luascriptfile;
+  prevptr = nextptr->prev;
+  nextptr->prev=thisptr;
+  prevptr->next=thisptr;
+
+  thisptr->next=nextptr;
+  thisptr->prev=prevptr;
+  thisptr->file=NULL;
+  thisptr->id=idmax+1;
+
+  if(file!=NULL){
+    len = strlen(file);
+    if(len>0){
+      NewMemory((void **)&thisptr->file,len+1);
+      strcpy(thisptr->file,file);
+    }
+  }
+  return thisptr;
+}
+#endif
 
 /* ------------------ start_script ------------------------ */
 
@@ -369,10 +406,10 @@ int compile_script(char *scriptfile){
   }
 
   return_val=0;
-  
-  /* 
+
+  /*
    ************************************************************************
-   ************************ start of pass 1 ********************************* 
+   ************************ start of pass 1 *********************************
    ************************************************************************
  */
 
@@ -397,9 +434,9 @@ int compile_script(char *scriptfile){
 
   NewMemory((void **)&scriptinfo,nscriptinfo*sizeof(scriptdata));
 
-  /* 
+  /*
    ************************************************************************
-   ************************ start of pass 2 ********************************* 
+   ************************ start of pass 2 *********************************
    ************************************************************************
  */
 
@@ -489,12 +526,12 @@ int compile_script(char *scriptfile){
           for(i=0;i<len;i++){
             if(buffer[i]=='/')buffer[i]='\\';
           }
-          if(buffer[len-1]!='\\')strcat(buffer,dirseparator);        
+          if(buffer[len-1]!='\\')strcat(buffer,dirseparator);
 #else
           for(i=0;i<len;i++){
             if(buffer[i]=='\\')buffer[i]='/';
           }
-          if(buffer[len-1]!='/')strcat(buffer,dirseparator);        
+          if(buffer[len-1]!='/')strcat(buffer,dirseparator);
 #endif
           scripti->cval=get_pointer(buffer);
         }
@@ -506,7 +543,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_SCENECLIP:
 
 // LOADVOLSMOKE
-//  mesh number (-1 for all meshes) (int)  
+//  mesh number (-1 for all meshes) (int)
       case SCRIPT_LOADVOLSMOKE:
         SETival;
         break;
@@ -538,13 +575,13 @@ int compile_script(char *scriptfile){
         break;
 
 // RENDERSTART
-//  start_frame (int) skip_frame (int)      
+//  start_frame (int) skip_frame (int)
       case SCRIPT_RENDERSTART:
         SETbuffer;
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
         break;
 
-// RENDERALL 
+// RENDERALL
 //  skip (int)
 // file name base (char) (or blank to use smokeview default)
       case SCRIPT_RENDERALL:
@@ -559,7 +596,7 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
-// VOLSMOKERENDERALL 
+// VOLSMOKERENDERALL
 //  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
       case SCRIPT_VOLSMOKERENDERALL:
@@ -581,14 +618,14 @@ int compile_script(char *scriptfile){
 //  mesh number (int)
       case SCRIPT_LOADISOM:
         SETcval;
-#ifndef pp_DEG        
+#ifndef pp_DEG
         removeDEG(scripti->cval);
-#endif        
+#endif
         scripti->ival = 1;
         SETival;
         break;
 
-// ISORENDERALL 
+// ISORENDERALL
 //  skip (int) start_frame (int) iso file index (int) ( index of &ISOF line in .fds input file)
 // file name base (char) (or blank to use smokeview default)
       case SCRIPT_ISORENDERALL:
@@ -625,11 +662,11 @@ int compile_script(char *scriptfile){
 
       case SCRIPT_KEYBOARD:
 
-// LOADINIFILE 
+// LOADINIFILE
 //  file (char)
       case SCRIPT_LOADINIFILE:
-        
- // LOADFILE 
+
+ // LOADFILE
 //  file (char)
       case SCRIPT_LOADFILE:
 
@@ -662,7 +699,7 @@ int compile_script(char *scriptfile){
       case SCRIPT_SETVIEWPOINT:
 
 // LABEL
-//   text 
+//   text
       case SCRIPT_LABEL:
 
 // LOADBOUNDARY
@@ -707,7 +744,7 @@ int compile_script(char *scriptfile){
         break;
 
 // LOADVOLSMOKEFRAME
-//  mesh index, frame (int)  
+//  mesh index, frame (int)
       case SCRIPT_LOADVOLSMOKEFRAME:
         SETbuffer;
         sscanf(buffer,"%i %i",&scripti->ival,&scripti->ival2);
@@ -741,7 +778,7 @@ int compile_script(char *scriptfile){
         scripti->ival = CLAMP(scripti->ival, 0, 3);
         SETival2;
         break;
-        
+
 // LOADSLICEM
 //  type (char)
 //  1/2/3 (int)  val (float)
@@ -902,17 +939,17 @@ void script_volsmokerenderall(scriptdata *scripti){
     return;
   }
   script_loadvolsmokeframe2();
-  
+
   if(script_startframe>0)scripti->ival3=script_startframe;
   if(vol_startframe0>0)scripti->ival3=vol_startframe0;
   // check first_frame_index
   first_frame_index=scripti->ival3;
   itimes=first_frame_index;
-  
+
   if(script_skipframe>0)scripti->ival=script_skipframe;
   if(vol_skipframe0>0)scripti->ival=vol_skipframe0;
   skip_local=MAX(1,scripti->ival);
-  
+
   PRINTF("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
   scripti->ival=skip_local;
@@ -1172,7 +1209,7 @@ void script_loadslice(scriptdata *scripti){
     for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
       count++;
-    } 
+    }
     break;
   }
   if(count==0)fprintf(stderr,"*** Error: Slice files of type %s failed to load\n",scripti->cval);
@@ -1240,7 +1277,7 @@ void script_loadvslice(scriptdata *scripti){
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
       count++;
-    } 
+    }
     break;
   }
   if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s failed to load\n",scripti->cval);
@@ -1276,7 +1313,7 @@ void script_loadvslicem(scriptdata *scripti, int meshnum){
     for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
       count++;
-    } 
+    }
     break;
   }
   if(count==0)fprintf(stderr,"*** Error: Vector slice files of type %s in mesh %i failed to load\n",scripti->cval,meshnum);
@@ -1289,7 +1326,7 @@ void script_loadtour(scriptdata *scripti){
   int count=0;
 
   PRINTF("script: loading tour %s\n\n",scripti->cval);
-  
+
   for(i=0;i<ntours;i++){
     tourdata *touri;
 
@@ -1455,7 +1492,7 @@ void script_showplot3ddata(scriptdata *scripti){
       plotiso[plotn-1]=isolevel;
       updateshowstep(showhide,ISO);
       updatesurface();
-      updatemenu=1;  
+      updatemenu=1;
       break;
     default:
       ASSERT(FFALSE);
@@ -1744,7 +1781,7 @@ void script_settimeval(scriptdata *scripti){
     imin=0;
     for(i=1;i<nglobal_times-1;i++){
       float val;
-      
+
       val = ABS(global_times[i]-timeval);
       if(val<valmin){
         valmin=val;
@@ -1931,7 +1968,7 @@ int run_script(void){
     case SCRIPT_XSCENECLIP:
       clipinfo.clip_xmin=scripti->ival;
       clipinfo.xmin = scripti->fval;
-      
+
       clipinfo.clip_xmax=scripti->ival2;
       clipinfo.xmax = scripti->fval2;
       updatefacelists=1;
@@ -1939,7 +1976,7 @@ int run_script(void){
     case SCRIPT_YSCENECLIP:
       clipinfo.clip_ymin=scripti->ival;
       clipinfo.ymin = scripti->fval;
-      
+
       clipinfo.clip_ymax=scripti->ival2;
       clipinfo.ymax = scripti->fval2;
       updatefacelists=1;
@@ -1947,7 +1984,7 @@ int run_script(void){
     case SCRIPT_ZSCENECLIP:
       clipinfo.clip_zmin=scripti->ival;
       clipinfo.zmin = scripti->fval;
-      
+
       clipinfo.clip_zmax=scripti->ival2;
       clipinfo.zmax = scripti->fval2;
       updatefacelists=1;

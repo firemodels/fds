@@ -8,6 +8,11 @@
 #include "string_util.h"
 #include "smokeviewvars.h"
 
+#ifdef pp_LUA
+#include "c_api.h"
+#include "lua_api.h"
+#endif
+
 //  version 6.3.3
 
 /* ------------------ main ------------------------ */
@@ -43,6 +48,11 @@ int main(int argc, char **argv){
 #endif
   display_version_info();
   setup_glut(argc,argv_sv);
+
+#ifdef pp_LUA
+  // Initialise the lua interpreter, it does not take control at this point
+  initLua();
+#endif
   return_code=setup_case(argc,argv_sv);
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
@@ -52,4 +62,4 @@ int main(int argc, char **argv){
 
   glutMainLoop();
   return 0;
-}	 
+}

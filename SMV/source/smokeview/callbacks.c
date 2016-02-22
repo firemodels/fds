@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -9,6 +9,10 @@
 #include "update.h"
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
+
+#ifdef pp_LUA
+#include "lua_api.h"
+#endif
 
 #undef pp_GPU_CULL_STATE
 #ifdef pp_GPU
@@ -271,7 +275,7 @@ void mouse_edit_tour(int button, int state, int x, int y){
   }
   tour_drag=0;
   if(val>0&&val<=ntourknots){
-  
+
   /* need to start colors at 1 so that black (color 0,0,0) is not interpreted as a blockage */
 
     val--;
@@ -321,7 +325,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
 
   val1 = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
   val = val1;
-  
+
   if(val>0&&val<=ntotalfaces){
     mesh *meshi;
     selectdata *sd;
@@ -409,7 +413,7 @@ void mouse_select_device(int button, int state, int x, int y){
   b = b>>nblueshift;
 
   val = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
-  
+
   if(val>0){
     devicedata *devicei;
     float *xyz;
@@ -457,7 +461,7 @@ void mouse_select_avatar(int button, int state, int x, int y){
   b = b>>nblueshift;
 
   val = (r << (nbluebits+ngreenbits)) | (g << nbluebits) | b;
-  
+
   if(val>0){
     selected_avatar_tag=val;
     glShadeModel(GL_SMOOTH);
@@ -576,7 +580,7 @@ int colorbar_click(int x, int y){
   colorbar_index = get_colorbar_index(1,x,y);
   if(colorbar_index>=0){
     int state;
- 
+
     colorbar_select_index=colorbar_index;
     state=glutGetModifiers();
     if(state==GLUT_ACTIVE_CTRL&&current_colorbar!=NULL&&current_colorbar->nsplits==1){
@@ -591,7 +595,7 @@ int colorbar_click(int x, int y){
   else if(colorbar_index==CB_SELECT_CONTINUE){
     return 0;
   }
-  else if(colorbar_index==CB_SELECT_STOP){   
+  else if(colorbar_index==CB_SELECT_STOP){
     colorbar_drag=0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
   }
@@ -700,7 +704,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       ASSERT(FFALSE);
       break;
   }
-  
+
   if(mi->direction[0]==0&&mi->direction[1]==0){
     mi->xdirection[0]=0.0;
     mi->xdirection[1]=0.0;
@@ -817,7 +821,7 @@ void mouse_CB(int button, int state, int xm, int ym){
   }
 
   mouse_down=1;
-  
+
   // check for double click for translating/rotating 3D slice plane
 
   if(vis_gslice_data==1||show_gslice_triangles==1||show_gslice_triangulation==1){
@@ -897,7 +901,7 @@ void mouse_CB(int button, int state, int xm, int ym){
         touring=0;
         break;
     }
-    mouse_down_xy0[0]=xm; 
+    mouse_down_xy0[0]=xm;
     mouse_down_xy0[1]=ym;
   }
   glutPostRedisplay();
@@ -1001,7 +1005,7 @@ void Drag_Tour_Node(int xm, int ym){
         tour_xyz[0] += dx;
         tour_xyz[1] += dy;
         tour_xyz[2] += dz;
-        
+
         mouse_down_xy0[0]=xm;
         mouse_down_xy0[1]=ym;
 
@@ -1204,7 +1208,7 @@ void motion_CB(int xm, int ym){
     if(throttle_gpu()==1)return;
   }
 #endif
-  
+
   glutPostRedisplay();
 
   if( colorbar_drag==1&&(showtime==1 || showplot3d==1)){
@@ -1339,7 +1343,7 @@ void keyboard(unsigned char key, int flag){
       if(isZoneFireModel==1){
         if(keystate==GLUT_ACTIVE_ALT){
           zone_ventfactor /= 1.5;
-        } 
+        }
         else{
           zone_ventfactor *= 1.5;
         }
@@ -1424,7 +1428,7 @@ void keyboard(unsigned char key, int flag){
           DialogMenu(DIALOG_COLORBAR); // colorbar dialog
           break;
         case GLUT_ACTIVE_CTRL:
-        default: 
+        default:
           if(nrooms>0){
             zone_highlight = 1 - zone_highlight;
             if(zone_highlight==1){
@@ -1540,7 +1544,7 @@ void keyboard(unsigned char key, int flag){
         update_smoke3dflags();
       }
       print_gpu_cull_state();
-      return;    
+      return;
 #endif
     case 'h':
       if(titlesafe_offset==0){
@@ -1612,7 +1616,7 @@ void keyboard(unsigned char key, int flag){
       if(visTimebar==0)PRINTF("Time bar hidden\n");
       if(visTimebar==1)PRINTF("Time bar visible\n");
       break;
-#ifdef _DEBUG 
+#ifdef _DEBUG
     case 'l':
       if(nsmoke3dinfo>0){
         smokecullflag=1-smokecullflag;
@@ -1944,7 +1948,7 @@ void keyboard(unsigned char key, int flag){
 #ifdef pp_GPU
         print_gpu_cull_state();
 #endif
-        return;    
+        return;
       }
       break;
     case 'w':
@@ -2267,7 +2271,7 @@ void specialkeyboard_CB(int key, int x, int y){
       ASSERT(FFALSE);
       break;
   }
-} 
+}
 
 /* ------------------ handle_plot3d_keys ------------------------ */
 
@@ -2349,7 +2353,7 @@ void handle_plot3d_keys(int  key){
 }
 
 /* ------------------ handle_move_keys ------------------------ */
-                                                 
+
 void handle_move_keys(int  key){
   int state;
   float dx, dy;
@@ -2466,12 +2470,12 @@ void handle_move_keys(int  key){
       }
       break;
     case GLUT_KEY_UP:
-      if(key_state==KEY_ALT){  
+      if(key_state==KEY_ALT){
         eye_xyz[2] += INC_Z;
       }
       else{
         float local_speed_factor=1.0;
-  
+
         if(key_state==KEY_SHIFT)local_speed_factor=4.0;
         dx = INC_XY*(sin_azimuth);
         dy = INC_XY*(cos_azimuth);
@@ -2512,7 +2516,7 @@ void handle_move_keys(int  key){
     eye_xyz0[2]=eye_xyz[2];
     update_translate();
   }
-} 
+}
 
 /* ------------------ gmod ------------------------ */
 
@@ -2534,7 +2538,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
 
   if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
-    
+
     oldcpuframe=cpuframe-10;
     if(oldcpuframe<0)oldcpuframe+=20;
     totalcpu=cputimes[cpuframe]-cputimes[oldcpuframe];
@@ -2546,7 +2550,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     }
     cpuframe++;
     if(cpuframe>=20)cpuframe=0;
-   
+
     last_frame_count=frame_count;
     frame_count=1;
     lasttime = thistime;
@@ -2693,7 +2697,7 @@ void ClearBuffers(int mode){
   else{
     glClearColor((float)0.0,(float)0.0,(float)0.0, (float)0.0);
   }
-  
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -2701,7 +2705,7 @@ void ClearBuffers(int mode){
 
 int DoStereo(void){
   int return_code=0;
-  
+
   if(showstereo==STEREO_TIME&&videoSTEREO==1){  // temporal stereo (shuttered glasses)
     glDrawBuffer(GL_BACK_LEFT);
     if(showstereo_frame==LEFT_EYE||showstereo_frame==BOTH_EYES){
@@ -2739,7 +2743,7 @@ int DoStereo(void){
   else if(showstereo==STEREO_RB){             // red/blue stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClearColor(1.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==LEFT_EYE||showstereo_frame==BOTH_EYES){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
@@ -2750,7 +2754,7 @@ int DoStereo(void){
     if(showstereo_frame==RIGHT_EYE||showstereo_frame==BOTH_EYES){
       glDrawBuffer(GL_BACK);
       glColorMask(GL_FALSE,GL_FALSE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 0.0, 1.0, 1.0); 
+      glClearColor(0.0, 0.0, 1.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0);
@@ -2762,7 +2766,7 @@ int DoStereo(void){
   else if(showstereo==STEREO_RC){             // red/cyan stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 0.0, 0.0, 1.0); 
+    glClearColor(1.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==LEFT_EYE||showstereo_frame==BOTH_EYES){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
@@ -2773,7 +2777,7 @@ int DoStereo(void){
     if(showstereo_frame==RIGHT_EYE||showstereo_frame==BOTH_EYES){
       glDrawBuffer(GL_BACK);
       glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 1.0, 1.0, 0.0); 
+      glClearColor(0.0, 1.0, 1.0, 0.0);
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0);
@@ -2785,7 +2789,7 @@ int DoStereo(void){
   else if(showstereo==STEREO_CUSTOM){             // custom red/blue stereo
     glDrawBuffer(GL_BACK);
     glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-    glClearColor(1.0, 1.0, 1.0, 1.0); 
+    glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if(showstereo_frame==LEFT_EYE||showstereo_frame==BOTH_EYES){
       glColorMask(GL_TRUE,GL_FALSE,GL_FALSE, GL_TRUE);
@@ -2795,7 +2799,7 @@ int DoStereo(void){
     if(showstereo_frame==RIGHT_EYE||showstereo_frame==BOTH_EYES){
       glDrawBuffer(GL_BACK);
       glColorMask(GL_FALSE,GL_TRUE,GL_TRUE,GL_TRUE);
-      glClearColor(0.0, 1.0, 1.0, 1.0); 
+      glClearColor(0.0, 1.0, 1.0, 1.0);
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0);
@@ -2831,8 +2835,39 @@ int DoStereo(void){
   return return_code;
 }
 
-/* ------------------ DoScript ------------------------ */
+#ifdef pp_LUA
+/* ------------------ DoScriptLua ------------------------ */
+void DoScriptLua(void) {
+  int script_return_code;
+  if(runluascript == 1) {
+    if(!luascript_loaded && strlen(luascript_filename)>0)
+      load_script(luascript_filename);
+    runluascript = 0;
+    PRINTF("running lua script section\n");
+    fflush(stdout);
+    script_return_code = runLuaScript();
+    if(script_return_code != LUA_OK && script_return_code != LUA_YIELD && exit_on_script_crash) {
+        exit(1);
+    }
+  }
+}
+#endif
 
+/* ------------------ DoScript ------------------------ */
+#ifdef pp_LUA_SSF
+void DoScript(void){
+  int script_return_code;
+  if(runscript == 1) {
+      runscript = 0;
+      PRINTF("running ssf script instruction\n");
+      fflush(stdout);
+      script_return_code = runSSFScript();
+      if(script_return_code != LUA_OK && script_return_code != LUA_YIELD && exit_on_script_crash) {
+          exit(1);
+      }
+    }
+}
+#else
 void DoScript(void){
   if(runscript==1&&default_script!=NULL){
     ScriptMenu(default_script->id);
@@ -2841,12 +2876,12 @@ void DoScript(void){
   script_render_flag=0;
   if(nscriptinfo>0&&current_script_command!=NULL&&(script_step==0||(script_step==1&&script_step_now==1))){
     script_step_now=0;
-#ifndef WIN32    
+#ifndef WIN32
     if(file_exists(stop_filename)){
       fprintf(stderr,"*** Warning: stop file found.  Remove before running smokeview script\n");
       exit(0);
     }
-#endif    
+#endif
     if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){\
       if(current_script_command->exit==0){
         RenderState(RENDER_ON);
@@ -2880,7 +2915,7 @@ void DoScript(void){
     else{
       if(current_script_command->command==SCRIPT_VOLSMOKERENDERALL){
         int remove_frame;
-  
+
         script_loadvolsmokeframe2();
         remove_frame=current_script_command->remove_frame;
         if(remove_frame>=0){
@@ -2906,6 +2941,7 @@ void DoScript(void){
     script_skipframe=-1;
   }
 }
+#endif
 
 /* ------------------ Display_CB ------------------------ */
 
@@ -2914,6 +2950,9 @@ void Display_CB(void){
 
   renderdoublenow=0;
   DoScript();
+#ifdef pp_LUA
+  DoScriptLua();
+#endif
   update_Display();
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(showstereo==STEREO_NONE){
@@ -2932,7 +2971,7 @@ void Display_CB(void){
       if(RenderOnceNow==1){
         renderdoublenow=1;
       }
-    
+
       if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
         if(itimes>=0&&itimes<nglobal_times&&
           ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
@@ -2987,7 +3026,7 @@ void Display_CB(void){
     if(rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_1AXIS){
       camera_current->az_elev[0] = anglexy0 + angle_global*RAD2DEG;
     }
-    else{          
+    else{
       camera_current->azimuth = azimuth0 + angle_global*RAD2DEG;
     }
     glutPostRedisplay();
@@ -3016,5 +3055,3 @@ void ResizeWindow(int width, int height){
   glutReshapeWindow(width,height);
   glutPostRedisplay();
 }
-
-

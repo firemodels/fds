@@ -34,3 +34,15 @@ cp libpng.a $LIBDIR/.
 cd $SRCDIR/zlib114
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
+
+# Lua # Lua interpreter
+cd $SRCDIR/lua-5.3.1/src
+export TARGET=liblua.a
+./makelib.sh $OPTS
+cp liblua.a $LIBDIR/.
+
+# LPEG # Lua parsing libarary to parse SSF files
+cd $SRCDIR/lpeg-1.0.0
+export TARGET=linux
+./makelib.sh $OPTS
+cp lpeg.so $LIBDIR/.
