@@ -67,7 +67,7 @@ int loadsmvall(const char *input_filename) {
 // This function takes a filepath to an smv file an finds the casename
 // and the extension, which are returned in the 2nd and 3rd arguments (the
 // 2nd and 3rd aguments a pre-existing strings).
-int parse_smv_filepath(char *smv_filepath, char *fdsprefix,
+int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
                        char *input_filename_ext) {
   int len_casename;
   strcpy(input_filename_ext,"");
@@ -417,7 +417,7 @@ void render(const char *filename) {
 // construct filepath for image to be renderd
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                    char *renderfile_path, int woffset, int hoffset, int screenH,
-                   char *basename) {
+                   const char *basename) {
 
     // char renderfile_ext[4]; // does not include the '.'
     char suffix[20];
@@ -478,7 +478,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                 printf("making dir: %s", renderfile_dir);
 #ifdef MINGW
                 mkdir(renderfile_dir);
-#else defined(pp_LINUX)
+#elseif defined(pp_LINUX)
                 mkdir(renderfile_dir, 0755);
 #endif
             }
@@ -508,7 +508,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 // The second argument to RenderFrameLua is the name that should be given to the
 // rendered file. If basename == NULL, then a default filename is formed based
 // on the chosen frame and rendering options.
-void RenderFrameLua(int view_mode, char *basename) {
+void RenderFrameLua(int view_mode, const char *basename) {
   char renderfile_name[1024]; // the name the file (including extension)
   char renderfile_dir[1024]; // the directory into which the image will be rendered
   char renderfile_path[2048]; // the full path of the rendered image
@@ -1290,7 +1290,7 @@ void unloadtour() {
 
 void exit_smokeview() {
 	PRINTF("exiting...\n");
-	exit(0);
+	exit(EXIT_SUCCESS);
 }
 
 /* ------------------ setviewpoint ------------------------ */
@@ -1389,7 +1389,10 @@ void set_sceneclip_z_max(int flag, float value) {
 void setrenderdir(const char *dir) {
     printf("c_api: setting renderdir to: %s\n", dir);
 	if(dir!=NULL&&strlen(dir)>0){
-		script_dir_path=dir;
+		int dirlen = strlen(dir);
+		char newdir[dirlen+1];
+		strcpy(newdir,dir);
+		script_dir_path=newdir;
         if(can_write_to_dir(script_dir_path)==0){
           fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
         }

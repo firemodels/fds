@@ -109,10 +109,10 @@ void set_sceneclip_z_min(int flag, float value);
 void set_sceneclip_z_max(int flag, float value);
 void set_clipping_mode(int mode);
 
-void RenderFrameLua(int view_mode, char *basename);
+void RenderFrameLua(int view_mode, const char *basename);
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                    char *renderfile_path, int woffset, int hoffset, int screenH,
-                   char *basename);
+                   const char *basename);
 
-int parse_smv_filepath(char *smv_filepath, char *fdsprefix,
+int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
                        char *input_filename_ext);
