@@ -9,8 +9,8 @@
 #define TRDECL(var,val)  var
 #endif
 
-#define _(String) translate(String,1)
-#define _d(String) translate(String,0)
+#define _(String) translate((char *)String,1)
+#define _d(String) translate((char *)String,0)
 // #define _(String) (String)
 
 /* --------------------------  structs ------------------------------------ */
