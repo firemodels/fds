@@ -478,7 +478,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                 printf("making dir: %s", renderfile_dir);
 #ifdef MINGW
                 mkdir(renderfile_dir);
-#elseif defined(pp_LINUX)
+#elif defined(pp_LINUX)
                 mkdir(renderfile_dir, 0755);
 #endif
             }
