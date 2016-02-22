@@ -167,16 +167,27 @@ LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILE
 
 # ------------- intel_linux_64 ----------------
 
+intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
+intel_linux_64 : LIBS_PLAT = 
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_linux_64 : LIBLUA    =
+ifeq ($(LUA_SCRIPTING),true)
+intel_linux_64 : CFLAGS    += -D pp_LUA
+intel_linux_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.a
+intel_linux_64 : SMVLUACORE_FILES += $(LIB_DIR_PLAT)/lpeg.so
+intel_linux_64 : LIBLUA    += $(LIB_DIR_PLAT)/liblua.a -ldl
+endif
 intel_linux_64 : LFLAGS    = -m64 -static-intel
 intel_linux_64 : CC        = icc
 intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
 
-intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS)
+intel_linux_64 : $(obj)  $(if ($(LUA_SCRIPTING),true),smvluacore)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR_PLAT) $(FULL_SMV_LIBS) \
+        $(LINUX_INTEL_LIBS_64)\
+        $(LINUX_SYSTEMLIBS) $(LIBLUA)
 
 # ------------- intel_linux_64_db ----------------
 
