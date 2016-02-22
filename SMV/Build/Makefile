@@ -286,17 +286,26 @@ mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libimf.a $(IFORT_COMPILER_LIB)/libirc.a $(IFORT_COMPILER_LIB)/libsvml.a
 
 # ------------- intel_osx_64 ----------------
-
+intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
+intel_osx_64 : LIBS_PLAT =
 intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
 intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
+intel_linux_64 : LIBLUA    =
+ifeq ($(LUA_SCRIPTING),true)
+intel_osx_64 : CFLAGS    += -D pp_LUA
+intel_osx_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.a
+intel_osx_64 : SMVLUACORE_FILES += $(LIB_DIR_PLAT)/lpeg.so
+intel_osx_64 : LIBLUA    += $(LIB_DIR_PLAT)/liblua.a -ldl
+endif
 intel_osx_64 : LFLAGS    = -m64 -static-intel -framework OpenGL -framework GLUT -mmacosx-version-min=10.4
 intel_osx_64 : CC        = icc
 intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
-intel_osx_64 : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
+intel_osx_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR_PLAT) $(SMV_LIBS) \
+        $(OSX_INTEL_LIBS) $(LIBLUA)
 
 # ------------- intel_osx_64_db ----------------
 
