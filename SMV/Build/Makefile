@@ -146,8 +146,17 @@ intel_win_64_db : $(objwin)
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+ifeq ($(LUA_SCRIPTING),true)
+intel_win_64 : INC += -I ../../source/lua-5.3.1/src
+endif
 intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32 /fpscomp:general
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
+intel_linux_64 : LIBLUA    =
+ifeq ($(LUA_SCRIPTING),true)
+intel_win_64 : CFLAGS    += -D pp_LUA
+intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)/liblua.a
+intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR_64)/lpeg.dll
+endif
 intel_win_64 : LFLAGS    = /F32768000
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -155,7 +164,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64) $(LIBLUA)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
