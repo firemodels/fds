@@ -154,7 +154,7 @@ EXTERNCPP void init_clip(void);
 EXTERNCPP void setClipPlanes(clipdata *ci, int option);
 
 EXTERNCPP void drawfilledtetra(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor);
-EXTERNCPP void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4, 
+EXTERNCPP void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
    unsigned char *rgb0color,unsigned char *rgb1color,unsigned char *rgb2color,unsigned char *rgb3color,int *vis_state);
 EXTERNCPP void drawtetra_outline(float *v1, float *v2, float *v3, float *v4, unsigned char *rgbcolor);
 EXTERNCPP void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
@@ -272,6 +272,9 @@ EXTERNCPP void start_script(void);
 EXTERNCPP int run_script(void);
 EXTERNCPP int compile_script(char *scriptfile);
 EXTERNCPP scriptfiledata *insert_scriptfile(char *file);
+#ifdef pp_LUA
+EXTERNCPP luascriptfiledata *insert_luascriptfile(char *file);
+#endif
 EXTERNCPP char *get_inifilename(int id);
 EXTERNCPP char *get_scriptfilename(int id);
 EXTERNCPP inifiledata *insert_inifile(char *file);
@@ -280,7 +283,7 @@ EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 EXTERNCPP void drawselect_avatars(void);
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
+EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
                                  int allocate_memory);
 EXTERNCPP void output_mfed_csv(multislicedata *mslicei);
 EXTERNCPP void ParticlePropShowMenu(int value);
@@ -469,7 +472,7 @@ EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texturedata *texti);
 EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int frame_index);
 EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int frame_index);
-EXTERNCPP void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata, 
+EXTERNCPP void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
 EXTERNCPP void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize);
 EXTERNCPP void getpatchheader2(char *file, int *version, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *patchdir);
@@ -586,8 +589,8 @@ EXTERNCPP void update_unit_defs(void);
 
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);
 EXTERNCPP void updateslicefilenum(void);
-EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype, 
-                             int smoothnorms, int trans_flag, int data_type, 
+EXTERNCPP void drawstaticiso(const isosurface *asurface,int surfacetype,
+                             int smoothnorms, int trans_flag, int data_type,
                              float line_width);
 EXTERNCPP int getplot3dtime(float *time);
 EXTERNCPP void normalize(float *xyz, int n);
@@ -746,7 +749,11 @@ EXTERNCPP void drawventdataPROFILE(void);
 EXTERNCPP void drawventdataSLAB(void);
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
+#ifdef LUA__SCRIPTING
+EXTERNCPP void RenderFrame(int view_mode, char *basename);
+#else
 EXTERNCPP void RenderFrame(int view_mode);
+#endif
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
@@ -765,7 +772,7 @@ EXTERNCPP void handleiso(void);
 EXTERNCPP void updatesurface(void);
 EXTERNCPP void WindowStatus(int state);
 EXTERNCPP void nodein_extvent(
-                    int ipatch, 
+                    int ipatch,
                     int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2, int option);
 EXTERNCPP void SetVentDirs(void);
 EXTERNCPP void SetCVentDirs(void);
@@ -803,7 +810,7 @@ EXTERNCPP void writeini(int flag,char *file);
 EXTERNCPP void DrawFirePlume(float radius, float height, float maxheight);
 EXTERNCPP int ispatchtype(int type);
 EXTERNCPP void adjustdatabounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
-EXTERNCPP void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink, 
+EXTERNCPP void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink,
                       int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustpart5chops(partdata *parti);
 EXTERNCPP void adjustpart5bounds(partdata *parti);
@@ -843,9 +850,9 @@ EXTERNCPP void smooth_blockages(void);
 EXTERNCPP void freesmoke3d(smoke3ddata *smoke3di);
 EXTERNCPP void readsmoke(int ifile,int flag, int *errorcode);
 EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
-EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version, 
+EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       float **timelist, int **use_smokeframe,
-                      int *nchars_uncompressed, 
+                      int *nchars_uncompressed,
                       int **nchars_compressed,
                       int **nchars_compressed_full,
                       int *nframes, int *nframes_full,int *have_light);
@@ -876,20 +883,20 @@ EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it
                    const unsigned char *isprink, int particle_type, int droplet_type,
               const float *tmin, const float *tmax, int nlevel,
               char **labels, char *scale, float *partlevels256);
-EXTERNCPP void getBoundaryColors(float *t, int nt, unsigned char *it, 
-              int settmin, float *tmin, int settmax, float *tmax, 
+EXTERNCPP void getBoundaryColors(float *t, int nt, unsigned char *it,
+              int settmin, float *tmin, int settmax, float *tmax,
               float *tmin_global, float *tmax_global,
               int ndatalevel, int nlevel,
               char **labels, char *scale, float *tvals256,
               int *extreme_min, int *extreme_max);
-EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it, 
+EXTERNCPP void getBoundaryColors2(float *t, int nt, unsigned char *it,
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_global, float *tmax_global,
               int ndatalevel,
               int *extreme_min, int *extreme_max
               );
-EXTERNCPP void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it, 
-              int settmin, float *tmin, int settmax, float *tmax, 
+EXTERNCPP void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
+              int settmin, float *tmin, int settmax, float *tmax,
               float *tmin_global, float *tmax_global,
               int nlevel,
               char **labels, char *scale, float *tvals256,
@@ -903,7 +910,7 @@ EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
                );
 EXTERNCPP void get_faceinfo(void);
 
-EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax, 
+EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax,
               int ndatalevel, int nlevel,
               char **labels,char **labelsiso, char **scale, float *fscale, float *tlevels, float *tlevels256,
               int *extreme_min, int *extreme_max
@@ -911,20 +918,20 @@ EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax
 EXTERNCPP float getsliceval(slicedata *sd, unsigned char ival);
 EXTERNCPP void updateallslicelabels(int slicetype, int *errorcode);
 EXTERNCPP void updateallisolabels(int slicetype, int *errorcode);
-EXTERNCPP void setslicelabels(float smin, float smax, 
+EXTERNCPP void setslicelabels(float smin, float smax,
                     slicedata *sd, int *errorcode);
 EXTERNCPP void getSliceLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *fscale, float *tlevels256);
 EXTERNCPP void updatePart5extremes(void);
 EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
-              float tmin, float tmax, 
+              float tmin, float tmax,
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *fscale, float *tlevels2,
               int *extreme_min, int *extreme_max
               );
 EXTERNCPP mesh *get_loaded_isomesh(void);
 EXTERNCPP void unload_iso_trans(void);
-EXTERNCPP void setisolabels(float smin, float smax, 
+EXTERNCPP void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode);
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
