@@ -290,6 +290,7 @@ $QFDS -d Species reactionrate_EDC_O2lim_1step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_prim.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_lump.fds
 $QFDS -d Species reactionrate_lumped_two_air.fds
+$QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
 $QFDS -d Species soot_gravitational_settling.fds
