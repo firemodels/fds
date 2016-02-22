@@ -298,7 +298,7 @@ if [ $STOPFDS ]; then
  touch $stopfile
  exit
 fi
-if ! [ -e $exe ]; then
+if ! [ -e "$exe" ]; then
   if [ "$showinput" == "0" ] ; then
     echo "The program, $exe, does not exist. Run aborted."
     ABORTRUN=y
