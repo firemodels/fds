@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -75,7 +75,7 @@ float get_angle(float d1, float d2, float d3){
 //        /  \
 //       d3   d2
 //      /      \
-//    v2---d1---v3           
+//    v2---d1---v3
 
 //       d2^2 + d3^2 - d1^2
 // arg = ------------------
@@ -84,7 +84,7 @@ float get_angle(float d1, float d2, float d3){
 // d2==0.0 ==> d3==d1 ==> arg=0.0
 // d3==0.0 ==> d2==d1 ==> arg=0.0
 
-  
+
   denom = 2.0*d2*d3;
   if(ABS(denom) > 0.0){
     arg = CLAMP((d2*d2 + d3*d3 - d1*d1) / denom,-1.0,1.0);
@@ -248,7 +248,7 @@ void draw_geom(int flag, int timestate){
     glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
     glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
     glEnable(GL_COLOR_MATERIAL);
-    
+
     glPushMatrix();
     glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -262,7 +262,7 @@ void draw_geom(int flag, int timestate){
       trianglei = tris[i];
       if(trianglei->geomtype == GEOM_GEOM&&show_geom_solid == 0)continue;
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
-      
+
       ti = trianglei->textureinfo;
       if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
@@ -316,7 +316,7 @@ void draw_geom(int flag, int timestate){
         trianglei = tris[i];
         if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
-      
+
         texti = trianglei->textureinfo;
         if(texti==NULL||texti->loaded!=1)continue;
         if(lasttexture!=texti){
@@ -376,7 +376,7 @@ void draw_geom(int flag, int timestate){
     if(nvolus>0){
 
       // draw volume solid
-      
+
       last_color=NULL;
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
@@ -389,18 +389,18 @@ void draw_geom(int flag, int timestate){
       glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,iso_shininess);
       glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE,block_ambient2);
       glEnable(GL_COLOR_MATERIAL);
-      
+
       last_color=NULL;
       glBegin(GL_TRIANGLES);
       for(j=0;j<nvolus;j++){
         tetrahedron *volumei;
         float *xyzptr[4];
         int *exterior;
-        //             
+        //
         //             0
         //            /  \
         //           /   .3
-        //             .   \ 
+        //             .   \
         //         / .      \
         //         1--------2
         //
@@ -414,7 +414,7 @@ void draw_geom(int flag, int timestate){
         xyzptr[2] = volumei->points[2]->xyz;
         xyzptr[3] = volumei->points[3]->xyz;
 
-        
+
         color = volumei->matl->color;
         if(last_color!=color){
           glColor3fv(color);
@@ -461,11 +461,11 @@ void draw_geom(int flag, int timestate){
         tetrahedron *volumei;
         float *xyzptr[4];
         int *exterior;
-        //             
+        //
         //             0
         //            /  \
         //           /   .3
-        //             .   \ 
+        //             .   \
         //         / .      \
         //         1--------2
         //
@@ -595,7 +595,7 @@ void draw_geom(int flag, int timestate){
         trianglei = geomlisti->triangles+j;
         if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
         if(trianglei->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==1))continue;
-       
+
         xyznorm=trianglei->tri_norm;
 
         p1 = trianglei->points[0]->xyz;
@@ -613,7 +613,7 @@ void draw_geom(int flag, int timestate){
         glVertex3fv(xyz2);
       }
       glEnd();
-        
+
       glPointSize(6.0);  // draw points at end of vector
       glBegin(GL_POINTS);
       glColor3fv(blue);
@@ -626,7 +626,7 @@ void draw_geom(int flag, int timestate){
         trianglei = geomlisti->triangles+j;
         if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
         if(trianglei->geomtype == GEOM_ISO&&(show_iso_normal == 0||smooth_iso_normal==1))continue;
-       
+
         xyznorm=trianglei->tri_norm;
 
         p1 = trianglei->points[0]->xyz;
@@ -660,7 +660,7 @@ void draw_geom(int flag, int timestate){
         pointi = geomlisti->points+j;
         if(pointi->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==0))continue;
         if(pointi->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==0))continue;
-        xyznorm = pointi->point_norm;       
+        xyznorm = pointi->point_norm;
         xyz1 = pointi->xyz;
 
         xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
@@ -757,9 +757,9 @@ void update_triangles(int flag){
         trianglei->points[1]->ntriangles++;
         trianglei->points[2]->ntriangles++;
       }
-      
+
       // count number of triangles
-      
+
       ntriangles = 0;
       for(i = 0; i<geomlisti->npoints; i++){
         point *pointi;
@@ -767,13 +767,13 @@ void update_triangles(int flag){
         pointi = geomlisti->points + i;
         ntriangles += pointi->ntriangles;
       }
-      
+
       // allocate triangle pointers
-      
+
       if(ntriangles>0)NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
-      
+
       // assign triangle pointers to points
-      
+
       for(i = 0; i<geomlisti->npoints; i++){
         point *pointi;
 
@@ -817,7 +817,7 @@ void update_triangles(int flag){
         }
         ReduceToUnit(norm);
       }
-    }  
+    }
   }
 
   // smooth normals at mesh boundaries
@@ -855,7 +855,7 @@ void update_triangles(int flag){
         }
       }
 
-  // copy surface points into an array 
+  // copy surface points into an array
 
       if(nsurface_points>0){
         int isurf,iii;
@@ -1180,9 +1180,9 @@ void get_geomdata_header(char *file, int *ntimes_local, int *nvals){
   for(;;){
     FORTREADBR(&time_local,1,stream);
     FORTREADBR(&nface_static,1,stream);
-    if(nface_static!=0)FSEEK(stream,4+nface_static*4+4,SEEK_CUR);    
+    if(nface_static!=0)FSEEK(stream,4+nface_static*4+4,SEEK_CUR);
     FORTREADBR(&nface_dynamic,1,stream);
-    if(nface_dynamic!=0)FSEEK(stream,4+nface_dynamic*4+4,SEEK_CUR);    
+    if(nface_dynamic!=0)FSEEK(stream,4+nface_dynamic*4+4,SEEK_CUR);
     nt++;
     nv+=(nface_static+nface_dynamic);
   }
@@ -1485,7 +1485,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
       FREEMEMORY(surf_ind);
       FREEMEMORY(texture_coords);
     }
-    if(nvolus>0){ 
+    if(nvolus>0){
       int ii;
       int *ijk;
       int *matl_ind=NULL;
@@ -1558,19 +1558,19 @@ int compare_faces(const void *arg1, const void *arg2){
   face2 %= 4;
   verts1 = vol1->faces+3*face1;
   verts2 = vol2->faces+3*face2;
-  
+
   v1[1]=MIN(verts1[1],verts1[2]);
   v1[2]=MAX(verts1[1],verts1[2]);
 
   v2[1]=MIN(verts2[1],verts2[2]);
   v2[2]=MAX(verts2[1],verts2[2]);
-  
+
   if(verts1[0]<verts2[0])return -1;
   if(verts1[0]>verts2[0])return 1;
-  
+
   if(v1[1]<v2[1])return -1;
   if(v1[1]>v2[1])return 1;
-  
+
   if(v1[2]<v2[2])return -1;
   if(v1[2]>v2[2])return 1;
   return 0;
@@ -1583,7 +1583,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
   iend = geomi->ntimes;
   if(geom_frame_index!=NULL)iend=1;
-  
+
   for(i = -1; i<iend; i++){
     geomlistdata *geomlisti;
     int nverts, nvolus;
@@ -1753,7 +1753,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
     NewMemory((void **)&patchi->geom_vals,nvals*sizeof(float));
     NewMemory((void **)&patchi->geom_ivals,nvals*sizeof(char));
   }
-  FORTgetembeddata(file, &ntimes_local, &nvals, patchi->geom_times, 
+  FORTgetembeddata(file, &ntimes_local, &nvals, patchi->geom_times,
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &redirect, &error, lenfile);
 
   reset_histogram(patchi->histogram);
@@ -1790,7 +1790,7 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
     }
   }
   getBoundaryColors3(patchi,patchi->geom_vals, patchi->geom_nvals, patchi->geom_ivals,
-    setpatchmin,&patchmin, setpatchmax,&patchmax, 
+    setpatchmin,&patchmin, setpatchmax,&patchmax,
     &patchmin_global, &patchmax_global,
     nrgb, colorlabelpatch,patchi->scale,boundarylevels256,
     &patchi->extreme_min,&patchi->extreme_max);
@@ -1824,7 +1824,7 @@ void draw_test_clip(void){
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
-  float verts[600]; 
+  float verts[600];
 
   box_state = b_state+1;
   v1 = tetra_vertices;
@@ -2025,7 +2025,7 @@ void draw_test_outline(void){
   int nverts;
   int faces[600], npolys, nfaces;
   int which_poly[200];
-  float verts[600]; 
+  float verts[600];
 
   box_state = b_state+1;
   v1 = tetra_vertices;
@@ -2046,14 +2046,14 @@ void draw_test_outline(void){
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
-  
+
   if(show_tetratest_labels == 1){
     output3Text(foregroundcolor, v1[0] - EPS, v1[1] - EPS, v1[2] - EPS, "v1");
     output3Text(foregroundcolor, v2[0] + EPS, v2[1] - EPS, v2[2] - EPS, "v2");
     output3Text(foregroundcolor, v3[0], v3[1] + EPS, v3[2] - EPS, "v3");
     output3Text(foregroundcolor, v4[0], v4[1], v4[2] + EPS, "v4");
   }
-  
+
   antialias(ON);
   glLineWidth(tetra_line_thickness);
   drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
@@ -2109,7 +2109,7 @@ void draw_test_outline(void){
       if(show_test_in_tetra==1){
         float green[4]={0.0,1.0,0.0,1.0};
         int in_tetra, tetra_state[4];
-        
+
         glColor3fv(green);
         glVertex3fv(tetra_xyz);
         FORTtest_in_tetra(tetra_xyz,&in_tetra,tetra_state);
@@ -2241,7 +2241,7 @@ void draw_test_triangle(void){
   }
   glVertex3f(v1[0],v1[1],0.0);
   glVertex3f(v2[0],v2[1],0.0);
-  
+
   glVertex3f(v2[0],v2[1],0.0);
   glVertex3f(v3[0],v3[1],0.0);
 
@@ -2249,7 +2249,7 @@ void draw_test_triangle(void){
   glVertex3f(v3[0],v3[1],0.0);
   glVertex3f(v1[0],v1[1],0.0);
   glEnd();
-  
+
   glPointSize(tetra_point_size);
   glBegin(GL_POINTS);
   if(flag==1){
@@ -2276,7 +2276,7 @@ void draw_test_polygon(void){
   float verts[8];
   int nverts,poly[4], npoly, tris[12], ntris;
   int i;
-  
+
   v1 = tetra_vertices;
   v2 = v1 + 3;
   v3 = v2 + 3;
@@ -2602,7 +2602,7 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
 int CompareTransparentTriangles(const void *arg1, const void *arg2){
   triangle *tri, *trj;
 
-  tri = *(triangle **)arg1; 
+  tri = *(triangle **)arg1;
   trj = *(triangle **)arg2;
 
   if(tri->distance<trj->distance)return 1;
@@ -2627,7 +2627,7 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
     geomdata *geomi;
-    
+
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->display==0)continue;
     geomi = isoi->geominfo;
@@ -2654,7 +2654,7 @@ void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs_local){
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
     geomdata *geomi;
-    
+
     isoi = isoinfo + i;
     if(isoi->loaded==0||isoi->display==0)continue;
     geomi = isoi->geominfo;

@@ -1,6 +1,6 @@
 #define IN_UPDATE
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -239,14 +239,14 @@ void Update_Show(void){
   int slicecolorbarflag;
   int shooter_flag;
 
-  showtime=0; 
-  showtime2=0; 
-  showplot3d=0; 
-  showpatch=0; 
-  showslice=0; 
-  showvslice=0; 
-  showsmoke=0; 
-  showzone=0; 
+  showtime=0;
+  showtime2=0;
+  showplot3d=0;
+  showpatch=0;
+  showslice=0;
+  showvslice=0;
+  showsmoke=0;
+  showzone=0;
   showiso=0;
   showvolrender=0;
   have_extreme_mindata=0;
@@ -419,7 +419,7 @@ void Update_Show(void){
       vd = vsliceinfo+i;
       if(vd->loaded==0||vd->display==0)continue;
       sd = sliceinfo + vd->ival;
-      
+
       if(sd->type!=islicetype)continue;
       if(sd->volslice==1&&sd->slicetype==SLICE_NODE_CENTER&&vis_gslice_data==1)SHOW_gslice_data=1;
       vsliceflag=1;
@@ -529,7 +529,7 @@ void Update_Show(void){
     shooter_flag=1;
   }
 
-  if( plotstate==DYNAMIC_PLOTS && 
+  if( plotstate==DYNAMIC_PLOTS &&
     ( sliceflag==1 || vsliceflag==1 || partflag==1 || patchflag==1 ||
     shooter_flag==1||
     smoke3dflag==1|| showtours==1 || evacflag==1||
@@ -584,7 +584,7 @@ void Update_Show(void){
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
       int ii;
-      
+
       meshi=meshinfo+i;
       ii=meshi->plot3dfilenum;
       if(ii==-1)continue;
@@ -673,7 +673,7 @@ void Synch_Times(void){
   /* synchronize tour times */
 
     for(j=0;j<ntours;j++){
-      tourdata *tourj; 
+      tourdata *tourj;
 
       tourj = tourinfo + j;
       if(tourj->display==0)continue;
@@ -972,7 +972,7 @@ void Update_Times(void){
 
   // pass 1 - determine ntimes
 
-  Update_Show();  
+  Update_Show();
   CheckMemory;
   nglobal_times = 0;
 
@@ -1448,7 +1448,7 @@ void Update_Times(void){
     meshi=meshinfo+i;
     if(meshi->iso_times==NULL)continue;
     FREEMEMORY(meshi->iso_timeslist);
-    if(nglobal_times>0)NewMemory((void **)&meshi->iso_timeslist,  nglobal_times*sizeof(int));  
+    if(nglobal_times>0)NewMemory((void **)&meshi->iso_timeslist,  nglobal_times*sizeof(int));
   }
 
   for(i=0;i<npatchinfo;i++){
@@ -1461,14 +1461,14 @@ void Update_Times(void){
     if(nglobal_times>0)NewMemory((void **)&patchi->geom_timeslist,nglobal_times*sizeof(int));
   }
   for(i=0;i<nmeshes;i++){
-    FREEMEMORY(meshinfo[i].patch_timeslist); 
+    FREEMEMORY(meshinfo[i].patch_timeslist);
   }
   for(i=0;i<nmeshes;i++){
     if(meshinfo[i].patch_times==NULL)continue;
     if(nglobal_times>0)NewMemory((void **)&meshinfo[i].patch_timeslist,nglobal_times*sizeof(int));
   }
 
-  FREEMEMORY(zone_timeslist); 
+  FREEMEMORY(zone_timeslist);
   if(nglobal_times>0)NewMemory((void **)&zone_timeslist,     nglobal_times*sizeof(int));
 
   FREEMEMORY(targtimeslist);
@@ -1514,10 +1514,10 @@ void Update_Times(void){
     FREEMEMORY(global_times);
   }
   if(nglobal_times>0)ResizeMemory((void **)&global_times,nglobal_times*sizeof(float));
-  
+
   // pass 4 - initialize individual time pointers
 
-  izone=0; 
+  izone=0;
   reset_itimes0();
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
@@ -1536,9 +1536,9 @@ void Update_Times(void){
     slicedata *sd;
 
     sd = sliceinfo + i;
-    sd->itime=0; 
+    sd->itime=0;
   }
-  frame_index=first_frame_index; 
+  frame_index=first_frame_index;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
@@ -1683,7 +1683,7 @@ int getplotstate(int choice){
 
         slicei = sliceinfo + slice_loaded_list[i];
         if(slicei->display==0||slicei->type!=islicetype)continue;
-        stept = 1; 
+        stept = 1;
         return DYNAMIC_PLOTS;
       }
       if(visGrid==0)stept = 1;
@@ -1789,8 +1789,8 @@ int getindex(float key, const float *list, int nlist){
 /* ------------------ isearch ------------------------ */
 
 int isearch(float *list, int nlist, float key, int guess){
-  /* 
-     find val such that list[val]<=key<list[val+1] 
+  /*
+     find val such that list[val]<=key<list[val+1]
      start with val=guess
   */
 
@@ -1827,7 +1827,7 @@ void reset_itimes0(void){
 
 /* ------------------ Update_Clipbounds ------------------------ */
 
-void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){ 
+void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
 
   if(set_i0==0&&set_i1==0)return;
   if(set_i0==1&&set_i1==1){

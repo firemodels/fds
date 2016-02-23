@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
@@ -331,10 +331,10 @@ void get_world_eyepos(float *mm, float user_eyepos[3],float scaled_eyepos_local[
        ( m0 m4  m8 )      (m12)
    Q=  ( m1 m5  m9 )  u = (m13)
        ( m2 m6 m10 )      (m14)
-      
-      (Q   u) (x)     (0)      
+
+      (Q   u) (x)     (0)
       (v^T 1) (y)   = (1)
-       
+
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
 
@@ -385,7 +385,7 @@ void getsmokesensors(void){
     devicei = deviceinfo + i;
     label = devicei->object->label;
 
-    
+
     if(STRCMP(label,"smokesensor")!=0)continue;
 
     col = devicei->screenijk[0];
@@ -437,7 +437,7 @@ void getdevice_screencoords(void){
 
     devicei = deviceinfo + i;
     label = devicei->object->label;
-    
+
     if(STRCMP(label,"smokesensor")!=0)continue;
     xyz = devicei->xyz;
     device_mesh = devicei->device_mesh;
@@ -804,7 +804,7 @@ void draw_pilot2(void){
         cosang = cos(DEG2RAD*angle);
         sinang = sin(DEG2RAD*angle);
         glVertex3f(xyz[0] - SCALE2FDS(piloti->fraction[kk])*cosang, xyz[1] - SCALE2FDS(piloti->fraction[kk])*sinang, xyz[2]);
-     
+
         kk = k+1;
         if(kk == piloti->nbuckets - 1)kk = 0;
         angle = (float)kk*dangle;
@@ -844,7 +844,7 @@ void draw_devices(void){
 
   if(select_device==0||show_mode!=SELECTOBJECT){
     int i;
-    
+
     for(i=0;i<ndeviceinfo;i++){
       devicedata *devicei;
 
@@ -1416,7 +1416,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
   if(iframe_local>object->nframes-1||iframe_local<0)iframe_local=0;
   framei=object->obj_frames[iframe_local];
   frame0=object->obj_frames[0];
-  
+
   ASSERT(framei->error==0||framei->error==1);
 
   if(framei->error==1){
@@ -1446,7 +1446,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     }
   }
 
-  // copy values 
+  // copy values
 
   if(prop!=NULL){
     int i;
@@ -1455,7 +1455,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
 
     if(prop->draw_evac==1&&frame0->nevac_tokens>0){
       tokendata *tok00;
-      
+
       tok00 = frame0->tokens;
       for(i=0;i<NEVAC_TOKENS;i++){
         tokendata *toki,*tok0;
@@ -1513,7 +1513,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     }
   }
 
-  if(object->use_displaylist==1){   
+  if(object->use_displaylist==1){
     displaylist_id = glGenLists(1);
     if(displaylist_id!=0){
       framei->display_list_ID=displaylist_id;
@@ -1556,7 +1556,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     }
     for(j=0;j<toki->nvars;j++){
       tokendata *tokj;
-      
+
       tokj = toki - toki->nvars + j;
       arg[j] = *(tokj->varptr);
     }
@@ -2015,7 +2015,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
     case SV_DRAWPOLYDISK:
       {
         int nsides;
-  
+
         nsides = arg[0]+0.5;
         drawpolydisk(nsides, arg[1],arg[2], rgbptr_local);
         rgbptr_local=NULL;
@@ -2319,11 +2319,11 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
 
     glNormal3f(-cosjp1,-sinjp1,0.0);
     glVertex3f(rmax*sini*cosjp1,rmax*sini*sinjp1,cosi*rmax);
-      
+
     glNormal3f(-cosj,-sinj,0.0);
     glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
   }
-  
+
   memcpy(colori,colorin,4*sizeof(float));
   memcpy(colorip1,colorin,4*sizeof(float));
   for(i=0;i<NLAT;i++){
@@ -2414,7 +2414,7 @@ void drawsphereseg(float anglemin, float anglemax, float rmin, float rmax){
 
     glVertex3f(rmax*sini*cosj,rmax*sini*sinj,cosi*rmax);
   }
-  
+
   memcpy(colori,colorin,4*sizeof(float));
   memcpy(colorip1,colorin,4*sizeof(float));
   for(i=0;i<NLAT;i++){
@@ -2505,7 +2505,7 @@ void drawsphere(float diameter, unsigned char *rgbcolor){
 
         glNormal3f(x,y,z);
         glVertex3f(x,y,z);
-  
+
         x = cos_long[i+1]*cos_lat[j];
         y = sin_long[i+1]*cos_lat[j];
         z = sin_lat[j];
@@ -2539,7 +2539,7 @@ void drawsphere(float diameter, unsigned char *rgbcolor){
         y = sin_long[i]*cos_lat[j];
         z = sin_lat[j];
         glVertex3f(x,y,z);
-  
+
         x = cos_long[i+1]*cos_lat[j];
         y = sin_long[i+1]*cos_lat[j];
         z = sin_lat[j];
@@ -2584,7 +2584,7 @@ void drawhsphere(float diameter, unsigned char *rgbcolor){
 
         glNormal3f(x,y,z);
         glVertex3f(x,y,z);
-  
+
         x = cos_long[i+1]*cos_lat[j];
         y = sin_long[i+1]*cos_lat[j];
         z = sin_lat[j];
@@ -2617,7 +2617,7 @@ void drawhsphere(float diameter, unsigned char *rgbcolor){
 
       glNormal3f(0.0,0.0,-1.0);
       glVertex3f(x,y,z);
-  
+
       x = cos_long[i];
       y = sin_long[i];
       z = 0.0;
@@ -2668,7 +2668,7 @@ void drawhsphere(float diameter, unsigned char *rgbcolor){
       y = sin_long[i];
       z = 0.0;
       glVertex3f(x,y,z);
-  
+
       x = 0.0;
       y = 0.0;
       z = 0.0;
@@ -2810,7 +2810,7 @@ void drawcircle(float diameter,unsigned char *rgbcolor, circdata *circinfo){
   ncirc = circinfo->ncirc;
   xcirc = circinfo->xcirc;
   ycirc = circinfo->ycirc;
-  
+
   glBegin(GL_LINE_LOOP);
   if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
   for(i=0;i<ncirc;i++){
@@ -2828,7 +2828,7 @@ void drawarc(float angle, float diameter,unsigned char *rgbcolor){
   if(object_circ.ncirc==0)Init_Circle(CIRCLE_SEGS,&object_circ);
   xcirc = object_circ.xcirc;
   ycirc = object_circ.ycirc;
-  
+
   iarc = CIRCLE_SEGS*(angle+180.0/CIRCLE_SEGS)/360.0;
   if(iarc<2)iarc=2;
   if(iarc>CIRCLE_SEGS)iarc=CIRCLE_SEGS;
@@ -2869,7 +2869,7 @@ void drawcube(float size, unsigned char *rgbcolor){
     glVertex3f( s2,-s2,-s2);  // 2
     glVertex3f( s2,-s2, s2);  // 6
     glVertex3f(-s2,-s2, s2);  // 5
-                    
+
     glNormal3f(0.0,1.0,0.0);
     glVertex3f( s2, s2,-s2);  // 3
     glVertex3f(-s2, s2,-s2);  // 4
@@ -2881,7 +2881,7 @@ void drawcube(float size, unsigned char *rgbcolor){
     glVertex3f(-s2,-s2, s2);  // 5
     glVertex3f(-s2, s2, s2);  // 8
     glVertex3f(-s2, s2,-s2);  // 4
-                     
+
     glNormal3f(1.0,0.0,0.0);
     glVertex3f( s2,-s2,-s2);  // 2
     glVertex3f( s2, s2,-s2);  // 3
@@ -3030,7 +3030,7 @@ void drawcubec(float size, unsigned char *rgbcolor){
     glVertex3f( s2,s1,s1);  // 2
     glVertex3f( s2,s1, s2);  // 6
     glVertex3f(s1,s1, s2);  // 5
-                    
+
     glNormal3f(0.0,1.0,0.0);
     glVertex3f( s2, s2,s1);  // 3
     glVertex3f(s1, s2,s1);  // 4
@@ -3042,7 +3042,7 @@ void drawcubec(float size, unsigned char *rgbcolor){
     glVertex3f(s1,s1, s2);  // 5
     glVertex3f(s1, s2, s2);  // 8
     glVertex3f(s1, s2,s1);  // 4
-                     
+
     glNormal3f(1.0,0.0,0.0);
     glVertex3f( s2,s1,s1);  // 2
     glVertex3f( s2, s2,s1);  // 3
@@ -3430,7 +3430,7 @@ void drawring(float diam_inner, float diam_outer, float height, unsigned char *r
   ncirc = object_circ.ncirc;
   xcirc = object_circ.xcirc;
   ycirc = object_circ.ycirc;
-  
+
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -3576,7 +3576,7 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
   ncirc = object_circ.ncirc;
   xcirc = object_circ.xcirc;
   ycirc = object_circ.ycirc;
-  
+
   if(object_outlines==0){
     glBegin(GL_QUADS);
     if(rgbcolor!=NULL)glColor3ubv(rgbcolor);
@@ -3587,7 +3587,7 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
 
       glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
       glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
- 
+
       glNormal3f(xcirc[i+1],ycirc[i+1],0.0);
       glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
 
@@ -3623,7 +3623,7 @@ void drawdisk(float diameter, float height, unsigned char *rgbcolor){
 
       glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0,0.0); // 2
       glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
- 
+
       glVertex3f(diameter*xcirc[i+1]/2.0,diameter*ycirc[i+1]/2.0, height); // 3
       glVertex3f(diameter*xcirc[  i]/2.0,diameter*ycirc[  i]/2.0, height); // 4
 
@@ -3687,7 +3687,7 @@ void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbco
       glNormal3f(cos_long[i],sin_long[i],0.0);
       glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0, height); // 4
     }
-  
+
     glNormal3f(0.0,-1.0,0.0);
     glVertex3f(0.0,0.0,0.0);
     glVertex3f(diameter*cos_long[  0]/2.0,diameter*sin_long[  0]/2.0,0.0); // 1
@@ -3735,7 +3735,7 @@ void drawarcdisk(float angle, float diameter, float height, unsigned char *rgbco
       glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0, height); // 4
       glVertex3f(diameter*cos_long[  i]/2.0,diameter*sin_long[  i]/2.0,0.0); // 1
     }
-  
+
     glVertex3f(0.0,0.0,0.0);
     glVertex3f(diameter*cos_long[  0]/2.0,diameter*sin_long[  0]/2.0,0.0); // 1
 
@@ -4451,7 +4451,7 @@ void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor){
   ncirc = object_circ.ncirc;
   xcirc = object_circ.xcirc;
   ycirc = object_circ.ycirc;
-  
+
   if(height<=0.0)height=0.0001;
   dz = -(d2-d1)/height;
   if(object_outlines==0){
@@ -4738,9 +4738,9 @@ int get_token_id(char *token, int *opptr, int *num_opptr, int *num_outopptr, int
 
   int op, num_op, num_outop;
   int return_val;
-  
+
   *use_displaylist=0;
-  
+
   return_val=0;
   if(STRCMP(token,"translate")==0){
     op=SV_TRANSLATE;
@@ -5581,7 +5581,7 @@ int get_ndevices(char *file){
     fclose(stream);
     return 0;
   }
-  
+
   while(!feof(stream)){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
@@ -5980,7 +5980,7 @@ devicedata *get_device(float *xyzval, char *device_label, int device_type){
 
 vdevicedata *get_vdevice(float *xyzval){
   int j;
-  
+
   for(j=0;j<nvdeviceinfo;j++){
     vdevicedata *vdevj;
     float *xyzj;
@@ -6218,7 +6218,7 @@ void setup_device_data(void){
     vdevi->pilotinfo.vel=NULL;
     vdevi->pilotinfo.fraction=NULL;
     vdevi->pilotinfo.nbuckets=0;
-#endif    
+#endif
 
     devj = get_device(xyzval,"VELOCITY",CSV_EXP);
     if(devj!=NULL){
@@ -6270,7 +6270,7 @@ void setup_device_data(void){
   }
 
   // look for duplicate device labels
-  
+
   is_dup=0;
   for(i=0;i<ndeviceinfo;i++){
     devicedata *devi;
@@ -6458,7 +6458,7 @@ int read_object_defs(char *file){
   int eof=0;
 
  // freeall_objects();
-  
+
   stream=fopen(file,"r");
   if(stream==NULL)return 0;
   PRINTF("Processing object file:  %s\n",file);
@@ -6489,7 +6489,7 @@ int read_object_defs(char *file){
 
       if(match(buffer_ptr,"AVATARDEF") == 1){
         object_type=IS_AVATAR;
-      }  
+      }
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
       label=remove_comment(buffer);
@@ -6497,7 +6497,7 @@ int read_object_defs(char *file){
       if(temp_object!=NULL){
         free_object(temp_object);
       }
-  
+
       NewMemory((void **)&current_object,sizeof(sv_object));
       current_object->used=0;
       current_object->use_displaylist=1;
@@ -6823,7 +6823,7 @@ void init_object_defs(void){
   char com_buffer2[1024];
   char objectfile[1024];
   int i;
-  
+
   svofile_exists = 0;
 
   if(smokeview_bindir!=NULL){
@@ -6882,7 +6882,7 @@ void init_object_defs(void){
     object_defs[2] = sprinkler_upright_object_backup;
     object_defs[3] = smoke_detector_object_backup;
   }
-  
+
   for(i=0;i<navatar_types;i++){
     sv_object_frame *obj_frame;
     int n;
@@ -6897,37 +6897,37 @@ void init_object_defs(void){
 
     evac_token=get_token_ptr("W",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("D",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("H1",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("SX",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("SY",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("SZ",obj_frame);
     evac_tokens[n++]=evac_token;
 
     evac_token=get_token_ptr("R",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("G",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("B",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("HX",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("HY",obj_frame);
     evac_tokens[n++]=evac_token;
-    
+
     evac_token=get_token_ptr("HZ",obj_frame);
     evac_tokens[n++]=evac_token;
   }
@@ -6992,7 +6992,7 @@ void init_avatar(void){
   char labels[1024];
 
   strcpy(labels,":DUM1 :DUM2 :DUM3 :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ ");
-  
+
   object_start = object_def_first.next;
   navatar_types=2;
   for(objecti = object_start;objecti->next!=NULL;objecti=objecti->next){
@@ -7183,18 +7183,18 @@ void init_device_plane(devicedata *devicei){
   float level=0.0;
   float xx[2], yy[2], zz[2];
 
-/* stuff min and max grid data into a more convenient form 
+/* stuff min and max grid data into a more convenient form
   assuming the following grid numbering scheme
 
        5-------6
-     / |      /| 
-   /   |     / | 
+     / |      /|
+   /   |     / |
   4 -------7   |
-  |    |   |   |  
+  |    |   |   |
   Z    1---|---2
   |  Y     |  /
   |/       |/
-  0--X-----3     
+  0--X-----3
 
   */
   if(devicei->plane_surface==NULL)return;
@@ -7338,7 +7338,7 @@ void init_device(devicedata *devicei, float *xyz, float *xyzn, int state0, int n
 
 /* ----------------------- get_indep_var_indices ----------------------------- */
 
-void get_indep_var_indices(sv_object *smv_object, 
+void get_indep_var_indices(sv_object *smv_object,
         char **var_indep_strings, int nvars_indep, int *index){
 
   int i;
@@ -7443,7 +7443,7 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
   char *c;
   char *tokens_head[BUFFER_SIZE], *tokens_tail[BUFFER_SIZE];
   int in_head=1,nhead=0,ntail=0;
-  
+
   c=string;
   in_quote=0;
   in_token=0;
@@ -7479,7 +7479,7 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
     if(in_token<last_in_token){
       char *tok;
       int in_head2;
-      
+
       *c=0;
       if(ntail>0)tok = tokens_tail[ntail-1];
       if(ntail>0&&(strcmp(tok,"include")==0||strcmp(tok,"includef")==0)){
@@ -7490,24 +7490,24 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
 	      int nparms;
 	      sv_object_frame *frame;
         int len2;
-        
+
         object_name=tokens_tail[ntail-2];
         if(object_name[0]=='"')object_name++;
         len2=strlen(object_name);
         if(object_name[len2-1]=='"')object_name[len2-1]=0;
-        
+
         if(missing_device==NULL){
           char com_buffer[1024];
-        
+
           strcpy(com_buffer, "0 0 255 setrgb push 45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop push -45.0 rotatey -0.1 offsetz 0.05 0.2 drawdisk pop");
           missing_device = init_SVOBJECT1("missing_device", com_buffer,1);
         }
-        
+
         included_object = get_SVOBJECT_type2(object_name,missing_device);
-        
+
         if(strcmp(tok,"includef")==0&&included_object!=missing_device&&ntail>2){
           char *iframe_label;
-          
+
           iframe_label=tokens_tail[ntail-3];
           sscanf(iframe_label,"%i",&iframe_local);
           if(iframe_local<0)iframe_local=0;
@@ -7525,7 +7525,7 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
         in_head2=1;
         for(j=0;j<frame->ntokens;j++){
           char *cc;
-          
+
           cc = frame->tokens[j].tokenlabel;
           if(in_head2==1&&cc[0]==':'){
             tokens_head[nhead++]=frame->tokens[j].tokenfulllabel;
@@ -7550,4 +7550,4 @@ void parse_object_string(char *string,char **tokens, int *ntokens){
   *ntokens=ntok2;
 }
 
-  
+

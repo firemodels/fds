@@ -69,7 +69,7 @@ void update_camera_ypos(camera *camera_data){
   float local_aperture_default;
   float width;
   float asp;
-  
+
   local_aperture_default=zoom2aperture(1.0);
   asp=(float)screenHeight/(float)screenWidth;
   width=xbar;
@@ -141,7 +141,7 @@ void init_camera(camera *camera_data,char *name){
     cam->clip_xmin=clipinfo.clip_xmin;
     cam->clip_ymin=clipinfo.clip_ymin;
     cam->clip_zmin=clipinfo.clip_zmin;
-  
+
     cam->clip_xmax=clipinfo.clip_xmax;
     cam->clip_ymax=clipinfo.clip_ymax;
     cam->clip_zmax=clipinfo.clip_zmax;
@@ -163,7 +163,7 @@ void init_camera(camera *camera_data,char *name){
     clipinfo.clip_xmin = cam->clip_xmin;
     clipinfo.clip_ymin = cam->clip_ymin;
     clipinfo.clip_zmin = cam->clip_zmin;
-  
+
     clipinfo.clip_xmax = cam->clip_xmax;
     clipinfo.clip_ymax = cam->clip_ymax;
     clipinfo.clip_zmax = cam->clip_zmax;
@@ -220,7 +220,7 @@ void update_camera(camera *ca){
     ca->clip_xmin=clipinfo.clip_xmin;
     ca->clip_ymin=clipinfo.clip_ymin;
     ca->clip_zmin=clipinfo.clip_zmin;
-  
+
     ca->xmin=clipinfo.xmin;
     ca->ymin=clipinfo.ymin;
     ca->zmin=clipinfo.zmin;

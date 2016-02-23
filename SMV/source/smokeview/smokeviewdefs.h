@@ -344,9 +344,9 @@ void _Sniff_Errors(char *whereat);
 #define BOX_CLIPPLANES 0
 
 #define DOWN_Y 0
-#define UP_X   1 
+#define UP_X   1
 #define UP_Y   2
-#define DOWN_X 3 
+#define DOWN_X 3
 #define DOWN_Z 4
 #define UP_Z   5
 
@@ -470,7 +470,7 @@ void _Sniff_Errors(char *whereat);
 #define VISIBLE   1
 #define INVISIBLE 0
 
-#define NBUCKETS 1000000 
+#define NBUCKETS 1000000
 
 #define MOVE 0
 #define STRETCH_BLACK 1
