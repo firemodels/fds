@@ -60,11 +60,11 @@ int main(int argc, char **argv){
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
   int mem_usage, mem_usage_max=75;
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   char command_buffer[1024];
   char user_path[1024];
   FILE *stream=NULL;
-#endif  
+#endif
 #ifdef pp_OSX
   char command_buffer[1024];
   char user_path[1024];
@@ -74,7 +74,7 @@ int main(int argc, char **argv){
   char *arg;
   char *command;
 
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   hostlistfile=NULL;
   host=NULL;
   strcpy(user_path,"");
@@ -281,7 +281,7 @@ int main(int argc, char **argv){
     arg=argv[i];
     strcat(command_buffer,arg);
     if(i<argc-1){
-      strcat(command_buffer," ");    
+      strcat(command_buffer," ");
     }
   }
   if(nhostinfo>0)strcat(command_buffer,")\"");
@@ -312,13 +312,13 @@ void usage(char *prog){
   printf("  -d dtime  - wait dtime seconds before running prog in the background\n");
   printf("  -debug    - display debug messages\n");
   printf("  -h        - display this message\n");
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   printf("  -hosts hostfiles - file containing a list of host names to run jobs on\n");
 #endif
   printf("  -m max    - wait to run prog until memory usage is less than max (25-100%s)\n",pp);
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   printf("  -p path   - specify directory path to change to after ssh'ing to remote host\n");
-#endif  
+#endif
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
   printf("  -v        - display version information\n");
   printf("  prog      - program to run in the background\n");
@@ -338,7 +338,7 @@ static HMODULE s_hKernel = NULL;
 
 void GetSystemTimesAddress(){
 	if( s_hKernel == NULL )
-	{ 
+	{
 		s_hKernel = LoadLibrary("Kernel32.dll" );
 		if( s_hKernel != NULL )
 		{
@@ -424,7 +424,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
   strcat(sysctl_file,var);
   strcat(sysctl_file,"_");
   strcat(sysctl_file,pid);
-  
+
   strcpy(command,"");
   if(host!=NULL){
     strcat(command,"ssh ");
@@ -460,7 +460,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
 
 int get_ncores(void){
   int ncores=1;
-  
+
   get_sysctl(NULL,"hw.ncpu",&ncores,NULL);
   return ncores;
 }
@@ -522,7 +522,7 @@ int get_host_ncores(char *host){
   char command[1024];
   char localfile[1024];
   int ncores=0;
-  
+
   strcpy(localfile,"/tmp/cpuinfo.");
   strcat(localfile,host);
   strcat(localfile,".");
@@ -563,7 +563,7 @@ float get_host_load(char *host){
   char command[1024];
   char localfile[1024];
   float load1;
-  
+
   strcpy(localfile,"/tmp/loadavg.");
   strcat(localfile,host);
   strcat(localfile,".");

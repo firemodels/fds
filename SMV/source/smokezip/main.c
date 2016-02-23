@@ -326,7 +326,7 @@ int main(int argc, char **argv){
 #endif
 
   // construct smv filename
-  
+
   if(filebase==NULL){
     usage(prog);
     return 1;
@@ -373,7 +373,7 @@ int main(int argc, char **argv){
       set_stdout(SMZLOG_STREAM);
     }
   }
-  
+
   // construct ini file name
 
   strcpy(inifile,smvfile);
@@ -399,7 +399,7 @@ int main(int argc, char **argv){
   if(nplot3dinfo>0){
     plot3dinfo[0].dup=0;
     for(i=1;i<nplot3dinfo;i++){
-      plot3d *plot3di; 
+      plot3d *plot3di;
 
       plot3di = plot3dinfo + i;
 
@@ -411,7 +411,7 @@ int main(int argc, char **argv){
   if(npatchinfo>0){
     patchinfo->dup=0;
     for(i=1;i<npatchinfo;i++){
-      patch *patchi; 
+      patch *patchi;
 
       patchi = patchinfo + i;
 
@@ -422,7 +422,7 @@ int main(int argc, char **argv){
   if(nsliceinfo>0){
     sliceinfo[0].dup=0;
     for(i=1;i<nsliceinfo;i++){
-      slice *slicei; 
+      slice *slicei;
 
       slicei = sliceinfo + i;
 
@@ -504,7 +504,7 @@ void *compress_all(void *arg){
 #endif
   return NULL;
 }
-       
+
 /* ------------------ makesvd ------------------------ */
 
 void makesvd(char *in_dir, char *smvfile){
@@ -526,7 +526,7 @@ void makesvd(char *in_dir, char *smvfile){
   }
 
 }
-       
+
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
@@ -588,7 +588,7 @@ void usage(char *prog){
   PRINTF("output options:\n");
   PRINTF("  -auto - compress only files that are auto-loaded by Smokeview\n");
   PRINTF("  -d destdir - copies compressed files (and files needed by Smokeview\n");
-  PRINTF("        to view the case) to the directory destdir\n"); 
+  PRINTF("        to view the case) to the directory destdir\n");
   PRINTF("  -s GLOBsourcedir - specifies directory containing source files\n");
   PRINTF("  -demo - Creates the files (compressed and .svd ) needed by the\n");
   PRINTF("        Smokeview demonstrator mode.  Compresses files that are autoloaded, \n");
@@ -598,7 +598,7 @@ void usage(char *prog){
   PRINTF("  -skip skipval - skip frames when compressing files\n\n");
   PRINTF("  -h  - display this message\n\n");
 }
-       
+
 /* ------------------ usage ------------------------ */
 
 void print_summary(void){
@@ -696,7 +696,7 @@ void print_summary(void){
 
       parti = partinfo + i;
       if(parti->compressed2==0)continue;
- 
+
       PRINTF("%s converted to:\n",parti->file);
       for(j=0;j<parti->nsummaries;j++){
         PRINTF("  %s\n",parti->summaries[j]);

@@ -1,13 +1,13 @@
-#ifdef WIN32 
+#ifdef WIN32
 #ifdef _DEBUG
 #pragma float_control( precise, on)
 #pragma float_control( except, on )
 #endif
-#pragma warning (disable:4996)		
-#pragma warning (disable:4701)		
-#pragma warning (disable:4310)		
-#pragma warning (disable:4127)		
-#pragma warning (disable:4244)		
+#pragma warning (disable:4996)
+#pragma warning (disable:4701)
+#pragma warning (disable:4310)
+#pragma warning (disable:4127)
+#pragma warning (disable:4244)
 #pragma warning (disable:1478)
 #pragma warning (disable:1786)
 

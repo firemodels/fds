@@ -8,7 +8,7 @@
 #include "MALLOC.h"
 
 int readsmv(char *smvfile){
-  
+
   FILE *streamsmv;
   int ioffset;
   int unit_start=15;
@@ -238,7 +238,7 @@ int readsmv(char *smvfile){
     NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(part5prop));
   }
 #endif
-  
+
   // read in smv file a second time_local to compress files
 
   ioffset=0;
@@ -486,7 +486,7 @@ int readsmv(char *smvfile){
       npartclassinfo++;
       continue;
     }
-    
+
   /*
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
@@ -705,7 +705,7 @@ int readsmv(char *smvfile){
       slicei->involuse=0;
       slicei->compressed=0;
       slicei->vol_compressed=0;
-        
+
       if(GLOBget_slice_bounds==1){
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
         slicei->histogram->buckets = NULL;
@@ -972,7 +972,7 @@ void readini2(char *inifile){
       if(nplot3d_vars<0)nplot3d_vars=0;
       if(nplot3d_vars>5)nplot3d_vars=5;
 
-      for(i=0;i<nplot3d_vars;i++){  
+      for(i=0;i<nplot3d_vars;i++){
         int iplot3d;
         int setvalmin, setvalmax;
         float valmin, valmax;
@@ -1198,7 +1198,7 @@ void init_volrender(void){
     vr = &(meshi->volrenderinfo);
     shortlabel = slicei->label.shortlabel;
 
-    if(STRCMP(shortlabel,"temp")==0){  
+    if(STRCMP(shortlabel,"temp")==0){
       vr->fire=slicei;
      continue;
     }

@@ -15,7 +15,7 @@ STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, i
 /* ------------------ convert_plot3d ------------------------ */
 
 int convert_plot3d(plot3d *plot3di){
-  
+
   char plot3dfile_svz[1024];
   int fileversion, one, zero;
   char *plot3d_file;
@@ -127,7 +127,7 @@ int convert_plot3d(plot3d *plot3di){
     NewMemory((void **)&plot3dframe_data,5*framesize*sizeof(float));
     NewMemory((void **)&plot3dframe_compressed,1.1*5*framesize*sizeof(unsigned char));
     NewMemory((void **)&plot3dframe_uncompressed,5*framesize*sizeof(unsigned char));
-    
+
     FORTgetplot3dq(plot3d_file, &nx, &ny, &nz, plot3dframe_data, &error, &isotest, len);
     kk=0;
     for(j=0;j<5;j++){
@@ -178,7 +178,7 @@ int convert_plot3d(plot3d *plot3di){
   // dum1, dum2, dum3, dum4
   // (((qq(i,j,k),i=1,nx),j=1,ny),k=1,nz)
 
-  //*** ZLIB format (C - no extra bytes surrounding data) 
+  //*** ZLIB format (C - no extra bytes surrounding data)
 
   //*** header
   // endian

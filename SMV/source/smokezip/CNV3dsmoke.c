@@ -168,7 +168,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   {
     float xyzbar0[3], xyzbar[3], dxyz[3];
     int ijkbar[3];
-    
+
     opacity=full_alphabuffer;
     radiance = opacity + nx*ny*nz;
 
@@ -193,7 +193,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   time_max=-1000000.0;
   for(;;){
     int nlight_data;
-    
+
     fread(&time_local,4,1,SMOKE3DFILE);
     if(feof(SMOKE3DFILE)!=0)break;
 
@@ -275,7 +275,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 #ifdef pp_THREAD
   {
     char before_label[256],after_label[256];
-  
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
     smoke3di->compressed=1;
@@ -288,7 +288,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   PRINTF("  records=%i, ",count);
   {
     char before_label[256],after_label[256];
-  
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 

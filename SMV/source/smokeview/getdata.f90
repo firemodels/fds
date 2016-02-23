@@ -1,4 +1,4 @@
-! $Date$ 
+! $Date$
 ! $Revision$
 ! $Author$
 
@@ -13,7 +13,7 @@
 !  IF (N_FACE_S>0)  WRITE(LU_GEOM) (SURF_S(I),I=1,N_FACE_S)
 !  IF (N_FACE_D>0)  WRITE(LU_GEOM) (SURF_D(I),I=1,N_FACE_D)
 
-!  ------------------ geomout ------------------------ 
+!  ------------------ geomout ------------------------
 
 subroutine geomout(verts, N_VERT_S, faces, N_FACE_S)
 implicit none
@@ -44,7 +44,7 @@ IF (N_FACE_S>0)  WRITE(LU_GEOM) (faces(3*I-2),faces(3*I-1),faces(3*I),I=1,N_FACE
 close(LU_GEOM)
 end subroutine geomout
 
-!  ------------------ getembeddata ------------------------ 
+!  ------------------ getembeddata ------------------------
 
 subroutine getembeddata(filename,ntimes,nvals,times,nstatics,ndynamics,vals,redirect_flag,error)
 implicit none
@@ -88,23 +88,23 @@ valmax = -valmin
 do itime=1, ntimes
   read(lu20,iostat=finish)times(itime)
   if(redirect_flag.eq.0)write(6,10)times(itime)
-10 format(" boundary element time=",f9.2)  
+10 format(" boundary element time=",f9.2)
   if(finish.eq.0)read(lu20,iostat=finish)nvert_s, ntri_s, nvert_d, ntri_d
   nstatics(itime)=nvert_s+ntri_s
 
   if(finish.eq.0.and.nvert_s.gt.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,nvert_s)
   nvars = nvars + nvert_s
-  
+
   if(finish.eq.0.and.ntri_s.gt.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_s)
   nvars = nvars + ntri_s
-  
+
   ndynamics(itime)=nvert_d+ntri_d
   if(finish.eq.0.and.nvert_d.ne.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,nvert_d)
   nvars = nvars + nvert_d
-  
+
   if(finish.eq.0.and.ntri_d.ne.0)read(lu20,iostat=finish)(vals(nvars+i),i=1,ntri_d)
   nvars = nvars + ntri_d
-  
+
   do i = 1, ntri_s+ntri_d+nvert_s+nvert_d
     ii = nvars + i - ntri_s-ntri_d-nvert_s-nvert_d
     if(vals(ii).lt.valmin)valmin=vals(ii)
@@ -117,7 +117,7 @@ close(lu20)
 
 end subroutine getembeddata
 
-!  ------------------ getzonedata ------------------------ 
+!  ------------------ getzonedata ------------------------
 
 subroutine getzonedata(zonefilename,nzonet,nrooms, nfires, zonet,zoneqfire,zonepr, zoneylay,zonetl,zonetu,error)
 implicit none
@@ -180,13 +180,13 @@ do j = 1, nzonet
       close(lu26)
       return
     endif
-  end do 
+  end do
 end do
 
 close(lu26)
 end subroutine getzonedata
 
-!  ------------------ getpatchdata ------------------------ 
+!  ------------------ getpatchdata ------------------------
 
 subroutine getpatchdata(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,npqq,error)
 implicit none
@@ -228,7 +228,7 @@ return
 
 end subroutine getpatchdata
 
-!  ------------------ getdata1 ------------------------ 
+!  ------------------ getdata1 ------------------------
 
 subroutine getdata1(file_unit,ipart,error)
 implicit none
@@ -285,7 +285,7 @@ end do
 return
 end subroutine getdata1
 
-!  ------------------ getdata2 ------------------------ 
+!  ------------------ getdata2 ------------------------
 
 subroutine getdata2(file_unit,xs,ys,zs,&
                     t,&
@@ -294,7 +294,7 @@ subroutine getdata2(file_unit,xs,ys,zs,&
                     xbox0, xbox, ybox0, ybox, zbox0, zbox, &
                     offset_x, offset_y, offset_z, redirect_flag, &
                     error)
-                   
+
 implicit none
 real, dimension(*), intent(out) :: t
 
@@ -468,7 +468,7 @@ do
         write(6,*)" particle time=",stime,"particles",npp1,"droplets",npp2
         write(6,20)stime,npp2
       endif
-20 format(" particle time=",f9.2," particles",i9," droplets",i9)      
+20 format(" particle time=",f9.2," particles",i9," droplets",i9)
     endif
   endif
 
@@ -479,7 +479,7 @@ close(lu10)
 return
 end subroutine getdata2
 
-!  ------------------ getdirval ------------------------ 
+!  ------------------ getdirval ------------------------
 
 subroutine getdirval(is1,is2,js1,js2,ks1,ks2,idir,joff,koff)
 implicit none
@@ -523,7 +523,7 @@ endif
 return
 end subroutine getdirval
 
-!  ------------------ writeslicedata ------------------------ 
+!  ------------------ writeslicedata ------------------------
 
 subroutine writeslicedata(file_unit,slicefilename,is1,is2,js1,js2,ks1,ks2,qdata,times,ntimes,redirect_flag)
 implicit none
@@ -574,7 +574,7 @@ close(file_unit)
 return
 end subroutine writeslicedata
 
-!  ------------------ getslicedata ------------------------ 
+!  ------------------ getslicedata ------------------------
 
 subroutine getslicedata(file_unit,slicefilename,shortlabel,&
             is1,is2,js1,js2,ks1,ks2,idir,qmin,qmax,qdata,times,nstepsmax,sliceframestep,&
@@ -649,12 +649,12 @@ lenunits = min(len_trim(unitlbl),6)
 ! units=unitlbl(1:lenunits)//char(0)
 
 read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
-is1 = ip1 
-is2 = ip2 
-js1 = jp1 
-js2 = jp2 
-ks1 = kp1 
-ks2 = kp2 
+is1 = ip1
+is2 = ip2
+js1 = jp1
+js2 = jp2
+ks1 = kp1
+ks2 = kp2
 if(error.ne.0)then
   close(lu11)
   return
@@ -662,7 +662,7 @@ endif
 
 nxsp = is2 + 1 - is1
 nysp = js2 + 1 - js1
-nzsp = ks2 + 1 - ks1  
+nzsp = ks2 + 1 - ks1
 call getdirval(is1,is2,js1,js2,ks1,ks2,idir,joff,koff)
 
 allocate(qq(nxsp,nysp+joff,nzsp+koff))
@@ -694,7 +694,7 @@ do
   nsteps = nsteps + 1
   times(nsteps) = time
   if(redirect_flag.eq.0)write(6,10)time
-10 format(" slice time=",f9.2)  
+10 format(" slice time=",f9.2)
   if(idir.eq.3)then
     istart = (nsteps-1)*nxsp*nysp
     do i = 1, nxsp
@@ -738,7 +738,7 @@ close(lu11)
 return
 end subroutine getslicedata
 
-!  ------------------ getsliceframe ------------------------ 
+!  ------------------ getsliceframe ------------------------
 
 subroutine getsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,testslice,error)
 implicit none
@@ -757,7 +757,7 @@ real :: ii, jj, kk
 
 nxsp = is2 + 1 - is1
 nysp = js2 + 1 - js1
-nzsp = ks2 + 1 - ks1  
+nzsp = ks2 + 1 - ks1
 
 read(lu11,iostat=error)time
 if(error.ne.0)return
@@ -784,7 +784,7 @@ endif
 return
 end subroutine getsliceframe
 
-!  ------------------ endian_out ------------------------ 
+!  ------------------ endian_out ------------------------
 
 subroutine endianout(endianfilename)
 implicit none
@@ -802,7 +802,7 @@ close(file_unit)
 return
 end subroutine endianout
 
-!  ------------------ outsliceheader ------------------------ 
+!  ------------------ outsliceheader ------------------------
 
 subroutine outsliceheader(slicefilename,unit,ip1, ip2, jp1, jp2, kp1, kp2, error)
 implicit none
@@ -833,7 +833,7 @@ write(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
 
 end subroutine outsliceheader
 
-!  ------------------ outsliceframe ------------------------ 
+!  ------------------ outsliceframe ------------------------
 
 subroutine outsliceframe(lu11,is1,is2,js1,js2,ks1,ks2,time,qframe,error)
 implicit none
@@ -848,7 +848,7 @@ integer :: nxsp, nysp, nzsp
 
 nxsp = is2 + 1 - is1
 nysp = js2 + 1 - js1
-nzsp = ks2 + 1 - ks1  
+nzsp = ks2 + 1 - ks1
 
 write(lu11,iostat=error)time
 if(error.ne.0)return
@@ -859,7 +859,7 @@ write(lu11,iostat=error)(((qframe(1+i+j*nxsp+k*nxsp*nysp),i=0,nxsp-1),j=0,nysp-1
 return
 end subroutine outsliceframe
 
-!  ------------------ outboundaryheader ------------------------ 
+!  ------------------ outboundaryheader ------------------------
 
 subroutine outboundaryheader(boundaryfilename,boundaryunitnumber,npatches,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,error)
 implicit none
@@ -889,7 +889,7 @@ end do
 return
 end subroutine outboundaryheader
 
-!  ------------------ outpatchframe ------------------------ 
+!  ------------------ outpatchframe ------------------------
 
 subroutine outpatchframe(lunit,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchtime,pqq,error)
 implicit none
@@ -922,7 +922,7 @@ return
 
 end subroutine outpatchframe
 
-!  ------------------ getplot3dq ------------------------ 
+!  ------------------ getplot3dq ------------------------
 
 subroutine getplot3dq(qfilename,nx,ny,nz,qq,error,isotest)
 implicit none
@@ -1001,7 +1001,7 @@ close(u_in)
 return
 end subroutine getplot3dq
 
-!  ------------------ plot3dout ------------------------ 
+!  ------------------ plot3dout ------------------------
 
 subroutine plot3dout(outfile, nx, ny, nz, qout, error3)
 implicit none
@@ -1581,7 +1581,7 @@ END SELECT
 
 END SUBROUTINE COLOR2RGB
 
-!  ------------------ funit ------------------------ 
+!  ------------------ funit ------------------------
 
 subroutine get_file_unit(funit,first_unit)
 integer, intent(in) :: first_unit
@@ -1598,7 +1598,7 @@ return
 end subroutine get_file_unit
 
 
-!  ------------------ GET_TETRABOX_VOLUME ------------------------ 
+!  ------------------ GET_TETRABOX_VOLUME ------------------------
 
 SUBROUTINE GET_TETRABOX_VOLUME_FB(BOX_BOUNDS_FB,V0_FB,V1_FB,V2_FB,V3_FB,TETRABOX_VOLUME_FB,AREAS_FB,CENTROID_FB)
 USE PRECISION_PARAMETERS
@@ -1744,7 +1744,7 @@ INTEGER, INTENT(OUT) :: IN_TETRA, TETRA_STATE(4)
 CALL TEST_IN_TETRA0(XYZ, IN_TETRA, TETRA_STATE)
 
 END SUBROUTINE TEST_IN_TETRA
-   
+
    !  ------------------ GET_IN_TRIANGLE ------------------------
 
 SUBROUTINE GET_IN_TRIANGLE(VERT,V1,V2,V3, FLAG)
@@ -1804,8 +1804,8 @@ CALL POLY2TRI(EVERTS,NVERTS,POLY,NPOLY,TRIS,NTRIS)
 END SUBROUTINE FPOLY2TRI
 
 
-   
-   
-   
-   
+
+
+
+
 
