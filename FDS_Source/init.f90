@@ -1,4 +1,4 @@
-MODULE INIT      
+MODULE INIT
 
 ! Allocate numerous arrays and perform miscellaneous initializations
 
