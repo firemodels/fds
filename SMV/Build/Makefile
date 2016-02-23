@@ -146,8 +146,17 @@ intel_win_64_db : $(objwin)
 # ------------- intel_win_64 ----------------
 
 intel_win_64 : INC = -I ../../source/include -I ../../source/shared -I ../../source/smokeview -I ../../source/glew
+ifeq ($(LUA_SCRIPTING),true)
+intel_win_64 : INC += -I ../../source/lua-5.3.1/src
+endif
 intel_win_64 : FFLAGS    = -O2 /iface:stdref /fpp -D WIN32 /fpscomp:general
 intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
+intel_win_64 : LIBLUA    =
+ifeq ($(LUA_SCRIPTING),true)
+intel_win_64 : CFLAGS    += -D pp_LUA
+intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)/liblua.a
+intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR_64)/lpeg.dll
+endif
 intel_win_64 : LFLAGS    = /F32768000
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
@@ -155,7 +164,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64) $(LIBLUA)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -286,11 +295,12 @@ mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libimf.a $(IFORT_COMPILER_LIB)/libirc.a $(IFORT_COMPILER_LIB)/libsvml.a
 
 # ------------- intel_osx_64 ----------------
+
 intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
 intel_osx_64 : LIBS_PLAT =
 intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
 intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
-intel_linux_64 : LIBLUA    =
+intel_osx_64 : LIBLUA    =
 ifeq ($(LUA_SCRIPTING),true)
 intel_osx_64 : CFLAGS    += -D pp_LUA
 intel_osx_64 : LIBS_PLAT += $(LIB_DIR_PLAT)/lua53.a
