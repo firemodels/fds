@@ -154,7 +154,8 @@ intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_S
 intel_win_64 : LIBLUA    =
 ifeq ($(LUA_SCRIPTING),true)
 intel_win_64 : CFLAGS    += -D pp_LUA
-intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)/liblua.a
+intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)\liblua.lib 
+intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)\lpeg.lib
 intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR_64)/lpeg.dll
 endif
 intel_win_64 : LFLAGS    = /F32768000

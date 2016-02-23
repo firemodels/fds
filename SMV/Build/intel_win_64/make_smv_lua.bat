@@ -19,7 +19,7 @@ if "%release%" == "-r" goto endif
   set SMV_TESTSTRING=test_
 :endif
 
-::erase *.obj *.mod
+erase *.obj *.mod
 make -j 4 SHELL="%ComSpec%" LUA_SCRIPTING="true" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
 if x%from% == xbot goto skip2
 pause
