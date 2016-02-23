@@ -45,12 +45,12 @@ if NOT x%arg2% == xlua goto skip_lua
 :: Lua interpreter
 cd %SRCDIR%\lua-5.3.1
 call makelib.bat
-copy src\liblua.a %LIBDIR%\liblua.a
+copy src\liblua.lib %LIBDIR%\liblua.lib
 
 :: LPEG
 cd %SRCDIR%\lpeg-1.0.0
 call makelib.bat
-copy lpeg.dll %LIBDIR%\lpeg.dll
+copy lpeg.lib %LIBDIR%\lpeg.lib
 :skip_lua
 
 cd %LIBDIR%

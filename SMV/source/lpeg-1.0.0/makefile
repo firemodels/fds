@@ -23,6 +23,7 @@ CWARNS = -Wall -Wextra -pedantic \
 	-Wstrict-prototypes \
 # -Wunreachable-code \
 
+RANLIB=ranlib
 
 CFLAGS = $(CWARNS) $(COPT) -std=c99 -I../lua-5.3.1/src -fPIC
 CC = gcc
@@ -43,6 +44,10 @@ macosx:
 
 lpeg.dll: $(FILES)
 	$(CC) $(DLLFLAGS) $(FILES) -o $@ -L ../lua-5.3.1/src -llua53
+
+lpeg.lib: $(FILES)
+	lib $(FILES) -OUT:$@
+
 lpeg.so: $(FILES)
 	$(CC) $(DLLFLAGS) $(FILES) -o $@ -L ../lua-5.3.1/src
 
