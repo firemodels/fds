@@ -326,9 +326,9 @@ STDCALLF FORTclosefortranfile(int *lunit);
 
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *ndummy, int *error);
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber,
                          int *version, int *error, FILE_SIZE len);
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
@@ -336,7 +336,7 @@ STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npat
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit,
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 

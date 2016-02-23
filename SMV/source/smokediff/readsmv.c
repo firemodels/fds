@@ -9,7 +9,7 @@
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
-  
+
   int igrid,ipdim;
   int islice,iplot3d,iboundary;
   char buffer[255];
@@ -147,7 +147,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       NewMemory((void **)&yp,sizeof(float)*(jbar+1));
       NewMemory((void **)&zp,sizeof(float)*(kbar+1));
       meshi->ibar=ibar;
-      meshi->jbar=jbar;      
+      meshi->jbar=jbar;
       meshi->kbar=kbar;
       meshi->xplt=xp;
       meshi->yplt=yp;
@@ -157,7 +157,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         trim_back(buffer);
         fprintf(stream_out,"GRID\n%s\n",buffer);
       }
-      
+
       continue;
     }
   /*
@@ -221,7 +221,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         xpltcopy++;
       }
       meshi->dx=xplt[1]-xplt[0];
-      
+
       continue;
     }
   /*
@@ -372,13 +372,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int i;
-        
+
         NewMemory((void **)&plot3di->file,(unsigned int)(strlen(full_file)+1));
         for(i = 0; i < 5; i++){
           NewMemory((void **)&plot3di->histogram[i], sizeof(histogramdata));
           init_histogram(plot3di->histogram[i],NHIST_BUCKETS);
         }
-      
+
         CheckMemory;
         strcpy(plot3di->file,trim_front(buffer));
         CheckMemory;
@@ -389,7 +389,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         if(readlabels(plot3di->labels+4,streamsmv)==2)break;
 
         CheckMemory;
-      
+
         iplot3d++;
       }
       else{

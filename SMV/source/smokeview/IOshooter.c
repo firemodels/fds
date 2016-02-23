@@ -135,7 +135,7 @@ void init_shooter_data(void){
   xmin = shooter_xyz[0]-shooter_dxyz[0]/2.0;
   ymin = shooter_xyz[1]-shooter_dxyz[1]/2.0;
   zmin = shooter_xyz[2]-shooter_dxyz[2]/2.0;
-  
+
   for(i=0;i<shooter_nparts;i++){
     xyz = shootpointinfo[i].xyz;
     uvw = shootpointinfo[i].uvw;

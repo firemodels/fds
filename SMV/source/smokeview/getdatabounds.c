@@ -49,7 +49,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
       }
       pmin2 = *pmin + (nsmall-1)*dp;
       pmax2 = *pmin + (nbig+1)*dp;
-      if(setpmin==PERCENTILE_MIN)*pmin = pmin2; 
+      if(setpmin==PERCENTILE_MIN)*pmin = pmin2;
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
@@ -63,7 +63,7 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
 
 void adjustpart5chops(partdata *parti){
   int i;
-  
+
   for(i=0;i<npart5prop;i++){
     part5prop *propi;
 
@@ -274,7 +274,7 @@ void adjustpart5bounds(partdata *parti){
 
 /* ------------------ adjustpartbounds ------------------------ */
 
-void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink, 
+void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink,
                       int local_skip, int ndataloop, int setpmin, float *pmin, int setpmax, float *pmax)
 {
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
@@ -325,7 +325,7 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
       }
       pmin2 = *pmin + (nsmall-1)*dp;
       pmax2 = *pmin + (nbig+1)*dp;
-      if(setpmin==PERCENTILE_MIN)*pmin = pmin2; 
+      if(setpmin==PERCENTILE_MIN)*pmin = pmin2;
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
@@ -395,7 +395,7 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       }
       pmin2 = *pmin + (nsmall-1)*dp;
       pmax2 = *pmin + (nbig+1)*dp;
-      if(setpmin==PERCENTILE_MIN)*pmin = pmin2; 
+      if(setpmin==PERCENTILE_MIN)*pmin = pmin2;
       if(setpmax==PERCENTILE_MAX)*pmax = pmax2;
       FreeMemory(buckets);
     }
@@ -418,7 +418,7 @@ void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float
       pmin2=MIN(val,pmin2);
       pmax2=MAX(val,pmax2);
     }
-    *pglobalmin = pmin2; 
+    *pglobalmin = pmin2;
     *pglobalmax = pmax2;
 }
 

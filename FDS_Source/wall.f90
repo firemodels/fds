@@ -857,12 +857,12 @@ IF (N_TRACKED_SPECIES==1) THEN
       WC%ZZ_F(1) = 1._EB
       RETURN
    ENDIF
-   
+
    IF ( SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .AND. ABS(SF%MASS_FLUX(1))<=TWO_EPSILON_EB ) THEN
       WC%ZZ_F(1) = 1._EB
       RETURN
    ENDIF
-   
+
 ENDIF
 
 ! Set a few common parameters

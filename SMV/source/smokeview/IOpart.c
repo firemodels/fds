@@ -1,7 +1,7 @@
 #define XYZ_EXTRA 7
 
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -202,7 +202,7 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
     CheckMemory;
     if(count>=nf_all)break;
     FORTPART5READ(&time_local,1);
-    
+
     if(count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
       doit=0;
     }
@@ -274,10 +274,10 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
       }
       else{
         if(parti->evac==1){
-          skip_local += 4 + XYZ_EXTRA*4*nparts + 4;  
+          skip_local += 4 + XYZ_EXTRA*4*nparts + 4;
         }
         else{
-          skip_local += 4 + 3*4*nparts + 4;  
+          skip_local += 4 + 3*4*nparts + 4;
         }
       }
       CheckMemory;
@@ -317,7 +317,7 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
         skip_local += 4 + 4*nparts*numtypes[2*i+1] + 4;
       }
 
-      
+
       returncode=0;
       if(skip_local>0){
         returncode=FSEEK(PART5FILE,skip_local,SEEK_CUR);
@@ -502,7 +502,7 @@ void init_part5prop(void){
             propi->partlabels[ii]=labeli;
           }
           NewMemory((void **)&propi->scale,256);
-          
+
 
           npart5prop++;
         }
@@ -530,7 +530,7 @@ void init_part5prop(void){
   }
   for(i=0;i<npartclassinfo;i++){
     part5class *partclassi;
- 
+
     partclassi = partclassinfo + i;
     for(j=1;j<partclassi->ntypes;j++){
       flowlabels *flowlabel;
@@ -594,7 +594,7 @@ void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nc
     int ii;
     part5data *datalast;
     int nvis=0,nleft;
-      
+
     for(ii=0;ii<nparts;ii++){
       int tag_index;
 
@@ -699,7 +699,7 @@ int getpart5nframes(partdata *parti){
         }
       }
   }
-  
+
   stream=fopen(size_file,"r");
   if(stream==NULL)return -1;
 
@@ -794,12 +794,12 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
         }
       }
   }
-  
+
   stream=fopen(size_file,"r");
   if(stream==NULL)return;
 
     // pass 1: count frames
-  
+
   nframes_all=0;
   for(;;){
     int exitloop;
@@ -830,7 +830,7 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
   NewMemory((void **)&parti->data5,parti->nclasses*parti->ntimes*sizeof(part5data));
   NewMemory((void **)&parti->times,parti->ntimes*sizeof(float));
 
-  // free memory for x, y, z frame data 
+  // free memory for x, y, z frame data
 
   for(i=0;i<parti->nclasses;i++){
     part5class *partclassi;
@@ -841,7 +841,7 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
   }
 
   // pass 2 - allocate memory for x, y, z frame data
-  //          
+  //
   {
     part5data *datacopy;
     int fail;
@@ -969,7 +969,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
-  FREEMEMORY(parti->times); 
+  FREEMEMORY(parti->times);
 
   if(colorlabelpart!=NULL){
     int n;
@@ -997,7 +997,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
     Update_Times();
     return;
   }
-  
+
   PRINTF("Sizing particle data: %s\n",file);
   getpart5header(parti, partframestep, &nf_all);
 
@@ -1145,13 +1145,13 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
-  FREEMEMORY(parti->times); 
-  FREEMEMORY(parti->xpart);  FREEMEMORY(parti->ypart);  FREEMEMORY(parti->zpart);  
-  FREEMEMORY(parti->xpartb); FREEMEMORY(parti->ypartb); FREEMEMORY(parti->zpartb); 
-  FREEMEMORY(parti->xparts); FREEMEMORY(parti->yparts); FREEMEMORY(parti->zparts); 
-  FREEMEMORY(parti->tpart);  FREEMEMORY(parti->itpart); 
+  FREEMEMORY(parti->times);
+  FREEMEMORY(parti->xpart);  FREEMEMORY(parti->ypart);  FREEMEMORY(parti->zpart);
+  FREEMEMORY(parti->xpartb); FREEMEMORY(parti->ypartb); FREEMEMORY(parti->zpartb);
+  FREEMEMORY(parti->xparts); FREEMEMORY(parti->yparts); FREEMEMORY(parti->zparts);
+  FREEMEMORY(parti->tpart);  FREEMEMORY(parti->itpart);
   FREEMEMORY(parti->isprink);
-  FREEMEMORY(parti->sframe); 
+  FREEMEMORY(parti->sframe);
   FREEMEMORY(parti->bframe);
   FREEMEMORY(parti->sprframe)
 
@@ -1179,7 +1179,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     Update_Times();
     return;
   }
-  
+
   PRINTF("Sizing particle data: %s\n",file);
   file_unit=15;
   FORTget_file_unit(&file_unit,&file_unit);
@@ -1304,7 +1304,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     parti->xparts,parti->yparts,parti->zparts,
     parti->tpart,&parti->droplet_type,parti->isprink,
     tspr,parti->bframe,parti->sframe,parti->sprframe,parti->times,&nspr,&npartpoints,&npartframes,&parti->ntimes,
-    &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep, 
+    &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep,
     &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
     &offset_x, &offset_y, &offset_z, &redirect,
     &error,1);
@@ -1314,7 +1314,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     readpart("",ifile,UNLOAD,&error);
     return;
   }
-  
+
   nmax = parti->bframe[parti->ntimes-1]+parti->sframe[parti->ntimes-1];
   PRINTF("loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->ntimes);
 
@@ -1333,12 +1333,12 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   isprinkcopy=parti->isprink;
   for(n=skip_local;n<nmax;n++){
     if(*isprinkcopy==0&&parti->particle_type==0){
-      tcopy++; 
+      tcopy++;
       isprinkcopy++;
       continue;
     }
     if(*isprinkcopy==1&&parti->droplet_type==0){
-      tcopy++; 
+      tcopy++;
       isprinkcopy++;
       havesprinkpart=1;
       continue;
@@ -1348,7 +1348,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     if(*isprinkcopy==1){
       havesprinkpart=1;
     }
-    tcopy++; 
+    tcopy++;
     isprinkcopy++;
   }
   /* convert particle temperatures into integers pointing to an rgb color table */
@@ -1381,7 +1381,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
       return;
     }
   }
-  getPartColors(parti->tpart, skip_local, nmax, 
+  getPartColors(parti->tpart, skip_local, nmax,
     parti->itpart,parti->isprink,parti->particle_type,parti->droplet_type,
     &tmin_global, &tmax_global, nrgb, colorlabelpart, partscale,partlevels256);
   for(n=0;n<skip_local;n++){
@@ -1477,7 +1477,7 @@ int get_evacpart_color(float **color_handle,part5data *datacopy, int show_defaul
     }
     else{
       colorptr=rgb_full[color[j]];
-    } 
+    }
     if(current_property!=NULL&&(color[j]>current_property->imax||color[j]<current_property->imin))showcolor=0;
   }
   *color_handle=colorptr;
@@ -1572,12 +1572,12 @@ void drawPart5(const partdata *parti){
                 selected_avatar_angle = datacopy->avatar_angle[j];
               }
               glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
-                 
+
               az_angle=angle[j];
               glRotatef(az_angle,0.0,0.0,1.0);
 
               get_evacpart_color(&colorptr,datacopy,show_default,j,itype);
-              
+
               //  :W :D :H1 :SX :SY :SZ :R :G :B :HX :HY :HZ
               //  class color: rgbobject[0], rgbobject[1], rgbobject[2]
 
@@ -1589,7 +1589,7 @@ void drawPart5(const partdata *parti){
                 obj_frame=prop->smv_object->obj_frames[0];
                 evac_tokens = obj_frame->evac_tokens;
                 obj_frame->nevac_tokens=12;
-                
+
                 n=0;
 
                 evac_token=evac_tokens[n++];
@@ -1669,7 +1669,7 @@ void drawPart5(const partdata *parti){
           if(offset_terrain==0){
 
             // *** draw particles as points
-           
+
             if(datacopy->partclassbase->vis_type==PART_POINTS){
               glBegin(GL_POINTS);
               if(show_default==1){
@@ -1700,7 +1700,7 @@ void drawPart5(const partdata *parti){
                 float *colorptr;
 
                 if(vis[j]!=1)continue;
-                  
+
                 glPushMatrix();
                 glTranslatef(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
 
@@ -1726,7 +1726,7 @@ void drawPart5(const partdata *parti){
                 partfacedir[0]=xbar0+SCALE2SMV(world_eyepos[0])-xplts[sx[j]];
                 partfacedir[1]=ybar0+SCALE2SMV(world_eyepos[1])-yplts[sy[j]];
                 partfacedir[2]=zbar0+SCALE2SMV(world_eyepos[2])-zplts[sz[j]];
-                
+
                 draw_SVOBJECT(prop->smv_object,0,prop,0,NULL,0);
                 glPopMatrix();
               }
@@ -1870,7 +1870,7 @@ void drawPart5(const partdata *parti){
       glLineWidth(streaklinewidth);
       for(j=0;j<datacopy->npoints;j++){
         int tagval;
-        
+
         tagval=datacopy->tags[j];
         if(vis[j]==0)continue;
         glBegin(GL_LINE_STRIP);
@@ -1902,7 +1902,7 @@ void drawPart5(const partdata *parti){
         tagval=datacopy->tags[j];
         if(vis[j]==0)continue;
         if(get_evacpart_color(&colorptr,datacopy,show_default,j,itype)==0)continue;
-        
+
         glBegin(GL_LINE_STRIP);
         glColor4fv(colorptr);
         glVertex3f(xplts[sx[j]],yplts[sy[j]],zplts[sz[j]]);
@@ -1966,7 +1966,7 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
       dep_vals[ii]=1.0;
     }
   }
-  
+
   dep_vals[ndep_vals-3]=colorptr[0]*255;
   dep_vals[ndep_vals-2]=colorptr[1]*255;
   dep_vals[ndep_vals-1]=colorptr[2]*255;
@@ -2009,7 +2009,7 @@ void drawPart(const partdata *parti){
   particle_type = parti->particle_type;
 
   /* define the data locations to look at */
-  
+
     xpoints = parti->xparts + parti->bframe[ipframe];
     ypoints = parti->yparts + parti->bframe[ipframe];
     zpoints = parti->zparts + parti->bframe[ipframe];
@@ -2068,7 +2068,7 @@ void drawStaticPart(const partdata *parti){
   int n;
   int nsmokepoints, nsprpoints;
   int ipframe;
-  
+
   /* define the data locations to look at */
 
   if(parti->version!=0)return;
@@ -2102,7 +2102,7 @@ int tagscompare( const void *arg1, const void *arg2 ){
   if(i<j)return -1;
   if(i>j)return 1;
   return 0;
-  
+
 }
 
 /* ------------------ partcompare ------------------------ */
@@ -2113,7 +2113,7 @@ int partcompare( const void *arg1, const void *arg2 ){
 
   i = *(int *)arg1;
   j = *(int *)arg2;
-  
+
   parti = partinfo + i;
   partj = partinfo + j;
 
@@ -2173,6 +2173,6 @@ void updatepartmenulabels(void){
         if(nmeshes>1||lenlabel>0)STRCAT(parti->menulabel,", ");
         STRCAT(parti->menulabel,parti->file);
       }
-    } 
+    }
   }
 }

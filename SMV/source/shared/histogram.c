@@ -150,7 +150,7 @@ void update_histogram(float *vals, int nvals, histogramdata *histogram_to){
 /* ------------------ merge_histogram ------------------------ */
 
 void merge_histogram(histogramdata *histogram_to, histogramdata *histogram_from){
-  
+
   // merge histogram histogram_from into histogram_to
 
   int i;
@@ -268,7 +268,7 @@ void get_2dminmax(float *uvals, float *vvals, int nvals, float *rmin, float *rma
   }
   for(i = 0; i < nvals; i++){
     float u, v, r;
-    
+
     u = uvals[i];
     v = vvals[i];
     r = sqrt(u*u + v*v);

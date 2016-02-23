@@ -92,11 +92,11 @@ void *convert_parts2iso(void *arg){
   int *thread_index;
 
   thread_index=(int *)arg;
-  
+
   LOCK_PART2ISO;
   if(GLOBfirst_part2iso==1){
     GLOBfirst_part2iso=0;
-  
+
     if(GLOBcleanfiles==1){
       FILE *stream;
       int j;
@@ -119,7 +119,7 @@ void *convert_parts2iso(void *arg){
           part5prop *propi;
           flowlabels *labels;
           char isofilename[1024];
-      
+
           propi = part5propinfo + i;
           labels = &propi->label;
           strcpy(isofilename,parti->file);
@@ -227,13 +227,13 @@ void convert_part(part *parti, int *thread_index){
 
 
 
-  //*** ZLIB format (C - no extra bytes surrounding data) 
+  //*** ZLIB format (C - no extra bytes surrounding data)
 
   //*** header
   // endian
   // completion (0/1)
   // fileversion (compressed particle file format version)
-  // fds version 
+  // fds version
   // compression level
   // global min max (used to perform conversion)
   // nclasses
@@ -442,7 +442,7 @@ void convert_part(part *parti, int *thread_index){
         part5prop *propi;
         int cval,kk;
         float denom;
-          
+
         propi=getpartprop(classi->labels[k].shortlabel);
         denom=propi->valmax-propi->valmin;
         if(denom<=0.0)denom=1.0;
@@ -621,7 +621,7 @@ void Get_Part_Bounds(void){
         vals = z + npoints[j];
         for(k=0;k<nquantities[j];k++){
           part5prop *propi;
-          
+
           propi=getpartprop(classj->labels[k].shortlabel);
           update_histogram(vals,npoints[j],propi->histogram);
 
@@ -632,7 +632,7 @@ void Get_Part_Bounds(void){
 
     FREEMEMORY(nquantities);
     FREEMEMORY(npoints);
-     
+
     LOCK_COMPRESS;
     FORTclosefortranfile(&unit);
     UNLOCK_COMPRESS;
@@ -744,7 +744,7 @@ void part2iso(part *parti, int *thread_index){
   xmin = partmesh->xbar0-partmesh->dx;
   ymin = partmesh->ybar0-partmesh->dy;
   zmin = partmesh->zbar0-partmesh->dz;
-  
+
   xpltcell = partmesh->xpltcell;
   ypltcell = partmesh->ypltcell;
   zpltcell = partmesh->zpltcell;
@@ -810,7 +810,7 @@ void part2iso(part *parti, int *thread_index){
   fprintf(SMVISOFILE,"ISOF %i\n",blocknumber);
   fprintf(SMVISOFILE," %s\n",isofile);
   fprintf(SMVISOFILE," %s\n",isolonglabel);
-  
+
   fprintf(SMVISOFILE," %s\n",isoshortlabel);
   fprintf(SMVISOFILE," %s\n",isounits);
   fprintf(SMVISOFILE,"\n");
@@ -921,7 +921,7 @@ void part2iso(part *parti, int *thread_index){
       }
       for(k=0;k<nquantities[j];k++){
         part5prop *propi;
-          
+
         propi=part5propinfo_copy+getpartprop_index(classj->labels[k].shortlabel);
 
         for(i=0;i<npoints[j];i++){
@@ -968,7 +968,7 @@ void part2iso(part *parti, int *thread_index){
     }
 
     NewMemory((void **)&summaries,nconv*sizeof(char *));
-    
+
     lenfile=strlen(isofile);
     NewMemory((void **)&summaries[0],lenfile+1);
     strcpy(summaries[0],isofile);

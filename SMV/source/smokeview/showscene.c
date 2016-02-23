@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -158,7 +158,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_devices();
 #ifdef pp_PILOT
     draw_pilot();
-#endif    
+#endif
     SNIFF_ERRORS("after draw_devices");
 
     if(visaxislabels==1){
@@ -280,7 +280,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   }
 
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
-  
+
   if(show_parallax==1){
     UNCLIP;
     antialias(ON);
@@ -300,7 +300,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   SNIFF_ERRORS("drawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
-  
+
   if(ngeominfoptrs>0){
     CLIP_GEOMETRY;
     draw_geom(DRAW_OPAQUE,GEOM_STATIC);
@@ -315,7 +315,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_geomdiag();
     SNIFF_ERRORS("draw_geomdiag");
   }
-  
+
   /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
   if(showshooter!=0&&shooter_active==1){
@@ -328,7 +328,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(visTerrainType!=TERRAIN_HIDDEN&&nterraininfo>0){
     int i;
-    
+
     //shaded 17 0
     //stepped 18 1
     //line    19 2
@@ -391,7 +391,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==0)){
     CLIP_VALS;
     drawslice_frame();
-  } 
+  }
 
   /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
@@ -445,7 +445,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 //**********************************************************************************
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
-  
+
   if(ngeominfoptrs>0){
     CLIP_GEOMETRY;
     draw_geom(DRAW_TRANSPARENT,GEOM_STATIC);
@@ -489,14 +489,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     CLIP_VALS;
     drawpatch_frame(DRAW_TRANSPARENT);
   }
-  
+
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
     CLIP_VALS;
     drawslice_frame();
     SNIFF_ERRORS("after drawslice_frame");
-  } 
+  }
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 

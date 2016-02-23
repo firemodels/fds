@@ -14,7 +14,7 @@ int getendian(void){
 
 /* ------------------ float_switch ------------------------ */
 
-float float_switch(float val){ 
+float float_switch(float val){
   float *val2ptr;
   unsigned char *buffer;
   unsigned char buffer2[4];
@@ -33,7 +33,7 @@ float float_switch(float val){
 
 /* ------------------ int_switch ------------------------ */
 
-int int_switch(int val){ 
+int int_switch(int val){
   int *val2ptr;
   unsigned char *buffer;
   unsigned char buffer2[4];

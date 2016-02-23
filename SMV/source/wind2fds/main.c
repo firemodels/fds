@@ -265,7 +265,7 @@ int main(int argc, char **argv){
 
   buffer_len=getrowcols(stream_in, &nrows, &ncols);
   buffer_len+=10;
-  
+
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&labels,buffer_len);
   NewMemory((void **)&labelptrs,buffer_len*sizeof(char *));
@@ -292,7 +292,7 @@ int main(int argc, char **argv){
       return 1;
     }
   }
-  
+
   nlabelptrs=gettokens(labels,labelptrs);
   ntransfer=0;
   for(i=0;i<nlabelptrs;i++){

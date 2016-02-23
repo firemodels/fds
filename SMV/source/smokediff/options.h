@@ -12,11 +12,11 @@
 #endif
 
 #ifdef pp_INTEL
-#pragma warning (disable:4996)		
-#pragma warning (disable:4701)		
-#pragma warning (disable:4310)		
-#pragma warning (disable:4127)		
-#pragma warning (disable:4244)		
+#pragma warning (disable:4996)
+#pragma warning (disable:4701)
+#pragma warning (disable:4310)
+#pragma warning (disable:4127)
+#pragma warning (disable:4244)
 #pragma warning (disable:1478)
 #pragma warning (disable:1786)
 

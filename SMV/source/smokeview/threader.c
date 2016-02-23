@@ -55,7 +55,7 @@ void init_multi_threading(void){
 #endif
 }
 
-// *************** multi-threaded compression **************** 
+// *************** multi-threaded compression ****************
 
 #ifdef pp_THREAD
  /* ------------------ mt_compress_svzip ------------------------ */

@@ -59,7 +59,7 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
   factor[0]=1;
   factor[1]=1;
   factor[2]=1;
-  
+
   if(ABS( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;

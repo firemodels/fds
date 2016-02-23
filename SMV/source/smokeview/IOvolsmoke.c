@@ -1,6 +1,6 @@
 #include "options.h"
 #include "glew.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -291,7 +291,7 @@ void init_volrender(void){
     shortlabel = slicei->label.shortlabel;
     longlabel = slicei->label.longlabel;
 
-    if(STRCMP(shortlabel,"temp")==0){  
+    if(STRCMP(shortlabel,"temp")==0){
       vr->fireslice=slicei;
      continue;
     }
@@ -553,7 +553,7 @@ void compute_all_smokecolors(void){
     int iwall;
     float dstep;
     float dx, dy, dz;
-    float *x, *y, *z; 
+    float *x, *y, *z;
     int ibar, jbar, kbar;
     float *smokecolor;
 
@@ -571,7 +571,7 @@ void compute_all_smokecolors(void){
     dy = y[1] - y[0];
     dz = z[1] - z[0];
     dstep = sqrt(dx*dx+dy*dy+dz*dz)/2.0;
-    
+
     if(vr->smokeslice==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
       float *xyz,xyzarray[3];
@@ -1287,7 +1287,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, smokedata_local);
 
-  if(firedata_local!=NULL){  
+  if(firedata_local!=NULL){
     glActiveTexture(GL_TEXTURE1);
     glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, firedata_local);
   }
@@ -1406,7 +1406,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   glUniform1f(GPUvol_temperature_max,temperature_max);
   glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
- 
+
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
@@ -1428,7 +1428,7 @@ void drawsmoke3dGPUVOL(void){
 
     // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
     // define parameters for smoke drawing
-    
+
     if(iwall<0){
       xx = meshi->x0;
       yy = meshi->y0;
@@ -1466,8 +1466,8 @@ void drawsmoke3dGPUVOL(void){
     }
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-    
+
+
     if(newmesh==1){
       glUniform1i(GPUvol_inside,inside);
       if(combine_meshes==1){
@@ -2062,7 +2062,7 @@ void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
 void *read_volsmoke_allframes_allmeshes2(void *arg){
   int i;
   int nframes=0;
-  
+
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -2197,8 +2197,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2215,8 +2215,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2310,8 +2310,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2328,8 +2328,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2368,7 +2368,7 @@ mesh *get_minmesh(void){
   int i;
   float mindist=-1.0;
   mesh *minmesh=NULL;
-  
+
   // find mesh closes to origin that is not already in a supermesh
 
   for(i=0;i<nmeshes;i++){
@@ -2576,7 +2576,7 @@ void init_supermesh(void){
     }
 
     // determine if a mesh side is exterior to a supermesh
-    
+
     for(i=0;i<smesh->nmeshes;i++){
       mesh *meshi;
       int *extsides;

@@ -1,6 +1,6 @@
 #define IN_STRING_UTIL
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -208,7 +208,7 @@ char *randstr(char* str, int length){
 
 void trim_commas(char *line){
   char *c;
-  
+
   for(c = line + strlen(line) - 1;c>=line;c--){
     if(isspace(*c))continue;
     if(strncmp(c,",",1)!=0)break;
@@ -219,7 +219,7 @@ void trim_commas(char *line){
 /* ------------------ trim ------------------------ */
 
 void trim_back(char *line){
-  
+
   //  removes trailing white space from the character string line
 
   char *c;
@@ -343,7 +343,7 @@ void num2string(char *string, float tval,float range){
   float tval2,mant10;
   int exp10;
 
-  tval2=ABS(tval); 
+  tval2=ABS(tval);
   if(0.01-.001<=tval2&&tval2<0.1){
     sprintf(string,"%3.2f",tval);
   }
@@ -510,7 +510,7 @@ float frexp10(float x, int *exp10){
   }
   mantissa = log10((double)xabs);
   *exp10 = (int)floor((double)mantissa);
-      
+
   mantissa = pow((double)10.0f,(double)mantissa-(double)*exp10);
   if(x<0)mantissa = -mantissa;
   return mantissa;
@@ -604,7 +604,7 @@ int match_wild(char *pTameText, char *pWildText){
 //Matching Wildcards: An Algorithm
 //by Kirk J. Krauss
 // http://drdobbs.com/windows/210200888
-// (modified from original by setting bCaseSensitive and cAltTerminator in the 
+// (modified from original by setting bCaseSensitive and cAltTerminator in the
 //  body of the routine and changing routine name to match_wild, also changed
 //  formatting to be consistent with smokeview coding style)
 
@@ -674,7 +674,7 @@ int match_wild(char *pTameText, char *pWildText){
       }
     }
     pTameText++;
-    pWildText++; 
+    pWildText++;
   }
   return bMatch;
 }

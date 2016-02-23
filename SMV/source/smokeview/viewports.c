@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -79,24 +79,24 @@ void get_viewport_info(void){
   doit=0;
   if(visMeshlabel==1){
     ninfo_lines++;
-    doit=1;  
+    doit=1;
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
 
@@ -198,7 +198,7 @@ void get_viewport_info(void){
   VP_scene.left=titlesafe_offset;
   VP_scene.down=titlesafe_offset+MAX(VP_timebar.height,VP_info.height);
   VP_scene.width=screenWidth-2*titlesafe_offset-VP_colorbar.width;
-  VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset; 
+  VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset;
   VP_scene.right = VP_scene.left + VP_scene.width;
   VP_scene.top = VP_scene.down + VP_scene.height;
 
@@ -212,13 +212,13 @@ void get_viewport_info(void){
 }
 
  /* ------------------------ SUB_portortho ------------------------- */
- 
-int SUB_portortho(int quad, 
+
+int SUB_portortho(int quad,
                   portdata *p,
                    GLdouble portx_left, GLdouble portx_right, GLdouble portx_down, GLdouble portx_top,
                    GLint screen_left, GLint screen_down
                    ){
-  
+
   GLint subport_left, subport_right, subport_down, subport_top;
   GLdouble subportx_left, subportx_right, subportx_down, subportx_top;
   GLsizei subport_width, subport_height;
@@ -228,7 +228,7 @@ int SUB_portortho(int quad,
   int irow, icol;
 
   switch(quad){
-  case 0:            
+  case 0:
     port_pixel_width = p->width;
     port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
@@ -288,7 +288,7 @@ int SUB_portortho(int quad,
 
 /* ------------------------ SUB_portortho2 ------------------------- */
 
-int SUB_portortho2(int quad, 
+int SUB_portortho2(int quad,
                   portdata *p,
                   GLint screen_left, GLint screen_down
                   ){
@@ -307,7 +307,7 @@ int SUB_portortho2(int quad,
   portx_down = p->down;
   portx_top = p->down + p->height;
   switch(quad){
-  case 0:            
+  case 0:
     port_pixel_width = p->width;
     port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
@@ -365,10 +365,10 @@ int SUB_portortho2(int quad,
 }
 
 /* ------------------------ SUB_portfrustum ------------------------- */
- 
-int SUB_portfrustum(int quad, 
+
+int SUB_portfrustum(int quad,
                    portdata *p,
-                   GLdouble portx_left, GLdouble portx_right, 
+                   GLdouble portx_left, GLdouble portx_right,
                    GLdouble portx_down, GLdouble portx_top,
                    GLdouble portx_near, GLdouble portx_far,
                    GLint screen_left, GLint screen_down
@@ -541,7 +541,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -571,7 +571,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -601,7 +601,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -832,7 +832,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
-  
+
   FrustumAsymmetry=0.0;
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
@@ -861,7 +861,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fright = widthdiv2;
   fup = scene_aspect_ratio*widthdiv2;
   fdown = -scene_aspect_ratio*widthdiv2;
-  
+
   if(showstereo==STEREO_NONE||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
     FrustumAsymmetry=0.0;
@@ -916,7 +916,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 
     elevation = camera_current->az_elev[1];
     azimuth = camera_current->az_elev[0];
-    
+
     /* set view direction for virtual tour */
     {
       tourdata *touri;
@@ -952,7 +952,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     getinverse(modelview_setup,inverse_modelview_setup);
 
     glMultMatrixf(modelview_identity);
-    
+
     glTranslatef(xcen,ycen,zcen);
 
     // rotate scene

@@ -6,7 +6,7 @@
   procinfo[nprocinfo].rollout = proc; \
   procinfo[nprocinfo].rollout_id = proc_id; \
   nprocinfo++
-#endif  
+#endif
 
 #define ONEORZERO(val) if(val!=0)val=1
 
@@ -132,11 +132,11 @@
 #endif
 
 #ifndef MAXDIFF2
-#define MAXDIFF2(x,y) MAX(ABS(x[0]-y[0]),ABS(x[1]-y[1]))  
+#define MAXDIFF2(x,y) MAX(ABS(x[0]-y[0]),ABS(x[1]-y[1]))
 #endif
 
 #ifndef MAXDIFF3
-#define MAXDIFF3(x,y) MAX(  MAXDIFF2(x,y),ABS(x[2]-y[2])  )  
+#define MAXDIFF3(x,y) MAX(  MAXDIFF2(x,y),ABS(x[2]-y[2])  )
 #endif
 
 #ifndef NORM3

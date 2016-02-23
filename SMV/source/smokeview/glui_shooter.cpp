@@ -119,7 +119,7 @@ extern "C" void show_glui_shooter(void){
 
 /* ------------------ glui_shooter_setup ------------------------ */
 
-extern "C" void glui_shooter_setup(int main_window){  
+extern "C" void glui_shooter_setup(int main_window){
 
   update_glui_shooter=0;
   if(glui_shooter!=NULL){

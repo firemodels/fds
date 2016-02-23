@@ -136,7 +136,7 @@ int convert_volslice(slice *slicei, int *thread_index){
     fwrite(&completion,4,1,slicestream);
   }
 
-  
+
   {
     int ni, nj, nk;
 
@@ -192,7 +192,7 @@ int convert_volslice(slice *slicei, int *thread_index){
 #ifndef pp_THREAD
       count++;
 #endif
-   
+
       data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
@@ -225,7 +225,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   {
     int completion=1;
 
-    FSEEK(slicestream,4,SEEK_SET);    
+    FSEEK(slicestream,4,SEEK_SET);
     fwrite(&completion,4,1,slicestream);
   }
   fclose(SLICEFILE);
@@ -447,7 +447,7 @@ int convert_slice(slice *slicei, int *thread_index){
   valmax=slicei->valmax;
   denom = valmax-valmin;
   if(denom==0.0)denom=1.0;
-  
+
   chop_min=0;
   chop_max=255;
   if(GLOBno_chop==0){
@@ -486,7 +486,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
 
 
-  //*** ZLIB format (C - no extra bytes surrounding data) 
+  //*** ZLIB format (C - no extra bytes surrounding data)
 
   //*** header
   // endian
@@ -500,13 +500,13 @@ int convert_slice(slice *slicei, int *thread_index){
   //*** frame
   // time, compressed frame size                        for each frame
   // compressed buffer
-  
+
 
   //*** RLE format (FORTRAN)
 
   //*** header
   // endian
-  // fileversion, slice version 
+  // fileversion, slice version
   // global min max (used to perform conversion)
   // i1,i2,j1,j2,k1,k2
 
@@ -526,7 +526,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
   FORTSLICEREAD(ijkbar,6);
   sizebefore+=8+6*4;
-  
+
   framesize =  (ijkbar[1]+1-ijkbar[0]);
   framesize *= (ijkbar[3]+1-ijkbar[2]);
   framesize *= (ijkbar[5]+1-ijkbar[4]);
@@ -594,7 +594,7 @@ int convert_slice(slice *slicei, int *thread_index){
 #ifndef pp_THREAD
       count++;
 #endif
-   
+
       data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
@@ -892,7 +892,7 @@ void update_slice_hist(void){
     PRINTF("  Examining %s\n",slicei->file);
 
     lenfile=strlen(slicei->file);
-    
+
     LOCK_COMPRESS;
     FORTget_file_unit(&unit1,&slicei->unit_start);
     FORTopenslice(slicei->file,&unit1,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
@@ -907,7 +907,7 @@ void update_slice_hist(void){
       update_histogram(sliceframe,sliceframesize,slicei->histogram);
     }
     FREEMEMORY(sliceframe);
-    
+
     LOCK_COMPRESS;
     FORTclosefortranfile(&unit1);
     UNLOCK_COMPRESS;

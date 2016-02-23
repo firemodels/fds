@@ -41,7 +41,7 @@ int main(int argc, char **argv){
   NewMemory((void **)&caseinfo,2*sizeof(casedata));
 
 
- // check_histogram();  
+ // check_histogram();
   test_mode=0;
   sourcedir1=NULL;
   sourcedir2=NULL;
@@ -148,10 +148,10 @@ int main(int argc, char **argv){
     strcat(smv1_out,smv1);
     strcat(smv1_out,".smv");
     fullfile(smoke1a,sourcedir1,smv1);
-    
+
     strcpy(fed_smoke1,smoke1a);
     strcat(fed_smoke1,".fed_smv");
-    
+
     strcpy(smoke1b,smoke1a);
     strcat(smoke1b,".smvtmp");
 
@@ -166,10 +166,10 @@ int main(int argc, char **argv){
   }
   if(smv2!=NULL){
     fullfile(smoke2a,sourcedir2,smv2);
-    
+
     strcpy(fed_smoke2,smoke2a);
     strcat(fed_smoke2,".fed_smv");
-    
+
     strcpy(smoke2b,smoke2a);
     strcat(smoke2b,".smvtmp");
     strcat(smoke2a,".smv");
@@ -273,7 +273,7 @@ void usage(void){
 
   PRINTF("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
   PRINTF("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");
-  PRINTF("  and boundary files are supported.  Differenced results may be viewed by opening\n"); 
+  PRINTF("  and boundary files are supported.  Differenced results may be viewed by opening\n");
   PRINTF("  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
 
   PRINTF("  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");

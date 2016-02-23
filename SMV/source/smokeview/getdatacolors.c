@@ -11,7 +11,7 @@
 
 /* ------------------ getBoundaryColors ------------------------ */
 
-void getBoundaryColors(float *t, int nt, unsigned char *it, 
+void getBoundaryColors(float *t, int nt, unsigned char *it,
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_arg, float *tmax_arg,
               int ndatalevel, int nlevel,
@@ -27,7 +27,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
   tmin2 = *t;
   tmax2 = *t;
-    
+
   STRCPY(scale,"");
   tcopy = t+1;
   for(n=1;n<nt;n++){
@@ -106,7 +106,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
 
 /* ------------------ getBoundaryColors2 ------------------------ */
 
-void getBoundaryColors2(float *t, int nt, unsigned char *it, 
+void getBoundaryColors2(float *t, int nt, unsigned char *it,
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_arg, float *tmax_arg,
               int ndatalevel,
@@ -120,7 +120,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
   tmin2 = *t;
   tmax2 = *t;
-    
+
   tcopy = t+1;
   for(n=1;n<nt;n++){
     if(*tcopy<tmin2)tmin2=*tcopy;
@@ -242,7 +242,7 @@ void update_patch_bounds(patchdata *patchi){
 
 /* ------------------ getBoundaryColors3 ------------------------ */
 
-void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it, 
+void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
               int settmin, float *ttmin, int settmax, float *ttmax,
               float *tmin_arg, float *tmax_arg,
               int nlevel,
@@ -361,8 +361,8 @@ void UpdateAllPatchColors(void){
 
     npatchvals = meshi->npatch_times*meshi->npatchsize;
 
-    getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval, 
-    setpatchmin,&patchmin, setpatchmax,&patchmax, 
+    getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval,
+    setpatchmin,&patchmin, setpatchmax,&patchmax,
     &patchmin_global, &patchmax_global,
     nrgb, colorlabelpatch,patchi->scale,boundarylevels256,
     &patchi->extreme_min,&patchi->extreme_max);
@@ -680,8 +680,8 @@ void getPart5Colors(partdata *parti, int nlevel){
 }
 /* ------------------ getPartColors ------------------------ */
 
-void getPartColors(const float *t, int local_skip, int nt, 
-                   unsigned char *it,const unsigned char *isprink, int particle_type, int droplet_type, 
+void getPartColors(const float *t, int local_skip, int nt,
+                   unsigned char *it,const unsigned char *isprink, int particle_type, int droplet_type,
               const float *ttmin, const float *ttmax, int nlevel,
               char **labels, char *scale, float *ppartlevels256){
   int n;
@@ -904,7 +904,7 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 /* ------------------ getPlot3DColors ------------------------ */
 
-void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax, 
+void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax,
               int ndatalevel, int nlevel,
               char **labels,char **labelsiso,char **scale, float *fscale, float *tlevels, float *tlevels256,
               int *extreme_min, int *extreme_max
@@ -1083,7 +1083,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
 /* ------------------ getSliceColors ------------------------ */
 
 void getSliceColors(const float *t, int nt, unsigned char *it,
-              float local_tmin, float local_tmax, 
+              float local_tmin, float local_tmax,
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *fscale, float *tlevels256,
               int *extreme_min, int *extreme_max
@@ -1359,7 +1359,7 @@ void initrgb(void){
         rgb[n][2] = rgb_ini[n*3+2];
         rgb[n][3] = transparent_level_local;
       }
-    }   
+    }
     else{
       for(n=0;n<nrgb;n++){
         rgb[n][0] = rgb_base[n][0];
@@ -1391,7 +1391,7 @@ void Update_Smokecolormap(int option){
   int icut;
   float *rgb_colormap;
   int have_fire;
-  
+
   have_fire = HaveFire();
   if(option==RENDER_SLICE){
     valmin=global_hrrpuv_min;
@@ -1407,7 +1407,7 @@ void Update_Smokecolormap(int option){
   }
   icut = (MAXSMOKERGB-1)*((valcut-valmin)/(valmax-valmin));
   icut = CLAMP(icut,2,(MAXSMOKERGB-3));
-  
+
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
   alpha = colorbarinfo[colorbartype].alpha;
@@ -1529,7 +1529,7 @@ void UpdateRGBColors(int colorbar_index){
       rgb_full[n][1]=(float)n/(float)(nrgb_full);
       rgb_full[n][2]=(float)n/(float)(nrgb_full);
       rgb_full[n][3]=transparent_level_local;
-    } 
+    }
   }
   if(contour_type==LINE_CONTOURS){
     for(n=0;n<nrgb_full;n++){
@@ -1538,7 +1538,7 @@ void UpdateRGBColors(int colorbar_index){
     }
     for(n=0;n<11;n++){
       int nnm1,nnp0,nnp1;
-        
+
       if(n==0){
         nnp0=1;
       }
@@ -1697,14 +1697,14 @@ void UpdateRGBColors(int colorbar_index){
   updatechopcolors();
   initcadcolors();
   Update_Texturebar();
-}        
+}
 
 /* ------------------ updatechopcolors ------------------------ */
 
 void updatechopcolors(void){
   int i;
   int ichopmin=0,ichopmax=nrgb_full;
-#define NCHOP 8  
+#define NCHOP 8
   int ii;
   float transparent_level_local=1.0;
 
@@ -1806,7 +1806,7 @@ void updatechopcolors(void){
 
     smin=slicebounds[islicetype].valmin;
     smax=slicebounds[islicetype].valmax;
- 
+
     if(setslicechopmin==1){
       ichopmin=nrgb_full*(slicechopmin-smin)/(smax-smin);
       if(ichopmin<0)ichopmin=0;
@@ -1869,7 +1869,7 @@ void updatechopcolors(void){
         if(ii>NCHOP-1)continue;
         rgb_part[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
-    } 
+    }
   }
   if(p3max_temp>p3min_temp){
     if(setp3chopmin_temp==1){
@@ -1901,7 +1901,7 @@ void updatechopcolors(void){
         if(ii>NCHOP-1)continue;
         rgb_plot3d[4*i+3]=transparent_level_local*(float)ii/(float)(NCHOP-1);
       }
-    } 
+    }
   }
   for(i=0;i<npartinfo;i++){
     partdata *parti;
