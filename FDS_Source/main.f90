@@ -431,7 +431,7 @@ ENDIF
 ! This ends the initialization part of the program
 
 INITIALIZATION_PHASE = .FALSE.
- 
+
 !***********************************************************************************************************************************
 !                                                   MAIN TIMESTEPPING LOOP
 !***********************************************************************************************************************************
@@ -521,7 +521,7 @@ MAIN_LOOP: DO
          IF (PROCESS(1)==MYID) CALL HVAC_CALC(T,DT,FIRST_PASS)
          IF (N_MPI_PROCESSES>1) CALL EXCHANGE_HVAC_SOLUTION
       ENDIF
-   
+
       ! Boundary conditions for temperature, species, and density. Start divergence calculation.
 
       COMPUTE_WALL_BC_LOOP_A: DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -559,7 +559,7 @@ MAIN_LOOP: DO
          CALL VELOCITY_PREDICTOR(T+DT,DT,DT_NEW,NM)
       ENDDO PREDICT_VELOCITY_LOOP
 
-      ! Check if there is a numerical instability after updating the velocity field. If there is, exit this loop, finish the time 
+      ! Check if there is a numerical instability after updating the velocity field. If there is, exit this loop, finish the time
       ! step, and stop the code.
 
       CALL STOP_CHECK(0)
@@ -573,9 +573,9 @@ MAIN_LOOP: DO
       ! needs to decrease, or all need to increase, exchange the array of new time step values, DT_NEW.
 
       IF (N_MPI_PROCESSES>1) THEN
-         CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_INTEGER,CHANGE_TIME_STEP_INDEX,COUNTS,DISPLS,& 
+         CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_INTEGER,CHANGE_TIME_STEP_INDEX,COUNTS,DISPLS,&
                              MPI_INTEGER,MPI_COMM_WORLD,IERR)
-         IF (ANY(CHANGE_TIME_STEP_INDEX==-1) .OR. ALL(CHANGE_TIME_STEP_INDEX==1)) &    
+         IF (ANY(CHANGE_TIME_STEP_INDEX==-1) .OR. ALL(CHANGE_TIME_STEP_INDEX==1)) &
             CALL MPI_ALLGATHERV(MPI_IN_PLACE,COUNTS(MYID),MPI_DOUBLE_PRECISION,DT_NEW,COUNTS,DISPLS, &
                                 MPI_DOUBLE_PRECISION,MPI_COMM_WORLD,IERR)
       ENDIF
