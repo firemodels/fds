@@ -12,7 +12,7 @@ size=_64
 # define run directories
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
-HISTORY_DIR="$FIREBOT_RUNDIR/history"
+HISTORY_DIR="~/.firebot/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -181,7 +181,7 @@ MKDIR ()
   if [ ! -d $DIR ]
   then
     echo Creating directory $DIR
-    mkdir $DIR
+    mkdir -p $DIR
   fi
 }
 
@@ -960,7 +960,7 @@ make_validation_git_stats()
 generate_timing_stats()
 {
    cd $fdsrepo/Utilities/Scripts
-   ./fds_timing_stats.sh
+   ./fds_timing_stats.sh > fds_timing_stats.csv
 }
 
 archive_timing_stats()
