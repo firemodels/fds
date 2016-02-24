@@ -961,6 +961,7 @@ generate_timing_stats()
 {
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh > fds_timing_stats.csv
+   ./fds_timing_stats.sh firebot 1 > fds_benchmarktiming_stats.csv
 }
 
 archive_timing_stats()
@@ -968,6 +969,7 @@ archive_timing_stats()
    echo echo archiving timing stats
    cd $fdsrepo/Utilities/Scripts
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+   cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
 }
 
 #  ==================================
