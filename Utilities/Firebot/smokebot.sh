@@ -12,7 +12,7 @@ size=_64
 # define run directories
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
-HISTORY_DIR="$SMOKEBOT_RUNDIR/history"
+HISTORY_DIR="~/.smokebot/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -296,7 +296,7 @@ MKDIR ()
   if [ ! -d $DIR ]
   then
     echo Creating directory $DIR
-    mkdir $DIR
+    mkdir -p $DIR
   fi
 }
 
@@ -371,10 +371,17 @@ update_cfast()
    # Check to see if CFAST repository exists
    updateclean=
    echo "cfast repo"
+   IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
    # If yes, then update the CFAST repository and compile CFAST
    if [ -e "$cfastrepo" ] ; then
       if [ "$CLEANREPO" == "1" ]; then
         echo "   cleaning"
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $cfastrepo has uncommitted changes"
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -c (clean) option"
+          exit
+        fi
         clean_repo $cfastrepo
         updateclean="1"
       fi
@@ -382,6 +389,12 @@ update_cfast()
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
         echo "   updating"
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $cfastrepo has uncommitted changes."
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -u (update) option"
+          exit
+        fi
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0a
         git pull >> $OUTPUT_DIR/stage0a 2>&1
         updateclean="1"
@@ -437,6 +450,13 @@ clean_FDS_repo()
       if [ "$CLEANREPO" == "1" ]; then
         cd $fdsrepo
         echo "   cleaning"
+        IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $fdsrepo has uncommitted changes."
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -c (clean) option"
+          exit
+        fi
         clean_repo $fdsrepo/Verification
         clean_repo $fdsrepo/SMV
         clean_repo $fdsrepo/FDS_Source
@@ -454,7 +474,7 @@ clean_FDS_repo()
 do_FDS_checkout()
 {
    cd $fdsrepo
-
+ 
    CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
    if [[ "$BRANCH" != "" ]] ; then
      if [[ `git branch | grep $BRANCH` == "" ]] ; then 
@@ -471,6 +491,13 @@ do_FDS_checkout()
    fi
    if [ "$UPDATEREPO" == "1" ]; then
      echo "   updating"
+     IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
+     if [ "$IS_DIRTY" == "1" ]; then
+       echo "The repo $fdsrepo has uncommitted changes."
+       echo "Commit or revert these changes or re-run"
+       echo "smokebot without the -u (update) option"
+       exit
+     fi
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
      git pull >> $OUTPUT_DIR/stage0b 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage0b 2>&1
@@ -1124,14 +1151,14 @@ generate_timing_stats()
    scripts/GEOM_Cases.sh
 
    cd $fdsrepo/Utilities/Scripts
-   ./fds_timing_stats.sh smokebot
+   ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
 }
 
 archive_timing_stats()
 {
    echo "   archiving"
    cd $fdsrepo/Utilities/Scripts
-   cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+   cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
 #  ===================================
