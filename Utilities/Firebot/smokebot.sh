@@ -12,7 +12,7 @@ size=_64
 # define run directories
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
-HISTORY_DIR="$SMOKEBOT_RUNDIR/history"
+HISTORY_DIR="~/.smokebot/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -296,7 +296,7 @@ MKDIR ()
   if [ ! -d $DIR ]
   then
     echo Creating directory $DIR
-    mkdir $DIR
+    mkdir -p $DIR
   fi
 }
 
@@ -1151,14 +1151,14 @@ generate_timing_stats()
    scripts/GEOM_Cases.sh
 
    cd $fdsrepo/Utilities/Scripts
-   ./fds_timing_stats.sh smokebot
+   ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
 }
 
 archive_timing_stats()
 {
    echo "   archiving"
    cd $fdsrepo/Utilities/Scripts
-   cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+   cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
 }
 
 #  ===================================
