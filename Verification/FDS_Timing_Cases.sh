@@ -1,5 +1,11 @@
 #!/bin/bash
-
+# cpu times are summed for all cases below and report in ... .
+# cases should be representative of the kind of work
+# performed by FDS.  It also should be likely that these cases 
+# do not change. The idea is to reduce the peformance of FDS
+# down to one number - a Dow Jones average so to speak
+# These case below are a straw man
+ 
 $QFDS -t -o 1 -d Timing_Benchmarks openmp_test64a.fds
 $QFDS -t -o 2 -d Timing_Benchmarks openmp_test64b.fds
 $QFDS -t -o 3 -d Timing_Benchmarks openmp_test64c.fds
