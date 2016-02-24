@@ -347,9 +347,9 @@ clean_smokebot_history()
    MKDIR $SMOKEBOT_RUNDIR > /dev/null
    cd $SMOKEBOT_RUNDIR
    MKDIR guides > /dev/null
-   MKDIR history > /dev/null
-   MKDIR output > /dev/null
-   rm -rf output/* > /dev/null
+   MKDIR $HISTORY_DIR > /dev/null
+   MKDIR $OUTPUT_DIR > /dev/null
+   rm -rf $OUTPUT_DIR/* > /dev/null
    MKDIR $NEWGUIDE_DIR > /dev/null
    chmod 775 $NEWGUIDE_DIR
 }
@@ -1152,6 +1152,7 @@ generate_timing_stats()
 
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
+   ./fds_timing_stats.sh smokebot 1 > smv_benchmarktiming_stats.csv
 }
 
 archive_timing_stats()
@@ -1159,6 +1160,7 @@ archive_timing_stats()
    echo "   archiving"
    cd $fdsrepo/Utilities/Scripts
    cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+   cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
 }
 
 #  ===================================
