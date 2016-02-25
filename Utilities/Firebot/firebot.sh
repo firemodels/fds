@@ -1113,6 +1113,7 @@ email_build_status()
    if [ "$UPLOADGUIDES" == "1" ]; then
    echo "Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
    echo "Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
+   echo "Firebot Status   :  http://goo.gl/vgeRx5" >> $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
    fi
 
