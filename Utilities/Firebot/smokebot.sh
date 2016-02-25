@@ -1153,6 +1153,7 @@ generate_timing_stats()
 
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
+   cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot 1 > smv_benchmarktiming_stats.csv
 }
 
