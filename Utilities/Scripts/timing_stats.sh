@@ -1,6 +1,6 @@
 #!/bin/bash
 # this script assumes it is being run in Verification
-while getopts 'd:pot' OPTION
+while getopts 'd:po:t' OPTION
 do
 case $OPTION  in
   d)
@@ -10,7 +10,7 @@ case $OPTION  in
    dummy=1
    ;;
   o)
-   dummy=1
+   dummy="$OPTARG"
    ;;
   t)
    dummy=1

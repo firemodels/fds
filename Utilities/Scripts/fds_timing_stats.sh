@@ -45,4 +45,3 @@ echo $TOTAL_CPU_TIME >> $tmpout
 
 cat $tmpout
 rm $tmpout
-
