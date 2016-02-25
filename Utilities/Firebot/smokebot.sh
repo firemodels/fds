@@ -371,9 +371,10 @@ update_cfast()
    # Check to see if CFAST repository exists
    updateclean=
    echo "cfast repo"
-   IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
    # If yes, then update the CFAST repository and compile CFAST
    if [ -e "$cfastrepo" ] ; then
+      cd $cfastrepo
+      IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
       if [ "$CLEANREPO" == "1" ]; then
         echo "   cleaning"
         if [ "$IS_DIRTY" == "1" ]; then
@@ -1152,6 +1153,7 @@ generate_timing_stats()
 
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
+   cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh smokebot 1 > smv_benchmarktiming_stats.csv
 }
 
