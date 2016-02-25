@@ -961,6 +961,7 @@ generate_timing_stats()
 {
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh > fds_timing_stats.csv
+   cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh firebot 1 > fds_benchmarktiming_stats.csv
 }
 
