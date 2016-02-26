@@ -1,7 +1,8 @@
 #!/bin/bash
 CURDIR=`pwd`
-cd history
+historydir=~/.firebot/history
 listin=/tmp/list.in.$$
+cd $historydir
 ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 > $listin
 cat $listin | head -30 | \
              awk -F ';' '{cputime="Benchmark time: "$9" s";\
