@@ -12,8 +12,8 @@ size=_64
 # define run directories
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
-HISTORY_DIR="~/.firebot/history"
-TIME_HISTORY="~/.firebot/fds_times.csv"
+HISTORY_DIR="$HOME/.firebot/history"
+TIME_HISTORY="$HOME/.firebot/fds_times.csv"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
