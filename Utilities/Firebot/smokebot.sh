@@ -13,6 +13,7 @@ size=_64
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
 HISTORY_DIR="~/.smokebot/history"
+TIME_HISTORY="~/.smokebot/smv_times.csv"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -1163,6 +1164,14 @@ archive_timing_stats()
    cd $fdsrepo/Utilities/Scripts
    cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
    cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
+   TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
+  d=`date "+%j"`
+  h=`date "+%k"`
+  m=`date "+%M"`
+  s=`date "+%S"`
+  decdate=`echo "scale=5; $d + $h/24.0 + $m/(60*24) + $s/(3600*24)" | bc`
+  echo $decdate,$TOTAL_SMV_TIMES>>$TIME_HISTORY
+
 }
 
 #  ===================================
