@@ -304,6 +304,8 @@ $QFDS -d Species hrrpuv_reac_series.fds
 $QFDS -d Species hrrpuv_reac_soot.fds
 $QFDS -d Species hrrpuv_reac_arrhenius.fds
 $QFDS -d Species ramp_chi_r.fds
+$QFDS -d Species bcor_test_1.fds
+$QFDS -d Species bcor_test_2.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
