@@ -1,10 +1,10 @@
 #!/bin/bash
-repo=~/FDS-SMVgitweb
+gitwebrepo=~/FDS-SMVgitweb
 firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
 old=~/.firebot/old
 new=~/.firebot/new
-newpage=$firebotdir/history/newpage
-running=$firebotdir/firebot_running
+newpage=~/.firebot/newpage
+running=~/.fdssmvgit/bot_running
 curdir=`pwd`
 
 # don't update status page if firebot is running
@@ -23,7 +23,7 @@ fi
 ./status2html.sh >> $newpage
 ./status_pubbot.sh >> $newpage
 cp $new $old
-cd $repo
+cd $gitwebrepo
 git remote update
 git merge origin/gh-pages
 cp $newpage firebot_status.html
