@@ -32,12 +32,12 @@
 &INIT MASS_FRACTION(1)=0.06038, SPEC_ID(1)='PROPANE' /
 
 &REAC ID = 'R1',
-      FUEL = 'AIR1',
+      FUEL = 'PROPANE',
       SPEC_ID_NU = 'PROPANE','AIR1','PRODUCTS'
       NU=-1,-5,1 /
 
 &REAC ID = 'R2',
-      FUEL = 'AIR2',
+      FUEL = 'PROPANE',
       SPEC_ID_NU = 'PROPANE','AIR2','PRODUCTS'
       NU=-1,-5,1 /
 
