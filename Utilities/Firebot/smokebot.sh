@@ -12,8 +12,8 @@ size=_64
 # define run directories
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
-HISTORY_DIR="~/.smokebot/history"
-TIME_HISTORY="~/.smokebot/smv_times.csv"
+HISTORY_DIR="$HOME/.smokebot/history"
+TIME_HISTORY="$HOME/.smokebot/smv_times.csv"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
