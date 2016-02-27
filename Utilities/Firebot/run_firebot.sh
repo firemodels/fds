@@ -31,6 +31,7 @@ echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
 echo "-f - force firebot run"
+echo "-F - skip figure generation and build document stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 if [ "$EMAIL" != "" ]; then
@@ -60,6 +61,7 @@ UPLOADGUIDES=
 SSH=
 FORCE=
 SKIPMATLAB=
+SKIPFIGURES=
 while getopts 'b:cfhim:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
@@ -71,6 +73,9 @@ case $OPTION  in
    ;;
   f)
    FORCE=1
+   ;;
+  F)
+   SKIPFIGURES=-F
    ;;
   h)
    usage;
@@ -142,8 +147,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $reponame $EMAIL "$@"
+  echo ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 fi
 rm $running

@@ -16,21 +16,18 @@ echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time S
 export QFDS=$SVNROOT/Utilities/Scripts/timing_stats.sh
 export RUNCFAST=$SVNROOT/Utilities/Scripts/timing_stats.sh
 export RUNTFDS=$SVNROOT/Utilities/Scripts/timing_stats.sh
+if [[ "$TIMING" == "" ]]; then 
+  export save_benchmark=
+else
+  export save_benchmark="yes"
+fi
 cd $SVNROOT/Verification
 if [[ "$MODE" == "smokebot" ]]; then
-  if [[ "$TIMING" == "" ]]; then 
-    scripts/SMV_Cases.sh >> $tmpout
-    scripts/GEOM_Cases.sh >> $tmpout
-    scripts/WUI_Cases.sh >> $tmpout
-  else
-    scripts/SMV_Timing_Cases.sh >> $tmpout
-  fi
+  scripts/SMV_Cases.sh >> $tmpout
+  scripts/GEOM_Cases.sh >> $tmpout
+  scripts/WUI_Cases.sh >> $tmpout
 else
-  if [[ "$TIMING" == "" ]]; then 
   ./FDS_Cases.sh >> $tmpout
-  else
-  ./FDS_Timing_Cases.sh >> $tmpout
-  fi
 fi
 
 TOTAL_CPU_TIME=0.0
@@ -45,3 +42,4 @@ echo $TOTAL_CPU_TIME >> $tmpout
 
 cat $tmpout
 rm $tmpout
+export only_benchmark_times=
