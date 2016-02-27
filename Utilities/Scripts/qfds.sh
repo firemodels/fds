@@ -20,6 +20,7 @@ then
   echo "used).  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
+  echo " -A     - used by timing scripts"
   echo " -b     - use debug version of FDS"
   echo " -B     - location of background program"
   echo " -d dir - specify directory where the case is found [default: .]"
@@ -89,9 +90,12 @@ nosocket=
 
 # read in parameters from command line
 
-while getopts 'bB:cd:e:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
+while getopts 'AbB:cd:e:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
 do
 case $OPTION  in
+  A)
+   DUMMY=1
+   ;;
   b)
    use_debug=1
    ;;

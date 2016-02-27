@@ -1,8 +1,12 @@
 #!/bin/bash
 # this script assumes it is being run in Verification
-while getopts 'd:po:t' OPTION
+is_benchmark="no"
+while getopts 'Ad:po:t' OPTION
 do
 case $OPTION  in
+  A)
+   is_benchmark="yes"
+   ;;
   d)
    dir="$OPTARG"
    ;;
@@ -18,6 +22,15 @@ case $OPTION  in
 esac
 done
 shift $(($OPTIND-1))
+
+# if we are saving benchmark times and this is not a benchmark case then exit
+# otherwise save the times
+
+if [ "$save_benchmark" == "yes" ]; then
+  if [ "$is_benchmark" == "no" ]; then
+     exit
+  fi
+fi
 
 fdsfile=$1
 curdir=`pwd`
