@@ -7,7 +7,7 @@ RUNSCRIPT=
 ssffile=
 TIMEOPTION=
 
-while getopts 'd:fmt' OPTION
+while getopts 'Ad:fmt' OPTION
 do
 case $OPTION in
   d)
