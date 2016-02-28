@@ -60,6 +60,7 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo "-c - clean repo"
+echo "-F - skip figures and document building stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 echo "-m email_address "
@@ -77,7 +78,8 @@ UPLOADGUIDES=0
 GIT_REVISION=
 SSH=
 SKIPMATLAB=
-while getopts 'b:chim:q:r:sS:uUv:' OPTION
+SKIPFIGURES=
+while getopts 'b:cFhim:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -85,6 +87,9 @@ case $OPTION in
    ;;
   c)
    CLEANREPO=1
+   ;;
+  F)
+   SKIPFIGURES=1
    ;;
   h)
    usage;
@@ -973,7 +978,7 @@ archive_timing_stats()
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
    cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
    TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
-  d=`date "+%j"`
+  d=`echo $(($(date --utc --date "$1" +%s)/86400-16800))`
   h=`date "+%k"`
   m=`date "+%M"`
   s=`date "+%S"`
@@ -1228,9 +1233,11 @@ fi
 
 ### Stage 6 ###
 # Depends on successful SMV compile
-if [[ $stage3c_success ]] ; then
-   make_fds_pictures
-   check_fds_pictures
+if [[ "$SKIPFIGURES" == "" ]] ; then
+   if [[ $stage3c_success ]] ; then
+      make_fds_pictures
+      check_fds_pictures
+   fi
 fi
 
 if [ "$SKIPMATLAB" == "" ] ; then
@@ -1250,17 +1257,21 @@ if [ "$SKIPMATLAB" == "" ] ; then
      archive_validation_stats
      make_validation_git_stats
    fi
+fi
 
 ### Stage 7c ###
    generate_timing_stats
    archive_timing_stats
 
 ### Stage 8 ###
-   make_fds_user_guide
-   make_fds_verification_guide
-   make_fds_technical_guide
-   make_fds_validation_guide
-   make_fds_Config_management_plan
+if [ "$SKIPMATLAB" == "" ] ; then
+   if [ "$SKIPFIGURES" == "" ] ; then
+      make_fds_user_guide
+      make_fds_verification_guide
+      make_fds_technical_guide
+      make_fds_validation_guide
+      make_fds_Config_management_plan
+   fi
 fi
 
 ### Wrap up and report results ###
