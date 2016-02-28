@@ -62,7 +62,7 @@ SSH=
 FORCE=
 SKIPMATLAB=
 SKIPFIGURES=
-while getopts 'b:cfhim:q:nr:sS:uUv' OPTION
+while getopts 'b:cFfhim:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
