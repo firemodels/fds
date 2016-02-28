@@ -20,5 +20,5 @@ call %envfile%
 
 %svn_drive%
 cd %svn_root%\SMV\source
-git log --pretty=oneline --abbrev-commit --since=%smvdate% .>> %svn_root%\SMV\for_bundle\readme.html
+git log --pretty=oneline --abbrev-commit --since=%smvlogdate% .>> %svn_root%\SMV\for_bundle\readme.html
 pause
