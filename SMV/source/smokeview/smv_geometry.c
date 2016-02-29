@@ -406,6 +406,33 @@ void update_plotxyz_all(void){
       meshi->iplotz_all[j]=ival;
     }
   }
+  for(i = 0; i<nmeshes; i++){
+    mesh *meshi;
+    int ival;
+
+    meshi = meshinfo+i;
+    ival = closest_nodeindex(xbar/2.0, meshi->xplt, meshi->ibar+1, dxyz_min);
+    if(ival<0)continue;
+    iplotx_all = ival;
+  }
+  for(i = 0; i<nmeshes; i++){
+    mesh *meshi;
+    int ival;
+
+    meshi = meshinfo+i;
+    ival = closest_nodeindex(ybar/2.0, meshi->yplt, meshi->jbar+1, dxyz_min);
+    if(ival<0)continue;
+    iploty_all = ival;
+  }
+  for(i = 0; i<nmeshes; i++){
+    mesh *meshi;
+    int ival;
+
+    meshi = meshinfo+i;
+    ival = closest_nodeindex(zbar/2.0, meshi->zplt, meshi->kbar+1, dxyz_min);
+    if(ival<0)continue;
+    iplotz_all = ival;
+  }
 }
 
 #define MESHEPS 0.001
