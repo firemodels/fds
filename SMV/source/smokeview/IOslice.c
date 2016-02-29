@@ -2340,12 +2340,12 @@ void getsliceparams(void){
       xyz_min = sd->xyz_min;
       xyz_max = sd->xyz_max;
       if(sd->is_fed==0){
-        xyz_min[0] = xplt[sd->ijk_min[0]];
-        xyz_max[0] = xplt[sd->ijk_max[0]];
-        xyz_min[1] = yplt[sd->ijk_min[1]];
-        xyz_max[1] = yplt[sd->ijk_max[1]];
-        xyz_min[2] = zplt[sd->ijk_min[2]];
-        xyz_max[2] = zplt[sd->ijk_max[2]];
+        xyz_min[0] = sd->xmin;
+        xyz_max[0] = sd->xmax;
+        xyz_min[1] = sd->ymin;
+        xyz_max[1] = sd->ymax;
+        xyz_min[2] = sd->zmin;
+        xyz_max[2] = sd->zmax;
       }
       else{
         float *xyz_min2, *xyz_max2;
