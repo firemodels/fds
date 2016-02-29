@@ -17,18 +17,16 @@ fi
 ./status2html.sh  > $new
 if [ -e $old ]; then
   ndiff=`diff $old $new|wc -l`
-  if [ "$ndiff" == "0" ] ; then
-    EXIT="no"
-  else
+  if [ ! "$ndiff" == "0" ] ; then
     cp $new $old
+    EXIT="no"
   fi
 fi
 if [ -e $olddata ]; then
   ndiff=`diff $olddata $newdata|wc -l`
-  if [ "$ndiff" == "0" ] ; then
-     EXIT="no"
-  else
+  if [ ! "$ndiff" == "0" ] ; then
      cp $newdata $olddata
+     EXIT="no"
   fi
 fi
 if [ "$EXIT" == "yes" ]; then
