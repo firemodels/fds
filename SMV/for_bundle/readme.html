@@ -24,10 +24,11 @@
     comment
 
 -->
-<li>6.3.5 - (build: Git-r8-x-yyyyyyy) Feb zz, 2016</li>
+<li>6.3.5 - (build: Git-r8-x-yyyyyyy) March 1, 2016</li>
 <ol>
 <li>fix: fix vector slice reload problem
-<li>fix: check for NULL pointers when displaying PLOT3D files
+<li>fix: fix problem with setting/saving PLOT3D view planes
+<li>fix: fix PLOT3D load problem (check for NULL pointers when displaying PLOT3D files)
 <li>fix: fix parsing of the .ini parameter P3VIEW (used to control PLOT3D visibility characteristics)
 </ol>
 
@@ -94,7 +95,7 @@ for a specified mesh
 <li> usability: improve 3d smoke dialog box - make it easier to specify fire and smoke color
 <li> usability: add keyboard shortcut, ';', to flip colorbar
 <li> fix: fix problem with loading compressed boundary files
-<li> fix: fix problem with device/object dialog box displays - 
+<li> fix: fix problem with device/object dialog box displays -
      (<a href="https://github.com/firemodels/fds-smv/issues/2777">Issue 2777</a>)
 <li> fix: update web page urls to use github instead of google code
 </ol>
@@ -113,36 +114,36 @@ for a specified mesh
 <li>6.2.4 - (build: gee24231) July 2, 2015</li>
 
 <ol>
-<li>enhancement: implement the script keyword ISORENDERALL for rendering all frames of an isosurface 
+<li>enhancement: implement the script keyword ISORENDERALL for rendering all frames of an isosurface
 file one frame at a time
 <li>enhancement: improve isosurface visualization by averaging isosurface normal vectors at mesh boundaries
-<li>enhancement: allow geometry to be colored using shades of gray and data can be colored 
-with a regular (non b/w) colorbar, cleanup up the coloring menu and dialog box - 
+<li>enhancement: allow geometry to be colored using shades of gray and data can be colored
+with a regular (non b/w) colorbar, cleanup up the coloring menu and dialog box -
 (<a href="https://github.com/firemodels/fds-smv/issues/2386">Issue 2386</a>)
 
 <li>usability: add texture lighting, multiple lights, add ini parameters (Richard O'Konski)
 <li>usability: improve the isosurface color setting dialog box
 <li>usability: add widget for setting isosurface colors using names instead of color coordinates
-<li>usability: allocate memory used for isosurfaces more efficiently 
-(allocate triangles for all points in a time step with one allocation rather 
+<li>usability: allocate memory used for isosurfaces more efficiently
+(allocate triangles for all points in a time step with one allocation rather
 than one allocation per point)
-<li>usability: add widgets to set isosurface transparency for each isosurface level independently 
+<li>usability: add widgets to set isosurface transparency for each isosurface level independently
 (just like colors)
 <li>usability: improve isosurface file loading efficiency for large cases
 <li>usabliity: increase permitted frame skip to 1000
 
 <li>fix: fix problem with windows build of wind2fds
-<li>fix: fix problems with skipping frames when rendering in a script - 
+<li>fix: fix problems with skipping frames when rendering in a script -
 (<a href="https://github.com/firemodels/fds-smv/issues/2416">Issue 2416</a>)
-<li>fix: correct logic for offsetting slice files above terrain - 
+<li>fix: correct logic for offsetting slice files above terrain -
 (<a href="https://github.com/firemodels/fds-smv/issues/2377">Issue 2377</a>)
-<li>fix: trap a division by zero that occurs when there are no meshes such as in a cfast case - 
+<li>fix: trap a division by zero that occurs when there are no meshes such as in a cfast case -
 (<a href="https://github.com/firemodels/fds-smv/issues/2413">Issue 2413</a>)
 <li>fix: fix problem when loading volume rendered smoke at arbitrary time steps (ie in single frame mode)
 <li>fix: fix memory overwrite bug in isosurface color setting code
-<li>fix: fix isosurface colors so that they turn to shades of gray when the 
+<li>fix: fix isosurface colors so that they turn to shades of gray when the
 black/white data option is selected
-<li>fix: fix 'o' keyboard shortcut so that it toggles outline mode properly - 
+<li>fix: fix 'o' keyboard shortcut so that it toggles outline mode properly -
 (<a href="https://github.com/firemodels/fds-smv/issues/2381">Issue 2381</a>)
 </ol>
 
@@ -152,15 +153,15 @@ black/white data option is selected
 <li>usability: display show grid menu item for all case types (cases without blockages also)
 <li>fix: fix problems with terrain slice display for cases where terrain (and/or zbar0) does not start at 0.0 -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2419&can=1&sort=-id">Issue 2419</a>)
-<li>fix: fix FDS crashes that can occur when Smokeview reads files being written to at the same time by FDS.  Fixed by  
-using the /fpscomp:general command line option to build Smokeview (rather than using the non-standard SHARED parameter on the OPEN statement) - 
+<li>fix: fix FDS crashes that can occur when Smokeview reads files being written to at the same time by FDS.  Fixed by
+using the /fpscomp:general command line option to build Smokeview (rather than using the non-standard SHARED parameter on the OPEN statement) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2415&can=1&sort=-id">Issue 2415</a>)
 <li>fix: fix debug display of memory block and block size info
 <li>fix: fix memory leaks in isosurface loading/unloading routines which were causing problems with isosurface display
 <li>fix: fix problem with shortcut Q used to toggle slice visibility
-<li>fix: fix display scaling portion of object dialog box - 
+<li>fix: fix display scaling portion of object dialog box -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2384&can=1&sort=-id">Issue 2384</a>)
-<li>fix: fix problem with slice menu entries for slices at boundaries - 
+<li>fix: fix problem with slice menu entries for slices at boundaries -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2406&can=1&sort=-id">Issue 2406</a>)
 </ol>
 
@@ -173,10 +174,10 @@ using the /fpscomp:general command line option to build Smokeview (rather than u
 
 <li>6.2.1 (build 22209) - April 3, 2015</li>
 <ol>
-<li>enhancement: add an option to generate a movie from rendered images if the program 
+<li>enhancement: add an option to generate a movie from rendered images if the program
     <a href="https://www.ffmpeg.org">ffmpeg </a>
     is present in the users path
-<li>enhancement: add an option to to play a Smokeview generated movie if the program <a href="https://www.ffmpeg.org">ffplay </a> is present in the users path.  
+<li>enhancement: add an option to to play a Smokeview generated movie if the program <a href="https://www.ffmpeg.org">ffplay </a> is present in the users path.
 <li>usability: allow increased resolution rendering for stopped time dependent scenes
 <li>usability: improve the layout of dialogs and menus
 <li>usability: when opening a dialog box panel, close other related panels to keep the dialog box height as small as possible
@@ -195,61 +196,61 @@ using the /fpscomp:general command line option to build Smokeview (rather than u
 
 <li>6.1.14 (build 21718) - Februrary 11, 2015</li>
 <ol>
-<li>enhancement: add option to reset rotation angles to gravity vector, GVEC - 
+<li>enhancement: add option to reset rotation angles to gravity vector, GVEC -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2343&can=1&sort=-id">Issue 2343</a>)
 
-<li>usability: speed up loading up 3d smoke and hrrpuv files - 
+<li>usability: speed up loading up 3d smoke and hrrpuv files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2352&can=1&sort=-id">Issue 2352</a>)
 <li>usability: add size info when outputting memory allocation failure messages
-<li>usability: clip fires (from cfast) that extend outside of a compartment - 
+<li>usability: clip fires (from cfast) that extend outside of a compartment -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2340&can=1&sort=-id">Issue 2340</a>)
-<li>usability: show or hide cad surfaces based upon time specified in .ge1 file - 
+<li>usability: show or hide cad surfaces based upon time specified in .ge1 file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2335&can=1&sort=-id">Issue 2335</a>)
-<li>usability: add option to view cad surfaces as opaque - 
+<li>usability: add option to view cad surfaces as opaque -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2332&can=1&sort=-id">Issue 2332</a>)
 <li>usability: add option to background utility to prevent jobs from running if memory usage is above a specified level
-<li>usability: add error message when attempting to render volume smoke data (from a script) when there is no data to render - 
+<li>usability: add error message when attempting to render volume smoke data (from a script) when there is no data to render -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2323&can=1&sort=-id">Issue 2323</a>)
 
 <li>fix: fix crash that occurs when 3D slice files are scrolled to the end of the time bar
-<li>fix: turn off extreme data display option and contract colorbar indices (range from 2 to 253 instead of 0 to 255) if smokeview is using OpenGL 1.x - 
+<li>fix: turn off extreme data display option and contract colorbar indices (range from 2 to 253 instead of 0 to 255) if smokeview is using OpenGL 1.x -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2336&can=1&sort=-id">Issue 2336</a>)
-<li>fix: fix problem with the display of "thick" blockages - 
+<li>fix: fix problem with the display of "thick" blockages -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2342&can=1&sort=-id">Issue 2342</a>)
 </ol>
 
 <li>6.1.13 (build 21323) - January 8, 2015
 <ol>
-<li>usability: open structured geometry dialog panel by default - 
+<li>usability: open structured geometry dialog panel by default -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2321&can=1&sort=-id">Issue 2321</a>)
-<li>usability: add option to display both sides of boundary files occuring on external surfaces - 
+<li>usability: add option to display both sides of boundary files occuring on external surfaces -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2305&can=1&sort=-id">Issue 2305</a>)
 <li>usability: add option to output orientation vector (as defined in an FDS input file) for a smokeview object
-<li>fix: fix problem setting or un-setting transparency when slice files are not present, fix problem with setting slice bounds when a slice file is not present - 
+<li>fix: fix problem setting or un-setting transparency when slice files are not present, fix problem with setting slice bounds when a slice file is not present -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2304&can=1&sort=-id">Issue 2304</a>)
-<li>fix problem with particle bound computation - 
+<li>fix problem with particle bound computation -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2278&can=1&sort=-id">Issue 2278</a>)
 <li>fix: check for when SETTIME parameters are out of bounds
 </ol>
 
 <li>6.1.12 (build 20604) - October 1, 2014
 <ol>
-<li>enhancement: add option to clip data but not geometry - 
+<li>enhancement: add option to clip data but not geometry -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2222&can=1&sort=-id">Issue 2222</a>)
-<li>enhancement: add option to draw arrows representing flow velocity at device locations, add dialog widgets for controlling these flow arrow dimensions - 
+<li>enhancement: add option to draw arrows representing flow velocity at device locations, add dialog widgets for controlling these flow arrow dimensions -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2221&can=1&sort=-id">Issue 2221</a>)
-<li>enhancement: add dialog widget for setting vector skip ('a' keyboard shortcut) - 
+<li>enhancement: add dialog widget for setting vector skip ('a' keyboard shortcut) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2220&can=1&sort=-id">Issue 2220</a>)
-<li>usability: add scale factor to bounds when drawing arbitrarily oriented slice and vector slices - 
+<li>usability: add scale factor to bounds when drawing arbitrarily oriented slice and vector slices -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2235&can=1&sort=-id">Issue 2235</a>)
-<li>usability: allow user to change units when displaying device values - 
+<li>usability: allow user to change units when displaying device values -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2221&can=1&sort=-id">Issue 2221</a>)
-<li>usability: round instead of truncate time when setting time with settimeval script command - 
+<li>usability: round instead of truncate time when setting time with settimeval script command -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2232&can=1&sort=-id">Issue 2232</a>)
 <li>usability: add warning for duplicate device labels
 <li>usability: add -w option to smokediff to ignore missing files
 <li>usability: allow device vectors to clamp to a plane
-<li>fix: fix problem with scale factors used to color general oriented slices and vector slices - 
+<li>fix: fix problem with scale factors used to color general oriented slices and vector slices -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2262&can=1&sort=-id">Issue 2262</a>)
 </ol>
 
@@ -265,24 +266,24 @@ using the /fpscomp:general command line option to build Smokeview (rather than u
 
 <li>6.1.9 (build 19353) - May 22, 2014
 <ol>
-<li>enhancement - add option to display slice vectors and contours simultaneously - 
+<li>enhancement - add option to display slice vectors and contours simultaneously -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2148&can=1&sort=-id">Issue 2148</a>)
 <li>enhancement: add option to render volume rendered smoke one frame at a time
-<li>enhancement: add an option to rotate the scene about a user specified point - 
+<li>enhancement: add an option to rotate the scene about a user specified point -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2114&can=1&sort=-id">Issue 2114</a>)
-<li>enhancement: add a dialog for specifying zone fire temperature bounds - 
+<li>enhancement: add a dialog for specifying zone fire temperature bounds -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2106&can=1&sort=-id">Issue 2106</a>)
 <li>usability - reset idle timer (on windows) when rendering images to prevent screen saver from activating
 <li>usability - improve volume render code for generating images one frame at a time
-<li>fix: fix problem with vent display - 
+<li>fix: fix problem with vent display -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2162&can=1&sort=-id">Issue 2162</a>)
-<li>fix: fix the option for setting the initial viewpoint when Smokeview starts up - 
+<li>fix: fix the option for setting the initial viewpoint when Smokeview starts up -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2140&can=1&sort=-id">Issue 2140</a>)
 </ol>
-<li>6.1.8 (build 18560) - March 5, 2014 
+<li>6.1.8 (build 18560) - March 5, 2014
 <ol>
 <li>enhancement: add command line options -convert_ini and -update_ini to update the specified .ini files to the format of the current smokeview release
-<li>usability: add option to update boundary colors without reloading data - 
+<li>usability: add option to update boundary colors without reloading data -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2101&can=1&sort=-id">Issue 2101</a>)
 <li>fix: fix problem parsing COLORBARFLIP .ini keyword
 <li>fix: fix a problem that arises when blockages are different in two cases being differenced by smokediff
@@ -291,11 +292,11 @@ using the /fpscomp:general command line option to build Smokeview (rather than u
 <li>6.1.7 (build 18507) - February 27, 2014
 <ol>
 <li>usability: improve rendering of left/right stereo images when run from a script
-<li>fix: fix problem with vertical offsets when displaying terrain slice files - 
+<li>fix: fix problem with vertical offsets when displaying terrain slice files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2095&can=1&sort=-id">Issue 2095</a>)
 <li>fix: fix cell centered slice drawing through blockages -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2090&can=1&sort=-id">Issue 2090</a>)
-<li>fix: fix problem with object coloring - 
+<li>fix: fix problem with object coloring -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2081&can=1&sort=-id">Issue 2081</a>)
 <li>fix: fix problem with color scaling
 </ol>
@@ -309,32 +310,32 @@ using the /fpscomp:general command line option to build Smokeview (rather than u
 <ol>
 <li>enhancement: draw vectors on general oriented slices
 
-<li>usability: save fire colormap state in .ini file - 
+<li>usability: save fire colormap state in .ini file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2020&can=1&sort=-id">Issue 2020</a>)
 
 <li> fix: correct call to qsort when drawing volume rendered smoke/fire
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2029&can=1&sort=-id">Issue 2029</a>)
 <li> fix: fix problem with rendering a general slice from a script
-<li>fix: fix label visibility - 
+<li>fix: fix label visibility -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2019&can=1&sort=-id">Issue 2019</a>)
 </ol>
 
 
 <li>6.1.4 (build 17174) - October 24, 2013
 <ol>
-<li>fix: allow general oriented 3d slice files to be displayed in regions smaller than a mesh - 
+<li>fix: allow general oriented 3d slice files to be displayed in regions smaller than a mesh -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=2007&can=1&sort=-id">Issue 2007</a>)
 </ol>
 
 <li>6.1.3 (build 17029) - September 27, 2013
 
 <ol>
-<li>usability: make 3d smoke names (SOOT MASS FRACTION) consistent in Load/Unload menus - 
+<li>usability: make 3d smoke names (SOOT MASS FRACTION) consistent in Load/Unload menus -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1984&can=1&sort=-id">Issue 1984</a>)
-<li>usability: add keyboard short cuts, ALT o and O.  The keyboard short cut ALT o toggles 
-between various blockage view states 
+<li>usability: add keyboard short cuts, ALT o and O.  The keyboard short cut ALT o toggles
+between various blockage view states
 (as defined in input file, in input file + outline, solid, outline, hidden).
-The keyboard shortcut, 'O', toggles between outline and normal blockage views. - 
+The keyboard shortcut, 'O', toggles between outline and normal blockage views. -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1978&can=1&sort=-id">Issue 1978</a>)
 <li>fix: fix problem rendering images when in stereo left/right mode
 <li>fix: remove "close" button from Smokeview dialog boxes for Windows and Linux builds.
@@ -349,15 +350,15 @@ The close button if pressed resulted in Smokeview shutting down.
 <li>fix - fix display of circular vents -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1977&can=1&sort=-id">Issue 1977</a>)
 <li>fix - fix parsing of the script keyword LOADISO
-<li>fix - fix problems (in smokezip) with generating isosurfaces from particles (using the -part2iso command line option) - 
+<li>fix - fix problems (in smokezip) with generating isosurfaces from particles (using the -part2iso command line option) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1972&can=1&sort=-id">Issue 1972</a>)
 </ol>
 
 <li>6.1.1 (build 16414) - July 29, 2013
 <ol>
-<li>fix: fix crash occuring when changing vector length with the 'a' key (crash occurred when case did not have a PLOT3D or vector slice file) - 
+<li>fix: fix crash occuring when changing vector length with the 'a' key (crash occurred when case did not have a PLOT3D or vector slice file) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1967&can=1&sort=-id">Issue 1967</a>)
-<li>fix: always show "Distance" in Units menu so that tick label units may be changed - 
+<li>fix: always show "Distance" in Units menu so that tick label units may be changed -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1962&can=1&sort=-id">Issue 1962</a>)
 </ol>
 
@@ -365,30 +366,30 @@ The close button if pressed resulted in Smokeview shutting down.
 <ol>
 <li>enhancement: add capability to move tour keyframes using the mouse
 <li>enhancement: add script commands for specifying various touring parameters allowing one to display a tour using a script
-<li>enhancement: add chopping to the particle dialog box so that one may hide particles below and/or above specified values - 
+<li>enhancement: add chopping to the particle dialog box so that one may hide particles below and/or above specified values -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1905&can=1&sort=-id">Issue 1905</a>)
 
 <li>usability: make tour lknot selection region larger to allow for easier editing
 <li>usability: add script commands for specifying general slice orientations
 <li>usability: add keyboard shortcuts, 'a' and 'd', for adding and deleting key frames
-<li>usability: make keyboard shortcut, 'a', and dialog box method for adjusting vector length consistent - 
+<li>usability: make keyboard shortcut, 'a', and dialog box method for adjusting vector length consistent -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1925&can=1&sort=-id">Issue 1925</a>)
 <li>usability: hide colorbar when displaying the wall index boundary file
-<li>usability: add option to draw circular vents as implemented within FDS - 
+<li>usability: add option to draw circular vents as implemented within FDS -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1879&can=1&sort=-id">Issue 1884</a>)
 <li>usability: offset slice to make visible when drawing slice with terrain
 
-<li>fix: fix problems with Tour, PLOT3D and Slice dialog display - 
+<li>fix: fix problems with Tour, PLOT3D and Slice dialog display -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1965&can=1&sort=-id">Issue 1965</a>)
-<li>fix: fix keyboard shortcut, 'a', for changing PLOT3D vector length - 
+<li>fix: fix keyboard shortcut, 'a', for changing PLOT3D vector length -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1963&can=1&sort=-id">Issue 1963</a>)
-<li>fix: use Units menu setting (m or ft) when outputting user defined ruler - 
+<li>fix: use Units menu setting (m or ft) when outputting user defined ruler -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1962&can=1&sort=-id">Issue 1962</a>)
-<li>fix: fix problem with vent (<em>other</em> vents) visiblity - 
+<li>fix: fix problem with vent (<em>other</em> vents) visiblity -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1949&can=1&sort=-id">Issue 1949</a>)
-<li>fix: fix indexing problem when examinnig vents - 
+<li>fix: fix indexing problem when examinnig vents -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1958&can=1&sort=-id">Issue 1958</a>)
-<li>fix: fix display of textures on CAD geometry - 
+<li>fix: fix display of textures on CAD geometry -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1929&can=1&sort=-id">Issue 1929</a>)
 <li>fix: fix problem with vent show/hide menus
 <li>fix: update boundary/particle file bounds if boundary/particle file has changed -
@@ -399,14 +400,14 @@ The close button if pressed resulted in Smokeview shutting down.
 <li>6.0.14 (build 15697) - April 30, 2013
 <ol>
 
-<li>enhancement: add an option to visualize circular vents 
+<li>enhancement: add an option to visualize circular vents
 <li>enhancement: add an option to toggle between vent/blockage and boundary file visibility using the 'B' key
 <li>enhancement: add an option to toggle boundary file visibility using the 'b' key
 <li>enhancement: add an option to visualize wall cell indices stored in a boundary file
 <li>usability: increase segments used to represent circles
-<li>usability: add unit labels to various dialog box bound and truncate entries - 
+<li>usability: add unit labels to various dialog box bound and truncate entries -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1879&can=1&sort=-id">Issue 1879</a>)
-<li>usability: output scaled font parameters to the .ini file - 
+<li>usability: output scaled font parameters to the .ini file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1876&can=1&sort=-id">Issue 1876</a>)
 <li>fix: allow non-terrain blockages to appear with terrain
 <li>fix: fix problem with slice file placement when drawing terrain
@@ -422,27 +423,27 @@ The close button if pressed resulted in Smokeview shutting down.
 <li>6.0.13 (build 15227) - March 23, 2013
 <ol>
 <li>enhancement: add <tt>orienx</tt>, <tt>orieny</tt> and <tt>orienc</tt> object definition keywords for setting the orientation of smokeview objects
-<li>enhancement: add <tt>randxy</tt>, <tt>randxz</tt> and <tt>randyz</tt> object definition keywords for generating random particle 
+<li>enhancement: add <tt>randxy</tt>, <tt>randxz</tt> and <tt>randyz</tt> object definition keywords for generating random particle
 orientations (when drawn as the tube smokeview object)
 <li>enhancement: add JPEG support back to OSX versions of Smokeview
-<li>usability: increase particle streak duration to be the entire simulation time - 
+<li>usability: increase particle streak duration to be the entire simulation time -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1868&can=1&sort=-id">Issue 1868</a>)
 <li>usability: add menu item to output messages to a log file
-<li>usability: write out FED slice and the particle size files to a temporary (<em>i.e.</em> writeable) directory if ouput to the local directory fails - 
+<li>usability: write out FED slice and the particle size files to a temporary (<em>i.e.</em> writeable) directory if ouput to the local directory fails -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1847&can=1&sort=-id">Issue 1847</a>)
 <li>fix: fix typo introduced in revision 14082 that was causing problems with vent visibility  -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1699</a>)
 <li>fix: fix problem with file name formation when rendering smokeview images
-<li>fix: fix problem with file formation which was showing up with FED area calculations - 
+<li>fix: fix problem with file formation which was showing up with FED area calculations -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1847&can=1&sort=-id">Issue 1847</a>)
 </ol>
 
 <li>6.0.12 (build 14788) - February 20, 2013
 <ol>
 
-<li>enhancement: add option to toggle blockage outline color between foreground color and blockage color - 
+<li>enhancement: add option to toggle blockage outline color between foreground color and blockage color -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1833&can=1&sort=-id">Issue 1833</a>)
-<li>enhancment: add option to highlight min and max extreme data independently - 
+<li>enhancment: add option to highlight min and max extreme data independently -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1796&can=1&sort=-id">Issue 1796</a>)
 <li>usability: add parameter to PLOT3DPROPS script keyword to specify vector length
 <li>usability: make corrections to colorbar shading type menu items
@@ -450,11 +451,11 @@ orientations (when drawn as the tube smokeview object)
 <li>usability: save outline color flag state in .ini file
 <li>usability - internal code cleanup - remove benchmark option
 <li>fix: fix the user control for setting the PLOT3D vector length
-<li>fix: fix problem with frame rate that is throttled on Windows - 
+<li>fix: fix problem with frame rate that is throttled on Windows -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1838&can=1&sort=-id">Issue 1838</a>)
-<li>fix: fix problem with font display when rendering images using the 'R' option - 
+<li>fix: fix problem with font display when rendering images using the 'R' option -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1832&can=1&sort=-id">Issue 1832</a>)
-<li>fix: fix problem with terrain slice display where slices were not following the slope of a terrain - 
+<li>fix: fix problem with terrain slice display where slices were not following the slope of a terrain -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1829&can=1&sort=-id">Issue 1829</a>)
 <li>fix: fix coloring of isosurface points
 <li>fix: fix problem with saving colorbar selection state
@@ -466,7 +467,7 @@ orientations (when drawn as the tube smokeview object)
 <li>enhancement: add the -volrender command line option used to generate images of volume rendered smoke/fire
 <li>enhancement: add command line options for specifying the starting frame ( -startframe n )
 and the number of frames to skip ( -skipframe n ) when rendering images
-<li>enhancement: add an option to difference FED slice files with smokediff (version 1.0.6) by creating an auxillary smv file that contains FED entries - 
+<li>enhancement: add an option to difference FED slice files with smokediff (version 1.0.6) by creating an auxillary smv file that contains FED entries -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1794&can=1&sort=-id">Issue 1794</a>)
 <li>fix: fix a bug occurring when reading the VOLSMOKE .ini keyword and data
 </ol>
@@ -478,7 +479,7 @@ and the number of frames to skip ( -skipframe n ) when rendering images
 <li>usability: add an option to control the step size when computing line integrals for GPU volume rendered smoke.
 <li>usability: make smoke/flame position and opacity factors consistent between GPU and non-GPU when performing volume rendering
 <li>fix: update texture maps used for coloring smoke when use changes smoke colormap
-<li>fix: fix problem with vent orientation that shows up with single grid cell channels - 
+<li>fix: fix problem with vent orientation that shows up with single grid cell channels -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1699</a>)
 </ol>
 
@@ -492,17 +493,17 @@ and the number of frames to skip ( -skipframe n ) when rendering images
 <li>usability: add several phrases to list of phrases being translated to other languages
 <li>usability: remove unused, unneeded colorbars
 <li>usability: improve controls in 3D smoke dialog box to specify the colorbar used to represent volume rendered smoke
-<li>usability: use colorbar names rather than indices when saving to a configuration (.ini) file 
+<li>usability: use colorbar names rather than indices when saving to a configuration (.ini) file
 <li>fix: fix interpolation error that caused graphical artifacts when drawing volume rendered smoke
 <li>fix: fix timebar mouse selection
-<li>fix: fix problem with colorbar deselection.  Change behavior so that the colorbar stays selected when clicking in and moving the scene - 
+<li>fix: fix problem with colorbar deselection.  Change behavior so that the colorbar stays selected when clicking in and moving the scene -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1775&can=1&sort=-id">Issue 1775</a>)
 </ol>
 
 <li>6.0.8 (build 13678) - November 6, 2012
 
 <ol>
-fix: fix extreme data option when set from the menus - 
+fix: fix extreme data option when set from the menus -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1767&can=1&sort=-id">Issue 1767</a>)
 fix : fix parsing of AMBIENT keyword found in CFAST generated .smv files
 </ol>
@@ -513,24 +514,24 @@ fix : fix parsing of AMBIENT keyword found in CFAST generated .smv files
 <li>enhancement: add an option to display scaled fonts.  One can control the height, width and thickness of these fonts from the Display dialog box.
 <li>enhancement: add a dialog box for creating new and modifying existing user labels.  A user label
 may be placed within the scene at arbitrary positions and time intervals.
-<li>enhancement: add an option to render images with a resolution up to 10x the original window size.  
+<li>enhancement: add an option to render images with a resolution up to 10x the original window size.
 This option is set within the render dialog box. Using scaled fonts with this option allows one to view text at the correct size in the rendered image.
 <li>usability: improve the layout of various regions such as the title, timebar, colorbar <em>etc</em> so that they do not overlap
 <li>usability: set the default minimum and maximum values for FED slices to 0.0 and 3.0 if these bounds are not already defined in an .ini file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1760&can=1&sort=-id">Issue 1760</a>)
 <li>fix: fix vent flow display in a CFAST case when a compartment is connected to the outside.
 <li>fix: fix a problem with view resets when a window is resized
-<li>fix: allow one to add viewpoints (was disabled) when the current viewpoint is external or internal - 
+<li>fix: allow one to add viewpoints (was disabled) when the current viewpoint is external or internal -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1757&can=1&sort=-id">Issue 1757</a>)
 </ol>
 
 <li>6.0.6 (build 13281) - October 11, 2012
 
 <ol>
-<li>enhancement: add option to display transparent blockages with outlines (to make them more conspicuous) - 
+<li>enhancement: add option to display transparent blockages with outlines (to make them more conspicuous) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1753&can=1&sort=-id">Issue 1753</a>)
 <li>enhancement: add keyboard short cut (~ key) to level scene
-<li>usability: incorporate 3-axis rotation option into interface for other rotation types 
+<li>usability: incorporate 3-axis rotation option into interface for other rotation types
 <li>fix: make the viewpoint consistent when resizing window
 <li>fix: fix bug in no graphics (-ng_ini ) startup option
 </ol>
@@ -549,23 +550,23 @@ This option is set within the render dialog box. Using scaled fonts with this op
 smokeview source: consolidate screen size intialization to one routine
 <li>fix: adust FED contour levels to be consistent with quantized values available on the colorbar
 <li>fix: correct problem with getmesh routine that was causing firebot to crash
-<li>fix: fix area computation (for one mesh, full slice) and use of blanking arrays when computing FEDs - 
+<li>fix: fix area computation (for one mesh, full slice) and use of blanking arrays when computing FEDs -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1728&can=1&sort=-id">Issue 1728</a>)
 </ol>
 
 <li>6.0.4 (build 12556) - September 10, 2012
 <ol>
-<li>usability: improve the colorbar display by eliminating the overlap of numerical labels and the colorbar - 
+<li>usability: improve the colorbar display by eliminating the overlap of numerical labels and the colorbar -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1726&can=1&sort=-id">Issue 1726</a>)
-<li>usability: display cell centered vector slices and cell centered slices in the same location - 
+<li>usability: display cell centered vector slices and cell centered slices in the same location -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1722&can=1&sort=-id">Issue 1722</a>)
-<li>usability: change the shortcut for opening the Colorbar editor from 'c' to 'C' - 
+<li>usability: change the shortcut for opening the Colorbar editor from 'c' to 'C' -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1721&can=1&sort=-id">Issue 1721</a>)
-<li>usability: sort 3d smoke files so that they are always drawn from back to front in order to improve the visualization - 
+<li>usability: sort 3d smoke files so that they are always drawn from back to front in order to improve the visualization -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1719&can=1&sort=-id">Issue 1719</a>)
-<li>fix: fix display of THCP targets - 
+<li>fix: fix display of THCP targets -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1727&can=1&sort=-id">Issue 1727</a>)
-<li>fix: fix display of large (> 2^32) slice or volume rendered smoke files - 
+<li>fix: fix display of large (> 2^32) slice or volume rendered smoke files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1723&can=1&sort=-id">Issue 1723</a>)
 <li>fix: fix memory allocation errors occuring when there are no 3d smoke files
 </ol>
@@ -573,18 +574,18 @@ smokeview source: consolidate screen size intialization to one routine
 <li>6.0.3 (build 12094) - August 18, 2012
 <ol>
 <li>enhancement: implement temperature->color mapping for non-gpu volume rendering
-<li>usability: scale the sensor to be 1/4th the smallest grid dimension - 
+<li>usability: scale the sensor to be 1/4th the smallest grid dimension -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1658&can=1&sort=-id">Issue 1658</a>)
 <li>usability: output texture directory path at startup
 <li>usability: calculate FED's for cell centered slices,
 corrections to FED calculation, save FED regenerate flag to .ini file
-<li>usability: output cell indices for min and max slice valies - 
+<li>usability: output cell indices for min and max slice valies -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1688&can=1&sort=-id">Issue 1688</a>)
-<li>fix: fix option to display slice files and vector slices within blockages - 
+<li>fix: fix option to display slice files and vector slices within blockages -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1708&can=1&sort=-id">Issue 1708</a>)
-<li>fix: fix problems when loading people positions before particles - 
+<li>fix: fix problems when loading people positions before particles -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1703&can=1&sort=-id">Issue 1703</a>)
-<li>fix: correct vent orientation algorithm - 
+<li>fix: correct vent orientation algorithm -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1699&can=1&sort=-id">Issue 1699</a>)
 <li>fix: add missing preprocessing directive to eliminate compile error in debug mode on mac
 </ol>
@@ -593,11 +594,11 @@ corrections to FED calculation, save FED regenerate flag to .ini file
 <ol>
 <li>usability: remove menu entries that do not belong when viewing a cases differenced by smokediff
 <li>usability: add the -bindir command line option to specify the directory containing startup files
-(<em>ie</em> objects.svo, smokeview.ini <em>etc</em>) - 
+(<em>ie</em> objects.svo, smokeview.ini <em>etc</em>) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1676&can=1&sort=-id">Issue 1676</a>)
 <li>usability: warn user if the directory specified by the RENDERDIR script command cannot be written to.
-Define a "temp" 
-directory (/tmp on Linux and OSX, c:\temp on the PC)  
+Define a "temp"
+directory (/tmp on Linux and OSX, c:\temp on the PC)
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1673&can=1&sort=-id">Issue 1673</a>)
 <li>fix: fix problem with the viewpoint menu when the colorbar is edited
 <li>fix: fix parsing of the command line when more than one option is present
@@ -606,10 +607,10 @@ directory (/tmp on Linux and OSX, c:\temp on the PC)
 <li>6.0.1 (build 11112) - June 20, 2012
 <ol>
 <li>usability: add options to cancel a running script or continue a "stepped" script
-<li>usability: add the device object command, " arg SCALEAUTO", in order to allow scaling of 
-objects that follow relative to the maximum domain size - 
+<li>usability: add the device object command, " arg SCALEAUTO", in order to allow scaling of
+objects that follow relative to the maximum domain size -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1658&can=1&sort=-id">Issue 1658</a>)
-<li>usability: display "W" unit for HRR < 1000 - 
+<li>usability: display "W" unit for HRR < 1000 -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1655&can=1&sort=-id">Issue 1655</a>)
 <li>fix: fix some problems with 3D smoke display when using the GPU and add back a widget for controlling fire transparency
 <li>fix: fix logic to determine visibility of the general slice
@@ -624,7 +625,7 @@ objects that follow relative to the maximum domain size -
 <li>improve zone fire modeling visualization of smoke and fire (use same 3D method for visualizing smoke as used for FDS)
 <li>allow numerical cell centered slice data to be displayed numerically (by presssing the '@' key)
 <li>allow vector plots to be drawn using staggered U,V,W velocity data
-<li>add option to read and visualize spreadsheet data 
+<li>add option to read and visualize spreadsheet data
 <li>compute fractional effective dose (FED) data using CO, CO2 and O2 concentration slice files.
 <li>improve scripting output display and capability (add single stepping mode)
 <li>add option to display menu and dialog text in alternate lanuguages (French, German)
@@ -643,8 +644,8 @@ objects that follow relative to the maximum domain size -
 
 <li>enhancement - improve geometry drawing for large cases by culling (not drawing)
 <ol>
-  <li> hidden one cell-sized faces generated when using the FDS BURN_AWAY option, 
-  <li> faces occuring outside the view frustum and 
+  <li> hidden one cell-sized faces generated when using the FDS BURN_AWAY option,
+  <li> faces occuring outside the view frustum and
   <li> faces that face away from the user -
   (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1287&can=1&sort=-id">Issue 1287</a>)
   </ol>
@@ -661,42 +662,42 @@ objects that follow relative to the maximum domain size -
 
 <li>enhancement - add the command line option -update_bounds to compute boundary file bounds
 
-<li>enhancement - provide options to color evac vector data with constant or non-constant (data based) colors - 
+<li>enhancement - provide options to color evac vector data with constant or non-constant (data based) colors -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1251&can=1&sort=-id">Issue 1251</a>)
 
 <li>usability - change and simplify the method used to parse the command line so that smokeview may be run from a web page
 
-<li>usability - add an option to turn off transparent face sorting in order to speed up geometry drawing - 
+<li>usability - add an option to turn off transparent face sorting in order to speed up geometry drawing -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1287&can=1&sort=-id">Issue 1287</a>)
 
 <li> usability - change default display of cell centered slice files to be cell centered rather than interpolated
 
-<li> usability - improve menu display for EVAC cases - 
+<li> usability - improve menu display for EVAC cases -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1251&can=1&sort=-id">Issue 1251</a>)
 
 <li>usability - display "load x", "load y" and/or "load z" menus only if there are more than one x, y, z slice files present
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1252&can=1&sort=-id">Issue 1252</a>)
 
-<li>usability - output mesh names (ID tag on &MESH line) rather than a mesh index in various menus.  If ID tag is missing then output a mesh index as usual - 
+<li>usability - output mesh names (ID tag on &MESH line) rather than a mesh index in various menus.  If ID tag is missing then output a mesh index as usual -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1250&can=1&sort=-id">Issue 1250</a>)
 <li>usability = clean up command line options and usage message
 <li>usability - remove OpenGL and GLUT initialization when using the -update_bounds option (so that smokeview can update bounds on terminals that do not have OpenGL).
 
 <li>fix - fix problem with BLOCKLOCATION .ini keyword
-<li>fix - fix problem with colorbar dialog box when creating a new colorbar - 
+<li>fix - fix problem with colorbar dialog box when creating a new colorbar -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1290&can=1&sort=-id">Issue 1290</a>)
 
-<li>fix - fix multi-slice menu display - 
+<li>fix - fix multi-slice menu display -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1282&can=1&sort=-id">Issue 1282</a>)
 
-<li>fix - scale colors by 255 when reading dxf2fds generated cad files - 
+<li>fix - scale colors by 255 when reading dxf2fds generated cad files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1280&can=1&sort=-id">Issue 1280</a>)
 </ol>
 
 <p>Smokezip change log
 <ol>
 <li>code cleanup - remove isosurface compression capability
-<li>fix - eliminate memory allocations for zero size buffers - 
+<li>fix - eliminate memory allocations for zero size buffers -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1268&can=1&sort=-id">Issue 1268</a>)
 
 </ol>
@@ -708,9 +709,9 @@ objects that follow relative to the maximum domain size -
 <li>enhancement: add option to re-read .smv file after FDS updates it -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1227&can=1&sort=-id">Issue 1227</a>)
 
-<li>enhancement: add option to chop or truncate boundary file data (same capability as exists now with slice files) - 
+<li>enhancement: add option to chop or truncate boundary file data (same capability as exists now with slice files) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1233&can=1&sort=-id">Issue 1233</a>)
-<li>enhancement: add cell center display for 3D slice files - 
+<li>enhancement: add cell center display for 3D slice files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1231&can=1&sort=-id">Issue 1231</a>)
 <li>enhancement: add GPU support, multi-threading and memory status display to the 64 bit windows version of Smokeview
 <li>enhancement: add Load All, Load x, Load y and Load z options to the slice file load menu -
@@ -721,10 +722,10 @@ option may be invoked from the menus or using the "L" key -
 <li>enhancement: add choice of 1440x1080 screen resolution to Motion/View/Render dialog box (for making high resolution animations)
 
 <li>usability: improve determination of boundary file min/max bounds
-<li>usability: show hrrpuv cutoff label when timebar is hidden - 
+<li>usability: show hrrpuv cutoff label when timebar is hidden -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1213&can=1&sort=-id">Issue 1213</a>)
 <li>usability: make isosurface generation more efficient by rejecting trivial cases earlier in the generation process
-<li>usability: modify readsmv to read in two files (2nd file created by smokezip which contains entries for additional isosurface surfaces) - 
+<li>usability: modify readsmv to read in two files (2nd file created by smokezip which contains entries for additional isosurface surfaces) -
 addresses issue 1208
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1208&can=1&sort=-id">Issue 1208</a>)
 
@@ -737,7 +738,7 @@ addresses issue 1208
 <li>fix - fix memory leak in CompressIsosurface routine
 <li>fix: fix typo which caused blockages to not disppear - addresses issue 1208
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1208&can=1&sort=-id">Issue 1208</a>)
-<li>fix: make rendering from menu consistent with rendering from keyboard ('r', 'R') and fix problems with 2x rendering from the menu - 
+<li>fix: make rendering from menu consistent with rendering from keyboard ('r', 'R') and fix problems with 2x rendering from the menu -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1204&can=1&sort=-id">Issue 1204</a>)
 
 <li>internal: change file name endian.c and endian.h to smv_endian.c and smv_endian.h to avoid name collisions on Linux and OSX systems
@@ -749,7 +750,7 @@ addresses issue 1208
 
 <p>Smokezip change log
 <ol>
-<li>enhancement: Add parallel processing to smokezip by compressing 2 or more files simultaneously.  
+<li>enhancement: Add parallel processing to smokezip by compressing 2 or more files simultaneously.
 This option is invoked with -t nfiles on the command line where nfiles is the number of files to be compressed at once.
 <li>enhancement: add an option generate isosurface files using data contained in particle files.  This option is invoked with -part2iso on the command line.
 <li>fix: fix error in PLOT3D file name parsing.
@@ -765,7 +766,7 @@ This option is invoked with -t nfiles on the command line where nfiles is the nu
 <li>enhancement: add thermocouple object definition to objects.svo file.  Display this object so that it is always facing the viewer.
 
 <li>usability: remove redundant Help Menu descriptions of data color interpolation methods
-<li>usability: reorganize and simplify vent visibility menus - 
+<li>usability: reorganize and simplify vent visibility menus -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1101&can=1&sort=-id">Issue 1101</a>)
 <li>usability: toggle colorbar labels bewteen smooth and non-smooth using 'A' key
 <li>usability: add option to draw blockage outlines and shaded surfaces at the same time -
@@ -775,7 +776,7 @@ This option is invoked with -t nfiles on the command line where nfiles is the nu
 <li>fix: fix render all option when user stops animation by clicking in the time bar
 <li>fix: fix duplicate loop index error, caused particle file display to crash under some circumstances -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1169&can=1&sort=-id">Issue 1169</a>)
-<li>fix: fix problem with clipping while forming a script file - 
+<li>fix: fix problem with clipping while forming a script file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1164&can=1&sort=-id">Issue 1164</a>)
 <li>fix: fix problems with scripting/config file dialog box -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1164&can=1&sort=-id">Issue 1164</a>)
@@ -806,14 +807,14 @@ Note, decompression is not yet implemented in smokeview.
 <li>5.5.6 (build 6366) - June 22, 2010
 <ol>
 <li>enhancement: document the Windows background utility used to run multiple FDS jobs simulataneously.
-<li>usability: add menu item to show/hide zone fire modeling fires - 
+<li>usability: add menu item to show/hide zone fire modeling fires -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=911&can=1&sort=-id">Issue 911</a>)
 </ol>
 
 <li>5.5.5 (build 6317) - June 9, 2010
 <ol>
 <li>enhancement: Use the middle mouse button to zoom the scene in and out and the right mouse button
-(after M key is pressed to detach menus) to move the scene up and down.  
+(after M key is pressed to detach menus) to move the scene up and down.
 The M key is pressed again to reattach menus to the right mouse button.
 <li> enhancement: Create a Smokeview object command named rotateeye.
 This command causes objects to always rotates so that it faces the viewer
@@ -846,9 +847,9 @@ In particular, programs contained in a Windows batch file.
 <li>usability: improve colorbar display
 <li>usability: improve algorithm for computing min/max data bounds
 <li>usability: add option to control whether colorbar labels are smoothed
-<li>fix: set up a default PROP for use with evacuation drawing - 
+<li>fix: set up a default PROP for use with evacuation drawing -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1057&can=1&sort=-id">Issue 1057</a>)
-<li>fix: fix problem reading CAD file name - 
+<li>fix: fix problem reading CAD file name -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1067&can=1&sort=-id">Issue 1067</a>)
 </ol>
 
@@ -860,7 +861,7 @@ index (defined further down in the FDS input file) will not be drawn.
 <li>fix: fix problem with dynamic particle display
 <li>fix: fix particle display when specifying min and max time bounds in .ini file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1047&can=1&sort=-id">Issue 1047</a>)
-<li>fix: add Fortran subroutine to create an endian (.end) file - 
+<li>fix: add Fortran subroutine to create an endian (.end) file -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1044&can=1&sort=-id">Issue 1044</a>)
 </ol>
 
@@ -870,9 +871,9 @@ index (defined further down in the FDS input file) will not be drawn.
 <li>enhancement: implement the gtranslate command - used to move objects relative to the global (FDS) coordinate system
 <li>enhancement: implement slice file line contour drawing
 <li>usability: reduce the width of the portion of the colorbar used to highlight data
-<li>fix: fix problem with terrain texture map display - 
+<li>fix: fix problem with terrain texture map display -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1041&can=1&sort=-id">Issue 1041</a>),
-<li>fix: fix bug in smokeview property setup - 
+<li>fix: fix bug in smokeview property setup -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1040&can=1&sort=-id">Issue 1040</a>),
 </ol>
 
@@ -880,20 +881,20 @@ index (defined further down in the FDS input file) will not be drawn.
 
 <ol>
 <li>enhancement: add option to customize colorbars for visualizing data
-<li>enhancement: add option to convert between molar concentration and ppm in Units menu 
+<li>enhancement: add option to convert between molar concentration and ppm in Units menu
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1035&can=1&sort=-id">Issue 1035</a>),
 <li>enhancement: implement procedures for modifying smokeview objects using data specified on a &PROP line in an FDS input file
 and data found in a particle file.  More details may be found in both the FDS and Smokeview User's guides.
 <li>enhancement: implement new version of PROP line (allowing multiple Smokeview objects) for particle files, clarify/simplify menus
 <li>enhancemnt: allow objects to input character strings.  This allows the <em>setcolor</em> to input a symbolic color name
-just as with FDS and texture file names may be input directly in the objects.svo file .  
+just as with FDS and texture file names may be input directly in the objects.svo file .
 <li>enhancement: Add <em>VOLUME FLOW RATE</em> and <em>DISTANCE</em> as quantities that can have their units changed.
 <li>enhancemet: add EQ, ABS, drawsquare, drawvent and noop object commands
 
 <p>
 <li>usability: ignore leading blanks when parsing file names (keywords affected: PART, SLCF, BNDF, ISOF, SMOKE3D, PL3D, ZONE, INPF, CHID, ENDF)
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1013&can=1&sort=-id">Issue 1013</a>),
-<li>usability: save avatar type in .ini file and output evac file when recording a script - 
+<li>usability: save avatar type in .ini file and output evac file when recording a script -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1030&can=1&sort=-id">Issue 1030</a>),
 <li>usability: implement a C version of the which command, a routine used to determine which directory in the PATH variable Smokeview is located in -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=1023&can=1&sort=-id">Issue 1023</a>),
@@ -904,13 +905,13 @@ just as with FDS and texture file names may be input directly in the objects.svo
 This association is made in an FDS input file by adding a PROP_ID keyword to an &OBST line.
 <li>usability: add drawcubec object command that sets origin at the front left corner rather than center of the cube.
 <li>usability: add rotatexyz object command.  This command rotates rotates an object about an arbitrary (x,y,z) vector
-<li>usability: use the .smv <em>UNIT</em> character strings rather than <em>SHORT LABEL</em> 
-character strings to generate the Smokeview Units menus.  
+<li>usability: use the .smv <em>UNIT</em> character strings rather than <em>SHORT LABEL</em>
+character strings to generate the Smokeview Units menus.
 <li>usability: add the unit classes state to the .ini file so that unit choices are saved across Smokeview calls
 <li>usability: add sub-menus for particle properties, fix a bug in parsing object textures on PROP line
 <li>usability: fix hide menu item in particle show/hide menu
 <li>usability: add PROPINDEX to .ini file, stores which smokeview objects are displayed
-<li>usability: added setrgb routine to input r,g,b color coordinates.  
+<li>usability: added setrgb routine to input r,g,b color coordinates.
 The r, g, b values range from 0 to 255 rather than 0.0 to 1.0 to be consistent with FDS input.
 <li>usability: adapted a FDS routine for use in Smokeview to return the r,g,b colors (ranging from 0 to 255)
 given a symbolic color name.
@@ -926,8 +927,8 @@ The original Blockage Edit dialog box was buggy and there are now better alterna
 <li>fix: fix bug in use of fmod function
 <li>fix: fix problem specifying textures on &PROP line
 
-<p><li>internal: change internal notation of Smokeview objects from devices to objects.  This 
-is to avoid confusion with FDS devices.  Change the file name where Smokeview objects are stored 
+<p><li>internal: change internal notation of Smokeview objects from devices to objects.  This
+is to avoid confusion with FDS devices.  Change the file name where Smokeview objects are stored
 to objects.svo
 <li>internal: implement a simpler more robust procedure for parsing the smokeview object file
 <li>internal: add missing scaling call when drawing particle objects
@@ -938,7 +939,7 @@ to objects.svo
 
 <ol>
 <li>usability: add logical and conditional operators to device file format
-<li>usability: clarify error message about inconsistent .smv keywords - 
+<li>usability: clarify error message about inconsistent .smv keywords -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=954&can=1&sort=-id">Issue 954</a>),
 </ol>
 
@@ -946,7 +947,7 @@ to objects.svo
 
 <ol>
 <li>enhancement: implement a new format for representing devices, use variable names (rather than numerical offsets)
-<li>enhancement: continue particle streaks across mesh boundaries - 
+<li>enhancement: continue particle streaks across mesh boundaries -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=935&can=1&sort=-id">Issue 935</a>),
 <li>enhancement: add a device to generae the intersection of a plane and the FDS geometry.
 <li>enhancement: Draw zone fire modeling vents with a user specified color (specified using the  VENTGEOM and VFLOWGEOM .smv keywords)
@@ -977,10 +978,10 @@ to objects.svo
 <li> usability: flip oxygen colorbar when displaying trainer cases
 <li> usability: improve slice file load menu ordering
 <li> fix: fix typo in smoke culling routine causing variable to be used before it was defined
-<li> fix: make GPU and non-GPU drawing of fire (HRRPUV) 
+<li> fix: make GPU and non-GPU drawing of fire (HRRPUV)
 ( transition from fire to non-fire region using (fire_color,fire_alpha) -> (fire_color,0) rather than (fire_color,fire_alpha) -> (black,0) )
 <li> fix: fix blockage clipping when drawing 3d slices in y plane
-<li> fix: fix mesh label output - 
+<li> fix: fix mesh label output -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=890&can=1&sort=-id">Issue 890</a>),
 </ol>
 
@@ -994,7 +995,7 @@ to objects.svo
 <li> internal: Change internal test for determining whether a directory is writable,
 <li> fix: add oxygen volume fraction as a criteria for whether a slice contains oxygen data,
 <li> fix: correct problem with forming boundary file menus in an Evac case (nloadsubmenu was initialized to 0 in the wrong location)
-<li> fix: correct option to Unload Evac files - 
+<li> fix: correct option to Unload Evac files -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=874&can=1&sort=-id">Issue 874</a>),
 </ol>
 
@@ -1005,16 +1006,16 @@ to objects.svo
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=862&can=1&sort=-id">Issue 862</a>),
 <li> fix: remove maximum bound for smokeview device scaling - addresses issue 853
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=853&can=1&sort=-id">Issue 853</a>),
-<li> fix: change grid location display so that it does not overlap with scene 
+<li> fix: change grid location display so that it does not overlap with scene
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=849&can=1&sort=-id">Issue 849</a>),
-<li> fix: fixed error in routine that checks whether the user has permission to write in a given directory - 
+<li> fix: fixed error in routine that checks whether the user has permission to write in a given directory -
 this error caused problems with rendering
 </ol>
 
 <li>5.4.3 (build 4599) - August 20, 2009
 
 <ol>
-<li>fix:  fix PLOT3D isosurface scripting, 
+<li>fix:  fix PLOT3D isosurface scripting,
 add PLOT3DPROPS script keyword to input general PLOT3D plot properties,
 implement smokeview scripting keyword, SHOWPLOT3DDATA, to allow the user to specify the location and visibility of PLOT3D planes
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=842&can=1&sort=-id">Issue 842</a>),
@@ -1027,13 +1028,13 @@ implement smokeview scripting keyword, SHOWPLOT3DDATA, to allow the user to spec
 <li>5.4.2 (build 4446) - July 23, 2009
 <ol>
 
-<li> usability: add functionality to the to the Motion/View (now Motion/View/Render) dialog box to render smokeview scenes 
+<li> usability: add functionality to the to the Motion/View (now Motion/View/Render) dialog box to render smokeview scenes
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=808&can=1&sort=-id">Issue 808</a>),
 <li> usability: identify Smokeview as either 32 or 64 bit in help menu and in the -version command line output.
 <li> fix: fix problem with the RENDERALL script command
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=814&can=1&sort=-id">Issue 814</a>),
 <li> fix: fix memory leak in the internal Smokeview routine, updatetimes().
-<li> fix: fix problem with render file naming that occurs when using the RENDERALL script command 
+<li> fix: fix problem with render file naming that occurs when using the RENDERALL script command
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=814&can=1&sort=-id">Issue 814</a>),
 <li> fix: correct problem with double size rendering
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=808&can=1&sort=-id">Issue 808</a>),
@@ -1069,7 +1070,7 @@ for drawing a disk with origin at the disk center rather than at the base
 <li>fix: fix definition of an internal variable, <tt>loaded_isomesh</tt>
 which should have been been defined to NULL when there are no iso-surfaces
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=789&can=1&sort=-id">Issue 789</a>),
-<li>fix: correct issue with drawing smokeview devices - 
+<li>fix: correct issue with drawing smokeview devices -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=775&can=1&sort=-id">Issue 775</a>),
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=776&can=1&sort=-id">Issue 776</a>)
 </ol>
@@ -1077,12 +1078,12 @@ which should have been been defined to NULL when there are no iso-surfaces
 <p><li>5.3.14 (build 3993) - May 18, 2009
 <ol>
 <li>enhancement: add an option to select a device and display information about it.
-<li>enhancement: implement offsetx, offsety and offsetz device keywords to simplify device definitions 
+<li>enhancement: implement offsetx, offsety and offsetz device keywords to simplify device definitions
 if only one translation direction is required.
-<li>enhancement: implement the device script command, putuservals2stack, which is a general form of the  
-existing command, getuservals .  putuservals2stack allows one to put user arguments 
+<li>enhancement: implement the device script command, putuservals2stack, which is a general form of the
+existing command, getuservals .  putuservals2stack allows one to put user arguments
 anywhere on the stack rather than just at the top. (needed for defining "tree" devices)
-<li>enhancement: add an option to select an avatar (evacuation visualization) in order to easily 
+<li>enhancement: add an option to select an avatar (evacuation visualization) in order to easily
 track its motion during the simluation - add preliminary code to change viewpoint to selected avatar.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=724&can=1&sort=-id">Issue 724</a>).
 <li>enhancement: change format of the DEVICE keyword in the .smv file keyword to allow an arbitrary number of user specified parameters
@@ -1091,7 +1092,7 @@ track its motion during the simluation - add preliminary code to change viewpoin
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=743&can=1&sort=-id">Issue 743</a>).
 <li>fix: fix render option menu display when render doubling option is active
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=741&can=1&sort=-id">Issue 741</a>).
-<li>fix: place interpolated cell centered slices at cell centers, 
+<li>fix: place interpolated cell centered slices at cell centers,
 label slice menus using cell center locations
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=727&can=1&sort=-id">Issue 727</a>).
 <li>fix: fix subscript error in slice file spreadsheet output routine
@@ -1099,7 +1100,7 @@ label slice menus using cell center locations
 
 <li>5.3.13 (build 3798) - April 16, 2009
 <ol>
-<li>enhancement: add options to specify point sizes for PLOT3D isosurfaces and animated isosurfaces. 
+<li>enhancement: add options to specify point sizes for PLOT3D isosurfaces and animated isosurfaces.
 The option is specified in the File/Bounds dialog box.  Also add an option to specify the line width when displaying isosurfaces with
 a <em>mesh</em> or outline view.
 <li>enhancement: add option to show isosurface normal vectors
@@ -1112,19 +1113,19 @@ a <em>mesh</em> or outline view.
 <ol>
 
 <li> enhancement: add support for viewing cell centered boundary file data.
-<li> enhancement: In smokezip, if slice data is truncated or chopped then collapse truncated data to a single color index 
+<li> enhancement: In smokezip, if slice data is truncated or chopped then collapse truncated data to a single color index
 so that greater compression levels can occur.  A -no_chop command line option is added to compress as before
 <li> enhancement: add support for "Fire lines" to Smokeview
 <li> enhancement: add an option to display terrain using 2d or line contours in addition to shaded contours and a texture map
 <li> enhancement: add an option to hide blockages/vents on a mesh by mesh basis.  This is set using the Motion/View dialog box
-<li> enhancement: Output statistics when loading data files (bytes loaded, time required and bit rate).  This is 
+<li> enhancement: Output statistics when loading data files (bytes loaded, time required and bit rate).  This is
 used to compare various network configurations for using smokeview (samba, nfs, local disk etc.)
 <li> fix: force iso-metric view for 2d cases
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=645&can=1&sort=-id">Issue 645</a>).
 <li> maintenance: Changes to both smokezip and smokeview to eliminate compiler warnings
 </ol>
 
-<li>5.3.11 (build 3279) - February 12, 2009 
+<li>5.3.11 (build 3279) - February 12, 2009
 <ol>
 <li>enhancement: add widgets to the motion/view dialog box for setting x,y,z scaling and near/far depth planes
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=619&can=1&sort=-id">Issue 619</a>).
@@ -1143,31 +1144,31 @@ All 3D slices of the same type are grouped into one multi-slice, non 3D slices a
 <li> fix: add error checking when blockage memory allocation fails to allow for a more graceful program exit.
 </ol>
 
-<li>5.3.10 (build 3188) - January 30, 2009 
+<li>5.3.10 (build 3188) - January 30, 2009
 <ol>
 <li>fix: fix display of cell-centered slice files when displayed on a mesh boundary
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=620&can=1&sort=-id">Issue 620</a>).
 <li>change: change sensor scaling minimum bound to 0.0 to allow smaller devices to be displayed
 </ol>
 
-<li>5.3.9 (build 3167) - January 28, 2009 
+<li>5.3.9 (build 3167) - January 28, 2009
 <ol>
 <li>fix: fix command line parsing when the -script parameter is present.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=618&can=1&sort=-id">Issue 618</a>).
 </ol>
 
-<li>5.3.8 (build 3138) - January 27, 2009 
+<li>5.3.8 (build 3138) - January 27, 2009
 <ol>
 <li>fix: add command line option, -ng_ini, to allow one to create an .ini file when using a <em>shell</em> that does not have graphics. (for testing)
 </ol>
 
-<li>5.3.7 (build 3104) - January 22, 2009 
+<li>5.3.7 (build 3104) - January 22, 2009
 <ol>
 <li>fix: update an internal color table whenever a smokeview script loads an ini file (in case the colorbar is altered)
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=610&can=1&sort=-id">Issue 610</a>).
 </ol>
 
-<li>5.3.6 (build 3091) - January 21, 2009 
+<li>5.3.6 (build 3091) - January 21, 2009
 <ol>
 <li>enhancement: add an option for viewing scenes using red/cyan stereo pairs (requires red/cyan glasses)
 <li>fix: change where zoom is reset within Smokeview source to only reset zoom for external and internal
@@ -1178,31 +1179,31 @@ pre-defined viewpoints so that user viewpoints may be displayed properly when sm
 <li>maintenance: internal coding reorganization to isolate calls to external imaging, compression and threading libraries
 </ol>
 
-<li>5.3.5 (build 3000) - January 11, 2009 
+<li>5.3.5 (build 3000) - January 11, 2009
 <ol>
 <li>enhancement: add an option for viewing scenes using red/blue stereo pairs (requires red/blue glasses)
 <li>fix: correct view directions to be parallel (rather than <em>toeing in</em>) when displaying stereo pairs
 <li>fix: draw devices and iso-surfaces using shades of grey when coloring is turned off
 </ol>
 
-<li>5.3.4 (build 2973) - January 4, 2009 
+<li>5.3.4 (build 2973) - January 4, 2009
 <ol>
 <li>enhancement: add clipping plane information to saved viewpoints (left out of 5.3.3)
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=562&can=1&sort=-id">Issue 562</a>).
 </ol>
 
-<li>5.3.3 (build 2931) - December 22, 2008 
+<li>5.3.3 (build 2931) - December 22, 2008
 <ol>
 <li>enhancement: add clipping plane information to saved viewpoints (note: this change was not added until 5.3.4)
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=562&can=1&sort=-id">Issue 562</a>).
 </ol>
 
-<li>5.3.2 (build 2880) - December 17, 2008 
+<li>5.3.2 (build 2880) - December 17, 2008
 <ol>
-<li>enhancement: add an option to draw sensors activating (and deactivating) multiple times, 
+<li>enhancement: add an option to draw sensors activating (and deactivating) multiple times,
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=581&can=1&sort=-id">Issue 581</a>).
 <li>enhancement: add 2 states to the sensor device to allow testing of  code to draw sensors more generally,
-<li>enhancement: improve user  tick/label drawing using antialiasing (smooth line drawing) 
+<li>enhancement: improve user  tick/label drawing using antialiasing (smooth line drawing)
 <li>fix: correct the default orientation vector for devices,
 <li>fix: compute the elevation and azmuthal orientation angles for devices
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=584&can=1&sort=-id">Issue 584</a>).
@@ -1210,7 +1211,7 @@ pre-defined viewpoints so that user viewpoints may be displayed properly when sm
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=561&can=1&sort=-id">Issue 561</a>).
 <li>fix: expand the time interval for drawing text labels to allow for numerical FDS time step differences
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=557&can=1&sort=-id">Issue 557</a>).
-<li>usability: change the wording of the <em>Show/Hide All Plot3D</em> plane menu item to indicate that this 
+<li>usability: change the wording of the <em>Show/Hide All Plot3D</em> plane menu item to indicate that this
 only effects planes in the active or current mesh
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=556&can=1&sort=-id">Issue 556</a>).
 <li>fix: code change to fix default cad color drawing
@@ -1218,7 +1219,7 @@ only effects planes in the active or current mesh
 <li>usability: add key code definitions to the help menu and Appendix C of the User's guide.
 </ol>
 
-<li>5.3 (build 2720) - November 23, 2008 
+<li>5.3 (build 2720) - November 23, 2008
 <ol>
 
 <li> enhancement: Add option to draw cell centered slice data.  Cell centered data is created by adding the string, <tt>CELL_CENTERED=.TRUE.</tt>
@@ -1228,14 +1229,14 @@ on a <tt>&SLCF</tt> line in an FDS input file (requires FDS built with svn revis
 so that data from both meshes are not displayed simultaneously.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=531&can=1&sort=-id">Issue 531</a>).
 
-<li>  enhancement - Add option to control placement of scaling ticks (through the Display dialog box) used 
+<li>  enhancement - Add option to control placement of scaling ticks (through the Display dialog box) used
 to document cases.
 
 <li> enhancement - Add menu item and command key equivalent (%) for toggling the projection type.  Pressing '%' toggles between
 perspective and size preserving projection methods for displaying the scene.
 
-<li> enhancement: Add a dialog box for setting up and running smokeview scripts.  
-The dialog box includes several items such as specifying a custom configuration/.ini file name for later loading by the script, specifying custom render images file names, 
+<li> enhancement: Add a dialog box for setting up and running smokeview scripts.
+The dialog box includes several items such as specifying a custom configuration/.ini file name for later loading by the script, specifying custom render images file names,
 specifying the render directory.  As a result, the edits required to finalize the auto-generated script are minimal.
 
 <li> enhancement: Improve the layout and functionality of the motion dialog box.
@@ -1247,12 +1248,12 @@ specifying the render directory.  As a result, the edits required to finalize th
 than 1200.0 would result in hiding of ALL hrrpuv data.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=524&can=1&sort=-id">Issue 524</a>).
 
-<li> fix: fix clipping when displaying cad textures (and devices) - 
+<li> fix: fix clipping when displaying cad textures (and devices) -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=536&can=1&sort=-id">Issue 536</a>).
 
-<li>fix - fixed the cad texture display by 
+<li>fix - fixed the cad texture display by
 <ul>
-<li>adding the texture origin to the .ge1 file and 
+<li>adding the texture origin to the .ge1 file and
 <li>fix texture file flipping issue
 </ul>
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=522&can=1&sort=-id">Issue 522</a>).
@@ -1260,7 +1261,7 @@ than 1200.0 would result in hiding of ALL hrrpuv data.
 
 <p><li>5.2.7 (build 2602) - November 4, 2008
 <ol>
-<li>change - smokezip now requires the user to specifiy the minimum and maximum data bounds when compressing boundary files.  
+<li>change - smokezip now requires the user to specifiy the minimum and maximum data bounds when compressing boundary files.
 This now makes the treatment of boundary and slice files consistent (and more correct).
 <li>fix - correct skip frame option in both Smokeview and Smokezip allowing users to load bigger cases by skipping data frames.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=513&can=1&sort=-id">Issue 513</a>).
@@ -1298,7 +1299,7 @@ burning but have simply exceeded a specified temperature threshold value.
 <li>fix - make requirements for GPU and smoke culling consistent.  Both options now require OpenGL 2.0 or greater.
 <li>fix - fix cad display option when displaying devices.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=449&can=1&sort=-id">Issue 449</a>).
-<li>fix - fix clipping for transparent blockages. 
+<li>fix - fix clipping for transparent blockages.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=446&can=1&sort=-id">Issue 446</a>).
 </ol>
 
@@ -1308,7 +1309,7 @@ burning but have simply exceeded a specified temperature threshold value.
 <li>enhancement - allow screen size to be updated when an .ini file is loaded from a script
 <li>enhancement - save isosurface transparency state in .ini file
 <li>enhancement - save vector length in .ini file
-<li>enhancement - add LOADINIFILE script keyword to let one change Smokeview view settings 
+<li>enhancement - add LOADINIFILE script keyword to let one change Smokeview view settings
 during a script run.
 </ol>
 
@@ -1320,33 +1321,33 @@ during a script run.
 
 <li>5.2 (build 2039) - July 17, 2008
 <ol>
-<li>enhancement - Add an option to speed up smoke visualization by using the 
+<li>enhancement - Add an option to speed up smoke visualization by using the
 graphics programming unit (GPU) to perform some of the needed computations.
-This option is not supported on Linux or Mac OSX releases of Smokeview.  
+This option is not supported on Linux or Mac OSX releases of Smokeview.
 The option is turned off
 by default and may be toggled on and off by pressing the 'G' key.
 
 <li>enhancement - add the ability to run Smokeview in a <em>batch</em> or unattended
-mode.  This mode may be used to automatically load a data file, view it from 
+mode.  This mode may be used to automatically load a data file, view it from
 a prescribed direction and render the resulting image.  This may be repeated for other views
 and/or other data files.  A script named <em>casename.ssf</em> may be executed by typing
 <p><tt>smokeview -runscript casename </tt>
 <p>at a command line or from the <tt>Load/Unload>Script Options</tt> menu.
-Scripts are created by adding desired commands to a text file named casename.ssf 
-or by turning on the <em>script recorder</em> found in the 
+Scripts are created by adding desired commands to a text file named casename.ssf
+or by turning on the <em>script recorder</em> found in the
 Load/Unload>Script Options menu.
 
-<li>enhancment - internal change in smokeview resulting in reduced memory 
+<li>enhancment - internal change in smokeview resulting in reduced memory
 requirements when loading large cases.
 
-<li>enhancement - When performing WUI computations, allow slice and vector slice files to conform to a 
+<li>enhancement - When performing WUI computations, allow slice and vector slice files to conform to a
 specified distance above the ground or terrain.
 
 <li>fix - fix bug that occurs when reading the hrr csv file while it is being written to.
 
 <li>fix - fix bug that occurs when drawing smoke on a computer without a GPU enabled video card.
 
-<li>fix - force terrain normals to be smooth across mesh boundaries so that seams 
+<li>fix - force terrain normals to be smooth across mesh boundaries so that seams
 are not visible
 
 <li>fix - fix time advance when adjusting 3D slice/vector files.
@@ -1371,14 +1372,14 @@ are not visible
 
 <li>5.1.4 (build 1635) - May 5, 2008
 <ol>
-<li>enhancement - save smooth blockages to a file so that their definition may be read in rather than re-calculated.  
+<li>enhancement - save smooth blockages to a file so that their definition may be read in rather than re-calculated.
 <li>enhancement - add an option to simplify file compression by compressing only files that were selected for auto-loading.
 <li>enhancement - save the size preserving or perspective projection state in the .ini file
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=331&can=1&sort=-id">Issue 331</a>).
 <li>enhancement - implement the "AUTOTERRAIN" keyword for WUI applications of FDS.  If all blockages are used to implement terrain
-(ie no blockages are used to represent buildings on the terrain), then AUTOTERRAIN is used to signal Smokeview to draw a smooth 
+(ie no blockages are used to represent buildings on the terrain), then AUTOTERRAIN is used to signal Smokeview to draw a smooth
 surface representing the terrain.
-<li>enhancement -  add option to toggle slice file offset - 
+<li>enhancement -  add option to toggle slice file offset -
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=348&can=1&sort=-id">Issue 348</a>).
 <li>enhancement - add support for skipping particle frames created by FDS 5 or later.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=350&can=1&sort=-id">Issue 350</a>).
@@ -1393,22 +1394,22 @@ particles may be drawn outside the solution domain.
 <li>fix - Fix drawing when smoke, iso and slice routines have non-increasing time steps.
 This could occur when FDS is restarted to an earlier time than was saved in these data files.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=317&can=1&sort=-id">Issue 317</a>).
-<li>fix - fix drawing of text on the colorbar 
+<li>fix - fix drawing of text on the colorbar
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=325&can=1&sort=-id">Issue 325</a>).
 </ol>
 
 <li>5.1.3 (build 1501) - March 26, 2008
 <ol>
-<li>enhancement -  redo grid show menu to make clearer which grid planes will be visible once grid drawing is turned on.  
+<li>enhancement -  redo grid show menu to make clearer which grid planes will be visible once grid drawing is turned on.
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=308&can=1&sort=-id">Issue 308</a>)
 <li>fix - fix data chopping (<a href="http://code.google.com/p/fds-smv/issues/detail?id=303&can=1&sort=-id">Issue 303</a>).
 </ol>
 
 <li>5.1.2 (build 1426) - March 11, 2008
 <ol>
-<li>enhancement - add option to select frame skip for isosurface and slice files (in addition to boundary and 3D 
+<li>enhancement - add option to select frame skip for isosurface and slice files (in addition to boundary and 3D
 smoke files) when compressing data with smokezip.
-<li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
+<li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .
 This mode is used to demonstrate an FDS/Smokeview case by presenting a simplified dialog box with pre-defined tours
 <li>enhancement - add the command line option -skip val to the companion program <bold>smokezip</bold> to allow
 frame skipping specifiation when running this tool from a command shell.
@@ -1416,7 +1417,7 @@ frame skipping specifiation when running this tool from a command shell.
 
 <li>5.1 (build 1345) - February 20, 2008
 <ol>
-<li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .  
+<li>enhancement - add demo mode, activated by copying casename.smv to casename.svd .
 This mode is used to demonstrate an FDS/Smokeview case by presenting a simplified dialog box with pre-defined tours
 and viewpoints (defined in an .ini file).  Further details are found in the Smokeview user's guide.
 <li>enhancement - add avatars to FDS-EVAC visualizations and Smokeview tours.  Avatars are defined in the device.svo file.
@@ -1426,7 +1427,7 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 <li>An option has been added to smooth blockages (or not) at startup.
 <li>Smooth blockages are now saved to a file the first time a case is loaded for quicker subsequent startups.
 </ol>
-<li>fix - fix problem with running smokezip (caused by imbedded blanks in the path name) from Smokeview 
+<li>fix - fix problem with running smokezip (caused by imbedded blanks in the path name) from Smokeview
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=283&can=1&sort=-id">issue 283</a>)
 <li>fix - fix problem with menu disconnects (<a href="http://code.google.com/p/fds-smv/issues/detail?id=263&can=1&sort=-id">issues 263</a>).
 <li>fix - add missing scaling info to PART5 colorbar label (<a href="http://code.google.com/p/fds-smv/issues/detail?id=269&can=1&sort=-id">issue 269</a>).
@@ -1439,7 +1440,7 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 
 <li>5.0.6 (build 1042) - November 30, 2007
 <ol>
-<li>fix - fix error in colorbar when displaying CFAST zone data 
+<li>fix - fix error in colorbar when displaying CFAST zone data
 (<a href="http://code.google.com/p/fds-smv/issues/detail?id=234&can=1&sort=-id">issue 234</a>).
 </ol>
 
@@ -1469,13 +1470,13 @@ and viewpoints (defined in an .ini file).  Further details are found in the Smok
 
 <li>5.0.2 (build 826) - October 10, 2007
 <ol>
-<li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in 
+<li>enhancement - changed default color of first iso-surface to purple to address fire colorization detailed in
 <a href="http://code.google.com/p/fds-smv/issues/detail?id=196&can=1&sort=-id">Issue 196</a>.
 <li>maintenance - internal source clean up to remove un-needed compiler directives.
 </ol>
 
 <li>5.0.1 (build 730) - October 1, 2007<br>
-enhancement - Display versioning information (svn build number, compile date, <em>etc.</em>) 
+enhancement - Display versioning information (svn build number, compile date, <em>etc.</em>)
 in the help menu and when Smokeview is run at a command line.
 
 <li>5.0.0 (build 661) - September 19, 2007<br>

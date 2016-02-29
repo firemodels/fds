@@ -1198,6 +1198,7 @@ void draw_devices(void){
             rmax = vv + dvel;
             drawsphereseg(anglemin, anglemax, rmin, rmax);
             glPopMatrix();
+            break;
           default:
             ASSERT(FFALSE);
             break;
