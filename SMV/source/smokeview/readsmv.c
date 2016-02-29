@@ -1738,42 +1738,36 @@ void update_mesh_coords(void){
     }
   }
 
-  {
-    mesh *meshi;
-
-    meshi=meshinfo;
-
-    xbar = meshi->xyz_bar[XXX];
-    ybar = meshi->xyz_bar[YYY];
-    zbar = meshi->xyz_bar[ZZZ];
-
-    xbar0 = meshi->xyz_bar0[XXX];
-    ybar0 = meshi->xyz_bar0[YYY];
-    zbar0 = meshi->xyz_bar0[ZZZ];
-  }
-
   ijkbarmax=meshinfo->ibar;
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
 
-    if(meshi->ibar>ijkbarmax)ijkbarmax=meshi->ibar;
-    if(meshi->jbar>ijkbarmax)ijkbarmax=meshi->jbar;
-    if(meshi->kbar>ijkbarmax)ijkbarmax=meshi->kbar;
+    ijkbarmax = MAX(ijkbarmax,meshi->ibar);
+    ijkbarmax = MAX(ijkbarmax,meshi->jbar);
+    ijkbarmax = MAX(ijkbarmax,meshi->kbar);
   }
 
-  for(i=1;i<nmeshes;i++){
+  for(i=0;i<nmeshes;i++){
     mesh *meshi;
 
     meshi=meshinfo+i;
+    if(i==0){
+      xbar = meshi->xyz_bar[XXX];
+      ybar = meshi->xyz_bar[YYY];
+      zbar = meshi->xyz_bar[ZZZ];
 
-    if(xbar <meshi->xyz_bar[XXX] )xbar =meshi->xyz_bar[XXX];
-    if(ybar <meshi->xyz_bar[YYY] )ybar =meshi->xyz_bar[YYY];
-    if(zbar <meshi->xyz_bar[ZZZ] )zbar =meshi->xyz_bar[ZZZ];
-    if(xbar0>meshi->xyz_bar0[XXX])xbar0=meshi->xyz_bar0[XXX];
-    if(ybar0>meshi->xyz_bar0[YYY])ybar0=meshi->xyz_bar0[YYY];
-    if(zbar0>meshi->xyz_bar0[ZZZ])zbar0=meshi->xyz_bar0[ZZZ];
+      xbar0 = meshi->xyz_bar0[XXX];
+      ybar0 = meshi->xyz_bar0[YYY];
+      zbar0 = meshi->xyz_bar0[ZZZ];
+    }
+    xbar = MAX(xbar, meshi->xyz_bar[XXX]);
+    ybar = MAX(ybar, meshi->xyz_bar[YYY]);
+    zbar = MAX(zbar, meshi->xyz_bar[ZZZ]);
+    xbar0 = MIN(xbar0, meshi->xyz_bar0[XXX]);
+    ybar0 = MIN(ybar0, meshi->xyz_bar0[YYY]);
+    zbar0 = MIN(zbar0, meshi->xyz_bar0[ZZZ]);
   }
 
   factor = 256*128;
@@ -10546,23 +10540,6 @@ int readini2(char *inifile, int localfile){
       contour_type=CLAMP(contour_type,0,2);
       continue;
     }
-    if(localfile==1&&match(buffer, "P3VIEW")==1){
-      for(i=0;i<nmeshes;i++){
-        mesh *meshi;
-
-        meshi = meshinfo + i;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i %i %i",
-          &visx_all,&meshi->plotx,&visy_all,&meshi->ploty,&visz_all,&meshi->plotz);
-        ONEORZERO(visx_all);
-        ONEORZERO(visy_all);
-        ONEORZERO(visz_all);
-        meshi->plotx=CLAMP(meshi->plotx,0,meshi->ibar);
-        meshi->ploty=CLAMP(meshi->ploty,0,meshi->jbar);
-        meshi->plotz=CLAMP(meshi->plotz,0,meshi->kbar);
-      }
-      continue;
-    }
     if(match(buffer,"P3CONT3DSMOOTH")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&p3cont3dsmooth);
@@ -11848,13 +11825,6 @@ void writeini_local(FILE *fileout){
       fprintf(fileout, "SCRIPTFILE\n");
       fprintf(fileout, " %s\n", file);
     }
-  }
-  fprintf(fileout, "P3VIEW\n");
-  for(i = 0; i<nmeshes; i++){
-    mesh *meshi;
-
-    meshi = meshinfo+i;
-    fprintf(fileout, " %i %i %i %i %i %i \n", visx_all, meshi->plotx, visy_all, meshi->ploty, visz_all, meshi->plotz);
   }
   fprintf(fileout, "SHOOTER\n");
   fprintf(fileout, " %f %f %f\n", shooter_xyz[0], shooter_xyz[1], shooter_xyz[2]);

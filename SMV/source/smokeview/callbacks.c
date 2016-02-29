@@ -1980,11 +1980,15 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visx_all=1-visx_all;
+        plotstate = getplotstate(STATIC_PLOTS);
+        updatemenu = 1;
       }
       break;
     case 'y':
     case 'Y':
       visy_all = 1-visy_all;
+      plotstate = getplotstate(STATIC_PLOTS);
+      updatemenu = 1;
       break;
     case 'z':
     case 'Z':
@@ -1993,6 +1997,8 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visz_all = 1 - visz_all;
+        plotstate = getplotstate(STATIC_PLOTS);
+        updatemenu = 1;
       }
       break;
     case '0':
