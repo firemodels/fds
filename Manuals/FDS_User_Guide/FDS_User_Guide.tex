@@ -465,14 +465,14 @@ Sample input files are included as part of the standard installation. A good cas
 
 \section{A Brief Primer on Computer Hardware}
 
-The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575. 
+The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575.
 \begin{description}
 \item[Cores:] Recent developments in computational architecture can lead to confusion concerning what a microprocessor is. Since the advent of multi-core technology, such as dual-cores and quad-cores, the term ``processor'' has been used to describe a logical execution unit or a physical chip. A multi-core chip may have several cores. With the advent of multi-core technology, the term ``processor'' has become context-sensitive, and is largely ambiguous when describing large multi-core systems. Essentially a core comprises a logical execution unit containing an L1 cache and functional units. Cores are able to independently execute programs or threads. Supercomputers are listed as having thousands of cores.
 \item[Chips:] A chip refers to a physical integrated circuit (IC) on a computer. A chip in the context of this document refers to an execution unit that can be single- or multi-core technology.
 \item[Sockets:] The socket refers to a physical connector on a computer motherboard that accepts a single physical chip. Many motherboards can have multiple sockets that can in turn accept multi-core chips.
 \item[Processes:] A process is an independent program running on a computer. A process has a full stack of memory associated for its own use, and does not depend on another process for execution. MPI (Message Passing Interface) processes are true processes because they can run on independent machines or the same machine.
 \item[Threads:] A thread is essentially a process that does not have a full stack of memory associated for it. The thread is tied to a parent process, and is merely an offshoot of execution. Typically thread processes must run on the same computer, but can execute simultaneously on separate cores of the same node. OpenMP parallelism uses threads for child processes.
-\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time. 
+\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time.
 \item[N-ways:] Multi-core compute nodes can be described by the number of execution units, or cores. A computer with 8 cores would be described as an 8-way node. This machine can have 8 independent processes running simultaneously. A 32-core system would be called a 32-way node.
 \item[Processors:] As explained above, a processor could describe either a single execution core or a single physical multi-core chip. The context of use will define the meaning of the term.
 \end{description}
@@ -557,7 +557,7 @@ Mesh   3 is assigned to MPI Process   2
 Mesh   4 is assigned to MPI Process   3
 Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
-This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer. 
+This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer.
 
 There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X and Linux, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
 
@@ -3913,6 +3913,19 @@ Since pressure zones are defined using {\ct XB}, it might not be possible to def
 
 Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
 are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+
+\subsubsection{Example Case: Irregularly Shaped Zone}
+\label{zone_shape_example}
+
+This example is similar to the ones in the previous section, except in this case, the pressure zone is L-shaped and split across two meshes. The objective is simply to ensure that the specification of the pressure zone is properly accounted for in the model. Figure~\ref{zone_shape} compares the predicted pressure in the compartment compared to an exact solution. Air is injected into the compartment for 5~s, after which the compartment is opened to a smaller compartment. At 15~s, the smaller compartment is opened to the outside.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_shape}
+\caption[Results of the {\ct zone\_shape} test case]{Output of {\ct zone\_shape} test case. Shown is the pressure in an L-shaped compartment that is opened to another compartment at 5~s, and the outdoors at 15~s.}
+\label{zone_shape}
+\end{figure}
+
 
 
 \subsection{Leaks}
