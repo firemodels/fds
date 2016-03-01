@@ -251,6 +251,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->enable();
       CHECKBOX_clip_ymax->enable();
       CHECKBOX_clip_zmax->enable();
+      show_bothsides_blockages = 1;
+      updatefaces=1;
     }
     else{
       SPINNER_clip_xmin->disable();
@@ -266,6 +268,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->disable();
       CHECKBOX_clip_ymax->disable();
       CHECKBOX_clip_zmax->disable();
+      show_bothsides_blockages = 0;
+      updatefaces=1;
     }
     break;
   case SPINNER_xlower:
