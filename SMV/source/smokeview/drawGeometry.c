@@ -2271,6 +2271,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       if(faceptr->kmin==faceptr->kmax){
         if(faceptr->kmin>0&&faceptr->kmin<meshi->kbar)faceptr->is_interior=1;
       }
+      faceptr->show_bothsides = show_bothsides_blockages;
     }
     if(vi!=NULL){
       faceptr->imin=vi->imin;
