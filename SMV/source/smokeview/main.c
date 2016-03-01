@@ -13,7 +13,7 @@
 #include "lua_api.h"
 #endif
 
-//  version 6.3.5
+//   version 6.3.5
 
 /* ------------------ main ------------------------ */
 
