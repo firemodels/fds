@@ -327,6 +327,16 @@ DO NN=1,N_HVAC_READ
                                     ,NN
             CALL SHUTDOWN(MESSAGE); RETURN
          ENDIF
+         IF (MAX_PRESSURE <= 0._EB) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: MAX_PRESSURE must be > 0. HVAC line number '&
+                                    ,NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
+         IF (MAX_FLOW <= 0._EB) THEN
+            WRITE(MESSAGE,'(A,I5)') 'ERROR: MAX_FLOW must be > 0. HVAC line number '&
+                                    ,NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+         ENDIF
          IF (VOLUME_FLOW < 1.E6_EB) THEN
             FAN(I_FAN)%FAN_TYPE = 1
          ELSEIF(RAMP_ID/='null') THEN
@@ -2062,7 +2072,7 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
          ENDIF
          TMP_SUM = TMP_NEW
       ENDDO
-
+      
       DN%TMP_V = TMP_NEW
       DN%CP_V = CPBAR
    ENDIF INTERNAL_NODE_IF
