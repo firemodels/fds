@@ -135,7 +135,6 @@ $QFDS -d Pressure_Effects pressure_boundary.fds
 $QFDS -d Pressure_Effects pressure_rise.fds
 $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
-$QFDS -d Pressure_Effects zone_shape.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver scarc2d_fft_1mesh.fds
@@ -450,6 +449,8 @@ $QFDS -t -p 8 -d Flowfields volume_flow_1.fds
 $QFDS -t -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -t -p 4 -d Heat_Transfer back_wall_test.fds
+
+$QFDS -t -p 2 -d Pressure_Effects zone_shape.fds
 
 $QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
