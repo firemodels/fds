@@ -9166,12 +9166,16 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (N_EDDY>0) THEN
                   SYNTHETIC_EDDY_METHOD = .TRUE.
                   IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) THEN
-                     CALL SHUTDOWN('ERROR: L_EDDY = 0 in Synthetic Eddy Method')
-                     RETURN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' L_EDDY = 0 in Synthetic Eddy Method'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) THEN
-                     CALL SHUTDOWN('ERROR: VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method')
-                     RETURN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ENDIF
+                  IF (TRIM(SURF_ID)=='HVAC') THEN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' Synthetic Eddy Method not permitted with HVAC'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
 
