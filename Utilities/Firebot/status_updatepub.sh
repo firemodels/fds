@@ -1,7 +1,7 @@
 #!/bin/bash
 gitwebrepo=~/FDS-SMVgitweb
 firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
-old=~/.firebot/old
+oldpage=~/.firebot/oldpage
 newpage=~/.firebot/newpage
 olddata=~/.firebot/old_data
 newdata=~/.firebot/fds_times.csv
@@ -14,21 +14,31 @@ cd $firebotdir
 if [ -e $running ] ; then
   exit
 fi
-./status2html.sh  > $new
-if [ -e $old ]; then
-  ndiff=`diff $old $new|wc -l`
-  if [ ! "$ndiff" == "0" ] ; then
-    cp $new $old
-    EXIT="no"
-  fi
+
+# check if status web page has changed
+
+./status2html.sh  > $newpage
+if [ ! -e $oldpage ]; then
+  cp $newpage $oldpage
 fi
-if [ -e $olddata ]; then
-  ndiff=`diff $olddata $newdata|wc -l`
-  if [ ! "$ndiff" == "0" ] ; then
-     cp $newdata $olddata
-     EXIT="no"
-  fi
+ndiff=`diff $oldpage $newpage|wc -l`
+if [ ! "$ndiff" == "0" ] ; then
+  cp $newpage $oldpage
+  EXIT="no"
 fi
+
+# check if FDS benchmark times have changed
+
+if [ ! -e $olddata ]; then
+  cp $newdata $olddata
+fi
+ndiff=`diff $olddata $newdata|wc -l`
+if [ ! "$ndiff" == "0" ] ; then
+   cp $newdata $olddata
+   EXIT="no"
+fi
+
+# if nothing has changed then exit without committing any files
 if [ "$EXIT" == "yes" ]; then
    exit
 fi
