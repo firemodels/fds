@@ -1,42 +1,44 @@
 #!/bin/bash
 curdir=`pwd`
 
-indir=$HOME/.firebot
-outdir=`pwd`
+indir=~firebot/.firebot
+outdir=/var/www/html/firebot
 
 if [ ! -d $indir ]; then
   mkdir -p $indir
 fi
 cd $indir
-indir=`pwd`
-firebotdir=$indir
+firebotdir=~/.firebot
+if [ ! -d $firebotdir ]; then
+  mkdir -p $firebotdir
+fi
 cd $curdir
+
+smokebotdir=~smokebot/.smokebot
 
 function usage {
 echo "Create a plot from fds timing data"
 echo ""
 echo "Options:"
 echo "-i - input directory [default: $indir]"
-echo "-f - use firebot cpu time directory"
 echo "-F - force plot creation"
 echo "-h - display this message"
 echo "-o - output directory [default: $outdir]"
-echo "-s - use smokebot cpu time directory"
+echo "-s - use smokebot for input [default: $smokebotdir]"
+echo "-v - show options used, do not run"
 exit
 }
 
 FORCE=
-while getopts 'fFhi:o:' OPTION
+SHOW=
+while getopts 'fFhi:o:sv' OPTION
 do
 case $OPTION  in
   h)
    usage
    ;;
   F)
-   FORCE=1
-   ;;
-  f)
-   indir=~firebot/.firebot
+   FORCE=-F
    ;;
   i)
    indir="$OPTARG"
@@ -45,12 +47,26 @@ case $OPTION  in
    outdir="$OPTARG"
    ;;
   s)
-   indir=~smokebot/.smokebot
+   indir=$smokebotdir
+   ;;
+  v)
+   SHOW=1
    ;;
 esac
 done
 shift $(($OPTIND-1))
 
+cd $indir
+indir=`pwd`
+cd $curdir
+cd $outdir
+outdir=`pwd`
+cd $curdir
+
+if [ "$SHOW" == "1" ]; then
+   echo $0 $FORCE -i $indir -o $outdir   
+   exit
+fi
 date=`date`
 cpufrom=$indir/fds_times.csv
 
