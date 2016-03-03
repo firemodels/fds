@@ -6,29 +6,49 @@ from __future__ import division # make floating point division default as in Mat
 import math
 import numpy as np
 import scipy.special as sp
-import matplotlib as mat
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica'],'size':16})
-mat.rcParams['mathtext.fontset'] = 'custom'
-mat.rcParams['mathtext.rm'] = 'Helvetica'        #'Bitstream Vera Sans'
-mat.rcParams['mathtext.it'] = 'Helvetica:italic' #'Bitstream Vera Sans:italic'
-mat.rcParams['mathtext.bf'] = 'Helvetica:bold'   #'Bitstream Vera Sans:bold'
+matplotlib.rcParams['mathtext.fontset'] = 'custom'
+matplotlib.rcParams['mathtext.rm'] = 'Helvetica'        #'Bitstream Vera Sans'
+matplotlib.rcParams['mathtext.it'] = 'Helvetica:italic' #'Bitstream Vera Sans:italic'
+matplotlib.rcParams['mathtext.bf'] = 'Helvetica:bold'   #'Bitstream Vera Sans:bold'
 
 
 ddir = '../../Verification/Flowfields/'
 
 M_16 = np.genfromtxt(ddir+'blasius_16_line.csv', delimiter=',', skip_header=1, names=True)
-z_16 = M_16['Up1z']
-u_16 = M_16['Up1']
+z_16 = M_16['Up05z']
+u_16 = M_16['Up05']
 
 M_32 = np.genfromtxt(ddir+'blasius_32_line.csv', delimiter=',', skip_header=1, names=True)
-z_32 = M_32['Up1z']
-u_32 = M_32['Up1']
+z_32 = M_32['Up05z']
+u_32 = M_32['Up05']
 
 # M_64 = np.genfromtxt(ddir+'blasius_64_line.csv', delimiter=',', skip_header=1, names=True)
-# z_64 = M_64['Up1z']
-# u_64 = M_64['Up1']
+# z_64 = M_64['Up05z']
+# u_64 = M_64['Up05']
+
+u0  = u_32[-1]
+mu  = 0.001
+rho = 1.199
+xc  = 0.05
+
+delta = math.sqrt(mu/rho*xc/u0)
+zmax = 0.3
+etamax = zmax/delta
+n = 256
+deta = etamax/n
+eta = np.array([0:deta:etamax])
+fp  = 1.
+
+z_bl=eta*delta
+u_bl=fp*u0
+
+print z_bl,u_bl
+
+raise SystemExit(0)
 
 # plot FDS results
 
