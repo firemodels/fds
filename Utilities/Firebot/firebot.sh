@@ -984,6 +984,10 @@ archive_timing_stats()
   s=`date "+%S"`
   decdate=`echo "scale=5; $d + $h/24.0 + $m/(60*24) + $s/(3600*24)" | bc`
   echo $decdate,$TOTAL_FDS_TIMES>>$TIME_HISTORY
+  if [ "$UPLOAD_GUIDES" == "1" ]; then
+    cd $fdsrepo/Utilities/Firebot
+    ./cpu2plot.sh -F
+  fi
 }
 
 #  ==================================
