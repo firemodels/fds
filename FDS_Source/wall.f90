@@ -1621,7 +1621,6 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
                ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,1)*ML%NU_GAS(NS,1)*MFLUX
                ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,1)*MFLUX
             ENDDO
-            ONE_D%MASSFLUX = ONE_D%MASSFLUX*ONE_D%AREA_ADJUST
             J = 0
             ! Always remesh for liquid fuels
             IF(MFLUX>TWO_EPSILON_EB) REMESH=.TRUE.
@@ -1674,7 +1673,6 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
                   ONE_D%MASSFLUX(NS)        = ONE_D%MASSFLUX(NS)        + ML%ADJUST_BURN_RATE(NS,J)*ML%NU_GAS(NS,J)*MFLUX_S
                   ONE_D%MASSFLUX_ACTUAL(NS) = ONE_D%MASSFLUX_ACTUAL(NS) +                           ML%NU_GAS(NS,J)*MFLUX_S
                ENDDO
-               ONE_D%MASSFLUX = ONE_D%MASSFLUX*ONE_D%AREA_ADJUST
                Q_S(I) = Q_S(I) - REACTION_RATE * ML%H_R(J)
                ONE_D%RHO(I,N) = MAX( 0._EB , ONE_D%RHO(I,N) - DT_BC*REACTION_RATE )
                DO NN=1,ML%N_RESIDUE(J)
@@ -1726,6 +1724,10 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
       ENDIF
 
    ENDDO POINT_LOOP1
+
+   ! Adjust the MASSFLUX of a wall surface cell to account for non-alignment of the mesh.
+
+   IF (PRESENT(WALL_INDEX)) ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)*ONE_D%AREA_ADJUST
 
    ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
 
