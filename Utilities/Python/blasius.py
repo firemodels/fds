@@ -26,9 +26,9 @@ M_32 = np.genfromtxt(ddir+'blasius_32_line.csv', delimiter=',', skip_header=1, n
 z_32 = M_32['Up1z']
 u_32 = M_32['Up1']
 
-M_64 = np.genfromtxt(ddir+'blasius_64_line.csv', delimiter=',', skip_header=1, names=True)
-z_64 = M_64['Up1z']
-u_64 = M_64['Up1']
+# M_64 = np.genfromtxt(ddir+'blasius_64_line.csv', delimiter=',', skip_header=1, names=True)
+# z_64 = M_64['Up1z']
+# u_64 = M_64['Up1']
 
 # plot FDS results
 
@@ -40,8 +40,8 @@ plt.plot(u_16,z_16,label='FDS $N$=16',**marker_style)
 marker_style = dict(color='green', linestyle='-.', marker='o', fillstyle='none', markersize=0)
 plt.plot(u_32,z_32,label='FDS $N$=32',**marker_style)
 
-marker_style = dict(color='blue', linestyle='-', marker='o', fillstyle='none', markersize=0)
-plt.plot(u_64,z_64,label='FDS $N$=64',**marker_style)
+# marker_style = dict(color='blue', linestyle='-', marker='o', fillstyle='none', markersize=0)
+# plt.plot(u_64,z_64,label='FDS $N$=64',**marker_style)
 
 #plt.axis([min(t), max(t), min(HRR), 1.1*max(HRR)])
 plt.xlabel('u (m/s)')
