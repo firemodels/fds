@@ -6,13 +6,18 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 &MESH IJK=25,50,12, XB=0.0, 5.0,0.0,10.0,0.0,2.4 /
 &MESH IJK=25,50,12, XB=5.0,10.0,0.0,10.0,0.0,2.4 /
 
-&TIME T_END=30. / 
+&TIME T_END=25., DT=0.02 / 
+
+&DUMP DT_DEVC=0.1 /
+
+&MISC CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE., STRATIFICATION=.FALSE. /
+
+&SURF ID='WALL', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
 
 &SURF ID='BLOW', SPEC_ID='AIR',MASS_FLUX(1)=1., COLOR='RED', RAMP_MF(1)='flow' / 
-&RAMP ID='flow', T= 0.0, F=0. /
-&RAMP ID='flow', T= 0.1, F=1. /
-&RAMP ID='flow', T= 5.0, F=1. /
-&RAMP ID='flow', T= 5.1, F=0. /
+&RAMP ID='flow', T= 0.00, F=1. /
+&RAMP ID='flow', T= 5.00, F=1. /
+&RAMP ID='flow', T= 5.01, F=0. /
 
 &OBST XB= 5.0, 5.2, 5.0,10.0, 0.0, 2.4 /
 &OBST XB= 0.0, 5.0, 5.0, 5.2, 0.0, 2.4 /
@@ -27,18 +32,15 @@ Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equi
 &VENT XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, SURF_ID='OPEN' /
 &OBST XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, DEVC_ID='door 3' /
 
-&DEVC XYZ=1.0,1.0,1.0,ID='pres_1',QUANTITY='PRESSURE' /
-&DEVC XYZ=7.5,5.0,1.0,ID='pres_2',QUANTITY='PRESSURE' /
-&DEVC XYZ=2.5,7.5,1.0,ID='pres_3',QUANTITY='PRESSURE' /
+&DEVC XYZ=1.0,1.0,1.0,ID='pres_1',QUANTITY='PRESSURE', TIME_AVERAGED=.FALSE. /
+&DEVC XYZ=7.5,5.0,1.0,ID='pres_2',QUANTITY='PRESSURE', TIME_AVERAGED=.FALSE. /
+&DEVC XYZ=2.5,7.5,1.0,ID='pres_3',QUANTITY='PRESSURE', TIME_AVERAGED=.FALSE. /
 
 &DEVC XYZ=0.0,0.0,0.0, ID='door 2', SETPOINT= 5.0, QUANTITY='TIME', INITIAL_STATE=.FALSE. /
-&DEVC XYZ=0.0,0.0,0.0, ID='door 3', SETPOINT=10.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+&DEVC XYZ=0.0,0.0,0.0, ID='door 3', SETPOINT=15.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
 
 &SLCF PBZ=1.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
 &SLCF PBZ=1.0,QUANTITY='PRESSURE' /
-&SLCF PBZ=1.0,QUANTITY='DENSITY' /
-
-&DUMP MASS_FILE=.TRUE. /
 
 &TAIL /
 
