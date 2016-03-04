@@ -93,7 +93,7 @@ if [ ! -e $outdir/test.$$ ]; then
 fi
 rm $outdir/test.$$
 
-cpuplot=$firebotdir/fds_times.png
+cpuplot=/tmp/fds_times.png.$$
 old=$firebotdir/old
 cputo=$firebotdir/fds_times.csv
 cputrunc=$firebotdir/fds_times_trunc.csv
@@ -120,4 +120,4 @@ set border ls 1
 plot "$cputrunc" using 1:2 title "$date" with lines ls 1
 EOF
 cp $cpuplot $outdir/fds_times.png
-rm $cpuplot
+#rm $cpuplot
