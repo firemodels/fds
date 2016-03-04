@@ -9166,12 +9166,16 @@ MESH_LOOP_1: DO NM=1,NMESHES
                IF (N_EDDY>0) THEN
                   SYNTHETIC_EDDY_METHOD = .TRUE.
                   IF (ANY(VT%SIGMA_IJ<TWO_EPSILON_EB)) THEN
-                     CALL SHUTDOWN('ERROR: L_EDDY = 0 in Synthetic Eddy Method')
-                     RETURN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' L_EDDY = 0 in Synthetic Eddy Method'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                   IF (ALL(ABS(VT%R_IJ)<TWO_EPSILON_EB)) THEN
-                     CALL SHUTDOWN('ERROR: VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method')
-                     RETURN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' VEL_RMS (or Reynolds Stress) = 0 in Synthetic Eddy Method'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ENDIF
+                  IF (TRIM(SURF_ID)=='HVAC') THEN
+                     WRITE(MESSAGE,'(A,I4,A)') 'ERROR: VENT ',NN,' Synthetic Eddy Method not permitted with HVAC'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
                   ENDIF
                ENDIF
 
@@ -9460,7 +9464,7 @@ USE DEVICE_VARIABLES, ONLY: DEVICE_TYPE, DEVICE, N_DEVC
 REAL(EB) :: DIAMETER,TEMPERATURE,DENSITY,RR_SUM,ZZ_GET(1:N_TRACKED_SPECIES),MASS_PER_VOLUME, &
             MASS_PER_TIME,DT_INSERT,UVW(3),HRRPUV,XYZ(3),DX,DY,DZ,HEIGHT,RADIUS,MASS_FRACTION(MAX_SPECIES), &
             PARTICLE_WEIGHT_FACTOR,AUTO_IGNITION_TEMPERATURE
-INTEGER  :: N,NN,NNN,II,JJ,KK,NS,NS2,NUMBER_INITIAL_PARTICLES,N_PARTICLES,N_INIT_NEW,N_INIT_READ,N_PARTICLES_PER_CELL
+INTEGER  :: NM,N,NN,NNN,II,JJ,KK,NS,NS2,NUMBER_INITIAL_PARTICLES,N_PARTICLES,N_INIT_NEW,N_INIT_READ,N_PARTICLES_PER_CELL
 LOGICAL  :: CELL_CENTERED
 EQUIVALENCE(NUMBER_INITIAL_PARTICLES,N_PARTICLES)
 CHARACTER(LABEL_LENGTH) :: ID,CTRL_ID,DEVC_ID,PART_ID,SHAPE,MULT_ID,SPEC_ID(1:MAX_SPECIES)
@@ -9555,9 +9559,24 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
       ID = DV%ID
    ENDIF
 
-   ! Transform XYZ into XB if necessary
+   ! Transform XYZ into XB if necessary, and move XYZ points off of mesh boundaries.
 
    IF (ANY(XYZ>-100000._EB)) THEN
+
+      MESH_LOOP: DO NM=1,NMESHES
+         IF (EVACUATION_ONLY(NM)) CYCLE MESH_LOOP
+         M=>MESHES(NM)
+         IF (XYZ(1)>=M%XS .AND. XYZ(1)<=M%XF .AND. XYZ(2)>=M%YS .AND.  XYZ(2)<=M%YF .AND. XYZ(3)>=M%ZS .AND. XYZ(3)<=M%ZF) THEN
+            IF (ABS(XYZ(1)-M%XS)<TWO_EPSILON_EB) XYZ(1) = XYZ(1) + 0.01_EB*M%DXI
+            IF (ABS(XYZ(1)-M%XF)<TWO_EPSILON_EB) XYZ(1) = XYZ(1) - 0.01_EB*M%DXI
+            IF (ABS(XYZ(2)-M%YS)<TWO_EPSILON_EB) XYZ(2) = XYZ(2) + 0.01_EB*M%DETA
+            IF (ABS(XYZ(2)-M%YF)<TWO_EPSILON_EB) XYZ(2) = XYZ(2) - 0.01_EB*M%DETA
+            IF (ABS(XYZ(3)-M%ZS)<TWO_EPSILON_EB) XYZ(3) = XYZ(3) + 0.01_EB*M%DZETA
+            IF (ABS(XYZ(3)-M%ZF)<TWO_EPSILON_EB) XYZ(3) = XYZ(3) - 0.01_EB*M%DZETA
+            EXIT MESH_LOOP
+         ENDIF
+      ENDDO MESH_LOOP
+
       XB(1:2) = XYZ(1)
       XB(3:4) = XYZ(2)
       XB(5:6) = XYZ(3)

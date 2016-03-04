@@ -33,8 +33,9 @@ EOF
 cd $curdir
 
 cat << EOF
+<h3>Benchmark Time History</h3>
+<IMG width=500 SRC="fds_times.png"><br>
 <h3>Firebot Status</h3>
 
-This page displays the status for up to 30 of the most recent build/test cycles.<br>
-
+Firebot status for up to 30 previous build/test cycles.<br>
 EOF
