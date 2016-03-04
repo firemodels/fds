@@ -1,4 +1,4 @@
 #!/bin/bash
 rm -f *.o
 
-make -f ../Makefile intel_osx_64
+make "FORTLIBDIR=$IFORT_COMPILER_LIB" -f ../Makefile intel_osx_64
