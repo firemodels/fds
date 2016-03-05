@@ -13,7 +13,7 @@ UPLOADPNG ()
   cd $FROMDIR
   FILE=$1
   FILEnew=${FILE}_new.png
-  cp $FILE.pdf $FILEnew
+  cp $FILE.png $FILEnew
   $GDRIVE list  | grep $FILEnew | awk '{ system("~/bin/gdrive delete -i " $1)} '
   $GDRIVE upload -p $MANUAL_PARENT_ID -f $FILEnew
 }
