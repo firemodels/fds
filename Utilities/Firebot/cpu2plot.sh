@@ -8,7 +8,7 @@ if [ ! -d $indir ]; then
   mkdir -p $indir
 fi
 cd $indir
-firebotdir=~/.firebot
+firebotdir=$HOME/.firebot
 if [ ! -d $firebotdir ]; then
   mkdir -p $firebotdir
 fi
