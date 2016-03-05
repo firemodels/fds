@@ -1,56 +1,41 @@
 #!/bin/bash
 curdir=`pwd`
-prefix=fds_
 
-# by default assumes data comes from firebot
-# and output goes to the firebot web page
+# by default assumes data comes from smokebot
+# and output goes to the smokebot web page
 
-indir=~firebot/.firebot
-outdir=/var/www/html/firebot
-datadir=$HOME/.firebot
-smokebotdir=~smokebot/.smokebot
+indir=~smokebot/.smokebot
+outdir=/var/www/html/smokebot
+datadir=$HOME/.smokebot
 
 function usage {
-echo "Create a plot from firebot or smokebot timing data"
+echo "Create a plot from smokebot timing data"
 echo ""
 echo "Options:"
-echo "-i - input directory [default: $indir]"
 echo "-F - force plot creation"
+echo "-i - input directory [default: $indir]"
 echo "-h - display this message"
 echo "-o - output directory [default: $outdir]"
-echo "-p - prefix [default: $prefix]"
-echo "-s - use smokebot for input [default: $smokebotdir]"
 echo "-v - show options used, do not run"
 exit
 }
 
 FORCE=
 SHOW=
-while getopts 'd:fFhi:o:p:sv' OPTION
+while getopts 'Fhi:o:v' OPTION
 do
 case $OPTION  in
-  d)
-   datadir="$OPTARG"
+  F)
+   FORCE=-F
    ;;
   h)
    usage
-   ;;
-  F)
-   FORCE=-F
    ;;
   i)
    indir="$OPTARG"
    ;;
   o)
    outdir="$OPTARG"
-   ;;
-  p)
-   prefix="$OPTARG"
-   ;;
-  s)
-   indir=$smokebotdir
-   datadir=$smokebotdir
-   prefix=smv_
    ;;
   v)
    SHOW=1
@@ -76,7 +61,7 @@ if [ "$SHOW" == "1" ]; then
    exit
 fi
 date=`date`
-cpufrom=$indir/${prefix}times.csv
+cpufrom=$indir/smv_times.csv
 
 if [ ! -d $indir ]; then
   echo input directory $indir does not exist
@@ -101,9 +86,9 @@ if [ ! -e $outdir/test.$$ ]; then
 fi
 rm $outdir/test.$$
 
-cpuplot=/tmp/${prefix}times.png.$$
-old=$datadir/${prefix}times_trunc_old.csv
-cputrunc=$datadir/${prefix}times_trunc.csv
+cpuplot=/tmp/smv_times.png.$$
+old=$datadir/smv_times_trunc_old.csv
+cputrunc=$datadir/smv_times_trunc.csv
 
 sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
 if [ "$FORCE" == "" ]; then
@@ -127,5 +112,5 @@ set style line 1 lt 1 lw 4 lc rgb "black"
 set border ls 1
 plot "$cputrunc" using 1:2 title "$date" with lines ls 1
 EOF
-cp $cpuplot $outdir/${prefix}times.png
+cp $cpuplot $outdir/smv_times.png
 rm $cpuplot
