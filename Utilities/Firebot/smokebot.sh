@@ -20,6 +20,7 @@ WARNING_LOG=$OUTPUT_DIR/warnings
 GUIDE_DIR=$OUTPUT_DIR/guides
 STAGE_STATUS=$OUTPUT_DIR/stage_status
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+WEBDIR=/var/www/html/smokebot
 
 # define repo names (default)
 fdsrepo=~/FDS-SMVgitclean
@@ -1173,7 +1174,8 @@ archive_timing_stats()
   echo $decdate,$TOTAL_SMV_TIMES>>$TIME_HISTORY
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
-    ./smvcpu2plot.sh -F 
+    ./smvcpu2plot.sh -F  -o $WEBDIR
+    cp $WEBDIR/smv_times.png $NEWGUIDE_DIR/.
   fi
 
 
