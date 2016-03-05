@@ -8,6 +8,16 @@ CURDIR=`pwd`
 MANUAL_PARENT_ID=0B_wB1pJL2bFQUlJwMmNfaHlqME0
 FIGURES_PARENT_ID=0B-W-dkXwdHWNOGVsZXNzTjdLek0
 
+UPLOADPNG ()
+{
+  cd $FROMDIR
+  FILE=$1
+  FILEnew=${FILE}_new.png
+  cp $FILE.pdf $FILEnew
+  $GDRIVE list  | grep $FILEnew | awk '{ system("~/bin/gdrive delete -i " $1)} '
+  $GDRIVE upload -p $MANUAL_PARENT_ID -f $FILEnew
+}
+
 UPLOADGUIDE ()
 {
   cd $FROMDIR
@@ -39,5 +49,6 @@ if [ -e $GDRIVE ] ; then
   UPLOADGUIDE SMV_Verification_Guide
   UPLOADFIGURES SMV_User_Guide SMV_UG
   UPLOADFIGURES SMV_Verification_Guide SMV_VG
+  UPLOADPNG smv_times
   cd $CURDIR
 fi
