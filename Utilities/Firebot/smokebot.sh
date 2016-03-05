@@ -156,7 +156,7 @@ export cfastrepo
 
 export SMV_SUMMARY="$fdsrepo/Manuals/SMV_Summary"
 WEBFROMDIR="$fdsrepo/Manuals/SMV_Summary"
-WEBTODIR=/var/www/html/VV/SMV2
+WEBTODIR=/var/www/html/smokebot
 
 SMV_VG_GUIDE=$fdsrepo/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsrepo/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
@@ -1173,8 +1173,7 @@ archive_timing_stats()
   echo $decdate,$TOTAL_SMV_TIMES>>$TIME_HISTORY
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
-    sleep 1
-    ./cpu2plot.sh -F -s -o /var/www/html/VV/SMV2/images
+    ./smvcpu2plot.sh -F 
   fi
 
 
@@ -1320,7 +1319,7 @@ fi
    cd $SMOKEBOT_RUNDIR
    if [ "$UPLOADRESULTS" == "1" ]; then
    # Check for warnings and errors
-   echo "Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
+   echo "Manuals (private): http://$WEBHOSTNAME/smokebot/summary" >> $TIME_LOG
    echo "Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
    echo "Manuals   (local):  $SMV_SUMMARY/manuals" >> $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG

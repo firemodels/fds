@@ -987,7 +987,7 @@ archive_timing_stats()
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     sleep 1
-    ./cpu2plot.sh -F
+    ./fdscpu2plot.sh -F
   fi
 }
 
