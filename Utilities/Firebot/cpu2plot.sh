@@ -1,6 +1,7 @@
 #!/bin/bash
 curdir=`pwd`
 prefix=fds_
+tempfile=/tmp/CPUTIME_debugoutput.$$
 
 indir=~firebot/.firebot
 outdir=/var/www/html/firebot
@@ -100,6 +101,13 @@ old=$firebotdir/old
 cputo=$firebotdir/${prefix}times.csv
 cputrunc=$firebotdir/${prefix}times_trunc.csv
 
+gnuplot --version >& $tempfile
+echo after gnupload version >> $tempfile
+echo "cpuplot=$cpuplot" >> $tempfile
+echo "cputrunc=$cputrunc" >> $tempfile
+echo "cputo=$cputo" >> $tempfile
+echo "old=$old" >> $tempfile
+
 sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
 if [ "$FORCE" == "" ]; then
   if [ -e $old ]; then
@@ -110,7 +118,10 @@ if [ "$FORCE" == "" ]; then
   fi
 fi
 
+echo "after if"  >> $tempfile
+
 cp $cputrunc $old
+
 cat << EOF | gnuplot
 set terminal png size 900 600 giant
 set xlabel "Days since Jan 1, 2016"
