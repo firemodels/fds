@@ -1,60 +1,41 @@
 #!/bin/bash
 curdir=`pwd`
-prefix=fds_
-tempfile=/tmp/CPUTIME_debugoutput.$$
 
-indir=~firebot/.firebot
-outdir=/var/www/html/firebot
+# by default assumes data comes from smokebot
+# and output goes to the smokebot web page
 
-if [ ! -d $indir ]; then
-  mkdir -p $indir
-fi
-cd $indir
-datadir=$HOME/.firebot
-if [ ! -d $datadir ]; then
-  mkdir -p $datadir
-fi
-cd $curdir
-
-smokebotdir=~smokebot/.smokebot
+indir=~smokebot/.smokebot
+outdir=/var/www/html/smokebot
+datadir=$HOME/.smokebot
 
 function usage {
-echo "Create a plot from fds timing data"
+echo "Create a plot from smokebot timing data"
 echo ""
 echo "Options:"
-echo "-i - input directory [default: $indir]"
 echo "-F - force plot creation"
+echo "-i - input directory [default: $indir]"
 echo "-h - display this message"
 echo "-o - output directory [default: $outdir]"
-echo "-s - use smokebot for input [default: $smokebotdir]"
 echo "-v - show options used, do not run"
 exit
 }
 
 FORCE=
 SHOW=
-while getopts 'd:fFhi:o:sv' OPTION
+while getopts 'Fhi:o:v' OPTION
 do
 case $OPTION  in
-  d)
-   datadir="$OPTARG"
+  F)
+   FORCE=-F
    ;;
   h)
    usage
-   ;;
-  F)
-   FORCE=-F
    ;;
   i)
    indir="$OPTARG"
    ;;
   o)
    outdir="$OPTARG"
-   ;;
-  s)
-   indir=$smokebotdir
-   datadir=$smokebotdir
-   prefix=smv_
    ;;
   v)
    SHOW=1
@@ -65,9 +46,14 @@ shift $(($OPTIND-1))
 
 cd $indir
 indir=`pwd`
+
 cd $curdir
+if [ ! -d $outdir ]; then
+  mkdir -p $outdir
+fi
 cd $outdir
 outdir=`pwd`
+
 cd $curdir
 
 if [ "$SHOW" == "1" ]; then
@@ -75,7 +61,7 @@ if [ "$SHOW" == "1" ]; then
    exit
 fi
 date=`date`
-cpufrom=$indir/${prefix}times.csv
+cpufrom=$indir/smv_times.csv
 
 if [ ! -d $indir ]; then
   echo input directory $indir does not exist
@@ -94,21 +80,15 @@ if [ ! -e $cpufrom ]; then
 fi
 touch $outdir/test.$$
 if [ ! -e $outdir/test.$$ ]; then
-  echo unable to write to outdir $outdir
+  echo unable to write to output directory $outdir
   echo script aborted
   exit
 fi
 rm $outdir/test.$$
 
-cpuplot=/tmp/${prefix}times.png.$$
-old=$datadir/${prefix}times_trunc_old.csv
-cputrunc=$datadir/${prefix}times_trunc.csv
-
-gnuplot --version >& $tempfile
-echo after gnupload version >> $tempfile
-echo "cpuplot=$cpuplot" >> $tempfile
-echo "cputrunc=$cputrunc" >> $tempfile
-echo "old=$old" >> $tempfile
+cpuplot=/tmp/smv_times.png.$$
+old=$datadir/smv_times_trunc_old.csv
+cputrunc=$datadir/smv_times_trunc.csv
 
 sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
 if [ "$FORCE" == "" ]; then
@@ -119,8 +99,6 @@ if [ "$FORCE" == "" ]; then
     fi
   fi
 fi
-
-echo "after if"  >> $tempfile
 
 cp $cputrunc $old
 
@@ -134,5 +112,5 @@ set style line 1 lt 1 lw 4 lc rgb "black"
 set border ls 1
 plot "$cputrunc" using 1:2 title "$date" with lines ls 1
 EOF
-cp $cpuplot $outdir/${prefix}times.png
-#rm $cpuplot
+cp $cpuplot $outdir/smv_times.png
+rm $cpuplot
