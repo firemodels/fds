@@ -1,31 +1,24 @@
 #!/bin/bash
 curdir=`pwd`
 prefix=fds_
-tempfile=/tmp/CPUTIME_debugoutput.$$
+
+# by default assumes data comes from firebot
+# and output goes to the firebot web page
 
 indir=~firebot/.firebot
 outdir=/var/www/html/firebot
-
-if [ ! -d $indir ]; then
-  mkdir -p $indir
-fi
-cd $indir
 datadir=$HOME/.firebot
-if [ ! -d $datadir ]; then
-  mkdir -p $datadir
-fi
-cd $curdir
-
 smokebotdir=~smokebot/.smokebot
 
 function usage {
-echo "Create a plot from fds timing data"
+echo "Create a plot from firebot or smokebot timing data"
 echo ""
 echo "Options:"
 echo "-i - input directory [default: $indir]"
 echo "-F - force plot creation"
 echo "-h - display this message"
 echo "-o - output directory [default: $outdir]"
+echo "-p - prefix [default: $prefix]"
 echo "-s - use smokebot for input [default: $smokebotdir]"
 echo "-v - show options used, do not run"
 exit
@@ -33,7 +26,7 @@ exit
 
 FORCE=
 SHOW=
-while getopts 'd:fFhi:o:sv' OPTION
+while getopts 'd:fFhi:o:p:sv' OPTION
 do
 case $OPTION  in
   d)
@@ -51,6 +44,9 @@ case $OPTION  in
   o)
    outdir="$OPTARG"
    ;;
+  p)
+   prefix="$OPTARG"
+   ;;
   s)
    indir=$smokebotdir
    datadir=$smokebotdir
@@ -65,9 +61,14 @@ shift $(($OPTIND-1))
 
 cd $indir
 indir=`pwd`
+
 cd $curdir
+if [ ! -d $outdir ]; then
+  mkdir -p $outdir
+fi
 cd $outdir
 outdir=`pwd`
+
 cd $curdir
 
 if [ "$SHOW" == "1" ]; then
@@ -94,7 +95,7 @@ if [ ! -e $cpufrom ]; then
 fi
 touch $outdir/test.$$
 if [ ! -e $outdir/test.$$ ]; then
-  echo unable to write to outdir $outdir
+  echo unable to write to output directory $outdir
   echo script aborted
   exit
 fi
@@ -103,12 +104,6 @@ rm $outdir/test.$$
 cpuplot=/tmp/${prefix}times.png.$$
 old=$datadir/${prefix}times_trunc_old.csv
 cputrunc=$datadir/${prefix}times_trunc.csv
-
-gnuplot --version >& $tempfile
-echo after gnupload version >> $tempfile
-echo "cpuplot=$cpuplot" >> $tempfile
-echo "cputrunc=$cputrunc" >> $tempfile
-echo "old=$old" >> $tempfile
 
 sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
 if [ "$FORCE" == "" ]; then
@@ -119,8 +114,6 @@ if [ "$FORCE" == "" ]; then
     fi
   fi
 fi
-
-echo "after if"  >> $tempfile
 
 cp $cputrunc $old
 
@@ -135,4 +128,4 @@ set border ls 1
 plot "$cputrunc" using 1:2 title "$date" with lines ls 1
 EOF
 cp $cpuplot $outdir/${prefix}times.png
-#rm $cpuplot
+rm $cpuplot
