@@ -1,5 +1,6 @@
 #!/bin/bash
 curdir=`pwd`
+prefix=fds_
 
 indir=~firebot/.firebot
 outdir=/var/www/html/firebot
@@ -48,6 +49,7 @@ case $OPTION  in
    ;;
   s)
    indir=$smokebotdir
+   prefix=smv_
    ;;
   v)
    SHOW=1
@@ -68,7 +70,7 @@ if [ "$SHOW" == "1" ]; then
    exit
 fi
 date=`date`
-cpufrom=$indir/fds_times.csv
+cpufrom=$indir/${prefix}times.csv
 
 if [ ! -d $indir ]; then
   echo input directory $indir does not exist
@@ -93,12 +95,12 @@ if [ ! -e $outdir/test.$$ ]; then
 fi
 rm $outdir/test.$$
 
-cpuplot=/tmp/fds_times.png.$$
+cpuplot=/tmp/${prefix}times.png.$$
 old=$firebotdir/old
-cputo=$firebotdir/fds_times.csv
-cputrunc=$firebotdir/fds_times_trunc.csv
+cputo=$firebotdir/${prefix}times.csv
+cputrunc=$firebotdir/${prefix}times_trunc.csv
 
-tail -30 $cpufrom > $cputrunc
+sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
 if [ "$FORCE" == "" ]; then
   if [ -e $old ]; then
     ndiff=`diff $old $cputrunc|wc -l`
@@ -119,5 +121,5 @@ set style line 1 lt 1 lw 4 lc rgb "black"
 set border ls 1
 plot "$cputrunc" using 1:2 title "$date" with lines ls 1
 EOF
-cp $cpuplot $outdir/fds_times.png
+cp $cpuplot $outdir/${prefix}times.png
 #rm $cpuplot
