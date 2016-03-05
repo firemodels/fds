@@ -1174,7 +1174,7 @@ archive_timing_stats()
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     sleep 1
-    ./cpu2plot.sh -F -s -o /var/www/html/smokebot
+    ./cpu2plot.sh -F -s -o /var/www/html/VV/SMV2/images
   fi
 
 
