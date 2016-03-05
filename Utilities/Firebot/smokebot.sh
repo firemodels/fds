@@ -1171,6 +1171,12 @@ archive_timing_stats()
   s=`date "+%S"`
   decdate=`echo "scale=5; $d + $h/24.0 + $m/(60*24) + $s/(3600*24)" | bc`
   echo $decdate,$TOTAL_SMV_TIMES>>$TIME_HISTORY
+  if [ "$UPLOADRESULTS" == "1" ]; then
+    cd $fdsrepo/Utilities/Firebot
+    sleep 1
+    ./cpu2plot.sh -F -s -o /var/www/html/smokebot
+  fi
+
 
 }
 
