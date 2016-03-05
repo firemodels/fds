@@ -18,6 +18,7 @@ TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+WEBDIR=/var/www/html/firebot
 
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
@@ -986,8 +987,8 @@ archive_timing_stats()
   echo $decdate,$TOTAL_FDS_TIMES>>$TIME_HISTORY
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
-    sleep 1
-    ./fdscpu2plot.sh -F
+    ./fdscpu2plot.sh -F -o $WEBDIR
+    cp $WEBDIR/fds_times.png $NEWGUIDE_DIR/.
   fi
 }
 
