@@ -228,8 +228,8 @@ intel_linux_64_profile : $(obj)
 
 # ------------- gnu_linux_64_db ----------------
 
-gnu_linux_64_db : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
-gnu_linux_64_db : CFLAGS    = -O0 -m64 -D pp_LINUX
+gnu_linux_64_db : FFLAGS    = -O0 -m64 -ggdb -Wall -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4 -fcheck=all -fbacktrace
+gnu_linux_64_db : CFLAGS    = -O0 -m64 -ggdb -Wall -Wno-write-strings -D pp_LINUX
 gnu_linux_64_db : LFLAGS    = -m64
 gnu_linux_64_db : CC        = gcc
 gnu_linux_64_db : CPP       = g++

@@ -2058,9 +2058,6 @@ int count_slicedups(void){
 
     mslicei = multisliceinfo + i;
     for(ii = 0; ii < mslicei->nslices; ii++){
-      slicedata *slicei;
-
-      slicei = sliceinfo + mslicei->islices[ii];
       count += is_slice_duplicate(mslicei, ii, COUNT_DUPLICATES);
     }
   }
@@ -6533,14 +6530,13 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type){
   int endian_fromfile;
   float minmax[2];
   int ijkbar[6];
-  FILE *stream, *sizestream, *RLESLICEFILE;
+  FILE *stream, *sizestream;
   float time_local;
   int ncompressed;
   int count;
 
   stream=FOPEN(file,"rb");
   if(stream==NULL)return 0;
-  RLESLICEFILE=stream;
 
   sizestream=fopen(sizefile,"w");
   if(sizestream==NULL){
