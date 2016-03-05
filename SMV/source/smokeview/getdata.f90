@@ -779,8 +779,6 @@ if(testslice.eq.1.or.testslice.eq.2)then
   end do
 endif
 
-999 continue
-
 return
 end subroutine getsliceframe
 
@@ -792,9 +790,7 @@ character(len=*) :: endianfilename
 integer :: one
 integer :: file_unit
 
-file_unit=31
-
-call get_file_unit(file_unit,file_unit)
+call get_file_unit(file_unit,31)
 open(unit=file_unit,file=trim(endianfilename),form="unformatted")
 one=1
 write(31)one

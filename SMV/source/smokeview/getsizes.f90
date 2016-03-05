@@ -791,9 +791,12 @@ character(len=30) :: patchlonglabel, patchshortlabel, patchunit
 integer :: lu15
 logical :: exists
 logical :: isopen
+integer :: first_unit
+
+first_unit = boundaryunitnumber
 
 error=0
-call get_file_unit(boundaryunitnumber,boundaryunitnumber)
+call get_file_unit(boundaryunitnumber,first_unit)
 lu15 = boundaryunitnumber
 inquire(unit=lu15,opened=isopen)
 
