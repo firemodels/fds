@@ -10,9 +10,9 @@ if [ ! -d $indir ]; then
   mkdir -p $indir
 fi
 cd $indir
-firebotdir=$HOME/.firebot
-if [ ! -d $firebotdir ]; then
-  mkdir -p $firebotdir
+datadir=$HOME/.firebot
+if [ ! -d $datadir ]; then
+  mkdir -p $datadir
 fi
 cd $curdir
 
@@ -33,9 +33,12 @@ exit
 
 FORCE=
 SHOW=
-while getopts 'fFhi:o:sv' OPTION
+while getopts 'd:fFhi:o:sv' OPTION
 do
 case $OPTION  in
+  d)
+   datadir="$OPTARG"
+   ;;
   h)
    usage
    ;;
@@ -50,6 +53,7 @@ case $OPTION  in
    ;;
   s)
    indir=$smokebotdir
+   datadir=$smokebotdir
    prefix=smv_
    ;;
   v)
@@ -97,15 +101,13 @@ fi
 rm $outdir/test.$$
 
 cpuplot=/tmp/${prefix}times.png.$$
-old=$firebotdir/old
-cputo=$firebotdir/${prefix}times.csv
-cputrunc=$firebotdir/${prefix}times_trunc.csv
+old=$datadir/${prefix}times_trunc_old.csv
+cputrunc=$datadir/${prefix}times_trunc.csv
 
 gnuplot --version >& $tempfile
 echo after gnupload version >> $tempfile
 echo "cpuplot=$cpuplot" >> $tempfile
 echo "cputrunc=$cputrunc" >> $tempfile
-echo "cputo=$cputo" >> $tempfile
 echo "old=$old" >> $tempfile
 
 sort -n -k 1 -t , $cpufrom | tail -30 > $cputrunc
