@@ -39,23 +39,25 @@ if [ ! "$ndiff" == "0" ] ; then
 fi
 
 # if nothing has changed then exit without committing any files
-if [ "$EXIT" == "yes" ]; then
-   exit
-fi
+#if [ "$EXIT" == "yes" ]; then
+#   exit
+#fi
 
-./status_pubtop.sh > $newpage
+./status_pubtop1.sh > $newpage
+./status_pubtop2.sh >> $newpage
+./status_pubtop3.sh >> $newpage
 ./status2html.sh >> $newpage
 ./status_pubbot.sh >> $newpage
 
 cd $gitwebrepo
-git remote update
-git merge origin/gh-pages
+#git remote update
+#git merge origin/gh-pages
 
-cp $newpage firebot_status.html
-git add firebot_status.html
+#cp $newpage firebot_status.html
+#git add firebot_status.html
 
-cp $newdata fds_times.csv
-git add fds_times.csv
+#cp $newdata fds_times.csv
+#git add fds_times.csv
 
-git commit -m "firebot: update firebot status page `date`"
-git push
+#git commit -m "firebot: update firebot status page `date`"
+#git push
