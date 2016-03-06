@@ -87,3 +87,23 @@ plt.legend(loc='upper left', numpoints=1, frameon=False)
 plt.savefig('blasius_prof.pdf', format='pdf')
 plt.close()
 
+# error vectors
+
+error_16 = u_16 - u_interp(z_16) # this creates a vector of errors of length len(z_16)
+error_32 = u_32 - u_interp(z_32)
+
+# RMS error
+
+rms_16 = math.sqrt(np.linalg.norm(error_16)/len(z_16))
+rms_32 = math.sqrt(np.linalg.norm(error_32)/len(z_32))
+
+print rms_16, rms_32
+
+
+
+
+
+
+
+
+
