@@ -43,9 +43,7 @@ if [ "$EXIT" == "yes" ]; then
    exit
 fi
 
-./status_pubtop1.sh > $newpage
-./status_pubtop2.sh >> $newpage
-./status_pubtop3.sh >> $newpage
+./status_pubtop.sh > $newpage
 ./status2html.sh >> $newpage
 ./status_pubbot.sh >> $newpage
 
