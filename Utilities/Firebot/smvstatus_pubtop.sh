@@ -37,7 +37,8 @@ cat << EOF
 
 </head>
 <body>
-<h2>Smokebot Status</h2>
+<h2>Smokeview Automatic Verification Summary Page</h2>
+
 
 <hr align='left'>
 
