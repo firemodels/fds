@@ -1268,7 +1268,6 @@ fi
 
 ### Stage 7c ###
    generate_timing_stats
-   archive_timing_stats
 
 ### Stage 8 ###
 if [ "$SKIPMATLAB" == "" ] ; then
@@ -1284,4 +1283,5 @@ fi
 ### Wrap up and report results ###
 set_files_world_readable
 save_build_status
+archive_timing_stats
 email_build_status 'Firebot'
