@@ -988,7 +988,6 @@ archive_timing_stats()
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./status_updatepub.sh -F
-    ./status_updatepriv.sh
   fi
 }
 
@@ -1128,12 +1127,10 @@ email_build_status()
    echo "Host Name: $hostname " >> $TIME_LOG
    echo "Start Time: $start_time " >> $TIME_LOG
    echo "Stop Time: $stop_time " >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
    if [ "$UPLOADGUIDES" == "1" ]; then
-   echo "Firebot status (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
-   echo "Firebot status (public) :  http://goo.gl/vgeRx5" >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
+   echo "Firebot status:  http://goo.gl/vgeRx5" >> $TIME_LOG
    fi
+   echo "-------------------------------" >> $TIME_LOG
 
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
