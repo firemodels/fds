@@ -1,3 +1,73 @@
+<!DOCTYPE html>
+<html><head><title>Firebot Build Status</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Days since Jan 1, 2016', 'CPU Time (s)'],
+[61.42976,2331.774],
+[61.48882,2304.420],
+[61.52056,2367.010],
+[61.55184,2309.598],
+[61.58239,2347.672],
+[61.91570,2382.739],
+[61.95358,2448.492],
+[61.99394,2643.000],
+[62.24547,2305.101],
+[62.74106,1630.771],
+[62.76956,1590.922],
+[63.23458,1534.919],
+[63.47988,2785.830],
+[64.24664,2482.943],
+[64.37939,2831.700],
+[64.42412,2544.300],
+[64.60403,2411.500],
+[65.00123,2667.900],
+[65.24687,2456.306],
+[65.55170,2400.576],
+[65.61342,2331.458],
+[65.65863,2332.476],
+[65.69330,2338.864],
+[65.74660,2491.900],
+[65.88882,2429.929],
+[65.91964,2373.908],
+[65.96356,3380.397],
+[66.24553,2345.845],
+[66.80525,2378.915],
+[66.83641,2331.347],
+        ]);
+
+        var options = {
+          title: 'Firebot CPU History',
+          curveType: 'line',
+          legend: { position: 'bottom' },
+          colors: ['black'],
+          pointSize: 5
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+        chart.draw(data, options);
+      }
+    </script>
+
+</head>
+<body>
+<h2>Smokebot Automatic Verification Summary Page</h2>
+
+<hr align='left'>
+
+<div id="curve_chart" style="width: 500px; height: 300px"></div>
+<h3>FDS/Smokeview Manuals</h3>
+<a href="http://goo.gl/n1Q3WH">Manuals</a>
+
+<h3>Smokeebot Status</h3>
+
+This page displays the status for up to 30 of the most recent build/test cycles.<br>
 <p><a href="https://github.com/firemodels/fds-smv/commit/">Revision: </a><font color="#00FF00"> Version: Git-r6-588-g63a52fb, Branch: development has warnings.</font><br>
 
 <p><a href="https://github.com/firemodels/fds-smv/commit/">Revision: </a><font color="#00FF00"> Version: Git-r6-469-gff41278, Branch: development has warnings.</font><br>
@@ -60,7 +130,7 @@
 
 <br><br>
 <hr align='left'><br>
-<i>Status last updated: Sun Mar  6 20:05:11 EST 2016</i><br><br><br>
+<i>Status last updated: Sun Mar  6 20:05:55 EST 2016</i><br><br><br>
 
 </body>
 </html>
