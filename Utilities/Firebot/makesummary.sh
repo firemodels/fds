@@ -44,8 +44,7 @@ cat << EOF
 <p><table>
 <tr><td valign=middle>Version info:</td><td><img width=400 src="images/fds_smv_version.png"></td></tr>
 </table>
-<h3>Benchmark Time History</h3>
-<IMG width=500 SRC="smv_times.png"><br>
+<div id="curve_chart" style="width: 500px; height: 300px"></div>
 <p>
 <a href="index2.html"><font size=5>Animations</font></a> -
 <font size=5>Stills</font> -  
