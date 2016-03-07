@@ -989,6 +989,7 @@ archive_timing_stats()
     cd $fdsrepo/Utilities/Firebot
     ./fdscpu2plot.sh -F -o $WEBDIR
     ./status_updatepub.sh -F
+    ./status_updatepriv.sh
   fi
 }
 

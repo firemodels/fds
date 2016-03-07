@@ -1178,6 +1178,7 @@ archive_timing_stats()
     cd $fdsrepo/Utilities/Firebot
     ./smvcpu2plot.sh -F  -o $WEBDIR
     ./smvstatus_updatepub.sh -F
+    ./makesummary.sh > /var/www/html/smokebot/index.html
   fi
 }
 
