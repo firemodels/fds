@@ -1461,7 +1461,6 @@ fi
 
 if [[ $stage1c_fdsrel_success ]] ; then
   generate_timing_stats
-  archive_timing_stats
 fi
 
 ### Stage 5 build documents ###
@@ -1491,5 +1490,8 @@ echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 echo Reporting results
 set_files_world_readable
 save_build_status
+if [[ $stage1c_fdsrel_success ]] ; then
+  archive_timing_stats
+fi
 echo "   emailing results"
 email_build_status
