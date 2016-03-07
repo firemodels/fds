@@ -998,7 +998,18 @@ check_smv_pictures_db()
       grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-
+   if [ "$UPLOADRESULTS" == "1" ]; then
+     if [ -d "$WEBTODIR" ]; then
+       if [ -d "$WEBFROMDIR" ]; then
+         CURDIR=`pwd`
+         cd $WEBTODIR
+         rm -rf *
+         cd $WEBFROMDIR
+         cp -r * $WEBTODIR/.
+         cd $CURDIR
+       fi
+     fi
+   fi
 }
 
 #  ==================================
@@ -1177,10 +1188,9 @@ archive_timing_stats()
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./smvcpu2plot.sh -F  -o $WEBDIR
-    cp $WEBDIR/smv_times.png $NEWGUIDE_DIR/.
+    ./smvstatus_updatepub.sh -F
+    ./makesummary.sh > /var/www/html/smokebot/index.html
   fi
-
-
 }
 
 #  ===================================

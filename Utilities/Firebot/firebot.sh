@@ -988,7 +988,8 @@ archive_timing_stats()
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./fdscpu2plot.sh -F -o $WEBDIR
-    cp $WEBDIR/fds_times.png $NEWGUIDE_DIR/.
+    ./status_updatepub.sh -F
+    ./status_updatepriv.sh
   fi
 }
 
