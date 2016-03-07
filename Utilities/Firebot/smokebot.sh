@@ -1334,9 +1334,8 @@ fi
    cd $SMOKEBOT_RUNDIR
    if [ "$UPLOADRESULTS" == "1" ]; then
    # Check for warnings and errors
-   echo "Manuals (private): http://$WEBHOSTNAME/smokebot/" >> $TIME_LOG
-   echo "  Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
-   echo "Manuals   (local): $SMV_SUMMARY/manuals" >> $TIME_LOG
+   echo "Smokebot summary: http://$WEBHOSTNAME/smokebot/" >> $TIME_LOG
+   echo " Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
    fi
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
