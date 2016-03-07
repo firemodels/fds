@@ -21,7 +21,7 @@ fi
 
 # check if status web page has changed
 
-./smvstatus2html.sh  > $newpage
+./make_pubpage -s -b  > $newpage
 if [ ! -e $oldpage ]; then
   cp $newpage $oldpage
 fi
@@ -49,9 +49,7 @@ if [ "$EXIT" == "yes" ]; then
   fi
 fi
 
-./smvstatus_pubtop.sh > $newpage
-./smvstatus2html.sh >> $newpage
-./status_pubbot.sh >> $newpage
+./make_pubpage.sh -s > $newpage
 
 cd $gitwebrepo
 git remote update
