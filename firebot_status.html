@@ -1,62 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head><title>Firebot Build Status</title>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawChart);
-
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-          ['Days since Jan 1, 2016', 'CPU Time (s)'],
-[57.08,14507.9],
-[57.67,14574.4],
-[58.08681,14455.600],
-[58.50140,14570.000],
-[59.49964,14413.300],
-[60.04970,14493.600],
-[61.05179,14708.400],
-[62.05437,14574.300],
-[63.05361,14550.500],
-[63.58938,14640.600],
-[63.78847,14513.900],
-[64.50527,14598.800],
-[65.09441,14684.700],
-[65.83212,14548.900],
-[66.05198,14577.900],
-[66.85448,14613.200]
-        ]);
-
-        var options = {
-          title: 'Firebot CPU History',
-          curveType: 'line',
-          legend: { position: 'bottom' },
-          colors: ['black'],
-          pointSize: 5
-        };
-
-        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
-
-        chart.draw(data, options);
-      }
-    </script>
-
-</head>
-<body>
-<h2>FDS Automatic Verification Summary Page</h2>
-
-<hr align='left'>
-
-<div id="curve_chart" style="width: 500px; height: 300px"></div>
-<h3>FDS/Smokeview Manuals</h3>
-<a href="http://goo.gl/n1Q3WH">Manuals</a>
-
-<h3>Firebot Status</h3>
-
-This page displays the status for up to 30 of the most recent build/test cycles.<br>
-
+<p><a href="https://github.com/firemodels/fds-smv/commit/536ad64a19cbf11d2e5e6967c418eb5628e4b2f0">Revision: Git-r8-116-g536ad64</a><font color="#00FF00"> Build success!</font><br>
+Benchmark time: 14587.600 s <br>
+Mon Mar  7 01:17:42 EST 2016
 <p><a href="https://github.com/firemodels/fds-smv/commit/b67467d10c86e0eecf7a9aa67e8739ac3b6cd60c">Revision: Git-r8-101-gb67467d</a><font color="#00FF00"> Build success!</font><br>
 Benchmark time: 14577.900 s <br>
 Sun Mar  6 01:17:36 EST 2016
@@ -129,7 +73,7 @@ Mon Feb 15 10:12:06 EST 2016
 Sun Feb 14 01:19:03 EST 2016
 <br><br>
 <hr align='left'><br>
-<i>Status last updated: Sun Mar  6 01:22:02 EST 2016</i><br><br><br>
+<i>Status last updated: Mon Mar  7 08:05:21 EST 2016</i><br><br><br>
 
 </body>
 </html>
