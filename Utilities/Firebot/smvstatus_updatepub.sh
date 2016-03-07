@@ -60,8 +60,5 @@ git merge origin/gh-pages
 cp $newpage smokebot_status.html
 git add smokebot_status.html
 
-cp $newdata smv_times.csv
-git add smv_times.csv
-
 git commit -m "smokebot: update smokebot status page `date`"
 git push
