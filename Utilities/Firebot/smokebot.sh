@@ -998,7 +998,18 @@ check_smv_pictures_db()
       grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-
+   if [ "$UPLOADRESULTS" == "1" ]; then
+     if [ -d "$WEBTODIR" ]; then
+       if [ -d "$WEBFROMDIR" ]; then
+         CURDIR=`pwd`
+         cd $WEBTODIR
+         rm -rf *
+         cd $WEBFROMDIR
+         cp -r * $WEBTODIR/.
+         cd $CURDIR
+       fi
+     fi
+   fi
 }
 
 #  ==================================
