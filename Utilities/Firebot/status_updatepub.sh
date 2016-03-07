@@ -21,7 +21,7 @@ fi
 
 # check if status web page has changed
 
-./status2html.sh  > $newpage
+./make_pubpage.sh -b > $newpage
 if [ ! -e $oldpage ]; then
   cp $newpage $oldpage
 fi
@@ -49,9 +49,7 @@ if [ "$EXIT" == "yes" ]; then
   fi
 fi
 
-./status_pubtop.sh > $newpage
-./status2html.sh >> $newpage
-./status_pubbot.sh >> $newpage
+./make_pubpage.sh > $newpage
 
 cd $gitwebrepo
 git remote update
