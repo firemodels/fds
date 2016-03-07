@@ -4,7 +4,7 @@ cpufrom=~/.smokebot/smv_times.csv
 
 cat << EOF
 <!DOCTYPE html>
-<html><head><title>Firebot Build Status</title>
+<html><head><title>Smokebot Build Status</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -22,7 +22,7 @@ cat << EOF
         ]);
 
         var options = {
-          title: 'Firebot CPU History',
+          title: 'Smokebot CPU History',
           curveType: 'line',
           legend: { position: 'bottom' },
           colors: ['black'],
@@ -45,7 +45,7 @@ cat << EOF
 <h3>FDS/Smokeview Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
-<h3>Smokeebot Status</h3>
+<h3>Smokebot Status</h3>
 
 This page displays the status for up to 30 of the most recent build/test cycles.<br>
 EOF
