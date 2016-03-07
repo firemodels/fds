@@ -22,12 +22,15 @@ cat << EOF
         ]);
 
         var options = {
-          title: 'Firebot CPU History',
+          title: 'Firebot CPU Time History',
           curveType: 'line',
-          legend: { position: 'bottom' },
+          legend: { position: 'right' },
           colors: ['black'],
-          pointSize: 5
+          pointSize: 5,
+          hAxis:{ title: 'Day number'},
+          vAxis:{ title: 'CPU Time (s)'}
         };
+        options.legend = 'none';
 
         var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
