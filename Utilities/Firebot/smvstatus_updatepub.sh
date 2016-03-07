@@ -38,7 +38,7 @@ if [ ! "$ndiff" == "0" ] ; then
    EXIT="no"
 fi
 
- if nothing has changed then exit without committing any files
+# if nothing has changed then exit without committing any files
 if [ "$EXIT" == "yes" ]; then
    exit
 fi
