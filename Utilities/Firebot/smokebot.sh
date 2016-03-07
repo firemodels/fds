@@ -1187,9 +1187,8 @@ archive_timing_stats()
   echo $decdate,$TOTAL_SMV_TIMES>>$TIME_HISTORY
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
-    ./smvcpu2plot.sh -F  -o $WEBDIR
     ./smvstatus_updatepub.sh -F
-    ./makesummary.sh > /var/www/html/smokebot/index.html
+    ./make_smv_summary.sh > /var/www/html/smokebot/index.html
   fi
 }
 

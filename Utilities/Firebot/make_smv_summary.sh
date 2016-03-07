@@ -187,16 +187,16 @@ cat << EOF
 
 <tr>
 <th>particles </th>
-<td><a href="images/pine_tree_part_000"><img width=200 src="images/pine_tree_part_000"></a></td>
-<td><a href="images/pine_tree_part_020"><img width=200 src="images/pine_tree_part_020"></a></td>
-<td><a href="images/pine_tree_part_040"><img width=200 src="images/pine_tree_part_040"></a></td>
+<td><a href="images/pine_tree_part_000.png"><img width=200 src="images/pine_tree_part_000.png"></a></td>
+<td><a href="images/pine_tree_part_020.png"><img width=200 src="images/pine_tree_part_020.png"></a></td>
+<td><a href="images/pine_tree_part_040.png"><img width=200 src="images/pine_tree_part_040.png"></a></td>
 </tr>
 
 <tr>
 <th>isosurfaces</th>
-<td><a href="images/pine_tree_partiso_000"><img width=200 src="images/pine_tree_partiso_000"></a></td>
-<td><a href="images/pine_tree_partiso_020"><img width=200 src="images/pine_tree_partiso_020"></a></td>
-<td><a href="images/pine_tree_partiso_040"><img width=200 src="images/pine_tree_partiso_040"></a></td>
+<td><a href="images/pine_tree_partiso_000.png"><img width=200 src="images/pine_tree_partiso_000.png"></a></td>
+<td><a href="images/pine_tree_partiso_020.png"><img width=200 src="images/pine_tree_partiso_020.png"></a></td>
+<td><a href="images/pine_tree_partiso_040.png"><img width=200 src="images/pine_tree_partiso_040.png"></a></td>
 </tr>
 
 <tr>
