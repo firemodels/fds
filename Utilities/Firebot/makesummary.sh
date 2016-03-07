@@ -187,16 +187,16 @@ cat << EOF
 
 <tr>
 <th>particles </th>
-<td><a href="images/tree_one_part_000.png"><img width=200 src="images/tree_one_part_000.png"></a></td>
-<td><a href="images/tree_one_part_010.png"><img width=200 src="images/tree_one_part_010.png"></a></td>
-<td><a href="images/tree_one_part_020.png"><img width=200 src="images/tree_one_part_020.png"></a></td>
+<td><a href="images/pine_tree_part_000"><img width=200 src="images/pine_tree_part_000"></a></td>
+<td><a href="images/pine_tree_part_020"><img width=200 src="images/pine_tree_part_020"></a></td>
+<td><a href="images/pine_tree_part_040"><img width=200 src="images/pine_tree_part_040"></a></td>
 </tr>
 
 <tr>
 <th>isosurfaces</th>
-<td><a href="images/tree_one_partiso_000.png"><img width=200 src="images/tree_one_partiso_000.png"></a></td>
-<td><a href="images/tree_one_partiso_010.png"><img width=200 src="images/tree_one_partiso_010.png"></a></td>
-<td><a href="images/tree_one_partiso_020.png"><img width=200 src="images/tree_one_partiso_020.png"></a></td>
+<td><a href="images/pine_tree_partiso_000"><img width=200 src="images/pine_tree_partiso_000"></a></td>
+<td><a href="images/pine_tree_partiso_020"><img width=200 src="images/pine_tree_partiso_020"></a></td>
+<td><a href="images/pine_tree_partiso_040"><img width=200 src="images/pine_tree_partiso_040"></a></td>
 </tr>
 
 <tr>
@@ -349,8 +349,8 @@ cat << EOF
 <tr><th></th><th colspan=2> Zone fire</th></tr>
 <tr>
 <th>slice</th>
-<td><a href="images/cfast_test_200.png"><img width=200 src="images/cfast_test_200.png"></a></d>
-<td><a href="images/cfast_test_400.png"><img width=200 src="images/cfast_test_400.png"></a></td>
+<td><a href="images/cfast_test_c2_200.png"><img width=200 src="images/cfast_test_c2_200.png"></a></d>
+<td><a href="images/cfast_test_c2_400.png"><img width=200 src="images/cfast_test_c2_400.png"></a></td>
 </tr>
 
 <tr>
