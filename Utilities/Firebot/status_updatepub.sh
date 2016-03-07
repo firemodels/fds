@@ -1,4 +1,6 @@
 #!/bin/bash
+FORCE=$1
+
 gitwebrepo=~/FDS-SMVgitweb
 firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
 oldpage=~/.firebot/oldpage
@@ -12,7 +14,9 @@ EXIT="yes"
 # don't update status page if firebot is running
 cd $firebotdir
 if [ -e $running ] ; then
-  exit
+  if [ "$FORCE" == "" ]; then
+    exit
+  fi
 fi
 
 # check if status web page has changed
@@ -38,9 +42,11 @@ if [ ! "$ndiff" == "0" ] ; then
    EXIT="no"
 fi
 
- if nothing has changed then exit without committing any files
+# if nothing has changed then exit without committing any files
 if [ "$EXIT" == "yes" ]; then
-   exit
+  if [ "$FORCE" == "" ]; then
+    exit
+  fi
 fi
 
 ./status_pubtop.sh > $newpage
