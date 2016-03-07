@@ -1177,10 +1177,8 @@ archive_timing_stats()
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./smvcpu2plot.sh -F  -o $WEBDIR
-    cp $WEBDIR/smv_times.png $NEWGUIDE_DIR/.
+    ./smvstatus_updatepub.sh -F
   fi
-
-
 }
 
 #  ===================================
