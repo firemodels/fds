@@ -1,10 +1,29 @@
 #!/bin/bash
-CURDIR=`pwd`
 cpufrom=~/.firebot/fds_times.csv
+historydir=~/.firebot/history
+BODY=
+TITLE=Firebot
 
+while getopts 'bs' OPTION
+do
+case $OPTION  in
+  b)
+   BODY="1"
+   ;;
+  s)
+   cpufrom=~/.smokebot/smv_times.csv
+   historydir=~/.smokebot/history
+   TITLE=Smokebot
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+
+
+if [ "$BODY" == "" ]; then
 cat << EOF
 <!DOCTYPE html>
-<html><head><title>Firebot Build Status</title>
+<html><head><title>$TITLE Build Status</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
@@ -22,7 +41,7 @@ cat << EOF
         ]);
 
         var options = {
-          title: 'Firebot CPU Time History',
+          title: '$TITLE CPU Time History',
           curveType: 'line',
           legend: { position: 'right' },
           colors: ['black'],
@@ -48,9 +67,36 @@ cat << EOF
 <h3>FDS/Smokeview Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
-<h3>Firebot Status</h3>
+<h3>$TITLE Status</h3>
 
 This page displays the status for up to 30 of the most recent build/test cycles.<br>
 EOF
+fi
+
+CURDIR=`pwd`
+listin=/tmp/list.in.$$
+cd $historydir
+ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 > $listin
+cat $listin | head -30 | \
+             awk -F ';' '{cputime="Benchmark time: "$9" s";\
+                          if($9=="")cputime="";\
+                          font="<font color=\"#00FF00\">";\
+                          if($8=="2")font="<font color=\"#FF00FF\">";\
+                          if($8=="3")font="<font color=\"#FF0000\">";\
+                          printf("<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a>%s %s</font><br>\n",$4,$5,font,$1);\
+                          if($9!="")printf("%s <br>\n",cputime);\
+                          printf("%s\n",$2);}' 
+rm $listin
+
+if [ "$BODY" == "" ]; then
+cat << EOF
+<br><br>
+<hr align='left'><br>
+<i>Status last updated: `date`</i><br><br><br>
+
+</body>
+</html>
+EOF
+fi
 
 cd $CURDIR
