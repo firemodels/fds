@@ -27,15 +27,19 @@
 [66.85448,14613.200],
 [67.05208,14587.600],
 [67.52124,14789.200],
+[67.72566,14739.700],
         ]);
 
         var options = {
-          title: 'Firebot CPU History',
+          title: 'Firebot CPU Time History',
           curveType: 'line',
-          legend: { position: 'bottom' },
+          legend: { position: 'right' },
           colors: ['black'],
-          pointSize: 5
+          pointSize: 5,
+          hAxis:{ title: 'Day number'},
+          vAxis:{ title: 'CPU Time (s)'}
         };
+        options.legend = 'none';
 
         var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
@@ -56,6 +60,8 @@
 <h3>Firebot Status</h3>
 
 This page displays the status for up to 30 of the most recent build/test cycles.<br>
+<p><a href="https://github.com/firemodels/fds-smv/commit/c30b0f2cd5b3d7180c7029d3ac04440b702a6a05">Revision: Git-r8-150-gc30b0f2</a><font color="#00FF00"> Build success!</font><br>
+Mon Mar  7 17:24:58 EST 2016
 <p><a href="https://github.com/firemodels/fds-smv/commit/f06ff11c0176f8fa5ac37f8f4f4acb6f2b284722">Revision: Git-r8-132-gf06ff11</a><font color="#00FF00"> Build success!</font><br>
 Benchmark time: 14789.200 s <br>
 Mon Mar  7 12:33:28 EST 2016
@@ -134,7 +140,7 @@ Mon Feb 15 10:12:06 EST 2016
 Sun Feb 14 01:19:03 EST 2016
 <br><br>
 <hr align='left'><br>
-<i>Status last updated: Mon Mar  7 12:42:01 EST 2016</i><br><br><br>
+<i>Status last updated: Mon Mar  7 17:24:58 EST 2016</i><br><br><br>
 
 </body>
 </html>
