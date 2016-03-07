@@ -60,8 +60,5 @@ git merge origin/gh-pages
 cp $newpage firebot_status.html
 git add firebot_status.html
 
-cp $newdata fds_times.csv
-git add fds_times.csv
-
 git commit -m "firebot: update firebot status page `date`"
 git push
