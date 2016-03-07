@@ -203,12 +203,6 @@ if [ "$RUN_SMV" == "1" ] ; then
   cd $CURDIDR
   source $STOPX
 
-# copy generated images to web summary directory
-
-  cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
-  cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 fi
 
 # generate geometry images
@@ -225,3 +219,10 @@ if [ "$RUN_GEOM" == "1" ] ; then
   scripts/GEOM_Cases.sh
   source $STOPX
 fi
+
+# copy generated images to web summary directory
+
+cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
+cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
