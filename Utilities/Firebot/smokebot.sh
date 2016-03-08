@@ -19,7 +19,8 @@ WARNING_LOG=$OUTPUT_DIR/warnings
 GUIDE_DIR=$OUTPUT_DIR/guides
 STAGE_STATUS=$OUTPUT_DIR/stage_status
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
-WEBDIR=/var/www/html/smokebot
+web_DIR=
+WEB_URL=
 
 # define repo names (default)
 fdsrepo=~/FDS-SMVgitclean
@@ -40,12 +41,7 @@ MAILTO=
 UPLOADRESULTS=
 COMPILER=intel
 
-WEBHOSTNAME=blaze.nist.gov
-if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
-WEBHOSTNAME=$SMOKEBOT_HOSTNAME
-fi
-
-while getopts 'ab:C:cI:m:Mo:q:r:sS:tuU' OPTION
+while getopts 'ab:C:cI:m:Mo:q:r:sS:tuUw:W:' OPTION
 do
 case $OPTION in
   a)
@@ -95,9 +91,39 @@ case $OPTION in
   u)
    UPDATEREPO=1
    ;;
+  w)
+   web_DIR="$OPTARG"
+   ;;
+  W)
+   WEB_URL="$OPTARG"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
+
+# if one of WEB_URL or web_DIR exist then both should exist
+# if web_DIR exists then it must be writable
+
+if [ "$WEB_URL" == "" ]; then
+  web_DIR=
+fi
+if [ "$web_DIR" == "" ]; then
+  WEB_URL=
+else
+  if [ -d $web_DIR ]; then
+    testfile=$web_DIR/test.$$
+    touch $testfile >& /dev/null
+    if [ -e $testfile ]; then
+      rm $testfile
+    else
+      web_DIR=
+      WEB_URL=
+    fi
+  else
+    web_DIR=
+    WEB_URL=
+  fi
+fi
 
 if [ "$COMPILER" == "intel" ]; then
 if [[ "$IFORT_COMPILER" != "" ]] ; then
@@ -156,7 +182,6 @@ export cfastrepo
 
 export SMV_SUMMARY="$fdsrepo/Manuals/SMV_Summary"
 WEBFROMDIR="$fdsrepo/Manuals/SMV_Summary"
-WEBTODIR=/var/www/html/smokebot
 
 SMV_VG_GUIDE=$fdsrepo/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsrepo/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
@@ -998,16 +1023,14 @@ check_smv_pictures_db()
       grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-   if [ "$UPLOADRESULTS" == "1" ]; then
-     if [ -d "$WEBTODIR" ]; then
-       if [ -d "$WEBFROMDIR" ]; then
-         CURDIR=`pwd`
-         cd $WEBTODIR
-         rm -rf *
-         cd $WEBFROMDIR
-         cp -r * $WEBTODIR/.
-         cd $CURDIR
-       fi
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d "$WEBFROMDIR" ]; then
+       CURDIR=`pwd`
+       cd $web_DIR
+       rm -rf *
+       cd $WEBFROMDIR
+       cp -r * $web_DIR/.
+       cd $CURDIR
      fi
    fi
 }
@@ -1134,16 +1157,14 @@ check_smv_movies()
       grep -I -E "Warning" $OUTPUT_DIR/stage4c >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-   if [ "$UPLOADRESULTS" == "1" ]; then
-     if [ -d "$WEBTODIR" ]; then
-       if [ -d "$WEBFROMDIR" ]; then 
-         CURDIR=`pwd`
-         cd $WEBTODIR
-         rm -rf *
-         cd $WEBFROMDIR
-         cp -r * $WEBTODIR/.
-         cd $CURDIR
-       fi
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d "$WEBFROMDIR" ]; then 
+       CURDIR=`pwd`
+       cd $web_DIR
+       rm -rf *
+       cd $WEBFROMDIR
+       cp -r * $web_DIR/.
+       cd $CURDIR
      fi
    fi
 
@@ -1175,15 +1196,17 @@ generate_timing_stats()
 
 archive_timing_stats()
 {
-   echo "   archiving"
-   cd $fdsrepo/Utilities/Scripts
-   cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
-   cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
-   TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
+  echo "   archiving"
+  cd $fdsrepo/Utilities/Scripts
+  cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+  cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
+  TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
   if [ "$UPLOADRESULTS" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./smvstatus_updatepub.sh -F
-    ./make_smv_summary.sh > /var/www/html/smokebot/index.html
+  fi
+  if [ ! "$web_DIR" == "" ]; then
+    ./make_smv_summary.sh > $web_DIR/index.html
   fi
 }
 
@@ -1199,20 +1222,24 @@ check_guide()
    label=$4
 
    # Scan and report any errors in build process for guides
-   SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
+
+   SMOKEBOT_MANDIR=
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d $web_DIR/manuals ]; then
+       SMOKEBOT_MANDIR=$web_DIR/manuals
+     fi
+   fi
+
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
-   then
-      if [ "$UPLOADRESULTS" == "1" ]; then
-      if [ -d $SMOKEBOT_MANDIR ] ; then
-        cp $directory/$document $SMOKEBOT_MANDIR/.
-      fi
-      fi
-      if [ -d $SMV_SUMMARY/manuals ] ; then
-        cp $directory/$document $SMV_SUMMARY/manuals/.
-      fi
-      cp $directory/$document $NEWGUIDE_DIR/.
-      chmod 664 $NEWGUIDE_DIR/$document
+   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]; then
+     if [ ! "$SMOKEBOT_MANDIR" == "" ]; then
+       cp $directory/$document $SMOKEBOT_MANDIR/.
+     fi
+     if [ -d $SMV_SUMMARY/manuals ] ; then
+       cp $directory/$document $SMV_SUMMARY/manuals/.
+     fi
+     cp $directory/$document $NEWGUIDE_DIR/.
+     chmod 664 $NEWGUIDE_DIR/$document
    else
       echo "Errors from Stage 5 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
@@ -1327,10 +1354,13 @@ fi
   fi
    echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_RUNDIR
-   if [ "$UPLOADRESULTS" == "1" ]; then
    # Check for warnings and errors
-   echo "Smokebot summary: http://$WEBHOSTNAME/smokebot/" >> $TIME_LOG
-   echo " Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
+   if [ ! "$WEB_URL" == "" ]; then
+     echo "Smokebot summary: $WEB_URL" >> $TIME_LOG
+   fi
+   if [ "$UPLOADRESULTS" == "1" ]; then
+     echo " Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
+   fi
    echo "-------------------------------" >> $TIME_LOG
    fi
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
