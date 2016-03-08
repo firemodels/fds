@@ -148,9 +148,6 @@ fi
 if [ ! "$WEB_URL" == "" ]; then
   WEB_URL="-W $WEB_URL"
 fi
-echo web_DIR=$web_DIR
-echo WEB_URL=$WEB_URL
-exit
 
 COMPILER="-I $COMPILER"
 
