@@ -180,7 +180,6 @@ fi
 if [ ! "$WEB_URL" == "" ]; then
 echo "         URL: $WEB_URL"
 fi
-exit
 
 cd
 
