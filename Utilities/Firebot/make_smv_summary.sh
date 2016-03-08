@@ -1,6 +1,5 @@
 #!/bin/bash
 CURDIR=`pwd`
-cpufrom=~/.smokebot/smv_times.csv
 
 cat << EOF
 <html>
@@ -15,7 +14,7 @@ cat << EOF
           ['Days since Jan 1, 2016', 'CPU Time (s)'],
 EOF
 
-sort -n -k 1 -t , $cpufrom | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
+./make_timelist.sh -s | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
 
 cat << EOF
         ]);
