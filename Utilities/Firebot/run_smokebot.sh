@@ -28,7 +28,6 @@ UPLOAD=
 FORCE=
 COMPILER=intel
 
-
 WEB_URL=
 web_DIR=/var/www/html/`whoami`
 if [ -d $web_DIR ]; then
@@ -45,7 +44,6 @@ notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ $notfound -eq 1 ] ; then
   QUEUE=none
 fi
-
 
 function usage {
 echo "Verification and validation testing script for smokeview"
@@ -181,13 +179,15 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
      cd $CURDIR
   fi
 fi
+
 CFASTREPO="-C $CFASTREPO"
 FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
+
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $webDIR $WEBURL $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
 fi
