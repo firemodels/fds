@@ -1352,7 +1352,6 @@ fi
   if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
     cat $GIT_FDSLOG >> $TIME_LOG
   fi
-   echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_RUNDIR
    # Check for warnings and errors
    if [ ! "$WEB_URL" == "" ]; then
@@ -1362,7 +1361,6 @@ fi
      echo " Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
    fi
    echo "-------------------------------" >> $TIME_LOG
-   fi
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
