@@ -174,6 +174,13 @@ echo "  running in: $SMOKEBOT_RUNDIR"
 echo "FDS-SMV repo: $fdsrepo"
 echo "  cfast repo: $cfastrepo"
 echo ""
+if [ ! "$web_DIR" == "" ]; then
+echo "     web dir: $web_DIR"
+fi
+if [ ! "$WEB_URL" == "" ]; then
+echo "         URL: $WEB_URL"
+fi
+exit
 
 cd
 
