@@ -21,7 +21,7 @@ fi
 
 # check if status web page has changed
 
-./make_pubpage -s -b  > $newpage
+./make_pubpage.sh -s -b  > $newpage
 if [ ! -e $oldpage ]; then
   cp $newpage $oldpage
 fi
