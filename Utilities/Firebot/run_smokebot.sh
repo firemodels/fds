@@ -28,6 +28,17 @@ UPLOAD=
 FORCE=
 COMPILER=intel
 
+
+WEB_URL=
+web_DIR=/var/www/html/`whoami`
+if [ -d $web_DIR ]; then
+  IP=`wget http://ipinfo.io/ip -qO -`
+  HOST=`host $IP | awk '{printf("%s\n",$5);}'`
+  WEB_URL=http://$HOST/`whoami`
+else
+  web_DIR=
+fi
+
 # checking to see if a queing system is available
 QUEUE=smokebot
 notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
@@ -59,10 +70,20 @@ echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides"
 echo "-v - show options used to run smokebot"
+if [ "$web_DIR" == "" ]; then
+echo "-w directory - web directory containing summary pages"
+else
+echo "-w directory - web directory containing summary pages [default: $web_DIR]"
+fi
+if [ "$WEB_URL" == "" ]; then
+echo "-W url - web url of summary pages"
+else
+echo "-W url - web url of summary pages [default: $WEB_URL]"
+fi
 exit
 }
 
-while getopts 'ab:C:cd:fhI:m:Mq:r:S:uUv' OPTION
+while getopts 'ab:C:cd:fhI:m:Mq:r:S:uUvw:W:' OPTION
 do
 case $OPTION  in
   a)
@@ -111,9 +132,25 @@ case $OPTION  in
   v)
    RUNSMOKEBOT=
    ;;
+  w)
+   web_DIR="$OPTARG"
+   ;;
+  W)
+   WEB_URL="$OPTARG"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
+
+if [ ! "$web_DIR" == "" ]; then
+  web_DIR="-w $web_DIR"
+fi
+if [ ! "$WEB_URL" == "" ]; then
+  WEB_URL="-W $WEB_URL"
+fi
+echo web_DIR=$web_DIR
+echo WEB_URL=$WEB_URL
+exit
 
 COMPILER="-I $COMPILER"
 
@@ -152,7 +189,7 @@ FDSREPO="-r $FDSREPO"
 BRANCH="-b $BRANCH"
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $webDIR $WEBURL $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
   echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
