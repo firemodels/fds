@@ -6,7 +6,7 @@ tempfile=/tmp/filelist.$$
 # below number computed by substituting
 # Jan 1, 2016 5 UTC (12 AM) into:
 # http://www.unixtimestamp.com/
-BASETIMESTAMP=1415463675
+BASETIMESTAMP=1451624400
 
 while getopts 's' OPTION
 do
