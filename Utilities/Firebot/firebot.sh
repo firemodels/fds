@@ -326,6 +326,7 @@ do_git_checkout()
    GIT_REVISION=`git describe --long --dirty`
    GIT_SHORTHASH=`git rev-parse --short HEAD`
    GIT_LONGHASH=`git rev-parse HEAD`
+   GIT_DATE=`git log -1 --format=%cd --date=local $GIT_SHORTHASH`
 }
 
 check_git_checkout()
@@ -1086,24 +1087,24 @@ save_build_status()
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Build success with warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success!;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success!;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
