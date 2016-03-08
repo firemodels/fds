@@ -13,7 +13,6 @@ size=_64
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
 HISTORY_DIR="$HOME/.firebot/history"
-TIME_HISTORY="$HOME/.firebot/fds_times.csv"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -980,12 +979,6 @@ archive_timing_stats()
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
    cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
    TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
-  d=`echo $(($(date --utc --date "$1" +%s)/86400-16800))`
-  h=`date "+%k"`
-  m=`date "+%M"`
-  s=`date "+%S"`
-  decdate=`echo "scale=5; $d + $h/24.0 + $m/(60*24) + $s/(3600*24)" | bc`
-  echo $decdate,$TOTAL_FDS_TIMES>>$TIME_HISTORY
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./status_updatepub.sh -F
