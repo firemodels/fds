@@ -1,8 +1,8 @@
 #!/bin/bash
-cpufrom=~/.firebot/fds_times.csv
 historydir=~/.firebot/history
 BODY=
 TITLE=Firebot
+SOPT=
 
 while getopts 'bs' OPTION
 do
@@ -11,9 +11,9 @@ case $OPTION  in
    BODY="1"
    ;;
   s)
-   cpufrom=~/.smokebot/smv_times.csv
    historydir=~/.smokebot/history
    TITLE=Smokebot
+   SOPT=-s
    ;;
 esac
 done
@@ -35,7 +35,7 @@ cat << EOF
           ['Days since Jan 1, 2016', 'CPU Time (s)'],
 EOF
 
-sort -n -k 1 -t , $cpufrom | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
+./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
 
 cat << EOF
         ]);
