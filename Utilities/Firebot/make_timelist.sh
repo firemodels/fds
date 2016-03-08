@@ -3,7 +3,10 @@ curdir=`pwd`
 cpufrom=~firebot/.firebot/fds_times.csv
 historydir=~firebot/.firebot/history
 tempfile=/tmp/filelist.$$
-BASETIMESTAMP=1451606400
+# below number computed by substituting
+# Jan 1, 2016 5 UTC (12 AM) into:
+# http://www.unixtimestamp.com/
+BASETIMESTAMP=1415463675
 
 while getopts 's' OPTION
 do
