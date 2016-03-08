@@ -3,8 +3,9 @@ curdir=`pwd`
 cpufrom=~firebot/.firebot/fds_times.csv
 historydir=~firebot/.firebot/history
 tempfile=/tmp/filelist.$$
-# below number computed by substituting
-# Jan 1, 2016 5 UTC (12 AM) into:
+# The offset below is computed by substituting
+# Jan 1, 2016 5 UTC (12 AM EST) into a web form
+# found at:
 # http://www.unixtimestamp.com/
 BASETIMESTAMP=1451624400
 
