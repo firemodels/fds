@@ -59,7 +59,7 @@ cat << EOF
 
 </head>
 <body>
-<h2>FDS Automatic Verification Summary Page</h2>
+<h2>$TITLE Summary Page</h2>
 
 <hr align='left'>
 
@@ -67,9 +67,8 @@ cat << EOF
 <h3>FDS/Smokeview Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
-<h3>$TITLE Status</h3>
+<h3>Status</h3>
 
-This page displays the status for up to 30 of the most recent build/test cycles.<br>
 EOF
 fi
 
@@ -84,15 +83,15 @@ cat $listin | head -30 | \
                           if($8=="2")font="<font color=\"#FF00FF\">";\
                           if($8=="3")font="<font color=\"#FF0000\">";\
                           printf("<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a>%s %s</font><br>\n",$4,$5,font,$1);\
-                          if($9!="")printf("%s <br>\n",cputime);\
-                          printf("%s\n",$2);}' 
+                          printf("Revision date: %s\n",$2);\ 
+                          if($9!="")printf("%s <br>\n",cputime);}'
 rm $listin
 
 if [ "$BODY" == "" ]; then
 cat << EOF
 <br><br>
 <hr align='left'><br>
-<i>Status last updated: `date`</i><br><br><br>
+<i>Updated: `date`</i><br><br><br>
 
 </body>
 </html>
