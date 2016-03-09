@@ -1612,7 +1612,6 @@ DIVMN  =  10000._EB
 IMX    = 0
 JMX    = 0
 KMX    = 0
-Q_MAX  = -10000._EB
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1647,7 +1646,6 @@ DO K=1,KBAR
             JMN=J
             KMN=K
          ENDIF
-         Q_MAX = MAX(Q(I,J,K),Q_MAX)
       ENDDO LOOP1
    ENDDO
 ENDDO
