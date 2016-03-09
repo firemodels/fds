@@ -48,9 +48,9 @@ cat << EOF
 </table>
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
 <p>
-<a href="index2.html"><font size=5>Animations</font></a> -
+<a href="movies.html"><font size=5>Animations</font></a> -
 <font size=5>Stills</font> -  
-<a href="index3.html"><font size=5>Manuals</font></a> 
+<a href="manuals.html"><font size=5>Manuals</font></a> 
 
 <p><hr>
 
