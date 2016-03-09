@@ -1029,16 +1029,6 @@ check_smv_pictures_db()
       grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-   if [ ! "$web_DIR" == "" ]; then
-     if [ -d "$WEBFROMDIR" ]; then
-       CURDIR=`pwd`
-       cd $web_DIR
-       rm -rf *
-       cd $WEBFROMDIR
-       cp -r * $web_DIR/.
-       cd $CURDIR
-     fi
-   fi
 }
 
 #  ==================================
@@ -1125,6 +1115,17 @@ check_smv_pictures()
       cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d "$WEBFROMDIR" ]; then
+       CURDIR=`pwd`
+       cd $web_DIR
+       rm -rf *
+       cd $WEBFROMDIR
+       cp -r * $web_DIR/.
+       cd $CURDIR
+     fi
+   fi
+
 }
 
 #  ===============================================
