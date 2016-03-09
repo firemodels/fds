@@ -21,7 +21,7 @@ fi
 
 # check if status web page has changed
 
-./make_pubpage -s -b  > $newpage
+./make_pubpage.sh -s -b  > $newpage
 if [ ! -e $oldpage ]; then
   cp $newpage $oldpage
 fi
@@ -33,6 +33,7 @@ fi
 
 # check if FDS benchmark times have changed
 
+./make_timelist.sh -s > $newdata
 if [ ! -e $olddata ]; then
   cp $newdata $olddata
 fi
