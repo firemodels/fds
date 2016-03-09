@@ -33,6 +33,7 @@ fi
 
 # check if FDS benchmark times have changed
 
+./make_timelist.sh > $newdata
 if [ ! -e $olddata ]; then
   cp $newdata $olddata
 fi

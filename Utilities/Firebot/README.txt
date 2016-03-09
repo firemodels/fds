@@ -20,9 +20,6 @@ More details on the Firebot build stages can be found in the FDS Configuration M
 ======================
 
 1. clone FDS-SMV repository
-  
- 
-
 
 2. Ensure that the following software packages are installed on the system:
 
