@@ -9588,6 +9588,12 @@ INIT_LOOP: DO N=1,N_INIT_READ+N_INIT_RESERVED
 
    IF (DX>0._EB .OR. DY>0._EB .OR. DZ>0._EB) SHAPE = 'LINE'
 
+   IF (N_PARTICLES>0 .AND. SHAPE=='LINE') THEN
+      XB(2) = XB(1) + DX*(N_PARTICLES-1)
+      XB(4) = XB(3) + DY*(N_PARTICLES-1)
+      XB(6) = XB(5) + DZ*(N_PARTICLES-1)
+   ENDIF
+
    ! Create a box around a CONE
 
    IF (SHAPE=='CONE' .OR. SHAPE=='RING') THEN
