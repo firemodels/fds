@@ -32,7 +32,7 @@ cat << EOF
 
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Days since Jan 1, 2016', 'CPU Time (s)'],
+          ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
 ./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
@@ -41,13 +41,13 @@ cat << EOF
         ]);
 
         var options = {
-          title: '$TITLE CPU Time History',
+          title: '$TITLE Time History',
           curveType: 'line',
           legend: { position: 'right' },
           colors: ['black'],
           pointSize: 5,
-          hAxis:{ title: 'Day number'},
-          vAxis:{ title: 'CPU Time (s)'}
+          hAxis:{ title: 'Day'},
+          vAxis:{ title: 'Benchmark Time (s)'}
         };
         options.legend = 'none';
 
