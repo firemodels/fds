@@ -13,7 +13,6 @@ size=_64
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
 HISTORY_DIR="$HOME/.firebot/history"
-TIME_HISTORY="$HOME/.firebot/fds_times.csv"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -327,6 +326,7 @@ do_git_checkout()
    GIT_REVISION=`git describe --long --dirty`
    GIT_SHORTHASH=`git rev-parse --short HEAD`
    GIT_LONGHASH=`git rev-parse HEAD`
+   GIT_DATE=`git log -1 --format=%cd --date=local $GIT_SHORTHASH`
 }
 
 check_git_checkout()
@@ -970,6 +970,7 @@ generate_timing_stats()
    ./fds_timing_stats.sh > fds_timing_stats.csv
    cd $fdsrepo/Utilities/Scripts
    ./fds_timing_stats.sh firebot 1 > fds_benchmarktiming_stats.csv
+   TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
 }
 
 archive_timing_stats()
@@ -979,16 +980,9 @@ archive_timing_stats()
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
    cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
    TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
-  d=`echo $(($(date --utc --date "$1" +%s)/86400-16800))`
-  h=`date "+%k"`
-  m=`date "+%M"`
-  s=`date "+%S"`
-  decdate=`echo "scale=5; $d + $h/24.0 + $m/(60*24) + $s/(3600*24)" | bc`
-  echo $decdate,$TOTAL_FDS_TIMES>>$TIME_HISTORY
   if [ "$UPLOADGUIDES" == "1" ]; then
     cd $fdsrepo/Utilities/Firebot
     ./status_updatepub.sh -F
-    ./status_updatepriv.sh
   fi
 }
 
@@ -1093,24 +1087,24 @@ save_build_status()
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Build success with warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success!;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success!;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
@@ -1128,12 +1122,10 @@ email_build_status()
    echo "Host Name: $hostname " >> $TIME_LOG
    echo "Start Time: $start_time " >> $TIME_LOG
    echo "Stop Time: $stop_time " >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
    if [ "$UPLOADGUIDES" == "1" ]; then
-   echo "Firebot status (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
-   echo "Firebot status (public) :  http://goo.gl/vgeRx5" >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
+   echo "Firebot status:  http://goo.gl/vgeRx5" >> $TIME_LOG
    fi
+   echo "-------------------------------" >> $TIME_LOG
 
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]

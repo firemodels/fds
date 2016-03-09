@@ -38,6 +38,7 @@ do
    jafter=`echo "$jafter" | bc`
    TOTAL_CPU_TIME=`echo "$TOTAL_CPU_TIME+$jafter" | bc`
 done
+echo `git rev-parse --short HEAD` >> $tmpout
 echo $TOTAL_CPU_TIME >> $tmpout
 
 cat $tmpout
