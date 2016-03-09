@@ -1212,6 +1212,7 @@ archive_timing_stats()
     ./smvstatus_updatepub.sh -F
   fi
   if [ ! "$web_DIR" == "" ]; then
+    cd $fdsrepo/Utilities/Firebot
     ./make_smv_summary.sh > $web_DIR/index.html
   fi
 }
