@@ -1119,7 +1119,9 @@ check_smv_pictures()
      if [ -d "$WEBFROMDIR" ]; then
        CURDIR=`pwd`
        cd $web_DIR
-       rm -rf *
+       rm -rf images
+       rm -rf manuals
+       rm index.html
        cd $WEBFROMDIR
        cp -r * $web_DIR/.
        cd $CURDIR
