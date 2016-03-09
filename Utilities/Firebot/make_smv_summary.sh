@@ -22,9 +22,9 @@ cat << EOF
         var options = {
           title: 'Smokebot Time History',
           curveType: 'line',
-          legend: { position: 'bottom' },
+          legend: { position: 'right' },
           colors: ['black'],
-          pointSize: 5
+          pointSize: 5,
           hAxis:{ title: 'Day'},
           vAxis:{ title: 'Benchmark Time (s)'}
         };
