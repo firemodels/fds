@@ -11,7 +11,7 @@ cat << EOF
 
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Days since Jan 1, 2016', 'CPU Time (s)'],
+          ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
 ./make_timelist.sh -s | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
@@ -20,12 +20,15 @@ cat << EOF
         ]);
 
         var options = {
-          title: 'Smokebot CPU History',
+          title: 'Smokebot Time History',
           curveType: 'line',
           legend: { position: 'bottom' },
           colors: ['black'],
           pointSize: 5
+          hAxis:{ title: 'Day'},
+          vAxis:{ title: 'Benchmark Time (s)'}
         };
+        options.legend = 'none';
 
         var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
