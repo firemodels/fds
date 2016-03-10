@@ -41,19 +41,37 @@ cat << EOF
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Verification Tests</h2>
-
-
-<p><table>
-<tr><td valign=middle>Version info:</td><td><img width=400 src="images/fds_smv_version.png"></td></tr>
-</table>
-<div id="curve_chart" style="width: 500px; height: 300px"></div>
 <p>
 <a href="movies.html"><font size=5>Animations</font></a> -
 <font size=5>Stills</font> -  
 <a href="manuals.html"><font size=5>Manuals</font></a> 
 
+<p><table>
+<tr><td valign=middle>Version info:</td><td><img width=400 src="images/fds_smv_version.png"></td></tr>
+</table>
+<div id="curve_chart" style="width: 500px; height: 300px"></div>
+
+<ul>
+<li><a href="#slice">Slice files</a>
+<li><a href="#boundary">Boundary files</a>
+<li><a href="#isosurfaces">Isosurfaces</a>
+<li><a href="#particles">Particles</a>
+<li><a href="#3dsmoke">3D Smoke</a>
+<li><a href="#plot3d">PLOT3D</a>
+<li><a href="#zone">Zone fire</a>
+<li><a href="#wui">WUI</a>
+<li><a href="#obstacles">Obstacles</a>
+<li><a href="#vents">Vents</a>
+<li><a href="#stereo">Stereo</a>
+<li><a href="#misc">Miscellaneous</a>
+<li><a href="#obj2state">Objects - two states</a>
+<li><a href="#obj1state">Objects - one state</a>
+<li><a href="#objelem">Objects - elementary</a>
+</ul>
+
 <p><hr>
 
+<a name="slice"></a>
 <p><table>
 <tr><th></th><th colspan=3> Slice</th></tr>
 <tr>
@@ -143,6 +161,7 @@ cat << EOF
 <p><hr>
 
 
+<a name="boundary"></a>
 <p><table>
 <tr><th></th><th colspan=3>Boundary</th></tr>
 <tr>
@@ -161,6 +180,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="wui"></a>
 <p><table>
 <tr><th></th><th colspan=4> WUI</th></tr>
 <tr>
@@ -215,6 +235,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="isosurfaces"></a>
 <p><table>
 <tr><th></th><th colspan=3> Isosurfaces</th></tr>
 <tr>
@@ -240,6 +261,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="stereo"></a>
 <p><table>
 <tr><th></th><th colspan=2>Stereo</th></tr>
 <tr>
@@ -256,6 +278,7 @@ cat << EOF
 
 <p><hr>
 
+<a name="particles"></a>
 <p><table>
 <tr><th></th><th colspan=3> Particles</th></tr>
 <tr>
@@ -274,6 +297,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="plot3d"></a>
 <p><table>
 <tr><th></th><th colspan=4> PLOT3D</th></tr>
 
@@ -312,6 +336,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="3dsmoke"></a>
 <p><table>
 <tr><th colspan=3> 3D Smoke</th></tr>
 
@@ -347,6 +372,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="zone"></a>
 <p><table>
 <tr><th></th><th colspan=2> Zone fire</th></tr>
 <tr>
@@ -363,6 +389,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="obstacles"></a>
 <p><table>
 <tr><th colspan=3> Obstacles</th></tr>
 <tr align=center><th>hidden</th><th>outline</th><th>solid</th></tr>
@@ -379,8 +406,7 @@ cat << EOF
 </tr>
 
 <p><hr>
-
-
+<a name="vents"></a>
 <p><table>
 <tr><th colspan=3> Rectangular vents</th></tr>
 <tr align=center><th>no vents</th><th>no open vents</th><th>all vents</th></tr>
@@ -412,6 +438,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="misc"></a>
 <p><table>
 <tr><th> Texture mapping</th></tr>
 <tr><td><a href="images/sillytexture.png"><img width=300 src="images/sillytexture.png"></a></td></tr>
@@ -440,6 +467,7 @@ cat << EOF
 
 
 <p><hr>
+<a name="obj2state"></a>
 <p><table>
 <tr><th colspan=2> Smokeview objects (two states)</th></tr>
 <tr align=center><th>inactive</th><th>active</th></tr>
@@ -466,6 +494,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="obj1state"></a>
 <table>
 <tr><th colspan=3> Smokeview objects (one state)</th></tr>
 <tr>
@@ -481,6 +510,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="objelem"></a>
 <p><table>
 <tr><th colspan=4>Device elements</th></tr>
 <tr>
