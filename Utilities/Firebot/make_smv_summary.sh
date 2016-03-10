@@ -180,6 +180,143 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="isosurfaces"></a>
+<p><table>
+<tr><th></th><th colspan=3> Isosurfaces</th></tr>
+<tr>
+<th>points</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_points_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_points_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_points_30.png"></a></td>
+</tr>
+
+<tr>
+<th>outline</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_outline_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_outline_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_outline_30.png"></a></td>
+</tr>
+
+<tr>
+<th>solid</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_solid_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_solid_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_solid_30.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="particles"></a>
+<p><table>
+<tr><th></th><th colspan=3> Particles</th></tr>
+<tr>
+<th>points</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_30.png"></a></td>
+</tr>
+
+<tr>
+<th>streaks</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_streak_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_streak_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_streak_30.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="3dsmoke"></a>
+<p><table>
+<tr><th colspan=3> 3D Smoke</th></tr>
+
+<tr>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_smoke_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_smoke_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_smoke_30.png"></a></td>
+</tr>
+</table>
+
+<p><table>
+
+<tr><td></td><th>all planes</th><th>every 2nd plane</th><th>every 3rd plane</th></tr>
+<tr>
+<th>0.1 m grid</th>
+<td><a href="images/smoke_test_all.png"><img width=300 src="images/smoke_test_all.png"></a></td>
+<td><a href="images/smoke_test_every2.png"><img width=300 src="images/smoke_test_every2.png"></a></td>
+<td><a href="images/smoke_test_every3.png"><img width=300 src="images/smoke_test_every3.png"></a></td>
+</tr>
+
+<tr>
+<th> 0.2 m grid</th>
+<td><a href="images/smoke_test2_all.png"><img width=300 src="images/smoke_test2_all.png"></a></td>
+<td><a href="images/smoke_test2_every2.png"><img width=300 src="images/smoke_test2_every2.png"></a></td>
+<td><a href="images/smoke_test2_every3.png"><img width=300 src="images/smoke_test2_every3.png"></a></td>
+</tr>
+<tr>
+<th>actual</th>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="plot3d"></a>
+<p><table>
+<tr><th></th><th colspan=4> PLOT3D</th></tr>
+
+<tr>
+<th>isosurface</th>
+<td><a href="images/plume5c_plot3d_i1.png"><img width=200 src="images/plume5c_plot3d_i1.png"></a></td>
+<td><a href="images/plume5c_plot3d_i2.png"><img width=200 src="images/plume5c_plot3d_i2.png"></a></td>
+<td><a href="images/plume5c_plot3d_i3.png"><img width=200 src="images/plume5c_plot3d_i3.png"></a></td>
+<td><a href="images/plume5c_plot3d_i4.png"><img width=200 src="images/plume5c_plot3d_i4.png"></a></td>
+</tr>
+
+<tr>
+<th>lines</th>
+<td><a href="images/plume5c_plot3d_l1.png"><img width=200 src="images/plume5c_plot3d_l1.png"></a></td>
+<td><a href="images/plume5c_plot3d_l2.png"><img width=200 src="images/plume5c_plot3d_l2.png"></a></td>
+<td><a href="images/plume5c_plot3d_l3.png"><img width=200 src="images/plume5c_plot3d_l3.png"></a></td>
+<td><a href="images/plume5c_plot3d_l4.png"><img width=200 src="images/plume5c_plot3d_l4.png"></a></td>
+</tr>
+
+<tr>
+<th>vectors</th>
+<td><a href="images/plume5c_plot3d_v1.png"><img width=200 src="images/plume5c_plot3d_v1.png"></a></td>
+<td><a href="images/plume5c_plot3d_v2.png"><img width=200 src="images/plume5c_plot3d_v2.png"></a></td>
+<td><a href="images/plume5c_plot3d_v3.png"><img width=200 src="images/plume5c_plot3d_v3.png"></a></td>
+<td><a href="images/plume5c_plot3d_v4.png"><img width=200 src="images/plume5c_plot3d_v4.png"></a></td>
+</tr>
+
+<tr><td></td><th>continuous</th><th>stepped</th><th>line</th></tr>
+<tr>
+<th>shade types</th>
+<td><a href="images/plume5c_plot3d_shaded.png"><img width=200 src="images/plume5c_plot3d_shaded.png"></a></td>
+<td><a href="images/plume5c_plot3d_step.png"><img width=200 src="images/plume5c_plot3d_step.png"></a></td>
+<td><a href="images/plume5c_plot3d_line.png"><img width=200 src="images/plume5c_plot3d_line.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="zone"></a>
+<p><table>
+<tr><th></th><th colspan=2> Zone fire</th></tr>
+<tr>
+<th>slice</th>
+<td><a href="images/cfast_test_c2_200.png"><img width=200 src="images/cfast_test_c2_200.png"></a></d>
+<td><a href="images/cfast_test_c2_400.png"><img width=200 src="images/cfast_test_c2_400.png"></a></td>
+</tr>
+
+<tr>
+<th>3d smoke</th>
+<td><a href="images/cfast_test_smoke_200.png"><img width=200 src="images/cfast_test_smoke_200.png"></a></td>
+<td><a href="images/cfast_test_smoke_400.png"><img width=200 src="images/cfast_test_smoke_400.png"></a></td>
+</tr>
+</table>
+
+
+<p><hr>
 <a name="wui"></a>
 <p><table>
 <tr><th></th><th colspan=4> WUI</th></tr>
@@ -235,32 +372,6 @@ cat << EOF
 </table>
 
 <p><hr>
-<a name="isosurfaces"></a>
-<p><table>
-<tr><th></th><th colspan=3> Isosurfaces</th></tr>
-<tr>
-<th>points</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_points_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_points_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_points_30.png"></a></td>
-</tr>
-
-<tr>
-<th>outline</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_outline_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_outline_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_outline_30.png"></a></td>
-</tr>
-
-<tr>
-<th>solid</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_solid_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_solid_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_solid_30.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
 <a name="stereo"></a>
 <p><table>
 <tr><th></th><th colspan=2>Stereo</th></tr>
@@ -274,118 +385,6 @@ cat << EOF
 <td colspan=2><img width=450 src="images/thouse5_iso_rb_stereo.png"></td>
 </tr>
 
-</table>
-
-<p><hr>
-
-<a name="particles"></a>
-<p><table>
-<tr><th></th><th colspan=3> Particles</th></tr>
-<tr>
-<th>points</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_30.png"></a></td>
-</tr>
-
-<tr>
-<th>streaks</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_streak_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_streak_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_streak_30.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
-<a name="plot3d"></a>
-<p><table>
-<tr><th></th><th colspan=4> PLOT3D</th></tr>
-
-<tr>
-<th>isosurface</th>
-<td><a href="images/plume5c_plot3d_i1.png"><img width=200 src="images/plume5c_plot3d_i1.png"></a></td>
-<td><a href="images/plume5c_plot3d_i2.png"><img width=200 src="images/plume5c_plot3d_i2.png"></a></td>
-<td><a href="images/plume5c_plot3d_i3.png"><img width=200 src="images/plume5c_plot3d_i3.png"></a></td>
-<td><a href="images/plume5c_plot3d_i4.png"><img width=200 src="images/plume5c_plot3d_i4.png"></a></td>
-</tr>
-
-<tr>
-<th>lines</th>
-<td><a href="images/plume5c_plot3d_l1.png"><img width=200 src="images/plume5c_plot3d_l1.png"></a></td>
-<td><a href="images/plume5c_plot3d_l2.png"><img width=200 src="images/plume5c_plot3d_l2.png"></a></td>
-<td><a href="images/plume5c_plot3d_l3.png"><img width=200 src="images/plume5c_plot3d_l3.png"></a></td>
-<td><a href="images/plume5c_plot3d_l4.png"><img width=200 src="images/plume5c_plot3d_l4.png"></a></td>
-</tr>
-
-<tr>
-<th>vectors</th>
-<td><a href="images/plume5c_plot3d_v1.png"><img width=200 src="images/plume5c_plot3d_v1.png"></a></td>
-<td><a href="images/plume5c_plot3d_v2.png"><img width=200 src="images/plume5c_plot3d_v2.png"></a></td>
-<td><a href="images/plume5c_plot3d_v3.png"><img width=200 src="images/plume5c_plot3d_v3.png"></a></td>
-<td><a href="images/plume5c_plot3d_v4.png"><img width=200 src="images/plume5c_plot3d_v4.png"></a></td>
-</tr>
-
-<tr><td></td><th>continuous</th><th>stepped</th><th>line</th></tr>
-<tr>
-<th>shade types</th>
-<td><a href="images/plume5c_plot3d_shaded.png"><img width=200 src="images/plume5c_plot3d_shaded.png"></a></td>
-<td><a href="images/plume5c_plot3d_step.png"><img width=200 src="images/plume5c_plot3d_step.png"></a></td>
-<td><a href="images/plume5c_plot3d_line.png"><img width=200 src="images/plume5c_plot3d_line.png"></a></td>
-</tr>
-
-</table>
-
-<p><hr>
-<a name="3dsmoke"></a>
-<p><table>
-<tr><th colspan=3> 3D Smoke</th></tr>
-
-<tr>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_smoke_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_smoke_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_smoke_30.png"></a></td>
-</tr>
-</table>
-
-<p><table>
-
-<tr><td></td><th>all planes</th><th>every 2nd plane</th><th>every 3rd plane</th></tr>
-<tr>
-<th>0.1 m grid</th>
-<td><a href="images/smoke_test_all.png"><img width=300 src="images/smoke_test_all.png"></a></td>
-<td><a href="images/smoke_test_every2.png"><img width=300 src="images/smoke_test_every2.png"></a></td>
-<td><a href="images/smoke_test_every3.png"><img width=300 src="images/smoke_test_every3.png"></a></td>
-</tr>
-
-<tr>
-<th> 0.2 m grid</th>
-<td><a href="images/smoke_test2_all.png"><img width=300 src="images/smoke_test2_all.png"></a></td>
-<td><a href="images/smoke_test2_every2.png"><img width=300 src="images/smoke_test2_every2.png"></a></td>
-<td><a href="images/smoke_test2_every3.png"><img width=300 src="images/smoke_test2_every3.png"></a></td>
-</tr>
-<tr>
-<th>actual</th>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
-<a name="zone"></a>
-<p><table>
-<tr><th></th><th colspan=2> Zone fire</th></tr>
-<tr>
-<th>slice</th>
-<td><a href="images/cfast_test_c2_200.png"><img width=200 src="images/cfast_test_c2_200.png"></a></d>
-<td><a href="images/cfast_test_c2_400.png"><img width=200 src="images/cfast_test_c2_400.png"></a></td>
-</tr>
-
-<tr>
-<th>3d smoke</th>
-<td><a href="images/cfast_test_smoke_200.png"><img width=200 src="images/cfast_test_smoke_200.png"></a></td>
-<td><a href="images/cfast_test_smoke_400.png"><img width=200 src="images/cfast_test_smoke_400.png"></a></td>
-</tr>
 </table>
 
 <p><hr>
