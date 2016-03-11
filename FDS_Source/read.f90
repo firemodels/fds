@@ -3290,7 +3290,7 @@ REAL(EB) :: SOOT_YIELD,CO_YIELD,EPUMO2,A, &
             FLAME_SPEED,FLAME_SPEED_EXPONENT,FLAME_SPEED_TEMPERATURE,&
             TURBULENT_FLAME_SPEED_ALPHA,TURBULENT_FLAME_SPEED_EXPONENT,RADIATIVE_FRACTION
 REAL(EB) :: E_TMP=0._EB,S_TMP=0._EB,ATOM_COUNTS(118),MW_FUEL=0._EB,H_F=0._EB,PR_TMP
-LOGICAL :: L_TMP,CHECK_ATOM_BALANCE,FAST_CHEMISTRY,SERIES_REACTION,REVERSE,THIRD_BODY
+LOGICAL :: L_TMP,CHECK_ATOM_BALANCE,FAST_CHEMISTRY,REVERSE,THIRD_BODY
 NAMELIST /REAC/ A,ALT_REAC_ID,AUTO_IGNITION_TEMPERATURE,C,CHECK_ATOM_BALANCE,CO_YIELD,CRITICAL_FLAME_TEMPERATURE,&
                 E,EPUMO2,K,EQUATION,FIXED_MIX_TIME,FLAME_SPEED,FLAME_SPEED_EXPONENT,FLAME_SPEED_TEMPERATURE,FORMULA,FUEL,&
                 FUEL_RADCAL_ID,FWD_ID,FYI,H,HEAT_OF_COMBUSTION,&
@@ -3417,7 +3417,6 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    RN%RAMP_FS                   = RAMP_FS
    RN%TABLE_FS                  = TABLE_FS
    RN%REVERSE                   = REVERSE
-   RN%SERIES_REACTION           = SERIES_REACTION
    RN%SOOT_H_FRACTION           = SOOT_H_FRACTION
    RN%SOOT_YIELD                = SOOT_YIELD
    RN%THIRD_BODY                = THIRD_BODY
@@ -3430,26 +3429,22 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ENDIF
    IF (RN%RAMP_FS/='null') CALL GET_RAMP_INDEX(RN%RAMP_FS,'EQUIVALENCE RATIO',RN%RAMP_FS_INDEX)
    IF (RN%RAMP_CHI_R/='null') CALL GET_RAMP_INDEX(RN%RAMP_CHI_R,'TIME',RN%RAMP_CHI_R_INDEX)
-
    IF (RN%TABLE_FS/='null') CALL GET_TABLE_INDEX(RN%TABLE_FS,FLAME_SPEED_TABLE,RN%TABLE_FS_INDEX)
 
-
-   IF (RN%A_PRIME == -1._EB) THEN
-      IF (RN%E == -1000._EB) THEN
-         IF (.NOT. RN%REVERSE) THEN
-            RN%FAST_CHEMISTRY=.TRUE.
-            NFR = NFR + 1
-         ENDIF
-      ENDIF
+   IF (RN%A_PRIME==-1._EB .AND. RN%E==-1000._EB .AND. .NOT.RN%REVERSE) THEN
+      RN%FAST_CHEMISTRY=.TRUE.
+      NFR = NFR + 1
    ENDIF
 
    ! Check appropriate extinction model
+
    IF (NFR > 1 .AND. EXTINCT_MOD == 2 .AND. SUPPRESSION) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: The default EXTINCTION MODEL is designed for 1 reaction. See Tech Guide'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    ! Determine the number of stoichiometric coefficients for this reaction
+
    IF (.NOT.SIMPLE_CHEMISTRY) THEN
       NS2 = 0
       DO NS=1,MAX_SPECIES
@@ -3476,6 +3471,7 @@ REAC_READ_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    ! Store the "read in" values of N_S, NU, and SPEC_ID_NU for use in PROC_REAC.
+
    IF (RN%N_SPEC > 0) THEN
       ALLOCATE(RN%N_S_READ(RN%N_SPEC))
       RN%N_S_READ(1:RN%N_SPEC) = N_S(1:RN%N_SPEC)
@@ -3539,7 +3535,6 @@ RAMP_FS                     = 'null'
 REAC_ATOM_ERROR             = 1.E-4_EB
 REAC_MASS_ERROR             = 1.E-4_EB
 REVERSE                     = .FALSE.
-SERIES_REACTION             = .FALSE.
 SOOT_H_FRACTION             = 0.1_EB
 SOOT_YIELD                  = 0.0_EB
 SPEC_ID_NU                  = 'null'
@@ -3560,7 +3555,6 @@ REAL(EB) :: MASS_PRODUCT,MASS_REACTANT,REACTION_BALANCE(118)
 INTEGER :: NS,NS2,NR,NRR,NSPEC
 LOGICAL :: NAME_FOUND,SKIP_ATOM_BALANCE
 TYPE (SPECIES_MIXTURE_TYPE), POINTER :: SM
-TYPE(REACTION_TYPE), POINTER :: RNN=>NULL()
 
 IF (N_REACTIONS <=0) RETURN
 
@@ -3657,6 +3651,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    ! Look for indices of fuels, oxidizers, and products. Normalize the stoichiometric coefficients by that of the fuel.
+
    DO NS2=1,N_TRACKED_SPECIES
       IF (ABS(RN%NU(NS2))<TWO_EPSILON_EB) CYCLE
       IF (RN%NU(NS2)>TWO_EPSILON_EB) I_PRODUCTS = NS2
@@ -3670,6 +3665,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
    ! Find AIR index
+
    GET_AIR_INDEX_LOOP: DO NS = 1,N_TRACKED_SPECIES
       IF (RN%NU(NS) < 0._EB .AND. NS /= RN%FUEL_SMIX_INDEX) THEN
          RN%AIR_SMIX_INDEX = NS
@@ -3678,6 +3674,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO GET_AIR_INDEX_LOOP
 
    ! Adjust mol/cm^3/s based rate to kg/m^3/s rate
+
    RN%RHO_EXPONENT = 0._EB
    DO NS=1,RN%N_SPEC
       IF (TRIM(RN%SPEC_ID_N_S_READ(NS))=='null') CYCLE
@@ -3694,17 +3691,25 @@ REAC_LOOP: DO NR=1,N_REACTIONS
          ENDIF
       ENDDO
       IF (.NOT. NAME_FOUND) THEN
-         WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Primitive species ', &
-                                       TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
+         WRITE(MESSAGE,'(A,I3,A,A,A)') &
+            'ERROR: Problem with REAC ',NR,'. Primitive species ',TRIM(RN%SPEC_ID_N_S_READ(NS)),' not found.'
          CALL SHUTDOWN(MESSAGE) ; RETURN
       ENDIF
    ENDDO
-
    RN%RHO_EXPONENT = RN%RHO_EXPONENT - 1._EB ! subtracting 1 accounts for division by rho in Eq. (5.51)
    RN%A_PRIME = RN%A_PRIME * 1000._EB*SPECIES_MIXTURE(RN%FUEL_SMIX_INDEX)%MW ! conversion terms in Eq. (5.48)
-   IF (RN%FUEL/='null' .AND. RN%FUEL_SMIX_INDEX<1) THEN
-      WRITE(MESSAGE,'(A,I3,A,A,A)') 'ERROR: Problem with REAC ',NR,'. Fuel ',TRIM(RN%FUEL),' not found.'
-      CALL SHUTDOWN(MESSAGE) ; RETURN
+
+   ! Adjust mol/cm^3/s based rate to kg/m^3/s rate for FAST_CHEMISTRY (this will get removed when we overhaul combustion)
+   ! Fictitious Arrhenius rate is dC_F/dt = -1E10*C_F*C_A
+
+   IF (RN%FAST_CHEMISTRY) THEN
+      IF (RN%AIR_SMIX_INDEX > -1) THEN
+         RN%RHO_EXPONENT_FAST = 1._EB
+         RN%A_PRIME_FAST = 1.E10_EB*(1000._EB*SPECIES_MIXTURE(RN%AIR_SMIX_INDEX)%MW)**(-1._EB)
+      ELSE
+         RN%RHO_EXPONENT_FAST = 0._EB
+         RN%A_PRIME_FAST = 1.E10_EB
+      ENDIF
    ENDIF
 
    ! Compute the primitive species reaction coefficients
@@ -3765,37 +3770,6 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDDO
 
 ENDDO REAC_LOOP
-
-
-! Determine number of fast/potentially fast series reactions
-
-N_SERIES_REACTIONS = 0
-SERIES_REACTION_LOOP: DO NR = 1,N_REACTIONS
-   RN => REACTION(NR)
-   RN%SERIES_REACTION = .FALSE.
-   ! Special treatment of series reactions is only needed for fast chemistry
-   FAST_CHEM_IF: IF (RN%FAST_CHEMISTRY) THEN
-
-      ! Determine whether a product of reaction RN is fuel of a different reaction RNN
-      SERIES_SPECIES_LOOP: DO NS = 1,N_TRACKED_SPECIES
-         PRODUCTS_IF: IF (RN%NU(NS) > 0._EB) THEN
-
-            RNN_LOOP: DO NRR = 1,N_REACTIONS
-               RNN => REACTION(NRR)
-               IF (RNN%FAST_CHEMISTRY) THEN
-                  IF (NRR == NR) CYCLE RNN_LOOP
-                  IF (NS == RNN%FUEL_SMIX_INDEX) THEN
-                     N_SERIES_REACTIONS = N_SERIES_REACTIONS + 1
-                     RN%SERIES_REACTION = .TRUE.
-                  ENDIF
-               ENDIF
-            ENDDO RNN_LOOP
-
-         ENDIF PRODUCTS_IF
-      ENDDO SERIES_SPECIES_LOOP
-
-   ENDIF FAST_CHEM_IF
-ENDDO SERIES_REACTION_LOOP
 
 ! Select integrator
 
