@@ -11,7 +11,7 @@ cat << EOF
 
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
-          ['Days since Jan 1, 2016', 'CPU Time (s)'],
+          ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
 ./make_timelist.sh -s | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
@@ -20,12 +20,15 @@ cat << EOF
         ]);
 
         var options = {
-          title: 'Smokebot CPU History',
+          title: 'Smokebot Time History',
           curveType: 'line',
-          legend: { position: 'bottom' },
+          legend: { position: 'right' },
           colors: ['black'],
-          pointSize: 5
+          pointSize: 5,
+          hAxis:{ title: 'Day'},
+          vAxis:{ title: 'Benchmark Time (s)'}
         };
+        options.legend = 'none';
 
         var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
 
@@ -38,19 +41,37 @@ cat << EOF
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <h2>Smokeview Verification Tests</h2>
-
+<p>
+<a href="movies.html"><font size=5>Animations</font></a> -
+<font size=5>Stills</font> -  
+<a href="manuals.html"><font size=5>Manuals</font></a> 
 
 <p><table>
 <tr><td valign=middle>Version info:</td><td><img width=400 src="images/fds_smv_version.png"></td></tr>
 </table>
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
-<p>
-<a href="index2.html"><font size=5>Animations</font></a> -
-<font size=5>Stills</font> -  
-<a href="index3.html"><font size=5>Manuals</font></a> 
+
+<ul>
+<li><a href="#slice">Slice files</a>
+<li><a href="#boundary">Boundary files</a>
+<li><a href="#isosurfaces">Isosurfaces</a>
+<li><a href="#particles">Particles</a>
+<li><a href="#3dsmoke">3D Smoke</a>
+<li><a href="#plot3d">PLOT3D</a>
+<li><a href="#zone">Zone fire</a>
+<li><a href="#wui">WUI</a>
+<li><a href="#obstacles">Obstacles</a>
+<li><a href="#vents">Vents</a>
+<li><a href="#stereo">Stereo</a>
+<li><a href="#misc">Miscellaneous</a>
+<li><a href="#obj2state">Objects - two states</a>
+<li><a href="#obj1state">Objects - one state</a>
+<li><a href="#objelem">Objects - elementary</a>
+</ul>
 
 <p><hr>
 
+<a name="slice"></a>
 <p><table>
 <tr><th></th><th colspan=3> Slice</th></tr>
 <tr>
@@ -140,6 +161,7 @@ cat << EOF
 <p><hr>
 
 
+<a name="boundary"></a>
 <p><table>
 <tr><th></th><th colspan=3>Boundary</th></tr>
 <tr>
@@ -158,6 +180,144 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="isosurfaces"></a>
+<p><table>
+<tr><th></th><th colspan=3> Isosurfaces</th></tr>
+<tr>
+<th>points</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_points_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_points_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_points_30.png"></a></td>
+</tr>
+
+<tr>
+<th>outline</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_outline_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_outline_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_outline_30.png"></a></td>
+</tr>
+
+<tr>
+<th>solid</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_solid_00.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_solid_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_solid_30.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="particles"></a>
+<p><table>
+<tr><th></th><th colspan=3> Particles</th></tr>
+<tr>
+<th>points</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_30.png"></a></td>
+</tr>
+
+<tr>
+<th>streaks</th>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_streak_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_streak_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_streak_30.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="3dsmoke"></a>
+<p><table>
+<tr><th colspan=3> 3D Smoke</th></tr>
+
+<tr>
+<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_smoke_01.png"></a></td>
+<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_smoke_10.png"></a></td>
+<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_smoke_30.png"></a></td>
+</tr>
+</table>
+
+<p><table>
+
+<tr><td></td><th>all planes</th><th>every 2nd plane</th><th>every 3rd plane</th></tr>
+<tr>
+<th>0.1 m grid</th>
+<td><a href="images/smoke_test_all.png"><img width=300 src="images/smoke_test_all.png"></a></td>
+<td><a href="images/smoke_test_every2.png"><img width=300 src="images/smoke_test_every2.png"></a></td>
+<td><a href="images/smoke_test_every3.png"><img width=300 src="images/smoke_test_every3.png"></a></td>
+</tr>
+
+<tr>
+<th> 0.2 m grid</th>
+<td><a href="images/smoke_test2_all.png"><img width=300 src="images/smoke_test2_all.png"></a></td>
+<td><a href="images/smoke_test2_every2.png"><img width=300 src="images/smoke_test2_every2.png"></a></td>
+<td><a href="images/smoke_test2_every3.png"><img width=300 src="images/smoke_test2_every3.png"></a></td>
+</tr>
+<tr>
+<th>actual</th>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="plot3d"></a>
+<p><table>
+<tr><th></th><th colspan=4> PLOT3D</th></tr>
+
+<tr>
+<th>isosurface</th>
+<td><a href="images/plume5c_plot3d_i1.png"><img width=200 src="images/plume5c_plot3d_i1.png"></a></td>
+<td><a href="images/plume5c_plot3d_i2.png"><img width=200 src="images/plume5c_plot3d_i2.png"></a></td>
+<td><a href="images/plume5c_plot3d_i3.png"><img width=200 src="images/plume5c_plot3d_i3.png"></a></td>
+<td><a href="images/plume5c_plot3d_i4.png"><img width=200 src="images/plume5c_plot3d_i4.png"></a></td>
+</tr>
+
+<tr>
+<th>lines</th>
+<td><a href="images/plume5c_plot3d_l1.png"><img width=200 src="images/plume5c_plot3d_l1.png"></a></td>
+<td><a href="images/plume5c_plot3d_l2.png"><img width=200 src="images/plume5c_plot3d_l2.png"></a></td>
+<td><a href="images/plume5c_plot3d_l3.png"><img width=200 src="images/plume5c_plot3d_l3.png"></a></td>
+<td><a href="images/plume5c_plot3d_l4.png"><img width=200 src="images/plume5c_plot3d_l4.png"></a></td>
+</tr>
+
+<tr>
+<th>vectors</th>
+<td><a href="images/plume5c_plot3d_v1.png"><img width=200 src="images/plume5c_plot3d_v1.png"></a></td>
+<td><a href="images/plume5c_plot3d_v2.png"><img width=200 src="images/plume5c_plot3d_v2.png"></a></td>
+<td><a href="images/plume5c_plot3d_v3.png"><img width=200 src="images/plume5c_plot3d_v3.png"></a></td>
+<td><a href="images/plume5c_plot3d_v4.png"><img width=200 src="images/plume5c_plot3d_v4.png"></a></td>
+</tr>
+
+<tr><td></td><th>continuous</th><th>stepped</th><th>line</th></tr>
+<tr>
+<th>shade types</th>
+<td><a href="images/plume5c_plot3d_shaded.png"><img width=200 src="images/plume5c_plot3d_shaded.png"></a></td>
+<td><a href="images/plume5c_plot3d_step.png"><img width=200 src="images/plume5c_plot3d_step.png"></a></td>
+<td><a href="images/plume5c_plot3d_line.png"><img width=200 src="images/plume5c_plot3d_line.png"></a></td>
+</tr>
+</table>
+
+<p><hr>
+<a name="zone"></a>
+<p><table>
+<tr><th></th><th colspan=2> Zone fire</th></tr>
+<tr>
+<th>slice</th>
+<td><a href="images/cfast_test_c2_200.png"><img width=200 src="images/cfast_test_c2_200.png"></a></d>
+<td><a href="images/cfast_test_c2_400.png"><img width=200 src="images/cfast_test_c2_400.png"></a></td>
+</tr>
+
+<tr>
+<th>3d smoke</th>
+<td><a href="images/cfast_test_smoke_200.png"><img width=200 src="images/cfast_test_smoke_200.png"></a></td>
+<td><a href="images/cfast_test_smoke_400.png"><img width=200 src="images/cfast_test_smoke_400.png"></a></td>
+</tr>
+</table>
+
+
+<p><hr>
+<a name="wui"></a>
 <p><table>
 <tr><th></th><th colspan=4> WUI</th></tr>
 <tr>
@@ -212,31 +372,7 @@ cat << EOF
 </table>
 
 <p><hr>
-<p><table>
-<tr><th></th><th colspan=3> Isosurfaces</th></tr>
-<tr>
-<th>points</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_points_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_points_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_points_30.png"></a></td>
-</tr>
-
-<tr>
-<th>outline</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_outline_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_outline_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_outline_30.png"></a></td>
-</tr>
-
-<tr>
-<th>solid</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_iso_solid_00.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_iso_solid_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_iso_solid_30.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
+<a name="stereo"></a>
 <p><table>
 <tr><th></th><th colspan=2>Stereo</th></tr>
 <tr>
@@ -252,114 +388,7 @@ cat << EOF
 </table>
 
 <p><hr>
-
-<p><table>
-<tr><th></th><th colspan=3> Particles</th></tr>
-<tr>
-<th>points</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_30.png"></a></td>
-</tr>
-
-<tr>
-<th>streaks</th>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_part_streak_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_part_streak_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_part_streak_30.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
-<p><table>
-<tr><th></th><th colspan=4> PLOT3D</th></tr>
-
-<tr>
-<th>isosurface</th>
-<td><a href="images/plume5c_plot3d_i1.png"><img width=200 src="images/plume5c_plot3d_i1.png"></a></td>
-<td><a href="images/plume5c_plot3d_i2.png"><img width=200 src="images/plume5c_plot3d_i2.png"></a></td>
-<td><a href="images/plume5c_plot3d_i3.png"><img width=200 src="images/plume5c_plot3d_i3.png"></a></td>
-<td><a href="images/plume5c_plot3d_i4.png"><img width=200 src="images/plume5c_plot3d_i4.png"></a></td>
-</tr>
-
-<tr>
-<th>lines</th>
-<td><a href="images/plume5c_plot3d_l1.png"><img width=200 src="images/plume5c_plot3d_l1.png"></a></td>
-<td><a href="images/plume5c_plot3d_l2.png"><img width=200 src="images/plume5c_plot3d_l2.png"></a></td>
-<td><a href="images/plume5c_plot3d_l3.png"><img width=200 src="images/plume5c_plot3d_l3.png"></a></td>
-<td><a href="images/plume5c_plot3d_l4.png"><img width=200 src="images/plume5c_plot3d_l4.png"></a></td>
-</tr>
-
-<tr>
-<th>vectors</th>
-<td><a href="images/plume5c_plot3d_v1.png"><img width=200 src="images/plume5c_plot3d_v1.png"></a></td>
-<td><a href="images/plume5c_plot3d_v2.png"><img width=200 src="images/plume5c_plot3d_v2.png"></a></td>
-<td><a href="images/plume5c_plot3d_v3.png"><img width=200 src="images/plume5c_plot3d_v3.png"></a></td>
-<td><a href="images/plume5c_plot3d_v4.png"><img width=200 src="images/plume5c_plot3d_v4.png"></a></td>
-</tr>
-
-<tr><td></td><th>continuous</th><th>stepped</th><th>line</th></tr>
-<tr>
-<th>shade types</th>
-<td><a href="images/plume5c_plot3d_shaded.png"><img width=200 src="images/plume5c_plot3d_shaded.png"></a></td>
-<td><a href="images/plume5c_plot3d_step.png"><img width=200 src="images/plume5c_plot3d_step.png"></a></td>
-<td><a href="images/plume5c_plot3d_line.png"><img width=200 src="images/plume5c_plot3d_line.png"></a></td>
-</tr>
-
-</table>
-
-<p><hr>
-<p><table>
-<tr><th colspan=3> 3D Smoke</th></tr>
-
-<tr>
-<td><a href="images/plume5c_part_01.png"><img width=200 src="images/plume5c_smoke_01.png"></a></td>
-<td><a href="images/plume5c_part_10.png"><img width=200 src="images/plume5c_smoke_10.png"></a></td>
-<td><a href="images/plume5c_part_30.png"><img width=200 src="images/plume5c_smoke_30.png"></a></td>
-</tr>
-</table>
-
-<p><table>
-
-<tr><td></td><th>all planes</th><th>every 2nd plane</th><th>every 3rd plane</th></tr>
-<tr>
-<th>0.1 m grid</th>
-<td><a href="images/smoke_test_all.png"><img width=300 src="images/smoke_test_all.png"></a></td>
-<td><a href="images/smoke_test_every2.png"><img width=300 src="images/smoke_test_every2.png"></a></td>
-<td><a href="images/smoke_test_every3.png"><img width=300 src="images/smoke_test_every3.png"></a></td>
-</tr>
-
-<tr>
-<th> 0.2 m grid</th>
-<td><a href="images/smoke_test2_all.png"><img width=300 src="images/smoke_test2_all.png"></a></td>
-<td><a href="images/smoke_test2_every2.png"><img width=300 src="images/smoke_test2_every2.png"></a></td>
-<td><a href="images/smoke_test2_every3.png"><img width=300 src="images/smoke_test2_every3.png"></a></td>
-</tr>
-<tr>
-<th>actual</th>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-<td><a href="images/graysquares.png"><img width=300 src="images/graysquares.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
-<p><table>
-<tr><th></th><th colspan=2> Zone fire</th></tr>
-<tr>
-<th>slice</th>
-<td><a href="images/cfast_test_c2_200.png"><img width=200 src="images/cfast_test_c2_200.png"></a></d>
-<td><a href="images/cfast_test_c2_400.png"><img width=200 src="images/cfast_test_c2_400.png"></a></td>
-</tr>
-
-<tr>
-<th>3d smoke</th>
-<td><a href="images/cfast_test_smoke_200.png"><img width=200 src="images/cfast_test_smoke_200.png"></a></td>
-<td><a href="images/cfast_test_smoke_400.png"><img width=200 src="images/cfast_test_smoke_400.png"></a></td>
-</tr>
-</table>
-
-<p><hr>
+<a name="obstacles"></a>
 <p><table>
 <tr><th colspan=3> Obstacles</th></tr>
 <tr align=center><th>hidden</th><th>outline</th><th>solid</th></tr>
@@ -376,8 +405,7 @@ cat << EOF
 </tr>
 
 <p><hr>
-
-
+<a name="vents"></a>
 <p><table>
 <tr><th colspan=3> Rectangular vents</th></tr>
 <tr align=center><th>no vents</th><th>no open vents</th><th>all vents</th></tr>
@@ -409,6 +437,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="misc"></a>
 <p><table>
 <tr><th> Texture mapping</th></tr>
 <tr><td><a href="images/sillytexture.png"><img width=300 src="images/sillytexture.png"></a></td></tr>
@@ -437,6 +466,7 @@ cat << EOF
 
 
 <p><hr>
+<a name="obj2state"></a>
 <p><table>
 <tr><th colspan=2> Smokeview objects (two states)</th></tr>
 <tr align=center><th>inactive</th><th>active</th></tr>
@@ -463,6 +493,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="obj1state"></a>
 <table>
 <tr><th colspan=3> Smokeview objects (one state)</th></tr>
 <tr>
@@ -478,6 +509,7 @@ cat << EOF
 </table>
 
 <p><hr>
+<a name="objelem"></a>
 <p><table>
 <tr><th colspan=4>Device elements</th></tr>
 <tr>
