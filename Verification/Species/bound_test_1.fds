@@ -1,4 +1,4 @@
-&HEAD CHID='bcor_test_1', TITLE='Test of species boundedness correction in fire'/
+&HEAD CHID='bound_test_1', TITLE='Test of species boundedness correction in fire'/
 
 &MESH IJK=4,1,4, XB=0,1,0,1,0,1/
 
