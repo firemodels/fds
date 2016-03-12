@@ -29,7 +29,6 @@ echo "-h - display this message"
 echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
-echo "-M - run only cases that use multiple processes"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
@@ -38,7 +37,6 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
-echo "-S - run only cases that use one process"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -49,7 +47,7 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'c:dhj:Mm:o:q:r:Ssw:' OPTION
+while getopts 'c:dhj:m:o:q:r:sw:' OPTION
 do
 case $OPTION in
   d)
@@ -64,9 +62,6 @@ case $OPTION in
   m)
    export STOPFDSMAXITER="$OPTARG"
    ;;
-  M)
-   RUNOPTION="-M"
-   ;;
   o)
    nthreads="$OPTARG"
    ;;
@@ -78,9 +73,6 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
-   ;;
-  S)
-   RUNOPTION="-S"
    ;;
   w)
    walltime="-w $OPTARG"
