@@ -1246,9 +1246,6 @@ void getPROGTitleBase(char *progname, char *title_base){
 /* ------------------ getPROGTitle ------------------------ */
 
 void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelease){
-  char version[100];
-  char svn_version[100];
-  char svn_date[100];
   char title_base[1024];
 
   getPROGTitleBase(progname, title_base);
