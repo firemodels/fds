@@ -1323,7 +1323,7 @@ void initvars(void){
   navatar_colors=0;
   avatar_colors=NULL;
   view_from_selected_avatar=0;
-  getGitHash(smv_githash);
+  getGitInfo(smv_githash,smv_gitdate);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1937,8 +1937,9 @@ void initvars(void){
   {
     char version[100];
     char svn_version[100];
+    char svn_date[100];
 
-    getGitHash(svn_version);    // get githash
+    getGitInfo(svn_version,svn_date);    // get githash
 
 // construct string of the form:
 //   5.x.y_#

@@ -715,30 +715,33 @@ void parse_commandline(int argc, char **argv){
 void display_version_info(void){
     char version[256];
     char githash[256];
+    char gitdate[256];
 
     getPROGversion(version);
-    getGitHash(githash);    // get githash
+    getGitInfo(githash,gitdate);    // get githash
     PRINTF("\n");
-    PRINTF("%s\n\n",TITLERELEASE);
-    PRINTF("Version: %s\n",version);
-    PRINTF("Smokeview (64 bit) Build: %s\n",githash);
+    PRINTF(" %s\n\n",TITLERELEASE);
+    PRINTF(" Version          : %s\n",version);
+    PRINTF(" Revision         : %s\n",githash);
+    PRINTF(" Revision Date    : %s\n",gitdate);
+    PRINTF(" Compilation Date : %s %s\n",__DATE__,__TIME__);
 #ifdef WIN32
-    PRINTF("Platform: WIN64 ");
+    PRINTF(" Platform         : WIN64 ");
 #ifdef pp_INTEL
-    PRINTF(" (Intel C/C++)\n");
+    PRINTF(" (Intel C/C++)");
 #else
 #ifdef WIN32
-    PRINTF(" (MSVS C/C++)\n");
+    PRINTF(" (MSVS C/C++)");
 #endif
 #endif
+    PRINTF("\n");
 #endif
 #ifdef pp_OSX
-    PRINTF("Platform: OSX64\n");
+    PRINTF(" Platform         : OSX64\n");
 #endif
 #ifdef pp_LINUX
-    PRINTF("Platform: LINUX64\n");
+    PRINTF(" Platform         : LINUX64\n");
 #endif
-    PRINTF("Build Date: %s\n",__DATE__);
     if(fds_version!=NULL){
       PRINTF("FDS Build: %s\n",fds_githash);
     }
