@@ -102,7 +102,7 @@ int main(int argc, char **argv){
   prog=argv[0];
 
   if(argc==1){
-   version2("wind2fds ");
+   version("wind2fds ");
    return 1;
   }
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-v")==0){
-      version2("wind2fds ");
+      version("wind2fds ");
       return 1;
     }
     else if(strcmp(arg,"-mintime")==0){

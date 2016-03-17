@@ -74,7 +74,7 @@ EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
 EXTERNCPP char *randstr(char* str, int length);
 EXTERNCPP void getPROGTitleBase(char *progname, char *title_base);
 EXTERNCPP void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelease);
-EXTERNCPP void version2(char *progname);
+EXTERNCPP void version(char *progname);
 
 #ifdef WIN32
 STREXTERN char STRDECL(dirseparator[],"\\");

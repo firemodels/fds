@@ -1270,9 +1270,9 @@ void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelea
   STRCPY(titlerelease, title);
 }
 
-/* ------------------ version2 ------------------------ */
+/* ------------------ version ------------------------ */
 
-void version2(char *progname){
+void version(char *progname){
   char version[256];
   char githash[256];
   char gitdate[256];

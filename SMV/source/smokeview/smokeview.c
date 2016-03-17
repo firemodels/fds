@@ -704,7 +704,7 @@ void parse_commandline(int argc, char **argv){
 /* ------------------ display_version_info ------------------------ */
 
 void display_version_info(char *progname){
-  version2(progname);
+  version(progname);
   if(fds_version!=NULL){
     PRINTF("FDS Build: %s\n",fds_githash);
   }

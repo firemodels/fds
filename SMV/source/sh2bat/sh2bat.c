@@ -1,6 +1,6 @@
 #define INMAIN
-// convert the Linux/OSX script containing a list FDS cases 
-// to an equivalent Windows bat version 
+// convert the Linux/OSX script containing a list FDS cases
+// to an equivalent Windows bat version
 #include "options.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'v':
-        version2("sh2bat ");
+        version("sh2bat ");
         exit(1);
         break;
       default:
@@ -109,7 +109,7 @@ int main(int argc, char **argv){
       char *casename;
       int j;
       char *datato, *datafrom;
-      
+
       comm_beg=buffer+1;
       comm_end=strchr(buffer,' ');
       data = comm_end+1;
