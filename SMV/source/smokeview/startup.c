@@ -1737,7 +1737,6 @@ void initvars(void){
   showbuild=0;
 
   strcpy(TITLERELEASE,"");
-  strcpy(TITLE,"");
   strcpy(FULLTITLE,"");
   strcpy(emptylabel,"");
   large_font=GLUT_BITMAP_HELVETICA_12;
@@ -1934,50 +1933,8 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  {
-    char version[100];
-    char svn_version[100];
-    char svn_date[100];
-
-    getGitInfo(svn_version,svn_date);    // get githash
-
-// construct string of the form:
-//   5.x.y_#
-
-    getPROGversion(version);
-
-    strcpy(TITLEBASE,"Smokeview ");
-
-    strcat(TITLEBASE,version);
-#ifdef pp_BETA
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#else
-#ifndef pp_OFFICIAL_RELEASE
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#endif
-#endif
-    strcat(TITLEBASE," - ");
-  }
-#ifdef _DEBUG
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#else
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#endif
-#ifdef pp_BETA
-  STRCAT(TITLE," - ");
-  STRCAT(TITLE,__TIME__);
-#endif
-
-  STRCPY(FULLTITLE,TITLE);
-
-  STRCPY(TITLERELEASE,TITLE);
-
+  getPROGTitle("Smokeview ", TITLE, FULLTITLE, TITLERELEASE);
+  
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
 

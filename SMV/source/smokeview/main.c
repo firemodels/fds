@@ -26,7 +26,7 @@ int main(int argc, char **argv){
   initMALLOC();
   init_rand_ab(1000000);
   initvars();
-  if(argc==1)display_version_info();
+  if(argc==1)display_version_info("Smokeview ");
   copy_args(&argc, argv, &argv_sv);
   if(argc==0||argc==1)return 0;
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv){
   have_ffplay = have_prog("ffplay -version >/dev/null 2>/dev/null");
 #endif
 #endif
-  display_version_info();
+  display_version_info("Smokeview ");
   setup_glut(argc,argv_sv);
 
 #ifdef pp_LUA

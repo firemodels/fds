@@ -9,20 +9,6 @@
 #include "string_util.h"
 
 
-/* ------------------ version ------------------------ */
-
-void version(char *prog){
-  char githash[256];
-  char gitdate[256];
-
-  getGitInfo(githash,gitdate);    // get githash
-
-  fprintf(stderr, "\n%s\n\n", prog);
-  fprintf(stderr, "Version: %s\n",PROGVERSION);
-  fprintf(stderr, "Build: %s\n", githash);
-  fprintf(stderr, "Build Date: %s\n", __DATE__);
-}
-
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
@@ -49,6 +35,7 @@ int main(int argc, char **argv){
   FILE *streamin=NULL,*streamout=NULL;
   int lendata;
 
+  set_stdout(stdout);
   buffptr=buffer;
   prog=argv[0];
   for(i=1;i<argc;i++){
@@ -64,7 +51,7 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'v':
-        version(prog);
+        version2("sh2bat ");
         exit(1);
         break;
       default:

@@ -81,7 +81,7 @@
 #endif
 
 #ifdef pp_release
-#define PROGVERSION "1.4.8"
+#define PROGVERSION "1.4.9"
 #endif
 
 

@@ -222,7 +222,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   fwrite(&one,4,1,boundarystream);           // write out a 1 to determine "endianness" when file is read in later
   fwrite(&zero,4,1,boundarystream);          // write out a zero now, then a one just before file is closed
   fwrite(&fileversion,4,1,boundarystream);   // write out compressed fileversion in case file format changes later
-  fwrite(&version,4,1,boundarystream);       // fds boundary file version
+  fwrite(&version_local,4,1,boundarystream);       // fds boundary file version
   sizeafter=16;
 
   // endian

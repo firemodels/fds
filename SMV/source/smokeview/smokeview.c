@@ -557,9 +557,6 @@ void parse_commandline(int argc, char **argv){
       tempdir_flag=1;
     }
 #endif
-    else if(strncmp(argv[i],"-time",5)==0){
-      time_flag=1;
-    }
     else if(strncmp(argv[i],"-h",2)==0){
       usage(argv);
       exit(0);
@@ -581,7 +578,7 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i],"-volrender",10)!=0&&(strncmp(argv[i],"-version",8)==0||strncmp(argv[i],"-v",2)==0)
       ){
-      display_version_info();
+      display_version_info("Smokeview ");
       exit(0);
     }
     else if(
@@ -702,58 +699,24 @@ void parse_commandline(int argc, char **argv){
 
     init_volrender_script(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
   }
-#ifndef pp_BETA
-  if(time_flag==1){
-    STRCAT(TITLE," - ");
-    STRCAT(TITLE,__TIME__);
-  }
-#endif
 }
 
 /* ------------------ display_version_info ------------------------ */
 
-void display_version_info(void){
-    char version[256];
-    char githash[256];
-    char gitdate[256];
-
-    getPROGversion(version);
-    getGitInfo(githash,gitdate);    // get githash
-    PRINTF("\n");
-    PRINTF(" %s\n\n",TITLERELEASE);
-    PRINTF(" Version          : %s\n",version);
-    PRINTF(" Revision         : %s\n",githash);
-    PRINTF(" Revision Date    : %s\n",gitdate);
-    PRINTF(" Compilation Date : %s %s\n",__DATE__,__TIME__);
-#ifdef WIN32
-    PRINTF(" Platform         : WIN64 ");
-#ifdef pp_INTEL
-    PRINTF(" (Intel C/C++)");
-#else
-#ifdef WIN32
-    PRINTF(" (MSVS C/C++)");
-#endif
-#endif
-    PRINTF("\n");
-#endif
-#ifdef pp_OSX
-    PRINTF(" Platform         : OSX64\n");
-#endif
-#ifdef pp_LINUX
-    PRINTF(" Platform         : LINUX64\n");
-#endif
-    if(fds_version!=NULL){
-      PRINTF("FDS Build: %s\n",fds_githash);
-    }
-    if(smokeviewpath!=NULL){
-      PRINTF("Smokeview path: %s\n",smokeviewpath);
-    }
-    if(smokezippath!=NULL){
-      PRINTF("Smokezip path: %s\n",smokezippath);
-    }
-    if(texturedir!=NULL){
-      PRINTF("Texture directory path: %s\n",texturedir);
-    }
+void display_version_info(char *progname){
+  version2(progname);
+  if(fds_version!=NULL){
+    PRINTF("FDS Build: %s\n",fds_githash);
+  }
+  if(smokeviewpath!=NULL){
+    PRINTF("Smokeview path: %s\n",smokeviewpath);
+  }
+  if(smokezippath!=NULL){
+    PRINTF("Smokezip path: %s\n",smokezippath);
+  }
+  if(texturedir!=NULL){
+    PRINTF("Texture directory path: %s\n",texturedir);
+  }
 }
 
 /* ------------------ usage ------------------------ */

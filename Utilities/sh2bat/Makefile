@@ -16,7 +16,7 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
-obj = sh2bat.o string_util.o dmalloc.o assert.o
+obj = sh2bat.o string_util.o dmalloc.o assert.o file_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -37,7 +37,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -D WIN32 -O2 /nologo $(GITINFO)
+intel_win_64 : CFLAGS    = -D WIN32 -O2 -D pp_INTEL /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
 intel_win_64 : exe       = sh2bat_win_64.exe

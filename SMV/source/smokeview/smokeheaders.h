@@ -762,7 +762,7 @@ EXTERNCPP void LoadSmoke3DMenu(int value);
 EXTERNCPP void Visible(int state);
 EXTERNCPP void parse_commandline(int argc, char **argv);
 EXTERNCPP void usage(char **argv);
-EXTERNCPP void display_version_info(void);
+EXTERNCPP void display_version_info(char *progname);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);
 EXTERNCPP void init_demo(float rad, int nlat, int nlong);
