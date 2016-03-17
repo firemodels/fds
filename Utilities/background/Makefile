@@ -17,7 +17,7 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
-obj = main.o string_util.o dmalloc.o
+obj = main.o string_util.o dmalloc.o file_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -38,7 +38,7 @@ no_target:
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -O1 /nologo -D WIN32 -I $(SOURCE_DIR)/shared $(GITINFO)
+intel_win_64 : CFLAGS    = -O1 /nologo -D WIN32 -D pp_INTEL -I $(SOURCE_DIR)/shared $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : exe       = background.exe
 
@@ -48,7 +48,7 @@ intel_win_64 : $(objwin)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_LINUX $(GITINFO)
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_INTEL -D pp_LINUX $(GITINFO)
 intel_linux_64 : CC        = icc
 intel_linux_64 : exe       = background
 
@@ -67,7 +67,7 @@ gnu_linux_64: $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit osx
 
-intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_OSX $(GITINFO)
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_INTEL -D pp_OSX $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : exe       = background
 
