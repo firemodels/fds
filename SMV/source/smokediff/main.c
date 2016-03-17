@@ -263,9 +263,10 @@ int main(int argc, char **argv){
 void usage(void){
   char smv_version[100];
   char githash[100];
+  char gitdate[100];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   PRINTF("\n");
   PRINTF("  smokediff [options] smv_case1 smv_case2\n");

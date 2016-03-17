@@ -533,9 +533,10 @@ void usage(char *prog){
   char smv_version[100];
   char buffer[1000];
   char githash[256];
+  char gitdate[256];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   PRINTF("\n");
   PRINTF("  smokezip %s(%s) - %s\n\n",smv_version,githash,__DATE__);

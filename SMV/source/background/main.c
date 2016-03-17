@@ -296,10 +296,11 @@ int main(int argc, char **argv){
 void usage(char *prog){
   char prog_version[100];
   char githash[100];
+  char gitdate[100];
   char pp[] = "%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("background %s(%s) - %s\n",prog_version,githash,__DATE__);
@@ -635,9 +636,10 @@ unsigned char cpuusage(){
 void version(void){
     char smv_version[100];
     char githash[100];
+    char gitdate[100];
 
     getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitHash(githash);    // get githash
+    getGitInfo(githash,gitdate);    // get githash
     printf("\n");
     printf("background\n\n");
     printf("Version: %s\n",smv_version);

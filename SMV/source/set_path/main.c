@@ -390,11 +390,12 @@ int reg_path(int setget, int pathtype, char *path){
 
 void version(void){
   char githash[256];
+  char gitdate[256];
   char version[256];
 
     getPROGversion(version);
 
-    getGitHash(githash);    // get githash
+    getGitInfo(githash,gitdate);    // get githash
     printf("\n");
     printf("set_path %s - %s\n\n",version,__DATE__);
     printf("Version: %s\n",version);
@@ -406,8 +407,9 @@ void version(void){
 
 void usage(void){
   char githash[100];
+  char gitdate[100];
 
-  getGitHash(githash);
+  getGitInfo(githash,gitdate);
 
   printf("set_path Build:%s\n",githash);
   printf("  Modify or display the User or System path environmental variables.\n\n");

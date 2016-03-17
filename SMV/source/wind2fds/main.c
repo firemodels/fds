@@ -15,10 +15,11 @@
 void usage(char *prog){
   char prog_version[100];
   char githash[100];
+  char gitdate[100];
   char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("wind2fds %s(%s) - %s\n", prog_version, githash, __DATE__);
@@ -46,9 +47,10 @@ void usage(char *prog){
 void version(char *prog){
   char version_local[100];
   char githash[100];
+  char gitdate[100];
 
   getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
   printf("\n");
   printf("%s\n\n", prog);
   printf("Version: %s\n", version_local);
