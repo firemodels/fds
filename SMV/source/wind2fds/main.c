@@ -42,22 +42,6 @@ void usage(char *prog){
   printf("                   from standard input\n");
 }
 
-/* ------------------ version ------------------------ */
-
-void version(char *prog){
-  char version_local[100];
-  char githash[100];
-  char gitdate[100];
-
-  getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-  getGitInfo(githash,gitdate);    // get githash
-  printf("\n");
-  printf("%s\n\n", prog);
-  printf("Version: %s\n", version_local);
-  printf("Build: %s\n", githash);
-  printf("Compile Date: %s\n", __DATE__);
-}
-
 /* ------------------ gettokens ------------------------ */
 
 int gettokens(char *tokens, char **tokenptrs){
@@ -111,13 +95,14 @@ int main(int argc, char **argv){
   unsigned int i_mindatetime, i_maxdatetime;
   int lendate=0;
 
+  set_stdout(stdout);
   strcpy(percen,"%");
   strcpy(prefix,"");
 
   prog=argv[0];
 
   if(argc==1){
-   version("wind2fds");
+   version("wind2fds ");
    return 1;
   }
 
@@ -149,7 +134,7 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-v")==0){
-      version("wind2fds");
+      version("wind2fds ");
       return 1;
     }
     else if(strcmp(arg,"-mintime")==0){

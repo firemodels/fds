@@ -28,31 +28,6 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
   return 1;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char githash[100];
-    char gitdate[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitInfo(githash,gitdate);    // get githash
-    PRINTF("\n");
-    PRINTF("Smokediff\n\n");
-    PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",githash);
-    PRINTF("Compile Date: %s\n",__DATE__);
-    PRINTF("Platform: WIN64\n");
-#ifdef pp_OSX
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX64\n");
-#endif
-
-
-}
-
 /* ------------------ similar_grid ------------------------ */
 
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){

@@ -45,10 +45,12 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;
   float delta_time, delta_time0;
+  char title_base[1024];
 
   CheckMemory;
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
-  STRCPY(FULLTITLE,TITLEBASE);
+  getPROGTitleBase("Smokeview ", title_base);
+  STRCPY(FULLTITLE,title_base);
   *errorcode=0;
 
   ASSERT(ifile>=0&&ifile<nplot3dinfo);
@@ -402,8 +404,10 @@ void update_plot3dtitle(void){
   int filenum;
   plot3ddata *plot3di;
   mesh *meshi;
+  char title_base[1024];
 
-  STRCPY(FULLTITLE,TITLEBASE);
+  getPROGTitleBase("Smokview ", title_base);
+  STRCPY(FULLTITLE,title_base);
   meshi=current_mesh;
   if(meshi==NULL)meshi=meshinfo;
   filenum=meshi->plot3dfilenum;

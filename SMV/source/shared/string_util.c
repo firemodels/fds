@@ -13,6 +13,7 @@
 #endif
 #include "MALLOC.h"
 #include "datadefs.h"
+#include "file_util.h"
 
 unsigned int *random_ints, nrandom_ints;
 
@@ -1210,6 +1211,102 @@ unsigned int diffdate(char *token, char *tokenbase){
   difft = date2sec(token) - date2sec(tokenbase);
   return difft;
 }
+
+/* ------------------ getPROGTitleBase ------------------------ */
+
+void getPROGTitleBase(char *progname, char *title_base){
+  char version[100];
+  char svn_version[100];
+  char svn_date[100];
+
+  getGitInfo(svn_version, svn_date);    // get githash
+
+  // construct string of the form:
+  //   5.x.y_#
+
+  getPROGversion(version);
+
+  strcpy(title_base, progname);
+
+  strcat(title_base, version);
+#ifdef pp_BETA
+  strcat(title_base, " (");
+  strcat(title_base, svn_version);
+  strcat(title_base, ")");
+#else
+#ifndef pp_OFFICIAL_RELEASE
+  strcat(title_base, " (");
+  strcat(title_base, svn_version);
+  strcat(title_base, ")");
+#endif
+#endif
+  strcat(title_base, " - ");
+}
+
+/* ------------------ getPROGTitle ------------------------ */
+
+void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelease){
+  char version[100];
+  char svn_version[100];
+  char svn_date[100];
+  char title_base[1024];
+
+  getPROGTitleBase(progname, title_base);
+
+#ifdef _DEBUG
+  STRCPY(title, title_base);
+  STRCAT(title, __DATE__);
+#else
+  STRCPY(title, title_base);
+  STRCAT(title, __DATE__);
+#endif
+#ifdef pp_BETA
+  STRCAT(title, " - ");
+  STRCAT(title, __TIME__);
+#endif
+
+  STRCPY(fulltitle, title);
+
+  STRCPY(titlerelease, title);
+}
+
+/* ------------------ version ------------------------ */
+
+void version(char *progname){
+  char version[256];
+  char githash[256];
+  char gitdate[256];
+  char title[1024], fulltitle[1024], titlerelease[1024];
+
+  getPROGversion(version);
+  getGitInfo(githash, gitdate);    // get githash
+  getPROGTitle(progname, title, fulltitle, titlerelease);
+  PRINTF("\n");
+  PRINTF(" %s\n\n", titlerelease);
+  PRINTF(" Version          : %s\n", version);
+  PRINTF(" Revision         : %s\n", githash);
+  PRINTF(" Revision Date    : %s\n", gitdate);
+  PRINTF(" Compilation Date : %s %s\n", __DATE__, __TIME__);
+#ifdef WIN32
+  PRINTF(" Platform         : WIN64 ");
+#ifdef pp_INTEL
+  PRINTF(" (Intel C/C++)");
+#else
+#ifdef WIN32
+  PRINTF(" (MSVS C/C++)");
+#endif
+#endif
+  PRINTF("\n");
+#endif
+#ifdef pp_OSX
+  PRINTF(" Platform         : OSX64\n");
+#endif
+#ifdef pp_LINUX
+  PRINTF(" Platform         : LINUX64\n");
+#endif
+}
+
+
 
 
 

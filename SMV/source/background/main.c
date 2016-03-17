@@ -74,6 +74,7 @@ int main(int argc, char **argv){
   char *arg;
   char *command;
 
+  set_stdout(stdout);
 #ifdef pp_LINUX
   hostlistfile=NULL;
   host=NULL;
@@ -88,7 +89,7 @@ int main(int argc, char **argv){
   prog=argv[0];
 
   if(argc==1){
-    version();
+    version("background ");
     return 1;
   }
 
@@ -159,7 +160,7 @@ int main(int argc, char **argv){
             }
             break;
           case 'v':
-            version();
+            version("background ");
             return 1;
           default:
             printf("Unknown option: %s\n",arg);
@@ -630,19 +631,3 @@ unsigned char cpuusage(){
   return usage;
 }
 #endif
-
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char githash[100];
-    char gitdate[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitInfo(githash,gitdate);    // get githash
-    printf("\n");
-    printf("background\n\n");
-    printf("Version: %s\n",smv_version);
-    printf("Build: %s\n",githash);
-    printf("Compile Date: %s\n",__DATE__);
-}
