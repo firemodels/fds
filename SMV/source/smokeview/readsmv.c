@@ -12736,9 +12736,10 @@ void writeini(int flag,char *filename){
   {
     char version[256];
     char githash[256];
+    char gitdate[256];
 
     getPROGversion(version);
-    getGitHash(githash);    // get githash
+    getGitInfo(githash,gitdate);    // get githash
     fprintf(fileout,"\n\n");
     fprintf(fileout,"# FDS/Smokeview Environment\n");
     fprintf(fileout,"# -------------------------\n\n");

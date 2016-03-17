@@ -13,8 +13,9 @@
 
 void version(char *prog){
   char githash[256];
+  char gitdate[256];
 
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   fprintf(stderr, "\n%s\n\n", prog);
   fprintf(stderr, "Version: %s\n",PROGVERSION);
@@ -26,8 +27,9 @@ void version(char *prog){
 
 void usage(char *prog){
  char githash[256];
+ char gitdate[256];
 
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
   fprintf(stderr, "convert a bash script to a windows batch file\n\n");

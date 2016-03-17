@@ -125,12 +125,15 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
-/* ------------------ getGitHash ------------------------ */
+/* ------------------ getGitInfo ------------------------ */
 
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
 #endif
-void getGitHash(char *githash){
+#ifndef pp_GITDATE
+#define pp_GITDATE "unknown"
+#endif
+void getGitInfo(char *githash, char *gitdate){
   char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
@@ -141,6 +144,16 @@ void getGitHash(char *githash){
   }
   else{
     strcpy(githash,"unknown");
+  }
+
+  strcpy(rev, pp_GITDATE);
+  trim_back(rev);
+  beg = trim_front(rev);
+  if(strlen(beg)>0){
+    strcpy(gitdate, beg);
+  }
+  else{
+    strcpy(gitdate, "unknown");
   }
 }
 
