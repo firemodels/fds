@@ -45,7 +45,6 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;
   float delta_time, delta_time0;
-  char title_base[1024];
 
   CheckMemory;
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
