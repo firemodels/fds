@@ -49,8 +49,6 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
   CheckMemory;
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
-  getPROGTitleBase("Smokeview ", title_base);
-  STRCPY(FULLTITLE,title_base);
   *errorcode=0;
 
   ASSERT(ifile>=0&&ifile<nplot3dinfo);
@@ -366,8 +364,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   if(visiso==1){
     updatesurface();
   }
-  STRCAT(FULLTITLE,", ");
-  STRCAT(FULLTITLE,file);
+
   updateplot3dlistindex();
 #ifdef pp_MEMPRINT
   PRINTF("After plot3d load: \n");
@@ -395,6 +392,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     FREEMEMORY(meshi->qdata);
   }
   update_glui_plot3d();
+  update_plot3dtitle();
   glutPostRedisplay();
 }
 
@@ -406,15 +404,15 @@ void update_plot3dtitle(void){
   mesh *meshi;
   char title_base[1024];
 
-  getPROGTitleBase("Smokview ", title_base);
-  STRCPY(FULLTITLE,title_base);
+  getBaseTitle("Smokeview ", title_base);
+  STRCPY(PLOT3D_TITLE,title_base);
   meshi=current_mesh;
   if(meshi==NULL)meshi=meshinfo;
   filenum=meshi->plot3dfilenum;
   if(filenum!=-1){
     plot3di = plot3dinfo+meshi->plot3dfilenum;
-    STRCAT(FULLTITLE,", ");
-    STRCAT(FULLTITLE,plot3di->file);
+    STRCAT(PLOT3D_TITLE,", ");
+    STRCAT(PLOT3D_TITLE,plot3di->file);
   }
 }
 /* ------------------ drawplot3d_texture ------------------------ */
