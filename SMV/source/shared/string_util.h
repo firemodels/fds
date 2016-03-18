@@ -72,8 +72,8 @@ EXTERNCPP void getGitInfo(char *githash, char *gitdate);
 EXTERNCPP char *getstring(char *buffer);
 EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
 EXTERNCPP char *randstr(char* str, int length);
-EXTERNCPP void getPROGTitleBase(char *progname, char *title_base);
-EXTERNCPP void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelease);
+EXTERNCPP void getBaseTitle(char *progname, char *title_base);
+EXTERNCPP void getTitle(char *progname, char *fulltitle);
 EXTERNCPP void version(char *progname);
 
 #ifdef WIN32

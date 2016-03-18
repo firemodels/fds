@@ -1736,8 +1736,6 @@ void initvars(void){
   nmenus=0;
   showbuild=0;
 
-  strcpy(TITLERELEASE,"");
-  strcpy(FULLTITLE,"");
   strcpy(emptylabel,"");
   large_font=GLUT_BITMAP_HELVETICA_12;
   small_font=GLUT_BITMAP_HELVETICA_10;
@@ -1933,8 +1931,9 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  getPROGTitle("Smokeview ", TITLE, FULLTITLE, TITLERELEASE);
-  
+  getTitle("Smokeview ", RELEASE_TITLE);
+  getTitle("Smokeview ", PLOT3D_TITLE);
+
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
 

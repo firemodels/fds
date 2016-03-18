@@ -1212,9 +1212,9 @@ unsigned int diffdate(char *token, char *tokenbase){
   return difft;
 }
 
-/* ------------------ getPROGTitleBase ------------------------ */
+/* ------------------ getBaseTitle ------------------------ */
 
-void getPROGTitleBase(char *progname, char *title_base){
+void getBaseTitle(char *progname, char *title_base){
   char version[100];
   char svn_version[100];
   char svn_date[100];
@@ -1243,28 +1243,24 @@ void getPROGTitleBase(char *progname, char *title_base){
   strcat(title_base, " - ");
 }
 
-/* ------------------ getPROGTitle ------------------------ */
+/* ------------------ getTitle ------------------------ */
 
-void getPROGTitle(char *progname, char *title, char *fulltitle, char *titlerelease){
+void getTitle(char *progname, char *fulltitle){
   char title_base[1024];
 
-  getPROGTitleBase(progname, title_base);
+  getBaseTitle(progname, title_base);
 
 #ifdef _DEBUG
-  STRCPY(title, title_base);
-  STRCAT(title, __DATE__);
+  STRCPY(fulltitle, title_base);
+  STRCAT(fulltitle, __DATE__);
 #else
-  STRCPY(title, title_base);
-  STRCAT(title, __DATE__);
+  STRCPY(fulltitle, title_base);
+  STRCAT(fulltitle, __DATE__);
 #endif
 #ifdef pp_BETA
-  STRCAT(title, " - ");
-  STRCAT(title, __TIME__);
+  STRCAT(fulltitle, " - ");
+  STRCAT(fulltitle, __TIME__);
 #endif
-
-  STRCPY(fulltitle, title);
-
-  STRCPY(titlerelease, title);
 }
 
 /* ------------------ version ------------------------ */
@@ -1273,13 +1269,13 @@ void version(char *progname){
   char version[256];
   char githash[256];
   char gitdate[256];
-  char title[1024], fulltitle[1024], titlerelease[1024];
+  char releasetitle[1024];
 
   getPROGversion(version);
   getGitInfo(githash, gitdate);    // get githash
-  getPROGTitle(progname, title, fulltitle, titlerelease);
+  getTitle(progname, releasetitle);
   PRINTF("\n");
-  PRINTF(" %s\n\n", titlerelease);
+  PRINTF(" %s\n\n", releasetitle);
   PRINTF(" Version          : %s\n", version);
   PRINTF(" Revision         : %s\n", githash);
   PRINTF(" Revision Date    : %s\n", gitdate);
@@ -1289,9 +1285,7 @@ void version(char *progname){
 #ifdef pp_INTEL
   PRINTF(" (Intel C/C++)");
 #else
-#ifdef WIN32
   PRINTF(" (MSVS C/C++)");
-#endif
 #endif
   PRINTF("\n");
 #endif
