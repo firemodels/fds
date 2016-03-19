@@ -54,7 +54,7 @@ fi
 
 cd $gitwebrepo
 git remote update
-git merge origin/gh-pages
+git merge origin/nist-pages
 
 cp $newpage firebot_status.html
 git add firebot_status.html

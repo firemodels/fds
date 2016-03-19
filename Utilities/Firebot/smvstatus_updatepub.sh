@@ -54,7 +54,7 @@ fi
 
 cd $gitwebrepo
 git remote update
-git merge origin/gh-pages
+git merge origin/nist-pages
 
 cp $newpage smokebot_status.html
 git add smokebot_status.html
