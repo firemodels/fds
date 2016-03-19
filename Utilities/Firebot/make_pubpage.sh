@@ -64,7 +64,7 @@ cat << EOF
 
 </head>
 <body>
-<h2>$TITLE Summary Page</h2>
+<h2>$TITLE Summary - `date`</h2>
 
 <hr align='left'>
 
@@ -100,7 +100,6 @@ if [ "$BODY" == "" ]; then
 cat << EOF
 <br><br>
 <hr align='left'><br>
-<i>Updated: `date`</i><br><br><br>
 
 </body>
 </html>
