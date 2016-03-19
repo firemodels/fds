@@ -21,7 +21,7 @@ echo.
 echo Using GIT revision %smv_revision% to build a test 64 bit Windows Smokeview
 
 %svn_drive%
-cd %svn_root%\SMV\Build\intel_win_64
+cd %svn_root%\SMV\Build\smokeview\intel_win_64
 call make_smv -t
 
 echo.

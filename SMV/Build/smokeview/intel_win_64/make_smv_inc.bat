@@ -1,6 +1,6 @@
 @echo off
 :: setup compiler environment
-call ..\..\..\Utilities\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 
 set SMV_TESTFLAG=
 set SMV_TESTSTRING=

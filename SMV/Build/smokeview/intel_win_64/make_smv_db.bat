@@ -4,7 +4,7 @@ set from=%2
 
 :: setup compiler environment
 if x%from% == xbot goto skip1
-call ..\..\..\Utilities\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 :skip1
 
 set SMV_TESTFLAG=
