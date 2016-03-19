@@ -1,6 +1,6 @@
 @echo off
 :: setup compiler environment
-call ..\..\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 
 Title Building make_time for 64 bit Windows
 

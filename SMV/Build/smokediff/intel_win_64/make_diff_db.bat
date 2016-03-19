@@ -1,6 +1,6 @@
 @echo off
 :: setup compiler environment
-call ..\..\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\UtilitiesScripts\setup_intel_compilers.bat
 
 Title Building debug smokediff for 64 bit Windows
 

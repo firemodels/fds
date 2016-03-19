@@ -1,7 +1,7 @@
 @echo off
 
 :: setup compiler environment
-call ..\..\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 
 Title Building 64 bit Windows setpath
 erase *.obj
