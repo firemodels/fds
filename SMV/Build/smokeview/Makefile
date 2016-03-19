@@ -3,15 +3,15 @@
 
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
 
-SOURCE_DIR = ../../source/
+SOURCE_DIR = ../../../source/
 SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG =
 SMV_PROFILESTRING =
 LUA_SCRIPTING = false
 ifeq ($(shell echo "check_quotes"),"check_quotes")
-  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\..\Utilities\Scripts\gitlog)
 else
   GIT_HASH := $(shell git describe --long --dirty)
   GIT_DATE := $(shell git log -1 --format=%cd)

@@ -1,16 +1,15 @@
-SOURCE_DIR = ../../../SMV/source/
-BUILD_DIR = ../../../SMV/Build
-LIB_DIR = ../../../SMV/Build/LIBS
+SOURCE_DIR = ../../../source/
+LIB_DIR = ../LIBS
 INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/smokezip ../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
+VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
-  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\..\Utilities\Scripts\gitlog)
 else
   GIT_HASH := $(shell git describe --long --dirty)
   GIT_DATE := $(shell git log -1 --format=%cd)

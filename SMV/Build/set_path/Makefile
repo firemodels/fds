@@ -1,13 +1,13 @@
-SOURCE_DIR = ../../../SMV/source/
-INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/sh2bat
+SOURCE_DIR = ../../../source/
+INC_DIR = -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/set_path
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/sh2bat:$(SOURCE_DIR)/shared
+VPATH = $(SOURCE_DIR)/set_path:$(SOURCE_DIR)/shared
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
-  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\..\Utilities\Scripts\gitlog)
 else
   GIT_HASH := $(shell git describe --long --dirty)
   GIT_DATE := $(shell git log -1 --format=%cd)
@@ -16,7 +16,7 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
-obj = sh2bat.o string_util.o dmalloc.o assert.o file_util.o
+obj = main.o string_util.o dmalloc.o file_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
@@ -34,16 +34,29 @@ no_target:
 
 # ********  rules for each platform supported *************
 
+# ------------- Win 32 ----------------
+#  32 bit windows
+
+intel_win_32 : CFLAGS    = -D WIN32 -D pp_INTEL -O2 /nologo $(GITINFO)
+intel_win_32 : CC        = icl
+intel_win_32 : CPP       = icl
+intel_win_32 : FC        = ifort
+intel_win_32 : exe       = set_path32.exe
+
+intel_win_32 : $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) Advapi32.lib 
+
 # ------------- Win 64 ----------------
 #  64 bit windows
 
-intel_win_64 : CFLAGS    = -D WIN32 -O2 -D pp_INTEL /nologo $(GITINFO)
+intel_win_64 : CFLAGS    = -D WIN32 -D pp_INTEL -O2 /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
-intel_win_64 : exe       = sh2bat_win_64.exe
+intel_win_64 : FC        = ifort
+intel_win_64 : exe       = set_path64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin)
+	$(CPP) -o $(bin)/$(exe) $(objwin) Advapi32.lib 
 
 #-------------- Clean Target to remove Object and Module files -----------
 

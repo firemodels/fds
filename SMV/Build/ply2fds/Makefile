@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../SMV/source/
+SOURCE_DIR = ../../../source/
 INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/ply2fds
 INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/ply2fds
 
@@ -7,8 +7,8 @@ FILTERC =
 VPATH = $(SOURCE_DIR)/ply2fds $(SOURCE_DIR)/shared
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
-  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\..\Utilities\Scripts\gitlog)
 else
   GIT_HASH := $(shell git describe --long --dirty)
   GIT_DATE := $(shell git log -1 --format=%cd)
@@ -18,7 +18,7 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # Definition of the object variables
 
-obj = main.o ply.o string_util.o dmalloc.o assert.o fil_util.o
+obj = main.o ply.o string_util.o dmalloc.o assert.o file_util.o
 objwin = $(obj:.o=.obj)
 
 #*** General Purpose Rules ***
