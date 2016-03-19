@@ -3,7 +3,7 @@ set arg1=%1
 
 :: setup compiler environment
 if x%arg1% == xbot goto skip1
-call ..\..\Scripts\setup_intel_compilers.bat
+call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 :skip1
 
 Title Building wind2fds for 64 bit Windows

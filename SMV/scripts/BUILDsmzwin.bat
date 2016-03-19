@@ -24,10 +24,7 @@ echo --------------------------------------------
 echo Building 64 bit Windows versions of smokezip
 echo --------------------------------------------
 
-cd %svn_root%\Utilities\smokezip\intel_win_64
-:: call %svn_root%\Utilities\Scripts\setup_intel_compilers.bat
-:: erase *.obj *.mod
-:: make -f ..\Makefile intel_win_64
+cd %svn_root%\SMV\Build\smokezip\intel_win_64
 call make_zip
 
 pause
