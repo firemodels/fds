@@ -35,7 +35,12 @@ cat << EOF
           ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
+MINTIME=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' 'BEGIN {min=1000000}{if ($2<min)min=$2}END{print min}'`
+MAXTIME=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' 'BEGIN {max=0}      {if ($2>max)max=$2}END{print max}'`
 ./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
+SPREAD=`echo "scale=3; $MAXTIME - $MINTIME" | bc`
+SPREAD=`echo "scale=3; $SPREAD/$MINTIME" | bc`
+SPREAD=`echo "scale=2; $SPREAD*100.0" | bc`
 
 cat << EOF
         ]);
@@ -64,6 +69,9 @@ cat << EOF
 <hr align='left'>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
+Min: $MINTIME (s)<br>
+Max: $MAXTIME (s)<br>
+Spread: $SPREAD %<br>
 <h3>FDS/Smokeview Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
