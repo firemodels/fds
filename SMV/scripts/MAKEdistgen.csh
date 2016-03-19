@@ -7,11 +7,11 @@ set FDS_EDITION=$5
 set SVNROOT=$6
 
 set platformsize=${platform}_$size
-set BACKGROUNDDIR=$SVNROOT/Utilities/background/intel_${platform}_64
+set BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_${platform}_64
 set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
-set SMOKEZIPDIR=$SVNROOT/Utilities/smokezip/intel_$platformsize
-set SMOKEDIFFDIR=$SVNROOT/Utilities/smokediff/intel_$platformsize
-set WINDDIR=$SVNROOT/Utilities/wind2fds/intel_$platformsize
+set SMOKEZIPDIR=$SVNROOT/SMV/Build/smokezip/intel_$platformsize
+set SMOKEDIFFDIR=$SVNROOT/SMV/Buiild/smokediff/intel_$platformsize
+set WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
 set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 set DIR=smv_${version}_$platform$size
 set UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh

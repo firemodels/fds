@@ -26,7 +26,7 @@ set platform=%1
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
 set smvdir=%svn_root%\SMV\uploads\%zipbase%
-set sh2bat=%svn_root%\Utilities\sh2bat\intel_win_64
+set sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
 
 cd %svn_root%\SMV\for_bundle
 
@@ -48,16 +48,16 @@ echo ***copying volrender.ssf
 echo.
 copy volrender.ssf %smvdir%\.
 
-CALL :COPY ..\..\Utilities\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
+CALL :COPY ..\..\SMV\Build\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
-CALL :COPY  ..\..\Utilities\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
+CALL :COPY  ..\..\SMV\Build\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
-CALL :COPY  ..\..\Utilities\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
+CALL :COPY  ..\..\SMV\Build\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
 
-CALL :COPY  ..\..\Utilities\background\intel_win_64\background.exe %smvdir%\background.exe
+CALL :COPY  ..\..\SMV\Build\background\intel_win_64\background.exe %smvdir%\background.exe
 
 echo bundleinfo=%bundleinfo%
-CALL :COPY  ..\..\Utilities\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
+CALL :COPY  ..\..\SMV\Build\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
 
 CALL :COPY objects.svo %smvdir%\.
 
