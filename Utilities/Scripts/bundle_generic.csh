@@ -45,10 +45,10 @@ setenv fds2asciiout fds2ascii$OUT
 set scp_fds_smvroot=$fds_smvroot
 set fds_smvroot=~/$fds_smvroot
 set fdsroot=$scp_fds_smvroot/FDS_Compilation
-set backgroundroot=$scp_fds_smvroot/Utilities/background
-set smokediffroot=$scp_fds_smvroot/Utilities/smokediff
-set smokeziproot=$scp_fds_smvroot/Utilities/smokezip
-set wind2fdsroot=$scp_fds_smvroot/Utilities/wind2fds
+set backgroundroot=$scp_fds_smvroot/SMV/Build/background
+set smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
+set smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
+set wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
 set uploaddir=$fds_smvroot/Utilities/uploads
 set bundledir=$bundlebase
 set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
