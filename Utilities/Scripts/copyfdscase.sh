@@ -1,7 +1,10 @@
 #!/bin/bash
-while getopts 'd:p:o:t' OPTION
+while getopts 'Ad:p:o:t' OPTION
 do
 case $OPTION  in
+  A)
+   dummy3="xxx"
+   ;;
   d)
    dir="$OPTARG"
    ;;
