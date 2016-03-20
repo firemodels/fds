@@ -944,12 +944,12 @@ compile_smv_db()
    # Clean and compile SMV debug
    echo "   smokeview"
    echo "      debug"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size}_db \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
    fi
@@ -960,7 +960,7 @@ check_compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage2b_success=true
@@ -1041,12 +1041,12 @@ compile_smv()
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
    echo "      release"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
@@ -1057,7 +1057,7 @@ check_compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
       stage2c_smv_success=true
