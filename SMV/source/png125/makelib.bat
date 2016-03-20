@@ -1,6 +1,6 @@
 @echo off
 setlocal
-call ..\setopts %OPTS%
+call ..\scripts\setopts %OPTS%
 erase *.o *.obj libpng.a libpng.lib
 set target=libpng.lib
 if %COMPILER% == gcc set target=libpng.a

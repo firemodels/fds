@@ -1,6 +1,6 @@
 @echo off
 setlocal
-call ..\setopts %OPTS%
+call ..\scripts\setopts %OPTS%
 erase *.o *.obj libgd.a libgd.lib
 set target=libgd.lib
 if %COMPILER% == gcc set target=libgd.a
