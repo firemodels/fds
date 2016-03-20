@@ -1,6 +1,6 @@
 @echo off
 setlocal
-call ..\setopts %OPTS%
+call ..\scripts\setopts %OPTS%
 erase *.o *.obj libz.a libz.lib
 set target=libz.lib
 if %COMPILER% == gcc set target=libz.a

@@ -1,6 +1,6 @@
 @echo off
 setlocal
-call ..\setopts %OPTS%
+call ..\scripts\setopts %OPTS%
 erase *.o *.obj libglutwin.a libglutwin.lib
 set target=libglutwin.lib
 if %COMPILER% == gcc set target=libglutwin.a
