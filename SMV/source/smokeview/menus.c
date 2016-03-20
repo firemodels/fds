@@ -1839,26 +1839,26 @@ void HelpMenu(int value){
       break;
     case MENU_HELP_DOWNLOADS:
 #ifdef pp_OSX
-      system("open http://firemodels.github.io/fds-smv/downloads.html");
+      system("open https://pages.nist.gov/fds-smv/downloads.html");
 #endif
 #ifdef WIN32
-      ShellExecute(NULL, "open", "http://firemodels.github.io/fds-smv/downloads.html", NULL, NULL, SW_SHOWNORMAL);
+      ShellExecute(NULL, "open", "https://pages.nist.gov/fds-smv/downloads.html", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
     case MENU_HELP_DOCUMENTATION:
 #ifdef pp_OSX
-      system("open http://firemodels.github.io/fds-smv/");
+      system("open https://pages.nist.gov/fds-smv/");
 #endif
 #ifdef WIN32
-      ShellExecute(NULL, "open", "http://firemodels.github.io/fds-smv/", NULL, NULL, SW_SHOWNORMAL);
+      ShellExecute(NULL, "open", "https://pages.nist.gov/fds-smv/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
     case MENU_HELP_FDSWEB:
 #ifdef pp_OSX
-      system("open http://firemodels.github.io/fds-smv/");
+      system("open https://pages.nist.gov/fds-smv/");
 #endif
 #ifdef WIN32
-      ShellExecute(NULL, "open", "http://firemodels.github.io/fds-smv/", NULL, NULL, SW_SHOWNORMAL);
+      ShellExecute(NULL, "open", "https://pages.nist.gov/fds-smv/", NULL, NULL, SW_SHOWNORMAL);
 #endif
       break;
     case MENU_DUMMY:
