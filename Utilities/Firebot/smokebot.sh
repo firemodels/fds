@@ -748,7 +748,7 @@ compile_smv_utilities()
 
    # smokezip:
    echo "      smokezip"
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1
    ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1
@@ -756,7 +756,7 @@ compile_smv_utilities()
    
    # smokediff:
    echo "      smokediff"
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1
    ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1
@@ -764,14 +764,14 @@ compile_smv_utilities()
    
    # background
    echo "      background"
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size}
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1
    
   # wind2fds:
    echo "      wind2fds"
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1
    ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1
@@ -781,21 +781,21 @@ compile_smv_utilities()
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokezip_${platform}${size} \; \
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokediff_${platform}${size} \; \
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size} \; \
    rm -f *.o background \; \
    echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size} \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1  \)
@@ -820,10 +820,10 @@ check_smv_utilities()
    if [ "$haveCC" == "1" ] ; then
      # Check for errors in SMV utilities compilation
      cd $fdsrepo
-     if [ -e "$fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}/smokezip_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}/smokediff_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/background/${COMPILER}_${platform}${size}/background" ]
+     if [ -e "$fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size}/smokezip_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size}/smokediff_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size}/background" ]
      then
         stage2a_success="1"
      else
@@ -944,12 +944,12 @@ compile_smv_db()
    # Clean and compile SMV debug
    echo "   smokeview"
    echo "      debug"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size}_db \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
    fi
@@ -960,7 +960,7 @@ check_compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage2b_success=true
@@ -1041,12 +1041,12 @@ compile_smv()
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
    echo "      release"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
@@ -1057,7 +1057,7 @@ check_compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
       stage2c_smv_success=true
@@ -1368,7 +1368,7 @@ fi
      echo "Smokebot summary: $WEB_URL" >> $TIME_LOG
    fi
    if [ "$UPLOADRESULTS" == "1" ]; then
-     echo " Smokebot status: http://goo.gl/xx6jbo" >> $TIME_LOG
+     echo " Smokebot status: https://goo.gl/gKVSDZ" >> $TIME_LOG
    fi
    echo "-------------------------------" >> $TIME_LOG
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
