@@ -29,7 +29,7 @@ set BUILDDIR=intel_win_%platform%
 
 set version=%smv_version%
 set bundledir=%svn_root%\smv\for_bundle
-set smvbuild=%svn_root%\SMV\Build\%BUILDDIR%
+set smvbuild=%svn_root%\SMV\Build\smokeview\%BUILDDIR%
 set svzipbuild=%svn_root%\SMV\Build\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\SMV\Build\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\SMV\Build\background\intel_win_64
