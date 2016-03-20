@@ -18,7 +18,7 @@ cd ..
 GITROOT=`pwd`
 cd $CURDIR
 
-export SMV=$GITROOT/SMV/Build/intel_$PLATFORM/smokeview_$PLATFORM
+export SMV=$GITROOT/SMV/Build/smokeview/intel_$PLATFORM/smokeview_$PLATFORM
 FDSEXE=$GITROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
 RUNSMV="$GITROOT/Utilities/Scripts/runsmv.sh"
 export SMVBINDIR="-bindir $GITROOT/SMV/for_bundle"
