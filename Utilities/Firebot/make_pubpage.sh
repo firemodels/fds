@@ -46,13 +46,13 @@ cat << EOF
         ]);
 
         var options = {
-          title: '$TITLE Time History',
+          title: '',
           curveType: 'line',
           legend: { position: 'right' },
           colors: ['black'],
           pointSize: 5,
           hAxis:{ title: 'Day'},
-          vAxis:{ title: 'Benchmark Time (s)'}
+          vAxis:{ title: 'Time (s)'}
         };
         options.legend = 'none';
 
@@ -65,26 +65,11 @@ cat << EOF
 </head>
 <body>
 <h2>$TITLE Summary - `date`</h2>
-
-<hr align='left'>
-
-<div id="curve_chart" style="width: 500px; height: 300px"></div>
-Min: $MINTIME (s)<br>
-Max: $MAXTIME (s)<br>
-Spread: $SPREAD %<br>
-<h3>FDS/Smokeview Manuals</h3>
-<a href="http://goo.gl/n1Q3WH">Manuals</a>
-
-<h3>Status</h3>
-
 EOF
-fi
 
 CURDIR=`pwd`
-listin=/tmp/list.in.$$
 cd $historydir
-ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 > $listin
-cat $listin | head -30 | \
+ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | head -1 | \
              awk -F ';' '{cputime="Benchmark time: "$9" s";\
                           if($9=="")cputime="";\
                           font="<font color=\"#00FF00\">";\
@@ -94,7 +79,37 @@ cat $listin | head -30 | \
                           printf("Revision date: %s\n",$2);\
                           if($9!="")printf("%s <br>\n",cputime);\
                           }' 
-rm $listin
+cd $CURDIR
+
+cat << EOF
+<hr align='left'>
+<h3>Timings</h3>
+
+<div id="curve_chart" style="width: 500px; height: 300px"></div>
+Min: $MINTIME (s)<br>
+Max: $MAXTIME (s)<br>
+Spread: $SPREAD %<br>
+<h3>Manuals</h3>
+<a href="http://goo.gl/n1Q3WH">Manuals</a>
+
+<h3>History</h3>
+
+EOF
+fi
+
+CURDIR=`pwd`
+cd $historydir
+ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | head -30 | \
+             awk -F ';' '{cputime="Benchmark time: "$9" s";\
+                          if($9=="")cputime="";\
+                          font="<font color=\"#00FF00\">";\
+                          if($8=="2")font="<font color=\"#FF00FF\">";\
+                          if($8=="3")font="<font color=\"#FF0000\">";\
+                          printf("<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a>%s %s</font><br>\n",$4,$5,font,$1);\
+                          printf("Revision date: %s\n",$2);\
+                          if($9!="")printf("%s <br>\n",cputime);\
+                          }' 
+cd $CURDIR
 
 if [ "$BODY" == "" ]; then
 cat << EOF
@@ -105,5 +120,3 @@ cat << EOF
 </html>
 EOF
 fi
-
-cd $CURDIR
