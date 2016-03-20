@@ -32,4 +32,4 @@ $QFDS -d Visualization thouse5delta.fds
 $QFDS -d Visualization transparency.fds
 $QFDS -d Visualization vcirctest.fds
 $QFDS -d Visualization vcirctest2.fds
-$RUNTFDS -d Visualization version.fds
+$QFDS -d Visualization version.fds
