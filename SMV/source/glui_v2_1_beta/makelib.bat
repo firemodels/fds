@@ -1,6 +1,6 @@
 @echo off
 setlocal
-call ..\setopts %OPTS%
+call ..\scripts\setopts %OPTS%
 erase *.o *.obj libglui.a libglui.lib
 set target=libglui.lib
 if %COMPILER% == gcc set target=libglui.a

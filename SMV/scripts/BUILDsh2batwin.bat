@@ -21,13 +21,10 @@ call %envfile%
 
 echo.
 echo ---------------------------------------------
-echo Building 64 bit Windows versions of smokediff
+echo Building 64 bit Windows versions of sh2bat
 echo ---------------------------------------------
 
-cd %svn_root%\Utilities\sh2bat\intel_win_64
-::call %svn_root%\Utilities\Scripts\setup_intel_compilers.bat
-::erase *.obj *.mod
-::make -f ..\Makefile intel_win_64
+cd %svn_root%\SMV\Build\sh2bat\intel_win_64
 call make_sh2bat
 
 pause
