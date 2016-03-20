@@ -74,7 +74,7 @@ shift $(($OPTIND-1))
 
 export SVNROOT=`pwd`/../..
 if [ "$SMV_PATH" == "" ]; then
-  SMV_PATH=$SVNROOT/SMV/Build/intel_$PLATFORM$SIZE
+  SMV_PATH=$SVNROOT/SMV/Build/smokeview/intel_$PLATFORM$SIZE
 fi
 export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
 export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
