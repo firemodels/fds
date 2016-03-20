@@ -168,8 +168,8 @@ if [ "$use_installed" == "1" ] ; then
   export WIND2FDS=wind2fds
   export BACKGROUND=background
 else
-  export WIND2FDS=$SVNROOT/Utilities/wind2fds/${COMPILER}_$PLATFORM/wind2fds_$PLATFORM
-  export BACKGROUND=$SVNROOT/Utilities/background/${COMPILER}_$PLATFORM/background
+  export WIND2FDS=$SVNROOT/SMV/Build/wind2fds/${COMPILER}_$PLATFORM/wind2fds_$PLATFORM
+  export BACKGROUND=$SVNROOT/SMV/Build/background/${COMPILER}_$PLATFORM/background
 fi
 export GEOM=$SVNROOT/SMV/source/geomtest/${COMPILER}_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
