@@ -10,7 +10,7 @@ set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%userprofile%\FIRE-LOCAL\reports\fds_manuals\
 set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
-set in_fds2ascii=%svn_root%\SMV\Build\fds2ascii
+set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_setpath=%svn_root%\SMV\Build\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
 set in_smokediff=%svn_root%\SMV\Build\smokediff
@@ -18,7 +18,7 @@ set in_smokezip=%svn_root%\SMV\Build\smokezip
 set in_wind2fds=%svn_root%\SMV\Build\wind2fds
 set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\SMV\Build\background
-set in_smv=%svn_root%\SMV\Build\intel_win_%platform%
+set in_smv=%svn_root%\SMV\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
 set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
