@@ -663,10 +663,10 @@ compile_smv_db()
    if [ "$USEINSTALL" == "" ]; then
    echo "      debug"
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    ./make_smv_db.sh &> $OUTPUT_DIR/stage3b
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
+   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage3b \)
    fi
    fi
@@ -676,7 +676,7 @@ check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
    if [ "$USEINSTALL" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage3b_success=true
@@ -712,10 +712,10 @@ compile_smv()
    if [ "$USEINSTALL" == "" ]; then
    echo "      release"
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    ./make_smv.sh &> $OUTPUT_DIR/stage3c
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
+   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
    ./make_smv.sh &> $OUTPUT_DIR/stage3c \)
    fi
    fi
@@ -725,7 +725,7 @@ check_compile_smv()
 {
    # Check for errors in SMV release compilation
    if [ "$USEINSTALL" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
       stage3c_success=true
@@ -1123,7 +1123,7 @@ email_build_status()
    echo "Start Time: $start_time " >> $TIME_LOG
    echo "Stop Time: $stop_time " >> $TIME_LOG
    if [ "$UPLOADGUIDES" == "1" ]; then
-   echo "Firebot status:  http://goo.gl/vgeRx5" >> $TIME_LOG
+   echo "Firebot status:  https://goo.gl/3azMpe" >> $TIME_LOG
    fi
    echo "-------------------------------" >> $TIME_LOG
 
