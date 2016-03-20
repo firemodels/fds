@@ -1,7 +1,7 @@
 #!/bin/bash
-source ../setopts.sh $*
+source ../scripts/setopts.sh $*
 LIBDIR=../LIBS/lib_osx_intel_64/
-source ../test_libs.sh lua
+source ../scripts/test_libs.sh lua
 LUA_SCRIPTING="LUA_SCRIPTING=true"
 
 make -f ../Makefile clean
