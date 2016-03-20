@@ -1,4 +1,4 @@
-&HEAD CHID='plot3d',TITLE='Plume whirl case ' /
+&HEAD CHID='movie_test',TITLE='Plume whirl case'  /
 
   same as plume5a except there is a blockage in the middle of the scene to block the flow
   The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
@@ -7,11 +7,11 @@
 
 &MISC HRRPUV_MAX_SMV=1300.0 /
 
-&DUMP NFRAMES=400 DT_PL3D=8.0, DT_SL3D=0.1 /
+&DUMP NFRAMES=100 DT_PL3D=8.0, DT_SL3D=0.1 /
 
 &INIT XB=0.2,1.4,0.2,1.4,0.5,2.2  TEMPERATURE=600.0 /
 
-&TIME T_END=40. /  Total simulation time
+&TIME T_END=10. /  Total simulation time
 
 &MATL ID                    = 'FABRIC'
       FYI                   = 'Properties completely fabricated'
