@@ -1,15 +1,15 @@
-#!/bin/csh -f
-set revision=$1
-set SVNROOT=~/$2
+#!/bin/bash
+revision=$1
+SVNROOT=~/$2
 
-set BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_linux_64
-set SMVDIR=$SVNROOT/SMV/Build/smokeview/intel_linux_64
-set SMZDIR=$SVNROOT/SMV/Build/smokezip/intel_linux_64
-set SMDDIR=$SVNROOT/SMV/Build/smokediff/intel_linux_64
-set WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_linux_64
-set FORBUNDLE=$SVNROOT/SMV/for_bundle
-set LINUXDIR=smv_test\_$revision\_linux64
-set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
+BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_linux_64
+SMVDIR=$SVNROOT/SMV/Build/smokeview/intel_linux_64
+SMZDIR=$SVNROOT/SMV/Build/smokezip/intel_linux_64
+SMDDIR=$SVNROOT/SMV/Build/smokediff/intel_linux_64
+WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_linux_64
+FORBUNDLE=$SVNROOT/SMV/for_bundle
+LINUXDIR=smv_test\_$revision\_linux64
+UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $SVNROOT/SMV/uploads
 

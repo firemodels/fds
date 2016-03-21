@@ -1,17 +1,17 @@
-#!/bin/csh -f
-set revision=$1
-set REMOTESVNROOT=FDS-SMV
-set OSXHOST=$2
-set SVNROOT=~/$3
+#!/bin/bash
+revision=$1
+REMOTESVNROOT=FDS-SMV
+OSXHOST=$2
+SVNROOT=~/$3
 
-set BACKGROUNDDIR=$REMOTESVNROOT/SMV/Build/background/intel_osx_64
-set SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
-set SMZDIR=$REMOTESVNROOT/SMV/Build/smokezip/intel_osx_64
-set SMDDIR=$REMOTESVNROOT/SMV/Build/smokediff/intel_osx_64
-set WINDDIR=$REMOTESVNROOT/SMV/Build/wind2fds/intel_osx_64
-set FORBUNDLE=$SVNROOT/SMV/for_bundle
-set OSXDIR=smv_test\_$revision\_osx64
-set UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
+BACKGROUNDDIR=$REMOTESVNROOT/SMV/Build/background/intel_osx_64
+SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
+SMZDIR=$REMOTESVNROOT/SMV/Build/smokezip/intel_osx_64
+SMDDIR=$REMOTESVNROOT/SMV/Build/smokediff/intel_osx_64
+WINDDIR=$REMOTESVNROOT/SMV/Build/wind2fds/intel_osx_64
+FORBUNDLE=$SVNROOT/SMV/for_bundle
+OSXDIR=smv_test\_$revision\_osx64
+UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $SVNROOT/SMV/uploads
 

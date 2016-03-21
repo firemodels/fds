@@ -1,20 +1,20 @@
-#!/bin/csh -f
-set version=$1
-set platform=$2
-set size=$3
-set HOST=$4
-set FDS_EDITION=$5
-set SVNROOT=$6
+#!/bin/bash
+version=$1
+platform=$2
+size=$3
+HOST=$4
+FDS_EDITION=$5
+SVNROOT=$6
 
-set platformsize=${platform}_$size
-set BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_${platform}_64
-set SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
-set SMOKEZIPDIR=$SVNROOT/SMV/Build/smokezip/intel_$platformsize
-set SMOKEDIFFDIR=$SVNROOT/SMV/Buiild/smokediff/intel_$platformsize
-set WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
-set FORBUNDLE=~/$SVNROOT/SMV/for_bundle
-set DIR=smv_${version}_$platform$size
-set UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
+platformsize=${platform}_$size
+BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_${platform}_64
+SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
+SMOKEZIPDIR=$SVNROOT/SMV/Build/smokezip/intel_$platformsize
+SMOKEDIFFDIR=$SVNROOT/SMV/Buiild/smokediff/intel_$platformsize
+WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
+FORBUNDLE=~/$SVNROOT/SMV/for_bundle
+DIR=smv_${version}_$platform$size
+UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd ~/$SVNROOT/SMV/uploads
 
@@ -40,11 +40,11 @@ cd ..
 gzip $DIR.tar
 
 set platform2=$platform
-if ( "$platform" == "linux" ) then
-set platform2=Linux
-endif
-if ( "$platform" == "osx" ) then
-set platform2=OSX
-endif
+if [ "$platform" == "linux" ]; then
+platform2=Linux
+fi
+if [ "$platform" == "osx" ]; then
+platform2=OSX
+fi
 
 $UPDATER $platform2 $size $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release
