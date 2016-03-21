@@ -3413,11 +3413,19 @@ Note that if {\ct HRRPUA} or solid phase reaction parameters are specified, no v
 
 \label{info:louvers}
 
-Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line in the example case {\ct Flowfields/tangential\_velocity.fds}
 \begin{lstlisting}
-&SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
+&SURF ID='LOUVER', VEL=-2.0, VEL_T=2.0,0.0, TAU_V=5., COLOR='GREEN' /
 \end{lstlisting}
-is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 1.2~m/s and a tangential velocity of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either the $y$ or $z$ direction, depending on what the normal direction is.
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 2~m/s in the first of the two tangential directions. Both the normal and tangential velocity components are ramped up with either {\ct TAU\_V} or {\ct RAMP\_V}, as shown in Fig.~\ref{fig:tangential_velocity}.
+
+\begin{figure}[ht!]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/tangential_velocity}
+\caption[The {\ct tangential\_velocity} test case]{Normal and tangential velocity components at a louvered vent, compared to the ideal curve.}
+\label{fig:tangential_velocity}
+\end{center}
+\end{figure}
 
 In cases of limited mesh resolution, it may not be possible to describe a louvered vent or slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
 
@@ -3474,7 +3482,6 @@ Real flows of low-viscosity fluids like air are rarely perfectly stationary in t
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
 velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, atmospheric, and ramp profiles with 10 \% turbulence intensity (see the {\ct sem\_*} test series in the Turbulence verification subdirectory).  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
-
 \begin{lstlisting}
 &SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
 &VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, VEL_RMS=.1 /
@@ -3491,19 +3498,15 @@ velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, 
 \label{fig:sem_profiles}
 \end{figure}
 
-Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
-
-\noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
-
+Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress. Note that if {\ct VEL\_RMS} is specified, this is equivalent to
 \begin{lstlisting}
 REYNOLDS_STRESS(1,1) = VEL_RMS**2
 REYNOLDS_STRESS(2,2) = VEL_RMS**2
 REYNOLDS_STRESS(3,3) = VEL_RMS**2
 \end{lstlisting}
+and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
 
-\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
-
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
+In Chapter 7 of Jarrin's thesis~\cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
 
 \begin{lstlisting}
 &VENT XB=... , SURF_ID='WIND', N_EDDY=500,
@@ -3581,7 +3584,7 @@ where:
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
-\item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}. 
+\item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
 \item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
 \item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
@@ -3603,7 +3606,7 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 \subsection{HVAC Dampers}
 \label{info:HVACdamper}
 
-Dampers can be modeled in one of two ways. 
+Dampers can be modeled in one of two ways.
 
 The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
 Verification Guide.
