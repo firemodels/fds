@@ -1,7 +1,0 @@
-&HEAD CHID='tetrabox',TITLE='tetrahedron box intersection  example $Revision$' /
-
-&MESH IJK=24,40,24, XB=0.0,6.4,0.0,8.0,0.0,4.8 /
-
-&TIME T_END=0. /
-
-&TAIL /
