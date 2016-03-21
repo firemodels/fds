@@ -198,7 +198,7 @@ cp $bundle_setup/FDS_Release_Notes.htm $bundledir/Documentation/FDS_Release_Note
 
 echo
 echo Copying Smokeview release notes from  the repository
-cp $forbundle/readme.html $bundledir/Documentation/SMV_Release_Notes.html
+cp ~/FDS-SMVwebpages/smv_readme.html $bundledir/Documentation/SMV_Release_Notes.html
 
 
 echo Obtaining example files from the repository
