@@ -9,7 +9,6 @@
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
-[56.68447,14455.600],
 [57.36149,14570.000],
 [57.37813,14413.300],
 [58.69160,14493.600],
@@ -39,16 +38,17 @@
 [76.87163,14573.000],
 [77.80131,14694.900],
 [78.94224,14799.700],
+[79.80261,14704.100],
         ]);
 
         var options = {
-          title: 'Firebot Time History',
+          title: '',
           curveType: 'line',
           legend: { position: 'right' },
           colors: ['black'],
           pointSize: 5,
           hAxis:{ title: 'Day'},
-          vAxis:{ title: 'Benchmark Time (s)'}
+          vAxis:{ title: 'Time (s)'}
         };
         options.legend = 'none';
 
@@ -60,19 +60,25 @@
 
 </head>
 <body>
-<h2>Firebot Summary - Sun Mar 20 03:03:22 EDT 2016</h2>
-
+<h2>Firebot Summary - Mon Mar 21 01:18:01 EDT 2016</h2>
+<p><a href="https://github.com/firemodels/fds-smv/commit/abe23e76bf3a3b36d90389fb00f61a7d30a516e2">Revision: Git-r8-393-gabe23e7</a><font color="#00FF00"> Build success!</font><br>
+Revision date: Sun Mar 20 20:15:46 2016
+Benchmark time: 14704.100 s <br>
 <hr align='left'>
+<h3>Timings</h3>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
 Min: 14413.300 (s)<br>
 Max: 14799.700 (s)<br>
 Spread: 2.600 %<br>
-<h3>FDS/Smokeview Manuals</h3>
+<h3>Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
-<h3>Status</h3>
+<h3>History</h3>
 
+<p><a href="https://github.com/firemodels/fds-smv/commit/abe23e76bf3a3b36d90389fb00f61a7d30a516e2">Revision: Git-r8-393-gabe23e7</a><font color="#00FF00"> Build success!</font><br>
+Revision date: Sun Mar 20 20:15:46 2016
+Benchmark time: 14704.100 s <br>
 <p><a href="https://github.com/firemodels/fds-smv/commit/4a0581e950e5488d3c338c6deb2bb275bf701c1f">Revision: Git-r8-359-g4a0581e</a><font color="#00FF00"> Build success!</font><br>
 Revision date: Sat Mar 19 23:36:50 2016
 Benchmark time: 14799.700 s <br>
@@ -160,9 +166,6 @@ Benchmark time: 14413.300 s <br>
 <p><a href="https://github.com/firemodels/fds-smv/commit/ac3dc1f84cd28b081b28ad172eadd877d2a5ecdd">Revision: Git-r7-277-gac3dc1f</a><font color="#00FF00"> Build success!</font><br>
 Revision date: Sat Feb 27 12:04:50 EST 2016
 Benchmark time: 14570.000 s <br>
-<p><a href="https://github.com/firemodels/fds-smv/commit/23270f419ee4b518a81a7f402f8fd2fd9f724960">Revision: Git-r7-273-g23270f4</a><font color="#00FF00"> Build success!</font><br>
-Revision date: Sat Feb 27 02:07:51 EST 2016
-Benchmark time: 14455.600 s <br>
 <br><br>
 <hr align='left'><br>
 
