@@ -5,7 +5,7 @@ MOVIE=
 RUNSCRIPT=
 ssffile=
 
-while getopts 'Ad:fm' OPTION
+while getopts 'Ad:fmt' OPTION
 do
 case $OPTION in
   d)
@@ -16,6 +16,9 @@ case $OPTION in
    ;;
   m)
    MOVIE="y"
+   ;;
+  t)
+   dummy=1
    ;;
 esac
 done

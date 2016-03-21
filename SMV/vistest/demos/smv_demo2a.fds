@@ -1,4 +1,4 @@
-&HEAD CHID='smv_demo2a',TITLE='Flashover Simulator Demo' /
+&HEAD CHID='smv_demo2a',TITLE='Flashover Simulator Demo'   /
 &MESH IJK=29,24,34, XB=-0.3,2.6,  -0.3,1.9761,-0.0508,3.37733 /
 &MESH IJK=29,24,34, XB=-0.3,2.6,1.9761,4.2522,-0.0508,3.37733 /
 &MESH IJK=29,24,34, XB=-0.3,2.6,4.2522,6.5283,-0.0508,3.37733 /
