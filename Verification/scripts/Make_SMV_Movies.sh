@@ -75,7 +75,7 @@ cd $VDIR
 $QFDS -e $FDSEXE -d Visualization -q terminal version2.fds
 
 cd $VDIR
-$RUNSMV -t -d Visualization version2
+$RUNSMV -d Visualization version2
 
 # The -m option assumes that a script
 # named casename_movies.ssf exists for each 

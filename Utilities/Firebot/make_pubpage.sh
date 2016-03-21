@@ -62,7 +62,9 @@ cat << EOF
 
 </head>
 <body>
-<h2>$TITLE Summary - `date`</h2>
+<h2>$TITLE Summary</h2>
+<hr align='left'>
+<h3>Status - `date`</h3>
 EOF
 
 CURDIR=`pwd`
@@ -73,14 +75,14 @@ ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | h
                           font="<font color=\"#00FF00\">";\
                           if($8=="2")font="<font color=\"#FF00FF\">";\
                           if($8=="3")font="<font color=\"#FF0000\">";\
-                          printf("<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a>%s %s</font><br>\n",$4,$5,font,$1);\
-                          printf("Revision date: %s\n",$2);\
+                          printf("%s %s</font><br>\n",font,$1);\
+                          printf("<a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a><br>\n",$font,$1);\
+                          printf("Revision date: %s<br>\n",$2);\
                           if($9!="")printf("%s <br>\n",cputime);\
                           }' 
 cd $CURDIR
 
 cat << EOF
-<hr align='left'>
 <h3>Timings</h3>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
@@ -103,8 +105,9 @@ ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | h
                           font="<font color=\"#00FF00\">";\
                           if($8=="2")font="<font color=\"#FF00FF\">";\
                           if($8=="3")font="<font color=\"#FF0000\">";\
-                          printf("<p><a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a>%s %s</font><br>\n",$4,$5,font,$1);\
-                          printf("Revision date: %s\n",$2);\
+                          printf("<p>%s %s</font><br>\n",font,$1);\
+                          printf("<a href=\"https://github.com/firemodels/fds-smv/commit/%s\">Revision: %s</a><br>\n",$4,$5);\
+                          printf("Revision date: %s<br>\n",$2);\
                           if($9!="")printf("%s <br>\n",cputime);\
                           }' 
 cd $CURDIR
