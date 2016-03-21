@@ -1931,8 +1931,8 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  getTitle("Smokeview ", RELEASE_TITLE);
-  getTitle("Smokeview ", PLOT3D_TITLE);
+  getTitle("Smokeview ", release_title);
+  getTitle("Smokeview ", plot3d_title);
 
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");

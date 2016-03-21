@@ -751,10 +751,10 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
 
   if(gversion==0){
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,textdown, PLOT3D_TITLE);
+      outputText(left,textdown, plot3d_title);
     }
     else{
-      outputText(left,textdown, RELEASE_TITLE);
+      outputText(left,textdown, release_title);
     }
   }
   else{
@@ -770,7 +770,7 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
       smv_top=textdown;
       smv_top2=smv_top+VP_title.text_height+v_space;
     }
-    outputText(left,smv_top2,RELEASE_TITLE);
+    outputText(left,smv_top2,release_title);
     sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
     outputText(left,smv_top,label);
     if(fds_githash!=NULL){

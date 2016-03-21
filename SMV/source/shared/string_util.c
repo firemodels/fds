@@ -1250,13 +1250,8 @@ void getTitle(char *progname, char *fulltitle){
 
   getBaseTitle(progname, title_base);
 
-#ifdef _DEBUG
   STRCPY(fulltitle, title_base);
   STRCAT(fulltitle, __DATE__);
-#else
-  STRCPY(fulltitle, title_base);
-  STRCAT(fulltitle, __DATE__);
-#endif
 #ifdef pp_BETA
   STRCAT(fulltitle, " - ");
   STRCAT(fulltitle, __TIME__);
