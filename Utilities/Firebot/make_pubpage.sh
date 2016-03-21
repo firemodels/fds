@@ -62,7 +62,8 @@ cat << EOF
 
 </head>
 <body>
-<h2>$TITLE Summary - `date`</h2>
+<h2>$TITLE Summary</h2>
+<p>Current date: `date`<br>
 EOF
 
 CURDIR=`pwd`
