@@ -7806,7 +7806,7 @@ updatemenu=0;
 /* -------------------------------- about menu -------------------------- */
 
   CREATEMENU(aboutmenu,AboutMenu);
-  glutAddMenuEntry(RELEASE_TITLE,1);
+  glutAddMenuEntry(release_title,1);
   {
 #ifdef pp_GPU
     char version_label[256];

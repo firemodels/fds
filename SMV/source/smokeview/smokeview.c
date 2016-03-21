@@ -724,7 +724,7 @@ void display_version_info(char *progname){
 void usage(char **argv){
   char buffer[1000];
 
-  PRINTF("%s\n",RELEASE_TITLE);
+  PRINTF("%s\n",release_title);
   PRINTF("%s\n\n",_("Visualize fire/smoke flow simulations."));
   PRINTF("Usage: %s [options] casename",get_basefilename(buffer,argv[0]));
   PRINTF("%s\n\n",_("where "));

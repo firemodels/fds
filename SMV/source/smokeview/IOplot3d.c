@@ -404,14 +404,14 @@ void update_plot3dtitle(void){
   char title_base[1024];
 
   getBaseTitle("Smokeview ", title_base);
-  STRCPY(PLOT3D_TITLE,title_base);
+  STRCPY(plot3d_title,title_base);
   meshi=current_mesh;
   if(meshi==NULL)meshi=meshinfo;
   filenum=meshi->plot3dfilenum;
   if(filenum!=-1){
     plot3di = plot3dinfo+meshi->plot3dfilenum;
-    STRCAT(PLOT3D_TITLE,", ");
-    STRCAT(PLOT3D_TITLE,plot3di->file);
+    STRCAT(plot3d_title,", ");
+    STRCAT(plot3d_title,plot3di->file);
   }
 }
 /* ------------------ drawplot3d_texture ------------------------ */
