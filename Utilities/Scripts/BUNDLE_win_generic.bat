@@ -159,7 +159,7 @@ echo.
 echo ***Copying Starup shortcuts
 echo.
  
-CALL :COPY "%in_for_bundle%\readme.html"               "%out_guides%\Smokeview_release_notes.html"
+CALL :COPY "%userprofile%\FDS-SMVwebpages\smv_readme.html" "%out_guides%\Smokeview_release_notes.html"
 
 CALL :COPY "%bundleinfo%\Overview.html"                "%out_doc%\Overview.html"
 
