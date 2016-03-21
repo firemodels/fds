@@ -22,7 +22,7 @@ rm -rf $DIR
 mkdir -p $DIR
 mkdir -p $DIR/bin
 mkdir -p $DIR/Documentation
-cp $FORBUNDLE/readme.html $DIR/Documentation/release_notes.html
+cp ~/FDS-SMVwebpages/smv_readme.html $DIR/Documentation/release_notes.html
 
 cp -r $FORBUNDLE/textures $DIR/bin/.
 cp $FORBUNDLE/objects.svo $DIR/bin/.
