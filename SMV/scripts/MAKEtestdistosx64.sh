@@ -83,6 +83,9 @@ SCP $OSXHOST $SMDDIR smokediff_osx_64 $OSXDIR/bin smokediff
 SCP $OSXHOST $WINDDIR/wind2fds_osx_64 $OSXDIR/bin wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 cd $OSXDIR
+echo ""
+echo "---- building installer ----"
+echo ""
 tar cvf ../$OSXDIR.tar .
 cd ..
 gzip $OSXDIR.tar

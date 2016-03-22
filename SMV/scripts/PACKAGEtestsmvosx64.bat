@@ -26,10 +26,14 @@ cd %svn_root%\smv\scripts
 set scriptdir=%linux_svn_root%/SMV/scripts
 set bundledir=%linux_svn_root%/SMV/uploads
 
-echo making OSX test distribution archive
+echo.
+echo --- making 64 bit OSX test Smokeview installer ---
+echo.
 plink %osx_logon% %scriptdir%/MAKEtestdistosx64.sh %smv_revision% %osx_hostname% %linux_svn_root%
 
-echo downloading OSX test distribution archive
+echo.
+echo --- downloading 64 bit OSX Smokeview installer ---
+echo.
 pscp %osx_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\uploads\.
 
 pause

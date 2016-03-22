@@ -28,12 +28,12 @@ set scriptdir=%linux_svn_root%/SMV/scripts
 set bundledir=%linux_svn_root%/SMV/uploads
 
 echo.
-echo making 64 bit OSX Smokeview installer
+echo --- making 64 bit OSX Smokeview installer ---
 echo.
 plink %osx_logon% %scriptdir%/MAKEdistgen.sh %version% osx 64 %osx_hostname% %fds_edition% %linux_svn_root%
 
 echo.
-echo downloading 64 bit OSX Smokeview installer
+echo --- downloading 64 bit OSX Smokeview installer ---
 echo.
 pscp %osx_logon%:%bundledir%/smv_%version%_osx64.sh ..\uploads\.
 
