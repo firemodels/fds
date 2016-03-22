@@ -48,7 +48,7 @@ set wui_casesbat=%svn_root%\Verification\scripts\WUI_Cases.bat
 set copyFDScases=%svn_root%\Utilities\Scripts\copyFDScases.bat
 set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
 
-set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
+set bundleinfo=%svn_root%\Utilities\Scripts\for_bundle
 
 Rem erase the temporary bundle directory if it already exists
 
