@@ -13,7 +13,7 @@ SCP ()
 
   scp $HOST\:$FROMDIR/$FROMFILE $TODIR/$TOFILE 2>/dev/null
   if [ -e $TODIR/$TOFILE ]; then
-    echo "$TOFILE copied from $HOST"
+    echo "file $FROMFILE copied from $HOST"
   else
     echo "***error: the file $TOFILE failed to copy from $HOST"
   fi
@@ -31,9 +31,9 @@ CP ()
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
-    echo "$TOFILE copied"
+    echo "file $FROMFILE copied"
   else
-    echo "***error: the file $TOFILE failed to copy"
+    echo "***error: the file $FROMFILE failed to copy"
   fi
 }
 
@@ -49,9 +49,9 @@ CP2 ()
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
-    echo "$TOFILE copied"
+    echo "file $FROMFILE copied"
   else
-    echo "***error: the file $TOFILE failed to copy"
+    echo "***error: the file $FROMFILE failed to copy"
   fi
 }
 
@@ -65,9 +65,9 @@ CPDIR ()
     cp -r $FROMDIR $TODIR
   fi
   if [ -e $TODIR ]; then
-    echo "$TODIR copied"
+    echo "directory $FROMDIR copied"
   else
-    echo "***error: the directory $TODIR failed to copy"
+    echo "***error: the directory $FROMDIR failed to copy"
   fi
 }
 
@@ -145,6 +145,7 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
 
+echo ""
 echo "*** copying programs ***"
 # background
 
@@ -191,8 +192,8 @@ cat <<EOF > $fullmanifest
 <BODY BGCOLOR="#FFFFFF" >
 <pre>
 EOF
-echo
-echo Creating Manifest
+echo ""
+echo "*** Creating Manifest ***"
 echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
 date >> $fullmanifest
 echo  >> $fullmanifest
@@ -215,6 +216,7 @@ echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
+echo ""
 echo "*** copying configuration files ***"
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $bundle_setup FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
@@ -229,6 +231,7 @@ CP $forbundle objects.svo $bundledir/bin objects.svo
 
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
+echo ""
 echo "*** Copying documentation ***"
 CP $bundle_setup Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
@@ -242,11 +245,15 @@ CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 if [ ! "$INTELLIB" == "" ]; then
 if [ -d $INTELLIB ]; then
+
+echo ""
 echo "*** copying run time libraries ***"
 CPDIR $INTELLIB $bundledir/bin/$DESTLIB
 fi
 fi
 
+echo ""
+echo "*** copying release notes ***"
 CP $bundle_setup FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
 CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
@@ -259,6 +266,8 @@ export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
 export RUNTFDS=$copyfdscase
 export RUNCFAST=$copycfastcase
+
+echo ""
 echo "*** copying example files ***"
 $fds_cases
 $smv_cases
@@ -282,7 +291,8 @@ cp $fullmanifest ~/$manifest
 cp $fullmanifest $uploaddir/$manifest
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
-echo Building archive
+echo ""
+echo "*** building archive ***"
 rm -rf $uploaddir/$bundlebase.tar
 rm -rf $uploaddir/$bundlebase.tar.gz
 cd $uploaddir/$bundlebase
