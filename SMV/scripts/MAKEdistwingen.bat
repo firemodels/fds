@@ -34,7 +34,6 @@ set svzipbuild=%svn_root%\SMV\Build\smokezip\%BUILDDIR%
 set svdiffbuild=%svn_root%\SMV\Build\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\SMV\Build\background\intel_win_64
 set sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
-set bundleinfo=%svn_root%\Utilities\Scripts\bundle_setup
 
 set zipbase=smv_%version%_win%platform%
 set smvdir=uploads\%zipbase%
