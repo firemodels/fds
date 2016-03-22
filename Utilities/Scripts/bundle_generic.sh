@@ -1,72 +1,72 @@
-#!/bin/csh -f
+#!/bin/bash
 
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
-setenv manifest manifest$FDSOS.html
-setenv OUT $MAJOR$FDSOS
-setenv OUT
+manifest=manifest$FDSOS.html
+OUT=$MAJOR$FDSOS
+OUT=
 
-setenv smokeviewdir intel$FDSOS
-setenv smokeview smokeview$FDSOS
-setenv smokeviewout smokeview$OUT
+smokeviewdir=intel$FDSOS
+smokeview=smokeview$FDSOS
+smokeviewout=smokeview$OUT
 
-setenv smokezipdir intel$FDSOS
-setenv smokezip smokezip$FDSOS
-setenv smokezipout smokezip$OUT
+smokezipdir=intel$FDSOS
+smokezip=smokezip$FDSOS
+smokezipout=smokezip$OUT
 
-setenv wind2fdsdir intel$FDSOS
-setenv wind2fds wind2fds$FDSOS
-setenv wind2fdsout wind2fds$OUT
+wind2fdsdir=intel$FDSOS
+wind2fds=wind2fds$FDSOS
+wind2fdsout=wind2fds$OUT
 
-setenv smokediffdir intel$FDSOS
-setenv smokediff smokediff$FDSOS
-setenv smokediffout smokediff$OUT
+smokediffdir=intel$FDSOS
+smokediff=smokediff$FDSOS
+smokediffout=smokediff$OUT
 
-setenv backgrounddir intel$FDSOS
-setenv background background
-setenv backgroundout background
+backgrounddir=intel$FDSOS
+background=background
+backgroundout=background
 
-setenv fdsdir intel$FDSOS
-setenv fds fds_intel$FDSOS
-setenv fdsout fds$OUT
+fdsdir=intel$FDSOS
+fds=fds_intel$FDSOS
+fdsout=fds$OUT
 
-setenv fdsmpidir mpi_intel$FDSOS
-setenv fdsmpi fds_mpi_intel$FDSOS
-setenv fdsmpiout fds$MAJOR\_mpi$FDSOS
-setenv fdsmpiout fds_mpi
-setenv fdsmpiout fds$OUT
+fdsmpidir=mpi_intel$FDSOS
+fdsmpi=fds_mpi_intel$FDSOS
+fdsmpiout=fds$MAJOR\_mpi$FDSOS
+fdsmpiout=fds_mpi
+fdsmpiout=fds$OUT
 
-setenv fds2asciidir intel$FDSOS
-setenv fds2ascii fds2ascii$FDSOS
-setenv fds2asciiout fds2ascii$OUT
+fds2asciidir=intel$FDSOS
+fds2ascii=fds2ascii$FDSOS
+fds2asciiout=fds2ascii$OUT
 
 
-set scp_fds_smvroot=$fds_smvroot
-set fds_smvroot=~/$fds_smvroot
-set fdsroot=$scp_fds_smvroot/FDS_Compilation
-set backgroundroot=$scp_fds_smvroot/SMV/Build/background
-set smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
-set smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
-set wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
-set uploaddir=$fds_smvroot/Utilities/uploads
-set bundledir=$bundlebase
-set bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
-set mandir=~/FIRE-LOCAL/reports/fds_manuals
-set smvbindir=$scp_fds_smvroot/SMV/Build/smokeview/$smokeviewdir
-set forbundle=$fds_smvroot/SMV/for_bundle
-set texturedir=$forbundle/textures
-set fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
-set wikify=$fds_smvroot/Utilities/Scripts/wikify.py
-set fullmanifest=$uploaddir/$bundledir/bin/$manifest
-set makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
+scp_fds_smvroot=$fds_smvroot
+fds_smvroot=~/$fds_smvroot
+fdsroot=$scp_fds_smvroot/FDS_Compilation
+backgroundroot=$scp_fds_smvroot/SMV/Build/background
+smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
+smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
+wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
+uploaddir=$fds_smvroot/Utilities/uploads
+bundledir=$bundlebase
+bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
+mandir=~/FIRE-LOCAL/reports/fds_manuals
+smvbindir=$scp_fds_smvroot/SMV/Build/smokeview/$smokeviewdir
+forbundle=$fds_smvroot/SMV/for_bundle
+texturedir=$forbundle/textures
+fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
+wikify=$fds_smvroot/Utilities/Scripts/wikify.py
+fullmanifest=$uploaddir/$bundledir/bin/$manifest
+makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
-set fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
-set smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
-set wui_cases=$fds_smvroot/Verification/scripts/WUI_Cases.sh
-set copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
-set copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
-set ExamplesDirectory=$fds_smvroot/Verification
+fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
+smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
+wui_cases=$fds_smvroot/Verification/scripts/WUI_Cases.sh
+copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
+copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
+ExamplesDirectory=$fds_smvroot/Verification
 
 cd $uploaddir
 rm -rf $bundlebase
@@ -115,15 +115,14 @@ scp -q $fdshost\:$wind2fdsroot/$wind2fdsdir/$wind2fds $bundledir/bin/$wind2fdsou
 echo copying $fdsmpi from $fdsdir on $fdshost
 scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
 
-if ($PLATFORM == "LINUX64") then
-   set ostype=LINUX
-endif
-if ($PLATFORM == "OSX64") then
-   set ostype=OSX
-endif
-if ($PLATFORM == "LINUX64" || $PLATFORM == "OSX64") then
-   set ossize=intel64
-endif
+if [ "$PLATFORM" == "LINUX64" ]; then
+   ostype=LINUX
+   ossize=intel64
+fi
+if [ "$PLATFORM" == "OSX64" ]; then
+   ostype=OSX
+   ossize=intel64
+fi
 
 cat <<EOF > $fullmanifest
 <html>
@@ -141,7 +140,7 @@ echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
 echo ------fds-------------------- >> $fullmanifest
-ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fdsmpi" >>& $fullmanifest
+ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fdsmpi" >> $fullmanifest
 
 echo  >> $fullmanifest
 echo ------fds2ascii-------------------- >> $fullmanifest
@@ -157,11 +156,11 @@ echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
-if ($?OSXBUNDLE) then
+if [ "$OSXBUNDLE" == "yes" ]; then
 echo copying OSX launcher script
 cp $bundle_setup/FDS-SMV_OSX_Launcher.app.zip $bundledir/bin/.
 cp $bundle_setup/README_OSX.html $bundledir/bin/.
-endif
+fi
 
 echo copying smokeview.ini from $forbundle
 cp $forbundle/smokeview.ini $bundledir/bin/.
@@ -186,10 +185,12 @@ cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
 cp $mandir/SMV_Verification_Guide.pdf $bundledir/Documentation/.
 
-if ($?INTELLIB) then
+if [ ! "$INTELLIB" == "" ]; then
+if [ -d $INTELLIB ]; then
 echo copying  run time libraries
 cp -r $INTELLIB $bundledir/bin/$DESTLIB
-endif
+fi
+fi
 
 echo
 echo Copying the FDS release notes from the repository into the installation directory
@@ -205,10 +206,10 @@ echo Obtaining example files from the repository
 cp $bundle_setup/readme_examples.html $bundledir/Examples/.
 
 cd $ExamplesDirectory
-setenv OUTDIR $uploaddir/$bundledir/Examples
-setenv QFDS $copyfdscase
-setenv RUNTFDS $copyfdscase
-setenv RUNCFAST $copycfastcase
+export OUTDIR=$uploaddir/$bundledir/Examples
+export QFDS=$copyfdscase
+export RUNTFDS=$copyfdscase
+export RUNCFAST=$copycfastcase
 echo Copying example files to bundle directory
 $fds_cases
 $smv_cases
@@ -242,3 +243,4 @@ gzip    ../$bundlebase.tar
 echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
+
