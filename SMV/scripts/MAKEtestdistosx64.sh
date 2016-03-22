@@ -71,6 +71,9 @@ mkdir -p $OSXDIR
 mkdir -p $OSXDIR/bin
 mkdir -p $OSXDIR/Documentation
 
+echo ""
+echo "---- copying files ----"
+echo ""
 CP $FORBUNDLE objects.svo $OSXDIR/bin objects.svo
 CP $FORBUNDLE smokeview.ini $OSXDIR/bin smokeview.ini
 CPDIR $FORBUNDLE/textures $OSXDIR/bin/textures

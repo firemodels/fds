@@ -74,6 +74,9 @@ mkdir -p $DIR/bin
 mkdir -p $DIR/Documentation
 cp ~/FDS-SMVwebpages/smv_readme.html $DIR/Documentation/release_notes.html
 
+echo ""
+echo "--- copying files ---"
+echo ""
 CPDIR $FORBUNDLE/textures $DIR/bin/textures
 CP $FORBUNDLE objects.svo $DIR/bin objects.svo
 CP $FORBUNDLE smokeview.ini $DIR/bin smokeview.ini
@@ -85,7 +88,7 @@ SCP $HOST $SMOKEZIPDIR smokezip_$platformsize $DIR/bin smokezip
 SCP $HOST $WINDDIR wind2fds_$platformsize $DIR/bin wind2fds
 
 echo ""
-echo "---- building installer ---"
+echo "--- building installer ---"
 echo ""
 rm -f $DIR.tar $DIR.tar.gz
 cd $DIR
