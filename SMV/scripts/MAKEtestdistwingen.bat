@@ -31,22 +31,17 @@ set sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
 cd %svn_root%\SMV\for_bundle
 
 echo.
-echo ***filling distribution directory
+echo --- filling distribution directory ---
 echo.
 IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
 CALL :COPY ..\Build\smokeview\intel_win_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
 
-echo.
-echo ***copying .po files
-echo.
-copy *.po %smvdir%\.
+echo copying .po files
+copy *.po %smvdir%\.>Nul
 
-echo.
-echo ***copying volrender.ssf
-echo.
-copy volrender.ssf %smvdir%\.
+CALL :COPY volrender.ssf %smvdir%\volrender.ssf
 
 CALL :COPY ..\..\SMV\Build\smokediff\intel_win_%platform%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
 
@@ -56,7 +51,6 @@ CALL :COPY  ..\..\SMV\Build\wind2fds\intel_win_%platform%\wind2fds_win_%platform
 
 CALL :COPY  ..\..\SMV\Build\background\intel_win_64\background.exe %smvdir%\background.exe
 
-echo bundleinfo=%bundleinfo%
 CALL :COPY  ..\..\SMV\Build\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
 
 CALL :COPY objects.svo %smvdir%\.
@@ -67,45 +61,43 @@ if "%platform%"=="64" CALL :COPY pthreadVC2_x64.dll %smvdir%\pthreadVC2_x64.dll
 
 CALL :COPY %sh2bat%\sh2bat.exe %smvdir%\sh2bat.exe
 
-CALL :COPY wrapup_smv_install_%platform%.bat "%smvdir%\wrapup_smv_install.bat
+CALL :COPY wrapup_smv_install_%platform%.bat %smvdir%\wrapup_smv_install.bat
 
 CALL :COPY smokeview.ini %smvdir%\smokeview.ini
 
-echo.
-echo ***copying textures
-echo.
+echo copying textures
 mkdir %smvdir%\textures
-copy textures\*.jpg %smvdir%\textures
-copy textures\*.png %smvdir%\textures
+copy textures\*.jpg %smvdir%\textures>Nul
+copy textures\*.png %smvdir%\textures>Nul
 
 echo.
-echo ***winzipping distribution directory
+echo --- compressing distribution directory ---
 echo.
 cd %smvdir%
-wzzip -a -r -p %zipbase%.zip *
+wzzip -a -r -p %zipbase%.zip *>Nul
 
 echo.
-echo ***creating self-extracting archive
+echo --- creating installer ---
 echo.
 wzipse32 %zipbase%.zip -runasadmin -d "c:\Program Files\firemodels\%smv_edition%" -c wrapup_smv_install.bat
 
 CALL :COPY %zipbase%.exe ..\.
 
 echo.
-echo ***Smokeview win%platform% test bundle built
+echo --- Smokeview win%platform% test installer built ---
 echo.
 
 cd %CURDIR%
 GOTO :EOF
 
 :COPY
-set label=%~n1.%~x1
-set infiletime=%~t1
+set label=%~n1%~x1
 set infile=%1
+set infiletime=%~t1
 set outfile=%2
 IF EXIST %infile% (
-   echo Copying %label%, %infiletime%
-   copy %infile% %outfile%
+   echo copying %label% %infiletime%
+   copy %infile% %outfile% >Nul
 ) ELSE (
    echo.
    echo *** warning: %infile% does not exist

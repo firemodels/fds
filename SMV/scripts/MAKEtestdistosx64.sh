@@ -71,6 +71,9 @@ mkdir -p $OSXDIR
 mkdir -p $OSXDIR/bin
 mkdir -p $OSXDIR/Documentation
 
+echo ""
+echo "---- copying files ----"
+echo ""
 CP $FORBUNDLE objects.svo $OSXDIR/bin objects.svo
 CP $FORBUNDLE smokeview.ini $OSXDIR/bin smokeview.ini
 CPDIR $FORBUNDLE/textures $OSXDIR/bin/textures
@@ -83,6 +86,9 @@ SCP $OSXHOST $SMDDIR smokediff_osx_64 $OSXDIR/bin smokediff
 SCP $OSXHOST $WINDDIR/wind2fds_osx_64 $OSXDIR/bin wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 cd $OSXDIR
+echo ""
+echo "---- building installer ----"
+echo ""
 tar cvf ../$OSXDIR.tar .
 cd ..
 gzip $OSXDIR.tar

@@ -64,6 +64,9 @@ UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
 
 cd $SVNROOT/SMV/uploads
 
+echo ""
+echo "--- copying files ---"
+echo ""
 rm -rf $LINUXDIR
 mkdir -p $LINUXDIR
 mkdir -p $LINUXDIR/bin
@@ -80,6 +83,9 @@ CP $SMDDIR smokediff_linux_64 $LINUXDIR/bin smokediff
 CP $WINDDIR wind2fds_linux_64 $LINUXDIR/bin wind2fds
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
 cd $LINUXDIR
+echo ""
+echo "--- building installer ---"
+echo ""
 tar cvf ../$LINUXDIR.tar .
 cd ..
 gzip $LINUXDIR.tar
