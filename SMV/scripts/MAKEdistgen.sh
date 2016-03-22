@@ -8,9 +8,9 @@ SVNROOT=$6
 
 platformsize=${platform}_$size
 BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_${platform}_64
-SMOKEVIEWDIR=$SVNROOT/SMV/Build/intel_$platformsize
+SMOKEVIEWDIR=$SVNROOT/SMV/Build/smokeview/intel_$platformsize
 SMOKEZIPDIR=$SVNROOT/SMV/Build/smokezip/intel_$platformsize
-SMOKEDIFFDIR=$SVNROOT/SMV/Buiild/smokediff/intel_$platformsize
+SMOKEDIFFDIR=$SVNROOT/SMV/Build/smokediff/intel_$platformsize
 WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
 FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 DIR=smv_${version}_$platform$size
