@@ -13,7 +13,7 @@ SCP ()
 
   scp $HOST\:$FROMDIR/$FROMFILE $TODIR/$TOFILE 2>/dev/null
   if [ -e $TODIR/$TOFILE ]; then
-    echo "file $FROMFILE copied from $HOST"
+    echo "$FROMFILE copied from host:$HOST"
   else
     echo "***error: the file $TOFILE failed to copy from $HOST"
   fi
@@ -31,7 +31,7 @@ CP ()
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
-    echo "file $FROMFILE copied"
+    echo "$FROMFILE copied"
   else
     echo "***error: the file $FROMFILE failed to copy"
   fi
@@ -49,7 +49,7 @@ CP2 ()
     cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
   fi
   if [ -e $TODIR/$TOFILE ]; then
-    echo "file $FROMFILE copied"
+    echo "$FROMFILE copied"
   else
     echo "***error: the file $FROMFILE failed to copy"
   fi
@@ -65,7 +65,7 @@ CPDIR ()
     cp -r $FROMDIR $TODIR
   fi
   if [ -e $TODIR ]; then
-    echo "directory $FROMDIR copied"
+    echo "$FROMDIR copied"
   else
     echo "***error: the directory $FROMDIR failed to copy"
   fi
