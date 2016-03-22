@@ -127,7 +127,8 @@ forbundle=$fds_smvroot/SMV/for_bundle
 texturedir=$forbundle/textures
 fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
 wikify=$fds_smvroot/Utilities/Scripts/wikify.py
-fullmanifest=$uploaddir/$bundledir/bin/$manifest
+fullmanifestdir=$uploaddir/$bundledir/bin
+fullmanifest=$fullmanifestdir/$manifest
 makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
@@ -146,7 +147,8 @@ mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
 
 echo ""
-echo "*** copying programs ***"
+echo "--- copying programs ---"
+echo ""
 # background
 
 SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
@@ -193,7 +195,8 @@ cat <<EOF > $fullmanifest
 <pre>
 EOF
 echo ""
-echo "*** Creating Manifest ***"
+echo "--- Creating Manifest ---"
+echo ""
 echo $PLATFORM FDS-Smokeview bundle created >> $fullmanifest
 date >> $fullmanifest
 echo  >> $fullmanifest
@@ -217,7 +220,8 @@ echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
 echo ""
-echo "*** copying configuration files ***"
+echo "--- copying configuration files ---"
+echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $bundle_setup FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
   CP $bundle_setup README_OSX.html $bundledir/bin README_OSX.html
@@ -232,7 +236,8 @@ CP $forbundle objects.svo $bundledir/bin objects.svo
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
 echo ""
-echo "*** Copying documentation ***"
+echo "--- copying documentation ---"
+echo ""
 CP $bundle_setup Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
@@ -247,13 +252,15 @@ if [ ! "$INTELLIB" == "" ]; then
 if [ -d $INTELLIB ]; then
 
 echo ""
-echo "*** copying run time libraries ***"
+echo "--- copying run time libraries ---"
+echo ""
 CPDIR $INTELLIB $bundledir/bin/$DESTLIB
 fi
 fi
 
 echo ""
-echo "*** copying release notes ***"
+echo "--- copying release notes ---"
+echo ""
 CP $bundle_setup FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
 CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
@@ -268,7 +275,8 @@ export RUNTFDS=$copyfdscase
 export RUNCFAST=$copycfastcase
 
 echo ""
-echo "*** copying example files ***"
+echo "--- copying example files ---"
+echo ""
 $fds_cases
 $smv_cases
 $wui_cases
@@ -287,12 +295,12 @@ cat <<EOF>>$fullmanifest
 </html>
 EOF
 
-cp $fullmanifest ~/$manifest
-cp $fullmanifest $uploaddir/$manifest
+CP $fullmanifestdir $manifest $uploaddir $manifest
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo ""
-echo "*** building archive ***"
+echo "--- building archive ---"
+echo ""
 rm -rf $uploaddir/$bundlebase.tar
 rm -rf $uploaddir/$bundlebase.tar.gz
 cd $uploaddir/$bundlebase
