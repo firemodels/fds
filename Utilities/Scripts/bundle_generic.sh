@@ -42,7 +42,7 @@ CP2 ()
   FROMDIR=$1
   FROMFILE=$2
   TODIR=$3
-  TOFILE=$FROMDIR
+  TOFILE=$FROMFILE
   if [ ! -e $FROMDIR/$FROMFILE ]; then
     echo "***error: the file $FROMFILE does not exist"
   else
@@ -145,6 +145,7 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
 
+echo "*** copying programs ***"
 # background
 
 SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
@@ -198,7 +199,7 @@ echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
 echo ------fds-------------------- >> $fullmanifest
-ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fdsmpi" >> $fullmanifest
+ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fdsmpi" >> $fullmanifest 2>&1 
 
 echo  >> $fullmanifest
 echo ------fds2ascii-------------------- >> $fullmanifest
@@ -214,6 +215,7 @@ echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
+echo "*** copying configuration files ***"
 if [ "$OSXBUNDLE" == "yes" ]; then
   CP $bundle_setup FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
   CP $bundle_setup README_OSX.html $bundledir/bin README_OSX.html
@@ -227,7 +229,7 @@ CP $forbundle objects.svo $bundledir/bin objects.svo
 
 SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
-echo Copying documentation
+echo "*** Copying documentation ***"
 CP $bundle_setup Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
@@ -240,7 +242,7 @@ CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 if [ ! "$INTELLIB" == "" ]; then
 if [ -d $INTELLIB ]; then
-echo copying  run time libraries
+echo "*** copying run time libraries ***"
 CPDIR $INTELLIB $bundledir/bin/$DESTLIB
 fi
 fi
@@ -257,7 +259,7 @@ export OUTDIR=$uploaddir/$bundledir/Examples
 export QFDS=$copyfdscase
 export RUNTFDS=$copyfdscase
 export RUNCFAST=$copycfastcase
-echo Copying example files to bundle directory
+echo "*** copying example files ***"
 $fds_cases
 $smv_cases
 $wui_cases
