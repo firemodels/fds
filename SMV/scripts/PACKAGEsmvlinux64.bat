@@ -28,7 +28,7 @@ set scriptdir=%linux_svn_root%/SMV/scripts
 set bundledir=%linux_svn_root%/SMV/uploads
 
 echo making 64 bit Linux distribution archive
-plink %linux_logon% %scriptdir%/MAKEdistgen.csh %version% linux 64 %linux_hostname% %fds_edition% %linux_svn_root%
+plink %linux_logon% %scriptdir%/MAKEdistgen.sh %version% linux 64 %linux_hostname% %fds_edition% %linux_svn_root%
 
 echo downloading Linux Smokeview files
 pscp %linux_logon%:%bundledir%/smv_%version%_linux64.sh ..\uploads\.
