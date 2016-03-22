@@ -83,13 +83,17 @@ SCP $HOST $SMOKEDIFFDIR smokediff_$platformsize $DIR/bin smokediff
 SCP $HOST $SMOKEVIEWDIR smokeview_$platformsize $DIR/bin smokeview
 SCP $HOST $SMOKEZIPDIR smokezip_$platformsize $DIR/bin smokezip
 SCP $HOST $WINDDIR wind2fds_$platformsize $DIR/bin wind2fds
+
+echo ""
+echo "---- building installer ---"
+echo ""
 rm -f $DIR.tar $DIR.tar.gz
 cd $DIR
 tar cvf ../$DIR.tar .
 cd ..
 gzip $DIR.tar
 
-set platform2=$platform
+platform2=$platform
 if [ "$platform" == "linux" ]; then
 platform2=Linux
 fi
