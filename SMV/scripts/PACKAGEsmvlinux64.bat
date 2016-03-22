@@ -33,7 +33,7 @@ echo.
 plink %linux_logon% %scriptdir%/MAKEdistgen.sh %version% linux 64 %linux_hostname% %fds_edition% %linux_svn_root%
 
 echo.
-echo --- downloading Linux Smokeview installer ---
+echo --- downloading installer ---
 echo.
 pscp %linux_logon%:%bundledir%/smv_%version%_linux64.sh ..\uploads\.
 

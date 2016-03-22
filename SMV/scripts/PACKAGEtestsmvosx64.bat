@@ -32,7 +32,7 @@ echo.
 plink %osx_logon% %scriptdir%/MAKEtestdistosx64.sh %smv_revision% %osx_hostname% %linux_svn_root%
 
 echo.
-echo --- downloading 64 bit OSX Smokeview installer ---
+echo --- downloading installer ---
 echo.
 pscp %osx_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\uploads\.
 

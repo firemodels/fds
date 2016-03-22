@@ -32,7 +32,7 @@ echo.
 plink %linux_logon% %scriptdir%/MAKEtestdistlinux64.sh %smv_revision% %linux_svn_root%
 
 echo.
-echo --- downloading 64 bit Linux Smokeview installer ---
+echo --- downloading installer ---
 echo.
 pscp %linux_logon%:%bundledir%/smv_test_%smv_revision%_linux64.sh ..\uploads\.
 
