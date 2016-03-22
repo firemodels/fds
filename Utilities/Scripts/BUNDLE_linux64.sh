@@ -1,21 +1,21 @@
-#!/bin/csh -f
+#!/bin/bash
 #
 # this script is called from windows which passes in the directory containing this script
 #
-setenv fds_smvroot $1
-setenv bundlebase $2
-setenv runhost $3
-setenv fdshost $3
-setenv smvhost $3
-setenv PLATFORM LINUX64
-setenv FDSEDITION $4
-setenv FDSVERSION $5
-setenv SMVVERSION $6
-setenv MAJOR $7
+export fds_smvroot=$1
+export bundlebase=$2
+export runhost=$3
+export fdshost=$3
+export smvhost=$3
+export PLATFORM=LINUX64
+export FDSEDITION=$4
+export FDSVERSION=$5
+export SMVVERSION=$6
+export MAJOR=$7
 
-setenv FDSOS _linux_64
-setenv INSTALLDIR FDS/$FDSEDITION
-setenv INTELLIB ~/FIRE-LOCAL/LIBS/LINUX/LIB64
-setenv DESTLIB LIB64
+export FDSOS=_linux_64
+export INSTALLDIR=FDS/$FDSEDITION
+export INTELLIB=~/FIRE-LOCAL/LIBS/LINUX/LIB64
+export DESTLIB=LIB64
 
-$fds_smvroot/Utilities/Scripts/bundle_generic.csh
+$fds_smvroot/Utilities/Scripts/bundle_generic.sh
