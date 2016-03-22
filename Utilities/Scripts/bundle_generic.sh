@@ -3,6 +3,75 @@
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
 
+SCP ()
+{
+  HOST=$1
+  FROMDIR=$2
+  FROMFILE=$3
+  TODIR=$4
+  TOFILE=$5
+
+  scp $HOST\:$FROMDIR/$FROMFILE $TODIR/$TOFILE 2>/dev/null
+  if [ -e $TODIR/$TOFILE ]; then
+    echo "$TOFILE copied from $HOST"
+  else
+    echo "***error: the file $TOFILE failed to copy from $HOST"
+  fi
+}
+
+CP ()
+{
+  FROMDIR=$1
+  FROMFILE=$2
+  TODIR=$3
+  TOFILE=$4
+  if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the file $FROMFILE does not exist"
+  else
+    cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
+  fi
+  if [ -e $TODIR/$TOFILE ]; then
+    echo "$TOFILE copied"
+  else
+    echo "***error: the file $TOFILE failed to copy"
+  fi
+}
+
+CP2 ()
+{
+  FROMDIR=$1
+  FROMFILE=$2
+  TODIR=$3
+  TOFILE=$FROMDIR
+  if [ ! -e $FROMDIR/$FROMFILE ]; then
+    echo "***error: the file $FROMFILE does not exist"
+  else
+    cp $FROMDIR/$FROMFILE $TODIR/$TOFILE
+  fi
+  if [ -e $TODIR/$TOFILE ]; then
+    echo "$TOFILE copied"
+  else
+    echo "***error: the file $TOFILE failed to copy"
+  fi
+}
+
+CPDIR ()
+{
+  FROMDIR=$1
+  TODIR=$2
+  if [ ! -e $FROMDIR ]; then
+    echo "***error: the directory $FROMDIR does not exist"
+  else
+    cp -r $FROMDIR $TODIR
+  fi
+  if [ -e $TODIR ]; then
+    echo "$TODIR copied"
+  else
+    echo "***error: the directory $TODIR failed to copy"
+  fi
+}
+
+
 manifest=manifest$FDSOS.html
 OUT=$MAJOR$FDSOS
 OUT=
@@ -76,44 +145,33 @@ mkdir $bundledir/Documentation
 mkdir $bundledir/Examples
 mkdir $bundledir/bin/textures
 
-echo Copying program files
-
 # background
 
-echo copying $background from $backgrounddir on $fdshost
-scp -q $fdshost\:$backgroundroot/$backgrounddir/$background $bundledir/bin/$backgroundout
+SCP $fdshost $backgroundroot/$backgrounddir $background $bundledir/bin $backgroundout
 
 # smokeview
 
-echo copying $smokeview from $smvbindir on $smvhost
-scp -q $smvhost\:$smvbindir/$smokeview $bundledir/bin/$smokeviewout
+SCP $smvhost $smvbindir $smokeview $bundledir/bin $smokeviewout
 
-echo copying textures
-cp $texturedir/*.png $bundledir/bin/textures/.
-cp $texturedir/*.jpg $bundledir/bin/textures/.
+# textures
+
+CPDIR $texturedir $bundledir/bin/textures
 
 # smokediff
 
-echo copying $smokediff from $smokediffdir on $fdshost
-scp -q $fdshost\:$smokediffroot/$smokediffdir/$smokediff $bundledir/bin/$smokediffout
+SCP $fdshost $smokediffroot/$smokediffdir $smokediff $bundledir/bin $smokediffout
 
 # smokezip
 
-echo copying $smokezip from $smokezipdir on $fdshost
-scp -q $fdshost\:$smokeziproot/$smokezipdir/$smokezip $bundledir/bin/$smokezipout
+SCP $fdshost $smokeziproot/$smokezipdir $smokezip $bundledir/bin $smokezipout
 
 # wind2fds
 
-echo copying $wind2fds from $wind2fdsdir on $fdshost
-scp -q $fdshost\:$wind2fdsroot/$wind2fdsdir/$wind2fds $bundledir/bin/$wind2fdsout
+SCP $fdshost $wind2fdsroot/$wind2fdsdir $wind2fds $bundledir/bin $wind2fdsout
 
 # FDS 
 
-# echo copying $fds from $fdsdir on $fdshost
-# scp -q $fdshost\:$fdsroot/$fdsdir/$fds $bundledir/bin/$fdsout
-
-echo copying $fdsmpi from $fdsdir on $fdshost
-scp -q $fdshost\:$fdsroot/$fdsmpidir/$fdsmpi $bundledir/bin/$fdsmpiout
+SCP $fdshost $fdsroot/$fdsmpidir $fdsmpi $bundledir/bin $fdsmpiout
 
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
@@ -157,53 +215,42 @@ echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
 
 if [ "$OSXBUNDLE" == "yes" ]; then
-echo copying OSX launcher script
-cp $bundle_setup/FDS-SMV_OSX_Launcher.app.zip $bundledir/bin/.
-cp $bundle_setup/README_OSX.html $bundledir/bin/.
+  CP $bundle_setup FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
+  CP $bundle_setup README_OSX.html $bundledir/bin README_OSX.html
 fi
 
-echo copying smokeview.ini from $forbundle
-cp $forbundle/smokeview.ini $bundledir/bin/.
+CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 
-echo copying volrender.ssf from $forbundle
-cp $forbundle/volrender.ssf $bundledir/bin/.
+CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
-echo copying objects.svo from $forbundle
-cp $forbundle/objects.svo $bundledir/bin/objects.svo
+CP $forbundle objects.svo $bundledir/bin objects.svo
 
-echo copying $fds2ascii from $fds2asciiroot on $fdshost
-scp -q $fdshost\:$fds2asciiroot/$fds2asciidir/$fds2ascii $bundledir/bin/$fds2asciiout
+SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
 echo Copying documentation
-cp $bundle_setup/Overview_linux_osx.html $bundledir/Documentation/Overview.html
-cp $mandir/FDS_Configuration_Management_Plan.pdf $bundledir/Documentation/.
-cp $mandir/FDS_Technical_Reference_Guide.pdf $bundledir/Documentation/.
-cp $mandir/FDS_User_Guide.pdf $bundledir/Documentation/.
-cp $mandir/FDS_Validation_Guide.pdf $bundledir/Documentation/.
-cp $mandir/FDS_Verification_Guide.pdf $bundledir/Documentation/.
-cp $mandir/SMV_User_Guide.pdf $bundledir/Documentation/.
-cp $mandir/SMV_Technical_Reference_Guide.pdf $bundledir/Documentation/.
-cp $mandir/SMV_Verification_Guide.pdf $bundledir/Documentation/.
+CP $bundle_setup Overview_linux_osx.html $bundledir/Documentation Overview.html
+CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
+CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
+CP2 $mandir FDS_Validation_Guide.pdf $bundledir/Documentation
+CP2 $mandir FDS_Verification_Guide.pdf $bundledir/Documentation
+CP2 $mandir SMV_User_Guide.pdf $bundledir/Documentation
+CP2 $mandir SMV_Technical_Reference_Guide.pdf $bundledir/Documentation
+CP2 $mandir SMV_Verification_Guide.pdf $bundledir/Documentation
 
 if [ ! "$INTELLIB" == "" ]; then
 if [ -d $INTELLIB ]; then
 echo copying  run time libraries
-cp -r $INTELLIB $bundledir/bin/$DESTLIB
+CPDIR $INTELLIB $bundledir/bin/$DESTLIB
 fi
 fi
 
-echo
-echo Copying the FDS release notes from the repository into the installation directory
+CP $bundle_setup FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
-cp $bundle_setup/FDS_Release_Notes.htm $bundledir/Documentation/FDS_Release_Notes.html
-
-echo
-echo Copying Smokeview release notes from  the repository
-cp ~/FDS-SMVwebpages/smv_readme.html $bundledir/Documentation/SMV_Release_Notes.html
+CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-echo Obtaining example files from the repository
-cp $bundle_setup/readme_examples.html $bundledir/Examples/.
+CP2 $bundle_setup readme_examples.html $bundledir/Examples
 
 cd $ExamplesDirectory
 export OUTDIR=$uploaddir/$bundledir/Examples
