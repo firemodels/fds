@@ -35,10 +35,11 @@ cat << EOF
           ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
-MINTIME=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' 'BEGIN {min=1000000}{if ($2<min)min=$2}END{print min}'`
-MAXTIME=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' 'BEGIN {max=0}      {if ($2>max)max=$2}END{print max}'`
+STDDEV=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; for (i in x){ss += (x[i]-a)^2} sd = sqrt(ss/n); print sd}'`
+STDDEV=`printf "%0.0f" $STDDEV`
+MEAN=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; print a}'`
+MEAN=`printf "%0.0f" $MEAN`
 ./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
-SPREAD=`echo "scale=2; 100.0*($MAXTIME - $MINTIME)/$MINTIME+0.05" | bc`
 
 cat << EOF
         ]);
@@ -83,16 +84,15 @@ ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | h
 cd $CURDIR
 
 cat << EOF
-<h3>Timings</h3>
+<h3>Timing History</h3>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
-Min: $MINTIME (s)<br>
-Max: $MAXTIME (s)<br>
-Spread: $SPREAD %<br>
+Mean: $MEAN s<br>
+Standard deviation: $STDDEV s<br>
 <h3>Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
-<h3>History</h3>
+<h3>Status History</h3>
 
 EOF
 fi
