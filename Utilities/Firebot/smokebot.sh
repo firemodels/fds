@@ -450,13 +450,13 @@ compile_cfast()
     # Build CFAST
     echo "Building"
     echo "   cfast release"
-    cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+    cd $cfastrepo/Build/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $OUTPUT_DIR/stage1a 2>&1
 
    # Check for errors in CFAST compilation
-   cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+   cd $cfastrepo/Build/CFAST/${COMPILER}_${platform}${size}
    if [ -e "cfast7_${platform}${size}" ]
    then
       stage0_success=true
