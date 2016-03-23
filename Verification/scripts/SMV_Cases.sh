@@ -33,3 +33,4 @@ $QFDS -d Visualization transparency.fds
 $QFDS -d Visualization vcirctest.fds
 $QFDS -d Visualization vcirctest2.fds
 $QFDS -d Visualization version.fds
+$QFDS -d Visualization version2.fds
