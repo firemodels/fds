@@ -3,6 +3,7 @@ historydir=~/.firebot/history
 BODY=
 TITLE=Firebot
 SOPT=
+NHIST=-55
 
 while getopts 'bs' OPTION
 do
@@ -35,11 +36,11 @@ cat << EOF
           ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
 EOF
 
-STDDEV=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; for (i in x){ss += (x[i]-a)^2} sd = sqrt(ss/n); print sd}'`
-STDDEV=`printf "%0.0f" $STDDEV`
-MEAN=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; print a}'`
+STDDEV=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; for (i in x){ss += (x[i]-a)^2} sd = sqrt(ss/n); print sd}'`
+STDDEV=`printf "%0.1f" $STDDEV`
+MEAN=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; print a}'`
 MEAN=`printf "%0.0f" $MEAN`
-./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail -30 | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
+./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
 
 cat << EOF
         ]);
@@ -99,7 +100,7 @@ fi
 
 CURDIR=`pwd`
 cd $historydir
-ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | head -30 | \
+ls -tl *-????????.txt | awk '{system("head "  $9)}' | sort -t ';' -r -n -k 7 | head $NHIST | \
              awk -F ';' '{cputime="Benchmark time: "$9" s";\
                           if($9=="")cputime="";\
                           font="<font color=\"#00FF00\">";\
