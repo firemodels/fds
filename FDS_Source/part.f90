@@ -2146,7 +2146,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
             ! Gas conditions
 
-            TMP_G  = TMP_INTERIM(II,JJ,KK)
+            TMP_G  = MAX(TMPMIN,TMP_INTERIM(II,JJ,KK))
             RHO_G  = RHO_INTERIM(II,JJ,KK)
             D_AIR = D_Z(NINT(TMP_G),Z_INDEX)
             CALL GET_VISCOSITY(ZZ_GET,MU_AIR,TMP_G)
