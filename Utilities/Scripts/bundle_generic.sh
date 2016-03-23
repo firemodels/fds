@@ -120,7 +120,7 @@ smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
 wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
 uploaddir=$fds_smvroot/Utilities/uploads
 bundledir=$bundlebase
-bundle_setup=$fds_smvroot/Utilities/Scripts/bundle_setup
+for_bundle=$fds_smvroot/Utilities/Scripts/for_bundle
 mandir=~/FIRE-LOCAL/reports/fds_manuals
 smvbindir=$scp_fds_smvroot/SMV/Build/smokeview/$smokeviewdir
 forbundle=$fds_smvroot/SMV/for_bundle
@@ -223,8 +223,8 @@ echo ""
 echo "--- copying configuration files ---"
 echo ""
 if [ "$OSXBUNDLE" == "yes" ]; then
-  CP $bundle_setup FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
-  CP $bundle_setup README_OSX.html $bundledir/bin README_OSX.html
+  CP $for_bundle FDS-SMV_OSX_Launcher.app.zip $bundledir/bin FDS-SMV_OSX_Launcher.app.zip
+  CP $for_bundle README_OSX.html $bundledir/bin README_OSX.html
 fi
 
 CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
@@ -238,7 +238,7 @@ SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiou
 echo ""
 echo "--- copying documentation ---"
 echo ""
-CP $bundle_setup Overview_linux_osx.html $bundledir/Documentation Overview.html
+CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
 CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
@@ -261,12 +261,12 @@ fi
 echo ""
 echo "--- copying release notes ---"
 echo ""
-CP $bundle_setup FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
+CP $for_bundle FDS_Release_Notes.htm $bundledir/Documentation FDS_Release_Notes.html
 
 CP ~/FDS-SMVwebpages smv_readme.html $bundledir/Documentation SMV_Release_Notes.html
 
 
-CP2 $bundle_setup readme_examples.html $bundledir/Examples
+CP2 $for_bundle readme_examples.html $bundledir/Examples
 
 cd $ExamplesDirectory
 export OUTDIR=$uploaddir/$bundledir/Examples
