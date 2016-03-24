@@ -34,7 +34,7 @@ USE MEMORY_FUNCTIONS, ONLY: COMPUTE_ONE_D_STORAGE_DIMENSIONS,COMPUTE_PARTICLE_ST
 USE GEOMETRY_FUNCTIONS, ONLY: ASSIGN_PRESSURE_ZONE
 USE RADCONS, ONLY: UIIDIM
 USE CONTROL_VARIABLES
-INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IIG,JJG,KKG
+INTEGER :: N,I,J,K,IW,IC,SURF_INDEX,IOR,IERR,IIG,JJG,KKG,N_OVERLAP
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: MU_N,ZZ_GET(1:N_TRACKED_SPECIES),CS,DELTA
@@ -427,8 +427,20 @@ ZONE_LOOP: DO N=1,N_ZONE
             IF (M%XC(I) > PZ%X1 .AND. M%XC(I) < PZ%X2 .AND. &
                 M%YC(J) > PZ%Y1 .AND. M%YC(J) < PZ%Y2 .AND. &
                 M%ZC(K) > PZ%Z1 .AND. M%ZC(K) < PZ%Z2) THEN
+                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K)) .AND. M%PRESSURE_ZONE(I,J,K)>0) THEN
+                   WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',M%PRESSURE_ZONE(I,J,K)
+                   STOP_STATUS = SETUP_STOP
+                   RETURN
+                ENDIF
                 M%PRESSURE_ZONE(I,J,K) = N
-                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N)
+                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) THEN
+                   CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N,N_OVERLAP)
+                   IF (N_OVERLAP>0) THEN
+                      WRITE(LU_ERR,'(A,I2,A,I2)') 'ERROR: ZONE ',N,' overlaps ZONE ',N_OVERLAP
+                      STOP_STATUS = SETUP_STOP
+                      RETURN
+                   ENDIF
+                ENDIF
             ENDIF
          ENDDO
       ENDDO
@@ -447,7 +459,7 @@ EVACUATION_ZONE_LOOP: DO N=1,N_ZONE
                 M%YC(J) - PZ%Y1 >=0._EB .AND. M%YC(J) < PZ%Y2 .AND. &
                 M%ZC(K) - PZ%Z1 >=0._EB .AND. M%ZC(K) < PZ%Z2) THEN
                 M%PRESSURE_ZONE(I,J,K) = N
-                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N)
+                IF (.NOT.M%SOLID(M%CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,M%XC(I),M%YC(J),M%ZC(K),N,N_OVERLAP)
             ENDIF
          ENDDO
       ENDDO
