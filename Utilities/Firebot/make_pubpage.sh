@@ -3,8 +3,7 @@ historydir=~/.firebot/history
 BODY=
 TITLE=Firebot
 SOPT=
-NHIST=-55
-NHIST2=-5
+NHIST=-50
 
 while getopts 'bs' OPTION
 do
@@ -45,13 +44,6 @@ STDDEV_PERCEN=`echo "scale=5; $STDDEV/$MEAN*100 " | bc`
 STDDEV=`printf "%0.1f" $STDDEV`
 STDDEV_PERCEN=`printf "%0.1f" $STDDEV_PERCEN`
 ./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST | awk -F ',' '{ printf("[%s,%s],\n",$1,$2) }'
-
-STDDEV2=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST2 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; for (i in x){ss += (x[i]-a)^2} sd = sqrt(ss/n); print sd}'`
-MEAN2=`./make_timelist.sh $SOPT | sort -n -k 1 -t , | tail $NHIST2 | awk -F ',' '{x[NR]=$2; s+=$2; n++} END{a=s/n; print a}'`
-MEAN2=`printf "%0.0f" $MEAN2`
-STDDEV_PERCEN2=`echo "scale=5; $STDDEV2/$MEAN2*100 " | bc`
-STDDEV2=`printf "%0.1f" $STDDEV2`
-STDDEV_PERCEN2=`printf "%0.1f" $STDDEV_PERCEN2`
 
 cat << EOF
         ]);
@@ -99,12 +91,8 @@ cat << EOF
 <h3>Timing History</h3>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
-<p><b>All</b><br>
 Mean: $MEAN s <br>
 Standard deviation: $STDDEV s ($STDDEV_PERCEN %) <br>
-<p><b>Last 5</b><br>
-Mean: $MEAN2 s <br>
-Standard deviation: $STDDEV2 s ($STDDEV_PERCEN2 %) <br>
 <h3>Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
