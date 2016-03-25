@@ -567,6 +567,7 @@ void draw_geom(int flag, int timestate){
         pointi = geomlisti->points+j;
         if(pointi->geomtype == GEOM_GEOM&&show_geom_points == 0)continue;
         if(pointi->geomtype == GEOM_ISO&&show_iso_points == 0)continue;
+        if(pointi->ntriangles==0)continue;
         color = pointi->triangles[0]->surf->color;
         if(last_color!=color){
           glColor3fv(color);
