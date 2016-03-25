@@ -1,5 +1,5 @@
-#!/bin/csh -f
-set SVNROOT=~/FDS-SMV
+#!/bin/bash
+SVNROOT=~/$1
 
 cd $SVNROOT/SMV/Build/wind2fds/intel_osx_64
 make -f ../Makefile clean >& /dev/null
