@@ -24,7 +24,7 @@ set scriptdir=%linux_svn_root%/SMV/scripts
 echo Building Linux versions of smokediff
 
 
-plink %linux_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEsmdlinux.csh
+plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEsmdlinux.sh %linux_svn_root%
 
 echo.
 echo compilation complete

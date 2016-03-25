@@ -24,7 +24,7 @@ cd %svn_root%\smv\scripts
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %linux_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEwindlinux.csh 
+plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEwindlinux.sh  %linux_svn_root%
 
 echo.
 echo compilation complete

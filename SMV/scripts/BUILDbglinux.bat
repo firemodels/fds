@@ -28,7 +28,7 @@ set version=%smv_version%_%smv_revision%
 
 set scriptdir=%linux_svn_root%/SMV/scripts
 
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEbglinux.csh %linux_svn_root%
+plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEbglinux.sh %linux_svn_root%
 
 echo.
 echo compilation complete
