@@ -83,13 +83,12 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
-if [ "$BACKGROUND_DELAY" == "" ]; then
-   BACKGROUND_DELAY=10
-fi
+BACKGROUND_DELAY=10
+BACKGROUND_LOAD=75
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:e:f:j:l:m:Nn:o:p:q:rstw:v' OPTION
+while getopts 'AbB:cd:D:e:f:j:l:L:m:Nn:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -100,6 +99,12 @@ case $OPTION  in
    ;;
   B)
    BACKGROUND="$OPTARG"
+   ;;
+  D)
+   BACKGROUND_DELAY="$OPTARG"
+   ;;
+  L)
+   BACKGROUND_LOAD="$OPTARG"
    ;;
   c)
    strip_extension=1
@@ -335,7 +340,7 @@ if [ "$queue" == "none" ]; then
     fi
   fi
   MPIRUN=
-  QSUB="$BACKGROUND -u 75 -d $BACKGROUND_DELAY "
+  QSUB="$BACKGROUND -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
 fi
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
