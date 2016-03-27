@@ -34,6 +34,8 @@ echo "-f - force firebot run"
 echo "-F - skip figure generation and build document stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
+echo "-L - firebot lite,  run only stages that build a debug fds and run cases with it"
+echo "                    (no release fds, no release cases, no matlab, etc)"
 if [ "$EMAIL" != "" ]; then
 echo "-m email_address [default: $EMAIL]"
 else
@@ -62,7 +64,8 @@ SSH=
 FORCE=
 SKIPMATLAB=
 SKIPFIGURES=
-while getopts 'b:cFfhim:q:nr:sS:uUv' OPTION
+FIREBOT_LITE=
+while getopts 'b:cFfhiLm:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -82,6 +85,9 @@ case $OPTION  in
    ;;
   i)
    USEINSTALL="-i"
+   ;;
+  L)
+   FIREBOT_LITE=-L
    ;;
   m)
    EMAIL="$OPTARG"
@@ -147,8 +153,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $FIREBOT_LITE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
+  echo ./$botscript $FIREBOT_LITE $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 fi
 rm $running
