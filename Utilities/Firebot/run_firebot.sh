@@ -30,11 +30,11 @@ echo ""
 echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
-echo "-D - exit after running debug cases"
 echo "-f - force firebot run"
 echo "-F - skip figure generation and build document stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
+echo "-L - firebot lite,  exit after running debug cases"
 if [ "$EMAIL" != "" ]; then
 echo "-m email_address [default: $EMAIL]"
 else
@@ -64,7 +64,7 @@ FORCE=
 SKIPMATLAB=
 SKIPFIGURES=
 FIREBOT_LITE=
-while getopts 'b:cDFfhim:q:nr:sS:uUv' OPTION
+while getopts 'b:cFfhiLm:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -72,9 +72,6 @@ case $OPTION  in
    ;;
   c)
    CLEANREPO=1
-   ;;
-  D)
-   FIREBOT_LITE=-D
    ;;
   f)
    FORCE=1
@@ -87,6 +84,9 @@ case $OPTION  in
    ;;
   i)
    USEINSTALL="-i"
+   ;;
+  L)
+   FIREBOT_LITE=-L
    ;;
   m)
    EMAIL="$OPTARG"
