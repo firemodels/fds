@@ -1188,8 +1188,10 @@ archive_compiler_version
 ### Stage 2a ###
 echo Building
 echo "   FDS"
-inspect_fds_db
-check_inspect_fds_db
+if [ "$FIREBOT_LITE" == "" ]; then
+   inspect_fds_db
+   check_inspect_fds_db
+fi
 
 ### Stage 2b ###
 compile_fds_mpi_db
