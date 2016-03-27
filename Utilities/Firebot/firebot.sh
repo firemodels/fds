@@ -60,10 +60,10 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo "-c - clean repo"
-echo "-D - exit after running debug cases"
 echo "-F - skip figures and document building stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
+echo "-L - firebot lite, exit after running debug cases"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
@@ -81,7 +81,7 @@ SSH=
 SKIPMATLAB=
 SKIPFIGURES=
 FIREBOT_LITE=
-while getopts 'b:cDFhim:q:r:sS:uUv:' OPTION
+while getopts 'b:cFhiLm:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -89,9 +89,6 @@ case $OPTION in
    ;;
   c)
    CLEANREPO=1
-   ;;
-  D)
-   FIREBOT_LITE=1
    ;;
   F)
    SKIPFIGURES=1
@@ -101,6 +98,9 @@ case $OPTION in
    ;;
   i)
    USEINSTALL="-r"
+   ;;
+  L)
+   FIREBOT_LITE=1
    ;;
   m)
    mailToFDS="$OPTARG"
@@ -1284,5 +1284,7 @@ fi
 ### Wrap up and report results ###
 set_files_world_readable
 save_build_status
-archive_timing_stats
+if [ "$FIREBOT_LITE" == "" ]; then
+  archive_timing_stats
+fi
 email_build_status 'Firebot'
