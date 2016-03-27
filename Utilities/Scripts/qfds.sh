@@ -83,6 +83,9 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
+if [ "$BACKGROUND_DELAY" == "" ]; then
+   BACKGROUND_DELAY=10
+fi
 
 # read in parameters from command line
 
@@ -332,7 +335,7 @@ if [ "$queue" == "none" ]; then
     fi
   fi
   MPIRUN=
-  QSUB="$BACKGROUND -u 75 -d 10 "
+  QSUB="$BACKGROUND -u 75 -d $BACKGROUND_DELAY "
 fi
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
