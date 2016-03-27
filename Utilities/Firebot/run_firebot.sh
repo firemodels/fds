@@ -34,7 +34,8 @@ echo "-f - force firebot run"
 echo "-F - skip figure generation and build document stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
-echo "-L - firebot lite,  exit after running debug cases"
+echo "-L - firebot lite,  run only stages that build a debug fds and run cases with it"
+echo "                    (no release fds, no release cases, no matlab, etc)"
 if [ "$EMAIL" != "" ]; then
 echo "-m email_address [default: $EMAIL]"
 else
