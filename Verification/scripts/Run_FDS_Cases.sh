@@ -12,6 +12,8 @@ walltime=
 RUNOPTION=
 CURDIR=`pwd`
 BACKGROUND=
+BACKGROUND_DELAY=2
+BACKGROUND_LOAD=75
 JOBPREFIX=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -47,17 +49,26 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'c:dhj:m:o:q:r:sw:' OPTION
+while getopts 'B:c:dD:hj:L:m:o:q:r:sw:' OPTION
 do
 case $OPTION in
   d)
    DEBUG=_db
+   ;;
+  B)
+   BACKGROUND="$OPTARG"
+   ;;
+  D)
+   BACKGROUND_DELAY="$OPTARG"
    ;;
   h)
    usage;
    ;;
   j)
    JOBPREFIX="-j $OPTARG"
+   ;;
+  L)
+   BACKGROUND_LOAD="$OPTARG"
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
@@ -105,7 +116,12 @@ else
 fi
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
-      BACKGROUND="-B background"
+      if [ "$BACKGROUND" == "" ]; then
+         BACKGROUND=background
+      fi
+      BACKGROUND="-B $BACKGROUND"
+      export BACKGROUND_DELAY
+      export BACKGROUND_LOAD
       JOBPREFIX=
    fi
    QUEUE="-q $QUEUE"
