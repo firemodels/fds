@@ -12,6 +12,8 @@ walltime=
 RUNOPTION=
 CURDIR=`pwd`
 BACKGROUND=
+BACKGROUND_DELAY=
+BACKGROUND_LOAD=
 JOBPREFIX=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -106,6 +108,8 @@ fi
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
       BACKGROUND="-B background"
+      BACKGROUND_DELAY="-D 1"
+      BACKGROUND_LOAD="-L 75"
       JOBPREFIX=
    fi
    QUEUE="-q $QUEUE"
@@ -113,7 +117,7 @@ fi
 
 export BASEDIR=`pwd`
 
-export QFDS="$QFDSSH $BACKGROUND $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
+export QFDS="$QFDSSH $BACKGROUND $BACKGROUND_DELAY $BACKGROUND_LOAD $walltime -n $nthreads $JOBPREFIX -e $FDSMPI $QUEUE" 
 cd ..
 ./FDS_Cases.sh
 cd $CURDIR
