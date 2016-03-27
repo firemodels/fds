@@ -30,6 +30,7 @@ echo ""
 echo "Options:"
 echo "-b - branch_name - run firebot using branch_name [default: $BRANCH]"
 echo "-c - clean repo"
+echo "-D - exit after running debug cases"
 echo "-f - force firebot run"
 echo "-F - skip figure generation and build document stages"
 echo "-h - display this message"
@@ -62,7 +63,8 @@ SSH=
 FORCE=
 SKIPMATLAB=
 SKIPFIGURES=
-while getopts 'b:cFfhim:q:nr:sS:uUv' OPTION
+FIREBOT_LITE=
+while getopts 'b:cDFfhim:q:nr:sS:uUv' OPTION
 do
 case $OPTION  in
   b)
@@ -70,6 +72,9 @@ case $OPTION  in
    ;;
   c)
    CLEANREPO=1
+   ;;
+  D)
+   FIREBOT_LITE=-D
    ;;
   f)
    FORCE=1
@@ -147,8 +152,8 @@ BRANCH="-b $BRANCH"
 QUEUE="-q $QUEUE"
 reponame="-r $reponame"
 if [ "$RUNFIREBOT" == "1" ] ; then
-  ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
+  ./$botscript $UPDATE $FIREBOT_LITE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 else
-  echo ./$botscript $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
+  echo ./$botscript $FIREBOT_LITE $UPDATE $USEINSTALL $UPLOADGUIDES $SSH $CLEAN $BRANCH $QUEUE $SKIPMATLAB $SKIPFIGURES $reponame $EMAIL "$@"
 fi
 rm $running
