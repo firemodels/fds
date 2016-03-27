@@ -60,6 +60,7 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo "-c - clean repo"
+echo "-D - exit after running debug cases"
 echo "-F - skip figures and document building stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
@@ -79,7 +80,8 @@ GIT_REVISION=
 SSH=
 SKIPMATLAB=
 SKIPFIGURES=
-while getopts 'b:cFhim:q:r:sS:uUv:' OPTION
+FIREBOT_LITE=
+while getopts 'b:cDFhim:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -87,6 +89,9 @@ case $OPTION in
    ;;
   c)
    CLEANREPO=1
+   ;;
+  D)
+   FIREBOT_LITE=1
    ;;
   F)
    SKIPFIGURES=1
@@ -1190,21 +1195,23 @@ check_inspect_fds_db
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+if [ "$FIREBOT_LITE" == "" ]; then
 ### Stage 2c ###
-compile_fds_mpi
-check_compile_fds_mpi
+  compile_fds_mpi
+  check_compile_fds_mpi
 
 ### Stage 3a ###
-compile_smv_utilities
-check_smv_utilities
+  compile_smv_utilities
+  check_smv_utilities
 
 ### Stage 3b ###
-compile_smv_db
-check_compile_smv_db
+  compile_smv_db
+  check_compile_smv_db
 
 ### Stage 3c ###
-compile_smv
-check_compile_smv
+  compile_smv
+  check_compile_smv
+fi
 
 ### Stage 4 ###
 # Depends on successful FDS debug compile
@@ -1213,6 +1220,7 @@ if [[ $stage2b_success ]] ; then
    check_cases_debug $fdsrepo/Verification 'verification'
 fi
 
+if [ "$FIREBOT_LITE" == "" ]; then
 # clean debug stage
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
@@ -1268,6 +1276,7 @@ if [ "$SKIPMATLAB" == "" ] ; then
       make_fds_validation_guide
       make_fds_Config_management_plan
    fi
+fi
 fi
 
 ### Wrap up and report results ###
