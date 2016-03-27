@@ -1124,6 +1124,11 @@ email_build_status()
    stop_time=`date`
    echo "" > $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
+if [ "$FIREBOT_LITE" != "" ]; then
+   echo "" >> $TIME_LOG
+   echo "Note: only VV cases with debug FDS were run" >> $TIME_LOG
+   echo "" >> $TIME_LOG
+fi
    echo "Host OS: Linux " >> $TIME_LOG
    echo "Host Name: $hostname " >> $TIME_LOG
    echo "Start Time: $start_time " >> $TIME_LOG
