@@ -25,6 +25,7 @@ then
   echo " -B     - location of background program"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
+  echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
@@ -60,6 +61,7 @@ OUT2ERROR=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
 fi
+EMAIL=
 
 # --------------------------- parse options --------------------
 
@@ -83,12 +85,20 @@ REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
 nosocket=
-BACKGROUND_DELAY=10
-BACKGROUND_LOAD=75
+
+if [ "$BACKGROUND" == "" ]; then
+   BACKGROUND=background
+fi
+if [ "$BACKGROUND_DELAY" == "" ]; then
+   BACKGROUND_DELAY=10
+fi
+if [ "$BACKGROUND_LOAD" == "" ]; then
+   BACKGROUND_LOAD=75
+fi
 
 # read in parameters from command line
 
-while getopts 'AbB:cd:D:e:f:j:l:L:m:Nn:o:p:q:rstw:v' OPTION
+while getopts 'AbB:cd:e:E:f:j:l:m:Nn:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
   A)
@@ -100,12 +110,6 @@ case $OPTION  in
   B)
    BACKGROUND="$OPTARG"
    ;;
-  D)
-   BACKGROUND_DELAY="$OPTARG"
-   ;;
-  L)
-   BACKGROUND_LOAD="$OPTARG"
-   ;;
   c)
    strip_extension=1
    ;;
@@ -115,6 +119,9 @@ case $OPTION  in
   e)
    exe="$OPTARG"
    use_repository=0
+   ;;
+  E)
+   EMAIL="$OPTARG"
    ;;
   f)
    FDSROOT="$OPTARG"
@@ -325,11 +332,11 @@ if [ "$queue" == "terminal" ] ; then
   MPIRUN=
 fi
 
+# use the queue none and the program background on systems 
+# without a queing system
+
 if [ "$queue" == "none" ]; then
   OUT2ERROR=" 2> $outerr"
-  if [ "$BACKGROUND" == "" ]; then
-    BACKGROUND=background
-  fi
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$showinput" == "0" ]; then
     if [ "$notfound" == "1" ];  then
@@ -342,6 +349,8 @@ if [ "$queue" == "none" ]; then
   MPIRUN=
   QSUB="$BACKGROUND -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
 fi
+
+# setup for systems using the queuing system SLURM
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   MPIRUN="srun"
@@ -383,6 +392,12 @@ cat << EOF >> $scriptfile
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
+if [ "$EMAIL" != "" ]; then
+cat << EOF >> $scriptfile
+#PBS -M $EMAIL
+#PBS -m ae
+EOF
+fi
 if [ "$walltimestring_pbs" != "" ] ; then
 cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
