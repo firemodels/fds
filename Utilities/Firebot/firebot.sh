@@ -63,6 +63,8 @@ echo "-c - clean repo"
 echo "-F - skip figures and document building stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
+echo "-L - firebot lite,  run only stages that build a debug fds and run cases with it"
+echo "                    (no release fds, no release cases, no matlab, etc)"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
@@ -79,7 +81,8 @@ GIT_REVISION=
 SSH=
 SKIPMATLAB=
 SKIPFIGURES=
-while getopts 'b:cFhim:q:r:sS:uUv:' OPTION
+FIREBOT_LITE=
+while getopts 'b:cFhiLm:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -96,6 +99,9 @@ case $OPTION in
    ;;
   i)
    USEINSTALL="-r"
+   ;;
+  L)
+   FIREBOT_LITE=1
    ;;
   m)
    mailToFDS="$OPTARG"
@@ -1118,6 +1124,11 @@ email_build_status()
    stop_time=`date`
    echo "" > $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
+if [ "$FIREBOT_LITE" != "" ]; then
+   echo "" >> $TIME_LOG
+   echo "Note: only VV cases with debug FDS were run" >> $TIME_LOG
+   echo "" >> $TIME_LOG
+fi
    echo "Host OS: Linux " >> $TIME_LOG
    echo "Host Name: $hostname " >> $TIME_LOG
    echo "Start Time: $start_time " >> $TIME_LOG
@@ -1183,28 +1194,32 @@ archive_compiler_version
 ### Stage 2a ###
 echo Building
 echo "   FDS"
-inspect_fds_db
-check_inspect_fds_db
+if [ "$FIREBOT_LITE" == "" ]; then
+   inspect_fds_db
+   check_inspect_fds_db
+fi
 
 ### Stage 2b ###
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+if [ "$FIREBOT_LITE" == "" ]; then
 ### Stage 2c ###
-compile_fds_mpi
-check_compile_fds_mpi
+  compile_fds_mpi
+  check_compile_fds_mpi
 
 ### Stage 3a ###
-compile_smv_utilities
-check_smv_utilities
+  compile_smv_utilities
+  check_smv_utilities
 
 ### Stage 3b ###
-compile_smv_db
-check_compile_smv_db
+  compile_smv_db
+  check_compile_smv_db
 
 ### Stage 3c ###
-compile_smv
-check_compile_smv
+  compile_smv
+  check_compile_smv
+fi
 
 ### Stage 4 ###
 # Depends on successful FDS debug compile
@@ -1213,6 +1228,7 @@ if [[ $stage2b_success ]] ; then
    check_cases_debug $fdsrepo/Verification 'verification'
 fi
 
+if [ "$FIREBOT_LITE" == "" ]; then
 # clean debug stage
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
@@ -1269,9 +1285,12 @@ if [ "$SKIPMATLAB" == "" ] ; then
       make_fds_Config_management_plan
    fi
 fi
+fi
 
 ### Wrap up and report results ###
 set_files_world_readable
 save_build_status
-archive_timing_stats
+if [ "$FIREBOT_LITE" == "" ]; then
+  archive_timing_stats
+fi
 email_build_status 'Firebot'
