@@ -827,8 +827,10 @@ void update_triangles(int flag){
       for(i = 0; i<geomlisti->ntriangles; i++){
         triangle *trianglei;
         int j;
+        float *tri_normi;
 
         trianglei = geomlisti->triangles+i;
+        tri_normi = trianglei->tri_norm;
         for(j = 0; j<3; j++){
           point *pointj;
           int k;
@@ -846,15 +848,19 @@ void update_triangles(int flag){
             norm[1] = 0.0;
             norm[2] = 1.0;
           }
+#define COS30 0.866
           for(k = 0; k<pointj->ntriangles; k++){
             triangle *trianglek;
-            float *tri_norm;
+            float *tri_normk, cosang;
 
             trianglek = pointj->triangles[k];
-            tri_norm = trianglek->tri_norm;
-            norm[0] += tri_norm[0];
-            norm[1] += tri_norm[1];
-            norm[2] += tri_norm[2];
+            tri_normk = trianglek->tri_norm;
+            cosang = DOT3(tri_normk,tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
+            if(ABS(cosang)>COS30){
+              norm[0] += tri_normk[0];
+              norm[1] += tri_normk[1];
+              norm[2] += tri_normk[2];
+            }
           }
           ReduceToUnit(norm);
         }
