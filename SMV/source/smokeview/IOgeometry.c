@@ -543,20 +543,15 @@ void draw_geom(int flag, int timestate){
         }
 #define EPSLINE 0.001
         {
-          float *xyzval;
+          int ind[6] = {0, 1, 1, 2, 2, 0};
+          int k;
 
-          xyzval = xyzptr[0];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[1];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[1];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[2];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[2];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[0];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          for(k = 0; k < 6; k++){
+            float *xyzval;
+
+            xyzval = xyzptr[ind[k]];
+            glVertex3f(xyzval[0] + EPSLINE*xyznorm[0], xyzval[1] + EPSLINE*xyznorm[1], xyzval[2] + EPSLINE*xyznorm[2]);
+          }
         }
       }
       glEnd();
