@@ -83,7 +83,7 @@ SCP $OSXHOST $BACKGROUNDDIR background $OSXDIR/bin background
 SCP $OSXHOST $SMVDIR smokeview_osx_test_64 $OSXDIR/bin smokeview
 SCP $OSXHOST $SMZDIR smokezip_osx_64 $OSXDIR/bin smokezip
 SCP $OSXHOST $SMDDIR smokediff_osx_64 $OSXDIR/bin smokediff
-SCP $OSXHOST $WINDDIR/wind2fds_osx_64 $OSXDIR/bin wind2fds
+SCP $OSXHOST $WINDDIR wind2fds_osx_64 $OSXDIR/bin wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 cd $OSXDIR
 echo ""
