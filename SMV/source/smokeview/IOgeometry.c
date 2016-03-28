@@ -293,7 +293,7 @@ void draw_geom(int flag, int timestate){
           point *pointj;
 
           pointj = trianglei->points[j];
-          glNormal3fv(pointj->point_norm);
+          glNormal3fv(trianglei->point_norm+3*j);
           glVertex3fv(pointj->xyz);
         }
       }
@@ -796,6 +796,9 @@ void update_triangles(int flag){
         pointi = trianglei->points[2];
         pointi->triangles[pointi->itriangle++]=trianglei;
       }
+
+      // compute average normals - method 1
+
       for(i=0;i<geomlisti->npoints;i++){
         point *pointi;
         int k;
@@ -817,6 +820,44 @@ void update_triangles(int flag){
           norm[2]+=norm2[2];
         }
         ReduceToUnit(norm);
+      }
+
+      // compute average normals - method 2
+
+      for(i = 0; i<geomlisti->ntriangles; i++){
+        triangle *trianglei;
+        int j;
+
+        trianglei = geomlisti->triangles+i;
+        for(j = 0; j<3; j++){
+          point *pointj;
+          int k;
+          float *norm;
+
+          pointj = trianglei->points[j];
+          norm = trianglei->point_norm+3*j;
+          if(pointj->ntriangles>0){
+            norm[0] = 0.0;
+            norm[1] = 0.0;
+            norm[2] = 0.0;
+          }
+          else{
+            norm[0] = 0.0;
+            norm[1] = 0.0;
+            norm[2] = 1.0;
+          }
+          for(k = 0; k<pointj->ntriangles; k++){
+            triangle *trianglek;
+            float *tri_norm;
+
+            trianglek = pointj->triangles[k];
+            tri_norm = trianglek->tri_norm;
+            norm[0] += tri_norm[0];
+            norm[1] += tri_norm[1];
+            norm[2] += tri_norm[2];
+          }
+          ReduceToUnit(norm);
+        }
       }
     }
   }
