@@ -541,12 +541,23 @@ void draw_geom(int flag, int timestate){
           glColor3fv(color);
           last_color=color;
         }
-        glVertex3fv(xyzptr[0]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[1]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[2]);
-        glVertex3fv(xyzptr[0]);
+#define EPSLINE 0.001
+        {
+          float *xyzval;
+
+          xyzval = xyzptr[0];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          xyzval = xyzptr[1];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          xyzval = xyzptr[1];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          xyzval = xyzptr[2];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          xyzval = xyzptr[2];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          xyzval = xyzptr[0];
+          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+        }
       }
       glEnd();
       glPopMatrix();
