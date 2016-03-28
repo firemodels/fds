@@ -56,7 +56,7 @@ CPDIR ()
 
 
 BACKGROUNDDIR=$REMOTESVNROOT/SMV/Build/background/intel_osx_64
-SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
+SMVDIR=$REMOTESVNROOT/SMV/Build/smokeview/intel_osx_64
 SMZDIR=$REMOTESVNROOT/SMV/Build/smokezip/intel_osx_64
 SMDDIR=$REMOTESVNROOT/SMV/Build/smokediff/intel_osx_64
 WINDDIR=$REMOTESVNROOT/SMV/Build/wind2fds/intel_osx_64
