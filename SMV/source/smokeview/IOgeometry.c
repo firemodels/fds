@@ -513,7 +513,7 @@ void draw_geom(int flag, int timestate){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
-      glLineWidth(4.0);
+      glLineWidth(2.0);
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
@@ -541,7 +541,7 @@ void draw_geom(int flag, int timestate){
           glColor3fv(color);
           last_color=color;
         }
-#define EPSLINE 0.001
+#define EPSLINE 0.005
         {
           int ind[6] = {0, 1, 1, 2, 2, 0};
           int k;
