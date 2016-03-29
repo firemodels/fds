@@ -56,7 +56,7 @@ CPDIR ()
 
 
 BACKGROUNDDIR=$REMOTESVNROOT/SMV/Build/background/intel_osx_64
-SMVDIR=$REMOTESVNROOT/SMV/Build/intel_osx_64
+SMVDIR=$REMOTESVNROOT/SMV/Build/smokeview/intel_osx_64
 SMZDIR=$REMOTESVNROOT/SMV/Build/smokezip/intel_osx_64
 SMDDIR=$REMOTESVNROOT/SMV/Build/smokediff/intel_osx_64
 WINDDIR=$REMOTESVNROOT/SMV/Build/wind2fds/intel_osx_64
@@ -83,7 +83,7 @@ SCP $OSXHOST $BACKGROUNDDIR background $OSXDIR/bin background
 SCP $OSXHOST $SMVDIR smokeview_osx_test_64 $OSXDIR/bin smokeview
 SCP $OSXHOST $SMZDIR smokezip_osx_64 $OSXDIR/bin smokezip
 SCP $OSXHOST $SMDDIR smokediff_osx_64 $OSXDIR/bin smokediff
-SCP $OSXHOST $WINDDIR/wind2fds_osx_64 $OSXDIR/bin wind2fds
+SCP $OSXHOST $WINDDIR wind2fds_osx_64 $OSXDIR/bin wind2fds
 rm -f $OSXDIR.tar $OSXDIR.tar.gz
 cd $OSXDIR
 echo ""

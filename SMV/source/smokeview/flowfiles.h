@@ -45,7 +45,7 @@ typedef struct {
 
 typedef struct _triangle {
   unsigned char skinny;
-  float distance, *color, tpoints[6], tri_norm[3];
+  float distance, *color, tpoints[6], tri_norm[3], point_norm[9];
   struct _texturedata *textureinfo;
   struct _surfdata *surf;
   int vert_index[3], interior, geomtype, insolid;
