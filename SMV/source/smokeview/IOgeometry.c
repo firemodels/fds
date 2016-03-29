@@ -547,10 +547,14 @@ void draw_geom(int flag, int timestate){
           int k;
 
           for(k = 0; k < 6; k++){
-            float *xyzval;
+            float *xyzval, *pknorm;
+            point *pk;
+
+            pk = trianglei->points[ind[k]];
+            pknorm = pk->point_norm;
 
             xyzval = xyzptr[ind[k]];
-            glVertex3f(xyzval[0] + EPSLINE*xyznorm[0], xyzval[1] + EPSLINE*xyznorm[1], xyzval[2] + EPSLINE*xyznorm[2]);
+            glVertex3f(xyzval[0] + EPSLINE*pknorm[0], xyzval[1] + EPSLINE*pknorm[1], xyzval[2] + EPSLINE*pknorm[2]);
           }
         }
       }
