@@ -4345,7 +4345,6 @@ void VentMenu(int value){
 #define GEOMETRY_SOLID 0
 #define GEOMETRY_OUTLINE 1
 #define GEOMETRY_SOLIDOUTLINE 2
-#define GEOMETRY_EXTERIOR 8
 #define GEOMETRY_INTERIOR_SOLID 9
 #define GEOMETRY_INTERIOR_OUTLINE 12
 #define GEOMETRY_DUPLICATES 10
@@ -4356,6 +4355,7 @@ void VentMenu(int value){
 #define GEOMETRY_SMOOTHNORMAL 4
 #define GEOMETRY_SHOWDIAGNOSTICS 13
 #define GEOMETRY_HILIGHTSKINNY 5
+#define GEOMETRY_HIDEALL 8
 
 /* ------------------ ImmersedMenu ------------------------ */
 
@@ -4363,71 +4363,60 @@ void ImmersedMenu(int value){
   updatemenu=1;
   switch(value){
 
-    case GEOMETRY_EXTERIOR:
-      show_geometry_exterior=1-show_geometry_exterior;
-      break;
     case GEOMETRY_INTERIOR_SOLID:
-      show_geometry_interior_solid=1-show_geometry_interior_solid;
+      show_geom_interior_solid=1-show_geom_interior_solid;
       break;
     case GEOMETRY_INTERIOR_OUTLINE:
-      show_geometry_interior_outline=1-show_geometry_interior_outline;
+      show_geom_interior_outline=1-show_geom_interior_outline;
       break;
     case GEOMETRY_TETRA_HIDE:
-      if(show_geometry_exterior==1||show_geometry_interior_solid==1||show_geometry_interior_outline==1){
-        show_geometry_exterior=0;
-        show_geometry_interior_solid=0;
-        show_geometry_interior_outline=0;
-      }
-      else{
-        show_geometry_exterior=1;
-        show_geometry_interior_solid=1;
-        show_geometry_interior_outline=0;
-      }
+      show_geom_interior_solid=0;
+      show_geom_interior_outline=0;
       break;
     case GEOMETRY_SOLIDOUTLINE:
-      if(show_geom_solid==1&&show_geom_outline==1){
-        show_geom_solid=1;
-        show_geom_outline=0;
+      if(show_geom_surface_solid==1&&show_geom_surface_outline==1){
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=0;
       }
       else{
-        show_geom_solid=1;
-        show_geom_outline=1;
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=1;
       }
       break;
     case GEOMETRY_SOLID:
-      if(show_geom_solid==1&&show_geom_outline==1){
-        show_geom_solid=1;
-        show_geom_outline=0;
+      if(show_geom_surface_solid==1&&show_geom_surface_outline==1){
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=0;
       }
-      else if(show_geom_solid==1&&show_geom_outline==0){
-        show_geom_solid=0;
-        show_geom_outline=1;
+      else if(show_geom_surface_solid==1&&show_geom_surface_outline==0){
+        show_geom_surface_solid=0;
+        show_geom_surface_outline=1;
       }
-      else if(show_geom_solid==0&&show_geom_outline==1){
-        show_geom_solid=1;
-        show_geom_outline=0;
+      else if(show_geom_surface_solid==0&&show_geom_surface_outline==1){
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=0;
       }
       else{
-        show_geom_solid=1;
-        show_geom_outline=0;
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=0;
       }
       break;
     case GEOMETRY_OUTLINE:
-      if(show_geom_solid==1&&show_geom_outline==1){
-        show_geom_solid=0;
-        show_geom_outline=1;
+      if(show_geom_surface_solid==1&&show_geom_surface_outline==1){
+        show_geom_surface_solid=0;
+        show_geom_surface_outline=1;
       }
-      else if(show_geom_solid==1&&show_geom_outline==0){
-        show_geom_solid=0;
-        show_geom_outline=1;
+      else if(show_geom_surface_solid==1&&show_geom_surface_outline==0){
+        show_geom_surface_solid=0;
+        show_geom_surface_outline=1;
       }
-      else if(show_geom_solid==0&&show_geom_outline==1){
-        show_geom_solid=1;
-        show_geom_outline=0;
+      else if(show_geom_surface_solid==0&&show_geom_surface_outline==1){
+        show_geom_surface_solid=1;
+        show_geom_surface_outline=0;
       }
       else{
-        show_geom_solid=0;
-        show_geom_outline=1;
+        show_geom_surface_solid=0;
+        show_geom_surface_outline=1;
       }
       break;
     case GEOMETRY_SHOWNORMAL:
@@ -4446,13 +4435,12 @@ void ImmersedMenu(int value){
       show_geometry_diagnostics = 1 - show_geometry_diagnostics;
       break;
     case GEOMETRY_HIDE:
-      if(show_geom_solid==0&&show_geom_outline==0){
-        show_geom_solid=1;
-      }
-      else{
-        show_geom_solid=0;
-        show_geom_outline=0;
-      }
+      show_geom_surface_solid=0;
+      show_geom_surface_outline=0;
+      break;
+    case GEOMETRY_HIDEALL:
+      ImmersedMenu(GEOMETRY_HIDE);
+      ImmersedMenu(GEOMETRY_TETRA_HIDE);
       break;
     case MENU_DUMMY:
       break;
@@ -5004,7 +4992,7 @@ static int plot3dshowmenu=0, staticvariablemenu=0, helpmenu=0, webhelpmenu=0, ke
 static int vectorskipmenu=0,unitsmenu=0;
 static int isosurfacemenu=0, isovariablemenu=0, levelmenu=0;
 static int fontmenu=0, aperturemenu=0,dialogmenu=0,zoommenu=0;
-static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, loadpatchmenu=0, ventmenu=0, circularventmenu=0;
+static int gridslicemenu=0, blockagemenu=0, immersedmenu=0, immersedinteriormenu=0, immersedsurfacemenu=0, loadpatchmenu=0, ventmenu=0, circularventmenu=0;
 static int loadisomenu=0, isosurfacetypemenu=0;
 static int geometrymenu=0, loadunloadmenu=0, reloadmenu=0, aboutmenu=0, disclaimermenu=0, terrain_showmenu=0;
 static int scriptmenu=0;
@@ -5362,79 +5350,95 @@ updatemenu=0;
     }
   }
 
-/* --------------------------------embedded menu -------------------------- */
+/* --------------------------------surface menu -------------------------- */
 
-  CREATEMENU(immersedmenu,ImmersedMenu);
-  glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
-  glutAddMenuEntry("Surface",MENU_DUMMY);
-  if(show_geom_solid==1&&show_geom_outline==1){
+  CREATEMENU(immersedsurfacemenu,ImmersedMenu);
+  if(show_geom_surface_solid==1&&show_geom_surface_outline==1){
     glutAddMenuEntry(_("   *Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
   else{
     glutAddMenuEntry(_("   Solid and outline"),GEOMETRY_SOLIDOUTLINE);
   }
-  if(show_geom_solid==1&&show_geom_outline==0){
+  if(show_geom_surface_solid==1&&show_geom_surface_outline==0){
     glutAddMenuEntry(_("   *Solid only"),GEOMETRY_SOLID);
   }
   else{
     glutAddMenuEntry(_("   Solid only"),GEOMETRY_SOLID);
   }
-  if(show_geom_outline==1&&show_geom_solid==0){
+  if(show_geom_surface_outline==1&&show_geom_surface_solid==0){
     glutAddMenuEntry(_("   *Outline only"),GEOMETRY_OUTLINE);
   }
   else{
     glutAddMenuEntry(_("   Outline only"),GEOMETRY_OUTLINE);
   }
-  if(show_geom_solid==0&&show_geom_outline==0){
+  if(show_geom_surface_solid == 0 && show_geom_surface_outline == 0){
     glutAddMenuEntry(_("   *Hide"),GEOMETRY_HIDE);
   }
   else{
     glutAddMenuEntry(_("   Hide"),GEOMETRY_HIDE);
   }
+
+/* --------------------------------embedded menu -------------------------- */
+
+  CREATEMENU(immersedinteriormenu,ImmersedMenu);
   if(have_volume==1){
     glutAddMenuEntry("Interior",MENU_DUMMY);
-    if(show_geometry_interior_solid==1)glutAddMenuEntry(_("   *solid"),GEOMETRY_INTERIOR_SOLID);
-    if(show_geometry_interior_solid==0)glutAddMenuEntry(_("   solid"),GEOMETRY_INTERIOR_SOLID);
-    if(show_geometry_interior_outline==1)glutAddMenuEntry(_("   *outline"),GEOMETRY_INTERIOR_OUTLINE);
-    if(show_geometry_interior_outline==0)glutAddMenuEntry(_("   outline"),GEOMETRY_INTERIOR_OUTLINE);
-    if(show_geometry_exterior==1&&show_geometry_interior_solid==1){
+    if(show_geom_interior_solid==1)glutAddMenuEntry(_("   *solid"),GEOMETRY_INTERIOR_SOLID);
+    if(show_geom_interior_solid==0)glutAddMenuEntry(_("   solid"),GEOMETRY_INTERIOR_SOLID);
+    if(show_geom_interior_outline==1)glutAddMenuEntry(_("   *outline"),GEOMETRY_INTERIOR_OUTLINE);
+    if(show_geom_interior_outline==0)glutAddMenuEntry(_("   outline"),GEOMETRY_INTERIOR_OUTLINE);
+    if(show_geom_interior_outline == 0 && show_geom_interior_solid == 0){
       glutAddMenuEntry(_("   *Hide"),GEOMETRY_TETRA_HIDE);
     }
     else{
       glutAddMenuEntry(_("   Hide"),GEOMETRY_TETRA_HIDE);
     }
   }
+
+/* --------------------------------embedded menu -------------------------- */
+
+  CREATEMENU(immersedmenu,ImmersedMenu);
+  glutAddSubMenu(_("Surface"),immersedsurfacemenu);
+  if(have_volume==1){
+    glutAddSubMenu(_("Interior"),immersedinteriormenu);
+  }
   if(sort_geometry==1){
-    glutAddMenuEntry(_(" *Sort faces"), GEOMETRY_SORTFACES);
+    glutAddMenuEntry(_("*Sort faces"), GEOMETRY_SORTFACES);
   }
   else{
-    glutAddMenuEntry(_(" Sort faces"), GEOMETRY_SORTFACES);
+    glutAddMenuEntry(_("Sort faces"), GEOMETRY_SORTFACES);
   }
-  if(show_geom_normal==1){
-    glutAddMenuEntry(_(" *Show normal"), GEOMETRY_SHOWNORMAL);
+  if(show_geom_normal == 1){
+    glutAddMenuEntry(_("*Show normal"), GEOMETRY_SHOWNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Show normal"), GEOMETRY_SHOWNORMAL);
+    glutAddMenuEntry(_("Show normal"), GEOMETRY_SHOWNORMAL);
   }
   if(smooth_geom_normal==1){
-    glutAddMenuEntry(_(" *Smooth normal"), GEOMETRY_SMOOTHNORMAL);
+    glutAddMenuEntry(_("*Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   else{
-    glutAddMenuEntry(_(" Smooth normal"), GEOMETRY_SMOOTHNORMAL);
+    glutAddMenuEntry(_("Smooth normal"), GEOMETRY_SMOOTHNORMAL);
   }
   if(ngeomdiaginfo>0){
     if(show_geometry_diagnostics == 1){
-      glutAddMenuEntry(_(" *Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
+      glutAddMenuEntry(_("*Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
     else{
-      glutAddMenuEntry(_(" Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
+      glutAddMenuEntry(_("Show geometry diagnostics"), GEOMETRY_SHOWDIAGNOSTICS);
     }
   }
   if(hilight_skinny == 1){
-    glutAddMenuEntry(_(" *Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
+    glutAddMenuEntry(_("*Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
   }
   else{
-    glutAddMenuEntry(_(" Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
+    glutAddMenuEntry(_("Hilight skinny triangles"), GEOMETRY_HILIGHTSKINNY);
+  }
+  if(show_geom_surface_solid == 0 && show_geom_surface_outline == 0 && show_geom_interior_solid == 0){
+    glutAddMenuEntry(_("*Hide all"), GEOMETRY_HIDEALL);
+  }
+  else{
+    glutAddMenuEntry(_("Hide all"), GEOMETRY_HIDEALL);
   }
 
 /* --------------------------------blockage menu -------------------------- */

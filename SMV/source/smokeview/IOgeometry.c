@@ -260,7 +260,7 @@ void draw_geom(int flag, int timestate){
       int  j;
 
       trianglei = tris[i];
-      if(trianglei->geomtype == GEOM_GEOM&&show_geom_solid == 0)continue;
+      if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_solid == 0)continue;
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
@@ -314,7 +314,7 @@ void draw_geom(int flag, int timestate){
         int j;
 
         trianglei = tris[i];
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
         texti = trianglei->textureinfo;
@@ -422,7 +422,7 @@ void draw_geom(int flag, int timestate){
         }
 
         for(k=0;k<4;k++){
-          if(exterior[k]==0&&show_geometry_interior_solid==1){
+          if(exterior[k]==0&&show_geom_interior_solid==1){
             int kk;
             float *v0, *v1, *v2;
             float v1m0[3], v2m0[3], v2m1[3], vcross[3];
@@ -480,9 +480,8 @@ void draw_geom(int flag, int timestate){
         xyzptr[3] = volumei->points[3]->xyz;
 
         for(k=0;k<4;k++){
-          if(exterior[k]==1&&show_geometry_exterior==1||
-             exterior[k]==0&&show_geometry_interior_outline==1){
-               if(exterior[k]==0&&show_geometry_interior_outline==1&&show_geometry_interior_solid==1){
+          if(exterior[k]==0&&show_geom_interior_outline==1){
+               if(exterior[k]==0&&show_geom_interior_outline==1&&show_geom_interior_solid==1){
                  color=black;
                }
                else{
@@ -521,7 +520,7 @@ void draw_geom(int flag, int timestate){
         triangle *trianglei;
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO&&show_iso_outline == 0)continue;
 
         xyznorm=trianglei->tri_norm;
