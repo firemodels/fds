@@ -674,9 +674,11 @@ void draw_geom(int flag, int timestate){
           float *pk;
           float *pknorm;
           float xyz2[3];
+          point *pointk;
 
-          pk = trianglei->points[k]->xyz;
-          pknorm = trianglei->point_norm + 3 * k;
+          pointk = trianglei->points[k];
+          pk = pointk->xyz;
+          pknorm = pointk->point_norm;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -700,9 +702,11 @@ void draw_geom(int flag, int timestate){
           float *pk;
           float *pknorm;
           float xyz2[3];
+          point *pointk;
 
-          pk = trianglei->points[k]->xyz;
-          pknorm = trianglei->point_norm + 3 * k;
+          pointk = trianglei->points[k];
+          pk = pointk->xyz;
+          pknorm = pointk->point_norm;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -825,14 +829,14 @@ void update_triangles(int flag){
         norm[1]=0.0;
         norm[2]=0.0;
         for(k=0;k<pointi->ntriangles;k++){
-          float *norm2;
+          float *normk;
           triangle *trianglei;
 
           trianglei = pointi->triangles[k];
-          norm2 = trianglei->tri_norm;
-          norm[0]+=norm2[0];
-          norm[1]+=norm2[1];
-          norm[2]+=norm2[2];
+          normk = trianglei->tri_norm;
+          norm[0]+=normk[0];
+          norm[1]+=normk[1];
+          norm[2]+=normk[2];
         }
         ReduceToUnit(norm);
       }
@@ -870,7 +874,7 @@ void update_triangles(int flag){
 
             trianglek = pointj->triangles[k];
             tri_normk = trianglek->tri_norm;
-            cosang = DOT3(tri_normk,tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
+            cosang = DOT3(tri_normk,tri_normi);
             if(ABS(cosang)>COS30){
               norm[0] += tri_normk[0];
               norm[1] += tri_normk[1];
