@@ -23,6 +23,7 @@ extern "C" void Volume_CB(int var);
 #define GEOMETRYTEST 35
 #define GEOM_MAX_ANGLE 36
 #define GEOM_OUTLINE_IOFFSET 37
+#define GEOM_IVECFACTOR 38
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
@@ -34,7 +35,9 @@ GLUI_Checkbox *CHECKBOX_show_geom_normal = NULL;
 GLUI_Checkbox *CHECKBOX_smooth_geom_normal = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
-GLUI_Panel *PANEL_geom1=NULL;
+GLUI_Rollout *ROLLOUT_geomtest2 = NULL;
+GLUI_Panel *PANEL_geom1 = NULL;
+GLUI_Panel *PANEL_normals = NULL;
 GLUI_Panel *PANEL_geom1a=NULL;
 GLUI_Panel *PANEL_geom1b=NULL;
 GLUI_Panel *PANEL_geom1c=NULL;
@@ -53,6 +56,7 @@ GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_vertices[12];
 GLUI_Spinner *SPINNER_geom_max_angle=NULL;
 GLUI_Spinner *SPINNER_geom_outline_ioffset=NULL;
+GLUI_Spinner *SPINNER_geom_ivecfactor = NULL;
 
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
@@ -282,8 +286,6 @@ extern "C" void glui_geometry_setup(int main_window){
 #ifdef pp_GEOMTEST
   ROLLOUT_unstructured = glui_geometry->add_rollout("Unstructured",false);
   if(unstructured_isopen==1)ROLLOUT_unstructured->open();
-  SPINNER_face_factor=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"face factor",GLUI_SPINNER_FLOAT,&face_factor);
-  SPINNER_face_factor->set_float_limits(0.0,0.5);
 
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
@@ -299,17 +301,23 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_surface, "solid", &show_geom_surface_solid, VOL_SHOWHIDE, Volume_CB);
   CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_surface, "outline", &show_geom_surface_outline, VOL_SHOWHIDE, Volume_CB);
 
-  glui_geometry->add_column_to_panel(PANEL_geom_showhide,false);
   PANEL_interior = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"interior");
   CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_interior,"solid",&show_geom_interior_solid,VOL_SHOWHIDE,Volume_CB);
   CHECKBOX_interior_outline=glui_geometry->add_checkbox_to_panel(PANEL_interior,"outline",&show_geom_interior_outline,VOL_SHOWHIDE,Volume_CB);
 
-  CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "show normal", &show_geom_normal);
-  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "smooth normals", &smooth_geom_normal);
-  SPINNER_geom_max_angle=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"max angle",GLUI_SPINNER_FLOAT,&geom_max_angle,GEOM_MAX_ANGLE,Volume_CB);
+  PANEL_normals = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"normals");
+  CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_normals, "show", &show_geom_normal);
+  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_normals, "smooth", &smooth_geom_normal);
+  SPINNER_geom_ivecfactor = glui_geometry->add_spinner_to_panel(PANEL_normals, "length", GLUI_SPINNER_INT, &geom_ivecfactor, GEOM_IVECFACTOR, Volume_CB);
+  SPINNER_geom_ivecfactor->set_int_limits(0, 200);
+
+  ROLLOUT_geomtest2 = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "test parameters", false);
+  SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
-  SPINNER_geom_outline_ioffset=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"outline offset",GLUI_SPINNER_INT,&geom_outline_ioffset,GEOM_OUTLINE_IOFFSET,Volume_CB);
-  SPINNER_geom_outline_ioffset->set_int_limits(0,40);
+  SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
+  SPINNER_geom_outline_ioffset->set_int_limits(0,200);
+  SPINNER_face_factor = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
+  SPINNER_face_factor->set_float_limits(0.0, 0.5);
 
   // -------------- Cube/Tetra intersection test -------------------
 
@@ -412,6 +420,9 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+  case GEOM_IVECFACTOR:
+    geom_vecfactor = (float)geom_ivecfactor/1000.0;
+    break;
   case GEOM_MAX_ANGLE:
     cos_geom_max_angle=cos(DEG2RAD*geom_max_angle);
     update_triangles(GEOM_STATIC,GEOM_UPDATE_NORMALS);

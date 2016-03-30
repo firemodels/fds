@@ -20,7 +20,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN int SVDECL(geom_outline_ioffset,5);
+SVEXTERN float SVDECL(geom_vecfactor, .030);
+SVEXTERN int SVDECL(geom_ivecfactor, 30);
+SVEXTERN int SVDECL(geom_outline_ioffset, 5);
 SVEXTERN float SVDECL(geom_outline_offset,0.005);
 SVEXTERN float SVDECL(geom_max_angle, 30.0), cos_geom_max_angle;
 SVEXTERN int SVDECL(update_setvents, 0);
