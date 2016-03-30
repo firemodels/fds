@@ -277,10 +277,10 @@ void usage(void){
   PRINTF("  and boundary files are supported.  Differenced results may be viewed by opening\n");
   PRINTF("  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
 
-  PRINTF("  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");
-  PRINTF("  identical when differencing boundary or PLOT3D files.  The x, y, and/or z mesh\n");
-  PRINTF("  resolution in smv_case1 must be an integer multiple of the corresponding x, y, z mesh\n");
-  PRINTF("  resolution in smv_case2 when differencing slice files.\n\n");
+  PRINTF("  Mesh bounds must be identical for corresponding meshes.  Mesh resolutions must be\n");
+  PRINTF("  identical when differencing boundary and PLOT3D files.  The x, y, and z mesh\n");
+  PRINTF("  resolutions in smv_case2 must be integer multiples of the corresponding x, y, z mesh\n");
+  PRINTF("  resolutions in smv_case1 when differencing slice files.\n\n");
 
   PRINTF("  -h  - display this message\n");
   PRINTF("  -v  - display version information\n");
