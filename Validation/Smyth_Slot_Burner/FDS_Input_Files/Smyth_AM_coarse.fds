@@ -1,4 +1,4 @@
-&HEAD CHID='Smyth_Andersen_coarse',TITLE='Smyth Methane Slot Burner with Andersen (2009) reduced mechanism' /
+&HEAD CHID='Smyth_AM_coarse',TITLE='Smyth Methane Slot Burner with modified Andersen (2009) reduced mechanism' /
 
 &MULT ID='mesh array', DX=0.006,DZ=0.006, I_UPPER= 3,K_UPPER=7 / 32 mesh
 &MESH XB=0.0,0.006,0.0,0.00025,-0.003,0.003, IJK=24,1,24, MULT_ID='mesh array' /
@@ -6,6 +6,8 @@
 &TIME T_END=2./
 
 &MISC TMPA=25., DNS=.TRUE., SECOND_ORDER_INTERPOLATED_BOUNDARY=.TRUE. /
+
+&PRES VELOCITY_TOLERANCE=1E-6, MAX_PRESSURE_ITERATIONS=100/
 
 &RADI WIDE_BAND_MODEL=.TRUE./
 
@@ -28,9 +30,11 @@
       NU= -1,-1.5,1,2
       CRITICAL_FLAME_TEMPERATURE=867./
 
+! A in R2 is tuned to match Smyth CO data
+
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 3.98e8
+      A = 8e10
       E = 4.1867e4
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1
