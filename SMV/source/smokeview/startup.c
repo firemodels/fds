@@ -1138,6 +1138,7 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+  cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
   if(moviefiletype==WMV){
     strcpy(movie_ext, ".wmv");
   }
