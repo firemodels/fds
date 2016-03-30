@@ -220,7 +220,7 @@ set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 :: build cfast
 
 echo             building cfast
-cd %cfastroot%\CFAST\intel_win%size%
+cd %cfastroot%\Build\CFAST\intel_win%size%
 erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 call make_cfast bot 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast7_win%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
