@@ -260,7 +260,7 @@ void draw_geom(int flag, int timestate){
       int  j;
 
       trianglei = tris[i];
-      if(trianglei->geomtype == GEOM_GEOM&&show_geom_solid == 0)continue;
+      if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_solid == 0)continue;
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
@@ -314,7 +314,7 @@ void draw_geom(int flag, int timestate){
         int j;
 
         trianglei = tris[i];
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
         texti = trianglei->textureinfo;
@@ -422,7 +422,7 @@ void draw_geom(int flag, int timestate){
         }
 
         for(k=0;k<4;k++){
-          if(exterior[k]==0&&show_geometry_interior_solid==1){
+          if(exterior[k]==0&&show_geom_interior_solid==1){
             int kk;
             float *v0, *v1, *v2;
             float v1m0[3], v2m0[3], v2m1[3], vcross[3];
@@ -480,9 +480,8 @@ void draw_geom(int flag, int timestate){
         xyzptr[3] = volumei->points[3]->xyz;
 
         for(k=0;k<4;k++){
-          if(exterior[k]==1&&show_geometry_exterior==1||
-             exterior[k]==0&&show_geometry_interior_outline==1){
-               if(exterior[k]==0&&show_geometry_interior_outline==1&&show_geometry_interior_solid==1){
+          if(exterior[k]==0&&show_geom_interior_outline==1){
+               if(exterior[k]==0&&show_geom_interior_outline==1&&show_geom_interior_solid==1){
                  color=black;
                }
                else{
@@ -513,7 +512,7 @@ void draw_geom(int flag, int timestate){
       glPushMatrix();
       glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
       glTranslatef(-xbar0,-ybar0,-zbar0);
-      glLineWidth(4.0);
+      glLineWidth(2.0);
       glBegin(GL_LINES);
       for(j=0;j<ntris;j++){
         float *xyzptr[3];
@@ -521,7 +520,7 @@ void draw_geom(int flag, int timestate){
         triangle *trianglei;
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO&&show_iso_outline == 0)continue;
 
         xyznorm=trianglei->tri_norm;
@@ -541,22 +540,23 @@ void draw_geom(int flag, int timestate){
           glColor3fv(color);
           last_color=color;
         }
-#define EPSLINE 0.001
         {
-          float *xyzval;
+          int ind[6] = {0, 1, 1, 2, 2, 0};
+          int k;
 
-          xyzval = xyzptr[0];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[1];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[1];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[2];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[2];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
-          xyzval = xyzptr[0];
-          glVertex3f(xyzval[0]+EPSLINE*xyznorm[0], xyzval[1]+EPSLINE*xyznorm[1], xyzval[2]+EPSLINE*xyznorm[2]);
+          for(k = 0; k < 6; k++){
+            float *xyzval, *pknorm, xyzval2[3];
+            point *pk;
+
+            pk = trianglei->points[ind[k]];
+            pknorm = pk->point_norm;
+            xyzval = xyzptr[ind[k]];
+
+            VECEQ3(xyzval2, pknorm);
+            VEC3MA(xyzval2, geom_outline_offset);
+            VECADD3(xyzval2, xyzval2, xyzval);
+            glVertex3fv(xyzval2);
+          }
         }
       }
       glEnd();
@@ -675,9 +675,11 @@ void draw_geom(int flag, int timestate){
           float *pk;
           float *pknorm;
           float xyz2[3];
+          point *pointk;
 
-          pk = trianglei->points[k]->xyz;
-          pknorm = trianglei->point_norm + 3 * k;
+          pointk = trianglei->points[k];
+          pk = pointk->xyz;
+          pknorm = pointk->point_norm;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -701,9 +703,11 @@ void draw_geom(int flag, int timestate){
           float *pk;
           float *pknorm;
           float xyz2[3];
+          point *pointk;
 
-          pk = trianglei->points[k]->xyz;
-          pknorm = trianglei->point_norm + 3 * k;
+          pointk = trianglei->points[k];
+          pk = pointk->xyz;
+          pknorm = pointk->point_norm;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -787,7 +791,11 @@ void update_triangles(int flag){
 
       // allocate triangle pointers
 
-      if(ntriangles>0)NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
+      FREEMEMORY(geomlisti->triangleptrs);
+      if(ntriangles>0){
+        NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
+        geomlisti->triangleptrs = triangles;
+      }
 
       // assign triangle pointers to points
 
@@ -826,14 +834,14 @@ void update_triangles(int flag){
         norm[1]=0.0;
         norm[2]=0.0;
         for(k=0;k<pointi->ntriangles;k++){
-          float *norm2;
+          float *normk;
           triangle *trianglei;
 
           trianglei = pointi->triangles[k];
-          norm2 = trianglei->tri_norm;
-          norm[0]+=norm2[0];
-          norm[1]+=norm2[1];
-          norm[2]+=norm2[2];
+          normk = trianglei->tri_norm;
+          norm[0]+=normk[0];
+          norm[1]+=normk[1];
+          norm[2]+=normk[2];
         }
         ReduceToUnit(norm);
       }
@@ -864,15 +872,14 @@ void update_triangles(int flag){
             norm[1] = 0.0;
             norm[2] = 1.0;
           }
-#define COS30 0.866
           for(k = 0; k<pointj->ntriangles; k++){
             triangle *trianglek;
             float *tri_normk, cosang;
 
             trianglek = pointj->triangles[k];
             tri_normk = trianglek->tri_norm;
-            cosang = DOT3(tri_normk,tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
-            if(ABS(cosang)>COS30){
+            cosang = DOT3(tri_normk,tri_normi);
+            if(ABS(cosang)>cos_geom_max_angle){
               norm[0] += tri_normk[0];
               norm[1] += tri_normk[1];
               norm[2] += tri_normk[2];
@@ -1329,6 +1336,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
     geomlisti = geomi->geomlistinfo+iframe;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->triangleptrs = NULL;
     geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;
@@ -1475,6 +1483,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->triangleptrs = NULL;
     geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;

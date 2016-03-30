@@ -20,6 +20,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(geom_outline_ioffset,5);
+SVEXTERN float SVDECL(geom_outline_offset,0.005);
+SVEXTERN float SVDECL(geom_max_angle, 30.0), cos_geom_max_angle;
 SVEXTERN int SVDECL(update_setvents, 0);
 #ifdef pp_SLICECOLORDEFER
 SVEXTERN int SVDECL(use_set_slicecolor, 1);
@@ -81,7 +84,7 @@ SVEXTERN int SVDECL(update_have_gvec,0),SVDECL(gvec_down,1),SVDECL(have_gvec,0),
 SVEXTERN float SVDECL(slice_line_contour_width,1.0);
 SVEXTERN int SVDECL(slice_contour_type,0);
 SVEXTERN int SVDECL(viscadopaque,0);
-SVEXTERN int SVDECL(structured_isopen,1), SVDECL(unstructured_isopen,0);
+SVEXTERN int SVDECL(structured_isopen,0), SVDECL(unstructured_isopen,0);
 SVEXTERN float SVDECL(patchout_tmin,1.0), SVDECL(patchout_tmax,-1.0);
 SVEXTERN float SVDECL(patchout_xmin,1.0), SVDECL(patchout_xmax,-1.0);
 SVEXTERN float SVDECL(patchout_ymin,1.0), SVDECL(patchout_ymax,-1.0);
@@ -103,9 +106,8 @@ SVEXTERN int face_id[200],face_vis[10], face_vis_old[10];
 SVEXTERN int SVDECL(update_volbox_controls,0);
 SVEXTERN float SVDECL(face_factor,0.01);
 SVEXTERN int SVDECL(have_volume,0);
-SVEXTERN int SVDECL(show_geometry_exterior,0);
-SVEXTERN int SVDECL(show_geometry_interior_solid,1);
-SVEXTERN int SVDECL(show_geometry_interior_outline,0);
+SVEXTERN int SVDECL(show_geom_interior_solid,1);
+SVEXTERN int SVDECL(show_geom_interior_outline,0);
 SVEXTERN int SVDECL(show_slices_and_vectors,0);
 SVEXTERN int SVDECL(vispilot,0);
 SVEXTERN int SVDECL(compute_fed,0);
@@ -239,7 +241,7 @@ SVEXTERN int SVDECL(show_iso_solid,1),SVDECL(show_iso_outline,1),SVDECL(show_iso
 SVEXTERN int SVDECL(show_patch_solid, 1), SVDECL(show_patch_outline, 0), SVDECL(show_patch_points, 0);
 SVEXTERN int SVDECL(show_patch_ingas, 1), SVDECL(show_patch_insolid, 1), SVDECL(show_patch_incutcell, 1);
 SVEXTERN int SVDECL(show_iso_normal, 0), SVDECL(smooth_iso_normal, 1);
-SVEXTERN int SVDECL(show_geom_solid, 1), SVDECL(show_geom_outline, 1), SVDECL(show_geom_points, 0);
+SVEXTERN int SVDECL(show_geom_surface_solid, 1), SVDECL(show_geom_surface_outline, 1), SVDECL(show_geom_points, 0);
 SVEXTERN int SVDECL(show_geom_normal, 0), SVDECL(smooth_geom_normal, 1);
 SVEXTERN geomlistdata SVDECL(*geomlistinfo, NULL);
 SVEXTERN int SVDECL(have_volcompressed,0);
