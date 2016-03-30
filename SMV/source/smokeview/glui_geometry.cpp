@@ -5,6 +5,7 @@ extern "C" void Volume_CB(int var);
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include GLUT_H
 
 #include "smokeviewvars.h"
@@ -20,6 +21,8 @@ extern "C" void Volume_CB(int var);
 #define SAVE_SETTINGS 33
 #define VISAXISLABELS 34
 #define GEOMETRYTEST 35
+#define GEOM_MAX_ANGLE 36
+#define GEOM_OUTLINE_IOFFSET 37
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
@@ -27,6 +30,8 @@ GLUI_Panel *PANEL_geom_testoptions = NULL;
 GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline=NULL;
 GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline=NULL;
 GLUI_Checkbox *CHECKBOX_geomtest=NULL, *CHECKBOX_triangletest=NULL;
+GLUI_Checkbox *CHECKBOX_show_geom_normal = NULL;
+GLUI_Checkbox *CHECKBOX_smooth_geom_normal = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geom1=NULL;
@@ -46,6 +51,9 @@ GLUI_Panel *PANEL_geom3abc=NULL;
 GLUI_Spinner *SPINNER_box_bounds[6];
 GLUI_Spinner *SPINNER_box_translate[3];
 GLUI_Spinner *SPINNER_tetra_vertices[12];
+GLUI_Spinner *SPINNER_geom_max_angle=NULL;
+GLUI_Spinner *SPINNER_geom_outline_ioffset=NULL;
+
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
 
@@ -98,6 +106,9 @@ extern "C" void update_geometry_controls(void){
   if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_geom_surface_outline);
   if(CHECKBOX_interior_solid!=NULL)CHECKBOX_interior_solid->set_int_val(show_geom_interior_solid);
   if(CHECKBOX_interior_outline!=NULL)CHECKBOX_interior_outline->set_int_val(show_geom_interior_outline);
+
+  if(CHECKBOX_show_geom_normal != NULL)CHECKBOX_show_geom_normal->set_int_val(show_geom_normal);
+  if(CHECKBOX_smooth_geom_normal != NULL)CHECKBOX_smooth_geom_normal->set_int_val(smooth_geom_normal);
 }
 
 /* ------------------ get_geom_dialog_state ------------------------ */
@@ -293,6 +304,13 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_interior,"solid",&show_geom_interior_solid,VOL_SHOWHIDE,Volume_CB);
   CHECKBOX_interior_outline=glui_geometry->add_checkbox_to_panel(PANEL_interior,"outline",&show_geom_interior_outline,VOL_SHOWHIDE,Volume_CB);
 
+  CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "show normal", &show_geom_normal);
+  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "smooth normals", &smooth_geom_normal);
+  SPINNER_geom_max_angle=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"max angle",GLUI_SPINNER_FLOAT,&geom_max_angle,GEOM_MAX_ANGLE,Volume_CB);
+  SPINNER_geom_max_angle->set_float_limits(0.0,90.0);
+  SPINNER_geom_outline_ioffset=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"outline offset",GLUI_SPINNER_INT,&geom_outline_ioffset,GEOM_OUTLINE_IOFFSET,Volume_CB);
+  SPINNER_geom_outline_ioffset->set_int_limits(0,40);
+
   // -------------- Cube/Tetra intersection test -------------------
 
   ROLLOUT_geomtest = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured,"Geometry tests",false);
@@ -394,6 +412,13 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+  case GEOM_MAX_ANGLE:
+    cos_geom_max_angle=cos(DEG2RAD*geom_max_angle);
+    update_triangles(GEOM_STATIC);
+    break;
+  case GEOM_OUTLINE_IOFFSET:
+    geom_outline_offset = (float)geom_outline_ioffset/1000.0;
+    break;
   case GEOMETRYTEST:
     if(geomtest_option != NO_TEST){
       BlockageMenu(visBLOCKHide);

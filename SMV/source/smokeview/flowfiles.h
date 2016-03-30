@@ -66,7 +66,7 @@ typedef struct _tetrahedron {
 typedef struct {
   int npoints,ntriangles,nvolus;
   point *points;
-  triangle *triangles;
+  triangle *triangles, **triangleptrs;
   tetrahedron *volumes;
 } geomlistdata;
 

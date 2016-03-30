@@ -540,20 +540,22 @@ void draw_geom(int flag, int timestate){
           glColor3fv(color);
           last_color=color;
         }
-#define EPSLINE 0.005
         {
           int ind[6] = {0, 1, 1, 2, 2, 0};
           int k;
 
           for(k = 0; k < 6; k++){
-            float *xyzval, *pknorm;
+            float *xyzval, *pknorm, xyzval2[3];
             point *pk;
 
             pk = trianglei->points[ind[k]];
             pknorm = pk->point_norm;
-
             xyzval = xyzptr[ind[k]];
-            glVertex3f(xyzval[0] + EPSLINE*pknorm[0], xyzval[1] + EPSLINE*pknorm[1], xyzval[2] + EPSLINE*pknorm[2]);
+
+            VECEQ3(xyzval2, pknorm);
+            VEC3MA(xyzval2, geom_outline_offset);
+            VECADD3(xyzval2, xyzval2, xyzval);
+            glVertex3fv(xyzval2);
           }
         }
       }
@@ -789,7 +791,11 @@ void update_triangles(int flag){
 
       // allocate triangle pointers
 
-      if(ntriangles>0)NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
+      FREEMEMORY(geomlisti->triangleptrs);
+      if(ntriangles>0){
+        NewMemoryMemID((void **)&triangles, ntriangles*sizeof(triangle *), geomi->memory_id);
+        geomlisti->triangleptrs = triangles;
+      }
 
       // assign triangle pointers to points
 
@@ -866,7 +872,6 @@ void update_triangles(int flag){
             norm[1] = 0.0;
             norm[2] = 1.0;
           }
-#define COS30 0.866
           for(k = 0; k<pointj->ntriangles; k++){
             triangle *trianglek;
             float *tri_normk, cosang;
@@ -874,7 +879,7 @@ void update_triangles(int flag){
             trianglek = pointj->triangles[k];
             tri_normk = trianglek->tri_norm;
             cosang = DOT3(tri_normk,tri_normi);
-            if(ABS(cosang)>COS30){
+            if(ABS(cosang)>cos_geom_max_angle){
               norm[0] += tri_normk[0];
               norm[1] += tri_normk[1];
               norm[2] += tri_normk[2];
@@ -1331,6 +1336,7 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
     geomlisti = geomi->geomlistinfo+iframe;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->triangleptrs = NULL;
     geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;
@@ -1477,6 +1483,7 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     geomlisti = geomi->geomlistinfo+i;
     geomlisti->points=NULL;
     geomlisti->triangles=NULL;
+    geomlisti->triangleptrs = NULL;
     geomlisti->volumes=NULL;
     geomlisti->npoints=0;
     geomlisti->ntriangles=0;

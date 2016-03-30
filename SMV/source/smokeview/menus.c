@@ -5378,7 +5378,7 @@ updatemenu=0;
     glutAddMenuEntry(_("   Hide"),GEOMETRY_HIDE);
   }
 
-/* --------------------------------embedded menu -------------------------- */
+/* --------------------------------interior geometry menu -------------------------- */
 
   CREATEMENU(immersedinteriormenu,ImmersedMenu);
   if(have_volume==1){
@@ -5395,7 +5395,7 @@ updatemenu=0;
     }
   }
 
-/* --------------------------------embedded menu -------------------------- */
+/* --------------------------------surface geometry menu -------------------------- */
 
   CREATEMENU(immersedmenu,ImmersedMenu);
   glutAddSubMenu(_("Surface"),immersedsurfacemenu);
@@ -5442,6 +5442,7 @@ updatemenu=0;
   }
 
 /* --------------------------------blockage menu -------------------------- */
+
   CREATEMENU(blockagemenu,BlockageMenu);
   if(use_menusmooth==1){
     if(sb_atstart==1){
@@ -6060,15 +6061,10 @@ updatemenu=0;
 
   CREATEMENU(geometrymenu,GeometryMenu);
   if(ntotal_blockages>0)glutAddSubMenu(_("Obstacles"),blockagemenu);
-  if(ngeominfo>0)glutAddSubMenu(_("Immersed Solids"),immersedmenu);
+  if(ngeominfo>0)glutAddSubMenu(_("Immersed"),immersedmenu);
   if(get_num_activedevices()>0||ncvents>0){
     glutAddSubMenu(_("Objects"),showobjectsmenu);
   }
-    //shaded 17 0
-    //stepped 18 1
-    //line    19 2
-    //texture 20 3
-    //hidden 21 4
   if(nterraininfo>0){
     glutAddSubMenu(_("Terrain"),terrain_showmenu);
   }
@@ -6091,8 +6087,10 @@ updatemenu=0;
   else{
     visFrame=0;
   }
+#ifdef _DEBUG
   if(show_triangle_count==1)glutAddMenuEntry(_("*Triangle count"), GEOM_TriangleCount);
   if(show_triangle_count==0)glutAddMenuEntry(_("Triangle count"), GEOM_TriangleCount);
+#endif
   glutAddMenuEntry(_("Show all"), GEOM_ShowAll);
   glutAddMenuEntry(_("Hide all"), GEOM_HideAll);
 

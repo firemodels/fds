@@ -20,6 +20,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(geom_outline_ioffset,5);
+SVEXTERN float SVDECL(geom_outline_offset,0.005);
+SVEXTERN float SVDECL(geom_max_angle, 30.0), cos_geom_max_angle;
 SVEXTERN int SVDECL(update_setvents, 0);
 #ifdef pp_SLICECOLORDEFER
 SVEXTERN int SVDECL(use_set_slicecolor, 1);
@@ -81,7 +84,7 @@ SVEXTERN int SVDECL(update_have_gvec,0),SVDECL(gvec_down,1),SVDECL(have_gvec,0),
 SVEXTERN float SVDECL(slice_line_contour_width,1.0);
 SVEXTERN int SVDECL(slice_contour_type,0);
 SVEXTERN int SVDECL(viscadopaque,0);
-SVEXTERN int SVDECL(structured_isopen,1), SVDECL(unstructured_isopen,0);
+SVEXTERN int SVDECL(structured_isopen,0), SVDECL(unstructured_isopen,0);
 SVEXTERN float SVDECL(patchout_tmin,1.0), SVDECL(patchout_tmax,-1.0);
 SVEXTERN float SVDECL(patchout_xmin,1.0), SVDECL(patchout_xmax,-1.0);
 SVEXTERN float SVDECL(patchout_ymin,1.0), SVDECL(patchout_ymax,-1.0);
