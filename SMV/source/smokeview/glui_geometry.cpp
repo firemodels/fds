@@ -300,6 +300,7 @@ extern "C" void glui_geometry_setup(int main_window){
   PANEL_surface = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"surface");
   CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_surface, "solid", &show_geom_surface_solid, VOL_SHOWHIDE, Volume_CB);
   CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_surface, "outline", &show_geom_surface_outline, VOL_SHOWHIDE, Volume_CB);
+  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_surface, "smooth", &smooth_geom_normal);
 
   PANEL_interior = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"interior");
   CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_interior,"solid",&show_geom_interior_solid,VOL_SHOWHIDE,Volume_CB);
@@ -307,7 +308,6 @@ extern "C" void glui_geometry_setup(int main_window){
 
   PANEL_normals = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"normals");
   CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_normals, "show", &show_geom_normal);
-  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_normals, "smooth", &smooth_geom_normal);
   SPINNER_geom_ivecfactor = glui_geometry->add_spinner_to_panel(PANEL_normals, "length", GLUI_SPINNER_INT, &geom_ivecfactor, GEOM_IVECFACTOR, Volume_CB);
   SPINNER_geom_ivecfactor->set_int_limits(0, 200);
 
