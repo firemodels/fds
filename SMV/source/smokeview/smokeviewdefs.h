@@ -353,6 +353,9 @@ void _Sniff_Errors(char *whereat);
 #define GEOM_STATIC 0
 #define GEOM_DYNAMIC 1
 
+#define GEOM_UPDATE_ALL 0
+#define GEOM_UPDATE_NORMALS 1
+
 #define NO_PLOTS 0
 #define STATIC_PLOTS 1
 #define STATIC_PLOTS_NORECURSE 3
