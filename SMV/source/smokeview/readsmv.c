@@ -7791,7 +7791,7 @@ typedef struct {
   read_all_geom();
   ngeominfoptrs=0;
   GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
-  update_triangles(GEOM_STATIC);
+  update_triangles(GEOM_STATIC,GEOM_UPDATE_ALL);
   get_faceinfo();
 
   PRINTF("%s",_("wrap up completed"));

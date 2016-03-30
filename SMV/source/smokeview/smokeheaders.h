@@ -940,7 +940,7 @@ EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
 EXTERNCPP surfdata *get_surface(char *label);
 EXTERNCPP void CalcTriNormal(float *v1, float *v2, float *v3, float *norm);
-EXTERNCPP void update_triangles(int time_flag);
+EXTERNCPP void update_triangles(int time_flag, int update);
 
 #ifndef CPP
 #include "smokefortheaders.h"

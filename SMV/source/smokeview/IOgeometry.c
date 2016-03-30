@@ -679,7 +679,7 @@ void draw_geom(int flag, int timestate){
 
           pointk = trianglei->points[k];
           pk = pointk->xyz;
-          pknorm = pointk->point_norm;
+          pknorm = trianglei->point_norm+3*k;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -707,7 +707,7 @@ void draw_geom(int flag, int timestate){
 
           pointk = trianglei->points[k];
           pk = pointk->xyz;
-          pknorm = pointk->point_norm;
+          pknorm = trianglei->point_norm+3*k;
           xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
           xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
           xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
@@ -722,9 +722,12 @@ void draw_geom(int flag, int timestate){
 
 /* ------------------ update_triangles ------------------------ */
 
-void update_triangles(int flag){
+void update_triangles(int flag,int update){
   int j, ii, ntimes;
 
+  if(update==GEOM_UPDATE_NORMALS){
+  // placeholder for just updating geometry normals
+  }
   for(j=0;j<ngeominfoptrs;j++){
     geomdata *geomi;
     float *xyzptr[3];

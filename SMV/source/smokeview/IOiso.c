@@ -154,7 +154,7 @@ void readiso_geom_wrapup(void){
   update_readiso_geom_wrapup=UPDATE_ISO_OFF;
   ngeominfoptrs = 0;
   GetGeomInfoPtrs(&geominfoptrs, &ngeominfoptrs);
-  update_triangles(GEOM_DYNAMIC);
+  update_triangles(GEOM_DYNAMIC,GEOM_UPDATE_ALL);
 
   Update_Times();
   get_faceinfo();

@@ -307,7 +307,7 @@ extern "C" void glui_geometry_setup(int main_window){
   CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "show normal", &show_geom_normal);
   CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(ROLLOUT_unstructured, "smooth normals", &smooth_geom_normal);
   SPINNER_geom_max_angle=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"max angle",GLUI_SPINNER_FLOAT,&geom_max_angle,GEOM_MAX_ANGLE,Volume_CB);
-  SPINNER_geom_max_angle->set_float_limits(0.0,90.0);
+  SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset=glui_geometry->add_spinner_to_panel(ROLLOUT_unstructured,"outline offset",GLUI_SPINNER_INT,&geom_outline_ioffset,GEOM_OUTLINE_IOFFSET,Volume_CB);
   SPINNER_geom_outline_ioffset->set_int_limits(0,40);
 
@@ -414,7 +414,7 @@ extern "C" void Volume_CB(int var){
   switch(var){
   case GEOM_MAX_ANGLE:
     cos_geom_max_angle=cos(DEG2RAD*geom_max_angle);
-    update_triangles(GEOM_STATIC);
+    update_triangles(GEOM_STATIC,GEOM_UPDATE_NORMALS);
     break;
   case GEOM_OUTLINE_IOFFSET:
     geom_outline_offset = (float)geom_outline_ioffset/1000.0;
