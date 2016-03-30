@@ -350,8 +350,6 @@ void draw_geom(int flag, int timestate){
     if(cullfaces==1)glEnable(GL_CULL_FACE);
   }
 
-#define VECFACTOR 0.03
-
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
@@ -617,9 +615,9 @@ void draw_geom(int flag, int timestate){
         xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
         xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
         xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+        xyz2[0] = xyz1[0] + SCALE2FDS(geom_vecfactor)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(geom_vecfactor)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(geom_vecfactor)*xyznorm[2];
 
         glVertex3fv(xyz1);
         glVertex3fv(xyz2);
@@ -648,9 +646,9 @@ void draw_geom(int flag, int timestate){
         xyz1[0] = (p1[0] + p2[0] + p3[0])/3.0;
         xyz1[1] = (p1[1] + p2[1] + p3[1])/3.0;
         xyz1[2] = (p1[2] + p2[2] + p3[2])/3.0;
-        xyz2[0] = xyz1[0] + SCALE2FDS(VECFACTOR)*xyznorm[0];
-        xyz2[1] = xyz1[1] + SCALE2FDS(VECFACTOR)*xyznorm[1];
-        xyz2[2] = xyz1[2] + SCALE2FDS(VECFACTOR)*xyznorm[2];
+        xyz2[0] = xyz1[0] + SCALE2FDS(geom_vecfactor)*xyznorm[0];
+        xyz2[1] = xyz1[1] + SCALE2FDS(geom_vecfactor)*xyznorm[1];
+        xyz2[2] = xyz1[2] + SCALE2FDS(geom_vecfactor)*xyznorm[2];
 
         glVertex3fv(xyz2);
       }
@@ -680,9 +678,9 @@ void draw_geom(int flag, int timestate){
           pointk = trianglei->points[k];
           pk = pointk->xyz;
           pknorm = trianglei->point_norm+3*k;
-          xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
-          xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
-          xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
+          xyz2[0] = pk[0] + SCALE2FDS(geom_vecfactor)*pknorm[0];
+          xyz2[1] = pk[1] + SCALE2FDS(geom_vecfactor)*pknorm[1];
+          xyz2[2] = pk[2] + SCALE2FDS(geom_vecfactor)*pknorm[2];
           glVertex3fv(pk);
           glVertex3fv(xyz2);
         }
@@ -708,9 +706,9 @@ void draw_geom(int flag, int timestate){
           pointk = trianglei->points[k];
           pk = pointk->xyz;
           pknorm = trianglei->point_norm+3*k;
-          xyz2[0] = pk[0] + SCALE2FDS(VECFACTOR)*pknorm[0];
-          xyz2[1] = pk[1] + SCALE2FDS(VECFACTOR)*pknorm[1];
-          xyz2[2] = pk[2] + SCALE2FDS(VECFACTOR)*pknorm[2];
+          xyz2[0] = pk[0] + SCALE2FDS(geom_vecfactor)*pknorm[0];
+          xyz2[1] = pk[1] + SCALE2FDS(geom_vecfactor)*pknorm[1];
+          xyz2[2] = pk[2] + SCALE2FDS(geom_vecfactor)*pknorm[2];
           glVertex3fv(xyz2);
         }
       }
