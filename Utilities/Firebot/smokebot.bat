@@ -220,7 +220,7 @@ set timingslogfile=%TIMINGSDIR%\timings_%revisionnum%.txt
 :: build cfast
 
 echo             building cfast
-cd %cfastroot%\CFAST\intel_win%size%
+cd %cfastroot%\Build\CFAST\intel_win%size%
 erase *.obj *.mod *.exe 1>> %OUTDIR%\stage0.txt 2>&1
 call make_cfast bot 1>> %OUTDIR%\stage0.txt 2>&1
 call :does_file_exist cfast7_win%size%.exe %OUTDIR%\stage0.txt|| exit /b 1
@@ -270,7 +270,7 @@ call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
 echo             debug
 
-cd %fdsroot%\SMV\Build\intel_win%size%
+cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
 erase *.obj *.mod *.exe smokeview_win%size%_db.exe 1> %OUTDIR%\stage2a.txt 2>&1
 call make_smv_db -r bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
@@ -279,7 +279,7 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage2a.txt "Stage 2a"
 
 echo             release
 
-cd %fdsroot%\SMV\Build\intel_win%size%
+cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
 erase *.obj *.mod smokeview_win%size%.exe 1> %OUTDIR%\stage2b.txt 2>&1
 call make_smv -r bot 1>> %OUTDIR%\stage2b.txt 2>&1
 
@@ -300,25 +300,25 @@ call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
 if %haveCC% == 1 (
   echo             background
-  cd %fdsroot%\Utilities\background\intel_win%size%
+  cd %fdsroot%\SMV\Build\background\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   call make_background bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist background.exe %OUTDIR%\stage3.txt
 
   echo             smokediff
-  cd %fdsroot%\Utilities\smokediff\intel_win%size%
+  cd %fdsroot%\SMV\Build\smokediff\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   call make_diff bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokediff_win%size%.exe %OUTDIR%\stage3.txt
 
   echo             smokezip
-  cd %fdsroot%\Utilities\smokezip\intel_win%size%
+  cd %fdsroot%\SMV\Build\smokezip\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   call make_zip bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokezip_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
   echo             wind2fds
-  cd %fdsroot%\Utilities\wind2fds\intel_win%size%
+  cd %fdsroot%\SMV\Build\wind2fds\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
   call make_wind bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
