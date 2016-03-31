@@ -795,13 +795,10 @@ void smooth_geom_normals(geomlistdata *geomlisti){
 /* ------------------ update_geom_normals ------------------------ */
 
 void update_geom_normals(void){
-  int j, ii, ntimes;
+  int j, ii;
 
   for(j = 0; j < ngeominfoptrs; j++){
     geomdata *geomi;
-    float *xyzptr[3];
-    float *xyznorm;
-    int i;
     int iend;
 
     geomi = geominfoptrs[j];
@@ -813,8 +810,6 @@ void update_geom_normals(void){
 
     for(ii = -1; ii < iend; ii++){
       geomlistdata *geomlisti;
-      int ntriangles;
-      triangle **triangles;
 
       if(ii == -1 || geomi->currentframe == NULL){
         geomlisti = geomi->geomlistinfo + ii;
