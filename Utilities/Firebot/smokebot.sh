@@ -244,15 +244,15 @@ run_auto()
   option=$1
   GIT_STATUSDIR=~/.smokebot
   SMV_SOURCE=$fdsrepo/SMV/source
-  GIT_SMVFILE=$GIT_STATUSDIR/smv_revision
-  GIT_SMVLOG=$GIT_STATUSDIR/smv_log
+  GIT_SMV_FILE=$GIT_STATUSDIR/smv_revision
+  GIT_SMV_LOG=$GIT_STATUSDIR/smv_log
   
   QUICKTRIGGER=$SMV_SOURCE/smokeview/smokebot_quicktrigger.txt
-  GIT_QUICKTRIGGERFILE=$GIT_STATUSDIR/quicktrigger_revision
+  GIT_QT_FILE=$GIT_STATUSDIR/quicktrigger_revision
 
   FDS_SOURCE=$fdsrepo/FDS_Source
-  GIT_FDSFILE=$GIT_STATUSDIR/fds_revision
-  GIT_FDSLOG=$GIT_STATUSDIR/FDS_log
+  GIT_FDS_FILE=$GIT_STATUSDIR/fds_revision
+  GIT_FDS_LOG=$GIT_STATUSDIR/FDS_log
 
   MESSAGE_FILE=$GIT_STATUSDIR/message
 
@@ -280,51 +280,57 @@ run_auto()
 
 # get info for smokeview
   cd $SMV_SOURCE
-  THIS_QUICKTRIGGERREVISION=`git log --abbrev-commit $QUICKTRIGGER | head -1 | awk '{print $2}'`
-  LAST_QUICKTRIGGERREVISION=`cat $GIT_QUICKTRIGGERFILE`
-  if [ ! -e $LAST_QUICKTRIGGERREVISION ]; then
-    touch $LAST_QUICKTRIGGERREVISION
+  if [ ! -e $GIT_QT_FILE ]; then
+    touch $GIT_QT_FILE
   fi
+  THIS_QT_REVISION=`git log --abbrev-commit $QUICKTRIGGER | head -1 | awk '{print $2}'`
+  LAST_QT_REVISION=`cat $GIT_QT_FILE`
 
-  THIS_SMVREVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
   THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_SMVREVISION=`cat $GIT_SMVFILE`
-  git log . | head -5 | tail -1 > $GIT_SMVLOG
+  if [ ! -e $GIT_SMV_FILE ]; then
+    touch $GIT_SMV_FILE
+  fi
+  THIS_SMV_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  LAST_SMV_REVISION=`cat $GIT_SMV_FILE`
+  git log . | head -5 | tail -1 > $GIT_SMV_LOG
 
 # get info for FDS
   cd $FDS_SOURCE
-  THIS_FDSREVISION=`git log --abbrev-commit . | head -1 | awk '{printf $2}'`
   THIS_FDSAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_FDSREVISION=`cat $GIT_FDSFILE`
-  git log . | head -5 | tail -1 > $GIT_FDSLOG
+  if [ ! -e $GIT_FDS_FILE ]; then
+    touch $GIT_FDS_FILE
+  fi
+  THIS_FDS_REVISION=`git log --abbrev-commit . | head -1 | awk '{printf $2}'`
+  LAST_FDS_REVISION=`cat $GIT_FDS_FILE`
+  git log . | head -5 | tail -1 > $GIT_FDS_LOG
 
   if [ "$option" == "" ]; then
-    if [[ $THIS_SMVREVISION == $LAST_SMVREVISION && $THIS_FDSREVISION == $LAST_FDSREVISION ]] ; then
+    if [[ $THIS_SMV_REVISION == $LAST_SMV_REVISION && $THIS_FDS_REVISION == $LAST_FDS_REVISION ]] ; then
       exit
     fi
   else
-    if [[ $THIS_QUICKTRIGGERREVISION == $LAST_QUICKTRIGGERREVISION ]] ; then
+    if [[ $THIS_QT_REVISION == $LAST_QT_REVISION ]] ; then
       exit
     fi
   fi
 
   rm -f $MESSAGE_FILE
   if [ "$option" == "" ]; then
-    if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
-      echo $THIS_SMVREVISION>$GIT_SMVFILE
-      echo -e "smokeview source has changed. $LAST_SMVREVISION->$THIS_SMVREVISION($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
-      cat $GIT_SMVLOG >> $MESSAGE_FILE
+    if [[ $THIS_SMV_REVISION != $LAST_SMV_REVISION ]] ; then
+      echo $THIS_SMV_REVISION>$GIT_SMV_FILE
+      echo -e "smokeview source has changed. $LAST_SMV_REVISION->$THIS_SMV_REVISION($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
     fi
-    if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
-      echo $THIS_FDSREVISION>$GIT_FDSFILE
-      echo -e "FDS source has changed. $LAST_FDSREVISION->$THIS_FDSREVISION($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
-      cat $GIT_FDSLOG >> $MESSAGE_FILE
+    if [[ $THIS_FDS_REVISION != $LAST_FDS_REVISION ]] ; then
+      echo $THIS_FDS_REVISION>$GIT_FDS_FILE
+      echo -e "FDS source has changed. $LAST_FDS_REVISION->$THIS_FDS_REVISION($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
+      cat $GIT_FDS_LOG >> $MESSAGE_FILE
     fi
   else
-    if [[ $THIS_QUICKTRIGGERREVISION != $LAST_QUICKTRIGGERREVISION ]] ; then
-      echo $THIS_QUICKTRIGGERREVISION>$GIT_QUICKTRIGGERFILE
+    if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
+      echo $THIS_QT_RREVISION>$GIT_QT_FILE
       echo -e "quick trigger file has changed. " >> $MESSAGE_FILE
-      cat $GIT_SMVLOG >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
     fi
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
@@ -1382,21 +1388,21 @@ fi
    echo "            total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
    echo "benchmark time(s): $TOTAL_SMV_TIMES" >> $TIME_LOG
 if [ "$RUNAUTO" == "y" ]; then
-   echo "FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
-   echo "SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
+   echo "FDS revisions: old: $LAST_FDS_REVISION new: $THIS_FDS_REVISION" >> $TIME_LOG
+   echo "SMV revisions: old: $LAST_SMV_REVISION new: $THIS_SMV_REVISION" >> $TIME_LOG
 fi
 if [ "$RUNAUTO" == "Y" ]; then
-   echo "FDS revisions: $THIS_SMVREVISION" >> $TIME_LOG
-   echo "SMV revisions: $THIS_FDSREVISION" >> $TIME_LOG
+   echo "FDS revisions: $THIS_SMV_REVISION" >> $TIME_LOG
+   echo "SMV revisions: $THIS_FDS_REVISION" >> $TIME_LOG
 fi
 if [ "$RUNAUTO" == "" ]; then
-   echo "SMV revisions: $THIS_SMVREVISION" >> $TIME_LOG
+   echo "SMV revisions: $THIS_SMV_REVISION" >> $TIME_LOG
 fi
-  if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
-    cat $GIT_SMVLOG >> $TIME_LOG
+  if [[ $THIS_SMV_REVISION != $LAST_SMV_REVISION ]] ; then
+    cat $GIT_SMV_LOG >> $TIME_LOG
   fi
-  if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
-    cat $GIT_FDSLOG >> $TIME_LOG
+  if [[ $THIS_FDS_REVISION != $LAST_FDS_REVISION ]] ; then
+    cat $GIT_FDS_LOG >> $TIME_LOG
   fi
    cd $SMOKEBOT_RUNDIR
    # Check for warnings and errors
