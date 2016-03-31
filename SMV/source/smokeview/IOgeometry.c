@@ -718,13 +718,128 @@ void draw_geom(int flag, int timestate){
   }
 }
 
+/* ------------------ smooth_geom_normals ------------------------ */
+
+void smooth_geom_normals(geomlistdata *geomlisti){
+  int i;
+
+      // compute average normals - method 1
+
+  for(i = 0; i < geomlisti->npoints; i++){
+    point *pointi;
+    int k;
+    float *norm;
+
+    pointi = geomlisti->points + i;
+    norm = pointi->point_norm;
+    norm[0] = 0.0;
+    norm[1] = 0.0;
+    norm[2] = 0.0;
+    for(k = 0; k < pointi->ntriangles; k++){
+      float *normk;
+      triangle *trianglei;
+
+      trianglei = pointi->triangles[k];
+      normk = trianglei->tri_norm;
+      norm[0] += normk[0];
+      norm[1] += normk[1];
+      norm[2] += normk[2];
+    }
+    ReduceToUnit(norm);
+  }
+
+      // compute average normals - method 2
+
+  for(i = 0; i < geomlisti->ntriangles; i++){
+    triangle *trianglei;
+    int j;
+    float *tri_normi;
+
+    trianglei = geomlisti->triangles + i;
+    tri_normi = trianglei->tri_norm;
+    for(j = 0; j<3; j++){
+      point *pointj;
+      int k;
+      float *norm;
+
+      pointj = trianglei->points[j];
+      norm = trianglei->point_norm + 3 * j;
+      if(pointj->ntriangles>0){
+        norm[0] = 0.0;
+        norm[1] = 0.0;
+        norm[2] = 0.0;
+      }
+      else{
+        norm[0] = 0.0;
+        norm[1] = 0.0;
+        norm[2] = 1.0;
+      }
+      for(k = 0; k<pointj->ntriangles; k++){
+        triangle *trianglek;
+        float *tri_normk, cosang;
+
+        trianglek = pointj->triangles[k];
+        tri_normk = trianglek->tri_norm;
+        cosang = DOT3(tri_normk, tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
+        if(ABS(cosang)>cos_geom_max_angle){
+          norm[0] += tri_normk[0];
+          norm[1] += tri_normk[1];
+          norm[2] += tri_normk[2];
+        }
+      }
+      ReduceToUnit(norm);
+    }
+  }
+}
+
+/* ------------------ update_geom_normals ------------------------ */
+
+void update_geom_normals(void){
+  int j, ii, ntimes;
+
+  for(j = 0; j < ngeominfoptrs; j++){
+    geomdata *geomi;
+    float *xyzptr[3];
+    float *xyznorm;
+    int i;
+    int iend;
+
+    geomi = geominfoptrs[j];
+    if(geomi->loaded == 0 || geomi->display == 0)continue;
+    if(geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)continue;
+
+    iend = geomi->ntimes;
+    if(geomi->currentframe != NULL)iend = 1;
+
+    for(ii = -1; ii < iend; ii++){
+      geomlistdata *geomlisti;
+      int ntriangles;
+      triangle **triangles;
+
+      if(ii == -1 || geomi->currentframe == NULL){
+        geomlisti = geomi->geomlistinfo + ii;
+      }
+      else{
+        geomlisti = geomi->currentframe;
+      }
+
+      smooth_geom_normals(geomlisti);
+    }
+  }
+
+  // smooth normals at mesh boundaries
+
+}
+
 /* ------------------ update_triangles ------------------------ */
 
 void update_triangles(int flag,int update){
   int j, ii, ntimes;
 
   if(update==GEOM_UPDATE_NORMALS){
-  // placeholder for just updating geometry normals
+// placeholder for just updating geometry normals
+    update_geom_normals();
+    return;
   }
   for(j=0;j<ngeominfoptrs;j++){
     geomdata *geomi;
@@ -822,73 +937,8 @@ void update_triangles(int flag,int update){
         pointi->triangles[pointi->itriangle++]=trianglei;
       }
 
-      // compute average normals - method 1
+      smooth_geom_normals(geomlisti);
 
-      for(i=0;i<geomlisti->npoints;i++){
-        point *pointi;
-        int k;
-        float *norm;
-
-        pointi = geomlisti->points + i;
-        norm=pointi->point_norm;
-        norm[0]=0.0;
-        norm[1]=0.0;
-        norm[2]=0.0;
-        for(k=0;k<pointi->ntriangles;k++){
-          float *normk;
-          triangle *trianglei;
-
-          trianglei = pointi->triangles[k];
-          normk = trianglei->tri_norm;
-          norm[0]+=normk[0];
-          norm[1]+=normk[1];
-          norm[2]+=normk[2];
-        }
-        ReduceToUnit(norm);
-      }
-
-      // compute average normals - method 2
-
-      for(i = 0; i<geomlisti->ntriangles; i++){
-        triangle *trianglei;
-        int j;
-        float *tri_normi;
-
-        trianglei = geomlisti->triangles+i;
-        tri_normi = trianglei->tri_norm;
-        for(j = 0; j<3; j++){
-          point *pointj;
-          int k;
-          float *norm;
-
-          pointj = trianglei->points[j];
-          norm = trianglei->point_norm+3*j;
-          if(pointj->ntriangles>0){
-            norm[0] = 0.0;
-            norm[1] = 0.0;
-            norm[2] = 0.0;
-          }
-          else{
-            norm[0] = 0.0;
-            norm[1] = 0.0;
-            norm[2] = 1.0;
-          }
-          for(k = 0; k<pointj->ntriangles; k++){
-            triangle *trianglek;
-            float *tri_normk, cosang;
-
-            trianglek = pointj->triangles[k];
-            tri_normk = trianglek->tri_norm;
-            cosang = DOT3(tri_normk,tri_normi);
-            if(ABS(cosang)>cos_geom_max_angle){
-              norm[0] += tri_normk[0];
-              norm[1] += tri_normk[1];
-              norm[2] += tri_normk[2];
-            }
-          }
-          ReduceToUnit(norm);
-        }
-      }
     }
   }
 
