@@ -27,6 +27,7 @@ SSH=
 UPLOAD=
 FORCE=
 COMPILER=intel
+SMOKEBOT_LITE=
 
 WEB_URL=
 web_DIR=/var/www/html/`whoami`
@@ -62,6 +63,8 @@ else
 echo "-m email_address"
 fi
 echo "-q queue [default: $QUEUE]"
+echo "-L - smokebot lite,  run only stages that build a debug fds and run cases with it"
+echo "                    (no release fds, no release cases, no manuals, etc)"
 echo "-M  - make movies"
 echo "-r - FDS-SMV repository location [default: $FDSREPO]"
 echo "-S host - generate images on host"
@@ -81,11 +84,14 @@ fi
 exit
 }
 
-while getopts 'ab:C:cd:fhI:m:Mq:r:S:uUvw:W:' OPTION
+while getopts 'aAb:C:cd:fhI:Lm:Mq:r:S:uUvw:W:' OPTION
 do
 case $OPTION  in
   a)
    RUNAUTO=-a
+   ;;
+  A)
+   RUNAUTO=-A
    ;;
   b)
    BRANCH="$OPTARG"
@@ -105,6 +111,9 @@ case $OPTION  in
   h)
    usage
    exit
+   ;;
+  L)
+   SMOKEBOT_LITE="-L"
    ;;
   m)
    EMAIL="$OPTARG"
@@ -186,8 +195,8 @@ BRANCH="-b $BRANCH"
 
 if [[ "$RUNSMOKEBOT" == "1" ]]; then
   touch $running
-  ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
+  ./$botscript $RUNAUTO $COMPILER $SSH $SMOKEBOT_LITE $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
   rm $running
 else
-  echo ./$botscript $RUNAUTO $COMPILER $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
+  echo ./$botscript $RUNAUTO $COMPILER $SMOKEBOT_LITE $SSH $BRANCH $CFASTREPO $FDSREPO $CLEANREPO $web_DIR $WEB_URL $UPDATEREPO $QUEUE $UPLOAD $EMAIL $MOVIE "$@"
 fi
