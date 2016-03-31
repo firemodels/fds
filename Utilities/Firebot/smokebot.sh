@@ -328,7 +328,7 @@ run_auto()
     fi
   else
     if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
-      echo $THIS_QT_RREVISION>$GIT_QT_FILE
+      echo $THIS_QT_REVISION>$GIT_QT_FILE
       echo -e "quick trigger file has changed. " >> $MESSAGE_FILE
       cat $GIT_SMV_LOG >> $MESSAGE_FILE
     fi
