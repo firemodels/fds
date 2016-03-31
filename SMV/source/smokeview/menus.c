@@ -4441,6 +4441,7 @@ void ImmersedMenu(int value){
     case GEOMETRY_HIDEALL:
       ImmersedMenu(GEOMETRY_HIDE);
       ImmersedMenu(GEOMETRY_TETRA_HIDE);
+      show_geom_normal = 0;
       break;
     case MENU_DUMMY:
       break;

@@ -35,7 +35,7 @@ GLUI_Checkbox *CHECKBOX_show_geom_normal = NULL;
 GLUI_Checkbox *CHECKBOX_smooth_geom_normal = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
-GLUI_Rollout *ROLLOUT_geomtest2 = NULL;
+GLUI_Panel *PANEL_geomtest2 = NULL;
 GLUI_Panel *PANEL_geom1 = NULL;
 GLUI_Panel *PANEL_normals = NULL;
 GLUI_Panel *PANEL_geom1a=NULL;
@@ -160,7 +160,7 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry = GLUI_Master.create_glui("Geometry",0,0,0);
   if(showedit_dialog==0)glui_geometry->hide();
 
-  ROLLOUT_structured = glui_geometry->add_rollout("Structured",false);
+  ROLLOUT_structured = glui_geometry->add_rollout("Obstacles",false);
   if(structured_isopen==1)ROLLOUT_structured->open();
   PANEL_obj_select = glui_geometry->add_panel_to_panel(ROLLOUT_structured,"SURFs");
 
@@ -284,7 +284,7 @@ extern "C" void glui_geometry_setup(int main_window){
   EDIT_zmax->set_float_limits(zplt_orig[0],zplt_orig[kbar],GLUI_LIMIT_CLAMP);
 
 #ifdef pp_GEOMTEST
-  ROLLOUT_unstructured = glui_geometry->add_rollout("Unstructured",false);
+  ROLLOUT_unstructured = glui_geometry->add_rollout("Immersed",false);
   if(unstructured_isopen==1)ROLLOUT_unstructured->open();
 
   for(i=0;i<nmeshes;i++){
@@ -311,12 +311,12 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_ivecfactor = glui_geometry->add_spinner_to_panel(PANEL_normals, "length", GLUI_SPINNER_INT, &geom_ivecfactor, GEOM_IVECFACTOR, Volume_CB);
   SPINNER_geom_ivecfactor->set_int_limits(0, 200);
 
-  ROLLOUT_geomtest2 = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "test parameters", false);
-  SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
+  PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
+  SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
-  SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
+  SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
   SPINNER_geom_outline_ioffset->set_int_limits(0,200);
-  SPINNER_face_factor = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
+  SPINNER_face_factor = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
   SPINNER_face_factor->set_float_limits(0.0, 0.5);
 
   // -------------- Cube/Tetra intersection test -------------------
