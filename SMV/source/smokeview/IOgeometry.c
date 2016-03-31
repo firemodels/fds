@@ -16,7 +16,6 @@ void Volume_CB(int var);
 void CalcTriNormal(float *v1, float *v2, float *v3, float *norm){
   float u[3], v[3];
   int i;
-  int testcompiler;
 
   for(i=0;i<3;i++){
     u[i]=v2[i]-v1[i];
