@@ -5,6 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "string_util.h"
+#include "file_util.h"
 
 
 /* ------------------ usage ------------------------ */
@@ -20,16 +21,22 @@ void usage(char *prog){
 
 /* ------------------ main ------------------------ */
 
+#define LENBUFFER 1024
+
 int main(int argc, char **argv){
-  char buffer[1024],*buffptr;
+  char buffer[LENBUFFER],*buffptr;
   int i;
-  char *filein=NULL,*fileout=NULL,*prog;
+  char filebase[LENBUFFER], fileout[LENBUFFER];
   FILE *streamin=NULL,*streamout=NULL;
+  float lat1, lat2, long1, long2;
+  int nlat, nlong;
+  int line_count,file_count;
 
   set_stdout(stdout);
   buffptr=buffer;
-  prog=argv[0];
-  for(i=1;i<argc;i++){
+  strcpy(filebase, "elevations");
+  sprintf(fileout, "%s%i", filebase,1);
+  for(i = 1; i<argc; i++){
     int lenarg;
     char *arg;
 
@@ -38,22 +45,47 @@ int main(int argc, char **argv){
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
       case 'h':
-        usage(prog);
+        usage("dem2geom");
         exit(1);
+        break;
+      case 'o':
         break;
       case 'v':
         version("dem2geom");
         exit(1);
         break;
       default:
-        usage(prog);
+        usage("demo2geom");
         exit(1);
         break;
       }
     }
   }
-  if(filein==NULL||fileout==NULL){
-    usage(prog);
-    exit(1);
+  fgets(buffer, LENBUFFER, stdin);
+  sscanf(buffer, "%f %f %i %f %f %i", &lat1, &lat2, &nlat, &long1, &long2, &nlong);
+  line_count = 0;
+  file_count = 1;
+  streamout=fopen(fileout, "w");
+  for(i = 0; i<nlat; i++){
+    int j;
+    float llat;
+
+    llat = (lat1*(float)(nlat-1-i)+lat2*(float)i)/(float)(nlat-1);
+
+    for(j = 0; j<nlong; j++){
+      float llong;
+
+      llong = (long1*(float)(nlong-1-j)+long2*(float)j)/(float)(nlong-1);
+      if(line_count>500){
+        file_count++;
+        fclose(streamout);
+        sprintf(fileout, "%s%i", filebase, file_count);
+        streamout = fopen(fileout, "w");
+        line_count = 0;
+      }
+      fprintf(streamout,"%f,%f\n", llat, llong);
+      line_count++;
+
+    }
   }
 }
