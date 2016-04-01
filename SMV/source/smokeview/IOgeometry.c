@@ -353,7 +353,6 @@ void draw_geom(int flag, int timestate){
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
     geomlistdata *geomlisti;
-    int npoints;
     int nvolus;
     int j;
     float *color;
