@@ -480,7 +480,7 @@ Predicting the concentration of products of incomplete combustion is challenging
 
 \subsection{Smyth Slot Burner Experiment}
 
-The two-step, CO production model in FDS was used to simulate a methane/air slot burner diffusion flame. Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner. Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations. The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
+A two-step CO production model (a modified version of the mechanism by Andersen et al.~\cite{AndersenJ:1}) is used to simulate a methane/air slot burner diffusion flame.  A 2D DNS calculation is run at two different grid resolutions: $\delta x = 0.250 \;\si{mm}$ and $\delta x = 0.125 \;\si{mm}$.  In our modified mechanism the hydrocarbon/oxygen reaction to CO is assumed to be infinitely fast (mixed is burnt) to avoid complications of modeling ignition.  The reversible CO to CO$_2$ reaction is modeled with Arrhenius kinetics.  As discussed by Westbrook and Dryer~\cite{Westbrook:1}, the kinetics constants for the reduced CO mechanisms may be model dependent.  Here, the Arrhenius constant for the forward CO to CO$_2$ reaction is tuned to match the Smyth experimental data.  These same model parameters are then also used in the NIST Reduced Scale Enclosure LES without modification (see Section \ref{sec:NIST_RSE_1994}).  Figures~\ref{Smyth_Slot_Burner_fuel_ox} through \ref{Smyth_Slot_Burner_co_co2} show predicted and measured concentrations of CH$_4$, O$_2$, CO,  and CO$_2$ at three elevations above the burner. Figure~\ref{Smyth_Slot_Burner_temp} shows predicted and measured temperatures at these same elevations.  The reported uncertainty in the species concentration measurements ranges from 10~\% to 20~\%.
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
@@ -545,6 +545,7 @@ Fig.~\ref{Beyler_Species} shows species predictions made by the two-step model c
 \clearpage
 
 \subsection{NIST Reduced Scale Enclosure (RSE) Experiments, 1994}
+\label{sec:NIST_RSE_1994}
 
 The RSE natural gas experiments were selected to assess the CO production capability rather than soot production. Nine fire sizes were simulated: 50~kW, 75~kW, 100~kW, 150~kW, 200~kW, 300~kW, 400~kW, 500~kW, and 600~kW. The experiments were modeled using properties of the natural gas supplied to the test facility. The model geometry included the compartment interior along with a 0.6~m deep region outside the door. Figures~\ref{NIST_RSE_1994_spec1} and \ref{NIST_RSE_1994_spec1} show the measured and predicted CO, CO$_2$ and O$_2$, and H$_2$O concentrations. Figure~\ref{NIST_RSE_1994_temp} shows the measured and predicted thermocouple temperatures in the front and rear of the compartment. The measured values are from the test series performed by Bryner, Johnsson, and Pitts~\cite{Bryner:1}.
 
