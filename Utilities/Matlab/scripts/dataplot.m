@@ -150,6 +150,12 @@ for i=2:n_plots
     if itest && (dtest || otest || ftest)
 
         if ~ftest
+            if exist('K')
+                clear K
+            end
+            if exist('d2_Key')
+                clear d2_Key
+            end
             close all
             figure
         else
