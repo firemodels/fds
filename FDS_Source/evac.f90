@@ -6405,9 +6405,11 @@ CONTAINS
                    Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
                    II = FLOOR( CELLSI(FLOOR((x_tmp(3)-XS)*RDXINT)) + 1.0_EB )
                    JJ = FLOOR( CELLSJ(FLOOR((y_tmp(3)-YS)*RDYINT)) + 1.0_EB )
+                   I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
                    Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
                    II = FLOOR( CELLSI(FLOOR((x_tmp(2)-XS)*RDXINT)) + 1.0_EB )
                    JJ = FLOOR( CELLSJ(FLOOR((y_tmp(2)-YS)*RDYINT)) + 1.0_EB )
+                   I_OBST = OBST_INDEX_C(CELL_INDEX(II,JJ,KK))
                    Is_Solid = (Is_Solid .OR. (SOLID(CELL_INDEX(II,JJ,KK)) .AND. .NOT. OBSTRUCTION(I_OBST)%HIDDEN))
                 END IF
 
