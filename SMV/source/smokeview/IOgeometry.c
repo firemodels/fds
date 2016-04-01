@@ -367,7 +367,6 @@ void draw_geom(int flag, int timestate){
       geomlisti = geomi->geomlistinfo+geomi->itime;
     }
     ntris = geomlisti->ntriangles;
-    npoints = geomlisti->npoints;
     nvolus = geomlisti->nvolus;
 
     if(nvolus>0){
