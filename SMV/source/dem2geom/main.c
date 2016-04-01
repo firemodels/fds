@@ -35,7 +35,7 @@ int main(int argc, char **argv){
   set_stdout(stdout);
   buffptr=buffer;
   strcpy(filebase, "elevations");
-  sprintf(fileout, "%s%i", filebase,1);
+  sprintf(fileout, "%s%i.csv", filebase,1);
   for(i = 1; i<argc; i++){
     int lenarg;
     char *arg;
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
         exit(1);
         break;
       default:
-        usage("demo2geom");
+        usage("dem2geom");
         exit(1);
         break;
       }
@@ -63,7 +63,7 @@ int main(int argc, char **argv){
   }
   fgets(buffer, LENBUFFER, stdin);
   sscanf(buffer, "%f %f %i %f %f %i", &lat1, &lat2, &nlat, &long1, &long2, &nlong);
-  line_count = 0;
+  line_count = 1;
   file_count = 1;
   streamout=fopen(fileout, "w");
   for(i = 0; i<nlat; i++){
@@ -79,11 +79,11 @@ int main(int argc, char **argv){
       if(line_count>500){
         file_count++;
         fclose(streamout);
-        sprintf(fileout, "%s%i", filebase, file_count);
+        sprintf(fileout, "%s%i.csv", filebase, file_count);
         streamout = fopen(fileout, "w");
-        line_count = 0;
+        line_count = 1;
       }
-      fprintf(streamout,"%f,%f\n", llat, llong);
+      fprintf(streamout,"%f,%f\n", llong, llat);
       line_count++;
 
     }
