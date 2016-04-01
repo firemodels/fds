@@ -5,6 +5,7 @@
 % [saved_data, drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [drange])
 %
 % Output:
+%
 %    saved_data - cell array containing data needed in scatplot.m
 %
 %    drange - data range needed for scatplot.m, must be commensurate with
@@ -28,6 +29,7 @@
 %    configuration file to "o" in those that you want to be processed only.
 %
 % Dependencies:
+%
 %    ../scripts/define_drow_variables.m
 %    dvcread.m
 %    parsepipe.m
@@ -39,6 +41,16 @@
 %    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, [2:4,6:8]);
 %
 %    >> [saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, 'WTC');
+%
+% Special switch_id tags:
+%
+%    'd' -- Proscess this data line as usual (exception: see 'o' below)
+%
+%    's' -- Skip this line
+%
+%    'o' -- Add 'o' in the switch_id column (first column) of FDS_validation_dataplot_inputs.csv to process "only" these lines.
+%
+%    'f' -- Follow the previous line and "hold on" the figure window, adding this line to the current plot.
 
 function [saved_data,drange] = dataplot(varargin)
 
@@ -132,10 +144,25 @@ for i=2:n_plots
     % Check to see if o line has been activated in configuration file
     otest = strcmp(parameters(strcmp(headers,'switch_id')),'o');
     
-    if itest && (dtest || otest)
+    % Check to see if f line has been activated in configuration file
+    ftest = strcmp(parameters(strcmp(headers,'switch_id')),'f'); % used for multiple lines on same plot
 
-        close all
-        figure
+    if itest && (dtest || otest || ftest)
+
+        if ~ftest
+            if exist('K')
+                clear K
+            end
+            if exist('d2_Key')
+                clear d2_Key
+            end
+            close all
+            figure
+        else
+            hold on
+            K_save = K;
+            d2_Key_save = d2_Key;
+        end
         
         define_drow_variables
         
@@ -232,14 +259,16 @@ for i=2:n_plots
                     X = M(indices,d1_Dep_Col)/Scale_Dep;
                     Y = M(indices,d1_Ind_Col)/Scale_Ind;
                 end
-                if strcmp(Plot_Type,'linear')
-                    K(j) = plot(X,Y,char(style(j))); hold on
-                elseif strcmp(Plot_Type,'loglog')
-                    K(j) = loglog(X,Y,char(style(j))); hold on
-                elseif strcmp(Plot_Type,'semilogx')
-                    K(j) = semilogx(X,Y,char(style(j))); hold on
-                elseif strcmp(Plot_Type,'semilogy')
-                    K(j) = semilogy(X,Y,char(style(j))); hold on
+                if ~ftest
+                    if strcmp(Plot_Type,'linear')
+                        K(j) = plot(X,Y,char(style(j))); hold on
+                    elseif strcmp(Plot_Type,'loglog')
+                        K(j) = loglog(X,Y,char(style(j))); hold on
+                    elseif strcmp(Plot_Type,'semilogx')
+                        K(j) = semilogx(X,Y,char(style(j))); hold on
+                    elseif strcmp(Plot_Type,'semilogy')
+                        K(j) = semilogy(X,Y,char(style(j))); hold on
+                    end
                 end
             end
         catch
@@ -345,14 +374,26 @@ for i=2:n_plots
                     X = M_Dep/Scale_Dep;
                     Y = M_Ind/Scale_Ind;
                 end
-                if strcmp(Plot_Type,'linear')
-                    K(length(S1)+j) = plot(X,Y,char(style(j)));
-                elseif strcmp(Plot_Type,'loglog')
-                    K(length(S1)+j) = loglog(X,Y,char(style(j)));
-                elseif strcmp(Plot_Type,'semilogx')
-                    K(length(S1)+j) = semilogx(X,Y,char(style(j)));
-                elseif strcmp(Plot_Type,'semilogy')
-                    K(length(S1)+j) = semilogy(X,Y,char(style(j)));
+                if ~ftest
+                    if strcmp(Plot_Type,'linear')
+                        K(length(S1)+j) = plot(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'loglog')
+                        K(length(S1)+j) = loglog(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'semilogx')
+                        K(length(S1)+j) = semilogx(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'semilogy')
+                        K(length(S1)+j) = semilogy(X,Y,char(style(j)));
+                    end
+                else
+                    if strcmp(Plot_Type,'linear')
+                        K(length(K_save)+j) = plot(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'loglog')
+                        K(length(K_save)+j) = loglog(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'semilogx')
+                        K(length(K_save)+j) = semilogx(X,Y,char(style(j)));
+                    elseif strcmp(Plot_Type,'semilogy')
+                        K(length(K_save)+j) = semilogy(X,Y,char(style(j)));
+                    end
                 end
 
             end
@@ -361,7 +402,6 @@ for i=2:n_plots
                 '); check syntax of FDS/model results (d2) columns. Skipping case.'])
             continue
         end
-        hold off
         
         % Wrap entire plot/save routine in try loop
         % Skips case upon any Matlab error
@@ -410,7 +450,13 @@ for i=2:n_plots
             end
 
             if size(Key_Position)>0
-                legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
+                if ~ftest
+                    legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
+                else
+                    % this allows us to handle multiple lines on the same plot
+                    legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key_save),parsepipe(d2_Key)],'Location',Key_Position);
+                    d2_Key = [d2_Key_save,'|',d2_Key];
+                end
                 % % The latest version of Matlab (R2015b) apparently get this correct, but I will
                 % % leave this commented code for a bit until we are sure this is working on blaze.
                 % if strcmp(Key_Position,'EastOutside')
@@ -459,8 +505,7 @@ for i=2:n_plots
         end    
         
     end
-    clear S1 S2 K style H M X Y P parameters
-    close all
+    clear S1 S2 style H M X Y P parameters
 end
 
 clear A
