@@ -54,20 +54,18 @@ void generate_elevs(void){
   char buffer[LENBUFFER];
   int nlong, nlat;
   int i;
-  float llat1, llat2, llong1, llong2;
+  float llat1, llat2, llong1, llong2, nz;
   float deltax, deltay, zmin, zmax;
 
 
   fgets(buffer, LENBUFFER, stdin);
-  sscanf(buffer, "%i %i", &nlong, &nlat);
-  fgets(buffer, LENBUFFER, stdin);
-  sscanf(buffer, "%f %f %f %f %f %f", &llong1, &llong2,&llat1, &llat2, &zmin,&zmax);
+  sscanf(buffer, "%f %f %f %f %f %f", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
 
   deltax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
   deltay = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
 
   printf("&HEAD CHID='terrain', TITLE='terrain' /\n");
-  printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",nlong,nlat,30,deltax,deltay,zmin,zmax);
+  printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",nlong,nlat,nz,deltax,deltay,zmin,zmax);
   printf("&TIME T_END = 0. /\n");
   printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltay, zmin,   zmax);
   printf("&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltax, deltay, zmin, zmax);
