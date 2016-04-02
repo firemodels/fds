@@ -60,6 +60,7 @@ platformsize=${platform}_$size
 BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_${platform}_64
 SMOKEVIEWDIR=$SVNROOT/SMV/Build/smokeview/intel_$platformsize
 SMOKEZIPDIR=$SVNROOT/SMV/Build/smokezip/intel_$platformsize
+DEM2FDSDIR=$SVNROOT/SMV/Build/dem2fds/intel_$platformsize
 SMOKEDIFFDIR=$SVNROOT/SMV/Build/smokediff/intel_$platformsize
 WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
 FORBUNDLE=~/$SVNROOT/SMV/for_bundle
@@ -85,6 +86,7 @@ SCP $HOST $BACKGROUNDDIR background $DIR/bin background
 SCP $HOST $SMOKEDIFFDIR smokediff_$platformsize $DIR/bin smokediff
 SCP $HOST $SMOKEVIEWDIR smokeview_$platformsize $DIR/bin smokeview
 SCP $HOST $SMOKEZIPDIR smokezip_$platformsize $DIR/bin smokezip
+SCP $HOST $DEM2FDSDIR dem2fds_$platformsize $DIR/bin dem2fds
 SCP $HOST $WINDDIR wind2fds_$platformsize $DIR/bin wind2fds
 
 echo ""
