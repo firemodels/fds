@@ -1,10 +1,10 @@
 SOURCE_DIR = ../../../source/
-INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2geom 
+INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
 
 FILTERC =
 FILTERF =
 
-VPATH = $(SOURCE_DIR)/dem2geom $(SOURCE_DIR)/shared  
+VPATH = $(SOURCE_DIR)/dem2fds $(SOURCE_DIR)/shared  
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
