@@ -128,7 +128,7 @@ void generate_latlongs(void){
   sprintf(fileout, "%s%i.csv", filebase, 1);
 
   fgets(buffer, LENBUFFER, stdin);
-  sscanf(buffer, "%f %f %i %f %f %i", &lat1, &lat2, &nlat, &long1, &long2, &nlong);
+  sscanf(buffer, "%f %f %i %f %f %i", &long1, &long2, &nlong, &lat1, &lat2, &nlat);
   line_count = 1;
   file_count = 1;
   streamout = fopen(fileout, "w");
