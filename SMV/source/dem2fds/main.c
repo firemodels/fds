@@ -59,7 +59,7 @@ void generate_elevs(void){
 
 
   fgets(buffer, LENBUFFER, stdin);
-  sscanf(buffer, "%f %f %i %f %f %%i f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
+  sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
 
   deltax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
   deltay = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
