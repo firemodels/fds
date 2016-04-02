@@ -15,6 +15,7 @@ set in_setpath=%svn_root%\SMV\Build\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
 set in_smokediff=%svn_root%\SMV\Build\smokediff
 set in_smokezip=%svn_root%\SMV\Build\smokezip
+set in_dem2fds=%svn_root%\SMV\Build\dem2fds
 set in_wind2fds=%svn_root%\SMV\Build\wind2fds
 set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\SMV\Build\background
@@ -78,13 +79,15 @@ copy %in_for_bundle%\*.po                                                       
 
 CALL :COPY  %fdsmpidir%\fds_mpi_win_%platform%.exe                               %out_bin%\fds.exe
 
-CALL :COPY  %in_testmpi%\test_mpi.exe                                           %out_bin%\test_mpi.exe
+CALL :COPY  %in_testmpi%\test_mpi.exe                                            %out_bin%\test_mpi.exe
 
 CALL :COPY  %in_smv%\smokeview_win_%platform%.exe                                %out_smv%\smokeview.exe
 
 CALL :COPY  %in_smokediff%\intel_win_%platform%\smokediff_win_%platform%.exe     %out_smv%\smokediff.exe
 
 CALL :COPY  %in_smokezip%\intel_win_%platform%\smokezip_win_%platform%.exe       %out_smv%\smokezip.exe 
+
+CALL :COPY  %in_dem2fds%\intel_win_%platform%\dem2fds_win_%platform%.exe         %out_smv%\dem2fds.exe 
 
 CALL :COPY  %in_wind2fds%\intel_win_%platform%\wind2fds_win_%platform%.exe       %out_smv%\wind2fds.exe 
 
