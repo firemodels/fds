@@ -142,7 +142,7 @@ void generate_latlongs(void){
       float llong;
 
       llong = (long1*(float)(nlong - 1 - j) + long2*(float)j) / (float)(nlong - 1);
-      if(line_count>500){
+      if(line_count>400){
         file_count++;
         fclose(streamout);
         sprintf(fileout, "%s%i.csv", filebase, file_count);
