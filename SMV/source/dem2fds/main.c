@@ -50,21 +50,22 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 
 /* ------------------ generate_elevs ------------------------ */
 
-void generate_elevs(void){
+void generate_elevs(char *filebase){
   char buffer[LENBUFFER];
-  int nlong, nlat;
+  int nlong, nlat,nz;
   int i;
-  float llat1, llat2, llong1, llong2, nz;
+  float llat1, llat2, llong1, llong2;
   float deltax, deltay, zmin, zmax;
 
 
   fgets(buffer, LENBUFFER, stdin);
+  trim_back(buffer);
   sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
 
   deltax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
   deltay = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
 
-  printf("&HEAD CHID='terrain', TITLE='terrain' /\n");
+  printf("&HEAD CHID='%s', TITLE='terrain' /\n",filebase);
   printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",nlong,nlat,nz,deltax,deltay,zmin,zmax);
   printf("&TIME T_END = 0. /\n");
   printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltay, zmin,   zmax);
@@ -113,17 +114,16 @@ void generate_elevs(void){
 
   /* ------------------ generate_latlongs ------------------------ */
 
-void generate_latlongs(void){
+void generate_longlats(char *filebase){
   char buffer[LENBUFFER];
-  char filebase[LENBUFFER], fileout[LENBUFFER];
+  char fileout[LENBUFFER];
   float lat1, lat2, long1, long2;
   int nlat, nlong;
   int line_count, file_count;
   FILE *streamin = NULL, *streamout = NULL;
   int i;
 
-  strcpy(filebase, "elevations");
-  sprintf(fileout, "%s%i.csv", filebase, 1);
+  sprintf(fileout, "%s_longlats_%03i.csv", filebase, 1);
 
   fgets(buffer, LENBUFFER, stdin);
   sscanf(buffer, "%f %f %i %f %f %i", &long1, &long2, &nlong, &lat1, &lat2, &nlat);
@@ -143,7 +143,7 @@ void generate_latlongs(void){
       if(line_count>400){
         file_count++;
         fclose(streamout);
-        sprintf(fileout, "%s%i.csv", filebase, file_count);
+        sprintf(fileout, "%s_longlats_%03i.csv", filebase, file_count);
         streamout = fopen(fileout, "w");
         line_count = 1;
       }
@@ -160,6 +160,10 @@ void generate_latlongs(void){
 int main(int argc, char **argv){
   int i;
   int gen_elevs = 0;
+  char *filebase = NULL;
+  char file_default[1000];
+
+  strcpy(file_default, "terrain");
 
   set_stdout(stdout);
   for(i = 1; i<argc; i++){
@@ -189,11 +193,17 @@ int main(int argc, char **argv){
         break;
       }
     }
+    else{
+      if(filebase == NULL){
+        filebase = argv[i];
+      }
+    }
   }
+  if(filebase == NULL)filebase = file_default;
   if(gen_elevs == 1){
-    generate_elevs();
+    generate_elevs(filebase);
   }
   else{
-    generate_latlongs();
+    generate_longlats(filebase);
   }
 }
