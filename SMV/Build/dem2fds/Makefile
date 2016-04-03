@@ -39,7 +39,7 @@ no_target:
 
 intel_win_64 : CFLAGS    = -Od -D WIN32 /nologo $(GITINFO)
 intel_win_64 : CC        = icl
-intel_win_64 : exe       = dem2geom_win_64.exe
+intel_win_64 : exe       = dem2fds_win_64.exe
 
 intel_win_64 : $(objwin)
 	$(CC) -o $(bin)/$(exe) $(objwin)
@@ -49,7 +49,7 @@ intel_win_64 : $(objwin)
 
 intel_linux_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_linux_64 : CC        = icc
-intel_linux_64 : exe       = dem2geom_linux_64
+intel_linux_64 : exe       = dem2fds_linux_64
 
 intel_linux_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) $(obj) 
@@ -60,7 +60,7 @@ intel_linux_64 : $(obj)
 
 intel_osx_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_osx_64 : CC        = icc
-intel_osx_64 : exe       = dem2geom_osx_64
+intel_osx_64 : exe       = dem2fds_osx_64
 
 intel_osx_64 : $(obj)
 	$(CC) -o $(bin)/$(exe) -m64 $(obj)
