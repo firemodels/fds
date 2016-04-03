@@ -84,6 +84,10 @@ smokezipdir=intel$FDSOS
 smokezip=smokezip$FDSOS
 smokezipout=smokezip$OUT
 
+dem2fdsdir=intel$FDSOS
+dem2fds=dem2fds$FDSOS
+dem2fdsout=dem2fds$OUT
+
 wind2fdsdir=intel$FDSOS
 wind2fds=wind2fds$FDSOS
 wind2fdsout=wind2fds$OUT
@@ -117,6 +121,7 @@ fdsroot=$scp_fds_smvroot/FDS_Compilation
 backgroundroot=$scp_fds_smvroot/SMV/Build/background
 smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
 smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
+dem2fdsroot=$scp_fds_smvroot/SMV/Build/dem2fds
 wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
 uploaddir=$fds_smvroot/Utilities/uploads
 bundledir=$bundlebase
@@ -169,6 +174,10 @@ SCP $fdshost $smokediffroot/$smokediffdir $smokediff $bundledir/bin $smokediffou
 
 SCP $fdshost $smokeziproot/$smokezipdir $smokezip $bundledir/bin $smokezipout
 
+# dem2fds
+
+SCP $fdshost $dem2fdsroot/$dem2fdsdir $dem2fds $bundledir/bin $dem2fdsout
+
 # wind2fds
 
 SCP $fdshost $wind2fdsroot/$wind2fdsdir $wind2fds $bundledir/bin $wind2fdsout
@@ -218,6 +227,8 @@ ssh -q $runhost $smokediffroot/$smokediffdir/$smokediff -v >> $fullmanifest
 echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
 ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
+echo ------dem2fds-------------------- >> $fullmanifest
+ssh -q $runhost $dem2fdsroot/$dem2fdsdir/$dem2fds -v >> $fullmanifest
 
 echo ""
 echo "--- copying configuration files ---"
