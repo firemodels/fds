@@ -56,6 +56,7 @@ CPDIR ()
 BACKGROUNDDIR=$SVNROOT/SMV/Build/background/intel_linux_64
 SMVDIR=$SVNROOT/SMV/Build/smokeview/intel_linux_64
 SMZDIR=$SVNROOT/SMV/Build/smokezip/intel_linux_64
+DEM2FDSDIR=$SVNROOT/SMV/Build/dem2fds/intel_linux_64
 SMDDIR=$SVNROOT/SMV/Build/smokediff/intel_linux_64
 WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_linux_64
 FORBUNDLE=$SVNROOT/SMV/for_bundle
@@ -78,7 +79,7 @@ CP $FORBUNDLE volrender.ssf $LINUXDIR/bin volrender.ssf
 cp $FORBUNDLE/*.po $LINUXDIR/bin/.
 CP $BACKGROUNDDIR background $LINUXDIR/bin background
 CP $SMVDIR smokeview_linux_test_64 $LINUXDIR/bin smokeview
-CP $SMZDIR smokezip_linux_64 $LINUXDIR/bin smokezip
+CP $DEM2FDSDIR dem2fds_linux_64 $LINUXDIR/bin dem2fds
 CP $SMDDIR smokediff_linux_64 $LINUXDIR/bin smokediff
 CP $WINDDIR wind2fds_linux_64 $LINUXDIR/bin wind2fds
 rm -f $LINUXDIR.tar $LINUXDIR.tar.gz
