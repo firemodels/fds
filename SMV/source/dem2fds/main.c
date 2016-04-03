@@ -7,6 +7,7 @@
 #include <math.h>
 #include "string_util.h"
 #include "file_util.h"
+#include "MALLOC.h"
 
 
 /* ------------------ usage ------------------------ */
@@ -53,9 +54,11 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 void generate_elevs(char *filebase){
   char buffer[LENBUFFER];
   int nlong, nlat,nz;
-  int i;
+  int i,j;
   float llat1, llat2, llong1, llong2;
   float deltax, deltay, zmin, zmax;
+  int count;
+  float **valptrs;
 
 
   fgets(buffer, LENBUFFER, stdin);
@@ -73,38 +76,36 @@ void generate_elevs(char *filebase){
   printf("&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", deltax, zmin,   zmax);
   printf("&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay, deltay, zmin, zmax);
   printf("&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay,   zmax, zmax);
+  printf("&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
+  printf("&SURF ID = 'surf1', RGB = 122,117,48 /\n");
 
-  printf("&GEOM ID='terrain', VERTS=\n");
-  for(i = 0; i < nlong; i++){
-    int j;
-    float xx;
 
-    xx = 0.0*(float)(nlong - i) + deltax*(float)i;
-    xx /= (float)(nlong - 1);
+  printf("&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",nlong,nlat,0.0,deltax,0.0,deltay);
 
-    for(j = 0; j < nlat; j++){
-      int idummy;
-      float dummy, llat, llong, elev;
-      float yy;
+  NewMemory((void **)&valptrs, sizeof(float *)*nlat);
+  for(j = 0; j < nlat; j++){
+    int idummy;
+    float dummy, llat, llong, elev;
+    float *vals;
 
-      yy = 0.0*(float)(nlat - j) + deltay*(float)j;
-      yy /= (float)(nlat - 1);
-
+    NewMemory((void **)&vals, sizeof(float)*nlong);
+    valptrs[j] = vals;
+    for(i = 0; i < nlong; i++){
       fgets(buffer, LENBUFFER, stdin);
       sscanf(buffer, "%i,%f,%f,%f,%f", &idummy, &llat, &llong, &dummy, &elev);
-      printf(" %f,%f,%f,\n", xx,yy, elev);
+      vals[i] = elev;
     }
   }
-#define IJ(i,j) (nlat*(j-1)+i)
-  printf(" FACES=\n");
-  for(i = 1; i < nlong; i++){
-    int j;
 
-    for(j = 1; j < nlat; j++){
-      //  j+1
-      //  j
-      //     i     i+1
-      printf(" %i, %i, %i, %i, %i, %i,\n", IJ(i, j), IJ(i + 1, j+1), IJ(i + 1, j ), IJ(i, j), IJ(i , j + 1), IJ(i+1, j + 1));
+  count = 1;
+  for(j = 0; j < nlat; j++){
+    float *vals;
+
+    vals = valptrs[nlat - 1 - j];
+    for(i = 0; i < nlong; i++){
+      printf(" %f,", vals[i]);
+      if(count % 10 == 0)printf("\n");
+      count++;
     }
   }
   printf("/\n");
@@ -165,6 +166,7 @@ int main(int argc, char **argv){
 
   strcpy(file_default, "terrain");
 
+  initMALLOC();
   set_stdout(stdout);
   for(i = 1; i<argc; i++){
     int lenarg;
