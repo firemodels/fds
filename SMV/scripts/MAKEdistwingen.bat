@@ -31,6 +31,7 @@ set version=%smv_version%
 set bundledir=%svn_root%\smv\for_bundle
 set smvbuild=%svn_root%\SMV\Build\smokeview\%BUILDDIR%
 set svzipbuild=%svn_root%\SMV\Build\smokezip\%BUILDDIR%
+set dem2fdsbuild=%svn_root%\SMV\Build\dem2fds\%BUILDDIR%
 set svdiffbuild=%svn_root%\SMV\Build\smokediff\%BUILDDIR%
 set bgbuild=%svn_root%\SMV\Build\background\intel_win_64
 set sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
@@ -60,6 +61,8 @@ CALL :COPY  volrender.ssf %smvdir%\volrender.ssf
 CALL :COPY  %svzipbuild%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
 CALL :COPY  %svdiffbuild%\smokediff_win_%platform%.exe %smvdir%\smokediff.exe
+
+CALL :COPY  %dem2fdsbuild%\dem2fds_win_%platform%.exe %smvdir%\dem2fds.exe
 
 CALL :COPY  ..\..\SMV\Build\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
 
