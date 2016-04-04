@@ -6911,7 +6911,7 @@ When prescribing a solid phase quantity, be sure to position the device at a sol
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
-designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the probe and try again.
+designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the device and try again. It is best to position the device, via the real triplet {\ct XYZ}, such that the device location is either at or within a cell width {\it outside} of the solid surface. The search algorithm in FDS will look for the nearest solid surface in the direction opposite to that indicated by {\ct IOR}.
 
 \subsubsection{Integrated Quantities}
 

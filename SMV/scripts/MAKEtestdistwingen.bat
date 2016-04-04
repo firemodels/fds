@@ -47,6 +47,8 @@ CALL :COPY ..\..\SMV\Build\smokediff\intel_win_%platform%\smokediff_win_%platfor
 
 CALL :COPY  ..\..\SMV\Build\smokezip\intel_win_%platform%\smokezip_win_%platform%.exe %smvdir%\smokezip.exe
 
+CALL :COPY  ..\..\SMV\Build\dem2fds\intel_win_%platform%\dem2fds_win_%platform%.exe %smvdir%\dem2fds.exe
+
 CALL :COPY  ..\..\SMV\Build\wind2fds\intel_win_%platform%\wind2fds_win_%platform%.exe %smvdir%\wind2fds.exe
 
 CALL :COPY  ..\..\SMV\Build\background\intel_win_64\background.exe %smvdir%\background.exe
