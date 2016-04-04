@@ -9,6 +9,7 @@
 #include "smokeviewvars.h"
 
 tetrahedron *volume_list;
+triangle *triangle_list;
 void Volume_CB(int var);
 
 /* ------------------ CalcTriNormal ------------------------ */
@@ -260,6 +261,8 @@ void draw_geom(int flag, int timestate){
       int  j;
 
       trianglei = tris[i];
+      if(trianglei->exterior == 1 && show_faces_exterior == 0)continue;
+      if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
       if(trianglei->geomtype == GEOM_GEOM&&show_faces_solid == 0)continue;
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
@@ -314,6 +317,8 @@ void draw_geom(int flag, int timestate){
         int j;
 
         trianglei = tris[i];
+        if(trianglei->exterior == 1 && show_faces_exterior == 0)continue;
+        if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
         if(trianglei->geomtype == GEOM_GEOM&&show_faces_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
@@ -423,7 +428,8 @@ void draw_geom(int flag, int timestate){
           float v1m0[3], v2m0[3], v2m1[3], vcross[3];
           float v0delta[3], v1delta[3], v2delta[3];
 
-          if(exterior[k] == 1)continue;
+          if(show_volumes_exterior == 0 && exterior[k] == 1)continue;
+          if(show_volumes_interior == 0 && exterior[k] == 0)continue;
           v0 = xyzptr[facelist[3 * k]];
           v1 = xyzptr[facelist[3 * k + 1]];
           v2 = xyzptr[facelist[3 * k + 2]];
@@ -482,24 +488,24 @@ void draw_geom(int flag, int timestate){
         xyzptr[3] = volumei->points[3]->xyz;
 
         for(k=0;k<4;k++){
-          if(exterior[k]==0){
-            if(show_volumes_solid==1){
-               color=black;
-            }
-            else{
-              color = volumei->matl->color;
-            }
-            if(last_color!=color){
-              glColor3fv(color);
-              last_color=color;
-            }
-            glVertex3fv(xyzptr[facelist[3*k]]);
-            glVertex3fv(xyzptr[facelist[3*k+1]]);
-            glVertex3fv(xyzptr[facelist[3*k+1]]);
-            glVertex3fv(xyzptr[facelist[3*k+2]]);
-            glVertex3fv(xyzptr[facelist[3*k+2]]);
-            glVertex3fv(xyzptr[facelist[3*k+0]]);
+          if(show_volumes_exterior == 0 && exterior[k] == 1)continue;
+          if(show_volumes_interior == 0 && exterior[k] == 0)continue;
+          if(show_volumes_solid==1){
+             color=black;
           }
+          else{
+            color = volumei->matl->color;
+          }
+          if(last_color!=color){
+            glColor3fv(color);
+            last_color=color;
+          }
+          glVertex3fv(xyzptr[facelist[3*k]]);
+          glVertex3fv(xyzptr[facelist[3*k+1]]);
+          glVertex3fv(xyzptr[facelist[3*k+1]]);
+          glVertex3fv(xyzptr[facelist[3*k+2]]);
+          glVertex3fv(xyzptr[facelist[3*k+2]]);
+          glVertex3fv(xyzptr[facelist[3*k+0]]);
         }
       }
       glEnd();
@@ -522,6 +528,8 @@ void draw_geom(int flag, int timestate){
         triangle *trianglei;
 
         trianglei = geomlisti->triangles+j;
+        if(trianglei->exterior == 1 && show_faces_exterior == 0)continue;
+        if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
         if(trianglei->geomtype == GEOM_GEOM&&show_faces_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO&&show_iso_outline == 0)continue;
 
@@ -607,7 +615,7 @@ void draw_geom(int flag, int timestate){
         float xyz1[3], xyz2[3];
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
+        if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 1))continue;
         if(trianglei->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==1))continue;
 
         xyznorm=trianglei->tri_norm;
@@ -638,7 +646,7 @@ void draw_geom(int flag, int timestate){
         float xyz1[3], xyz2[3];
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM&&(show_geom_normal == 0||smooth_geom_normal==1))continue;
+        if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 1))continue;
         if(trianglei->geomtype == GEOM_ISO&&(show_iso_normal == 0||smooth_iso_normal==1))continue;
 
         xyznorm=trianglei->tri_norm;
@@ -825,9 +833,6 @@ void update_geom_normals(void){
       smooth_geom_normals(geomlisti);
     }
   }
-
-  // smooth normals at mesh boundaries
-
 }
 
 /* ------------------ update_triangles ------------------------ */
@@ -1664,6 +1669,35 @@ void reorder_face(int *faces){
   faces[2]=face_temp[4];
 }
 
+/* ------------------ compare_faces ------------------------ */
+
+int compare_faces(const void *arg1, const void *arg2){
+  triangle *face1, *face2;
+  int *verts1, *verts2;
+  int v1[3], v2[3];
+
+  face1 = triangle_list + *(int *)arg1;
+  face2 = triangle_list + *(int *)arg2;
+  verts1 = face1->vert_index;
+  verts2 = face2->vert_index;
+
+  v1[1] = MIN(verts1[1], verts1[2]);
+  v1[2] = MAX(verts1[1], verts1[2]);
+
+  v2[1] = MIN(verts2[1], verts2[2]);
+  v2[2] = MAX(verts2[1], verts2[2]);
+
+  if(verts1[0]<verts2[0])return -1;
+  if(verts1[0]>verts2[0])return 1;
+
+  if(v1[1]<v2[1])return -1;
+  if(v1[1]>v2[1])return 1;
+
+  if(v1[2]<v2[2])return -1;
+  if(v1[2]>v2[2])return 1;
+  return 0;
+}
+
 /* ------------------ compare_volume_faces ------------------------ */
 
 int compare_volume_faces(const void *arg1, const void *arg2){
@@ -1708,7 +1742,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
   for(i = -1; i<iend; i++){
     geomlistdata *geomlisti;
-    int nverts, nvolus;
+    int nverts, nvolus, ntriangles;
     int j;
     point *pointbase;
 
@@ -1717,7 +1751,8 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
     nverts=geomlisti->npoints;
     nvolus=geomlisti->nvolus;
-    if(nverts==0||nvolus==0||geomlisti->points==NULL)continue;
+    ntriangles = geomlisti->ntriangles;
+    if(nverts==0||geomlisti->points==NULL)continue;
     pointbase = geomlisti->points;
     for(j=0;j<nvolus;j++){
       tetrahedron *tetrai;
@@ -1786,6 +1821,39 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         if(MAX(verts1[1],verts1[2])<MAX(verts2[1],verts2[2])||MAX(verts1[1],verts1[2])>MAX(verts2[1],verts2[2]))continue;
         vol1->exterior[face1]=0;
         vol2->exterior[face2]=0;
+      }
+
+      FREEMEMORY(facelist);
+    }
+    if(ntriangles > 0){
+      int *facelist = NULL, nfacelist;
+
+      nfacelist = ntriangles;
+      triangle_list = geomlisti->triangles;
+      NewMemory((void **)&facelist, nfacelist*sizeof(int));
+      for(j = 0; j < nfacelist; j++){
+        triangle *trij;
+        int *vert_index;
+
+        trij = geomlisti->triangles + j;
+        trij->exterior = 1;
+        facelist[j] = j;
+        vert_index = trij->vert_index;
+        vert_index[0] = trij->points[0] - pointbase;
+        vert_index[1] = trij->points[1] - pointbase;
+        vert_index[2] = trij->points[2] - pointbase;
+      }
+      qsort(facelist, nfacelist, sizeof(int), compare_faces);
+      for(j = 1; j < nfacelist; j++){
+        if(compare_faces(facelist + j, facelist + j - 1) == 0){
+          triangle *trij, *trijm1;
+
+          trij = geomlisti->triangles + facelist[j];
+          trij->exterior = 0;
+
+          trijm1 = geomlisti->triangles + facelist[j - 1];
+          trijm1->exterior = 0;
+         }
       }
 
       FREEMEMORY(facelist);
