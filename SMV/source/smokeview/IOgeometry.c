@@ -791,9 +791,10 @@ void smooth_geom_normals(geomlistdata *geomlisti){
         float *tri_normk, cosang;
 
         trianglek = pointj->triangles[k];
+        if(trianglek->exterior == 0)continue;
         tri_normk = trianglek->tri_norm;
         cosang = DOT3(tri_normk, tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
-        if(ABS(cosang)>cos_geom_max_angle){
+        if(cosang>cos_geom_max_angle){
           norm[0] += tri_normk[0];
           norm[1] += tri_normk[1];
           norm[2] += tri_normk[2];
