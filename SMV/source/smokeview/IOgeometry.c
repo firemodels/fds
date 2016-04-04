@@ -260,7 +260,7 @@ void draw_geom(int flag, int timestate){
       int  j;
 
       trianglei = tris[i];
-      if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_solid == 0)continue;
+      if(trianglei->geomtype == GEOM_GEOM&&show_faces_solid == 0)continue;
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
@@ -314,7 +314,7 @@ void draw_geom(int flag, int timestate){
         int j;
 
         trianglei = tris[i];
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_faces_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
         texti = trianglei->textureinfo;
@@ -369,7 +369,7 @@ void draw_geom(int flag, int timestate){
     ntris = geomlisti->ntriangles;
     nvolus = geomlisti->nvolus;
 
-    if(nvolus > 0 && show_geom_interior_solid == 1){
+    if(nvolus > 0 && show_volumes_solid == 1){
 
       // draw volume solid
 
@@ -418,30 +418,29 @@ void draw_geom(int flag, int timestate){
         }
 
         for(k = 0; k < 4; k++){
-          if(exterior[k] == 0){
-            int kk;
-            float *v0, *v1, *v2;
-            float v1m0[3], v2m0[3], v2m1[3], vcross[3];
-            float v0delta[3], v1delta[3], v2delta[3];
+          int kk;
+          float *v0, *v1, *v2;
+          float v1m0[3], v2m0[3], v2m1[3], vcross[3];
+          float v0delta[3], v1delta[3], v2delta[3];
 
-            v0 = xyzptr[facelist[3 * k]];
-            v1 = xyzptr[facelist[3 * k + 1]];
-            v2 = xyzptr[facelist[3 * k + 2]];
-            VECDIFF3(v1m0, v1, v0);
-            VECDIFF3(v2m0, v2, v0);
-            VECDIFF3(v2m1, v2, v1);
-            CROSS(vcross, v1m0, v2m0);
+          if(exterior[k] == 1)continue;
+          v0 = xyzptr[facelist[3 * k]];
+          v1 = xyzptr[facelist[3 * k + 1]];
+          v2 = xyzptr[facelist[3 * k + 2]];
+          VECDIFF3(v1m0, v1, v0);
+          VECDIFF3(v2m0, v2, v0);
+          VECDIFF3(v2m1, v2, v1);
+          CROSS(vcross, v1m0, v2m0);
 
-            for(kk = 0; kk < 3; kk++){
-              v0delta[kk] = v0[kk] + face_factor*v1m0[kk] + face_factor*v2m0[kk];
-              v1delta[kk] = v1[kk] - face_factor*v1m0[kk] + face_factor*v2m1[kk];
-              v2delta[kk] = v2[kk] - face_factor*v2m0[kk] - face_factor*v2m1[kk];
-            }
-            glNormal3fv(vcross);
-            glVertex3fv(v0delta);
-            glVertex3fv(v1delta);
-            glVertex3fv(v2delta);
+          for(kk = 0; kk < 3; kk++){
+            v0delta[kk] = v0[kk] + face_factor*v1m0[kk] + face_factor*v2m0[kk];
+            v1delta[kk] = v1[kk] - face_factor*v1m0[kk] + face_factor*v2m1[kk];
+            v2delta[kk] = v2[kk] - face_factor*v2m0[kk] - face_factor*v2m1[kk];
           }
+          glNormal3fv(vcross);
+          glVertex3fv(v0delta);
+          glVertex3fv(v1delta);
+          glVertex3fv(v2delta);
         }
       }
       glEnd();
@@ -451,7 +450,7 @@ void draw_geom(int flag, int timestate){
 
       // draw volume outline
 
-    if(nvolus > 0 && show_geom_interior_outline == 1){
+    if(nvolus > 0 && show_volumes_outline == 1){
       last_color = NULL;
       glPushMatrix();
       glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
@@ -484,7 +483,7 @@ void draw_geom(int flag, int timestate){
 
         for(k=0;k<4;k++){
           if(exterior[k]==0){
-            if(show_geom_interior_solid==1){
+            if(show_volumes_solid==1){
                color=black;
             }
             else{
@@ -523,7 +522,7 @@ void draw_geom(int flag, int timestate){
         triangle *trianglei;
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM&&show_geom_surface_outline == 0)continue;
+        if(trianglei->geomtype == GEOM_GEOM&&show_faces_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO&&show_iso_outline == 0)continue;
 
         xyznorm=trianglei->tri_norm;
@@ -837,7 +836,6 @@ void update_triangles(int flag,int update){
   int j, ii, ntimes;
 
   if(update==GEOM_UPDATE_NORMALS){
-// placeholder for just updating geometry normals
     update_geom_normals();
     return;
   }
@@ -1666,9 +1664,9 @@ void reorder_face(int *faces){
   faces[2]=face_temp[4];
 }
 
-/* ------------------ compare_faces ------------------------ */
+/* ------------------ compare_volume_faces ------------------------ */
 
-int compare_faces(const void *arg1, const void *arg2){
+int compare_volume_faces(const void *arg1, const void *arg2){
   int face1, face2;
   tetrahedron *vol1, *vol2;
   int *verts1, *verts2;
@@ -1769,7 +1767,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       for(j=0;j<nfacelist;j++){
         facelist[j]=j;
       }
-      qsort(facelist,nfacelist,sizeof(int),compare_faces);
+      qsort(facelist,nfacelist,sizeof(int),compare_volume_faces);
       for(j=1;j<nfacelist;j++){
         int face1, face2;
         tetrahedron *vol1, *vol2;

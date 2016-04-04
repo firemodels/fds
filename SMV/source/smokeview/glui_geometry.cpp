@@ -33,6 +33,10 @@ GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline=NULL;
 GLUI_Checkbox *CHECKBOX_geomtest=NULL, *CHECKBOX_triangletest=NULL;
 GLUI_Checkbox *CHECKBOX_show_geom_normal = NULL;
 GLUI_Checkbox *CHECKBOX_smooth_geom_normal = NULL;
+GLUI_Checkbox *CHECKBOX_faces_interior=NULL;
+GLUI_Checkbox *CHECKBOX_faces_exterior=NULL;
+GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
+GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -78,7 +82,7 @@ GLUI_EditText *EDIT_xmax=NULL, *EDIT_ymax=NULL, *EDIT_zmax=NULL;
 
 GLUI_Listbox *LIST_surface[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
-GLUI_Panel *PANEL_obj_select=NULL,*PANEL_surface=NULL,*PANEL_interior=NULL,*PANEL_geom_showhide;
+GLUI_Panel *PANEL_obj_select=NULL,*PANEL_faces=NULL,*PANEL_volumes=NULL,*PANEL_geom_showhide;
 GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
 
 GLUI_Rollout *ROLLOUT_structured=NULL;
@@ -106,10 +110,10 @@ extern "C" void update_visaxislabels(void){
 /* ------------------ update_geometry_controls ------------------------ */
 
 extern "C" void update_geometry_controls(void){
-  if(CHECKBOX_surface_solid!=NULL)CHECKBOX_surface_solid->set_int_val(show_geom_surface_solid);
-  if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_geom_surface_outline);
-  if(CHECKBOX_interior_solid!=NULL)CHECKBOX_interior_solid->set_int_val(show_geom_interior_solid);
-  if(CHECKBOX_interior_outline!=NULL)CHECKBOX_interior_outline->set_int_val(show_geom_interior_outline);
+  if(CHECKBOX_surface_solid!=NULL)CHECKBOX_surface_solid->set_int_val(show_faces_solid);
+  if(CHECKBOX_surface_outline!=NULL)CHECKBOX_surface_outline->set_int_val(show_faces_outline);
+  if(CHECKBOX_interior_solid!=NULL)CHECKBOX_interior_solid->set_int_val(show_volumes_solid);
+  if(CHECKBOX_interior_outline!=NULL)CHECKBOX_interior_outline->set_int_val(show_volumes_outline);
 
   if(CHECKBOX_show_geom_normal != NULL)CHECKBOX_show_geom_normal->set_int_val(show_geom_normal);
   if(CHECKBOX_smooth_geom_normal != NULL)CHECKBOX_smooth_geom_normal->set_int_val(smooth_geom_normal);
@@ -164,14 +168,14 @@ extern "C" void glui_geometry_setup(int main_window){
   if(structured_isopen==1)ROLLOUT_structured->open();
   PANEL_obj_select = glui_geometry->add_panel_to_panel(ROLLOUT_structured,"SURFs");
 
-  PANEL_surface=glui_geometry->add_panel_to_panel(PANEL_obj_select,"",GLUI_PANEL_NONE);
+  PANEL_faces=glui_geometry->add_panel_to_panel(PANEL_obj_select,"",GLUI_PANEL_NONE);
 
-  glui_geometry->add_column_to_panel(PANEL_surface,false);
+  glui_geometry->add_column_to_panel(PANEL_faces,false);
 
   if(nsurfinfo>0){
-    glui_geometry->add_statictext_to_panel(PANEL_surface,"");
+    glui_geometry->add_statictext_to_panel(PANEL_faces,"");
 
-    LIST_surface[DOWN_X] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_X] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Left"),surface_indices+DOWN_X,UPDATE_LIST,OBJECT_CB);
     LIST_surface[DOWN_X]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -181,7 +185,7 @@ extern "C" void glui_geometry_setup(int main_window){
       LIST_surface[DOWN_X]->add_item(i,surfacelabel);
     }
 
-    LIST_surface[UP_X] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_X] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Right"),surface_indices+UP_X,UPDATE_LIST,OBJECT_CB);
     LIST_surface[UP_X]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -191,7 +195,7 @@ extern "C" void glui_geometry_setup(int main_window){
       LIST_surface[UP_X]->add_item(i,surfacelabel);
     }
 
-    LIST_surface[DOWN_Y] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_Y] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Front"),surface_indices+DOWN_Y,UPDATE_LIST,OBJECT_CB);
     LIST_surface[DOWN_Y]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -201,7 +205,7 @@ extern "C" void glui_geometry_setup(int main_window){
       LIST_surface[DOWN_Y]->add_item(i,surfacelabel);
     }
 
-    LIST_surface[UP_Y] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_Y] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Back"),surface_indices+UP_Y,UPDATE_LIST,OBJECT_CB);
     LIST_surface[UP_Y]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -211,7 +215,7 @@ extern "C" void glui_geometry_setup(int main_window){
       LIST_surface[UP_Y]->add_item(i,surfacelabel);
     }
 
-    LIST_surface[DOWN_Z] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[DOWN_Z] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Down"),surface_indices+DOWN_Z,UPDATE_LIST,OBJECT_CB);
     LIST_surface[DOWN_Z]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -221,7 +225,7 @@ extern "C" void glui_geometry_setup(int main_window){
       LIST_surface[DOWN_Z]->add_item(i,surfacelabel);
     }
 
-    LIST_surface[UP_Z] = glui_geometry->add_listbox_to_panel(PANEL_surface,_d("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
+    LIST_surface[UP_Z] = glui_geometry->add_listbox_to_panel(PANEL_faces,_d("Up"),surface_indices+UP_Z,UPDATE_LIST,OBJECT_CB);
     LIST_surface[UP_Z]->set_w(260);
     for(i=0;i<nsurfinfo;i++){
       surfi = surfinfo + sorted_surfidlist[i];
@@ -297,14 +301,18 @@ extern "C" void glui_geometry_setup(int main_window){
     }
   }
   PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured,"",GLUI_PANEL_NONE);
-  PANEL_surface = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"surface");
-  CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_surface, "solid", &show_geom_surface_solid, VOL_SHOWHIDE, Volume_CB);
-  CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_surface, "outline", &show_geom_surface_outline, VOL_SHOWHIDE, Volume_CB);
-  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_surface, "smooth", &smooth_geom_normal);
+  PANEL_faces = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"faces");
+  CHECKBOX_faces_interior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "interior", &show_faces_interior);
+  CHECKBOX_faces_exterior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "exterior", &show_faces_exterior);
+  CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_faces, "solid", &show_faces_solid, VOL_SHOWHIDE, Volume_CB);
+  CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_faces, "outline", &show_faces_outline, VOL_SHOWHIDE, Volume_CB);
+  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_faces, "smooth", &smooth_geom_normal);
 
-  PANEL_interior = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"interior");
-  CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_interior,"solid",&show_geom_interior_solid,VOL_SHOWHIDE,Volume_CB);
-  CHECKBOX_interior_outline=glui_geometry->add_checkbox_to_panel(PANEL_interior,"outline",&show_geom_interior_outline,VOL_SHOWHIDE,Volume_CB);
+  PANEL_volumes = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"volumes");
+  CHECKBOX_volumes_interior = glui_geometry->add_checkbox_to_panel(PANEL_volumes, "interior", &show_volumes_interior);
+  CHECKBOX_volumes_exterior = glui_geometry->add_checkbox_to_panel(PANEL_volumes, "exterior", &show_volumes_exterior);
+  CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_volumes,"solid",&show_volumes_solid,VOL_SHOWHIDE,Volume_CB);
+  CHECKBOX_interior_outline=glui_geometry->add_checkbox_to_panel(PANEL_volumes,"outline",&show_volumes_outline,VOL_SHOWHIDE,Volume_CB);
 
   PANEL_normals = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"normals");
   CHECKBOX_show_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_normals, "show", &show_geom_normal);
