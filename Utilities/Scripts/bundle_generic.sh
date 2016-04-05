@@ -250,7 +250,7 @@ echo ""
 echo "--- copying documentation ---"
 echo ""
 CP $for_bundle Overview_linux_osx.html $bundledir/Documentation Overview.html
-CP2 $mandir FDS_Configuration_Management_Plan.pdf $bundledir/Documentation
+CP2 $mandir FDS_Config_Management_Plan.pdf $bundledir/Documentation
 CP2 $mandir FDS_Technical_Reference_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_User_Guide.pdf $bundledir/Documentation
 CP2 $mandir FDS_Validation_Guide.pdf $bundledir/Documentation
