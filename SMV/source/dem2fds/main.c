@@ -77,7 +77,7 @@ void generate_elevs(char *filebase){
   printf("&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay, deltay, zmin, zmax);
   printf("&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay,   zmax, zmax);
   printf("&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
-  printf("&SURF ID = 'surf1', RGB = 122,117,48 /\n");
+  printf("&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n",filebase);
 
 
   printf("&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",nlong,nlat,0.0,deltax,0.0,deltay);

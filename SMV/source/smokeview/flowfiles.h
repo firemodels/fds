@@ -48,7 +48,7 @@ typedef struct _triangle {
   float distance, *color, tpoints[6], tri_norm[3], point_norm[9];
   struct _texturedata *textureinfo;
   struct _surfdata *surf;
-  int vert_index[3], interior, geomtype, insolid;
+  int vert_index[3], exterior, geomtype, insolid;
   point *points[3];
 } triangle;
 

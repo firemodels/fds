@@ -9148,7 +9148,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"SHOWTETRAS")==1){
       fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&show_geom_interior_solid,&show_geom_interior_outline);
+      sscanf(buffer,"%i %i",&show_volumes_solid,&show_volumes_outline);
       continue;
     }
     if(match(buffer,"SHOWTRIANGLES")==1){
@@ -12462,7 +12462,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTERRAIN\n");
   fprintf(fileout, " %i\n", visTerrainType);
   fprintf(fileout, "SHOWTETRAS\n");
-  fprintf(fileout, " %i %i\n", show_geom_interior_solid, show_geom_interior_outline);
+  fprintf(fileout, " %i %i\n", show_volumes_solid, show_volumes_outline);
   fprintf(fileout, "SHOWTHRESHOLD\n");
   fprintf(fileout, " %i %i %f\n", vis_threshold, vis_onlythreshold, temp_threshold);
   fprintf(fileout, "SHOWTICKS\n");
