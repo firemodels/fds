@@ -61,6 +61,7 @@ GLUI_Spinner *SPINNER_tetra_vertices[12];
 GLUI_Spinner *SPINNER_geom_max_angle=NULL;
 GLUI_Spinner *SPINNER_geom_outline_ioffset=NULL;
 GLUI_Spinner *SPINNER_geom_ivecfactor = NULL;
+GLUI_Spinner *SPINNER_geom_vert_exag=NULL;
 
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
@@ -300,7 +301,8 @@ extern "C" void glui_geometry_setup(int main_window){
       break;
     }
   }
-  PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured,"",GLUI_PANEL_NONE);
+
+  PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "", GLUI_PANEL_NONE);
   PANEL_faces = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"faces");
   CHECKBOX_faces_interior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "interior", &show_faces_interior);
   CHECKBOX_faces_exterior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "exterior", &show_faces_exterior);
@@ -320,6 +322,8 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_ivecfactor->set_int_limits(0, 200);
 
   PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
+  SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
+  SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
