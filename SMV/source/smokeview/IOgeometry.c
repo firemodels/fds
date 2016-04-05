@@ -319,7 +319,6 @@ void draw_geom(int flag, int timestate){
         trianglei = tris[i];
         if(trianglei->exterior == 1 && show_faces_exterior == 0)continue;
         if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
-        if(trianglei->geomtype == GEOM_GEOM&&show_faces_outline == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
         texti = trianglei->textureinfo;
