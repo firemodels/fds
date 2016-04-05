@@ -787,11 +787,10 @@ Our goal is to integrate the ODE
 \begin{equation}
 \frac{\d Y}{\d t} = f(Y)
 \end{equation}
-where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction (temperature dependence of the rate law is frozen at the initial condition).  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $\Delta t$. The RK2 scheme is given by
+where $f(Y)$ represents a reaction rate law and $Y$ is a species mass fraction (temperature dependence of the rate law is frozen at the initial condition).  The total time interval is the FDS time step, $\delta t$, and the iteration substep is $\Delta t$. The scheme is given by
 \begin{align}
-\label{RK2}
-Y^* &= Y^k + \Delta t^k \, f(Y^k) \notag\\
-Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + \Delta t^k \, f(Y^*))
+\label{RK2-1} Y^* &= Y^k + \Delta t^k \, f(Y^k) \\
+\label{RK2-2} Y^{k+1}   &= \frac{1}{2}\,(Y^k + Y^* + \Delta t^k \, f(Y^*))
 \end{align}
 Here $k$ is the iteration index.  The number of sub-time intervals is determined by an error controller, as described below. This second-order scheme is an improvement upon the first-order explicit scheme used for simple chemistry. To maintain stability for stiff problems, however, an intractable number of time steps may be required.
 
@@ -828,6 +827,10 @@ The time step ($\Delta t_{new}$) required to maintain the specified/acceptable e
 \Delta t_{new}=\Delta t \left(\frac{err\_tol}{error}\right)^{1/4}
 \end{equation}
 Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required.
+
+\subsection*{Maintaining Boundedness}
+
+For an arbitrary reaction rate and time step the forward integration may lead to unbounded species mass fractions.  To avoid this issue, we use a method which limits a sub-time step based on the time it takes the limiting species to go out of bounds.  That substep is taken. Then right-hand-sides of the ODEs are recomputed with the new concentrations.  This process is repeated until either all reaction rates are zero or the time has reached the total LES time step.  So-called ``infinitely fast'' reactions are treated as second-order reactions (assuming two reactants) with zero activation energy and large Arrhenius constants.  This method maintains the proper reactant ratios in the case of multiple infinitely fast reactions.
 
 \subsection*{A Total Variation Scheme for Stiff Chemistry}
 
