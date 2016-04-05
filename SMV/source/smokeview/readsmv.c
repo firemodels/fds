@@ -8941,7 +8941,16 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer," %i %i %i",&structured_isopen,&unstructured_isopen,&show_geometry_diagnostics);
       continue;
     }
-    if(match(buffer,"SHOWTRIANGLECOUNT")==1){
+    if(match(buffer, "GEOMSHOW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i", &show_faces_interior, &show_faces_exterior, &show_faces_solid, &show_faces_outline, &smooth_geom_normal);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i", &show_volumes_interior, &show_volumes_exterior, &show_volumes_solid, &show_volumes_outline);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f", &geom_vert_exag, &geom_max_angle);
+      continue;
+    }
+    if(match(buffer, "SHOWTRIANGLECOUNT") == 1){
       fgets(buffer,255,stream);
       sscanf(buffer," %i",&show_triangle_count);
       continue;
@@ -12353,6 +12362,11 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
   fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
+  fprintf(fileout, "GEOMSHOW\n");
+  fprintf(fileout, " %i %i %i %i %i\n", show_faces_interior, show_faces_exterior, show_faces_solid, show_faces_outline, smooth_geom_normal);
+  fprintf(fileout, " %i %i %i %i\n", show_volumes_interior, show_volumes_exterior, show_volumes_solid, show_volumes_outline);
+  fprintf(fileout, " %f %f\n", geom_vert_exag, geom_max_angle);
+
   fprintf(fileout, "GVERSION\n");
   fprintf(fileout, " %i\n", gversion);
   fprintf(fileout, "ISOTRAN2\n");

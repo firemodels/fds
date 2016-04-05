@@ -733,13 +733,21 @@ void draw_geom(int flag, int timestate){
 
 void smooth_geom_normals(geomlistdata *geomlisti){
   int i;
+  float zmin, *zORIG;
 
       // compute average normals - method 1
 
+  if(geomlisti->npoints > 0){
+    zORIG = geomlisti->zORIG;
+    zmin = zORIG[0];
+    for(i = 1; i < geomlisti->npoints; i++){
+      zmin = MIN(zmin, zORIG[i]);
+    }
+  }
   for(i = 0; i < geomlisti->npoints; i++){
     point *pointi;
     int k;
-    float *norm;
+    float *norm, *xyz;
 
     pointi = geomlisti->points + i;
     norm = pointi->point_norm;
@@ -757,6 +765,9 @@ void smooth_geom_normals(geomlistdata *geomlisti){
       norm[2] += normk[2];
     }
     ReduceToUnit(norm);
+
+    xyz = pointi->xyz;
+    xyz[2] = zmin + geom_vert_exag*(zORIG[i] - zmin);
   }
 
       // compute average normals - method 2
@@ -1427,17 +1438,21 @@ void read_geom0(geomdata *geomi, int load_flag, int type, int *geom_frame_index,
     if(skipframe==0&&nverts>0){
       int ii;
       float *xyz=NULL;
+      float *zORIG;
 
       if(iframe<0)PRINTF("static geometry\n");
       NewMemory((void **)&xyz,3*nverts*sizeof(float));
       NewMemoryMemID((void **)&points,nverts*sizeof(point),geomi->memory_id);
-      geomlisti->points=points;
+      NewMemory((void **)&zORIG, nverts*sizeof(float));
+      geomlisti->zORIG = zORIG;
+      geomlisti->points = points;
       geomlisti->npoints=nverts;
       FORTREADBR(xyz,3*nverts,stream);
       for(ii=0;ii<nverts;ii++){
         points[ii].xyz[0]=xyz[3*ii];
         points[ii].xyz[1]=xyz[3*ii+1];
         points[ii].xyz[2]=xyz[3*ii+2];
+        zORIG[ii] = xyz[3 * ii+2];
       }
       FREEMEMORY(xyz);
     }
@@ -1560,17 +1575,21 @@ void read_geom2(geomdata *geomi, int load_flag, int type, int *errorcode){
     if(nverts>0){
       int ii;
       float *xyz=NULL;
+      float *zORIG;
 
       if(i<0)PRINTF("static geometry\n");
       NewMemory((void **)&xyz,3*nverts*sizeof(float));
+      NewMemory((void **)&zORIG,nverts*sizeof(float));
       NewMemoryMemID((void **)&points,nverts*sizeof(point),geomi->memory_id);
       geomlisti->points=points;
+      geomlisti->zORIG=zORIG;
       geomlisti->npoints=nverts;
       FORTREADBR(xyz,3*nverts,stream);
       for(ii=0;ii<nverts;ii++){
         points[ii].xyz[0]=xyz[3*ii];
         points[ii].xyz[1]=xyz[3*ii+1];
         points[ii].xyz[2]=xyz[3*ii+2];
+        zORIG[ii] = xyz[3*ii+2];
       }
       FREEMEMORY(xyz);
     }
