@@ -830,9 +830,9 @@ Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to 
 
 \subsection*{Maintaining Boundedness}
 
-For an arbitrary reaction rate and time step the forward integration may lead to unbounded species mass fractions.  To avoid this issue, we use a method which limits a sub-time step based on the time it takes the limiting species to go out of bounds.  That substep is taken. Then right-hand-sides of the ODEs are recomputed with the new concentrations.  This process is repeated until either all reaction rates are zero or the time has reached the total LES time step.  So-called ``infinitely fast'' reactions are treated as second-order reactions (assuming two reactants) with zero activation energy and large Arrhenius constants.  This method maintains the proper reactant ratios in the case of multiple infinitely fast reactions.
+For an arbitrary reaction rate and time step the forward integration may lead to unbounded species mass fractions.  To avoid this issue, we use a method which limits a sub-time step based on the time it takes the limiting species to go out of bounds (see Kahaner et al.~\cite{Kahaner:1989}).  That substep is taken, then the right-hand-sides of the ODEs are recomputed with the new concentrations.  This process is repeated until either all reaction rates are zero or the time has reached the total LES time step.  So-called ``infinitely fast'' reactions are treated as second-order reactions (assuming two reactants) with zero activation energy and large Arrhenius constants.  This method maintains the proper reactant ratios in the case of multiple infinitely fast reactions.
 
-\subsection*{A Total Variation Scheme for Stiff Chemistry}
+\subsection*{A Total Variation Scheme for Detecting Equilibrium}
 
 The stiffness associated with a flame front is handled by the error controller and variable time stepping discussed above. The scheme discussed in this section automatically detects chemical equilibrium, the explicit integration of which is also a stiff problem.  Even with error control, the numerical solution may exhibit numerical fluctuations between the bounds of the error tolerance.  This is an undesirable condition which often occurs in cases with competing or reversible reactions.
 
