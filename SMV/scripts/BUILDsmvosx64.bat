@@ -1,9 +1,7 @@
 @echo off
-Title Building relase Smokeview for 64 bit OSX
+Title Building Smokeview for 64 bit OSX
 
-Rem  Windows batch file to build Smokeview for all platforms.
-Rem  This script builds LInux and OSX Smokeview's by doing a
-Rem  remote shell (plink) to the NIST Linux cluster.
+Rem  Windows batch file to build Smokeview for 64 bit OSX
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -23,7 +21,7 @@ call %envfile%
 
 %svn_drive%
 
-plink %osx_logon% %linux_svn_root%/SMV/scripts/MAKEsmv.sh intel_osx_64
+plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_osx_64 make_smv.sh
 
 echo.
 echo compilation complete

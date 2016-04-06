@@ -1,9 +1,9 @@
 @echo off
-Title Building 64 bit Linux background
+Title Building background for 64 bit Linux
 
-::  Windows batch file to build a Linux version of background
+Rem  Windows batch file to build a background for 64 bit Linux
 
-:: setup environment variables (defining where repository resides etc) 
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,17 +18,10 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
-echo.
-echo Using GIT revision %smv_revision% to build a Linux version of background
 
 %svn_drive%
-cd %svn_root%\smv\scripts
-set version=%smv_version%_%smv_revision%
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEbglinux.sh %linux_svn_root%
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/background/intel_linux_64 make_background.sh
 
 echo.
 echo compilation complete

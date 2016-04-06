@@ -1,9 +1,9 @@
 @echo off
-Title Building Smokediff for OSX
+Title Building smokediff for 64 bit OSX
 
-::  Windows batch file to build OSX version of smokediff
+Rem  Windows batch file to build smokediff for 64 bit OSX
 
-:: setup environment variables (defining where repository resides etc) 
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -20,12 +20,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-echo Building OSX version of smokediff
-
-plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEsmdosx.sh %linux_svn_root%
+plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokediff/intel_osx_64 make_diff.sh
 
 echo.
 echo compilation complete

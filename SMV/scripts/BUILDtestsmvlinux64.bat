@@ -22,7 +22,7 @@ call %envfile%
 
 %svn_drive%
 
-plink %linux_logon% %linux_svn_root%/SMV/scripts/MAKEsmv.sh intel_linux_64 -t
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_linux_64 make_smv.sh -t
 
 echo.
 echo compilation complete

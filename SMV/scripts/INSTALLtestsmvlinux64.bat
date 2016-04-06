@@ -1,7 +1,7 @@
 @echo off
-Title Installing 64 bit Linux test Smokeview
+Title install test smokeview on 64 bit linux
 
-Rem  Windows batch file to create an achive for a 64 bit Linux test smokeview
+Rem  Windows batch file to install test smokeview on 64 bit linux
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -21,12 +21,8 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\smv\scripts
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/uploads smv_test_%smv_revision%_linux64.sh y
 
-set exe=smv_test_%smv_revision%_linux64.sh
-
-echo updating 64 bit test smokeview
-plink %linux_logon% %linux_svn_root%/SMV/uploads/%exe% y
-
-
+echo.
+echo installation complete
 pause

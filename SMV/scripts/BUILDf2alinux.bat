@@ -1,9 +1,9 @@
 @echo off
-Title Building 64 bit Linux fds2ascii
+Title Building fds2ascii for 64 bit linux
 
-::  Windows batch file to build Linux version of smokezip
+Rem  Windows batch file to build fds2ascii for 64 bit linux
 
-:: setup environment variables (defining where repository resides etc) 
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,14 +18,10 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Building Linux version of fds2ascii
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEf2alinux.sh %linux_svn_root%
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh Utilities/fds2ascii/intel_linux_64 make_fds2ascii.sh
 
 echo.
 echo compilation complete
