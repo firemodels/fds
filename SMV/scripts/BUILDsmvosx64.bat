@@ -22,12 +22,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\scripts
-set version=%smv_version%_%smv_revision%
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-
-plink %osx_logon% %scriptdir%/ssh_command.sh %osx_hostname% %scriptdir% MAKEsmvosx64.sh %linux_svn_root%
+plink %osx_logon% %linux_svn_root%/SMV/scripts/MAKEsmv.sh intel_osx_64
 
 echo.
 echo compilation complete
