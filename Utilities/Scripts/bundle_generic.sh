@@ -186,6 +186,8 @@ SCP $fdshost $wind2fdsroot/$wind2fdsdir $wind2fds $bundledir/bin $wind2fdsout
 
 SCP $fdshost $fdsroot/$fdsmpidir $fdsmpi $bundledir/bin $fdsmpiout
 
+SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
+
 if [ "$PLATFORM" == "LINUX64" ]; then
    ostype=LINUX
    ossize=intel64
@@ -212,23 +214,26 @@ echo  >> $fullmanifest
 echo Versions:>> $fullmanifest
 echo  >> $fullmanifest
 echo ------fds-------------------- >> $fullmanifest
-ssh -q $runhost " echo 0 | $fdsroot/$fdsmpidir/$fdsmpi" >> $fullmanifest 2>&1 
+echo 0 | $bundledir/bin/$fdsmpiout >> $fullmanifest 2>&1 
 
 echo  >> $fullmanifest
 echo ------fds2ascii-------------------- >> $fullmanifest
-ssh -q $runhost $fds2asciiroot/$fds2asciidir/$fds2ascii -v >> $fullmanifest
+$bundledir/bin/$fds2asciiout -v >> $fullmanifest
 
 echo  >> $fullmanifest
 echo ------smokeview-------------------- >> $fullmanifest
-ssh -q $runhost $smvbindir/$smokeview -v  >> $fullmanifest
+$bundledir/bin/$smokeviewout -v  >> $fullmanifest
+
 echo  >> $fullmanifest
 echo ------smokediff-------------------- >> $fullmanifest
-ssh -q $runhost $smokediffroot/$smokediffdir/$smokediff -v >> $fullmanifest
+$bundledir/bin/$smokediffwout -v  >> $fullmanifest
+
 echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
-ssh -q $runhost $smokeziproot/$smokezipdir/$smokezip -v >> $fullmanifest
+$bundledir/bin/$smokezipout -v  >> $fullmanifest
+
 echo ------dem2fds-------------------- >> $fullmanifest
-ssh -q $runhost $dem2fdsroot/$dem2fdsdir/$dem2fds -v >> $fullmanifest
+$bundledir/bin/$dem2fds -v  >> $fullmanifest
 
 echo ""
 echo "--- copying configuration files ---"
@@ -243,8 +248,6 @@ CP $forbundle smokeview.ini $bundledir/bin smokeview.ini
 CP $forbundle volrender.ssf $bundledir/bin volrender.ssf
 
 CP $forbundle objects.svo $bundledir/bin objects.svo
-
-SCP $fdshost $fds2asciiroot/$fds2asciidir $fds2ascii $bundledir/bin $fds2asciiout
 
 echo ""
 echo "--- copying documentation ---"
