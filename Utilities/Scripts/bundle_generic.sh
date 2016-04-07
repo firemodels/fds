@@ -226,14 +226,14 @@ $bundledir/bin/$smokeviewout -v  >> $fullmanifest
 
 echo  >> $fullmanifest
 echo ------smokediff-------------------- >> $fullmanifest
-$bundledir/bin/$smokediffwout -v  >> $fullmanifest
+$bundledir/bin/$smokediffout -v  >> $fullmanifest
 
 echo  >> $fullmanifest
 echo ------smokezip-------------------- >> $fullmanifest
 $bundledir/bin/$smokezipout -v  >> $fullmanifest
 
 echo ------dem2fds-------------------- >> $fullmanifest
-$bundledir/bin/$dem2fds -v  >> $fullmanifest
+$bundledir/bin/$dem2fdsout -v  >> $fullmanifest
 
 echo ""
 echo "--- copying configuration files ---"
