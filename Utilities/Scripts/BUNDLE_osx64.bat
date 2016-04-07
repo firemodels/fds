@@ -24,7 +24,7 @@ plink %osx_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.sh %linux_svn_
 set manifest=%svn_root%\Utilities\uploads\manifest_osx_64.html
 echo Downloading manifest
 erase %manifest%
-pscp %osx_logon%:manifest_osx_64.html %manifest%
+pscp %osx_logon%:%linux_svn_root%/Utilities/uploads/manifest_osx_64.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
