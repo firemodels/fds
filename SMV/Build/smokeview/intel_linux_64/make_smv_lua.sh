@@ -1,9 +1,9 @@
 #!/bin/bash
-source ../scripts/setopts.sh $*
-source ../scripts/test_ifort.sh
+source ../../scripts/setopts.sh $*
+source ../../scripts/test_ifort.sh
 source $IFORT_COMPILER/bin/compilervars.sh intel64
-LIBDIR=../LIBS/lib_linux_intel_64/
-source ../scripts/test_libs.sh lua
+LIBDIR=../../LIBS/lib_linux_intel_64/
+source ../../scripts/test_libs.sh lua
 LUA_SCRIPTING="LUA_SCRIPTING=true"
 
 make -f ../Makefile clean
