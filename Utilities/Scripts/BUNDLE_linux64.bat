@@ -25,7 +25,7 @@ plink %linux_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_linux64.sh %linux_
 set manifest=%svn_root%\Utilities\uploads\manifest_linux_64.html
 echo Downloading manifest
 erase %manifest%
-pscp %linux_logon%:manifest_linux_64.html %manifest%
+pscp %linux_logon%:%linux_svn_root%/Utilities/uploads/manifest_linux_64.html %manifest%
 start explorer %manifest%
 
 echo Downloading compressed archive to:
