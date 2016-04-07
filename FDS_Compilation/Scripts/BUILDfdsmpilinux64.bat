@@ -21,7 +21,7 @@ call %envfile%
 
 %svn_drive%
 
-plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/mpi_intel_linux_64 make_fds.sh
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/mpi_intel_linux_64 make_fds.sh
 
 echo.
 echo compilation complete
