@@ -1,7 +1,8 @@
 @echo off
-Title Building Smokediff for Linux
+Title Building smokediff for 64 bit linux
 
-:: setup environment variables (defining where repository resides etc) 
+Rem  Windows batch file to build smokediff for 64 bit linux
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,13 +19,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-echo Building Linux versions of smokediff
-
-
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEsmdlinux.sh %linux_svn_root%
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokediff/intel_linux_64 make_diff.sh
 
 echo.
 echo compilation complete

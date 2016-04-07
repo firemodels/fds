@@ -21,11 +21,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEtestsmvlinux64.sh %linux_svn_root%
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_linux_64 make_smv.sh -t
 
 echo.
 echo compilation complete

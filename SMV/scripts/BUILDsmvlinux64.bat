@@ -1,7 +1,7 @@
 @echo off
-Title Building release Smokeview for 64 bit Linuux
+Title Building Smokeview for 64 bit Linux
 
-Rem  Windows batch file to build a release Smokeview for Linux 64.
+Rem  Windows batch file to build a test Smokeview for 64 bit Linux
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -20,13 +20,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
-set version=%smv_version%_%smv_revision%
 
-set scriptdir=%linux_svn_root%/SMV/scripts
-
-plink %linux_logon% %scriptdir%/ssh_command.sh %linux_hostname% %scriptdir% MAKEsmvlinux64.sh %linux_svn_root%
-
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_linux_64 make_smv.sh
 echo.
 echo compilation complete
 pause
