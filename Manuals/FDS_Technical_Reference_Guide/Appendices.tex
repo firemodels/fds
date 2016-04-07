@@ -826,7 +826,7 @@ The time step ($\Delta t_{new}$) required to maintain the specified/acceptable e
 \begin{equation}\label{eq:dt_new}
 \Delta t_{new}=\Delta t \left(\frac{err\_tol}{error}\right)^{1/4}
 \end{equation}
-Eq.~(\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required.
+Equation (\ref{eq:dt_new}) indicates that if the error estimate is large relative to the tolerance, then the new time step decreases; whereas if the error is small, then the new time step increases. This dynamic time stepping scheme improves computational efficiency because it allows the integrator to take the largest time step possible bounded by either the error tolerance or the global simulation time step, thus minimizing the total number of integration steps required.
 
 \subsection*{Maintaining Boundedness}
 
