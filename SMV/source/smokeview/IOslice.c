@@ -2230,10 +2230,6 @@ void getsliceparams(void){
       strcpy(sd->slicedir,"");
       position=-999.0;
       if(sd->is1==sd->is2||(sd->js1!=sd->js2&&sd->ks1!=sd->ks2)){
-        mesh *meshi;
-
-        meshi = meshinfo + sd->blocknumber;
-
         sd->idir=1;
         position = meshi->xplt_orig[is1];
         if(sd->slicetype==SLICE_CELL_CENTER){
@@ -2262,9 +2258,6 @@ void getsliceparams(void){
         }
       }
       if(sd->js1==sd->js2){
-        mesh *meshi;
-
-        meshi = meshinfo + sd->blocknumber;
         sd->dplane_min = meshi->dplane_min[2];
         sd->dplane_max = meshi->dplane_max[2];
 
@@ -2287,9 +2280,6 @@ void getsliceparams(void){
         sprintf(sd->slicedir,"Y=%f",position);
       }
       if(sd->ks1==sd->ks2){
-        mesh *meshi;
-
-        meshi = meshinfo + sd->blocknumber;
         sd->dplane_min = meshi->dplane_min[3];
         sd->dplane_max = meshi->dplane_max[3];
 

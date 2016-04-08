@@ -5749,7 +5749,6 @@ void setup_tree_devices(void){
 
   max_device_tree=0;
   for(i = 0; i < ntreedeviceinfo; i++){
-    treedevicedata *treei;
     int j, n;
 
     treei = treedeviceinfo + i;

@@ -1026,15 +1026,15 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){

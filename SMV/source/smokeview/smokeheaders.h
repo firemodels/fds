@@ -842,7 +842,7 @@ EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *geom_fra
 EXTERNCPP void init_geom(geomdata *geomi, int hasdata, int fdsblock);
 EXTERNCPP void read_geomdata(int ifile, int load_flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
-EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP void readpart(char *file, int ifile, int loadflag, int set_colorbound, int *errorcode);
 EXTERNCPP void readzone(int ifile, int flag, int *errorcode);
 EXTERNCPP void readvslice(int ivslice, int flag, int *errorcode);
 

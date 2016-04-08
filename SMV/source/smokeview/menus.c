@@ -2411,7 +2411,7 @@ void LoadUnloadMenu(int value){
       readpatch(i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      readpart("",i,UNLOAD,&errorcode);
+      readpart("",i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
@@ -2494,7 +2494,7 @@ void LoadUnloadMenu(int value){
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
         partinfo[i].reload=1;
-        readpart(partinfo[i].file,i,UNLOAD,&errorcode);
+        readpart(partinfo[i].file,i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
       }
       else{
         partinfo[i].reload=0;
@@ -2503,12 +2503,12 @@ void LoadUnloadMenu(int value){
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file,i,UNLOAD,&errorcode);
+        readpart(partinfo[i].file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
       }
     }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file,i,LOAD,&errorcode);
+        readpart(partinfo[i].file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
       }
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
@@ -2716,7 +2716,7 @@ void EvacMenu(int value){
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
-      readpart(parti->file,i,UNLOAD,&errorcode);
+      readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
@@ -2725,7 +2725,7 @@ void EvacMenu(int value){
       parti=partinfo + i;
       if(parti->evac==0)continue;
       ReadEvacFile=1;
-      readpart(parti->file,i,LOAD,&errorcode);
+      readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADFILE\n");
         fprintf(scriptoutstream," %s\n",parti->file);
@@ -2737,7 +2737,7 @@ void EvacMenu(int value){
   if(value>=0){
     ReadEvacFile=1;
     npartframes_max=get_min_partframes();
-    readpart(partinfo[value].file,value,LOAD,&errorcode);
+    readpart(partinfo[value].file, value, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partinfo[value].file);
@@ -2748,7 +2748,7 @@ void EvacMenu(int value){
 
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("",i,UNLOAD,&errorcode);
+      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
   }
   updatemenu=1;
@@ -2960,13 +2960,13 @@ void ParticleMenu(int value){
       fprintf(scriptoutstream," %s\n",partfile);
     }
     npartframes_max=get_min_partframes();
-    readpart(partfile,value,LOAD,&errorcode);
+    readpart(partfile, value, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
   }
   else{
     if(value==-1){
       for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==1)continue;
-        readpart("",i,UNLOAD,&errorcode);
+        readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
       }
     }
     else{
@@ -2979,7 +2979,7 @@ void ParticleMenu(int value){
         for(i = 0; i<npartinfo; i++){
           parti = partinfo+i;
           if(parti->evac==1)continue;
-          readpart(parti->file, i, UNLOAD, &errorcode);
+          readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS, &errorcode);
         }
       }
       for(i=0;i<npartinfo;i++){
@@ -2987,7 +2987,7 @@ void ParticleMenu(int value){
         if(parti->evac==1)continue;
         if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
         if(parti->version==1){
-          readpart(parti->file,i,LOAD,&errorcode);
+          readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
         }
       }
       force_redisplay=1;
@@ -3106,12 +3106,12 @@ void UnloadEvacMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("",value,UNLOAD,&errorcode);
+    readpart("", value, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("",i,UNLOAD,&errorcode);
+      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
   }
 }
@@ -3124,12 +3124,12 @@ void UnloadPartMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("",value,UNLOAD,&errorcode);
+    readpart("", value, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==1)continue;
-      readpart("",i,UNLOAD,&errorcode);
+      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
   }
 }

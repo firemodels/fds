@@ -981,7 +981,7 @@ void update_partcolorbounds(partdata *parti){
 
     /* -----  ------------- readpart5 ------------------------ */
 
-void readpart5(char *file, int ifile, int flag, int *errorcode){
+void readpart5(char *file, int ifile, int loadflag, int set_partcolor, int *errorcode){
   size_t lenfile;
   int error=0;
   partdata *parti;
@@ -998,7 +998,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   freeallpart5data(parti);
 
-  if(parti->loaded==0&&flag==UNLOAD)return;
+  if(parti->loaded==0&&loadflag==UNLOAD)return;
 
 
   *errorcode=0;
@@ -1030,7 +1030,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   FREEMEMORY(parti->times);
 
-  if(flag==UNLOAD){
+  if(loadflag==UNLOAD){
     update_partcolorbounds(parti);
     Update_Times();
     updatemenu=1;
@@ -1044,7 +1044,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   lenfile = strlen(file);
   if(lenfile==0){
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     Update_Times();
     return;
   }
@@ -1134,7 +1134,7 @@ void update_all_partvis2(void){
 
 /* ------------------ readpart ------------------------ */
 
-void readpart(char *file, int ifile, int flag, int *errorcode){
+void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *errorcode){
   int nmax, n, i;
   FILE_SIZE lenfile;
   float *tcopy;
@@ -1160,12 +1160,12 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   ASSERT(ifile>=0&&ifile<=npartinfo);
   parti=partinfo+ifile;
   if(parti->version==1){
-    readpart5(file,ifile,flag,errorcode);
+    readpart5(file,ifile,loadflag,set_partcolor,errorcode);
     return;
   }
   blocknumber=parti->blocknumber;
   meshi=meshinfo+blocknumber;
-  if(parti->loaded==0&&flag==UNLOAD)return;
+  if(parti->loaded==0&&loadflag==UNLOAD)return;
 
 
   nb=meshi->nbptrs;
@@ -1194,7 +1194,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   FREEMEMORY(parti->bframe);
   FREEMEMORY(parti->sprframe)
 
-  if(flag==UNLOAD){
+  if(loadflag==UNLOAD){
     Update_Times();
     updatemenu=1;
 #ifdef pp_MEMPRINT
@@ -1214,7 +1214,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
 
   lenfile = strlen(file);
   if(lenfile==0){
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     Update_Times();
     return;
   }
@@ -1273,7 +1273,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     if(return_code==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
+      readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
       return;
     }
   }
@@ -1281,7 +1281,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(NewMemory((void **)&parti->times,sizeof(float)*npartframes)==0){
     *errorcode=1;
     FORTclosefortranfile(&file_unit);
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
   if(NewMemory((void **)&parti->xparts,npartpoints*sizeof(short))==0||
@@ -1291,7 +1291,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     FORTclosefortranfile(&file_unit);
     fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
     fprintf(stderr,"          to load %s\n",parti->file);
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
   bytesperpoint=7;
@@ -1306,7 +1306,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
     fprintf(stderr,"          to load %s\n",parti->file);
       FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
+      readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
       return;
   }
   for(i=0;i<npartpoints;i++){
@@ -1330,7 +1330,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(error!=0){
     *errorcode=1;
     fprintf(stderr,"*** Error: problem reading %s\n",file);
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
   xbox=DENORMALIZE_X(xbar);
@@ -1350,7 +1350,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   if(error!=0||parti->ntimes==0){
     if(error!=0)fprintf(stderr,"*** Error: problem reading %s\n",file);
     *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
 
@@ -1407,7 +1407,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
   partmax=tmax_global;
   if(NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *))==0){
     FORTclosefortranfile(&file_unit);
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     *errorcode=1;
     return;
   }
@@ -1416,7 +1416,7 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
     if(NewMemory((void **)&colorlabelpart[n],11)==0){
       *errorcode=1;
       FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
+      readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
       return;
     }
   }
@@ -1433,13 +1433,13 @@ void readpart(char *file, int ifile, int flag, int *errorcode){
      ResizeMemory((void **)&parti->zparts,nmax*sizeof(short))==0){
     FORTclosefortranfile(&file_unit);
     *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
   if(ResizeMemory((void **)&parti->itpart,nmax*sizeof(unsigned char))==0){
     FORTclosefortranfile(&file_unit);
     *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     return;
   }
   updateglui();
