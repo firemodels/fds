@@ -1106,6 +1106,7 @@ typedef struct {
   part5class **partclassptr;
   part5data *data5;
   histogramdata **histograms;
+  float *valmin, *valmax;
 } partdata;
 
 /* --------------------------  targ ------------------------------------ */

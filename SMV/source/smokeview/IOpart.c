@@ -946,7 +946,40 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
 
 }
 
-/* ------------------ readpart5 ------------------------ */
+/* ------------------ update_partcolorbounds ------------------------ */
+
+void update_partcolorbounds(partdata *parti){
+  int j;
+
+  adjustpart5bounds(parti);
+  if(colorlabelpart!=NULL){
+    NewMemory((void **)&colorlabelpart, MAXRGB*sizeof(char *));
+    {
+      int n;
+
+      for(n = 0; n<MAXRGB; n++){
+        colorlabelpart[n] = NULL;
+      }
+      for(n = 0; n<nrgb; n++){
+        NewMemory((void **)&colorlabelpart[n], 11);
+      }
+    }
+  }
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo+j;
+    if(partj->loaded==0||partj->display==0)continue;
+    if(partj==parti){
+      getPart5Colors(partj, nrgb, PARTFILE_MAP);
+    }
+    else{
+      getPart5Colors(partj, nrgb, PARTFILE_REMAP);
+    }
+  }
+}
+
+    /* -----  ------------- readpart5 ------------------------ */
 
 void readpart5(char *file, int ifile, int flag, int *errorcode){
   size_t lenfile;
@@ -956,6 +989,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   int local_starttime0, local_stoptime0;
   float delta_time0, delta_time;
   FILE_SIZE file_size;
+  int j;
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
 
@@ -969,29 +1003,35 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   *errorcode=0;
   partfilenum=ifile;
-  if(parti->evac==0){
-    ReadPartFile=0;
+  ReadPartFile = 0;
+  ReadEvacFile = 0;
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo + j;
+    if(partj->loaded==1&&partj!=parti&&partj->evac==1){
+      ReadEvacFile = 1;
+      break;
+    }
   }
-  else{
-    ReadEvacFile=0;
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo + j;
+    if(partj->loaded==1&&partj!=parti&&partj->evac==0){
+      ReadPartFile = 1;
+      break;
+    }
   }
-  parti->loaded=0;
+  parti->loaded = 0;
   parti->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
   FREEMEMORY(parti->times);
 
-  if(colorlabelpart!=NULL){
-    int n;
-
-    for(n=0;n<MAXRGB;n++){
-      FREEMEMORY(colorlabelpart[n]);
-    }
-    FREEMEMORY(colorlabelpart);
-  }
-
   if(flag==UNLOAD){
+    update_partcolorbounds(parti);
     Update_Times();
     updatemenu=1;
     updatePart5extremes();
@@ -1038,19 +1078,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   parti->loaded = 1;
   parti->display = 1;
-  adjustpart5bounds(parti);
-  NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *));
-  {
-    int n;
-
-    for(n=0;n<MAXRGB;n++){
-      colorlabelpart[n]=NULL;
-    }
-    for(n=0;n<nrgb;n++){
-      NewMemory((void **)&colorlabelpart[n],11);
-    }
-  }
-  getPart5Colors(parti,nrgb);
+  update_partcolorbounds(parti);
   updateglui();
 #ifdef pp_MEMPRINT
   PRINTF("After particle file load: \n");

@@ -62,7 +62,9 @@
 #define pp_MEMPRINT
 #endif
 
-#define pp_PARTTEST
+// for debugging, set particle values o 100*parti->seq_id + small random number
+//#define pp_PARTTEST
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #ifdef _DEBUG  // comment the following line when debugging REALLY large cases (to avoid memory checks)

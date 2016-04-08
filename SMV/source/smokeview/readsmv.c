@@ -6623,6 +6623,8 @@ typedef struct {
       parti->particle_type=0;
       parti->droplet_type=0;
       parti->histograms = NULL;
+      parti->valmin = NULL;
+      parti->valmax = NULL;
 
       parti->data5=NULL;
       parti->partclassptr=NULL;

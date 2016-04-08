@@ -2971,21 +2971,22 @@ void ParticleMenu(int value){
     }
     else{
       ReadPartFile=1;
-      whichpart=-(10+value);
-      partj = partinfo + whichpart;
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
       npartframes_max=get_min_partframes();
-      for(i=0;i<npartinfo;i++){
-        parti = partinfo + i;
-        if(parti->evac==1)continue;
-        readpart(parti->file,i,UNLOAD,&errorcode);
+      if(value==PARTFILE_LOADALL){
+        for(i = 0; i<npartinfo; i++){
+          parti = partinfo+i;
+          if(parti->evac==1)continue;
+          readpart(parti->file, i, UNLOAD, &errorcode);
+        }
       }
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
-        if(parti->version==1||strcmp(parti->label.longlabel,partj->label.longlabel)==0){
+        if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
+        if(parti->version==1){
           readpart(parti->file,i,LOAD,&errorcode);
         }
       }

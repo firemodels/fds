@@ -94,7 +94,13 @@ void adjustpart5bounds(partdata *parti){
   part5data *datacopy;
   int alpha05;
 
-  if(parti->histograms == NULL){
+  if(parti->valmin==NULL){
+    NewMemory((void **)&parti->valmin, npart5prop*sizeof(float));
+  }
+  if(parti->valmax==NULL){
+    NewMemory((void **)&parti->valmax, npart5prop*sizeof(float));
+  }
+  if(parti->histograms==NULL){
     NewMemory((void **)&parti->histograms, npart5prop*sizeof(histogramdata *));
     for(i = 0; i < npart5prop; i++){
       NewMemory((void **)&parti->histograms[i], sizeof(histogramdata));
@@ -109,26 +115,28 @@ void adjustpart5bounds(partdata *parti){
     reset_histogram(&propi->histogram);
   }
   datacopy = parti->data5;
-  for(i=0;i<parti->ntimes;i++){
-    for(j=0;j<parti->nclasses;j++){
-      part5class *partclassi;
-      float *rvals;
+  if(datacopy!=NULL){
+    for(i = 0; i<parti->ntimes; i++){
+      for(j = 0; j<parti->nclasses; j++){
+        part5class *partclassi;
+        float *rvals;
 
-      partclassi = parti->partclassptr[j];
-      rvals = datacopy->rvals;
+        partclassi = parti->partclassptr[j];
+        rvals = datacopy->rvals;
 
-      for(k=2;k<partclassi->ntypes;k++){
-        part5prop *prop_id;
-        int partprop_index;
+        for(k = 2; k<partclassi->ntypes; k++){
+          part5prop *prop_id;
+          int partprop_index;
 
-        prop_id = get_part5prop(partclassi->labels[k].longlabel);
-        if(prop_id==NULL)continue;
+          prop_id = get_part5prop(partclassi->labels[k].longlabel);
+          if(prop_id==NULL)continue;
 
-        partprop_index = prop_id - part5propinfo;
-        update_histogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
-        rvals+=datacopy->npoints;
+          partprop_index = prop_id-part5propinfo;
+          update_histogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
+          rvals += datacopy->npoints;
+        }
+        datacopy++;
       }
-      datacopy++;
     }
   }
   for(j=0;j<npartinfo;j++){
@@ -152,7 +160,7 @@ void adjustpart5bounds(partdata *parti){
 
     propi = part5propinfo + i;
     histi = &propi->histogram;
-    
+
     propi->global_min = histi->valmin;
     propi->global_max = histi->valmax;
 
@@ -187,6 +195,8 @@ void adjustpart5bounds(partdata *parti){
       ASSERT(FFALSE);
       break;
     }
+    parti->valmin[i] = propi->valmin;
+    parti->valmax[i] = propi->valmax;
   }
   adjustpart5chops(parti);
 #ifdef _DEBUG

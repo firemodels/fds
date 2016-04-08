@@ -2613,7 +2613,7 @@ void PART_CB(int var){
      PART_CB(FILETYPEINDEX);
      if(EDIT_part_min!=NULL&&setpartmin==SET_MIN)PART_CB(SETVALMIN);
      if(EDIT_part_max!=NULL&&setpartmax==SET_MAX)PART_CB(SETVALMAX);
-     ParticleMenu(0);
+     ParticleMenu(PARTFILE_RELOADALL);
      updateglui();
      ParticlePropShowMenu(prop_index_SAVE);
     }

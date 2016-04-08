@@ -878,7 +878,7 @@ EXTERNCPP void updatetracers(void);
 EXTERNCPP void update_fedinfo(void);
 void update_gslice_planes(void);
 
-EXTERNCPP void getPart5Colors(partdata *parti, int nlevels);
+EXTERNCPP void getPart5Colors(partdata *parti, int nlevels, int convert_flag);
 EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it,
                    const unsigned char *isprink, int particle_type, int droplet_type,
               const float *tmin, const float *tmax, int nlevel,
