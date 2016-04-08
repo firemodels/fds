@@ -1105,6 +1105,7 @@ typedef struct {
   int nclasses;
   part5class **partclassptr;
   part5data *data5;
+  histogramdata **histograms;
 } partdata;
 
 /* --------------------------  targ ------------------------------------ */

@@ -1036,6 +1036,8 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   PRINTF("computing particle color levels \n");
 
+  parti->loaded = 1;
+  parti->display = 1;
   adjustpart5bounds(parti);
   NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *));
   {
@@ -1066,8 +1068,6 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   parttype=0;
   PART_CB_INIT();
   ParticlePropShowMenu(part5colorindex);
-  parti->loaded=1;
-  parti->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   Update_Times();
   updatePart5extremes();
