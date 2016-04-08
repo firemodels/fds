@@ -1055,6 +1055,7 @@ typedef struct {
   float chopmin, chopmax;
   int setchopmin, setchopmax;
   int extreme_min, extreme_max;
+  histogramdata histogram;
   int *buckets;
 } part5prop;
 

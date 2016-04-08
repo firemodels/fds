@@ -11,7 +11,7 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
-//#define pp_PARTTEST
+#include "histogram.h"
 
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
@@ -304,17 +304,17 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
       CheckMemory;
       if(doit==1){
         if(numtypes[2*i]>0){
-#ifdef pp_PARTTEST        
+#ifdef pp_PARTTEST
           int iii;
-#endif          
+#endif
 
           FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
 
-#ifdef pp_PARTTEST        
+#ifdef pp_PARTTEST
           for(iii = 0; iii<nparts*numtypes[2*i]; iii++){
-            datacopy->rvals[iii] = 100.0*parti->seq_id;
+            datacopy->rvals[iii] = 100.0*parti->seq_id+(float)randint(-1000,1000)/1000.0;
           }
-#endif          
+#endif
           if(returncode==0)goto wrapup;
         }
       }
@@ -513,7 +513,7 @@ void init_part5prop(void){
             propi->partlabels[ii]=labeli;
           }
           NewMemory((void **)&propi->scale,256);
-
+          init_histogram(&propi->histogram, NHIST_BUCKETS);
 
           npart5prop++;
         }

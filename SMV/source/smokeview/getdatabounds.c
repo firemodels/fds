@@ -94,62 +94,6 @@ void adjustpart5bounds(partdata *parti){
   part5data *datacopy;
   int alpha05;
 
-  for(i=0;i<npart5prop;i++){
-    part5prop *propi;
-    int n;
-    int *buckets;
-
-    propi = part5propinfo + i;
-
-    if(propi->set_global_bounds==1){
-      propi->global_min =  1000000000.0;
-      propi->global_max = -1000000000.0;
-    }
-
-    NewMemory((void **)&propi->buckets,NBUCKETS*sizeof(int));
-    buckets = propi->buckets;
-    for (n=0;n<NBUCKETS;n++){
-      buckets[n]=0;
-    }
-  }
-
-  // compute global min and max
-
-  datacopy = parti->data5;
-  for(i=0;i<parti->ntimes;i++){
-    for(j=0;j<parti->nclasses;j++){
-      part5class *partclassi;
-      float *rvals;
-
-      partclassi=parti->partclassptr[j];
-      rvals = datacopy->rvals;
-
-      for(k=2;k<partclassi->ntypes;k++){
-        part5prop *prop_id;
-        float *valmin, *valmax;
-
-        prop_id = get_part5prop(partclassi->labels[k].longlabel);
-        if(prop_id==NULL)continue;
-
-        valmin = &prop_id->global_min;
-        valmax = &prop_id->global_max;
-
-        if(prop_id->set_global_bounds==1&&(valmin!=NULL||valmax!=NULL)){
-          for(m=0;m<datacopy->npoints;m++){
-            float val;
-
-            val=*rvals++;
-            if(valmin!=NULL)*valmin=MIN(*valmin,val);
-            if(valmax!=NULL)*valmax=MAX(*valmax,val);
-          }
-        }
-      }
-      datacopy++;
-    }
-  }
-
-  // generate data histogram (buckets) in order to determine percentile min and max
-
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes;i++){
     for(j=0;j<parti->nclasses;j++){
@@ -167,20 +111,8 @@ void adjustpart5bounds(partdata *parti){
         prop_id = get_part5prop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
-        valmin = &prop_id->global_min;
-        valmax = &prop_id->global_max;
-        dg = (*valmax-*valmin)/(float)NBUCKETS;
-        if(dg==0.0)dg=1.0;
-        buckets=prop_id->buckets;
-
-        for(m=0;m<datacopy->npoints;m++){
-          float val;
-          int ival;
-
-          val=*rvals++;
-          ival = CLAMP((val-*valmin)/dg,0,NBUCKETS-1);
-          buckets[ival]++;
-        }
+        update_histogram(rvals, datacopy->npoints, &prop_id->histogram);
+        rvals+=datacopy->npoints;
       }
       datacopy++;
     }
@@ -190,52 +122,16 @@ void adjustpart5bounds(partdata *parti){
 
   for(i=0;i<npart5prop;i++){
     part5prop *propi;
-    int total;
-    int *buckets;
-    int nsmall, nbig;
-    int n;
-    float gmin, gmax, dg;
+    histogramdata *histi;
 
     propi = part5propinfo + i;
-    buckets = propi->buckets;
+    histi = &propi->histogram;
+    
+    propi->global_min = histi->valmin;
+    propi->global_max = histi->valmax;
 
-    if(propi->set_global_bounds==1){
-      total = 0;
-      for(n=0;n<NBUCKETS;n++){
-        total+=buckets[n];
-      }
-      alpha05 = (int)(percentile_level*total);
-
-      total = 0;
-      nsmall=0;
-      nbig = NBUCKETS-1;
-      for (n=0;n<NBUCKETS;n++){
-        total += buckets[n];
-        if(total>alpha05){
-          nsmall=n;
-          break;
-        }
-      }
-      total = 0;
-      for (n=NBUCKETS;n>0;n--){
-        total += buckets[n-1];
-        if(total>alpha05){
-          nbig=n-1;
-          break;
-        }
-      }
-      gmin = propi->global_min;
-      gmax = propi->global_max;
-      dg = (gmax-gmin)/(float)NBUCKETS;
-      propi->percentile_min = gmin + nsmall*dg;
-      propi->percentile_max = gmin + nbig*dg;
-    }
-    FREEMEMORY(propi->buckets);
-  }
-  for(i=0;i<npart5prop;i++){
-    part5prop *propi;
-
-    propi = part5propinfo + i;
+    propi->percentile_min = get_histogram_value(histi, percentile_level);
+    propi->percentile_max = get_histogram_value(histi, 1.0 - percentile_level);
 
     switch(propi->setvalmin){
     case PERCENTILE_MIN:
