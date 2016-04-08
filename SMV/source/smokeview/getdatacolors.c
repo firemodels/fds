@@ -500,7 +500,6 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
 
             for(m = 0; m<datacopy->npoints; m++){
               float val;
-              int irval;
 
               val = *rvals++;
               *irvals++ = CLAMP(val+0.5, 0, navatar_colors-1);

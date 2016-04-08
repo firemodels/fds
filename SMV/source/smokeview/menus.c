@@ -2946,8 +2946,7 @@ void ParticlePropShowMenu(int value){
 
 void ParticleMenu(int value){
   int errorcode,i;
-  int whichpart;
-  partdata *parti, *partj;
+  partdata *parti;
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
