@@ -9517,32 +9517,16 @@ updatemenu=0;
       if(npartinfo>0){
         if(nevac!=npartinfo){
           strcpy(loadmenulabel,"Particle file");
-          if(partframeskip>0||partpointskip>0){
-            if(partframeskip>0&&partpointskip>0){
-              sprintf(steplabel,"/Skip Frame %i, Point %i",partframeskip,partpointskip);
-            }
-            else if(partframeskip<=0&&partpointskip>0){
-              sprintf(steplabel,"/Skip Point %i",partpointskip);
-            }
-            else if(partframeskip>0&&partpointskip<=0){
-              sprintf(steplabel,"/Skip Frame %i",partframeskip);
-            }
+          if(partframeskip>0){
+            sprintf(steplabel,"/Skip Frame %i",partframeskip);
             strcat(loadmenulabel,steplabel);
           }
           glutAddSubMenu(loadmenulabel,particlemenu);
         }
         if(nevac>0){
           strcpy(loadmenulabel,_("Evacuation"));
-          if(partframeskip>0||partpointskip>0){
-            if(partframeskip>0&&partpointskip>0){
-              sprintf(steplabel,"/Skip Frame %i, Point %i",partframeskip,partpointskip);
-            }
-            else if(partframeskip<=0&&partpointskip>0){
-              sprintf(steplabel,"/Skip Point %i",partpointskip);
-            }
-            else if(partframeskip>0&&partpointskip<=0){
-              sprintf(steplabel,"/Skip Frame %i",partframeskip);
-            }
+          if(partframeskip>0){
+            sprintf(steplabel,"/Skip Frame %i",partframeskip);
             strcat(loadmenulabel,steplabel);
           }
           glutAddSubMenu(loadmenulabel,evacmenu);

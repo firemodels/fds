@@ -9908,13 +9908,6 @@ int readini2(char *inifile, int localfile){
       boundzipskip=boundzipstep-1;
       continue;
     }
-    if(match(buffer,"PARTPOINTSTEP")==1){
-		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%i",&partpointstep);
-		  if(partpointstep<1)partpointstep=1;
-      partpointskip=partpointstep-1;
-      continue;
-    }
     if(match(buffer,"MSCALE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%f %f %f",mscale,mscale+1,mscale+2);
@@ -12279,8 +12272,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", isozipstep);
   fprintf(fileout, "NOPART\n");
   fprintf(fileout, " %i\n", nopart);
-  fprintf(fileout, "PARTPOINTSTEP\n");
-  fprintf(fileout, " %i\n", partpointstep);
   fprintf(fileout, "SHOWFEDAREA\n");
   fprintf(fileout, " %i\n", show_fed_area);
   fprintf(fileout, "SLICEAVERAGE\n");

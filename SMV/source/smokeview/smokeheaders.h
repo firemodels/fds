@@ -413,7 +413,6 @@ EXTERNCPP void print_part5prop(void);
 EXTERNCPP part5prop *get_part5prop(char *label);
 EXTERNCPP void init_part5prop(void);
 EXTERNCPP void update_streakvalue(float value);
-EXTERNCPP void update_all_partvis2(void);
 EXTERNCPP void ParticleMenu(int value);
 EXTERNCPP void LoadPatchMenu(int value);
 EXTERNCPP void LoadSliceMenu(int value);

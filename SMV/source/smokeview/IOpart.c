@@ -132,7 +132,7 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
 
 /* ------------------ getpart5data ------------------------ */
 
-void getpart5data(partdata *parti, int partframestep_local, int partpointstep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
+void getpart5data(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -290,16 +290,18 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
       }
       CheckMemory;
       if(doit==1){
-        if(numtypes[2*i]>0){
+        if(numtypes[2 * i] > 0){
 #ifdef pp_PARTTEST
-          int iii;
+          int iii, jjj;
 #endif
 
-          FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
+          FORTPART5READ(datacopy->rvals, nparts*numtypes[2 * i]);
 
 #ifdef pp_PARTTEST
-          for(iii = 0; iii<nparts*numtypes[2*i]; iii++){
-            datacopy->rvals[iii] = 100.0*parti->seq_id+(float)randint(-1000,1000)/1000.0;
+          for(jjj = 0; jjj < numtypes[2 * i]; jjj++){
+            for(iii = 0; iii < nparts; iii++){
+              datacopy->rvals[iii+jjj*nparts] = 1000.0*parti->seq_id + 200*jjj+ (float)randint(-1000, 1000) / 1000.0;
+            }
           }
 #endif
           if(returncode==0)goto wrapup;
@@ -579,13 +581,9 @@ void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nc
 
   if(first_frame==1){
     int ii;
+
     for(ii=0;ii<nparts;ii++){
-      if(ii%partpointstep==0){
-        vis_part[ii]=1;
-      }
-      else{
-        vis_part[ii]=0;
-      }
+      vis_part[ii]=1;
     }
   }
   else{
@@ -598,7 +596,7 @@ void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nc
 
       datalast = datacopy-nclasses;
       tag_index = get_tagindex(parti,&datalast,datacopy->tags[ii]);
-      if(partpointstep==1||(tag_index!=-1&&datalast->vis_part[tag_index]==1)){
+      if(tag_index!=-1&&datalast->vis_part[tag_index]==1){
         datacopy->vis_part[ii]=1;
         nvis++;
       }
@@ -607,7 +605,7 @@ void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nc
       }
     }
 
-    nleft = nparts/partpointstep - nvis;
+    nleft = nparts - nvis;
     if(nleft>0){
       for(ii=0;ii<nparts;ii++){
         if(datacopy->vis_part[ii]==1)continue;
@@ -987,7 +985,6 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
 
   if(parti->loaded==0&&loadflag==UNLOAD)return;
 
-
   *errorcode=0;
   partfilenum=ifile;
   ReadPartFile = 0;
@@ -1040,7 +1037,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   getpart5header(parti, partframestep, &nf_all);
 
   PRINTF("Loading particle data: %s\n",file);
-  getpart5data(parti,partframestep,partpointstep, nf_all, &delta_time, &file_size);
+  getpart5data(parti,partframestep, nf_all, &delta_time, &file_size);
   updateglui();
 
 #ifdef pp_MEMPRINT
@@ -1106,17 +1103,6 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   PRINTF(" (overhead: %.2f s)\n",delta_time0-delta_time);
 
   glutPostRedisplay();
-}
-
-/* ------------------ update_all_partvis2 ------------------------ */
-
-void update_all_partvis2(void){
-  partdata *parti;
-  int i;
-  for(i=0;i<npartinfo;i++){
-    parti = partinfo + i;
-    if(parti->loaded==1)update_all_partvis(parti);
-  }
 }
 
 /* ----------------------- drawselect_avatars ----------------------------- */

@@ -1605,9 +1605,6 @@ void initvars(void){
   isozipstep=1, isozipskip=0;
   slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
-  partpointstep=1;
-  partpointstep_old=0;
-  partpointskip=0;
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;

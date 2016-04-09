@@ -255,7 +255,6 @@ GLUI_Spinner *SPINNER_tload_end=NULL;
 GLUI_Spinner *SPINNER_tload_skip=NULL;
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL,*SPINNER_plot3d_vectorlinelength=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
-GLUI_Spinner *SPINNER_partpointstep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
 GLUI_Spinner *SPINNER_slicezipstep=NULL;
 GLUI_Spinner *SPINNER_isozipstep=NULL;
@@ -2493,14 +2492,8 @@ void PART_CB(int var){
     break;
   case FRAMELOADING:
     partframestep=partframeskip+1;
-    partpointstep=partpointskip+1;
     evacframestep=evacframeskip+1;
     evacframestep=evacframeskip+1;
-    if(partpointstep!=partpointstep_old){
-      update_all_partvis2();
-      partpointstep_old=partpointstep;
-    }
-
     updatemenu=1;
     break;
   case CHOPUPDATE:
