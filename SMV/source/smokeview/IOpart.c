@@ -674,9 +674,9 @@ void init_partprop(void){
   }
 }
 
-/* ------------------ get_partnframes ------------------------ */
+/* ------------------ get_npartframes ------------------------ */
 
-int get_partnframes(partdata *parti){
+int get_npartframes(partdata *parti){
   FILE *stream;
   char buffer[256];
   float time_local;
@@ -698,26 +698,24 @@ int get_partnframes(partdata *parti){
 
   // create a size file if 1) the size does not exist
   //                       2) base file is newer than the size file
-  if(stat_sizefile!=0||
-    stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
-    //create_part5sizefile(reg_file,size_file);
-      {
-        int lenreg, lensize, error;
-        int angle_flag=0;
+  // create_part5sizefile(reg_file,size_file);
 
-        trim_back(reg_file);
-        trim_back(size_file);
-        lenreg=strlen(reg_file);
-        lensize=strlen(size_file);
-        if(parti->evac==1){
-          angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
-        }
-        else{
-          angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
-        }
-      }
+  if(stat_sizefile != 0 || stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
+    int lenreg, lensize, error;
+    int angle_flag=0;
+
+    trim_back(reg_file);
+    trim_back(size_file);
+    lenreg=strlen(reg_file);
+    lensize=strlen(size_file);
+    if(parti->evac==1){
+      angle_flag=1;
+      FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
+    }
+    else{
+      angle_flag=0;
+      FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
+    }
   }
 
   stream=fopen(size_file,"r");
@@ -754,7 +752,7 @@ int get_min_partframes(void){
     int nframes;
 
     parti = partinfo + i;
-    nframes = get_partnframes(parti);
+    nframes = get_npartframes(parti);
     if(nframes>0){
       if(min_frames==-1){
         min_frames=nframes;
