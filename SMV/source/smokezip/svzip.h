@@ -189,7 +189,7 @@ typedef struct {
   char *name;
   int ntypes;
   flowlabels *labels;
-} part5class;
+} partclassdata;
 
 /* --------------------------  part5data ------------------------------------ */
 
@@ -219,7 +219,7 @@ typedef struct {
   mesh *partmesh;
 
   int nclasses;
-  part5class **classptr;
+  partclassdata **classptr;
   part5data *data5;
 } part;
 #endif
@@ -272,7 +272,7 @@ void smoothlabel(float *a, float *b, int n);
 void compress_parts(void *arg);
 void *convert_parts2iso(void *arg);
 part *getpart(char *string);
-part5prop *getpartprop(char *string);
+partpropdata *getpartprop(char *string);
 int getpartprop_index(char *string);
 void convert_part(part *parti, int *thread_index);
 int convertable_part(part *parti);
@@ -364,8 +364,8 @@ EXTERN smoke3d *smoke3dinfo;
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
 EXTERN part *partinfo;
-EXTERN part5class *partclassinfo;
-EXTERN part5prop *part5propinfo;
+EXTERN partclassdata *partclassinfo;
+EXTERN partpropdata *part5propinfo;
 EXTERN threaddata *threadinfo;
 EXTERN spherepoints sphereinfo;
 
