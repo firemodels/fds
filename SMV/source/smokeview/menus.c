@@ -1634,7 +1634,6 @@ void ParticleShowMenu(int value){
       case MENU_PARTSHOW_SHOWALL:
         visSprinkPart=1;
         visSmokePart=2;
-        visStaticSmoke=1;
         for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
@@ -1642,12 +1641,10 @@ void ParticleShowMenu(int value){
         }
         break;
       case MENU_PARTSHOW_STATIC:
-        visStaticSmoke = 1 - visStaticSmoke;
         break;
       case MENU_PARTSHOW_HIDEALL:
         visSprinkPart=0;
         visSmokePart=0;
-        visStaticSmoke=0;
         for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0||parti->evac==1)continue;
@@ -1676,8 +1673,6 @@ void ParticleShowMenu(int value){
     }
   }
   else{
-  //  visSmokePart=0;
-  //  visSprinkPart=0;
     switch(value){
       case 1:
         visSmokePart = 2;
@@ -1688,7 +1683,6 @@ void ParticleShowMenu(int value){
       case 3:
         visSprinkPart=1;
         visSmokePart=2;
-        visStaticSmoke=1;
         for(i=0;i<npartinfo;i++){
           parti = partinfo + i;
           if(parti->loaded==0)continue;
@@ -1696,7 +1690,6 @@ void ParticleShowMenu(int value){
         }
         break;
       case 5:
-        visStaticSmoke=1;
         break;
       default:
         ASSERT(FFALSE);
@@ -6595,14 +6588,6 @@ updatemenu=0;
     else{
       glutAddMenuEntry(_("Particles"), MENU_PARTSHOW_PARTICLES);
     }
-    if(staticframe0==1){
-      if(visStaticSmoke==1){
-        glutAddMenuEntry(_("*Particles (static)"), MENU_PARTSHOW_STATIC);
-      }
-      else{
-        glutAddMenuEntry(_("Particles (static)"), MENU_PARTSHOW_STATIC);
-      }
-    }
     if(havesprinkpart==1){
       if(plotstate==DYNAMIC_PLOTS&&visSprinkPart==1){
         glutAddMenuEntry(_("*Droplets"), MENU_PARTSHOW_DROPLETS);
@@ -6614,7 +6599,6 @@ updatemenu=0;
     showall=0;
     if(plotstate==DYNAMIC_PLOTS){
       if(visSprinkPart==1&&visSmokePart!=0)showall=1;
-      if(staticframe0==1&&visStaticSmoke==0)showall=0;
     }
     glutAddMenuEntry("-",MENU_DUMMY);
     if(showall==1){
@@ -6629,7 +6613,6 @@ updatemenu=0;
       hideall=1;
       if(visSmokePart!=0)hideall=0;
       if(havesprinkpart==1&&visSprinkPart==1)hideall=0;
-      if(staticframe0==1&&visStaticSmoke==1)hideall=0;
       if(hideall==1){
         glutAddMenuEntry(_("*Hide all"), MENU_PARTSHOW_HIDEALL);
       }
@@ -6638,7 +6621,6 @@ updatemenu=0;
       }
     }
   }
-
 
 /* --------------------------------Evac show menu -------------------------- */
 

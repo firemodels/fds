@@ -1444,8 +1444,6 @@ void initvars(void){
 
   drawColorLabel=0;
   olddrawColorLabel=0;
-  staticframe0=0;
-  visStaticSmoke=1;
   vis3DSmoke3D=1;
   smokeskip=1;
   smokeskipm1=0;

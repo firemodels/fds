@@ -583,7 +583,6 @@ SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
 SVEXTERN int glui_active;
 
 SVEXTERN int drawColorLabel,olddrawColorLabel;
-SVEXTERN int staticframe0,visStaticSmoke;
 SVEXTERN int vis3DSmoke3D;
 SVEXTERN int smokeskip,smokeskipm1;
 SVEXTERN int nrooms,nzoneinfo, nfires;

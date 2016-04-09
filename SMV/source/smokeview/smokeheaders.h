@@ -739,7 +739,6 @@ EXTERNCPP void drawTimeBar(float xleft, float xright, float ybot, float ytop);
 EXTERNCPP void drawColorBars(void);
 EXTERNCPP void drawPart(const partdata *parti);
 EXTERNCPP void drawEvac(const partdata *parti);
-EXTERNCPP void drawStaticPart(const partdata *parti);
 EXTERNCPP void drawgrid(const mesh *gb);
 EXTERNCPP void drawroomgeom(void);
 EXTERNCPP void drawfiredata(void);

@@ -41,7 +41,7 @@ if(returncode==READPASS){\
 void drawpart_frame(void){
   partdata *parti;
 
-  if(staticframe0==0||frame_index!=0){
+  if(frame_index!=0){
     int i;
 
     for(i=0;i<npartinfo;i++){
@@ -55,16 +55,6 @@ void drawpart_frame(void){
         drawPart(parti);
         SNIFF_ERRORS("after drawPart");
       }
-    }
-  }
-  if(visStaticSmoke==1&&staticframe0==1){
-    int i;
-
-    for(i=0;i<npartinfo;i++){
-      parti = partinfo + i;
-      if(parti->loaded==0||parti->display==0)continue;
-      drawStaticPart(parti);
-      SNIFF_ERRORS("after drawStaticPart");
     }
   }
 }
@@ -1688,21 +1678,6 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
 void drawPart(const partdata *parti){
   if(parti->times[0]>global_times[itimes])return;
   drawPart5(parti);
-}
-
-/* ------------------ drawStaticPart ------------------------ */
-
-void drawStaticPart(const partdata *parti){
-
-  short *xpoints, *ypoints, *zpoints;
-
-  int n;
-  int nsmokepoints, nsprpoints;
-  int ipframe;
-
-  /* define the data locations to look at */
-
-  return;
 }
 
 /* ------------------ tagscompare ------------------------ */
