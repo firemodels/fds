@@ -1543,7 +1543,6 @@ void initvars(void){
 
   npartinfo=0, nsliceinfo=0, nvsliceinfo=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
   nevac=0;
-  current_particle_type=-1,last_particle_type=-2;
   nsmoke3dinfo=0;
   nisoinfo=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;

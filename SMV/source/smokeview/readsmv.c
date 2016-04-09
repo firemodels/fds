@@ -2553,7 +2553,6 @@ int readsmv(char *file, char *file2){
 
   if(npartinfo>0){
     for(i=0;i<npartinfo;i++){
-      freelabels(&partinfo[i].label);
       FREEMEMORY(partinfo[i].partclassptr);
       FREEMEMORY(partinfo[i].reg_file);
       FREEMEMORY(partinfo[i].comp_file);
@@ -3041,8 +3040,7 @@ int readsmv(char *file, char *file2){
       nVENT++;
       continue;
     }
-    if(match(buffer,"PART") == 1||match(buffer,"EVAC")==1
-      ||match(buffer,"PRT5")==1||match(buffer,"EVA5")==1
+    if(match(buffer,"PRT5")==1||match(buffer,"EVA5")==1
       ){
       npartinfo++;
       continue;
@@ -6499,8 +6497,7 @@ typedef struct {
     ++++++++++++++++++++++ PART ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PART") == 1 || match(buffer,"EVAC")==1
-      ||match(buffer,"PRT5")==1||match(buffer,"EVA5")==1
+    if(match(buffer,"PRT5")==1||match(buffer,"EVA5")==1
       ){
       unsigned int lenkey;
       partdata *parti;
@@ -6514,14 +6511,9 @@ typedef struct {
 
       parti = partinfo + ipart;
 
-      parti->version=0;
-      if(match(buffer,"PRT5")==1||match(buffer,"EVA5")==1){
-        parti->version=1;
-      }
       lenkey=4;
       parti->evac=0;
-      if(match(buffer,"EVAC")==1
-        ||match(buffer,"EVA5")==1
+      if(match(buffer,"EVA5")==1
         ){
         parti->evac=1;
         nevac++;
@@ -6604,24 +6596,7 @@ typedef struct {
       parti->loaded=0;
       parti->display=0;
       parti->times=NULL;
-      parti->xpart=NULL;
-      parti->ypart=NULL;
-      parti->zpart=NULL;
-      parti->xpartb=NULL;
-      parti->ypartb=NULL;
-      parti->zpartb=NULL;
-      parti->xparts=NULL;
-      parti->yparts=NULL;
-      parti->zparts=NULL;
-      parti->tpart=NULL;
-      parti->itpart=NULL;
-      parti->isprink=NULL;
-      parti->sframe=NULL;
-      parti->bframe=NULL;
-      parti->sprframe=NULL;
       parti->timeslist=NULL;
-      parti->particle_type=0;
-      parti->droplet_type=0;
       parti->histograms = NULL;
       parti->valmin = NULL;
       parti->valmax = NULL;
@@ -6629,57 +6604,44 @@ typedef struct {
       parti->data5=NULL;
       parti->partclassptr=NULL;
 
-      if(parti->version==1){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&parti->nclasses);
-        if(parti->nclasses>0){
-//          createnulllabel(&parti->label);
-          if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
-          for(i=0;i<parti->nclasses;i++){
-            int iclass;
-            int ic,iii;
+      fgets(buffer,255,stream);
+      sscanf(buffer,"%i",&parti->nclasses);
+      if(parti->nclasses>0){
+        if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
+        for(i=0;i<parti->nclasses;i++){
+          int iclass;
+          int ic,iii;
 
-            fgets(buffer,255,stream);
-            if(parti->file==NULL)continue;
-            sscanf(buffer,"%i",&iclass);
-            if(iclass<1)iclass=1;
-            if(iclass>npartclassinfo)iclass=npartclassinfo;
-            ic=0;
-            for(iii=0;iii<npartclassinfo;iii++){
-              part5class *pci;
+          fgets(buffer,255,stream);
+          if(parti->file==NULL)continue;
+          sscanf(buffer,"%i",&iclass);
+          if(iclass<1)iclass=1;
+          if(iclass>npartclassinfo)iclass=npartclassinfo;
+          ic=0;
+          for(iii=0;iii<npartclassinfo;iii++){
+            part5class *pci;
 
-              pci = partclassinfo + iii;
-              if(parti->evac==1&&pci->kind!=HUMANS)continue;
-              if(parti->evac==0&&pci->kind!=PARTICLES)continue;
-              if(iclass-1==ic){
-                parti->partclassptr[i]=pci;
-                break;
-              }
-              ic++;
+            pci = partclassinfo + iii;
+            if(parti->evac==1&&pci->kind!=HUMANS)continue;
+            if(parti->evac==0&&pci->kind!=PARTICLES)continue;
+            if(iclass-1==ic){
+              parti->partclassptr[i]=pci;
+              break;
             }
+            ic++;
           }
         }
+      }
         // if no classes were specifed for the prt5 entry then assign it the default class
-        if(parti->file!=NULL&&parti->nclasses==0){
-          NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
-            parti->partclassptr[i]=partclassinfo + parti->nclasses;
-        }
-        if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
-          npartinfo--;
-        }
-        else{
-          ipart++;
-        }
+      if(parti->file!=NULL&&parti->nclasses==0){
+        NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
+          parti->partclassptr[i]=partclassinfo + parti->nclasses;
+      }
+      if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
+        npartinfo--;
       }
       else{
-        if(STAT(buffer,&statbuffer)==0){
-          if( readlabels(&parti->label,stream)==2 )return 2;
-          ipart++;
-        }
-        else{
-          if(readlabels(&parti->label,stream)==2)return 2;
-          npartinfo--;
-        }
+        ipart++;
       }
       continue;
     }

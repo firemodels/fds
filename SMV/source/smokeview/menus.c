@@ -2985,9 +2985,7 @@ void ParticleMenu(int value){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
-        if(parti->version==1){
-          readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
-        }
+        readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
       }
       force_redisplay=1;
       Update_Framenumber(0);
@@ -4974,7 +4972,7 @@ void InitMenus(int unload){
   int nsmoke3dloaded,nvolsmoke3dloaded;
   int nsliceloaded,nvsliceloaded2,nvsliceloaded,nmultisliceloaded;
   int nvslice0, nvslice1, nvslice2,nvsliceloaded0,nvsliceloaded1;
-  int npartloaded,npart5loaded,npart4loaded,nevacloaded;
+  int npartloaded,npart5loaded,nevacloaded;
   int npatchloaded;
   int nplot3dloaded;
   int nisoloaded;
@@ -5133,7 +5131,6 @@ updatemenu=0;
 
 
   npart5loaded=0;
-  npart4loaded=0;
   npartloaded=0;
   nevacloaded=0;
   for(i=0;i<npartinfo;i++){
@@ -5143,8 +5140,7 @@ updatemenu=0;
     if(parti->loaded==1&&parti->evac==0)npartloaded++;
     if(parti->loaded==1&&parti->evac==1)nevacloaded++;
     if(parti->loaded==1){
-      if(parti->version==1)npart5loaded++;
-      if(parti->version==0)npart4loaded++;
+      npart5loaded++;
     }
   }
 
@@ -7320,28 +7316,6 @@ updatemenu=0;
       }
     }
   }
-  if(npart4loaded>0){
-    showhide_data = 1;
-    if(havesprinkpart!=0||staticframe0!=0||npartloaded>1){
-      glutAddSubMenu(_("Particles"),particleshowmenu);
-    }
-    else{
-      if(ReadPartFile==1&&showsmoke==1)glutAddMenuEntry(_("*Particles"),MENU_SHOWHIDE_PARTICLES);
-      if(ReadPartFile==1&&showsmoke==0)glutAddMenuEntry(_("Particles"),MENU_SHOWHIDE_PARTICLES);
-    }
-  }
-  if(partinfo!=NULL&&partinfo[0].version==1){
-  }
-  else{
-    showhide_data = 1;
-    if(nevacloaded>1){
-      glutAddSubMenu(_("Evacuation"),evacshowmenu);
-    }
-    else{
-      if(ReadEvacFile==1&&showevac==1)glutAddMenuEntry(_("*Evacuation"),MENU_SHOWHIDE_EVAC);
-      if(ReadEvacFile==1&&showevac==0)glutAddMenuEntry(_("Evacuation"),MENU_SHOWHIDE_EVAC);
-    }
-  }
 
   if(ReadIsoFile==1){
     int niso_loaded=0;
@@ -8061,47 +8035,16 @@ updatemenu=0;
         char menulabel[1024];
 
         CREATEMENU(particlemenu,ParticleMenu);
-        if(npartinfo>0){
-          if(partinfo->version==1){
-            strcpy(menulabel,_("Particles"));
-            strcat(menulabel," - ");
-            strcat(menulabel,_("All meshes"));
-            glutAddMenuEntry(menulabel,MENU_PARTICLE_ALLMESHES);
-            strcpy(menulabel,_("Particles"));
-            strcat(menulabel," - ");
-            strcat(menulabel,_("Single mesh"));
-            glutAddSubMenu(menulabel,particlesubmenu);
-            glutAddMenuEntry("-",MENU_PARTICLE_DUMMY);
-          }
-          else{
-            for(i=0;i<npartinfo;i++){
-              int j;
-
-              useitem=i;
-              parti = partinfo + i;
-              if(parti->evac==1)continue;
-              for(j=0;j<i;j++){
-                partj = partinfo + j;
-                if(partj->evac==1)continue;
-                if(strcmp(parti->label.longlabel,partj->label.longlabel)==0){
-                  useitem=-1;
-                  break;
-                }
-              }
-              if(useitem!=-1){
-                atleastone=1;
-                strcpy(menulabel,parti->label.longlabel);
-                strcat(menulabel," - ");
-                strcat(menulabel,_("All meshes"));
-                glutAddMenuEntry(menulabel,-useitem-10);
-              }
-            }
-            strcpy(menulabel,_("Particles"));
-            strcat(menulabel," - ");
-            strcat(menulabel,_("Single mesh"));
-            glutAddSubMenu(menulabel,particlesubmenu);
-            if(atleastone==1)glutAddMenuEntry("-",MENU_PARTICLE_DUMMY);
-          }
+        if(npartinfo > 0){
+          strcpy(menulabel, _("Particles"));
+          strcat(menulabel, " - ");
+          strcat(menulabel, _("All meshes"));
+          glutAddMenuEntry(menulabel, MENU_PARTICLE_ALLMESHES);
+          strcpy(menulabel, _("Particles"));
+          strcat(menulabel, " - ");
+          strcat(menulabel, _("Single mesh"));
+          glutAddSubMenu(menulabel, particlesubmenu);
+          glutAddMenuEntry("-", MENU_PARTICLE_DUMMY);
         }
       }
     }

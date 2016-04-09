@@ -1750,7 +1750,6 @@ void updatechopcolors(void){
 
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
-  last_particle_type=current_particle_type;
   for(i=0;i<nrgb_full;i++){
     rgb_iso[4*i]=rgb_full[i][0];
     rgb_iso[4*i+1]=rgb_full[i][1];

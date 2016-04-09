@@ -1079,29 +1079,21 @@ typedef struct {
 /* --------------------------  partdata ------------------------------------ */
 
 typedef struct {
-  int seq_id, autoload;
+  int seq_id, autoload, loaded, display, reload;
   char *file;
   char *comp_file, *size_file, *reg_file;
   int sort_tags_loaded;
   int compression_type;
-  int loaded, display, reload;
   int evac;
   float zoffset;
   int blocknumber;
   int num_memblocks;
   float *times;
   int *timeslist;
-  float *xpart, *ypart, *zpart, *tpart;
-  short *xparts, *yparts, *zparts;
-  unsigned char *xpartb, *ypartb, *zpartb;
 
-  unsigned char *itpart,*isprink;
-  int *sframe, *sprframe, *bframe, ntimes, itime;
-  int particle_type, droplet_type;
+  int ntimes, itime;
 
-  flowlabels label;
   char menulabel[128];
-  int version;
   int nclasses;
   part5class **partclassptr;
   part5data *data5;
