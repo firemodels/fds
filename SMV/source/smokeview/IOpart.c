@@ -1158,9 +1158,9 @@ int get_evacpart_color(float **color_handle,part5data *datacopy, int show_defaul
   return showcolor;
 }
 
-/* ------------------ drawPart5 ------------------------ */
+/* ------------------ drawPart ------------------------ */
 
-void drawPart5(const partdata *parti){
+void drawPart(const partdata *parti){
   int ipframe;
   part5data *datacopy,*datapast;
   int nclasses;
@@ -1168,7 +1168,8 @@ void drawPart5(const partdata *parti){
   int offset_terrain;
   propdata *prop;
 
-  if(nterraininfo>0&&ABS(vertical_factor-1.0)>0.01){
+  if(parti->times[0] > global_times[itimes])return;
+  if(nterraininfo>0 && ABS(vertical_factor - 1.0)>0.01){
     offset_terrain=1;
   }
   else{
@@ -1654,13 +1655,6 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
     prop->vars_dep_index[ii]=partclassi->vars_dep_index[ii];
   }
   prop->tag_number = datacopy->tags[j];
-}
-
-/* ------------------ drawPart ------------------------ */
-
-void drawPart(const partdata *parti){
-  if(parti->times[0]>global_times[itimes])return;
-  drawPart5(parti);
 }
 
 /* ------------------ tagscompare ------------------------ */
