@@ -40,21 +40,18 @@ if(returncode==READPASS){\
 
 void drawpart_frame(void){
   partdata *parti;
+  int i;
 
-  if(frame_index!=0){
-    int i;
-
-    for(i=0;i<npartinfo;i++){
-      parti = partinfo + i;
-      if(parti->loaded==0||parti->display==0)continue;
-      if(parti->evac==1){
-        drawEvac(parti);
-        SNIFF_ERRORS("after drawEvac");
-      }
-      else{
-        drawPart(parti);
-        SNIFF_ERRORS("after drawPart");
-      }
+  for(i=0;i<npartinfo;i++){
+    parti = partinfo + i;
+    if(parti->loaded==0||parti->display==0)continue;
+    if(parti->evac==1){
+      drawEvac(parti);
+      SNIFF_ERRORS("after drawEvac");
+    }
+    else{
+      drawPart(parti);
+      SNIFF_ERRORS("after drawPart");
     }
   }
 }
