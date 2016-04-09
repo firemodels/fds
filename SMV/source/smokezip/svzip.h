@@ -171,7 +171,7 @@ typedef struct {
 
 #ifdef pp_PART
 
-/* --------------------------  part5prop ------------------------------------ */
+/* --------------------------  partpropdata ------------------------------------ */
 
 typedef struct {
   int used;
@@ -181,7 +181,7 @@ typedef struct {
   float valmin, valmax;
   histogramdata *histogram;
   int setvalmin, setvalmax;
-} part5prop;
+} partpropdata;
 
 /* --------------------------  partclass ------------------------------------ */
 

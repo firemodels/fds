@@ -764,7 +764,7 @@ void part2iso(part *parti, int *thread_index){
   nlevels=1;
   levels[0]=0.5;
 
-  if(npart5propinfo>0)NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(part5prop));
+  if(npart5propinfo>0)NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(partpropdata));
 
   for(i=0;i<npart5propinfo;i++){
     partpropdata *propi;
@@ -1125,7 +1125,7 @@ void part2object(part *parti, int *thread_index){
   nlevels=1;
   levels[0]=0.5;
 
-  if(npart5propinfo>0)NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(part5prop));
+  if(npart5propinfo>0)NewMemory((void **)&part5propinfo_copy,npart5propinfo*sizeof(partpropdata));
 
   for(i=0;i<npart5propinfo;i++){
     partpropdata *propi;

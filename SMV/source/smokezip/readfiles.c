@@ -235,7 +235,7 @@ int readsmv(char *smvfile){
     NewMemory((void **)&partclassinfo,npartclassinfo*sizeof(partclassdata));
   }
   if(maxpart5propinfo>0){
-    NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(part5prop));
+    NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(partpropdata));
   }
 #endif
 
