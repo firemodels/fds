@@ -1079,21 +1079,16 @@ typedef struct {
 /* --------------------------  partdata ------------------------------------ */
 
 typedef struct {
+  char *file, *comp_file, *size_file, *reg_file;
   int seq_id, autoload, loaded, display, reload;
-  char *file;
-  char *comp_file, *size_file, *reg_file;
-  int sort_tags_loaded;
-  int compression_type;
-  int evac;
-  float zoffset;
-  int blocknumber;
-  int num_memblocks;
-  float *times;
-  int *timeslist;
+  int sort_tags_loaded, compression_type, evac;
+  int blocknumber, num_memblocks;
+  int *timeslist, ntimes, itime;
 
-  int ntimes, itime;
+  float zoffset, *times;
 
   char menulabel[128];
+
   int nclasses;
   part5class **partclassptr;
   part5data *data5;

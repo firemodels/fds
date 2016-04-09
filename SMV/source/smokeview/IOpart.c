@@ -1686,21 +1686,7 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
 /* ------------------ drawPart ------------------------ */
 
 void drawPart(const partdata *parti){
-  short *xpoints, *ypoints, *zpoints;
-  unsigned char *itpoint=NULL;
-
-
-  int n;
-  int nsmokepoints, nsprpoints;
-  int ipframe;
-  int droplet_type, particle_type;
-  float *rgb_smoke, *rgb_ismoke;
-
-  ipframe=parti->itime;
-  rgb_smoke = rgb_part;
-
   if(parti->times[0]>global_times[itimes])return;
-
   drawPart5(parti);
 }
 

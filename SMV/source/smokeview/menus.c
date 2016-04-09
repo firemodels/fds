@@ -8026,26 +8026,20 @@ updatemenu=0;
       }
       glutAddMenuEntry(menulabel,i);
     }
-    {
-      int useitem;
-      int atleastone=0;
-      partdata *parti, *partj;
+    if(nmeshes>1){
+      char menulabel[1024];
 
-      if(nmeshes>1){
-        char menulabel[1024];
-
-        CREATEMENU(particlemenu,ParticleMenu);
-        if(npartinfo > 0){
-          strcpy(menulabel, _("Particles"));
-          strcat(menulabel, " - ");
-          strcat(menulabel, _("All meshes"));
-          glutAddMenuEntry(menulabel, MENU_PARTICLE_ALLMESHES);
-          strcpy(menulabel, _("Particles"));
-          strcat(menulabel, " - ");
-          strcat(menulabel, _("Single mesh"));
-          glutAddSubMenu(menulabel, particlesubmenu);
-          glutAddMenuEntry("-", MENU_PARTICLE_DUMMY);
-        }
+      CREATEMENU(particlemenu,ParticleMenu);
+      if(npartinfo > 0){
+        strcpy(menulabel, _("Particles"));
+        strcat(menulabel, " - ");
+        strcat(menulabel, _("All meshes"));
+        glutAddMenuEntry(menulabel, MENU_PARTICLE_ALLMESHES);
+        strcpy(menulabel, _("Particles"));
+        strcat(menulabel, " - ");
+        strcat(menulabel, _("Single mesh"));
+        glutAddSubMenu(menulabel, particlesubmenu);
+        glutAddMenuEntry("-", MENU_PARTICLE_DUMMY);
       }
     }
 
