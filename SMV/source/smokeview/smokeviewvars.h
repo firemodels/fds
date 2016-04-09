@@ -583,7 +583,6 @@ SVEXTERN float SVDECL(vecfactor,1.0),SVDECL(veclength,0.0);
 SVEXTERN int glui_active;
 
 SVEXTERN int drawColorLabel,olddrawColorLabel;
-SVEXTERN int staticframe0,visStaticSmoke;
 SVEXTERN int vis3DSmoke3D;
 SVEXTERN int smokeskip,smokeskipm1;
 SVEXTERN int nrooms,nzoneinfo, nfires;
@@ -723,7 +722,6 @@ SVEXTERN int n_devices;
 SVEXTERN int npartinfo, nsliceinfo, nvsliceinfo, nslice2, npatch2, nplot3dinfo, npatchinfo;
 SVEXTERN int nfedinfo;
 SVEXTERN int nevac;
-SVEXTERN int current_particle_type,last_particle_type;
 SVEXTERN int SVDECL(nsmoke3dinfo,0);
 SVEXTERN int nisoinfo, niso_bounds;
 SVEXTERN int ntrnx, ntrny, ntrnz,npdim,nmeshes,clip_mesh;

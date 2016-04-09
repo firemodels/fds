@@ -466,8 +466,8 @@ void updatePart5extremes(void){
 
 /* ------------------ getPart5Colors ------------------------ */
 
-void getPart5Colors(partdata *parti, int nlevel){
-  int i,j,k,m;
+void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
+  int i;
   part5data *datacopy;
   // float *diameter_data;
   float *length_data, *azimuth_data, *elevation_data;
@@ -475,13 +475,15 @@ void getPart5Colors(partdata *parti, int nlevel){
 
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes;i++){
+    int j;
+
     for(j=0;j<parti->nclasses;j++){
       float valmin, valmax, dval;
       part5class *partclassi;
       float *rvals;
       unsigned char *irvals;
       float *dsx, *dsy, *dsz;
-      int flag;
+      int flag, k;
 
       partclassi = parti->partclassptr[j];
       rvals = datacopy->rvals;
@@ -493,38 +495,72 @@ void getPart5Colors(partdata *parti, int nlevel){
         if(prop_id==NULL)continue;
 
         if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
-          for(m=0;m<datacopy->npoints;m++){
-            float val;
-            int irval;
+          if(convert_flag==PARTFILE_MAP){
+            int m;
 
-            val=*rvals++;
-            irval = val+0.5;
-            if(irval<0)irval=0;
-            if(irval>navatar_colors-1)irval=navatar_colors-1;
-            *irvals++=irval;
+            for(m = 0; m<datacopy->npoints; m++){
+              float val;
+
+              val = *rvals++;
+              *irvals++ = CLAMP(val+0.5, 0, navatar_colors-1);
+            }
           }
         }
         else{
+          int prop_id_index;
+          float partimin, partimax;
+
           valmin = prop_id->valmin;
           valmax = prop_id->valmax;
           dval = valmax - valmin;
           if(dval<=0.0)dval=1.0;
+          prop_id_index = prop_id-part5propinfo;
+          partimin = parti->valmin[prop_id_index];
+          partimax = parti->valmax[prop_id_index];
 
-          for(m=0;m<datacopy->npoints;m++){
-            float val;
-            int irval;
+          if(convert_flag==PARTFILE_MAP){
+            int m;
 
-            val=*rvals++;
-            if(val<valmin){
-              irval=0;
+            for(m = 0; m<datacopy->npoints; m++){
+              float val;
+              int irval;
+
+              val = *rvals++;
+              if(val<valmin){
+                irval = 0;
+              }
+              else if(val>valmax){
+                irval = 255;
+              }
+              else{
+                irval = extreme_data_offset+(float)(255-2*extreme_data_offset)*(val-valmin)/dval;
+              }
+              *irvals++ = CLAMP(irval, 0, 255);
             }
-            else if(val>valmax){
-              irval=255;
+          }
+          else if(convert_flag==PARTFILE_REMAP){
+            int m;
+
+            for(m = 0; m<datacopy->npoints; m++){
+              float val;
+              int irval;
+
+              irval = *irvals;
+              val = partimin+(float)(irval-extreme_data_offset)*(partimax-partimin)/(255.0-2.0*extreme_data_offset);
+              if(val<valmin){
+                irval = 0;
+              }
+              else if(val>valmax){
+                irval = 255;
+              }
+              else{
+                irval = extreme_data_offset+(float)(255-2*extreme_data_offset)*(val-valmin)/dval;
+              }
+              *irvals++ = CLAMP(irval, 0, 255);
             }
-            else{
-              irval = extreme_data_offset+(float)(255-2*extreme_data_offset)*(val-valmin)/dval;
-            }
-            *irvals++=CLAMP(irval,colorbar_offset,255-colorbar_offset);
+          }
+          else{
+            ASSERT(FFALSE);
           }
         }
       }
@@ -560,6 +596,8 @@ void getPart5Colors(partdata *parti, int nlevel){
       }
       flag=0;
       if(azimuth_data!=NULL&&elevation_data!=NULL&&length_data!=NULL){
+        int m;
+
         flag=1;
         dsx = datacopy->dsx;
         dsy = datacopy->dsy;
@@ -577,7 +615,7 @@ void getPart5Colors(partdata *parti, int nlevel){
       }
       if(u_vel_data!=NULL&&v_vel_data!=NULL&&w_vel_data!=NULL){
         float denom;
-
+        int m;
         part5prop *prop_U, *prop_V, *prop_W;
 
         prop_U = get_part5prop(partclassi->labels[partclassi->col_u_vel+2].longlabel);
@@ -618,6 +656,8 @@ void getPart5Colors(partdata *parti, int nlevel){
 // erase data memory in a separate loop (so all "columns" are available when doing any conversions)
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes;i++){
+    int j;
+
     for(j=0;j<parti->nclasses;j++){
       FREEMEMORY(datacopy->rvals);
       datacopy++;
@@ -1710,7 +1750,6 @@ void updatechopcolors(void){
 
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
-  last_particle_type=current_particle_type;
   for(i=0;i<nrgb_full;i++){
     rgb_iso[4*i]=rgb_full[i][0];
     rgb_iso[4*i+1]=rgb_full[i][1];

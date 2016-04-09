@@ -500,12 +500,10 @@ void Update_Show(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->evac==1)continue;
-      if(parti->loaded==0||parti->display==0)continue;
-      partflag=1;
-      current_particle_type=parti->particle_type;
-      if(current_particle_type!=last_particle_type)updatechopcolors();
-      break;
+      if(parti->evac==0&&parti->loaded==1&&parti->display==1){
+        partflag=1;
+        break;
+      }
     }
     if(current_property!=NULL){
       if(current_property->extreme_max==1)have_extreme_maxdata=1;
@@ -518,10 +516,10 @@ void Update_Show(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->evac==0)continue;
-      if(parti->loaded==0||parti->display==0)continue;
-      evacflag=1;
-      break;
+      if(parti->evac==1&&parti->loaded==1&&parti->display==1){
+        evacflag=1;
+        break;
+      }
     }
   }
   shooter_flag=0;

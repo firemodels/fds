@@ -739,7 +739,6 @@ EXTERNCPP void drawTimeBar(float xleft, float xright, float ybot, float ytop);
 EXTERNCPP void drawColorBars(void);
 EXTERNCPP void drawPart(const partdata *parti);
 EXTERNCPP void drawEvac(const partdata *parti);
-EXTERNCPP void drawStaticPart(const partdata *parti);
 EXTERNCPP void drawgrid(const mesh *gb);
 EXTERNCPP void drawroomgeom(void);
 EXTERNCPP void drawfiredata(void);
@@ -842,7 +841,7 @@ EXTERNCPP void read_geom(geomdata *geomi, int load_flag, int type, int *geom_fra
 EXTERNCPP void init_geom(geomdata *geomi, int hasdata, int fdsblock);
 EXTERNCPP void read_geomdata(int ifile, int load_flag, int *errorcode);
 EXTERNCPP void readpatch(int ifile, int flag, int *errorcode);
-EXTERNCPP void readpart(char *file, int ifile, int flag, int *errorcode);
+EXTERNCPP void readpart(char *file, int ifile, int loadflag, int set_colorbound, int *errorcode);
 EXTERNCPP void readzone(int ifile, int flag, int *errorcode);
 EXTERNCPP void readvslice(int ivslice, int flag, int *errorcode);
 
@@ -878,7 +877,7 @@ EXTERNCPP void updatetracers(void);
 EXTERNCPP void update_fedinfo(void);
 void update_gslice_planes(void);
 
-EXTERNCPP void getPart5Colors(partdata *parti, int nlevels);
+EXTERNCPP void getPart5Colors(partdata *parti, int nlevels, int convert_flag);
 EXTERNCPP void getPartColors(const float *t, int skip, int nt, unsigned char *it,
                    const unsigned char *isprink, int particle_type, int droplet_type,
               const float *tmin, const float *tmax, int nlevel,

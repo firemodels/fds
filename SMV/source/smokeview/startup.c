@@ -1026,15 +1026,15 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){
@@ -1444,8 +1444,6 @@ void initvars(void){
 
   drawColorLabel=0;
   olddrawColorLabel=0;
-  staticframe0=0;
-  visStaticSmoke=1;
   vis3DSmoke3D=1;
   smokeskip=1;
   smokeskipm1=0;
@@ -1543,7 +1541,6 @@ void initvars(void){
 
   npartinfo=0, nsliceinfo=0, nvsliceinfo=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
   nevac=0;
-  current_particle_type=-1,last_particle_type=-2;
   nsmoke3dinfo=0;
   nisoinfo=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;

@@ -1055,6 +1055,7 @@ typedef struct {
   float chopmin, chopmax;
   int setchopmin, setchopmax;
   int extreme_min, extreme_max;
+  histogramdata histogram;
   int *buckets;
 } part5prop;
 
@@ -1078,32 +1079,21 @@ typedef struct {
 /* --------------------------  partdata ------------------------------------ */
 
 typedef struct {
-  int seq_id, autoload;
-  char *file;
-  char *comp_file, *size_file, *reg_file;
-  int sort_tags_loaded;
-  int compression_type;
-  int loaded, display, reload;
-  int evac;
-  float zoffset;
-  int blocknumber;
-  int num_memblocks;
-  float *times;
-  int *timeslist;
-  float *xpart, *ypart, *zpart, *tpart;
-  short *xparts, *yparts, *zparts;
-  unsigned char *xpartb, *ypartb, *zpartb;
+  char *file, *comp_file, *size_file, *reg_file;
+  int seq_id, autoload, loaded, display, reload;
+  int sort_tags_loaded, compression_type, evac;
+  int blocknumber, num_memblocks;
+  int *timeslist, ntimes, itime;
 
-  unsigned char *itpart,*isprink;
-  int *sframe, *sprframe, *bframe, ntimes, itime;
-  int particle_type, droplet_type;
+  float zoffset, *times;
 
-  flowlabels label;
   char menulabel[128];
-  int version;
+
   int nclasses;
   part5class **partclassptr;
   part5data *data5;
+  histogramdata **histograms;
+  float *valmin, *valmax;
 } partdata;
 
 /* --------------------------  targ ------------------------------------ */

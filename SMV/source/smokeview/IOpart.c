@@ -11,7 +11,7 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
-//#define pp_PARTTEST
+#include "histogram.h"
 
 int tagscompare( const void *arg1, const void *arg2 );
 void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
@@ -40,31 +40,18 @@ if(returncode==READPASS){\
 
 void drawpart_frame(void){
   partdata *parti;
+  int i;
 
-  if(staticframe0==0||frame_index!=0){
-    int i;
-
-    for(i=0;i<npartinfo;i++){
-      parti = partinfo + i;
-      if(parti->loaded==0||parti->display==0)continue;
-      if(parti->evac==1){
-        drawEvac(parti);
-        SNIFF_ERRORS("after drawEvac");
-      }
-      else{
-        drawPart(parti);
-        SNIFF_ERRORS("after drawPart");
-      }
+  for(i=0;i<npartinfo;i++){
+    parti = partinfo + i;
+    if(parti->loaded==0||parti->display==0)continue;
+    if(parti->evac==1){
+      drawEvac(parti);
+      SNIFF_ERRORS("after drawEvac");
     }
-  }
-  if(visStaticSmoke==1&&staticframe0==1){
-    int i;
-
-    for(i=0;i<npartinfo;i++){
-      parti = partinfo + i;
-      if(parti->loaded==0||parti->display==0)continue;
-      drawStaticPart(parti);
-      SNIFF_ERRORS("after drawStaticPart");
+    else{
+      drawPart(parti);
+      SNIFF_ERRORS("after drawPart");
     }
   }
 }
@@ -304,17 +291,17 @@ void getpart5data(partdata *parti, int partframestep_local, int partpointstep_lo
       CheckMemory;
       if(doit==1){
         if(numtypes[2*i]>0){
-#ifdef pp_PARTTEST        
+#ifdef pp_PARTTEST
           int iii;
-#endif          
+#endif
 
           FORTPART5READ(datacopy->rvals,nparts*numtypes[2*i]);
 
-#ifdef pp_PARTTEST        
+#ifdef pp_PARTTEST
           for(iii = 0; iii<nparts*numtypes[2*i]; iii++){
-            datacopy->rvals[iii] = 100.0*parti->seq_id;
+            datacopy->rvals[iii] = 100.0*parti->seq_id+(float)randint(-1000,1000)/1000.0;
           }
-#endif          
+#endif
           if(returncode==0)goto wrapup;
         }
       }
@@ -513,7 +500,7 @@ void init_part5prop(void){
             propi->partlabels[ii]=labeli;
           }
           NewMemory((void **)&propi->scale,256);
-
+          init_histogram(&propi->histogram, NHIST_BUCKETS);
 
           npart5prop++;
         }
@@ -946,9 +933,42 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
 
 }
 
-/* ------------------ readpart5 ------------------------ */
+/* ------------------ update_partcolorbounds ------------------------ */
 
-void readpart5(char *file, int ifile, int flag, int *errorcode){
+void update_partcolorbounds(partdata *parti){
+  int j;
+
+  adjustpart5bounds(parti);
+  if(colorlabelpart!=NULL){
+    NewMemory((void **)&colorlabelpart, MAXRGB*sizeof(char *));
+    {
+      int n;
+
+      for(n = 0; n<MAXRGB; n++){
+        colorlabelpart[n] = NULL;
+      }
+      for(n = 0; n<nrgb; n++){
+        NewMemory((void **)&colorlabelpart[n], 11);
+      }
+    }
+  }
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo+j;
+    if(partj->loaded==0||partj->display==0)continue;
+    if(partj==parti){
+      getPart5Colors(partj, nrgb, PARTFILE_MAP);
+    }
+    else{
+      getPart5Colors(partj, nrgb, PARTFILE_REMAP);
+    }
+  }
+}
+
+    /* -----  ------------- readpart ------------------------ */
+
+void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *errorcode){
   size_t lenfile;
   int error=0;
   partdata *parti;
@@ -956,6 +976,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   int local_starttime0, local_stoptime0;
   float delta_time0, delta_time;
   FILE_SIZE file_size;
+  int j;
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
 
@@ -964,34 +985,40 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   freeallpart5data(parti);
 
-  if(parti->loaded==0&&flag==UNLOAD)return;
+  if(parti->loaded==0&&loadflag==UNLOAD)return;
 
 
   *errorcode=0;
   partfilenum=ifile;
-  if(parti->evac==0){
-    ReadPartFile=0;
+  ReadPartFile = 0;
+  ReadEvacFile = 0;
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo + j;
+    if(partj->loaded==1&&partj!=parti&&partj->evac==1){
+      ReadEvacFile = 1;
+      break;
+    }
   }
-  else{
-    ReadEvacFile=0;
+  for(j = 0; j<npartinfo; j++){
+    partdata *partj;
+
+    partj = partinfo + j;
+    if(partj->loaded==1&&partj!=parti&&partj->evac==0){
+      ReadPartFile = 1;
+      break;
+    }
   }
-  parti->loaded=0;
+  parti->loaded = 0;
   parti->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   updatemenu=1;
 
   FREEMEMORY(parti->times);
 
-  if(colorlabelpart!=NULL){
-    int n;
-
-    for(n=0;n<MAXRGB;n++){
-      FREEMEMORY(colorlabelpart[n]);
-    }
-    FREEMEMORY(colorlabelpart);
-  }
-
-  if(flag==UNLOAD){
+  if(loadflag==UNLOAD){
+    update_partcolorbounds(parti);
     Update_Times();
     updatemenu=1;
     updatePart5extremes();
@@ -1004,7 +1031,7 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   lenfile = strlen(file);
   if(lenfile==0){
-    readpart("",ifile,UNLOAD,&error);
+    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
     Update_Times();
     return;
   }
@@ -1036,19 +1063,9 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
 
   PRINTF("computing particle color levels \n");
 
-  adjustpart5bounds(parti);
-  NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *));
-  {
-    int n;
-
-    for(n=0;n<MAXRGB;n++){
-      colorlabelpart[n]=NULL;
-    }
-    for(n=0;n<nrgb;n++){
-      NewMemory((void **)&colorlabelpart[n],11);
-    }
-  }
-  getPart5Colors(parti,nrgb);
+  parti->loaded = 1;
+  parti->display = 1;
+  update_partcolorbounds(parti);
   updateglui();
 #ifdef pp_MEMPRINT
   PRINTF("After particle file load: \n");
@@ -1066,8 +1083,6 @@ void readpart5(char *file, int ifile, int flag, int *errorcode){
   parttype=0;
   PART_CB_INIT();
   ParticlePropShowMenu(part5colorindex);
-  parti->loaded=1;
-  parti->display=1;
   plotstate=getplotstate(DYNAMIC_PLOTS);
   Update_Times();
   updatePart5extremes();
@@ -1102,344 +1117,6 @@ void update_all_partvis2(void){
     parti = partinfo + i;
     if(parti->loaded==1)update_all_partvis(parti);
   }
-}
-
-/* ------------------ readpart ------------------------ */
-
-void readpart(char *file, int ifile, int flag, int *errorcode){
-  int nmax, n, i;
-  FILE_SIZE lenfile;
-  float *tcopy;
-  unsigned char *isprinkcopy;
-  int error=0;
-  int bytesperpoint;
-  int skip_local;
-  int statfile,statfile2;
-  STRUCTSTAT statbuffer,statbuffer2;
-  char partsizefile[1024],buffer[1024];
-  FILE *sizefile;
-  int readpartsize=1;
-  int partpointstepold, partframestepold;
-  size_t return_code;
-  int nb,nv;
-  float xbox, ybox, zbox;
-  partdata *parti;
-  int blocknumber;
-  mesh *meshi;
-  float offset_x, offset_y, offset_z;
-  int file_unit;
-
-  ASSERT(ifile>=0&&ifile<=npartinfo);
-  parti=partinfo+ifile;
-  if(parti->version==1){
-    readpart5(file,ifile,flag,errorcode);
-    return;
-  }
-  blocknumber=parti->blocknumber;
-  meshi=meshinfo+blocknumber;
-  if(parti->loaded==0&&flag==UNLOAD)return;
-
-
-  nb=meshi->nbptrs;
-  nv=meshi->nvents;
-
-  *errorcode=0;
-  partfilenum=ifile;
-  if(partinfo[ifile].evac==0){
-    ReadPartFile=0;
-  }
-  else{
-    ReadEvacFile=0;
-  }
-  partinfo[ifile].loaded=0;
-  partinfo[ifile].display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  updatemenu=1;
-
-  FREEMEMORY(parti->times);
-  FREEMEMORY(parti->xpart);  FREEMEMORY(parti->ypart);  FREEMEMORY(parti->zpart);
-  FREEMEMORY(parti->xpartb); FREEMEMORY(parti->ypartb); FREEMEMORY(parti->zpartb);
-  FREEMEMORY(parti->xparts); FREEMEMORY(parti->yparts); FREEMEMORY(parti->zparts);
-  FREEMEMORY(parti->tpart);  FREEMEMORY(parti->itpart);
-  FREEMEMORY(parti->isprink);
-  FREEMEMORY(parti->sframe);
-  FREEMEMORY(parti->bframe);
-  FREEMEMORY(parti->sprframe)
-
-  if(flag==UNLOAD){
-    Update_Times();
-    updatemenu=1;
-#ifdef pp_MEMPRINT
-    PRINTF("After particle file unload: \n");
-    PrintMemoryInfo;
-#endif
-    return;
-  }
-
-  if(colorlabelpart!=NULL){
-    PRINTF("freeing colorlabelpart\n");
-    for(n=0;n<MAXRGB;n++){
-      FREEMEMORY(colorlabelpart[n]);
-    }
-    FREEMEMORY(colorlabelpart);
-  }
-
-  lenfile = strlen(file);
-  if(lenfile==0){
-    readpart("",ifile,UNLOAD,&error);
-    Update_Times();
-    return;
-  }
-
-  PRINTF("Sizing particle data: %s\n",file);
-  file_unit=15;
-  FORTget_file_unit(&file_unit,&file_unit);
-  FORTgetsizes(&file_unit,file,&nb,&nv,&nspr,&mxframepoints,&staticframe0,&error,lenfile);
-  STRCPY(partsizefile,file);
-  STRCAT(partsizefile,".sz");
-  statfile=STAT(file,&statbuffer);
-  statfile2=STAT(partsizefile,&statbuffer2);
-  if(statfile==0&&statfile2==0&&difftime(statbuffer2.st_mtime,statbuffer.st_mtime)>0){
-    sizefile=fopen(partsizefile,"r");
-    if(sizefile!=NULL){
-      if(fgets(buffer,255,sizefile)!=NULL){
-        sscanf(buffer,"%i %i %i %i %i %i %i %i %i",
-          &nb,&nv,&nspr,&mxframepoints,&staticframe0,&npartpoints,&npartframes,&partframestepold,&partpointstepold);
-        fclose(sizefile);
-        if(partframestepold==partframestep&&partpointstepold==partpointstep)readpartsize=0;
-      }
-    }
-  }
-  if(readpartsize==1){
-    FORTgetdata1(&file_unit,&parttype,&error);
-    FORTgetsizes2(&file_unit,&settmin_p,&tmin_p,&settmax_p,&tmax_p,
-                     &nspr, &partframestep, &partpointstep, &npartpoints, &npartframes, &error);
-    sizefile=fopen(partsizefile,"w");
-    if(sizefile!=NULL){
-      fprintf(sizefile,"%i %i %i %i %i %i %i %i %i",
-          nb,nv,nspr,mxframepoints,staticframe0,npartpoints,npartframes,partframestep,partpointstep);
-    }
-    else{
-      fprintf(stderr,"*** Error:  unable to write to %s\n",partsizefile);
-    }
-    file_unit=15;
-    FORTget_file_unit(&file_unit,&file_unit);
-    FORTgetsizes(&file_unit,file,&nb,&nv,&nspr,&mxframepoints,&staticframe0,&error,lenfile);
-  }
-  if(staticframe0==1)first_frame_index=1;
-  if(error!=0){
-    fprintf(stderr,"*** Error: problem reading %s\n",file);
-    return;
-  }
-  if(npartpoints<=0){
-    fprintf(stderr,"*** Warning: the particle file:%s is empty\n",file);
-    return;
-  }
-  if(nspr>0){
-    if(tspr==NULL){
-      return_code=NewMemory((void **)&tspr,sizeof(float)*nspr);
-    }
-    else{
-      return_code=ResizeMemory((void **)&tspr,sizeof(float)*nspr);
-    }
-    if(return_code==0){
-      *errorcode=1;
-      FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-  }
-
-  if(NewMemory((void **)&parti->times,sizeof(float)*npartframes)==0){
-    *errorcode=1;
-    FORTclosefortranfile(&file_unit);
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-  if(NewMemory((void **)&parti->xparts,npartpoints*sizeof(short))==0||
-     NewMemory((void **)&parti->yparts,npartpoints*sizeof(short))==0||
-     NewMemory((void **)&parti->zparts,npartpoints*sizeof(short))==0){
-    *errorcode=1;
-    FORTclosefortranfile(&file_unit);
-    fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
-    fprintf(stderr,"          to load %s\n",parti->file);
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-  bytesperpoint=7;
-
-  if(NewMemory((void **)&parti->tpart,npartpoints*sizeof(float))==0||
-     NewMemory((void **)&parti->itpart,npartpoints*sizeof(unsigned char))==0||
-     NewMemory((void **)&parti->isprink,npartpoints*sizeof(unsigned char))==0||
-     NewMemory((void **)&parti->bframe,npartframes*sizeof(int))==0||
-     NewMemory((void **)&parti->sframe,npartframes*sizeof(int))==0||
-     NewMemory((void **)&parti->sprframe,npartframes*sizeof(int))==0){
-      *errorcode=1;
-    fprintf(stderr,"*** Error: memory allocation failed while attempting .\n");
-    fprintf(stderr,"          to load %s\n",parti->file);
-      FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
-      return;
-  }
-  for(i=0;i<npartpoints;i++){
-    parti->isprink[i]=0;
-  }
-  for(i=0;i<npartframes;i++){
-    parti->sprframe[i]=0;
-  }
-
-
-  PRINTF("Loading particle data: %s\n",file);
-  FORTgetdata1(&file_unit,&parttype,&error);
-  if(partfilenum>=0&&partfilenum<npartinfo){
-    partshortlabel=partinfo[partfilenum].label.shortlabel;
-    partunitlabel=partinfo[partfilenum].label.unit;
-  }
-  else{
-    partshortlabel=emptylabel;
-    partunitlabel=emptylabel;
-  }
-  if(error!=0){
-    *errorcode=1;
-    fprintf(stderr,"*** Error: problem reading %s\n",file);
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-  xbox=DENORMALIZE_X(xbar);
-  ybox=DENORMALIZE_Y(ybar);
-  zbox=DENORMALIZE_Z(zbar);
-  offset_x=meshi->offset[XXX];
-  offset_y=meshi->offset[YYY];
-  offset_z=meshi->offset[ZZZ];
-  FORTgetdata2(&file_unit,
-    parti->xparts,parti->yparts,parti->zparts,
-    parti->tpart,&parti->droplet_type,parti->isprink,
-    tspr,parti->bframe,parti->sframe,parti->sprframe,parti->times,&nspr,&npartpoints,&npartframes,&parti->ntimes,
-    &settmin_p,&settmax_p,&tmin_p,&tmax_p,&partframestep,&partpointstep,
-    &xbar0, &xbox, &ybar0, &ybox, &zbar0, &zbox,
-    &offset_x, &offset_y, &offset_z, &redirect,
-    &error,1);
-  if(error!=0||parti->ntimes==0){
-    if(error!=0)fprintf(stderr,"*** Error: problem reading %s\n",file);
-    *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-
-  nmax = parti->bframe[parti->ntimes-1]+parti->sframe[parti->ntimes-1];
-  PRINTF("loaded: points=%i, size=%i KBytes, frames=%i\n",nmax,nmax*bytesperpoint/1024,parti->ntimes);
-
-  if(parttype==-1||parttype==-3){
-    parti->particle_type=1;  /*  only color temperature */
-  }
-  else{
-    parti->particle_type=0;
-  }
-  havesprinkpart=0;
-  skip_local=0;
-  if(staticframe0==1)skip_local=parti->sframe[0];
-  tcopy=parti->tpart+skip_local;
-  tmin_global=1000000000.0;
-  tmax_global=-tmin_global;
-  isprinkcopy=parti->isprink;
-  for(n=skip_local;n<nmax;n++){
-    if(*isprinkcopy==0&&parti->particle_type==0){
-      tcopy++;
-      isprinkcopy++;
-      continue;
-    }
-    if(*isprinkcopy==1&&parti->droplet_type==0){
-      tcopy++;
-      isprinkcopy++;
-      havesprinkpart=1;
-      continue;
-    }
-    if(*tcopy<tmin_global)tmin_global=*tcopy;
-    if(*tcopy>tmax_global)tmax_global=*tcopy;
-    if(*isprinkcopy==1){
-      havesprinkpart=1;
-    }
-    tcopy++;
-    isprinkcopy++;
-  }
-  /* convert particle temperatures into integers pointing to an rgb color table */
-
-  PRINTF("computing particle color levels \n");
-  if(parti->particle_type!=0||parti->droplet_type!=0){
-    adjustpartbounds(parti->tpart,parti->particle_type,parti->droplet_type,parti->isprink,
-      skip_local,nmax,setpartmin,&tmin_global,setpartmax,&tmax_global);
-  }
-  if(setpartmin == SET_MIN){
-    tmin_global = partmin;
-  }
-  if(setpartmax == SET_MAX){
-    tmax_global = partmax;
-  }
-  partmin=tmin_global;
-  partmax=tmax_global;
-  if(NewMemory((void **)&colorlabelpart,MAXRGB*sizeof(char *))==0){
-    FORTclosefortranfile(&file_unit);
-    readpart("",ifile,UNLOAD,&error);
-    *errorcode=1;
-    return;
-  }
-  for(n=0;n<MAXRGB;n++){colorlabelpart[n]=NULL;}
-  for(n=0;n<nrgb;n++){
-    if(NewMemory((void **)&colorlabelpart[n],11)==0){
-      *errorcode=1;
-      FORTclosefortranfile(&file_unit);
-      readpart("",ifile,UNLOAD,&error);
-      return;
-    }
-  }
-  getPartColors(parti->tpart, skip_local, nmax,
-    parti->itpart,parti->isprink,parti->particle_type,parti->droplet_type,
-    &tmin_global, &tmax_global, nrgb, colorlabelpart, partscale,partlevels256);
-  for(n=0;n<skip_local;n++){
-    parti->itpart[n]=0;
-  }
-  FREEMEMORY(parti->tpart);
-  FREEMEMORY(parti->isprink);
-  if(ResizeMemory((void **)&parti->xparts,nmax*sizeof(short))==0||
-     ResizeMemory((void **)&parti->yparts,nmax*sizeof(short))==0||
-     ResizeMemory((void **)&parti->zparts,nmax*sizeof(short))==0){
-    FORTclosefortranfile(&file_unit);
-    *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-  if(ResizeMemory((void **)&parti->itpart,nmax*sizeof(unsigned char))==0){
-    FORTclosefortranfile(&file_unit);
-    *errorcode=1;
-    readpart("",ifile,UNLOAD,&error);
-    return;
-  }
-  updateglui();
-
-#ifdef pp_MEMPRINT
-  PRINTF("After particle file load: \n");
-  PrintMemoryInfo;
-#endif
-  if(partinfo[ifile].evac==0){
-    ReadPartFile=1;
-  }
-  else{
-    ReadEvacFile=1;
-  }
-  if(partinfo[ifile].evac==0){
-    visParticles=1;
-  }
-  else{
-    visEvac=1;
-  }
-  partinfo[ifile].loaded=1;
-  partinfo[ifile].display=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
-  updatemenu=1;
-  Idle_CB();
-
-  glutPostRedisplay();
 }
 
 /* ----------------------- drawselect_avatars ----------------------------- */
@@ -1996,111 +1673,8 @@ void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr,
 /* ------------------ drawPart ------------------------ */
 
 void drawPart(const partdata *parti){
-  short *xpoints, *ypoints, *zpoints;
-  unsigned char *itpoint=NULL;
-
-
-  int n;
-  int nsmokepoints, nsprpoints;
-  int ipframe;
-  int droplet_type, particle_type;
-  float *rgb_smoke, *rgb_ismoke;
-
-  ipframe=parti->itime;
-  rgb_smoke = rgb_part;
-
   if(parti->times[0]>global_times[itimes])return;
-
-  if(parti->version==1){
-    drawPart5(parti);
-    return;
-  }
-
-  droplet_type = parti->droplet_type;
-  particle_type = parti->particle_type;
-
-  /* define the data locations to look at */
-
-    xpoints = parti->xparts + parti->bframe[ipframe];
-    ypoints = parti->yparts + parti->bframe[ipframe];
-    zpoints = parti->zparts + parti->bframe[ipframe];
-
-  /* isprinkframe = isprink + bframe[ipframe];*/
-
-  itpoint = parti->itpart + parti->bframe[ipframe];
-  nsprpoints = parti->sprframe[ipframe];
-  nsmokepoints = parti->sframe[ipframe]-nsprpoints;
-
-  glPointSize(partpointsize);
-  glBegin(GL_POINTS);
-  if(parti->version==0){
-    if(visSmokePart!=0){
-      if(particle_type==0){
-        for (n = 0; n < nsmokepoints; n++){
-          glColor4fv(rgb[itpoint[n]]);
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-      else{
-        for (n = 0; n < nsmokepoints; n++){
-          rgb_ismoke = rgb_smoke + 4*itpoint[n];
-          if(rgb_ismoke[3]>0.5){
-            glColor4fv(rgb_ismoke);
-            glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-          }
-        }
-      }
-    }
-    if(visSprinkPart==1){
-      if(droplet_type==0){
-        glColor4fv(rgb[rgb_blue]);
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++){
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-      else{
-        for (n = nsmokepoints; n < nsmokepoints+nsprpoints; n++){
-          glColor4fv(rgb_full[itpoint[n]]);
-          glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-        }
-      }
-    }
-  }
-
-  glEnd();
-}
-
-/* ------------------ drawStaticPart ------------------------ */
-
-void drawStaticPart(const partdata *parti){
-
-  short *xpoints, *ypoints, *zpoints;
-
-  int n;
-  int nsmokepoints, nsprpoints;
-  int ipframe;
-
-  /* define the data locations to look at */
-
-  if(parti->version!=0)return;
-  ipframe=0;
-  xpoints = parti->xparts + parti->bframe[ipframe];
-  ypoints = parti->yparts + parti->bframe[ipframe];
-  zpoints = parti->zparts + parti->bframe[ipframe];
-
-  /* isprinkframe = isprink + bframe[ipframe];*/
-
-  nsprpoints = parti->sprframe[ipframe];
-  nsmokepoints = parti->sframe[ipframe]-nsprpoints;
-
-  glPointSize(partpointsize);
-
-  glColor4fv(static_color);
-  glBegin(GL_POINTS);
-  for(n=0;n<nsmokepoints+nsprpoints;n++){
-    glVertex3f(xplts[xpoints[n]],yplts[ypoints[n]],zplts[zpoints[n]]);
-  }
-  glEnd();
+  drawPart5(parti);
 }
 
 /* ------------------ tagscompare ------------------------ */
@@ -2128,16 +1702,8 @@ int partcompare( const void *arg1, const void *arg2 ){
   parti = partinfo + i;
   partj = partinfo + j;
 
-  if(parti->version==1){
-    if(parti->blocknumber<partj->blocknumber)return -1;
-    if(parti->blocknumber>partj->blocknumber)return 1;
-  }
-  else{
-    if(strcmp(parti->label.longlabel,partj->label.longlabel)<0)return -1;
-    if(strcmp(parti->label.longlabel,partj->label.longlabel)>0)return 1;
-    if(parti->blocknumber<partj->blocknumber)return -1;
-    if(parti->blocknumber>partj->blocknumber)return 1;
-  }
+  if(parti->blocknumber<partj->blocknumber)return -1;
+  if(parti->blocknumber>partj->blocknumber)return 1;
   return 0;
 }
 
@@ -2164,12 +1730,7 @@ void updatepartmenulabels(void){
         STRCAT(parti->menulabel,"humans");
       }
       else{
-        if(parti->version==1){
-          STRCAT(parti->menulabel,"particles");
-        }
-        else{
-          STRCAT(parti->menulabel,parti->label.longlabel);
-        }
+        STRCAT(parti->menulabel,"particles");
       }
       lenlabel=strlen(parti->menulabel);
       if(nmeshes>1){

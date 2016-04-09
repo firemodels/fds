@@ -1065,25 +1065,21 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,UNLOAD,&errorcode);
-      count++;
-    }
+    readpart(parti->file,i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
+    count++;
   }
   for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,LOAD,&errorcode);
-      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
-        FREEMEMORY(loaded_file);
-        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
-        strcpy(loaded_file,scripti->cval);
-      }
-      count++;
+    readpart(parti->file,i,LOAD,SET_PARTCOLORBOUNDS,&errorcode);
+    if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+      FREEMEMORY(loaded_file);
+      NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+      strcpy(loaded_file,scripti->cval);
     }
+    count++;
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
@@ -1578,7 +1574,7 @@ void script_loadfile(scriptdata *scripti){
 
     parti = partinfo + i;
     if(strcmp(parti->file,scripti->cval)==0){
-      readpart(parti->file,i,LOAD,&errorcode);
+      readpart(parti->file,i,LOAD,SET_PARTCOLORBOUNDS,&errorcode);
       return;
     }
   }
