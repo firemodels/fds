@@ -1047,9 +1047,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /* Particle File Bounds  */
 
-//SVEXTERN part5prop *part5propinfo;
-//SVEXTERN int npart5prop;
-
   if(npartinfo>0&&nevac!=npartinfo){
     glui_active=1;
     ROLLOUT_part = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Particle",false,PART_ROLLOUT,Bound_Rollout_CB);
@@ -1061,7 +1058,7 @@ extern "C" void glui_bounds_setup(int main_window){
       RADIO_part5 = glui_bounds->add_radiogroup_to_panel(ROLLOUT_part,&ipart5prop,FILETYPEINDEX,PART_CB);
 
       for(i=0;i<npart5prop;i++){
-        part5prop *partpropi;
+        partpropdata *partpropi;
 
         partpropi = part5propinfo + i;
         glui_bounds->add_radiobutton_to_group(RADIO_part5,partpropi->label->shortlabel);
@@ -1070,7 +1067,7 @@ extern "C" void glui_bounds_setup(int main_window){
       glui_bounds->add_column_to_panel(ROLLOUT_part,false);
 
       {
-        part5prop *propi;
+        partpropdata *propi;
 
         propi = part5propinfo;
         setpartmin=propi->setvalmin;
@@ -2416,7 +2413,7 @@ extern "C" void update_glui_streakvalue(float rvalue){
 /* ------------------ PART_CB ------------------------ */
 
 void PART_CB(int var){
-  part5prop *prop_new, *prop_old;
+  partpropdata *prop_new, *prop_old;
 
   prop_new = part5propinfo + ipart5prop;
   prop_old = part5propinfo + ipart5prop_old;

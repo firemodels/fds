@@ -1262,9 +1262,9 @@ SVEXTERN int nstreak_rvalue; // 5
 SVEXTERN float streak_rvalue[8]; // 1.0, 2.0 4.0, 8.0, 16.0 twfin
 SVEXTERN int streak_index, update_streaks;       // 0
 SVEXTERN float float_streak5value;// 1.0
-SVEXTERN part5class SVDECL(*partclassinfo,NULL);
+SVEXTERN partclassdata SVDECL(*partclassinfo,NULL);
 SVEXTERN int npartclassinfo;
-SVEXTERN part5prop SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
+SVEXTERN partpropdata SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
 SVEXTERN int SVDECL(npart5prop,0),ipart5prop,ipart5prop_old;
 SVEXTERN int prop_index;
 SVEXTERN targ SVDECL(*targinfo,NULL);

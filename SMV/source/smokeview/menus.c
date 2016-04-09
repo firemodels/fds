@@ -2524,15 +2524,14 @@ void LoadUnloadMenu(int value){
     glutPostRedisplay();
     showfiles=1-showfiles;
     updatemenu=1;
-    updateslicemenulabels();
-    updatevslicemenulabels();
-   // updatesmokemenulabels();
-    updatesmoke3dmenulabels();
-    updatepatchmenulabels();
-    updateisomenulabels();
-    updatepartmenulabels();
-    updatetourmenulabels();
-    updateplot3dmenulabels();
+    update_slice_menulabels();
+    update_vslice_menulabels();
+    update_smoke3d_menulabels();
+    update_patch_menulabels();
+    update_iso_menulabels();
+    update_part_menulabels();
+    update_tour_menulabels();
+    update_plot3d_menulabels();
   }
   if(value==REDIRECT){
     updatemenu=1;
@@ -2809,7 +2808,7 @@ void Particle5ShowMenu(int value){
 /* ------------------ ParticlePropShowMenu ------------------------ */
 
 void ParticlePropShowMenu(int value){
-  part5prop *propi;
+  partpropdata *propi;
 
   int propvalue;
 
@@ -2923,7 +2922,7 @@ void ParticlePropShowMenu(int value){
       }
     }
     else{
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       partclassj = partclassinfo + iclass;
       partclassj->vis_type=vistype;
@@ -4652,7 +4651,7 @@ void PropMenu(int value){
         propi->vars_indep_index);
 
       for(i=0;i<npartclassinfo;i++){
-        part5class *partclassi;
+        partclassdata *partclassi;
 
         partclassi = partclassinfo + i;
         update_partclass_depend(partclassi);
@@ -6333,13 +6332,13 @@ updatemenu=0;
 
       ntypes=0;
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         int j;
 
         propi = part5propinfo + i;
         if(propi->display==0)continue;
         for(j=0;j<npartclassinfo;j++){
-          part5class *partclassj;
+          partclassdata *partclassj;
           char menulabel[1024];
 
           if(propi->class_present[j]==0)continue;
@@ -6434,7 +6433,7 @@ updatemenu=0;
     if(npart5prop>=0){
       glutAddMenuEntry(_("Color with:"),MENU_PROP_DUMMY);
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         char menulabel[1024];
 
         propi = part5propinfo + i;
@@ -6456,13 +6455,13 @@ updatemenu=0;
       glutAddMenuEntry(_("Draw"),MENU_PROP_DUMMY);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         int j;
 
         propi = part5propinfo + i;
         if(propi->display==0)continue;
         for(j=0;j<npartclassinfo;j++){
-          part5class *partclassj;
+          partclassdata *partclassj;
           char menulabel[1024];
 
           if(propi->class_present[j]==0)continue;
@@ -6500,7 +6499,7 @@ updatemenu=0;
     if(npart5prop>=0){
       glutAddMenuEntry(_("Color with:"),MENU_PROP_DUMMY);
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         char menulabel[1024];
 
         propi = part5propinfo + i;
@@ -6521,13 +6520,13 @@ updatemenu=0;
       glutAddMenuEntry(_("Draw"),MENU_PROP_DUMMY);
       ntypes=0;
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         int j;
 
         propi = part5propinfo + i;
         if(propi->display==0)continue;
         for(j=0;j<npartclassinfo;j++){
-          part5class *partclassj;
+          partclassdata *partclassj;
           char menulabel[1024];
 
           if(propi->class_present[j]==0)continue;

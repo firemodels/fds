@@ -1384,9 +1384,9 @@ int isocompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ updateisomenulabels ------------------------ */
+/* ------------------ update_iso_menulabels ------------------------ */
 
-void updateisomenulabels(void){
+void update_iso_menulabels(void){
   int i;
   isodata *isoi;
   char label[128];

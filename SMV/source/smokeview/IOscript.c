@@ -1382,7 +1382,7 @@ void script_partclasscolor(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(propi->particle_property==0)continue;
@@ -1505,13 +1505,13 @@ void script_partclasstype(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     int j;
 
     propi = part5propinfo + i;
     if(propi->display==0)continue;
     for(j=0;j<npartclassinfo;j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       if(propi->class_present[j]==0)continue;
       partclassj = partclassinfo + j;

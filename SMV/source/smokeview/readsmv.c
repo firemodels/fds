@@ -1002,7 +1002,7 @@ void readsmv_dynamic(char *file){
   }
 
   fclose(stream);
-  updateplot3dmenulabels();
+  update_plot3d_menulabels();
   init_plot3dtimelist();
 }
 
@@ -2466,7 +2466,7 @@ int readsmv(char *file, char *file2){
     int j;
 
     for(i=0;i<npartclassinfo+1;i++){
-      part5class *partclassi;
+      partclassdata *partclassi;
 
       partclassi = partclassinfo + i;
       FREEMEMORY(partclassi->name);
@@ -3149,11 +3149,10 @@ int readsmv(char *file, char *file2){
  }
  if(npartclassinfo>=0){
    float rgb_class[4];
-   part5class *partclassi;
+   partclassdata *partclassi;
    size_t len;
 
-
-   NewMemory((void **)&partclassinfo,(npartclassinfo+1)*sizeof(part5class));
+   NewMemory((void **)&partclassinfo,(npartclassinfo+1)*sizeof(partclassdata));
 
    // define a dummy class
 
@@ -3843,7 +3842,7 @@ int readsmv(char *file, char *file2){
     if(match(buffer,"CLASS_OF_PARTICLES") == 1||
        match(buffer,"CLASS_OF_HUMANS") == 1){
       float rgb_class[4];
-      part5class *partclassi;
+      partclassdata *partclassi;
       char *device_ptr;
       char *prop_id;
       char prop_buffer[255];
@@ -5309,7 +5308,7 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"CLASS_OF_PARTICLES") == 1||
        match(buffer,"CLASS_OF_HUMANS") == 1){
-      part5class *partclassi;
+      partclassdata *partclassi;
       char *device_ptr;
       char *prop_id;
       char prop_buffer[255];
@@ -6607,7 +6606,7 @@ typedef struct {
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&parti->nclasses);
       if(parti->nclasses>0){
-        if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(part5class *));
+        if(parti->file!=NULL)NewMemory((void **)&parti->partclassptr,parti->nclasses*sizeof(partclassdata *));
         for(i=0;i<parti->nclasses;i++){
           int iclass;
           int ic,iii;
@@ -6619,7 +6618,7 @@ typedef struct {
           if(iclass>npartclassinfo)iclass=npartclassinfo;
           ic=0;
           for(iii=0;iii<npartclassinfo;iii++){
-            part5class *pci;
+            partclassdata *pci;
 
             pci = partclassinfo + iii;
             if(parti->evac==1&&pci->kind!=HUMANS)continue;
@@ -6634,7 +6633,7 @@ typedef struct {
       }
         // if no classes were specifed for the prt5 entry then assign it the default class
       if(parti->file!=NULL&&parti->nclasses==0){
-        NewMemory((void **)&parti->partclassptr,sizeof(part5class *));
+        NewMemory((void **)&parti->partclassptr,sizeof(partclassdata *));
           parti->partclassptr[i]=partclassinfo + parti->nclasses;
       }
       if(parti->file==NULL||STAT(parti->file,&statbuffer)!=0){
@@ -7570,7 +7569,7 @@ typedef struct {
 
   init_multi_threading();
 
-  init_part5prop();
+  init_partprop();
 
   init_clip();
 
@@ -7605,7 +7604,7 @@ typedef struct {
 
 
   for(i=0;i<npartclassinfo;i++){
-    part5class *partclassi;
+    partclassdata *partclassi;
 
     partclassi = partclassinfo + i;
 
@@ -7712,12 +7711,12 @@ typedef struct {
   }
   update_terrain(1,vertical_factor);
   update_terrain_colors();
-  updatesmoke3dmenulabels();
+  update_smoke3d_menulabels();
   updatevslicetypes();
-  updatepatchmenulabels();
-  updateisomenulabels();
-  updatepartmenulabels();
-  updatetourmenulabels();
+  update_patch_menulabels();
+  update_iso_menulabels();
+  update_part_menulabels();
+  update_tour_menulabels();
   init_user_ticks();
   clip_I=ibartemp; clip_J=jbartemp; clip_K=kbartemp;
 
@@ -9605,9 +9604,9 @@ int readini2(char *inifile, int localfile){
 
         trim_back(short_label);
         s1=trim_front(short_label);
-        if(strlen(s1)>0)label_index=get_part5prop_index_s(s1);
+        if(strlen(s1)>0)label_index=get_partprop_index_s(s1);
         if(label_index>=0&&label_index<npart5prop){
-          part5prop *propi;
+          partpropdata *propi;
 
           propi = part5propinfo + label_index;
           propi->setvalmin=ivmin;
@@ -9660,9 +9659,9 @@ int readini2(char *inifile, int localfile){
 
         trim_back(short_label);
         s1=trim_front(short_label);
-        if(strlen(s1)>0)label_index=get_part5prop_index_s(s1);
+        if(strlen(s1)>0)label_index=get_partprop_index_s(s1);
         if(label_index>=0&&label_index<npart5prop){
-          part5prop *propi;
+          partpropdata *propi;
 
           propi = part5propinfo + label_index;
           propi->setchopmin=icmin;
@@ -9948,7 +9947,7 @@ int readini2(char *inifile, int localfile){
         propi->smv_object=propi->smv_objects[val];
       }
       for(i=0;i<npartclassinfo;i++){
-        part5class *partclassi;
+        partclassdata *partclassi;
 
         partclassi = partclassinfo + i;
         update_partclass_depend(partclassi);
@@ -9956,7 +9955,7 @@ int readini2(char *inifile, int localfile){
       }
       continue;
     }
-    if(localfile==1&&match(buffer,"PART5CLASSVIS")==1){
+    if(localfile==1&&match(buffer,"partclassdataVIS")==1){
       int ntemp;
       int j;
 
@@ -9964,7 +9963,7 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i",&ntemp);
 
       for(j=0;j<ntemp;j++){
-        part5class *partclassj;
+        partclassdata *partclassj;
 
         if(j>npartclassinfo)break;
 
@@ -9976,7 +9975,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer,"PART5COLOR")==1){
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
 
         propi = part5propinfo + i;
         propi->display=0;
@@ -9985,7 +9984,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&i);
       if(i>=0&&i<npart5prop){
-        part5prop *propi;
+        partpropdata *propi;
 
         part5colorindex=i;
         propi = part5propinfo + i;
@@ -9997,7 +9996,7 @@ int readini2(char *inifile, int localfile){
       char *token;
 
       for(i=0;i<npart5prop;i++){
-        part5prop *propi;
+        partpropdata *propi;
         int j;
 
         propi = part5propinfo + i;
@@ -11568,7 +11567,7 @@ typedef struct {
             touri->first_frame.next->prev = &touri->first_frame;
             touri->last_frame.prev->next = &touri->last_frame;
           }
-          updatetourmenulabels();
+          update_tour_menulabels();
           createtourpaths();
           Update_Times();
           plotstate = getplotstate(DYNAMIC_PLOTS);
@@ -11728,7 +11727,7 @@ void writeini_local(FILE *fileout){
   if(npart5prop > 0){
     fprintf(fileout, "PART5PROPDISP\n");
     for(i = 0; i < npart5prop; i++){
-      part5prop *propi;
+      partpropdata *propi;
       int j;
 
       propi = part5propinfo + i;
@@ -11740,7 +11739,7 @@ void writeini_local(FILE *fileout){
     }
     fprintf(fileout, "PART5COLOR\n");
     for(i = 0; i < npart5prop; i++){
-      part5prop *propi;
+      partpropdata *propi;
 
       propi = part5propinfo + i;
       if(propi->display == 1){
@@ -11754,10 +11753,10 @@ void writeini_local(FILE *fileout){
   if(npartclassinfo > 0){
     int j;
 
-    fprintf(fileout, "PART5CLASSVIS\n");
+    fprintf(fileout, "partclassdataVIS\n");
     fprintf(fileout, " %i\n", npartclassinfo);
     for(j = 0; j<npartclassinfo; j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       partclassj = partclassinfo + j;
       fprintf(fileout, " %i\n", partclassj->vis_type);
@@ -11935,7 +11934,7 @@ void writeini_local(FILE *fileout){
   fprintf(fileout, "C_PARTICLES\n");
   fprintf(fileout, " %i %f %i %f\n", setpartchopmin, partchopmin, setpartchopmax, partchopmax);
   for(i = 0; i < npart5prop; i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     fprintf(fileout, "C_PARTICLES\n");
@@ -12010,7 +12009,7 @@ void writeini_local(FILE *fileout){
   fprintf(fileout, " %i %f %i %f\n", setpartmin, partmin, setpartmax, partmax);
   if(npart5prop > 0){
     for(i = 0; i < npart5prop; i++){
-      part5prop *propi;
+      partpropdata *propi;
 
       propi = part5propinfo + i;
       fprintf(fileout, "V5_PARTICLES\n");

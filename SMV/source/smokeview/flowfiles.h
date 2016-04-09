@@ -250,7 +250,6 @@ typedef struct _labeldata {
   int useforegroundcolor,show_always;
 } labeldata;
 
-
 /* --------------------------  texture ------------------------------------ */
 
 typedef struct _texturedata {
@@ -496,7 +495,6 @@ typedef struct {
   int dir,nbars,useforegroundcolor;
   float width, rgb[3];
 } tickdata;
-
 
 /* --------------------------  feddata ------------------------------------ */
 
@@ -790,7 +788,6 @@ typedef struct {
 
 #endif
 
-
 /* --------------------------  pathdata ------------------------------------ */
 
 typedef struct _pathdata {
@@ -973,7 +970,6 @@ int text_height, text_width;
 int doit;
 } portdata;
 
-
 /* --------------------------  mousedata ------------------------------------ */
 
 typedef struct {
@@ -1012,7 +1008,7 @@ typedef struct _camera {
   char name[301];
 } camera;
 
-/* --------------------------  part5class ------------------------------------ */
+/* --------------------------  partclassdata ------------------------------------ */
 
 typedef struct {
   char *name;
@@ -1032,10 +1028,9 @@ typedef struct {
   float fvars_dep[PROPVARMAX];
   char *vars_dep[PROPVARMAX];
   flowlabels *labels;
-} part5class;
+} partclassdata;
 
-
-/* --------------------------  part5prop ------------------------------------ */
+/* --------------------------  partpropdata ------------------------------------ */
 
 typedef struct {
   flowlabels *label;
@@ -1057,12 +1052,12 @@ typedef struct {
   int extreme_min, extreme_max;
   histogramdata histogram;
   int *buckets;
-} part5prop;
+} partpropdata;
 
 /* --------------------------  part5data ------------------------------------ */
 
 typedef struct {
-  part5class *partclassbase;
+  partclassdata *partclassbase;
   float time;
   int npoints,n_rtypes, n_itypes;
   short *sx, *sy, *sz;
@@ -1090,7 +1085,7 @@ typedef struct {
   char menulabel[128];
 
   int nclasses;
-  part5class **partclassptr;
+  partclassdata **partclassptr;
   part5data *data5;
   histogramdata **histograms;
   float *valmin, *valmax;
@@ -1446,6 +1441,5 @@ typedef struct {
 typedef struct {
   texturedata face[6];
 } skyboxdata;
-
 
 #endif

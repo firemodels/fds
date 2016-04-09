@@ -13,13 +13,8 @@
 #include "smokeviewvars.h"
 #include "histogram.h"
 
-int tagscompare( const void *arg1, const void *arg2 );
-void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j);
-
 void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level,float *valrgb, int vis_override);
-void update_all_partvis(partdata *parti);
-void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses);
-int get_tagindex(const partdata *parti, part5data **data, int tagval);
+
 #define READPASS 1
 #define READFAIL 0
 
@@ -36,9 +31,9 @@ if(returncode==READPASS){\
   if(ferror(PART5FILE)==1||feof(PART5FILE)==1)returncode=READFAIL;\
 }
 
-/* ------------------ drawpart_frame ------------------------ */
+/* ------------------ draw_partframe ------------------------ */
 
-void drawpart_frame(void){
+void draw_partframe(void){
   partdata *parti;
   int i;
 
@@ -46,19 +41,19 @@ void drawpart_frame(void){
     parti = partinfo + i;
     if(parti->loaded==0||parti->display==0)continue;
     if(parti->evac==1){
-      drawEvac(parti);
-      SNIFF_ERRORS("after drawEvac");
+      draw_evac(parti);
+      SNIFF_ERRORS("after draw_evac");
     }
     else{
-      drawPart(parti);
-      SNIFF_ERRORS("after drawPart");
+      draw_part(parti);
+      SNIFF_ERRORS("after draw_part");
     }
   }
 }
 
-/* ------------------ drawevac_frame ------------------------ */
+/* ------------------ draw_evacframe ------------------------ */
 
-void drawevac_frame(void){
+void draw_evacframe(void){
   int i;
 
   for(i=0;i<npartinfo;i++){
@@ -66,14 +61,14 @@ void drawevac_frame(void){
 
     parti = partinfo + i;
     if(parti->loaded==0||parti->display==0||parti->evac==0)continue;
-    drawEvac(parti);
+    draw_evac(parti);
   }
-  SNIFF_ERRORS("after drawEvac 2");
+  SNIFF_ERRORS("after draw_evac 2");
 }
 
-/* ------------------ freepart5data ------------------------ */
+/* ------------------ free_part5data ------------------------ */
 
-void freepart5data(part5data *datacopy){
+void free_part5data(part5data *datacopy){
   FREEMEMORY(datacopy->cvals);
   FREEMEMORY(datacopy->sx);
   FREEMEMORY(datacopy->sy);
@@ -92,24 +87,24 @@ void freepart5data(part5data *datacopy){
   FREEMEMORY(datacopy->irvals);
 }
 
-/* ------------------ freeallpart5data ------------------------ */
+/* ------------------ freeall_part5data ------------------------ */
 
-void freeallpart5data(partdata *parti){
+void freeall_part5data(partdata *parti){
   int i;
   part5data *datacopy;
 
   if(parti->data5==NULL)return;
   datacopy = parti->data5;
   for(i=0;i<parti->ntimes*parti->nclasses;i++){
-    freepart5data(datacopy);
+    free_part5data(datacopy);
     datacopy++;
   }
   FREEMEMORY(parti->data5);
 }
 
-/* ------------------ initpart5data ------------------------ */
+/* ------------------ init_part5data ------------------------ */
 
-void initpart5data(part5data *datacopy, part5class *partclassi){
+void init_part5data(part5data *datacopy, partclassdata *partclassi){
   datacopy->cvals=NULL;
   datacopy->partclassbase=partclassi;
   datacopy->sx=NULL;
@@ -129,10 +124,136 @@ void initpart5data(part5data *datacopy, part5class *partclassi){
   datacopy->irvals=NULL;
 }
 
+/* ------------------ compare_tags ------------------------ */
 
-/* ------------------ getpart5data ------------------------ */
+int compare_tags(const void *arg1, const void *arg2){
+  int i, j;
 
-void getpart5data(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
+  i = *(int *)arg1;
+  j = *(int *)arg2;
+  if(i<j)return -1;
+  if(i>j)return 1;
+  return 0;
+
+}
+
+/* ------------------ compare_part ------------------------ */
+
+int compare_part(const void *arg1, const void *arg2){
+  partdata *parti, *partj;
+  int i, j;
+
+  i = *(int *)arg1;
+  j = *(int *)arg2;
+
+  parti = partinfo + i;
+  partj = partinfo + j;
+
+  if(parti->blocknumber<partj->blocknumber)return -1;
+  if(parti->blocknumber>partj->blocknumber)return 1;
+  return 0;
+}
+
+/* ------------------ get_tagindex ------------------------ */
+
+int get_tagindex(const partdata *partin, part5data **datain, int tagval){
+  int *returnval;
+  part5data *data;
+  int i;
+
+  for(i = -1; i < npartinfo; i++){
+    const partdata *parti;
+
+    if(i == -1){
+      parti = partin;
+      data = *datain;
+    }
+    else{
+      parti = partinfo + i;
+      if(parti == partin)continue;
+      if(parti->loaded == 0 || parti->display == 0)continue;
+      data = parti->data5 + (*datain - partin->data5);
+    }
+    if(parti->loaded == 0 || parti->display == 0)continue;
+
+    if(data->npoints == 0)continue;
+    ASSERT(data->sort_tags != NULL);
+    returnval = bsearch(&tagval, data->sort_tags, data->npoints, 2 * sizeof(int), compare_tags);
+    if(returnval == NULL)continue;
+    *datain = data;
+    return *(returnval + 1);
+  }
+  return -1;
+}
+
+/* ------------------ update_partvis ------------------------ */
+
+void update_partvis(int first_frame, partdata *parti, part5data *datacopy, int nclasses){
+  int nparts;
+  unsigned char *vis_part;
+
+  nparts = datacopy->npoints;
+  vis_part = datacopy->vis_part;
+
+  if(first_frame == 1){
+    int ii;
+
+    for(ii = 0; ii < nparts; ii++){
+      vis_part[ii] = 1;
+    }
+  }
+  else{
+    int ii;
+    part5data *datalast;
+    int nvis = 0, nleft;
+
+    for(ii = 0; ii < nparts; ii++){
+      int tag_index;
+
+      datalast = datacopy - nclasses;
+      tag_index = get_tagindex(parti, &datalast, datacopy->tags[ii]);
+      if(tag_index != -1 && datalast->vis_part[tag_index] == 1){
+        datacopy->vis_part[ii] = 1;
+        nvis++;
+      }
+      else{
+        datacopy->vis_part[ii] = 0;
+      }
+    }
+
+    nleft = nparts - nvis;
+    if(nleft > 0){
+      for(ii = 0; ii<nparts; ii++){
+        if(datacopy->vis_part[ii] == 1)continue;
+        if(nleft>0){
+          datacopy->vis_part[ii] = 1;
+          nleft--;
+        }
+      }
+    }
+  }
+}
+
+/* ------------------ update_all_partvis ------------------------ */
+
+void update_all_partvis(partdata *parti){
+  part5data *datacopy;
+  int i, j;
+  int firstframe = 1;
+
+  datacopy = parti->data5;
+  for(i = 0; i < parti->ntimes; i++){
+    for(j = 0; j < parti->nclasses; j++){
+      update_partvis(firstframe, parti, datacopy, parti->nclasses);
+      datacopy++;
+    }
+    if(firstframe == 1)firstframe = 0;
+  }
+}
+
+/* ------------------ get_partdata ------------------------ */
+
+void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -206,7 +327,7 @@ void getpart5data(partdata *parti, int partframestep_local, int nf_all, float *d
       parti->times[count2]=time_local;
     }
     for(i=0;i<nclasses;i++){
-      part5class *partclassi;
+      partclassdata *partclassi;
       int factor=256*128-1;
 
       partclassi = parti->partclassptr[i];
@@ -282,7 +403,7 @@ void getpart5data(partdata *parti, int partframestep_local, int nf_all, float *d
             sort_tags[2*j]=datacopy->tags[j];
             sort_tags[2*j+1]=j;
           }
-          qsort( sort_tags, (size_t)nparts, 2*sizeof(int), tagscompare );
+          qsort( sort_tags, (size_t)nparts, 2*sizeof(int), compare_tags );
         }
       }
       else{
@@ -343,12 +464,12 @@ wrapup:
 }
 
 /* ------------------ get_part5prop ------------------------ */
-
-void print_part5prop(void){
+#ifdef _DEBUG
+void print_partprop(void){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     PRINTF("label=%s min=%f max=%f\n",propi->label->longlabel,propi->valmin,propi->valmax);
@@ -357,15 +478,16 @@ void print_part5prop(void){
     PRINTF("\n");
   }
 }
+#endif
 
 
-/* ------------------ get_part5prop_index_s ------------------------ */
+/* ------------------ get_partprop_index_s ------------------------ */
 
-int get_part5prop_index_s(char *shortlabel){
+int get_partprop_index_s(char *shortlabel){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(strcmp(propi->label->shortlabel,shortlabel)==0)return i;
@@ -373,13 +495,13 @@ int get_part5prop_index_s(char *shortlabel){
   return -1;
 }
 
-/* ------------------ get_part5prop_index ------------------------ */
+/* ------------------ get_partprop_index ------------------------ */
 
-int get_part5prop_index(char *label){
+int get_partprop_index(char *label){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(strcmp(propi->label->longlabel,label)==0)return i;
@@ -387,13 +509,13 @@ int get_part5prop_index(char *label){
   return 0;
 }
 
-/* ------------------ get_part5prop_s ------------------------ */
+/* ------------------ get_partprop_s ------------------------ */
 
-part5prop *get_part5prop_s(char *label){
+partpropdata *get_partprop_s(char *label){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(strcmp(propi->label->shortlabel,label)==0)return propi;
@@ -403,11 +525,11 @@ part5prop *get_part5prop_s(char *label){
 
 /* ------------------ get_part5prop ------------------------ */
 
-part5prop *get_part5prop(char *label){
+partpropdata *get_partprop(char *label){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(strcmp(propi->label->longlabel,label)==0)return propi;
@@ -415,12 +537,12 @@ part5prop *get_part5prop(char *label){
   return NULL;
 }
 
-/* ------------------ init_part5prop ------------------------ */
+/* ------------------ init_partprop ------------------------ */
 
-void init_part5prop(void){
+void init_partprop(void){
   int i,j,k;
 
-  // 0.  only needed if init_part5prop is called more than once
+  // 0.  only needed if init_partprop is called more than once
   // (and if so, need to also free memory of each component)
 
   FREEMEMORY(part5propinfo);
@@ -429,7 +551,7 @@ void init_part5prop(void){
   // 1.  count max number of distinct variables
 
   for(i=0;i<npartclassinfo;i++){
-    part5class *partclassi;
+    partclassdata *partclassi;
 
     partclassi = partclassinfo + i;
     npart5prop+=(partclassi->ntypes-1);
@@ -438,12 +560,12 @@ void init_part5prop(void){
   // 2. now count the exact amount and put labels into array just allocated
 
   if(npart5prop>0){
-    NewMemory((void **)&part5propinfo,npart5prop*sizeof(part5prop));
+    NewMemory((void **)&part5propinfo,npart5prop*sizeof(partpropdata));
     npart5prop=0;
 
     for(i=0;i<npartclassinfo;i++){
       int ii;
-      part5class *partclassi;
+      partclassdata *partclassi;
 
       partclassi = partclassinfo + i;
       for(j=1;j<partclassi->ntypes;j++){
@@ -453,7 +575,7 @@ void init_part5prop(void){
         define_it = 1;
         flowlabel = partclassi->labels + j;
         for(k=0;k<npart5prop;k++){
-          part5prop *propi;
+          partpropdata *propi;
           char *proplabel;
 
           propi = part5propinfo + k;
@@ -464,7 +586,7 @@ void init_part5prop(void){
           }
         }
         if(define_it==1){
-          part5prop *propi;
+          partpropdata *propi;
 
           propi = part5propinfo + npart5prop;
 
@@ -511,7 +633,7 @@ void init_part5prop(void){
     }
   }
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     int ii;
 
     propi = part5propinfo + i;
@@ -529,15 +651,15 @@ void init_part5prop(void){
     }
   }
   for(i=0;i<npartclassinfo;i++){
-    part5class *partclassi;
+    partclassdata *partclassi;
 
     partclassi = partclassinfo + i;
     for(j=1;j<partclassi->ntypes;j++){
       flowlabels *flowlabel;
-      part5prop *classprop;
+      partpropdata *classprop;
 
       flowlabel = partclassi->labels + j;
-      classprop = get_part5prop(flowlabel->longlabel);
+      classprop = get_partprop(flowlabel->longlabel);
       if(classprop!=NULL){
         if(partclassi->kind==1){
           classprop->human_property=1;
@@ -552,107 +674,9 @@ void init_part5prop(void){
   }
 }
 
-/* ------------------ update_partvis ------------------------ */
+/* ------------------ get_partnframes ------------------------ */
 
-void update_all_partvis(partdata *parti){
-  part5data *datacopy;
-  int i,j;
-  int firstframe=1;
-
-  datacopy = parti->data5;
-  for(i=0;i<parti->ntimes;i++){
-    for(j=0;j<parti->nclasses;j++){
-      update_partvis(firstframe,parti,datacopy,parti->nclasses);
-      datacopy++;
-    }
-    if(firstframe==1)firstframe=0;
-  }
-}
-
-
-/* ------------------ update_partvis ------------------------ */
-
-void update_partvis(int first_frame,partdata *parti, part5data *datacopy, int nclasses){
-  int nparts;
-  unsigned char *vis_part;
-
-  nparts=datacopy->npoints;
-  vis_part=datacopy->vis_part;
-
-  if(first_frame==1){
-    int ii;
-
-    for(ii=0;ii<nparts;ii++){
-      vis_part[ii]=1;
-    }
-  }
-  else{
-    int ii;
-    part5data *datalast;
-    int nvis=0,nleft;
-
-    for(ii=0;ii<nparts;ii++){
-      int tag_index;
-
-      datalast = datacopy-nclasses;
-      tag_index = get_tagindex(parti,&datalast,datacopy->tags[ii]);
-      if(tag_index!=-1&&datalast->vis_part[tag_index]==1){
-        datacopy->vis_part[ii]=1;
-        nvis++;
-      }
-      else{
-        datacopy->vis_part[ii]=0;
-      }
-    }
-
-    nleft = nparts - nvis;
-    if(nleft>0){
-      for(ii=0;ii<nparts;ii++){
-        if(datacopy->vis_part[ii]==1)continue;
-        if(nleft>0){
-          datacopy->vis_part[ii]=1;
-          nleft--;
-        }
-      }
-    }
-  }
-}
-
-/* ------------------ get_tagindex ------------------------ */
-
-int get_tagindex(const partdata *partin, part5data **datain, int tagval){
-  int *returnval;
-  part5data *data;
-  int i;
-
-  for(i=-1;i<npartinfo;i++){
-    const partdata *parti;
-
-    if(i==-1){
-      parti=partin;
-      data = *datain;
-    }
-    else{
-      parti=partinfo + i;
-      if(parti==partin)continue;
-      if(parti->loaded==0||parti->display==0)continue;
-      data = parti->data5+(*datain-partin->data5);
-    }
-    if(parti->loaded==0||parti->display==0)continue;
-
-    if(data->npoints==0)continue;
-    ASSERT(data->sort_tags!=NULL);
-    returnval=bsearch(&tagval,data->sort_tags,data->npoints,2*sizeof(int),tagscompare);
-    if(returnval==NULL)continue;
-    *datain=data;
-    return *(returnval+1);
-  }
-  return -1;
-}
-
-/* ------------------ getpart5nframes ------------------------ */
-
-int getpart5nframes(partdata *parti){
+int get_partnframes(partdata *parti){
   FILE *stream;
   char buffer[256];
   float time_local;
@@ -730,7 +754,7 @@ int get_min_partframes(void){
     int nframes;
 
     parti = partinfo + i;
-    nframes = getpart5nframes(parti);
+    nframes = get_partnframes(parti);
     if(nframes>0){
       if(min_frames==-1){
         min_frames=nframes;
@@ -743,9 +767,9 @@ int get_min_partframes(void){
   return min_frames;
 }
 
-/* ------------------ getpart5header ------------------------ */
+/* ------------------ get_partheader ------------------------ */
 
-void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
+void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
   FILE *stream;
   char buffer[256];
   float time_local;
@@ -829,7 +853,7 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
   // free memory for x, y, z frame data
 
   for(i=0;i<parti->nclasses;i++){
-    part5class *partclassi;
+    partclassdata *partclassi;
 
     partclassi = parti->partclassptr[i];
     FREEMEMORY(partclassi->xyz);
@@ -870,11 +894,11 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
       for(j=0;j<parti->nclasses;j++){
         int npoints ,ntypes;
 
-        part5class *partclassj;
+        partclassdata *partclassj;
 
         datacopy->time = time_local;
         partclassj = parti->partclassptr[j];
-        initpart5data(datacopy,partclassj);
+        init_part5data(datacopy,partclassj);
         if(fgets(buffer,255,stream)==NULL){
           fail=1;
           break;
@@ -916,7 +940,7 @@ void getpart5header(partdata *parti, int partframestep_local, int *nf_all){
   //           don't need to allocate memory for all frames
 
   for(i=0;i<parti->nclasses;i++){
-    part5class *partclassi;
+    partclassdata *partclassi;
 
     partclassi = parti->partclassptr[i];
     if(partclassi->maxpoints>0){
@@ -981,7 +1005,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   ASSERT(ifile>=0&&ifile<npartinfo);
   parti=partinfo+ifile;
 
-  freeallpart5data(parti);
+  freeall_part5data(parti);
 
   if(parti->loaded==0&&loadflag==UNLOAD)return;
 
@@ -1034,10 +1058,10 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   }
 
   PRINTF("Sizing particle data: %s\n",file);
-  getpart5header(parti, partframestep, &nf_all);
+  get_partheader(parti, partframestep, &nf_all);
 
   PRINTF("Loading particle data: %s\n",file);
-  getpart5data(parti,partframestep, nf_all, &delta_time, &file_size);
+  get_partdata(parti,partframestep, nf_all, &delta_time, &file_size);
   updateglui();
 
 #ifdef pp_MEMPRINT
@@ -1105,9 +1129,9 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   glutPostRedisplay();
 }
 
-/* ----------------------- drawselect_avatars ----------------------------- */
+/* ----------------------- draw_select_avatars ----------------------------- */
 
-void drawselect_avatars(void){
+void draw_select_avatars(void){
   int i;
 
   for(i=0;i<npartinfo;i++){
@@ -1116,16 +1140,16 @@ void drawselect_avatars(void){
     parti = partinfo + i;
     if(parti->loaded==0||parti->display==0)continue;
     if(parti->evac==1){
-      drawEvac(parti);
-      SNIFF_ERRORS("after drawEvac");
+      draw_evac(parti);
+      SNIFF_ERRORS("after draw_evac");
     }
   }
 }
 
-/* ------------------ drawEvac ------------------------ */
+/* ------------------ draw_evac ------------------------ */
 
-void drawEvac(const partdata *parti){
-  drawPart(parti);
+void draw_evac(const partdata *parti){
+  draw_part(parti);
 }
 
 /* ------------------ get_evacpart_color ------------------------ */
@@ -1158,9 +1182,60 @@ int get_evacpart_color(float **color_handle,part5data *datacopy, int show_defaul
   return showcolor;
 }
 
-/* ------------------ drawPart ------------------------ */
+/* ------------------ copy_dep_vals ------------------------ */
 
-void drawPart(const partdata *parti){
+void copy_dep_vals(partclassdata *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j){
+  int ii;
+  int ndep_vals;
+  float *dep_vals;
+
+  if(prop == NULL)return;
+  dep_vals = partclassi->fvars_dep;
+  ndep_vals = partclassi->nvars_dep;
+  for(ii = 0; ii < partclassi->nvars_dep - 3; ii++){
+
+    unsigned char *var_type;
+    unsigned char color_index;
+    partpropdata *varprop;
+    float valmin, valmax;
+    char *shortlabel;
+    flowlabels *label;
+
+    shortlabel = NULL;
+    varprop = NULL;
+    label = datacopy->partclassbase->labels + ii + 2;
+    if(label != NULL)shortlabel = label->shortlabel;
+    if(shortlabel != NULL)varprop = get_partprop_s(shortlabel);
+    if(varprop != NULL){
+      var_type = datacopy->irvals + ii*datacopy->npoints;
+      color_index = var_type[j];
+      valmin = varprop->valmin;
+      valmax = varprop->valmax;
+      dep_vals[ii] = valmin + color_index*(valmax - valmin) / 255.0;
+    }
+    else{
+      dep_vals[ii] = 1.0;
+    }
+  }
+
+  dep_vals[ndep_vals - 3] = colorptr[0] * 255;
+  dep_vals[ndep_vals - 2] = colorptr[1] * 255;
+  dep_vals[ndep_vals - 1] = colorptr[2] * 255;
+  prop->nvars_dep = partclassi->nvars_dep;
+  prop->smv_object->visible = 1;
+  for(ii = 0; ii < prop->nvars_dep; ii++){
+    prop->fvars_dep[ii] = partclassi->fvars_dep[ii];
+  }
+  prop->nvars_dep = partclassi->nvars_dep;
+  for(ii = 0; ii < partclassi->nvars_dep; ii++){
+    prop->vars_dep_index[ii] = partclassi->vars_dep_index[ii];
+  }
+  prop->tag_number = datacopy->tags[j];
+}
+
+/* ------------------ draw_part ------------------------ */
+
+void draw_part(const partdata *parti){
   int ipframe;
   part5data *datacopy,*datapast;
   int nclasses;
@@ -1190,7 +1265,7 @@ void drawPart(const partdata *parti){
         short *sx, *sy, *sz;
         float *angle, *width, *depth, *height;
         unsigned char *vis, *color;
-        part5class *partclassi;
+        partclassdata *partclassi;
         int partclass_index, itype, vistype, class_vis;
         int show_default;
 
@@ -1508,7 +1583,7 @@ void drawPart(const partdata *parti){
     int show_default;
     float *colorptr;
 
-    part5class *partclassi;
+    partclassdata *partclassi;
     int partclass_index, itype, vistype, class_vis;
 
     partclassi = parti->partclassptr[i];
@@ -1606,90 +1681,9 @@ void drawPart(const partdata *parti){
 
 }
 
-/* ------------------ copy_dep_vals ------------------------ */
+/* ------------------ update_part_menulabels ------------------------ */
 
-void copy_dep_vals(part5class *partclassi, part5data *datacopy, float *colorptr, propdata *prop, int j){
-  int ii;
-  int ndep_vals;
-  float *dep_vals;
-
-  if(prop==NULL)return;
-  dep_vals=partclassi->fvars_dep;
-  ndep_vals=partclassi->nvars_dep;
-  for(ii=0;ii<partclassi->nvars_dep-3;ii++){
-
-    unsigned char *var_type;
-    unsigned char color_index;
-    part5prop *varprop;
-    float valmin, valmax;
-    char *shortlabel;
-    flowlabels *label;
-
-    shortlabel=NULL;
-    varprop=NULL;
-    label = datacopy->partclassbase->labels+ii+2;
-    if(label!=NULL)shortlabel=label->shortlabel;
-    if(shortlabel!=NULL)varprop = get_part5prop_s(shortlabel);
-    if(varprop!=NULL){
-      var_type = datacopy->irvals + ii*datacopy->npoints;
-      color_index=var_type[j];
-      valmin=varprop->valmin;
-      valmax=varprop->valmax;
-      dep_vals[ii]=valmin + color_index*(valmax-valmin)/255.0;
-    }
-    else{
-      dep_vals[ii]=1.0;
-    }
-  }
-
-  dep_vals[ndep_vals-3]=colorptr[0]*255;
-  dep_vals[ndep_vals-2]=colorptr[1]*255;
-  dep_vals[ndep_vals-1]=colorptr[2]*255;
-  prop->nvars_dep=partclassi->nvars_dep;
-  prop->smv_object->visible=1;
-  for(ii=0;ii<prop->nvars_dep;ii++){
-    prop->fvars_dep[ii]=partclassi->fvars_dep[ii];
-  }
-  prop->nvars_dep=partclassi->nvars_dep;
-  for(ii=0;ii<partclassi->nvars_dep;ii++){
-    prop->vars_dep_index[ii]=partclassi->vars_dep_index[ii];
-  }
-  prop->tag_number = datacopy->tags[j];
-}
-
-/* ------------------ tagscompare ------------------------ */
-
-int tagscompare( const void *arg1, const void *arg2 ){
-  int i, j;
-
-  i = *(int *)arg1;
-  j = *(int *)arg2;
-  if(i<j)return -1;
-  if(i>j)return 1;
-  return 0;
-
-}
-
-/* ------------------ partcompare ------------------------ */
-
-int partcompare( const void *arg1, const void *arg2 ){
-  partdata *parti, *partj;
-  int i, j;
-
-  i = *(int *)arg1;
-  j = *(int *)arg2;
-
-  parti = partinfo + i;
-  partj = partinfo + j;
-
-  if(parti->blocknumber<partj->blocknumber)return -1;
-  if(parti->blocknumber>partj->blocknumber)return 1;
-  return 0;
-}
-
-/* ------------------ updatepartmenulabels ------------------------ */
-
-void updatepartmenulabels(void){
+void update_part_menulabels(void){
   int i;
   partdata *parti;
   char label[128];
@@ -1701,7 +1695,7 @@ void updatepartmenulabels(void){
     for(i=0;i<npartinfo;i++){
       partorderindex[i]=i;
     }
-    qsort( (int *)partorderindex, (size_t)npartinfo, sizeof(int), partcompare );
+    qsort( (int *)partorderindex, (size_t)npartinfo, sizeof(int), compare_part );
 
     for(i=0;i<npartinfo;i++){
       parti = partinfo + i;

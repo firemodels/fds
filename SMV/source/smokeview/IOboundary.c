@@ -2521,9 +2521,9 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   glEnd();
 }
 
-/* ------------------ drawpatch_frame ------------------------ */
+/* ------------------ draw_patchframe ------------------------ */
 
-void drawpatch_frame(int flag){
+void draw_patchframe(int flag){
   mesh *meshi;
   int i;
 
@@ -3694,9 +3694,9 @@ int patchcompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ updatepatchmenulabels ------------------------ */
+/* ------------------ update_patch_menulabels ------------------------ */
 
-void updatepatchmenulabels(void){
+void update_patch_menulabels(void){
   int i;
   patchdata *patchi;
   char label[128];

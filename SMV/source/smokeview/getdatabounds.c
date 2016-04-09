@@ -65,7 +65,7 @@ void adjustpart5chops(partdata *parti){
   int i;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     propi->imin=0;
@@ -107,7 +107,7 @@ void adjustpart5bounds(partdata *parti){
     }
   }
   for(i = 0; i < npart5prop; i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     reset_histogram(parti->histograms[i]);
@@ -117,17 +117,17 @@ void adjustpart5bounds(partdata *parti){
   if(datacopy!=NULL){
     for(i = 0; i<parti->ntimes; i++){
       for(j = 0; j<parti->nclasses; j++){
-        part5class *partclassi;
+        partclassdata *partclassi;
         float *rvals;
 
         partclassi = parti->partclassptr[j];
         rvals = datacopy->rvals;
 
         for(k = 2; k<partclassi->ntypes; k++){
-          part5prop *prop_id;
+          partpropdata *prop_id;
           int partprop_index;
 
-          prop_id = get_part5prop(partclassi->labels[k].longlabel);
+          prop_id = get_partprop(partclassi->labels[k].longlabel);
           if(prop_id==NULL)continue;
 
           partprop_index = prop_id-part5propinfo;
@@ -144,7 +144,7 @@ void adjustpart5bounds(partdata *parti){
     partj = partinfo + j;
     if(partj->loaded==0||partj->display==0)continue;
     for(i = 0; i < npart5prop; i++){
-      part5prop *propi;
+      partpropdata *propi;
 
       propi = part5propinfo + i;
       merge_histogram(&propi->histogram,partj->histograms[i]);
@@ -154,7 +154,7 @@ void adjustpart5bounds(partdata *parti){
   // calculate percentile min and max
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     histogramdata *histi;
 
     propi = part5propinfo + i;
@@ -199,7 +199,7 @@ void adjustpart5bounds(partdata *parti){
   }
   adjustpart5chops(parti);
 #ifdef _DEBUG
-  print_part5prop();
+  print_partprop();
 #endif
 }
 
