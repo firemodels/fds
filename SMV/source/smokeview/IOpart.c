@@ -251,10 +251,23 @@ void update_all_partvis(partdata *parti){
   }
 }
 
+/* ------------------ Sizefile_Status ------------------------ */
+
+int Sizefile_Status(partdata *parti){
+  STRUCTSTAT stat_sizefile_buffer, stat_regfile_buffer;
+  int stat_sizefile, stat_regfile;
+
+  stat_sizefile = STAT(parti->size_file, &stat_sizefile_buffer);
+  stat_regfile = STAT(parti->reg_file, &stat_regfile_buffer);
+  if(stat_regfile != 0)return -1;
+  if(stat_sizefile != 0 || stat_regfile_buffer.st_mtime > stat_sizefile_buffer.st_mtime)return 1;
+  return 0;
+}
+
 /* ------------------ get_partdata ------------------------ */
 
-void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
-  FILE *PART5FILE;
+void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int load_option, float *delta_time, FILE_SIZE *file_size){
+  FILE *PART5FILE, *PART5SIZEFILE=NULL;
   int one;
   int endianswitch=0;
   int version;
@@ -273,12 +286,16 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
   int first_frame=1;
   int local_starttime=0, local_stoptime=0;
 
+  if(load_option==MAKE_SIZEFILE&&Sizefile_Status(parti)==1){
+    PART5SIZEFILE=fopen(parti->size_file,"w");
+  }
+
   reg_file=parti->reg_file;
 
   PART5FILE=fopen(reg_file,"rb");
   if(PART5FILE==NULL)return;
 
-  *file_size=get_filesize(reg_file);
+  if(file_size!=NULL)*file_size=get_filesize(reg_file);
   FSEEK(PART5FILE,4,SEEK_CUR);fread(&one,4,1,PART5FILE);FSEEK(PART5FILE,4,SEEK_CUR);
   if(one!=1)endianswitch=1;
 
@@ -309,10 +326,11 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
     int doit;
 
     CheckMemory;
-    if(count>=nf_all)break;
+    if(load_option==GET_DATA&&count>=*nf_all)break;
     FORTPART5READ(&time_local,1);
+    if(PART5SIZEFILE != NULL)fprintf(PART5SIZEFILE, " %f", time_local);
 
-    if(count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
+    if(load_option==MAKE_SIZEFILE||count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
       doit=0;
     }
     else{
@@ -333,7 +351,8 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
       partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
       if(returncode==0)goto wrapup;
-      numpoints[i]=nparts;
+      if(PART5SIZEFILE != NULL)fprintf(PART5SIZEFILE, "   %i", nparts);
+      numpoints[i] = nparts;
       skip_local=0;
       CheckMemory;
       if(doit==1){
@@ -453,14 +472,16 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
 
   }
 wrapup:
-  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
-  *delta_time=(local_stoptime-local_starttime)/1000.0;
-
+  if(load_option==GET_DATA){
+    local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+    if(delta_time!=NULL)*delta_time=(local_stoptime-local_starttime)/1000.0;
+    update_all_partvis(parti);
+  }
   CheckMemory;
-  update_all_partvis(parti);
   FREEMEMORY(numtypes);
   FREEMEMORY(numpoints);
   fclose(PART5FILE);
+  if(PART5SIZEFILE != NULL)fclose(PART5SIZEFILE);
 }
 
 /* ------------------ get_part5prop ------------------------ */
@@ -774,43 +795,36 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
   int count;
   char *reg_file, *size_file;
   int i;
-  int stat_sizefile, stat_regfile;
-  STRUCTSTAT stat_sizefile_buffer, stat_regfile_buffer;
   int nframes_all;
-
-  reg_file=parti->reg_file;
-  size_file=parti->size_file;
-
-  // if size file doesn't exist then generate it
+  int sizefile_status;
 
   parti->ntimes=0;
 
-  stat_sizefile=STAT(size_file,&stat_sizefile_buffer);
-  stat_regfile=STAT(reg_file,&stat_regfile_buffer);
-  if(stat_regfile!=0)return;
+  reg_file = parti->reg_file;
+  size_file = parti->size_file;
 
-  // create a size file if 1) the size does not exist
-  //                       2) base file is newer than the size file
-  if(stat_sizefile!=0||
-    stat_regfile_buffer.st_mtime>stat_sizefile_buffer.st_mtime){
-    //create_part5sizefile(reg_file,size_file);
-      {
-        int lenreg, lensize, error;
-        int angle_flag=0;
+  // if size file doesn't exist then generate it
 
-        trim_back(reg_file);
-        trim_back(size_file);
-        lenreg=strlen(reg_file);
-        lensize=strlen(size_file);
-        if(parti->evac==1){
-          angle_flag=1;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
-        }
-        else{
-          angle_flag=0;
-          FORTfcreate_part5sizefile(reg_file,size_file, &angle_flag, &redirect, &error, lenreg,lensize);
-        }
-      }
+  //get_partdata(parti, partframestep, &nframes_all, MAKE_SIZEFILE, NULL, NULL);
+
+  sizefile_status = Sizefile_Status(parti);
+  if(sizefile_status == -1)return; // particle file does not exist so cannot be sized
+  if(sizefile_status == 1){        // size file is missing or older than particle file
+    int lenreg, lensize, error;
+    int angle_flag = 0;
+
+    trim_back(reg_file);
+    trim_back(size_file);
+    lenreg = strlen(reg_file);
+    lensize = strlen(size_file);
+    if(parti->evac == 1){
+      angle_flag = 1;
+      FORTfcreate_part5sizefile(reg_file, size_file, &angle_flag, &redirect, &error, lenreg, lensize);
+    }
+    else{
+      angle_flag = 0;
+      FORTfcreate_part5sizefile(reg_file, size_file, &angle_flag, &redirect, &error, lenreg, lensize);
+    }
   }
 
   stream=fopen(size_file,"r");
@@ -1059,7 +1073,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   get_partheader(parti, partframestep, &nf_all);
 
   PRINTF("Loading particle data: %s\n",file);
-  get_partdata(parti,partframestep, nf_all, &delta_time, &file_size);
+  get_partdata(parti,partframestep, &nf_all, GET_DATA, &delta_time, &file_size);
   updateglui();
 
 #ifdef pp_MEMPRINT

@@ -622,6 +622,9 @@ void _Sniff_Errors(char *whereat);
 #define UNLOAD 1
 #define RESETBOUNDS 2
 
+#define MAKE_SIZEFILE 0
+#define GET_DATA 1
+
 #define MAXPLOT3DVARS 6
 #define NRGB 12
 
