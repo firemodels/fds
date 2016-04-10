@@ -491,7 +491,6 @@ void get_histdata(partdata *parti, int partframestep_local, int nf_all){
   int *numtypes = NULL, *numtypescopy, *numpoints = NULL;
   int numtypes_temp[2];
   char *reg_file;
-  part5data *datacopy;
   int count;
   float *rvals;
   int nrvals;
@@ -577,6 +576,7 @@ void get_histdata(partdata *parti, int partframestep_local, int nf_all){
             NewMemory((void **)&rvals, nrvals*sizeof(float));
           }
           FORTPART5READ(rvals, nparts*numtypes[2 * i]);
+          if(returncode == 0)goto wrapup;
 
 #ifdef pp_PARTTEST
           for(jjj = 0; jjj < numtypes[2 * i]; jjj++){
@@ -585,7 +585,6 @@ void get_histdata(partdata *parti, int partframestep_local, int nf_all){
             }
           }
 #endif
-          if(returncode == 0)goto wrapup;
         }
       }
       else{
@@ -598,14 +597,12 @@ void get_histdata(partdata *parti, int partframestep_local, int nf_all){
         skip_local += 4 + 4 * nparts*numtypes[2 * i + 1] + 4;
       }
 
-
       returncode = 0;
       if(skip_local > 0){
         returncode = FSEEK(PART5FILE, skip_local, SEEK_CUR);
         if(returncode != 0)goto wrapup;
       }
       CheckMemory;
-      datacopy++;
     }
     CheckMemory;
   }
