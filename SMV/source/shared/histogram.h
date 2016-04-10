@@ -25,6 +25,7 @@ typedef struct {
 
 void complete_histogram(histogramdata *histogram);
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram);
+void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram);
 void free_histogram(histogramdata *histogram);
 float get_histogram_value(histogramdata *histogram, float cdf);
 void init_histogram(histogramdata *histogram, int nbuckets);

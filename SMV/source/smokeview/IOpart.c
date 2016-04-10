@@ -251,15 +251,46 @@ void update_all_partvis(partdata *parti){
   }
 }
 
-/* ------------------ Sizefile_Status ------------------------ */
+/* ------------------ get_histfile_status ------------------------ */
 
-int Sizefile_Status(partdata *parti){
+int get_histfile_status(partdata *parti){
+
+  // return -1 if history file cannot be created (corresponding particle file does not exist)
+  // return  0 if history file does not need to be created
+  // return  1 if history file needs to be created (doesn't exist or is older than corresponding particle file)
+
+  STRUCTSTAT stat_histfile_buffer, stat_regfile_buffer;
+  int stat_histfile, stat_regfile;
+
+  stat_histfile = STAT(parti->hist_file, &stat_histfile_buffer);
+  stat_regfile = STAT(parti->reg_file, &stat_regfile_buffer);
+
+  if(stat_regfile != 0)return -1; // particle filei does not exist
+
+  // history file does not exist or is older than particle file
+
+  if(stat_histfile != 0 || stat_regfile_buffer.st_mtime > stat_histfile_buffer.st_mtime)return 1;
+  return 0;
+}
+
+/* ------------------ get_sizefile_status ------------------------ */
+
+int get_sizefile_status(partdata *parti){
+
+  // return -1 if size file cannot be created (corresponding particle file does not exist)
+  // return  0 if size file does not need to be created
+  // return  1 if size file needs to be created (doesn't exist or is older than corresponding particle file)
+
   STRUCTSTAT stat_sizefile_buffer, stat_regfile_buffer;
   int stat_sizefile, stat_regfile;
 
   stat_sizefile = STAT(parti->size_file, &stat_sizefile_buffer);
   stat_regfile = STAT(parti->reg_file, &stat_regfile_buffer);
-  if(stat_regfile != 0)return -1;
+  
+  if(stat_regfile != 0)return -1; // history file does not exist
+
+  // size file does not exist or is older than particle file
+
   if(stat_sizefile != 0 || stat_regfile_buffer.st_mtime > stat_sizefile_buffer.st_mtime)return 1;
   return 0;
 }
@@ -475,9 +506,69 @@ wrapup:
   fclose(PART5FILE);
 }
 
-/* ------------------ get_histdata ------------------------ */
 
-void get_histdata(partdata *parti, int partframestep_local, int nf_all){
+/* ------------------ write_histfile_data ------------------------ */
+
+void write_histfile_data(partdata *parti){
+  FILE *STREAM_HIST = NULL;
+  int i;
+
+  STREAM_HIST = fopen(parti->hist_file, "wb");
+  if(STREAM_HIST == NULL)return;
+
+  for(i = 0; i < parti->nclasses; i++){
+    histogramdata *histi;
+    float valminmax[2];
+
+    histi = parti->histograms[i];
+    valminmax[0] = histi->valmin;
+    valminmax[1] = histi->valmax;
+
+    fwrite(valminmax, sizeof(float), 2, STREAM_HIST);
+    fwrite(&histi->nbuckets, sizeof(int), 1, STREAM_HIST);
+    fread(histi->buckets, sizeof(int), histi->nbuckets, STREAM_HIST);
+  }
+  fclose(STREAM_HIST);
+}
+
+ /* ------------------ read_histfile_data ------------------------ */
+
+void read_histfile_data(partdata *parti){
+  FILE *STREAM_HIST = NULL;
+  int i, *buckets=NULL, nbucketsmax=0, nbuckets;
+  float valminmax[2];
+
+  STREAM_HIST = fopen(parti->hist_file, "rb");
+  if(STREAM_HIST == NULL)return;
+
+  if(parti->histograms == NULL){
+    NewMemory((void **)&parti->histograms, parti->nclasses*sizeof(histogramdata *));
+    for(i = 0; i < parti->nclasses; i++){
+      NewMemory((void **)&parti->histograms[i], parti->nclasses*sizeof(histogramdata));
+    }
+  }
+
+  for(i = 0; i < parti->nclasses; i++){
+    histogramdata *histi;
+
+    fread(valminmax, sizeof(float), 2, STREAM_HIST);
+    fread(&nbuckets, sizeof(int), 1, STREAM_HIST);
+    if(nbuckets > nbucketsmax){
+      nbucketsmax = nbuckets;
+      FREEMEMORY(buckets);
+      NewMemory((void **)&buckets, nbucketsmax*sizeof(int));
+    }
+    fread(buckets, sizeof(int), nbuckets, STREAM_HIST);
+    histi = parti->histograms[i];
+    copy_buckets2histogram(buckets, nbuckets, valminmax[0], valminmax[1], histi);
+  }
+  FREEMEMORY(buckets);
+  fclose(STREAM_HIST);
+}
+
+  /* ------------------ get_histdata ------------------------ */
+
+void get_histfile_data(partdata *parti, int partframestep_local, int nf_all){
   FILE *PART5FILE;
   int one;
   int endianswitch = 0;
@@ -494,8 +585,16 @@ void get_histdata(partdata *parti, int partframestep_local, int nf_all){
   int count;
   float *rvals;
   int nrvals;
+  int histfile_status;
 
   reg_file = parti->reg_file;
+
+  histfile_status = get_histfile_status(parti);
+  if(histfile_status == -1)return;
+  if(histfile_status == 0){
+    read_histfile_data(parti);
+    return;
+  }
 
   nrvals = 100;
   NewMemory((void **)&rvals, nrvals*sizeof(float));
@@ -612,6 +711,7 @@ wrapup:
   FREEMEMORY(numpoints);
   FREEMEMORY(rvals);
   fclose(PART5FILE);
+ // write_histfile_data(parti);
 }
 
 /* ------------------ get_part5prop ------------------------ */
@@ -934,7 +1034,7 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
   reg_file = parti->reg_file;
   size_file = parti->size_file;
 
-  sizefile_status = Sizefile_Status(parti);
+  sizefile_status = get_sizefile_status(parti);
   if(sizefile_status == -1)return; // particle file does not exist so cannot be sized
   if(sizefile_status == 1){        // size file is missing or older than particle file
     int lenreg, lensize, error;

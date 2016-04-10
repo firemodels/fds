@@ -83,10 +83,30 @@ void init_histogram(histogramdata *histogram, int nbuckets){
 /* ------------------ free_histogram ------------------------ */
 
 void free_histogram(histogramdata *histogram){
-  FREEMEMORY(histogram->buckets);
+  if(histogram != NULL){
+    FREEMEMORY(histogram->buckets);
+  }
 }
 
-/* ------------------ copy_data2histogram ------------------------ */
+/* ------------------ copy_buckets2histogram ------------------------ */
+
+void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram){
+  int i, ntotal=0;
+
+
+  free_histogram(histogram);
+  init_histogram(histogram, nbuckets);
+  for(i = 0; i < nbuckets; i++){
+    histogram->buckets[i] = buckets[i];
+    ntotal += buckets[i];
+  }
+  histogram->ntotal = ntotal;
+  histogram->valmin = valmin;
+  histogram->valmax = valmax;
+  histogram->defined = 1;
+}
+
+  /* ------------------ copy_data2histogram ------------------------ */
 
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram){
 
