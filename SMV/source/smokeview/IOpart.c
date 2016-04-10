@@ -266,8 +266,8 @@ int Sizefile_Status(partdata *parti){
 
 /* ------------------ get_partdata ------------------------ */
 
-void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int load_option, float *delta_time, FILE_SIZE *file_size){
-  FILE *PART5FILE, *PART5SIZEFILE=NULL;
+void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
+  FILE *PART5FILE;
   int one;
   int endianswitch=0;
   int version;
@@ -285,10 +285,6 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
   int count2;
   int first_frame=1;
   int local_starttime=0, local_stoptime=0;
-
-  if(load_option==MAKE_SIZEFILE&&Sizefile_Status(parti)==1){
-    PART5SIZEFILE=fopen(parti->size_file,"w");
-  }
 
   reg_file=parti->reg_file;
 
@@ -326,11 +322,11 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
     int doit;
 
     CheckMemory;
-    if(load_option==GET_DATA&&count>=*nf_all)break;
+    if(count>=nf_all)break;
     FORTPART5READ(&time_local,1);
-    if(PART5SIZEFILE != NULL)fprintf(PART5SIZEFILE, " %f", time_local);
+    if(returncode == 0)break;
 
-    if(load_option==MAKE_SIZEFILE||count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
+    if(count%partframestep_local!=0||(settmin_p==1&&time_local<tmin_p-TEPS)||(settmax_p==1&&time_local>tmax_p+TEPS)){
       doit=0;
     }
     else{
@@ -339,7 +335,6 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
     }
     count++;
 
-    if(returncode==0)break;
     if(doit==1){
       PRINTF("particle time=%.2f",time_local);
       parti->times[count2]=time_local;
@@ -351,7 +346,6 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
       partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts,1);
       if(returncode==0)goto wrapup;
-      if(PART5SIZEFILE != NULL)fprintf(PART5SIZEFILE, "   %i", nparts);
       numpoints[i] = nparts;
       skip_local=0;
       CheckMemory;
@@ -464,7 +458,7 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
         if(returncode!=0)goto wrapup;
       }
       CheckMemory;
-      if(doit==1)datacopy++;
+      datacopy++;
     }
     CheckMemory;
     if(first_frame==1)first_frame=0;
@@ -472,19 +466,228 @@ void get_partdata(partdata *parti, int partframestep_local, int *nf_all, int loa
 
   }
 wrapup:
-  if(load_option==GET_DATA){
-    local_stoptime = glutGet(GLUT_ELAPSED_TIME);
-    if(delta_time!=NULL)*delta_time=(local_stoptime-local_starttime)/1000.0;
-    update_all_partvis(parti);
-  }
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  if(delta_time!=NULL)*delta_time=(local_stoptime-local_starttime)/1000.0;
+  update_all_partvis(parti);
   CheckMemory;
   FREEMEMORY(numtypes);
   FREEMEMORY(numpoints);
   fclose(PART5FILE);
-  if(PART5SIZEFILE != NULL)fclose(PART5SIZEFILE);
+}
+
+/* ------------------ get_histdata ------------------------ */
+
+void get_histdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size){
+  FILE *PART5FILE;
+  int one;
+  int endianswitch = 0;
+  int version;
+  int nclasses;
+  int i;
+  int skip_local;
+  size_t returncode;
+  float time_local;
+  int nparts;
+  int *numtypes = NULL, *numtypescopy, *numpoints = NULL;
+  int numtypes_temp[2];
+  char *reg_file;
+  part5data *datacopy;
+  int count;
+  int count2;
+  int first_frame = 1;
+  int local_starttime = 0, local_stoptime = 0;
+
+  reg_file = parti->reg_file;
+
+  PART5FILE = fopen(reg_file, "rb");
+  if(PART5FILE == NULL)return;
+
+  if(file_size != NULL)*file_size = get_filesize(reg_file);
+  FSEEK(PART5FILE, 4, SEEK_CUR); fread(&one, 4, 1, PART5FILE); FSEEK(PART5FILE, 4, SEEK_CUR);
+  if(one != 1)endianswitch = 1;
+
+  FORTPART5READ(&version, 1); if(returncode == 0)goto wrapup;
+  FORTPART5READ(&nclasses, 1); if(returncode == 0)goto wrapup;
+  NewMemory((void **)&numtypes, 2 * nclasses*sizeof(int));
+  NewMemory((void **)&numpoints, nclasses*sizeof(int));
+  numtypescopy = numtypes;
+  numtypes_temp[0] = 0;
+  numtypes_temp[1] = 0;
+  CheckMemory;
+  for(i = 0; i < nclasses; i++){
+    FORTPART5READ(numtypes_temp, 2);
+    if(returncode == 0)goto wrapup;
+    *numtypescopy++ = numtypes_temp[0];
+    *numtypescopy++ = numtypes_temp[1];
+    skip_local = 2 * (numtypes_temp[0] + numtypes_temp[1])*(8 + 30);
+    returncode = FSEEK(PART5FILE, skip_local, SEEK_CUR);
+    if(returncode != 0)goto wrapup;
+  }
+  CheckMemory;
+
+  datacopy = parti->data5;
+  count = 0;
+  count2 = -1;
+  local_starttime = glutGet(GLUT_ELAPSED_TIME);
+  for(;;){
+    int doit;
+
+    CheckMemory;
+    if(count >= nf_all)break;
+    FORTPART5READ(&time_local, 1);
+    if(returncode == 0)break;
+
+    if(count%partframestep_local != 0 || (settmin_p == 1 && time_local<tmin_p - TEPS) || (settmax_p == 1 && time_local>tmax_p + TEPS)){
+      doit = 0;
+    }
+    else{
+      count2++;
+      doit = 1;
+    }
+    count++;
+
+    if(doit == 1){
+      PRINTF("particle time=%.2f", time_local);
+      parti->times[count2] = time_local;
+    }
+    for(i = 0; i < nclasses; i++){
+      partclassdata *partclassi;
+      int factor = 256 * 128 - 1;
+
+      partclassi = parti->partclassptr[i];
+      FORTPART5READ(&nparts, 1);
+      if(returncode == 0)goto wrapup;
+      numpoints[i] = nparts;
+      skip_local = 0;
+      CheckMemory;
+      if(doit == 1){
+        short *sx, *sy, *sz;
+        float *xyz;
+        float *angle, *width, *depth, *height;
+        int j;
+
+        if(parti->evac == 1){
+          FORTPART5READ(partclassi->xyz, XYZ_EXTRA*nparts);
+        }
+        else{
+          FORTPART5READ(partclassi->xyz, 3 * nparts);
+        }
+        CheckMemory;
+        if(nparts > 0){
+          if(returncode == 0)goto wrapup;
+          xyz = partclassi->xyz;
+          sx = datacopy->sx;
+          sy = datacopy->sy;
+          sz = datacopy->sz;
+          if(parti->evac == 1){
+            angle = datacopy->avatar_angle;
+            width = datacopy->avatar_width;
+            depth = datacopy->avatar_depth;
+            height = datacopy->avatar_height;
+          }
+          for(j = 0; j < nparts; j++){
+            float xx, yy, zz;
+
+            xx = NORMALIZE_X(xyz[j]) / xbar;
+            yy = NORMALIZE_Y(xyz[nparts + j]) / ybar;
+            zz = NORMALIZE_Z(xyz[2 * nparts + j]) / zbar;
+
+            sx[j] = factor*xx;
+            sy[j] = factor*yy;
+            sz[j] = factor*zz;
+            if(parti->evac == 1){
+              angle[j] = xyz[j + 3 * nparts];
+              width[j] = xyz[j + 4 * nparts];
+              depth[j] = xyz[j + 5 * nparts];
+              height[j] = xyz[j + 6 * nparts];
+            }
+          }
+          CheckMemory;
+        }
+      }
+      else{
+        if(parti->evac == 1){
+          skip_local += 4 + XYZ_EXTRA * 4 * nparts + 4;
+        }
+        else{
+          skip_local += 4 + 3 * 4 * nparts + 4;
+        }
+      }
+      CheckMemory;
+      if(doit == 1){
+        int *sort_tags;
+        int j;
+
+        sort_tags = datacopy->sort_tags;
+        FORTPART5READ(datacopy->tags, nparts);
+        CheckMemory;
+        if(nparts > 0){
+          if(returncode == 0)goto wrapup;
+          for(j = 0; j < nparts; j++){
+            sort_tags[2 * j] = datacopy->tags[j];
+            sort_tags[2 * j + 1] = j;
+          }
+          qsort(sort_tags, (size_t)nparts, 2 * sizeof(int), compare_tags);
+        }
+      }
+      else{
+        skip_local += 4 + 4 * nparts + 4;  // skip over tag for now
+      }
+      CheckMemory;
+      if(doit == 1){
+        if(numtypes[2 * i] > 0){
+#ifdef pp_PARTTEST
+          int iii, jjj;
+#endif
+
+          FORTPART5READ(datacopy->rvals, nparts*numtypes[2 * i]);
+
+#ifdef pp_PARTTEST
+          for(jjj = 0; jjj < numtypes[2 * i]; jjj++){
+            for(iii = 0; iii < nparts; iii++){
+              datacopy->rvals[iii + jjj*nparts] = 1000.0*parti->seq_id + 200 * jjj + (float)randint(-1000, 1000) / 1000.0;
+            }
+          }
+#endif
+          if(returncode == 0)goto wrapup;
+        }
+      }
+      else{
+        if(numtypes[2 * i]>0){
+          skip_local += 4 + 4 * nparts*numtypes[2 * i] + 4;  // skip over vals for now
+        }
+      }
+      CheckMemory;
+      if(numtypes[2 * i + 1] > 0){
+        skip_local += 4 + 4 * nparts*numtypes[2 * i + 1] + 4;
+      }
+
+
+      returncode = 0;
+      if(skip_local > 0){
+        returncode = FSEEK(PART5FILE, skip_local, SEEK_CUR);
+        if(returncode != 0)goto wrapup;
+      }
+      CheckMemory;
+      datacopy++;
+    }
+    CheckMemory;
+    if(first_frame == 1)first_frame = 0;
+    if(doit == 1)PRINTF(" completed\n");
+
+  }
+wrapup:
+  local_stoptime = glutGet(GLUT_ELAPSED_TIME);
+  if(delta_time != NULL)*delta_time = (local_stoptime - local_starttime) / 1000.0;
+  update_all_partvis(parti);
+  CheckMemory;
+  FREEMEMORY(numtypes);
+  FREEMEMORY(numpoints);
+  fclose(PART5FILE);
 }
 
 /* ------------------ get_part5prop ------------------------ */
+
 #ifdef _DEBUG
 void print_partprop(void){
   int i;
@@ -803,10 +1006,6 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
   reg_file = parti->reg_file;
   size_file = parti->size_file;
 
-  // if size file doesn't exist then generate it
-
-  //get_partdata(parti, partframestep, &nframes_all, MAKE_SIZEFILE, NULL, NULL);
-
   sizefile_status = Sizefile_Status(parti);
   if(sizefile_status == -1)return; // particle file does not exist so cannot be sized
   if(sizefile_status == 1){        // size file is missing or older than particle file
@@ -1073,7 +1272,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
   get_partheader(parti, partframestep, &nf_all);
 
   PRINTF("Loading particle data: %s\n",file);
-  get_partdata(parti,partframestep, &nf_all, GET_DATA, &delta_time, &file_size);
+  get_partdata(parti,partframestep, nf_all, &delta_time, &file_size);
   updateglui();
 
 #ifdef pp_MEMPRINT

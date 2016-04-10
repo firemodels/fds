@@ -1074,7 +1074,7 @@ typedef struct {
 /* --------------------------  partdata ------------------------------------ */
 
 typedef struct {
-  char *file, *comp_file, *size_file, *reg_file;
+  char *file, *comp_file, *size_file, *reg_file, *hist_file;
   int seq_id, autoload, loaded, display, reload;
   int sort_tags_loaded, compression_type, evac;
   int blocknumber, num_memblocks;

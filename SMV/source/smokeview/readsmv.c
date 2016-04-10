@@ -6557,6 +6557,11 @@ typedef struct {
       STRCPY(parti->size_file,bufferptr);
       STRCAT(parti->size_file,".sz");
 
+      parti->hist_file = NULL;
+      if(NewMemory((void **)&parti->hist_file, (unsigned int)(len + 1 + 5)) == 0)return 2;
+      STRCPY(parti->hist_file, bufferptr);
+      STRCAT(parti->hist_file, ".hist");
+
       // parti->size_file can't be written to, then put it in a world writeable temp directory
 
       if(file_exists(parti->size_file)==0&&can_write_to_dir(".")==0&&smokeviewtempdir!=NULL){
@@ -6569,7 +6574,19 @@ typedef struct {
         STRCAT(parti->size_file,".sz");
       }
 
-      parti->comp_file=NULL;
+      // parti->hist_file can't be written to, then put it in a world writeable temp directory
+
+      if(file_exists(parti->hist_file) == 0 && can_write_to_dir(".") == 0 && smokeviewtempdir != NULL){
+        len = strlen(smokeviewtempdir) + strlen(bufferptr) + 1 + 5 + 1;
+        FREEMEMORY(parti->hist_file);
+        if(NewMemory((void **)&parti->hist_file, (unsigned int)len) == 0)return 2;
+        STRCPY(parti->hist_file, smokeviewtempdir);
+        STRCAT(parti->hist_file, dirseparator);
+        STRCAT(parti->hist_file, bufferptr);
+        STRCAT(parti->hist_file, ".hist");
+      }
+
+      parti->comp_file = NULL;
       if(NewMemory((void **)&parti->comp_file,(unsigned int)(len+1+4))==0)return 2;
       STRCPY(parti->comp_file,bufferptr);
       STRCAT(parti->comp_file,".svz");
@@ -6631,7 +6648,9 @@ typedef struct {
           }
         }
       }
-        // if no classes were specifed for the prt5 entry then assign it the default class
+      
+      // if no classes were specified for the prt5 entry then assign it the default class
+        
       if(parti->file!=NULL&&parti->nclasses==0){
         NewMemory((void **)&parti->partclassptr,sizeof(partclassdata *));
           parti->partclassptr[i]=partclassinfo + parti->nclasses;
