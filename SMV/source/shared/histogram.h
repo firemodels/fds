@@ -18,6 +18,7 @@ typedef struct {
   float valmin, valmax;
   float valxmin, valxmax;
   float valymin, valymax;
+  float valmean, valstdev;
   int complete;
 } histogramdata;
 

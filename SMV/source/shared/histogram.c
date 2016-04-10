@@ -88,14 +88,52 @@ void free_histogram(histogramdata *histogram){
   }
 }
 
-/* ------------------ copy_buckets2histogram ------------------------ */
+
+/* ------------------ calc_hist_stats ------------------------ */
+
+void calc_hist_stats(histogramdata *histogram){
+  int i;
+  float valmean, stddev, dval;
+
+  dval = (histogram->valmax - histogram->valmin) / histogram->nbuckets;
+  valmean = 0.0;
+  for(i = 0; i < histogram->nbuckets; i++){
+    float val;
+    int nbucketi;
+
+    nbucketi = histogram->buckets[i];
+    if(nbucketi == 0)continue;
+    val = histogram->valmin + ((float)(i)+0.5)*dval;
+    valmean += nbucketi * val;
+  }
+  valmean /= (float)histogram->ntotal;
+  histogram->valmean = valmean;
+
+  stddev = 0.0;
+  for(i = 0; i < histogram->nbuckets; i++){
+    float val;
+    int nbucketi;
+
+    nbucketi = histogram->buckets[i];
+    if(nbucketi == 0)continue;
+    val = histogram->valmin + ((float)(i)+0.5)*dval - valmean;
+    val = nbucketi*val*val;
+    stddev += val;
+  }
+  stddev = sqrt(stddev/(float)histogram->ntotal);
+  histogram->valstdev = stddev;
+}
+
+  /* ------------------ copy_buckets2histogram ------------------------ */
 
 void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram){
-  int i, ntotal=0;
+  int i, ntotal;
 
 
   free_histogram(histogram);
   init_histogram(histogram, nbuckets);
+  
+  ntotal = 0;
   for(i = 0; i < nbuckets; i++){
     histogram->buckets[i] = buckets[i];
     ntotal += buckets[i];
