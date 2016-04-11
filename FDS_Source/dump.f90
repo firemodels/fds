@@ -6724,6 +6724,18 @@ LP => LAGRANGIAN_PARTICLE(LP_INDEX)
                PARTICLE_OUTPUT = T-LP%T_INSERT
             CASE(440)  ! PARTICLE WEIGHTING FACTOR
                PARTICLE_OUTPUT = LP%PWT
+            CASE(441)  ! PARTICLE X
+               PARTICLE_OUTPUT = LP%X
+            CASE(442)  ! PARTICLE Y
+               PARTICLE_OUTPUT = LP%Y
+            CASE(443)  ! PARTICLE Z
+               PARTICLE_OUTPUT = LP%Z
+            CASE(444)  ! PARTICLE U
+               PARTICLE_OUTPUT = LP%U
+            CASE(445)  ! PARTICLE V
+               PARTICLE_OUTPUT = LP%V
+            CASE(446)  ! PARTICLE W
+               PARTICLE_OUTPUT = LP%W
          END SELECT
 
 END FUNCTION PARTICLE_OUTPUT
