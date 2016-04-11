@@ -90,7 +90,7 @@ void adjustpart5chops(partdata *parti){
 /* ------------------ adjustpart5bounds ------------------------ */
 
 void adjustpart5bounds(partdata *parti){
-  int i,j,k;
+  int i;
 
   if(parti->valmin==NULL){
     NewMemory((void **)&parti->valmin, npart5prop*sizeof(float));

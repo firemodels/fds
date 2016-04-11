@@ -478,7 +478,7 @@ void convert_part(part *parti, int *thread_index){
     ncompressed_int=0;
     if(ntotal_int>0){
       ncompressed_zlib=BUFFER_SIZE;
-      compress(int_buffer_compressed, &ncompressed_zlib, (unsigned char *)int_buffer_uncompressed, 4*ntotal_int);
+      compress_zlib(int_buffer_compressed, &ncompressed_zlib, (unsigned char *)int_buffer_uncompressed, 4*ntotal_int);
       ncompressed_int = ncompressed_zlib;
       sizeafter+=(4+ncompressed_int);
       fwrite(&ncompressed_int,4,1,partstream);
@@ -488,7 +488,7 @@ void convert_part(part *parti, int *thread_index){
     ncompressed_char=0;
     if(ntotal_char>0){
       ncompressed_zlib=BUFFER_SIZE;
-      compress(char_buffer_compressed, &ncompressed_zlib, char_buffer_uncompressed, ntotal_char);
+      compress_zlib(char_buffer_compressed, &ncompressed_zlib, char_buffer_uncompressed, ntotal_char);
       ncompressed_char = ncompressed_zlib;
       sizeafter+=(4+ncompressed_char);
       fwrite(&ncompressed_char,4,1,partstream);

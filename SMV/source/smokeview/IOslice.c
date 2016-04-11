@@ -6581,7 +6581,7 @@ void uncompress_slicedataframe(slicedata *sd,int iframe_local){
   countout=sd->nsliceii;
 
   if(sd->compression_type==COMPRESSED_ZLIB){
-    uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
+    uncompress_zlib(sd->slicecomplevel,&countout,compressed_data,countin);
   }
 }
 

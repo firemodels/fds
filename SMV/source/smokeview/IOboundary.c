@@ -4041,7 +4041,7 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   countin = meshi->zipsize[local_iframe];
   countout=meshi->npatchsize;
 
-  uncompress(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
+  uncompress_zlib(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
 
 }
 

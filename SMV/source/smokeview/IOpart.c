@@ -310,8 +310,6 @@ void get_part_histogram(partdata *parti){
     }
   }
   for(i = 0; i < npart5prop; i++){
-    partpropdata *propi;
-
     reset_histogram(parti->histograms[i]);
   }
   if(file_exists(parti->hist_file) == 1){

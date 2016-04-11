@@ -157,7 +157,7 @@ int convert_plot3d(plot3d *plot3di){
         plot3dframe_uncompressed[kk++]=ival;
       }
     }
-    compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,5*framesize);
+    compress_zlib(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,5*framesize);
     sizeafter=16+ncompressed_zlib;
     sizebefore=5*framesize*sizeof(float);
   }
