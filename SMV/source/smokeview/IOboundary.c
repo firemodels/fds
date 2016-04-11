@@ -8,6 +8,7 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
+#include "compress.h"
 
 /* ------------------ output_Patchdata ------------------------ */
 

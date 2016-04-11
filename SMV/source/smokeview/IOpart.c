@@ -12,6 +12,7 @@
 #include "update.h"
 #include "smokeviewvars.h"
 #include "histogram.h"
+#include "compress.h"
 
 void draw_SVOBJECT(sv_object *object, int frame_index_local, propdata *prop, int recurse_level,float *valrgb, int vis_override);
 
@@ -622,6 +623,10 @@ wrapup:
 void write_part_histogram(partdata *parti){
   FILE *STREAM_HIST = NULL;
   int i;
+  unsigned char *compressed_buckets=NULL;
+  int ncompressed_bucketsMAX=0;
+  uLongf ncompressed_buckets;
+  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "wb");
   if(STREAM_HIST == NULL)return;
@@ -636,7 +641,17 @@ void write_part_histogram(partdata *parti){
 
     fwrite(valminmax, sizeof(float), 2, STREAM_HIST);
     fwrite(&histi->nbuckets, sizeof(int), 1, STREAM_HIST);
-    fwrite(histi->buckets, sizeof(int), histi->nbuckets, STREAM_HIST);
+    if(sizeof(int)*histi->nbuckets>ncompressed_bucketsMAX){
+      ncompressed_bucketsMAX = sizeof(int)*histi->nbuckets;
+      FREEMEMORY(compressed_buckets);
+      NewMemory((void **)&compressed_buckets, 1.02*ncompressed_bucketsMAX+600);
+    }
+
+    ncompressed_buckets = 1.02*ncompressed_bucketsMAX+600;
+    ierror = compress_zlib(compressed_buckets, &ncompressed_buckets, (unsigned char *)histi->buckets, histi->nbuckets*sizeof(int));
+
+    fwrite(&ncompressed_buckets, sizeof(uLongf), 1, STREAM_HIST);
+    fwrite(compressed_buckets, sizeof(unsigned char), ncompressed_buckets, STREAM_HIST);
   }
   fclose(STREAM_HIST);
 }
@@ -645,8 +660,12 @@ void write_part_histogram(partdata *parti){
 
 void read_part_histogram(partdata *parti){
   FILE *STREAM_HIST = NULL;
-  int i, *buckets=NULL, nbucketsmax=0, nbuckets;
+  int i, *buckets=NULL, nbucketsmax=0;
   float valminmax[2];
+  unsigned char *compressed_buckets=NULL;
+  int ncompressed_bucketsMAX = 0;
+  uLongf ncompressed_buckets, nbuckets, nbuffer;
+  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "rb");
   if(STREAM_HIST == NULL)return;
@@ -666,9 +685,20 @@ void read_part_histogram(partdata *parti){
     if(nbuckets > nbucketsmax){
       nbucketsmax = nbuckets;
       FREEMEMORY(buckets);
-      NewMemory((void **)&buckets, nbucketsmax*sizeof(int));
+      NewMemory((void **)&buckets, (1.02*nbucketsmax+600)*sizeof(int));
     }
-    fread(buckets, sizeof(int), nbuckets, STREAM_HIST);
+    fread(&ncompressed_buckets, sizeof(uLongf), 1, STREAM_HIST);
+    if(ncompressed_buckets>ncompressed_bucketsMAX){
+      ncompressed_bucketsMAX = ncompressed_buckets;
+      FREEMEMORY(compressed_buckets);
+      NewMemory((void **)&compressed_buckets, 1.02*ncompressed_bucketsMAX+600);
+    }
+    fread(compressed_buckets, sizeof(unsigned char), ncompressed_buckets, STREAM_HIST);
+
+    nbuffer = (1.02*nbucketsmax+600)*sizeof(int);
+    ierror = uncompress_zlib((unsigned char *)buckets, &nbuffer, compressed_buckets, ncompressed_buckets);
+    nbuckets = nbuffer/4;
+
     histi = parti->histograms[i];
     copy_buckets2histogram(buckets, nbuckets, valminmax[0], valminmax[1], histi);
   }
