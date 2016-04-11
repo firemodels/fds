@@ -14,6 +14,7 @@
 #include "MALLOC.h"
 #include "datadefs.h"
 #include "file_util.h"
+#include "compress.h"
 
 unsigned int *random_ints, nrandom_ints;
 

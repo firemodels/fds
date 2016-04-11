@@ -744,9 +744,6 @@ void get_histfile_data(partdata *parti, int partframestep_local, int nf_all){
     count++;
 
     for(i = 0; i < nclasses; i++){
-      partclassdata *partclassi;
-
-      partclassi = parti->partclassptr[i];
       FORTPART5READ(&nparts, 1);
       if(returncode == 0)goto wrapup;
       numpoints[i] = nparts;
