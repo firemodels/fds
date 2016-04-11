@@ -138,12 +138,12 @@ void generate_fds(char *filebase, int option){
       float *vals, *valsp1;
 
         vals = valptrs[jbar - j];
-      valsp1 = valptrs[jbar+1-j];
+      valsp1 = valptrs[jbar-1-j];
       for(i = 0; i < ibar; i++){
         float vavg;
 
         vavg = (vals[i]+vals[i+1]+valsp1[i]+valsp1[i+1])/4.0;
-        printf("&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
+        printf("&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
       }
     }
   }
