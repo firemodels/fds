@@ -80,7 +80,6 @@ pulsating
 compression_wave
 plate_view_factor
 terminal_velocity_convergence
-flat_fire_comparison
 fluid_part
 extinction
 fan_curve
