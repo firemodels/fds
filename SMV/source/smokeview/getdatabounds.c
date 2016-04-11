@@ -91,7 +91,6 @@ void adjustpart5chops(partdata *parti){
 
 void adjustpart5bounds(partdata *parti){
   int i,j,k;
-  part5data *datacopy;
 
   if(parti->valmin==NULL){
     NewMemory((void **)&parti->valmin, npart5prop*sizeof(float));
@@ -99,59 +98,6 @@ void adjustpart5bounds(partdata *parti){
   if(parti->valmax==NULL){
     NewMemory((void **)&parti->valmax, npart5prop*sizeof(float));
   }
-  if(parti->histograms==NULL){
-    NewMemory((void **)&parti->histograms, npart5prop*sizeof(histogramdata *));
-    for(i = 0; i < npart5prop; i++){
-      NewMemory((void **)&parti->histograms[i], sizeof(histogramdata));
-      init_histogram(parti->histograms[i], NHIST_BUCKETS);
-    }
-  }
-  for(i = 0; i < npart5prop; i++){
-    partpropdata *propi;
-
-    propi = part5propinfo + i;
-    reset_histogram(parti->histograms[i]);
-    reset_histogram(&propi->histogram);
-  }
-  datacopy = parti->data5;
-  if(datacopy!=NULL){
-    for(i = 0; i<parti->ntimes; i++){
-      for(j = 0; j<parti->nclasses; j++){
-        partclassdata *partclassi;
-        float *rvals;
-
-        partclassi = parti->partclassptr[j];
-        rvals = datacopy->rvals;
-
-        for(k = 2; k<partclassi->ntypes; k++){
-          partpropdata *prop_id;
-          int partprop_index;
-
-          prop_id = get_partprop(partclassi->labels[k].longlabel);
-          if(prop_id==NULL)continue;
-
-          partprop_index = prop_id-part5propinfo;
-          update_histogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
-          rvals += datacopy->npoints;
-        }
-        datacopy++;
-      }
-    }
-  }
-  for(j=0;j<npartinfo;j++){
-    partdata *partj;
-
-    partj = partinfo + j;
-    if(partj->loaded==0||partj->display==0)continue;
-    for(i = 0; i < npart5prop; i++){
-      partpropdata *propi;
-
-      propi = part5propinfo + i;
-      merge_histogram(&propi->histogram,partj->histograms[i]);
-    }
-  }
-
-  // calculate percentile min and max
 
   for(i=0;i<npart5prop;i++){
     partpropdata *propi;

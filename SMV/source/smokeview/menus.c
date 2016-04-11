@@ -2404,7 +2404,7 @@ void LoadUnloadMenu(int value){
       readpatch(i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      readpart("",i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
+      readpart("",i,UNLOAD,FREE_PARTDATA,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
@@ -2487,7 +2487,7 @@ void LoadUnloadMenu(int value){
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
         partinfo[i].reload=1;
-        readpart(partinfo[i].file,i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
+        readpart(partinfo[i].file,i,UNLOAD,FREE_PARTDATA,&errorcode);
       }
       else{
         partinfo[i].reload=0;
@@ -2496,12 +2496,12 @@ void LoadUnloadMenu(int value){
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+        readpart(partinfo[i].file, i, UNLOAD, FREE_PARTDATA,&errorcode);
       }
     }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+        readpart(partinfo[i].file, i, LOAD, FREE_PARTDATA,&errorcode);
       }
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
@@ -2708,7 +2708,7 @@ void EvacMenu(int value){
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
-      readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
@@ -2717,7 +2717,7 @@ void EvacMenu(int value){
       parti=partinfo + i;
       if(parti->evac==0)continue;
       ReadEvacFile=1;
-      readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+      readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADFILE\n");
         fprintf(scriptoutstream," %s\n",parti->file);
@@ -2729,7 +2729,7 @@ void EvacMenu(int value){
   if(value>=0){
     ReadEvacFile=1;
     npartframes_max=get_min_partframes();
-    readpart(partinfo[value].file, value, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+    readpart(partinfo[value].file, value, LOAD, FREE_PARTDATA,&errorcode);
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partinfo[value].file);
@@ -2740,7 +2740,7 @@ void EvacMenu(int value){
 
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
     }
   }
   updatemenu=1;
@@ -2934,12 +2934,13 @@ void ParticlePropShowMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ ParticleMenu ------------------------ */
+/* ------------------ LoadParticleMenu ------------------------ */
 
-void ParticleMenu(int value){
+void LoadParticleMenu(int value){
   int errorcode,i;
   partdata *parti;
 
+  get_allpart_histogram();
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
     char  *partfile;
@@ -2951,13 +2952,13 @@ void ParticleMenu(int value){
       fprintf(scriptoutstream," %s\n",partfile);
     }
     npartframes_max=get_min_partframes();
-    readpart(partfile, value, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+    readpart(partfile, value, LOAD, FREE_PARTDATA,&errorcode);
   }
   else{
     if(value==-1){
       for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==1)continue;
-        readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+        readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
       }
     }
     else{
@@ -2970,14 +2971,14 @@ void ParticleMenu(int value){
         for(i = 0; i<npartinfo; i++){
           parti = partinfo+i;
           if(parti->evac==1)continue;
-          readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS, &errorcode);
+          readpart(parti->file, i, UNLOAD, FREE_PARTDATA, &errorcode);
         }
       }
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
-        readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+        readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
       }
       force_redisplay=1;
       Update_Framenumber(0);
@@ -3095,12 +3096,12 @@ void UnloadEvacMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
     }
   }
 }
@@ -3113,12 +3114,12 @@ void UnloadPartMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==1)continue;
-      readpart("", i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
     }
   }
 }
@@ -7224,7 +7225,7 @@ updatemenu=0;
     if(trainer_mode==0){
       glutAddMenuEntry(_("Save"),SAVE_VIEWPOINT);
       glutAddMenuEntry(_("Set as Startup"),MENU_STARTUPVIEW);
-      glutAddSubMenu(_("Zoom"),zoommenu); 
+      glutAddSubMenu(_("Zoom"),zoommenu);
       if(projection_type==1)glutAddMenuEntry(_("Switch to perspective view       ALT v"),MENU_SIZEPRESERVING);
       if(projection_type==0)glutAddMenuEntry(_("Switch to size preserving view   ALT v"),MENU_SIZEPRESERVING);
       glutAddMenuEntry("-",MENU_DUMMY);
@@ -7988,10 +7989,10 @@ updatemenu=0;
     glutAddMenuEntry(_("Unload all"),MENU_UNLOADPARTICLE_UNLOADALL);
 
     if(nmeshes==1){
-      CREATEMENU(particlemenu,ParticleMenu);
+      CREATEMENU(particlemenu,LoadParticleMenu);
     }
     else{
-      CREATEMENU(particlesubmenu,ParticleMenu);
+      CREATEMENU(particlesubmenu,LoadParticleMenu);
     }
     for(ii=0;ii<npartinfo;ii++){
       char menulabel[1024];
@@ -8010,7 +8011,7 @@ updatemenu=0;
     if(nmeshes>1){
       char menulabel[1024];
 
-      CREATEMENU(particlemenu,ParticleMenu);
+      CREATEMENU(particlemenu,LoadParticleMenu);
       if(npartinfo > 0){
         strcpy(menulabel, _("Particles"));
         strcat(menulabel, " - ");

@@ -655,12 +655,14 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
   }
 // erase data memory in a separate loop (so all "columns" are available when doing any conversions)
   datacopy = parti->data5;
-  for(i=0;i<parti->ntimes;i++){
-    int j;
+  if(parti->freedata == FREE_PARTDATA){
+    for(i = 0; i < parti->ntimes; i++){
+      int j;
 
-    for(j=0;j<parti->nclasses;j++){
-      FREEMEMORY(datacopy->rvals);
-      datacopy++;
+      for(j = 0; j < parti->nclasses; j++){
+        FREEMEMORY(datacopy->rvals);
+        datacopy++;
+      }
     }
   }
   for(i=0;i<npart5prop;i++){

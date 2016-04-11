@@ -286,13 +286,125 @@ int get_sizefile_status(partdata *parti){
 
   stat_sizefile = STAT(parti->size_file, &stat_sizefile_buffer);
   stat_regfile = STAT(parti->reg_file, &stat_regfile_buffer);
-  
+
   if(stat_regfile != 0)return -1; // history file does not exist
 
   // size file does not exist or is older than particle file
 
   if(stat_sizefile != 0 || stat_regfile_buffer.st_mtime > stat_sizefile_buffer.st_mtime)return 1;
   return 0;
+}
+
+/* ------------------ get_part_histogram ------------------------ */
+
+void get_part_histogram(partdata *parti){
+  int i;
+  part5data *datacopy;
+  int errorcode;
+
+  if(parti->histograms == NULL){
+    NewMemory((void **)&parti->histograms, npart5prop*sizeof(histogramdata *));
+    for(i = 0; i < npart5prop; i++){
+      NewMemory((void **)&parti->histograms[i], sizeof(histogramdata));
+      init_histogram(parti->histograms[i], NHIST_BUCKETS);
+    }
+  }
+  for(i = 0; i < npart5prop; i++){
+    partpropdata *propi;
+
+    reset_histogram(parti->histograms[i]);
+  }
+  if(file_exists(parti->hist_file) == 1){
+    read_part_histogram(parti);
+    return;
+  }
+  readpart(parti->reg_file, parti - partinfo, LOAD, DONOT_FREE_PARTDATA, &errorcode);
+  datacopy = parti->data5;
+  if(datacopy != NULL){
+    for(i = 0; i < parti->ntimes; i++){
+      int j;
+
+      for(j = 0; j < parti->nclasses; j++){
+        partclassdata *partclassi;
+        float *rvals;
+        int k;
+
+        partclassi = parti->partclassptr[j];
+        rvals = datacopy->rvals;
+
+        if(rvals!=NULL){
+          for(k = 2; k<partclassi->ntypes; k++){
+            partpropdata *prop_id;
+            int partprop_index;
+
+            prop_id = get_partprop(partclassi->labels[k].longlabel);
+            if(prop_id==NULL)continue;
+
+            partprop_index = prop_id-part5propinfo;
+            update_histogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
+            rvals += datacopy->npoints;
+          }
+        }
+        datacopy++;
+      }
+    }
+    readpart(parti->reg_file, parti - partinfo, UNLOAD, FREE_PARTDATA, &errorcode);
+  }
+  write_part_histogram(parti);
+}
+
+/* ------------------ get_allpart_histogram ------------------------ */
+
+void get_allpart_histogram(void){
+  int i, update, status;
+
+  // will update histograms the first time called
+  // for subsequent calls histograms will only be updated if particle files are newer than histogram files
+  // ie if FDS is running the case while smokeview is viewing it
+
+  if(update_get_allpart_histogram == 0){
+    update = 0;
+    for(i = 0; i < npartinfo; i++){
+      partdata *parti;
+
+      parti = partinfo + i;
+      status = get_histfile_status(parti);
+      if(status == 1){
+        update = 1;
+        break;
+      }
+    }
+    if(update == 0)return;
+  }
+
+  update_get_allpart_histogram = 0;
+  npartframes_max=get_min_partframes();
+
+
+  for(i = 0; i < npartinfo; i++){
+    partdata *parti;
+
+    parti = partinfo + i;
+    get_part_histogram(parti);
+  }
+  for(i = 0; i < npart5prop; i++){
+    partpropdata *propi;
+
+    propi = part5propinfo + i;
+    reset_histogram(&propi->histogram);
+  }
+  for(i = 0; i < npartinfo; i++){
+    partdata *parti;
+    int j;
+
+    parti = partinfo + i;
+    for(j = 0; j < npart5prop; j++){
+      partpropdata *propj;
+
+      propj = part5propinfo + j;
+      merge_histogram(&propj->histogram, parti->histograms[j]);
+    }
+  }
 }
 
 /* ------------------ get_partdata ------------------------ */
@@ -507,16 +619,16 @@ wrapup:
 }
 
 
-/* ------------------ write_histfile_data ------------------------ */
+/* ------------------ write_part_histogram ------------------------ */
 
-void write_histfile_data(partdata *parti){
+void write_part_histogram(partdata *parti){
   FILE *STREAM_HIST = NULL;
   int i;
 
   STREAM_HIST = fopen(parti->hist_file, "wb");
   if(STREAM_HIST == NULL)return;
 
-  for(i = 0; i < parti->nclasses; i++){
+  for(i = 0; i < npart5prop; i++){
     histogramdata *histi;
     float valminmax[2];
 
@@ -526,14 +638,14 @@ void write_histfile_data(partdata *parti){
 
     fwrite(valminmax, sizeof(float), 2, STREAM_HIST);
     fwrite(&histi->nbuckets, sizeof(int), 1, STREAM_HIST);
-    fread(histi->buckets, sizeof(int), histi->nbuckets, STREAM_HIST);
+    fwrite(histi->buckets, sizeof(int), histi->nbuckets, STREAM_HIST);
   }
   fclose(STREAM_HIST);
 }
 
- /* ------------------ read_histfile_data ------------------------ */
+ /* ------------------ read_part_histogram ------------------------ */
 
-void read_histfile_data(partdata *parti){
+void read_part_histogram(partdata *parti){
   FILE *STREAM_HIST = NULL;
   int i, *buckets=NULL, nbucketsmax=0, nbuckets;
   float valminmax[2];
@@ -543,12 +655,12 @@ void read_histfile_data(partdata *parti){
 
   if(parti->histograms == NULL){
     NewMemory((void **)&parti->histograms, parti->nclasses*sizeof(histogramdata *));
-    for(i = 0; i < parti->nclasses; i++){
+    for(i = 0; i < npart5prop; i++){
       NewMemory((void **)&parti->histograms[i], parti->nclasses*sizeof(histogramdata));
     }
   }
 
-  for(i = 0; i < parti->nclasses; i++){
+  for(i = 0; i < npart5prop; i++){
     histogramdata *histi;
 
     fread(valminmax, sizeof(float), 2, STREAM_HIST);
@@ -566,7 +678,7 @@ void read_histfile_data(partdata *parti){
   fclose(STREAM_HIST);
 }
 
-  /* ------------------ get_histdata ------------------------ */
+  /* ------------------ get_histfile_data ------------------------ */
 
 void get_histfile_data(partdata *parti, int partframestep_local, int nf_all){
   FILE *PART5FILE;
@@ -585,16 +697,8 @@ void get_histfile_data(partdata *parti, int partframestep_local, int nf_all){
   int count;
   float *rvals;
   int nrvals;
-  int histfile_status;
 
   reg_file = parti->reg_file;
-
-  histfile_status = get_histfile_status(parti);
-  if(histfile_status == -1)return;
-  if(histfile_status == 0){
-    read_histfile_data(parti);
-    return;
-  }
 
   nrvals = 100;
   NewMemory((void **)&rvals, nrvals*sizeof(float));
@@ -711,7 +815,6 @@ wrapup:
   FREEMEMORY(numpoints);
   FREEMEMORY(rvals);
   fclose(PART5FILE);
- // write_histfile_data(parti);
 }
 
 /* ------------------ get_part5prop ------------------------ */
@@ -1229,7 +1332,7 @@ void update_partcolorbounds(partdata *parti){
 
     /* -----  ------------- readpart ------------------------ */
 
-void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *errorcode){
+void readpart(char *file, int ifile, int loadflag, int free_partdata, int *errorcode){
   size_t lenfile;
   int error=0;
   partdata *parti;
@@ -1270,6 +1373,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
       break;
     }
   }
+  parti->freedata = free_partdata;
   parti->loaded = 0;
   parti->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1291,7 +1395,7 @@ void readpart(char *file, int ifile, int loadflag, int set_partcolor, int *error
 
   lenfile = strlen(file);
   if(lenfile==0){
-    readpart("",ifile,UNLOAD,DEFER_PARTCOLORBOUNDS,&error);
+    readpart("",ifile,UNLOAD,FREE_PARTDATA,&error);
     Update_Times();
     return;
   }

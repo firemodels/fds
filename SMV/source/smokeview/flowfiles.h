@@ -1079,6 +1079,7 @@ typedef struct {
   int sort_tags_loaded, compression_type, evac;
   int blocknumber, num_memblocks;
   int *timeslist, ntimes, itime;
+  int freedata;
 
   float zoffset, *times;
 

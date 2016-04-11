@@ -1,6 +1,9 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void get_allpart_histogram(void);
+EXTERNCPP void write_part_histogram(partdata *parti);
+EXTERNCPP void read_part_histogram(partdata *parti);
 EXTERNCPP void makeiblank_all(void);
 #ifdef pp_SLICEDUP
 EXTERNCPP void update_slicedup_dialog(void);
@@ -415,7 +418,7 @@ EXTERNCPP void print_partprop(void);
 EXTERNCPP partpropdata *get_partprop(char *label);
 EXTERNCPP void init_partprop(void);
 EXTERNCPP void update_streakvalue(float value);
-EXTERNCPP void ParticleMenu(int value);
+EXTERNCPP void LoadParticleMenu(int value);
 EXTERNCPP void LoadPatchMenu(int value);
 EXTERNCPP void LoadSliceMenu(int value);
 EXTERNCPP void LoadVSliceMenu(int value);
