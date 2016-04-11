@@ -840,9 +840,9 @@ void drawplot3d_texture(mesh *meshi){
 
 }
 
-/* ------------------ drawplot3d_frame ------------------------ */
+/* ------------------ draw_plot3dframe ------------------------ */
 
-void drawplot3d_frame(void){
+void draw_plot3dframe(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
@@ -1881,9 +1881,9 @@ void drawgrid(const mesh *meshi){
   }
 }
 
-/* ------------------ updateplot3dmenulabel ------------------------ */
+/* ------------------ update_plot3d_menulabels ------------------------ */
 
-void updateplot3dmenulabels(void){
+void update_plot3d_menulabels(void){
   int i;
   plot3ddata *plot3di;
   char label[128];

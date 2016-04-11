@@ -232,10 +232,10 @@ int readsmv(char *smvfile){
     }
   }
   if(npartclassinfo>0){
-    NewMemory((void **)&partclassinfo,npartclassinfo*sizeof(part5class));
+    NewMemory((void **)&partclassinfo,npartclassinfo*sizeof(partclassdata));
   }
   if(maxpart5propinfo>0){
-    NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(part5prop));
+    NewMemory((void **)&part5propinfo,maxpart5propinfo*sizeof(partpropdata));
   }
 #endif
 
@@ -441,7 +441,7 @@ int readsmv(char *smvfile){
   */
 
     if(match(buffer,"CLASS_OF_PARTICLES") == 1){
-      part5class *partclassi;
+      partclassdata *partclassi;
       int j;
       char *percen;
 
@@ -462,7 +462,7 @@ int readsmv(char *smvfile){
         NewMemory((void **)&partclassi->labels,partclassi->ntypes*sizeof(flowlabels));
         for(j=0;j<partclassi->ntypes;j++){
           flowlabels *labelj;
-          part5prop *part5propi;
+          partpropdata *part5propi;
 
           labelj = partclassi->labels+j;
           labelj->longlabel=NULL;
@@ -546,7 +546,7 @@ int readsmv(char *smvfile){
       if(fgets(buffer,BUFFERSIZE,streamsmv)==NULL)break;
       sscanf(buffer,"%i",&parti->nclasses);
       if(parti->nclasses>0){
-        NewMemory((void **)&parti->classptr,parti->nclasses*sizeof(part5class *));
+        NewMemory((void **)&parti->classptr,parti->nclasses*sizeof(partclassdata *));
       }
       else{
         parti->nclasses=0;
@@ -1049,7 +1049,7 @@ void readini2(char *inifile){
     if(match(buffer,"V_PARTICLES")==1){
       int setpartmin, setpartmax;
       float partmin, partmax;
-      part5prop *partpropi;
+      partpropdata *partpropi;
 
       fgets(buffer,BUFFERSIZE,stream);
       strcpy(buffer2,"");

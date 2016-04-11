@@ -1026,15 +1026,15 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
-      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, DEFER_PARTCOLORBOUNDS,&errorcode);
-      if(parti->autoload==1)readpart(parti->file, i, LOAD, SET_PARTCOLORBOUNDS,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){
@@ -1605,9 +1605,6 @@ void initvars(void){
   isozipstep=1, isozipskip=0;
   slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
-  partpointstep=1;
-  partpointstep_old=0;
-  partpointskip=0;
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;

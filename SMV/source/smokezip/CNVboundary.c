@@ -354,7 +354,7 @@ int convert_boundary(patch *patchi, int *thread_index){
 
       //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
       ncompressed_zlib=ncompressed_zlibSAVE;
-      returncode=compress(compressed_boundarybuffer, &ncompressed_zlib, full_boundarybuffer, npatchfull);
+      returncode=compress_zlib(compressed_boundarybuffer, &ncompressed_zlib, full_boundarybuffer, npatchfull);
       if(returncode!=0){
         fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
       }

@@ -419,7 +419,7 @@ void updatePart5extremes(void){
   part5data *datacopy;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     propi->extreme_max=0;
@@ -435,15 +435,15 @@ void updatePart5extremes(void){
     datacopy = parti->data5;
     for(i=0;i<parti->ntimes;i++){
       for(j=0;j<parti->nclasses;j++){
-        part5class *partclassi;
+        partclassdata *partclassi;
         unsigned char *irvals;
 
         partclassi = parti->partclassptr[j];
         irvals = datacopy->irvals;
         for(k=2;k<partclassi->ntypes;k++){
-          part5prop *prop_id;
+          partpropdata *prop_id;
 
-          prop_id = get_part5prop(partclassi->labels[k].longlabel);
+          prop_id = get_partprop(partclassi->labels[k].longlabel);
           if(prop_id==NULL)continue;
 
           if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
@@ -479,7 +479,7 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
 
     for(j=0;j<parti->nclasses;j++){
       float valmin, valmax, dval;
-      part5class *partclassi;
+      partclassdata *partclassi;
       float *rvals;
       unsigned char *irvals;
       float *dsx, *dsy, *dsz;
@@ -489,9 +489,9 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
       rvals = datacopy->rvals;
       irvals = datacopy->irvals;
       for(k=2;k<partclassi->ntypes;k++){
-        part5prop *prop_id;
+        partpropdata *prop_id;
 
-        prop_id = get_part5prop(partclassi->labels[k].longlabel);
+        prop_id = get_partprop(partclassi->labels[k].longlabel);
         if(prop_id==NULL)continue;
 
         if(strcmp(partclassi->labels[k].longlabel,"HUMAN_COLOR")==0){
@@ -616,11 +616,11 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
       if(u_vel_data!=NULL&&v_vel_data!=NULL&&w_vel_data!=NULL){
         float denom;
         int m;
-        part5prop *prop_U, *prop_V, *prop_W;
+        partpropdata *prop_U, *prop_V, *prop_W;
 
-        prop_U = get_part5prop(partclassi->labels[partclassi->col_u_vel+2].longlabel);
-        prop_V = get_part5prop(partclassi->labels[partclassi->col_v_vel+2].longlabel);
-        prop_W = get_part5prop(partclassi->labels[partclassi->col_w_vel+2].longlabel);
+        prop_U = get_partprop(partclassi->labels[partclassi->col_u_vel+2].longlabel);
+        prop_V = get_partprop(partclassi->labels[partclassi->col_v_vel+2].longlabel);
+        prop_W = get_partprop(partclassi->labels[partclassi->col_w_vel+2].longlabel);
         if(prop_U!=NULL&&prop_V!=NULL&&prop_W!=NULL){
           float umax, vmax, wmax;
 
@@ -655,18 +655,19 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
   }
 // erase data memory in a separate loop (so all "columns" are available when doing any conversions)
   datacopy = parti->data5;
-  for(i=0;i<parti->ntimes;i++){
-    int j;
+  if(parti->freedata == FREE_PARTDATA){
+    for(i = 0; i < parti->ntimes; i++){
+      int j;
 
-    for(j=0;j<parti->nclasses;j++){
-      FREEMEMORY(datacopy->rvals);
-      datacopy++;
+      for(j = 0; j < parti->nclasses; j++){
+        FREEMEMORY(datacopy->rvals);
+        datacopy++;
+      }
     }
   }
   for(i=0;i<npart5prop;i++){
     int n;
-
-    part5prop *propi;
+    partpropdata *propi;
     float local_tmin, local_tmax;
     int expmin, expmax;
     float factor,range,tval;
