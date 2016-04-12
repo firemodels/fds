@@ -21,6 +21,11 @@ call %envfile%
 
 %svn_drive%
 
+echo.
+echo --------------------------------------------
+echo Building 64 bit linux versions of dem2fds
+echo --------------------------------------------
+
 plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/dem2fds/intel_linux_64 make_dem2fds.sh
 
 echo.
