@@ -92,6 +92,9 @@ void generate_fds(char *filebase, int option){
 
   printf("&HEAD CHID='%s', TITLE='terrain' /\n",filebase);
   printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",ibar,jbar,kbar,xmax,ymax,zmin,zmax);
+  if(option==GENERATE_OBSTS){
+    printf("&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", filebase);
+  }
   printf("&TIME T_END = 0. /\n");
   printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
   printf("&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
@@ -137,8 +140,8 @@ void generate_fds(char *filebase, int option){
     for(j = 0; j < jbar; j++){
       float *vals, *valsp1;
 
-        vals = valptrs[jbar - j];
-      valsp1 = valptrs[jbar-1-j];
+      vals = valptrs[j];
+      valsp1 = valptrs[j+1];
       for(i = 0; i < ibar; i++){
         float vavg;
 
