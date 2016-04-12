@@ -138,6 +138,7 @@
 <h3>Verification</h3>
 <ul>
 <li><a href="scripts/RUNwindowssmokebot.bat">Run windows Smokebot</a>
+<li><a href="scripts/VIEW_localimages.bat">View</a> web summary
 </ul>
 
 <p><table border=on>
@@ -158,11 +159,18 @@
 <td><a href="scripts/View_SMV_VG.bat">View</a></td>
 </tr>
 </table>
-<ul>
-<li><a href="scripts/COPY_smv_guides.bat">Copy guides</a> from local repo to FIRE-LOCAL
-<li><a href="Scripts/COPY_smvlinux_guides.bat">Copy guides</a> from Linux smokebot to FIRE-LOCAL
-<li><a href="scripts/VIEW_localimages.bat">View</a> web summary
-</ul>
+
+<p><table border=on>
+<tr><th colspan=3>Copy Guides</th></tr>
+</th><th>From</th><th></th><th>To</th></tr>
+<tr>
+<td>Windows: repo</td><td><a href="scripts/COPY_smv_guides.bat">==></a></td><td rowspan=2>Windows: ~\FDS_Guides</td><tr>
+<td>Linux: ~smokebot repo</td><td><a href="scripts/COPY_smvlinux_guides.bat">==></a></td><tr>
+<td rowspan=2>Windows: ~\FDS_Guides</td><td><a href="Scripts/COPYguides2linux.bat">==></a></td><td>Linux: ~/FDS_Guides</td></tr>
+<tr><td><a href="Scripts/COPYguides2osx.bat">==></a></td><td>OSX: ~/FDS_Guides</td></tr>
+</table>
+
+
 
 <h3>Other</h3>
 <ul>

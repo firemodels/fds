@@ -1,4 +1,5 @@
 @echo off
+
 Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
@@ -8,7 +9,6 @@ echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
-
 pause>NUL
 goto:eof
 
@@ -17,16 +17,13 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-set mandir=%svn_root%\Manuals
-set todir=%userprofile%\FDS_Guides
 
-echo copying SMV_User_Guide.pdf
-copy %mandir%\SMV_User_Guide\SMV_User_Guide.pdf %todir%\.
+echo.
+echo ---uploading guides to OSX
+echo.
+set fromdir="%userprofile%"\FDS_Guides
+set todir=FDS_Guides
 
-echo copying SMV_Technical_Reference_Guide.pdf
-copy %mandir%\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf %todir%\.
+pscp %fromdir%\*.pdf %osx_logon%:%todir%/.
 
-echo copying SMV_Verification_Guide.pdf
-copy %mandir%\SMV_Verification_Guide\SMV_Verification_Guide.pdf %todir%\.
 pause
-

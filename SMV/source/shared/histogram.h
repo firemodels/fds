@@ -7,6 +7,10 @@
 
 #define HIST_USE_BOUNDS 0
 #define HIST_COMPUTE_BOUNDS 1
+#define HIST_OK 0
+#define HIST_OLD 1
+#define HIST_ERR -1
+
 
 /* --------------------------  flowlabels ------------------------------------ */
 
