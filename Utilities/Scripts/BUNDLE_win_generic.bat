@@ -8,7 +8,7 @@ set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
-set in_pdf=%userprofile%\FIRE-LOCAL\reports\fds_manuals\
+set in_pdf=%userprofile%\FDS_Guides
 set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
 set in_fds2ascii=%svn_root%\Utilities\fds2ascii
 set in_setpath=%svn_root%\SMV\Build\set_path\intel_win_64
