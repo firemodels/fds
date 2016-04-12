@@ -21,13 +21,13 @@ call %envfile%
 echo.
 echo ---downloading guides
 echo.
-set manualdir=%firebotrepo%/Manuals
-set firelocaldir="%userprofile%"\FIRE-LOCAL\reports\fds_manuals
+set fromdir=%firebotrepo%/Manuals
+set todir="%userprofile%"\FDS_Guides
 
-pscp %linux_logon%:%manualdir%/FDS_User_Guide/FDS_User_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Verification_Guide/FDS_Verification_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf  %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Validation_Guide/FDS_Validation_Guide.pdf %firelocaldir%\.
-pscp %linux_logon%:%manualdir%/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf %firelocaldir%\.
+pscp %linux_logon%:%fromdir%/FDS_User_Guide/FDS_User_Guide.pdf                                %todir%\.
+pscp %linux_logon%:%fromdir%/FDS_Verification_Guide/FDS_Verification_Guide.pdf                %todir%\.
+pscp %linux_logon%:%fromdir%/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf  %todir%\.
+pscp %linux_logon%:%fromdir%/FDS_Validation_Guide/FDS_Validation_Guide.pdf                    %todir%\.
+pscp %linux_logon%:%fromdir%/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf        %todir%\.
 
 pause
