@@ -18,7 +18,7 @@ call %envfile%
 
 %svn_drive%
 set mandir=%svn_root%\Manuals
-set todir=%userprofile%\FIRE-LOCAL\reports\fds_manuals
+set todir=%userprofile%\FDS_Guides
 
 echo copying SMV_User_Guide.pdf
 copy %mandir%\SMV_User_Guide\SMV_User_Guide.pdf %todir%\.
