@@ -24,6 +24,8 @@ echo.
 set fromdir=%smokebotrepo%/Manuals
 set todir="%userprofile%"\FDS_Guides
 
+Title Copying smokeview guides from smokebot to FDS_Guides
+
 pscp %linux_logon%:%fromdir%/SMV_User_Guide/SMV_User_Guide.pdf                                %todir%\.
 pscp %linux_logon%:%fromdir%/SMV_Verification_Guide/SMV_Verification_Guide.pdf                %todir%\.
 pscp %linux_logon%:%fromdir%/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf  %todir%\.

@@ -19,11 +19,12 @@ call %envfile%
 %svn_drive%
 
 echo.
-echo ---uploading guides to Linux
+echo ---uploading guides to Linux: %linux_hostname%
 echo.
 set fromdir="%userprofile%"\FDS_Guides
 set todir=FDS_Guides
 
+Title uploading guides to Linux: %linux_hostname%
 pscp %fromdir%\*.pdf %linux_logon%:%todir%/.
 
 pause

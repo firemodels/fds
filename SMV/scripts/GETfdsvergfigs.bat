@@ -18,8 +18,13 @@ call %envfile%
 
 set CURDIR=%CD%
 
+Title Download FDS verification guide images
+
+
 cd %svn_root%\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
 pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/* .
+
+Title Download FDS verification guide scatterplot images
 
 cd %svn_root%\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\Scatterplots
 pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/* .
