@@ -244,13 +244,14 @@ run_auto()
   option=$1
   GIT_STATUSDIR=~/.smokebot
   SMV_SOURCE=$fdsrepo/SMV/source
+  TRIGGER_DIR=$fdsrepo/SMV/source/scripts
   GIT_SMV_FILE=$GIT_STATUSDIR/smv_revision
   GIT_SMV_LOG=$GIT_STATUSDIR/smv_log
   
-  QUICKTRIGGER=$SMV_SOURCE/smokeview/smokebot_quicktrigger.txt
+  QUICKTRIGGER=$TRIGGER_DIR/smokeview/smokebot_quicktrigger.txt
   GIT_QT_FILE=$GIT_STATUSDIR/quicktrigger_revision
 
-  TRIGGER=$SMV_SOURCE/smokeview/smokebot_trigger.txt
+  TRIGGER=$TRIGGER_DIR/smokeview/smokebot_trigger.txt
   GIT_T_FILE=$GIT_STATUSDIR/trigger_revision
 
   FDS_SOURCE=$fdsrepo/FDS_Source
@@ -343,6 +344,11 @@ run_auto()
     if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
       echo $THIS_QT_REVISION>$GIT_QT_FILE
       echo -e "quick trigger file has changed. " >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
+    fi
+    if [[ $THIS_T_REVISION != $LAST_T_REVISION ]] ; then
+      echo $THIS_T_REVISION>$GIT_T_FILE
+      echo -e "trigger file has changed. " >> $MESSAGE_FILE
       cat $GIT_SMV_LOG >> $MESSAGE_FILE
     fi
   fi
