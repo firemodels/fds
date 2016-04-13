@@ -250,6 +250,9 @@ run_auto()
   QUICKTRIGGER=$SMV_SOURCE/smokeview/smokebot_quicktrigger.txt
   GIT_QT_FILE=$GIT_STATUSDIR/quicktrigger_revision
 
+  TRIGGER=$SMV_SOURCE/smokeview/smokebot_trigger.txt
+  GIT_T_FILE=$GIT_STATUSDIR/trigger_revision
+
   FDS_SOURCE=$fdsrepo/FDS_Source
   GIT_FDS_FILE=$GIT_STATUSDIR/fds_revision
   GIT_FDS_LOG=$GIT_STATUSDIR/FDS_log
@@ -286,10 +289,14 @@ run_auto()
   THIS_QT_REVISION=`git log --abbrev-commit $QUICKTRIGGER | head -1 | awk '{print $2}'`
   LAST_QT_REVISION=`cat $GIT_QT_FILE`
 
+  THIS_T_REVISION=`git log --abbrev-commit $TRIGGER | head -1 | awk '{print $2}'`
+  LAST_T_REVISION=`cat $GIT_T_FILE`
+
   THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
   if [ ! -e $GIT_SMV_FILE ]; then
     touch $GIT_SMV_FILE
   fi
+  
   THIS_SMV_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
   LAST_SMV_REVISION=`cat $GIT_SMV_FILE`
   git log . | head -5 | tail -1 > $GIT_SMV_LOG
@@ -309,8 +316,14 @@ run_auto()
       exit
     fi
   else
-    if [[ $THIS_QT_REVISION == $LAST_QT_REVISION ]] ; then
+    if [[ $THIS_QT_REVISION == $LAST_QT_REVISION && $THIS_T_REVISION == $LAST_T_REVISION ]] ; then
       exit
+    fi
+    if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
+      SMOKEBOT_LITE=1
+    fi
+    if [[ $THIS_T_REVISION != $LAST_T_REVISION ]] ; then
+      SMOKEBOT_LITE=
     fi
   fi
 
