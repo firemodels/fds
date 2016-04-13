@@ -2418,28 +2418,28 @@ int readsmv(char *file, char *file2){
   ntickinfo_smv=0;
 
   FREEMEMORY(camera_external);
-  if(file!=NULL)NewMemory((void **)&camera_external,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_external,sizeof(cameradata));
 
   FREEMEMORY(camera_external_save);
-  if(file!=NULL)NewMemory((void **)&camera_external_save,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_external_save,sizeof(cameradata));
 
   FREEMEMORY(camera_ini);
   if(file!=NULL){
-    NewMemory((void **)&camera_ini,sizeof(camera));
+    NewMemory((void **)&camera_ini,sizeof(cameradata));
     camera_ini->defined=0;
   }
 
   FREEMEMORY(camera_current);
-  if(file!=NULL)NewMemory((void **)&camera_current,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_current,sizeof(cameradata));
 
   FREEMEMORY(camera_internal);
-  if(file!=NULL)NewMemory((void **)&camera_internal,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_internal,sizeof(cameradata));
 
   FREEMEMORY(camera_save);
-  if(file!=NULL)NewMemory((void **)&camera_save,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_save,sizeof(cameradata));
 
   FREEMEMORY(camera_last);
-  if(file!=NULL)NewMemory((void **)&camera_last,sizeof(camera));
+  if(file!=NULL)NewMemory((void **)&camera_last,sizeof(cameradata));
 
   updatefaces=1;
   nfires=0;
@@ -2651,8 +2651,6 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(LESendian);
 
   FREEMEMORY(database_filename);
-
-  FREEMEMORY(targinfo);
 
   FREEMEMORY(vsliceinfo);
   FREEMEMORY(sliceinfo);
@@ -10923,7 +10921,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
       }
       if(is_viewpoint5==1){
-        camera *ci;
+        cameradata *ci;
 
         ci = camera_ini;
   		  fgets(buffer,255,stream);
@@ -11622,7 +11620,7 @@ typedef struct {
 
 void output_viewpoints(FILE *fileout){
   float *eye, *az_elev, *mat;
-  camera *ca;
+  cameradata *ca;
 
   for(ca = camera_list_first.next; ca->next != NULL; ca = ca->next){
     if(strcmp(ca->name, "internal") == 0)continue;

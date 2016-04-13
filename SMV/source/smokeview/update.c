@@ -1917,7 +1917,7 @@ void update_ShowScene(void){
     load_Files();
   }
   if(update_startup_view == 1){
-    camera *ca;
+    cameradata *ca;
 
     ca = get_camera(label_startup_view);
     if(ca != NULL){

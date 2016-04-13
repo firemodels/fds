@@ -114,7 +114,7 @@ void transparentoff(void){
 
 /* ------------------ camera2quat ------------------------ */
 
-void camera2quat(camera *ca, float *quat, float *rotation){
+void camera2quat(cameradata *ca, float *quat, float *rotation){
   if(ca->quat_defined==1){
     quat[0]=ca->quaternion[0];
     quat[1]=ca->quaternion[1];

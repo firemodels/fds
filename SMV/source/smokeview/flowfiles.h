@@ -982,7 +982,7 @@ typedef struct {
 
 /* --------------------------  camera ------------------------------------ */
 
-typedef struct _camera {
+typedef struct _cameradata {
   int defined,dirty;
   int projection_type;
   int rotation_type, rotation_index;
@@ -1004,9 +1004,9 @@ typedef struct _camera {
   float zmin, zmax;
 
   int view_id;
-  struct _camera *next,*prev;
+  struct _cameradata *next,*prev;
   char name[301];
-} camera;
+} cameradata;
 
 /* --------------------------  partclassdata ------------------------------------ */
 
@@ -1092,30 +1092,11 @@ typedef struct {
   float *valmin, *valmax;
 } partdata;
 
-/* --------------------------  targ ------------------------------------ */
-
- typedef struct {
-  int loaded,display,type;
-  char *file;
-} targ;
-
-/* --------------------------  targpos ------------------------------------ */
-
-typedef struct {
-  int nsteps;
-  float *x, *y, *z, *t;
-  float *x2, *y2, *z2;
-  float rgb[3];
-  float *vals;
-  float valmin,valmax;
-  unsigned char *color;
-} targpos;
-
 /* --------------------------  compinfo ------------------------------------ */
 
 typedef struct {
   int offset, size;
-} compinfo;
+} compdata;
 
 /* --------------------------  menudata ------------------------------------ */
 
@@ -1174,7 +1155,7 @@ typedef struct _slicedata {
   float *contour_areas;
   int *contour_areas_percen;
   int ncontour_areas;
-  compinfo *compindex;
+  compdata *compindex;
   unsigned char *slicelevel;
   char menulabel[128];
   char menulabel2[128];

@@ -1322,7 +1322,7 @@ void OptionMenu(int value){
 /* ------------------ Get_Next_View_Label ------------------------ */
 
 void Get_Next_View_Label(char *label){
-  camera *ca;
+  cameradata *ca;
   int i;
 
   for(i=1;;i++){
@@ -7211,7 +7211,7 @@ updatemenu=0;
   CREATEMENU(resetmenu,ResetMenu);
   {
     char line[256];
-    camera *ca;
+    cameradata *ca;
 
     if(trainer_mode==1){
       if(visBlocks==visBLOCKOutline){

@@ -38,7 +38,7 @@ void draw_triangle_outline(float *v1, float *v2, float *v3,
                    float del, int level);
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
+                            float *times, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type,
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
@@ -46,7 +46,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d);
 int getslicecompresseddata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
+                            float *times, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax);
 
 int makeslicesizefile(char *file, char *sizefile, int compression_type);
 
@@ -1127,7 +1127,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 
       if(NewMemory((void **)&sd->qslicedata_compressed,sd->ncompressed)==0||
          NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0||
-         NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->ntimes))==0
+         NewMemory((void **)&sd->compindex,sizeof(compdata)*(1+sd->ntimes))==0
          ){
         readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
@@ -6417,7 +6417,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 
 int getslicecompresseddata(char *file,
                             int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            float *times_local, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax){
   int returnval;
 
   returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin_local,tmax_local,ncompressed,sliceskip,nsliceframes,
@@ -6429,7 +6429,7 @@ int getslicecompresseddata(char *file,
 
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            float *times_local, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax){
   FILE *stream;
   int count, ns;
   unsigned char *cd;

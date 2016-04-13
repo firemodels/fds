@@ -185,7 +185,7 @@ extern "C" void glui_trainer_setup(int main_window){
 
   LIST_viewpoint = glui_trainer->add_listbox_to_panel(PANEL_explore,_d("Viewpoint:"),&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
   {
-    camera *ca;
+    cameradata *ca;
 
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
       char line[256];

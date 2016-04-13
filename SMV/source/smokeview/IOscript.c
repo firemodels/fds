@@ -1864,7 +1864,7 @@ void settimeval(float timeval){
 
 void script_setviewpoint(scriptdata *scripti){
   char *viewpoint;
-  camera *ca;
+  cameradata *ca;
   int count=0;
 
   viewpoint = scripti->cval;
