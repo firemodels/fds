@@ -2404,7 +2404,7 @@ void LoadUnloadMenu(int value){
       readpatch(i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      readpart("",i,UNLOAD,FREE_PARTDATA,&errorcode);
+      readpart("",i,UNLOAD,PARTDATA,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
@@ -2487,7 +2487,7 @@ void LoadUnloadMenu(int value){
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
         partinfo[i].reload=1;
-        readpart(partinfo[i].file,i,UNLOAD,FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file,i,UNLOAD,PARTDATA,&errorcode);
       }
       else{
         partinfo[i].reload=0;
@@ -2496,12 +2496,12 @@ void LoadUnloadMenu(int value){
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file, i, UNLOAD, PARTDATA,&errorcode);
       }
     }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, LOAD, FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file, i, LOAD, PARTDATA,&errorcode);
       }
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
@@ -2708,7 +2708,7 @@ void EvacMenu(int value){
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
-      readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
@@ -2717,7 +2717,7 @@ void EvacMenu(int value){
       parti=partinfo + i;
       if(parti->evac==0)continue;
       ReadEvacFile=1;
-      readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
+      readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADFILE\n");
         fprintf(scriptoutstream," %s\n",parti->file);
@@ -2729,7 +2729,7 @@ void EvacMenu(int value){
   if(value>=0){
     ReadEvacFile=1;
     npartframes_max=get_min_partframes();
-    readpart(partinfo[value].file, value, LOAD, FREE_PARTDATA,&errorcode);
+    readpart(partinfo[value].file, value, LOAD, PARTDATA,&errorcode);
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partinfo[value].file);
@@ -2740,7 +2740,7 @@ void EvacMenu(int value){
 
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
   updatemenu=1;
@@ -2952,13 +2952,13 @@ void LoadParticleMenu(int value){
       fprintf(scriptoutstream," %s\n",partfile);
     }
     npartframes_max=get_min_partframes();
-    readpart(partfile, value, LOAD, FREE_PARTDATA,&errorcode);
+    readpart(partfile, value, LOAD, PARTDATA,&errorcode);
   }
   else{
     if(value==-1){
       for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==1)continue;
-        readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+        readpart("", i, UNLOAD, PARTDATA,&errorcode);
       }
     }
     else{
@@ -2971,14 +2971,14 @@ void LoadParticleMenu(int value){
         for(i = 0; i<npartinfo; i++){
           parti = partinfo+i;
           if(parti->evac==1)continue;
-          readpart(parti->file, i, UNLOAD, FREE_PARTDATA, &errorcode);
+          readpart(parti->file, i, UNLOAD, PARTDATA, &errorcode);
         }
       }
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
-        readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
+        readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       }
       force_redisplay=1;
       Update_Framenumber(0);
@@ -3096,12 +3096,12 @@ void UnloadEvacMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
+    readpart("", value, UNLOAD, PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
 }
@@ -3114,12 +3114,12 @@ void UnloadPartMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
+    readpart("", value, UNLOAD, PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==1)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
 }
