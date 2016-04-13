@@ -1065,7 +1065,7 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    readpart(parti->file,i,UNLOAD,DEFER_PARTCOLORBOUNDS,&errorcode);
+    readpart(parti->file,i,UNLOAD,FREE_PARTDATA,&errorcode);
     count++;
   }
   for(i=0;i<npartinfo;i++){
@@ -1073,7 +1073,7 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    readpart(parti->file,i,LOAD,SET_PARTCOLORBOUNDS,&errorcode);
+    readpart(parti->file,i,LOAD,FREE_PARTDATA,&errorcode);
     if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
       FREEMEMORY(loaded_file);
       NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
@@ -1382,7 +1382,7 @@ void script_partclasscolor(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(propi->particle_property==0)continue;
@@ -1505,13 +1505,13 @@ void script_partclasstype(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     int j;
 
     propi = part5propinfo + i;
     if(propi->display==0)continue;
     for(j=0;j<npartclassinfo;j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       if(propi->class_present[j]==0)continue;
       partclassj = partclassinfo + j;
@@ -1574,7 +1574,7 @@ void script_loadfile(scriptdata *scripti){
 
     parti = partinfo + i;
     if(strcmp(parti->file,scripti->cval)==0){
-      readpart(parti->file,i,LOAD,SET_PARTCOLORBOUNDS,&errorcode);
+      readpart(parti->file,i,LOAD,FREE_PARTDATA,&errorcode);
       return;
     }
   }

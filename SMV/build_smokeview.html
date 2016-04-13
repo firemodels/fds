@@ -3,7 +3,10 @@
 <TITLE>Smokeview</TITLE>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - <font size=5>Smokeview</font> - <a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
+<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
+<font size=5>Smokeview</font> - 
+<a href="build_guides.html"><font size=5>Guides</font></a> -
+<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
 
 <hr size="1">
 
@@ -31,21 +34,6 @@
 
 <h3>Smokeview</h3>
 
-<tr><td valign=top>
-
-<p><table border=on>
-<tr><th colspan=2>Full Windows Debug</th><th colspan=3>Incremental Test</th></tr>
-<tr><th>Test</th><th>Release</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
-<tr>
-<td align=center><a href="scripts/BUILDdebugtestsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdebugsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvwininc64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvlinuxinc64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvosxinc64.bat">Build</a></td></tr>
-</tr>
-</table>
-
-<tr><td valign=top>
 <p><table border=on>
 <tr><th colspan=3>Full Test</th><th colspan=3>Full Release</th></tr>
 <tr>
@@ -97,6 +85,13 @@
 </tr>
 
 <tr>
+<th>dem2fds</th>
+<td align=center><a href="scripts/BUILDdemwin.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDdemlinux.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDdemosx.bat">Build</a></td>
+</tr>
+
+<tr>
 <th>fds2ascii</th>
 <td align=center><a href="scripts/BUILDf2awin.bat">Build</a></td>
 <td align=center><a href="scripts/BUILDf2alinux.bat">Build</a></td>
@@ -117,12 +112,6 @@
 <td align=center><a href="scripts/BUILDsmzosx.bat">Build</a></td>
 </tr>
 
-<tr>
-<th>dem2fds</th>
-<td align=center><a href="scripts/BUILDdemwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdemlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdemosx.bat">Build</a></td>
-</tr>
 
 <tr>
 <th>wind2fds</th>
@@ -131,44 +120,37 @@
 <td align=center><a href="scripts/BUILDwindosx.bat">Build</a></td>
 </tr>
 </table>
+
 <p>Build windows installation utilities: <a href="scripts/BUILDsetpathwin.bat">set_path</a>, <a href="scripts/BUILDsh2batwin.bat">sh2bat</a>
 
 <h3>Verification</h3>
 <ul>
 <li><a href="scripts/RUNwindowssmokebot.bat">Run windows Smokebot</a>
-</ul>
-
-<p><table border=on>
-<tr><th>Technical</th><th>User</th><th>Verification</th></tr>
-<tr align=center>
-<td></td>
-<td><a href="scripts/GETsmvugfigs.bat">Get images</a><br>(Linux smokebot)</td>
-<td><a href="scripts/GETsmvvergfigs.bat">Get images</a><br>(Linux smokebot)</td>
-</tr>
-<tr align=center>
-<td><a href="scripts/BUILDsmvtg.bat">Build</a></td>
-<td><a href="scripts/BUILDsmvug.bat">Build</a></td>
-<td><a href="scripts/BUILDsmvvg.bat">Build</a></td>
-</tr>
-<tr align=center>
-<td><a href="scripts/View_SMV_TG.bat">View</a></td>
-<td><a href="scripts/View_SMV_UG.bat">View</a></td>
-<td><a href="scripts/View_SMV_VG.bat">View</a></td>
-</tr>
-</table>
-<ul>
-<li><a href="scripts/COPY_smv_guides.bat">Copy guides</a> from local repo to FIRE-LOCAL
-<li><a href="Scripts/COPY_smvlinux_guides.bat">Copy guides</a> from Linux smokebot to FIRE-LOCAL
 <li><a href="scripts/VIEW_localimages.bat">View</a> web summary
 </ul>
 
+<h3>Smokeview Debug/Incremental Build</h3>
+<p><table border=on>
+<tr><th colspan=2>Full Windows Debug</th><th colspan=3>Incremental Test</th></tr>
+<tr><th>Test</th><th>Release</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
+<tr>
+<td align=center><a href="scripts/BUILDdebugtestsmvwin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDdebugsmvwin64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDtestsmvwininc64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDtestsmvlinuxinc64.bat">Build</a></td>
+<td align=center><a href="scripts/BUILDtestsmvosxinc64.bat">Build</a></td></tr>
+</tr>
+</table>
+
+
+
 <h3>Other</h3>
 <ul>
-<li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page. 
+<li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page
 <li><a href="scripts/COPYhome2config.bat">configuration file ===>> repo.</a>
 <li><a href="scripts/COPYconfig2home.bat">configuration file <<=== repo.</a>
 <li><a href="scripts/TEST_setup.bat">Test</a> settings and build/bundle environment. 
-<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>.
+<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>
 
 <p><hr>

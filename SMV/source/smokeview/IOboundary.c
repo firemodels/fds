@@ -8,6 +8,7 @@
 #include "smv_endian.h"
 #include "update.h"
 #include "smokeviewvars.h"
+#include "compress.h"
 
 /* ------------------ output_Patchdata ------------------------ */
 
@@ -2521,9 +2522,9 @@ void drawpatch_threshold_cellcenter(const mesh *meshi){
   glEnd();
 }
 
-/* ------------------ drawpatch_frame ------------------------ */
+/* ------------------ draw_patchframe ------------------------ */
 
-void drawpatch_frame(int flag){
+void draw_patchframe(int flag){
   mesh *meshi;
   int i;
 
@@ -3694,9 +3695,9 @@ int patchcompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ updatepatchmenulabels ------------------------ */
+/* ------------------ update_patch_menulabels ------------------------ */
 
-void updatepatchmenulabels(void){
+void update_patch_menulabels(void){
   int i;
   patchdata *patchi;
   char label[128];
@@ -4041,7 +4042,7 @@ void uncompress_patchdataframe(mesh *meshi,int local_iframe){
   countin = meshi->zipsize[local_iframe];
   countout=meshi->npatchsize;
 
-  uncompress(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
+  uncompress_zlib(meshi->cpatchval_iframe_zlib,&countout,compressed_data,countin);
 
 }
 

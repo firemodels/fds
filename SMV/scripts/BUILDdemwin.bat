@@ -21,7 +21,7 @@ call %envfile%
 
 echo.
 echo --------------------------------------------
-echo Building 64 bit Windows versions of smokezip
+echo Building 64 bit Windows versions of dem2fds
 echo --------------------------------------------
 
 cd %svn_root%\SMV\Build\dem2fds\intel_win_64

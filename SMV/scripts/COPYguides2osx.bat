@@ -1,6 +1,8 @@
 @echo off
 
-set envfile=%userprofile%\fds_smv_env.bat
+Rem setup environment variables (defining where repository resides etc) 
+
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -16,12 +18,14 @@ call %envfile%
 
 %svn_drive%
 
-set CURDIR=%CD%
+echo.
+echo ---uploading guides to OSX: %osx_hostname%
+echo.
+set fromdir="%userprofile%"\FDS_Guides
+set todir=FDS_Guides
 
-Title Download smokeview user guide images
+Title uploading guides to OSX: %osx_hostname%
 
-cd %svn_root%\Manuals\SMV_User_Guide\SCRIPT_FIGURES
-pscp %linux_logon%:%smokebotrepo%/Manuals/SMV_User_Guide/SCRIPT_FIGURES/* .
+pscp %fromdir%\*.pdf %osx_logon%:%todir%/.
 
-cd %CURDIR%
 pause

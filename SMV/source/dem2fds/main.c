@@ -9,6 +9,8 @@
 #include "file_util.h"
 #include "MALLOC.h"
 
+#define GENERATE_GEOM 1
+#define GENERATE_OBSTS 2
 
 /* ------------------ usage ------------------------ */
 
@@ -51,13 +53,15 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 
 /* ------------------ generate_elevs ------------------------ */
 
-void generate_elevs(char *filebase){
+void generate_fds(char *filebase, int option){
   char buffer[LENBUFFER];
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
-  float deltax, deltay, zmin, zmax;
+  float xmax, ymax, zmin, zmax, dx, dy;
+  float *xgrid, *ygrid;
   int count;
+  int ibar, jbar, kbar;
   float **valptrs;
 
 
@@ -65,22 +69,41 @@ void generate_elevs(char *filebase){
   trim_back(buffer);
   sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
 
-  deltax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
-  deltay = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
+  xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
+  dx = xmax / (float)nlong;
+
+  ymax = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
+  dy = ymax / (float)nlat;
+
+  ibar = nlong - 1;
+  jbar = nlat - 1;
+  kbar = nz;
+
+  NewMemory((void **)&xgrid, sizeof(float)*(ibar+1));
+  for(i=0;i<ibar+1;i++){
+    xgrid[i] = xmax*(float)i/(float)ibar;
+  }
+
+  NewMemory((void **)&ygrid, sizeof(float)*(jbar+1));
+  for(i=0;i<jbar+1;i++){
+    ygrid[i] = ymax*(float)i/(float)jbar;
+  }
+
 
   printf("&HEAD CHID='%s', TITLE='terrain' /\n",filebase);
-  printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",nlong,nlat,nz,deltax,deltay,zmin,zmax);
+  printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",ibar,jbar,kbar,xmax,ymax,zmin,zmax);
+  if(option==GENERATE_OBSTS){
+    printf("&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", filebase);
+  }
   printf("&TIME T_END = 0. /\n");
-  printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltay, zmin,   zmax);
-  printf("&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltax, deltay, zmin, zmax);
-  printf("&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", deltax, zmin,   zmax);
-  printf("&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay, deltay, zmin, zmax);
-  printf("&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", deltax, deltay,   zmax, zmax);
+  printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
+  printf("&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
+  printf("&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
+  printf("&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
+  printf("&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
   printf("&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
   printf("&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n",filebase);
 
-
-  printf("&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",nlong,nlat,0.0,deltax,0.0,deltay);
 
   NewMemory((void **)&valptrs, sizeof(float *)*nlat);
   for(j = 0; j < nlat; j++){
@@ -97,20 +120,37 @@ void generate_elevs(char *filebase){
     }
   }
 
-  count = 1;
-  for(j = 0; j < nlat; j++){
-    float *vals;
+  if(option==GENERATE_GEOM){
+    printf("&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
+                      nlong,nlat,0.0,xmax,0.0,ymax);
+    count = 1;
+    for(j = 0; j < jbar + 1; j++){
+      float *vals;
 
-    vals = valptrs[nlat - 1 - j];
-    for(i = 0; i < nlong; i++){
-      printf(" %f,", vals[i]);
-      if(count % 10 == 0)printf("\n");
-      count++;
+      vals = valptrs[jbar - j];
+      for(i = 0; i < ibar + 1; i++){
+        printf(" %f,", vals[i]);
+        if(count % 10 == 0)printf("\n");
+        count++;
+      }
+    }
+    printf("/\n");
+  }
+  if(option==GENERATE_OBSTS){
+    for(j = 0; j < jbar; j++){
+      float *vals, *valsp1;
+
+      vals = valptrs[j];
+      valsp1 = valptrs[j+1];
+      for(i = 0; i < ibar; i++){
+        float vavg;
+
+        vavg = (vals[i]+vals[i+1]+valsp1[i]+valsp1[i+1])/4.0;
+        printf("&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
+      }
     }
   }
-  printf("/\n");
   printf("&TAIL /\n");
-
 }
 
   /* ------------------ generate_latlongs ------------------------ */
@@ -161,6 +201,7 @@ void generate_longlats(char *filebase){
 int main(int argc, char **argv){
   int i;
   int gen_elevs = 0;
+  int gen_obsts = 0;
   char *filebase = NULL;
   char file_default[1000];
 
@@ -181,6 +222,7 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'o':
+        gen_obsts = 1;
         break;
       case 'e':
         gen_elevs = 1;
@@ -203,7 +245,10 @@ int main(int argc, char **argv){
   }
   if(filebase == NULL)filebase = file_default;
   if(gen_elevs == 1){
-    generate_elevs(filebase);
+    generate_fds(filebase,GENERATE_GEOM);
+  }
+  else if(gen_obsts == 1){
+    generate_fds(filebase,GENERATE_OBSTS);
   }
   else{
     generate_longlats(filebase);

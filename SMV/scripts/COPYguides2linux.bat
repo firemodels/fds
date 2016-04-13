@@ -19,15 +19,12 @@ call %envfile%
 %svn_drive%
 
 echo.
-echo ---copying guides
+echo ---uploading guides to Linux: %linux_hostname%
 echo.
-set fromdir=%svn_root%\Manuals
-set todir="%userprofile%"\FDS_Guides
+set fromdir="%userprofile%"\FDS_Guides
+set todir=FDS_Guides
 
-Title Copy smokeview guides from repo to FDS_Guide
-
-copy %fromdir%\SMV_User_Guide\SMV_User_Guide.pdf                                %todir%\.
-copy %fromdir%\SMV_Verification_Guide\SMV_Verification_Guide.pdf                %todir%\.
-copy %fromdir%\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf  %todir%\.
+Title uploading guides to Linux: %linux_hostname%
+pscp %fromdir%\*.pdf %linux_logon%:%todir%/.
 
 pause

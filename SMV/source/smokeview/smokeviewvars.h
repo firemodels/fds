@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(force_update_histograms, 1);
 SVEXTERN float SVDECL(geom_vert_exag, 1.0);
 SVEXTERN float SVDECL(geom_vecfactor, .030);
 SVEXTERN int SVDECL(geom_ivecfactor, 30);
@@ -805,9 +806,6 @@ SVEXTERN int smoke3dzipstep, smoke3dzipskip;
 SVEXTERN int slicezipstep, slicezipskip;
 SVEXTERN int isozipstep, isozipskip;
 SVEXTERN int evacframeskip, evacframestep;
-SVEXTERN int partpointstep;
-SVEXTERN int partpointstep_old;
-SVEXTERN int partpointskip;
 SVEXTERN int viewoption;
 SVEXTERN int SVDECL(clip_mode,CLIP_OFF),clip_mode_last;
 SVEXTERN int clip_i,clip_j,clip_k;
@@ -1265,9 +1263,9 @@ SVEXTERN int nstreak_rvalue; // 5
 SVEXTERN float streak_rvalue[8]; // 1.0, 2.0 4.0, 8.0, 16.0 twfin
 SVEXTERN int streak_index, update_streaks;       // 0
 SVEXTERN float float_streak5value;// 1.0
-SVEXTERN part5class SVDECL(*partclassinfo,NULL);
+SVEXTERN partclassdata SVDECL(*partclassinfo,NULL);
 SVEXTERN int npartclassinfo;
-SVEXTERN part5prop SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
+SVEXTERN partpropdata SVDECL(*part5propinfo,NULL), SVDECL(*current_property,NULL);
 SVEXTERN int SVDECL(npart5prop,0),ipart5prop,ipart5prop_old;
 SVEXTERN int prop_index;
 SVEXTERN targ SVDECL(*targinfo,NULL);

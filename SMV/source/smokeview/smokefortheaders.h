@@ -25,10 +25,8 @@
 #define FORTgetpatchsizes2 _F(getpatchsizes2)
 #define FORTgetpatchdata _F(getpatchdata)
 #define FORTgetdata1 _F(getdata1)
-#define FORTgetdata2 _F(getdata2)
 #define FORTgetsizes _F(getsizes)
 #define FORTgetsizesa _F(getsizesa)
-#define FORTgetsizes2 _F(getsizes2)
 #define FORTgetslicesizes _F(getslicesizes)
 #define FORTwriteslicedata _F(writeslicedata)
 #define FORTgetslicedata _F(getslicedata)
@@ -80,22 +78,10 @@ STDCALLF FORTgetpatchsizes2(int *file_unit,int *version, int *npatch,int *npatch
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *npqq, int *error);
 STDCALLF FORTgetdata1(int *file_unit, int *ipart, int *error);
-STDCALLF FORTgetdata2(int *file_unit,
-                     short *xparts, short *yparts, short *zparts,
-                     float *t,
-                     int *sprinkflag, unsigned char *isprink, float *tspr, int *bframe,int *sframe,int *sprframe,
-                     float *times,int *nspr,int *nmax,int *mxframes,int *nframes,
-                     int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p, int *partframestep, int *partpointstep,
-                     float *xbox0, float *xbox, float *ybox0, float *ybox, float *zbox0, float *zbox,
-                     float *offset_x, float *offset_y, float *offset_z, int *redirect,
-                     int *error,
-                     FILE_SIZE lenisprink);
 
 STDCALLF FORTgetsizesa(char *partfilename, int *npartpoint,int *npartframes,FILE_SIZE lenfile);
 STDCALLF FORTgetsizes(int *file_unit,char *partfilename,
                      int *nb, int *nv, int *nspr,int *mxframepoints, int *showstaticsmoke, int *error, FILE_SIZE filelen);
-STDCALLF FORTgetsizes2(int *file_unit,int *settmin_p, float *tmin_p, int *settmax_p, float *tmax_p,
-                      int *nspr, int *frameloadstep, int *partpointstep, int *npartpoints, int *npartframes, int *error);
 STDCALLF FORTgetslicesizes(char *slicefilename, int *nslicei, int *nslicej, int *nslicek,
                           int *nsteps,int *sliceframestep, int *error,
                           int *settime_p, int *settmax_p, float *tmin_p, float *tmax_p,

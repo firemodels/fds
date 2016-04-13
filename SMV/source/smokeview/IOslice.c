@@ -1697,9 +1697,9 @@ void update_slice_menu_show(void){
   }
 }
 
-/* ------------------ updateslicemenulabels ------------------------ */
+/* ------------------ update_slice_menulabels ------------------------ */
 
-void updateslicemenulabels(void){
+void update_slice_menulabels(void){
   int i;
   char label[128];
   multislicedata *mslicei;
@@ -1790,9 +1790,9 @@ void updateslicemenulabels(void){
   }
 }
 
-/* ------------------ updatevslicemenulabels ------------------------ */
+/* ------------------ update_vslice_menulabels ------------------------ */
 
-void updatevslicemenulabels(void){
+void update_vslice_menulabels(void){
   int i;
   slicedata *sd, *sdold;
   vslicedata *vsd, *vsdold;
@@ -2439,7 +2439,7 @@ void getsliceparams(void){
       slicei->mslice = mslicei;
     }
   }
-  updateslicemenulabels();
+  update_slice_menulabels();
   update_slicedir_count();
 }
 
@@ -2720,7 +2720,7 @@ void update_fedinfo(void){
     }
   }
   if(stream_fedsmv!=NULL)fclose(stream_fedsmv);
-  if(nfediso>0)updateisomenulabels();
+  if(nfediso>0)update_iso_menulabels();
 
 }
 
@@ -2914,7 +2914,7 @@ void updatevslices(void){
   }
 
   if(nvsliceinfo>0)PRINTF("    updating vector slice menus\n");
-  updatevslicemenulabels();
+  update_vslice_menulabels();
   PRINTF("  vector slices update completed\n\n");
 
 }
@@ -3418,9 +3418,9 @@ void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
 
 }
 
-/* ------------------ drawslice_frame ------------------------ */
+/* ------------------ draw_sliceframe ------------------------ */
 
-void drawslice_frame(){
+void draw_sliceframe(){
     int ii;
 
     for(ii=0;ii<nslice_loaded;ii++){
@@ -3509,9 +3509,9 @@ void drawslice_frame(){
   }
 }
 
-/* ------------------ drawvslice_frame ------------------------ */
+/* ------------------ draw_vsliceframe ------------------------ */
 
-void drawvslice_frame(void){
+void draw_vsliceframe(void){
   int i;
 
   for(i=0;i<nvsliceinfo;i++){
@@ -6581,7 +6581,7 @@ void uncompress_slicedataframe(slicedata *sd,int iframe_local){
   countout=sd->nsliceii;
 
   if(sd->compression_type==COMPRESSED_ZLIB){
-    uncompress(sd->slicecomplevel,&countout,compressed_data,countin);
+    uncompress_zlib(sd->slicecomplevel,&countout,compressed_data,countin);
   }
 }
 

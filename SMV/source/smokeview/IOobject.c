@@ -6960,12 +6960,12 @@ void update_object_used(void){
     }
   }
   for(i = 0; i<npart5prop; i++){
-    part5prop *partpropi;
+    partpropdata *partpropi;
     int j;
 
     partpropi = part5propinfo+i;
     for(j = 0; j<npartclassinfo; j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
       propdata *propi;
       int jj;
 
@@ -7384,7 +7384,7 @@ void get_evac_indices(sv_object *smv_object,int *evac_index,int *nevac_index){
 
 /* ----------------------- update_partclass_depend ----------------------------- */
 
-void update_partclass_depend(part5class *partclassi){
+void update_partclass_depend(partclassdata *partclassi){
   int i;
 
   if(partclassi->prop!=NULL){

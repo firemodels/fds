@@ -255,7 +255,6 @@ GLUI_Spinner *SPINNER_tload_end=NULL;
 GLUI_Spinner *SPINNER_tload_skip=NULL;
 GLUI_Spinner *SPINNER_plot3d_vectorpointsize=NULL,*SPINNER_plot3d_vectorlinewidth=NULL,*SPINNER_plot3d_vectorlinelength=NULL;
 GLUI_Spinner *SPINNER_sliceaverage=NULL;
-GLUI_Spinner *SPINNER_partpointstep=NULL;
 GLUI_Spinner *SPINNER_smoke3dzipstep=NULL;
 GLUI_Spinner *SPINNER_slicezipstep=NULL;
 GLUI_Spinner *SPINNER_isozipstep=NULL;
@@ -1048,9 +1047,6 @@ extern "C" void glui_bounds_setup(int main_window){
 
   /* Particle File Bounds  */
 
-//SVEXTERN part5prop *part5propinfo;
-//SVEXTERN int npart5prop;
-
   if(npartinfo>0&&nevac!=npartinfo){
     glui_active=1;
     ROLLOUT_part = glui_bounds->add_rollout_to_panel(ROLLOUT_filebounds,"Particle",false,PART_ROLLOUT,Bound_Rollout_CB);
@@ -1062,7 +1058,7 @@ extern "C" void glui_bounds_setup(int main_window){
       RADIO_part5 = glui_bounds->add_radiogroup_to_panel(ROLLOUT_part,&ipart5prop,FILETYPEINDEX,PART_CB);
 
       for(i=0;i<npart5prop;i++){
-        part5prop *partpropi;
+        partpropdata *partpropi;
 
         partpropi = part5propinfo + i;
         glui_bounds->add_radiobutton_to_group(RADIO_part5,partpropi->label->shortlabel);
@@ -1071,7 +1067,7 @@ extern "C" void glui_bounds_setup(int main_window){
       glui_bounds->add_column_to_panel(ROLLOUT_part,false);
 
       {
-        part5prop *propi;
+        partpropdata *propi;
 
         propi = part5propinfo;
         setpartmin=propi->setvalmin;
@@ -2417,7 +2413,7 @@ extern "C" void update_glui_streakvalue(float rvalue){
 /* ------------------ PART_CB ------------------------ */
 
 void PART_CB(int var){
-  part5prop *prop_new, *prop_old;
+  partpropdata *prop_new, *prop_old;
 
   prop_new = part5propinfo + ipart5prop;
   prop_old = part5propinfo + ipart5prop_old;
@@ -2493,14 +2489,8 @@ void PART_CB(int var){
     break;
   case FRAMELOADING:
     partframestep=partframeskip+1;
-    partpointstep=partpointskip+1;
     evacframestep=evacframeskip+1;
     evacframestep=evacframeskip+1;
-    if(partpointstep!=partpointstep_old){
-      update_all_partvis2();
-      partpointstep_old=partpointstep;
-    }
-
     updatemenu=1;
     break;
   case CHOPUPDATE:
@@ -2608,7 +2598,7 @@ void PART_CB(int var){
      PART_CB(FILETYPEINDEX);
      if(EDIT_part_min!=NULL&&setpartmin==SET_MIN)PART_CB(SETVALMIN);
      if(EDIT_part_max!=NULL&&setpartmax==SET_MAX)PART_CB(SETVALMAX);
-     ParticleMenu(PARTFILE_RELOADALL);
+     LoadParticleMenu(PARTFILE_RELOADALL);
      updateglui();
      ParticlePropShowMenu(prop_index_SAVE);
     }

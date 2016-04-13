@@ -266,9 +266,9 @@ int is_fire_or_soot(smoke3ddata *smoke3di){
   return return_val;
 }
 
-/* ------------------ drawsmoke_frame ------------------------ */
+/* ------------------ draw_smokeframe ------------------------ */
 
-void drawsmoke_frame(void){
+void draw_smokeframe(void){
   CheckMemory;
   if(showvolrender==1&&smoke3dVoldebug==1){
     drawsmoke3dVOLdebug();
@@ -439,7 +439,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   if(smoke3di->compression_type==UNKNOWN){
     smoke3di->compression_type=getsmoke3d_version(smoke3di);
-    updatesmoke3dmenulabels();
+    update_smoke3d_menulabels();
   }
 
   CheckMemory;
@@ -927,10 +927,10 @@ void updatesmoke3d(smoke3ddata *smoke3di){
   countout=smoke3di->nchars_uncompressed;
   switch(smoke3di->compression_type){
   case RLE:
-    countout = irle(smoke3di->smokeframe_comp_list[iframe_local],countin,smoke3di->smokeframe_in);
+    countout = uncompress_rle(smoke3di->smokeframe_comp_list[iframe_local],countin,smoke3di->smokeframe_in);
     break;
   case ZLIB:
-    uncompress(
+    uncompress_zlib(
       smoke3di->smokeframe_in,&countout,
       smoke3di->smokeframe_comp_list[iframe_local],countin);
     break;
@@ -4774,9 +4774,9 @@ void drawsmoke3dCULL(void){
 
 #endif
 
-/* ------------------ updatesmoke3dmenulabels ------------------------ */
+/* ------------------ update_smoke3d_menulabels ------------------------ */
 
-void updatesmoke3dmenulabels(void){
+void update_smoke3d_menulabels(void){
   int i;
   smoke3ddata *smoke3di;
   char meshlabel[128];

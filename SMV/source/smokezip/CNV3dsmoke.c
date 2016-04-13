@@ -215,7 +215,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     // uncompress frame data (from RLE format)
 
-    nfull_data=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
+    nfull_data=uncompress_rle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
     CheckMemory;
     if(nfull_file!=nfull_data){
       fprintf(stderr,"*** Warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
@@ -229,7 +229,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     // compress frame data (into ZLIB format)
 
     ncompressed_zlib=buffersize;
-    returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
+    returncode=compress_zlib(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
     CheckMemory;
     if(returncode!=0){
       fprintf(stderr,"*** Warning zlib compressor failed - frame %f\n",time_local);

@@ -839,7 +839,7 @@ void TOUR_CB(int var){
         LISTBOX_tour->delete_item(thistour-tourinfo);
         LISTBOX_tour->add_item(thistour-tourinfo,thistour->label);
       }
-      updatetourmenulabels();
+      update_tour_menulabels();
       updatemenu=1;
     }
     break;
