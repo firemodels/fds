@@ -18,6 +18,8 @@ call %envfile%
 
 set CURDIR=%CD%
 
+Title Download smokeview user guide images
+
 cd %svn_root%\Manuals\SMV_User_Guide\SCRIPT_FIGURES
 pscp %linux_logon%:%smokebotrepo%/Manuals/SMV_User_Guide/SCRIPT_FIGURES/* .
 

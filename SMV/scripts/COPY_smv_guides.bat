@@ -19,13 +19,15 @@ call %envfile%
 %svn_drive%
 
 echo.
-echo ---downloading guides
+echo ---copying guides
 echo.
-set fromdir=%smokebotrepo%/Manuals
+set fromdir=%svn_root%\Manuals
 set todir="%userprofile%"\FDS_Guides
 
-pscp %linux_logon%:%fromdir%/SMV_User_Guide/SMV_User_Guide.pdf                                %todir%\.
-pscp %linux_logon%:%fromdir%/SMV_Verification_Guide/SMV_Verification_Guide.pdf                %todir%\.
-pscp %linux_logon%:%fromdir%/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf  %todir%\.
+Title Copy smokeview guides from repo to FDS_Guide
+
+copy %fromdir%\SMV_User_Guide\SMV_User_Guide.pdf                                %todir%\.
+copy %fromdir%\SMV_Verification_Guide\SMV_Verification_Guide.pdf                %todir%\.
+copy %fromdir%\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf  %todir%\.
 
 pause

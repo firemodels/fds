@@ -19,10 +19,12 @@ call %envfile%
 %svn_drive%
 
 echo.
-echo ---uploading guides to OSX
+echo ---uploading guides to OSX: %osx_hostname%
 echo.
 set fromdir="%userprofile%"\FDS_Guides
 set todir=FDS_Guides
+
+Title uploading guides to OSX: %osx_hostname%
 
 pscp %fromdir%\*.pdf %osx_logon%:%todir%/.
 
