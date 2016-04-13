@@ -17,16 +17,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-set mandir=%svn_root%\Manuals
-set todir=%userprofile%\FDS_Guides
-
-echo copying SMV_User_Guide.pdf
-copy %mandir%\SMV_User_Guide\SMV_User_Guide.pdf %todir%\.
-
-echo copying SMV_Technical_Reference_Guide.pdf
-copy %mandir%\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf %todir%\.
-
-echo copying SMV_Verification_Guide.pdf
-copy %mandir%\SMV_Verification_Guide\SMV_Verification_Guide.pdf %todir%\.
-pause
-
+cd %svn_root%\SMV\
+start notepad build_guides.html
