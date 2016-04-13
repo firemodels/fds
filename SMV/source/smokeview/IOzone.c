@@ -1855,7 +1855,7 @@ void drawfiredata(void){
           firedata *firei;
           roomdata *roomi;
           float deltaz;
-          mesh *meshi;
+          meshdata *meshi;
 
           // radius/plumeheight = .268 = atan(15 degrees)
           firei = fireinfo + i;
@@ -1877,7 +1877,7 @@ void drawfiredata(void){
         if(qdot>0.0f){
           firedata *firei;
           roomdata *roomi;
-          mesh *meshi;
+          meshdata *meshi;
 
           // radius/plumeheight = .268 = atan(15 degrees)
           firei = fireinfo + i;

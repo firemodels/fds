@@ -169,7 +169,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
 void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
   int i;
-  mesh *meshi;
+  meshdata *meshi;
   unsigned char *cpatchval;
   int npqq_local;
   int upper, lower;
@@ -349,7 +349,7 @@ void UpdateAllPatchColors(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     patchdata *patchi;
     int npatchvals;
     float patchmin_global, patchmax_global;
@@ -960,7 +960,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   float *q;
   unsigned char *iq;
   plot3ddata *p;
-  mesh *meshi;
+  meshdata *meshi;
   char *iblank;
   int i;
   int ntotal;
@@ -1527,7 +1527,7 @@ void UpdateRGBColors(int colorbar_index){
   int i,j;
   float *rgb2ptr;
   int cci;
-  mesh *meshi;
+  meshdata *meshi;
   int vent_offset, outline_offset;
   facedata *facej;
   float transparent_level_local=1.0;

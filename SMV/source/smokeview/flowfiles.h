@@ -284,7 +284,7 @@ typedef struct {
   unsigned char *uc_znormal;
   float *times;
   terraincell *tcell;
-  struct _mesh *terrain_mesh;
+  struct _meshdata *terrain_mesh;
   int ntimes;
 } terraindata;
 
@@ -568,7 +568,7 @@ typedef struct _volrenderdata {
 
 /* --------------------------  mesh ------------------------------------ */
 
-typedef struct _mesh {
+typedef struct _meshdata {
   int ibar, jbar, kbar;
   float cellsize;
   int ncvents,nvents,ndummyvents;
@@ -674,9 +674,9 @@ typedef struct _mesh {
   int *pi1, *pi2, *pj1, *pj2, *pk1, *pk2;
   contour **patch_contours;
   int *blockonpatch;
-  struct _mesh **meshonpatch;
-  struct _mesh *nabors[6];
-  struct _supermesh *super;
+  struct _meshdata **meshonpatch;
+  struct _meshdata *nabors[6];
+  struct _supermeshdata *super;
   int *ptype;
   int *patchrow, *patchcol, *blockstart;
   unsigned int *zipoffset, *zipsize;
@@ -738,11 +738,11 @@ typedef struct _mesh {
   float gslice_verts[6*3];
   int gslice_nverts,gslice_triangles[4*3],gslice_ntriangles;
   int s_offset[3];
-} mesh;
+} meshdata;
 
 /* --------------------------  supermesh ------------------------------------ */
 
-typedef struct _supermesh {
+typedef struct _supermeshdata {
 #ifdef pp_GPU
   GLuint smoke_texture_id,fire_texture_id,blockage_texture_id;
   float *smoke_texture_buffer,*fire_texture_buffer;
@@ -751,16 +751,16 @@ typedef struct _supermesh {
   float boxmin_scaled[3], boxmax_scaled[3];
   int drawsides[7];
   int nmeshes;
-  mesh **meshes;
+  meshdata **meshes;
   int ibar, jbar, kbar;
-} supermesh;
+} supermeshdata;
 
 /* --------------------------  volfacelistdata ------------------------------------ */
 
 typedef struct {
   float *xyz,dist2;
   int iwall;
-  mesh *facemesh;
+  meshdata *facemesh;
 } volfacelistdata;
 
 /* --------------------------  culldata ------------------------------------ */
@@ -770,7 +770,7 @@ typedef struct _culldata {
   int   ibeg, iend, jbeg, jend, kbeg, kend;
   int iskip, jskip, kskip;
   int vis;
-  mesh *cull_mesh;
+  meshdata *cull_mesh;
   int npixels,npixels_old;
 } culldata;
 
@@ -783,7 +783,7 @@ typedef struct {
   float norm[3];
   int dir;
   culldata *cull;
-  mesh *cull_mesh;
+  meshdata *cull_mesh;
 } cullplanedata;
 
 #endif
@@ -883,7 +883,7 @@ typedef struct _device{
   int *valids;
   int ival,nvals,type2,type2vis;
   int in_devc_csv;
-  mesh *device_mesh;
+  meshdata *device_mesh;
   texturedata *textureinfo;
   char *texturefile;
   int ntextures;

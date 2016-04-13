@@ -467,7 +467,7 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_rotation_type,_d("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
   LIST_mesh2->add_item(-1,_d("user specified center"));
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     LIST_mesh2->add_item(i,meshi->label);
@@ -844,7 +844,7 @@ void update_rotation_index(int val){
   *rotation_index=val;
   camera_current->rotation_index=val;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + *rotation_index;
     camera_current->xcen=meshi->xcen;

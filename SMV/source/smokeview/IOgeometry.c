@@ -2391,7 +2391,7 @@ void draw_geom_cutcells(void){
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
     int nx, nxy;
     float *x, *y, *z;

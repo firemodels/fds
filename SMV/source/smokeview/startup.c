@@ -40,7 +40,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
@@ -49,7 +49,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;

@@ -321,7 +321,7 @@ void readsmv_dynamic(char *file){
   stream=fopen(file,"r");
   if(stream==NULL)return;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi=meshinfo+i;
@@ -389,7 +389,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
-      mesh *meshi;
+      meshdata *meshi;
       int len;
       ventdata *vi;
       int showvent, blocknumber, tempval;
@@ -436,7 +436,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
-      mesh *meshi;
+      meshdata *meshi;
       int blocknumber,blocktemp,tempval;
       blockagedata *bc;
 
@@ -492,7 +492,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"HEAT_ACT") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       int blocknumber,blocktemp;
       int nn;
 
@@ -535,7 +535,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SPRK_ACT") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       int blocknumber,blocktemp;
       int nn;
 
@@ -614,7 +614,7 @@ void readsmv_dynamic(char *file){
   // ------------------------------- pass 1 dynamic - end ------------------------------------
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int nlist;
     int j;
 
@@ -794,7 +794,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
-      mesh *meshi;
+      meshdata *meshi;
       int len,showvent,blocknumber,tempval;
       ventdata *vi;
 
@@ -853,7 +853,7 @@ void readsmv_dynamic(char *file){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
-      mesh *meshi;
+      meshdata *meshi;
       int nlist,blocknumber,tempval,showobst,blocktemp;
       blockagedata *bc;
 
@@ -1619,7 +1619,7 @@ void init_vent_colors(void){
 
   nventcolors=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;
@@ -1637,7 +1637,7 @@ void init_vent_colors(void){
   }
   ventcolors[0]=surfinfo->color;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;
@@ -1695,7 +1695,7 @@ void update_mesh_coords(void){
 
   /* add in offsets */
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ii;
 
     meshi=meshinfo+i;
@@ -1727,7 +1727,7 @@ void update_mesh_coords(void){
     meshi->zcen+=meshi->offset[ZZZ];
   }
   for(i=1;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(meshi->xyz_bar0[ZZZ]!=meshinfo->xyz_bar0[ZZZ]){
@@ -1740,7 +1740,7 @@ void update_mesh_coords(void){
 
   ijkbarmax=meshinfo->ibar;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
 
@@ -1750,7 +1750,7 @@ void update_mesh_coords(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(i==0){
@@ -1829,7 +1829,7 @@ void update_mesh_coords(void){
   ybar = NORMALIZE_Y(ybar);
   zbar = NORMALIZE_Z(zbar);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     /* compute a local scaling factor for each block */
@@ -1864,14 +1864,14 @@ void update_mesh_coords(void){
   }
 
   {
-    mesh *meshi;
+    meshdata *meshi;
     meshi=meshinfo;
     veclength = meshi->xplt[1]-meshi->xplt[0];
   }
   min_gridcell_size=meshinfo->xplt[1]-meshinfo->xplt[0];
   for(i=0;i<nmeshes;i++){
     float dx, dy, dz;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     dx = meshi->xplt[1] - meshi->xplt[0];
@@ -1882,7 +1882,7 @@ void update_mesh_coords(void){
     min_gridcell_size=MIN(dz,min_gridcell_size);
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(veclength>meshi->xplt[1]-meshi->xplt[0])veclength=meshi->xplt[1]-meshi->xplt[0];
@@ -1893,7 +1893,7 @@ void update_mesh_coords(void){
   veclength = 0.01;
 
   for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
+    meshdata *meshi;
     float *face_centers;
     float *xplt_cen, *yplt_cen, *zplt_cen;
     int ibar, jbar, kbar;
@@ -2004,7 +2004,7 @@ void update_mesh_coords(void){
   nopenvents_nonoutline=0;
   ndummyvents=0;
   for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+igrid;
     for(i=0;i<meshi->nbptrs;i++){
@@ -2028,7 +2028,7 @@ void update_mesh_coords(void){
   }
 
   for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+igrid;
     for(i=0;i<meshi->nbptrs;i++){
@@ -2073,7 +2073,7 @@ void update_mesh_coords(void){
     }
   }
   for(igrid=0;igrid<nmeshes;igrid++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+igrid;
     for(i=0;i<meshi->nbptrs;i++){
@@ -2139,7 +2139,7 @@ void update_mesh_coords(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     float *xspr, *yspr, *zspr;
     float *xsprplot, *ysprplot, *zsprplot;
     float *xheat, *yheat, *zheat;
@@ -2184,7 +2184,7 @@ void update_mesh_coords(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo + i;
     meshi->vent_offset[XXX] = ventoffset_factor*(meshi->xplt[1]-meshi->xplt[0]);
@@ -2205,7 +2205,7 @@ void update_mesh_coords(void){
 
 int compare_meshes( const void *arg1, const void *arg2 ){
   smoke3ddata *smoke3di, *smoke3dj;
-  mesh *meshi, *meshj;
+  meshdata *meshi, *meshj;
   float *xyzmini, *xyzmaxi;
   float *xyzminj, *xyzmaxj;
   int dir=0;
@@ -2292,7 +2292,7 @@ int compare_meshes( const void *arg1, const void *arg2 ){
 
 void sort_smoke3dinfo(void){
   if(nsmoke3dinfo>1){
-    qsort((mesh **)smoke3dinfo_sorted,(size_t)nsmoke3dinfo,sizeof(smoke3ddata *),compare_meshes);
+    qsort((meshdata **)smoke3dinfo_sorted,(size_t)nsmoke3dinfo,sizeof(smoke3ddata *),compare_meshes);
   }
 }
 
@@ -3219,14 +3219,14 @@ int readsmv(char *file, char *file2){
     }
   }
   FREEMEMORY(meshinfo);
-  if(NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh))==0)return 2;
+  if(NewMemory((void **)&meshinfo,nmeshes*sizeof(meshdata))==0)return 2;
   FREEMEMORY(supermeshinfo);
-  if(NewMemory((void **)&supermeshinfo,nmeshes*sizeof(supermesh))==0)return 2;
+  if(NewMemory((void **)&supermeshinfo,nmeshes*sizeof(supermeshdata))==0)return 2;
   meshinfo->plot3dfilenum=-1;
   update_current_mesh(meshinfo);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    supermesh *smeshi;
+    meshdata *meshi;
+    supermeshdata *smeshi;
 
     smeshi = supermeshinfo + i;
     smeshi->nmeshes=0;
@@ -3246,7 +3246,7 @@ int readsmv(char *file, char *file2){
     meshi->nsmoothblockages_list++;
   }
   if(setPDIM==0){
-    mesh *meshi;
+    meshdata *meshi;
 
     if(roomdefined==0){
       xbar0 = 0.0;    xbar = 1.0;
@@ -3653,7 +3653,7 @@ int readsmv(char *file, char *file2){
   */
     if(match(buffer,"OBST") == 1&&autoterrain==1){
       int nobsts=0;
-      mesh *meshi;
+      meshdata *meshi;
       unsigned char *is_block_terrain;
       int nn;
 
@@ -4505,7 +4505,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"GRID") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       int mesh_type=0;
       float *xp, *yp, *zp;
       float *xp2, *yp2, *zp2;
@@ -4722,7 +4722,7 @@ int readsmv(char *file, char *file2){
 
 
   if(setGRID==0){
-    mesh *meshi;
+    meshdata *meshi;
     float *xp, *yp, *zp;
     float *xp2, *yp2, *zp2;
     float *xplt_cen, *yplt_cen, *zplt_cen;
@@ -4769,7 +4769,7 @@ int readsmv(char *file, char *file2){
     meshi->plotz=kbartemp/2;
   }
   if(setPDIM==0&&roomdefined==1){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo;
     meshi->xyz_bar0[XXX]=xbar0;
@@ -4827,7 +4827,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"CUTCELLS") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       int imesh,ncutcells;
 
       sscanf(buffer+10,"%i",&imesh);
@@ -4891,7 +4891,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"THCP") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       float normdenom;
       char *device_label;
       int tempval;
@@ -4961,7 +4961,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"SPRK") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       char *device_label;
       int tempval;
 
@@ -5039,7 +5039,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"HEAT") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       char *device_label;
       int tempval;
       int  nn;
@@ -5349,7 +5349,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"OFFSET") == 1){
-      mesh *meshi;
+      meshdata *meshi;
 
       ioffset++;
       meshi=meshinfo+ioffset-1;
@@ -5580,7 +5580,7 @@ int readsmv(char *file, char *file2){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PDIM") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       float *meshrgb;
 
       ipdim++;
@@ -5770,7 +5770,7 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"OBST") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       propdata *prop;
       char *proplabel;
       int n_blocks=0;
@@ -6044,7 +6044,7 @@ typedef struct {
         */
     if(match(buffer,"CVENT") == 1){
       cventdata *cvinfo;
-      mesh *meshi;
+      meshdata *meshi;
       float *origin;
       int ncv;
       int j;
@@ -6209,7 +6209,7 @@ typedef struct {
         */
 
     if(match(buffer,"VENT") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       ventdata *vinfo;
       float *xplttemp,*yplttemp,*zplttemp;
       int nn;
@@ -6973,7 +6973,7 @@ typedef struct {
       sd->menu_show=1;
       sd->constant_color=NULL;
       {
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
@@ -7341,7 +7341,7 @@ typedef struct {
 
     zbarmin=meshinfo->xyz_bar0[ZZZ];
     for(i=1;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
       if(meshi->xyz_bar0[ZZZ]<zbarmin)zbarmin=meshi->xyz_bar0[ZZZ];
@@ -7349,7 +7349,7 @@ typedef struct {
     nOBST=0;
     iobst=0;
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int ibar, jbar;
 
       meshi = meshinfo + i;
@@ -7369,7 +7369,7 @@ typedef struct {
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int nlist;
     int j;
 
@@ -7489,7 +7489,7 @@ typedef struct {
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     */
     if(match(buffer, "OBST")==1&&autoterrain==1){
-      mesh *meshi;
+      meshdata *meshi;
       int nxcell;
       int n_blocks;
       int iblock;
@@ -7708,7 +7708,7 @@ typedef struct {
   updatepatchtypes();
   if(autoterrain==1){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       float *zcell;
       int j;
 
@@ -7743,7 +7743,7 @@ typedef struct {
     int ntotal=0;
 
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
       ntotal += meshi->nbptrs;
@@ -8061,7 +8061,7 @@ int ifsmoothblock(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int  j;
 
     meshi = meshinfo + i;
@@ -8086,7 +8086,7 @@ void updateusetextures(void){
     texti->used=0;
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi=meshinfo + i;
@@ -8342,7 +8342,7 @@ void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
 
 /* ------------------ initmesh ------------------------ */
 
-void initmesh(mesh *meshi){
+void initmesh(meshdata *meshi){
   meshi->ncutcells=0;
   meshi->cutcells=NULL;
   meshi->slice_min[0]=1.0;
@@ -9035,7 +9035,7 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&meshnum);
       if(meshnum>=0&&meshnum<nmeshes){
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi = meshinfo + meshnum;
         meshi->mesh_offset_ptr=meshi->mesh_offset;
@@ -9066,7 +9066,7 @@ int readini2(char *inifile, int localfile){
 #endif
     if(match(buffer,"MESHVIS")==1){
       int nm;
-      mesh *meshi;
+      meshdata *meshi;
 
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&nm);
@@ -12344,7 +12344,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "ISOTRAN2\n");
   fprintf(fileout, " %i\n", transparent_state);
   for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     if(meshi->mesh_offset_ptr != NULL){
@@ -12357,7 +12357,7 @@ void writeini(int flag,char *filename){
     fprintf(fileout," %i\n",nmeshes);
 
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
       fprintf(fileout," %i\n",meshi->blockvis);

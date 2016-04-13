@@ -293,7 +293,7 @@ extern "C" void glui_geometry_setup(int main_window){
   if(unstructured_isopen==1)ROLLOUT_unstructured->open();
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     if(meshi->ncutcells>0){
@@ -559,7 +559,7 @@ extern "C" void Update_Blockvals(int flag){
   if(flag==SELECT_BLOCKS){
     if(bchighlight!=NULL){
       char dialog_label[255];
-      mesh *blockmesh;
+      meshdata *blockmesh;
 
       if(nmeshes>1){
         blockmesh = meshinfo + bchighlight->meshindex;

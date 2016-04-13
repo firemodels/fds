@@ -1423,7 +1423,7 @@ void RenderState(int onoff){
 void RenderMenu(int value){
   slicedata *sd;
   int i,n;
-  mesh *meshi;
+  meshdata *meshi;
 
   updatemenu=1;
   if(value>=11000)return;
@@ -3255,7 +3255,7 @@ void ShowVolSmoke3DMenu(int value){
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + value;
@@ -3269,7 +3269,7 @@ void ShowVolSmoke3DMenu(int value){
   }
   else if(value==HIDE_ALL){  // hide all
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -3283,7 +3283,7 @@ void ShowVolSmoke3DMenu(int value){
   }
   else if(value==SHOW_ALL){  // show all
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -3310,7 +3310,7 @@ void UnLoadVolSmoke3DMenu(int value){
   if(value<0){
     if(value==UNLOAD_ALL){
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
 
         meshi = meshinfo + i;
@@ -3323,7 +3323,7 @@ void UnLoadVolSmoke3DMenu(int value){
     }
   }
   else{
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     slicedata *fireslice, *smokeslice;
 
@@ -3347,7 +3347,7 @@ void LoadVolSmoke3DMenu(int value){
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     slicedata *fireslice, *smokeslice;
 
@@ -4950,7 +4950,7 @@ int get_total_vents(void){
   int i;
 
   for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     ntotal_vents += meshi->nvents;
@@ -5048,7 +5048,7 @@ updatemenu=0;
 
   nvolsmoke3dloaded=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -6754,7 +6754,7 @@ updatemenu=0;
 /* --------------------------------iso show menu -------------------------- */
 
     if(nisoinfo>0&&ReadIsoFile==1){
-      mesh *hmesh;
+      meshdata *hmesh;
       isodata *iso2;
       int ii;
 
@@ -7165,7 +7165,7 @@ updatemenu=0;
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
       char menulabel[1024];
 
@@ -8331,7 +8331,7 @@ updatemenu=0;
 
               STRCPY(mlabel,sd->label.longlabel);
               if(ii==0&&sd->mesh_type>0||(ii>0&&sd->mesh_type!=sdm1->mesh_type)){
-                sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
+                sprintf(mlabel2,"*** Evac type %i meshdata ***",sd->mesh_type);
                 glutAddMenuEntry(mlabel2,MENU_DUMMY);
               }
               glutAddSubMenu(mlabel,loadsubvslicemenu[nloadsubvslicemenu]);
@@ -8620,7 +8620,7 @@ updatemenu=0;
           STRCPY(mlabel,sd->label.longlabel);
           if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
             if(sd->menu_show==1){
-              sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
+              sprintf(mlabel2,"*** Evac type %i meshdata ***",sd->mesh_type);
               glutAddMenuEntry(mlabel2,MENU_DUMMY);
             }
           }
@@ -8649,7 +8649,7 @@ updatemenu=0;
         glutAddMenuEntry(vlabel,UNLOAD_ALL);
       }
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
 
         meshi = meshinfo + i;
@@ -8670,7 +8670,7 @@ updatemenu=0;
         glutAddMenuEntry("-",MENU_DUMMY);
       }
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
         char menulabel[1024];
 

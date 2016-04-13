@@ -2079,7 +2079,7 @@ void update_part_menulabels(void){
       }
       lenlabel=strlen(parti->menulabel);
       if(nmeshes>1){
-	    mesh *partmesh;
+	    meshdata *partmesh;
 
 		partmesh = meshinfo + parti->blocknumber;
         sprintf(label,"%s",partmesh->label);
