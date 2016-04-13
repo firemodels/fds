@@ -2126,7 +2126,7 @@ void update_mesh_coords(void){
     firen->dz=SCALE2SMV(firen->dz);
   }
   for(n=0;n<nzvents;n++){
-    zvent *zvi;
+    zventdata *zvi;
 
     zvi = zventinfo + n;
 
@@ -3342,7 +3342,7 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(zventinfo);
   if(nzventsnew>0)nzvents=nzventsnew;
   if(nzvents>0){
-    if(NewMemory((void **)&zventinfo,nzvents*sizeof(zvent))==0)return 2;
+    if(NewMemory((void **)&zventinfo,nzvents*sizeof(zventdata))==0)return 2;
   }
   nzvents=0;
   nzhvents=0;
@@ -5375,7 +5375,7 @@ int readsmv(char *file, char *file2){
     if(have_zonevents==1){
       int vent_type=HFLOW_VENT;
       int vertical_vent_type=0;
-      zvent *zvi;
+      zventdata *zvi;
       float vent_area;
       int roomfrom, roomto, wall;
       roomdata *roomi;

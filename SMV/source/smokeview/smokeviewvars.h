@@ -1252,7 +1252,7 @@ SVEXTERN int SVDECL(nskyboxinfo,0);
 SVEXTERN skyboxdata SVDECL(*skyboxinfo,NULL);
 SVEXTERN firedata SVDECL(*fireinfo,NULL);
 SVEXTERN roomdata SVDECL(*roominfo,NULL);
-SVEXTERN zvent SVDECL(*zventinfo,NULL);
+SVEXTERN zventdata SVDECL(*zventinfo,NULL);
 SVEXTERN zonedata SVDECL(*zoneinfo,NULL);
 SVEXTERN zonedata SVDECL(*activezone,NULL);
 SVEXTERN partdata SVDECL(*partinfo,NULL);
