@@ -758,7 +758,7 @@ void draw_geom(int flag, int timestate){
 
 /* ------------------ smooth_geom_normals ------------------------ */
 
-void smooth_geom_normals(geomlistdata *geomlisti){
+void smooth_geom_normals(geomlistdata *geomlisti, int geomtype){
   int i;
   float zmin, *zORIG;
 
@@ -831,7 +831,7 @@ void smooth_geom_normals(geomlistdata *geomlisti){
         if(trianglek->exterior == 0)continue;
         tri_normk = trianglek->tri_norm;
         cosang = DOT3(tri_normk, tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
-        if(cosang>cos_geom_max_angle){
+        if(geomtype==GEOM_ISO||cosang>cos_geom_max_angle){ // smooth using all triangles if an isosurface
           norm[0] += tri_normk[0];
           norm[1] += tri_normk[1];
           norm[2] += tri_normk[2];
@@ -867,8 +867,7 @@ void update_geom_normals(void){
       else{
         geomlisti = geomi->currentframe;
       }
-
-      smooth_geom_normals(geomlisti);
+      smooth_geom_normals(geomlisti,geomi->geomtype);
     }
   }
 }
@@ -978,7 +977,7 @@ void update_triangles(int flag,int update){
         pointi->triangles[pointi->itriangle++]=trianglei;
       }
 
-      smooth_geom_normals(geomlisti);
+      smooth_geom_normals(geomlisti,geomi->geomtype);
 
     }
   }
