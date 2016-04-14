@@ -69,31 +69,22 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-xlabel('{\it u} (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name)
-ylabel('{\it z} (m)','Interpreter',Font_Interpreter,'FontName',Font_Name)
+xlabel('{\it u} (m/s)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
+ylabel('{\it z} (m)','Interpreter',Font_Interpreter,'FontName',Font_Name,'FontSize',Label_Font_Size)
 
 h = legend(H,'Blasius','{\it N_z}=16','{\it N_z}=32','{\it N_z}=64','Location','northwest');
-set(h,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
+set(h,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [repository,'blasius_16_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [repository,'blasius_16_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf for whole velocity profile
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[1.1*Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 1.1*Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/blasius_profile')
 
 
@@ -139,33 +130,25 @@ H(1)=loglog(dz, err,'b*-','LineWidth',Line_Width); hold on
 H(2)=loglog(dz, 10*dz,'k--','LineWidth',Line_Width);
 H(3)=loglog(dz, 100*dz.^2,'k-','LineWidth',Line_Width);
 
-xlabel('Grid Spacing, {\it \deltaz} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
-ylabel('RMS Error (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter)
-axis([1e-3 1e-1 1e-3 1e-0])
-legend_handle=legend(H,'FDS','O({\it \deltaz})','O({\it \deltaz^2})','Location','Northwest');
-set(legend_handle,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Title_Font_Size)
+set(gca,'FontSize',Label_Font_Size)
 
-% add SVN if file is available
+xlabel('Grid Spacing, {\it\deltaz} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+ylabel('RMS Error (m/s)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+axis([1e-3 1e-1 1e-3 1e-0])
+legend_handle=legend(H,'FDS','{\itO}({\it\deltaz})','{\itO}({\it\deltaz^2})','Location','Northwest');
+set(legend_handle,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
 
-SVN_Filename = [repository,'blasius_16_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = 10^( log10(y_lim(1))+ SVN_Scale_Y*( log10(y_lim(2)) - log10(y_lim(1)) ) );
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+% add Git revision if file is available
+
+Git_Filename = [repository,'blasius_16_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[1.1*Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 1.1*Paper_Width Paper_Height]);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/blasius_convergence')
 
 

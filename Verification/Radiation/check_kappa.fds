@@ -1,4 +1,4 @@
-&HEAD CHID='check_kappa', TITLE='Check calculation of KAPPA, SVN $Revision$'/
+&HEAD CHID='check_kappa', TITLE='Check calculation of KAPPA'/
 
 &MESH XB=0.0,0.9,0.0,0.1,0.0,0.9, IJK=3,1,3, MULT_ID='mesh' /
 &MULT ID='mesh', DX=1., DZ=1., I_UPPER=9, K_UPPER=9 /

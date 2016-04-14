@@ -5,13 +5,23 @@
 close all
 clear all
 
-addpath ../../Verification/Radiation/
+datadir='../../Verification/Radiation/';
+
+skip_case=false;
+
+if ~exist([datadir,'radiating_polygon_square_20_line.csv']); skip_case=true; end
+if ~exist([datadir,'radiating_polygon_square_40_line.csv']); skip_case=true; end
+if ~exist([datadir,'radiating_polygon_square_80_line.csv']); skip_case=true; end
+
+if skip_case % skip_case_if
+    display(['Error: Files for radiating_polygon_square do not exist. Skipping case.'])
+else
 
 % gather FDS results
 
-M = importdata('radiating_polygon_square_20_line.csv',',',2); z_20 = 1-M.data(:,1); flux_20 = M.data(:,2);
-M = importdata('radiating_polygon_square_40_line.csv',',',2); z_40 = 1-M.data(:,1); flux_40 = M.data(:,2);
-M = importdata('radiating_polygon_square_80_line.csv',',',2); z_80 = 1-M.data(:,1); flux_80 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_20_line.csv'],',',2); z_20 = 1-M.data(:,1); flux_20 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_40_line.csv'],',',2); z_40 = 1-M.data(:,1); flux_40 = M.data(:,2);
+M = importdata([datadir,'radiating_polygon_square_80_line.csv'],',',2); z_80 = 1-M.data(:,1); flux_80 = M.data(:,2);
 
 % analytical solution (Siegel and Howell, 2nd ed., appendix
 
@@ -34,29 +44,22 @@ H(3)=plot(z_40,flux_40,'-go','MarkerSize',Marker_Size);
 H(4)=plot(z_80,flux_80,'-ro','MarkerSize',Marker_Size);
 
 axis([0 1 30 150])
-set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 text(0.25,140,'Radiative Flux from a Hot Square Plate','FontSize',Label_Font_Size,'FontName',Font_Name)
 
-xlabel('Distance from Plate (m)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter);
-ylabel('Heat Flux (kW/m^2)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
-legend_handle = legend(H,'analytical','5 cm, 100 angles','2.5 cm, 400 angles','1.25 cm, 1600 angles','Location','East');
+xlabel('Distance from Plate (m)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name);
+ylabel('Heat Flux (kW/m^2)','FontSize',Label_Font_Size,'Interpreter',Font_Interpreter,'FontName',Font_Name)
+legend_handle = legend(H,'analytical','5 cm, 100 angles','2.5 cm, 400 angles','1.25 cm, 1600 angles','Location','SouthWest');
 set(legend_handle,'Interpreter',Font_Interpreter);
-set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'Fontsize',Label_Font_Size);
 set(legend_handle,'Box','on');
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = ['radiating_polygon_square_20_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = [datadir,'radiating_polygon_square_20_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
@@ -66,4 +69,4 @@ set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiating_polygon_square'])
 
-
+end % skip_case_if

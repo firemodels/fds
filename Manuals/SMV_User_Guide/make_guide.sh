@@ -6,8 +6,6 @@ export TEXINPUTS=".:../LaTeX_Style_Files:"
 clean_build=1
 
 # Build SMV User Guide
-KWDIR=../../Utilities/keyword
-SDIR=.
 
 gitrevision=`git describe --long --dirty`
 echo "\\newcommand{\\gitrevision}{$gitrevision}" > ../Bibliography/gitrevision.tex

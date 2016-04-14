@@ -7,21 +7,22 @@
 
 close all
 clear all
+format long
 
 % define the fuel, C_m H_n O_a N_b
-m = 1;
-n = 4;
+m = 3;
+n = 8;
 a = 0;
 b = 0;
 
-% defind hydrogen atomic fraction in soot
+% define hydrogen atomic fraction in soot
 
-X_H = 0;
+X_H = 0.1;
 
 % define CO and soot yields
 
 y_CO = 0;
-y_s  = 0;
+y_s  = .01;
 
 % define the element matrix (number of atoms [rows] for each primitive species [columns])
 
@@ -46,11 +47,10 @@ W = E'*[12.0107 1.0794 15.9994 14.0067]' % primitive species molecular weights
 
 % define the volume fractions of the background and fuel
 
-v_0 = [0 .21 .79 .0 .0 0 0];
+v_0 = [0 2.077972E-01 7.834714E-01 8.344567E-03 3.868556E-04 0 0];
 v_0 = v_0/sum(v_0) % normalize
 
 v_1 = [1 0 0 0 0 0 0];
-v_1 = v_1/sum(v_1) % normalize
 
 % the reaction coefficients for the product primitive species temporarily stored in v_2
 

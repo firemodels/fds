@@ -181,6 +181,11 @@ for m = 1:4
     AxisPlotLeg = legend(AxisPlotLabels(1:m),'Location','NorthEast');
     set(AxisPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
 
+    % add Git revision if file is available
+
+    Git_Filename = [input_dir,'vort2d_40_git.txt'];
+    addverstr(gca,Git_Filename,'linear')
+
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname{m},'_uzgraph']);
 
@@ -253,6 +258,11 @@ for m = 1:4
     % Create legend
     PointPlotLeg = legend('Analytical','FDS','Location','SouthEast');
     set(PointPlotLeg,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter);
+
+    % add Git revision if file is available
+
+    Git_Filename = [input_dir,'vort2d_40_git.txt'];
+    addverstr(gca,Git_Filename,'linear')
 
     % Save plot to file
     print(gcf,'-dpdf',[plot_dir,'vort2d_',meshname{m},'_upgraph']);

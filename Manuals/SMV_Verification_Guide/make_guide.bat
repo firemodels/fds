@@ -1,6 +1,8 @@
 @echo off
 set paper=SMV_Verification_Guide
 
+Title Building %paper%
+
 git describe --long --dirty > gitinfo.txt
 set /p gitrevision=<gitinfo.txt
 echo \newcommand^{\gitrevision^}^{%gitrevision%^} > ..\Bibliography\gitrevision.tex
@@ -19,5 +21,6 @@ find "Error:" %paper%.err
 
 if exist ..\Bibliography\gitrevision.tex erase ..\Bibliography\gitrevision.tex
 echo %paper% build complete
+pause
 
 

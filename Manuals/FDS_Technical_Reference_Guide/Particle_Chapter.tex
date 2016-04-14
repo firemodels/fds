@@ -35,13 +35,13 @@ The exact solution procedure of the above model is presented in Appendix~\ref{pa
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles, 
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles,
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
      10\left(0.6+0.4 \, \RE_D^{0.8} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
      1                                             & 1000 < \RE_D
-     \end{array} \right. 
+     \end{array} \right.
 \end{align}
 Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
@@ -156,9 +156,9 @@ Liquid droplets can represent either discrete airborne spheres or elements of th
 Over the course of a time step of the gas phase solver, the droplets in a given grid cell evaporate to form the gas species $\alpha$. The evaporation rate is a function of the liquid equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}$, the local gas phase vapor mass fraction, $Y_{\rm \alpha,g}$, the (assumed uniform) droplet temperature, $T_{\rm p}$, and the local gas temperature, $T_{\rm g}$. The subscript ``g'' refers to the average of the quantity in the cell occupied by the droplet. The subscript ``p'' refers to the liquid droplet. If the droplet is attached to a solid, $T_{\rm s}$ is the surface temperature. The mass and energy transfer between the gas and the liquid can be described by the following set of equations~\cite{Cheremisinoff:1}
 \begin{align}
 \frac{\d m_{\rm p}}{\d t} & = - A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \, (Y_{\alpha,\ell} - Y_{\rm \alpha, g}) \\[0.2in]
-\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \dq_{\rm r} + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
+\frac{\d T_{\rm p}}{\d t} & = \frac{1}{m_{\rm p} \, c_{\rm p}}  \left[ \dq_{\rm r} + A_{\rm p} \, h  \, (T_{\rm g}-T_{\rm p}) + \frac{\d m_{\rm p}}{\d t} \; h_{\rm v} \right] \label{droplet_temp}
 \end{align}
-Here, $m_{\rm p}$ is the mass of the liquid droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet, and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
+The droplet is taken to be a pure liquid of species $\alpha$ (usually, either water or fuel).  Here, $m_{\rm p}$ is the mass of the droplet (or that fraction of the surface film associated with the formerly airborne droplet), $A_{\rm p}$ is the surface area of the liquid droplet, $h_{\rm m}$ is the mass transfer coefficient to be discussed below, $\rho_{\rm g}$ is the gas density, $c_{\rm p}$ is the liquid specific heat, $h$ is the heat transfer coefficient between the droplet and the gas, $\dq_{\rm r}$ is the rate of radiative heating of the droplet (see Eq.~(\ref{eq:qr})), and $h_{\rm v}$ is the latent heat of vaporization of the liquid. The vapor mass fraction of the gas, $Y_{\rm \alpha,g}$, is obtained from the gas phase mass transport equations, and the liquid equilibrium vapor mass fraction is obtained from the Clausius-Clapeyron equation
 \be X_{\rm \alpha,\ell} = \exp \left[ \frac{h_{\rm v} \, W_{\alpha}}R
       \left( \frac{1}{T_{\rm b}}-\frac{1}{T_{\rm p}} \right) \right]  \quad ; \quad
       Y_{\rm \alpha,\ell} = \frac{X_{\rm \alpha,\ell}}{X_{\rm \alpha,\ell} \, (1-W_{\rm a}/W_{\alpha}) + W_{\rm a}/W_{\alpha}}  \label{clausius_clapeyron} \ee
@@ -183,7 +183,7 @@ appropriate amount of vaporized liquid is added to the given mesh cell, and the 
 
 Equation~(\ref{droplet_temp}) is solved semi-implicitly over the course of a gas phase time step as follows:
 \be
-   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
+   \frac{T_{\rm p}^{n+1}-T_{\rm p}^n}{\dt} = \frac{1}{m_{\rm p} \, c_{\rm p}} \left[ \dq_{\rm r} + A_{\rm p} \, h \, \left( T_{\rm g}-\frac{T_{\rm p}^{n+1}+T_{\rm p}^n}{2} \right) -
    A_{\rm p} \, h_{\rm m} \, \rho_{\rm g} \left( \frac{Y_{\rm \alpha,\ell}^{n+1}+Y_{\rm \alpha,\ell}^n}{2} - Y_{\rm \alpha,g} \right) h_{\rm v}  \right]
 \ee
 The equilibrium vapor mass fraction, $Y_{\rm \alpha,\ell}^n$, is computed using $T_{\rm p}^n$ via Eq.~(\ref{clausius_clapeyron}), and its value at the next time step is approximated via
@@ -197,14 +197,32 @@ where the derivative of $Y_{\rm \alpha,\ell}$ with respect to temperature is obt
 \ee
 The amount of evaporated liquid is given by
 \be
-   \delta m_{\rm p} = -\dt \, A_{\rm p} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
+   \delta m_{\rm p} = - \dt \, A_{\rm p} \, h_m \, \rho_{\rm g}  \left[  Y_{\rm \alpha,\ell}^n + \ha \left( \frac{\d Y_{\rm \alpha,\ell}}{\d T_{\rm p}} \right)^n \;
    \Big( T_{\rm p}^{n+1}-T_{\rm p}^n \Big)  - Y_{\rm \alpha, g} \right]
 \ee
-The amount of heat extracted from the gas is
+The amount of heat transfer from the gas to the particle is
 \be
-   \delta q = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
+   \delta q_{\rm p} = \dt \, A_{\rm p} \, h \, \left( T_{\rm g} - \frac{T_{\rm p}^n+T_{\rm p}^{n+1}}{2} \right)
 \ee
 
+
+\subsection{Filtered Volumetric Source Terms}
+
+The filtered volumetric source terms for mass and energy---which are required in the mass transport equation, Eq.~(\ref{species}), and the divergence expression, Eq.~(\ref{eqn_simplediv1})---are obtained by summation of the individual particle source contributions with a given cell divided by the LES time step, $\delta t_{\si{LES}}$, and the local cell volume, $V_{\si{c}}$. The bulk mass and energy source terms are, respectively,
+\begin{equation}
+\label{eq:bulk_source}
+\dot{m}_{{\rm b},\alpha}^{\ppp} = - \frac{ \sum_p \sum_n \delta m_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \quad ; \quad
+\dot{q}_{\rm b}^{\ppp} = - \frac{ \sum_p \sum_n \delta q_{\si{p}}^n }{\delta t_{\si{LES}} V_{\si{c}}} \,\mbox{.}
+\end{equation}
+where $n$ represents the sub-time step in the integration of the droplet mass and energy equations.  The summation over $p$ is over all the particles within the cell.
+
+\subsection{Lagrangian Contribution to the Velocity Divergence}
+
+In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_SOURCE} within the code,
+\begin{equation}
+D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
+\end{equation}
+which is embedded in Eq.~(\ref{eqn_fdsD1}).
 
 \section{Fire Suppression by Water}
 
@@ -267,7 +285,7 @@ a cylindrical, spherical or cartesian coordinate system.
 
 It is assumed that the particles interact with the surrounding gas via an additional source term in the energy conservation
 equation. For a grid cell with indices $ijk$, the source term is:
-\be \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) \ee
+\be \label{eq:qr} \dq_{{\rm r},ijk}''' \equiv (-\nabla \cdot \dot{\bq}_{\rm r}'')_{ijk} = \sum \kappa_{\rm p} \left( U_{ijk} - 4 \sigma \, T_{\rm p}^4 \right) \ee
 where the summation is over all the particles within the cell. The effective absorption coefficient for a single particle is given by
 \be \kappa_{\rm p} = \frac{A}{4 \, \dx \, \dy \, \dz} \ee
 where $A$ is the surface area of the particle and $\dx \, \dy \, \dz$ is the volume of the cell.

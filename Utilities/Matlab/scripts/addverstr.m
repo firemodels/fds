@@ -2,12 +2,18 @@
 % 6-23-2015
 % addverstr.m
 
-function []=addverstr(ha,fn,pt)
+function []=addverstr(ha,fn,pt,varargin)
 
 Font_Name = 'Times';
 Font_Interpreter = 'TeX';
-VerStr_Scale_X = 0.65;
-VerStr_Scale_Y = 1.05;
+
+if length(varargin)==0
+    VerStr_Scale_X = 0.65;
+    VerStr_Scale_Y = 1.05;
+else
+    VerStr_Scale_X = varargin{1};
+    VerStr_Scale_Y = varargin{2};
+end
 
 if exist(fn,'file')
     VerStr = importdata(fn);

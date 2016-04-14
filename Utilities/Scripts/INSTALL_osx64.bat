@@ -1,11 +1,10 @@
 @echo off
-Title Install 64 bit Linux bundle
+Title install bundle on a 64 bit OSX system
 
-REM Windows batch file to Install 64 bit Linux bundle
+Rem  Windows batch file to install bundle on a 64 bit OSX system
 
-set platform=linux64
 
-set envfile=%userprofile%\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -19,7 +18,11 @@ goto:eof
 
 call %envfile%
 
-set exe=FDS_%fds_version%-SMV_%smv_version%_%platform%.sh
+%svn_drive%
 
-plink %svn_logon% %linux_svn_root%/SMV/scripts/ssh_command2.csh %osx_hostname% FDS-SMV/Utilities/uploads %exe% y
+set platform=osx64
+plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh Utilities/uploads FDS_%fds_version%-SMV_%smv_version%_%platform%.sh y
+
+echo.
+echo installation complete
 pause

@@ -2,8 +2,12 @@ RENDERDIR
  ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
 LOADINIFILE
  colorconv_slice.ini
-LOADFILE
- colorconv_01.sf
+// LOADFILE
+//  colorconv_01.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 1.000000
+ 1
 RENDERCLIP
  1 100 100 20 20
 SETTIMEVAL

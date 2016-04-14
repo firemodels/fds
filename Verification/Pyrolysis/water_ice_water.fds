@@ -1,4 +1,4 @@
-&HEAD CHID='water_ice_water',TITLE='Phase change test: freeze-melt water, SVN $Revision$' / 
+&HEAD CHID='water_ice_water',TITLE='Phase change test: freeze-melt water' / 
 
 &MESH IJK=3,1,4, XB=-1.5,1.5,-0.5,0.5,0,4 / 
 

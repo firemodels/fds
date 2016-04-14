@@ -1,4 +1,4 @@
-&HEAD CHID='radiation_shield', TITLE='Test wall heat transfer in a box, SVN $Revision$'/
+&HEAD CHID='radiation_shield', TITLE='Test wall heat transfer in a box'/
 
 &MESH XB=0.0,10.0,0.0,0.1,0.0,1.0, IJK=100,1,10 /
 

@@ -1,4 +1,4 @@
-&HEAD CHID='smoke_test2', TITLE='Verify Smokeview Smoke3D Feature, SVN $Revision$' /
+&HEAD CHID='smoke_test2', TITLE='Verify Smokeview Smoke3D Feature' /
   
   A quantitative test of the smoke opacity calculation in Smokeview.  This test simplifies
   the general case by assuming a uniform distribution of smoke.  Smoke grey levels are computed

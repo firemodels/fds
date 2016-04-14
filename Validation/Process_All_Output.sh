@@ -1,7 +1,9 @@
 #!/bin/bash -f
 
-export SVNROOT=`pwd`/..
-export VDIR=$SVNROOT/Validation
+if [ "$FDSSMV" == "" ] ; then
+  export FDSSMV=~/FDS-SMVgitclean
+fi
+export VDIR=$FDSSMV/Validation
 
 # This list of active validation data sets is used by Validationbot
 # to automatically run validation cases on a regular basis.
@@ -31,6 +33,7 @@ $VDIR/LEMTA_Spray/FDS_Output_Files/Process_Output.csh
 $VDIR/LLNL_Enclosure/FDS_Output_Files/Process_Output.csh
 $VDIR/McCaffrey_Plume/FDS_Output_Files/Process_Output.csh
 $VDIR/Moody_Chart/FDS_Output_Files/Process_Output.csh
+$VDIR/MPI_Scaling_Tests/FDS_Output_Files/Process_Output.csh
 $VDIR/NBS_Multi-Room/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_Douglas_Firs/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_FSE_2008/FDS_Output_Files/Process_Output.csh
@@ -39,6 +42,7 @@ $VDIR/NIST_NRC/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_RSE_1994/FDS_Output_Files/Process_Output.csh
 $VDIR/NIST_Smoke_Alarms/FDS_Output_Files/Process_Output.csh
 $VDIR/NRCC_Facade/FDS_Output_Files/Process_Output.csh
+$VDIR/NRCC_Smoke_Tower/FDS_Output_Files/Process_Output.csh
 $VDIR/NRL_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/Pool_Fires/FDS_Output_Files/Process_Output.csh
 $VDIR/PRISME/FDS_Output_Files/Process_Output.csh
@@ -50,11 +54,11 @@ $VDIR/Smyth_Slot_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/SP_AST/FDS_Output_Files/Process_Output.csh
 $VDIR/Steckler_Compartment/FDS_Output_Files/Process_Output.csh
 $VDIR/Turbulent_Jet/FDS_Output_Files/Process_Output.csh
-$VDIR/UL_Commodity/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NFPRF/FDS_Output_Files/Process_Output.csh
 $VDIR/UL_NIST_Vents/FDS_Output_Files/Process_Output.csh
 $VDIR/Ulster_SBI/FDS_Output_Files/Process_Output.csh
 $VDIR/UMD_Polymers/FDS_Output_Files/Process_Output.csh
+$VDIR/UMD_Line_Burner/FDS_Output_Files/Process_Output.csh
 $VDIR/USCG_HAI/FDS_Output_Files/Process_Output.csh
 $VDIR/USN_Hangars/FDS_Output_Files/Process_Output.csh
 $VDIR/Vettori_Flat_Ceiling/FDS_Output_Files/Process_Output.csh

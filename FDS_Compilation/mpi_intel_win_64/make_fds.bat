@@ -1,11 +1,14 @@
 @echo off
-:: change following line to set fds_build_debug=1 to display error messages when building FDS
-set fds_build_debug=0
+set arg1=%1
 
 :: setup compiler environment
+if x%arg1% == xbot goto skip1
 call ..\..\Utilities\Scripts\setup_intel_compilers.bat
+:skip1
 
 Title Building FDS (mpi) for 64 bit Windows
 
 make SHELL="%ComSpec%" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64
+if x%arg1% == xbot goto skip2
 pause
+:skip2

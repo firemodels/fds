@@ -7,16 +7,9 @@ function main()
 clear all
 close all
 
-plot_style
-
-fontname = 'Times';
-set(0,'defaultaxesfontname',fontname);
-set(0,'defaulttextfontname',fontname);
-
 expdir = '../../Validation/Backward_Facing_Step/Experimental_Data/';
 datdir = '../../Validation/Backward_Facing_Step/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';
-
 
 rkappa = 1/.41;
 B = 5.2;
@@ -79,6 +72,13 @@ sp5 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure(1)
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 %%%Exp Data%%%
 
@@ -140,19 +140,10 @@ lh = legend([h_dat,h_leg([1:length(h_leg)])], ['J&D',fds_key([1:length(h_leg)])]
 set(lh,'box','off')
 %set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name); 
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
@@ -163,6 +154,13 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 figure(2)
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 %%%Exp Data%%%
 j = find(strcmp(D.colheaders,'Cp-x/h'));
@@ -209,36 +207,30 @@ end
 
 lh = legend([h_dat,h_leg2([1:length(h_leg2)])], ['J&D',fds_key([1:length(h_leg2)])], 'Location', 'SouthEast');
 set(lh,'box','off')
-%set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name); 
-    
-hold on
+%set(lh,'Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
 
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
 print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cp'])
 
-% for profile plots with four subplots, make the following mods to Plot_Style
-SVN_Scale_X=0.5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % wall-normal streamwise velocity profiles
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(3);
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -284,7 +276,7 @@ for i = 1:4
             ylabel('{\it z/h}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);
             xh=xlabel('{\it <u>/U_0}','Interpreter',Font_Interpreter,'Fontsize',20,'FontName',Font_Name);                                       
         else
-            set(gca,'XTickLabel',[])                
+            set(gca,'XTickLabel',[])
             set(gca,'YTickLabel',[])
         end
         if q == 1
@@ -297,24 +289,10 @@ for i = 1:4
     
 end
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% add Git revision if file is available
 
-% add SVN if file is available
-
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear',0,1.05)
 
 % print to pdf
 
@@ -325,9 +303,16 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_U'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(4);
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
-%            subplot(1,4,i)
+
     j = find(strcmp(D.colheaders,strcat({'z '},x_loc{i})));
     z = D.data(:,j);
     I = find(z>0);
@@ -380,26 +365,10 @@ for i = 1:4
 
 end
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% add Git revision if file is available
 
-hold on
-
-% add SVN if file is available
-
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear',0,1.05)
 
 % print to pdf
 
@@ -410,9 +379,15 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_W'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(5);
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
-%            subplot(1,4,i)
 
     j = find(strcmp(D.colheaders,strcat({'z '}, x_loc{i})));
     z = D.data(:,j);
@@ -464,28 +439,13 @@ for i = 1:4
             set(th,'Position',tpos)
         end
     end
-    
 
 end
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% add Git revision if file is available
 
-% add SVN if file is available
-
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear',0,1.05)
 
 % print to pdf
 
@@ -497,7 +457,13 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_uu'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(6);
-%set(hx, 'Position', [500 500 600 450]);
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
 
@@ -551,29 +517,15 @@ for i = 1:4
             tpos = get(th,'Position');
             tpos(2) = tpos(2) * .90;
             set(th,'Position',tpos)
-        end            
+        end
     end
 
 end
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% add Git if file is available
 
-% add SVN if file is available
-
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear',0,1.05)
 
 % print to pdf
 
@@ -584,6 +536,13 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_ww'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 hx = figure(7);
+plot_style
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gcf,'Visible',Figure_Visibility);
+set(gcf,'PaperUnits',Paper_Units);
+set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
 for i = 1:4
     j = find(strcmp(D.colheaders,strcat({'z '},x_loc{i})));
@@ -637,38 +596,23 @@ for i = 1:4
             tpos = get(th,'Position');
             tpos(2) = tpos(2) * .90;
             set(th,'Position',tpos)
-        end            
+        end
     end
     
     th = title(strcat('{\it x/h}','=',x_loc{i}),'Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name);
 
 end
 
-set(gcf,'Visible',Figure_Visibility);
-set(gcf,'PaperUnits',Paper_Units);
-set(gcf,'PaperSize',[Paper_Width Paper_Height]);
-set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-
-hold on
-
 % add SVN if file is available
 
-SVN_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
-addverstr(gca,SVN_Filename,'linear')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [datdir,'backward_facing_step_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear',0,1.05)
 
 % print to pdf
+
 print(gcf,'-dpdf',[pltdir,'backward_facing_step_uw'])
 
-end
+end % main()
 
 
 %THE FOLLOWING CODE IS ALL EXTERNAL SCRIPTS IMBEDDED IN THIS SCRIPT TO

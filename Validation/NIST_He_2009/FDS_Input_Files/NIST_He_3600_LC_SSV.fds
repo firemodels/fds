@@ -2,7 +2,7 @@
 
 &MESH IJK=60,60,30, XB=0.0, 1.50, 0.0, 1.50, 0.0, 0.75 /
 
-&TIME T_BEGIN=-0.1,T_END=32460. / 1 h release and an equilibrium phase
+&TIME T_BEGIN=-0.1,T_END=7200. / 1 h release and an equilibrium phase
 &MISC TMPA=21. /
 &SPEC ID='HELIUM', MASS_EXTINCTION_COEFFICIENT=500. /
 

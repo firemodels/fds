@@ -3,7 +3,7 @@ At end of simulation average the soot density for sp1 at 150 s, sp2 at 100 s and
 Compute flowrate weighted average and convert to kg/m^2.  
 Using default value of extinction coefficient, 45.6 % at T_END.
 
-&HEAD CHID='aspiration_detector', TITLE='Test of aspiration detector, SVN $Revision$' /
+&HEAD CHID='aspiration_detector', TITLE='Test of aspiration detector' /
 
 &MESH IJK = 10,10,10, XB=-1.,1.,-1.,1.,-1.,1. /
 &RADI RADIATION=.FALSE./

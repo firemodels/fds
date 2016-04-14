@@ -23,7 +23,6 @@ HVENT,2,3,1,1,0.1,0,0,1,1
 !!
 !!Fire keywords
 !!
-GLOBA,10,393.15
 !!bunkbed
 FIRE,2,1.8,1.2,0,1,TIME,0,0,0,0,bunkbed
 CHEMI,25,42,6,2,0,0.52,2.62E+07

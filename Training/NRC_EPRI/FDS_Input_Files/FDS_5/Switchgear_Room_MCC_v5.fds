@@ -1,0 +1,143 @@
+&HEAD CHID='Switchgear_Room_MCC_v5', TITLE='MCC fire in a switchgear room'  /
+
+&MESH IJK=85,85,30, XB= 0.0, 8.5,0.0,8.5,0.0,3.0 /
+&MESH IJK=28,85,90, XB= 8.5,11.3,0.0,8.5,0.0,9.0 /
+&MESH IJK=28,85,90, XB=11.3,14.1,0.0,8.5,0.0,9.0 /
+&MESH IJK=30,85,90, XB=14.1,17.1,0.0,8.5,0.0,9.0 /
+
+&TIME T_END=3600. /
+
+Construction
+
+&MISC SURF_DEFAULT='CONCRETE WALL' /
+
+&MATL ID            = 'CONCRETE'
+      SPECIFIC_HEAT = 0.750
+      CONDUCTIVITY  = 1.6
+      DENSITY       = 2400. /
+
+&SURF ID            = 'CONCRETE WALL'
+      COLOR         = 'GRAY'
+      MATL_ID       = 'CONCRETE'
+      THICKNESS     = 0.6 /
+
+Cables
+
+&MATL ID             = 'XPE/Neoprene'
+      SPECIFIC_HEAT  = 1.5
+      CONDUCTIVITY   = 0.2
+      DENSITY        = 2264. / THIEF material properties used to define cables in trays
+
+&SURF ID             = 'CABLE'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'XPE/Neoprene'
+      GEOMETRY       = 'CYLINDRICAL'
+      THICKNESS      = 0.0075 / THIEF model of cables
+
+&OBST XB= 2.0, 3.0, 0.0, 8.0, 2.6, 2.7, SURF_ID = 'CABLE' / 
+&OBST XB= 3.0, 7.5, 5.5, 6.5, 2.6, 2.7, SURF_ID = 'CABLE' / 
+&OBST XB= 8.7,17.1, 3.0, 4.0, 8.7, 8.8, SURF_ID = 'CABLE' /
+
+Cabinets
+      
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'CABINET'
+      COLOR          = 'OLIVE'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0015 /
+
+&OBST XB= 2.0, 3.5, 2.0, 6.5, 0.0, 2.4, SURF_ID = 'CABINET' / Cabinet row with fire
+&OBST XB= 3.5, 7.5, 5.0, 6.5, 0.0, 2.4, SURF_ID = 'CABINET' / Cabinet row opposite
+
+Fire
+
+&REAC ID='XPE/Neoprene'
+      RADIATIVE_FRACTION=0.53
+      C = 3.
+      H = 4.5
+      OTHER = 0.5
+      MW_OTHER=35.5
+      HEAT_OF_COMBUSTION=10300.
+      CO_YIELD=0.082
+      SOOT_YIELD=0.175 /
+
+&SURF ID      = 'CABINET FIRE'
+      COLOR   = 'ORANGE'
+      HRRPUA  = 3900.
+      RAMP_Q  = 'fire ramp' /
+
+&RAMP ID='fire ramp', T=   0.0, F=0.00 /
+&RAMP ID='fire ramp', T=  72.0, F=0.01 /
+&RAMP ID='fire ramp', T= 144.0, F=0.04 /
+&RAMP ID='fire ramp', T= 216.0, F=0.09 /
+&RAMP ID='fire ramp', T= 288.0, F=0.16 /
+&RAMP ID='fire ramp', T= 360.0, F=0.25 /
+&RAMP ID='fire ramp', T= 432.0, F=0.36 /
+&RAMP ID='fire ramp', T= 504.0, F=0.49 /
+&RAMP ID='fire ramp', T= 576.0, F=0.64 /
+&RAMP ID='fire ramp', T= 648.0, F=0.81 /
+&RAMP ID='fire ramp', T= 720.0, F=1.00 /
+&RAMP ID='fire ramp', T=1200.0, F=1.00 /
+&RAMP ID='fire ramp', T=2340.0, F=0.00 /
+
+&VENT XB= 2.5, 3.1, 4.0, 4.3, 2.4, 2.4, SURF_ID = 'CABINET FIRE'/
+
+Ventilation
+
+&SURF ID             = 'DOOR'
+      COLOR          = 'BROWN'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.05 /
+
+&SURF ID             = 'SUPPLY'
+      COLOR          = 'BLUE'
+      VOLUME_FLOW    = -0.735 /
+
+&SURF ID             = 'RETURN'
+      COLOR          = 'YELLOW'
+      VOLUME_FLOW    = 0.735 /
+
+&VENT XB= 2.5, 3.5, 8.5, 8.5, 0.0, 2.0, SURF_ID = 'DOOR' / 
+&VENT XB=14.5,15.5, 0.0, 0.0, 0.0, 2.0, SURF_ID = 'DOOR' / 
+&VENT XB= 0.0, 0.0, 4.0, 4.5, 2.2, 2.7, SURF_ID = 'SUPPLY' /
+&OBST XB= 0.2, 0.2, 4.0, 4.5, 2.2, 2.7, SURF_ID = 'CABINET' /
+&VENT XB=17.1,17.1, 4.0, 4.5, 5.8, 6.3, SURF_ID = 'RETURN' /
+
+Devices/Outputs
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC QUANTITY= 'UPPER TEMPERATURE',ID='HGL_Temp_Low_FDS',    XB= 1.0, 1.0,1.0,1.0,0.0,3.0 /
+&DEVC QUANTITY= 'UPPER TEMPERATURE',ID='HGL_Temp_High_FDS',   XB=13.5,13.5,2.5,2.5,0.0,9.0 /
+
+&DEVC QUANTITY= 'LAYER HEIGHT',     ID='HGL_Height_Low_FDS',  XB= 1.0, 1.0,1.0,1.0,0.0,3.0 /
+&DEVC QUANTITY= 'LAYER HEIGHT',     ID='HGL_Height_High_FDS', XB=13.5,13.5,2.5,2.5,0.0,9.0 /
+
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, ID='Temp_Cable_A_FDS', XB=2.0, 3.0,0.0,8.0,2.6,2.7, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, ID='Temp_Cable_B_FDS', XB=3.0, 7.5,5.5,6.5,2.6,2.7, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, ID='Temp_Cable_C_FDS', XB=8.7,17.1,3.0,4.0,8.7,8.8, SURF_ID='CABLE', STATISTICS='MAX' /
+
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_A_FDS', XB=2.0, 3.0,0.0,8.0,2.6,2.7, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_B_FDS', XB=3.0, 7.5,5.5,6.5,2.6,2.7, SURF_ID='CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cable_B_FDS', XB=8.7,17.1,3.0,4.0,8.7,8.8, SURF_ID='CABLE', STATISTICS='MAX' /
+
+&DEVC QUANTITY= 'WALL TEMPERATURE', ID='Temp_Cabinet_FDS', XB=3.5,7.5,4.9,6.6,0.0,2.4, SURF_ID='CABINET', STATISTICS='MAX' /
+&DEVC QUANTITY= 'GAUGE HEAT FLUX',  ID='Flux_Cabinet_FDS', XB=3.5,7.5,4.9,6.6,0.0,2.4, SURF_ID='CABINET', STATISTICS='MAX' /
+
+Smokeview output
+
+&BNDF QUANTITY= 'WALL TEMPERATURE' /
+&BNDF QUANTITY= 'GAUGE HEAT FLUX' /
+
+&SLCF PBX=1.0, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+&SLCF PBY=4.3, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+&SLCF PBZ=2.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+&SLCF PBZ=8.0, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+
+End the file
+
+&TAIL /

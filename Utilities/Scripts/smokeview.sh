@@ -1,15 +1,21 @@
 #!/bin/bash
 
-RUNSCRIPT=
 ssffile=
 SMV=smokeview
+RUNSCRIPT=-runscript
 SMVDIR=$(dirname "$0")
 
-while getopts 'd:' OPTION
+while getopts 'd:e:s:' OPTION
 do
 case $OPTION in
   d)
    dir="$OPTARG"
+   ;;
+  e)
+   SMV="$OPTARG"
+   ;;
+  s)
+   RUNSCRIPT="-scriptfile $OPTARG"
    ;;
 esac
 done
@@ -18,7 +24,6 @@ shift $(($OPTIND-1))
 in=$1
 in=${in%*.*}
 
-RUNSCRIPT=-runscript
 ssffile=$in.ssf
 
 notfound=`$SMV -help 2>&1 | tail -1 | grep "not found" | wc -l`

@@ -11,8 +11,6 @@
       FYI='Methane, C H_4'               
       SOOT_YIELD=0.005 /                 
            
-&RADI RADIATIVE_FRACTION=0.20 /                           
-
 &SURF ID='burner', HRRPUA=1222., COLOR='RED', RAMP_Q='burner_ramp' /
 &RAMP ID='burner_ramp',T=  0.,F=0. /
 &RAMP ID='burner_ramp',T=  1.,F=1. /

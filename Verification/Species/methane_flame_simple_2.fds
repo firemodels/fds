@@ -1,4 +1,4 @@
-&HEAD CHID='methane_flame_simple_2', TITLE='Verification of simple chemistry flame, SVN $Revision$'/
+&HEAD CHID='methane_flame_simple_2', TITLE='Verification of simple chemistry flame'/
 
 All material properties etc. are completely fabricated.
 
@@ -7,8 +7,6 @@ All material properties etc. are completely fabricated.
 &TIME T_END=10.0 DT = 0.01 /
 
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
-
-&MISC HRRPUV_AVERAGE=1e8/
 
 Fire
 HRR = 100 kW 

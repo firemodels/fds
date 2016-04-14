@@ -1,0 +1,521 @@
+&HEAD CHID='CLC-II-R', TITLE='PJTyson MSc Dissertation' /
+
+&DUMP DT_DEVC=10., DT_HRR=10. /
+&TIME T_END=2400. /
+
+&MESH IJK=56,112,36, XB=0.0,5.6,0.0,11.2,0.0,3.6, MULT_ID='fl 1-2' /
+&MULT ID='fl 1-2', DX=5.6, DZ=3.6, I_UPPER=2, K_UPPER=1 /
+
+&MESH IJK=84,112,26, XB=0.0,8.4,0.0,11.2,7.2,9.8, MULT_ID='fl 3-10' /
+&MULT ID='fl 3-10', DX=8.4, DZ=2.6, I_UPPER=1, K_UPPER=8 /
+
+&VENT PBX=0.0,  SURF_ID='OPEN',  / North Open Ambient
+&VENT PBX=16.8, SURF_ID='OPEN',  / South Open Ambient
+&VENT PBY=0.0,  SURF_ID='OPEN',  / East Open Ambient
+&VENT PBY=11.2, SURF_ID='OPEN',  / West Open Ambient
+&VENT PBZ=30.6, SURF_ID='OPEN',  / Top
+
+&MISC TMPA=2.0/
+
+&REAC FUEL='PROPANE', CO_YIELD=0.005, SOOT_YIELD=0.024/
+
+&OBST XB=13.5,14.1,2.6,8.7,4.1,4.4, SURF_IDS='FIRE','Steel','Steel'/ PROPANE GAS BURNER
+
+&SURF ID     = 'FIRE'
+      COLOR  = 'RED'
+      HRRPUA = 273.2
+      RAMP_Q = 'FIRERAMP' /
+
+&RAMP ID='FIRERAMP', T=   0., F=0.000 /
+&RAMP ID='FIRERAMP', T=  10., F=0.170 /
+&RAMP ID='FIRERAMP', T= 110., F=0.176 /
+&RAMP ID='FIRERAMP', T= 230., F=1.914 /
+&RAMP ID='FIRERAMP', T= 270., F=2.400 /
+&RAMP ID='FIRERAMP', T= 320., F=2.950 /
+&RAMP ID='FIRERAMP', T= 380., F=3.370 /
+&RAMP ID='FIRERAMP', T= 410., F=3.250 /
+&RAMP ID='FIRERAMP', T= 480., F=1.175 /
+&RAMP ID='FIRERAMP', T= 560., F=0.770 /
+&RAMP ID='FIRERAMP', T= 730., F=0.480 /
+&RAMP ID='FIRERAMP', T=1610., F=0.175 /
+&RAMP ID='FIRERAMP', T=2140., F=0.075 /
+&RAMP ID='FIRERAMP', T=2150., F=0.000 /
+
+&DEVC ID='Slot 5',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.55 / Fire Compartment - SW Corner Thermocouple Tree @ 2.95m From FFL
+&DEVC ID='Slot 6',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.17 / Fire Compartment - SW Corner Thermocouple Tree @ 2.57m From FFL
+&DEVC ID='Slot 8',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,6.02 / Fire Compartment - SW Corner Thermocouple Tree @ 2.42m From FFL
+&DEVC ID='Slot 9',   QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.87 / Fire Compartment - SW Corner Thermocouple Tree @ 2.27m From FFL
+&DEVC ID='Slot 10',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.72 / Fire Compartment - SW Corner Thermocouple Tree @ 2.12m From FFL
+&DEVC ID='Slot 11',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.57 / Fire Compartment - SW Corner Thermocouple Tree @ 1.97m From FFL
+&DEVC ID='Slot 12',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.42 / Fire Compartment - SW Corner Thermocouple Tree @ 1.82m From FFL
+&DEVC ID='Slot 13',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.27 / Fire Compartment - SW Corner Thermocouple Tree @ 1.67m From FFL
+&DEVC ID='Slot 14',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,5.12 / Fire Compartment - SW Corner Thermocouple Tree @ 1.52m From FFL
+&DEVC ID='Slot 15',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.97 / Fire Compartment - SW Corner Thermocouple Tree @ 1.37m From FFL
+&DEVC ID='Slot 16',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.82 / Fire Compartment - SW Corner Thermocouple Tree @ 1.22m From FFL
+&DEVC ID='Slot 17',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.52 / Fire Compartment - SW Corner Thermocouple Tree @ 0.92m From FFL
+&DEVC ID='Slot 18',  QUANTITY='THERMOCOUPLE',    XYZ=15.4,1.5,4.22 / Fire Compartment - SW Corner Thermocouple Tree @ 0.62m From FFL
+&DEVC ID='Slot 19',  QUANTITY='THERMOCOUPLE',    XYZ=13.8,9.8,6.70 / Fire Compartment - East Side Ceiling @ 3.1m From FFL
+&DEVC ID='Slot 21',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,5.65 / Fire Lobby - Lobby Door Thermocouple Tree @ 2.05m From FFL
+&DEVC ID='Slot 22',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,5.25 / Fire Lobby - Lobby Door Thermocouple Tree @ 1.65m From FFL
+&DEVC ID='Slot 23',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,4.75 / Fire Lobby - Lobby Door Thermocouple Tree @ 1.15m From FFL
+&DEVC ID='Slot 24',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,4.35 / Fire Lobby - Lobby Door Thermocouple Tree @ 0.75m From FFL
+&DEVC ID='Slot 25',  QUANTITY='THERMOCOUPLE',    XYZ=9.3,3.05,3.95 / Fire Lobby - Lobby Door Thermocouple Tree @ 0.35m From FFL
+&DEVC ID='Slot 33',  QUANTITY='VOLUME FRACTION', XYZ=8.5,3.60,6.85, SPEC_ID='OXYGEN',          DRY=.TRUE. / Fire Landing - In Front of Lobby Door @ 3.25m From FFL
+&DEVC ID='Slot 34',  QUANTITY='VOLUME FRACTION', XYZ=8.5,3.60,6.85, SPEC_ID='CARBON DIOXIDE',  DRY=.TRUE. / Fire Landing - In Front of Lobby Door @ 3.25m From FFL
+&DEVC ID='Slot 35',  QUANTITY='VOLUME FRACTION', XYZ=8.5,3.60,6.85, SPEC_ID='CARBON MONOXIDE', DRY=.TRUE. / Fire Landing - In Front of Lobby Door @ 3.25m From FFL
+&DEVC ID='Slot 20',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,2.8 / Ground Floor Stairs - Between Flights @ 2.8m From FFL
+&DEVC ID='Slot 4',   QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,6.4 / Floor 2 Stairs - Between Flights @ 2.8m From FFL
+&DEVC ID='Slot 52',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,9.0 / Floor 3 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 44',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,11.6/ Floor 4 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 72',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,14.2/ Floor 5 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 64',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,16.8/ Floor 6 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 92',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,19.4/ Floor 7 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 84',  QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,22.0/ Floor 8 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 112', QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,24.6/ Floor 9 stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 104', QUANTITY='THERMOCOUPLE',    XYZ=6.4,3.85,27.2/ Floor 10 Stairs - Between Flights @ 1.8m From FFL
+&DEVC ID='Slot 55',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,9.45/  Floor 3 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 47',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,12.05/ Floor 4 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 75',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,14.65/ Floor 5 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 67',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,17.25/ Floor 6 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 95',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,19.85/ Floor 7 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 87',  QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,22.45/ Floor 8 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 115', QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,25.05/ Floor 9 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 107', QUANTITY='THERMOCOUPLE',    XYZ=10.5,3.15,27.65/ Floor 10 Lobby @ 2.25m From FFL
+&DEVC ID='Slot 48',  QUANTITY='THERMOCOUPLE',    XYZ=13.8,9.8,11.9/   Floor 4 Compartment - East Side Ceiling @ 2.1m From FFL
+&DEVC ID='Slot 88',  QUANTITY='THERMOCOUPLE',    XYZ=13.8,9.8,22.3/   Floor 8 Compartment - East Side Ceiling @ 2.1m From FFL
+&DEVC ID='Slot 108', QUANTITY='THERMOCOUPLE',    XYZ=13.8,9.8,27.5/   Floor 10 Compartment - East Side Ceiling @ 2.1m From FFL
+
+&MATL ID           ='MDF',
+      FYI          ='As Provided by Cathy Yan Wang - MSc 2008.',
+      SPECIFIC_HEAT=2.38,
+      CONDUCTIVITY =0.17,
+      DENSITY      =800.0/
+
+&MATL ID            = 'CONCRETE',
+      FYI           = 'BSEN 1992-1-2:2004: Design of Concrete Structures - Structural Fire Design'
+      SPECIFIC_HEAT = 1.0
+      CONDUCTIVITY  = 1.6
+      DENSITY       = 2300.0/
+
+&MATL ID            = 'SOFTWOOD DOOR',
+      FYI           = 'BSEN1995-1-2: 2004: Design of Timber Structures - Structural Fire Design',
+      SPECIFIC_HEAT = 1.52
+      CONDUCTIVITY  = 0.12
+      DENSITY       = 450.0 /
+
+&MATL ID            = 'STEEL',
+      FYI           = 'BSEN1993-1-2:2005 and SFPE Handbook of Fire Protection Engineering 4th Edition',
+      SPECIFIC_HEAT = 0.45,
+      CONDUCTIVITY  = 50.
+      DENSITY       = 7833.
+      EMISSIVITY    = 0.95 /
+
+&MATL ID                ='CERAMIC FIBER',
+      FYI               ='UNIFRAX Fibrefrax Durablanket S, Product Information Sheet',
+      SPECIFIC_HEAT_RAMP='CERAMIC FIBER_SPECIFIC_HEAT_RAMP',
+      CONDUCTIVITY_RAMP ='CERAMIC FIBER_CONDUCTIVITY_RAMP',
+      DENSITY           =96.0,
+      EMISSIVITY        =0.97/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=0.0,    F=0.821869/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=20.0,   F=0.834357/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=100.0,  F=0.860803/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=200.0,  F=0.89386/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=300.0,  F=0.926917/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=400.0,  F=0.959973/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=500.0,  F=0.99303/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=600.0,  F=1.02609/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=700.0,  F=1.05914/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=800.0,  F=1.0922/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=900.0,  F=1.12526/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=1000.0, F=1.15832/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=1100.0, F=1.19137/
+&RAMP ID='CERAMIC FIBER_SPECIFIC_HEAT_RAMP', T=1200.0, F=1.22443/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=20.0,   F=0.0518461/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=100.0,  F=0.0544123/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=200.0,  F=0.0633764/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=300.0,  F=0.0787366/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=400.0,  F=0.100493/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=500.0,  F=0.128645/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=600.0,  F=0.163193/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=700.0,  F=0.204138/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=800.0,  F=0.251478/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=900.0,  F=0.305215/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=1000.0, F=0.365347/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=1100.0, F=0.431875/
+&RAMP ID='CERAMIC FIBER_CONDUCTIVITY_RAMP',  T=1200.0, F=0.5048/
+
+
+&SURF ID                     ='Concrete Wall',
+      FYI                    ='RC concrete wall 200mm thick',
+      COLOR                  ='GRAY 60',
+      MATL_ID(1,1)           ='CONCRETE',
+      THICKNESS(1)           =0.2/
+&SURF ID='MDF Wall',
+      FYI                    ='50mm thick MDF Wall',
+      RGB                    =51,51,0,
+      MATL_ID(1,1)           ='MDF',
+      THICKNESS(1)           =0.05/
+&SURF ID                     ='Timber Door',
+      FYI                    ='38mm thick softwood internal door',
+      RGB                    =255,204,145,
+      MATL_ID(1,1)           ='SOFTWOOD DOOR',
+      THICKNESS(1)           =0.038/
+&SURF ID='Concrete Floor',
+      FYI                    ='RC Concrete Floor 200mm thick',
+      COLOR                  ='GRAY 40',
+      MATL_ID(1,1)           ='CONCRETE',
+      THICKNESS(1)           =0.2/
+&SURF ID='Steel',
+      FYI                    ='5mm thick mild steel plate',
+      RGB                    =204,204,255,
+      MATL_ID(1,1)           ='STEEL',
+      THICKNESS(1)           =0.005/
+&SURF ID                     ='Ceramic Fiber Blanket',
+      FYI                    ='Durablanket S Ceramic Fibre blanket 25.4mm thick',
+      COLOR                  ='WHITE',
+      MATL_ID(1,1)           ='CERAMIC FIBER',
+      THICKNESS(1)           =0.0254/
+   
+BUILDING GEMOEMTRY
+
+&OBST XB= 2.6,11.7, 2.4, 2.6, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair shaft and external corridor
+&OBST XB= 2.6,11.7, 8.7, 8.9, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating external corridor and elevator shaft
+&OBST XB= 2.4, 2.6, 2.4, 8.9, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall that includes building supply and return vents
+&OBST XB=11.7,11.9, 1.2,10.1, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating burn area from internal shafts
+&OBST XB= 2.6, 4.0, 5.4, 5.6, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating building supply and return/exhaust
+&OBST XB= 4.0, 4.2, 2.6, 8.7, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating building return/exhaust and stair shaft
+&OBST XB= 4.2, 9.2, 5.1, 5.3, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair shaft and stair supply/exhaust
+&OBST XB= 9.2, 9.4, 2.6, 8.7, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair shaft and stair vestibule
+&OBST XB=10.2,10.4, 3.9, 5.7, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating smoke shaft and elevator/stair vestibule supply
+&OBST XB= 9.4,11.7, 3.7, 3.9, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair vestibule and smoke shaft/vestibule supply
+&OBST XB= 6.2, 6.4, 5.9, 8.7, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating service shaft and elevator shaft
+&OBST XB= 4.2,11.7, 5.7, 5.9, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair supply/exhaust and service/elevator shafts
+&OBST XB= 7.0, 7.2, 5.3, 5.7, 0.0,27.8, SURF_ID='Concrete Wall'/ Wall separating stair supply and exhaust
+
+&OBST XB= 8.4, 8.5, 1.2, 2.4, 0.0, 3.4, SURF_ID='Concrete Wall'/ Wall forming passage to outside, first floor
+&OBST XB= 7.2, 7.4, 1.2, 2.4, 0.0, 3.4, SURF_ID='Concrete Wall'/ Wall forming passage to outside, first floor
+
+&OBST XB= 1.2,15.7, 1.0, 1.2, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
+&OBST XB= 1.0, 1.2, 1.0,10.1, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
+&OBST XB= 1.0,15.9,10.1,10.3, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
+&OBST XB=15.7,15.9, 1.0,10.1, 0.0,27.8, SURF_ID='Concrete Wall'/ External Wall
+
+&HOLE XB= 2.6, 4.0, 2.6, 5.4, 3.2,26.0 / Building return/exhaust shaft
+&HOLE XB= 2.6, 4.0, 5.6, 8.7, 3.2,26.0 / Building supply shaft
+&HOLE XB= 4.2, 6.2, 5.9, 8.7, 3.2,26.0 / Service shaft
+&HOLE XB= 6.4, 9.2, 5.9, 8.7, 3.2,26.0 / Elevator shaft
+&HOLE XB=10.4,11.7, 3.9, 5.7, 3.2,26.0 / Smoke shaft
+&HOLE XB= 9.4,10.2, 3.9, 5.7, 3.2,26.0 / Elevator/stair vestibule supply shaft
+&HOLE XB= 4.2, 7.0, 5.3, 5.7, 3.2,26.0 / Stair supply shaft
+&HOLE XB= 7.2, 9.2, 5.3, 5.7, 3.2,26.0 / Stair exhaust shaft
+&HOLE XB= 4.2, 6.8, 2.6, 5.1, 8.0,26.0 / Upper stair shaft
+&HOLE XB= 4.2, 7.6, 2.6, 5.1, 1.0, 8.0 / Lower stair shaft
+
+&OBST XB=7.4,8.3,1.2,1.325,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door 4 Closed
+&OBST XB=8.3,9.2,2.6,2.725,0.0,2.1,    SURF_ID='Timber Door'/ 1st Floor Door 3 Open
+&OBST XB=10.8,11.7,2.6,2.725,0.0,2.1,  SURF_ID='Timber Door'/ 1st Floor Door 2 Open
+&OBST XB=14.8,15.7,4.35,4.475,0.0,2.1, SURF_ID='Timber Door'/ 1st Floor Door 1 Half Open
+&OBST XB=15.575,15.7,5.25,6.15,0.0,2.1,SURF_ID='Timber Door'/ 1st Floor Door 1 Half Closed
+&OBST XB=8.5,9.4,3.4,3.5,3.6,5.7,      SURF_ID='Timber Door'/ 2nd Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,3.6,5.7,    SURF_ID='Timber Door'/ 2nd Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
+&OBST XB=9.075,9.2,2.6,3.5,7.2,9.3,    SURF_ID='Timber Door'/ 3rd Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,7.2,9.3,    SURF_ID='Timber Door'/ 3rd floor Door
+&OBST XB=10.9,11.8,9.7,9.8,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,9.8,11.9,     SURF_ID='Timber Door'/ 4th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,9.8,11.9,   SURF_ID='Timber Door'/ 4th Floor Part Open Door
+&OBST XB=9.075,9.2,2.6,3.5,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=11.575,11.7,2.6,3.5,12.4,14.5,SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,12.4,14.5,  SURF_ID='Timber Door'/ 5th Floor Door
+&OBST XB=12.7,12.9,8.7,8.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=12.9,13.4,8.6,8.7,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=13.4,13.5,8.5,8.6,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.2,11.3,3.3,3.4,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Part Open Door
+&OBST XB=14.5,15.4,5.3,5.4,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,15.0,17.1,    SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,15.0,17.1,  SURF_ID='Timber Door'/ 6th Floor Door
+&OBST XB=9.075,9.2,2.6,3.5,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,17.6,19.7,  SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=11.575,11.7,2.6,3.5,17.6,19.7,SURF_ID='Timber Door'/ 7th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,20.2,22.3,    SURF_ID='Timber Door'/ 8th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,20.2,22.3,  SURF_ID='Timber Door'/ 8th Floor Part Open Door
+&OBST XB=9.075,9.2,2.6,3.5,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,7.7,7.8,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=10.9,11.8,2.6,2.7,22.8,24.9,  SURF_ID='Timber Door'/ 9th Floor Door
+&OBST XB=8.5,9.4,3.4,3.5,25.4,27.5,    SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=10.9,11.8,7.7,7.8,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=10.9,11.8,9.7,9.8,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Door
+&OBST XB=11.2,11.3,3.3,3.4,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.3,11.4,3.1,3.3,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.4,11.5,2.9,3.1,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.5,11.6,2.7,2.9,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+&OBST XB=11.6,11.7,2.6,2.7,25.4,27.5,  SURF_ID='Timber Door'/ 10th Floor Part Open Door
+
+&VENT PBZ=0.                          , SURF_ID='Concrete Floor'/ Ground
+&OBST XB= 1.2,15.7, 1.2,10.1, 3.4, 3.6, SURF_ID='Concrete Floor'/ Floor 2
+&OBST XB= 1.2,15.7, 1.2,10.1, 7.0, 7.2, SURF_ID='Concrete Floor'/ Floor 3
+&OBST XB= 1.2,15.7, 1.2,10.1, 9.6, 9.8, SURF_ID='Concrete Floor'/ Floor 4
+&OBST XB= 1.2,15.7, 1.2,10.1,12.2,12.4, SURF_ID='Concrete Floor'/ Floor 5
+&OBST XB= 1.2,15.7, 1.2,10.1,14.8,15.0, SURF_ID='Concrete Floor'/ Floor 6
+&OBST XB= 1.2,15.7, 1.2,10.1,17.4,17.6, SURF_ID='Concrete Floor'/ Floor 7
+&OBST XB= 1.2,15.7, 1.2,10.1,20.0,20.2, SURF_ID='Concrete Floor'/ Floor 8
+&OBST XB= 1.2,15.7, 1.2,10.1,22.6,22.8, SURF_ID='Concrete Floor'/ Floor 9
+&OBST XB= 1.2,15.7, 1.2,10.1,25.2,25.4, SURF_ID='Concrete Floor'/ Floor 10
+&OBST XB= 1.0,15.9, 1.0,10.3,27.8,28.0, SURF_ID='Concrete Floor'/ Roof
+
+&OBST XB= 6.8, 7.6, 3.8, 5.1, 7.0, 7.2, SURF_ID='Concrete Floor', PERMIT_HOLE=.FALSE. / Extra bit of floor at base of upper stairs
+
+Lower stairs and risers
+
+&MULT ID='lower', DZ=3.6, K_UPPER=1 /
+&OBST XB= 7.6, 7.6, 3.9, 5.1, 0.0, 0.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.6, 3.9, 5.1, 0.2, 0.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.3, 3.9, 5.1, 0.2, 0.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.3, 3.9, 5.1, 0.4, 0.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.0, 3.9, 5.1, 0.4, 0.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 7.0, 3.9, 5.1, 0.6, 0.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 6.7, 3.9, 5.1, 0.6, 0.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.7, 3.9, 5.1, 0.8, 0.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.4, 3.9, 5.1, 0.8, 1.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.4, 3.9, 5.1, 1.0, 1.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.1, 3.9, 5.1, 1.0, 1.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 6.1, 3.9, 5.1, 1.2, 1.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 5.8, 3.9, 5.1, 1.2, 1.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.8, 3.9, 5.1, 1.4, 1.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.5, 3.9, 5.1, 1.4, 1.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.2, 5.5, 3.9, 5.1, 1.6, 1.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.2, 5.2, 3.9, 5.1, 1.6, 1.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 4.2, 5.2, 2.6, 5.1, 1.8, 1.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs landing
+&OBST XB= 5.2, 5.2, 2.6, 3.8, 1.8, 2.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.2, 5.5, 2.6, 3.8, 2.0, 2.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.5, 2.6, 3.8, 2.0, 2.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.8, 2.6, 3.8, 2.2, 2.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 5.8, 2.6, 3.8, 2.2, 2.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 6.1, 2.6, 3.8, 2.4, 2.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.1, 2.6, 3.8, 2.4, 2.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.4, 2.6, 3.8, 2.6, 2.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.4, 2.6, 3.8, 2.6, 2.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.7, 2.6, 3.8, 2.8, 2.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 6.7, 2.6, 3.8, 2.8, 3.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 7.0, 2.6, 3.8, 3.0, 3.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.0, 2.6, 3.8, 3.0, 3.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.3, 2.6, 3.8, 3.2, 3.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.3, 2.6, 3.8, 3.2, 3.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.6, 2.6, 3.8, 3.4, 3.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+
+Lower stairs framing
+
+&OBST XB= 7.5, 7.7, 3.9, 3.9, 0.0, 0.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.6, 3.9, 3.9, 0.1, 0.3, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.2, 7.4, 3.9, 3.9, 0.2, 0.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.3, 3.9, 3.9, 0.3, 0.5, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.9, 7.1, 3.9, 3.9, 0.4, 0.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 7.0, 3.9, 3.9, 0.5, 0.7, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.6, 6.8, 3.9, 3.9, 0.6, 0.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.7, 3.9, 3.9, 0.7, 0.9, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.3, 6.5, 3.9, 3.9, 0.8, 1.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.4, 3.9, 3.9, 0.9, 1.1, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.0, 6.3, 3.9, 3.9, 1.0, 1.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 6.1, 3.9, 3.9, 1.1, 1.3, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.7, 5.9, 3.9, 3.9, 1.2, 1.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.8, 3.9, 3.9, 1.3, 1.5, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.4, 5.6, 3.9, 3.9, 1.4, 1.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.2, 5.5, 3.9, 3.9, 1.5, 1.7, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.1, 5.3, 3.9, 3.9, 1.6, 1.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.1, 5.3, 3.8, 3.8, 1.8, 2.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.2, 5.5, 3.8, 3.8, 1.9, 2.1, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.4, 5.6, 3.8, 3.8, 2.0, 2.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.5, 5.8, 3.8, 3.8, 2.1, 2.3, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.7, 5.9, 3.8, 3.8, 2.2, 2.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 5.8, 6.1, 3.8, 3.8, 2.3, 2.5, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.0, 6.2, 3.8, 3.8, 2.4, 2.6, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.1, 6.4, 3.8, 3.8, 2.5, 2.7, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.3, 6.5, 3.8, 3.8, 2.6, 2.8, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.4, 6.7, 3.8, 3.8, 2.7, 2.9, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.6, 6.8, 3.8, 3.8, 2.8, 3.0, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.7, 7.0, 3.8, 3.8, 2.9, 3.1, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 6.9, 7.1, 3.8, 3.8, 3.0, 3.2, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.0, 7.3, 3.8, 3.8, 3.1, 3.3, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.2, 7.4, 3.8, 3.8, 3.2, 3.4, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+&OBST XB= 7.3, 7.6, 3.8, 3.8, 3.3, 3.5, MULT_ID='lower', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Lower stairs
+
+Upper stairs
+
+&MULT ID='upper', DZ=2.6, K_UPPER=6 /
+&OBST XB= 6.8, 6.8, 3.9, 5.1, 7.2, 7.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.8, 3.9, 5.1, 7.4, 7.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.5, 3.9, 5.1, 7.4, 7.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.5, 3.9, 5.1, 7.6, 7.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.2, 3.9, 5.1, 7.6, 7.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 6.2, 3.9, 5.1, 7.8, 7.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 5.9, 3.9, 5.1, 7.8, 8.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.9, 3.9, 5.1, 8.0, 8.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.6, 3.9, 5.1, 8.0, 8.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.3, 5.6, 3.9, 5.1, 8.2, 8.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.3, 5.3, 3.9, 5.1, 8.2, 8.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 4.2, 5.3, 2.6, 5.1, 8.4, 8.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs landing
+&OBST XB= 5.3, 5.3, 2.6, 3.8, 8.4, 8.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.3, 5.6, 2.6, 3.8, 8.6, 8.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.6, 2.6, 3.8, 8.6, 8.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.9, 2.6, 3.8, 8.8, 8.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 5.9, 2.6, 3.8, 8.8, 9.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 6.2, 2.6, 3.8, 9.0, 9.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.2, 2.6, 3.8, 9.0, 9.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.5, 2.6, 3.8, 9.2, 9.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.5, 2.6, 3.8, 9.2, 9.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.8, 2.6, 3.8, 9.4, 9.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.8, 6.8, 2.6, 3.8, 9.4, 9.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+
+Upper stairs framing
+
+&OBST XB= 6.7, 6.9, 3.9, 3.9, 7.2, 7.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.8, 3.9, 3.9, 7.3, 7.5, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.4, 6.6, 3.9, 3.9, 7.4, 7.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.5, 3.9, 3.9, 7.5, 7.7, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.1, 6.3, 3.9, 3.9, 7.6, 7.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 6.2, 3.9, 3.9, 7.7, 7.9, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.8, 6.0, 3.9, 3.9, 7.8, 8.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.9, 3.9, 3.9, 7.9, 8.1, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.5, 5.7, 3.9, 3.9, 8.0, 8.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.3, 5.6, 3.9, 3.9, 8.1, 8.3, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.2, 5.4, 3.9, 3.9, 8.2, 8.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.2, 5.4, 3.8, 3.8, 8.4, 8.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.3, 5.6, 3.8, 3.8, 8.5, 8.7, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.5, 5.7, 3.8, 3.8, 8.6, 8.8, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.6, 5.9, 3.8, 3.8, 8.7, 8.9, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.8, 6.0, 3.8, 3.8, 8.8, 9.0, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 5.9, 6.2, 3.8, 3.8, 8.9, 9.1, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.1, 6.3, 3.8, 3.8, 9.0, 9.2, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.2, 6.5, 3.8, 3.8, 9.1, 9.3, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.4, 6.6, 3.8, 3.8, 9.2, 9.4, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.5, 6.8, 3.8, 3.8, 9.3, 9.5, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+&OBST XB= 6.7, 6.9, 3.8, 3.8, 9.4, 9.6, MULT_ID='upper', SURF_ID='Steel', PERMIT_HOLE=.FALSE. / Upper stairs
+
+&OBST XB=12.1,12.2,2.4,8.8,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=12.1,12.7,8.8,8.9,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=13.6,15.5,8.8,8.9,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=15.4,15.5,6.2,8.8,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=12.7,13.6,8.8,8.9,17.1,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=12.2,15.4,2.4,2.5,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=15.4,15.5,2.4,5.3,15.0,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+&OBST XB=15.4,15.5,5.3,6.2,17.1,17.4,  SURF_ID='MDF Wall'/ 5th Floor Internal Wall
+
+&VENT XB= 9.4,11.7, 3.7, 3.7, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 2.6, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 3.7, 3.6, 3.6, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB= 9.4,11.7, 2.6, 3.7, 7.0, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Floor 2 Stair Vestibule Insulation
+&VENT XB=11.9,15.7, 1.2,10.1, 3.6, 3.6, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7, 1.2,10.1, 7.0, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=15.7,15.7, 1.2,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,11.9, 1.2, 2.6, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,11.9, 3.5,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7,10.1,10.1, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+&VENT XB=11.9,15.7, 1.2, 1.2, 3.6, 7.0, SURF_ID='Ceramic Fiber Blanket'/ Fire Compartment Insulation
+
+&HOLE XB= 9.3,11.7, 8.7, 8.9, 0.0, 3.3 / Floor 1 Door Openings
+&HOLE XB= 9.1, 9.3, 5.9, 8.7, 0.0, 1.3 /
+&HOLE XB= 4.2, 6.2, 8.7, 8.9, 0.0, 1.3 /
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 0.0, 2.1 /
+&HOLE XB= 7.4, 8.3, 1.0, 1.2, 0.0, 2.1 /
+&HOLE XB= 7.4, 8.3, 2.4, 2.6, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 7.6, 8.5, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 2.6, 3.5, 0.0, 2.1 /
+&HOLE XB=11.7,11.9, 1.2, 2.4, 0.0, 3.3 /
+&HOLE XB=15.7,15.9, 4.4 ,6.2, 0.0, 2.1 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 3.6, 5.7 / Floor 2 Door Openings
+&HOLE XB=11.7,11.9, 8.9,10.1, 3.6, 4.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5, 3.6, 5.7 /
+
+&HOLE XB=11.7,11.9, 2.6, 3.5, 7.2, 9.3 / Floor 3 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8, 7.2, 9.3 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6, 7.2, 9.1 /
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 7.2, 9.3 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5, 9.8,11.9 / Floor 4 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5, 9.8,11.9 /
+&HOLE XB=11.7,11.9, 8.9, 9.8, 9.8,11.9 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,12.4,14.5 / Floor 5 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,12.4,14.5 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,12.4,14.5 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6,12.4,14.3 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,15.0,16.9 / Floor 6 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,15.0,17.1 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,15.0,17.1 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,15.0,17.4 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,17.6,19.7 / Floor 7 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8,17.6,19.7 /
+&HOLE XB= 9.4,11.3, 2.4, 2.6,17.6,19.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,17.6,19.7 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,20.2,22.3 / Floor 8 Door Openings
+&HOLE XB=11.7,11.9, 2.6, 3.5,20.2,22.3 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,20.2,22.3 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,20.2,22.7 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,22.8,24.9 / Floor 9 Door Openings
+&HOLE XB= 9.4,11.3, 2.4, 2.6,22.8,24.7 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,22.8,24.9 /
+&HOLE XB=11.7,11.9, 6.9, 7.8,22.8,24.9 /
+&HOLE XB=11.7,11.9, 8.9, 9.8,22.8,24.9 /
+
+&HOLE XB= 9.2, 9.4, 2.6, 3.5,25.4,27.5 / Floor 10 Door Openings
+&HOLE XB=11.7,11.9, 8.9, 9.8,25.4,27.5 /
+&HOLE XB=11.7,11.9, 2.6, 3.5,25.4,27.5 /
+&HOLE XB=11.7,11.9, 1.2, 2.4,25.4,27.8 /
+&HOLE XB=11.7,11.9, 6.9, 7.8,25.4,27.5 /
+
+Leakage
+
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 0.7, 2.2, SURF_ID='Steel', ID='W01-E'/ Floor  1 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 4.3, 5.8, SURF_ID='Steel', ID='W02-E'/ Floor  2 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0, 8.1, 9.6, SURF_ID='Steel', ID='W03-E'/ Floor  3 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,10.7,12.2, SURF_ID='Steel', ID='W04-E'/ Floor  4 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,13.3,14.8, SURF_ID='Steel', ID='W05-E'/ Floor  5 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,15.9,17.4, SURF_ID='Steel', ID='W06-E'/ Floor  6 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,18.5,20.0, SURF_ID='Steel', ID='W07-E'/ Floor  7 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,21.1,22.6, SURF_ID='Steel', ID='W08-E'/ Floor  8 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,23.7,25.2, SURF_ID='Steel', ID='W09-E'/ Floor  9 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.0, 1.0,26.3,27.8, SURF_ID='Steel', ID='W10-E'/ Floor 10 1.5 x 1.5 m Window, Exterior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 0.7, 2.2, SURF_ID='Steel', ID='W01-I'/ Floor  1 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 4.3, 5.8, SURF_ID='Steel', ID='W02-I'/ Floor  2 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2, 8.1, 9.6, SURF_ID='Steel', ID='W03-I'/ Floor  3 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,10.7,12.2, SURF_ID='Steel', ID='W04-I'/ Floor  4 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,13.3,14.8, SURF_ID='Steel', ID='W05-I'/ Floor  5 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,15.9,17.4, SURF_ID='Steel', ID='W06-I'/ Floor  6 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,18.5,20.0, SURF_ID='Steel', ID='W07-I'/ Floor  7 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,21.1,22.6, SURF_ID='Steel', ID='W08-I'/ Floor  8 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,23.7,25.2, SURF_ID='Steel', ID='W09-I'/ Floor  9 1.5 x 1.5 m Window, Interior
+&VENT XB= 5.7, 7.2, 1.2, 1.2,26.3,27.8, SURF_ID='Steel', ID='W10-I'/ Floor 10 1.5 x 1.5 m Window, Interior
+&HVAC ID='LEAK-W01', TYPE_ID='LEAK', VENT_ID='W01-E',  VENT2_ID='W01-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W02', TYPE_ID='LEAK', VENT_ID='W02-E',  VENT2_ID='W02-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W03', TYPE_ID='LEAK', VENT_ID='W03-E',  VENT2_ID='W03-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W04', TYPE_ID='LEAK', VENT_ID='W04-E',  VENT2_ID='W04-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W05', TYPE_ID='LEAK', VENT_ID='W05-E',  VENT2_ID='W05-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W06', TYPE_ID='LEAK', VENT_ID='W06-E',  VENT2_ID='W06-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W07', TYPE_ID='LEAK', VENT_ID='W07-E',  VENT2_ID='W07-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W08', TYPE_ID='LEAK', VENT_ID='W08-E',  VENT2_ID='W08-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W09', TYPE_ID='LEAK', VENT_ID='W09-E',  VENT2_ID='W09-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+&HVAC ID='LEAK-W10', TYPE_ID='LEAK', VENT_ID='W10-E',  VENT2_ID='W10-I', LEAK_ENTHALPY=.TRUE., AREA=0.06 /
+
+&SLCF PBY=3.2, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=3.2, QUANTITY='PRESSURE' /
+
+&TAIL/
