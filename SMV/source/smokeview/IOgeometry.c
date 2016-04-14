@@ -225,7 +225,7 @@ void draw_geom(int flag, int timestate){
   int ntris;
   triangle **tris;
 
-  if(flag==DRAW_OPAQUE){
+  if(flag == DRAW_OPAQUE){
     ntris=nopaque_triangles;
     tris=opaque_triangles;
   }
@@ -236,7 +236,6 @@ void draw_geom(int flag, int timestate){
 
   if(ntris>0&&timestate==GEOM_STATIC){
     float *color;
-
 
   // draw geometry surface
 
@@ -303,11 +302,18 @@ void draw_geom(int flag, int timestate){
     }
     glEnd();
 
-    if(visGeomTextures==1){
+    if(visGeomTextures == 1 || terrain_texture_option == 1){
       texturedata *lasttexture;
 
-      glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-      glEnable(GL_TEXTURE_2D);
+      if(terrain_texture_option == 1){
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glEnable(GL_TEXTURE_1D);
+        glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
+      }
+      else{
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glEnable(GL_TEXTURE_2D);
+      }
 
       lasttexture=NULL;
       glBegin(GL_TRIANGLES);
@@ -321,27 +327,48 @@ void draw_geom(int flag, int timestate){
         if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
-        texti = trianglei->textureinfo;
-        if(texti==NULL||texti->loaded!=1)continue;
-        if(lasttexture!=texti){
-          glEnd();
-          glBindTexture(GL_TEXTURE_2D,texti->name);
-          glBegin(GL_TRIANGLES);
-          lasttexture=texti;
-        }
-        for(j=0;j<3;j++){
-          point *pointj;
-          float *tpointj;
+        if(terrain_texture_option == 1){
+          for(j = 0; j < 3; j++){
+            point *pointj;
+            float *xyz, texture_z;
 
-          pointj = trianglei->points[j];
-          tpointj = trianglei->tpoints+2*j;
-          glNormal3fv(pointj->point_norm);
-          glTexCoord2fv(tpointj);
-          glVertex3fv(pointj->xyz);
+            pointj = trianglei->points[j];
+            xyz = pointj->xyz;
+            texture_z = NORMALIZE_ZZ(xyz[2]);
+
+            glNormal3fv(pointj->point_norm);
+            glTexCoord1f(texture_z);
+            glVertex3fv(xyz);
+          }
+        }
+        else{
+          texti = trianglei->textureinfo;
+          if(texti == NULL || texti->loaded != 1)continue;
+          if(lasttexture != texti){
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, texti->name);
+            glBegin(GL_TRIANGLES);
+            lasttexture = texti;
+          }
+          for(j = 0; j < 3; j++){
+            point *pointj;
+            float *tpointj;
+
+            pointj = trianglei->points[j];
+            tpointj = trianglei->tpoints + 2 * j;
+            glNormal3fv(pointj->point_norm);
+            glTexCoord2fv(tpointj);
+            glVertex3fv(pointj->xyz);
+          }
         }
       }
       glEnd();
-      glDisable(GL_TEXTURE_2D);
+      if(terrain_texture_option == 1){
+        glDisable(GL_TEXTURE_1D);
+      }
+      else{
+        glDisable(GL_TEXTURE_2D);
+      }
     }
 
     glDisable(GL_COLOR_MATERIAL);

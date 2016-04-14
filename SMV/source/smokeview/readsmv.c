@@ -1318,7 +1318,7 @@ void init_textures(void){
     FREEMEMORY(textureinfo);
   }
 
-  // define colobar textures
+  // define colorbar textures
 
   PRINTF("%s",_("       Loading colorbar texture"));
 
@@ -1338,6 +1338,17 @@ void init_textures(void){
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 #endif
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
+
+  glGenTextures(1, &terrain_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef pp_GPU
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+#else
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+#endif
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, rgb_terrain2);
 
   glGenTextures(1,&texture_slice_colorbar_id);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -6646,9 +6657,9 @@ typedef struct {
           }
         }
       }
-      
+
       // if no classes were specified for the prt5 entry then assign it the default class
-        
+
       if(parti->file!=NULL&&parti->nclasses==0){
         NewMemory((void **)&parti->partclassptr,sizeof(partclassdata *));
           parti->partclassptr[i]=partclassinfo + parti->nclasses;

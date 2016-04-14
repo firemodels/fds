@@ -1337,7 +1337,11 @@ void initcadcolors(void){
 
 void Update_Texturebar(void){
   if(use_graphics==0)return;
-  glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, rgb_terrain2);
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_terrain2) ");
+
+  glBindTexture(GL_TEXTURE_1D, texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
 
@@ -1772,7 +1776,17 @@ void updatechopcolors(void){
       rgb_slice[4*i+3]=0.0;
     }
 
-    rgb_part[4*i]=rgb_full[i][0];
+    rgb_terrain2[4 * i] = rgb_full[i][0];
+    rgb_terrain2[4 * i + 1] = rgb_full[i][1];
+    rgb_terrain2[4 * i + 2] = rgb_full[i][2];
+    if(rgb_full[i][3] > 0.001){
+      rgb_terrain2[4 * i + 3] = transparent_level_local;
+    }
+    else{
+      rgb_terrain2[4 * i + 3] = 0.0;
+    }
+
+    rgb_part[4 * i] = rgb_full[i][0];
     rgb_part[4*i+1]=rgb_full[i][1];
     rgb_part[4*i+2]=rgb_full[i][2];
     rgb_part[4*i+3]=rgb_full[i][3];

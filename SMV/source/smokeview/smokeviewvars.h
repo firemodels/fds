@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(terrain_texture_option, 0);
 SVEXTERN int SVDECL(force_update_histograms, 1);
 SVEXTERN float SVDECL(geom_vert_exag, 1.0);
 SVEXTERN float SVDECL(geom_vecfactor, .030);
@@ -494,7 +495,8 @@ SVEXTERN int SVDECL(fire_colorbar_index_ini,0);
 SVEXTERN float SVDECL(*rgb2_ini,NULL);
 SVEXTERN float rgb_full[MAXRGB][4];
 SVEXTERN float rgb_full2[MAXRGB][4];
-SVEXTERN float rgb_slice[4*MAXRGB];
+SVEXTERN float rgb_terrain2[4 * MAXRGB];
+SVEXTERN float rgb_slice[4 * MAXRGB];
 SVEXTERN float rgb_volsmokecolormap[4*MAXSMOKERGB];
 SVEXTERN float rgb_slicesmokecolormap[4*MAXSMOKERGB];
 SVEXTERN float rgb_iso[4*MAXRGB];
@@ -1237,7 +1239,7 @@ SVEXTERN char surfacedefaultlabel[256];
 SVEXTERN int ntotalfaces;
 SVEXTERN colordata SVDECL(*firstcolor,NULL);
 SVEXTERN texturedata SVDECL(*textureinfo,NULL), SVDECL(*terrain_texture,NULL);
-SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id;
+SVEXTERN GLuint texture_colorbar_id, texture_slice_colorbar_id, texture_patch_colorbar_id, texture_plot3d_colorbar_id, texture_iso_colorbar_id, terrain_colorbar_id;
 SVEXTERN GLuint volsmoke_colormap_id,slice3d_colormap_id,slicesmoke_colormap_id;
 SVEXTERN int SVDECL(volsmoke_colormap_id_defined,-1);
 SVEXTERN int SVDECL(slice3d_colormap_id_defined,-1);
