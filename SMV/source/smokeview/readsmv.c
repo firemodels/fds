@@ -622,12 +622,12 @@ void readsmv_dynamic(char *file){
 
     nlist=meshi->nsmoothblockages_list+2; // add an entry for t=0.0
     FREEMEMORY(meshi->smoothblockages_list);
-    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockage));
+    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockagedata));
 
     meshi->nsmoothblockages_list++;
 
     for(j=0;j<nlist;j++){
-      smoothblockage *sb;
+      smoothblockagedata *sb;
 
       sb=meshi->smoothblockages_list+j;
       sb->smoothblockagecolors=NULL;
@@ -1476,7 +1476,7 @@ void update_bound_info(void){
     FREEMEMORY(isoindex);
     FREEMEMORY(isobounds);
     NewMemory((void*)&isoindex,nisoinfo*sizeof(int));
-    NewMemory((void*)&isobounds,nisoinfo*sizeof(databounds));
+    NewMemory((void*)&isobounds,nisoinfo*sizeof(boundsdata));
     niso_bounds=0;
     for(i=0;i<nisoinfo;i++){
       isodata *isoi;
@@ -1516,7 +1516,7 @@ void update_bound_info(void){
 
   if(nsliceinfo>0){
     FREEMEMORY(slicebounds);
-    NewMemory((void*)&slicebounds,nsliceinfo*sizeof(databounds));
+    NewMemory((void*)&slicebounds,nsliceinfo*sizeof(boundsdata));
     nslice2=0;
     for(i=0;i<nsliceinfo;i++){
       slicedata *slicei;
@@ -1853,7 +1853,7 @@ void update_mesh_coords(void){
   }
 
   for(i=0;i<noutlineinfo;i++){
-    outline *outlinei;
+    outlinedata *outlinei;
     float *x1, *x2, *yy1, *yy2, *z1, *z2;
     int j;
 
@@ -2096,7 +2096,7 @@ void update_mesh_coords(void){
   }
 
   for(i=0;i<ncadgeom;i++){
-    cadgeom *cd;
+    cadgeomdata *cd;
     int j;
 
     cd=cadgeominfo+i;
@@ -2518,7 +2518,7 @@ int readsmv(char *file, char *file2){
 
   if(noutlineinfo>0){
     for(i=0;i<noutlineinfo;i++){
-      outline *outlinei;
+      outlinedata *outlinei;
 
       outlinei = outlineinfo + i;
       FREEMEMORY(outlinei->x1);
@@ -3381,13 +3381,13 @@ int readsmv(char *file, char *file2){
 
   if(cadgeominfo!=NULL)freecadinfo();
   if(ncadgeom>0){
-    if(NewMemory((void **)&cadgeominfo,ncadgeom*sizeof(cadgeom))==0)return 2;
+    if(NewMemory((void **)&cadgeominfo,ncadgeom*sizeof(cadgeomdata))==0)return 2;
   }
 
   if(noutlineinfo>0){
-    if(NewMemory((void **)&outlineinfo,noutlineinfo*sizeof(outline))==0)return 2;
+    if(NewMemory((void **)&outlineinfo,noutlineinfo*sizeof(outlinedata))==0)return 2;
     for(i=0;i<noutlineinfo;i++){
-      outline *outlinei;
+      outlinedata *outlinei;
 
       outlinei = outlineinfo + i;
       outlinei->x1=NULL;
@@ -4160,7 +4160,7 @@ int readsmv(char *file, char *file2){
   */
 
     if(match(buffer,"OUTLINE") == 1){
-      outline *outlinei;
+      outlinedata *outlinei;
 
       noutlineinfo++;
       outlinei = outlineinfo + noutlineinfo - 1;
@@ -7387,12 +7387,12 @@ typedef struct {
     meshi=meshinfo+i;
 
     nlist=meshi->nsmoothblockages_list+2; // add an entry for t=0.0
-    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockage));
+    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockagedata));
 
     meshi->nsmoothblockages_list++;
 
     for(j=0;j<nlist;j++){
-      smoothblockage *sb;
+      smoothblockagedata *sb;
 
       sb=meshi->smoothblockages_list+j;
       sb->smoothblockagecolors=NULL;

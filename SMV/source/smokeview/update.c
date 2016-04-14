@@ -213,7 +213,7 @@ void Update_Framenumber(int changetime){
     }
     if(ntotal_smooth_blockages>0){
       for(i=0;i<nmeshes;i++){
-        smoothblockage *sb;
+        smoothblockagedata *sb;
         meshdata *meshi;
 
         meshi = meshinfo+i;
@@ -657,7 +657,7 @@ void Synch_Times(void){
       meshi=meshinfo+igrid;
       if(meshi->showsmoothtimelist==NULL)continue;
       for(n=0;n<nglobal_times;n++){
-        smoothblockage *sb;
+        smoothblockagedata *sb;
 
         sb = getsmoothblockage(meshi,global_times[n]);
         meshi->showsmoothtimelist[n] = sb;
@@ -1478,7 +1478,7 @@ void Update_Times(void){
 
       meshi=meshinfo+i;
       FREEMEMORY(meshi->showsmoothtimelist);
-      if(nglobal_times>0)NewMemory((void **)&meshi->showsmoothtimelist,nglobal_times*sizeof(smoothblockage *));
+      if(nglobal_times>0)NewMemory((void **)&meshi->showsmoothtimelist,nglobal_times*sizeof(smoothblockagedata *));
     }
   }
 
@@ -1880,7 +1880,7 @@ void update_smoothblockage_info(void){
   int i;
 
   for(i = 0; i < nmeshes; i++){
-    smoothblockage *sb;
+    smoothblockagedata *sb;
     meshdata *meshi;
 
     meshi = meshinfo + i;

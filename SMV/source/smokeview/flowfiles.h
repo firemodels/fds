@@ -236,7 +236,7 @@ typedef struct {
   int nlines;
   float *x1, *y1, *z1;
   float *x2, *y2, *z2;
-} outline;
+} outlinedata;
 
 /* --------------------------  labeldata ------------------------------------ */
 
@@ -391,7 +391,7 @@ typedef struct _blockagedata {
   float texture_origin[3];
 } blockagedata;
 
-/* --------------------------  cadlook ------------------------------------ */
+/* --------------------------  cadlookdata ------------------------------------ */
 
 typedef struct {
   int index;
@@ -399,7 +399,7 @@ typedef struct {
   float rgb[4], shininess;
   texturedata textureinfo;
   int onesided;
-} cadlook;
+} cadlookdata;
 
 /* --------------------------  cadquad ------------------------------------ */
 
@@ -410,7 +410,7 @@ typedef struct {
   int colorindex;
   float colors[4];
   float time_show;
-  cadlook *cadlookq;
+  cadlookdata *cadlookq;
 } cadquad;
 
 /* --------------------------  clipdata ------------------------------------ */
@@ -426,17 +426,17 @@ typedef struct {
   float zmin, zmax;
 } clipdata;
 
-/* --------------------------  cadgeom ------------------------------------ */
+/* --------------------------  cadgeomdata ------------------------------------ */
 
 typedef struct {
   char *file;
   int *order;
   int version;
   int ncadlookinfo;
-  cadlook *cadlookinfo;
+  cadlookdata *cadlookinfo;
   int nquads;
   cadquad *quad;
-} cadgeom;
+} cadgeomdata;
 
 /* --------------------------  cventdata ------------------------------------ */
 
@@ -505,7 +505,7 @@ typedef struct {
   int loaded,display;
 } feddata;
 
-/* --------------------------  iso ------------------------------------ */
+/* --------------------------  isodata ------------------------------------ */
 
 typedef struct _isodata {
   int seq_id, autoload;
@@ -535,14 +535,14 @@ typedef struct _isodata {
   char menulabel[128];
 } isodata;
 
-/* --------------------------  smoothblockage ------------------------------------ */
+/* --------------------------  smoothblockagedata ------------------------------------ */
 
 typedef struct {
   int nsmoothblockagecolors;
   float *smoothblockagecolors;
   isosurface **smoothblockagesurfaces;
   float time;
-} smoothblockage;
+} smoothblockagedata;
 
 /* --------------------------  volrenderdata ------------------------------------ */
 
@@ -695,10 +695,10 @@ typedef struct _meshdata {
   int visInteriorPatches;
   float surface_tempmin, surface_tempmax;
 
-  smoothblockage *smoothblockages_list;
+  smoothblockagedata *smoothblockages_list;
   int nsmoothblockages_list;
 
-  smoothblockage **showsmoothtimelist;
+  smoothblockagedata **showsmoothtimelist;
 
   int nface_textures, nface_outlines, nfaces;
   int nface_normals_single, nface_normals_double, nface_transparent_double;
@@ -1229,7 +1229,7 @@ typedef struct {
   float fscale;
   char scale[31];
   flowlabels *label;
-} databounds;
+} boundsdata;
 
 /* --------------------------  vslice ------------------------------------ */
 

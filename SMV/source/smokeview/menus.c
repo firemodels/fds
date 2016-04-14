@@ -5564,8 +5564,8 @@ updatemenu=0;
       glutAddMenuEntry(_("   Cad"),BLOCKlocation_cad);
     }
     {
-      cadgeom *cd;
-      cadlook *cdi;
+      cadgeomdata *cd;
+      cadlookdata *cdi;
       int showtexturemenu;
 
       showtexturemenu=0;

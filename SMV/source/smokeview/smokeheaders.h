@@ -457,8 +457,8 @@ EXTERNCPP void clear_3dsmoke_startup(void);
 EXTERNCPP void put_startup_smoke3d(FILE *fileout);
 EXTERNCPP void drawonlythreshold(const meshdata *meshi);
 EXTERNCPP void draw_transparent_faces(void);
-EXTERNCPP smoothblockage *getsmoothblockage(meshdata *meshi,float tt);
-EXTERNCPP void freesmoothblocks(smoothblockage *sb);
+EXTERNCPP smoothblockagedata *getsmoothblockage(meshdata *meshi,float tt);
+EXTERNCPP void freesmoothblocks(smoothblockagedata *sb);
 EXTERNCPP int isblockagevisible(blockagedata *bc, float time);
 EXTERNCPP float zoom2aperture(float zoom0);
 EXTERNCPP float aperture2zoom(float ap);
@@ -606,8 +606,8 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, FILE **isostreampt
 EXTERNCPP void array2string(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
 
-EXTERNCPP void getsmoothblockparms(meshdata *gb, smoothblockage *sb);
-EXTERNCPP void MakeIsoBlockages(meshdata *gb, smoothblockage *sb);
+EXTERNCPP void getsmoothblockparms(meshdata *gb, smoothblockagedata *sb);
+EXTERNCPP void MakeIsoBlockages(meshdata *gb, smoothblockagedata *sb);
 
 EXTERNCPP int ifsmoothblock(void);
 EXTERNCPP void updatevslices(void);
@@ -833,10 +833,10 @@ EXTERNCPP void init_unit_defs(void);
 EXTERNCPP void InitUnits(void);
 EXTERNCPP f_units *get_unit_class(char *unit);
 
-EXTERNCPP void readcad2geom(cadgeom *cd);
-EXTERNCPP void readcadgeom(cadgeom *cd);
-EXTERNCPP void drawcadgeom(const cadgeom *cd);
-EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
+EXTERNCPP void readcad2geom(cadgeomdata *cd);
+EXTERNCPP void readcadgeom(cadgeomdata *cd);
+EXTERNCPP void drawcadgeom(const cadgeomdata *cd);
+EXTERNCPP void drawcad2geom_opaque(const cadgeomdata *cd,int trans_flag);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local);

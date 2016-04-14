@@ -2939,7 +2939,7 @@ void updatevslicetypes(void){
 
 void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values){
   int j;
-  databounds *sb;
+  boundsdata *sb;
   int contours_gen=0;
   float dval;
 
@@ -3175,7 +3175,7 @@ void updatesliceboundlabels(){
 
   for(i=0;i<nsliceinfo;i++){
     int j;
-    databounds *sb;
+    boundsdata *sb;
     slicedata *sd;
 
     sd = sliceinfo + i;
@@ -3191,7 +3191,7 @@ void setslicecolors(float smin, float smax,
                     slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
-  databounds *sb;
+  boundsdata *sb;
 
   slicetype=getslicetype(sd);
   sb = slicebounds + slicetype;
@@ -3216,7 +3216,7 @@ void setslicelabels(float smin, float smax,
                     slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
-  databounds *sb;
+  boundsdata *sb;
 
   slicetype=getslicetype(sd);
   sb = slicebounds + slicetype;
@@ -3847,7 +3847,7 @@ void update_slice3d_texture(meshdata *meshi, slicedata *slicei, float *valdata){
 void drawgslice_dataGPU(slicedata *slicei){
   meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float *boxmin, *boxmax;
 
@@ -3901,7 +3901,7 @@ void drawgslice_dataGPU(slicedata *slicei){
 void drawgslice_data(slicedata *slicei){
   meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float del;
 
@@ -3953,7 +3953,7 @@ void drawgslice_data(slicedata *slicei){
 void drawvgslice_data(vslicedata *vslicei){
   meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float del;
   slicedata *slicei;

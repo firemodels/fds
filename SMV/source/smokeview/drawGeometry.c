@@ -8,7 +8,7 @@
 #include "update.h"
 #include "smokeviewvars.h"
 
-cadgeom *current_cadgeom;
+cadgeomdata *current_cadgeom;
 
 /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
@@ -621,7 +621,7 @@ void drawoutlines(void){
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<noutlineinfo;i++){
-    outline *outlinei;
+    outlinedata *outlinei;
     float *xx1, *yy1, *zz1;
     float *xx2, *yy2, *zz2;
     int j;
@@ -1306,7 +1306,7 @@ void freecadinfo(void){
     int i;
 
     for(i=0;i<ncadgeom;i++){
-      cadgeom *cd;
+      cadgeomdata *cd;
 
       cd = cadgeominfo + i;
       FREEMEMORY(cd->quad);
@@ -1366,7 +1366,7 @@ void calcQuadNormal(float *xyz, float *out){
 
 /* ------------------ readcadgeom ------------------------ */
 
-void readcadgeom(cadgeom *cd){
+void readcadgeom(cadgeomdata *cd){
   char buffer[255];
   float lastcolor[3];
   FILE *stream;
@@ -1466,9 +1466,9 @@ void readcadgeom(cadgeom *cd){
 
 int quadcompare( const void *arg1, const void *arg2 ){
   int i1, i2;
-  cadgeom *cd;
+  cadgeomdata *cd;
   cadquad *quadi, *quadj;
-  cadlook *cli, *clj;
+  cadlookdata *cli, *clj;
 
   cd=current_cadgeom;
 
@@ -1488,7 +1488,7 @@ int quadcompare( const void *arg1, const void *arg2 ){
 
 /* ------------------ readcad2geom ------------------------ */
 
-void readcad2geom(cadgeom *cd){
+void readcad2geom(cadgeomdata *cd){
   char buffer[255];
   FILE *stream;
   int nquads=0;
@@ -1518,10 +1518,10 @@ void readcad2geom(cadgeom *cd){
   }
 
   cd->cadlookinfo=NULL;
-  NewMemory((void **)&cd->cadlookinfo,cd->ncadlookinfo*sizeof(cadlook));
+  NewMemory((void **)&cd->cadlookinfo,cd->ncadlookinfo*sizeof(cadlookdata));
 
   for(i=0;i<cd->ncadlookinfo;i++){
-    cadlook *cdi;
+    cadlookdata *cdi;
     texturedata *texti;
     int errorcode;
     int ii;
@@ -1640,7 +1640,7 @@ void readcad2geom(cadgeom *cd){
     float *normal;
     int look_index;
     cadquad *quadi;
-    cadlook *cl;
+    cadlookdata *cl;
     float *xyzpoints;
     float time_show;
 
@@ -1730,7 +1730,7 @@ void update_cadtextcoords(cadquad *quadi){
 
 /* ------------------ drawcadgeom ------------------------ */
 
-void drawcadgeom(const cadgeom *cd){
+void drawcadgeom(const cadgeomdata *cd){
   int i;
   int last_colorindex=-999;
   float *lastcolor;
@@ -1789,7 +1789,7 @@ void drawcadgeom(const cadgeom *cd){
 
 /* ------------------ drawcadgeom2 ------------------------ */
 
-void drawcad2geom(const cadgeom *cd, int trans_flag){
+void drawcad2geom(const cadgeomdata *cd, int trans_flag){
   int ii;
   float *thiscolor,*lastcolor;
   int thisonesided, lastonesided;
@@ -3888,7 +3888,7 @@ void update_smooth_blockages(void){
       meshi=meshinfo+i;
 
       for(j=0;j<meshi->nsmoothblockages_list;j++){
-        smoothblockage *sb;
+        smoothblockagedata *sb;
 
         if(read_smoothobst==1){
           PRINTF("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
@@ -3913,9 +3913,9 @@ void update_smooth_blockages(void){
 
 /* ------------------ getsmoothblockage ------------------------ */
 
-smoothblockage *getsmoothblockage(meshdata *meshi,float tt){
+smoothblockagedata *getsmoothblockage(meshdata *meshi,float tt){
   int j;
-  smoothblockage *sb,*sb2;
+  smoothblockagedata *sb,*sb2;
 
 
   sb=meshi->smoothblockages_list;
@@ -3945,7 +3945,7 @@ int isblockagevisible(blockagedata *bc, float local_time){
 
 /* ------------------ getsmoothblockparms ------------------------ */
 
-void getsmoothblockparms(meshdata *meshi, smoothblockage *sb){
+void getsmoothblockparms(meshdata *meshi, smoothblockagedata *sb){
   int i;
   int nsmoothcolors=0;
   int fail;
@@ -4125,7 +4125,7 @@ void WriteSmoothIsoSurface(isosurface *asurface){
 
 /* ------------------ MakeIsoBlockages ------------------------ */
 
-void MakeIsoBlockages(meshdata *meshi, smoothblockage *sb){
+void MakeIsoBlockages(meshdata *meshi, smoothblockagedata *sb){
   float *cellcopy,*cell=NULL,*node=NULL,*nodecopy;
   int ib,i,j,k,iblockcolor;
   int imin, imax, jmin, jmax, kmin, kmax;
@@ -4310,7 +4310,7 @@ void MakeIsoBlockages(meshdata *meshi, smoothblockage *sb){
 }
 /* ------------------ MakeIsoBlockages2 ------------------------ */
 
-void MakeIsoBlockages2(meshdata *meshi, smoothblockage *sb){
+void MakeIsoBlockages2(meshdata *meshi, smoothblockagedata *sb){
 //xxx experimental smooth blockage generation routine
   float *cell=NULL;
   int ib,i,j,k,iblockcolor;
@@ -5271,7 +5271,7 @@ void drawBlockages(int mode, int trans_flag){
 
   int smoothnorms;
   int i;
-  cadgeom *cd;
+  cadgeomdata *cd;
   int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);

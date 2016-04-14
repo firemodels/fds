@@ -973,7 +973,7 @@ void drawColorBars(void){
     SNIFF_ERRORS("before colorbar");
     CheckMemory;
     if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
-      databounds *sb;
+      boundsdata *sb;
 
       sb = slicebounds + islicetype;
 
@@ -1214,7 +1214,7 @@ void drawColorBars(void){
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     char unitlabel[256];
     int sliceunitclass,sliceunittype;
-    databounds *sb;
+    boundsdata *sb;
 
     sb = slicebounds + islicetype;
     strcpy(unitlabel,sb->label->unit);
@@ -1251,7 +1251,7 @@ void drawColorBars(void){
 
   if(showiso_colorbar==1){
     char unitlabel[256];
-    databounds *sb;
+    boundsdata *sb;
 
     sb = isobounds + iisottype;
     strcpy(unitlabel,sb->label->unit);
@@ -1363,7 +1363,7 @@ void drawColorBars(void){
 
   if(showiso_colorbar==1){
     float tttval, tttmin, tttmax;
-    databounds *sb;
+    boundsdata *sb;
     float isorange;
 
     sb = isobounds + iisottype;
@@ -1478,7 +1478,7 @@ void drawColorBars(void){
 
   if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
     float tttval, tttmin, tttmax;
-    databounds *sb;
+    boundsdata *sb;
     float slicerange;
 
     sb=slicebounds+islicetype;

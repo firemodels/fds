@@ -1446,7 +1446,7 @@ void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode){
   char *scale;
   int isotype;
-  databounds *sb;
+  boundsdata *sb;
 
   isotype=getisottype(sd);
   sb = isobounds + isotype;
