@@ -24,7 +24,8 @@ extern "C" void Volume_CB(int var);
 #define GEOM_MAX_ANGLE 36
 #define GEOM_OUTLINE_IOFFSET 37
 #define GEOM_IVECFACTOR 38
-#define SHOW_TERRAIN_TEXTURE 39
+#define SHOW_TEXTURE_2D_IMAGE 39
+#define SHOW_TEXTURE_1D_IMAGE 40
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
@@ -38,8 +39,8 @@ GLUI_Checkbox *CHECKBOX_faces_interior=NULL;
 GLUI_Checkbox *CHECKBOX_faces_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
-GLUI_Checkbox *CHECKBOX_terrain_texture_option = NULL;
-GLUI_Checkbox *CHECKBOX_show_terrain_texture = NULL;
+GLUI_Checkbox *CHECKBOX_show_texture_1dimage = NULL;
+GLUI_Checkbox *CHECKBOX_show_texture_2dimage = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -145,6 +146,23 @@ extern "C" void get_geom_dialog_state(void){
     }
   }
 }
+
+/* ------------------ get_texture_show ------------------------ */
+
+int get_texture_show(void){
+  int i;
+
+  for(i = 0; i<ntextures; i++){
+    texturedata *texti;
+
+    texti = textureinfo+i;
+    if(texti->loaded==1&&texti->used==1){
+      if(texti->display == 1)return 1;
+    }
+  }
+  return 0;
+}
+
 
 /* ------------------ glui_geometry_setup ------------------------ */
 
@@ -329,7 +347,7 @@ extern "C" void glui_geometry_setup(int main_window){
   PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
   SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
-  CHECKBOX_terrain_texture_option = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "color elevation", &terrain_texture_option);
+  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
   {
     int used = 0;
 
@@ -342,10 +360,12 @@ extern "C" void glui_geometry_setup(int main_window){
         break;
       }
     }
+
     if(used==1){
-      CHECKBOX_show_terrain_texture = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show image",
-                                        &show_terrain_texture, SHOW_TERRAIN_TEXTURE, Volume_CB);
-      Volume_CB(SHOW_TERRAIN_TEXTURE);
+      show_texture_2dimage = get_texture_show();
+      CHECKBOX_show_texture_2dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "image",
+                                        &show_texture_2dimage, SHOW_TEXTURE_2D_IMAGE, Volume_CB);
+      Volume_CB(SHOW_TEXTURE_2D_IMAGE);
     }
   }
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
@@ -456,16 +476,29 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
-  case SHOW_TERRAIN_TEXTURE:
+  case SHOW_TEXTURE_1D_IMAGE:
+    if(show_texture_1dimage == 1 && show_texture_2dimage == 1){
+      show_texture_2dimage=0;
+      Volume_CB(SHOW_TEXTURE_2D_IMAGE);
+      if(CHECKBOX_show_texture_2dimage!=NULL&&CHECKBOX_show_texture_2dimage->get_int_val() == 1)CHECKBOX_show_texture_2dimage->set_int_val(0);
+    }
+    break;
+  case SHOW_TEXTURE_2D_IMAGE:
+    if(show_texture_1dimage==1&&show_texture_2dimage==1){
+      show_texture_1dimage=0;
+      if(CHECKBOX_show_texture_1dimage->get_int_val() == 1)CHECKBOX_show_texture_1dimage->set_int_val(0);
+    }
     for(i = 0; i<ntextures; i++){
       texturedata *texti;
 
       texti = textureinfo+i;
       if(texti->loaded==1&&texti->used==1){
-        texti->display = 1 - show_terrain_texture;
+        texti->display = 1 - show_texture_2dimage;
         TextureShowMenu(i);
-        if(texti->display==1&&CHECKBOX_show_terrain_texture->get_int_val()==0)CHECKBOX_show_terrain_texture->set_int_val(1);
-        if(texti->display==0&&CHECKBOX_show_terrain_texture->get_int_val()==1)CHECKBOX_show_terrain_texture->set_int_val(0);
+        if(CHECKBOX_show_texture_2dimage != NULL){
+          if(texti->display == 1 && CHECKBOX_show_texture_2dimage->get_int_val() == 0)CHECKBOX_show_texture_2dimage->set_int_val(1);
+          if(texti->display == 0 && CHECKBOX_show_texture_2dimage->get_int_val() == 1)CHECKBOX_show_texture_2dimage->set_int_val(0);
+        }
         break;
       }
     }

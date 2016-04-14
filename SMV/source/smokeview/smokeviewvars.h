@@ -20,7 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN int SVDECL(terrain_texture_option, 0), SVDECL(show_terrain_texture, 0);
+SVEXTERN int SVDECL(show_texture_1dimage, 0), SVDECL(show_texture_2dimage, 0);
 SVEXTERN int SVDECL(force_update_histograms, 1);
 SVEXTERN float SVDECL(geom_vert_exag, 1.0);
 SVEXTERN float SVDECL(geom_vecfactor, .030);

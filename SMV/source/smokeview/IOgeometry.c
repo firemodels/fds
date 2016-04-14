@@ -266,7 +266,7 @@ void draw_geom(int flag, int timestate){
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
-      if(terrain_texture_option==1)continue;
+      if(show_texture_1dimage==1)continue;
       if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
@@ -303,10 +303,10 @@ void draw_geom(int flag, int timestate){
     }
     glEnd();
 
-    if(visGeomTextures == 1 || terrain_texture_option == 1){
+    if(visGeomTextures == 1 || show_texture_1dimage == 1){
       texturedata *lasttexture;
 
-      if(terrain_texture_option == 1){
+      if(show_texture_1dimage == 1){
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
         glEnable(GL_TEXTURE_1D);
         glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
@@ -328,7 +328,7 @@ void draw_geom(int flag, int timestate){
         if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
-        if(terrain_texture_option == 1){
+        if(show_texture_1dimage == 1){
           for(j = 0; j < 3; j++){
             point *pointj;
             float *xyz, texture_z;
@@ -364,7 +364,7 @@ void draw_geom(int flag, int timestate){
         }
       }
       glEnd();
-      if(terrain_texture_option == 1){
+      if(show_texture_1dimage == 1){
         glDisable(GL_TEXTURE_1D);
       }
       else{
