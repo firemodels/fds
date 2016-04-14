@@ -408,7 +408,6 @@ void _Sniff_Errors(char *whereat);
 #define BLOCK_regular 0
 #define BLOCK_texture 1
 #define BLOCK_outline 2
-#define BLOCK_smooth  3
 #define BLOCK_hidden -2
 
 #define BLOCK_face 0
@@ -421,12 +420,9 @@ void _Sniff_Errors(char *whereat);
 #define visBLOCKNormal 8
 #define visBLOCKSolidOutline 12
 //#define visBLOCKFacet 3
-//#define visBLOCKSmooth 4
 #define visBLOCKOutline 2
 #define visBLOCKHide 0
-#define visBLOCKSmoothAsNormal 9
 #define visBLOCKTransparent 10
-#define visSmoothBLOCKSolid 11
 #define visBLOCKAddOutline 14
 #define visBLOCKOnlyOutline 15
 #define visBLOCKOutlineColor 16
@@ -443,8 +439,6 @@ void _Sniff_Errors(char *whereat);
 #define BLOCKlocation_exact 6
 #define BLOCKlocation_cad 7
 #define BLOCKtexture_cad 31
-#define SMOOTH_BLOCKAGES 101
-#define SMOOTH_ATSTART 102
 
 #define WALL_1 0
 #define WALL_3 1

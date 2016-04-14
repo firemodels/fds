@@ -333,7 +333,6 @@ void parse_commandline(int argc, char **argv){
   strcpy(render_file_base, fdsprefix);
   FREEMEMORY(trainer_filename);
   FREEMEMORY(test_filename);
-  FREEMEMORY(smoothblockage_filename);
 
   strcpy(input_filename_ext,"");
 
@@ -462,13 +461,6 @@ void parse_commandline(int argc, char **argv){
     NewMemory((void **)&test_filename,(unsigned int)(len_casename+6));
     STRCPY(test_filename,fdsprefix);
     STRCAT(test_filename,".svd");
-  }
-  if(smoothblockage_filename==NULL){
-    char filename_base[1024];
-
-    STRCPY(filename_base,fdsprefix);
-    STRCAT(filename_base,".sb");
-    smoothblockage_filename=get_filename(smokeviewtempdir,filename_base,tempdir_flag);
   }
 
   for (i=1;i<argc;i++){

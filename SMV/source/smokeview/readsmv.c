@@ -325,8 +325,6 @@ void readsmv_dynamic(char *file){
     int j;
 
     meshi=meshinfo+i;
-    meshi->nsmoothblockages_list=1;
-    FREEMEMORY(meshi->smoothblockages_list);
     for(j=0;j<meshi->nbptrs;j++){
       blockagedata *bc_local;
 
@@ -458,8 +456,6 @@ void readsmv_dynamic(char *file){
       if(tempval<0||tempval>=meshi->nbptrs)continue;
       bc=meshi->blockageinfoptrs[tempval];
       bc->nshowtime++;
-      meshi->nsmoothblockages_list++;
-      if(meshi->nsmoothblockages_list>0)use_menusmooth=1;
       continue;
     }
 
@@ -613,31 +609,6 @@ void readsmv_dynamic(char *file){
 
   // ------------------------------- pass 1 dynamic - end ------------------------------------
 
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int nlist;
-    int j;
-
-    meshi=meshinfo+i;
-
-    nlist=meshi->nsmoothblockages_list+2; // add an entry for t=0.0
-    FREEMEMORY(meshi->smoothblockages_list);
-    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockagedata));
-
-    meshi->nsmoothblockages_list++;
-
-    for(j=0;j<nlist;j++){
-      smoothblockagedata *sb;
-
-      sb=meshi->smoothblockages_list+j;
-      sb->smoothblockagecolors=NULL;
-      sb->smoothblockagesurfaces=NULL;
-      sb->nsmoothblockagecolors=0;
-    }
-    meshi->nsmoothblockages_list=1;
-    meshi->smoothblockages_list[0].time=-1.0;
-    meshi->nsmoothblockages_list++;
-  }
   if(nplot3dinfo>0){
     if(plot3dinfo==NULL){
       NewMemory((void **)&plot3dinfo,nplot3dinfo*sizeof(plot3ddata));
@@ -875,19 +846,6 @@ void readsmv_dynamic(char *file){
       tempval--;
       if(tempval<0||tempval>=meshi->nbptrs)continue;
       bc=meshi->blockageinfoptrs[tempval];
-
-      meshi->nsmoothblockages_list++;
-      nlist=meshi->nsmoothblockages_list;
-      if(nlist==2&&time_local!=0.0){          //  insert time=0.0 into list if not there
-        meshi->smoothblockages_list[1].time=0.0;
-        meshi->nsmoothblockages_list++;
-        nlist++;
-      }
-      meshi->smoothblockages_list[nlist-1].time=time_local;
-      if(time_local==meshi->smoothblockages_list[nlist-2].time){
-        nlist--;
-        meshi->nsmoothblockages_list=nlist;
-      }
 
       if(bc->showtime==NULL){
         if(time_local!=0.0)bc->nshowtime++;
@@ -2008,7 +1966,6 @@ void update_mesh_coords(void){
     face_centers[17]=meshi->boxmax_scaled[2];
   }
 
-  nsmoothblocks=0;
   ntransparentblocks=0;
   ntransparentvents=0;
   nopenvents=0;
@@ -2022,7 +1979,6 @@ void update_mesh_coords(void){
       blockagedata *bc;
 
       bc=meshi->blockageinfoptrs[i];
-      if(bc->type==BLOCK_smooth)nsmoothblocks++;
       if(bc->color[3]<0.99)ntransparentblocks++;
     }
     for(i=0;i<meshi->nvents;i++){
@@ -2396,7 +2352,6 @@ int readsmv(char *file, char *file2){
   }
 
   ntotal_blockages=0;
-  ntotal_smooth_blockages=0;
 
   if(ncsvinfo>0){
     csvdata *csvi;
@@ -3251,10 +3206,6 @@ int readsmv(char *file, char *file2){
     meshi->ncvents=0;
     meshi->plotn=1;
     meshi->itextureoffset=0;
-
-    meshi->nsmoothblockages_list=0;
-    meshi->smoothblockages_list=NULL;
-    meshi->nsmoothblockages_list++;
   }
   if(setPDIM==0){
     meshdata *meshi;
@@ -5938,6 +5889,7 @@ typedef struct {
         sscanf(buffer,"%i %i %i %i %i %i %i %i",
           ijk,ijk+1,ijk+2,ijk+3,ijk+4,ijk+5,
           &colorindex,&blocktype);
+        if(blocktype&3==3)blocktype -= 3; // convert any smooth blocks to 'normal' blocks
         if(blocktype>0&&(blocktype&8)==8){
           bc->is_wuiblock=1;
           blocktype -= 8;
@@ -6018,11 +5970,6 @@ typedef struct {
             updateindexcolors=1;
           }
         }
-        if(bc->type==BLOCK_smooth){
-          ntotal_smooth_blockages++;
-          use_menusmooth=1;
-        }
-
       }
       CheckMemoryOn;
       continue;
@@ -7379,31 +7326,6 @@ typedef struct {
     }
   }
 
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int nlist;
-    int j;
-
-    meshi=meshinfo+i;
-
-    nlist=meshi->nsmoothblockages_list+2; // add an entry for t=0.0
-    NewMemory((void **)&meshi->smoothblockages_list,nlist*sizeof(smoothblockagedata));
-
-    meshi->nsmoothblockages_list++;
-
-    for(j=0;j<nlist;j++){
-      smoothblockagedata *sb;
-
-      sb=meshi->smoothblockages_list+j;
-      sb->smoothblockagecolors=NULL;
-      sb->smoothblockagesurfaces=NULL;
-      sb->nsmoothblockagecolors=0;
-    }
-    meshi->nsmoothblockages_list=1;
-    meshi->smoothblockages_list[0].time=-1.0;
-    meshi->nsmoothblockages_list++;
-  }
-
   /*
    ************************************************************************
    ************************ start of pass 5 *********************************
@@ -8066,25 +7988,6 @@ void backup_blockage(blockagedata *bc){
   }
 }
 
-/* ------------------ ifsmoothblock ------------------------ */
-
-int ifsmoothblock(void){
-  int i;
-
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int  j;
-
-    meshi = meshinfo + i;
-    for(j=0;j<meshi->nbptrs;j++){
-      blockagedata *bc;
-
-      bc = meshi->blockageinfoptrs[j];
-      if(bc->type==BLOCK_smooth&&bc->del!=1)return 1;
-    }
-  }
-  return 0;
-}
 /* ------------------ updateusetextures ------------------------ */
 
 void updateusetextures(void){
@@ -8112,7 +8015,6 @@ void updateusetextures(void){
 
           texti = bc->surf[k]->textureinfo;
           if(texti!=NULL&&texti->loaded==1){
-            if(texti->loaded==1&&bc->type==BLOCK_smooth)bc->type=BLOCK_texture;
             if(usetextures==1)texti->display=1;
             texti->used=1;
           }
@@ -8402,7 +8304,6 @@ void initmesh(meshdata *meshi){
   meshi->meshrgb[1]=0.0;
   meshi->meshrgb[2]=0.0;
   meshi->meshrgb_ptr=NULL;
-  meshi->showsmoothtimelist=NULL;
   meshi->cellsize=0.0;
   meshi->smokedir=1;
   meshi->merge_alpha=NULL;
@@ -8448,7 +8349,6 @@ void initmesh(meshdata *meshi){
   meshi->animatedsurfaces=NULL;
   meshi->blockagesurface=NULL;
   meshi->blockagesurfaces=NULL;
-  meshi->smoothblockagecolors=NULL;
   meshi->showlevels=NULL;
   meshi->isolevels=NULL;
   meshi->nisolevels=0;
@@ -8510,7 +8410,6 @@ void initmesh(meshdata *meshi){
   meshi->zheat=NULL;
   meshi->theat=NULL;
   meshi->blockageinfoptrs=NULL;
-  meshi->nsmoothblockagecolors=0;
 
   meshi->surface_tempmax=SURFACE_TEMPMAX;
   meshi->surface_tempmin=SURFACE_TEMPMIN;
@@ -9218,12 +9117,6 @@ int readini2(char *inifile, int localfile){
       sscanf(buffer,"%i %i",&show_smokesensors,&test_smokesensors);
       continue;
     }
-    if(match(buffer,"SBATSTART")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&sb_atstart);
-      ONEORZERO(sb_atstart);
-      continue;
-    }
 #ifdef pp_GPU
     if(gpuactive==1&&match(buffer,"USEGPU")==1){
       fgets(buffer,255,stream);
@@ -9296,12 +9189,6 @@ int readini2(char *inifile, int localfile){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i",&trainerview);
       if(trainerview!=2&&trainerview!=3)trainerview=1;
-      continue;
-    }
-    if(match(buffer,"SMOOTHBLOCKSOLID")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&smooth_block_solid);
-      ONEORZERO(smooth_block_solid);
       continue;
     }
     if(match(buffer,"SHOWTRANSPARENTVENTS")==1){
@@ -10315,11 +10202,6 @@ int readini2(char *inifile, int localfile){
     if(match(buffer,"SHOWTITLE")==1){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i ",&visTitle);
-      continue;
-      }
-    if(match(buffer,"SHOWNORMALWHENSMOOTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visSmoothAsNormal);
       continue;
       }
     if(match(buffer,"SHOWTRANSPARENT")==1){
@@ -12387,8 +12269,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", p3dsurfacesmooth);
   fprintf(fileout, "PROJECTION\n");
   fprintf(fileout, " %i\n", projection_type);
-  fprintf(fileout, "SBATSTART\n");
-  fprintf(fileout, " %i\n", sb_atstart);
   fprintf(fileout, "SCALEDFONT\n");
   fprintf(fileout, " %i %f %i\n", scaled_font2d_height, scaled_font2d_height2width, scaled_font2d_thickness);
   fprintf(fileout, " %i %f %i\n", scaled_font3d_height, scaled_font3d_height2width, scaled_font3d_thickness);
@@ -12440,8 +12320,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWMEMLOAD\n");
   fprintf(fileout, " %i\n", visAvailmemory);
 #endif
-  fprintf(fileout, "SHOWNORMALWHENSMOOTH\n");
-  fprintf(fileout, " %i\n", visSmoothAsNormal);
   fprintf(fileout, "SHOWOPENVENTS\n");
   fprintf(fileout, " %i %i\n", visOpenVents, visOpenVentsAsOutline);
   fprintf(fileout, "SHOWOTHERVENTS\n");
@@ -12494,8 +12372,6 @@ void writeini(int flag,char *filename){
 #endif
   fprintf(fileout, "SMOKESENSORS\n");
   fprintf(fileout, " %i %i\n", show_smokesensors, test_smokesensors);
-  fprintf(fileout, "SMOOTHBLOCKSOLID\n");
-  fprintf(fileout, " %i\n", smooth_block_solid);
 #ifdef pp_LANG
   fprintf(fileout, "STARTUPLANG\n");
   fprintf(fileout, " %s\n", startup_lang_code);

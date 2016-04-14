@@ -457,8 +457,6 @@ EXTERNCPP void clear_3dsmoke_startup(void);
 EXTERNCPP void put_startup_smoke3d(FILE *fileout);
 EXTERNCPP void drawonlythreshold(const meshdata *meshi);
 EXTERNCPP void draw_transparent_faces(void);
-EXTERNCPP smoothblockagedata *getsmoothblockage(meshdata *meshi,float tt);
-EXTERNCPP void freesmoothblocks(smoothblockagedata *sb);
 EXTERNCPP int isblockagevisible(blockagedata *bc, float time);
 EXTERNCPP float zoom2aperture(float zoom0);
 EXTERNCPP float aperture2zoom(float ap);
@@ -540,7 +538,7 @@ EXTERNCPP void drawsmoke3dVOL(void);
 #ifdef pp_CULL
 EXTERNCPP void drawsmoke3dCULL(void);
 #endif
-EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
+EXTERNCPP void get_drawing_parms(int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void update_smoke3d_menulabels(void);
 EXTERNCPP void Labels_CB(int value);
 EXTERNCPP void output_Slicedata(void);
@@ -606,10 +604,6 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, FILE **isostreampt
 EXTERNCPP void array2string(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
 
-EXTERNCPP void getsmoothblockparms(meshdata *gb, smoothblockagedata *sb);
-EXTERNCPP void MakeIsoBlockages(meshdata *gb, smoothblockagedata *sb);
-
-EXTERNCPP int ifsmoothblock(void);
 EXTERNCPP void updatevslices(void);
 EXTERNCPP void getgsliceparams(void);
 EXTERNCPP void update_part_menulabels(void);
@@ -849,7 +843,6 @@ EXTERNCPP void readpart(char *file, int ifile, int loadflag, int set_colorbound,
 EXTERNCPP void readzone(int ifile, int flag, int *errorcode);
 EXTERNCPP void readvslice(int ivslice, int flag, int *errorcode);
 
-EXTERNCPP void smooth_blockages(void);
 EXTERNCPP void freesmoke3d(smoke3ddata *smoke3di);
 EXTERNCPP void readsmoke(int ifile,int flag, int *errorcode);
 EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
@@ -861,7 +854,6 @@ EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readfed(int ifile, int flag, int file_type, int *errorcode);
 EXTERNCPP void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorcode);
-EXTERNCPP void update_smooth_blockages(void);
 EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 
 EXTERNCPP void InitMenus(int unload);

@@ -313,7 +313,6 @@ SVEXTERN int SVDECL(update_startup_view,0);
 SVEXTERN int render_multi,render_multi_state,render_multi_menu,render_from_menu;
 SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
-SVEXTERN int sb_atstart;
 SVEXTERN int SVDECL(cullgeom_portsize,16);
 SVEXTERN int SVDECL(update_initcullgeom,1),SVDECL(cullgeom,1);
 #ifdef pp_CULL
@@ -790,8 +789,7 @@ SVEXTERN int SVDECL(visEvac,1);
 SVEXTERN int visBlocks;
 SVEXTERN int SVDECL(outline_color_flag,0);
 SVEXTERN int SVDECL(solid_state,-1),SVDECL(outline_state,-1);
-SVEXTERN int SVDECL(smooth_block_solid,0);
-SVEXTERN int visSmoothAsNormal,visTransparentBlockage;
+SVEXTERN int visTransparentBlockage;
 SVEXTERN int visBlocksSave;
 SVEXTERN int SVDECL(blocklocation,BLOCKlocation_grid);
 SVEXTERN int ncadgeom;
@@ -936,10 +934,9 @@ SVEXTERN char emptylabel[2];
 SVEXTERN void SVDECL(*large_font,NULL);
 SVEXTERN void SVDECL(*small_font,NULL);
 
-SVEXTERN int nsmoothblocks,nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks,ntransparentvents;
+SVEXTERN int nopenvents,nopenvents_nonoutline,ndummyvents,ntransparentblocks,ntransparentvents;
 SVEXTERN int nventcolors;
 SVEXTERN float SVDECL(**ventcolors,NULL);
-SVEXTERN int ntotal_smooth_blockages;
 SVEXTERN float texture_origin[3];
 
 SVEXTERN int vslicecolorbarflag;
@@ -1043,8 +1040,6 @@ SVEXTERN char SVDECL(*target_filename,NULL);
 SVEXTERN int SVDECL(update_bounds,0);
 SVEXTERN int SVDECL(*sorted_surfidlist,NULL),SVDECL(*inv_sorted_surfidlist,NULL),nsorted_surfidlist;
 SVEXTERN char SVDECL(*trainer_filename,NULL), SVDECL(*test_filename,NULL);
-SVEXTERN char SVDECL(*smoothblockage_filename,NULL);
-SVEXTERN int SVDECL(read_smoothobst,0);
 SVEXTERN FILE SVDECL(*STREAM_SB,NULL);
 SVEXTERN time_t smv_modtime;
 SVEXTERN float temp_threshold;
@@ -1161,9 +1156,6 @@ SVEXTERN char script_filename[1024];
 SVEXTERN char luascript_filename[1024];
 #endif
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
-SVEXTERN int updatesmoothblocks,menusmooth,use_menusmooth;
-SVEXTERN int smoothing_blocks;
-SVEXTERN int blocksneedsmoothing;
 SVEXTERN int SVDECL(updategetobstlabels,1);
 
 SVEXTERN int pixel_skip;

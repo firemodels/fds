@@ -535,15 +535,6 @@ typedef struct _isodata {
   char menulabel[128];
 } isodata;
 
-/* --------------------------  smoothblockagedata ------------------------------------ */
-
-typedef struct {
-  int nsmoothblockagecolors;
-  float *smoothblockagecolors;
-  isosurface **smoothblockagesurfaces;
-  float time;
-} smoothblockagedata;
-
 /* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct _volrenderdata {
@@ -646,8 +637,6 @@ typedef struct _meshdata {
   isosurface currentsurf,currentsurf2;
   isosurface *blockagesurface;
   isosurface **blockagesurfaces;
-  float *smoothblockagecolors;
-  int nsmoothblockagecolors;
   int ntc;
   int nspr;
   float *xsprplot, *ysprplot, *zsprplot, *tspr;
@@ -694,11 +683,6 @@ typedef struct _meshdata {
   int npatchsize;
   int visInteriorPatches;
   float surface_tempmin, surface_tempmax;
-
-  smoothblockagedata *smoothblockages_list;
-  int nsmoothblockages_list;
-
-  smoothblockagedata **showsmoothtimelist;
 
   int nface_textures, nface_outlines, nfaces;
   int nface_normals_single, nface_normals_double, nface_transparent_double;

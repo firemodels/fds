@@ -4541,9 +4541,6 @@ void BlockageMenu(int value){
      visBlocks=value;
      update_trainer_outline();
      break;
-   case visSmoothBLOCKSolid:
-     smooth_block_solid = 1 - smooth_block_solid;
-     break;
    case visBLOCKNormal:
    case visBLOCKOutline:
    case visBLOCKHide:
@@ -4560,18 +4557,8 @@ void BlockageMenu(int value){
    case BLOCKtexture_cad:
      visCadTextures=1-visCadTextures;
      break;
-   case visBLOCKSmoothAsNormal:
-     visSmoothAsNormal = 1 - visSmoothAsNormal;
-     break;
    case visBLOCKTransparent:
      visTransparentBlockage=1-visTransparentBlockage;
-     break;
-   case SMOOTH_BLOCKAGES:
-     menusmooth=1;
-     updatesmoothblocks=1;
-     break;
-   case SMOOTH_ATSTART:
-     sb_atstart=1-sb_atstart;
      break;
    default:
      if(value<0){
@@ -5433,15 +5420,6 @@ updatemenu=0;
 /* --------------------------------blockage menu -------------------------- */
 
   CREATEMENU(blockagemenu,BlockageMenu);
-  if(use_menusmooth==1){
-    if(sb_atstart==1){
-      glutAddMenuEntry(_("*Smooth blockages at startup"),SMOOTH_ATSTART);
-    }
-    else{
-      glutAddMenuEntry(_("Smooth blockages at startup"),SMOOTH_ATSTART);
-    }
-    glutAddMenuEntry(_("Smooth blockages now"),SMOOTH_BLOCKAGES);
-  }
   glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
   if(visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
     glutAddMenuEntry(_("   *Defined in input file"),visBLOCKAsInput);
@@ -5449,24 +5427,8 @@ updatemenu=0;
    else{
     glutAddMenuEntry(_("   Defined in input file"),visBLOCKAsInput);
   }
-  if(use_menusmooth==1){
-    if(smooth_block_solid==1){
-      glutAddMenuEntry(_("       *Smooth blockages drawn opaque"),visSmoothBLOCKSolid);
-    }
-    else{
-      glutAddMenuEntry(_("       Smooth blockages drawn opaque"),visSmoothBLOCKSolid);
-    }
-  }
   if(visBlocks==visBLOCKNormal||visBlocks==visBLOCKSolidOutline){
     glutAddMenuEntry(_("   *Solid"),visBLOCKNormal);
-    if(nsmoothblocks>0){
-      if(visSmoothAsNormal==1){
-         glutAddMenuEntry(_("      Smooth"),visBLOCKSmoothAsNormal);
-      }
-      else{
-         glutAddMenuEntry(_("      *Smooth"),visBLOCKSmoothAsNormal);
-      }
-    }
     if(ntransparentblocks>0){
       if(visTransparentBlockage==1){
          glutAddMenuEntry(_("      *Transparent"),visBLOCKTransparent);

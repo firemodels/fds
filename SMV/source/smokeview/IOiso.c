@@ -1046,10 +1046,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
-  int drawing_smooth;
   int transparenton_flag=0;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1075,12 +1074,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       rgbtemp[2]=col[2];
     }
 
-    if(smooth_block_solid==0){
-      rgbtemp[3]=asurface->color[3];
-    }
-    else{
-      rgbtemp[3]=1.0;
-    }
+    rgbtemp[3]=asurface->color[3];
     if(data_type!=0){
       if(rgbtemp[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)return;
       if(rgbtemp[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)return;

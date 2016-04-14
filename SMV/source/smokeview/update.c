@@ -211,21 +211,6 @@ void Update_Framenumber(int changetime){
         meshi->iso_itime=meshi->iso_timeslist[itimes];
       }
     }
-    if(ntotal_smooth_blockages>0){
-      for(i=0;i<nmeshes;i++){
-        smoothblockagedata *sb;
-        meshdata *meshi;
-
-        meshi = meshinfo+i;
-        if(meshi->showsmoothtimelist!=NULL){
-          sb=meshi->showsmoothtimelist[itimes];
-          if(sb==NULL)continue;
-          meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-          meshi->smoothblockagecolors=sb->smoothblockagecolors;
-          meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-        }
-      }
-    }
     if(showzone==1){
       izone=zone_timeslist[itimes];
     }
@@ -649,21 +634,6 @@ void Synch_Times(void){
   int n,i,istart,igrid;
 
   /* synchronize smooth blockage times */
-
-  if(ntotal_smooth_blockages>0){
-    for(igrid=0;igrid<nmeshes;igrid++){
-      meshdata *meshi;
-
-      meshi=meshinfo+igrid;
-      if(meshi->showsmoothtimelist==NULL)continue;
-      for(n=0;n<nglobal_times;n++){
-        smoothblockagedata *sb;
-
-        sb = getsmoothblockage(meshi,global_times[n]);
-        meshi->showsmoothtimelist[n] = sb;
-      }
-    }
-  }
 
   for(n=0;n<nglobal_times;n++){
     int j,jj;
@@ -1472,16 +1442,6 @@ void Update_Times(void){
   FREEMEMORY(targtimeslist);
   if(nglobal_times>0)NewMemory((void **)&targtimeslist,  nglobal_times*sizeof(int));
 
-  if(ntotal_smooth_blockages>0){
-    for(i=0;i<nmeshes;i++){
-      meshdata *meshi;
-
-      meshi=meshinfo+i;
-      FREEMEMORY(meshi->showsmoothtimelist);
-      if(nglobal_times>0)NewMemory((void **)&meshi->showsmoothtimelist,nglobal_times*sizeof(smoothblockagedata *));
-    }
-  }
-
   // end pass 3
 
   // reset render_frame array
@@ -1873,32 +1833,6 @@ void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
   UpdateColorTableList(ncolortableinfo_old);
 }
 
-
-/* ------------------ update_smoothblockage_info ------------------------ */
-
-void update_smoothblockage_info(void){
-  int i;
-
-  for(i = 0; i < nmeshes; i++){
-    smoothblockagedata *sb;
-    meshdata *meshi;
-
-    meshi = meshinfo + i;
-    meshi->nsmoothblockagecolors = 0;
-    meshi->smoothblockagecolors = NULL;
-    meshi->blockagesurfaces = NULL;
-
-    if(meshi->smoothblockages_list != NULL){
-      sb = meshi->smoothblockages_list;
-      if(sb != NULL){
-        meshi->nsmoothblockagecolors = sb->nsmoothblockagecolors;
-        meshi->smoothblockagecolors = sb->smoothblockagecolors;
-        meshi->blockagesurfaces = sb->smoothblockagesurfaces;
-      }
-    }
-  }
-}
-
 /* ------------------ update_ShowScene ------------------------ */
 
 void update_ShowScene(void){
@@ -1926,9 +1860,6 @@ void update_ShowScene(void){
     update_rotation_center = 0;
     update_rotation_center_ini = 0;
     update_startup_view = 0;
-  }
-  if(menusmooth == 1 && smoothing_blocks == 0 && updatesmoothblocks == 1){
-    smooth_blockages();
   }
   if(update_tourlist == 1){
     Update_Tourlist();
@@ -2047,9 +1978,6 @@ void update_Display(void){
   if(update_fire_colorbar_index == 1){
     SmokeColorBarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index = 0;
-  }
-  if(showtime == 0 && ntotal_smooth_blockages > 0){
-    update_smoothblockage_info();
   }
   if(update_colorbar_select_index == 1 && colorbar_select_index >= 0 && colorbar_select_index <= 255){
     update_colorbar_select_index = 0;

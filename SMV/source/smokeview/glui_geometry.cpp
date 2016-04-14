@@ -510,7 +510,6 @@ void Blockedit_DLG_CB(int var){
     break;
   case CLOSE_WINDOW:
     DialogMenu(DIALOG_GEOMETRY);
-    smooth_blockages();
     break;
   default:
     ASSERT(FFALSE);
