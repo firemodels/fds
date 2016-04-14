@@ -1,11 +1,11 @@
-&HEAD CHID='HVAC_flow_loss',TITLE='Test of duct flow loss, SVN $Revision$' /
+&HEAD CHID='HVAC_flow_loss',TITLE='Test of duct flow loss' /
 
 &MESH IJK=20,20,20, XB=0.,1.,0.,1.,0.,1./
 
 &MISC STRATIFICATION=.FALSE./
 
 &TIME T_END=10. /
-&DUMP NFRAMES=20/
+!&DUMP NFRAMES=20/
 &RADI RADIATION=.FALSE./
 
 &VENT MB='XMIN',SURF_ID='OPEN'/

@@ -75,18 +75,10 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
@@ -134,18 +126,10 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
@@ -175,8 +159,8 @@ for i=1:lnx
     H(1+i)=plot(u_fds,y/h,fds_marker{i});
 end
 
-ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
-xlabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
+ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+xlabel('Streamwise Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 
 axis([0 2 1 3])
 
@@ -188,18 +172,10 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northwest');
 set(lh,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 
@@ -230,8 +206,8 @@ for i=1:lnx
     H(1+i)=plot(urms_fds,y/h,fds_marker{i});
 end
 
-ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
-xlabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size)
+ylabel('\it z/h','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
+xlabel('Streamwise RMS Velocity (m/s)','Interpreter',Font_Interpreter,'Fontsize',Label_Font_Size,'FontName',Font_Name)
 
 axis([0 1 1 3])
 
@@ -243,18 +219,10 @@ set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 lh = legend(H,'PIV data',fds_key{1:lnx},'Location','Northeast');
 set(lh,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git revision if file is available
 
-SVN_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_svn.txt'];
-if exist(SVN_Filename,'file')
-    SVN = importdata(SVN_Filename);
-    x_lim = get(gca,'XLim');
-    y_lim = get(gca,'YLim');
-    X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-    Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-    text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-        'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-end
+Git_Filename = [datadir,'ribbed_channel_',num2str(nx(1)),'_git.txt'];
+addverstr(gca,Git_Filename,'linear')
 
 % print to pdf
 

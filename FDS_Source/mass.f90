@@ -22,7 +22,7 @@ SUBROUTINE MASS_FINITE_DIFFERENCES(NM)
 ! Compute spatial differences for density equation
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE GLOBAL_CONSTANTS, ONLY: N_TOTAL_SCALARS,PREDICTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,TUSED
+USE GLOBAL_CONSTANTS, ONLY: N_TOTAL_SCALARS,PREDICTOR,EVACUATION_ONLY,SOLID_PHASE_ONLY,T_USED
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB) :: TNOW,ZZZ(1:4)
@@ -179,23 +179,23 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
 
 ENDDO SPECIES_LOOP
 
-TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
+T_USED(3)=T_USED(3)+SECOND()-TNOW
 
 END SUBROUTINE MASS_FINITE_DIFFERENCES
 
 
-SUBROUTINE DENSITY(T,NM)
+SUBROUTINE DENSITY(T,DT,NM)
 
 ! Update the species mass fractions and density
 
 USE COMP_FUNCTIONS, ONLY: SECOND,SHUTDOWN
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SENSIBLE_ENTHALPY,GET_SPECIFIC_HEAT
-USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,TMPMAX,TMPMIN,EVACUATION_ONLY, &
-                            PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,TUSED
+USE GLOBAL_CONSTANTS, ONLY: N_TRACKED_SPECIES,EVACUATION_ONLY, &
+                            PREDICTOR,N_ZONE,GAS_SPECIES,R0,SOLID_PHASE_ONLY,T_USED
 USE MANUFACTURED_SOLUTIONS, ONLY: VD2D_MMS_Z_OF_RHO,VD2D_MMS_Z_SRC,UF_MMS,WF_MMS,VD2D_MMS_RHO_OF_Z,VD2D_MMS_Z_SRC
 USE SOOT_ROUTINES, ONLY: SETTLING_VELOCITY
 INTEGER, INTENT(IN) :: NM
-REAL(EB), INTENT(IN) :: T
+REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES),RHS,UN,Q_Z,XHAT,ZHAT
 INTEGER :: I,J,K,N,IW,IOR,IIG,JJG,KKG
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: DEL_RHO_D_DEL_Z__0=>NULL()
@@ -228,7 +228,7 @@ PREDICTOR_STEP: SELECT CASE (PREDICTOR)
 
 CASE(.TRUE.) PREDICTOR_STEP
 
-   IF (.NOT.CHANGE_TIME_STEP(NM)) THEN
+   IF (FIRST_PASS) THEN
       ! This IF is required because DEL_RHO_D_DEL_Z is updated to the next time level in divg within
       ! the CHANGE_TIME_STEP loop in main while we are determining the appropriate stable DT.
       IF (ANY(SPECIES_MIXTURE%DEPOSITING) .AND. GRAVITATIONAL_SETTLING) CALL SETTLING_VELOCITY(NM)
@@ -250,20 +250,20 @@ CASE(.TRUE.) PREDICTOR_STEP
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      UN = UVW_SAVE(IW)
+      SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT; CYCLE WALL_LOOP
+         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+      END SELECT
+
       SELECT CASE(IOR)
-         CASE( 1)
-            UU(IIG-1,JJG,KKG) = UN
-         CASE(-1)
-            UU(IIG,JJG,KKG)   = UN
-         CASE( 2)
-            VV(IIG,JJG-1,KKG) = UN
-         CASE(-2)
-            VV(IIG,JJG,KKG)   = UN
-         CASE( 3)
-            WW(IIG,JJG,KKG-1) = UN
-         CASE(-3)
-            WW(IIG,JJG,KKG)   = UN
+         CASE( 1); UU(IIG-1,JJG,KKG) = UN
+         CASE(-1); UU(IIG,JJG,KKG)   = UN
+         CASE( 2); VV(IIG,JJG-1,KKG) = UN
+         CASE(-2); VV(IIG,JJG,KKG)   = UN
+         CASE( 3); WW(IIG,JJG,KKG-1) = UN
+         CASE(-3); WW(IIG,JJG,KKG)   = UN
       END SELECT
    ENDDO WALL_LOOP
 
@@ -285,6 +285,10 @@ CASE(.TRUE.) PREDICTOR_STEP
          ENDDO
       ENDDO
    ENDDO
+
+   ! Add gas production source term
+
+   IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0) ZZS = ZZS + DT*M_DOT_PPP
 
    ! Manufactured solution
 
@@ -362,8 +366,6 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-
 ! The CORRECTOR step
 
 CASE(.FALSE.) PREDICTOR_STEP
@@ -383,20 +385,20 @@ CASE(.FALSE.) PREDICTOR_STEP
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
-      UN = UVW_SAVE(IW)
+      SELECT CASE(WC%BOUNDARY_TYPE)
+         CASE DEFAULT; CYCLE WALL_LOOP_2
+         ! SOLID_BOUNDARY is not currently functional here, but keep for testing
+         CASE(SOLID_BOUNDARY);        UN = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+         CASE(INTERPOLATED_BOUNDARY); UN = UVW_SAVE(IW)
+      END SELECT
+
       SELECT CASE(IOR)
-         CASE( 1)
-            UU(IIG-1,JJG,KKG) = UN
-         CASE(-1)
-            UU(IIG,JJG,KKG)   = UN
-         CASE( 2)
-            VV(IIG,JJG-1,KKG) = UN
-         CASE(-2)
-            VV(IIG,JJG,KKG)   = UN
-         CASE( 3)
-            WW(IIG,JJG,KKG-1) = UN
-         CASE(-3)
-            WW(IIG,JJG,KKG)   = UN
+         CASE( 1); UU(IIG-1,JJG,KKG) = UN
+         CASE(-1); UU(IIG,JJG,KKG)   = UN
+         CASE( 2); VV(IIG,JJG-1,KKG) = UN
+         CASE(-2); VV(IIG,JJG,KKG)   = UN
+         CASE( 3); WW(IIG,JJG,KKG-1) = UN
+         CASE(-3); WW(IIG,JJG,KKG)   = UN
       END SELECT
    ENDDO WALL_LOOP_2
 
@@ -415,11 +417,19 @@ CASE(.FALSE.) PREDICTOR_STEP
                    + (FY(I,J,K,N)*VV(I,J,K)      - FY(I,J-1,K,N)*VV(I,J-1,K)       )*RDY(J)        &
                    + (FZ(I,J,K,N)*WW(I,J,K)      - FZ(I,J,K-1,N)*WW(I,J,K-1)       )*RDZ(K)
 
-               ZZ(I,J,K,N) = .5_EB*(RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N)) - .5_EB*DT*RHS
+               ZZ(I,J,K,N) = .5_EB*( RHO(I,J,K)*ZZ(I,J,K,N) + RHOS(I,J,K)*ZZS(I,J,K,N) - DT*RHS )
             ENDDO
          ENDDO
       ENDDO
    ENDDO
+
+   ! Add gas production source term
+
+   IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0) THEN
+      ZZ = ZZ + 0.5_EB*DT*M_DOT_PPP
+      M_DOT_PPP = 0._EB
+      D_SOURCE  = 0._EB
+   ENDIF
 
    ! Manufactured solution
 
@@ -497,11 +507,9 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   TMP = MAX(TMPMIN,MIN(TMPMAX,TMP))
-
 END SELECT PREDICTOR_STEP
 
-TUSED(3,NM)=TUSED(3,NM)+SECOND()-TNOW
+T_USED(3)=T_USED(3)+SECOND()-TNOW
 
 END SUBROUTINE DENSITY
 
@@ -512,21 +520,20 @@ SUBROUTINE CHECK_MASS_DENSITY
 ! Do not apply OpenMP to this routine
 
 USE GLOBAL_CONSTANTS, ONLY : PREDICTOR,RHOMIN,RHOMAX
-REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3)
+REAL(EB) :: MASS_N(-3:3),CONST,MASS_C,RHO_ZZ_CUT,RHO_CUT,VC(-3:3),SIGN_FACTOR,SUM_MASS_N,VC1(-3:3),RHO_ZZ_MIN,RHO_ZZ_MAX
 INTEGER  :: IC,I,J,K,N
-REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_ZZ=>NULL(),RHOP=>NULL()
-REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
-REAL(EB), PARAMETER :: ZZ_MIN=0._EB, ZZ_MAX=HUGE(1._EB)
+REAL(EB), POINTER, DIMENSION(:,:,:) :: DELTA_RHO=>NULL(),DELTA_RHO_ZZ=>NULL(),RHOP=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:,:) :: RHO_ZZ=>NULL()
 
-DELTA_RHO => WORK1
+DELTA_RHO => WORK4
 DELTA_RHO =  0._EB
 
 IF (PREDICTOR) THEN
-   ZZP=>ZZS
-   RHOP=>RHOS
+   RHO_ZZ => ZZS  ! At this stage of the time step, ZZS is actually RHOS*ZZS
+   RHOP   => RHOS
 ELSE
-   ZZP=>ZZ
-   RHOP=>RHO
+   RHO_ZZ => ZZ   ! At this stage of the time step, ZZ is actually RHO*ZZ
+   RHOP   => RHO
 ENDIF
 
 ! Correct density
@@ -586,10 +593,12 @@ RHOP(1:IBAR,1:JBAR,1:KBAR) = MIN(RHOMAX,MAX(RHOMIN,RHOP(1:IBAR,1:JBAR,1:KBAR)+DE
 
 ! Correct species mass density
 
+RHO_ZZ_MIN = 0._EB
+
 SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
 
-DELTA_ZZ => WORK2
-DELTA_ZZ = 0._EB
+DELTA_RHO_ZZ => WORK5
+DELTA_RHO_ZZ = 0._EB
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -602,14 +611,16 @@ DO K=1,KBAR
       VC1( 3)  = DY(J)  *DZ(K+1)
       DO I=1,IBAR
 
-         IF (ZZP(I,J,K,N)>=ZZ_MIN .AND. ZZP(I,J,K,N)<=ZZ_MAX) CYCLE
+         RHO_ZZ_MAX = RHOP(I,J,K)
+
+         IF (RHO_ZZ(I,J,K,N)>=RHO_ZZ_MIN .AND. RHO_ZZ(I,J,K,N)<=RHO_ZZ_MAX) CYCLE
          IC = CELL_INDEX(I,J,K)
          IF (SOLID(IC)) CYCLE
-         IF (ZZP(I,J,K,N)<ZZ_MIN) THEN
-            ZZ_CUT = ZZ_MIN
+         IF (RHO_ZZ(I,J,K,N)<RHO_ZZ_MIN) THEN
+            RHO_ZZ_CUT = RHO_ZZ_MIN
             SIGN_FACTOR = 1._EB
          ELSE
-            ZZ_CUT = ZZ_MAX
+            RHO_ZZ_CUT = RHO_ZZ_MAX
             SIGN_FACTOR = -1._EB
          ENDIF
          MASS_N = 0._EB
@@ -621,28 +632,34 @@ DO K=1,KBAR
          VC(-3)  = DX(I)  * VC1(-3)
          VC( 3)  = DX(I)  * VC1( 3)
 
-         MASS_C = ABS(ZZ_CUT-ZZP(I,J,K,N))*VC(0)
-         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I-1,J,K,N)))-ZZ_CUT)*VC(-1)
-         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I+1,J,K,N)))-ZZ_CUT)*VC( 1)
-         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J-1,K,N)))-ZZ_CUT)*VC(-2)
-         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J+1,K,N)))-ZZ_CUT)*VC( 2)
-         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J,K-1,N)))-ZZ_CUT)*VC(-3)
-         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(I,J,K+1,N)))-ZZ_CUT)*VC( 3)
+         MASS_C = ABS(RHO_ZZ_CUT-RHO_ZZ(I,J,K,N))*VC(0)
+         IF (WALL_INDEX(IC,-1)==0) MASS_N(-1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I-1,J,K,N)))-RHO_ZZ_CUT)*VC(-1)
+         IF (WALL_INDEX(IC, 1)==0) MASS_N( 1) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I+1,J,K,N)))-RHO_ZZ_CUT)*VC( 1)
+         IF (WALL_INDEX(IC,-2)==0) MASS_N(-2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J-1,K,N)))-RHO_ZZ_CUT)*VC(-2)
+         IF (WALL_INDEX(IC, 2)==0) MASS_N( 2) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J+1,K,N)))-RHO_ZZ_CUT)*VC( 2)
+         IF (WALL_INDEX(IC,-3)==0) MASS_N(-3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K-1,N)))-RHO_ZZ_CUT)*VC(-3)
+         IF (WALL_INDEX(IC, 3)==0) MASS_N( 3) = ABS(MIN(RHO_ZZ_MAX,MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K+1,N)))-RHO_ZZ_CUT)*VC( 3)
          SUM_MASS_N = SUM(MASS_N)
          IF (SUM_MASS_N<=TWO_EPSILON_EB) CYCLE
          CONST = SIGN_FACTOR*MIN(1._EB,MASS_C/SUM_MASS_N)
-         DELTA_ZZ(I,J,K)   = DELTA_ZZ(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
-         DELTA_ZZ(I-1,J,K) = DELTA_ZZ(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
-         DELTA_ZZ(I+1,J,K) = DELTA_ZZ(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
-         DELTA_ZZ(I,J-1,K) = DELTA_ZZ(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
-         DELTA_ZZ(I,J+1,K) = DELTA_ZZ(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
-         DELTA_ZZ(I,J,K-1) = DELTA_ZZ(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
-         DELTA_ZZ(I,J,K+1) = DELTA_ZZ(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
+         DELTA_RHO_ZZ(I,J,K)   = DELTA_RHO_ZZ(I,J,K)   + CONST*SUM_MASS_N/VC( 0)
+         DELTA_RHO_ZZ(I-1,J,K) = DELTA_RHO_ZZ(I-1,J,K) - CONST*MASS_N(-1)/VC(-1)
+         DELTA_RHO_ZZ(I+1,J,K) = DELTA_RHO_ZZ(I+1,J,K) - CONST*MASS_N( 1)/VC( 1)
+         DELTA_RHO_ZZ(I,J-1,K) = DELTA_RHO_ZZ(I,J-1,K) - CONST*MASS_N(-2)/VC(-2)
+         DELTA_RHO_ZZ(I,J+1,K) = DELTA_RHO_ZZ(I,J+1,K) - CONST*MASS_N( 2)/VC( 2)
+         DELTA_RHO_ZZ(I,J,K-1) = DELTA_RHO_ZZ(I,J,K-1) - CONST*MASS_N(-3)/VC(-3)
+         DELTA_RHO_ZZ(I,J,K+1) = DELTA_RHO_ZZ(I,J,K+1) - CONST*MASS_N( 3)/VC( 3)
       ENDDO
    ENDDO
 ENDDO
 
-ZZP(1:IBAR,1:JBAR,1:KBAR,N) = MIN(ZZ_MAX,MAX(ZZ_MIN,ZZP(1:IBAR,1:JBAR,1:KBAR,N)+DELTA_ZZ(1:IBAR,1:JBAR,1:KBAR)))
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         RHO_ZZ(I,J,K,N) = MIN(RHOP(I,J,K),MAX(RHO_ZZ_MIN,RHO_ZZ(I,J,K,N)+DELTA_RHO_ZZ(I,J,K)))
+      ENDDO
+   ENDDO
+ENDDO
 
 ENDDO SPECIES_LOOP
 
@@ -652,8 +669,8 @@ DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
          IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-         N=MAXLOC(ZZP(I,J,K,1:N_TRACKED_SPECIES),1)
-         ZZP(I,J,K,N) = RHOP(I,J,K) - ( SUM(ZZP(I,J,K,1:N_TRACKED_SPECIES)) - ZZP(I,J,K,N) )
+         N=MAXLOC(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES),1)
+         RHO_ZZ(I,J,K,N) = RHOP(I,J,K) - ( SUM(RHO_ZZ(I,J,K,1:N_TRACKED_SPECIES)) - RHO_ZZ(I,J,K,N) )
       ENDDO
    ENDDO
 ENDDO
@@ -778,6 +795,112 @@ ELSE WIND_DIRECTION_IF
 ENDIF WIND_DIRECTION_IF
 
 END FUNCTION SCALAR_FACE_VALUE
+
+
+REAL(EB) FUNCTION SCALAR_FACE_VALUE_NEW(A,U,LIMITER)
+
+REAL(EB), INTENT(IN) :: A(3),U(4)
+INTEGER, INTENT(IN) :: LIMITER
+REAL(EB) :: R,B,DU_UP,DU_LOC,V(5)
+
+! This function is identical to the original SCALAR_FACE_VALUE except
+! that we only use 2nd order limiters if the upwind velocity is the
+! same sign as the local face velocity.
+
+! This function computes the scalar value on a face.
+! The scalar is denoted U, and the velocity is denoted A.
+! The divergence (computed elsewhere) uses a central difference across
+! the cell subject to a flux LIMITER.  The flux LIMITER choices are:
+!
+! CENTRAL_LIMITER  = 0
+! GODUNOV_LIMITER  = 1
+! SUPERBEE_LIMITER = 2
+! MINMOD_LIMITER   = 3
+! CHARM_LIMITER    = 4
+! MP5_LIMITER      = 5
+!
+!                    location of face
+!
+!                            f
+!    |     o     |     o     |     o     |     o     |
+!               A(1)        A(2)        A(3)
+!         U(1)        U(2)        U(3)        U(4)
+
+WIND_DIRECTION_IF: IF (A(2)>0._EB) THEN
+
+   ! the flow is left to right
+
+   IF (A(1)>0._EB) THEN
+      DU_UP = U(2)-U(1)
+   ELSE
+      DU_UP = 0._EB
+   ENDIF
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE_NEW = U(2)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE_NEW = U(2) + 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(1)-U(2),U(1:4)/)
+         SCALAR_FACE_VALUE_NEW = MP5(V)
+   END SELECT
+
+ELSE WIND_DIRECTION_IF
+
+   ! the flow is right to left
+
+   IF (A(3)<0._EB) THEN
+      DU_UP = U(4)-U(3)
+   ELSE
+      DU_UP = 0._EB
+   ENDIF
+   DU_LOC = U(3)-U(2)
+
+   R = 0._EB
+   B = 0._EB
+
+   SELECT CASE(LIMITER)
+      CASE(0) ! central differencing
+         SCALAR_FACE_VALUE_NEW = 0.5_EB*(U(2)+U(3))
+      CASE(1) ! first-order upwinding
+         SCALAR_FACE_VALUE_NEW = U(3)
+      CASE(2) ! SUPERBEE, Roe (1986)
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(2._EB*R,1._EB),MIN(R,2._EB))
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
+      CASE(3) ! MINMOD
+         IF (ABS(DU_LOC)>TWO_EPSILON_EB) R = DU_UP/DU_LOC
+         B = MAX(0._EB,MIN(1._EB,R))
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_LOC
+      CASE(4) ! CHARM
+         IF (ABS(DU_UP)>TWO_EPSILON_EB) R = DU_LOC/DU_UP
+         IF (R>0._EB) B = R*(3._EB*R+1._EB)/((R+1._EB)**2)
+         SCALAR_FACE_VALUE_NEW = U(3) - 0.5_EB*B*DU_UP
+      CASE(5) ! MP5, Suresh and Huynh (1997)
+         V = (/2._EB*U(4)-U(3),U(4),U(3),U(2),U(1)/)
+         SCALAR_FACE_VALUE_NEW = MP5(V)
+    END SELECT
+
+ENDIF WIND_DIRECTION_IF
+
+END FUNCTION SCALAR_FACE_VALUE_NEW
 
 
 REAL(EB) FUNCTION MP5(V)

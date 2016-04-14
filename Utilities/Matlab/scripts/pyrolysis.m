@@ -115,11 +115,11 @@ for i_plot=1:2
     % Plot attributes
     
     set(gca,'FontName',Font_Name)
-    set(AX(1),'FontName',Font_Name)
-    set(AX(2),'FontName',Font_Name)
-    xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-    set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-    set(get(AX(2),'Ylabel'),'String','Reaction Rate (s^{-1}) \times 10^3','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+    xlabel('Temperature (\circC)','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    set(AX(2),'XTickMode','manual')
+    set(AX(2),'XTick',[])
+    set(get(AX(1),'Ylabel'),'String','Mass Fraction','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
+    set(get(AX(2),'Ylabel'),'String','Reaction Rate (s^{-1}) \times 10^3','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'FontName',Font_Name)
     set(AX(1),'YLim',[0 1.1])
     set(AX(2),'YLim',[0 2.2])
     set(AX(1),'YTickMode','manual')
@@ -144,16 +144,8 @@ for i_plot=1:2
         chid = 'pyrolysis_2';
     end
     
-    SVN_Filename = [chid,'_svn.txt'];
-    if exist(SVN_Filename,'file')
-        SVN = importdata(SVN_Filename);
-        x_lim = get(gca,'XLim');
-        y_lim = get(gca,'YLim');
-        X_SVN_Position = x_lim(1)+SVN_Scale_X*(x_lim(2)-x_lim(1));
-        Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-        text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-            'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-    end
+    Git_Filename = [chid,'_git.txt'];
+    addverstr(gca,Git_Filename,'linear');
     
     % Create the PDF files
     

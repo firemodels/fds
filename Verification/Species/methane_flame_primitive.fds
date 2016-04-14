@@ -1,4 +1,4 @@
-&HEAD CHID='methane_flame_primitive', TITLE='Verification of simple chemistry flame, SVN $Revision$'/
+&HEAD CHID='methane_flame_primitive', TITLE='Verification of simple chemistry flame'/
 
 All material properties etc. are completely fabricated.
 
@@ -6,8 +6,6 @@ All material properties etc. are completely fabricated.
 
 &TIME T_END=10.0, DT=0.01 /
 &DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
-
-&MISC HRRPUV_AVERAGE=1e8/
 
 Fire
 HRR = 100 kW 
@@ -29,15 +27,15 @@ Species and reactions
 
 
 &SPEC ID='NITROGEN', BACKGROUND=.TRUE./
-&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.232378 /
-&SPEC ID='WATER VAPOR', MASS_FRACTION_0 = 0.0052281/
-&SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.000595 /
+&SPEC ID='OXYGEN', MASS_FRACTION_0 = 0.2311814 /
+&SPEC ID='WATER VAPOR', MASS_FRACTION_0 = 0.005149269/
+&SPEC ID='CARBON DIOXIDE', MASS_FRACTION_0 = 0.000591936 /
 &SPEC ID='CARBON MONOXIDE', MASS_FRACTION_0 = 0.0 /
 &SPEC ID='METHANE' /
 
 &REAC FUEL='METHANE', 
       SPEC_ID_NU='METHANE','OXYGEN','CARBON DIOXIDE','WATER VAPOR','CARBON MONOXIDE', 
-      NU=-1,-1.971363,0.942726,2,0.057274/
+      NU=-1,-1.9713631,0.9427262,2,0.0572738/
 
 
 Measurements

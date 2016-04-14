@@ -9,8 +9,11 @@ UNLOADALL
 UNLOADALL
 LOADINIFILE
  plumeiso.ini
-LOADFILE
- plumeiso.prt5.iso
+// LOADFILE
+//  plumeiso.prt5.iso
+LOADISOM
+ particle boundary: 0.5
+ 1
 SETTIMEVAL
  10.05
 RENDERONCE

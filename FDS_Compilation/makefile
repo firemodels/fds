@@ -11,24 +11,26 @@
 
 VPATH = ../FDS_Source
 
-GIT_HASH := $(shell git describe --long --dirty)
-GIT_DATE := $(shell git log -1 --format=%cd)
-GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
-
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   BUILD_DATE := $(shell date /t) $(shell time /t)
+  GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
 else
 # linux/osx
+  GIT_HASH := $(shell git describe --long --dirty)
+  GIT_DATE := $(shell git log -1 --format=%cd)
   BUILD_DATE := $(shell date "+%b %d, %Y  %T")
 # The preprocessor used by xlf uses comma as separation between preprocessing commands.
 # Commas needs to be escaped if they are to be used as part of a value in a preprocessing variable.
   BUILD_DATE_XLF := $(shell date "+%b %d\, %Y  %T")  
 endif
 
+GITINFO_BASE=-DGITHASH_PP=\"$(GIT_HASH)\" -DGITDATE_PP=\""$(GIT_DATE)\""
 GITINFO=-fpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOGNU=-cpp $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 GITINFOXLF=-qsuffix=cpp=f90 '-WF,-DGITHASH_PP=\"$(GIT_HASH)\",-DGITDATE_PP=\"$(GIT_DATE)\",-DBUILDDATE_PP=\"$(BUILD_DATE_XLF)\"'
+GITINFOPGI=-Mpreprocess $(GITINFO_BASE) -DBUILDDATE_PP=\""$(BUILD_DATE)\""
 
 
 # Definition of the non-MPI object variables
@@ -244,7 +246,7 @@ mpi_intel_linux_64ib_db : setup $(obj_mpi)
 
 # OSX   
 
-intel_osx_64 : FFLAGS = -m64 -O2 -ipo $(GITINFO) 
+intel_osx_64 : FFLAGS = -m64 -O2 $(GITINFO) 
 intel_osx_64 : LFLAGS = -static-intel
 intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 intel_osx_64 : FCOMPL = ifort
@@ -260,7 +262,7 @@ intel_osx_64_db : obj = fds_intel_osx_64_db
 intel_osx_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_intel_osx_64 : FFLAGS = -m64 -O2 -ipo $(GITINFO) 
+mpi_intel_osx_64 : FFLAGS = -m64 -O2 $(GITINFO) 
 mpi_intel_osx_64 : LFLAGS = -L$(MPIDIST)/lib -static-intel
 mpi_intel_osx_64 : FOPENMPFLAGS = -openmp -openmp-link static
 mpi_intel_osx_64 : FCOMPL = mpifort
@@ -368,7 +370,7 @@ sun_linux_64_profile : $(obj_serial)
 #*** Portland Group Compiler***
 
 # AMD Opteron 64Bit PC
-pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard
+pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard $(GITINFOPGI)
 pgi_linux_64 : FCOMPL = pgf90
 pgi_linux_64 : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
 pgi_linux_64 : obj = fds_pgi_Opteron64
@@ -376,7 +378,7 @@ pgi_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) -o $(obj) $(obj_serial)
 
 # AMD Opteron 64Bit PC
-mpi_pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard
+mpi_pgi_linux_64 : FFLAGS = -fast -tp k8-64 -Mstandard $(GITINFOPGI)
 mpi_pgi_linux_64 : FCOMPL = mpifort
 mpi_pgi_linux_64 : LFLAGS  = -fast -tp k8-64 -byteswapio -Bstatic -lc -lgcc_eh
 mpi_pgi_linux_64 : obj = fds_mpi_pgi_Opteron64
@@ -407,39 +409,74 @@ aix_mpi : $(obj_mpi)
 
 #*** GNU Compilers ***
 
-gnu_win_64 : FFLAGS = -O2
+gnu_win_64 : FFLAGS = -O2 $(GITINFOGNU)
 gnu_win_64 : FCOMPL = gfortran
 gnu_win_64 : FOPENMPFLAGS = -fopenmp
 gnu_win_64 : obj = fds_gnu_win_64
 gnu_win_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
-gnu_linux : FCOMPL = gfortran
-gnu_linux : FOPENMPFLAGS = -fopenmp
-gnu_linux : obj = fds_gnu_linux
-gnu_linux : $(obj_serial)
+gnu_win_64_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
+gnu_win_64_db : FCOMPL = gfortran
+gnu_win_64_db : FOPENMPFLAGS = -fopenmp
+gnu_win_64_db : obj = fds_gnu_win_64
+gnu_win_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_osx : FFLAGS  = -O2 $(GITINFOGNU)
-gnu_osx : FCOMPL  = gfortran
-gnu_osx : FOPENMPFLAGS = -fopenmp
-gnu_osx : obj     = fds_gnu_osx
-gnu_osx : $(obj_serial)
+gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
+gnu_linux_64 : FCOMPL = gfortran
+gnu_linux_64 : FOPENMPFLAGS = -fopenmp
+gnu_linux_64 : obj = fds_linux_64
+gnu_linux_64 : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_gnu_linux : FFLAGS = -O2 $(GITINFOGNU)
-mpi_gnu_linux : FCOMPL = mpifort
-mpi_gnu_linux : FOPENMPFLAGS = 
-mpi_gnu_linux : obj = fds_mpi_gnu_linux
-mpi_gnu_linux : setup $(obj_mpi) 
+gnu_linux_64_db : FFLAGS = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
+gnu_linux_64_db : FCOMPL = gfortran
+gnu_linux_64_db : FOPENMPFLAGS = -fopenmp
+gnu_linux_64_db : obj = fds_linux_64_db
+gnu_linux_64_db : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+gnu_osx_64 : FFLAGS = -O2 $(GITINFOGNU)
+gnu_osx_64 : FCOMPL = gfortran
+gnu_osx_64 : FOPENMPFLAGS = -fopenmp
+gnu_osx_64 : obj = fds_osx_64
+gnu_osx_64 : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+gnu_osx_64_db : FFLAGS  = -O0 -ggdb -Wall -Wline-truncation -Wcharacter-truncation -Wsurprising -Waliasing -fcheck=all -fbacktrace $(GITINFOGNU)
+gnu_osx_64_db : FCOMPL  = gfortran
+gnu_osx_64_db : FOPENMPFLAGS = -fopenmp
+gnu_osx_64_db : obj     = fds_osx_64_db
+gnu_osx_64_db : $(obj_serial)
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
+
+mpi_gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_linux_64 : FCOMPL = mpifort
+mpi_gnu_linux_64 : FOPENMPFLAGS = 
+mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
+mpi_gnu_linux_64 : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
-mpi_gnu_osx : FFLAGS = -O2 $(GITINFOGNU)
-mpi_gnu_osx : FCOMPL = mpif90
-mpi_gnu_osx : FOPENMPFLAGS = 
-mpi_gnu_osx : obj = fds_mpi_gnu_osx
-mpi_gnu_osx : setup $(obj_mpi) 
+mpi_gnu_linux_64_db : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_linux_64_db : FCOMPL = mpifort
+mpi_gnu_linux_64_db : FOPENMPFLAGS = 
+mpi_gnu_linux_64_db : obj = fds_mpi_gnu_linux_64_db
+mpi_gnu_linux_64_db : setup $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
+
+mpi_gnu_osx_64 : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_osx_64 : FCOMPL = mpifort
+mpi_gnu_osx_64 : FOPENMPFLAGS = 
+mpi_gnu_osx_64 : obj = fds_mpi_gnu_osx_64
+mpi_gnu_osx_64 : setup $(obj_mpi) 
+	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
+
+mpi_gnu_osx_64_db : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_osx_64_db : FCOMPL = mpifort
+mpi_gnu_osx_64_db : FOPENMPFLAGS = 
+mpi_gnu_osx_64_db : obj = fds_mpi_gnu_osx_64_db
+mpi_gnu_osx_64_db : setup $(obj_mpi) 
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi) 
 
 

@@ -1,4 +1,4 @@
-&HEAD CHID='hot_spheres_vistest', TITLE='Test radiation from lagrangian particles, SVN $Revision$'/
+&HEAD CHID='hot_spheres_vistest', TITLE='Test radiation from lagrangian particles'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK=20,20,20 /
 &TIME T_END=3. /

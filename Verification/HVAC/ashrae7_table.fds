@@ -1,4 +1,4 @@
-&HEAD CHID='ashrae7_table',TITLE='AHSRAHE Fundamentals HVAC Sample Case 7 User Defined Fan Curve, SVN $Revision$' /
+&HEAD CHID='ashrae7_table',TITLE='AHSRAHE Fundamentals HVAC Sample Case 7 User Defined Fan Curve' /
 
 &MESH IJK=20,20,20, XB=0.,10.,0.,10.,0.,10./
 

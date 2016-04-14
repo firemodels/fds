@@ -1,0 +1,150 @@
+&HEAD CHID='Annulus_v6', TITLE='Cable tray in the Annulus around containment'  /
+
+&MESH IJK=48,25,64, XB=-4.8,4.8,0.0,2.5,3.4,16.2 /
+
+&TIME T_END=3600. /
+
+&MISC TMPA=35. /
+
+Ventilation and openings
+
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+Construction
+
+&MATL ID             = 'CONCRETE'
+      SPECIFIC_HEAT  = 0.75
+      CONDUCTIVITY   = 1.6
+      DENSITY        = 2400. /
+
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'LINER'
+      COLOR          = 'BLACK'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0254 /
+
+&SURF ID             = 'SHIELD'
+      COLOR          = 'GRAY'
+      MATL_ID        = 'CONCRETE'
+      TRANSPARENCY   = 0.5
+      THICKNESS      = 0.9 /
+
+&OBST XB=-1.86, 1.86, 1.7, 1.8, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-2.62, 2.62, 1.8, 1.9, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-3.21, 3.21, 1.9, 2.0, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-3.70, 3.70, 2.0, 2.1, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-4.13, 4.13, 2.1, 2.2, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-4.52, 4.52, 2.2, 2.3, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-4.88, 4.88, 2.3, 2.4, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-5.21, 5.21, 2.4, 2.5, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-5.51, 5.51, 2.5, 2.6, 3.3, 18.3, SURF_ID = 'LINER'/
+&OBST XB=-5.80, 5.80, 2.6, 2.7, 3.3, 18.3, SURF_ID = 'LINER'/
+
+&OBST XB=-5.80, 5.80, 0.0,  0.0, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-1.96, 0.0,  0.1, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 1.96, 5.80, 0.0,  0.1, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-2.76, 0.1,  0.2, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 2.76, 5.80, 0.1,  0.2, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-3.38, 0.2,  0.3, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 3.38, 5.80, 0.2,  0.3, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-3.90, 0.3,  0.4, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 3.90, 5.80, 0.3,  0.4, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-4.36, 0.4,  0.5, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 4.36, 5.80, 0.4,  0.5, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-4.77, 0.5,  0.6, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 4.77, 5.80, 0.5,  0.6, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-5.14, 0.6,  0.7, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 5.14, 5.80, 0.6,  0.7, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB=-5.80,-5.49, 0.7,  0.8, 3.3, 18.3, SURF_ID = 'SHIELD'/
+&OBST XB= 5.49, 5.80, 0.7,  0.8, 3.3, 18.3, SURF_ID = 'SHIELD'/
+
+Target Cables
+
+&MATL ID            = 'PE/PVC'
+      SPECIFIC_HEAT = 1.289
+      CONDUCTIVITY  = 0.192
+      DENSITY       = 1380.
+      EMISSIVITY    = 0.95 / Properties of the plastics within the cable
+
+&SURF ID             = 'TARGET CABLE'
+      COLOR          = 'OLIVE'
+      MATL_ID        = 'PE/PVC'
+      GEOMETRY       = 'CYLINDRICAL'
+      THICKNESS      = 0.0075 / 
+
+&SURF ID             = 'TRAY'
+      COLOR          = 'SILVER'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.002 /
+
+&OBST XB=-1.45,-0.85, 1.6, 1.7, 6.2,10.8, SURF_ID6='TRAY','TRAY','TARGET CABLE','TARGET CABLE','TARGET CABLE','TARGET CABLE' /
+&OBST XB=-1.45,-0.85, 0.0, 1.7, 6.0, 6.2, SURF_ID6='TRAY','TRAY','TARGET CABLE','TARGET CABLE','TARGET CABLE','TARGET CABLE' /
+
+Fire
+
+&SPEC ID = 'PE/PVC', FORMULA = 'C2H3.5Cl0.5' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'HYDROGEN CHLORIDE', LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE., FORMULA='C1' /
+
+&SPEC ID='AIR', BACKGROUND=.TRUE., SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=0.21, 
+                                   SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=0.79 /
+
+&SPEC ID='PRODUCTS',               SPEC_ID(1)='HYDROGEN CHLORIDE', VOLUME_FRACTION(1)=0.5, 
+                                   SPEC_ID(2)='WATER VAPOR',       VOLUME_FRACTION(2)=1.5, 
+                                   SPEC_ID(3)='CARBON MONOXIDE',   VOLUME_FRACTION(3)=0.2376, 
+                                   SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=1.2496, 
+                                   SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.5128, 
+                                   SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=7.9692 /
+
+&REAC ID='PE/PVC', HEAT_OF_COMBUSTION = 20900., SPEC_ID_NU='PE/PVC','AIR','PRODUCTS', NU=-1,-10.0876,1,RADIATIVE_FRACTION=0.49 /
+
+&SURF ID             = 'BURNING CABLE'
+      COLOR          = 'ORANGE'
+      RAMP_Q         = 'fire ramp'
+      HRRPUA         = 250. /
+
+&RAMP ID='fire ramp', T=   0., F=0. /
+&RAMP ID='fire ramp', T= 441., F=1. /
+&RAMP ID='fire ramp', T=2207., F=1. /
+&RAMP ID='fire ramp', T=2648., F=0. /
+
+&OBST XB= 0.85, 1.45, 1.6, 1.7, 4.4, 9.0, SURF_ID = 'TRAY' /
+&VENT XB= 0.85, 1.45, 1.6, 1.6, 4.4, 9.0, XYZ=1.15,1.6,4.4, SPREAD_RATE=0.258,  SURF_ID = 'BURNING CABLE' /
+&OBST XB= 0.85, 1.45, 0.0, 1.7, 4.2, 4.4, SURF_ID = 'TRAY' /
+&VENT XB= 0.85, 1.45, 0.0, 1.6, 4.4, 4.4, XYZ=1.15,1.6,4.4, SPREAD_RATE=0.0009, SURF_ID = 'BURNING CABLE' / 
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.0015, ID='Max_Cable_Temp_FDS', XB=-2.0,0.0,0.0,2.0,3.4,10.0, SURF_ID='TARGET CABLE', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Max_Heat_Flux_FDS', XB=-2.0,0.0,0.0,2.0,3.4,10.0, SURF_ID='TARGET CABLE', STATISTICS='MAX' /
+
+&PROP ID='Standard Sprinkler', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=130., ACTIVATION_TEMPERATURE=100., SPRAY_ANGLE=30.,80., FLOW_RATE=200. /
+&DEVC ID='Link_Temp_FDS', PROP_ID='Standard Sprinkler', XYZ=0.0,1.6,12.7 /
+&OBST XB=-0.2, 0.2, 1.5, 1.7,13.0,13.0, SURF_ID='TRAY'/ Sprinkler heat shield
+
+Smokeview output
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+&BNDF QUANTITY='BURNING RATE' /
+
+End file
+
+&TAIL /
+

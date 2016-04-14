@@ -14,21 +14,25 @@ SCENECLIP
  0
 SETVIEWPOINT
  view 1
-LOADFILE
- levelset1_lsfs.sf
+// LOADFILE
+//  levelset1_lsfs.sf
+LOADSLICEM
+ phifield(terrain)
+ 3 1.000000
+ 1
 SETTIMEVAL
  30.000000
 RENDERONCE
- levelset_30 
+ levelset_30
 SETTIMEVAL
  60.000000
 RENDERONCE
- levelset_60 
+ levelset_60
 SETTIMEVAL
  90.000000
 RENDERONCE
- levelset_90 
+ levelset_90
 SETTIMEVAL
  120.000000
 RENDERONCE
- levelset_120 
+ levelset_120

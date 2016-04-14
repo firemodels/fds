@@ -10,7 +10,7 @@
 
 &MISC TMPA=15. /
 
-&RADI RADIATIVE_FRACTION=0.4 /
+
 
 &REAC FUEL         = 'PROPYLENE'
       FYI        = 'Propylene, C_3 H_6'

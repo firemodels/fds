@@ -1,7 +1,7 @@
 This verification case tests the computation of three-dimensional radiation
 from a homogenous, infinitelly wide layer of radiating material. 
 
-&HEAD CHID='radiation_plane_layer_3_1', TITLE='Test wall heat transfer from a plane layer, SVN $Revision$'/
+&HEAD CHID='radiation_plane_layer_3_1', TITLE='Test wall heat transfer from a plane layer'/
 
 &MESH IJK = 20,20,20, XB= 0.0,1.0,-10.0,10.0,-10.0,10.0 /
 

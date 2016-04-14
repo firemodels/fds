@@ -1,0 +1,150 @@
+&HEAD CHID='Pump_Room_v5', TITLE='Lube Oil Fire in Pump Room'/
+
+&MESH IJK=38,23,25, XB= 0.0,7.6,0.0,4.6,0.0,4.9 /
+
+&TIME T_END=3600. /
+
+General construction
+
+&MISC SURF_DEFAULT= 'CONCRETE WALL'/
+
+&MATL ID             = 'CONCRETE'
+      SPECIFIC_HEAT  = 0.75
+      CONDUCTIVITY   = 1.6
+      DENSITY        = 2400. /
+                     
+&SURF ID             = 'CONCRETE WALL'
+      COLOR          = 'GRAY'
+      TRANSPARENCY   = 0.5
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.1 /
+
+&SURF ID             = 'CONCRETE FLOOR'
+      COLOR          = 'GRAY'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.9 /
+
+&VENT MB='ZMIN', SURF_ID='CONCRETE FLOOR' /
+&VENT MB='ZMAX', SURF_ID='CONCRETE FLOOR' /
+
+Cable
+
+&PROP ID                        = 'PE/PVC CABLE'
+      QUANTITY                  = 'CABLE TEMPERATURE'
+      CABLE_DIAMETER            = 0.015
+      CABLE_JACKET_THICKNESS    = 0.002
+      CABLE_MASS_PER_LENGTH     = 0.4
+      CABLE_FAILURE_TEMPERATURE = 205. / THIEF model inputs
+
+&MATL ID             = 'Kaowool'
+      SPECIFIC_HEAT  = 1.07
+      CONDUCTIVITY   = 0.06
+      DENSITY        = 128. 
+      EMISSIVITY     = 0.9 /
+
+&SURF ID             = 'BLANKET'
+      COLOR          = 'PINK'
+      MATL_ID        = 'Kaowool'
+      BACKING        = 'EXPOSED'
+      THICKNESS      = 0.05 /
+
+&OBST XB= 1.0, 1.8, 1.5, 4.6, 4.5, 4.5, SURF_ID='BLANKET' /
+&OBST XB= 1.0, 1.8, 1.5, 4.6, 4.7, 4.7, SURF_ID='BLANKET' /
+&OBST XB= 1.0, 1.0, 1.5, 4.6, 4.5, 4.7, SURF_ID='BLANKET' /
+&OBST XB= 1.8, 1.8, 1.5, 4.6, 4.5, 4.7, SURF_ID='BLANKET' /
+
+Fire
+
+&REAC ID                 = 'HYDROCARBON'
+      FYI                = 'General Hydrocarbon, C_14 H_30'
+      RADIATIVE_FRACTION=0.34
+      C                  = 14.
+      H                  = 30.
+      HEAT_OF_COMBUSTION = 46400.
+      CO_YIELD           = 0.019
+      SOOT_YIELD         = 0.059 /
+
+&SURF ID     = 'OIL FIRE'
+      COLOR  = 'ORANGE'
+      RAMP_Q = 'fire ramp'
+      HRRPUA = 1811. /
+
+&RAMP ID='fire ramp', T=   0., F=0.0 /
+&RAMP ID='fire ramp', T=   1., F=1.0 /
+&RAMP ID='fire ramp', T=1345., F=1.0 /
+&RAMP ID='fire ramp', T=1346., F=0.0 /
+
+&OBST XB= 2.3, 6.3, 2.1, 2.3, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
+&OBST XB= 2.3, 6.3, 3.8, 4.1, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
+&OBST XB= 2.3, 2.5, 2.3, 3.8, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
+&OBST XB= 6.0, 6.3, 2.3, 3.8, 0.0, 0.1, SURF_IDS='OIL FIRE', 'CONCRETE WALL', 'CONCRETE WALL' /
+
+Pump
+
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'PUMP'
+      COLOR          = 'OLIVE'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0015 /
+
+&OBST XB= 2.5, 4.5, 2.3, 3.8, 0.0, 1.5, SURF_ID='PUMP' /
+&OBST XB= 4.5, 6.0, 2.3, 3.8, 0.0, 2.1, SURF_ID='PUMP' /
+
+Ventilation
+
+&SURF ID             = 'DOOR'
+      COLOR          = 'BROWN'
+      MATL_ID        = 'STEEL'
+      BACKING        = 'EXPOSED'
+      LEAK_PATH      = 1,0 
+      THICKNESS      = 0.05 /
+
+&ZONE XB= 0.0, 7.6, 1.5, 4.6, 0.0, 4.9, LEAK_AREA(0)=0.014 /
+
+&OBST XB= 0.0, 5.7, 1.4, 1.5, 0.0, 4.9, SURF_ID='CONCRETE WALL' /
+&OBST XB= 5.6, 5.7, 0.0, 1.4, 0.0, 4.9, SURF_ID='CONCRETE WALL' /
+&HOLE XB= 5.5, 5.8, 0.2, 1.3, 0.0, 2.1 / Door Opening
+&OBST XB= 5.6, 5.7, 0.2, 1.3, 0.0, 2.1, SURF_ID='DOOR', DEVC_ID='DoorClock', PERMIT_HOLE=.FALSE. / 
+&DEVC XYZ=0.0,0.0,0.0, ID='DoorClock', QUANTITY='TIME', SETPOINT=600., INITIAL_STATE=.TRUE. /
+
+&VENT XB= 0.0, 0.0, 0.0, 1.4, 0.0, 4.9, SURF_ID='OPEN' /
+&VENT XB= 0.0, 5.6, 0.0, 0.0, 0.0, 4.9, SURF_ID='OPEN' /
+
+&SURF ID             = 'SUPPLY'
+      COLOR          = 'BLACK'
+      VOLUME_FLOW    = -0.25 /
+
+&SURF ID             = 'RETURN'
+      COLOR          = 'BLACK'
+      VOLUME_FLOW    = 0.25 /
+
+&VENT XB= 3.5, 4.0, 4.6, 4.6, 3.5, 4.0, SURF_ID='SUPPLY' /
+&VENT XB= 3.5, 4.0, 1.5, 1.5, 3.5, 4.0, SURF_ID='RETURN' /
+
+Output devices
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC ID='Gas_Temp_FDS', XYZ=2.0,3.0,4.5, QUANTITY='TEMPERATURE' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Wall_FDS', XYZ=0.0,3.0,4.0, IOR=1 /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Max_Surf_Temp_ERFBS_FDS', XB=0,3,0,5,2,6, STATISTICS='MAX', SURF_ID='BLANKET' /
+&DEVC ID='Max_Temp_ERFBS_FDS', PROP_ID='PE/PVC CABLE', XYZ=1.4,3.0,4.6, ORIENTATION=-3 /
+
+Smokeview
+
+&BNDF QUANTITY='WALL_TEMPERATURE'/
+&BNDF QUANTITY='GAUGE_HEAT_FLUX'/
+
+&SLCF PBY=2.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=0.5, VECTOR=.TRUE., QUANTITY='TEMPERATURE'/
+&SLCF PBY=0.5, QUANTITY='MIXTURE FRACTION'/
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='oxygen' /
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='fuel' /
+
+End of file
+
+&TAIL /

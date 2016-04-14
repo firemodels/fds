@@ -1,0 +1,92 @@
+&HEAD CHID='Group_A_2x2x4', TITLE='UL Group A Plastic Calorimetry Test' /
+
+&MESH IJK=35,35,160, XB=-1.50,3.75,-1.50,3.75,0.00,24.00 /
+&TIME T_END=300. /
+
+
+
+&REAC FUEL         = 'POLYSTYRENE', RADIATIVE_FRACTION=0.5
+      FYI        = 'Styrene, C_8 H_8'
+      H          = 8.
+      C          = 8.
+      HEAT_OF_COMBUSTION=40000.
+      SOOT_YIELD = 0.164
+      CO_YIELD   = 0.06 /
+
+&MATL ID                    = 'CONCRETE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 2300.
+      CONDUCTIVITY          = 0.10
+      SPECIFIC_HEAT         = 0.88 /
+
+&MATL ID                    = 'YELLOW PINE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 640.
+      CONDUCTIVITY          = 0.14
+      SPECIFIC_HEAT         = 2.85 
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'CORRUGATED PAPER'
+      DENSITY               = 200.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT         = 1.5
+      HEAT_OF_COMBUSTION    = 11500.
+      EMISSIVITY            = 0.8 /
+
+&SURF ID                    = 'PLASTIC A'
+      FYI                   = 'FMRC Standard Plastic Commodity'
+      COLOR                 = 'TAN'
+      HRRPUA                = 500.
+      IGNITION_TEMPERATURE  = 370.
+      RAMP_Q                = 'GAP'
+      MATL_ID               = 'CORRUGATED PAPER'
+      BURN_AWAY             = .TRUE.
+      THICKNESS             = 0.005
+      E_COEFFICIENT         =  0.5 /
+&RAMP ID='GAP',T=   0.0,F=0.0 /
+&RAMP ID='GAP',T=   1.0,F=0.6 /
+&RAMP ID='GAP',T=  30.0,F=0.2 /
+&RAMP ID='GAP',T=  80.0,F=1.6 /
+&RAMP ID='GAP',T= 100.0,F=1.0 /
+
+&SURF ID                    = 'PALLET'
+      MATL_ID               = 'YELLOW PINE'
+      COLOR                 = 'BROWN' 
+      THICKNESS             = 0.012 /
+
+&SURF ID                    = 'FLOOR'
+      MATL_ID               = 'CONCRETE'
+      COLOR                 = 'GRAY 60' 
+      THICKNESS             = 0.2 /
+
+&SURF ID='IGNITOR', HRRPUA=1000., TAU_Q=60., COLOR='RED' /
+
+&MULT ID='pallet spacing', DX=1.20, DY=1.20, DZ=1.50, I_UPPER=1, J_UPPER=1, K_UPPER=3 /
+
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
+
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+
+&OBST XB= 1.05, 1.20, 0.45, 0.60, 0.00, 0.15, SURF_IDS='IGNITOR','PALLET','PALLET' /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+
+
+
+
+&TAIL /

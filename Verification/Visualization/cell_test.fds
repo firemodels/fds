@@ -1,4 +1,4 @@
-&HEAD CHID='cell_test', TITLE='Check cell center values in smokeview, SVN $Revision$'/
+&HEAD CHID='cell_test', TITLE='Check cell center values in smokeview'/
 
 &MESH XB=0.0,3.0,0.0,4.0,0.0,5.0, IJK=3,4,5 /
 

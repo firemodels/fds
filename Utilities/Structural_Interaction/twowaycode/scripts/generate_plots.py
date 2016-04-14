@@ -12,7 +12,7 @@ from matplotlib import rcParams
 from scipy import integrate
 
 # Getting SVN number 
-GIT='GITV1-29-g296c114-dirty '
+GIT=
 
 # Help to find the fonts properly!
 # You can find the list of fonts installed on the system with:
@@ -64,7 +64,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Temperature ($^{\circ}$C)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 0.2, 650, 'Surface Temperature (simply_beam)')
-plt.text( 8.2, 705, 'SVN '+SVN, fontdict=font3)
+plt.text( 6.8, 705, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/simply_beam'+'_ts'+'.pdf',format='pdf')
 close()
 
@@ -80,7 +80,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Displacement (cm)', fontdict=font1)
 plt.legend(numpoints=1,loc=4, prop=font2)
 plt.text( 3.5, -0.35, 'Displacement in z axis (simply_beam)')
-plt.text( 8.2, 0.05, 'SVN '+SVN, fontdict=font3)
+plt.text( 6.8, 0.05, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/simply_beam'+'_dz'+'.pdf',format='pdf')
 close()
 
@@ -96,7 +96,7 @@ plt.xlabel('Time (min)', fontdict=font1)
 plt.ylabel('Displacement (cm)', fontdict=font1)
 plt.legend(numpoints=1,loc=5, prop=font2)
 plt.text( 0.2, 0.455, 'Displacement in x and y axis (simply_beam)')
-plt.text( 8.2, 0.505, 'SVN '+SVN, fontdict=font3)
+plt.text( 6.8, 0.505, GIT, fontdict=font3)
 plt.savefig('SCRIPT_FIGURES/simply_beam'+'_dx_dy'+'.pdf',format='pdf')
 close()
 

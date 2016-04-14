@@ -36,33 +36,33 @@ Module DCDFLIB
   ! Original F77 version from Netlib: http://www.netlib.org/random:
   !
   !                                    DCDFLIB
-  ! 
+  !
   !             Library of Fortran Routines for Cumulative Distribution
   !                  Functions, Inverses, and Other Parameters
-  ! 
+  !
   !                                 (February, 1994)
   !                     Summary Documentation of Each Routine
-  ! 
+  !
   !                             Compiled and Written by:
-  ! 
+  !
   !                                  Barry W. Brown
   !                                   James Lovato
   !                                   Kathy Russell
-  ! 
+  !
   !     Department of Biomathematics, Box 237
   !     The University of Texas, M.D. Anderson Cancer Center
   !     1515 Holcombe Boulevard
   !     Houston, TX      77030
-  ! 
+  !
   !  This work was supported by grant CA-16672 from the National Cancer Institute.
-  ! 
-  ! 
+  !
+  !
   !                           SUMMARY OF DCDFLIB
-  ! 
+  !
   ! This  library  contains routines  to compute  cumulative  distribution
   ! functions, inverses, and    parameters  of the  distribution  for  the
   ! following set of statistical distributions:
-  ! 
+  !
   !     (1) Beta
   !     (2) Binomial
   !     (3) Chi-square
@@ -74,12 +74,12 @@ Module DCDFLIB
   !     (9) Normal
   !     (10) Poisson
   !     (11) Student's t
-  ! 
+  !
   ! Given values of all but one parameter of a distribution, the other is
-  ! computed.  These calculations are done with  FORTRAN Double Precision 
+  ! computed.  These calculations are done with  FORTRAN Double Precision
   ! variables.
   !*********************************************************
-  ! 
+  !
   !
   !*********************************************************
 
@@ -102,13 +102,13 @@ Contains
     !
     !    In this algorithm, DEL(X) is the function defined by
     !
-    !      ln ( Gamma(X) ) = ( X - 0.5 ) * ln ( X ) - X + 0.5 * ln ( 2 * PI ) 
+    !      ln ( Gamma(X) ) = ( X - 0.5 ) * ln ( X ) - X + 0.5 * ln ( 2 * PI )
     !                      + DEL(X).
     !
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -203,7 +203,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -248,7 +248,7 @@ Contains
 
     Return
   End Function alnrel
-  
+
   Function apser ( a, b, x, eps )
 
     !*****************************************************************************80
@@ -259,14 +259,14 @@ Contains
     !
     !    APSER is used only for cases where
     !
-    !      A <= min ( EPS, EPS * B ), 
-    !      B * X <= 1, and 
+    !      A <= min ( EPS, EPS * B ),
+    !      B * X <= 1, and
     !      X <= 0.5.
     !
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -339,18 +339,18 @@ Contains
     !
     !    The function DEL(A) is a remainder term that is used in the expression:
     !
-    !      ln ( Gamma ( A ) ) = ( A - 0.5 ) * ln ( A ) 
+    !      ln ( Gamma ( A ) ) = ( A - 0.5 ) * ln ( A )
     !        - A + 0.5 * ln ( 2 * PI ) + DEL ( A ),
     !
     !    or, in other words, DEL ( A ) is defined as:
     !
-    !      DEL ( A ) = ln ( Gamma ( A ) ) - ( A - 0.5 ) * ln ( A ) 
+    !      DEL ( A ) = ln ( Gamma ( A ) ) - ( A - 0.5 ) * ln ( A )
     !        + A + 0.5 * ln ( 2 * PI ).
     !
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -473,7 +473,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -643,7 +643,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -725,7 +725,7 @@ Contains
        e = ( 1.0D+00 + t ) / ( c1 + t + t )
        beta = n + w / s + e * ( c + n * yp1 )
        p = 1.0D+00 + t
-       s = s +  2.0D+00 
+       s = s +  2.0D+00
        !
        !  Update AN, BN, ANP1, and BNP1.
        !
@@ -765,7 +765,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -773,7 +773,7 @@ Contains
     !  Parameters:
     !
     !    Input, real ( kind = 8 ) A, B, the parameters of the function.
-    !    A and B should be nonnegative.  It is assumed that 15 <= A 
+    !    A and B should be nonnegative.  It is assumed that 15 <= A
     !    and B <= 1, and that B is less than A.
     !
     !    Input, real ( kind = 8 ) X, Y.  X is the argument of the
@@ -870,7 +870,7 @@ Contains
        bp2n = b + n2
        j = ( bp2n * ( bp2n + 1.0D+00 ) * j &
             + ( z + bp2n + 1.0D+00 ) * t ) * v
-       n2 = n2 +  2.0D+00 
+       n2 = n2 +  2.0D+00
        t = t * t2
        cn = cn / ( n2 * ( n2 + 1.0D+00 ))
        c(n) = cn
@@ -920,7 +920,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -1408,9 +1408,9 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
-    !    ACM Transactions on Mathematical Software, 
+    !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
     !
     !  Parameters:
@@ -1569,7 +1569,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -1723,7 +1723,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -1781,7 +1781,7 @@ Contains
 
        If ( x <= 0.375D+00 ) Then
           lnx = Log ( x )
-          lny = alnrel ( - x )      
+          lny = alnrel ( - x )
        Else If ( y <= 0.375D+00 ) Then
           lnx = alnrel ( - y )
           lny = Log ( y )
@@ -1851,7 +1851,7 @@ Contains
        Else If ( 8.0D+00 <= b0 ) Then
 
           u = gamma_ln1 ( a0 ) + algdiv ( a0, b0 )
-          beta_rcomp = a0 * Exp ( z - u ) 
+          beta_rcomp = a0 * Exp ( z - u )
 
        End If
 
@@ -1902,7 +1902,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -2098,7 +2098,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -2259,7 +2259,7 @@ Contains
     !    returns the corresponding data; when there is no more data, the
     !    output value of N_DATA will be 0 again.
     !
-    !    Output, integer A, real ( kind = 8 ) B, integer X, the arguments 
+    !    Output, integer A, real ( kind = 8 ) B, integer X, the arguments
     !    of the function.
     !
     !    Output, real ( kind = 8 ) FX, the value of the function.
@@ -2328,10 +2328,10 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the beta distribution 
+    !    This routine calculates any one parameter of the beta distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly by code associated with the reference.
     !
     !    Computation of the other parameters involves a seach for a value that
@@ -2347,9 +2347,9 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
-    !    ACM Transactions on Mathematical Software, 
+    !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
     !
     !  Parameters:
@@ -2366,7 +2366,7 @@ Contains
     !
     !    Input/output, real ( kind = 8 ) Q, equals 1-P.  Input range: [0, 1].
     !
-    !    Input/output, real ( kind = 8 ) X, the upper limit of integration 
+    !    Input/output, real ( kind = 8 ) X, the upper limit of integration
     !    of the beta density.  If it is an input value, it should lie in
     !    the range [0,1].  If it is an output value, it will be searched for
     !    in the range [0,1].
@@ -2748,10 +2748,10 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the binomial distribution 
+    !    This routine calculates any one parameter of the binomial distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of the other parameters involves a seach for a value that
@@ -2759,7 +2759,7 @@ Contains
     !    monotonicity of P with respect to the other parameters.
     !
     !    P is the probablility of S or fewer successes in XN binomial trials,
-    !    each trial having an individual probability of success of PR.  
+    !    each trial having an individual probability of success of PR.
     !
     !  Modified:
     !
@@ -2767,13 +2767,13 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.24.
     !
     !  Parameters:
     !
-    !    Input, integer WHICH, indicates which of argument values is to 
+    !    Input, integer WHICH, indicates which of argument values is to
     !    be calculated from the others.
     !    1: Calculate P and Q from S, XN, PR and OMPR;
     !    2: Calculate S from P, Q, XN, PR and OMPR;
@@ -2781,7 +2781,7 @@ Contains
     !    4: Calculate PR and OMPR from P, Q, S and XN.
     !
     !    Input/output, real ( kind = 8 ) P, the cumulation, from 0 to S,
-    !    of the binomial distribution.  If P is an input value, it should 
+    !    of the binomial distribution.  If P is an input value, it should
     !    lie in the range [0,1].
     !
     !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
@@ -2797,7 +2797,7 @@ Contains
     !    If it is an output value it will be searched for in the
     !    range [1.0D-300, 1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) PR, the probability of success in each 
+    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
     !    binomial trial.  Whether this is an input or output value, it should
     !    lie in the range: [0,1].
     !
@@ -3027,7 +3027,7 @@ Contains
           If ( p <= q ) Then
              fx = cum - p
           Else
-             fx = ccum - q   
+             fx = ccum - q
           End If
 
           Call dinvr ( status, s, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
@@ -3178,17 +3178,17 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the chi square distribution 
+    !    This routine calculates any one parameter of the chi square distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of the other parameters involves a seach for a value that
     !    produces the desired value of P.  The search relies on the
     !    monotonicity of P with respect to the other parameters.
     !
-    !    The CDF of the chi square distribution can be evaluated 
+    !    The CDF of the chi square distribution can be evaluated
     !    within Mathematica by commands such as:
     !
     !      Needs["Statistics`ContinuousDistributions`"]
@@ -3196,8 +3196,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.4.19.
     !
     !    Stephen Wolfram,
@@ -3213,7 +3213,7 @@ Contains
     !    2: Calculate X from P, Q and DF;
     !    3: Calculate DF from P, Q and X.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of 
+    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
     !    the chi-square distribution.  If this is an input value, it should
     !    lie in the range [0,1].
     !
@@ -3221,8 +3221,8 @@ Contains
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) X, the upper limit of integration 
-    !    of the chi-square distribution.  If this is an input 
+    !    Input/output, real ( kind = 8 ) X, the upper limit of integration
+    !    of the chi-square distribution.  If this is an input
     !    value, it should lie in the range: [0, +infinity).  If it is an output
     !    value, it will be searched for in the range: [0,1.0D+300].
     !
@@ -3498,7 +3498,7 @@ Contains
     !    This routine calculates any one parameter of the noncentral chi-square
     !    distribution given values for the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of the other parameters involves a seach for a value that
@@ -3510,7 +3510,7 @@ Contains
     !    this parameter can consume immense computer resources.  This is
     !    why the search range is bounded by 10,000.
     !
-    !    The CDF of the noncentral chi square distribution can be evaluated 
+    !    The CDF of the noncentral chi square distribution can be evaluated
     !    within Mathematica by commands such as:
     !
     !      Needs["Statistics`ContinuousDistributions`"]
@@ -3518,8 +3518,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.25.
     !
     !    Stephen Wolfram,
@@ -3536,26 +3536,26 @@ Contains
     !    3: Calculate DF from P, X and PNONC;
     !    4: Calculate PNONC from P, X and DF.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of 
+    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of
     !    the noncentral chi-square distribution.  If this is an input
     !    value, it should lie in the range: [0, 1.0-1.0D-16).
     !
-    !    Input/output, real ( kind = 8 ) Q, is generally not used by this 
+    !    Input/output, real ( kind = 8 ) Q, is generally not used by this
     !    subroutine and is only included for similarity with other routines.
     !    However, if P is to be computed, then a value will also be computed
     !    for Q.
     !
-    !    Input, real ( kind = 8 ) X, the upper limit of integration of the 
+    !    Input, real ( kind = 8 ) X, the upper limit of integration of the
     !    noncentral chi-square distribution.  If this is an input value, it
     !    should lie in the range: [0, +infinity).  If it is an output value,
     !    it will be sought in the range: [0,1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom 
+    !    Input/output, real ( kind = 8 ) DF, the number of degrees of freedom
     !    of the noncentral chi-square distribution.  If this is an input value,
     !    it should lie in the range: (0, +infinity).  If it is an output value,
     !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter of 
+    !    Input/output, real ( kind = 8 ) PNONC, the noncentrality parameter of
     !    the noncentral chi-square distribution.  If this is an input value, it
     !    should lie in the range: [0, +infinity).  If it is an output value,
     !    it will be searched for in the range: [0,1.0D+4]
@@ -3806,10 +3806,10 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the F distribution 
+    !    This routine calculates any one parameter of the F distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of the other parameters involves a seach for a value that
@@ -3823,8 +3823,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.6.2.
     !
     !  Parameters:
@@ -3836,7 +3836,7 @@ Contains
     !    3: Calculate DFN from P, Q, F and DFD;
     !    4: Calculate DFD from P, Q, F and DFN.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of 
+    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
     !    the F-density.  If it is an input value, it should lie in the
     !    range [0,1].
     !
@@ -3844,17 +3844,17 @@ Contains
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of integration 
+    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
     !    of the F-density.  If this is an input value, it should lie in the
     !    range [0, +infinity).  If it is an output value, it will be searched
     !    for in the range [0,1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of 
+    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of
     !    freedom of the numerator sum of squares.  If this is an input value,
     !    it should lie in the range: (0, +infinity).  If it is an output value,
     !    it will be searched for in the range: [ 1.0D-300, 1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom 
+    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
     !    of the denominator sum of squares.  If this is an input value, it should
     !    lie in the range: (0, +infinity).  If it is an output value, it will
     !    be searched for in the  range: [ 1.0D-300, 1.0D+300].
@@ -4154,24 +4154,24 @@ Contains
   End Subroutine cdff
 
   Subroutine cdffnc ( which, p, q, f, dfn, dfd, pnonc, status, bound )
-    
+
     !*****************************************************************************80
     !
     !! CDFFNC evaluates the CDF of the Noncentral F distribution.
     !
     !  Discussion:
     !
-    !    This routine originally used 1.0D+300 as the upper bound for the 
+    !    This routine originally used 1.0D+300 as the upper bound for the
     !    interval in which many of the missing parameters are to be sought.
-    !    Since the underlying rootfinder routine needs to evaluate the 
+    !    Since the underlying rootfinder routine needs to evaluate the
     !    function at this point, it is no surprise that the program was
     !    experiencing overflows.  A less extravagant upper bound
     !    is being tried for now!
     !
-    !    This routine calculates any one parameter of the Noncentral F distribution 
+    !    This routine calculates any one parameter of the Noncentral F distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of the other parameters involves a seach for a value that
@@ -4189,7 +4189,7 @@ Contains
     !    assumes monotonicity and will find an arbitrary one of the two
     !    values.
     !
-    !    The CDF of the noncentral F distribution can be evaluated 
+    !    The CDF of the noncentral F distribution can be evaluated
     !    within Mathematica by commands such as:
     !
     !      Needs["Statistics`ContinuousDistributions`"]
@@ -4201,8 +4201,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.6.20.
     !
     !    Stephen Wolfram,
@@ -4220,7 +4220,7 @@ Contains
     !    4: Calculate DFD from P, Q, F, DFN and PNONC;
     !    5: Calculate PNONC from P, Q, F, DFN and DFD.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of 
+    !    Input/output, real ( kind = 8 ) P, the integral from 0 to F of
     !    the noncentral F-density.  If P is an input value it should
     !    lie in the range [0,1) (Not including 1!).
     !
@@ -4229,17 +4229,17 @@ Contains
     !    Its input value is not checked.  If P is to be computed, the
     !    Q is set to 1 - P.
     !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of integration 
+    !    Input/output, real ( kind = 8 ) F, the upper limit of integration
     !    of the noncentral F-density.  If this is an input value, it should
     !    lie in the range: [0, +infinity).  If it is an output value, it
     !    will be searched for in the range: [0,1.0D+30].
     !
-    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of freedom 
+    !    Input/output, real ( kind = 8 ) DFN, the number of degrees of freedom
     !    of the numerator sum of squares.  If this is an input value, it should
     !    lie in the range: (0, +infinity).  If it is an output value, it will
     !    be searched for in the range: [ 1.0, 1.0D+30].
     !
-    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom 
+    !    Input/output, real ( kind = 8 ) DFD, the number of degrees of freedom
     !    of the denominator sum of squares.  If this is an input value, it should
     !    be in range: (0, +infinity).  If it is an output value, it will be
     !    searched for in the range [1.0, 1.0D+30].
@@ -4386,7 +4386,7 @@ Contains
        f = 5.0D+00
        ! Call dstinv ( 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol )
        Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, inf, 0.5D+00, 0.5D+00, 5.0D+00, atol, tol, .TRUE. )
-       status = 0  
+       status = 0
        fx = 0.0D+00
        Call dinvr ( status, f, fx, qleft, qhi, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, 0.0D+00, .FALSE. )
 
@@ -4557,7 +4557,7 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the Gamma distribution 
+    !    This routine calculates any one parameter of the Gamma distribution
     !    given the others.
     !
     !    The cumulative distribution function P is calculated directly.
@@ -4570,7 +4570,7 @@ Contains
     !
     !  Reference:
     !
-    !    Armido DiDinato, Alfred Morris, 
+    !    Armido DiDinato, Alfred Morris,
     !    Algorithm 654:
     !    Computation of the incomplete gamma function ratios and their inverse,
     !    ACM Transactions on Mathematical Software,
@@ -4585,25 +4585,25 @@ Contains
     !    3: Calculate SHAPE from P, Q, X and SCALE;
     !    4: Calculate SCALE from P, Q, X and SHAPE.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of the 
-    !    Gamma density.  If this is an input value, it should lie in the 
+    !    Input/output, real ( kind = 8 ) P, the integral from 0 to X of the
+    !    Gamma density.  If this is an input value, it should lie in the
     !    range: [0,1].
     !
     !    Input/output, real ( kind = 8 ) Q, equal to 1-P.  If Q is an input
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) X, the upper limit of integration of 
+    !    Input/output, real ( kind = 8 ) X, the upper limit of integration of
     !    the Gamma density.  If this is an input value, it should lie in the
     !    range: [0, +infinity).  If it is an output value, it will lie in
     !    the range: [0,1E300].
     !
-    !    Input/output, real ( kind = 8 ) SHAPE, the shape parameter of the 
-    !    Gamma density.  If this is an input value, it should lie in the range: 
+    !    Input/output, real ( kind = 8 ) SHAPE, the shape parameter of the
+    !    Gamma density.  If this is an input value, it should lie in the range:
     !    (0, +infinity).  If it is an output value, it will be searched for
     !    in the range: [1.0D-300,1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) SCALE, the scale parameter of the 
+    !    Input/output, real ( kind = 8 ) SCALE, the scale parameter of the
     !    Gamma density.  If this is an input value, it should lie in the range
     !    (0, +infinity).  If it is an output value, it will be searched for
     !    in the range: (1.0D-300,1.0D+300].
@@ -4614,7 +4614,7 @@ Contains
     !    +1, if the answer appears to be lower than lowest search bound;
     !    +2, if the answer appears to be higher than greatest search bound;
     !    +3, if P + Q /= 1;
-    !    +10, if the Gamma or inverse Gamma routine cannot compute the answer.  
+    !    +10, if the Gamma or inverse Gamma routine cannot compute the answer.
     !    This usually happens only for X and SHAPE very large (more than 1.0D+10.
     !
     !    Output, real ( kind = 8 ) BOUND, is only defined if STATUS is nonzero.
@@ -4886,8 +4886,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.26.
     !
     !  Parameters:
@@ -4899,7 +4899,7 @@ Contains
     !    3: Calculate S from P, Q, F, PR and OMPR;
     !    4: Calculate PR and OMPR from P, Q, F and S.
     !
-    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to F of 
+    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to F of
     !    the negative binomial distribution.  If P is an input value, it
     !    should lie in the range [0,1].
     !
@@ -4907,23 +4907,23 @@ Contains
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) F, the upper limit of cumulation of 
-    !    the binomial distribution.  There are F or fewer failures before 
+    !    Input/output, real ( kind = 8 ) F, the upper limit of cumulation of
+    !    the binomial distribution.  There are F or fewer failures before
     !    the S-th success.  If this is an input value, it may lie in the
     !    range [0,+infinity), and if it is an output value, it will be searched
     !    for in the range [0,1.0D+300].
     !
     !    Input/output, real ( kind = 8 ) S, the number of successes.
     !    If this is an input value, it should lie in the range: [0, +infinity).
-    !    If it is an output value, it will be searched for in the range: 
+    !    If it is an output value, it will be searched for in the range:
     !    [0, 1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) PR, the probability of success in each 
+    !    Input/output, real ( kind = 8 ) PR, the probability of success in each
     !    binomial trial.  Whether an input or output value, it should lie in the
     !    range [0,1].
     !
     !    Input/output, real ( kind = 8 ) OMPR, the value of (1-PR).  Whether an
-    !    input or output value, it should lie in the range [0,1].  
+    !    input or output value, it should lie in the range [0,1].
     !
     !    Output, integer STATUS, reports the status of the computation.
     !     0, if the calculation completed correctly;
@@ -5290,7 +5290,7 @@ Contains
     !    is used to calculate the cumulative standard normal distribution.
     !
     !    The rational functions from pages 90-95 of Kennedy and Gentle
-    !    are used as starting values to a Newton iteration which 
+    !    are used as starting values to a Newton iteration which
     !    compute the inverse standard normal.  Therefore no searches are
     !    necessary for any parameter.
     !
@@ -5302,8 +5302,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.2.12.
     !
     !    William Cody,
@@ -5327,7 +5327,7 @@ Contains
     !    3: Calculate MEAN from P, Q, X and SD;
     !    4: Calculate SD from P, Q, X and MEAN.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to X 
+    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to X
     !    of the Normal density.  If this is an input or output value, it will
     !    lie in the range [0,1].
     !
@@ -5335,12 +5335,12 @@ Contains
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) X, the upper limit of integration of 
+    !    Input/output, real ( kind = 8 ) X, the upper limit of integration of
     !    the Normal density.
     !
     !    Input/output, real ( kind = 8 ) MEAN, the mean of the Normal density.
     !
-    !    Input/output, real ( kind = 8 ) SD, the standard deviation of the 
+    !    Input/output, real ( kind = 8 ) SD, the standard deviation of the
     !    Normal density.  If this is an input value, it should lie in the
     !    range (0,+infinity).
     !
@@ -5492,10 +5492,10 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the Poisson distribution 
+    !    This routine calculates any one parameter of the Poisson distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of other parameters involve a seach for a value that
@@ -5504,8 +5504,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.4.21.
     !
     !  Parameters:
@@ -5516,7 +5516,7 @@ Contains
     !    2: Calculate A from P, Q and XLAM;
     !    3: Calculate XLAM from P, Q and S.
     !
-    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to S of the 
+    !    Input/output, real ( kind = 8 ) P, the cumulation from 0 to S of the
     !    Poisson density.  Whether this is an input or output value, it will
     !    lie in the range [0,1].
     !
@@ -5529,7 +5529,7 @@ Contains
     !    the range: [0, +infinity).  If it is an output value, it will be
     !    searched for in the range: [0,1.0D+300].
     !
-    !    Input/output, real ( kind = 8 ) XLAM, the mean of the Poisson 
+    !    Input/output, real ( kind = 8 ) XLAM, the mean of the Poisson
     !    distribution.  If this is an input value, it should lie in the range
     !    [0, +infinity).  If it is an output value, it will be searched for
     !    in the range: [0,1E300].
@@ -5774,10 +5774,10 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine calculates any one parameter of the T distribution 
+    !    This routine calculates any one parameter of the T distribution
     !    given the others.
     !
-    !    The value P of the cumulative distribution function is calculated 
+    !    The value P of the cumulative distribution function is calculated
     !    directly.
     !
     !    Computation of other parameters involve a seach for a value that
@@ -5785,13 +5785,13 @@ Contains
     !    monotonicity of P with respect to the other parameters.
     !
     !    The original version of this routine allowed the search interval
-    !    to extend from -1.0D+300 to +1.0D+300, which is fine until you 
+    !    to extend from -1.0D+300 to +1.0D+300, which is fine until you
     !    try to evaluate a function at such a point!
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.27.
     !
     !  Parameters:
@@ -5802,7 +5802,7 @@ Contains
     !    2 : Calculate T from P, Q and DF;
     !    3 : Calculate DF from P, Q and T.
     !
-    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to T of 
+    !    Input/output, real ( kind = 8 ) P, the integral from -infinity to T of
     !    the T-density.  Whether an input or output value, this will lie in the
     !    range [0,1].
     !
@@ -5810,7 +5810,7 @@ Contains
     !    value, it should lie in the range [0,1].  If Q is an output value,
     !    it will lie in the range [0,1].
     !
-    !    Input/output, real ( kind = 8 ) T, the upper limit of integration of 
+    !    Input/output, real ( kind = 8 ) T, the upper limit of integration of
     !    the T-density.  If this is an input value, it may have any value.
     !    It it is an output value, it will be searched for in the range
     !    [ -1.0D+30, 1.0D+30 ].
@@ -6050,7 +6050,7 @@ Contains
     !
     !  Discussion:
     !
-    !    The CDF of the noncentral chi square distribution can be evaluated 
+    !    The CDF of the noncentral chi square distribution can be evaluated
     !    within Mathematica by commands such as:
     !
     !      Needs["Statistics`ContinuousDistributions`"]
@@ -6268,8 +6268,8 @@ Contains
     !
     !    Armido Didonato, Alfred Morris,
     !    Algorithm 708:
-    !    Significant Digit Computation of the Incomplete Beta Function Ratios. 
-    !    ACM Transactions on Mathematical Software, 
+    !    Significant Digit Computation of the Incomplete Beta Function Ratios.
+    !    ACM Transactions on Mathematical Software,
     !    Volume 18, Number 3, September 1992, pages 360-373.
     !
     !  Parameters:
@@ -6325,8 +6325,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.24.
     !
     !  Parameters:
@@ -6341,7 +6341,7 @@ Contains
     !
     !    Output, real ( kind = 8 ) CUM, the cumulative binomial distribution.
     !
-    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative 
+    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
     !    binomial distribution.
     !
     Implicit None
@@ -6382,7 +6382,7 @@ Contains
     !
     !    Output, real ( kind = 8 ) CUM, the cumulative chi-square distribution.
     !
-    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative 
+    !    Output, real ( kind = 8 ) CCUM, the complement of the cumulative
     !    chi-square distribution.
     !
     Implicit None
@@ -6418,8 +6418,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.4.25.
     !
     !  Parameters:
@@ -6428,7 +6428,7 @@ Contains
     !
     !    Input, real ( kind = 8 ) DF, the number of degrees of freedom.
     !
-    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter of 
+    !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter of
     !    the noncentral chi-square distribution.
     !
     !    Output, real ( kind = 8 ) CUM, CCUM, the CDF and complementary
@@ -6436,7 +6436,7 @@ Contains
     !
     !  Local Parameters:
     !
-    !    Local, real ( kind = 8 ) EPS, the convergence criterion.  The sum 
+    !    Local, real ( kind = 8 ) EPS, the convergence criterion.  The sum
     !    stops when a term is less than EPS*SUM.
     !
     !    Local, integer NTIRED, the maximum number of terms to be evaluated
@@ -6463,7 +6463,7 @@ Contains
     Integer iterb
     Integer iterf
     Real ( kind = 8 ) lcntaj
-    Real ( kind = 8 ) lcntwt      
+    Real ( kind = 8 ) lcntwt
     Real ( kind = 8 ) lfact
     Integer, Parameter :: ntired = 1000
     Real ( kind = 8 ) pcent
@@ -6496,7 +6496,7 @@ Contains
        Return
     End If
 
-    xnonc = pnonc /  2.0D+00 
+    xnonc = pnonc /  2.0D+00
     !
     !  The following code calculates the weight, chi-square, and
     !  adjustment term for the central term in the infinite series.
@@ -6510,7 +6510,7 @@ Contains
        icent = 1
     End If
 
-    chid2 = x /  2.0D+00 
+    chid2 = x /  2.0D+00
     !
     !  Calculate central weight term.
     !
@@ -6524,7 +6524,7 @@ Contains
     !
     !  Calculate central adjustment term.
     !
-    dfd2 = dg(Real(icent,kind=8)) /  2.0D+00 
+    dfd2 = dg(Real(icent,kind=8)) /  2.0D+00
     lfact = gamma_log ( 1.0D+00 + dfd2 )
     lcntaj = dfd2 * Log ( chid2 ) - chid2 - lfact
     centaj = Exp ( lcntaj )
@@ -6545,7 +6545,7 @@ Contains
 
     Do
 
-       dfd2 = dg(Real(i,kind=8)) /  2.0D+00 
+       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
        !
        !  Adjust chi-square for two fewer degrees of freedom.
        !  The adjusted value ends up in PTERM.
@@ -6595,7 +6595,7 @@ Contains
        !  Update adjustment term for DF for next iteration.
        !
        i = i + 1
-       dfd2 = dg(Real(i,kind=8)) /  2.0D+00 
+       dfd2 = dg(Real(i,kind=8)) /  2.0D+00
        adj = adj * chid2 / dfd2
        sumadj = sumadj + adj
        iterf = iterf + 1
@@ -6639,8 +6639,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.28.
     !
     !  Parameters:
@@ -6727,8 +6727,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.16, 26.6.17, 26.6.18, 26.6.20.
     !
     !  Parameters:
@@ -6742,7 +6742,7 @@ Contains
     !
     !    Input, real ( kind = 8 ) PNONC, the noncentrality parameter.
     !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the noncentral F CDF and 
+    !    Output, real ( kind = 8 ) CUM, CCUM, the noncentral F CDF and
     !    complementary CDF.
     !
     Implicit None
@@ -6807,7 +6807,7 @@ Contains
        Return
     End If
 
-    xnonc = pnonc /  2.0D+00 
+    xnonc = pnonc /  2.0D+00
     !
     !  Calculate the central term of the Poisson weighting factor.
     !
@@ -6924,7 +6924,7 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine computes the cumulative distribution function of the 
+    !    This routine computes the cumulative distribution function of the
     !    incomplete gamma distribution, i.e., the integral from 0 to X of
     !
     !      (1/GAM(A))*EXP(-T)*T**(A-1) DT
@@ -6972,8 +6972,8 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine returns the probability that there will be F or 
-    !    fewer failures before there are S successes, with each binomial 
+    !    This routine returns the probability that there will be F or
+    !    fewer failures before there are S successes, with each binomial
     !    trial having a probability of success PR.
     !
     !    Prob(# failures = F | S successes, PR)  =
@@ -6984,8 +6984,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.5.26.
     !
     !  Parameters:
@@ -7037,7 +7037,7 @@ Contains
     !    functions, and proper selection of the machine dependent
     !    constants.
     !
-    !  Author: 
+    !  Author:
     !
     !    William Cody
     !    Mathematics and Computer Science Division
@@ -7048,12 +7048,12 @@ Contains
     !
     !    William Cody,
     !    Rational Chebyshev approximations for the error function,
-    !    Mathematics of Computation, 
+    !    Mathematics of Computation,
     !    1969, pages 631-637.
     !
-    !    William Cody, 
-    !    Algorithm 715: 
-    !    SPECFUN - A Portable FORTRAN Package of Special Function Routines 
+    !    William Cody,
+    !    Algorithm 715:
+    !    SPECFUN - A Portable FORTRAN Package of Special Function Routines
     !    and Test Drivers,
     !    ACM Transactions on Mathematical Software,
     !    Volume 19, Number 1, 1993, pages 22-32.
@@ -7067,7 +7067,7 @@ Contains
     !
     !  Local Parameters:
     !
-    !    Local, real ( kind = 8 ) EPS, the argument below which anorm(x) 
+    !    Local, real ( kind = 8 ) EPS, the argument below which anorm(x)
     !    may be represented by 0.5 and above which  x*x  will not underflow.
     !    A conservative value is the largest machine number X
     !    such that   1.0D+00 + X = 1.0D+00   to machine precision.
@@ -7233,18 +7233,18 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun, 
+    !    Milton Abramowitz, Irene Stegun,
     !    Handbook of Mathematical Functions,
     !    Formula 26.4.21.
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) S, the upper limit of cumulation of the 
+    !    Input, real ( kind = 8 ) S, the upper limit of cumulation of the
     !    Poisson density function.
     !
     !    Input, real ( kind = 8 ) XLAM, the mean of the Poisson distribution.
     !
-    !    Output, real ( kind = 8 ) CUM, CCUM, the Poisson density CDF and 
+    !    Output, real ( kind = 8 ) CUM, CCUM, the Poisson density CDF and
     !    complementary CDF.
     !
     Implicit None
@@ -7272,7 +7272,7 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun, 
+    !    Milton Abramowitz, Irene Stegun,
     !    Handbook of Mathematical Functions,
     !    Formula 26.5.27.
     !
@@ -7280,7 +7280,7 @@ Contains
     !
     !    Input, real ( kind = 8 ) T, the upper limit of integration.
     !
-    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of 
+    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of
     !    the T distribution.
     !
     !    Output, real ( kind = 8 ) CUM, CCUM, the T distribution CDF and
@@ -7362,9 +7362,9 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
-    !    ACM Transactions on Mathematical Software, 
+    !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
     !
     !  Parameters:
@@ -7417,20 +7417,20 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine returns X such that 
+    !    This routine returns X such that
     !
-    !      CUMNOR(X) = P, 
+    !      CUMNOR(X) = P,
     !
-    !    that is, so that 
+    !    that is, so that
     !
     !      P = integral ( -Infinity <= T <= X ) exp(-U*U/2)/sqrt(2*PI) dU
     !
-    !    The rational function on page 95 of Kennedy and Gentle is used as a 
+    !    The rational function on page 95 of Kennedy and Gentle is used as a
     !    starting value for the Newton method of finding roots.
     !
     !  Reference:
     !
-    !    William Kennedy, James Gentle, 
+    !    William Kennedy, James Gentle,
     !    Statistical Computing,
     !    Marcel Dekker, NY, 1980,
     !    QA276.4 K46
@@ -7501,29 +7501,29 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine seeks to find bounds on a root of the function and 
-    !    invokes ZROR to perform the zero finding.  STINVR must have been 
+    !    This routine seeks to find bounds on a root of the function and
+    !    invokes ZROR to perform the zero finding.  STINVR must have been
     !    called before this routine in order to set its parameters.
     !
     !  Reference:
     !
     !    JCP Bus, TJ Dekker,
-    !    Two Efficient Algorithms with Guaranteed Convergence for 
+    !    Two Efficient Algorithms with Guaranteed Convergence for
     !    Finding a Zero of a Function,
     !    ACM Transactions on Mathematical Software,
     !    Volume 1, Number 4, pages 330-345, 1975.
     !
     !  Parameters:
     !
-    !    Input/output, integer STATUS.  At the beginning of a zero finding 
+    !    Input/output, integer STATUS.  At the beginning of a zero finding
     !    problem, STATUS should be set to 0 and INVR invoked.  The value
     !    of parameters other than X will be ignored on this call.
-    !    If INVR needs the function to be evaluated, it will set STATUS to 1 
-    !    and return.  The value of the function should be set in FX and INVR 
+    !    If INVR needs the function to be evaluated, it will set STATUS to 1
+    !    and return.  The value of the function should be set in FX and INVR
     !    again called without changing any of its other parameters.
     !    If INVR finishes without error, it returns with STATUS 0, and X an
     !    approximate root of F(X).
-    !    If INVR cannot bound the function, it returns a negative STATUS and 
+    !    If INVR cannot bound the function, it returns a negative STATUS and
     !    sets QLEFT and QHI.
     !
     !    Output, real ( kind = 8 ) X, the value at which F(X) is to be evaluated.
@@ -7532,7 +7532,7 @@ Contains
     !    on the previous call, when INVR returned with STATUS = 1.
     !
     !    Output, logical QLEFT, is defined only if QMFINV returns FALSE.  In that
-    !    case, QLEFT is TRUE if the stepping search terminated unsucessfully 
+    !    case, QLEFT is TRUE if the stepping search terminated unsucessfully
     !    at SMALL, and FALSE if the search terminated unsucessfully at BIG.
     !
     !    Output, logical QHI, is defined only if QMFINV returns FALSE.  In that
@@ -7861,14 +7861,14 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine is given a monotone function F, and a value Y, 
-    !    and seeks an argument value X such that F(X) = Y.  
+    !    This routine is given a monotone function F, and a value Y,
+    !    and seeks an argument value X such that F(X) = Y.
     !
     !    This routine uses reverse communication -- see invr.
     !    This routine sets quantities needed by INVR.
     !
     !    F must be a monotone function, the results of QMFINV are
-    !    otherwise undefined.  QINCR must be TRUE if F is nondecreasing 
+    !    otherwise undefined.  QINCR must be TRUE if F is nondecreasing
     !    and FALSE if F is nonincreasing.
     !
     !    QMFINV will return TRUE if and only if F(SMALL) and
@@ -7888,7 +7888,7 @@ Contains
     !    to determine whether to step left or right to bound the
     !    desired x.  the initial step size is
     !
-    !      max ( ABSSTP, RELSTP * ABS ( S ) ) 
+    !      max ( ABSSTP, RELSTP * ABS ( S ) )
     !
     !    for the input value of X.
     !
@@ -7899,30 +7899,30 @@ Contains
     !    after setting QLEFT and QHI.
     !
     !    If X is successfully bounded then Algorithm R of the paper
-    !    Bus and Dekker is employed to find the zero of the function F(X)-Y. 
+    !    Bus and Dekker is employed to find the zero of the function F(X)-Y.
     !    This is routine QRZERO.
     !
     !  Reference:
     !
     !    JCP Bus, TJ Dekker,
-    !    Two Efficient Algorithms with Guaranteed Convergence for 
+    !    Two Efficient Algorithms with Guaranteed Convergence for
     !    Finding a Zero of a Function,
     !    ACM Transactions on Mathematical Software,
     !    Volume 1, Number 4, pages 330-345, 1975.
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) ZSMALL, ZBIG, the left and right endpoints 
+    !    Input, real ( kind = 8 ) ZSMALL, ZBIG, the left and right endpoints
     !    of the interval to be searched for a solution.
     !
-    !    Input, real ( kind = 8 ) ZABSST, ZRELSTP, the initial step size in 
+    !    Input, real ( kind = 8 ) ZABSST, ZRELSTP, the initial step size in
     !    the search is max ( ZABSST, ZRELST * abs ( X ) ).
     !
-    !    Input, real ( kind = 8 ) STPMUL.  When a step doesn't bound the zero, 
-    !    the stepsize is multiplied by STPMUL and another step taken.  A 
+    !    Input, real ( kind = 8 ) STPMUL.  When a step doesn't bound the zero,
+    !    the stepsize is multiplied by STPMUL and another step taken.  A
     !    popular value is 2.0.
     !
-    !    Input, real ( kind = 8 ) ABSTOL, RELTOL, two numbers that determine 
+    !    Input, real ( kind = 8 ) ABSTOL, RELTOL, two numbers that determine
     !    the accuracy of the solution
     !
     small = zsmall
@@ -7951,8 +7951,8 @@ Contains
     !
     !  Reference:
     !
-    !    Milton Abramowitz, Irene Stegun,  
-    !    Handbook of Mathematical Functions 
+    !    Milton Abramowitz, Irene Stegun,
+    !    Handbook of Mathematical Functions
     !    1966, Formula 26.2.12.
     !
     !  Parameters:
@@ -8006,9 +8006,9 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine returns 
+    !    This routine returns
     !
-    !      ln ( Gamma ( Z ) ) - Sterling ( Z )  
+    !      ln ( Gamma ( Z ) ) - Sterling ( Z )
     !
     !    where Sterling(Z) is Sterling's approximation to ln ( Gamma ( Z ) ).
     !
@@ -8025,7 +8025,7 @@ Contains
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) Z, the value at which the Sterling 
+    !    Input, real ( kind = 8 ) Z, the value at which the Sterling
     !    remainder is to be calculated.  Z must be positive.
     !
     !    Output, real ( kind = 8 ) DSTREM, the Sterling remainder.
@@ -8082,15 +8082,15 @@ Contains
     !    initial approximation.
     !
     !    Thanks to Charles Katholi for pointing out that the RESHAPE
-    !    function should not use a range in the "SHAPE" field (0:4,4), 
+    !    function should not use a range in the "SHAPE" field (0:4,4),
     !    but simply the number of rows and columns (5,4), 04 May 2006.
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) P, Q, the value whose inverse from the 
+    !    Input, real ( kind = 8 ) P, Q, the value whose inverse from the
     !    T distribution CDF is desired, and the value (1-P).
     !
-    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of the 
+    !    Input, real ( kind = 8 ) DF, the number of degrees of freedom of the
     !    T distribution.
     !
     !    Output, real ( kind = 8 ) DT1, the approximate value of X for which
@@ -8160,7 +8160,7 @@ Contains
     !  Reference:
     !
     !    JCP Bus, TJ Dekker,
-    !    Two Efficient Algorithms with Guaranteed Convergence for 
+    !    Two Efficient Algorithms with Guaranteed Convergence for
     !    Finding a Zero of a Function,
     !    ACM Transactions on Mathematical Software,
     !    Volume 1, Number 4, pages 330-345, 1975.
@@ -8184,10 +8184,10 @@ Contains
     !                 this case, XLO and XHI are undefined.
     !                         integer STATUS
     !
-    !    Output, real ( kind = 8 ) X, the value of X at which F(X) is to 
+    !    Output, real ( kind = 8 ) X, the value of X at which F(X) is to
     !    be evaluated.
     !
-    !    Input, real ( kind = 8 ) FX, the value of F(X), which must be calculated 
+    !    Input, real ( kind = 8 ) FX, the value of F(X), which must be calculated
     !    by the user when ZROR has returned on the previous call with STATUS = 1.
     !
     !    Output, real ( kind = 8 ) XLO, XHI, are lower and upper bounds for the
@@ -8399,7 +8399,7 @@ Contains
 140 Continue
 
     If ( ext == 3 ) Then
-       p = p *  2.0D+00 
+       p = p *  2.0D+00
     End If
 
     If (.Not. ( ( p * 1.0D+00 ) == 0.0D+00 .Or. p <= ( q * tol ) ) ) Then
@@ -8504,17 +8504,17 @@ Contains
     !  Reference:
     !
     !    JCP Bus, TJ Dekker,
-    !    Two Efficient Algorithms with Guaranteed Convergence for 
+    !    Two Efficient Algorithms with Guaranteed Convergence for
     !    Finding a Zero of a Function,
     !    ACM Transactions on Mathematical Software,
     !    Volume 1, Number 4, pages 330-345, 1975.
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) XLO, XHI, the left and right endpoints of the 
+    !    Input, real ( kind = 8 ) XLO, XHI, the left and right endpoints of the
     !    interval to be searched for a solution.
     !
-    !    Input, real ( kind = 8 ) ABSTOL, RELTOL, two numbers that determine 
+    !    Input, real ( kind = 8 ) ABSTOL, RELTOL, two numbers that determine
     !    the accuracy of the solution.
     !
     xxlo = xlo
@@ -8637,7 +8637,7 @@ Contains
     !    Since some compilers already supply a routine named ERF which evaluates
     !    the error function, this routine has been given a distinct, if
     !    somewhat unnatural, name.
-    !    
+    !
     !    The function is defined by:
     !
     !      ERF(X) = ( 2 / sqrt ( PI ) ) * Integral ( 0 <= T <= X ) EXP ( - T**2 ) dT.
@@ -8658,7 +8658,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -8693,7 +8693,7 @@ Contains
     Real ( kind = 8 ), Dimension ( 8 ) :: q = (/ &
          1.00000000000000D+00, 1.27827273196294D+01, &
          7.70001529352295D+01, 2.77585444743988D+02, &
-         6.38980264465631D+02, 9.31354094850610D+02, & 
+         6.38980264465631D+02, 9.31354094850610D+02, &
          7.90950925327898D+02, 3.00459260956983D+02 /)
     Real ( kind = 8 ), Dimension ( 5 ) :: r = (/ &
          2.10144126479064D+00, 2.62370141675169D+01, &
@@ -8779,7 +8779,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -8792,7 +8792,7 @@ Contains
     !
     !    Input, real ( kind = 8 ) X, the argument of the function.
     !
-    !    Output, real ( kind = 8 ) ERROR_FC, the value of the complementary 
+    !    Output, real ( kind = 8 ) ERROR_FC, the value of the complementary
     !    error function.
     !
     Implicit None
@@ -8877,7 +8877,7 @@ Contains
        If ( x <= -5.6D+00 ) Then
 
           If ( ind == 0 ) Then
-             error_fc =  2.0D+00 
+             error_fc =  2.0D+00
           Else
              error_fc =  2.0D+00  * Exp ( x * x )
           End If
@@ -8945,7 +8945,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -9009,7 +9009,7 @@ Contains
     !
     !    Input, integer N, length of A.
     !
-    !    Input, real ( kind = 8 ) X, the point at which the polynomial 
+    !    Input, real ( kind = 8 ) X, the point at which the polynomial
     !    is to be evaluated.
     !
     !    Output, real ( kind = 8 ) EVAL_POL, the value of the polynomial at X.
@@ -9051,7 +9051,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -9210,7 +9210,7 @@ Contains
     !
     !  Discussion:
     !
-    !    The value of NONCENTRAL_F_CDF ( DFN, DFD, LAMDA, X ) can be evaluated 
+    !    The value of NONCENTRAL_F_CDF ( DFN, DFD, LAMDA, X ) can be evaluated
     !    in Mathematica by commands like:
     !
     !      Needs["Statistics`ContinuousDistributions`"]
@@ -9242,7 +9242,7 @@ Contains
     !    returns the corresponding data; when there is no more data, the
     !    output value of N_DATA will be 0 again.
     !
-    !    Output, integer A, integer B, real ( kind = 8 ) LAMBDA, the 
+    !    Output, integer A, integer B, real ( kind = 8 ) LAMBDA, the
     !    parameters of the function.
     !
     !    Output, real ( kind = 8 ) X, the argument of the function.
@@ -9327,18 +9327,18 @@ Contains
     !
     !  Discussion:
     !
-    !    This routine is appropriate for use when 
+    !    This routine is appropriate for use when
     !
-    !      B < min ( EPS, EPS * A ) 
+    !      B < min ( EPS, EPS * A )
     !
-    !    and 
+    !    and
     !
     !      X <= 0.5.
     !
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -9414,7 +9414,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -9491,7 +9491,7 @@ Contains
 
        top = (((((((  &
             r(9)   &
-            * t + r(8) ) & 
+            * t + r(8) ) &
             * t + r(7) ) &
             * t + r(6) ) &
             * t + r(5) ) &
@@ -9529,7 +9529,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -9620,7 +9620,7 @@ Contains
 
           End If
           !
-          !  Check if 1/T can overflow. 
+          !  Check if 1/T can overflow.
           !
           If ( Abs ( t ) < 1.0D-30 ) Then
              If ( 1.0001D+00 < Abs ( t ) * Huge ( t ) ) Then
@@ -9741,7 +9741,7 @@ Contains
     !
     !    Input, integer IND, indicates the accuracy request:
     !    0, as much accuracy as possible.
-    !    1, to within 1 unit of the 6-th significant digit, 
+    !    1, to within 1 unit of the 6-th significant digit,
     !    otherwise, to within 1 unit of the 3rd significant digit.
     !
     !  Local Parameters:
@@ -10236,7 +10236,7 @@ Contains
 270 Continue
 
     If ( Abs ( s ) <= 2.0D+00 * e .And. 3.28D-03 < a * e * e ) Then
-       ans =  2.0D+00 
+       ans =  2.0D+00
        Return
     End If
 
@@ -10316,7 +10316,7 @@ Contains
                ) * z + d1(7)  &
                ) * z + d1(6)  &
                ) * z + d1(5)  &
-               ) * z + d1(4)  & 
+               ) * z + d1(4)  &
                ) * z + d1(3)  &
                ) * z + d1(2)  &
                ) * z + d1(1)  &
@@ -10333,7 +10333,7 @@ Contains
                ) * z + d2(3) &
                ) * z + d2(2) &
                ) * z + d2(1) &
-               ) * z + d20 
+               ) * z + d20
 
           c3 = ((((((( &
                d3(8) &
@@ -10402,7 +10402,7 @@ Contains
 330 Continue
 
     If ( 3.28D-03 < a * e * e ) Then
-       ans =  2.0D+00 
+       ans =  2.0D+00
        Return
     End If
 
@@ -10486,7 +10486,7 @@ Contains
 410 Continue
 
     If ( Abs ( s ) <= 2.0D+00 * e ) Then
-       ans =  2.0D+00 
+       ans =  2.0D+00
        Return
     End If
 
@@ -10510,9 +10510,9 @@ Contains
     !  Discussion:
     !
     !    The routine is given positive A, and nonnegative P and Q where P + Q = 1.
-    !    The value X is computed with the property that P(A,X) = P and Q(A,X) = Q.  
+    !    The value X is computed with the property that P(A,X) = P and Q(A,X) = Q.
     !    Schroder iteration is employed.  The routine attempts to compute X
-    !    to 10 significant digits if this is possible for the particular computer 
+    !    to 10 significant digits if this is possible for the particular computer
     !    arithmetic being used.
     !
     !  Author:
@@ -10543,13 +10543,13 @@ Contains
     !    -2, A <= 0
     !    -3, No solution was obtained. The ratio Q/A is too large.
     !    -4, P + Q /= 1
-    !    -6, 20 iterations were performed. The most recent value obtained 
+    !    -6, 20 iterations were performed. The most recent value obtained
     !        for X is given.  This cannot occur if X0 <= 0.
     !    -7, Iteration failed. No value is given for X.
     !        This may occur when X is approximately 0.
     !    -8, A value for X has been obtained, but the routine is not certain
     !        of its accuracy.  Iteration cannot be performed in this
-    !        case. If X0 <= 0, this can occur only when P or Q is 
+    !        case. If X0 <= 0, this can occur only when P or Q is
     !        approximately 0. If X0 is positive then this can occur when A is
     !        exceedingly close to X and A is extremely large (say A >= 1.E20).
     !
@@ -10614,7 +10614,7 @@ Contains
     Real ( kind = 8 ) sum1
     Real ( kind = 8 ) t
     Real ( kind = 8 ), Parameter :: tol = 1.0D-05
-    Real ( kind = 8 ), Parameter :: two =  2.0D+00 
+    Real ( kind = 8 ), Parameter :: two =  2.0D+00
     Real ( kind = 8 ) u
     Real ( kind = 8 ) w
     Real ( kind = 8 ) x
@@ -10713,9 +10713,9 @@ Contains
        Return
     End If
 
-    y = -Log ( b ) 
+    y = -Log ( b )
     s = half + ( half - a )
-    z = Log ( y ) 
+    z = Log ( y )
     t = y - s * z
 
     If ( 0.15D+00 <= b ) Then
@@ -11208,7 +11208,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -11260,7 +11260,7 @@ Contains
             * a + p3 ) &
             * a + p2 ) &
             * a + p1 ) &
-            * a + p0  
+            * a + p0
 
        bot = (((((  &
             q6   &
@@ -11277,7 +11277,7 @@ Contains
 
        x = ( a - 0.5D+00 ) - 0.5D+00
 
-       top = ((((( r5 * x + r4 ) * x + r3 ) * x + r2 ) * x + r1 ) * x + r0 ) 
+       top = ((((( r5 * x + r4 ) * x + r3 ) * x + r2 ) * x + r1 ) * x + r0 )
 
        bot = ((((( s5 * x + s4 ) * x + s3 ) * x + s2 ) * x + s1 ) * x + 1.0D+00 )
 
@@ -11303,7 +11303,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -11376,7 +11376,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -11651,7 +11651,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -11689,7 +11689,7 @@ Contains
 
     !*****************************************************************************80
     !
-    !! IPMPAR returns integer machine constants. 
+    !! IPMPAR returns integer machine constants.
     !
     !  Discussion:
     !
@@ -12132,7 +12132,7 @@ Contains
     !
     !    Output, real ( kind = 8 ) P, the probability of a success on one trial.
     !
-    !    Output, real ( kind = 8 ) CDF, the probability of at most F failures 
+    !    Output, real ( kind = 8 ) CDF, the probability of at most F failures
     !    before the S-th success.
     !
     Implicit None
@@ -12544,7 +12544,7 @@ Contains
     !  Discussion:
     !
     !    The main computation involves evaluation of rational Chebyshev
-    !    approximations.  PSI was written at Argonne National Laboratory 
+    !    approximations.  PSI was written at Argonne National Laboratory
     !    for FUNPACK, and subsequently modified by A. H. Morris of NSWC.
     !
     !  Reference:
@@ -12555,7 +12555,7 @@ Contains
     !    Volume 27, 1973, pages 123-127.
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -12564,7 +12564,7 @@ Contains
     !
     !    Input, real ( kind = 8 ) XX, the argument of the psi function.
     !
-    !    Output, real ( kind = 8 ) PSI, the value of the psi function.  PSI 
+    !    Output, real ( kind = 8 ) PSI, the value of the psi function.  PSI
     !    is assigned the value 0 when the psi function is undefined.
     !
     Implicit None
@@ -12619,8 +12619,8 @@ Contains
     Real ( kind = 8 ) xx
     Real ( kind = 8 ) z
     !
-    !  XMAX1 is the largest positive floating point constant with entirely 
-    !  integer representation.  It is also used as negative of lower bound 
+    !  XMAX1 is the largest positive floating point constant with entirely
+    !  integer representation.  It is also used as negative of lower bound
     !  on acceptable negative arguments and as the positive argument beyond which
     !  psi may be represented as LOG(X).
     !
@@ -12716,7 +12716,7 @@ Contains
 
     End If
     !
-    !  0.5 <= X <= 3 
+    !  0.5 <= X <= 3
     !
     If ( x <= 3.0D+00 ) Then
 
@@ -12875,7 +12875,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -12945,7 +12945,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -13001,7 +13001,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -13025,7 +13025,7 @@ Contains
     Real ( kind = 8 ) r
     Real ( kind = 8 ) rlog
     Real ( kind = 8 ) t
-    Real ( kind = 8 ), Parameter :: two =  2.0D+00 
+    Real ( kind = 8 ), Parameter :: two =  2.0D+00
     Real ( kind = 8 ) u
     Real ( kind = 8 ) w
     Real ( kind = 8 ) w1
@@ -13080,7 +13080,7 @@ Contains
     !  Reference:
     !
     !    Armido DiDinato, Alfred Morris,
-    !    Algorithm 708: 
+    !    Algorithm 708:
     !    Significant Digit Computation of the Incomplete Beta Function Ratios,
     !    ACM Transactions on Mathematical Software,
     !    Volume 18, 1993, pages 360-373.
@@ -13105,7 +13105,7 @@ Contains
     Real ( kind = 8 ) r
     Real ( kind = 8 ) rlog1
     Real ( kind = 8 ) t
-    Real ( kind = 8 ), Parameter :: two =  2.0D+00 
+    Real ( kind = 8 ), Parameter :: two =  2.0D+00
     Real ( kind = 8 ) w
     Real ( kind = 8 ) w1
     Real ( kind = 8 ) x
@@ -13146,7 +13146,7 @@ Contains
        w = ( ( p2 * t + p1 ) * t + p0 ) / ( ( q2 * t + q1 ) * t + 1.0D+00 )
        rlog1 = two * t * ( 1.0D+00 / ( 1.0D+00 - r ) - r * w ) + w1
 
-    Else 
+    Else
 
        w = ( x + half ) + half
        rlog1 = x - Log ( w )
@@ -13239,21 +13239,21 @@ Contains
     !
     !  Discussion:
     !
-    !    The routine returns an X for which it is approximately true that 
-    !      P = CUMNOR(X),  
-    !    that is, 
+    !    The routine returns an X for which it is approximately true that
+    !      P = CUMNOR(X),
+    !    that is,
     !      P = Integral ( -infinity < U <= X ) exp(-U*U/2)/sqrt(2*PI) dU.
     !
     !  Reference:
     !
     !    William Kennedy, James Gentle,
-    !    Statistical Computing, 
+    !    Statistical Computing,
     !    Marcel Dekker, NY, 1980, page 95,
     !    QA276.4 K46
     !
     !  Parameters:
     !
-    !    Input, real ( kind = 8 ) P, the probability whose normal deviate 
+    !    Input, real ( kind = 8 ) P, the probability whose normal deviate
     !    is sought.
     !
     !    Output, real ( kind = 8 ) STVALN, the normal deviate whose probability
@@ -13563,7 +13563,7 @@ Contains
     Integer i
     Real(EB) p, x
     Real(EB), Allocatable :: yi(:), invdist(:)
-    !    External Interpolate1d, Dens2InvDistr 
+    !    External Interpolate1d, Dens2InvDistr
 
     Call Random_number(rnd_vec)
     !    Call ranmar(rnd_vec,n_rnd)        ! Uniform (0,1) on the y axis
@@ -13782,7 +13782,7 @@ Contains
        Else If ( x < b ) Then
           y2 = y_peak - (x-peak)*xkk2
           p = p_peak + (x-peak)*0.5_EB*(y_peak+y2)
-       Else 
+       Else
           p = 1.0_EB
        End If
     Else If (imode == 2 ) Then   ! inverse cdf
@@ -13792,7 +13792,7 @@ Contains
           x = a + Sqrt( 2.0_EB*p / xkk1 )
        Else If ( p < 1.0_EB ) Then
           x = b - Sqrt( 2.0_EB*(1.0_EB-p)/xkk2)
-       Else 
+       Else
           x = b
        End If
     Else
@@ -13844,7 +13844,7 @@ Contains
           x = 0
        Else If ( p < 1.0_EB ) Then
           x = (1.0_EB/lambda)*((-Log(1.0_EB-p))**(1.0_EB/alpha))
-       Else 
+       Else
           x = Huge(p)  ! largest positive number
        End If
     Else
@@ -13898,7 +13898,7 @@ Contains
           x = -Huge(p)  ! smallest possible value
        Else If ( p < 1.0_EB ) Then
           x = (-1.0_EB/alpha)*Log(-1.0_EB*Log(p))
-       Else 
+       Else
           x = Huge(p)  ! largest positive number
        End If
     Else
@@ -13931,7 +13931,7 @@ Contains
     ! calculated.
     !
     ! Assumptions: f(x) >= 0 for all x
-    !              f(x)  > 0 for some x  
+    !              f(x)  > 0 for some x
     ! These assumptions are not checked, because they should
     ! hold, if f(x) is a probability density function.
     !

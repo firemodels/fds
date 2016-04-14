@@ -1,4 +1,4 @@
-&HEAD CHID='symmetry_test', TITLE='Test symmetry of flow solver, SVN $Revision$' /
+&HEAD CHID='symmetry_test', TITLE='Test symmetry of flow solver' /
 
 &MESH IJK=10,10,10, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 

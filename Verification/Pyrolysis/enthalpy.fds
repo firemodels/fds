@@ -8,7 +8,7 @@ a positive source term thus increasing the heating
 rate. This is seen as a bump in the temperature
 curve after 80 degC.
 
-&HEAD CHID='enthalpy', TITLE='Test reaction enthalpy, SVN $Revision$' /
+&HEAD CHID='enthalpy', TITLE='Test reaction enthalpy' /
 
 &MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
 

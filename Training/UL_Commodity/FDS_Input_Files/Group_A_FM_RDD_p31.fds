@@ -1,0 +1,124 @@
+&HEAD CHID='Group_A_FM_RDD_p31', TITLE='FM Group A Plastic RDD Test' /
+
+&MESH IJK=35,35,40, XB=-1.50,3.75,-1.50,3.75,0.00,6.00 /
+&TIME T_END=900. /
+
+&MISC ALLOW_UNDERSIDE_PARTICLES=.TRUE. /
+
+
+
+&SPEC ID='WATER VAPOR' /
+
+&PART ID='water drops', SPEC_ID='WATER VAPOR', DIAMETER=1000., SAMPLING_FACTOR=10 /
+
+&PROP ID='nozzle', PART_ID='water drops', FLOW_RATE=4.7, PARTICLES_PER_SECOND=500, PARTICLE_VELOCITY=1., SPRAY_ANGLE=0.,35., SMOKEVIEW_ID='nozzle'  /
+
+&DEVC XYZ=0.225,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.825,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=1.425,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=2.025,0.225,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.225,0.825,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.825,0.825,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=1.425,0.825,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=2.025,0.825,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.225,1.425,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.825,1.425,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=1.425,1.425,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=2.025,1.425,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.225,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=0.825,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=1.425,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+&DEVC XYZ=2.025,2.025,3.30, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=83.0, ID='noz_1' /
+
+&REAC FUEL         = 'POLYSTYRENE', RADIATIVE_FRACTION=0.5
+      FYI        = 'Styrene, C_8 H_8'
+      H          = 8.
+      C          = 8.
+      HEAT_OF_COMBUSTION=40000.
+      SOOT_YIELD = 0.164
+      CO_YIELD   = 0.06 /
+
+&MATL ID                    = 'CONCRETE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 2300.
+      CONDUCTIVITY          = 0.10
+      SPECIFIC_HEAT         = 0.88 /
+
+&MATL ID                    = 'YELLOW PINE'
+      FYI                   = 'Drysdale, Intro to Fire Dynamics'
+      DENSITY               = 640.
+      CONDUCTIVITY          = 0.14
+      SPECIFIC_HEAT         = 2.85 
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'CORRUGATED PAPER'
+      DENSITY               = 200.
+      CONDUCTIVITY          = 0.1
+      SPECIFIC_HEAT         = 1.5
+      HEAT_OF_COMBUSTION    = 11500.
+      EMISSIVITY            = 0.8 /
+
+&SURF ID                    = 'PLASTIC A'
+      FYI                   = 'FMRC Standard Plastic Commodity'
+      COLOR                 = 'TAN'
+      HRRPUA                = 500.
+      IGNITION_TEMPERATURE  = 370.
+      RAMP_Q                = 'GAP'
+      MATL_ID               = 'CORRUGATED PAPER'
+      BURN_AWAY             = .TRUE.
+      THICKNESS             = 0.005
+      E_COEFFICIENT         =  0.5 /
+&RAMP ID='GAP',T=   0.0,F=0.0 /
+&RAMP ID='GAP',T=   1.0,F=0.6 /
+&RAMP ID='GAP',T=  30.0,F=0.2 /
+&RAMP ID='GAP',T=  80.0,F=1.6 /
+&RAMP ID='GAP',T= 100.0,F=1.0 /
+
+&SURF ID                    = 'PALLET'
+      MATL_ID               = 'YELLOW PINE'
+      COLOR                 = 'BROWN' 
+      THICKNESS             = 0.012 /
+
+&SURF ID                    = 'FLOOR'
+      MATL_ID               = 'CONCRETE'
+      COLOR                 = 'GRAY 60' 
+      THICKNESS             = 0.2 /
+
+&MULT ID='pallet spacing', DX=1.20, DY=1.20, DZ0=0.45, DZ=1.50, I_UPPER=1, J_UPPER=1, K_UPPER=1 /
+
+&OBST XB= 0.00, 1.05, 0.00, 1.05,  .15, 1.20, SURF_ID='PLASTIC A', OVERLAY=.FALSE., BULK_DENSITY=43.7, MULT_ID='pallet spacing'  /
+
+&OBST XB= 0.00, 1.05, 0.00, 0.15, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.30, 0.45, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.60, 0.75, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.90, 1.05, 0.00, 0.02, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 1.05, 0.00, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.30, 0.45, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.60, 0.75, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+ OBST XB= 0.00, 1.05, 0.90, 1.05, 0.13, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 0.00, 0.02, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+&OBST XB= 1.03, 1.05, 0.00, 1.05, 0.00, 0.15, SURF_ID='PALLET', MULT_ID='pallet spacing'  /
+
+&PART ID='ignitor particle', SURF_ID='ignitor', SAMPLING_FACTOR=1, STATIC=.TRUE., AGE=10. /
+&SURF ID='ignitor', TMP_FRONT=1500., GEOMETRY='CYLINDRICAL', COLOR='RED', LENGTH=0.15, RADIUS=0.01 /
+&INIT XYZ=0.95,1.10,0.65, PART_ID='ignitor particle', N_PARTICLES=1 /
+&INIT XYZ=1.10,1.25,0.65, PART_ID='ignitor particle', N_PARTICLES=1 /
+&INIT XYZ=1.25,1.15,0.65, PART_ID='ignitor particle', N_PARTICLES=1 /
+&INIT XYZ=1.15,0.95,0.65, PART_ID='ignitor particle', N_PARTICLES=1 /
+
+&OBST XB= -.15, 2.40, -.15, 2.40, 0.00, 0.30, SURF_ID='FLOOR' / Platform
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+
+&BNDF QUANTITY='BURNING RATE' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='MPUA', PART_ID='water drops' /
+&BNDF QUANTITY='CPUA', PART_ID='water drops' /
+
+&TAIL /
