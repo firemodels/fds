@@ -266,6 +266,7 @@ void draw_geom(int flag, int timestate){
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
+      if(terrain_texture_option==1)continue;
       if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;

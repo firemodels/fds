@@ -24,6 +24,7 @@ extern "C" void Volume_CB(int var);
 #define GEOM_MAX_ANGLE 36
 #define GEOM_OUTLINE_IOFFSET 37
 #define GEOM_IVECFACTOR 38
+#define SHOW_TERRAIN_TEXTURE 39
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
@@ -38,6 +39,7 @@ GLUI_Checkbox *CHECKBOX_faces_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_terrain_texture_option = NULL;
+GLUI_Checkbox *CHECKBOX_show_terrain_texture = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -102,6 +104,8 @@ void Blockedit_DLG_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
+
+extern "C" void TextureShowMenu(int val);
 
 /* ------------------ update_axislabels ------------------------ */
 
@@ -326,6 +330,24 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
   CHECKBOX_terrain_texture_option = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "color elevation", &terrain_texture_option);
+  {
+    int used = 0;
+
+    for(i = 0; i<ntextures; i++){
+      texturedata *texti;
+
+      texti = textureinfo+i;
+      if(texti->loaded==1&&texti->used==1){
+        used = 1;
+        break;
+      }
+    }
+    if(used==1){
+      CHECKBOX_show_terrain_texture = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show image",
+                                        &show_terrain_texture, SHOW_TERRAIN_TEXTURE, Volume_CB);
+      Volume_CB(SHOW_TERRAIN_TEXTURE);
+    }
+  }
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
@@ -434,6 +456,20 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+  case SHOW_TERRAIN_TEXTURE:
+    for(i = 0; i<ntextures; i++){
+      texturedata *texti;
+
+      texti = textureinfo+i;
+      if(texti->loaded==1&&texti->used==1){
+        texti->display = 1 - show_terrain_texture;
+        TextureShowMenu(i);
+        if(texti->display==1&&CHECKBOX_show_terrain_texture->get_int_val()==0)CHECKBOX_show_terrain_texture->set_int_val(1);
+        if(texti->display==0&&CHECKBOX_show_terrain_texture->get_int_val()==1)CHECKBOX_show_terrain_texture->set_int_val(0);
+        break;
+      }
+    }
+    break;
   case GEOM_IVECFACTOR:
     geom_vecfactor = (float)geom_ivecfactor/1000.0;
     break;
