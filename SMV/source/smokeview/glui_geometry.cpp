@@ -37,6 +37,7 @@ GLUI_Checkbox *CHECKBOX_faces_interior=NULL;
 GLUI_Checkbox *CHECKBOX_faces_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
+GLUI_Checkbox *CHECKBOX_terrain_texture_option = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -324,6 +325,7 @@ extern "C" void glui_geometry_setup(int main_window){
   PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
   SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
+  CHECKBOX_terrain_texture_option = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "color elevation", &terrain_texture_option);
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
