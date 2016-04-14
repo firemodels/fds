@@ -4668,8 +4668,6 @@ void drawticks(void){
 /* ------------------ drawBlockages ------------------------ */
 
 void drawBlockages(int mode, int trans_flag){
-
-  int smoothnorms;
   int i;
   cadgeomdata *cd;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;

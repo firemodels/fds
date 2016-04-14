@@ -825,7 +825,7 @@ void readsmv_dynamic(char *file){
   */
     if(match(buffer,"SHOW_OBST") == 1||match(buffer,"HIDE_OBST")==1){
       meshdata *meshi;
-      int nlist,blocknumber,tempval,showobst,blocktemp;
+      int blocknumber,tempval,showobst,blocktemp;
       blockagedata *bc;
 
       if(nmeshes>1){
