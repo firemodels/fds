@@ -4,8 +4,6 @@
 #define EXTERN extern
 #endif
 
-void version(void);
-int getrevision(char *svn);
 char *hostlistfile;
 char *host;
 #ifdef pp_LINUX

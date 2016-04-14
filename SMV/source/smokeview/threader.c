@@ -2,9 +2,46 @@
 #include "options.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
+
+/* ------------------ compress_svzip2 ------------------------ */
+
+void compress_svzip2(void){
+  char shellcommand[1024];
+
+  PRINTF("Compressing...\n");
+  compress_onoff(OFF);
+
+  writeini(LOCAL_INI, NULL);
+
+  // surround smokezip path name with "'s so that the system call can handle imbedded blanks
+
+  strcpy(shellcommand, "\"");
+  strcat(shellcommand, smokezippath);
+  strcat(shellcommand, "\" ");
+  if(overwrite_all == 1){
+    strcat(shellcommand, " -f ");
+  }
+  if(erase_all == 1){
+    strcat(shellcommand, " -c ");
+  }
+  if(compress_autoloaded == 1){
+    strcat(shellcommand, " -auto ");
+  }
+  strcat(shellcommand, " ");
+  strcat(shellcommand, smv_filename);
+
+  PRINTF("Executing shell command: %s\n", shellcommand);
+  system(shellcommand);
+  update_smoke3d_menulabels();
+  update_patch_menulabels();
+  compress_onoff(ON);
+  updatemenu = 1;
+  PRINTF("Compression completed\n");
+}
 
 /* ------------------ init_all_threads ------------------------ */
 
@@ -12,10 +49,13 @@ void init_multi_threading(void){
 #ifdef pp_THREAD
   pthread_mutex_init(&mutexCOMPRESS,NULL);
   pthread_mutex_init(&mutexVOLLOAD,NULL);
+#ifdef pp_THREADIBLANK
+  pthread_mutex_init(&mutexIBLANK, NULL);
+#endif
 #endif
 }
 
-// *************** multi-threaded compression **************** 
+// *************** multi-threaded compression ****************
 
 #ifdef pp_THREAD
  /* ------------------ mt_compress_svzip ------------------------ */
@@ -56,7 +96,27 @@ void *mt_update_smooth_blockages(void *arg){
 }
 #endif
 
-/* ------------------ system ------------------------ */
+// ************** multi threaded blank creation **********************
+
+/* ------------------ mt_makeiblank ------------------------ */
+#ifdef pp_THREAD
+#ifdef pp_THREADIBLANK
+void *mt_makeiblank(void *arg){
+
+  PRINTF("Creating blanking arrays in the background\n");
+  makeiblank();
+  SetCVentDirs();
+  LOCK_IBLANK
+  update_setvents = 1;
+  UNLOCK_IBLANK
+  pthread_exit(NULL);
+  return NULL;
+}
+#endif
+#endif
+
+
+/* ------------------ mt_psystem ------------------------ */
 
 #ifdef pp_THREAD
 void *mt_psystem(void *arg){
@@ -88,6 +148,28 @@ void psytem(char *commandline){
 }
 #endif
 
+/* ------------------ makeiblank_all ------------------------ */
+
+#ifdef pp_THREAD
+#ifdef pp_THREADIBLANK
+void makeiblank_all(void){
+  pthread_create(&makeiblank_thread_id, NULL, mt_makeiblank, NULL);
+}
+#else
+void makeiblank_all(void){
+  makeiblank();
+  SetCVentDirs();
+  update_setvents=1;
+}
+#endif
+#else
+void makeiblank_all(void){
+  makeiblank();
+  SetCVentDirs();
+  update_set_vents=1;
+}
+#endif
+
 /* ------------------ smooth_blockages ------------------------ */
 
 #ifdef pp_THREAD
@@ -115,7 +197,7 @@ int Update_Bounds(void){
   return 1;
 }
 
-/* ------------------ Update_All_Patch_Bounds ------------------------ */
+/* ------------------ Update_All_Patch_Bounds_mt ------------------------ */
 
 #ifdef pp_THREAD
 void *Update_All_Patch_Bounds_mt(void *arg){

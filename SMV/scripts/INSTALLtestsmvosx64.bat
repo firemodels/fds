@@ -1,7 +1,7 @@
 @echo off
-Title Packaging test Smokeview for 64 bit Linux
+Title install test smokeview on 64 bit OSX
 
-Rem  Windows batch file to create an achive for a 64 bit Linux test smokeview
+Rem  Windows batch file to install test smokeview on 64 bit OSX
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -21,13 +21,8 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\smv\scripts
+plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/uploads smv_test_%smv_revision%_osx64.sh y
 
-set scriptdir=FDS-SMV/SMV/scripts
-set uploaddir=FDS-SMV/SMV/for_bundle/uploads
-set smvdir=smv_test_%smv_revision%_osx64.sh
-
-echo updating 64 bit smokeview
-plink %svn_logon% %linux_svn_root%/SMV/for_bundle/uploads/%exe% y
-
+echo.
+echo installation complete
 pause

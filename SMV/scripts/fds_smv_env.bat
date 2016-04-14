@@ -1,30 +1,43 @@
 @echo off
-Rem ------ FDS/Smokeview version and revision numbers ---------
 
-set smv_version=6.2.1
-set smv_revision=22196
+:: Smokeview version and revision
 
-set fds_version=test21315
-set fds_revision=21315
+set smv_version=6.3.4
+set smv_revision=b22a887
+
+:: FDS version and revision
+
+set fds_version=test
+set fds_revision=59edcfc
+
+set smvlogdate="1-Nov-2015"
+
+:: PC repo
+
+set svn_root=%userprofile%\FDS-SMV
+set svn_drive=c:
+
+:: Linux/OSX repo
+
+set linux_svn_root=FDS-SMV
+set firebotrepo=/home2/smokevis2/firebot/FDS-SMVgitclean
+set smokebotrepo=/home2/smokevis2/smokebot/FDS-SMVgitclean
+set fdswikirepo=%userprofile%\FDS-SMVwikis
+
+:: FDS/Smokeview version
 
 set fdssmv_major_version=6
-
-Rem ---------- FDS-Smokeview repository settings ------------
-
 set fds_edition=FDS6
-set svn_root=%userprofile%\fds-smv
-set svn_drive=c:
-set linux_svn_root=FDS-SMV
+set smv_edition=SMV6
 
-Rem ---------- User/Host names -----------------
+:: Linux user and host name
 
 set linux_hostname=blaze.nist.gov
-set osx_hostname=bluesky.el.nist.gov
-
 set linux_username=%username%
-set svn_logon=%linux_username%@%linux_hostname%
+set linux_logon=%linux_username%@%linux_hostname%
 
-Rem ----------- for uploading to Bintray -----------------
+:: OSX user and host name
 
-set bintray_api_key=%userprofile%\bintray_api_key.txt
-set upload=%svn_root%\Utilities\Scripts\curl
+set osx_hostname=192.168.1.5
+set osx_username=%username%
+set osx_logon=%osx_username%@%osx_hostname%

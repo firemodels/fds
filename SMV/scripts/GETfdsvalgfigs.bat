@@ -23,7 +23,10 @@ for /D %%d in (*) do (
     echo.
     echo copying files from %%d
     cd %%d
-    pscp %svn_logon%:/home2/smokevis2/firebot/FDS-SMV/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/%%d/* .
+
+    Title Download FDS validation guide %%d images
+
+    pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/%%d/* .
     cd ..
 )
 

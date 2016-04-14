@@ -18,8 +18,10 @@ call %envfile%
 
 set CURDIR=%CD%
 
+Title Download FDS user guide images
+
 cd %svn_root%\Manuals\FDS_User_Guide\SCRIPT_FIGURES
-pscp %svn_logon%:/home2/smokevis2/firebot/FDS-SMV/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
+pscp %linux_logon%:%firebotrepo%/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
 
 cd %CURDIR%
 pause

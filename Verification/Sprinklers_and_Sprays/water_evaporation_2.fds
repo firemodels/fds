@@ -1,7 +1,7 @@
 One water droplet evaporates in a box until it reaches the saturation point.
 This case tests conservation of mass and energy.
 
-&HEAD CHID='water_evaporation_2', TITLE='Water Evaporation Test, SVN $Revision$' / 
+&HEAD CHID='water_evaporation_2', TITLE='Water Evaporation Test' / 
 
 &MESH IJK=4,4,4, XB=0.0,0.4,0.0,0.4,0.0,0.4 / 
 

@@ -87,13 +87,13 @@ extern "C" void update_colorbar_list(void){
   LISTBOX_colorbar->set_int_val(selectedcolorbar_index);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_type ------------------------ */
 
 extern "C" void update_colorbar_type(void){
   LISTBOX_colorbar->set_int_val(colorbartype);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_label ------------------------ */
 
 extern "C" void update_colorbar_label(void){
   EDITTEXT_colorbar_label->set_text(colorbar_label);
@@ -159,25 +159,25 @@ extern "C" void glui_colorbar_setup(int main_window){
     FREEMEMORY(colorbar_label);
   }
   NewMemory((void **)&colorbar_label,sizeof(GLUI_String));
-  strcpy(colorbar_label,_("New colorbar"));
+  strcpy(colorbar_label,_d("New colorbar"));
 
   update_glui_colorbar=0;
   if(glui_colorbar!=NULL){
     glui_colorbar->close();
     glui_colorbar=NULL;
   }
-  glui_colorbar = GLUI_Master.create_glui(_("Customize Colorbar"),0,0,0);
+  glui_colorbar = GLUI_Master.create_glui(_d("Customize Colorbar"),0,0,0);
   if(showcolorbar_dialog==0)glui_colorbar->hide();
 
   PANEL_cb2R2 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_new=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_("New colorbar"),COLORBAR_NEW,COLORBAR_CB);
+  BUTTON_new=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_d("New colorbar"),COLORBAR_NEW,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
-  BUTTON_delete=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
+  BUTTON_delete=glui_colorbar->add_button_to_panel(PANEL_cb2R2,_d("Delete colorbar"),COLORBAR_DELETE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb2R2,false);
   colorbar_hidescene=1;
-  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(PANEL_cb2R2,_("Hide scene"),&colorbar_hidescene);
+  CHECKBOX_hidesv = glui_colorbar->add_checkbox_to_panel(PANEL_cb2R2,_d("Hide scene"),&colorbar_hidescene);
 
-  PANEL_cb1 = glui_colorbar->add_panel(_("Colorbar"));
+  PANEL_cb1 = glui_colorbar->add_panel(_d("Colorbar"));
   if(ncolorbars>0){
     selectedcolorbar_index=-1;
     LISTBOX_colorbar=glui_colorbar->add_listbox_to_panel(PANEL_cb1,"",&selectedcolorbar_index,COLORBAR_LIST,COLORBAR_CB);
@@ -189,28 +189,28 @@ extern "C" void glui_colorbar_setup(int main_window){
     }
     LISTBOX_colorbar->set_int_val(colorbartype);
   }
-  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(PANEL_cb1,_("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
-  BUTTON_update=glui_colorbar->add_button_to_panel(PANEL_cb1,_("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
+  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(PANEL_cb1,_d("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);
+  BUTTON_update=glui_colorbar->add_button_to_panel(PANEL_cb1,_d("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb1,false);
 
-  PANEL_point = glui_colorbar->add_panel(_("Node"));
-  
+  PANEL_point = glui_colorbar->add_panel(_d("Node"));
+
   PANEL_cb5 = glui_colorbar->add_panel_to_panel(PANEL_point,"",GLUI_PANEL_NONE);
 
-  BUTTON_prev=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Previous"),COLORBAR_PREV,COLORBAR_CB);
-  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Delete"),COLORBAR_DELETEPOINT,COLORBAR_CB);
-  
+  BUTTON_prev=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Previous"),COLORBAR_PREV,COLORBAR_CB);
+  BUTTON_deletepoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Delete"),COLORBAR_DELETEPOINT,COLORBAR_CB);
+
   glui_colorbar->add_column_to_panel(PANEL_cb5,false);
 
-  BUTTON_next=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Next"),COLORBAR_NEXT,COLORBAR_CB);
-  BUTTON_addpoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_("Insert"),COLORBAR_ADDPOINT,COLORBAR_CB);
+  BUTTON_next=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Next"),COLORBAR_NEXT,COLORBAR_CB);
+  BUTTON_addpoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Insert"),COLORBAR_ADDPOINT,COLORBAR_CB);
 
   PANEL_cb4 = glui_colorbar->add_panel_to_panel(PANEL_point,"",GLUI_PANEL_NONE);
-  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("node index"),  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
+  SPINNER_colorindex=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_d("node index"),  GLUI_SPINNER_INT,&cb_colorindex,  COLORBAR_COLORINDEX,COLORBAR_CB);
   SPINNER_colorindex->set_int_limits(0,255);
-  SPINNER_right_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("red"),  GLUI_SPINNER_INT,cb_rgb,COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_right_green=glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("green"),GLUI_SPINNER_INT,cb_rgb+1,COLORBAR_RGB,COLORBAR_CB);
-  SPINNER_right_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb4,_("blue"), GLUI_SPINNER_INT,cb_rgb+2,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_red=  glui_colorbar->add_spinner_to_panel(PANEL_cb4,_d("red"),  GLUI_SPINNER_INT,cb_rgb,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_green=glui_colorbar->add_spinner_to_panel(PANEL_cb4,_d("green"),GLUI_SPINNER_INT,cb_rgb+1,COLORBAR_RGB,COLORBAR_CB);
+  SPINNER_right_blue= glui_colorbar->add_spinner_to_panel(PANEL_cb4,_d("blue"), GLUI_SPINNER_INT,cb_rgb+2,COLORBAR_RGB,COLORBAR_CB);
 
   SPINNER_right_red->set_int_limits(0,255);
   SPINNER_right_green->set_int_limits(0,255);
@@ -219,9 +219,9 @@ extern "C" void glui_colorbar_setup(int main_window){
   colorbar_global2local();
 
   PANEL_cb10 = glui_colorbar->add_panel("",GLUI_PANEL_NONE);
-  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(PANEL_cb10,_("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
+  BUTTON_colorbar_save=glui_colorbar->add_button_to_panel(PANEL_cb10,_d("Save settings"),COLORBAR_SAVE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb10,false);
-  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(PANEL_cb10,_("Close"),COLORBAR_CLOSE,COLORBAR_CB);
+  BUTTON_colorbar_close=glui_colorbar->add_button_to_panel(PANEL_cb10,_d("Close"),COLORBAR_CLOSE,COLORBAR_CB);
 
   glui_colorbar->set_main_gfx_window( main_window );
 }
@@ -237,8 +237,8 @@ void COLORBAR_CB(int var){
   case COLORBAR_COLORINDEX:
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
-      current_colorbar=cbi;
-      
+      UpdateCurrentColorbar(cbi);
+
       cbi->index_node[colorbarpoint]=cb_colorindex;
 
       colorbar_global2local();
@@ -375,7 +375,7 @@ void COLORBAR_CB(int var){
     if(colorbartype<0||colorbartype>=ncolorbars)return;
     addcolorbar(colorbartype);
     colorbartype=ncolorbars-1;
-    current_colorbar=colorbarinfo + colorbartype;
+    UpdateCurrentColorbar(colorbarinfo + colorbartype);
     update_colorbar_splits(current_colorbar);
     cbi = colorbarinfo + colorbartype;  //addcolorbar resizes (and possibly moves) colorbarinfo
     LISTBOX_colorbar->add_item(colorbartype,cbi->label);
@@ -423,7 +423,7 @@ extern "C" void colorbar_global2local(void){
 
   cbi = colorbarinfo + colorbartype;
   colorbarpoint=cbi->nodehilight;
-    
+
   SPINNER_colorindex->set_int_val(cbi->index_node[colorbarpoint]);
 
   BUTTON_next->enable();

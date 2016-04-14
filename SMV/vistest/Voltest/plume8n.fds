@@ -1,4 +1,4 @@
-&HEAD CHID='plume8n',TITLE='Plume whirl case SVN $Revision$' /
+&HEAD CHID='plume8n',TITLE='Plume whirl case SVN $Revision$'  /
 
   same as plume5a except there is a blockage in the middle of the scene to block the flow
   The purpose of this case is to demonstrate the curved flow (via streak lines) that results.
@@ -95,7 +95,6 @@
 
 &SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='TEMPERATURE',VECTOR=.TRUE / 3D slice
 &SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='DENSITY',SPEC_ID='SOOT'  / 3D slice
-&SLCF XB=0.0,1.6,0.0,1.6,0.0,3.2, QUANTITY='SCALAR RESOLUTION', QUANTITY2='TEMPERATURE'/
 
 &BNDF QUANTITY='GAUGE HEAT FLUX' /   Common surface quantities. Good for monitoring fire spread.
 &BNDF QUANTITY='BURNING RATE' /

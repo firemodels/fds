@@ -168,7 +168,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   {
     float xyzbar0[3], xyzbar[3], dxyz[3];
     int ijkbar[3];
-    
+
     opacity=full_alphabuffer;
     radiance = opacity + nx*ny*nz;
 
@@ -193,7 +193,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   time_max=-1000000.0;
   for(;;){
     int nlight_data;
-    
+
     fread(&time_local,4,1,SMOKE3DFILE);
     if(feof(SMOKE3DFILE)!=0)break;
 
@@ -215,7 +215,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 
     // uncompress frame data (from RLE format)
 
-    nfull_data=irle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
+    nfull_data=uncompress_rle(compressed_alphabuffer, ncompressed_rle, full_alphabuffer);
     CheckMemory;
     if(nfull_file!=nfull_data){
       fprintf(stderr,"*** Warning frame size expected=%i frame size found=%i\n",nfull_file,nfull_data);
@@ -229,7 +229,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
     // compress frame data (into ZLIB format)
 
     ncompressed_zlib=buffersize;
-    returncode=compress(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
+    returncode=compress_zlib(compressed_alphabuffer, &ncompressed_zlib, full_alphabuffer, nfull_data);
     CheckMemory;
     if(returncode!=0){
       fprintf(stderr,"*** Warning zlib compressor failed - frame %f\n",time_local);
@@ -275,7 +275,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
 #ifdef pp_THREAD
   {
     char before_label[256],after_label[256];
-  
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
     smoke3di->compressed=1;
@@ -288,7 +288,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
   PRINTF("  records=%i, ",count);
   {
     char before_label[256],after_label[256];
-  
+
     getfilesizelabel(sizebefore,before_label);
     getfilesizelabel(sizeafter,after_label);
 

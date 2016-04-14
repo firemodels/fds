@@ -1,5 +1,5 @@
 @echo off
-Title Packaging test Smokeview for 64 bit OSX
+Title Building 64 bit OSX test Smokeview bundle
 
 Rem  Windows batch file to create an OSX achive for an OSX test smokeview
 
@@ -21,21 +21,19 @@ call %envfile%
 
 %svn_drive%
 
-cd "%svn_root%\..\Google Drive\SMV_Test_Versions
-set gupload=%CD%
-
 cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
-set bundledir=FDS-SMV/SMV/for_bundle/uploads
+set scriptdir=%linux_svn_root%/SMV/scripts
+set bundledir=%linux_svn_root%/SMV/uploads
 
-echo making OSX test distribution archive
-plink %svn_logon% %scriptdir%/MAKEtestdistosx64.csh %smv_revision% %osx_hostname%
+echo.
+echo --- making 64 bit OSX test Smokeview installer ---
+echo.
+plink %osx_logon% %scriptdir%/MAKEtestdistosx64.sh %smv_revision% %osx_hostname% %linux_svn_root%
 
-echo downloading OSX test distribution archive
-pscp %svn_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\for_bundle\uploads\.
-
-echo copying ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.sh to %gupload%
-copy ..\for_bundle\uploads\smv_test_%smv_revision%_osx64.sh "%gupload%"
+echo.
+echo --- downloading installer ---
+echo.
+pscp %osx_logon%:%bundledir%/smv_test_%smv_revision%_osx64.sh ..\uploads\.
 
 pause

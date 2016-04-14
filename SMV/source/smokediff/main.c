@@ -8,7 +8,7 @@
 #include "MALLOC.h"
 
 //dummy change to bump version number to 1.0.10
-//dummy change to force revision change
+//dummy change to force githash change
 
 /* ------------------ main ------------------------ */
 
@@ -41,7 +41,7 @@ int main(int argc, char **argv){
   NewMemory((void **)&caseinfo,2*sizeof(casedata));
 
 
- // check_histogram();  
+ // check_histogram();
   test_mode=0;
   sourcedir1=NULL;
   sourcedir2=NULL;
@@ -49,7 +49,7 @@ int main(int argc, char **argv){
   strcpy(type_label,"");
 
   if(argc==1){
-    version();
+    version("Smokediff ");
     return 1;
   }
 
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
         i++;
         break;
       case 'v':
-        version();
+        version("Smokediff ");
         return 1;
       case 'w':
         display_warnings=0;
@@ -148,10 +148,10 @@ int main(int argc, char **argv){
     strcat(smv1_out,smv1);
     strcat(smv1_out,".smv");
     fullfile(smoke1a,sourcedir1,smv1);
-    
+
     strcpy(fed_smoke1,smoke1a);
     strcat(fed_smoke1,".fed_smv");
-    
+
     strcpy(smoke1b,smoke1a);
     strcat(smoke1b,".smvtmp");
 
@@ -159,25 +159,25 @@ int main(int argc, char **argv){
     smoke1 = smoke1a;
 
     if(file_exists(fed_smoke1)==1){
-      copy_file(smoke1b,smoke1a,0);
-      copy_file(smoke1b,fed_smoke1,1);
+      copyfile(".",smoke1a, smoke1b, REPLACE_FILE);
+      copyfile(".",fed_smoke1, smoke1b, APPEND_FILE);
       smoke1=smoke1b;
     }
   }
   if(smv2!=NULL){
     fullfile(smoke2a,sourcedir2,smv2);
-    
+
     strcpy(fed_smoke2,smoke2a);
     strcat(fed_smoke2,".fed_smv");
-    
+
     strcpy(smoke2b,smoke2a);
     strcat(smoke2b,".smvtmp");
     strcat(smoke2a,".smv");
     smoke2 = smoke2a;
 
     if(file_exists(fed_smoke2)==1){
-      copy_file(smoke2b,smoke2a,0);
-      copy_file(smoke2b,fed_smoke2,1);
+      copyfile(".",smoke2a, smoke2b, REPLACE_FILE);
+      copyfile(".",fed_smoke2, smoke2b, APPEND_FILE);
       smoke2=smoke2b;
     }
   }
@@ -262,24 +262,25 @@ int main(int argc, char **argv){
 
 void usage(void){
   char smv_version[100];
-  char revision[100];
+  char githash[100];
+  char gitdate[100];
 
   getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-  getRevision(revision);    // get revision
+  getGitInfo(githash,gitdate);    // get githash
 
   PRINTF("\n");
   PRINTF("  smokediff [options] smv_case1 smv_case2\n");
-  PRINTF("    version: %s (revision %s) - %s\n\n",smv_version,revision,__DATE__);
+  PRINTF("    version: %s (githash %s) - %s\n\n",smv_version,githash,__DATE__);
 
   PRINTF("  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from\n");
   PRINTF("  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d\n");
-  PRINTF("  and boundary files are supported.  Differenced results may be viewed by opening\n"); 
+  PRINTF("  and boundary files are supported.  Differenced results may be viewed by opening\n");
   PRINTF("  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.\n\n");
 
-  PRINTF("  Mesh bounds must be identical for corresponsing meshes.  Mesh resolutions must be\n");
-  PRINTF("  identical when differencing boundary or PLOT3D files.  The x, y, and/or z mesh\n");
-  PRINTF("  resolution in smv_case1 must be an integer multiple of the corresponding x, y, z mesh\n");
-  PRINTF("  resolution in smv_case2 when differencing slice files.\n\n");
+  PRINTF("  Mesh bounds must be identical for corresponding meshes.  Mesh resolutions must be\n");
+  PRINTF("  identical when differencing boundary and PLOT3D files.  The x, y, and z mesh\n");
+  PRINTF("  resolutions in smv_case2 must be integer multiples of the corresponding x, y, z mesh\n");
+  PRINTF("  resolutions in smv_case1 when differencing slice files.\n\n");
 
   PRINTF("  -h  - display this message\n");
   PRINTF("  -v  - display version information\n");

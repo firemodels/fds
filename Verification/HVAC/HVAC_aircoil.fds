@@ -1,4 +1,4 @@
-&HEAD CHID='HVAC_aircoil',TITLE='Test of aircoil, SVN $Revision$' /
+&HEAD CHID='HVAC_aircoil',TITLE='Test of aircoil' /
 
 &MESH IJK=10,10,10, XB=0.,1.,0.,1.,0.,1./
 

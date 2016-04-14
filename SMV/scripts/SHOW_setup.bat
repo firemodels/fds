@@ -42,24 +42,21 @@ echo Press any key to continue
 pause>NUL
 
 echo.
-echo *** Linux/OSX User/Host names
+echo *** Linux User/Host names
+
+echo linux_hostname=%linux_hostname%
+echo linux_username=%linux_username%
 
 echo.
-echo linux_hostname=%linux_hostname%
+echo *** OSX User/Host names
+
 echo osx_hostname=%osx_hostname%
-echo linux_username=%linux_username%
-echo svn_logon=%svn_logon%
+echo osx_username=%osx_username%
+
 
 echo.
 echo Press any key to continue
 pause>NUL
-
-echo.
-echo *** Bintray upload settings
-
-echo.
-echo bintray_api_key=%bintray_api_key%
-echo upload=%upload%
 
 echo.
 echo variable display complete.

@@ -339,12 +339,13 @@ difference between that which is absorbed and that which is emitted.
 
 In calculations of limited spatial resolution, the source term, $I_{\rm b}$, defined in Eq.~(\ref{emission_source_term}) requires special treatment in the flaming region of the fire. Typical FDS calculations use grid cells that are tens of centimeters in size, and consequently the computed temperatures constitute a bulk average for a given grid cell and are considerably lower than the maximum temperature in a diffusion flame. Because of its fourth-power dependence on the temperature, the source term must be modeled in those grid cells where combustion occurs. Elsewhere, the computed temperature is used directly to compute the source term. It is assumed that this ``flaming region'' is where the local heat release rate is non-zero, $\dq'''>0$. In this region, the global radiative fraction model is used. The emission source term is multiplied by a corrective factor, $C$:
 \be I_{\rm b,f}(\bx) = C \, \frac{\sigma \, T(\bx)^4}{\pi}   \quad ; \quad
-    C = \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \label{corrected_emission_source_term}
+    C = \max \left[ 1 \; , \; \frac{\sum_{\dq'''_{ijk}>0} \left( \chi_{\rm r} \, \dq'''_{ijk} + \kappa_{ijk} \, U_{ijk} \right) \, \d V}{\sum_{\dq'''_{ijk}>0} \left( 4 \, \kappa_{ijk} \, \sigma \, T^4_{ijk} \right) \, \d V} \right] \label{corrected_emission_source_term}
 \ee
 When the source term defined in Eq.~(\ref{corrected_emission_source_term}) is substituted into Eq.~(\ref{net_emission}), the net radiative emission from the flaming region becomes the desired fraction of the total heat release rate.
 
 The radiative fraction, $\chi_{\rm r}$, is a useful quantity in fire science. It is the nominal fraction of the combustion energy that is emitted as thermal radiation. For most combustibles, $\chi_{\rm r}$ is between 0.3 and 0.4~\cite{Beyler2:SFPE}. However, in Eq.~(\ref{corrected_emission_source_term}), $\chi_{\rm r}$ is interpreted as the fraction of energy radiated from the flaming region.  For a small fire with a base diameter less than approximately 1~m, the local $\chi_{\rm r}$ is approximately equal to its global counterpart. However, as the fire increases in size, the global value will typically decrease due to a net re-absorption of the thermal radiation by the increasing smoke mantle~\cite{Takahashi:1}.
 
+To account for the possibility that different fuels may have different values of radiative fraction, $\chi_{\rm r}$ is defined on a per-reaction basis, similar to the approach discussed by Gupta et al.~\cite{Gupta:2015}. If multiple $\chi_{\rm r}$ values are given, FDS will generate a local $\chi_{\rm r}$ by weighting the reaction specific $\chi_{\rm r}$ values by the local reaction rates.
 
 
 \section{Numerical Method}
@@ -661,19 +662,16 @@ The absorption and scattering efficiencies, $Q_{\rm a}$ and $Q_{\rm s}$, and the
 
 \subsection{Heat absorbed by droplets}
 
-The droplet contribution to the radiative
-loss term is
-\be -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{droplets}) =
+The droplet contribution to the radiative loss term is
+\be \dot{q}'''_{\rm r} \equiv -\nabla\!\cdot \dbq_{\rm r}''(\bx)(\mbox{droplets}) =
     \kappa_{\rm p}(\bx) \, \left[ U(\bx) - 4 \pi \, I_{{\rm b,p}}(\bx) \right]
 \ee
-For each individual droplet, the radiative heating/cooling power is
-computed as
+For each individual droplet, the radiative heating/cooling power is computed as
 \be
 \dq_{\rm r} = \frac{m_{\rm p}}{\rho_{\rm p}(\bx)}
     \kappa_{\rm p}(\bx) \, \left[ U(\bx) - 4\pi \, I_{{\rm b,p}}(\bx) \right]
 \ee
-where $m_{\rm p}$ is the mass of the droplet and $\rho_{\rm p}(\bx)$ is the total
-density of droplets in the cell.\\
+where $m_{\rm p}$ is the mass of the droplet and $\rho_{\rm p}(\bx)$ is the total density of droplets in the cell.
 
 
 

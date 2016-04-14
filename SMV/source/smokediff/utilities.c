@@ -28,47 +28,6 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
   return 1;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char revision[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
-    PRINTF("\n");
-    PRINTF("Smokediff\n\n");
-    PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",revision);
-    PRINTF("Compile Date: %s\n",__DATE__);
-#ifdef X64
-    PRINTF("Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    PRINTF("Platform: WIN32\n");
-#endif
-#endif
-#ifndef pp_OSX64
-#ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifndef pp_LINUX64
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
-    PRINTF("Platform: LINUX64\n");
-#endif
-
-
-}
-
 /* ------------------ similar_grid ------------------------ */
 
 int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
@@ -76,7 +35,7 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
   factor[0]=1;
   factor[1]=1;
   factor[2]=1;
-  
+
   if(ABS( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;

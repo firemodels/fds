@@ -10,7 +10,7 @@
 
 &MISC TMPA=15. /
 
-&RADI RADIATIVE_FRACTION=0.2 /
+
 
 &REAC FUEL         = 'METHANOL'
       FYI        = 'Methanol, C H_4 O'

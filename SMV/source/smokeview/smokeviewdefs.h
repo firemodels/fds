@@ -7,6 +7,89 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define PARTFILE_MAP  0
+#define PARTFILE_REMAP 1
+
+#define PARTFILE_LOADALL -11
+#define PARTFILE_RELOADALL -12
+
+#define FIRST_TIME 1
+#define NOT_FIRST_TIME 2
+
+#define SET_SLICECOLOR 0
+#define DEFER_SLICECOLOR 1
+
+#define FREE_PARTDATA 0
+#define DONOT_FREE_PARTDATA 1
+
+#ifdef pp_SLICEDUP
+#define SLICEDUP_KEEPALL 0
+#define SLICEDUP_KEEPFINE 1
+#define SLICEDUP_KEEPCOARSE 2
+#endif
+
+#define SMOKESENSORS_HIDDEN 0
+#define SMOKESENSORS_0255 1
+#define SMOKESENSORS_01 2
+#define SMOKESENSORS_SCALED 3
+#define SMOKESENSORS_0INF 4
+
+#define TOURINDEX_ALL  -3
+#define TOURINDEX_MANUAL -1
+#define TOURINDEX_DEFAULT -4
+
+#define SURFACE_HIDDEN 0
+#define SURFACE_SOLID 1
+#define SURFACE_OUTLINE 2
+#define SURFACE_POINTS 3
+
+#define SHOWALL_FILES 0
+#define SHOWONLY_FILE 1
+#define HIDEALL_FILES 2
+
+#define UNCOMPRESSED_ALLFRAMES 0
+#define UNCOMPRESSED_BYFRAME 1
+#define COMPRESSED_ALLFRAMES 2
+
+#define UNCOMPRESSED 0
+#define COMPRESSED_ZLIB 1
+
+#define DISABLE 0
+#define ENABLE 1
+
+#define XWALLMIN -1
+#define XWALLMAX 1
+#define YWALLMIN -2
+#define YWALLMAX 2
+#define ZWALLMIN -3
+#define ZWALLMAX 3
+
+#define NOT_FDSBLOCK 0
+#define FDSBLOCK 1
+
+#define GEOM_GEOM 0
+#define GEOM_ISO 1
+#define GEOM_SLICE 2
+
+#define PATCH_NODE_CENTER 0
+#define PATCH_CELL_CENTER 1
+#define PATCH_GEOMETRY 2
+
+#define NODATA 0
+#define HASDATA 1
+
+#define NO_TEST 0
+#define TRIANGLE_TEST 1
+#define POLYGON_TEST 2
+#define TETRAHEDRON_TEST 3
+
+#ifndef UPDATE_SMOKEFIRE_COLORS
+#define UPDATE_SMOKEFIRE_COLORS 54
+#endif
+#define SOOT 1
+#define FIRE 2
+#define WATER 3
+
 #define NELEV_ZONE 100
 
 #define UPDATE_ISO_OFF 0
@@ -20,7 +103,9 @@ void _Sniff_Errors(char *whereat);
 #define ZONEHAZARD_COLOR 1
 #define ZONESMOKE_COLOR 2
 
-#define MAXSLABS 10
+#define MAX_HSLABS 10
+#define MAX_VSLABS 2
+#define MAX_MSLABS 2
 
 #define MAKE_MOVIE 28
 
@@ -57,7 +142,7 @@ void _Sniff_Errors(char *whereat);
 
 #define HFLOW_VENT 0
 #define VFLOW_VENT 1
-#define HVAC_VENT 2
+#define MFLOW_VENT 2
 
 #define CLIP_ON_DENORMAL 2
 #define CLIP_ON 1
@@ -101,6 +186,10 @@ void _Sniff_Errors(char *whereat);
 #define SOLIDGAS 1
 #define GASSOLID 1
 
+#define IN_GAS 0
+#define IN_SOLID 1
+#define IN_CUTCELL 2
+
 #define EMBED_YES 0
 #define EMBED_NO  1
 
@@ -124,9 +213,6 @@ void _Sniff_Errors(char *whereat);
 
 #define STEPS_PER_DEG 10.0
 
-#define GEOM_NORMAL 0
-#define GEOM_ISO 1
-
 #define FED_SLICE 0
 #define FED_ISO 1
 
@@ -134,10 +220,11 @@ void _Sniff_Errors(char *whereat);
 #define RLE 0
 #define ZLIB 1
 
-#define SLICE_NODE 1
-#define SLICE_CENTER 2
+#define SLICE_NODE_CENTER 1
+#define SLICE_CELL_CENTER 2
 #define SLICE_FIRELINE 3
 #define SLICE_TERRAIN 4
+#define SLICE_FACE_CENTER 5
 
 #define TERRAIN_3D 0
 #define TERRAIN_2D_STEPPED 1
@@ -201,6 +288,10 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_PLOT3DPROPS 216
 #define SCRIPT_LOADVOLSMOKE 217
 #define SCRIPT_LOADVOLSMOKEFRAME 218
+#define SCRIPT_LOADISOM 219
+#define SCRIPT_LOADBOUNDARYM 220
+#define SCRIPT_LOADSLICEM 221
+#define SCRIPT_LOADVSLICEM 222
 
 #define SCRIPT_SETTIMEVAL 301
 #define SCRIPT_SETVIEWPOINT 302
@@ -221,11 +312,6 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_ISO_FILE 4
 
 #define SCRIPT_UNKNOWN -1
-
-#define DIRX 1
-#define DIRY 2
-#define DIRZ 3
-#define ISO 4
 
 #define PROJECTION 24
 
@@ -267,14 +353,17 @@ void _Sniff_Errors(char *whereat);
 #define BOX_CLIPPLANES 0
 
 #define DOWN_Y 0
-#define UP_X   1 
+#define UP_X   1
 #define UP_Y   2
-#define DOWN_X 3 
+#define DOWN_X 3
 #define DOWN_Z 4
 #define UP_Z   5
 
 #define GEOM_STATIC 0
 #define GEOM_DYNAMIC 1
+
+#define GEOM_UPDATE_ALL 0
+#define GEOM_UPDATE_NORMALS 1
 
 #define NO_PLOTS 0
 #define STATIC_PLOTS 1
@@ -370,6 +459,13 @@ void _Sniff_Errors(char *whereat);
 #define BOTTOM_WALL 5
 #define TOP_WALL 6
 
+#define XLEFT -1
+#define XRIGHT 1
+#define YFRONT -2
+#define YBACK 2
+#define ZBOTTOM -3
+#define ZTOP 3
+
 #define IMIN 0
 #define IMAX 1
 #define JMIN 2
@@ -386,15 +482,19 @@ void _Sniff_Errors(char *whereat);
 #define VISIBLE   1
 #define INVISIBLE 0
 
-#define NBUCKETS 1000000 
+#define NBUCKETS 1000000
 
 #define MOVE 0
 #define STRETCH_BLACK 1
 #define STRETCH_WHITE 2
 
-#define XDIR 0
-#define YDIR 1
-#define ZDIR 2
+#define XDIR 1
+#define YDIR 2
+#define ZDIR 3
+#define XDIRNEG -1
+#define YDIRNEG -2
+#define ZDIRNEG -3
+#define ISO 4
 
 #define NTARGTIMES 100
 
@@ -482,6 +582,13 @@ void _Sniff_Errors(char *whereat);
 #define UPwallmenu -7
 #define DOWNwallmenu -8
 #define DUMMYwallmenu -9
+#define SOLIDpatchmenu -10
+#define OUTLINEpatchmenu -11
+#define POINTSpatchmenu -12
+#define INSOLIDpatchmenu -13
+#define INGASpatchmenu -14
+#define INCUTCELLpatchmenu -15
+
 
 #define INTERIORwall 0
 #define FRONTwall 1
@@ -514,6 +621,9 @@ void _Sniff_Errors(char *whereat);
 #define LOAD 0
 #define UNLOAD 1
 #define RESETBOUNDS 2
+
+#define MAKE_SIZEFILE 0
+#define GET_DATA 1
 
 #define MAXPLOT3DVARS 6
 #define NRGB 12
@@ -564,6 +674,7 @@ void _Sniff_Errors(char *whereat);
 #define MENU_LABEL_HideAll 5
 #define MENU_LABEL_framelabel 9
 #define MENU_LABEL_hrr 16
+#define MENU_LABEL_northangle 21
 
 #define MENU_TRAINER_smoke 1
 #define MENU_TRAINER_temp 2
@@ -571,10 +682,6 @@ void _Sniff_Errors(char *whereat);
 
 #define ON 1
 #define OFF 0
-
-#define X_SLICE 1
-#define Y_SLICE 2
-#define Z_SLICE 3
 
 #define DIALOG_3DSMOKE 20
 #define DIALOG_BOUNDS 14
@@ -610,26 +717,19 @@ void _Sniff_Errors(char *whereat);
 
 #define UPDATE_PROJECTION -2
 
-#define MENU_TOUR_EDIT -14
-#define MENU_TOUR_NEW -12
+#define MENU_TOUR_DEFAULT -1
 #define MENU_TOUR_MANUAL -2
 #define MENU_TOUR_SHOWALL -3
+#define MENU_TOUR_SHOWDIALOG -4
 #define MENU_TOUR_VIEWFROMROUTE -5
+#define MENU_TOUR_NEW -12
+#define MENU_TOUR_CLEARALL -13
+#define MENU_TOUR_EDIT -14
 
 #define MENU_TEXTURE_SHOWALL -1
+#define MENU_TEXTURE_HIDEALL -2
 
 #define MENU_SHOWHIDE_FLIP 15
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 

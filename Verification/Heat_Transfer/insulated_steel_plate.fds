@@ -1,4 +1,4 @@
-&HEAD CHID='insulated_steel_plate', TITLE='Insulated steel plate gets hot, SVN $Revision$' /
+&HEAD CHID='insulated_steel_plate', TITLE='Insulated steel plate gets hot' /
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
 

@@ -1,0 +1,83 @@
+&HEAD CHID='compgeom_demo_1b', TITLE='Complex Geometry test case 1.' /
+  
+#&MESH IJK=256,256,256, XB=-2,2,-2,2,0,4 /
+
+#&MESH IJK=256,128,128, XB=-2,2,-2,0,0,2 /
+#&MESH IJK=256,128,128, XB=-2,2,0,2,0,2 /
+#&MESH IJK=256,128,128, XB=-2,2,-2,0,2,4 /
+#&MESH IJK=256,128,128, XB=-2,2,0,2,2,4 /
+
+&MESH IJK=64,64,64, XB=-2,2,-2,2,0,4 /
+
+#&MESH IJK=32,16,32, XB=-2,2,-2,0,0,4 /
+#&MESH IJK=32,16,32, XB=-2,2,0,2,0,4 /
+
+#&MESH IJK=256,128,256, XB=-2,2,-2,0,0,4 /
+#&MESH IJK=256,128,256, XB=-2,2,0,2,0,4 /
+
+#&MESH IJK=256,128,128, XB=-2,2,-2,0,0,2 /
+#&MESH IJK=256,128,128, XB=-2,2,0,2,0,2 /
+#&MESH IJK=256,128,128, XB=-2,2,-2,0,2,4 /
+#&MESH IJK=256,128,128, XB=-2,2,0,2,2,4 /
+
+#&MESH IJK=128,64,64, XB=-2,2,-2,0,0,2 /
+#&MESH IJK=128,64,64, XB=-2,2,0,2,0,2 /
+#&MESH IJK=128,64,64, XB=-2,2,-2,0,2,4 /
+#&MESH IJK=128,64,64, XB=-2,2,0,2,2,4 /
+  
+&TIME T_END=0.0/
+&MISC CC_IBM=.TRUE./
+  
+&REAC FUEL='PROPANE', SOOT_YIELD=0.01/
+  
+&VENT XB=-1,1,-1,1,0,0, SURF_ID='fire' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+  
+&SURF ID='fire', HRRPUA=1000., COLOR='RED'/
+&SURF ID='beast', COLOR='GREEN', MATL_ID='beast', THICKNESS=0.1/
+&MATL ID='beast', DENSITY=1, CONDUCTIVITY=1, SPECIFIC_HEAT=1/
+  
+&SLCF PBX=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBX=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
+&SLCF PBX=0, QUANTITY='DIVERGENCE', CELL_CENTERED=.TRUE. /
+&SLCF PBX=0, QUANTITY='MASS FRACTION', SPEC_ID='PROPANE', CELL_CENTERED=.TRUE. /
+  
+&BNDE QUANTITY='GAS TEMPERATURE' /
+  
+&GEOM ID='FEM_MESH', MATL_ID='beast'
+VERTS=
+-0.07945931129895,     0.78656609248549,     1.38762756430421,
+-0.50000000000000,     0.50000000000000,     2.70710678118655,
+ 0.00000000000000,     0.00000000000000,     2.00000000000000,
+ 0.86237243569579,     0.36237243569579,     2.35355339059327,
+ 0.94183174699474,    -0.42419365678970,     2.96592582628907,
+ 0.07945931129895,    -0.78656609248549,     2.61237243569579,
+ 0.57945931129895,    -1.28656609248549,     1.90526565450925,
+ 0.50000000000000,    -0.50000000000000,     1.29289321881345,
+VOLUS=
+      1,        2,        3,        4,
+      8,        1,        3,        4,
+      6,        8,        3,        4,
+      6,        7,        8,        5,
+      5,        4,        8,        6,
+FACES=
+      1,        2,        4,
+      2,        3,        4,
+      2,        1,        3,
+      8,        3,        1,
+      8,        1,        4,
+      7,        8,        4,
+      7,        4,        5,
+      5,        6,        7,
+      7,        6,        8,
+      6,        3,        8,
+      5,        4,        6,
+      4,        3,        6,                                       
+SURF_ID='beast'/
+
+
+&TAIL /

@@ -1,9 +1,9 @@
 #!/bin/csh -f
-setenv SVNROOT ~/FDS-SMV
-set PDIR=$SVNROOT/Utilities/Data_Processing
-set WDIR=$SVNROOT/Validation/Cup_Burner/FDS_Output_Files
-set DDIR=$SVNROOT/Validation/Cup_Burner/Current_Results
+ 
+set PDIR=$FDSSMV/Utilities/Data_Processing
+set WDIR=$FDSSMV/Validation/Cup_Burner/FDS_Output_Files
+set DDIR=$FDSSMV/Validation/Cup_Burner/Current_Results
 cd $DDIR
 cp *_devc.csv $WDIR
-cp *svn.txt $WDIR
+cp *git.txt $WDIR
 cd $WDIR

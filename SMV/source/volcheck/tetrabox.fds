@@ -1,3 +1,0 @@
-&HEAD CHID='tetrabox'
-&MESH IJK=10,10,10, XB=-1.0,2.0,-1.0,2.0,-1.0,2.0 /
-&TIME T_END=0.0 /

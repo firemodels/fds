@@ -1,6 +1,10 @@
 #ifndef MALLOC_H_DEFINED
 #define MALLOC_H_DEFINED
 
+#ifdef __MINGW32__
+#include "options.h"
+#endif
+
 #ifdef pp_THREAD
 #include <pthread.h>
 #endif
@@ -29,11 +33,7 @@ typedef char bbyte;
 #endif
 
 #ifdef pp_MEMDEBUG
-#ifdef BIT64
 #define MMsize unsigned long long
-#else
-#define MMsize unsigned int
-#endif
 #endif
 
 typedef struct {
@@ -42,8 +42,8 @@ typedef struct {
   int memory_id;
 #ifdef pp_MEMPRINT
   size_t size;
-#endif  
-  
+#endif
+
 } MMdata;
 
 MMEXTERN MMdata MMfirst, MMlast;
@@ -126,7 +126,7 @@ char *_strcat(char *s1, const char *s2);
 #define STRCAT(f,g) _strcat((f),(g))
 #else
 #define ValidPointer(pv,size)
-#define GetTotalMemory 
+#define GetTotalMemory
 #define CheckMemory
 #define CheckMemoryOn
 #define CheckMemoryOff

@@ -3,9 +3,9 @@ RENDERDIR
 SETVIEWPOINT
  view_left
 RENDERONCE
- transparency_left 
+ transparency_left
 RENDERONCE
- transparency_left 
+ transparency_left
 SETVIEWPOINT
  view_center
 RENDERONCE
@@ -14,4 +14,4 @@ SETVIEWPOINT
  view_right
 RENDERONCE
  transparency_right
- 
+

@@ -1,8 +1,8 @@
-! $Date$ 
+! $Date$
 ! $Revision$
 ! $Author$
 
-!  ------------------ getembeddatasize ------------------------ 
+!  ------------------ getembeddatasize ------------------------
 
 subroutine getembeddatasize(filename,ntimes,nvars,error)
 implicit none
@@ -37,7 +37,7 @@ read(lu20)one
 read(lu20)version
 ntimes=0
 nvars=0
-do 
+do
   read(lu20,iostat=finish)time
   if(finish.eq.0)read(lu20,iostat=finish)nvert_s,nface_s,nvert_d,nface_d
   if(finish.eq.0.and.nvert_s>0)read(lu20,iostat=finish)(dummy,i=1,nvert_s)
@@ -52,7 +52,7 @@ close(lu20)
 
 end subroutine getembeddatasize
 
-!  ------------------ endian_open ------------------------ 
+!  ------------------ endian_open ------------------------
 
 integer function endian_open(file,lunit)
 character(len=*), intent(in) :: file
@@ -86,7 +86,7 @@ endif
 return
 end function endian_open
 
-!  ------------------ fcreate_part5sizefile ------------------------ 
+!  ------------------ fcreate_part5sizefile ------------------------
 
 subroutine fcreate_part5sizefile(part5file, part5sizefile, angle_flag, redirect_flag, error)
 implicit none
@@ -129,7 +129,7 @@ do i = 1, nclasses
     read(lu20,iostat=error)dummy
     if(error.ne.0)go to 999
     read(lu20,iostat=error)dummy
-    if(error.ne.0)go to 999    
+    if(error.ne.0)go to 999
   end do
 end do
 do
@@ -139,23 +139,23 @@ do
   if(error.ne.0)go to 999
   do i = 1, nclasses
     read(lu20,iostat=error)numpoints(i)
-    if(error.ne.0)go to 999    
+    if(error.ne.0)go to 999
     if(angle_flag.eq.1)then
       read(lu20,iostat=error)(rdummy,j=1,7*numpoints(i))
      else
       read(lu20,iostat=error)(rdummy,j=1,3*numpoints(i))
     endif
-    if(error.ne.0)go to 999    
+    if(error.ne.0)go to 999
     read(lu20,iostat=error)(rdummy,j=1,numpoints(i))
-    if(error.ne.0)go to 999    
+    if(error.ne.0)go to 999
     if(numtypes(2*i-1)>0)then
       read(lu20,iostat=error)(rdummy,j=1,numpoints(i)*numtypes(2*i-1))
-      if(error.ne.0)go to 999    
+      if(error.ne.0)go to 999
     endif
     if(numtypes(2*i)>0)then
       read(lu20,iostat=error)(idummy,j=1,numpoints(i)*numtypes(2*i))
-      if(error.ne.0)go to 999    
-    endif    
+      if(error.ne.0)go to 999
+    endif
   end do
   write(lu21,"(e15.8)")time
   do i = 1, nclasses
@@ -170,7 +170,7 @@ end do
 !      skip += 4 + 4*nparts + 4;
 !      if(numtypes[2*i]>0)skip += 4 + 4*nparts*numtypes[2*i] + 4;
 !      if(numtypes[2*i+1]>0)skip += 4 + 4*nparts*numtypes[2*i+1] + 4;
-!      
+!
 !      returncode=fseek(PART5FILE,skip,SEEK_CUR);
 !      if(returncode!=0)goto wrapup;
 !    }
@@ -185,7 +185,7 @@ close(lu21)
 return
 end subroutine fcreate_part5sizefile
 
-!  ------------------ getzonesize ------------------------ 
+!  ------------------ getzonesize ------------------------
 
 subroutine getzonesize(zonefilename,nzonet,nrooms,nfires,error)
 implicit none
@@ -241,7 +241,7 @@ do
     error = 0
     exit_all=1
     exit
-  end do 
+  end do
   if(exit_all.eq.1)exit
   do i = 1, nfires
     read(lu26,iostat=error)dummy,dummy2
@@ -256,7 +256,7 @@ end do
 close(lu26)
 end subroutine getzonesize
 
-!  ------------------ getpatchsizes1 ------------------------ 
+!  ------------------ getpatchsizes1 ------------------------
 
 subroutine getpatchsizes1(file_unit,patchfilename,patchlonglabel,patchshortlabel,patchunit, &
        npatch,headersize,error)
@@ -294,7 +294,7 @@ if(error.eq.0)read(lu15,iostat=error)patchlonglabel
 if(error.eq.0)read(lu15,iostat=error)patchshortlabel
 if(error.eq.0)read(lu15,iostat=error)patchunit
 if(error.eq.0)read(lu15,iostat=error)npatch
-headersize = 3*(30+8) + 4 + 8 
+headersize = 3*(30+8) + 4 + 8
 
 patchlonglabel=trim(patchlonglabel)//char(0)
 lenshort = min(len_trim(patchshortlabel),6)
@@ -305,7 +305,7 @@ patchunit=patchunit(1:lenunits)//char(0)
 return
 end subroutine getpatchsizes1
 
-!  ------------------ getpatchsizes2 ------------------------ 
+!  ------------------ getpatchsizes2 ------------------------
 
 subroutine getpatchsizes2(file_unit,version,npatch,npatchsize,pi1,pi2,pj1,pj2,pk1,pk2,patchdir,headersize,framesize)
 implicit none
@@ -341,7 +341,7 @@ framesize = 8+4+8*npatch+npatchsize*4
 return
 end subroutine getpatchsizes2
 
-!  ------------------ getsizesa ------------------------ 
+!  ------------------ getsizesa ------------------------
 !    FORTgetsizesa(file,&npartpoint,&npartframes,lenfile);
 
 subroutine getsizesa(partfilename,npartpoints,npartframes)
@@ -380,7 +380,7 @@ endif
 do i = 1, 5
   read(lu10,'(a)')line
 end do
-do 
+do
   read(lu10,*,end=999)dummy,nparts
   nlines = (nparts-1)*3/6 + 1
   do i = 1, nlines
@@ -394,7 +394,7 @@ close(lu10)
 return
 end subroutine getsizesa
 
-!  ------------------ getsizes ------------------------ 
+!  ------------------ getsizes ------------------------
 
 subroutine getsizes(file_unit,partfilename,nb,nv,nspr,mxframepoints,showstaticsmoke, error)
 implicit none
@@ -459,82 +459,8 @@ rewind(lu10)
 return
 end subroutine getsizes
 
-!  ------------------ getsizes2 ------------------------ 
 
-subroutine getsizes2(file_unit,settmin_p,tmin_p,settmax_p,tmax_p,nspr,frameloadstep,partpointstep,npartpoints,npartframes,error)
-implicit none
-
-integer, intent(in) :: file_unit,settmin_p, settmax_p, nspr
-real, intent(in) :: tmin_p, tmax_p
-integer, intent(in) :: frameloadstep, partpointstep
-integer, intent(out) :: npartpoints, npartframes, error
-
-integer :: lu10
-integer :: idummy
-real :: dummy
-integer, allocatable, dimension(:) :: ispr
-integer :: naspr
-integer :: i
-integer :: npoints, npoints2
-integer :: npp1, npp2
-real :: stime
-integer :: nf
-logical :: load
-
-lu10 = file_unit
-
-npartframes = 0
-npartpoints = 0
-if(nspr.gt.0)allocate(ispr(nspr))
-
-nf = 0
-do
-  read(lu10,iostat=error) stime,npp1,idummy,(ispr(i),i=1,nspr)
-  if(error.ne.0)go to 999
-  naspr = 0
-  do i = 1, nspr
-    if(ispr(i).ne.0)naspr = naspr + 1
-  end do
-
-  read(lu10,iostat=error) (dummy,i=1,npp1),(dummy,i=1,npp1),(dummy,i=1,npp1),(dummy,i=1,npp1)
-  if(error.ne.0)go to 999
-  if((settmin_p.ne.0.and.stime.lt.tmin_p).or.mod(nf,frameloadstep).ne.0)then
-    load=.false.
-   else
-    load=.true.
-  endif
-  nf = nf + 1
-  if(settmax_p.ne.0.and.stime.gt.tmax_p)go to 999
-  npoints = 0
-  if(load)npoints = (npp1-1)/partpointstep + 1
-
-  npp2 = 0
-
-  npoints2 = 0
-  if(naspr.ne.0)then       ! read in sprinkler data
-    read(lu10,iostat=error) npp2
-    if(error.ne.0)go to 999
-    if(npp2.ge.0)then
-      read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-     else
-      read(lu10,iostat=error) (dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2),(dummy,i=1,npp2)
-    endif
-    if(load)npoints2 = (abs(npp2)-1)/partpointstep + 1
-  end if
-  if(error.ne.0)goto 999
-  if(load)then
-    npartframes = npartframes + 1
-    npartpoints = npartpoints + npoints + npoints2
-  endif
-
-end do
-999 continue
-error = 0
-close(lu10)
-return
-end subroutine getsizes2
-
-!  ------------------ getsliceparms ------------------------ 
+!  ------------------ getsliceparms ------------------------
 
 subroutine getsliceparms(slicefilename, ip1, ip2, jp1, jp2, kp1, kp2, ni, nj, nk, slice3d, error)
 implicit none
@@ -596,7 +522,7 @@ call getdirval(ip1,ip2,jp1,jp2,kp1,kp2,idir,joff,koff)
 return
 end subroutine getsliceparms
 
-!  ------------------ getslicesizes ------------------------ 
+!  ------------------ getslicesizes ------------------------
 
 subroutine getslicesizes(slicefilename, nslicei, nslicej, nslicek, nsteps, sliceframestep,&
    error, settmin_s, settmax_s, tmin_s, tmax_s, headersize, framesize)
@@ -624,7 +550,7 @@ integer :: count
 
 error=0
 lu11 = 11
-nsteps = 0 
+nsteps = 0
 inquire(unit=lu11,opened=connected)
 if(connected)close(lu11)
 
@@ -649,7 +575,7 @@ headersize = headersize + 3*38
 read(lu11,iostat=error)ip1, ip2, jp1, jp2, kp1, kp2
 headersize = headersize + 6*4 + 8
 if(error.ne.0)return
-  
+
 nxsp = ip2 + 1 - ip1
 nysp = jp2 + 1 - jp1
 nzsp = kp2 + 1 - kp1
@@ -692,7 +618,7 @@ return
 
 end subroutine getslicesizes
 
-!  ------------------ openpart ------------------------ 
+!  ------------------ openpart ------------------------
 
 subroutine openpart(partfilename, unit, error)
 implicit none
@@ -726,7 +652,7 @@ endif
 return
 end subroutine openpart
 
-!  ------------------ openslice ------------------------ 
+!  ------------------ openslice ------------------------
 
 subroutine openslice(slicefilename, unitnum, is1, is2, js1, js2, ks1, ks2, error)
 implicit none
@@ -765,7 +691,7 @@ read(lu11,iostat=error)is1, is2, js1, js2, ks1, ks2
 return
 end subroutine openslice
 
-!  ------------------ closefortranfile ------------------------ 
+!  ------------------ closefortranfile ------------------------
 
 subroutine closefortranfile(unit)
 implicit none
@@ -777,7 +703,7 @@ close(unit)
 return
 end subroutine closefortranfile
 
-!  ------------------ getboundaryheader1 ------------------------ 
+!  ------------------ getboundaryheader1 ------------------------
 
 subroutine getboundaryheader1(boundaryfilename,boundaryunitnumber,npatch,error)
 implicit none
@@ -791,9 +717,12 @@ character(len=30) :: patchlonglabel, patchshortlabel, patchunit
 integer :: lu15
 logical :: exists
 logical :: isopen
+integer :: first_unit
+
+first_unit = boundaryunitnumber
 
 error=0
-call get_file_unit(boundaryunitnumber,boundaryunitnumber)
+call get_file_unit(boundaryunitnumber,first_unit)
 lu15 = boundaryunitnumber
 inquire(unit=lu15,opened=isopen)
 
@@ -820,7 +749,7 @@ if(error.ne.0)close(lu15)
 return
 end subroutine getboundaryheader1
 
-!  ------------------ getboundaryheader2 ------------------------ 
+!  ------------------ getboundaryheader2 ------------------------
 
 subroutine getboundaryheader2(boundaryunitnumber,version,npatch,pi1,pi2,pj1,pj2,pk1,pk2,patchdir)
 implicit none
@@ -849,7 +778,7 @@ close(lu15)
 return
 end subroutine getboundaryheader2
 
-!  ------------------ openboundary ------------------------ 
+!  ------------------ openboundary ------------------------
 
 subroutine openboundary(boundaryfilename,boundaryunitnumber,version,error)
 implicit none
@@ -902,7 +831,7 @@ if(error.ne.0)close(lu15)
 return
 end subroutine openboundary
 
-!  ------------------ getpartheader1 ------------------------ 
+!  ------------------ getpartheader1 ------------------------
 
 subroutine getpartheader1(unit,nclasses,fdsversion,size)
 implicit none
@@ -922,7 +851,7 @@ return
 
 end subroutine getpartheader1
 
-!  ------------------ getpartheader2 ------------------------ 
+!  ------------------ getpartheader2 ------------------------
 
 subroutine getpartheader2(unit,nclasses,nquantities,size)
 implicit none
@@ -949,7 +878,7 @@ return
 
 end subroutine getpartheader2
 
-!  ------------------ getpartdataframe ------------------------ 
+!  ------------------ getpartdataframe ------------------------
 
 subroutine getpartdataframe(unit,nclasses,nquantities,npoints,time,tagdata,pdata,size,error)
 implicit none
@@ -977,7 +906,7 @@ do i = 1, nclasses
   read(unit,iostat=error)nparticles
   if(error.ne.0)return
   npoints(i)=nparticles
-  
+
   pstart=pend+1
   pend=pstart+3*nparticles-1
   read(unit,iostat=error)(pdata(j),j=pstart,pend)

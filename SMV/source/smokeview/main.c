@@ -8,8 +8,12 @@
 #include "string_util.h"
 #include "smokeviewvars.h"
 
-//  dummy change to update version to 6.2.5
-//  dummy change  to force revision update
+#ifdef pp_LUA
+#include "c_api.h"
+#include "lua_api.h"
+#endif
+
+//   version 6.3.5
 
 /* ------------------ main ------------------------ */
 
@@ -22,7 +26,7 @@ int main(int argc, char **argv){
   initMALLOC();
   init_rand_ab(1000000);
   initvars();
-  if(argc==1)display_version_info();
+  if(argc==1)display_version_info("Smokeview ");
   copy_args(&argc, argv, &argv_sv);
   if(argc==0||argc==1)return 0;
 
@@ -42,8 +46,13 @@ int main(int argc, char **argv){
   have_ffplay = have_prog("ffplay -version >/dev/null 2>/dev/null");
 #endif
 #endif
-  display_version_info();
+  display_version_info("Smokeview ");
   setup_glut(argc,argv_sv);
+
+#ifdef pp_LUA
+  // Initialise the lua interpreter, it does not take control at this point
+  initLua();
+#endif
   return_code=setup_case(argc,argv_sv);
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
@@ -53,4 +62,4 @@ int main(int argc, char **argv){
 
   glutMainLoop();
   return 0;
-}	 
+}

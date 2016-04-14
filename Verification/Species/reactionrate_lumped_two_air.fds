@@ -7,7 +7,7 @@
 !
 ! Composition is stoichiometric, so all fuel and both
 ! AIR should be consumed and all the reamins is products.
-! ------------------------------------------------
+! -------------------------------------------------------
 
 &HEAD CHID='reactionrate_lumped_two_air', TITLE='Lumped Species Reactions' /
 &MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
@@ -32,12 +32,12 @@
 &INIT MASS_FRACTION(1) = 0.46981, SPEC_ID(1)='AIR2',MASS_FRACTION(2)=0.06038, SPEC_ID(2)='PROPANE' /
 
 &REAC ID = 'R1',
-    FUEL = 'PROPANE',
+    FUEL = 'AIR1',
     SPEC_ID_NU = 'PROPANE','AIR1','PRODUCTS'
     NU=-1,-5,1 /
 
 &REAC ID = 'R2',
-    FUEL = 'PROPANE',
+    FUEL = 'AIR2',
     SPEC_ID_NU = 'PROPANE','AIR2','PRODUCTS'
     NU=-1,-5,1 /
 

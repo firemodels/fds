@@ -1,4 +1,4 @@
-&HEAD CHID='smoke_detector', TITLE='Verification of smoke detector algorithm, SVN $Revision$'/
+&HEAD CHID='smoke_detector', TITLE='Verification of smoke detector algorithm'/
 
 &MESH IJK=5,5,5, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
 

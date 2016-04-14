@@ -14,7 +14,7 @@
 % file to "o" to process only that line.
 %
 % If you create your own script (your plots are not generated with dataplot.m),
-% please do not forget to add the SVN number to the plot.  Examples for how
+% please do not forget to add the Git revision number to the plot.  Examples for how
 % this is done can be found in any of the 'Special cases' scripts below dataplot.
 
 close all
@@ -80,7 +80,6 @@ pulsating
 compression_wave
 plate_view_factor
 terminal_velocity_convergence
-flat_fire_comparison
 fluid_part
 extinction
 fan_curve
@@ -93,5 +92,6 @@ hot_layer_collapse
 radiating_polygon
 saad_mms_temporal_error
 shunn_mms_temporal_error
+scaling_tests
 
 display('verification scripts completed successfully!')

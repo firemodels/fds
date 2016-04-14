@@ -13,7 +13,7 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   trdata *tri, *trj;
   int compval;
 
-  tri = (trdata *)arg1; 
+  tri = (trdata *)arg1;
   trj = (trdata *)arg2;
 
   compval = STRCMP(tri->key,trj->key);
@@ -24,10 +24,10 @@ int compare_trdata( const void *arg1, const void *arg2 ){
 /* ------------------ parse_lang ------------------------ */
 
 int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
-  /*! \fn int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr)
-      \brief read a po file and put english/foreign language string pairs into
-             the trinfo data structure
-  */
+
+//  read a po file and put english/foreign language string pairs into
+//  the trinfo data structure
+
   FILE *stream;
   trdata *trinfo_local;
   int ntrinfo_local;
@@ -39,7 +39,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     for(i=0;i<ntrinfo_local;i++){
       trdata *tri;
-  
+
       tri = trinfo_local + i;
       FREEMEMORY(tri->key);
       FREEMEMORY(tri->value);
@@ -59,7 +59,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key!=NULL&&key==buf)ntrinfo_local++;
@@ -85,7 +85,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key==NULL||key!=buf)continue;
@@ -105,7 +105,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
       doit=0;
       if(fgets(buffer,1000,stream)==NULL)break;
       buf=trim_front(buffer);
-      trim(buf);
+      trim_back(buf);
       if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)doit=1;
     }
     value = getstring(buf+6);
@@ -127,9 +127,9 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 /* ------------------ init_translate ------------------------ */
 
 void init_translate(char *bindir, char *tr_name){
-  /*! \fn void init_translate(char *bindir, char *tr_name)
-      \brief initialize po language translation data structures
-  */
+
+//  initialize po language translation data structures
+
   char *LANG;
 
   if(tr_name!=NULL){
@@ -155,7 +155,7 @@ void init_translate(char *bindir, char *tr_name){
     STRCAT(smokeview_lang,"smokeview_");
     STRCAT(smokeview_lang,lang);
     STRCAT(smokeview_lang,".po");
-    
+
     stream=fopen(smokeview_lang,"r");
     if(stream!=NULL){
       fclose(stream);
@@ -176,15 +176,12 @@ void init_translate(char *bindir, char *tr_name){
 
 /* ------------------ translate ------------------------ */
 
-char *translate(char *string){
-  /*! \fn char *translate(char *string)
-      \brief return the translation of string, return string if translation not found
-  */
+char *translate(char *string,int option){
   int i, len, nchars_before=0, nchars_after=0;
   unsigned int nchars_in=0;
   char *string_before, *string_in, *string_out, *string_after;
 
-  if(tr_otherlang==0)return string;
+  if(tr_otherlang==0||option==0)return string;
 
 
   len = strlen(string);

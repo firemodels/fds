@@ -1,4 +1,4 @@
-&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device, SVN $Revision$' /
+&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device' /
 
   A small white (255,255,255) smokesensor appears over top a grey (128,128,128) obstacle.
   A red dot indicates where the smoke opacity is recorded and should appear in the middle of the

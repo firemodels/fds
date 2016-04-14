@@ -19,7 +19,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.2.5"
+#define PROGVERSION "6.3.6"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
@@ -36,9 +36,16 @@
 #endif
 
 #define pp_DRAWISO
-#define pp_THREAD
 #define pp_LANG
 #define pp_DEG
+#define pp_SLICEDUP
+#define pp_SLICECOLORDEFER
+
+#define pp_THREAD
+#define pp_THREADIBLANK // test iblank computation in background.
+#ifdef pp_THREADIBLANK  // if pp_THREADIBLANK is set then pp_THREAD also has to be set
+#define pp_THREAD
+#endif
 
 #define _CRT_SECURE_NO_DEPRECATE
 
@@ -47,13 +54,16 @@
 //VVVVVVVVVVVVVVVVVVVVVVVVVVVVV  turn on options that are being tested VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
 #ifdef pp_BETA
-#define pp_SETTIME
 #define pp_PILOT
+//#define pp_WINDROSE  2d histogram, variation of pilot data
 #define pp_GEOMTEST
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
 #endif
+
+// for debugging, set particle values to 100*parti->seq_id + small random number
+//#define pp_PARTTEST
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -86,38 +96,7 @@
 
 // VVVVVVVVVVVVVVVVVVVVVVVVV  set platform defines VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-#ifdef pp_LINUX64
-#define pp_LINUX
-#endif
-
-#ifdef pp_OSX64
-#define pp_OSX
-#endif
-
-//*** turn on BIT64 if compiled on a 64 bit platform
-
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_LINUX64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_OSX64
-#undef pp_OSX
-#define pp_OSX
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 #ifdef X64
 #define STRUCTSTAT struct __stat64

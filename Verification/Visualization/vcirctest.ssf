@@ -13,11 +13,11 @@ RENDERCLIP
 SETVIEWPOINT
  view 1
 RENDERONCE
- vcirctest_fds 
+ vcirctest_fds
 KEYBOARD
  q
 RENDERONCE
- vcirctest_circ 
+ vcirctest_circ
 LOADINIFILE
  vcirctest_outline.ini
 SETVIEWPOINT
@@ -25,10 +25,10 @@ SETVIEWPOINT
 SETVIEWPOINT
  view 1
 RENDERONCE
- vcirctest_fds_outline 
+ vcirctest_fds_outline
 KEYBOARD
  q
 RENDERONCE
  vcirctest_circ_outline
 
- 
+

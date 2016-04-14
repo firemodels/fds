@@ -57,46 +57,6 @@ void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *n
   normal[2]/=norm2;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char revision[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
-    PRINTF("\n");
-    PRINTF("Smokezip\n\n");
-    PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",revision);
-    PRINTF("Compile Date: %s\n",__DATE__);
-#ifdef X64
-    PRINTF("Platform: WIN64\n");
-#endif
-#ifdef WIN32
-#ifndef X64
-    PRINTF("Platform: WIN32\n");
-#endif
-#endif
-#ifndef pp_OSX64
-#ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifndef pp_LINUX64
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
-    PRINTF("Platform: LINUX64\n");
-#endif
-
-}
-
 /* ------------------ atan3 ------------------------ */
 
 float atan3(float dy,float dx){

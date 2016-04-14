@@ -1,4 +1,5 @@
 @echo off
+Title Building 64 bit Windows release Smokeview bundle
 
 Rem  Windows batch file to package a release 64 bit windows smokeview
 

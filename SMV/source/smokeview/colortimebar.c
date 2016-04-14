@@ -10,7 +10,7 @@
 
 void UpdateTimeLabels(void){
   float time0;
- 
+
   time0 = timeoffset;
   if(global_times!=NULL)time0 = timeoffset + global_times[itimes];
   if(vishmsTimelabel==1){
@@ -130,7 +130,7 @@ void addcolorbar(int icolorbar){
   ncolorbars++;
   CheckMemory;
   ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
-  current_colorbar = colorbarinfo + colorbartype;
+  UpdateCurrentColorbar(colorbarinfo + colorbartype);
 
   cb_from = colorbarinfo + icolorbar;
   CheckMemory;
@@ -351,6 +351,33 @@ colorbardata *getcolorbar(char *label){
   return NULL;
 }
 
+/* ------------------ UpdateCurrentColorbar ------------------------ */
+#define FILEUPDATE 6
+void UpdateCurrentColorbar(colorbardata *cb){
+  int jj=0,fed_loaded=0;
+
+  current_colorbar = cb;
+  if(current_colorbar != NULL&&strcmp(current_colorbar->label, "FED") == 0){
+    is_fed_colorbar = 1;
+  }
+  else{
+    is_fed_colorbar = 0;
+  }
+  for(jj=0;jj<nslice_loaded;jj++){
+    slicedata *slicej;
+    int j;
+
+    j = slice_loaded_list[jj];
+    slicej = sliceinfo + j;
+    if(slicej->display==0)continue;
+    if(slicej->is_fed==1){
+      fed_loaded=1;
+      break;
+    }
+  }
+  if(is_fed_colorbar==1&&fed_loaded==1)Slice_CB(FILEUPDATE);
+}
+
 /* ------------------ remapcolorbar ------------------------ */
 
 void remapcolorbar(colorbardata *cbi){
@@ -509,11 +536,11 @@ void initdefaultcolorbars(void){
   colorbardata *cbi;
 
   ndefaultcolorbars=11;
-  
+
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
   NewMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
-  current_colorbar = colorbarinfo + colorbartype;
+  UpdateCurrentColorbar(colorbarinfo + colorbartype);
 
 
   // rainbow colorbar
@@ -579,7 +606,7 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[10]=0;
   cbi->rgb_node[11]=0;
   cbi++;
-  
+
   // yellow/red
 
   strcpy(cbi->label,"yellow->red");
@@ -597,7 +624,7 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[4]=0;
   cbi->rgb_node[5]=0;
   cbi++;
-  
+
   // blue/green/red
 
   strcpy(cbi->label,"blue->green->red");
@@ -739,7 +766,7 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[10]=128;
   cbi->rgb_node[11]=0;
   cbi++;
-  
+
   // fire 2
 
   fire_colorbar_index=cbi-colorbarinfo;
@@ -942,7 +969,7 @@ void drawColorBars(void){
     (showpatch==1&&wc_flag==0)||
     (showzone==1&&zonecolortype==ZONETEMP_COLOR)||
     showplot3d==1){
-    
+
     SNIFF_ERRORS("before colorbar");
     CheckMemory;
     if(showslice==1||(showvslice==1&&vslicecolorbarflag==1)){
@@ -976,9 +1003,9 @@ void drawColorBars(void){
 
         if(rgb_plot3d_local[3]!=0.0){
           glColor4fv(rgb_plot3d_local);
-          glVertex2f((float)colorbar_left_pos, ybot); 
+          glVertex2f((float)colorbar_left_pos, ybot);
           glVertex2f(colorbar_right_pos,ybot);
-       
+
           glVertex2f(colorbar_right_pos,ytop);
           glVertex2f(colorbar_left_pos, ytop);
         }
@@ -997,7 +1024,7 @@ void drawColorBars(void){
 
         if(have_extreme_mindata==1||have_extreme_maxdata==1)glEnable(GL_POLYGON_SMOOTH);
 
-        if(show_extreme_mindata==1&&have_extreme_mindata==1&&rgb_plot3d_local[3]!=0.0){     
+        if(show_extreme_mindata==1&&have_extreme_mindata==1&&rgb_plot3d_local[3]!=0.0){
           glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d_local);
 
@@ -1015,7 +1042,7 @@ void drawColorBars(void){
         if(show_extreme_maxdata==1&&have_extreme_maxdata==1&&rgb_plot3d_local[3]!=0.0){
           glBegin(GL_TRIANGLES);
           glColor4fv(rgb_plot3d_local);
-          glVertex2f(colorbar_left_pos, ybot); 
+          glVertex2f(colorbar_left_pos, ybot);
           glVertex2f(colorbar_right_pos,ybot);
           glVertex2f(barmid, ytop);
           glEnd();
@@ -1069,7 +1096,7 @@ void drawColorBars(void){
         rgb_cb2=rgb_full[i3];
 
         if(rgb_cb[3]!=0.0&&rgb_cb2[3]!=0.0){
-          glColor4fv(rgb_cb); 
+          glColor4fv(rgb_cb);
           glVertex2f(colorbar_left_pos, yy);
           glVertex2f(colorbar_right_pos,yy);
 
@@ -1092,7 +1119,7 @@ void drawColorBars(void){
         glColor4fv(rgb_full[0]);
 
         glVertex2f( colorbar_left_pos, colorbar_down_pos);
-        glVertex2f(            barmid, colorbar_down_pos-0.866*colorbar_delta); 
+        glVertex2f(            barmid, colorbar_down_pos-0.866*colorbar_delta);
         glVertex2f(colorbar_right_pos, colorbar_down_pos);
         glEnd();
       }
@@ -1101,7 +1128,7 @@ void drawColorBars(void){
         glBegin(GL_TRIANGLES);
         glColor4fv(rgb_full[nrgb_full-1]);
         glVertex2f(colorbar_right_pos, colorbar_top_pos);
-        glVertex2f(            barmid, colorbar_top_pos+0.866*colorbar_delta); 
+        glVertex2f(            barmid, colorbar_top_pos+0.866*colorbar_delta);
         glVertex2f( colorbar_left_pos, colorbar_top_pos);
         glEnd();
       }

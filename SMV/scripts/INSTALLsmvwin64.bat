@@ -1,4 +1,5 @@
 @echo off
+Title Installing 64 bit Windows release Smokeview
 
 Rem Windows batch file to upload Smokeview test files to
 Rem the download site.  This script assume that the Windows
@@ -19,7 +20,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\for_bundle\uploads
+cd %svn_root%\SMV\uploads
 
 Rem ----------------------------------------------------------
 Rem should not need to edit any lines below

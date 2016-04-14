@@ -1,0 +1,245 @@
+&HEAD CHID='Main_Control_Room_Purge_v5', TITLE='Cabinet fire in MCR affecting visibility of operators.'/
+
+&MESH IJK=123,81,25, XB=0.0,24.6,0.0,16.2,0.0,5.2 /
+
+&TIME T_END=3600.0 /
+
+General construction
+
+&MISC SURF_DEFAULT='CONCRETE WALL' /
+
+&MATL ID             = 'CONCRETE'
+      SPECIFIC_HEAT  = 0.750
+      CONDUCTIVITY   = 1.6
+      DENSITY        = 2400. /
+
+&SURF ID             = 'CONCRETE WALL'
+      COLOR          = 'GRAY 65'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.9 /
+
+&SURF ID             = 'CONCRETE CEILING'
+      COLOR          = 'GRAY 50'
+      MATL_ID        = 'CONCRETE'
+      THICKNESS      = 0.5 /
+
+Fire
+
+&REAC ID                          = 'XPE/Neoprene'
+      RADIATIVE_FRACTION=0.53
+      C                           = 3.
+      H                           = 4.5
+      OTHER                       = 0.5
+      MW_OTHER                    = 35.5
+      HEAT_OF_COMBUSTION          = 10300.
+      MASS_EXTINCTION_COEFFICIENT = 8700.
+      CO_YIELD                    = 0.1
+      SOOT_YIELD                  = 0.175 /
+
+&SURF ID     = 'ELECTRICAL FIRE'
+      COLOR  = 'ORANGE'
+      HRRPUA = 5850.
+      RAMP_Q = 'fire' / 
+
+&RAMP ID='fire', T=   0, F=0.0000 /
+&RAMP ID='fire', T=  30, F=0.0017 /
+&RAMP ID='fire', T=  60, F=0.0069 /
+&RAMP ID='fire', T=  90, F=0.0156 /
+&RAMP ID='fire', T= 120, F=0.0278 /
+&RAMP ID='fire', T= 150, F=0.0434 /
+&RAMP ID='fire', T= 180, F=0.0625 /
+&RAMP ID='fire', T= 210, F=0.0851 /
+&RAMP ID='fire', T= 240, F=0.1111 /
+&RAMP ID='fire', T= 270, F=0.1406 /
+&RAMP ID='fire', T= 300, F=0.1736 /
+&RAMP ID='fire', T= 330, F=0.2101 /
+&RAMP ID='fire', T= 360, F=0.2500 /
+&RAMP ID='fire', T= 390, F=0.2934 /
+&RAMP ID='fire', T= 420, F=0.3403 /
+&RAMP ID='fire', T= 450, F=0.3906 /
+&RAMP ID='fire', T= 480, F=0.4444 /
+&RAMP ID='fire', T= 510, F=0.5017 /
+&RAMP ID='fire', T= 540, F=0.5625 /
+&RAMP ID='fire', T= 570, F=0.6267 /
+&RAMP ID='fire', T= 600, F=0.6944 /
+&RAMP ID='fire', T= 630, F=0.7656 /
+&RAMP ID='fire', T= 660, F=0.8403 /
+&RAMP ID='fire', T= 690, F=0.9184 /
+&RAMP ID='fire', T= 720, F=1.0000 /
+&RAMP ID='fire', T=1200, F=1.0000 /
+&RAMP ID='fire', T=2340, F=0.0000 /
+
+&OBST XB= 1.5, 2.5, 3.0, 5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&VENT XB= 2.5, 2.5, 3.7, 4.3, 1.9, 2.1, SURF_ID = 'ELECTRICAL FIRE' / 
+
+Ventilation
+
+&SURF ID='DOOR CRACK', LEAK_PATH=1,0, COLOR='BEIGE' /
+&ZONE LEAK_AREA(0)=0.0117 /
+
+&VENT XB= 0.0, 0.0, 7.0, 7.9, 0.0, 0.2, SURF_ID = 'DOOR CRACK' /
+
+&SURF ID             = 'DUCT STEEL'
+      COLOR          = 'GRAY 90'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.002 /
+
+&SURF ID             = 'SUPPLY'
+      COLOR          = 'BLUE 4'
+      VOLUME_FLOW    = -0.45
+      RAMP_V	     = 'PURGE' /
+
+&SURF ID             = 'RETURN'
+      COLOR          = 'CARROT'
+      VOLUME_FLOW    = 1.34
+      RAMP_V	     = 'PURGE' / 
+
+&RAMP ID='PURGE', T=   0.0, F=0.0 /
+&RAMP ID='PURGE', T=  10.0, F=5.0 /
+&RAMP ID='PURGE', T=3600.0, F=5.0 /
+
+&OBST XB=  3.4,  4.0,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB=  3.4,  4.0,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB=  3.4,  4.0,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB=  3.4,  4.0,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB= 12.0, 12.6,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 12.0, 12.6,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB= 12.0, 12.6,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 12.0, 12.6,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB= 20.6, 21.2,  3.0,  3.6, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 20.6, 21.2,  3.0,  3.6, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB= 20.6, 21.2,  8.6,  9.2, 3.0, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 20.6, 21.2,  8.6,  9.2, 3.0, 3.0, SURF_ID = 'SUPPLY' /
+
+&OBST XB=  3.4,  4.0, 12.7, 13.3, 4.9, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB=  3.4,  4.0, 12.7, 13.3, 4.9, 4.9, SURF_ID = 'RETURN' /
+
+&OBST XB= 20.6, 21.2, 12.7, 13.3, 4.9, 5.2, SURF_ID = 'DUCT STEEL' /
+&VENT XB= 20.6, 21.2, 12.7, 13.3, 4.9, 4.9, SURF_ID = 'RETURN' /
+
+Miscellaneous construction
+
+&MATL ID             = 'CARPET'
+      SPECIFIC_HEAT  = 2.0
+      CONDUCTIVITY   = 1.7
+      DENSITY        = 200.  /
+
+&SURF ID             = 'CARPETED FLOOR'
+      COLOR          = 'LIGHT STEEL BLUE'
+      MATL_ID(1:2,1) = 'CARPET', 'CONCRETE'
+      THICKNESS      = 0.0125,0.5 /
+
+&VENT MB='ZMIN', SURF_ID='CARPETED FLOOR' / 
+&VENT MB='ZMAX', SURF_ID='CONCRETE CEILING' / 
+
+&MATL ID             = 'GYPSUM'
+      SPECIFIC_HEAT  = 1.1
+      CONDUCTIVITY   = 0.17
+      DENSITY        = 960. /
+
+&SURF ID             = 'GYPSUM BOARD'
+      COLOR          = 'WHEAT'
+      MATL_ID        = 'GYPSUM'
+      THICKNESS      = 0.016 /
+
+&VENT MB='XMIN', SURF_ID='GYPSUM BOARD'/ west wall
+&VENT MB='XMAX', SURF_ID='GYPSUM BOARD'/ east wall
+&VENT MB='YMAX', SURF_ID='GYPSUM BOARD'/ north wall
+
+&OBST XB=  0.0,  1.0, 10.0, 10.0, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
+&OBST XB=  1.0,  1.0, 10.0, 14.5, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
+&OBST XB=  1.0,  6.0, 14.5, 14.5, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
+&OBST XB=  6.0,  6.0, 14.5, 16.2, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
+&OBST XB= 20.4, 20.4, 14.5, 16.2, 0.0, 5.2, SURF_ID='GYPSUM BOARD' /  
+&OBST XB= 20.4, 23.5, 14.5, 14.5, 0.0, 5.2, SURF_ID='GYPSUM BOARD' / 
+&OBST XB= 23.5, 23.5, 10.0, 14.5, 0.0, 5.2, SURF_ID='GYPSUM BOARD' /
+&OBST XB= 23.5, 24.6, 10.0, 10.0, 0.0, 5.2, SURF_ID='GYPSUM BOARD' /
+
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'CABINET'
+      COLOR          = 'OLIVE'
+      MATL_ID        = 'STEEL'
+      BACKING        = 'EXPOSED'
+      THICKNESS      = 0.0015 /
+
+&OBST XB=  1.5,  9.5,  8.0,  9.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  1.5,  9.5,  6.0,  7.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB= 14.5, 22.5,  8.0,  9.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB= 14.5, 22.5,  6.0,  7.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  6.5, 16.0, 11.0, 12.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  3.5,  5.5,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  9.5, 14.5,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB= 18.6, 20.6,  4.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  0.0, 24.6,  0.0,  1.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+&OBST XB=  0.0, 24.6,  1.0,  1.5, 0.0, 1.0, SURF_ID = 'CABINET' / 
+&OBST XB= 21.6, 22.6,  3.0,  5.0, 0.0, 2.4, SURF_ID = 'CABINET' / 
+
+&MATL ID                    = 'WOOD'
+      SPECIFIC_HEAT         = 2.5
+      CONDUCTIVITY          = 0.12
+      DENSITY               = 540. /
+
+&SURF ID             = 'TABLE'
+      COLOR          = 'TOMATO'
+      MATL_ID        = 'WOOD'
+      THICKNESS      = 0.20 /
+
+&OBST XB= 11.0, 13.0, 10.0, 11.0, 1.0, 1.0, SURF_ID = 'TABLE' / back table top
+&OBST XB= 11.0, 13.0,  8.0,  9.0, 1.0, 1.0, SURF_ID = 'TABLE' / front table top
+
+Human target
+
+&OBST XB= 11.0, 11.2,  5.4,  5.6, 1.6, 1.8 / Head of operator
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC ID='HGL_Temp_FDS',   XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='UPPER TEMPERATURE' /
+&DEVC ID='HGL_Height_FDS', XB=11.4,11.4,5.8,5.8,0.0,5.2, QUANTITY='LAYER HEIGHT' /
+&DEVC ID='Heat_Flux_FDS', XYZ=11.1,5.5,1.8, IOR=3, QUANTITY='GAUGE HEAT FLUX' /
+&DEVC ID='OD_FDS', XYZ=11.4,5.8,1.8, QUANTITY='OPTICAL DENSITY' /
+
+&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION = 3.28 /
+&DEVC ID='Smoke1',  XYZ= 4.6,  4.6, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke2',  XYZ=12.3,  4.6, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke3',  XYZ=20.1,  4.6, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke4',  XYZ= 4.6, 12.2, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke5',  XYZ=12.3, 12.2, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke6',  XYZ=20.1, 12.2, 3.0, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke7',  XYZ= 4.6,  4.6, 5.1, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke8',  XYZ=12.3,  4.6, 5.1, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke9',  XYZ=20.1,  4.6, 5.1, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke10', XYZ= 4.6, 12.2, 5.1, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke11', XYZ=12.3, 12.2, 5.1, PROP_ID='Smoke Detector' /
+&DEVC ID='Smoke12', XYZ=20.1, 12.2, 5.1, PROP_ID='Smoke Detector' /
+
+Smokeview output
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+
+&SLCF PBZ=1.524, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBZ=1.524, QUANTITY='soot density' /
+
+&SLCF PBX=12.3, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBX=12.3, QUANTITY='soot density' /
+
+&SLCF PBY=8.1, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=8.1, QUANTITY='soot density' /
+
+&SLCF PBY=4.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=4.0, QUANTITY='soot density' /
+
+End of file
+
+&TAIL /

@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -59,7 +59,7 @@ void DrawCircVentsApproxSolid(int option){
 
               INCIRCLE(xx,(yy+yy2)/2.0,(zz+zz2)/2.0,in_circle);
               if(in_circle==NO)continue;
-              
+
               glVertex3f(xx, yy,zz);
               glVertex3f(xx,yy2,zz);
               glVertex3f(xx,yy2,zz2);
@@ -125,7 +125,7 @@ void DrawCircVentsApproxSolid(int option){
 
               INCIRCLE((xx+xx2)/2.0,(yy+yy2)/2.0,zz,in_circle);
               if(in_circle==NO)continue;
-              
+
               glVertex3f( xx, yy,zz);
               glVertex3f(xx2, yy,zz);
               glVertex3f(xx2,yy2,zz);
@@ -538,10 +538,10 @@ void DrawCircVentsExactOutline(int option){
   }
 }
 
-/* ------------------ DrawCircVentsExact ------------------------ */
+/* ------------------ DrawCircVents ------------------------ */
 
 void DrawCircVents(int option){
-  if(option==VENT_HIDE)return;
+  if(option==VENT_HIDE||cvents_defined==0)return;
   if(blocklocation==BLOCKlocation_grid&&visCircularVents!=VENT_RECTANGLE){
     if(circle_outline==0)DrawCircVentsApproxSolid(option);
     if(circle_outline==1)DrawCircVentsApproxOutline(option);
@@ -567,7 +567,7 @@ void UpdateIndexColors(void){
   }
   for(i=0;i<nsurfinfo;i++){
     surfdata *surfi;
-    
+
     surfi = surfinfo + i;
     if(strcmp(surfi->surfacelabel,"INERT")==0){
       surfi->color=block_ambient2;
@@ -697,8 +697,8 @@ void drawcbox(float x, float y, float z, float size){
 
 /* ------------------ get_blockvals ------------------------ */
 
-void get_blockvals(  float *xmin, float *xmax, 
-                     float *ymin, float *ymax, 
+void get_blockvals(  float *xmin, float *xmax,
+                     float *ymin, float *ymax,
                      float *zmin, float *zmax,
                      int *imin, int *jmin, int *kmin){
   blockagedata *bc;
@@ -752,7 +752,7 @@ void SetCVentDirs(void){
     int ibar, jbar;
     char *c_iblank;
     int iv;
- 
+
     meshi=meshinfo+ii;
 
     ibar = meshi->ibar;
@@ -764,15 +764,15 @@ void SetCVentDirs(void){
       int dir;
       int orien;
       float *boxmin, *boxmax;
-    
+
       cvi=meshi->cventinfo+iv;
       boxmin = cvi->boxmin;
       boxmax = cvi->boxmax;
 
       dir=0;
-      if(cvi->imin==cvi->imax)dir=1;
-      if(cvi->jmin==cvi->jmax)dir=2;
-      if(cvi->kmin==cvi->kmax)dir=3;
+      if(cvi->imin==cvi->imax)dir=XDIR;
+      if(cvi->jmin==cvi->jmax)dir=YDIR;
+      if(cvi->kmin==cvi->kmax)dir=ZDIR;
       orien=0;
 
       boxmin[0]=cvi->xmin;
@@ -790,7 +790,7 @@ void SetCVentDirs(void){
       switch(dir){
         int ventdir;
 
-      case 1:
+      case XDIR:
         if(cvi->imin==0){
           orien=1;
         }
@@ -837,7 +837,7 @@ void SetCVentDirs(void){
         }
         cvi->dir=ventdir;
         break;
-      case 2:
+      case YDIR:
         if(cvi->jmin==0){
           orien=1;
         }
@@ -884,7 +884,7 @@ void SetCVentDirs(void){
         }
         cvi->dir=ventdir;
         break;
-      case 3:
+      case ZDIR:
         if(cvi->kmin==0){
           orien=1;
         }
@@ -991,7 +991,7 @@ void SetCVentDirs(void){
           }
         }
       }
-      
+
       blank=cvi->blank;
       switch(cvi->dir){
       case DOWN_X:
@@ -1058,6 +1058,21 @@ void SetCVentDirs(void){
     }
   }
 
+  LOCK_IBLANK
+  for(ii = 0; ii < nmeshes; ii++){
+    mesh *meshi;
+    int iv;
+
+    meshi = meshinfo + ii;
+    for(iv = 0; iv < meshi->ncvents; iv++){
+      cventdata *cvi;
+
+      cvi = meshi->cventinfo + iv;
+      cvi->blank = cvi->blank0;
+    }
+  }
+  cvents_defined = 1;
+  UNLOCK_IBLANK
 }
 
 /* ------------------ SetVentDirs ------------------------ */
@@ -1096,14 +1111,14 @@ void SetVentDirs(void){
       vi=meshi->ventinfo+iv;
 
       dir=0;
-      if(vi->imin==vi->imax)dir=1;
-      if(vi->jmin==vi->jmax)dir=2;
-      if(vi->kmin==vi->kmax)dir=3;
+      if(vi->imin==vi->imax)dir=XDIR;
+      if(vi->jmin==vi->jmax)dir=YDIR;
+      if(vi->kmin==vi->kmax)dir=ZDIR;
       orien=0;
 
       switch(dir){
-      case 1:
-        vi->dir2=1;
+      case XDIR:
+        vi->dir2=XDIR;
         offset=ventoffset_factor*(xplttemp[1]-xplttemp[0]);
         if(vi->imin==0){
           orien=1;
@@ -1119,7 +1134,7 @@ void SetVentDirs(void){
             for(k=vi->kmin;k<=MIN(vi->kmax,kbar-1);k++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i-1,j,k)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1148,12 +1163,12 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->xvent1 += voffset;
-          vi->xvent2 += voffset;
+          vi->xvent1 = vi->xvent1_orig+voffset;
+          vi->xvent2 = vi->xvent2_orig+voffset;
         }
         break;
-      case 2:
-        vi->dir2=2;
+      case YDIR:
+        vi->dir2=YDIR;
         offset=ventoffset_factor*(yplttemp[1]-yplttemp[0]);
         if(vi->jmin==0){
           orien=1;
@@ -1169,7 +1184,7 @@ void SetVentDirs(void){
             for(k=vi->kmin;MIN(k<=vi->kmax,kbar-1);k++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i,j-1,k)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1198,12 +1213,12 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->yvent1 += voffset;
-          vi->yvent2 += voffset;
+          vi->yvent1 = vi->yvent1_orig+voffset;
+          vi->yvent2 = vi->yvent2_orig+voffset;
         }
         break;
-      case 3:
-        vi->dir2=3;
+      case ZDIR:
+        vi->dir2=ZDIR;
         offset=ventoffset_factor*(zplttemp[1]-zplttemp[0]);
         if(vi->kmin==0){
           orien=1;
@@ -1219,7 +1234,7 @@ void SetVentDirs(void){
             for(j=vi->jmin;j<=MIN(vi->jmax,jbar-1);j++){
               int state1, state2;
 
-              if(use_iblank==1){
+              if(use_iblank==1&&c_iblank!=NULL){
                 state1=c_iblank[IJKCELL(i,j,k-1)];
                 state2=c_iblank[IJKCELL(i,j,k)];
               }
@@ -1248,8 +1263,8 @@ void SetVentDirs(void){
         }
         if(iv<meshi->nvents)vi->dir=ventdir;
         if(vi->dummy==0){
-          vi->zvent1 += voffset;
-          vi->zvent2 += voffset;
+          vi->zvent1 = vi->zvent1_orig+voffset;
+          vi->zvent2 = vi->zvent2_orig+voffset;
         }
         break;
       default:
@@ -1349,7 +1364,6 @@ void calcQuadNormal(float *xyz, float *out){
 
 }
 
-
 /* ------------------ readcadgeom ------------------------ */
 
 void readcadgeom(cadgeom *cd){
@@ -1366,7 +1380,7 @@ void readcadgeom(cadgeom *cd){
     fclose(stream);
     return;
   }
-  trim(buffer);
+  trim_back(buffer);
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
     fclose(stream);
@@ -1541,7 +1555,7 @@ void readcad2geom(cadgeom *cd){
     for(ii=0;ii<lenbuffer;ii++){
       if(buffer[ii]==',')buffer[ii]=' ';
     }
-    
+
     sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f %i",
       &cdi->index,rrgb,rrgb+1,rrgb+2,
       &cdi->texture_width,&cdi->texture_height,
@@ -1549,14 +1563,14 @@ void readcad2geom(cadgeom *cd){
       t_origin,t_origin+1,t_origin+2,
       onesided
       );
-      
+
     rrgb[0]/=255.0;
     rrgb[1]/=255.0;
     rrgb[2]/=255.0;
     if(rrgb[0]<0.0||rrgb[1]<0.0||rrgb[2]<0.0)rrgb[3]=1.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
-    trim(buffer);
+    trim_back(buffer);
     len=strlen(buffer);
 
     texti = &cdi->textureinfo;
@@ -1719,13 +1733,13 @@ void update_cadtextcoords(cadquad *quadi){
 void drawcadgeom(const cadgeom *cd){
   int i;
   int last_colorindex=-999;
-  float *lastcolor; 
+  float *lastcolor;
   float rgbtemp[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
 
   lastcolor=rgbtemp;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  glEnable(GL_LIGHTING); 
+  glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_COLOR_MATERIAL);
@@ -1777,7 +1791,7 @@ void drawcadgeom(const cadgeom *cd){
 
 void drawcad2geom(const cadgeom *cd, int trans_flag){
   int ii;
-  float *thiscolor,*lastcolor; 
+  float *thiscolor,*lastcolor;
   int thisonesided, lastonesided;
   int colorindex;
   texturedata *lasttexture;
@@ -1790,7 +1804,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
-  glEnable(GL_LIGHTING); 
+  glEnable(GL_LIGHTING);
   if(trans_flag==DRAW_TRANSPARENT)transparenton();
   glBegin(GL_QUADS);
   colorindex=0;
@@ -1851,13 +1865,13 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       lastonesided=thisonesided;
       glBegin(GL_QUADS);
     }
-  
+
     this_block_shininess = quadi->cadlookq->shininess;
     if(last_block_shininess!=this_block_shininess){
       last_block_shininess=this_block_shininess;
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&this_block_shininess);
     }
-    
+
     normal = quadi->normals;
 
     glNormal3fv(normal);
@@ -1867,7 +1881,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     glVertex3fv(xyzpoint+9);
   }
   glEnd();
-  
+
   if(visCadTextures==1){
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,enable_texture_lighting? GL_MODULATE : GL_REPLACE);
@@ -1885,7 +1899,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       float *normal;
       cadquad *quadi;
       int i;
-    
+
       i=cd->order[ii];
       ASSERT(i>=0&&i<cd->nquads);
       quadi = cd->quad+i;
@@ -1895,11 +1909,11 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       if(texti->loaded==0)continue;
 
       if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
-      
+
       txypoint = quadi->txypoints;
       normal = quadi->normals;
       thisonesided = quadi->cadlookq->onesided;
-    
+
       if(lasttexture!=texti || lastonesided!=thisonesided){
         glEnd();
         if(lasttexture!=texti){
@@ -1917,7 +1931,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
         }
         glBegin(GL_QUADS);
       }
-      
+
       this_block_shininess = quadi->cadlookq->shininess;
       if(last_block_shininess!=this_block_shininess){
         last_block_shininess=this_block_shininess;
@@ -1952,7 +1966,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   }
 }
 
-/* ------------------ updatefaces ------------------------ */
+/* ------------------ UpdateFaces ------------------------ */
 
 void UpdateFaces(void){
   int i;
@@ -2008,15 +2022,15 @@ void UpdateFaces(void){
 
 /* ------------------ obst_or_vent2faces ------------------------ */
 
-void obst_or_vent2faces(const mesh *meshi,blockagedata *bc, 
+void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
                         ventdata *vi, facedata *faceptr, int facetype){
   /*
-         
+
        7---------6
      /         /
    /         /
   4--------5
-                 
+
        3 ------  2
       /         /
     /         /
@@ -2059,34 +2073,34 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
   ASSERT(bc!=NULL&&vi==NULL||bc==NULL&&vi!=NULL);
   if(bc!=NULL){
     jend=6;
-    xminmax[0] = xplt[bc->ijk[IMIN]]; 
+    xminmax[0] = xplt[bc->ijk[IMIN]];
     xminmax[1] = xplt[bc->ijk[IMAX]];
-    yminmax[0] = yplt[bc->ijk[JMIN]]; 
+    yminmax[0] = yplt[bc->ijk[JMIN]];
     yminmax[1] = yplt[bc->ijk[JMAX]];
-    zminmax[0] = zplt[bc->ijk[KMIN]]; 
+    zminmax[0] = zplt[bc->ijk[KMIN]];
     zminmax[1] = zplt[bc->ijk[KMAX]];
 
-    xminmax2[0] = bc->xmin; 
+    xminmax2[0] = bc->xmin;
     xminmax2[1] = bc->xmax;
-    yminmax2[0] = bc->ymin; 
+    yminmax2[0] = bc->ymin;
     yminmax2[1] = bc->ymax;
-    zminmax2[0] = bc->zmin; 
+    zminmax2[0] = bc->zmin;
     zminmax2[1] = bc->zmax;
   }
   if(vi!=NULL){
     jend=1;
-    xminmax[0] = xplt[vi->imin]; 
+    xminmax[0] = xplt[vi->imin];
     xminmax[1] = xplt[vi->imax];
-    yminmax[0] = yplt[vi->jmin]; 
+    yminmax[0] = yplt[vi->jmin];
     yminmax[1] = yplt[vi->jmax];
-    zminmax[0] = zplt[vi->kmin]; 
+    zminmax[0] = zplt[vi->kmin];
     zminmax[1] = zplt[vi->kmax];
 
-    xminmax2[0] = vi->xmin; 
+    xminmax2[0] = vi->xmin;
     xminmax2[1] = vi->xmax;
-    yminmax2[0] = vi->ymin; 
+    yminmax2[0] = vi->ymin;
     yminmax2[1] = vi->ymax;
-    zminmax2[0] = vi->zmin; 
+    zminmax2[0] = vi->zmin;
     zminmax2[1] = vi->zmax;
   }
 
@@ -2107,7 +2121,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     faceptr->is_interior=0;
     faceptr->show_bothsides=0;
     faceptr->bc=NULL;
-    
+
     if(bc!=NULL){
       faceptr->bc=bc;
       faceptr->hidden=0;
@@ -2177,11 +2191,11 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     if(t_height==0.0)t_height=1.0;
     if(bc!=NULL){
       switch(bc->useblockcolor){
-      case 1:
+      case TTRUE:
         faceptr->color=bc->color;
         faceptr->transparent=bc->transparent;
         break;
-      case 0:
+      case FFALSE:
         if(bc->surf[j]==surfacedefault){
          // faceptr->color=block_ambient2;
           faceptr->color=surfacedefault->color;  /* fix ?? */
@@ -2257,6 +2271,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       if(faceptr->kmin==faceptr->kmax){
         if(faceptr->kmin>0&&faceptr->kmin<meshi->kbar)faceptr->is_interior=1;
       }
+      faceptr->show_bothsides = show_bothsides_blockages;
     }
     if(vi!=NULL){
       faceptr->imin=vi->imin;
@@ -2282,7 +2297,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     offset[YYY]=(float)0.0;
     offset[ZZZ]=(float)0.0;
     switch(faceptr->dir){
-     case DOWN_Y: 
+     case DOWN_Y:
        faceptr->normal[1]=(float)-1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = -meshi->vent_offset[YYY];
        faceptr->jmax=faceptr->jmin;
@@ -2294,7 +2309,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &zbar0;
        break;
-     case UP_X:    
+     case UP_X:
        faceptr->normal[0]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = meshi->vent_offset[XXX];
        faceptr->imin=faceptr->imax;
@@ -2306,7 +2321,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &ybar0;
        ystart = &zbar0;
        break;
-     case UP_Y:   
+     case UP_Y:
        faceptr->normal[1]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = meshi->vent_offset[YYY];
        faceptr->jmin=faceptr->jmax;
@@ -2318,7 +2333,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &zbar0;
        break;
-     case DOWN_X:  
+     case DOWN_X:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = -meshi->vent_offset[XXX];
        xtex = yy;
        ytex = zz;
@@ -2330,7 +2345,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &ybar0;
        ystart = &zbar0;
        break;
-     case DOWN_Z: 
+     case DOWN_Z:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = -meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
@@ -2342,7 +2357,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &ybar0;
        break;
-     case UP_Z:   
+     case UP_Z:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
@@ -2378,7 +2393,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       float xvert, yvert, zvert;
 
       jjj = bfi[k];
-      
+
       xvert=xx[jjj]+offset[XXX];
       yvert=yy[jjj]+offset[YYY];
       zvert=zz[jjj]+offset[ZZZ];
@@ -2468,9 +2483,9 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       ya_texture[3] = ya_texture[2];
 
       for(k=0;k<4;k++){
-        faceptr->approx_texture_coords[2*k]=xa_texture[k]/t_width; 
+        faceptr->approx_texture_coords[2*k]=xa_texture[k]/t_width;
         faceptr->approx_texture_coords[2*k+1]=ya_texture[k]/t_height;
-        faceptr->exact_texture_coords[2*k]=xe_texture[k]/t_width; 
+        faceptr->exact_texture_coords[2*k]=xe_texture[k]/t_width;
         faceptr->exact_texture_coords[2*k+1]=ye_texture[k]/t_height;
       }
     }
@@ -2518,7 +2533,7 @@ void set_cull_vis(void){
       yy[1] = NORMALIZE_Y(culli->yend);
       zz[0] = NORMALIZE_Z(culli->zbeg);
       zz[1] = NORMALIZE_Z(culli->zend);
-      
+
       if(PointInFrustum(xx[0],yy[0],zz[0])==1){
         culli->vis=1;
         continue;
@@ -2555,7 +2570,7 @@ void set_cull_vis(void){
   }
 }
 
-/* ------------------ comparesinglefaces ------------------------ */
+/* ------------------ comparesinglefaces0 ------------------------ */
 
 int comparesinglefaces0( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
@@ -2778,7 +2793,7 @@ void UpdateFacelists(void){
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
       if(Clip_Face(&clipinfo,facej)==1)continue;
 
-      if(showedit_dialog==1&&show_geomtest==0&&j<vent_offset){
+      if(showedit_dialog == 1 && geomtest_option == NO_TEST && j<vent_offset){
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
         if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
         continue;
@@ -3094,7 +3109,7 @@ void drawselect_faces(){
         showtimelist_handle = facei->showtimelist_handle;\
         showtimelist = *showtimelist_handle;\
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;\
-        if(showedit_dialog==0||show_geomtest==1){\
+        if(showedit_dialog==0||geomtest_option!=NO_TEST){\
           new_color=facei->color;\
         }\
         else{\
@@ -3115,7 +3130,7 @@ void drawselect_faces(){
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices+9);
 
-/* ------------------ drawfaces ------------------------ */
+/* ------------------ draw_faces ------------------------ */
 
 void draw_faces(){
   float *new_color,*old_color=NULL;
@@ -3222,7 +3237,7 @@ void draw_faces(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{
@@ -3381,14 +3396,14 @@ void draw_faces(){
       if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 
-    }    
+    }
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
   }
 }
 
-/* ------------------ compareisonodes ------------------------ */
+/* ------------------ comparetransparentfaces ------------------------ */
 
 int comparetransparentfaces( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
@@ -3422,8 +3437,6 @@ void Sort_Transparent_Faces(float *mm){
     facei->dist2eye=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
   }
   qsort((facedata **)face_transparent,(size_t)nface_transparent,sizeof(facedata *),comparetransparentfaces);
-
-
 }
 
 /* ------------------ draw_transparent_faces ------------------------ */
@@ -3467,7 +3480,7 @@ void draw_transparent_faces(){
       showtimelist_handle = facei->showtimelist_handle;
       showtimelist = *showtimelist_handle;
       if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-      if(showedit_dialog==0||show_geomtest==1){
+      if(showedit_dialog == 0 || geomtest_option != NO_TEST){
         new_color=facei->color;
       }
       else{
@@ -3581,7 +3594,6 @@ void draw_transparent_faces(){
 void UpdateHiddenFaces(){
   int i;
 
-
   updatehiddenfaces=0;
   if(hide_overlaps!=0)PRINTF("  identifying hidden faces -");
   for(i=0;i<nmeshes;i++){
@@ -3682,7 +3694,7 @@ void allocate_faces(){
       mesh *meshi;
 
       meshi = meshinfo + i;
- 
+
       ntotal = 6*meshi->nbptrs + meshi->nvents+12;
       nfaces_temp+=(6*meshi->nbptrs);
       mem_sum+= ntotal*(sizeof(facedata)+5*sizeof(facedata *));
@@ -3769,7 +3781,6 @@ void update_selectblocks(void){
   nselectblocks=ntotal;
 }
 
-
 /* ------------------ update_selectfaces ------------------------ */
 
 void update_selectfaces(void){
@@ -3778,7 +3789,7 @@ void update_selectfaces(void){
 
   int i;
   selectdata *sd;
-  
+
   FREEMEMORY(selectfaceinfo);
 
   ntotalfaces=0;
@@ -3792,11 +3803,11 @@ void update_selectfaces(void){
 
   NewMemory((void **)&selectfaceinfo,ntotalfaces*sizeof(selectdata));
 
-/* down y 
-     up x 
-     up y 
-   down x 
-   down z 
+/* down y
+     up x
+     up y
+   down x
+   down z
      up z */
   ntotalfaces=0;
   sd = selectfaceinfo;
@@ -3932,13 +3943,13 @@ int isblockagevisible(blockagedata *bc, float local_time){
 }
 
 
-/* ------------------ getsmoothblockparams ------------------------ */
+/* ------------------ getsmoothblockparms ------------------------ */
 
 void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
   int i;
   int nsmoothcolors=0;
   int fail;
-  
+
   /* number of unique smooth block colors */
 
   for(i=0;i<meshi->nbptrs;i++){
@@ -3980,16 +3991,16 @@ void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
     NewMemory((void **)&meshi->smoothblockagecolors,4*nsmoothcolors*sizeof(float));
     NewMemory((void **)&meshi->blockagesurfaces,nsmoothcolors*sizeof(isosurface *));
   }
-  
+
   sb->nsmoothblockagecolors=meshi->nsmoothblockagecolors;
   sb->smoothblockagecolors=meshi->smoothblockagecolors;
   sb->smoothblockagesurfaces=meshi->blockagesurfaces;
-  
+
   for(i=0;i<nsmoothcolors;i++){
     meshi->blockagesurfaces[i]=NULL;
   }
   nsmoothcolors=0;
-  
+
   /* smooth block colors */
 
   for(i=0;i<meshi->nbptrs;i++){
@@ -4126,7 +4137,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
   float *xplt,*yplt,*zplt;
   float *rgbtemp,*rgbtemp2;
   int ibar,jbar,kbar;
-  
+
   int ii, jj, kk;
   int im1, jm1, km1;
   int read_error=0;
@@ -4217,7 +4228,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
           k=kk-1;
         }
         else{
-          k=kk; 
+          k=kk;
           km1=kk-1;
         }
         for(jj=1;jj<jbar+2;jj++){
@@ -4230,7 +4241,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
             j=jj-1;
           }
           else{
-            j=jj; 
+            j=jj;
             jm1=jj-1;
           }
           for(ii=1;ii<ibar+2;ii++){
@@ -4243,7 +4254,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
               i=ii-1;
             }
             else{
-              i=ii; 
+              i=ii;
               im1=ii-1;
             }
             vals[0]=cell[cellindex(im1,jm1,km1)];
@@ -4254,7 +4265,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
             vals[5]=cell[cellindex(i  ,jm1,k)];
             vals[6]=cell[cellindex(i  ,j  ,km1)];
             vals[7]=cell[cellindex(i  ,j  ,k)];
-  
+
             val = (vals[0]+vals[1]+vals[2]+vals[3]+vals[4]+vals[5]+vals[6]+vals[7]+0.01)/8.0;
             node[nodeindex(ii,jj,kk)]=val;
           }
@@ -4276,7 +4287,7 @@ void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
     }
     if(read_smoothobst==0){
       float dlevel=-1.0;
-      
+
       GetIsosurface(asurface, node, NULL, NULL, level, dlevel,
                      xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3);
       GetNormalSurface(asurface);
@@ -4312,7 +4323,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
   float *rgbtemp,*rgbtemp2;
   int ibar,jbar,kbar;
   int nx2, ny2, nz2;
-  
+
   int read_error=0;
 
 #define cellindex2(i,j,k) ((i+1)+(j+1)*nx2+(k+1)*nx2*ny2)
@@ -4409,7 +4420,7 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
     }
     else{
       float dlevel=-1.0;
-      
+
       GetIsosurface(asurface, cell, NULL, NULL, level, dlevel,
                      xplt2-1, nx2, yplt2-1, ny2, zplt2-1, nz2);
       GetNormalSurface(asurface);
@@ -4425,14 +4436,14 @@ void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
     meshi->blockagesurface=asurface;
     if(sb->smoothblockagesurfaces!=NULL)sb->smoothblockagesurfaces[iblockcolor]=asurface;
   }
-  FREEMEMORY(cell); 
+  FREEMEMORY(cell);
   FREEMEMORY(XPLT2);
   FREEMEMORY(YPLT2);
   FREEMEMORY(ZPLT2);
   return;
 }
 
-/* ------------------ update_demo ------------------------ */
+/* ------------------ init_demo ------------------------ */
 
 void init_demo(float rad, int nlat, int nlong){
   int i,j;
@@ -4459,9 +4470,9 @@ void init_demo(float rad, int nlat, int nlong){
 
 /* ------------------ calcNormal3 ------------------------ */
 
-void calcNormal3(const float *v1, 
-                 const float *v2, 
-                 const float *v3, 
+void calcNormal3(const float *v1,
+                 const float *v2,
+                 const float *v3,
                  float *out){
   float u[3], v[3];
   int i;
@@ -4483,19 +4494,19 @@ void calcNormal3(const float *v1,
 
 /* ------------------ calcNormal4 ------------------------ */
 
-void calcNormal4(const float *v1, 
+void calcNormal4(const float *v1,
                  float *out){
   out[0]=v1[0]-0.2143;
   out[1]=v1[1]-0.2143;
   out[2]=v1[2]-0.5;
-  
+
 
 
   ReduceToUnit(out);
 
 }
 
-/* ------------------ draw_demo ------------------------ */
+/* ------------------ draw_demo2 ------------------------ */
 
 void draw_demo2(int option){
       demo_mode++;
@@ -4512,6 +4523,9 @@ void draw_demo2(int option){
       glVertex3f(1.0,0.3,0.0);
       glEnd();
 }
+
+/* ------------------ draw_demo ------------------------ */
+
 void draw_demo(int nlat, int nlong){
   int i, j;
   extern float *sphere_xyz;
@@ -4581,7 +4595,7 @@ void draw_demo(int nlat, int nlong){
     case 3:
     case 4:
     case 5:
-//#define COLOR(x) (1.0+((x)-0.2143)/0.3)/2.0 
+//#define COLOR(x) (1.0+((x)-0.2143)/0.3)/2.0
 #define COLOR(x) 0.0
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -4664,7 +4678,7 @@ void draw_demo(int nlat, int nlong){
   }
 }
 
-/* ------------------ innitticks ------------------------ */
+/* ------------------ init_user_ticks ------------------------ */
 
 void init_user_ticks(void){
   int i;
@@ -4704,7 +4718,7 @@ void init_user_ticks(void){
 
 }
 
-/* ------------------ drawticks ------------------------ */
+/* ------------------ draw_user_ticks ------------------------ */
 
 void draw_user_ticks(void){
   int i;
@@ -4736,14 +4750,14 @@ void draw_user_ticks(void){
     show_tick_y=0;
     show_tick_z=0;
     switch(user_tick_option){
-      case -1:
+      case XDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_x = 1;
         show_tick_z = 1;
         break;
-      case 1:
+      case XDIR:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_max[1];
         step[1] = -step[1];
@@ -4751,14 +4765,14 @@ void draw_user_ticks(void){
         show_tick_x = 1;
         show_tick_z = 1;
         break;
-      case -2:
+      case YDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_y = 1;
         show_tick_z = 1;
         break;
-      case 2:
+      case YDIR:
         tick_origin[0] = user_tick_max[0];
         step[0] = -step[0];
         tick_origin[1] = user_tick_origin[1];
@@ -4766,14 +4780,14 @@ void draw_user_ticks(void){
         show_tick_y = 1;
         show_tick_z = 1;
         break;
-      case -3:
+      case ZDIRNEG:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_origin[2];
         show_tick_x = 1;
         show_tick_y = 1;
         break;
-      case 3:
+      case ZDIR:
         tick_origin[0] = user_tick_origin[0];
         tick_origin[1] = user_tick_origin[1];
         tick_origin[2] = user_tick_max[2];
@@ -4835,7 +4849,7 @@ void draw_user_ticks(void){
         )continue;
       xyz[1]=tick_origin[1];
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
@@ -4870,7 +4884,7 @@ void draw_user_ticks(void){
           )continue;
         xyz[1]=tick_origin[1];
         xyz[2]=tick_origin[2];
-        if(user_tick_option==3){
+        if(user_tick_option==ZDIR){
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[2]=xyz[2];
@@ -4893,7 +4907,7 @@ void draw_user_ticks(void){
       if((step[0]>0.0&&xyz[0]>user_tick_max[0])||(step[0]<0.0&&xyz[0]<user_tick_min[0]))continue;
       xyz[1]=tick_origin[1];
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[2]=xyz[2];
@@ -4925,7 +4939,7 @@ void draw_user_ticks(void){
         (step[1]<0.0&&xyz[1]<user_tick_min[1])
         )continue;
       xyz[2]=tick_origin[2];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
@@ -4960,7 +4974,7 @@ void draw_user_ticks(void){
           (step[1]<0.0&&xyz[1]<user_tick_min[1])
           )continue;
         xyz[2]=tick_origin[2];
-        if(user_tick_option==3){
+        if(user_tick_option==ZDIR){
           xyz2[0]=xyz[0]-SCALE2FDS(user_tick_length)/2.0;
           xyz2[1]=xyz[1];
           xyz2[2]=xyz[2];
@@ -4987,7 +5001,7 @@ void draw_user_ticks(void){
         )continue;
       xyz[2]=tick_origin[2];
       xyz2[0]=xyz[0];
-      if(user_tick_option==3){
+      if(user_tick_option==ZDIR){
         xyz2[0]=xyz[0]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2];
@@ -5018,7 +5032,7 @@ void draw_user_ticks(void){
         (step[2]>0.0&&xyz[2]>user_tick_max[2])||
         (step[2]<0.0&&xyz[2]<user_tick_min[2])
         )continue;
-      if(user_tick_option==2){
+      if(user_tick_option==YDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length);
       }
@@ -5052,7 +5066,7 @@ void draw_user_ticks(void){
           (step[2]>0.0&&xyz[2]>user_tick_max[2])||
           (step[2]<0.0&&xyz[2]<user_tick_min[2])
           )continue;
-        if(user_tick_option==2){
+        if(user_tick_option==YDIR){
           xyz2[0]=xyz[0];
           xyz2[1]=xyz[1]-SCALE2FDS(user_tick_length)/2.0;
         }
@@ -5077,7 +5091,7 @@ void draw_user_ticks(void){
         (step[2]>0.0&&xyz[2]>user_tick_max[2])||
         (step[2]<0.0&&xyz[2]<user_tick_min[2])
         )continue;
-      if(user_tick_option==2){
+      if(user_tick_option==YDIR){
         xyz2[0]=xyz[0];
         xyz2[1]=xyz[1]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
@@ -5095,8 +5109,7 @@ void draw_user_ticks(void){
   glPopMatrix();
 }
 
-
-/* ------------------ getdir ------------------------ */
+/* ------------------ get_tick_dir ------------------------ */
 
 int get_tick_dir(float *mm){
     /*
@@ -5108,10 +5121,10 @@ int get_tick_dir(float *mm){
        ( m0 m4  m8 )      (m12)
    Q=  ( m1 m5  m9 )  u = (m13)
        ( m2 m6 m10 )      (m14)
-      
-      (Q   u) (x)     (0)      
+
+      (Q   u) (x)     (0)
       (v^T 1) (y)   = (1)
-       
+
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
   int i,ii;
@@ -5123,26 +5136,25 @@ int get_tick_dir(float *mm){
   xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-  
+
   minangle=1000000.0;
 
   for(i=-3;i<=3;i++){
     if(i==0)continue;
-    ii = i;
-    if(i<0)ii=-i;
+    ii = ABS(i);
     norm[0]=0.0;
     norm[1]=0.0;
     norm[2]=0.0;
     switch(ii){
-    case 1:
+    case XDIR:
       if(i<0)norm[1]=-1.0;
       if(i>0)norm[1]=1.0;
       break;
-    case 2:
+    case YDIR:
       if(i<0)norm[0]=-1.0;
       if(i>0)norm[0]=1.0;
       break;
-    case 3:
+    case ZDIR:
       if(i<0)norm[2]=-1.0;
       if(i>0)norm[2]=1.0;
       break;
@@ -5170,29 +5182,37 @@ int get_tick_dir(float *mm){
   return iminangle;
 }
 
+/* ------------------ DrawGravityAxis ------------------------ */
 
-/* ------------------ drawaxis ------------------------ */
-
-void drawaxis(void){
+void DrawGravityAxis(void){
   glLineWidth(linewidth);
   glBegin(GL_LINES);
+
+  // x axis
   glColor3f(0.0,0.0,1.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0+0.5);
-  
+
+  // y axis
   glColor3f(0.0,1.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0+0.5,zbar/2.0);
-  
+
+  // z axis
   glColor3f(1.0,0.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0+0.5,ybar/2.0,zbar/2.0);
 
+  // gravity vector
   glColor3fv(foregroundcolor);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0+gvecunit[0],ybar/2.0+gvecunit[1],zbar/2.0+gvecunit[2]);
 
   glEnd();
+  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0, zbar / 2.0 + 0.5, "x");
+  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0 + 0.5, zbar / 2.0, "y");
+  output3Text(foregroundcolor, xbar / 2.0 + 0.5, ybar / 2.0, zbar / 2.0, "x");
+  output3Text(foregroundcolor, xbar / 2.0 + gvecunit[0], ybar / 2.0 + gvecunit[1], zbar / 2.0 + gvecunit[2], "g");
 }
 
 /* ------------------ drawticks ------------------------ */
@@ -5256,7 +5276,7 @@ void drawBlockages(int mode, int trans_flag){
 
   get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-  if(drawing_smooth==1&&(showedit_dialog==0||show_geomtest==1)){
+  if(drawing_smooth == 1 && (showedit_dialog == 0 || geomtest_option != NO_TEST)){
     if(clip_mode!=CLIP_OFF)glDisable(GL_CULL_FACE);
     for(i=0;i<nmeshes;i++){
       mesh *meshi;
@@ -5423,7 +5443,7 @@ void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawi
   }
 }
 
-/* ------------------ drawfacesBAK ------------------------ */
+/* ------------------ draw_facesOLD ------------------------ */
 
 void draw_facesOLD(){
   float *new_color,*old_color=NULL;
@@ -5462,7 +5482,7 @@ void draw_facesOLD(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{
@@ -5535,7 +5555,7 @@ void draw_facesOLD(){
         showtimelist_handle = facei->showtimelist_handle;
         showtimelist = *showtimelist_handle;
         if(showtimelist!=NULL&&showtimelist[itimes]==0)continue;
-        if(showedit_dialog==0||show_geomtest==1){
+        if(showedit_dialog == 0 || geomtest_option != NO_TEST){
           new_color=facei->color;
         }
         else{
@@ -5708,7 +5728,6 @@ void draw_facesOLD(){
   if(show_triangle_count==1)printf("obst/vent triangles: %i\n",n_geom_triangles);
 }
 
-
 /* ------------------ initcullgeom ------------------------ */
 
 void initcullgeom(int cullgeomflag){
@@ -5869,7 +5888,7 @@ culldata *get_face_port(mesh *meshi, facedata *facei){
 
   ixyz = ii1 + jj1*nx + kk1*nx*ny;
   return_cull = meshi->cullgeominfo + ixyz;
-  
+
   return return_cull;
 }
 
@@ -5919,7 +5938,7 @@ void remove_dup_blockages(void){
       for(j=1;j<meshi->nbptrs;j++){
         blockagedata *bc, *bcm1;
         int *ijk1, *ijk2;
-      
+
         bc = bclist[j];
         bcm1 = bclist[j-1];
         if(bc->nshowtime>0)continue;
@@ -5938,7 +5957,7 @@ void remove_dup_blockages(void){
       jj=0;
       for(j=0;j<meshi->nbptrs;j++){
         blockagedata *bc;
-      
+
         bc=bclist[j];
         if(bc->dup==1)continue;
         bclist[jj++]=bc;
@@ -5949,7 +5968,7 @@ void remove_dup_blockages(void){
   updatefacelists=1;
 }
 
-/* ------------------ getlabels ------------------------ */
+/* ------------------ getobstlabels ------------------------ */
 
 void getobstlabels(const char *filein){
 
@@ -5995,7 +6014,7 @@ void getobstlabels(const char *filein){
     obstlabel++;
     lenlabel=strlen(obstlabel);
     obstlabel=trim_front(obstlabel);
-    trim(obstlabel);
+    trim_back(obstlabel);
     lenlabel=strlen(obstlabel);
     if(lenlabel>0){
       NewMemory((void **)&obstlabels[fdsobstcount-1],(unsigned int)(lenlabel+1));

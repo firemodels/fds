@@ -6,7 +6,6 @@
 &DUMP DT_SL3D=0.06666/
 &ZONE XB=2.7,2.8,0.5,0.6,1.1,1.2 /
 
-&RADI RADIATIVE_FRACTION=0.40 /
 &REAC FUEL='N-HEPTANE'
       FYI='Heptane, C_7 H_16'
       C=7.

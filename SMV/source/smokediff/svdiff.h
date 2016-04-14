@@ -27,21 +27,7 @@
 #define STAT stat
 #endif
 
-#ifdef X64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef pp_LINUX64
-#undef BIT64
-#define BIT64
-#endif
-
-#ifdef BIT64
 #define FILE_SIZE unsigned long long
-#else
-#define FILE_SIZE unsigned int
-#endif
 
 //************************** data structures ****************************************
 
@@ -108,7 +94,6 @@ typedef struct {
 //************************** headers ****************************************
 
 int getendian(void);
-void version(void);
 void usage(void);
 int mesh_match(mesh *mesh1, mesh *mesh2);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
@@ -151,9 +136,9 @@ STDCALLF FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
                               int *patchdir, int *error1, FILE_SIZE len);
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *npqq, int *error);
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber,
                          int *version, int *error, FILE_SIZE len);
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
@@ -164,7 +149,7 @@ STDCALLF FORTgetsliceparms(char *file,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
                           int *ni, int *nj, int *nk,
                           int *slice3d, int *error,FILE_SIZE lenfile);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit,
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 STDCALLF FORTclosefortranfile(int *unit);

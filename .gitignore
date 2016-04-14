@@ -11,11 +11,11 @@
 *.exp
 *.lib
 *.i90
+*.dll
 
 # executables
 fds_intel_*
 fds_mpi_intel_*
-background
 fds2ascii_*
 smokediff_*
 smokezip_*
@@ -55,6 +55,7 @@ Manuals/*/*Guide.pdf
 *.fed_smv
 *slice.info
 *svn.txt
+Current_Results
 
 # smokeview files, directories
 SMV/win32_local/
@@ -63,5 +64,9 @@ smokeview*64*
 SMV/for_bundle/uploads
 
 # manuals script-generated files
-Manuals/*/SCRIPT_FIGURES/*.pdf
+Manuals/*/SCRIPT_FIGURES/*/*.pdf
+Manuals/*/SCRIPT_FIGURES/*/*.tex
 
+# Validation script generated csv files
+Validation/*/FDS_Output_Files/*.csv
+#!Validation/*/FDS_Output_Files/*_[devc].csv

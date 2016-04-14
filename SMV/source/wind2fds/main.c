@@ -10,8 +10,37 @@
 
 //dummy change to bump version number to  0.9
 
-void usage(char *prog);
-void version(char *prog);
+/* ------------------ usage ------------------------ */
+
+void usage(char *prog){
+  char prog_version[100];
+  char githash[100];
+  char gitdate[100];
+  char buffer[1024];
+
+  getPROGversion(prog_version);  // get version (ie 5.x.z)
+  getGitInfo(githash,gitdate);    // get githash
+
+  printf("\n");
+  printf("wind2fds %s(%s) - %s\n", prog_version, githash, __DATE__);
+  printf("  Convert spreadsheets containing wind data to files compatible with Smokeview:\n\n");
+  printf("  %s", get_basefilename(buffer, prog));
+  printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
+
+  printf("where\n\n");
+
+  printf("  -h             - displays this message\n");
+  printf("  -prefix label  - prefix column headers with label\n");
+  printf("  -offset x y z  - offset sensor locations by (x,y,z)\n");
+  printf("  -wv            - converting a non-sodar file\n");
+  printf("  -date mm/dd/yyyy - only convert data recorded on mm/dd/yyyy\n");
+  printf("  -mindate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded before specified date\n");
+  printf("  -maxdate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded after specified date\n");
+  printf("  -mintime \"hh:mm:ss\" - ignore data recorded before specified time (on any date)\n");
+  printf("  -maxtime \"hh:mm:ss\" - ignore data recorded after specified time (on any date)\n");
+  printf("  datafile.csv   - spreadsheet file to be converted. Use '-' to input data\n");
+  printf("                   from standard input\n");
+}
 
 /* ------------------ gettokens ------------------------ */
 
@@ -27,7 +56,7 @@ int gettokens(char *tokens, char **tokenptrs){
     token=strtok(NULL,",");
   }
   for(i=0;i<ntokenptrs;i++){
-    trim(tokenptrs[i]);
+    trim_back(tokenptrs[i]);
     tokenptrs[i]=trim_front(tokenptrs[i]);
   }
   return ntokenptrs;
@@ -66,13 +95,14 @@ int main(int argc, char **argv){
   unsigned int i_mindatetime, i_maxdatetime;
   int lendate=0;
 
+  set_stdout(stdout);
   strcpy(percen,"%");
   strcpy(prefix,"");
 
   prog=argv[0];
 
   if(argc==1){
-   version("wind2fds");
+   version("wind2fds ");
    return 1;
   }
 
@@ -104,7 +134,7 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-v")==0){
-      version("wind2fds");
+      version("wind2fds ");
       return 1;
     }
     else if(strcmp(arg,"-mintime")==0){
@@ -222,7 +252,7 @@ int main(int argc, char **argv){
 
   buffer_len=getrowcols(stream_in, &nrows, &ncols);
   buffer_len+=10;
-  
+
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&labels,buffer_len);
   NewMemory((void **)&labelptrs,buffer_len*sizeof(char *));
@@ -249,7 +279,7 @@ int main(int argc, char **argv){
       return 1;
     }
   }
-  
+
   nlabelptrs=gettokens(labels,labelptrs);
   ntransfer=0;
   for(i=0;i<nlabelptrs;i++){
@@ -481,48 +511,3 @@ int main(int argc, char **argv){
   return 0;
 }
 
-/* ------------------ usage ------------------------ */
-
-void usage(char *prog){
-  char prog_version[100];
-  char revision[100];
-  char buffer[1024];
-
-  getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getRevision(revision);    // get revision
-
-  printf("\n");
-  printf("wind2fds %s(%s) - %s\n",prog_version,revision,__DATE__);
-  printf("  Convert spreadsheets containing wind data to files compatible with Smokeview:\n\n");
-  printf("  %s",get_basefilename(buffer,prog));
-  printf(" prog [-prefix label] [-offset x y z] datafile\n\n");
-
-  printf("where\n\n");
-
-  printf("  -h             - displays this message\n");
-  printf("  -prefix label  - prefix column headers with label\n");
-  printf("  -offset x y z  - offset sensor locations by (x,y,z)\n");
-  printf("  -wv            - converting a non-sodar file\n");
-  printf("  -date mm/dd/yyyy - only convert data recorded on mm/dd/yyyy\n");
-  printf("  -mindate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded before specified date\n");
-  printf("  -maxdate \"mm/dd/yyyy [hh:mm:ss]\" - ignore data recorded after specified date\n");
-  printf("  -mintime \"hh:mm:ss\" - ignore data recorded before specified time (on any date)\n");
-  printf("  -maxtime \"hh:mm:ss\" - ignore data recorded after specified time (on any date)\n");
-  printf("  datafile.csv   - spreadsheet file to be converted. Use '-' to input data\n");
-  printf("                   from standard input\n");
-}
-
-/* ------------------ version ------------------------ */
-
-void version(char *prog){
-    char version_local[100];
-    char revision[100];
-
-    getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-    getRevision(revision);    // get revision
-    printf("\n");
-    printf("%s\n\n",prog);
-    printf("Version: %s\n",version_local);
-    printf("Build: %s\n",revision);
-    printf("Compile Date: %s\n",__DATE__);
-}

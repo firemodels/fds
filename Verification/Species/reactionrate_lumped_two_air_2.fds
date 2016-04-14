@@ -1,0 +1,49 @@
+! Examination of a singular fuel reacting with two
+! different lumped species of air. Each air has the same
+! composition and therefore the same products.
+!
+! Propane + 5*AIR1 = Products 
+! Propane + 5*AIR2 = Products
+!
+! Composition is stoichiometric, so all fuel and both
+! AIR should be consumed and all that reamins is products.
+! --------------------------------------------------------
+
+&HEAD CHID='reactionrate_lumped_two_air_2', TITLE='Lumped Species Reactions, AIR2 MASS_FRACTION_0=0' /
+&MESH IJK=4,1,4, XB=0.0,0.1,0.0,0.025,0.0,0.1 /
+&TIME T_END=1.0 DT=0.01 /
+&MISC INITIAL_UNMIXED_FRACTION=0.0, SUPPRESSION=.FALSE. /
+
+!define primitive species and component species that define air and products
+&SPEC ID = 'PROPANE' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+
+!create air species -- each which can reaction with fuel
+&SPEC ID = 'AIR1', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76, BACKGROUND=.TRUE. /
+&SPEC ID = 'AIR2', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76 /
+
+!create products lumped species
+&SPEC ID = 'PRODUCTS', SPEC_ID = 'CARBON DIOXIDE','WATER VAPOR','NITROGEN', VOLUME_FRACTION = 3,4,18.8 /
+
+!initial fuel and non-background air lumped species
+&INIT MASS_FRACTION(1)=0.06038, SPEC_ID(1)='PROPANE' /
+
+&REAC ID = 'R1',
+      FUEL = 'PROPANE',
+      SPEC_ID_NU = 'PROPANE','AIR1','PRODUCTS'
+      NU=-1,-5,1 /
+
+&REAC ID = 'R2',
+      FUEL = 'PROPANE',
+      SPEC_ID_NU = 'PROPANE','AIR2','PRODUCTS'
+      NU=-1,-5,1 /
+
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='PROPANE', ID='C3H8' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='AIR1', ID='AIR1' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='AIR2', ID='AIR2' /
+&DEVC XYZ=0.05,0.0125,0.05, QUANTITY='MASS FRACTION', SPEC_ID='PRODUCTS', ID='P1' /
+
+&TAIL /

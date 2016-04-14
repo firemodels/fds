@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
@@ -28,7 +28,22 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
 void drawcone(float d1, float height, float *rgbcolor);
 void drawdisk(float diameter, float height, float *rgbcolor);
 
-    /*
+
+/* ------------------ drawnorth ------------------------ */
+
+void drawnorth(void){
+  glPushMatrix();
+  glTranslatef(northangle_position[0], northangle_position[1], northangle_position[2]);
+  glRotatef(-northangle, 0.0, 0.0, 1.0);
+  glBegin(GL_LINES);
+  glColor3fv(foregroundcolor);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.1, 0.0);
+  glEnd();
+  glPopMatrix();
+}
+
+  /*
 typedef struct {
   float xyz[3];
   float trunk_diam;
@@ -65,7 +80,7 @@ void drawtrees(void){
 
     glPushMatrix();
     glTranslatef(treei->xyz[0],treei->xyz[1],treei->xyz[2]);
-    
+
     switch(state){
       case 0:
         glColor4fv(trunccolor);
@@ -97,7 +112,7 @@ void drawtrees(void){
     }
     glPopMatrix();
 
- 
+
   }
   glPopMatrix();
 
@@ -106,7 +121,7 @@ void drawtrees(void){
 
 }
 
-/* ------------------ get_zcell ------------------------ */
+/* ------------------ get_zcell_val ------------------------ */
 
 float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int *loc){
   int imesh;
@@ -292,7 +307,7 @@ void terrain2geom(float xmin, float xmax, float ymin, float ymax, int nx, int ny
   FREEMEMORY(verts);
   FREEMEMORY(faces);
 }
- 
+
 /* ------------------ initterrain_all ------------------------ */
 
 void initterrain_all(void){
@@ -307,7 +322,7 @@ void initterrain_all(void){
     float *znode, *znode_offset;
     int nycell;
     unsigned char *uc_znormal;
-    
+
     meshi = meshinfo + imesh;
 
     terri = meshi->terrain;
@@ -465,7 +480,7 @@ void initterrain_all(void){
     mesh *meshi;
     terraindata *terri;
     int i;
-    
+
     meshi = meshinfo + imesh;
     terri = meshi->terrain;
 
@@ -489,7 +504,7 @@ void initterrain_all(void){
       terri->levels[i]=zmin + i*dz;
     }
     terri->levels[12]=zmax;
-    
+
     freecontour(&meshi->terrain_contour);
     initcontour(&meshi->terrain_contour,rgbptr,nrgb);
 
@@ -513,7 +528,7 @@ void initterrain_all(void){
 
 /* ------------------ initterrain_znode ------------------------ */
 
-void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny, 
+void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
                        int allocate_memory){
   float dx, dy;
   float *x, *y, *z;
@@ -615,7 +630,7 @@ void drawterrain(terraindata *terri, int only_geom){
 
   terrain_color[0]=0.47843;
   terrain_color[1]=0.45882;
-  terrain_color[2]=0.18824; 
+  terrain_color[2]=0.18824;
   terrain_color[3]=1.0;
 
   glPushMatrix();
@@ -681,7 +696,7 @@ void drawterrain(terraindata *terri, int only_geom){
     }
   }
   glEnd();
-    
+
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
 
@@ -689,7 +704,7 @@ void drawterrain(terraindata *terri, int only_geom){
 
 }
 
-/* ------------------ drawterrain ------------------------ */
+/* ------------------ drawterrain_texture ------------------------ */
 
 void drawterrain_texture(terraindata *terri, int only_geom){
   float *znode;
@@ -703,7 +718,7 @@ void drawterrain_texture(terraindata *terri, int only_geom){
 
   terrain_color[0]=1.0;
   terrain_color[1]=1.0;
-  terrain_color[2]=1.0; 
+  terrain_color[2]=1.0;
   terrain_color[3]=1.0;
 
   glPushMatrix();
@@ -770,7 +785,7 @@ void drawterrain_texture(terraindata *terri, int only_geom){
   glEnd();
 
   glDisable(GL_TEXTURE_2D);
-   
+
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
 
@@ -792,7 +807,7 @@ float *get_terraincolor(terraincell *ti){
     index = ti->state[0]%10;
     return rgb_terrain[index];
   }
-  
+
   sv_time = global_times[itimes];
   ter_time = ti->time;
   ileft = ti->interval;
@@ -800,7 +815,7 @@ float *get_terraincolor(terraincell *ti){
   if(ter_time[ileft]<=sv_time&&sv_time<ter_time[ileft+1]){
     return rgb_terrain[ileft%10];
   }
-  
+
   for(i=ileft+1;i<ti->nstates-1;i++){
     if(ter_time[i]<=sv_time&&sv_time<ter_time[i+1]){
       ti->interval=i;
@@ -920,15 +935,15 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   *xmax=xyminmax[1];
   *ymin=xyminmax[2];
   *ymax=xyminmax[3];
-  
+
   FORTWUIREAD(nxy,2);
   *nx=nxy[0];
   *ny=nxy[1];
-  
+
   FSEEK(WUIFILE,16+5*(*nx)*(*ny),SEEK_CUR); // skip over zelev and state
 
   for(;;){
-    
+
     FORTWUIREAD(&time_local,1);
     if(returncode==0)break;
 
@@ -945,8 +960,6 @@ int getterrain_size(char *file,float *xmin, float *xmax, int *nx, float *ymin, f
   fclose(WUIFILE);
 
   return 0;
-
-
 }
 
 /* ------------------ getterrain_data ------------------------ */
@@ -984,13 +997,13 @@ int getterrain_data(char *file,terraindata *terri){
   NewMemory((void **)&cellstate_buffer,nx*ny);
 
 
-  FORTWUIREAD(terri->zcell,ntotal); 
+  FORTWUIREAD(terri->zcell,ntotal);
   FSEEK(WUIFILE,4,SEEK_CUR);fread(terri->state,1,ntotal,WUIFILE);FSEEK(WUIFILE,4,SEEK_CUR);
   init_tnode(terri);
   init_tnorm(terri);
-  
+
   for(nt=0;nt<terri->ntimes;nt++){
-    
+
     FORTWUIREAD(&time_local,1);
     PRINTF("terrain time=%f\n",time_local);
     if(returncode==0)break;
@@ -1029,8 +1042,6 @@ int getterrain_data(char *file,terraindata *terri){
   FREEMEMORY(cellindex_buffer);
   FREEMEMORY(cellstate_buffer);
   return 0;
-
-
 }
 
 /* ------------------ init_terraincell ------------------------ */
@@ -1149,7 +1160,7 @@ void init_tnorm(terraindata *terri){
 
  //     -dzdx -dzdy 1       uu x vv
 
-      
+
 //      znormal = terri->znormal + 3*ijnode2(i,j);
       uc_znormal = terri->uc_znormal + ijnode3(i,j);
       znormal3[0] = -dzdx;
@@ -1291,7 +1302,7 @@ void update_mesh_terrain(void){
   }
 
   // compute z level above bottom mesh
-  
+
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     int ii, jj;

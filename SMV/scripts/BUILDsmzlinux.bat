@@ -1,9 +1,9 @@
 @echo off
-Title Building Smokezip for Linux
+Title Building smokezip for 64 bit linux
 
-::  Windows batch file to build Linux version of smokezip
+Rem  Windows batch file to build smokezip for 64 bit linux
 
-::  setup environment variables (defining where repository resides etc) 
+Rem setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,14 +18,10 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Building Linux version of smokezip
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
-
-plink %svn_logon% %scriptdir%/ssh_command.csh %linux_hostname% %scriptdir% MAKEsmzlinux.csh %smv_revision%
+plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokezip/intel_linux_64 make_zip.sh
 
 echo.
 echo compilation complete

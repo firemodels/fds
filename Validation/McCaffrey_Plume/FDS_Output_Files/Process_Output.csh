@@ -1,8 +1,8 @@
 #!/bin/csh -f
-setenv SVNROOT ~/FDS-SMV
-set WDIR=$SVNROOT/Validation/McCaffrey_Plume/FDS_Output_Files
-set DDIR=$SVNROOT/Validation/McCaffrey_Plume/Current_Results
+ 
+set WDIR=$FDSSMV/Validation/McCaffrey_Plume/FDS_Output_Files
+set DDIR=$FDSSMV/Validation/McCaffrey_Plume/Current_Results
 cd $DDIR
 cp McC*line.csv $WDIR
-cp *svn.txt $WDIR
+cp *git.txt $WDIR
 

@@ -2,13 +2,16 @@
 #define FILE_UTIL_H_DEFINED
 
 #include <time.h>
+#ifdef __MINGW32__
+#include <stdio.h>
+#include "options.h"
+#endif
 
 typedef struct {
   char *file;
   int type;
 } filelistdata;
 
-#ifdef BIT64
 #ifdef X64
 #define FSEEK(a,b,c) _fseeki64(a,b,c)
 #define FTELL(a) _ftelli64(a)
@@ -16,17 +19,15 @@ typedef struct {
 #define FSEEK(a,b,c) fseeko(a,b,c)
 #define FTELL(a) ftello(a)
 #endif
-#else
-#define FSEEK(a,b,c) fseek(a,b,c)
-#define FTELL(a) ftell(a)
-#endif
+
+#define REPLACE_FILE 0
+#define APPEND_FILE 1
 
 EXTERNCPP int FFLUSH(void);
 EXTERNCPP int PRINTF(const char * format, ...);
 EXTERNCPP void set_stdout(FILE *stream);
 EXTERNCPP void getfilesizelabel(int size, char *sizelabel);
-EXTERNCPP void filecopy(char *destdir, char *file, char *filebase);
-EXTERNCPP void copy_file(char *destfile, char *sourcefile, int mode);
+EXTERNCPP void copyfile(char *destdir, char *filein, char *fileout, int mode);
 EXTERNCPP char *get_smokezippath(char *progdir);
 EXTERNCPP int have_prog(char *prog);
 EXTERNCPP int filecat(char *file_in1, char *file_in2, char *file_out);

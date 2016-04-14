@@ -17,13 +17,9 @@ goto:eof
 
 call %envfile%
 
-%svn_drive%
-cd %svn_root%\smv\scripts
+set LIBDIR=%linux_svn_root%/SMV/Build/LIBS
 
-set scriptdir=FDS-SMV/Utilities/Scripts
-set LIBDIR=FDS-SMV/SMV/Build/LIBS
-
-plink %svn_logon% %scriptdir%/ssh_command2.csh %linux_hostname% %LIBDIR%/lib_linux_intel_64 makelibs.sh
+plink %linux_logon% %LIBDIR%/lib_linux_intel_64/makelibs.sh
 
 echo.
 echo build complete

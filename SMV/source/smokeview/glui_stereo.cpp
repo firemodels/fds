@@ -69,37 +69,37 @@ extern "C" void glui_stereo_setup(int main_window){
   if(glui_stereo!=NULL)glui_stereo->close();
   glui_stereo = GLUI_Master.create_glui("Stereo",0,0,0);
   glui_stereo->hide();
-  
-  PANEL_stereo_method = glui_stereo->add_panel(_("Stereo Method"));
+
+  PANEL_stereo_method = glui_stereo->add_panel(_d("Stereo Method"));
   RADIO_showstereo = glui_stereo->add_radiogroup_to_panel(PANEL_stereo_method,&showstereo,STEREO_SHOW,STEREO_CB);
-  RADIOBUTTON_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Off"));
-  RADIOBUTTON_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Successive frames"));
+  RADIOBUTTON_1=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Off"));
+  RADIOBUTTON_seq=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Successive frames"));
   if(videoSTEREO==0)RADIOBUTTON_seq->disable();
-  RADIOBUTTON_2=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Left/Right"));
-  RADIOBUTTON_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Blue"));
-  RADIOBUTTON_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Red/Cyan"));
-  RADIOBUTTON_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_("Custom Red/Custom Blue"));
-  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(PANEL_stereo_method,_("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
-  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(PANEL_stereo_method, _("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
-  
+  RADIOBUTTON_2=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Left/Right"));
+  RADIOBUTTON_3=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Red/Blue"));
+  RADIOBUTTON_4=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Red/Cyan"));
+  RADIOBUTTON_5=glui_stereo->add_radiobutton_to_group(RADIO_showstereo,_d("Custom Red/Custom Blue"));
+  SPINNER_right_green2=glui_stereo->add_spinner_to_panel(PANEL_stereo_method,_d("green"),GLUI_SPINNER_FLOAT,&right_green,STEREO_GREEN,STEREO_CB);
+  SPINNER_right_blue2= glui_stereo->add_spinner_to_panel(PANEL_stereo_method, _d("blue"),GLUI_SPINNER_FLOAT,&right_blue,STEREO_BLUE,STEREO_CB);
+
   SPINNER_right_green2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
   SPINNER_right_blue2->set_float_limits(0.0,1.0,GLUI_LIMIT_CLAMP);
 
   fzero=SCALE2FDS(fzero);
-  SPINNER_zero_parallax=glui_stereo->add_spinner(_("Distance to zero parallax plane (m)"),GLUI_SPINNER_FLOAT,&fzero);
+  SPINNER_zero_parallax=glui_stereo->add_spinner(_d("Distance to zero parallax plane (m)"),GLUI_SPINNER_FLOAT,&fzero);
   glui_stereo->add_checkbox("Show stereo parallax",&show_parallax);
   RADIO_showstereo_frame = glui_stereo->add_radiogroup(&showstereo_frame);
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Left eye"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Right eye"));
-  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_("Both eyes"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_d("Left eye"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_d("Right eye"));
+  glui_stereo->add_radiobutton_to_group(RADIO_showstereo_frame,_d("Both eyes"));
   //SPINNER_zero_parallax->set_float_limits(0.1*xyzmaxdiff,2.0*xyzmaxdiff,GLUI_LIMIT_CLAMP);
   STEREO_CB(STEREO_SHOW);
   Update_Glui_Stereo();
 
-  BUTTON_stereo_1=glui_stereo->add_button(_("Reset"),STEREO_RESET,STEREO_CB);
-  BUTTON_stereo_2=glui_stereo->add_button(_("Save settings"),SAVE_SETTINGS,STEREO_CB);
-  BUTTON_stereo_3=glui_stereo->add_button(_("Close"),STEREO_CLOSE,STEREO_CB);
-  
+  BUTTON_stereo_1=glui_stereo->add_button(_d("Reset"),STEREO_RESET,STEREO_CB);
+  BUTTON_stereo_2=glui_stereo->add_button(_d("Save settings"),SAVE_SETTINGS,STEREO_CB);
+  BUTTON_stereo_3=glui_stereo->add_button(_d("Close"),STEREO_CLOSE,STEREO_CB);
+
   glui_stereo->set_main_gfx_window( main_window );
 }
 

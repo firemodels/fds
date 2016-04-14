@@ -1,12 +1,15 @@
 #define IN_FILE
 
 #include "options.h"
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
 #include <stdlib.h>
+#ifdef pp_OSX
+#include <unistd.h>
+#endif
 #include <math.h>
 #ifdef WIN32
 #include <io.h>
@@ -45,19 +48,19 @@ int PRINTF(const char * format, ...){
   return return_val;
 }
 
-/* ------------------ set_file ------------------------ */
+/* ------------------ set_stdout ------------------------ */
 
 void set_stdout(FILE *stream){
   alt_stdout=stream;
 }
 
-/* ------------------ filecopy ------------------------ */
+#define FILE_BUFFER 1000
 
-#define FILE_BUFFER 1000000
-void filecopy(char *destdir, char *file_in, char *file_out){
+/* ------------------ copyfile ------------------------ */
+
+void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   char buffer[FILE_BUFFER];
-  FILE *streamin;
-  FILE *streamout;
+  FILE *streamin=NULL, *streamout=NULL;
   char *full_file_out=NULL;
   size_t chars_in;
 
@@ -73,61 +76,32 @@ void filecopy(char *destdir, char *file_in, char *file_out){
   }
   strcat(full_file_out,file_out);
 
-  streamout=fopen(full_file_out,"rb");
-  if(streamout!=NULL){
-    fprintf(stderr,"*** Warning: will not overwrite %s%s\n",destdir,file_in);
-    fclose(streamout);
-    fclose(streamin);
-    return;
+  if(mode==REPLACE_FILE){
+    streamout=fopen(full_file_out,"wb");
   }
-  streamout=fopen(full_file_out,"wb");
-  if(streamout==NULL){
-    fclose(streamin);
-    return;
-  }
-  for(;;){
-    int end_of_file;
-       
-    end_of_file=0;
-    chars_in=fread(buffer,1,FILE_BUFFER,streamin);
-    if(chars_in!=FILE_BUFFER)end_of_file=1;
-    if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
-    if(end_of_file==1)break;
-  }
-  fclose(streamin);
-  fclose(streamout);
-}
-
-/* ------------------ copyfile ------------------------ */
-
-void copy_file(char *destfile, char *sourcefile, int mode){
-  char buffer[FILE_BUFFER];
-  FILE *streamin, *streamout;
-  size_t chars_in;
-
-  streamin=fopen(sourcefile,"rb");
-  if(streamin==NULL)return;
-
-  if(mode==0){
-    streamout=fopen(destfile,"wb");
+  else if(mode==APPEND_FILE){
+    streamout=fopen(full_file_out,"ab");
   }
   else{
-    streamout=fopen(destfile,"ab");
+    ASSERT(0);
   }
+
   if(streamout==NULL){
+    FREEMEMORY(full_file_out);
     fclose(streamin);
     return;
   }
-  PRINTF("  Copying %s to %s\n",sourcefile,destfile);
+  PRINTF("  Copying %s to %s\n",file_in,file_out);
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,streamin);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
     if(chars_in>0)fwrite(buffer,chars_in,1,streamout);
     if(end_of_file==1)break;
   }
+  FREEMEMORY(full_file_out);
   fclose(streamin);
   fclose(streamout);
 }
@@ -208,7 +182,7 @@ char *get_filename(char *temp_dir, char *file, int flag){
   char *file_out=NULL;
   FILE *stream=NULL;
 
-  trim(file);
+  trim_back(file);
   file2=trim_front(file);
   if(flag==0){
     stream=fopen(file2,"r");
@@ -233,7 +207,7 @@ char *get_filename(char *temp_dir, char *file, int flag){
 void fullfile(char *file_out, char *dir, char *file){
   char *file2;
 
-  trim(file);
+  trim_back(file);
   file2=trim_front(file);
   strcpy(file_out,"");
   if(dir!=NULL)strcat(file_out,dir);
@@ -268,7 +242,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in1);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
@@ -279,7 +253,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in2);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
@@ -297,7 +271,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   char filename_buffer[1024], *file1_noext;
 
-  trim(file1);
+  trim_back(file1);
   strcpy(filename_buffer,trim_front(file1));
   file1_noext=strstr(filename_buffer,ext);
   strcpy(outfile,"");
@@ -314,9 +288,9 @@ void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
 /* ------------------ can_write_to_dir ------------------------ */
 
 int can_write_to_dir(char *dir){
-  /*! \fn int can_write_to_dir(char *dir)
-      \brief returns 1 if the directory can be written to, 0 otherwise
-  */
+
+// returns 1 if the directory can be written to, 0 otherwise
+
   char *full_name;
   char file_name[256], *file_name_ptr;
   FILE *stream;
@@ -324,7 +298,7 @@ int can_write_to_dir(char *dir){
   int return_val=0;
 
   if(dir==NULL||strlen(dir)==0)return 0;
-  
+
   file_name_ptr=randstr(file_name,20);
   if(file_name_ptr==NULL)return 0;
 
@@ -339,7 +313,7 @@ int can_write_to_dir(char *dir){
   }
 
   strcat(full_name,file_name_ptr);
-  
+
   stream=fopen(full_name,"wb");
   if(stream!=NULL){
     fclose(stream);
@@ -353,9 +327,9 @@ int can_write_to_dir(char *dir){
 /* ------------------ is_file_newer ------------------------ */
 
 int is_file_newer(char *file1, char *file2){
-  /*! \fn int is_file_newer(char *file1, char *file2)
-      \brief returns 1 if file1 is newer than file2, 0 otherwise
-  */
+
+// returns 1 if file1 is newer than file2, 0 otherwise
+
   STRUCTSTAT statbuff1, statbuff2;
   int statfile1, statfile2;
 
@@ -408,9 +382,9 @@ FILE_SIZE get_filesize(const char *filename){
   /* ------------------ file_exists ------------------------ */
 
 int file_exists(char *filename){
-  /*! \fn int file_exists(char *filename)
-      \brief returns 1 if the file filename exists, 0 otherwise
-  */
+
+// returns 1 if the file filename exists, 0 otherwise
+
 #ifdef WIN32
   if(filename==NULL||_access(filename,0)==-1){
     return 0;
@@ -430,7 +404,7 @@ int file_exists(char *filename){
 #endif
 }
 
-/* ------------------ get_filelist ------------------------ */
+/* ------------------ free_filelist ------------------------ */
 
 void free_filelist(filelistdata *filelist, int *nfilelist){
   int i;
@@ -442,13 +416,13 @@ void free_filelist(filelistdata *filelist, int *nfilelist){
   *nfilelist=0;
 }
 
-  /* ------------------ get_filelist ------------------------ */
+  /* ------------------ get_nfilelist ------------------------ */
 
 int get_nfilelist(const char *path, char *key){
   struct dirent *entry;
   DIR *dp;
   int maxfiles=0;
- 
+
   dp = opendir(path);
   if(dp == NULL){
     perror("opendir");
@@ -474,7 +448,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
 
   // DT_DIR - is a diretory
   // DT_REG - is a regular file
- 
+
   dp = opendir(path);
   if(dp == NULL){
     perror("opendir");
@@ -567,12 +541,12 @@ void getfilesizelabel(int size, char *sizelabel){
   }
 }
 
-/* ------------------ rootdir ------------------------ */
+/* ------------------ getprogdir ------------------------ */
 
 char *getprogdir(char *progname, char **svpath){
-  /*! \fn char *getprogdir(char *progname, char **svpath)
-      \brief returns the directory containing the file progname
-  */
+
+// returns the directory containing the file progname
+
   char *progpath, *lastsep, *smokeviewpath2;
 
   lastsep=strrchr(progname,dirseparator[0]);
@@ -614,9 +588,9 @@ char *getprogdir(char *progname, char **svpath){
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
-  /*! \fn char *lastname(char *argi)
-      \brief returns the file name contained in the full path name argi
-  */
+
+// returns the file name contained in the full path name argi
+
   char *lastdirsep;
   char *dir, *filename, cwdpath[1000];
 
@@ -680,9 +654,9 @@ char *get_zonefilename(char *bufptr){
 /* ------------------ file_modtime ------------------------ */
 
 time_t file_modtime(char *filename){
-  /*! \fn time_t file_modtime(char *filename)
-      \brief returns the modification time of the file named filename
-  */
+
+// returns the modification time of the file named filename
+
   STRUCTSTAT statbuffer;
   time_t return_val;
   int statfile;
@@ -698,17 +672,12 @@ time_t file_modtime(char *filename){
 /* ------------------ which ------------------------ */
 
 char *which(char *progname){
-  /*! \fn char *which(char *progname)
-      \brief returns the PATH directory containing the file progname
-  */
-  char *pathlistptr, fullpath[4096], pathlist[4096], prog[4096];
-  char *dir,*returndir;
+
+// returns the PATH directory containing the file progname
+
+  char *pathlist, *pathlistcopy, *fullprogname, *prognamecopy;
+  char *dir,*pathentry;
   char pathsep[2], dirsep[2];
-  int lendir;
-#ifdef WIN32
-  int lenprog;
-  const char *ext;
-#endif
 
 #ifdef WIN32
   strcpy(pathsep,";");
@@ -718,42 +687,44 @@ char *which(char *progname){
   strcpy(dirsep,"/");
 #endif
 
-  if(progname==NULL)return NULL;
-  strcpy(prog,progname);
-  progname=prog;
+  pathlist = getenv("PATH");
+  if(pathlist==NULL||strlen(pathlist)==0||progname==NULL||strlen(progname)==0)return NULL;
 
-  pathlistptr=getenv("PATH");
-  if(pathlistptr==NULL)return NULL;
-  strcpy(pathlist,pathlistptr);
-  
+  NewMemory((void **)&prognamecopy, (unsigned int)(strlen(progname)+4+1));
+  strcpy(prognamecopy, progname);
+
+  NewMemory((void **)&pathlistcopy, (unsigned int)(strlen(pathlist)+1));
+  strcpy(pathlistcopy, pathlist);
+
 #ifdef WIN32
-  lenprog=strlen(prog);
-  ext=progname+lenprog-4;
-  if(lenprog<=4||STRCMP(ext,".exe")!=0){
-    strcat(progname,".exe");
+  {
+    const char *ext;
+
+    ext = prognamecopy+strlen(progname)-4;
+    if(strlen(progname)<=4||STRCMP(ext,".exe")!=0)strcat(prognamecopy, ".exe");
   }
 #endif
-        
-  dir=strtok(pathlist,pathsep);
-  while(dir!=NULL){
-    strcpy(fullpath,dir);
-    strcat(fullpath,dirsep);
-    strcat(fullpath,prog);
-    if(file_exists(fullpath)==1){
-      lendir=strlen(dir);
-      if(lendir<=0)continue;
-      NewMemory((void **)&returndir,(unsigned int)(lendir+2));
-      strcpy(returndir,dir);
-      strcat(returndir,dirsep);
-#ifdef pp_BETA
-      PRINTF("Using %s in %s\n\n",prog,dir);
-#endif
-      return returndir;
+
+  NewMemory((void **)&fullprogname, (unsigned int)(strlen(progname)+4+strlen(dirsep)+strlen(pathlist)+1));
+
+  dir=strtok(pathlistcopy,pathsep);
+  while(dir!=NULL&&strlen(dir)>0){
+    strcpy(fullprogname,dir);
+    strcat(fullprogname,dirsep);
+    strcat(fullprogname,prognamecopy);
+    if(file_exists(fullprogname)==1){
+      NewMemory((void **)&pathentry,(unsigned int)(strlen(dir)+2));
+      strcpy(pathentry,dir);
+      strcat(pathentry,dirsep);
+      FREEMEMORY(pathlistcopy);
+      FREEMEMORY(fullprogname);
+      FREEMEMORY(prognamecopy);
+      return pathentry;
     }
     dir=strtok(NULL,pathsep);
   }
-#ifdef pp_BETA
-  fprintf(stderr,"*** Error: %s not found in any path directory\n",prog);
-#endif
+  FREEMEMORY(pathlistcopy);
+  FREEMEMORY(fullprogname);
+  FREEMEMORY(prognamecopy);
   return NULL;
 }

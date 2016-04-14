@@ -1,9 +1,8 @@
 #!/bin/bash
 
 # Firebot variables
-FDS_SVNROOT=/home/jgs/FDS-SMV
-FIREBOT_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
-FDS2FTMI_DIR=$FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi
+FIREBOT_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
+FDS2FTMI_DIR=$FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi
 OUTPUT_DIR=/home/jgs/FDS-SMV/Utilities/Structural_Interaction/fds2ftmi/scripts/output
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
@@ -21,62 +20,22 @@ rm *.csv
 cd $FDS2FTMI_DIR/examples/h_profile
 rm *.csv 
 
-function usage {
-echo "build_fds2ftmi.sh [ -q queue_name -r revision_number -s -u svn_username -v max_validation_processes -y ]"
-echo "Runs fds2ftmi testing script to run verification cases and build the user guide"
-echo ""
-echo "Options"
-echo "-r - revision_number - run cases using a specific SVN revision number"
-echo "     default: (none, latest SVN HEAD)"
-echo ""
-exit
-}
-
-# Update repository
-SVN_REVISION=''
-while getopts 'hq:r:su:v:y' OPTION
-do
-case $OPTION in
-  h)
-   usage;
-   ;;
-  q)
-   QUEUE="$OPTARG"
-   ;;
-  r)
-   SVN_REVISION="$OPTARG"
-esac
-done
-shift $(($OPTIND-1))
-
-if [[ $SVN_REVISION = "" ]]; then
-   cd $FDS_SVNROOT/FDS_Source
-   svn update >> $OUTPUT_DIR/stage1 2>&1
-   cd $FDS2FTMI_DIR/source
-   svn update >> $OUTPUT_DIR/stage1_ftmi 2>&1
-else
-   cd $FDS_SVNROOT/FDS_Source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1 2>&1
-   cd $FDS2FTMI_DIR/source
-   svn update -r $SVN_REVISION >> $OUTPUT_DIR/stage1_ftmi 2>&1
-   echo "At revision ${SVN_REVISION}." 
-fi
-
-SVN_REVISION=`tail -n 1 $OUTPUT_DIR/stage1 | sed "s/[^0-9]//g"`
-echo $SVN_REVISION
+# Get Git Hash
+GIT_HASH=$(shell git describe --long)
+echo %GIT_HASH%
 
 # Print the FDS revision number on User Guide
 cd $FDS2FTMI_DIR
-sed -i "s:.*SVN Repository Revision.*:SVN Repository Revision ${SVN_REVISION}:" fds2ftmi_user_guide.tex
+sed -i "s:.*Git Hash.*:%GIT_HASH%:" fds2ftmi_user_guide.tex
 
 # Print the FDS revision number on python scripts
 cd $FIREBOT_DIR
-sed -i "s:.*SVN=.*:SVN='${SVN_REVISION}':" generate_plots.py
+sed -i "s:.*GIT=.*:GIT='%GIT_HASH%':" generate_plots.py
 
 compile_fds_db()
 {
    # Clean and compile FDS debug
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2a
 }
@@ -84,7 +43,7 @@ compile_fds_db()
 check_compile_fds_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64_db
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64_db
    if [ -e "fds_intel_linux_64_db" ]
    then
       stage2a_success=true
@@ -108,7 +67,7 @@ check_compile_fds_db()
 compile_fds()
 {
    # Clean and compile FDS
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage4a
 }
@@ -116,7 +75,7 @@ compile_fds()
 check_compile_fds()
 {
    # Check for errors in FDS compilation
-   cd $FDS_SVNROOT/FDS_Compilation/intel_linux_64
+   cd $FDS_GITROOT/FDS_Compilation/intel_linux_64
    if [ -e "fds_intel_linux_64" ]
    then
       stage4a_success=true
@@ -143,7 +102,7 @@ check_compile_fds()
 compile_fds2ftmi_db()
 {
    # Clean and compile FDS2ftmi debug
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
    make -f ../makefile clean &> /dev/null
    ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage2a_ftmi
 }
@@ -151,7 +110,7 @@ compile_fds2ftmi_db()
 check_compile_fds2ftmi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64_db
    if [ -e "fds2ftmi_linux_64_db" ]
    then
       stage2a_ftmi_success=true
@@ -177,7 +136,7 @@ check_compile_fds2ftmi_db()
 compile_fds2ftmi()
 {
    # Clean and compile FDS2ftmi debug
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
    make -f ../makefile clean &> /dev/null
    ./make_fds2ftmi.sh &> $OUTPUT_DIR/stage4a_ftmi
 }
@@ -185,7 +144,7 @@ compile_fds2ftmi()
 check_compile_fds2ftmi()
 {
    # Check for errors in FDS debug compilation
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/intel_linux_64
    if [ -e "fds2ftmi_linux_64" ]
    then
       stage4a_ftmi_success=true
@@ -212,7 +171,7 @@ check_compile_fds2ftmi()
 run_ansys_license_test()
 {
    # Run simple test to see if ansys license is available
-   cd $FDS_SVNROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
+   cd $FDS_GITROOT/Utilities/Structural_Interaction/fds2ftmi/scripts
    ansys150 -j lic_test <lic_test.ans> $OUTPUT_DIR/stage7_ansys_license
    rm lic_test.db
    rm lic_test.err
@@ -290,12 +249,10 @@ pdflatex fds2ftmi_user_guide.tex
 
 # Revert the FDS revision number on User Guide
 cd $FDS2FTMI_DIR
-rm fds2ftmi_user_guide.tex
-svn up -r $SVN_REVISION fds2ftmi_user_guide.tex
+git checkout -- fds2ftmi_user_guide.tex
 
 # Revert the FDS revision number on python scripts
 cd $FIREBOT_DIR
-rm generate_plots.py
-svn up -r $SVN_REVISION generate_plots.py
+git checkout -- generate_plots.py
 
 exit

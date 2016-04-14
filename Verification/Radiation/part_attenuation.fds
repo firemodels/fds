@@ -1,4 +1,4 @@
-&HEAD CHID='part_attenuation', TITLE='Test radiation attenuation for lagrangian particles, SVN $Revision$'/
+&HEAD CHID='part_attenuation', TITLE='Test radiation attenuation for lagrangian particles'/
 
 &MESH XB=-2,-1, 0, 1, 0, 1 IJK=10,10,10 /
 &MESH XB= 0, 1, 0, 1, 0, 1 IJK=10,10,10 /

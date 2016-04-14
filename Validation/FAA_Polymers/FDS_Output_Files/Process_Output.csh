@@ -1,9 +1,9 @@
 #!/bin/csh -f
-setenv SVNROOT ~/FDS-SMV
-set WDIR=$SVNROOT/Validation/FAA_Polymers/FDS_Output_Files
-set DDIR=$SVNROOT/Validation/FAA_Polymers/Current_Results
+ 
+set WDIR=$FDSSMV/Validation/FAA_Polymers/FDS_Output_Files
+set DDIR=$FDSSMV/Validation/FAA_Polymers/Current_Results
 cd $DDIR
 cp *devc.csv $WDIR
-cp *svn.txt $WDIR
+cp *git.txt $WDIR
 cd $WDIR
 

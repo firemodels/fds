@@ -9,20 +9,20 @@
 #define GAS 1
 #define GASGAS 2
 
-/*  
+/*
   contouring algorithm
   --------------------
 
   task:  produce shaded color contours for values v_{i,j} at
          points (x_i,y_j): 0<=i<=ibar and 0<=j<=jbar.
 
-  sub-task: shade the portion of each rectangle (formed by points 
+  sub-task: shade the portion of each rectangle (formed by points
            (x_i,y_j) (x_i+1,y_j+1) ) that lie between the levels
            contourlow and contourhigh
 
   there are 81 cases to consider since each of the four corners
-  of the above rectangle can be 
-      1) below contourlow, 
+  of the above rectangle can be
+      1) below contourlow,
       2) between contourlow and contourhigh
       3) above contourhigh
 
@@ -239,7 +239,7 @@ void setcontourslice(contour *ci,int idir,float xyz){
 
 /*  ------------------ getcontours ------------------------ */
 
-void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
+void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float *levels,int cellflag,int dataflag,
                  const contour *ci){
   int n,i,j;
@@ -426,7 +426,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
 
 /*  ------------------ getlinecontours ------------------------ */
 
-void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,  
+void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float line_min, const float line_max,
                  const contour *ci){
   int n,i,j;
@@ -442,7 +442,7 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   int blankit=0;
   float dval;
 
-  
+
 
   nlevels=ci->nlevels;
   dval=0.0;
@@ -553,7 +553,7 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
     vallownet[n]=val[n]-contlow;
     valhighnet[n]=val[n]-conthigh;
   }
-  xcopy[4]=x[0]; 
+  xcopy[4]=x[0];
   ycopy[4]=y[0];
   vallownet[4]=vallownet[0];
   valhighnet[4]=valhighnet[0];
@@ -578,7 +578,7 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   for(n=0;n<*nnode;n++){
     edgenum=contourfill_list[casenum][n+1];
     if(edgenum>=0){
-      xnode[n]=x[edgenum]; 
+      xnode[n]=x[edgenum];
       ynode[n]=y[edgenum];
     }
     else{
@@ -630,7 +630,7 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
     valcopy[n]=val[n];
     valnet[n]=val[n]-linelevel;
   }
-  xcopy[4]=x[0]; 
+  xcopy[4]=x[0];
   ycopy[4]=y[0];
   valnet[4]=valnet[0];
   valcopy[4]=val[0];
@@ -706,7 +706,7 @@ void GetContourAreas(const contour *ci){
   }
 }
 
-/*  ------------------ drawcontours ------------------------ */
+/*  ------------------ DrawContours ------------------------ */
 
 void DrawContours(const contour *ci){
   int nlevels, n, npolys, *polysize, ipoly, j, nnodes;
@@ -724,7 +724,7 @@ void DrawContours(const contour *ci){
     polysize=ci->polysize[n];
     npolysv=ci->npolys;
     npolys=npolysv[n];
-    if(ci->idir==1){
+    if(ci->idir==XDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         glBegin(GL_POLYGON);
@@ -734,7 +734,7 @@ void DrawContours(const contour *ci){
         glEnd();
       }
     }
-    else if(ci->idir==2){
+    else if(ci->idir==YDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         nnodes=polysize[ipoly];
@@ -745,7 +745,7 @@ void DrawContours(const contour *ci){
         glEnd();
       }
     }
-    else if(ci->idir==3){
+    else if(ci->idir==ZDIR){
       glColor4fv(rgb[n]);
       for(ipoly=0;ipoly<npolys;ipoly++){
         glBegin(GL_POLYGON);
@@ -777,7 +777,7 @@ void DrawLineContours(const contour *ci, float linewidth){
     xline=ci->xlines[n];
     yline=ci->ylines[n];
     nlinepts=ci->nlines[n];
-    if(ci->idir==1){
+    if(ci->idir==XDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);
@@ -786,7 +786,7 @@ void DrawLineContours(const contour *ci, float linewidth){
       }
       glEnd();
     }
-    else if(ci->idir==2){
+    else if(ci->idir==YDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);
@@ -795,7 +795,7 @@ void DrawLineContours(const contour *ci, float linewidth){
       }
       glEnd();
     }
-    else if(ci->idir==3){
+    else if(ci->idir==ZDIR){
       glColor4fv(rgb[n]);
       glLineWidth(linewidth);
       glBegin(GL_LINES);

@@ -1,4 +1,4 @@
-&HEAD CHID='convective_cooling', TITLE='Convective cooling test case, SVN $Revision$' /
+&HEAD CHID='convective_cooling', TITLE='Convective cooling test case' /
 
 &MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
 

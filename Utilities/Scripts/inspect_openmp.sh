@@ -1,28 +1,78 @@
 #!/bin/bash
+CURDIR=`pwd`
 
-# inspect_openmp.sh
-# Kristopher Overholt
-# 4/30/2013
+GITROOT=~/FDS-SMVgitclean
+if [ "$FDSSMV" != "" ] ; then
+  GITROOT=$FDSSMV
+fi
+RESULT_DIR=$GITROOT/Utilities/Scripts/inspect_openmp_ti3
+
+function usage {
+  echo "Usage: inspect_openmp.sh [-r repository root] [-v] casename.dfs"
+  echo ""
+  echo " -d result-dir - directory containing thread checker results"
+  echo "    [default: $RESULT_DIR"
+  echo " -h display this message"
+  echo " -r repository root - FDS repository root directory"
+  echo "    [default: $GITROOT]"
+  echo " -v   - list command that will be used to thread check"
+  echo "input_file - input file"
+  echo ""
+  exit
+}
+
+if [ $# -lt 1 ]
+then
+  usage
+fi
+
+showinput=
+while getopts 'd:hr:v' OPTION
+do
+case $OPTION  in
+  d)
+   RESULT_DIR="$OPTARG"
+   ;;
+  h)
+   usage;
+   ;;
+  r)
+   GITROOT="$OPTARG"
+   ;;
+  v)
+   showinput=1
+   ;;
+esac
+done
+shift $(($OPTIND-1))
+case=$1
 
 # Perform OpenMP thread checking (locate deadlocks and data races)
 
-export SVNROOT=`pwd`/../..
 source /opt/intel/inspector_xe/inspxe-vars.sh quiet
 
-TARGET=$SVNROOT/FDS_Compilation/intel_linux_64_inspect
+TARGET=$GITROOT/FDS_Compilation/intel_linux_64_inspect
 
-if [ -d inspect_openmp_ti3 ]
-then
-    rm -r inspect_openmp_ti3
+if [ "$showinput" == "" ] ; then
+  if [ -d $RESULT_DIR ] ; then
+    rm -r $RESULT_DIR
+  fi
+  cd $TARGET
+  make -f ../makefile clean
+  ./make_fds.sh
 fi
 
-cd $TARGET
-make -f ../makefile clean
-./make_fds.sh
-
-cd $SVNROOT/Verification/Timing_Benchmarks
 export OMP_NUM_THREADS=2
+
+if [ "$showinput" == "1" ] ; then
+  echo inspxe-cl -collect ti3 -knob scope=normal \
+          -result-dir $RESULT_DIR \
+          -search-dir src=$GITROOT/FDS_Source \
+          -- $GITROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
+  exit
+fi
+cd $CURDIR
 inspxe-cl -collect ti3 -knob scope=normal \
-          -result-dir $SVNROOT/Utilities/Scripts/inspect_openmp_ti3 \
-          -search-dir src=$SVNROOT/FDS_Source \
-          -- $SVNROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect bench2.fds
+          -result-dir $RESULT_DIR \
+          -search-dir src=$GITROOT/FDS_Source \
+          -- $GITROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect $case

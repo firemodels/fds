@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -14,7 +14,7 @@
 #include <direct.h>
 #endif
 
-/* ------------------ snifferrors ------------------------ */
+/* ------------------ _Sniff_Errors ------------------------ */
 
 void _Sniff_Errors(char *whereat){
   int error;
@@ -33,13 +33,13 @@ void _Sniff_Errors(char *whereat){
 
 void updateLights(float *pos1, float *pos2){
   int i;
-  GLfloat ambientlight2[4], diffuselight2[4];  
+  GLfloat ambientlight2[4], diffuselight2[4];
   int lightCount;
   float div;
-        
+
   glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, lightmodel_localviewer == 0? GL_FALSE : GL_TRUE);
   glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, lightmodel_separatespecularcolor == 0? GL_SINGLE_COLOR : GL_SEPARATE_SPECULAR_COLOR);
-  
+
   lightCount = 0;
   if(light_enabled0){
     ++lightCount;
@@ -48,14 +48,14 @@ void updateLights(float *pos1, float *pos2){
     ++lightCount;
   }
 
-  div = lightCount > 0? 1.0f/(float)lightCount : 1.0f;  
+  div = lightCount > 0? 1.0f/(float)lightCount : 1.0f;
   for(i=0;i<3;i++){
     ambientlight2[i]=ambientlight[i]*div;
     diffuselight2[i]=diffuselight[i]*div;
   }
   ambientlight2[3]=1.0;
   diffuselight2[3]=1.0;
-  if(light_enabled0){  
+  if(light_enabled0){
     glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuselight2);
     glLightfv(GL_LIGHT0,GL_AMBIENT,ambientlight2);
     if(pos1!=NULL)glLightfv(GL_LIGHT0,GL_POSITION,pos1);
@@ -65,7 +65,7 @@ void updateLights(float *pos1, float *pos2){
     glDisable(GL_LIGHT0);
   }
 
-  if(light_enabled1){  
+  if(light_enabled1){
     glLightfv(GL_LIGHT1,GL_DIFFUSE,diffuselight2);
     glLightfv(GL_LIGHT1,GL_AMBIENT,ambientlight2);
     if(pos2!=NULL)glLightfv(GL_LIGHT1,GL_POSITION,pos2);
@@ -112,7 +112,7 @@ void transparentoff(void){
   glDisable(GL_BLEND);
 }
 
-/* ------------------ smv2quat ------------------------ */
+/* ------------------ camera2quat ------------------------ */
 
 void camera2quat(camera *ca, float *quat, float *rotation){
   if(ca->quat_defined==1){
@@ -190,7 +190,7 @@ void ResetView(int option){
     float azimuth, elevation,axis[3];
     float quat_temp[4];
     float x, y, z;
-   
+
     azimuth = camera_current->az_elev[0]*DEG2RAD;
     elevation = camera_current->az_elev[1]*DEG2RAD;
 
@@ -250,7 +250,7 @@ void init_volrender_script(char *prefix, char *tour_label, int startframe, int s
     runscript=1;
     fclose(script_stream);
   }
-} 
+}
 
 /* ------------------ parse_commandline ------------------------ */
 
@@ -292,10 +292,13 @@ void parse_commandline(int argc, char **argv){
       if(
         strncmp(argi,"-points",7)==0||
         strncmp(argi,"-frames",7)==0||
-#ifdef pp_LANG        
+#ifdef pp_LANG
         strncmp(argi,"-lang",5)==0||
-#endif        
+#endif
         strncmp(argi,"-script",7)==0||
+#ifdef pp_LUA
+        strncmp(argi,"-luascript",10)==0||
+#endif
         strncmp(argi,"-startframe",11)==0||
         strncmp(argi,"-skipframe",10)==0||
         strncmp(argi,"-bindir",7)==0||
@@ -303,7 +306,10 @@ void parse_commandline(int argc, char **argv){
         ){
         iarg++;
       }
-      if(strncmp(argi,"-convert_ini",12)==0)iarg+=2;
+      if(strncmp(argi, "-convert_ini", 12)==0||
+         strncmp(argi, "-convert_ssf", 12)==0){
+        iarg += 2;
+      }
 
       if(smv_parse==0)continue;
       if(smv_parse==1)break;
@@ -390,6 +396,17 @@ void parse_commandline(int argc, char **argv){
         default_script = insert_scriptfile(scriptbuffer);
       }
     }
+#ifdef pp_LUA
+    {
+      char luascriptbuffer[1024];
+
+      STRCPY(luascriptbuffer,fdsprefix);
+      STRCAT(luascriptbuffer,".lua");
+      if(default_luascript==NULL&&STAT(luascriptbuffer,&statbuffer)==0){
+        default_luascript = insert_luascriptfile(luascriptbuffer);
+      }
+    }
+#endif
   }
   if(smv_filename!=NULL){
     STRUCTSTAT statbuffer;
@@ -418,7 +435,7 @@ void parse_commandline(int argc, char **argv){
     STRCAT(sliceinfo_filename,"_slice.info");
   }
 
-  // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file 
+  // if smokezip created part2iso files then concatenate .smv entries found in the .isosmv file
   // to the end of the .smv file creating a new .smv file.  Then read in that .smv file.
 
   {
@@ -456,10 +473,7 @@ void parse_commandline(int argc, char **argv){
 
   for (i=1;i<argc;i++){
     if(strncmp(argv[i],"-",1)!=0)continue;
-    if(strncmp(argv[i],"-ini",3)==0){
-      writeini(GLOBAL_INI,NULL);
-    }
-    else if(strncmp(argv[i],"-update_bounds",14)==0){
+    if(strncmp(argv[i],"-update_bounds",14)==0){
       use_graphics=0;
       update_bounds=1;
     }
@@ -489,7 +503,7 @@ void parse_commandline(int argc, char **argv){
         show_lang_menu=1;
       }
     }
-#endif    
+#endif
     else if(strncmp(argv[i],"-convert_ini",12)==0){
       char *local_ini_from=NULL, *local_ini_to=NULL;
 
@@ -498,13 +512,30 @@ void parse_commandline(int argc, char **argv){
       if(local_ini_from!=NULL&&local_ini_to!=NULL){
         NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
         strcpy(ini_from,local_ini_from);
-        
+
         NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
         strcpy(ini_to,local_ini_to);
         convert_ini=1;
       }
     }
-    else if(strncmp(argv[i],"-update_ini",11)==0){
+    else if(strncmp(argv[i], "-convert_ssf", 12)==0){
+      char *local_ssf_from = NULL, *local_ssf_to = NULL;
+
+      if(++i<argc)local_ssf_from = argv[i];
+      if(++i<argc)local_ssf_to = argv[i];
+      if(local_ssf_from!=NULL&&local_ssf_to!=NULL){
+        NewMemory((void **)&ssf_from, strlen(local_ssf_from)+1);
+        strcpy(ssf_from, local_ssf_from);
+
+        NewMemory((void **)&ssf_to, strlen(local_ssf_to)+1);
+        strcpy(ssf_to, local_ssf_to);
+        convert_ssf = 1;
+      }
+    }
+    else if(strncmp(argv[i], "-update_ssf", 11)==0){
+      update_ssf = 1;
+    }
+    else if(strncmp(argv[i], "-update_ini", 11)==0){
       char *local_ini_from=NULL, *local_ini_to=NULL;
 
       if(++i<argc)local_ini_from = argv[i];
@@ -512,7 +543,7 @@ void parse_commandline(int argc, char **argv){
       if(local_ini_from!=NULL){
         NewMemory((void **)&ini_from,strlen(local_ini_from)+1);
         strcpy(ini_from,local_ini_from);
-        
+
         NewMemory((void **)&ini_to,strlen(local_ini_to)+1);
         strcpy(ini_to,local_ini_to);
         convert_ini=1;
@@ -526,22 +557,19 @@ void parse_commandline(int argc, char **argv){
       tempdir_flag=1;
     }
 #endif
-    else if(strncmp(argv[i],"-time",5)==0){
-      time_flag=1;
-    }
     else if(strncmp(argv[i],"-h",2)==0){
       usage(argv);
       exit(0);
     }
     else if(strncmp(argv[i],"-noblank",8)==0){
-      arg_iblank=1;
+      iblank_set_on_commandline=1;
       use_iblank=0;
     }
     else if(strncmp(argv[i],"-fed",4)==0){
       compute_fed=1;
     }
     else if(strncmp(argv[i],"-blank",6)==0){
-      arg_iblank=1;
+      iblank_set_on_commandline=1;
       use_iblank=1;
     }
     else if(strncmp(argv[i],"-gversion",9)==0){
@@ -550,7 +578,7 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i],"-volrender",10)!=0&&(strncmp(argv[i],"-version",8)==0||strncmp(argv[i],"-v",2)==0)
       ){
-      display_version_info();
+      display_version_info("Smokeview ");
       exit(0);
     }
     else if(
@@ -564,8 +592,24 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i],"-runscript",10)==0){
       from_commandline=1;
+#ifdef pp_LUA
+      strcpy(script_filename, "");
+#endif
       runscript=1;
     }
+#ifdef pp_LUA
+    else if(strncmp(argv[i],"-runluascript",13)==0){
+      from_commandline=1;
+      strcpy(luascript_filename, "");
+      strncpy(luascript_filename, fdsprefix, 1020);
+      strcat(luascript_filename, ".lua");
+      runluascript=1;
+    }
+    else if(strncmp(argv[i],"-killscript",11)==0){
+      from_commandline=1;
+      exit_on_script_crash=1;
+    }
+#endif
     else if(strncmp(argv[i],"-skipframe",10)==0){
       from_commandline=1;
       ++i;
@@ -597,6 +641,16 @@ void parse_commandline(int argc, char **argv){
         runscript=1;
       }
     }
+#ifdef pp_LUA
+    else if(strncmp(argv[i],"-luascript",10)==0){
+      from_commandline=1;
+      ++i;
+      if(i<argc){
+        strncpy(luascript_filename,argv[i],1024);
+        runluascript=1;
+      }
+    }
+#endif
     else if(strncmp(argv[i],"-noexit",7)==0){
       noexit=1;
     }
@@ -622,6 +676,21 @@ void parse_commandline(int argc, char **argv){
       exit(1);
     }
   }
+  if(update_ssf==1){
+    int len_prefix = 0;
+
+    len_prefix = strlen(fdsprefix);
+
+    FREEMEMORY(ssf_from);
+    NewMemory((void **)&ssf_from, len_prefix+4+1);
+    strcpy(ssf_from, fdsprefix);
+    strcat(ssf_from, ".ssf");
+
+    FREEMEMORY(ssf_to);
+    NewMemory((void **)&ssf_to, len_prefix+4+1);
+    strcpy(ssf_to, fdsprefix);
+    strcat(ssf_to, ".ssf");
+  }
   if(make_volrender_script==1){
 
     NewMemory((void **)&volrender_scriptname,(unsigned int)(len_casename+14+1));
@@ -630,73 +699,24 @@ void parse_commandline(int argc, char **argv){
 
     init_volrender_script(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
   }
-#ifndef pp_BETA
-  if(time_flag==1){
-    STRCAT(TITLE," - ");
-    STRCAT(TITLE,__TIME__);
-  }
-#endif
 }
 
-/* ------------------ version ------------------------ */
+/* ------------------ display_version_info ------------------------ */
 
-void display_version_info(void){
-    char version[256];
-    char revision[256];
-
-    getPROGversion(version);
-    getRevision(revision);    // get revision
-    PRINTF("\n");
-    PRINTF("%s\n\n",TITLERELEASE);
-    PRINTF("Version: %s\n",version);
-#ifdef BIT64
-    PRINTF("Smokeview (64 bit) Build: %s\n",revision);
-#else
-    PRINTF("Smokeview (32 bit) Build: %s\n",revision);
-#endif
-#ifdef WIN32
-#ifdef X64
-    PRINTF("Platform: WIN64 ");
-#else
-    PRINTF("Platform: WIN32 ");
-#endif
-#ifdef pp_INTEL
-    PRINTF(" (Intel C/C++)\n");
-#else
-#ifdef WIN32
-    PRINTF(" (MSVS C/C++)\n");
-#endif
-#endif
-#endif
-#ifndef pp_OSX64
-#ifdef pp_OSX
-    PRINTF("Platform: OSX\n");
-#endif
-#endif
-#ifdef pp_OSX64
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifndef pp_LINUX64
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX\n");
-#endif
-#endif
-#ifdef pp_LINUX64
-    PRINTF("Platform: LINUX64\n");
-#endif
-    PRINTF("Build Date: %s\n",__DATE__);
-    if(revision_fds>0){
-      PRINTF("FDS Build: %i\n",revision_fds);
-    }
-    if(smokeviewpath!=NULL){
-      PRINTF("Smokeview path: %s\n",smokeviewpath);
-    }
-    if(smokezippath!=NULL){
-      PRINTF("Smokezip path: %s\n",smokezippath);
-    }
-    if(texturedir!=NULL){
-      PRINTF("Texture directory path: %s\n",texturedir);
-    }
+void display_version_info(char *progname){
+  version(progname);
+  if(fds_version!=NULL){
+    PRINTF("FDS Build: %s\n",fds_githash);
+  }
+  if(smokeviewpath!=NULL){
+    PRINTF("Smokeview path: %s\n",smokeviewpath);
+  }
+  if(smokezippath!=NULL){
+    PRINTF("Smokezip path: %s\n",smokezippath);
+  }
+  if(texturedir!=NULL){
+    PRINTF("Texture directory path: %s\n",texturedir);
+  }
 }
 
 /* ------------------ usage ------------------------ */
@@ -704,7 +724,7 @@ void display_version_info(void){
 void usage(char **argv){
   char buffer[1000];
 
-  PRINTF("%s\n",TITLERELEASE);
+  PRINTF("%s\n",release_title);
   PRINTF("%s\n\n",_("Visualize fire/smoke flow simulations."));
   PRINTF("Usage: %s [options] casename",get_basefilename(buffer,argv[0]));
   PRINTF("%s\n\n",_("where "));
@@ -720,6 +740,11 @@ void usage(char **argv){
   PRINTF("%s\n",_(" -ng_ini        - No graphics version of -ini."));
   PRINTF("%s\n",_(" -runscript     - run the script file casename.ssf"));
   PRINTF("%s\n",_(" -script scriptfile - run the script file scriptfile"));
+#ifdef pp_LUA
+  PRINTF("%s\n",_(" -runluascript  - run the lua script file casename.lua"));
+  PRINTF("%s\n",_(" -luascript scriptfile - run the Lua script file scriptfile"));
+  PRINTF("%s\n",_(" -killscript    - exit smokeview (with an error code) if the script fails"));
+#endif
   PRINTF("%s\n",_(" -skipframe n   - render every n frames"));
   PRINTF("%s\n",_(" -startframe n  - start rendering at frame n"));
   PRINTF("%s\n",_(" -stereo        - activate stereo mode"));
@@ -749,6 +774,12 @@ void usage(char **argv){
 #ifdef pp_DEG
     strcat(label,", pp_DEG");
 #endif
+#ifdef pp_DRAWISO
+    strcat(label, ", pp_DRAWISO");
+#endif
+#ifdef pp_ffmpeg
+    strcat(label, ", pp_ffmpeg");
+#endif
 #ifdef pp_GEOMTEST
     strcat(label,", pp_GEOMTEST");
 #endif
@@ -761,6 +792,9 @@ void usage(char **argv){
 #ifdef pp_GPUTHROTTLE
     strcat(label,", pp_GPUTHROTTLE");
 #endif
+#ifdef pp_HAZARD
+    strcat(label, ", pp_HAZARD");
+#endif
 #ifdef pp_INTEL
     strcat(label,", pp_INTEL");
 #endif
@@ -770,11 +804,11 @@ void usage(char **argv){
 #ifdef pp_LINUX
     strcat(label,", pp_LINUX");
 #endif
-#ifdef pp_LINUX64
-    strcat(label,", pp_LINUX64");
-#endif
 #ifdef pp_MEMDEBUG
     strcat(label,", pp_MEMDEBUG");
+#endif
+#ifdef pp_MEMPRINT
+    strcat(label, ", pp_MEMPRINT");
 #endif
 #ifdef pp_memstatus
     strcat(label,", pp_memstatus");
@@ -788,9 +822,6 @@ void usage(char **argv){
 #ifdef pp_OSX
     strcat(label,", pp_OSX");
 #endif
-#ifdef pp_OSX64
-    strcat(label,", pp_OSX64");
-#endif
 #ifdef pp_PILOT
     strcat(label,", pp_PILOT");
 #endif
@@ -802,9 +833,6 @@ void usage(char **argv){
 #endif
 #ifdef WIN32
     strcat(label,", WIN32");
-#endif
-#ifdef X64
-    strcat(label,", X64");
 #endif
     PRINTF("  \n");
     PRINTF("%s\n\n",_("  Smokeview was built using the following pre-processing directives:"));

@@ -1,6 +1,6 @@
 simply_beam
-%FDS_SVNROOT%\FDS_Compilation\intel_win_64\fds_win_64
-ansys150
+%FDS_GITROOT%\FDS_Compilation\intel_win_64\fds_win_64
+%ANSYS%
 600 2
 10
 25

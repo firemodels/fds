@@ -1,7 +1,7 @@
 #!/bin/csh -f
-setenv SVNROOT ~/FDS-SMV
-set WDIR=$SVNROOT/Validation/Beyler_Hood/FDS_Output_Files
-set DDIR=$SVNROOT/Validation/Beyler_Hood/Current_Results
+ 
+set WDIR=$FDSSMV/Validation/Beyler_Hood/FDS_Output_Files
+set DDIR=$FDSSMV/Validation/Beyler_Hood/Current_Results
 cp $DDIR/*devc.csv $WDIR
-cp $DDIR/*svn.txt $WDIR
+cp $DDIR/*git.txt $WDIR
 

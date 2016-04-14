@@ -1,4 +1,9 @@
 #!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR
+
+LUA=$1
+
 OPTS="-i -6"
 LIBDIR=`pwd`
 SRCDIR=$LIBDIR/../../../source
@@ -35,3 +40,19 @@ cp libpng.a $LIBDIR/.
 cd $SRCDIR/zlib114
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
+
+if [ "$LUA" == "lua" ]; then
+
+# Lua # Lua interpreter
+cd $SRCDIR/lua-5.3.1/src
+export TARGET=liblua.a
+./makelib.sh $OPTS
+cp liblua.a $LIBDIR/.
+
+# LPEG # Lua parsing libarary to parse SSF files
+cd $SRCDIR/lpeg-1.0.0
+export TARGET=macosx
+./makelib.sh $OPTS
+cp lpeg.so $LIBDIR/.
+fi
+

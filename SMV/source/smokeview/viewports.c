@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -41,9 +41,9 @@ int getStringWidth(char *string){
   return length;
 }
 
-/* ------------------------ GetVP_info ------------------------- */
+/* ------------------------ get_viewport_info ------------------------- */
 
-void Get_VP_info(void){
+void get_viewport_info(void){
   int doit;
   float text_height;
   float text_width;
@@ -79,24 +79,24 @@ void Get_VP_info(void){
   doit=0;
   if(visMeshlabel==1){
     ninfo_lines++;
-    doit=1;  
+    doit=1;
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visx_all==1)||visGrid==noGridProbe||visGrid==GridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visy_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
   if(((showplot3d==1||visGrid!=noGridnoProbe)&&visz_all==1)||visGrid==GridProbe||visGrid==noGridProbe){
     if(visgridloc==1){
       ninfo_lines++;
-      doit=1;  
+      doit=1;
     }
   }
 
@@ -198,7 +198,7 @@ void Get_VP_info(void){
   VP_scene.left=titlesafe_offset;
   VP_scene.down=titlesafe_offset+MAX(VP_timebar.height,VP_info.height);
   VP_scene.width=screenWidth-2*titlesafe_offset-VP_colorbar.width;
-  VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset; 
+  VP_scene.height=screenHeight-MAX(VP_timebar.height,VP_info.height)-VP_title.height - 2*titlesafe_offset;
   VP_scene.right = VP_scene.left + VP_scene.width;
   VP_scene.top = VP_scene.down + VP_scene.height;
 
@@ -212,13 +212,13 @@ void Get_VP_info(void){
 }
 
  /* ------------------------ SUB_portortho ------------------------- */
- 
-int SUB_portortho(int quad, 
+
+int SUB_portortho(int quad,
                   portdata *p,
                    GLdouble portx_left, GLdouble portx_right, GLdouble portx_down, GLdouble portx_top,
                    GLint screen_left, GLint screen_down
                    ){
-  
+
   GLint subport_left, subport_right, subport_down, subport_top;
   GLdouble subportx_left, subportx_right, subportx_down, subportx_top;
   GLsizei subport_width, subport_height;
@@ -228,7 +228,7 @@ int SUB_portortho(int quad,
   int irow, icol;
 
   switch(quad){
-  case 0:            
+  case 0:
     port_pixel_width = p->width;
     port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
@@ -286,9 +286,9 @@ int SUB_portortho(int quad,
 }
 
 
-/* ------------------------ SUB_portortho ------------------------- */
+/* ------------------------ SUB_portortho2 ------------------------- */
 
-int SUB_portortho2(int quad, 
+int SUB_portortho2(int quad,
                   portdata *p,
                   GLint screen_left, GLint screen_down
                   ){
@@ -307,7 +307,7 @@ int SUB_portortho2(int quad,
   portx_down = p->down;
   portx_top = p->down + p->height;
   switch(quad){
-  case 0:            
+  case 0:
     port_pixel_width = p->width;
     port_pixel_height = p->height;
     port_unit_width = portx_right - portx_left;
@@ -365,10 +365,10 @@ int SUB_portortho2(int quad,
 }
 
 /* ------------------------ SUB_portfrustum ------------------------- */
- 
-int SUB_portfrustum(int quad, 
+
+int SUB_portfrustum(int quad,
                    portdata *p,
-                   GLdouble portx_left, GLdouble portx_right, 
+                   GLdouble portx_left, GLdouble portx_right,
                    GLdouble portx_down, GLdouble portx_top,
                    GLdouble portx_near, GLdouble portx_far,
                    GLint screen_left, GLint screen_down
@@ -541,7 +541,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -571,7 +571,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -601,7 +601,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
       plotval=(int)(plotval*100-0.5);
     }
     plotval/=100;
-          
+
     sprintf(buff_label,"%f",plotval);
     trimzeros(buff_label);
     strcat(buff_label," m");
@@ -634,7 +634,7 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ------------------------ TIME BAR Viewport ------------------------- */
+/* ------------------------ TIMEBAR_viewport ------------------------- */
 
 void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #ifdef pp_memstatus
@@ -725,7 +725,7 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #endif
 }
 
-/* --------------------- COLOR BAR Viewport ------------------------- */
+/* --------------------- COLORBAR_viewport ------------------------- */
 
 void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   if(SUB_portortho2(quad,&VP_colorbar,screen_left, screen_down)==0)return;
@@ -736,7 +736,7 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   drawColorBars();
 }
 
-    /* -------------------------- TITLE Viewport -------------------------- */
+    /* -------------------------- TITLE_viewport -------------------------- */
 
 void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
@@ -751,17 +751,17 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
 
   if(gversion==0){
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,textdown, FULLTITLE);
+      outputText(left,textdown, plot3d_title);
     }
     else{
-      outputText(left,textdown, TITLE);
+      outputText(left,textdown, release_title);
     }
   }
   else{
     char label[256];
     int smv_top, smv_top2, fds_top;
 
-    if(revision_fds>0){
+    if(fds_githash!=NULL){
       fds_top=textdown;
       smv_top=fds_top+VP_title.text_height+v_space;
       smv_top2=smv_top+VP_title.text_height+v_space;
@@ -770,15 +770,11 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
       smv_top=textdown;
       smv_top2=smv_top+VP_title.text_height+v_space;
     }
-    outputText(left,smv_top2,TITLE);
-#ifdef BIT64
-    sprintf(label,"Smokeview (64 bit) revision: %s",revision_smv);
-#else
-    sprintf(label,"Smokeview (32 bit) revision: %s",revision_smv);
-#endif
+    outputText(left,smv_top2,release_title);
+    sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
     outputText(left,smv_top,label);
-    if(revision_fds>0){
-      sprintf(label,"FDS revision:%i",revision_fds);
+    if(fds_githash!=NULL){
+      sprintf(label,"FDS build:%s",fds_githash);
       outputText(left,fds_top,label);
     }
   }
@@ -836,7 +832,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fnear =  - eyeyINI-1.0;
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
-  
+
   FrustumAsymmetry=0.0;
   StereoCameraOffset=0.0;
   aperture_temp=aperture;
@@ -865,7 +861,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fright = widthdiv2;
   fup = scene_aspect_ratio*widthdiv2;
   fdown = -scene_aspect_ratio*widthdiv2;
-  
+
   if(showstereo==STEREO_NONE||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
     FrustumAsymmetry=0.0;
@@ -920,7 +916,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 
     elevation = camera_current->az_elev[1];
     azimuth = camera_current->az_elev[0];
-    
+
     /* set view direction for virtual tour */
     {
       tourdata *touri;
@@ -956,20 +952,10 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     getinverse(modelview_setup,inverse_modelview_setup);
 
     glMultMatrixf(modelview_identity);
-    
+
     glTranslatef(xcen,ycen,zcen);
 
     // rotate scene
-    {
-      float u[3], axis[3], angle;
-
-      u[0]=0.0;
-      u[1]=0.0;
-      u[2]=1.0;
-      rotateu2v(user_zaxis,u,axis,&angle);//xx
-      glRotatef(RAD2DEG*angle,axis[0],axis[1],axis[2]);
-      glRotatef(zaxis_angles[2],u[0],u[1],u[2]);
-    }
     if(rotation_type==ROTATION_3AXIS){
       glMultMatrixf(quat_rotation);
     }
@@ -979,7 +965,17 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       }
       glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
-    
+    {
+      float u[3], axis[3], angle;
+
+      u[0] = 0.0;
+      u[1] = 0.0;
+      u[2] = 1.0;
+      rotateu2v(user_zaxis, u, axis, &angle);
+      glRotatef(RAD2DEG*angle, axis[0], axis[1], axis[2]);
+      glRotatef(zaxis_angles[2], u[0], u[1], u[2]);
+    }
+
     glTranslatef(-xcen,-ycen,-zcen);
 
     glGetFloatv(GL_MODELVIEW_MATRIX,modelview_scratch);
@@ -1024,7 +1020,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     FREEMEMORY(geominfoptrs);
     ngeominfoptrs=0;
     GetGeomInfoPtrs(&geominfoptrs,&ngeominfoptrs);
-    if(ngeominfoptrs>0)Sort_Embedded_Geometry(modelview_scratch);
+    if(ngeominfoptrs>0)ShowHideSortGeometry(modelview_scratch);
     if(showiso==1&&sort_iso_triangles==1&&niso_trans>0)Sort_Iso_Triangles(modelview_scratch);
 
     glScalef(mscale[0],mscale[1],mscale[2]);

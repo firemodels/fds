@@ -9,7 +9,7 @@
 
 &MISC TMPA=10. /
 
-&RADI RADIATIVE_FRACTION=0.4 /
+
 
 &REAC FUEL         = 'N-HEPTANE'
       FYI        = 'Heptane, C_7 H_16'

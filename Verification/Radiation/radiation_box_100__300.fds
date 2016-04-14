@@ -37,7 +37,7 @@ RADI NUMBER_RADIATION_ANGLES=1000
 RADI NUMBER_RADIATION_ANGLES=2000  
 
 ------------------------------------------------------------------------
-&HEAD CHID='radiation_box_100__300', TITLE='Test wall heat transfer in a box, SVN $Revision$'/
+&HEAD CHID='radiation_box_100__300', TITLE='Test wall heat transfer in a box'/
 
 &MESH XB=0.0,1.0,0.0,1.0,0.0,1.0, IJK =100,100,100 /
 &MISC Y_CO2_INFTY=0.,HUMIDITY=0./

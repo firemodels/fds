@@ -12,23 +12,24 @@
 GLhandleARB p_smoke, p_3dslice, p_zonesmoke, p_volsmoke;
 
 void printInfoLog(GLhandleARB obj);
-
+#define LINK_BAD 0
+#define LINK_GOOD 1
 /* ------------------ setZoneSmokeShaders ------------------------ */
 
 int setZoneSmokeShaders(){
   GLhandleARB vert_shader, frag_shader;
   GLint error_code;
-    
+
   const GLchar *FragmentShaderSource[]={
     "uniform int zonedir,zoneinside;"
     "uniform float xyzmaxdiff,zlay,odl,odu;"
     "uniform vec3 eyepos,boxmin, boxmax;"
     "varying vec3 fragpos;"
-    
+
     "void main(){"
     "  float L,opacity,alpha,alpha_min,alpha_zlay;"
     "  float factor_U, factor_L, grey;"
-    
+
     "  vec3 dalphamin,dalphamax;"
     "  L=distance(fragpos,eyepos)*xyzmaxdiff;"
     "  alpha_min=1000000.0;"
@@ -135,10 +136,10 @@ int setZoneSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -228,10 +229,10 @@ int set3DSliceShaders(void){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -274,7 +275,7 @@ int setVolSmokeShaders(){
     "uniform int drawsides[7];"
     "varying vec3 fragpos;"
     "uniform float mass_extinct;"
-    
+
 #ifdef pp_GPUDEPTH
 // http://en.wikipedia.org/wiki/Depth_buffer#Mathematics
     "float LinearizeDepth(vec2 uv){"
@@ -379,10 +380,10 @@ int setVolSmokeShaders(){
     "    if(block_val<0.5)soot_val=0.0;"
     "    if(havefire==1){"
     "      if(slicetype==1){"
-    "        tempval = texture3D(fire_texture,position);" 
+    "        tempval = texture3D(fire_texture,position);"
     "      }"
     "      else{"
-    "        tempval = texture3D(fire_texture,position2);" 
+    "        tempval = texture3D(fire_texture,position2);"
     "      }"
     "      colorindex = clamp((tempval-temperature_min)/(temperature_max-temperature_min),0.0,1.0);"
     "      color_val = texture1D(smokecolormap,colorindex).rgb;"
@@ -463,10 +464,10 @@ int setVolSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -504,7 +505,6 @@ int setVolSmokeShaders(){
 
   if(error_code!=1)return error_code;
   return error_code;
-
 }
 
 /* ------------------ setSmokeShaders ------------------------ */
@@ -523,7 +523,7 @@ int setSmokeShaders(){
   const GLchar *VertexShaderSource[]={
     "uniform sampler1D smokecolormap;"
     "uniform float hrrpuv_max_smv, hrrpuv_cutoff;"
-    "uniform float aspectratio, smoke3d_rthick, fire_alpha;"
+    "uniform float aspectratio, smoke3d_rthick, fire_alpha, smoke_albedo;"
     "uniform int have_smoke, adjustalphaflag;"
 
     "attribute float hrr, smoke_alpha;"
@@ -557,16 +557,15 @@ int setSmokeShaders(){
     "  }"
     "  hrrlocal=(hrr/254.0)*hrrpuv_max_smv;"
     "  if(hrrlocal>hrrpuv_cutoff){"
-    "    colorindex=0.51+(hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff);"
+    "    colorindex=0.51+((hrrlocal-hrrpuv_cutoff)/(hrrpuv_max_smv-hrrpuv_cutoff))/2.0;"
     "    colorindex=clamp(colorindex,0.5,1.0);"
     "    alpha=fire_alpha/255.0;"
+    "    hrrcolor = texture1D(smokecolormap,colorindex);"
+    "    newcolor=vec4(vec3(hrrcolor),alpha);"
     "  }"
     "  else{"
-    "    colorindex=hrrlocal/hrrpuv_cutoff;"
-    "    colorindex=clamp(colorindex,0.0,0.49);"
+    "    newcolor=vec4(smoke_albedo,smoke_albedo,smoke_albedo,alpha);"
     "  }"
-    "  hrrcolor = texture1D(smokecolormap,colorindex);"
-    "  newcolor=vec4(vec3(hrrcolor),alpha);"
     "  gl_Position = ftransform();"
     "}"
 };
@@ -603,10 +602,10 @@ int setSmokeShaders(){
   case GL_INVALID_ENUM:
     PRINTF(" INVALID ENUM\n");
     break;
-  case 0:
+  case LINK_BAD:
     PRINTF(" Link failed\n");
     break;
-  case 1:
+  case LINK_GOOD:
     PRINTF(" Link succeeded\n");
     break;
   default:
@@ -624,6 +623,8 @@ int setSmokeShaders(){
   GPU_have_smoke =     glGetUniformLocation(p_smoke,"have_smoke");
   GPU_aspectratio =    glGetUniformLocation(p_smoke,"aspectratio");
   GPU_adjustalphaflag =glGetUniformLocation(p_smoke,"adjustalphaflag");
+  GPU_smoke_albedo = glGetUniformLocation(p_smoke, "smoke_albedo");
+
   GPU_hrr =            glGetAttribLocation(p_smoke,"hrr");
   GPU_smokealpha =     glGetAttribLocation(p_smoke,"smoke_alpha");
   return error_code;
@@ -631,7 +632,7 @@ int setSmokeShaders(){
 }
 
 
-/* ------------------ LoadZoneSmokeShaders ------------------------ */
+/* ------------------ Load3DSliceShaders ------------------------ */
 
 void Load3DSliceShaders(void){
   glUseProgramObjectARB(p_3dslice);
@@ -665,7 +666,7 @@ void UnLoadShaders(void){
 
 int init_shaders(void){
   GLenum err;
-  
+
   gpuactive=0;
   usegpu=0;
   if(opengl_version<200){
@@ -743,7 +744,7 @@ void createDepthTexture( void ){
 		glDeleteTextures( 1, &depthtexture_id );
 		depthtexture_id = 0;
 	}
-	
+
   glActiveTexture(GL_TEXTURE4);
   glGenTextures(1, &depthtexture_id);
   glBindTexture(GL_TEXTURE_2D, depthtexture_id);
@@ -753,7 +754,7 @@ void createDepthTexture( void ){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);	
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
   glActiveTexture(GL_TEXTURE0);
 
 }
@@ -785,4 +786,3 @@ void printInfoLog(GLhandleARB obj){
   }
 }
 #endif
-

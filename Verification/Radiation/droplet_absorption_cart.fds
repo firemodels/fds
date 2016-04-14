@@ -13,7 +13,7 @@ By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical
 value of dT should be equal to the time averaged Q_abs.
 
 --------------------FDS Data-----------------------------
-&HEAD CHID='droplet_absorption_cart',TITLE='Cartesian droplet absorption test case, SVN $Revision$' /
+&HEAD CHID='droplet_absorption_cart',TITLE='Cartesian droplet absorption test case' /
 
 &MESH IJK=3,3,3, XB=0.0,3.0,0.0,3.0,0.0,3.0 /
 

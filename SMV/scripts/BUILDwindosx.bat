@@ -1,6 +1,7 @@
 @echo off
+Title Building wind2fds for 64 bit OSX
 
-Rem  Windows batch file to build a release Smokeview for Linux 32.
+Rem  Windows batch file to build wind2fds for 64 bit OSX
 
 Rem setup environment variables (defining where repository resides etc) 
 
@@ -19,11 +20,8 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\smv\scripts
 
-set scriptdir=FDS-SMV/SMV/scripts
-
-plink %svn_logon% %scriptdir%/ssh_command.csh %osx_hostname% %scriptdir% MAKEwindosx.csh
+plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/wind2fds/intel_osx_64 make_wind.sh
 
 echo.
 echo compilation complete

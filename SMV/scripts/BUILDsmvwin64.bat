@@ -1,5 +1,5 @@
 @echo off
-Title Building Smokeview for 64 bit Windows
+Title Building release Smokeview for 64 bit Windows
 
 Rem  Windows batch file to build a release Smokeview for Windows 64.
 
@@ -18,16 +18,12 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo Using the environment variables:
 echo.
-echo Using SVN revision %smv_revision% to build a 64 bit Windows Smokeview
+echo Using GIT revision %smv_revision% to build a 64 bit Windows Smokeview
 
 %svn_drive%
-cd %svn_root%\smv\source\smokeview
-
-cd %svn_root%\smv\Build\intel_win_64
-call make_smv
-copy %svn_root%\smv\bin\smv5_win_64.exe %svn_root%\smv\for_bundle\smokeview64_release.exe
+cd %svn_root%\SMV\Build\smokeview\intel_win_64
+call make_smv -r
 
 echo.
 echo compilation complete

@@ -43,9 +43,11 @@ LABEL
   render slice files
 
 UNLOADALL
-LOADFILE
+LOADSLICE
+ TEMPERATURE
+ 2 1.6
  thouse5_01.sf
-KEYBOARD 
+KEYBOARD
  *
 KEYBOARD
  y
@@ -74,8 +76,9 @@ LABEL
 UNLOADALL
 LOADINIFILE
  thouse5_gslice.ini
-LOADFILE
- thouse5_24.sf
+LOADSLICE
+ TEMPERATURE
+ 0 0.0
 SETTIMEVAL
  60.000000
 
@@ -118,8 +121,12 @@ LABEL
 UNLOADALL
 LOADINIFILE
  thouse5_gslice.ini
-LOADVFILE
- thouse5_24.sf
+// LOADVFILE
+//  thouse5_23.sf
+LOADVSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
 SETTIMEVAL
  60.000000
 
@@ -186,8 +193,8 @@ LABEL
   render iso-surface
 
 UNLOADALL
-LOADFILE
- thouse5_01.iso
+LOADISO
+ TEMPERATURE: 30.0, 100.0
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -211,8 +218,8 @@ LABEL
   render boundary file (cell averaged)
 
 UNLOADALL
-LOADFILE
- thouse5_03.bf
+LOADBOUNDARY
+ WALL TEMPERATURE
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -235,8 +242,8 @@ RENDERONCE
 LABEL
   render boundary file (cell centered)
 
-LOADFILE
- thouse5_06.bf
+LOADBOUNDARY
+ WALL TEMPERATURE
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -262,8 +269,8 @@ LABEL
 UNLOADALL
 LOADINIFILE
  thouse5_bound_trunc.ini
-LOADFILE
- thouse5_03.bf
+LOADBOUNDARY
+ WALL TEMPERATURE
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -331,7 +338,7 @@ LABEL
   render two left/right stereo images
 
 LOADINIFILE
- thouse5_lr_stereo.ini 
+ thouse5_lr_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -343,7 +350,7 @@ LABEL
   render two stereo images
 
 LOADINIFILE
- thouse5_rc_stereo.ini 
+ thouse5_rc_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -355,7 +362,7 @@ LABEL
   render two stereo images
 
 LOADINIFILE
- thouse5_rb_stereo.ini 
+ thouse5_rb_stereo.ini
 SETTIMEVAL
  30.000000
 RENDERONCE
@@ -402,6 +409,14 @@ RENDERONCE
 LABEL
   render 3D smoke, clipping blockages and smoke
 
+UNLOADALL
+LOAD3DSMOKE
+ soot mass fraction
+LOAD3DSMOKE
+ HRRPUV
+SETVIEWPOINT
+ external
+
 LOADINIFILE
  thouse5_clip_blockages_data.ini
 SETTIMEVAL
@@ -439,7 +454,7 @@ SHOWPLOT3DDATA
 PLOT3DPROPS
  1 0 4 1
 RENDERONCE
-thouse5_plot3d_val 
+thouse5_plot3d_val
 
 SHOWPLOT3DDATA
  1 1 1 0 5.866670
@@ -490,8 +505,8 @@ LOADINIFILE
 UNLOADALL
 SETVIEWPOINT
  external
-LOADFILE
- thouse5_32_fed.iso
+LOADISO
+ Fractional effective dose: 0.3, 1.0, 3.0
 SETTIMEVAL
  5.000000
 RENDERONCE
@@ -522,11 +537,10 @@ LOADINIFILE
 SCENECLIP
  1
 SETVIEWPOINT
- top
-ZSCENECLIP
- 0 0.0 1 2.000000
-LOADFILE
- thouse5_35_fed.sf
+ upy
+LOADSLICE
+ Fractional effective dose
+ 2 1.6
 SETTIMEVAL
  5.0
 RENDERONCE
@@ -548,7 +562,7 @@ RENDERONCE
 
 LABEL
   render chopped slice file (ceiling jet)
-  
+
 LOADINIFILE
  thouse5_cjet.ini
 UNLOADALL
@@ -652,7 +666,9 @@ LABEL
 UNLOADALL
 LOADINIFILE
  thouse5_device.ini
-LOADFILE
+LOADSLICE
+ TEMPERATURE
+ 1 5.87
  thouse5_17.sf
 SETTIMEVAL
  5.000000

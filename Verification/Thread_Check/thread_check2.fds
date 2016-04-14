@@ -1,0 +1,10 @@
+&HEAD CHID = 'thread_inspect2' /
+
+&MULT ID='m1', DX=0.4, DY=0.5, I_UPPER=1, J_UPPER=1 /
+&MESH IJK=40,50,50, XB=-0.4,0.0,-0.5,0.0,0.0,0.5, MULT_ID='m1' /
+
+&TIME T_END=0.1 /
+
+&TAIL /
+
+

@@ -7,7 +7,7 @@
 #include "geometry.h"
 #include "datadefs.h"
 
-/* ------------------ parse_device_keyword ------------------------ */
+/* ------------------ get_canopy_info ------------------------ */
 
 int get_canopy_info(FILE *stream, float **center, float **radh){
   int ndevices=0,ncanopies=0, count=0;
@@ -25,12 +25,12 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
 
       ndevices++;
       fgets(buffer,255,stream);
-      trim(buffer);
+      trim_back(buffer);
       front = trim_front(buffer);
       percen = strchr(front,'%');
       if(percen!=NULL){
         *percen=0;
-        trim(front);
+        trim_back(front);
       }
       if(STRCMP(front,"CANOPY")==0)ncanopies++;
     }
@@ -52,12 +52,12 @@ int get_canopy_info(FILE *stream, float **center, float **radh){
 
       count++;
       fgets(buffer,255,stream);
-      trim(buffer);
+      trim_back(buffer);
       front = trim_front(buffer);
       percen = strchr(front,'%');
       if(percen!=NULL){
         *percen=0;
-        trim(front);
+        trim_back(front);
       }
       centerptr[0]=0.0;
       centerptr[1]=0.0;
@@ -162,8 +162,7 @@ void rotateu2v(float *u, float *v, float *axis, float *angle){
   }
 }
 
-
-/* ------------------ mult_quat ------------------------ */
+/* ------------------ angleaxis2quat ------------------------ */
 
 void angleaxis2quat(float angle, float *axis, float *quat){
   float sum;
@@ -238,7 +237,7 @@ void mult_quat(float x[4], float y[4], float z[4]){
   z[3]=z2[3];
 }
 
-/* ------------------ mult_quat ------------------------ */
+/* ------------------ normalize_quat ------------------------ */
 
 void normalize_quat(float x[4]){
   float sum;
@@ -403,7 +402,7 @@ void getVertInfo(geomdata *geom){
     verti->verts=NULL;
     verti->type=GEOM_INTERIOR;
   }
-  
+
   // count triangles connected to each vertex
 
   for(i=0;i<geom->ntris;i++){
@@ -496,7 +495,7 @@ void getVertInfo(geomdata *geom){
     if(verti->nverts>0)ResizeMemory((void **)&verti->verts,verti->nverts*sizeof(vertdata *));
   }
 }
-/* ------------------ calcNormal3 ------------------------ */
+/* ------------------ getNormal ------------------------ */
 
 void getNormal(float *v1, float *v2, float *v3, float *area, float *normal){
   float u[3], v[3], norm;
@@ -632,7 +631,7 @@ void InitGeom(geomdata *geomi, float *xyz, int nxyz, int *tris, int ntris){
   trii->next=NULL;
 }
 
-/* --------------------------  DeleteTri ------------------------------------ */
+/* --------------------------  RemoveTri ------------------------------------ */
 
 void RemoveTri(tridata *trii){
   tridata *prev, *next;
@@ -644,7 +643,7 @@ void RemoveTri(tridata *trii){
   trii->active=0;
 }
 
-/* --------------------------  DeleteVert ------------------------------------ */
+/* --------------------------  RemoveVert ------------------------------------ */
 
 void RemoveVert(vertdata *verti){
   int i;
@@ -662,6 +661,8 @@ void RemoveVert(vertdata *verti){
   next->prev=prev;
   verti->active=0;
 }
+
+/* --------------------------  Retriangulate ------------------------------------ */
 
 void Retriangulate(vertdata **verts, int nverts, tridata **tris){
 }

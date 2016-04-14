@@ -1,6 +1,6 @@
 #include "options.h"
 #include "glew.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -40,7 +40,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   firedata_local = meshi->volrenderinfo.firedataptr;
   slicetype = meshi->volrenderinfo.smokeslice->slicetype;
 
-  if(slicetype==SLICE_NODE){
+  if(slicetype==SLICE_NODE_CENTER){
     xplt = meshi->xplt_cen;
     yplt = meshi->yplt_cen;
     zplt = meshi->zplt_cen;
@@ -83,7 +83,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
   if(firedata_local!=NULL){
     float dtemp;
 
-    if(slicetype==SLICE_NODE){
+    if(slicetype==SLICE_NODE_CENTER){
       ijk = IJKNODE(i,j,k);
 
       dx = (xyz[0] - xplt[i])/dxbar;
@@ -136,7 +136,7 @@ void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, floa
     *smoke_color=getcolorptr(black);
   }
   if(smokedata_local!=NULL){
-    if(slicetype==SLICE_NODE){
+    if(slicetype==SLICE_NODE_CENTER){
       vv = smokedata_local + ijk;
       val000 = vv[0]; // i,j,k
       val100 = vv[1]; // i+1,j,k
@@ -275,7 +275,7 @@ void init_volrender(void){
   }
   for(i=0;i<nsliceinfo;i++){
     slicedata *slicei;
-    char *shortlabel;
+    char *shortlabel, *longlabel;
     int blocknumber;
     mesh *meshi;
     volrenderdata *vr;
@@ -289,12 +289,13 @@ void init_volrender(void){
     if(slicei->nslicei!=meshi->ibar+1||slicei->nslicej!=meshi->jbar+1||slicei->nslicek!=meshi->kbar+1)continue;
     vr = &(meshi->volrenderinfo);
     shortlabel = slicei->label.shortlabel;
+    longlabel = slicei->label.longlabel;
 
-    if(STRCMP(shortlabel,"temp")==0){  
+    if(STRCMP(shortlabel,"temp")==0){
       vr->fireslice=slicei;
      continue;
     }
-    if(STRCMP(shortlabel,"rho_Soot")==0){
+    if(STRCMP(shortlabel, "rho_Soot")==0||(strlen(longlabel)>=12&&strncmp(longlabel, "SOOT DENSITY",12)==0)){
       vr->smokeslice=slicei;
       continue;
     }
@@ -412,32 +413,32 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
       }
     }
     switch(iwall_min){
-      case -1:
+      case XWALLMIN:
         vert_end[0] = boxmin[0];
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case 1:
+      case XWALLMAX:
         vert_end[0] = boxmax[0];
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case -2:
+      case YWALLMIN:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = boxmin[1];
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case 2:
+      case YWALLMAX:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = boxmax[1];
         vert_end[2] = CLAMP(xyzvert[2] + t_intersect_min*dz,boxmin[2],boxmax[2]);
         break;
-      case -3:
+      case ZWALLMIN:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = boxmin[2];
         break;
-      case 3:
+      case ZWALLMAX:
         vert_end[0] = CLAMP(xyzvert[0] + t_intersect_min*dx,boxmin[0],boxmax[0]);
         vert_end[1] = CLAMP(xyzvert[1] + t_intersect_min*dy,boxmin[1],boxmax[1]);
         vert_end[2] = boxmax[2];
@@ -552,7 +553,7 @@ void compute_all_smokecolors(void){
     int iwall;
     float dstep;
     float dx, dy, dz;
-    float *x, *y, *z; 
+    float *x, *y, *z;
     int ibar, jbar, kbar;
     float *smokecolor;
 
@@ -570,7 +571,7 @@ void compute_all_smokecolors(void){
     dy = y[1] - y[0];
     dz = z[1] - z[0];
     dstep = sqrt(dx*dx+dy*dy+dz*dz)/2.0;
-    
+
     if(vr->smokeslice==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
       float *xyz,xyzarray[3];
@@ -579,8 +580,8 @@ void compute_all_smokecolors(void){
       xyz = xyzarray;
       if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
       switch(iwall){
-        case 1:
-        case -1:
+        case XWALLMIN:
+        case XWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_yz0;
             xyz[0] = meshi->x0;
@@ -611,8 +612,8 @@ void compute_all_smokecolors(void){
             }
           }
           break;
-        case 2:
-        case -2:
+        case YWALLMIN:
+        case YWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_xz0;
             xyz[1] = meshi->y0;
@@ -643,8 +644,8 @@ void compute_all_smokecolors(void){
             }
           }
           break;
-        case 3:
-        case -3:
+        case ZWALLMIN:
+        case ZWALLMAX:
           if(iwall<0){
             smokecolor=vr->smokecolor_xy0;
             xyz[2]=meshi->z0;
@@ -711,8 +712,8 @@ void drawsmoke3dVOLdebug(void){
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           x[0] = meshi->x0;
           x[1] = x[0];
@@ -727,8 +728,8 @@ void drawsmoke3dVOLdebug(void){
         z[1] = zplt[kbar];
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(iwall<0){
           y[0] = meshi->y0;
           y[1] = y[0];
@@ -743,8 +744,8 @@ void drawsmoke3dVOLdebug(void){
         z[1] = zplt[kbar];
         output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(iwall<0){
           z[0] = meshi->z0;
           z[1] = z[0];
@@ -788,8 +789,8 @@ void drawsmoke3dVOLdebug(void){
 
     if(iwall==0||meshi->drawsides[iwall+3]==0)continue;
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           x[0] = meshi->x0;
           glColor3f(1.0,0.0,0.0);
@@ -807,8 +808,8 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[0],y[1],z[0]);
         glVertex3f(x[0],y[0],z[1]);
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(iwall<0){
           y[0] = meshi->y0;
           glColor3f(1.0,0.0,0.0);
@@ -826,8 +827,8 @@ void drawsmoke3dVOLdebug(void){
         glVertex3f(x[0],y[0],z[1]);
         glVertex3f(x[1],y[0],z[0]);
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(iwall<0){
           z[0] = meshi->z0;
           glColor3f(1.0,0.0,0.0);
@@ -889,8 +890,8 @@ void drawsmoke3dVOL(void){
 
     glBegin(GL_TRIANGLES);
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(iwall<0){
           xx = meshi->x0;
           smokecolor = vr->smokecolor_yz0;
@@ -984,8 +985,8 @@ void drawsmoke3dVOL(void){
          smokecolor+=4;
         }
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         n00 = 0;
         n01 = 4;
         n10 = 4*(kbar+1);
@@ -1078,8 +1079,8 @@ void drawsmoke3dVOL(void){
           smokecolor+=4;
         }
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         n00 = 0;
         n01 = 4;
         n10 = 4*(jbar+1);
@@ -1286,7 +1287,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, smokedata_local);
 
-  if(firedata_local!=NULL){  
+  if(firedata_local!=NULL){
     glActiveTexture(GL_TEXTURE1);
     glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, firedata_local);
   }
@@ -1295,7 +1296,9 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
   ni = meshi->ibar;
   nj = meshi->jbar;
   nk = meshi->kbar;
-  glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+  if(meshi->f_iblank_cell!=NULL){
+    glTexSubImage3D(GL_TEXTURE_3D, 0, ijk_offset[0], ijk_offset[1], ijk_offset[2], ni, nj, nk, GL_RED, GL_FLOAT, meshi->f_iblank_cell);
+  }
 
   glActiveTexture(GL_TEXTURE0);
 }
@@ -1403,7 +1406,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   glUniform1f(GPUvol_temperature_max,temperature_max);
   glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
- 
+
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
@@ -1425,7 +1428,7 @@ void drawsmoke3dGPUVOL(void){
 
     // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
     // define parameters for smoke drawing
-    
+
     if(iwall<0){
       xx = meshi->x0;
       yy = meshi->y0;
@@ -1463,8 +1466,8 @@ void drawsmoke3dGPUVOL(void){
     }
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-    
+
+
     if(newmesh==1){
       glUniform1i(GPUvol_inside,inside);
       if(combine_meshes==1){
@@ -1507,8 +1510,8 @@ void drawsmoke3dGPUVOL(void){
     glBegin(GL_TRIANGLES);
 
     switch(iwall){
-      case 1:
-      case -1:
+      case XWALLMIN:
+      case XWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(xx,yy1,z1);
           glVertex3f(xx,yy2,z1);
@@ -1528,8 +1531,8 @@ void drawsmoke3dGPUVOL(void){
           glVertex3f(xx,yy2,z2);
         }
         break;
-      case 2:
-      case -2:
+      case YWALLMIN:
+      case YWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(x1,yy,z1);
           glVertex3f(x2,yy,z2);
@@ -1549,8 +1552,8 @@ void drawsmoke3dGPUVOL(void){
           glVertex3f(x1,yy,z2);
         }
         break;
-      case 3:
-      case -3:
+      case ZWALLMIN:
+      case ZWALLMAX:
         if(inside==0&&iwall>0||inside!=0&&iwall<0){
           glVertex3f(x1,yy1,zz);
           glVertex3f(x2,yy1,zz);
@@ -2059,7 +2062,7 @@ void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
 void *read_volsmoke_allframes_allmeshes2(void *arg){
   int i;
   int nframes=0;
-  
+
   for(i=0;i<nmeshes;i++){
     mesh *meshi;
     volrenderdata *vr;
@@ -2194,8 +2197,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2212,8 +2215,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2290,7 +2293,7 @@ void init_volsmoke_supertexture(supermesh *smesh){
   supermesh_index = smesh - supermeshinfo;
   supermesh_index++;
 
-  PRINTF("Defining smoke and fire textures for supermesh %i ",supermesh_index);
+  PRINTF("  Defining smoke and fire textures for supermesh %i ",supermesh_index);
   FFLUSH();
 
   glActiveTexture(GL_TEXTURE0);
@@ -2307,8 +2310,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2325,8 +2328,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2365,7 +2368,7 @@ mesh *get_minmesh(void){
   int i;
   float mindist=-1.0;
   mesh *minmesh=NULL;
-  
+
   // find mesh closes to origin that is not already in a supermesh
 
   for(i=0;i<nmeshes;i++){
@@ -2573,7 +2576,7 @@ void init_supermesh(void){
     }
 
     // determine if a mesh side is exterior to a supermesh
-    
+
     for(i=0;i<smesh->nmeshes;i++){
       mesh *meshi;
       int *extsides;

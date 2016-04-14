@@ -77,7 +77,7 @@ extern "C" void glui_clip_setup(int main_window){
   glui_clip->hide();
 
   PANEL_clip = glui_clip->add_panel("",GLUI_PANEL_NONE);
-  PANEL_clip_lower = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip Lower"));
+  PANEL_clip_lower = glui_clip->add_panel_to_panel(PANEL_clip,_d("Clip Lower"));
   PANEL_clipx = glui_clip->add_panel_to_panel(PANEL_clip_lower,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xmin=glui_clip->add_spinner_to_panel(PANEL_clipx,"X",GLUI_SPINNER_FLOAT,&clipinfo.xmin,SPINNER_xlower,CLIP_CB);
   SPINNER_clip_xmin->set_float_limits(xclip_min,xclip_max,GLUI_LIMIT_CLAMP);
@@ -97,14 +97,14 @@ extern "C" void glui_clip_setup(int main_window){
   CHECKBOX_clip_zmin=glui_clip->add_checkbox_to_panel(PANEL_clipz,"",&clipinfo.clip_zmin,CLIP_zlower,CLIP_CB);
 
   radio_clip = glui_clip->add_radiogroup_to_panel(PANEL_clip,&clip_mode,CLIP_all,CLIP_CB);
-  RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_("Clipping disabled"));
-  RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages and data"));
-  RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip blockages"));
-  RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_("Clip data"));
+  RADIOBUTTON_clip_1a=glui_clip->add_radiobutton_to_group(radio_clip,_d("Clipping disabled"));
+  RADIOBUTTON_clip_1b=glui_clip->add_radiobutton_to_group(radio_clip,_d("Clip blockages and data"));
+  RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_d("Clip blockages"));
+  RADIOBUTTON_clip_1c=glui_clip->add_radiobutton_to_group(radio_clip,_d("Clip data"));
 
   glui_clip->add_column_to_panel(PANEL_clip,false);
 
-  PANEL_clip_upper = glui_clip->add_panel_to_panel(PANEL_clip,_("Clip upper"));
+  PANEL_clip_upper = glui_clip->add_panel_to_panel(PANEL_clip,_d("Clip upper"));
 
   PANEL_clipX = glui_clip->add_panel_to_panel(PANEL_clip_upper,"X",GLUI_PANEL_NONE);
   SPINNER_clip_xmax=glui_clip->add_spinner_to_panel(PANEL_clipX,"X",GLUI_SPINNER_FLOAT,&clipinfo.xmax,SPINNER_xupper,CLIP_CB);
@@ -136,11 +136,11 @@ extern "C" void glui_clip_setup(int main_window){
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  BUTTON_clip_1=glui_clip->add_button_to_panel(panel_wrapup,_("Save settings"),SAVE_SETTINGS,CLIP_CB);
+  BUTTON_clip_1=glui_clip->add_button_to_panel(panel_wrapup,_d("Save settings"),SAVE_SETTINGS,CLIP_CB);
 
   glui_clip->add_column_to_panel(panel_wrapup,false);
 
-  BUTTON_clip_2=glui_clip->add_button_to_panel(panel_wrapup,_("Close"),CLIP_CLOSE,CLIP_CB);
+  BUTTON_clip_2=glui_clip->add_button_to_panel(panel_wrapup,_d("Close"),CLIP_CLOSE,CLIP_CB);
 
   if(updateclipvals==1){
     set_clip_controls(INI_VALS);  // clip vals from ini file
@@ -169,7 +169,6 @@ extern "C" void hide_glui_clip(void){
 extern "C" void show_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->show();
 }
-
 
 /* ------------------ Update_Glui_Clip ------------------------ */
 
@@ -252,6 +251,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->enable();
       CHECKBOX_clip_ymax->enable();
       CHECKBOX_clip_zmax->enable();
+      show_bothsides_blockages = 1;
+      updatefaces=1;
     }
     else{
       SPINNER_clip_xmin->disable();
@@ -267,6 +268,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->disable();
       CHECKBOX_clip_ymax->disable();
       CHECKBOX_clip_zmax->disable();
+      show_bothsides_blockages = 0;
+      updatefaces=1;
     }
     break;
   case SPINNER_xlower:
