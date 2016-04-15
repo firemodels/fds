@@ -35,7 +35,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   float sum;
   int error;
   int ibar,jbar,kbar;
-  mesh *meshi,*gbb,*gbi;
+  meshdata *meshi,*gbb,*gbi;
   plot3ddata *p;
   int nloaded=0;
   int nx, ny, nz;
@@ -400,7 +400,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 void update_plot3dtitle(void){
   int filenum;
   plot3ddata *plot3di;
-  mesh *meshi;
+  meshdata *meshi;
   char title_base[1024];
 
   getBaseTitle("Smokeview ", title_base);
@@ -416,7 +416,7 @@ void update_plot3dtitle(void){
 }
 /* ------------------ drawplot3d_texture ------------------------ */
 
-void drawplot3d_texture(mesh *meshi){
+void drawplot3d_texture(meshdata *meshi){
   int i,j,k;
   int colorindex;
   float *color1t, *color2t;
@@ -846,7 +846,7 @@ void draw_plot3dframe(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
@@ -862,7 +862,7 @@ void draw_plot3dframe(void){
 
 /* ------------------ drawplot3d ------------------------ */
 
-void drawplot3d(mesh *meshi){
+void drawplot3d(meshdata *meshi){
   int i,j,k;
   int colorindex;
   unsigned char *color1, *color2;
@@ -1286,7 +1286,7 @@ void updatesurface(void){
   if(cache_qdata==0)return;
   for(i=0;i<nmeshes;i++){
     float dlevel=-1.0;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo+i;
     if(meshi->plot3dfilenum==-1)continue;
@@ -1357,7 +1357,7 @@ void updateallplotslices(void){
 
 /* ------------------ get_plot3d_index ------------------------ */
 
-int get_plot3d_index(mesh *meshi, int dir, float val){
+int get_plot3d_index(meshdata *meshi, int dir, float val){
   float valmin;
   int i, ivalmin, nvals;
   float *xyz;
@@ -1393,7 +1393,7 @@ int get_plot3d_index(mesh *meshi, int dir, float val){
 
 /* ------------------ update_plot_xyz ------------------------ */
 
-void update_plot_xyz(mesh *current_mesh_local){
+void update_plot_xyz(meshdata *current_mesh_local){
   int i;
   float xval, yval, zval;
 
@@ -1402,7 +1402,7 @@ void update_plot_xyz(mesh *current_mesh_local){
   zval = current_mesh_local->zplt[current_mesh_local->plotz];
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     float xmin, xmax;
     float ymin, ymax;
     float zmin, zmax;
@@ -1491,7 +1491,7 @@ void updateplotslice(int slicedir){
 
   update_plot_xyz(current_mesh);
   for(i=0;i<nmeshes;i++){
-    mesh *meshjj;
+    meshdata *meshjj;
 
     meshjj = meshinfo + i;
     if(meshjj->plot3dfilenum==-1)continue;
@@ -1501,12 +1501,12 @@ void updateplotslice(int slicedir){
 
 /* ------------------ updateplotslice_mesh ------------------------ */
 
-void updateplotslice_mesh(mesh *mesh_in, int slicedir){
+void updateplotslice_mesh(meshdata *mesh_in, int slicedir){
   int i, j, k;
   int plotx, ploty, plotz;
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
-  mesh *meshi;
+  meshdata *meshi;
   contour *plot3dcontour1ptr, *plot3dcontour2ptr, *plot3dcontour3ptr;
   unsigned char *yzcolorbase, *xzcolorbase, *xycolorbase;
   float *yzcolorfbase, *xzcolorfbase, *xycolorfbase;
@@ -1770,7 +1770,7 @@ void updateshowstep(int val, int slicedir){
     zmin = current_mesh->zplt[0];
     zmax = current_mesh->zplt[current_mesh->kbar];
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       float xmin2, xmax2;
       float ymin2, ymax2;
       float zmin2, zmax2;
@@ -1796,7 +1796,7 @@ void updateshowstep(int val, int slicedir){
 /* ------------------ drawgrid ------------------------ */
 
 void drawsphere(float diameter, unsigned char *rgbcolor);
-void drawgrid(const mesh *meshi){
+void drawgrid(const meshdata *meshi){
   int i, j, k;
   float *xplt, *yplt, *zplt;
   int ibar, jbar, kbar;
@@ -1907,7 +1907,7 @@ void update_plot3d_menulabels(void){
         STRCAT(plot3di->menulabel,label);
       }
       if(nmeshes>1){
-        mesh *plot3dmesh;
+        meshdata *plot3dmesh;
 
         plot3dmesh = meshinfo + plot3di->blocknumber;
         sprintf(label,"%s",plot3dmesh->label);
@@ -1976,7 +1976,7 @@ void get_plot3d_uvw(float xyz[3], float uvw[3]){
   uvw[1]=0.0;
   uvw[2]=0.0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar, kbar;
     float *udata,  *vdata, *wdata, *qdata;
     int nx, ny, nxy;

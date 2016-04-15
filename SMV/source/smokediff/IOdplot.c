@@ -46,7 +46,7 @@ void setup_plot3d(FILE *stream_out){
 plot3d *getplot3d(plot3d *plot3din, casedata *case2){
   int i;
   float dx, dy, dz;
-  mesh *meshin;
+  meshdata *meshin;
 
   meshin = plot3din->plot3dmesh;
   dx = meshin->dx/2.0;
@@ -55,7 +55,7 @@ plot3d *getplot3d(plot3d *plot3din, casedata *case2){
 
   for(i=0;i<case2->nplot3dinfo;i++){
     plot3d *plot3dout_local;
-    mesh *meshout;
+    meshdata *meshout;
 
     plot3dout_local = case2->plot3dinfo + i;
     meshout = plot3dout_local->plot3dmesh;
@@ -87,7 +87,7 @@ void diff_plot3ds(FILE *stream_out){
   for(j=0;j<caseinfo->nplot3dinfo;j++){
     plot3d *plot3di, *plot3d1, *plot3d2;
     float *qframe1, *qframe2, *qout;
-    mesh *plot3dmesh;
+    meshdata *plot3dmesh;
     int nx, ny, nz, nq;
     int len1, len2, lenout;
     int isotest=0;

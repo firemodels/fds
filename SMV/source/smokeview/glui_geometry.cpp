@@ -24,6 +24,11 @@ extern "C" void Volume_CB(int var);
 #define GEOM_MAX_ANGLE 36
 #define GEOM_OUTLINE_IOFFSET 37
 #define GEOM_IVECFACTOR 38
+#define SHOW_TEXTURE_2D_IMAGE 39
+#define SHOW_TEXTURE_1D_IMAGE 40
+#define TERRAIN_ZMIN 41
+#define TERRAIN_ZMAX 42
+#define RESET_ZBOUNDS 43
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
@@ -37,6 +42,8 @@ GLUI_Checkbox *CHECKBOX_faces_interior=NULL;
 GLUI_Checkbox *CHECKBOX_faces_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
+GLUI_Checkbox *CHECKBOX_show_texture_1dimage = NULL;
+GLUI_Checkbox *CHECKBOX_show_texture_2dimage = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -62,6 +69,7 @@ GLUI_Spinner *SPINNER_geom_max_angle=NULL;
 GLUI_Spinner *SPINNER_geom_outline_ioffset=NULL;
 GLUI_Spinner *SPINNER_geom_ivecfactor = NULL;
 GLUI_Spinner *SPINNER_geom_vert_exag=NULL;
+GLUI_Spinner *SPINNER_geom_zmin = NULL, *SPINNER_geom_zmax = NULL;
 
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
@@ -75,6 +83,7 @@ GLUI_Checkbox *CHECKBOX_visaxislabels;
 GLUI *glui_geometry=NULL;
 
 GLUI_Button *BUTTON_blockage_1=NULL;
+GLUI_Button *BUTTON_reset_zbounds = NULL;
 
 GLUI_Checkbox *CHECKBOX_blockage=NULL;
 
@@ -101,6 +110,9 @@ void Blockedit_DLG_CB(int var);
 
 char a_updatelabel[1000];
 char *updatelabel=NULL;
+
+extern "C" void TextureShowMenu(int val);
+extern "C" void get_geom_zbounds(float *zmin, float *zmax);
 
 /* ------------------ update_axislabels ------------------------ */
 
@@ -140,6 +152,37 @@ extern "C" void get_geom_dialog_state(void){
     }
   }
 }
+
+/* ------------------ have_texture ------------------------ */
+
+int have_texture(void){
+  int i;
+
+  for(i = 0; i < ntextures; i++){
+    texturedata *texti;
+
+    texti = textureinfo + i;
+    if(texti->loaded == 1 && texti->used == 1)return 1;
+  }
+  return 0;
+}
+
+/* ------------------ get_texture_show ------------------------ */
+
+int get_texture_show(void){
+  int i;
+
+  for(i = 0; i<ntextures; i++){
+    texturedata *texti;
+
+    texti = textureinfo+i;
+    if(texti->loaded==1&&texti->used==1){
+      if(texti->display == 1)return 1;
+    }
+  }
+  return 0;
+}
+
 
 /* ------------------ glui_geometry_setup ------------------------ */
 
@@ -293,7 +336,7 @@ extern "C" void glui_geometry_setup(int main_window){
   if(unstructured_isopen==1)ROLLOUT_unstructured->open();
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     if(meshi->ncutcells>0){
@@ -324,6 +367,21 @@ extern "C" void glui_geometry_setup(int main_window){
   PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
   SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
+  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
+  
+  get_geom_zbounds(&terrain_zmin, &terrain_zmax);
+  SPINNER_geom_zmin = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmin", GLUI_SPINNER_FLOAT, &terrain_zmin,TERRAIN_ZMIN,Volume_CB); 
+  SPINNER_geom_zmin->set_float_limits(zbar0ORIG, zbarORIG);
+  SPINNER_geom_zmax = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmax", GLUI_SPINNER_FLOAT, &terrain_zmax,TERRAIN_ZMAX,Volume_CB);
+  SPINNER_geom_zmax->set_float_limits(zbar0ORIG, zbarORIG);
+  BUTTON_reset_zbounds = glui_geometry->add_button_to_panel(PANEL_geomtest2,_d("Reset zmin/zmax"), RESET_ZBOUNDS, Volume_CB);
+
+  if(have_texture()==1){
+    show_texture_2dimage = get_texture_show();
+    CHECKBOX_show_texture_2dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "image",&show_texture_2dimage, SHOW_TEXTURE_2D_IMAGE, Volume_CB);
+    Volume_CB(SHOW_TEXTURE_2D_IMAGE);
+  }
+
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
@@ -423,7 +481,6 @@ extern "C" void glui_geometry_setup(int main_window){
   glui_geometry->add_button(_d("Save settings"),SAVE_SETTINGS,Blockedit_DLG_CB);
   BUTTON_blockage_1=glui_geometry->add_button(_d("Close"),CLOSE_WINDOW,Blockedit_DLG_CB);
 
-
   glui_geometry->set_main_gfx_window( main_window );
 }
 
@@ -432,6 +489,43 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+  case RESET_ZBOUNDS:
+    get_geom_zbounds(&terrain_zmin, &terrain_zmax);
+    SPINNER_geom_zmin->set_float_val(terrain_zmin);
+    SPINNER_geom_zmax->set_float_val(terrain_zmax);
+  case TERRAIN_ZMIN:
+  case TERRAIN_ZMAX:
+    if(ABS(terrain_zmin - terrain_zmax) < 0.01){
+      terrain_zmax = terrain_zmin + .01;
+      SPINNER_geom_zmax->set_float_val(terrain_zmax);
+    }
+  case SHOW_TEXTURE_1D_IMAGE:
+    if(show_texture_1dimage == 1 && show_texture_2dimage == 1){
+      show_texture_2dimage=0;
+      Volume_CB(SHOW_TEXTURE_2D_IMAGE);
+      if(CHECKBOX_show_texture_2dimage!=NULL&&CHECKBOX_show_texture_2dimage->get_int_val() == 1)CHECKBOX_show_texture_2dimage->set_int_val(0);
+    }
+    break;
+  case SHOW_TEXTURE_2D_IMAGE:
+    if(show_texture_1dimage==1&&show_texture_2dimage==1){
+      show_texture_1dimage=0;
+      if(CHECKBOX_show_texture_1dimage->get_int_val() == 1)CHECKBOX_show_texture_1dimage->set_int_val(0);
+    }
+    for(i = 0; i<ntextures; i++){
+      texturedata *texti;
+
+      texti = textureinfo+i;
+      if(texti->loaded==1&&texti->used==1){
+        texti->display = 1 - show_texture_2dimage;
+        TextureShowMenu(i);
+        if(CHECKBOX_show_texture_2dimage != NULL){
+          if(texti->display == 1 && CHECKBOX_show_texture_2dimage->get_int_val() == 0)CHECKBOX_show_texture_2dimage->set_int_val(1);
+          if(texti->display == 0 && CHECKBOX_show_texture_2dimage->get_int_val() == 1)CHECKBOX_show_texture_2dimage->set_int_val(0);
+        }
+        break;
+      }
+    }
+    break;
   case GEOM_IVECFACTOR:
     geom_vecfactor = (float)geom_ivecfactor/1000.0;
     break;
@@ -510,7 +604,6 @@ void Blockedit_DLG_CB(int var){
     break;
   case CLOSE_WINDOW:
     DialogMenu(DIALOG_GEOMETRY);
-    smooth_blockages();
     break;
   default:
     ASSERT(FFALSE);
@@ -559,7 +652,7 @@ extern "C" void Update_Blockvals(int flag){
   if(flag==SELECT_BLOCKS){
     if(bchighlight!=NULL){
       char dialog_label[255];
-      mesh *blockmesh;
+      meshdata *blockmesh;
 
       if(nmeshes>1){
         blockmesh = meshinfo + bchighlight->meshindex;

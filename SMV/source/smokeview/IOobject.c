@@ -433,7 +433,7 @@ void getdevice_screencoords(void){
     devicedata *devicei;
     int *ijk;
     char *label;
-    mesh *device_mesh;
+    meshdata *device_mesh;
 
     devicei = deviceinfo + i;
     label = devicei->object->label;
@@ -7210,7 +7210,7 @@ void init_device_plane(devicedata *devicei){
   colorindex=0;
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
     float xvert[12], yvert[12], zvert[12];
     int triangles[18];
     int nvert, ntriangles;

@@ -384,7 +384,7 @@ extern "C" void update_cursor_checkbox(void){
 /* ------------------ update_view_gluilist ------------------------ */
 
 extern "C" void update_view_gluilist(void){
-  camera *ca;
+  cameradata *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     LIST_viewpoints->add_item(ca->view_id,ca->name);
@@ -467,7 +467,7 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_rotation_type,_d("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
   LIST_mesh2->add_item(-1,_d("user specified center"));
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     LIST_mesh2->add_item(i,meshi->label);
@@ -733,7 +733,7 @@ extern "C" void glui_motion_setup(int main_window){
 
 void enable_disable_views(void){
   int ival;
-  camera *cex;
+  cameradata *cex;
 
   ival=LIST_viewpoints->get_int_val();
   if(ival>=0){
@@ -844,7 +844,7 @@ void update_rotation_index(int val){
   *rotation_index=val;
   camera_current->rotation_index=val;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + *rotation_index;
     camera_current->xcen=meshi->xcen;
@@ -1444,7 +1444,7 @@ void Motion_DLG_CB(int var){
 /* ------------------ view_exist ------------------------ */
 
 int view_exist(char *view){
-  camera *ca;
+  cameradata *ca;
 
   if(view==NULL)return 0;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -1475,9 +1475,9 @@ void get_unique_view_name(void){
 void Viewpoint_CB(int var){
   int ival;
   int rotation_type_save;
-  camera *cam1,*cex,*ca;
+  cameradata *cam1,*cex,*ca;
   char *label;
-  camera *prev, *next;
+  cameradata *prev, *next;
   int view_id;
 
   switch(var){
@@ -1647,7 +1647,7 @@ extern "C" void set_startup_view(void){
 extern "C" void add_list_view(char *label_in){
   int ival;
   char *label;
-  camera *cam1,*cam2,*cex,*ca;
+  cameradata *cam1,*cam2,*cex,*ca;
 
   ival=LIST_viewpoints->get_int_val();
   if(ival==-1){

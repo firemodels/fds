@@ -50,7 +50,7 @@ void Update_Framenumber(int changetime){
       int imesh;
 
       for(imesh=0;imesh<nmeshes;imesh++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
         slicedata *fireslice, *smokeslice;
         int j;
@@ -185,7 +185,7 @@ void Update_Framenumber(int changetime){
       }
       for(i=0;i<nmeshes;i++){
         patchdata *patchi;
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi = meshinfo+i;
         patchi=patchinfo + meshi->patchfilenum;
@@ -201,7 +201,7 @@ void Update_Framenumber(int changetime){
     }
     if(showiso==1){
       isodata *isoi;
-      mesh *meshi;
+      meshdata *meshi;
 
       CheckMemory;
       for(i=0;i<nisoinfo;i++){
@@ -209,21 +209,6 @@ void Update_Framenumber(int changetime){
         meshi = meshinfo + isoi->blocknumber;
         if(isoi->loaded==0||meshi->iso_times==NULL||meshi->iso_timeslist==NULL)continue;
         meshi->iso_itime=meshi->iso_timeslist[itimes];
-      }
-    }
-    if(ntotal_smooth_blockages>0){
-      for(i=0;i<nmeshes;i++){
-        smoothblockage *sb;
-        mesh *meshi;
-
-        meshi = meshinfo+i;
-        if(meshi->showsmoothtimelist!=NULL){
-          sb=meshi->showsmoothtimelist[itimes];
-          if(sb==NULL)continue;
-          meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-          meshi->smoothblockagecolors=sb->smoothblockagecolors;
-          meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-        }
       }
     }
     if(showzone==1){
@@ -317,7 +302,7 @@ void Update_Show(void){
   }
   if(nvolrenderinfo>0&&usevolrender==1){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -351,7 +336,7 @@ void Update_Show(void){
       updatemenu=1;
     }
     for(ii=0;ii<nslice_loaded;ii++){
-      mesh *slicemesh;
+      meshdata *slicemesh;
       slicedata *sd;
 
       i=slice_loaded_list[ii];
@@ -426,7 +411,7 @@ void Update_Show(void){
       break;
     }
     for(i=0;i<nvsliceinfo;i++){
-      mesh *slicemesh;
+      meshdata *slicemesh;
       slicedata *sd;
       vslicedata *vd;
 
@@ -548,7 +533,7 @@ void Update_Show(void){
     }
     if(patchflag==1)showpatch=1;
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
       meshi->visInteriorPatches=0;
@@ -556,7 +541,7 @@ void Update_Show(void){
     if(showpatch==1&&visPatchType[0]==1){
       for(i=0;i<nmeshes;i++){
         patchdata *patchi;
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi=meshinfo+i;
         if(meshi->patch_times==NULL)continue;
@@ -580,7 +565,7 @@ void Update_Show(void){
   if(plotstate==STATIC_PLOTS&&ReadPlot3dFile==1&&plotn>0&&plotn<=numplot3dvars)showplot3d=1;
   if(showplot3d==1){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int ii;
 
       meshi=meshinfo+i;
@@ -591,7 +576,7 @@ void Update_Show(void){
       if(plot3dinfo[ii].extreme_min[plotn-1]==1)have_extreme_mindata=1;
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int ii;
 
       meshi=meshinfo+i;
@@ -649,21 +634,6 @@ void Synch_Times(void){
   int n,i,istart,igrid;
 
   /* synchronize smooth blockage times */
-
-  if(ntotal_smooth_blockages>0){
-    for(igrid=0;igrid<nmeshes;igrid++){
-      mesh *meshi;
-
-      meshi=meshinfo+igrid;
-      if(meshi->showsmoothtimelist==NULL)continue;
-      for(n=0;n<nglobal_times;n++){
-        smoothblockage *sb;
-
-        sb = getsmoothblockage(meshi,global_times[n]);
-        meshi->showsmoothtimelist[n] = sb;
-      }
-    }
-  }
 
   for(n=0;n<nglobal_times;n++){
     int j,jj;
@@ -762,7 +732,7 @@ void Synch_Times(void){
     }
     for(j=0;j<nmeshes;j++){
       patchdata *patchi;
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+j;
       if(meshi->patchfilenum<0||meshi->patch_times==NULL)continue;
@@ -774,7 +744,7 @@ void Synch_Times(void){
   /* synchronize isosurface times */
 
     for(igrid=0;igrid<nmeshes;igrid++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+igrid;
       if(meshi->iso_times==NULL)continue;
@@ -786,7 +756,7 @@ void Synch_Times(void){
     if(nvolrenderinfo>0){
       for(igrid=0;igrid<nmeshes;igrid++){
         volrenderdata *vr;
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi=meshinfo+igrid;
         vr = &meshi->volrenderinfo;
@@ -1024,7 +994,7 @@ void Update_Times(void){
   }
   for(i=0;i<nmeshes;i++){
     patchdata *patchi;
-    mesh *meshi;
+    meshdata *meshi;
     int filenum;
 
     meshi=meshinfo+i;
@@ -1041,7 +1011,7 @@ void Update_Times(void){
   }
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       isodata *ib;
 
       meshi=meshinfo+i;
@@ -1054,7 +1024,7 @@ void Update_Times(void){
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
       volrenderdata *vr;
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
       vr = &meshi->volrenderinfo;
@@ -1205,7 +1175,7 @@ void Update_Times(void){
   }
   for(i=0;i<nmeshes;i++){
     patchdata *patchi;
-    mesh *meshi;
+    meshdata *meshi;
     int filenum;
 
     meshi=meshinfo + i;
@@ -1230,7 +1200,7 @@ void Update_Times(void){
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
       volrenderdata *vr;
-      mesh *meshi;
+      meshdata *meshi;
       int n;
 
       meshi=meshinfo + i;
@@ -1265,7 +1235,7 @@ void Update_Times(void){
   }
   if(ReadIsoFile==1&&visAIso!=0){
     for(i=0;i<nisoinfo;i++){
-      mesh *meshi;
+      meshdata *meshi;
       isodata *ib;
       int n;
 
@@ -1420,7 +1390,7 @@ void Update_Times(void){
   }
   if(nvolrenderinfo>0){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -1441,7 +1411,7 @@ void Update_Times(void){
     }
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(meshi->iso_times==NULL)continue;
@@ -1471,16 +1441,6 @@ void Update_Times(void){
 
   FREEMEMORY(targtimeslist);
   if(nglobal_times>0)NewMemory((void **)&targtimeslist,  nglobal_times*sizeof(int));
-
-  if(ntotal_smooth_blockages>0){
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-
-      meshi=meshinfo+i;
-      FREEMEMORY(meshi->showsmoothtimelist);
-      if(nglobal_times>0)NewMemory((void **)&meshi->showsmoothtimelist,nglobal_times*sizeof(smoothblockage *));
-    }
-  }
 
   // end pass 3
 
@@ -1525,7 +1485,7 @@ void Update_Times(void){
     geomi->itime=0;
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     meshi->patch_itime=0;
@@ -1538,7 +1498,7 @@ void Update_Times(void){
   }
   frame_index=first_frame_index;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(meshi->iso_times==NULL)continue;
@@ -1555,7 +1515,7 @@ void Update_Times(void){
 
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     for(j=0;j<meshi->nbptrs;j++){
@@ -1605,7 +1565,7 @@ void Update_Times(void){
 
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     if(meshi->ventinfo==NULL)continue;
@@ -1661,7 +1621,7 @@ int getplotstate(int choice){
       stept = 0;
       for(i=0;i<nmeshes;i++){
         plot3ddata *ploti;
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi=meshinfo + i;
         if(meshi->plot3dfilenum==-1)continue;
@@ -1747,7 +1707,7 @@ int getplotstate(int choice){
       }
       if(nvolrenderinfo>0){
         for(i=0;i<nmeshes;i++){
-          mesh *meshi;
+          meshdata *meshi;
           volrenderdata *vr;
 
           meshi = meshinfo + i;
@@ -1873,32 +1833,6 @@ void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
   UpdateColorTableList(ncolortableinfo_old);
 }
 
-
-/* ------------------ update_smoothblockage_info ------------------------ */
-
-void update_smoothblockage_info(void){
-  int i;
-
-  for(i = 0; i < nmeshes; i++){
-    smoothblockage *sb;
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    meshi->nsmoothblockagecolors = 0;
-    meshi->smoothblockagecolors = NULL;
-    meshi->blockagesurfaces = NULL;
-
-    if(meshi->smoothblockages_list != NULL){
-      sb = meshi->smoothblockages_list;
-      if(sb != NULL){
-        meshi->nsmoothblockagecolors = sb->nsmoothblockagecolors;
-        meshi->smoothblockagecolors = sb->smoothblockagecolors;
-        meshi->blockagesurfaces = sb->smoothblockagesurfaces;
-      }
-    }
-  }
-}
-
 /* ------------------ update_ShowScene ------------------------ */
 
 void update_ShowScene(void){
@@ -1917,7 +1851,7 @@ void update_ShowScene(void){
     load_Files();
   }
   if(update_startup_view == 1){
-    camera *ca;
+    cameradata *ca;
 
     ca = get_camera(label_startup_view);
     if(ca != NULL){
@@ -1926,9 +1860,6 @@ void update_ShowScene(void){
     update_rotation_center = 0;
     update_rotation_center_ini = 0;
     update_startup_view = 0;
-  }
-  if(menusmooth == 1 && smoothing_blocks == 0 && updatesmoothblocks == 1){
-    smooth_blockages();
   }
   if(update_tourlist == 1){
     Update_Tourlist();
@@ -2047,9 +1978,6 @@ void update_Display(void){
   if(update_fire_colorbar_index == 1){
     SmokeColorBarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index = 0;
-  }
-  if(showtime == 0 && ntotal_smooth_blockages > 0){
-    update_smoothblockage_info();
   }
   if(update_colorbar_select_index == 1 && colorbar_select_index >= 0 && colorbar_select_index <= 255){
     update_colorbar_select_index = 0;
