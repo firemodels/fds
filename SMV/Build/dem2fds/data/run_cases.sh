@@ -21,6 +21,9 @@ fds ${case}.fds
 case=test1x1
 $fds ${case}.fds
 
+case=test1x2
+$fds ${case}.fds
+
 case=test3x3
 $fds ${case}.fds
 
