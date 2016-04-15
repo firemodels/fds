@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
 EXTERNCPP void write_part_histogram(partdata *parti);
 EXTERNCPP void read_part_histogram(partdata *parti);
