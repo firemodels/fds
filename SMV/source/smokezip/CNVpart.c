@@ -212,7 +212,7 @@ void convert_part(part *parti, int *thread_index){
   unsigned int *int_buffer_uncompressed;
   unsigned char *int_buffer_compressed;
   unsigned char *char_buffer_uncompressed,*char_buffer_compressed;
-  mesh *partmesh;
+  meshdata *partmesh;
   float xmin, xmax,  ymin, ymax, zmin, zmax;
   uLongf ncompressed_zlib;
   int percent_done;
@@ -678,7 +678,7 @@ void part2iso(part *parti, int *thread_index){
   int error, size;
   int j;
   int npartcount, i;
-  mesh *partmesh;
+  meshdata *partmesh;
   int nx, ny, nz;
   char *isofile, tisofile[1024];
   char isolonglabel[32], isoshortlabel[32], isounits[32];
@@ -1039,7 +1039,7 @@ void part2object(part *parti, int *thread_index){
   int error, size;
   int j;
   int npartcount, i;
-  mesh *partmesh;
+  meshdata *partmesh;
   int nx, ny, nz;
   char *isofile, tisofile[1024];
   char isolonglabel[32], isoshortlabel[32], isounits[32];

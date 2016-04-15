@@ -9,7 +9,7 @@
 #include "smokeviewvars.h"
 
 void sync_isobounds(int isottype);
-void unloadiso(mesh *gb);
+void unloadiso(meshdata *gb);
 
 /* ------------------ getisolevels ------------------------ */
 
@@ -167,7 +167,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_in
   isodata *isoi;
   geomdata *geomi;
   int ilevel,error;
-  mesh *meshi;
+  meshdata *meshi;
   int i;
   surfdata *surfi;
 
@@ -256,7 +256,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   int error;
   float factor, offset[3];
 
-  mesh *meshi;
+  meshdata *meshi;
   isodata *ib;
 
   int local_starttime=0, local_stoptime=0;
@@ -691,7 +691,7 @@ void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *
   isodata *isoi;
 
   if(ifile>=0&&ifile<nisoinfo){
-    mesh *meshi;
+    meshdata *meshi;
 
     isoi = isoinfo+ifile;
     meshi = meshinfo+isoi->blocknumber;
@@ -742,12 +742,12 @@ void unload_iso_trans(void){
 
 /* ------------------ unloadiso ------------------------ */
 
-void unloadiso(mesh *meshi){
+void unloadiso(meshdata *meshi){
   isosurface *asurface;
   isodata *ib;
   int nloaded=0;
   int i;
-  mesh *meshi2;
+  meshdata *meshi2;
 
   if(meshi->isofilenum==-1)return;
   ib = isoinfo + meshi->isofilenum;
@@ -795,7 +795,7 @@ void drawiso_orig(int tranflag){
   isosurface *asurface;
   isodata *isoi=NULL;
   int iso_lighting;
-  mesh *meshi;
+  meshdata *meshi;
 
   meshi = loaded_isomesh;
 
@@ -1046,10 +1046,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
-  int drawing_smooth;
   int transparenton_flag=0;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1075,12 +1074,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       rgbtemp[2]=col[2];
     }
 
-    if(smooth_block_solid==0){
-      rgbtemp[3]=asurface->color[3];
-    }
-    else{
-      rgbtemp[3]=1.0;
-    }
+    rgbtemp[3]=asurface->color[3];
     if(data_type!=0){
       if(rgbtemp[3]<1.0&&trans_flag!=DRAW_TRANSPARENT)return;
       if(rgbtemp[3]>=1.0&&trans_flag==DRAW_TRANSPARENT)return;
@@ -1403,7 +1397,7 @@ void update_iso_menulabels(void){
       isoi = isoinfo + i;
       STRCPY(isoi->menulabel,isoi->surface_label.longlabel);
       if(nmeshes>1){
-	      mesh *isomesh;
+	      meshdata *isomesh;
 
 		    isomesh = meshinfo + isoi->blocknumber;
         sprintf(label,"%s",isomesh->label);
@@ -1424,7 +1418,7 @@ void update_iso_showlevels(void){
   int nisolevels;
   int *showlevels;
   int i, j;
-  mesh *meshi;
+  meshdata *meshi;
 
   if(loaded_isomesh==NULL)return;
 
@@ -1446,7 +1440,7 @@ void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode){
   char *scale;
   int isotype;
-  databounds *sb;
+  boundsdata *sb;
 
   isotype=getisottype(sd);
   sb = isobounds + isotype;
@@ -1515,7 +1509,7 @@ void sync_isobounds(int isottype){
 
   for(i=0;i<nisoinfo;i++){
     isodata *isoi;
-    mesh *meshi;
+    meshdata *meshi;
     int ii;
     isosurface *asurface;
 
@@ -1640,7 +1634,7 @@ void Update_Isotris(int flag){
   isosurface *asurfi;
   isotri **iso_trans_tmp,**iso_opaques_tmp;
   int *showlevels;
-  mesh *meshi;
+  meshdata *meshi;
   float *colorptr;
   isosurface *asurface;
   int ntris;
@@ -1832,14 +1826,14 @@ void Update_Isotris(int flag){
 
 /* ------------------ get_loaded_isomesh ------------------------ */
 
-mesh *get_loaded_isomesh(void){
-  mesh *return_mesh;
+meshdata *get_loaded_isomesh(void){
+  meshdata *return_mesh;
   int i,nsteps=-1;
 
   if(isoinfo==NULL)return NULL;
   return_mesh=NULL;
   for(i=0;i<nisoinfo;i++){
-    mesh *mesh2;
+    meshdata *mesh2;
     isodata *isoi;
 
     isoi = isoinfo + i;
