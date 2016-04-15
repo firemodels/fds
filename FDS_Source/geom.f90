@@ -6172,15 +6172,15 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
 
 ! define terrain faces
-!    I21   I22
+!    I12   I22
 !    I11   I21
       IJ = 1
       DO J = 1, IJK(2) - 1
          DO I = 1, IJK(1) - 1
-            I21 = (J-1)*IJK(1) + I
-            I22 = I21 + 1
-            I11 = I21 + IJK(1)
-            I12 = I11 + 1
+            I11 = (J-1)*IJK(1) + I
+            I21 = I11 + 1
+            I12 = I11 + IJK(1)
+            I22 = I12 + 1
 
             FACES(3*IJ-2) = I11
             FACES(3*IJ-1) = I21
