@@ -379,10 +379,16 @@ void draw_geom(int flag, int timestate){
           for(j = 0; j < 3; j++){
             point *pointj;
             float *xyz, texture_z;
+            float zorig;
 
             pointj = trianglei->points[j];
             xyz = pointj->xyz;
-            texture_z = NORMALIZE_ZZ(xyz[2]);
+            //    znew = zmin + geom_vert_exag*(zorig - zmin);
+            //   zorig = zmin + (znew-zmin)/geom_vert_exag
+
+            zorig = terrain_zmin + (xyz[2] - terrain_zmin) / geom_vert_exag;
+
+            texture_z = NORMALIZE_ZZ(zorig);
 
             glNormal3fv(pointj->point_norm);
             glTexCoord1f(texture_z);

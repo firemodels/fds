@@ -1785,6 +1785,20 @@ void updatechopcolors(void){
     else{
       rgb_terrain2[4 * i + 3] = 0.0;
     }
+    if(show_zlevel == 1){
+      int ilevel;
+      float dz;
+
+      dz = (terrain_zmax - terrain_zmin);
+      if(ABS(dz)<0.01)dz=1;
+
+      ilevel = 255 * (terrain_zlevel - terrain_zmin) / dz;
+      if(ABS(ilevel - i) < 3){
+        rgb_terrain2[4 * i] = 0;
+        rgb_terrain2[4 * i + 1] = 0;
+        rgb_terrain2[4 * i + 2] = 0;
+      }
+    }
 
     rgb_part[4 * i] = rgb_full[i][0];
     rgb_part[4*i+1]=rgb_full[i][1];

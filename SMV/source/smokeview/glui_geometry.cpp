@@ -29,10 +29,14 @@ extern "C" void Volume_CB(int var);
 #define TERRAIN_ZMIN 41
 #define TERRAIN_ZMAX 42
 #define RESET_ZBOUNDS 43
+#define TERRAIN_ZLEVEL 44
+#define SHOW_ZLEVEL 45
+#define GEOM_VERT_EXAG 46
 
 GLUI_RadioGroup *RADIO_geomtest_option = NULL;
 
 GLUI_Panel *PANEL_geom_testoptions = NULL;
+GLUI_Checkbox *CHECKBOX_show_zlevel = NULL;
 GLUI_Checkbox *CHECKBOX_surface_solid=NULL, *CHECKBOX_surface_outline=NULL;
 GLUI_Checkbox *CHECKBOX_interior_solid=NULL, *CHECKBOX_interior_outline=NULL;
 GLUI_Checkbox *CHECKBOX_geomtest=NULL, *CHECKBOX_triangletest=NULL;
@@ -69,7 +73,7 @@ GLUI_Spinner *SPINNER_geom_max_angle=NULL;
 GLUI_Spinner *SPINNER_geom_outline_ioffset=NULL;
 GLUI_Spinner *SPINNER_geom_ivecfactor = NULL;
 GLUI_Spinner *SPINNER_geom_vert_exag=NULL;
-GLUI_Spinner *SPINNER_geom_zmin = NULL, *SPINNER_geom_zmax = NULL;
+GLUI_Spinner *SPINNER_geom_zmin = NULL, *SPINNER_geom_zmax = NULL, *SPINNER_geom_zlevel=NULL;
 
 GLUI_Checkbox *CHECKBOX_tetrabox_showhide[10];
 GLUI_Checkbox *CHECKBOX_visaxislabels;
@@ -113,6 +117,9 @@ char *updatelabel=NULL;
 
 extern "C" void TextureShowMenu(int val);
 extern "C" void get_geom_zbounds(float *zmin, float *zmax);
+extern "C" void updatechopcolors(void);
+extern "C" void update_geom_normals();
+
 
 /* ------------------ update_axislabels ------------------------ */
 
@@ -365,16 +372,24 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_ivecfactor->set_int_limits(0, 200);
 
   PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
-  SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_MAX_ANGLE, Volume_CB);
+  SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_VERT_EXAG, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
-  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
-  
+  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
+
   get_geom_zbounds(&terrain_zmin, &terrain_zmax);
-  SPINNER_geom_zmin = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmin", GLUI_SPINNER_FLOAT, &terrain_zmin,TERRAIN_ZMIN,Volume_CB); 
+  SPINNER_geom_zmin = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmin", GLUI_SPINNER_FLOAT, &terrain_zmin,TERRAIN_ZMIN,Volume_CB);
   SPINNER_geom_zmin->set_float_limits(zbar0ORIG, zbarORIG);
+
   SPINNER_geom_zmax = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmax", GLUI_SPINNER_FLOAT, &terrain_zmax,TERRAIN_ZMAX,Volume_CB);
   SPINNER_geom_zmax->set_float_limits(zbar0ORIG, zbarORIG);
-  BUTTON_reset_zbounds = glui_geometry->add_button_to_panel(PANEL_geomtest2,_d("Reset zmin/zmax"), RESET_ZBOUNDS, Volume_CB);
+
+  terrain_zlevel=(terrain_zmin+terrain_zmax)/2.0;
+  CHECKBOX_show_zlevel = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show zlevel", &show_zlevel, SHOW_ZLEVEL, Volume_CB);
+  SPINNER_geom_zlevel = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zlevel", GLUI_SPINNER_FLOAT, &terrain_zlevel, TERRAIN_ZLEVEL, Volume_CB);
+  SPINNER_geom_zlevel->set_float_limits(zbar0ORIG, zbarORIG);
+
+  Volume_CB(GEOM_VERT_EXAG);
+  BUTTON_reset_zbounds = glui_geometry->add_button_to_panel(PANEL_geomtest2, _d("Reset zmin/zmax"), RESET_ZBOUNDS, Volume_CB);
 
   if(have_texture()==1){
     show_texture_2dimage = get_texture_show();
@@ -489,16 +504,26 @@ extern "C" void glui_geometry_setup(int main_window){
 extern "C" void Volume_CB(int var){
   int i;
   switch(var){
+  case GEOM_VERT_EXAG:
+    update_geom_normals();
+    break;
+  case SHOW_ZLEVEL:
+  case TERRAIN_ZLEVEL:
+    updatechopcolors();
+  break;
   case RESET_ZBOUNDS:
     get_geom_zbounds(&terrain_zmin, &terrain_zmax);
     SPINNER_geom_zmin->set_float_val(terrain_zmin);
     SPINNER_geom_zmax->set_float_val(terrain_zmax);
+    SPINNER_geom_zlevel->set_float_limits(terrain_zmin, terrain_zmax);
   case TERRAIN_ZMIN:
   case TERRAIN_ZMAX:
     if(ABS(terrain_zmin - terrain_zmax) < 0.01){
       terrain_zmax = terrain_zmin + .01;
       SPINNER_geom_zmax->set_float_val(terrain_zmax);
     }
+    SPINNER_geom_zlevel->set_float_limits(terrain_zmin, terrain_zmax);
+    updatechopcolors();
   case SHOW_TEXTURE_1D_IMAGE:
     if(show_texture_1dimage == 1 && show_texture_2dimage == 1){
       show_texture_2dimage=0;
