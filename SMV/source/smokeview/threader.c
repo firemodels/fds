@@ -17,7 +17,7 @@ void compress_svzip2(void){
 
   writeini(LOCAL_INI, NULL);
 
-  // surround smokezip path name with "'s so that the system call can handle imbedded blanks
+  // surround smokezip path name with "'s so that the system call can handle embedded blanks
 
   strcpy(shellcommand, "\"");
   strcat(shellcommand, smokezippath);
@@ -78,21 +78,6 @@ void compress_svzip(void){
 #else
 void compress_svzip(void){
   compress_svzip2();
-}
-#endif
-// ************** multi threaded blockage smoothing **********************
-
-/* ------------------ mt_update_smooth_blockages ------------------------ */
-#ifdef pp_THREAD
-void *mt_update_smooth_blockages(void *arg){
-
-  if(ifsmoothblock()==1){
-    PRINTF("Smoothing blockages in the background\n");
-    update_smooth_blockages();
-    updatefacelists=1;
-  }
-  pthread_exit(NULL);
-  return NULL;
 }
 #endif
 
@@ -167,23 +152,6 @@ void makeiblank_all(void){
   makeiblank();
   SetCVentDirs();
   update_set_vents=1;
-}
-#endif
-
-/* ------------------ smooth_blockages ------------------------ */
-
-#ifdef pp_THREAD
-void smooth_blockages(void){
-  smoothing_blocks=1;
-  pthread_create(&smooth_block_thread_id,NULL,mt_update_smooth_blockages,NULL);
-}
-#else
-void smooth_blockages(void){
-  smoothing_blocks=1;
-    blocksneedsmoothing=ifsmoothblock();
-    if(blocksneedsmoothing==1){
-      update_smooth_blockages();
-    }
 }
 #endif
 

@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
 EXTERNCPP void write_part_histogram(partdata *parti);
 EXTERNCPP void read_part_histogram(partdata *parti);
@@ -194,7 +195,7 @@ EXTERNCPP void rotation_type_CB(int var);
 EXTERNCPP  void update_rotation_type(int val);
 EXTERNCPP void sort_smoke3dinfo(void);
 
-EXTERNCPP void camera2quat(camera *ca, float *quat, float *rotation);
+EXTERNCPP void camera2quat(cameradata *ca, float *quat, float *rotation);
 EXTERNCPP void angleaxis2quat(float angle, float *axis, float *quat);
 EXTERNCPP void quat2rot(float quat[4],float rot[16]);
 EXTERNCPP void mult_quat(float x[4], float y[4], float z[4]);
@@ -286,7 +287,7 @@ EXTERNCPP void get_newscriptfilename(char *newscriptfilename);
 EXTERNCPP void init_avatar(void);
 EXTERNCPP void draw_select_avatars(void);
 EXTERNCPP void readterrain(char *file, int ifile, int flag, int *errorcode);
-EXTERNCPP void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
+EXTERNCPP void initterrain_znode(meshdata *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
                                  int allocate_memory);
 EXTERNCPP void output_mfed_csv(multislicedata *mslicei);
 EXTERNCPP void ParticlePropShowMenu(int value);
@@ -305,12 +306,12 @@ EXTERNCPP void drawterrain_texture(terraindata *terri, int only_geom);
 EXTERNCPP void drawtrees(void);
 EXTERNCPP int createnulllabel(flowlabels *flowlabel);
 EXTERNCPP void initcullgeom(int cullflag);
-EXTERNCPP void get_cullskips(mesh *meshi, int cullflag, int cull_portsize, int *iiskip, int *jjskip, int *kkskip);
+EXTERNCPP void get_cullskips(meshdata *meshi, int cullflag, int cull_portsize, int *iiskip, int *jjskip, int *kkskip);
 #ifdef pp_CULL
 EXTERNCPP void initcull(int cullflag);
 EXTERNCPP void initcullplane(int cullflag);
 EXTERNCPP void setPixelCount(void);
-EXTERNCPP void setPixelCountOrthog(mesh *meshi);
+EXTERNCPP void setPixelCountOrthog(meshdata *meshi);
 EXTERNCPP void getPixelCount(void);
 EXTERNCPP int init_cull_exts(void);
 #endif
@@ -332,12 +333,12 @@ EXTERNCPP void next_zindex(int inc,int flag);
 EXTERNCPP void Init_Sphere(int nlat, int nlong);
 EXTERNCPP void Init_Circle(unsigned int npoints, circdata *circinfo);
 EXTERNCPP int have_terrain_slice(void);
-EXTERNCPP float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc);
-EXTERNCPP void update_camera_ypos(camera *camera_data);
-EXTERNCPP camera *get_camera(char *name);
+EXTERNCPP float get_zcell_val_offset(meshdata *meshi,float xval, float yval, int *loc);
+EXTERNCPP void update_camera_ypos(cameradata *camera_data);
+EXTERNCPP cameradata *get_camera(char *name);
 EXTERNCPP char *get_camera_label(int index);
-EXTERNCPP void clip2cam(camera *cam);
-EXTERNCPP void cam2clip(camera *cam);
+EXTERNCPP void clip2cam(cameradata *cam);
+EXTERNCPP void cam2clip(cameradata *cam);
 EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);
@@ -355,11 +356,11 @@ EXTERNCPP void freeall_objects(void);
 EXTERNCPP void parse_object_string(char *string, char **tokens, int *ntokens);
 EXTERNCPP void update_partclass_depend(partclassdata *partclassi);
 
-EXTERNCPP int get_plot3d_index(mesh *meshi, int dir, float val);
+EXTERNCPP int get_plot3d_index(meshdata *meshi, int dir, float val);
 EXTERNCPP int plot3dlistcompare( const void *arg1, const void *arg2 );
 EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
-EXTERNCPP void update_plot_xyz(mesh *current_mesh);
-EXTERNCPP void updateplotslice_mesh(mesh *mesh_in, int slicedir);
+EXTERNCPP void update_plot_xyz(meshdata *current_mesh);
+EXTERNCPP void updateplotslice_mesh(meshdata *mesh_in, int slicedir);
 
 EXTERNCPP char *get_chid(char *file, char *buffer);
 EXTERNCPP void addcolorbar(int icolorbar);
@@ -388,7 +389,7 @@ EXTERNCPP int AnySmoke(char *type);
 EXTERNCPP int AnySlices(char *type);
 EXTERNCPP void TrainerViewMenu(int var);
 
-EXTERNCPP void delete_camera(camera *cam1);
+EXTERNCPP void delete_camera(cameradata *cam1);
 EXTERNCPP void ShowAllSmoke(void);
 EXTERNCPP void HideAllSmoke(void);
 EXTERNCPP void HideAllSlices(void);
@@ -429,8 +430,8 @@ EXTERNCPP void update_windowsizelist(void);
 EXTERNCPP void ResizeWindow(int width, int height);
 EXTERNCPP void update_trainer_outline(void);
 EXTERNCPP void update_trainer_moves(void);
-EXTERNCPP mesh *getmesh(float *xyz);
-EXTERNCPP mesh *getmesh_nofail(float *xyz);
+EXTERNCPP meshdata *getmesh(float *xyz);
+EXTERNCPP meshdata *getmesh_nofail(float *xyz);
 EXTERNCPP int on_mesh_boundary(float *xyz);
 
 EXTERNCPP void Render_CB(int var);
@@ -455,10 +456,8 @@ EXTERNCPP void get_startup_patch(int seq_id);
 EXTERNCPP void set_3dsmoke_startup(void);
 EXTERNCPP void clear_3dsmoke_startup(void);
 EXTERNCPP void put_startup_smoke3d(FILE *fileout);
-EXTERNCPP void drawonlythreshold(const mesh *meshi);
+EXTERNCPP void drawonlythreshold(const meshdata *meshi);
 EXTERNCPP void draw_transparent_faces(void);
-EXTERNCPP smoothblockage *getsmoothblockage(mesh *meshi,float tt);
-EXTERNCPP void freesmoothblocks(smoothblockage *sb);
 EXTERNCPP int isblockagevisible(blockagedata *bc, float time);
 EXTERNCPP float zoom2aperture(float zoom0);
 EXTERNCPP float aperture2zoom(float ap);
@@ -475,7 +474,7 @@ EXTERNCPP void free_skybox(void);
 EXTERNCPP void draw_skybox(void);
 EXTERNCPP void loadskytexture(char *filebase, texturedata *texti);
 EXTERNCPP void uncompress_slicedataframe(slicedata *sd,int frame_index);
-EXTERNCPP void uncompress_patchdataframe(mesh *meshi,int frame_index);
+EXTERNCPP void uncompress_patchdataframe(meshdata *meshi,int frame_index);
 EXTERNCPP void getpatchdata_zlib(patchdata *patchi,unsigned char *data,int ndata,
                        float *times, unsigned int *zipoffset, unsigned int *zipsize, int ntimes);
 EXTERNCPP void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize);
@@ -511,7 +510,7 @@ EXTERNCPP void get_screen_mapping(float *xyz0, float *screen_perm);
 EXTERNCPP void getvolsmokedir(float *mm);
 EXTERNCPP void getzonesmokedir(float *mm);
 EXTERNCPP void get_world_eyepos(float *mm, float user_eyepos[3], float scaled_eyepos[3]);
-EXTERNCPP culldata *get_face_port(mesh *meshi, facedata *facei);
+EXTERNCPP culldata *get_face_port(meshdata *meshi, facedata *facei);
 EXTERNCPP void set_cull_vis(void);
 EXTERNCPP void ExtractFrustum(void);
 EXTERNCPP int PointInFrustum( float x, float y, float z);
@@ -531,7 +530,7 @@ EXTERNCPP void drawgslice_data(slicedata *slicei);
 EXTERNCPP void drawgslice_outline(void);
 EXTERNCPP void draw_patchframe(int flag);
 EXTERNCPP void Motion_CB(int var);
-EXTERNCPP void init_slice3d_texture(mesh *meshi);
+EXTERNCPP void init_slice3d_texture(meshdata *meshi);
 
 #ifdef pp_GPU
 EXTERNCPP void drawsmoke3dGPU(smoke3ddata *smoke3di);
@@ -540,7 +539,7 @@ EXTERNCPP void drawsmoke3dVOL(void);
 #ifdef pp_CULL
 EXTERNCPP void drawsmoke3dCULL(void);
 #endif
-EXTERNCPP void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
+EXTERNCPP void get_drawing_parms(int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent);
 EXTERNCPP void update_smoke3d_menulabels(void);
 EXTERNCPP void Labels_CB(int value);
 EXTERNCPP void output_Slicedata(void);
@@ -550,16 +549,16 @@ EXTERNCPP void update_extreme(void);
 EXTERNCPP void update_colorbar_type(void);
 EXTERNCPP void update_colorbar_label(void);
 EXTERNCPP void init_camera_list(void);
-EXTERNCPP camera *insert_camera(camera *cb,camera *source, char *name);
+EXTERNCPP cameradata *insert_camera(cameradata *cb,cameradata *source, char *name);
 EXTERNCPP void add_default_views(void);
 EXTERNCPP void update_view_gluilist(void);
 EXTERNCPP void reset_gltime(void);
 EXTERNCPP void enable_reset_saved_view(void);
 EXTERNCPP void reset_glui_view(int ival);
-EXTERNCPP void init_camera(camera *camera_data,char *name);
-EXTERNCPP void copy_camera(camera *to, camera *from);
+EXTERNCPP void init_camera(cameradata *camera_data,char *name);
+EXTERNCPP void copy_camera(cameradata *to, cameradata *from);
 EXTERNCPP void set_camera_current(float angles[2], float eye[3], float zoom);
-EXTERNCPP void update_camera(camera *ca);
+EXTERNCPP void update_camera(cameradata *ca);
 EXTERNCPP void update_projection_type(void);
 EXTERNCPP void update_eyerotate(void);
 EXTERNCPP void update_cursor_checkbox(void);
@@ -606,10 +605,6 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, FILE **isostreampt
 EXTERNCPP void array2string(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
 
-EXTERNCPP void getsmoothblockparms(mesh *gb, smoothblockage *sb);
-EXTERNCPP void MakeIsoBlockages(mesh *gb, smoothblockage *sb);
-
-EXTERNCPP int ifsmoothblock(void);
 EXTERNCPP void updatevslices(void);
 EXTERNCPP void getgsliceparams(void);
 EXTERNCPP void update_part_menulabels(void);
@@ -678,23 +673,23 @@ EXTERNCPP void updateLights(float *pos1, float *pos2);
 EXTERNCPP int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers);
 EXTERNCPP GLubyte *getscreenbuffer(void);
 EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
-EXTERNCPP int  inblockage(const mesh *gb,float x, float y, float z);
+EXTERNCPP int  inblockage(const meshdata *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
-EXTERNCPP void initmesh(mesh *gb);
+EXTERNCPP void initmesh(meshdata *gb);
 EXTERNCPP void updateglui(void);
 EXTERNCPP void updateslicelist(int index);
 EXTERNCPP void drawiso(int tranflag);
-EXTERNCPP void drawplot3d(mesh *gb);
-EXTERNCPP void drawplot3d_texture(mesh *gb);
+EXTERNCPP void drawplot3d(meshdata *gb);
+EXTERNCPP void drawplot3d_texture(meshdata *gb);
 EXTERNCPP void updateshowstep(int val, int slicedir);
 EXTERNCPP void ClearBuffers(int mode);
 EXTERNCPP void updateplotslice(int slicedir);
-EXTERNCPP void drawpatch(const mesh *gb);
-EXTERNCPP void drawpatch_cellcenter(const mesh *gb);
-EXTERNCPP void drawpatch_texture(const mesh *gb);
-EXTERNCPP void drawpatch_texture_cellcenter(const mesh *gb);
-EXTERNCPP void drawpatch_texture_threshold(const mesh *gb);
-EXTERNCPP void drawpatch_threshold_cellcenter(const mesh *meshi);
+EXTERNCPP void drawpatch(const meshdata *gb);
+EXTERNCPP void drawpatch_cellcenter(const meshdata *gb);
+EXTERNCPP void drawpatch_texture(const meshdata *gb);
+EXTERNCPP void drawpatch_texture_cellcenter(const meshdata *gb);
+EXTERNCPP void drawpatch_texture_threshold(const meshdata *gb);
+EXTERNCPP void drawpatch_threshold_cellcenter(const meshdata *meshi);
 
 EXTERNCPP void Render(int view_mode);
 EXTERNCPP void updateslicebounds(void);
@@ -724,7 +719,7 @@ EXTERNCPP void update_plot3dtitle(void);
 EXTERNCPP void LoadPlot3dMenu(int value);
 EXTERNCPP void init_plot3dtimelist(void);
 EXTERNCPP void update_iso_showlevels(void);
-EXTERNCPP void update_current_mesh(mesh *meshi);
+EXTERNCPP void update_current_mesh(meshdata *meshi);
 EXTERNCPP void DialogMenu(int value);
 EXTERNCPP void ApertureMenu(int value);
 EXTERNCPP void ZoomMenu(int value);
@@ -743,7 +738,7 @@ EXTERNCPP void drawTimeBar(float xleft, float xright, float ybot, float ytop);
 EXTERNCPP void drawColorBars(void);
 EXTERNCPP void draw_part(const partdata *parti);
 EXTERNCPP void draw_evac(const partdata *parti);
-EXTERNCPP void drawgrid(const mesh *gb);
+EXTERNCPP void drawgrid(const meshdata *gb);
 EXTERNCPP void drawroomgeom(void);
 EXTERNCPP void drawfiredata(void);
 EXTERNCPP void drawroomdata(void);
@@ -776,15 +771,15 @@ EXTERNCPP void updatesurface(void);
 EXTERNCPP void WindowStatus(int state);
 EXTERNCPP void nodein_extvent(
                     int ipatch,
-                    int *patchblankcopy,const mesh *meshi,int i1,int i2, int j1, int j2, int k1, int k2, int option);
+                    int *patchblankcopy,const meshdata *meshi,int i1,int i2, int j1, int j2, int k1, int k2, int option);
 EXTERNCPP void SetVentDirs(void);
 EXTERNCPP void SetCVentDirs(void);
-EXTERNCPP int nodeinblockage(const mesh *meshi, int i,int j,int k, int *imesh, int *iblockage);
-EXTERNCPP int nodeinvent(const mesh *gb, int i,int j,int k, int dir,int option);
+EXTERNCPP int nodeinblockage(const meshdata *meshi, int i,int j,int k, int *imesh, int *iblockage);
+EXTERNCPP int nodeinvent(const meshdata *gb, int i,int j,int k, int dir,int option);
 EXTERNCPP void writeboundini(void);
 EXTERNCPP void readboundini(void);
 EXTERNCPP int readini2(char *inifile, int localfile);
-EXTERNCPP void obst_or_vent2faces(const mesh *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
+EXTERNCPP void obst_or_vent2faces(const meshdata *gb,blockagedata *bc, ventdata *vi, facedata *faceptr,int facetype);
 EXTERNCPP void initsurface(surfdata *surf);
 EXTERNCPP void initmatl(matldata *matl);
 EXTERNCPP void initventsurface(surfdata *surf);
@@ -833,10 +828,10 @@ EXTERNCPP void init_unit_defs(void);
 EXTERNCPP void InitUnits(void);
 EXTERNCPP f_units *get_unit_class(char *unit);
 
-EXTERNCPP void readcad2geom(cadgeom *cd);
-EXTERNCPP void readcadgeom(cadgeom *cd);
-EXTERNCPP void drawcadgeom(const cadgeom *cd);
-EXTERNCPP void drawcad2geom_opaque(const cadgeom *cd,int trans_flag);
+EXTERNCPP void readcad2geom(cadgeomdata *cd);
+EXTERNCPP void readcadgeom(cadgeomdata *cd);
+EXTERNCPP void drawcadgeom(const cadgeomdata *cd);
+EXTERNCPP void drawcad2geom_opaque(const cadgeomdata *cd,int trans_flag);
 
 EXTERNCPP void readplot3d(char *file, int ifile, int flag,int *errorcode);
 EXTERNCPP void read_geom_header(geomdata *geomi, int *geom_frame_index, int *ntimes_local);
@@ -849,7 +844,6 @@ EXTERNCPP void readpart(char *file, int ifile, int loadflag, int set_colorbound,
 EXTERNCPP void readzone(int ifile, int flag, int *errorcode);
 EXTERNCPP void readvslice(int ivslice, int flag, int *errorcode);
 
-EXTERNCPP void smooth_blockages(void);
 EXTERNCPP void freesmoke3d(smoke3ddata *smoke3di);
 EXTERNCPP void readsmoke(int ifile,int flag, int *errorcode);
 EXTERNCPP void readsmoke3d(int ifile,int flag, int *errorcode);
@@ -861,7 +855,6 @@ EXTERNCPP int getsmoke3d_sizes(int skip, char *smokefile, int version,
                       int *nframes, int *nframes_full,int *have_light);
 EXTERNCPP void readfed(int ifile, int flag, int file_type, int *errorcode);
 EXTERNCPP void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorcode);
-EXTERNCPP void update_smooth_blockages(void);
 EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_index, int *errorcode);
 
 EXTERNCPP void InitMenus(int unload);
@@ -932,7 +925,7 @@ EXTERNCPP void getSliceColors(const float *t, int nt, unsigned char *it,
               char labels[12][11],char **scale, float *fscale, float *tlevels2,
               int *extreme_min, int *extreme_max
               );
-EXTERNCPP mesh *get_loaded_isomesh(void);
+EXTERNCPP meshdata *get_loaded_isomesh(void);
 EXTERNCPP void unload_iso_trans(void);
 EXTERNCPP void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode);

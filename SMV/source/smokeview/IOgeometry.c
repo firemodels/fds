@@ -213,7 +213,54 @@ void draw_geomdiag(void){
     glPopMatrix();
 }
 
-/* ------------------ draw_geom ------------------------ */
+  /* ------------------ get_geom_zbounds ------------------------ */
+
+void get_geom_zbounds(float *zmin, float *zmax){
+  int j;
+  int first = 1;
+  
+  for(j = 0; j < ngeominfoptrs; j++){
+    geomdata *geomi;
+    int iend, ii;
+
+    geomi = geominfoptrs[j];
+    if(geomi->loaded == 0 || geomi->display == 0)continue;
+    if(geomi->geomtype != GEOM_GEOM&&geomi->geomtype != GEOM_ISO)continue;
+
+    iend = geomi->ntimes;
+    if(geomi->currentframe != NULL)iend = 1;
+
+    for(ii = -1; ii < iend; ii++){
+      geomlistdata *geomlisti;
+      int k;
+
+      if(ii == -1 || geomi->currentframe == NULL){
+        geomlisti = geomi->geomlistinfo + ii;
+      }
+      else{
+        geomlisti = geomi->currentframe;
+      }
+      for(k = 0; k < geomlisti->npoints; k++){
+        float zval;
+        point *pointk;
+
+        pointk = geomlisti->points + k;
+        zval = pointk->xyz[2];
+        if(first == 1){
+          *zmin = zval;
+          *zmax = zval;
+          first = 0;
+        }
+        else{
+          *zmin = MIN(*zmin, zval);
+          *zmax = MAX(*zmax, zval);
+        }
+      }
+    }
+  }
+}
+
+  /* ------------------ draw_geom ------------------------ */
 
 void draw_geom(int flag, int timestate){
   int i;
@@ -225,7 +272,7 @@ void draw_geom(int flag, int timestate){
   int ntris;
   triangle **tris;
 
-  if(flag==DRAW_OPAQUE){
+  if(flag == DRAW_OPAQUE){
     ntris=nopaque_triangles;
     tris=opaque_triangles;
   }
@@ -236,7 +283,6 @@ void draw_geom(int flag, int timestate){
 
   if(ntris>0&&timestate==GEOM_STATIC){
     float *color;
-
 
   // draw geometry surface
 
@@ -267,6 +313,7 @@ void draw_geom(int flag, int timestate){
       if(trianglei->geomtype == GEOM_ISO&&show_iso_solid == 0)continue;
 
       ti = trianglei->textureinfo;
+      if(show_texture_1dimage==1)continue;
       if(visGeomTextures==1&&ti!=NULL&&ti->loaded==1)continue;
       if(hilight_skinny==1&&trianglei->skinny==1){
         color=skinny_color;
@@ -303,11 +350,18 @@ void draw_geom(int flag, int timestate){
     }
     glEnd();
 
-    if(visGeomTextures==1){
+    if(visGeomTextures == 1 || show_texture_1dimage == 1){
       texturedata *lasttexture;
 
-      glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
-      glEnable(GL_TEXTURE_2D);
+      if(show_texture_1dimage == 1){
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glEnable(GL_TEXTURE_1D);
+        glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
+      }
+      else{
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+        glEnable(GL_TEXTURE_2D);
+      }
 
       lasttexture=NULL;
       glBegin(GL_TRIANGLES);
@@ -321,27 +375,54 @@ void draw_geom(int flag, int timestate){
         if(trianglei->exterior == 0 && show_faces_interior == 0)continue;
         if(trianglei->geomtype == GEOM_ISO &&show_iso_outline == 0)continue;
 
-        texti = trianglei->textureinfo;
-        if(texti==NULL||texti->loaded!=1)continue;
-        if(lasttexture!=texti){
-          glEnd();
-          glBindTexture(GL_TEXTURE_2D,texti->name);
-          glBegin(GL_TRIANGLES);
-          lasttexture=texti;
-        }
-        for(j=0;j<3;j++){
-          point *pointj;
-          float *tpointj;
+        if(show_texture_1dimage == 1){
+          for(j = 0; j < 3; j++){
+            point *pointj;
+            float *xyz, texture_z;
+            float zorig;
 
-          pointj = trianglei->points[j];
-          tpointj = trianglei->tpoints+2*j;
-          glNormal3fv(pointj->point_norm);
-          glTexCoord2fv(tpointj);
-          glVertex3fv(pointj->xyz);
+            pointj = trianglei->points[j];
+            xyz = pointj->xyz;
+            //    znew = zmin + geom_vert_exag*(zorig - zmin);
+            //   zorig = zmin + (znew-zmin)/geom_vert_exag
+
+            zorig = terrain_zmin + (xyz[2] - terrain_zmin) / geom_vert_exag;
+
+            texture_z = NORMALIZE_ZZ(zorig);
+
+            glNormal3fv(pointj->point_norm);
+            glTexCoord1f(texture_z);
+            glVertex3fv(xyz);
+          }
+        }
+        else{
+          texti = trianglei->textureinfo;
+          if(texti == NULL || texti->loaded != 1)continue;
+          if(lasttexture != texti){
+            glEnd();
+            glBindTexture(GL_TEXTURE_2D, texti->name);
+            glBegin(GL_TRIANGLES);
+            lasttexture = texti;
+          }
+          for(j = 0; j < 3; j++){
+            point *pointj;
+            float *tpointj;
+
+            pointj = trianglei->points[j];
+            tpointj = trianglei->tpoints + 2 * j;
+            glNormal3fv(pointj->point_norm);
+            glTexCoord2fv(tpointj);
+            glVertex3fv(pointj->xyz);
+          }
         }
       }
       glEnd();
-      glDisable(GL_TEXTURE_2D);
+      if(show_texture_1dimage == 1){
+        glDisable(GL_TEXTURE_1D);
+      }
+      else{
+        glDisable(GL_TEXTURE_2D);
+      }
     }
 
     glDisable(GL_COLOR_MATERIAL);
@@ -731,7 +812,7 @@ void draw_geom(int flag, int timestate){
 
 /* ------------------ smooth_geom_normals ------------------------ */
 
-void smooth_geom_normals(geomlistdata *geomlisti){
+void smooth_geom_normals(geomlistdata *geomlisti, int geomtype){
   int i;
   float zmin, *zORIG;
 
@@ -804,7 +885,7 @@ void smooth_geom_normals(geomlistdata *geomlisti){
         if(trianglek->exterior == 0)continue;
         tri_normk = trianglek->tri_norm;
         cosang = DOT3(tri_normk, tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
-        if(cosang>cos_geom_max_angle){
+        if(geomtype==GEOM_ISO||cosang>cos_geom_max_angle){ // smooth using all triangles if an isosurface
           norm[0] += tri_normk[0];
           norm[1] += tri_normk[1];
           norm[2] += tri_normk[2];
@@ -840,8 +921,7 @@ void update_geom_normals(void){
       else{
         geomlisti = geomi->currentframe;
       }
-
-      smooth_geom_normals(geomlisti);
+      smooth_geom_normals(geomlisti,geomi->geomtype);
     }
   }
 }
@@ -951,7 +1031,7 @@ void update_triangles(int flag,int update){
         pointi->triangles[pointi->itriangle++]=trianglei;
       }
 
-      smooth_geom_normals(geomlisti);
+      smooth_geom_normals(geomlisti,geomi->geomtype);
 
     }
   }
@@ -2391,7 +2471,7 @@ void draw_geom_cutcells(void){
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
     int nx, nxy;
     float *x, *y, *z;

@@ -29,7 +29,7 @@ float aperture2zoom(float ap){
 /* ------------------ init_camera_list ------------------------ */
 
 void init_camera_list(void){
-  camera *cb, *ca;
+  cameradata *cb, *ca;
 
   if(init_camera_list_flag==0)return;
   cb=&camera_list_first;
@@ -49,7 +49,7 @@ void init_camera_list(void){
 /* ------------------ add_default_views ------------------------ */
 
 void add_default_views(void){
-  camera *cb, *ca;
+  cameradata *cb, *ca;
 
   cb=&camera_list_first;
   ca=cb->next;
@@ -65,7 +65,7 @@ void add_default_views(void){
 
 /* ------------------ update_camera_ypos ------------------------ */
 
-void update_camera_ypos(camera *camera_data){
+void update_camera_ypos(cameradata *camera_data){
   float local_aperture_default;
   float width;
   float asp;
@@ -88,7 +88,7 @@ void update_camera_ypos(camera *camera_data){
 
 /* ------------------ init_camera ------------------------ */
 
-void init_camera(camera *camera_data,char *name){
+void init_camera(cameradata *camera_data,char *name){
   strcpy(camera_data->name,name);
   camera_data->rotation_index=nmeshes;
   camera_data->defined=1;
@@ -136,7 +136,7 @@ void init_camera(camera *camera_data,char *name){
 
 /* ------------------ clip2cam ------------------------ */
 
-  void clip2cam(camera *cam){
+  void clip2cam(cameradata *cam){
     cam->clip_mode=clip_mode;
     cam->clip_xmin=clipinfo.clip_xmin;
     cam->clip_ymin=clipinfo.clip_ymin;
@@ -158,7 +158,7 @@ void init_camera(camera *camera_data,char *name){
 
 /* ------------------ clip2cam ------------------------ */
 
-  void cam2clip(camera *cam){
+  void cam2clip(cameradata *cam){
     clip_mode = cam->clip_mode;
     clipinfo.clip_xmin = cam->clip_xmin;
     clipinfo.clip_ymin = cam->clip_ymin;
@@ -181,9 +181,9 @@ void init_camera(camera *camera_data,char *name){
 
 /* ------------------ copy_camera ------------------------ */
 
-void copy_camera(camera *to, camera *from){
+void copy_camera(cameradata *to, cameradata *from){
 
-  memcpy(to,from,sizeof(camera));
+  memcpy(to,from,sizeof(cameradata));
   if(to==camera_current){
     zoom=camera_current->zoom;
     update_glui_zoom();
@@ -202,7 +202,7 @@ void copy_camera(camera *to, camera *from){
 
 /* ------------------ update_camera ------------------------ */
 
-void update_camera(camera *ca){
+void update_camera(cameradata *ca){
   if(ca==camera_current){
     rotation_type=ca->rotation_type;
     if(ca->rotation_index>=0&&ca->rotation_index<nmeshes){
@@ -266,14 +266,14 @@ void set_camera_current(float angles[2], float eye[3], float zzoom){
 
 /* ------------------ insert_camera ------------------------ */
 
-camera *insert_camera(camera *cb,camera *source, char *name){
-  camera *cam,*ca;
+cameradata *insert_camera(cameradata *cb,cameradata *source, char *name){
+  cameradata *cam,*ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(ca->name,name)==0)return NULL;
   }
 
-  if(NewMemory((void **)&cam,sizeof(camera))==0)return NULL;
+  if(NewMemory((void **)&cam,sizeof(cameradata))==0)return NULL;
   init_camera(cam,name);
   if(source!=NULL){
     copy_camera(cam,source);
@@ -292,8 +292,8 @@ camera *insert_camera(camera *cb,camera *source, char *name){
 
 /* ------------------ delete_camera ------------------------ */
 
-void delete_camera(camera *cam){
-  camera *ca, *cb;
+void delete_camera(cameradata *cam){
+  cameradata *ca, *cb;
 
   cb=cam->prev;
   ca=cam->next;
@@ -305,8 +305,8 @@ void delete_camera(camera *cam){
 
 /* ------------------ get_camera ------------------------ */
 
-camera *get_camera(char *name){
-  camera *ca;
+cameradata *get_camera(char *name){
+  cameradata *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(strcmp(ca->name,name)==0){
@@ -319,7 +319,7 @@ camera *get_camera(char *name){
 /* ------------------ get_camera_label ------------------------ */
 
 char *get_camera_label(int index){
-  camera *ca;
+  cameradata *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     if(ca->view_id==index){
