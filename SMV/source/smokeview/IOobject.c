@@ -5599,36 +5599,6 @@ int get_ndevices(char *file){
   return nd;
 }
 
-/* ----------------------- read_device_header ----------------------------- */
-
-void read_device_header(char *file, devicedata *devices, int ndevices){
-  FILE *stream;
-  devicedata *devicecopy;
-  char buffer[BUFFER_LEN],*comma;
-  int buffer_len=BUFFER_LEN;
-
-  if(file==NULL)return;
-  stream=fopen(file,"r");
-  if(stream==NULL)return;
-
-  devicecopy=devices;
-
-  while(!feof(stream)){
-    fgets(buffer,buffer_len,stream);
-    comma=strchr(buffer,',');
-    if(comma!=NULL)*comma=0;
-    trim_back(buffer);
-    if(strcmp(buffer,"//DATA")==0){
-      break;
-    }
-    if(strcmp(buffer,"DEVICE")==0){
-      parse_device_keyword(stream, devicecopy);
-      devicecopy++;
-    }
-  }
-
-}
-
 #define EPSDEV 0.01
 
 /* ------------------ comparev2devices ------------------------ */

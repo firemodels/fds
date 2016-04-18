@@ -780,6 +780,14 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
+/* ------------------ sort_smoke3dinfo ------------------------ */
+
+void sort_smoke3dinfo(void){
+  if(nsmoke3dinfo > 1){
+    qsort((meshdata **)smoke3dinfo_sorted, (size_t)nsmoke3dinfo, sizeof(smoke3ddata *), compare_meshes);
+  }
+}
+
 /* ----------------------- Scene_viewport ----------------------------- */
 
 void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down){

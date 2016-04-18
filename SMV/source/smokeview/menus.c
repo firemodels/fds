@@ -4945,6 +4945,23 @@ int get_total_vents(void){
   return ntotal_vents;
 }
 
+/* ------------------ ispatchtype ------------------------ */
+
+int ispatchtype(int type){
+  int i;
+
+  for(i = 0; i < nmeshes; i++){
+    meshdata *meshi;
+    int n;
+
+    meshi = meshinfo + i;
+    for(n = 0; n < meshi->npatches; n++){
+      if(meshi->patchtype[n] == type)return 1;
+    }
+  }
+  return 0;
+}
+
 /* ------------------ InitMenus ------------------------ */
 
 void InitMenus(int unload){

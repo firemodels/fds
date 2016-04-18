@@ -66,7 +66,7 @@ unsigned int compress_rle(unsigned char *buffer_in, int nchars_in, unsigned char
   return buffer_out-buffer_start;
 }
 
-/* ------------------ irle ------------------------ */
+/* ------------------ uncompress_rle ------------------------ */
 
 unsigned int uncompress_rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
   int nrepeats,nn;

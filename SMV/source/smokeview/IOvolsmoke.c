@@ -2445,7 +2445,7 @@ void make_smesh(supermeshdata *smesh, meshdata *firstmesh){
   }
 }
 
-/* ------------------ compare_meshes ------------------------ */
+/* ------------------ compare_smeshes ------------------------ */
 
 int compare_smeshes( const void *arg1, const void *arg2 ){
   meshdata *meshi, *meshj;
