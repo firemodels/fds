@@ -1836,9 +1836,9 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
    IF (BETA>TWO_EPSILON_EB) THEN
       ! fluid momentum source term
       MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
-      LP%ACCEL_X = LP%ACCEL_X + MPOM*(U_OLD-LP%U)/DT_P
-      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(V_OLD-LP%V)/DT_P
-      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(W_OLD-LP%W)/DT_P
+      LP%ACCEL_X = LP%ACCEL_X + MPOM*(U_OLD-LP%U)/DT
+      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(V_OLD-LP%V)/DT
+      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(W_OLD-LP%W)/DT
       ! semi-analytical solution for PARTICLE position
       ALBO = ALPHA*LOG(OBDT)/(BETA*OPA)
       LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GX_LOC*HALF_DT2
