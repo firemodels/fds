@@ -6204,7 +6204,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             IJ = IJ + 1
          ENDDO
       ENDDO
-      N_FACES = IJ
+      N_FACES = IJ - 1
 
       DO I = 1, N_VERTS
          VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
@@ -6269,7 +6269,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             IJ = IJ + 1
          ENDDO
       ENDDO
-      N_VOLUS=IJ
+      N_VOLUS=IJ - 1
       N_FACES=0
    ENDIF ZVALS_IF
 
