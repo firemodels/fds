@@ -1249,7 +1249,9 @@ PARTICLE_LOOP: DO IP=1,NLP
    DT_P   = DT/REAL(N_ITER,EB)
 
    ! Time stepping loop
-
+   LP%ACCEL_X = 0._EB
+   LP%ACCEL_Y = 0._EB
+   LP%ACCEL_Z = 0._EB
    TIME_STEP_LOOP: DO ITER=1,N_ITER
 
    ! Determine particle radius
@@ -1834,9 +1836,9 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
    IF (BETA>TWO_EPSILON_EB) THEN
       ! fluid momentum source term
       MPOM = LP%PWT*LP%MASS/(RHO_G/RVC)
-      LP%ACCEL_X = MPOM*(U_OLD-LP%U)/DT_P
-      LP%ACCEL_Y = MPOM*(V_OLD-LP%V)/DT_P
-      LP%ACCEL_Z = MPOM*(W_OLD-LP%W)/DT_P
+      LP%ACCEL_X = LP%ACCEL_X + MPOM*(U_OLD-LP%U)/DT
+      LP%ACCEL_Y = LP%ACCEL_Y + MPOM*(V_OLD-LP%V)/DT
+      LP%ACCEL_Z = LP%ACCEL_Z + MPOM*(W_OLD-LP%W)/DT
       ! semi-analytical solution for PARTICLE position
       ALBO = ALPHA*LOG(OBDT)/(BETA*OPA)
       LP%X = X_OLD + (U_OLD+ALPHA*UBAR)*DTOPA + ALBO*(U_OLD-UBAR) + GX_LOC*HALF_DT2
@@ -2858,7 +2860,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       M_DROP = LPC%FTPR * R_DROP**3
       A_DROP = 4._EB*PI * R_DROP**2
       IF (SUM(AVG_DROP_AREA(II,JJ,KK,:))>0._EB) THEN
-         Q_D_1 = MIN(H_V*M_DROP/DT,(QR_W(II,JJ,KK)/SUM(AVG_DROP_AREA(II,JJ,KK,:)))*0.25_EB*A_DROP)      
+         Q_D_1 = MIN(H_V*M_DROP/DT,(QR_W(II,JJ,KK)/SUM(AVG_DROP_AREA(II,JJ,KK,:)))*0.25_EB*A_DROP)
       ELSE
          Q_D_1 = 0._EB
       ENDIF
