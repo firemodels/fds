@@ -193,7 +193,6 @@ EXTERNCPP void rotateu2v(float *u, float *v, float *axis, float *angle);
 EXTERNCPP void rotation_type_CB(int var);
 EXTERNCPP  void update_rotation_type(int val);
 
-EXTERNCPP void camera2quat(cameradata *ca, float *quat, float *rotation);
 EXTERNCPP void angleaxis2quat(float angle, float *axis, float *quat);
 EXTERNCPP void quat2rot(float quat[4],float rot[16]);
 EXTERNCPP void mult_quat(float x[4], float y[4], float z[4]);
@@ -385,10 +384,6 @@ EXTERNCPP int AnySlices(char *type);
 EXTERNCPP void TrainerViewMenu(int var);
 
 EXTERNCPP void delete_camera(cameradata *cam1);
-EXTERNCPP void ShowAllSmoke(void);
-EXTERNCPP void HideAllSmoke(void);
-EXTERNCPP void HideAllSlices(void);
-EXTERNCPP void ShowAllSlices(char *type1, char *type2);
 EXTERNCPP void UnloadSliceMenu(int value);
 EXTERNCPP void ViewpointMenu(int value);
 EXTERNCPP void FrameRateMenu(int var);
@@ -746,8 +741,6 @@ EXTERNCPP void Slice_CB(int var);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
 EXTERNCPP void Visible(int state);
-EXTERNCPP void parse_commandline(int argc, char **argv);
-EXTERNCPP void usage(char **argv);
 EXTERNCPP void display_version_info(char *progname);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);

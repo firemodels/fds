@@ -256,11 +256,6 @@ int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
-  /*
-  warning: the following line was commented out!! (perhaps it broke something)
-     this line is necessary in order to define smv_filename and trainer_filename
-  */
- // parse_commandlines(argc, argv);
   return_code=-1;
   if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
