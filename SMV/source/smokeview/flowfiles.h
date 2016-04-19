@@ -163,7 +163,7 @@ typedef struct _scriptfiledata {
   char *file;
 } scriptfiledata;
 
-/* --------------------------  scriptfiledata ------------------------------------ */
+/* --------------------------  luascriptfiledata ------------------------------------ */
 
 #ifdef pp_LUA
 typedef struct _luascriptfiledata {
@@ -230,7 +230,7 @@ typedef struct _colordata {
   struct _colordata *nextcolor;
 } colordata;
 
-/* --------------------------  outline ------------------------------------ */
+/* --------------------------  outlinedata ------------------------------------ */
 
 typedef struct {
   int nlines;
@@ -250,7 +250,7 @@ typedef struct _labeldata {
   int useforegroundcolor,show_always;
 } labeldata;
 
-/* --------------------------  texture ------------------------------------ */
+/* --------------------------  texturedata ------------------------------------ */
 
 typedef struct _texturedata {
   char *file;
@@ -724,7 +724,7 @@ typedef struct _meshdata {
   int s_offset[3];
 } meshdata;
 
-/* --------------------------  supermesh ------------------------------------ */
+/* --------------------------  supermeshdata ------------------------------------ */
 
 typedef struct _supermeshdata {
 #ifdef pp_GPU
@@ -964,7 +964,7 @@ typedef struct {
   float lasttime;
 } mousedata;
 
-/* --------------------------  camera ------------------------------------ */
+/* --------------------------  cameradata ------------------------------------ */
 
 typedef struct _cameradata {
   int defined,dirty;
@@ -1076,7 +1076,7 @@ typedef struct {
   float *valmin, *valmax;
 } partdata;
 
-/* --------------------------  compinfo ------------------------------------ */
+/* --------------------------  compdata ------------------------------------ */
 
 typedef struct {
   int offset, size;
@@ -1098,7 +1098,7 @@ typedef struct {
   int ntimes, ntimes_csv;
 } hrrdata;
 
-/* --------------------------  slice ------------------------------------ */
+/* --------------------------  slicedata ------------------------------------ */
 
 typedef struct _slicedata {
   int mesh_type;
@@ -1165,9 +1165,11 @@ typedef struct _slicedata {
   int reload;
   float delta_orig, dplane_min, dplane_max;
   int extreme_min, extreme_max;
+  histogramdata **histograms;
+  int nhistograms;
 } slicedata;
 
-/* --------------------------  multislice ------------------------------------ */
+/* --------------------------  multislicedata ------------------------------------ */
 
 typedef struct _multislicedata {
   int mesh_type;
@@ -1196,7 +1198,7 @@ typedef struct {
   char menulabel2[128];
 } multivslicedata;
 
-/* --------------------------  databounds ------------------------------------ */
+/* --------------------------  boundsdata ------------------------------------ */
 
 typedef struct {
   char *datalabel;
@@ -1215,7 +1217,7 @@ typedef struct {
   flowlabels *label;
 } boundsdata;
 
-/* --------------------------  vslice ------------------------------------ */
+/* --------------------------  vslicedata ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
@@ -1239,7 +1241,7 @@ typedef struct {
   unsigned char *frame_in, *frame_out, *view_tmp, *comp_all, **frame_comp_list;
 } smokedata;
 
-/* --------------------------  smoke3d ------------------------------------ */
+/* --------------------------  smoke3ddata ------------------------------------ */
 
 typedef struct _smoke3ddata {
   int seq_id,autoload;
@@ -1274,7 +1276,7 @@ typedef struct _smoke3ddata {
   int dir;
 } smoke3ddata;
 
-/* --------------------------  patch ------------------------------------ */
+/* --------------------------  patchdata ------------------------------------ */
 
 typedef struct {
   int seq_id, autoload;
@@ -1358,7 +1360,7 @@ typedef struct {
   int zoneinside;
 } roomdata;
 
-/* --------------------------  zvent ------------------------------------ */
+/* --------------------------  zventdata ------------------------------------ */
 
 typedef struct {
   int wall, nslab;

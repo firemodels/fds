@@ -4821,12 +4821,9 @@ void drawvolslice(const slicedata *sd){
 
    constval = xplt[plotx]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   maxj = sd->js2;
-   if(sd->js1+1>maxj){
-     maxj=sd->js1+1;
-   }
+   maxj = MAX(sd->js1+1, sd->js2);
    for(j=sd->js1; j<maxj; j++){
-     n = (j-sd->js1)*sd->nslicek -1;
+     n = (j-sd->js1)*sd->nslicek - 1;
      n += (plotx-sd->is1)*sd->nslicej*sd->nslicek;
      n2 = n + sd->nslicek;
      yy1 = yplt[j];
@@ -4873,10 +4870,7 @@ void drawvolslice(const slicedata *sd){
 
    constval = yplt[ploty]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   maxi = sd->is1+sd->nslicei-1;
-   if(sd->is1+1>maxi){
-     maxi=sd->is1+1;
-   }
+   maxi = MAX(sd->is1+sd->nslicei-1, sd->is1+1);
    for(i=sd->is1; i<maxi; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -1;
      n += (ploty-sd->js1)*sd->nslicek;
@@ -4928,10 +4922,7 @@ void drawvolslice(const slicedata *sd){
 
    constval = zplt[plotz]+offset_slice*sd->sliceoffset;
    glBegin(GL_TRIANGLES);
-   maxi = sd->is1+sd->nslicei-1;
-   if(sd->is1+1>maxi){
-     maxi=sd->is1+1;
-   }
+   maxi = MAX(sd->is1+sd->nslicei-1, sd->is1+1);
    for(i=sd->is1; i<maxi; i++){
      n = (i-sd->is1)*sd->nslicej*sd->nslicek -sd->nslicek;
      n += (plotz-sd->ks1);
@@ -7147,3 +7138,69 @@ void draw_triangle_outline(float *v1, float *v2, float *v3,
     glEnd();
   }
 }
+
+/* ------------------ slicedata2hist ------------------------ */
+
+void slicedata2hist(slicedata *sd, float *xyz, float *dxyz, float time, float dtime, histogramdata *histogram){
+  int i,j,k,t;
+  int imin, imax, jmin, jmax, kmin, kmax, tmin, tmax;
+  int ntimes;
+  float *times, *xplt, *yplt, *zplt;
+  int ibar, jbar, kbar;
+  meshdata *meshi;
+  int nvals,ival;
+  float *vals;
+
+  meshi = meshinfo+sd->blocknumber;
+  xplt = meshi->xplt;
+  yplt = meshi->yplt;
+  zplt = meshi->zplt;
+  ibar = meshi->ibar;
+  jbar = meshi->jbar;
+  kbar = meshi->kbar;
+
+
+  times = sd->times;
+  ntimes = sd->ntimes;
+  tmin = get_interval(time-dtime, times, ntimes);
+  tmax = get_interval(time+dtime, times, ntimes);
+  imin = get_interval(xyz[0]-dxyz[0], xplt, ibar+1);
+  imax = get_interval(xyz[0]+dxyz[0], xplt, ibar+1);
+  jmin = get_interval(xyz[1]-dxyz[1], yplt, jbar+1);
+  jmax = get_interval(xyz[1]+dxyz[1], yplt, jbar+1);
+  kmin = get_interval(xyz[2]-dxyz[2], zplt, kbar+1);
+  kmax = get_interval(xyz[2]+dxyz[2], zplt, kbar+1);
+
+  nvals = (tmax+1-tmin)*(imax+1-imin)*(jmax+1-jmin)*(kmax+1-kmin);
+  NewMemory((void **)&vals, nvals*sizeof(float));
+
+  // val(i,j,k) = di*nj*nk + dj*nk + dk
+
+//#define SLICEVAL(i,j,k) qslice[(i-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + (k-sd->ks1)]
+  ival = 0;
+  for(t = tmin; t<=tmax; t++){
+    float *qslice;
+
+    qslice = sd->qslicedata+t*sd->nsliceii;
+    for(i = imin; i<=imax; i++){
+      float *qslicei;
+
+      qslicei = qslice+(i-sd->is1)*sd->nslicej*sd->nslicek;
+      for(j = jmin; j<=jmax; j++){
+        float *qslicej;
+
+        qslicej = qslicei+(j-sd->js1)*sd->nslicek;
+        for(k = kmin; k<=kmax; k++){
+          float *qslicek;
+
+          qslicek = qslicej+(k-sd->ks1);
+          vals[ival++] = *qslicek;
+        }
+      }
+    }
+  }
+  init_histogram(histogram, NHIST_BUCKETS);
+  copy_data2histogram(vals, nvals, histogram);
+  FREEMEMORY(vals);
+}
+
