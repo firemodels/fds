@@ -188,17 +188,74 @@ void init_lang(void){
 }
 #endif
 
+/* ------------------ readboundini ------------------------ */
+
+void readboundini(void){
+  FILE *stream = NULL;
+  char *fullfilename = NULL;
+
+  if(boundini_filename == NULL)return;
+  fullfilename = get_filename(smokeviewtempdir, boundini_filename, tempdir_flag);
+  if(fullfilename != NULL)stream = fopen(fullfilename, "r");
+  if(stream == NULL || is_file_newer(smv_filename, fullfilename) == 1){
+    if(stream != NULL)fclose(stream);
+    FREEMEMORY(fullfilename);
+    return;
+  }
+  PRINTF("%s", _("reading: "));
+  PRINTF("%s\n", fullfilename);
+
+  while(!feof(stream)){
+    char buffer[255], buffer2[255];
+
+    CheckMemory;
+    if(fgets(buffer, 255, stream) == NULL)break;
+
+    if(match(buffer, "B_BOUNDARY") == 1){
+      float gmin, gmax;
+      float pmin, pmax;
+      int filetype;
+      char *buffer2ptr;
+      int lenbuffer2;
+      int i;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%f %f %f %f %i %s", &gmin, &pmin, &pmax, &gmax, &filetype, buffer2);
+      trim_back(buffer2);
+      buffer2ptr = trim_front(buffer2);
+      lenbuffer2 = strlen(buffer2ptr);
+      for(i = 0; i < npatchinfo; i++){
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(lenbuffer2 != 0 &&
+          strcmp(patchi->label.shortlabel, buffer2ptr) == 0 &&
+          patchi->filetype == filetype&&
+          is_file_newer(boundini_filename, patchi->file) == 1){
+          bounddata *boundi;
+
+          boundi = &patchi->bounds;
+          boundi->defined = 1;
+          boundi->global_min = gmin;
+          boundi->global_max = gmax;
+          boundi->percentile_min = pmin;
+          boundi->percentile_max = pmax;
+        }
+      }
+      continue;
+    }
+  }
+  FREEMEMORY(fullfilename);
+  return;
+}
+
 /* ------------------ setup_case ------------------------ */
 
 int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
-  /*
-  warning: the following line was commented out!! (perhaps it broke something)
-     this line is necessary in order to define smv_filename and trainer_filename
-  */
- // parse_commandlines(argc, argv);
   return_code=-1;
   if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;

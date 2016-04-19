@@ -1858,43 +1858,6 @@ void update_vslice_menulabels(void){
   }
 }
 
-/* ------------------ hide_slice2 ------------------------ */
-
-int hide_slice2(slicedata *sdi,slicedata *sdj){
-  float delta_orig;
-  float dx, dy, dz, aslice, aintersect;
-
-  if(sdi->volslice==1||sdj->volslice==1)return 0;
-  delta_orig = MAX(sdi->delta_orig,sdj->delta_orig);
-  if(strcmp(sdj->label.shortlabel,sdi->label.shortlabel)!=0
-      ||sdj->idir!=sdi->idir
-      ||sdj->position_orig+delta_orig<sdi->position_orig
-      ||sdj->position_orig-delta_orig>sdi->position_orig
-      ||sdj->mesh_type!=sdi->mesh_type
-        ){
-      return 0;
-  }
-  dx = MIN(sdi->xmax,sdj->xmax) - MAX(sdi->xmin,sdj->xmin);
-  dy = MIN(sdi->ymax,sdj->ymax) - MAX(sdi->ymin,sdj->ymin);
-  dz = MIN(sdi->zmax,sdj->zmax) - MAX(sdi->zmin,sdj->zmin);
-  if(sdi->idir==XDIR){
-    dx=1.0;
-    aslice=(sdi->ymax-sdi->ymin)*(sdi->zmax-sdi->zmin);
-  }
-  if(sdi->idir==YDIR){
-    dy=1.0;
-    aslice=(sdi->xmax-sdi->xmin)*(sdi->zmax-sdi->zmin);
-  }
-  if(sdi->idir==ZDIR){
-    dz=1.0;
-    aslice=(sdi->xmax-sdi->xmin)*(sdi->ymax-sdi->ymin);
-  }
-  aintersect=dx*dy*dz;
-  if(dx<=0.0||dy<=0.0||dz<=0.0||sdj->blocknumber<=sdi->blocknumber)return 0;
-  if(aintersect<0.1*aslice)return 0;
-  return 1;
-}
-
 /* ------------------ new_multi_slice ------------------------ */
 
 int new_multi_slice(slicedata *sdold,slicedata *sd){

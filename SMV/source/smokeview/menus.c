@@ -245,6 +245,160 @@ void OpenSMVFile(char *filebuffer,int filebufferlength,int *openfile){
 }
 #endif
 
+/* ------------------ HideAllSmoke ------------------------ */
+
+void HideAllSmoke(void){
+  int i;
+  for(i = 0; i < nsmoke3dinfo; i++){
+    smoke3ddata *smoke3di;
+
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->loaded == 1)smoke3di->display = 0;
+  }
+  for(i = 0; i < nisoinfo; i++){
+    isodata *isoi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded == 1)isoi->display = 0;
+  }
+}
+
+/* ------------------ HideAllSlices ------------------------ */
+
+void HideAllSlices(void){
+  int i;
+
+  glutSetCursor(GLUT_CURSOR_WAIT);
+  for(i = 0; i < nsliceinfo; i++){
+    sliceinfo[i].display = 0;
+  }
+  updatemenu = 1;
+  glutPostRedisplay();
+  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+}
+
+/* ------------------ ShowAllSmoke ------------------------ */
+
+void ShowAllSmoke(void){
+  int i;
+  for(i = 0; i < nsmoke3dinfo; i++){
+    smoke3ddata *smoke3di;
+
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->loaded == 1)smoke3di->display = 1;
+  }
+  for(i = 0; i < nisoinfo; i++){
+    isodata *isoi;
+
+    isoi = isoinfo + i;
+    if(isoi->loaded == 1)isoi->display = 1;
+  }
+}
+
+/* ------------------ ShowMultiSliceMenu ------------------------ */
+
+void ShowMultiSliceMenu(int value){
+  multislicedata *mslicei;
+  slicedata *sd;
+  int mdisplay;
+  int i;
+
+  updatemenu = 1;
+  glutPostRedisplay();
+  switch(value){
+  case SHOW_ALL:
+  case HIDE_ALL:
+    ShowHideSliceMenu(value);
+    return;
+  case -11:
+    show_slice_in_obst = 1 - show_slice_in_obst;
+    break;
+  case -12:
+    offset_slice = 1 - offset_slice;
+    break;
+  case -14:
+    show_fed_area = 1 - show_fed_area;
+    break;
+  default:
+    mslicei = multisliceinfo + value;
+    mdisplay = 0;
+    if(islicetype == mslicei->type){
+      if(plotstate != DYNAMIC_PLOTS){
+        plotstate = DYNAMIC_PLOTS;
+        mdisplay = 1;
+      }
+      else{
+        mdisplay = 1 - mslicei->display;
+      }
+    }
+    else{
+      plotstate = DYNAMIC_PLOTS;
+      islicetype = mslicei->type;
+      mdisplay = 1;
+    }
+    for(i = 0; i < mslicei->nslices; i++){
+      sd = sliceinfo + mslicei->islices[i];
+      if(sd->loaded == 0)continue;
+      sd->display = mdisplay;
+    }
+    break;
+  }
+  updateslicefilenum();
+  plotstate = getplotstate(DYNAMIC_PLOTS);
+
+  updateglui();
+  updateslicelistindex(slicefilenum);
+  Update_Show();
+}
+
+/* ------------------ ShowAllSlices ------------------------ */
+
+void ShowAllSlices(char *type1, char *type2){
+  int i;
+
+  glutSetCursor(GLUT_CURSOR_WAIT);
+  if(trainer_showall_mslice == 1){
+    for(i = 0; i < nsliceinfo; i++){
+      sliceinfo[i].display = 0;
+      if(sliceinfo[i].loaded == 0)continue;
+      if(
+        type1 != NULL&&STRCMP(sliceinfo[i].label.longlabel, type1) == 0 ||
+        type2 != NULL&&STRCMP(sliceinfo[i].label.longlabel, type2) == 0
+        ){
+        sliceinfo[i].display = 1;
+        islicetype = sliceinfo[i].type;
+      }
+    }
+  }
+  else{
+    int msliceindex;
+
+    if(trainerload == 2){
+      if(trainerload == trainerload_old){
+        trainer_temp_index++;
+        if(trainer_temp_index > trainer_temp_n - 1){
+          trainer_temp_index = 0;
+        }
+      }
+      msliceindex = trainer_temp_indexes[trainer_temp_index];
+    }
+    else{
+      if(trainerload == trainerload_old){
+        trainer_oxy_index++;
+        if(trainer_oxy_index > trainer_oxy_n - 1){
+          trainer_oxy_index = 0;
+        }
+      }
+      msliceindex = trainer_oxy_indexes[trainer_oxy_index];
+    }
+    ShowMultiSliceMenu(HIDE_ALL);
+    ShowMultiSliceMenu(msliceindex);
+  }
+  updatemenu = 1;
+  glutPostRedisplay();
+  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+}
+
 /* ------------------ TrainerViewMenu ------------------------ */
 
 void TrainerViewMenu(int value){
@@ -939,62 +1093,6 @@ void ShowHideSliceMenu(int value){
       islicetype = sd->type;
       sd->display=1;
     }
-  }
-  updateslicefilenum();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-
-  updateglui();
-  updateslicelistindex(slicefilenum);
-  Update_Show();
-}
-
-/* ------------------ ShowMultiSliceMenu ------------------------ */
-
-void ShowMultiSliceMenu(int value){
-  multislicedata *mslicei;
-  slicedata *sd;
-  int mdisplay;
-  int i;
-
-  updatemenu=1;
-  glutPostRedisplay();
-  switch(value){
-  case SHOW_ALL:
-  case HIDE_ALL:
-    ShowHideSliceMenu(value);
-    return;
-  case -11:
-    show_slice_in_obst=1-show_slice_in_obst;
-    break;
-  case -12:
-    offset_slice=1-offset_slice;
-    break;
-  case -14:
-    show_fed_area=1-show_fed_area;
-    break;
-  default:
-    mslicei = multisliceinfo + value;
-    mdisplay=0;
-    if(islicetype==mslicei->type){
-      if(plotstate!=DYNAMIC_PLOTS){
-        plotstate=DYNAMIC_PLOTS;
-        mdisplay=1;
-      }
-      else{
-        mdisplay = 1 - mslicei->display;
-      }
-    }
-    else{
-      plotstate=DYNAMIC_PLOTS;
-      islicetype=mslicei->type;
-      mdisplay=1;
-    }
-    for(i=0;i<mslicei->nslices;i++){
-      sd = sliceinfo + mslicei->islices[i];
-      if(sd->loaded==0)continue;
-      sd->display=mdisplay;
-    }
-    break;
   }
   updateslicefilenum();
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -3511,106 +3609,24 @@ int AnySlices(char *type){
   return 0;
 }
 
-/* ------------------ HideAllSlices ------------------------ */
+/* ------------------ UnLoadTerrainMenu ------------------------ */
 
-void HideAllSlices(void){
+void UnloadTerrainMenu(int value){
   int i;
+  int errorcode;
 
-  glutSetCursor(GLUT_CURSOR_WAIT);
-  for(i=0;i<nsliceinfo;i++){
-    sliceinfo[i].display=0;
+  if(value >= 0 && value < nterraininfo){
+    readterrain("", value, UNLOAD, &errorcode);
   }
-  updatemenu=1;
+  else if(value == MENU_UNLOADTERRAIN_UNLOADALL){
+    for(i = 0; i < nterraininfo; i++){
+      UnloadTerrainMenu(i);
+    }
+  }
+  updatemenu = 1;
   glutPostRedisplay();
-  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+
 }
-
-/* ------------------ ShowAllSmoke ------------------------ */
-
-void ShowAllSmoke(void){
-  int i;
-  for(i=0;i<nsmoke3dinfo;i++){
-    smoke3ddata *smoke3di;
-
-    smoke3di = smoke3dinfo + i;
-    if(smoke3di->loaded==1)smoke3di->display=1;
-  }
-  for(i=0;i<nisoinfo;i++){
-    isodata *isoi;
-
-    isoi = isoinfo + i;
-    if(isoi->loaded==1)isoi->display=1;
-  }
-}
-
-/* ------------------ HideAllSmoke ------------------------ */
-
-void HideAllSmoke(void){
-  int i;
-  for(i=0;i<nsmoke3dinfo;i++){
-    smoke3ddata *smoke3di;
-
-    smoke3di = smoke3dinfo + i;
-    if(smoke3di->loaded==1)smoke3di->display=0;
-  }
-  for(i=0;i<nisoinfo;i++){
-    isodata *isoi;
-
-    isoi = isoinfo + i;
-    if(isoi->loaded==1)isoi->display=0;
-  }
-}
-
-/* ------------------ ShowAllSlices ------------------------ */
-
-void ShowAllSlices(char *type1, char *type2){
-  int i;
-
-  glutSetCursor(GLUT_CURSOR_WAIT);
-  if(trainer_showall_mslice==1){
-    for(i=0;i<nsliceinfo;i++){
-      sliceinfo[i].display=0;
-      if(sliceinfo[i].loaded==0)continue;
-      if(
-        type1!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type1)==0||
-        type2!=NULL&&STRCMP(sliceinfo[i].label.longlabel,type2)==0
-        ){
-        sliceinfo[i].display=1;
-        islicetype=sliceinfo[i].type;
-      }
-    }
-  }
-  else{
-    int msliceindex;
-
-    if(trainerload==2){
-      if(trainerload==trainerload_old){
-        trainer_temp_index++;
-        if(trainer_temp_index>trainer_temp_n-1){
-          trainer_temp_index=0;
-        }
-      }
-      msliceindex=trainer_temp_indexes[trainer_temp_index];
-    }
-    else{
-      if(trainerload==trainerload_old){
-        trainer_oxy_index++;
-        if(trainer_oxy_index>trainer_oxy_n-1){
-          trainer_oxy_index=0;
-        }
-      }
-      msliceindex=trainer_oxy_indexes[trainer_oxy_index];
-    }
-    ShowMultiSliceMenu(HIDE_ALL);
-    ShowMultiSliceMenu(msliceindex);
-  }
-  updatemenu=1;
-  glutPostRedisplay();
-  glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-}
-
-void UnloadTerrainMenu(int value);
-void LoadTerrainMenu(int value);
 
 /* ------------------ LoadTerrainMenu ------------------------ */
 
@@ -3634,25 +3650,6 @@ void LoadTerrainMenu(int value){
   }
   updatemenu=1;
   glutPostRedisplay();
-}
-
-/* ------------------ UnLoadTerrainMenu ------------------------ */
-
-void UnloadTerrainMenu(int value){
-  int i;
-  int errorcode;
-
-  if(value>=0&&value<nterraininfo){
-    readterrain("",value,UNLOAD,&errorcode);
-  }
-  else if(value==MENU_UNLOADTERRAIN_UNLOADALL){
-    for(i=0;i<nterraininfo;i++){
-      UnloadTerrainMenu(i);
-    }
-  }
-  updatemenu=1;
-  glutPostRedisplay();
-
 }
 
 /* ------------------ DefineAllFEDs ------------------------ */
@@ -4943,6 +4940,23 @@ int get_total_vents(void){
     ntotal_vents += meshi->nvents;
   }
   return ntotal_vents;
+}
+
+/* ------------------ ispatchtype ------------------------ */
+
+int ispatchtype(int type){
+  int i;
+
+  for(i = 0; i < nmeshes; i++){
+    meshdata *meshi;
+    int n;
+
+    meshi = meshinfo + i;
+    for(n = 0; n < meshi->npatches; n++){
+      if(meshi->patchtype[n] == type)return 1;
+    }
+  }
+  return 0;
 }
 
 /* ------------------ InitMenus ------------------------ */
