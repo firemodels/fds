@@ -21,7 +21,7 @@ cd $SRCDIR/glut-3.7.6
 cp libglut.a $LIBDIR/.
 
 # JPEG
-cd $SRCDIR/jpeg-6b
+cd $SRCDIR/jpeg-9b
 ./makelib.sh $OPTS
 cp libjpeg.a $LIBDIR/.
 
