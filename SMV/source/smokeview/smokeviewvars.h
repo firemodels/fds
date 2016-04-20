@@ -31,6 +31,7 @@ SVEXTERN int SVDECL(geom_ivecfactor, 30);
 SVEXTERN int SVDECL(geom_outline_ioffset, 5);
 SVEXTERN float SVDECL(geom_outline_offset,0.005);
 SVEXTERN float SVDECL(geom_max_angle, 30.0), cos_geom_max_angle;
+SVEXTERN int SVDECL(use_max_angle, 1);
 SVEXTERN int SVDECL(update_setvents, 0);
 #ifdef pp_SLICECOLORDEFER
 SVEXTERN int SVDECL(use_set_slicecolor, 1);
@@ -1091,8 +1092,6 @@ SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
-SVEXTERN meshdata *getmesh_in_smesh(meshdata *mesh_guess, supermeshdata *smesh, float *xyz);
-SVEXTERN float getmesh_zcell(meshdata *meshi, float xval, float yval, int *valid);
 SVEXTERN int SVDECL(updatehiddenfaces,1),SVDECL(hide_overlaps,0);
 SVEXTERN int SVDECL(nsurfids,0);
 SVEXTERN surfid SVDECL(*surfids,NULL);
