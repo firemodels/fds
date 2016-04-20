@@ -27,7 +27,7 @@ cp libglui.a $LIBDIR/.
 #cp libglut.a $LIBDIR/.
 
 # JPEG
-cd $SRCDIR/jpeg-6b
+cd $SRCDIR/jpeg-9b
 ./makelib.sh $OPTS
 cp libjpeg.a $LIBDIR/.
 

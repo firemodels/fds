@@ -50,7 +50,7 @@ AR2= ranlib
 # library object files common to compression and decompression
 COMOBJECTS= jcomapi.o jutils.o jerror.o jmemmgr.o $(SYSDEPMEM)
 # compression library object files
-CLIBOBJECTS= jcapimin.o jcapistd.o jctrans.o jcparam.o \
+CLIBOBJECTS= jaricom.o jdarith.o jcarith.o jcapimin.o jcapistd.o jctrans.o jcparam.o \
         jdatadst.o jcinit.o jcmaster.o jcmarker.o jcmainct.o \
         jcprepct.o jccoefct.o jccolor.o jcsample.o jchuff.o \
         jcdctmgr.o jfdctfst.o jfdctflt.o \

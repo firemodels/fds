@@ -22,7 +22,7 @@ call makelib %OPTS%
 copy libglutwin.lib %LIBDIR%\glut32.lib
 
 :: JPEG
-cd %SRCDIR%\jpeg-6b
+cd %SRCDIR%\jpeg-9b
 call makelib %OPTS%
 copy libjpeg.lib %LIBDIR%\jpeg.lib
 
