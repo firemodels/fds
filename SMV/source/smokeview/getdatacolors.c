@@ -1836,7 +1836,7 @@ void updatechopcolors(void){
       int ilevel;
       float dz;
 
-      dz = (terrain_zmax - terrain_zmin);
+      dz = (terrain_zmax - terrain_zmin)*geom_vert_exag;
       if(ABS(dz)<0.01)dz=1;
 
       ilevel = 255 * (terrain_zlevel - terrain_zmin) / dz;

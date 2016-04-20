@@ -24,7 +24,6 @@
 #define NORMALIZE_X(x) (((x)-xbar0)/xyzmaxdiff)
 #define NORMALIZE_Y(y) (((y)-ybar0)/xyzmaxdiff)
 #define NORMALIZE_Z(z) (((z)-zbar0)/xyzmaxdiff)
-#define NORMALIZE_ZZ(z) (((z)-terrain_zmin)/(terrain_zmax-terrain_zmin))
 
 #define DENORMALIZE_X(x) (xbar0+(x)*xyzmaxdiff)
 #define DENORMALIZE_Y(y) (ybar0+(y)*xyzmaxdiff)

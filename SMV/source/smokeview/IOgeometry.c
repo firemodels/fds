@@ -379,16 +379,14 @@ void draw_geom(int flag, int timestate){
           for(j = 0; j < 3; j++){
             point *pointj;
             float *xyz, texture_z;
-            float zorig;
 
             pointj = trianglei->points[j];
             xyz = pointj->xyz;
-            //    znew = zmin + geom_vert_exag*(zorig - zmin);
-            //   zorig = zmin + (znew-zmin)/geom_vert_exag
+            //       znew = terrain_zmin + geom_vert_exag*(zold-terrain_zmin);
+            //    zmaxnew = terrain_zmin + geom_vert_exag*(terrain_zmax-terrain_zmin)
+            //       zold = terrain_zmin + (znew-terrain_zmin)/geom_vert_exag
 
-            zorig = terrain_zmin + (xyz[2] - terrain_zmin) / geom_vert_exag;
-
-            texture_z = NORMALIZE_ZZ(zorig);
+            texture_z = (xyz[2] - terrain_zmin)/(geom_vert_exag*(terrain_zmax-terrain_zmin));
 
             glNormal3fv(pointj->point_norm);
             glTexCoord1f(texture_z);
@@ -695,7 +693,10 @@ void draw_geom(int flag, int timestate){
         float xyz1[3], xyz2[3];
 
         trianglei = geomlisti->triangles+j;
-        if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 1))continue;
+        if(trianglei->exterior==1&&show_faces_exterior==0)continue;
+        if(trianglei->exterior==0)continue;
+
+        if(trianglei->geomtype==GEOM_GEOM&&(show_geom_normal==0||smooth_geom_normal==1))continue;
         if(trianglei->geomtype == GEOM_ISO &&(show_iso_normal == 0||smooth_iso_normal==1))continue;
 
         xyznorm=trianglei->tri_norm;
@@ -726,6 +727,8 @@ void draw_geom(int flag, int timestate){
         float xyz1[3], xyz2[3];
 
         trianglei = geomlisti->triangles+j;
+        if(trianglei->exterior==1&&show_faces_exterior==0)continue;
+        if(trianglei->exterior==0)continue;
         if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 1))continue;
         if(trianglei->geomtype == GEOM_ISO&&(show_iso_normal == 0||smooth_iso_normal==1))continue;
 
@@ -758,6 +761,8 @@ void draw_geom(int flag, int timestate){
         int k;
 
         trianglei = geomlisti->triangles + j;
+        if(trianglei->exterior==1&&show_faces_exterior==0)continue;
+        if(trianglei->exterior==0)continue;
         if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 0))continue;
         if(trianglei->geomtype == GEOM_ISO && (show_iso_normal == 0 || smooth_iso_normal == 0))continue;
 
@@ -786,6 +791,8 @@ void draw_geom(int flag, int timestate){
         int k;
 
         trianglei = geomlisti->triangles + j;
+        if(trianglei->exterior==1&&show_faces_exterior==0)continue;
+        if(trianglei->exterior==0)continue;
         if(trianglei->geomtype == GEOM_GEOM && (show_geom_normal == 0 || smooth_geom_normal == 0))continue;
         if(trianglei->geomtype == GEOM_ISO && (show_iso_normal == 0 || smooth_iso_normal == 0))continue;
 
@@ -885,7 +892,7 @@ void smooth_geom_normals(geomlistdata *geomlisti, int geomtype){
         if(trianglek->exterior == 0)continue;
         tri_normk = trianglek->tri_norm;
         cosang = DOT3(tri_normk, tri_normi)/(NORM3(tri_normk)*NORM3(tri_normi));
-        if(geomtype==GEOM_ISO||cosang>cos_geom_max_angle){ // smooth using all triangles if an isosurface
+        if(use_max_angle==0||geomtype==GEOM_ISO||cosang>cos_geom_max_angle){ // smooth using all triangles if an isosurface
           norm[0] += tri_normk[0];
           norm[1] += tri_normk[1];
           norm[2] += tri_normk[2];
@@ -1780,14 +1787,16 @@ int compare_faces(const void *arg1, const void *arg2){
   verts1 = face1->vert_index;
   verts2 = face2->vert_index;
 
-  v1[1] = MIN(verts1[1], verts1[2]);
-  v1[2] = MAX(verts1[1], verts1[2]);
+  v1[0] = MIN(verts1[0], MIN(verts1[1], verts1[2]));
+  v1[2] = MAX(verts1[0], MAX(verts1[1], verts1[2]));
+  v1[1] = verts1[0]+verts1[1]+verts1[2]-v1[0]-v1[2];
 
-  v2[1] = MIN(verts2[1], verts2[2]);
-  v2[2] = MAX(verts2[1], verts2[2]);
+  v2[0] = MIN(verts2[0], MIN(verts2[1], verts2[2]));
+  v2[2] = MAX(verts2[0], MAX(verts2[1], verts2[2]));
+  v2[1] = verts2[0]+verts2[1]+verts2[2]-v2[0]-v2[2];
 
-  if(verts1[0]<verts2[0])return -1;
-  if(verts1[0]>verts2[0])return 1;
+  if(v1[0]<v2[0])return -1;
+  if(v1[0]>v2[0])return 1;
 
   if(v1[1]<v2[1])return -1;
   if(v1[1]>v2[1])return 1;
@@ -1915,9 +1924,9 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         face2 %= 4;
         verts1 = vol1->faces+3*face1;
         verts2 = vol2->faces+3*face2;
-        if(verts1[0]<verts2[0]||verts1[0]>verts2[0])continue;
-        if(MIN(verts1[1],verts1[2])<MIN(verts2[1],verts2[2])||MIN(verts1[1],verts1[2])>MIN(verts2[1],verts2[2]))continue;
-        if(MAX(verts1[1],verts1[2])<MAX(verts2[1],verts2[2])||MAX(verts1[1],verts1[2])>MAX(verts2[1],verts2[2]))continue;
+        if(verts1[0]!=verts2[0])continue;
+        if(MIN(verts1[1],verts1[2])!=MIN(verts2[1],verts2[2]))continue;
+        if(MAX(verts1[1],verts1[2])!=MAX(verts2[1],verts2[2]))continue;
         vol1->exterior[face1]=0;
         vol2->exterior[face2]=0;
       }

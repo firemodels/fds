@@ -7365,6 +7365,8 @@ typedef struct {
       sd->ncontour_areas=0;
       sd->menu_show=1;
       sd->constant_color=NULL;
+      sd->histograms = NULL;
+      sd->nhistograms=0;
       {
         meshdata *meshi;
 
