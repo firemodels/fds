@@ -215,37 +215,6 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
   glEnd();
 }
 
-/* ------------------ getmesh_zcell ------------------------ */
-
-float getmesh_zcell(meshdata *meshi, float xval, float yval, int *valid){
-  float *xplt, *yplt,*zcell;
-  float dx, dy;
-  int ibar, jbar;
-  int ival, jval;
-  float zval;
-  int nxcell;
-
-  xplt = meshi->xplt_orig;
-  yplt = meshi->yplt_orig;
-  ibar = meshi->ibar;
-  jbar = meshi->jbar;
-  nxcell=ibar;
-  *valid=0;
-  if(xval<xplt[0]||xval>xplt[ibar])return 0.0;
-  if(yval<yplt[0]||yval>yplt[jbar])return 0.0;
-
-  dx = xplt[1]-xplt[0];
-  dy = yplt[1]-yplt[0];
-  ival = (xval-xplt[0])/dx;
-  if(ival>=ibar)ival=ibar-1;
-  jval = (yval-yplt[0])/dy;
-  if(jval>=jbar)jval=jbar-1;
-  zcell = meshi->zcell;
-  zval = zcell[IJCELL2(ival,jval)];
-  *valid=1;
-  return zval;
-}
-
 /* ------------------ compare_floats ------------------------ */
 
 int compare_floats( const void *arg1, const void *arg2 ){
@@ -2003,45 +1972,6 @@ int makeiblank_orig(void){
   PRINTF("  blanking array initialization completed\n");
   return 0;
 }
-
-/* ------------------ getmesh_in_smesh ------------------------ */
-
-meshdata *getmesh_in_smesh(meshdata *mesh_guess, supermeshdata *smesh, float *xyz){
-  int i;
-  float *smin, *smax;
-
-  smin = smesh->boxmin_scaled;
-  smax = smesh->boxmax_scaled;
-
-  if(xyz[0]<smin[0]||xyz[1]<smin[1]||xyz[2]<smin[2])return NULL;
-  if(xyz[0]>smax[0]||xyz[1]>smax[1]||xyz[2]>smax[2])return NULL;
-  for(i=-1;i<smesh->nmeshes;i++){
-    meshdata *meshi;
-    float *bmin, *bmax;
-
-    if(i==-1){
-      if(mesh_guess==NULL)continue;
-      meshi=mesh_guess;
-    }
-    else{
-      meshi = smesh->meshes[i];
-      if(meshi==mesh_guess)continue;
-    }
-
-    bmin = meshi->boxmin_scaled;
-    bmax = meshi->boxmax_scaled;
-
-    if(
-      bmin[0]<=xyz[0]&&xyz[0]<=bmax[0]&&
-      bmin[1]<=xyz[1]&&xyz[1]<=bmax[1]&&
-      bmin[2]<=xyz[2]&&xyz[2]<=bmax[2]){
-        return meshi;
-    }
-  }
-  ASSERT(FFALSE);
-  return NULL;
-}
-
 
 /* ------------------ init_clip ------------------------ */
 
