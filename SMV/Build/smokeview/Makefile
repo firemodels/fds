@@ -52,8 +52,6 @@ endif
 
 objwin = $(obj:.o=.obj)
 
-# include file directory locations (should be the same for all builds)
-
 INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.1.1 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128
 WININC = -I $(SOURCE_DIR)/GLINC -I $(SOURCE_DIR)/pthreads
 

@@ -1,7 +1,6 @@
 SOURCE_DIR = ../../../source/
 LIB_DIR = ../../LIBS
-INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
-INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
+INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 
@@ -38,7 +37,7 @@ no_target:
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
+	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .F90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.obj:
