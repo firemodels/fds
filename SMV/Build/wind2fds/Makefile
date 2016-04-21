@@ -1,7 +1,7 @@
 SOURCE_DIR = ../../../source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
+INC_DIR =  -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 FILTERC =
 
 VPATH = $(SOURCE_DIR)/wind2fds $(SOURCE_DIR)/shared 

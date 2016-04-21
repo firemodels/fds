@@ -1,6 +1,6 @@
 SOURCE_DIR = ../../../source/
 LIB_DIR = ../../LIBS
-INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
+INC_DIR =  -I $(SOURCE_DIR)/pthreads -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 
