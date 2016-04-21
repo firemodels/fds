@@ -1,5 +1,5 @@
 SOURCE_DIR = ../../../source/
-INC_DIR = -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/set_path
+INC_DIR = -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/set_path
 FILTERC =
 FILTERF =
 

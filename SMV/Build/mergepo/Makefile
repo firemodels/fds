@@ -1,5 +1,5 @@
 SOURCE_DIR = ../../source/
-INC_DIR = -I $(SOURCE_DIR)/mergepo -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/include2
+INC_DIR = -I $(SOURCE_DIR)/mergepo -I $(SOURCE_DIR)/shared 
 FILTERC =
 FILTERF =
 
