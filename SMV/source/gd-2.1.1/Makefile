@@ -2,7 +2,7 @@
 #for your system. 
 AR=ar
 
-CFLAGS=-g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
+CFLAGS=-g  ${STDINT} -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11
 
 INCLUDEDIRS=-I. -I../png125 -I../jpeg-9b -I../zlib128
 
@@ -34,7 +34,7 @@ CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
 LIBOBJS=gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
 		gd_io_file.o gd_ss.o gd_io_ss.o gd_png.o gd_jpeg.o gdxpm.o \
 		gdfontt.o gdfonts.o gdfontmb.o gdfontl.o gdfontg.o \
-		gdtables.o gdft.o gdcache.o gdkanji.o wbmp.o \
+		gdtables.o gdft.o gdkanji.o wbmp.o \
 		gd_wbmp.o gdhelpers.o gd_topal.o 
 LIBOBJSWIN = $(LIBOBJS:.o=.obj)
 

@@ -2,13 +2,17 @@
 extern "C" {
 #endif
 
-#ifdef _WIN32
-#define NONDLL
-#define BGDWIN32
-#endif
-
 #ifndef GD_H
 #define GD_H 1
+
+#ifdef _WIN32
+#ifndef NONDLL
+#define NONDLL
+#endif
+#ifndef BGDWIN32
+#define BGDWIN32
+#endif
+#endif
 
 /* Version information.  This gets parsed by build scripts as well as
  * gcc so each #define line in this group must also be splittable on
