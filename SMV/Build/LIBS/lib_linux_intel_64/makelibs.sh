@@ -14,7 +14,7 @@ cd $SRCDIR
 SRCDIR=`pwd`
 
 # GD
-cd $SRCDIR/gd-2.0.15
+cd $SRCDIR/gd-2.1.1
 ./makelib.sh $OPTS
 cp libgd.a $LIBDIR/.
 
