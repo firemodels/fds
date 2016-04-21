@@ -4,6 +4,9 @@
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
 
 SOURCE_DIR = ../../../source/
+BUILD_DIR = ../../../Build
+LIB_DIR = $(BUILD_DIR)/LIBS
+
 SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG =
@@ -25,11 +28,6 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 VPATH = $(SOURCE_DIR)/smokeview:../../../../FDS_Source:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
 bin = .
-
-# BUILD_DIR defined directory containing this Makefile
-
-BUILD_DIR = $(SOURCE_DIR)/../Build
-LIB_DIR = $(BUILD_DIR)/LIBS
 
 # Definition of the object variables
 

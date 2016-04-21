@@ -36,7 +36,6 @@ copy libglutwin.lib %LIBDIR%\glut32.lib
 cd %SRCDIR%\glui_v2_1_beta
 call makelib %OPTS%
 copy  libglui.lib %LIBDIR%\glui.lib
-pause
 
 :: pthreads
 cd %SRCDIR%\pthreads
