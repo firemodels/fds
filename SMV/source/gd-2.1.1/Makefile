@@ -31,7 +31,7 @@ CC=$(COMPILER) $(SIZE) $(INCLUDEDIRS)
 .c.o:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 
-LIBOBJS=gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
+LIBOBJS=gd.o gd_security.o gd_color.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o \
 		gd_io_file.o gd_ss.o gd_io_ss.o gd_png.o gd_jpeg.o gdxpm.o \
 		gdfontt.o gdfonts.o gdfontmb.o gdfontl.o gdfontg.o \
 		gdtables.o gdft.o gdkanji.o wbmp.o \
