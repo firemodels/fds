@@ -7,7 +7,7 @@ set LIBDIR=%CD%
 set SRCDIR=%LIBDIR%\..\..\..\source
 
 :: GD
-cd %SRCDIR%\gd-2.0.15
+cd %SRCDIR%\gd-2.1.1
 call makelib %OPTS%
 copy libgd.lib %LIBDIR%\gd.lib
 
