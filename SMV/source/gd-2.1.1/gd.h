@@ -2,6 +2,10 @@
 extern "C" {
 #endif
 
+#ifdef _WIN32
+#define NONDLL
+#define BGDWIN32
+#endif
 
 #ifndef GD_H
 #define GD_H 1
