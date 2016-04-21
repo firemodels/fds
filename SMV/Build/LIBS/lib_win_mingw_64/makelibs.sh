@@ -2,6 +2,7 @@
 OPTS="-g -6"
 LIBDIR=`pwd`
 SRCDIR=$LIBDIR/../../../source
+rm *.a
 cd $SRCDIR
 SRCDIR=`pwd`
 

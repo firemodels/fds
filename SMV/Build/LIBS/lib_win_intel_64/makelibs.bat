@@ -5,6 +5,7 @@ set arg2=%2
 
 set LIBDIR=%CD%
 set SRCDIR=%LIBDIR%\..\..\..\source
+erase *.lib
 
 :: GD
 cd %SRCDIR%\gd-2.1.1
