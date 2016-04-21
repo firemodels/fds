@@ -7,20 +7,10 @@ set LIBDIR=%CD%
 set SRCDIR=%LIBDIR%\..\..\..\source
 erase *.lib
 
-:: GD
-cd %SRCDIR%\gd-2.1.1
+:: ZLIB
+cd %SRCDIR%\zlib128
 call makelib %OPTS%
-copy libgd.lib %LIBDIR%\gd.lib
-
-:: GLUI
-cd %SRCDIR%\glui_v2_1_beta
-call makelib %OPTS%
-copy  libglui.lib %LIBDIR%\glui.lib
-
-:: GLUT
-cd %SRCDIR%\glut-3.7.6
-call makelib %OPTS%
-copy libglutwin.lib %LIBDIR%\glut32.lib
+copy libz.lib %LIBDIR%\zlib.lib
 
 :: JPEG
 cd %SRCDIR%\jpeg-9b
@@ -32,10 +22,21 @@ cd %SRCDIR%\png125
 call makelib %OPTS%
 copy libpng.lib %LIBDIR%\png.lib
 
-:: ZLIB
-cd %SRCDIR%\zlib128
+:: GD
+cd %SRCDIR%\gd-2.1.1
 call makelib %OPTS%
-copy libz.lib %LIBDIR%\zlib.lib
+copy libgd.lib %LIBDIR%\gd.lib
+
+:: GLUT
+cd %SRCDIR%\glut-3.7.6
+call makelib %OPTS%
+copy libglutwin.lib %LIBDIR%\glut32.lib
+
+:: GLUI
+cd %SRCDIR%\glui_v2_1_beta
+call makelib %OPTS%
+copy  libglui.lib %LIBDIR%\glui.lib
+pause
 
 :: pthreads
 cd %SRCDIR%\pthreads
