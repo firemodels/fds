@@ -1,8 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #ifndef _GDFONTS_H_
 #define _GDFONTS_H_ 1
 
@@ -20,18 +15,13 @@ extern "C"
 	No copyright info was found in the original bdf.
  */
 
-
 #include "gd.h"
 
-   BGD_EXPORT_DATA_PROT gdFontPtr gdFontSmall;
-   BGD_DECLARE(gdFontPtr) gdFontGetSmall(void);
+extern BGD_EXPORT_DATA_PROT gdFontPtr gdFontSmall;
+BGD_DECLARE(gdFontPtr) gdFontGetSmall(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
-
-#ifdef __cplusplus
-}
 #endif
