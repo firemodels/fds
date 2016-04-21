@@ -5,7 +5,7 @@ SRCDIR=$LIBDIR/../../../source
 cd $SRCDIR
 SRCDIR=`pwd`
 
-cp $LIBDIR/*.a
+rm $LIBDIR/*.a
 
 # GD
 cd $SRCDIR/gd-2.1.1
