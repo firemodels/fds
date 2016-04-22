@@ -204,6 +204,14 @@ mpi_intel_linux_64ib : obj = fds_mpi_intel_linux_64ib
 mpi_intel_linux_64ib : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
+mpi_intel_linux_64ib_scorep : FFLAGS = -m64 -O2 -ipo -traceback $(GITINFO)
+mpi_intel_linux_64ib_scorep : LFLAGS = -static-intel
+mpi_intel_linux_64ib_scorep : FCOMPL = scorep --mpp=mpi mpifort
+mpi_intel_linux_64ib_scorep : FOPENMPFLAGS =
+mpi_intel_linux_64ib_scorep : obj = fds_mpi_intel_linux_64ib_scorep
+mpi_intel_linux_64ib_scorep : setup $(obj_mpi)
+	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
+
 intel_linux_64_db : FFLAGS = -m64 -check -warn unused -O0 -auto -WB -traceback -g -fpe0 -fltconsistency -stand:f08 $(GITINFO) 
 intel_linux_64_db : LFLAGS = -static-intel
 intel_linux_64_db : FCOMPL = ifort
