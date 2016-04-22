@@ -1,0 +1,23 @@
+SCOREP_REGION_NAMES_BEGIN
+  EXCLUDE * 
+  INCLUDE 
+     MAIN__
+     pres.pressure_solver_
+     pres.compute_velocity_error_
+     divg.divergence_part_1_
+     divg.divergence_part_2_
+     velo.velocity_predictor_
+     velo.velocity_corrector_
+     velo.match_velocity_
+     velo.no_flux_
+     mass.density_
+     wall_routines.wall_bc_
+     velo.compute_velocity_flux_
+     velo.velocity_bc_
+     velo.viscosity_bc_
+     rad.compute_radiation_
+     fire.combustion_
+     mass.mass_finite_differences_
+     init.open_and_close_
+SCOREP_REGION_NAMES_END
+
