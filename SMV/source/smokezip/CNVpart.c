@@ -10,6 +10,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 #include "isodefs.h"
+#include "compress.h"
 
 
 

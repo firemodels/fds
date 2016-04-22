@@ -18,7 +18,7 @@ call makelib %OPTS%
 copy libjpeg.lib %LIBDIR%\jpeg.lib
 
 :: PNG
-cd %SRCDIR%\png125
+cd %SRCDIR%\png-1.6.21
 call makelib %OPTS%
 copy libpng.lib %LIBDIR%\png.lib
 
