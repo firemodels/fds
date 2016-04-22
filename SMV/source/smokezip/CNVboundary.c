@@ -7,6 +7,7 @@
 #include <zlib.h>
 #include "svzip.h"
 #include "MALLOC.h"
+#include "compress.h"
 
 pdfdata pdfmerge,pdfframe;
 
