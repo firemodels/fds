@@ -1,6 +1,5 @@
 SOURCE_DIR = ../../../source/
-INC2_DIR = -I $(SOURCE_DIR)/include2  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/ply2fds
-INC_DIR =  -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/ply2fds
+INC_DIR =  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/ply2fds
 
 FILTERC =
 
@@ -32,7 +31,7 @@ no_target:
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
+	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 
 # ********  rules for each platform supported *************
 

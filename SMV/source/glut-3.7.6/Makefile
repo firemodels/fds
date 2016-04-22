@@ -16,7 +16,7 @@ FILTERC=
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 
 
-CFLAGS= -O2 $(PLATFORM) -I ../include
+CFLAGS= -O2 $(PLATFORM) -I ../GLINC
 
 RANLIB=ranlib
 

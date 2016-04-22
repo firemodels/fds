@@ -4,6 +4,9 @@
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
 
 SOURCE_DIR = ../../../source/
+BUILD_DIR = ../../../Build
+LIB_DIR = $(BUILD_DIR)/LIBS
+
 SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG =
@@ -26,12 +29,6 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 VPATH = $(SOURCE_DIR)/smokeview:../../../../FDS_Source:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
 bin = .
 
-# BUILD_DIR defined directory containing this Makefile
-
-BUILD_DIR = $(SOURCE_DIR)/../Build
-LIB_DIR = $(BUILD_DIR)/LIBS
-INC_DIR = $(SOURCE_DIR)/include2
-
 # Definition of the object variables
 
 obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_wui.o\
@@ -53,9 +50,8 @@ endif
 
 objwin = $(obj:.o=.obj)
 
-# include file directory locations (should be the same for all builds)
-
-INC = -I $(INC_DIR)/glut -I $(INC_DIR)/glui -I $(INC_DIR)/gd -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(INC_DIR)/zlib
+INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.1.1 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128
+WININC = -I $(SOURCE_DIR)/GLINC -I $(SOURCE_DIR)/pthreads
 
 ifeq ($(LUA_SCRIPTING),true)
 INC += -I $(SOURCE_DIR)/lua-5.3.1/src
@@ -114,7 +110,7 @@ SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR
 
 # ------------- ms_win_64 ----------------
 
-ms_win_64 : INC = -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew
+ms_win_64 : INC += $(WININC) -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
 ms_win_64 : FFLAGS    = -O2 /iface:stdref /fpp
 ms_win_64 : CFLAGS    = -O1 -D WIN32 -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG)
 ms_win_64 : LFLAGS    = /F32768000
@@ -131,7 +127,7 @@ ms_win_64 : $(objwin)
 
 # ------------- intel_win_64_db ----------------
 
-intel_win_64_db : INC = -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew
+intel_win_64_db : INC += $(WININC) -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
 intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp -D WIN32 /Z7 /nologo /fpscomp:general /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
 intel_win_64_db : CFLAGS    = /Od /W5 /debug:full /Z7 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
 intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
@@ -145,7 +141,7 @@ intel_win_64_db : $(objwin)
 
 # ------------- intel_win_64 ----------------
 
-intel_win_64 : INC = -I $(SOURCE_DIR)/include -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew
+intel_win_64 : INC += $(WININC) -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
 ifeq ($(LUA_SCRIPTING),true)
 intel_win_64 : INC += -I $(SOURCE_DIR)/lua-5.3.1/src
 endif

@@ -25,7 +25,7 @@ no_target:
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
+	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .F90.o:
 	$(FC) -c $(FFLAGS) $(FILTERF) $<
 .f90.obj:

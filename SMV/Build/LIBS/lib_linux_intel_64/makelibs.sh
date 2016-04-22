@@ -1,6 +1,7 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $DIR
+rm *.a
 
 LUA=$1
 
@@ -13,23 +14,23 @@ SRCDIR=$LIBDIR/../../../source
 cd $SRCDIR
 SRCDIR=`pwd`
 
-# GD
-cd $SRCDIR/gd-2.0.15
+# GLUT
+cd $SRCDIR/glut-3.7.6
 ./makelib.sh $OPTS
-cp libgd.a $LIBDIR/.
+cp libglut.a $LIBDIR/.
 
 # GLUI
 cd $SRCDIR/glui_v2_1_beta
 ./makelib.sh $OPTS
 cp libglui.a $LIBDIR/.
 
-# GLUT
-cd $SRCDIR/glut-3.7.6
+# ZLIB
+cd $SRCDIR/zlib128
 ./makelib.sh $OPTS
-cp libglut.a $LIBDIR/.
+cp libz.a $LIBDIR/.
 
 # JPEG
-cd $SRCDIR/jpeg-6b
+cd $SRCDIR/jpeg-9b
 ./makelib.sh $OPTS
 cp libjpeg.a $LIBDIR/.
 
@@ -38,10 +39,10 @@ cd $SRCDIR/png125
 ./makelib.sh $OPTS
 cp libpng.a $LIBDIR/.
 
-# ZLIB
-cd $SRCDIR/zlib114
+# GD
+cd $SRCDIR/gd-2.1.1
 ./makelib.sh $OPTS
-cp libz.a $LIBDIR/.
+cp libgd.a $LIBDIR/.
 
 if [ "$LUA" == "lua" ]; then
 
