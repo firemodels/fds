@@ -282,17 +282,17 @@ void update_inilist(void){
   }
 }
 
-/* ------------------ freelabels ------------------------ */
+/* ------------------ free_labels ------------------------ */
 
-void freelabels(flowlabels *flowlabel){
+void free_labels(flowlabels *flowlabel){
   FREEMEMORY(flowlabel->longlabel);
   FREEMEMORY(flowlabel->shortlabel);
   FREEMEMORY(flowlabel->unit);
 }
 
-/* ------------------ initmesh ------------------------ */
+/* ------------------ init_mesh ------------------------ */
 
-void initmesh(meshdata *meshi){
+void init_mesh(meshdata *meshi){
   meshi->ncutcells = 0;
   meshi->cutcells = NULL;
   meshi->slice_min[0] = 1.0;
@@ -536,7 +536,7 @@ void readsmv_dynamic(char *file){
 
       plot3di = plot3dinfo + i;
       for(n=0;n<6;n++){
-        freelabels(&plot3di->label[n]);
+        free_labels(&plot3di->label[n]);
       }
       FREEMEMORY(plot3di->reg_file);
       FREEMEMORY(plot3di->comp_file);
@@ -2454,9 +2454,9 @@ int is_slice_dup(slicedata *sd){
   return 0;
 }
 
-/* ------------------ createnulllabel ------------------------ */
+/* ------------------ create_nulllabel ------------------------ */
 
-int createnulllabel(flowlabels *flowlabel){
+int create_nulllabel(flowlabels *flowlabel){
   char buffer[255];
   size_t len;
 
@@ -2526,16 +2526,16 @@ void init_evac_prop(void){
   prop_evacdefault->ntextures = 0;
 }
 
-/* ------------------ initmatl ------------------------ */
+/* ------------------ init_matl ------------------------ */
 
-void initmatl(matldata *matl){
+void init_matl(matldata *matl){
   matl->matllabel = NULL;
   matl->color = block_ambient2;
 }
 
 /* ------------------ initobst ------------------------ */
 
-void initobst(blockagedata *bc, surfdata *surf, int index, int meshindex){
+void init_obst(blockagedata *bc, surfdata *surf, int index, int meshindex){
   int colorindex, blocktype;
   int i;
   char blocklabel[255];
@@ -2608,9 +2608,9 @@ void initobst(blockagedata *bc, surfdata *surf, int index, int meshindex){
   strcpy(bc->label, blocklabel);
 }
 
-/* ------------------ initsurface ------------------------ */
+/* ------------------ init_surface ------------------------ */
 
-void initsurface(surfdata *surf){
+void init_surface(surfdata *surf){
   surf->iso_level = -1;
   surf->used_by_obst = 0;
   surf->used_by_vent = 0;
@@ -2629,9 +2629,9 @@ void initsurface(surfdata *surf){
   surf->transparent = 0;
 }
 
-/* ------------------ initventsurface ------------------------ */
+/* ------------------ init_ventsurface ------------------------ */
 
-void initventsurface(surfdata *surf){
+void init_ventsurface(surfdata *surf){
   surf->emis = 1.0;
   surf->temp_ignition = TEMP_IGNITION_MAX;
   surf->surfacelabel = NULL;
@@ -2676,9 +2676,9 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
 
 }
 
-/* ------------------ setsurfaceindex ------------------------ */
+/* ------------------ set_surfaceindex ------------------------ */
 
-void setsurfaceindex(blockagedata *bc){
+void set_surfaceindex(blockagedata *bc){
   int i, j, jj;
   surfdata *surfj;
   char *surflabel, *bclabel;
@@ -2724,6 +2724,235 @@ void setsurfaceindex(blockagedata *bc){
   bc->walltype = WALL_6;
   bc->walltypeORIG = WALL_6;
 
+}
+
+/* ------------------ surfid_compare ------------------------ */
+
+int surfid_compare(const void *arg1, const void *arg2){
+  surfdata *surfi, *surfj;
+  int i, j;
+
+  i = *(int *)arg1;
+  j = *(int *)arg2;
+
+  surfi = surfinfo+i;
+  surfj = surfinfo+j;
+
+  return(strcmp(surfi->surfacelabel, surfj->surfacelabel));
+}
+
+/* ------------------ updated_sorted_surfidlist ------------------------ */
+
+void update_sorted_surfidlist(void){
+  int i;
+
+  FREEMEMORY(sorted_surfidlist);
+  FREEMEMORY(inv_sorted_surfidlist);
+  NewMemory((void **)&sorted_surfidlist, nsurfinfo*sizeof(int));
+  NewMemory((void **)&inv_sorted_surfidlist, nsurfinfo*sizeof(int));
+
+
+  nsorted_surfidlist = nsurfinfo;
+  for(i = 0; i<nsorted_surfidlist; i++){
+    sorted_surfidlist[i] = i;
+  }
+
+  qsort((int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare);
+  for(i = 0; i<nsorted_surfidlist; i++){
+    inv_sorted_surfidlist[sorted_surfidlist[i]] = i;
+  }
+}
+
+/* ------------------ parse_database ------------------------ */
+
+void parse_database(char *file){
+  FILE *stream;
+  char buffer[1000], *buffer2 = NULL, *buffer3, *slashptr;
+  size_t lenbuffer, lenbuffer2;
+  size_t sizebuffer2;
+  char *surf_id = NULL, *start, *surf_id2;
+  char *c;
+  int i, j;
+  surfdata *surfj;
+  char *labeli, *labelj;
+  int nexti;
+  int nsurfids_shown;
+
+  /* free memory called before */
+
+  for(i = 0; i<nsurfids; i++){
+    surf_id = surfids[i].label;
+    FREEMEMORY(surf_id);
+  }
+  FREEMEMORY(surfids);
+  nsurfids = 0;
+
+
+  if(file==NULL||strlen(file)==0||(stream = fopen(file, "r"))==NULL){
+    NewMemory((void **)&surfids, (nsurfids+1)*sizeof(surfid));
+    surf_id = NULL;
+    NewMemory((void **)&surf_id, 6);
+    strcpy(surf_id, "INERT");
+    surfids[0].label = surf_id;
+    surfids[0].location = 0;
+    surfids[0].show = 1;
+    nsurfids = 1;
+  }
+
+  else{
+    sizebuffer2 = 1001;
+    NewMemory((void **)&buffer2, sizebuffer2);
+
+    /* find out how many surfs are in database file so memory can be allocated */
+
+    while(!feof(stream)){
+      if(fgets(buffer, 1000, stream)==NULL)break;
+      if(STRSTR(buffer, "&SURF")==NULL)continue;
+
+
+      slashptr = strstr(buffer, "/");
+      if(slashptr!=NULL)strcpy(buffer2, buffer);
+      buffer3 = buffer;
+      while(slashptr!=NULL){
+        fgets(buffer, 1000, stream);
+        lenbuffer = strlen(buffer);
+        lenbuffer2 = strlen(buffer2);
+        if(lenbuffer2+lenbuffer+2>sizebuffer2){
+          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
+          ResizeMemory((void **)&buffer2, (unsigned int)sizebuffer2);
+        }
+        strcat(buffer2, buffer);
+        slashptr = strstr(buffer, "/");
+        buffer3 = buffer2;
+      }
+      start = STRSTR(buffer3, "ID");
+      if(start!=NULL)nsurfids++;
+    }
+
+    /* allocate memory */
+
+    NewMemory((void **)&surfids, (nsurfids+1)*sizeof(surfid));
+    surf_id = NULL;
+    NewMemory((void **)&surf_id, 6);
+    strcpy(surf_id, "INERT");
+    surfids[0].label = surf_id;
+    surfids[0].location = 0;
+    surfids[0].show = 1;
+
+
+    /* now look for IDs and copy them into an array */
+
+    rewind(stream);
+    nsurfids = 1;
+    while(!feof(stream)){
+      if(fgets(buffer, 1000, stream)==NULL)break;
+      if(STRSTR(buffer, "&SURF")==NULL)continue;
+
+
+      slashptr = strstr(buffer, "/");
+      if(slashptr!=NULL)strcpy(buffer2, buffer);
+      while(slashptr!=NULL){
+        fgets(buffer, 1000, stream);
+        lenbuffer = strlen(buffer);
+        lenbuffer2 = strlen(buffer2);
+        if(lenbuffer2+lenbuffer+2>sizebuffer2){
+          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
+          ResizeMemory((void **)&buffer2, (unsigned int)sizebuffer2);
+        }
+        strcat(buffer2, buffer);
+        slashptr = strstr(buffer, "/");
+        buffer3 = buffer2;
+      }
+      start = STRSTR(buffer3+3, "ID");
+      if(start!=NULL)nsurfids++;
+      surf_id = NULL;
+      surf_id2 = NULL;
+      for(c = start; c!=NULL&&*c!='\0'; c++){
+        if(surf_id==NULL&&*c=='\''){
+          surf_id = c+1;
+          continue;
+        }
+        if(surf_id!=NULL&&*c=='\''){
+          *c = '\0';
+          NewMemory((void **)&surf_id2, strlen(surf_id)+1);
+          strcpy(surf_id2, surf_id);
+          surfids[nsurfids-1].label = surf_id2;
+          surfids[nsurfids-1].location = 1;
+          surfids[nsurfids-1].show = 1;
+          break;
+        }
+      }
+
+    }
+  }
+
+  /* identify duplicate surfaces */
+  /*** debug: make sure ->show is defined for all cases ***/
+
+  nsurfids_shown = 0;
+  for(i = 0; i<nsurfids; i++){
+    labeli = surfids[i].label;
+    nexti = 0;
+    for(j = 0; j<nsurfinfo; j++){
+      surfj = surfinfo+j;
+      labelj = surfj->surfacelabel;
+      if(strcmp(labeli, labelj)==0){
+        nexti = 1;
+        break;
+      }
+    }
+    if(nexti==1){
+      surfids[i].show = 0;
+      continue;
+    }
+    for(j = 0; j<i; j++){
+      labelj = surfids[j].label;
+      if(strcmp(labeli, labelj)==0){
+        nexti = 1;
+        break;
+      }
+    }
+    if(nexti==1){
+      surfids[i].show = 0;
+      continue;
+    }
+    nsurfids_shown++;
+
+  }
+
+  /* add surfaces found in database to those surfaces defined in previous SURF lines */
+
+  if(nsurfids_shown>0){
+    if(nsurfinfo==0){
+      FREEMEMORY(surfinfo);
+      FREEMEMORY(textureinfo);
+      NewMemory((void **)&surfinfo, (nsurfids_shown+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      NewMemory((void **)&textureinfo, nsurfids_shown*sizeof(surfdata));
+    }
+    if(nsurfinfo>0){
+      if(surfinfo==NULL){
+        NewMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      }
+      else{
+        ResizeMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      }
+      if(textureinfo==NULL){
+        NewMemory((void **)&textureinfo, (nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+      }
+      else{
+        ResizeMemory((void **)&textureinfo, (nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+      }
+    }
+    surfj = surfinfo+nsurfinfo-1;
+    for(j = 0; j<nsurfids; j++){
+      if(surfids[j].show==0)continue;
+      surfj++;
+      init_surface(surfj);
+      surfj->surfacelabel = surfids[j].label;
+    }
+    nsurfinfo += nsurfids_shown;
+  }
+  update_sorted_surfidlist();
 }
 
 /* ------------------ readsmv ------------------------ */
@@ -2847,15 +3076,15 @@ int readsmv(char *file, char *file2){
   nrooms=0;
 
   if(file!=NULL){
-    initsurface(&sdefault);
+    init_surface(&sdefault);
     NewMemory((void **)&sdefault.surfacelabel,(5+1));
     strcpy(sdefault.surfacelabel,"INERT");
 
-    initventsurface(&v_surfacedefault);
+    init_ventsurface(&v_surfacedefault);
     NewMemory((void **)&v_surfacedefault.surfacelabel,(4+1));
     strcpy(v_surfacedefault.surfacelabel,"VENT");
 
-    initsurface(&e_surfacedefault);
+    init_surface(&e_surfacedefault);
     NewMemory((void **)&e_surfacedefault.surfacelabel,(8+1));
     strcpy(e_surfacedefault.surfacelabel,"EXTERIOR");
     e_surfacedefault.color=mat_ambient2;
@@ -2876,7 +3105,7 @@ int readsmv(char *file, char *file2){
           flowlabels *labelj;
 
           labelj = partclassi->labels+j;
-          freelabels(labelj);
+          free_labels(labelj);
         }
         FREEMEMORY(partclassi->labels);
         partclassi->ntypes=0;
@@ -2929,7 +3158,7 @@ int readsmv(char *file, char *file2){
 
       zonei = zoneinfo + i;
       for(n=0;n<4;n++){
-        freelabels(&zonei->label[n]);
+        free_labels(&zonei->label[n]);
       }
       FREEMEMORY(zonei->file);
     }
@@ -2971,7 +3200,7 @@ int readsmv(char *file, char *file2){
     for(i=0;i<nsliceinfo;i++){
       slicedata *sd;
       sd = sliceinfo + i;
-      freelabels(&sliceinfo[i].label);
+      free_labels(&sliceinfo[i].label);
       FREEMEMORY(sd->reg_file);
       FREEMEMORY(sd->comp_file);
       FREEMEMORY(sd->size_file);
@@ -3008,7 +3237,7 @@ int readsmv(char *file, char *file2){
       patchdata *patchi;
 
       patchi = patchinfo + i;
-      freelabels(&patchi->label);
+      free_labels(&patchi->label);
       FREEMEMORY(patchi->reg_file);
       FREEMEMORY(patchi->comp_file);
       FREEMEMORY(patchi->size_file);
@@ -3019,7 +3248,7 @@ int readsmv(char *file, char *file2){
 
   if(nisoinfo>0){
     for(i=0;i<nisoinfo;i++){
-      freelabels(&isoinfo[i].surface_label);
+      free_labels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
@@ -3577,7 +3806,7 @@ int readsmv(char *file, char *file2){
    partclassi->labels=NULL;
 
    NewMemory((void **)&partclassi->labels,sizeof(flowlabels));
-   createnulllabel(partclassi->labels);
+   create_nulllabel(partclassi->labels);
 
    npartclassinfo=0;
 
@@ -3757,7 +3986,7 @@ int readsmv(char *file, char *file2){
     FREEMEMORY(matlinfo);
     if(NewMemory((void **)&matlinfo,nmatlinfo*sizeof(matldata))==0)return 2;
     matli = matlinfo;
-    initmatl(matli);
+    init_matl(matli);
     s_color[0]=matli->color[0];
     s_color[1]=matli->color[1];
     s_color[2]=matli->color[2];
@@ -4776,7 +5005,7 @@ int readsmv(char *file, char *file2){
       char *buffer3;
 
       surfi = surfinfo + nsurfinfo;
-      initsurface(surfi);
+      init_surface(surfi);
       fgets(buffer,255,stream);
       trim_back(buffer);
       len=strlen(buffer);
@@ -4871,7 +5100,7 @@ int readsmv(char *file, char *file2){
       int len;
 
       matli = matlinfo + nmatlinfo;
-      initmatl(matli);
+      init_matl(matli);
 
       fgets(buffer,255,stream);
       trim_back(buffer);
@@ -4919,7 +5148,7 @@ int readsmv(char *file, char *file2){
       igrid++;
       if(meshinfo!=NULL){
         meshi=meshinfo+igrid-1;
-        initmesh(meshi);
+        init_mesh(meshi);
         {
           size_t len_meshlabel;
           char *meshlabel;
@@ -5115,7 +5344,7 @@ int readsmv(char *file, char *file2){
   PRINTF("\n");
 
   CheckMemory;
-  parsedatabase(database_filename);
+  parse_database(database_filename);
 
 
   if(setGRID==0){
@@ -5148,7 +5377,7 @@ int readsmv(char *file, char *file2){
       zp[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)kbartemp;
     }
     meshi=meshinfo;
-    initmesh(meshi);
+    init_mesh(meshi);
     meshi->xplt=xp;
     meshi->yplt=yp;
     meshi->zplt=zp;
@@ -6215,7 +6444,7 @@ typedef struct {
         meshi->blockageinfoptrs[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
         bc=meshi->blockageinfoptrs[nn];
-        initobst(bc,surfacedefault,nn+1,iobst-1);
+        init_obst(bc,surfacedefault,nn+1,iobst-1);
         fgets(buffer,255,stream);
         trim_back(buffer);
         for(i=0;i<6;i++){
@@ -6283,7 +6512,7 @@ typedef struct {
         for(i=0;i<6;i++){
           bc->surf[i]->used_by_obst=1;
         }
-        setsurfaceindex(bc);
+        set_surfaceindex(bc);
       }
 
       nn=-1;
@@ -7985,7 +8214,7 @@ typedef struct {
   /*
     Associate a surface with each block.
   */
-  updateusetextures();
+  update_usetextures();
 
   /* compute global bar's and box's */
 
@@ -8152,242 +8381,9 @@ typedef struct {
   return 0;
 }
 
+/* ------------------ update_usetextures ------------------------ */
 
-/* ------------------ surfid_compare ------------------------ */
-
-int surfid_compare(const void *arg1, const void *arg2){
-  surfdata *surfi, *surfj;
-  int i, j;
-
-  i = *(int *)arg1;
-  j = *(int *)arg2;
-
-  surfi = surfinfo + i;
-  surfj = surfinfo + j;
-
-  return(strcmp(surfi->surfacelabel, surfj->surfacelabel));
-}
-
-/* ------------------ updated_sorted_surfidlist ------------------------ */
-
-void update_sorted_surfidlist(void){
-  int i;
-
-  FREEMEMORY(sorted_surfidlist);
-  FREEMEMORY(inv_sorted_surfidlist);
-  NewMemory((void **)&sorted_surfidlist, nsurfinfo*sizeof(int));
-  NewMemory((void **)&inv_sorted_surfidlist, nsurfinfo*sizeof(int));
-
-
-  nsorted_surfidlist = nsurfinfo;
-  for(i = 0; i < nsorted_surfidlist; i++){
-    sorted_surfidlist[i] = i;
-  }
-
-
-  qsort((int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare);
-  for(i = 0; i < nsorted_surfidlist; i++){
-    inv_sorted_surfidlist[sorted_surfidlist[i]] = i;
-  }
-
-
-}
-
-/* ------------------ parsedatabase ------------------------ */
-
-void parsedatabase(char *file){
-  FILE *stream;
-  char buffer[1000],*buffer2=NULL,*buffer3,*slashptr;
-  size_t lenbuffer,lenbuffer2;
-  size_t sizebuffer2;
-  char *surf_id=NULL,*start,*surf_id2;
-  char *c;
-  int i,j;
-  surfdata *surfj;
-  char *labeli, *labelj;
-  int nexti;
-  int nsurfids_shown;
-
-  /* free memory called before */
-
-  for(i=0;i<nsurfids;i++){
-    surf_id=surfids[i].label;
-    FREEMEMORY(surf_id);
-  }
-  FREEMEMORY(surfids);
-  nsurfids=0;
-
-
-  if( file==NULL||strlen(file)==0||(stream=fopen(file,"r"))==NULL){
-    NewMemory((void **)&surfids,(nsurfids+1)*sizeof(surfid));
-    surf_id=NULL;
-    NewMemory((void **)&surf_id,6);
-    strcpy(surf_id,"INERT");
-    surfids[0].label=surf_id;
-    surfids[0].location=0;
-    surfids[0].show=1;
-    nsurfids=1;
-  }
-
-  else{
-    sizebuffer2=1001;
-    NewMemory((void **)&buffer2,sizebuffer2);
-
-  /* find out how many surfs are in database file so memory can be allocated */
-
-    while(!feof(stream)){
-      if(fgets(buffer,1000,stream)==NULL)break;
-      if(STRSTR(buffer,"&SURF")==NULL)continue;
-
-
-      slashptr=strstr(buffer,"/");
-      if(slashptr!=NULL)strcpy(buffer2,buffer);
-      buffer3=buffer;
-      while(slashptr!=NULL){
-        fgets(buffer,1000,stream);
-        lenbuffer=strlen(buffer);
-        lenbuffer2=strlen(buffer2);
-        if(lenbuffer2+lenbuffer+2>sizebuffer2){
-          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
-          ResizeMemory((void **)&buffer2,(unsigned int)sizebuffer2);
-        }
-        strcat(buffer2,buffer);
-        slashptr=strstr(buffer,"/");
-        buffer3=buffer2;
-      }
-      start=STRSTR(buffer3,"ID");
-      if(start!=NULL)nsurfids++;
-    }
-
-  /* allocate memory */
-
-    NewMemory((void **)&surfids,(nsurfids+1)*sizeof(surfid));
-    surf_id=NULL;
-    NewMemory((void **)&surf_id,6);
-    strcpy(surf_id,"INERT");
-    surfids[0].label=surf_id;
-    surfids[0].location=0;
-    surfids[0].show=1;
-
-
-  /* now look for IDs and copy them into an array */
-
-    rewind(stream);
-    nsurfids=1;
-    while(!feof(stream)){
-      if(fgets(buffer,1000,stream)==NULL)break;
-      if(STRSTR(buffer,"&SURF")==NULL)continue;
-
-
-      slashptr=strstr(buffer,"/");
-      if(slashptr!=NULL)strcpy(buffer2,buffer);
-      while(slashptr!=NULL){
-        fgets(buffer,1000,stream);
-        lenbuffer=strlen(buffer);
-        lenbuffer2=strlen(buffer2);
-        if(lenbuffer2+lenbuffer+2>sizebuffer2){
-          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
-          ResizeMemory((void **)&buffer2,(unsigned int)sizebuffer2);
-        }
-        strcat(buffer2,buffer);
-        slashptr=strstr(buffer,"/");
-        buffer3=buffer2;
-      }
-      start=STRSTR(buffer3+3,"ID");
-      if(start!=NULL)nsurfids++;
-      surf_id=NULL;
-      surf_id2=NULL;
-      for(c=start;c!=NULL&&*c!='\0';c++){
-        if(surf_id==NULL&&*c=='\''){
-          surf_id=c+1;
-          continue;
-        }
-        if(surf_id!=NULL&&*c=='\''){
-          *c='\0';
-          NewMemory((void **)&surf_id2,strlen(surf_id)+1);
-          strcpy(surf_id2,surf_id);
-          surfids[nsurfids-1].label=surf_id2;
-          surfids[nsurfids-1].location=1;
-          surfids[nsurfids-1].show=1;
-          break;
-        }
-      }
-
-    }
-  }
-
-  /* identify duplicate surfaces */
-  /*** debug: make sure ->show is defined for all cases ***/
-
-  nsurfids_shown=0;
-  for(i=0;i<nsurfids;i++){
-    labeli = surfids[i].label;
-    nexti = 0;
-    for(j=0;j<nsurfinfo;j++){
-      surfj = surfinfo + j;
-      labelj = surfj->surfacelabel;
-      if(strcmp(labeli,labelj)==0){
-        nexti = 1;
-        break;
-      }
-    }
-    if(nexti==1){
-      surfids[i].show=0;
-      continue;
-    }
-    for(j=0;j<i;j++){
-      labelj = surfids[j].label;
-      if(strcmp(labeli,labelj)==0){
-        nexti = 1;
-        break;
-      }
-    }
-    if(nexti==1){
-      surfids[i].show=0;
-      continue;
-    }
-    nsurfids_shown++;
-
-  }
-
-  /* add surfaces found in database to those surfaces defined in previous SURF lines */
-
-  if(nsurfids_shown>0){
-    if(nsurfinfo==0){
-      FREEMEMORY(surfinfo);
-      FREEMEMORY(textureinfo);
-      NewMemory((void **)&surfinfo,(nsurfids_shown+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surfdata));
-    }
-    if(nsurfinfo>0){
-      if(surfinfo==NULL){
-        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      }
-      else{
-        ResizeMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      }
-      if(textureinfo==NULL){
-        NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
-      }
-      else{
-        ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
-      }
-    }
-    surfj = surfinfo + nsurfinfo - 1;
-    for(j=0;j<nsurfids;j++){
-      if(surfids[j].show==0)continue;
-      surfj++;
-      initsurface(surfj);
-      surfj->surfacelabel=surfids[j].label;
-    }
-    nsurfinfo += nsurfids_shown;
-  }
-  update_sorted_surfidlist();
-}
-
-/* ------------------ updateusetextures ------------------------ */
-
-void updateusetextures(void){
+void update_usetextures(void){
   int i;
 
   for(i=0;i<ntextures;i++){

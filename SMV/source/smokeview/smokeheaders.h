@@ -559,7 +559,6 @@ EXTERNCPP void matvecmult(double *m1, float *v1, float *v2);
 EXTERNCPP void update_meshlist1(int val);
 EXTERNCPP void update_translate(void);
 EXTERNCPP void BlockageMenu(int value);
-EXTERNCPP void parsedatabase(char *databasefile);
 EXTERNCPP char *STRSTR(char *c, const char *key);
 EXTERNCPP void handle_plot3d_keys(int  key);
 EXTERNCPP void handle_move_keys(int  key);
@@ -644,7 +643,7 @@ EXTERNCPP void get_blockvals(float *xmin, float *xmax,
 EXTERNCPP void transparentoff(void);
 EXTERNCPP void transparenton(void);
 EXTERNCPP void getobstlabels(const char *filein);
-EXTERNCPP void updateusetextures(void);
+EXTERNCPP void update_usetextures(void);
 EXTERNCPP int updatergbhist(int width, int height,int maketable, int *colortable, int nrgb);
 EXTERNCPP void antialias(int flag);
 EXTERNCPP void saveview(void);

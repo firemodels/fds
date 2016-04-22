@@ -784,7 +784,7 @@ extern "C" void OBJECT_CB(int var){
           changed_idlist[bchighlight->blockage_id]=1;
         }
         blockages_dirty=1;
-        updateusetextures();
+        update_usetextures();
         UpdateFaces();
       }
       break;
