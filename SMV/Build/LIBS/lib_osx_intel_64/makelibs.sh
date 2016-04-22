@@ -33,7 +33,7 @@ cd $SRCDIR/jpeg-9b
 cp libjpeg.a $LIBDIR/.
 
 # PNG
-cd $SRCDIR/png125
+cd $SRCDIR/png-1.6.21
 ./makelib.sh $OPTS
 cp libpng.a $LIBDIR/.
 
