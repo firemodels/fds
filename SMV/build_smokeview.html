@@ -12,7 +12,7 @@ function get_fullpath(command,platform){
   return directoryPath.concat(command).concat(platform);
 }
 function build_libs(platform){
-  MyObject.Run(get_fullpath("scripts/BUILD_LIBS.bat ",platform));
+  MyObject.Run(get_fullpath("scripts/BUILDlibs.bat ",platform));
 }
 function build_smv(args){
   MyObject.Run(get_fullpath("scripts/BUILDsmv.bat ",args));
