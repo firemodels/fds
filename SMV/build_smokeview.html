@@ -14,6 +14,9 @@ function get_fullpath(command,platform){
 function build_libs(platform){
   MyObject.Run(get_fullpath("scripts/BUILD_LIBS.bat ",platform));
 }
+function build_smv(args){
+  MyObject.Run(get_fullpath("scripts/BUILDsmv.bat ",args));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -53,12 +56,12 @@ function build_libs(platform){
 <tr>
 <th>Windows</th><th align=center>Linux</th><th align=center>OSX</th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
-<td align=center><a href="scripts/BUILDtestsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvlinux64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvosx64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvlinux64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvosx64.bat">Build</a></td>
+<td align=center><button onclick="build_smv('windows test')">Build</button></td>
+<td align=center><button onclick="build_smv('linux test')">Build</button></td>
+<td align=center><button onclick="build_smv('osx test')">Build</button></td>
+<td align=center><button onclick="build_smv('windows release')">Build</button></td>
+<td align=center><button onclick="build_smv('linux release')">Build</button></td>
+<td align=center><button onclick="build_smv('osx release')">Build</button></td>
 </tr>
 <tr>
 <td align=center><a href="scripts/PACKAGEtestsmvwin64.bat">Package</a></td>
