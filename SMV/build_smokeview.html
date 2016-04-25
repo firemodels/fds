@@ -20,6 +20,9 @@ function build_smv(args){
 function build_prog(args){
   MyObject.Run(get_fullpath("scripts/BUILDprog.bat ",args));
 }
+function build_utilprog(args){
+  MyObject.Run(get_fullpath("../Utilities/Scripts/BUILDutilprog.bat ",args));
+}
 function package_smv(args){
   MyObject.Run(get_fullpath("scripts/PACKAGEsmv.bat ",args));
 }
@@ -119,9 +122,9 @@ function install_smv(args){
 
 <tr>
 <th>fds2ascii</th>
-<td align=center><a href="scripts/BUILDf2awin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDf2alinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDf2aosx.bat">Build</a></td>
+<td align=center><button onclick="build_utilprog('fds2ascii windows')">Build</button></td>
+<td align=center><button onclick="build_utilprog('fds2ascii linux')">Build</button></td>
+<td align=center><button onclick="build_utilprog('fds2ascii osx')">Build</button></td>
 </tr>
 
 <tr>
