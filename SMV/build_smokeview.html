@@ -17,6 +17,9 @@ function build_libs(platform){
 function build_smv(args){
   MyObject.Run(get_fullpath("scripts/BUILDsmv.bat ",args));
 }
+function build_prog(args){
+  MyObject.Run(get_fullpath("scripts/BUILDprog.bat ",args));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -96,16 +99,16 @@ function build_smv(args){
 
 <tr>
 <th>background</th>
-<td align=center><a href="scripts/BUILDbgwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDbglinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDbgosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('background windows')">Build</button></td>
+<td align=center><button onclick="build_prog('background linux')">Build</button></td>
+<td align=center><button onclick="build_prog('background osx')">Build</button></td>
 </tr>
 
 <tr>
 <th>dem2fds</th>
-<td align=center><a href="scripts/BUILDdemwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdemlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdemosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('dem2fds windows')">Build</button></td>
+<td align=center><button onclick="build_prog('dem2fds linux')">Build</button></td>
+<td align=center><button onclick="build_prog('dem2fds osx')">Build</button></td>
 </tr>
 
 <tr>
@@ -117,24 +120,24 @@ function build_smv(args){
 
 <tr>
 <th>smokediff</th>
-<td align=center><a href="scripts/BUILDsmdwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmdlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmdosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('smokediff windows')">Build</button></td>
+<td align=center><button onclick="build_prog('smokediff linux')">Build</button></td>
+<td align=center><button onclick="build_prog('smokediff osx')">Build</button></td>
 </tr>
 
 <tr>
 <th>smokezip</th>
-<td align=center><a href="scripts/BUILDsmzwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmzlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmzosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('smokezip windows')">Build</button></td>
+<td align=center><button onclick="build_prog('smokezip linux')">Build</button></td>
+<td align=center><button onclick="build_prog('smokezipo osx')">Build</button></td>
 </tr>
 
 
 <tr>
 <th>wind2fds</th>
-<td align=center><a href="scripts/BUILDwindwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDwindlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDwindosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('wind2fds windows')">Build</button></td>
+<td align=center><button onclick="build_prog('wind2fds linux')">Build</button></td>
+<td align=center><button onclick="build_prog('wind2fds osx')">Build</button></td>
 </tr>
 </table>
 
