@@ -1,6 +1,36 @@
 <html>
 <head>
 <TITLE>Smokeview</TITLE>
+<script type="text/javascript">
+MyObject = new ActiveXObject("WScript.Shell")
+function build_libs_windows()
+{
+var location = window.location.pathname;
+var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+var command="scripts/BUILD_LIBS.bat windows";
+var fullcommand=directoryPath.concat(command);
+//document.getElementById("demo").innerHTML = fullcommand;
+MyObject.Run(fullcommand);
+}
+function build_libs_linux()
+{
+var location = window.location.pathname;
+var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+var command="scripts/BUILD_LIBS.bat linux";
+var fullcommand=directoryPath.concat(command);
+//document.getElementById("demo").innerHTML = fullcommand;
+MyObject.Run(fullcommand);
+}
+function build_libs_osx()
+{
+var location = window.location.pathname;
+var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+var command="scripts/BUILD_LIBS.bat osx";
+var fullcommand=directoryPath.concat(command);
+//document.getElementById("demo").innerHTML = fullcommand;
+MyObject.Run(fullcommand);
+}
+</script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
@@ -20,15 +50,15 @@
 </ul>
 
 <h3>Libraries</h3>
-
+<p id="demo"></p>
 <p><table border=on>
 <tr>
 <th>Windows</th><th>Linux</th><th>OSX</th>
 </tr>
 <tr>
-<td align=center><input type="button" value="Build" onclick="window.open('scripts/BUILD_LIBS_win64.bat')" /></td>
-<td align=center><input type="button" value="Build" onclick="window.open('scripts/BUILD_LIBS_linux.bat')" /></td>
-<td align=center><input type="button" value="Build" onclick="window.open('scripts/BUILD_LIBS_osx.bat')" /></td>
+<td align=center><button onclick="build_libs_windows()">Build</button></td>
+<td align=center><button onclick="build_libs_linux()">Build</button></td>
+<td align=center><button onclick="build_libs_osx()">Build</button></td>
 </tr>
 </table>
 
