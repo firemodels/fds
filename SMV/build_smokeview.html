@@ -20,6 +20,9 @@ function build_smv(args){
 function build_prog(args){
   MyObject.Run(get_fullpath("scripts/BUILDprog.bat ",args));
 }
+function package_smv(args){
+  MyObject.Run(get_fullpath("scripts/PACKAGEsmv.bat ",args));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -67,12 +70,12 @@ function build_prog(args){
 <td align=center><button onclick="build_smv('osx release')">Build</button></td>
 </tr>
 <tr>
-<td align=center><a href="scripts/PACKAGEtestsmvwin64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEtestsmvlinux64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEtestsmvosx64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvwin64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvlinux64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvosx64.bat">Package</a></td>
+<td align=center><button onclick="package_smv('windows test')">Package</button></td>
+<td align=center><button onclick="package_smv('linux test')">Package</button></td>
+<td align=center><button onclick="package_smv('osx test')">Package</button></td>
+<td align=center><button onclick="package_smv('windows release')">Package</button></td>
+<td align=center><button onclick="package_smv('linux release')">Package</button></td>
+<td align=center><button onclick="package_smv('osx release')">Package</button></td>
 </tr>
 <tr>
 <td align=center><a href="scripts/INSTALLtestsmvwin64.bat">Install</a></td>
