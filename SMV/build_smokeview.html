@@ -2,33 +2,17 @@
 <head>
 <TITLE>Smokeview</TITLE>
 <script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
 MyObject = new ActiveXObject("WScript.Shell")
-function build_libs_windows()
-{
-var location = window.location.pathname;
-var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
-var command="scripts/BUILD_LIBS.bat windows";
-var fullcommand=directoryPath.concat(command);
-//document.getElementById("demo").innerHTML = fullcommand;
-MyObject.Run(fullcommand);
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  return directoryPath.concat(command).concat(platform);
 }
-function build_libs_linux()
-{
-var location = window.location.pathname;
-var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
-var command="scripts/BUILD_LIBS.bat linux";
-var fullcommand=directoryPath.concat(command);
-//document.getElementById("demo").innerHTML = fullcommand;
-MyObject.Run(fullcommand);
-}
-function build_libs_osx()
-{
-var location = window.location.pathname;
-var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
-var command="scripts/BUILD_LIBS.bat osx";
-var fullcommand=directoryPath.concat(command);
-//document.getElementById("demo").innerHTML = fullcommand;
-MyObject.Run(fullcommand);
+function build_libs(platform){
+  MyObject.Run(get_fullpath("scripts/BUILD_LIBS.bat ",platform));
 }
 </script>
 </HEAD>
@@ -56,9 +40,9 @@ MyObject.Run(fullcommand);
 <th>Windows</th><th>Linux</th><th>OSX</th>
 </tr>
 <tr>
-<td align=center><button onclick="build_libs_windows()">Build</button></td>
-<td align=center><button onclick="build_libs_linux()">Build</button></td>
-<td align=center><button onclick="build_libs_osx()">Build</button></td>
+<td align=center><button onclick="build_libs('windows')">Build</button></td>
+<td align=center><button onclick="build_libs('linux')">Build</button></td>
+<td align=center><button onclick="build_libs('osx')">Build</button></td>
 </tr>
 </table>
 
