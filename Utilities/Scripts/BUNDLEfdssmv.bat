@@ -32,7 +32,7 @@ if "%platform%" == "windows" (
 )
 if "%platform%" == "linux" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_linux64
-  plink %linux_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% %bundledir% %linux_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
+  plink %linux_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_linux64.sh %linux_svn_root% !bundledir! %linux_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
 
   set manifest=%svn_root%\Utilities\uploads\manifest_linux_64.html
   echo Downloading manifest
@@ -41,13 +41,13 @@ if "%platform%" == "linux" (
   start explorer !manifest!
 
   echo Downloading compressed archive to:
-  echo   %svn_root%\Utilities\uploads\%bundledir%.sh
-  pscp %linux_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
+  echo   %svn_root%\Utilities\uploads\!bundledir!.sh
+  pscp %linux_logon%:%linux_svn_root%/Utilities/uploads/!bundledir!.sh %svn_root%/Utilities/uploads/.
   goto eof
 )
 if "%platform%" == "osx" (
   set bundledir=FDS_%fds_version%-SMV_%smv_version%_osx64
-  plink %osx_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.sh %linux_svn_root% %bundledir% %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
+  plink %osx_logon% %linux_svn_root%/Utilities/Scripts/BUNDLE_osx64.sh %linux_svn_root% !bundledir! %osx_hostname% %fds_edition%  %fds_version% %smv_version% %fdssmv_major_version%
 
   set manifest=%svn_root%\Utilities\uploads\manifest_osx_64.html
   echo Downloading manifest
@@ -56,8 +56,8 @@ if "%platform%" == "osx" (
   start explorer !manifest!
 
   echo Downloading compressed archive to:
-  echo   %svn_root%\Utilities\uploads\%bundledir%.sh
-  pscp %osx_logon%:%linux_svn_root%/Utilities/uploads/%bundledir%.sh %svn_root%/Utilities/uploads/.
+  echo   %svn_root%\Utilities\uploads\!bundledir!.sh
+  pscp %osx_logon%:%linux_svn_root%/Utilities/uploads/!bundledir!.sh %svn_root%/Utilities/uploads/.
   goto eof
 )
 
