@@ -1,6 +1,7 @@
 @echo off
+set guide=%1
 
-set envfile=%userprofile%\fds_smv_env.bat
+set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
 echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
@@ -12,13 +13,11 @@ goto:eof
 
 :endif_envexist
 
+echo Creating figures for the Smokeview User's guide
+
 call %envfile%
 
 %svn_drive%
+cd %svn_root%\Manuals\%guide%
 
-set CURDIR=%CD%
-
-cd %svn_root%\Manuals\FDS_Technical_Reference_Guide\
-start acrobat FDS_Technical_Reference_Guide.pdf
-
-cd %CURDIR%
+start acrobat %guide%.pdf

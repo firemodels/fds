@@ -9,7 +9,8 @@ MyObject = new ActiveXObject("WScript.Shell")
 function get_fullpath(command,platform){
   var location = window.location.pathname;
   var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
-  return directoryPath.concat(command).concat(platform);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
 }
 function build_libs(platform){
   MyObject.Run(get_fullpath("scripts/BUILDlibs.bat ",platform));
