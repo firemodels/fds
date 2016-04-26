@@ -1044,12 +1044,10 @@ unsigned int date2day(char *tokenorig){
 
   strcpy(token,tokenorig);
   slash1=strchr(token,'/');
-  if(slash1!=NULL)slash2=strchr(slash1+1,'/');
+  if(slash1==NULL)return 0;
 
-  if(slash1==NULL){
-    return 0;
-  }
-  else if(slash1!=NULL&&slash2==NULL){
+  slash2 = strchr(slash1+1, '/');
+  if(slash2==NULL){
     char *dayend;
 
     year=NULL;

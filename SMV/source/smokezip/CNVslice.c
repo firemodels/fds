@@ -88,6 +88,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -97,6 +98,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       fclose(slicestream);
       fprintf(stderr,"*** Warning: The file %s exists.\n",slicefile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(SLICEFILE);
       return 0;
     }
   }
@@ -104,6 +106,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   slicestream=fopen(slicefile_svz,"wb");
   if(slicestream==NULL){
     fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",slicefile_svz);
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -393,6 +396,7 @@ int convert_slice(slice *slicei, int *thread_index){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -402,6 +406,7 @@ int convert_slice(slice *slicei, int *thread_index){
       fclose(slicestream);
       fprintf(stderr,"*** Warning:  %s exists.\n",slicefile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(SLICEFILE);
       return 0;
     }
   }
