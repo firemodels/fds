@@ -24,7 +24,7 @@ echo.
 %svn_drive%
 
 
-if "%whichguides%" == "from_smvlocal" (
+if "%whichguides%" == "from_smv_local" (
   set fromdir=%svn_root%\Manuals
   set todir="%userprofile%"\FDS_Guides
 
@@ -38,7 +38,7 @@ if "%whichguides%" == "from_smvlocal" (
   copy !fromdir!\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf  !todir!\.
   goto eof
 )
-if "%whichguides%" == "from_smvlinux" (
+if "%whichguides%" == "from_smv_linux" (
   set fromdir=%smokebotrepo%/Manuals
   set todir="%userprofile%"\FDS_Guides
 
@@ -52,7 +52,7 @@ if "%whichguides%" == "from_smvlinux" (
   pscp %linux_logon%:!fromdir!/SMV_Technical_Reference_Guide/SMV_Technical_Reference_Guide.pdf  !todir!\.
   goto eof
 )
-if "%whichguides%" == "from_fdslinux" (
+if "%whichguides%" == "from_fds_linux" (
   set fromdir=%firebotrepo%/Manuals
   set todir="%userprofile%"\FDS_Guides
 
