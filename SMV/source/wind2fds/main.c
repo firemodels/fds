@@ -428,10 +428,12 @@ int main(int argc, char **argv){
   if(is_sodar_file==0){
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      fclose(stream_out);
       return 1;
     }
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      fclose(stream_out);
       return 1;
     }
   }
