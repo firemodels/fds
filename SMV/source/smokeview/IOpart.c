@@ -624,7 +624,6 @@ void write_part_histogram(partdata *parti){
   unsigned char *compressed_buckets=NULL;
   int ncompressed_bucketsMAX=0;
   uLongf ncompressed_buckets;
-  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "wb");
   if(STREAM_HIST == NULL)return;
@@ -663,7 +662,6 @@ void read_part_histogram(partdata *parti){
   unsigned char *compressed_buckets=NULL;
   int ncompressed_bucketsMAX = 0;
   uLongf ncompressed_buckets, nbuckets, nbuffer;
-  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "rb");
   if(STREAM_HIST == NULL)return;
