@@ -21,6 +21,9 @@ function view_guide(guide){
 function copy_guides(guide){
   MyObject.Run(get_fullpath("scripts/COPYguides.bat ",guide));
 }
+function get_figs(guide){
+  MyObject.Run(get_fullpath("scripts/GETfigs.bat ",guide));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -34,11 +37,33 @@ function copy_guides(guide){
 <h3>Download Images</h3>
 
 <p><table border=on>
-<tr><td rowspan=2, align=center>Linux smokebot</td><td>SMV User</td><td><a href="scripts/GETsmvugfigs.bat">==></a><td rowspan=5>Windows repo</td></tr>
-<tr><td>SMV Verification</td><td><a href="scripts/GETsmvvergfigs.bat">==></a></td></tr>
-<tr><td rowspan=3, align=center>Linux firebot</td><td align=center>FDS User</td><td><a href="scripts/GETfdsugfigs.bat">==></a></tr>
-<tr><td align=center>FDS Validation</td><td><a href="scripts/GETfdsvalgfigs.bat">==></a></td></tr>
-<tr><td align=center>FDS Verification</td><td><a href="scripts/GETfdsvergfigs.bat">==></a></td></tr>
+<tr>
+<td rowspan=2, align=center>Linux smokebot</td>
+<td>SMV User</td>
+<td><button onclick="get_figs('smvug')">==></button></td>
+<td rowspan=5>Windows repo</td>
+</tr>
+
+<tr>
+<td>SMV Verification</td>
+<td><button onclick="get_figs('smvvg')">==></button></td>
+</tr>
+
+<tr>
+<td rowspan=3, align=center>Linux firebot</td>
+<td align=center>FDS User</td>
+<td><button onclick="get_figs('fdsug')">==></button></td>
+</tr>
+
+<tr>
+<td align=center>FDS Validation</td>
+<td><button onclick="get_figs('fdsvalg')">==></button></td>
+</tr>
+
+<tr>
+<td align=center>FDS Verification</td>
+<td><button onclick="get_figs('fdsverg')">==></button></td>
+</tr>
 </table>
 
 <h3>Build Guides</h3>
