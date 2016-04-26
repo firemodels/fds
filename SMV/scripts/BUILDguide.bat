@@ -1,4 +1,5 @@
 @echo off
+set guide=%1
 
 set envfile=%userprofile%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -18,7 +19,7 @@ call %envfile%
 
 set CURDIR=%CD%
 
-cd %svn_root%\Manuals\FDS_User_Guide\
-start acrobat FDS_User_Guide.pdf
+cd %svn_root%\Manuals\%guide%
+call make_guide
 
 cd %CURDIR%
