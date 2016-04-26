@@ -3918,7 +3918,10 @@ void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
     streamsize=fopen(sizefile,"r");
 
     stream=fopen(patchi->file,"rb");
-    if(stream==NULL)return;
+    if(stream==NULL){
+      if(streamsize!=NULL)fclose(streamsize);
+      return;
+    }
 
     streamsize=fopen(sizefile,"w");
     if(streamsize==NULL){

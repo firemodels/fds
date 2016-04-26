@@ -360,9 +360,9 @@ extern "C" void set_glui_keyframe(void){
   if(selected_frame==NULL)return;
 
   ti = selected_tour;
-  if(ti!=NULL){
-    tour_hide=1-ti->display;
-  }
+  if(ti==NULL)return;
+
+  tour_hide=1-ti->display;
   if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
   glui_avatar_index=ti->glui_avatar_index;
   TOUR_CB(TOUR_AVATAR);
@@ -431,7 +431,7 @@ extern "C" void set_glui_keyframe(void){
   SPINNER_viewz->set_float_val(tour_view_xyz[2]);
   SPINNER_az_path->set_float_val(tour_az_path);
   SPINNER_elev_path->set_float_val(tour_elev_path);
-  if(ti!=NULL&&CHECKBOX_tourhide!=NULL)CHECKBOX_tourhide->set_int_val(tour_hide);
+  if(CHECKBOX_tourhide!=NULL)CHECKBOX_tourhide->set_int_val(tour_hide);
   EDIT_label->set_text(tour_label);
 
   if(edittour==1){
