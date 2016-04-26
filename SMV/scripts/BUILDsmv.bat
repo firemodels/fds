@@ -20,8 +20,8 @@ goto:eof
 
 call %envfile%
 echo.
-echo  Building %type% Smokeview for 64 bit %platform%
-Title Building %type% Smokeview for 64 bit %platform%
+echo  Building %buildtype% Smokeview for %platform%
+Title Building %buildtype% Smokeview for %platform%
 
 %svn_drive%
 
