@@ -28,14 +28,14 @@ if "%whichguides%" == "from_smv_local" (
   set fromdir=%svn_root%\Manuals
   set todir="%userprofile%"\FDS_Guides
 
-  Title Copying smokeview guides from local repo
+  Title Copying smokeview guides from local repo to %userprofile%\FDS_Guides
   echo copying guides
   echo from directory: !fromdir!
   echo to directory: !todir!
 
-  copy !fromdir!\SMV_User_Guide\SMV_User_Guide.pdf                                !todir!\.
-  copy !fromdir!\SMV_Verification_Guide\SMV_Verification_Guide.pdf                !todir!\.
-  copy !fromdir!\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf  !todir!\.
+  call :COPY !fromdir!\SMV_User_Guide\SMV_User_Guide.pdf                                !todir!\.
+  call :COPY !fromdir!\SMV_Verification_Guide\SMV_Verification_Guide.pdf                !todir!\.
+  call :COPY !fromdir!\SMV_Technical_Reference_Guide\SMV_Technical_Reference_Guide.pdf  !todir!\.
   goto eof
 )
 if "%whichguides%" == "from_smv_linux" (
@@ -92,6 +92,24 @@ if "%whichguides%" == "to_osx" (
   pscp !fromdir!\*.pdf %osx_logon%:!todir!/.
   goto eof
 )
+goto eof
+
+:COPY
+set label=%~n1%~x1
+set infile=%1
+set infiletime=%~t1
+set outfile=%2
+IF EXIST %infile% (
+   echo copying %label% %infiletime%
+   copy %infile% %outfile% >Nul
+) ELSE (
+   echo.
+   echo *** warning: %infile% does not exist
+   echo.
+   pause
+)
+exit /b
+
 
 :eof
 echo.
