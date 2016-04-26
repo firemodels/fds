@@ -18,12 +18,15 @@ function build_guide(guide){
 function view_guide(guide){
   MyObject.Run(get_fullpath("scripts/VIEWguide.bat ",guide));
 }
+function copy_guides(guide){
+  MyObject.Run(get_fullpath("scripts/COPYguides.bat ",guide));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
 <a href="build_smokeview.html"><font size=5>Smokeview</font></a> - 
-<font size=5>Guides</font></a>
+<font size=5>Guides</font></a> -
 <a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
 
 <hr size="1">
@@ -79,11 +82,31 @@ function view_guide(guide){
 
 <p><table border=on>
 <tr>
-<td>Windows repo Smokeview</td><td><a href="scripts/COPY_smv_guides.bat">==></a></td><td rowspan=3>Windows ~\FDS_Guides</td><tr>
-<td>smokebot Smokeview</td><td><a href="scripts/COPY_smvlinux_guides.bat">==></a></td><tr>
-<td>firebot FDS</td><td><a href="scripts/COPY_fdslinux_guides.bat">==></a></td><tr>
-<td rowspan=2>Windows ~\FDS_Guides</td><td><a href="Scripts/COPYguides2linux.bat">==></a></td><td>Linux ~/FDS_Guides</td></tr>
-<tr><td><a href="Scripts/COPYguides2osx.bat">==></a></td><td>OSX ~/FDS_Guides</td></tr>
+<td>Windows repo Smokeview</td>
+<td><button onclick="copy_guides('from_smv_local')">==></button></td>
+<td rowspan=3>Windows ~\FDS_Guides</td>
+</tr
+
+<tr>
+<td>smokebot Smokeview</td>
+<td><button onclick="copy_guides('from_smv_linux')">==></button></td>
+</tr>
+
+<tr>
+<td>firebot FDS</td>
+<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
+</tr>
+
+<tr>
+<td rowspan=2>Windows ~\FDS_Guides</td>
+<td><button onclick="copy_guides('to_linux')">==></button></td>
+<td>Linux ~/FDS_Guides</td>
+</tr>
+
+<tr>
+<td><button onclick="copy_guides('to_osx')">==></button></td>
+<td>OSX ~/FDS_Guides</td>
+</tr>
 </table>
 
 <h3>Other</h3>
