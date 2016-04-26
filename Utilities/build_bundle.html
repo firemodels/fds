@@ -15,6 +15,9 @@ function get_fullpath(command,platform){
 function bundle_fdssmv(platform){
   MyObject.Run(get_fullpath("Scripts/BUNDLEfdssmv.bat ",platform));
 }
+function install_fdssmv(platform){
+  MyObject.Run(get_fullpath("Scripts/INSTALLfdssmv.bat ",platform));
+}
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
@@ -47,9 +50,9 @@ function bundle_fdssmv(platform){
 </tr>
 
 <tr>
-<td align=center><a href="../Utilities/Scripts/INSTALL_win64.bat">Install</a></td>
-<td align=center><a href="../Utilities/Scripts/INSTALL_linux64.bat">Install</a></td>
-<td align=center><a href="../Utilities/Scripts/INSTALL_osx64.bat">Install</a></td>
+<td align=center><button onclick="install_fdssmv('windows')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('linux')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('osx')">Install</button></td>
 </tr>
 <tr>
 <td align=center colspan=3><a href="../Utilities/Scripts/UPLOADbundles.bat">Upload</a> (google drive and git)</td>
