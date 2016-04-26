@@ -308,16 +308,19 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   if(meshi->isolevels==NULL){
     readiso("",ifile,UNLOAD,NULL,&error);
     *errorcode=1;
+    fclose(isostream);
     return;
   }
   if(NewMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     readiso("",ifile,UNLOAD,NULL,&error);
     *errorcode=1;
+    fclose(isostream);
     return;
   }
   if(NewMemory((void **)&meshi->showlevels,sizeof(int)*meshi->nisolevels)==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,NULL,&error);
+    fclose(isostream);
     return;
   }
   for(ilevel=0;ilevel<meshi->nisolevels;ilevel++){
@@ -341,11 +344,13 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   if(NewMemory((void **)&meshi->animatedsurfaces,meshi->nisolevels*meshi->niso_times*sizeof(isosurface))==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,NULL,&error);
+    fclose(isostream);
     return;
   }
   if(ResizeMemory((void **)&meshi->iso_times,sizeof(float)*meshi->niso_times)==0){
     *errorcode=1;
     readiso("",ifile,UNLOAD,NULL,&error);
+    fclose(isostream);
     return;
   }
 

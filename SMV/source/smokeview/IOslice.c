@@ -82,7 +82,7 @@ int makeslicesizefile(char *file, char *sizefile, int compression_type);
            }                                  \
          }
 
-#define GET_VAL_N(U,n)  ( (U)==NULL ? 0.0 : ( (U)->compression_type==COMPRESSED_ZLIB ? (U)->qval256[(U)->iqsliceframe[(n)]] : (U)->qslice[(n)] )  )
+#define GET_VAL_N(U,n)  ( (U)->compression_type==COMPRESSED_ZLIB ? (U)->qval256[(U)->iqsliceframe[(n)]] : (U)->qslice[(n)] ) 
 
 #define GET_VEC_DXYZ(U,DU,n) \
          if(U==NULL){       \

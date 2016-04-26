@@ -1222,8 +1222,8 @@ void update_terrain(int allocate_memory, float vertical_factor_local){
 
       meshi=meshinfo + imesh;
       terri = meshi->terrain;
-      terri->terrain_mesh=meshi;
       if(terri==NULL)continue;
+      terri->terrain_mesh = meshi;
       znode = terri->znode;
       znode_scaled = terri->znode_scaled;
 

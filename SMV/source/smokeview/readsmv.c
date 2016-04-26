@@ -2673,7 +2673,7 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
       devicecopy++;
     }
   }
-
+  fclose(stream);
 }
 
 /* ------------------ set_surfaceindex ------------------------ */
@@ -11495,7 +11495,7 @@ void writeini_local(FILE *fileout){
       propi = part5propinfo + i;
       fprintf(fileout, " ");
       for(j = 0; j < npartclassinfo; j++){
-        fprintf(fileout, " %i ", propi->class_vis[j]);
+        fprintf(fileout, " %i ", (int)propi->class_vis[j]);
       }
       fprintf(fileout, "\n");
     }
@@ -12363,7 +12363,7 @@ void writeini(int flag,char *filename){
       fprintf(fileout, " %i %i\n", cbi->nnodes, cbi->nodehilight);
       for(i = 0; i < cbi->nnodes; i++){
         rrgb = cbi->rgb_node + 3 * i;
-        fprintf(fileout, " %i %i %i %i\n", cbi->index_node[i], (int)rrgb[0], (int)rrgb[1], (int)rrgb[2]);
+        fprintf(fileout, " %i %i %i %i\n", (int)cbi->index_node[i], (int)rrgb[0], (int)rrgb[1], (int)rrgb[2]);
       }
     }
   }

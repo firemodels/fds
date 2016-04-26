@@ -2271,9 +2271,7 @@ void drawtsphere(int texture_index,float diameter, unsigned char *rgbcolor){
     }
     glEnd();
     glPopMatrix();
-    if(texti!=NULL){
-      glDisable(GL_TEXTURE_2D);
-    }
+    glDisable(GL_TEXTURE_2D);
   }
   else{
     drawsphere(diameter,rgbcolor);
@@ -6072,7 +6070,7 @@ void setup_pilot_data(int nbuckets){
       int nvals;
 
       nvals = MIN(udev->nvals, vdev->nvals);
-      nvals = MIN(nvals, wdev->nvals);
+      if(wdev!=NULL)nvals = MIN(nvals, wdev->nvals);
       for(j = 0; j<nvals; j++){
         float uval, vval, wval = 0.0, vel, veluv, angle;
 

@@ -879,7 +879,10 @@ void Convert_ssf(void){
 
   if(strcmp(ssf_from, ssf_to)==0){
     strcpy(tempfile, template);
-    if(randstr(tempfile+strlen(template), LENTEMP-strlen(template))==NULL||strlen(tempfile)==0)return;
+    if(randstr(tempfile+strlen(template), LENTEMP-strlen(template))==NULL||strlen(tempfile)==0){
+      fclose(stream_from);
+      return;
+    }
     stream_to = fopen(tempfile, "w");
     outeqin = 1;
   }
