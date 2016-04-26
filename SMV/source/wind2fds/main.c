@@ -68,7 +68,7 @@ int main(int argc, char **argv){
   char *prog;
   char *arg,*csv,*argin=NULL,*argout=NULL;
   char file_in[256],file_out[256];
-  FILE *stream_in, *stream_out;
+  FILE *stream_in=NULL, *stream_out=NULL;
   int buffer_len, nrows, ncols;
   char *buffer,*labels,**labelptrs;
   char *datalabels,**datalabelptrs;
@@ -212,6 +212,8 @@ int main(int argc, char **argv){
 
   if(argin==NULL){
     fprintf(stderr,"*** Error: An input file was not specified\n");
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
   if(strcmp(argin,"-")==0){
@@ -226,6 +228,7 @@ int main(int argc, char **argv){
   }
   if(stream_in==NULL){
     fprintf(stderr,"*** Error: The file %s could not be opened for input\n",file_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
 
@@ -245,6 +248,7 @@ int main(int argc, char **argv){
   stream_out=fopen(file_out,"w");
   if(stream_out==NULL){
     fprintf(stderr,"*** Error: The file %s could not be opened for output\n",file_out);
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
     return 1;
   }
 
@@ -263,12 +267,16 @@ int main(int argc, char **argv){
 
   if(fgets(labels,buffer_len,stream_in)==NULL){
     fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
   if(is_sodar_file==1){
     while(strncmp(labels,"Sodar",5)==0){
       if(fgets(labels,buffer_len,stream_in)==NULL){
         fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+        if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+        if(stream_out!=NULL)fclose(stream_out);
         return 1;
       }
     }
@@ -276,6 +284,8 @@ int main(int argc, char **argv){
   else{
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+      if(stream_out!=NULL)fclose(stream_out);
       return 1;
     }
   }
@@ -508,6 +518,8 @@ int main(int argc, char **argv){
     fprintf(stream_out,"\n");
   }
 
+  if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+  if(stream_out!=NULL)fclose(stream_out);
   return 0;
 }
 
