@@ -807,7 +807,7 @@ compile_smv_utilities()
    cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_smokezip.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # smokediff:
@@ -815,7 +815,7 @@ compile_smv_utilities()
    cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_smokediff.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # background
@@ -830,7 +830,7 @@ compile_smv_utilities()
    cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_wind2fds.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    else
    $SSH \( \
@@ -840,12 +840,12 @@ compile_smv_utilities()
    cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokezip_${platform}${size} \; \
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_smokezip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokediff_${platform}${size} \; \
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_smokediff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size} \; \
    rm -f *.o background \; \
@@ -853,7 +853,7 @@ compile_smv_utilities()
    ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size} \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_wind2fds.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1  \)
    fi
    else

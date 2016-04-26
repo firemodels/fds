@@ -1,6 +1,21 @@
 <html>
 <head>
 <TITLE>FDS</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function build_fds(args){
+  MyObject.Run(get_fullpath("Scripts/BUILDfds.bat ",args));
+}
+</script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <font size=5>FDS</font> - 
@@ -18,19 +33,19 @@
 
 <tr align="center">
 <td>
-<a href="Scripts/BUILDfdsmpiwin64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdswin64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpiwin64.bat">release</a>
+<button onclick="build_fds('windows debug')">debug</button><br>
+<button onclick="build_fds('windows dev')">dev</button><br>
+<button onclick="build_fds('windows release')">release</button>
 </td>
 <td>
-<a href="Scripts/BUILDfdsmpilinux64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdslinux64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpilinux64.bat">release</a>
+<button onclick="build_fds('linux debug')">debug</button><br>
+<button onclick="build_fds('linux dev')">dev</button><br>
+<button onclick="build_fds('linux release')">release</button>
 </td>
 <td>
-<a href="Scripts/BUILDfdsmpiosx64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdsosx64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpiosx64.bat">release</a>
+<button onclick="build_fds('osx debug')">debug</button><br>
+<button onclick="build_fds('osx dev')">dev</button><br>
+<button onclick="build_fds('osx release')">release</button>
 </td>
 </tr>
 
