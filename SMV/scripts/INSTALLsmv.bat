@@ -19,9 +19,16 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo.
-echo  Installing %type% Smokeview for 64 bit %platform%
-Title Installing %type% Smokeview for 64 bit %platform%
+if "%buildtype%" == "test" (
+  echo.
+  echo  Installing test %platform% Smokeview
+  Title  Installing test %platform% Smokeview
+)
+if "%buildtype%" == "release" (
+  echo.
+  echo  Installing %platform% Smokeview
+  Title  Installing %platform% Smokeview
+)
 
 %svn_drive%
 

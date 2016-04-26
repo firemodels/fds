@@ -19,9 +19,6 @@ goto:eof
 :endif_envexist
 
 call %envfile%
-echo.
-echo  Bundling %type% Smokeview for 64 bit %platform%
-Title Bundling %type% Smokeview for 64 bit %platform%
 
 %svn_drive%
 
@@ -32,6 +29,10 @@ if "%buildtype%" == "test" (
 if "%buildtype%" == "release" (
    set type=
 )
+
+echo.
+echo  Bundling %type% Smokeview for %platform%
+Title Bundling %type% Smokeview for %platform%
 
 :: windows
 
