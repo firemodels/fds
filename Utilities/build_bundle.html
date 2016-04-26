@@ -1,6 +1,24 @@
 <html>
 <head>
 <TITLE>Bundle</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function bundle_fdssmv(platform){
+  MyObject.Run(get_fullpath("Scripts/BUNDLEfdssmv.bat ",platform));
+}
+function install_fdssmv(platform){
+  MyObject.Run(get_fullpath("Scripts/INSTALLfdssmv.bat ",platform));
+}
+</script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
 <a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
@@ -26,15 +44,15 @@
 <table border=on>
 <tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
-<td align=center><a href="../Utilities/Scripts/BUNDLE_win64.bat">Bundle</a></td>
-<td align=center><a href="../Utilities/Scripts/BUNDLE_linux64.bat">Bundle</a></td>
-<td align=center><a href="../Utilities/Scripts/BUNDLE_osx64.bat">Bundle</a></td>
+<td align=center><button onclick="bundle_fdssmv('windows')">Bundle</button></td>
+<td align=center><button onclick="bundle_fdssmv('linux')">Bundle</button></td>
+<td align=center><button onclick="bundle_fdssmv('osx')">Bundle</button></td>
 </tr>
 
 <tr>
-<td align=center><a href="../Utilities/Scripts/INSTALL_win64.bat">Install</a></td>
-<td align=center><a href="../Utilities/Scripts/INSTALL_linux64.bat">Install</a></td>
-<td align=center><a href="../Utilities/Scripts/INSTALL_osx64.bat">Install</a></td>
+<td align=center><button onclick="install_fdssmv('windows')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('linux')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('osx')">Install</button></td>
 </tr>
 <tr>
 <td align=center colspan=3><a href="../Utilities/Scripts/UPLOADbundles.bat">Upload</a> (google drive and git)</td>
