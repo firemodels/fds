@@ -1,4 +1,4 @@
-@echo off
+ @echo off
 :: setup compiler environment
 call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 
@@ -12,7 +12,11 @@ if "%1" NEQ "-t" goto endif
   set SMV_TESTFLAG=-D pp_BETA
   set SMV_TESTSTRING=test_
 :endif
+set OPT=
+if  "x%VS140COMNTOOLS%" == "x" goto endif2
+  set OPT=-DHAVE_SNPRINTF
+:endif2
 
-make SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
+make SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG% %OPT%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64
 pause
 
