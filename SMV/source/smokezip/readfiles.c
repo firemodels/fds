@@ -183,7 +183,7 @@ int readsmv(char *smvfile){
   }
 
   if(nmeshes>0&&nmeshes==ipdim){
-    NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
+    NewMemory((void **)&meshinfo,nmeshes*sizeof(meshdata));
   }
   else{
   }
@@ -314,7 +314,7 @@ int readsmv(char *smvfile){
     }
 
     if(match(buffer,"GRID") == 1){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+igrid;
       igrid++;
@@ -328,7 +328,7 @@ int readsmv(char *smvfile){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PDIM") == 1){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+ipdim;
       ipdim++;
@@ -830,7 +830,7 @@ int readsmv(char *smvfile){
     int i;
 
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int ii, jj, kk;
       float *xplt, *yplt, *zplt;
       float *xpltcell, *ypltcell, *zpltcell;
@@ -1169,7 +1169,7 @@ void init_volrender(void){
 
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -1182,7 +1182,7 @@ void init_volrender(void){
     slice *slicei;
     char *shortlabel;
     int blocknumber;
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     int ni, nj, nk;
 
@@ -1209,7 +1209,7 @@ void init_volrender(void){
   }
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;

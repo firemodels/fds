@@ -40,7 +40,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
@@ -49,7 +49,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
@@ -249,8 +249,6 @@ int setup_case(int argc, char **argv){
 #ifdef pp_LANG
   init_lang();
 #endif
-
-  if(sb_atstart==1)smooth_blockages();
 
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
@@ -1026,15 +1024,15 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
-      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
-      if(parti->autoload==1)readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){
@@ -1313,7 +1311,6 @@ void initvars(void){
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
 
-  sb_atstart=1;
   select_device=0;
   selected_device_tag=-1;
   navatar_types=0;
@@ -1589,7 +1586,6 @@ void initvars(void){
   visAvailmemory=0;
 #endif
   visBlocks=visBLOCKAsInput;
-  visSmoothAsNormal=1;
   visTransparentBlockage=0;
   visBlocksSave=visBLOCKAsInput;
   blocklocation=BLOCKlocation_grid;
@@ -1816,11 +1812,6 @@ void initvars(void){
   adjustalphaflag=3;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
-  updatesmoothblocks=1;
-  menusmooth=0;
-  use_menusmooth=0;
-  smoothing_blocks=0;
-  blocksneedsmoothing=0;
 
   visUSERticks=0;
   user_tick_show_x=1;

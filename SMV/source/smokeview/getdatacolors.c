@@ -169,7 +169,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
 
 void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
   int i;
-  mesh *meshi;
+  meshdata *meshi;
   unsigned char *cpatchval;
   int npqq_local;
   int upper, lower;
@@ -349,7 +349,7 @@ void UpdateAllPatchColors(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     patchdata *patchi;
     int npatchvals;
     float patchmin_global, patchmax_global;
@@ -655,7 +655,7 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
   }
 // erase data memory in a separate loop (so all "columns" are available when doing any conversions)
   datacopy = parti->data5;
-  if(parti->freedata == FREE_PARTDATA){
+  if(parti->data_type == PARTDATA){
     for(i = 0; i < parti->ntimes; i++){
       int j;
 
@@ -960,7 +960,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   float *q;
   unsigned char *iq;
   plot3ddata *p;
-  mesh *meshi;
+  meshdata *meshi;
   char *iblank;
   int i;
   int ntotal;
@@ -1337,7 +1337,11 @@ void initcadcolors(void){
 
 void Update_Texturebar(void){
   if(use_graphics==0)return;
-  glBindTexture(GL_TEXTURE_1D,texture_colorbar_id);
+  glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, rgb_terrain2);
+  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_terrain2) ");
+
+  glBindTexture(GL_TEXTURE_1D, texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
   SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
 
@@ -1527,7 +1531,7 @@ void UpdateRGBColors(int colorbar_index){
   int i,j;
   float *rgb2ptr;
   int cci;
-  mesh *meshi;
+  meshdata *meshi;
   int vent_offset, outline_offset;
   facedata *facej;
   float transparent_level_local=1.0;
@@ -1772,7 +1776,31 @@ void updatechopcolors(void){
       rgb_slice[4*i+3]=0.0;
     }
 
-    rgb_part[4*i]=rgb_full[i][0];
+    rgb_terrain2[4 * i] = rgb_full[i][0];
+    rgb_terrain2[4 * i + 1] = rgb_full[i][1];
+    rgb_terrain2[4 * i + 2] = rgb_full[i][2];
+    if(rgb_full[i][3] > 0.001){
+      rgb_terrain2[4 * i + 3] = transparent_level_local;
+    }
+    else{
+      rgb_terrain2[4 * i + 3] = 0.0;
+    }
+    if(show_zlevel == 1){
+      int ilevel;
+      float dz;
+
+      dz = (terrain_zmax - terrain_zmin);
+      if(ABS(dz)<0.01)dz=1;
+
+      ilevel = 255 * (terrain_zlevel - terrain_zmin) / dz;
+      if(ABS(ilevel - i) < 3){
+        rgb_terrain2[4 * i] = 0;
+        rgb_terrain2[4 * i + 1] = 0;
+        rgb_terrain2[4 * i + 2] = 0;
+      }
+    }
+
+    rgb_part[4 * i] = rgb_full[i][0];
     rgb_part[4*i+1]=rgb_full[i][1];
     rgb_part[4*i+2]=rgb_full[i][2];
     rgb_part[4*i+3]=rgb_full[i][3];

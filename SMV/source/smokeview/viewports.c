@@ -511,7 +511,7 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
 
 void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   char slicelabel[255];
-  mesh *mesh_xyz=NULL;
+  meshdata *mesh_xyz=NULL;
   float xyz[3];
   int info_lines=0;
 

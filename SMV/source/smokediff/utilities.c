@@ -10,7 +10,7 @@
 
 /* ------------------ mesh_match ------------------------ */
 
-int mesh_match(mesh *mesh1, mesh *mesh2){
+int mesh_match(meshdata *mesh1, meshdata *mesh2){
   int ibar, jbar, kbar;
 
   if(mesh1->ibar!=mesh2->ibar)return 0;
@@ -30,7 +30,7 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
 
 /* ------------------ similar_grid ------------------------ */
 
-int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
+int similar_grid(meshdata *mesh1, meshdata *mesh2, int *factor){
 
   factor[0]=1;
   factor[1]=1;
@@ -57,7 +57,7 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
 
 /* ------------------ exact_grid ------------------------ */
 
-int exact_grid(mesh *mesh1, mesh *mesh2, int *factor){
+int exact_grid(meshdata *mesh1, meshdata *mesh2, int *factor){
   float eps;
 
   factor[0]=1;

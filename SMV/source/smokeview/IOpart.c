@@ -317,7 +317,7 @@ void get_part_histogram(partdata *parti){
     read_part_histogram(parti);
     return;
   }
-  readpart(parti->reg_file, parti - partinfo, LOAD, DONOT_FREE_PARTDATA, &errorcode);
+  readpart(parti->reg_file, parti - partinfo, LOAD, HISTDATA, &errorcode);
   datacopy = parti->data5;
   if(datacopy != NULL){
     for(i = 0; i < parti->ntimes; i++){
@@ -347,7 +347,7 @@ void get_part_histogram(partdata *parti){
         datacopy++;
       }
     }
-    readpart(parti->reg_file, parti - partinfo, UNLOAD, FREE_PARTDATA, &errorcode);
+    readpart(parti->reg_file, parti - partinfo, UNLOAD, HISTDATA, &errorcode);
   }
   write_part_histogram(parti);
 }
@@ -406,7 +406,7 @@ void get_allpart_histogram(void){
 
 /* ------------------ get_partdata ------------------------ */
 
-void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size, int free_partdata){
+void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *delta_time, FILE_SIZE *file_size, int data_type){
   FILE *PART5FILE;
   int one;
   int endianswitch=0;
@@ -476,7 +476,7 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
     count++;
 
     if(doit==1){
-      if(free_partdata==FREE_PARTDATA)PRINTF("particle time=%.2f", time_local);
+      if(data_type==PARTDATA)PRINTF("particle time=%.2f", time_local);
       parti->times[count2]=time_local;
     }
     for(i=0;i<nclasses;i++){
@@ -602,7 +602,7 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
     }
     CheckMemory;
     if(first_frame==1)first_frame=0;
-    if(doit==1&&free_partdata==FREE_PARTDATA)PRINTF(" completed\n");
+    if(doit==1&&data_type==PARTDATA)PRINTF(" completed\n");
 
   }
 wrapup:
@@ -1355,7 +1355,7 @@ void update_partcolorbounds(partdata *parti){
 
     /* -----  ------------- readpart ------------------------ */
 
-void readpart(char *file, int ifile, int loadflag, int free_partdata, int *errorcode){
+void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode){
   size_t lenfile;
   int error=0;
   partdata *parti;
@@ -1396,7 +1396,7 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
       break;
     }
   }
-  parti->freedata = free_partdata;
+  parti->data_type = data_type;
   parti->loaded = 0;
   parti->display=0;
   plotstate=getplotstate(DYNAMIC_PLOTS);
@@ -1410,7 +1410,7 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
     updatemenu=1;
     updatePart5extremes();
 #ifdef pp_MEMPRINT
-    if(free_partdata==FREE_PARTDATA)PRINTF("After particle file unload: \n");
+    if(data_type==PARTDATA)PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
 #endif
     return;
@@ -1418,12 +1418,12 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
 
   lenfile = strlen(file);
   if(lenfile==0){
-    readpart("",ifile,UNLOAD,FREE_PARTDATA,&error);
+    readpart("",ifile,UNLOAD,PARTDATA,&error);
     Update_Times();
     return;
   }
 
-  if(free_partdata == DONOT_FREE_PARTDATA){
+  if(data_type == HISTDATA){
     PRINTF("Updating histogram for: %s\n", file);
   }
   else{
@@ -1431,12 +1431,12 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
   }
   get_partheader(parti, partframestep, &nf_all);
 
-  if(free_partdata == FREE_PARTDATA)PRINTF("Loading particle data: %s\n", file);
-  get_partdata(parti,partframestep, nf_all, &delta_time, &file_size,free_partdata);
+  if(data_type == PARTDATA)PRINTF("Loading particle data: %s\n", file);
+  get_partdata(parti,partframestep, nf_all, &delta_time, &file_size,data_type);
   updateglui();
 
 #ifdef pp_MEMPRINT
-  if(free_partdata==FREE_PARTDATA)PRINTF("After particle file load: \n");
+  if(data_type==PARTDATA)PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1453,14 +1453,14 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
   }
   /* convert particle temperatures into integers pointing to an rgb color table */
 
-  if(free_partdata==FREE_PARTDATA)PRINTF("computing particle color levels \n");
+  if(data_type==PARTDATA)PRINTF("computing particle color levels \n");
 
   parti->loaded = 1;
   parti->display = 1;
   update_partcolorbounds(parti);
   updateglui();
 #ifdef pp_MEMPRINT
-  if(free_partdata==FREE_PARTDATA)PRINTF("After particle file load: \n");
+  if(data_type==PARTDATA)PRINTF("After particle file load: \n");
   PrintMemoryInfo;
 #endif
   if(parti->evac==0){
@@ -1488,14 +1488,14 @@ void readpart(char *file, int ifile, int loadflag, int free_partdata, int *error
     float loadrate;
 
     loadrate = ((float)file_size*8.0/1000000.0)/delta_time;
-    if(free_partdata==FREE_PARTDATA)PRINTF(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
+    if(data_type==PARTDATA)PRINTF(" %.1f MB loaded in %.2f s - rate: %.1f Mb/s",
     (float)file_size/1000000.,delta_time,loadrate);
   }
   else{
-    if(free_partdata==FREE_PARTDATA)PRINTF(" %.1f MB downloaded in %.2f s",
+    if(data_type==PARTDATA)PRINTF(" %.1f MB downloaded in %.2f s",
     (float)file_size/1000000.,delta_time);
   }
-  if(free_partdata==FREE_PARTDATA)PRINTF(" (overhead: %.2f s)\n", delta_time0-delta_time);
+  if(data_type==PARTDATA)PRINTF(" (overhead: %.2f s)\n", delta_time0-delta_time);
 
   glutPostRedisplay();
 }
@@ -2079,7 +2079,7 @@ void update_part_menulabels(void){
       }
       lenlabel=strlen(parti->menulabel);
       if(nmeshes>1){
-	    mesh *partmesh;
+	    meshdata *partmesh;
 
 		partmesh = meshinfo + parti->blocknumber;
         sprintf(label,"%s",partmesh->label);

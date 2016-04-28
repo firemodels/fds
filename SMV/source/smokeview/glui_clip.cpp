@@ -126,7 +126,7 @@ extern "C" void glui_clip_setup(int main_window){
 
   PANEL_blockageview = glui_clip->add_rollout_to_panel(PANEL_clip,"Hide blockages",false);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     glui_clip->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
@@ -329,7 +329,7 @@ void set_clip_controls(int val){
     clipinfo.zmax = zclip_max;
   }
   if(val>=1&&val<=nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
     float *xplt, *yplt, *zplt;
 
     float dxclip, dyclip, dzclip;

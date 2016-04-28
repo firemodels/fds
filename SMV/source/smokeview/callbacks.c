@@ -84,7 +84,7 @@ void next_xindex(int inc,int flag){
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         slicei = sliceinfo + i;
         if(slicei->loaded==0||slicei->display==0)continue;
@@ -93,7 +93,7 @@ void next_xindex(int inc,int flag){
       }
       for(i=0;i<nvsliceinfo;i++){
         vslicedata *vslicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         vslicei = vsliceinfo + i;
         if(vslicei->loaded==0||vslicei->display==0)continue;
@@ -104,7 +104,7 @@ void next_xindex(int inc,int flag){
     else{
       for(i=0;i<nplot3dinfo;i++){
         plot3ddata *plot3di;
-        mesh *meshi;
+        meshdata *meshi;
 
         plot3di = plot3dinfo + i;
         if(plot3di->loaded==0||plot3di->display==0)continue;
@@ -139,7 +139,7 @@ void next_yindex(int inc,int flag){
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         slicei = sliceinfo + i;
         if(slicei->loaded==0||slicei->display==0)continue;
@@ -148,7 +148,7 @@ void next_yindex(int inc,int flag){
       }
       for(i=0;i<nvsliceinfo;i++){
         vslicedata *vslicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         vslicei = vsliceinfo + i;
         if(vslicei->loaded==0||vslicei->display==0)continue;
@@ -159,7 +159,7 @@ void next_yindex(int inc,int flag){
     else{
       for(i=0;i<nplot3dinfo;i++){
         plot3ddata *plot3di;
-        mesh *meshi;
+        meshdata *meshi;
 
         plot3di = plot3dinfo + i;
         if(plot3di->loaded==0||plot3di->display==0)continue;
@@ -194,7 +194,7 @@ void next_zindex(int inc,int flag){
     if(plotstate==DYNAMIC_PLOTS){
       for(i=0;i<nsliceinfo;i++){
         slicedata *slicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         slicei = sliceinfo + i;
         if(slicei->loaded==0||slicei->display==0)continue;
@@ -203,7 +203,7 @@ void next_zindex(int inc,int flag){
       }
       for(i=0;i<nvsliceinfo;i++){
         vslicedata *vslicei;
-        mesh *meshi;
+        meshdata *meshi;
 
         vslicei = vsliceinfo + i;
         if(vslicei->loaded==0||vslicei->display==0)continue;
@@ -214,7 +214,7 @@ void next_zindex(int inc,int flag){
     else{
       for(i=0;i<nplot3dinfo;i++){
         plot3ddata *plot3di;
-        mesh *meshi;
+        meshdata *meshi;
 
         plot3di = plot3dinfo + i;
         if(plot3di->loaded==0||plot3di->display==0)continue;
@@ -327,7 +327,7 @@ void mouse_edit_blockage(int button, int state, int x, int y){
   val = val1;
 
   if(val>0&&val<=ntotalfaces){
-    mesh *meshi;
+    meshdata *meshi;
     selectdata *sd;
     int i;
 
@@ -491,14 +491,14 @@ void checktimebound(void){
       sd->itime=0;
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
 
       meshi->patch_itime=0;
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
@@ -522,13 +522,13 @@ void checktimebound(void){
       if(sd->volslice==1)sd->itime--;
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
       meshi->patch_itime=meshi->npatch_times-1;
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+i;
       if(meshi->iso_times==NULL)continue;
@@ -538,7 +538,7 @@ void checktimebound(void){
   /* set blockage visibility */
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi=meshinfo+i;
@@ -1298,7 +1298,7 @@ void print_gpu_cull_state(void){
 void keyboard(unsigned char key, int flag){
   char key2;
   int skip2;
-  mesh *gbsave,*gbi;
+  meshdata *gbsave,*gbi;
   int i;
   int keystate=0;
 
@@ -1781,7 +1781,7 @@ void keyboard(unsigned char key, int flag){
             fprintf(scriptoutstream," %f\n",timeval);
             if(nvolrenderinfo>0&&load_at_rendertimes==1){
               for(i=0;i<nmeshes;i++){
-                mesh *meshi;
+                meshdata *meshi;
                 volrenderdata *vr;
                 int j;
                 int framenum;
@@ -1811,7 +1811,7 @@ void keyboard(unsigned char key, int flag){
             int show_plot3dkeywords=0;
 
             for(i=0;i<nmeshes;i++){
-              mesh *meshi;
+              meshdata *meshi;
               plot3ddata *plot3di;
               float *xp, *yp, *zp;
 
@@ -2687,7 +2687,7 @@ void reset_gltime(void){
 
 /* ------------------ update_current_mesh ------------------------ */
 
-void update_current_mesh(mesh *meshi){
+void update_current_mesh(meshdata *meshi){
   current_mesh=meshi;
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();

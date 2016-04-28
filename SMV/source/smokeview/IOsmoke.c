@@ -365,7 +365,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   float time_local;
   char compstring[128];
-  mesh *meshi;
+  meshdata *meshi;
   int fortran_skip;
 
   local_starttime0 = glutGet(GLUT_ELAPSED_TIME);
@@ -415,7 +415,7 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       free_iblank_smoke3d = 1;
       for (j = 0; j < nsmoke3dinfo; j++){
         smoke3ddata *smoke3dj;
-        mesh *meshj;
+        meshdata *meshj;
 
         smoke3dj = smoke3dinfo + j;
         meshj = meshinfo + smoke3dj->blocknumber;
@@ -964,7 +964,7 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
 
 #ifdef pp_CULL
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     meshi->cull_smoke3d=NULL;
@@ -1003,7 +1003,7 @@ void mergesmoke3dcolors(smoke3ddata *smoke3dset){
 
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
-    mesh *meshi;
+    meshdata *meshi;
     float fire_alpha;
     unsigned char *firecolor,*sootcolor;
     unsigned char *mergecolor,*mergealpha;
@@ -1140,7 +1140,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
   unsigned char value[4],light_value[4];
   int ivalue[4];
 
-  mesh *meshi;
+  meshdata *meshi;
 
   have_light = smoke3di->have_light;
   meshi = meshinfo + smoke3di->blocknumber;
@@ -2936,7 +2936,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   unsigned char *firecolor, *alphaf_in;
   float value[4], fvalue[4];
 
-  mesh *meshi;
+  meshdata *meshi;
 
   meshi = meshinfo + smoke3di->blocknumber;
   if(meshvisptr[meshi-meshinfo]==0)return;
@@ -4091,13 +4091,13 @@ void drawsmoke3dCULL(void){
   unsigned char *iblank_smoke3d;
   int have_smoke;
   smoke3ddata *smoke3di;
-  mesh *meshi;
+  meshdata *meshi;
   cullplanedata *culli;
 
   unsigned char value[4];
   unsigned char fvalue[4];
 
-  mesh *mesh_old;
+  meshdata *mesh_old;
 
   CheckMemory;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
@@ -4805,7 +4805,7 @@ void update_smoke3d_menulabels(void){
     }
 //    len=strlen(smoke3di->menulabel);
     if(nmeshes>1){
-	  mesh *smokemesh;
+	  meshdata *smokemesh;
 
 	  smokemesh = meshinfo + smoke3di->blocknumber;
       sprintf(meshlabel,"%s",smokemesh->label);
@@ -4849,7 +4849,7 @@ void makeiblank_smoke3d(void){
   update_makeiblank_smoke3d=0;
   for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
-    mesh *smokemesh;
+    meshdata *smokemesh;
     int ibar, jbar, kbar;
     int ijksize;
 
@@ -4873,7 +4873,7 @@ void makeiblank_smoke3d(void){
 #define LOWERMESHES 1
 
   for(ic=nmeshes-1;ic>=0;ic--){
-    mesh *smokemesh;
+    meshdata *smokemesh;
     unsigned char *iblank_smoke3d;
     float *xplt, *yplt, *zplt;
     float dx, dy, dz;
@@ -5044,7 +5044,7 @@ void makeiblank_smoke3d(void){
     n = nmeshes;
   }
   for(i=0;i<n;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     if(flag==ALLMESHES&&i==nm)continue;
@@ -5127,7 +5127,7 @@ void initcullplane(int cullflag){
   ncullplaneinfo=0;
 
   for(iii=0;iii<nmeshes;iii++){
-    mesh *meshi;
+    meshdata *meshi;
     culldata *culli;
 
     meshi=meshinfo+iii;
@@ -5707,7 +5707,7 @@ void initcull(int cullflag){
   ncullplaneinfo=0;
 
   for(ii=0;ii<nmeshes;ii++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+ii;
 
@@ -5794,13 +5794,13 @@ void setPixelCount(void){
   }
 
   for(imesh=0;imesh<nmeshes;imesh++){
-    mesh *meshi;
+    meshdata *meshi;
     meshi = meshinfo + imesh;
 
     meshi->culldefined=0;
   }
   for(n=0;n<nsmoke3dinfo;n++){
-    mesh *meshi;
+    meshdata *meshi;
     smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + n;
@@ -5821,7 +5821,7 @@ void setPixelCount(void){
 
 /* ------------------ setPixelCountOrthog ------------------------ */
 
-void setPixelCountOrthog(mesh *meshi){
+void setPixelCountOrthog(meshdata *meshi){
   int icull;
   float x0[3], x1[3], x2[3], x3[3];
   float x4[3], x5[3], x6[3], x7[3];
@@ -5951,7 +5951,7 @@ void setPixelCountOrthog(mesh *meshi){
 /* ------------------ getPixelCount ------------------------ */
 
 void getPixelCount(void){
-  mesh *meshi;
+  meshdata *meshi;
   int i;
   int icull;
 

@@ -71,7 +71,7 @@ void increment_shooter_data(shootpointdata *pold, shootpointdata *pnew, float dt
   shooter_time+=dtstep;
   for(i=0;i<shooter_nparts;i++){
     float dvel[3];
-    mesh *meshpoint;
+    meshdata *meshpoint;
     float grid_vel,tstep;
 
     xyzold = pold[i].xyz;

@@ -36,7 +36,7 @@ typedef struct {
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float *xplt, *yplt, *zplt;
-} mesh;
+} meshdata;
 
 typedef struct _boundary {
   char *file;
@@ -49,7 +49,7 @@ typedef struct _boundary {
   char keyword[255];
   int boundarytype;
   histogramdata *histogram;
-  mesh *boundarymesh;
+  meshdata *boundarymesh;
   flowlabels label;
 } boundary;
 
@@ -64,7 +64,7 @@ typedef struct _slice {
   struct _slice *slice2;
   char keyword[255];
   int slicetype;
-  mesh *slicemesh;
+  meshdata *slicemesh;
   histogramdata *histogram;
   flowlabels label;
 } slice;
@@ -76,13 +76,13 @@ typedef struct _plot3d {
   struct _plot3d *plot3d2;
   float xmin, xmax, ymin, ymax, zmin, zmax;
   histogramdata *histogram[5];
-  mesh *plot3dmesh;
+  meshdata *plot3dmesh;
   flowlabels labels[5];
 } plot3d;
 
 typedef struct {
   slice *sliceinfo;
-  mesh *meshinfo;
+  meshdata *meshinfo;
   plot3d *plot3dinfo;
   boundary *boundaryinfo;
   char *dir;
@@ -95,7 +95,7 @@ typedef struct {
 
 int getendian(void);
 void usage(void);
-int mesh_match(mesh *mesh1, mesh *mesh2);
+int mesh_match(meshdata *mesh1, meshdata *mesh2);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_boundary(FILE *stream_out);
 void setup_slice(FILE *stream_out);
@@ -106,8 +106,8 @@ boundary *getboundary(boundary *boundaryin, casedata *case2);
 void diff_boundaryes(FILE *stream_out);
 void diff_slices(FILE *stream_out);
 void diff_plot3ds(FILE *stream_out);
-int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
-int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
+int similar_grid(meshdata *mesh1, meshdata *mesh2, int *factor);
+int exact_grid(meshdata *mesh1, meshdata *mesh2, int *factor);
 int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 
 #define FORTgetsliceparms _F(getsliceparms)

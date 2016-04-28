@@ -123,14 +123,14 @@ void drawtrees(void){
 
 /* ------------------ get_zcell_val ------------------------ */
 
-float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int *loc){
+float get_zcell_val(meshdata *meshi,float xval, float yval, float *zval_offset, int *loc){
   int imesh;
   int meshstart=-1;
 
   if(meshi==NULL)meshstart=0;
   if(zval_offset!=NULL)*zval_offset=0.0;
   for(imesh=meshstart;imesh<nmeshes;imesh++){
-    mesh *meshj;
+    meshdata *meshj;
     float *xplt, *yplt;
     int ibar, jbar;
 
@@ -178,14 +178,14 @@ float get_zcell_val(mesh *meshi,float xval, float yval, float *zval_offset, int 
 
 /* ------------------ get_zcell_val_offset ------------------------ */
 
-float get_zcell_val_offset(mesh *meshi,float xval, float yval, int *loc){
+float get_zcell_val_offset(meshdata *meshi,float xval, float yval, int *loc){
   int imesh;
   int meshstart=-1;
 
   if(meshi==NULL)meshstart=0;
 
   for(imesh=meshstart;imesh<nmeshes;imesh++){
-    mesh *meshj;
+    meshdata *meshj;
     float *xplt, *yplt;
     int ibar, jbar;
 
@@ -245,7 +245,7 @@ void update_terrain_colors(void){
     float f1;
 
     f1 = (float)i/(float)(MAXRGB-1);
-    rgbterrain[4*i]=((1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0])/255.0;
+    rgbterrain[4*i  ]=((1.0-f1)*terrain_rgba_zmin[0] + f1*terrain_rgba_zmax[0])/255.0;
     rgbterrain[4*i+1]=((1.0-f1)*terrain_rgba_zmin[1] + f1*terrain_rgba_zmax[1])/255.0;
     rgbterrain[4*i+2]=((1.0-f1)*terrain_rgba_zmin[2] + f1*terrain_rgba_zmax[2])/255.0;
     rgbterrain[4*i+3]=1.0;
@@ -315,7 +315,7 @@ void initterrain_all(void){
   float zmin, zmax, dz;
 
   for(imesh=0;imesh<nmeshes;imesh++){
-    mesh *meshi;
+    meshdata *meshi;
     terraindata *terri;
     int j;
     float dx, dy;
@@ -477,7 +477,7 @@ void initterrain_all(void){
   zmin = meshinfo->terrain->znode[0];
   zmax = zmin;
   for(imesh=0;imesh<nmeshes;imesh++){
-    mesh *meshi;
+    meshdata *meshi;
     terraindata *terri;
     int i;
 
@@ -494,7 +494,7 @@ void initterrain_all(void){
   }
   dz = (zmax - zmin)/12.0;
   for(imesh=0;imesh<nmeshes;imesh++){
-    mesh *meshi;
+    meshdata *meshi;
     terraindata *terri;
     int i;
 
@@ -528,7 +528,7 @@ void initterrain_all(void){
 
 /* ------------------ initterrain_znode ------------------------ */
 
-void initterrain_znode(mesh *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
+void initterrain_znode(meshdata *meshi, terraindata *terri, float xmin, float xmax, int nx, float ymin, float ymax, int ny,
                        int allocate_memory){
   float dx, dy;
   float *x, *y, *z;
@@ -1191,7 +1191,7 @@ void update_terrain(int allocate_memory, float vertical_factor_local){
     }
 
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       terraindata *terri;
       float xmin, xmax, ymin, ymax;
       int nx, ny;
@@ -1215,7 +1215,7 @@ void update_terrain(int allocate_memory, float vertical_factor_local){
     int imesh;
 
     for(imesh=0;imesh<nmeshes;imesh++){
-      mesh *meshi;
+      meshdata *meshi;
       terraindata *terri;
       float *znode, *znode_scaled;
       int i, j;
@@ -1272,8 +1272,8 @@ void update_mesh_terrain(void){
 
   if(nterraininfo<=0)return;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-    mesh *meshj;
+    meshdata *meshi;
+    meshdata *meshj;
     int ii, jj;
     float *x, *y, *z;
     float xyz[3];
@@ -1304,7 +1304,7 @@ void update_mesh_terrain(void){
   // compute z level above bottom mesh
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ii, jj;
     float xyz[3], *x, *y;
     float *zcell;
@@ -1323,7 +1323,7 @@ void update_mesh_terrain(void){
 
         xyz[1]=y[jj];
         for(j=0;j<nmeshes;j++){
-          mesh *meshj,*mesh_above;
+          meshdata *meshj,*mesh_above;
 
           meshj = meshinfo + j;
           if(meshi==meshj)continue;

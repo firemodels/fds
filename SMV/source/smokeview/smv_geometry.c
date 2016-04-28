@@ -217,7 +217,7 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
 
 /* ------------------ getmesh_zcell ------------------------ */
 
-float getmesh_zcell(mesh *meshi, float xval, float yval, int *valid){
+float getmesh_zcell(meshdata *meshi, float xval, float yval, int *valid){
   float *xplt, *yplt,*zcell;
   float dx, dy;
   int ibar, jbar;
@@ -316,7 +316,7 @@ void update_plotxyz_all(void){
   nploty_all=0;
   nplotz_all=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     nplotx_all+=(meshi->ibar+1);
@@ -331,7 +331,7 @@ void update_plotxyz_all(void){
   zp = plotz_all;
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     for(j=0;j<meshi->ibar+1;j++){
@@ -367,7 +367,7 @@ void update_plotxyz_all(void){
   removedupfloats(&ploty_all,&nploty_all,&iploty_all,dxyz_min);
   removedupfloats(&plotz_all,&nplotz_all,&iplotz_all,dxyz_min);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;
@@ -407,7 +407,7 @@ void update_plotxyz_all(void){
     }
   }
   for(i = 0; i<nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ival;
 
     meshi = meshinfo+i;
@@ -416,7 +416,7 @@ void update_plotxyz_all(void){
     iplotx_all = ival;
   }
   for(i = 0; i<nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ival;
 
     meshi = meshinfo+i;
@@ -425,7 +425,7 @@ void update_plotxyz_all(void){
     iploty_all = ival;
   }
   for(i = 0; i<nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ival;
 
     meshi = meshinfo+i;
@@ -439,11 +439,11 @@ void update_plotxyz_all(void){
 
 /* ------------------ getmesh ------------------------ */
 
-mesh *getmesh(float *xyz){
+meshdata *getmesh(float *xyz){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar, kbar;
     float *xplt, *yplt, *zplt;
 
@@ -473,7 +473,7 @@ int on_mesh_boundary(float *xyz){
   int i;
 
   for(i = 0; i<nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar, kbar;
     float *xplt, *yplt, *zplt;
 
@@ -532,11 +532,11 @@ int on_mesh_boundary(float *xyz){
 
 /* ------------------ getmesh_nofail ------------------------ */
 
-mesh *getmesh_nofail(float *xyz){
+meshdata *getmesh_nofail(float *xyz){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar, kbar;
     float *xplt, *yplt, *zplt;
 
@@ -558,7 +558,7 @@ mesh *getmesh_nofail(float *xyz){
     }
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar, kbar;
     float *xplt, *yplt, *zplt;
 
@@ -945,7 +945,7 @@ void getvolsmokedir(float *mm){
   xyzeyeorig[2] = -DOT3(mm+8,mm+12)/mscale[2];
 
   for(j=0;j<nmeshes;j++){
-    mesh *meshj;
+    meshdata *meshj;
     int *inside;
     int *drawsides;
     float x0, x1, yy0, yy1, z0, z1;
@@ -1048,7 +1048,7 @@ void getvolsmokedir(float *mm){
   // turn off drawing for mesh sides that are on the inside of a supermesh
   if(combine_meshes==1){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int *drawsides,*extsides;
       int jj;
 
@@ -1062,14 +1062,14 @@ void getvolsmokedir(float *mm){
       }
     }
     for(i=0;i<nsupermeshinfo;i++){
-      supermesh *smesh;
+      supermeshdata *smesh;
 
       smesh = supermeshinfo + i;
       for(j=0;j<7;j++){
         smesh->drawsides[j]=0;
       }
       for(j=0;j<smesh->nmeshes;j++){
-        mesh *meshj;
+        meshdata *meshj;
         int k;
 
         meshj = smesh->meshes[j];
@@ -1083,7 +1083,7 @@ void getvolsmokedir(float *mm){
   vi = volfacelistinfo;
   nvolfacelistinfo=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int facemap[7]={12,6,0,0,3,9,15};
     volrenderdata *vr;
     int *drawsides;
@@ -1141,7 +1141,7 @@ void getsmokedir(float *mm){
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
   int i,ii,j;
-  mesh *meshj;
+  meshdata *meshj;
   float norm[3],scalednorm[3];
   float normdir[3];
   float absangle,cosangle,minangle;
@@ -1391,7 +1391,7 @@ void getnewpos(float *oldpos, float dx, float dy, float dz,float local_speed_fac
 
 float getblockage_distance(float x, float y, float z){
   int i;
-  mesh *meshi;
+  meshdata *meshi;
   float *xplt, *yplt, *zplt;
   float xmin, xmax, ymin, ymax, zmin, zmax;
   int ibar, jbar, kbar, nx, nxy;
@@ -1448,7 +1448,7 @@ float getblockage_distance(float x, float y, float z){
 void init_blockage_distance(void){
   int ig,jg;
   float *b_zdist;
-  mesh *meshi,*meshj;
+  meshdata *meshi,*meshj;
   int minindex;
   int ibar,jbar,kbar, nx, nxy;
   int nnodes;
@@ -1559,7 +1559,7 @@ int makeiblank_carve(void){
 
   n_embedded_meshes=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo+i;
     meshi->c_iblank_embed=NULL;
@@ -1568,7 +1568,7 @@ int makeiblank_carve(void){
 
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int n_embedded;
 
     meshi = meshinfo+i;
@@ -1587,7 +1587,7 @@ int makeiblank_carve(void){
 
     n_embedded=0;
     for(j=0;j<nmeshes;j++){
-      mesh *meshj;
+      meshdata *meshj;
 
       if(i==j)continue;
       meshj = meshinfo + j;
@@ -1612,7 +1612,7 @@ int makeiblank_carve(void){
       ib_embed[j]=EMBED_NO;
     }
     for(j=0;j<nmeshes;j++){
-      mesh *meshj;
+      meshdata *meshj;
       int i1, i2, jj1, j2, k1, k2;
       int ii, jj, kk;
       float *xplt, *yplt, *zplt;
@@ -1686,7 +1686,7 @@ int makeiblank(void){
   PRINTF("  initializing blanking array\n");
   if(use_iblank==0)return 0;
   for(ig=0;ig<nmeshes;ig++){
-    mesh *meshi;
+    meshdata *meshi;
     int nx, ny, nxy, ibarjbar;
     int ibar,jbar,kbar;
     float *fblank_cell=NULL;
@@ -1867,7 +1867,7 @@ int makeiblank(void){
   //init_blockage_distance();
   LOCK_IBLANK
   for(ig = 0; ig < nmeshes; ig++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + ig;
     meshi->c_iblank_node = meshi->c_iblank_node0;
@@ -1891,7 +1891,7 @@ int makeiblank_orig(void){
   PRINTF("  initializing blanking array\n");
   if(use_iblank == 0)return 0;
   for(ig = 0; ig < nmeshes; ig++){
-    mesh *meshi;
+    meshdata *meshi;
     int nx, ny, nxy;
     int ibar, jbar, kbar;
     float *fblank_cell = NULL;
@@ -2006,7 +2006,7 @@ int makeiblank_orig(void){
 
 /* ------------------ getmesh_in_smesh ------------------------ */
 
-mesh *getmesh_in_smesh(mesh *mesh_guess, supermesh *smesh, float *xyz){
+meshdata *getmesh_in_smesh(meshdata *mesh_guess, supermeshdata *smesh, float *xyz){
   int i;
   float *smin, *smax;
 
@@ -2016,7 +2016,7 @@ mesh *getmesh_in_smesh(mesh *mesh_guess, supermesh *smesh, float *xyz){
   if(xyz[0]<smin[0]||xyz[1]<smin[1]||xyz[2]<smin[2])return NULL;
   if(xyz[0]>smax[0]||xyz[1]>smax[1]||xyz[2]>smax[2])return NULL;
   for(i=-1;i<smesh->nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     float *bmin, *bmax;
 
     if(i==-1){

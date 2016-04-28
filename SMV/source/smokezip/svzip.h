@@ -60,13 +60,13 @@
 /* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct {
-  struct _mesh *rendermesh;
+  struct _meshdata *rendermesh;
   struct _slice *smoke, *fire;
 } volrenderdata;
 
 /* --------------------------  mesh ------------------------------------ */
 
-typedef struct _mesh {
+typedef struct _meshdata {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
   float *xpltcell, *ypltcell, *zpltcell;
@@ -74,7 +74,7 @@ typedef struct _mesh {
   float dx, dy, dz;
   float dxx, dyy, dzz;
   volrenderdata volrenderinfo;
-} mesh;
+} meshdata;
 
 /* --------------------------  patch ------------------------------------ */
 
@@ -138,7 +138,7 @@ typedef struct {
   int inuse;
   float time;
   int blocknumber;
-  mesh *plot3d_mesh;
+  meshdata *plot3d_mesh;
   int filesize;
   int seq_id,autozip;
   int doit, done, count;
@@ -164,7 +164,7 @@ typedef struct {
   int inuse,is_soot;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
-  mesh *smokemesh;
+  meshdata *smokemesh;
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;
@@ -216,7 +216,7 @@ typedef struct {
   int setvalmin, setvalmax;
   float valmin, valmax;
   flowlabels *label;
-  mesh *partmesh;
+  meshdata *partmesh;
 
   int nclasses;
   partclassdata **classptr;
@@ -359,7 +359,7 @@ EXTERN int GLOBframeskip;
 EXTERN int GLOBno_chop;
 
 EXTERN patch *patchinfo;
-EXTERN mesh *meshinfo;
+EXTERN meshdata *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;

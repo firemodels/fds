@@ -224,7 +224,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     if(setPDIM==1){
       if(visGrid!=noGridnoProbe){
         int igrid;
-        mesh *meshi;
+        meshdata *meshi;
 
         UNCLIP;
         for(igrid=0;igrid<nmeshes;igrid++){

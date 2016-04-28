@@ -886,7 +886,7 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   if(index > nmeshes - 1)index = -1;
   for(i = 0; i < nmeshes; i++){
     if(index == i || index < 0){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -1065,7 +1065,7 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    readpart(parti->file,i,UNLOAD,FREE_PARTDATA,&errorcode);
+    readpart(parti->file,i,UNLOAD,PARTDATA,&errorcode);
     count++;
   }
   for(i=0;i<npartinfo;i++){
@@ -1073,7 +1073,7 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    readpart(parti->file,i,LOAD,FREE_PARTDATA,&errorcode);
+    readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
     if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
       FREEMEMORY(loaded_file);
       NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
@@ -1139,7 +1139,7 @@ void script_loadvolsmoke(scriptdata *scripti){
     read_volsmoke_allframes_allmeshes2(NULL);
   }
   else if(imesh>=0&&imesh<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + imesh;
@@ -1227,7 +1227,7 @@ void script_loadslicem(scriptdata *scripti, int meshnum){
     if(match_upper(slicei->label.longlabel, scripti->cval) == NOTMATCH)continue;
     if(scripti->ival == 0){
       int *min, *max;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(slicei->volslice == 0)continue;
       min = slicei->ijk_min;
@@ -1428,7 +1428,7 @@ void script_plot3dprops(scriptdata *scripti){
   update_plot3d_display();
 
   if(visVector==1&&ReadPlot3dFile==1){
-    mesh *gbsave,*gbi;
+    meshdata *gbsave,*gbi;
 
     gbsave=current_mesh;
     for(i=0;i<nmeshes;i++){
@@ -1446,7 +1446,7 @@ void script_plot3dprops(scriptdata *scripti){
 /* ------------------ script_showplot3ddata ------------------------ */
 
 void script_showplot3ddata(scriptdata *scripti){
-  mesh *meshi;
+  meshdata *meshi;
   int imesh, dir, showhide;
   float val;
   int isolevel;
@@ -1574,7 +1574,7 @@ void script_loadfile(scriptdata *scripti){
 
     parti = partinfo + i;
     if(strcmp(parti->file,scripti->cval)==0){
-      readpart(parti->file,i,LOAD,FREE_PARTDATA,&errorcode);
+      readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
       return;
     }
   }
@@ -1864,7 +1864,7 @@ void settimeval(float timeval){
 
 void script_setviewpoint(scriptdata *scripti){
   char *viewpoint;
-  camera *ca;
+  cameradata *ca;
   int count=0;
 
   viewpoint = scripti->cval;

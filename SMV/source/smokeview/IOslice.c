@@ -24,7 +24,7 @@
 
 int endianswitch;
 float gslice_valmin, gslice_valmax, *gslicedata;
-mesh *gslice_valmesh;
+meshdata *gslice_valmesh;
 slicedata *gslice_u, *gslice_v, *gslice_w;
 slicedata *gslice;
 
@@ -38,7 +38,7 @@ void draw_triangle_outline(float *v1, float *v2, float *v3,
                    float del, int level);
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
+                            float *times, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax);
 int average_slice_data(float *data_out, float *data_in, int ndata, int data_per_timestep, float *times, int ntimes, float average_time);
 int getsliceheader(char *comp_file, char *size_file, int compression_type,
                    int framestep, int set_tmin, int set_tmax, float tmin, float tmax,
@@ -46,7 +46,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 int getsliceheader0(char *comp_file, char *size_file, int compression_type, int *i1, int *i2, int *j1, int *j2, int *k1, int *k2, int *slice3d);
 int getslicecompresseddata(char *file,
                             int set_tmin, int set_tmax, float tmin, float tmax, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax);
+                            float *times, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax);
 
 int makeslicesizefile(char *file, char *sizefile, int compression_type);
 
@@ -300,7 +300,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
   slicedata *fed_slice,*o2,*co2,*co;
   isodata *fed_iso;
   int error_local;
-  mesh *meshi;
+  meshdata *meshi;
   float *xgrid=NULL, *ygrid=NULL;
   int nx, ny;
   int nxy;
@@ -944,7 +944,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
   slicedata *sd;
   vslicedata *vd;
   int flag2=0;
-  mesh *meshi;
+  meshdata *meshi;
   int local_starttime=0, local_stoptime=0;
   FILE_SIZE file_size=0;
   int local_starttime0=0, local_stoptime0=0;
@@ -1127,7 +1127,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 
       if(NewMemory((void **)&sd->qslicedata_compressed,sd->ncompressed)==0||
          NewMemory((void **)&sd->times,sizeof(float)*sd->ntimes)==0||
-         NewMemory((void **)&sd->compindex,sizeof(compinfo)*(1+sd->ntimes))==0
+         NewMemory((void **)&sd->compindex,sizeof(compdata)*(1+sd->ntimes))==0
          ){
         readslice("",ifile,UNLOAD,set_slicecolor,&error);
         *errorcode=1;
@@ -1377,7 +1377,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
   push_slice_loadstack(slicefilenumber);
 
   if(sd->volslice==1){
-    mesh *meshj;
+    meshdata *meshj;
 
     meshj = meshinfo + sd->blocknumber;
 
@@ -1397,7 +1397,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 #endif
   }
   else{
-    mesh *meshj;
+    meshdata *meshj;
 
     meshj = meshinfo + sd->blocknumber;
     meshj->slice_min[0]=1.0;
@@ -1671,7 +1671,7 @@ void update_slice_menu_show(void){
   int i;
 
   for(i=0;i<nsliceinfo;i++){
-    mesh *slicemesh;
+    meshdata *slicemesh;
     slicedata *sd;
 
     sd = sliceinfo + i;
@@ -1717,8 +1717,8 @@ void update_slice_menulabels(void){
     STRCAT(mslicei->menulabel2,sd->menulabel);
 
     if(nmeshes>1){
-      mesh *meshi;
-      mesh *slicemesh;
+      meshdata *meshi;
+      meshdata *slicemesh;
 
       slicemesh = meshinfo + sd->blocknumber;
       sprintf(label,", %s",slicemesh->label);
@@ -1743,7 +1743,7 @@ void update_slice_menulabels(void){
       STRCAT(sd->menulabel," (ZLIB)");
     }
     for(i=1;i<nsliceinfo;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       sdold = sliceinfo + sliceorderindex[i - 1];
       sd = sliceinfo + sliceorderindex[i];
@@ -1767,7 +1767,7 @@ void update_slice_menulabels(void){
         }
       }
       if(nmeshes>1){
-        mesh *slicemesh;
+        meshdata *slicemesh;
 
         slicemesh = meshinfo + sd->blocknumber;
         sprintf(label,", %s",slicemesh->label);
@@ -1813,7 +1813,7 @@ void update_vslice_menulabels(void){
     STRCPY(vsd->menulabel,mvslicei->menulabel);
     STRCPY(vsd->menulabel2,mvslicei->menulabel2);
     if(nmeshes>1){
-      mesh *slicemesh;
+      meshdata *slicemesh;
 
 	  slicemesh = meshinfo + sd->blocknumber;
       sprintf(label,", %s",slicemesh->label);
@@ -1837,7 +1837,7 @@ void update_vslice_menulabels(void){
         STRCAT(mvslicei->menulabel2,mvslicei->menulabel);
       }
       if(nmeshes>1){
-	    mesh *slicemesh;
+	    meshdata *slicemesh;
 
 		slicemesh = meshinfo + sd->blocknumber;
         sprintf(label,", %s",slicemesh->label);
@@ -1944,7 +1944,7 @@ void getgsliceparams(void){
   for(i = 0; i < npatchinfo;i++){
     int ii1, ii2, jj1, jj2, kk1, kk2;
     patchdata *patchi;
-    mesh *meshi;
+    meshdata *meshi;
 
     patchi = patchinfo + i;
     meshi = meshinfo + patchi->blocknumber;
@@ -2211,7 +2211,7 @@ void getsliceparams(void){
   for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
     int is1, is2, js1, js2, ks1, ks2;
-    mesh *meshi;
+    meshdata *meshi;
 
     sd = sliceinfo + i;
     meshi = meshinfo + sd->blocknumber;
@@ -2939,7 +2939,7 @@ void updatevslicetypes(void){
 
 void update_slice_contours(int slice_type_index, float line_min, float line_max, int nline_values){
   int j;
-  databounds *sb;
+  boundsdata *sb;
   int contours_gen=0;
   float dval;
 
@@ -2951,7 +2951,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
   sb = slicebounds + slice_type_index;
   for(j=0;j<nsliceinfo;j++){
     slicedata *sd;
-    mesh *meshi;
+    meshdata *meshi;
     int nx, ny, nz;
     int ibar, jbar, kbar;
     float *xplt, *yplt, *zplt;
@@ -3175,7 +3175,7 @@ void updatesliceboundlabels(){
 
   for(i=0;i<nsliceinfo;i++){
     int j;
-    databounds *sb;
+    boundsdata *sb;
     slicedata *sd;
 
     sd = sliceinfo + i;
@@ -3191,7 +3191,7 @@ void setslicecolors(float smin, float smax,
                     slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
-  databounds *sb;
+  boundsdata *sb;
 
   slicetype=getslicetype(sd);
   sb = slicebounds + slicetype;
@@ -3216,7 +3216,7 @@ void setslicelabels(float smin, float smax,
                     slicedata *sd, int *errorcode){
   char *scale;
   int slicetype;
-  databounds *sb;
+  boundsdata *sb;
 
   slicetype=getslicetype(sd);
   sb = slicebounds + slicetype;
@@ -3263,7 +3263,7 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
   int ntimes;
   int iimin, iimax, jjmin, jjmax, kkmin, kkmax;
   char *iblank_node, *iblank_cell;
-  mesh *meshi;
+  meshdata *meshi;
 
   meshi = meshinfo + sd->blocknumber;
   iblank_node = meshi->c_iblank_node;
@@ -3640,7 +3640,7 @@ void update_gslice_planes(void){
 
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
     float vals[8],xx[2],yy[2],zz[2];
     float *xyzmin, *xyzmax;
@@ -3687,7 +3687,7 @@ void drawgslice_outline(void){
   if(show_gslice_triangles==1){
     glBegin(GL_LINES);
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int j;
 
       meshi = meshinfo + i;
@@ -3712,7 +3712,7 @@ void drawgslice_outline(void){
 
   if(show_gslice_triangulation==1){
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int j;
       float del;
 
@@ -3756,7 +3756,7 @@ void drawgslice_outline(void){
 
 /* ------------------ init_slice3d_texture ------------------------ */
 
-void init_slice3d_texture(mesh *meshi){
+void init_slice3d_texture(meshdata *meshi){
   GLint border_size=0;
   GLsizei nx, ny, nz;
 
@@ -3807,7 +3807,7 @@ void init_slice3d_texture(mesh *meshi){
 
 /* ------------------ update_slice3d_texture ------------------------ */
 
-void update_slice3d_texture(mesh *meshi, slicedata *slicei, float *valdata){
+void update_slice3d_texture(meshdata *meshi, slicedata *slicei, float *valdata){
   GLint xoffset=0,yoffset=0,zoffset=0;
   GLsizei nx, ny, nz, nxy;
   int slice_ny, slice_nz;
@@ -3845,9 +3845,9 @@ void update_slice3d_texture(mesh *meshi, slicedata *slicei, float *valdata){
 /* ------------------ drawgslice_dataGPU ------------------------ */
 
 void drawgslice_dataGPU(slicedata *slicei){
-  mesh *meshi;
+  meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float *boxmin, *boxmax;
 
@@ -3899,9 +3899,9 @@ void drawgslice_dataGPU(slicedata *slicei){
 /* ------------------ drawgslice_data ------------------------ */
 
 void drawgslice_data(slicedata *slicei){
-  mesh *meshi;
+  meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float del;
 
@@ -3951,9 +3951,9 @@ void drawgslice_data(slicedata *slicei){
 /* ------------------ drawvgslice_data ------------------------ */
 
 void drawvgslice_data(vslicedata *vslicei){
-  mesh *meshi;
+  meshdata *meshi;
   int j;
-  databounds *sb;
+  boundsdata *sb;
   float valmin, valmax;
   float del;
   slicedata *slicei;
@@ -4017,7 +4017,7 @@ void drawvolslice_texture(const slicedata *sd){
   char *iblank_embed;
   int plotx, ploty, plotz;
 
-  mesh *meshi;
+  meshdata *meshi;
 
   if(sd->volslice==1&&visx_all==0&&visy_all==0&&visz_all==0)return;
   meshi = meshinfo + sd->blocknumber;
@@ -4254,7 +4254,7 @@ void drawvolslice_terrain(const slicedata *sd){
   int nycell;
   char *iblank_embed;
 
-  mesh *meshi;
+  meshdata *meshi;
 
   meshi = meshinfo + sd->blocknumber;
 
@@ -4505,7 +4505,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
   char *iblank_cell, *iblank_embed;
   int incx=0, incy=0, incz=0;
 
-  mesh *meshi;
+  meshdata *meshi;
 
   float *rgb_ptr;
 
@@ -4819,7 +4819,7 @@ void drawvolslice(const slicedata *sd){
   char *iblank_x, *iblank_y, *iblank_z;
   char *iblank_embed;
 
-  mesh *meshi;
+  meshdata *meshi;
 
   float *rgb_ptr;
 
@@ -5029,7 +5029,7 @@ void drawvvolslice(const vslicedata *vd){
   slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
-  mesh *meshi;
+  meshdata *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
   int plotx, ploty, plotz;
   char *iblank;
@@ -5297,7 +5297,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
   float constval;
   slicedata *u, *v, *w,*sd;
   float vrange;
-  mesh *meshi;
+  meshdata *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
   int plotx, ploty, plotz;
 
@@ -5818,7 +5818,7 @@ void drawvvolslice_terrain(const vslicedata *vd){
   slicedata *u, *v, *w,*sd;
   float dx, dy, dz;
   float vrange;
-  mesh *meshi;
+  meshdata *meshi;
   float *xplttemp,*yplttemp,*zplttemp;
   char *iblank;
   int nx, ny, nxy;
@@ -6173,7 +6173,7 @@ void init_Slicedata(void){
   int i, j, k, ii;
   float *xplt, *yplt, *zplt;
   slicedata *sd;
-  mesh *meshi;
+  meshdata *meshi;
   char *ext;
   char flabel[256];
 
@@ -6417,7 +6417,7 @@ int getsliceheader(char *comp_file, char *size_file, int compression_type,
 
 int getslicecompresseddata(char *file,
                             int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            float *times_local, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax){
   int returnval;
 
   returnval=getslicezlibdata(file,set_tmin,set_tmax,tmin_local,tmax_local,ncompressed,sliceskip,nsliceframes,
@@ -6429,7 +6429,7 @@ int getslicecompresseddata(char *file,
 
 int getslicezlibdata(char *file,
                             int set_tmin, int set_tmax, float tmin_local, float tmax_local, int ncompressed, int sliceskip, int nsliceframes,
-                            float *times_local, unsigned char *compressed_data, compinfo *compindex, float *valmin, float *valmax){
+                            float *times_local, unsigned char *compressed_data, compdata *compindex, float *valmin, float *valmax){
   FILE *stream;
   int count, ns;
   unsigned char *cd;
@@ -6782,7 +6782,7 @@ float get_texture_index(float *xyz){
 
   float *slicedata0;
   float valmin, valmax;
-  mesh *valmesh;
+  meshdata *valmesh;
 
   slicedata0 = gslicedata;
   valmin = gslice_valmin;
@@ -6865,7 +6865,7 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   float val;
   int ijk;
 
-  mesh *valmesh;
+  meshdata *valmesh;
 
   valmesh = meshinfo + sd->blocknumber;
 

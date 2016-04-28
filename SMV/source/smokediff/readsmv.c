@@ -13,7 +13,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   int igrid,ipdim;
   int islice,iplot3d,iboundary;
   char buffer[255];
-  mesh *meshinfo=NULL;
+  meshdata *meshinfo=NULL;
   slice *sliceinfo=NULL;
   boundary *boundaryinfo=NULL;
   plot3d *plot3dinfo=NULL;
@@ -75,7 +75,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   // allocate memory for mesh info
 
   if(nmeshes>0&&nmeshes==ipdim){
-    NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
+    NewMemory((void **)&meshinfo,nmeshes*sizeof(meshdata));
   }
   smvcase->meshinfo = meshinfo;
   smvcase->nmeshes = nmeshes;
@@ -135,7 +135,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"GRID") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       float *xp, *yp, *zp;
       int ibar, jbar, kbar;
 
@@ -166,7 +166,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PDIM") == 1){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+ipdim;
       ipdim++;
@@ -186,7 +186,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNX")==1){
       float *xpltcopy, *xplt;
       int ibar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -232,7 +232,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNY")==1){
       float *ypltcopy, *yplt;
       int jbar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -276,7 +276,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNZ")==1){
       float *zpltcopy,*zplt;
       int kbar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -349,7 +349,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PL3D") == 1){
-      mesh *plot3dmesh;
+      meshdata *plot3dmesh;
       plot3d *plot3di;
       float time_local;
       int meshnumber=1;
@@ -423,7 +423,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       FILE_SIZE filesize;
       slice *slicei;
       int meshnumber=0;
-      mesh *slicemesh;
+      meshdata *slicemesh;
       char full_file[1024];
 
       len=strlen(buffer);
@@ -517,7 +517,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       FILE_SIZE filesize;
       boundary *boundaryi;
       int meshnumber=0;
-      mesh *boundarymesh;
+      meshdata *boundarymesh;
       char full_file[1024];
 
       len=strlen(buffer);

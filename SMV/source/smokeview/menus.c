@@ -1322,7 +1322,7 @@ void OptionMenu(int value){
 /* ------------------ Get_Next_View_Label ------------------------ */
 
 void Get_Next_View_Label(char *label){
-  camera *ca;
+  cameradata *ca;
   int i;
 
   for(i=1;;i++){
@@ -1423,7 +1423,7 @@ void RenderState(int onoff){
 void RenderMenu(int value){
   slicedata *sd;
   int i,n;
-  mesh *meshi;
+  meshdata *meshi;
 
   updatemenu=1;
   if(value>=11000)return;
@@ -2404,7 +2404,7 @@ void LoadUnloadMenu(int value){
       readpatch(i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      readpart("",i,UNLOAD,FREE_PARTDATA,&errorcode);
+      readpart("",i,UNLOAD,PARTDATA,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
@@ -2487,7 +2487,7 @@ void LoadUnloadMenu(int value){
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].loaded==1){
         partinfo[i].reload=1;
-        readpart(partinfo[i].file,i,UNLOAD,FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file,i,UNLOAD,PARTDATA,&errorcode);
       }
       else{
         partinfo[i].reload=0;
@@ -2496,12 +2496,12 @@ void LoadUnloadMenu(int value){
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file, i, UNLOAD, PARTDATA,&errorcode);
       }
     }
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].reload==1){
-        readpart(partinfo[i].file, i, LOAD, FREE_PARTDATA,&errorcode);
+        readpart(partinfo[i].file, i, LOAD, PARTDATA,&errorcode);
       }
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
@@ -2708,7 +2708,7 @@ void EvacMenu(int value){
 
       parti=partinfo + i;
       if(parti->evac==0)continue;
-      readpart(parti->file, i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
     }
     npartframes_max=get_min_partframes();
     for(i=0;i<npartinfo;i++){
@@ -2717,7 +2717,7 @@ void EvacMenu(int value){
       parti=partinfo + i;
       if(parti->evac==0)continue;
       ReadEvacFile=1;
-      readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
+      readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADFILE\n");
         fprintf(scriptoutstream," %s\n",parti->file);
@@ -2729,7 +2729,7 @@ void EvacMenu(int value){
   if(value>=0){
     ReadEvacFile=1;
     npartframes_max=get_min_partframes();
-    readpart(partinfo[value].file, value, LOAD, FREE_PARTDATA,&errorcode);
+    readpart(partinfo[value].file, value, LOAD, PARTDATA,&errorcode);
     if(scriptoutstream!=NULL){
       fprintf(scriptoutstream,"LOADFILE\n");
       fprintf(scriptoutstream," %s\n",partinfo[value].file);
@@ -2740,7 +2740,7 @@ void EvacMenu(int value){
 
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
   updatemenu=1;
@@ -2952,13 +2952,13 @@ void LoadParticleMenu(int value){
       fprintf(scriptoutstream," %s\n",partfile);
     }
     npartframes_max=get_min_partframes();
-    readpart(partfile, value, LOAD, FREE_PARTDATA,&errorcode);
+    readpart(partfile, value, LOAD, PARTDATA,&errorcode);
   }
   else{
     if(value==-1){
       for(i=0;i<npartinfo;i++){
         if(partinfo[i].evac==1)continue;
-        readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+        readpart("", i, UNLOAD, PARTDATA,&errorcode);
       }
     }
     else{
@@ -2971,14 +2971,14 @@ void LoadParticleMenu(int value){
         for(i = 0; i<npartinfo; i++){
           parti = partinfo+i;
           if(parti->evac==1)continue;
-          readpart(parti->file, i, UNLOAD, FREE_PARTDATA, &errorcode);
+          readpart(parti->file, i, UNLOAD, PARTDATA, &errorcode);
         }
       }
       for(i=0;i<npartinfo;i++){
         parti = partinfo + i;
         if(parti->evac==1)continue;
         if(parti->loaded==0&&value==PARTFILE_RELOADALL)continue;
-        readpart(parti->file, i, LOAD, FREE_PARTDATA,&errorcode);
+        readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       }
       force_redisplay=1;
       Update_Framenumber(0);
@@ -3096,12 +3096,12 @@ void UnloadEvacMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
+    readpart("", value, UNLOAD, PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==0)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
 }
@@ -3114,12 +3114,12 @@ void UnloadPartMenu(int value){
   updatemenu=1;
   glutPostRedisplay();
   if(value>=0){
-    readpart("", value, UNLOAD, FREE_PARTDATA,&errorcode);
+    readpart("", value, UNLOAD, PARTDATA,&errorcode);
   }
   else{
     for(i=0;i<npartinfo;i++){
       if(partinfo[i].evac==1)continue;
-      readpart("", i, UNLOAD, FREE_PARTDATA,&errorcode);
+      readpart("", i, UNLOAD, PARTDATA,&errorcode);
     }
   }
 }
@@ -3255,7 +3255,7 @@ void ShowVolSmoke3DMenu(int value){
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + value;
@@ -3269,7 +3269,7 @@ void ShowVolSmoke3DMenu(int value){
   }
   else if(value==HIDE_ALL){  // hide all
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -3283,7 +3283,7 @@ void ShowVolSmoke3DMenu(int value){
   }
   else if(value==SHOW_ALL){  // show all
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -3310,7 +3310,7 @@ void UnLoadVolSmoke3DMenu(int value){
   if(value<0){
     if(value==UNLOAD_ALL){
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
 
         meshi = meshinfo + i;
@@ -3323,7 +3323,7 @@ void UnLoadVolSmoke3DMenu(int value){
     }
   }
   else{
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     slicedata *fireslice, *smokeslice;
 
@@ -3347,7 +3347,7 @@ void LoadVolSmoke3DMenu(int value){
   updatemenu=1;
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     slicedata *fireslice, *smokeslice;
 
@@ -4541,9 +4541,6 @@ void BlockageMenu(int value){
      visBlocks=value;
      update_trainer_outline();
      break;
-   case visSmoothBLOCKSolid:
-     smooth_block_solid = 1 - smooth_block_solid;
-     break;
    case visBLOCKNormal:
    case visBLOCKOutline:
    case visBLOCKHide:
@@ -4560,18 +4557,8 @@ void BlockageMenu(int value){
    case BLOCKtexture_cad:
      visCadTextures=1-visCadTextures;
      break;
-   case visBLOCKSmoothAsNormal:
-     visSmoothAsNormal = 1 - visSmoothAsNormal;
-     break;
    case visBLOCKTransparent:
      visTransparentBlockage=1-visTransparentBlockage;
-     break;
-   case SMOOTH_BLOCKAGES:
-     menusmooth=1;
-     updatesmoothblocks=1;
-     break;
-   case SMOOTH_ATSTART:
-     sb_atstart=1-sb_atstart;
      break;
    default:
      if(value<0){
@@ -4950,7 +4937,7 @@ int get_total_vents(void){
   int i;
 
   for(i = 0; i < nmeshes; i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     ntotal_vents += meshi->nvents;
@@ -5048,7 +5035,7 @@ updatemenu=0;
 
   nvolsmoke3dloaded=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -5433,15 +5420,6 @@ updatemenu=0;
 /* --------------------------------blockage menu -------------------------- */
 
   CREATEMENU(blockagemenu,BlockageMenu);
-  if(use_menusmooth==1){
-    if(sb_atstart==1){
-      glutAddMenuEntry(_("*Smooth blockages at startup"),SMOOTH_ATSTART);
-    }
-    else{
-      glutAddMenuEntry(_("Smooth blockages at startup"),SMOOTH_ATSTART);
-    }
-    glutAddMenuEntry(_("Smooth blockages now"),SMOOTH_BLOCKAGES);
-  }
   glutAddMenuEntry(_("View Method:"),MENU_DUMMY);
   if(visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
     glutAddMenuEntry(_("   *Defined in input file"),visBLOCKAsInput);
@@ -5449,24 +5427,8 @@ updatemenu=0;
    else{
     glutAddMenuEntry(_("   Defined in input file"),visBLOCKAsInput);
   }
-  if(use_menusmooth==1){
-    if(smooth_block_solid==1){
-      glutAddMenuEntry(_("       *Smooth blockages drawn opaque"),visSmoothBLOCKSolid);
-    }
-    else{
-      glutAddMenuEntry(_("       Smooth blockages drawn opaque"),visSmoothBLOCKSolid);
-    }
-  }
   if(visBlocks==visBLOCKNormal||visBlocks==visBLOCKSolidOutline){
     glutAddMenuEntry(_("   *Solid"),visBLOCKNormal);
-    if(nsmoothblocks>0){
-      if(visSmoothAsNormal==1){
-         glutAddMenuEntry(_("      Smooth"),visBLOCKSmoothAsNormal);
-      }
-      else{
-         glutAddMenuEntry(_("      *Smooth"),visBLOCKSmoothAsNormal);
-      }
-    }
     if(ntransparentblocks>0){
       if(visTransparentBlockage==1){
          glutAddMenuEntry(_("      *Transparent"),visBLOCKTransparent);
@@ -5564,8 +5526,8 @@ updatemenu=0;
       glutAddMenuEntry(_("   Cad"),BLOCKlocation_cad);
     }
     {
-      cadgeom *cd;
-      cadlook *cdi;
+      cadgeomdata *cd;
+      cadlookdata *cdi;
       int showtexturemenu;
 
       showtexturemenu=0;
@@ -6754,7 +6716,7 @@ updatemenu=0;
 /* --------------------------------iso show menu -------------------------- */
 
     if(nisoinfo>0&&ReadIsoFile==1){
-      mesh *hmesh;
+      meshdata *hmesh;
       isodata *iso2;
       int ii;
 
@@ -7165,7 +7127,7 @@ updatemenu=0;
       glutAddMenuEntry("-",MENU_DUMMY);
     }
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
       char menulabel[1024];
 
@@ -7211,7 +7173,7 @@ updatemenu=0;
   CREATEMENU(resetmenu,ResetMenu);
   {
     char line[256];
-    camera *ca;
+    cameradata *ca;
 
     if(trainer_mode==1){
       if(visBlocks==visBLOCKOutline){
@@ -8331,7 +8293,7 @@ updatemenu=0;
 
               STRCPY(mlabel,sd->label.longlabel);
               if(ii==0&&sd->mesh_type>0||(ii>0&&sd->mesh_type!=sdm1->mesh_type)){
-                sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
+                sprintf(mlabel2,"*** Evac type %i meshdata ***",sd->mesh_type);
                 glutAddMenuEntry(mlabel2,MENU_DUMMY);
               }
               glutAddSubMenu(mlabel,loadsubvslicemenu[nloadsubvslicemenu]);
@@ -8620,7 +8582,7 @@ updatemenu=0;
           STRCPY(mlabel,sd->label.longlabel);
           if(i==0&&sd->mesh_type>0||(i>0&&sd->mesh_type!=sdim1->mesh_type)){
             if(sd->menu_show==1){
-              sprintf(mlabel2,"*** Evac type %i mesh ***",sd->mesh_type);
+              sprintf(mlabel2,"*** Evac type %i meshdata ***",sd->mesh_type);
               glutAddMenuEntry(mlabel2,MENU_DUMMY);
             }
           }
@@ -8649,7 +8611,7 @@ updatemenu=0;
         glutAddMenuEntry(vlabel,UNLOAD_ALL);
       }
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
 
         meshi = meshinfo + i;
@@ -8670,7 +8632,7 @@ updatemenu=0;
         glutAddMenuEntry("-",MENU_DUMMY);
       }
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
         volrenderdata *vr;
         char menulabel[1024];
 

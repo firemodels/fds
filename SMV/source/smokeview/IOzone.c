@@ -904,7 +904,7 @@ void fill_zonedata(int izone_index){
   if(zoneodl!=NULL)odl0 = zoneodl + izone_index*nrooms;
   if(zoneodu!=NULL)odu0 = zoneodu + izone_index*nrooms;
   for(ivent=0;ivent<nzhvents+nzvvents+nzmvents;ivent++){
-    zvent *zventi;
+    zventdata *zventi;
     int islab;
 
     zventi = zventinfo + ivent;
@@ -1104,7 +1104,7 @@ void drawroomgeom(void){
   if(visVents==1){
     glLineWidth(ventlinewidth);
     for(i=0;i<nzvents;i++){
-      zvent *zvi;
+      zventdata *zvi;
       float x1, x2, y1, y2, z1, z2;
 
       zvi = zventinfo + i;
@@ -1175,7 +1175,7 @@ void getzoneventbounds(void){
   int i;
 
   for(i=0;i<nzvents;i++){
-    zvent *zvi;
+    zventdata *zvi;
 
     zvi = zventinfo + i;
     zvi->g_vmax=-1000000000.0;
@@ -1185,7 +1185,7 @@ void getzoneventbounds(void){
     fill_zonedata(izone);
     for(i=0;i<nzvents;i++){
       int j;
-      zvent *zvi;
+      zventdata *zvi;
       float zelev[NELEV_ZONE];
 
       zvi = zventinfo + i;
@@ -1200,7 +1200,7 @@ void getzoneventbounds(void){
   }
   zone_maxventflow=0.0;
   for(i=0;i<nzvents;i++){
-    zvent *zvi;
+    zventdata *zvi;
 
     zvi = zventinfo + i;
     if(zvi->vent_type==VFLOW_VENT||zvi->vent_type==MFLOW_VENT)continue;
@@ -1221,7 +1221,7 @@ void drawventdataPROFILE(void){
 
   for(i=0;i<nzvents;i++){
     int j;
-    zvent *zvi;
+    zventdata *zvi;
     float zelev[NELEV_ZONE];
 
     zvi = zventinfo + i;
@@ -1233,7 +1233,7 @@ void drawventdataPROFILE(void){
   }
   factor = 0.1*zone_ventfactor/zone_maxventflow;
   for(i=0;i<nzvents;i++){
-    zvent *zvi;
+    zventdata *zvi;
     int j;
     float zelev[NELEV_ZONE];
     float *vcolor1,*vcolor2;
@@ -1353,7 +1353,7 @@ void drawventdataSLAB(void){
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
   for(i = 0; i<nzvents; i++){
-    zvent *zvi;
+    zventdata *zvi;
     int islab;
     float xmid, ymid;
 
@@ -1855,7 +1855,7 @@ void drawfiredata(void){
           firedata *firei;
           roomdata *roomi;
           float deltaz;
-          mesh *meshi;
+          meshdata *meshi;
 
           // radius/plumeheight = .268 = atan(15 degrees)
           firei = fireinfo + i;
@@ -1877,7 +1877,7 @@ void drawfiredata(void){
         if(qdot>0.0f){
           firedata *firei;
           roomdata *roomi;
-          mesh *meshi;
+          meshdata *meshi;
 
           // radius/plumeheight = .268 = atan(15 degrees)
           firei = fireinfo + i;
