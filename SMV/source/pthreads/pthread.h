@@ -109,11 +109,6 @@
 /* Include everything */
 #endif
 
-#ifdef VS2015
-#ifndef HAVE_STRUCT_TIMESPEC
-#define HAVE_STRUCT_TIMESPEC 1
-#endif
-#endif
 #if defined(_UWIN)
 #   define HAVE_STRUCT_TIMESPEC 1
 #   define HAVE_SIGNAL_H        1

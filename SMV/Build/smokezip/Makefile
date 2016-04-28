@@ -25,7 +25,7 @@ obj =    main.o CNV3dsmoke.o CNVboundary.o CNVpart.o CNVplot3d.o CNVslice.o asse
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
-main.obj: CFLAGS = -Od /nologo -D WIN32 -D pp_WIN_INTEL
+main.obj: CFLAGS = -Od /nologo -D WIN32 -D pp_WIN_INTEL $(OPT)
 
 #*** General Purpose Rules ***
 

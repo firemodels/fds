@@ -8,9 +8,8 @@ call ..\..\..\..\Utilities\Scripts\setup_intel_compilers.bat
 
 set OPT=
 if  "x%VS140COMNTOOLS%" == "x" goto endif2
-  set OPT=-DHAVE_SNPRINTF
+  set OPT=-DHAVE_SNPRINTF -DHAVE_STRUCT_TIMESPEC
 :endif2
-
 
 Title Building smokezip for 64 bit Windows
 

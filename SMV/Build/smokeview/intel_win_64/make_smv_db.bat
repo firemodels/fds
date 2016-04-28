@@ -15,9 +15,8 @@ if "%release%" == "-r" goto endif
 :endif
 set OPT=
 if  "x%VS140COMNTOOLS%" == "x" goto endif2
-  set OPT=-DHAVE_SNPRINTF
+  set OPT=-DHAVE_SNPRINTF -DHAVE_STRUCT_TIMESPEC
 :endif2
-
 
 erase *.obj *.mod
 make -j 4 SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG% %OPT%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db > compile.out 2>&1
