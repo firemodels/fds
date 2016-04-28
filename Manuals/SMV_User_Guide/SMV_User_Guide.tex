@@ -5794,10 +5794,6 @@ should be used to render images.  (default: 1)
 
 \hitem{RENDEROPTION}\ Records the option used to render images.
 
-\hitem{SBATSTART}\ Specifies that if smooth blockages are present in a
-simulation that they should be
-smoothed when Smokeview starts up.
-
 \hitem{SENSORRELSIZE}\ Specifies a scaling factor that is applied when
 drawing all sensors.  (default: 1.0)
 
@@ -5872,10 +5868,6 @@ keyword described in subsection \ref{subsect_features}. (default:
 \hitem{SHOWMEMLOAD}\ Specifies (when run on a PC) whether a label
 giving the memory used should be drawn (1) or not drawn (0).
 (default: 0)
-
-\hitem{SHOWNORMALWHENSMOOTH}\ Specifies that smooth blocks
-should be drawn as normal blocks (1) or drawn as smooth
-blocks (0). (default: 0)
 
 \hitem{SHOWOPENVENTS}\ Specifies that open vents should be drawn
 (1) or not drawn (0).  (default: 0)
@@ -5955,9 +5947,6 @@ the four walls (four vertical bounding surfaces) should be drawn (1) or not draw
 
 \hitem{SMOKERTHICK}\ When the GPU is used to visualize smoke, this parameter specifies a
 relative thickness scaling factor.
-
-\hitem{SMOOTHBLOCKSOLID}\  Specifies that smooth blockages should
-be drawn as regular rectangular blockages: (default: 0)
 
 \hitem{STARTUPVIEW}Used by Smokeview to record the view to be
 displayed at startup (as defined in a previous Smokeview run).
@@ -6318,7 +6307,7 @@ to follow (values follow)\\n$>$0 - use n'th color table entry}\\  \hline
 
 blocktype & integer &
 \tabentry{Defines how the blockage is drawn.\\ -1 - use surface to obtain
-blocktype\\0 - regular block\\2 - outline\\ 3 - smooth}\\  \hline
+blocktype\\0 - regular block\\2 - outline}\\  \hline
 
 \parbox[c]{1.0in}{red, green, blue\\alpha}\ & float &
 \tabentry{Each color value ranges from 0.0 to 1.0 .  The alpha {\em color}\
