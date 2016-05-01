@@ -875,9 +875,21 @@ int lua_getcolorbarindex(lua_State *L) {
     return 1;
 }
 
+int lua_set_slice_in_obst(lua_State *L) {
+    int setting = lua_toboolean(L, 1);
+    set_slice_in_obst(setting);
+    return 0;
+}
+
+int lua_get_slice_in_obst(lua_State *L) {
+    int setting = get_slice_in_obst();
+    lua_pushboolean(L, setting);
+    return 1;
+}
+
 int lua_settimebarvisibility(lua_State *L) {
     int setting = lua_toboolean(L, 1);
-    settimebarvisibility(setting);
+    set_slice_in_obst(setting);
     return 0;
 }
 
@@ -1169,6 +1181,8 @@ void initLua() {
 	lua_register(L, "setcolorbarindex", lua_setcolorbarindex);
 	lua_register(L, "getcolorbarindex", lua_getcolorbarindex);
 
+    lua_register(L, "set_slice_in_obst", lua_set_slice_in_obst);
+    lua_register(L, "get_slice_in_obst", lua_get_slice_in_obst);
     lua_register(L, "settimebarvisibility", lua_settimebarvisibility);
     lua_register(L, "gettimebarvisibility", lua_gettimebarvisibility);
     lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);

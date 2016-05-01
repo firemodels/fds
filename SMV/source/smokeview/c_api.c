@@ -687,6 +687,22 @@ void settime(float timeval) {
          global_times[itimes], itimes);
 }
 
+void set_slice_in_obst(int setting) {
+	show_slice_in_obst = setting;
+	if(show_slice_in_obst==0)PRINTF("Not showing slices witin blockages.\n");
+  if(show_slice_in_obst==1)PRINTF("Showing slices within blockages.\n");
+  // updateslicefilenum();
+  // plotstate=getplotstate(DYNAMIC_PLOTS);
+	//
+  // updateglui();
+  // updateslicelistindex(slicefilenum);
+  // Update_Show();
+}
+
+int get_slice_in_obst() {
+	return show_slice_in_obst;
+}
+
 void settimebarvisibility(int setting) {
   visTimebar = setting;
   if(visTimebar==0)PRINTF("Time bar hidden\n");
@@ -1392,10 +1408,7 @@ void set_sceneclip_z_max(int flag, float value) {
 void setrenderdir(const char *dir) {
     printf("c_api: setting renderdir to: %s\n", dir);
 	if(dir!=NULL&&strlen(dir)>0){
-		int dirlen = strlen(dir);
-		char newdir[dirlen+1];
-		strcpy(newdir,dir);
-		script_dir_path=newdir;
+		script_dir_path=dir;
         if(can_write_to_dir(script_dir_path)==0){
           fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
         }

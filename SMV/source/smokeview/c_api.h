@@ -25,6 +25,8 @@ void loadboundaryfile(const char *filepath);
 void loadboundary(const char *filepath);
 void label(const char *label);
 void load3dsmoke(const char *smoke_type);
+void set_slice_in_obst(int setting);
+int get_slice_in_obst();
 void settimebarvisibility(int setting);
 int gettimebarvisibility();
 void toggletimebarvisibility();
