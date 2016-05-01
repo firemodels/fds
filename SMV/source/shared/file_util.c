@@ -1,7 +1,7 @@
 #define IN_FILE
 
 #include "options.h"
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -85,7 +85,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   else{
     ASSERT(0);
   }
-  
+
   if(streamout==NULL){
     FREEMEMORY(full_file_out);
     fclose(streamin);
@@ -94,7 +94,7 @@ void copyfile(char *destdir, char *file_in, char *file_out, int mode){
   PRINTF("  Copying %s to %s\n",file_in,file_out);
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,streamin);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
@@ -242,7 +242,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in1);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
@@ -253,7 +253,7 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 
   for(;;){
     int end_of_file;
-       
+
     end_of_file=0;
     chars_in=fread(buffer,1,FILE_BUFFER,stream_in2);
     if(chars_in!=FILE_BUFFER)end_of_file=1;
@@ -298,7 +298,7 @@ int can_write_to_dir(char *dir){
   int return_val=0;
 
   if(dir==NULL||strlen(dir)==0)return 0;
-  
+
   file_name_ptr=randstr(file_name,20);
   if(file_name_ptr==NULL)return 0;
 
@@ -313,7 +313,7 @@ int can_write_to_dir(char *dir){
   }
 
   strcat(full_name,file_name_ptr);
-  
+
   stream=fopen(full_name,"wb");
   if(stream!=NULL){
     fclose(stream);
@@ -422,7 +422,7 @@ int get_nfilelist(const char *path, char *key){
   struct dirent *entry;
   DIR *dp;
   int maxfiles=0;
- 
+
   dp = opendir(path);
   if(dp == NULL){
     perror("opendir");
@@ -448,7 +448,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
 
   // DT_DIR - is a diretory
   // DT_REG - is a regular file
- 
+
   dp = opendir(path);
   if(dp == NULL){
     perror("opendir");
@@ -706,7 +706,7 @@ char *which(char *progname){
 #endif
 
   NewMemory((void **)&fullprogname, (unsigned int)(strlen(progname)+4+strlen(dirsep)+strlen(pathlist)+1));
-        
+
   dir=strtok(pathlistcopy,pathsep);
   while(dir!=NULL&&strlen(dir)>0){
     strcpy(fullprogname,dir);

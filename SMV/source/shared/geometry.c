@@ -402,7 +402,7 @@ void getVertInfo(geomdata *geom){
     verti->verts=NULL;
     verti->type=GEOM_INTERIOR;
   }
-  
+
   // count triangles connected to each vertex
 
   for(i=0;i<geom->ntris;i++){

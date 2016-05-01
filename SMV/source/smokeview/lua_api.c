@@ -17,6 +17,10 @@
 lua_State* L;
 int lua_displayCB(lua_State *L);
 
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
 /* ------------------ load_script ------------------------ */
 // There are two options for scripting, Lua and SSF. Which is run is set here
 // based on the commandline arguments. If either (exclusive) of these values

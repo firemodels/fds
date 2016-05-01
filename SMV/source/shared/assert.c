@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* ------------------ ResizeWindow ------------------------ */
+/* ------------------ _Assert ------------------------ */
 
 void _Assert(char *filename, unsigned linenumber){
   /*! \fn void _Assert(char *filename, unsigned linenumber)

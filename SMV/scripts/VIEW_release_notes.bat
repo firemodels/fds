@@ -17,5 +17,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\for_bundle
-start explorer readme.html
+cd %userprofile%\FDS-SMVwebpages
+start explorer smv_readme.html

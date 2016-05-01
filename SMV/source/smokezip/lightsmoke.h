@@ -28,7 +28,7 @@ typedef struct {
 //************* headers
 //***********************
 
-void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3], 
+void setup_radiancemap(radiancedata *radianceinfo, int ijkbar[3], float xyzbar0[3], float xyzbar[3], float dxyz[3],
                                unsigned char *radiance, unsigned char *opacity);
 void build_radiancemap2(radiancedata *radianceinfo);
 void build_radiancemap(radiancedata *radianceinfo);

@@ -37,11 +37,11 @@ if %useinstalled% == 1 (
   set SMOKEVIEW=smokeview
   set WIND2FDS=wind2fds
 ) else (
-  set BACKGROUND=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
-  set SMOKEDIFF=%SVNROOT%\Utilities\smokediff\intel_win%size%\smokediff_win%size%.exe
-  set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win%size%\smokeview_win%TEST%%size%%DEBUG%.exe -bindir %SVNROOT%\SMV\for_bundle
-  set  SMOKEZIP=%SVNROOT%\Utilities\smokezip\intel_win%size%\smokezip_win%size%.exe
-  set  WIND2FDS=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
+  set BACKGROUND=%SVNROOT%\SMV\Build\background\intel_win%size%\background.exe
+  set SMOKEDIFF=%SVNROOT%\SMV\Build\smokediff\intel_win%size%\smokediff_win%size%.exe
+  set SMOKEVIEW=%SVNROOT%\SMV\Build\smokeview\intel_win%size%\smokeview_win%TEST%%size%%DEBUG%.exe -bindir %SVNROOT%\SMV\for_bundle
+  set  SMOKEZIP=%SVNROOT%\SMV\Build\smokezip\intel_win%size%\smokezip_win%size%.exe
+  set  WIND2FDS=%SVNROOT%\SMV\Build\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 )
 
 call :is_file_installed %SMOKEVIEW%|| exit /b 1
@@ -56,12 +56,9 @@ set smvug="%SVNROOT%\Manuals\SMV_User_Guide"
 set smvvg="%SVNROOT%\Manuals\SMV_Verification_Guide"
 set summary="%SVNROOT%\Manuals\SMV_Summary"
 
-set RUNGEOM=call "%SCRIPT_DIR%\runsmv.bat"
 set QFDS=call "%SCRIPT_DIR%\runsmv.bat"
-set RUNTFDS=call "%SCRIPT_DIR%\runtsmv.bat"
-set RUNWFDS=call "%SCRIPT_DIR%\runsmv.bat"
 set RUNCFAST=call "%SCRIPT_DIR%\runsmv.bat"
-set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
+set SH2BAT=%SVNROOT%\SMV\Build\sh2bat\intel_win_64\sh2bat
 
 :: erase summary images
 

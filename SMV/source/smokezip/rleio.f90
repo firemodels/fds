@@ -7,7 +7,7 @@ USE RLE
 
   !*** header
   ! endian
-  ! fileversion, slice version 
+  ! fileversion, slice version
   ! global min max (used to perform conversion)
   ! i1,i2,j1,j2,k1,k2
 
@@ -71,7 +71,7 @@ OPEN(UNIT=10,FILE=RLEFILE,FORM='UNFORMATTED',STATUS='OLD',POSITION='APPEND')
 
 
 ! NOTE:  CVAL MUST BE DIMENSIONED AT LEAST AS LARGE AS Q (IE NQ)
-!        NRLE IS THE AMOUNT OF SPACE ACTUALLY USED 
+!        NRLE IS THE AMOUNT OF SPACE ACTUALLY USED
 !        DUE TO COMPRESSION)
 
 ! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv

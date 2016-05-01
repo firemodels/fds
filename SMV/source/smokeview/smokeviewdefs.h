@@ -7,11 +7,20 @@ void _Sniff_Errors(char *whereat);
 #define SNIFF_ERRORS(f)
 #endif
 
+#define PARTFILE_MAP  0
+#define PARTFILE_REMAP 1
+
+#define PARTFILE_LOADALL -11
+#define PARTFILE_RELOADALL -12
+
 #define FIRST_TIME 1
 #define NOT_FIRST_TIME 2
 
 #define SET_SLICECOLOR 0
 #define DEFER_SLICECOLOR 1
+
+#define PARTDATA 0
+#define HISTDATA 1
 
 #ifdef pp_SLICEDUP
 #define SLICEDUP_KEEPALL 0
@@ -344,14 +353,17 @@ void _Sniff_Errors(char *whereat);
 #define BOX_CLIPPLANES 0
 
 #define DOWN_Y 0
-#define UP_X   1 
+#define UP_X   1
 #define UP_Y   2
-#define DOWN_X 3 
+#define DOWN_X 3
 #define DOWN_Z 4
 #define UP_Z   5
 
 #define GEOM_STATIC 0
 #define GEOM_DYNAMIC 1
+
+#define GEOM_UPDATE_ALL 0
+#define GEOM_UPDATE_NORMALS 1
 
 #define NO_PLOTS 0
 #define STATIC_PLOTS 1
@@ -396,7 +408,6 @@ void _Sniff_Errors(char *whereat);
 #define BLOCK_regular 0
 #define BLOCK_texture 1
 #define BLOCK_outline 2
-#define BLOCK_smooth  3
 #define BLOCK_hidden -2
 
 #define BLOCK_face 0
@@ -409,12 +420,9 @@ void _Sniff_Errors(char *whereat);
 #define visBLOCKNormal 8
 #define visBLOCKSolidOutline 12
 //#define visBLOCKFacet 3
-//#define visBLOCKSmooth 4
 #define visBLOCKOutline 2
 #define visBLOCKHide 0
-#define visBLOCKSmoothAsNormal 9
 #define visBLOCKTransparent 10
-#define visSmoothBLOCKSolid 11
 #define visBLOCKAddOutline 14
 #define visBLOCKOnlyOutline 15
 #define visBLOCKOutlineColor 16
@@ -431,8 +439,6 @@ void _Sniff_Errors(char *whereat);
 #define BLOCKlocation_exact 6
 #define BLOCKlocation_cad 7
 #define BLOCKtexture_cad 31
-#define SMOOTH_BLOCKAGES 101
-#define SMOOTH_ATSTART 102
 
 #define WALL_1 0
 #define WALL_3 1
@@ -470,7 +476,7 @@ void _Sniff_Errors(char *whereat);
 #define VISIBLE   1
 #define INVISIBLE 0
 
-#define NBUCKETS 1000000 
+#define NBUCKETS 1000000
 
 #define MOVE 0
 #define STRETCH_BLACK 1
@@ -609,6 +615,9 @@ void _Sniff_Errors(char *whereat);
 #define LOAD 0
 #define UNLOAD 1
 #define RESETBOUNDS 2
+
+#define MAKE_SIZEFILE 0
+#define GET_DATA 1
 
 #define MAXPLOT3DVARS 6
 #define NRGB 12

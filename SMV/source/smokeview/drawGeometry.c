@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -8,7 +8,7 @@
 #include "update.h"
 #include "smokeviewvars.h"
 
-cadgeom *current_cadgeom;
+cadgeomdata *current_cadgeom;
 
 /* ------------------ DrawCircVentsApproxSolid ------------------------ */
 
@@ -21,7 +21,7 @@ void DrawCircVentsApproxSolid(int option){
   glBegin(GL_TRIANGLES);
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
     float *xplt, *yplt, *zplt;
 
     meshi = meshinfo + i;
@@ -59,7 +59,7 @@ void DrawCircVentsApproxSolid(int option){
 
               INCIRCLE(xx,(yy+yy2)/2.0,(zz+zz2)/2.0,in_circle);
               if(in_circle==NO)continue;
-              
+
               glVertex3f(xx, yy,zz);
               glVertex3f(xx,yy2,zz);
               glVertex3f(xx,yy2,zz2);
@@ -125,7 +125,7 @@ void DrawCircVentsApproxSolid(int option){
 
               INCIRCLE((xx+xx2)/2.0,(yy+yy2)/2.0,zz,in_circle);
               if(in_circle==NO)continue;
-              
+
               glVertex3f( xx, yy,zz);
               glVertex3f(xx2, yy,zz);
               glVertex3f(xx2,yy2,zz);
@@ -164,7 +164,7 @@ void DrawCircVentsApproxOutline(int option){
   glBegin(GL_LINES);
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
     float *xplt, *yplt, *zplt;
 
     meshi = meshinfo + i;
@@ -337,7 +337,7 @@ void DrawCircVentsExactSolid(int option){
   ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     for(j=0;j<meshi->ncvents;j++){
@@ -443,7 +443,7 @@ void DrawCircVentsExactOutline(int option){
   ASSERT(option==VENT_CIRCLE||option==VENT_RECTANGLE);
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     for(j=0;j<meshi->ncvents;j++){
@@ -567,7 +567,7 @@ void UpdateIndexColors(void){
   }
   for(i=0;i<nsurfinfo;i++){
     surfdata *surfi;
-    
+
     surfi = surfinfo + i;
     if(strcmp(surfi->surfacelabel,"INERT")==0){
       surfi->color=block_ambient2;
@@ -578,7 +578,7 @@ void UpdateIndexColors(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
@@ -621,7 +621,7 @@ void drawoutlines(void){
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
   for(i=0;i<noutlineinfo;i++){
-    outline *outlinei;
+    outlinedata *outlinei;
     float *xx1, *yy1, *zz1;
     float *xx2, *yy2, *zz2;
     int j;
@@ -697,8 +697,8 @@ void drawcbox(float x, float y, float z, float size){
 
 /* ------------------ get_blockvals ------------------------ */
 
-void get_blockvals(  float *xmin, float *xmax, 
-                     float *ymin, float *ymax, 
+void get_blockvals(  float *xmin, float *xmax,
+                     float *ymin, float *ymax,
                      float *zmin, float *zmax,
                      int *imin, int *jmin, int *kmin){
   blockagedata *bc;
@@ -748,11 +748,11 @@ void SetCVentDirs(void){
 
   Init_Circle(90,&cvent_circ);
   for(ii=0;ii<nmeshes;ii++){
-    mesh *meshi;
+    meshdata *meshi;
     int ibar, jbar;
     char *c_iblank;
     int iv;
- 
+
     meshi=meshinfo+ii;
 
     ibar = meshi->ibar;
@@ -764,7 +764,7 @@ void SetCVentDirs(void){
       int dir;
       int orien;
       float *boxmin, *boxmax;
-    
+
       cvi=meshi->cventinfo+iv;
       boxmin = cvi->boxmin;
       boxmax = cvi->boxmax;
@@ -941,7 +941,7 @@ void SetCVentDirs(void){
   // set up blanking arrays for circular vents
 
   for(ii=0;ii<nmeshes;ii++){
-    mesh *meshi;
+    meshdata *meshi;
     int iv,i,j,k;
     unsigned char *blank;
     float *xplt, *yplt, *zplt;
@@ -991,7 +991,7 @@ void SetCVentDirs(void){
           }
         }
       }
-      
+
       blank=cvi->blank;
       switch(cvi->dir){
       case DOWN_X:
@@ -1060,7 +1060,7 @@ void SetCVentDirs(void){
 
   LOCK_IBLANK
   for(ii = 0; ii < nmeshes; ii++){
-    mesh *meshi;
+    meshdata *meshi;
     int iv;
 
     meshi = meshinfo + ii;
@@ -1081,7 +1081,7 @@ void SetVentDirs(void){
   int ii;
 
   for(ii=0;ii<nmeshes;ii++){
-    mesh *meshi;
+    meshdata *meshi;
     float *xplttemp;
     float *yplttemp;
     float *zplttemp;
@@ -1277,7 +1277,7 @@ void SetVentDirs(void){
 
 /* ------------------ inblockage ------------------------ */
 
-int inblockage(const mesh *meshi,float x, float y, float z){
+int inblockage(const meshdata *meshi,float x, float y, float z){
   int i;
   float *xplt, *yplt, *zplt;
 
@@ -1306,7 +1306,7 @@ void freecadinfo(void){
     int i;
 
     for(i=0;i<ncadgeom;i++){
-      cadgeom *cd;
+      cadgeomdata *cd;
 
       cd = cadgeominfo + i;
       FREEMEMORY(cd->quad);
@@ -1366,7 +1366,7 @@ void calcQuadNormal(float *xyz, float *out){
 
 /* ------------------ readcadgeom ------------------------ */
 
-void readcadgeom(cadgeom *cd){
+void readcadgeom(cadgeomdata *cd){
   char buffer[255];
   float lastcolor[3];
   FILE *stream;
@@ -1466,9 +1466,9 @@ void readcadgeom(cadgeom *cd){
 
 int quadcompare( const void *arg1, const void *arg2 ){
   int i1, i2;
-  cadgeom *cd;
+  cadgeomdata *cd;
   cadquad *quadi, *quadj;
-  cadlook *cli, *clj;
+  cadlookdata *cli, *clj;
 
   cd=current_cadgeom;
 
@@ -1488,7 +1488,7 @@ int quadcompare( const void *arg1, const void *arg2 ){
 
 /* ------------------ readcad2geom ------------------------ */
 
-void readcad2geom(cadgeom *cd){
+void readcad2geom(cadgeomdata *cd){
   char buffer[255];
   FILE *stream;
   int nquads=0;
@@ -1518,10 +1518,10 @@ void readcad2geom(cadgeom *cd){
   }
 
   cd->cadlookinfo=NULL;
-  NewMemory((void **)&cd->cadlookinfo,cd->ncadlookinfo*sizeof(cadlook));
+  NewMemory((void **)&cd->cadlookinfo,cd->ncadlookinfo*sizeof(cadlookdata));
 
   for(i=0;i<cd->ncadlookinfo;i++){
-    cadlook *cdi;
+    cadlookdata *cdi;
     texturedata *texti;
     int errorcode;
     int ii;
@@ -1555,7 +1555,7 @@ void readcad2geom(cadgeom *cd){
     for(ii=0;ii<lenbuffer;ii++){
       if(buffer[ii]==',')buffer[ii]=' ';
     }
-    
+
     sscanf(buffer,"%i %f %f %f %f %f %f %f %f %f %f %i",
       &cdi->index,rrgb,rrgb+1,rrgb+2,
       &cdi->texture_width,&cdi->texture_height,
@@ -1563,7 +1563,7 @@ void readcad2geom(cadgeom *cd){
       t_origin,t_origin+1,t_origin+2,
       onesided
       );
-      
+
     rrgb[0]/=255.0;
     rrgb[1]/=255.0;
     rrgb[2]/=255.0;
@@ -1640,7 +1640,7 @@ void readcad2geom(cadgeom *cd){
     float *normal;
     int look_index;
     cadquad *quadi;
-    cadlook *cl;
+    cadlookdata *cl;
     float *xyzpoints;
     float time_show;
 
@@ -1730,16 +1730,16 @@ void update_cadtextcoords(cadquad *quadi){
 
 /* ------------------ drawcadgeom ------------------------ */
 
-void drawcadgeom(const cadgeom *cd){
+void drawcadgeom(const cadgeomdata *cd){
   int i;
   int last_colorindex=-999;
-  float *lastcolor; 
+  float *lastcolor;
   float rgbtemp[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
 
   lastcolor=rgbtemp;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  glEnable(GL_LIGHTING); 
+  glEnable(GL_LIGHTING);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_COLOR_MATERIAL);
@@ -1789,9 +1789,9 @@ void drawcadgeom(const cadgeom *cd){
 
 /* ------------------ drawcadgeom2 ------------------------ */
 
-void drawcad2geom(const cadgeom *cd, int trans_flag){
+void drawcad2geom(const cadgeomdata *cd, int trans_flag){
   int ii;
-  float *thiscolor,*lastcolor; 
+  float *thiscolor,*lastcolor;
   int thisonesided, lastonesided;
   int colorindex;
   texturedata *lasttexture;
@@ -1804,7 +1804,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
-  glEnable(GL_LIGHTING); 
+  glEnable(GL_LIGHTING);
   if(trans_flag==DRAW_TRANSPARENT)transparenton();
   glBegin(GL_QUADS);
   colorindex=0;
@@ -1865,13 +1865,13 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       lastonesided=thisonesided;
       glBegin(GL_QUADS);
     }
-  
+
     this_block_shininess = quadi->cadlookq->shininess;
     if(last_block_shininess!=this_block_shininess){
       last_block_shininess=this_block_shininess;
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&this_block_shininess);
     }
-    
+
     normal = quadi->normals;
 
     glNormal3fv(normal);
@@ -1881,7 +1881,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
     glVertex3fv(xyzpoint+9);
   }
   glEnd();
-  
+
   if(visCadTextures==1){
     glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,enable_texture_lighting? GL_MODULATE : GL_REPLACE);
@@ -1899,7 +1899,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       float *normal;
       cadquad *quadi;
       int i;
-    
+
       i=cd->order[ii];
       ASSERT(i>=0&&i<cd->nquads);
       quadi = cd->quad+i;
@@ -1909,11 +1909,11 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
       if(texti->loaded==0)continue;
 
       if(RectangleInFrustum(xyzpoint,xyzpoint+3,xyzpoint+6,xyzpoint+9)==0)continue;
-      
+
       txypoint = quadi->txypoints;
       normal = quadi->normals;
       thisonesided = quadi->cadlookq->onesided;
-    
+
       if(lasttexture!=texti || lastonesided!=thisonesided){
         glEnd();
         if(lasttexture!=texti){
@@ -1931,7 +1931,7 @@ void drawcad2geom(const cadgeom *cd, int trans_flag){
         }
         glBegin(GL_QUADS);
       }
-      
+
       this_block_shininess = quadi->cadlookq->shininess;
       if(last_block_shininess!=this_block_shininess){
         last_block_shininess=this_block_shininess;
@@ -1975,7 +1975,7 @@ void UpdateFaces(void){
   updatefaces=0;
   have_vents_int=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     facedata *faceptr;
     int j;
 
@@ -2022,15 +2022,15 @@ void UpdateFaces(void){
 
 /* ------------------ obst_or_vent2faces ------------------------ */
 
-void obst_or_vent2faces(const mesh *meshi,blockagedata *bc, 
+void obst_or_vent2faces(const meshdata *meshi,blockagedata *bc,
                         ventdata *vi, facedata *faceptr, int facetype){
   /*
-         
+
        7---------6
      /         /
    /         /
   4--------5
-                 
+
        3 ------  2
       /         /
     /         /
@@ -2073,34 +2073,34 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
   ASSERT(bc!=NULL&&vi==NULL||bc==NULL&&vi!=NULL);
   if(bc!=NULL){
     jend=6;
-    xminmax[0] = xplt[bc->ijk[IMIN]]; 
+    xminmax[0] = xplt[bc->ijk[IMIN]];
     xminmax[1] = xplt[bc->ijk[IMAX]];
-    yminmax[0] = yplt[bc->ijk[JMIN]]; 
+    yminmax[0] = yplt[bc->ijk[JMIN]];
     yminmax[1] = yplt[bc->ijk[JMAX]];
-    zminmax[0] = zplt[bc->ijk[KMIN]]; 
+    zminmax[0] = zplt[bc->ijk[KMIN]];
     zminmax[1] = zplt[bc->ijk[KMAX]];
 
-    xminmax2[0] = bc->xmin; 
+    xminmax2[0] = bc->xmin;
     xminmax2[1] = bc->xmax;
-    yminmax2[0] = bc->ymin; 
+    yminmax2[0] = bc->ymin;
     yminmax2[1] = bc->ymax;
-    zminmax2[0] = bc->zmin; 
+    zminmax2[0] = bc->zmin;
     zminmax2[1] = bc->zmax;
   }
   if(vi!=NULL){
     jend=1;
-    xminmax[0] = xplt[vi->imin]; 
+    xminmax[0] = xplt[vi->imin];
     xminmax[1] = xplt[vi->imax];
-    yminmax[0] = yplt[vi->jmin]; 
+    yminmax[0] = yplt[vi->jmin];
     yminmax[1] = yplt[vi->jmax];
-    zminmax[0] = zplt[vi->kmin]; 
+    zminmax[0] = zplt[vi->kmin];
     zminmax[1] = zplt[vi->kmax];
 
-    xminmax2[0] = vi->xmin; 
+    xminmax2[0] = vi->xmin;
     xminmax2[1] = vi->xmax;
-    yminmax2[0] = vi->ymin; 
+    yminmax2[0] = vi->ymin;
     yminmax2[1] = vi->ymax;
-    zminmax2[0] = vi->zmin; 
+    zminmax2[0] = vi->zmin;
     zminmax2[1] = vi->zmax;
   }
 
@@ -2121,7 +2121,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     faceptr->is_interior=0;
     faceptr->show_bothsides=0;
     faceptr->bc=NULL;
-    
+
     if(bc!=NULL){
       faceptr->bc=bc;
       faceptr->hidden=0;
@@ -2271,6 +2271,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       if(faceptr->kmin==faceptr->kmax){
         if(faceptr->kmin>0&&faceptr->kmin<meshi->kbar)faceptr->is_interior=1;
       }
+      faceptr->show_bothsides = show_bothsides_blockages;
     }
     if(vi!=NULL){
       faceptr->imin=vi->imin;
@@ -2296,7 +2297,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
     offset[YYY]=(float)0.0;
     offset[ZZZ]=(float)0.0;
     switch(faceptr->dir){
-     case DOWN_Y: 
+     case DOWN_Y:
        faceptr->normal[1]=(float)-1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = -meshi->vent_offset[YYY];
        faceptr->jmax=faceptr->jmin;
@@ -2308,7 +2309,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &zbar0;
        break;
-     case UP_X:    
+     case UP_X:
        faceptr->normal[0]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = meshi->vent_offset[XXX];
        faceptr->imin=faceptr->imax;
@@ -2320,7 +2321,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &ybar0;
        ystart = &zbar0;
        break;
-     case UP_Y:   
+     case UP_Y:
        faceptr->normal[1]=(float)1.0;
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[YYY] = meshi->vent_offset[YYY];
        faceptr->jmin=faceptr->jmax;
@@ -2332,7 +2333,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &zbar0;
        break;
-     case DOWN_X:  
+     case DOWN_X:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[XXX] = -meshi->vent_offset[XXX];
        xtex = yy;
        ytex = zz;
@@ -2344,7 +2345,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &ybar0;
        ystart = &zbar0;
        break;
-     case DOWN_Z: 
+     case DOWN_Z:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = -meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
@@ -2356,7 +2357,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
        xstart = &xbar0;
        ystart = &ybar0;
        break;
-     case UP_Z:   
+     case UP_Z:
        if(facetype==VENT_face&&vi!=NULL&&vi->dummy==0)offset[ZZZ] = meshi->vent_offset[ZZZ];
        xtex = xx;
        ytex = yy;
@@ -2392,7 +2393,7 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       float xvert, yvert, zvert;
 
       jjj = bfi[k];
-      
+
       xvert=xx[jjj]+offset[XXX];
       yvert=yy[jjj]+offset[YYY];
       zvert=zz[jjj]+offset[ZZZ];
@@ -2482,9 +2483,9 @@ void obst_or_vent2faces(const mesh *meshi,blockagedata *bc,
       ya_texture[3] = ya_texture[2];
 
       for(k=0;k<4;k++){
-        faceptr->approx_texture_coords[2*k]=xa_texture[k]/t_width; 
+        faceptr->approx_texture_coords[2*k]=xa_texture[k]/t_width;
         faceptr->approx_texture_coords[2*k+1]=ya_texture[k]/t_height;
-        faceptr->exact_texture_coords[2*k]=xe_texture[k]/t_width; 
+        faceptr->exact_texture_coords[2*k]=xe_texture[k]/t_width;
         faceptr->exact_texture_coords[2*k+1]=ye_texture[k]/t_height;
       }
     }
@@ -2516,7 +2517,7 @@ void set_cull_vis(void){
   }
   for(imesh=0;imesh<nmeshes;imesh++){
     int iport;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + imesh;
     for(iport=0;iport<meshi->ncullgeominfo;iport++){
@@ -2532,7 +2533,7 @@ void set_cull_vis(void){
       yy[1] = NORMALIZE_Y(culli->yend);
       zz[0] = NORMALIZE_Z(culli->zbeg);
       zz[1] = NORMALIZE_Z(culli->zend);
-      
+
       if(PointInFrustum(xx[0],yy[0],zz[0])==1){
         culli->vis=1;
         continue;
@@ -2704,9 +2705,9 @@ void UpdateFacelists(void){
   int n_textures, n_outlines;
   int n_normals_single, n_normals_double, n_transparent_double;
   int i;
-  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
+  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(updatehiddenfaces==1)UpdateHiddenFaces();
   updatefacelists=0;
@@ -2720,7 +2721,7 @@ void UpdateFacelists(void){
     glutPostRedisplay();
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int patchfilenum;
     int j;
     patchdata *patchi;
@@ -2863,7 +2864,6 @@ void UpdateFacelists(void){
           drawing_texture=1;
         }
 
-        if(drawing_smooth==1&&facej->type==BLOCK_smooth)continue;
         if(facej->transparent==0||drawing_blockage_transparent==0){
           if(drawing_texture==0){
             if(facej->show_bothsides==0){
@@ -2903,12 +2903,6 @@ void UpdateFacelists(void){
         break;
        case BLOCK_outline:
         meshi->face_outlines[n_outlines++]=facej;
-         break;
-       case BLOCK_smooth:
-         if(updatesmoothblocks!=0||visSmoothAsNormal==1){
-           if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
-           if(facej->show_bothsides==1)meshi->face_normals_double[n_normals_double++]=facej;
-         }
          break;
        case BLOCK_hidden:
          break;
@@ -3042,7 +3036,7 @@ void UpdateFacelists(void){
   }
   n_geom_triangles=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo  + i;
     n_geom_triangles += meshi->nface_textures+meshi->nface_normals_single+meshi->nface_normals_double;
@@ -3059,7 +3053,7 @@ void drawselect_faces(){
   glBegin(GL_QUADS);
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo + i;
     for(j=0;j<meshi->nbptrs;j++){
@@ -3149,7 +3143,7 @@ void draw_faces(){
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
       facedata **face_START;
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi=meshinfo + j;
@@ -3218,7 +3212,7 @@ void draw_faces(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi=meshinfo + j;
@@ -3287,7 +3281,7 @@ void draw_faces(){
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi = meshinfo + j;
@@ -3347,7 +3341,7 @@ void draw_faces(){
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi = meshinfo + j;
@@ -3395,7 +3389,7 @@ void draw_faces(){
       if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 
-    }    
+    }
     glDisable(GL_COLOR_MATERIAL);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -3447,11 +3441,11 @@ void draw_transparent_faces(){
   float up_color[4]={0.9,0.9,0.9,1.0};
   float down_color[4]={0.1,0.1,0.1,1.0};
   float highlight_color[4]={1.0,0.0,0.0,1.0};
-  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
+  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
   if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1))return;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(nface_transparent<=0&&nface_transparent_double<=0)return;
 
@@ -3541,7 +3535,7 @@ void draw_transparent_faces(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi=meshinfo + j;
@@ -3597,7 +3591,7 @@ void UpdateHiddenFaces(){
   if(hide_overlaps!=0)PRINTF("  identifying hidden faces -");
   for(i=0;i<nmeshes;i++){
     int j;
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo + i;
 
@@ -3641,7 +3635,7 @@ void allocate_faces(){
 
   FREEMEMORY(face_transparent);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ntotal;
 
     meshi = meshinfo + i;
@@ -3690,10 +3684,10 @@ void allocate_faces(){
     ntotal2=0;
     for(i=0;i<nmeshes;i++){
       int ntotal;
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
- 
+
       ntotal = 6*meshi->nbptrs + meshi->nvents+12;
       nfaces_temp+=(6*meshi->nbptrs);
       mem_sum+= ntotal*(sizeof(facedata)+5*sizeof(facedata *));
@@ -3749,7 +3743,7 @@ void update_selectblocks(void){
   int local_count=0;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     ntotal += meshi->nbptrs;
@@ -3765,7 +3759,7 @@ void update_selectblocks(void){
     sortedblocklist[i]=i;
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;
@@ -3788,12 +3782,12 @@ void update_selectfaces(void){
 
   int i;
   selectdata *sd;
-  
+
   FREEMEMORY(selectfaceinfo);
 
   ntotalfaces=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo + i;
     ntotalfaces += 6*meshi->nbptrs;
@@ -3802,16 +3796,16 @@ void update_selectfaces(void){
 
   NewMemory((void **)&selectfaceinfo,ntotalfaces*sizeof(selectdata));
 
-/* down y 
-     up x 
-     up y 
-   down x 
-   down z 
+/* down y
+     up x
+     up y
+   down x
+   down z
      up z */
   ntotalfaces=0;
   sd = selectfaceinfo;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi=meshinfo + i;
@@ -3838,98 +3832,6 @@ void update_selectfaces(void){
   }
 }
 
-/* ------------------ update_smooth_blockages ------------------------ */
-
-void update_smooth_blockages(void){
-  int i, blocktotal;
-
-  blocktotal=0;
-
-  if(menusmooth==0){
-    STREAM_SB=fopen(smoothblockage_filename,"rb");
-  }
-  if(STREAM_SB!=NULL){
-    time_t sb_modtime;
-
-    sb_modtime=file_modtime(smoothblockage_filename);
-    if(sb_modtime!=0&&smv_modtime!=0&&smv_modtime>sb_modtime){
-      fclose(STREAM_SB);
-      STREAM_SB=NULL;
-    }
-  }
-  if(STREAM_SB!=NULL){
-    int version;
-    read_smoothobst=1;
-    if(fread(&version,4,1,STREAM_SB)==1){
-      rewind(STREAM_SB);
-    }
-    else{
-      read_smoothobst=0;
-    }
-  }
-  if(STREAM_SB==NULL){
-    read_smoothobst=0;
-    STREAM_SB=fopen(smoothblockage_filename,"wb");
-  }
-
-  for(i=0;i<nmeshes;i++){
-    mesh *meshi;
-
-    meshi = meshinfo + i;
-    blocktotal += meshi->nbptrs;
-  }
-  if(blocktotal>0){
-    PRINTF("Initializing smooth blockage data - ");
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-      int j;
-
-      meshi=meshinfo+i;
-
-      for(j=0;j<meshi->nsmoothblockages_list;j++){
-        smoothblockage *sb;
-
-        if(read_smoothobst==1){
-          PRINTF("Reading smooth blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
-        }
-        else{
-          PRINTF("Smoothing blockages %i of %i in mesh %i\n",j+1,meshi->nsmoothblockages_list,i+1);
-        }
-        sb=meshi->smoothblockages_list+j;
-
-        getsmoothblockparms(meshi,sb);
-        MakeIsoBlockages(meshi,sb);
-      }
-    }
-    PRINTF(" - completed \n");
-  }
-  fclose(STREAM_SB);
-  STREAM_SB=NULL;
-  blocksneedsmoothing=0;
-  updatesmoothblocks=0;
-  smoothing_blocks=0;
-}
-
-/* ------------------ getsmoothblockage ------------------------ */
-
-smoothblockage *getsmoothblockage(mesh *meshi,float tt){
-  int j;
-  smoothblockage *sb,*sb2;
-
-
-  sb=meshi->smoothblockages_list;
-  if(sb==NULL)return NULL;
-  if(tt<0.0)return sb;
-
-  for(j=1;j<meshi->nsmoothblockages_list-1;j++){
-    sb=meshi->smoothblockages_list+j;
-    sb2=sb+1;
-    if(sb->time<=tt&&tt<sb2->time)return sb;
-  }
-  sb=meshi->smoothblockages_list+meshi->nsmoothblockages_list-1;
-  return sb;
-}
-
 /* ------------------ isblockagevisible ------------------------ */
 
 int isblockagevisible(blockagedata *bc, float local_time){
@@ -3939,507 +3841,6 @@ int isblockagevisible(blockagedata *bc, float local_time){
   listindex=getindex(local_time,bc->showtime,bc->nshowtime);
   val = bc->showhide[listindex];
   return val;
-}
-
-
-/* ------------------ getsmoothblockparms ------------------------ */
-
-void getsmoothblockparms(mesh *meshi, smoothblockage *sb){
-  int i;
-  int nsmoothcolors=0;
-  int fail;
-  
-  /* number of unique smooth block colors */
-
-  for(i=0;i<meshi->nbptrs;i++){
-    int j;
-    blockagedata *bc;
-
-    bc = meshi->blockageinfoptrs[i];
-    if(bc->type!=BLOCK_smooth||bc->del==1)continue;
-    if(isblockagevisible(bc,sb->time)!=1){
-      continue;
-    }
-    fail=0;
-    for(j=0;j<i;j++){
-      blockagedata *bc2;
-
-      bc2=meshi->blockageinfoptrs[j];
-      if(bc2->type!=BLOCK_smooth)continue;
-      if(bc2->del==1)continue;
-      if(isblockagevisible(bc2,sb->time)!=1)continue;
-      if(ABS(bc->color[0]-bc2->color[0])>0.0001)continue;
-      if(ABS(bc->color[1]-bc2->color[1])>0.0001)continue;
-      if(ABS(bc->color[2]-bc2->color[2])>0.0001)continue;
-      if(ABS(bc->color[3]-bc2->color[3])>0.0001)continue;
-      fail=1;
-      break;
-    }
-    if(fail==0){
-      nsmoothcolors++;
-    }
-  }
-
-  meshi->nsmoothblockagecolors=nsmoothcolors;
-
-  /* free and allocate memory */
-
-  FREEMEMORY(sb->smoothblockagecolors);
-  FREEMEMORY(sb->smoothblockagesurfaces);
-  if(nsmoothcolors>0){
-    NewMemory((void **)&meshi->smoothblockagecolors,4*nsmoothcolors*sizeof(float));
-    NewMemory((void **)&meshi->blockagesurfaces,nsmoothcolors*sizeof(isosurface *));
-  }
-  
-  sb->nsmoothblockagecolors=meshi->nsmoothblockagecolors;
-  sb->smoothblockagecolors=meshi->smoothblockagecolors;
-  sb->smoothblockagesurfaces=meshi->blockagesurfaces;
-  
-  for(i=0;i<nsmoothcolors;i++){
-    meshi->blockagesurfaces[i]=NULL;
-  }
-  nsmoothcolors=0;
-  
-  /* smooth block colors */
-
-  for(i=0;i<meshi->nbptrs;i++){
-    blockagedata *bc;
-    int j;
-
-    bc = meshi->blockageinfoptrs[i];
-    if(bc->type!=BLOCK_smooth||bc->del==1)continue;
-    if(isblockagevisible(bc,sb->time)!=1)continue;
-    fail=0;
-    for(j=0;j<i;j++){
-      blockagedata *bc2;
-
-      bc2=meshi->blockageinfoptrs[j];
-      if(bc2->type!=BLOCK_smooth)continue;
-      if(bc2->del==1)continue;
-      if(isblockagevisible(bc2,sb->time)!=1)continue;
-      if(ABS(bc->color[0]-bc2->color[0])>0.0001)continue;
-      if(ABS(bc->color[1]-bc2->color[1])>0.0001)continue;
-      if(ABS(bc->color[2]-bc2->color[2])>0.0001)continue;
-      if(ABS(bc->color[3]-bc2->color[3])>0.0001)continue;
-      fail=1;
-      break;
-    }
-    if(fail==0){
-      meshi->smoothblockagecolors[4*nsmoothcolors]=bc->color[0];
-      meshi->smoothblockagecolors[4*nsmoothcolors+1]=bc->color[1];
-      meshi->smoothblockagecolors[4*nsmoothcolors+2]=bc->color[2];
-      meshi->smoothblockagecolors[4*nsmoothcolors+3]=bc->color[3];
-      nsmoothcolors++;
-    }
-  }
-}
-/* ------------------ ReadSmoothIsoSurface ------------------------ */
-
-int ReadSmoothIsoSurface(isosurface *asurface){
-  // use STREAM_SB
-  int one;
-  float color[4];
-
-  if(STREAM_SB==NULL)return 1;
-
-  fread(&one,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-
-  fread(&asurface->nvertices,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-  fread(&asurface->ntriangles,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-
-  fread(&asurface->xmin,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-  fread(&asurface->ymin,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-  fread(&asurface->zmin,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-  fread(&asurface->xyzmaxdiff,4,1,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-
-  fread(color,4,4,STREAM_SB);
-  if(feof(STREAM_SB)!=0)return 1;
-  asurface->color=getcolorptr(color);
-
-  asurface->vertices=NULL;
-  asurface->vertexnorm=NULL;
-  if(asurface->nvertices>0){
-    NewMemory((void **)&asurface->vertices,3*asurface->nvertices*sizeof(short));
-    NewMemory((void **)&asurface->vertexnorm,3*asurface->nvertices*sizeof(short));
-    fread(asurface->vertices,2,3*asurface->nvertices,STREAM_SB); // vertices scaled between 0 and 2**16-1
-    if(feof(STREAM_SB)!=0){
-      FREEMEMORY(asurface->vertices);
-      FREEMEMORY(asurface->vertexnorm);
-      return 1;
-    }
-    fread(asurface->vertexnorm,2,3*asurface->nvertices,STREAM_SB); // norms scaled between 0 and 2**16-1
-    if(feof(STREAM_SB)!=0){
-      FREEMEMORY(asurface->vertices);
-      FREEMEMORY(asurface->vertexnorm);
-      return 1;
-    }
-  }
-  asurface->triangles=NULL;
-  if(asurface->ntriangles>0){
-    NewMemory((void **)&asurface->triangles,asurface->ntriangles*sizeof(int));
-    if(fread(asurface->triangles,4,asurface->ntriangles,STREAM_SB)<asurface->ntriangles){
-      FREEMEMORY(asurface->triangles);
-      return 1;
-    }
-  }
-  return 0;
-}
-
-/* ------------------ WriteSmoothIsoSurface ------------------------ */
-
-void WriteSmoothIsoSurface(isosurface *asurface){
-  // use STREAM_SB
-  int one=1;
-
-  if(STREAM_SB==NULL)return;
-
-  fwrite(&one,4,1,STREAM_SB);
-
-  fwrite(&asurface->nvertices,4,1,STREAM_SB);
-  fwrite(&asurface->ntriangles,4,1,STREAM_SB);
-
-  fwrite(&asurface->xmin,4,1,STREAM_SB);
-  fwrite(&asurface->ymin,4,1,STREAM_SB);
-  fwrite(&asurface->zmin,4,1,STREAM_SB);
-  fwrite(&asurface->xyzmaxdiff,4,1,STREAM_SB);
-
-  fwrite(asurface->color,4,4,STREAM_SB);
-
-  if(asurface->nvertices>0){
-    fwrite(asurface->vertices,2,3*asurface->nvertices,STREAM_SB); // vertices scaled between 0 and 2**16-1
-    fwrite(asurface->vertexnorm,2,3*asurface->nvertices,STREAM_SB); // norms scaled between 0 and 2**16-1
-  }
-  if(asurface->ntriangles>0){
-    fwrite(asurface->triangles,4,asurface->ntriangles,STREAM_SB); // triangle indices
-  }
-
-}
-
-/* ------------------ MakeIsoBlockages ------------------------ */
-
-void MakeIsoBlockages(mesh *meshi, smoothblockage *sb){
-  float *cellcopy,*cell=NULL,*node=NULL,*nodecopy;
-  int ib,i,j,k,iblockcolor;
-  int imin, imax, jmin, jmax, kmin, kmax;
-  float val;
-  isosurface *asurface;
-  float level;
-  float vals[8];
-  float *xplt2, *yplt2, *zplt2;
-  float *xplt,*yplt,*zplt;
-  float *rgbtemp,*rgbtemp2;
-  int ibar,jbar,kbar;
-  
-  int ii, jj, kk;
-  int im1, jm1, km1;
-  int read_error=0;
-
-#undef cellindex
-#define cellindex(i,j,k) ((i)+(j)*(ibar+2)+(k)*(ibar+2)*(jbar+2))
-#define nodeindex(i,j,k) ((i)+(j)*(ibar+3)+(k)*(ibar+3)*(jbar+3))
-
-  xplt=meshi->xplt;
-  yplt=meshi->yplt;
-  zplt=meshi->zplt;
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  kbar=meshi->kbar;
-
-  NewMemory((void **)&cell,(ibar+2)*(jbar+2)*(kbar+2)*sizeof(float));
-  NewMemory((void **)&node,(ibar+3)*(jbar+3)*(kbar+3)*sizeof(float));
-
-  NewMemory((void **)&xplt2,(ibar+3)*sizeof(float));
-  NewMemory((void **)&yplt2,(jbar+3)*sizeof(float));
-  NewMemory((void **)&zplt2,(kbar+3)*sizeof(float));
-  for(i=0;i<ibar+1;i++){
-    xplt2[i+1]=xplt[i];
-  }
-  xplt2[0]=xplt[0]-(xplt[1]-xplt[0])/10.0;
-  xplt2[ibar+2]=xplt[ibar]+(xplt[ibar]-xplt[ibar-1])/10.0;
-  for(j=0;j<jbar+1;j++){
-    yplt2[j+1]=yplt[j];
-  }
-  yplt2[0]=yplt[0]-(yplt[1]-yplt[0])/10.0;
-  yplt2[jbar+2]=yplt[jbar]+(yplt[jbar]-yplt[jbar-1])/10.0;
-  for(k=0;k<kbar+1;k++){
-    zplt2[k+1]=zplt[k];
-  }
-  zplt2[0]=zplt[0]-(zplt[1]-zplt[0])/10.0;
-  zplt2[kbar+2]=zplt[kbar]+(zplt[kbar]-zplt[kbar-1])/10.0;
-
-  meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-  meshi->smoothblockagecolors=sb->smoothblockagecolors;
-  meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-
-  for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
-
-    rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
-    if(read_smoothobst==0){
-      cellcopy=cell;
-      nodecopy=node;
-      for(i=0;i<(ibar+2)*(jbar+2)*(kbar+2);i++){
-        *cellcopy++=0.0;
-      }
-      for(ib=0;ib<meshi->nbptrs;ib++){
-        blockagedata *bc;
-
-        bc=meshi->blockageinfoptrs[ib];
-        if(bc->type!=BLOCK_smooth||bc->del==1)continue;
-        if(isblockagevisible(bc,sb->time)!=1)continue;
-        rgbtemp2=bc->color;
-        if(ABS(rgbtemp[0]-rgbtemp2[0])<0.0001&&
-           ABS(rgbtemp[1]-rgbtemp2[1])<0.0001&&
-           ABS(rgbtemp[2]-rgbtemp2[2])<0.0001&&
-           ABS(rgbtemp[3]-rgbtemp2[3])<0.0001
-           ){
-          imin = bc->ijk[IMIN];
-          imax = bc->ijk[IMAX];
-          jmin = bc->ijk[JMIN];
-          jmax = bc->ijk[JMAX];
-          kmin = bc->ijk[KMIN];
-          kmax = bc->ijk[KMAX];
-          for(k=kmin;k<kmax;k++){
-            for(j=jmin;j<jmax;j++){
-              for(i=imin;i<imax;i++){
-                cell[cellindex(i+1,j+1,k+1)]=1.0;
-              }
-            }
-          }
-        }
-      }
-      for(i=0;i<(ibar+3)*(jbar+3)*(kbar+3);i++){
-        *nodecopy++=0.0;
-      }
-      for(kk=1;kk<kbar+2;kk++){
-        if(kk==1){
-          km1=kk;
-          k=kk;
-        }
-        else if(kk==kbar+1){
-          km1=kk-1;
-          k=kk-1;
-        }
-        else{
-          k=kk; 
-          km1=kk-1;
-        }
-        for(jj=1;jj<jbar+2;jj++){
-          if(jj==1){
-            jm1=jj;
-            j=jj;
-          }
-          else if(jj==jbar+1){
-            jm1=jj-1;
-            j=jj-1;
-          }
-          else{
-            j=jj; 
-            jm1=jj-1;
-          }
-          for(ii=1;ii<ibar+2;ii++){
-            if(ii==1){
-              im1=ii;
-              i=ii;
-            }
-            else if(ii==ibar+1){
-              im1=ii-1;
-              i=ii-1;
-            }
-            else{
-              i=ii; 
-              im1=ii-1;
-            }
-            vals[0]=cell[cellindex(im1,jm1,km1)];
-            vals[1]=cell[cellindex(im1,jm1,k)];
-            vals[2]=cell[cellindex(im1,j  ,km1)];
-            vals[3]=cell[cellindex(im1,j  ,k)];
-            vals[4]=cell[cellindex(i  ,jm1,km1)];
-            vals[5]=cell[cellindex(i  ,jm1,k)];
-            vals[6]=cell[cellindex(i  ,j  ,km1)];
-            vals[7]=cell[cellindex(i  ,j  ,k)];
-  
-            val = (vals[0]+vals[1]+vals[2]+vals[3]+vals[4]+vals[5]+vals[6]+vals[7]+0.01)/8.0;
-            node[nodeindex(ii,jj,kk)]=val;
-          }
-        }
-      }
-    }
-    asurface=NULL;
-    NewMemory((void **)&asurface,sizeof(isosurface));
-    level=0.250;
-    InitIsosurface(asurface, level, rgbtemp,0);
-    if(read_smoothobst==1){
-      // read in smoothed iso info here
-      read_error=ReadSmoothIsoSurface(asurface);
-      if(read_error!=0){
-        read_smoothobst=0;
-        fprintf(stderr,"*** Error: unexpected end of file encountered while\n");
-        fprintf(stderr,"              reading the smooth blockage file.\n");
-      }
-    }
-    if(read_smoothobst==0){
-      float dlevel=-1.0;
-      
-      GetIsosurface(asurface, node, NULL, NULL, level, dlevel,
-                     xplt2, ibar+3, yplt2, jbar+3, zplt2, kbar+3);
-      GetNormalSurface(asurface);
-      CompressIsosurface(asurface,1,
-          xplt2[0],xplt2[ibar+2],
-          yplt2[0],yplt2[jbar+2],
-          zplt2[0],zplt2[kbar+2]);
-      SmoothIsoSurface(asurface);
-      // write out smoothed iso info here
-      if(read_error==0)WriteSmoothIsoSurface(asurface);
-    }
-
-    if(meshi->blockagesurfaces!=NULL)meshi->blockagesurfaces[iblockcolor]=asurface;
-    meshi->blockagesurface=asurface;
-    if(sb->smoothblockagesurfaces!=NULL)sb->smoothblockagesurfaces[iblockcolor]=asurface;
-  }
-  FREEMEMORY(node); FREEMEMORY(cell);
-  FREEMEMORY(xplt2);FREEMEMORY(yplt2);FREEMEMORY(zplt2);
-  return;
-}
-/* ------------------ MakeIsoBlockages2 ------------------------ */
-
-void MakeIsoBlockages2(mesh *meshi, smoothblockage *sb){
-//xxx experimental smooth blockage generation routine
-  float *cell=NULL;
-  int ib,i,j,k,iblockcolor;
-  int imin, imax, jmin, jmax, kmin, kmax;
-  isosurface *asurface;
-  float level;
-  float *xplt2, *yplt2, *zplt2;
-  float *XPLT2, *YPLT2, *ZPLT2;
-  float *xplt,*yplt,*zplt;
-  float *rgbtemp,*rgbtemp2;
-  int ibar,jbar,kbar;
-  int nx2, ny2, nz2;
-  
-  int read_error=0;
-
-#define cellindex2(i,j,k) ((i+1)+(j+1)*nx2+(k+1)*nx2*ny2)
-
-  xplt=meshi->xplt;
-  yplt=meshi->yplt;
-  zplt=meshi->zplt;
-  ibar=meshi->ibar;
-  jbar=meshi->jbar;
-  kbar=meshi->kbar;
-  nx2=ibar+2;
-  ny2=jbar+2;
-  nz2=kbar+2;
-
-  NewMemory((void **)&cell,nx2*ny2*nz2*sizeof(float));
-
-  NewMemory((void **)&XPLT2,nx2*sizeof(float));
-  NewMemory((void **)&YPLT2,ny2*sizeof(float));
-  NewMemory((void **)&ZPLT2,nz2*sizeof(float));
-
-  xplt2 = XPLT2+1;
-  yplt2 = YPLT2+1;
-  zplt2 = ZPLT2+1;
-
-  for(i=0;i<ibar;i++){
-    xplt2[i]=(xplt[i]+xplt[i+1])/2.0;
-  }
-  xplt2[-1]  =xplt2[0]-(xplt[1]-xplt[0]);
-  xplt2[ibar]=xplt2[ibar-1]+(xplt[ibar]-xplt[ibar-1]);
-
-  for(i=0;i<jbar;i++){
-    yplt2[i]=(yplt[i]+yplt[i+1])/2.0;
-  }
-  yplt2[-1]=yplt2[0]-(yplt[1]-yplt[0]);
-  yplt2[jbar]=yplt2[jbar-1]+(yplt[jbar]-yplt[jbar-1]);
-
-  for(i=0;i<kbar;i++){
-    zplt2[i]=(zplt[i]+zplt[i+1])/2.0;
-  }
-  zplt2[-1]=zplt2[0]-(zplt[1]-zplt[0]);
-  zplt2[kbar]=zplt2[kbar-1]+(zplt[kbar]-zplt[kbar-1]);
-
-  meshi->nsmoothblockagecolors=sb->nsmoothblockagecolors;
-  meshi->smoothblockagecolors=sb->smoothblockagecolors;
-  meshi->blockagesurfaces=sb->smoothblockagesurfaces;
-
-  for(iblockcolor=0;iblockcolor<meshi->nsmoothblockagecolors;iblockcolor++){
-
-    rgbtemp=meshi->smoothblockagecolors + 4*iblockcolor;
-    if(read_smoothobst==0){
-      for(i=0;i<nx2*ny2*nz2;i++){
-        cell[i]=0.0;
-      }
-      for(ib=0;ib<meshi->nbptrs;ib++){
-        blockagedata *bc;
-
-        bc=meshi->blockageinfoptrs[ib];
-        if(bc->type!=BLOCK_smooth||bc->del==1)continue;
-        if(isblockagevisible(bc,sb->time)!=1)continue;
-        rgbtemp2=bc->color;
-        if(ABS(rgbtemp[0]-rgbtemp2[0])<0.0001&&
-           ABS(rgbtemp[1]-rgbtemp2[1])<0.0001&&
-           ABS(rgbtemp[2]-rgbtemp2[2])<0.0001&&
-           ABS(rgbtemp[3]-rgbtemp2[3])<0.0001
-           ){
-          imin = bc->ijk[IMIN];
-          imax = bc->ijk[IMAX];
-          jmin = bc->ijk[JMIN];
-          jmax = bc->ijk[JMAX];
-          kmin = bc->ijk[KMIN];
-          kmax = bc->ijk[KMAX];
-          for(k=kmin;k<kmax;k++){
-            for(j=jmin;j<jmax;j++){
-              for(i=imin;i<imax;i++){
-                cell[cellindex2(i,j,k)]=1.0;
-              }
-            }
-          }
-        }
-      }
-    }
-    asurface=NULL;
-    NewMemory((void **)&asurface,sizeof(isosurface));
-    level=0.50;
-    InitIsosurface(asurface, level, rgbtemp,0);
-    if(read_smoothobst==1){
-      // read in smoothed iso info here
-      read_error=ReadSmoothIsoSurface(asurface);
-      if(read_error!=0){
-        read_smoothobst=0;
-        fprintf(stderr,"*** Error: unexpected end of file encountered while\n");
-        fprintf(stderr,"              reading the smooth blockage file.\n");
-      }
-    }
-    else{
-      float dlevel=-1.0;
-      
-      GetIsosurface(asurface, cell, NULL, NULL, level, dlevel,
-                     xplt2-1, nx2, yplt2-1, ny2, zplt2-1, nz2);
-      GetNormalSurface(asurface);
-      CompressIsosurface(asurface,1,
-          xplt2[-1],xplt2[ibar],
-          yplt2[-1],yplt2[jbar],
-          zplt2[-1],zplt2[kbar]);
-      SmoothIsoSurface(asurface);
-      if(read_error==0)WriteSmoothIsoSurface(asurface);
-    }
-
-    if(meshi->blockagesurfaces!=NULL)meshi->blockagesurfaces[iblockcolor]=asurface;
-    meshi->blockagesurface=asurface;
-    if(sb->smoothblockagesurfaces!=NULL)sb->smoothblockagesurfaces[iblockcolor]=asurface;
-  }
-  FREEMEMORY(cell); 
-  FREEMEMORY(XPLT2);
-  FREEMEMORY(YPLT2);
-  FREEMEMORY(ZPLT2);
-  return;
 }
 
 /* ------------------ init_demo ------------------------ */
@@ -4469,9 +3870,9 @@ void init_demo(float rad, int nlat, int nlong){
 
 /* ------------------ calcNormal3 ------------------------ */
 
-void calcNormal3(const float *v1, 
-                 const float *v2, 
-                 const float *v3, 
+void calcNormal3(const float *v1,
+                 const float *v2,
+                 const float *v3,
                  float *out){
   float u[3], v[3];
   int i;
@@ -4493,12 +3894,12 @@ void calcNormal3(const float *v1,
 
 /* ------------------ calcNormal4 ------------------------ */
 
-void calcNormal4(const float *v1, 
+void calcNormal4(const float *v1,
                  float *out){
   out[0]=v1[0]-0.2143;
   out[1]=v1[1]-0.2143;
   out[2]=v1[2]-0.5;
-  
+
 
 
   ReduceToUnit(out);
@@ -4594,7 +3995,7 @@ void draw_demo(int nlat, int nlong){
     case 3:
     case 4:
     case 5:
-//#define COLOR(x) (1.0+((x)-0.2143)/0.3)/2.0 
+//#define COLOR(x) (1.0+((x)-0.2143)/0.3)/2.0
 #define COLOR(x) 0.0
       glEnable(GL_LIGHTING);
       glMaterialfv(GL_FRONT_AND_BACK,GL_SHININESS,&block_shininess);
@@ -4690,7 +4091,7 @@ void init_user_ticks(void){
   user_tick_max[2]=-1000000000.0;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     user_tick_min[0]=MIN(meshi->boxmin[0],user_tick_min[0]);
@@ -5120,10 +4521,10 @@ int get_tick_dir(float *mm){
        ( m0 m4  m8 )      (m12)
    Q=  ( m1 m5  m9 )  u = (m13)
        ( m2 m6 m10 )      (m14)
-      
-      (Q   u) (x)     (0)      
+
+      (Q   u) (x)     (0)
       (v^T 1) (y)   = (1)
-       
+
       m3=m7=m11=0, v^T=0, y=1   Qx+u=0 => x=-Q^Tu
     */
   int i,ii;
@@ -5135,7 +4536,7 @@ int get_tick_dir(float *mm){
   xyzeyeorig[0] = -(mm[0]*mm[12]+mm[1]*mm[13]+ mm[2]*mm[14])/mscale[0];
   xyzeyeorig[1] = -(mm[4]*mm[12]+mm[5]*mm[13]+ mm[6]*mm[14])/mscale[1];
   xyzeyeorig[2] = -(mm[8]*mm[12]+mm[9]*mm[13]+mm[10]*mm[14])/mscale[2];
-  
+
   minangle=1000000.0;
 
   for(i=-3;i<=3;i++){
@@ -5191,12 +4592,12 @@ void DrawGravityAxis(void){
   glColor3f(0.0,0.0,1.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0+0.5);
-  
+
   // y axis
   glColor3f(0.0,1.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
   glVertex3f(xbar/2.0,ybar/2.0+0.5,zbar/2.0);
-  
+
   // z axis
   glColor3f(1.0,0.0,0.0);
   glVertex3f(xbar/2.0,ybar/2.0,zbar/2.0);
@@ -5267,33 +4668,12 @@ void drawticks(void){
 /* ------------------ drawBlockages ------------------------ */
 
 void drawBlockages(int mode, int trans_flag){
-
-  int smoothnorms;
   int i;
-  cadgeom *cd;
-  int drawing_smooth, drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
+  cadgeomdata *cd;
+  int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  get_drawing_parms(&drawing_smooth, &drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
-  if(drawing_smooth == 1 && (showedit_dialog == 0 || geomtest_option != NO_TEST)){
-    if(clip_mode!=CLIP_OFF)glDisable(GL_CULL_FACE);
-    for(i=0;i<nmeshes;i++){
-      mesh *meshi;
-      int j;
-
-      meshi = meshinfo + i;
-      for(j=0;j<meshi->nsmoothblockagecolors;j++){
-        isosurface *bsurface;
-        smoothnorms=1;
-        if(meshi->blockagesurface!=NULL){
-          bsurface=meshi->blockagesurfaces[j];
-          drawstaticiso(bsurface,1,smoothnorms,trans_flag,1,plot3dlinewidth);
-        }
-      }
-    }
-    SNIFF_ERRORS("after drawblocks");
-    if(clip_mode!=CLIP_OFF)glEnable(GL_CULL_FACE);
-  }
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
     if(mode==SELECTOBJECT){
       if(blockageSelect==1){
@@ -5418,16 +4798,10 @@ void snap_scene(void){
 
 /* ------------------ get_drawing_parms ------------------------ */
 
-void get_drawing_parms(int *drawing_smooth, int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent){
-  *drawing_smooth=0;
+void get_drawing_parms(int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent){
   *drawing_transparent=0;
   *drawing_blockage_transparent=0;
   *drawing_vent_transparent=0;
-  if(ntotal_smooth_blockages>0&&updatesmoothblocks==0){
-    if(visSmoothAsNormal==0||visBlocks==visBLOCKAsInput){
-      if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKSolidOutline&&visBlocks!=visBLOCKHide)*drawing_smooth=1;
-    }
-  }
   if(ntransparentblocks>0){
     if(visTransparentBlockage==1||visBlocks==visBLOCKAsInput||visBlocks==visBLOCKAsInputOutline){
       if(visBlocks!=visBLOCKOutline&&visBlocks!=visBLOCKHide){
@@ -5462,7 +4836,7 @@ void draw_facesOLD(){
     glEnable(GL_COLOR_MATERIAL);
     glBegin(GL_TRIANGLES);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi=meshinfo + j;
@@ -5536,7 +4910,7 @@ void draw_facesOLD(){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
     glBegin(GL_QUADS);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi=meshinfo + j;
@@ -5605,7 +4979,7 @@ void draw_facesOLD(){
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi = meshinfo + j;
@@ -5671,7 +5045,7 @@ void draw_facesOLD(){
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     for(j=0;j<nmeshes;j++){
-      mesh *meshi;
+      meshdata *meshi;
       int i;
 
       meshi = meshinfo + j;
@@ -5736,7 +5110,7 @@ void initcullgeom(int cullgeomflag){
   update_initcullgeom=0;
   updatefacelists=1;
   for(imesh=0;imesh<nmeshes;imesh++){
-    mesh *meshi;
+    meshdata *meshi;
     int iskip, jskip, kskip;
     int ibeg, iend, jbeg, jend, kbeg, kend;
     float xbeg, xend, ybeg, yend, zbeg, zend;
@@ -5821,7 +5195,7 @@ void initcullgeom(int cullgeomflag){
 
 /* ------------------ get_cullskips ------------------------ */
 
-void get_cullskips(mesh *meshi, int cullflag, int cull_portsize_local, int *iiskip, int *jjskip, int *kkskip){
+void get_cullskips(meshdata *meshi, int cullflag, int cull_portsize_local, int *iiskip, int *jjskip, int *kkskip){
   int iskip, jskip, kskip;
 
   if(cullflag==1){
@@ -5849,7 +5223,7 @@ void get_cullskips(mesh *meshi, int cullflag, int cull_portsize_local, int *iisk
 
 /* ------------------ get_face_port ------------------------ */
 
-culldata *get_face_port(mesh *meshi, facedata *facei){
+culldata *get_face_port(meshdata *meshi, facedata *facei){
   int ii1, jj1, kk1;
   int ii2, jj2, kk2;
   int nx, ny, nz;
@@ -5887,7 +5261,7 @@ culldata *get_face_port(mesh *meshi, facedata *facei){
 
   ixyz = ii1 + jj1*nx + kk1*nx*ny;
   return_cull = meshi->cullgeominfo + ixyz;
-  
+
   return return_cull;
 }
 
@@ -5924,7 +5298,7 @@ void remove_dup_blockages(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
 
@@ -5937,7 +5311,7 @@ void remove_dup_blockages(void){
       for(j=1;j<meshi->nbptrs;j++){
         blockagedata *bc, *bcm1;
         int *ijk1, *ijk2;
-      
+
         bc = bclist[j];
         bcm1 = bclist[j-1];
         if(bc->nshowtime>0)continue;
@@ -5956,7 +5330,7 @@ void remove_dup_blockages(void){
       jj=0;
       for(j=0;j<meshi->nbptrs;j++){
         blockagedata *bc;
-      
+
         bc=bclist[j];
         if(bc->dup==1)continue;
         bclist[jj++]=bc;
@@ -6023,7 +5397,7 @@ void getobstlabels(const char *filein){
   fclose(stream_in);
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;

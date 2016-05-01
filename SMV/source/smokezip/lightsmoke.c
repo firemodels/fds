@@ -30,7 +30,7 @@ void build_radiancemap(radiancedata *radianceinfo){
   for(i=0;i<(nx+2)*(ny+2)*(nz+2);i++){
     total_fradiance[i]=0.0;
   }
-  
+
   for(j=-1;j<ny+1;j++){
   for(k=-1;k<nz+1;k++){
     fradiance[IJKRAD2(-1,j,k)]=0.2;
@@ -51,7 +51,7 @@ void build_radiancemap(radiancedata *radianceinfo){
   CheckMemory;
 
   // increasing i
-  
+
   for(i=0;i<nx;i++){
   for(j=0;j<ny;j++){
   for(k=0;k<nz;k++){
@@ -70,7 +70,7 @@ void build_radiancemap(radiancedata *radianceinfo){
   CheckMemory;
 
   // decreasing i
-  
+
   for(i=nx-1;i>=0;i--){
   for(j=0;j<ny;j++){
   for(k=0;k<nz;k++){
@@ -89,7 +89,7 @@ void build_radiancemap(radiancedata *radianceinfo){
   CheckMemory;
 
   // increasing j
-  
+
   for(j=0;j<ny;j++){
   for(i=0;i<nx;i++){
   for(k=0;k<nz;k++){
@@ -108,7 +108,7 @@ void build_radiancemap(radiancedata *radianceinfo){
   CheckMemory;
 
   // decreasing j
-  
+
   for(j=ny-1;j>=0;j--){
   for(i=0;i<nx;i++){
   for(k=0;k<nz;k++){
@@ -125,9 +125,9 @@ void build_radiancemap(radiancedata *radianceinfo){
     total_fradiance[i]+=fradiance[i];
   }
   CheckMemory;
-  
+
   // decreasing k
-  
+
   for(k=nz-1;k>=0;k--){
   for(j=0;j<ny;j++){
   for(i=0;i<nx;i++){

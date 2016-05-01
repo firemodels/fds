@@ -13,6 +13,10 @@
 
 #include "c_api.h"
 
+#ifdef WIN32
+#define snprintf _snprintf
+#endif
+
 int set_slice_bound_min(const char *slice_type, int set, float value) {
 	int i;
     for(i = 0; i < nslice2; i++) {

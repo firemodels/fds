@@ -83,10 +83,69 @@ void init_histogram(histogramdata *histogram, int nbuckets){
 /* ------------------ free_histogram ------------------------ */
 
 void free_histogram(histogramdata *histogram){
-  FREEMEMORY(histogram->buckets);
+  if(histogram != NULL){
+    FREEMEMORY(histogram->buckets);
+  }
 }
 
-/* ------------------ copy_data2histogram ------------------------ */
+/* ------------------ get_hist_statistics ------------------------ */
+
+void get_histogram_statistics(histogramdata *histogram){
+  int i, ntotal;
+  float valmean, stdev, dval;
+
+  dval = (histogram->valmax - histogram->valmin) / histogram->nbuckets;
+  valmean = 0.0;
+  ntotal = 0;
+  for(i = 0; i < histogram->nbuckets; i++){
+    float val;
+    int nbucketi;
+
+    nbucketi = histogram->buckets[i];
+    if(nbucketi == 0)continue;
+    val = histogram->valmin + ((float)(i)+0.5)*dval;
+    valmean += nbucketi * val;
+    ntotal += nbucketi;
+  }
+  valmean /= (float)ntotal;
+  histogram->valmean = valmean;
+  ASSERT(histogram->ntotal == ntotal);
+
+  stdev = 0.0;
+  for(i = 0; i < histogram->nbuckets; i++){
+    float valdiff;
+    int nbucketi;
+
+    nbucketi = histogram->buckets[i];
+    if(nbucketi == 0)continue;
+    valdiff = histogram->valmin + ((float)(i)+0.5)*dval - valmean;
+    stdev += nbucketi*valdiff*valdiff;
+  }
+  stdev = sqrt(stdev / (float)ntotal);
+  histogram->valstdev = stdev;
+}
+
+  /* ------------------ copy_buckets2histogram ------------------------ */
+
+void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram){
+  int i, ntotal;
+
+
+  free_histogram(histogram);
+  init_histogram(histogram, nbuckets);
+  
+  ntotal = 0;
+  for(i = 0; i < nbuckets; i++){
+    histogram->buckets[i] = buckets[i];
+    ntotal += buckets[i];
+  }
+  histogram->ntotal = ntotal;
+  histogram->valmin = valmin;
+  histogram->valmax = valmax;
+  histogram->defined = 1;
+}
+
+  /* ------------------ copy_data2histogram ------------------------ */
 
 void copy_data2histogram(float *vals, int nvals, histogramdata *histogram){
 
@@ -150,7 +209,7 @@ void update_histogram(float *vals, int nvals, histogramdata *histogram_to){
 /* ------------------ merge_histogram ------------------------ */
 
 void merge_histogram(histogramdata *histogram_to, histogramdata *histogram_from){
-  
+
   // merge histogram histogram_from into histogram_to
 
   int i;
@@ -268,7 +327,7 @@ void get_2dminmax(float *uvals, float *vvals, int nvals, float *rmin, float *rma
   }
   for(i = 0; i < nvals; i++){
     float u, v, r;
-    
+
     u = uvals[i];
     v = vvals[i];
     r = sqrt(u*u + v*v);

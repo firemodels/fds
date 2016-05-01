@@ -36,7 +36,7 @@ typedef struct {
   float xbar0, xbar, ybar0, ybar, zbar0, zbar;
   float dx, dy, dz;
   float *xplt, *yplt, *zplt;
-} mesh;
+} meshdata;
 
 typedef struct _boundary {
   char *file;
@@ -49,7 +49,7 @@ typedef struct _boundary {
   char keyword[255];
   int boundarytype;
   histogramdata *histogram;
-  mesh *boundarymesh;
+  meshdata *boundarymesh;
   flowlabels label;
 } boundary;
 
@@ -64,7 +64,7 @@ typedef struct _slice {
   struct _slice *slice2;
   char keyword[255];
   int slicetype;
-  mesh *slicemesh;
+  meshdata *slicemesh;
   histogramdata *histogram;
   flowlabels label;
 } slice;
@@ -76,13 +76,13 @@ typedef struct _plot3d {
   struct _plot3d *plot3d2;
   float xmin, xmax, ymin, ymax, zmin, zmax;
   histogramdata *histogram[5];
-  mesh *plot3dmesh;
+  meshdata *plot3dmesh;
   flowlabels labels[5];
 } plot3d;
 
 typedef struct {
   slice *sliceinfo;
-  mesh *meshinfo;
+  meshdata *meshinfo;
   plot3d *plot3dinfo;
   boundary *boundaryinfo;
   char *dir;
@@ -94,9 +94,8 @@ typedef struct {
 //************************** headers ****************************************
 
 int getendian(void);
-void version(void);
 void usage(void);
-int mesh_match(mesh *mesh1, mesh *mesh2);
+int mesh_match(meshdata *mesh1, meshdata *mesh2);
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_boundary(FILE *stream_out);
 void setup_slice(FILE *stream_out);
@@ -107,8 +106,8 @@ boundary *getboundary(boundary *boundaryin, casedata *case2);
 void diff_boundaryes(FILE *stream_out);
 void diff_slices(FILE *stream_out);
 void diff_plot3ds(FILE *stream_out);
-int similar_grid(mesh *mesh1, mesh *mesh2, int *factor);
-int exact_grid(mesh *mesh1, mesh *mesh2, int *factor);
+int similar_grid(meshdata *mesh1, meshdata *mesh2, int *factor);
+int exact_grid(meshdata *mesh1, meshdata *mesh2, int *factor);
 int getpatchindex(int in1, boundary *boundaryin, boundary *boundaryout);
 
 #define FORTgetsliceparms _F(getsliceparms)
@@ -137,9 +136,9 @@ STDCALLF FORToutboundaryheader(char *outfile, int *unit3, int *npatches,
                               int *patchdir, int *error1, FILE_SIZE len);
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *npqq, int *error);
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber,
                          int *version, int *error, FILE_SIZE len);
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
@@ -150,7 +149,7 @@ STDCALLF FORTgetsliceparms(char *file,
                           int *is1,int *is2,int *js1,int *js2,int *ks1, int *ks2,
                           int *ni, int *nj, int *nk,
                           int *slice3d, int *error,FILE_SIZE lenfile);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit,
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 STDCALLF FORTclosefortranfile(int *unit);

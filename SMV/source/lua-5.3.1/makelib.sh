@@ -1,6 +1,6 @@
 #!/bin/bash
 rm -f *.o
-source ../setopts.sh $*
+source ../scripts/setopts.sh $*
 
 rm -f *.o
 eval make COMPILER=${COMPILER} SIZE=${SIZE} ${TARGET}

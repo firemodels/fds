@@ -68,11 +68,13 @@ EXTERNCPP int log_base2(float xx);
 #endif
 EXTERNCPP void array2string(float *vals, int nvals, char *string);
 EXTERNCPP float frexp10(float x, int *exp10);
-EXTERNCPP void getGitHash(char *githash);
+EXTERNCPP void getGitInfo(char *githash, char *gitdate);
 EXTERNCPP char *getstring(char *buffer);
 EXTERNCPP char *time2timelabel(float time, float dt, char *timelabel);
 EXTERNCPP char *randstr(char* str, int length);
-
+EXTERNCPP void getBaseTitle(char *progname, char *title_base);
+EXTERNCPP void getTitle(char *progname, char *fulltitle);
+EXTERNCPP void version(char *progname);
 
 #ifdef WIN32
 STREXTERN char STRDECL(dirseparator[],"\\");

@@ -9,11 +9,11 @@
 /* ------------------ readsmv ------------------------ */
 
 int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
-  
+
   int igrid,ipdim;
   int islice,iplot3d,iboundary;
   char buffer[255];
-  mesh *meshinfo=NULL;
+  meshdata *meshinfo=NULL;
   slice *sliceinfo=NULL;
   boundary *boundaryinfo=NULL;
   plot3d *plot3dinfo=NULL;
@@ -75,7 +75,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
   // allocate memory for mesh info
 
   if(nmeshes>0&&nmeshes==ipdim){
-    NewMemory((void **)&meshinfo,nmeshes*sizeof(mesh));
+    NewMemory((void **)&meshinfo,nmeshes*sizeof(meshdata));
   }
   smvcase->meshinfo = meshinfo;
   smvcase->nmeshes = nmeshes;
@@ -135,7 +135,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"GRID") == 1){
-      mesh *meshi;
+      meshdata *meshi;
       float *xp, *yp, *zp;
       int ibar, jbar, kbar;
 
@@ -147,7 +147,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       NewMemory((void **)&yp,sizeof(float)*(jbar+1));
       NewMemory((void **)&zp,sizeof(float)*(kbar+1));
       meshi->ibar=ibar;
-      meshi->jbar=jbar;      
+      meshi->jbar=jbar;
       meshi->kbar=kbar;
       meshi->xplt=xp;
       meshi->yplt=yp;
@@ -157,7 +157,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         trim_back(buffer);
         fprintf(stream_out,"GRID\n%s\n",buffer);
       }
-      
+
       continue;
     }
   /*
@@ -166,7 +166,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PDIM") == 1){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi=meshinfo+ipdim;
       ipdim++;
@@ -186,7 +186,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNX")==1){
       float *xpltcopy, *xplt;
       int ibar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -221,7 +221,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         xpltcopy++;
       }
       meshi->dx=xplt[1]-xplt[0];
-      
+
       continue;
     }
   /*
@@ -232,7 +232,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNY")==1){
       float *ypltcopy, *yplt;
       int jbar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -276,7 +276,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(match(buffer,"TRNZ")==1){
       float *zpltcopy,*zplt;
       int kbar, idummy, nn;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(stream_out!=NULL){
         trim_back(buffer);
@@ -349,7 +349,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(match(buffer,"PL3D") == 1){
-      mesh *plot3dmesh;
+      meshdata *plot3dmesh;
       plot3d *plot3di;
       float time_local;
       int meshnumber=1;
@@ -372,13 +372,13 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
         int i;
-        
+
         NewMemory((void **)&plot3di->file,(unsigned int)(strlen(full_file)+1));
         for(i = 0; i < 5; i++){
           NewMemory((void **)&plot3di->histogram[i], sizeof(histogramdata));
           init_histogram(plot3di->histogram[i],NHIST_BUCKETS);
         }
-      
+
         CheckMemory;
         strcpy(plot3di->file,trim_front(buffer));
         CheckMemory;
@@ -389,7 +389,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         if(readlabels(plot3di->labels+4,streamsmv)==2)break;
 
         CheckMemory;
-      
+
         iplot3d++;
       }
       else{
@@ -423,7 +423,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       FILE_SIZE filesize;
       slice *slicei;
       int meshnumber=0;
-      mesh *slicemesh;
+      meshdata *slicemesh;
       char full_file[1024];
 
       len=strlen(buffer);
@@ -517,7 +517,7 @@ int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       FILE_SIZE filesize;
       boundary *boundaryi;
       int meshnumber=0;
-      mesh *boundarymesh;
+      meshdata *boundarymesh;
       char full_file[1024];
 
       len=strlen(buffer);

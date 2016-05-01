@@ -40,7 +40,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
@@ -49,7 +49,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
@@ -188,17 +188,74 @@ void init_lang(void){
 }
 #endif
 
+/* ------------------ readboundini ------------------------ */
+
+void readboundini(void){
+  FILE *stream = NULL;
+  char *fullfilename = NULL;
+
+  if(boundini_filename == NULL)return;
+  fullfilename = get_filename(smokeviewtempdir, boundini_filename, tempdir_flag);
+  if(fullfilename != NULL)stream = fopen(fullfilename, "r");
+  if(stream == NULL || is_file_newer(smv_filename, fullfilename) == 1){
+    if(stream != NULL)fclose(stream);
+    FREEMEMORY(fullfilename);
+    return;
+  }
+  PRINTF("%s", _("reading: "));
+  PRINTF("%s\n", fullfilename);
+
+  while(!feof(stream)){
+    char buffer[255], buffer2[255];
+
+    CheckMemory;
+    if(fgets(buffer, 255, stream) == NULL)break;
+
+    if(match(buffer, "B_BOUNDARY") == 1){
+      float gmin, gmax;
+      float pmin, pmax;
+      int filetype;
+      char *buffer2ptr;
+      int lenbuffer2;
+      int i;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%f %f %f %f %i %s", &gmin, &pmin, &pmax, &gmax, &filetype, buffer2);
+      trim_back(buffer2);
+      buffer2ptr = trim_front(buffer2);
+      lenbuffer2 = strlen(buffer2ptr);
+      for(i = 0; i < npatchinfo; i++){
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(lenbuffer2 != 0 &&
+          strcmp(patchi->label.shortlabel, buffer2ptr) == 0 &&
+          patchi->filetype == filetype&&
+          is_file_newer(boundini_filename, patchi->file) == 1){
+          bounddata *boundi;
+
+          boundi = &patchi->bounds;
+          boundi->defined = 1;
+          boundi->global_min = gmin;
+          boundi->global_max = gmax;
+          boundi->percentile_min = pmin;
+          boundi->percentile_max = pmax;
+        }
+      }
+      continue;
+    }
+  }
+  FREEMEMORY(fullfilename);
+  return;
+}
+
 /* ------------------ setup_case ------------------------ */
 
 int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
-  /*
-  warning: the following line was commented out!! (perhaps it broke something)
-     this line is necessary in order to define smv_filename and trainer_filename
-  */
- // parse_commandlines(argc, argv);
   return_code=-1;
   if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
@@ -249,8 +306,6 @@ int setup_case(int argc, char **argv){
 #ifdef pp_LANG
   init_lang();
 #endif
-
-  if(sb_atstart==1)smooth_blockages();
 
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
@@ -1026,15 +1081,15 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){
@@ -1138,6 +1193,7 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+  cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
   if(moviefiletype==WMV){
     strcpy(movie_ext, ".wmv");
   }
@@ -1312,7 +1368,6 @@ void initvars(void){
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
 
-  sb_atstart=1;
   select_device=0;
   selected_device_tag=-1;
   navatar_types=0;
@@ -1323,7 +1378,7 @@ void initvars(void){
   navatar_colors=0;
   avatar_colors=NULL;
   view_from_selected_avatar=0;
-  getGitHash(smv_githash);
+  getGitInfo(smv_githash,smv_gitdate);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1443,8 +1498,6 @@ void initvars(void){
 
   drawColorLabel=0;
   olddrawColorLabel=0;
-  staticframe0=0;
-  visStaticSmoke=1;
   vis3DSmoke3D=1;
   smokeskip=1;
   smokeskipm1=0;
@@ -1542,7 +1595,6 @@ void initvars(void){
 
   npartinfo=0, nsliceinfo=0, nvsliceinfo=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
   nevac=0;
-  current_particle_type=-1,last_particle_type=-2;
   nsmoke3dinfo=0;
   nisoinfo=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
@@ -1591,7 +1643,6 @@ void initvars(void){
   visAvailmemory=0;
 #endif
   visBlocks=visBLOCKAsInput;
-  visSmoothAsNormal=1;
   visTransparentBlockage=0;
   visBlocksSave=visBLOCKAsInput;
   blocklocation=BLOCKlocation_grid;
@@ -1607,9 +1658,6 @@ void initvars(void){
   isozipstep=1, isozipskip=0;
   slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
-  partpointstep=1;
-  partpointstep_old=0;
-  partpointskip=0;
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;
@@ -1736,9 +1784,6 @@ void initvars(void){
   nmenus=0;
   showbuild=0;
 
-  strcpy(TITLERELEASE,"");
-  strcpy(TITLE,"");
-  strcpy(FULLTITLE,"");
   strcpy(emptylabel,"");
   large_font=GLUT_BITMAP_HELVETICA_12;
   small_font=GLUT_BITMAP_HELVETICA_10;
@@ -1824,11 +1869,6 @@ void initvars(void){
   adjustalphaflag=3;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
-  updatesmoothblocks=1;
-  menusmooth=0;
-  use_menusmooth=0;
-  smoothing_blocks=0;
-  blocksneedsmoothing=0;
 
   visUSERticks=0;
   user_tick_show_x=1;
@@ -1934,48 +1974,8 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  {
-    char version[100];
-    char svn_version[100];
-
-    getGitHash(svn_version);    // get githash
-
-// construct string of the form:
-//   5.x.y_#
-
-    getPROGversion(version);
-
-    strcpy(TITLEBASE,"Smokeview ");
-
-    strcat(TITLEBASE,version);
-#ifdef pp_BETA
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#else
-#ifndef pp_OFFICIAL_RELEASE
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#endif
-#endif
-    strcat(TITLEBASE," - ");
-  }
-#ifdef _DEBUG
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#else
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#endif
-#ifdef pp_BETA
-  STRCAT(TITLE," - ");
-  STRCAT(TITLE,__TIME__);
-#endif
-
-  STRCPY(FULLTITLE,TITLE);
-
-  STRCPY(TITLERELEASE,TITLE);
+  getTitle("Smokeview ", release_title);
+  getTitle("Smokeview ", plot3d_title);
 
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");

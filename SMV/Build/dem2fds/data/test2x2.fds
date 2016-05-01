@@ -1,0 +1,19 @@
+&HEAD CHID='test2x2', TITLE='terrain' /
+&MESH IJK = 3, 3, 3, XB = 0, 3, 0, 3, 0, 4 /
+&TIME T_END = 0. /
+
+&VENT XB = 0.0, 0.0, 0.0,  3.0, 0.0, 4.0, SURF_ID = 'OPEN' /
+&VENT XB = 3.0, 3.0, 0.0,  3.0, 0.0, 4.0, SURF_ID = 'OPEN' /
+&VENT XB = 0.0, 3.0, 0.0,  0.0, 0.0, 4.0, SURF_ID = 'OPEN' /
+&VENT XB = 0.0, 3.0, 3.0,  3.0, 0.0, 4.0, SURF_ID = 'OPEN' /
+&VENT XB = 0.0, 3.0, 0.0,  3.0, 4.0, 4.0, SURF_ID = 'OPEN' /
+
+&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /
+&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='blodget.png' /
+&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',
+      IJK=3,3,XB=0.0,3.0,0.0,3.0,
+      ZVALS=1.0,0.25,0.75,
+            1.0,1.4,3.8,
+            2.0,2.3,3.8,
+ /
+&TAIL /

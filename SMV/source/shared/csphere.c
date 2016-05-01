@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #ifdef pp_DRAWISO
 #ifdef pp_OSX
@@ -41,7 +41,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
 
   NewMemory((void **)&sphereinfo->dtheta,(n+1)*sizeof(float));
   NewMemory((void **)&sphereinfo->nlong,(n+1)*sizeof(int));
-  
+
   // allocate and define vallist
 
   NewMemory((void **)&sphereinfo->vallist,(n+1)*sizeof(int));

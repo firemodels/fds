@@ -10,7 +10,7 @@
 
 /* ------------------ mesh_match ------------------------ */
 
-int mesh_match(mesh *mesh1, mesh *mesh2){
+int mesh_match(meshdata *mesh1, meshdata *mesh2){
   int ibar, jbar, kbar;
 
   if(mesh1->ibar!=mesh2->ibar)return 0;
@@ -28,38 +28,14 @@ int mesh_match(mesh *mesh1, mesh *mesh2){
   return 1;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char githash[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitHash(githash);    // get githash
-    PRINTF("\n");
-    PRINTF("Smokediff\n\n");
-    PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",githash);
-    PRINTF("Compile Date: %s\n",__DATE__);
-    PRINTF("Platform: WIN64\n");
-#ifdef pp_OSX
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX64\n");
-#endif
-
-
-}
-
 /* ------------------ similar_grid ------------------------ */
 
-int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
+int similar_grid(meshdata *mesh1, meshdata *mesh2, int *factor){
 
   factor[0]=1;
   factor[1]=1;
   factor[2]=1;
-  
+
   if(ABS( mesh1->xbar0-mesh2->xbar0)>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->xbar- mesh2->xbar )>mesh1->dx/2.0)return 0;
   if(ABS( mesh1->ybar0-mesh2->ybar0)>mesh1->dy/2.0)return 0;
@@ -81,7 +57,7 @@ int similar_grid(mesh *mesh1, mesh *mesh2, int *factor){
 
 /* ------------------ exact_grid ------------------------ */
 
-int exact_grid(mesh *mesh1, mesh *mesh2, int *factor){
+int exact_grid(meshdata *mesh1, meshdata *mesh2, int *factor){
   float eps;
 
   factor[0]=1;

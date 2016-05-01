@@ -1,6 +1,8 @@
 @echo off
 set paper=FDS_User_Guide
 
+Title Build %paper%
+
 git describe --long --dirty > gitinfo.txt
 set /p gitrevision=<gitinfo.txt
 echo \newcommand^{\gitrevision^}^{%gitrevision%^} > ..\Bibliography\gitrevision.tex

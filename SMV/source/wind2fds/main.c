@@ -15,10 +15,11 @@
 void usage(char *prog){
   char prog_version[100];
   char githash[100];
+  char gitdate[100];
   char buffer[1024];
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("wind2fds %s(%s) - %s\n", prog_version, githash, __DATE__);
@@ -39,21 +40,6 @@ void usage(char *prog){
   printf("  -maxtime \"hh:mm:ss\" - ignore data recorded after specified time (on any date)\n");
   printf("  datafile.csv   - spreadsheet file to be converted. Use '-' to input data\n");
   printf("                   from standard input\n");
-}
-
-/* ------------------ version ------------------------ */
-
-void version(char *prog){
-  char version_local[100];
-  char githash[100];
-
-  getPROGversion(version_local);  // get Smokeview version (ie 5.x.z)
-  getGitHash(githash);    // get githash
-  printf("\n");
-  printf("%s\n\n", prog);
-  printf("Version: %s\n", version_local);
-  printf("Build: %s\n", githash);
-  printf("Compile Date: %s\n", __DATE__);
 }
 
 /* ------------------ gettokens ------------------------ */
@@ -82,7 +68,7 @@ int main(int argc, char **argv){
   char *prog;
   char *arg,*csv,*argin=NULL,*argout=NULL;
   char file_in[256],file_out[256];
-  FILE *stream_in, *stream_out;
+  FILE *stream_in=NULL, *stream_out=NULL;
   int buffer_len, nrows, ncols;
   char *buffer,*labels,**labelptrs;
   char *datalabels,**datalabelptrs;
@@ -109,13 +95,14 @@ int main(int argc, char **argv){
   unsigned int i_mindatetime, i_maxdatetime;
   int lendate=0;
 
+  set_stdout(stdout);
   strcpy(percen,"%");
   strcpy(prefix,"");
 
   prog=argv[0];
 
   if(argc==1){
-   version("wind2fds");
+   version("wind2fds ");
    return 1;
   }
 
@@ -147,7 +134,7 @@ int main(int argc, char **argv){
       continue;
     }
     else if(strcmp(arg,"-v")==0){
-      version("wind2fds");
+      version("wind2fds ");
       return 1;
     }
     else if(strcmp(arg,"-mintime")==0){
@@ -225,6 +212,8 @@ int main(int argc, char **argv){
 
   if(argin==NULL){
     fprintf(stderr,"*** Error: An input file was not specified\n");
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
   if(strcmp(argin,"-")==0){
@@ -239,6 +228,7 @@ int main(int argc, char **argv){
   }
   if(stream_in==NULL){
     fprintf(stderr,"*** Error: The file %s could not be opened for input\n",file_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
 
@@ -258,6 +248,7 @@ int main(int argc, char **argv){
   stream_out=fopen(file_out,"w");
   if(stream_out==NULL){
     fprintf(stderr,"*** Error: The file %s could not be opened for output\n",file_out);
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
     return 1;
   }
 
@@ -265,7 +256,7 @@ int main(int argc, char **argv){
 
   buffer_len=getrowcols(stream_in, &nrows, &ncols);
   buffer_len+=10;
-  
+
   NewMemory((void **)&buffer,buffer_len);
   NewMemory((void **)&labels,buffer_len);
   NewMemory((void **)&labelptrs,buffer_len*sizeof(char *));
@@ -276,12 +267,16 @@ int main(int argc, char **argv){
 
   if(fgets(labels,buffer_len,stream_in)==NULL){
     fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+    if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+    if(stream_out!=NULL)fclose(stream_out);
     return 1;
   }
   if(is_sodar_file==1){
     while(strncmp(labels,"Sodar",5)==0){
       if(fgets(labels,buffer_len,stream_in)==NULL){
         fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+        if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+        if(stream_out!=NULL)fclose(stream_out);
         return 1;
       }
     }
@@ -289,10 +284,12 @@ int main(int argc, char **argv){
   else{
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+      if(stream_out!=NULL)fclose(stream_out);
       return 1;
     }
   }
-  
+
   nlabelptrs=gettokens(labels,labelptrs);
   ntransfer=0;
   for(i=0;i<nlabelptrs;i++){
@@ -431,10 +428,12 @@ int main(int argc, char **argv){
   if(is_sodar_file==0){
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      fclose(stream_out);
       return 1;
     }
     if(fgets(labels,buffer_len,stream_in)==NULL){
       fprintf(stderr,"*** Error: The file %s is empty\n",file_in);
+      fclose(stream_out);
       return 1;
     }
   }
@@ -521,6 +520,8 @@ int main(int argc, char **argv){
     fprintf(stream_out,"\n");
   }
 
+  if(stream_in!=NULL&&stream_in!=stdin)fclose(stream_in);
+  if(stream_out!=NULL)fclose(stream_out);
   return 0;
 }
 

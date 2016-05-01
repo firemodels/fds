@@ -8,9 +8,21 @@
 
 #define MARK 255
 
-/* ------------------ rle ------------------------ */
+/* ------------------ compress_zlib ------------------------ */
 
-unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
+int compress_zlib(unsigned char *dest, uLongf *destLen, unsigned char *source, int sourceLen){
+  return compress(dest, destLen, source, sourceLen);
+}
+
+/* ------------------ uncompress_zlib ------------------------ */
+
+int uncompress_zlib(unsigned char *dest, uLongf *destLen, unsigned char *source, int sourceLen){
+  return uncompress(dest, destLen, source, sourceLen);
+}
+
+/* ------------------ compress_rle ------------------------ */
+
+unsigned int compress_rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
   unsigned char lastchar=MARK, cmark=MARK, thischar, *buffer_start;
   unsigned char *buffer_in_end;
   int nrepeats=1;
@@ -54,9 +66,9 @@ unsigned int rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_
   return buffer_out-buffer_start;
 }
 
-/* ------------------ irle ------------------------ */
+/* ------------------ uncompress_rle ------------------------ */
 
-unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
+unsigned int uncompress_rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out){
   int nrepeats,nn;
   unsigned char thischar, *buffer_in_end;
 
@@ -178,7 +190,7 @@ int uncompress_volsliceframe(unsigned char *compressed_data_in,
   float valmin, valmax;
   int i,ndatafile;
   uLongf countin,countout;
-  
+
   valmin=*(float *)(compressed_data_in+24);
   valmax=*(float *)(compressed_data_in+28);
   *timeval_out=*(float *)(compressed_data_in+20);

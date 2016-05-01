@@ -1,6 +1,6 @@
 #include "options.h"
 #include "glew.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -15,7 +15,7 @@
 
 /* ----------------------- get_pt_smokecolor ----------------------------- */
 
-void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], mesh *meshi, int *inobst, char *blank_local){
+void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], meshdata *meshi, int *inobst, char *blank_local){
   int i, j, k;
   int ijk;
   float val000,val100,val010,val110;
@@ -176,7 +176,7 @@ void init_volrender_surface(int flag){
   int i;
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int ii;
     float dx, dy, dz;
 
@@ -205,7 +205,7 @@ void init_volrender_surface(int flag){
   }
   ijkbarmax=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     ijkbarmax=MAX(ijkbarmax,meshi->ivolbar);
@@ -213,7 +213,7 @@ void init_volrender_surface(int flag){
     ijkbarmax=MAX(ijkbarmax,meshi->kvolbar);
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -257,7 +257,7 @@ void init_volrender(void){
 
   nvolrenderinfo=0;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -277,7 +277,7 @@ void init_volrender(void){
     slicedata *slicei;
     char *shortlabel, *longlabel;
     int blocknumber;
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     slicei = sliceinfo + i;
@@ -291,7 +291,7 @@ void init_volrender(void){
     shortlabel = slicei->label.shortlabel;
     longlabel = slicei->label.longlabel;
 
-    if(STRCMP(shortlabel,"temp")==0){  
+    if(STRCMP(shortlabel,"temp")==0){
       vr->fireslice=slicei;
      continue;
     }
@@ -301,7 +301,7 @@ void init_volrender(void){
     }
   }
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -345,9 +345,47 @@ void init_volrender(void){
 
 }
 
+/* ------------------ getmesh_in_smesh ------------------------ */
+
+meshdata *getmesh_in_smesh(meshdata *mesh_guess, supermeshdata *smesh, float *xyz){
+  int i;
+  float *smin, *smax;
+
+  smin = smesh->boxmin_scaled;
+  smax = smesh->boxmax_scaled;
+
+  if(xyz[0]<smin[0]||xyz[1]<smin[1]||xyz[2]<smin[2])return NULL;
+  if(xyz[0]>smax[0]||xyz[1]>smax[1]||xyz[2]>smax[2])return NULL;
+  for(i = -1; i<smesh->nmeshes; i++){
+    meshdata *meshi;
+    float *bmin, *bmax;
+
+    if(i==-1){
+      if(mesh_guess==NULL)continue;
+      meshi = mesh_guess;
+    }
+    else{
+      meshi = smesh->meshes[i];
+      if(meshi==mesh_guess)continue;
+    }
+
+    bmin = meshi->boxmin_scaled;
+    bmax = meshi->boxmax_scaled;
+
+    if(
+      bmin[0]<=xyz[0]&&xyz[0]<=bmax[0]&&
+      bmin[1]<=xyz[1]&&xyz[1]<=bmax[1]&&
+      bmin[2]<=xyz[2]&&xyz[2]<=bmax[2]){
+      return meshi;
+    }
+  }
+  ASSERT(FFALSE);
+  return NULL;
+}
+
 /* ------------------ get_cum_smokecolor ------------------------ */
 
-void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh *meshi, int iwall){
+void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, meshdata *meshi, int iwall){
   float t_intersect, t_intersect_min=FLT_MAX, *boxmin, *boxmax;
   int i;
   int nsteps;
@@ -360,7 +398,7 @@ void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, mesh
   char *blank_local;
   float pt_smoketran, *pt_smokecolor;
   float tauhat,alphahat;
-  mesh *xyz_mesh=NULL;
+  meshdata *xyz_mesh=NULL;
 
   if(combine_meshes==1){
     boxmin = meshi->super->boxmin_scaled;
@@ -548,12 +586,12 @@ void compute_all_smokecolors(void){
 
   if(freeze_volsmoke==1)return;
   for(ii=0;ii<nmeshes;ii++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     int iwall;
     float dstep;
     float dx, dy, dz;
-    float *x, *y, *z; 
+    float *x, *y, *z;
     int ibar, jbar, kbar;
     float *smokecolor;
 
@@ -571,7 +609,7 @@ void compute_all_smokecolors(void){
     dy = y[1] - y[0];
     dz = z[1] - z[0];
     dstep = sqrt(dx*dx+dy*dy+dz*dz)/2.0;
-    
+
     if(vr->smokeslice==NULL)continue;
     for(iwall=-3;iwall<=3;iwall++){
       float *xyz,xyzarray[3];
@@ -691,7 +729,7 @@ void drawsmoke3dVOLdebug(void){
 
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
-    mesh *meshi;
+    meshdata *meshi;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -768,7 +806,7 @@ void drawsmoke3dVOLdebug(void){
   glBegin(GL_LINES);
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
-    mesh *meshi;
+    meshdata *meshi;
     float x[2], y[2], z[2];
     float *xplt, *yplt, *zplt;
     int ibar, jbar, kbar;
@@ -863,7 +901,7 @@ void drawsmoke3dVOL(void){
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
     int i,j;
     float xx, yy, zz;
@@ -1187,8 +1225,8 @@ void drawsmoke3dVOL(void){
 
 /* ------------------ set_super_index ------------------------ */
 
-void set_super_index(mesh *meshi, int dir){
-  mesh *nab;
+void set_super_index(meshdata *meshi, int dir){
+  meshdata *nab;
   int index;
 
   if(meshi->s_offset[dir]>=0)return;
@@ -1207,13 +1245,13 @@ void set_super_index(mesh *meshi, int dir){
 
 /* ------------------ update_volsmoke_supertexture ------------------------ */
 
-void update_volsmoke_supertexture(supermesh *smesh){
+void update_volsmoke_supertexture(supermeshdata *smesh){
   GLsizei ni, nj, nk;
   int i;
 
   glActiveTexture(GL_TEXTURE0);
   for(i=0;i<smesh->nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int *s_offset;
     float *smokedataptr;
 
@@ -1232,7 +1270,7 @@ void update_volsmoke_supertexture(supermesh *smesh){
   }
   glActiveTexture(GL_TEXTURE1);
   for(i=0;i<smesh->nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int *s_offset;
     float *firedataptr;
 
@@ -1253,7 +1291,7 @@ void update_volsmoke_supertexture(supermesh *smesh){
   }
   glActiveTexture(GL_TEXTURE3);
   for(i=0;i<smesh->nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int *s_offset;
 
     meshi = smesh->meshes[i];
@@ -1273,7 +1311,7 @@ void update_volsmoke_supertexture(supermesh *smesh){
 
 /* ------------------ update_volsmoke_texture ------------------------ */
 
-void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedata_local){
+void update_volsmoke_texture(meshdata *meshi, float *smokedata_local, float *firedata_local){
   GLsizei ni, nj, nk;
   int ijk_offset[3]={0,0,0};
 
@@ -1287,7 +1325,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
   glActiveTexture(GL_TEXTURE0);
   glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, smokedata_local);
 
-  if(firedata_local!=NULL){  
+  if(firedata_local!=NULL){
     glActiveTexture(GL_TEXTURE1);
     glTexSubImage3D(GL_TEXTURE_3D,0,ijk_offset[0],ijk_offset[1],ijk_offset[2],ni,nj,nk,GL_RED, GL_FLOAT, firedata_local);
   }
@@ -1305,7 +1343,7 @@ void update_volsmoke_texture(mesh *meshi, float *smokedata_local, float *firedat
 
 /* ------------------ mesh_connect ------------------------ */
 
-int mesh_connect(mesh *mesh_from, int val, mesh *mesh_to){
+int mesh_connect(meshdata *mesh_from, int val, meshdata *mesh_to){
   float *eps;
 
   eps = mesh_from->boxeps;
@@ -1370,7 +1408,7 @@ int mesh_connect(mesh *mesh_from, int val, mesh *mesh_to){
 void drawsmoke3dGPUVOL(void){
 
   int iwall;
-  mesh *meshold=NULL;
+  meshdata *meshold=NULL;
   int ii;
   int inside;
   int *drawsides;
@@ -1406,13 +1444,13 @@ void drawsmoke3dGPUVOL(void){
   glUniform1f(GPUvol_temperature_cutoff,temperature_cutoff);
   glUniform1f(GPUvol_temperature_max,temperature_max);
   glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
- 
+
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
   if(use_transparency_data==1)transparenton();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
     volfacelistdata *vi;
-    mesh *meshi;
+    meshdata *meshi;
     float x1, x2, yy1, yy2, z1, z2;
     float xx, yy, zz;
 
@@ -1428,7 +1466,7 @@ void drawsmoke3dGPUVOL(void){
 
     // VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
     // define parameters for smoke drawing
-    
+
     if(iwall<0){
       xx = meshi->x0;
       yy = meshi->y0;
@@ -1466,8 +1504,8 @@ void drawsmoke3dGPUVOL(void){
     }
 
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    
-    
+
+
     if(newmesh==1){
       glUniform1i(GPUvol_inside,inside);
       if(combine_meshes==1){
@@ -1942,7 +1980,7 @@ void unload_volsmoke_frame_allmeshes(int framenum){
 
   PRINTF("Unloading smoke frame: %i\n",framenum);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -2002,7 +2040,7 @@ void read_volsmoke_allframes(volrenderdata *vr){
 
 /* ------------------ read_volsmoke_frame_allmeshes ------------------------ */
 
-void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
+void read_volsmoke_frame_allmeshes(int framenum, supermeshdata *smesh){
   int i;
   int first=1;
   int nm;
@@ -2014,7 +2052,7 @@ void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
     nm=smesh->nmeshes;
   }
   for(i=0;i<nm;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     if(smesh==NULL){
@@ -2030,7 +2068,7 @@ void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
     }
   }
   for(i=0;i<nm;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     if(smesh==NULL){
@@ -2062,9 +2100,9 @@ void read_volsmoke_frame_allmeshes(int framenum, supermesh *smesh){
 void *read_volsmoke_allframes_allmeshes2(void *arg){
   int i;
   int nframes=0;
-  
+
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -2091,7 +2129,7 @@ void define_volsmoke_textures(void){
   if(combine_meshes==1&&gpuactive==1){
 #ifdef pp_GPU
     for(i=0;i<nsupermeshinfo;i++){
-      supermesh *smesh;
+      supermeshdata *smesh;
 
       smesh = supermeshinfo + i;
       init_volsmoke_supertexture(smesh);
@@ -2100,7 +2138,7 @@ void define_volsmoke_textures(void){
   }
   else{
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo  + i;
       init_volsmoke_texture(meshi);
@@ -2116,7 +2154,7 @@ void read_volsmoke_allframes_allmeshes(void){
   compress_volsmoke=glui_compress_volsmoke;
   load_volcompressed=glui_load_volcompressed;
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + i;
@@ -2160,7 +2198,7 @@ void unload_volsmoke_textures(void){
   PRINTF("Unloading smoke and fire textures for each mesh\n");
   FFLUSH();
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     FREEMEMORY(meshi->smoke_texture_buffer);
@@ -2170,7 +2208,7 @@ void unload_volsmoke_textures(void){
 
 /* ------------------ init_volsmoke_texture ------------------------ */
 
-void init_volsmoke_texture(mesh *meshi){
+void init_volsmoke_texture(meshdata *meshi){
   GLint border_size=0;
   GLsizei nx, ny, nz;
   int i;
@@ -2197,8 +2235,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2215,8 +2253,8 @@ void init_volsmoke_texture(mesh *meshi){
   for(i=0;i<nx*ny*nz;i++){
     meshi->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, meshi->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2258,7 +2296,7 @@ void unload_volsmoke_supertextures(void){
 
   doit=0;
   for(i=0;i<nsupermeshinfo;i++){
-    supermesh *smesh;
+    supermeshdata *smesh;
 
     smesh = supermeshinfo + i;
     if(smesh->smoke_texture_buffer!=NULL||smesh->fire_texture_buffer!=NULL){
@@ -2269,7 +2307,7 @@ void unload_volsmoke_supertextures(void){
   if(doit==0)return;
   PRINTF("Unloading smoke and fire textures for each supermesh\n");
   for(i=0;i<nsupermeshinfo;i++){
-    supermesh *smesh;
+    supermeshdata *smesh;
 
     smesh = supermeshinfo + i;
     FREEMEMORY(smesh->fire_texture_buffer);
@@ -2280,7 +2318,7 @@ void unload_volsmoke_supertextures(void){
 
 /* ------------------ init_volsmoke_supertexture ------------------------ */
 #ifdef pp_GPU
-void init_volsmoke_supertexture(supermesh *smesh){
+void init_volsmoke_supertexture(supermeshdata *smesh){
   GLint border_size=0;
   int supermesh_index;
   GLsizei nx, ny, nz;
@@ -2310,8 +2348,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->smoke_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->smoke_texture_buffer);
 
   glActiveTexture(GL_TEXTURE1);
@@ -2328,8 +2366,8 @@ void init_volsmoke_supertexture(supermesh *smesh){
   for(i=0;i<nx*ny*nz;i++){
     smesh->fire_texture_buffer[i]=0.0;
   }
-  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F, 
-    nx, ny, nz, border_size, 
+  glTexImage3D(GL_TEXTURE_3D, 0, GL_R32F,
+    nx, ny, nz, border_size,
     GL_RED, GL_FLOAT, smesh->fire_texture_buffer);
 
   if(volsmoke_colormap_id_defined==-1){
@@ -2364,15 +2402,15 @@ void init_volsmoke_supertexture(supermesh *smesh){
 
 /* ------------------ get_minmesh ------------------------ */
 
-mesh *get_minmesh(void){
+meshdata *get_minmesh(void){
   int i;
   float mindist=-1.0;
-  mesh *minmesh=NULL;
-  
+  meshdata *minmesh=NULL;
+
   // find mesh closes to origin that is not already in a supermesh
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     float dist2;
 
     meshi = meshinfo + i;
@@ -2388,20 +2426,20 @@ mesh *get_minmesh(void){
 
 /* ------------------ extend_mesh ------------------------ */
 
-int extend_mesh(supermesh *smesh, int direction){
+int extend_mesh(supermeshdata *smesh, int direction){
   int i;
   int count=0,nbefore;
 
   nbefore=smesh->nmeshes;
   for(i=0;i<nbefore;i++){
-    mesh *nabor;
+    meshdata *nabor;
 
     nabor = smesh->meshes[i]->nabors[direction];
     if(nabor!=NULL&&nabor->super!=NULL)continue;
     if(nabor==NULL)return 0;
   }
   for(i=0;i<nbefore;i++){
-    mesh *nabor;
+    meshdata *nabor;
 
     nabor = smesh->meshes[i]->nabors[direction];
     if(nabor->super!=NULL)continue;
@@ -2416,10 +2454,10 @@ int extend_mesh(supermesh *smesh, int direction){
 
 /* ------------------ make_smesh ------------------------ */
 
-void make_smesh(supermesh *smesh, mesh *firstmesh){
-  mesh **meshptrs;
+void make_smesh(supermeshdata *smesh, meshdata *firstmesh){
+  meshdata **meshptrs;
 
-  NewMemory((void **)&meshptrs,nmeshes*sizeof(mesh *));
+  NewMemory((void **)&meshptrs,nmeshes*sizeof(meshdata *));
   smesh->meshes=meshptrs;
 
   smesh->meshes[0]=firstmesh;
@@ -2445,14 +2483,14 @@ void make_smesh(supermesh *smesh, mesh *firstmesh){
   }
 }
 
-/* ------------------ compare_meshes ------------------------ */
+/* ------------------ compare_smeshes ------------------------ */
 
 int compare_smeshes( const void *arg1, const void *arg2 ){
-  mesh *meshi, *meshj;
+  meshdata *meshi, *meshj;
   float dcell;
 
-  meshi = *(mesh **)arg1;
-  meshj = *(mesh **)arg2;
+  meshi = *(meshdata **)arg1;
+  meshj = *(meshdata **)arg2;
   dcell = MIN(meshi->dcell,meshj->dcell)/2.0;
   if(meshi->z0<meshj->z0-dcell)return -1;
   if(meshi->z0>meshj->z0+dcell)return 1;
@@ -2467,18 +2505,18 @@ int compare_smeshes( const void *arg1, const void *arg2 ){
 
 void init_supermesh(void){
   int i;
-  mesh *thismesh;
-  supermesh *smesh;
+  meshdata *thismesh;
+  supermeshdata *smesh;
 
   // determine mesh connectivity
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
     int j;
 
     meshi = meshinfo + i;
     for(j=i+1;j<nmeshes;j++){
-      mesh *meshj;
+      meshdata *meshj;
 
       meshj = meshinfo + j;
 
@@ -2523,7 +2561,7 @@ void init_supermesh(void){
   }
 
   for(smesh = supermeshinfo;smesh!=supermeshinfo+nsupermeshinfo;smesh++){
-    mesh *nab;
+    meshdata *nab;
     float *smin, *smax;
     int nsize;
 
@@ -2557,7 +2595,7 @@ void init_supermesh(void){
     // sort meshes in supermesh from lower front left to upper back right
 
     if(nvolrenderinfo>1){
-      qsort((mesh **)smesh->meshes,smesh->nmeshes,sizeof(mesh *),compare_smeshes);
+      qsort((meshdata **)smesh->meshes,smesh->nmeshes,sizeof(meshdata *),compare_smeshes);
     }
 
     // count meshes in supermesh in each direction
@@ -2576,12 +2614,12 @@ void init_supermesh(void){
     }
 
     // determine if a mesh side is exterior to a supermesh
-    
+
     for(i=0;i<smesh->nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
       int *extsides;
       int j;
-      mesh **nabors;
+      meshdata **nabors;
 
       meshi = smesh->meshes[i];
       extsides=meshi->extsides;

@@ -19,7 +19,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.3.4"
+#define PROGVERSION "6.3.6"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
@@ -55,12 +55,15 @@
 
 #ifdef pp_BETA
 #define pp_PILOT
-//#define pp_WINDROSE  2d histogram, variation of pilot ddata
+//#define pp_WINDROSE  2d histogram, variation of pilot data
 #define pp_GEOMTEST
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
 #endif
+
+// for debugging, set particle values to 100*parti->seq_id + small random number
+//#define pp_PARTTEST
 
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

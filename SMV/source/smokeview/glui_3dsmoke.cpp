@@ -204,7 +204,7 @@ extern "C" void delete_vol_tourlist(void){
 
 extern "C" void create_vol_tourlist(void){
   int i;
-  
+
   if(LISTBOX_VOL_tour==NULL)return;
   for(i=0;i<ntours;i++){
     tourdata *touri;
@@ -237,7 +237,7 @@ extern "C" void update_combine_meshes(void){
 extern "C" void update_gpu(void){
 #ifdef pp_GPU
   if(nsmoke3dinfo>0&&CHECKBOX_smokeGPU!=NULL){
-    CHECKBOX_smokeGPU->set_int_val(usegpu);  
+    CHECKBOX_smokeGPU->set_int_val(usegpu);
   }
 #endif
 }
@@ -304,7 +304,7 @@ void update_alpha(void){
   if(PANEL_testsmoke!=NULL){
     TEXT_smokealpha->set_text(label);
   }
-  
+
   if(smoke_extinct!=0.0&&smoke_dens!=0){
     depth=0.693147/(smoke_extinct*smoke_dens);
     sprintf(label,"50%s smoke depth=%f","%",depth);
@@ -323,11 +323,11 @@ extern "C" void glui_3dsmoke_setup(int main_window){
 
   int i;
 
-  
+
   if(nsmoke3dinfo<=0&&nvolrenderinfo<=0)return;
   if(CHECKBOX_meshvisptr!=NULL)FREEMEMORY(CHECKBOX_meshvisptr);
   NewMemory((void **)&CHECKBOX_meshvisptr,nmeshes*sizeof(GLUI_Checkbox *));
-  
+
   glui_3dsmoke=glui_bounds;
 
   if(smoketest==1){
@@ -443,7 +443,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   if(nsmoke3dinfo>0){
     PANEL_meshvis = glui_3dsmoke->add_rollout_to_panel(PANEL_overall,"Mesh Visibility",false);
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
       glui_3dsmoke->add_checkbox_to_panel(PANEL_meshvis,meshi->label,meshvisptr+i);
@@ -461,12 +461,12 @@ extern "C" void glui_3dsmoke_setup(int main_window){
   }
 
   // slice render dialog
-  
+
   if(nsmoke3dinfo>0){
     ROLLOUT_slices = glui_3dsmoke->add_rollout_to_panel(PANEL_overall,_d("Slice rendered"),false, SLICERENDER_ROLLOUT, Smoke_Rollout_CB);
     ADDPROCINFO(smokeprocinfo, nsmokeprocinfo, ROLLOUT_slices, SLICERENDER_ROLLOUT);
     ROLLOUT_slices->set_alignment(GLUI_ALIGN_LEFT);
- 
+
 #ifdef pp_GPU
     if(gpuactive==0){
       usegpu=0;
@@ -484,7 +484,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     {
       int ijk_max=0;
       for(i=0;i<nmeshes;i++){
-        mesh *meshi;
+        meshdata *meshi;
 
         meshi = meshinfo + i;
         if(ijk_max<meshi->ibar+1)ijk_max=meshi->ibar+1;
@@ -819,7 +819,7 @@ extern "C" void Smoke3d_CB(int var){
     break;
   case FIRE_HALFDEPTH:
     for(i=0;i<nmeshes;i++){
-      mesh *meshi;
+      meshdata *meshi;
 
       meshi = meshinfo + i;
       meshi->update_firehalfdepth=1;
@@ -828,10 +828,10 @@ extern "C" void Smoke3d_CB(int var){
     force_redisplay=1;
     Update_Smokecolormap(smoke_render_option);
     Idle_CB();
-   break;  
+   break;
 #ifdef pp_GPU
   case SMOKE_RTHICK:
-  
+
     smoke3d_thick = log_base2(smoke3d_rthick);
     glutPostRedisplay();
     force_redisplay=1;

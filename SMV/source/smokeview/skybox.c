@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "glew.h"
@@ -78,18 +78,18 @@ void free_skybox(void){
 void draw_floor(void){
   int i;
 
-/* stuff min and max grid data into a more convenient form 
+/* stuff min and max grid data into a more convenient form
   assuming the following grid numbering scheme
 
        5-------6
-     / |      /| 
-   /   |     / | 
+     / |      /|
+   /   |     / |
   4 -------7   |
-  |    |   |   |  
+  |    |   |   |
   Z    1---|---2
   |  Y     |  /
   |/       |/
-  0--X-----3     
+  0--X-----3
 
   */
   float points[]={
@@ -134,12 +134,12 @@ void draw_floor(void){
   glEnable(GL_TEXTURE_2D);
 
   for(i=4;i<5;i++){
-  
+
     if(skyboxinfo->face[i].file==NULL)continue;
 
     glBindTexture(GL_TEXTURE_2D,skyboxinfo->face[i].name);
     glBegin(GL_QUADS);
-    
+
     normal = normals + 3*i;
     faceptr = faces + 4*i;
 

@@ -25,7 +25,7 @@ int memusage(void){
   MEMORYSTATUS stat;
   int load;
 
-  GlobalMemoryStatus(&stat);    
+  GlobalMemoryStatus(&stat);
   load=stat.dwMemoryLoad;
   return load;
 }
@@ -69,7 +69,7 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 /* ------------------ initMALLOC ------------------------ */
 
 void initMALLOC(void){
-  
+
   MMfirstptr=&MMfirst;
   MMlastptr=&MMlast;
 
@@ -345,10 +345,10 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew, int memory_id){
   if(pbNew != NULL){
     if(pbNew!=(char *)(*ppold)-infoblocksize){
       this_ptr=(MMdata *)pbNew;
-      
+
       prev_ptr->next=this_ptr;
       next_ptr->prev=this_ptr;
-      
+
 #ifdef pp_MEMPRINT
       this_ptr->size = sizeNew;
 #endif

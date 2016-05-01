@@ -45,10 +45,10 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
 set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
-set CFASTEXE=%CFAST%\CFAST\intel_win%size%\cfast7_win%size%.exe
-set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
+set CFASTEXE=%CFAST%\Build\CFAST\intel_win%size%\cfast7_win%size%.exe
+set WIND2FDSEXE=%SVNROOT%\SMV\Build\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 
-set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
+set BACKGROUNDEXE=%SVNROOT%\SMV\Build\background\intel_win%size%\background.exe
 
 :: Run jobs in background (or not)
 
@@ -66,7 +66,7 @@ call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
 
-set SH2BAT=%SVNROOT%\Utilities\sh2bat\intel_win_64\sh2bat
+set SH2BAT=%SVNROOT%\SMV\Build\sh2bat\intel_win_64\sh2bat
 call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.

@@ -1,81 +1,104 @@
 <html>
 <head>
 <TITLE>Smokeview</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function build_libs(platform){
+  MyObject.Run(get_fullpath("scripts/BUILDlibs.bat ",platform));
+}
+function build_smv(args){
+  MyObject.Run(get_fullpath("scripts/BUILDsmv.bat ",args));
+}
+function build_smv2(args){
+  MyObject.Run(get_fullpath("scripts/BUILDsmv2.bat ",args));
+}
+function build_prog(args){
+  MyObject.Run(get_fullpath("scripts/BUILDprog.bat ",args));
+}
+function build_utilprog(args){
+  MyObject.Run(get_fullpath("../Utilities/Scripts/BUILDutilprog.bat ",args));
+}
+function package_smv(args){
+  MyObject.Run(get_fullpath("scripts/PACKAGEsmv.bat ",args));
+}
+function install_smv(args){
+  MyObject.Run(get_fullpath("scripts/INSTALLsmv.bat ",args));
+}
+</script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - <font size=5>Smokeview</font> - <a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
+<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
+<font size=5>Smokeview</font> - 
+<a href="build_guides.html"><font size=5>Guides</font></a> -
+<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
 
 <hr size="1">
 
 <h3>Preliminaries</h3>
 <ul>
-<li>Update <a href="scripts/EDIT_setup.bat">configuration file</a>, <a href="scripts/Update_repos_gitlatest.bat">repos</a>.
-<li><a href="scripts/GET_smvlog.bat">Add gitlog</a> (after <a href="scripts/EDIT_setup.bat">smvdate</a>) to release notes, <a href="scripts/VIEW_release_notes.bat">view</a> release notes
-<li>Get <a href="scripts/GET_revision.bat">repo hash</a>
+<li>Edit <a href="scripts/EDIT_setup.bat">config file</a>
+<li>Update <a href="scripts/Update_repos_gitlatest.bat">repos</a>
+<li><a href="scripts/GET_smvlog.bat">Add log entries</a> to release notes (for commits made after <a href="scripts/EDIT_setup.bat">smvdate</a> defined in config file) 
+<li><a href="scripts/VIEW_release_notes.bat">view</a> release notes
+<li><a href="scripts/GET_revision.bat">Get repo revision</a>
 </ul>
 
 <h3>Libraries</h3>
-
+<p id="demo"></p>
 <p><table border=on>
 <tr>
 <th>Windows</th><th>Linux</th><th>OSX</th>
 </tr>
 <tr>
-<td align=center><a href="scripts/BUILD_LIBS_win64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILD_LIBS_linux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILD_LIBS_osx.bat">Build</a></td>
+<td align=center><button onclick="build_libs('windows')">Build</button></td>
+<td align=center><button onclick="build_libs('linux')">Build</button></td>
+<td align=center><button onclick="build_libs('osx')">Build</button></td>
 </tr>
 </table>
 
 <h3>Smokeview</h3>
 
-<tr><td valign=top>
-
 <p><table border=on>
-<tr><th colspan=2>Windows Debug</th><th colspan=3>Incremental Test</th></tr>
-<tr><th>Test</th><th>Release</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
-<tr>
-<td align=center><a href="scripts/BUILDdebugtestsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDdebugsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvwininc64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvlinuxinc64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvosxinc64.bat">Build</a></td></tr>
-</tr>
-</table>
-
-<tr><td valign=top>
-<p><table border=on>
-<tr><th colspan=3>Test</th><th colspan=3>Release</th></tr>
+<tr><th colspan=3>Full Test</th><th colspan=3>Full Release</th></tr>
 <tr>
 <th>Windows</th><th align=center>Linux</th><th align=center>OSX</th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
-<td align=center><a href="scripts/BUILDtestsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvlinux64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDtestsmvosx64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvwin64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvlinux64.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmvosx64.bat">Build</a></td>
+<td align=center><button onclick="build_smv('windows test')">Build</button></td>
+<td align=center><button onclick="build_smv('linux test')">Build</button></td>
+<td align=center><button onclick="build_smv('osx test')">Build</button></td>
+<td align=center><button onclick="build_smv('windows release')">Build</button></td>
+<td align=center><button onclick="build_smv('linux release')">Build</button></td>
+<td align=center><button onclick="build_smv('osx release')">Build</button></td>
 </tr>
 <tr>
-<td align=center><a href="scripts/PACKAGEtestsmvwin64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEtestsmvlinux64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEtestsmvosx64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvwin64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvlinux64.bat">Package</a></td>
-<td align=center><a href="scripts/PACKAGEsmvosx64.bat">Package</a></td>
+<td align=center><button onclick="package_smv('windows test')">Package</button></td>
+<td align=center><button onclick="package_smv('linux test')">Package</button></td>
+<td align=center><button onclick="package_smv('osx test')">Package</button></td>
+<td align=center><button onclick="package_smv('windows release')">Package</button></td>
+<td align=center><button onclick="package_smv('linux release')">Package</button></td>
+<td align=center><button onclick="package_smv('osx release')">Package</button></td>
 </tr>
 <tr>
-<td align=center><a href="scripts/INSTALLtestsmvwin64.bat">Install</a></td>
-<td align=center><a href="scripts/INSTALLtestsmvlinux64.bat">Install</a></td>
-<td align=center><a href="scripts/INSTALLtestsmvosx64.bat">Install</a></td>
-<td align=center><a href="scripts/INSTALLsmvwin64.bat">Install</a></td>
-<td align=center><a href="scripts/INSTALLsmvlinux64.bat">Install</a></td>
-<td align=center><a href="scripts/INSTALLsmvosx64.bat">Install</a></td>
+<td align=center><button onclick="install_smv('windows test')">Install</button></td>
+<td align=center><button onclick="install_smv('linux test')">Install</button></td>
+<td align=center><button onclick="install_smv('osx test')">Install</button></td>
+<td align=center><button onclick="install_smv('windows release')">Install</button></td>
+<td align=center><button onclick="install_smv('linux release')">Install</button></td>
+<td align=center><button onclick="install_smv('osx release')">Install</button></td>
 </tr>
-<tr><td align=center COLSPAN=3><a href="scripts/GET_smvtest_version.bat">Revision</a></td>
-<td align=center COLSPAN=3><a href="scripts/GET_smv_version.bat">Revision</a></td></tr>
-<tr><td align=center COLSPAN=3><a href="scripts/UPLOADsmv2google.bat">Upload to google drive</a></td>
-<td align=center COLSPAN=3><a href="scripts/UPLOADsmv2git.bat">Upload to git</a></td></tr>
+<tr><td align=center COLSPAN=3><a href="scripts/GET_smvtest_version.bat">Get Smokeview Revision</a></td>
+<td align=center COLSPAN=3><a href="scripts/GET_smv_version.bat">Get Smokeview Revision</a></td></tr>
+<tr><td align=center COLSPAN=3><a href="scripts/UPLOADsmv2google.bat">Upload</a> (google drive)</td>
+<td align=center COLSPAN=3><a href="scripts/UPLOADsmv2git.bat">Upload</a> (git)</td></tr>
 </table>
 
 <h3>Utilities</h3>
@@ -89,77 +112,78 @@
 
 <tr>
 <th>background</th>
-<td align=center><a href="scripts/BUILDbgwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDbglinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDbgosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('background windows')">Build</button></td>
+<td align=center><button onclick="build_prog('background linux')">Build</button></td>
+<td align=center><button onclick="build_prog('background osx')">Build</button></td>
+</tr>
+
+<tr>
+<th>dem2fds</th>
+<td align=center><button onclick="build_prog('dem2fds windows')">Build</button></td>
+<td align=center><button onclick="build_prog('dem2fds linux')">Build</button></td>
+<td align=center><button onclick="build_prog('dem2fds osx')">Build</button></td>
 </tr>
 
 <tr>
 <th>fds2ascii</th>
-<td align=center><a href="scripts/BUILDf2awin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDf2alinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDf2aosx.bat">Build</a></td>
+<td align=center><button onclick="build_utilprog('fds2ascii windows')">Build</button></td>
+<td align=center><button onclick="build_utilprog('fds2ascii linux')">Build</button></td>
+<td align=center><button onclick="build_utilprog('fds2ascii osx')">Build</button></td>
 </tr>
 
 <tr>
 <th>smokediff</th>
-<td align=center><a href="scripts/BUILDsmdwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmdlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmdosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('smokediff windows')">Build</button></td>
+<td align=center><button onclick="build_prog('smokediff linux')">Build</button></td>
+<td align=center><button onclick="build_prog('smokediff osx')">Build</button></td>
 </tr>
 
 <tr>
 <th>smokezip</th>
-<td align=center><a href="scripts/BUILDsmzwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmzlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDsmzosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('smokezip windows')">Build</button></td>
+<td align=center><button onclick="build_prog('smokezip linux')">Build</button></td>
+<td align=center><button onclick="build_prog('smokezip osx')">Build</button></td>
 </tr>
+
 
 <tr>
 <th>wind2fds</th>
-<td align=center><a href="scripts/BUILDwindwin.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDwindlinux.bat">Build</a></td>
-<td align=center><a href="scripts/BUILDwindosx.bat">Build</a></td>
+<td align=center><button onclick="build_prog('wind2fds windows')">Build</button></td>
+<td align=center><button onclick="build_prog('wind2fds linux')">Build</button></td>
+<td align=center><button onclick="build_prog('wind2fds osx')">Build</button></td>
 </tr>
 </table>
-<p>Build installation utilities: <a href="scripts/BUILDsetpathwin.bat">set_path</a>, <a href="scripts/BUILDsh2batwin.bat">sh2bat</a>
+
+<p>Build windows installation utilities: 
+<button onclick="build_prog('set_path windows')">set_path</button>, 
+<button onclick="build_prog('sh2bat windows')">sh2bat</button>
 
 <h3>Verification</h3>
 <ul>
 <li><a href="scripts/RUNwindowssmokebot.bat">Run windows Smokebot</a>
-</ul>
-
-<p><table border=on>
-<tr><th>Technical</th><th>User</th><th>Verification</th></tr>
-<tr align=center>
-<td></td>
-<td><a href="scripts/GETsmvugfigs.bat">Get images</a></td>
-<td><a href="scripts/GETsmvvergfigs.bat">Get images</a></td>
-</tr>
-<tr align=center>
-<td><a href="scripts/BUILDsmvtg.bat">Build</a></td>
-<td><a href="scripts/BUILDsmvug.bat">Build</a></td>
-<td><a href="scripts/BUILDsmvvg.bat">Build</a></td>
-</tr>
-<tr align=center>
-<td><a href="scripts/View_SMV_TG.bat">View</a></td>
-<td><a href="scripts/View_SMV_UG.bat">View</a></td>
-<td><a href="scripts/View_SMV_VG.bat">View</a></td>
-</tr>
-</table>
-<ul>
-<li><a href="scripts/COPY_smv_guides.bat">Copy guides</a> from local repo to FIRE-LOCAL
-<li><a href="Scripts/COPY_smvlinux_guides.bat">Copy guides</a> from Linux smokebot to FIRE-LOCAL
 <li><a href="scripts/VIEW_localimages.bat">View</a> web summary
 </ul>
 
+<h3>Smokeview Debug/Incremental Build</h3>
+<p><table border=on>
+<tr><th colspan=2>Full Windows Debug</th><th colspan=3>Incremental Test</th></tr>
+<tr><th>Test</th><th>Release</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
+<tr>
+<td align=center><button onclick="build_smv2('win_smvtd')">Build</button></td>
+<td align=center><button onclick="build_smv2('win_smvd')">Build</button></td>
+<td align=center><button onclick="build_smv2('win_smvti')">Build</button></td>
+<td align=center><button onclick="build_smv2('linux_smvti')">Build</button></td>
+<td align=center><button onclick="build_smv2('osx_smvti')">Build</button></td>
+</tr>
+</table>
+
 <h3>Other</h3>
 <ul>
-<li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page. 
+<li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page
 <li><a href="scripts/COPYhome2config.bat">configuration file ===>> repo.</a>
 <li><a href="scripts/COPYconfig2home.bat">configuration file <<=== repo.</a>
 <li><a href="scripts/TEST_setup.bat">Test</a> settings and build/bundle environment. 
-<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>.
+<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>
 
 <p><hr>

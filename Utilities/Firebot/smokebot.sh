@@ -12,13 +12,16 @@ size=_64
 # define run directories
 SMOKEBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$SMOKEBOT_RUNDIR/output"
-HISTORY_DIR="$SMOKEBOT_RUNDIR/history"
+HISTORY_DIR="$HOME/.smokebot/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 GUIDE_DIR=$OUTPUT_DIR/guides
 STAGE_STATUS=$OUTPUT_DIR/stage_status
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+web_DIR=
+WEB_URL=
+SMOKEBOT_LITE=
 
 # define repo names (default)
 fdsrepo=~/FDS-SMVgitclean
@@ -39,16 +42,14 @@ MAILTO=
 UPLOADRESULTS=
 COMPILER=intel
 
-WEBHOSTNAME=blaze.nist.gov
-if [ "$SMOKEBOT_HOSTNAME" != "" ] ; then
-WEBHOSTNAME=$SMOKEBOT_HOSTNAME
-fi
-
-while getopts 'ab:C:cI:m:Mo:q:r:sS:tuU' OPTION
+while getopts 'aAb:C:cI:Lm:Mo:q:r:sS:tuUw:W:' OPTION
 do
 case $OPTION in
   a)
    RUNAUTO="y"
+   ;;
+  A)
+   RUNAUTO="Y"
    ;;
   b)
    BRANCH="$OPTARG"
@@ -61,6 +62,9 @@ case $OPTION in
    ;;
   I)
    COMPILER="$OPTARG"
+   ;;
+  L)
+   SMOKEBOT_LITE=1
    ;;
   m)
    MAILTO="$OPTARG"
@@ -94,9 +98,39 @@ case $OPTION in
   u)
    UPDATEREPO=1
    ;;
+  w)
+   web_DIR="$OPTARG"
+   ;;
+  W)
+   WEB_URL="$OPTARG"
+   ;;
 esac
 done
 shift $(($OPTIND-1))
+
+# if one of WEB_URL or web_DIR exist then both should exist
+# if web_DIR exists then it must be writable
+
+if [ "$WEB_URL" == "" ]; then
+  web_DIR=
+fi
+if [ "$web_DIR" == "" ]; then
+  WEB_URL=
+else
+  if [ -d $web_DIR ]; then
+    testfile=$web_DIR/test.$$
+    touch $testfile >& /dev/null
+    if [ -e $testfile ]; then
+      rm $testfile
+    else
+      web_DIR=
+      WEB_URL=
+    fi
+  else
+    web_DIR=
+    WEB_URL=
+  fi
+fi
 
 if [ "$COMPILER" == "intel" ]; then
 if [[ "$IFORT_COMPILER" != "" ]] ; then
@@ -146,6 +180,12 @@ echo "Preliminaries:"
 echo "  running in: $SMOKEBOT_RUNDIR"
 echo "FDS-SMV repo: $fdsrepo"
 echo "  cfast repo: $cfastrepo"
+if [ ! "$web_DIR" == "" ]; then
+echo "     web dir: $web_DIR"
+fi
+if [ ! "$WEB_URL" == "" ]; then
+echo "         URL: $WEB_URL"
+fi
 echo ""
 
 cd
@@ -155,7 +195,6 @@ export cfastrepo
 
 export SMV_SUMMARY="$fdsrepo/Manuals/SMV_Summary"
 WEBFROMDIR="$fdsrepo/Manuals/SMV_Summary"
-WEBTODIR=/var/www/html/VV/SMV2
 
 SMV_VG_GUIDE=$fdsrepo/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$fdsrepo/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
@@ -202,14 +241,22 @@ TIME_LIMIT_EMAIL_NOTIFICATION="unsent"
 
 run_auto()
 {
+  option=$1
   GIT_STATUSDIR=~/.smokebot
   SMV_SOURCE=$fdsrepo/SMV/source
-  GIT_SMVFILE=$GIT_STATUSDIR/smv_revision
-  GIT_SMVLOG=$GIT_STATUSDIR/smv_log
+  TRIGGER_DIR=$fdsrepo/SMV/source/scripts
+  GIT_SMV_FILE=$GIT_STATUSDIR/smv_revision
+  GIT_SMV_LOG=$GIT_STATUSDIR/smv_log
+  
+  QUICKTRIGGER=$TRIGGER_DIR/smokeview/smokebot_quicktrigger.txt
+  GIT_QT_FILE=$GIT_STATUSDIR/quicktrigger_revision
+
+  TRIGGER=$TRIGGER_DIR/smokeview/smokebot_trigger.txt
+  GIT_T_FILE=$GIT_STATUSDIR/trigger_revision
 
   FDS_SOURCE=$fdsrepo/FDS_Source
-  GIT_FDSFILE=$GIT_STATUSDIR/fds_revision
-  GIT_FDSLOG=$GIT_STATUSDIR/FDS_log
+  GIT_FDS_FILE=$GIT_STATUSDIR/fds_revision
+  GIT_FDS_LOG=$GIT_STATUSDIR/FDS_log
 
   MESSAGE_FILE=$GIT_STATUSDIR/message
 
@@ -237,32 +284,73 @@ run_auto()
 
 # get info for smokeview
   cd $SMV_SOURCE
-  THIS_SMVREVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  if [ ! -e $GIT_QT_FILE ]; then
+    touch $GIT_QT_FILE
+  fi
+  THIS_QT_REVISION=`git log --abbrev-commit $QUICKTRIGGER | head -1 | awk '{print $2}'`
+  LAST_QT_REVISION=`cat $GIT_QT_FILE`
+
+  THIS_T_REVISION=`git log --abbrev-commit $TRIGGER | head -1 | awk '{print $2}'`
+  LAST_T_REVISION=`cat $GIT_T_FILE`
+
   THIS_SMVAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_SMVREVISION=`cat $GIT_SMVFILE`
-  git log . | head -5 | tail -1 > $GIT_SMVLOG
+  if [ ! -e $GIT_SMV_FILE ]; then
+    touch $GIT_SMV_FILE
+  fi
+  
+  THIS_SMV_REVISION=`git log --abbrev-commit . | head -1 | awk '{print $2}'`
+  LAST_SMV_REVISION=`cat $GIT_SMV_FILE`
+  git log . | head -5 | tail -1 > $GIT_SMV_LOG
 
 # get info for FDS
   cd $FDS_SOURCE
-  THIS_FDSREVISION=`git log --abbrev-commit . | head -1 | awk '{printf $2}'`
   THIS_FDSAUTHOR=`git log . | head -2 | tail -1 | awk '{print $2}'`
-  LAST_FDSREVISION=`cat $GIT_FDSFILE`
-  git log . | head -5 | tail -1 > $GIT_FDSLOG
+  if [ ! -e $GIT_FDS_FILE ]; then
+    touch $GIT_FDS_FILE
+  fi
+  THIS_FDS_REVISION=`git log --abbrev-commit . | head -1 | awk '{printf $2}'`
+  LAST_FDS_REVISION=`cat $GIT_FDS_FILE`
+  git log . | head -5 | tail -1 > $GIT_FDS_LOG
 
-  if [[ $THIS_SMVREVISION == $LAST_SMVREVISION && $THIS_FDSREVISION == $LAST_FDSREVISION ]] ; then
-    exit
+  if [ "$option" == "" ]; then
+    if [[ $THIS_SMV_REVISION == $LAST_SMV_REVISION && $THIS_FDS_REVISION == $LAST_FDS_REVISION ]] ; then
+      exit
+    fi
+  else
+    if [[ $THIS_QT_REVISION == $LAST_QT_REVISION && $THIS_T_REVISION == $LAST_T_REVISION ]] ; then
+      exit
+    fi
+    if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
+      SMOKEBOT_LITE=1
+    fi
+    if [[ $THIS_T_REVISION != $LAST_T_REVISION ]] ; then
+      SMOKEBOT_LITE=
+    fi
   fi
 
   rm -f $MESSAGE_FILE
-  if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
-    echo $THIS_SMVREVISION>$GIT_SMVFILE
-    echo -e "smokeview source has changed. $LAST_SMVREVISION->$THIS_SMVREVISION($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
-    cat $GIT_SMVLOG >> $MESSAGE_FILE
-  fi
-  if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
-    echo $THIS_FDSREVISION>$GIT_FDSFILE
-    echo -e "FDS source has changed. $LAST_FDSREVISION->$THIS_FDSREVISION($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
-    cat $GIT_FDSLOG >> $MESSAGE_FILE
+  if [ "$option" == "" ]; then
+    if [[ $THIS_SMV_REVISION != $LAST_SMV_REVISION ]] ; then
+      echo $THIS_SMV_REVISION>$GIT_SMV_FILE
+      echo -e "smokeview source has changed. $LAST_SMV_REVISION->$THIS_SMV_REVISION($THIS_SMVAUTHOR)" >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
+    fi
+    if [[ $THIS_FDS_REVISION != $LAST_FDS_REVISION ]] ; then
+      echo $THIS_FDS_REVISION>$GIT_FDS_FILE
+      echo -e "FDS source has changed. $LAST_FDS_REVISION->$THIS_FDS_REVISION($THIS_FDSAUTHOR)" >> $MESSAGE_FILE
+      cat $GIT_FDS_LOG >> $MESSAGE_FILE
+    fi
+  else
+    if [[ $THIS_QT_REVISION != $LAST_QT_REVISION ]] ; then
+      echo $THIS_QT_REVISION>$GIT_QT_FILE
+      echo -e "quick trigger file has changed. " >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
+    fi
+    if [[ $THIS_T_REVISION != $LAST_T_REVISION ]] ; then
+      echo $THIS_T_REVISION>$GIT_T_FILE
+      echo -e "trigger file has changed. " >> $MESSAGE_FILE
+      cat $GIT_SMV_LOG >> $MESSAGE_FILE
+    fi
   fi
   echo -e "Smokebot run initiated." >> $MESSAGE_FILE
   cat $MESSAGE_FILE | mail -s "smokebot run initiated" $mailTo > /dev/null
@@ -296,7 +384,7 @@ MKDIR ()
   if [ ! -d $DIR ]
   then
     echo Creating directory $DIR
-    mkdir $DIR
+    mkdir -p $DIR
   fi
 }
 
@@ -347,9 +435,9 @@ clean_smokebot_history()
    MKDIR $SMOKEBOT_RUNDIR > /dev/null
    cd $SMOKEBOT_RUNDIR
    MKDIR guides > /dev/null
-   MKDIR history > /dev/null
-   MKDIR output > /dev/null
-   rm -rf output/* > /dev/null
+   MKDIR $HISTORY_DIR > /dev/null
+   MKDIR $OUTPUT_DIR > /dev/null
+   rm -rf $OUTPUT_DIR/* > /dev/null
    MKDIR $NEWGUIDE_DIR > /dev/null
    chmod 775 $NEWGUIDE_DIR
 }
@@ -373,8 +461,16 @@ update_cfast()
    echo "cfast repo"
    # If yes, then update the CFAST repository and compile CFAST
    if [ -e "$cfastrepo" ] ; then
+      cd $cfastrepo
+      IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
       if [ "$CLEANREPO" == "1" ]; then
         echo "   cleaning"
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $cfastrepo has uncommitted changes"
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -c (clean) option"
+          exit
+        fi
         clean_repo $cfastrepo
         updateclean="1"
       fi
@@ -382,6 +478,12 @@ update_cfast()
       # Update to latest GIT revision
       if [ "$UPDATEREPO" == "1" ]; then
         echo "   updating"
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $cfastrepo has uncommitted changes."
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -u (update) option"
+          exit
+        fi
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0a
         git pull >> $OUTPUT_DIR/stage0a 2>&1
         updateclean="1"
@@ -404,13 +506,13 @@ compile_cfast()
     # Build CFAST
     echo "Building"
     echo "   cfast release"
-    cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+    cd $cfastrepo/Build/CFAST/${COMPILER}_${platform}${size}
     rm -f cfast7_${platform}${size}
     make --makefile ../makefile clean &> /dev/null
     ./make_cfast.sh >> $OUTPUT_DIR/stage1a 2>&1
 
    # Check for errors in CFAST compilation
-   cd $cfastrepo/CFAST/${COMPILER}_${platform}${size}
+   cd $cfastrepo/Build/CFAST/${COMPILER}_${platform}${size}
    if [ -e "cfast7_${platform}${size}" ]
    then
       stage0_success=true
@@ -437,6 +539,13 @@ clean_FDS_repo()
       if [ "$CLEANREPO" == "1" ]; then
         cd $fdsrepo
         echo "   cleaning"
+        IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
+        if [ "$IS_DIRTY" == "1" ]; then
+          echo "The repo $fdsrepo has uncommitted changes."
+          echo "Commit or revert these changes or re-run"
+          echo "smokebot without the -c (clean) option"
+          exit
+        fi
         clean_repo $fdsrepo/Verification
         clean_repo $fdsrepo/SMV
         clean_repo $fdsrepo/FDS_Source
@@ -454,7 +563,7 @@ clean_FDS_repo()
 do_FDS_checkout()
 {
    cd $fdsrepo
-
+ 
    CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
    if [[ "$BRANCH" != "" ]] ; then
      if [[ `git branch | grep $BRANCH` == "" ]] ; then 
@@ -471,6 +580,13 @@ do_FDS_checkout()
    fi
    if [ "$UPDATEREPO" == "1" ]; then
      echo "   updating"
+     IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
+     if [ "$IS_DIRTY" == "1" ]; then
+       echo "The repo $fdsrepo has uncommitted changes."
+       echo "Commit or revert these changes or re-run"
+       echo "smokebot without the -u (update) option"
+       exit
+     fi
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
      git pull >> $OUTPUT_DIR/stage0b 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage0b 2>&1
@@ -482,6 +598,9 @@ do_FDS_checkout()
       echo "   not cleaned or updated"
    fi 
    GIT_REVISION=`git describe --long --dirty`
+   GIT_SHORTHASH=`git rev-parse --short HEAD`
+   GIT_LONGHASH=`git rev-parse HEAD`
+   GIT_DATE=`git log -1 --format=%cd --date=local $GIT_SHORTHASH`
 }
 
 check_FDS_checkout()
@@ -685,56 +804,56 @@ compile_smv_utilities()
 
    # smokezip:
    echo "      smokezip"
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size}
    rm -f *.o smokezip_${platform}${size}
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_smokezip.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # smokediff:
    echo "      smokediff"
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size}
    rm -f *.o smokediff_${platform}${size}
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_smokediff.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    
    # background
    echo "      background"
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size}
    rm -f *.o background
    echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1
    ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1
    
   # wind2fds:
    echo "      wind2fds"
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size}
    rm -f *.o wind2fds_${platform}${size}
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1
-   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1
+   ./make_wind2fds.sh >> $OUTPUT_DIR/stage2a 2>&1
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    else
    $SSH \( \
    cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokezip_${platform}${size} \; \
    echo 'Compiling smokezip:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_zip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_smokezip.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size} \; \
    rm -f *.o smokediff_${platform}${size} \; \
    echo 'Compiling smokediff:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_diff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_smokediff.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/background/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size} \; \
    rm -f *.o background \; \
    echo 'Compiling background:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./make_background.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   cd $fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size} \; \
    echo 'Compiling wind2fds:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
-   ./make_wind.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
+   ./make_wind2fds.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage2a 2>&1  \)
    fi
    else
@@ -757,10 +876,10 @@ check_smv_utilities()
    if [ "$haveCC" == "1" ] ; then
      # Check for errors in SMV utilities compilation
      cd $fdsrepo
-     if [ -e "$fdsrepo/Utilities/smokezip/${COMPILER}_${platform}${size}/smokezip_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/smokediff/${COMPILER}_${platform}${size}/smokediff_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
-        [ -e "$fdsrepo/Utilities/background/${COMPILER}_${platform}${size}/background" ]
+     if [ -e "$fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size}/smokezip_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/smokediff/${COMPILER}_${platform}${size}/smokediff_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/wind2fds/${COMPILER}_${platform}${size}/wind2fds_${platform}${size}" ]  && \
+        [ -e "$fdsrepo/SMV/Build/background/${COMPILER}_${platform}${size}/background" ]
      then
         stage2a_success="1"
      else
@@ -881,12 +1000,12 @@ compile_smv_db()
    # Clean and compile SMV debug
    echo "   smokeview"
    echo "      debug"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}_db
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size}_db \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
    fi
@@ -897,7 +1016,7 @@ check_compile_smv_db()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage2b_success=true
@@ -966,7 +1085,6 @@ check_smv_pictures_db()
       grep -I -E "Warning" $OUTPUT_DIR/stage4a >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-
 }
 
 #  ==================================
@@ -979,12 +1097,12 @@ compile_smv()
    if [ "$SSH" == "" ] ; then
    # Clean and compile SMV
    echo "      release"
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    rm -f smokeview_${platform}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size} \; \
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
    rm -f smokeview_${platform}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
@@ -995,7 +1113,7 @@ check_compile_smv()
 {
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
-   cd $fdsrepo/SMV/Build/${COMPILER}_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
       stage2c_smv_success=true
@@ -1053,6 +1171,19 @@ check_smv_pictures()
       cat $OUTPUT_DIR/stage4b >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d "$WEBFROMDIR" ]; then
+       CURDIR=`pwd`
+       cd $web_DIR
+       rm -rf images
+       rm -rf manuals
+       rm index.html
+       cd $WEBFROMDIR
+       cp -r * $web_DIR/.
+       cd $CURDIR
+     fi
+   fi
+
 }
 
 #  ===============================================
@@ -1091,16 +1222,14 @@ check_smv_movies()
       grep -I -E "Warning" $OUTPUT_DIR/stage4c >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
-   if [ "$UPLOADRESULTS" == "1" ]; then
-     if [ -d "$WEBTODIR" ]; then
-       if [ -d "$WEBFROMDIR" ]; then 
-         CURDIR=`pwd`
-         cd $WEBTODIR
-         rm -rf *
-         cd $WEBFROMDIR
-         cp -r * $WEBTODIR/.
-         cd $CURDIR
-       fi
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d "$WEBFROMDIR" ]; then 
+       CURDIR=`pwd`
+       cd $web_DIR
+       rm -rf *
+       cd $WEBFROMDIR
+       cp -r * $web_DIR/.
+       cd $CURDIR
      fi
    fi
 
@@ -1124,14 +1253,27 @@ generate_timing_stats()
    scripts/GEOM_Cases.sh
 
    cd $fdsrepo/Utilities/Scripts
-   ./fds_timing_stats.sh smokebot
+   ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
+   cd $fdsrepo/Utilities/Scripts
+   ./fds_timing_stats.sh smokebot 1 > smv_benchmarktiming_stats.csv
+   TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
 }
 
 archive_timing_stats()
 {
-   echo "   archiving"
-   cd $fdsrepo/Utilities/Scripts
-   cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+  echo "   archiving"
+  cd $fdsrepo/Utilities/Scripts
+  cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+  cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
+  TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
+  if [ "$UPLOADRESULTS" == "1" ]; then
+    cd $fdsrepo/Utilities/Firebot
+    ./smvstatus_updatepub.sh -F
+  fi
+  if [ ! "$web_DIR" == "" ]; then
+    cd $fdsrepo/Utilities/Firebot
+    ./make_smv_summary.sh > $web_DIR/index.html
+  fi
 }
 
 #  ===================================
@@ -1146,20 +1288,24 @@ check_guide()
    label=$4
 
    # Scan and report any errors in build process for guides
-   SMOKEBOT_MANDIR=/var/www/html/smokebot/manuals/
+
+   SMOKEBOT_MANDIR=
+   if [ ! "$web_DIR" == "" ]; then
+     if [ -d $web_DIR/manuals ]; then
+       SMOKEBOT_MANDIR=$web_DIR/manuals
+     fi
+   fi
+
    cd $SMOKEBOT_RUNDIR
-   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]
-   then
-      if [ "$UPLOADRESULTS" == "1" ]; then
-      if [ -d $SMOKEBOT_MANDIR ] ; then
-        cp $directory/$document $SMOKEBOT_MANDIR/.
-      fi
-      fi
-      if [ -d $SMV_SUMMARY/manuals ] ; then
-        cp $directory/$document $SMV_SUMMARY/manuals/.
-      fi
-      cp $directory/$document $NEWGUIDE_DIR/.
-      chmod 664 $NEWGUIDE_DIR/$document
+   if [[ `grep "! LaTeX Error:" -I $stage` == "" ]]; then
+     if [ ! "$SMOKEBOT_MANDIR" == "" ]; then
+       cp $directory/$document $SMOKEBOT_MANDIR/.
+     fi
+     if [ -d $SMV_SUMMARY/manuals ] ; then
+       cp $directory/$document $SMV_SUMMARY/manuals/.
+     fi
+     cp $directory/$document $NEWGUIDE_DIR/.
+     chmod 664 $NEWGUIDE_DIR/$document
    else
       echo "Errors from Stage 5 - Build FDS-SMV Guides:" >> $ERROR_LOG
       echo $3 >> $ERROR_LOG
@@ -1200,6 +1346,8 @@ make_guide()
 
 save_build_status()
 {
+   STOP_TIME=$(date)
+   STOP_TIME_INT=$(date +%s)
    cd $SMOKEBOT_RUNDIR
    # Save status outcome of build to a text file
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
@@ -1207,27 +1355,27 @@ save_build_status()
      echo "***Warnings:" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
      echo "   build failure and warnings for version: ${GIT_REVISION}, branch: $BRANCH."
-     echo "Build failure and warnings for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_SMV_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
       echo "   build failure for version: ${GIT_REVISION}, branch: $BRANCH."
-      echo "Build failure for Version: ${GIT_REVISION}, Branch: $BRANCH." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_SMV_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
       echo "   build success with warnings for version: ${GIT_REVISION}, branch: $BRANCH."
-      echo "Version: ${GIT_REVISION}, Branch: $BRANCH has warnings." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_SMV_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
       echo "   build success for version: ${GIT_REVISION}, branch: $BRANCH."
-      echo "Build success! Version: ${GIT_REVISION}, Branch: $BRANCH passed all build tests." > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success!;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_SMV_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
@@ -1245,39 +1393,45 @@ email_build_status()
    echo $THIS_FDS_FAILED>$FDS_STATUS_FILE
    stop_time=`date`
    echo "----------------------------------------------" > $TIME_LOG
-   echo "          host: $hostname " >> $TIME_LOG
-   echo "         start: $start_time " >> $TIME_LOG
-   echo "          stop: $stop_time " >> $TIME_LOG
-   echo "         setup: $DIFF_PRELIM" >> $TIME_LOG
-   echo "build software: $DIFF_BUILDSOFTWARE" >> $TIME_LOG
-   echo "     run cases: $DIFF_RUNCASES" >> $TIME_LOG
-   echo " make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
+   echo "             host: $hostname " >> $TIME_LOG
+   echo "            start: $start_time " >> $TIME_LOG
+   echo "             stop: $stop_time " >> $TIME_LOG
+   echo "            setup: $DIFF_PRELIM" >> $TIME_LOG
+   echo "   build software: $DIFF_BUILDSOFTWARE" >> $TIME_LOG
+   echo "        run cases: $DIFF_RUNCASES" >> $TIME_LOG
+   echo "    make pictures: $DIFF_MAKEPICTURES" >> $TIME_LOG
 if [ "$MAKEMOVIES" == "1" ]; then
-   echo "   make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
+   echo "      make movies: $DIFF_MAKEMOVIES" >> $TIME_LOG
 fi
-   echo "   make guides: $DIFF_MAKEGUIDES" >> $TIME_LOG
-   echo "         total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
-if [ "$RUNAUTO" != "" ]; then
-   echo "FDS revisions: old: $LAST_FDSREVISION new: $THIS_FDSREVISION" >> $TIME_LOG
-   echo "SMV revisions: old: $LAST_SMVREVISION new: $THIS_SMVREVISION" >> $TIME_LOG
-else
-   echo "SMV revisions: $THIS_SMVREVISION" >> $TIME_LOG
+   echo "      make guides: $DIFF_MAKEGUIDES" >> $TIME_LOG
+   echo "            total: $DIFF_SCRIPT_TIME" >> $TIME_LOG
+   echo "benchmark time(s): $TOTAL_SMV_TIMES" >> $TIME_LOG
+if [ "$RUNAUTO" == "y" ]; then
+   echo "FDS revisions: old: $LAST_FDS_REVISION new: $THIS_FDS_REVISION" >> $TIME_LOG
+   echo "SMV revisions: old: $LAST_SMV_REVISION new: $THIS_SMV_REVISION" >> $TIME_LOG
 fi
-  if [[ $THIS_SMVREVISION != $LAST_SMVREVISION ]] ; then
-    cat $GIT_SMVLOG >> $TIME_LOG
+if [ "$RUNAUTO" == "Y" ]; then
+   echo "FDS revisions: $THIS_SMV_REVISION" >> $TIME_LOG
+   echo "SMV revisions: $THIS_FDS_REVISION" >> $TIME_LOG
+fi
+if [ "$RUNAUTO" == "" ]; then
+   echo "SMV revisions: $THIS_SMV_REVISION" >> $TIME_LOG
+fi
+  if [[ $THIS_SMV_REVISION != $LAST_SMV_REVISION ]] ; then
+    cat $GIT_SMV_LOG >> $TIME_LOG
   fi
-  if [[ $THIS_FDSREVISION != $LAST_FDSREVISION ]] ; then
-    cat $GIT_FDSLOG >> $TIME_LOG
+  if [[ $THIS_FDS_REVISION != $LAST_FDS_REVISION ]] ; then
+    cat $GIT_FDS_LOG >> $TIME_LOG
   fi
-   echo "----------------------------------------------" >> $TIME_LOG
    cd $SMOKEBOT_RUNDIR
-   if [ "$UPLOADRESULTS" == "1" ]; then
    # Check for warnings and errors
-   echo "Manuals (private): http://$WEBHOSTNAME/VV/SMV2" >> $TIME_LOG
-   echo "Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
-   echo "Manuals   (local):  $SMV_SUMMARY/manuals" >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
+   if [ ! "$WEB_URL" == "" ]; then
+     echo "Smokebot summary: $WEB_URL" >> $TIME_LOG
    fi
+   if [ "$UPLOADRESULTS" == "1" ]; then
+     echo " Smokebot status: https://goo.gl/gKVSDZ" >> $TIME_LOG
+   fi
+   echo "-------------------------------" >> $TIME_LOG
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
    then
      # Send email with failure message and warnings, body of email contains appropriate log file
@@ -1314,6 +1468,9 @@ fi
 if [[ $RUNAUTO == "y" ]] ; then
   run_auto
 fi
+if [[ $RUNAUTO == "Y" ]] ; then
+  run_auto trigger
+fi
 
 #  ============================
 #  = Primary script execution =
@@ -1342,9 +1499,11 @@ compile_cfast
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+if [ "$SMOKEBOT_LITE" == "" ]; then
 if [[ $stage1b_fdsdb_success ]] ; then
    compile_fds_mpi
    check_compile_fds_mpi
+fi
 fi
 
 ### Stage 2 build smokeview ###
@@ -1354,8 +1513,11 @@ check_smv_utilities
 compile_smv_db
 check_compile_smv_db
 
-compile_smv
-check_compile_smv
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  compile_smv
+  check_compile_smv
+fi
+
 BUILDSOFTWARE_end=`GET_TIME`
 DIFF_BUILDSOFTWARE=`GET_DURATION $BUILDSOFTWARE_beg $BUILDSOFTWARE_end`
 echo "Build Software: $DIFF_BUILDSOFTWARE" >> $STAGE_STATUS
@@ -1367,9 +1529,11 @@ if [[ $stage1b_fdsdb_success && "$RUNDEBUG" == "1" ]] ; then
    check_verification_cases_debug
 fi
 
-if [[ $stage1c_fdsrel_success ]] ; then
-   run_verification_cases_release
-   check_verification_cases_release
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [[ $stage1c_fdsrel_success ]] ; then
+     run_verification_cases_release
+     check_verification_cases_release
+  fi
 fi
 RUNCASES_end=`GET_TIME`
 DIFF_RUNCASES=`GET_DURATION $RUNCASES_beg $RUNCASES_end`
@@ -1377,45 +1541,51 @@ echo "Run cases: $DIFF_RUNCASES" >> $STAGE_STATUS
 
 ### Stage 4 generate images ###
 MAKEPICTURES_beg=`GET_TIME`
-if [[ $stage1c_fdsrel_success && $stage2c_smv_success ]] ; then
-  make_smv_pictures
-  check_smv_pictures
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [[ $stage1c_fdsrel_success && $stage2c_smv_success ]] ; then
+    make_smv_pictures
+    check_smv_pictures
+  fi
 fi
 MAKEPICTURES_end=`GET_TIME`
 DIFF_MAKEPICTURES=`GET_DURATION $MAKEPICTURES_beg $MAKEPICTURES_end`
 echo "Make pictures: $DIFF_MAKEPICTURES" >> $STAGE_STATUS
 
-if [ "$MAKEMOVIES" == "1" ]
-then
-  MAKEMOVIES_beg=`GET_TIME`
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [ "$MAKEMOVIES" == "1" ]; then
+    MAKEMOVIES_beg=`GET_TIME`
  
-  make_smv_movies
-  check_smv_movies
+    make_smv_movies
+    check_smv_movies
 
-  MAKEMOVIES_end=`GET_TIME`
-  DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
-  echo "Make movies: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
+    MAKEMOVIES_end=`GET_TIME`
+    DIFF_MAKEMOVIES=`GET_DURATION $MAKEMOVIES_beg $MAKEMOVIES_end`
+    echo "Make movies: $DIFF_MAKEMOVIES" >> $STAGE_STATUS
+fi
 fi
 
-if [[ $stage1c_fdsrel_success ]] ; then
-  generate_timing_stats
-  archive_timing_stats
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [[ $stage1c_fdsrel_success ]] ; then
+    generate_timing_stats
+  fi
 fi
 
 ### Stage 5 build documents ###
 MAKEGUIDES_beg=`GET_TIME`
-if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
-   echo Making guides
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
+     echo Making guides
 #   echo "   geometry notes"
 #  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
-   echo "   user"
-  make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
-   echo "   technical"
-  make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
-   echo "   verification"
-  make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
-else
-   echo Errors found, not building guides
+     echo "   user"
+    make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
+     echo "   technical"
+    make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
+     echo "   verification"
+    make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+  else
+    echo Errors found, not building guides
+  fi
 fi
 MAKEGUIDES_end=`GET_TIME`
 DIFF_MAKEGUIDES=`GET_DURATION $MAKEGUIDES_beg $MAKEGUIDES_end`
@@ -1429,5 +1599,11 @@ echo "Total time: $DIFF_SCRIPT_TIME" >> $STAGE_STATUS
 echo Reporting results
 set_files_world_readable
 save_build_status
+ 
+if [ "$SMOKEBOT_LITE" == "" ]; then
+  if [[ $stage1c_fdsrel_success ]] ; then
+    archive_timing_stats
+  fi
+fi
 echo "   emailing results"
 email_build_status

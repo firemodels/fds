@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -116,14 +116,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(showsmoke==1){
       CLIP_VALS;
-      drawpart_frame();
+      draw_partframe();
     }
 
 /* ++++++++++++++++++++++++ draw evacuation +++++++++++++++++++++++++ */
 
     if(showevac==1){
       CLIP_VALS;
-      drawevac_frame();
+      draw_evacframe();
     }
 
 /* ++++++++++++++++++++++++ draw test geometry +++++++++++++++++++++++++ */
@@ -158,7 +158,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_devices();
 #ifdef pp_PILOT
     draw_pilot();
-#endif    
+#endif
     SNIFF_ERRORS("after draw_devices");
 
     if(visaxislabels==1){
@@ -224,7 +224,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     if(setPDIM==1){
       if(visGrid!=noGridnoProbe){
         int igrid;
-        mesh *meshi;
+        meshdata *meshi;
 
         UNCLIP;
         for(igrid=0;igrid<nmeshes;igrid++){
@@ -253,8 +253,8 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(mode==SELECTOBJECT){
     if(select_avatar==1){
       CLIP_GEOMETRY;
-      drawselect_avatars();
-      SNIFF_ERRORS("after drawselect_avatars");
+      draw_select_avatars();
+      SNIFF_ERRORS("after draw_select_avatars");
       return;
     }
   }
@@ -280,7 +280,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   }
 
   /* ++++++++++++++++++++++++ draw stereo parallax indicator +++++++++++++++++++++++++ */
-  
+
   if(show_parallax==1){
     UNCLIP;
     antialias(ON);
@@ -300,7 +300,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   SNIFF_ERRORS("drawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
-  
+
   if(ngeominfoptrs>0){
     CLIP_GEOMETRY;
     draw_geom(DRAW_OPAQUE,GEOM_STATIC);
@@ -315,7 +315,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     draw_geomdiag();
     SNIFF_ERRORS("draw_geomdiag");
   }
-  
+
   /* ++++++++++++++++++++++++ draw shooter points +++++++++++++++++++++++++ */
 
   if(showshooter!=0&&shooter_active==1){
@@ -328,7 +328,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(visTerrainType!=TERRAIN_HIDDEN&&nterraininfo>0){
     int i;
-    
+
     //shaded 17 0
     //stepped 18 1
     //line    19 2
@@ -390,14 +390,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   }
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==0)){
     CLIP_VALS;
-    drawslice_frame();
-  } 
+    draw_sliceframe();
+  }
 
   /* ++++++++++++++++++++++++ draw boundary files +++++++++++++++++++++++++ */
 
   if(showpatch==1){
     CLIP_VALS;
-    drawpatch_frame(DRAW_OPAQUE);
+    draw_patchframe(DRAW_OPAQUE);
   }
 
 /* ++++++++++++++++++++++++ draw labels +++++++++++++++++++++++++ */
@@ -445,7 +445,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 //**********************************************************************************
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
-  
+
   if(ngeominfoptrs>0){
     CLIP_GEOMETRY;
     draw_geom(DRAW_TRANSPARENT,GEOM_STATIC);
@@ -466,7 +466,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(show3dsmoke==1||showvolrender==1){
     CLIP_VALS;
-    drawsmoke_frame();
+    draw_smokeframe();
   }
 
   if(active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN){
@@ -487,16 +487,16 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(showpatch == 1){
     CLIP_VALS;
-    drawpatch_frame(DRAW_TRANSPARENT);
+    draw_patchframe(DRAW_TRANSPARENT);
   }
-  
+
 /* ++++++++++++++++++++++++ draw slice files +++++++++++++++++++++++++ */
 
   if((show_slices_and_vectors==1&&showvslice==1)||(showslice==1&&use_transparency_data==1)){
     CLIP_VALS;
-    drawslice_frame();
-    SNIFF_ERRORS("after drawslice_frame");
-  } 
+    draw_sliceframe();
+    SNIFF_ERRORS("after draw_sliceframe");
+  }
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 
@@ -510,7 +510,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(showvslice==1){
     CLIP_VALS;
-    drawvslice_frame();
+    draw_vsliceframe();
   }
   SNIFF_ERRORS("after drawvslice");
 
@@ -518,7 +518,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(showplot3d==1){
     CLIP_VALS;
-    drawplot3d_frame();
+    draw_plot3dframe();
   }
   SNIFF_ERRORS("after drawplot3d");
 }

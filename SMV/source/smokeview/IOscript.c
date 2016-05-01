@@ -739,7 +739,7 @@ int compile_script(char *scriptfile){
         SETbuffer;
         sscanf(buffer,"%i %i %i %i %f",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->fval);
         if(scripti->ival2==4){
-          sscanf(buffer2,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->ival5);
+          sscanf(buffer,"%i %i %i %i %i",&scripti->ival,&scripti->ival2,&scripti->ival3,&scripti->ival4,&scripti->ival5);
         }
         break;
 
@@ -886,7 +886,7 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   if(index > nmeshes - 1)index = -1;
   for(i = 0; i < nmeshes; i++){
     if(index == i || index < 0){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -1065,25 +1065,21 @@ void script_loadparticles(scriptdata *scripti){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,UNLOAD,&errorcode);
-      count++;
-    }
+    readpart(parti->file,i,UNLOAD,PARTDATA,&errorcode);
+    count++;
   }
   for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,LOAD,&errorcode);
-      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
-        FREEMEMORY(loaded_file);
-        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
-        strcpy(loaded_file,scripti->cval);
-      }
-      count++;
+    readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
+    if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
+      FREEMEMORY(loaded_file);
+      NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
+      strcpy(loaded_file,scripti->cval);
     }
+    count++;
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
@@ -1143,7 +1139,7 @@ void script_loadvolsmoke(scriptdata *scripti){
     read_volsmoke_allframes_allmeshes2(NULL);
   }
   else if(imesh>=0&&imesh<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + imesh;
@@ -1231,7 +1227,7 @@ void script_loadslicem(scriptdata *scripti, int meshnum){
     if(match_upper(slicei->label.longlabel, scripti->cval) == NOTMATCH)continue;
     if(scripti->ival == 0){
       int *min, *max;
-      mesh *meshi;
+      meshdata *meshi;
 
       if(slicei->volslice == 0)continue;
       min = slicei->ijk_min;
@@ -1386,7 +1382,7 @@ void script_partclasscolor(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
 
     propi = part5propinfo + i;
     if(propi->particle_property==0)continue;
@@ -1432,7 +1428,7 @@ void script_plot3dprops(scriptdata *scripti){
   update_plot3d_display();
 
   if(visVector==1&&ReadPlot3dFile==1){
-    mesh *gbsave,*gbi;
+    meshdata *gbsave,*gbi;
 
     gbsave=current_mesh;
     for(i=0;i<nmeshes;i++){
@@ -1450,7 +1446,7 @@ void script_plot3dprops(scriptdata *scripti){
 /* ------------------ script_showplot3ddata ------------------------ */
 
 void script_showplot3ddata(scriptdata *scripti){
-  mesh *meshi;
+  meshdata *meshi;
   int imesh, dir, showhide;
   float val;
   int isolevel;
@@ -1509,13 +1505,13 @@ void script_partclasstype(scriptdata *scripti){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     int j;
 
     propi = part5propinfo + i;
     if(propi->display==0)continue;
     for(j=0;j<npartclassinfo;j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       if(propi->class_present[j]==0)continue;
       partclassj = partclassinfo + j;
@@ -1578,7 +1574,7 @@ void script_loadfile(scriptdata *scripti){
 
     parti = partinfo + i;
     if(strcmp(parti->file,scripti->cval)==0){
-      readpart(parti->file,i,LOAD,&errorcode);
+      readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
       return;
     }
   }
@@ -1868,7 +1864,7 @@ void settimeval(float timeval){
 
 void script_setviewpoint(scriptdata *scripti){
   char *viewpoint;
-  camera *ca;
+  cameradata *ca;
   int count=0;
 
   viewpoint = scripti->cval;

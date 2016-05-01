@@ -155,7 +155,7 @@ extern "C" void glui_trainer_setup(int main_window){
   if(glui_trainer!=NULL)glui_trainer->close();
   glui_trainer = GLUI_Master.create_glui(_d("Demonstrator"),0,screenWidth+12,0);
   if(showgluitrainer==0)glui_trainer->hide();
-  
+
   glui_trainer->set_main_gfx_window( main_window );
   PANEL_smokeview = glui_trainer->add_panel(_d("Data"));
   BUTTON_smoke3d = glui_trainer->add_button_to_panel(PANEL_smokeview,_d("Smoke/Fire"),LOAD_SMOKE,TRAINER_CB);
@@ -166,7 +166,7 @@ extern "C" void glui_trainer_setup(int main_window){
   if(AnySlices("oxygen")==0&&AnySlices(_d("oxygen VOLUME FRACTION"))==0){
     BUTTON_oxy->disable();
   }
-  
+
   PANEL_explore = glui_trainer->add_panel("Explore",true);
 
   trainer_path=-1;
@@ -185,7 +185,7 @@ extern "C" void glui_trainer_setup(int main_window){
 
   LIST_viewpoint = glui_trainer->add_listbox_to_panel(PANEL_explore,_d("Viewpoint:"),&trainer_viewpoints,TRAINERVIEWPOINTS,TRAINER_CB);
   {
-    camera *ca;
+    cameradata *ca;
 
     for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
       char line[256];

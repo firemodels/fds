@@ -1,6 +1,6 @@
 #define IN_STRING_UTIL
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <ctype.h>
@@ -13,6 +13,8 @@
 #endif
 #include "MALLOC.h"
 #include "datadefs.h"
+#include "file_util.h"
+#include "compress.h"
 
 unsigned int *random_ints, nrandom_ints;
 
@@ -125,12 +127,15 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
-/* ------------------ getGitHash ------------------------ */
+/* ------------------ getGitInfo ------------------------ */
 
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
 #endif
-void getGitHash(char *githash){
+#ifndef pp_GITDATE
+#define pp_GITDATE "unknown"
+#endif
+void getGitInfo(char *githash, char *gitdate){
   char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
@@ -141,6 +146,16 @@ void getGitHash(char *githash){
   }
   else{
     strcpy(githash,"unknown");
+  }
+
+  strcpy(rev, pp_GITDATE);
+  trim_back(rev);
+  beg = trim_front(rev);
+  if(strlen(beg)>0){
+    strcpy(gitdate, beg);
+  }
+  else{
+    strcpy(gitdate, "unknown");
   }
 }
 
@@ -208,7 +223,7 @@ char *randstr(char* str, int length){
 
 void trim_commas(char *line){
   char *c;
-  
+
   for(c = line + strlen(line) - 1;c>=line;c--){
     if(isspace(*c))continue;
     if(strncmp(c,",",1)!=0)break;
@@ -219,7 +234,7 @@ void trim_commas(char *line){
 /* ------------------ trim ------------------------ */
 
 void trim_back(char *line){
-  
+
   //  removes trailing white space from the character string line
 
   char *c;
@@ -343,7 +358,7 @@ void num2string(char *string, float tval,float range){
   float tval2,mant10;
   int exp10;
 
-  tval2=ABS(tval); 
+  tval2=ABS(tval);
   if(0.01-.001<=tval2&&tval2<0.1){
     sprintf(string,"%3.2f",tval);
   }
@@ -510,7 +525,7 @@ float frexp10(float x, int *exp10){
   }
   mantissa = log10((double)xabs);
   *exp10 = (int)floor((double)mantissa);
-      
+
   mantissa = pow((double)10.0f,(double)mantissa-(double)*exp10);
   if(x<0)mantissa = -mantissa;
   return mantissa;
@@ -604,7 +619,7 @@ int match_wild(char *pTameText, char *pWildText){
 //Matching Wildcards: An Algorithm
 //by Kirk J. Krauss
 // http://drdobbs.com/windows/210200888
-// (modified from original by setting bCaseSensitive and cAltTerminator in the 
+// (modified from original by setting bCaseSensitive and cAltTerminator in the
 //  body of the routine and changing routine name to match_wild, also changed
 //  formatting to be consistent with smokeview coding style)
 
@@ -674,7 +689,7 @@ int match_wild(char *pTameText, char *pWildText){
       }
     }
     pTameText++;
-    pWildText++; 
+    pWildText++;
   }
   return bMatch;
 }
@@ -1029,12 +1044,10 @@ unsigned int date2day(char *tokenorig){
 
   strcpy(token,tokenorig);
   slash1=strchr(token,'/');
-  if(slash1!=NULL)slash2=strchr(slash1+1,'/');
+  if(slash1==NULL)return 0;
 
-  if(slash1==NULL){
-    return 0;
-  }
-  else if(slash1!=NULL&&slash2==NULL){
+  slash2 = strchr(slash1+1, '/');
+  if(slash2==NULL){
     char *dayend;
 
     year=NULL;
@@ -1197,6 +1210,88 @@ unsigned int diffdate(char *token, char *tokenbase){
   difft = date2sec(token) - date2sec(tokenbase);
   return difft;
 }
+
+/* ------------------ getBaseTitle ------------------------ */
+
+void getBaseTitle(char *progname, char *title_base){
+  char version[100];
+  char svn_version[100];
+  char svn_date[100];
+
+  getGitInfo(svn_version, svn_date);    // get githash
+
+  // construct string of the form:
+  //   5.x.y_#
+
+  getPROGversion(version);
+
+  strcpy(title_base, progname);
+
+  strcat(title_base, version);
+#ifdef pp_BETA
+  strcat(title_base, " (");
+  strcat(title_base, svn_version);
+  strcat(title_base, ")");
+#else
+#ifndef pp_OFFICIAL_RELEASE
+  strcat(title_base, " (");
+  strcat(title_base, svn_version);
+  strcat(title_base, ")");
+#endif
+#endif
+  strcat(title_base, " - ");
+}
+
+/* ------------------ getTitle ------------------------ */
+
+void getTitle(char *progname, char *fulltitle){
+  char title_base[1024];
+
+  getBaseTitle(progname, title_base);
+
+  STRCPY(fulltitle, title_base);
+  STRCAT(fulltitle, __DATE__);
+#ifdef pp_BETA
+  STRCAT(fulltitle, " - ");
+  STRCAT(fulltitle, __TIME__);
+#endif
+}
+
+/* ------------------ version ------------------------ */
+
+void version(char *progname){
+  char version[256];
+  char githash[256];
+  char gitdate[256];
+  char releasetitle[1024];
+
+  getPROGversion(version);
+  getGitInfo(githash, gitdate);    // get githash
+  getTitle(progname, releasetitle);
+  PRINTF("\n");
+  PRINTF(" %s\n\n", releasetitle);
+  PRINTF(" Version          : %s\n", version);
+  PRINTF(" Revision         : %s\n", githash);
+  PRINTF(" Revision Date    : %s\n", gitdate);
+  PRINTF(" Compilation Date : %s %s\n", __DATE__, __TIME__);
+#ifdef WIN32
+  PRINTF(" Platform         : WIN64 ");
+#ifdef pp_INTEL
+  PRINTF(" (Intel C/C++)");
+#else
+  PRINTF(" (MSVS C/C++)");
+#endif
+  PRINTF("\n");
+#endif
+#ifdef pp_OSX
+  PRINTF(" Platform         : OSX64\n");
+#endif
+#ifdef pp_LINUX
+  PRINTF(" Platform         : LINUX64\n");
+#endif
+}
+
+
 
 
 
