@@ -214,6 +214,9 @@ function camera.print(camera)
 end
 
 function camera.set(camera)
+    if camera == nil then
+        error("camera.set: camera does not exist")
+    end
     camera_set_eyex(camera.eyePos.x)
     camera_set_eyey(camera.eyePos.y)
     camera_set_eyez(camera.eyePos.z)
