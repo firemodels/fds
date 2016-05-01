@@ -264,6 +264,7 @@ mingw_win_64 : LIBS_PLAT = $(LIB_DIR_PLAT)/libglui.a \
 	$(LIB_DIR_PLAT)/libgd.a $(LIB_DIR_PLAT)/libjpeg.a \
 	$(LIB_DIR_PLAT)/libpng.a $(LIB_DIR_PLAT)/libz.a \
 	$(LIB_DIR_PLAT)/libglutwin.a
+mingw_win_64 : INC += $(WININC)
 mingw_win_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend \
 						       -ffree-form -frecord-marker=4 -fno-underscoring
 mingw_win_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -D GLEW_STATIC -D MINGW
