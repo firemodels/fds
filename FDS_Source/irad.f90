@@ -2020,8 +2020,8 @@ IF (AEROSOL_AL2O3) THEN
    ELSEIF (TEMP < 500._EB) THEN
       FF = 5.E-6_EB
    ELSE
-      FF = 0.00073_EB     
-   ENDIF   
+      FF = 0.00073_EB
+   ENDIF
 ELSE
    FF         = 7.0_EB/LAMBDA
 ENDIF

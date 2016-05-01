@@ -1451,7 +1451,7 @@ where the mixed number $m$ is between 0.12 and 0.20.
 
 In the transition region, viscous mixing spreads over the entire jet flow and the flow velocity along the axis decreases. The mean flow velocity at the jet centerline $u_{max}(x)$ is calculated by
 \begin{equation}
-u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
+\frac{u_{max}(x)}{u_0} = \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 \end{equation}
 
 Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
@@ -3132,13 +3132,13 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \section{Specified Heat Flux Boundary Conditions (\texorpdfstring{\textct{adiabatic\_xxx\_flux}}{adiabatic\_xxx\_flux})}
 
 There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \textct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \textct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
-\be 
+\be
    \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
 \ee
 where $\dot{Q}=16$~kW, $\gamma=1.4$, and $V=8$~m$^3$. After 30~s, the pressure rise, $p$, is expected to be 24~kPa (left, Fig.~\ref{adiabatic_flux}). The expected temperature rise, $\Delta T$, is found by solving the energy conservation equation:
 \be
    \dot{Q} \, \Delta t = c_p \, \rho \, V \, \Delta T - V \, \Delta p
-\ee 
+\ee
 as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 
 \begin{figure}[ht]
@@ -3147,7 +3147,7 @@ as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_pres} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_temp} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_pres} &
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp} 
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp}
 \end{tabular*}
 \caption[The \textct{adiabatic\_con\_flux} and \textct{adiabatic\_net\_flux} test cases]{Pressure and average temperature of a small compartment with specified heat flux boundary conditions.}
 \label{adiabatic_flux}
@@ -4017,7 +4017,14 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 
 \subsection{Case 6}
 
-This case tests the conservation of energy between drops, surfaces, and  the gas.  A 1 m$^3$ box is filled with 1 kg of gas ($c_p$ = 1~\si{kJ/(kg.K)} and W = 28~g/mol) at an initial temperature of 100~\si{\degree C}.  The box is filled with 0.1~kg of droplets ($c_p$ = 2~\si{kJ/(kg.K)}) that evaporate to the gas.  The droplets have an initial temperature of 20~\si{\degree C}, a freezing point of 0~\si{\degree C}, a boiling point of 100~\si{\degree C},  and a median diameter of 0.2~mm. All walls except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness) has a total mass of 1 kg, a specific heat of 1~\si{kJ/(kg.K)}, and an initial temperature of 250~\si{\degree C}.  At steady-state all the drops will have evaporated, the wall and the gas will be at 172.0~\si{\degree C} and the pressure rise will be 34,600 Pa (see Fig.~\ref{water_evaporation_6_plots}).
+This case tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. A box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K. All walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
+\begin{eqnarray*}
+\Delta E &=& m_{\rm w} \, c_{\rm w} \, (T_{{\rm w},0}-T_{\rm g,f}) \\[.1in]
+\Delta H &=& m_{\rm g,0} \, c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm g,0} ) + m_{\rm d} \Big( c_{\rm l} \, (T_{\rm b}-T_{\rm d,0}) + c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm b}) + h_v  \Big) \\[.1in]
+\Delta p &=& \frac{R}{W \, V} \left( m_{\rm g,f} \, T_{\rm g,f} - m_{\rm g,0} \, T_{\rm g,0} \right) \quad ; \quad R = 8.314 \; \hbox{kJ/kmol/K}
+\end{eqnarray*}
+The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pressure increase is 34.6~kPa.
+
 
 \begin{figure}[h!]
 \noindent
@@ -4230,7 +4237,7 @@ In the following examples, both leaks and fans are demonstrated.
 \subsection{Single Zone Leakage (\texorpdfstring\textct{leak\_test}{leak\_test})}
 \label{single_zone_leak}
 
-Two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve''
+Two compartments (each 0.9~m by 1~m by 1~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve'':
 \be
   \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
   U_{\hbox{\footnotesize max}} \;

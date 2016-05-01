@@ -1869,7 +1869,7 @@ IF ( VERT(1)<MIN(V1(1),V2(1),V3(1)) .OR. VERT(2)<MIN(V1(2),V2(2),V3(2)).OR.&
 
 ! rewrite as
 ! ( V2H_x   V3H_x )  (a)     (  VH_x )
-! (               )  ( )  =  (       )  
+! (               )  ( )  =  (       )
 ! ( V2H_y   VH3_y )  (b)     (  VH_y )
 
 ! where
@@ -1944,12 +1944,12 @@ NTRIS = 0
 IP = 1
 DO WHILE (NP >= 3 .AND. IP .LE. NPOLY)
    LOOP_I: DO I = 1, NP - 2
-   
+
       ! candidate triangle
       V1 => VERTS(2*P(I  )-1:2*P(I  ))
       V2 => VERTS(2*P(I+1)-1:2*P(I+1))
       V3 => VERTS(2*P(I+2)-1:2*P(I+2))
-      
+
       IF(IS_ANGLE_GE_180(V1,V2,V3))CYCLE LOOP_I ! reject triangle if angle >= 180.0
       DO J = 1, I-1
          VERT => VERTS(2*POLY(J)-1:2*POLY(J))        ! reject triangle if another polygon point is inside this triangle
@@ -1974,7 +1974,7 @@ DO WHILE (NP >= 3 .AND. IP .LE. NPOLY)
       EXIT
    END DO LOOP_I
    IP = IP + 1
-END DO 
+END DO
 END SUBROUTINE POLY2TRI
 
 END MODULE BOXTETRA_ROUTINES

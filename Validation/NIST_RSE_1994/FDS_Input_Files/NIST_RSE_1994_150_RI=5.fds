@@ -24,7 +24,7 @@ MESH XB=0.00,0.98,-0.973,0.00,-0.196,0.98, IJK=10,10,12/
 
 &REAC ID = 'R2'
       FUEL = 'CARBON MONOXIDE'
-      A = 1.5e9
+      A = 8e10
       E = 41840
       SPEC_ID_NU='CARBON MONOXIDE','OXYGEN','CARBON DIOXIDE'
       NU= -1,-0.5,1

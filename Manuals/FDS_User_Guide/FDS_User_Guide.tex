@@ -465,14 +465,14 @@ Sample input files are included as part of the standard installation. A good cas
 
 \section{A Brief Primer on Computer Hardware}
 
-The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575. 
+The following brief definitions were copied from the Indiana University Knowledge Base, which was developed with support from (U.S) National Science Foundation grant OCI-1053575.
 \begin{description}
 \item[Cores:] Recent developments in computational architecture can lead to confusion concerning what a microprocessor is. Since the advent of multi-core technology, such as dual-cores and quad-cores, the term ``processor'' has been used to describe a logical execution unit or a physical chip. A multi-core chip may have several cores. With the advent of multi-core technology, the term ``processor'' has become context-sensitive, and is largely ambiguous when describing large multi-core systems. Essentially a core comprises a logical execution unit containing an L1 cache and functional units. Cores are able to independently execute programs or threads. Supercomputers are listed as having thousands of cores.
 \item[Chips:] A chip refers to a physical integrated circuit (IC) on a computer. A chip in the context of this document refers to an execution unit that can be single- or multi-core technology.
 \item[Sockets:] The socket refers to a physical connector on a computer motherboard that accepts a single physical chip. Many motherboards can have multiple sockets that can in turn accept multi-core chips.
 \item[Processes:] A process is an independent program running on a computer. A process has a full stack of memory associated for its own use, and does not depend on another process for execution. MPI (Message Passing Interface) processes are true processes because they can run on independent machines or the same machine.
 \item[Threads:] A thread is essentially a process that does not have a full stack of memory associated for it. The thread is tied to a parent process, and is merely an offshoot of execution. Typically thread processes must run on the same computer, but can execute simultaneously on separate cores of the same node. OpenMP parallelism uses threads for child processes.
-\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time. 
+\item[Hyper-threading:] Hyper-threading is an Intel technology that originally preceded multi-core systems, and was used to make a single core appear logically as multiple cores on the same chip. Intel abandoned hyper-threading briefly during the advent of multi-core processors but reintroduced the technology in 2008. Since then, Intel has used it extensively to improve the performance of parallel computations in its multi-core processors. Hyper-threading improves performance by sharing the computational workload between multiple cores whenever possible, allowing the operating system to schedule more than one process at a time.
 \item[N-ways:] Multi-core compute nodes can be described by the number of execution units, or cores. A computer with 8 cores would be described as an 8-way node. This machine can have 8 independent processes running simultaneously. A 32-core system would be called a 32-way node.
 \item[Processors:] As explained above, a processor could describe either a single execution core or a single physical multi-core chip. The context of use will define the meaning of the term.
 \end{description}
@@ -557,7 +557,7 @@ Mesh   3 is assigned to MPI Process   2
 Mesh   4 is assigned to MPI Process   3
 Mesh   5 is assigned to MPI Process   4
 \end{lstlisting}
-This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer. 
+This means that 5 MPI processes (numbered 0 to 4) have started and that each mesh is being handled by its own process. The processes may be on the same or different computers. Each computer has its own memory (RAM), but each individual MPI process has its own independent memory, even if the processes are on the same computer.
 
 There are different implementations of MPI, much like there are different Fortran and C compilers. Each implementation is essentially a library of subroutines called from FDS that transfer data from one process to another across a fast network. The format of the subroutine calls has been widely accepted in the community, allowing different vendors and organizations the freedom to develop better software while working within an open framework. For Mac OS~X and Linux, we use Open MPI, an open source implementation that is developed and maintained by a consortium of academic, research, and industry partners (www.open-mpi.org). For Windows, we use Intel MPI~\footnote{Prior to FDS version 6.1.2, the Windows version of FDS used MPICH, a free implementation of MPI developed by Argonne National Laboratory. The MPICH developers have announced that they are no longer supporting the Windows version.}.
 
@@ -3413,11 +3413,19 @@ Note that if {\ct HRRPUA} or solid phase reaction parameters are specified, no v
 
 \label{info:louvers}
 
-Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line
+Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line in the example case {\ct Flowfields/tangential\_velocity.fds}
 \begin{lstlisting}
-&SURF ID='LOUVER', VEL=-1.2, VEL_T=0.5,-0.3 /
+&SURF ID='LOUVER', VEL=-2.0, VEL_T=3.0,0.0, TAU_V=5., COLOR='GREEN' /
 \end{lstlisting}
-is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 1.2~m/s and a tangential velocity of 0.5~m/s in either the $x$ or $y$ direction and -0.3~m/s in either the $y$ or $z$ direction, depending on what the normal direction is.
+is a boundary condition for a louvered vent that pushes air into the space with a normal velocity of 2~m/s and a tangential velocity of 3~m/s in the first of the two tangential directions. Note that the negative sign of the normal component of velocity indicates that the fluid is injected into the computational domain. The tangential velocity of 3~m/s indicates that the flow is in the positive $y$ direction. Both the normal and tangential velocity components are ramped up with either {\ct TAU\_V} or {\ct RAMP\_V}, as shown in Fig.~\ref{fig:tangential_velocity}.
+
+\begin{figure}[ht!]
+\begin{center}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/tangential_velocity}
+\caption[The {\ct tangential\_velocity} test case]{Normal and tangential velocity components at a louvered vent, compared to the ideal curve.}
+\label{fig:tangential_velocity}
+\end{center}
+\end{figure}
 
 In cases of limited mesh resolution, it may not be possible to describe a louvered vent or slot diffuser using {\ct VEL\_T} because there may not be enough mesh cells spanning the opening. In these cases, you might consider simply specifying a flat plate obstruction in front of the {\ct VENT} with an offset of one mesh cell. The plate will simply redirect the air flow in all lateral directions.
 
@@ -3470,11 +3478,10 @@ In most practical simulations, it is not possible to resolve this boundary layer
 \subsection{Synthetic Turbulence Inflow Boundary Conditions}
 \label{info:synthetic_turbulence}
 
-Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM).  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
+Real flows of low-viscosity fluids like air are rarely perfectly stationary in time or uniform in space---they are turbulent (to some degree). Of course, the turbulence characteristics of the flow may have a significant impact on mixing and other behaviors so the specification of nominally constant and uniform boundary conditions may be insufficient.  To address this issue, FDS employs a synthetic eddy method (SEM)\footnote{SEM only applies to velocity boundary conditions and so may not be used for HVAC vents, which are strict mass flux boundaries.}.  Refer to Jarrin \cite{Jarrin:2008} for a detailed description. In brief, ``eddies'' are injected into the flow at random positions on the boundary and advect with the mean flow over a short distance near the boundary equivalent to the maximum eddy length scale.  Once the eddy passes through this region it is recycled at the inlet of the boundary with a new random position and length scale. The eddies are idealized as velocity perturbations over a spherical region in space with a diameter (eddy length scale) selected from a uniform random distribution. The selection procedures guarantee that prescribed first and second-order statistics (including Reynolds stresses) are satisfied.
 
 Synthetic turbulence is invoked by setting the number of eddies, {\ct N\_EDDY}, the characteristic eddy length scale, {\ct L\_EDDY}, and either the root mean square (RMS)
 velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, {\ct REYNOLDS\_STRESS(3,3)} on the {\ct VENT} line.  In Fig.~\ref{fig:sem_profiles} we show examples using SEM for flat, parabolic, atmospheric, and ramp profiles with 10 \% turbulence intensity (see the {\ct sem\_*} test series in the Turbulence verification subdirectory).  The input lines for the atmospheric case are (see Section \ref{info:stratification} for further discussion of profile parameters).
-
 \begin{lstlisting}
 &SURF ID='inlet', VEL=-1, PROFILE='ATMOSPHERIC', Z0=0.5, PLE=0.3 /
 &VENT MB='XMIN', SURF_ID='inlet', N_EDDY=100, L_EDDY=0.2, VEL_RMS=.1 /
@@ -3491,19 +3498,15 @@ velocity fluctuation, {\ct VEL\_RMS}, or the Reynolds stress tensor components, 
 \label{fig:sem_profiles}
 \end{figure}
 
-Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress.
-
-\noindent Note that if {\ct VEL\_RMS} is specified, this is equivalent to
-
+Note that the Reynolds stress is symmetric and only the lower triangular part needs to be specified.  The RMS velocity fluctuation is isotropic (equivalent for each component). Thus, {\ct VEL\_RMS} $\equiv \sqrt{2k/3}$, where $k\equiv \langle\frac{1}{2}u_i^\prime u_i^\prime\rangle$ is the turbulent kinetic energy per unit mass. Below is an example illustrating the equivalence between the RMS velocity fluctuation and the diagonal components of the Reynolds stress. Note that if {\ct VEL\_RMS} is specified, this is equivalent to
 \begin{lstlisting}
 REYNOLDS_STRESS(1,1) = VEL_RMS**2
 REYNOLDS_STRESS(2,2) = VEL_RMS**2
 REYNOLDS_STRESS(3,3) = VEL_RMS**2
 \end{lstlisting}
+and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
 
-\noindent and all other components of {\ct REYNOLDS\_STRESS} are zero. If the fluctuations are not isotropic, then the Reynolds stresses must be specified componentwise.
-
-In Chapter 7 of Jarrin's thesis \cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
+In Chapter 7 of Jarrin's thesis~\cite{Jarrin:2008}, he introduces the Modified Synthetic Eddy Method in which the eddy length scales are anisotropic. This allows more realistic characterization of streamwise vortices in a turbulent boundary layer. To specify the length scales corresponding to the $\sigma_{ij}$ values in Jarrin's Eq.~(7.1) use {\ct L\_EDDY\_IJ(3,3)}.  Here is an example with random values for the eddy length scales and Reynolds stress components:
 
 \begin{lstlisting}
 &VENT XB=... , SURF_ID='WIND', N_EDDY=500,
@@ -3581,6 +3584,7 @@ where:
 \item[{\ct MASS\_FLOW}] is a fixed mass flow rate (kg/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}.  You can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  {\ct MASS\_FLOW} should only be specified for conditions where the upstream node density will not change during the solution process.
 \item[{\ct NODE\_ID}] gives the {\ct ID}s of the nodes on either end of the duct segment.  Positive velocity in a duct is defined as flow from the first node to second node.
 \item[{\ct PERIMETER}] is used along with {\ct AREA} to specify a duct with non-circular cross-section.  The {\ct DIAMETER} will be computed as the hydraulic diameter.
+\item[{\ct RAMP\_LOSS}] If specified this {\ct RAMP} is a multiplier for the {\ct LOSS}.
 \item[{\ct REVERSE}]  is a logical parameter that when {\ct .TRUE.} indicates that the specified {\ct FAN\_ID} or {\ct VOLUME\_FLOW} blows from the second node to the first.
 \item[{\ct ROUGHNESS}] is the absolute roughness in m of the duct that is used to compute the friction factor for the duct.
 \item[{\ct VOLUME\_FLOW}] is a fixed flow rate (m$^3$/s) through the duct.  Only specify one of {\ct MASS\_FLOW} or {\ct VOLUME\_FLOW}. If you specify {\ct VOLUME\_FLOW}, you can change its value in time either using the characteristic time, {\ct TAU\_VF},  to define a tanh ({\ct TAU\_VF}>0) or t$^2$ ramp ({\ct TAU\_VF}<0); or you can specify a {\ct RAMP\_ID}.  This cannot be controlled by a device or control function; however, a constant volume flow {\ct FAN} can be.
@@ -3602,7 +3606,9 @@ where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
 \subsection{HVAC Dampers}
 \label{info:HVACdamper}
 
-A damper can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
+Dampers can be modeled in one of two ways.
+
+The first method is a simple binary (flow or no flow) damper. This can be placed in a duct by adding the keyword {\ct DAMPER} along with either a {\ct CTRL\_ID} or {\ct DEVC\_ID}.  When the control or device is {\ct .TRUE.} the damper will be open, and when {\ct .FALSE.} the damper will be closed and block 100~\% of the duct area.  The example below shows a duct with a damper that that is linked to a {\ct DEVC} that closes the damper at 10~s. For further details see the {\ct HVAC\_damper} example case, which is documented in the
 Verification Guide.
 
 \begin{lstlisting}
@@ -3610,6 +3616,16 @@ Verification Guide.
       LENGTH=1.0,LOSS=0,0,DAMPER=.TRUE.,DEVC_ID='TIMER'/
 &DEVC QUANTITY='TIME',ID='TIMER',SETPOINT=10,INITIAL_STATE=.TRUE.,XYZ=0,0,0/
 \end{lstlisting}
+
+The second method is to specify a {\ct RAMP\_LOSS} for the duct. This approach multiplies the {\ct LOSS} array for the duct by the output of the {\ct RAMP}. This allows for dampers that have leakage and/or dampers that have a variable position other than fully open or fully closed. An example is shown below where the {\ct LOSS} in the duct changes from 1,1 at 10~s to 2000,2000 at 11~s.
+
+\begin{lstlisting}
+&HVAC TYPE_ID='DUCT',ID='EXHAUST 2',NODE_ID='TEE','EXHAUST 2',AREA=0.01,
+      LENGTH=1.0,LOSS=1,1,RAMP_LOSS='LOSS RAMP'/
+&RAMP ID='LOSS RAMP',T=10,F=1/
+&RAMP ID='LOSS RAMP',T=11,F=2000/
+\end{lstlisting}
+
 
 \subsection{HVAC Node Parameters}
 \label{info:HVACnode}
@@ -3877,9 +3893,9 @@ STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pr
 The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
 temperature and density to rise during the 60~s injection period. Afterwards, the
 temperature, density, and pressure should remain constant, according to the equation of state.
-The figures below show the results of this calculation.  The density matches exactly showing
+Figure~\ref{pressure_rise} shows the results of this calculation.  The density matches exactly showing
 that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with
-the ideal values.
+the ideal values obtained from the first law of thermodynamics.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -3913,6 +3929,19 @@ Since pressure zones are defined using {\ct XB}, it might not be possible to def
 
 Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach number formulation does not allow for high speed, compressible effects that
 are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
+
+\subsubsection{Example Case: Irregularly Shaped Zone}
+\label{zone_shape_example}
+
+This example is similar to the ones in the previous section, except in this case, the pressure zone is L-shaped and split across two meshes. The objective is simply to ensure that the specification of the pressure zone is properly accounted for in the model. Figure~\ref{zone_shape} compares the predicted pressure in the compartment compared to an exact solution. Air is injected into the compartment for 5~s, after which the compartment is opened to a smaller compartment. At 15~s, the smaller compartment is opened to the outside.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_shape}
+\caption[Results of the {\ct zone\_shape} test case]{Output of {\ct zone\_shape} test case. Shown is the pressure in an L-shaped compartment that is opened to another compartment at 5~s, and the outdoors at 15~s.}
+\label{zone_shape}
+\end{figure}
+
 
 
 \subsection{Leaks}
@@ -4369,7 +4398,7 @@ There are several options for specifying the properties of gas and liquid specie
 
 \subsubsection{Option 1: FDS Defined Species}
 
-Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction.
+Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties from 0 K to 5000 K.
 
 \clearpage
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|l|}
@@ -4439,7 +4468,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 
 \subsubsection{Option 2: User-Specified Properties}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below.
+If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
 
 \subsubsection{Conductivity}
 
@@ -5312,6 +5341,17 @@ All other species        & 0.35 \\ \hline\end{tabular}
 
 If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time.
 
+\paragraph{Time variation of radiative fraction}
+
+Even for a single fuel species the global flame radiative fraction may depend on other parameters of the problem like global equivalent ratio.  If a time variation of the radiative fraction is necessary, it may be added through a ramp function, {\ct RAMP\_CHI\_R}, on the {\ct REAC} line.
+
+\begin{lstlisting}
+&REAC ..., RADIATIVE_FRACTION = 0.23, RAMP_CHI_R = 'chi_r'/
+&RAMP ID = 'chi_r', T =  0.0, F = 1.0/
+&RAMP ID = 'chi_r', T =  5.0, F = 1.0/
+&RAMP ID = 'chi_r', T = 60.0, F = 0.1/
+\end{lstlisting}
+
 \subsection{Spatial and Temporal Resolution of the Radiation Transport Equation}
 
 \label{info:RADI_Resolution}
@@ -5534,7 +5574,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 \end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
-As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}). The default value of {\ct CNF\_CUTOFF} is 0.005.
+As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
 To prevent FDS from generating a distribution of droplets altogether, set {\ct MONODISPERSE} to {\ct .TRUE.} on the {\ct PART} line, in which case every droplet will be assigned the same {\ct DIAMETER}.
 
@@ -5562,6 +5602,8 @@ burning rate will be adjusted to account for the difference between the heats of
 
 If a spray nozzle is used to generate the fuel droplets, its characteristics are specified
 in the same way as those for a sprinkler.  If the fuel species is present in the liquid properties table as a fuel, then the droplets will be given fuel radiation absorption properties.
+
+Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An altnerate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
 
 \subsubsection{Example Case: spray\_burner}
 
@@ -6880,7 +6922,7 @@ When prescribing a solid phase quantity, be sure to position the device at a sol
 \begin{lstlisting}
 &DEVC XYZ=0.7,0.9,2.1, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='...' /
 \end{lstlisting}
-designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the probe and try again.
+designates the surface temperature of a wall facing the negative $y$ direction. There are still instances where FDS cannot determine which solid surface is being designated, in which case an error message appears in the diagnostic output file. Re-position the device and try again. It is best to position the device, via the real triplet {\ct XYZ}, such that the device location is either at or within a cell width {\it outside} of the solid surface. The search algorithm in FDS will look for the nearest solid surface in the direction opposite to that indicated by {\ct IOR}.
 
 \subsubsection{Integrated Quantities}
 
@@ -7320,7 +7362,7 @@ ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 
 It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
 
-The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_M} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation.
+The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
 The properties of the PDPA device are defined using the following keywords on the {\ct PROP} line:
 \begin{description}
@@ -8602,7 +8644,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct COOLANT\_SPECIFIC\_HEAT}   & Real              & Section~\ref{info:HVACaircoil}                                                & \si{kJ/(kg.K)} &               \\ \hline
 {\ct COOLANT\_TEMPERATURE}      & Real              & Section~\ref{info:HVACaircoil}                                                & $^\circ$C     &                \\ \hline
 {\ct CTRL\_ID}                  & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}       &               &                \\ \hline
-{\ct DAMPER}                    & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
+{\ct DAMPER}                    & Logical           & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               & {\ct .FALSE.}  \\ \hline
 {\ct DEVC\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfan}, \ref{info:HVACfilter}      &               &                \\ \hline
 {\ct DIAMETER}                  & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct DUCT\_ID}                  & Character Array   & Section~\ref{info:HVACnode}                                                   &               &                \\ \hline
@@ -8613,15 +8655,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ID}                        & Character         & Section~\ref{info:HVAC}                                                       &               &                \\ \hline
 {\ct LEAK\_ENTHALPY}            & Logical           & Section~\ref{info:local_leakage}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct LENGTH}                    & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
-{\ct LOADING}                   & Real Array        &  Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
-{\ct LOADING\_MULTIPLIER}       & Real Array        &  Section ~\ref{info:HVACfilter}                                               & 1/kg          & 1.0            \\ \hline
+{\ct LOADING}                   & Real Array        & Section ~\ref{info:HVACfilter}                                               & kg            & 0.0            \\ \hline
+{\ct LOADING\_MULTIPLIER}       & Real Array        & Section ~\ref{info:HVACfilter}                                               & 1/kg          & 1.0            \\ \hline
 {\ct LOSS}                      & Real Array        & Sections ~\ref{info:HVACduct} -- \ref{info:HVACfilter}                        &               & 0.0            \\ \hline
 {\ct MASS\_FLOW  }              & Real              & Section~\ref{info:HVACduct}                                                   &  kg/s         &                \\ \hline
 {\ct MAX\_FLOW}                 & Real              & Section ~\ref{info:HVACfan}                                                   &  m$^3$/s      &                \\ \hline
-{\ct MAX\_PRESSURE}             & Real              &  Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
+{\ct MAX\_PRESSURE}             & Real              & Section ~\ref{info:HVACfan}                                                  &  Pa           &                \\ \hline
 {\ct NODE\_ID}                  & Character Doublet & Section~\ref{info:HVACduct}                                                   &               &                \\ \hline
 {\ct PERIMETER}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            &                \\ \hline
 {\ct RAMP\_ID}                  & Character         & Sections ~\ref{info:HVACduct}, \ref{info:HVACfilter}, \ref{info:HVACfan}      &               &                \\ \hline
+{\ct RAMP\_LOSS}                & Character         & Sections~\ref{info:HVACduct}, \ref{info:HVACdamper}             &               &                \\ \hline
 {\ct REVERSE}                   & Logical           & Section~\ref{info:HVACduct}                                                   &               & {\ct .FALSE.}  \\ \hline
 {\ct ROUGHNESS}                 & Real              & Section~\ref{info:HVACduct}                                                   &  m            & 0.0            \\ \hline
 {\ct SPEC\_ID}                  & Character Array   & Section ~\ref{info:HVACfilter}                                                &               &                \\ \hline
@@ -9304,6 +9347,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct O}                                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0    \\ \hline
 %{\ct ODE\_SOLVER}                         & Character   & Section~\ref??}                           &                   &       \\ \hline
 {\ct RADIATIVE\_FRACTION}                  & Real       & Section~\ref{info:CHI_R}                   &                   &                \\ \hline
+{\ct RAMP\_CHI\_R}                        & Character   & Section~\ref{info:CHI_R}                   &                   &                \\ \hline
 {\ct REAC\_ATOM\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & atoms             & 1.E-5    \\ \hline
 {\ct REAC\_MASS\_ERROR}                   & Real        & Section~\ref{info:REAC_Diagnostics}       & kg/kg             & 1.E-4    \\ \hline
 {\ct SOOT\_H\_FRACTION}                   & Real        & Section~\ref{info:simple_chemistry}       &                   & 0.1    \\ \hline

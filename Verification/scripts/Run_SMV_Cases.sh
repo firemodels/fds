@@ -1,4 +1,4 @@
-#/bin/bash
+ #/bin/bash
 
 # This script runs the Smokeview Verification Cases on a 
 # Linux machine with a batch queuing system
@@ -14,8 +14,6 @@ RUN_GEOM=1
 RUN_WUI=1
 JOBPREFIX=
 JOBPREF=
-# not running any mpi cases now
-RUN_MPI=0
 STOPFDS=
 RUNOPTION=
 CFASTREPO=~/cfastgitclean
@@ -53,7 +51,6 @@ echo "-I - compiler (intel or gnu)"
 echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
-echo "-M - run only cases using multiple processes"
 echo "-o nthreads - run OpenMP version of FDS with a specified number of threads [default: $nthreads]"
 echo "-p size - platform size"
 echo "     default: 64"
@@ -63,7 +60,6 @@ echo "     default: batch"
 echo "     other options: vis"
 echo "-r - run only regular smokeview cases"
 echo "-s - stop FDS runs"
-echo "-S - run only cases using a single process"
 echo "-u - use installed versions of utilities background and wind2fds"
 echo "-w - wait for cases to complete before returning"
 echo "-W - run only WUI cases"
@@ -92,7 +88,7 @@ cd $CURDIR/..
 
 
 use_installed="0"
-while getopts 'c:dghI:j:Mm:o:p:q:rSsuWw' OPTION
+while getopts 'c:dghI:j:m:o:p:q:rsuWw' OPTION
 do
 case $OPTION in
   c)
@@ -104,7 +100,6 @@ case $OPTION in
    ;;
   g)
    RUN_SMV=0
-   RUN_MPI=0
    RUN_GEOM=1
    RUN_WUI=0
    ;;
@@ -116,9 +111,6 @@ case $OPTION in
    ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
-   ;;
-  M)
-   RUNOPTION="-M"
    ;;
   j)
    JOBPREFIX="-j $OPTARG"
@@ -136,15 +128,11 @@ case $OPTION in
    ;;
   r)
    RUN_SMV=1
-   RUN_MPI=0
    RUN_GEOM=0
    ;;
   s)
    stop_cases=true
    export STOPFDS=-s
-   ;;
-  S)
-   RUNOPTION="-S"
    ;;
   u)
    use_installed="1"
@@ -154,7 +142,6 @@ case $OPTION in
    ;;
   W)
    RUN_SMV=0
-   RUN_MPI=0
    RUN_GEOM=0
    RUN_WUI=1
    ;;
@@ -181,14 +168,14 @@ if [ "$use_installed" == "1" ] ; then
   export WIND2FDS=wind2fds
   export BACKGROUND=background
 else
-  export WIND2FDS=$SVNROOT/Utilities/wind2fds/${COMPILER}_$PLATFORM/wind2fds_$PLATFORM
-  export BACKGROUND=$SVNROOT/Utilities/background/${COMPILER}_$PLATFORM/background
+  export WIND2FDS=$SVNROOT/SMV/Build/wind2fds/${COMPILER}_$PLATFORM/wind2fds_$PLATFORM
+  export BACKGROUND=$SVNROOT/SMV/Build/background/${COMPILER}_$PLATFORM/background
 fi
 export GEOM=$SVNROOT/SMV/source/geomtest/${COMPILER}_$PLATFORM/geomtest
 export FDSEXE=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
 export FDS=$FDSEXE
 export FDSMPI=$SVNROOT/FDS_Compilation/mpi_${COMPILER}_$PLATFORM$IB$DEBUG/fds_mpi_${COMPILER}_$PLATFORM$IB$DEBUG
-export CFAST=$CFASTREPO/CFAST/${COMPILER}_$PLATFORM/cfast7_$PLATFORM
+export CFAST=$CFASTREPO/Build/CFAST/${COMPILER}_$PLATFORM/cfast7_$PLATFORM
 QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 # Set queue to submit cases to
@@ -244,11 +231,6 @@ fi
 if [ "$RUN_WUI" == "1" ] ; then
   cd $SVNROOT/Verification
   scripts/WUI_Cases.sh
-fi
-if [ "$RUN_MPI" == "1" ] ; then
-  cd $SVNROOT/Verification
-  export QFDS="$QFDSSH -e $FDSMPI $QUEUE $STOPFDS $JOBPREFIX"
-  scripts/SMV_MPI_Cases.sh
 fi
 if [ "$WAIT" == "1" ] ; then
   wait_cases_end

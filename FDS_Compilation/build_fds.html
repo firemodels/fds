@@ -1,15 +1,29 @@
 <html>
 <head>
 <TITLE>FDS</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function build_fds(args){
+  MyObject.Run(get_fullpath("Scripts/BUILDfds.bat ",args));
+}
+</script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
-<font size=5>FDS</font> - <a href="../SMV/build_smokeview.html"><font size=5>Smokeview</font></a> - <a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
+<font size=5>FDS</font> - 
+<a href="../SMV/build_smokeview.html"><font size=5>Smokeview</font></a> - 
+<a href="../SMV/build_guides.html"><font size=5>Guides</font></a> - 
+<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
 
 <hr size="1">
-<h3>Preliminaries</h3>
-<ul>
-<li>Update <a href="Scripts/EDIT_setup.bat">configuration file</a>, <a href="../SMV/scripts/Update_repos_git.bat">repos</a>.
-</ul>
 
 <h3>FDS</h3>
 <p><table border=on>
@@ -19,59 +33,31 @@
 
 <tr align="center">
 <td>
-<a href="Scripts/BUILDfdsmpiwin64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdswin64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpiwin64.bat">release</a>
+<button onclick="build_fds('windows debug')">debug</button><br>
+<button onclick="build_fds('windows dev')">dev</button><br>
+<button onclick="build_fds('windows release')">release</button>
 </td>
 <td>
-<a href="Scripts/BUILDfdsmpilinux64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdslinux64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpilinux64.bat">release</a>
+<button onclick="build_fds('linux debug')">debug</button><br>
+<button onclick="build_fds('linux dev')">dev</button><br>
+<button onclick="build_fds('linux release')">release</button>
 </td>
 <td>
-<a href="Scripts/BUILDfdsmpiosx64db.bat">debug</a><br>
-<a href="Scripts/BUILDfdsosx64dv.bat">dev</a><br>
-<a href="Scripts/BUILDfdsmpiosx64.bat">release</a>
+<button onclick="build_fds('osx debug')">debug</button><br>
+<button onclick="build_fds('osx dev')">dev</button><br>
+<button onclick="build_fds('osx release')">release</button>
 </td>
 </tr>
 
 </table>
-
-
-<h3>Guides</h3>
-<p><table border=on>
-<tr><th>Config</th><th>Technical</th><th>User</th><th>Validation</th><th>Verification</th></tr>
-<tr align=center>
-<td></td><td></td>
-<td><a href="../SMV/scripts/GETfdsugfigs.bat">Get images</a></td>
-<td><a href="../SMV/scripts/GETfdsvalgfigs.bat">Get images</a></td>
-<td><a href="../SMV/scripts/GETfdsvergfigs.bat">Get images</a></td>
-</tr>
-<tr align=center>
-<td><a href="../SMV/scripts/BUILDfdscg.bat">Build</a></td>
-<td><a href="../SMV/scripts/BUILDfdstg.bat">Build</a></td>
-<td><a href="../SMV/scripts/BUILDfdsug.bat">Build</a></td>
-<td><a href="../SMV/scripts/BUILDfdsvalg.bat">Build</a></td>
-<td><a href="../SMV/scripts/BUILDfdsverg.bat">Build</a></td>
-</tr>
-<tr align=center>
-<td><a href="../SMV/scripts/VIEWfdscg.bat">View</a></td>
-<td><a href="../SMV/scripts/VIEWfdstg.bat">View</a></td>
-<td><a href="../SMV/scripts/VIEWfdsug.bat">View</a></td>
-<td><a href="../SMV/scripts/VIEWfdsvalg.bat">View</a></td>
-<td><a href="../SMV/scripts/VIEWfdsverg.bat">View</a></td>
-</tr>
-</table>
-<ul>
-<li><a href="Scripts/BUILDtestmpiwin64.bat">Build test_mpi utility</a>
-<li><a href="Scripts/COPY_fds_guides.bat">Copy FDS guides</a> from Linux firebot to FIRE-LOCAL
-
-</ul>
 
 <h3>Other</h3>
 <ul>
-<li><a href="Scripts/EDIT_build_fds.bat">Edit</a> this page.
-<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>.
+<li><a href="Scripts/BUILDtestmpiwin64.bat">Build test_mpi utility</a>
+<li>Edit <a href="Scripts/EDIT_setup.bat">config file</a>
+<li>Update <a href="../SMV/scripts/Update_repos_gitlatest.bat">repos</a>
+<li><a href="Scripts/EDIT_build_fds.bat">Edit</a> this page
+<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>
 
 
