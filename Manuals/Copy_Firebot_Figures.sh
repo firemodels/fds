@@ -3,10 +3,15 @@
 export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVgitclean/
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
 export FIREBOTVER=$FIREBOTROOT/Verification/
+export FBTG=$FIREBOTMANS/FDS_Technical_Reference_Guide/
 export FBUG=$FIREBOTMANS/FDS_User_Guide/
 export FBVG=$FIREBOTMANS/FDS_Verification_Guide/
 export FBVAL=$FIREBOTMANS/FDS_Validation_Guide/
 export BASEDIR=`pwd`
+
+# Copy Tech Guide Figures
+cp $FBTG/SCRIPT_FIGURES/* $BASEDIR/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/
+echo Tech Guide Figures Copied
 
 # Copy User's Guide Figures
 cp $FBUG/SCRIPT_FIGURES/* $BASEDIR/FDS_User_Guide/SCRIPT_FIGURES/

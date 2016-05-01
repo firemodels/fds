@@ -1,29 +1,56 @@
 #!/bin/bash
+# this script assumes it is being run in Verification
+is_benchmark="no"
+while getopts 'Ad:po:t' OPTION
+do
+case $OPTION  in
+  A)
+   is_benchmark="yes"
+   ;;
+  d)
+   dir="$OPTARG"
+   ;;
+  p)
+   dummy=1
+   ;;
+  o)
+   dummy="$OPTARG"
+   ;;
+  t)
+   dummy=1
+   ;;
+esac
+done
+shift $(($OPTIND-1))
 
-dir=$1
-fdsfile=$2
+# if we are saving benchmark times and this is not a benchmark case then exit
+# otherwise save the times
+
+if [ "$save_benchmark" == "yes" ]; then
+  if [ "$is_benchmark" == "no" ]; then
+     exit
+  fi
+fi
+
+fdsfile=$1
 curdir=`pwd`
-
-SVNROOT=`pwd`/../..
-cd $SVNROOT
-SVNROOT=`pwd`
-dir=$SVNROOT/Verification/$dir
-csvoutfile=$SVNROOT/Utilities/Scripts/fds_timing_stats.csv
-cd $curdir
 
 fdsbase=${fdsfile%.*}
 outfile=$fdsbase.out
 cpufile=${fdsbase}_cpu.csv
 cd $dir
-
-#echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $SVNROOT/Utilities/Scripts/fds_timing_stats.csv
-
+if ! [ -e $outfile ]; then
+  exit
+fi
+if ! [ -e $cpufile ]; then
+  exit
+fi
    # Grep for wall clock time
    WALL_CLOCK_TIME_VALUE=`grep -H "Total Elapsed Wall Clock Time (s):" "$outfile" | awk -F' ' '{print $(NF)}'`
 
    # Grep for CPU time and units
    TOTAL_CPU_TIME=0.0
-   CPU_TIME=`cat "$cpufile" | awk '{if(NR>1)print}' | awk -F',' '{print $(2)}'`
+   CPU_TIME=`cat "$cpufile" | awk '{if(NR>1)print}' | awk -F',' '{print $(NF)}'`
    for j in $CPU_TIME
    do
       jafter=`echo ${j} | sed -e 's/[eE]+*/\\*10\\^/'`
@@ -56,13 +83,6 @@ cd $dir
    fi
 
    # Write results to fds_timing_stats.csv file
-#   echo "$FILE,$WALL_CLOCK_TIME_VALUE,$CPU_TIME,$NUM_TOTAL_CELLS,$NUM_TIME_STEPS,$PERFORMANCE" >> $csvoutfile
-echo WALL_CLOCK_TIME_VALUE=$WALL_CLOCK_TIME_VALUE
-echo TOTAL_CPU_TIME=$TOTAL_CPU_TIME
-echo X_CELLS=$X_CELLS
-echo Y_CELLS=$Y_CELLS
-echo Z_CELLS=$Z_CELLS
-echo NUM_TIME_STEPS=$NUM_TIME_STEPS
-echo PERFORMANCE=$PERFORMANCE
+   echo "$fdsfile,$WALL_CLOCK_TIME_VALUE,$CPU_TIME,$NUM_TOTAL_CELLS,$NUM_TIME_STEPS,$PERFORMANCE"
 
    cd $curdir

@@ -12,11 +12,12 @@ size=_64
 # define run directories
 FIREBOT_RUNDIR=`pwd`
 OUTPUT_DIR="$FIREBOT_RUNDIR/output"
-HISTORY_DIR="$FIREBOT_RUNDIR/history"
+HISTORY_DIR="$HOME/.firebot/history"
 TIME_LOG=$OUTPUT_DIR/timings
 ERROR_LOG=$OUTPUT_DIR/errors
 WARNING_LOG=$OUTPUT_DIR/warnings
 NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
+WEBDIR=/var/www/html/firebot
 
 platform="linux"
 if [ "`uname`" == "Darwin" ] ; then
@@ -59,8 +60,11 @@ echo ""
 echo "Options"
 echo "-b - branch_name - run firebot using branch branch_name"
 echo "-c - clean repo"
+echo "-F - skip figures and document building stages"
 echo "-h - display this message"
 echo "-i - use installed version of smokeview"
+echo "-L - firebot lite,  run only stages that build a debug fds and run cases with it"
+echo "                    (no release fds, no release cases, no matlab, etc)"
 echo "-m email_address "
 echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
@@ -76,7 +80,9 @@ UPLOADGUIDES=0
 GIT_REVISION=
 SSH=
 SKIPMATLAB=
-while getopts 'b:chim:q:r:sS:uUv:' OPTION
+SKIPFIGURES=
+FIREBOT_LITE=
+while getopts 'b:cFhiLm:q:r:sS:uUv:' OPTION
 do
 case $OPTION in
   b)
@@ -85,11 +91,17 @@ case $OPTION in
   c)
    CLEANREPO=1
    ;;
+  F)
+   SKIPFIGURES=1
+   ;;
   h)
    usage;
    ;;
   i)
    USEINSTALL="-r"
+   ;;
+  L)
+   FIREBOT_LITE=1
    ;;
   m)
    mailToFDS="$OPTARG"
@@ -181,7 +193,7 @@ MKDIR ()
   if [ ! -d $DIR ]
   then
     echo Creating directory $DIR
-    mkdir $DIR
+    mkdir -p $DIR
   fi
 }
 
@@ -320,6 +332,7 @@ do_git_checkout()
    GIT_REVISION=`git describe --long --dirty`
    GIT_SHORTHASH=`git rev-parse --short HEAD`
    GIT_LONGHASH=`git rev-parse HEAD`
+   GIT_DATE=`git log -1 --format=%cd --date=local $GIT_SHORTHASH`
 }
 
 check_git_checkout()
@@ -656,10 +669,10 @@ compile_smv_db()
    if [ "$USEINSTALL" == "" ]; then
    echo "      debug"
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    ./make_smv_db.sh &> $OUTPUT_DIR/stage3b
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
+   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
    ./make_smv_db.sh &> $OUTPUT_DIR/stage3b \)
    fi
    fi
@@ -669,7 +682,7 @@ check_compile_smv_db()
 {
    # Check for errors in SMV debug compilation
    if [ "$USEINSTALL" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}_db" ]
    then
       stage3b_success=true
@@ -705,10 +718,10 @@ compile_smv()
    if [ "$USEINSTALL" == "" ]; then
    echo "      release"
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    ./make_smv.sh &> $OUTPUT_DIR/stage3c
    else
-   $SSH \( cd $fdsrepo/SMV/Build/intel_${platform}${size} \; \
+   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
    ./make_smv.sh &> $OUTPUT_DIR/stage3c \)
    fi
    fi
@@ -718,7 +731,7 @@ check_compile_smv()
 {
    # Check for errors in SMV release compilation
    if [ "$USEINSTALL" == "" ]; then
-   cd $fdsrepo/SMV/Build/intel_${platform}${size}
+   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
    if [ -e "smokeview_${platform}${size}" ]
    then
       stage3c_success=true
@@ -960,7 +973,10 @@ make_validation_git_stats()
 generate_timing_stats()
 {
    cd $fdsrepo/Utilities/Scripts
-   ./fds_timing_stats.sh
+   ./fds_timing_stats.sh > fds_timing_stats.csv
+   cd $fdsrepo/Utilities/Scripts
+   ./fds_timing_stats.sh firebot 1 > fds_benchmarktiming_stats.csv
+   TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
 }
 
 archive_timing_stats()
@@ -968,6 +984,12 @@ archive_timing_stats()
    echo echo archiving timing stats
    cd $fdsrepo/Utilities/Scripts
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
+   cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
+   TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
+  if [ "$UPLOADGUIDES" == "1" ]; then
+    cd $fdsrepo/Utilities/Firebot
+    ./status_updatepub.sh -F
+  fi
 }
 
 #  ==================================
@@ -1071,24 +1093,24 @@ save_build_status()
    then
      echo "" >> $ERROR_LOG
      cat $WARNING_LOG >> $ERROR_LOG
-     echo "Build failure and warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+     echo "Build failure and warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
      cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for errors only
    elif [ -e $ERROR_LOG ]
    then
-      echo "Build failure;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build failure;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;3;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $ERROR_LOG > "$HISTORY_DIR/${GIT_REVISION}_errors.txt"
 
    # Check for warnings only
    elif [ -e $WARNING_LOG ]
    then
-      echo "Build success with warnings;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success with warnings;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;2;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
       cat $WARNING_LOG > "$HISTORY_DIR/${GIT_REVISION}_warnings.txt"
 
    # No errors or warnings
    else
-      echo "Build success!;$STOP_TIME;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1" > "$HISTORY_DIR/${GIT_REVISION}.txt"
+      echo "Build success!;$GIT_DATE;$GIT_SHORTHASH;$GIT_LONGHASH;${GIT_REVISION};$BRANCH;$STOP_TIME_INT;1;$TOTAL_FDS_TIMES" > "$HISTORY_DIR/${GIT_REVISION}.txt"
    fi
 }
 
@@ -1102,16 +1124,19 @@ email_build_status()
    stop_time=`date`
    echo "" > $TIME_LOG
    echo "-------------------------------" >> $TIME_LOG
+if [ "$FIREBOT_LITE" != "" ]; then
+   echo "" >> $TIME_LOG
+   echo "Note: only VV cases with debug FDS were run" >> $TIME_LOG
+   echo "" >> $TIME_LOG
+fi
    echo "Host OS: Linux " >> $TIME_LOG
    echo "Host Name: $hostname " >> $TIME_LOG
    echo "Start Time: $start_time " >> $TIME_LOG
    echo "Stop Time: $stop_time " >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
    if [ "$UPLOADGUIDES" == "1" ]; then
-   echo "Manuals (private):  http://blaze.nist.gov/firebot" >> $TIME_LOG
-   echo "Manuals  (public):  http://goo.gl/n1Q3WH" >> $TIME_LOG
-   echo "-------------------------------" >> $TIME_LOG
+   echo "Firebot status:  https://goo.gl/3azMpe" >> $TIME_LOG
    fi
+   echo "-------------------------------" >> $TIME_LOG
 
    # Check for warnings and errors
    if [[ -e $WARNING_LOG && -e $ERROR_LOG ]]
@@ -1169,28 +1194,32 @@ archive_compiler_version
 ### Stage 2a ###
 echo Building
 echo "   FDS"
-inspect_fds_db
-check_inspect_fds_db
+if [ "$FIREBOT_LITE" == "" ]; then
+   inspect_fds_db
+   check_inspect_fds_db
+fi
 
 ### Stage 2b ###
 compile_fds_mpi_db
 check_compile_fds_mpi_db
 
+if [ "$FIREBOT_LITE" == "" ]; then
 ### Stage 2c ###
-compile_fds_mpi
-check_compile_fds_mpi
+  compile_fds_mpi
+  check_compile_fds_mpi
 
 ### Stage 3a ###
-compile_smv_utilities
-check_smv_utilities
+  compile_smv_utilities
+  check_smv_utilities
 
 ### Stage 3b ###
-compile_smv_db
-check_compile_smv_db
+  compile_smv_db
+  check_compile_smv_db
 
 ### Stage 3c ###
-compile_smv
-check_compile_smv
+  compile_smv
+  check_compile_smv
+fi
 
 ### Stage 4 ###
 # Depends on successful FDS debug compile
@@ -1199,6 +1228,7 @@ if [[ $stage2b_success ]] ; then
    check_cases_debug $fdsrepo/Verification 'verification'
 fi
 
+if [ "$FIREBOT_LITE" == "" ]; then
 # clean debug stage
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
@@ -1216,9 +1246,11 @@ fi
 
 ### Stage 6 ###
 # Depends on successful SMV compile
-if [[ $stage3c_success ]] ; then
-   make_fds_pictures
-   check_fds_pictures
+if [[ "$SKIPFIGURES" == "" ]] ; then
+   if [[ $stage3c_success ]] ; then
+      make_fds_pictures
+      check_fds_pictures
+   fi
 fi
 
 if [ "$SKIPMATLAB" == "" ] ; then
@@ -1238,21 +1270,27 @@ if [ "$SKIPMATLAB" == "" ] ; then
      archive_validation_stats
      make_validation_git_stats
    fi
+fi
 
 ### Stage 7c ###
    generate_timing_stats
-   archive_timing_stats
 
 ### Stage 8 ###
-   make_fds_user_guide
-   make_fds_verification_guide
-   make_fds_technical_guide
-   make_fds_validation_guide
-   make_fds_Config_management_plan
+if [ "$SKIPMATLAB" == "" ] ; then
+   if [ "$SKIPFIGURES" == "" ] ; then
+      make_fds_user_guide
+      make_fds_verification_guide
+      make_fds_technical_guide
+      make_fds_validation_guide
+      make_fds_Config_management_plan
+   fi
+fi
 fi
 
 ### Wrap up and report results ###
 set_files_world_readable
 save_build_status
+if [ "$FIREBOT_LITE" == "" ]; then
+  archive_timing_stats
+fi
 email_build_status 'Firebot'
-

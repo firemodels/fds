@@ -93,11 +93,11 @@ if [ "$use_installed" == "1" ] ; then
   export WIND2FDS=wind2fds
   export BACKGROUND=background
 else
-  export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
-  export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
-  export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
-  export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
-  export BACKGROUND=$SVNROOT/Utilities/background/intel_$VERSION2/background
+  export SMV=$SVNROOT/SMV/Build/smokeview/intel_$VERSION2/smokeview_$VERSION
+  export SMOKEZIP=$SVNROOT/SMV/Build/smokezip/intel_$VERSION2/smokezip_$VERSION2
+  export SMOKEDIFF=$SVNROOT/SMV/Build/smokediff/intel_$VERSION2/smokediff_$VERSION2
+  export WIND2FDS=$SVNROOT/SMV/Build/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
+  export BACKGROUND=$SVNROOT/SMV/Build/background/intel_$VERSION2/background
 fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
@@ -114,7 +114,6 @@ echo
 
 RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
-export RUNTFDS="$RUNSMV -t"
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
@@ -203,12 +202,6 @@ if [ "$RUN_SMV" == "1" ] ; then
   cd $CURDIDR
   source $STOPX
 
-# copy generated images to web summary directory
-
-  cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
-  cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 fi
 
 # generate geometry images
@@ -225,3 +218,10 @@ if [ "$RUN_GEOM" == "1" ] ; then
   scripts/GEOM_Cases.sh
   source $STOPX
 fi
+
+# copy generated images to web summary directory
+
+cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
+cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.

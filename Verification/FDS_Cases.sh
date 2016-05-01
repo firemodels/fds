@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# add -A to any case that you wish to be a part of the benchmark timing suite
+
 $QFDS -d Atmospheric_Effects lee_waves.fds
 $QFDS -d Atmospheric_Effects stack_effect.fds
 $QFDS -d Atmospheric_Effects lapse_rate.fds
@@ -133,7 +135,6 @@ $QFDS -d Pressure_Effects pressure_boundary.fds
 $QFDS -d Pressure_Effects pressure_rise.fds
 $QFDS -d Pressure_Effects zone_break_fast.fds
 $QFDS -d Pressure_Effects zone_break_slow.fds
-$QFDS -d Pressure_Effects zone_shape.fds
 
 $QFDS -d Pressure_Solver dancing_eddies_1mesh.fds
 $QFDS -d Pressure_Solver scarc2d_fft_1mesh.fds
@@ -290,6 +291,7 @@ $QFDS -d Species reactionrate_EDC_O2lim_1step.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_prim.fds
 $QFDS -d Species reactionrate_EDC_O2lim_2fuel_lump.fds
 $QFDS -d Species reactionrate_lumped_two_air.fds
+$QFDS -d Species reactionrate_lumped_two_air_2.fds
 $QFDS -d Species reactionrate_series_reaction.fds
 $QFDS -d Species pvc_combustion.fds
 $QFDS -d Species soot_gravitational_settling.fds
@@ -303,6 +305,8 @@ $QFDS -d Species hrrpuv_reac_series.fds
 $QFDS -d Species hrrpuv_reac_soot.fds
 $QFDS -d Species hrrpuv_reac_arrhenius.fds
 $QFDS -d Species ramp_chi_r.fds
+$QFDS -d Species bound_test_1.fds
+$QFDS -d Species bound_test_2.fds
 
 $QFDS -d Sprinklers_and_Sprays activate_sprinklers.fds
 $QFDS -d Sprinklers_and_Sprays bucket_test_1.fds
@@ -446,6 +450,8 @@ $QFDS -t -p 8 -d Flowfields volume_flow_2.fds
 
 $QFDS -t -p 4 -d Heat_Transfer back_wall_test.fds
 
+$QFDS -t -p 2 -d Pressure_Effects zone_shape.fds
+
 $QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight.fds
 $QFDS -t -p 4 -d Pressure_Solver dancing_eddies_tight_overlap.fds
 $QFDS -t -p 4 -d Pressure_Solver dancing_eddies_default.fds
@@ -466,20 +472,20 @@ $QFDS -t -p 4 -d WRF wrf_time_ramp.fds
 $QFDS -t -p 4 -d WRF wrf_prof_ramp.fds
 $QFDS -t -p 4 -d WRF wrf_time_prof_ramp.fds
 
-$QFDS -t -o 1 -d Timing_Benchmarks openmp_test64a.fds
-$QFDS -t -o 2 -d Timing_Benchmarks openmp_test64b.fds
-$QFDS -t -o 3 -d Timing_Benchmarks openmp_test64c.fds
-$QFDS -t -o 4 -d Timing_Benchmarks openmp_test64d.fds
-$QFDS -t -o 5 -d Timing_Benchmarks openmp_test64e.fds
-$QFDS -t -o 6 -d Timing_Benchmarks openmp_test64f.fds
-$QFDS -t -o 7 -d Timing_Benchmarks openmp_test64g.fds
-$QFDS -t -o 8 -d Timing_Benchmarks openmp_test64h.fds
+$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test64a.fds
+$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test64b.fds
+$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test64c.fds
+$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test64d.fds
+$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test64e.fds
+$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test64f.fds
+$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test64g.fds
+$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test64h.fds
 
-$QFDS -t -o 1 -d Timing_Benchmarks openmp_test128a.fds
-$QFDS -t -o 2 -d Timing_Benchmarks openmp_test128b.fds
-$QFDS -t -o 3 -d Timing_Benchmarks openmp_test128c.fds
-$QFDS -t -o 4 -d Timing_Benchmarks openmp_test128d.fds
-$QFDS -t -o 5 -d Timing_Benchmarks openmp_test128e.fds
-$QFDS -t -o 6 -d Timing_Benchmarks openmp_test128f.fds
-$QFDS -t -o 7 -d Timing_Benchmarks openmp_test128g.fds
-$QFDS -t -o 8 -d Timing_Benchmarks openmp_test128h.fds
+$QFDS -t -o 1 -A -d Timing_Benchmarks openmp_test128a.fds
+$QFDS -t -o 2 -A -d Timing_Benchmarks openmp_test128b.fds
+$QFDS -t -o 3 -A -d Timing_Benchmarks openmp_test128c.fds
+$QFDS -t -o 4 -A -d Timing_Benchmarks openmp_test128d.fds
+$QFDS -t -o 5 -A -d Timing_Benchmarks openmp_test128e.fds
+$QFDS -t -o 6 -A -d Timing_Benchmarks openmp_test128f.fds
+$QFDS -t -o 7 -A -d Timing_Benchmarks openmp_test128g.fds
+$QFDS -t -o 8 -A -d Timing_Benchmarks openmp_test128h.fds

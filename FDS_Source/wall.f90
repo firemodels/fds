@@ -138,7 +138,7 @@ DO I=1,N_TGA
    ENDIF
    IF (MOD(I,NINT(1._EB/(TGA_HEATING_RATE*DT_TGA)))==0) THEN
       IF (N_REACTIONS>0) THEN
-         HRR = ONE_D%MASSFLUX(REACTION(1)%FUEL_SMIX_INDEX)*0.001*REACTION(1)%HEAT_OF_COMBUSTION/SURF_DEN_0
+         HRR = ONE_D%MASSFLUX(REACTION(1)%FUEL_SMIX_INDEX)*0.001*REACTION(1)%HEAT_OF_COMBUSTION/(ONE_D%AREA_ADJUST*SURF_DEN_0)
       ELSE
          HRR = 0._EB
       ENDIF
@@ -857,12 +857,12 @@ IF (N_TRACKED_SPECIES==1) THEN
       WC%ZZ_F(1) = 1._EB
       RETURN
    ENDIF
-   
+
    IF ( SF%SPECIES_BC_INDEX==SPECIFIED_MASS_FLUX .AND. ABS(SF%MASS_FLUX(1))<=TWO_EPSILON_EB ) THEN
       WC%ZZ_F(1) = 1._EB
       RETURN
    ENDIF
-   
+
 ENDIF
 
 ! Set a few common parameters
@@ -952,7 +952,6 @@ METHOD_OF_MASS_TRANSFER: SELECT CASE(SPECIES_BC_INDEX)
       ! If the user has specified the burning rate, evaluate the ramp and other related parameters
 
       SUM_MASSFLUX_LOOP: DO N=1,N_TRACKED_SPECIES
-         IF (CALL_PYROLYSIS)  ONE_D%MASSFLUX(N) = ONE_D%MASSFLUX(N)*AREA_ADJUST
          IF (ABS(SF%MASS_FLUX(N)) > TWO_EPSILON_EB) THEN  ! Use user-specified ramp-up of mass flux
             IF (ABS(T_IGN-T_BEGIN) < SPACING(ONE_D%T_IGN) .AND. SF%RAMP_INDEX(N)>=1) THEN
                IF (PREDICTOR) TSI = T + DT
@@ -1725,6 +1724,10 @@ PYROLYSIS_MATERIAL_IF: IF (SF%PYROLYSIS_MODEL==PYROLYSIS_MATERIAL) THEN
       ENDIF
 
    ENDDO POINT_LOOP1
+
+   ! Adjust the MASSFLUX of a wall surface cell to account for non-alignment of the mesh.
+
+   IF (PRESENT(WALL_INDEX)) ONE_D%MASSFLUX(1:N_TRACKED_SPECIES) = ONE_D%MASSFLUX(1:N_TRACKED_SPECIES)*ONE_D%AREA_ADJUST
 
    ! Compute new coordinates if the solid changes thickness. Save new coordinates in X_S_NEW.
 

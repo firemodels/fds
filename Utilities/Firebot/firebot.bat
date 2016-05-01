@@ -555,7 +555,7 @@ exit /b 0
 :: -------------------------------------------------------------
 
   set program=%1
-  %program% -help 1>> %OUTDIR%\stage_exist.txt 2>&1
+  %program% --help 1>> %OUTDIR%\stage_exist.txt 2>&1
   type %OUTDIR%\stage_exist.txt | find /i /c "not recognized" > %OUTDIR%\stage_count.txt
   set /p nothave=<%OUTDIR%\stage_count.txt
   if %nothave% == 1 (

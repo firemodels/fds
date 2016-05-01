@@ -12,6 +12,8 @@ walltime=
 RUNOPTION=
 CURDIR=`pwd`
 BACKGROUND=
+BACKGROUND_DELAY=2
+BACKGROUND_LOAD=75
 JOBPREFIX=
 
 if [ "$FDSNETWORK" == "infiniband" ] ; then
@@ -29,7 +31,6 @@ echo "-h - display this message"
 echo "-j - job prefix"
 echo "-m max_iterations - stop FDS runs after a specifed number of iterations (delayed stop)"
 echo "     example: an option of 10 would cause FDS to stop after 10 iterations"
-echo "-M - run only cases that use multiple processes"
 echo "-o nthreads - run FDS with a specified number of threads [default: $nthreads]"
 echo "-q queue_name - run cases using the queue queue_name"
 echo "     default: batch"
@@ -38,7 +39,6 @@ echo "-r resource_manager - run cases using the resource manager"
 echo "     default: PBS"
 echo "     other options: SLURM"
 echo "-s - stop FDS runs"
-echo "-S - run only cases that use one process"
 echo "-w time - walltime request for a batch job"
 echo "     default: empty"
 echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
@@ -49,11 +49,17 @@ cd ../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
-while getopts 'c:dhj:Mm:o:q:r:Ssw:' OPTION
+while getopts 'B:c:dD:hj:L:m:o:q:r:sw:' OPTION
 do
 case $OPTION in
   d)
    DEBUG=_db
+   ;;
+  B)
+   BACKGROUND="$OPTARG"
+   ;;
+  D)
+   BACKGROUND_DELAY="$OPTARG"
    ;;
   h)
    usage;
@@ -61,11 +67,11 @@ case $OPTION in
   j)
    JOBPREFIX="-j $OPTARG"
    ;;
+  L)
+   BACKGROUND_LOAD="$OPTARG"
+   ;;
   m)
    export STOPFDSMAXITER="$OPTARG"
-   ;;
-  M)
-   RUNOPTION="-M"
    ;;
   o)
    nthreads="$OPTARG"
@@ -78,9 +84,6 @@ case $OPTION in
    ;;
   s)
    export STOPFDS=1
-   ;;
-  S)
-   RUNOPTION="-S"
    ;;
   w)
    walltime="-w $OPTARG"
@@ -113,7 +116,12 @@ else
 fi
 if [ "$QUEUE" != "" ]; then
    if [ "$QUEUE" == "none" ]; then
-      BACKGROUND="-B background"
+      if [ "$BACKGROUND" == "" ]; then
+         BACKGROUND=background
+      fi
+      BACKGROUND="-B $BACKGROUND"
+      export BACKGROUND_DELAY
+      export BACKGROUND_LOAD
       JOBPREFIX=
    fi
    QUEUE="-q $QUEUE"
