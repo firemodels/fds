@@ -1,0 +1,71 @@
+<html>
+<head>
+<TITLE>Bundle</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function bundle_fdssmv(platform){
+  MyObject.Run(get_fullpath("Scripts/BUNDLEfdssmv.bat ",platform));
+}
+function install_fdssmv(platform){
+  MyObject.Run(get_fullpath("Scripts/INSTALLfdssmv.bat ",platform));
+}
+</script>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
+<a href="../SMV/build_smokeview.html"><font size=5>Smokeview</font></a> - 
+<a href="../SMV/build_guides.html"><font size=5>Guides</font></a> - 
+<font size=5>Bundle</font>
+<hr>
+
+<h3>Checklist</h3>
+<ul>
+<li>Edit <a href="../SMV/scripts/EDIT_setup.bat">config file</a>
+<li><a href="../SMV/scripts/Update_repos_gitlatest.bat">Update FDS-SMV</a> on all three platforms
+<li>Build 
+<a href="../FDS_Compilation/build_fds.html">FDS</a>, 
+<a href="../SMV/build_smokeview.html">Smokeview and utilities</a>
+<li>Update and commit release notes for FDS and Smokeview
+<li><a href="Scripts/CONV_fds_release.bat">Convert</a> FDS wiki to html, then commit
+<li><a href="../SMV/build_guides.html">Copy FDS guides</a> from Linux firebot to ~/FDS_Guides on all three platforms
+<li><a href="../SMV/build_guides.html">Copy Smokeview guides</a> from Linux firebot to ~/FDS_Guides on all three platforms
+</ul>
+
+<h3>Bundles</h3>
+<table border=on>
+<tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+<tr>
+<td align=center><button onclick="bundle_fdssmv('windows')">Bundle</button></td>
+<td align=center><button onclick="bundle_fdssmv('linux')">Bundle</button></td>
+<td align=center><button onclick="bundle_fdssmv('osx')">Bundle</button></td>
+</tr>
+
+<tr>
+<td align=center><button onclick="install_fdssmv('windows')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('linux')">Install</button></td>
+<td align=center><button onclick="install_fdssmv('osx')">Install</button></td>
+</tr>
+<tr>
+<td align=center colspan=3><a href="../Utilities/Scripts/UPLOADbundles.bat">Upload</a> (google drive and git)</td>
+</tr>
+</table>
+
+<h3>Other</h3>
+<ul>
+<li><a href="Scripts/EDIT_bundle.bat">Edit</a> this page
+<li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>
+</ul>
+
+<p><hr>
+
+</BODY>
+</HTML>

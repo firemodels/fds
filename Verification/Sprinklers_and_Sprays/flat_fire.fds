@@ -15,7 +15,7 @@
 
 &PART ID='particles', SURF_ID='sphere', DRAG_COEFFICIENT=0.2, QUANTITIES(1:2)='U-VELOCITY','W-VELOCITY' /
 
-&INIT XB=0.,0.,0.,0.,8.,8., UVW=400.,0.,0., PART_ID='particles', N_PARTICLES=1 /
+&INIT ID='part', XB=0.,0.,0.,0.,8.,8., UVW=400.,0.,0., PART_ID='particles', N_PARTICLES=1 /
 
 &SURF ID='slip walls', FREE_SLIP=.TRUE., DEFAULT=.TRUE./
 
@@ -23,5 +23,10 @@
 &VENT MB='ZMAX', SURF_ID='OPEN' /
 
 &SLCF PBY=0.0,QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&DEVC ID='x', QUANTITY='PARTICLE X', INIT_ID='part' /
+&DEVC ID='z', QUANTITY='PARTICLE Z', INIT_ID='part' /
+&DEVC ID='u', QUANTITY='PARTICLE U', INIT_ID='part' /
+&DEVC ID='w', QUANTITY='PARTICLE W', INIT_ID='part' /
 
 &TAIL /

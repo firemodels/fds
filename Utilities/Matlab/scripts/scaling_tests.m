@@ -37,6 +37,9 @@ H1(4) = loglog(r2,t2/4,'k:'); hold on
 H1(5) = loglog(r2,t2/8,'k:'); hold on
 H1(6) = loglog(r2,t2/16,'k:'); hold on
 H1(7) = loglog(r2,t2/32,'k:'); hold on
+H1(8) = loglog(r2,t2/64,'k:'); hold on
+H1(9) = loglog(r2,t2/128,'k:'); hold on
+H1(10) = loglog(r2,t2/256,'k:'); hold on
 
 H(1) = loglog(r,t(:,15),'k-o'); 
 H(2) = loglog(r,t(:,3),'r-o'); 
@@ -50,10 +53,10 @@ H(8) = loglog(r,t(:,2),'k-s');
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Label_Font_Size)
 xlabel('MPI Processes','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-ylabel('Relative CPU Time','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-Min_Ind = 0.9;
+ylabel('Relative Wall Clock Time','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+Min_Ind = 1.0;
 Max_Ind = 1200;
-Min_Dep = 0.0001;
+Min_Dep = 0.00001;
 Max_Dep = 1.;
 axis([Min_Ind Max_Ind Min_Dep Max_Dep])
 set(gca,'XTickLabel',num2str(get(gca,'XTick')'))
@@ -64,7 +67,7 @@ Y_Title_Position = 10^(log10(Min_Dep)+Title_Position(2)*(log10(Max_Dep)-log10(Mi
 text(X_Title_Position,Y_Title_Position,'Strong Scaling Test','FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
 legend_handle = legend(H,'Total','DIVG','MASS','VELO','PRES','COMM','RADI','MAIN','Location','NorthEast');
 set(legend_handle,'Interpreter',Font_Interpreter);
-set(legend_handle,'Fontsize',Key_Font_Size);
+set(legend_handle,'Fontsize',8);
 
 git_file = [FDS_Output_Files,'strong_scaling_test_288_git.txt'];
 addverstr(gca,git_file,'loglog')

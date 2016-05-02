@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR=
-while getopts 'd:tp:o:' OPTION
+while getopts 'Ad:tp:o:' OPTION
 do
 case $OPTION in
   d)

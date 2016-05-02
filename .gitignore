@@ -11,6 +11,7 @@
 *.exp
 *.lib
 *.i90
+*.dll
 
 # executables
 fds_intel_*

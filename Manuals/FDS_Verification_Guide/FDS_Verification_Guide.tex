@@ -1451,7 +1451,7 @@ where the mixed number $m$ is between 0.12 and 0.20.
 
 In the transition region, viscous mixing spreads over the entire jet flow and the flow velocity along the axis decreases. The mean flow velocity at the jet centerline $u_{max}(x)$ is calculated by
 \begin{equation}
-u_{max}(x) =    \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
+\frac{u_{max}(x)}{u_0} = \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 \end{equation}
 
 Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
@@ -2567,6 +2567,61 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
 
+
+\clearpage
+
+\section{Heat Release Rates from Reaction Mechanisms (\textct{hrrpuv\_reac})}
+\label{hrrpuv_reac}
+
+One of the most important quantities computed in FDS is the heat release rate per unit volume (HRRPUV), $\dot{q}^{\ppp}$.  HRRPUV shows up in the energy equation and hence the expression for the velocity divergence (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The value of $\dot{q}^{\ppp}$ within a computation cell can be computed two ways, which should be equivalent.  The first is to use individual species heats of formation times the respective chemical production rates:
+\begin{equation}
+\label{eq:qdotppp}
+\dot{q}^{\ppp} = - \sum_\alpha \dot{m}_\alpha^{\ppp} \, \Delta h_{{\rm f},\alpha}^\circ
+\end{equation}
+Note that Eq.~(\ref{eq:qdotppp}) is what is ultimately used in the FDS divergence expression.
+
+The second is to sum the individual reaction rates  times their respective heats of combustion, which are precomputed in the read routines in FDS:
+\begin{equation}
+\label{eq:qdotppp2}
+\dot{q}^{\ppp} = \sum_i r_{{\rm F},i}^\prime \, \Delta H_{{\rm c},i}
+\end{equation}
+Here F denotes the fuel for reaction $i$.
+
+In this section, we show results comparing Eqs.~(\ref{eq:qdotppp}) and (\ref{eq:qdotppp2}) for a series of cases with different reaction mechanisms.  This test series is meant to touch various pathways through the chemistry ODE solver involving mixing, fast and slow chemistry, extinction, and series and parallel reactions.  The result are presented in Fig.~\ref{hrrpuv_reac_figures}.  The measure of correctness is that the black dots (hrrpuv), taken from Eq.~(\ref{eq:qdotppp}), exactly match with the sum of the individual reaction HRR curves denoted by the solid black line, Eq.~(\ref{eq:qdotppp2}). Below we briefly describe the key features of each case.
+
+\subsubsection{Single Reaction (\textct{hrrpuv\_reac\_single})} This is a single reaction with specified lumped species without extinction.
+
+\subsubsection{Series Reactions (\textct{hrrpuv\_reac\_series})} This is a set of series reactions with primitive species.
+
+\subsubsection{Simple Reaction (\textct{hrrpuv\_reac\_simple})} This is FDS Simple Chemistry integrated using two Forward Euler substeps.
+
+\subsubsection{Reaction with Extinction (\textct{hrrpuv\_reac\_extinction})} This is a single reaction with specified lumped species with extinction.
+
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel})} This is a set of parallel reactions with two fuels going to one set of products.
+
+\subsubsection{Parallel Reactions (\textct{hrrpuv\_reac\_parallel\_2})} This is a set of parallel reactions with one fuel going to two products.
+
+\subsubsection{Arrhenius Reaction (\textct{hrrpuv\_reac\_arrhenius})} This is simple Arrhenius rate law using the default ODE integrator for finite-rate chemistry, which is RK4.
+
+\subsubsection{Soot Production (\textct{hrrpuv\_reac\_soot})} This example combines a fast reaction for the primary reaction with finite-rate chemistry for the soot oxidation reaction.
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_single} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_series} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_simple} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_extinction} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_parallel_2} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_arrhenius} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/hrrpuv_reac_soot}
+\end{tabular*}
+\caption[Results of the {\ct hrrpuv\_reac} test cases]{Heat release rate per unit volume for the various {\ct hrrpuv\_reac} test cases.}
+\label{hrrpuv_reac_figures}
+\end{figure}
+
+
 \clearpage
 
 \section{Mixture Fraction (\textct{burke\_schumann})}
@@ -2588,24 +2643,26 @@ Y_{\rm F} &= 0 \\
 Y_{\rm O} &= 1- \frac{f}{f_{\rm stoich}} \\
 Y_{\rm P} &= \frac{f}{f_{\rm stoich}}
 \end{align}
-Fig.~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations.
-\begin{figure}
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
-\caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{Lumped species mass fractions as a function of mixture fraction.}
-\label{fig:burke_schumann_spec}
-\end{figure}
-The state relation for temperature is given by:
+Figure~\ref{fig:burke_schumann_spec} demonstrates that the predicted final fuel, oxidizer, and product mass fractions obey the ideal state relations. The state relation for temperature is given by:
 \begin{equation}\label{eq:mix_relate_temp}
 T = T_0 +  (f-Y_{\rm F}(f)) \, \frac{\Delta h_{\rm c}}{c_{v}}
 \end{equation}
 The specific heat, $c_p$, for each species is set to 1~\si{kJ/(kg.K)} as in the analysis by Turns~\cite{Turns:1996}. The enthalpy of formation of each of the species except for the fuel is set to zero, such that the heat of combustion of the reaction equals the heat of formation of the fuel. To obtain true adiabatic conditions in FDS, these cases were conducted inside a constant-volume reactor, so Eq.~(\ref{eq:mix_relate_temp}) is based on $c_v$ rather than $c_p$. We use the  following relationship $c_v = c_p - R/W$ to determine $c_v$. The molecular weight of the species were not assumed to be uniform; thus, the average molecular weight and $c_v$ vary with the mixture fraction. As a result, the traditional linear temperature profile is not expected.  The FDS result is shown in Fig.~\ref{fig:burke_schumann_temp}.
-\begin{figure}
+
+\begin{figure}[!ht]
 \centering
-\includegraphics[width=3.2in]{SCRIPT_FIGURES/burke_schumann_temp}
-\caption[Mixture fraction state relation for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_spec}
+\caption[Mixture fraction state relations for species (\textct{burke\_schumann})]{(Left) Lumped species mass fractions as a function of mixture fraction.}
+\label{fig:burke_schumann_spec}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/burke_schumann_temp}
+\caption[Mixture fraction state relations for temperature (\textct{burke\_schumann})]{Non-dimensional temperature, $(T-T_0)/(T_{\rm stoich} - T_0)$, as a function of the mixture fraction.}
 \label{fig:burke_schumann_temp}
 \end{figure}
+
 
 
 \clearpage
@@ -3067,6 +3124,33 @@ In this example, a unit cube made of 0.5~cm thick steel has several of its sides
 \end{tabular*}
 \caption[The \textct{back\_wall\_test} test case]{(Left) The heat flux into and out of a steel plate. (Right) The external temperature of a steel box whose sides are either zero or one cell thick.}
 \label{back_wall_test}
+\end{figure}
+
+
+\clearpage
+
+\section{Specified Heat Flux Boundary Conditions (\texorpdfstring{\textct{adiabatic\_xxx\_flux}}{adiabatic\_xxx\_flux})}
+
+There are options in FDS to specify either a net (convective and radiative) or convective boundary condition at a solid surface. In these two test cases, \textct{Heat\_Transfer/adiabatic\_con\_flux.fds} and \textct{Heat\_Transfer/adiabatic\_net\_flux.fds}, a sealed cube of side length 2~m has a 0.4~m by 0.4~m area on the floor with a specified convective and net heat flux of 100~kW/m$^2$. The case with the specified convective heat flux boundary has the radiation turned off. The case with the net heat flux boundary has both convection and radiation enabled so that the net flux is 100~kW/m$^2$. The flux is applied for 30~s and then turned off. The pressure in the compartment is expected to rise according to the equation:
+\be
+   \frac{\d p}{\d t} = \frac{(\gamma-1) \, \dot{Q}}{V}
+\ee
+where $\dot{Q}=16$~kW, $\gamma=1.4$, and $V=8$~m$^3$. After 30~s, the pressure rise, $p$, is expected to be 24~kPa (left, Fig.~\ref{adiabatic_flux}). The expected temperature rise, $\Delta T$, is found by solving the energy conservation equation:
+\be
+   \dot{Q} \, \Delta t = c_p \, \rho \, V \, \Delta T - V \, \Delta p
+\ee
+as shown in the right hand plots of Fig.~\ref{adiabatic_flux}.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_pres} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_con_flux_temp} \\
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_pres} &
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/adiabatic_net_flux_temp}
+\end{tabular*}
+\caption[The \textct{adiabatic\_con\_flux} and \textct{adiabatic\_net\_flux} test cases]{Pressure and average temperature of a small compartment with specified heat flux boundary conditions.}
+\label{adiabatic_flux}
 \end{figure}
 
 
@@ -3674,7 +3758,9 @@ In a second test case, consider a single 10~m long, 1~m square duct. Spherical p
 \subsection{Mesh Screen in a Duct (\texorpdfstring\textct{screen\_drag}{screen\_drag})}
 
 These two test cases consider a 1 m wide by 1 m tall by 2 m long channel with either a 2 m/s or a 20 m/s fixed velocity boundary condition fixed velocity boundary condition on one end, an \textct{OPEN} boundary condition on the other end, and \textct{FREE\_SLIP} on the y- and z-faces.  Three channels are stacked vertically (each with its own \textct{MESH}, and a plane of particles is placed across each channel at 1 m.  The plane of particles are defined as a screen with a wire diameter of 0.0003 m.  A \textct{FREE\_AREA\_FRACTION} of 0.1, 0.4, and 0.8 is set for the particles in the channels.  According to the screen drag formula
-\be  \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen} \ee
+\be
+   \Delta \hbox{P} \;= \; \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right) \Delta x_{\rm screen}
+\ee
 where K and Y are empirical constants defined in the User's Guide, the pressure drops for the 2 m/s inlet should be 126 Pa, 14 Pa, and 5.3 Pa, and for the 20 m/s inlet should be 1260 Pa, 168 Pa, and 124 Pa.   Comparisons of computed and analytical results are shown in Fig.~\ref{screen_drag_plots}.
 
 \begin{figure}[ht]
@@ -3683,6 +3769,24 @@ where K and Y are empirical constants defined in the User's Guide, the pressure 
 \caption[Sample cases \textct{screen\_drag}]{Outputs of the \textct{screen\_drag} test cases compared with analytical solutions.  Left 2~m/s inlet, right 20~m/s inlet.}
 \label{screen_drag_plots}
 \end{figure}
+
+\subsection{Flow through Porous Media (\texorpdfstring\textct{porous\_media}{porous\_media})}
+
+This case involves a 2~m long duct with a 0.5~m by 0.5~m cross section and 1~m/s flow in the $x$ direction. An 8.5~cm thick block of rigid aluminum foam is positioned in the duct. The pressure drop induced by the foam is expected to be approximately:
+\be
+   \Delta p \approx \delta \left( \frac{\mu}{\hbox{K}} u \; + \; \rho \frac{\hbox{Y}}{\sqrt{\hbox{K}}} u^2 \right)
+\ee
+where ${\rm K}=1 \times 10^{-7}$~m$^2$ and ${\rm Y}=0.1$ in all three coordinate directions. The block thickness $\delta=0.085$~m, the velocity $u=1$~m/s, the air density $\rho=1.2$~kg/m$^3$, and the air viscosity $\mu=1.8 \times 10^{-5}$~kg/m/s. Comparisons of computed and analytical results for three different grid resolutions (1 corresponds to low resolution, 2 medium, 3 fine) are shown in Fig.~\ref{porous_media_plot}. The computed pressure drop does not match the expected result because the air velocity is not necessarily 1~m/s inside the block, in particular for the finest grid resolution (pres\_3).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/porous_media}
+\caption[Results of the \textct{porous\_media} test case]{Pressure drop caused by a block of aluminum foam.}
+\label{porous_media_plot}
+\end{figure}
+
+
+
 
 \subsection{Particle Terminal Velocity (\texorpdfstring\textct{terminal\_velocity}{terminal\_velocity})}
 
@@ -3913,7 +4017,14 @@ As opposed to the other cases above, this case tests the predicted rate of evapo
 
 \subsection{Case 6}
 
-This case tests the conservation of energy between drops, surfaces, and  the gas.  A 1 m$^3$ box is filled with 1 kg of gas ($c_p$ = 1~\si{kJ/(kg.K)} and W = 28~g/mol) at an initial temperature of 100~\si{\degree C}.  The box is filled with 0.1~kg of droplets ($c_p$ = 2~\si{kJ/(kg.K)}) that evaporate to the gas.  The droplets have an initial temperature of 20~\si{\degree C}, a freezing point of 0~\si{\degree C}, a boiling point of 100~\si{\degree C},  and a median diameter of 0.2~mm. All walls except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness) has a total mass of 1 kg, a specific heat of 1~\si{kJ/(kg.K)}, and an initial temperature of 250~\si{\degree C}.  At steady-state all the drops will have evaporated, the wall and the gas will be at 172.0~\si{\degree C} and the pressure rise will be 34,600 Pa (see Fig.~\ref{water_evaporation_6_plots}).
+This case tests the conservation of energy between droplets, surfaces, and the gas. It also demonstrates that one can specify thermophysical properties rather than rely on tabulated data. A box with volume, $V=1$~m$^3$, is filled with gas with the following properties: $m_{\rm g,0}=1$~kg, $c_{p,\rm g}=1$~\si{kJ/(kg.K)}, $W=28$~g/mol, $T_{{\rm g},0}=373.15$~K.  The box is filled with droplets with total mass, $m_{\rm d}=0.1$~kg, specific heat, $c_{\rm l}$ = 2~\si{kJ/(kg.K)}, and heat of vaporization, $h_v=173.15$~kJ/kg. The droplets evaporate into the same gas as the background.  The droplets have an initial temperature, $T_{\rm d,0}=293.15$~K, and a boiling point, $T_{\rm b}=373.15$~K. All walls of the box except the floor are adiabatic.  The floor is thermally thin (e.g., high conductivity compared to its thickness), with a perfectly insulated backing. It has a total mass, $m_{\rm w}=1$~kg, a specific heat, $c_{\rm w}=1$~\si{kJ/(kg.K)}, and an initial temperature, $T_{\rm w,0}=523.15$~K.  After approximately 100~s, all the droplets evaporate, the wall and the gas temperatures converge to a single final temperature, $T_{\rm g,f}$, and the pressure rises to $p_{\rm f}$ (see Fig.~\ref{water_evaporation_6_plots}). The final gas temperature can be found by solving the equation, $\Delta E = \Delta H - V \Delta p$, where $\Delta E$ is the energy transferred from the hot floor to the gas, $\Delta H$ is the increased enthalpy of the gas due to the convective heating of the floor and the evaporation of the water droplets, and $\Delta p$ is the change in gas pressure.
+\begin{eqnarray*}
+\Delta E &=& m_{\rm w} \, c_{\rm w} \, (T_{{\rm w},0}-T_{\rm g,f}) \\[.1in]
+\Delta H &=& m_{\rm g,0} \, c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm g,0} ) + m_{\rm d} \Big( c_{\rm l} \, (T_{\rm b}-T_{\rm d,0}) + c_{p,{\rm g}} \, (T_{\rm g,f}-T_{\rm b}) + h_v  \Big) \\[.1in]
+\Delta p &=& \frac{R}{W \, V} \left( m_{\rm g,f} \, T_{\rm g,f} - m_{\rm g,0} \, T_{\rm g,0} \right) \quad ; \quad R = 8.314 \; \hbox{kJ/kmol/K}
+\end{eqnarray*}
+The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pressure increase is 34.6~kPa.
+
 
 \begin{figure}[h!]
 \noindent
@@ -4126,7 +4237,7 @@ In the following examples, both leaks and fans are demonstrated.
 \subsection{Single Zone Leakage (\texorpdfstring\textct{leak\_test}{leak\_test})}
 \label{single_zone_leak}
 
-Two compartments (each 3.6~m by 2.4~m by 2.4~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve''
+Two compartments (each 0.9~m by 1~m by 1~m) are connected by a small fan and a leak at the floor. The volume flow rate of the fan is given by the ``fan curve'':
 \be
   \dot{V}_{\hbox{\footnotesize fan}} = A_{\hbox{\footnotesize duct}}
   U_{\hbox{\footnotesize max}} \;

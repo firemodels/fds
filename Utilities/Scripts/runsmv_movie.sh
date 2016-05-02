@@ -4,6 +4,12 @@ in=$2
 movies=_movies
 smvscript=$in$movies.ssf
 
+if [ "x$BASEDIR" == "x" ]; then
+  BASEDIR=`pwd`
+fi
+if [ "x$SMV" == "x" ]; then
+  SMV=smokeview
+fi
 fulldir=$BASEDIR/$dir
 
 notfound=`$SMV -help 2>&1 | tail -1 | grep "not found" | wc -l`

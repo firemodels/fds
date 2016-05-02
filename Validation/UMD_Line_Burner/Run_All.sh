@@ -9,8 +9,4 @@ $QFDS $DEBUG -p 8  $QUEUE -d $INDIR methane_dx_1p25cm.fds
 $QFDS $DEBUG -p 16 $QUEUE -d $INDIR methane_dx_p625cm.fds
 #$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR methane_dx_p3125cm.fds
 
-$QFDS $DEBUG -p 8  $QUEUE -d $INDIR meth_ext_dx_1p25cm.fds
-$QFDS $DEBUG -p 16 $QUEUE -d $INDIR meth_ext_dx_p625cm.fds
-#$QFDS $DEBUG -p 128 -n 8 $QUEUE -d $INDIR meth_ext_dx_p3125cm.fds
-
 echo FDS cases submitted

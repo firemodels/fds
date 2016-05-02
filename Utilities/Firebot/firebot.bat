@@ -60,8 +60,6 @@ if "%altemail%" == "1" (
   )
 )
 
-set release=0
-set debug=1
 set errorlog=%OUTDIR%\firebot_errors.txt
 set timefile=%OUTDIR%\time.txt
 set datefile=%OUTDIR%\date.txt
@@ -83,8 +81,7 @@ set havewarnings=0
 set have_icc=1
 
 set emailexe=%userprofile%\bin\mailsend.exe
-set gettimeexe=%fdsroot%\Utilities\get_time\intel_win%size%\get_time.exe
-set runbatchexe=%fdsroot%\SMV\source\runbatch\intel_win%size%\runbatch.exe
+set gettimeexe=%userprofile%\FIRE-LOCAL\repo_exes\get_time.exe
 
 call :get_datetime startdate starttime
 
@@ -192,10 +189,12 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
-   cd %fdsroot%
-   git clean -dxf -e win32_local 1> Nul 2>&1
-   git add . 1> Nul 2>&1
-   git reset --hard HEAD 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
+   call :git_clean %fdsroot%\SMV\source
+   call :git_clean %fdsroot%\SMV\Build
+   call :git_clean %fdsroot%\FDS_Source
+   call :git_clean %fdsroot%\FDS_Compilation
+   call :git_clean %fdsroot%\Manuals
 :skip_clean1
 
 :: update FDS/Smokeview repository
@@ -203,6 +202,7 @@ if %clean% == 0 goto skip_clean1
 if %update% == 0 goto skip_update1
 echo             updating %fdsbasename% repository
 cd %fdsroot%
+
 git fetch origin
 git pull 1>> %OUTDIR%\stage0.txt 2>&1
 :skip_update1
@@ -282,7 +282,7 @@ echo Stage 3 - Building Utilities
 echo             fds2ascii
 cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
 erase *.obj *.mod *.exe 1> Nul 2>&1
-ifort -o fds2ascii_win%size%.exe /nologo ..\..\Data_processing\fds2ascii.f90  1> %OUTDIR%\makefds2ascii.log 2>&1
+call make_fds2ascii bot 1> %OUTDIR%\makefds2ascii.log 2>&1
 call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/Smokeview utilities"
 
@@ -312,7 +312,7 @@ echo             debug mode
 :: run cases
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %debug% 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_FDS_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
@@ -332,11 +332,11 @@ echo             release mode
 cd %fdsroot%\Verification\
 if %clean% == 0 goto skip_clean2
    echo             cleaning Verification directory
-   git clean -dxf -e win32_local 1> Nul 2>&1
+   call :git_clean %fdsroot%\Verification
 :skip_clean2
 
 cd %fdsroot%\Verification\scripts
-call Run_FDS_cases %release% 1> %OUTDIR%\stage4b.txt 2>&1
+call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
@@ -555,7 +555,7 @@ exit /b 0
 :: -------------------------------------------------------------
 
   set program=%1
-  %program% -help 1>> %OUTDIR%\stage_exist.txt 2>&1
+  %program% --help 1>> %OUTDIR%\stage_exist.txt 2>&1
   type %OUTDIR%\stage_exist.txt | find /i /c "not recognized" > %OUTDIR%\stage_count.txt
   set /p nothave=<%OUTDIR%\stage_count.txt
   if %nothave% == 1 (
@@ -624,6 +624,17 @@ if %nerrors% GTR 0 (
   set haveerrors=1
   set haveerrors_now=1
 )
+exit /b
+
+:: -------------------------------------------------------------
+ :git_clean
+:: -------------------------------------------------------------
+
+set gitcleandir=%1
+cd %gitcleandir%
+git clean -dxf 1>> Nul 2>&1
+git add . 1>> Nul 2>&1
+git reset --hard HEAD 1>> Nul 2>&1
 exit /b
 
 :: -------------------------------------------------------------

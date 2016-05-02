@@ -7,9 +7,8 @@
 
 &RADI RADIATION=.FALSE./
 
-
-&ZONE /  Declare the entire mesh to be pressure zone 1, but then over-ride with second ZONE declaration
-&ZONE XB= 0.1, 1.0, 0.0, 1.0, 0.0, 1.0, LEAK_AREA(1)=0.002/, LEAK_AREA(0)=0.002 for Case 2
+&ZONE XB=-1.0, 0.0, 0.0, 1.0, 0.0, 1.0 / 
+&ZONE XB= 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, LEAK_AREA(1)=0.002/, LEAK_AREA(0)=0.002 for Case 2
 
 &SPEC MW=28.,ID='BACKGROUND',BACKGROUND=.TRUE./
 

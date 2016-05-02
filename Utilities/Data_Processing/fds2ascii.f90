@@ -1,11 +1,16 @@
+#ifndef GITHASH_PP
+#define GITHASH_PP "unknown"
+#endif
+#ifndef GITDATE_PP
+#define GITDATE_PP "unknown"
+#endif
+#ifndef BUILDDATE_PP
+#define BUILDDATE_PP "unknown"
+#endif
 PROGRAM FDS2ASCII
 
 ! Program to convert various FDS output files to ASCII
 
-! $Id$  
-! $Revision$
-! $Date$
- 
 IMPLICIT NONE
 
 INTERFACE
@@ -17,7 +22,6 @@ INTEGER, INTENT(OUT) :: N_TOKS
 END SUBROUTINE PARSE
 END INTERFACE
 
-CHARACTER(255), PARAMETER :: revision='$Revision$'
 CHARACTER(255), PARAMETER :: f2aversion='2.1.0'
 INTEGER, PARAMETER :: FB = SELECTED_REAL_KIND(6)
 INTEGER, PARAMETER :: FILE_DIM = 500
@@ -88,11 +92,11 @@ IF(NARGS.GT.0)THEN
   DO I = 1, NARGS
     CALL GETARG(I,ARG)
     IF(ARG.EQ."-h".OR.ARG.EQ."-H")THEN
-      CALL USAGE2(f2aversion,revision)
+      CALL USAGE2(f2aversion)
       STOP
     ENDIF
     IF(ARG.EQ."-v".OR.ARG.EQ."-V")THEN
-      CALL VERSION2(f2aversion,revision)
+      CALL VERSION2(f2aversion)
       STOP
     ENDIF
   END DO
@@ -1060,17 +1064,14 @@ END SUBROUTINE SEARCH2
 
 ! *********************** USAGE2 *******************************
 
-SUBROUTINE USAGE2(f2aversion,revision)
+SUBROUTINE USAGE2(f2aversion)
 IMPLICIT NONE
 
-CHARACTER(255), intent(in) :: revision, f2aversion
-CHARACTER(255) :: rev2
+CHARACTER(255), intent(in) :: f2aversion
 INTEGER :: lastchar
         
-lastchar = len(trim(revision))
-rev2 = revision(2:lastchar-1)
         
-WRITE(6,*)"fds2ascii ",trim(f2aversion)," ",trim(rev2)
+WRITE(6,*)"fds2ascii ",trim(f2aversion)," ",TRIM(GITHASH_PP)
 WRITE(6,*)""
 WRITE(6,*)"  Convert boundary, slice or plot3d data generated"
 WRITE(6,*)"  by FDS to an ascii spreadsheet file."
@@ -1086,17 +1087,19 @@ END SUBROUTINE USAGE2
 
 ! *********************** VERSION2 *******************************
 
-SUBROUTINE VERSION2(f2aversion,revision)
+SUBROUTINE VERSION2(f2aversion)
 IMPLICIT NONE
 
-CHARACTER(255), intent(in) :: revision, f2aversion
-CHARACTER(255) :: rev2
-INTEGER :: lastchar
-        
-lastchar = len(trim(revision))
-rev2 = revision(2:lastchar-1)
-        
-WRITE(6,*)"fds2ascii ",trim(f2aversion)," ",trim(rev2)
+CHARACTER(255), intent(in) :: f2aversion
+
+CHARACTER(60) :: DATE
+
+WRITE(6,'(/A/)')      ' fds2ascii'
+WRITE(6,'(A,A)')      ' Version          : ',TRIM(f2aversion)
+WRITE(6,'(A,A)')      ' Revision         : ',TRIM(GITHASH_PP)
+WRITE(6,'(A,A)')      ' Revision Date    : ',TRIM(GITDATE_PP)
+WRITE(6,'(A,A/)')     ' Compilation Date : ',TRIM(BUILDDATE_PP)
+
 
 END SUBROUTINE VERSION2
 

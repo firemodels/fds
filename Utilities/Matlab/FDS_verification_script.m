@@ -80,7 +80,6 @@ pulsating
 compression_wave
 plate_view_factor
 terminal_velocity_convergence
-flat_fire_comparison
 fluid_part
 extinction
 fan_curve
@@ -94,6 +93,5 @@ radiating_polygon
 saad_mms_temporal_error
 shunn_mms_temporal_error
 scaling_tests
-hrrpuv_reac_output
 
 display('verification scripts completed successfully!')

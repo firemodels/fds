@@ -20,15 +20,16 @@ then
   echo "used).  A parallel version of FDS is invoked by using -p to specify the"
   echo "number of MPI processes and/or -o to specify the number of OpenMP threads."
   echo ""
+  echo " -A     - used by timing scripts"
   echo " -b     - use debug version of FDS"
   echo " -B     - location of background program"
   echo " -d dir - specify directory where the case is found [default: .]"
   echo " -e exe - full path of FDS used to run case"
+  echo " -E email address - send an email when the job ends or if it aborts"
   echo " -f repository root - name and location of repository where FDS is located"
   echo "    [default: $FDSROOT]"
   echo " -l node1+node2+...+noden - specify which nodes to run job on"
   echo " -m m - reserve m processes per node [default: 1]"
-  echo " -M   - run only if number of process is greater than 1"
   echo " -n n - number of MPI processes per node [default: 1]"
   echo " -N   - do not use socket or report binding options"
   echo " -o o - number of OpenMP threads per process [default: 1]"
@@ -37,7 +38,6 @@ then
   echo "        If queue is terminal then job is run in the foreground on local computer"
   echo " -r   - report bindings"
   echo " -s   - stop job"
-  echo " -S   - run only if number of process is equal to 1"
   echo " -t   - used for timing studies, run a job alone on a node"
   echo " -w time - walltime, where time is hh:mm for PBS and dd-hh:mm:ss for SLURM. [default: $walltime]"
   echo " -v   - list script used to run case to standard output"
@@ -61,6 +61,7 @@ OUT2ERROR=
 if [ "$FDSNETWORK" == "infiniband" ] ; then
   IB=ib
 fi
+EMAIL=
 
 # --------------------------- parse options --------------------
 
@@ -83,15 +84,26 @@ strip_extension=0
 REPORT_BINDINGS="--report-bindings"
 nodelist=
 erroptionfile=
-RUN_SINGLE=1
-RUN_MULTI=1
 nosocket=
+
+if [ "$BACKGROUND" == "" ]; then
+   BACKGROUND=background
+fi
+if [ "$BACKGROUND_DELAY" == "" ]; then
+   BACKGROUND_DELAY=10
+fi
+if [ "$BACKGROUND_LOAD" == "" ]; then
+   BACKGROUND_LOAD=75
+fi
 
 # read in parameters from command line
 
-while getopts 'bB:cd:e:f:j:l:Mm:Nn:o:p:q:rsStw:v' OPTION
+while getopts 'AbB:cd:e:E:f:j:l:m:Nn:o:p:q:rstw:v' OPTION
 do
 case $OPTION  in
+  A)
+   DUMMY=1
+   ;;
   b)
    use_debug=1
    ;;
@@ -108,6 +120,9 @@ case $OPTION  in
    exe="$OPTARG"
    use_repository=0
    ;;
+  E)
+   EMAIL="$OPTARG"
+   ;;
   f)
    FDSROOT="$OPTARG"
    ;;
@@ -119,10 +134,6 @@ case $OPTION  in
    ;;
   m)
    max_processes_per_node="$OPTARG"
-   ;;
-  M)
-   RUN_MULTI=1
-   RUN_SINGLE=0 
    ;;
   N)
    nosocket="1"
@@ -144,10 +155,6 @@ case $OPTION  in
    ;;
   s)
    stopjob=1
-   ;;
-  S)
-   RUN_MULTI=0
-   RUN_SINGLE=1 
    ;;
   t)
    benchmark="yes"
@@ -182,16 +189,6 @@ if [ $use_repository -eq 1 ] ; then
 # use non-mpi version of fds 
 #  exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
 # fi
-fi
-
-if [ $nmpi_processes -gt 1 ] ; then
-   if [ "$RUN_MULTI" == "0" ] ; then
-      exit
-   fi
-else
-   if [ "$RUN_SINGLE" == "0" ] ; then
-      exit
-   fi
 fi
 
 #define input file
@@ -298,7 +295,7 @@ if [ $STOPFDS ]; then
  touch $stopfile
  exit
 fi
-if ! [ -e $exe ]; then
+if ! [ -e "$exe" ]; then
   if [ "$showinput" == "0" ] ; then
     echo "The program, $exe, does not exist. Run aborted."
     ABORTRUN=y
@@ -335,11 +332,11 @@ if [ "$queue" == "terminal" ] ; then
   MPIRUN=
 fi
 
+# use the queue none and the program background on systems 
+# without a queing system
+
 if [ "$queue" == "none" ]; then
   OUT2ERROR=" 2> $outerr"
-  if [ "$BACKGROUND" == "" ]; then
-    BACKGROUND=background
-  fi
   notfound=`$BACKGROUND -help 2>&1 | tail -1 | grep "not found" | wc -l`
   if [ "$showinput" == "0" ]; then
     if [ "$notfound" == "1" ];  then
@@ -349,8 +346,11 @@ if [ "$queue" == "none" ]; then
       exit
     fi
   fi
-  QSUB="$BACKGROUND -u 75 -d 10 "
+  MPIRUN=
+  QSUB="$BACKGROUND -u $BACKGROUND_LOAD -d $BACKGROUND_DELAY "
 fi
+
+# setup for systems using the queuing system SLURM
 
 if [ "$RESOURCE_MANAGER" == "SLURM" ] ; then
   MPIRUN="srun"
@@ -392,6 +392,12 @@ cat << EOF >> $scriptfile
 #PBS -o $outlog
 #PBS -l nodes=$nodes:ppn=$ppn
 EOF
+if [ "$EMAIL" != "" ]; then
+cat << EOF >> $scriptfile
+#PBS -M $EMAIL
+#PBS -m ae
+EOF
+fi
 if [ "$walltimestring_pbs" != "" ] ; then
 cat << EOF >> $scriptfile
 #PBS $walltimestring_pbs
@@ -404,9 +410,11 @@ cat << EOF >> $scriptfile
 export OMP_NUM_THREADS=$nopenmp_threads
 
 cd $fulldir
-echo Start time: \`date\`
-echo Running $infile on \`hostname\`
-echo Directory: \`pwd\`
+echo
+echo \`date\`
+echo "Input file: $in"
+echo " Directory: \`pwd\`"
+echo "      Host: \`hostname\`"
 $MPIRUN $exe $in $OUT2ERROR
 EOF
 
