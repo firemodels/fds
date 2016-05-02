@@ -6188,7 +6188,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       IJ = 1
       DO J = 1, IJK(2) - 1
          DO I = 1, IJK(1) - 1
-            I1= (J-1)*IJK(1) + I
+            I1 = (J-1)*IJK(1) + I
             I2 = I1 + 1
             I3 = I2 + IJK(1)
             I4 = I3 - 1
@@ -6204,7 +6204,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
             IJ = IJ + 1
          ENDDO
       ENDDO
-      N_FACES = IJ
+      N_FACES = IJ - 1
 
       DO I = 1, N_VERTS
          VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
@@ -6229,47 +6229,53 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
 !     8-------7
 !   / .     / |
-! 5-------6   | 
+! 5-------6   |
 ! |   .   |   |
 ! |   .   |   |
-! |   4-------3 
+! |   4-------3
 ! | /     | /
 ! 1-------2
 
-! split box into 5 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
+! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
 
-            VOLUS(4*IJ-3) = I2
-            VOLUS(4*IJ-2) = I1
-            VOLUS(4*IJ-1) = I4
-            VOLUS(4*IJ-0) = I5
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I2
+            VOLUS(4*IJ-1) = I6
+            VOLUS(4*IJ-0) = I7
             IJ = IJ + 1
 
-            VOLUS(4*IJ-3) = I4
-            VOLUS(4*IJ-2) = I2
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I3
+            VOLUS(4*IJ-1) = I2
+            VOLUS(4*IJ-0) = I7
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I6
             VOLUS(4*IJ-1) = I5
             VOLUS(4*IJ-0) = I7
             IJ = IJ + 1
 
-            VOLUS(4*IJ-3) = I5
-            VOLUS(4*IJ-2) = I6
-            VOLUS(4*IJ-1) = I7
-            VOLUS(4*IJ-0) = I2
-            IJ = IJ + 1
-
-            VOLUS(4*IJ-3) = I2
+            VOLUS(4*IJ-3) = I1
             VOLUS(4*IJ-2) = I4
             VOLUS(4*IJ-1) = I3
             VOLUS(4*IJ-0) = I7
             IJ = IJ + 1
 
-            VOLUS(4*IJ-3) = I8
-            VOLUS(4*IJ-2) = I5
-            VOLUS(4*IJ-1) = I7
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I7
+            VOLUS(4*IJ-1) = I5
+            VOLUS(4*IJ-0) = I8
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I7
+            VOLUS(4*IJ-1) = I8
             VOLUS(4*IJ-0) = I4
             IJ = IJ + 1
          ENDDO
       ENDDO
-      N_VOLUS=IJ
+      N_VOLUS=IJ - 1
       N_FACES=0
    ENDIF ZVALS_IF
 
@@ -6561,7 +6567,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       ! find faces that match
 
-         SORT_FACES=1
+         SORT_FACES=0
          IF (SORT_FACES==1 ) THEN  ! o(n*log(n)) algorithm for determining external faces
             ALLOCATE(OFACES(N_FACES),STAT=IZERO)
             CALL ChkMemErr('READ_GEOM','OFACES',IZERO)
