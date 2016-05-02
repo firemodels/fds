@@ -201,6 +201,53 @@ void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_
   }
 }
 
+/* ------------------ writeboundini ------------------------ */
+
+void writeboundini(void){
+  FILE *stream = NULL;
+  char *fullfilename = NULL;
+  int i;
+
+  if(boundini_filename == NULL)return;
+  fullfilename = get_filename(smokeviewtempdir, boundini_filename, tempdir_flag);
+
+  if(fullfilename == NULL)return;
+
+  for(i = 0; i < npatchinfo; i++){
+    bounddata *boundi;
+    patchdata *patchi;
+    int skipi;
+    int j;
+
+    skipi = 0;
+    patchi = patchinfo + i;
+    if(patchi->bounds.defined == 0)continue;
+    for(j = 0; j < i - 1; j++){
+      patchdata *patchj;
+
+      patchj = patchinfo + j;
+      if(patchi->type == patchj->type&&patchi->filetype == patchj->filetype){
+        skipi = 1;
+        break;
+      }
+    }
+    if(skipi == 1)continue;
+
+    boundi = &patchi->bounds;
+    if(stream == NULL){
+      stream = fopen(fullfilename, "w");
+      if(stream == NULL){
+        FREEMEMORY(fullfilename);
+        return;
+      }
+    }
+    fprintf(stream, "B_BOUNDARY\n");
+    fprintf(stream, " %f %f %f %f %i %s\n", boundi->global_min, boundi->percentile_min, boundi->percentile_max, boundi->global_max, patchi->filetype, patchi->label.shortlabel);
+  }
+  if(stream != NULL)fclose(stream);
+  FREEMEMORY(fullfilename);
+}
+
 /* ------------------ update_patch_bounds ------------------------ */
 
 void update_patch_bounds(patchdata *patchi){
@@ -1789,7 +1836,7 @@ void updatechopcolors(void){
       int ilevel;
       float dz;
 
-      dz = (terrain_zmax - terrain_zmin);
+      dz = (terrain_zmax - terrain_zmin)*geom_vert_exag;
       if(ABS(dz)<0.01)dz=1;
 
       ilevel = 255 * (terrain_zlevel - terrain_zmin) / dz;

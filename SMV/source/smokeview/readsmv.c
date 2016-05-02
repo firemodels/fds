@@ -30,10 +30,6 @@
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
 
-propdata *get_prop_id(char *prop_id);
-void init_evac_prop(void);
-void init_prop(propdata *propi, int nsmokeview_ids, char *label);
-
 /* ------------------ readhrr ------------------------ */
 #define LENBUFFER 1024
 void readhrr(int flag, int *errorcode){
@@ -113,6 +109,42 @@ void readhrr(int flag, int *errorcode){
   }
   hrrinfo->ntimes_csv = ntimeshrr-nfirst;
   fclose(HRRFILE);
+}
+
+/* ------------------ init_prop ------------------------ */
+
+void init_prop(propdata *propi, int nsmokeview_ids, char *label){
+  int nlabel;
+
+  nlabel = strlen(label);
+  if(nlabel == 0){
+    NewMemory((void **)&propi->label, 5);
+    strcpy(propi->label, "null");
+  }
+  else{
+    NewMemory((void **)&propi->label, nlabel + 1);
+    strcpy(propi->label, label);
+  }
+
+  NewMemory((void **)&propi->smokeview_ids, nsmokeview_ids*sizeof(char *));
+  NewMemory((void **)&propi->smv_objects, nsmokeview_ids*sizeof(sv_object *));
+
+  propi->nsmokeview_ids = nsmokeview_ids;
+  propi->blockvis = 1;
+  propi->inblockage = 0;
+  propi->ntextures = 0;
+  propi->nvars_dep = 0;
+  propi->nvars_evac = 0;
+  propi->nvars_indep = 0;
+  propi->vars_indep = NULL;
+  propi->svals = NULL;
+  propi->texturefiles = NULL;
+  propi->rotate_axis = NULL;
+  propi->rotate_angle = 0.0;
+  propi->fvals = NULL;
+  propi->vars_indep_index = NULL;
+  propi->tag_number = 0;
+  propi->draw_evac = 0;
 }
 
 /* ------------------ init_default_prop ------------------------ */
@@ -250,40 +282,235 @@ void update_inilist(void){
   }
 }
 
-/* ------------------ init_prop ------------------------ */
+/* ------------------ free_labels ------------------------ */
 
-void init_prop(propdata *propi, int nsmokeview_ids, char *label){
-  int nlabel;
+void free_labels(flowlabels *flowlabel){
+  FREEMEMORY(flowlabel->longlabel);
+  FREEMEMORY(flowlabel->shortlabel);
+  FREEMEMORY(flowlabel->unit);
+}
 
-  nlabel = strlen(label);
-  if(nlabel==0){
-    NewMemory((void **)&propi->label,5);
-    strcpy(propi->label,"null");
-  }
-  else{
-    NewMemory((void **)&propi->label,nlabel+1);
-    strcpy(propi->label,label);
-  }
+/* ------------------ init_mesh ------------------------ */
 
-  NewMemory((void **)&propi->smokeview_ids,nsmokeview_ids*sizeof(char *));
-  NewMemory((void **)&propi->smv_objects,nsmokeview_ids*sizeof(sv_object *));
+void init_mesh(meshdata *meshi){
+  meshi->ncutcells = 0;
+  meshi->cutcells = NULL;
+  meshi->slice_min[0] = 1.0;
+  meshi->slice_min[1] = 1.0;
+  meshi->slice_min[2] = 1.0;
+  meshi->slice_max[0] = 0.0;
+  meshi->slice_max[1] = 0.0;
+  meshi->slice_max[2] = 0.0;
+  meshi->s_offset[0] = -1;
+  meshi->s_offset[1] = -1;
+  meshi->s_offset[2] = -1;
+  meshi->super = NULL;
+  meshi->nabors[0] = NULL;
+  meshi->nabors[1] = NULL;
+  meshi->nabors[2] = NULL;
+  meshi->nabors[3] = NULL;
+  meshi->nabors[4] = NULL;
+  meshi->nabors[5] = NULL;
+  meshi->update_firehalfdepth = 0;
+  meshi->iplotx_all = NULL;
+  meshi->iploty_all = NULL;
+  meshi->iplotz_all = NULL;
+#ifdef pp_GPU
+  meshi->smoke_texture_buffer = NULL;
+  meshi->smoke_texture_id = -1;
+  meshi->fire_texture_buffer = NULL;
+  meshi->fire_texture_id = -1;
+  meshi->slice3d_texture_buffer = NULL;
+  meshi->slice3d_texture_id = -1;
+  meshi->slice3d_c_buffer = NULL;
+#endif
+  meshi->mesh_offset_ptr = NULL;
+#ifdef pp_CULL
+  meshi->cullinfo = NULL;
+  meshi->culldefined = 0;
+  meshi->cullQueryId = NULL;
+  meshi->cull_smoke3d = NULL;
+  meshi->smokedir_old = -100;
+#endif
+  meshi->cullgeominfo = NULL;
+  meshi->is_bottom = 1;
+  meshi->blockvis = 1;
+  meshi->zcell = NULL;
+  meshi->terrain = NULL;
+  meshi->meshrgb[0] = 0.0;
+  meshi->meshrgb[1] = 0.0;
+  meshi->meshrgb[2] = 0.0;
+  meshi->meshrgb_ptr = NULL;
+  meshi->cellsize = 0.0;
+  meshi->smokedir = 1;
+  meshi->merge_alpha = NULL;
+  meshi->merge_color = NULL;
+  meshi->dx = 1.0;
+  meshi->dy = 1.0;
+  meshi->dz = 1.0;
+  meshi->dxy = 1.0;
+  meshi->dxz = 1.0;
+  meshi->dyz = 1.0;
+  meshi->label = NULL;
+  meshi->mxpatch_frames = 0;
+  meshi->slicedir = YDIR;
+  meshi->visInteriorPatches = 0;
+  meshi->plot3dfilenum = -1;
+  meshi->patchfilenum = -1;
+  meshi->obst_bysize = NULL;
+  meshi->iqdata = NULL;
+  meshi->qdata = NULL;
+  meshi->yzcolorbase = NULL;
+  meshi->xzcolorbase = NULL;
+  meshi->xycolorbase = NULL;
+  meshi->yzcolorfbase = NULL;
+  meshi->xzcolorfbase = NULL;
+  meshi->xycolorfbase = NULL;
+  meshi->yzcolortbase = NULL;
+  meshi->xzcolortbase = NULL;
+  meshi->xycolortbase = NULL;
+  meshi->dx_xy = NULL;
+  meshi->dy_xy = NULL;
+  meshi->dz_xy = NULL;
+  meshi->dx_xz = NULL;
+  meshi->dy_xz = NULL;
+  meshi->dz_xz = NULL;
+  meshi->dx_yz = NULL;
+  meshi->dy_yz = NULL;
+  meshi->dz_yz = NULL;
+  meshi->c_iblank_xy = NULL;
+  meshi->c_iblank_xz = NULL;
+  meshi->c_iblank_yz = NULL;
+  meshi->iblank_smoke3d = NULL;
+  meshi->iblank_smoke3d_defined = 0;
+  meshi->animatedsurfaces = NULL;
+  meshi->blockagesurface = NULL;
+  meshi->blockagesurfaces = NULL;
+  meshi->showlevels = NULL;
+  meshi->isolevels = NULL;
+  meshi->nisolevels = 0;
+  meshi->iso_times = NULL;
+  meshi->iso_timeslist = NULL;
+  meshi->isofilenum = -1;
+  meshi->nvents = 0;
+  meshi->ndummyvents = 0;
+  meshi->ncvents = 0;
+  meshi->npatches = 0;
+  meshi->patchtype = NULL;
+  meshi->offset[XXX] = 0.0;
+  meshi->offset[YYY] = 0.0;
+  meshi->offset[ZZZ] = 0.0;
+  meshi->patchtype = NULL;
+  meshi->patchdir = NULL;
+  meshi->patch_surfindex = NULL;
+  meshi->pi1 = NULL;
+  meshi->pi2 = NULL;
+  meshi->pj1 = NULL;
+  meshi->pj2 = NULL;
+  meshi->pk1 = NULL;
+  meshi->pk2 = NULL;
+  meshi->meshonpatch = NULL;
+  meshi->blockonpatch = NULL;
+  meshi->ptype = NULL;
+  meshi->patchrow = NULL, meshi->patchcol = NULL, meshi->blockstart = NULL;
+  meshi->zipoffset = NULL, meshi->zipsize = NULL;
+  meshi->visPatches = NULL;
+  meshi->xyzpatch = NULL;
+  meshi->xyzpatch_threshold = NULL;
+  meshi->patchventcolors = NULL;
+  meshi->cpatchval = NULL;
+  meshi->cpatchval_iframe = NULL;
+  meshi->cpatchval_iframe_zlib = NULL;
+  meshi->cpatchval_zlib = NULL;
+  meshi->patch_times = NULL;
+  meshi->patchval = NULL;
+  meshi->patchval_iframe = NULL;
+  meshi->thresholdtime = NULL;
+  meshi->patchblank = NULL;
+  meshi->patch_contours = NULL;
+  meshi->patch_timeslist = NULL;
+  meshi->ntc = 0;
+  meshi->nspr = 0;
+  meshi->xsprplot = NULL;
+  meshi->ysprplot = NULL;
+  meshi->zsprplot = NULL;
+  meshi->xspr = NULL;
+  meshi->yspr = NULL;
+  meshi->zspr = NULL;
+  meshi->tspr = NULL;
+  meshi->nheat = 0;
+  meshi->xheatplot = NULL;
+  meshi->yheatplot = NULL;
+  meshi->zheatplot = NULL;
+  meshi->xheat = NULL;
+  meshi->yheat = NULL;
+  meshi->zheat = NULL;
+  meshi->theat = NULL;
+  meshi->blockageinfoptrs = NULL;
 
-  propi->nsmokeview_ids=nsmokeview_ids;
-  propi->blockvis=1;
-  propi->inblockage=0;
-  propi->ntextures=0;
-  propi->nvars_dep=0;
-  propi->nvars_evac=0;
-  propi->nvars_indep=0;
-  propi->vars_indep=NULL;
-  propi->svals=NULL;
-  propi->texturefiles=NULL;
-  propi->rotate_axis=NULL;
-  propi->rotate_angle=0.0;
-  propi->fvals=NULL;
-  propi->vars_indep_index=NULL;
-  propi->tag_number=0;
-  propi->draw_evac=0;
+  meshi->surface_tempmax = SURFACE_TEMPMAX;
+  meshi->surface_tempmin = SURFACE_TEMPMIN;
+
+  meshi->faceinfo = NULL;
+  meshi->face_normals_single = NULL;
+  meshi->face_normals_double = NULL;
+  meshi->face_transparent_double = NULL;
+  meshi->face_textures = NULL;
+  meshi->face_outlines = NULL;
+
+  meshi->xplt = NULL;
+  meshi->yplt = NULL;
+  meshi->zplt = NULL;
+  meshi->xvolplt = NULL;
+  meshi->yvolplt = NULL;
+  meshi->zvolplt = NULL;
+  meshi->xplt_cen = NULL;
+  meshi->yplt_cen = NULL;
+  meshi->zplt_cen = NULL;
+  meshi->xplt_orig = NULL;
+  meshi->yplt_orig = NULL;
+  meshi->zplt_orig = NULL;
+
+  meshi->f_iblank_cell = NULL;
+  meshi->c_iblank_cell = NULL;
+  meshi->c_iblank_x = NULL;
+  meshi->c_iblank_y = NULL;
+  meshi->c_iblank_z = NULL;
+  meshi->c_iblank_node = NULL;
+  meshi->c_iblank_embed = NULL;
+  meshi->block_zdist = NULL;
+
+  meshi->f_iblank_cell0 = NULL;
+  meshi->c_iblank_cell0 = NULL;
+  meshi->c_iblank_x0 = NULL;
+  meshi->c_iblank_y0 = NULL;
+  meshi->c_iblank_z0 = NULL;
+  meshi->c_iblank_node0 = NULL;
+  meshi->c_iblank_embed0 = NULL;
+  meshi->block_zdist0 = NULL;
+
+  meshi->xyz_bar[XXX] = 1.0;
+  meshi->xyz_bar0[XXX] = 0.0;
+  meshi->xyz_bar[YYY] = 1.0;
+  meshi->xyz_bar0[YYY] = 0.0;
+  meshi->xyz_bar[ZZZ] = 1.0;
+  meshi->xyz_bar0[ZZZ] = 0.0;
+
+  meshi->xyzmaxdiff = 1.0;
+
+  meshi->xcen = 0.5;
+  meshi->ycen = 0.5;
+  meshi->zcen = 0.5;
+
+  meshi->plotx = 1;
+  meshi->ploty = 1;
+  meshi->plotz = 1;
+
+  meshi->boxoffset = 0.0;
+  meshi->ventinfo = NULL;
+  meshi->cventinfo = NULL;
+  meshi->select_min = 0;
+  meshi->select_max = 0;
 }
 
 /* ------------------ readsmv_dynamic ------------------------ */
@@ -309,7 +536,7 @@ void readsmv_dynamic(char *file){
 
       plot3di = plot3dinfo + i;
       for(n=0;n<6;n++){
-        freelabels(&plot3di->label[n]);
+        free_labels(&plot3di->label[n]);
       }
       FREEMEMORY(plot3di->reg_file);
       FREEMEMORY(plot3di->comp_file);
@@ -964,6 +1191,56 @@ void readsmv_dynamic(char *file){
   init_plot3dtimelist();
 }
 
+
+/* ------------------ get_labels ------------------------ */
+
+void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){
+  char *tok0, *tok1, *tok2;
+
+  tok0 = NULL;
+  tok1 = NULL;
+  tok2 = NULL;
+  tok0 = strtok(buffer, "%");
+  if(tok0 != NULL)tok1 = strtok(NULL, "%");
+  if(tok1 != NULL)tok2 = strtok(NULL, "%");
+  if(tok1 != NULL){
+    trim_back(tok1);
+    tok1 = trim_front(tok1);
+    if(strlen(tok1) == 0)tok1 = NULL;
+  }
+  if(tok2 != NULL){
+    trim_back(tok2);
+    tok2 = trim_front(tok2);
+    if(strlen(tok2) == 0)tok2 = NULL;
+  }
+  if(label2 != NULL){
+    if(tok2 == NULL&&kind == HUMANS){
+      strcpy(prop_buffer, "Human_props(default)");
+      *label2 = prop_buffer;
+    }
+    else{
+      *label2 = tok2;
+    }
+  }
+  if(label1 != NULL)*label1 = tok1;
+}
+
+/* ------------------ get_prop_id ------------------------ */
+
+propdata *get_prop_id(char *prop_id){
+  int i;
+
+  if(propinfo == NULL || prop_id == NULL || strlen(prop_id) == 0)return NULL;
+  for(i = 0; i < npropinfo; i++){
+    propdata *propi;
+
+    propi = propinfo + i;
+
+    if(strcmp(propi->label, prop_id) == 0)return propi;
+  }
+  return NULL;
+}
+
 /* ------------------ parse_device_keyword ------------------------ */
 
 void parse_device_keyword(FILE *stream, devicedata *devicei){
@@ -1581,63 +1858,44 @@ void update_endian_info(void){
 #endif
 }
 
-/* ------------------ update_vent_colors ------------------------ */
+/*
+new OBST format:
+i1 i2 j1 j2 k1 k2 colorindex blocktype       : if blocktype!=1&&colorindex!=-3
+i1 i2 j1 j2 k1 k2 colorindex blocktype r g b : if blocktype!=1&&colorindex==-3
+i1 i2 j1 j2 k1 k2 ceiling texture blocktype [wall texture floor texture] : if blocktype==1
+int colorindex, blocktype;
+colorindex: -1 default color
+-2 invisible
+-3 use r g b color
+>=0 color/color2/texture index
+blocktype: 0 regular block non-textured
+1 regular block textured
+2 outline
+3 smoothed block
+r g b           colors used if colorindex==-3
+*/
 
-void init_vent_colors(void){
+/* ------------------ backup_blockage ------------------------ */
+
+void backup_blockage(blockagedata *bc){
   int i;
 
-  nventcolors=0;
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int j;
-
-    meshi = meshinfo + i;
-    for(j=0;j<meshi->nvents;j++){
-      ventdata *venti;
-
-      venti = meshi->ventinfo+j;
-      if(venti->vent_id>nventcolors)nventcolors=venti->vent_id;
-    }
+  bc->xyzORIG[0] = bc->xmin;
+  bc->xyzORIG[1] = bc->xmax;
+  bc->xyzORIG[2] = bc->ymin;
+  bc->xyzORIG[3] = bc->ymax;
+  bc->xyzORIG[4] = bc->zmin;
+  bc->xyzORIG[5] = bc->zmax;
+  bc->ijkORIG[0] = bc->ijk[0];
+  bc->ijkORIG[1] = bc->ijk[1];
+  bc->ijkORIG[2] = bc->ijk[2];
+  bc->ijkORIG[3] = bc->ijk[3];
+  bc->ijkORIG[4] = bc->ijk[4];
+  bc->ijkORIG[5] = bc->ijk[5];
+  for(i = 0; i<6; i++){
+    bc->surfORIG[i] = bc->surf[i];
+    bc->surf_indexORIG[i] = bc->surf_index[i];
   }
-  nventcolors++;
-  NewMemory((void **)&ventcolors,nventcolors*sizeof(float *));
-  for(i=0;i<nventcolors;i++){
-    ventcolors[i]=NULL;
-  }
-  ventcolors[0]=surfinfo->color;
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int j;
-
-    meshi = meshinfo + i;
-    for(j=0;j<meshi->nvents;j++){
-      ventdata *venti;
-      int vent_id;
-
-      venti = meshi->ventinfo+j;
-      vent_id = CLAMP(venti->vent_id,1,nventcolors-1);
-      if(venti->useventcolor==1){
-        ventcolors[vent_id]=venti->color;
-      }
-      else{
-        ventcolors[vent_id]=venti->surf[0]->color;
-      }
-    }
-    for(j=0;j<meshi->ncvents;j++){
-      cventdata *cventi;
-      int cvent_id;
-
-      cventi = meshi->cventinfo+j;
-      cvent_id = CLAMP(cventi->cvent_id,1,nventcolors-1);
-      if(cventi->useventcolor==1){
-        ventcolors[cvent_id]=cventi->color;
-      }
-      else{
-        ventcolors[cvent_id]=cventi->surf[0]->color;
-      }
-    }
-  }
-
 }
 
 /* ------------------ update_mesh_coords ------------------------ */
@@ -2168,101 +2426,6 @@ void update_mesh_coords(void){
   }
 }
 
-/* ----------------------- compare_meshes ----------------------------- */
-
-int compare_meshes( const void *arg1, const void *arg2 ){
-  smoke3ddata *smoke3di, *smoke3dj;
-  meshdata *meshi, *meshj;
-  float *xyzmini, *xyzmaxi;
-  float *xyzminj, *xyzmaxj;
-  int dir=0;
-  int returnval=0;
-
-  smoke3di = *(smoke3ddata **)arg1;
-  smoke3dj = *(smoke3ddata **)arg2;
-  meshi = meshinfo + smoke3di->blocknumber;
-  meshj = meshinfo + smoke3dj->blocknumber;
-  if(meshi==meshj)return 0;
-  xyzmini = meshi->boxmin;
-  xyzmaxi = meshi->boxmax;
-  xyzminj = meshj->boxmin;
-  xyzmaxj = meshj->boxmax;
-  if(dir==0){
-    if(xyzmaxi[0]<=xyzminj[0])dir=1;
-    if(xyzmaxj[0]<=xyzmini[0])dir=-1;
-  }
-  if(dir==0){
-    if(xyzmaxi[1]<=xyzminj[1])dir=2;
-    if(xyzmaxj[1]<=xyzmini[1])dir=-2;
-  }
-  if(dir==0){
-    if(xyzmaxi[2]<=xyzminj[2])dir=3;
-    if(xyzmaxj[2]<=xyzmini[2])dir=-3;
-  }
-  switch(dir){
-    case 0:
-      returnval=0;
-      break;
-    case XDIR:
-      if(world_eyepos[0]<xyzmaxi[0]){
-        returnval=1;
-      }
-      else{
-        returnval=-1;
-      }
-      break;
-    case XDIRNEG:
-      if(world_eyepos[0]<xyzmaxj[0]){
-        returnval=-1;
-      }
-      else{
-        returnval=1;
-      }
-      break;
-    case YDIR:
-      if(world_eyepos[1]<xyzmaxi[1]){
-        returnval=1;
-      }
-      else{
-        returnval=-1;
-      }
-      break;
-    case YDIRNEG:
-      if(world_eyepos[1]<xyzmaxj[1]){
-        returnval=-1;
-      }
-      else{
-        returnval=1;
-      }
-      break;
-    case ZDIR:
-      if(world_eyepos[2]<xyzmaxi[2]){
-        returnval=1;
-      }
-      else{
-        returnval=-1;
-      }
-      break;
-    case ZDIRNEG:
-      if(world_eyepos[2]<xyzmaxj[2]){
-        returnval=-1;
-      }
-      else{
-        returnval=1;
-      }
-      break;
-  }
-  return returnval;
-}
-
-/* ------------------ sort_smoke3dinfo ------------------------ */
-
-void sort_smoke3dinfo(void){
-  if(nsmoke3dinfo>1){
-    qsort((meshdata **)smoke3dinfo_sorted,(size_t)nsmoke3dinfo,sizeof(smoke3ddata *),compare_meshes);
-  }
-}
-
 /* ------------------ is_slice_dup ------------------------ */
 
 int is_slice_dup(slicedata *sd){
@@ -2289,6 +2452,507 @@ int is_slice_dup(slicedata *sd){
     return 1;
   }
   return 0;
+}
+
+/* ------------------ create_nulllabel ------------------------ */
+
+int create_nulllabel(flowlabels *flowlabel){
+  char buffer[255];
+  size_t len;
+
+  len = strlen("Particles");
+  strcpy(buffer, "Particles");
+  trim_back(buffer);
+  len = strlen(buffer);
+  if(NewMemory((void **)&flowlabel->longlabel, (unsigned int)(len + 1)) == 0)return 2;
+  STRCPY(flowlabel->longlabel, buffer);
+
+
+  len = strlen("Particles");
+  strcpy(buffer, "Particles");
+  len = strlen(buffer);
+  trim_back(buffer);
+  len = strlen(buffer);
+  if(NewMemory((void **)&flowlabel->shortlabel, (unsigned int)(len + 1)) == 0)return 2;
+  STRCPY(flowlabel->shortlabel, buffer);
+
+  len = strlen("Particles");
+  strcpy(buffer, "Particles");
+  len = strlen(buffer);
+  trim_back(buffer);
+  len = strlen(buffer);
+  if(NewMemory((void *)&flowlabel->unit, (unsigned int)(len + 1)) == 0)return 2;
+  STRCPY(flowlabel->unit, buffer);
+  return 0;
+}
+
+/* ------------------ get_surface ------------------------ */
+
+surfdata *get_surface(char *label){
+  int i;
+
+  for(i = 0; i < nsurfinfo; i++){
+    surfdata *surfi;
+
+    surfi = surfinfo + i;
+    if(strcmp(surfi->surfacelabel, label) == 0)return surfi;
+  }
+  return surfacedefault;
+}
+
+/* ------------------ init_evac_prop ------------------------ */
+
+void init_evac_prop(void){
+  char label[256];
+  char *smokeview_id;
+  int nsmokeview_ids;
+
+  strcpy(label, "evac default");
+
+  NewMemory((void **)&prop_evacdefault, sizeof(propdata));
+  nsmokeview_ids = 1;
+
+  init_prop(prop_evacdefault, nsmokeview_ids, label);
+
+
+  NewMemory((void **)&smokeview_id, 6 + 1);
+  strcpy(smokeview_id, "sensor");
+  prop_evacdefault->smokeview_ids[0] = smokeview_id;
+  prop_evacdefault->smv_objects[0] = get_SVOBJECT_type(prop_evacdefault->smokeview_ids[0], missing_device);
+
+  prop_evacdefault->smv_object = prop_evacdefault->smv_objects[0];
+  prop_evacdefault->smokeview_id = prop_evacdefault->smokeview_ids[0];
+
+  prop_evacdefault->ntextures = 0;
+}
+
+/* ------------------ init_matl ------------------------ */
+
+void init_matl(matldata *matl){
+  matl->matllabel = NULL;
+  matl->color = block_ambient2;
+}
+
+/* ------------------ initobst ------------------------ */
+
+void init_obst(blockagedata *bc, surfdata *surf, int index, int meshindex){
+  int colorindex, blocktype;
+  int i;
+  char blocklabel[255];
+  size_t len;
+
+  bc->prop = NULL;
+  bc->is_wuiblock = 0;
+  bc->transparent = 0;
+  bc->usecolorindex = 0;
+  bc->colorindex = -1;
+  bc->nshowtime = 0;
+  bc->hole = 0;
+  bc->showtime = NULL;
+  bc->showhide = NULL;
+  bc->showtimelist = NULL;
+  bc->show = 1;
+  bc->blockage_id = index;
+  bc->meshindex = meshindex;
+  bc->hidden = 0;
+  bc->invisible = 0;
+  bc->texture_origin[0] = texture_origin[0];
+  bc->texture_origin[1] = texture_origin[1];
+  bc->texture_origin[2] = texture_origin[2];
+
+  /*
+  new OBST format:
+  i1 i2 j1 j2 k1 k2 colorindex blocktype       : if blocktype!=1&&colorindex!=-3
+  i1 i2 j1 j2 k1 k2 colorindex blocktype r g b : if blocktype!=1&&colorindex==-3
+  i1 i2 j1 j2 k1 k2 ceiling texture blocktype [wall texture floor texture] : if blocktype==1
+  int colorindex, blocktype;
+  colorindex: -1 default color
+  -2 invisible
+  -3 use r g b color
+  >=0 color/color2/texture index
+  blocktype: 0 regular block non-textured
+  1 regular block textured
+  2 outline
+  3 smoothed block
+  r g b           colors used if colorindex==-3
+  */
+  colorindex = -1;
+  blocktype = 0;
+  bc->ijk[IMIN] = 0;
+  bc->ijk[IMAX] = 1;
+  bc->ijk[JMIN] = 0;
+  bc->ijk[JMAX] = 1;
+  bc->ijk[KMIN] = 0;
+  bc->ijk[KMAX] = 1;
+  bc->colorindex = colorindex;
+  bc->type = blocktype;
+
+  bc->del = 0;
+  bc->changed = 0;
+  bc->changed_surface = 0;
+  bc->walltype = WALL_1;
+
+  bc->color = surf->color;
+  bc->useblockcolor = 0;
+  for(i = 0; i<6; i++){
+    bc->surf_index[i] = -1;
+    bc->surf[i] = surf;
+    bc->faceinfo[i] = NULL;
+  }
+  for(i = 0; i<7; i++){
+    bc->patchvis[i] = 1;
+  }
+  sprintf(blocklabel, "**blockage %i", index);
+  len = strlen(blocklabel);
+  NewMemory((void **)&bc->label, ((unsigned int)(len + 1))*sizeof(char));
+  strcpy(bc->label, blocklabel);
+}
+
+/* ------------------ init_surface ------------------------ */
+
+void init_surface(surfdata *surf){
+  surf->iso_level = -1;
+  surf->used_by_obst = 0;
+  surf->used_by_vent = 0;
+  surf->emis = 1.0;
+  surf->temp_ignition = TEMP_IGNITION_MAX;
+  surf->surfacelabel = NULL;
+  surf->texturefile = NULL;
+  surf->textureinfo = NULL;
+  surf->color = block_ambient2;
+  surf->t_width = 1.0;
+  surf->t_height = 1.0;
+  surf->type = BLOCK_regular;
+  surf->obst_surface = 1;
+  surf->location = 0;
+  surf->invisible = 0;
+  surf->transparent = 0;
+}
+
+/* ------------------ init_ventsurface ------------------------ */
+
+void init_ventsurface(surfdata *surf){
+  surf->emis = 1.0;
+  surf->temp_ignition = TEMP_IGNITION_MAX;
+  surf->surfacelabel = NULL;
+  surf->texturefile = NULL;
+  surf->textureinfo = NULL;
+  surf->color = ventcolor;
+  surf->t_width = 1.0;
+  surf->t_height = 1.0;
+  surf->type = BLOCK_outline;
+  surf->obst_surface = 0;
+
+}
+
+/* ----------------------- read_device_header ----------------------------- */
+#define BUFFER_LEN 255
+
+void read_device_header(char *file, devicedata *devices, int ndevices){
+  FILE *stream;
+  devicedata *devicecopy;
+  char buffer[BUFFER_LEN], *comma;
+  int buffer_len = BUFFER_LEN;
+
+  if(file == NULL)return;
+  stream = fopen(file, "r");
+  if(stream == NULL)return;
+
+  devicecopy = devices;
+
+  while(!feof(stream)){
+    fgets(buffer, buffer_len, stream);
+    comma = strchr(buffer, ',');
+    if(comma != NULL)*comma = 0;
+    trim_back(buffer);
+    if(strcmp(buffer, "//DATA") == 0){
+      break;
+    }
+    if(strcmp(buffer, "DEVICE") == 0){
+      parse_device_keyword(stream, devicecopy);
+      devicecopy++;
+    }
+  }
+  fclose(stream);
+}
+
+/* ------------------ set_surfaceindex ------------------------ */
+
+void set_surfaceindex(blockagedata *bc){
+  int i, j, jj;
+  surfdata *surfj;
+  char *surflabel, *bclabel;
+  int *surf_index;
+  int wall_flag;
+
+  for(i = 0; i < 6; i++){
+    bc->surf_index[i] = -1;
+    bclabel = bc->surf[i]->surfacelabel;
+    if(bc->surf[i] == NULL)continue;
+    for(jj = 1; jj < nsurfinfo + 1; jj++){
+      j = jj;
+      if(jj == nsurfinfo)j = 0;
+      surfj = surfinfo + j;
+      surflabel = surfj->surfacelabel;
+      if(strcmp(bclabel, surflabel) != 0)continue;
+      bc->surf_index[i] = j;
+      break;
+    }
+  }
+  surf_index = bc->surf_index;
+  wall_flag = 1;
+  for(i = 1; i < 6; i++){
+    if(surf_index[i] != surf_index[0]){
+      wall_flag = 0;
+      break;
+    }
+  }
+  if(wall_flag == 1){
+    bc->walltype = WALL_1;
+    bc->walltypeORIG = WALL_1;
+    return;
+  }
+  if(
+    surf_index[UP_X] == surf_index[DOWN_X] &&
+    surf_index[DOWN_Y] == surf_index[DOWN_X] &&
+    surf_index[UP_Y] == surf_index[DOWN_X]
+    ){
+    bc->walltype = WALL_3;
+    bc->walltypeORIG = WALL_3;
+    return;
+  }
+  bc->walltype = WALL_6;
+  bc->walltypeORIG = WALL_6;
+
+}
+
+/* ------------------ surfid_compare ------------------------ */
+
+int surfid_compare(const void *arg1, const void *arg2){
+  surfdata *surfi, *surfj;
+  int i, j;
+
+  i = *(int *)arg1;
+  j = *(int *)arg2;
+
+  surfi = surfinfo+i;
+  surfj = surfinfo+j;
+
+  return(strcmp(surfi->surfacelabel, surfj->surfacelabel));
+}
+
+/* ------------------ updated_sorted_surfidlist ------------------------ */
+
+void update_sorted_surfidlist(void){
+  int i;
+
+  FREEMEMORY(sorted_surfidlist);
+  FREEMEMORY(inv_sorted_surfidlist);
+  NewMemory((void **)&sorted_surfidlist, nsurfinfo*sizeof(int));
+  NewMemory((void **)&inv_sorted_surfidlist, nsurfinfo*sizeof(int));
+
+
+  nsorted_surfidlist = nsurfinfo;
+  for(i = 0; i<nsorted_surfidlist; i++){
+    sorted_surfidlist[i] = i;
+  }
+
+  qsort((int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare);
+  for(i = 0; i<nsorted_surfidlist; i++){
+    inv_sorted_surfidlist[sorted_surfidlist[i]] = i;
+  }
+}
+
+/* ------------------ parse_database ------------------------ */
+
+void parse_database(char *file){
+  FILE *stream;
+  char buffer[1000], *buffer2 = NULL, *buffer3, *slashptr;
+  size_t lenbuffer, lenbuffer2;
+  size_t sizebuffer2;
+  char *surf_id = NULL, *start, *surf_id2;
+  char *c;
+  int i, j;
+  surfdata *surfj;
+  char *labeli, *labelj;
+  int nexti;
+  int nsurfids_shown;
+
+  /* free memory called before */
+
+  for(i = 0; i<nsurfids; i++){
+    surf_id = surfids[i].label;
+    FREEMEMORY(surf_id);
+  }
+  FREEMEMORY(surfids);
+  nsurfids = 0;
+
+
+  if(file==NULL||strlen(file)==0||(stream = fopen(file, "r"))==NULL){
+    NewMemory((void **)&surfids, (nsurfids+1)*sizeof(surfid));
+    surf_id = NULL;
+    NewMemory((void **)&surf_id, 6);
+    strcpy(surf_id, "INERT");
+    surfids[0].label = surf_id;
+    surfids[0].location = 0;
+    surfids[0].show = 1;
+    nsurfids = 1;
+  }
+
+  else{
+    sizebuffer2 = 1001;
+    NewMemory((void **)&buffer2, sizebuffer2);
+
+    /* find out how many surfs are in database file so memory can be allocated */
+
+    while(!feof(stream)){
+      if(fgets(buffer, 1000, stream)==NULL)break;
+      if(STRSTR(buffer, "&SURF")==NULL)continue;
+
+
+      slashptr = strstr(buffer, "/");
+      if(slashptr!=NULL)strcpy(buffer2, buffer);
+      buffer3 = buffer;
+      while(slashptr!=NULL){
+        fgets(buffer, 1000, stream);
+        lenbuffer = strlen(buffer);
+        lenbuffer2 = strlen(buffer2);
+        if(lenbuffer2+lenbuffer+2>sizebuffer2){
+          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
+          ResizeMemory((void **)&buffer2, (unsigned int)sizebuffer2);
+        }
+        strcat(buffer2, buffer);
+        slashptr = strstr(buffer, "/");
+        buffer3 = buffer2;
+      }
+      start = STRSTR(buffer3, "ID");
+      if(start!=NULL)nsurfids++;
+    }
+
+    /* allocate memory */
+
+    NewMemory((void **)&surfids, (nsurfids+1)*sizeof(surfid));
+    surf_id = NULL;
+    NewMemory((void **)&surf_id, 6);
+    strcpy(surf_id, "INERT");
+    surfids[0].label = surf_id;
+    surfids[0].location = 0;
+    surfids[0].show = 1;
+
+
+    /* now look for IDs and copy them into an array */
+
+    rewind(stream);
+    nsurfids = 1;
+    while(!feof(stream)){
+      if(fgets(buffer, 1000, stream)==NULL)break;
+      if(STRSTR(buffer, "&SURF")==NULL)continue;
+
+
+      slashptr = strstr(buffer, "/");
+      if(slashptr!=NULL)strcpy(buffer2, buffer);
+      while(slashptr!=NULL){
+        fgets(buffer, 1000, stream);
+        lenbuffer = strlen(buffer);
+        lenbuffer2 = strlen(buffer2);
+        if(lenbuffer2+lenbuffer+2>sizebuffer2){
+          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
+          ResizeMemory((void **)&buffer2, (unsigned int)sizebuffer2);
+        }
+        strcat(buffer2, buffer);
+        slashptr = strstr(buffer, "/");
+        buffer3 = buffer2;
+      }
+      start = STRSTR(buffer3+3, "ID");
+      if(start!=NULL)nsurfids++;
+      surf_id = NULL;
+      surf_id2 = NULL;
+      for(c = start; c!=NULL&&*c!='\0'; c++){
+        if(surf_id==NULL&&*c=='\''){
+          surf_id = c+1;
+          continue;
+        }
+        if(surf_id!=NULL&&*c=='\''){
+          *c = '\0';
+          NewMemory((void **)&surf_id2, strlen(surf_id)+1);
+          strcpy(surf_id2, surf_id);
+          surfids[nsurfids-1].label = surf_id2;
+          surfids[nsurfids-1].location = 1;
+          surfids[nsurfids-1].show = 1;
+          break;
+        }
+      }
+
+    }
+  }
+
+  /* identify duplicate surfaces */
+  /*** debug: make sure ->show is defined for all cases ***/
+
+  nsurfids_shown = 0;
+  for(i = 0; i<nsurfids; i++){
+    labeli = surfids[i].label;
+    nexti = 0;
+    for(j = 0; j<nsurfinfo; j++){
+      surfj = surfinfo+j;
+      labelj = surfj->surfacelabel;
+      if(strcmp(labeli, labelj)==0){
+        nexti = 1;
+        break;
+      }
+    }
+    if(nexti==1){
+      surfids[i].show = 0;
+      continue;
+    }
+    for(j = 0; j<i; j++){
+      labelj = surfids[j].label;
+      if(strcmp(labeli, labelj)==0){
+        nexti = 1;
+        break;
+      }
+    }
+    if(nexti==1){
+      surfids[i].show = 0;
+      continue;
+    }
+    nsurfids_shown++;
+
+  }
+
+  /* add surfaces found in database to those surfaces defined in previous SURF lines */
+
+  if(nsurfids_shown>0){
+    if(nsurfinfo==0){
+      FREEMEMORY(surfinfo);
+      FREEMEMORY(textureinfo);
+      NewMemory((void **)&surfinfo, (nsurfids_shown+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      NewMemory((void **)&textureinfo, nsurfids_shown*sizeof(surfdata));
+    }
+    if(nsurfinfo>0){
+      if(surfinfo==NULL){
+        NewMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      }
+      else{
+        ResizeMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
+      }
+      if(textureinfo==NULL){
+        NewMemory((void **)&textureinfo, (nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+      }
+      else{
+        ResizeMemory((void **)&textureinfo, (nsurfids_shown+nsurfinfo)*sizeof(surfdata));
+      }
+    }
+    surfj = surfinfo+nsurfinfo-1;
+    for(j = 0; j<nsurfids; j++){
+      if(surfids[j].show==0)continue;
+      surfj++;
+      init_surface(surfj);
+      surfj->surfacelabel = surfids[j].label;
+    }
+    nsurfinfo += nsurfids_shown;
+  }
+  update_sorted_surfidlist();
 }
 
 /* ------------------ readsmv ------------------------ */
@@ -2412,15 +3076,15 @@ int readsmv(char *file, char *file2){
   nrooms=0;
 
   if(file!=NULL){
-    initsurface(&sdefault);
+    init_surface(&sdefault);
     NewMemory((void **)&sdefault.surfacelabel,(5+1));
     strcpy(sdefault.surfacelabel,"INERT");
 
-    initventsurface(&v_surfacedefault);
+    init_ventsurface(&v_surfacedefault);
     NewMemory((void **)&v_surfacedefault.surfacelabel,(4+1));
     strcpy(v_surfacedefault.surfacelabel,"VENT");
 
-    initsurface(&e_surfacedefault);
+    init_surface(&e_surfacedefault);
     NewMemory((void **)&e_surfacedefault.surfacelabel,(8+1));
     strcpy(e_surfacedefault.surfacelabel,"EXTERIOR");
     e_surfacedefault.color=mat_ambient2;
@@ -2441,7 +3105,7 @@ int readsmv(char *file, char *file2){
           flowlabels *labelj;
 
           labelj = partclassi->labels+j;
-          freelabels(labelj);
+          free_labels(labelj);
         }
         FREEMEMORY(partclassi->labels);
         partclassi->ntypes=0;
@@ -2494,7 +3158,7 @@ int readsmv(char *file, char *file2){
 
       zonei = zoneinfo + i;
       for(n=0;n<4;n++){
-        freelabels(&zonei->label[n]);
+        free_labels(&zonei->label[n]);
       }
       FREEMEMORY(zonei->file);
     }
@@ -2536,7 +3200,7 @@ int readsmv(char *file, char *file2){
     for(i=0;i<nsliceinfo;i++){
       slicedata *sd;
       sd = sliceinfo + i;
-      freelabels(&sliceinfo[i].label);
+      free_labels(&sliceinfo[i].label);
       FREEMEMORY(sd->reg_file);
       FREEMEMORY(sd->comp_file);
       FREEMEMORY(sd->size_file);
@@ -2573,7 +3237,7 @@ int readsmv(char *file, char *file2){
       patchdata *patchi;
 
       patchi = patchinfo + i;
-      freelabels(&patchi->label);
+      free_labels(&patchi->label);
       FREEMEMORY(patchi->reg_file);
       FREEMEMORY(patchi->comp_file);
       FREEMEMORY(patchi->size_file);
@@ -2584,7 +3248,7 @@ int readsmv(char *file, char *file2){
 
   if(nisoinfo>0){
     for(i=0;i<nisoinfo;i++){
-      freelabels(&isoinfo[i].surface_label);
+      free_labels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
@@ -3142,7 +3806,7 @@ int readsmv(char *file, char *file2){
    partclassi->labels=NULL;
 
    NewMemory((void **)&partclassi->labels,sizeof(flowlabels));
-   createnulllabel(partclassi->labels);
+   create_nulllabel(partclassi->labels);
 
    npartclassinfo=0;
 
@@ -3322,7 +3986,7 @@ int readsmv(char *file, char *file2){
     FREEMEMORY(matlinfo);
     if(NewMemory((void **)&matlinfo,nmatlinfo*sizeof(matldata))==0)return 2;
     matli = matlinfo;
-    initmatl(matli);
+    init_matl(matli);
     s_color[0]=matli->color[0];
     s_color[1]=matli->color[1];
     s_color[2]=matli->color[2];
@@ -4341,7 +5005,7 @@ int readsmv(char *file, char *file2){
       char *buffer3;
 
       surfi = surfinfo + nsurfinfo;
-      initsurface(surfi);
+      init_surface(surfi);
       fgets(buffer,255,stream);
       trim_back(buffer);
       len=strlen(buffer);
@@ -4436,7 +5100,7 @@ int readsmv(char *file, char *file2){
       int len;
 
       matli = matlinfo + nmatlinfo;
-      initmatl(matli);
+      init_matl(matli);
 
       fgets(buffer,255,stream);
       trim_back(buffer);
@@ -4484,7 +5148,7 @@ int readsmv(char *file, char *file2){
       igrid++;
       if(meshinfo!=NULL){
         meshi=meshinfo+igrid-1;
-        initmesh(meshi);
+        init_mesh(meshi);
         {
           size_t len_meshlabel;
           char *meshlabel;
@@ -4680,7 +5344,7 @@ int readsmv(char *file, char *file2){
   PRINTF("\n");
 
   CheckMemory;
-  parsedatabase(database_filename);
+  parse_database(database_filename);
 
 
   if(setGRID==0){
@@ -4713,7 +5377,7 @@ int readsmv(char *file, char *file2){
       zp[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)kbartemp;
     }
     meshi=meshinfo;
-    initmesh(meshi);
+    init_mesh(meshi);
     meshi->xplt=xp;
     meshi->yplt=yp;
     meshi->zplt=zp;
@@ -5780,7 +6444,7 @@ typedef struct {
         meshi->blockageinfoptrs[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
         bc=meshi->blockageinfoptrs[nn];
-        initobst(bc,surfacedefault,nn+1,iobst-1);
+        init_obst(bc,surfacedefault,nn+1,iobst-1);
         fgets(buffer,255,stream);
         trim_back(buffer);
         for(i=0;i<6;i++){
@@ -5848,7 +6512,7 @@ typedef struct {
         for(i=0;i<6;i++){
           bc->surf[i]->used_by_obst=1;
         }
-        setsurfaceindex(bc);
+        set_surfaceindex(bc);
       }
 
       nn=-1;
@@ -6930,6 +7594,8 @@ typedef struct {
       sd->ncontour_areas=0;
       sd->menu_show=1;
       sd->constant_color=NULL;
+      sd->histograms = NULL;
+      sd->nhistograms=0;
       {
         meshdata *meshi;
 
@@ -7548,7 +8214,7 @@ typedef struct {
   /*
     Associate a surface with each block.
   */
-  updateusetextures();
+  update_usetextures();
 
   /* compute global bar's and box's */
 
@@ -7715,282 +8381,9 @@ typedef struct {
   return 0;
 }
 
-/* ------------------ parsedatabase ------------------------ */
+/* ------------------ update_usetextures ------------------------ */
 
-void parsedatabase(char *file){
-  FILE *stream;
-  char buffer[1000],*buffer2=NULL,*buffer3,*slashptr;
-  size_t lenbuffer,lenbuffer2;
-  size_t sizebuffer2;
-  char *surf_id=NULL,*start,*surf_id2;
-  char *c;
-  int i,j;
-  surfdata *surfj;
-  char *labeli, *labelj;
-  int nexti;
-  int nsurfids_shown;
-
-  /* free memory called before */
-
-  for(i=0;i<nsurfids;i++){
-    surf_id=surfids[i].label;
-    FREEMEMORY(surf_id);
-  }
-  FREEMEMORY(surfids);
-  nsurfids=0;
-
-
-  if( file==NULL||strlen(file)==0||(stream=fopen(file,"r"))==NULL){
-    NewMemory((void **)&surfids,(nsurfids+1)*sizeof(surfid));
-    surf_id=NULL;
-    NewMemory((void **)&surf_id,6);
-    strcpy(surf_id,"INERT");
-    surfids[0].label=surf_id;
-    surfids[0].location=0;
-    surfids[0].show=1;
-    nsurfids=1;
-  }
-
-  else{
-    sizebuffer2=1001;
-    NewMemory((void **)&buffer2,sizebuffer2);
-
-  /* find out how many surfs are in database file so memory can be allocated */
-
-    while(!feof(stream)){
-      if(fgets(buffer,1000,stream)==NULL)break;
-      if(STRSTR(buffer,"&SURF")==NULL)continue;
-
-
-      slashptr=strstr(buffer,"/");
-      if(slashptr!=NULL)strcpy(buffer2,buffer);
-      buffer3=buffer;
-      while(slashptr!=NULL){
-        fgets(buffer,1000,stream);
-        lenbuffer=strlen(buffer);
-        lenbuffer2=strlen(buffer2);
-        if(lenbuffer2+lenbuffer+2>sizebuffer2){
-          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
-          ResizeMemory((void **)&buffer2,(unsigned int)sizebuffer2);
-        }
-        strcat(buffer2,buffer);
-        slashptr=strstr(buffer,"/");
-        buffer3=buffer2;
-      }
-      start=STRSTR(buffer3,"ID");
-      if(start!=NULL)nsurfids++;
-    }
-
-  /* allocate memory */
-
-    NewMemory((void **)&surfids,(nsurfids+1)*sizeof(surfid));
-    surf_id=NULL;
-    NewMemory((void **)&surf_id,6);
-    strcpy(surf_id,"INERT");
-    surfids[0].label=surf_id;
-    surfids[0].location=0;
-    surfids[0].show=1;
-
-
-  /* now look for IDs and copy them into an array */
-
-    rewind(stream);
-    nsurfids=1;
-    while(!feof(stream)){
-      if(fgets(buffer,1000,stream)==NULL)break;
-      if(STRSTR(buffer,"&SURF")==NULL)continue;
-
-
-      slashptr=strstr(buffer,"/");
-      if(slashptr!=NULL)strcpy(buffer2,buffer);
-      while(slashptr!=NULL){
-        fgets(buffer,1000,stream);
-        lenbuffer=strlen(buffer);
-        lenbuffer2=strlen(buffer2);
-        if(lenbuffer2+lenbuffer+2>sizebuffer2){
-          sizebuffer2 = lenbuffer2+lenbuffer+2+1000;
-          ResizeMemory((void **)&buffer2,(unsigned int)sizebuffer2);
-        }
-        strcat(buffer2,buffer);
-        slashptr=strstr(buffer,"/");
-        buffer3=buffer2;
-      }
-      start=STRSTR(buffer3+3,"ID");
-      if(start!=NULL)nsurfids++;
-      surf_id=NULL;
-      surf_id2=NULL;
-      for(c=start;c!=NULL&&*c!='\0';c++){
-        if(surf_id==NULL&&*c=='\''){
-          surf_id=c+1;
-          continue;
-        }
-        if(surf_id!=NULL&&*c=='\''){
-          *c='\0';
-          NewMemory((void **)&surf_id2,strlen(surf_id)+1);
-          strcpy(surf_id2,surf_id);
-          surfids[nsurfids-1].label=surf_id2;
-          surfids[nsurfids-1].location=1;
-          surfids[nsurfids-1].show=1;
-          break;
-        }
-      }
-
-    }
-  }
-
-  /* identify duplicate surfaces */
-  /*** debug: make sure ->show is defined for all cases ***/
-
-  nsurfids_shown=0;
-  for(i=0;i<nsurfids;i++){
-    labeli = surfids[i].label;
-    nexti = 0;
-    for(j=0;j<nsurfinfo;j++){
-      surfj = surfinfo + j;
-      labelj = surfj->surfacelabel;
-      if(strcmp(labeli,labelj)==0){
-        nexti = 1;
-        break;
-      }
-    }
-    if(nexti==1){
-      surfids[i].show=0;
-      continue;
-    }
-    for(j=0;j<i;j++){
-      labelj = surfids[j].label;
-      if(strcmp(labeli,labelj)==0){
-        nexti = 1;
-        break;
-      }
-    }
-    if(nexti==1){
-      surfids[i].show=0;
-      continue;
-    }
-    nsurfids_shown++;
-
-  }
-
-  /* add surfaces found in database to those surfaces defined in previous SURF lines */
-
-  if(nsurfids_shown>0){
-    if(nsurfinfo==0){
-      FREEMEMORY(surfinfo);
-      FREEMEMORY(textureinfo);
-      NewMemory((void **)&surfinfo,(nsurfids_shown+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      NewMemory((void **)&textureinfo,nsurfids_shown*sizeof(surfdata));
-    }
-    if(nsurfinfo>0){
-      if(surfinfo==NULL){
-        NewMemory((void **)&surfinfo,(nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      }
-      else{
-        ResizeMemory((void **)&surfinfo, (nsurfids_shown+nsurfinfo+MAX_ISO_COLORS+1)*sizeof(surfdata));
-      }
-      if(textureinfo==NULL){
-        NewMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
-      }
-      else{
-        ResizeMemory((void **)&textureinfo,(nsurfids_shown+nsurfinfo)*sizeof(surfdata));
-      }
-    }
-    surfj = surfinfo + nsurfinfo - 1;
-    for(j=0;j<nsurfids;j++){
-      if(surfids[j].show==0)continue;
-      surfj++;
-      initsurface(surfj);
-      surfj->surfacelabel=surfids[j].label;
-    }
-    nsurfinfo += nsurfids_shown;
-  }
-  update_sorted_surfidlist();
-}
-
-/* ------------------ surfid_compare ------------------------ */
-
-int surfid_compare( const void *arg1, const void *arg2 ){
-  surfdata *surfi, *surfj;
-  int i, j;
-
-  i=*(int *)arg1;
-  j=*(int *)arg2;
-
-  surfi = surfinfo + i;
-  surfj = surfinfo + j;
-
-  return(strcmp(surfi->surfacelabel,surfj->surfacelabel));
-}
-
-/* ------------------ updated_sorted_surfidlist ------------------------ */
-
-void update_sorted_surfidlist(void){
-  int i;
-
-  FREEMEMORY(sorted_surfidlist);
-  FREEMEMORY(inv_sorted_surfidlist);
-  NewMemory((void **)&sorted_surfidlist,nsurfinfo*sizeof(int));
-  NewMemory((void **)&inv_sorted_surfidlist,nsurfinfo*sizeof(int));
-
-
-  nsorted_surfidlist=nsurfinfo;
-  for(i=0;i<nsorted_surfidlist;i++){
-    sorted_surfidlist[i]=i;
-  }
-
-
-  qsort( (int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare );
-  for(i=0;i<nsorted_surfidlist;i++){
-    inv_sorted_surfidlist[sorted_surfidlist[i]]=i;
-  }
-
-
-}
-
-
-        /*
-        new OBST format:
-        i1 i2 j1 j2 k1 k2 colorindex blocktype       : if blocktype!=1&&colorindex!=-3
-        i1 i2 j1 j2 k1 k2 colorindex blocktype r g b : if blocktype!=1&&colorindex==-3
-        i1 i2 j1 j2 k1 k2 ceiling texture blocktype [wall texture floor texture] : if blocktype==1
-        int colorindex, blocktype;
-        colorindex: -1 default color
-                    -2 invisible
-                    -3 use r g b color
-                    >=0 color/color2/texture index
-        blocktype: 0 regular block non-textured
-                   1 regular block textured
-                   2 outline
-                   3 smoothed block
-        r g b           colors used if colorindex==-3
-        */
-
-/* ------------------ backup_blockage ------------------------ */
-
-void backup_blockage(blockagedata *bc){
-  int i;
-
-  bc->xyzORIG[0]=bc->xmin;
-  bc->xyzORIG[1]=bc->xmax;
-  bc->xyzORIG[2]=bc->ymin;
-  bc->xyzORIG[3]=bc->ymax;
-  bc->xyzORIG[4]=bc->zmin;
-  bc->xyzORIG[5]=bc->zmax;
-  bc->ijkORIG[0]=bc->ijk[0];
-  bc->ijkORIG[1]=bc->ijk[1];
-  bc->ijkORIG[2]=bc->ijk[2];
-  bc->ijkORIG[3]=bc->ijk[3];
-  bc->ijkORIG[4]=bc->ijk[4];
-  bc->ijkORIG[5]=bc->ijk[5];
-  for(i=0;i<6;i++){
-    bc->surfORIG[i]=bc->surf[i];
-    bc->surf_indexORIG[i]=bc->surf_index[i];
-  }
-}
-
-/* ------------------ updateusetextures ------------------------ */
-
-void updateusetextures(void){
+void update_usetextures(void){
   int i;
 
   for(i=0;i<ntextures;i++){
@@ -8084,436 +8477,2807 @@ void updateusetextures(void){
   }
 }
 
-/* ------------------ initsurface ------------------------ */
+/* ------------------ readini2 ------------------------ */
 
-void initsurface(surfdata *surf){
-  surf->iso_level=-1;
-  surf->used_by_obst=0;
-  surf->used_by_vent=0;
-  surf->emis=1.0;
-  surf->temp_ignition=TEMP_IGNITION_MAX;
-  surf->surfacelabel=NULL;
-  surf->texturefile=NULL;
-  surf->textureinfo=NULL;
-  surf->color=block_ambient2;
-  surf->t_width=1.0;
-  surf->t_height=1.0;
-  surf->type=BLOCK_regular;
-  surf->obst_surface=1;
-  surf->location=0;
-  surf->invisible=0;
-  surf->transparent=0;
-}
-
-/* ------------------ initmatl ------------------------ */
-
-void initmatl(matldata *matl){
-  matl->matllabel=NULL;
-  matl->color=block_ambient2;
-}
-
-/* ------------------ initventsurface ------------------------ */
-
-void initventsurface(surfdata *surf){
-  surf->emis=1.0;
-  surf->temp_ignition=TEMP_IGNITION_MAX;
-  surf->surfacelabel=NULL;
-  surf->texturefile=NULL;
-  surf->textureinfo=NULL;
-  surf->color=ventcolor;
-  surf->t_width=1.0;
-  surf->t_height=1.0;
-  surf->type=BLOCK_outline;
-  surf->obst_surface=0;
-
-}
-
-/* ------------------ setsurfaceindex ------------------------ */
-
-void setsurfaceindex(blockagedata *bc){
-  int i,j,jj;
-  surfdata *surfj;
-  char *surflabel, *bclabel;
-  int *surf_index;
-  int wall_flag;
-
-  for(i=0;i<6;i++){
-    bc->surf_index[i]=-1;
-    bclabel=bc->surf[i]->surfacelabel;
-    if(bc->surf[i]==NULL)continue;
-    for(jj=1;jj<nsurfinfo+1;jj++){
-      j=jj;
-      if(jj==nsurfinfo)j=0;
-      surfj = surfinfo + j;
-      surflabel=surfj->surfacelabel;
-      if(strcmp(bclabel,surflabel)!=0)continue;
-      bc->surf_index[i]=j;
-      break;
-    }
-  }
-  surf_index = bc->surf_index;
-  wall_flag = 1;
-  for(i=1;i<6;i++){
-    if(surf_index[i]!=surf_index[0]){
-      wall_flag=0;
-      break;
-    }
-  }
-  if(wall_flag==1){
-    bc->walltype=WALL_1;
-    bc->walltypeORIG=WALL_1;
-    return;
-  }
-  if(
-      surf_index[UP_X]==surf_index[DOWN_X]&&
-    surf_index[DOWN_Y]==surf_index[DOWN_X]&&
-      surf_index[UP_Y]==surf_index[DOWN_X]
-    ){
-    bc->walltype=WALL_3;
-    bc->walltypeORIG=WALL_3;
-    return;
-  }
-  bc->walltype=WALL_6;
-  bc->walltypeORIG=WALL_6;
-
-}
-
-/* ------------------ initobst ------------------------ */
-
-void initobst(blockagedata *bc, surfdata *surf,int index,int meshindex){
-  int colorindex, blocktype;
+int readini2(char *inifile, int localfile){
   int i;
-  char blocklabel[255];
-  size_t len;
+  FILE *stream;
 
-  bc->prop=NULL;
-  bc->is_wuiblock=0;
-  bc->transparent=0;
-  bc->usecolorindex=0;
-  bc->colorindex=-1;
-  bc->nshowtime=0;
-  bc->hole=0;
-  bc->showtime=NULL;
-  bc->showhide=NULL;
-  bc->showtimelist=NULL;
-  bc->show=1;
-  bc->blockage_id=index;
-  bc->meshindex=meshindex;
-  bc->hidden=0;
-  bc->invisible=0;
-  bc->texture_origin[0]=texture_origin[0];
-  bc->texture_origin[1]=texture_origin[1];
-  bc->texture_origin[2]=texture_origin[2];
+  updatemenu = 1;
+  updatefacelists = 1;
 
-  /*
-  new OBST format:
-  i1 i2 j1 j2 k1 k2 colorindex blocktype       : if blocktype!=1&&colorindex!=-3
-  i1 i2 j1 j2 k1 k2 colorindex blocktype r g b : if blocktype!=1&&colorindex==-3
-  i1 i2 j1 j2 k1 k2 ceiling texture blocktype [wall texture floor texture] : if blocktype==1
-  int colorindex, blocktype;
-  colorindex: -1 default color
-              -2 invisible
-              -3 use r g b color
-              >=0 color/color2/texture index
-  blocktype: 0 regular block non-textured
-             1 regular block textured
-             2 outline
-             3 smoothed block
-  r g b           colors used if colorindex==-3
-  */
-  colorindex=-1;
-  blocktype=0;
-  bc->ijk[IMIN]=0;
-  bc->ijk[IMAX]=1;
-  bc->ijk[JMIN]=0;
-  bc->ijk[JMAX]=1;
-  bc->ijk[KMIN]=0;
-  bc->ijk[KMAX]=1;
-  bc->colorindex=colorindex;
-  bc->type=blocktype;
+  if((stream = fopen(inifile, "r")) == NULL)return 1;
 
-  bc->del=0;
-  bc->changed=0;
-  bc->changed_surface=0;
-  bc->walltype=WALL_1;
+  for(i = 0; i<nunitclasses_ini; i++){
+    f_units *uc;
 
-  bc->color=surf->color;
-  bc->useblockcolor=0;
-  for(i=0;i<6;i++){
-    bc->surf_index[i]=-1;
-    bc->surf[i]=surf;
-    bc->faceinfo[i]=NULL;
+    uc = unitclasses_ini + i;
+    FREEMEMORY(uc->units);
   }
-  for(i=0;i<7;i++){
-    bc->patchvis[i]=1;
+  FREEMEMORY(unitclasses_ini);
+  nunitclasses_ini = 0;
+
+  if(localfile == 1){
+    update_inilist();
   }
-  sprintf(blocklabel,"**blockage %i",index);
-  len=strlen(blocklabel);
-  NewMemory((void **)&bc->label,((unsigned int)(len+1))*sizeof(char));
-  strcpy(bc->label,blocklabel);
-}
 
-/* ------------------ initmesh ------------------------ */
+  PRINTF("%s", _("processing config file: "));
+  PRINTF("%s\n", inifile);
+  if(localfile == 1){
+    update_selectedtour_index = 0;
+  }
 
-void initmesh(meshdata *meshi){
-  meshi->ncutcells=0;
-  meshi->cutcells=NULL;
-  meshi->slice_min[0]=1.0;
-  meshi->slice_min[1]=1.0;
-  meshi->slice_min[2]=1.0;
-  meshi->slice_max[0]=0.0;
-  meshi->slice_max[1]=0.0;
-  meshi->slice_max[2]=0.0;
-  meshi->s_offset[0]=-1;
-  meshi->s_offset[1]=-1;
-  meshi->s_offset[2]=-1;
-  meshi->super=NULL;
-  meshi->nabors[0]=NULL;
-  meshi->nabors[1]=NULL;
-  meshi->nabors[2]=NULL;
-  meshi->nabors[3]=NULL;
-  meshi->nabors[4]=NULL;
-  meshi->nabors[5]=NULL;
-  meshi->update_firehalfdepth=0;
-  meshi->iplotx_all=NULL;
-  meshi->iploty_all=NULL;
-  meshi->iplotz_all=NULL;
+  /* find number of each kind of file */
+
+  while(!feof(stream)){
+    char buffer[255], buffer2[255];
+
+    CheckMemory;
+    if(fgets(buffer, 255, stream) == NULL)break;
+
+    if(localfile == 1){
+      if(match(buffer, "GSLICEPARMS") == 1){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %i %i", &vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
+        ONEORZERO(vis_gslice_data);
+        ONEORZERO(show_gslice_triangles);
+        ONEORZERO(show_gslice_triangulation);
+        ONEORZERO(show_gslice_normal);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f", gslice_xyz, gslice_xyz + 1, gslice_xyz + 2);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f", gslice_normal_azelev, gslice_normal_azelev + 1);
+        update_gslice = 1;
+        continue;
+      }
+      if(match(buffer, "GEOMETRYTEST") == 1){
+        int *v, ii;
+        float *b1, *b2, *b3;
+
+        v = tetrabox_vis;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %i %i %f %f", &geomtest_option, &show_tetratest_labels, &tetra_line_thickness, &tetra_point_size);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %i %i %i %i %i ", v, v + 1, v + 2, v + 3, v + 4);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %i %i %i %i %i ", v + 5, v + 6, v + 7, v + 8, v + 9);
+        ONEORZERO(show_tetratest_labels);
+        for(ii = 0; ii<10; ii++){
+          ONEORZERO(v[ii]);
+        }
+        b1 = box_bounds2;
+        b2 = tetra_vertices;
+        b3 = box_translate;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %f %f %f %f %f %f", b1, b1 + 1, b1 + 2, b1 + 3, b1 + 4, b1 + 5);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %f %f %f %f %f %f", b2, b2 + 1, b2 + 2, b2 + 3, b2 + 4, b2 + 5);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %f %f %f %f %f %f", b2 + 6, b2 + 7, b2 + 8, b2 + 9, b2 + 10, b2 + 11);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, " %f %f %f", b3, b3 + 1, b3 + 2);
+        continue;
+      }
+      if(match(buffer, "GRIDPARMS") == 1){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %i", &visx_all, &visy_all, &visz_all);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %i", &iplotx_all, &iploty_all, &iplotz_all);
+        if(iplotx_all>nplotx_all - 1)iplotx_all = 0;
+        if(iploty_all>nploty_all - 1)iploty_all = 0;
+        if(iplotz_all>nplotz_all - 1)iplotz_all = 0;
+        continue;
+      }
+    }
+#ifdef pp_DUP
+    if(match(buffer, "SLICEDUP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i", &slicedup_option, &vectorslicedup_option);
+      continue;
+    }
+#endif
+    if(match(buffer, "NORTHANGLE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i", &vis_northangle);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f", northangle_position, northangle_position + 1, northangle_position + 2);
+      continue;
+    }
+    if(match(buffer, "TREEPARMS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i", &mintreesize, &vis_xtree, &vis_ytree, &vis_ztree);
+      mintreesize = MAX(mintreesize, 2);
+      vis_xtree = CLAMP(vis_xtree, 0, 1);
+      vis_ytree = CLAMP(vis_ytree, 0, 1);
+      vis_ztree = CLAMP(vis_ztree, 0, 1);
+      continue;
+    }
+    if(match(buffer, "ZAXISANGLES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f ", zaxis_angles, zaxis_angles + 1, zaxis_angles + 2);
+      changed_zaxis = 1;
+      continue;
+    }
+    if(match(buffer, "GEOMDIAGS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics);
+      continue;
+    }
+    if(match(buffer, "GEOMSHOW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i", &show_faces_interior, &show_faces_exterior, &show_faces_solid, &show_faces_outline, &smooth_geom_normal);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i", &show_volumes_interior, &show_volumes_exterior, &show_volumes_solid, &show_volumes_outline);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f", &geom_vert_exag, &geom_max_angle);
+      continue;
+    }
+    if(match(buffer, "SHOWTRIANGLECOUNT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i", &show_triangle_count);
+      continue;
+    }
+    if(match(buffer, "SHOWDEVICEVALS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i %i %i",
+        &showdeviceval, &showvdeviceval, &devicetypes_index, &colordeviceval, &vectortype, &vispilot, &showdevicetype, &showdeviceunit);
+      devicetypes_index = CLAMP(devicetypes_index, 0, ndevicetypes - 1);
+      update_glui_devices();
+      continue;
+    }
+    if(match(buffer, "SHOWMISSINGOBJECTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i", &show_missing_objects);
+      ONEORZERO(show_missing_objects);
+      continue;
+    }
+    if(match(buffer, "DEVICEVECTORDIMENSIONS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", &vector_baselength, &vector_basediameter, &vector_headlength, &vector_headdiameter);
+      continue;
+    }
+    if(match(buffer, "DEVICEBOUNDS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f", &device_valmin, &device_valmax);
+      continue;
+    }
+    if(match(buffer, "DEVICEORIENTATION") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f", &show_device_orientation, &orientation_scale);
+      show_device_orientation = CLAMP(show_device_orientation, 0, 1);
+      orientation_scale = CLAMP(orientation_scale, 0.1, 10.0);
+      continue;
+    }
+    if(match(buffer, "GVERSION") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &gversion);
+      ONEORZERO(gversion);
+    }
+    if(match(buffer, "SCALEDFONT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i", &scaled_font2d_height, &scaled_font2d_height2width, &scaled_font2d_thickness);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i", &scaled_font3d_height, &scaled_font3d_height2width, &scaled_font3d_thickness);
+    }
+    if(match(buffer, "FEDCOLORBAR") == 1){
+      char *fbuff;
+
+      fgets(buffer, 255, stream);
+      trim_back(buffer);
+      fbuff = trim_front(buffer);
+      if(strlen(fbuff)>0)strcpy(default_fed_colorbar, fbuff);
+    }
+    if(match(buffer, "FED") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &regenerate_fed);
+      ONEORZERO(regenerate_fed);
+      continue;
+    }
+    if(match(buffer, "SHOWFEDAREA") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_fed_area);
+      ONEORZERO(show_fed_area);
+      continue;
+    }
+    if(match(buffer, "USENEWDRAWFACE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &use_new_drawface);
+      ONEORZERO(use_new_drawface);
+      continue;
+    }
+    if(match(buffer, "TLOAD") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f %i %i", &use_tload_begin, &tload_begin, &use_tload_end, &tload_end, &use_tload_skip, &tload_skip);
+      continue;
+    }
+    if(match(buffer, "VOLSMOKE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i",
+        &glui_compress_volsmoke, &use_multi_threading, &load_at_rendertimes, &volbw, &show_volsmoke_moving);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f %f %f %f",
+        &temperature_min, &temperature_cutoff, &temperature_max, &fire_opacity_factor, &mass_extinct, &gpu_vol_factor, &nongpu_vol_factor);
+      ONEORZERO(glui_compress_volsmoke);
+      ONEORZERO(use_multi_threading);
+      ONEORZERO(load_at_rendertimes);
+      fire_opacity_factor = CLAMP(fire_opacity_factor, 1.0, 10.0);
+      mass_extinct = CLAMP(mass_extinct, 100.0, 100000.0);
+      init_volrender_surface(NOT_FIRSTCALL);
+      continue;
+    }
+    if(match(buffer, "BOUNDARYTWOSIDE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &showpatch_both);
+      ONEORZERO(showpatch_both);
+    }
+    if(match(buffer, "MESHOFFSET") == 1){
+      int meshnum;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &meshnum);
+      if(meshnum >= 0 && meshnum<nmeshes){
+        meshdata *meshi;
+
+        meshi = meshinfo + meshnum;
+        meshi->mesh_offset_ptr = meshi->mesh_offset;
+      }
+      continue;
+    }
+#ifdef pp_LANG
+    if(match(buffer, "STARTUPLANG") == 1){
+      char *bufptr;
+
+      fgets(buffer, 255, stream);
+      trim_back(buffer);
+      bufptr = trim_front(buffer);
+      strncpy(startup_lang_code, bufptr, 2);
+      startup_lang_code[2] = '\0';
+      if(strcmp(startup_lang_code, "en") != 0){
+        show_lang_menu = 1;
+      }
+      if(tr_name == NULL){
+        int langlen;
+
+        langlen = strlen(bufptr);
+        NewMemory((void **)&tr_name, langlen + 48 + 1);
+        strcpy(tr_name, bufptr);
+      }
+      continue;
+    }
+#endif
+    if(match(buffer, "MESHVIS") == 1){
+      int nm;
+      meshdata *meshi;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nm);
+      for(i = 0; i<nm; i++){
+        if(i>nmeshes - 1)break;
+        meshi = meshinfo + i;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &meshi->blockvis);
+        ONEORZERO(meshi->blockvis);
+      }
+      continue;
+    }
+    if(match(buffer, "SPHERESEGS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &device_sphere_segments);
+      device_sphere_segments = CLAMP(device_sphere_segments, 6, 48);
+      Init_Sphere(device_sphere_segments, 2 * device_sphere_segments);
+      Init_Circle(2 * device_sphere_segments, &object_circ);
+      continue;
+    }
+    if(match(buffer, "SHOWEVACSLICES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", &show_evac_slices, &constant_evac_coloring, &show_evac_colorbar);
+      ONEORZERO(show_evac_slices);
+      if(constant_evac_coloring != 1)constant_evac_coloring = 0;
+      data_evac_coloring = 1 - constant_evac_coloring;
+      ONEORZERO(show_evac_colorbar);
+      update_slice_menu_show();
+      update_evac_parms();
+      continue;
+    }
+    if(match(buffer, "DIRECTIONCOLOR") == 1){
+      float *dc;
+
+      dc = direction_color;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", dc, dc + 1, dc + 2);
+      dc[3] = 1.0;
+      direction_color_ptr = getcolorptr(direction_color);
+      update_slice_menu_show();
+      update_evac_parms();
+      continue;
+    }
+    if(match(buffer, "OFFSETSLICE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &offset_slice);
+      ONEORZERO(offset_slice);
+      continue;
+    }
+    if(match(buffer, "VECLENGTH") == 1){
+      float vf = 1.0;
+      int dummy;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f", &dummy, &vf);
+      vecfactor = vf;
+      continue;
+    }
+    if(match(buffer, "VECCONTOURS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_slices_and_vectors);
+      ONEORZERO(show_slices_and_vectors);
+      continue;
+    }
+    if(match(buffer, "ISOTRAN2") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &transparent_state);
+      continue;
+    }
+    if(match(buffer, "SHOWTETRAS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &show_volumes_solid, &show_volumes_outline);
+      continue;
+    }
+    if(match(buffer, "SHOWTRIANGLES") == 1){
+      int dummy;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i %i", &show_iso_solid, &show_iso_outline, &show_iso_points, &show_iso_normal, &dummy, &smooth_iso_normal);
+      ONEORZERO(show_iso_solid);
+      ONEORZERO(show_iso_outline);
+      ONEORZERO(show_iso_points);
+      ONEORZERO(show_iso_normal);
+      ONEORZERO(smooth_iso_normal);
+#ifdef pp_BETA
+      ONEORZERO(show_iso_normal);
+#else
+      show_iso_normal = 0;
+#endif
+      visAIso = show_iso_solid * 1 + show_iso_outline * 2 + show_iso_points * 4;
+      continue;
+    }
+    if(match(buffer, "SHOWSTREAK") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i", &streak5show, &streak5step, &showstreakhead, &streak_index);
+      ONEORZERO(streak5show);
+      if(streak5show == 0)streak_index = -2;
+      ONEORZERO(showstreakhead);
+      update_streaks = 1;
+      continue;
+    }
+
+    if(match(buffer, "SHOWTERRAIN") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visTerrainType);
+      continue;
+    }
+    if(match(buffer, "STEREO") == 1){
+      fgets(buffer, 255, stream);
+      showstereoOLD = showstereo;
+      sscanf(buffer, "%i", &showstereo);
+      showstereo = CLAMP(showstereo, 0, 5);
+      if(showstereo == STEREO_TIME&&videoSTEREO != 1)showstereo = STEREO_NONE;
+      Update_Glui_Stereo();
+      continue;
+    }
+    if(match(buffer, "TERRAINPARMS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", terrain_rgba_zmin, terrain_rgba_zmin + 1, terrain_rgba_zmin + 2);
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", terrain_rgba_zmax, terrain_rgba_zmax + 1, terrain_rgba_zmax + 2);
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f", &vertical_factor);
+
+      for(i = 0; i<3; i++){
+        terrain_rgba_zmin[i] = CLAMP(terrain_rgba_zmin[i], 0, 2255);
+        terrain_rgba_zmax[i] = CLAMP(terrain_rgba_zmax[i], 0, 2255);
+      }
+      vertical_factor = CLAMP(vertical_factor, 0.25, 4.0);
+      update_terrain(0, vertical_factor);
+      update_terrain_colors();
+      continue;
+    }
+    if(match(buffer, "SMOKESENSORS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &show_smokesensors, &test_smokesensors);
+      continue;
+    }
 #ifdef pp_GPU
-  meshi->smoke_texture_buffer=NULL;
-  meshi->smoke_texture_id=-1;
-  meshi->fire_texture_buffer=NULL;
-  meshi->fire_texture_id=-1;
-  meshi->slice3d_texture_buffer=NULL;
-  meshi->slice3d_texture_id=-1;
-  meshi->slice3d_c_buffer=NULL;
+    if(gpuactive == 1 && match(buffer, "USEGPU") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &usegpu);
+      ONEORZERO(usegpu);
+      continue;
+    }
 #endif
-  meshi->mesh_offset_ptr=NULL;
+    if(match(buffer, "V_PLOT3D") == 1){
+      int tempval;
+      int n3d;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &tempval);
+      if(tempval<0)tempval = 0;
+      n3d = tempval;
+      if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+      for(i = 0; i<n3d; i++){
+        int iplot3d, isetmin, isetmax;
+        float p3mintemp, p3maxtemp;
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %f %i %f", &iplot3d, &isetmin, &p3mintemp, &isetmax, &p3maxtemp);
+        iplot3d--;
+        if(iplot3d >= 0 && iplot3d<mxplot3dvars){
+          setp3min[iplot3d] = isetmin;
+          setp3max[iplot3d] = isetmax;
+          p3min[iplot3d] = p3mintemp;
+          p3max[iplot3d] = p3maxtemp;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "CACHE_QDATA") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &cache_qdata);
+      ONEORZERO(cache_qdata);
+      continue;
+    }
+    if(match(buffer, "UNLOAD_QDATA") == 1){
+      int unload_qdata;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &unload_qdata);
+      cache_qdata = 1 - unload_qdata;
+      ONEORZERO(cache_qdata);
+      continue;
+    }
+    if(match(buffer, "CACHE_BOUNDARYDATA") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &cache_boundarydata);
+      continue;
+    }
+    if(match(buffer, "TREECOLORS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", trunccolor, trunccolor + 1, trunccolor + 2);
+      sscanf(buffer, "%f %f %f", treecolor, treecolor + 1, treecolor + 2);
+      sscanf(buffer, "%f %f %f", treecharcolor, treecharcolor + 1, treecharcolor + 2);
+      for(i = 0; i<3; i++){
+        treecolor[i] = CLAMP(treecolor[i], 0.0, 1.0);
+        treecharcolor[i] = CLAMP(treecharcolor[i], 0.0, 1.0);
+        trunccolor[i] = CLAMP(trunccolor[i], 0.0, 1.0);
+      }
+      treecolor[3] = 1.0;
+      treecharcolor[3] = 1.0;
+      trunccolor[3] = 1.0;
+      continue;
+    }
+    if(match(buffer, "TRAINERVIEW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &trainerview);
+      if(trainerview != 2 && trainerview != 3)trainerview = 1;
+      continue;
+    }
+    if(match(buffer, "SHOWTRANSPARENTVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_transparent_vents);
+      ONEORZERO(show_transparent_vents);
+      continue;
+    }
+    if(match(buffer, "COLORBARTYPE") == 1){
+      char *label;
+
+      update_colorbartype = 1;
+      fgets(buffer, 255, stream);
+      label = strchr(buffer, '%');
+      if(label == NULL){
+        sscanf(buffer, "%i", &colorbartype);
+        remap_colorbartype(colorbartype, colorbarname);
+      }
+      else{
+        label++;
+        trim_back(label);
+        label = trim_front(label);
+        strcpy(colorbarname, label);
+      }
+      continue;
+    }
+    if(match(buffer, "FIRECOLORMAP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &firecolormap_type, &fire_colorbar_index_ini);
+      firecolormap_type_save = firecolormap_type;
+      update_fire_colorbar_index = 1;
+      continue;
+    }
+    if(match(buffer, "SHOWEXTREMEDATA") == 1){
+      int below = -1, above = -1, show_extremedata;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", &show_extremedata, &below, &above);
+      if(below == -1 && above == -1){
+        if(below == -1)below = 0;
+        if(below != 0)below = 1;
+        if(above == -1)above = 0;
+        if(above != 0)above = 1;
+      }
+      else{
+        if(show_extremedata != 1)show_extremedata = 0;
+        if(show_extremedata == 1){
+          below = 1;
+          above = 1;
+        }
+        else{
+          below = 0;
+          above = 0;
+        }
+      }
+      show_extreme_mindata = below;
+      show_extreme_maxdata = above;
+      continue;
+    }
+    if(match(buffer, "EXTREMECOLORS") == 1){
+      int mmin[3], mmax[3];
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i %i",
+        mmin, mmin + 1, mmin + 2,
+        mmax, mmax + 1, mmax + 2);
+      for(i = 0; i<3; i++){
+        rgb_below_min[i] = CLAMP(mmin[i], 0, 255);
+        rgb_above_max[i] = CLAMP(mmax[i], 0, 255);
+      }
+      continue;
+    }
+    if(match(buffer, "SLICEAVERAGE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i", &slice_average_flag, &slice_average_interval, &vis_slice_average);
+      ONEORZERO(slice_average_flag);
+      if(slice_average_interval<0.0)slice_average_interval = 0.0;
+      continue;
+    }
+    if(match(buffer, "SKYBOX") == 1){
+      skyboxdata *skyi;
+
+      free_skybox();
+      nskyboxinfo = 1;
+      NewMemory((void **)&skyboxinfo, nskyboxinfo*sizeof(skyboxdata));
+      skyi = skyboxinfo;
+
+      for(i = 0; i<6; i++){
+        fgets(buffer, 255, stream);
+        loadskytexture(buffer, skyi->face + i);
+      }
+    }
+    if(match(buffer, "C_PLOT3D") == 1){
+      int tempval;
+      int n3d;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &tempval);
+      if(tempval<0)tempval = 0;
+      n3d = tempval;
+      if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+      for(i = 0; i<n3d; i++){
+        int iplot3d, isetmin, isetmax;
+        float p3mintemp, p3maxtemp;
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %f %i %f", &iplot3d, &isetmin, &p3mintemp, &isetmax, &p3maxtemp);
+        iplot3d--;
+        if(iplot3d >= 0 && iplot3d<mxplot3dvars){
+          setp3chopmin[iplot3d] = isetmin;
+          setp3chopmax[iplot3d] = isetmax;
+          p3chopmin[iplot3d] = p3mintemp;
+          p3chopmax[iplot3d] = p3maxtemp;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "DEVICENORMLENGTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f", &devicenorm_length);
+      if(devicenorm_length<0.0 || devicenorm_length>1.0)devicenorm_length = 0.1;
+      continue;
+    }
+    if(match(buffer, "SHOWHRRCUTOFF") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_hrrcutoff);
+      ONEORZERO(show_hrrcutoff);
+      continue;
+    }
+    if(match(buffer, "TWOSIDEDVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &show_bothsides_int, &show_bothsides_ext);
+      ONEORZERO(show_bothsides_int);
+      ONEORZERO(show_bothsides_ext);
+      continue;
+    }
+    if(match(buffer, "SHOWSLICEINOBST") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_slice_in_obst);
+      ONEORZERO(show_slice_in_obst);
+      continue;
+    }
+    if(match(buffer, "SKIPEMBEDSLICE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &skip_slice_in_embedded_mesh);
+      ONEORZERO(skip_slice_in_embedded_mesh);
+      continue;
+    }
+    if(match(buffer, "PERCENTILELEVEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f", &percentile_level);
+      if(percentile_level<0.0)percentile_level = 0.01;
+      if(percentile_level>0.5)percentile_level = 0.01;
+      continue;
+    }
+    if(match(buffer, "TRAINERMODE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &trainer_mode);
+      continue;
+    }
+    if(match(buffer, "COMPRESSAUTO") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &compress_autoloaded);
+      continue;
+    }
+    if(match(buffer, "PLOT3DAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_plot3d(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "VSLICEAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_vslice(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "SLICEAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_slice(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "MSLICEAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+
+        if(seq_id >= 0 && seq_id<nmultisliceinfo){
+          multislicedata *mslicei;
+
+          mslicei = multisliceinfo + seq_id;
+          mslicei->autoload = 1;
+        }
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "PARTAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_part(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "ISOAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_iso(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "S3DAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_smoke(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "PATCHAUTO") == 1){
+      int n3dsmokes = 0;
+      int seq_id;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n3dsmokes);
+      for(i = 0; i<n3dsmokes; i++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &seq_id);
+        get_startup_patch(seq_id);
+      }
+      update_load_Files = 1;
+      continue;
+    }
+    if(match(buffer, "LOADFILESATSTARTUP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &loadfiles_at_startup);
+      continue;
+    }
+    if(match(buffer, "SHOWALLTEXTURES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &showall_textures);
+      continue;
+    }
+    if(match(buffer, "ENABLETEXTURELIGHTING") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &enable_texture_lighting);
+      continue;
+    }
+    if(match(buffer, "PIXELSKIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &pixel_skip);
+      continue;
+    }
+    if(match(buffer, "PROJECTION") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &projection_type);
+      Motion_CB(PROJECTION);
+      update_projection_type();
+      continue;
+    }
+    if(match(buffer, "V_PARTICLES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f", &setpartmin, &partmin, &setpartmax, &partmax);
+      continue;
+    }
+    if(match(buffer, "V5_PARTICLES") == 1){
+      int ivmin, ivmax;
+      float vmin, vmax;
+      char short_label[256], *s1;
+
+      strcpy(short_label, "");
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f %s", &ivmin, &vmin, &ivmax, &vmax, short_label);
+
+      if(npart5prop>0){
+        int label_index = 0;
+
+        trim_back(short_label);
+        s1 = trim_front(short_label);
+        if(strlen(s1)>0)label_index = get_partprop_index_s(s1);
+        if(label_index >= 0 && label_index<npart5prop){
+          partpropdata *propi;
+
+          propi = part5propinfo + label_index;
+          propi->setvalmin = ivmin;
+          propi->setvalmax = ivmax;
+          propi->valmin = vmin;
+          propi->valmax = vmax;
+          switch(ivmin){
+          case PERCENTILE_MIN:
+            propi->percentile_min = vmin;
+            break;
+          case GLOBAL_MIN:
+            propi->global_min = vmin;
+            break;
+          case SET_MIN:
+            propi->user_min = vmin;
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+          }
+          switch(ivmax){
+          case PERCENTILE_MAX:
+            propi->percentile_max = vmax;
+            break;
+          case GLOBAL_MAX:
+            propi->global_max = vmax;
+            break;
+          case SET_MAX:
+            propi->user_max = vmax;
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+          }
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "C_PARTICLES") == 1){
+      int icmin, icmax;
+      float cmin, cmax;
+      char short_label[256], *s1;
+
+      strcpy(short_label, "");
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f %s", &icmin, &cmin, &icmax, &cmax, short_label);
+
+      if(npart5prop>0){
+        int label_index = 0;
+
+        trim_back(short_label);
+        s1 = trim_front(short_label);
+        if(strlen(s1)>0)label_index = get_partprop_index_s(s1);
+        if(label_index >= 0 && label_index<npart5prop){
+          partpropdata *propi;
+
+          propi = part5propinfo + label_index;
+          propi->setchopmin = icmin;
+          propi->setchopmax = icmax;
+          propi->chopmin = cmin;
+          propi->chopmax = cmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "V_SLICE") == 1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+      char *level_val;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%i %f %i %f %s", &setvalmin, &valmin, &setvalmax, &valmax, buffer2);
+      {
+        char *colon;
+
+        colon = strstr(buffer, ":");
+        level_val = NULL;
+        if(colon != NULL){
+          level_val = colon + 1;
+          trim_back(level_val);
+          *colon = 0;
+          if(strlen(level_val)>1){
+            sscanf(level_val, "%f %f %i", &slice_line_contour_min, &slice_line_contour_max, &slice_line_contour_num);
+          }
+          {
+            level_val = NULL;
+          }
+        }
+      }
+      if(strcmp(buffer2, "") != 0){
+        trim_back(buffer2);
+        for(i = 0; i<nslice2; i++){
+          if(strcmp(slicebounds[i].datalabel, buffer2) != 0)continue;
+          slicebounds[i].setvalmin = setvalmin;
+          slicebounds[i].setvalmax = setvalmax;
+          slicebounds[i].valmin = valmin;
+          slicebounds[i].valmax = valmax;
+          if(level_val != NULL){
+            slicebounds[i].line_contour_min = slice_line_contour_min;
+            slicebounds[i].line_contour_max = slice_line_contour_max;
+            slicebounds[i].line_contour_num = slice_line_contour_num;
+          }
+          break;
+        }
+      }
+      else{
+        for(i = 0; i<nslice2; i++){
+          slicebounds[i].setvalmin = setvalmin;
+          slicebounds[i].setvalmax = setvalmax;
+          slicebounds[i].valmin = valmin;
+          slicebounds[i].valmax = valmax;
+          slicebounds[i].line_contour_min = slice_line_contour_min;
+          slicebounds[i].line_contour_max = slice_line_contour_max;
+          slicebounds[i].line_contour_num = slice_line_contour_num;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "C_SLICE") == 1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%i %f %i %f %s", &setvalmin, &valmin, &setvalmax, &valmax, buffer2);
+      if(strcmp(buffer, "") != 0){
+        for(i = 0; i<nslice2; i++){
+          if(strcmp(slicebounds[i].datalabel, buffer2) != 0)continue;
+          slicebounds[i].setchopmin = setvalmin;
+          slicebounds[i].setchopmax = setvalmax;
+          slicebounds[i].chopmin = valmin;
+          slicebounds[i].chopmax = valmax;
+          break;
+        }
+      }
+      else{
+        for(i = 0; i<nslice2; i++){
+          slicebounds[i].setchopmin = setvalmin;
+          slicebounds[i].setchopmax = setvalmax;
+          slicebounds[i].chopmin = valmin;
+          slicebounds[i].chopmax = valmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "V_ISO") == 1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%i %f %i %f %s", &setvalmin, &valmin, &setvalmax, &valmax, buffer2);
+      if(strcmp(buffer2, "") != 0){
+        for(i = 0; i<niso_bounds; i++){
+          if(strcmp(isobounds[i].datalabel, buffer2) != 0)continue;
+          isobounds[i].setvalmin = setvalmin;
+          isobounds[i].setvalmax = setvalmax;
+          isobounds[i].valmin = valmin;
+          isobounds[i].valmax = valmax;
+          break;
+        }
+      }
+      else{
+        for(i = 0; i<niso_bounds; i++){
+          isobounds[i].setvalmin = setvalmin;
+          isobounds[i].setvalmax = setvalmax;
+          isobounds[i].valmin = valmin;
+          isobounds[i].valmax = valmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "C_ISO") == 1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%i %f %i %f %s", &setvalmin, &valmin, &setvalmax, &valmax, buffer2);
+      if(strcmp(buffer, "") != 0){
+        for(i = 0; i<niso_bounds; i++){
+          if(strcmp(isobounds[i].datalabel, buffer2) != 0)continue;
+          isobounds[i].setchopmin = setvalmin;
+          isobounds[i].setchopmax = setvalmax;
+          isobounds[i].chopmin = valmin;
+          isobounds[i].chopmax = valmax;
+          break;
+        }
+      }
+      else{
+        for(i = 0; i<niso_bounds; i++){
+          isobounds[i].setchopmin = setvalmin;
+          isobounds[i].setchopmax = setvalmax;
+          isobounds[i].chopmin = valmin;
+          isobounds[i].chopmax = valmax;
+        }
+      }
+      continue;
+    }
+    if(match(buffer, "V_BOUNDARY") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f %s", &setpatchmin, &patchmin, &setpatchmax, &patchmax, buffer2);
+      if(strcmp(buffer2, "") != 0)local2globalpatchbounds(buffer2);
+      continue;
+    }
+    if(match(buffer, "C_BOUNDARY") == 1){
+      float valmin, valmax;
+      int setvalmin, setvalmax;
+      char *buffer2ptr;
+      int lenbuffer2;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%i %f %i %f %s", &setvalmin, &valmin, &setvalmax, &valmax, buffer2);
+      trim_back(buffer2);
+      buffer2ptr = trim_front(buffer2);
+      lenbuffer2 = strlen(buffer2ptr);
+      for(i = 0; i<npatchinfo; i++){
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(lenbuffer2 == 0 || strcmp(patchi->label.shortlabel, buffer2ptr) == 0){
+          patchi->chopmin = valmin;
+          patchi->chopmax = valmax;
+          patchi->setchopmin = setvalmin;
+          patchi->setchopmax = setvalmax;
+        }
+      }
+      updatepatchlistindex2(buffer2ptr);
+      continue;
+    }
+    if(match(buffer, "V_ZONE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f", &setzonemin, &zoneusermin, &setzonemax, &zoneusermax);
+      if(setzonemin == PERCENTILE_MIN)setzonemin = GLOBAL_MIN;
+      if(setzonemax == PERCENTILE_MIN)setzonemax = GLOBAL_MIN;
+      if(setzonemin == SET_MIN)zonemin = zoneusermin;
+      if(setzonemax == SET_MAX)zonemax = zoneusermax;
+      update_glui_zonebounds();
+      continue;
+    }
+    if(match(buffer, "V_TARGET") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f %s", &settargetmin, &targetmin, &settargetmax, &targetmax, buffer2);
+      continue;
+    }
+    if(match(buffer, "OUTLINEMODE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &highlight_flag, &outline_color_flag);
+      if(nmeshes<2){
+        ONEORZERO(highlight_flag);
+      }
+      continue;
+    }
+    if(match(buffer, "SLICEDATAOUT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &output_slicedata);
+      ONEORZERO(output_slicedata);
+      continue;
+    }
+    if(match(buffer, "PATCHDATAOUT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %f %f %f %f %f %f %f", &output_patchdata,
+        &patchout_tmin, &patchout_tmax,
+        &patchout_xmin, &patchout_xmax,
+        &patchout_ymin, &patchout_ymax,
+        &patchout_zmin, &patchout_zmax
+        );
+      ONEORZERO(output_patchdata);
+      continue;
+    }
+    if(match(buffer, "SMOKE3DZIPSTEP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &smoke3dzipstep);
+      if(smoke3dzipstep<1)smoke3dzipstep = 1;
+      smoke3dzipskip = smoke3dzipstep - 1;
+      continue;
+    }
+    if(match(buffer, "SLICEZIPSTEP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &slicezipstep);
+      if(slicezipstep<1)slicezipstep = 1;
+      slicezipskip = slicezipstep - 1;
+      continue;
+    }
+    if(match(buffer, "ISOZIPSTEP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &isozipstep);
+      if(isozipstep<1)isozipstep = 1;
+      isozipskip = isozipstep - 1;
+      continue;
+    }
+    if(match(buffer, "BOUNDZIPSTEP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &boundzipstep);
+      if(boundzipstep<1)boundzipstep = 1;
+      boundzipskip = boundzipstep - 1;
+      continue;
+    }
+    if(match(buffer, "MSCALE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", mscale, mscale + 1, mscale + 2);
+      continue;
+    }
+    if(match(buffer, "RENDERCLIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i",
+        &clip_rendered_scene, &render_clip_left, &render_clip_right, &render_clip_bottom, &render_clip_top);
+      continue;
+    }
+    if(match(buffer, "CLIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f", &nearclip, &farclip);
+      continue;
+    }
+    if(match(buffer, "SHOWTRACERSALWAYS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_tracers_always);
+      ONEORZERO(show_tracers_always);
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "PROPINDEX") == 1){
+      int nvals;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nvals);
+      for(i = 0; i<nvals; i++){
+        propdata *propi;
+        int ind, val;
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i", &ind, &val);
+        if(ind<0 || ind>npropinfo - 1)continue;
+        propi = propinfo + ind;
+        if(val<0 || val>propi->nsmokeview_ids - 1)continue;
+        propi->smokeview_id = propi->smokeview_ids[val];
+        propi->smv_object = propi->smv_objects[val];
+      }
+      for(i = 0; i<npartclassinfo; i++){
+        partclassdata *partclassi;
+
+        partclassi = partclassinfo + i;
+        update_partclass_depend(partclassi);
+
+      }
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "partclassdataVIS") == 1){
+      int ntemp;
+      int j;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &ntemp);
+
+      for(j = 0; j<ntemp; j++){
+        partclassdata *partclassj;
+
+        if(j>npartclassinfo)break;
+
+        partclassj = partclassinfo + j;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &partclassj->vis_type);
+      }
+      continue;
+    }
+    if(match(buffer, "PART5COLOR") == 1){
+      for(i = 0; i<npart5prop; i++){
+        partpropdata *propi;
+
+        propi = part5propinfo + i;
+        propi->display = 0;
+      }
+      part5colorindex = 0;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &i);
+      if(i >= 0 && i<npart5prop){
+        partpropdata *propi;
+
+        part5colorindex = i;
+        propi = part5propinfo + i;
+        propi->display = 1;
+      }
+      continue;
+    }
+    if(match(buffer, "PART5PROPDISP") == 1){
+      char *token;
+
+      for(i = 0; i<npart5prop; i++){
+        partpropdata *propi;
+        int j;
+
+        propi = part5propinfo + i;
+        fgets(buffer, 255, stream);
+
+        trim_back(buffer);
+        token = strtok(buffer, " ");
+        j = 0;
+        while(token != NULL&&j<npartclassinfo){
+          int visval;
+
+          sscanf(token, "%i", &visval);
+          propi->class_vis[j] = visval;
+          token = strtok(NULL, " ");
+          j++;
+        }
+      }
+      CheckMemory;
+      continue;
+    }
+    if(match(buffer, "COLORBAR") == 1){
+      float *rgb_ini_copy;
+      int nn;
+
+      CheckMemory;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", &nrgb_ini, &usetexturebar, &colorbar_select_index);
+      FREEMEMORY(rgb_ini);
+      if(NewMemory((void **)&rgb_ini, 4 * nrgb_ini*sizeof(float)) == 0)return 2;
+      rgb_ini_copy = rgb_ini;
+      for(nn = 0; nn<nrgb_ini; nn++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f ", rgb_ini_copy, rgb_ini_copy + 1, rgb_ini_copy + 2);
+        rgb_ini_copy += 3;
+      }
+      initrgb();
+      if(colorbar_select_index >= 0 && colorbar_select_index <= 255){
+        update_colorbar_select_index = 1;
+      }
+      continue;
+    }
+    if(match(buffer, "COLOR2BAR") == 1){
+      float *rgb_ini_copy;
+      int nn;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &nrgb2_ini);
+      if(nrgb2_ini<8){
+        fprintf(stderr, "*** Error: must have at lease 8 colors in COLOR2BAR\n");
+        exit(1);
+      }
+      FREEMEMORY(rgb2_ini);
+      if(NewMemory((void **)&rgb2_ini, 4 * nrgb_ini*sizeof(float)) == 0)return 2;
+      rgb_ini_copy = rgb2_ini;
+      for(nn = 0; nn<nrgb2_ini; nn++){
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f ", rgb_ini_copy, rgb_ini_copy + 1, rgb_ini_copy + 2);
+        rgb_ini_copy += 3;
+      }
+      continue;
+    }
+    if(match(buffer, "P3DSURFACETYPE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &p3dsurfacetype);
+      continue;
+    }
+    if(match(buffer, "P3DSURFACESMOOTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &p3dsurfacesmooth);
+      continue;
+    }
+    if(match(buffer, "CULLFACES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &cullfaces);
+      continue;
+    }
+    if(match(buffer, "PARTPOINTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &partpointsize);
+      continue;
+    }
+    if(match(buffer, "ISOPOINTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &isopointsize);
+      continue;
+    }
+    if(match(buffer, "ISOLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &isolinewidth);
+      continue;
+    }
+    if(match(buffer, "PLOT3DPOINTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &plot3dpointsize);
+      continue;
+    }
+    if(match(buffer, "GRIDLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &gridlinewidth);
+      continue;
+    }
+    if(match(buffer, "TICKLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &ticklinewidth);
+      continue;
+    }
+    if(match(buffer, "PLOT3DLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &plot3dlinewidth);
+      continue;
+    }
+    if(match(buffer, "VECTORPOINTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &vectorpointsize);
+      continue;
+    }
+    if(match(buffer, "VECTORLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f", &vectorlinewidth, &slice_line_contour_width);
+      continue;
+    }
+    if(match(buffer, "STREAKLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &streaklinewidth);
+      continue;
+    }
+    if(match(buffer, "LINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &linewidth);
+      solidlinewidth = linewidth;
+      continue;
+    }
+    if(match(buffer, "VENTLINEWIDTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &ventlinewidth);
+      continue;
+    }
+    if(match(buffer, "SLICEOFFSET") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &sliceoffset_factor);
+      continue;
+    }
+    if(match(buffer, "TITLESAFE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &titlesafe_offset);
+      continue;
+    }
+    if(match(buffer, "VENTOFFSET") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &ventoffset_factor);
+      continue;
+    }
+    if(match(buffer, "AXISSMOOTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &axislabels_smooth);
+      continue;
+    }
+    if(match(buffer, "SHOWBLOCKS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visBlocks);
+      continue;
+    }
+    if(match(buffer, "SHOWSENSORS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i ", &visSensor, &visSensorNorm);
+      ONEORZERO(visSensor);
+      ONEORZERO(visSensorNorm);
+      continue;
+    }
+    if(match(buffer, "AVATAREVAC") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &iavatar_evac);
+      continue;
+    }
+    if(match(buffer, "SHOWVENTFLOW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i", &visVentHFlow, &visventslab, &visventprofile, &visVentVFlow, &visVentMFlow);
+      continue;
+    }
+    if(match(buffer, "SHOWVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visVents);
+      continue;
+    }
+    if(match(buffer, "SHOWTIMELABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visTimelabel);
+      continue;
+    }
+    if(match(buffer, "SHOWHMSTIMELABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &vishmsTimelabel);
+      continue;
+    }
+    if(match(buffer, "SHOWFRAMELABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visFramelabel);
+      continue;
+    }
+    if(match(buffer, "SHOWHRRLABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visHRRlabel);
+      continue;
+    }
+    if(match(buffer, "RENDERFILETYPE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &renderfiletype, &moviefiletype);
+      continue;
+    }
+    if(match(buffer, "RENDERFILELABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &renderfilelabel);
+      ONEORZERO(renderfilelabel);
+      continue;
+    }
+    if(match(buffer, "CELLCENTERTEXT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &cell_center_text);
+      continue;
+    }
+    if(match(buffer, "SHOWGRIDLOC") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visgridloc);
+      continue;
+    }
+    if(match(buffer, "SHOWGRID") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visGrid);
+      continue;
+    }
+    if(match(buffer, "SHOWFLOOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visFloor);
+      continue;
+    }
+    if(match(buffer, "SPEED") == 1){
+      fgets(buffer, 255, stream);
+      //  sscanf(buffer,"%f %f",&speed_crawl,&speed_walk);
+      continue;
+    }
+    if(match(buffer, "FONTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &fontindex);
+      fontindex = CLAMP(fontindex, 0, SCALED_FONT);
+      FontMenu(fontindex);
+      continue;
+    }
+    if(match(buffer, "ZOOM") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f ", &zoomindex, &zoom);
+      if(zoomindex != -1){
+        if(zoomindex<0)zoomindex = 2;
+        if(zoomindex>4)zoomindex = 2;
+        zoom = zooms[zoomindex];
+      }
+      else{
+        if(zoom<zooms[0]){
+          zoom = zooms[0];
+          zoomindex = 0;
+        }
+        if(zoom>zooms[4]){
+          zoom = zooms[4];
+          zoomindex = 4;
+        }
+      }
+      zoomini = zoom;
+      updatezoomini = 1;
+      ZoomMenu(zoomindex);
+      continue;
+    }
+    if(match(buffer, "APERATURE") == 1 || match(buffer, "APERTURE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &apertureindex);
+      apertureindex = CLAMP(apertureindex, 0, 4);
+      ApertureMenu(apertureindex);
+      continue;
+    }
+    if(match(buffer, "SHOWWALLS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visWalls);
+      continue;
+    }
+    if(match(buffer, "SHOWCEILING") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visCeiling);
+      continue;
+    }
+    if(match(buffer, "SHOWTITLE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visTitle);
+      continue;
+    }
+    if(match(buffer, "SHOWTRANSPARENT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &visTransparentBlockage);
+      continue;
+    }
+    if(match(buffer, "SHOWCADOPAQUE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &viscadopaque);
+      continue;
+    }
+    if(match(buffer, "VECTORPOINTSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &vectorpointsize);
+      continue;
+    }
+    if(match(buffer, "VECTORSKIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &vectorskip);
+      if(vectorskip<1)vectorskip = 1;
+      continue;
+    }
+    if(match(buffer, "SPRINKLERABSSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &sprinklerabssize);
+      continue;
+    }
+    if(match(buffer, "SENSORABSSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &sensorabssize);
+      continue;
+    }
+    if(match(buffer, "SENSORRELSIZE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f ", &sensorrelsize);
+      if(sensorrelsize<sensorrelsizeMIN)sensorrelsize = sensorrelsizeMIN;
+      continue;
+    }
+    if(match(buffer, "SETBW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &setbw, &setbwdata);
+      continue;
+    }
+    if(match(buffer, "FLIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &background_flip);
+      continue;
+    }
+    if(match(buffer, "COLORBAR_FLIP") == 1 || match(buffer, "COLORBARFLIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &colorbarflip);
+      continue;
+    }
+    if(match(buffer, "TRANSPARENT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f", &use_transparency_data, &transparent_level);
+      continue;
+    }
+    if(match(buffer, "VENTCOLOR") == 1){
+      float ventcolor_temp[4];
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", ventcolor_temp, ventcolor_temp + 1, ventcolor_temp + 2);
+      ventcolor_temp[3] = 1.0;
+      ventcolor = getcolorptr(ventcolor_temp);
+      updatefaces = 1;
+      updateindexcolors = 1;
+      continue;
+    }
+    if(match(buffer, "STATICPARTCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", static_color, static_color + 1, static_color + 2);
+      continue;
+    }
+    if(match(buffer, "HEATOFFCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", heatoffcolor, heatoffcolor + 1, heatoffcolor + 2);
+      continue;
+    }
+    if(match(buffer, "HEATONCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", heatoncolor, heatoncolor + 1, heatoncolor + 2);
+      continue;
+    }
+    if(match(buffer, "SENSORCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", sensorcolor, sensorcolor + 1, sensorcolor + 2);
+      continue;
+    }
+    if(match(buffer, "SENSORNORMCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", sensornormcolor, sensornormcolor + 1, sensornormcolor + 2);
+      continue;
+    }
+    if(match(buffer, "SPRINKONCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", sprinkoncolor, sprinkoncolor + 1, sprinkoncolor + 2);
+      continue;
+    }
+    if(match(buffer, "SPRINKOFFCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", sprinkoffcolor, sprinkoffcolor + 1, sprinkoffcolor + 2);
+      continue;
+    }
+    if(match(buffer, "BACKGROUNDCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", backgroundbasecolor, backgroundbasecolor + 1, backgroundbasecolor + 2);
+      continue;
+    }
+    if(match(buffer, "FOREGROUNDCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", foregroundbasecolor, foregroundbasecolor + 1, foregroundbasecolor + 2);
+      continue;
+    }
+    if(match(buffer, "BLOCKCOLOR") == 1){
+      float blockcolor_temp[4];
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", blockcolor_temp, blockcolor_temp + 1, blockcolor_temp + 2);
+      blockcolor_temp[3] = 1.0;
+      block_ambient2 = getcolorptr(blockcolor_temp);
+      updatefaces = 1;
+      updateindexcolors = 1;
+      continue;
+    }
+    if(match(buffer, "BLOCKLOCATION") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &blocklocation);
+      continue;
+    }
+    if(match(buffer, "BLOCKSHININESS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f", &block_shininess);
+      updatefaces = 1;
+      updateindexcolors = 1;
+      continue;
+    }
+    if(match(buffer, "BLOCKSPECULAR") == 1){
+      float blockspec_temp[4];
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", blockspec_temp, blockspec_temp + 1, blockspec_temp + 2);
+      blockspec_temp[3] = 1.0;
+      block_specular2 = getcolorptr(blockspec_temp);
+      updatefaces = 1;
+      updateindexcolors = 1;
+      continue;
+    }
+    if(match(buffer, "SHOWOPENVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &visOpenVents, &visOpenVentsAsOutline);
+      continue;
+    }
+    if(match(buffer, "SHOWDUMMYVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visDummyVents);
+      continue;
+    }
+    if(match(buffer, "SHOWOTHERVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visOtherVents);
+      ONEORZERO(visOtherVents);
+      continue;
+    }
+    if(match(buffer, "SHOWCVENTS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &visCircularVents, &circle_outline);
+      visCircularVents = CLAMP(visCircularVents, 0, 2);
+      circle_outline = CLAMP(circle_outline, 0, 1);
+      continue;
+    }
+    if(match(buffer, "SHOWTICKS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visFDSticks);
+      continue;
+    }
+    if(match(buffer, "USERTICKS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i %i", &visUSERticks, &auto_user_tick_placement, &user_tick_sub,
+        &user_tick_show_x, &user_tick_show_y, &user_tick_show_z);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", user_tick_origin, user_tick_origin + 1, user_tick_origin + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", user_tick_min, user_tick_min + 1, user_tick_min + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", user_tick_max, user_tick_max + 1, user_tick_max + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", user_tick_step, user_tick_step + 1, user_tick_step + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", &user_tick_show_x, &user_tick_show_y, &user_tick_show_z);
+      continue;
+    }
+    if(match(buffer, "SHOWLABELS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visLabels);
+      continue;
+    }
+    if(match(buffer, "BOUNDCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", boundcolor, boundcolor + 1, boundcolor + 2);
+      continue;
+    }
+    if(match(buffer, "TIMEBARCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", timebarcolor, timebarcolor + 1, timebarcolor + 2);
+      continue;
+    }
+    if(match(buffer, "CONTOURTYPE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &contour_type);
+      contour_type = CLAMP(contour_type, 0, 2);
+      continue;
+    }
+    if(match(buffer, "P3CONT3DSMOOTH") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &p3cont3dsmooth);
+      continue;
+    }
+    if(match(buffer, "SURFINC") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &surfincrement);
+      continue;
+    }
+    if(match(buffer, "FRAMERATE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visFramerate);
+      continue;
+    }
+    if(match(buffer, "SHOWFRAMERATE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visFramerate);
+      continue;
+    }
+    if(match(buffer, "SHOWFRAME") == 1 && match(buffer, "SHOWFRAMERATE") != 1 && match(buffer, "SHOWFRAMELABEL") != 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visFrame);
+      ONEORZERO(visFrame);
+      continue;
+    }
+    if(match(buffer, "FRAMERATEVALUE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &frameratevalue);
+      FrameRateMenu(frameratevalue);
+      continue;
+    }
+    if(match(buffer, "SHOWSPRINKPART") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visSprinkPart);
+      continue;
+    }
+    if(match(buffer, "SHOWAXISLABELS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visaxislabels);
+      continue;
+    }
+#ifdef pp_memstatus
+    if(match(buffer, "SHOWMEMLOAD") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visAvailmemory);
+      continue;
+    }
+#endif
+    if(match(buffer, "SHOWBLOCKLABEL") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visMeshlabel);
+      continue;
+    }
+    if(match(buffer, "SHOWVZONE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visVZone);
+      continue;
+    }
+    if(match(buffer, "SHOWZONEFIRE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i ", &viszonefire);
+      if(viszonefire != 0)viszonefire = 1;
+      continue;
+    }
+    if(match(buffer, "SHOWSZONE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visSZone);
+      continue;
+    }
+    if(match(buffer, "SHOWHZONE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visHZone);
+      continue;
+    }
+    if(match(buffer, "SHOWHAZARDCOLORS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &zonecolortype);
+      zonecolortype = CLAMP(zonecolortype, 0, 2);
+      continue;
+    }
+    if(match(buffer, "SHOWSMOKEPART") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visSmokePart);
+      continue;
+    }
+    if(match(buffer, "RENDEROPTION") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i", &render_option, &nrender_rows);
+      RenderMenu(render_option);
+      continue;
+    }
+    if(match(buffer, "SHOWISONORMALS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &show_iso_normal);
+      if(show_iso_normal != 1)show_iso_normal = 0;
+      continue;
+    }
+    if(match(buffer, "SHOWISO") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visAIso);
+      visAIso &= 7;
+      show_iso_solid = (visAIso & 1) / 1;
+      show_iso_outline = (visAIso & 2) / 2;
+      show_iso_points = (visAIso & 4) / 4;
+      continue;
+    }
+    if(trainer_mode == 0 && windowresized == 0){
+      if(match(buffer, "WINDOWWIDTH") == 1){
+        int scrWidth;
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &scrWidth);
+        if(scrWidth <= 0){
+          scrWidth = glutGet(GLUT_SCREEN_WIDTH);
+        }
+        if(scrWidth != screenWidth){
+          setScreenSize(&scrWidth, NULL);
+          screenWidthINI = scrWidth;
+          update_screensize = 1;
+        }
+        continue;
+      }
+      if(match(buffer, "WINDOWHEIGHT") == 1){
+        int scrHeight;
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i", &scrHeight);
+        if(scrHeight <= 0){
+          scrHeight = glutGet(GLUT_SCREEN_HEIGHT);
+        }
+        if(scrHeight != screenHeight){
+          setScreenSize(NULL, &scrHeight);
+          screenHeightINI = scrHeight;
+          update_screensize = 1;
+        }
+        continue;
+      }
+    }
+    if(match(buffer, "SHOWTIMEBAR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visTimebar);
+      continue;
+    }
+    if(match(buffer, "SHOWCOLORBARS") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &visColorbar);
+      continue;
+    }
+    if(match(buffer, "EYEVIEW") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &rotation_type);
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "SCRIPTFILE") == 1){
+      if(fgets(buffer2, 255, stream) == NULL)break;
+      insert_scriptfile(remove_comment(buffer2));
+      updatemenu = 1;
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "SHOWDEVICES") == 1){
+      sv_object *obj_typei;
+      char *dev_label;
+      int ndevices_ini;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &ndevices_ini);
+
+      for(i = 0; i<nobject_defs; i++){
+        obj_typei = object_defs[i];
+        obj_typei->visible = 0;
+      }
+      for(i = 0; i<ndevices_ini; i++){
+        fgets(buffer, 255, stream);
+        trim_back(buffer);
+        dev_label = trim_front(buffer);
+        obj_typei = get_object(dev_label);
+        if(obj_typei != NULL){
+          obj_typei->visible = 1;
+        }
+      }
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "XYZCLIP") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &clip_mode);
+      clip_mode = CLAMP(clip_mode, 0, 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f", &clipinfo.clip_xmin, &clipinfo.xmin, &clipinfo.clip_xmax, &clipinfo.xmax);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f", &clipinfo.clip_ymin, &clipinfo.ymin, &clipinfo.clip_ymax, &clipinfo.ymax);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %f %i %f", &clipinfo.clip_zmin, &clipinfo.zmin, &clipinfo.clip_zmax, &clipinfo.zmax);
+      updateclipvals = 1;
+      continue;
+    }
+    if(match(buffer, "NOPART") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nopart);
+      continue;
+    }
+    if(match(buffer, "WINDOWOFFSET") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &titlesafe_offsetBASE);
+      continue;
+    }
+    if(match(buffer, "LIGHT0") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%d", &light_enabled0);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LIGHT1") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%d", &light_enabled1);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LIGHTPOS0") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", light_position0, light_position0 + 1, light_position0 + 2, light_position0 + 3);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LIGHTPOS1") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", light_position1, light_position1 + 1, light_position1 + 2, light_position1 + 3);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LIGHTMODELLOCALVIEWER") == 1){
+      int temp;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%d", &temp);
+      lightmodel_localviewer = temp == 0 ? GL_FALSE : GL_TRUE;
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LIGHTMODELSEPARATESPECULARCOLOR") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%d", &lightmodel_separatespecularcolor);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "AMBIENTLIGHT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", ambientlight, ambientlight + 1, ambientlight + 2);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "DIFFUSELIGHT") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", diffuselight, diffuselight + 1, diffuselight + 2);
+      UpdateLIGHTS = 1;
+      continue;
+    }
+    if(match(buffer, "LABELSTARTUPVIEW") == 1){
+      char *front;
+
+      fgets(buffer, 255, stream);
+      front = trim_front(buffer);
+      trim_back(front);
+      strcpy(label_startup_view, front);
+      update_startup_view = 1;
+      continue;
+    }
+    if(match(buffer, "USER_ROTATE") == 1){
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%i %i %f %f %f", &glui_rotation_index_ini, &show_rotation_center, &xcenCUSTOM, &ycenCUSTOM, &zcenCUSTOM);
+      update_rotation_center_ini = 1;
+      continue;
+    }
+    if(match(buffer, "INPUT_FILE") == 1){
+      size_t len;
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      len = strlen(buffer);
+      buffer[len - 1] = '\0';
+      trim_back(buffer);
+      len = strlen(buffer);
+
+      FREEMEMORY(INI_fds_filein);
+      if(NewMemory((void **)&INI_fds_filein, (unsigned int)(len + 1)) == 0)return 2;
+      STRCPY(INI_fds_filein, buffer);
+      continue;
+    }
+    if(match(buffer, "VIEWPOINT3") == 1
+      || match(buffer, "VIEWPOINT4") == 1
+      || match(buffer, "VIEWPOINT5") == 1
+      || match(buffer, "VIEWPOINT6") == 1
+      ){
+      int p_type;
+      float *eye, mat[16], *az_elev;
+      int is_viewpoint4 = 0;
+      int is_viewpoint5 = 0;
+      int is_viewpoint6 = 0;
+      float xyzmaxdiff_local = -1.0;
+      float xmin_local = 0.0, ymin_local = 0.0, zmin_local = 0.0;
+
+      if(match(buffer, "VIEWPOINT4") == 1)is_viewpoint4 = 1;
+      if(match(buffer, "VIEWPOINT5") == 1){
+        is_viewpoint4 = 1;
+        is_viewpoint5 = 1;
+      }
+      if(match(buffer, "VIEWPOINT6") == 1){
+        is_viewpoint4 = 1;
+        is_viewpoint5 = 1;
+        is_viewpoint6 = 1;
+      }
+      eye = camera_ini->eye;
+      az_elev = camera_ini->az_elev;
+
+      {
+        char name_ini[32];
+        strcpy(name_ini, "ini");
+        init_camera(camera_ini, name_ini);
+      }
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %f %f %f %f",
+        &camera_ini->rotation_type, &camera_ini->rotation_index, &camera_ini->view_id,
+        &xyzmaxdiff_local, &xmin_local, &ymin_local, &zmin_local);
+
+      {
+        float zoom_in;
+        int zoomindex_in;
+
+        zoom_in = zoom;
+        zoomindex_in = zoomindex;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f %i", eye, eye + 1, eye + 2, &zoom_in, &zoomindex_in);
+        if(xyzmaxdiff_local>0.0){
+          eye[0] = xmin_local + eye[0] * xyzmaxdiff_local;
+          eye[1] = ymin_local + eye[1] * xyzmaxdiff_local;
+          eye[2] = zmin_local + eye[2] * xyzmaxdiff_local;
+        }
+        zoom = zoom_in;
+        zoomindex = zoomindex_in;
+        if(zoomindex != -1){
+          if(zoomindex<0)zoomindex = 2;
+          if(zoomindex>4)zoomindex = 2;
+          zoom = zooms[zoomindex];
+        }
+        else{
+          if(zoom<zooms[0]){
+            zoom = zooms[0];
+            zoomindex = 0;
+          }
+          if(zoom>zooms[4]){
+            zoom = zooms[4];
+            zoomindex = 4;
+          }
+        }
+        updatezoommenu = 1;
+      }
+
+      p_type = 0;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %i", &camera_ini->view_angle, &camera_ini->azimuth, &camera_ini->elevation, &p_type);
+      if(p_type != 1)p_type = 0;
+      camera_ini->projection_type = p_type;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", &camera_ini->xcen, &camera_ini->ycen, &camera_ini->zcen);
+      if(xyzmaxdiff_local>0.0){
+        camera_ini->xcen = xmin_local + camera_ini->xcen*xyzmaxdiff_local;
+        camera_ini->ycen = ymin_local + camera_ini->ycen*xyzmaxdiff_local;
+        camera_ini->zcen = zmin_local + camera_ini->zcen*xyzmaxdiff_local;
+      }
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f", az_elev, az_elev + 1);
+
+      if(is_viewpoint6 == 1){
+        float *q;
+
+        for(i = 0; i<16; i++){
+          mat[i] = 0.0;
+          if(i % 5 == 0)mat[i] = 1.0;
+        }
+        q = camera_ini->quaternion;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %f %f %f %f", &camera_ini->quat_defined, q, q + 1, q + 2, q + 3);
+      }
+      else{
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f", mat, mat + 1, mat + 2, mat + 3);
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f", mat + 4, mat + 5, mat + 6, mat + 7);
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f", mat + 8, mat + 9, mat + 10, mat + 11);
+
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f", mat + 12, mat + 13, mat + 14, mat + 15);
+      }
+      if(is_viewpoint5 == 1){
+        cameradata *ci;
+
+        ci = camera_ini;
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%i %i %i %i %i %i %i",
+          &ci->clip_mode,
+          &ci->clip_xmin, &ci->clip_ymin, &ci->clip_zmin,
+          &ci->clip_xmax, &ci->clip_ymax, &ci->clip_zmax);
+        fgets(buffer, 255, stream);
+        sscanf(buffer, "%f %f %f %f %f %f",
+          &ci->xmin, &ci->ymin, &ci->zmin,
+          &ci->xmax, &ci->ymax, &ci->zmax);
+        if(xyzmaxdiff_local>0.0){
+          ci->xmin = xmin_local + ci->xmin*xyzmaxdiff_local;
+          ci->xmax = xmin_local + ci->xmax*xyzmaxdiff_local;
+          ci->ymin = ymin_local + ci->ymin*xyzmaxdiff_local;
+          ci->zmax = ymin_local + ci->ymax*xyzmaxdiff_local;
+          ci->ymin = zmin_local + ci->zmin*xyzmaxdiff_local;
+          ci->zmax = zmin_local + ci->zmax*xyzmaxdiff_local;
+        }
+      }
+      if(is_viewpoint4 == 1){
+        char *bufferptr;
+
+        fgets(buffer, 255, stream);
+        trim_back(buffer);
+        bufferptr = trim_front(buffer);
+        strcpy(camera_ini->name, bufferptr);
+        init_camera_list();
+        insert_camera(&camera_list_first, camera_ini, bufferptr);
+      }
+
+      enable_reset_saved_view();
+      camera_ini->dirty = 1;
+      camera_ini->defined = 1;
+      continue;
+    }
+    if(match(buffer, "COLORTABLE") == 1){
+      int nctableinfo;
+      colortabledata *ctableinfo = NULL;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nctableinfo);
+      nctableinfo = MAX(nctableinfo, 0);
+      if(nctableinfo>0){
+        NewMemory((void **)&ctableinfo, nctableinfo*sizeof(colortabledata));
+        for(i = 0; i<nctableinfo; i++){
+          colortabledata *rgbi;
+          char *labelptr, *percenptr, label[256];
+          int  colori[4];
+
+
+          rgbi = ctableinfo + i;
+          fgets(buffer, 255, stream);
+          percenptr = strchr(buffer, '%');
+          if(percenptr != NULL){
+            labelptr = trim_front(percenptr + 1);
+            trim_back(labelptr);
+            strcpy(rgbi->label, labelptr);
+            percenptr[0] = 0;
+          }
+          else{
+            sprintf(label, "Color %i", i + 1);
+            strcpy(rgbi->label, label);
+          }
+          colori[3] = 255;
+          sscanf(buffer, "%i %i %i %i", colori, colori + 1, colori + 2, colori + 3);
+          rgbi->color[0] = CLAMP(colori[0], 0, 255);
+          rgbi->color[1] = CLAMP(colori[1], 0, 255);
+          rgbi->color[2] = CLAMP(colori[2], 0, 255);
+          rgbi->color[3] = CLAMP(colori[3], 0, 255);
+        }
+        UpdateColorTable(ctableinfo, nctableinfo);
+        FREEMEMORY(ctableinfo);
+      }
+      continue;
+    }
+
+    if(match(buffer, "ISOCOLORS") == 1){
+      int nn, n_iso_c = 0;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f", &iso_shininess, &iso_transparency);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f", iso_specular, iso_specular + 1, iso_specular + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &n_iso_c);
+      for(nn = 0; nn<MAX_ISO_COLORS; nn++){
+        float *iso_color;
+
+        iso_color = iso_colors + 4 * nn;
+        if(nn < n_iso_c){
+          fgets(buffer, 255, stream);
+          sscanf(buffer, "%f %f %f %f", iso_color, iso_color + 1, iso_color + 2, iso_color + 3);
+        }
+        iso_color[0] = CLAMP(iso_color[0], 0.0, 1.0);
+        iso_color[1] = CLAMP(iso_color[1], 0.0, 1.0);
+        iso_color[2] = CLAMP(iso_color[2], 0.0, 1.0);
+        iso_color[3] = CLAMP(iso_color[3], 0.0, 1.0);
+      }
+      update_isocolors();
+      update_iso_colorlevel();
+      continue;
+    }
+    if(match(buffer, "UNITCLASSES") == 1){
+      int nuc;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &nuc);
+      for(i = 0; i<nuc; i++){
+        int unit_index;
+
+        fgets(buffer, 255, stream);
+        if(i>nunitclasses - 1)continue;
+        sscanf(buffer, "%i", &unit_index);
+        unitclasses[i].unit_index = unit_index;
+      }
+      continue;
+    }
+    if(match(buffer, "SMOOTHLINES") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i", &antialiasflag);
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "VIEWTIMES") == 1){
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f %i", &view_tstart, &view_tstop, &view_ntimes);
+      if(view_ntimes<2)view_ntimes = 2;
+      ReallocTourMemory();
+      continue;
+    }
+    if(localfile == 1 && match(buffer, "SHOOTER") == 1){
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f %f", shooter_xyz, shooter_xyz + 1, shooter_xyz + 2);
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f %f", shooter_dxyz, shooter_dxyz + 1, shooter_dxyz + 2);
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f %f", shooter_uvw, shooter_uvw + 1, shooter_uvw + 2);
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f %f", &shooter_velmag, &shooter_veldir, &shooterpointsize);
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%i %i %i %i %i", &shooter_fps, &shooter_vel_type, &shooter_nparts, &visShooter, &shooter_cont_update);
+
+      if(fgets(buffer, 255, stream) == NULL)break;
+      sscanf(buffer, "%f %f", &shooter_duration, &shooter_v_inf);
+      continue;
+    }
+    {
+      int nkeyframes;
+      float key_time, key_xyz[3], key_az_path, key_view[3], params[3], zzoom, key_elev_path;
+      float t_globaltension, key_bank;
+      int t_globaltension_flag;
+      int viewtype, uselocalspeed;
+      float *col;
+
+      if(match(buffer, "ADJUSTALPHA") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &adjustalphaflag);
+        continue;
+      }
+      if(match(buffer, "SMOKECULL") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
 #ifdef pp_CULL
-  meshi->cullinfo=NULL;
-  meshi->culldefined=0;
-  meshi->cullQueryId=NULL;
-  meshi->cull_smoke3d=NULL;
-  meshi->smokedir_old=-100;
+        if(gpuactive == 1){
+          sscanf(buffer, "%i", &cullsmoke);
+          if(cullsmoke != 0)cullsmoke = 1;
+        }
+        else{
+          cullsmoke = 0;
+        }
+#else
+        sscanf(buffer, "%i", &smokecullflag);
 #endif
-  meshi->cullgeominfo=NULL;
-  meshi->is_bottom=1;
-  meshi->blockvis=1;
-  meshi->zcell=NULL;
-  meshi->terrain=NULL;
-  meshi->meshrgb[0]=0.0;
-  meshi->meshrgb[1]=0.0;
-  meshi->meshrgb[2]=0.0;
-  meshi->meshrgb_ptr=NULL;
-  meshi->cellsize=0.0;
-  meshi->smokedir=1;
-  meshi->merge_alpha=NULL;
-  meshi->merge_color=NULL;
-  meshi->dx=1.0;
-  meshi->dy=1.0;
-  meshi->dz=1.0;
-  meshi->dxy=1.0;
-  meshi->dxz=1.0;
-  meshi->dyz=1.0;
-  meshi->label=NULL;
-  meshi->mxpatch_frames=0;
-  meshi->slicedir=YDIR;
-  meshi->visInteriorPatches=0;
-  meshi->plot3dfilenum=-1;
-  meshi->patchfilenum=-1;
-  meshi->obst_bysize=NULL;
-  meshi->iqdata=NULL;
-  meshi->qdata=NULL;
-  meshi->yzcolorbase=NULL;
-  meshi->xzcolorbase=NULL;
-  meshi->xycolorbase=NULL;
-  meshi->yzcolorfbase=NULL;
-  meshi->xzcolorfbase=NULL;
-  meshi->xycolorfbase=NULL;
-  meshi->yzcolortbase=NULL;
-  meshi->xzcolortbase=NULL;
-  meshi->xycolortbase=NULL;
-  meshi->dx_xy=NULL;
-  meshi->dy_xy=NULL;
-  meshi->dz_xy=NULL;
-  meshi->dx_xz=NULL;
-  meshi->dy_xz=NULL;
-  meshi->dz_xz=NULL;
-  meshi->dx_yz=NULL;
-  meshi->dy_yz=NULL;
-  meshi->dz_yz=NULL;
-  meshi->c_iblank_xy=NULL;
-  meshi->c_iblank_xz=NULL;
-  meshi->c_iblank_yz=NULL;
-  meshi->iblank_smoke3d=NULL;
-  meshi->iblank_smoke3d_defined = 0;
-  meshi->animatedsurfaces=NULL;
-  meshi->blockagesurface=NULL;
-  meshi->blockagesurfaces=NULL;
-  meshi->showlevels=NULL;
-  meshi->isolevels=NULL;
-  meshi->nisolevels=0;
-  meshi->iso_times=NULL;
-  meshi->iso_timeslist=NULL;
-  meshi->isofilenum=-1;
-  meshi->nvents=0;
-  meshi->ndummyvents=0;
-  meshi->ncvents=0;
-  meshi->npatches=0;
-  meshi->patchtype=NULL;
-  meshi->offset[XXX]=0.0;
-  meshi->offset[YYY]=0.0;
-  meshi->offset[ZZZ]=0.0;
-  meshi->patchtype=NULL;
-  meshi->patchdir=NULL;
-  meshi->patch_surfindex=NULL;
-  meshi->pi1=NULL;
-  meshi->pi2=NULL;
-  meshi->pj1=NULL;
-  meshi->pj2=NULL;
-  meshi->pk1=NULL;
-  meshi->pk2=NULL;
-  meshi->meshonpatch=NULL;
-  meshi->blockonpatch=NULL;
-  meshi->ptype=NULL;
-  meshi->patchrow=NULL, meshi->patchcol=NULL, meshi->blockstart=NULL;
-  meshi->zipoffset=NULL, meshi->zipsize=NULL;
-  meshi->visPatches=NULL;
-  meshi->xyzpatch=NULL;
-  meshi->xyzpatch_threshold=NULL;
-  meshi->patchventcolors=NULL;
-  meshi->cpatchval=NULL;
-  meshi->cpatchval_iframe=NULL;
-  meshi->cpatchval_iframe_zlib=NULL;
-  meshi->cpatchval_zlib=NULL;
-  meshi->patch_times=NULL;
-  meshi->patchval=NULL;
-  meshi->patchval_iframe=NULL;
-  meshi->thresholdtime=NULL;
-  meshi->patchblank=NULL;
-  meshi->patch_contours=NULL;
-  meshi->patch_timeslist=NULL;
-  meshi->ntc=0;
-  meshi->nspr=0;
-  meshi->xsprplot=NULL;
-  meshi->ysprplot=NULL;
-  meshi->zsprplot=NULL;
-  meshi->xspr=NULL;
-  meshi->yspr=NULL;
-  meshi->zspr=NULL;
-  meshi->tspr=NULL;
-  meshi->nheat=0;
-  meshi->xheatplot=NULL;
-  meshi->yheatplot=NULL;
-  meshi->zheatplot=NULL;
-  meshi->xheat=NULL;
-  meshi->yheat=NULL;
-  meshi->zheat=NULL;
-  meshi->theat=NULL;
-  meshi->blockageinfoptrs=NULL;
+        continue;
+      }
+      if(match(buffer, "SMOKESKIP") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &smokeskipm1);
+        continue;
+      }
+      if(match(buffer, "SMOKEALBEDO") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f", &smoke_albedo);
+        smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
+        continue;
+      }
+      if(match(buffer, "SMOKETHICK") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &smoke3d_thick);
+        continue;
+      }
+#ifdef pp_GPU
+      if(match(buffer, "SMOKERTHICK") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f", &smoke3d_rthick);
+        smoke3d_rthick = CLAMP(smoke3d_rthick, 1.0, 255.0);
+        smoke3d_thick = log_base2(smoke3d_rthick);
+        continue;
+      }
+#endif
+      if(match(buffer, "FIRECOLOR") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i %i %i", &fire_red, &fire_green, &fire_blue);
+        continue;
+      }
+      if(match(buffer, "SMOKECOLOR") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i %i %i", &smoke_red, &smoke_green, &smoke_blue);
+        continue;
+      }
+      if(match(buffer, "FIREDEPTH") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f", &fire_halfdepth);
+        continue;
+      }
+      if(match(buffer, "VIEWTOURFROMPATH") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &viewtourfrompath);
+        continue;
+      }
+      if(match(buffer, "VIEWALLTOURS") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &viewalltours);
+        continue;
+      }
+      if(match(buffer, "SHOWTOURROUTE") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &edittour);
+        continue;
+      }
+      if(match(buffer, "TIMEOFFSET") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f", &timeoffset);
+        continue;
+      }
+      if(match(buffer, "SHOWPATHNODES") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &show_path_knots);
+        continue;
+      }
+      if(match(buffer, "SHOWIGNITION") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i %i", &vis_threshold, &vis_onlythreshold);
+        continue;
+      }
+      if(match(buffer, "SHOWTHRESHOLD") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i %i %f", &vis_threshold, &vis_onlythreshold, &temp_threshold);
+        continue;
+      }
+      if(match(buffer, "TOURCONSTANTVEL") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%i", &tour_constant_vel);
+        continue;
+      }
+      if(match(buffer, "TOUR_AVATAR") == 1){
+        if(fgets(buffer, 255, stream) == NULL)break;
+        //        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
+        //        if(tourlocus_type!=0)tourlocus_type=1;
+        continue;
+      }
 
-  meshi->surface_tempmax=SURFACE_TEMPMAX;
-  meshi->surface_tempmin=SURFACE_TEMPMIN;
+      /*
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      ++++++++++++++++++++++ GENCOLORBAR ++++++++++++++++++++++++++
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      */
 
-  meshi->faceinfo=NULL;
-  meshi->face_normals_single=NULL;
-  meshi->face_normals_double=NULL;
-  meshi->face_transparent_double=NULL;
-  meshi->face_textures=NULL;
-  meshi->face_outlines=NULL;
+      if(match(buffer, "GCOLORBAR") == 1){
+        colorbardata *cbi;
+        int r1, g1, b1;
+        int n;
+        int ncolorbarini;
 
-  meshi->xplt=NULL;
-  meshi->yplt=NULL;
-  meshi->zplt=NULL;
-  meshi->xvolplt=NULL;
-  meshi->yvolplt=NULL;
-  meshi->zvolplt=NULL;
-  meshi->xplt_cen=NULL;
-  meshi->yplt_cen=NULL;
-  meshi->zplt_cen=NULL;
-  meshi->xplt_orig=NULL;
-  meshi->yplt_orig=NULL;
-  meshi->zplt_orig=NULL;
+        fgets(buffer, 255, stream);
+        ncolorbarini = 0;
+        sscanf(buffer, "%i", &ncolorbarini);
 
-  meshi->f_iblank_cell=NULL;
-  meshi->c_iblank_cell=NULL;
-  meshi->c_iblank_x=NULL;
-  meshi->c_iblank_y=NULL;
-  meshi->c_iblank_z=NULL;
-  meshi->c_iblank_node = NULL;
-  meshi->c_iblank_embed=NULL;
-  meshi->block_zdist=NULL;
+        initdefaultcolorbars();
 
-  meshi->f_iblank_cell0 = NULL;
-  meshi->c_iblank_cell0 = NULL;
-  meshi->c_iblank_x0 = NULL;
-  meshi->c_iblank_y0 = NULL;
-  meshi->c_iblank_z0 = NULL;
-  meshi->c_iblank_node0 = NULL;
-  meshi->c_iblank_embed0=NULL;
-  meshi->block_zdist0=NULL;
+        ncolorbars = ndefaultcolorbars + ncolorbarini;
+        if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
 
-  meshi->xyz_bar[XXX]=1.0;
-  meshi->xyz_bar0[XXX]=0.0;
-  meshi->xyz_bar[YYY]=1.0;
-  meshi->xyz_bar0[YYY]=0.0;
-  meshi->xyz_bar[ZZZ]=1.0;
-  meshi->xyz_bar0[ZZZ]=0.0;
+        for(n = ndefaultcolorbars; n<ncolorbars; n++){
+          char *cb_buffptr;
 
-  meshi->xyzmaxdiff=1.0;
+          cbi = colorbarinfo + n;
+          fgets(buffer, 255, stream);
+          trim_back(buffer);
+          cb_buffptr = trim_front(buffer);
+          strcpy(cbi->label, cb_buffptr);
 
-  meshi->xcen=0.5;
-  meshi->ycen=0.5;
-  meshi->zcen=0.5;
+          fgets(buffer, 255, stream);
+          sscanf(buffer, "%i %i", &cbi->nnodes, &cbi->nodehilight);
+          if(cbi->nnodes<0)cbi->nnodes = 0;
+          if(cbi->nodehilight<0 || cbi->nodehilight >= cbi->nnodes){
+            cbi->nodehilight = 0;
+          }
 
-  meshi->plotx=1;
-  meshi->ploty=1;
-  meshi->plotz=1;
+          cbi->label_ptr = cbi->label;
+          for(i = 0; i<cbi->nnodes; i++){
+            int icbar;
+            int nn;
 
-  meshi->boxoffset=0.0;
-  meshi->ventinfo=NULL;
-  meshi->cventinfo=NULL;
-  meshi->select_min=0;
-  meshi->select_max=0;
-}
+            fgets(buffer, 255, stream);
+            r1 = -1; g1 = -1; b1 = -1;
+            sscanf(buffer, "%i %i %i %i", &icbar, &r1, &g1, &b1);
+            cbi->index_node[i] = icbar;
+            nn = 3 * i;
+            cbi->rgb_node[nn] = r1;
+            cbi->rgb_node[nn + 1] = g1;
+            cbi->rgb_node[nn + 2] = b1;
+          }
+          remapcolorbar(cbi);
+        }
+      }
 
-/* ------------------ freelabels ------------------------ */
+      if(match(buffer, "TOURCOLORS") == 1){
+        col = tourcol_selectedpathline;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
 
-void freelabels(flowlabels *flowlabel){
-  FREEMEMORY(flowlabel->longlabel);
-  FREEMEMORY(flowlabel->shortlabel);
-  FREEMEMORY(flowlabel->unit);
-}
+        col = tourcol_selectedpathlineknots;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
 
-/* ------------------ createnulllabel ------------------------ */
+        col = tourcol_selectedknot;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
 
-int createnulllabel(flowlabels *flowlabel){
-  char buffer[255];
-  size_t len;
+        col = tourcol_pathline;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
 
-  len=strlen("Particles");
-  strcpy(buffer,"Particles");
-  trim_back(buffer);
-  len=strlen(buffer);
-  if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->longlabel,buffer);
+        col = tourcol_pathknots;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+        col = tourcol_text;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+        col = tourcol_avatar;
+        if(fgets(buffer, 255, stream) == NULL)break;
+        sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+        continue;
+      }
+
+      /*
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      ++++++++++++++++++++++ LABEL ++++++++++++++++++++++++++++++++
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      */
+
+      if(localfile == 1 && (match(buffer, "LABEL") == 1 || match(buffer, "TICKLABEL") == 1)){
+
+        /*
+        LABEL
+        x y z r g b tstart tstop
+        label
+
+        */
+        float *xyz, *rgbtemp, *tstart_stop;
+        labeldata labeltemp, *labeli;
+        int *useforegroundcolor;
+        char *bufferptr;
+        int *show_always;
+        int ticklabel = 0;
+        float *xyztick, *xyztickdir;
+        int *showtick;
+
+        if(match(buffer, "TICKLABEL") == 1)ticklabel = 1;
+
+        labeli = &labeltemp;
+
+        labeli->labeltype = TYPE_INI;
+        xyz = labeli->xyz;
+        rgbtemp = labeli->frgb;
+        xyztick = labeli->tick_begin;
+        xyztickdir = labeli->tick_direction;
+        showtick = &labeli->show_tick;
+
+        useforegroundcolor = &labeli->useforegroundcolor;
+        tstart_stop = labeli->tstart_stop;
+        show_always = &labeli->show_always;
+
+        fgets(buffer, 255, stream);
+        rgbtemp[0] = -1.0;
+        rgbtemp[1] = -1.0;
+        rgbtemp[2] = -1.0;
+        rgbtemp[3] = 1.0;
+        tstart_stop[0] = -1.0;
+        tstart_stop[1] = -1.0;
+        *useforegroundcolor = -1;
+        *show_always = 1;
+
+        sscanf(buffer, "%f %f %f %f %f %f %f %f %i %i",
+          xyz, xyz + 1, xyz + 2,
+          rgbtemp, rgbtemp + 1, rgbtemp + 2,
+          tstart_stop, tstart_stop + 1, useforegroundcolor, show_always);
+
+        if(ticklabel == 1){
+          fgets(buffer, 255, stream);
+          sscanf(buffer, "%f %f %f %f %f %f %i",
+            xyztick, xyztick + 1, xyztick + 2,
+            xyztickdir, xyztickdir + 1, xyztickdir + 2,
+            showtick);
+          *showtick = CLAMP(*showtick, 0, 1);
+        }
+        else{
+          xyztick[0] = 0.0;
+          xyztick[1] = 0.0;
+          xyztick[2] = 0.0;
+          xyztickdir[0] = 1.0;
+          xyztickdir[1] = 0.0;
+          xyztickdir[2] = 0.0;
+          *showtick = 0;
+        }
+        *show_always = CLAMP(*show_always, 0, 1);
+        *useforegroundcolor = CLAMP(*useforegroundcolor, -1, 1);
+        if(*useforegroundcolor == -1){
+          if(rgbtemp[0]<0.0 || rgbtemp[1]<0.0 || rgbtemp[2]<0.0 || rgbtemp[0]>1.0 || rgbtemp[1]>1.0 || rgbtemp[2]>1.0){
+            *useforegroundcolor = 1;
+          }
+          else{
+            *useforegroundcolor = 0;
+          }
+        }
+        fgets(buffer, 255, stream);
+        trim_back(buffer);
+        bufferptr = trim_front(buffer);
+        strcpy(labeli->name, bufferptr);
+        LABEL_insert(labeli);
+        continue;
+      }
+
+      /*
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      ++++++++++++++++++++++ TICKS ++++++++++++++++++++++++++++++++
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      */
+
+      /*
+      typedef struct {
+      float begin[3],end[3],length;
+      float dxyz[3],dlength;
+      int dir,nbars;
+      } tickdata;
+      */
+
+      if(localfile == 1 && match(buffer, "TICKS") == 1){
+        ntickinfo++;
+        ResizeMemory((void **)&tickinfo, (ntickinfo)*sizeof(tickdata));
+
+        {
+          tickdata *ticki;
+          float *begt, *endt;
+          int *nbarst;
+          float term;
+          float length = 0.0;
+          float *dxyz;
+          float sum;
+
+          ticki = tickinfo + ntickinfo - 1;
+          begt = ticki->begin;
+          endt = ticki->end;
+          nbarst = &ticki->nbars;
+          dxyz = ticki->dxyz;
 
 
-  len=strlen("Particles");
-  strcpy(buffer,"Particles");
-  len=strlen(buffer);
-  trim_back(buffer);
-  len=strlen(buffer);
-  if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->shortlabel,buffer);
+          /*
+          TICKS
+          b1 b2 b3 e1 e2 e3 nb
+          ticklength tickdir tickcolor (r g b) tickwidth
+          */
+          if(fgets(buffer, 255, stream) == NULL)break;
+          *nbarst = 0;
+          sscanf(buffer, "%f %f %f %f %f %f %i", begt, begt + 1, begt + 2, endt, endt + 1, endt + 2, nbarst);
+          if(*nbarst<1)*nbarst = 1;
+          if(fgets(buffer, 255, stream) == NULL)break;
+          {
+            float *rgbtemp;
 
-  len=strlen("Particles");
-  strcpy(buffer,"Particles");
-  len=strlen(buffer);
-  trim_back(buffer);
-  len=strlen(buffer);
-  if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
-  STRCPY(flowlabel->unit,buffer);
+            rgbtemp = ticki->rgb;
+            VECEQCONS(rgbtemp, -1.0);
+            ticki->width = -1.0;
+            sscanf(buffer, "%f %i %f %f %f %f", &ticki->dlength, &ticki->dir, rgbtemp, rgbtemp + 1, rgbtemp + 2, &ticki->width);
+            if(rgbtemp[0]<0.0 || rgbtemp[0]>1.0 ||
+              rgbtemp[1]<0.0 || rgbtemp[1]>1.0 ||
+              rgbtemp[2]<0.0 || rgbtemp[2]>1.0){
+              ticki->useforegroundcolor = 1;
+            }
+            else{
+              ticki->useforegroundcolor = 0;
+            }
+            if(ticki->width<0.0)ticki->width = 1.0;
+          }
+          for(i = 0; i<3; i++){
+            term = endt[i] - begt[i];
+            length += term*term;
+          }
+          if(length <= 0.0){
+            endt[0] = begt[0] + 1.0;
+            length = 1.0;
+          }
+          ticki->length = sqrt(length);
+          VECEQCONS(dxyz, 0.0);
+          switch(ticki->dir){
+          case XLEFT:
+          case XRIGHT:
+            dxyz[0] = 1.0;
+            break;
+          case YBACK:
+          case YFRONT:
+            dxyz[1] = 1.0;
+            break;
+          case ZBOTTOM:
+          case ZTOP:
+            dxyz[2] = 1.0;
+            break;
+          default:
+            ASSERT(FFALSE);
+            break;
+          }
+          if(ticki->dir<0){
+            for(i = 0; i<3; i++){
+              dxyz[i] = -dxyz[i];
+            }
+          }
+          sum = 0.0;
+          sum = dxyz[0] * dxyz[0] + dxyz[1] * dxyz[1] + dxyz[2] * dxyz[2];
+          if(sum>0.0){
+            sum = sqrt(sum);
+            dxyz[0] *= (ticki->dlength / sum);
+            dxyz[1] *= (ticki->dlength / sum);
+            dxyz[2] *= (ticki->dlength / sum);
+          }
+        }
+        continue;
+      }
+
+      if(localfile == 1){
+        int tours_flag;
+
+        tours_flag = 0;
+        if(match(buffer, "TOURS") == 1)tours_flag = 1;
+        if(tours_flag == 1){
+          if(ntours > 0){
+            for(i = 0; i < ntours; i++){
+              tourdata *touri;
+
+              touri = tourinfo + i;
+              freetour(touri);
+            }
+            FREEMEMORY(tourinfo);
+          }
+          ntours = 0;
+
+          fgets(buffer, 255, stream);
+          sscanf(buffer, "%i", &ntours);
+          ntours++;
+          if(ntours > 0){
+            if(NewMemory((void **)&tourinfo, ntours*sizeof(tourdata)) == 0)return 2;
+            for(i = 0; i < ntours; i++){
+              tourdata *touri;
+
+              touri = tourinfo + i;
+              touri->path_times = NULL;
+              touri->pathnodes = NULL;
+            }
+          }
+          ReallocTourMemory();
+          init_circulartour();
+          {
+            keyframe *thisframe, *addedframe;
+            tourdata *touri;
+            int glui_avatar_index_local;
+
+            for(i = 1; i < ntours; i++){
+              int j;
+
+              touri = tourinfo + i;
+              inittour(touri);
+              fgets(buffer, 255, stream);
+              trim_back(buffer);
+              strcpy(touri->label, trim_front(buffer));
+
+              t_globaltension = touri->global_tension;
+              t_globaltension_flag = touri->global_tension_flag;
+              fgets(buffer, 255, stream);
+              glui_avatar_index_local = 0;
+              sscanf(buffer, "%i %i %f %i %i",
+                &nkeyframes, &t_globaltension_flag, &t_globaltension, &glui_avatar_index_local, &touri->display2);
+              glui_avatar_index_local = CLAMP(glui_avatar_index_local, 0, navatar_types - 1);
+              touri->glui_avatar_index = glui_avatar_index_local;
+              if(touri->display2 != 1)touri->display2 = 0;
+              touri->global_tension_flag = t_globaltension_flag;
+              touri->global_tension = t_globaltension;
+              touri->nkeyframes = nkeyframes;
+
+              if(NewMemory((void **)&touri->keyframe_times, nkeyframes*sizeof(float)) == 0)return 2;
+              if(NewMemory((void **)&touri->pathnodes, view_ntimes*sizeof(pathdata)) == 0)return 2;
+              if(NewMemory((void **)&touri->path_times, view_ntimes*sizeof(float)) == 0)return 2;
+
+              thisframe = &touri->first_frame;
+              for(j = 0; j < nkeyframes; j++){
+                params[0] = 0.0;
+                params[1] = 0.0;
+                params[2] = 0.0;
+                key_view[0] = 0.0;
+                key_view[1] = 0.0;
+                key_view[2] = 0.0;
+                key_bank = 0.0;
+                key_az_path = 0.0;
+                key_elev_path = 0.0;
+                viewtype = 0;
+                zzoom = 1.0;
+                uselocalspeed = 0;
+                fgets(buffer, 255, stream);
+
+                sscanf(buffer, "%f %f %f %f %i",
+                  &key_time,
+                  key_xyz, key_xyz + 1, key_xyz + 2,
+                  &viewtype);
+
+                if(viewtype == 0){
+                  sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
+                    &key_time,
+                    key_xyz, key_xyz + 1, key_xyz + 2,
+                    &viewtype, &key_az_path, &key_elev_path, &key_bank,
+                    params, params + 1, params + 2,
+                    &zzoom, &uselocalspeed);
+                }
+                else{
+                  sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
+                    &key_time,
+                    key_xyz, key_xyz + 1, key_xyz + 2,
+                    &viewtype, key_view, key_view + 1, key_view + 2,
+                    params, params + 1, params + 2,
+                    &zzoom, &uselocalspeed);
+                }
+                if(zzoom<0.25)zzoom = 0.25;
+                if(zzoom>4.00)zzoom = 4.0;
+                addedframe = add_frame(thisframe, key_time, key_xyz, key_az_path, key_elev_path,
+                  key_bank, params, viewtype, zzoom, key_view);
+                thisframe = addedframe;
+                touri->keyframe_times[j] = key_time;
+              }
+            }
+          }
+          if(tours_flag == 1){
+            for(i = 0; i < ntours; i++){
+              tourdata *touri;
+
+              touri = tourinfo + i;
+              touri->first_frame.next->prev = &touri->first_frame;
+              touri->last_frame.prev->next = &touri->last_frame;
+            }
+            update_tour_menulabels();
+            createtourpaths();
+            Update_Times();
+            plotstate = getplotstate(DYNAMIC_PLOTS);
+            selectedtour_index = TOURINDEX_MANUAL;
+            selected_frame = NULL;
+            selected_tour = NULL;
+            if(viewalltours == 1)TourMenu(MENU_TOUR_SHOWALL);
+          }
+          else{
+            ntours = 0;
+          }
+          strcpy(buffer, "1.00000 1.00000 2.0000 0");
+          trimmzeros(buffer);
+          continue;
+        }
+        if(match(buffer, "TOURINDEX")){
+          if(fgets(buffer, 255, stream) == NULL)break;
+          sscanf(buffer, "%i", &selectedtour_index_ini);
+          if(selectedtour_index_ini < 0)selectedtour_index_ini = -1;
+          update_selectedtour_index = 1;
+        }
+      }
+
+    }
+
+  }
+  fclose(stream);
   return 0;
+
 }
 
 /* ------------------ readini ------------------------ */
@@ -8595,2918 +11359,6 @@ int readini(char *inifile){
   updatezoommenu=1;
   getsliceparams2();
   return 0;
-}
-
-/* ------------------ readboundini ------------------------ */
-
-void readboundini(void){
-  FILE *stream=NULL;
-  char *fullfilename=NULL;
-
-  if(boundini_filename==NULL)return;
-  fullfilename=get_filename(smokeviewtempdir,boundini_filename,tempdir_flag);
-  if(fullfilename!=NULL)stream=fopen(fullfilename,"r");
-  if(stream==NULL||is_file_newer(smv_filename,fullfilename)==1){
-    if(stream!=NULL)fclose(stream);
-    FREEMEMORY(fullfilename);
-    return;
-  }
-  PRINTF("%s",_("reading: "));
-  PRINTF("%s\n",fullfilename);
-
-  while(!feof(stream)){
-    char buffer[255], buffer2[255];
-
-    CheckMemory;
-    if(fgets(buffer,255,stream)==NULL)break;
-
-    if(match(buffer,"B_BOUNDARY")==1){
-      float gmin, gmax;
-      float pmin, pmax;
-      int filetype;
-      char *buffer2ptr;
-      int lenbuffer2;
-      int i;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%f %f %f %f %i %s",&gmin,&pmin,&pmax,&gmax,&filetype,buffer2);
-      trim_back(buffer2);
-      buffer2ptr=trim_front(buffer2);
-      lenbuffer2=strlen(buffer2ptr);
-      for(i=0;i<npatchinfo;i++){
-        patchdata *patchi;
-
-        patchi = patchinfo +i;
-        if(lenbuffer2!=0&&
-          strcmp(patchi->label.shortlabel,buffer2ptr)==0&&
-          patchi->filetype==filetype&&
-          is_file_newer(boundini_filename,patchi->file)==1){
-          bounddata *boundi;
-
-          boundi = &patchi->bounds;
-          boundi->defined=1;
-          boundi->global_min=gmin;
-          boundi->global_max=gmax;
-          boundi->percentile_min=pmin;
-          boundi->percentile_max=pmax;
-        }
-      }
-      continue;
-    }
-  }
-  FREEMEMORY(fullfilename);
-  return;
-}
-
-/* ------------------ writeboundini ------------------------ */
-
-void writeboundini(void){
-  FILE *stream=NULL;
-  char *fullfilename=NULL;
-  int i;
-
-  if(boundini_filename==NULL)return;
-  fullfilename=get_filename(smokeviewtempdir,boundini_filename,tempdir_flag);
-
-  if(fullfilename==NULL)return;
-
-  for(i=0;i<npatchinfo;i++){
-    bounddata *boundi;
-    patchdata *patchi;
-    int skipi;
-    int j;
-
-    skipi = 0;
-    patchi = patchinfo + i;
-    if(patchi->bounds.defined==0)continue;
-    for(j=0;j<i-1;j++){
-      patchdata *patchj;
-
-      patchj = patchinfo + j;
-      if(patchi->type==patchj->type&&patchi->filetype==patchj->filetype){
-        skipi=1;
-        break;
-      }
-    }
-    if(skipi==1)continue;
-
-    boundi = &patchi->bounds;
-    if(stream==NULL){
-      stream=fopen(fullfilename,"w");
-      if(stream==NULL){
-        FREEMEMORY(fullfilename);
-        return;
-      }
-    }
-    fprintf(stream,"B_BOUNDARY\n");
-    fprintf(stream," %f %f %f %f %i %s\n",boundi->global_min,boundi->percentile_min,boundi->percentile_max,boundi->global_max,patchi->filetype,patchi->label.shortlabel);
-  }
-  if(stream!=NULL)fclose(stream);
-  FREEMEMORY(fullfilename);
-}
-
-/* ------------------ readini2 ------------------------ */
-
-int readini2(char *inifile, int localfile){
-  int i;
-  FILE *stream;
-
-  updatemenu=1;
-  updatefacelists=1;
-
-  if( (stream=fopen(inifile,"r"))==NULL)return 1;
-
-  for(i=0;i<nunitclasses_ini;i++){
-    f_units *uc;
-
-    uc=unitclasses_ini+i;
-    FREEMEMORY(uc->units);
-  }
-  FREEMEMORY(unitclasses_ini);
-  nunitclasses_ini=0;
-
-  if(localfile==1){
-    update_inilist();
-  }
-
-  PRINTF("%s",_("processing config file: "));
-  PRINTF("%s\n",inifile);
-  if(localfile==1){
-    update_selectedtour_index=0;
-  }
-
-  /* find number of each kind of file */
-
-  while(!feof(stream)){
-    char buffer[255],buffer2[255];
-
-    CheckMemory;
-    if(fgets(buffer,255,stream)==NULL)break;
-
-    if(localfile==1){
-      if(match(buffer,"GSLICEPARMS")==1){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i",&vis_gslice_data, &show_gslice_triangles, &show_gslice_triangulation, &show_gslice_normal);
-        ONEORZERO(vis_gslice_data);
-        ONEORZERO(show_gslice_triangles);
-        ONEORZERO(show_gslice_triangulation);
-        ONEORZERO(show_gslice_normal);
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f",gslice_xyz,gslice_xyz+1,gslice_xyz+2);
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f",gslice_normal_azelev,gslice_normal_azelev+1);
-        update_gslice=1;
-        continue;
-      }
-      if(match(buffer,"GEOMETRYTEST")==1){
-        int *v,ii;
-        float *b1,*b2,*b3;
-
-        v=tetrabox_vis;
-        fgets(buffer,255,stream);
-        sscanf(buffer, " %i %i %f %f", &geomtest_option, &show_tetratest_labels, &tetra_line_thickness, &tetra_point_size);
-        fgets(buffer,255,stream);
-        sscanf(buffer, " %i %i %i %i %i ", v, v + 1, v + 2, v + 3, v + 4);
-        fgets(buffer,255,stream);
-        sscanf(buffer," %i %i %i %i %i ",v+5,v+6,v+7,v+8,v+9);
-        ONEORZERO(show_tetratest_labels);
-        for(ii=0;ii<10;ii++){
-          ONEORZERO(v[ii]);
-        }
-        b1=box_bounds2;
-        b2=tetra_vertices;
-        b3=box_translate;
-        fgets(buffer,255,stream);
-        sscanf(buffer," %f %f %f %f %f %f",b1,b1+1,b1+2,b1+3,b1+4,b1+5);
-        fgets(buffer,255,stream);
-        sscanf(buffer," %f %f %f %f %f %f",b2,b2+1,b2+2,b2+3,b2+4,b2+5);
-        fgets(buffer,255,stream);
-        sscanf(buffer," %f %f %f %f %f %f",b2+6,b2+7,b2+8,b2+9,b2+10,b2+11);
-        fgets(buffer,255,stream);
-        sscanf(buffer," %f %f %f",b3,b3+1,b3+2);
-        continue;
-      }
-      if(match(buffer,"GRIDPARMS")==1){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i",&visx_all, &visy_all, &visz_all);
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i",&iplotx_all, &iploty_all, &iplotz_all);
-        if(iplotx_all>nplotx_all-1)iplotx_all=0;
-        if(iploty_all>nploty_all-1)iploty_all=0;
-        if(iplotz_all>nplotz_all-1)iplotz_all=0;
-        continue;
-      }
-    }
-#ifdef pp_DUP
-    if(match(buffer, "SLICEDUP") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i", &slicedup_option,&vectorslicedup_option);
-      continue;
-    }
-#endif
-    if(match(buffer, "NORTHANGLE") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %i", &vis_northangle);
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %f %f %f", northangle_position, northangle_position+1, northangle_position+2);
-      continue;
-    }
-    if(match(buffer, "TREEPARMS") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i %i", &mintreesize, &vis_xtree, &vis_ytree, &vis_ztree);
-      mintreesize = MAX(mintreesize, 2);
-      vis_xtree = CLAMP(vis_xtree, 0, 1);
-      vis_ytree = CLAMP(vis_ytree, 0, 1);
-      vis_ztree = CLAMP(vis_ztree, 0, 1);
-      continue;
-    }
-    if(match(buffer, "ZAXISANGLES") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer," %f %f %f ",zaxis_angles,zaxis_angles+1,zaxis_angles+2);
-      changed_zaxis=1;
-      continue;
-    }
-    if(match(buffer,"GEOMDIAGS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer," %i %i %i",&structured_isopen,&unstructured_isopen,&show_geometry_diagnostics);
-      continue;
-    }
-    if(match(buffer, "GEOMSHOW") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i %i", &show_faces_interior, &show_faces_exterior, &show_faces_solid, &show_faces_outline, &smooth_geom_normal);
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i", &show_volumes_interior, &show_volumes_exterior, &show_volumes_solid, &show_volumes_outline);
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %f %f", &geom_vert_exag, &geom_max_angle);
-      continue;
-    }
-    if(match(buffer, "SHOWTRIANGLECOUNT") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer," %i",&show_triangle_count);
-      continue;
-    }
-    if(match(buffer,"SHOWDEVICEVALS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer," %i %i %i %i %i %i %i %i",
-        &showdeviceval,&showvdeviceval,&devicetypes_index,&colordeviceval,&vectortype,&vispilot,&showdevicetype,&showdeviceunit);
-      devicetypes_index=CLAMP(devicetypes_index,0,ndevicetypes-1);
-      update_glui_devices();
-      continue;
-    }
-    if(match(buffer, "SHOWMISSINGOBJECTS") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, " %i",&show_missing_objects);
-      ONEORZERO(show_missing_objects);
-      continue;
-    }
-    if(match(buffer, "DEVICEVECTORDIMENSIONS") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",&vector_baselength,&vector_basediameter,&vector_headlength,&vector_headdiameter);
-      continue;
-    }
-    if(match(buffer,"DEVICEBOUNDS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&device_valmin,&device_valmax);
-      continue;
-    }
-    if(match(buffer,"DEVICEORIENTATION")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&show_device_orientation,&orientation_scale);
-      show_device_orientation=CLAMP(show_device_orientation,0,1);
-      orientation_scale=CLAMP(orientation_scale,0.1,10.0);
-      continue;
-    }
-    if(match(buffer,"GVERSION")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&gversion);
-      ONEORZERO(gversion);
-    }
-    if(match(buffer,"SCALEDFONT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&scaled_font2d_height,&scaled_font2d_height2width,&scaled_font2d_thickness);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&scaled_font3d_height,&scaled_font3d_height2width,&scaled_font3d_thickness);
-    }
-    if(match(buffer,"FEDCOLORBAR")==1){
-      char *fbuff;
-
-      fgets(buffer,255,stream);
-      trim_back(buffer);
-      fbuff=trim_front(buffer);
-      if(strlen(fbuff)>0)strcpy(default_fed_colorbar,fbuff);
-    }
-    if(match(buffer,"FED")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&regenerate_fed);
-      ONEORZERO(regenerate_fed);
-      continue;
-    }
-    if(match(buffer,"SHOWFEDAREA")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_fed_area);
-      ONEORZERO(show_fed_area);
-      continue;
-    }
-    if(match(buffer,"USENEWDRAWFACE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&use_new_drawface);
-      ONEORZERO(use_new_drawface);
-      continue;
-    }
-    if(match(buffer,"TLOAD")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %i %i",&use_tload_begin,&tload_begin,&use_tload_end,&tload_end,&use_tload_skip,&tload_skip);
-      continue;
-    }
-    if(match(buffer,"VOLSMOKE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i",
-        &glui_compress_volsmoke,&use_multi_threading,&load_at_rendertimes,&volbw,&show_volsmoke_moving);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f %f %f %f",
-        &temperature_min,&temperature_cutoff,&temperature_max,&fire_opacity_factor,&mass_extinct,&gpu_vol_factor,&nongpu_vol_factor);
-      ONEORZERO(glui_compress_volsmoke);
-      ONEORZERO(use_multi_threading);
-      ONEORZERO(load_at_rendertimes);
-      fire_opacity_factor=CLAMP(fire_opacity_factor,1.0,10.0);
-      mass_extinct=CLAMP(mass_extinct,100.0,100000.0);
-      init_volrender_surface(NOT_FIRSTCALL);
-      continue;
-    }
-    if(match(buffer,"BOUNDARYTWOSIDE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&showpatch_both);
-      ONEORZERO(showpatch_both);
-    }
-    if(match(buffer,"MESHOFFSET")==1){
-      int meshnum;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&meshnum);
-      if(meshnum>=0&&meshnum<nmeshes){
-        meshdata *meshi;
-
-        meshi = meshinfo + meshnum;
-        meshi->mesh_offset_ptr=meshi->mesh_offset;
-      }
-      continue;
-    }
-#ifdef pp_LANG
-    if(match(buffer,"STARTUPLANG")==1){
-      char *bufptr;
-
-      fgets(buffer,255,stream);
-      trim_back(buffer);
-      bufptr=trim_front(buffer);
-      strncpy(startup_lang_code,bufptr,2);
-      startup_lang_code[2]='\0';
-      if(strcmp(startup_lang_code,"en")!=0){
-        show_lang_menu=1;
-      }
-      if(tr_name==NULL){
-        int langlen;
-
-        langlen=strlen(bufptr);
-        NewMemory((void **)&tr_name,langlen+48+1);
-        strcpy(tr_name,bufptr);
-      }
-      continue;
-    }
-#endif
-    if(match(buffer,"MESHVIS")==1){
-      int nm;
-      meshdata *meshi;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nm);
-      for(i=0;i<nm;i++){
-        if(i>nmeshes-1)break;
-        meshi = meshinfo + i;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&meshi->blockvis);
-        ONEORZERO(meshi->blockvis);
-      }
-      continue;
-    }
-    if(match(buffer,"SPHERESEGS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&device_sphere_segments);
-      device_sphere_segments=CLAMP(device_sphere_segments,6,48);
-      Init_Sphere(device_sphere_segments,2*device_sphere_segments);
-      Init_Circle(2*device_sphere_segments,&object_circ);
-      continue;
-    }
-    if(match(buffer,"SHOWEVACSLICES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&show_evac_slices,&constant_evac_coloring,&show_evac_colorbar);
-      ONEORZERO(show_evac_slices);
-      if(constant_evac_coloring!=1)constant_evac_coloring=0;
-      data_evac_coloring=1-constant_evac_coloring;
-      ONEORZERO(show_evac_colorbar);
-      update_slice_menu_show();
-      update_evac_parms();
-      continue;
-    }
-    if(match(buffer,"DIRECTIONCOLOR")==1){
-      float *dc;
-
-	    dc = direction_color;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",dc,dc+1,dc+2);
-      dc[3]=1.0;
-      direction_color_ptr=getcolorptr(direction_color);
-      update_slice_menu_show();
-      update_evac_parms();
-      continue;
-    }
-    if(match(buffer,"OFFSETSLICE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&offset_slice);
-      ONEORZERO(offset_slice);
-      continue;
-    }
-    if(match(buffer,"VECLENGTH")==1){
-      float vf=1.0;
-      int dummy;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&dummy,&vf);
-      vecfactor = vf;
-      continue;
-    }
-    if(match(buffer,"VECCONTOURS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_slices_and_vectors);
-      ONEORZERO(show_slices_and_vectors);
-      continue;
-    }
-    if(match(buffer,"ISOTRAN2")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&transparent_state);
-      continue;
-    }
-    if(match(buffer,"SHOWTETRAS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&show_volumes_solid,&show_volumes_outline);
-      continue;
-    }
-    if(match(buffer,"SHOWTRIANGLES")==1){
-      int dummy;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i %i",&show_iso_solid,&show_iso_outline,&show_iso_points,&show_iso_normal,&dummy,&smooth_iso_normal);
-      ONEORZERO(show_iso_solid);
-      ONEORZERO(show_iso_outline);
-      ONEORZERO(show_iso_points);
-      ONEORZERO(show_iso_normal);
-      ONEORZERO(smooth_iso_normal);
-#ifdef pp_BETA
-      ONEORZERO(show_iso_normal);
-#else
-      show_iso_normal=0;
-#endif
-      visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
-      continue;
-    }
-    if(match(buffer,"SHOWSTREAK")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i",&streak5show,&streak5step,&showstreakhead,&streak_index);
-      ONEORZERO(streak5show);
-      if(streak5show==0)streak_index=-2;
-      ONEORZERO(showstreakhead);
-      update_streaks=1;
-      continue;
-    }
-
-    if(match(buffer,"SHOWTERRAIN")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTerrainType);
-      continue;
-    }
-    if(match(buffer,"STEREO")==1){
-      fgets(buffer,255,stream);
-      showstereoOLD=showstereo;
-      sscanf(buffer,"%i",&showstereo);
-      showstereo=CLAMP(showstereo,0,5);
-      if(showstereo==STEREO_TIME&&videoSTEREO!=1)showstereo=STEREO_NONE;
-      Update_Glui_Stereo();
-      continue;
-    }
-    if(match(buffer,"TERRAINPARMS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",terrain_rgba_zmin,terrain_rgba_zmin+1,terrain_rgba_zmin+2);
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",terrain_rgba_zmax,terrain_rgba_zmax+1,terrain_rgba_zmax+2);
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&vertical_factor);
-
-      for(i=0;i<3;i++){
-        terrain_rgba_zmin[i]=CLAMP(terrain_rgba_zmin[i],0,2255);
-        terrain_rgba_zmax[i]=CLAMP(terrain_rgba_zmax[i],0,2255);
-      }
-      vertical_factor=CLAMP(vertical_factor,0.25,4.0);
-      update_terrain(0,vertical_factor);
-      update_terrain_colors();
-      continue;
-    }
-    if(match(buffer,"SMOKESENSORS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&show_smokesensors,&test_smokesensors);
-      continue;
-    }
-#ifdef pp_GPU
-    if(gpuactive==1&&match(buffer,"USEGPU")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&usegpu);
-      ONEORZERO(usegpu);
-      continue;
-    }
-#endif
-    if(match(buffer,"V_PLOT3D")==1){
-      int tempval;
-      int n3d;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
-      if(tempval<0)tempval=0;
-      n3d=tempval;
-      if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-      for(i=0;i<n3d;i++){
-        int iplot3d, isetmin, isetmax;
-        float p3mintemp, p3maxtemp;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %f %i %f",&iplot3d,&isetmin,&p3mintemp,&isetmax,&p3maxtemp);
-        iplot3d--;
-        if(iplot3d>=0&&iplot3d<mxplot3dvars){
-          setp3min[iplot3d]=isetmin;
-          setp3max[iplot3d]=isetmax;
-          p3min[iplot3d]=p3mintemp;
-          p3max[iplot3d]=p3maxtemp;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"CACHE_QDATA")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&cache_qdata);
-      ONEORZERO(cache_qdata);
-      continue;
-    }
-    if(match(buffer,"UNLOAD_QDATA")==1){
-      int unload_qdata;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&unload_qdata);
-      cache_qdata = 1 - unload_qdata;
-      ONEORZERO(cache_qdata);
-      continue;
-    }
-    if(match(buffer,"CACHE_BOUNDARYDATA")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&cache_boundarydata);
-      continue;
-    }
-    if(match(buffer,"TREECOLORS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",trunccolor,trunccolor+1,trunccolor+2);
-      sscanf(buffer,"%f %f %f",treecolor,treecolor+1,treecolor+2);
-      sscanf(buffer,"%f %f %f",treecharcolor,treecharcolor+1,treecharcolor+2);
-      for(i=0;i<3;i++){
-        treecolor[i]=CLAMP(treecolor[i],0.0,1.0);
-        treecharcolor[i]=CLAMP(treecharcolor[i],0.0,1.0);
-        trunccolor[i]=CLAMP(trunccolor[i],0.0,1.0);
-      }
-      treecolor[3]=1.0;
-      treecharcolor[3]=1.0;
-      trunccolor[3]=1.0;
-      continue;
-    }
-    if(match(buffer,"TRAINERVIEW")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&trainerview);
-      if(trainerview!=2&&trainerview!=3)trainerview=1;
-      continue;
-    }
-    if(match(buffer,"SHOWTRANSPARENTVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_transparent_vents);
-      ONEORZERO(show_transparent_vents);
-      continue;
-    }
-    if(match(buffer,"COLORBARTYPE")==1){
-      char *label;
-
-      update_colorbartype=1;
-      fgets(buffer,255,stream);
-      label = strchr(buffer,'%');
-      if(label==NULL){
-        sscanf(buffer,"%i",&colorbartype);
-        remap_colorbartype(colorbartype,colorbarname);
-      }
-      else{
-        label++;
-        trim_back(label);
-        label=trim_front(label);
-        strcpy(colorbarname,label);
-      }
-      continue;
-    }
-    if(match(buffer,"FIRECOLORMAP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&firecolormap_type,&fire_colorbar_index_ini);
-      firecolormap_type_save=firecolormap_type;
-      update_fire_colorbar_index=1;
-      continue;
-    }
-    if(match(buffer,"SHOWEXTREMEDATA")==1){
-      int below=-1, above=-1, show_extremedata;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&show_extremedata,&below,&above);
-      if(below==-1&&above==-1){
-        if(below==-1)below=0;
-        if(below!=0)below=1;
-        if(above==-1)above=0;
-        if(above!=0)above=1;
-      }
-      else{
-        if(show_extremedata!=1)show_extremedata=0;
-        if(show_extremedata==1){
-          below=1;
-          above=1;
-        }
-        else{
-          below=0;
-          above=0;
-        }
-      }
-      show_extreme_mindata=below;
-      show_extreme_maxdata=above;
-      continue;
-    }
-    if(match(buffer,"EXTREMECOLORS") == 1){
-      int mmin[3],mmax[3];
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i %i",
-        mmin,mmin+1,mmin+2,
-        mmax,mmax+1,mmax+2);
-      for(i=0;i<3;i++){
-        rgb_below_min[i]=CLAMP(mmin[i],0,255);
-        rgb_above_max[i]=CLAMP(mmax[i],0,255);
-      }
-      continue;
-    }
-    if(match(buffer,"SLICEAVERAGE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i",&slice_average_flag,&slice_average_interval,&vis_slice_average);
-      ONEORZERO(slice_average_flag);
-      if(slice_average_interval<0.0)slice_average_interval=0.0;
-      continue;
-    }
-    if(match(buffer,"SKYBOX")==1){
-      skyboxdata *skyi;
-
-      free_skybox();
-      nskyboxinfo=1;
-      NewMemory((void **)&skyboxinfo,nskyboxinfo*sizeof(skyboxdata));
-      skyi = skyboxinfo;
-
-      for(i=0;i<6;i++){
-        fgets(buffer,255,stream);
-        loadskytexture(buffer,skyi->face+i);
-      }
-    }
-    if(match(buffer,"C_PLOT3D")==1){
-      int tempval;
-      int n3d;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&tempval);
-      if(tempval<0)tempval=0;
-      n3d=tempval;
-      if(n3d>mxplot3dvars)n3d=mxplot3dvars;
-      for(i=0;i<n3d;i++){
-        int iplot3d, isetmin, isetmax;
-        float p3mintemp, p3maxtemp;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %f %i %f",&iplot3d,&isetmin,&p3mintemp,&isetmax,&p3maxtemp);
-        iplot3d--;
-        if(iplot3d>=0&&iplot3d<mxplot3dvars){
-          setp3chopmin[iplot3d]=isetmin;
-          setp3chopmax[iplot3d]=isetmax;
-          p3chopmin[iplot3d]=p3mintemp;
-          p3chopmax[iplot3d]=p3maxtemp;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"DEVICENORMLENGTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&devicenorm_length);
-      if(devicenorm_length<0.0||devicenorm_length>1.0)devicenorm_length=0.1;
-      continue;
-    }
-    if(match(buffer,"SHOWHRRCUTOFF")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_hrrcutoff);
-      ONEORZERO(show_hrrcutoff);
-      continue;
-    }
-    if(match(buffer,"TWOSIDEDVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&show_bothsides_int,&show_bothsides_ext);
-      ONEORZERO(show_bothsides_int);
-      ONEORZERO(show_bothsides_ext);
-      continue;
-    }
-    if(match(buffer,"SHOWSLICEINOBST")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_slice_in_obst);
-      ONEORZERO(show_slice_in_obst);
-      continue;
-    }
-    if(match(buffer,"SKIPEMBEDSLICE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&skip_slice_in_embedded_mesh);
-      ONEORZERO(skip_slice_in_embedded_mesh);
-      continue;
-    }
-    if(match(buffer,"PERCENTILELEVEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&percentile_level);
-      if(percentile_level<0.0)percentile_level=0.01;
-      if(percentile_level>0.5)percentile_level=0.01;
-      continue;
-    }
-    if(match(buffer,"TRAINERMODE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&trainer_mode);
-      continue;
-    }
-    if(match(buffer,"COMPRESSAUTO")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&compress_autoloaded);
-      continue;
-    }
-    if(match(buffer,"PLOT3DAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_plot3d(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"VSLICEAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_vslice(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"SLICEAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_slice(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"MSLICEAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-
-        if(seq_id>=0&&seq_id<nmultisliceinfo){
-          multislicedata *mslicei;
-
-          mslicei = multisliceinfo + seq_id;
-          mslicei->autoload=1;
-        }
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"PARTAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_part(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"ISOAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_iso(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"S3DAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_smoke(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"PATCHAUTO")==1){
-      int n3dsmokes=0;
-      int seq_id;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n3dsmokes);
-      for(i=0;i<n3dsmokes;i++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&seq_id);
-        get_startup_patch(seq_id);
-      }
-      update_load_Files=1;
-      continue;
-    }
-    if(match(buffer,"LOADFILESATSTARTUP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&loadfiles_at_startup);
-      continue;
-    }
-    if(match(buffer,"SHOWALLTEXTURES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&showall_textures);
-      continue;
-    }
-    if(match(buffer,"ENABLETEXTURELIGHTING") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&enable_texture_lighting);
-      continue;
-    }
-    if(match(buffer,"PIXELSKIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&pixel_skip);
-      continue;
-    }
-    if(match(buffer,"PROJECTION")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&projection_type);
-      Motion_CB(PROJECTION);
-      update_projection_type();
-      continue;
-    }
-    if(match(buffer,"V_PARTICLES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&setpartmin,&partmin,&setpartmax,&partmax);
-      continue;
-    }
-    if(match(buffer,"V5_PARTICLES")==1){
-      int ivmin, ivmax;
-      float vmin, vmax;
-      char short_label[256],*s1;
-
-      strcpy(short_label,"");
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %s",&ivmin,&vmin,&ivmax,&vmax,short_label);
-
-      if(npart5prop>0){
-        int label_index=0;
-
-        trim_back(short_label);
-        s1=trim_front(short_label);
-        if(strlen(s1)>0)label_index=get_partprop_index_s(s1);
-        if(label_index>=0&&label_index<npart5prop){
-          partpropdata *propi;
-
-          propi = part5propinfo + label_index;
-          propi->setvalmin=ivmin;
-          propi->setvalmax=ivmax;
-          propi->valmin=vmin;
-          propi->valmax=vmax;
-          switch(ivmin){
-            case PERCENTILE_MIN:
-              propi->percentile_min=vmin;
-              break;
-            case GLOBAL_MIN:
-              propi->global_min=vmin;
-              break;
-            case SET_MIN:
-              propi->user_min=vmin;
-              break;
-            default:
-              ASSERT(FFALSE);
-              break;
-          }
-          switch(ivmax){
-            case PERCENTILE_MAX:
-              propi->percentile_max=vmax;
-              break;
-            case GLOBAL_MAX:
-              propi->global_max=vmax;
-              break;
-            case SET_MAX:
-              propi->user_max=vmax;
-              break;
-            default:
-              ASSERT(FFALSE);
-              break;
-          }
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"C_PARTICLES")==1){
-      int icmin, icmax;
-      float cmin, cmax;
-      char short_label[256],*s1;
-
-      strcpy(short_label,"");
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %s",&icmin,&cmin,&icmax,&cmax,short_label);
-
-      if(npart5prop>0){
-        int label_index=0;
-
-        trim_back(short_label);
-        s1=trim_front(short_label);
-        if(strlen(s1)>0)label_index=get_partprop_index_s(s1);
-        if(label_index>=0&&label_index<npart5prop){
-          partpropdata *propi;
-
-          propi = part5propinfo + label_index;
-          propi->setchopmin=icmin;
-          propi->setchopmax=icmax;
-          propi->chopmin=cmin;
-          propi->chopmax=cmax;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"V_SLICE")==1){
-      float valmin, valmax;
-      int setvalmin, setvalmax;
-      char *level_val;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-      {
-        char *colon;
-
-        colon=strstr(buffer,":");
-        level_val=NULL;
-        if(colon!=NULL){
-          level_val=colon+1;
-          trim_back(level_val);
-          *colon=0;
-          if(strlen(level_val)>1){
-            sscanf(level_val,"%f %f %i",&slice_line_contour_min,&slice_line_contour_max,&slice_line_contour_num);
-          }
-          {
-            level_val=NULL;
-          }
-        }
-      }
-      if(strcmp(buffer2,"")!=0){
-        trim_back(buffer2);
-        for(i=0;i<nslice2;i++){
-          if(strcmp(slicebounds[i].datalabel,buffer2)!=0)continue;
-          slicebounds[i].setvalmin=setvalmin;
-          slicebounds[i].setvalmax=setvalmax;
-          slicebounds[i].valmin=valmin;
-          slicebounds[i].valmax=valmax;
-          if(level_val!=NULL){
-            slicebounds[i].line_contour_min=slice_line_contour_min;
-            slicebounds[i].line_contour_max=slice_line_contour_max;
-            slicebounds[i].line_contour_num=slice_line_contour_num;
-          }
-          break;
-        }
-      }
-      else{
-        for(i=0;i<nslice2;i++){
-          slicebounds[i].setvalmin=setvalmin;
-          slicebounds[i].setvalmax=setvalmax;
-          slicebounds[i].valmin=valmin;
-          slicebounds[i].valmax=valmax;
-          slicebounds[i].line_contour_min=slice_line_contour_min;
-          slicebounds[i].line_contour_max=slice_line_contour_max;
-          slicebounds[i].line_contour_num=slice_line_contour_num;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"C_SLICE")==1){
-      float valmin, valmax;
-      int setvalmin, setvalmax;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-      if(strcmp(buffer,"")!=0){
-        for(i=0;i<nslice2;i++){
-          if(strcmp(slicebounds[i].datalabel,buffer2)!=0)continue;
-          slicebounds[i].setchopmin=setvalmin;
-          slicebounds[i].setchopmax=setvalmax;
-          slicebounds[i].chopmin=valmin;
-          slicebounds[i].chopmax=valmax;
-          break;
-        }
-      }
-      else{
-        for(i=0;i<nslice2;i++){
-          slicebounds[i].setchopmin=setvalmin;
-          slicebounds[i].setchopmax=setvalmax;
-          slicebounds[i].chopmin=valmin;
-          slicebounds[i].chopmax=valmax;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"V_ISO")==1){
-      float valmin, valmax;
-      int setvalmin, setvalmax;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-      if(strcmp(buffer2,"")!=0){
-        for(i=0;i<niso_bounds;i++){
-          if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
-          isobounds[i].setvalmin=setvalmin;
-          isobounds[i].setvalmax=setvalmax;
-          isobounds[i].valmin=valmin;
-          isobounds[i].valmax=valmax;
-          break;
-        }
-      }
-      else{
-        for(i=0;i<niso_bounds;i++){
-          isobounds[i].setvalmin=setvalmin;
-          isobounds[i].setvalmax=setvalmax;
-          isobounds[i].valmin=valmin;
-          isobounds[i].valmax=valmax;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"C_ISO")==1){
-      float valmin, valmax;
-      int setvalmin, setvalmax;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-      if(strcmp(buffer,"")!=0){
-        for(i=0;i<niso_bounds;i++){
-          if(strcmp(isobounds[i].datalabel,buffer2)!=0)continue;
-          isobounds[i].setchopmin=setvalmin;
-          isobounds[i].setchopmax=setvalmax;
-          isobounds[i].chopmin=valmin;
-          isobounds[i].chopmax=valmax;
-          break;
-        }
-      }
-      else{
-        for(i=0;i<niso_bounds;i++){
-          isobounds[i].setchopmin=setvalmin;
-          isobounds[i].setchopmax=setvalmax;
-          isobounds[i].chopmin=valmin;
-          isobounds[i].chopmax=valmax;
-        }
-      }
-      continue;
-    }
-    if(match(buffer,"V_BOUNDARY")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %s",&setpatchmin,&patchmin,&setpatchmax,&patchmax,buffer2);
-      if(strcmp(buffer2,"")!=0)local2globalpatchbounds(buffer2);
-      continue;
-    }
-    if(match(buffer,"C_BOUNDARY")==1){
-      float valmin, valmax;
-      int setvalmin, setvalmax;
-      char *buffer2ptr;
-      int lenbuffer2;
-
-      fgets(buffer,255,stream);
-      strcpy(buffer2,"");
-      sscanf(buffer,"%i %f %i %f %s",&setvalmin,&valmin,&setvalmax,&valmax,buffer2);
-      trim_back(buffer2);
-      buffer2ptr=trim_front(buffer2);
-      lenbuffer2=strlen(buffer2ptr);
-      for(i=0;i<npatchinfo;i++){
-        patchdata *patchi;
-
-        patchi = patchinfo + i;
-        if(lenbuffer2==0||strcmp(patchi->label.shortlabel,buffer2ptr)==0){
-          patchi->chopmin=valmin;
-          patchi->chopmax=valmax;
-          patchi->setchopmin=setvalmin;
-          patchi->setchopmax=setvalmax;
-        }
-      }
-      updatepatchlistindex2(buffer2ptr);
-      continue;
-    }
-    if(match(buffer,"V_ZONE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&setzonemin,&zoneusermin,&setzonemax,&zoneusermax);
-      if(setzonemin==PERCENTILE_MIN)setzonemin=GLOBAL_MIN;
-      if(setzonemax==PERCENTILE_MIN)setzonemax=GLOBAL_MIN;
-      if(setzonemin==SET_MIN)zonemin=zoneusermin;
-      if(setzonemax==SET_MAX)zonemax=zoneusermax;
-      update_glui_zonebounds();
-      continue;
-    }
-    if(match(buffer,"V_TARGET")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f %s",&settargetmin,&targetmin,&settargetmax,&targetmax,buffer2);
-      continue;
-    }
-    if(match(buffer,"OUTLINEMODE")==1){
-	  fgets(buffer,255,stream);
-	  sscanf(buffer,"%i %i",&highlight_flag,&outline_color_flag);
-      if(nmeshes<2){
-        ONEORZERO(highlight_flag);
-      }
-      continue;
-    }
-    if(match(buffer,"SLICEDATAOUT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&output_slicedata);
-      ONEORZERO(output_slicedata);
-      continue;
-    }
-    if(match(buffer,"PATCHDATAOUT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %f %f %f %f %f %f %f",&output_patchdata,
-        &patchout_tmin,&patchout_tmax,
-        &patchout_xmin,&patchout_xmax,
-        &patchout_ymin,&patchout_ymax,
-        &patchout_zmin,&patchout_zmax
-        );
-      ONEORZERO(output_patchdata);
-      continue;
-    }
-    if(match(buffer,"SMOKE3DZIPSTEP")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&smoke3dzipstep);
-	    if(smoke3dzipstep<1)smoke3dzipstep=1;
-      smoke3dzipskip=smoke3dzipstep-1;
-      continue;
-    }
-    if(match(buffer,"SLICEZIPSTEP")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&slicezipstep);
-	    if(slicezipstep<1)slicezipstep=1;
-      slicezipskip=slicezipstep-1;
-      continue;
-    }
-    if(match(buffer,"ISOZIPSTEP")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&isozipstep);
-	    if(isozipstep<1)isozipstep=1;
-      isozipskip=isozipstep-1;
-      continue;
-    }
-    if(match(buffer,"BOUNDZIPSTEP")==1){
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%i",&boundzipstep);
-	    if(boundzipstep<1)boundzipstep=1;
-      boundzipskip=boundzipstep-1;
-      continue;
-    }
-    if(match(buffer,"MSCALE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",mscale,mscale+1,mscale+2);
-      continue;
-    }
-    if(match(buffer,"RENDERCLIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i",
-        &clip_rendered_scene,&render_clip_left,&render_clip_right,&render_clip_bottom,&render_clip_top);
-      continue;
-    }
-    if(match(buffer,"CLIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&nearclip,&farclip);
-      continue;
-    }
-    if(match(buffer,"SHOWTRACERSALWAYS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_tracers_always);
-      ONEORZERO(show_tracers_always);
-      continue;
-    }
-    if(localfile==1&&match(buffer,"PROPINDEX")==1){
-      int nvals;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nvals);
-      for(i=0;i<nvals;i++){
-        propdata *propi;
-        int ind, val;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i",&ind,&val);
-        if(ind<0||ind>npropinfo-1)continue;
-        propi = propinfo + ind;
-        if(val<0||val>propi->nsmokeview_ids-1)continue;
-        propi->smokeview_id=propi->smokeview_ids[val];
-        propi->smv_object=propi->smv_objects[val];
-      }
-      for(i=0;i<npartclassinfo;i++){
-        partclassdata *partclassi;
-
-        partclassi = partclassinfo + i;
-        update_partclass_depend(partclassi);
-
-      }
-      continue;
-    }
-    if(localfile==1&&match(buffer,"partclassdataVIS")==1){
-      int ntemp;
-      int j;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ntemp);
-
-      for(j=0;j<ntemp;j++){
-        partclassdata *partclassj;
-
-        if(j>npartclassinfo)break;
-
-        partclassj = partclassinfo + j;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&partclassj->vis_type);
-      }
-      continue;
-    }
-    if(match(buffer,"PART5COLOR")==1){
-      for(i=0;i<npart5prop;i++){
-        partpropdata *propi;
-
-        propi = part5propinfo + i;
-        propi->display=0;
-      }
-      part5colorindex=0;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&i);
-      if(i>=0&&i<npart5prop){
-        partpropdata *propi;
-
-        part5colorindex=i;
-        propi = part5propinfo + i;
-        propi->display=1;
-      }
-      continue;
-    }
-    if(match(buffer,"PART5PROPDISP")==1){
-      char *token;
-
-      for(i=0;i<npart5prop;i++){
-        partpropdata *propi;
-        int j;
-
-        propi = part5propinfo + i;
-        fgets(buffer,255,stream);
-
-        trim_back(buffer);
-        token=strtok(buffer," ");
-        j=0;
-        while(token!=NULL&&j<npartclassinfo){
-          int visval;
-
-          sscanf(token,"%i",&visval);
-          propi->class_vis[j]=visval;
-          token=strtok(NULL," ");
-          j++;
-        }
-      }
-      CheckMemory;
-      continue;
-    }
-    if(match(buffer,"COLORBAR") == 1){
-      float *rgb_ini_copy;
-      int nn;
-
-      CheckMemory;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&nrgb_ini,&usetexturebar,&colorbar_select_index);
-      FREEMEMORY(rgb_ini);
-      if(NewMemory((void **)&rgb_ini,4*nrgb_ini*sizeof(float))==0)return 2;
-      rgb_ini_copy=rgb_ini;
-      for(nn=0;nn<nrgb_ini;nn++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f ",rgb_ini_copy,rgb_ini_copy+1,rgb_ini_copy+2);
-        rgb_ini_copy+=3;
-      }
-      initrgb();
-      if(colorbar_select_index>=0&&colorbar_select_index<=255){
-        update_colorbar_select_index=1;
-      }
-      continue;
-    }
-    if(match(buffer,"COLOR2BAR") == 1){
-      float *rgb_ini_copy;
-      int nn;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&nrgb2_ini);
-      if(nrgb2_ini<8){
-        fprintf(stderr,"*** Error: must have at lease 8 colors in COLOR2BAR\n");
-        exit(1);
-      }
-      FREEMEMORY(rgb2_ini);
-      if(NewMemory((void **)&rgb2_ini,4*nrgb_ini*sizeof(float))==0)return 2;
-      rgb_ini_copy=rgb2_ini;
-      for(nn=0;nn<nrgb2_ini;nn++){
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f ",rgb_ini_copy,rgb_ini_copy+1,rgb_ini_copy+2);
-        rgb_ini_copy+=3;
-      }
-      continue;
-    }
-    if(match(buffer,"P3DSURFACETYPE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&p3dsurfacetype);
-      continue;
-    }
-    if(match(buffer,"P3DSURFACESMOOTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&p3dsurfacesmooth);
-      continue;
-    }
-    if(match(buffer,"CULLFACES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&cullfaces);
-      continue;
-    }
-    if(match(buffer,"PARTPOINTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&partpointsize);
-      continue;
-    }
-    if(match(buffer,"ISOPOINTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&isopointsize);
-      continue;
-    }
-    if(match(buffer,"ISOLINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&isolinewidth);
-      continue;
-    }
-    if(match(buffer,"PLOT3DPOINTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&plot3dpointsize);
-      continue;
-    }
-    if(match(buffer,"GRIDLINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&gridlinewidth);
-      continue;
-    }
-    if(match(buffer, "TICKLINEWIDTH") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, "%f ", &ticklinewidth);
-      continue;
-    }
-    if(match(buffer, "PLOT3DLINEWIDTH") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&plot3dlinewidth);
-      continue;
-    }
-    if(match(buffer,"VECTORPOINTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&vectorpointsize);
-      continue;
-    }
-    if(match(buffer,"VECTORLINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&vectorlinewidth,&slice_line_contour_width);
-      continue;
-    }
-    if(match(buffer,"STREAKLINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&streaklinewidth);
-      continue;
-    }
-    if(match(buffer,"LINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&linewidth);
-      solidlinewidth=linewidth;
-      continue;
-    }
-    if(match(buffer,"VENTLINEWIDTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&ventlinewidth);
-      continue;
-    }
-    if(match(buffer,"SLICEOFFSET")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&sliceoffset_factor);
-      continue;
-    }
-    if(match(buffer,"TITLESAFE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&titlesafe_offset);
-      continue;
-    }
-    if(match(buffer,"VENTOFFSET")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&ventoffset_factor);
-      continue;
-    }
-    if(match(buffer,"AXISSMOOTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&axislabels_smooth);
-      continue;
-    }
-    if(match(buffer,"SHOWBLOCKS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visBlocks);
-      continue;
-    }
-    if(match(buffer,"SHOWSENSORS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i ",&visSensor,&visSensorNorm);
-      ONEORZERO(visSensor);
-      ONEORZERO(visSensorNorm);
-      continue;
-    }
-    if(match(buffer,"AVATAREVAC")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&iavatar_evac);
-      continue;
-    }
-    if(match(buffer, "SHOWVENTFLOW") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i %i %i", &visVentHFlow,&visventslab,&visventprofile,&visVentVFlow,&visVentMFlow);
-      continue;
-    }
-    if(match(buffer, "SHOWVENTS") == 1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visVents);
-      continue;
-    }
-    if(match(buffer,"SHOWTIMELABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visTimelabel);
-      continue;
-    }
-    if(match(buffer,"SHOWHMSTIMELABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&vishmsTimelabel);
-      continue;
-    }
-    if(match(buffer,"SHOWFRAMELABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visFramelabel);
-      continue;
-    }
-    if(match(buffer,"SHOWHRRLABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visHRRlabel);
-      continue;
-    }
-    if(match(buffer,"RENDERFILETYPE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&renderfiletype,&moviefiletype);
-      continue;
-    }
-    if(match(buffer,"RENDERFILELABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&renderfilelabel);
-      ONEORZERO(renderfilelabel);
-      continue;
-    }
-    if(match(buffer,"CELLCENTERTEXT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&cell_center_text);
-      continue;
-    }
-    if(match(buffer,"SHOWGRIDLOC")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visgridloc);
-      continue;
-    }
-    if(match(buffer,"SHOWGRID")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visGrid);
-      continue;
-    }
-    if(match(buffer,"SHOWFLOOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visFloor);
-      continue;
-    }
-    if(match(buffer,"SPEED")==1){
-      fgets(buffer,255,stream);
-    //  sscanf(buffer,"%f %f",&speed_crawl,&speed_walk);
-      continue;
-    }
-    if(match(buffer,"FONTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&fontindex);
-      fontindex=CLAMP(fontindex,0,SCALED_FONT);
-      FontMenu(fontindex);
-      continue;
-    }
-    if(match(buffer,"ZOOM")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f ",&zoomindex,&zoom);
-      if(zoomindex!=-1){
-        if(zoomindex<0)zoomindex=2;
-        if(zoomindex>4)zoomindex=2;
-        zoom=zooms[zoomindex];
-      }
-      else{
-        if(zoom<zooms[0]){
-          zoom=zooms[0];
-          zoomindex=0;
-        }
-        if(zoom>zooms[4]){
-          zoom=zooms[4];
-          zoomindex=4;
-        }
-      }
-      zoomini=zoom;
-      updatezoomini=1;
-      ZoomMenu(zoomindex);
-      continue;
-    }
-    if(match(buffer,"APERATURE")==1||match(buffer,"APERTURE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&apertureindex);
-      apertureindex=CLAMP(apertureindex,0,4);
-      ApertureMenu(apertureindex);
-      continue;
-    }
-    if(match(buffer,"SHOWWALLS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visWalls);
-      continue;
-      }
-    if(match(buffer,"SHOWCEILING")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visCeiling);
-      continue;
-      }
-    if(match(buffer,"SHOWTITLE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visTitle);
-      continue;
-      }
-    if(match(buffer,"SHOWTRANSPARENT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&visTransparentBlockage);
-      continue;
-      }
-    if(match(buffer,"SHOWCADOPAQUE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&viscadopaque);
-      continue;
-      }
-    if(match(buffer,"VECTORPOINTSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&vectorpointsize);
-      continue;
-      }
-    if(match(buffer,"VECTORSKIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&vectorskip);
-      if(vectorskip<1)vectorskip=1;
-      continue;
-      }
-    if(match(buffer,"SPRINKLERABSSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&sprinklerabssize);
-      continue;
-      }
-    if(match(buffer,"SENSORABSSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&sensorabssize);
-      continue;
-      }
-    if(match(buffer,"SENSORRELSIZE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f ",&sensorrelsize);
-      if(sensorrelsize<sensorrelsizeMIN)sensorrelsize=sensorrelsizeMIN;
-      continue;
-      }
-    if(match(buffer,"SETBW")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&setbw,&setbwdata);
-      continue;
-      }
-    if(match(buffer,"FLIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&background_flip);
-      continue;
-      }
-    if(match(buffer,"COLORBAR_FLIP")==1||match(buffer,"COLORBARFLIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&colorbarflip);
-      continue;
-      }
-    if(match(buffer,"TRANSPARENT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f",&use_transparency_data,&transparent_level);
-      continue;
-      }
-    if(match(buffer,"VENTCOLOR")==1){
-      float ventcolor_temp[4];
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",ventcolor_temp,ventcolor_temp+1,ventcolor_temp+2);
-      ventcolor_temp[3]=1.0;
-      ventcolor=getcolorptr(ventcolor_temp);
-      updatefaces=1;
-      updateindexcolors=1;
-      continue;
-      }
-    if(match(buffer,"STATICPARTCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",static_color,static_color+1,static_color+2);
-      continue;
-      }
-    if(match(buffer,"HEATOFFCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",heatoffcolor,heatoffcolor+1,heatoffcolor+2);
-      continue;
-      }
-    if(match(buffer,"HEATONCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",heatoncolor,heatoncolor+1,heatoncolor+2);
-      continue;
-      }
-    if(match(buffer,"SENSORCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",sensorcolor,sensorcolor+1,sensorcolor+2);
-      continue;
-      }
-    if(match(buffer,"SENSORNORMCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",sensornormcolor,sensornormcolor+1,sensornormcolor+2);
-      continue;
-      }
-    if(match(buffer,"SPRINKONCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",sprinkoncolor,sprinkoncolor+1,sprinkoncolor+2);
-      continue;
-      }
-    if(match(buffer,"SPRINKOFFCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",sprinkoffcolor,sprinkoffcolor+1,sprinkoffcolor+2);
-      continue;
-      }
-    if(match(buffer,"BACKGROUNDCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",backgroundbasecolor,backgroundbasecolor+1,backgroundbasecolor+2);
-      continue;
-      }
-    if(match(buffer,"FOREGROUNDCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",foregroundbasecolor,foregroundbasecolor+1,foregroundbasecolor+2);
-      continue;
-      }
-    if(match(buffer,"BLOCKCOLOR")==1){
-      float blockcolor_temp[4];
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",blockcolor_temp,blockcolor_temp+1,blockcolor_temp+2);
-      blockcolor_temp[3]=1.0;
-      block_ambient2=getcolorptr(blockcolor_temp);
-      updatefaces=1;
-      updateindexcolors=1;
-      continue;
-      }
-    if(match(buffer,"BLOCKLOCATION")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&blocklocation);
-      continue;
-      }
-    if(match(buffer,"BLOCKSHININESS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f",&block_shininess);
-      updatefaces=1;
-      updateindexcolors=1;
-      continue;
-      }
-    if(match(buffer,"BLOCKSPECULAR")==1){
-      float blockspec_temp[4];
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",blockspec_temp,blockspec_temp+1,blockspec_temp+2);
-      blockspec_temp[3]=1.0;
-      block_specular2=getcolorptr(blockspec_temp);
-      updatefaces=1;
-      updateindexcolors=1;
-      continue;
-      }
-    if(match(buffer,"SHOWOPENVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&visOpenVents,&visOpenVentsAsOutline);
-      continue;
-      }
-    if(match(buffer,"SHOWDUMMYVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visDummyVents);
-      continue;
-      }
-    if(match(buffer,"SHOWOTHERVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visOtherVents);
-      ONEORZERO(visOtherVents);
-      continue;
-      }
-    if(match(buffer,"SHOWCVENTS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&visCircularVents,&circle_outline);
-      visCircularVents=CLAMP(visCircularVents,0,2);
-      circle_outline=CLAMP(circle_outline,0,1);
-      continue;
-    }
-    if(match(buffer,"SHOWTICKS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visFDSticks);
-      continue;
-      }
-    if(match(buffer,"USERTICKS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i %i %i %i",&visUSERticks,&auto_user_tick_placement,&user_tick_sub,
-        &user_tick_show_x,&user_tick_show_y,&user_tick_show_z);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",user_tick_origin,user_tick_origin+1,user_tick_origin+2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",user_tick_min,user_tick_min+1,user_tick_min+2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",user_tick_max,user_tick_max+1,user_tick_max+2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",user_tick_step,user_tick_step+1,user_tick_step+2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i %i",&user_tick_show_x,&user_tick_show_y,&user_tick_show_z);
-      continue;
-      }
-    if(match(buffer,"SHOWLABELS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visLabels);
-      continue;
-      }
-    if(match(buffer,"BOUNDCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",boundcolor,boundcolor+1,boundcolor+2);
-      continue;
-      }
-    if(match(buffer,"TIMEBARCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",timebarcolor,timebarcolor+1,timebarcolor+2);
-      continue;
-      }
-    if(match(buffer,"CONTOURTYPE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&contour_type);
-      contour_type=CLAMP(contour_type,0,2);
-      continue;
-    }
-    if(match(buffer,"P3CONT3DSMOOTH")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&p3cont3dsmooth);
-      continue;
-    }
-    if(match(buffer,"SURFINC")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&surfincrement);
-      continue;
-    }
-    if(match(buffer,"FRAMERATE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visFramerate);
-      continue;
-    }
-    if(match(buffer,"SHOWFRAMERATE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visFramerate);
-      continue;
-      }
-    if(match(buffer,"SHOWFRAME")==1&&match(buffer,"SHOWFRAMERATE")!=1&&match(buffer,"SHOWFRAMELABEL")!=1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visFrame);
-      ONEORZERO(visFrame);
-      continue;
-    }
-    if(match(buffer,"FRAMERATEVALUE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&frameratevalue);
-      FrameRateMenu(frameratevalue);
-      continue;
-    }
-    if(match(buffer,"SHOWSPRINKPART")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visSprinkPart);
-      continue;
-    }
-    if(match(buffer,"SHOWAXISLABELS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visaxislabels);
-      continue;
-    }
-#ifdef pp_memstatus
-    if(match(buffer,"SHOWMEMLOAD")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visAvailmemory);
-      continue;
-    }
-#endif
-    if(match(buffer,"SHOWBLOCKLABEL")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visMeshlabel);
-      continue;
-    }
-    if(match(buffer,"SHOWVZONE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visVZone);
-      continue;
-    }
-    if(match(buffer,"SHOWZONEFIRE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i ",&viszonefire);
-      if(viszonefire!=0)viszonefire=1;
-      continue;
-    }
-    if(match(buffer,"SHOWSZONE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visSZone);
-      continue;
-    }
-    if(match(buffer,"SHOWHZONE")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visHZone);
-      continue;
-    }
-    if(match(buffer,"SHOWHAZARDCOLORS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&zonecolortype);
-      zonecolortype = CLAMP(zonecolortype,0,2);
-      continue;
-    }
-    if(match(buffer,"SHOWSMOKEPART")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visSmokePart);
-      continue;
-    }
-    if(match(buffer,"RENDEROPTION")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %i",&render_option,&nrender_rows);
-      RenderMenu(render_option);
-      continue;
-    }
-    if(match(buffer,"SHOWISONORMALS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&show_iso_normal);
-      if(show_iso_normal!=1)show_iso_normal=0;
-      continue;
-    }
-    if(match(buffer,"SHOWISO")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visAIso);
-      visAIso&=7;
-      show_iso_solid=(visAIso&1)/1;
-      show_iso_outline=(visAIso&2)/2;
-      show_iso_points=(visAIso&4)/4;
-      continue;
-    }
-    if(trainer_mode==0&&windowresized==0){
-      if(match(buffer,"WINDOWWIDTH")==1){
-        int scrWidth;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&scrWidth);
-        if(scrWidth<=0){
-          scrWidth = glutGet(GLUT_SCREEN_WIDTH);
-        }
-        if(scrWidth!=screenWidth){
-          setScreenSize(&scrWidth,NULL);
-          screenWidthINI=scrWidth;
-          update_screensize=1;
-        }
-        continue;
-      }
-      if(match(buffer,"WINDOWHEIGHT")==1){
-        int scrHeight;
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i",&scrHeight);
-        if(scrHeight<=0){
-          scrHeight = glutGet(GLUT_SCREEN_HEIGHT);
-        }
-        if(scrHeight!=screenHeight){
-          setScreenSize(NULL,&scrHeight);
-          screenHeightINI=scrHeight;
-          update_screensize=1;
-        }
-        continue;
-        }
-    }
-    if(match(buffer,"SHOWTIMEBAR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visTimebar);
-      continue;
-    }
-    if(match(buffer,"SHOWCOLORBARS")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&visColorbar);
-      continue;
-    }
-    if(match(buffer,"EYEVIEW")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&rotation_type);
-      continue;
-    }
-    if(localfile==1&&match(buffer,"SCRIPTFILE")==1){
-      if(fgets(buffer2,255,stream)==NULL)break;
-      insert_scriptfile(remove_comment(buffer2));
-      updatemenu=1;
-      continue;
-    }
-    if(localfile==1&&match(buffer,"SHOWDEVICES")==1){
-      sv_object *obj_typei;
-      char *dev_label;
-      int ndevices_ini;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&ndevices_ini);
-
-      for(i=0;i<nobject_defs;i++){
-        obj_typei = object_defs[i];
-        obj_typei->visible=0;
-      }
-      for(i=0;i<ndevices_ini;i++){
-        fgets(buffer,255,stream);
-        trim_back(buffer);
-        dev_label=trim_front(buffer);
-        obj_typei=get_object(dev_label);
-        if(obj_typei!=NULL){
-          obj_typei->visible=1;
-        }
-      }
-      continue;
-    }
-    if(localfile==1&&match(buffer,"XYZCLIP")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&clip_mode);
-      clip_mode=CLAMP(clip_mode,0,2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_xmin, &clipinfo.xmin, &clipinfo.clip_xmax, &clipinfo.xmax);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_ymin, &clipinfo.ymin, &clipinfo.clip_ymax, &clipinfo.ymax);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i %f %i %f",&clipinfo.clip_zmin, &clipinfo.zmin, &clipinfo.clip_zmax, &clipinfo.zmax);
-      updateclipvals=1;
-      continue;
-    }
-    if(match(buffer,"NOPART")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nopart);
-      continue;
-    }
-    if(match(buffer,"WINDOWOFFSET")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&titlesafe_offsetBASE);
-      continue;
-    }
-    if(match(buffer,"LIGHT0")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%d",&light_enabled0);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LIGHT1")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%d",&light_enabled1);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LIGHTPOS0")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",light_position0,light_position0+1,light_position0+2,light_position0+3);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LIGHTPOS1")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f %f",light_position1,light_position1+1,light_position1+2,light_position1+3);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LIGHTMODELLOCALVIEWER")==1){
-      int temp;
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%d",&temp);
-      lightmodel_localviewer = temp == 0? GL_FALSE : GL_TRUE;
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LIGHTMODELSEPARATESPECULARCOLOR")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%d",&lightmodel_separatespecularcolor);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"AMBIENTLIGHT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",ambientlight,ambientlight+1,ambientlight+2);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"DIFFUSELIGHT")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",diffuselight,diffuselight+1,diffuselight+2);
-      UpdateLIGHTS=1;
-      continue;
-    }
-    if(match(buffer,"LABELSTARTUPVIEW")==1){
-      char *front;
-
-      fgets(buffer,255,stream);
-      front=trim_front(buffer);
-      trim_back(front);
-      strcpy(label_startup_view,front);
-      update_startup_view=1;
-      continue;
-    }
-    if(match(buffer,"USER_ROTATE") == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i %i %f %f %f",&glui_rotation_index_ini,&show_rotation_center,&xcenCUSTOM,&ycenCUSTOM,&zcenCUSTOM);
-      update_rotation_center_ini=1;
-      continue;
-    }
-    if(match(buffer,"INPUT_FILE") == 1){
-      size_t len;
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      len=strlen(buffer);
-      buffer[len-1]='\0';
-      trim_back(buffer);
-      len=strlen(buffer);
-
-      FREEMEMORY(INI_fds_filein);
-      if(NewMemory((void **)&INI_fds_filein,(unsigned int)(len+1))==0)return 2;
-      STRCPY(INI_fds_filein,buffer);
-      continue;
-    }
-    if(match(buffer,"VIEWPOINT3")==1
-      ||match(buffer,"VIEWPOINT4")==1
-      ||match(buffer,"VIEWPOINT5")==1
-      ||match(buffer,"VIEWPOINT6")==1
-      ){
-      int p_type;
-      float *eye,mat[16],*az_elev;
-      int is_viewpoint4=0;
-      int is_viewpoint5=0;
-      int is_viewpoint6=0;
-      float xyzmaxdiff_local=-1.0;
-      float xmin_local=0.0, ymin_local=0.0, zmin_local=0.0;
-
-      if(match(buffer,"VIEWPOINT4")==1)is_viewpoint4=1;
-      if(match(buffer,"VIEWPOINT5")==1){
-        is_viewpoint4=1;
-        is_viewpoint5=1;
-      }
-      if(match(buffer,"VIEWPOINT6")==1){
-        is_viewpoint4=1;
-        is_viewpoint5=1;
-        is_viewpoint6=1;
-      }
-      eye=camera_ini->eye;
-      az_elev=camera_ini->az_elev;
-
-      {
-        char name_ini[32];
-        strcpy(name_ini,"ini");
-        init_camera(camera_ini,name_ini);
-      }
-
-		  fgets(buffer,255,stream);
-		  sscanf(buffer,"%i %i %i %f %f %f %f",
-        &camera_ini->rotation_type,&camera_ini->rotation_index,&camera_ini->view_id,
-        &xyzmaxdiff_local,&xmin_local,&ymin_local,&zmin_local);
-
-      {
-        float zoom_in;
-        int zoomindex_in;
-
-        zoom_in=zoom;
-        zoomindex_in=zoomindex;
-        fgets(buffer,255,stream);
-	  	  sscanf(buffer,"%f %f %f %f %i",eye,eye+1,eye+2,&zoom_in,&zoomindex_in);
-        if(xyzmaxdiff_local>0.0){
-          eye[0] = xmin_local + eye[0]*xyzmaxdiff_local;
-          eye[1] = ymin_local + eye[1]*xyzmaxdiff_local;
-          eye[2] = zmin_local + eye[2]*xyzmaxdiff_local;
-        }
-        zoom=zoom_in;
-        zoomindex=zoomindex_in;
-        if(zoomindex!=-1){
-         if(zoomindex<0)zoomindex=2;
-         if(zoomindex>4)zoomindex=2;
-         zoom=zooms[zoomindex];
-        }
-        else{
-          if(zoom<zooms[0]){
-            zoom=zooms[0];
-            zoomindex=0;
-          }
-          if(zoom>zooms[4]){
-            zoom=zooms[4];
-            zoomindex=4;
-          }
-        }
-        updatezoommenu=1;
-      }
-
-      p_type=0;
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%f %f %f %i",&camera_ini->view_angle, &camera_ini->azimuth,&camera_ini->elevation,&p_type);
-      if(p_type!=1)p_type=0;
-      camera_ini->projection_type=p_type;
-
-	    fgets(buffer,255,stream);
-	    sscanf(buffer,"%f %f %f",&camera_ini->xcen,&camera_ini->ycen,&camera_ini->zcen);
-      if(xyzmaxdiff_local>0.0){
-        camera_ini->xcen = xmin_local + camera_ini->xcen*xyzmaxdiff_local;
-        camera_ini->ycen = ymin_local + camera_ini->ycen*xyzmaxdiff_local;
-        camera_ini->zcen = zmin_local + camera_ini->zcen*xyzmaxdiff_local;
-      }
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",az_elev,az_elev+1);
-
-      if(is_viewpoint6==1){
-        float *q;
-
-        for(i=0;i<16;i++){
-          mat[i]=0.0;
-          if(i%5==0)mat[i]=1.0;
-        }
-        q = camera_ini->quaternion;
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%i %f %f %f %f",&camera_ini->quat_defined,q,q+1,q+2,q+3);
-      }
-      else{
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat,mat+1,mat+2,mat+3);
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+4,mat+5,mat+6,mat+7);
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+8,mat+9,mat+10,mat+11);
-
-        fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f",mat+12,mat+13,mat+14,mat+15);
-      }
-      if(is_viewpoint5==1){
-        cameradata *ci;
-
-        ci = camera_ini;
-  		  fgets(buffer,255,stream);
-        sscanf(buffer,"%i %i %i %i %i %i %i",
-          &ci->clip_mode,
-          &ci->clip_xmin,&ci->clip_ymin,&ci->clip_zmin,
-          &ci->clip_xmax,&ci->clip_ymax,&ci->clip_zmax);
-  		  fgets(buffer,255,stream);
-        sscanf(buffer,"%f %f %f %f %f %f",
-          &ci->xmin,&ci->ymin,&ci->zmin,
-          &ci->xmax,&ci->ymax,&ci->zmax);
-        if(xyzmaxdiff_local>0.0){
-          ci->xmin = xmin_local + ci->xmin*xyzmaxdiff_local;
-          ci->xmax = xmin_local + ci->xmax*xyzmaxdiff_local;
-          ci->ymin = ymin_local + ci->ymin*xyzmaxdiff_local;
-          ci->zmax = ymin_local + ci->ymax*xyzmaxdiff_local;
-          ci->ymin = zmin_local + ci->zmin*xyzmaxdiff_local;
-          ci->zmax = zmin_local + ci->zmax*xyzmaxdiff_local;
-        }
-      }
-      if(is_viewpoint4==1){
-        char *bufferptr;
-
-  		  fgets(buffer,255,stream);
-        trim_back(buffer);
-        bufferptr=trim_front(buffer);
-        strcpy(camera_ini->name,bufferptr);
-        init_camera_list();
-        insert_camera(&camera_list_first,camera_ini,bufferptr);
-      }
-
-      enable_reset_saved_view();
-      camera_ini->dirty=1;
-      camera_ini->defined=1;
-      continue;
-    }
-    if(match(buffer, "COLORTABLE")==1){
-      int nctableinfo;
-      colortabledata *ctableinfo = NULL;
-
-      fgets(buffer, 255, stream);
-      sscanf(buffer, "%i", &nctableinfo);
-      nctableinfo = MAX(nctableinfo, 0);
-      if(nctableinfo>0){
-        NewMemory((void **)&ctableinfo, nctableinfo*sizeof(colortabledata));
-        for(i = 0; i<nctableinfo; i++){
-          colortabledata *rgbi;
-          char *labelptr,*percenptr,label[256];
-          int  colori[4];
-
-
-          rgbi = ctableinfo+i;
-          fgets(buffer, 255, stream);
-          percenptr = strchr(buffer, '%');
-          if(percenptr!=NULL){
-            labelptr = trim_front(percenptr+1);
-            trim_back(labelptr);
-            strcpy(rgbi->label, labelptr);
-            percenptr[0] = 0;
-          }
-          else{
-            sprintf(label, "Color %i", i+1);
-            strcpy(rgbi->label, label);
-          }
-          colori[3] = 255;
-          sscanf(buffer, "%i %i %i %i", colori, colori+1, colori+2, colori+3);
-          rgbi->color[0] = CLAMP(colori[0], 0, 255);
-          rgbi->color[1] = CLAMP(colori[1], 0, 255);
-          rgbi->color[2] = CLAMP(colori[2], 0, 255);
-          rgbi->color[3] = CLAMP(colori[3], 0, 255);
-        }
-        UpdateColorTable(ctableinfo,nctableinfo);
-        FREEMEMORY(ctableinfo);
-      }
-      continue;
-    }
-
-    if(match(buffer,"ISOCOLORS")==1){
-      int nn,n_iso_c=0;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f",&iso_shininess,&iso_transparency);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%f %f %f",iso_specular,iso_specular+1,iso_specular+2);
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&n_iso_c);
-      for(nn = 0; nn<MAX_ISO_COLORS; nn++){
-        float *iso_color;
-
-        iso_color = iso_colors + 4*nn;
-        if(nn < n_iso_c){
-          fgets(buffer, 255, stream);
-          sscanf(buffer, "%f %f %f %f", iso_color, iso_color + 1, iso_color + 2, iso_color + 3);
-        }
-        iso_color[0] = CLAMP(    iso_color[0], 0.0, 1.0);
-        iso_color[1] = CLAMP(    iso_color[1], 0.0, 1.0);
-        iso_color[2] = CLAMP(    iso_color[2], 0.0, 1.0);
-        iso_color[3] = CLAMP(    iso_color[3], 0.0, 1.0);
-      }
-      update_isocolors();
-      update_iso_colorlevel();
-      continue;
-    }
-    if(match(buffer,"UNITCLASSES")==1){
-      int nuc;
-
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&nuc);
-      for(i=0;i<nuc;i++){
-        int unit_index;
-
-        fgets(buffer,255,stream);
-        if(i>nunitclasses-1)continue;
-        sscanf(buffer,"%i",&unit_index);
-        unitclasses[i].unit_index=unit_index;
-      }
-      continue;
-    }
-    if(match(buffer,"SMOOTHLINES")==1){
-      fgets(buffer,255,stream);
-      sscanf(buffer,"%i",&antialiasflag);
-      continue;
-      }
-    if(localfile==1&&match(buffer,"VIEWTIMES") == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f %i",&view_tstart,&view_tstop,&view_ntimes);
-      if(view_ntimes<2)view_ntimes=2;
-      ReallocTourMemory();
-      continue;
-    }
-    if(localfile==1&&match(buffer,"SHOOTER") == 1){
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f %f",shooter_xyz,shooter_xyz+1,shooter_xyz+2);
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f %f",shooter_dxyz,shooter_dxyz+1,shooter_dxyz+2);
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f %f",shooter_uvw,shooter_uvw+1,shooter_uvw+2);
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f %f",&shooter_velmag,&shooter_veldir,&shooterpointsize);
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%i %i %i %i %i",&shooter_fps,&shooter_vel_type,&shooter_nparts,&visShooter,&shooter_cont_update);
-
-      if(fgets(buffer,255,stream)==NULL)break;
-      sscanf(buffer,"%f %f",&shooter_duration,&shooter_v_inf);
-      continue;
-    }
-    {
-      int nkeyframes;
-      float key_time, key_xyz[3], key_az_path, key_view[3], params[3], zzoom, key_elev_path;
-      float t_globaltension, key_bank;
-      int t_globaltension_flag;
-      int viewtype,uselocalspeed;
-      float *col;
-
-      if(match(buffer,"ADJUSTALPHA")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&adjustalphaflag);
-        continue;
-      }
-      if(match(buffer,"SMOKECULL")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-#ifdef pp_CULL
-        if(gpuactive==1){
-          sscanf(buffer,"%i",&cullsmoke);
-          if(cullsmoke!=0)cullsmoke=1;
-        }
-        else{
-          cullsmoke=0;
-        }
-#else
-        sscanf(buffer,"%i",&smokecullflag);
-#endif
-        continue;
-      }
-      if(match(buffer,"SMOKESKIP")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&smokeskipm1);
-        continue;
-      }
-      if(match(buffer,"SMOKEALBEDO")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f",&smoke_albedo);
-        smoke_albedo = CLAMP(smoke_albedo, 0.0, 1.0);
-        continue;
-      }
-      if(match(buffer,"SMOKETHICK")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&smoke3d_thick);
-        continue;
-      }
-#ifdef pp_GPU
-      if(match(buffer,"SMOKERTHICK")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f",&smoke3d_rthick);
-        smoke3d_rthick=CLAMP(smoke3d_rthick,1.0,255.0);
-        smoke3d_thick=log_base2(smoke3d_rthick);
-        continue;
-      }
-#endif
-      if(match(buffer,"FIRECOLOR")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i %i %i",&fire_red,&fire_green,&fire_blue);
-        continue;
-      }
-      if(match(buffer, "SMOKECOLOR")==1){
-        if(fgets(buffer, 255, stream)==NULL)break;
-        sscanf(buffer, "%i %i %i", &smoke_red, &smoke_green, &smoke_blue);
-        continue;
-      }
-      if(match(buffer, "FIREDEPTH")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f",&fire_halfdepth);
-        continue;
-      }
-      if(match(buffer,"VIEWTOURFROMPATH")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&viewtourfrompath);
-        continue;
-      }
-      if(match(buffer,"VIEWALLTOURS")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&viewalltours);
-        continue;
-      }
-      if(match(buffer,"SHOWTOURROUTE")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&edittour);
-        continue;
-      }
-      if(match(buffer,"TIMEOFFSET")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f",&timeoffset);
-        continue;
-      }
-      if(match(buffer,"SHOWPATHNODES")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&show_path_knots);
-        continue;
-      }
-      if(match(buffer,"SHOWIGNITION")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i %i",&vis_threshold,&vis_onlythreshold);
-        continue;
-      }
-      if(match(buffer,"SHOWTHRESHOLD")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i %i %f",&vis_threshold,&vis_onlythreshold,&temp_threshold);
-        continue;
-      }
-      if(match(buffer,"TOURCONSTANTVEL")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%i",&tour_constant_vel);
-        continue;
-      }
-      if(match(buffer,"TOUR_AVATAR")==1){
-        if(fgets(buffer,255,stream)==NULL)break;
-//        sscanf(buffer,"%i %f %f %f %f",&tourlocus_type,tourcol_avatar,tourcol_avatar+1,tourcol_avatar+2,&tourrad_avatar);
-//        if(tourlocus_type!=0)tourlocus_type=1;
-        continue;
-      }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ GENCOLORBAR ++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-      if(match(buffer,"GCOLORBAR") == 1){
-        colorbardata *cbi;
-        int r1, g1, b1;
-        int n;
-        int ncolorbarini;
-
-        fgets(buffer,255,stream);
-        ncolorbarini=0;
-        sscanf(buffer,"%i",&ncolorbarini);
-
-        initdefaultcolorbars();
-
-        ncolorbars=ndefaultcolorbars+ncolorbarini;
-        if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo,ncolorbars*sizeof(colorbardata));
-
-        for(n=ndefaultcolorbars;n<ncolorbars;n++){
-          char *cb_buffptr;
-
-          cbi = colorbarinfo + n;
-          fgets(buffer,255,stream);
-          trim_back(buffer);
-          cb_buffptr=trim_front(buffer);
-          strcpy(cbi->label,cb_buffptr);
-
-          fgets(buffer,255,stream);
-          sscanf(buffer,"%i %i",&cbi->nnodes,&cbi->nodehilight);
-          if(cbi->nnodes<0)cbi->nnodes=0;
-          if(cbi->nodehilight<0||cbi->nodehilight>=cbi->nnodes){
-            cbi->nodehilight=0;
-          }
-
-          cbi->label_ptr=cbi->label;
-          for(i=0;i<cbi->nnodes;i++){
-            int icbar;
-            int nn;
-
-            fgets(buffer,255,stream);
-            r1=-1; g1=-1; b1=-1;
-            sscanf(buffer,"%i %i %i %i",&icbar,&r1,&g1,&b1);
-            cbi->index_node[i]=icbar;
-            nn = 3*i;
-            cbi->rgb_node[nn  ]=r1;
-            cbi->rgb_node[nn+1]=g1;
-            cbi->rgb_node[nn+2]=b1;
-          }
-          remapcolorbar(cbi);
-        }
-    }
-
-      if(match(buffer,"TOURCOLORS")==1){
-        col=tourcol_selectedpathline;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_selectedpathlineknots;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_selectedknot;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_pathline;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_pathknots;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_text;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        col=tourcol_avatar;
-        if(fgets(buffer,255,stream)==NULL)break;
-        sscanf(buffer,"%f %f %f",col,col+1,col+2);
-
-        continue;
-      }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ LABEL ++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-    if(localfile==1&&(match(buffer,"LABEL") == 1||match(buffer,"TICKLABEL")==1)){
-
-      /*
-      LABEL
-      x y z r g b tstart tstop
-      label
-
-      */
-        float *xyz, *rgbtemp, *tstart_stop;
-        labeldata labeltemp, *labeli;
-        int *useforegroundcolor;
-        char *bufferptr;
-        int *show_always;
-        int ticklabel = 0;
-        float *xyztick, *xyztickdir;
-        int *showtick;
-
-        if(match(buffer, "TICKLABEL")==1)ticklabel = 1;
-
-        labeli = &labeltemp;
-
-        labeli->labeltype=TYPE_INI;
-        xyz = labeli->xyz;
-        rgbtemp = labeli->frgb;
-        xyztick = labeli->tick_begin;
-        xyztickdir = labeli->tick_direction;
-        showtick = &labeli->show_tick;
-
-        useforegroundcolor=&labeli->useforegroundcolor;
-        tstart_stop = labeli->tstart_stop;
-        show_always = &labeli->show_always;
-
-        fgets(buffer,255,stream);
-        rgbtemp[0]=-1.0;
-        rgbtemp[1]=-1.0;
-        rgbtemp[2]=-1.0;
-        rgbtemp[3]=1.0;
-        tstart_stop[0]=-1.0;
-        tstart_stop[1]=-1.0;
-        *useforegroundcolor=-1;
-        *show_always=1;
-
-        sscanf(buffer,"%f %f %f %f %f %f %f %f %i %i",
-          xyz,xyz+1,xyz+2,
-          rgbtemp,rgbtemp+1,rgbtemp+2,
-          tstart_stop,tstart_stop+1,useforegroundcolor,show_always);
-
-        if(ticklabel==1){
-          fgets(buffer, 255, stream);
-          sscanf(buffer, "%f %f %f %f %f %f %i",
-            xyztick, xyztick+1, xyztick+2,
-            xyztickdir, xyztickdir+1, xyztickdir+2,
-            showtick);
-          *showtick = CLAMP(*showtick, 0, 1);
-        }
-        else{
-          xyztick[0] = 0.0;
-          xyztick[1] = 0.0;
-          xyztick[2] = 0.0;
-          xyztickdir[0] = 1.0;
-          xyztickdir[1] = 0.0;
-          xyztickdir[2] = 0.0;
-          *showtick = 0;
-        }
-        *show_always=CLAMP(*show_always,0,1);
-        *useforegroundcolor = CLAMP(*useforegroundcolor,-1,1);
-        if(*useforegroundcolor==-1){
-          if(rgbtemp[0]<0.0||rgbtemp[1]<0.0||rgbtemp[2]<0.0||rgbtemp[0]>1.0||rgbtemp[1]>1.0||rgbtemp[2]>1.0){
-            *useforegroundcolor=1;
-          }
-          else{
-            *useforegroundcolor=0;
-          }
-        }
-        fgets(buffer,255,stream);
-        trim_back(buffer);
-        bufferptr = trim_front(buffer);
-        strcpy(labeli->name,bufferptr);
-        LABEL_insert(labeli);
-      continue;
-    }
-
-  /*
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    ++++++++++++++++++++++ TICKS ++++++++++++++++++++++++++++++++
-    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  */
-
-/*
-typedef struct {
-  float begin[3],end[3],length;
-  float dxyz[3],dlength;
-  int dir,nbars;
-} tickdata;
-*/
-
-    if(localfile==1&&match(buffer,"TICKS") == 1){
-      ntickinfo++;
-      ResizeMemory((void **)&tickinfo,(ntickinfo)*sizeof(tickdata));
-
-      {
-        tickdata *ticki;
-        float *begt, *endt;
-        int *nbarst;
-        float term;
-        float length=0.0;
-        float *dxyz;
-        float sum;
-
-        ticki = tickinfo + ntickinfo - 1;
-        begt = ticki->begin;
-        endt = ticki->end;
-        nbarst=&ticki->nbars;
-        dxyz = ticki->dxyz;
-
-
-        /*
-        TICKS
-        b1 b2 b3 e1 e2 e3 nb
-        ticklength tickdir tickcolor (r g b) tickwidth
-        */
-        if(fgets(buffer,255,stream)==NULL)break;
-        *nbarst=0;
-        sscanf(buffer,"%f %f %f %f %f %f %i",begt,begt+1,begt+2,endt,endt+1,endt+2,nbarst);
-        if(*nbarst<1)*nbarst=1;
-        if(fgets(buffer,255,stream)==NULL)break;
-        {
-          float *rgbtemp;
-
-          rgbtemp=ticki->rgb;
-          VECEQCONS(rgbtemp,-1.0);
-          ticki->width=-1.0;
-          sscanf(buffer,"%f %i %f %f %f %f",&ticki->dlength,&ticki->dir,rgbtemp,rgbtemp+1,rgbtemp+2,&ticki->width);
-          if(rgbtemp[0]<0.0||rgbtemp[0]>1.0||
-             rgbtemp[1]<0.0||rgbtemp[1]>1.0||
-             rgbtemp[2]<0.0||rgbtemp[2]>1.0){
-            ticki->useforegroundcolor=1;
-          }
-          else{
-            ticki->useforegroundcolor=0;
-          }
-          if(ticki->width<0.0)ticki->width=1.0;
-        }
-        for(i=0;i<3;i++){
-          term = endt[i]-begt[i];
-          length += term*term;
-        }
-        if(length<=0.0){
-          endt[0]=begt[0]+1.0;
-          length = 1.0;
-        }
-        ticki->length=sqrt(length);
-        VECEQCONS(dxyz,0.0);
-        switch(ticki->dir){
-        case XLEFT:
-        case XRIGHT:
-          dxyz[0]=1.0;
-          break;
-        case YBACK:
-        case YFRONT:
-          dxyz[1]=1.0;
-          break;
-        case ZBOTTOM:
-        case ZTOP:
-          dxyz[2]=1.0;
-          break;
-        default:
-          ASSERT(FFALSE);
-          break;
-        }
-        if(ticki->dir<0){
-          for(i=0;i<3;i++){
-            dxyz[i]=-dxyz[i];
-          }
-        }
-        sum = 0.0;
-        sum = dxyz[0]*dxyz[0] + dxyz[1]*dxyz[1] + dxyz[2]*dxyz[2];
-        if(sum>0.0){
-          sum=sqrt(sum);
-          dxyz[0] *= (ticki->dlength/sum);
-          dxyz[1] *= (ticki->dlength/sum);
-          dxyz[2] *= (ticki->dlength/sum);
-        }
-      }
-      continue;
-    }
-
-    if(localfile == 1){
-      int tours_flag;
-
-      tours_flag = 0;
-      if(match(buffer, "TOURS") == 1)tours_flag = 1;
-      if(tours_flag == 1){
-        if(ntours > 0){
-          for(i = 0; i < ntours; i++){
-            tourdata *touri;
-
-            touri = tourinfo + i;
-            freetour(touri);
-          }
-          FREEMEMORY(tourinfo);
-        }
-        ntours = 0;
-
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%i", &ntours);
-        ntours++;
-        if(ntours > 0){
-          if(NewMemory((void **)&tourinfo, ntours*sizeof(tourdata)) == 0)return 2;
-          for(i = 0; i < ntours; i++){
-            tourdata *touri;
-
-            touri = tourinfo + i;
-            touri->path_times = NULL;
-            touri->pathnodes = NULL;
-          }
-        }
-        ReallocTourMemory();
-        init_circulartour();
-        {
-          keyframe *thisframe, *addedframe;
-          tourdata *touri;
-          int glui_avatar_index_local;
-
-          for(i = 1; i < ntours; i++){
-            int j;
-
-            touri = tourinfo + i;
-            inittour(touri);
-            fgets(buffer, 255, stream);
-            trim_back(buffer);
-            strcpy(touri->label, trim_front(buffer));
-
-            t_globaltension = touri->global_tension;
-            t_globaltension_flag = touri->global_tension_flag;
-            fgets(buffer, 255, stream);
-            glui_avatar_index_local = 0;
-            sscanf(buffer, "%i %i %f %i %i",
-              &nkeyframes, &t_globaltension_flag, &t_globaltension, &glui_avatar_index_local, &touri->display2);
-            glui_avatar_index_local = CLAMP(glui_avatar_index_local, 0, navatar_types - 1);
-            touri->glui_avatar_index = glui_avatar_index_local;
-            if(touri->display2 != 1)touri->display2 = 0;
-            touri->global_tension_flag = t_globaltension_flag;
-            touri->global_tension = t_globaltension;
-            touri->nkeyframes = nkeyframes;
-
-            if(NewMemory((void **)&touri->keyframe_times, nkeyframes*sizeof(float)) == 0)return 2;
-            if(NewMemory((void **)&touri->pathnodes, view_ntimes*sizeof(pathdata)) == 0)return 2;
-            if(NewMemory((void **)&touri->path_times, view_ntimes*sizeof(float)) == 0)return 2;
-
-            thisframe = &touri->first_frame;
-            for(j = 0; j < nkeyframes; j++){
-              params[0] = 0.0;
-              params[1] = 0.0;
-              params[2] = 0.0;
-              key_view[0] = 0.0;
-              key_view[1] = 0.0;
-              key_view[2] = 0.0;
-              key_bank = 0.0;
-              key_az_path = 0.0;
-              key_elev_path = 0.0;
-              viewtype = 0;
-              zzoom = 1.0;
-              uselocalspeed = 0;
-              fgets(buffer, 255, stream);
-
-              sscanf(buffer, "%f %f %f %f %i",
-                &key_time,
-                key_xyz, key_xyz + 1, key_xyz + 2,
-                &viewtype);
-
-              if(viewtype == 0){
-                sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
-                  &key_time,
-                  key_xyz, key_xyz + 1, key_xyz + 2,
-                  &viewtype, &key_az_path, &key_elev_path, &key_bank,
-                  params, params + 1, params + 2,
-                  &zzoom, &uselocalspeed);
-              }
-              else{
-                sscanf(buffer, "%f %f %f %f %i %f %f %f %f %f %f %f %i",
-                  &key_time,
-                  key_xyz, key_xyz + 1, key_xyz + 2,
-                  &viewtype, key_view, key_view + 1, key_view + 2,
-                  params, params + 1, params + 2,
-                  &zzoom, &uselocalspeed);
-              }
-              if(zzoom<0.25)zzoom = 0.25;
-              if(zzoom>4.00)zzoom = 4.0;
-              addedframe = add_frame(thisframe, key_time, key_xyz, key_az_path, key_elev_path,
-                key_bank, params, viewtype, zzoom, key_view);
-              thisframe = addedframe;
-              touri->keyframe_times[j] = key_time;
-            }
-          }
-        }
-        if(tours_flag == 1){
-          for(i = 0; i < ntours; i++){
-            tourdata *touri;
-
-            touri = tourinfo + i;
-            touri->first_frame.next->prev = &touri->first_frame;
-            touri->last_frame.prev->next = &touri->last_frame;
-          }
-          update_tour_menulabels();
-          createtourpaths();
-          Update_Times();
-          plotstate = getplotstate(DYNAMIC_PLOTS);
-          selectedtour_index = TOURINDEX_MANUAL;
-          selected_frame = NULL;
-          selected_tour = NULL;
-          if(viewalltours == 1)TourMenu(MENU_TOUR_SHOWALL);
-        }
-        else{
-          ntours = 0;
-        }
-        strcpy(buffer, "1.00000 1.00000 2.0000 0");
-        trimmzeros(buffer);
-        continue;
-      }
-      if(match(buffer, "TOURINDEX")){
-        if(fgets(buffer, 255, stream) == NULL)break;
-        sscanf(buffer, "%i", &selectedtour_index_ini);
-        if(selectedtour_index_ini < 0)selectedtour_index_ini = -1;
-        update_selectedtour_index = 1;
-      }
-    }
-
-  }
-
-  }
-  fclose(stream);
-  return 0;
-
 }
 
 /* ------------------ output_viewpoints ------------------------ */
@@ -11643,7 +11495,7 @@ void writeini_local(FILE *fileout){
       propi = part5propinfo + i;
       fprintf(fileout, " ");
       for(j = 0; j < npartclassinfo; j++){
-        fprintf(fileout, " %i ", propi->class_vis[j]);
+        fprintf(fileout, " %i ", (int)propi->class_vis[j]);
       }
       fprintf(fileout, "\n");
     }
@@ -12511,7 +12363,7 @@ void writeini(int flag,char *filename){
       fprintf(fileout, " %i %i\n", cbi->nnodes, cbi->nodehilight);
       for(i = 0; i < cbi->nnodes; i++){
         rrgb = cbi->rgb_node + 3 * i;
-        fprintf(fileout, " %i %i %i %i\n", cbi->index_node[i], (int)rrgb[0], (int)rrgb[1], (int)rrgb[2]);
+        fprintf(fileout, " %i %i %i %i\n", (int)cbi->index_node[i], (int)rrgb[0], (int)rrgb[1], (int)rrgb[2]);
       }
     }
   }
@@ -12717,91 +12569,4 @@ void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
   }
 }
 
-/* ------------------ get_labels ------------------------ */
 
-void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){
-  char *tok0, *tok1, *tok2;
-
-  tok0=NULL;
-  tok1=NULL;
-  tok2=NULL;
-  tok0 = strtok(buffer,"%");
-  if(tok0!=NULL)tok1=strtok(NULL,"%");
-  if(tok1!=NULL)tok2=strtok(NULL,"%");
-  if(tok1!=NULL){
-    trim_back(tok1);
-    tok1=trim_front(tok1);
-    if(strlen(tok1)==0)tok1=NULL;
-  }
-  if(tok2!=NULL){
-    trim_back(tok2);
-    tok2=trim_front(tok2);
-    if(strlen(tok2)==0)tok2=NULL;
-  }
-  if(label2!=NULL){
-    if(tok2==NULL&&kind==HUMANS){
-      strcpy(prop_buffer,"Human_props(default)");
-      *label2=prop_buffer;
-    }
-    else{
-      *label2=tok2;
-    }
-  }
-  if(label1!=NULL)*label1=tok1;
-}
-
-/* ------------------ get_prop_id ------------------------ */
-
-propdata *get_prop_id(char *prop_id){
-  int i;
-
-  if(propinfo==NULL||prop_id==NULL||strlen(prop_id)==0)return NULL;
-  for(i=0;i<npropinfo;i++){
-    propdata *propi;
-
-    propi = propinfo + i;
-
-    if(strcmp(propi->label,prop_id)==0)return propi;
-  }
-  return NULL;
-}
-
-/* ------------------ init_evac_prop ------------------------ */
-
-void init_evac_prop(void){
-  char label[256];
-  char *smokeview_id;
-  int nsmokeview_ids;
-
-  strcpy(label,"evac default");
-
-  NewMemory( (void **)&prop_evacdefault,sizeof(propdata));
-  nsmokeview_ids=1;
-
-  init_prop(prop_evacdefault,nsmokeview_ids,label);
-
-
-  NewMemory((void **)&smokeview_id,6+1);
-  strcpy(smokeview_id,"sensor");
-  prop_evacdefault->smokeview_ids[0]=smokeview_id;
-  prop_evacdefault->smv_objects[0]=get_SVOBJECT_type(prop_evacdefault->smokeview_ids[0],missing_device);
-
-  prop_evacdefault->smv_object=prop_evacdefault->smv_objects[0];
-  prop_evacdefault->smokeview_id=prop_evacdefault->smokeview_ids[0];
-
-  prop_evacdefault->ntextures=0;
-}
-
-/* ------------------ get_surface ------------------------ */
-
-surfdata *get_surface(char *label){
-  int i;
-
-  for(i=0;i<nsurfinfo;i++){
-    surfdata *surfi;
-
-    surfi = surfinfo + i;
-    if(strcmp(surfi->surfacelabel,label)==0)return surfi;
-  }
-  return surfacedefault;
-}

@@ -21,5 +21,8 @@ set case=test1x1
 set case=test1x2
 %fds% %case%.fds
 
+set case=test2x2
+%fds% %case%.fds
+
 set case=test3x3
 %fds% %case%.fds

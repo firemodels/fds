@@ -345,6 +345,44 @@ void init_volrender(void){
 
 }
 
+/* ------------------ getmesh_in_smesh ------------------------ */
+
+meshdata *getmesh_in_smesh(meshdata *mesh_guess, supermeshdata *smesh, float *xyz){
+  int i;
+  float *smin, *smax;
+
+  smin = smesh->boxmin_scaled;
+  smax = smesh->boxmax_scaled;
+
+  if(xyz[0]<smin[0]||xyz[1]<smin[1]||xyz[2]<smin[2])return NULL;
+  if(xyz[0]>smax[0]||xyz[1]>smax[1]||xyz[2]>smax[2])return NULL;
+  for(i = -1; i<smesh->nmeshes; i++){
+    meshdata *meshi;
+    float *bmin, *bmax;
+
+    if(i==-1){
+      if(mesh_guess==NULL)continue;
+      meshi = mesh_guess;
+    }
+    else{
+      meshi = smesh->meshes[i];
+      if(meshi==mesh_guess)continue;
+    }
+
+    bmin = meshi->boxmin_scaled;
+    bmax = meshi->boxmax_scaled;
+
+    if(
+      bmin[0]<=xyz[0]&&xyz[0]<=bmax[0]&&
+      bmin[1]<=xyz[1]&&xyz[1]<=bmax[1]&&
+      bmin[2]<=xyz[2]&&xyz[2]<=bmax[2]){
+      return meshi;
+    }
+  }
+  ASSERT(FFALSE);
+  return NULL;
+}
+
 /* ------------------ get_cum_smokecolor ------------------------ */
 
 void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, meshdata *meshi, int iwall){
@@ -2445,7 +2483,7 @@ void make_smesh(supermeshdata *smesh, meshdata *firstmesh){
   }
 }
 
-/* ------------------ compare_meshes ------------------------ */
+/* ------------------ compare_smeshes ------------------------ */
 
 int compare_smeshes( const void *arg1, const void *arg2 ){
   meshdata *meshi, *meshj;

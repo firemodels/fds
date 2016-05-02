@@ -7,6 +7,7 @@
 #include <zlib.h>
 #include "svzip.h"
 #include "MALLOC.h"
+#include "compress.h"
 
 #define FORTgetplot3dq _F(getplot3dq)
 
@@ -85,6 +86,7 @@ int convert_plot3d(plot3d *plot3di){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(PLOT3DFILE);
     return 0;
   }
 
@@ -94,6 +96,7 @@ int convert_plot3d(plot3d *plot3di){
       fclose(plot3dstream);
       fprintf(stderr,"*** Warning: The file %s exists.\n",plot3dfile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(PLOT3DFILE);
       return 0;
     }
   }

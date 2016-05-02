@@ -8,6 +8,7 @@
 #include "lightsmoke.h"
 #include "file_util.h"
 #include "MALLOC.h"
+#include "compress.h"
 
 /* ------------------ convert_3dsmoke ------------------------ */
 
@@ -106,6 +107,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(SMOKE3DFILE);
     return;
   }
 
@@ -115,6 +117,7 @@ void convert_3dsmoke(smoke3d *smoke3di, int *thread_index){
       fclose(smoke3dstream);
       fprintf(stderr,"*** Warning:  %s exists.\n",smoke3dfile_svz);
       fprintf(stderr,"*** Warning:     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(SMOKE3DFILE);
       return;
     }
   }

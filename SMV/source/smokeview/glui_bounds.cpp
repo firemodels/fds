@@ -2063,13 +2063,14 @@ extern "C"  void glui_script_disable(void){
 
         id = LIST_ini_list->get_int_val();
         ini_filename = get_inifilename(id);
+        if(ini_filename==NULL)break;
         if(strcmp(ini_filename,caseini_filename)==0){
           readini(NULL);
         }
         else if(id>=0){
           char *script_filename2;
 
-          if(ini_filename==NULL||strlen(ini_filename)==0)break;
+          if(strlen(ini_filename)==0)break;
           script_filename2=script_filename;
           strcpy(script_filename,ini_filename);
           windowresized=0;

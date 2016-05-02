@@ -239,7 +239,7 @@ void drawcolorbarpath(void){
 
       dzpoint = (float)cbi->index_node[i]/255.0;
       zdenorm = DENORMALIZE_Z(dzpoint);
-      sprintf(cbuff,"%i",cbi->index_node[i]);
+      sprintf(cbuff,"%i",(int)cbi->index_node[i]);
       output3Text(foregroundcolor, xdenorm,ydenorm,zdenorm, cbuff);
     }
     glPopMatrix();

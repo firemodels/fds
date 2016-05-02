@@ -1,8 +1,7 @@
 SOURCE_DIR = ../../../source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC2_DIR = -I $(SOURCE_DIR)/include2 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
-INC_DIR =  -I $(SOURCE_DIR)/include  -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
+INC_DIR =  -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 
 FILTERC =
 
 VPATH = $(SOURCE_DIR)/wind2fds $(SOURCE_DIR)/shared 
@@ -36,7 +35,7 @@ no_target:
 .c.obj:
 	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 .c.o:
-	$(CC) -c $(CFLAGS) $(FILTERC) $(INC2_DIR) $<
+	$(CC) -c $(CFLAGS) $(FILTERC) $(INC_DIR) $<
 
 
 # ********  rules for each platform supported *************

@@ -372,6 +372,65 @@ int getpatchindex(const patchdata *patchi){
   return -1;
 }
 
+/* ------------------ update_vent_colors ------------------------ */
+
+void init_vent_colors(void){
+  int i;
+
+  nventcolors = 0;
+  for(i = 0; i < nmeshes; i++){
+    meshdata *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    for(j = 0; j<meshi->nvents; j++){
+      ventdata *venti;
+
+      venti = meshi->ventinfo + j;
+      if(venti->vent_id>nventcolors)nventcolors = venti->vent_id;
+    }
+  }
+  nventcolors++;
+  NewMemory((void **)&ventcolors, nventcolors*sizeof(float *));
+  for(i = 0; i < nventcolors; i++){
+    ventcolors[i] = NULL;
+  }
+  ventcolors[0] = surfinfo->color;
+  for(i = 0; i < nmeshes; i++){
+    meshdata *meshi;
+    int j;
+
+    meshi = meshinfo + i;
+    for(j = 0; j < meshi->nvents; j++){
+      ventdata *venti;
+      int vent_id;
+
+      venti = meshi->ventinfo + j;
+      vent_id = CLAMP(venti->vent_id, 1, nventcolors - 1);
+      if(venti->useventcolor == 1){
+        ventcolors[vent_id] = venti->color;
+      }
+      else{
+        ventcolors[vent_id] = venti->surf[0]->color;
+      }
+    }
+    for(j = 0; j < meshi->ncvents; j++){
+      cventdata *cventi;
+      int cvent_id;
+
+      cventi = meshi->cventinfo + j;
+      cvent_id = CLAMP(cventi->cvent_id, 1, nventcolors - 1);
+      if(cventi->useventcolor == 1){
+        ventcolors[cvent_id] = cventi->color;
+      }
+      else{
+        ventcolors[cvent_id] = cventi->surf[0]->color;
+      }
+    }
+  }
+
+}
+
 /* ------------------ readpatch_bndf ------------------------ */
 
 void readpatch_bndf(int ifile, int flag, int *errorcode){
@@ -1596,23 +1655,6 @@ void nodein_extvent(int ipatch, int *patchblank, const meshdata *meshi,
     ASSERT(FFALSE);
     break;
   }
-}
-
-/* ------------------ ispatchtype ------------------------ */
-
-int ispatchtype(int type){
-  int i;
-
-  for(i=0;i<nmeshes;i++){
-    meshdata *meshi;
-    int n;
-
-    meshi=meshinfo+i;
-    for(n=0;n<meshi->npatches;n++){
-      if(meshi->patchtype[n]==type)return 1;
-    }
-  }
-  return 0;
 }
 
 /* ------------------ local2globalpatchbounds ------------------------ */
@@ -3876,7 +3918,10 @@ void getpatchsizeinfo(patchdata *patchi, int *nframes, int *buffersize){
     streamsize=fopen(sizefile,"r");
 
     stream=fopen(patchi->file,"rb");
-    if(stream==NULL)return;
+    if(stream==NULL){
+      if(streamsize!=NULL)fclose(streamsize);
+      return;
+    }
 
     streamsize=fopen(sizefile,"w");
     if(streamsize==NULL){

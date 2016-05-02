@@ -48,10 +48,10 @@ class RGBc {
 public:
   Byte r, g, b;
     
-  void set(Byte r,Byte g,Byte b) {this->r=r;this->g=g;this->b=b;};
+  void set(Byte rr,Byte gg,Byte bb) {this->r=rr;this->g=gg;this->b=bb;};
     
   RGBc( void ) {};
-  RGBc( Byte r, Byte g, Byte b ) { set( r, g, b ); };
+  RGBc( Byte rr, Byte gg, Byte bb ) { set( rr, gg, bb ); };
 };
 #define _RGBC_
 #endif
@@ -729,7 +729,7 @@ public:
 
   virtual void update_size( void )     { };
   virtual void idle( void )            { };
-  virtual int  mouse_over( int state, int x, int y ) { return false; };
+  virtual int  mouse_over( int sstate, int x, int y ) { return false; };
   
   virtual void enable( void ); 
   virtual void disable( void );

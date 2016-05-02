@@ -397,6 +397,8 @@ extern "C" void glui_geometry_setup(int main_window){
     Volume_CB(SHOW_TEXTURE_2D_IMAGE);
   }
 
+  
+  glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "use max angle", &use_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
   SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
@@ -782,7 +784,7 @@ extern "C" void OBJECT_CB(int var){
           changed_idlist[bchighlight->blockage_id]=1;
         }
         blockages_dirty=1;
-        updateusetextures();
+        update_usetextures();
         UpdateFaces();
       }
       break;

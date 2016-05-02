@@ -624,7 +624,6 @@ void write_part_histogram(partdata *parti){
   unsigned char *compressed_buckets=NULL;
   int ncompressed_bucketsMAX=0;
   uLongf ncompressed_buckets;
-  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "wb");
   if(STREAM_HIST == NULL)return;
@@ -646,7 +645,7 @@ void write_part_histogram(partdata *parti){
     }
 
     ncompressed_buckets = 1.02*ncompressed_bucketsMAX+600;
-    ierror = compress_zlib(compressed_buckets, &ncompressed_buckets, (unsigned char *)histi->buckets, histi->nbuckets*sizeof(int));
+    compress_zlib(compressed_buckets, &ncompressed_buckets, (unsigned char *)histi->buckets, histi->nbuckets*sizeof(int));
 
     fwrite(&ncompressed_buckets, sizeof(uLongf), 1, STREAM_HIST);
     fwrite(compressed_buckets, sizeof(unsigned char), ncompressed_buckets, STREAM_HIST);
@@ -663,7 +662,6 @@ void read_part_histogram(partdata *parti){
   unsigned char *compressed_buckets=NULL;
   int ncompressed_bucketsMAX = 0;
   uLongf ncompressed_buckets, nbuckets, nbuffer;
-  int ierror;
 
   STREAM_HIST = fopen(parti->hist_file, "rb");
   if(STREAM_HIST == NULL)return;
@@ -694,7 +692,7 @@ void read_part_histogram(partdata *parti){
     fread(compressed_buckets, sizeof(unsigned char), ncompressed_buckets, STREAM_HIST);
 
     nbuffer = (1.02*nbucketsmax+600)*sizeof(int);
-    ierror = uncompress_zlib((unsigned char *)buckets, &nbuffer, compressed_buckets, ncompressed_buckets);
+    uncompress_zlib((unsigned char *)buckets, &nbuffer, compressed_buckets, ncompressed_buckets);
     nbuckets = nbuffer/4;
 
     histi = parti->histograms[i];

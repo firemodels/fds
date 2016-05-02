@@ -5,8 +5,10 @@ SRCDIR=$LIBDIR/../../../source
 cd $SRCDIR
 SRCDIR=`pwd`
 
+rm $LIBDIR/*.a
+
 # GD
-cd $SRCDIR/gd-2.0.15
+cd $SRCDIR/gd-2.1.1
 ./makelib.sh $OPTS
 cp libgd.a $LIBDIR/.
 
@@ -21,17 +23,17 @@ cd $SRCDIR/glut-3.7.6
 cp libglut.a $LIBDIR/.
 
 # JPEG
-cd $SRCDIR/jpeg-6b
+cd $SRCDIR/jpeg-9b
 ./makelib.sh $OPTS
 cp libjpeg.a $LIBDIR/.
 
 # PNG
-cd $SRCDIR/png125
+cd $SRCDIR/png-1.6.21
 ./makelib.sh $OPTS
 cp libpng.a $LIBDIR/.
 
 # ZLIB
-cd $SRCDIR/zlib114
+cd $SRCDIR/zlib128
 ./makelib.sh $OPTS
 cp libz.a $LIBDIR/.
 

@@ -580,7 +580,10 @@ float get_host_load(char *host){
 
   stream=fopen(localfile,"r");
   if(stream==NULL)return 1.0;
-  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return 1.0;
+  }
   sscanf(buffer,"%f",&load1);
   fclose(stream);
   unlink(localfile);
@@ -596,7 +599,10 @@ float get_load(void){
 
   stream=fopen("/proc/loadavg","r");
   if(stream==NULL)return 1.0;
-  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return 1.0;
+  }
   sscanf(buffer,"%f",&load1);
   fclose(stream);
   return load1;

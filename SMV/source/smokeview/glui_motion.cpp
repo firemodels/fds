@@ -1470,6 +1470,40 @@ void get_unique_view_name(void){
   }
 }
 
+/* ------------------ camera2quat ------------------------ */
+
+void camera2quat(cameradata *ca, float *quat, float *rotation){
+  if(ca->quat_defined == 1){
+    quat[0] = ca->quaternion[0];
+    quat[1] = ca->quaternion[1];
+    quat[2] = ca->quaternion[2];
+    quat[3] = ca->quaternion[3];
+  }
+  else{
+    float quat_temp[4];
+    float azimuth, elevation, axis[3];
+
+    azimuth = ca->az_elev[0] * DEG2RAD;
+    elevation = (ca->az_elev[1])*DEG2RAD;
+
+    axis[0] = 1.0;
+    axis[1] = 0.0;
+    axis[2] = 0.0;
+
+    angleaxis2quat(elevation, axis, quat_temp);
+
+    axis[0] = 0.0;
+    axis[1] = 0.0;
+    axis[2] = 1.0;
+
+    angleaxis2quat(azimuth, axis, quat);
+
+    mult_quat(quat_temp, quat, quat);
+  }
+
+  if(rotation != NULL)quat2rot(quat, rotation);
+}
+
 /* ------------------ Viewpoint_CB ------------------------ */
 
 void Viewpoint_CB(int var){

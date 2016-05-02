@@ -14,6 +14,7 @@ if "%release%" == "-r" goto endif
   set SMV_TESTSTRING=test_
 :endif
 
+erase *.obj *.mod
 make -j 4 SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db > compile.out 2>&1
 call :find_smokeview_warnings compile.out
 

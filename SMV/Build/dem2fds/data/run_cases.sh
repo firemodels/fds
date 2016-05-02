@@ -12,9 +12,6 @@ fds ${case}.fds
 case=sugarloaf
 fds ${case}.fds
 
-case=test
-fds ${case}.fds
-
 case=trails
 fds ${case}.fds
 
@@ -22,6 +19,9 @@ case=test1x1
 $fds ${case}.fds
 
 case=test1x2
+$fds ${case}.fds
+
+case=test2x2
 $fds ${case}.fds
 
 case=test3x3
