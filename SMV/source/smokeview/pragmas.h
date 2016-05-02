@@ -5,7 +5,7 @@
 #pragma warning (disable:776) // Possible truncation of addition
 #pragma warning (disable:712) // Loss of precision
 #pragma warning (disable:1786)
-#pragma warning (disable:177)		
+#pragma warning (disable:177)
 #pragma warning (disable:2557)		/* comparison between signed and unsigned operands */
 #pragma warning (disable:695)		/* calling convenetion if ignored for this type */
 #pragma warning (disable:810)		/* conversion from xx to yy may lose sig bits */

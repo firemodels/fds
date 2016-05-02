@@ -60,11 +60,11 @@ int main(int argc, char **argv){
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
   int mem_usage, mem_usage_max=75;
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   char command_buffer[1024];
   char user_path[1024];
   FILE *stream=NULL;
-#endif  
+#endif
 #ifdef pp_OSX
   char command_buffer[1024];
   char user_path[1024];
@@ -74,7 +74,8 @@ int main(int argc, char **argv){
   char *arg;
   char *command;
 
-#ifdef pp_LINUX  
+  set_stdout(stdout);
+#ifdef pp_LINUX
   hostlistfile=NULL;
   host=NULL;
   strcpy(user_path,"");
@@ -88,7 +89,7 @@ int main(int argc, char **argv){
   prog=argv[0];
 
   if(argc==1){
-    version();
+    version("background ");
     return 1;
   }
 
@@ -159,7 +160,7 @@ int main(int argc, char **argv){
             }
             break;
           case 'v':
-            version();
+            version("background ");
             return 1;
           default:
             printf("Unknown option: %s\n",arg);
@@ -196,7 +197,7 @@ int main(int argc, char **argv){
         char *hostname;
 
         if(fgets(buffer,255,stream)==NULL)break;
-        trim(buffer);
+        trim_back(buffer);
         hostname=malloc(strlen(buffer)+1);
         strcpy(hostname,buffer);
         hd->hostname=hostname;
@@ -281,7 +282,7 @@ int main(int argc, char **argv){
     arg=argv[i];
     strcat(command_buffer,arg);
     if(i<argc-1){
-      strcat(command_buffer," ");    
+      strcat(command_buffer," ");
     }
   }
   if(nhostinfo>0)strcat(command_buffer,")\"");
@@ -296,10 +297,11 @@ int main(int argc, char **argv){
 void usage(char *prog){
   char prog_version[100];
   char githash[100];
+  char gitdate[100];
   char pp[] = "%";
 
   getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitHash(githash);    // get githash
+  getGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("background %s(%s) - %s\n",prog_version,githash,__DATE__);
@@ -312,13 +314,13 @@ void usage(char *prog){
   printf("  -d dtime  - wait dtime seconds before running prog in the background\n");
   printf("  -debug    - display debug messages\n");
   printf("  -h        - display this message\n");
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   printf("  -hosts hostfiles - file containing a list of host names to run jobs on\n");
 #endif
   printf("  -m max    - wait to run prog until memory usage is less than max (25-100%s)\n",pp);
-#ifdef pp_LINUX  
+#ifdef pp_LINUX
   printf("  -p path   - specify directory path to change to after ssh'ing to remote host\n");
-#endif  
+#endif
   printf("  -u max    - wait to run prog until cpu usage is less than max (25-100%s)\n",pp);
   printf("  -v        - display version information\n");
   printf("  prog      - program to run in the background\n");
@@ -338,7 +340,7 @@ static HMODULE s_hKernel = NULL;
 
 void GetSystemTimesAddress(){
 	if( s_hKernel == NULL )
-	{ 
+	{
 		s_hKernel = LoadLibrary("Kernel32.dll" );
 		if( s_hKernel != NULL )
 		{
@@ -424,7 +426,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
   strcat(sysctl_file,var);
   strcat(sysctl_file,"_");
   strcat(sysctl_file,pid);
-  
+
   strcpy(command,"");
   if(host!=NULL){
     strcat(command,"ssh ");
@@ -460,7 +462,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
 
 int get_ncores(void){
   int ncores=1;
-  
+
   get_sysctl(NULL,"hw.ncpu",&ncores,NULL);
   return ncores;
 }
@@ -522,7 +524,7 @@ int get_host_ncores(char *host){
   char command[1024];
   char localfile[1024];
   int ncores=0;
-  
+
   strcpy(localfile,"/tmp/cpuinfo.");
   strcat(localfile,host);
   strcat(localfile,".");
@@ -563,7 +565,7 @@ float get_host_load(char *host){
   char command[1024];
   char localfile[1024];
   float load1;
-  
+
   strcpy(localfile,"/tmp/loadavg.");
   strcat(localfile,host);
   strcat(localfile,".");
@@ -578,7 +580,10 @@ float get_host_load(char *host){
 
   stream=fopen(localfile,"r");
   if(stream==NULL)return 1.0;
-  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return 1.0;
+  }
   sscanf(buffer,"%f",&load1);
   fclose(stream);
   unlink(localfile);
@@ -594,7 +599,10 @@ float get_load(void){
 
   stream=fopen("/proc/loadavg","r");
   if(stream==NULL)return 1.0;
-  if(fgets(buffer,255,stream)==NULL)return 1.0;
+  if(fgets(buffer,255,stream)==NULL){
+    fclose(stream);
+    return 1.0;
+  }
   sscanf(buffer,"%f",&load1);
   fclose(stream);
   return load1;
@@ -629,18 +637,3 @@ unsigned char cpuusage(){
   return usage;
 }
 #endif
-
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char githash[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitHash(githash);    // get githash
-    printf("\n");
-    printf("background\n\n");
-    printf("Version: %s\n",smv_version);
-    printf("Build: %s\n",githash);
-    printf("Compile Date: %s\n",__DATE__);
-}

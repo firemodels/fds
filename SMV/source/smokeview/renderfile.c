@@ -10,16 +10,16 @@
 #include GLUT_H
 #include "gd.h"
 
-/* ------------------ does_movie_exist ------------------------ */
-
 #define RENDER_TYPE 0
 #define RENDER_START 3
+
+/* ------------------ does_movie_exist ------------------------ */
 
 int does_movie_exist(char *mov_name, char *moviefile){
   char *movie;
 
   if(mov_name == NULL || strlen(mov_name) < 1)return 0;
-  trim(mov_name);
+  trim_back(mov_name);
   movie = trim_front(mov_name);
   strcpy(moviefile, movie);
   strcat(moviefile, ".mp4");
@@ -31,7 +31,7 @@ int does_movie_exist(char *mov_name, char *moviefile){
 
 void PlayMovie(void){
   char command_line[1024], moviefile_path[1024];
-  
+
   if(play_movie_now==0)return;
   if(file_exists(get_moviefile_path(moviefile_path)) == 1){
     strcpy(command_line, "ffplay ");
@@ -41,14 +41,14 @@ void PlayMovie(void){
   else{
     PRINTF("*** Error: the movie file, %s, does not exist\n", moviefile_path);
   }
-}  
+}
 
 /* ------------------ get_moviefile_path ------------------------ */
 
 char *get_moviefile_path(char *moviefile_path){
   char moviefile[1024], *movie;
 
-  trim(movie_name);
+  trim_back(movie_name);
   movie = trim_front(movie_name);
   strcpy(moviefile, movie);
   strcat(moviefile, movie_ext);
@@ -111,7 +111,7 @@ void MakeMovie(void){
   }
 
 
-  if(make_movie_now==1){  
+  if(make_movie_now==1){
 // construct name of frames used to make movie
 
     strcpy(movie_frames, render_file_base);
@@ -187,7 +187,7 @@ void Render(int view_mode){
   }
 
   if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
-    if(render_multi==0)RenderFrame(view_mode); 
+    if(render_multi==0)RenderFrame(view_mode);
     RenderOnceNow=0;
     if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
     if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
@@ -274,7 +274,7 @@ void RenderFrame(int view_mode){
     }
     strcat(renderfile_suffix,suffix);
   }
-  
+
   // directory
 
   if(can_write_to_dir(renderfile_dir)==0){
@@ -323,7 +323,7 @@ void RenderFrame(int view_mode){
       code = getplot3dtime(&time_local);
       if(code==1&&renderfilelabel==1){
         char timelabel_local[20], *timelabelptr, dt=1.0;
-  
+
         timelabelptr = time2timelabel(time_local,dt,timelabel_local);
         strcat(suffix,"_");
         strcat(suffix,timelabelptr);
@@ -517,8 +517,6 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
-
-
 /* ------------------ SVimage2file ------------------------ */
 
 int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int hoffset, int height){
@@ -587,7 +585,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
     }
   }
 
-  if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=0){
+  if(test_smokesensors==1&&active_smokesensors==1&&show_smokesensors!=SMOKESENSORS_HIDDEN){
     int idev;
 
     for(idev=0;idev<ndeviceinfo;idev++){
@@ -691,7 +689,7 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
     }
   }
 
-  
+
   if(printflag==1)PRINTF("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){

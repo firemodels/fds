@@ -57,29 +57,6 @@ void Normal(unsigned short *v1, unsigned short *v2, unsigned short *v3, float *n
   normal[2]/=norm2;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-    char smv_version[100];
-    char githash[100];
-
-    getPROGversion(smv_version);  // get Smokeview version (ie 5.x.z)
-    getGitHash(githash);    // get githash
-    PRINTF("\n");
-    PRINTF("Smokezip\n\n");
-    PRINTF("Version: %s\n",smv_version);
-    PRINTF("Build: %s\n",githash);
-    PRINTF("Compile Date: %s\n",__DATE__);
-    PRINTF("Platform: WIN64\n");
-#ifdef pp_OSX
-    PRINTF("Platform: OSX64\n");
-#endif
-#ifdef pp_LINUX
-    PRINTF("Platform: LINUX64\n");
-#endif
-
-}
-
 /* ------------------ atan3 ------------------------ */
 
 float atan3(float dy,float dx){

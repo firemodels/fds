@@ -108,7 +108,7 @@ int is_tour_open(void){
   return 0;
 }
 
-/* ------------------ Shooter_Rollout_CB ------------------------ */
+/* ------------------ Tours_Rollout_CB ------------------------ */
 
 void Tours_Rollout_CB(int var){
   toggle_rollout(toursprocinfo, ntoursprocinfo, var);
@@ -168,7 +168,7 @@ extern "C" void glui_tour_setup(int main_window){
 
   ROLLOUT_tour = glui_tour->add_rollout("Tours",true,TOURS_TOURS_ROLLOUT, Tours_Rollout_CB);
   ADDPROCINFO(toursprocinfo, ntoursprocinfo, ROLLOUT_tour, TOURS_TOURS_ROLLOUT);
-  
+
 
   PANEL_tour1 = glui_tour->add_panel_to_panel(ROLLOUT_tour,"",GLUI_PANEL_NONE);
 
@@ -179,11 +179,11 @@ extern "C" void glui_tour_setup(int main_window){
   PANEL_tour4 = glui_tour->add_panel_to_panel(ROLLOUT_tour,"",GLUI_PANEL_NONE);
 
   if(ntours>0){
-    selectedtour_index=-1;
-    selectedtour_index_old=-1;
+    selectedtour_index = TOURINDEX_MANUAL;
+    selectedtour_index_old = TOURINDEX_MANUAL;
     LISTBOX_tour=glui_tour->add_listbox_to_panel(PANEL_tour4,"",&selectedtour_index,TOUR_LIST,TOUR_CB);
 
-    LISTBOX_tour->add_item(-1,"Manual");
+    LISTBOX_tour->add_item(TOURINDEX_MANUAL, "Manual");
     LISTBOX_tour->add_item(-999,"-");
     for(i=0;i<ntours;i++){
       tourdata *touri;
@@ -226,7 +226,7 @@ extern "C" void glui_tour_setup(int main_window){
 
   ROLLOUT_settings = glui_tour->add_rollout(_d("Settings"),true,SETTINGS_TOURS_ROLLOUT, Tours_Rollout_CB);
   ADDPROCINFO(toursprocinfo, ntoursprocinfo, ROLLOUT_settings, SETTINGS_TOURS_ROLLOUT);
-  
+
   CHECKBOX_showtourroute=glui_tour->add_checkbox_to_panel(ROLLOUT_settings,_d("Edit tour"),&edittour,SHOWTOURROUTE,TOUR_CB);
   CHECKBOX_view=glui_tour->add_checkbox_to_panel(ROLLOUT_settings,_d("View from tour path"),&viewtourfrompath,VIEWTOURFROMPATH,TOUR_CB);
   CHECKBOX_snap=glui_tour->add_checkbox_to_panel(ROLLOUT_settings,_d("View from selected keyframe"),&keyframe_snap,VIEWSNAP,TOUR_CB);
@@ -252,8 +252,8 @@ extern "C" void glui_tour_setup(int main_window){
 
   ROLLOUT_keyframe = glui_tour->add_rollout("Keyframe",true,KEYFRAME_TOURS_ROLLOUT, Tours_Rollout_CB);
   ADDPROCINFO(toursprocinfo, ntoursprocinfo, ROLLOUT_keyframe, KEYFRAME_TOURS_ROLLOUT);
-  
-  
+
+
   PANEL_pos = glui_tour->add_panel_to_panel(ROLLOUT_keyframe,"",GLUI_PANEL_NONE);
 
   PANEL_pos3 = glui_tour->add_panel_to_panel(PANEL_pos,"",GLUI_PANEL_NONE);
@@ -360,9 +360,9 @@ extern "C" void set_glui_keyframe(void){
   if(selected_frame==NULL)return;
 
   ti = selected_tour;
-  if(ti!=NULL){
-    tour_hide=1-ti->display;
-  }
+  if(ti==NULL)return;
+
+  tour_hide=1-ti->display;
   if(selected_tour!=NULL)strcpy(tour_label,selected_tour->label);
   glui_avatar_index=ti->glui_avatar_index;
   TOUR_CB(TOUR_AVATAR);
@@ -385,7 +385,7 @@ extern "C" void set_glui_keyframe(void){
   tour_tension=selected_frame->tension;
   tour_zoom=selected_frame->nodeval.zoom;
   tour_elev_path=selected_frame->nodeval.elev_path;
- 
+
   tour_global_tension_flag=selected_tour->global_tension_flag;
   tour_global_tension=selected_tour->global_tension;
 
@@ -405,7 +405,7 @@ extern "C" void set_glui_keyframe(void){
 
   {
     float time_temp;
-      
+
     time_temp=tour_ttt;
     SPINNER_t->set_float_limits(selected_frame->prev->disp_time,selected_frame->next->disp_time);
     tour_ttt=time_temp;
@@ -415,7 +415,7 @@ extern "C" void set_glui_keyframe(void){
   if(edittour==1){
     if(tour_constant_vel==0){
       SPINNER_t->enable();
-    }  
+    }
     else{
       SPINNER_t->disable();
     }
@@ -431,7 +431,7 @@ extern "C" void set_glui_keyframe(void){
   SPINNER_viewz->set_float_val(tour_view_xyz[2]);
   SPINNER_az_path->set_float_val(tour_az_path);
   SPINNER_elev_path->set_float_val(tour_elev_path);
-  if(ti!=NULL&&CHECKBOX_tourhide!=NULL)CHECKBOX_tourhide->set_int_val(tour_hide);
+  if(CHECKBOX_tourhide!=NULL)CHECKBOX_tourhide->set_int_val(tour_hide);
   EDIT_label->set_text(tour_label);
 
   if(edittour==1){
@@ -518,7 +518,7 @@ void TOUR_CB(int var){
     break;
   case SHOWTOURROUTE:
     edittour = 1 - edittour;
-    TOURMENU(-4);
+    TOURMENU(MENU_TOUR_SHOWDIALOG);
     update_tourcontrols();
     TOUR_CB(VIEW1);
     updatemenu=0;
@@ -537,7 +537,7 @@ void TOUR_CB(int var){
       CHECKBOX_snap->set_int_val(keyframe_snap);
     }
     viewtourfrompath = 1 - viewtourfrompath;
-    TOURMENU(-5);
+    TOURMENU(MENU_TOUR_VIEWFROMROUTE);
     break;
   case VIEW2:
     viewtype1=1-viewtype2;
@@ -766,7 +766,7 @@ void TOUR_CB(int var){
   case TOUR_AVATAR:
     if(selected_tour->glui_avatar_index!=glui_avatar_index){
       selected_tour->glui_avatar_index=glui_avatar_index;
-// hack to make touring avatar show up      
+// hack to make touring avatar show up
 //      avatar_types[glui_avatar_index]->visible=1;
       updatemenu=1;
     }
@@ -786,21 +786,21 @@ void TOUR_CB(int var){
   case TOUR_LIST:
     if(selectedtour_index==-999){
       selectedtour_index=selectedtour_index_old;
-      if(selectedtour_index==-999)selectedtour_index=-1;
+      if(selectedtour_index==-999)selectedtour_index = TOURINDEX_MANUAL;
       TOUR_CB(TOUR_LIST);
       return;
     }
     switch(selectedtour_index){
-    case -3:
-      TOURMENU(-3); // show all tours
+    case TOURINDEX_ALL:
+      TOURMENU(MENU_TOUR_SHOWALL); // show all tours
       set_glui_keyframe();
       break;
-    case -1:
+    case TOURINDEX_MANUAL:
       edittour=0;
-      TOURMENU(-13);  // reset tour vis to ini values
+      TOURMENU(MENU_TOUR_CLEARALL);  // reset tour vis to ini values
       break;
-    case -4:
-      TOURMENU(-1);  // default tour
+    case TOURINDEX_DEFAULT:
+      TOURMENU(MENU_TOUR_DEFAULT);  // default tour
       break;
     default:
       selected_tour=tourinfo + selectedtour_index;
@@ -839,7 +839,7 @@ void TOUR_CB(int var){
         LISTBOX_tour->delete_item(thistour-tourinfo);
         LISTBOX_tour->add_item(thistour-tourinfo,thistour->label);
       }
-      updatetourmenulabels();
+      update_tour_menulabels();
       updatemenu=1;
     }
     break;
@@ -884,7 +884,7 @@ extern "C" void delete_tourlist(void){
 
 extern "C" void create_tourlist(void){
   int i;
-  
+
   if(LISTBOX_tour==NULL)return;
   for(i=0;i<ntours;i++){
     tourdata *touri;
@@ -984,7 +984,7 @@ extern "C" void update_tourcontrols(void){
     CHECKBOX_showtour_locus->enable();
   }
   else{
-    selectedtour_index = -1;
+    selectedtour_index = TOURINDEX_MANUAL;
     LISTBOX_tour->set_int_val(selectedtour_index);
     LISTBOX_avatar->disable();
     CHECKBOX_showtour_locus->disable();

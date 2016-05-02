@@ -60,13 +60,13 @@
 /* --------------------------  volrenderdata ------------------------------------ */
 
 typedef struct {
-  struct _mesh *rendermesh;
+  struct _meshdata *rendermesh;
   struct _slice *smoke, *fire;
 } volrenderdata;
 
 /* --------------------------  mesh ------------------------------------ */
 
-typedef struct _mesh {
+typedef struct _meshdata {
   int ibar, jbar, kbar;
   float *xplt, *yplt, *zplt;
   float *xpltcell, *ypltcell, *zpltcell;
@@ -74,7 +74,7 @@ typedef struct _mesh {
   float dx, dy, dz;
   float dxx, dyy, dzz;
   volrenderdata volrenderinfo;
-} mesh;
+} meshdata;
 
 /* --------------------------  patch ------------------------------------ */
 
@@ -138,7 +138,7 @@ typedef struct {
   int inuse;
   float time;
   int blocknumber;
-  mesh *plot3d_mesh;
+  meshdata *plot3d_mesh;
   int filesize;
   int seq_id,autozip;
   int doit, done, count;
@@ -164,14 +164,14 @@ typedef struct {
   int inuse,is_soot;
   int seq_id, autozip;
   int nx, ny, nz, filesize;
-  mesh *smokemesh;
+  meshdata *smokemesh;
   unsigned char *compressed_lightingbuffer;
   uLongf ncompressed_lighting_zlib;
 } smoke3d;
 
 #ifdef pp_PART
 
-/* --------------------------  part5prop ------------------------------------ */
+/* --------------------------  partpropdata ------------------------------------ */
 
 typedef struct {
   int used;
@@ -181,7 +181,7 @@ typedef struct {
   float valmin, valmax;
   histogramdata *histogram;
   int setvalmin, setvalmax;
-} part5prop;
+} partpropdata;
 
 /* --------------------------  partclass ------------------------------------ */
 
@@ -189,7 +189,7 @@ typedef struct {
   char *name;
   int ntypes;
   flowlabels *labels;
-} part5class;
+} partclassdata;
 
 /* --------------------------  part5data ------------------------------------ */
 
@@ -216,10 +216,10 @@ typedef struct {
   int setvalmin, setvalmax;
   float valmin, valmax;
   flowlabels *label;
-  mesh *partmesh;
+  meshdata *partmesh;
 
   int nclasses;
-  part5class **classptr;
+  partclassdata **classptr;
   part5data *data5;
 } part;
 #endif
@@ -252,8 +252,7 @@ void rand_3d(float xyz[3], float xmin, float xmax, float ymin, float ymax, float
 void get_startup_slice(int seq_id);
 void get_startup_smoke(int seq_id);
 void get_startup_patch(int seq_id);
-void version(void);
-unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
+unsigned int uncompress_rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out);
 int readsmv(char *file);
 int getendian(void);
 int convert_slice(slice *slicei, int *thread_index);
@@ -273,7 +272,7 @@ void smoothlabel(float *a, float *b, int n);
 void compress_parts(void *arg);
 void *convert_parts2iso(void *arg);
 part *getpart(char *string);
-part5prop *getpartprop(char *string);
+partpropdata *getpartprop(char *string);
 int getpartprop_index(char *string);
 void convert_part(part *parti, int *thread_index);
 int convertable_part(part *parti);
@@ -326,9 +325,9 @@ STDCALLF FORTclosefortranfile(int *lunit);
 
 STDCALLF FORTgetpatchdata(int *lunit, int *npatch,int *pi1,int *pi2,int *pj1,int *pj2,int *pk1,int *pk2,
                          float *patch_times,float *pqq, int *ndummy, int *error);
-STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTopenboundary(char *boundaryfilename, int *boundaryunitnumber,
                          int *version, int *error, FILE_SIZE len);
-STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber, 
+STDCALLF FORTgetboundaryheader1(char *boundaryfilename, int *boundaryunitnumber,
                                int *npatch, int *error, FILE_SIZE lenfile);
 STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npatches,
                                int *pi1, int *pi2, int *pj1, int *pj2, int *pk1, int *pk2, int *patchdir);
@@ -336,7 +335,7 @@ STDCALLF FORTgetboundaryheader2(int *boundaryunitnumber, int *version, int *npat
 STDCALLF FORTgetsliceframe(int *lu11,
                           int *is1,int *is2,int *js1,int *js2,int *ks1,int *ks2,
                           float *time,float *qframe,int *slicetest, int *error);
-STDCALLF FORTopenslice(char *slicefilename, int *unit, 
+STDCALLF FORTopenslice(char *slicefilename, int *unit,
                       int *is1, int *is2, int *js1, int *js2, int *ks1, int *ks2,
                       int *error, FILE_SIZE lenfile);
 
@@ -360,13 +359,13 @@ EXTERN int GLOBframeskip;
 EXTERN int GLOBno_chop;
 
 EXTERN patch *patchinfo;
-EXTERN mesh *meshinfo;
+EXTERN meshdata *meshinfo;
 EXTERN smoke3d *smoke3dinfo;
 EXTERN slice *sliceinfo;
 EXTERN plot3d *plot3dinfo;
 EXTERN part *partinfo;
-EXTERN part5class *partclassinfo;
-EXTERN part5prop *part5propinfo;
+EXTERN partclassdata *partclassinfo;
+EXTERN partpropdata *part5propinfo;
 EXTERN threaddata *threadinfo;
 EXTERN spherepoints sphereinfo;
 

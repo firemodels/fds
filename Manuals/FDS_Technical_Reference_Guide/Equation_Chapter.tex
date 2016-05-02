@@ -207,8 +207,8 @@ The basic procedure is as follows:
 
 \begin{enumerate}
 \item Estimate $\rho$, $Z_\alpha$, and $\bp$ at the next time step with an explicit Euler step. The species mass density is estimated by
-\be \frac{(\rho Z)_\alpha^*- \rho^n Z_\alpha^n}{\dt} + \nabla\!\cdot \rho^n \, Z_\alpha^n \, \bu^n = \nabla\!\cdot (\rho^n D_\alpha^n \nabla Z_\alpha^n) + \dot{m}_\alpha'''(\rho^n) \ee
-The asterisk denotes a first order accurate estimate at the next time step. Note that the mass source term, $\dot{m}_\alpha'''(\rho^n)$, is computed in the previous time step using the corrected value of the density and species mass fractions.
+\be \frac{(\rho Z)_\alpha^*- \rho^n Z_\alpha^n}{\dt} + \nabla\!\cdot \rho^n \, Z_\alpha^n \, \bu^n = \nabla\!\cdot (\rho^n D_\alpha^n \nabla Z_\alpha^n) + (\dot{m}_\alpha''' + \dot{m}_{\rm b,\alpha}''')^n \ee
+The asterisk denotes a first order accurate estimate at the next time step. Note that the mass source terms are computed in the previous time step using the corrected value of the density and species mass fractions.
 
 \item Compute the density from $\rho^* = \sum_\alpha (\rho Z_\alpha)^*$ and mass fractions from $Z_\alpha^* = (\rho Z)_\alpha^*/\rho^*$.
 
@@ -239,10 +239,10 @@ If the stability criterion is satisfied, the procedure continues to the correcto
 \item Correct the transported species mass densities at the next time step.
 \be
 \frac{(\rho Z_\alpha)^{n+1} - \ha \left(\rho^n Z_\alpha^n + \rho^* Z_\alpha^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* Z_\alpha^* \bu^* =
-\nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*) + \dot{m}_\alpha'''(\rho^n)
+\nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*) + (\dot{m}_\alpha'''+ \dot{m}_{\rm b,\alpha}''')^n
 \ee
 
-The background pressure is corrected similarly. Note that the mass source term is the same as that added in the predictor step. It is only computed once per time step.
+The background pressure is corrected similarly. Note that the mass source terms are the same as those added in the predictor step. They are only computed once per time step.
 
 \item Compute the density $\rho^{n+1} = \sum_\alpha (\rho Z_\alpha)^{n+1}$ and mass fractions $Z_\alpha^{n+1} = (\rho Z_\alpha)^{n+1}/\rho^{n+1}$.
 

@@ -66,6 +66,9 @@ GLUI_Spinner *SPINNER_scaled_font2d_height2width=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_height2width=NULL;
 GLUI_Spinner *SPINNER_scaled_font3d_thickness=NULL;
 GLUI_Spinner *SPINNER_scaled_font2d_thickness=NULL;
+GLUI_Spinner *SPINNER_northangle_position_x = NULL;
+GLUI_Spinner *SPINNER_northangle_position_y = NULL;
+GLUI_Spinner *SPINNER_northangle_position_z = NULL;
 
 GLUI_Checkbox *CHECKBOX_labels_showtick = NULL;
 GLUI_Checkbox *CHECKBOX_labels_meshlabel = NULL;
@@ -108,6 +111,7 @@ GLUI_Checkbox *CHECKBOX_labels_flip=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shade=NULL;
 GLUI_Checkbox *CHECKBOX_labels_shadedata=NULL;
 GLUI_Checkbox *CHECKBOX_labels_transparent_override=NULL;
+GLUI_Checkbox *CHECKBOX_shownorth = NULL;
 
 GLUI_Rollout *ROLLOUT_LB_tick0 = NULL;
 GLUI_Rollout *ROLLOUT_coloring=NULL;
@@ -115,6 +119,7 @@ GLUI_Rollout *ROLLOUT_font=NULL;
 GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_general=NULL;
+GLUI_Rollout *ROLLOUT_north = NULL;
 
 GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
 GLUI_Panel *PANEL_extreme_min=NULL, *PANEL_extreme_max=NULL;
@@ -191,6 +196,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_usertick 28
 #define LABELS_usertick2 29
 #define LABELS_shadedata 30
+#define LABELS_shownorth 31
 
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
@@ -368,12 +374,21 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_ticklinewidth = glui_labels->add_spinner_to_panel(PANEL_gen3, "tick line width", GLUI_SPINNER_FLOAT, &ticklinewidth);
   SPINNER_ticklinewidth->set_float_limits(1.0, 10.0, GLUI_LIMIT_CLAMP);
 
+  if(have_northangle==1){
+    ROLLOUT_north = glui_labels->add_rollout_to_panel(PANEL_gen3,"North direction",false);
+    CHECKBOX_shownorth=glui_labels->add_checkbox_to_panel(ROLLOUT_north,_d("show"),&vis_northangle,LABELS_shownorth,Labels_CB);
+    SPINNER_northangle_position_x = glui_labels->add_spinner_to_panel(ROLLOUT_north, "x:", GLUI_SPINNER_FLOAT, northangle_position);
+    SPINNER_northangle_position_y = glui_labels->add_spinner_to_panel(ROLLOUT_north, "y:", GLUI_SPINNER_FLOAT, northangle_position+1);
+    SPINNER_northangle_position_z = glui_labels->add_spinner_to_panel(ROLLOUT_north, "z:", GLUI_SPINNER_FLOAT, northangle_position+2);
+  }
+
+
   glui_labels->add_column_to_panel(PANEL_gen3,false);
 
   CHECKBOX_label_1=glui_labels->add_checkbox_to_panel(PANEL_gen3,_d("Fast blockage drawing"),&use_new_drawface,LABELS_drawface,Labels_CB);
   CHECKBOX_label_2=glui_labels->add_checkbox_to_panel(PANEL_gen3,_d("Sort transparent faces"),&sort_transparent_faces,LABELS_drawface,Labels_CB);
   CHECKBOX_label_3=glui_labels->add_checkbox_to_panel(PANEL_gen3,_d("Hide overlaps"),&hide_overlaps,LABELS_hide_overlaps,Labels_CB);
- 
+
   if(nface_transparent>0){
     glui_labels->add_column_to_panel(PANEL_gen1,true);
     PANEL_transparency = glui_labels->add_panel_to_panel(PANEL_gen3,_d("Geometry transparency"));
@@ -440,7 +455,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
   CHECKBOX_show_extreme_mindata=glui_labels->add_checkbox_to_panel(PANEL_extreme_min,_d("Color below min"),&show_extreme_mindata,COLORBAR_EXTREME,Extreme_CB);
-  
+
   SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_extreme_min,_d("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_down_green=glui_labels->add_spinner_to_panel(PANEL_extreme_min,_d("green"),GLUI_SPINNER_INT,cb_down_rgb+1,COLORBAR_EXTREME_RGB,Extreme_CB);
   SPINNER_down_blue= glui_labels->add_spinner_to_panel(PANEL_extreme_min,_d("blue"), GLUI_SPINNER_INT,cb_down_rgb+2,COLORBAR_EXTREME_RGB,Extreme_CB);
@@ -504,7 +519,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   CHECKBOX_visUSERticks=glui_labels->add_checkbox_to_panel(PANEL_tick1a,_d("Show user ticks"),&visUSERticks,LABELS_usertick,Labels_CB);
   glui_labels->add_column_to_panel(PANEL_tick1a,false);
-  SPINNER_subtick=glui_labels->add_spinner_to_panel(PANEL_tick1a,_d("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub); 
+  SPINNER_subtick=glui_labels->add_spinner_to_panel(PANEL_tick1a,_d("sub-intervals"),GLUI_SPINNER_INT,&user_tick_sub);
   SPINNER_subtick->set_int_limits(1,10,GLUI_LIMIT_CLAMP);
 
   PANEL_tick1b = glui_labels->add_panel_to_panel(PANEL_tick1,"",false);
@@ -550,7 +565,7 @@ extern "C" void glui_labels_setup(int main_window){
 
 
   PANEL_LB_panel3 = glui_labels->add_panel_to_panel(ROLLOUT_user_labels,"Labels");
- 
+
   CHECKBOX_LB_visLabels=glui_labels->add_checkbox_to_panel(PANEL_LB_panel3,"Show labels",&visLabels,LB_VISLABELS,Text_Labels_CB);
 
   PANEL_LB_panel4 = glui_labels->add_panel_to_panel(PANEL_LB_panel3,"",GLUI_PANEL_NONE);
@@ -630,7 +645,7 @@ extern "C" void glui_labels_setup(int main_window){
 
   Text_Labels_CB(LB_LIST);
 
-  // -------------- 
+  // --------------
 
   PANEL_label2 = glui_labels->add_panel("",false);
   glui_labels->add_column_to_panel(PANEL_label2,false);
@@ -844,6 +859,8 @@ extern "C" void Labels_CB(int var){
     break;
 #endif
 
+  case LABELS_shownorth:
+    break;
   case LABELS_version:
   case LABELS_meshlabel:
   case LABELS_label:
@@ -913,7 +930,6 @@ extern "C" void Labels_CB(int var){
     ASSERT(FFALSE);
   }
 }
-
 
 /* ------------------ set_labels_controls ------------------------ */
 

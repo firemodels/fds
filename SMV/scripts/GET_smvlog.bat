@@ -19,6 +19,10 @@ goto:eof
 call %envfile%
 
 %svn_drive%
+set curdir=%CD%
 cd %svn_root%\SMV\source
-git log --pretty=oneline --abbrev-commit --since=%smvdate% .>> %svn_root%\SMV\for_bundle\readme.html
+echo git log --pretty=oneline --abbrev-commit --since=%smvlogdate% 
+pause
+git log --pretty=oneline --abbrev-commit --since=%smvlogdate% .>> %userprofile%\FDS-SMVwebpages\smv_readme.html
+cd %curdir%
 pause

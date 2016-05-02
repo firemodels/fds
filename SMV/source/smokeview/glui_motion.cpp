@@ -47,6 +47,7 @@
 #define GSLICE_NORMAL 27
 #define PLAY_MOVIE 29
 #define MOVIE_NAME 30
+#define CLOSE_MOTION 1
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -62,8 +63,8 @@
 #define WINDOW_ROLLOUT 2
 #define SCALING_ROLLOUT 3
 #define RENDER_ROLLOUT 4
-#define TRANSLATEROTATE_ROLLOUT 5  
-#define ROTATION_ROLLOUT 6  
+#define TRANSLATEROTATE_ROLLOUT 5
+#define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
 
@@ -208,7 +209,7 @@ void update_render_start_button(void){
 
 void enable_disable_playmovie(void){
   char moviefile_path[1024];
- 
+
   if(file_exists(get_moviefile_path(moviefile_path)) == 1&&play_movie_now==1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
@@ -234,14 +235,14 @@ void enable_disable_makemovie(int onoff){
 
 void update_movie_type(int type){
   moviefiletype = type;
-  RADIO_movie_type->set_int_val(moviefiletype);
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
   renderfiletype = type;
-  RADIO_render_type->set_int_val(renderfiletype);
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -251,7 +252,7 @@ void update_zaxis_angles(void){
   SPINNER_zaxis_angles[1]->set_float_val(zaxis_angles[1]);
 }
 
-/* ------------------ update_gvec ------------------------ */
+/* ------------------ update_gvec_down ------------------------ */
 
 void update_gvec_down(int gvec_down_local){
   gvec_down = gvec_down_local;
@@ -303,7 +304,7 @@ extern "C" void update_rotation_type(int val){
 extern "C" void update_glui_set_view_xyz(float *xyz){
   if(xyz==NULL)return;
   if(SPINNER_set_view_x==NULL||SPINNER_set_view_y==NULL||SPINNER_set_view_z==NULL)return;
-  
+
   DENORMALIZE_XYZ(set_view_xyz,xyz);
 
   SPINNER_set_view_x->set_float_val(set_view_xyz[0]);
@@ -327,7 +328,11 @@ extern "C" void gluiIdleNULL(void){
 
 extern "C" void reset_glui_view(int ival){
   ASSERT(ival>=0);
+#ifdef pp_LUA
+  LIST_viewpoints->set_int_val(ival);
+#else
   if(ival!=old_listview)LIST_viewpoints->set_int_val(ival);
+#endif
   selected_view=ival;
   BUTTON_replace_view->enable();
   Viewpoint_CB(RESTORE_VIEW);
@@ -376,10 +381,10 @@ extern "C" void update_cursor_checkbox(void){
   CHECKBOX_cursor_blockpath->set_int_val(cursorPlot3D);
 }
 
-/* ------------------ update_view_list ------------------------ */
+/* ------------------ update_view_gluilist ------------------------ */
 
 extern "C" void update_view_gluilist(void){
-  camera *ca;
+  cameradata *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     LIST_viewpoints->add_item(ca->view_id,ca->name);
@@ -445,7 +450,7 @@ extern "C" void glui_motion_setup(int main_window){
   ROTATE_eye_z=glui_motion->add_translation_to_panel(PANEL_rotate,_d("View"),GLUI_TRANSLATION_X,motion_dir,EYE_ROTATE,Motion_CB);
   ROTATE_eye_z->set_speed(180.0/(float)screenWidth);
   ROTATE_eye_z->disable();
- 
+
   ROLLOUT_rotation_type = glui_motion->add_rollout_to_panel(PANEL_motion,_d("Specify Rotation"),false,ROTATION_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo, nmotionprocinfo, ROLLOUT_rotation_type, ROTATION_ROLLOUT);
 
@@ -462,7 +467,7 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_mesh2 = glui_motion->add_listbox_to_panel(ROLLOUT_rotation_type,_d("Rotate about:"),rotation_index,MESH_LIST,Motion_CB);
   LIST_mesh2->add_item(-1,_d("user specified center"));
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     LIST_mesh2->add_item(i,meshi->label);
@@ -547,7 +552,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_gslice_center_y->set_float_limits(ybar0,DENORMALIZE_Y(ybar),GLUI_LIMIT_CLAMP);
   SPINNER_gslice_center_z->set_float_limits(zbar0,DENORMALIZE_Z(zbar),GLUI_LIMIT_CLAMP);
   Gslice_CB(GSLICE_TRANSLATE);
-  
+
   PANEL_gslice_normal = glui_motion->add_panel_to_panel(ROLLOUT_gslice,_d("normal"),true);
   SPINNER_gslice_normal_az=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"az:",GLUI_SPINNER_FLOAT,gslice_normal_azelev,GSLICE_NORMAL,Gslice_CB);
   SPINNER_gslice_normal_elev=glui_motion->add_spinner_to_panel(PANEL_gslice_normal,"elev:",GLUI_SPINNER_FLOAT,gslice_normal_azelev+1,GSLICE_NORMAL,Gslice_CB);
@@ -558,7 +563,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangle outline",&show_gslice_triangles);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"triangulation",&show_gslice_triangulation);
   glui_motion->add_checkbox_to_panel(PANEL_gslice_show,"plane normal",&show_gslice_normal);
-  
+
   PANEL_viewA = glui_motion->add_panel(_d("View"), true);
   ROLLOUT_viewpoints = glui_motion->add_rollout_to_panel(PANEL_viewA,_d("Viewpoints"), false,VIEWPOINTS_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_viewpoints,VIEWPOINTS_ROLLOUT);
@@ -703,7 +708,7 @@ extern "C" void glui_motion_setup(int main_window){
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
-    glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);    
+    glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
       BUTTON_play_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Play Movie", PLAY_MOVIE, Render_CB);
@@ -728,7 +733,7 @@ extern "C" void glui_motion_setup(int main_window){
 
 void enable_disable_views(void){
   int ival;
-  camera *cex;
+  cameradata *cex;
 
   ival=LIST_viewpoints->get_int_val();
   if(ival>=0){
@@ -839,7 +844,7 @@ void update_rotation_index(int val){
   *rotation_index=val;
   camera_current->rotation_index=val;
   if(*rotation_index>=0&&*rotation_index<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + *rotation_index;
     camera_current->xcen=meshi->xcen;
@@ -861,8 +866,8 @@ void update_rotation_index(int val){
 
   az_elev = camera_current->az_elev;
 
-  az_elev[0]=0.; 
-  az_elev[1]=0.; 
+  az_elev[0]=0.;
+  az_elev[1]=0.;
 
   camera_current->azimuth=0.0;
 
@@ -1258,7 +1263,7 @@ extern "C" void Motion_CB(int var){
       ASSERT(FFALSE);
       break;
   }
-  
+
   dx = d_eye_xyz[0];
   dy = d_eye_xyz[1];
   if(var==EYE_ROTATE){
@@ -1422,7 +1427,7 @@ extern "C" void show_glui_motion(int menu_id){
 
 void Motion_DLG_CB(int var){
   switch(var){
-  case 1:
+  case CLOSE_MOTION:
     if(glui_motion!=NULL)glui_motion->hide();
     updatemenu=1;
     break;
@@ -1439,7 +1444,7 @@ void Motion_DLG_CB(int var){
 /* ------------------ view_exist ------------------------ */
 
 int view_exist(char *view){
-  camera *ca;
+  cameradata *ca;
 
   if(view==NULL)return 0;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
@@ -1465,14 +1470,48 @@ void get_unique_view_name(void){
   }
 }
 
+/* ------------------ camera2quat ------------------------ */
+
+void camera2quat(cameradata *ca, float *quat, float *rotation){
+  if(ca->quat_defined == 1){
+    quat[0] = ca->quaternion[0];
+    quat[1] = ca->quaternion[1];
+    quat[2] = ca->quaternion[2];
+    quat[3] = ca->quaternion[3];
+  }
+  else{
+    float quat_temp[4];
+    float azimuth, elevation, axis[3];
+
+    azimuth = ca->az_elev[0] * DEG2RAD;
+    elevation = (ca->az_elev[1])*DEG2RAD;
+
+    axis[0] = 1.0;
+    axis[1] = 0.0;
+    axis[2] = 0.0;
+
+    angleaxis2quat(elevation, axis, quat_temp);
+
+    axis[0] = 0.0;
+    axis[1] = 0.0;
+    axis[2] = 1.0;
+
+    angleaxis2quat(azimuth, axis, quat);
+
+    mult_quat(quat_temp, quat, quat);
+  }
+
+  if(rotation != NULL)quat2rot(quat, rotation);
+}
+
 /* ------------------ Viewpoint_CB ------------------------ */
 
 void Viewpoint_CB(int var){
   int ival;
   int rotation_type_save;
-  camera *cam1,*cex,*ca;
+  cameradata *cam1,*cex,*ca;
   char *label;
-  camera *prev, *next;
+  cameradata *prev, *next;
   int view_id;
 
   switch(var){
@@ -1642,7 +1681,7 @@ extern "C" void set_startup_view(void){
 extern "C" void add_list_view(char *label_in){
   int ival;
   char *label;
-  camera *cam1,*cam2,*cex,*ca;
+  cameradata *cam1,*cam2,*cex,*ca;
 
   ival=LIST_viewpoints->get_int_val();
   if(ival==-1){

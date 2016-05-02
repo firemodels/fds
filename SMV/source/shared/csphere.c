@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <stdlib.h>
 #ifdef pp_DRAWISO
 #ifdef pp_OSX
@@ -12,7 +12,7 @@
 #include <math.h>
 #include "csphere.h"
 
-/* ------------------ initsphere ------------------------ */
+/* ------------------ initspherepoints ------------------------ */
 
 void initspherepoints(spherepoints *sphereinfo, int n){
   int i,j;
@@ -41,7 +41,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
 
   NewMemory((void **)&sphereinfo->dtheta,(n+1)*sizeof(float));
   NewMemory((void **)&sphereinfo->nlong,(n+1)*sizeof(int));
-  
+
   // allocate and define vallist
 
   NewMemory((void **)&sphereinfo->vallist,(n+1)*sizeof(int));
@@ -134,7 +134,7 @@ void initspherepoints(spherepoints *sphereinfo, int n){
   sphereinfo->maxerr_deg=asin(maxerr/2.0)*180.0/pi;
 }
 
-/* ------------------ freeaphere ------------------------ */
+/* ------------------ freespherepoints ------------------------ */
 
 void freespherepoints(spherepoints *sphereinfo){
   FREEMEMORY(sphereinfo->dtheta);
@@ -144,7 +144,7 @@ void freespherepoints(spherepoints *sphereinfo){
 }
 
 
-/* ------------------ getnormal ------------------------ */
+/* ------------------ getnormalvectorptr ------------------------ */
 
 float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
   float *normptr;
@@ -154,7 +154,7 @@ float *getnormalvectorptr(spherepoints *sphereinfo, unsigned int index){
   return normptr;
 }
 
-/* ------------------ getnormal ------------------------ */
+/* ------------------ getnormalvector ------------------------ */
 
 void getnormalvector(spherepoints *sphereinfo, unsigned int index, float *normal){
   float *normptr;
@@ -247,7 +247,7 @@ unsigned int getnormalindex(spherepoints *sphereinfo, float *normal){
 }
 #ifdef pp_DRAWISO
 
-/* ------------------ drawsphere ------------------------ */
+/* ------------------ drawspherepoints ------------------------ */
 
 void drawspherepoints(spherepoints *spherei){
   float u[3], v[3], *w;

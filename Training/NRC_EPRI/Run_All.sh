@@ -1,30 +1,19 @@
 #!/bin/bash
 
-# This script runs the a set of Validation Cases on a linux machine with
-# a batch queuing system
-
+# This script runs a set of Validation Cases on a Linux machine with a batch queuing system.
+# See the file Validation/Common_Run_All.sh for more information.
 export SVNROOT=`pwd`/../..
-export FDS=~/FDS/FDS5/bin/fds5_linux_64
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_linux_64_7031/fds5_mpi_intel_linux_64
-export RUNFDS=$SVNROOT/Utilities/Scripts/runfds.sh
-export RUNFDSMPI=$SVNROOT/Utilities/Scripts/runfdsmpi.sh
-export BASEDIR=`pwd`
-export INDIR=Current_Results
-source ~/.bashrc_fds intel64
+source $SVNROOT/Validation/Common_Run_All.sh
 
-# uncomment following line to stop all cases
-#export STOPFDS=1
+$QFDS $DEBUG $QUEUE -d $INDIR Annulus_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Main_Control_Room_Purge_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Main_Control_Room_No_Purge_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR Pump_Room_v6.fds
 
-/bin/sh -c "cp $BASEDIR/FDS_Input_Files/*.fds $BASEDIR/$INDIR"
-
-$RUNFDS $INDIR Annulus
-$RUNFDS $INDIR Main_Control_Room_Purge
-$RUNFDS $INDIR Main_Control_Room_No_Purge
-$RUNFDS $INDIR Pump_Room 
-
-$RUNFDSMPI 7 $INDIR Cable_Spreading_Room
-$RUNFDSMPI 4 $INDIR Corridor
-$RUNFDSMPI 5 $INDIR Switchgear_Room_Cabinet
-$RUNFDSMPI 4 $INDIR Switchgear_Room_MCC
-$RUNFDSMPI 2 $INDIR Turbine_Building
+$QFDS $DEBUG $QUEUE -d $INDIR -p 7 Cable_Spreading_Room_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR -p 4 Corridor_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR -p 5 Switchgear_Room_Cabinet_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR -p 4 Switchgear_Room_MCC_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR -p 2 Turbine_Building_Location_1_v6.fds
+$QFDS $DEBUG $QUEUE -d $INDIR -p 2 Turbine_Building_Location_2_v6.fds
 

@@ -1,0 +1,102 @@
+\documentclass[]{article}
+\newcommand{\function}[4]{\noindent {function: \itshape #1}(#2) returns #3 \\ #4\par
+\medskip}
+\newcommand{\val}[4]{\noindent {value: \itshape #1} type: #2 #3 \\ #4\par
+\medskip}
+\newcommand{\argu}[1]{\emph{#1}}
+\begin{document}
+\title{Smokview Lua Scripting Guide}
+\author{Jake O'Shannessy}
+\date{}
+\maketitle
+
+\section{Function/Value Index}
+% all entries are currently on one line to aid reordering
+\function{bounds.slices.set}{string name, float min, float max}{}{}
+\val{camera.eye.x}{}{}{}
+\function{camera.eye.x.mod}{}{}{}
+\val{camera.eye.y}{}{}{}
+\function{camera.eye.y.mod}{}{}{}
+\val{camera.eye.z}{}{}{}
+\function{camera.eye.z.mod}{}{}{}
+\val{camera.eye.az}{}{}{}
+\function{camera.eye.elev.mod}{}{}{}
+\val{camera.projection\_type}{}{}{}
+\val{clip.mode}{int}{}{}
+\function{clip.x.set}{float min, float max}{}{}
+\val{clip.x.min}{float}{}{}
+\val{clip.x.max}{float}{}{}
+\function{clip.y.set}{float min, float max}{}{}
+\val{clip.y.min}{float}{}{}
+\val{clip.y.max}{float}{}{}
+\function{clip.z.set}{float min, float max}{}{}
+\val{clip.z.min}{float}{}{}
+\val{clip.z.max}{float}{}{}
+% \val{ncsvinfo}{int}{no set}{} just overload the # operator for these
+\val{csvinfo}{[csvinfo]}{no set}{}
+% \val{ndevices}{int}{no set}{} just overload the # operator for these
+\val{devices}{[device]}{no set}{}
+\val{display\_CB}{}{}{}
+\function{exit}{}{}{}
+\val{frame}{int}{}{}
+\val{global\_times}{[float]}{no set}{}
+\val{grid.visibility}{bool}{}{}
+\val{grid.x.vis}{bool}{}{}
+\val{grid.x.plot}{int}{}{}
+\val{grid.y.vis}{bool}{}{}
+\val{grid.y.plot}{int}{}{}
+\val{grid.z.vis}{bool}{}{}
+\val{grid.z.plot}{int}{}{}
+\function{gslice.orien}{float az, float elev}{}{}
+\function{gslice.pos}{float x, float y, float z}{}{}
+\function{gslice.view}{int data, bool show\_triangles, bool show\_triangulation, bool show\_normal}{}{}
+\function{initsmvdata}{}{}{deprecated, incorporate into load.smv}
+\function{label}{string}{}{}
+\function{load.3dsmoke}{string type}{}{}
+\function{load.boundaryfile}{filepath}{}{}
+\function{load.datafile}{filepath}{}{}
+\function{load.inifile}{filepath}{}{}
+\function{load.iso}{string type}{}{}
+\function{load.particles}{name}{}{}
+\function{load.plot3d}{int meshnumber, float time\_local}{}{}
+\function{load.vdatafile}{filepath}{}{}
+\function{load.volsmoke}{int meshnumber}{}{}
+\function{load.volsmokeframe}{int meshnumber, int framenumber}{}{}
+\function{load.vslice}{string type, int axis, float distance}{}{}
+\function{load.smv}{filepath}{errorcode}{Load an smv file from \argu{filepath}.}
+\function{load.tour}{string name}{}{}
+% \val{nmeshes}{int}{no set}{} just overload the # operator for these
+\val{model.chid}{string}{readonly}{}
+\val{model.meshes}{[mesh]}{no set}{}
+\val{model.slices}{[slice]}{no set}{}
+\val{partclasscolor}{string}{}{}
+\val{partclasstype}{string}{}{}
+\function{plot3dprops}{int variable\_index, bool showvector, int vector\_length\_index, int display\_type, float vector\_length}{}{}
+\function{renderclip}{flag, left, right, bottom}{none}{}
+\function{render}{}{}{}
+\val{render.dir}{filepath}{}{}
+\val{render.type}{int}{}{}
+\function{render.movie}{string name, string base, float framerate}{}{}
+\val{render.movie.type}{string type}{}{}
+% \val{nslices}{int}{no set}{} just overload the # operator for these
+\function{settourview}{int edittourArg, int mode, bool show\_tourlocusArg,float tour\_global\_tensionArg}{}{}
+\function{tempyieldscript}{float}{}{}
+\val{tour.keyframe}{float}{}{}
+\val{time}{float}{}{}
+\val{timebar.visibility}{int}{}{}
+\function{timebar.visibility.toggle}{}{}{}
+\val{smokeviewEmbedded}{bool}{readonly}{}
+\val{smokeviewProgam}{table}{readonly}{Information on the Smokeview program.}
+\val{smokeviewProgam.version}{string}{readonly}{Running version of the Smokeview program.}
+\val{smokeviewProgam.githash}{string}{readonly}{Git hash of the running Smokeview program.}
+\function{unload.all}{}{}{}
+\function{unload.tour}{}{}{}
+\val{view.viewpoint}{string}{}{}
+\val{view.colorbar.flip}{bool}{}{}
+\val{view.colorbar.index}{int}{}{}
+\function{window.hide}{}{}{}
+\function{window.size}{}{}{}
+\val{window.size.width}{int}{}{}
+\val{window.size.height}{int}{}{}
+\function{yieldscript}{}{}{}
+\end{document}

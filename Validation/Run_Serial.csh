@@ -28,7 +28,6 @@ cd Restivo_Experiment; ./Run_All.sh -y; cd ..
 cd Sippola_Aerosol_Deposition; ./Run_All.sh -y; cd ..
 cd SP_AST; ./Run_All.sh -y; cd ..
 cd Steckler_Compartment; ./Run_All.sh -y; cd ..
-cd UL_Commodity; ./Run_All.sh -y; cd ..
 cd UL_NIST_Vents; ./Run_All.sh -y; cd ..
 cd Ulster_SBI; ./Run_All.sh -y; cd ..
 cd UMD_Polymers; ./Run_All.sh -y; cd ..

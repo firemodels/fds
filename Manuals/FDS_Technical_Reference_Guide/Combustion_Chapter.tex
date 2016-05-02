@@ -402,13 +402,9 @@ For a single reaction, the change in fuel is based on the limiting reactant \cit
 \Delta \hat{Y}_{\rm F} = -\min \left( \hat{Y}_{\rm F}, \hat{Y}_{\alpha} \,\frac{\nu_{\rm F}\,W_{\rm F}}{\nu_{\alpha}\,W_{\alpha}}\right) \quad ; \quad \mbox{for all reactants, $\alpha$}
 \end{equation}
 The minimum is taken in Eq.~(\ref{eq:stoich_fuel_single}) to ensure that the reactant species mass fractions remain realizable.
-\subsubsection{Multiple Reactions}
 
-For multiple reactions with infinitely fast chemistry, a more general boundedness correction algorithm is used. In this formulation, the change in fuel is simply the amount of the fuel present
-\begin{equation}\label{eq:fuel_mult_reac}
-\Delta \hat{Y}_{\rm F} = -\hat{Y}_{\rm F}
-\end{equation}
-Discussion of how this algorithm is used to maintain realizability is in Section \ref{boundedness}.
+\subsubsection{Multiple Reactions}
+For multiple reactions with infinitely fast chemistry, the reaction rate is treated as a second-order (assuming two reactants) Arrhenius reaction with zero activation energy.  The Arrhenius constant is set to a large value.  Further discussion of the time integration for these cases is given in Appendix \ref{chemistry_integration}.
 
 \subsection{Finite-Rate Chemistry (Arrhenius Reaction)}
 \label{Reaction_Rate_Model}
@@ -446,7 +442,7 @@ To simplify the calculations within FDS, density and molecular weight are pulled
 \begin{equation}\label{eq:aprime}
 A^{\prime}_{i} = A_{i} \, \prod \, (W_{\alpha} \times 1000)^{\,-a_{\alpha,i}} \times \left(\frac{1 \; \si{kmol}}{10^3 \; \si{mol}}\right) \times \left(\frac{10^6 \; \si{cm^3}}{1 \; \si{m^3}}\right) \times W_{\,\si{F}}
 \end{equation}
-Using $A_i^{\prime}$, the reaction rate in becomes
+Using $A_i^{\prime}$, the reaction rate in mass units becomes
 \begin{equation}\label{eq:finite_rate_fin}
 r^{\prime}_{\si{F},i} = -A_i^{\prime}\;\rho^{\sum a_{\alpha,i}}\;T^{n_i}\;\mathrm{e}^{-E_i/RT}\;\prod Y_{\alpha}^{\,a_{\alpha,i}} \quad [=] \quad \left(\frac{\si{kg \; F}}{\si{m^3.s}}\right)
 \end{equation}
@@ -458,7 +454,7 @@ Last, the rate of change in composition for species $\alpha$ in the mixed reacto
 \begin{equation}\label{rate_expression_y}
 \frac{\d \hat{Y}_{\alpha}}{\d t} = \frac{1}{\rho}\sum_{i} r^{\prime}_{\alpha,i} \quad [=] \quad \left(\frac{\si{kg \; \alpha}}{\si{kg.s}}\right)
 \end{equation}
-See Section \ref{boundedness} for a discussion on the algorithm used to ensure species remain realizable.
+See Appendix~\ref{chemistry_integration} for a discussion on the algorithm used to ensure species remain bounded.
 
 \subsubsection{Third Body Reactions}
 
@@ -479,98 +475,5 @@ Using the change in fuel concentration for each of the $i$ reactions, the change
 \Delta \hat{Y}_{\alpha} = \sum_i \,\left(\frac{\nu_{\alpha,i} \,W_{\alpha}}{\nu_{{\rm F},i} \,W_{{\rm F},i}}\right)\Delta \hat{Y}_{{\rm F},i}
 \end{equation}
 
-\subsection{Maintaining Species Boundedness}
-\label{boundedness}
-
-To maintain realizable species mass fractions ($\hat{Y}_{\alpha}\ge0$ and $\sum\hat{Y}_{\alpha}=1$), a predictor-corrector scheme is used
-\begin{align}
-\hat{Y}_\alpha^p &= \hat{Y}_\alpha^k + \Delta \hat{Y}_\alpha \label{eq:bc_predict} \\
-\hat{Y}_\alpha^{k+1} &= \hat{Y}_\alpha^k + \Delta \hat{Y}_\alpha \beta \label{eq:bc_correct}
-\end{align}
-After computing the predicted values, a boundedness correction, $\beta$, is applied to the change in species vector, $\Delta \hat{Y}_{\alpha}$, to determine the corrected values. Here $\beta$ is defined as
-\begin{equation} \label{eq:bc_beta}
-\beta = \left\{ \begin{array}{ll} \displaystyle
-          \displaystyle \frac{0-\hat{Y}_{\alpha}^k}{\lvert \hat{Y}_{\alpha}^p\rvert + \hat{Y}_{\alpha}^k}  & \quad {\hat{Y}_\alpha^p \le 0} \\ [0.2in]
-          \displaystyle \frac{1-\hat{Y}_{\alpha}^k}{\hat{Y}_{\alpha}^p - \hat{Y}_{\alpha}^k}  & \quad {\hat{Y}_\alpha^p > 1} \end{array}\right. \quad ; \quad \mbox{take minimum value over all $\alpha$ species}
-\end{equation}
-
-\subsubsection{Example: Infinitely Fast Chemistry, Oxygen-limited, Methane Combustion}
-Consider a single step methane oxidation reaction
-\begin{equation}\label{eq:bc_methane}
-\mathrm{CH_4 + 2 \, O_2} \rightarrow  \mathrm{CO_2 + 2 \, H_2O}
-\end{equation}
-where the initial mass fractions of species are 30\% methane, 30\% oxygen, and 40\% nitrogen by mass. In this example, the conditions are oxygen-limited. This means that the only way for all of the fuel to be consumed would be to have a negative mass fraction of oxygen. This is not physical. As a result, we follow Eq.~(\ref{eq:stoich_fuel_single}) and find change in fuel concentration by the limiting reactant:
-\begin{equation}\label{eq:bc_delf_prim}
-\Delta \hat{Y}_{\rm F} = -\min \left( 0.3, 0.3 \frac{(-1)(16)}{(-2)(32)}\right) = -0.075
-\end{equation}
-An alternative method is to follow the predictor-corrector scheme discussed in Section \ref{boundedness}. First we find the change in fuel concentration
-\begin{equation}\label{eq:bc_fuel_single}
-\Delta \hat{Y}_{\rm F} = -0.3
-\end{equation}
-and the corresponding change is oxygen
-\begin{equation}\label{eq:bc_o2_single}
-\Delta \hat{Y}_{\rm O_2} = -0.3 \left( \frac{(-2)(32)}{(-1)(16)} \right) = -1.2
-\end{equation}
-Following Eq.~(\ref{eq:bc_predict}), the updated reaction concentrations are $\hat{Y}_{\rm F}^p$ = 0 and $\hat{Y}_{\rm O_2}^p$ = $-$0.9. The boundedness correction factor is then calculated:
-\begin{equation}\label{eq:calc_beta_single}
-\beta = \frac{0.3}{0.9 + 0.3} = 0.25
-\end{equation}
-Multiplying $\beta$ by the change in fuel results
-\begin{equation}\label{eq:bc_beta_single}
-\Delta \hat{Y}_{\rm F} = (-0.3)(0.25) = -0.075
-\end{equation}
-which is the same result as found by Eq.~(\ref{eq:bc_delf_prim}).
-
-\subsubsection{Example: Infinitely Fast Chemistry, Oxygen-limited, Methane-Propane Combustion}
-Consider the case where there are two, single step hydrocarbon oxidization reactions
-\begin{align}
-&\mbox{Reaction 1}& \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O}       && && \label{eq:two_fuel_ox_limit1} \\
-&\mbox{Reaction 2}& \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}  && && \label{eq:two_fuel_ox_limit2}
-\end{align}
-The initial composition of a premixed reactor is 30\% methane, 40\% propane, and 30\% oxygen by mass.
-\subsubsection{Lumped Species Approach}
-One way to solve this problem is to use a lumped species approach; combine the methane and propane into a new fuel known as `My Fuel.' In this example, the initial volume fractions of methane and propane are 0.673 and 0.327, respectively. `My Fuel' can then be defined as
-\begin{equation}\label{eq:my_fuel}
-\rm{My\;Fuel} = \left( 0.673\, \mathrm{CH_4} + 0.327\, \mathrm{C_3H_8} \right) = C_{1.65}H_{5.31}
-\end{equation}
-The molecular weight of this lumped fuel is 25.21 g/mol. Based on the lumped fuel composition, a single reaction can be constructed
-\begin{equation}\label{eq:lumped_reac}
-\mathrm{C_{1.65}H_{5.31} + 2.98 \, O_2} \rightarrow  \mathrm{1.65 \, CO_2 + 2.66 \, H_2O}
-\end{equation}
-On a mass basis, the reactor is 70 \% fuel, with with 43 \% of that mass methane and 57 \% propane. Following Eq.~(\ref{eq:stoich_fuel_single}) yields a change in fuel of
-\begin{equation}\label{eq:bc_delf_lump}
-\Delta \hat{Y}_{\rm F} = -\min \left( 0.7, 0.3 \frac{(-1)(25.21)}{(-2.98)(32)}\right) = -0.0793
-\end{equation}
-The change in fuel for each species is based on each fuel's mass fraction in the lumped fuel
-\begin{align}
-\Delta \hat{Y}_{\rm F,1} &= (-0.0793)(0.43) = -0.0339 \label{eq:change_reac_lump1} \\
-\Delta \hat{Y}_{\rm F,2} &= (-0.0793)(0.57) = -0.0452 \label{eq:change_reac_lump2}
-\end{align}
-\subsubsection{Primitive Species Approach}
-An alternative method is to process each reaction independently and use the boundedness correction algorithm (Section \ref{boundedness}). The first step is to compute the change in fuel for each reaction
-\begin{align}\label{eq:change_fuel_2reac}
-\Delta \hat{Y}_{\rm F,1} &= -0.3\\
-\Delta \hat{Y}_{\rm F,2} &= -0.4
-\end{align}
-and the equivalent change in oxygen
-\begin{align}\label{eq:change_o2_2reac}
-\Delta \hat{Y}_{\rm O_2,1} &= -0.3 \left( \frac{(-2)(32)}{(-1)(16)} \right) = -1.2 \\
-\Delta \hat{Y}_{\rm O_2,2} &= -0.4 \left( \frac{(-5)(32)}{(-1)(44)} \right) = -1.45
-\end{align}
-The updated reaction concentrations are then
-\begin{align}\label{eq:uncorrect_spec}
-\hat{Y}_{{\rm F},1}^p &= 0.3 - 0.3 = 0 \\
-\hat{Y}_{{\rm F},2}^p &= 0.4 - 0.4 = 0 \\
-\hat{Y}_{\rm O_2}^p &= 0.3 - 1.2 - 1.45 = -2.35
-\end{align}
-The resulting boundedness correction factor is found to be
-\begin{equation}\label{eq:calc_beta_two}
-\beta = \frac{0.3}{2.35 + 0.3} = 0.113
-\end{equation}
-Applying the $\beta$ correction to the change in fuel for each reaction results in the same values are Eqs.~(\ref{eq:change_reac_lump1}) and (\ref{eq:change_reac_lump2})
-\begin{align}
-\Delta \hat{Y}_{\rm F,1} &= (-0.3)(0.113) = -0.0339 \label{eq:del_meth_C} \\
-\Delta \hat{Y}_{\rm F,2} &= (-0.4)(0.113) = -0.0452 \label{eq:del_prop_c}
-\end{align}
 
 

@@ -17,6 +17,7 @@
 
 #define GAS 1
 #define SOLID 0
+#define UNCOMPRESSED 0
 
 /* ------------------ vol_tetra ------------------------ */
 
@@ -36,7 +37,7 @@ float vol_tetra(float *a, float *b, float *c, float *d){
   return ABS(volume);
 }
 
-/* ------------------ vol_hexa ------------------------ */
+/* ------------------ vol_penta ------------------------ */
 
 float vol_penta(float *a, float *b, float *c, float *d, float *e, float *f){
   float vol1, vol2, vol3;
@@ -59,9 +60,9 @@ float GetTetraVol(float *verts[4], float vals[4], float level){
        3/       4\         \
        /          \   .     2
       /     2 .    \      /
-     / .            \   / 1 
+     / .            \   / 1
     0 -------------- 1/
-           0   
+           0
 */
 
   int state[4]={0,0,0,0},i,index=0,p2=1;
@@ -152,7 +153,7 @@ float GetTetraVol(float *verts[4], float vals[4], float level){
 
 /* ------------------ getisobox ------------------------ */
 
-void getisobox(float x[2], float y[2], float z[3], float *vals, float level, 
+void getisobox(float x[2], float y[2], float z[3], float *vals, float level,
                float *xyzverts, int *nvert, int *triangles, int *ntriangles){
                  int nodeindexes[8]={0,1,2,3,4,5,6,7};
                  float xvert[6], yvert[6], zvert[6];
@@ -168,16 +169,16 @@ void getisobox(float x[2], float y[2], float z[3], float *vals, float level,
 
 /* ------------------ GetIsobox ------------------------ */
 
-int GetIsobox(const float *x, 
-               const float *y, 
-               const float *z, 
-               const float *vals, 
-               const float *tvals, 
-               const int *nodeindexes, 
+int GetIsobox(const float *x,
+               const float *y,
+               const float *z,
+               const float *vals,
+               const float *tvals,
+               const int *nodeindexes,
                float level,
-               float *xvert, 
-               float *yvert, 
-               float *zvert, 
+               float *xvert,
+               float *yvert,
+               float *zvert,
                float *tvert, int *closestnodes, int *nvert,
                int *triangles, int *ntriangles){
        /*
@@ -196,7 +197,7 @@ int GetIsobox(const float *x,
 
        OUTPUT
        -----
-       xvert, yvert, zvert - array of x,y,z coordinates that have iso-surface value 
+       xvert, yvert, zvert - array of x,y,z coordinates that have iso-surface value
        nvert - number of vertices
        triangles - set of 3 integer indices for each triangle pointing into xvert, yvert, zvert arrays
        ntriangles - number of indices in triangles
@@ -431,7 +432,7 @@ int edgelist2[15][16]={
 
 /* determine min and max solution values */
 
-  vmin = vals[0]; 
+  vmin = vals[0];
   vmax = vals[0];
   if(closestnodes!=NULL){
     for(n=0;n<12;n++){
@@ -459,12 +460,12 @@ int edgelist2[15][16]={
   sign = 1;
   for(n=0;n<8;n++){
     if(vals[n]>level){
-      bigger++; 
+      bigger++;
       casenum |= prods[n];
     }
   }
 
-/* there are more nodes greater than the iso-surface level than below, so 
+/* there are more nodes greater than the iso-surface level than below, so
    solve the complementary problem */
 
   if(bigger>4){
@@ -474,18 +475,18 @@ int edgelist2[15][16]={
     }
   }
 
-/* stuff min and max grid data into a more convenient form 
+/* stuff min and max grid data into a more convenient form
   assuming the following grid numbering scheme
 
        5-------6
-     / |      /| 
-   /   |     / | 
+     / |      /|
+   /   |     / |
   4 -------7   |
-  |    |   |   |  
+  |    |   |   |
   Z    1---|---2
   |  Y     |  /
   |/       |/
-  0--X-----3     
+  0--X-----3
 
   */
 
@@ -510,7 +511,7 @@ int edgelist2[15][16]={
   else{
     thistype=1;
   }
- 
+
   if(thistype!=-1){
     edges = &(edgelist[type][1]);
     if(sign>0){
@@ -518,7 +519,7 @@ int edgelist2[15][16]={
     }
     else{
       path = &(pathccwlist[type][1]); /* construct triangles counter clockwise */
-    }     
+    }
   }
   else{
     edges = &(edgelist2[type][1]);
@@ -527,7 +528,7 @@ int edgelist2[15][16]={
     }
     else{
       path = &(pathccwlist2[type][1]);  /* construct triangles counter clockwise */
-    }     
+    }
   }
   npath = path[-1];
   nedges = edges[-1];
@@ -593,7 +594,7 @@ int edgelist2[15][16]={
 
 /* ------------------ calcNormal2f ------------------------ */
 
-void calcNormal2f(const float *v1, const float *v2, const float *v3, 
+void calcNormal2f(const float *v1, const float *v2, const float *v3,
                  float *out, float *area){
   float u[3], v[3];
   int i;
@@ -615,9 +616,9 @@ void calcNormal2f(const float *v1, const float *v2, const float *v3,
 
 /* ------------------ calcNormal2 ------------------------ */
 
-void calcNormal2(const unsigned short *v1, 
-                 const unsigned short *v2, 
-                 const unsigned short *v3, 
+void calcNormal2(const unsigned short *v1,
+                 const unsigned short *v2,
+                 const unsigned short *v3,
                  float *out, float *area){
   float u[3], v[3];
   int i;
@@ -684,13 +685,13 @@ void ReduceToUnit(float *v){
 
 /* ------------------ GetIsosurface ------------------------ */
 
-int GetIsosurface(isosurface *surface, 
-                  const float *data, 
-                  const float *tdata, 
-                  const char *iblank_cell, 
+int GetIsosurface(isosurface *surface,
+                  const float *data,
+                  const float *tdata,
+                  const char *iblank_cell,
                   float level, float dlevel,
-                  const float *xplt, int nx, 
-                  const float *yplt, int ny, 
+                  const float *xplt, int nx,
+                  const float *yplt, int ny,
                   const float *zplt, int nz
                    ){
   int ibar,jbar;
@@ -704,7 +705,7 @@ int GetIsosurface(isosurface *surface,
   int ijkbase,ip1jk,ijkp1,ip1jkp1,ijp1k,ip1jp1k,ijp1kp1,ip1jp1kp1;
   int ijbase;
   int nxy;
-  
+
   ibar = nx-1;
   jbar = ny-1;
   xx = xxx;
@@ -775,7 +776,7 @@ int GetIsosurface(isosurface *surface,
                     xvert, yvert, zvert, tvertptr, closestnodes, &nvert, triangles, &ntriangles);
 
           if(nvert>0||ntriangles>0){
-            if(UpdateIsosurface(surface, xvert, yvert, zvert, tvertptr, 
+            if(UpdateIsosurface(surface, xvert, yvert, zvert, tvertptr,
                                 closestnodes, nvert, triangles, ntriangles)!=0)return 1;
           }
         }
@@ -838,8 +839,8 @@ int order_closestnodes( const void *arg1, const void *arg2 ){
 /* ------------------ CompressIsosurface ------------------------ */
 
 int CompressIsosurface(isosurface *surface, int reduce_triangles,
-                        float xmin, float xmax, 
-                        float ymin, float ymax, 
+                        float xmin, float xmax,
+                        float ymin, float ymax,
                         float zmin, float zmax){
   int i,j,nn;
   float *x=NULL, *y=NULL, *z=NULL, *t=NULL;
@@ -862,21 +863,21 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
   orderdata *orderinfo;
   unsigned short *vertices=NULL;
   int *rank=NULL,*sortedlist=NULL,*closestnodes=NULL;
- 
+
   nvertices=surface->nvertices;
   if(nvertices==0)return 0;
   vertices=surface->vertices;
 
-  x=surface->xvert; 
-  y=surface->yvert; 
-  z=surface->zvert; 
+  x=surface->xvert;
+  y=surface->yvert;
+  z=surface->zvert;
   if(surface->tvert!=NULL)t=surface->tvert;
 
   sortedlist=surface->sortedlist;
   rank=surface->rank;
   triangles=surface->triangles;
   ntriangles=surface->ntriangles;
-  
+
   if(surface->dataflag==1){
     tvertices=surface->tvertices;
     FREEMEMORY(tvertices);
@@ -966,7 +967,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
     sdi = sortinfo + i;
     sortedlist[i]=sdi->index;
   }
-  
+
   for(i=0;i<nvertices;i++){
     rankdata *rdi;
 
@@ -1131,7 +1132,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
       vertices[3*iim1+2]=sumz/nn;
       if(surface->dataflag==1&&tvertices!=NULL)tvertices[iim1]=sumt/nn;
 
-      nn=0; 
+      nn=0;
       sumx = 0; sumy = 0;sumz = 0; sumt = 0;
     }
   }
@@ -1183,16 +1184,17 @@ int MergeIsosurface(isosurface *to_surface, isosurface *from_surface){
     from_surface->triangles,from_surface->ntriangles);
   return return_val;
 }
+
 /* ------------------ UpdateIsosurface ------------------------ */
 
-int UpdateIsosurface(isosurface *surface, 
-                      const float *xvert, 
-                      const float *yvert, 
-                      const float *zvert, 
-                      const float *tvert, 
-                      const int *closestnodes, 
-                      int nvert, 
-                      const int *triangles, 
+int UpdateIsosurface(isosurface *surface,
+                      const float *xvert,
+                      const float *yvert,
+                      const float *zvert,
+                      const float *tvert,
+                      const int *closestnodes,
+                      int nvert,
+                      const int *triangles,
                       int ntriangles){
   int n,ns, noldvert, *is;
   float *xs=NULL, *ys=NULL, *zs=NULL, *ts=NULL;
@@ -1354,7 +1356,7 @@ int ResizeSurface(isosurface *surfacedata, int incvert, int inctriangles, int in
 /* ------------------ InitIsosurface ------------------------ */
 
 void InitIsosurface(isosurface *surfacedata, float level, float *color,int colorindex){
-  surfacedata->compression_type=0;
+  surfacedata->compression_type=UNCOMPRESSED;
   surfacedata->level = level;
   surfacedata->color = color;
   surfacedata->colorindex=colorindex;
@@ -1469,7 +1471,7 @@ int GetNormalSurface(isosurface *surfacedata){
   int *triangles=NULL;
   int ntriangles;
   int nn, n, index;
-  
+
   ntriangles = (surfacedata->ntriangles)/3;
   if(ntriangles==0)return 0;
 
@@ -1495,18 +1497,18 @@ int GetNormalSurface(isosurface *surfacedata){
   nn = 0;
   for(n=0;n<ntriangles;n++){
     index = triangles[nn++];
-    vertx[0] = xvert[index]; 
-    verty[0] = yvert[index]; 
+    vertx[0] = xvert[index];
+    verty[0] = yvert[index];
     vertz[0] = zvert[index];
 
     index = triangles[nn++];
-    vertx[1] = xvert[index]; 
-    verty[1] = yvert[index]; 
+    vertx[1] = xvert[index];
+    verty[1] = yvert[index];
     vertz[1] = zvert[index];
 
     index = triangles[nn++];
-    vertx[2] = xvert[index]; 
-    verty[2] = yvert[index]; 
+    vertx[2] = xvert[index];
+    verty[2] = yvert[index];
     vertz[2] = zvert[index];
 
     calcNormal(vertx,verty,vertz,out);
@@ -1518,9 +1520,9 @@ int GetNormalSurface(isosurface *surfacedata){
 
 }
 
-/* ------------------ isoheader ------------------------ */
+/* ------------------ CCisoheader ------------------------ */
 
-void CCisoheader(char *isofile, 
+void CCisoheader(char *isofile,
                  char *isolonglabel, char *isoshortlabel, char *isounits,
                  float *levels, int *nlevels, int *error){
   int version=1,option=1;
@@ -1549,9 +1551,9 @@ void CCisoheader(char *isofile,
 }
 
 
-/* ------------------ isotheader ------------------------ */
+/* ------------------ CCtisoheader ------------------------ */
 
-void CCtisoheader(char *isofile, 
+void CCtisoheader(char *isofile,
                  char *isolonglabel, char *isoshortlabel, char *isounits,
                  float *levels, int *nlevels, int *error){
   int version=2,option=1;
@@ -1568,7 +1570,7 @@ void CCtisoheader(char *isofile,
   len[1]=strlen(isoshortlabel)+1;
   len[2]=strlen(isounits)+1;
 
-  fwrite(&one,4,1,isostream);  
+  fwrite(&one,4,1,isostream);
   fwrite(&version,4,1,isostream);
   fwrite(len,4,3,isostream);
   fwrite(isolonglabel, 1,len[0],isostream);
@@ -1639,10 +1641,10 @@ void isoout(FILE *isostream,float t, int timeindex, isosurface *surface, int *er
 
 /* ------------------ CCisosurface2file ------------------------ */
 
-void CCisosurface2file(char *isofile, float *t, float *data, char *iblank, 
+void CCisosurface2file(char *isofile, float *t, float *data, char *iblank,
 						float *level, int *nlevels,
-                   float *xplt, int *nx, 
-                   float *yplt, int *ny, 
+                   float *xplt, int *nx,
+                   float *yplt, int *ny,
                    float *zplt, int *nz,
                    int *reduce_triangles, int *error
                    ){
@@ -1673,7 +1675,7 @@ void CCisosurface2file(char *isofile, float *t, float *data, char *iblank,
         dlevel=MIN(ABS(level[i+1]-level[i]),ABS(level[i]-level[i-1]));
       }
     }
-         
+
     InitIsosurface(&surface,level[i],NULL,i);
     surface.dataflag=0;
     if(GetIsosurface(&surface,data,NULL,(const char *)iblank,level[i],dlevel,xplt,*nx,yplt,*ny,zplt,*nz)!=0){
@@ -1706,10 +1708,10 @@ void CCisosurface2file(char *isofile, float *t, float *data, char *iblank,
 
 /* ------------------ CCisosurface2file ------------------------ */
 
-void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, float *data2, int *iblank, 
+void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, float *data2, int *iblank,
 						float *level, int *nlevels,
-                   float *xplt, int *nx, 
-                   float *yplt, int *ny, 
+                   float *xplt, int *nx,
+                   float *yplt, int *ny,
                    float *zplt, int *nz,
                    int *reduce_triangles, int *error
                    ){
@@ -1735,7 +1737,7 @@ void CCisosurfacet2file(char *isofile, float *t, float *data, int *data2flag, fl
   *error = 0;
   for(i=0;i<*nlevels;i++){
     float dlevel=0.0;
-    
+
     if(*nlevels>1){
       if(i==0){
         dlevel=ABS(level[1]-level[0]);
@@ -1802,8 +1804,6 @@ float get_tri_area(int *edgelist, float *xyz){
   return 0.5*NORM3(vcross);
 }
 
-/* ------------------ get_iso_level_area_tetra ------------------------ */
-
 #define FACTOR(ii,v0,v1,x0,x1) \
   if(v0*v1<0.0){\
     factor2=-v0/(v1-v0);\
@@ -1811,8 +1811,11 @@ float get_tri_area(int *edgelist, float *xyz){
     xyziso[1+3*ii]=MIX(factor2,(x1)[1],(x0)[1]);\
     xyziso[2+3*ii]=MIX(factor2,(x1)[2],(x0)[2]);\
   }
-float get_iso_level_area_tetra(float level, 
-                               float v0, float v1, float v2, float v3, 
+
+/* ------------------ get_iso_level_area_tetra ------------------------ */
+
+float get_iso_level_area_tetra(float level,
+                               float v0, float v1, float v2, float v3,
                                float *xyz0, float *xyz1, float *xyz2, float *xyz3){
   float area, vals2[4],factor2,xyziso[18];
   int i,factor,casenum;
@@ -1866,7 +1869,7 @@ float get_iso_level_area_tetra(float level,
   return area;
 }
 
-/* ------------------ get_iso_level_area_tetra ------------------------ */
+/* ------------------ get_iso_level_area_cube ------------------------ */
 
 float get_iso_level_area_cube(float level, float *vals, float *xyz){
   float area=0.0;

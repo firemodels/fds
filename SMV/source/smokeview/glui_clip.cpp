@@ -126,7 +126,7 @@ extern "C" void glui_clip_setup(int main_window){
 
   PANEL_blockageview = glui_clip->add_rollout_to_panel(PANEL_clip,"Hide blockages",false);
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi = meshinfo + i;
     glui_clip->add_checkbox_to_panel(PANEL_blockageview,meshi->label,&meshi->blockvis);
@@ -169,7 +169,6 @@ extern "C" void hide_glui_clip(void){
 extern "C" void show_glui_clip(void){
   if(glui_clip!=NULL)glui_clip->show();
 }
-
 
 /* ------------------ Update_Glui_Clip ------------------------ */
 
@@ -252,6 +251,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->enable();
       CHECKBOX_clip_ymax->enable();
       CHECKBOX_clip_zmax->enable();
+      show_bothsides_blockages = 1;
+      updatefaces=1;
     }
     else{
       SPINNER_clip_xmin->disable();
@@ -267,6 +268,8 @@ void CLIP_CB(int var){
       CHECKBOX_clip_xmax->disable();
       CHECKBOX_clip_ymax->disable();
       CHECKBOX_clip_zmax->disable();
+      show_bothsides_blockages = 0;
+      updatefaces=1;
     }
     break;
   case SPINNER_xlower:
@@ -326,7 +329,7 @@ void set_clip_controls(int val){
     clipinfo.zmax = zclip_max;
   }
   if(val>=1&&val<=nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
     float *xplt, *yplt, *zplt;
 
     float dxclip, dyclip, dzclip;

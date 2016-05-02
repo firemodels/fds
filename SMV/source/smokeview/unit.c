@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -62,10 +62,10 @@ void set_unit_vis(void){
       }
     }
     if(uci->visible==1)continue;
-  
+
     for(j=0;j<npatchinfo;j++){
       patchdata *patchj;
-      
+
       patchj = patchinfo + j;
       if(is_unit_present(patchj->label.unit,uci->units->unit)==1){
         uci->visible=1;
@@ -77,7 +77,7 @@ void set_unit_vis(void){
     for(j=0;j<nplot3dinfo;j++){
       plot3ddata *plot3dj;
       int n;
-      
+
       plot3dj = plot3dinfo + j;
       for(n=0;n<5;n++){
         if(is_unit_present(plot3dj->label[n].unit,uci->units->unit)==1){
@@ -117,7 +117,7 @@ void update_unit_defs(void){
     firstpatch=1;
     for(j=0;j<npatchinfo;j++){
       patchdata *patchj;
-      
+
       patchj = patchinfo + j;
       if(patchj->loaded==0||patchj->display==0)continue;
       if(unit_type_match(patchj->label.unit,unitclasses+i)!=0)continue;
@@ -135,7 +135,7 @@ void update_unit_defs(void){
     firstslice=1;
     for(j=0;j<nsliceinfo;j++){
       slicedata *slicej;
-      
+
       slicej = sliceinfo + j;
       if(slicej->loaded==0||slicej->display==0)continue;
       if(unit_type_match(slicej->label.unit,unitclasses+i)!=0)continue;
@@ -154,7 +154,7 @@ void update_unit_defs(void){
     for(j=0;j<nplot3dinfo;j++){
       plot3ddata *plot3dj;
       int n;
-      
+
       plot3dj = plot3dinfo + j;
       if(plot3dj->loaded==0||plot3dj->display==0)continue;
       for(n=0;n<5;n++){
@@ -228,7 +228,7 @@ void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
   }
 }
 
-/* ------------------ Init_Units ------------------------ */
+/* ------------------ InitUnits ------------------------ */
 
 void InitUnits(void){
   int i;
@@ -237,7 +237,7 @@ void InitUnits(void){
 
   nunitclasses_default=6;
   NewMemory((void **)&unitclasses_default,nunitclasses_default*sizeof(f_units));
-  
+
   for(i=0;i<nunitclasses_default;i++){
     unitclasses_default[i].submenuid=0;
   }

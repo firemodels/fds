@@ -7,6 +7,7 @@
 #include <zlib.h>
 #include "svzip.h"
 #include "MALLOC.h"
+#include "compress.h"
 
 #define FORTgetplot3dq _F(getplot3dq)
 
@@ -15,7 +16,7 @@ STDCALLF FORTgetplot3dq(char *qfilename, int *nx, int *ny, int *nz, float *qq, i
 /* ------------------ convert_plot3d ------------------------ */
 
 int convert_plot3d(plot3d *plot3di){
-  
+
   char plot3dfile_svz[1024];
   int fileversion, one, zero;
   char *plot3d_file;
@@ -43,7 +44,7 @@ int convert_plot3d(plot3d *plot3di){
   strcpy(filetype,"");
   shortlabel=plot3di->labels[0].shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(plot3d_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",plot3d_file);
@@ -85,6 +86,7 @@ int convert_plot3d(plot3d *plot3di){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(PLOT3DFILE);
     return 0;
   }
 
@@ -94,6 +96,7 @@ int convert_plot3d(plot3d *plot3di){
       fclose(plot3dstream);
       fprintf(stderr,"*** Warning: The file %s exists.\n",plot3dfile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(PLOT3DFILE);
       return 0;
     }
   }
@@ -127,7 +130,7 @@ int convert_plot3d(plot3d *plot3di){
     NewMemory((void **)&plot3dframe_data,5*framesize*sizeof(float));
     NewMemory((void **)&plot3dframe_compressed,1.1*5*framesize*sizeof(unsigned char));
     NewMemory((void **)&plot3dframe_uncompressed,5*framesize*sizeof(unsigned char));
-    
+
     FORTgetplot3dq(plot3d_file, &nx, &ny, &nz, plot3dframe_data, &error, &isotest, len);
     kk=0;
     for(j=0;j<5;j++){
@@ -157,7 +160,7 @@ int convert_plot3d(plot3d *plot3di){
         plot3dframe_uncompressed[kk++]=ival;
       }
     }
-    compress(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,5*framesize);
+    compress_zlib(plot3dframe_compressed,&ncompressed_zlib,plot3dframe_uncompressed,5*framesize);
     sizeafter=16+ncompressed_zlib;
     sizebefore=5*framesize*sizeof(float);
   }
@@ -178,7 +181,7 @@ int convert_plot3d(plot3d *plot3di){
   // dum1, dum2, dum3, dum4
   // (((qq(i,j,k),i=1,nx),j=1,ny),k=1,nz)
 
-  //*** ZLIB format (C - no extra bytes surrounding data) 
+  //*** ZLIB format (C - no extra bytes surrounding data)
 
   //*** header
   // endian

@@ -35,13 +35,13 @@ The exact solution procedure of the above model is presented in Appendix~\ref{pa
      0.44                                              & 1000 < \RE_D
      \end{array} \right.  \\[0.2in]
 \RE_D &= \frac{\rho \, |\bu_{\rm p}-\bu| \, 2 r_{\rm p}}{\mu(T)} \end{align}
-where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles, 
+where $\mu(T)$ is the dynamic viscosity of air at temperature $T$. For cylindrical particles,
 \begin{align}
  C_{\rm d} &= \left\{ \begin{array}{ll}
      10/\RE_D^{0.8}                                & \RE_D < 1    \\[0.1in]
      10\left(0.6+0.4 \, \RE_D^{0.8} \right)/\RE_D  & 1 < \RE_D < 1000 \\[0.1in]
      1                                             & 1000 < \RE_D
-     \end{array} \right. 
+     \end{array} \right.
 \end{align}
 Additional corrections are made to account for drag reduction due to the wake effect~\cite{Ramirez:1} and deformation of the droplet~\cite{Loth:1}.
 
@@ -218,9 +218,9 @@ where $n$ represents the sub-time step in the integration of the droplet mass an
 
 \subsection{Lagrangian Contribution to the Velocity Divergence}
 
-In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_LAGRANGIAN} within the code,
+In practice, the filtered mass and energy source term contributions to the velocity divergence constraint are collected in a single term denoted {\ct D\_SOURCE} within the code,
 \begin{equation}
-D_{\si{Lagrangian}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha h_{s,\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} \right)
+D_{\si{\tiny SOURCE}} = \frac{1}{\rho} \sum_\alpha \frac{\overline{W}}{W_\alpha} \, \dot{m}_{{\rm b},\alpha}^{\ppp} + \frac{1}{\rho c_p T} \left( \dot{q}_{\rm b}^{\ppp} - \sum_\alpha \dot{m}_{{\rm b},\alpha}^{\ppp} \, \int_{T_{\rm b}}^T c_{p,\alpha} \d T'  \right)
 \end{equation}
 which is embedded in Eq.~(\ref{eqn_fdsD1}).
 

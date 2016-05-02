@@ -7,6 +7,7 @@
 #include <zlib.h>
 #include "svzip.h"
 #include "MALLOC.h"
+#include "compress.h"
 
 pdfdata pdfmerge,pdfframe;
 
@@ -32,7 +33,7 @@ int clean_boundary(patch *patchi){
   strcpy(filetype,"");
   shortlabel=patchi->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   BOUNDARYFILE=fopen(boundary_file,"rb");
   if(BOUNDARYFILE==NULL){
@@ -135,7 +136,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   strcpy(filetype,"");
   shortlabel=patchi->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(boundary_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",boundary_file);
@@ -196,7 +197,7 @@ int convert_boundary(patch *patchi, int *thread_index){
     fclose(BOUNDARYFILE);
     return 0;
   }
-  
+
 
   // read and write boundary header
 #ifndef pp_THREAD
@@ -206,7 +207,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   strcpy(units,"");
   unit=patchi->label.unit;
   if(strlen(unit)>0)strcat(units,unit);
-  trim(units);
+  trim_back(units);
   sprintf(cval,"%f",patchi->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
@@ -222,7 +223,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   fwrite(&one,4,1,boundarystream);           // write out a 1 to determine "endianness" when file is read in later
   fwrite(&zero,4,1,boundarystream);          // write out a zero now, then a one just before file is closed
   fwrite(&fileversion,4,1,boundarystream);   // write out compressed fileversion in case file format changes later
-  fwrite(&version,4,1,boundarystream);       // fds boundary file version
+  fwrite(&version_local,4,1,boundarystream);       // fds boundary file version
   sizeafter=16;
 
   // endian
@@ -236,7 +237,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   // time_local
   // compressed size of frame
   // compressed buffer
-  
+
 
   {
     int skip;
@@ -319,7 +320,7 @@ int convert_boundary(patch *patchi, int *thread_index){
         k1 = ijks[6*j+4];
         k2 = ijks[6*j+5];
         size = (i2+1-i1)*(j2+1-j1)*(k2+1-k1);
-        
+
         FORTREAD(patchvalscopy,size);
         sizebefore+=(size+2)*4;
         if(returncode==0)goto wrapup;
@@ -339,7 +340,7 @@ int convert_boundary(patch *patchi, int *thread_index){
         float val;
 
         val = patchvals[i];
-    
+
         if(val<patchi->valmin){
           ival=0;
         }
@@ -354,7 +355,7 @@ int convert_boundary(patch *patchi, int *thread_index){
 
       //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
       ncompressed_zlib=ncompressed_zlibSAVE;
-      returncode=compress(compressed_boundarybuffer, &ncompressed_zlib, full_boundarybuffer, npatchfull);
+      returncode=compress_zlib(compressed_boundarybuffer, &ncompressed_zlib, full_boundarybuffer, npatchfull);
       if(returncode!=0){
         fprintf(stderr,"*** Error: compress returncode=%i\n",returncode);
       }
@@ -522,7 +523,7 @@ void *compress_patches(void *arg){
       }
       patchi->inuse=1;
       UNLOCK_PATCH;
-    
+
       convert_boundary(patchi,thread_index);
     }
     else{
@@ -584,7 +585,7 @@ void update_patch_hist(void){
     while(error1==0){
       int ndummy;
 
-      FORTgetpatchdata(&unit1, &patchi->npatches, 
+      FORTgetpatchdata(&unit1, &patchi->npatches,
         pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &ndummy,&error1);
       update_histogram(patchframe,patchframesize,patchi->histogram);
     }

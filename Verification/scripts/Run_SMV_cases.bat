@@ -1,25 +1,30 @@
 @echo off
 
-set rundebug=%1
-
 set size=_64
-
 set svn_drive=c:
-if "%rundebug%" == "1" (
-set DEBUG=_db
-) else (
 set DEBUG=
-)
-
 set SCRIPT_DIR=%CD%
+set rungeomcases=1
+set runwuicases=1
+set runsmvcases=1
+set rundebug=0
+
+set curdir=%CD%
 cd %CD%\..
 set BASEDIR=%CD%
 
 cd %BASEDIR%\..\
 set SVNROOT=%CD%
 
-cd %SVNROOT%\..\cfastclean\
+cd %SVNROOT%\..\cfastgitclean\
 set CFAST=%CD%
+
+set stopscript=0
+call :getopts %*
+cd %curdir%
+if %stopscript% == 1 (
+  exit /b
+)
 
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 set WAIT_FILE=%SCRIPT_DIR%\wait.txt
@@ -40,10 +45,10 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 
 set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
 set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
-set CFASTEXE=%CFAST%\CFAST\intel_win%size%\cfast7_win%size%.exe
-set WIND2FDSEXE=%SVNROOT%\Utilities\wind2fds\intel_win%size%\wind2fds_win%size%.exe
+set CFASTEXE=%CFAST%\Build\CFAST\intel_win%size%\cfast7_win%size%.exe
+set WIND2FDSEXE=%SVNROOT%\SMV\Build\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 
-set BACKGROUNDEXE=%SVNROOT%\Utilities\background\intel_win%size%\background.exe
+set BACKGROUNDEXE=%SVNROOT%\SMV\Build\background\intel_win%size%\background.exe
 
 :: Run jobs in background (or not)
 
@@ -61,7 +66,7 @@ call :is_file_installed %WIND2FDSEXE%|| exit /b 1
 set FDS=%bg%%FDSEXE%
 set CFAST=%bg%%CFASTEXE%
 
-set SH2BAT=%SVNROOT%\Utilities\Data_Processing\sh2bat
+set SH2BAT=%SVNROOT%\SMV\Build\sh2bat\intel_win_64\sh2bat
 call :is_file_installed %sh2bat%|| exit /b 1
 
 echo.
@@ -78,9 +83,18 @@ cd %SVNROOT%\Verification\WUI
 %WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_data1d.csv
 
 cd %SCRIPT_DIR%
-echo creating FDS case list from SMV_Cases.sh
-%SH2BAT% SMV_Cases.sh SMV_Cases.bat
-%SH2BAT% SMV_geom_Cases.sh SMV_geom_Cases.bat
+if %runsmvcases% == 1 (
+  echo creating case list from SMV_Cases.sh
+  %SH2BAT% SMV_Cases.sh SMV_Cases.bat
+)
+if %rungeomcases% == 1 (
+  echo creating case list from GEOM_Cases.sh
+  %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  echo creating case list from WUI_Cases.sh
+  %SH2BAT% WUI_Cases.sh WUI_Cases.bat
+)
 
 cd %BASEDIR%
 
@@ -106,8 +120,15 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-call %SCRIPT_DIR%\SMV_Cases.bat
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %runsmvcases% == 1 (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+)
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 
 :: run cases
 
@@ -115,8 +136,15 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-call %SCRIPT_DIR%\SMV_Cases.bat
-call %SCRIPT_DIR%\SMV_geom_Cases.bat
+if %runsmvcases% == 1 (
+  call %SCRIPT_DIR%\SMV_Cases.bat
+)
+if %rungeomcases% == 1 (
+  call %SCRIPT_DIR%\GEOM_Cases.bat
+)
+if %runwuicases% == 1 (
+  call %SCRIPT_DIR%\WUI_Cases.bat
+)
 call :wait_until_finished
 
 cd %BASEDIR%
@@ -157,4 +185,60 @@ exit /b
   )
   exit /b 0
 
+:getopts
+ if (%1)==() exit /b
+ set valid=0
+ set arg=%1
+ if /I "%1" EQU "-help" (
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+ if /I "%1" EQU "-debug" (
+   set valid=1
+   set DEBUG=_db
+   set rundebug=1
+ )
+ if /I "%1" EQU "-cfastrepo" (
+   set valid=1
+   set CFAST=%2
+   shift
+ )
+ if /I "%1" EQU "-geom" (
+   set valid=1
+   set runwuicases=0
+   set runsmvcases=0
+   set rungeomcases=1
+ )
+ if /I "%1" EQU "-wui" (
+   set valid=1
+   set runwuicases=1
+   set runsmvcases=0
+   set rungeomcases=0
+ )
+ shift
+ if %valid% == 0 (
+   echo.
+   echo ***Error: the input argument %arg% is invalid
+   echo.
+   echo Usage:
+   call :usage
+   set stopscript=1
+   exit /b
+ )
+if not (%1)==() goto getopts
+exit /b
+
+:usage  
+echo Run_SMV_Cases [options]
+echo. 
+echo -help  - display this message
+echo -cfastrepo - specify cfast repo location [default: %CFAST%]
+echo -debug - run with debug FDS
+echo -geom  - run only geom cases
+echo -wui   - run only WUI cases
+exit /b
+
+
 :eof
+cd %curdir%

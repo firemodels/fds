@@ -37,3 +37,12 @@ int reg_path(int setget, int pathtype, char *path);
 #define EXTERNCPP
 #endif
 
+#ifdef X64
+#define STRUCTSTAT struct __stat64
+#define STAT _stat64
+#else
+#define STRUCTSTAT struct stat
+#define STAT stat
+#endif
+
+

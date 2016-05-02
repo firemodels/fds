@@ -1,5 +1,5 @@
 #include "options.h"
-#include <stdio.h>  
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -8,6 +8,9 @@
 
 #include "smokeviewvars.h"
 #include "update.h"
+#ifdef pp_LUA
+#include "lua_api.h"
+#endif
 
 /* ------------------ Init ------------------------ */
 
@@ -37,7 +40,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
@@ -46,7 +49,7 @@ void Init(void){
   }
 
   for(i=0;i<nmeshes;i++){
-    mesh *meshi;
+    meshdata *meshi;
 
     meshi=meshinfo+i;
     meshi->currentsurf.defined=0;
@@ -96,7 +99,7 @@ void Init(void){
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
   glClearColor(backgroundcolor[0],backgroundcolor[1],backgroundcolor[2], 0.0f);
-  glShadeModel(GL_SMOOTH); 
+  glShadeModel(GL_SMOOTH);
   glDisable(GL_DITHER);
 
   thistime=0;
@@ -151,7 +154,7 @@ void init_lang(void){
     filelisti = filelistinfo + i;
     file=filelisti->file;
     if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
-    trim(file);
+    trim_back(file);
     file=trim_front(file);
     len=strlen(file);
     langi->file=file;
@@ -185,17 +188,74 @@ void init_lang(void){
 }
 #endif
 
+/* ------------------ readboundini ------------------------ */
+
+void readboundini(void){
+  FILE *stream = NULL;
+  char *fullfilename = NULL;
+
+  if(boundini_filename == NULL)return;
+  fullfilename = get_filename(smokeviewtempdir, boundini_filename, tempdir_flag);
+  if(fullfilename != NULL)stream = fopen(fullfilename, "r");
+  if(stream == NULL || is_file_newer(smv_filename, fullfilename) == 1){
+    if(stream != NULL)fclose(stream);
+    FREEMEMORY(fullfilename);
+    return;
+  }
+  PRINTF("%s", _("reading: "));
+  PRINTF("%s\n", fullfilename);
+
+  while(!feof(stream)){
+    char buffer[255], buffer2[255];
+
+    CheckMemory;
+    if(fgets(buffer, 255, stream) == NULL)break;
+
+    if(match(buffer, "B_BOUNDARY") == 1){
+      float gmin, gmax;
+      float pmin, pmax;
+      int filetype;
+      char *buffer2ptr;
+      int lenbuffer2;
+      int i;
+
+      fgets(buffer, 255, stream);
+      strcpy(buffer2, "");
+      sscanf(buffer, "%f %f %f %f %i %s", &gmin, &pmin, &pmax, &gmax, &filetype, buffer2);
+      trim_back(buffer2);
+      buffer2ptr = trim_front(buffer2);
+      lenbuffer2 = strlen(buffer2ptr);
+      for(i = 0; i < npatchinfo; i++){
+        patchdata *patchi;
+
+        patchi = patchinfo + i;
+        if(lenbuffer2 != 0 &&
+          strcmp(patchi->label.shortlabel, buffer2ptr) == 0 &&
+          patchi->filetype == filetype&&
+          is_file_newer(boundini_filename, patchi->file) == 1){
+          bounddata *boundi;
+
+          boundi = &patchi->bounds;
+          boundi->defined = 1;
+          boundi->global_min = gmin;
+          boundi->global_max = gmax;
+          boundi->percentile_min = pmin;
+          boundi->percentile_max = pmax;
+        }
+      }
+      continue;
+    }
+  }
+  FREEMEMORY(fullfilename);
+  return;
+}
+
 /* ------------------ setup_case ------------------------ */
 
 int setup_case(int argc, char **argv){
   int return_code;
   char *input_file;
 
-  /* 
-  warning: the following line was commented out!! (perhaps it broke something)
-     this line is necessary in order to define smv_filename and trainer_filename
-  */
- // parse_commandlines(argc, argv); 
   return_code=-1;
   if(strcmp(input_filename_ext,".svd")==0||demo_option==1){
     trainer_mode=1;
@@ -247,8 +307,6 @@ int setup_case(int argc, char **argv){
   init_lang();
 #endif
 
-  if(sb_atstart==1)smooth_blockages();
-
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
@@ -298,7 +356,7 @@ void setup_glut(int argc, char **argv){
   NewMemory((void **)&smokeviewini,    (unsigned int)(strlen(smokeview_bindir)+14));
   STRCPY(smokeviewini,smokeview_bindir);
   STRCAT(smokeviewini,"smokeview.ini");
-  
+
   startup_pass=2;
 
   smoketempdir=getenv("SVTEMPDIR");
@@ -363,7 +421,7 @@ void setup_glut(int argc, char **argv){
 
       TRAINER_WIDTH=300;
       scrW = glutGet(GLUT_SCREEN_WIDTH)-TRAINER_WIDTH;
-      scrH = glutGet(GLUT_SCREEN_HEIGHT)-50; 
+      scrH = glutGet(GLUT_SCREEN_HEIGHT)-50;
       setScreenSize(&scrW,&scrH);
       max_screenWidth = screenWidth;
       max_screenHeight = screenHeight;
@@ -397,7 +455,7 @@ int get_opengl_version(char *version_label){
   char version_label2[256];
   int i;
   int major=0, minor=0, subminor=0;
-  
+
   version_string=glGetString(GL_VERSION);
   if(version_string==NULL){
     PRINTF("*** Warning: GL_VERSION string is NULL\n");
@@ -424,7 +482,7 @@ void InitOpenGL(void){
   int err;
 
   PRINTF("%s",_("Initializing OpenGL\n"));
-  
+
   type = GLUT_RGB|GLUT_DEPTH;
   if(buffertype==GLUT_DOUBLE){
     type |= GLUT_DOUBLE;
@@ -481,7 +539,7 @@ void InitOpenGL(void){
 
   opengl_version = get_opengl_version(opengl_version_label);
 
-  err=0;  
+  err=0;
  #ifdef pp_GPU
   err=glewInit();
   if(err==GLEW_OK){
@@ -524,7 +582,7 @@ void InitOpenGL(void){
 
   light_position0[0]=1.0f;
   light_position0[1]=1.0f;
-  light_position0[2]=4.0f; 
+  light_position0[2]=4.0f;
   light_position0[3]=0.f;
 
   light_position1[0]=-1.0f;
@@ -536,7 +594,7 @@ void InitOpenGL(void){
   updateLights(light_position0,light_position1);
 
   {
-    glGetIntegerv(GL_RED_BITS,&nredbits);    
+    glGetIntegerv(GL_RED_BITS,&nredbits);
     glGetIntegerv(GL_GREEN_BITS,&ngreenbits);
     glGetIntegerv(GL_BLUE_BITS,&nbluebits);
 
@@ -840,7 +898,7 @@ void InitOpenGL(void){
         mslicei = multisliceinfo + i;
         if(mslicei->loaded==1)fprintf(fileout," %i\n",i);
      }
-   }   
+   }
 
    // startup smoke
 
@@ -934,7 +992,7 @@ void InitOpenGL(void){
     }
   }
 
- /* ------------------ get_startup_smoke3d ------------------------ */
+ /* ------------------ get_startup_smoke ------------------------ */
 
   void get_startup_smoke(int seq_id){
     int i;
@@ -1023,22 +1081,22 @@ void InitOpenGL(void){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,UNLOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
       partdata *parti;
 
       parti = partinfo + i;
-      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file,i,UNLOAD,&errorcode);
-      if(parti->autoload==1)readpart(parti->file,i,LOAD,&errorcode);
+      if(parti->autoload==0&&parti->loaded==1)readpart(parti->file, i, UNLOAD, PARTDATA,&errorcode);
+      if(parti->autoload==1)readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
     }
     update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
     for(i = 0; i<nisoinfo; i++){
       isodata *isoi;
 
       isoi = isoinfo + i;
-      if(isoi->autoload==0&&isoi->autoload==1)readiso(isoi->file,i,UNLOAD,NULL,&errorcode);
+      if(isoi->autoload==0&&isoi->loaded==1)readiso(isoi->file,i,UNLOAD,NULL,&errorcode);
       if(isoi->autoload == 1){
         readiso(isoi->file, i, LOAD,NULL, &errorcode);
       }
@@ -1055,13 +1113,28 @@ void InitOpenGL(void){
       }
     }
     // note:  only slices that are NOT a part of a vector slice will be loaded here
-    for(i=0;i<nsliceinfo;i++){
-      slicedata *slicei;
+    {
+      int last_slice;
 
-      slicei = sliceinfo + i;
-      if(slicei->autoload==0&&slicei->loaded==1)readslice(slicei->file,i,UNLOAD,&errorcode);
-      if(slicei->autoload==1&&slicei->loaded==0){
-        readslice(slicei->file,i,LOAD,&errorcode);
+      last_slice = nsliceinfo - 1;
+      for(i = nsliceinfo-1; i >=0; i--){
+        slicedata *slicei;
+
+        slicei = sliceinfo + i;
+        if((slicei->autoload == 0 && slicei->loaded == 1)||(slicei->autoload == 1 && slicei->loaded == 0)){
+          last_slice = i;
+          break;
+        }
+      }
+      for(i = 0; i < nsliceinfo; i++){
+        slicedata *slicei;
+        int set_slicecolor;
+
+        slicei = sliceinfo + i;
+        set_slicecolor = DEFER_SLICECOLOR;
+        if(i == last_slice)set_slicecolor = SET_SLICECOLOR;
+        if(slicei->autoload == 0 && slicei->loaded == 1)readslice(slicei->file, i, UNLOAD, set_slicecolor,&errorcode);
+        if(slicei->autoload == 1 && slicei->loaded == 0)readslice(slicei->file, i, LOAD, set_slicecolor, &errorcode);
       }
     }
     for(i=0;i<nterraininfo;i++){
@@ -1069,7 +1142,7 @@ void InitOpenGL(void){
 
       terri = terraininfo + i;
       if(terri->autoload==0&&terri->loaded==1)readterrain(terri->file,i,UNLOAD,&errorcode);
-      if(terri->autoload==1&&terri->loaded==0)readslice(terri->file,i,LOAD,&errorcode);
+      if(terri->autoload==1&&terri->loaded==0)readterrain(terri->file,i,LOAD,&errorcode);
     }
     for(i=0;i<nsmoke3dinfo;i++){
       smoke3ddata *smoke3di;
@@ -1120,6 +1193,7 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+  cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
   if(moviefiletype==WMV){
     strcpy(movie_ext, ".wmv");
   }
@@ -1149,7 +1223,7 @@ void initvars(void){
 #else
   strcpy(degC,"C");
 #endif
-  
+
 #ifdef pp_DEG
   degF[0]=176; // deg symbol (small superscript 0)
   degF[1]='F';
@@ -1173,7 +1247,7 @@ void initvars(void){
 
   {
     labeldata *gl;
-  
+
     gl=&LABEL_default;
     gl->rgb[0]=0;
     gl->rgb[1]=0;
@@ -1228,7 +1302,7 @@ void initvars(void){
   block_ambient_orig[2] = 0.4;
   block_ambient_orig[3] = 1.0;
   block_ambient2=getcolorptr(block_ambient_orig);
-  
+
   block_specular_orig[0] = 0.0;
   block_specular_orig[1] = 0.0;
   block_specular_orig[2] = 0.0;
@@ -1246,6 +1320,16 @@ void initvars(void){
   last_scriptfile.id=-1;
   last_scriptfile.prev=&first_scriptfile;
   last_scriptfile.next=NULL;
+
+#ifdef pp_LUA
+  first_luascriptfile.id=-1;
+  first_luascriptfile.prev=NULL;
+  first_luascriptfile.next=&last_luascriptfile;
+
+  last_luascriptfile.id=-1;
+  last_luascriptfile.prev=&first_luascriptfile;
+  last_luascriptfile.next=NULL;
+#endif
 
   first_inifile.id=-1;
   first_inifile.prev=NULL;
@@ -1272,7 +1356,6 @@ void initvars(void){
   direction_color[3]=1.0;
 
   direction_color_ptr=getcolorptr(direction_color);
-  arg_iblank=0;
   show_slice_terrain=0;
 
   shooter_uvw[0]=0.0;
@@ -1280,12 +1363,11 @@ void initvars(void){
   shooter_uvw[2]=0.0;
   vis_slice_contours=0;
   update_slicecontours=0;
-  
+
   partfacedir[0]=0.0;
   partfacedir[1]=0.0;
   partfacedir[2]=1.0;
-  
-  sb_atstart=1;
+
   select_device=0;
   selected_device_tag=-1;
   navatar_types=0;
@@ -1296,7 +1378,7 @@ void initvars(void){
   navatar_colors=0;
   avatar_colors=NULL;
   view_from_selected_avatar=0;
-  getGitHash(smv_githash);
+  getGitInfo(smv_githash,smv_gitdate);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1403,11 +1485,10 @@ void initvars(void){
   show_transparent_vents=1;
   maxtourframes=500;
   blockageSelect=0;
-  stretch_var_black=0; 
-  stretch_var_white=0; 
+  stretch_var_black=0;
+  stretch_var_white=0;
   move_var=0;
 
-  showhide_option=0;
   snifferrornumber=0;
   xyz_dir=0;
   which_face=2;
@@ -1417,8 +1498,6 @@ void initvars(void){
 
   drawColorLabel=0;
   olddrawColorLabel=0;
-  staticframe0=0;
-  visStaticSmoke=1;
   vis3DSmoke3D=1;
   smokeskip=1;
   smokeskipm1=0;
@@ -1442,7 +1521,6 @@ void initvars(void){
 
   editwindow_status=-1;
   startup_pass=1;
-  ntargtimes=500;
 
   slicefilenumber=0;
   exportdata=0;
@@ -1458,7 +1536,6 @@ void initvars(void){
   setpartmin_old=setpartmin;
   setpartmax_old=setpartmax;
   setpatchmin=GLOBAL_MIN, setpatchmax=GLOBAL_MAX;
-  loadpatchbysteps=0;
   settargetmin=0, settargetmax=0;
   setpartchopmin=0, setpartchopmax=0;
   partchopmin=1.0,  partchopmax=0.;
@@ -1486,7 +1563,6 @@ void initvars(void){
   visaxislabels=0;
   numplot3dvars=0;
   p3dsurfacesmooth=1;
-  p3dsurfacetype=1;
   parttype=0;
   allexterior=1,showexterior=1;
   allinterior=1;
@@ -1506,13 +1582,9 @@ void initvars(void){
 
   smokediff=0;
   smoke3d_cvis=1.0;
-  show_smokesensors=1;
   test_smokesensors=0;
   active_smokesensors=0;
   loadplot3dall=0;
-  visTarg = 0;
-  ReadTargFile=0;
-  showtarget=0;
   visAIso=1;
   surfincrement=0,visiso=0;
   isotest=0;
@@ -1523,13 +1595,11 @@ void initvars(void){
 
   npartinfo=0, nsliceinfo=0, nvsliceinfo=0, nslice2=0, npatch2=0, nplot3dinfo=0, npatchinfo=0;
   nevac=0;
-  current_particle_type=-1,last_particle_type=-2;
   nsmoke3dinfo=0;
   nisoinfo=0, niso_bounds=0;
   ntrnx=0, ntrny=0, ntrnz=0,npdim=0,nmeshes=0,clip_mesh=0;
   noffset=0;
   visLabels=0;
-  ntarginfo=0;
   showallslicevectors=0;
   framerate=-1.0;
   itimes=0, itimeold=-999, seqnum=0,RenderTime=0; RenderTimeOld=0; itime_save=-1;
@@ -1563,7 +1633,7 @@ void initvars(void){
   vertical_factor=1.0;
   terrain_rgba_zmin[0]=90;
   terrain_rgba_zmin[1]=50;
-  terrain_rgba_zmin[2]=50; 
+  terrain_rgba_zmin[2]=50;
 
   terrain_rgba_zmax[0]=200;
   terrain_rgba_zmax[1]=200;
@@ -1573,7 +1643,6 @@ void initvars(void){
   visAvailmemory=0;
 #endif
   visBlocks=visBLOCKAsInput;
-  visSmoothAsNormal=1;
   visTransparentBlockage=0;
   visBlocksSave=visBLOCKAsInput;
   blocklocation=BLOCKlocation_grid;
@@ -1589,13 +1658,10 @@ void initvars(void){
   isozipstep=1, isozipskip=0;
   slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
-  partpointstep=1;
-  partpointstep_old=0;
-  partpointskip=0;
   render_option=RenderWindow;
   RenderMenu(render_option);
   viewoption=0;
-  
+
   partpointsize=4.0,vectorpointsize=3.0,streaklinewidth=1.0;
   isopointsize=4.0;
   isolinewidth=2.0;
@@ -1649,8 +1715,8 @@ void initvars(void){
   sensorcolor[1]=1.0;
   sensorcolor[2]=0.0;
   sensorcolor[3]=1.0;
-  
-  
+
+
   sensornormcolor[0]=1.0;
   sensornormcolor[1]=1.0;
   sensornormcolor[2]=0.0;
@@ -1707,7 +1773,7 @@ void initvars(void){
   timebarcolor[1]=0.6;
   timebarcolor[2]=0.6;
   timebarcolor[3]=1.0;
- 
+
   redcolor[0]=1.0;
   redcolor[1]=0.0;
   redcolor[2]=0.0;
@@ -1718,9 +1784,6 @@ void initvars(void){
   nmenus=0;
   showbuild=0;
 
-  strcpy(TITLERELEASE,"");
-  strcpy(TITLE,"");
-  strcpy(FULLTITLE,"");
   strcpy(emptylabel,"");
   large_font=GLUT_BITMAP_HELVETICA_12;
   small_font=GLUT_BITMAP_HELVETICA_10;
@@ -1806,11 +1869,6 @@ void initvars(void){
   adjustalphaflag=3;
 
   highlight_block=-1, highlight_mesh=0, highlight_flag=2;
-  updatesmoothblocks=1;
-  menusmooth=0;
-  use_menusmooth=0;
-  smoothing_blocks=0;
-  blocksneedsmoothing=0;
 
   visUSERticks=0;
   user_tick_show_x=1;
@@ -1835,10 +1893,8 @@ void initvars(void){
   tour_constant_vel=0;
   tour_bias=0.0,tour_continuity=0.0;
   view_ntimes=1000;
-  ntours=0,selectedtour_index=-1,selectedtour_index_old=-1,selectedtour_index_ini=-1;
   glui_avatar_index=0;
   iavatar_evac=0;
-  update_selectedtour_index=0;
   viewtourfrompath=0,viewalltours=0,viewanytours=0,edittour=0;
   tour_usecurrent=0;
   visFDSticks=0;
@@ -1896,9 +1952,9 @@ void initvars(void){
   object_def_last.next=NULL;
   object_def_last.prev=&object_def_first;
   object_defs=NULL;
- 
+
   showfiles=0;
- 
+
   smokecullflag=1;
   smokedrawtest=0,smokedrawtest2=0;
   visMAINmenus=0;
@@ -1918,48 +1974,8 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  {
-    char version[100];
-    char svn_version[100];
-
-    getGitHash(svn_version);    // get githash
-
-// construct string of the form:
-//   5.x.y_#
-
-    getPROGversion(version);
-
-    strcpy(TITLEBASE,"Smokeview ");
-
-    strcat(TITLEBASE,version);
-#ifdef pp_BETA
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#else
-#ifndef pp_OFFICIAL_RELEASE
-    strcat(TITLEBASE," (");
-    strcat(TITLEBASE,svn_version);
-    strcat(TITLEBASE,")");
-#endif
-#endif
-    strcat(TITLEBASE," - ");
-  }
-#ifdef _DEBUG
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#else
-  STRCPY(TITLE,TITLEBASE);
-  STRCAT(TITLE,__DATE__);
-#endif
-#ifdef pp_BETA
-  STRCAT(TITLE," - ");
-  STRCAT(TITLE,__TIME__);
-#endif
-
-  STRCPY(FULLTITLE,TITLE);
-
-  STRCPY(TITLERELEASE,TITLE);
+  getTitle("Smokeview ", release_title);
+  getTitle("Smokeview ", plot3d_title);
 
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");
@@ -2034,7 +2050,7 @@ void initvars(void){
 
   videoSTEREO=0;
   fzero=0.25;
- 
+
 
   strcpy(blank_global,"");
 
@@ -2067,23 +2083,23 @@ void initvars(void){
   iso_colors[16] = 0.00;
   iso_colors[17] = 0.718750;
   iso_colors[18] = 1.00;
-  
+
   iso_colors[20] = 0.00;
   iso_colors[21] = 1.0;
   iso_colors[22] = 0.5625;
-  
+
   iso_colors[24] = 0.17185;
   iso_colors[25] = 1.0;
   iso_colors[26] = 0.0;
-  
+
   iso_colors[28] = 0.890625;
   iso_colors[29] = 1.0;
   iso_colors[30] = 0.0;
-  
+
   iso_colors[32] = 1.0;
   iso_colors[33] = 0.380952;
   iso_colors[34] = 0.0;
-  
+
   iso_colors[36] = 1.0;
   iso_colors[37] = 0.0;
   iso_colors[38] = 0.0;
@@ -2120,7 +2136,7 @@ void initvars(void){
     colortabledata *cti;
 
     NewMemory((void **)&colortableinfo, ncolortableinfo*sizeof(colortabledata));
-    
+
     cti = colortableinfo+0;
     cti->color[0] = 210;
     cti->color[1] = 180;
@@ -2151,13 +2167,13 @@ void initvars(void){
   memcpy(bw_base,bw_baseBASE,MAXRGB*4*sizeof(float));
   memcpy(rgb2,rgb2BASE,MAXRGB*3*sizeof(float));
   memcpy(bw_base,bw_baseBASE,MAXRGB*4*sizeof(float));
-  
+
   nrgb2=8;
 
   ncamera_list=0,i_view_list=1,init_camera_list_flag=1;
   camera_max_id=2;
   startup=0,startup_view_ini=1,selected_view=-999;
-  
+
 
   {
     int iii;
@@ -2212,5 +2228,3 @@ void copy_args(int *argc, char **aargv, char ***argv_sv){
   *argv_sv=aargv;
 #endif
 }
-
-

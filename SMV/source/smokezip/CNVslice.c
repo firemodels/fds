@@ -53,7 +53,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   strcpy(filetype,"");
   shortlabel=slicei->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
@@ -88,6 +88,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -97,6 +98,7 @@ int convert_volslice(slice *slicei, int *thread_index){
       fclose(slicestream);
       fprintf(stderr,"*** Warning: The file %s exists.\n",slicefile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(SLICEFILE);
       return 0;
     }
   }
@@ -104,6 +106,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   slicestream=fopen(slicefile_svz,"wb");
   if(slicestream==NULL){
     fprintf(stderr,"*** Warning: The file %s could not be opened for writing\n",slicefile_svz);
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -136,7 +139,7 @@ int convert_volslice(slice *slicei, int *thread_index){
     fwrite(&completion,4,1,slicestream);
   }
 
-  
+
   {
     int ni, nj, nk;
 
@@ -192,7 +195,7 @@ int convert_volslice(slice *slicei, int *thread_index){
 #ifndef pp_THREAD
       count++;
 #endif
-   
+
       data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
@@ -225,7 +228,7 @@ int convert_volslice(slice *slicei, int *thread_index){
   {
     int completion=1;
 
-    FSEEK(slicestream,4,SEEK_SET);    
+    FSEEK(slicestream,4,SEEK_SET);
     fwrite(&completion,4,1,slicestream);
   }
   fclose(SLICEFILE);
@@ -253,7 +256,7 @@ int convert_volslice(slice *slicei, int *thread_index){
 
 /* ------------------ convert_slice ------------------------ */
 
-// unsigned int irle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out)
+// unsigned int uncompress_rle(unsigned char *buffer_in, int nchars_in, unsigned char *buffer_out)
 
 int convert_slice(slice *slicei, int *thread_index){
 
@@ -313,7 +316,7 @@ int convert_slice(slice *slicei, int *thread_index){
   strcpy(filetype,"");
   shortlabel=slicei->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim(filetype);
+  trim_back(filetype);
 
   if(getfileinfo(slice_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",slice_file);
@@ -393,6 +396,7 @@ int convert_slice(slice *slicei, int *thread_index){
       GLOBfilesremoved++;
       UNLOCK_COMPRESS;
     }
+    fclose(SLICEFILE);
     return 0;
   }
 
@@ -402,6 +406,7 @@ int convert_slice(slice *slicei, int *thread_index){
       fclose(slicestream);
       fprintf(stderr,"*** Warning:  %s exists.\n",slicefile_svz);
       fprintf(stderr,"     Use the -f option to overwrite smokezip compressed files\n");
+      fclose(SLICEFILE);
       return 0;
     }
   }
@@ -426,7 +431,7 @@ int convert_slice(slice *slicei, int *thread_index){
   strcpy(units,"");
   unit=slicei->label.unit;
   if(strlen(unit)>0)strcat(units,unit);
-  trim(units);
+  trim_back(units);
   sprintf(cval,"%f",slicei->valmin);
   trimzeros(cval);
 #ifndef pp_THREAD
@@ -447,7 +452,7 @@ int convert_slice(slice *slicei, int *thread_index){
   valmax=slicei->valmax;
   denom = valmax-valmin;
   if(denom==0.0)denom=1.0;
-  
+
   chop_min=0;
   chop_max=255;
   if(GLOBno_chop==0){
@@ -486,7 +491,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
 
 
-  //*** ZLIB format (C - no extra bytes surrounding data) 
+  //*** ZLIB format (C - no extra bytes surrounding data)
 
   //*** header
   // endian
@@ -500,13 +505,13 @@ int convert_slice(slice *slicei, int *thread_index){
   //*** frame
   // time, compressed frame size                        for each frame
   // compressed buffer
-  
+
 
   //*** RLE format (FORTRAN)
 
   //*** header
   // endian
-  // fileversion, slice version 
+  // fileversion, slice version
   // global min max (used to perform conversion)
   // i1,i2,j1,j2,k1,k2
 
@@ -526,7 +531,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
   FORTSLICEREAD(ijkbar,6);
   sizebefore+=8+6*4;
-  
+
   framesize =  (ijkbar[1]+1-ijkbar[0]);
   framesize *= (ijkbar[3]+1-ijkbar[2]);
   framesize *= (ijkbar[5]+1-ijkbar[4]);
@@ -594,7 +599,7 @@ int convert_slice(slice *slicei, int *thread_index){
 #ifndef pp_THREAD
       count++;
 #endif
-   
+
       data_loc=FTELL(SLICEFILE);
       percent_done=100.0*(float)data_loc/(float)slicei->filesize;
 #ifdef pp_THREAD
@@ -659,7 +664,7 @@ int convert_slice(slice *slicei, int *thread_index){
 
       //int compress (Bytef *dest,   uLongf *destLen, const Bytef *source, uLong sourceLen);
       ncompressed_zlib=ncompressed_save;
-      returncode=compress(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
+      returncode=compress_zlib(sliceframe_compressed,&ncompressed_zlib,sliceframe_uncompressed,framesize);
 
       file_loc=FTELL(slicestream);
       fwrite(&time_local,4,1,slicestream);
@@ -892,7 +897,7 @@ void update_slice_hist(void){
     PRINTF("  Examining %s\n",slicei->file);
 
     lenfile=strlen(slicei->file);
-    
+
     LOCK_COMPRESS;
     FORTget_file_unit(&unit1,&slicei->unit_start);
     FORTopenslice(slicei->file,&unit1,&is1,&is2,&js1,&js2,&ks1,&ks2,&error1,lenfile);
@@ -907,7 +912,7 @@ void update_slice_hist(void){
       update_histogram(sliceframe,sliceframesize,slicei->histogram);
     }
     FREEMEMORY(sliceframe);
-    
+
     LOCK_COMPRESS;
     FORTclosefortranfile(&unit1);
     UNLOCK_COMPRESS;

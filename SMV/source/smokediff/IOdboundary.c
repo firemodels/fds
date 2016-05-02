@@ -162,7 +162,7 @@ void diff_boundaryes(FILE *stream_out){
     NewMemory((void **)&pqq2b,nsize2*sizeof(float));
     NewMemory((void **)&pqq2out,nsize2*sizeof(float));
     NewMemory((void **)&pqq3,nsize3*sizeof(float));
-    
+
     NewMemory((void **)&p3i1,npatches3*sizeof(int));
     NewMemory((void **)&p3i2,npatches3*sizeof(int));
     NewMemory((void **)&p3j1,npatches3*sizeof(int));
@@ -237,11 +237,11 @@ void diff_boundaryes(FILE *stream_out){
 
       reset_histogram(boundary1->histogram);
 
-      FORTgetpatchdata(&unit1, &boundary1->npatches, 
+      FORTgetpatchdata(&unit1, &boundary1->npatches,
         p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &npqq1, &error1);
-      FORTgetpatchdata(&unit2, &boundary2->npatches, 
+      FORTgetpatchdata(&unit2, &boundary2->npatches,
         p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2a, pqq2a, &npqq2a, &error2);
-      if(error2==0)FORTgetpatchdata(&unit2, &boundary2->npatches, 
+      if(error2==0)FORTgetpatchdata(&unit2, &boundary2->npatches,
         p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2b, pqq2b, &npqq2b, &error2);
       for(;;){
         int iq;
@@ -254,7 +254,7 @@ void diff_boundaryes(FILE *stream_out){
             pqq2a[i]=pqq2b[i];
           }
           patchtime2a=patchtime2b;
-          FORTgetpatchdata(&unit2, &boundary2->npatches, 
+          FORTgetpatchdata(&unit2, &boundary2->npatches,
             p2i1, p2i2, p2j1, p2j2, p2k1, p2k2, &patchtime2b, pqq2b, &npqq2b, &error2);
           if(error2!=0)break;
         }
@@ -298,7 +298,7 @@ void diff_boundaryes(FILE *stream_out){
           FFLUSH();
         }
 
-        FORTgetpatchdata(&unit1, &boundary1->npatches, 
+        FORTgetpatchdata(&unit1, &boundary1->npatches,
           p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &npqq1, &error1);
       }
       PRINTF("\n");

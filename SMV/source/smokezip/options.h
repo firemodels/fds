@@ -17,14 +17,14 @@
 #pragma float_control( precise, on)
 #pragma float_control( except, on )
 #endif
-#pragma warning (disable:193)		
-#pragma warning (disable:695)		
-#pragma warning (disable:2557)		
-#pragma warning (disable:4996)		
-#pragma warning (disable:4701)		
-#pragma warning (disable:4310)		
-#pragma warning (disable:4127)		
-#pragma warning (disable:4244)		
+#pragma warning (disable:193)
+#pragma warning (disable:695)
+#pragma warning (disable:2557)
+#pragma warning (disable:4996)
+#pragma warning (disable:4701)
+#pragma warning (disable:4310)
+#pragma warning (disable:4127)
+#pragma warning (disable:4244)
 #pragma warning (disable:1478)
 #pragma warning (disable:1786)
 
@@ -81,7 +81,7 @@
 #endif
 
 #ifdef pp_release
-#define PROGVERSION "1.4.8"
+#define PROGVERSION "1.4.9"
 #endif
 
 

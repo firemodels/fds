@@ -2,6 +2,10 @@
 #define FILE_UTIL_H_DEFINED
 
 #include <time.h>
+#ifdef __MINGW32__
+#include <stdio.h>
+#include "options.h"
+#endif
 
 typedef struct {
   char *file;

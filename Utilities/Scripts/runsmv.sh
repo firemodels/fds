@@ -1,13 +1,11 @@
 #!/bin/bash
 
-
 FED=
 MOVIE=
 RUNSCRIPT=
 ssffile=
-TIMEOPTION=
 
-while getopts 'd:fmt' OPTION
+while getopts 'Ad:fmt' OPTION
 do
 case $OPTION in
   d)
@@ -20,7 +18,7 @@ case $OPTION in
    MOVIE="y"
    ;;
   t)
-   TIMEOPTION=-time
+   dummy=1
    ;;
 esac
 done
@@ -67,4 +65,4 @@ fi
 #source ~/.bashrc_fds default
 cd $fulldir
 echo $SMV $FED $SMVBINDIR $RUNSCRIPT $in
-$SMV $TIMEOPTION $FED $SMVBINDIR -redirect $RUNSCRIPT $in
+$SMV $FED $SMVBINDIR -redirect $RUNSCRIPT $in

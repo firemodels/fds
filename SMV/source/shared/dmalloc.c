@@ -17,13 +17,15 @@ static blockinfo *GetBlockInfo(bbyte *pb);
 
 #ifdef WIN32
 
+/* ------------------ memusage ------------------------ */
+
 // return memory usage between 0% and 100%
 
 int memusage(void){
   MEMORYSTATUS stat;
   int load;
 
-  GlobalMemoryStatus(&stat);    
+  GlobalMemoryStatus(&stat);
   load=stat.dwMemoryLoad;
   return load;
 }
@@ -64,10 +66,10 @@ void _memorystatus(unsigned int size,unsigned int *availmem,unsigned int *physme
 #endif
 #endif
 
-/* ------------------ initMM ------------------------ */
+/* ------------------ initMALLOC ------------------------ */
 
 void initMALLOC(void){
-  
+
   MMfirstptr=&MMfirst;
   MMlastptr=&MMlast;
 
@@ -214,7 +216,7 @@ void FreeAllMemory(int memory_id){
     }
 #ifdef _DEBUG
     count++;
-    if(count % 1000 == 0)printf("unloading %i blocks out of %i %i\n", count2, count,nblocks);
+    if(count % 1000 == 0&&count2!=0)printf("unloading %i blocks out of %i\n", count2, nblocks);
 #endif
     thisptr = nextptr;
   }
@@ -343,10 +345,10 @@ mallocflag _ResizeMemoryNOTHREAD(void **ppv, size_t sizeNew, int memory_id){
   if(pbNew != NULL){
     if(pbNew!=(char *)(*ppold)-infoblocksize){
       this_ptr=(MMdata *)pbNew;
-      
+
       prev_ptr->next=this_ptr;
       next_ptr->prev=this_ptr;
-      
+
 #ifdef pp_MEMPRINT
       this_ptr->size = sizeNew;
 #endif

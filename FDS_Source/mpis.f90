@@ -30,7 +30,9 @@ USE PRECISION_PARAMETERS, ONLY : DPC, EB
        integer MPI_DISTRIBUTE_BLOCK, MPI_DISTRIBUTE_CYCLIC
        integer MPI_DISTRIBUTE_NONE, MPI_DISTRIBUTE_DFLT_DARG
        integer MPI_ROOT, MPI_CANCEL_SOURCE
+       integer MPI_MODE_WRONLY,MPI_MODE_CREATE
 
+       parameter (MPI_OFFSET_KIND=4)
        parameter (MPI_SUCCESS=0)
        parameter (MPI_ANY_SOURCE=-1)
        parameter (MPI_ANY_TAG=-1)
@@ -1704,10 +1706,59 @@ subroutine mpi_get_library_version(pname, pnamelen, ierror)
 end subroutine
 
 
+subroutine mpi_type_contiguous ( count, oldtype, newtype, ierror)
+   integer count,oldtype,newtype,ierror
+   dummy = count+oldtype+newtype+ierror
+end subroutine
+
+
+subroutine mpi_file_set_view ( fh, int1, int2, int3, char1, int4, ierr)
+   integer fh, int2, int3, int4, ierr
+   integer(mpi_offset_kind) :: int1
+   character :: char1
+   dummy = fh+int1+int2+int3+int4+ierr
+   char1 = 'null'
+end subroutine
+
+
+subroutine mpi_type_commit ( record, ierr)
+   integer record, ierr
+   dummy = record+ierr
+end subroutine
+
+
+subroutine mpi_type_free ( record, ierr)
+   integer record, ierr
+   dummy = record+ierr
+end subroutine
+
+
 subroutine mpi_barrier ( comm, ierror )
   integer comm
   integer ierror
   dummy = comm + ierror
+end subroutine
+
+
+subroutine mpi_file_open ( comm, filename, amode, info, fh, ierror )
+   integer comm, amode, info, fh, ierror
+   character :: filename
+   dummy = comm+amode+info+fh+ierror
+   filename = 'null'
+end subroutine
+
+
+subroutine mpi_file_write_at ( fh, linenumber, line, int1, int2, int3, ierror )
+   integer fh, linenumber, int1, int2, int3, ierror
+   character line
+   dummy = fh+linenumber+int1+int2+int3+ierror
+   line = 'null'
+end subroutine
+
+
+subroutine mpi_file_close ( fh, ierror )
+   integer fh, ierror
+   dummy = fh+ierror
 end subroutine
 
 

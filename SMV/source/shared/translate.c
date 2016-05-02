@@ -13,7 +13,7 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   trdata *tri, *trj;
   int compval;
 
-  tri = (trdata *)arg1; 
+  tri = (trdata *)arg1;
   trj = (trdata *)arg2;
 
   compval = STRCMP(tri->key,trj->key);
@@ -39,7 +39,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     for(i=0;i<ntrinfo_local;i++){
       trdata *tri;
-  
+
       tri = trinfo_local + i;
       FREEMEMORY(tri->key);
       FREEMEMORY(tri->value);
@@ -59,7 +59,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key!=NULL&&key==buf)ntrinfo_local++;
@@ -85,7 +85,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
     if(fgets(buffer,1000,stream)==NULL)break;
     buf=trim_front(buffer);
-    trim(buf);
+    trim_back(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key==NULL||key!=buf)continue;
@@ -105,7 +105,7 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
       doit=0;
       if(fgets(buffer,1000,stream)==NULL)break;
       buf=trim_front(buffer);
-      trim(buf);
+      trim_back(buf);
       if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)doit=1;
     }
     value = getstring(buf+6);
@@ -155,7 +155,7 @@ void init_translate(char *bindir, char *tr_name){
     STRCAT(smokeview_lang,"smokeview_");
     STRCAT(smokeview_lang,lang);
     STRCAT(smokeview_lang,".po");
-    
+
     stream=fopen(smokeview_lang,"r");
     if(stream!=NULL){
       fclose(stream);

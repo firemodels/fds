@@ -4,7 +4,6 @@
 #define EXTERN extern
 #endif
 
-void version(void);
 char *hostlistfile;
 char *host;
 #ifdef pp_LINUX

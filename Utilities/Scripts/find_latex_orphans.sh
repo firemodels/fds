@@ -11,13 +11,13 @@ cd $SVNROOT/Manuals
 #  = Make all guides with the -recorder option to output external dependencies =
 #  =============================================================================
 
-cd FDS_Configuration_Management_Plan
-echo 'Building FDS Configuration Management Plan'
+cd FDS_Config_Management_Plan
+echo 'Building FDS Config Management Plan'
 output=`./make_guide.sh`
-pdflatex -interaction nonstopmode -recorder FDS_Configuration_Management_Plan &> /dev/null
+pdflatex -interaction nonstopmode -recorder FDS_Config_Management_Plan &> /dev/null
 if [[ $output != *successfully* ]];
 then
-    echo 'Error: Problem compiling FDS Configuration Management Plan'
+    echo 'Error: Problem compiling FDS Config Management Plan'
     echo $output
 fi
 cd ..
@@ -109,10 +109,10 @@ cd $SVNROOT/Manuals
 REFERENCED_FILES=`grep -h INPUT */*.fls | grep -E 'pdf|png|eps|jpg' | cut -f2 -d' ' | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
 FIGDIR=/FIGURES
-GRAPHICS_FILES_F=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+GRAPHICS_FILES_F=`find FDS_Config_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
 FIGDIR=/SCRIPT_FIGURES
-GRAPHICS_FILES_SF=`find FDS_Configuration_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
+GRAPHICS_FILES_SF=`find FDS_Config_Management_Plan$FIGDIR FDS_Technical_Reference_Guide$FIGDIR FDS_User_Guide$FIGDIR FDS_Validation_Guide$FIGDIR FDS_Verification_Guide$FIGDIR SMV_Technical_Reference_Guide$FIGDIR SMV_User_Guide$FIGDIR SMV_Verification_Guide$FIGDIR -name *.png -o -name *.pdf -o -name *.eps -o -name *.jpg | xargs -n1 basename | sed 's/\..\{3\}$//'`
 
 # gf: have a loop outputting orphans for each GRPHICS_FILESxxx variable above
 

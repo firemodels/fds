@@ -65,7 +65,6 @@ if exist %running% goto skip_running
     cd %curdir%
     :no_update
 
-echo  444
 :: run firebot
 
   echo 1 > %running%
@@ -73,10 +72,8 @@ echo  444
   if exist %running% erase %running%
   goto end_running
 :skip_running
-  echo ***Error: firebot is currently running.
-  echo           If this is not the case, erase the file:
-  echo           %running%
-  echo           or rerun using the -force option
+  echo ***Error: firebot is currently running. If this is
+  echo           not the case rerun using the -force option
 :end_running
 
 goto eof

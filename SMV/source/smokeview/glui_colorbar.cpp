@@ -87,13 +87,13 @@ extern "C" void update_colorbar_list(void){
   LISTBOX_colorbar->set_int_val(selectedcolorbar_index);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_type ------------------------ */
 
 extern "C" void update_colorbar_type(void){
   LISTBOX_colorbar->set_int_val(colorbartype);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_colorbar_label ------------------------ */
 
 extern "C" void update_colorbar_label(void){
   EDITTEXT_colorbar_label->set_text(colorbar_label);
@@ -189,17 +189,17 @@ extern "C" void glui_colorbar_setup(int main_window){
     }
     LISTBOX_colorbar->set_int_val(colorbartype);
   }
-  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(PANEL_cb1,_d("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);  
+  EDITTEXT_colorbar_label=glui_colorbar->add_edittext_to_panel(PANEL_cb1,_d("Label"),GLUI_EDITTEXT_TEXT,colorbar_label,COLORBAR_LABEL,COLORBAR_CB);
   BUTTON_update=glui_colorbar->add_button_to_panel(PANEL_cb1,_d("Update label"),COLORBAR_UPDATE,COLORBAR_CB);
   glui_colorbar->add_column_to_panel(PANEL_cb1,false);
 
   PANEL_point = glui_colorbar->add_panel(_d("Node"));
-  
+
   PANEL_cb5 = glui_colorbar->add_panel_to_panel(PANEL_point,"",GLUI_PANEL_NONE);
 
   BUTTON_prev=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Previous"),COLORBAR_PREV,COLORBAR_CB);
   BUTTON_deletepoint=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Delete"),COLORBAR_DELETEPOINT,COLORBAR_CB);
-  
+
   glui_colorbar->add_column_to_panel(PANEL_cb5,false);
 
   BUTTON_next=glui_colorbar->add_button_to_panel(PANEL_cb5,_d("Next"),COLORBAR_NEXT,COLORBAR_CB);
@@ -238,7 +238,7 @@ void COLORBAR_CB(int var){
     if(colorbartype>=ndefaultcolorbars&&colorbartype<ncolorbars){
       cbi = colorbarinfo + colorbartype;
       UpdateCurrentColorbar(cbi);
-      
+
       cbi->index_node[colorbarpoint]=cb_colorindex;
 
       colorbar_global2local();
@@ -423,7 +423,7 @@ extern "C" void colorbar_global2local(void){
 
   cbi = colorbarinfo + colorbartype;
   colorbarpoint=cbi->nodehilight;
-    
+
   SPINNER_colorindex->set_int_val(cbi->index_node[colorbarpoint]);
 
   BUTTON_next->enable();

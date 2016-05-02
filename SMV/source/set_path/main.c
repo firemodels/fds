@@ -28,7 +28,6 @@ char path_type[10];
 
 
 void usage(void);
-void version(void);
 
 /* ------------------ backup_path ------------------------ */
 
@@ -88,12 +87,13 @@ int main(int argc, char **argv){
   char tokens[BUFFER_SIZE], newpath[BUFFER_SIZE], *token;
   int newentry_present;
 
+  set_stdout(stdout);
   strcpy(path_type,"User");
   if(argc==1){
     usage();
     return 1;
   }
- 
+
   for(i=1;i<argc;i++){
     arg=argv[i];
     if(arg[0]!='-'||strlen(arg)<=1)break;
@@ -145,7 +145,7 @@ int main(int argc, char **argv){
         test_mode=1;
         break;
       case 'v':
-        version();
+        version("set_path ");
         return 0;
       default:
         usage();
@@ -290,10 +290,10 @@ int reg_path(int setget, int pathtype, char *path){
   int lenpath;
 
   LPCTSTR reg_path_local=NULL;
-  
+
   char creg_user_path[]="Environment";
   LPCTSTR reg_user_path=creg_user_path;
-  
+
   char creg_system_path[]="SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
   LPCTSTR reg_system_path=(LPCTSTR)creg_system_path;
 
@@ -386,28 +386,13 @@ int reg_path(int setget, int pathtype, char *path){
   return 1;
 }
 
-/* ------------------ version ------------------------ */
-
-void version(void){
-  char githash[256];
-  char version[256];
-
-    getPROGversion(version);
-
-    getGitHash(githash);    // get githash
-    printf("\n");
-    printf("set_path %s - %s\n\n",version,__DATE__);
-    printf("Version: %s\n",version);
-    printf("Build: %s\n",githash);
-    printf("Build Date: %s\n",__DATE__);
-}
-
 /* ------------------ usage ------------------------ */
 
 void usage(void){
   char githash[100];
+  char gitdate[100];
 
-  getGitHash(githash);
+  getGitInfo(githash,gitdate);
 
   printf("set_path Build:%s\n",githash);
   printf("  Modify or display the User or System path environmental variables.\n\n");

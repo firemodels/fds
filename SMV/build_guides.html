@@ -1,0 +1,146 @@
+<html>
+<head>
+<TITLE>Guides</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function build_guide(guide){
+  MyObject.Run(get_fullpath("scripts/BUILDguide.bat ",guide));
+}
+function view_guide(guide){
+  MyObject.Run(get_fullpath("scripts/VIEWguide.bat ",guide));
+}
+function copy_guides(guide){
+  MyObject.Run(get_fullpath("scripts/COPYguides.bat ",guide));
+}
+function get_figs(guide){
+  MyObject.Run(get_fullpath("scripts/GETfigs.bat ",guide));
+}
+</script>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
+<a href="build_smokeview.html"><font size=5>Smokeview</font></a> - 
+<font size=5>Guides</font></a> -
+<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
+
+<hr size="1">
+
+<h3>Download Images</h3>
+
+<p><table border=on>
+<tr>
+<td rowspan=2, align=center>Linux smokebot</td>
+<td>SMV User</td>
+<td><button onclick="get_figs('smvug')">==></button></td>
+<td rowspan=5>Windows repo</td>
+</tr>
+
+<tr>
+<td>SMV Verification</td>
+<td><button onclick="get_figs('smvvg')">==></button></td>
+</tr>
+
+<tr>
+<td rowspan=3, align=center>Linux firebot</td>
+<td align=center>FDS User</td>
+<td><button onclick="get_figs('fdsug')">==></button></td>
+</tr>
+
+<tr>
+<td align=center>FDS Validation</td>
+<td><button onclick="get_figs('fdsvalg')">==></button></td>
+</tr>
+
+<tr>
+<td align=center>FDS Verification</td>
+<td><button onclick="get_figs('fdsverg')">==></button></td>
+</tr>
+</table>
+
+<h3>Build Guides</h3>
+
+
+<p><table border=on>
+<tr><th colspan=5>FDS</th></tr>
+<tr><th>Config</th><th>Technical</th><th>User</th><th>Validation</th><th>Verification</th></tr>
+<tr align=center>
+<td><button onclick="build_guide('FDS_Config_management_Plan')">Build</button></td>
+<td><button onclick="build_guide('FDS_Technical_Reference_Guide')">Build</button></td>
+<td><button onclick="build_guide('FDS_User_Guide')">Build</button></td>
+<td><button onclick="build_guide('FDS_Validation_Guide')">Build</button></td>
+<td><button onclick="build_guide('FDS_Verification_Guide')">Build</button></td>
+</tr>
+<tr align=center>
+<td><button onclick="view_guide('FDS_Config_management_Plan')">View</button></td>
+<td><button onclick="view_guide('FDS_Technical_Reference_Guide')">View</button></td>
+<td><button onclick="view_guide('FDS_User_Guide')">View</button></td>
+<td><button onclick="view_guide('FDS_Validation_Guide')">View</button></td>
+<td><button onclick="view_guide('FDS_Verification_Guide')">View</button></td>
+</tr>
+</table>
+
+<p><table border=on>
+<tr><th colspan=3>Smokeview</th></tr>
+<tr><th>Technical</th><th>User</th><th>Verification</th></tr>
+<tr align=center>
+<td><button onclick="build_guide('SMV_Technical_Reference_Guide')">Build</button></td>
+<td><button onclick="build_guide('SMV_User_Guide')">Build</button></td>
+<td><button onclick="build_guide('SMV_Verification_Guide')">Build</button></td>
+</tr>
+<tr align=center>
+<td><button onclick="view_guide('SMV_Technical_Reference_Guide')">View</button></td>
+<td><button onclick="view_guide('SMV_User_Guide')">View</button></td>
+<td><button onclick="view_guide('SMV_Verification_Guide')">View</button></td>
+</tr>
+</table>
+
+<h3>Copy/Upload Guides</h3>
+
+<p><table border=on>
+<tr>
+<td rowspan=2>SMV guides</td><td>Windows repo</td>
+<td><button onclick="copy_guides('from_smv_local')">==></button></td>
+<td rowspan=3>Windows ~\FDS_Guides</td>
+</tr
+
+<tr>
+<td>Linux smokebot</td>
+<td><button onclick="copy_guides('from_smv_linux')">==></button></td>
+</tr>
+
+<tr>
+<td rowspan=3 align=center>FDS guides</td>
+<td align=center>Linux firebot</td>
+<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
+</tr>
+
+<tr>
+<td rowspan=2 align=center>Windows <br>~/FDS_Guides</td>
+<td><button onclick="copy_guides('to_linux')">==></button></td>
+<td>Linux ~/FDS_Guides</td>
+</tr>
+
+<tr>
+<td><button onclick="copy_guides('to_osx')">==></button></td>
+<td>OSX ~/FDS_Guides</td>
+</tr>
+</table>
+
+<h3>Other</h3>
+<ul>
+<li><a href="scripts/EDIT_build_guides.bat">Edit</a> this page
+</ul>
+
+<p><hr>
+
+</BODY>
+</HTML>

@@ -26,13 +26,13 @@ void outputAxisLabels(){
   output3Text(foregroundcolor,   x,y0, z0, "X");
   output3Text(foregroundcolor, x0,  y, z0, "Y");
   output3Text(foregroundcolor, x0,y0,   z, "Z");
-  
+
   glPopMatrix();
 }
 
 /* ------------------ outputSText3 ------------------------ */
 
-void outputSText3(float x, float y, float z, char *string){ 
+void outputSText3(float x, float y, float z, char *string){
   char *c;
   float u[3]={0.0,0.0,1.0},v[3];
   float axis[3],angle,theta;
@@ -57,7 +57,7 @@ void outputSText3(float x, float y, float z, char *string){
 
   glRotatef(90.0,cos(theta*DEG2RAD),sin(theta*DEG2RAD),0.0);
   glRotatef(theta,u[0],u[1],u[2]);
- 
+
   glScalef(scale_x,scale_y,1.0);
   for (c=string; *c != '\0'; c++){
     glutStrokeCharacter(GLUT_STROKE_ROMAN,*c);
@@ -68,7 +68,7 @@ void outputSText3(float x, float y, float z, char *string){
 
 /* ------------------ outputSText2r ------------------------ */
 
-void outputSText2r(float x, float y, float z, char *string){ 
+void outputSText2r(float x, float y, float z, char *string){
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -95,7 +95,7 @@ void outputSText2r(float x, float y, float z, char *string){
 
 /* ------------------ outputSText2 ------------------------ */
 
-void outputSText2(float x, float y, float z, char *string){ 
+void outputSText2(float x, float y, float z, char *string){
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -180,7 +180,7 @@ void outputText(float x, float y, char *string){
     glRasterPos2f(x, y);
     for (c=string; *c!='\0'; c++){
       glutBitmapCharacter(large_font,(unsigned char)*c);
-    }  
+    }
   }
 }
 
@@ -255,7 +255,6 @@ void drawLabels(void){
   }
   glPopMatrix();
 }
-
 
 /* ------------------ LABEL_Next ------------------------ */
 

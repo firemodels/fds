@@ -144,7 +144,7 @@ INTEGER,  SAVE :: IBM_SEG_CRS(IBM_MAXCROSS_X2)
 PRIVATE
 PUBLIC :: INIT_IBM,SET_CUTCELLS_3D,TRILINEAR,GETU,GETGRAD,GET_VELO_IBM,INIT_FACE, &
           READ_GEOM,READ_VERT,READ_FACE,READ_VOLU,LINKED_LIST_INSERT,&
-          WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA
+          WRITE_GEOM,WRITE_GEOM_ALL,WRITE_GEOM_DATA,IBM_FGSC,IBM_IDCF,IBM_GASPHASE,IBM_CUTCFE,IBM_SOLID
 
 CONTAINS
 
@@ -5984,8 +5984,10 @@ REAL(EB) :: XB(6), DX
 INTEGER :: N_VERTS, N_FACES, N_FACES_TEMP, N_VOLUS, N_ZVALS
 INTEGER :: MATL_INDEX
 INTEGER :: IOS,IZERO,N, I, J, K, IJ, NSUB_GEOMS, GEOM_INDEX
-INTEGER :: I11, I12, I21, I22
+INTEGER :: I1, I2, I3, I4, I5, I6, I7, I8
 INTEGER :: GEOM_TYPE, NXB, IJK(3)
+REAL(EB), POINTER, DIMENSION(:) :: VNEW, VOLD
+
 INTEGER :: N_LEVELS, N_LAT, N_LONG, SPHERE_TYPE
 TYPE (MESH_TYPE), POINTER :: M=>NULL()
 INTEGER, POINTER, DIMENSION(:) :: FACEI, FACEJ, FACE_FROM, FACE_TO
@@ -6172,29 +6174,108 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
       ENDDO
 
 ! define terrain faces
-!    I21   I22
-!    I11   I21
+!        8 ---- 7
+!       /|     /|
+!     5 ----- 6 |
+!     |  |    | |
+!     |  |    | |
+!     |  |    | |
+!     |  4 ---- 3
+!     | /     |/
+!     1 ----  2
+
+
       IJ = 1
       DO J = 1, IJK(2) - 1
          DO I = 1, IJK(1) - 1
-            I21 = (J-1)*IJK(1) + I
-            I22 = I21 + 1
-            I11 = I21 + IJK(1)
-            I12 = I11 + 1
+            I1 = (J-1)*IJK(1) + I
+            I2 = I1 + 1
+            I3 = I2 + IJK(1)
+            I4 = I3 - 1
 
-            FACES(3*IJ-2) = I11
-            FACES(3*IJ-1) = I21
-            FACES(3*IJ) = I22
+            FACES(3*IJ-2) = I1
+            FACES(3*IJ-1) = I2
+            FACES(3*IJ) = I3
             IJ = IJ + 1
 
-            FACES(3*IJ-2) = I11
-            FACES(3*IJ-1) = I22
-            FACES(3*IJ) = I12
+            FACES(3*IJ-2) = I1
+            FACES(3*IJ-1) = I3
+            FACES(3*IJ) = I4
             IJ = IJ + 1
          ENDDO
       ENDDO
-      G%ZVALS(1:N_ZVALS) = ZVALS(1:N_ZVALS)
-      CALL EXTRUDE_SURFACE(ZMIN,VERTS,MAX_VERTS,N_VERTS,FACES,N_FACES,VOLUS,MAX_VOLUS, N_VOLUS)
+      N_FACES = IJ - 1
+
+      DO I = 1, N_VERTS
+         VNEW=>VERTS(3*N_VERTS+3*I-2:3*N_VERTS+3*I)
+         VOLD=>VERTS(3*I-2:3*I)
+         VNEW(1:3)=(/VOLD(1:2),ZMIN/)
+      ENDDO
+      N_VERTS=2*N_VERTS
+
+
+      IJ = 1
+      DO J = 1, IJK(2) - 1
+         DO I = 1, IJK(1) - 1
+            I1 = (J-1)*IJK(1) + I
+            I2 = I1 + 1
+            I3 = I2 + IJK(1)
+            I4 = I3 - 1
+
+            I5 = I1 + N_VERTS/2
+            I6 = I2 + N_VERTS/2
+            I7 = I3 + N_VERTS/2
+            I8 = I4 + N_VERTS/2
+
+!     8-------7
+!   / .     / |
+! 5-------6   |
+! |   .   |   |
+! |   .   |   |
+! |   4-------3
+! | /     | /
+! 1-------2
+
+! split box into 6 tetrahedra using: https://www.ics.uci.edu/~eppstein/projects/tetra/
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I2
+            VOLUS(4*IJ-1) = I6
+            VOLUS(4*IJ-0) = I7
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I3
+            VOLUS(4*IJ-1) = I2
+            VOLUS(4*IJ-0) = I7
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I6
+            VOLUS(4*IJ-1) = I5
+            VOLUS(4*IJ-0) = I7
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I4
+            VOLUS(4*IJ-1) = I3
+            VOLUS(4*IJ-0) = I7
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I7
+            VOLUS(4*IJ-1) = I5
+            VOLUS(4*IJ-0) = I8
+            IJ = IJ + 1
+
+            VOLUS(4*IJ-3) = I1
+            VOLUS(4*IJ-2) = I7
+            VOLUS(4*IJ-1) = I8
+            VOLUS(4*IJ-0) = I4
+            IJ = IJ + 1
+         ENDDO
+      ENDDO
+      N_VOLUS=IJ - 1
       N_FACES=0
    ENDIF ZVALS_IF
 
@@ -6486,7 +6567,7 @@ READ_GEOM_LOOP: DO N=1,N_GEOMETRY
 
       ! find faces that match
 
-         SORT_FACES=1
+         SORT_FACES=0
          IF (SORT_FACES==1 ) THEN  ! o(n*log(n)) algorithm for determining external faces
             ALLOCATE(OFACES(N_FACES),STAT=IZERO)
             CALL ChkMemErr('READ_GEOM','OFACES',IZERO)
