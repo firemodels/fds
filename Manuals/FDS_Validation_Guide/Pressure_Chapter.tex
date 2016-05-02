@@ -157,8 +157,6 @@ The PRISME experiments were conducted in a relatively well-sealed set of compart
 \label{PRISME_Room_1_Pressure_1-3}
 \end{figure}
 
-\newpage
-
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_D4_Room_1_Pressure} &
@@ -198,41 +196,56 @@ The PRISME experiments were conducted in a relatively well-sealed set of compart
 \label{PRISME_Room_2_Pressure_4-6}
 \end{figure}
 
+
+\clearpage
+
 \section{PRISME SOURCE Experiments}
 
-The PRISME experiments were conducted in a relatively well-sealed set of compartments with a well-controlled ventilation system. Supply air was forced into and exhaust products extracted from the test compartments via two fans and a fairly extensive ventilation network. The air flow rates and nodal pressures were measured throughout the system. The FDS simulations included the ventilation system, and for each segment of the network a loss coefficient was calculated so as to match the initial conditions of the experiments. The plots to follow show the predicted and measured compartment pressures and supply and exhaust flows. These air flows were predicted by the model, based on the initial specification of the ventilation system.
+The PRISME SOURCE experiments were conducted in a single compartment with a well-controlled ventilation system. Supply air was forced into and exhaust products extracted from the test compartment via two fans and a fairly extensive ventilation network. The air flow rates and nodal pressures were measured throughout the system. The FDS simulations included the ventilation system, and for each segment of the network a loss coefficient was calculated so as to match the initial conditions of the experiments. The plots to follow show the predicted and measured compartment pressures and supply and exhaust flows. These air flows were predicted by the model, based on the initial specification of the ventilation system.
 
 \newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Pressure} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Pressure} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D1_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D2_Room_2_Supply_Exhaust} \\
 \includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Pressure} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Pressure} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Pressure} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Pressure} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Pressure} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Pressure}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D3_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D4_Room_2_Supply_Exhaust} 
 \end{tabular*}
-\caption{PRISME SOURCE, compartment pressure.}
-\label{PRISME_SOURCE_Room_2_Pressure}
+\caption{PRISME SOURCE, pressure and supply/exhaust flow rates, Tests 1, 2, 3 and 4.}
+\label{PRISME_SOURCE_Room_2_Pressure_1}
 \end{figure}
 
-\clearpage
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D5a_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6_Room_2_Supply_Exhaust} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Pressure} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/PRISME/PRS_SI_D6a_Room_2_Supply_Exhaust}
+\end{tabular*}
+\caption{PRISME SOURCE, pressure and supply/exhaust flow rates, Tests 5, 5a, 6 and 6a.}
+\label{PRISME_SOURCE_Room_2_Pressure_2}
+\end{figure}
+
+
 
 \clearpage
 
 \section{Summary of Pressure Predictions}
 \label{Compartment Over-Pressure}
-\label{Open Compartment Over-Pressure}
-
 
 \begin{figure}[h!]
 \begin{center}
 \begin{tabular}{c}
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure} \\
-\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Open_Compartment_Pressure}
+\includegraphics[width=3.5in]{SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure} 
 \end{tabular}
 \end{center}
 \caption[Summary of pressure predictions]{Summary of pressure predictions for open and closed compartments.}

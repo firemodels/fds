@@ -1,5 +1,7 @@
 @echo off
 
+set curdir=%CD%
+
 if "x%1" == "x" goto else1
 set SMOKEVIEW=%1
 :else1
@@ -23,9 +25,10 @@ set SVNROOT=%CD%
 cd %BASEDIR%
 set RUNSMV=call "%BASEDIR%\scripts\runsmv.bat"
 
-call ..\Utilities\Data_Processing\sh2bat FDS_Pictures.sh FDS_Pictures.bat
+call %SVNROOT%\SMV\Build\sh2bat\intel_win_64\sh2bat FDS_Pictures.sh FDS_Pictures.bat
 
 call FDS_Pictures.bat
 
 cd %BASEDIR%
 erase FDS_Pictures.bat
+cd %curdir%

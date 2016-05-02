@@ -19,6 +19,7 @@ SETTIMEVAL
  400.000000
 RENDERONCE
  cfast_test_c1_400
+
 UNLOADALL
 LOADINIFILE
  cfast_test_smoke.ini
@@ -40,6 +41,7 @@ SETTIMEVAL
  400.000000
 RENDERONCE
  cfast_test_smoke_400
+
 UNLOADALL
 // LOADFILE
 //  cfast_test_0001.sf

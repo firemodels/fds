@@ -1,0 +1,212 @@
+&HEAD CHID='Switchgear_Room_Cabinet_v6', TITLE='Cabinet Fire in Switchgear Room'/
+
+&MESH IJK= 26,20,60, XB=7.0, 9.6, 8.4,10.4,0.0,6.1 /
+&MESH IJK= 35,92,60, XB=0.0, 7.0, 0.0,18.4,0.0,6.1 /
+&MESH IJK= 97,42,60, XB=7.0,26.4, 0.0, 8.4,0.0,6.1 /
+&MESH IJK= 97,40,60, XB=7.0,26.4,10.4,18.4,0.0,6.1 /
+&MESH IJK= 84,10,60, XB=9.6,26.4, 8.4,10.4,0.0,6.1 /
+
+&TIME T_END=3600. /
+
+Walls, ceiling and floor
+
+&MISC SURF_DEFAULT = 'CONCRETE WALL' /
+
+&MATL ID            = 'CONCRETE'
+      SPECIFIC_HEAT = 0.75
+      CONDUCTIVITY  = 1.6
+      DENSITY       = 2400. /
+
+&SURF ID            = 'CONCRETE WALL'
+      COLOR         = 'GRAY'
+      MATL_ID       = 'CONCRETE'
+      THICKNESS     = 0.5 /
+
+Cables
+
+&MATL ID            = 'PE/PVC'
+      SPECIFIC_HEAT = 1.289
+      CONDUCTIVITY  = 0.192
+      DENSITY       = 1380.
+      EMISSIVITY    = 0.95 / Properties of the plastics within the cable
+
+&MATL ID='THIEF cable material', DENSITY=2263., CONDUCTIVITY=0.2, SPECIFIC_HEAT=1.5 /
+&SURF ID='THIEF cable surface', THICKNESS=0.0075, LENGTH=0.1, MATL_ID='THIEF cable material', GEOMETRY='CYLINDRICAL' /
+&PART ID='THIEF cable segment', SURF_ID='THIEF cable surface', ORIENTATION=0,0,-1, STATIC=.TRUE., PROP_ID='THIEF cable picture' /
+&PROP ID='THIEF cable picture', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.015' /
+&INIT ID='THIEF cable position A', XYZ=8.3,9.5,3.8, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&INIT ID='THIEF cable position B', XYZ=8.3,9.5,4.3, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&INIT ID='THIEF cable position C', XYZ=8.3,9.5,4.8, N_PARTICLES=1, PART_ID='THIEF cable segment' /
+&DEVC ID='Temp_Cable_A_FDS', INIT_ID='THIEF cable position A', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
+&DEVC ID='Temp_Cable_B_FDS', INIT_ID='THIEF cable position B', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
+&DEVC ID='Temp_Cable_C_FDS', INIT_ID='THIEF cable position C', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=0.002, SETPOINT=205. /
+
+&SURF ID                        = 'NON-BURNING CABLE'
+      COLOR                     = 'BLACK'
+      MATL_ID                   = 'PE/PVC'
+      THICKNESS                 = 0.025  
+      BACKING                   = 'EXPOSED' / Description of "slab" of cables in the tray
+
+&SURF ID                        = 'BURNING CABLE'
+      COLOR                     = 'BLACK'
+      HRRPUA                    = 250.
+      RAMP_Q                    = 'cable fire ramp' /
+
+&RAMP ID='cable fire ramp', T=   0., F=0. /
+&RAMP ID='cable fire ramp', T= 127., F=1. /
+&RAMP ID='cable fire ramp', T= 635., F=1. /
+&RAMP ID='cable fire ramp', T= 762., F=0. /
+
+&SURF ID            = 'TRAY'
+      COLOR         = 'SILVER'
+      MATL_ID       = 'STEEL'
+      THICKNESS     = 0.003 /
+
+&MULT ID='tray', DY=3.0, DZ=0.5, J_LOWER=-1, J_UPPER=1, K_LOWER=0, K_UPPER=2 /
+
+&OBST XB= 1.0, 25.5, 9.0, 9.8, 3.9, 4.0, SURF_IDS = 'NON-BURNING CABLE','TRAY','NON-BURNING CABLE', MULT_ID='tray' /
+
+&VENT XB= 8.0,  8.6, 9.0, 9.8, 4.0, 4.0, SURF_ID = 'BURNING CABLE', DEVC_ID='Temp_Cable_A_FDS' /
+&VENT XB= 1.0,  8.0, 9.0, 9.8, 4.0, 4.0, SURF_ID = 'BURNING CABLE', DEVC_ID='Temp_Cable_A_FDS', SPREAD_RATE=0.00089, XYZ=8.0,9.5,4. /
+&VENT XB= 8.6, 25.5, 9.0, 9.8, 4.0, 4.0, SURF_ID = 'BURNING CABLE', DEVC_ID='Temp_Cable_A_FDS', SPREAD_RATE=0.00089, XYZ=8.6,9.5,4. /
+
+&VENT XB= 7.6,  9.0, 9.0, 9.8, 4.5, 4.5, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay4' /
+&VENT XB= 1.0,  7.6, 9.0, 9.8, 4.5, 4.5, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay4',SPREAD_RATE=0.00089, XYZ=7.6,9.5,4.5/
+&VENT XB= 9.0, 25.5, 9.0, 9.8, 4.5, 4.5, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay4',SPREAD_RATE=0.00089, XYZ=9.0,9.5,4.5/ 
+
+&VENT XB= 7.3,  9.3, 9.0, 9.8, 5.0, 5.0, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay7' /
+&VENT XB= 1.0,  7.3, 9.0, 9.8, 5.0, 5.0, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay7',SPREAD_RATE=0.00089, XYZ=7.3,9.5,5.0/
+&VENT XB= 9.3, 25.5, 9.0, 9.8, 5.0, 5.0, SURF_ID = 'BURNING CABLE', CTRL_ID='Temp_Cable_A_Delay7',SPREAD_RATE=0.00089, XYZ=9.3,9.5,5.0/
+
+&CTRL ID='Temp_Cable_A_Delay4', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Temp_Cable_A_FDS', DELAY=240. / Delay of 4 min past ignition of Tray A
+&CTRL ID='Temp_Cable_A_Delay7', FUNCTION_TYPE='TIME_DELAY', INPUT_ID='Temp_Cable_A_FDS', DELAY=420. / Delay of 7 min past ignition of Tray A
+
+Cabinets
+
+&MATL ID             = 'STEEL'
+      SPECIFIC_HEAT  = 0.465
+      CONDUCTIVITY   = 54.
+      DENSITY        = 7850. /
+
+&SURF ID             = 'CABINET'
+      COLOR          = 'OLIVE'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.0015 /
+
+&OBST XB= 4.0, 22.5,  6.0,  7.0, 0.0, 2.4, SURF_ID = 'CABINET' /
+&OBST XB= 4.0, 22.5,  9.0, 10.0, 0.0, 2.4, SURF_ID = 'CABINET' /
+&OBST XB= 4.0, 22.5, 12.0, 13.0, 0.0, 2.4, SURF_ID = 'CABINET' /
+
+Cabinet Fire
+
+&SPEC ID = 'PE/PVC', FORMULA = 'C2H3.5Cl0.5' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'HYDROGEN CHLORIDE', LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON MONOXIDE',   LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'SOOT',              LUMPED_COMPONENT_ONLY = .TRUE., FORMULA='C1' /
+
+&SPEC ID='AIR', BACKGROUND=.TRUE., SPEC_ID(1)='OXYGEN',   VOLUME_FRACTION(1)=0.21,
+                                   SPEC_ID(2)='NITROGEN', VOLUME_FRACTION(2)=0.79 /
+
+&SPEC ID='PRODUCTS',               SPEC_ID(1)='HYDROGEN CHLORIDE', VOLUME_FRACTION(1)=0.5,
+                                   SPEC_ID(2)='WATER VAPOR',       VOLUME_FRACTION(2)=1.5,
+                                   SPEC_ID(3)='CARBON MONOXIDE',   VOLUME_FRACTION(3)=0.2376,
+                                   SPEC_ID(4)='CARBON DIOXIDE',    VOLUME_FRACTION(4)=1.2496,
+                                   SPEC_ID(5)='SOOT',              VOLUME_FRACTION(5)=0.5128,
+                                   SPEC_ID(6)='NITROGEN',          VOLUME_FRACTION(6)=7.9692 /
+
+&REAC ID='PE/PVC', HEAT_OF_COMBUSTION = 20900., SPEC_ID_NU='PE/PVC','AIR','PRODUCTS', NU=-1,-10.0876,1, RADIATIVE_FRACTION = 0.49 /
+
+&SURF ID            = 'CABINET FIRE'
+      COLOR         = 'ORANGE'
+      HRRPUA        = 2578.
+      RAMP_Q        = 'fire ramp' /
+
+&RAMP ID='fire ramp', T=    0.0, F=0.00 /
+&RAMP ID='fire ramp', T=   72.0, F=0.01 /
+&RAMP ID='fire ramp', T=  144.0, F=0.04 /
+&RAMP ID='fire ramp', T=  216.0, F=0.09 /
+&RAMP ID='fire ramp', T=  288.0, F=0.16 /
+&RAMP ID='fire ramp', T=  360.0, F=0.25 /
+&RAMP ID='fire ramp', T=  432.0, F=0.36 /
+&RAMP ID='fire ramp', T=  504.0, F=0.49 /
+&RAMP ID='fire ramp', T=  576.0, F=0.64 /
+&RAMP ID='fire ramp', T=  648.0, F=0.81 /
+&RAMP ID='fire ramp', T=  720.0, F=1.00 /
+&RAMP ID='fire ramp', T= 1200.0, F=1.00 /
+&RAMP ID='fire ramp', T= 1920.0, F=0.00 /
+
+&VENT XB= 8.0, 8.6, 9.4, 9.7, 2.4, 2.4, SURF_ID = 'CABINET FIRE' /
+
+Ventilation
+
+&SURF ID             = 'DUCT STEEL'
+      COLOR          = 'GRAY 2'
+      MATL_ID        = 'STEEL'
+      THICKNESS      = 0.002 /
+
+&SURF ID             = 'SUPPLY'
+      RGB            = 0,191,255
+      VOLUME_FLOW    = -0.472 /
+
+&SURF ID             = 'RETURN'
+      RGB            = 124,252,0
+      VOLUME_FLOW    = 0.472 / 
+
+&OBST XB= 2.0, 2.5, 6.0, 6.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB= 2.0, 2.5, 6.0, 6.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB= 2.0, 2.5, 6.0, 6.6, 5.6, 5.6, SURF_ID = 'SUPPLY'/
+
+&OBST XB= 2.0, 2.5, 9.0, 9.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB= 2.0, 2.5, 9.0, 9.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB= 2.0, 2.5, 9.0, 9.6, 5.6, 5.6, SURF_ID = 'SUPPLY'/
+
+&OBST XB= 2.0, 2.5,12.0,12.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB= 2.0, 2.5,12.0,12.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB= 2.0, 2.5,12.0,12.6, 5.6, 5.6, SURF_ID = 'SUPPLY'/
+
+&OBST XB=24.0,24.5, 6.0, 6.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB=24.0,24.5, 6.0, 6.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB=24.0,24.5, 6.0, 6.6, 5.6, 5.6, SURF_ID = 'RETURN'/
+
+&OBST XB=24.0,24.5, 9.0, 9.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB=24.0,24.5, 9.0, 9.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB=24.0,24.5, 9.0, 9.6, 5.6, 5.6, SURF_ID = 'RETURN'/
+
+&OBST XB=24.0,24.5,12.0,12.6, 5.6, 6.1, SURF_ID = 'DUCT STEEL'/
+&OBST XB=24.0,24.5,12.0,12.6, 5.4, 5.4, SURF_ID = 'DUCT STEEL'/
+&VENT XB=24.0,24.5,12.0,12.6, 5.6, 5.6, SURF_ID = 'RETURN'/
+
+&VENT XB= 0.0, 0.0,15.0,16.1, 0.2, 2.0, COLOR='BROWN', SURF_ID='DUCT STEEL' /
+&VENT XB= 0.0, 0.0,15.0,16.1, 0.0, 0.2, SURF_ID='DOOR CRACK' /
+&SURF ID='DOOR CRACK', LEAK_PATH=1,0, COLOR='BEIGE' /
+&ZONE LEAK_AREA(0)=0.0117 /
+
+Output
+
+&DUMP DT_DEVC=15., DT_HRR=15. /
+
+&DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_A_FDS', XYZ=8.3,9.5,3.9, ORIENTATION=0,0,-1 /
+&DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_B_FDS', XYZ=8.3,9.5,4.4, ORIENTATION=0,0,-1 /
+&DEVC QUANTITY='RADIATIVE HEAT FLUX GAS',  ID='Flux_Cable_C_FDS', XYZ=8.3,9.5,4.9, ORIENTATION=0,0,-1 /
+
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Cabinet_A_FDS', XB=7.0, 9.6, 5.0, 8.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
+&DEVC QUANTITY='WALL TEMPERATURE', ID='Temp_Cabinet_B_FDS', XB=7.0, 9.6,11.0,14.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
+
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cabinet_A_FDS', XB=7.0, 9.6, 5.0, 8.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
+&DEVC QUANTITY='GAUGE HEAT FLUX', ID='Flux_Cabinet_B_FDS', XB=7.0, 9.6,11.0,14.0,0.0,2.6, SURF_ID='CABINET', STATISTICS='MAX' /
+
+Smokeview output
+
+&BNDF QUANTITY='WALL TEMPERATURE'/
+&BNDF QUANTITY='GAUGE HEAT FLUX'/
+&BNDF QUANTITY='BURNING RATE'/
+
+&SLCF PBX=8.3, VECTOR=.TRUE., QUANTITY='TEMPERATURE' /
+
+End the file
+
+&TAIL /

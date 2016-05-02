@@ -477,7 +477,7 @@ CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
             DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                        (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                        (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -489,7 +489,7 @@ CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
             DELKDELT = &
                  (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
                  (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + Q_H_CORR(I,J,K) + QR(I,J,K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -1267,7 +1267,7 @@ SUBROUTINE EVACUATION_PRESSURE_ZONES
 IMPLICIT NONE
 REAL(EB) :: VC,VC1,TNOW,RDT,TSI,TIME_RAMP_FACTOR,ZONE_VOLUME,DELTA_P,PRES_RAMP_FACTOR,&
             X1,Y1,X2,Y2,Z1,Z2
-INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,I_VENT
+INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,ITMP,I,J,K,IPZ,I_VENT,N_OVERLAP
 
 IF (.NOT.EVACUATION_ONLY(NM)) RETURN
 
@@ -1335,7 +1335,7 @@ EVACUATION_PREDICTOR: IF (PREDICTOR) THEN
                     YC(J) - Y1 >=0._EB .AND. YC(J) < Y2 .AND. &
                     ZC(K) - Z1 >=0._EB .AND. ZC(K) < Z2) THEN
                   PRESSURE_ZONE(I,J,K) = N
-                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N)
+                  IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CALL ASSIGN_PRESSURE_ZONE(NM,XC(I),YC(J),ZC(K),N,N_OVERLAP)
                ENDIF
             ENDDO
          ENDDO
@@ -1612,7 +1612,6 @@ DIVMN  =  10000._EB
 IMX    = 0
 JMX    = 0
 KMX    = 0
-Q_MAX  = -10000._EB
 
 DO K=1,KBAR
    DO J=1,JBAR
@@ -1647,7 +1646,6 @@ DO K=1,KBAR
             JMN=J
             KMN=K
          ENDIF
-         Q_MAX = MAX(Q(I,J,K),Q_MAX)
       ENDDO LOOP1
    ENDDO
 ENDDO

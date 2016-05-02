@@ -11,6 +11,7 @@ echo "-h - display this message"
 echo "-i - use installed version of smokeview"
 echo "-t - use test version of smokeview"
 echo "-s size - use 32 or 64 bit (default) version of smokeview"
+echo "-W - only generate WUI case images"
 exit
 }
 
@@ -38,8 +39,9 @@ TEST=
 use_installed="0"
 RUN_SMV=1
 RUN_GEOM=0
+RUN_WUI=1
 
-while getopts 'dghis:t' OPTION
+while getopts 'dghis:tW' OPTION
 do
 case $OPTION  in
   d)
@@ -48,6 +50,7 @@ case $OPTION  in
   g)
    RUN_SMV=0
    RUN_GEOM=1
+   RUN_WUI=0
    ;;
   h)
    usage;
@@ -66,6 +69,11 @@ case $OPTION  in
      SIZE=_32
    fi
   ;;
+  W)
+   RUN_SMV=0
+   RUN_GEOM=0
+   RUN_WUI=1
+   ;;
 esac
 done
 shift $(($OPTIND-1))
@@ -85,11 +93,11 @@ if [ "$use_installed" == "1" ] ; then
   export WIND2FDS=wind2fds
   export BACKGROUND=background
 else
-  export SMV=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
-  export SMOKEZIP=$SVNROOT/Utilities/smokezip/intel_$VERSION2/smokezip_$VERSION2
-  export SMOKEDIFF=$SVNROOT/Utilities/smokediff/intel_$VERSION2/smokediff_$VERSION2
-  export WIND2FDS=$SVNROOT/Utilities/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
-  export BACKGROUND=$SVNROOT/Utilities/background/intel_$VERSION2/background
+  export SMV=$SVNROOT/SMV/Build/smokeview/intel_$VERSION2/smokeview_$VERSION
+  export SMOKEZIP=$SVNROOT/SMV/Build/smokezip/intel_$VERSION2/smokezip_$VERSION2
+  export SMOKEDIFF=$SVNROOT/SMV/Build/smokediff/intel_$VERSION2/smokediff_$VERSION2
+  export WIND2FDS=$SVNROOT/SMV/Build/wind2fds/intel_$VERSION2/wind2fds_$VERSION2
+  export BACKGROUND=$SVNROOT/SMV/Build/background/intel_$VERSION2/background
 fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
@@ -106,7 +114,6 @@ echo
 
 RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
-export RUNTFDS="$RUNSMV -t"
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
@@ -187,17 +194,6 @@ if [ "$RUN_SMV" == "1" ] ; then
 
   echo Generating images
 
-# copy wui error image in case wfds does not exist
-
-  FROMDIR=$SVNROOT/Manuals/SMV_Verification_Guide/FIGURES
-  TODIR=$SVNROOT/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_000.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_010.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_part_020.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_000.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_010.png
-  cp $FROMDIR/wfds_error.png $TODIR/tree_one_partiso_020.png
- 
   source $STARTX
   cd $SVNROOT/Verification
   scripts/SMV_Cases.sh
@@ -206,19 +202,26 @@ if [ "$RUN_SMV" == "1" ] ; then
   cd $CURDIDR
   source $STOPX
 
-# copy generated images to web summary directory
-
-  cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
-  cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
-  cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 fi
 
 # generate geometry images
 
+if [ "$RUN_WUI" == "1" ] ; then
+  source $STARTX
+  cd $SVNROOT/Verification
+  scripts/WUI_Cases.sh
+  source $STOPX
+fi
 if [ "$RUN_GEOM" == "1" ] ; then
   source $STARTX
   cd $SVNROOT/Verification
-  scripts/SMV_geom_Cases.sh
+  scripts/GEOM_Cases.sh
   source $STOPX
 fi
+
+# copy generated images to web summary directory
+
+cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
+cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
+cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
