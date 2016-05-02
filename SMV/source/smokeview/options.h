@@ -35,6 +35,10 @@
 #define pp_GPUTHROTTLE
 #endif
 
+#ifdef VS2015
+#define HAVE_SNPRINTF
+#define HAVE_STRUCT_TIMESPEC
+#endif
 #define pp_DRAWISO
 #define pp_LANG
 #define pp_DEG
