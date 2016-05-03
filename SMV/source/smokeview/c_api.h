@@ -27,9 +27,6 @@ void label(const char *label);
 void load3dsmoke(const char *smoke_type);
 void set_slice_in_obst(int setting);
 int get_slice_in_obst();
-void settimebarvisibility(int setting);
-int gettimebarvisibility();
-void toggletimebarvisibility();
 void loadvolsmoke(int meshnumber);
 void loadvolsmokeframe(int meshnumber, int framenumber, int flag);
 void rendertype(const char *type);
@@ -118,3 +115,66 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 
 int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
                        char *input_filename_ext);
+
+// --------- show/hide options--------
+
+// colorbar
+void set_colorbar_visibility(int setting);
+int get_colorbar_visibility();
+void toggle_timebar_visibility();
+
+// timebar
+void set_timebar_visibility(int setting);
+int get_timebar_visibility();
+void toggle_timebar_visibility();
+
+// title
+void set_title_visibility(int setting);
+int get_title_visibility();
+void toggle_title_visibility();
+
+// axis
+void set_axis_visibility(int setting);
+int get_axis_visibility();
+void toggle_axis_visibility();
+
+// frame
+void set_framelabel_visibility(int setting);
+int get_framelabel_visibility();
+void toggle_framelabel_visibility();
+
+// framerate
+void set_framerate_visibility(int setting);
+int get_framerate_visibility();
+void toggle_framerate_visibility();
+
+// grid locations
+void set_gridloc_visibility(int setting);
+int get_gridloc_visibility();
+void toggle_gridloc_visibility();
+
+// hrrpuv cutoff
+void set_hrrcutoff_visibility(int setting);
+int get_hrrcutoff_visibility();
+void toggle_hrrcutoff_visibility();
+// memory load
+// mesh
+// slice average
+// time
+// user settable ticks
+// version info
+// show all
+// hide all
+
+// --------- options--------
+
+// Display Units
+// time
+void set_timehms(int setting);
+int get_timehms();
+void toggle_timehms();
+
+// arbitrary
+void set_units(int unitclass, int unit_index);
+void set_units_default();
+void set_unitclass_default(int unitclass);

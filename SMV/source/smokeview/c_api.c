@@ -190,8 +190,6 @@ int loadsmv(char *input_filename, char *input_filename_ext){
   init_lang();
 #endif
 
-  if(sb_atstart==1)smooth_blockages();
-
   if(ntours==0)setup_tour();
   glui_colorbar_setup(mainwindow_id);
   glui_motion_setup(mainwindow_id);
@@ -268,7 +266,7 @@ int loadfile(const char *filename) {
 
     parti = partinfo + i;
     if(strcmp(parti->file,filename)==0){
-      readpart(parti->file,i,LOAD,&errorcode);
+      readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
       return errorcode;
     }
   }
@@ -707,20 +705,204 @@ int get_slice_in_obst() {
 	return show_slice_in_obst;
 }
 
-void settimebarvisibility(int setting) {
+// colorbar visibility
+void set_colorbar_visibility(int setting) {
+  visColorbar = setting;
+  if(visColorbar==0)PRINTF("Colorbar hidden\n");
+  if(visColorbar==1)PRINTF("Colorbar visible\n");
+}
+
+int get_colorbar_visibility() {
+  return visColorbar;
+}
+
+void toggle_colorbar_visibility() {
+  visColorbar = 1 - visColorbar;
+  if(visColorbar==0)PRINTF("Colorbar hidden\n");
+  if(visColorbar==1)PRINTF("Colorbar visible\n");
+}
+
+// timebar visibility
+void set_timebar_visibility(int setting) {
   visTimebar = setting;
   if(visTimebar==0)PRINTF("Time bar hidden\n");
   if(visTimebar==1)PRINTF("Time bar visible\n");
 }
 
-int gettimebarvisibility() {
-    return visTimebar;
+int get_timebar_visibility() {
+  return visTimebar;
 }
 
-void toggletimebarvisibility() {
+void toggle_timebar_visibility() {
   visTimebar = 1 - visTimebar;
   if(visTimebar==0)PRINTF("Time bar hidden\n");
   if(visTimebar==1)PRINTF("Time bar visible\n");
+}
+
+// title visibility
+void set_title_visibility(int setting) {
+  visTitle = setting;
+  if(visTitle==0)PRINTF("Title hidden\n");
+  if(visTitle==1)PRINTF("Title visible\n");
+}
+
+int get_title_visibility() {
+  return visTitle;
+}
+
+void toggle_title_visibility() {
+  visTitle = 1 - visTitle;
+  if(visTitle==0)PRINTF("Title hidden\n");
+  if(visTitle==1)PRINTF("Title visible\n");
+}
+
+// axis visibility
+void set_axis_visibility(int setting) {
+  visaxislabels = setting;
+  update_visaxislabels();
+  if(visaxislabels==0)PRINTF("Axis labels hidden\n");
+  if(visaxislabels==1)PRINTF("Axis labels visible\n");
+}
+
+int get_axis_visibility() {
+  return visaxislabels;
+}
+
+void toggle_axis_visibility() {
+  visaxislabels = 1 - visaxislabels;
+  update_visaxislabels();
+  if(visaxislabels==0)PRINTF("Axis labels hidden\n");
+  if(visaxislabels==1)PRINTF("Axis labels visible\n");
+}
+
+// framelabel visibility
+void set_framelabel_visibility(int setting) {
+  visFramelabel = setting;
+  // The frame label should not be shown without the timebar
+  // so show timebar if necessary.
+  if(visFramelabel==1)visTimebar=1;
+  if(visFramelabel==1){
+    visHRRlabel=0;
+    if(hrrinfo!=NULL){
+      hrrinfo->display=visHRRlabel;
+      Update_Times();
+    }
+  }
+  if(visFramelabel==0)PRINTF("Frame label hidden\n");
+  if(visFramelabel==1)PRINTF("Frame label visible\n");
+}
+
+int get_framelabel_visibility() {
+  return visFramelabel;
+}
+
+void toggle_framelabel_visibility() {
+  visFramelabel = 1 - visFramelabel;
+  // The frame label should not be shown without the timebar
+  // so show timebar if necessary.
+  if(visFramelabel==1)visTimebar=1;
+    if(visFramelabel==1){
+      visHRRlabel=0;
+      if(hrrinfo!=NULL){
+        hrrinfo->display=visHRRlabel;
+        Update_Times();
+      }
+  }
+  if(visFramelabel==0)PRINTF("Frame label hidden\n");
+  if(visFramelabel==1)PRINTF("Frame label visible\n");
+}
+
+// framerate visibility
+void set_framerate_visibility(int setting) {
+  visFramerate = setting;
+  if(visFramerate==0)PRINTF("Frame rate hidden\n");
+  if(visFramerate==1)PRINTF("Frame rate visible\n");
+}
+
+int get_framerate_visibility() {
+  return visFramerate;
+}
+
+void toggle_framerate_visibility() {
+  visFramerate = 1 - visFramerate;
+  if(visFramerate==0)PRINTF("Frame rate hidden\n");
+  if(visFramerate==1)PRINTF("Frame rate visible\n");
+}
+
+// grid locations visibility
+void set_gridloc_visibility(int setting) {
+  visgridloc = setting;
+  if(visgridloc==0)PRINTF("Grid locations hidden\n");
+  if(visgridloc==1)PRINTF("Grid locations visible\n");
+}
+
+int get_gridloc_visibility() {
+  return visgridloc;
+}
+
+void toggle_gridloc_visibility() {
+  visgridloc = 1 - visgridloc;
+  if(visgridloc==0)PRINTF("Grid locations hidden\n");
+  if(visgridloc==1)PRINTF("Grid locations visible\n");
+}
+
+// HRRPUV cutoff visibility
+void set_hrrcutoff_visibility(int setting) {
+  show_hrrcutoff = setting;
+  if(show_hrrcutoff==0)PRINTF("Grid locations hidden\n");
+  if(show_hrrcutoff==1)PRINTF("Grid locations visible\n");
+}
+
+int get_hrrcutoff_visibility() {
+  return show_hrrcutoff;
+}
+
+void toggle_hrrcutoff_visibility() {
+  show_hrrcutoff = 1 - show_hrrcutoff;
+  if(show_hrrcutoff==0)PRINTF("Grid locations hidden\n");
+  if(show_hrrcutoff==1)PRINTF("Grid locations visible\n");
+}
+
+// Display Units
+// time
+void set_timehms(int setting) {
+  vishmsTimelabel = 1 - vishmsTimelabel;
+  set_labels_controls();
+  if(vishmsTimelabel==0)PRINTF("Time label in h:m:s\n");
+  if(vishmsTimelabel==1)PRINTF("Time label in s\n");
+}
+
+int get_timehms() {
+  return vishmsTimelabel;
+}
+
+void toggle_timehms() {
+  vishmsTimelabel = 1 - vishmsTimelabel;
+  set_labels_controls();
+  if(vishmsTimelabel==0)PRINTF("Time label in h:m:s\n");
+  if(vishmsTimelabel==1)PRINTF("Time label in s\n");
+}
+
+// arbitrary
+void set_units(int unitclass, int unit_index) {
+  unitclasses[unitclass].unit_index=unit_index;
+  updatemenu=1;
+  glutPostRedisplay();
+}
+
+void set_units_default() {
+  int i;
+  for(i=0;i<nunitclasses;i++){
+      unitclasses[i].unit_index=0;
+    }
+  updatemenu=1;
+  glutPostRedisplay();
+}
+
+void set_unitclass_default(int unitclass) {
+  unitclasses[unitclass].unit_index=0;
+  updatemenu=1;
+  glutPostRedisplay();
 }
 
 void setframe(int framenumber) {
@@ -746,7 +928,7 @@ void loadvolsmoke(int meshnumber) {
     read_volsmoke_allframes_allmeshes2(NULL);
   }
   else if(imesh>=0&&imesh<nmeshes){
-    mesh *meshi;
+    meshdata *meshi;
     volrenderdata *vr;
 
     meshi = meshinfo + imesh;
@@ -770,7 +952,7 @@ void loadvolsmokeframe(int meshnumber, int framenumber, int flag) {
   if(index > nmeshes - 1)index = -1;
   for(i = 0; i < nmeshes; i++){
     if(index == i || index < 0){
-      mesh *meshi;
+      meshdata *meshi;
       volrenderdata *vr;
 
       meshi = meshinfo + i;
@@ -918,25 +1100,21 @@ void loadparticles(const char *name){
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,UNLOAD,&errorcode);
-      count++;
-    }
+    readpart(parti->file,i,UNLOAD,PARTDATA,&errorcode);
+    count++;
   }
   for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
     if(parti->evac==1)continue;
-    if(parti->version==1){
-      readpart(parti->file,i,LOAD,&errorcode);
+      readpart(parti->file,i,LOAD,PARTDATA,&errorcode);
       if(name!=NULL&&strlen(name)>0){
         FREEMEMORY(loaded_file);
         NewMemory((void **)&loaded_file,strlen(name)+1);
         strcpy(loaded_file,name);
       }
       count++;
-    }
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
@@ -950,7 +1128,7 @@ void partclasscolor(const char *color){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-	part5prop *propi;
+	partpropdata *propi;
 
 	propi = part5propinfo + i;
 	if(propi->particle_property==0)continue;
@@ -969,13 +1147,13 @@ void partclasstype(const char *part_type){
   int count=0;
 
   for(i=0;i<npart5prop;i++){
-    part5prop *propi;
+    partpropdata *propi;
     int j;
 
     propi = part5propinfo + i;
     if(propi->display==0)continue;
     for(j=0;j<npartclassinfo;j++){
-      part5class *partclassj;
+      partclassdata *partclassj;
 
       if(propi->class_present[j]==0)continue;
       partclassj = partclassinfo + j;
@@ -1024,7 +1202,7 @@ void plot3dprops(int variable_index, int showvector, int vector_length_index,
   update_plot3d_display();
 
   if(visVector==1&&ReadPlot3dFile==1){
-    mesh *gbsave,*gbi;
+    meshdata *gbsave,*gbi;
 
     gbsave=current_mesh;
     for(i=0;i<nmeshes;i++){
@@ -1045,7 +1223,7 @@ void plot3dprops(int variable_index, int showvector, int vector_length_index,
 //
 // void script_showplot3ddata(int meshnumber, int plane_orientation, int display,
 //                            float position) {
-//   mesh *meshi;
+//   meshdata *meshi;
 //   int imesh, dir, showhide;
 //   float val;
 //   int isolevel;
@@ -1289,7 +1467,7 @@ void unloadall() {
       readpatch(i,UNLOAD,&errorcode);
     }
     for(i=0;i<npartinfo;i++){
-      readpart("",i,UNLOAD,&errorcode);
+      readpart("",i,UNLOAD,PARTDATA,&errorcode);
     }
     for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
@@ -1319,7 +1497,7 @@ void exit_smokeview() {
 /* ------------------ setviewpoint ------------------------ */
 
 int setviewpoint(const char *viewpoint){
-  camera *ca;
+  cameradata *ca;
   int count=0;
   int errorcode = 0;
   PRINTF("setting viewpoint to %s\n\n",viewpoint);

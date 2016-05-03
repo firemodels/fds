@@ -416,7 +416,7 @@ int lua_get_nmeshes(lua_State *L) {
 // TODO: provide more information via this interface.
 int lua_get_meshes(lua_State *L) {
     int entries = nmeshes;
-    mesh *infotable = meshinfo;
+    meshdata *infotable = meshinfo;
     PRINTF("lua: initialising mesh table\n");
     lua_createtable(L, 0, entries);
 	int i;
@@ -519,18 +519,15 @@ int lua_initsmvproginfo(lua_State *L) {
     char githash[256];
 
     getPROGversion(version);
-    getGitHash(githash);
+    // getGitHash(githash);
 
-    lua_createtable(L, 0, 8);
+    lua_createtable(L, 0, 6);
 
     lua_pushstring(L, version);
     lua_setfield(L, -2, "version");
 
-    lua_pushstring(L, githash);
-    lua_setfield(L, -2, "githash");
-
-    lua_pushstring(L, TITLERELEASE);
-    lua_setfield(L, -2, "titlerelease");
+    // lua_pushstring(L, githash);
+    // lua_setfield(L, -2, "githash");
 
     lua_pushstring(L, __DATE__);
     lua_setfield(L, -2, "builddate");
@@ -893,7 +890,7 @@ int lua_get_slice_in_obst(lua_State *L) {
 
 int lua_settimebarvisibility(lua_State *L) {
     int setting = lua_toboolean(L, 1);
-    set_slice_in_obst(setting);
+    set_timebar_visibility(setting);
     return 0;
 }
 
@@ -903,7 +900,7 @@ int lua_gettimebarvisibility(lua_State *L) {
 }
 
 int lua_toggletimebarvisibility(lua_State *L) {
-    toggletimebarvisibility();
+    toggle_timebar_visibility();
     return 0;
 }
 
