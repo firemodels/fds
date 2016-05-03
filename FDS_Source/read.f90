@@ -515,12 +515,18 @@ MESH_LOOP: DO N=1,NMESHES_READ
 
             ! Determine which PROCESS to assign the MESH to
 
-            IF (USE_MPI) THEN
+            IF (USE_MPI) THEN 
                IF (MPI_PROCESS>-1) THEN
                   CURRENT_MPI_PROCESS = MPI_PROCESS
                   IF (CURRENT_MPI_PROCESS>N_MPI_PROCESSES-1) THEN
-                     WRITE(MESSAGE,'(A)') 'ERROR: MPI_PROCESS greater than total number of processes'
-                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                     IF (N_MPI_PROCESSES > 1) THEN
+                        WRITE(MESSAGE,'(A,I0,A)') 'ERROR: MPI_PROCESS for MESH ',NM,' greater than total number of processes'
+                        CALL SHUTDOWN(MESSAGE) ; RETURN
+                     ELSE
+                        ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
+                        WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
+                        IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                     ENDIF
                   ENDIF
                ELSE
                   CURRENT_MPI_PROCESS = MIN(NM-1,N_MPI_PROCESSES-1)
