@@ -526,6 +526,7 @@ MESH_LOOP: DO N=1,NMESHES_READ
                         ! Prevents fatal error when testing a run on a single core with MPI_PROCESS set for meshes
                         WRITE(MESSAGE,'(A,I0,A)') 'WARNING: MPI_PROCESS set for MESH ',NM,' and only one MPI process exists'
                         IF (MYID==0) WRITE(LU_ERR,'(A)') TRIM(MESSAGE)
+                        CURRENT_MPI_PROCESS=0
                      ENDIF
                   ENDIF
                ELSE
