@@ -558,7 +558,7 @@ int lua_get_sliceinfo(lua_State *L) {
   int i;
   for (i = 0; i < nsliceinfo; i++) {
     lua_pushnumber(L, i);
-    lua_createtable(L, 0, 12);
+    lua_createtable(L, 0, 14);
 
     if(sliceinfo[i].slicelabel != NULL) {
       lua_pushstring(L, sliceinfo[i].slicelabel);
@@ -568,6 +568,11 @@ int lua_get_sliceinfo(lua_State *L) {
     if(sliceinfo[i].label.longlabel != NULL) {
       lua_pushstring(L, sliceinfo[i].label.longlabel);
       lua_setfield(L, -2, "longlabel");
+    }
+
+    if(sliceinfo[i].label.shortlabel != NULL) {
+      lua_pushstring(L, sliceinfo[i].label.shortlabel);
+      lua_setfield(L, -2, "shortlabel");
     }
 
     lua_pushstring(L, sliceinfo[i].file);
