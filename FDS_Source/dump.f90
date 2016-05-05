@@ -707,7 +707,7 @@ ENDIF IF_DUMP_SPECIES_INFO
 
 IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
-   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step, Pressure Iteration, Mesh, I, J, K, Total Iterations, Velocity Error'
+   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step, Pressure Iteration, Mesh, I, J, K, Total Iterations, Velocity Error, Pressure Error'
 ENDIF
 
 ! Check particle sample distribution
@@ -3281,6 +3281,7 @@ IF (ITERATE_PRESSURE) THEN
    WRITE(LU_OUTPUT,'(7X,A,I6)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
+   WRITE(LU_OUTPUT,'(7X,A,E9.2             )') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX)
 ENDIF
 IF (PRES_METHOD=='SCARC') THEN
    WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
@@ -3313,11 +3314,11 @@ WRITE(LU_OUTPUT,*)
 151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
 152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
 153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
-154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-           6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-           6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
+154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
+           6X,' Max divergence: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
+           6X,' Min divergence: ',E9.2,' at (',I4,',',I4,',',I4,')')
+133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I4,',',I4,',',I4,')')
+230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I4,',',I4,',',I4,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
