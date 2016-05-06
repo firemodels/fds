@@ -544,13 +544,7 @@ void LabelMenu(int value){
     visHRRlabel=1;
     show_hrrcutoff=1;
     visFramelabel=1;
-    if(hrrinfo!=NULL){
-      if(hrrinfo->display==0){
-        hrrinfo->display=1;
-        Update_Times();
-      }
-      hrrinfo->display=1;
-    }
+	if (hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
@@ -566,13 +560,7 @@ void LabelMenu(int value){
     visMeshlabel=0;
     visHRRlabel=0;
     show_hrrcutoff=0;
-    if(hrrinfo!=NULL){
-      if(hrrinfo->display==1){
-        hrrinfo->display=0;
-        Update_Times();
-      }
-      hrrinfo->display=0;
-    }
+	if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
     if(ntickinfo>0)visFDSticks=0;
     visgridloc=0;
     vis_slice_average=0;
@@ -600,10 +588,7 @@ void LabelMenu(int value){
      if(visFramelabel==1)visTimebar=1;
      if(visFramelabel==1){
        visHRRlabel=0;
-       if(hrrinfo!=NULL){
-         hrrinfo->display=visHRRlabel;
-         Update_Times();
-       }
+	   Update_hrrinfo(visHRRlabel);
      }
      break;
    case MENU_LABEL_meshlabel:
@@ -637,10 +622,7 @@ void LabelMenu(int value){
    case MENU_LABEL_hrr:
      visHRRlabel=1-visHRRlabel;
      if(visHRRlabel==1)visTimebar=1;
-     if(hrrinfo!=NULL){
-       hrrinfo->display=visHRRlabel;
-       Update_Times();
-     }
+	 Update_hrrinfo(visHRRlabel);
      break;
    case MENU_LABEL_hrrcutoff:
      show_hrrcutoff=1-show_hrrcutoff;
