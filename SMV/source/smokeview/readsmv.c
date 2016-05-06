@@ -9083,7 +9083,14 @@ int readini2(char *inifile, int localfile){
       if(devicenorm_length<0.0 || devicenorm_length>1.0)devicenorm_length = 0.1;
       continue;
     }
-    if(match(buffer, "SHOWHRRCUTOFF") == 1){
+	if (match(buffer, "SHOWHRRLABEL") == 1) {
+		fgets(buffer, 255, stream);
+		sscanf(buffer, "%i", &visHRRlabel);
+		ONEORZERO(visHRRlabel);
+		Update_hrrinfo(visHRRlabel);
+		continue;
+	}
+	if(match(buffer, "SHOWHRRCUTOFF") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, "%i", &show_hrrcutoff);
       ONEORZERO(show_hrrcutoff);
@@ -12162,6 +12169,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i\n", vishmsTimelabel);
   fprintf(fileout, "SHOWHRRCUTOFF\n");
   fprintf(fileout, " %i\n", show_hrrcutoff);
+  fprintf(fileout, "SHOWHRRLABEL\n");
+  fprintf(fileout, " %i\n", visHRRlabel);
   fprintf(fileout, "SHOWISO\n");
   fprintf(fileout, " %i\n", visAIso);
   fprintf(fileout, "SHOWISONORMALS\n");

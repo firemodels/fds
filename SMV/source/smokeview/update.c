@@ -26,6 +26,15 @@ int compare_float( const void *arg1, const void *arg2 ){
   return 0;
 }
 
+/* ------------------ Update_hrrinfo ------------------------ */
+
+void Update_hrrinfo(int vis) {
+  if (hrrinfo != NULL) {
+    hrrinfo->display = vis;
+	Update_Times();
+  }
+}
+
 /* ------------------ Update_Framenumber ------------------------ */
 
 void Update_Framenumber(int changetime){
