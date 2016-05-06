@@ -228,7 +228,7 @@ int main(int argc, char **argv){
         gen_elevs = 1;
         break;
       case 'v':
-        version("dem2geom");
+        PRINTversion("dem2geom");
         exit(1);
         break;
       default:
