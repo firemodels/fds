@@ -1259,7 +1259,7 @@ void getTitle(char *progname, char *fulltitle){
 
 /* ------------------ version ------------------------ */
 
-void version(char *progname){
+void PRINTversion(char *progname){
   char version[256];
   char githash[256];
   char gitdate[256];

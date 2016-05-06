@@ -5,6 +5,7 @@
 /*lint -e40 */
 /*lint -e516 */
 /*lint -e718 */
+/*lint -e438 */
 /*lint -e459 */
 /*lint -e506 */
 /*lint -e509 */
@@ -15,6 +16,7 @@
 /*lint -e550 */
 /*lint -e570 */
 /*lint -e571 */
+/*lint -e574 */
 /*lint -e613 */
 /*lint -e644 */
 /*lint -e645 */

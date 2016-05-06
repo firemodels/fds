@@ -49,7 +49,7 @@ int main(int argc, char **argv){
   strcpy(type_label,"");
 
   if(argc==1){
-    version("Smokediff ");
+    PRINTversion("Smokediff ");
     return 1;
   }
 
@@ -123,7 +123,7 @@ int main(int argc, char **argv){
         i++;
         break;
       case 'v':
-        version("Smokediff ");
+        PRINTversion("Smokediff ");
         return 1;
       case 'w':
         display_warnings=0;
