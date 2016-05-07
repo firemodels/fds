@@ -297,7 +297,7 @@ test("loaded file test", function()
         end)
     end)
     test("projection type get/set 2", function()
-        local x = orthogsonal
+        local x = orthogonal
         test("set", function() view.projection_type = x end)
         test("get", function() return view.projection_type end)
         test("equal", function()
