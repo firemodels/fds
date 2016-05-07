@@ -89,7 +89,7 @@ int main(int argc, char **argv){
   prog=argv[0];
 
   if(argc==1){
-    version("background ");
+    PRINTversion("background ");
     return 1;
   }
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv){
             }
             break;
           case 'v':
-            version("background ");
+            PRINTversion("background ");
             return 1;
           default:
             printf("Unknown option: %s\n",arg);

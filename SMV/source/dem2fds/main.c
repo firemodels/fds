@@ -34,7 +34,7 @@ float dist(float llong1, float llong2, float llat1, float llat2){
   // R = 6371000
 
   float deg2rad;
-  float a, c, R, dist;
+  float a, c, R, distance;
   float dlat, dlong;
 
   deg2rad = 4.0*atan(1.0)/180.0;
@@ -47,8 +47,8 @@ float dist(float llong1, float llong2, float llat1, float llat2){
   a = pow(sin(dlat / 2.0), 2) + cos(llat1)*cos(llat2)*pow(sin(dlong / 2.0), 2);
   c = 2 * asin(sqrt(ABS(a)));
   R = 6371000;
-  dist = R*c;
-  return dist;
+  distance = R*c;
+  return distance;
 }
 
 /* ------------------ generate_elevs ------------------------ */
@@ -58,7 +58,7 @@ void generate_fds(char *filebase, int option){
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
-  float xmax, ymax, zmin, zmax, dx, dy;
+  float xmax, ymax, zmin, zmax;
   float *xgrid, *ygrid;
   int count;
   int ibar, jbar, kbar;
@@ -70,10 +70,8 @@ void generate_fds(char *filebase, int option){
   sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
 
   xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
-  dx = xmax / (float)nlong;
 
   ymax = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
-  dy = ymax / (float)nlat;
 
   ibar = nlong - 1;
   jbar = nlat - 1;
@@ -161,13 +159,15 @@ void generate_longlats(char *filebase){
   float lat1, lat2, long1, long2;
   int nlat, nlong;
   int line_count, file_count;
-  FILE *streamin = NULL, *streamout = NULL;
+  FILE *streamout = NULL;
   int i;
 
   sprintf(fileout, "%s_longlats_%03i.csv", filebase, 1);
 
   fgets(buffer, LENBUFFER, stdin);
   sscanf(buffer, "%f %f %i %f %f %i", &long1, &long2, &nlong, &lat1, &lat2, &nlat);
+  if (nlat < 2)nlat = 2;
+  if (nlong < 2)nlong = 2;
   line_count = 1;
   file_count = 1;
   streamout = fopen(fileout, "w");
@@ -228,7 +228,7 @@ int main(int argc, char **argv){
         gen_elevs = 1;
         break;
       case 'v':
-        version("dem2geom");
+        PRINTversion("dem2geom");
         exit(1);
         break;
       default:
