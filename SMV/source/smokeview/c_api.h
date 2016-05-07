@@ -94,7 +94,7 @@ void camera_set_ycen(float ycen);
 void camera_set_zcen(float zcen);
 
 void camera_toggle_projection_type();
-void camera_set_projection_type(int projection_type);
+int camera_set_projection_type(int projection_type);
 int camera_get_projection_type();
 
 void set_sceneclip_x(int clipMin, float min, int clipMax, float max);

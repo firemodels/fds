@@ -36,6 +36,19 @@ _view = {
             assert(errorcode == 0, string.format("setviewpoint errorcode: %d\n",errorcode))
             return errorcode
         end
+    },
+    projection_type = {
+        get = function ()
+            return camera_get_projection_type()
+        end,
+        set = function (v)
+            if not (type(v) == "number" and (v == 0 or v == 1)) then
+              error("projection type: " .. v .. " invalid")
+            end
+            local errorcode = camera_set_projection_type(v)
+            assert(errorcode == 0, string.format("set_projection_type errorcode: %d\n",errorcode))
+            return errorcode
+        end
     }
 }
 local view_mt = {

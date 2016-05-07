@@ -1776,10 +1776,11 @@ float camera_get_elev() {
 void camera_toggle_projection_type() {
   camera_current->projection_type = 1 - camera_current->projection_type;
 }
-void camera_set_projection_type(int projection_type) {
+int camera_set_projection_type(int projection_type) {
   camera_current->projection_type = projection_type;
   // 1 is orthogonal
   // 0 is perspective
+  return 0;
 }
 int camera_get_projection_type() {
   return camera_current->projection_type;
