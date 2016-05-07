@@ -115,7 +115,7 @@ end)
 
 -- load each different type of data file
 test("load slice file", function() load.datafile("room_fire_02.sf") end)
-test("load boundary file", function() load.datafile("room_fire_01.bf") end)
+-- test("load boundary file", function() load.datafile("room_fire_01.bf") end)
 test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
 testException("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.zs") end)
 test("load particle file", function() load.datafile("room_fire.prt5") end)
@@ -291,9 +291,9 @@ test("loaded file test", function()
     test("projectiontype get/set 1", function()
         local x = 0
         test("set", function() camera_set_projection_type(x) end)
-        test("get", function() return render.movie.type end)
+        test("get", function() return camera_get_projection_type() end)
         test("equal", function()
-            assert(render.movie.type == x, "get does not match set")
+            assert(camera_get_projection_type() == x, "get does not match set")
         end)
     end)
     testException("render.movie.type invalid", function()
@@ -389,7 +389,7 @@ function mkMovie()
         .. " -i renders/combined/%%d.png"
         .. " renders/testMovie.mp4"))
 end
-mkMovie()
+-- mkMovie()
 exit()
 -- this is an example of the format for the camera specification
 oc = {
