@@ -11,6 +11,14 @@ require "tour"
 render_startframe = 0
 render_skipframe = 1
 
+-- predefined axes
+X = 1
+Y = 2
+Z = 3
+
+orthogonal = 1
+perspective = 0
+
 smv.getfinalframe = function()return get_nglobal_times()-1 end
 getfinalframe = smv.getfinalframe
 
