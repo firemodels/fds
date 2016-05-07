@@ -13,9 +13,13 @@ if "%release%" == "-r" goto endif
   set SMV_TESTFLAG=-D pp_BETA
   set SMV_TESTSTRING=test_
 :endif
+set OPT=
+if  "x%VS140COMNTOOLS%" == "x" goto endif2
+  set OPT=-DHAVE_SNPRINTF -DHAVE_STRUCT_TIMESPEC
+:endif2
 
 erase *.obj *.mod
-make -j 4 SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db > compile.out 2>&1
+make -j 4 SHELL="%ComSpec%" SMV_TESTFLAG="%SMV_TESTFLAG% %OPT%" SMV_TESTSTRING="%SMV_TESTSTRING%" -f ..\Makefile intel_win_64_db > compile.out 2>&1
 call :find_smokeview_warnings compile.out
 
 if x%from% == xbot goto skip2
