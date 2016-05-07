@@ -288,12 +288,28 @@ test("loaded file test", function()
             assert(render.movie.type == "MP4", "get does not match set")
         end)
     end)
-    test("projectiontype get/set 1", function()
+    test("projection type get/set 1", function()
         local x = 0
-        test("set", function() camera_set_projection_type(x) end)
-        test("get", function() return render.movie.type end)
+        test("set", function() view.projection_type = x end)
+        test("get", function() return view.projection_type end)
         test("equal", function()
-            assert(render.movie.type == x, "get does not match set")
+            assert(view.projection_type == x, "get does not match set")
+        end)
+    end)
+    test("projection type get/set 2", function()
+        local x = orthogsonal
+        test("set", function() view.projection_type = x end)
+        test("get", function() return view.projection_type end)
+        test("equal", function()
+            assert(view.projection_type == x, "get does not match set")
+        end)
+    end)
+    test("projection type get/set 2", function()
+        local x = perspective
+        test("set", function() view.projection_type = x end)
+        test("get", function() return view.projection_type end)
+        test("equal", function()
+            assert(view.projection_type == x, "get does not match set")
         end)
     end)
     testException("render.movie.type invalid", function()
@@ -389,8 +405,9 @@ function mkMovie()
         .. " -i renders/combined/%%d.png"
         .. " renders/testMovie.mp4"))
 end
-mkMovie()
-exit()
+-- mkMovie()
+if (tests.failed == 0) then exit() else error("tests failed") end
+
 -- this is an example of the format for the camera specification
 oc = {
     rotationType = 0,
