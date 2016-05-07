@@ -3534,8 +3534,6 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
-
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
 
@@ -3561,7 +3559,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
-
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3592,6 +3590,7 @@ where:
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER}, or {\ct FAN\_ID} should be specified for a duct.  Also note that if one of these is specified, but no device or control function is provided, then the item will be assumed to be on or open as appropriate.
 
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction at given point in time (flow can reverse direction over time).  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
+
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{FIGURES/hvac-simplify}
@@ -3599,6 +3598,7 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \caption[An example of simplifying a complex duct]{An example of simplifying a complex duct.}
 \label{fig:HVAC_Simplify}
 \end{figure}
+
 This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting, $K$, losses through the duct as follows:
 \be K_{\mbox{\tiny eff}} = \sum_i {K_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
