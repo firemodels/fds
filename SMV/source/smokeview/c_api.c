@@ -19,32 +19,56 @@
 
 int set_slice_bound_min(const char *slice_type, int set, float value) {
 	int i;
-    for(i = 0; i < nslice2; i++) {
-        printf("setting %s min bound ", slice_type);
-        if(set) {printf("ON");} else {printf("OFF");}
-        printf(" with value of %f\n", value);
-        if(!strcmp(slice_type, slicebounds[i].datalabel)) {
-            slicebounds[i].setvalmin=set;
-            slicebounds[i].valmin=value;
-        }
-    }
-    updateslicebounds();
-    Slice_CB(6); // TODO: remove constant
+  for(i = 0; i < nslice2; i++) {
+      printf("setting %s min bound ", slice_type);
+      if(set) {printf("ON");} else {printf("OFF");}
+      printf(" with value of %f\n", value);
+      if(!strcmp(slice_type, slicebounds[i].datalabel)) {
+          slicebounds[i].setvalmin=set;
+          slicebounds[i].valmin=value;
+      }
+  }
+  updateslicebounds();
+  Slice_CB(6); // TODO: remove constant
+}
+
+float get_slice_bound_min(const char *slice_type) {
+  int i;
+  float min, max;
+  for(i = 0; i < nslice2; i++) {
+      if(!strcmp(slice_type, slicebounds[i].datalabel)) {
+          min=slicebounds[i].valmin;
+          // max=slicebounds[i].valmax;
+      }
+  }
+  return min;
+}
+
+float get_slice_bound_max(const char *slice_type) {
+  int i;
+  float min, max;
+  for(i = 0; i < nslice2; i++) {
+      if(!strcmp(slice_type, slicebounds[i].datalabel)) {
+          // min=slicebounds[i].valmin;
+          max=slicebounds[i].valmax;
+      }
+  }
+  return max;
 }
 
 int set_slice_bound_max(const char *slice_type, int set, float value) {
 	int i;
-    for(i = 0; i < nslice2; i++) {
-        printf("setting %s max bound ", slice_type);
-        if(set) {printf("ON");} else {printf("OFF");}
-        printf(" with value of %f\n", value);
-        if(!strcmp(slice_type, slicebounds[i].datalabel)) {
-            slicebounds[i].setvalmax=set;
-            slicebounds[i].valmax=value;
-        }
-    }
-    updateslicebounds();
-    Slice_CB(6); // TODO: remove constant
+  for(i = 0; i < nslice2; i++) {
+      printf("setting %s max bound ", slice_type);
+      if(set) {printf("ON");} else {printf("OFF");}
+      printf(" with value of %f\n", value);
+      if(!strcmp(slice_type, slicebounds[i].datalabel)) {
+          slicebounds[i].setvalmax=set;
+          slicebounds[i].valmax=value;
+      }
+  }
+  updateslicebounds();
+  Slice_CB(6); // TODO: remove constant
 }
 
 /* ------------------ loadsmvall ------------------------ */

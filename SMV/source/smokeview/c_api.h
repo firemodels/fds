@@ -1,5 +1,7 @@
 int set_slice_bound_min(const char *slice_type, int set, float value);
 int set_slice_bound_max(const char *slice_type, int set, float value);
+float get_slice_bound_min(const char *slice_type);
+float get_slice_bound_max(const char *slice_type);
 
 void printsliceinfo();
 

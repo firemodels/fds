@@ -1096,6 +1096,20 @@ int lua_set_slice_bound_min(lua_State *L) {
   return 0;
 }
 
+int lua_get_slice_bound_min(lua_State *L) {
+  const char *slice_type = lua_tostring(L, 1);
+  float value = get_slice_bound_min(slice_type);
+  lua_pushnumber(L, value);
+  return 1;
+}
+
+int lua_get_slice_bound_max(lua_State *L) {
+  const char *slice_type = lua_tostring(L, 1);
+  float value = get_slice_bound_max(slice_type);
+  lua_pushnumber(L, value);
+  return 1;
+}
+
 int lua_set_slice_bound_max(lua_State *L) {
   const char *slice_type = lua_tostring(L, 1);
   int set = lua_toboolean(L, 2);
@@ -1150,6 +1164,8 @@ void initLua() {
   addLuaPaths();
   lua_register(L, "set_slice_bound_min", lua_set_slice_bound_min);
   lua_register(L, "set_slice_bound_max", lua_set_slice_bound_max);
+  lua_register(L, "get_slice_bound_min", lua_get_slice_bound_min);
+  lua_register(L, "get_slice_bound_max", lua_get_slice_bound_max);
   lua_register(L, "loadsmvall", lua_loadsmvall);
   lua_register(L, "hidewindow", lua_hidewindow);
   lua_register(L, "yieldscript", lua_yieldscript);
