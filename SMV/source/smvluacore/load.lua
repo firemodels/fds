@@ -5,15 +5,16 @@ unload = {}
 function load.slice(matchFunc)
     for key,value in pairs(sliceinfo) do
         if (matchFunc(value)) then
-            loaddatafile(value.file)
+            return load.datafile(value.file)
         end
     end
+    error("No matching slices were found.")
 end
 
 function load.vslice(matchFunc)
     for key,value in pairs(sliceinfo) do
         if (matchFunc(value)) then
-            loadvdatafile(value.file)
+            return load.vdatafile(value.file)
         end
     end
 end
