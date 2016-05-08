@@ -1,16 +1,37 @@
 
 load  = {}
 unload = {}
-function load.namedslice(name)
+
+function load.slice(matchFunc)
     for key,value in pairs(sliceinfo) do
-        if (value.label == name) then
+        if (matchFunc(value)) then
             loaddatafile(value.file)
         end
     end
 end
 
-function load.slice(...)
-    return loadslice(...)
+function load.vslice(matchFunc)
+    for key,value in pairs(sliceinfo) do
+        if (matchFunc(value)) then
+            loadvdatafile(value.file)
+        end
+    end
+end
+
+function load.namedslice(name)
+    return load.slice(function(slice)
+        return (slice.label == name)
+    end)
+end
+
+function load.namedvslice(name)
+    return load.vslice(function(slice)
+        return (slice.label == name)
+    end)
+end
+
+function load.slice_std(slice_type, axis, distance)
+    return loadslice_std(slice_type, axis, distance)
 end
 
 function load.datafile(filename)

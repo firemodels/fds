@@ -284,13 +284,13 @@ int lua_label(lua_State *L) {
   Load a slice file given the type of slice, the axis along which it exists and
   its position along this axis.
 */
-// int lua_loadslice(lua_State *L) {
-//   const char *type = lua_tostring(L, 1);
-//   int axis = lua_tonumber(L, 2);
-//   float distance = lua_tonumber(L, 3);
-//   loadslice(type, axis, distance);
-//   return 0;
-// }
+int lua_loadslice(lua_State *L) {
+  const char *type = lua_tostring(L, 1);
+  int axis = lua_tonumber(L, 2);
+  float distance = lua_tonumber(L, 3);
+  loadslice(type, axis, distance);
+  return 0;
+}
 
 /*
   Set the clipping mode, which determines which parts of the model are clipped
@@ -558,7 +558,7 @@ int lua_get_sliceinfo(lua_State *L) {
   int i;
   for (i = 0; i < nsliceinfo; i++) {
     lua_pushnumber(L, i);
-    lua_createtable(L, 0, 14);
+    lua_createtable(L, 0, 15);
 
     if(sliceinfo[i].slicelabel != NULL) {
       lua_pushstring(L, sliceinfo[i].slicelabel);
@@ -604,6 +604,9 @@ int lua_get_sliceinfo(lua_State *L) {
 
     lua_pushnumber(L, sliceinfo[i].ijk_max[2]);
     lua_setfield(L, -2, "kmax");
+
+    lua_pushnumber(L, sliceinfo[i].position_orig);
+    lua_setfield(L, -2, "position_orig");
 
 
     lua_pushstring(L, sliceinfo[i].slicedir);
@@ -1201,7 +1204,7 @@ void initLua() {
   lua_register(L, "partclasstype", lua_partclasstype);
   lua_register(L, "plot3dprops", lua_plot3dprops);
   lua_register(L, "loadplot3d", lua_loadplot3d);
-  // lua_register(L, "loadslice", lua_loadslice);
+  lua_register(L, "loadslice", lua_loadslice);
   // lua_register(L, "loadnamedslice", lua_loadnamedslice);
   lua_register(L, "loadvslice", lua_loadvslice);
   lua_register(L, "loadiso", lua_loadiso);
