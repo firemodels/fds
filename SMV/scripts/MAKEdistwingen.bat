@@ -1,10 +1,8 @@
 @echo off
 
-Rem  Windows batch file to build Smokeview for all platforms.
-Rem  This script builds LInux and OSX Smokeview's by doing a
-Rem  remote shell (plink) to the NIST Linux cluster.
+:: Windows batch file to build a smokeview bundle
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
