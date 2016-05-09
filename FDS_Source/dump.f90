@@ -707,7 +707,7 @@ ENDIF IF_DUMP_SPECIES_INFO
 
 IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
-   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step, Pressure Iteration, Mesh, I, J, K, Total Iterations, Velocity Error, Pressure Error'
+   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step,Iteration,Total,Mesh,I,J,K,Velocity Error,Mesh,I,J,K,Pressure Error'
 ENDIF
 
 ! Check particle sample distribution
@@ -3275,13 +3275,18 @@ ELSE
 ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
-   II = VELOCITY_ERROR_MAX_I(NM)
-   JJ = VELOCITY_ERROR_MAX_J(NM)
-   KK = VELOCITY_ERROR_MAX_K(NM)
+   II = VELOCITY_ERROR_MAX_LOC(1,NM)
+   JJ = VELOCITY_ERROR_MAX_LOC(2,NM)
+   KK = VELOCITY_ERROR_MAX_LOC(3,NM)
    WRITE(LU_OUTPUT,'(7X,A,I6)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
-   WRITE(LU_OUTPUT,'(7X,A,E9.2             )') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX)
+   NM = MAXLOC(PRESSURE_ERROR_MAX,1)
+   II = PRESSURE_ERROR_MAX_LOC(1,NM)
+   JJ = PRESSURE_ERROR_MAX_LOC(2,NM)
+   KK = PRESSURE_ERROR_MAX_LOC(3,NM)
+   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
+                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
 IF (PRES_METHOD=='SCARC') THEN
    WRITE(LU_OUTPUT,'(7X,A,i6,A,e9.2,A,e9.2)') 'ScaRC: iterations', SCARC_ITERATIONS, &
