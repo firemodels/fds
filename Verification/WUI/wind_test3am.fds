@@ -1,0 +1,52 @@
+&HEAD CHID='wind_test3bm',TITLE='wind test' /
+
+
+MESH IJK=190,80,50, XB=-3.0,16.,-4,4,0.0,5.0 /
+&MESH IJK=256,20,50, XB=-3.0,22.6,-4,-2,0.0,5.0 /
+&MESH IJK=256,20,50, XB=-3.0,22.6,-2, 0,0.0,5.0 /
+&MESH IJK=256,20,50, XB=-3.0,22.6, 0, 2,0.0,5.0 /
+&MESH IJK=256,20,50, XB=-3.0,22.6, 2, 4,0.0,5.0 /
+
+&MISC  /
+
+&DUMP DT_SL3D=0.1 /
+
+&TIME T_END=100. /  Total simulation time
+
+&SURF ID             = 'SHED',
+      RGB            = 151,96,88
+/
+
+&SURF ID             = 'FANOBST',
+      RGB            = 151,96,88,
+/
+
+  
+&SURF ID             = 'FANOUT', VEL=-2.98,VEL_T=0.0,-0.37 RGB=151,96,88 /
+&SURF ID             = 'FANIN', VEL=3.00, RGB=151,96,88 /
+
+&OBST XB=-0.5,0.0,-0.9,0.9,0.9,2.7,SURF_ID='FANOBST' /  FAN
+&VENT XB= 0.0,0.0,-0.9,0.9,0.9,2.7,SURF_ID='FANOUT' /  FAN
+&VENT XB=-0.5,-0.5,-0.9,0.9,0.9,2.7,SURF_ID='FANIN' /  FAN
+
+&OBST XB= 10.7,13.3,-1.2,1.2,0.0,2.1,SURF_ID='SHED' /
+
+&OBST XB= 10.7,11.1,-1.2,1.2,2.0,2.3,SURF_ID='SHED' /
+&OBST XB= 11.1,11.6,-1.2,1.2,2.0,2.5,SURF_ID='SHED' /
+&OBST XB= 11.6,12.0,-1.2,1.2,2.0,2.7,SURF_ID='SHED' /
+&OBST XB= 11.9,12.1,-1.2,1.2,2.0,2.9,SURF_ID='SHED' /
+&OBST XB= 12.0,12.4,-1.2,1.2,2.0,2.7,SURF_ID='SHED' /
+&OBST XB= 12.4,12.9,-1.2,1.2,2.0,2.5,SURF_ID='SHED' /
+&OBST XB= 12.9,13.3,-1.2,1.2,2.0,2.3,SURF_ID='SHED' /
+
+&VENT XB=-3.0,-3.0,-4.0, 4,0.0,5.0,SURF_ID='OPEN'/
+&VENT XB=22.6,22.6,-4.0, 4,0.0,5.0,SURF_ID='OPEN'/
+&VENT XB=-3.0,22.6,-4.0,-4,0.0,5.0,SURF_ID='OPEN'/
+&VENT XB=-3.0,22.6, 4.0, 4,0.0,5.0,SURF_ID='OPEN'/
+&VENT XB=-3.0,22.6,-4.0, 4,5.0,5.0,SURF_ID='OPEN'/
+
+&SLCF PBY=0.1,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+&SLCF PBZ=1.8,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+
+
+&TAIL /
