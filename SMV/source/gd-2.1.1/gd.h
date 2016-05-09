@@ -96,9 +96,11 @@ extern "C" {
 #  ifndef strcasecmp
 #    define strcasecmp _stricmp
 #  endif 
-#  ifndef snprintf 
-#   define snprintf _snprintf
-#  endif 
+#  ifndef HAVE_SNPRINTF
+#    ifndef snprintf 
+#     define snprintf _snprintf
+#    endif 
+#  endif
 #endif 
 
 #ifdef __cplusplus

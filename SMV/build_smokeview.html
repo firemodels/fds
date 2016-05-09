@@ -45,8 +45,8 @@ function install_smv(args){
 
 <h3>Preliminaries</h3>
 <ul>
-<li>Edit <a href="scripts/EDIT_setup.bat">config file</a>
 <li>Update <a href="scripts/Update_repos_gitlatest.bat">repos</a>
+<li>Edit <a href="scripts/EDIT_setup.bat">config file</a>
 <li><a href="scripts/GET_smvlog.bat">Add log entries</a> to release notes (for commits made after <a href="scripts/EDIT_setup.bat">smvdate</a> defined in config file) 
 <li><a href="scripts/VIEW_release_notes.bat">view</a> release notes
 <li><a href="scripts/GET_revision.bat">Get repo revision</a>
@@ -68,7 +68,7 @@ function install_smv(args){
 <h3>Smokeview</h3>
 
 <p><table border=on>
-<tr><th colspan=3>Full Test</th><th colspan=3>Full Release</th></tr>
+<tr><th colspan=3>Test</th><th colspan=3>Release</th></tr>
 <tr>
 <th>Windows</th><th align=center>Linux</th><th align=center>OSX</th><th>Windows</th><th>Linux</th><th>OSX</th></tr>
 <tr>
@@ -152,11 +152,18 @@ function install_smv(args){
 <td align=center><button onclick="build_prog('wind2fds linux')">Build</button></td>
 <td align=center><button onclick="build_prog('wind2fds osx')">Build</button></td>
 </tr>
-</table>
 
-<p>Build windows installation utilities: 
-<button onclick="build_prog('set_path windows')">set_path</button>, 
-<button onclick="build_prog('sh2bat windows')">sh2bat</button>
+<tr>
+<th>setpath</th>
+<td align=center><button onclick="build_prog('set_path windows')">Build</button></td>
+</tr>
+
+<tr>
+<th>sh2bat</th>
+<td align=center><button onclick="build_prog('sh2bat windows')">Build</button></td>
+</tr>
+
+</table>
 
 <h3>Verification</h3>
 <ul>
@@ -164,16 +171,13 @@ function install_smv(args){
 <li><a href="scripts/VIEW_localimages.bat">View</a> web summary
 </ul>
 
-<h3>Smokeview Debug/Incremental Build</h3>
+<h3>Smokeview</h3>
 <p><table border=on>
-<tr><th colspan=2>Full Windows Debug</th><th colspan=3>Incremental Test</th></tr>
-<tr><th>Test</th><th>Release</th><th>Windows</th><th align=center>Linux</th><th align=center>OSX</th></tr>
+<tr><th colspan=2>Windows Debug</th></tr>
+<tr><th>Test</th><th>Release</th></tr>
 <tr>
 <td align=center><button onclick="build_smv2('win_smvtd')">Build</button></td>
 <td align=center><button onclick="build_smv2('win_smvd')">Build</button></td>
-<td align=center><button onclick="build_smv2('win_smvti')">Build</button></td>
-<td align=center><button onclick="build_smv2('linux_smvti')">Build</button></td>
-<td align=center><button onclick="build_smv2('osx_smvti')">Build</button></td>
 </tr>
 </table>
 

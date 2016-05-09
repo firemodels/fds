@@ -3,6 +3,7 @@ LIB_DIR = ../../LIBS
 INC_DIR =  -I $(SOURCE_DIR)/pthreads -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
+OPT =
 
 VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
@@ -24,7 +25,7 @@ obj =    main.o CNV3dsmoke.o CNVboundary.o CNVpart.o CNVplot3d.o CNVslice.o asse
 objwin = $(obj:.o=.obj)
 
 # main has to be compiled without optimization (on a Windows PC) otherwise errors occcur
-main.obj: CFLAGS = -Od /nologo -D WIN32 -D pp_WIN_INTEL
+main.obj: CFLAGS = -Od /nologo -D WIN32 -D pp_WIN_INTEL $(OPT)
 
 #*** General Purpose Rules ***
 
@@ -49,7 +50,7 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D PTW32_STATIC_LIB -D X64 -D pp_INTEL $(GITINFO)
+intel_win_64 : CFLAGS    = -Od /nologo -D WIN32 -D PTW32_STATIC_LIB -D X64 -D pp_INTEL $(OPT) $(GITINFO)
 intel_win_64 : FFLAGS    = -Od /nologo -fpp -D pp_cvf -D X64 /iface:stdref /fpscomp:general
 intel_win_64 : CC        = icl
 intel_win_64 : CPP       = icl
