@@ -2,9 +2,9 @@
 Title Running Windows Smokebot
 
 
-Rem  Windows batch file to package a test Linux Smokeview
+::  batch file to run windows smokebot
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
