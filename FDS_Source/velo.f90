@@ -2657,6 +2657,7 @@ TYPE (MESH_TYPE), POINTER :: M2
 TYPE (WALL_TYPE), POINTER :: WC
 TYPE (EXTERNAL_WALL_TYPE), POINTER :: EWC
 
+IF (NMESHES==1) RETURN
 IF (SOLID_PHASE_ONLY) RETURN
 IF (EVACUATION_ONLY(NM)) RETURN
 
@@ -2926,7 +2927,7 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 REAL(EB), INTENT(IN) :: T
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
-INTEGER  :: I,J,K,IC1,IC2,II,JJ,KK,IIG,JJG,KKG,IOR,IW
+INTEGER  :: I,J,K,II,JJ,KK,IIG,JJG,KKG,IOR,IW
 REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,TNOW
 LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
@@ -2945,7 +2946,7 @@ ENDIF
 
 BAROCLINIC_TERMS_ATTACHED = .TRUE.
 
-RHMK => WORK1 ! rho*(H-K)
+RHMK => WORK1 ! p=rho*(H-K)
 RRHO => WORK2 ! reciprocal of rho
 
 IF (PREDICTOR) THEN
@@ -2975,7 +2976,7 @@ ENDIF
 ! Compute pressure and 1/rho in each grid cell
 
 !$OMP PARALLEL PRIVATE(WC, VT, TSI, TIME_RAMP_FACTOR, P_EXTERNAL, &
-!$OMP& II, JJ, KK, IOR, IIG, JJG, KKG, UN, INFLOW, IC1, IC2)
+!$OMP& II, JJ, KK, IOR, IIG, JJG, KKG, UN, INFLOW)
 !$OMP DO SCHEDULE(static)
 DO K=0,KBP1
    DO J=0,JBP1
@@ -3029,15 +3030,12 @@ ENDDO EXTERNAL_WALL_LOOP
 !$OMP END MASTER
 !$OMP BARRIER
 
-! Compute baroclinic term in the x momentum equation
+! Compute baroclinic term in the x momentum equation, p*d/dx(1/rho)
 
 !$OMP DO SCHEDULE(static)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=0,IBAR
-         IC1 = CELL_INDEX(I,J,K)
-         IC2 = CELL_INDEX(I+1,J,K)
-         IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
          FVX_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
                          (RHOP(I+1,J,K)+RHOP(I,J,K))
          FVX(I,J,K) = FVX(I,J,K) + FVX_B(I,J,K)
@@ -3046,16 +3044,13 @@ DO K=1,KBAR
 ENDDO
 !$OMP END DO nowait
 
-! Compute baroclinic term in the y momentum equation
+! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho)
 
 IF (.NOT.TWO_D) THEN
 !$OMP DO SCHEDULE(static)
    DO K=1,KBAR
       DO J=0,JBAR
          DO I=1,IBAR
-            IC1 = CELL_INDEX(I,J,K)
-            IC2 = CELL_INDEX(I,J+1,K)
-            IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
             FVY_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
                             (RHOP(I,J+1,K)+RHOP(I,J,K))
             FVY(I,J,K) = FVY(I,J,K) + FVY_B(I,J,K)
@@ -3065,15 +3060,12 @@ IF (.NOT.TWO_D) THEN
 !$OMP END DO nowait
 ENDIF
 
-! Compute baroclinic term in the z momentum equation
+! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho)
 
 !$OMP DO SCHEDULE(static)
 DO K=0,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
-         IC1 = CELL_INDEX(I,J,K)
-         IC2 = CELL_INDEX(I,J,K+1)
-         IF (SOLID(IC1) .OR. SOLID(IC2)) CYCLE
          FVZ_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
                          (RHOP(I,J,K+1)+RHOP(I,J,K))
          FVZ(I,J,K) = FVZ(I,J,K) + FVZ_B(I,J,K)
