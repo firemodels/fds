@@ -2,6 +2,7 @@
 
 # this script is called by bundle_platform_size.csh
 # where platform may be linux or osx and size may be 32 or 64
+errlog=/tmp/errlog.$$
 
 SCP ()
 {
@@ -15,7 +16,7 @@ SCP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied from host:$HOST"
   else
-    echo "***error: the file $TOFILE failed to copy from $HOST"
+    echo "***error: $TOFILE on $HOST not copied to bundle" >> $errlog
   fi
 }
 
@@ -33,7 +34,7 @@ CP ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: the file $FROMFILE failed to copy"
+    echo "***error: $FROMFILE not copied to bundle" >> $errlog
   fi
 }
 
@@ -51,7 +52,7 @@ CP2 ()
   if [ -e $TODIR/$TOFILE ]; then
     echo "$FROMFILE copied"
   else
-    echo "***error: the file $FROMFILE failed to copy"
+    echo "***error: $FROMFILE not copied to bundle" >> $errlog
   fi
 }
 
@@ -67,7 +68,7 @@ CPDIR ()
   if [ -e $TODIR ]; then
     echo "$FROMDIR copied"
   else
-    echo "***error: the directory $FROMDIR failed to copy"
+    echo "***error: the directory $FROMDIR not copied to bundle" >> $errlog
   fi
 }
 
@@ -310,6 +311,7 @@ cat <<EOF>>$fullmanifest
 EOF
 
 CP $fullmanifestdir $manifest $uploaddir $manifest
+
 cat $fullmanifest | Mail -s " $PLATFORM" `whoami`
 
 echo ""
@@ -325,3 +327,15 @@ echo Creating installer
 cd ..
 $makeinstaller -o $ostype -i $bundlebase.tar.gz -d $INSTALLDIR $bundlebase.sh 
 
+if [ -e $errlog ]; then
+  numerrs=`cat $errlog | wc -l `
+  if [ $numerrs -gt 0 ]; then
+    echo ""
+    echo "----------------------------------------------------------------"
+    echo "---------------- bundle generation errors ----------------------"
+    cat $errlog
+    echo "----------------------------------------------------------------"
+    echo "----------------------------------------------------------------"
+    echo ""
+  fi
+fi

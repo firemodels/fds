@@ -2,9 +2,9 @@
 set platform=%1
 set buildtype=%2
 
-Rem  Windows batch file to build a test Smokeview for Windows 64
+:: batch file to generate Windows, Linux or OSX smokeview bundles
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -55,7 +55,7 @@ if "%platform%" == "linux" (
   echo --- making 64 bit Linux Smokeview installer ---
   echo.
   if "%buildtype%" == "release" (
-    plink %linux_logon% %scriptdir%/MAKEdistgen.sh %version% linux 64 %linux_hostname% %fds_edition% %linux_svn_root%
+    plink %linux_logon% %scriptdir%/MAKEdistgen.sh %version% linux %linux_hostname% %fds_edition% %linux_svn_root%
   )
   if "%buildtype%" == "test" (
     plink %linux_logon% %scriptdir%/MAKEtestdistlinux64.sh %smv_revision% %linux_svn_root%
@@ -82,7 +82,7 @@ if "%platform%" == "osx" (
   echo --- making 64 bit OSX Smokeview installer ---
   echo.
   if "%buildtype%" == "release" (
-    plink %osx_logon% %scriptdir%/MAKEdistgen.sh %version% osx 64 %osx_hostname% %fds_edition% %linux_svn_root%
+    plink %osx_logon% %scriptdir%/MAKEdistgen.sh %version% osx %osx_hostname% %fds_edition% %linux_svn_root%
   )
   if "%buildtype%" == "test" (
     plink %osx_logon% %scriptdir%/MAKEtestdistosx64.sh %smv_revision% %osx_hostname% %linux_svn_root%
