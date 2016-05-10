@@ -8592,6 +8592,24 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
+    if (match(buffer, "SPLITCOLORBAR") == 1) {
+      int i;
+      
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit1L, colorsplit1L + 1, colorsplit1L + 2, colorsplit1H, colorsplit1H + 1, colorsplit1H + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit2L, colorsplit2L + 1, colorsplit2L + 2, colorsplit2H, colorsplit2H + 1, colorsplit2H + 2);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f ", splitvals, splitvals + 1, splitvals + 2);
+
+      for(i=0;i<3;i++){
+         colorsplit1L[i] = CLAMP(colorsplit1L[i],0,255);
+         colorsplit1H[i] = CLAMP(colorsplit1H[i],0,255);
+         colorsplit2L[i] = CLAMP(colorsplit2L[i],0,255);
+         colorsplit2H[i] = CLAMP(colorsplit2H[i],0,255);
+      }
+      continue;
+    }
     if(match(buffer, "ZAXISANGLES") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %f %f %f ", zaxis_angles, zaxis_angles + 1, zaxis_angles + 2);
@@ -11949,6 +11967,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f %f %f\n", sensornormcolor[0], sensornormcolor[1], sensornormcolor[2]);
   fprintf(fileout, "SETBW\n");
   fprintf(fileout, " %i %i\n", setbw,setbwdata);
+  fprintf(fileout, "SPLITCOLORBAR\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit1L[0], colorsplit1L[1], colorsplit1L[2], colorsplit1H[0], colorsplit1H[1], colorsplit1H[2]);
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit2L[0], colorsplit2L[1], colorsplit2L[2], colorsplit2H[0], colorsplit2H[1], colorsplit2H[2]);
+  fprintf(fileout, " %f %f %f\n", splitvals[0], splitvals[1], splitvals[2]);
   fprintf(fileout, "SPRINKOFFCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sprinkoffcolor[0], sprinkoffcolor[1], sprinkoffcolor[2]);
   fprintf(fileout, "SPRINKONCOLOR\n");
