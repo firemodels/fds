@@ -145,7 +145,7 @@ int main(int argc, char **argv){
         test_mode=1;
         break;
       case 'v':
-        version("set_path ");
+        PRINTversion("set_path ");
         return 0;
       default:
         usage();

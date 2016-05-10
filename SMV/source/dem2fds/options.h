@@ -38,4 +38,4 @@ int reg_path(int setget, int pathtype, char *path);
 #define STAT stat
 #endif
 
-
+#include "lint.h"

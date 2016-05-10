@@ -3534,8 +3534,6 @@ It may be helpful to use the boundary file output quantity {\ct MASS FLUX WALL C
 &BNDF QUANTITY='MASS FLUX WALL CELL', CELL_CENTERED=.TRUE. /
 \end{lstlisting}
 
-As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
-
 \section{HVAC Systems: The \texorpdfstring{{\tt HVAC}}{HVAC} Namelist Group (Table \ref{tbl:HVAC})}
 \label{info:HVAC}
 
@@ -3561,7 +3559,7 @@ Additionally you must define the locations where the HVAC network joins the comp
 \end{description}
 A number of examples of simple HVAC systems are given in the HVAC folder of the sample cases and are discussed in the FDS Verification Guide.
 
-
+As described in the Technical Reference Manual, the HVAC pressure solution is not directly coupled to the FDS pressure solution. Rather their is implicit coupling using the wall boundary condition for HVAC vents. At times this can result in stability problems. If this occurs, setting the keyword {\ct DT\_HVAC} on the {\ct MISC} line may help. When set, this will cause FDS to use the value of {\ct DT\_HVAC} in the HVAC solver rather than the current FDS time step (filter loading will use the FDS time step). In effect as {\ct DT\_HVAC} is increased, the HVAC solution will approach a steady-state solution for the current conditions in the domain.
 
 \subsection{HVAC Duct Parameters}
 \label{info:HVACduct}
@@ -3592,6 +3590,7 @@ where:
 Note that only one of {\ct AIRCOIL\_ID}, {\ct DAMPER}, or {\ct FAN\_ID} should be specified for a duct.  Also note that if one of these is specified, but no device or control function is provided, then the item will be assumed to be on or open as appropriate.
 
 To reduce the computational cost of the HVAC solver, a duct should be considered as any length of duct that connects two items that must be defined as nodes (i.e., a connection to the FDS domain, a filter, or a location where more than two ducts join).  That is, a duct should be considered as any portion of the HVAC system where flow can only be in one direction at given point in time (flow can reverse direction over time).  For example the top of Figure~\ref{fig:HVAC_Simplify} shows a segment of an HVAC system where flow from a tee goes through an expansion fitting, two elbows, an expansion fitting, and a straight length of duct before it terminates as a connection to the FDS domain.
+
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3in]{FIGURES/hvac-simplify}
@@ -3599,6 +3598,7 @@ To reduce the computational cost of the HVAC solver, a duct should be considered
 \caption[An example of simplifying a complex duct]{An example of simplifying a complex duct.}
 \label{fig:HVAC_Simplify}
 \end{figure}
+
 This could be input as each individual fitting or duct with its associated area and loss as shown in the middle of the figure; however, this would result in five duct segments (one for each component) with six node connections resulting in eleven parameters (five velocities and six pressures) which must be solved for.  This is not needed since whatever the flow rate is in any one segment of the duct, that same flow rate exists in all other segments; thus, the velocities in any segment can be found by taking the area ratios, $v_1/v_2=A_2/A_1$.  Since flow losses are proportional to the square of the velocity, an equivalent duct can be constructed using the total length of the duct, and a representative area ($A_{\mbox{\tiny eff}}$) or diameter.  The pressure losses associated with all the segments of the duct can be collapsed to a single effective loss ($K_{\mbox{\tiny eff}}$) by summing all of the fitting, $K$, losses through the duct as follows:
 \be K_{\mbox{\tiny eff}} = \sum_i {K_i \frac {A_{\mbox{\tiny eff}}}{A_i}} \ee
 where $i$ is a fitting and $A_i$ is the area associated with the fitting loss.
@@ -5574,7 +5574,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 \end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
-As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
+As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct \textbf{N\_STR}ATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
 To prevent FDS from generating a distribution of droplets altogether, set {\ct MONODISPERSE} to {\ct .TRUE.} on the {\ct PART} line, in which case every droplet will be assigned the same {\ct DIAMETER}.
 
@@ -7303,8 +7303,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
 \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
 A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP} line. Note that in FDS, the PDPA device cannot produce complete droplet size
-distributions, but only various mean properties.
+measurement are defined using an associated {\ct PROP} line. 
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
@@ -7360,7 +7359,7 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct PDPA\_NORMALIZE} to {\ct .FALSE.}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Section~\ref{info:particle_size}), the counts are not necessarily integers.
 
 The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
@@ -7371,7 +7370,7 @@ The properties of the PDPA device are defined using the following keywords on th
 \item[{\ct PDPA\_END}] $t_{\rm e}$, ending time of time integration in seconds.
 \item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
-\item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
+\item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$, or to unnormalize the histogram output.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $\phi$.
 \item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
 \end{description}

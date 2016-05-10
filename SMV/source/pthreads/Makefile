@@ -5,11 +5,12 @@ CC=$(COMPILER) $(SIZE)
 INC=-I.
 CFLAGS=-o2
 FILTERC=-D PTW32_BUILD -D PTW32_STATIC_LIB
+OPT=
 
 .SUFFIXES:      .c .o .obj
 
 .c.obj:
-	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
+	$(CC) -c $(CFLAGS) $(INC) $(OPT) $(FILTERC) $<
 .c.o:
 	$(CC) -c $(CFLAGS) $(INC) $(FILTERC) $<
 
