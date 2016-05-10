@@ -203,7 +203,8 @@ test("no loaded file tests", function()
         test("get", function() return view.framenumber end)
         test("equal", function()
             assert(view.framenumber == x, "get does not match set\n get is: "
-                   .. tostring(view.framenumber) .. "\n  set is: " .. tostring(x))
+                   .. tostring(view.framenumber) .. "\n  set is: "
+                   .. tostring(x))
         end)
     end)
     test("window.height", function()
@@ -217,16 +218,20 @@ test("no loaded file tests", function()
         test("set", function() timebar.visibility = true end)
         test("get", function() return timebar.visibility end)
         test("equal", function()
-            assert(timebar.visibility == true, "get does not match set\n get is: "
-                   .. tostring(timebar.visibility) .. "\n  set is: " .. tostring(true))
+            assert(timebar.visibility == true,
+                    "get does not match set\n get is: "
+                    .. tostring(timebar.visibility) .. "\n  set is: "
+                    .. tostring(true))
         end)
     end)
     test("timebar.visibility2", function()
         test("set", function() timebar.visibility = false end)
         test("get", function() return timebar.visibility end)
         test("equal", function()
-            assert(timebar.visibility == false, "get does not match set\n get is: "
-                   .. tostring(timebar.visibility) .. "\n  set is: " .. tostring(false))
+            assert(timebar.visibility == false,
+                    "get does not match set\n get is: "
+                    .. tostring(timebar.visibility) .. "\n  set is: "
+                    .. tostring(false))
         end)
     end)
     -- test("timebar.visibility.toggle", function()
@@ -236,13 +241,41 @@ test("no loaded file tests", function()
     -- end)
     -- remember that this is being used with no data loaded
     -- also the time set is not guaranteed, so get may not always match set
-    test("time", function()
-        test("set", function() time = 127 end)
-        test("get", function() return time end)
+    test("time no data ", function()
+        test("set", function() settime(127) end)
+        test("get", function() return gettime() end)
         test("equal", function()
-            assert(time == 127, "get does not match set")
+            assert(gettime() == nil, "time is not nil")
         end)
     end)
+    test("time no data negative", function()
+        test("set", function() settime(-5) end)
+        test("get", function() return gettime() end)
+        test("equal", function()
+            assert(gettime() == nil, "time is not nil")
+        end)
+    end)
+    load.datafile("room_fire_02.sf")
+    test("time data ", function()
+        test("set", function() settime(127) end)
+        test("get", function() return gettime() end)
+        test("equal", function()
+            local ret_time =  math.floor(gettime() + 0.5) -- round to nearest
+                                                          -- whole number
+            assert(ret_time == 127, "time data should be " .. 127 .. " but is "
+                 .. ret_time)
+        end)
+    end)
+    test("time data negative", function()
+        test("set", function() settime(-5) end)
+        test("get", function() return gettime() end)
+        test("equal", function()
+            -- the returned time should be 0 s, as that is the closest available
+            -- time to -1
+            assert(gettime() == 0, "retrieved time value is incorrect")
+        end)
+    end)
+    unload.all()
 end)
 
 
@@ -272,7 +305,8 @@ test("loaded file test", function()
         test("set", function() render.type = "JPG" end)
         test("get", function() return render.type end)
         test("equal", function()
-            assert(render.type == "JPG", "get does not match set: " .. render.type)
+            assert(render.type == "JPG", "get does not match set: "
+                .. render.type)
         end)
     end)
     testException("render.type invalid", function()
