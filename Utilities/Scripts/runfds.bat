@@ -16,11 +16,11 @@ set in=%infile%.fds
 set out=%infile%.err
 set stopfile=%infile%.stop
 
-Rem test existence of %FDS%
+:: test existence of %FDS%
 
-Rem test existence of %fulldir%
+:: test existence of %fulldir%
 
-Rem test existence of FDS input file %fulldir%/%in%
+:: test existence of FDS input file %fulldir%/%in%
 
 cd %fulldir%
 echo %in% started
