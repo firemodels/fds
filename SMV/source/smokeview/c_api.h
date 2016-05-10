@@ -8,7 +8,7 @@ void printsliceinfo();
 int loadsmvall(const char *input_filepath);
 int loadsmv(char *input_filename, char *input_filename_ext);
 void renderclip(int flag, int left, int right, int bottom, int top);
-void render(const char *filename);
+int render(const char *filename);
 void gsliceview(int data, int show_triangles, int show_triangulation,
                 int show_normal);
 void gslicepos(float x, float y, float z);
@@ -19,7 +19,7 @@ void settourview(int edittourArg, int mode, int show_tourlocusArg,
 int getframe();
 void setframe(int framenumber);
 float gettime();
-void settime(float timeval);
+int settime(float timeval);
 int loadfile(const char *filename);
 void loadinifile(const char *filepath);
 int loadvfile(const char *filepath);
@@ -110,7 +110,7 @@ void set_sceneclip_z_min(int flag, float value);
 void set_sceneclip_z_max(int flag, float value);
 void set_clipping_mode(int mode);
 
-void RenderFrameLua(int view_mode, const char *basename);
+int RenderFrameLua(int view_mode, const char *basename);
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
                    char *renderfile_path, int woffset, int hoffset, int screenH,
                    const char *basename);

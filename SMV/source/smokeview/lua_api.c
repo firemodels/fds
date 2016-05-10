@@ -104,8 +104,9 @@ int lua_render(lua_State *L) {
   printf("rendering to: %s\n", script_dir_path);
   const char *basename = lua_tostring(L, 1);
   printf("basename(lua): %s\n", basename);
-  render(basename);
-  return 0;
+  int ret = render(basename);
+  lua_pushnumber(L, ret);
+  return 1;
 }
 
 int lua_gsliceview(lua_State *L) {
@@ -215,9 +216,14 @@ int lua_setframe(lua_State *L) {
   Get the time value of the currently loaded frame.
 */
 int lua_gettime(lua_State *L) {
-  float time = gettime();
-  lua_pushnumber(L, time);
-  return 1;
+  if(global_times!=NULL&&nglobal_times>0){
+    float time = gettime();
+    lua_pushnumber(L, time);
+    return 1;
+  } else {
+    return 0;
+  }
+
 }
 
 /*
@@ -226,8 +232,9 @@ int lua_gettime(lua_State *L) {
 int lua_settime(lua_State *L) {
   lua_displayCB(L);
   float t = lua_tonumber(L, 1);
-  settime(t);
-  return 0;
+  int return_code = settime(t);
+  lua_pushnumber(L, return_code);
+  return 1;
 }
 
 /*
@@ -558,7 +565,7 @@ int lua_get_sliceinfo(lua_State *L) {
   int i;
   for (i = 0; i < nsliceinfo; i++) {
     lua_pushnumber(L, i);
-    lua_createtable(L, 0, 15);
+    lua_createtable(L, 0, 16);
 
     if(sliceinfo[i].slicelabel != NULL) {
       lua_pushstring(L, sliceinfo[i].slicelabel);
@@ -604,6 +611,9 @@ int lua_get_sliceinfo(lua_State *L) {
 
     lua_pushnumber(L, sliceinfo[i].ijk_max[2]);
     lua_setfield(L, -2, "kmax");
+
+    lua_pushnumber(L, sliceinfo[i].blocknumber);
+    lua_setfield(L, -2, "blocknumber");
 
     lua_pushnumber(L, sliceinfo[i].position_orig);
     lua_setfield(L, -2, "position_orig");

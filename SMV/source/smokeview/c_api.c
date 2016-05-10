@@ -430,13 +430,13 @@ void renderclip(int flag, int left, int right, int bottom, int top) {
 
 /* ------------------ render ------------------------ */
 
-void render(const char *filename) {
+int render(const char *filename) {
     //runluascript=0;
 	Display_CB();
     //runluascript=1;
     //strcpy(render_file_base,filename);
     printf("basename(c): %s\n", filename);
-	RenderFrameLua(VIEW_CENTER, filename);
+	return RenderFrameLua(VIEW_CENTER, filename);
 }
 
 
@@ -537,12 +537,13 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 // The second argument to RenderFrameLua is the name that should be given to the
 // rendered file. If basename == NULL, then a default filename is formed based
 // on the chosen frame and rendering options.
-void RenderFrameLua(int view_mode, const char *basename) {
+int RenderFrameLua(int view_mode, const char *basename) {
   char renderfile_name[1024]; // the name the file (including extension)
   char renderfile_dir[1024]; // the directory into which the image will be rendered
   char renderfile_path[2048]; // the full path of the rendered image
   int woffset=0,hoffset=0;
   int screenH;
+  int return_code;
 
   if(script_dir_path != NULL){
       strcpy(renderfile_dir, script_dir_path);
@@ -562,10 +563,11 @@ void RenderFrameLua(int view_mode, const char *basename) {
 
   printf("renderfile_name: %s\n", renderfile_name);
   // render image
-  SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
+  return_code = SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
+  return return_code;
 }
 
 
@@ -666,13 +668,14 @@ float gettime() {
 }
 /* ------------------ settime ------------------------ */
 
-void settime(float timeval) {
+int settime(float timeval) {
   printf("t: %f\n", timeval);
   int i,imin;
   float valmin;
 
   PRINTF("setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
+     PRINTF("global times exist",timeval);
     if(timeval<global_times[0])timeval=global_times[0];
     if(timeval>global_times[nglobal_times-1]-0.0001){
       float dt;
@@ -708,9 +711,14 @@ void settime(float timeval) {
     force_redisplay=1;
     Update_Framenumber(0);
     UpdateTimeLabels();
-  }
-  PRINTF("script: time set to %f s (i.e. frame number: %d)\n\n",
+    PRINTF("script: time set to %f s (i.e. frame number: %d)\n\n",
          global_times[itimes], itimes);
+    return 0;
+  } else {
+    PRINTF("no data loaded, time could not be set\n");
+    return 1;
+  }
+
 }
 
 void set_slice_in_obst(int setting) {
