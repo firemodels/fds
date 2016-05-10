@@ -67,10 +67,25 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 smvluacore: $(SMVLUACORE_FILES)
 	cp $(SMVLUACORE_FILES) . # cannot use $^ here
 
-# libraries used by smokeview
+# ------------- libraries used by smokeview -------------------
 
-SMV_LIBS = -lglui -lgd -ljpeg -lpng -lz
-FULL_SMV_LIBS = $(SMV_LIBS) -lglut
+#--- windows
+
+WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
+
+WIN_LIBDIR = $(LIB_DIR)/lib_win_intel_64
+SMV_LIBS_WIN = $(WIN_LIBDIR)\glui.lib $(WIN_LIBDIR)\glut32.lib $(WIN_LIBDIR)\gd.lib $(WIN_LIBDIR)\jpeg.lib $(WIN_LIBDIR)\png.lib $(WIN_LIBDIR)\zlib.lib $(WIN_LIBDIR)\pthreads.lib
+
+#--- OSX
+
+SMV_LIBS_OSX = -lglui -lgd -ljpeg -lpng -lz
+
+#--- Linux
+
+SMV_LIBS_LINUX = $(SMV_LIBS_OSX) -lglut
+SYSTEM_LIBS_LINUX = -lpthread -lX11 -lXmu -lGLU -lGL -lm
+INTEL_LIBS_LINUX = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILER_LIB)/intel64/libirc.a
+
 
 #*** General Purpose Rules ***
 
@@ -103,11 +118,6 @@ no_target:
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Windows VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 
-WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
-
-WIN_LIBDIR_64 = $(LIB_DIR)/lib_win_intel_64
-SMV_LIBS_64 = $(WIN_LIBDIR_64)\glui.lib $(WIN_LIBDIR_64)\glut32.lib $(WIN_LIBDIR_64)\gd.lib $(WIN_LIBDIR_64)\jpeg.lib $(WIN_LIBDIR_64)\png.lib $(WIN_LIBDIR_64)\zlib.lib $(WIN_LIBDIR_64)\pthreads.lib
-
 # ------------- ms_win_64 ----------------
 
 ms_win_64 : INC += $(WININC) -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
@@ -120,7 +130,7 @@ ms_win_64 : FC        = ifort
 ms_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 ms_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_WIN)
 
 # note: use /fpscomp:general option to allow smokeview to read files being currently written to by FDS
 #       (instead of the non-standard SHARED keyword in a FORTRAN OPEN statement)
@@ -137,7 +147,7 @@ intel_win_64_db : FC        = ifort
 intel_win_64_db : exe       = smokeview_win_$(SMV_TESTSTRING)64_db
 
 intel_win_64_db : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_WIN)
 
 # ------------- intel_win_64 ----------------
 
@@ -150,9 +160,9 @@ intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_S
 intel_win_64 : LIBLUA    =
 ifeq ($(LUA_SCRIPTING),true)
 intel_win_64 : CFLAGS    += -D pp_LUA
-intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)\liblua.lib 
-intel_win_64 : SMV_LIBS_64 += $(WIN_LIBDIR_64)\lpeg.lib
-intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR_64)/lpeg.dll
+intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\liblua.lib 
+intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\lpeg.lib
+intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR)/lpeg.dll
 endif
 intel_win_64 : LFLAGS    = /F32768000
 intel_win_64 : CC        = icl
@@ -161,15 +171,11 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokeview_win_$(SMV_TESTSTRING)64
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_64) $(LIBLUA)
+	$(CPP) -o $(bin)/$(exe) $(LFLAGS) $(objwin) $(WIN_LIBS) $(SMV_LIBS_WIN) $(LIBLUA)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV  Linux VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
-
-LINUX_SYSTEMLIBS = -lpthread -lX11 -lXmu -lGLU -lGL -lm
-
-LINUX_INTEL_LIBS_64 = $(IFORT_COMPILER_LIB)/intel64/libifcore.a  $(IFORT_COMPILER_LIB)/intel64/libirc.a
 
 # ------------- intel_linux_64 ----------------
 
@@ -191,9 +197,9 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
 
 intel_linux_64 : $(obj)  $(if ($(LUA_SCRIPTING),true),smvluacore)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR_PLAT) $(FULL_SMV_LIBS) \
-        $(LINUX_INTEL_LIBS_64)\
-        $(LINUX_SYSTEMLIBS) $(LIBLUA)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR_PLAT) $(SMV_LIBS_LINUX) \
+        $(INTEL_LIBS_LINUX)\
+        $(SYSTEM_LIBS_LINUX) $(LIBLUA)
 
 # ------------- intel_linux_64_db ----------------
 
@@ -206,7 +212,7 @@ intel_linux_64_db : FC        = ifort
 intel_linux_64_db : exe       = smokeview_linux_64_db$(SMV_PROFILESTRING)
 
 intel_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX)
 
 
 # ------------- intel_linux_64_profile ----------------
@@ -220,7 +226,7 @@ intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(FULL_SMV_LIBS) $(LINUX_INTEL_LIBS_64) $(LINUX_SYSTEMLIBS) -p
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX) -p
 
 # ------------- gnu_linux_64_db ----------------
 
@@ -233,7 +239,7 @@ gnu_linux_64_db : FC        = gfortran
 gnu_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX)
 
 # ------------- gnu_linux_64 ----------------
 
@@ -254,7 +260,7 @@ gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
-		$(FULL_SMV_LIBS) -lgfortran $(LINUX_SYSTEMLIBS) \
+		$(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX) \
 		$(if ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
 
 # ------------- mingw_win_64 ----------------
@@ -312,7 +318,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
 intel_osx_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR_PLAT) $(SMV_LIBS) \
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR_PLAT) $(SMV_LIBS_OSX) \
         $(OSX_INTEL_LIBS) $(LIBLUA)
 
 # ------------- intel_osx_64_db ----------------
@@ -326,7 +332,7 @@ intel_osx_64_db : FC        = ifort
 intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILESTRING)
 
 intel_osx_64_db : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS) $(OSX_INTEL_LIBS)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS_OSX) $(OSX_INTEL_LIBS)
 
 # ------------- gnu_osx_64_db ----------------
 
@@ -339,7 +345,7 @@ gnu_osx_64_db : FC        = gfortran
 gnu_osx_64_db : exe       = smokeview_osx_64_db
 
 gnu_osx_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
 
 # ------------- gnu_osx_64 ----------------
 
@@ -352,7 +358,7 @@ gnu_osx_64 : FC        = gfortran
 gnu_osx_64 : exe       = smokeview_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS) -L $(GLIBDIR) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 

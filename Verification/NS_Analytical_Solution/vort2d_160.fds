@@ -8,7 +8,6 @@
 
 &MISC DNS=.TRUE.,
       STRATIFICATION=.FALSE.,
-      BAROCLINIC=.FALSE.,
       NOISE=.FALSE.,
       CFL_MAX=0.5,
       GVEC(3)=0.0,

@@ -107,32 +107,28 @@ function get_figs(guide){
 
 <p><table border=on>
 <tr>
-<td rowspan=2>SMV guides</td><td>Windows repo</td>
+<td>Windows SMV guides</td>
 <td><button onclick="copy_guides('from_smv_local')">==></button></td>
 <td rowspan=3>Windows ~\FDS_Guides</td>
-</tr
+</tr>
+</table>
 
+<p><table border=on>
 <tr>
-<td>Linux smokebot</td>
+<td>smokebot SMV guides</td>
 <td><button onclick="copy_guides('from_smv_linux')">==></button></td>
-</tr>
-
-<tr>
-<td rowspan=3 align=center>FDS guides</td>
-<td align=center>Linux firebot</td>
-<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
-</tr>
-
-<tr>
-<td rowspan=2 align=center>Windows <br>~/FDS_Guides</td>
+<td rowspan=2 align=center>Windows <br>~\FDS_Guides</td>
 <td><button onclick="copy_guides('to_linux')">==></button></td>
 <td>Linux ~/FDS_Guides</td>
 </tr>
 
 <tr>
+<td align=center>firebot FDS guides</td>
+<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
 <td><button onclick="copy_guides('to_osx')">==></button></td>
 <td>OSX ~/FDS_Guides</td>
 </tr>
+
 </table>
 
 <h3>Other</h3>

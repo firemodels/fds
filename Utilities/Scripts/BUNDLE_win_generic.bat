@@ -51,7 +51,7 @@ set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
 
 set bundleinfo=%svn_root%\Utilities\Scripts\for_bundle
 
-Rem erase the temporary bundle directory if it already exists
+:: erase the temporary bundle directory if it already exists
 
 if exist %basedir% rmdir /s /q %basedir%
 
@@ -218,7 +218,7 @@ if exist %basename%.zip erase %basename%.zip
 cd %out_bundle%\%fdsversion%
 wzzip -a -r -xExamples\*.csv -P ..\..\..\%basename%.zip * ..\%smvversion% > Nul
 
-Rem create an installation file from the zipped bundle directory
+:: create an installation file from the zipped bundle directory
 
 echo.
 echo --- creating installer ---
