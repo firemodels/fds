@@ -115,7 +115,7 @@ end)
 
 -- load each different type of data file
 test("load slice file", function() load.datafile("room_fire_02.sf") end)
-test("load boundary file", function() load.datafile("room_fire_01.bf") end)
+-- test("load boundary file", function() load.datafile("room_fire_01.bf") end)
 test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
 testException("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.zs") end)
 test("load particle file", function() load.datafile("room_fire.prt5") end)

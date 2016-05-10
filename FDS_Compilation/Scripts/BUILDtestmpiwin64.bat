@@ -1,7 +1,7 @@
 @echo off
 Title Building FDS for 64 bit Windows
 
-Rem Batch file used to build a 64 bit version of FDS
+:: batch file to build test_mpi program
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
