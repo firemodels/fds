@@ -1,8 +1,8 @@
 @echo off
 
-Rem  Windows batch file to build a test Smokeview for 64 bit Linux
+:: batch file to copy configuration file from repo to the home directory
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
