@@ -1,6 +1,6 @@
 @echo off
 
-Rem Batch file used to update FDS source revision number
+:: batch file used to update Windows, Linux and OSX GIT repos
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -14,7 +14,7 @@ goto:eof
 
 :endif_envexist
 
-Rem location of batch files used to set up Intel compilation environment
+:: location of batch files used to set up Intel compilation environment
 
 call %envfile%
 

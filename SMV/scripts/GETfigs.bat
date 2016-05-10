@@ -2,9 +2,9 @@
 setlocal EnableDelayedExpansion
 set whichguides=%1
 
-Rem  batch file to copy guides
+::  batch to copy smokview/smokebot or fdsfirebot figures to local repo
 
-Rem setup environment variables (defining where repository resides etc) 
+::  setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist

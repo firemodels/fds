@@ -1,10 +1,11 @@
 #!/bin/bash
 version=$1
 platform=$2
-size=$3
-HOST=$4
-FDS_EDITION=$5
-SVNROOT=$6
+HOST=$3
+FDS_EDITION=$4
+SVNROOT=$5
+
+size=64
 
 SCP ()
 {
