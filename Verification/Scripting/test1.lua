@@ -130,7 +130,19 @@ testException("load non-existant vector file", function() load.vdatafile("qwert.
 -- unload all the loaded data
 test("unload all data", function() unload.all()end)
 test("window.size()", function() window.size(1024,768)end)
-test("set render.dir", function() render.dir = "renders" end)
+test("render.dir", function()
+    local testPath = "renders"
+    test("set", function () render.dir = testPath end)
+    test("get", function () return render.dir end)
+    test("get == set", function () return render.dir == testPath end)
+end)
+test("bad render.dir", function()
+    local firstPath = "renders"
+    local badPath = "|renders"
+    test("set firstPath", function () render.dir = firstPath end)
+    testException("set badPath", function () render.dir = badPath end)
+    test("get == firstPath", function () return render.dir == firstPath end)
+end)
 
 -- the following tests depend on data not being loaded
 test("no loaded file tests", function()

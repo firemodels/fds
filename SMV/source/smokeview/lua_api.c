@@ -814,8 +814,9 @@ int lua_unloadtour(lua_State *L) {
 
 int lua_setrenderdir(lua_State *L) {
   const char *dir = lua_tostring(L, 1);
-  setrenderdir(dir);
-  return 0;
+  int return_code = setrenderdir(dir);
+  lua_pushnumber(L, return_code);
+  return 1;
 }
 
 int lua_getrenderdir(lua_State *L) {

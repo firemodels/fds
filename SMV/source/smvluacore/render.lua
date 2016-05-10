@@ -60,7 +60,10 @@ _render = {
             return getrenderdir();
         end,
         set = function(v)
-            return setrenderdir(v)
+            local errorcode = setrenderdir(v)
+            if (errorcode == 0) then return errorcode
+              else error("setting render.dir failed");
+            end
         end
     }
 }

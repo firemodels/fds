@@ -1619,18 +1619,30 @@ void set_sceneclip_z_max(int flag, float value) {
 
 /* ------------------ setrenderdir ------------------------ */
 
-void setrenderdir(const char *dir) {
-    printf("c_api: setting renderdir to: %s\n", dir);
-	if(dir!=NULL&&strlen(dir)>0){
-		script_dir_path=dir;
-        if(can_write_to_dir(script_dir_path)==0){
-          fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",script_dir_path);
-        }
-        PRINTF("script: setting render path to %s\n",script_dir_path);
+int setrenderdir(const char *dir) {
+  printf("c_api: setting renderdir to: %s\n", dir);
+  // TODO: as lua gives us consts, but most smv code uses non-const, we
+  // must make a non-const copy
+  int l = strlen(dir);
+  char *dir_path_temp = malloc(l+1);
+  strncpy(dir_path_temp,dir,l);
+	if(dir!=NULL&&strlen(dir_path_temp)>0){
+      if(can_write_to_dir(dir_path_temp)==0){
+        fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",dir_path_temp);
+        return 1;
+      } else {
+        free(script_dir_path);
+        script_dir_path=dir_path_temp;
+        PRINTF("c_api: renderdir set to: %s\n", script_dir_path);
+        return 0;
+      }
    	} else {
-        script_dir_path=NULL;
+      // TODO: why would we ever want to set the render directory to NULL
+      script_dir_path=NULL;
+      free(dir_path_temp);
+      return 1;
     }
-  printf("c_api: renderdir set to: %s\n", script_dir_path);
+
 }
 
 /* ------------------ setcolorbarindex ------------------------ */
