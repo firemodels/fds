@@ -5579,7 +5579,7 @@ You can specify your own cumulative number fraction (CNF)\footnote{The CNF indic
 \end{lstlisting}
 Note that the {\ct RAMP} variable {\ct T} indicates the diameter and is given in micrometers. The fourth plot in Fig.~\ref{droplet_distributions} is an example of where the CNF is specified and the CVF is calculated from it. It is essentially the reverse of what is shown in the first plot, where the CVF is specified and the CNF is calculated from it.
 
-As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into seven bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct N\_STRATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
+As droplets are created in the simulation, their diameters are randomly chosen based on the given distribution. You can prevent excessively large droplets from being chosen by specifying a {\ct MAXIMUM\_DIAMETER}, which is assigned an infinitely large value by default. Droplets less than a specified {\ct MINIMUM\_DIAMETER} are assumed to evaporate in a single time step. The default value is 0.005 times the value of {\ct DIAMETER}. The droplet distribution is divided into a series of bins\footnote{By default, the range of particle sizes is divided into six bins, and the sampled particles are divided among these bins. This ensures that a reasonable number of particles are assigned to the entire spectrum of sizes. To change the default number of bins, set {\ct \textbf{N\_STR}ATA} on the {\ct PART} line.}. To avoid very small particle weights, the distribution is clipped at the cumulative fractions of {\ct CNF\_CUTOFF} and (1 - {\ct CNF\_CUTOFF}).  Note that {\ct CNF\_CUTOFF} is set on the {\ct MISC} line. The default value of {\ct CNF\_CUTOFF} is 0.005.
 
 To prevent FDS from generating a distribution of droplets altogether, set {\ct MONODISPERSE} to {\ct .TRUE.} on the {\ct PART} line, in which case every droplet will be assigned the same {\ct DIAMETER}.
 
@@ -7308,8 +7308,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
 \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
 A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP} line. Note that in FDS, the PDPA device cannot produce complete droplet size
-distributions, but only various mean properties.
+measurement are defined using an associated {\ct PROP} line. 
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
@@ -7365,7 +7364,7 @@ A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 ${}^*$ $T_{\rm m}$ is the melting temperature of the associated species.
 \end{table}
 
-It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line.
+It is also possible to output histograms of PDPA output quantities. When {\ct PDPA\_HISTOGRAM} is set to {\ct .TRUE.}, normalized histogram bin counts are output to a comma-separated value (.csv) file from all devices associated with this {\ct PROP} line. The number of bins and the limits of the histogram are controlled by parameters on the {\ct PROP} line. The value used in creating the histogram is $D_i^m \; \phi$. Note that when making a histogram of diameters, the limits must be given in meters, not microns. Values falling outside the histogram limits are included in the counts of the first and last bins. Cumulative distributions can be output by setting {\ct PDPA\_HISTOGRAM\_CUMULATIVE=.TRUE.} on the {\ct PROP} line. To output unnormalized counts or cumulative distribution, set {\ct PDPA\_NORMALIZE} to {\ct .FALSE.}. Note, however, that the counts correspond to the super droplets/particles, not the numerical ones. Due to the stratified sampling technique used (see Section~\ref{info:particle_size}), the counts are not necessarily integers.
 
 The histogram output file contains of two-columns for each device. The first column gives the bin centers, and the second column gives the normalized bin count. The bin counts are normalized so that the total area of the histogram is 1. Here the histogram consists of equal width bars centered at the given bin centers and heights equal to the corresponding bin count. Volume and area based distributions can be output by setting the {\ct PDPA\_N} parameter on the {\ct PROP} line to {\ct 3} and {\ct 2} respectively. Notice that this works differently from the mean diameter computation where the weighting is based on the {\ct PDPA\_M} parameter.
 
@@ -7376,7 +7375,7 @@ The properties of the PDPA device are defined using the following keywords on th
 \item[{\ct PDPA\_END}] $t_{\rm e}$, ending time of time integration in seconds.
 \item[{\ct PDPA\_INTEGRATE}] A logical parameter for choosing between time integrated or instantaneous values. {\ct .TRUE.} by default.
 \item[{\ct PDPA\_RADIUS}] Radius (m) of the sphere, centered at the device location, inside which the particles are monitored.
-\item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$.
+\item[{\ct PDPA\_NORMALIZE}] Can be set {\ct .FALSE.} to force $V = 1$ in the formula for $f_2(t)$, or to unnormalize the histogram output.
 \item[{\ct QUANTITY}] Specified on {\ct PROP} line for choosing the variable $\phi$.
 \item[{\ct PDPA\_HISTOGRAM\_NBINS}] Number of bins used for the histogram.
 \end{description}
