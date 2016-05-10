@@ -17,6 +17,16 @@
 #define snprintf _snprintf
 #endif
 
+// function prototypes for functions drawn from other areas of smokeview
+// from startup.c
+void readboundini(void);
+void init_lang(void);
+void Init(void);
+// from menus.c
+void update_menu(void);
+void LoadVolSmoke3DMenu(int value);
+void UnLoadVolSmoke3DMenu(int value);
+
 int set_slice_bound_min(const char *slice_type, int set, float value) {
 	int i;
   for(i = 0; i < nslice2; i++) {
@@ -556,7 +566,8 @@ int RenderFrameLua(int view_mode, const char *basename) {
 #endif
 
   screenH = screenHeight;
-  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
+  // we should not be rendering under these conditions
+  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return 0;
   // construct filename for image to be rendered
   form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
                 woffset, hoffset, screenH, basename);
