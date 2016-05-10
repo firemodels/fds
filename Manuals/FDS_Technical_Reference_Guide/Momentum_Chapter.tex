@@ -108,7 +108,7 @@ The transport equation for the resolved kinetic energy per unit mass, $K\equiv \
 \overline{\rho} \,\DoD{K}{t} &= -\widetilde{u}_i\frac{\partial \bar{p}}{\partial x_i} - \widetilde{u}_i\frac{\partial \tau_{ij}^{\rm dev}}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{b,i}) \widetilde{u}_i \notag \\
 \overline{\rho} \,\DoD{K}{t} + \frac{\partial}{\partial x_j} ([\bar{p}\delta_{ij} + \tau_{ij}^{\rm dev}]\widetilde{u}_i) &=  \bar{p} \frac{\partial \widetilde{u}_i}{\partial x_i} + \tau_{ij}^{\rm dev}\frac{\partial \widetilde{u}_i}{\partial x_j} + (\overline{\rho} g_i + \bar{f}_{{\rm b},i}) \widetilde{u}_i
 \end{align}
-The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability)~\cite{Piomelli:1991}. 
+The terms on the left hand side represent transport.  The terms on the right hand side are sources or sinks of kinetic energy.  Of particular interest in LES is the \emph{production of subgrid kinetic energy}, buried in the second RHS term.  The effect of this term is to transfer energy between the resolved and unresolved scales of motion.  In the classical picture of the ``energy cascade'', the net transfer of energy is from large to small scales, where ultimately the motions are dissipated as heat by viscosity.  In LES, however, this term may also be a source of energy, a phenomenon called \emph{backscatter}.  An issue that makes designing subgrid closures for LES challenging is that, far from being the exception, backscatter is ubiquitous and often critical to the formation of large-scale motions (think of subgrid buoyancy-generated turbulence, e.g., the Rayleigh-Taylor instability)~\cite{Piomelli:1991}.
 Most simple LES subgrid closures take production of subgrid kinetic energy to be equal to the dissipation of total kinetic energy.  Using gradient diffusion for SGS closure, this assumption implies the following:
 \begin{align}
 \label{eqn_ke_dissipation}
@@ -131,7 +131,7 @@ Following the analysis of Smagorinsky~\cite{Smagorinsky:1}, the eddy viscosity c
 \be
 \mu_t = \rho \, (C_{\rm s}\, \Delta)^2 \, |S| \label{constant_coef_LES} \quad ; \quad |S| = \left(2 S_{ij}S_{ij} - \frac{2}{3} (\nabla\!\cdot \bu)^2 \right)^\ha
 \ee
-where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5. 
+where $C_{\rm s}=0.2$ is a constant and $\Delta = (\delta x \, \delta y \, \delta z)^{1/3}$ is the filter width. This model was used in FDS versions 1 through 5.
 
 \subsection{Dynamic Smagorinsky Model}
 
@@ -255,120 +255,80 @@ where species 0 is nitrogen.
 
 \section{Simplifying the Momentum Equation}
 
-First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
-\be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum} \ee
-Next, we make the following substitutions:
+First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5}) \be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum} \ee Next, we make the following substitutions:
 \begin{enumerate}
 \item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
 $\nabla p=\rho_n \bg + \nabla \tp$.
 \item Apply the vector identity: $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times\bo $
 \item Divide all terms by the density, $\rho$
 \item Decompose the pressure term:
-   \[ \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \nabla \left(\frac{1}{\rho} \right)  \]
+   \be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \label{p_decomp} \ee
 \item Define $\cH \equiv |\bu|^2/2 + \tp/\rho $
 \end{enumerate}
 Now the momentum equation can be written
-\be \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg
-+ \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq} \ee
+\be
+   \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq}
+\ee
 It is convenient to write this equation in the form:
-\be \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation} \ee
-The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the
-pressure gradient (though, as discussed above, $\cH$ is not a true ``pressure''). The spatial discretization of the momentum equations takes the form
+\be
+   \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation}
+\ee
+The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the pressure gradient (though, as discussed above, $\cH$ is not a true ``pressure'' nor is this the true pressure gradient because of the exclusion of the baroclinic torque term). The spatial discretization of the momentum equation is as follows:
 \begin{align}
-\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx} &= 0  \label{umom} \\
-\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy} &= 0  \label{vmom} \\
-\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz} &= 0  \label{wmom}
+&\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx}  = 0  \label{umom} \\[0.15in]
+&\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy}  = 0  \label{vmom} \\[0.15in]
+&\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz}  = 0  \label{wmom}
 \end{align}
-where $\hp_{ijk}$ is taken at center of cell $ijk$,
-$\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing
-in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side
-facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$
-at the side facing in the forward $z$ (vertical) direction.
-The flux terms are discretized:
-\begin{align}
-F_x &= \hw \, \omy - \hv \, \omz - \frac{1}{\rho} \left( f_x
-  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\
-F_y &= \hu \, \omz - \hw \, \omx - \frac{1}{\rho} \left( f_y
-  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\
-F_z &= \hv \, \omx - \hu \, \omy - \frac{1}{\rho} \left( f_z
-  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
-\end{align}
-In the
-definitions to follow, the components of the vorticity $(\om_x,\om_y,\om_z)$
-are located at cell edges pointing in the $x$, $y$ and $z$ directions,
-respectively. The same is true for the off-diagonal terms of the viscous
-stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and
-$\tau_{xy}=\tau_{yx}$. The diagonal components of the stress
-tensor, $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$, and the external force
-components, $f_x$, $f_y$, and $f_z$, are located at their
-respective cell faces.
-\begin{align}
-F_{\x,ijk} &=  \ha \left(
- w_{i+\ha,jk} \; \om_{y,ijk} +
- w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right)
-            - \ha \left(
- v_{i+\ha,jk} \; \om_{z,ijk} +
- v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\
-           &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk}
-  + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx}
-  + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy}
-  + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\
-F_{\y,ijk} &= \ha \left(
- u_{i,j+\ha,k} \; \om_{z,ijk} +
- u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right)
-             - \ha \left(
- w_{i,j+\ha,k} \; \om_{x,ijk}+
- w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\
-           &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk}
-  + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx}
-  + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy}
-  + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\
-F_{\z,ijk} &=  \ha \left(
- v_{ij,k+\ha} \; \om_{x,ijk} +
- v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right)
-             -\ha \left(
- u_{ij,k+\ha} \; \om_{y,ijk} +
- u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\
-           &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk}
-  + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx}
-  + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy}
-  + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right)
-\end{align}
+where $\hp_{ijk}$ is taken at the center of cell $ijk$, $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$ at the side facing in the forward $z$ (vertical) direction. 
 
-\noindent The components of the vorticity vector are:
+The flux terms, $\bF$, are discretized:
 \begin{align}
-\om_{x,ijk} &= \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} -
-             \frac{\hv_{ij,k+1}-\hv_{ijk}}{ \dz}  \\
-\om_{y,ijk} &= \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} -
-             \frac{\hw_{i+1,jk}-\hw_{ijk}}{\dx}  \\
-\om_{z,ijk} &= \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -
-             \frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy}
+F_x &= \hw \, \omy - \hv \, \omz - \tp \, \dod{}{x} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_x  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\[0.1in]
+F_y &= \hu \, \omz - \hw \, \omx - \tp \, \dod{}{y} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_y  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\[0.1in]
+F_z &= \hv \, \omx - \hu \, \omy - \tp \, \dod{}{z} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_z  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
 \end{align}
-\noindent The components of the viscous stress tensor are:
+In the definitions to follow, the components of the vorticity $(\om_x,\om_y,\om_z)$ are located at cell edges pointing in the $x$, $y$ and $z$ directions, respectively. The same is true for the off-diagonal terms of the viscous stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and $\tau_{xy}=\tau_{yx}$. The diagonal components of the stress tensor, $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$, and the external force components, $f_x$, $f_y$, and $f_z$, are located at their respective cell faces.
 \begin{align}
-\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\
-\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\
-\tau_{xy,ijk} &= \tau_{yx,ijk}
-        = \mu_{i+\ha,j+\ha,k} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy}
-                         + \frac{v_{i+1,jk} -v_{ijk}}{\dx} \right) \\
-\tau_{xz,ijk} &= \tau_{zx,ijk}
-        =\mu_{i+\ha,j,k+\ha} \left( \frac{u_{ij,k+1}-u_{ijk}}{\dz}
-                        + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\
-\tau_{yz,ijk} &= \tau_{zy,ijk}
-        =\mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}
-                        + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
+F_{\x,ijk} &= \ha \left( w_{i+\ha,jk} \; \om_{y,ijk} + w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) - \ha \left( v_{i+\ha,jk} \; \om_{z,ijk} + v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\[.1in]
+           &  - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right) \nonumber\\[.1in]
+           &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk} + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx} + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy} + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\[.2in]
+F_{\y,ijk} &= \ha \left( u_{i,j+\ha,k} \; \om_{z,ijk} + u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) - \ha \left( w_{i,j+\ha,k} \; \om_{x,ijk} + w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\[.1in]
+           &  - \frac{\tp_{i,j+1,k} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i,j+1,k}}{\rho_{ijk}+\rho_{i,j+1,k}} \frac{1}{\dy} \left( \frac{1}{\rho_{i,j+1,k}} - \frac{1}{\rho_{ijk}} \right) \nonumber \\[.1in]
+           &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk} + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx} + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy} + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\[.2in]
+F_{\z,ijk} &=  \ha \left( v_{ij,k+\ha} \; \om_{x,ijk} + v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right) -\ha \left( u_{ij,k+\ha} \; \om_{y,ijk} + u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\[.1in]
+           &  - \frac{\tp_{ij,k+1} \, \rho_{ijk} + \tp_{ijk} \, \rho_{ij,k+1}}{\rho_{ijk}+\rho_{ij,k+1}} \frac{1}{\dz} \left( \frac{1}{\rho_{ij,k+1}} - \frac{1}{\rho_{ijk}} \right) \nonumber \\[.1in]
+           &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk} + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx} + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy} + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right)
 \end{align}
+Notice the somewhat unusual discretization of the term $\tp \, \nabla (1/\rho)$, which is needed to be consistent with the discretization of the other two terms in Eq.~(\ref{p_decomp}):
+\be
+  \frac{1}{(\rho_{ijk}+\rho_{i,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} = \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right)
+\ee
+The components of the vorticity vector are:
+\begin{align}
+\om_{x,ijk} &= \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} - \frac{\hv_{ij,k+1}-\hv_{ijk}}{ \dz}  \\[.1in]
+\om_{y,ijk} &= \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} - \frac{\hw_{i+1,jk}-\hw_{ijk}}{\dx}  \\[.1in]
+\om_{z,ijk} &= \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -\frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy}
+\end{align}
+The components of the viscous stress tensor are:
+\begin{align}
+\tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
+\tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
+\tau_{zz,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} \right)  \\[.1in]
+\tau_{xy,ijk} &= \tau_{yx,ijk} = \mu_{i+\ha,j+\ha,k} \left( \frac{u_{i,j+1,k}-u_{ijk}}{\dy} + \frac{v_{i+1,jk} -v_{ijk}}{\dx} \right) \\[.1in]
+\tau_{xz,ijk} &= \tau_{zx,ijk} = \mu_{i+\ha,j,k+\ha} \left( \frac{u_{ij,k+1}-u_{ijk}}{\dz}  + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\[.1in]
+\tau_{yz,ijk} &= \tau_{zy,ijk} = \mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}  + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
+\end{align}
+By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos}) is identically equal to the divergence defined by
+\be
+(\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} + \frac{v_{ijk}-v_{i,j-1,k}}{\dy} + \frac{w_{ijk}-w_{ij,k-1}}{\dz}
+\ee
+The equivalence of the two definitions of the divergence is a result of the form of the discretized equations, the time-stepping scheme, and the direct solution of the Poisson equation for the pressure.
 
-\noindent
-By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos})
-is identically equal to the divergence defined by
-\be (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} +
-                               \frac{v_{ijk}-v_{i,j-1,k}}{\dy} +
-                               \frac{w_{ijk}-w_{ij,k-1}}{\dz}   \ee
-The equivalence of the two definitions of the divergence is a result
-of the form of the discretized equations, the time-stepping scheme, and
-the direct solution of the Poisson equation for the pressure.
+The perturbation pressure, $\tp$, appears twice in the discretized momentum equation. It is included in $\hp$ and in $\bF$ as the baroclinic torque term, $\tp \, \nabla (1/\rho)$. But these two values of $\tp$ are offset in time. In other words, before the velocity, $\bu$, can be advanced to the next time step, a Poisson equation for $\hp$ must be solved:
+\be
+   \nabla^2 \hp^n = - \dod{(\nabla \cdot \bu)}{t} - \nabla \cdot \bF^n + \nabla \cdot \tp^{n-1} \, \nabla \left( \frac{1}{\rho^n}\right)  \label{Peq}
+\ee
+in which the perturbation pressure on the right hand side of the equation is lagged one time step. The reason for this is that the fast Poisson solver for $\hp$ requires that the equation be {\em separable}, i.e. of the form $\nabla^2 \hp = \; \cdots$  To bring the two values of $\tp$ into closer agreement, Eq.~(\ref{Peq}) is solved iteratively, something which is already necessary because of the use multiple meshes with independently computed pressure fields.
 
 
 \newpage
@@ -537,26 +497,15 @@ In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. 
 \newpage
 \section{The Equation for Pressure (Poisson Equation)}
 
-An elliptic partial differential equation (known as a Poisson equation) is obtained by
-taking the divergence of the momentum equation
+An elliptic partial differential equation (known as a Poisson equation) is obtained by taking the divergence of the momentum equation
 \be \nabla^2 \cH =
-     -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF
+     -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF 
     \quad ; \quad \bF = - \bu\times\bo - \tp \, \nabla \! \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
     \Big( (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big)
    \label{pe}\ee
-Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The
-pressure on the right hand side is taken from the previous time step of the
-overall explicit time-marching scheme. It can be neglected if the baroclinic torque is
-not important in a given simulation (constant density flows, for example). The pressure on the left hand side (incorporated
-in the variable $\cH$) is solved for directly.
-The reason for the decomposition of the pressure term is so that the linear algebraic system
-arising from the discretization of Eq.~(\ref{pe})
-has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy
-by a fast, direct (i.e., non-iterative) method that utilizes
-Fast Fourier Transforms (FFT).
+Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The pressure on the right hand side is taken from the previous time step of the overall explicit time-marching scheme. It can be neglected if the baroclinic torque is not important in a given simulation (constant density flows, for example). The pressure on the left hand side (incorporated in the variable $\cH$) is solved for directly. The reason for the decomposition of the pressure term is so that the linear algebraic system arising from the discretization of Eq.~(\ref{pe}) has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy by a fast, direct (i.e., non-iterative) method that utilizes Fast Fourier Transforms (FFT).
 
-The discretized form of the
-Poisson equation for the modified pressure, $\hp$, is:
+The discretized form of the Poisson equation for the modified pressure, $\hp$, is:
 \begin{align}
 \frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
 \frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
@@ -565,25 +514,20 @@ Poisson equation for the modified pressure, $\hp$, is:
     -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
     -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
 \end{align}
-The lack of a superscript implies that all quantities are to be
-evaluated at the same time level.
-This elliptic partial differential equation is solved using a direct
-FFT-based solver~\cite{Sweet:1} that is part of a library of routines
-for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized form of the
-elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric
-Research (NCAR) in Boulder, Colorado.}.
-To ensure that the divergence of the fluid is consistent with the definition
-given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
-\be \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+The lack of a superscript implies that all quantities are to be evaluated at the same time level. This elliptic partial differential equation is solved using a direct FFT-based solver~\cite{Sweet:1} that is part of a library of routines for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized form of the elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric Research (NCAR) in Boulder, Colorado.}. To ensure that the divergence of the fluid is consistent with the definition given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
+\be 
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
           \frac{(\nabla\!\cdot \bu)_{ijk}^*
-              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt} \ee
+              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt} 
+\ee
 at the predictor step, and then
-\be \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+\be 
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
          \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
          \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
-       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} \ee
-at the corrector step. The thermodynamic divergence is
-given in Eq.~(\ref{eqn_divfromeos}).
+       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} 
+\ee
+at the corrector step. The thermodynamic divergence is given in Eq.~(\ref{eqn_divfromeos}).
 
 
 \subsection{Open Boundary Conditions}
