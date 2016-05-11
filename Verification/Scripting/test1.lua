@@ -176,6 +176,13 @@ test("no loaded file tests", function()
             assert(view.colorbar.index == 197, "get does not match set")
         end)
     end)
+    test("view.colorbar", function()
+        test("set", function() view.colorbar = true end)
+        test("get", function() return view.colorbar end)
+        test("equal", function()
+            assert(view.colorbar == true, "get does not match set")
+        end)
+    end)
     -- test with an existing viewpoint
     test("view.viewpoint", function()
         local x = "internal"
@@ -251,6 +258,28 @@ test("no loaded file tests", function()
     --     timebar.visibility.toggle()
     --     assert(timebat.visibility ~= orig)
     -- end)
+    test("hrrlabel visibility", function()
+        test("set", function() set_hrrlabel_visibility(true) end)
+        test("get", function() return get_hrrlabel_visibility() end)
+        test("equal", function()
+            assert(get_hrrlabel_visibility() == true,
+                    "get does not match set\n get is: "
+                    .. tostring(get_hrrlabel_visibility()) .. "\n  set is: "
+                    .. tostring(true))
+        end)
+    end)
+    test("hrrlabel visibility after unload", function()
+        set_hrrlabel_visibility(false)
+        unload.all()
+        test("set", function() set_hrrlabel_visibility(true) end)
+        test("get", function() return get_hrrlabel_visibility() end)
+        test("equal", function()
+            assert(get_hrrlabel_visibility() == true,
+                    "get does not match set\n get is: "
+                    .. tostring(get_hrrlabel_visibility()) .. "\n  set is: "
+                    .. tostring(true))
+        end)
+    end)
     -- remember that this is being used with no data loaded
     -- also the time set is not guaranteed, so get may not always match set
     test("time no data ", function()
