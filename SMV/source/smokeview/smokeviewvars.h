@@ -23,16 +23,14 @@
 SVEXTERN colorbardata SVDECL(*split_colorbar, NULL);
 SVEXTERN int split_colorbar_index;
 #ifdef INMAIN
-SVEXTERN float splitvals[3]={0.0,0.5,1.0};
+SVEXTERN float splitvals[3]={-1.0,0.0,1.0};
 #else
 SVEXTERN float splitvals[3];
 #endif
 #ifdef INMAIN
-SVEXTERN int colorsplit1L[3] = {  0,  0,  0 }, colorsplit1H[3] = { 64, 64,255 };
-SVEXTERN int colorsplit2L[3] = {  0,192,  0 }, colorsplit2H[3] = { 0,  0,255 };
+SVEXTERN int colorsplit[12] = {  0,0,0,  64,64,255,  0,192,0,  255,0,0 };
 #else
-SVEXTERN int colorsplit1L[3], colorsplit1H[3];
-SVEXTERN int colorsplit2L[3], colorsplit2H[3];
+SVEXTERN int colorsplit[12];
 #endif
 
 SVEXTERN int SVDECL(show_zlevel, 0);

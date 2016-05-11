@@ -8592,21 +8592,18 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
-    if (match(buffer, "SPLITCOLORBAR") == 1) {
+    if (match(buffer, "COLORBAR_SPLIT") == 1) {
       int i;
       
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit1L, colorsplit1L + 1, colorsplit1L + 2, colorsplit1H, colorsplit1H + 1, colorsplit1H + 2);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit    , colorsplit + 1, colorsplit + 2, colorsplit + 3, colorsplit +  4, colorsplit +  5);
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit2L, colorsplit2L + 1, colorsplit2L + 2, colorsplit2H, colorsplit2H + 1, colorsplit2H + 2);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit + 6, colorsplit + 7, colorsplit + 8, colorsplit + 9, colorsplit + 10, colorsplit + 11);
       fgets(buffer, 255, stream);
       sscanf(buffer, " %f %f %f ", splitvals, splitvals + 1, splitvals + 2);
 
-      for(i=0;i<3;i++){
-         colorsplit1L[i] = CLAMP(colorsplit1L[i],0,255);
-         colorsplit1H[i] = CLAMP(colorsplit1H[i],0,255);
-         colorsplit2L[i] = CLAMP(colorsplit2L[i],0,255);
-         colorsplit2H[i] = CLAMP(colorsplit2H[i],0,255);
+      for(i=0;i<12;i++){
+        colorsplit[i] = CLAMP(colorsplit[i],0,255);
       }
       continue;
     }
@@ -11913,6 +11910,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f :black  \n",rgb2[7][0],rgb2[7][1],rgb2[7][2]);
   fprintf(fileout, "COLORBAR_FLIP\n");
   fprintf(fileout, " %i\n", colorbarflip);
+  fprintf(fileout, "COLORBAR_SPLIT\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[0], colorsplit[1], colorsplit[2], colorsplit[3], colorsplit[4], colorsplit[5]);
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[6], colorsplit[7], colorsplit[8], colorsplit[9], colorsplit[10], colorsplit[11]);
+  fprintf(fileout, " %f %f %f\n", splitvals[0], splitvals[1], splitvals[2]);
   fprintf(fileout, "DIFFUSELIGHT\n");
   fprintf(fileout, " %f %f %f\n", diffuselight[0], diffuselight[1], diffuselight[2]);
   fprintf(fileout, "DIRECTIONCOLOR\n");
@@ -11967,10 +11968,6 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %f %f %f\n", sensornormcolor[0], sensornormcolor[1], sensornormcolor[2]);
   fprintf(fileout, "SETBW\n");
   fprintf(fileout, " %i %i\n", setbw,setbwdata);
-  fprintf(fileout, "SPLITCOLORBAR\n");
-  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit1L[0], colorsplit1L[1], colorsplit1L[2], colorsplit1H[0], colorsplit1H[1], colorsplit1H[2]);
-  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit2L[0], colorsplit2L[1], colorsplit2L[2], colorsplit2H[0], colorsplit2H[1], colorsplit2H[2]);
-  fprintf(fileout, " %f %f %f\n", splitvals[0], splitvals[1], splitvals[2]);
   fprintf(fileout, "SPRINKOFFCOLOR\n");
   fprintf(fileout, " %f %f %f\n", sprinkoffcolor[0], sprinkoffcolor[1], sprinkoffcolor[2]);
   fprintf(fileout, "SPRINKONCOLOR\n");

@@ -903,31 +903,19 @@ void initdefaultcolorbars(void){
 
   split_colorbar_index = cbi - colorbarinfo;
   split_colorbar = cbi;
-  strcpy(cbi->label, "custom split");
+  strcpy(cbi->label, "split");
   cbi->label_ptr = cbi->label;
 
   cbi->nnodes = 4;
   cbi->nodehilight = 0;
 
   cbi->index_node[0] = 0;
-  cbi->rgb_node[0] = colorsplit1L[0];
-  cbi->rgb_node[1] = colorsplit1L[1];
-  cbi->rgb_node[2] = colorsplit1L[2];
-
   cbi->index_node[1] = 127;
-  cbi->rgb_node[3] = colorsplit1H[0];
-  cbi->rgb_node[4] = colorsplit1H[1];
-  cbi->rgb_node[5] = colorsplit1H[2];
-
   cbi->index_node[2] = 127;
-  cbi->rgb_node[6] = colorsplit2L[0];
-  cbi->rgb_node[7] = colorsplit2L[1];
-  cbi->rgb_node[8] = colorsplit2L[2];
-
   cbi->index_node[3] = 255;
-  cbi->rgb_node[9] = colorsplit2H[0];
-  cbi->rgb_node[10] = colorsplit2H[1];
-  cbi->rgb_node[11] = colorsplit2H[2];
+  for (i = 0; i < 12; i++) {
+    cbi->rgb_node[i] = colorsplit[i];
+  }
   cbi++;
   
   // construct colormaps from color node info
