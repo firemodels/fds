@@ -878,8 +878,8 @@ void toggle_gridloc_visibility() {
 // HRRPUV cutoff visibility
 void set_hrrcutoff_visibility(int setting) {
   show_hrrcutoff = setting;
-  if(show_hrrcutoff==0)PRINTF("Grid locations hidden\n");
-  if(show_hrrcutoff==1)PRINTF("Grid locations visible\n");
+  if(show_hrrcutoff==0)PRINTF("HRR cutoff hidden\n");
+  if(show_hrrcutoff==1)PRINTF("HRR cutoff visible\n");
 }
 
 int get_hrrcutoff_visibility() {
@@ -888,9 +888,47 @@ int get_hrrcutoff_visibility() {
 
 void toggle_hrrcutoff_visibility() {
   show_hrrcutoff = 1 - show_hrrcutoff;
-  if(show_hrrcutoff==0)PRINTF("Grid locations hidden\n");
-  if(show_hrrcutoff==1)PRINTF("Grid locations visible\n");
+  if(show_hrrcutoff==0)PRINTF("HRR cutoff hidden\n");
+  if(show_hrrcutoff==1)PRINTF("HRR cutoff visible\n");
 }
+
+// HRR label
+void set_hrrlabel_visibility(int setting) {
+  visHRRlabel = setting;
+  if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+  if(show_hrrcutoff==0)PRINTF("HRR label hidden\n");
+  if(show_hrrcutoff==1)PRINTF("HRR label visible\n");
+}
+
+int get_hrrlabel_visibility() {
+  return visHRRlabel;
+}
+
+void toggle_hrrlabel_visibility() {
+  visHRRlabel = 1 - visHRRlabel;
+  if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+  if(show_hrrcutoff==0)PRINTF("HRR label hidden\n");
+  if(show_hrrcutoff==1)PRINTF("HRR label visible\n");
+}
+
+// memory load
+#ifdef pp_memstatus
+void set_memload_visibility(int setting) {
+  visAvailmemory = setting;
+  if(visAvailmemory==0)PRINTF("Memory load hidden\n");
+  if(visAvailmemory==1)PRINTF("Memory load visible\n");
+}
+
+int get_memload_visibility() {
+  return visAvailmemory;
+}
+
+void toggle_memload_visibility() {
+  visAvailmemory = 1 - visAvailmemory;
+  if(visAvailmemory==0)PRINTF("Memory load hidden\n");
+  if(visAvailmemory==1)PRINTF("Memory load visible\n");
+}
+#endif
 
 // Display Units
 // time
@@ -1472,9 +1510,6 @@ void unloadall() {
    // for(i=0;i<nterraininfo;i++){
    //   readterrain("",i,UNLOAD,&errorcode);
    // }
-    if(hrr_csv_filename!=NULL){
-      readhrr(UNLOAD, &errorcode);
-    }
 #ifdef pp_DEVICE
     if(devc_csv_filename!=NULL){
       read_device_data(devc_csv_filename,CSV_FDS,UNLOAD);
@@ -1636,7 +1671,7 @@ int setrenderdir(const char *dir) {
    	} else {
       // TODO: why would we ever want to set the render directory to NULL
       script_dir_path=NULL;
-      free(dir_path_temp);
+      FREEMEMORY(dir_path_temp);
       return 1;
     }
 

@@ -159,7 +159,19 @@ void toggle_gridloc_visibility();
 void set_hrrcutoff_visibility(int setting);
 int get_hrrcutoff_visibility();
 void toggle_hrrcutoff_visibility();
+
+// hrr label
+void set_hrrlabel_visibility(int setting);
+int get_hrrlabel_visibility();
+void toggle_hrrlabel_visibility();
+
 // memory load
+#ifdef pp_memstatus
+void set_memload_visibility(int setting);
+int get_memload_visibility();
+void toggle_memload_visibility();
+#endif
+
 // mesh
 // slice average
 // time

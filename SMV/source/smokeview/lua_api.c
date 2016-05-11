@@ -941,6 +941,24 @@ int lua_toggletimebarvisibility(lua_State *L) {
   return 0;
 }
 
+// HRR Label Visbility
+int lua_set_hrrlabel_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_hrrlabel_visibility(setting);
+  return 0;
+}
+
+int lua_get_hrrlabel_visibility(lua_State *L) {
+  int setting = get_hrrlabel_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_hrrlabel_visibility(lua_State *L) {
+  toggle_hrrlabel_visibility();
+  return 0;
+}
+
 int lua_camera_mod_eyex(lua_State *L) {
   float delta = lua_tonumber(L, 1);
   camera_mod_eyex(delta);
@@ -1244,6 +1262,10 @@ void initLua() {
   lua_register(L, "settimebarvisibility", lua_settimebarvisibility);
   lua_register(L, "gettimebarvisibility", lua_gettimebarvisibility);
   lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);
+
+  lua_register(L, "set_hrrlabel_visibility", lua_set_hrrlabel_visibility);
+  lua_register(L, "get_hrrlabel_visibility", lua_get_hrrlabel_visibility);
+  lua_register(L, "toggle_hrrlabel_visibility", lua_toggle_hrrlabel_visibility);
 
   lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
   lua_register(L, "camera_set_eyex", lua_camera_set_eyex);
