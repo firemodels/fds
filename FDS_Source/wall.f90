@@ -197,16 +197,17 @@ USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY
 REAL(EB), INTENT(IN) :: T,DT
 REAL(EB) :: DT_BC,DTMP,DT_SUB,T_LOC,RHO_B,K_B,C_B
-INTEGER  :: SURF_INDEX,IW,IP,II,JJ,KK,I,J,K,IOR,IC
+INTEGER  :: SURF_INDEX,IW,IP,II,JJ,KK,I,J,K,IOR,IC,ICM,ICP
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),OM_RHOP=>NULL(),&
-                                       DTDX=>NULL(),DTDY=>NULL(),DTDZ=>NULL()
+                                       KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
 REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZP=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE(LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
-TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL()
+TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
+TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 
 IF (VEG_LEVEL_SET_UNCOUPLED) RETURN
 
@@ -284,42 +285,103 @@ ENDIF
 ! UNDER CONSTRUCTION ***************
 
 IF (ANY(OBSTRUCTION%HT3D) .AND. CORRECTOR) THEN
-   DTDX=>WORK1; DTDX=0._EB
-   DTDY=>WORK2; DTDY=0._EB
-   DTDZ=>WORK3; DTDZ=0._EB
+   KDTDX=>WORK1; KDTDX=0._EB
+   KDTDY=>WORK2; KDTDY=0._EB
+   KDTDZ=>WORK3; KDTDZ=0._EB
    DT_SUB = DT ! fix this later
    T_LOC = 0._EB
+
    SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
       DT_SUB = MIN(DT_SUB,DT-T_LOC)
       T_LOC = T_LOC + DT_SUB
-      ! build heat flux vector
-      DO K=0,KBAR
-         DO J=0,JBAR
+   
+      ! build heat flux vectors
+      DO K=1,KBAR
+         DO J=1,JBAR
             DO I=0,IBAR
-               IF (.NOT.SOLID(CELL_INDEX(I,J,K))) CYCLE
-               DTDX(I,J,K) = (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I+1,J,K)
+               IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+               OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+               OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+               K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
+               KDTDX(I,J,K) = K_B * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
             ENDDO
          ENDDO
       ENDDO
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J+1,K)
+               IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+               OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+               OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+               K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
+               KDTDY(I,J,K) = K_B * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            ENDDO
+         ENDDO
+      ENDDO
+      DO K=0,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J,K+1)
+               IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+               OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+               OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+               K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
+               KDTDZ(I,J,K) = K_B * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            ENDDO
+         ENDDO
+      ENDDO
+   
+      ! build fluxes on boundaries (later hook into pyrolysis code)
       HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
+         IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
          WC => WALL(IW)
-         II  = WC%ONE_D%II
-         JJ  = WC%ONE_D%JJ
-         KK  = WC%ONE_D%KK
-         IC  = CELL_INDEX(II,JJ,KK)
+         SURF_INDEX = WC%SURF_INDEX
+         SF => SURFACE(SURF_INDEX)
+         II = WC%ONE_D%II
+         JJ = WC%ONE_D%JJ
+         KK = WC%ONE_D%KK
+         IC = CELL_INDEX(II,JJ,KK)
          IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
          IOR = WC%ONE_D%IOR
-         OB => OBSTRUCTION(OBST_INDEX_C(IC))
-         
-         SELECT CASE(IOR)
-            CASE( 1); DTDX(II,JJ,KK)   = 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
-            CASE(-1); DTDX(II-1,JJ,KK) = 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
-            CASE( 2); DTDY(II,JJ,KK)   = 0._EB
-            CASE(-2); DTDY(II,JJ-1,KK) = 0._EB
-            CASE( 3); DTDZ(II,JJ,KK)   = 0._EB
-            CASE(-3); DTDZ(II,JJ,KK-1) = 0._EB
-         END SELECT
+
+         METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
+
+            CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
+
+               OB => OBSTRUCTION(OBST_INDEX_C(IC))
+               K_B = OB%BULK_CONDUCTIVITY
+               SELECT CASE(IOR)
+                  CASE( 1); KDTDX(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
+                  CASE(-1); KDTDX(II-1,JJ,KK) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
+                  CASE( 2); KDTDY(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDY(JJ)
+                  CASE(-2); KDTDY(II,JJ-1,KK) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDY(JJ)
+                  CASE( 3); KDTDZ(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDZ(KK)
+                  CASE(-3); KDTDZ(II,JJ,KK-1) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
+               END SELECT
+
+            CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+
+               SELECT CASE(IOR)
+                  CASE( 1); KDTDX(II,JJ,KK)   = -SF%NET_HEAT_FLUX
+                  CASE(-1); KDTDX(II-1,JJ,KK) =  SF%NET_HEAT_FLUX
+                  CASE( 2); KDTDY(II,JJ,KK)   = -SF%NET_HEAT_FLUX
+                  CASE(-2); KDTDY(II,JJ-1,KK) =  SF%NET_HEAT_FLUX
+                  CASE( 3); KDTDZ(II,JJ,KK)   = -SF%NET_HEAT_FLUX
+                  CASE(-3); KDTDZ(II,JJ,KK-1) =  SF%NET_HEAT_FLUX
+               END SELECT
+
+            CASE (CONVECTIVE_FLUX_BC) METHOD_OF_HEAT_TRANSFER
+
+
+         END SELECT METHOD_OF_HEAT_TRANSFER
+
       ENDDO HT3D_WALL_LOOP
+
       DO K=1,KBAR
          DO J=1,JBAR
             DO I=1,IBAR
@@ -327,12 +389,14 @@ IF (ANY(OBSTRUCTION%HT3D) .AND. CORRECTOR) THEN
                IF (.NOT.SOLID(IC)) CYCLE
                OB => OBSTRUCTION(OBST_INDEX_C(IC))
                RHO_B = OB%BULK_DENSITY
-               K_B   = OB%BULK_CONDUCTIVITY
                C_B   = OB%BULK_SPECIFIC_HEAT
-               TMP(I,J,K) = TMP(I,J,K) + DT_SUB*(K_B/RHO_B/C_B)*(DTDX(I,J,K)-DTDX(I-1,J,K))*RDX(I)
+               TMP(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_B*C_B) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+                                                                (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                                                                (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
             ENDDO
          ENDDO
       ENDDO
+
    ENDDO SUBSTEP_LOOP
 ENDIF
 
