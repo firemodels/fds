@@ -110,13 +110,11 @@ int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
   int len_casename;
   strcpy(input_filename_ext,"");
   len_casename = (int) strlen(smv_filepath);
-  printf("len_casename %d\n", len_casename);
   if(len_casename>4){
     char *c_ext;
 
     c_ext=strrchr(smv_filepath,'.');
     if(c_ext!=NULL){
-      printf("c_ext: %s\n", c_ext);
       STRCPY(input_filename_ext,c_ext);
       to_lower(input_filename_ext);
 
@@ -125,29 +123,19 @@ int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
          strcmp(input_filename_ext,".svd")==0||
          strcmp(input_filename_ext,".smt")==0)
          ){
-        printf("comp done\n");
         // c_ext[0]=0;
-        printf("1\n");
         STRCPY(fdsprefix,smv_filepath);
-        printf("fdsprefixlen1: %d\n", strlen(fdsprefix));
         fdsprefix[strlen(fdsprefix)-4] = 0;
-        printf("fdsprefixlen2: %d\n", strlen(fdsprefix));
-        printf("2\n");
         strcpy(movie_name, fdsprefix);
-        printf("3\n");
         strcpy(render_file_base, fdsprefix);
         FREEMEMORY(trainer_filename);
-        printf("4\n");
         NewMemory((void **)&trainer_filename,(unsigned int)(len_casename+7));
         STRCPY(trainer_filename,smv_filepath);
-        printf("5\n");
         STRCAT(trainer_filename,".svd");
         FREEMEMORY(test_filename);
-        printf("6\n");
         NewMemory((void **)&test_filename,(unsigned int)(len_casename+7));
         STRCPY(test_filename,smv_filepath);
         STRCAT(test_filename,".smt");
-        printf("7\n");
       }
     }
   }
@@ -680,13 +668,11 @@ float gettime() {
 /* ------------------ settime ------------------------ */
 
 int settime(float timeval) {
-  printf("t: %f\n", timeval);
   int i,imin;
   float valmin;
 
   PRINTF("setting time to %f\n\n",timeval);
   if(global_times!=NULL&&nglobal_times>0){
-     PRINTF("global times exist",timeval);
     if(timeval<global_times[0])timeval=global_times[0];
     if(timeval>global_times[nglobal_times-1]-0.0001){
       float dt;
