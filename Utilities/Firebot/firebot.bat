@@ -8,7 +8,8 @@ set update=%3
 set altemail=%4
 set usematlab=%5
 set installed=%6
-set emailto=%7
+set lite=%7
+set emailto=%8
 
 set size=_64
 
@@ -235,16 +236,19 @@ call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debu
 
 echo             parallel release
 
+if %lite% == 1 goto skip_lite1
 cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
 call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
 call :does_file_exist fds_mpi_win%size%.exe %OUTDIR%\makefdsr.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
+:skip_lite1
 
 :: -------------------------------------------------------------
 ::                           stage 2
 :: -------------------------------------------------------------
 
+if %lite% == 1 goto skip_lite2
 if %installed% == 1 goto skip_build_cstuff
 if %have_icc% == 0 goto skip_build_cstuff
 echo Stage 2 - Building Smokeview
@@ -297,6 +301,7 @@ if %have_icc% == 1 (
   call :is_file_installed background|| exit /b 1
   echo             background not built, using installed version
 )
+:skip_lite2
 
 call :GET_DURATION PRELIM %PRELIM_beg%
 
@@ -325,6 +330,8 @@ call Check_FDS_cases
 
 call :report_errors Stage 4a, "Debug FDS case errors"|| exit /b 1
 
+if %lite% == 1 goto skip_lite3
+
 echo             release mode
 
 :: run cases
@@ -348,9 +355,11 @@ call Check_FDS_cases
 :: report errors
 
 call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
+:skip_lite3
 
 call :GET_DURATION RUNVV %RUNVV_beg%
 
+if %lite% == 1 goto skip_lite4
 :: -------------------------------------------------------------
 ::                           stage 5
 :: -------------------------------------------------------------
@@ -410,6 +419,8 @@ if have_matlab==0 goto skip_VV
 :skip_VV  
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
+
+:skip_lite4
 call :GET_DURATION TOTALTIME %TIME_beg%
 
 :: -------------------------------------------------------------
@@ -425,8 +436,10 @@ echo .        start: %startdate% %starttime% >> %infofile%
 echo .         stop: %stopdate% %stoptime%   >> %infofile%
 echo .        setup: %DIFF_PRELIM%           >> %infofile%
 echo .    run cases: %DIFF_RUNVV%            >> %infofile%
+if %lite% == 1 goto skip_lite5
 echo .make pictures: %DIFF_MAKEPICS%         >> %infofile%
 echo .  make guides: %DIFF_MAKEGUIDES%       >> %infofile%
+:skip_lite5
 echo .        total: %DIFF_TOTALTIME%        >> %infofile%
 echo . -----------------------------         >> %infofile%
 
