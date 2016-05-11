@@ -8594,7 +8594,7 @@ int readini2(char *inifile, int localfile){
     }
     if (match(buffer, "COLORBAR_SPLIT") == 1) {
       int i;
-      
+
       fgets(buffer, 255, stream);
       sscanf(buffer, " %i %i %i %i %i %i ", colorsplit    , colorsplit + 1, colorsplit + 2, colorsplit + 3, colorsplit +  4, colorsplit +  5);
       fgets(buffer, 255, stream);

@@ -1066,7 +1066,7 @@ extern "C" void update_transparency(void){
 extern "C" void Split_CB(int var) {
   int isplit, i;
   float denom;
-  
+
   switch (var) {
   case SPLIT_COLORBAR:
     denom = splitvals[2]-splitvals[0];
@@ -1084,7 +1084,7 @@ extern "C" void Split_CB(int var) {
     break;
   }
 }
-	
+
 /* ------------------ Extreme_CB ------------------------ */
 
 extern "C" void Extreme_CB(int var){
