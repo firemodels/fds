@@ -10,6 +10,17 @@ _view = {
         end
     },
     colorbar = {
+        get = function(setting)
+            if (setting == nil)
+                then return getcolorbarvisibility()
+                else
+                  if (type(setting) ~= "boolean")
+                      then setcolorbarvisibility(setting)
+                  else
+                      error("the arguent of setcolorbarvisibility must be a boolean")
+                  end
+            end
+            end,
         flip = {
             get = function ()
                 return getcolorbarflip()
