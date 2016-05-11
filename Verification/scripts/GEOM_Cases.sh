@@ -22,7 +22,7 @@ $QFDS -d Immersed_Boundary_Method geom_sphere3c.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3d.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3e.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3f.fds
-$QFDS -d Immersed_Boundary_Method geom_sphere_fire.fds
+#$QFDS -d Immersed_Boundary_Method geom_sphere_fire.fds
 $QFDS -d Immersed_Boundary_Method geom_terrain.fds
 $QFDS -d Immersed_Boundary_Method geom_texture.fds
 $QFDS -d Immersed_Boundary_Method geom_texture2.fds
