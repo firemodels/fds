@@ -234,9 +234,10 @@ call make_fds bot 1> %OUTDIR%\makefdsd.log 2>&1
 call :does_file_exist fds_mpi_win%size%_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debug compilation"
 
+if %lite% == 1 goto skip_lite1
+
 echo             parallel release
 
-if %lite% == 1 goto skip_lite1
 cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%
 erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
 call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
