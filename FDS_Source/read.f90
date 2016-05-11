@@ -705,6 +705,11 @@ IF (USE_MPI) THEN
    ENDDO
 ENDIF
 
+! Define the additional evacuation door flow meshes
+
+!Timo: Mesh counter NM_EVAC is now fire meshes plus main evac meshes
+IF (.NOT. NO_EVACUATION) CALL DEFINE_EVACUATION_MESHES(NM_EVAC)
+
 ! Determine mesh neighbors
 
 ALLOCATE(NEIGHBOR_LIST(10000))
@@ -713,6 +718,7 @@ DO NM=1,NMESHES
    M%N_NEIGHBORING_MESHES = 0
    NEIGHBOR_LIST = 0
    DO NM2=1,NMESHES
+      IF(NM/=NM2 .AND. EVACUATION_ONLY(NM2)) CYCLE
       M2 => MESHES(NM2)
       IF (M2%XS>M%XF+TWO_EPSILON_EB .OR. M2%XF<M%XS-TWO_EPSILON_EB .OR. &
           M2%YS>M%YF+TWO_EPSILON_EB .OR. M2%YF<M%YS-TWO_EPSILON_EB .OR. &
@@ -731,7 +737,7 @@ DEALLOCATE(NEIGHBOR_LIST)
 
 IF (ANY(MEAN_FORCING)) THEN
    DO NM=1,NMESHES
-      IF (MYID/=PROCESS(NM)) CYCLE
+      IF (MYID/=PROCESS(NM) .OR. EVACUATION_ONLY(NM)) CYCLE
       M=>MESHES(NM)
       ALLOCATE(M%MEAN_FORCING_CELL(0:M%IBP1,0:M%JBP1,0:M%KBP1),STAT=IZERO)
       CALL ChkMemErr('INIT','MEAN_FORCING_CELL',IZERO)
@@ -746,11 +752,6 @@ IF (LAPSE_RATE < 0._EB) TMPMIN = MIN(TMPMIN,TMPA+LAPSE_RATE*ZF_MAX)
 TMPMAX = 3000._EB
 
 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
-
-! Define the additional evacuation door flow meshes
-
-!Timo: Mesh counter NM_EVAC is now fire meshes plus main evac meshes
-IF (.NOT. NO_EVACUATION) CALL DEFINE_EVACUATION_MESHES(NM_EVAC)
 
 CONTAINS
 
@@ -803,7 +804,7 @@ LOOP_EMESHES: DO N = 1, NEVAC_MESHES
    KBAR_MAX = MAX(KBAR_MAX,M%KBAR)
    EVACUATION_ONLY(NM) = .TRUE.
    EVACUATION_SKIP(NM) = .FALSE.
-   EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET
+   EVACUATION_Z_OFFSET(NM) = EVAC_Z_OFFSET ! Not used, this line is not needed
    M%N_EXTERNAL_WALL_CELLS = 2*M%IBAR*M%KBAR+2*M%JBAR*M%KBAR
    IF (EVACUATION .AND. M%KBAR/=1) THEN
       WRITE(MESSAGE,'(A)') 'ERROR: IJK(3) must be 1 for all evacuation grids'
@@ -1040,6 +1041,9 @@ MESH_LOOP: DO NM=1,NMESHES
    DO N=1,M%N_NEIGHBORING_MESHES
       IF (MYID==PROCESS(M%NEIGHBORING_MESH(N))) PROCESS_TRANS = .TRUE.
    ENDDO
+   ! A fast fix for fire+evacuation calculation with MPI and neighboring_mesh array problem
+   ! Evacuation meshes need fire mesh obst information => evacuation process processes all fire meshes
+   IF(MYID==EVAC_PROCESS .AND. .NOT.EVACUATION_ONLY(NM)) PROCESS_TRANS = .TRUE.
 
    IF (.NOT.PROCESS_TRANS) CYCLE MESH_LOOP
 
@@ -7457,7 +7461,6 @@ MESH_LOOP: DO NM=1,NMESHES
 
    M=>MESHES(NM)
    CALL POINT_TO_MESH(NM)
-
    ! Count OBST lines
 
    REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
