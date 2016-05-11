@@ -123,7 +123,7 @@ int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
 // colorbar
 void set_colorbar_visibility(int setting);
 int get_colorbar_visibility();
-void toggle_timebar_visibility();
+void toggle_colorbar_visibility();
 
 // timebar
 void set_timebar_visibility(int setting);
