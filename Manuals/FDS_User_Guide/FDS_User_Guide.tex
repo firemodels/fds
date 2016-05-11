@@ -7201,6 +7201,14 @@ material might have a different heat of combustion. For this reason, it is not a
 
 Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.
 
+As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hallways.fds} simulates a fire near the end of five connected hallways. The other end of the hallways is open. As is seen in Fig.~\ref{hallways_energy}, the quantities {\ct Q\_ENTH} and {\ct Q\_TOTAL} are very closely matched, indicating that the sources of energy loss and gain are properly added and subtracted from the energy equation. As expected, the net energy gain/loss eventually goes to zero as the compartment reaches a quasi-steady state.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/hallways}
+\caption[Results of the {\ct hallways} test case]{The energy budget for the {\ct hallways} test case.}
+\label{hallways_energy}
+\end{figure}
+
 
 
 
@@ -7308,7 +7316,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
 \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
 A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP} line. 
+measurement are defined using an associated {\ct PROP} line.
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
