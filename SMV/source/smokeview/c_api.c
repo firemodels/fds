@@ -1622,7 +1622,7 @@ int setrenderdir(const char *dir) {
   // must make a non-const copy
   int l = strlen(dir);
   char *dir_path_temp = malloc(l+1);
-  strncpy(dir_path_temp,dir,l);
+  strncpy(dir_path_temp,dir,l+1);
 	if(dir!=NULL&&strlen(dir_path_temp)>0){
       if(can_write_to_dir(dir_path_temp)==0){
         fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",dir_path_temp);
