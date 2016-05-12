@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "ASSERT.h"
 #include "string_util.h"
+#include "file_util.h"
 #include "datadefs.h"
 
 // dummy change to bump version to 1.0
