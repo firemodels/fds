@@ -2,9 +2,9 @@
 setlocal EnableDelayedExpansion
 set platform=%1
 
-Rem  Windows batch file to build a test Smokeview for Windows 64
+:: batch file to generate Windows, Linux or OSX FDS-SMV bundles
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
