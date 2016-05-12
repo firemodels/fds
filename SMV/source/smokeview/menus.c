@@ -2388,6 +2388,8 @@ void ScriptMenu(int value){
 
 /* ------------------ ScriptMenu ------------------------ */
 #ifdef pp_LUA
+// prototype here rather than create a header file for lua_api
+int load_script(char *filename);
 void LuaScriptMenu(int value){
   luascriptfiledata *luascriptfile;
 
