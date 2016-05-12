@@ -156,6 +156,9 @@ if NOT exist %emailexe% (
   echo             found mailsend
 )
 
+call :is_file_installed background|| exit /b 1
+echo             found background
+
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
@@ -183,6 +186,9 @@ echo             found pdflatex
 
 call :is_file_installed sed|| exit /b 1
 echo             found sed
+
+call :is_file_installed sh2bat||exit /b 1
+echo             found sh2bat
 
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
