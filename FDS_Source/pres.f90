@@ -23,9 +23,9 @@ USE TURBULENCE, ONLY: NS_H_EXACT
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP,P
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP,P,RESIDUAL
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
-REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,TNOW,DUMMY=0._EB, &
+REAL(EB) :: TRM1,TRM2,TRM3,TRM4,LHSS,RHSS,H_OTHER,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL, &
             UBAR,VBAR,WBAR
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -411,7 +411,8 @@ ENDDO
 ! Optional check of the accuracy of the separable pressure solution, del^2 H = -del dot F - dD/dt
 
 IF (CHECK_POISSON) THEN
-   POIS_ERR = 0._EB
+   RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR)
+   !$OMP PARALLEL DO PRIVATE(I,J,K,RHSS,LHSS) SCHEDULE(STATIC)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -422,19 +423,24 @@ IF (CHECK_POISSON) THEN
             LHSS = ((HP(I+1,J,K)-HP(I,J,K))*RDXN(I)*R(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J)      - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K)      - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
-            RES = ABS(RHSS-LHSS)
-            POIS_ERR = MAX(RES,POIS_ERR)
+            RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
+   POIS_ERR = MAXVAL(RESIDUAL)
 ENDIF
 
 ! Mandatory check of the accuracy of the inseparable pressure solution, del dot (1/rho) del p + del^K = -del dot F - dD/dt
 
 IF (ITERATE_BAROCLINIC_TERM) THEN
    P => WORK7
+   RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR)
+   !$OMP PARALLEL PRIVATE(I,J,K,RHSS,LHSS,NM)
+   !$OMP WORKSHARE
    P = RHOP*(HP-KRES)
-   PRESSURE_ERROR_MAX(NM) = 0._EB
+   !$OMP END WORKSHARE
+   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -460,22 +466,14 @@ IF (ITERATE_BAROCLINIC_TERM) THEN
             !    + (FVX_B(I,J,K)*R(I) - FVX_B(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
             !    + (FVY_B(I,J,K)      - FVY_B(I,J-1,K)       )*RDY(J)        &
             !    + (FVZ_B(I,J,K)      - FVZ_B(I,J,K-1)       )*RDZ(K)
-    ! - ((P(I,J,K)*RHOP(I+1,J,K)+P(I+1,J,K)*RHOP(I,J,K))*(1./RHOP(I+1,J,K)-1./RHOP(I,J,K))*RDXN(I)/(RHOP(I+1,J,K)+RHOP(I,J,K)) - &
-    !    (P(I,J,K)*RHOP(I-1,J,K)+P(I-1,J,K)*RHOP(I,J,K))*(1./RHOP(I,J,K)-1./RHOP(I-1,J,K))*RDXN(I)/(RHOP(I-1,J,K)+RHOP(I,J,K)))*RDX(I)&
-    ! - ((P(I,J,K)*RHOP(I,J+1,K)+P(I,J+1,K)*RHOP(I,J,K))*(1./RHOP(I,J+1,K)-1./RHOP(I,J,K))*RDYN(J)/(RHOP(I,J+1,K)+RHOP(I,J,K)) - &
-    !    (P(I,J,K)*RHOP(I,J-1,K)+P(I,J-1,K)*RHOP(I,J,K))*(1./RHOP(I,J,K)-1./RHOP(I,J-1,K))*RDYN(J)/(RHOP(I,J-1,K)+RHOP(I,J,K)))*RDY(J)&
-    ! - ((P(I,J,K)*RHOP(I,J,K+1)+P(I,J,K+1)*RHOP(I,J,K))*(1./RHOP(I,J,K+1)-1./RHOP(I,J,K))*RDZN(K)/(RHOP(I,J,K+1)+RHOP(I,J,K)) - &
-    !    (P(I,J,K)*RHOP(I,J,K-1)+P(I,J,K-1)*RHOP(I,J,K))*(1./RHOP(I,J,K)-1./RHOP(I,J,K-1))*RDZN(K)/(RHOP(I,J,K-1)+RHOP(I,J,K)))*RDZ(K)
-            RES = ABS(RHSS-LHSS)
-            IF (RES>PRESSURE_ERROR_MAX(NM)) THEN
-               PRESSURE_ERROR_MAX(NM)   = MAX(RES,PRESSURE_ERROR_MAX(NM))
-               PRESSURE_ERROR_MAX_LOC(1,NM) = I
-               PRESSURE_ERROR_MAX_LOC(2,NM) = J
-               PRESSURE_ERROR_MAX_LOC(3,NM) = K
-            ENDIF
+            RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END DO
+   !$OMP END PARALLEL
+   PRESSURE_ERROR_MAX(NM) = MAXVAL(RESIDUAL)
+   PRESSURE_ERROR_MAX_LOC(:,NM) = MAXLOC(RESIDUAL)
 ENDIF
 
 T_USED(5)=T_USED(5)+SECOND()-TNOW
