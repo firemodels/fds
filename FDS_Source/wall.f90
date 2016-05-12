@@ -196,7 +196,7 @@ SUBROUTINE THERMAL_BC(T,DT,NM)
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
 USE PHYSICAL_FUNCTIONS, ONLY : GET_SPECIFIC_GAS_CONSTANT,GET_SPECIFIC_HEAT,GET_VISCOSITY
 REAL(EB), INTENT(IN) :: T,DT
-REAL(EB) :: DT_BC,DTMP,DT_SUB,T_LOC,RHO_B,K_B,C_B
+REAL(EB) :: DT_BC,DTMP,DT_SUB,T_LOC,RHO_B,K_B,C_B,TMP_G,TMP_F,TMP_S,RDN,HTC
 INTEGER  :: SURF_INDEX,IW,IP,II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
@@ -385,9 +385,25 @@ IF (ANY(OBSTRUCTION%HT3D) .AND. CORRECTOR) THEN
                IIG = WC%ONE_D%IIG
                JJG = WC%ONE_D%JJG
                KKG = WC%ONE_D%KKG
+               TMP_G = TMP(IIG,JJG,KKG)
+               TMP_S = TMP(II,JJ,KK)
+               TMP_F = WC%ONE_D%TMP_F
+               DTMP = TMP_G - TMP_F
                WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,&
                                           SF%HEAT_TRANSFER_MODEL,SF%ROUGHNESS,WC%SURF_INDEX,WALL_INDEX=IW)
-
+               HTC = WC%ONE_D%HEAT_TRANS_COEF
+               SELECT CASE(ABS(IOR))
+                  CASE( 1); RDN = RDX(II)
+                  CASE( 2); RDN = RDY(JJ)
+                  CASE( 3); RDN = RDZ(KK)
+               END SELECT
+               IF (RADIATION) THEN
+                  TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_B*RDN*TMP_S ) / &
+                          ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_B*RDN       )
+               ELSE
+                  TMP_F = ( HTC*TMP_G + 2._EB*K_B*RDN*TMP_S ) / &
+                          ( HTC       + 2._EB*K_B*RDN       )
+               ENDIF
 
          END SELECT METHOD_OF_HEAT_TRANSFER
 
