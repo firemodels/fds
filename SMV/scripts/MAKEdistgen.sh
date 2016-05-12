@@ -107,4 +107,4 @@ if [ "$platform" == "osx" ]; then
 platform2=OSX
 fi
 
-$UPDATER $platform2 $size $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release
+$UPDATER $platform2 $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release

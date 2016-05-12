@@ -35,6 +35,8 @@ GLUI_Spinner *SPINNER_LB_tick_zdir=NULL;
 
 GLUI_Spinner *SPINNER_down_red=NULL,*SPINNER_down_green=NULL,*SPINNER_down_blue=NULL;
 GLUI_Spinner *SPINNER_up_red=NULL,*SPINNER_up_green=NULL,*SPINNER_up_blue=NULL;
+GLUI_Spinner *SPINNER_colorsplit[12];
+GLUI_Spinner *SPINNER_valsplit[3];
 GLUI_Spinner *SPINNER_LB_time_start=NULL;
 GLUI_Spinner *SPINNER_LB_time_stop=NULL;
 GLUI_Spinner *SPINNER_LB_red=NULL;
@@ -121,6 +123,10 @@ GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_general=NULL;
 GLUI_Rollout *ROLLOUT_north = NULL;
 
+GLUI_Panel *PANEL_split = NULL;
+GLUI_Panel *PANEL_split1L = NULL, *PANEL_split1H = NULL;
+GLUI_Panel *PANEL_split2L = NULL, *PANEL_split2H = NULL;
+GLUI_Panel *PANEL_split3 = NULL;
 GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
 GLUI_Panel *PANEL_extreme_min=NULL, *PANEL_extreme_max=NULL;
 GLUI_Panel *PANEL_extreme2=NULL;
@@ -198,6 +204,8 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define LABELS_shadedata 30
 #define LABELS_shownorth 31
 
+#define SPLIT_COLORBAR 1
+
 #define LABELS_HMS 18
 #define SAVE_SETTINGS 99
 
@@ -211,6 +219,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define UPDATEPLOT 10
 extern "C" void PLOT3D_CB(int var);
 extern "C" void Extreme_CB(int var);
+extern "C" void Split_CB(int var);
 
 
 int cb_up_rgb[3],cb_down_rgb[3];
@@ -483,6 +492,50 @@ extern "C" void glui_labels_setup(int main_window){
     Extreme_CB(COLORBAR_EXTREME_RGB);
   }
   colorbar_global2local();
+
+  PANEL_split = glui_labels->add_panel_to_panel(ROLLOUT_coloring, "Split colorbar");
+  PANEL_split1H = glui_labels->add_panel_to_panel(PANEL_split, "color below split");
+
+  SPINNER_colorsplit[3] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("red"), GLUI_SPINNER_INT, colorsplit+3, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[4] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("green"), GLUI_SPINNER_INT, colorsplit + 4, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[5] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("blue"), GLUI_SPINNER_INT, colorsplit + 5, SPLIT_COLORBAR, Split_CB);
+
+  PANEL_split1L = glui_labels->add_panel_to_panel(PANEL_split, "min color");
+
+  SPINNER_colorsplit[0] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("red"),  GLUI_SPINNER_INT,colorsplit, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[1] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("green"),  GLUI_SPINNER_INT,colorsplit+1, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[2] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("blue"),  GLUI_SPINNER_INT,colorsplit+2, SPLIT_COLORBAR, Split_CB);
+
+  glui_labels->add_column_to_panel(PANEL_split, false);
+
+  PANEL_split2H = glui_labels->add_panel_to_panel(PANEL_split, "max color");
+
+  SPINNER_colorsplit[9] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("red"),  GLUI_SPINNER_INT,colorsplit+9, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[10] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("green"),  GLUI_SPINNER_INT,colorsplit+10, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[11] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("blue"),  GLUI_SPINNER_INT,colorsplit+11, SPLIT_COLORBAR, Split_CB);
+
+  PANEL_split2L = glui_labels->add_panel_to_panel(PANEL_split, "color above split");
+
+  SPINNER_colorsplit[6] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("red"), GLUI_SPINNER_INT, colorsplit+6, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[7] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("green"), GLUI_SPINNER_INT, colorsplit + 7, SPLIT_COLORBAR, Split_CB);
+  SPINNER_colorsplit[8] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("blue"), GLUI_SPINNER_INT, colorsplit + 8, SPLIT_COLORBAR, Split_CB);
+
+  glui_labels->add_column_to_panel(PANEL_split, false);
+
+  PANEL_split3 = glui_labels->add_panel_to_panel(PANEL_split, "vals");
+
+  glui_labels->add_spinner_to_panel(PANEL_split3,_d("max"),  GLUI_SPINNER_FLOAT,splitvals+2, SPLIT_COLORBAR, Split_CB);
+  glui_labels->add_spinner_to_panel(PANEL_split3,_d("split"),  GLUI_SPINNER_FLOAT,splitvals+1, SPLIT_COLORBAR, Split_CB);
+  glui_labels->add_spinner_to_panel(PANEL_split3,_d("min"),  GLUI_SPINNER_FLOAT,splitvals, SPLIT_COLORBAR, Split_CB);
+
+  {
+    int i;
+
+    for (i = 0; i < 12; i++) {
+      SPINNER_colorsplit[i]->set_int_limits(0, 255);
+    }
+  }
+  Split_CB(SPLIT_COLORBAR);
 
   // -------------- Fonts -------------------
 
@@ -1005,6 +1058,31 @@ extern "C" void update_axislabels_smooth(void){
 
 extern "C" void update_transparency(void){
   CHECKBOX_transparentflag->set_int_val(use_transparency_data);
+}
+
+
+/* ------------------ Split_CB ------------------------ */
+
+extern "C" void Split_CB(int var) {
+  int isplit, i;
+  float denom;
+
+  switch (var) {
+  case SPLIT_COLORBAR:
+    denom = splitvals[2]-splitvals[0];
+    if(denom==0.0)denom=1.0;
+    isplit = CLAMP(255*(splitvals[1]-splitvals[0])/denom,0,254);
+    split_colorbar->index_node[1]=isplit;
+    split_colorbar->index_node[2]=isplit+1;
+
+	for(i = 0; i < 12; i++) {
+	  split_colorbar->rgb_node[i] = colorsplit[i] & 0xFF;
+  	}
+    remapcolorbar(split_colorbar);
+    update_colorbar_splits(split_colorbar);
+	UpdateRGBColors(COLORBAR_INDEX_NONE);
+    break;
+  }
 }
 
 /* ------------------ Extreme_CB ------------------------ */

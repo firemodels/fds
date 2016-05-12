@@ -8592,6 +8592,21 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
+    if (match(buffer, "COLORBAR_SPLIT") == 1) {
+      int i;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit    , colorsplit + 1, colorsplit + 2, colorsplit + 3, colorsplit +  4, colorsplit +  5);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit + 6, colorsplit + 7, colorsplit + 8, colorsplit + 9, colorsplit + 10, colorsplit + 11);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f ", splitvals, splitvals + 1, splitvals + 2);
+
+      for(i=0;i<12;i++){
+        colorsplit[i] = CLAMP(colorsplit[i],0,255);
+      }
+      continue;
+    }
     if(match(buffer, "ZAXISANGLES") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %f %f %f ", zaxis_angles, zaxis_angles + 1, zaxis_angles + 2);
@@ -11895,6 +11910,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f :black  \n",rgb2[7][0],rgb2[7][1],rgb2[7][2]);
   fprintf(fileout, "COLORBAR_FLIP\n");
   fprintf(fileout, " %i\n", colorbarflip);
+  fprintf(fileout, "COLORBAR_SPLIT\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[0], colorsplit[1], colorsplit[2], colorsplit[3], colorsplit[4], colorsplit[5]);
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[6], colorsplit[7], colorsplit[8], colorsplit[9], colorsplit[10], colorsplit[11]);
+  fprintf(fileout, " %f %f %f\n", splitvals[0], splitvals[1], splitvals[2]);
   fprintf(fileout, "DIFFUSELIGHT\n");
   fprintf(fileout, " %f %f %f\n", diffuselight[0], diffuselight[1], diffuselight[2]);
   fprintf(fileout, "DIRECTIONCOLOR\n");
