@@ -707,7 +707,7 @@ ENDIF IF_DUMP_SPECIES_INFO
 
 IF (VELOCITY_ERROR_FILE) THEN
    OPEN(UNIT=LU_VELOCITY_ERROR,FILE=FN_VELOCITY_ERROR,FORM='FORMATTED',STATUS='UNKNOWN',POSITION='REWIND')
-   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step, Pressure Iteration, Mesh, I, J, K, Total Iterations, Velocity Error'
+   WRITE(LU_VELOCITY_ERROR,'(A)') 'Time Step,Iteration,Total,Mesh,I,J,K,Velocity Error,Mesh,I,J,K,Pressure Error'
 ENDIF
 
 ! Check particle sample distribution
@@ -2969,7 +2969,7 @@ WRITE(LU_CORE(NM)) VS
 WRITE(LU_CORE(NM)) WS
 WRITE(LU_CORE(NM)) DS
 WRITE(LU_CORE(NM)) HS
-IF (N_REACTIONS>0) WRITE(LU_CORE(NM)) D_SOURCE
+IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) WRITE(LU_CORE(NM)) D_SOURCE
 WRITE(LU_CORE(NM)) RHO
 WRITE(LU_CORE(NM)) TMP
 WRITE(LU_CORE(NM)) Q
@@ -3097,7 +3097,7 @@ READ(LU_RESTART(NM))  VS
 READ(LU_RESTART(NM))  WS
 READ(LU_RESTART(NM))  DS
 READ(LU_RESTART(NM))  HS
-IF (N_REACTIONS>0) READ(LU_RESTART(NM)) D_SOURCE
+IF (N_LP_ARRAY_INDICES>0 .OR. N_REACTIONS>0 .OR. ANY(SPECIES_MIXTURE%DEPOSITING)) READ(LU_RESTART(NM)) D_SOURCE
 READ(LU_RESTART(NM))  RHO
 READ(LU_RESTART(NM))  TMP
 READ(LU_RESTART(NM))  Q
@@ -3275,11 +3275,17 @@ ELSE
 ENDIF
 IF (ITERATE_PRESSURE) THEN
    NM = MAXLOC(VELOCITY_ERROR_MAX,1)
-   II = VELOCITY_ERROR_MAX_I(NM)
-   JJ = VELOCITY_ERROR_MAX_J(NM)
-   KK = VELOCITY_ERROR_MAX_K(NM)
+   II = VELOCITY_ERROR_MAX_LOC(1,NM)
+   JJ = VELOCITY_ERROR_MAX_LOC(2,NM)
+   KK = VELOCITY_ERROR_MAX_LOC(3,NM)
    WRITE(LU_OUTPUT,'(7X,A,I6)') 'Pressure Iterations: ',PRESSURE_ITERATIONS
    WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Velocity Error: ',MAXVAL(VELOCITY_ERROR_MAX), &
+                                               ' on Mesh ',NM,' at (',II,JJ,KK,')'
+   NM = MAXLOC(PRESSURE_ERROR_MAX,1)
+   II = PRESSURE_ERROR_MAX_LOC(1,NM)
+   JJ = PRESSURE_ERROR_MAX_LOC(2,NM)
+   KK = PRESSURE_ERROR_MAX_LOC(3,NM)
+   WRITE(LU_OUTPUT,'(7X,A,E9.2,A,I3,A,3I4,A)') 'Maximum Pressure Error: ',MAXVAL(PRESSURE_ERROR_MAX), &
                                                ' on Mesh ',NM,' at (',II,JJ,KK,')'
 ENDIF
 IF (PRES_METHOD=='SCARC') THEN
@@ -3313,11 +3319,11 @@ WRITE(LU_OUTPUT,*)
 151 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.4,' s')
 152 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.3,' s')
 153 FORMAT(6X,' Step Size: ',E12.3,' s, Total Time: ',F10.2,' s')
-154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-           6X,' Max divergence: ',E9.2,' at (',I3,',',I3,',',I3,')'/ &
-           6X,' Min divergence: ',E9.2,' at (',I3,',',I3,',',I3,')')
-133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I3,',',I3,',',I3,')')
-230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I3,',',I3,',',I3,')')
+154 FORMAT(6X,' Max CFL number: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
+           6X,' Max divergence: ',E9.2,' at (',I4,',',I4,',',I4,')'/ &
+           6X,' Min divergence: ',E9.2,' at (',I4,',',I4,',',I4,')')
+133 FORMAT(6X,' Max div. error: ',E9.2,' at (',I4,',',I4,',',I4,')')
+230 FORMAT(6X,' Max VN number:  ',E9.2,' at (',I4,',',I4,',',I4,')')
 119 FORMAT(6X,' Total Heat Release Rate:      ',F13.3,' kW')
 120 FORMAT(6X,' Radiation Loss to Boundaries: ',F13.3,' kW')
 421 FORMAT(6X,' Fire Resolution Index:        ',F12.3)
@@ -6980,11 +6986,19 @@ IF (N_PDPA_HISTOGRAM>0) THEN
             IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_NBINS>=I) THEN
                DI=(I-0.5_EB)*DD
                IF (PROPERTY(DV%PROP_INDEX)%PDPA_HISTOGRAM_CUMULATIVE) THEN
-                  CUMSUM(NN)=CUMSUM(NN)+DV%PDPA_HISTOGRAM_COUNTS(I)*DD
+                  IF (PROPERTY(DV%PROP_INDEX)%PDPA_NORMALIZE) THEN
+                     CUMSUM(NN)=CUMSUM(NN)+DV%PDPA_HISTOGRAM_COUNTS(I)*DD
+                  ELSE
+                     CUMSUM(NN)=CUMSUM(NN)+DV%PDPA_HISTOGRAM_COUNTS(I)
+                  ENDIF
                ELSE
                   CUMSUM(NN)=DV%PDPA_HISTOGRAM_COUNTS(I)
                ENDIF
-               WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI*1E6_EB,CUMSUM(NN)/CONST(NN)/DD
+               IF (PROPERTY(DV%PROP_INDEX)%PDPA_NORMALIZE) THEN
+                  WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI*1E6_EB,CUMSUM(NN)/CONST(NN)/DD
+               ELSE
+                  WRITE(LU_HISTOGRAM,TCFORM,ADVANCE="NO") DI*1E6_EB,CUMSUM(NN)
+               ENDIF
             ELSE
                IF (NN>1) THEN
                   WRITE(LU_HISTOGRAM,"(A)",ADVANCE="NO") ",,"

@@ -1,10 +1,11 @@
 #!/bin/bash
 version=$1
 platform=$2
-size=$3
-HOST=$4
-FDS_EDITION=$5
-SVNROOT=$6
+HOST=$3
+FDS_EDITION=$4
+SVNROOT=$5
+
+size=64
 
 SCP ()
 {
@@ -106,4 +107,4 @@ if [ "$platform" == "osx" ]; then
 platform2=OSX
 fi
 
-$UPDATER $platform2 $size $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release
+$UPDATER $platform2 $version $DIR.tar.gz $DIR.sh FDS/$FDS_EDITION release

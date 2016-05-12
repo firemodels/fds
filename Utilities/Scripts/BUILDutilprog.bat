@@ -2,9 +2,9 @@
 set prog=%1
 set platform=%2
 
-Rem  Windows batch file to build a test Smokeview for Windows 64
+:: batch file to build utility programs on Windows, Linux or OSX systems
 
-Rem setup environment variables (defining where repository resides etc) 
+:: setup environment variables (defining where repository resides etc) 
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist

@@ -1,14 +1,13 @@
 #!/bin/bash
-EXPECTED_ARGS=7
+EXPECTED_ARGS=6
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: make_updater.sh ostype ossize SMV_TAR.tar.gz INSTALLER.sh"
+  echo "Usage: make_updater.sh ostype SMV_TAR.tar.gz INSTALLER.sh"
   echo ""
   echo "Creates a Smokeview updater sh script. "
   echo ""
   echo "  ostype - OSX or LINUX"
-  echo "  ossize - ia32, intel64"
   echo "  SMV.tar.gz - compressed tar file containing Smokeview update"
   echo "  INSTALLER.sh - .sh script containing self-extracting updater"
   echo "  updatedir - default update directory"
@@ -17,12 +16,13 @@ then
 fi
 
 ostype=$1
-ossize=$2
-revision=$3
-SMV_TAR=$4
-INSTALLER=$5
-INSTALLDIR=$6
-TYPE=$7
+revision=$2
+SMV_TAR=$3
+INSTALLER=$4
+INSTALLDIR=$5
+TYPE=$6
+
+ossize=64
 
 if [ "$TYPE" == "test" ] 
 then
@@ -150,7 +150,6 @@ cat << EOF >> $INSTALLER
   fi
 EOF
 fi
-
 cat << EOF >> $INSTALLER
 
 if [ ! -d \$SMV_root ]
