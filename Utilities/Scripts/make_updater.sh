@@ -1,5 +1,5 @@
 #!/bin/bash
-EXPECTED_ARGS=7
+EXPECTED_ARGS=6
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
@@ -150,7 +150,6 @@ cat << EOF >> $INSTALLER
   fi
 EOF
 fi
-
 cat << EOF >> $INSTALLER
 
 if [ ! -d \$SMV_root ]
