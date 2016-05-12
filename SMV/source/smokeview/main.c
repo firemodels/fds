@@ -102,6 +102,9 @@ void usage(char **argv){
 #ifdef pp_LINUX
     strcat(label, ", pp_LINUX");
 #endif
+#ifdef pp_LUA
+    strcat(label, ", pp_LUA");
+#endif
 #ifdef pp_MEMDEBUG
     strcat(label, ", pp_MEMDEBUG");
 #endif
