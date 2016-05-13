@@ -2907,7 +2907,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
   float dval;
 
   dval=0.0;
-  if(nline_values>1&&line_max!=line_min){
+  if(nline_values>1){
     dval=(line_max-line_min)/(float)(nline_values-1);
   }
 

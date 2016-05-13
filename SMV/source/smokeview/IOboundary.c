@@ -1265,6 +1265,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
       case COMPRESSED_ALLFRAMES:
         ii++;
         break;
+      default:
+        ASSERT(FFALSE);
+        break;
     }
   }
   local_stoptime = glutGet(GLUT_ELAPSED_TIME);
