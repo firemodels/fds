@@ -648,7 +648,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
                DZ_F = DZ_F/RN%K
             ENDIF
             IF (DZ_F > TWO_EPSILON_EB) REACTANTS_PRESENT = .TRUE.
-            Q_REAC_OUT(I) = RN%HEAT_OF_COMBUSTION*DZ_F*DT_LOC
+            Q_REAC_TMP(I) = RN%HEAT_OF_COMBUSTION * DZ_F * DT_LOC ! Note: here DF_F=dZ/dt, hence need DT_LOC
             DZZ = DZZ + RN%NU_MW_O_MW_F*DZ_F*DT_LOC/RN%K
          ENDDO REACTION_LOOP_2
          IF (REACTANTS_PRESENT) THEN
