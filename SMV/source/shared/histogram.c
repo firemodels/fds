@@ -54,7 +54,7 @@ void reset_histogram(histogramdata *histogram){
 
   // initialize histogram data structures
 
-  int i, nbuckets;
+  int i;
 
   for(i = 0; i<histogram->nbuckets; i++){
     histogram->buckets[i] = 0;

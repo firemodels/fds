@@ -73,8 +73,6 @@
 #define MENU_EVAC_UNLOADALL -1
 #define MENU_EVAC_DUMMY -2
 
-#define MENU_LOADPLOT3D_DUMMY -1
-
 #define MENU_PARTICLE_UNLOAD -1
 #define MENU_PARTICLE_DUMMY -2
 #define MENU_PARTICLE_ALLMESHES -11
@@ -708,7 +706,6 @@ void ColorBarMenu(int value){
       initrgb();
       set_labels_controls();
       break;
-     break;
    case COLORBAR_TRANSPARENT:
      use_transparency_data=1-use_transparency_data;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
@@ -1052,7 +1049,6 @@ void ShowHideSliceMenu(int value){
     case MENU_SHOWSLICE_SLICEANDVECTORS:
       show_slices_and_vectors=1-show_slices_and_vectors;
       return;
-      break;
     default:
       ASSERT(FFALSE);
     }
@@ -3769,8 +3765,6 @@ void LoadMultiVSliceMenu(int value){
         updatemenu=1;
         glutPostRedisplay();
         return;
-        break;
-
       case UNLOAD_ALL:
         LoadVSliceMenu(UNLOAD_ALL);
         break;
@@ -4317,7 +4311,6 @@ void VentMenu(int value){
 #define GEOMETRY_SOLIDOUTLINE 2
 #define GEOMETRY_INTERIOR_SOLID 9
 #define GEOMETRY_INTERIOR_OUTLINE 12
-#define GEOMETRY_DUPLICATES 10
 #define GEOMETRY_HIDE 7
 #define GEOMETRY_TETRA_HIDE 11
 #define GEOMETRY_SHOWNORMAL 3

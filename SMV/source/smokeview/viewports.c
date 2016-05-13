@@ -863,6 +863,9 @@ int compare_meshes(const void *arg1, const void *arg2){
       returnval = 1;
     }
     break;
+  default:
+	  ASSERT(FFALSE);
+	  break;
   }
   return returnval;
 }
