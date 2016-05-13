@@ -43,11 +43,19 @@
 
 
 #ifdef X64
+#ifndef STRUCTSTAT
 #define STRUCTSTAT struct __stat64
+#endif
+#ifndef STAT
 #define STAT _stat64
+#endif
 #else
+#ifndef STRUCTSTAT
 #define STRUCTSTAT struct stat
+#endif
+#ifndef STAT
 #define STAT stat
+#endif
 #endif
 
 //***********************
@@ -229,8 +237,8 @@ typedef struct {
   float pdfmin,pdfmax;
 } pdfdata;
 
-#define BOUND(x,xmin,xmax) (x<xmin)?xmin:(x>xmax)?xmax:x
-#define GET_INTERVAL(xyz,xyz0,dxyz) ((xyz)-(xyz0))/(dxyz)
+#define BOUND(x,xmin,xmax) (((x)<(xmin))?(xmin):((x)>(xmax))?(xmax):(x))
+#define GET_INTERVAL(xyz,xyz0,dxyz) (((xyz)-(xyz0))/(dxyz))
 
 
 //***********************
