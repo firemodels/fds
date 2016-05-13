@@ -11,6 +11,7 @@
 #include "background.h"
 #include "datadefs.h"
 #include "MALLOC.h"
+#include "file_util.h"
 
 #ifdef pp_LINUX
 #define pp_LINUXOSX
@@ -455,7 +456,7 @@ void get_sysctl(char *host, char *var, int *ivar, float *fvar){
     }
     fclose(stream);
   }
-  unlink(sysctl_file);
+  UNLINK(sysctl_file);
 }
 
 /* ------------------ get_ncores ------------------------ */
@@ -553,7 +554,7 @@ int get_host_ncores(char *host){
     ncores=1;
   }
   fclose(stream);
-  unlink(localfile);
+  UNLINK(localfile);
   return ncores;
 }
 
@@ -586,7 +587,7 @@ float get_host_load(char *host){
   }
   sscanf(buffer,"%f",&load1);
   fclose(stream);
-  unlink(localfile);
+  UNLINK(localfile);
   return load1;
 }
 

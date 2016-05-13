@@ -13,8 +13,6 @@
 #include "string_util.h"
 #include "file_util.h"
 
-#define UNLINK unlink
-
 #include "histogram.h"
 #include "threader.h"
 #include "smv_endian.h"
