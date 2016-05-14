@@ -10714,10 +10714,10 @@ PROC_CTRL_LOOP: DO NC = 1, N_CTRL
    ! setup input array
 
    CF%N_INPUTS = 0
-   INPUT_COUNT: DO
-      IF (CF%INPUT_ID(CF%N_INPUTS+1)=='null') EXIT INPUT_COUNT
-      CF%N_INPUTS = CF%N_INPUTS + 1
+   INPUT_COUNT: DO NN=1,40
+      IF (CF%INPUT_ID(NN)=='null') EXIT INPUT_COUNT
    END DO INPUT_COUNT
+   CF%N_INPUTS=NN-1
    IF (CF%N_INPUTS==0) THEN
       WRITE(MESSAGE,'(A,I5,A)')  'ERROR: CTRL ',NC,' must have at least one input'
       CALL SHUTDOWN(MESSAGE) ; RETURN
