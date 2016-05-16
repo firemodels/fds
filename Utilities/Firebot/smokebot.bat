@@ -387,7 +387,7 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making Smokeview pictures
 
 cd %fdsroot%\Verification\scripts
-call MAKE_SMV_pictures 1> %OUTDIR%\stage5.txt 2>&1
+call Make_SMV_Pictures -smvwui 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
