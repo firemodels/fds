@@ -9,7 +9,6 @@
       function drawChart() {
         var data = google.visualization.arrayToDataTable([
           ['Days since Jan 1, 2016', 'Benchmark Time (s)'],
-[124.29534,1994.200],
 [124.59980,1994.500],
 [125.59577,1991.600],
 [126.56153,1991.200],
@@ -39,6 +38,7 @@
 [134.67269,2599.000],
 [136.34905,2614.100],
 [136.41011,2612.500],
+[136.61428,0.0],
         ]);
 
         var options = {
@@ -62,21 +62,25 @@
 <body>
 <h2>Smokebot Summary</h2>
 <hr align='left'>
-<h3>Status - Mon May 16 11:41:42 EDT 2016</h3>
-<font color="#00FF00"> Build success!</font><br>
-<a href="https://github.com/firemodels/fds-smv/commit/8d0079e29567dd853ddf4c85ad3b7d0b62dbcde5">Revision: Git-r10-435-g8d0079e</a><br>
-Revision date: Mon May 16 10:50:34 2016<br>
-Benchmark time: 2612.500 s <br>
+<h3>Status - Mon May 16 15:56:55 EDT 2016</h3>
+<font color="#FF0000"> Build failure</font><br>
+<a href="https://github.com/firemodels/fds-smv/commit/833a03c70657b8eced075e556d798dead0db0b1f">Revision: Git-r10-442-g833a03c</a><br>
+Revision date: Mon May 16 15:44:34 2016<br>
+Benchmark time: 0.0 s <br>
 <h3>Timing History</h3>
 
 <div id="curve_chart" style="width: 500px; height: 300px"></div>
-Mean: 2368 s <br>
-Standard deviation: 285.0 s (12.0 %) <br>
+Mean: 2301 s <br>
+Standard deviation: 508.9 s (22.1 %) <br>
 <h3>Manuals</h3>
 <a href="http://goo.gl/n1Q3WH">Manuals</a>
 
 <h3>Status History</h3>
 
+<p><font color="#FF0000"> Build failure</font><br>
+<a href="https://github.com/firemodels/fds-smv/commit/833a03c70657b8eced075e556d798dead0db0b1f">Revision: Git-r10-442-g833a03c</a><br>
+Revision date: Mon May 16 15:44:34 2016<br>
+Benchmark time: 0.0 s <br>
 <p><font color="#00FF00"> Build success!</font><br>
 <a href="https://github.com/firemodels/fds-smv/commit/8d0079e29567dd853ddf4c85ad3b7d0b62dbcde5">Revision: Git-r10-435-g8d0079e</a><br>
 Revision date: Mon May 16 10:50:34 2016<br>
@@ -193,10 +197,6 @@ Benchmark time: 1991.600 s <br>
 <a href="https://github.com/firemodels/fds-smv/commit/a824d64c481a9fb0a5a9a757c1ca776cd626f48a">Revision: Git-r10-304-ga824d64</a><br>
 Revision date: Wed May 4 15:23:43 2016<br>
 Benchmark time: 1994.500 s <br>
-<p><font color="#00FF00"> Build success!</font><br>
-<a href="https://github.com/firemodels/fds-smv/commit/38fa5f8800eb01e7ee950d620f78fc17078f5fce">Revision: Git-r10-298-g38fa5f8</a><br>
-Revision date: Wed May 4 08:05:18 2016<br>
-Benchmark time: 1994.200 s <br>
 <br><br>
 <hr align='left'><br>
 
