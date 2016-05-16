@@ -105,10 +105,10 @@ timebar = {}
 _timebar = {
     visibility = {
         get = function()
-            return gettimebarvisibility()
+            return get_timebar_visibility()
         end,
         set = function(v)
-            return settimebarvisibility(v)
+            return set_timebar_visibility(v)
         end,
         -- toggle = function ()
         --     timebar.visibility = not timebar.visibility

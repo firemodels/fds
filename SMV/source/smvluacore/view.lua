@@ -12,12 +12,12 @@ _view = {
     colorbar = {
         get = function(setting)
             if (setting == nil)
-                then return getcolorbarvisibility()
+                then return get_colorbar_visibility()
                 else
                   if (type(setting) ~= "boolean")
-                      then setcolorbarvisibility(setting)
+                      then set_colorbar_visibility(setting)
                   else
-                      error("the arguent of setcolorbarvisibility must be a boolean")
+                      error("the argument of set_colorbar_visibility must be a boolean")
                   end
             end
             end,
