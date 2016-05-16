@@ -267,7 +267,7 @@ if %lite% == 1 goto skip_lite2
 
     echo             debug
 
-    cd %fdsroot%\SMV\Build\intel_win%size%
+    cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
     erase *.obj *.mod *.exe smokeview_win%size%_db.exe 1> Nul 2>&1
     call make_smv_db -r bot 1> %OUTDIR%\makesmvd.log 2>&1
     call :does_file_exist smokeview_win%size%_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
@@ -275,13 +275,13 @@ if %lite% == 1 goto skip_lite2
 
     echo             release
 
-    cd %fdsroot%\SMV\Build\intel_win%size%
+    cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
     erase *.obj *.mod smokeview_win%size%.exe 1> Nul 2>&1
     call make_smv -r bot 1> %OUTDIR%\makesmvr.log 2>&1
 
     call :does_file_exist smokeview_win%size%.exe %OUTDIR%\makesmvr.log|| aexit /b 1
     call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
-    set smokeview=%fdsroot%\SMV\Build\intel_win%size%\smokeview_win%size%.exe
+    set smokeview=%fdsroot%\SMV\Build\smokeview\intel_win%size%\smokeview_win%size%.exe
   :skip_build_cstuff
 
 :: -------------------------------------------------------------
@@ -299,7 +299,7 @@ if %lite% == 1 goto skip_lite2
 
   if %have_icc% == 1 (
     echo             background
-    cd %fdsroot%\Utilities\background\intel_win%size%
+    cd %fdsroot%\SMV\Build\background\intel_win%size%
     erase *.obj *.mod *.exe 1> Nul 2>&1
     call make_background bot 1> %OUTDIR%\makebackground.log 2>&1
     call :does_file_exist background.exe %OUTDIR%\makebackground.log
