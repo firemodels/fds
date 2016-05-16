@@ -319,7 +319,7 @@ int can_write_to_dir(char *dir){
     fclose(stream);
     return_val=1;
   }
-  unlink(full_name);
+  UNLINK(full_name);
   FREEMEMORY(full_name);
   return return_val;
 }

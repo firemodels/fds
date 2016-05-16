@@ -93,4 +93,4 @@ echo ""
 tar cvf ../$OSXDIR.tar .
 cd ..
 gzip $OSXDIR.tar
-$UPDATER OSX 64 $revision $OSXDIR.tar.gz $OSXDIR.sh FDS/FDS6 test
+$UPDATER OSX $revision $OSXDIR.tar.gz $OSXDIR.sh FDS/FDS6 test

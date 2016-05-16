@@ -23,9 +23,9 @@ USE TURBULENCE, ONLY: NS_H_EXACT
 
 INTEGER, INTENT(IN) :: NM
 REAL(EB), INTENT(IN) :: T
-REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP
+REAL(EB), POINTER, DIMENSION(:,:,:) :: UU,VV,WW,HP,RHOP,P,RESIDUAL
 INTEGER :: I,J,K,IW,IOR,NOM,N_INT_CELLS,IIO,JJO,KKO
-REAL(EB) :: TRM1,TRM2,TRM3,TRM4,RES,LHSS,RHSS,H_OTHER,TNOW,DUMMY=0._EB, &
+REAL(EB) :: TRM1,TRM2,TRM3,TRM4,LHSS,RHSS,H_OTHER,TNOW,DUMMY=0._EB, &
             TSI,TIME_RAMP_FACTOR,DX_OTHER,DY_OTHER,DZ_OTHER,P_EXTERNAL, &
             UBAR,VBAR,WBAR
 TYPE (VENTS_TYPE), POINTER :: VT
@@ -43,11 +43,13 @@ IF (PREDICTOR) THEN
    VV => V
    WW => W
    HP => H
+   RHOP => RHO
 ELSE
    UU => US
    VV => VS
    WW => WS
    HP => HS
+   RHOP => RHOS
 ENDIF
 
 ! Apply pressure boundary conditions at external cells.
@@ -406,10 +408,11 @@ DO J=1,JBAR
    ENDDO
 ENDDO
 
-! Optional check of the accuracy of the pressure solver
+! Optional check of the accuracy of the separable pressure solution, del^2 H = -del dot F - dD/dt
 
 IF (CHECK_POISSON) THEN
-   POIS_ERR = 0._EB
+   RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR)
+   !$OMP PARALLEL DO PRIVATE(I,J,K,RHSS,LHSS) SCHEDULE(STATIC)
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -420,11 +423,55 @@ IF (CHECK_POISSON) THEN
             LHSS = ((HP(I+1,J,K)-HP(I,J,K))*RDXN(I)*R(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
                  + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J)      - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
                  + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K)      - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1)        )*RDZ(K)
-            RES = ABS(RHSS-LHSS)
-            POIS_ERR = MAX(RES,POIS_ERR)
+            RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
          ENDDO
       ENDDO
    ENDDO
+   !$OMP END PARALLEL DO
+   POIS_ERR = MAXVAL(RESIDUAL)
+ENDIF
+
+! Mandatory check of the accuracy of the inseparable pressure solution, del dot (1/rho) del p + del^K = -del dot F - dD/dt
+
+IF (ITERATE_BAROCLINIC_TERM) THEN
+   P => WORK7
+   P = RHOP*(HP-KRES)
+   RESIDUAL => WORK8(1:IBAR,1:JBAR,1:KBAR)
+   !$OMP PARALLEL PRIVATE(I,J,K,RHSS,LHSS,NM)
+   !$OMP DO COLLAPSE(3) SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            RHSS = ( R(I-1)*(FVX(I-1,J,K)-FVX_B(I-1,J,K)) - R(I)*(FVX(I,J,K)-FVX_B(I,J,K)) )*RDX(I)*RRN(I) &
+                 + (        (FVY(I,J-1,K)-FVY_B(I,J-1,K)) -      (FVY(I,J,K)-FVY_B(I,J,K)) )*RDY(J)        &
+                 + (        (FVZ(I,J,K-1)-FVZ_B(I,J,K-1)) -      (FVZ(I,J,K)-FVZ_B(I,J,K)) )*RDZ(K)        &
+                 - DDDT(I,J,K)
+            LHSS = ((P(I+1,J,K)-P(I,J,K))*RDXN(I)*R(I)    *2._EB/(RHOP(I+1,J,K)+RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I-1,J,K))*RDXN(I-1)*R(I-1)*2._EB/(RHOP(I-1,J,K)+RHOP(I,J,K)))*RDX(I)*RRN(I) &
+                 + ((P(I,J+1,K)-P(I,J,K))*RDYN(J)         *2._EB/(RHOP(I,J+1,K)+RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I,J-1,K))*RDYN(J-1)       *2._EB/(RHOP(I,J-1,K)+RHOP(I,J,K)))*RDY(J)        &
+                 + ((P(I,J,K+1)-P(I,J,K))*RDZN(K)         *2._EB/(RHOP(I,J,K+1)+RHOP(I,J,K)) - &
+                    (P(I,J,K)-P(I,J,K-1))*RDZN(K-1)       *2._EB/(RHOP(I,J,K-1)+RHOP(I,J,K)))*RDZ(K)        &
+   !        LHSS = ((P(I+1,J,K)/RHOP(I+1,J,K)-P(I,J,K)/RHOP(I,J,K))*RDXN(I)*R(I)    - &
+   !                (P(I,J,K)/RHOP(I,J,K)-P(I-1,J,K)/RHOP(I-1,J,K))*RDXN(I-1)*R(I-1))*RDX(I)*RRN(I) &
+   !             + ((P(I,J+1,K)/RHOP(I,J+1,K)-P(I,J,K)/RHOP(I,J,K))*RDYN(J)         - &
+   !                (P(I,J,K)/RHOP(I,J,K)-P(I,J-1,K)/RHOP(I,J-1,K))*RDYN(J-1)       )*RDY(J)        &
+   !             + ((P(I,J,K+1)/RHOP(I,J,K+1)-P(I,J,K)/RHOP(I,J,K))*RDZN(K)         - &
+   !                (P(I,J,K)/RHOP(I,J,K)-P(I,J,K-1)/RHOP(I,J,K-1))*RDZN(K-1)       )*RDZ(K)        &
+                 + ((KRES(I+1,J,K)-KRES(I,J,K))*RDXN(I)*R(I) - (KRES(I,J,K)-KRES(I-1,J,K))*RDXN(I-1)*R(I-1) )*RDX(I)*RRN(I) &
+                 + ((KRES(I,J+1,K)-KRES(I,J,K))*RDYN(J)      - (KRES(I,J,K)-KRES(I,J-1,K))*RDYN(J-1)        )*RDY(J)        &
+                 + ((KRES(I,J,K+1)-KRES(I,J,K))*RDZN(K)      - (KRES(I,J,K)-KRES(I,J,K-1))*RDZN(K-1)        )*RDZ(K)        
+            !    + (FVX_B(I,J,K)*R(I) - FVX_B(I-1,J,K)*R(I-1))*RDX(I)*RRN(I) &
+            !    + (FVY_B(I,J,K)      - FVY_B(I,J-1,K)       )*RDY(J)        &
+            !    + (FVZ_B(I,J,K)      - FVZ_B(I,J,K-1)       )*RDZ(K)
+            RESIDUAL(I,J,K) = ABS(RHSS-LHSS)
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END DO
+   !$OMP END PARALLEL
+   PRESSURE_ERROR_MAX(NM) = MAXVAL(RESIDUAL)
+   PRESSURE_ERROR_MAX_LOC(:,NM) = MAXLOC(RESIDUAL)
 ENDIF
 
 T_USED(5)=T_USED(5)+SECOND()-TNOW
@@ -436,8 +483,7 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 ! Check the maximum velocity error at a solid boundary
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,&
-                            VELOCITY_ERROR_MAX_I,VELOCITY_ERROR_MAX_J,VELOCITY_ERROR_MAX_K,T_USED
+USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
@@ -624,10 +670,10 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    ! Save maximum velocity error
 
    IF (ABS(VELOCITY_ERROR)>VELOCITY_ERROR_MAX(NM)) THEN
-      VELOCITY_ERROR_MAX_I(NM) = II
-      VELOCITY_ERROR_MAX_J(NM) = JJ
-      VELOCITY_ERROR_MAX_K(NM) = KK
-      VELOCITY_ERROR_MAX(NM)   = ABS(VELOCITY_ERROR)
+      VELOCITY_ERROR_MAX_LOC(1,NM) = II
+      VELOCITY_ERROR_MAX_LOC(2,NM) = JJ
+      VELOCITY_ERROR_MAX_LOC(3,NM) = KK
+      VELOCITY_ERROR_MAX(NM)       = ABS(VELOCITY_ERROR)
    ENDIF
 
 ENDDO CHECK_WALL_LOOP
