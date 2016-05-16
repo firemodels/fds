@@ -223,6 +223,12 @@ goto eof
    set rungeomcases=1
    set runwuicases=0
  )
+ if /I "%1" EQU "-smvwui" (
+   set valid=1
+   set runsmvcases=1
+   set rungeomcases=0
+   set runwuicases=1
+ )
  if /I "%1" EQU "-wui" (
    set valid=1
    set runsmvcases=0
