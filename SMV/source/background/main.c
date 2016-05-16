@@ -56,7 +56,9 @@ void Sleep(int ticks){
 int main(int argc, char **argv){
   char *prog;
   int i;
+#ifdef pp_LINUXOSX
   int debug;
+#endif  
   int argstart=-1;
   float delay_time=0.0;
   int cpu_usage, cpu_usage_max=25;
@@ -86,7 +88,9 @@ int main(int argc, char **argv){
   sprintf(pid,"%i",getpid());
 #endif
 
+#ifdef pp_LINUXOSX
   debug=0;
+#endif  
   prog=argv[0];
 
   if(argc==1){
@@ -111,9 +115,11 @@ int main(int argc, char **argv){
                 if(delay_time<0.0)delay_time=0.0;
               }
             }
+#ifdef pp_LINUXOSX            
             else{
 		          debug=1;
 		        }
+#endif		        
             break;
           case 'h':
 #ifdef pp_LINUX
@@ -342,7 +348,7 @@ static HMODULE s_hKernel = NULL;
 void GetSystemTimesAddress(){
 	if( s_hKernel == NULL )
 	{
-		s_hKernel = LoadLibrary("Kernel32.dll" );
+		s_hKernel = LoadLibrary((wchar_t *)"Kernel32.dll" );
 		if( s_hKernel != NULL )
 		{
 			s_pfnGetSystemTimes = (pfnGetSystemTimes)GetProcAddress( s_hKernel, "GetSystemTimes" );

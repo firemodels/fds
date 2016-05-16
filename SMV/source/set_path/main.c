@@ -293,7 +293,7 @@ int reg_path(int setget, int pathtype, char *path){
   LPCTSTR reg_path_local=NULL;
 
   char creg_user_path[]="Environment";
-  LPCTSTR reg_user_path=creg_user_path;
+  LPCTSTR reg_user_path=(LPCTSTR)creg_user_path;
 
   char creg_system_path[]="SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
   LPCTSTR reg_system_path=(LPCTSTR)creg_system_path;

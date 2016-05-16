@@ -87,12 +87,12 @@ int main(int argc, char **argv){
   char *c_mintime_ptr=NULL, c_mintime[256];
   char *c_maxtime_ptr=NULL, c_maxtime[256];
   int have_mintime=0, have_maxtime=0;
-  unsigned int i_mintime, i_maxtime;
+  unsigned int i_mintime=0, i_maxtime=0;
 
   char *c_mindatetime_ptr=NULL, c_mindatetime[256];
   char *c_maxdatetime_ptr=NULL, c_maxdatetime[256];
   int have_mindatetime=0, have_maxdatetime=0;
-  unsigned int i_mindatetime, i_maxdatetime;
+  unsigned int i_mindatetime=0, i_maxdatetime=0;
   int lendate=0;
 
   set_stdout(stdout);
@@ -107,10 +107,7 @@ int main(int argc, char **argv){
   }
 
   for(i=1;i<argc;i++){
-    int lenarg;
-
     arg=argv[i];
-    lenarg=strlen(arg);
     if(strcmp(arg,"-wv")==0){
       is_sodar_file=0;
       continue;

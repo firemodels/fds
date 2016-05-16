@@ -2851,6 +2851,7 @@ void parse_database(char *file){
 
       slashptr = strstr(buffer, "/");
       if(slashptr!=NULL)strcpy(buffer2, buffer);
+	  buffer3 = buffer2;
       while(slashptr!=NULL){
         fgets(buffer, 1000, stream);
         lenbuffer = strlen(buffer);
@@ -8593,7 +8594,7 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if (match(buffer, "COLORBAR_SPLIT") == 1) {
-      int i;
+      int ii;
 
       fgets(buffer, 255, stream);
       sscanf(buffer, " %i %i %i %i %i %i ", colorsplit    , colorsplit + 1, colorsplit + 2, colorsplit + 3, colorsplit +  4, colorsplit +  5);
@@ -8602,8 +8603,8 @@ int readini2(char *inifile, int localfile){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %f %f %f ", splitvals, splitvals + 1, splitvals + 2);
 
-      for(i=0;i<12;i++){
-        colorsplit[i] = CLAMP(colorsplit[i],0,255);
+      for(ii=0;ii<12;ii++){
+        colorsplit[ii] = CLAMP(colorsplit[ii],0,255);
       }
       continue;
     }
