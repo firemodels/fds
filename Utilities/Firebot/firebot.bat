@@ -8,7 +8,8 @@ set update=%3
 set altemail=%4
 set usematlab=%5
 set installed=%6
-set emailto=%7
+set lite=%7
+set emailto=%8
 
 set size=_64
 
@@ -155,6 +156,9 @@ if NOT exist %emailexe% (
   echo             found mailsend
 )
 
+call :is_file_installed background|| exit /b 1
+echo             found background
+
 call :is_file_installed cut|| exit /b 1
 echo             found cut
 
@@ -182,6 +186,9 @@ echo             found pdflatex
 
 call :is_file_installed sed|| exit /b 1
 echo             found sed
+
+call :is_file_installed sh2bat||exit /b 1
+echo             found sh2bat
 
 echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
@@ -233,70 +240,75 @@ call make_fds bot 1> %OUTDIR%\makefdsd.log 2>&1
 call :does_file_exist fds_mpi_win%size%_db.exe %OUTDIR%\makefdsd.log|| exit /b 1
 call :find_warnings "warning" %OUTDIR%\makefdsd.log "Stage 1b, FDS parallel debug compilation"
 
-echo             parallel release
+if %lite% == 1 goto skip_lite1
 
-cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%
-erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
-call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
-call :does_file_exist fds_mpi_win%size%.exe %OUTDIR%\makefdsr.log|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
+  echo             parallel release
+
+  cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%
+  erase *.obj *.mod *.exe *.pdb 1> Nul 2>&1
+  call make_fds bot 1> %OUTDIR%\makefdsr.log 2>&1
+  call :does_file_exist fds_mpi_win%size%.exe %OUTDIR%\makefdsr.log|| exit /b 1
+  call :find_warnings "warning" %OUTDIR%\makefdsr.log "Stage 1d, FDS parallel release compilation"
+:skip_lite1
 
 :: -------------------------------------------------------------
 ::                           stage 2
 :: -------------------------------------------------------------
 
-if %installed% == 1 goto skip_build_cstuff
-if %have_icc% == 0 goto skip_build_cstuff
-echo Stage 2 - Building Smokeview
+if %lite% == 1 goto skip_lite2
+  if %installed% == 1 goto skip_build_cstuff
+  if %have_icc% == 0 goto skip_build_cstuff
+    echo Stage 2 - Building Smokeview
 
-echo             libs
+    echo             libs
 
-cd %fdsroot%\SMV\Build\LIBS\lib_win_intel%size%
-call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
+    cd %fdsroot%\SMV\Build\LIBS\lib_win_intel%size%
+    call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
-echo             debug
+    echo             debug
 
-cd %fdsroot%\SMV\Build\intel_win%size%
-erase *.obj *.mod *.exe smokeview_win%size%_db.exe 1> Nul 2>&1
-call make_smv_db -r bot 1> %OUTDIR%\makesmvd.log 2>&1
-call :does_file_exist smokeview_win%size%_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug compilation"
+    cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
+    erase *.obj *.mod *.exe smokeview_win%size%_db.exe 1> Nul 2>&1
+    call make_smv_db -r bot 1> %OUTDIR%\makesmvd.log 2>&1
+    call :does_file_exist smokeview_win%size%_db.exe %OUTDIR%\makesmvd.log|| exit /b 1
+    call :find_warnings "warning" %OUTDIR%\makesmvd.log "Stage 2a, Smokeview debug compilation"
 
-echo             release
+    echo             release
 
-cd %fdsroot%\SMV\Build\intel_win%size%
-erase *.obj *.mod smokeview_win%size%.exe 1> Nul 2>&1
-call make_smv -r bot 1> %OUTDIR%\makesmvr.log 2>&1
+    cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
+    erase *.obj *.mod smokeview_win%size%.exe 1> Nul 2>&1
+    call make_smv -r bot 1> %OUTDIR%\makesmvr.log 2>&1
 
-call :does_file_exist smokeview_win%size%.exe %OUTDIR%\makesmvr.log|| aexit /b 1
-call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
-set smokeview=%fdsroot%\SMV\Build\intel_win%size%\smokeview_win%size%.exe
-:skip_build_cstuff
+    call :does_file_exist smokeview_win%size%.exe %OUTDIR%\makesmvr.log|| aexit /b 1
+    call :find_warnings "warning" %OUTDIR%\makesmvr.log "Stage 2b, Smokeview release compilation"
+    set smokeview=%fdsroot%\SMV\Build\smokeview\intel_win%size%\smokeview_win%size%.exe
+  :skip_build_cstuff
 
 :: -------------------------------------------------------------
 ::                           stage 3
 :: -------------------------------------------------------------
 
-echo Stage 3 - Building Utilities
+  echo Stage 3 - Building Utilities
 
-echo             fds2ascii
-cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
-erase *.obj *.mod *.exe 1> Nul 2>&1
-call make_fds2ascii bot 1> %OUTDIR%\makefds2ascii.log 2>&1
-call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
-call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/Smokeview utilities"
-
-if %have_icc% == 1 (
-  echo             background
-  cd %fdsroot%\Utilities\background\intel_win%size%
+  echo             fds2ascii
+  cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
   erase *.obj *.mod *.exe 1> Nul 2>&1
-  call make_background bot 1> %OUTDIR%\makebackground.log 2>&1
-  call :does_file_exist background.exe %OUTDIR%\makebackground.log
-  call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
-) else (
-  call :is_file_installed background|| exit /b 1
-  echo             background not built, using installed version
-)
+  call make_fds2ascii bot 1> %OUTDIR%\makefds2ascii.log 2>&1
+  call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
+  call :find_warnings "warning" %OUTDIR%\makefds2ascii.log "Stage 3, Building FDS/Smokeview utilities"
+
+  if %have_icc% == 1 (
+    echo             background
+    cd %fdsroot%\SMV\Build\background\intel_win%size%
+    erase *.obj *.mod *.exe 1> Nul 2>&1
+    call make_background bot 1> %OUTDIR%\makebackground.log 2>&1
+    call :does_file_exist background.exe %OUTDIR%\makebackground.log
+    call :find_warnings "warning" %OUTDIR%\makebackground.log "Stage 3, Building FDS/Smokeview utilities"
+  ) else (
+    call :is_file_installed background|| exit /b 1
+    echo             background not built, using installed version
+  )
+:skip_lite2
 
 call :GET_DURATION PRELIM %PRELIM_beg%
 
@@ -325,91 +337,99 @@ call Check_FDS_cases
 
 call :report_errors Stage 4a, "Debug FDS case errors"|| exit /b 1
 
-echo             release mode
+if %lite% == 1 goto skip_lite3
+
+  echo             release mode
 
 :: run cases
 
-cd %fdsroot%\Verification\
-if %clean% == 0 goto skip_clean2
-   echo             cleaning Verification directory
-   call :git_clean %fdsroot%\Verification
+  cd %fdsroot%\Verification\
+  if %clean% == 0 goto skip_clean2
+     echo             cleaning Verification directory
+     call :git_clean %fdsroot%\Verification
 :skip_clean2
 
-cd %fdsroot%\Verification\scripts
-call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
+  cd %fdsroot%\Verification\scripts
+  call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
-set haveerrors_now=0
-echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\scripts
-call Check_FDS_cases
+  set haveerrors_now=0
+  echo. > %OUTDIR%\stage_error.txt
+  cd %fdsroot%\Verification\scripts
+  call Check_FDS_cases
 
 :: report errors
 
-call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
+  call :report_errors Stage 4b, "Release FDS case errors"|| exit /b 1
+:skip_lite3
 
 call :GET_DURATION RUNVV %RUNVV_beg%
+
+if %lite% == 1 goto skip_lite4
 
 :: -------------------------------------------------------------
 ::                           stage 5
 :: -------------------------------------------------------------
 
-if exist %emailexe% (
-  call :get_datetime current_ddate current_ttime
+  if exist %emailexe% (
+    call :get_datetime current_ddate current_ttime
 
-  echo "making pictures on %COMPUTERNAME% %revisionstring%" > %infofile%
-  echo "  start time: %startdate% %starttime%" >> %infofile%
-  echo "current time: %current_ddate% %current_ttime%" >> %infofile%
-  call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
-)
-call :GET_TIME MAKEPICS_beg
+    echo "making pictures on %COMPUTERNAME% %revisionstring%" > %infofile%
+    echo "  start time: %startdate% %starttime%" >> %infofile%
+    echo "current time: %current_ddate% %current_ttime%" >> %infofile%
+    call %email% %mailToFDSDebug% "making pictures on %COMPUTERNAME% %revisionstring%" %infofile%
+  )
+  call :GET_TIME MAKEPICS_beg
 
-echo Stage 5 - Making pictures
-echo             FDS verification cases
+  echo Stage 5 - Making pictures
+  echo             FDS verification cases
 
-cd %fdsroot%\Verification\scripts
-call MAKE_FDS_pictures %smokeview% 1> %OUTDIR%\stage5.txt 2>&1
+  cd %fdsroot%\Verification\scripts
+  call MAKE_FDS_pictures %smokeview% 1> %OUTDIR%\stage5.txt 2>&1
 
-if %have_matlab%==0 goto skip_matlabplots
-echo             matlab verification plots
-cd %fdsroot%\Utilities\Matlab
-matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
+  if %have_matlab%==0 goto skip_matlabplots
+    echo             matlab verification plots
+    cd %fdsroot%\Utilities\Matlab
+    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
 
-echo             matlab validation plots
-cd %fdsroot%\Utilities\Matlab
-matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
+    echo             matlab validation plots
+    cd %fdsroot%\Utilities\Matlab
+    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
 
-cd %fdsroot%\Utilities\Scripts
-validation_git_stats
+    cd %fdsroot%\Utilities\Scripts
+    validation_git_stats
 
-:skip_matlabplots
+  :skip_matlabplots
 
-call :GET_DURATION MAKEPICS %MAKEPICS_beg%
+  call :GET_DURATION MAKEPICS %MAKEPICS_beg%
 
 :: -------------------------------------------------------------
 ::                           stage 6
 :: -------------------------------------------------------------
 
-call :GET_TIME MAKEGUIDES_beg
+  call :GET_TIME MAKEGUIDES_beg
 
-echo Stage 6 - Building guides
+  echo Stage 6 - Building guides
 
-echo             FDS Technical Reference
-call :build_guide FDS_Technical_Reference_Guide %fdsroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
+  echo             FDS Technical Reference
+  call :build_guide FDS_Technical_Reference_Guide %fdsroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
 
-if have_matlab==0 goto skip_VV
-  echo             FDS User
-  call :build_guide FDS_User_Guide %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  if have_matlab==0 goto skip_VV
+    echo             FDS User
+    call :build_guide FDS_User_Guide %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-  echo             FDS Verification
-  call :build_guide FDS_Verification_Guide %fdsroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+    echo             FDS Verification
+    call :build_guide FDS_Verification_Guide %fdsroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-  echo             FDS Validation
-  call :build_guide FDS_Validation_Guide %fdsroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
-:skip_VV  
+    echo             FDS Validation
+    call :build_guide FDS_Validation_Guide %fdsroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+  :skip_VV  
 
-call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
+  call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
+
+:skip_lite4
+
 call :GET_DURATION TOTALTIME %TIME_beg%
 
 :: -------------------------------------------------------------
@@ -425,8 +445,10 @@ echo .        start: %startdate% %starttime% >> %infofile%
 echo .         stop: %stopdate% %stoptime%   >> %infofile%
 echo .        setup: %DIFF_PRELIM%           >> %infofile%
 echo .    run cases: %DIFF_RUNVV%            >> %infofile%
+if %lite% == 1 goto skip_lite5
 echo .make pictures: %DIFF_MAKEPICS%         >> %infofile%
 echo .  make guides: %DIFF_MAKEGUIDES%       >> %infofile%
+:skip_lite5
 echo .        total: %DIFF_TOTALTIME%        >> %infofile%
 echo . -----------------------------         >> %infofile%
 

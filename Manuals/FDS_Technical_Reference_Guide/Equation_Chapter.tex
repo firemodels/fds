@@ -131,11 +131,11 @@ Noting the vector identity $(\bu \cdot \nabla) \bu = \nabla|\bu|^2/2 - \bu\times
 \ee
 The term $\bof_\text{b}$ represents the drag force exerted by the subgrid-scale particles and droplets. The viscous stress, $\btau$, is closed via gradient diffusion with the turbulent viscosity obtained from the Deardorff eddy viscosity model \cite{Deardorff:1980,Pope:2000}. It is convenient to write Eq.~(\ref{momeqnoncon}) in the form:
 \be
-   \dod{\bu}{t} + \bF + \nabla \cH = 0
+   \dod{\bu}{t} + \bF + \nabla \cH  = 0
 \ee
 so that a Poisson equation for the pressure can be derived by taking its divergence:
 \be
-   \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF \right]   \label{simplephi2}
+   \nabla^2 \cH = - \left[ \dod{ }{t} (\nabla\!\cdot \bu) + \nabla\!\cdot \bF  \right]   \label{simplephi2}
 \ee
 Note the appearance of the time derivative of the divergence. This is an important feature of the time marching scheme. Note also that the right hand side of the Poisson equation retains a term that includes the perturbation pressure, $\tp \, \nabla (1/\rho)$. This term accounts for the baroclinic torque. It is included on the right hand side of the Poisson equation by using its value from the previous time step. This approximation allows us to solve a separable form of the Poisson equation, for which there are fast, direct solvers that are optimized for uniform grids~\cite{Sweet:1}.
 
@@ -217,11 +217,11 @@ The asterisk denotes a first order accurate estimate at the next time step. Note
 \item \label{step_pred_div} Compute the divergence, $(\nabla\!\cdot \bu)^*$, from Eq.~(\ref{eqn_simplediv1}) using the estimated thermodynamic quantities. Note that we use the parentheses to emphasize that an estimate of the velocity field, $\bu^*$, at the next time step has not been computed yet, only its divergence.
 
 \item Solve the Poisson equation for the pressure term:
-\be \nabla^2 \cH^n = - \frac{ (\nabla\!\cdot \bu)^* - \nabla\!\cdot \bu^n }{\dt} - \nabla\!\cdot \bF^n \ee
+\be \nabla^2 \cH^n = - \frac{ (\nabla\!\cdot \bu)^* - \nabla\!\cdot \bu^n }{\dt} - \nabla\!\cdot \bF^n  \ee
 
 \item Estimate the velocity at the next time step.
 \be
-\frac{\bu^* - \bu^n}{\dt} +  \bF^n + \nabla \cH^n = 0
+\frac{\bu^* - \bu^n}{\dt} +  \bF^n + \nabla \cH^n  = 0
 \ee
 Note that this procedure guarantees that the divergence of the estimated velocity field, $\nabla\!\cdot \bu^*$, is identically
 equal to the divergence that is derived from the estimated thermodynamic quantities, $(\nabla\!\cdot \bu)^*$, in Step \ref{step_pred_div}.
@@ -241,7 +241,6 @@ If the stability criterion is satisfied, the procedure continues to the correcto
 \frac{(\rho Z_\alpha)^{n+1} - \ha \left(\rho^n Z_\alpha^n + \rho^* Z_\alpha^* \right)}{\dt/2} +  \nabla\!\cdot \rho^* Z_\alpha^* \bu^* =
 \nabla\!\cdot (\rho^* D_\alpha^* \nabla Z_\alpha^*) + (\dot{m}_\alpha'''+ \dot{m}_{\rm b,\alpha}''')^n
 \ee
-
 The background pressure is corrected similarly. Note that the mass source terms are the same as those added in the predictor step. They are only computed once per time step.
 
 \item Compute the density $\rho^{n+1} = \sum_\alpha (\rho Z_\alpha)^{n+1}$ and mass fractions $Z_\alpha^{n+1} = (\rho Z_\alpha)^{n+1}/\rho^{n+1}$.
@@ -255,13 +254,12 @@ The background pressure is corrected similarly. Note that the mass source terms 
 \item Compute the pressure using the estimated quantities.
 \be
 \label{eqn_corrector_poisson2}
-\nabla^2\cH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right]
-   - \nabla\!\cdot \mathbf{F}^*
+\nabla^2\cH^* = - \left[ \frac{ (\nabla\cdot\bu)^{n+1} - \ha \left( \nabla\cdot \bu^* + \nabla\cdot \bu^n \right) }{\dt/2} \right] - \nabla\!\cdot \mathbf{F}^* 
 \ee
 
 \item Correct the velocity at the next time step.
 \be
-\frac{ \bu^{n+1} - \ha \left( \bu^* + \bu^n \right)}{\dt/2} + \mathbf{F}^* + \nabla \cH^*  = 0
+\frac{ \bu^{n+1} - \ha \left( \bu^* + \bu^n \right)}{\dt/2} + \mathbf{F}^* + \nabla \cH^* = 0
 \ee
 Note again that the divergence of the corrected velocity field is identically equal to the divergence that was computed in Step \ref{step_cor_div}.
 
