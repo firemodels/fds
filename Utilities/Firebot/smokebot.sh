@@ -22,7 +22,6 @@ NEWGUIDE_DIR=$OUTPUT_DIR/Newest_Guides
 web_DIR=
 WEB_URL=
 SMOKEBOT_LITE=
-CASEOPTIONS=-R
 
 # define repo names (default)
 fdsrepo=~/FDS-SMVgitclean
@@ -37,7 +36,6 @@ OPENMP=
 RUN_OPENMP=
 TESTFLAG=
 CLEANREPO=0
-MAKEGEOM=0
 UPDATEREPO=0
 SSH=
 MAILTO=
@@ -61,10 +59,6 @@ case $OPTION in
    ;;
   c)
    CLEANREPO=1
-   ;;
-  G)
-   MAKEGEOM=1
-   CASEOPTIONS=
    ;;
   I)
    COMPILER="$OPTARG"
@@ -711,7 +705,7 @@ run_verification_cases_debug()
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
-   ./Run_SMV_Cases.sh -c $cfastrepo $CASEOPTIONS -I $COMPILER $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 -m 2 -d -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3a 2>&1
 
    # Wait for SMV verification cases to end
    wait_verification_cases_debug_end
@@ -953,7 +947,7 @@ run_verification_cases_release()
    # Start running all SMV verification cases
    cd $fdsrepo/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
-   ./Run_SMV_Cases.sh -c $cfastrepo $CASEOPTIONS -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
+   ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
 
    # Wait for all verification cases to end
    wait_verification_cases_release_end
@@ -1580,16 +1574,14 @@ fi
 MAKEGUIDES_beg=`GET_TIME`
 if [ "$SMOKEBOT_LITE" == "" ]; then
   if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
-    echo Making guides
-    if [ "$MAKEGEOM" == "1" ]; then
-      echo "   geometry notes"
-      make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
-    fi
-    echo "   user"
+     echo Making guides
+#   echo "   geometry notes"
+#  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
+     echo "   user"
     make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
-    echo "   technical"
+     echo "   technical"
     make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
-    echo "   verification"
+     echo "   verification"
     make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
   else
     echo Errors found, not building guides
