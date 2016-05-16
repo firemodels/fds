@@ -308,19 +308,19 @@ if %haveCC% == 1 (
   echo             smokediff
   cd %fdsroot%\SMV\Build\smokediff\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_diff bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_smokediff bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokediff_win%size%.exe %OUTDIR%\stage3.txt
 
   echo             smokezip
   cd %fdsroot%\SMV\Build\smokezip\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_zip bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_smokezip bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokezip_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
   echo             wind2fds
   cd %fdsroot%\SMV\Build\wind2fds\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_wind bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_wind2fds bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
   call :is_file_installed background|| exit /b 1
