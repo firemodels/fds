@@ -347,7 +347,7 @@ echo             debug mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_Cases -debug -smvwui 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
@@ -364,7 +364,7 @@ echo             release mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases  1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_Cases -smvwui 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
@@ -410,8 +410,8 @@ call :build_guide SMV_Verification_Guide %fdsroot%\Manuals\SMV_Verification_Guid
 echo             User
 call :build_guide SMV_User_Guide %fdsroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             Geom Notes
-call :build_guide geom_notes %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+:: echo             Geom Notes
+:: call :build_guide geom_notes %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
