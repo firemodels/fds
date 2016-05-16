@@ -59,6 +59,7 @@ echo "-q queue - run cases using the queue named queue"
 echo "     default: batch"
 echo "     other options: vis"
 echo "-r - run only regular smokeview cases"
+echo "-R - run regular smokeview and WUI cases"
 echo "-s - stop FDS runs"
 echo "-u - use installed versions of utilities background and wind2fds"
 echo "-w - wait for cases to complete before returning"
@@ -129,7 +130,12 @@ case $OPTION in
   r)
    RUN_SMV=1
    RUN_GEOM=0
+   RUN_WUI=0
    ;;
+  R)
+   RUN_SMV=1
+   RUN_GEOM=0
+   RUN_WUI=1
   s)
    stop_cases=true
    export STOPFDS=-s
