@@ -930,6 +930,111 @@ void toggle_memload_visibility() {
 }
 #endif
 
+// mesh label
+void set_meshlabel_visibility(int setting) {
+  visMeshlabel = setting;
+  if(visMeshlabel==0)PRINTF("Mesh label hidden\n");
+  if(visMeshlabel==1)PRINTF("Mesh label visible\n");
+}
+
+int get_meshlabel_visibility() {
+  return visMeshlabel;
+}
+
+void toggle_meshlabel_visibility() {
+  visMeshlabel = 1 - visMeshlabel;
+  if(visMeshlabel==0)PRINTF("Mesh label hidden\n");
+  if(visMeshlabel==1)PRINTF("Mesh label visible\n");
+}
+
+// slice average
+void set_slice_average_visibility(int setting) {
+  vis_slice_average = setting;
+  if(vis_slice_average==0)PRINTF("Slice average hidden\n");
+  if(vis_slice_average==1)PRINTF("Slice average visible\n");
+}
+
+int get_slice_average_visibility() {
+  return vis_slice_average;
+}
+
+void toggle_slice_average_visibility() {
+  vis_slice_average = 1 - vis_slice_average;
+  if(vis_slice_average==0)PRINTF("Slice average hidden\n");
+  if(vis_slice_average==1)PRINTF("Slice average visible\n");
+}
+
+// time
+void set_time_visibility(int setting) {
+  visTimelabel = setting;
+  if(visTimelabel==0)PRINTF("Time label hidden\n");
+  if(visTimelabel==1)PRINTF("Time label visible\n");
+}
+
+int get_time_visibility() {
+  return visTimelabel;
+}
+
+void toggle_time_visibility() {
+  visTimelabel = 1 - visTimelabel;
+  if(visTimelabel==0)PRINTF("Time label hidden\n");
+  if(visTimelabel==1)PRINTF("Time label visible\n");
+}
+
+// user settable ticks
+void set_user_ticks_visibility(int setting) {
+  visUSERticks = setting;
+  if(visUSERticks==0)PRINTF("User settable ticks hidden\n");
+  if(visUSERticks==1)PRINTF("User settable ticks visible\n");
+}
+
+int get_user_ticks_visibility() {
+  return visUSERticks;
+}
+
+void toggle_user_ticks_visibility() {
+  visUSERticks = 1 - visUSERticks;
+  if(visUSERticks==0)PRINTF("User settable ticks hidden\n");
+  if(visUSERticks==1)PRINTF("User settable ticks visible\n");
+}
+
+//version info
+void set_version_info_visibility(int setting) {
+  gversion = setting;
+  if(gversion==0)PRINTF("Version info hidden\n");
+  if(gversion==1)PRINTF("Version info visible\n");
+}
+
+int get_version_info_visibility() {
+  return gversion;
+}
+
+void toggle_version_info_visibility() {
+  gversion = 1 - gversion;
+  if(gversion==0)PRINTF("Version info hidden\n");
+  if(gversion==1)PRINTF("Version info visible\n");
+}
+
+void set_all_label_visibility(int setting) {
+  set_colorbar_visibility(setting);
+  set_timebar_visibility(setting);
+  set_title_visibility(setting);
+  set_axis_visibility(setting);
+  set_framelabel_visibility(setting);
+  set_framerate_visibility(setting);
+  set_gridloc_visibility(setting);
+  set_hrrcutoff_visibility(setting);
+  set_hrrlabel_visibility(setting);
+  #ifdef pp_memstatus
+  set_memload_visibility(setting);
+  #endif
+  set_meshlabel_visibility(setting);
+  set_slice_average_visibility(setting);
+  set_time_visibility(setting);
+  set_user_ticks_visibility(setting);
+  set_version_info_visibility(setting);
+}
+
 // Display Units
 // time
 void set_timehms(int setting) {

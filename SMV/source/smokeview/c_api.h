@@ -118,7 +118,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 int parse_smv_filepath(const char *smv_filepath, char *fdsprefix,
                        char *input_filename_ext);
 
-// --------- show/hide options--------
+// --------- show/hide label options--------
 
 // colorbar
 void set_colorbar_visibility(int setting);
@@ -173,12 +173,32 @@ void toggle_memload_visibility();
 #endif
 
 // mesh
+void set_meshlabel_visibility(int setting);
+int get_meshlabel_visibility();
+void toggle_meshlabel_visibility();
+
 // slice average
+void set_slice_average_visibility(int setting);
+int get_slice_average_visibility();
+void toggle_slice_average_visibility();
+
 // time
+void set_time_visibility(int setting);
+int get_time_visibility();
+void toggle_time_visibility();
+
 // user settable ticks
+void set_user_ticks_visibility(int setting);
+int get_user_ticks_visibility();
+void toggle_user_ticks_visibility();
+
 // version info
-// show all
-// hide all
+void set_version_info_visibility(int setting);
+int get_version_info_visibility();
+void toggle_version_info_visibility();
+
+// set all
+void set_all_label_visibility(int setting);
 
 // --------- options--------
 

@@ -907,37 +907,149 @@ int lua_get_slice_in_obst(lua_State *L) {
   return 1;
 }
 
-int lua_setcolorbarvisibility(lua_State *L) {
+
+
+//////////////////////
+
+int lua_set_colorbar_visibility(lua_State *L) {
   int setting = lua_toboolean(L, 1);
   set_colorbar_visibility(setting);
   return 0;
 }
 
-int lua_getcolorbarvisibility(lua_State *L) {
+int lua_get_colorbar_visibility(lua_State *L) {
   int setting = get_colorbar_visibility();
   lua_pushboolean(L, setting);
   return 1;
 }
 
-int lua_togglecolorbarvisibility(lua_State *L) {
+int lua_toggle_colorbar_visibility(lua_State *L) {
   toggle_colorbar_visibility();
   return 0;
 }
 
-int lua_settimebarvisibility(lua_State *L) {
+int lua_set_timebar_visibility(lua_State *L) {
   int setting = lua_toboolean(L, 1);
   set_timebar_visibility(setting);
   return 0;
 }
 
-int lua_gettimebarvisibility(lua_State *L) {
+int lua_get_timebar_visibility(lua_State *L) {
   int setting = get_timebar_visibility();
   lua_pushboolean(L, setting);
   return 1;
 }
 
-int lua_toggletimebarvisibility(lua_State *L) {
+int lua_toggle_timebar_visibility(lua_State *L) {
   toggle_timebar_visibility();
+  return 0;
+}
+
+// title
+int lua_set_title_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_title_visibility(setting);
+  return 0;
+}
+
+int lua_get_title_visibility(lua_State *L) {
+  int setting = get_title_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_title_visibility(lua_State *L) {
+  toggle_title_visibility();
+  return 0;
+}
+
+// axis
+int lua_set_axis_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_axis_visibility(setting);
+  return 0;
+}
+
+int lua_get_axis_visibility(lua_State *L) {
+  int setting = get_axis_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_axis_visibility(lua_State *L) {
+  toggle_axis_visibility();
+  return 0;
+}
+
+// frame
+int lua_set_framelabel_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_framelabel_visibility(setting);
+  return 0;
+}
+
+int lua_get_framelabel_visibility(lua_State *L) {
+  int setting = get_framelabel_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_framelabel_visibility(lua_State *L) {
+  toggle_timebar_visibility();
+  return 0;
+}
+
+// framerate
+int lua_set_framerate_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_framerate_visibility(setting);
+  return 0;
+}
+
+int lua_get_framerate_visibility(lua_State *L) {
+  int setting = get_framerate_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_framerate_visibility(lua_State *L) {
+  toggle_framerate_visibility();
+  return 0;
+}
+
+// grid locations
+int lua_set_gridloc_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_gridloc_visibility(setting);
+  return 0;
+}
+
+int lua_get_gridloc_visibility(lua_State *L) {
+  int setting = get_gridloc_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_gridloc_visibility(lua_State *L) {
+  toggle_gridloc_visibility();
+  return 0;
+}
+
+// hrrpuv cutoff
+int lua_set_hrrcutoff_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_hrrcutoff_visibility(setting);
+  return 0;
+}
+
+int lua_get_hrrcutoff_visibility(lua_State *L) {
+  int setting = get_hrrcutoff_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_hrrcutoff_visibility(lua_State *L) {
+  toggle_hrrcutoff_visibility();
   return 0;
 }
 
@@ -958,6 +1070,124 @@ int lua_toggle_hrrlabel_visibility(lua_State *L) {
   toggle_hrrlabel_visibility();
   return 0;
 }
+// memory load
+#ifdef pp_memstatus
+int lua_set_memload_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_memload_visibility(setting);
+  return 0;
+}
+
+int lua_get_memload_visibility(lua_State *L) {
+  int setting = get_memload_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_memload_visibility(lua_State *L) {
+  toggle_memload_visibility();
+  return 0;
+}
+#endif
+
+// mesh label
+int lua_set_meshlabel_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_meshlabel_visibility(setting);
+  return 0;
+}
+
+int lua_get_meshlabel_visibility(lua_State *L) {
+  int setting = get_meshlabel_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_meshlabel_visibility(lua_State *L) {
+  toggle_meshlabel_visibility();
+  return 0;
+}
+
+// slice average
+int lua_set_slice_average_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_slice_average_visibility(setting);
+  return 0;
+}
+
+int lua_get_slice_average_visibility(lua_State *L) {
+  int setting = get_slice_average_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_slice_average_visibility(lua_State *L) {
+  toggle_slice_average_visibility();
+  return 0;
+}
+
+// time
+int lua_set_time_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_time_visibility(setting);
+  return 0;
+}
+
+int lua_get_time_visibility(lua_State *L) {
+  int setting = get_time_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_time_visibility(lua_State *L) {
+  toggle_time_visibility();
+  return 0;
+}
+
+// user settable ticks
+int lua_set_user_ticks_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_user_ticks_visibility(setting);
+  return 0;
+}
+
+int lua_get_user_ticks_visibility(lua_State *L) {
+  int setting = get_user_ticks_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_user_ticks_visibility(lua_State *L) {
+  toggle_user_ticks_visibility();
+  return 0;
+}
+
+// version info
+int lua_set_version_info_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_version_info_visibility(setting);
+  return 0;
+}
+
+int lua_get_version_info_visibility(lua_State *L) {
+  int setting = get_version_info_visibility();
+  lua_pushboolean(L, setting);
+  return 1;
+}
+
+int lua_toggle_version_info_visibility(lua_State *L) {
+  toggle_version_info_visibility();
+  return 0;
+}
+
+// set all
+int lua_set_all_label_visibility(lua_State *L) {
+  int setting = lua_toboolean(L, 1);
+  set_all_label_visibility(setting);
+  return 0;
+}
+
+//////////////////////////////////////
 
 int lua_camera_mod_eyex(lua_State *L) {
   float delta = lua_tonumber(L, 1);
@@ -1255,17 +1485,85 @@ void initLua() {
   lua_register(L, "set_slice_in_obst", lua_set_slice_in_obst);
   lua_register(L, "get_slice_in_obst", lua_get_slice_in_obst);
 
-  lua_register(L, "setcolorbarvisibility", lua_setcolorbarvisibility);
-  lua_register(L, "getcolorbarvisibility", lua_getcolorbarvisibility);
-  lua_register(L, "togglecolorbarvisibility", lua_togglecolorbarvisibility);
+  // colorbar
+  lua_register(L, "set_colorbar_visibility", lua_set_colorbar_visibility);
+  lua_register(L, "get_colorbar_visibility", lua_get_colorbar_visibility);
+  lua_register(L, "toggle_colorbar_visibility", lua_toggle_colorbar_visibility);
 
-  lua_register(L, "settimebarvisibility", lua_settimebarvisibility);
-  lua_register(L, "gettimebarvisibility", lua_gettimebarvisibility);
-  lua_register(L, "toggletimebarvisibility", lua_toggletimebarvisibility);
+  // timebar
+  lua_register(L, "set_timebar_visibility", lua_set_timebar_visibility);
+  lua_register(L, "get_timebar_visibility", lua_get_timebar_visibility);
+  lua_register(L, "toggle_timebar_visibility", lua_toggle_timebar_visibility);
 
+  // title
+  lua_register(L, "set_title_visibility", lua_set_title_visibility);
+  lua_register(L, "get_title_visibility", lua_get_title_visibility);
+  lua_register(L, "toggle_title_visibility", lua_toggle_title_visibility);
+
+  // axis
+  lua_register(L, "set_axis_visibility", lua_set_axis_visibility);
+  lua_register(L, "get_axis_visibility", lua_get_axis_visibility);
+  lua_register(L, "toggle_axis_visibility", lua_toggle_axis_visibility);
+
+  // frame label
+  lua_register(L, "set_framelabel_visibility", lua_set_framelabel_visibility);
+  lua_register(L, "get_framelabel_visibility", lua_get_framelabel_visibility);
+  lua_register(L, "toggle_framelabel_visibility", lua_toggle_framelabel_visibility);
+
+  // framerate
+  lua_register(L, "set_framerate_visibility", lua_set_framerate_visibility);
+  lua_register(L, "get_framerate_visibility", lua_get_framerate_visibility);
+  lua_register(L, "toggle_framerate_visibility", lua_toggle_framerate_visibility);
+
+  // grid locations
+  lua_register(L, "set_gridloc_visibility", lua_set_gridloc_visibility);
+  lua_register(L, "get_gridloc_visibility", lua_get_gridloc_visibility);
+  lua_register(L, "toggle_gridloc_visibility", lua_toggle_gridloc_visibility);
+
+  // hrrpuv cutoff
+  lua_register(L, "set_hrrcutoff_visibility", lua_set_hrrcutoff_visibility);
+  lua_register(L, "get_hrrcutoff_visibility", lua_get_hrrcutoff_visibility);
+  lua_register(L, "toggle_hrrcutoff_visibility", lua_toggle_hrrcutoff_visibility);
+
+  // hrr label
   lua_register(L, "set_hrrlabel_visibility", lua_set_hrrlabel_visibility);
   lua_register(L, "get_hrrlabel_visibility", lua_get_hrrlabel_visibility);
   lua_register(L, "toggle_hrrlabel_visibility", lua_toggle_hrrlabel_visibility);
+
+  // memory load
+#ifdef pp_memstatus
+  lua_register(L, "set_memload_visibility", lua_set_memload_visibility);
+  lua_register(L, "get_memload_visibility", lua_get_memload_visibility);
+  lua_register(L, "toggle_memload_visibility", lua_toggle_memload_visibility);
+#endif
+
+  // mesh label
+  lua_register(L, "set_meshlabel_visibility", lua_set_meshlabel_visibility);
+  lua_register(L, "get_meshlabel_visibility", lua_get_meshlabel_visibility);
+  lua_register(L, "toggle_meshlabel_visibility", lua_toggle_meshlabel_visibility);
+
+  // slice average
+  lua_register(L, "set_slice_average_visibility", lua_set_slice_average_visibility);
+  lua_register(L, "get_slice_average_visibility", lua_get_slice_average_visibility);
+  lua_register(L, "toggle_slice_average_visibility", lua_toggle_slice_average_visibility);
+
+  // time
+  lua_register(L, "set_time_visibility", lua_set_time_visibility);
+  lua_register(L, "get_time_visibility", lua_get_time_visibility);
+  lua_register(L, "toggle_time_visibility", lua_toggle_time_visibility);
+
+  // user settable ticks
+  lua_register(L, "set_user_ticks_visibility", lua_set_user_ticks_visibility);
+  lua_register(L, "get_user_ticks_visibility", lua_get_user_ticks_visibility);
+  lua_register(L, "toggle_user_ticks_visibility", lua_toggle_user_ticks_visibility);
+
+  // version info
+  lua_register(L, "set_version_info_visibility", lua_set_version_info_visibility);
+  lua_register(L, "get_version_info_visibility", lua_get_version_info_visibility);
+  lua_register(L, "toggle_version_info_visibility", lua_toggle_version_info_visibility);
+
+  // set all
+  lua_register(L, "set_all_label_visibility", lua_set_all_label_visibility);
 
   lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
   lua_register(L, "camera_set_eyex", lua_camera_set_eyex);
