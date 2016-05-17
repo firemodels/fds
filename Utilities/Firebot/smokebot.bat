@@ -308,19 +308,19 @@ if %haveCC% == 1 (
   echo             smokediff
   cd %fdsroot%\SMV\Build\smokediff\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_diff bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_smokediff bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokediff_win%size%.exe %OUTDIR%\stage3.txt
 
   echo             smokezip
   cd %fdsroot%\SMV\Build\smokezip\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_zip bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_smokezip bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist smokezip_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 
   echo             wind2fds
   cd %fdsroot%\SMV\Build\wind2fds\intel_win%size%
   erase *.obj *.mod *.exe 1>> %OUTDIR%\stage3.txt 2>&1
-  call make_wind bot 1>> %OUTDIR%\stage3.txt 2>&1
+  call make_wind2fds bot 1>> %OUTDIR%\stage3.txt 2>&1
   call :does_file_exist wind2fds_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
 ) else (
   call :is_file_installed background|| exit /b 1
@@ -347,7 +347,7 @@ echo             debug mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
+call Run_SMV_Cases -debug -smvwui 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
@@ -364,7 +364,7 @@ echo             release mode
 :: run the cases
 
 cd %fdsroot%\Verification\scripts
-call Run_SMV_cases  1> %OUTDIR%\stage4b.txt 2>&1
+call Run_SMV_Cases -smvwui 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
@@ -387,7 +387,7 @@ call :GET_TIME MAKEPICS_beg
 echo Stage 5 - Making Smokeview pictures
 
 cd %fdsroot%\Verification\scripts
-call MAKE_SMV_pictures 1> %OUTDIR%\stage5.txt 2>&1
+call Make_SMV_Pictures -smvwui 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"
 
@@ -410,8 +410,8 @@ call :build_guide SMV_Verification_Guide %fdsroot%\Manuals\SMV_Verification_Guid
 echo             User
 call :build_guide SMV_User_Guide %fdsroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
-echo             Geom Notes
-call :build_guide geom_notes %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+:: echo             Geom Notes
+:: call :build_guide geom_notes %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
