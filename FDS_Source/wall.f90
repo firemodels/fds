@@ -681,10 +681,11 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Currently, this is not hooked into PYROLYSIS shell elements,
 ! but this is under development.
 
-REAL(EB) :: DT_SUB,T_LOC,RHO_B,K_B,C_B,TMP_G,TMP_F,TMP_S,RDN,HTC
-INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG
+REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P
+INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
+TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 
 KDTDX=>WORK1; KDTDX=0._EB
@@ -706,9 +707,23 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.OBM%HT3D .OR. .NOT.OBP%HT3D) CYCLE
-            K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
-            KDTDX(I,J,K) = K_B * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
+            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
+            MLM => MATERIAL(OBM%MATL_INDEX)
+            MLP => MATERIAL(OBP%MATL_INDEX)
+            IF (MLM%K_S>0._EB) THEN
+               K_S_M = MLM%K_S
+            ELSE
+               NR = -NINT(MLM%K_S)
+               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            ENDIF
+            IF (MLP%K_S>0._EB) THEN
+               K_S_P = MLP%K_S
+            ELSE
+               NR = -NINT(MLP%K_S)
+               K_S_P = EVALUATE_RAMP(TMP(I+1,J,K),0._EB,NR)
+            ENDIF
+            K_S = 0.5_EB*(K_S_M+K_S_P)
+            KDTDX(I,J,K) = K_S * (TMP(I+1,J,K)-TMP(I,J,K))*RDXN(I)
          ENDDO
       ENDDO
    ENDDO
@@ -720,9 +735,23 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.OBM%HT3D .OR. .NOT.OBP%HT3D) CYCLE
-            K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
-            KDTDY(I,J,K) = K_B * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
+            MLM => MATERIAL(OBM%MATL_INDEX)
+            MLP => MATERIAL(OBP%MATL_INDEX)
+            IF (MLM%K_S>0._EB) THEN
+               K_S_M = MLM%K_S
+            ELSE
+               NR = -NINT(MLM%K_S)
+               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            ENDIF
+            IF (MLP%K_S>0._EB) THEN
+               K_S_P = MLP%K_S
+            ELSE
+               NR = -NINT(MLP%K_S)
+               K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
+            ENDIF
+            K_S = 0.5_EB*(K_S_M+K_S_P)
+            KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
          ENDDO
       ENDDO
    ENDDO
@@ -734,9 +763,23 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
             IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
             OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
             OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.OBM%HT3D .OR. .NOT.OBP%HT3D) CYCLE
-            K_B = 0.5_EB*(OBM%BULK_CONDUCTIVITY+OBP%BULK_CONDUCTIVITY)
-            KDTDZ(I,J,K) = K_B * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
+            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
+            MLM => MATERIAL(OBM%MATL_INDEX)
+            MLP => MATERIAL(OBP%MATL_INDEX)
+            IF (MLM%K_S>0._EB) THEN
+               K_S_M = MLM%K_S
+            ELSE
+               NR = -NINT(MLM%K_S)
+               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            ENDIF
+            IF (MLP%K_S>0._EB) THEN
+               K_S_P = MLP%K_S
+            ELSE
+               NR = -NINT(MLP%K_S)
+               K_S_P = EVALUATE_RAMP(TMP(I,J,K+1),0._EB,NR)
+            ENDIF
+            K_S = 0.5_EB*(K_S_M+K_S_P)
+            KDTDZ(I,J,K) = K_S * (TMP(I,J,K+1)-TMP(I,J,K))*RDZN(K)
          ENDDO
       ENDDO
    ENDDO
@@ -752,9 +795,14 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
       KK = WC%ONE_D%KK
       IC = CELL_INDEX(II,JJ,KK)
       IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
-      OB => OBSTRUCTION(OBST_INDEX_C(IC))
-      IF (.NOT.OB%HT3D) CYCLE HT3D_WALL_LOOP
-      K_B = OB%BULK_CONDUCTIVITY
+      OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE HT3D_WALL_LOOP
+      ML => MATERIAL(OB%MATL_INDEX)
+      IF (ML%K_S>0._EB) THEN
+         K_S = ML%K_S
+      ELSE
+         NR = -NINT(ML%K_S)
+         K_S = EVALUATE_RAMP(TMP(II,JJ,KK),0._EB,NR)
+      ENDIF
       IOR = WC%ONE_D%IOR
 
       METHOD_OF_HEAT_TRANSFER: SELECT CASE(SF%THERMAL_BC_INDEX)
@@ -762,12 +810,12 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
          CASE (SPECIFIED_TEMPERATURE) METHOD_OF_HEAT_TRANSFER
 
             SELECT CASE(IOR)
-               CASE( 1); KDTDX(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
-               CASE(-1); KDTDX(II-1,JJ,KK) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
-               CASE( 2); KDTDY(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDY(JJ)
-               CASE(-2); KDTDY(II,JJ-1,KK) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDY(JJ)
-               CASE( 3); KDTDZ(II,JJ,KK)   = K_B * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDZ(KK)
-               CASE(-3); KDTDZ(II,JJ,KK-1) = K_B * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
+               CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
+               CASE(-1); KDTDX(II-1,JJ,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
+               CASE( 2); KDTDY(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDY(JJ)
+               CASE(-2); KDTDY(II,JJ-1,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDY(JJ)
+               CASE( 3); KDTDZ(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDZ(KK)
+               CASE(-3); KDTDZ(II,JJ,KK-1) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
             END SELECT
 
          CASE (NET_FLUX_BC) METHOD_OF_HEAT_TRANSFER
@@ -799,11 +847,11 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                CASE( 3); RDN = RDZ(KK)
             END SELECT
             IF (RADIATION) THEN
-               TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_B*RDN*TMP_S ) / &
-                       ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_B*RDN       )
+               TMP_F = ( WC%ONE_D%QRADIN +                    HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                       ( WC%ONE_D%EMISSIVITY*SIGMA*TMP_F**3 + HTC       + 2._EB*K_S*RDN       )
             ELSE
-               TMP_F = ( HTC*TMP_G + 2._EB*K_B*RDN*TMP_S ) / &
-                       ( HTC       + 2._EB*K_B*RDN       )
+               TMP_F = ( HTC*TMP_G + 2._EB*K_S*RDN*TMP_S ) / &
+                       ( HTC       + 2._EB*K_S*RDN       )
             ENDIF
 
             WC%ONE_D%TMP_F = TMP_F
@@ -818,11 +866,17 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
          DO I=1,IBAR
             IC = CELL_INDEX(I,J,K)
             IF (.NOT.SOLID(IC)) CYCLE
-            OB => OBSTRUCTION(OBST_INDEX_C(IC))
-            IF (.NOT.OB%HT3D) CYCLE
-            RHO_B = OB%BULK_DENSITY
-            C_B   = OB%BULK_SPECIFIC_HEAT
-            TMP(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_B*C_B) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+            OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE
+            ML => MATERIAL(OB%MATL_INDEX)
+            RHO_S = ML%RHO_S
+            IF (ML%C_S>0._EB) THEN
+               C_S = ML%C_S
+            ELSE
+               NR = -NINT(ML%C_S)
+               C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+            ENDIF
+
+            TMP(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                                                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
                                                              (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K) )
          ENDDO
@@ -1614,7 +1668,7 @@ IF (E_WALLB < 0._EB .AND. SF%BACKING /= INSULATED) THEN
    ENDIF
    DO N=1,SF%N_MATL
       IF (ONE_D%RHO(NWP,N)<=TWO_EPSILON_EB) CYCLE
-      ML  => MATERIAL(SF%MATL_INDEX(N))
+      ML => MATERIAL(SF%MATL_INDEX(N))
       VOLSUM = VOLSUM + ONE_D%RHO(NWP,N)/ML%RHO_S
       E_WALLB = E_WALLB + ONE_D%RHO(NWP,N)*ML%EMISSIVITY/ML%RHO_S
    ENDDO
@@ -2039,18 +2093,18 @@ POINT_LOOP3: DO I=1,NWP
       IF (ML%K_S>0._EB) THEN
          K_S(I) = K_S(I) + ONE_D%RHO(I,N)*ML%K_S/ML%RHO_S
       ELSE
-         NR     = -NINT(ML%K_S)
+         NR = -NINT(ML%K_S)
          K_S(I) = K_S(I) + ONE_D%RHO(I,N)*EVALUATE_RAMP(ONE_D%TMP(I),0._EB,NR)/ML%RHO_S
       ENDIF
 
       IF (ML%C_S>0._EB) THEN
          RHOCBAR(I) = RHOCBAR(I) + ONE_D%RHO(I,N)*ML%C_S
       ELSE
-         NR     = -NINT(ML%C_S)
+         NR = -NINT(ML%C_S)
          RHOCBAR(I) = RHOCBAR(I) + ONE_D%RHO(I,N)*EVALUATE_RAMP(ONE_D%TMP(I),0._EB,NR)*C_S_ADJUST_UNITS
       ENDIF
       IF (.NOT.E_FOUND) ONE_D%EMISSIVITY = ONE_D%EMISSIVITY + ONE_D%RHO(I,N)*ML%EMISSIVITY/ML%RHO_S
-      RHO_S(I)   = RHO_S(I) + ONE_D%RHO(I,N)
+      RHO_S(I) = RHO_S(I) + ONE_D%RHO(I,N)
 
    ENDDO MATERIAL_LOOP3
 
