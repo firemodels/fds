@@ -4,13 +4,6 @@
 #if defined(WIN32)
 #include <windows.h>
 #endif
-#ifdef pp_OSX
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
-#else
-#include <GL/gl.h>
-#include <GL/glu.h>
-#endif
 
 #define DONT_GET_AREAS 0
 #define GET_CELL_AREAS 1

@@ -18,7 +18,6 @@ void init_supermesh(void);
 void unload_volsmoke_frame_allmeshes(int framenum);
 void compute_all_smokecolors(void);
 void drawsmoke3dGPUVOL(void);
-void drawsmoke3dVOL(void);
 void drawsmoke3dVOLdebug(void);
 void get_cum_smokecolor(float *cum_smokecolor, float *xyzvert, float dstep, meshdata *meshi, int iwall);
 void get_pt_smokecolor(float *smoke_tran, float **smoke_color, float dstep, float xyz[3], meshdata *meshi, int *inobst, char *blank);
