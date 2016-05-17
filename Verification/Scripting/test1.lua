@@ -334,6 +334,78 @@ test("show/hide labels", function()
     end)
 end)
 
+test("show/hide - geometry - obstacles", function()
+    view.viewpoint = "n"
+    displayCB()
+    test("as_input raw", function()
+        blockage_view_method(1)
+        render("as_input raw")
+        end)
+    test("as_input interface", function()
+        view.blockages.method = "as_input"
+        render("as_input interface")
+        end)
+    -- reset
+    blockage_view_method(1)
+    test("solid raw", function()
+        blockage_view_method(2)
+        render("solid raw")
+        end)
+    test("solid interface", function()
+        view.blockages.method = "solid"
+        render("solid interface")
+        end)
+    -- reset
+    blockage_view_method(1)
+    test("outline_only raw", function()
+        blockage_view_method(3)
+        render("outline_only raw")
+        end)
+    test("outline_only interface", function()
+        view.blockages.method = "outline_only"
+        render("outline_only interface")
+        end)
+    -- reset
+    blockage_view_method(1)
+    test("outline_added raw", function()
+        blockage_view_method(4)
+        render("outline_added raw")
+        end)
+    test("outline_added interface", function()
+        view.blockages.method = "outline_added"
+        render("outline_added interface")
+        end)
+    -- reset
+    blockage_view_method(1)
+    test("hidden raw", function()
+        blockage_view_method(5)
+        render("hidden raw")
+        end)
+    test("hidden interface", function()
+        view.blockages.method = "hidden"
+        render("hidden interface")
+        end)
+    view.blockages.method = "outline_only"
+    test("blockage color outline raw", function()
+        blockage_outline_color(1)
+        render("blockage color outline raw")
+        end)
+    test("blockage color outline interface", function()
+        view.blockages.outline_color = "blockage"
+        render("blockage color outline interface")
+        end)
+    test("foreground color outline raw", function()
+        blockage_outline_color(2)
+        render("foreground color outline raw")
+        end)
+    test("foreground color outline interface", function()
+        view.blockages.outline_color = "foreground"
+        render("foreground color outline interface")
+        end)
+    blockage_view_method(1)
+    blockage_outline_color(1)
+end)
+
 -- the following tests depend on data not being loaded
 test("no loaded file tests", function()
     test("pre-reqs", function()unload.all()end)
