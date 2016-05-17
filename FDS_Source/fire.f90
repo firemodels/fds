@@ -635,7 +635,7 @@ KINETICS_SELECT: SELECT CASE(KINETICS)
             ENDDO
             DZ_F = RN%A_PRIME*RHO_0**RN%RHO_EXPONENT*TMP_0**RN%N_T*EXP(-RN%E/(R0*TMP_0)) ! dZ/dt, FDS Tech Guide, Eq. (5.49)
             DO NS=1,N_SPECIES
-               IF(RN%N_S(NS) > -998._EB)  DZ_F = YY_PRIMITIVE(NS)**RN%N_S(NS)*DZ_F
+               IF(RN%N_S(NS) > -998._EB) DZ_F = YY_PRIMITIVE(NS)**RN%N_S(NS)*DZ_F
             ENDDO
             IF (RN%THIRD_BODY) THEN
                CALL GET_MOLECULAR_WEIGHT(ZZ_TMP,MW)
