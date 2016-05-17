@@ -995,7 +995,7 @@ int lua_get_framelabel_visibility(lua_State *L) {
 }
 
 int lua_toggle_framelabel_visibility(lua_State *L) {
-  toggle_timebar_visibility();
+  toggle_framelabel_visibility();
   return 0;
 }
 
