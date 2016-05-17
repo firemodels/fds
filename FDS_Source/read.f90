@@ -7459,8 +7459,8 @@ CHARACTER(25) :: COLOR
 LOGICAL :: EVACUATION_OBST,OVERLAY
 REAL(EB) :: TRANSPARENCY,XB1,XB2,XB3,XB4,XB5,XB6,BULK_DENSITY,VOL_ADJUSTED,VOL_SPECIFIED,UNDIVIDED_INPUT_AREA(3)
 LOGICAL :: EMBEDDED,THICKEN,PERMIT_HOLE,ALLOW_VENT,EVACUATION, REMOVABLE,BNDF_FACE(-3:3),BNDF_OBST,OUTLINE,NOTERRAIN,HT3D
-NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_CONDUCTIVITY,BULK_DENSITY,BULK_SPECIFIC_HEAT,&
-                COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HT3D,ID,MALT_ID,MESH_ID,MULT_ID,NOTERRAIN,&
+NAMELIST /OBST/ ALLOW_VENT,BNDF_FACE,BNDF_OBST,BULK_DENSITY,&
+                COLOR,CTRL_ID,DEVC_ID,EVACUATION,FYI,HT3D,ID,MATL_ID,MESH_ID,MULT_ID,NOTERRAIN,&
                 OUTLINE,OVERLAY,PERMIT_HOLE,PROP_ID,REMOVABLE,RGB,SURF_ID,SURF_ID6,SURF_IDS,TEXTURE_ORIGIN,THICKEN,&
                 TRANSPARENCY,XB
 
@@ -7523,11 +7523,9 @@ MESH_LOOP: DO NM=1,NMESHES
       SURF_IDS = 'null'
       SURF_ID6 = 'null'
       COLOR    = 'null'
-      MESH_ID     = 'null'
+      MESH_ID  = 'null'
       RGB         = -1
-      BULK_CONDUCTIVITY  = -1._EB
-      BULK_DENSITY       = -1._EB
-      BULK_SPECIFIC_HEAT = -1._EB
+      BULK_DENSITY= -1._EB
       HT3D        = .FALSE.
       TRANSPARENCY= 1._EB
       BNDF_FACE   = BNDF_DEFAULT
@@ -7896,8 +7894,26 @@ MESH_LOOP: DO NM=1,NMESHES
                OB%HT3D = HT3D
                IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%HT3D=.FALSE.
                IF (OB%HT3D .AND. TRIM(MATL_ID)=='null') THEN
-                  WRITE(MESSAGE,'(A,I5,A)')  'ERROR: Problem with OBST number',NN,' HT3D requires MATL_ID.'
+                  WRITE(MESSAGE,'(A,I5,A)')  'ERROR: Problem with OBST number',NN,', HT3D requires MATL_ID.'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
+               ENDIF
+
+               ! Set MATL_INDEX for HT3D
+
+               IF (OB%HT3D) THEN
+                  OB%MATL_ID = MATL_ID
+                  DO NNN=1,N_MATL
+                     ML=>MATERIAL(NNN)
+                     IF (TRIM(OB%MATL_ID)==TRIM(ML%ID)) THEN
+                        OB%MATL_INDEX=NNN
+                        OB%BULK_DENSITY=ML%RHO_S
+                        EXIT
+                     ENDIF
+                  ENDDO
+                  IF (OB%MATL_INDEX<0) THEN
+                     WRITE(MESSAGE,'(A,I5,A)')  'ERROR: Problem with OBST number',NN,', MATL_ID not found.'
+                     CALL SHUTDOWN(MESSAGE) ; RETURN
+                  ENDIF
                ENDIF
 
                ! Make obstruction invisible if it's within a finer mesh
