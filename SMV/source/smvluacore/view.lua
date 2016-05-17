@@ -1,7 +1,7 @@
 
 
 
-view = {colorbar = {}}
+view = {colorbar = {}, blockages = {}}
 _view = {
     -- colorbar = {
     --     get = function()
@@ -110,8 +110,96 @@ _colorbar = {
         end
     }
 }
-
 setmetatable(view.colorbar, colorbar_mt)
+
+local blockages_mt = {
+   -- get method
+   __index = function (t,k)
+       if type(_blockages[k]) == "function" then
+           return _blockages[k]
+       else
+           return _blockages[k].get()
+       end
+   end,
+   -- set method
+   __newindex = function (t,k,v)
+       _blockages[k].set(v)
+   end
+}
+
+-- View Method
+-- 1 - Defined in input file
+-- 2 - Solid
+-- 3 - Outine only
+-- 4 - Outline added
+-- 5 - Hidden
+local viewMethodTable = {
+    as_input = 1,
+    solid = 2,
+    outline_only = 3,
+    outline_added = 4,
+    hidden = 5
+}
+local outlineColorTable = {
+    blockage = 1,
+    foreground = 2
+}
+local locationViewTable = {
+    grid = 1,
+    exact = 2,
+    cad = 3
+}
+local convertTo = function(table, strValue)
+    local v = table[strValue]
+    if v == nil then error("invalid view method: " .. strValue)
+        else return v
+        end
+    end
+local convertFrom = function(table, intValue)
+    for key,value in pairs(table) do
+        if (value == intValue) then
+            return key
+        end
+    end
+    error("invalid view method value: " .. intValue)
+    end
+
+_blockages = {
+    method = {
+        -- get
+        -- blockage_view_method(int setting)
+        set = function(setting)
+            if (type(setting) == "string") then
+                blockage_view_method(convertTo(viewMethodTable, setting))
+            else
+                error("view.blockages.method expected string but got " .. type(setting))
+            end
+            end
+    },
+    outline_color = {
+        -- get
+        -- blockage_view_method(int setting)
+        set = function(setting)
+            if (type(setting) == "string") then
+                blockage_outline_color(convertTo(outlineColorTable, setting))
+            else
+                error("view.blockages.outline_color expected string but got " .. type(setting))
+            end
+            end
+    },
+    locations = {
+        -- get
+        -- blockage_view_method(int setting)
+        set = function(setting)
+            if (type(setting) == "string") then
+                blockage_locations(convertTo(locationViewTable, setting))
+            else
+                error("view.blockages.locations expected string but got " .. type(setting))
+            end
+            end
+    }
+}
+setmetatable(view.blockages, blockages_mt)
 
 window = {}
 window.size = function(width, height)

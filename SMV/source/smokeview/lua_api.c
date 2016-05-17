@@ -1189,6 +1189,27 @@ int lua_set_all_label_visibility(lua_State *L) {
 
 //////////////////////////////////////
 
+int lua_blockage_view_method(lua_State *L) {
+  int setting = lua_tonumber(L, 1);
+  int return_code = blockage_view_method(setting);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_blockage_outline_color(lua_State *L) {
+  int setting = lua_tonumber(L, 1);
+  int return_code = blockage_outline_color(setting);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_blockage_locations(lua_State *L) {
+  int setting = lua_tonumber(L, 1);
+  int return_code = blockage_locations(setting);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
 int lua_camera_mod_eyex(lua_State *L) {
   float delta = lua_tonumber(L, 1);
   camera_mod_eyex(delta);
@@ -1564,6 +1585,11 @@ void initLua() {
 
   // set all
   lua_register(L, "set_all_label_visibility", lua_set_all_label_visibility);
+
+  // set the blockage view method
+  lua_register(L, "blockage_view_method", lua_blockage_view_method);
+  lua_register(L, "blockage_outline_color", lua_blockage_outline_color);
+  lua_register(L, "blockage_locations", lua_blockage_locations);
 
   lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
   lua_register(L, "camera_set_eyex", lua_camera_set_eyex);

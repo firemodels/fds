@@ -212,3 +212,7 @@ void toggle_timehms();
 void set_units(int unitclass, int unit_index);
 void set_units_default();
 void set_unitclass_default(int unitclass);
+
+int blockage_view_method(int setting);
+int blockage_outline_color(int setting);
+int blockage_locations(int setting);

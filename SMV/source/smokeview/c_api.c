@@ -1077,6 +1077,82 @@ void set_unitclass_default(int unitclass) {
   glutPostRedisplay();
 }
 
+// Show/Hide Geometry
+// Obstacles
+// View Method
+// 1 - Defined in input file
+// 2 - Solid
+// 3 - Outine only
+// 4 - Outline added
+// 5 - Hidden
+int blockage_view_method(int setting) {
+  int value;
+  switch(setting) {
+    case 1:
+      value=visBLOCKAsInput;
+      break;
+    case 2:
+      value=visBLOCKNormal;
+      break;
+    case 3:
+      value=visBLOCKOutline;
+      break;
+    case 4:
+      value=visBLOCKAddOutline;
+      break;
+    case 5:
+      value=visBLOCKHide;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+  }
+  // TODO
+  // The below is the menu code verbatim. Simplify to contain only the
+  // necessary code.
+  BlockageMenu(value);
+  return 0;
+}
+
+// 1 - Use blockage
+// 2 - Use foreground
+int blockage_outline_color(int setting) {
+  switch(setting) {
+    case 1:
+      outline_color_flag = 0;
+      updatefaces=1;
+      break;
+    case 2:
+      outline_color_flag = 1;
+      updatefaces=1;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+  }
+  return 0;
+}
+
+// 1 - grid
+// 2 - exact
+// 3 - cad
+int blockage_locations(int setting) {
+  switch(setting) {
+    case 1:
+      blocklocation=BLOCKlocation_grid;
+      break;
+    case 2:
+      blocklocation=BLOCKlocation_exact;
+    case 3:
+      blocklocation=BLOCKlocation_cad;
+      break;
+    default:
+      ASSERT(FFALSE);
+      break;
+  }
+  return 0;
+}
+
 void setframe(int framenumber) {
   itimes=framenumber;
   script_itime=itimes;
