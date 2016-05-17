@@ -292,15 +292,12 @@ void drawcone(float d1, float height, unsigned char *rgbcolor);
 void drawtrunccone(float d1, float d2, float height, unsigned char *rgbcolor);
 void drawline(float *xyz1, float *xyz2, unsigned char *rgbcolor);
 void drawarc(float angle, float diameter, unsigned char *rgbcolor);
-void drawcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
-void drawfilledcircle(float diameter, unsigned char *rgbcolor, circdata *circinfo);
 void drawpoint(unsigned char *rgbcolor);
 void drawsphere(float diameter, unsigned char *rgbcolor);
 void drawhsphere(float diameter, unsigned char *rgbcolor);
 void drawtriblock(float size, float height, unsigned char *rgbcolor);
 void drawtsphere(int texture_index, float diameter, unsigned char *rgbcolor);
 void drawcube(float size, unsigned char *rgbcolor);
-void drawcubec(float size, unsigned char *rgbcolor);
 void drawsquare(float size, unsigned char *rgbcolor);
 void drawvent(float width, float height, unsigned char *rgbcolor);
 void drawcdisk(float diameter, float height, unsigned char *rgbcolor);
@@ -5633,6 +5630,9 @@ int comparev2devices(const void *arg1, const void *arg2){
     if(xyzi[1] - xyzj[1]<-EPSDEV)return -1;
     if(xyzi[1] - xyzj[1]>+EPSDEV)return 1;
     break;
+  default:
+    ASSERT(FFALSE);
+    break;
   }
   return 0;
 }
@@ -5676,6 +5676,9 @@ int comparev3devices( const void *arg1, const void *arg2 ){
     if(xyzi[1]-xyzj[1]>+EPSDEV)return 1;
     if(xyzi[2]-xyzj[2]<-EPSDEV)return -1;
     if(xyzi[2]-xyzj[2]>+EPSDEV)return 1;
+    break;
+  default:
+    ASSERT(FFALSE);
     break;
   }
   return 0;
@@ -6036,7 +6039,7 @@ void setup_pilot_data(int nbuckets){
     devicedata *udev, *vdev, *wdev;
     devicedata *angledev, *veldev;
     int j, ibucket;
-    pilotdata *piloti,*pilotii;
+	pilotdata *piloti;
 
     vdevicei = vdeviceinfo + i;
     udev = vdevicei->udev;

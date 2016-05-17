@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "ASSERT.h"
 #include "string_util.h"
+#include "file_util.h"
 #include "datadefs.h"
 
 // dummy change to bump version to 1.0
@@ -292,7 +293,7 @@ int reg_path(int setget, int pathtype, char *path){
   LPCTSTR reg_path_local=NULL;
 
   char creg_user_path[]="Environment";
-  LPCTSTR reg_user_path=creg_user_path;
+  LPCTSTR reg_user_path=(LPCTSTR)creg_user_path;
 
   char creg_system_path[]="SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment";
   LPCTSTR reg_system_path=(LPCTSTR)creg_system_path;
