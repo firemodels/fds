@@ -12,6 +12,8 @@
 #define GENERATE_GEOM 1
 #define GENERATE_OBSTS 2
 
+int nelevsperfile=400;
+
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
@@ -21,6 +23,20 @@ void usage(char *prog){
   getGitInfo(githash,gitdate);    // get githash
 
   fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
+  fprintf(stderr, "  Create an FDS input file using elevation data.\n\n");
+  fprintf(stderr, "Usage:\n\n");
+  fprintf(stderr, "  dem2fds [-e|-g|-o][-h][-n n][-v] casename\n\n");
+  fprintf(stderr, "where\n\n");
+  fprintf(stderr, "  -e - create elevation files (default)\n");
+  fprintf(stderr, "  -g - create FDS input file from elevations using &GEOM keywords\n");
+  fprintf(stderr, "  -o - create FDS input file from elevations using &OBST keywords\n");
+  fprintf(stderr, "  -n n - number of elevations per file. default: %i \n",nelevsperfile);
+  fprintf(stderr, "  -h - display this message\n");
+  fprintf(stderr, "  -v - show versioning information\n\n");
+  fprintf(stderr, " Usage examples:\n");
+  fprintf(stderr, " 1. create elevation files:                dem2fds -e casename < casename.in\n");
+  fprintf(stderr, " 2. create FDS file using &GEOM keywords : dem2fds -g casename\n");
+  fprintf(stderr, " 3. create FDS file using &OBST keywords : dem2fds -o casename\n");
 }
 
 #define ABS(a) ((a)>=0 ? (a) : (-(a)))
@@ -181,7 +197,7 @@ void generate_longlats(char *filebase){
       float llong;
 
       llong = (long1*(float)(nlong - 1 - j) + long2*(float)j) / (float)(nlong - 1);
-      if(line_count>400){
+      if(line_count>nelevsperfile){
         file_count++;
         fclose(streamout);
         sprintf(fileout, "%s_longlats_%03i.csv", filebase, file_count);
@@ -200,8 +216,8 @@ void generate_longlats(char *filebase){
 
 int main(int argc, char **argv){
   int i;
-  int gen_elevs = 0;
-  int gen_obsts = 0;
+  int gen_fdsgeom = 0;
+  int gen_fdsobst = 0;
   char *filebase = NULL;
   char file_default[1000];
 
@@ -222,10 +238,17 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'o':
-        gen_obsts = 1;
+        gen_fdsobst = 1;
         break;
       case 'e':
-        gen_elevs = 1;
+        break;
+      case 'n':
+        ++i;
+        if(i < argc)sscanf(argv[i], "%i", &nelevsperfile);
+        printf("nelevsperfile=%i\n",nelevsperfile);
+        break;
+      case 'g':
+        gen_fdsgeom = 1;
         break;
       case 'v':
         PRINTversion("dem2geom");
@@ -244,10 +267,10 @@ int main(int argc, char **argv){
     }
   }
   if(filebase == NULL)filebase = file_default;
-  if(gen_elevs == 1){
+  if(gen_fdsgeom == 1){
     generate_fds(filebase,GENERATE_GEOM);
   }
-  else if(gen_obsts == 1){
+  else if(gen_fdsobst == 1){
     generate_fds(filebase,GENERATE_OBSTS);
   }
   else{
