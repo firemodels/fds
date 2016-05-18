@@ -7890,6 +7890,12 @@ MESH_LOOP: DO NM=1,NMESHES
 
                ! Only allow the use of BULK_DENSITY if the obstruction has a non-zero volume
 
+               IF (EVACUATION_ONLY(NM)) BULK_DENSITY = -1._EB
+               OB%BULK_DENSITY = BULK_DENSITY
+               IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%BULK_DENSITY = -1._EB
+
+               ! No HT3D for EVAC or zero volume OBST
+
                IF (EVACUATION_ONLY(NM)) HT3D=.FALSE.
                OB%HT3D = HT3D
                IF (ABS(OB%VOLUME_ADJUST)<TWO_EPSILON_EB .AND. OB%BULK_DENSITY>0._EB) OB%HT3D=.FALSE.
