@@ -763,6 +763,16 @@ MAIN_LOOP: DO
       FLUSH_CLOCK = FLUSH_CLOCK + DT_FLUSH
    ENDIF
 
+   ! Dump a restart file if necessary
+
+   IF ((T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR.  RADIATION_COMPLETED)) THEN
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_SKIP(NM)) CYCLE
+         CALL DUMP_RESTART(T,DT,NM)
+      ENDDO
+      RESTART_CLOCK = RESTART_CLOCK + DT_RESTART
+   ENDIF
+
    ! Check for abnormal run stop
 
    CALL STOP_CHECK(1)  ! The argument 1 means that FDS will end unless there is logic associated with the STOP_STATUS
