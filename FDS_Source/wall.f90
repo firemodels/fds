@@ -280,7 +280,7 @@ IF (SOLID_PARTICLES) THEN
 ENDIF
 
 ! *********************** UNDER CONSTRUCTION *************************
-IF (ANY(OBSTRUCTION%HT3D) .AND. CORRECTOR) CALL SOLID_HEAT_TRANSFER_3D
+IF (SOLID_HT3D .AND. CORRECTOR) CALL SOLID_HEAT_TRANSFER_3D
 ! ********************************************************************
 
 
