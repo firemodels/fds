@@ -439,7 +439,7 @@ loadVisuals(int *nitems_return)
         GLXFBConfigSGIX fbc;
         int fbconfigID, drawType, renderType;
 
-        fbc = glXGetFBConfigFromVisualSGIX(__glutDisplay, vlist[i]);
+        fbc = (GLXFBConfigSGIX)glXGetFBConfigFromVisualSGIX(__glutDisplay, vlist[i]);
         if (fbc) {
           rc = glXGetFBConfigAttribSGIX(__glutDisplay, fbc,
 	    GLX_FBCONFIG_ID_SGIX, &fbconfigID);

@@ -11462,7 +11462,7 @@ void writeini_local(FILE *fileout){
     fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
   }
   fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
-  fprintf(fileout, "%f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
+  fprintf(fileout, " %f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
   fprintf(fileout, "DEVICEBOUNDS\n");
   fprintf(fileout, " %f %f\n", device_valmin, device_valmax);
   fprintf(fileout, "DEVICEORIENTATION\n");
@@ -12071,7 +12071,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SMOKE3DZIPSTEP\n");
   fprintf(fileout, " %i\n", smoke3dzipstep);
   fprintf(fileout, "USER_ROTATE\n");
-  fprintf(fileout, "%i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
+  fprintf(fileout, " %i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
 
   fprintf(fileout,"\n *** VIEW PARAMETERS ***\n\n");
 
@@ -12310,7 +12310,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "PIXELSKIP\n");
   fprintf(fileout, " %i\n", pixel_skip);
   fprintf(fileout, "RENDERCLIP\n");
-  fprintf(fileout, "%i %i %i %i %i\n",
+  fprintf(fileout, " %i %i %i %i %i\n",
     clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
   fprintf(fileout, "RENDERFILELABEL\n");
   fprintf(fileout, " %i\n", renderfilelabel);
