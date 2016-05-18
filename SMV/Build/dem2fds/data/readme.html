@@ -1,0 +1,61 @@
+<html>
+<head>
+<TITLE>Creating Terrain Files</TITLE>
+</head>
+<BODY BGCOLOR="#FFFFFF" >
+<h3>Creating an FDS Terrain Case (preliminary)</h3>
+
+<h4><Preliminaries</h4>
+  Install or verify that the following is installed:
+<ul>
+  <li>  Google Earth
+  <li>  latest test smokeview
+  <li>  screen capture program
+</ul>
+
+<h4>Create FDS Input File</h4>
+<ol>
+  <li> Open Google Earth and identify a rectangular region of interest (in the United States).
+  <li> Record the lat/lon coordinates of two opposite corners of this region.
+  <li> Save this region to an image file using a screen capture program.  Name this image casename.png where casename is the 'CHID' parameter in your FDS input file
+  <li> Create a file named casename.in containing the following line:<br>
+    <tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes</tt>
+
+<ol>
+     <li> Note that Google Earth gives latitudes and longitudes as d=degrees, m=minutes and  s=seconds.
+       dem2fds, the program that uses this data assumes that latitudes and longitudes are in decimal <em>i.e.</em> d + m/60 + s/3600
+    <li>Also note that longitudes in the United States are negative.
+</ol>
+
+<li> Type the command:<br>
+     <tt>dem2fds casename < casename.in</tt><br>
+
+   This command generated a series of files named casename_longlats_xxx.csv .  Each file contains 400 longitude/latitude pairs
+
+<li> Go to <a href="http://viewer.nationalmap.gov/theme/elevation/">http://viewer.nationalmap.gov/theme/elevation/</a> and click on bulk
+
+<ol>
+   <li>  Click on Choose Files and select a file for each casename_longlats_xxx.csv generated in step 5
+   <li>  Click on Get Elevations
+   <li>  After that web site retrieved all the data requested save the file
+</ol>
+
+<li> Concatenate all elevation files generated in step 6 after removing the header line in each file.
+Call this file casename_elevs.in
+
+<li> Creating an FDS input file
+
+   <ol>
+   <li>Using obstacles (&OBST lines):<br>
+   <tt>dem2fds -o casename</tt><br>
+
+   <li>Using geometry (&GEOM lines):<br>
+   <tt>dem2fds -e casename</tt><br>
+   </ol>
+   
+
+</ol>
+
+</BODY>
+</HTML>
+
