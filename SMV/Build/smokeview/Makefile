@@ -139,7 +139,7 @@ ms_win_64 : $(objwin)
 
 intel_win_64_db : INC += $(WININC) -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview
 intel_win_64_db : FFLAGS    = /Od /iface:stdref /fpp -D WIN32 /Z7 /nologo /fpscomp:general /debug:full /extend_source:132 /warn:unused /warn:nointerfaces /Qtrapuv /fp:strict /fp:except /traceback /check:all /stand:f08
-intel_win_64_db : CFLAGS    = /Od /W5 /debug:full /Z7 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
+intel_win_64_db : CFLAGS    = /Od /W4 /debug:full /Z7 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_STATIC -D PTW32_STATIC_LIB $(SMV_TESTFLAG) $(GITINFO)
 intel_win_64_db : LFLAGS    = /F32768000 /DEBUG
 intel_win_64_db : CC        = icl
 intel_win_64_db : CPP       = icl
