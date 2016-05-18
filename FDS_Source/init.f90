@@ -871,6 +871,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
 
 ENDDO OBST_LOOP_2
 
+! Solid 3D heat transfer
+
+SOLID_HT3D=.FALSE.
+IF (ANY(OBSTRUCTION%HT3D)) SOLID_HT3D=.TRUE.
+
 ! Allocate local auto-ignition temperature
 
 IF (REIGNITION_MODEL) THEN
