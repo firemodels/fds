@@ -62,7 +62,8 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 	$(SMVLUACORE_DIR)/ssfparser.lua $(SMVLUACORE_DIR)/ssfcommands.lua \
 	$(SMVLUACORE_DIR)/clipping.lua $(SMVLUACORE_DIR)/bounds.lua \
 	$(SMVLUACORE_DIR)/render.lua $(SMVLUACORE_DIR)/load.lua \
-	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua
+	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua \
+	$(SMVLUACORE_DIR)/iniparser.lua $(SMVLUACORE_DIR)/inioptions.lua
 
 smvluacore: $(SMVLUACORE_FILES)
 	cp $(SMVLUACORE_FILES) . # cannot use $^ here
@@ -160,7 +161,7 @@ intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_S
 intel_win_64 : LIBLUA    =
 ifeq ($(LUA_SCRIPTING),true)
 intel_win_64 : CFLAGS    += -D pp_LUA
-intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\liblua.lib 
+intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\liblua.lib
 intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\lpeg.lib
 intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR)/lpeg.dll
 endif
@@ -180,7 +181,7 @@ intel_win_64 : $(objwin)
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
-intel_linux_64 : LIBS_PLAT = 
+intel_linux_64 : LIBS_PLAT =
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_linux_64 : LIBLUA    =

@@ -1404,6 +1404,52 @@ int lua_set_slice_bound_max(lua_State *L) {
   return 0;
 }
 
+int lua_set_ambientlight(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_ambientlight(r, g, b);
+  return 0;
+}
+
+int lua_set_backgroundcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_backgroundcolor(r, g, b);
+  return 0;
+}
+
+int lua_set_blockcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_blockcolor(r, g, b);
+  return 0;
+}
+
+int lua_set_blockshininess(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_blockshininess(v);
+  return 0;
+}
+
+int lua_set_blockspecular(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_blockspecular(r, g, b);
+  return 0;
+}
+
+int lua_set_boundcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_boundcolor(r, g, b);
+  return 0;
+}
+
 // add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
   // package.path is a path variable where Lua scripts and modules may be
@@ -1639,6 +1685,12 @@ void initLua() {
   lua_register(L, "set_sceneclip_z_min", lua_set_sceneclip_z_min);
   lua_register(L, "set_sceneclip_z_max", lua_set_sceneclip_z_max);
 
+  lua_register(L, "set_ambientlight", lua_set_ambientlight);
+  lua_register(L, "set_backgroundcolor", lua_set_backgroundcolor);
+  lua_register(L, "set_blockcolor", lua_set_blockcolor);
+  lua_register(L, "set_blockshininess", lua_set_blockshininess);
+  lua_register(L, "set_blockspecular", lua_set_blockspecular);
+  lua_register(L, "set_boundcolor", lua_set_boundcolor);
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 

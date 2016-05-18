@@ -1,7 +1,7 @@
 
 
 
-view = {colorbar = {}, blockages = {}}
+view = {colorbar = {}, blockages = {}, color = {}}
 _view = {
     -- colorbar = {
     --     get = function()
@@ -111,6 +111,72 @@ _colorbar = {
     }
 }
 setmetatable(view.colorbar, colorbar_mt)
+
+local color_mt = {
+   -- get method
+   __index = function (t,k)
+       if type(_color[k]) == "function" then
+           return _color[k]
+       else
+           return _color[k].get()
+       end
+   end,
+   -- set method
+   __newindex = function (t,k,v)
+       _color[k].set(v)
+   end
+}
+_color = {
+    ambientlight = {
+        -- get = function ()
+        --     return getcolorbarflip()
+        -- end,
+        set = function (v)
+            return set_ambientlight(v.r, v.g, v.b)
+        end
+    },
+    backgroundcolor = {
+        -- get = function ()
+        --     return getcolorbarindex()
+        -- end,
+        set = function (v)
+            set_backgroundcolor(v.r, v.g, v.b)
+        end
+    },
+    blockcolor = {
+        -- get = function()
+        --     return get_colorbar_visibility()
+        -- end,
+        set = function(v)
+            return set_blockcolor(v.r, v.g, v.b)
+        end
+    },
+    blockshininess = {
+        -- get = function ()
+        --     return getcolorbarindex()
+        -- end,
+        set = function (v)
+            return set_blockshininess(v)
+        end
+    },
+    blockspecular = {
+        -- get = function()
+        --     return get_colorbar_visibility()
+        -- end,
+        set = function(v)
+            return set_blockspecular(v.r, v.g, v.b)
+        end
+    },
+    boundcolor = {
+        -- get = function()
+        --     return get_colorbar_visibility()
+        -- end,
+        set = function(v)
+            return set_boundcolor(v.r, v.g, v.b)
+        end
+    }
+}
+setmetatable(view.color, color_mt)
 
 local blockages_mt = {
    -- get method

@@ -2042,3 +2042,39 @@ int camera_set_projection_type(int projection_type) {
 int camera_get_projection_type() {
   return camera_current->projection_type;
 }
+
+// .ini config options
+int set_ambientlight(float r, float g, float b) {
+  ambientlight[0] = r;
+  ambientlight[1] = g;
+  ambientlight[2] = b;
+  return 0;
+} // AMBIENTLIGHT
+int set_backgroundcolor(float r, float g, float b) {
+  backgroundbasecolor[0] = r;
+  backgroundbasecolor[1] = g;
+  backgroundbasecolor[2] = b;
+  return 0;
+} // BACKGROUNDCOLOR
+int set_blockcolor(float r, float g, float b) {
+  block_ambient2[0] = r;
+  block_ambient2[1] = g;
+  block_ambient2[2] = b;
+  return 0;
+} // BLOCKCOLOR
+int set_blockshininess(float v) {
+  block_shininess = v;
+  return 0;
+} // BLOCKSHININESS
+int set_blockspecular(float r, float g, float b) {
+  block_specular2[0] = r;
+  block_specular2[1] = g;
+  block_specular2[2] = b;
+  return 0;
+} // BLOCKSPECULAR
+int set_boundcolor(float r, float g, float b) {
+  boundcolor[0] = r;
+  boundcolor[1] = g;
+  boundcolor[2] = b;
+  return 0;
+} // BOUNDCOLOR
