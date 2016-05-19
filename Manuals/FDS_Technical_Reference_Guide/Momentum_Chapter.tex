@@ -253,9 +253,15 @@ where species 0 is nitrogen.
 
 \newpage
 
-\section{Simplifying the Momentum Equation}
+\section{Coupling the Velocity and Pressure}
 
-First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5}) \be \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum} \ee Next, we make the following substitutions:
+\subsection{Simplifications of the Momentum Equation}
+
+First, we start with the non-conservative form of the momentum equation introduced above (see Eq.~\ref{eqn_LES_5})
+\be
+   \rho \left( \dod{\bu}{t} + (\bu \cdot \nabla)\bu  \right) + \nabla p = \rho \bg + \bof_b + \nabla\!\cdot \btau_{ij}  \label{momentum}
+\ee
+Next, we make the following substitutions:
 \begin{enumerate}
 \item Subtract the hydrostatic pressure gradient of the $n$th pressure zone, $\rho_n(z,t) \bg$, from both sides. Note that
 $\nabla p=\rho_n \bg + \nabla \tp$.
@@ -267,49 +273,47 @@ $\nabla p=\rho_n \bg + \nabla \tp$.
 \end{enumerate}
 Now the momentum equation can be written
 \be
-   \dod{\bu}{t} - \bu\times\bo + \nabla \cH - \tp \, \nabla \left( \frac{1}{\rho}\right) = \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]  \label{momeq}
+   \dod{\bu}{t} \underbrace{- \bu\times\bo - \frac{1}{\rho} \Big[ (\rho-\rho_n) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big]}_{\bF_{\rm A}}  \underbrace{- \tp \, \nabla \left( \frac{1}{\rho}\right)}_{\bF_{\rm B}} + \nabla \cH =  0 \label{momeq}
 \ee
-It is convenient to write this equation in the form:
+Note that the subscripts A and B for the vector $\bF$ denote Advective and Baroclinic. As will be seen in the following sections, it is convenient to group the various terms of the momentum equation into these two terms.
+
+\subsection{Finite-Difference Approximation of the Momentum Equation}
+\label{findiffmom}
+
+As discussed in the previous section, it is convenient to write the momentum equation in the form:
 \be
-   \dod{\bu}{t} + \bF + \nabla \cH = 0 \label{simple_momentum_equation}
+   \dod{\bu}{t} + \bF + \nabla \cH = 0 \quad ; \quad \bF = \bF_{\rm A} + \bF_{\rm B} \label{simple_momentum_equation}
 \ee
-The vector $\bF$ is referred to collectively as the momentum flux terms, and the term $\nabla \cH$ is referred to as the pressure gradient (though, as discussed above, $\cH$ is not a true ``pressure'' nor is this the true pressure gradient because of the exclusion of the baroclinic torque term). The spatial discretization of the momentum equation is as follows:
+The advective and baroclinic terms, $\bF_{\rm A}$ and $\bF_{\rm B}$, are expanded as:
+\begin{align}
+F_{{\rm A},x} &= \hw \, \omy - \hv \, \omz  - \frac{1}{\rho} \left( (\rho-\rho_n)g_x + f_x  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \quad ; \quad & F_{{\rm B},x} = -\tp \, \dod{}{x} \left( \frac{1}{\rho} \right) \\[0.1in]
+F_{{\rm A},y} &= \hu \, \omz - \hw \, \omx  - \frac{1}{\rho} \left( (\rho-\rho_n)g_y + f_y  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \quad ; \quad & F_{{\rm B},y} = -\tp \, \dod{}{y} \left( \frac{1}{\rho} \right) \\[0.1in]
+F_{{\rm A},z} &= \hv \, \omx - \hu \, \omy  - \frac{1}{\rho} \left( (\rho-\rho_n)g_z + f_z  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right) \quad ; \quad & F_{{\rm B},z} = -\tp \, \dod{}{z} \left( \frac{1}{\rho} \right)
+\end{align}
+The term $\nabla \cH$ is referred to as the pressure gradient, even though, as discussed above, $\cH$ is not actually a pressure. Its discretization is:
 \begin{align}
 &\dod{\hu}{t} + F_{\x,ijk} + \frac{\hp_{i+1,jk} -\hp_{ijk}}{\dx}  = 0  \label{umom} \\[0.15in]
 &\dod{\hv}{t} + F_{\y,ijk} + \frac{\hp_{i,j+1,k}-\hp_{ijk}}{\dy}  = 0  \label{vmom} \\[0.15in]
 &\dod{\hw}{t} + F_{\z,ijk} + \frac{\hp_{ij,k+1} -\hp_{ijk}}{\dz}  = 0  \label{wmom}
 \end{align}
-where $\hp_{ijk}$ is taken at the center of cell $ijk$, $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$ at the side facing in the forward $z$ (vertical) direction. 
+where $\hp_{ijk}$ is taken at the center of cell $ijk$, $\hu_{ijk}$ and $F_{\x,ijk}$ are taken at the side of the cell facing in the forward $x$ direction, $\hv_{ijk}$ and $F_{\y,ijk}$ at the side facing in the forward $y$ direction, and $\hw_{ijk}$ and $F_{\z,ijk}$ at the side facing in the forward $z$ (vertical) direction.
 
-The flux terms, $\bF$, are discretized:
+For the discretization of $\bF_{\rm A}$, the components of the vorticity $(\om_x,\om_y,\om_z)$ are located at cell edges pointing in the $x$, $y$ and $z$ directions, respectively. The same is true for the off-diagonal terms of the viscous stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and $\tau_{xy}=\tau_{yx}$. The diagonal components of the stress tensor, $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$, and the external force components, $f_x$, $f_y$, and $f_z$, are located at their respective cell faces.
 \begin{align}
-F_x &= \hw \, \omy - \hv \, \omz - \tp \, \dod{}{x} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_x  +  \dod{\tau_{xx}}{x} + \dod{\tau_{xy}}{y} + \dod{\tau_{xz}}{z} \right) \\[0.1in]
-F_y &= \hu \, \omz - \hw \, \omx - \tp \, \dod{}{y} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_y  +  \dod{\tau_{yx}}{x} + \dod{\tau_{yy}}{y} + \dod{\tau_{yz}}{z} \right) \\[0.1in]
-F_z &= \hv \, \omx - \hu \, \omy - \tp \, \dod{}{z} \left( \frac{1}{\rho} \right) - \frac{1}{\rho} \left( f_z  +  \dod{\tau_{zx}}{x} + \dod{\tau_{zy}}{y} + \dod{\tau_{zz}}{z} \right)
-\end{align}
-In the definitions to follow, the components of the vorticity $(\om_x,\om_y,\om_z)$ are located at cell edges pointing in the $x$, $y$ and $z$ directions, respectively. The same is true for the off-diagonal terms of the viscous stress tensor: $\tau_{zy}=\tau_{yz}$, $\tau_{xz}=\tau_{zx}$, and $\tau_{xy}=\tau_{yx}$. The diagonal components of the stress tensor, $\tau_{xx}$, $\tau_{yy}$, and $\tau_{zz}$, and the external force components, $f_x$, $f_y$, and $f_z$, are located at their respective cell faces.
-\begin{align}
-F_{\x,ijk} &= \ha \left( w_{i+\ha,jk} \; \om_{y,ijk} + w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) - \ha \left( v_{i+\ha,jk} \; \om_{z,ijk} + v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\[.1in]
-           &  - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right) \nonumber\\[.1in]
+F_{{\rm A},\x,ijk} &= \ha \left( w_{i+\ha,jk} \; \om_{y,ijk} + w_{i+\ha,j,k-1} \; \om_{y,ij,k-1} \right) - \ha \left( v_{i+\ha,jk} \; \om_{z,ijk} + v_{i+\ha,j-1,k} \; \om_{z,i,j-1,k} \right) \nonumber\\[.1in]
            &  - \frac{1}{\rho_{i+\ha,jk}} \left( f_{x,ijk} + \frac{\tau_{xx,i+1,jk}-\tau_{xx,ijk}}{\dx} + \frac{\tau_{xy,ijk}-\tau_{xy,i,j-1,k}}{\dy} + \frac{\tau_{xz,ijk}-\tau_{xz,i,j,k-1}}{\dz}  \right)  \\[.2in]
-F_{\y,ijk} &= \ha \left( u_{i,j+\ha,k} \; \om_{z,ijk} + u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) - \ha \left( w_{i,j+\ha,k} \; \om_{x,ijk} + w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\[.1in]
-           &  - \frac{\tp_{i,j+1,k} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i,j+1,k}}{\rho_{ijk}+\rho_{i,j+1,k}} \frac{1}{\dy} \left( \frac{1}{\rho_{i,j+1,k}} - \frac{1}{\rho_{ijk}} \right) \nonumber \\[.1in]
+F_{{\rm A},\y,ijk} &= \ha \left( u_{i,j+\ha,k} \; \om_{z,ijk} + u_{i-1,j+\ha,k} \; \om_{z,i-1,jk} \right) - \ha \left( w_{i,j+\ha,k} \; \om_{x,ijk} + w_{i,j+\ha,k-1} \; \om_{x,ij,k-1} \right) \nonumber \\[.1in]
            &  - \frac{1}{\rho_{i,j+\ha,k}} \left( f_{y,ijk} + \frac{\tau_{yx,ijk}-\tau_{yx,i-1,jk}}{\dx} + \frac{\tau_{yy,i,j+1,k}-\tau_{yy,ijk}}{\dy} + \frac{\tau_{yz,ijk}-\tau_{yz,i,j,k-1}}{\dz} \right) \\[.2in]
-F_{\z,ijk} &=  \ha \left( v_{ij,k+\ha} \; \om_{x,ijk} + v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right) -\ha \left( u_{ij,k+\ha} \; \om_{y,ijk} + u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\[.1in]
-           &  - \frac{\tp_{ij,k+1} \, \rho_{ijk} + \tp_{ijk} \, \rho_{ij,k+1}}{\rho_{ijk}+\rho_{ij,k+1}} \frac{1}{\dz} \left( \frac{1}{\rho_{ij,k+1}} - \frac{1}{\rho_{ijk}} \right) \nonumber \\[.1in]
+F_{{\rm A},\z,ijk} &=  \ha \left( v_{ij,k+\ha} \; \om_{x,ijk} + v_{i,j-1,k+\ha} \; \om_{x,i,j-1,k} \right) -\ha \left( u_{ij,k+\ha} \; \om_{y,ijk} + u_{i-1,j,k+\ha} \; \om_{y,i-1,jk} \right) \nonumber \\[.1in]
            &  - \frac{1}{\rho_{ij,k+\ha}} \left( f_{z,ijk} + \frac{\tau_{zx,ijk}-\tau_{zx,i-1,jk}}{\dx} + \frac{\tau_{zy,ijk}-\tau_{zy,i,j-1,k}}{\dy} + \frac{\tau_{zz,ij,k+1}-\tau_{zz,ijk}}{\dz} \right)
 \end{align}
-Notice the somewhat unusual discretization of the term $\tp \, \nabla (1/\rho)$, which is needed to be consistent with the discretization of the other two terms in Eq.~(\ref{p_decomp}):
-\be
-  \frac{1}{(\rho_{ijk}+\rho_{i,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} = \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right)
-\ee
-The components of the vorticity vector are:
+The components of the vorticity vector are discretized:
 \begin{align}
 \om_{x,ijk} &= \frac{\hw_{i,j+1,k}-\hw_{ijk}}{\dy} - \frac{\hv_{ij,k+1}-\hv_{ijk}}{ \dz}  \\[.1in]
 \om_{y,ijk} &= \frac{\hu_{ij,k+1}-\hu_{ijk}}{\dz} - \frac{\hw_{i+1,jk}-\hw_{ijk}}{\dx}  \\[.1in]
 \om_{z,ijk} &= \frac{\hv_{i+1,jk}- \hv_{ijk}}{\dx} -\frac{\hu_{i,j+1,k}-\hu_{ijk}}{ \dy}
 \end{align}
-The components of the viscous stress tensor are:
+The components of the viscous stress tensor are discretized:
 \begin{align}
 \tau_{xx,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{v_{ijk}-v_{i,j-1,k}}{\dy} - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
 \tau_{yy,ijk} &= \mu_{ijk} \left( \ft (\nabla\!\cdot \bu)_{ijk} - 2 \frac{u_{ijk}-u_{i-1,jk}}{\dx}  - 2 \frac{w_{ijk}-w_{ij,k-1}}{\dz} \right)  \\[.1in]
@@ -318,17 +322,175 @@ The components of the viscous stress tensor are:
 \tau_{xz,ijk} &= \tau_{zx,ijk} = \mu_{i+\ha,j,k+\ha} \left( \frac{u_{ij,k+1}-u_{ijk}}{\dz}  + \frac{w_{i+1,jk}-w_{ijk}}{\dx} \right) \\[.1in]
 \tau_{yz,ijk} &= \tau_{zy,ijk} = \mu_{i,j+\ha,k+\ha} \left( \frac{v_{ij,k+1}-v_{ijk}}{\dz}  + \frac{w_{i,j+1,k}-w_{ijk}}{\dy} \right)
 \end{align}
-By construction, the divergence defined in Eq.~(\ref{eqn_divfromeos}) is identically equal to the divergence defined by
+The components of the baroclinic term, $\bF_{\rm B}$, are discretized:
+\begin{align}
+F_{{\rm B},\x,ijk} &=  - \frac{\tp_{i+1,jk}  \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}}   \, \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}}  - \frac{1}{\rho_{ijk}} \right) \\[.1in]
+F_{{\rm B},\y,ijk} &=  - \frac{\tp_{i,j+1,k} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i,j+1,k}}{\rho_{ijk}+\rho_{i,j+1,k}} \, \frac{1}{\dy} \left( \frac{1}{\rho_{i,j+1,k}} - \frac{1}{\rho_{ijk}} \right) \\[.1in]
+F_{{\rm B},\z,ijk} &=  - \frac{\tp_{ij,k+1}  \, \rho_{ijk} + \tp_{ijk} \, \rho_{ij,k+1}}{\rho_{ijk}+\rho_{ij,k+1}}   \, \frac{1}{\dz} \left( \frac{1}{\rho_{ij,k+1}}  - \frac{1}{\rho_{ijk}} \right)
+\end{align}
+Notice the somewhat unusual discretization of the term $\tp \, \nabla (1/\rho)$, which is needed to be consistent with the discretization of the other two terms in Eq.~(\ref{p_decomp}):
+\begin{align}
+  \frac{1}{(\rho_{ijk}+\rho_{i,jk})/2} \frac{\tp_{i+1,jk}-\tp_{ijk}}{\dx} =& \frac{1}{\dx} \left( \frac{\tp_{i+1,jk}}{\rho_{i+1,jk}}-\frac{\tp_{ijk}}{\rho_{ijk}} \right) \nonumber \\[.1in]
+  & - \frac{\tp_{i+1,jk} \, \rho_{ijk} + \tp_{ijk} \, \rho_{i+1,jk}}{\rho_{ijk}+\rho_{i+1,jk}} \frac{1}{\dx} \left( \frac{1}{\rho_{i+1,jk}} - \frac{1}{\rho_{ijk}} \right)
+\end{align}
+
+
+
+\subsection{The Poisson Equation for Pressure}
+\label{PoissonEq}
+
+Before the components of velocity can be advanced in time, an elliptic partial differential equation (known as a Poisson equation) must be solved for the pressure term, $\cH$. This equation is formed by taking the divergence of the momentum equation:
+\be
+   \nabla^2 \cH = -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \left( \bF_{\rm A} + \bF_{\rm B} \right)  \label{pe}
+\ee
+Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The value of $\tp$ in $\bF_{\rm B}$ is taken from the last computed $\cH$. The pressure on the left hand side (incorporated in the variable $\cH$) is solved for directly. The reason for the decomposition of the pressure term is so that the linear algebraic system arising from the discretization of Eq.~(\ref{pe}) has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy by a fast, direct (i.e., non-iterative) method that utilizes Fast Fourier Transforms (FFT). As will be discussed below, the Poisson equation is solved multiple times, each time driving the old and new values of $\tp$ closer together.
+
+The discretized form of the Poisson equation is
+\begin{align}
+\frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
+\frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
+\frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \notag \\ =
+    -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
+    -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
+    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
+\label{pe_fin}
+\end{align}
+This elliptic partial differential equation is solved using a direct FFT-based solver~\cite{Sweet:1} that is part of a library of routines for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized form of the elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric Research (NCAR) in Boulder, Colorado.}. To ensure that the divergence of the fluid is consistent with the definition given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
+\be
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+          \frac{(\nabla\!\cdot \bu)_{ijk}^*
+              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt}
+\ee
+at the predictor step, and then
+\be
+   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
+         \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
+         \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
+       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2}
+\ee
+at the corrector step. By construction, the thermodynamic divergence defined in Eq.~(\ref{eqn_divfromeos}) is identically equal to the divergence defined by
 \be
 (\nabla\!\cdot \bu)_{ijk} = \frac{u_{ijk}-u_{i-1,jk}}{\dx} + \frac{v_{ijk}-v_{i,j-1,k}}{\dy} + \frac{w_{ijk}-w_{ij,k-1}}{\dz}
 \ee
 The equivalence of the two definitions of the divergence is a result of the form of the discretized equations, the time-stepping scheme, and the direct solution of the Poisson equation for the pressure.
 
-The perturbation pressure, $\tp$, appears twice in the discretized momentum equation. It is included in $\hp$ and in $\bF$ as the baroclinic torque term, $\tp \, \nabla (1/\rho)$. But these two values of $\tp$ are offset in time. In other words, before the velocity, $\bu$, can be advanced to the next time step, a Poisson equation for $\hp$ must be solved:
+The following sections describe how the boundary conditions for the pressure equation are specified.
+
+
+\subsubsection{Open Boundary Conditions}
+
+An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + |\mathbf{u}|^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
 \be
-   \nabla^2 \hp^n = - \dod{(\nabla \cdot \bu)}{t} - \nabla \cdot \bF^n + \nabla \cdot \tp^{n-1} \, \nabla \left( \frac{1}{\rho^n}\right)  \label{Peq}
+  \cH_{\ha,jk} = \left\{ \begin{array}{ll} \displaystyle
+          \displaystyle \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
+          \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
+          \end{array} \right.
 \ee
-in which the perturbation pressure on the right hand side of the equation is lagged one time step. The reason for this is that the fast Poisson solver for $\hp$ requires that the equation be {\em separable}, i.e. of the form $\nabla^2 \hp = \; \cdots$  To bring the two values of $\tp$ into closer agreement, Eq.~(\ref{Peq}) is solved iteratively, something which is already necessary because of the use multiple meshes with independently computed pressure fields.
+The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
+
+
+\subsubsection{Solid Boundary Conditions}
+
+FDS uses a simple, direct-forcing immersed boundary method (IBM) \cite{Fadlun:2000} for block Cartesian geometries.  This section discusses the modifications required of the force terms in the momentum equation for IBM.
+
+Direct Poisson solvers are most efficient if the domain is a rectangular region, although other geometries such as cylinders and spheres can be handled almost as easily. For these solvers, a no-flux condition is simple to prescribe at external boundaries. Using the $x=x_{\hbox{\tiny max}}$ boundary as an example: \be \dod{\cH}{x} = -F_x - \dod{u}{t} \label{bc} \ee where $F_x$ is the $x$-component of $\bF$ at the vent or solid wall, and $\partial u/\partial t$ is the user-specified rate of change in the $x$-component of velocity. In discretized form, the Poisson solver is supplied with the Neumann boundary condition \be \frac{\hp_{I+1,jk}-\hp_{I,jk}}{\dx} = -F_{x,I,jk} \label{dbc} \ee because the normal component of velocity is zero at this boundary from the start of the calculation.
+
+Many practical problems, however, involve more complicated geometries. For building fires, doors and windows within multi-room enclosures are very important features of the simulations. These elements may be included in the overall domain as masked grid cells, but the no-flux condition (\ref{dbc}) cannot be directly prescribed at the boundaries of these blocked cells. However, it is possible to exploit the relatively small changes in the pressure from one time step to the next, or solve the pressure equation several times within a time step, to enforce the no-flux condition. At the start of a time step, the components of $\bF$ are computed at all cell faces that do not correspond to walls. At those cell faces that do correspond to solid walls but are not located at the exterior of the computational grid, we prescribe (for example at the cell face where $u_{ijk}$ ``lives``):
+\be
+F_{x,ijk}^{n,k} = - \frac{\hp_{i+1,jk}^{k-1}-\hp_{ijk}^{k-1}}{\dx} - \frac{u_{ijk}^{\rm ibm}-u_{ijk}^n}{\dt} \label{sbc}
+\ee
+at the predictor step, and
+\be
+F_{x,ijk}^{*,k} = - \frac{\hp_{i+1,jk}^{k-1}-\hp_{ijk}^{k-1}}{\dx} - \frac{u_{ijk}^{\rm ibm}-\ha \left( u_{ijk}^*+u_{ijk}^n \right)}{\dt/2} \label{sbcc}
+\ee
+at the corrector step. Note that the superscript $n$ refers to the time step and $k$ refers to the iteration in cases where the pressure equation is solved multiple times. The superscript ${\rm ibm}$ denotes the normal component of velocity that we are aiming for at the next time step; thus, $u_{n+1} \approx u_{ijk}^{ibm}$ as described in Section \ref{section:TZD_bc}. This is approximate because the true value of the velocity time derivative depends on the solution of the pressure equation, but since the most recent estimate of pressure is used, the approximation is fairly good. Also, even though there are small errors in normal velocity at solid surfaces, the divergence of each blocked cell remains exactly zero for the duration of the calculation. In other words, the total flux into a given obstruction is always identically zero, and the error in normal velocity is usually at least several orders of magnitude smaller than the characteristic flow velocity. When implemented as part of a predictor-corrector updating scheme, the no-flux condition at solid surfaces is maintained fairly well. If greater accuracy is required, the Poisson equation can be solved iteratively as the boundary condition (\ref{sbc}) or (\ref{sbcc}) is updated with each successive approximation of the pressure gradient at the solid wall.
+
+
+
+\subsubsection{Boundary Conditions at Mesh Interfaces}
+\label{section:mesh_interface}
+
+Dirichlet boundary conditions are applied at the interface between two meshes, which means that $\cH$ is specified at the interface. Consider the interface between two non-overlapping meshes. The value of $\cH$ in the center of the rightmost cell of the left mesh is denoted $\cH_I$, and the value of $\cH$ in the center of the leftmost cell of the right mesh is $\cH_1$. The interface value of the left mesh is denoted $\cH_{I+\ha} \equiv (\cH_I + \cH_{I+1})/2$, and the interface value of the right mesh is denoted $\cH_\ha \equiv (\cH_0 + \cH_1)/2$. The specified value of $\cH$ for both meshes is:
+\be
+   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,k-1}-u_0^{*,k-1} \right) \label{Hbc}
+\ee
+The superscript $k$ is an iterative index. The terms, $u_I^{*,k-1}$ and $u_0^{*,k-1}$, are first-order estimates of the normal velocity components at the next time step, based on the previous ($k-1$) estimate of the pressure field. For example, the normal velocity at the left mesh interface is calculated:
+\be
+  u_I^{*,k-1} = \bar{u}_I^n - \dt \left( F_{x,I}^{n} + \frac{ \cH_{I+\ha}^{k-1} - \cH_I^{k-1} }{ \dx/2} \right) \quad ; \quad \cH_{I+\ha}^{k-1} = \frac{\cH_I^{k-1}+\cH_1^{k-1}}{2} \label{u_est}
+\ee
+The purpose of the second term on the right hand side of Eq.~(\ref{Hbc}) is demonstrated by substituting $\cH_{I+\ha}^k$ from Eq.~(\ref{Hbc}) into Eq.~(\ref{u_est}) which leads to:
+\be
+   u_I^{*,k-1} = \bar{u}_I^n - \frac{u_I^{*,k-2}-u_0^{*,k-2}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{k-2}+\cH_1^{k-2})/2 - \cH_I^{k-1} }{ \dx/2} \right) \label{uI}
+\ee
+The extra term on the right hand side drives $u_I$ halfway towards $u_0$, which is itself driven halfway towards $u_I$. This iterative process continues until $\left| u_I^{*,k} - u_0^{*,k} \right|$ falls below a specified tolerance. By default, the tolerance is $\dx/2$.
+
+For the corrector step, this procedure is the same, except the boundary condition for the pressure term is:
+\be
+   \cH_{\ha}^k = \cH_{I+\ha}^k \equiv \frac{\cH_I^{k-1} + \cH_1^{k-1} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,k-1}-u_0^{n+1,k-1} \right)
+\ee
+
+\subsection{Iterative Procedure for Updating Velocity}
+\label{section:pressure_iteration}
+
+The Poisson solver in FDS produces an exact solution of Eq.~(\ref{pe_fin}) on each mesh. There are three problems with this solution, however:
+\begin{enumerate}
+\item The solution, $\cH$, is continuous at mesh interfaces, but the finite-difference of its gradient is not. This means that the normal component of velocity at the mesh interface will not agree at the next time step.
+\item At solid internal boundaries, the normal component of velocity is not exactly zero because the normal component of $\bF$ is set equal to the previous value of the gradient of $\cH$. The no-flux boundary condition is only exact at external boundaries.
+\item The perturbation pressure, $\tp$, that is included in $\bF$ is from the previous time step. Thus, after solving the Poisson equation, the value of $\tp$ implicit in $\cH$ will not equal the value in $\bF$.
+\end{enumerate}
+One solution to these three problems is to solve the Poisson equation multiple times, each time updating the lagged value of pressure until the normal component of velocity at internal solids and mesh boundaries converges within a specified tolerance, and until the old and new values of the perturbation pressure, $\tp$, converge to within a specified tolerance.
+
+Following is a step by step procedure for advancing the velocity components. This same procedure is followed, with a few noted exceptions, in both the predictor and corrector stages of the time step.
+
+\begin{enumerate}
+\item The overlapping normal components of velocity that co-exist at the mesh interface are replaced by their average. Consider two meshes joined side by side in the $x$ direction. The component $u_I \equiv u_{I,jk}$ lives on the right boundary of the left hand mesh, and $u_0 \equiv u_{0,jk}$ lives on the left boundary of the right hand mesh. Define the discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points. To do this we simply average the coincident values of the normal velocity component at the mesh interfaces. For instance, considering the same side-by-side meshes as before,
+   \be
+   \label{eqn_patchave_ufield}
+      \bar{u}_I = \bar{u}_0 \equiv \frac{1}{2} \left( u_{I,jk} + u_{0,jk} \right)
+   \ee
+   for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are possible).
+\item Compute $\bF_{\rm A}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+
+\item\label{step3} Add the baroclinic term $\bF(\bar{\mathbf{u}})=\bF_{\rm A}(\bar{\mathbf{u}})+\bF_{\rm B}(\bar{\mathbf{u}})$ as described in Section~\ref{findiffmom}.
+
+\item Compute the normal component of $\bF$ at solid surfaces from Eq.~(\ref{sbc}) or Eq.~(\ref{sbcc}).
+
+\item Solve the Poisson equation for the pressure $\cH$ as described in Section~\ref{PoissonEq}. At the predictor stage:
+\be
+\label{eqn_poisson_stg1}
+\nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) - \mathbf{F}(\bar{\mathbf{u}}^n)
+\ee
+At the corrector stage:
+\be
+\label{eqn_poisson_stg2}
+\nabla^2 {\cH}^* = -\left(\frac{ 2 \nabla \cdot \bu^{n+1} - \nabla\!\cdot \bu^* - \nabla\!\cdot (\bar{\bu}^* - \bu^*) - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) - \mathbf{F}(\bar{\mathbf{u}}^*)
+\ee
+The extra terms in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$ and $\nabla\!\cdot (\bar{\bu}^* - \bu^*)$, ``correct'' the divergence error. The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface, since all force terms are determined using the patch-averaged field. This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric; this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the production of spurious vorticity at mesh interfaces.
+
+\item Estimate the velocity field at the next time step. For the predictor step:
+\begin{equation}
+\label{eqn_RK1}
+\mathbf{u}^{*,k} = \bar{\mathbf{u}}^n - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^n) + {\nabla\cH}^{k-1} \right)
+\end{equation}
+At the corrector step:
+\begin{equation}
+\label{eqn_RK1}
+\mathbf{u}^{n+1,k} = \ha \left( \bar{\mathbf{u}}^n + \bar{\mathbf{u}}^* - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^*) + {\nabla\cH}^{k-1} \right) \right)
+\end{equation}
+Note that for both stages, the normal components of velocity at the interface are no longer expected to match because the individual pressure fields do not match exactly at the interface.
+
+\item Check the convergence criteria. The default velocity tolerance is 
+   \be 
+      \left| u_I^* - u_0^* \right| < 0.5 \, \delta x
+   \ee
+    and the default convergence criteria for the pressure, $p=\rho(\cH-|\bu|^2/2)$, is
+   \be 
+      \left| \nabla \cdot (p^k-p^{k-1}) \nabla (1/\rho) \right|<20/\dx^2
+   \ee   
+   If the criteria are not met, return to Step~\ref{step3}.
+\end{enumerate}
+
+
 
 
 \newpage
@@ -492,187 +654,6 @@ In the default LES mode of operation, the CFL is increased or decreased to remai
 \mbox{CFL} = \delta t \left( \frac{\|\mathbf{u}\|}{\delta x} + |\nabla\cdot\mathbf{u}| \right)
 \end{equation}
 In DNS mode, the time step is also adjusted to maintain VN between 0.4 and 0.5. If either the CFL or VN is too large then the new time step is set to 90\% of the allowable value.  If both CFL and VN are below their minimum values then the current time step is increased by 10\%.  See the User's Guide~\cite{FDS_Users_Guide} for details.
-
-
-\newpage
-\section{The Equation for Pressure (Poisson Equation)}
-
-An elliptic partial differential equation (known as a Poisson equation) is obtained by taking the divergence of the momentum equation
-\be \nabla^2 \cH =
-     -\dod{(\nabla\!\cdot \bu)}{t} - \nabla\!\cdot \bF 
-    \quad ; \quad \bF = - \bu\times\bo - \tp \, \nabla \! \left( \frac{1}{\rho} \right) - \frac{1}{\rho}
-    \Big( (\rho-\rho_0) \bg + \bof_{\rm b} + \nabla\!\cdot \btau_{ij} \Big)
-   \label{pe}\ee
-Note that the perturbation pressure $\tp$ appears on both sides of Eq.~(\ref{pe}). The pressure on the right hand side is taken from the previous time step of the overall explicit time-marching scheme. It can be neglected if the baroclinic torque is not important in a given simulation (constant density flows, for example). The pressure on the left hand side (incorporated in the variable $\cH$) is solved for directly. The reason for the decomposition of the pressure term is so that the linear algebraic system arising from the discretization of Eq.~(\ref{pe}) has constant coefficients (i.e., it is {\em separable}) and can be solved to machine accuracy by a fast, direct (i.e., non-iterative) method that utilizes Fast Fourier Transforms (FFT).
-
-The discretized form of the Poisson equation for the modified pressure, $\hp$, is:
-\begin{align}
-\frac{\hp_{i+1,jk}-2\hp_{ijk}+\hp_{i-1,jk}}{\dx^2} +
-\frac{\hp_{i,j+1,k}-2\hp_{ijk}+\hp_{i,j-1,k}}{\dy^2} +
-\frac{\hp_{ij,k+1}-2\hp_{ijk}+\hp_{ij,k-1}}{\dz^2} \notag \\ =
-    -\frac{F_{\x,ijk} - F_{\x,i-1,jk}}{\dx}
-    -\frac{F_{\y,ijk} - F_{\y,i,j-1,k}}{\dy}
-    -\frac{F_{\z,ijk} - F_{\z,ij,k-1}}{\dz} - \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk}
-\end{align}
-The lack of a superscript implies that all quantities are to be evaluated at the same time level. This elliptic partial differential equation is solved using a direct FFT-based solver~\cite{Sweet:1} that is part of a library of routines for solving elliptic PDEs called CRAYFISHPAK\footnote{CRAYFISHPAK, a vectorized form of the elliptic equation solver FISHPAK, was originally developed at the National Center for Atmospheric Research (NCAR) in Boulder, Colorado.}. To ensure that the divergence of the fluid is consistent with the definition given in Eq.~(\ref{eqn_divfromeos}), the time derivative of the divergence is defined
-\be 
-   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
-          \frac{(\nabla\!\cdot \bu)_{ijk}^*
-              - (\nabla\!\cdot \bu)_{ijk}^n}{\dt} 
-\ee
-at the predictor step, and then
-\be 
-   \frac{\delta}{\delta t}(\nabla\!\cdot \bu)_{ijk} \equiv
-         \frac{(\nabla\!\cdot \bu)_{ijk}^{n+1} -
-         \ha \left[ (\nabla\!\cdot \bu)_{ijk}^*
-       + (\nabla\!\cdot \bu)_{ijk}^n \right]}{\dt/2} 
-\ee
-at the corrector step. The thermodynamic divergence is given in Eq.~(\ref{eqn_divfromeos}).
-
-
-\subsection{Open Boundary Conditions}
-
-An open boundary is where fluid is allowed to flow into or out of the computational domain depending on the local pressure gradient. The boundary condition for the pressure depends on whether the local flow is incoming or outgoing. In either case, it is assumed that the quantity, $\cH = \tilde{p}/\rho + |\mathbf{u}|^2/2$, remains constant along a streamline. It is also assumed that the pressure perturbation at the boundary is a user-specified input, $\tilde{p}_{\rm ext}$, that is zero by default. The Poisson solver for the quantity, $\cH$, requires a Dirichlet condition at an open boundary; that is, its value is specified at the border of the computational domain. As an example, consider the boundary, $x=x_{\min}$. The boundary value of $\cH$ is given by the following expressions depending on the direction of the flow across the external cell face:
-\be \cH_{\ha,jk} = \left\{ \begin{array}{ll} \displaystyle
-          \displaystyle \frac{\tp_{\rm ext}}{\rho_{1,jk}} + \ha \left( \bar{u}_{1.jk}^2 + \bar{v}_{1,jk}^2 + \bar{w}_{1,jk}^2 \right)  & {\rm outgoing} \\ [0.2in]
-          \displaystyle \frac{\tp_{\rm ext}}{\rho_\infty} + \ha \left( u_\infty^2 + v_\infty^2 + w_\infty^2 \right)  & {\rm incoming}
-          \end{array} \right.
-\ee
-The bar over the velocity components indicates an average over the respective faces of the grid cell adjacent to the boundary. The subscript $\infty$ denotes user-specified far field velocity and density values. Typically, the far field velocity is zero, but for simulations involving an external wind, these values can be specified accordingly.
-
-
-\subsection{Solid Boundary Conditions}
-
-FDS uses a simple, direct-forcing immersed boundary method (IBM) \cite{Fadlun:2000} for block Cartesian geometries.  This section discusses the modifications required of the force terms in the momentum equation for IBM.
-
-Direct Poisson solvers are most efficient if the domain is a
-rectangular region, although other geometries such as cylinders
-and spheres can be handled almost as easily. For these solvers,
-a no-flux condition is simple to prescribe at external boundaries.
-Using the $x=x_{\hbox{\tiny max}}$ boundary as an example:
-\be \dod{\cH}{x} = -F_x - \dod{u}{t} \label{bc} \ee
-where $F_x$ is the $x$-component of $\bF$ at the vent or solid wall,
-and $\partial u/\partial t$ is the user-specified rate of change
-in the $x$-component of velocity.
-In discretized form, the Poisson solver is
-supplied with the Neumann boundary condition
-\be \frac{\hp_{I+1,jk}-\hp_{I,jk}}{\dx} = -F_{x,I,jk} \label{dbc} \ee
-because the normal component of velocity is zero at this boundary from the start of the calculation.
-
-Many practical problems, however, involve more
-complicated geometries. For building fires,
-doors and windows within multi-room enclosures are very important features
-of the simulations. These elements may be included
-in the overall domain as masked grid cells,
-but the no-flux condition (\ref{dbc}) cannot be directly prescribed
-at the boundaries of these blocked cells.
-Fortunately, it is possible to exploit
-the relatively small changes in the pressure from one time
-step to the next to enforce the no-flux condition.
-At the start of a time step,
-the components of the convection/diffusion term $\bF$ are computed
-at all cell faces that do not correspond to walls.
-At those cell faces that do correspond to solid walls but are not located at the exterior of the
-computational grid, we prescribe (using the same example as above, but now with $i \ne I$):
-\be
-F_{x,ijk}^n = - \frac{\hp_{i+1,jk}^{n-1}-\hp_{ijk}^{n-1}}{\dx} - \frac{u_{ijk}^b-u_{ijk}^n}{\dt} \label{sbc}
-\ee
-at the predictor step, and
-\be
-F_{x,ijk}^* = - \frac{\hp_{i+1,jk}^{*-1}-\hp_{ijk}^{*-1}}{\dx} - \frac{u_{ijk}^b-\ha
-   \left( u_{ijk}^*+u_{ijk}^n \right)}{\dt/2} \label{sbcc}
-\ee
-at the corrector step.  The no flux condition is enforced at a solid boundary by setting the normal component of the velocity on that boundary to zero.  That is, we set $u_{ijk}^b = 0$.  If a mass flux exists on the boundary, then $u_{ijk}^b = u_n$ as described in Section \ref{section:TZD_bc}.
-
-Note that $*-1$ denotes the pressure term used in the corrector part of the
-previous time step. In both of these cases, the value of $\hp^n$ or $\hp^*$ is not known---it is what we are solving for.
-Instead, the value of $\hp$ from the previous time step is used to estimate the pressure gradient.
-Equations~(\ref{sbc}) or (\ref{sbcc}) assert that following the solution of the Poisson
-equation for the pressure, the desired normal component of velocity at the next time step, $u^*$ or $u^{n+1}$, will
-be driven towards $u_{ijk}^b$.
-
-This is approximate because the true value of the velocity time
-derivative depends on the solution of the pressure equation, but since
-the most recent estimate of pressure is used, the approximation is fairly
-good. Also, even though there are small errors in normal velocity at solid
-surfaces, the divergence of each blocked cell
-remains exactly zero for the duration of the calculation.
-In other words, the total flux into a given obstruction is always identically
-zero, and the error in normal velocity is usually at least
-several orders of magnitude smaller than the characteristic flow velocity.
-When implemented as part of a predictor-corrector updating scheme,
-the no-flux condition at solid surfaces is maintained fairly well. If greater accuracy is
-required, the Poisson equation can be solved iteratively as the boundary condition (\ref{sbc}) or (\ref{sbcc}) is updated with
-each successive approximation of the pressure gradient at the solid wall.
-
-
-
-\subsection{Boundary Conditions at Mesh Interfaces}
-\label{section:mesh_interface}
-
-The time advancement scheme for multiple meshes involves averaging the normal components of velocity at the mesh interface in
-order to drive them closer into alignment. Because FDS uses a staggered grid, the normal components of velocity co-exist on the mesh interface.
-Consider two meshes joined side by side in the $x$ direction. The component $u_I \equiv u_{I,jk}$ lives on the right boundary of the left hand mesh, and
-$u_0 \equiv u_{0,jk}$ lives on the left boundary of the right hand mesh.
-Ideally, these velocities should be identical, but they are not because of errors associated with solving the pressure on each mesh separately.
-While the primitive velocity components are indeed unique to a given mesh, for each mesh we may define the
-discrete ``patch-averaged'' field $\bar{\mathbf{u}}$ which is identical at all overlapping mesh points.
-To do this we simply average the coincident values of the normal velocity component at the mesh interfaces.
-For instance, considering the same side-by-side meshes as before,
-\be
-\label{eqn_patchave_ufield}
-\bar{u}_I = \bar{u}_0 \equiv \frac{1}{2} \left( u_{I,jk} + u_{0,jk} \right)
-\ee
-for all patch boundary cells $j$ and $k$. Here, for simplicity, we are only considering the case in which the
-cell sizes are equivalent for the adjoining meshes (coarse-fine mesh interfaces are possible).
-
-To see how the new patch-averaged fields are used, consider the predictor step in the time advancement,
-which may now be written as
-\begin{equation}
-\label{eqn_RK1}
-\mathbf{u}^* = \bar{\mathbf{u}}^n - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^n) + {\nabla\cH}^n \right)
-\end{equation}
-Note that (\ref{eqn_RK1}) updates a $\bar{\mathbf{u}}$ field to a $\mathbf{u}$ field. In other words, the normal components
-of velocity at the interface are no longer expected to match because the individual pressure fields do not match exactly
-at the interface. However, the error introduced in the divergence by the velocity averaging procedure is corrected by the time
-derivative of divergence in the pressure equation:
-\be
-\label{eqn_poisson_stg1}
-\nabla^2 {\cH}^n = -\left(\frac{ \nabla\!\cdot \bu^* - \nabla\!\cdot \bu^n - \nabla\!\cdot (\bar{\bu}^n - \bu^n) }{\delta t}\right) -
-  \mathbf{F}(\bar{\mathbf{u}}^n)
-\ee
-The extra term in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$, ``corrects'' the divergence error.
-The benefit to averaging the normal components of velocity at mesh interfaces is that $\mathbf{F}$ is the same on each side of the interface,
-since all force terms are determined using the patch-averaged field.
-This also means that stress tensors computed at a mesh interface (which are buried in $\mathbf{F}$) are symmetric;
-this symmetry is a requirement for angular momentum conservation.  Thus, the patch-averaging procedure prevents the
-production of spurious vorticity at mesh interfaces.
-
-\subsection{Pressure Iteration Scheme}
-\label{section:pressure_iteration}
-
-Equation~(\ref{eqn_poisson_stg1}) corrects the error in the divergence resulting from the averaging of normal velocity components, but it still does not guarantee that the
-updated velocity components will be equal. To drive the two normal components of velocity closer together, we use the
-following iterative scheme in the predictor step, again using the $x$ direction interface boundary as an example:
-\begin{enumerate}
-\item Define the pressure term at the mesh interface, $\cH_B$, consistent with a Dirichlet boundary condition. Note that the superscript ``old'' refers to the fact that at this point, the Poisson equation for pressure has not been solved:
-\be
-   \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{4\, \dt} \left( u_I^{*,\,{\rm old}}-u_0^{*,\,{\rm old}} \right)
-\ee
-Note also that $\cH$ is cell-centered; thus, $\cH_I$ is at the center of the $I$th grid cell of the left hand mesh, and $\cH_1$ is at the center of the first grid cell of the right hand mesh.
-\item Solve the Poisson equation in each mesh separately and exchange values of $\cH_I$ and $\cH_1$.
-\item Predict the normal component of velocity at the next time step. Note that the boundary condition for interface pressure term effectively yields the following:
-\begin{align}
-   u_I^* &= \bar{u}_I^n - \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,I}^{n} + \frac{ (\cH_I^{\rm old}+\cH_1^{\rm old})/2 - \cH_I }{ \dx/2} \right) \label{uI} \\
-   u_0^* &= \bar{u}_0^n + \frac{u_I^{\rm *,\, old}-u_0^{\rm *,\, old}}{2} - \dt \left( F_{x,0}^{n} + \frac{ \cH_1 - (\cH_I^{\rm old}+\cH_1^{\rm old})/2 }{ \dx/2} \right) \label{u0}
-\end{align}
-\item Repeat this process until $\left| u_I^* - u_0^* \right|$ falls below a specified tolerance.
-\end{enumerate}
-For the corrector step, the procedure is the same, except the boundary condition for the pressure term is:
-\be
-   \cH_B = \frac{\cH_I^{\rm old} + \cH_1^{\rm old} }{2} + \frac{\dx}{2\, \dt} \left( u_I^{n+1,\,{\rm old}}-u_0^{n+1,\,{\rm old}} \right)
-\ee
-The default velocity tolerance is $\left| u_I^* - u_0^* \right| < 0.5 \, \delta x$ and the default maximum number of pressure iterations is 10.  Both of these parameters can be changed by the user. Details can be found in the FDS User's Guide~\cite{FDS_Users_Guide}.
 
 
 
