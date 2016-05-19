@@ -681,12 +681,16 @@ SUBROUTINE SOLID_HEAT_TRANSFER_3D
 ! Currently, this is not hooked into PYROLYSIS shell elements,
 ! but this is under development.
 
-REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S
+REAL(EB) :: DT_SUB,T_LOC,RHO_S,K_S,C_S,TMP_G,TMP_F,TMP_S,RDN,HTC,K_S_M,K_S_P,H_S,C_S_ADJUST_UNITS
 INTEGER  :: II,JJ,KK,I,J,K,IOR,IC,ICM,ICP,IIG,JJG,KKG,NR,ITER
 REAL(EB), POINTER, DIMENSION(:,:,:) :: KDTDX=>NULL(),KDTDY=>NULL(),KDTDZ=>NULL()
 TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
+
+! Special adjustment of specific heat for steady state applications
+
+C_S_ADJUST_UNITS = 1000._EB/TIME_SHRINK_FACTOR
 
 KDTDX=>WORK1; KDTDX=0._EB
 KDTDY=>WORK2; KDTDY=0._EB
@@ -873,7 +877,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                C_S = ML%C_S
             ELSE
                NR = -NINT(ML%C_S)
-               C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+               C_S = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR) * C_S_ADJUST_UNITS
             ENDIF
             TMP(I,J,K) = TMP(I,J,K) + DT_SUB/(RHO_S*C_S) * ( (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
                                                              (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
