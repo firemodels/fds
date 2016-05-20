@@ -474,19 +474,19 @@ The extra terms in the time derivative, $\nabla\!\cdot (\bar{\bu}^n - \bu^n)$ an
 \end{equation}
 At the corrector step:
 \begin{equation}
-\label{eqn_RK1}
+\label{eqn_RK2}
 \mathbf{u}^{n+1,k} = \ha \left( \bar{\mathbf{u}}^n + \bar{\mathbf{u}}^* - \dt \left( \mathbf{F}(\bar{\mathbf{u}}^*) + {\nabla\cH}^{k-1} \right) \right)
 \end{equation}
 Note that for both stages, the normal components of velocity at the interface are no longer expected to match because the individual pressure fields do not match exactly at the interface.
 
-\item Check the convergence criteria. The default velocity tolerance is 
-   \be 
+\item Check the convergence criteria. The default velocity tolerance is
+   \be
       \left| u_I^* - u_0^* \right| < 0.5 \, \delta x
    \ee
     and the default convergence criteria for the pressure, $p=\rho(\cH-|\bu|^2/2)$, is
-   \be 
+   \be
       \left| \nabla \cdot (p^k-p^{k-1}) \nabla (1/\rho) \right|<20/\dx^2
-   \ee   
+   \ee
    If the criteria are not met, return to Step~\ref{step3}.
 \end{enumerate}
 
