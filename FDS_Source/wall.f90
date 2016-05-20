@@ -688,6 +688,14 @@ TYPE(OBSTRUCTION_TYPE), POINTER :: OB=>NULL(),OBM=>NULL(),OBP=>NULL()
 TYPE (MATERIAL_TYPE), POINTER :: ML=>NULL(),MLM=>NULL(),MLP=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 
+! Initialize verification tests
+
+IF (ICYC==1) THEN
+   SELECT CASE(HT3D_TEST)
+      CASE(1); CALL CARSLAW_JAEGER_TEST_1
+   END SELECT
+ENDIF
+
 ! Special adjustment of specific heat for steady state applications
 
 C_S_ADJUST_UNITS = 1000._EB/TIME_SHRINK_FACTOR
@@ -889,6 +897,25 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
 ENDDO SUBSTEP_LOOP
 
 END SUBROUTINE SOLID_HEAT_TRANSFER_3D
+
+
+SUBROUTINE CARSLAW_JAEGER_TEST_1
+! Initialize solid temperature profile for simple 1D verification test
+! Carslaw and Jaeger, Conduction of Heat in Solids, Oxford Press, 1946, Sec 3.3.
+INTEGER :: I,J,K,IC
+REAL(EB), PARAMETER :: LL=1._EB, AA=100._EB, NN=2._EB, X_0=-.5_EB
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      DO I=1,IBAR
+         IC = CELL_INDEX(I,J,K)
+         IF (.NOT.SOLID(IC)) CYCLE
+         TMP(I,J,K) = TMPA + AA * SIN(NN*PI*(XC(I)-X_0)/LL) ! TMPA = 293.15 K
+      ENDDO
+   ENDDO
+ENDDO
+
+END SUBROUTINE CARSLAW_JAEGER_TEST_1
 
 
 END SUBROUTINE THERMAL_BC
