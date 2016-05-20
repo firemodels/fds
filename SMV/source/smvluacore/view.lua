@@ -33,6 +33,15 @@ _view = {
             return errorcode
         end
     },
+    color2bar = {
+        get = function ()
+            return get_color2bar_colors()
+        end,
+        set = function (colors)
+            print("setting color2bar colors")
+            return set_color2bar_colors(#colors, colors)
+        end
+    },
     projection_type = {
         get = function ()
             return camera_get_projection_type()
@@ -89,6 +98,14 @@ _colorbar = {
             return setcolorbarflip(v)
         end
     },
+    texture_flag = {
+        get = function ()
+            return nil -- getcolorbarflip()
+        end,
+        set = function (v)
+            return nil -- setcolorbarflip(v)
+        end
+    },
     index = {
         get = function ()
             return getcolorbarindex()
@@ -107,6 +124,15 @@ _colorbar = {
             else
                 error("the argument of set_colorbar_visibility must be a boolean, but it is a " .. type(setting))
             end
+        end
+    },
+    colors = {
+        get = function()
+            return get_colorbar_colors()
+        end,
+        set = function(colors)
+            print("setting colorbar colors")
+            return set_colorbar_colors(#colors, colors)
         end
     }
 }

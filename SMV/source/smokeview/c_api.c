@@ -2050,31 +2050,91 @@ int set_ambientlight(float r, float g, float b) {
   ambientlight[2] = b;
   return 0;
 } // AMBIENTLIGHT
+
 int set_backgroundcolor(float r, float g, float b) {
   backgroundbasecolor[0] = r;
   backgroundbasecolor[1] = g;
   backgroundbasecolor[2] = b;
   return 0;
 } // BACKGROUNDCOLOR
+
 int set_blockcolor(float r, float g, float b) {
   block_ambient2[0] = r;
   block_ambient2[1] = g;
   block_ambient2[2] = b;
   return 0;
 } // BLOCKCOLOR
+
 int set_blockshininess(float v) {
   block_shininess = v;
   return 0;
 } // BLOCKSHININESS
+
 int set_blockspecular(float r, float g, float b) {
   block_specular2[0] = r;
   block_specular2[1] = g;
   block_specular2[2] = b;
   return 0;
 } // BLOCKSPECULAR
+
 int set_boundcolor(float r, float g, float b) {
   boundcolor[0] = r;
   boundcolor[1] = g;
   boundcolor[2] = b;
   return 0;
 } // BOUNDCOLOR
+
+int set_colorbar_textureflag(int v)  {
+  usetexturebar = v;
+  return 0;
+}
+int get_colorbar_textureflag() {
+  return usetexturebar;
+}
+
+int set_colorbar_colors(int ncolors, float colors[][3]) {
+  int i;
+  float *rgb_ini_copy;
+  float *rgb_ini_copy_p;
+  CheckMemory;
+  if(NewMemory((void **)&rgb_ini_copy, 4 * ncolors*sizeof(float)) == 0)return 2;
+  rgb_ini_copy_p = rgb_ini_copy;
+  for (i = 0; i < ncolors; i++) {
+    float *r = rgb_ini_copy_p;
+    float *g = rgb_ini_copy_p + 1;
+    float *b = rgb_ini_copy_p + 2;
+    *r = colors[i][0];
+    *g = colors[i][1];
+    *b = colors[i][2];
+    rgb_ini_copy_p +=3;
+  }
+
+  FREEMEMORY(rgb_ini);
+  rgb_ini = rgb_ini_copy;
+  nrgb_ini = ncolors;
+  initrgb();
+  return 0;
+}
+
+int set_color2bar_colors(int ncolors, float colors[][3]) {
+  int i;
+  float *rgb_ini_copy;
+  float *rgb_ini_copy_p;
+  CheckMemory;
+  if(NewMemory((void **)&rgb_ini_copy, 4 * ncolors*sizeof(float)) == 0)return 2;;
+  rgb_ini_copy_p = rgb_ini_copy;
+  for (i = 0; i < ncolors; i++) {
+    float *r = rgb_ini_copy_p;
+    float *g = rgb_ini_copy_p + 1;
+    float *b = rgb_ini_copy_p + 2;
+    *r = colors[i][0];
+    *g = colors[i][1];
+    *b = colors[i][2];
+    rgb_ini_copy_p +=3;
+  }
+
+  FREEMEMORY(rgb2_ini);
+  rgb2_ini = rgb_ini_copy;
+  nrgb2_ini = ncolors;
+  return 0;
+}

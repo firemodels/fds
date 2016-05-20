@@ -225,32 +225,11 @@ int set_blockcolor(float r, float g, float b); // BLOCKCOLOR
 int set_blockshininess(float v); // BLOCKSHININESS
 int set_blockspecular(float r, float g, float b); // BLOCKSPECULAR
 int set_boundcolor(float r, float g, float b); // BOUNDCOLOR
-
-
-// -- COLORBAR
-// --  12 1 128
-// --  0.000000 0.000000 1.000000
-// --  0.000000 0.359375 1.000000
-// --  0.000000 0.718750 1.000000
-// --  0.000000 1.000000 0.921875
-// --  0.000000 1.000000 0.562500
-// --  0.000000 1.000000 0.203125
-// --  0.171875 1.000000 0.000000
-// --  0.531250 1.000000 0.000000
-// --  0.890625 1.000000 0.000000
-// --  1.000000 0.746032 0.000000
-// --  1.000000 0.380952 0.000000
-// --  1.000000 0.000000 0.000000
-// -- COLOR2BAR
-// --  8
-// --  1.000000 1.000000 1.000000 :white
-// --  1.000000 1.000000 0.000000 :yellow
-// --  0.000000 0.000000 1.000000 :blue
-// --  1.000000 0.000000 0.000000 :red
-// --  0.000000 1.000000 0.000000 :green
-// --  1.000000 0.000000 1.000000 :magenta
-// --  0.000000 1.000000 1.000000 :cyan
-// --  0.000000 0.000000 0.000000 :black
+int set_colorbar_textureflag(int v);
+int get_colorbar_textureflag();
+int set_colorbar_contourvalue(int v);
+int set_colorbar_colors(int ncolors, float colors[][3]);
+int set_color2bar_colors(int ncolors, float colors[][3]);
 int set_diffuselight(float r, float g, float b); // DIFFUSELIGHT
 int set_directioncolor(float r, float g, float b); // DIRECTIONCOLOR
 int set_flip(int setting); // FLIP
@@ -285,8 +264,7 @@ int set_lightmodelseparatespecularcolor(int setting); // LIGHTMODELSEPARATESPECU
 // --  -1.000000 1.000000 4.000000 0.000000
 int set_sensorcolor(float r, float g, float b); // SENSORCOLOR
 int set_sensornormcolor(float r, float g, float b); // SENSORNORMCOLOR
-// -- SETBW
-// --  0 0
+int set_bw(int a, int b); // SETBW
 int set_sprinkleroffcolor(float r, float g, float b); // SPRINKOFFCOLOR
 int set_sprinkleroncolor(float r, float g, float b); // SPRINKONCOLOR
 int set_staticpartcolor(float r, float g, float b); // STATICPARTCOLOR

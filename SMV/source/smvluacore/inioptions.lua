@@ -52,6 +52,38 @@ options =
         print("Setting bound color to " .. r  .. " " .. g .. " "  .. b)
         return function () view.color.boundcolor = {r = r, g = g, b = b} end
         end
+    , COLORBAR = function(opt)
+        local ncolors = opt.argLines[1][1]
+        local texture_flag = opt.argLines[1][2]
+        local contour_value = opt.argLines[1][3]
+        local r, g, b
+        local colors = {}
+        for i=2,ncolors+1,1 do
+            r = opt.argLines[i][1]
+            g = opt.argLines[i][2]
+            b = opt.argLines[i][3]
+            table.insert(colors,{r=r,g=g,b=b})
+        end
+        return function ()
+            view.colorbar.colors = colors
+            view.colorbar.texture_flag = (textureflag ~= 0)
+            view.colorbar.index = contour_value
+            end
+        end
+    , COLOR2BAR = function(opt)
+        local ncolors = opt.argLines[1][1]
+        local r, g, b
+        local colors = {}
+        for i=2,ncolors+1,1 do
+            r = opt.argLines[i][1]
+            g = opt.argLines[i][2]
+            b = opt.argLines[i][3]
+            table.insert(colors,{r=r,g=g,b=b})
+        end
+        return function ()
+            view.color2bar.colors = colors
+            end
+        end
     }
 
 -- an ssfType is either a string or one of the three number types:

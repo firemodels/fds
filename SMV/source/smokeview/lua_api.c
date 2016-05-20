@@ -1450,6 +1450,121 @@ int lua_set_boundcolor(lua_State *L) {
   return 0;
 }
 
+float getcolorfield(lua_State *L, const char *key) {
+  if (!lua_istable(L, -1)){
+    fprintf(stderr, "top of stack is not a table, cannot use getcolorfield\n");
+    exit(1);
+  }
+  lua_pushstring(L, key);
+  lua_gettable(L, -2);
+  float result = lua_tonumber(L, -1);
+  lua_pop(L, 1);
+  return result;
+}
+
+int get_color(lua_State *L, float *color) {
+  if (!lua_istable(L, -1)){
+    fprintf(stderr, "color table is not present\n");
+    return 1;
+  }
+  float r = getcolorfield(L, "r");
+  float g = getcolorfield(L, "g");
+  float b = getcolorfield(L, "b");
+  color[0] = r;
+  color[1] = g;
+  color[2] = b;
+  lua_pop(L, 1);
+  return 0;
+}
+
+int lua_set_colorbar_colors(lua_State *L) {
+  int ncolors = lua_tonumber(L, 1);
+  if (!lua_istable(L, -1)){
+    fprintf(stderr, "colorbar table is not present\n");
+    exit(1);
+  }
+  int i;
+  float *color;
+  float colors[ncolors][3];
+  for (i = 1; i <= ncolors; i++) {
+    lua_pushnumber(L, i);
+    lua_gettable(L,-2);
+    get_color(L, colors[i-1]);
+  }
+
+  int return_code = set_colorbar_colors(ncolors, colors);
+  return 0;
+}
+
+int lua_get_colorbar_colors(lua_State *L) {
+  int i;
+  float *rgb_ini_copy_p = rgb_ini;
+  lua_createtable(L, 0, nrgb_ini);
+  for (i = 0; i < nrgb_ini; i++) {
+    lua_pushnumber(L, i+1);
+    lua_createtable(L, 0, 2);
+
+    lua_pushnumber(L, *rgb_ini_copy_p);
+    lua_setfield(L, -2, "r");
+
+    lua_pushnumber(L, *(rgb_ini_copy_p + 1));
+    lua_setfield(L, -2, "g");
+
+    lua_pushnumber(L, *(rgb_ini_copy_p + 2));
+    lua_setfield(L, -2, "b");
+
+    lua_settable(L, -3);
+    rgb_ini_copy_p += 3;
+  }
+  PRINTF("lua: done creating colorbar table\n");
+  // Leaves one returned value on the stack, the mesh table.
+  return 1;
+}
+
+int lua_set_color2bar_colors(lua_State *L) {
+  int ncolors = lua_tonumber(L, 1);
+  if (!lua_istable(L, -1)){
+    fprintf(stderr, "colorbar table is not present\n");
+    return 1;
+  }
+  int i;
+  float *color;
+  float colors[ncolors][3];
+  for (i = 1; i <= ncolors; i++) {
+    lua_pushnumber(L, i);
+    lua_gettable(L,-2);
+    get_color(L, colors[i-1]);
+  }
+
+  int return_code = set_color2bar_colors(ncolors, colors);
+  return 0;
+}
+
+int lua_get_color2bar_colors(lua_State *L) {
+  int i;
+  float *rgb_ini_copy_p = rgb2_ini;
+  lua_createtable(L, 0, nrgb2_ini);
+  for (i = 0; i < nrgb2_ini; i++) {
+    lua_pushnumber(L, i+1);
+    lua_createtable(L, 0, 2);
+
+    lua_pushnumber(L, *rgb_ini_copy_p);
+    lua_setfield(L, -2, "r");
+
+    lua_pushnumber(L, *(rgb_ini_copy_p + 1));
+    lua_setfield(L, -2, "g");
+
+    lua_pushnumber(L, *(rgb_ini_copy_p + 2));
+    lua_setfield(L, -2, "b");
+
+    lua_settable(L, -3);
+    rgb_ini_copy_p += 3;
+  }
+  PRINTF("lua: done creating color2bar table\n");
+  // Leaves one returned value on the stack, the mesh table.
+  return 1;
+}
+
 // add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
   // package.path is a path variable where Lua scripts and modules may be
@@ -1636,6 +1751,11 @@ void initLua() {
   lua_register(L, "blockage_view_method", lua_blockage_view_method);
   lua_register(L, "blockage_outline_color", lua_blockage_outline_color);
   lua_register(L, "blockage_locations", lua_blockage_locations);
+
+  lua_register(L, "set_colorbar_colors", lua_set_colorbar_colors);
+  lua_register(L, "get_colorbar_colors", lua_get_colorbar_colors);
+  lua_register(L, "set_color2bar_colors", lua_set_color2bar_colors);
+  lua_register(L, "get_color2bar_colors", lua_get_color2bar_colors);
 
   lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
   lua_register(L, "camera_set_eyex", lua_camera_set_eyex);
