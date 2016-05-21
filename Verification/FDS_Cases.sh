@@ -96,6 +96,7 @@ $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
+$QFDS -d Heat_Transfer ht3d_test_1.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
