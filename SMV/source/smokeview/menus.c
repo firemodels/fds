@@ -308,8 +308,9 @@ void ShowMultiSliceMenu(int value){
   case HIDE_ALL:
     ShowHideSliceMenu(value);
     return;
-  case -11:
+  case MENU_SHOWSLICE_INBLOCKAGE:
     show_slice_in_obst = 1 - show_slice_in_obst;
+	update_show_slice_in_obst();
     break;
   case -12:
     offset_slice = 1 - offset_slice;
@@ -960,6 +961,7 @@ void ShowVSliceMenu(int value){
   }
   if(value == MENU_SHOWSLICE_INBLOCKAGE){
     show_slice_in_obst=1-show_slice_in_obst;
+	update_show_slice_in_obst();
     return;
   }
   if(value == MENU_SHOWSLICE_OFFSET){
@@ -1036,6 +1038,7 @@ void ShowHideSliceMenu(int value){
       break;
     case MENU_SHOWSLICE_INBLOCKAGE:
       show_slice_in_obst=1-show_slice_in_obst;
+      update_show_slice_in_obst();
       break;
     case MENU_SHOWSLICE_OFFSET:
       offset_slice=1-offset_slice;
@@ -3683,6 +3686,10 @@ void LoadSliceMenu(int value){
       for(i=0;i<nsliceinfo;i++){
         readslice("",i,UNLOAD,DEFER_SLICECOLOR,&errorcode);
       }
+    }
+    else if(value==MENU_SHOWSLICE_INBLOCKAGE){
+      show_slice_in_obst=1-show_slice_in_obst;
+      update_show_slice_in_obst();
     }
     else{
       int submenutype;
@@ -8579,6 +8586,8 @@ updatemenu=0;
           iloadsubslicemenu++;
         }
       }
+      glutAddMenuEntry("-", MENU_DUMMY);
+      glutAddMenuEntry("Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
       glutAddMenuEntry("-",MENU_DUMMY);
       if(nsliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadslicemenu);
