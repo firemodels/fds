@@ -5383,7 +5383,12 @@ PROC_MATL_LOOP: DO N=1,N_MATL
    ! Check units of specific heat
 
    IF (ML%RAMP_C_S/='null') THEN
-         IF (RAMPS(-INT(ML%C_S))%DEPENDENT_DATA(1) > 10._EB) &
+         NR = -NINT(ML%C_S)
+         IF (.NOT.RAMPS(NR)%DEP_VAR_UNITS_CONVERTED) THEN
+            RAMPS(NR)%INTERPOLATED_DATA(:) = RAMPS(NR)%INTERPOLATED_DATA(:)*1000._EB/TIME_SHRINK_FACTOR
+            RAMPS(NR)%DEP_VAR_UNITS_CONVERTED = .TRUE.
+         ENDIF
+         IF (RAMPS(NR)%DEPENDENT_DATA(1) > 10._EB) &
             WRITE(LU_ERR,'(A,A)') 'WARNING: SPECIFIC_HEAT units are kJ/kg/K check MATL ',TRIM(ID)
    ENDIF
 
