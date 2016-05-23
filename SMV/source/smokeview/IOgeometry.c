@@ -2340,7 +2340,6 @@ void draw_test_outline(void){
   zmax = box_bounds+5;
 
   // tetrahedron
-#define EPS 0.02
 
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));

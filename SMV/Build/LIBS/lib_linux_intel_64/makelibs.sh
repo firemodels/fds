@@ -40,7 +40,7 @@ cd $SRCDIR/png-1.6.21
 cp libpng.a $LIBDIR/.
 
 # GD
-cd $SRCDIR/gd-2.1.1
+cd $SRCDIR/gd-2.0.15
 ./makelib.sh $OPTS
 cp libgd.a $LIBDIR/.
 

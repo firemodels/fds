@@ -7,6 +7,12 @@
 #include "options.h"
 #endif
 
+#ifdef WIN32
+#define UNLINK _unlink
+#else
+#define UNLINK unlink
+#endif
+
 typedef struct {
   char *file;
   int type;
