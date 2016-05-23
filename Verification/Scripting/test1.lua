@@ -89,6 +89,21 @@ function testException (testName, test)
     end
     level = level - 1
 end
+
+angledCam = {
+        rotationType = 0,
+        eyePos = { x = 0.481481, y= -1.278639, z = 0.222222},
+        zoom =  1.0,
+        viewAngle = 0,
+        directionAngle = 0,
+        elevationAngle = 0,
+        projectionType = 0, -- TODO: convert this to string
+        viewDir  = {x =  0.481481, y = 0.500000, z = 0.222222},
+        zAngle = {az = -51.000000, elev = 52.000000},
+        transformMatrix = nil,
+        clipping = nil
+    }
+
 test("determine if script is running from within smokeview", function()
     -- determine whether the script is running from within Smokeview
     if smokeviewEmbedded then
@@ -335,7 +350,7 @@ test("show/hide labels", function()
 end)
 
 test("show/hide - geometry - obstacles", function()
-    view.viewpoint = "n"
+    camera.set(angledCam)
     displayCB()
     test("as_input raw", function()
         blockage_view_method(1)
