@@ -236,35 +236,17 @@ int set_flip(int setting); // FLIP
 int set_foregroundcolor(float r, float g, float b); // FOREGROUNDCOLOR
 int set_heatoffcolor(float r, float g, float b); // HEATOFFCOLOR
 int set_heatoncolor(float r, float g, float b); // HEATONCOLOR
-// -- ISOCOLORS
-// --  10.000000 0.800000 : shininess, default opaqueness
-// --  0.700000 0.700000 0.700000 : specular
-// --  10 : number of levels
-// --  0.957255 0.000392 0.957255 0.800392 : red, green, blue, alpha (opaqueness)
-// --  0.750000 0.800000 0.800000 0.800000
-// --  0.000000 0.960000 0.280000 0.800000
-// --  0.000000 0.000000 1.000000 0.800000
-// --  0.000000 0.718750 1.000000 0.800000
-// --  0.000000 1.000000 0.562500 0.800000
-// --  0.171875 1.000000 0.000000 0.800000
-// --  0.890625 1.000000 0.000000 0.800000
-// --  1.000000 0.380952 0.000000 0.800000
-// --  1.000000 0.000000 0.000000 0.800000
-// -- COLORTABLE
-// --  2
-// --  210 180 140 255 % tan
-// --  178 34 34 255 % firebrick
+int set_isocolors(float shininess, float default_opaueness, float specular[3], int nlevels, float colors[][4]);
+int set_colortable(int ncolors, int colors[][4], char **names);
 int set_light0(int setting); // LIGHT0
 int set_light1(int setting); // LIGHT1
 int set_lightmodellocalviewer(int setting); // LIGHTMODELLOCALVIEWER
 int set_lightmodelseparatespecularcolor(int setting); // LIGHTMODELSEPARATESPECULARCOLOR
-// -- LIGHTPOS0
-// --  1.000000 1.000000 4.000000 0.000000
-// -- LIGHTPOS1
-// --  -1.000000 1.000000 4.000000 0.000000
+int set_lightpos0(float a, float b, float c, float d); // LIGHTPOS0
+int set_lightpos1(float a, float b, float c, float d); // LIGHTPOS1
 int set_sensorcolor(float r, float g, float b); // SENSORCOLOR
 int set_sensornormcolor(float r, float g, float b); // SENSORNORMCOLOR
-int set_bw(int a, int b); // SETBW
+int set_bw(int geo_setting, int data_setting); // SETBW
 int set_sprinkleroffcolor(float r, float g, float b); // SPRINKOFFCOLOR
 int set_sprinkleroncolor(float r, float g, float b); // SPRINKONCOLOR
 int set_staticpartcolor(float r, float g, float b); // STATICPARTCOLOR

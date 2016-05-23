@@ -2138,3 +2138,161 @@ int set_color2bar_colors(int ncolors, float colors[][3]) {
   nrgb2_ini = ncolors;
   return 0;
 }
+
+int set_diffuselight(float r, float g, float b) {
+  diffuselight[0] = r;
+  diffuselight[1] = g;
+  diffuselight[2] = b;
+  return 0;
+}// DIFFUSELIGHT
+
+int set_directioncolor(float r, float g, float b) {
+  direction_color[0] = r;
+  direction_color[1] = g;
+  direction_color[2] = b;
+  return 0;
+} // DIRECTIONCOLOR
+int set_flip(int setting); // FLIP // TODO: check already defined
+int set_foregroundcolor(float r, float g, float b) {
+  foregroundbasecolor[0] = r;
+  foregroundbasecolor[1] = g;
+  foregroundbasecolor[2] = b;
+  return 0;
+} // FOREGROUNDCOLOR
+int set_heatoffcolor(float r, float g, float b) {
+  heatoffcolor[0] = r;
+  heatoffcolor[1] = g;
+  heatoffcolor[2] = b;
+  return 0;
+} // HEATOFFCOLOR
+int set_heatoncolor(float r, float g, float b) {
+  heatoncolor[0] = r;
+  heatoncolor[1] = g;
+  heatoncolor[2] = b;
+  return 0;
+} // HEATONCOLOR
+int set_isocolors(float shininess, float default_opaqueness, float specular[3], int nlevels, float colors[][4]) {
+  int i;
+
+  iso_shininess = shininess;
+  iso_transparency = default_opaqueness;
+  iso_specular[0] = specular[0];
+  iso_specular[1] = specular[1];
+  iso_specular[2] = specular[2];
+
+  for (i = 0; i < nlevels; i++) {
+    iso_colors[0] = CLAMP(colors[i][0], 0.0, 1.0);
+    iso_colors[1] = CLAMP(colors[i][1], 0.0, 1.0);
+    iso_colors[2] = CLAMP(colors[i][2], 0.0, 1.0);
+    iso_colors[3] = CLAMP(colors[i][3], 0.0, 1.0);
+  }
+  update_isocolors();
+  update_iso_colorlevel();
+  return 0;
+} // ISOCOLORS
+int set_colortable(int ncolors, int colors[][4], char **names) {
+  int nctableinfo;
+  int i;
+  colortabledata *ctableinfo = NULL;
+  nctableinfo = ncolors;
+  nctableinfo = MAX(nctableinfo, 0);
+  if(nctableinfo>0){
+    NewMemory((void **)&ctableinfo, nctableinfo*sizeof(colortabledata));
+    for(i = 0; i<nctableinfo; i++){
+      colortabledata *rgbi;
+      rgbi = ctableinfo + i;
+      // TODO: This sets the default alpha value to 255, as per the
+      // original readsmv.c function, but is defunct in this context
+      // as this value is required by the function prototype.
+      // color[i][3] = 255;
+      strcpy(rgbi->label, names[i]);
+      rgbi->color[0] = CLAMP(colors[i][0], 0, 255);
+      rgbi->color[1] = CLAMP(colors[i][1], 0, 255);
+      rgbi->color[2] = CLAMP(colors[i][2], 0, 255);
+      rgbi->color[3] = CLAMP(colors[i][3], 0, 255);
+    }
+    UpdateColorTable(ctableinfo, nctableinfo);
+    FREEMEMORY(ctableinfo);
+  }
+  return 0;
+} // COLORTABLE
+int set_light0(int setting) {
+  light_enabled0 = setting;
+  UpdateLIGHTS = 1;
+  return 0;
+} // LIGHT0
+int set_light1(int setting) {
+  light_enabled1 = setting;
+  UpdateLIGHTS = 1;
+  return 0;
+} // LIGHT1
+int set_lightpos0(float a, float b, float c, float d) {
+  light_position0[0] = a;
+  light_position0[1] = a;
+  light_position0[2] = a;
+  light_position0[3] = a;
+  return 0;
+} // LIGHTPOS0
+int set_lightpos1(float a, float b, float c, float d) {
+  light_position1[0] = a;
+  light_position1[1] = a;
+  light_position1[2] = a;
+  light_position1[3] = a;
+  return 0;
+} // LIGHTPOS1
+int set_lightmodellocalviewer(int setting) {
+  lightmodel_localviewer = setting == 0 ? GL_FALSE : GL_TRUE;
+  UpdateLIGHTS = 1;
+  return 0;
+} // LIGHTMODELLOCALVIEWER
+int set_lightmodelseparatespecularcolor(int setting) {
+  lightmodel_separatespecularcolor = setting;
+  UpdateLIGHTS = 1;
+  return 0;
+} // LIGHTMODELSEPARATESPECULARCOLOR
+int set_sensorcolor(float r, float g, float b) {
+  sensorcolor[0] = r;
+  sensorcolor[1] = g;
+  sensorcolor[2] = b;
+  return 0;
+} // SENSORCOLOR
+int set_sensornormcolor(float r, float g, float b) {
+  sensornormcolor[0] = r;
+  sensornormcolor[1] = g;
+  sensornormcolor[2] = b;
+  return 0;
+} // SENSORNORMCOLOR
+int set_bw(int geo_setting, int data_setting) {
+  setbw = geo_setting;
+  setbwdata = data_setting;
+} // SETBW
+int set_sprinkleroffcolor(float r, float g, float b) {
+  sprinkoffcolor[0] = r;
+  sprinkoffcolor[1] = g;
+  sprinkoffcolor[2] = b;
+  return 0;
+} // SPRINKOFFCOLOR
+int set_sprinkleroncolor(float r, float g, float b) {
+  sprinkoncolor[0] = r;
+  sprinkoncolor[1] = g;
+  sprinkoncolor[2] = b;
+  return 0;
+} // SPRINKONCOLOR
+int set_staticpartcolor(float r, float g, float b) {
+  static_color[0] = r;
+  static_color[1] = g;
+  static_color[2] = b;
+  return 0;
+} // STATICPARTCOLOR
+int set_timebarcolor(float r, float g, float b) {
+  timebarcolor[0] = r;
+  timebarcolor[1] = g;
+  timebarcolor[2] = b;
+  return 0;
+} // TIMEBARCOLOR
+int set_ventcolor(float r, float g, float b) {
+  ventcolor[0] = r;
+  ventcolor[1] = g;
+  ventcolor[2] = b;
+  return 0;
+} // VENTCOLOR
