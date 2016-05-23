@@ -2211,7 +2211,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S
                      ELSE
                         RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*&
-                                  EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))*1000._EB/TIME_SHRINK_FACTOR
+                                  EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))
                      ENDIF
                   ENDDO
                   MCBAR = RHOCBAR*WALL(IW)%AW*(WALL(IW)%ONE_D%X(1)-WALL(IW)%ONE_D%X(0))
