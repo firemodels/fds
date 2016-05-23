@@ -8587,7 +8587,8 @@ updatemenu=0;
         }
       }
       glutAddMenuEntry("-", MENU_DUMMY);
-      glutAddMenuEntry("Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
+      if(show_slice_in_obst == 1)glutAddMenuEntry("*Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
+      if(show_slice_in_obst == 0)glutAddMenuEntry("Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
       glutAddMenuEntry("-",MENU_DUMMY);
       if(nsliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadslicemenu);
