@@ -1711,6 +1711,8 @@ Another limitation of the pressure solver is that at solid surfaces that are not
 
 If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
+By default, FDS will suspend the pressure iterations if the error is not reduced by at least 25~\% at each step. If you do not want FDS to suspend the pressure iteration, add {\ct SUSPEND\_PRESSURE\_ITERATIONS=.FALSE.} to the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or {\ct MAX\_PRESSURE\_ITERATIONS}.
+
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
@@ -1773,7 +1775,7 @@ The equation for the pressure perturbation is formed by taking the divergence of
 \be
    \nabla^2 \left( \frac{\tp^n}{\rho^n} \right) = \tp^{n-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
 \ee
-To alleviate numerical problems related to a mismatch between the old and new pressure fields, the pressure equation is solved iteratively until the change in the baroclinic term drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is 1~m/s$^2$. If a numerical instability occurs in a simulation involving a tunnel, you could try reducing this value to alleviate the mismatch between old and new pressure fields.
+To alleviate numerical problems related to a mismatch between the old and new pressure fields, the pressure equation is solved iteratively until the change in the baroclinic term drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size. If a numerical instability occurs in a simulation involving a tunnel, you could try reducing this value to alleviate the mismatch between old and new pressure fields.
 
 
 
@@ -7201,6 +7203,14 @@ material might have a different heat of combustion. For this reason, it is not a
 
 Note that the volume integrations in Eq.~(\ref{eqn_enthalpytransport}) are performed over the entire domain. The differential, $\d V$, is the product of the local grid cell dimensions, $\d x \, \d y \, \d z$. For the special case of two-dimensional cylindrical coordinates, $\d V=r \, \d r \, \d \theta \, \d z$, where $r=x$, $\d r = \d x$, and $\d \theta = \d y$.
 
+As a test of the energy balance, a sample case called {\ct Pressure\_Solver/hallways.fds} simulates a fire near the end of five connected hallways. The other end of the hallways is open. As is seen in Fig.~\ref{hallways_energy}, the quantities {\ct Q\_ENTH} and {\ct Q\_TOTAL} are very closely matched, indicating that the sources of energy loss and gain are properly added and subtracted from the energy equation. As expected, the net energy gain/loss eventually goes to zero as the compartment reaches a quasi-steady state.
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3in]{SCRIPT_FIGURES/hallways}
+\caption[Results of the {\ct hallways} test case]{The energy budget for the {\ct hallways} test case.}
+\label{hallways_energy}
+\end{figure}
+
 
 
 
@@ -7308,7 +7318,7 @@ For more information about specifying arrays of devices via the parameter {\ct P
 Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
 \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
 A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP} line. 
+measurement are defined using an associated {\ct PROP} line.
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
@@ -8884,7 +8894,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct C\_SMAGORINSKY}                            & Real          & Section~\ref{info:LES}                                &               & 0.20              \\ \hline
 {\ct C\_VREMAN}                                 & Real          & Section~\ref{info:LES}                                &               & 0.07              \\ \hline
 %{\ct COMPUTE_VISCOSITY_TWICE}                   & Logical       &                                                       &               & {\ct .TRUE.}     \\ \hline
-{\ct CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
+{\ct \footnotesize CONSTANT\_SPECIFIC\_HEAT\_RATIO}           & Logical       & Section~\ref{info:Enthalpy}                           &               & {\ct .FALSE.}     \\ \hline
 {\ct DNS}                                       & Logical       & Section~\ref{info:MISC_Basics}                        &               & {\ct .FALSE.}     \\ \hline
 {\ct DRIFT\_FLUX}                               & Logical       & Section~\ref{info:deposition}                         &               & {\ct .TRUE.}      \\ \hline
 {\ct DT\_HVAC}                                  & Real          & Section~\ref{info:HVAC}                               & s             &                   \\ \hline
@@ -9142,6 +9152,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct PRESSURE\_RELAX\_TIME}         & Real          & Section~\ref{info:PRES}           & s             & 1.                        \\ \hline
 {\ct PRESSURE\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s$^2$       & 1.                        \\ \hline
 {\ct RELAXATION\_FACTOR}            & Real          & Section~\ref{info:PRES}           &               & 1.                        \\ \hline
+{\ct SUSPEND\_PRESSURE\_ITERATIONS} & Logical       & Section~\ref{info:PRES}           &               & {\ct .TRUE.}              \\ \hline
 {\ct VELOCITY\_TOLERANCE}           & Real          & Section~\ref{info:PRES}           & m/s           &                           \\ \hline
 \end{longtable}
 
@@ -9204,7 +9215,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct BEAD\_DENSITY}                     & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
 {\ct BEAD\_DIAMETER}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
 {\ct BEAD\_EMISSIVITY}                  & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
-{\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
+{\ct \footnotesize BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
 {\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
@@ -9313,7 +9324,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
+
 \section{\texorpdfstring{{\tt REAC}}{REAC} (Reaction Parameters)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
@@ -9632,7 +9643,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 
 \vspace{\baselineskip}
 
-\newpage
+
 \section{\texorpdfstring{{\tt TRNX, TRNY, TRNZ}}{TRNX, TRNY, TRNZ} (MESH Transformations)}
 
 \begin{longtable}{@{\extracolsep{\fill}}|l|l|l|l|l|}
