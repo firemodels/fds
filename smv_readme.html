@@ -23,6 +23,29 @@
 <!--
     comment
 
+<li>6.3.7 - (build: xxx) May yy, 2016</li>
+<ol>
+<li>usability: add option to compute slice bounds using data within blockages
+<li>usability: add configuration parameter, SHOWHRRLABEL, for the hrr label
+<li>usability: add dialog box widgets for controlling terrain visibliity
+<li>usablity: compute particle histogram files in order to improve the computation of particle bounds
+<li>fix: change smoke colormap size to 256 (all that will fit in smoke vis variable) to correct smoke->color mapping -
+     (<a href="https://github.com/firemodels/fds-smv/issues/3882">Issue 3882</a>)
+<li>fix: changes to remove compiler warnings
+<li>fix: add missing call to disable lighting in geometry drawing routines
+<li>fix: corrections to isosurface surface normal vector computation
+<li>fix: corrections to particle bound and color mapping code for multiple mesh cases (<em>i.e.</em> more than one particle file) -
+     (<a href="https://github.com/firemodels/fds-smv/issues/3767">Issue 3767</a>)
+<li>internal: code cleanup - fix some lint warnings
+<li>internal: code cleanup - use undprecated version of unlink routine
+<li>internal: changes to smokeview and smokezip build scripts and makefiles to allow builds with Visual Studio 2015
+<li>internal: update makefiles and scripts to use PNG 1.6.21, JPEG 9b and ZLIB 1.2.8
+<li>internal: add 1d texture for visualizing terrain elevations
+<li>internal: code cleanup - remove partpointstep/partpointskip variables, not used with particle file format
+<li>internal: code cleanup - simplify particle routines by removing code used to implement pre FDS 5 particle file format
+<li>internal: add option to readpart routine to set or defer setting colors/bounds (for use with multi-mesh cases)
+</ol>
+
 -->
 <li>6.3.6 - (build: Git-r9-1-ga93247d) April 5, 2016</li>
 <ol>
