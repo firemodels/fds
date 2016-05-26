@@ -46,16 +46,17 @@
   </ol>
 
 <li> Concatenate all elevation files generated in step 6 after removing the header line in each file.
-Call this file casename_elevs.in
+Call this file <tt>casename_elevs.csv</tt> .  The first line of <tt>casename_elevs.csv</tt> should be <br>
+<tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes zmin zmax nz</tt>
 
 <li> Creating an FDS input file
 
    <ol>
      <li>Using obstacles (&OBST lines):<br>
-     <tt>dem2fds -o casename</tt><br>
+     <tt>dem2fds -o casename < casename_elevs.csv</tt><br>
 
      <li>Using geometry (&GEOM lines):<br>
-     <tt>dem2fds -e casename</tt><br>
+     <tt>dem2fds -e casename < casename_elevs.csv</tt><br>
    </ol>
 
 </ol>
