@@ -189,7 +189,8 @@ int loadsmv(char *input_filename, char *input_filename_ext){
       fprintf(stderr,"*** Error: Smokeview file, %s, not found\n",input_file);
       return 1;
     case 2:
-      fprintf(stderr,"*** Error: problem reading Smokeview file, %s\n",input_file);
+      fprintf(stderr,"*** Error: problem reading Smokeview file, %s\n",
+              input_file);
       return 2;
     case 0:
       readsmv_dynamic(input_file);
@@ -369,7 +370,8 @@ int loadvfile(const char *filepath){
       return 0;
     }
   }
-  fprintf(stderr,"*** Error: Vector slice file %s was not loaded\n",filepath);
+  fprintf(stderr,"*** Error: Vector slice file %s was not loaded\n",
+          filepath);
   return 1;
 }
 
@@ -510,7 +512,8 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 #endif
             }
         }
-        if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+        if(showstereo==STEREO_LR
+            &&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
           hoffset=screenHeight/4;
           screenH = screenHeight/2;
           if(view_mode==VIEW_RIGHT)woffset=screenWidth;
@@ -537,7 +540,8 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 // on the chosen frame and rendering options.
 int RenderFrameLua(int view_mode, const char *basename) {
   char renderfile_name[1024]; // the name the file (including extension)
-  char renderfile_dir[1024]; // the directory into which the image will be rendered
+  char renderfile_dir[1024]; // the directory into which the image will be
+                            // rendered
   char renderfile_path[2048]; // the full path of the rendered image
   int woffset=0,hoffset=0;
   int screenH;
@@ -550,7 +554,8 @@ int RenderFrameLua(int view_mode, const char *basename) {
   }
 
 #ifdef WIN32
-  SetThreadExecutionState(ES_DISPLAY_REQUIRED); // reset display idle timer to prevent screen saver from activating
+  // reset display idle timer to prevent screen saver from activating
+  SetThreadExecutionState(ES_DISPLAY_REQUIRED);
 #endif
 
   screenH = screenHeight;
@@ -562,7 +567,8 @@ int RenderFrameLua(int view_mode, const char *basename) {
 
   printf("renderfile_name: %s\n", renderfile_name);
   // render image
-  return_code = SVimage2file(renderfile_dir,renderfile_name,renderfiletype,woffset,screenWidth,hoffset,screenH);
+  return_code = SVimage2file(renderfile_dir,renderfile_name,renderfiletype,
+                             woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -1396,7 +1402,8 @@ void partclasscolor(const char *color){
 	  count++;
 	}
   }
-  if(count==0)fprintf(stderr,"*** Error: particle class color: %s failed to be set\n",color);
+  if(count==0)fprintf(stderr,
+      "*** Error: particle class color: %s failed to be set\n",color);
 }
 
 /* ------------------ partclasstype ------------------------ */
@@ -1852,7 +1859,8 @@ int setrenderdir(const char *dir) {
   strncpy(dir_path_temp,dir,l+1);
 	if(dir!=NULL&&strlen(dir_path_temp)>0){
       if(can_write_to_dir(dir_path_temp)==0){
-        fprintf(stderr,"*** Error: Cannot write to the RENDERDIR directory: %s\n",dir_path_temp);
+        fprintf(stderr,"*** Error: Cannot write to the RENDERDIR "
+                "directory: %s\n",dir_path_temp);
         return 1;
       } else {
         free(script_dir_path);
@@ -1902,7 +1910,8 @@ void setgridvisibility(int selection) {
 
 /* ------------------ setgridparms ------------------------ */
 
-void setgridparms(int x_vis, int y_vis, int z_vis, int x_plot, int y_plot, int z_plot) {
+void setgridparms(int x_vis, int y_vis, int z_vis,
+                  int x_plot, int y_plot, int z_plot) {
 	visx_all = x_vis;
 	visy_all = y_vis;
 	visz_all = z_vis;
@@ -2190,7 +2199,8 @@ int set_heatoncolor(float r, float g, float b) {
   return 0;
 } // HEATONCOLOR
 
-int set_isocolors(float shininess, float default_opaqueness, float specular[3], int nlevels, float colors[][4]) {
+int set_isocolors(float shininess, float default_opaqueness, float specular[3],
+                  int nlevels, float colors[][4]) {
   int i;
 
   iso_shininess = shininess;
@@ -2727,7 +2737,8 @@ int set_projection(int v) {
   return 0;
 } // PROJECTION
 
-int set_scaledfont(int height2d, float height2dwidth, int thickness2d, int height3d, float height3dwidth, int thickness3d) {
+int set_scaledfont(int height2d, float height2dwidth, int thickness2d,
+                   int height3d, float height3dwidth, int thickness3d) {
   scaled_font2d_height = scaled_font2d_height;
   scaled_font2d_height2width = scaled_font2d_height2width;
   thickness2d = scaled_font2d_thickness;
@@ -3394,41 +3405,42 @@ int set_showtourroute(int v) {
   return 0;
 } // SHOWTOURROUTE
 
-//   {
-//     float *col;
+int set_tourcolors(float colors[8][3]) {
+  tourcol_selectedpathline[0] = colors[0][0];
+  tourcol_selectedpathline[2] = colors[0][1];
+  tourcol_selectedpathline[3] = colors[0][2];
 
-//     fprintf(fileout, "TOURCOLORS\n");
-// col = tourcol_selectedpathline;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_selectedpathlineknots[0] = colors[1][0];
+  tourcol_selectedpathlineknots[1] = colors[1][1];
+  tourcol_selectedpathlineknots[2] = colors[1][2];
 
-//         col = tourcol_selectedpathlineknots;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_selectedknot[0] = colors[2][0];
+  tourcol_selectedknot[1] = colors[2][1];
+  tourcol_selectedknot[2] = colors[2][2];
 
-//         col = tourcol_selectedknot;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_selectedpathline[0] = colors[3][0];
+  tourcol_selectedpathline[1] = colors[3][1];
+  tourcol_selectedpathline[2] = colors[3][2];
 
-//         col = tourcol_pathline;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_pathline[0] = colors[4][0];
+  tourcol_pathline[1] = colors[4][1];
+  tourcol_pathline[2] = colors[4][2];
 
-//         col = tourcol_pathknots;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_pathknots[0] = colors[5][0];
+  tourcol_pathknots[1] = colors[5][1];
+  tourcol_pathknots[2] = colors[5][2];
 
-//         col = tourcol_text;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_text[0] = colors[6][0];
+  tourcol_text[1] = colors[6][1];
+  tourcol_text[2] = colors[6][2];
 
-//         col = tourcol_avatar;
-//         if(fgets(buffer, 255, stream) == NULL)break;
-//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+  tourcol_avatar[0] = colors[7][0];
+  tourcol_avatar[1] = colors[7][1];
+  tourcol_avatar[2] = colors[7][2];
 
-//         continue;
+  return 0;
+} // TOURCOLORS
 
-//   }
 int set_tourconstantvel(int v) {
   tour_constant_vel = v;
   return 0;
