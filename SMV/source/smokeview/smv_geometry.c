@@ -1297,7 +1297,8 @@ void getsmokedir(float *mm){
       normdir[1] = DOT3SKIP(mm+1,4,scalednorm,1);
       normdir[2] = DOT3SKIP(mm+2,4,scalednorm,1);
 
-      cosangle = CLAMP(normdir[2]/NORM3(normdir),-1.0,1.0);
+	  cosangle = normdir[2] / NORM3(normdir);
+	  cosangle = CLAMP(cosangle,-1.0,1.0);
       absangle=acos(cosangle)*RAD2DEG;
       if(absangle<0.0)absangle=-absangle;
       if(absangle<minangle){

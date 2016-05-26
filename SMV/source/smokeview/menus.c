@@ -73,8 +73,6 @@
 #define MENU_EVAC_UNLOADALL -1
 #define MENU_EVAC_DUMMY -2
 
-#define MENU_LOADPLOT3D_DUMMY -1
-
 #define MENU_PARTICLE_UNLOAD -1
 #define MENU_PARTICLE_DUMMY -2
 #define MENU_PARTICLE_ALLMESHES -11
@@ -310,8 +308,9 @@ void ShowMultiSliceMenu(int value){
   case HIDE_ALL:
     ShowHideSliceMenu(value);
     return;
-  case -11:
+  case MENU_SHOWSLICE_INBLOCKAGE:
     show_slice_in_obst = 1 - show_slice_in_obst;
+	update_show_slice_in_obst();
     break;
   case -12:
     offset_slice = 1 - offset_slice;
@@ -708,7 +707,6 @@ void ColorBarMenu(int value){
       initrgb();
       set_labels_controls();
       break;
-     break;
    case COLORBAR_TRANSPARENT:
      use_transparency_data=1-use_transparency_data;
      UpdateRGBColors(COLORBAR_INDEX_NONE);
@@ -963,6 +961,7 @@ void ShowVSliceMenu(int value){
   }
   if(value == MENU_SHOWSLICE_INBLOCKAGE){
     show_slice_in_obst=1-show_slice_in_obst;
+	update_show_slice_in_obst();
     return;
   }
   if(value == MENU_SHOWSLICE_OFFSET){
@@ -1039,6 +1038,7 @@ void ShowHideSliceMenu(int value){
       break;
     case MENU_SHOWSLICE_INBLOCKAGE:
       show_slice_in_obst=1-show_slice_in_obst;
+      update_show_slice_in_obst();
       break;
     case MENU_SHOWSLICE_OFFSET:
       offset_slice=1-offset_slice;
@@ -1052,7 +1052,6 @@ void ShowHideSliceMenu(int value){
     case MENU_SHOWSLICE_SLICEANDVECTORS:
       show_slices_and_vectors=1-show_slices_and_vectors;
       return;
-      break;
     default:
       ASSERT(FFALSE);
     }
@@ -3688,6 +3687,10 @@ void LoadSliceMenu(int value){
         readslice("",i,UNLOAD,DEFER_SLICECOLOR,&errorcode);
       }
     }
+    else if(value==MENU_SHOWSLICE_INBLOCKAGE){
+      show_slice_in_obst=1-show_slice_in_obst;
+      update_show_slice_in_obst();
+    }
     else{
       int submenutype;
       char *submenulabel;
@@ -3769,8 +3772,6 @@ void LoadMultiVSliceMenu(int value){
         updatemenu=1;
         glutPostRedisplay();
         return;
-        break;
-
       case UNLOAD_ALL:
         LoadVSliceMenu(UNLOAD_ALL);
         break;
@@ -4317,7 +4318,6 @@ void VentMenu(int value){
 #define GEOMETRY_SOLIDOUTLINE 2
 #define GEOMETRY_INTERIOR_SOLID 9
 #define GEOMETRY_INTERIOR_OUTLINE 12
-#define GEOMETRY_DUPLICATES 10
 #define GEOMETRY_HIDE 7
 #define GEOMETRY_TETRA_HIDE 11
 #define GEOMETRY_SHOWNORMAL 3
@@ -8586,6 +8586,9 @@ updatemenu=0;
           iloadsubslicemenu++;
         }
       }
+      glutAddMenuEntry("-", MENU_DUMMY);
+      if(show_slice_in_obst == 1)glutAddMenuEntry("*Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
+      if(show_slice_in_obst == 0)glutAddMenuEntry("Show slice in blockage", MENU_SHOWSLICE_INBLOCKAGE);
       glutAddMenuEntry("-",MENU_DUMMY);
       if(nsliceloaded>1){
         glutAddSubMenu(_("Unload"),unloadslicemenu);

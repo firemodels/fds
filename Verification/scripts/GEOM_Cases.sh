@@ -15,14 +15,14 @@ $QFDS -d Immersed_Boundary_Method geom_sphere1d.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere1e.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere1f.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere2.fds
-$QFDS -d Immersed_Boundary_Method geom_sphere2_fire.fds
+#$QFDS -d Immersed_Boundary_Method geom_sphere2_fire.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3a.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3b.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3c.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3d.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3e.fds
 $QFDS -d Immersed_Boundary_Method geom_sphere3f.fds
-$QFDS -d Immersed_Boundary_Method geom_sphere_fire.fds
+#$QFDS -d Immersed_Boundary_Method geom_sphere_fire.fds
 $QFDS -d Immersed_Boundary_Method geom_terrain.fds
 $QFDS -d Immersed_Boundary_Method geom_texture.fds
 $QFDS -d Immersed_Boundary_Method geom_texture2.fds

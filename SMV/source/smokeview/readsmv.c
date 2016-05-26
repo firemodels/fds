@@ -2851,6 +2851,7 @@ void parse_database(char *file){
 
       slashptr = strstr(buffer, "/");
       if(slashptr!=NULL)strcpy(buffer2, buffer);
+	  buffer3 = buffer2;
       while(slashptr!=NULL){
         fgets(buffer, 1000, stream);
         lenbuffer = strlen(buffer);
@@ -8592,6 +8593,21 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
+    if (match(buffer, "COLORBAR_SPLIT") == 1) {
+      int ii;
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit    , colorsplit + 1, colorsplit + 2, colorsplit + 3, colorsplit +  4, colorsplit +  5);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %i %i %i %i %i %i ", colorsplit + 6, colorsplit + 7, colorsplit + 8, colorsplit + 9, colorsplit + 10, colorsplit + 11);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, " %f %f %f ", splitvals, splitvals + 1, splitvals + 2);
+
+      for(ii=0;ii<12;ii++){
+        colorsplit[ii] = CLAMP(colorsplit[ii],0,255);
+      }
+      continue;
+    }
     if(match(buffer, "ZAXISANGLES") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, " %f %f %f ", zaxis_angles, zaxis_angles + 1, zaxis_angles + 2);
@@ -11446,7 +11462,7 @@ void writeini_local(FILE *fileout){
     fprintf(fileout, " %f %f %f\n", b3[0], b3[1], b3[2]);
   }
   fprintf(fileout, "DEVICEVECTORDIMENSIONS\n");
-  fprintf(fileout, "%f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
+  fprintf(fileout, " %f %f %f %f\n", vector_baselength, vector_basediameter, vector_headlength, vector_headdiameter);
   fprintf(fileout, "DEVICEBOUNDS\n");
   fprintf(fileout, " %f %f\n", device_valmin, device_valmax);
   fprintf(fileout, "DEVICEORIENTATION\n");
@@ -11895,6 +11911,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %f %f %f :black  \n",rgb2[7][0],rgb2[7][1],rgb2[7][2]);
   fprintf(fileout, "COLORBAR_FLIP\n");
   fprintf(fileout, " %i\n", colorbarflip);
+  fprintf(fileout, "COLORBAR_SPLIT\n");
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[0], colorsplit[1], colorsplit[2], colorsplit[3], colorsplit[4], colorsplit[5]);
+  fprintf(fileout, " %i %i %i %i %i %i\n", colorsplit[6], colorsplit[7], colorsplit[8], colorsplit[9], colorsplit[10], colorsplit[11]);
+  fprintf(fileout, " %f %f %f\n", splitvals[0], splitvals[1], splitvals[2]);
   fprintf(fileout, "DIFFUSELIGHT\n");
   fprintf(fileout, " %f %f %f\n", diffuselight[0], diffuselight[1], diffuselight[2]);
   fprintf(fileout, "DIRECTIONCOLOR\n");
@@ -12051,7 +12071,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SMOKE3DZIPSTEP\n");
   fprintf(fileout, " %i\n", smoke3dzipstep);
   fprintf(fileout, "USER_ROTATE\n");
-  fprintf(fileout, "%i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
+  fprintf(fileout, " %i %i %f %f %f\n", glui_rotation_index, show_rotation_center, xcenCUSTOM, ycenCUSTOM, zcenCUSTOM);
 
   fprintf(fileout,"\n *** VIEW PARAMETERS ***\n\n");
 
@@ -12290,7 +12310,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "PIXELSKIP\n");
   fprintf(fileout, " %i\n", pixel_skip);
   fprintf(fileout, "RENDERCLIP\n");
-  fprintf(fileout, "%i %i %i %i %i\n",
+  fprintf(fileout, " %i %i %i %i %i\n",
     clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
   fprintf(fileout, "RENDERFILELABEL\n");
   fprintf(fileout, " %i\n", renderfilelabel);

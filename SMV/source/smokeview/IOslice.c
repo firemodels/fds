@@ -2907,7 +2907,7 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
   float dval;
 
   dval=0.0;
-  if(nline_values>1&&line_max!=line_min){
+  if(nline_values>1){
     dval=(line_max-line_min)/(float)(nline_values-1);
   }
 
@@ -3263,8 +3263,8 @@ void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax){
           // 1 partially blocked
           // 2 unblocked
           if(sd->slicetype==SLICE_CELL_CENTER&&((k==0&&sd->nslicek!=1)||(j==0&&sd->nslicej!=1)||(i==0&&sd->nslicei!=1)))continue;
-          if(sd->slicetype!=SLICE_CELL_CENTER&&iblank_node!=NULL&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==SOLID)continue;
-          if(sd->slicetype==SLICE_CELL_CENTER&&iblank_cell!=NULL&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==EMBED_YES)continue;
+          if(sd->slicetype!=SLICE_CELL_CENTER&&show_slice_in_obst==0&&iblank_node!=NULL&&iblank_node[IJKNODE(sd->is1+i,sd->js1+j,sd->ks1+k)]==SOLID)continue;
+          if(sd->slicetype==SLICE_CELL_CENTER&&show_slice_in_obst==0&&iblank_cell!=NULL&&iblank_cell[IJKCELL(sd->is1+i-1,sd->js1+j-1,sd->ks1+k-1)]==EMBED_YES)continue;
           if(first==1){
             *pmin=pdata[n];
             *pmax=pdata[n];

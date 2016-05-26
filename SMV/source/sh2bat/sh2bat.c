@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include "string_util.h"
+#include "file_util.h"
 
 
 /* ------------------ usage ------------------------ */
@@ -28,15 +28,12 @@ void usage(char *prog){
 /* ------------------ main ------------------------ */
 
 int main(int argc, char **argv){
-  char buffer[1024],*buffptr;
-  char buffer2[1024];
+  char buffer[1024];
   int i;
   char *filein=NULL,*fileout=NULL,*prog;
   FILE *streamin=NULL,*streamout=NULL;
-  int lendata;
 
   set_stdout(stdout);
-  buffptr=buffer;
   prog=argv[0];
   for(i=1;i<argc;i++){
     int lenarg;
@@ -106,12 +103,10 @@ int main(int argc, char **argv){
     }
     if(buffer[0]=='$'){
       char *comm_beg, *comm_end, *data;
-      char *casename;
-      int j;
-      char *datato, *datafrom;
 
       comm_beg=buffer+1;
       comm_end=strchr(buffer,' ');
+      if (comm_end == NULL)continue;
       data = comm_end+1;
       *comm_end=0;
 

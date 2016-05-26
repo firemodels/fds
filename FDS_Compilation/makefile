@@ -220,7 +220,7 @@ intel_linux_64_db : obj = fds_intel_linux_64_db
 intel_linux_64_db : setup $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-intel_linux_64_inspect : FFLAGS = -g -O0 $(GITINFO) 
+intel_linux_64_inspect : FFLAGS = -g -O0 -check none $(GITINFO) 
 intel_linux_64_inspect : LFLAGS = -shared-intel
 intel_linux_64_inspect : FCOMPL = ifort
 intel_linux_64_inspect : FOPENMPFLAGS = -openmp
@@ -236,7 +236,7 @@ mpi_intel_linux_64_db : obj = fds_mpi_intel_linux_64_db
 mpi_intel_linux_64_db : setup $(obj_mpi)
 	$(FCOMPL) $(FFLAGS) $(LFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_mpi)
 
-mpi_intel_linux_64_inspect : FFLAGS = -g -O0 $(GITINFO) 
+mpi_intel_linux_64_inspect : FFLAGS = -g -O0 -check none $(GITINFO) 
 mpi_intel_linux_64_inspect : LFLAGS = -static-intel
 mpi_intel_linux_64_inspect : FCOMPL = mpifort
 mpi_intel_linux_64_inspect : FOPENMPFLAGS = -openmp -openmp-link static -liomp5

@@ -89,7 +89,7 @@ void drawTimeBar(float xleft, float xright, float ybot, float ytop){
 
 /* ------------------ newcolorbar ------------------------ */
 
-colorbardata *newcolorbar(char *name, unsigned char *table, int ntable){
+colorbardata *Newcolorbar(char *name, unsigned char *table, int ntable){
   colorbardata *newcolorbar;
   int i;
   unsigned char *rgb_node;
@@ -535,7 +535,7 @@ void initdefaultcolorbars(void){
   int i;
   colorbardata *cbi;
 
-  ndefaultcolorbars=11;
+  ndefaultcolorbars=12;
 
   FREEMEMORY(colorbarinfo);
   ncolorbars=ndefaultcolorbars;
@@ -897,10 +897,28 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[9]=253;
   cbi->rgb_node[10]=254;
   cbi->rgb_node[11]=255;
-
   cbi++;
+  
+  // split
 
-// construct colormaps from color node info
+  split_colorbar_index = cbi - colorbarinfo;
+  split_colorbar = cbi;
+  strcpy(cbi->label, "split");
+  cbi->label_ptr = cbi->label;
+
+  cbi->nnodes = 4;
+  cbi->nodehilight = 0;
+
+  cbi->index_node[0] = 0;
+  cbi->index_node[1] = 127;
+  cbi->index_node[2] = 127;
+  cbi->index_node[3] = 255;
+  for (i = 0; i < 12; i++) {
+    cbi->rgb_node[i] = colorsplit[i];
+  }
+  cbi++;
+  
+  // construct colormaps from color node info
 
   for(i=0;i<ndefaultcolorbars;i++){
     cbi = colorbarinfo + i;

@@ -1006,7 +1006,7 @@ void SetCVentDirs(void){
 
             dy = yplt[j]-NORMALIZE_Y(cvi->origin[1]);
             drad=sqrt(dy*dy+dz*dz);
-            if(SCALE2SMV(drad>cvi->radius)){
+            if(SCALE2SMV(drad)>cvi->radius){
               blank[IJCIRC(j-cvi->jmin,k-cvi->kmin)]=0;
             }
           }
@@ -1024,7 +1024,7 @@ void SetCVentDirs(void){
 
             dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
             drad=sqrt(dx*dx+dz*dz);
-            if(SCALE2SMV(drad>cvi->radius)){
+            if(SCALE2SMV(drad)>cvi->radius){
               blank[IJCIRC(i-cvi->imin,k-cvi->kmin)]=0;
             }
           }
@@ -1042,7 +1042,7 @@ void SetCVentDirs(void){
 
             dx = xplt[i]-NORMALIZE_X(cvi->origin[0]);
             drad=sqrt(dx*dx+dy*dy);
-            if(SCALE2SMV(drad>cvi->radius)){
+            if(SCALE2SMV(drad)>cvi->radius){
               blank[IJCIRC(i-cvi->imin,j-cvi->jmin)]=0;
             }
             else{
@@ -1181,7 +1181,7 @@ void SetVentDirs(void){
           j=vi->jmin;
           breakloop=0;
           for(i=vi->imin;i<=MIN(vi->imax,ibar-1);i++){
-            for(k=vi->kmin;MIN(k<=vi->kmax,kbar-1);k++){
+            for(k=vi->kmin;k<=MIN(vi->kmax,kbar-1);k++){
               int state1, state2;
 
               if(use_iblank==1&&c_iblank!=NULL){

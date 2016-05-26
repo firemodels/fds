@@ -1,6 +1,7 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+EXTERNCPP void update_show_slice_in_obst(void);
 EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
 EXTERNCPP void write_part_histogram(partdata *parti);
@@ -110,7 +111,6 @@ EXTERNCPP void set_labels_controls(void);
 EXTERNCPP void hide_glui_display(void);
 EXTERNCPP void show_glui_tour(void);
 EXTERNCPP void hide_glui_tour(void);
-EXTERNCPP void hide_glui_trainer(void);
 EXTERNCPP void show_glui_stereo(void);
 EXTERNCPP void hide_glui_stereo(void);
 
@@ -876,7 +876,6 @@ EXTERNCPP void getZoneColors(const float *t, int nt, unsigned char *it,
                float tmin, float tmax, int nlevel, int nlevel_full,
                char **labels, char *scale, float *tvals256
                );
-EXTERNCPP void get_faceinfo(void);
 
 EXTERNCPP void getPlot3DColors(int iplot, int settmin, float *ttmin, int settmax, float *ttmax,
               int ndatalevel, int nlevel,
