@@ -1080,31 +1080,35 @@ void set_unitclass_default(int unitclass) {
 // Show/Hide Geometry
 // Obstacles
 // View Method
-// 1 - Defined in input file
-// 2 - Solid
-// 3 - Outine only
-// 4 - Outline added
-// 5 - Hidden
+
+/** Set the method for viewing blockages.
+ * The 'setting' integer is used as following:
+ * 0 - Defined in input file
+ * 1 - Solid
+ * 2 - Outine only
+ * 3 - Outline added
+ * 4 - Hidden
+ */
 int blockage_view_method(int setting) {
   int value;
   switch(setting) {
-    case 1:
+    case 0:
       value=visBLOCKAsInput;
       break;
-    case 2:
+    case 1:
       value=visBLOCKNormal;
       break;
-    case 3:
+    case 2:
       value=visBLOCKOutline;
       break;
-    case 4:
+    case 3:
       value=visBLOCKAddOutline;
       break;
-    case 5:
+    case 4:
       value=visBLOCKHide;
       break;
     default:
-      ASSERT(FFALSE);
+      return 1;
       break;
   }
   // TODO
@@ -1114,36 +1118,43 @@ int blockage_view_method(int setting) {
   return 0;
 }
 
-// 1 - Use blockage
-// 2 - Use foreground
+/** Set the color to be used when drawing blockage outlines.
+ * The 'setting' integer is used as following:
+ * 0 - Use blockage
+ * 1 - Use foreground
+ */
 int blockage_outline_color(int setting) {
   switch(setting) {
-    case 1:
+    case 0:
       outline_color_flag = 0;
       updatefaces=1;
       break;
-    case 2:
+    case 1:
       outline_color_flag = 1;
       updatefaces=1;
       break;
     default:
-      ASSERT(FFALSE);
+      return 1;
       break;
   }
   return 0;
 }
 
-// 1 - grid
-// 2 - exact
-// 3 - cad
+/** Determine how the blockages should be displayed.
+ * The 'setting' integer is used as following:
+ * 0 - grid - Snapped to the grid as used by FDS.
+ * 1 - exact - As specified.
+ * 2 - cad - Using CAD geometry.
+ * This is used for the BLOCKLOCATION .ini option.
+ */
 int blockage_locations(int setting) {
   switch(setting) {
-    case 1:
+    case 0:
       blocklocation=BLOCKlocation_grid;
       break;
-    case 2:
+    case 1:
       blocklocation=BLOCKlocation_exact;
-    case 3:
+    case 2:
       blocklocation=BLOCKlocation_cad;
       break;
     default:
@@ -1905,14 +1916,17 @@ void setgridparms(int x_vis, int y_vis, int z_vis, int x_plot, int y_plot, int z
 	if(iplotz_all>nplotz_all-1)iplotz_all=0;
 }
 
-/* ------------------ setcolorbarflip ------------------------ */
+/** Set the direction of the colorbar.
+ * Is used for the .ini option FLIP.
+ */
 void setcolorbarflip(int flip) {
 	colorbarflip = flip;
 	update_colorbarflip();
-    UpdateRGBColors(COLORBAR_INDEX_NONE);
+  UpdateRGBColors(COLORBAR_INDEX_NONE);
 }
 
-/* ------------------ getcolorbarflip ------------------------ */
+/** Get the direction of the colorbar.
+ */
 int getcolorbarflip(int flip) {
     return colorbarflip;
 }
@@ -2043,7 +2057,9 @@ int camera_get_projection_type() {
   return camera_current->projection_type;
 }
 
+
 // .ini config options
+   // *** COLOR/LIGHTING ***
 int set_ambientlight(float r, float g, float b) {
   ambientlight[0] = r;
   ambientlight[1] = g;
@@ -2152,25 +2168,28 @@ int set_directioncolor(float r, float g, float b) {
   direction_color[2] = b;
   return 0;
 } // DIRECTIONCOLOR
-int set_flip(int setting); // FLIP // TODO: check already defined
+
 int set_foregroundcolor(float r, float g, float b) {
   foregroundbasecolor[0] = r;
   foregroundbasecolor[1] = g;
   foregroundbasecolor[2] = b;
   return 0;
 } // FOREGROUNDCOLOR
+
 int set_heatoffcolor(float r, float g, float b) {
   heatoffcolor[0] = r;
   heatoffcolor[1] = g;
   heatoffcolor[2] = b;
   return 0;
 } // HEATOFFCOLOR
+
 int set_heatoncolor(float r, float g, float b) {
   heatoncolor[0] = r;
   heatoncolor[1] = g;
   heatoncolor[2] = b;
   return 0;
 } // HEATONCOLOR
+
 int set_isocolors(float shininess, float default_opaqueness, float specular[3], int nlevels, float colors[][4]) {
   int i;
 
@@ -2190,6 +2209,7 @@ int set_isocolors(float shininess, float default_opaqueness, float specular[3], 
   update_iso_colorlevel();
   return 0;
 } // ISOCOLORS
+
 int set_colortable(int ncolors, int colors[][4], char **names) {
   int nctableinfo;
   int i;
@@ -2216,16 +2236,19 @@ int set_colortable(int ncolors, int colors[][4], char **names) {
   }
   return 0;
 } // COLORTABLE
+
 int set_light0(int setting) {
   light_enabled0 = setting;
   UpdateLIGHTS = 1;
   return 0;
 } // LIGHT0
+
 int set_light1(int setting) {
   light_enabled1 = setting;
   UpdateLIGHTS = 1;
   return 0;
 } // LIGHT1
+
 int set_lightpos0(float a, float b, float c, float d) {
   light_position0[0] = a;
   light_position0[1] = a;
@@ -2233,6 +2256,7 @@ int set_lightpos0(float a, float b, float c, float d) {
   light_position0[3] = a;
   return 0;
 } // LIGHTPOS0
+
 int set_lightpos1(float a, float b, float c, float d) {
   light_position1[0] = a;
   light_position1[1] = a;
@@ -2240,59 +2264,1189 @@ int set_lightpos1(float a, float b, float c, float d) {
   light_position1[3] = a;
   return 0;
 } // LIGHTPOS1
+
 int set_lightmodellocalviewer(int setting) {
   lightmodel_localviewer = setting == 0 ? GL_FALSE : GL_TRUE;
   UpdateLIGHTS = 1;
   return 0;
 } // LIGHTMODELLOCALVIEWER
+
 int set_lightmodelseparatespecularcolor(int setting) {
   lightmodel_separatespecularcolor = setting;
   UpdateLIGHTS = 1;
   return 0;
 } // LIGHTMODELSEPARATESPECULARCOLOR
+
 int set_sensorcolor(float r, float g, float b) {
   sensorcolor[0] = r;
   sensorcolor[1] = g;
   sensorcolor[2] = b;
   return 0;
 } // SENSORCOLOR
+
 int set_sensornormcolor(float r, float g, float b) {
   sensornormcolor[0] = r;
   sensornormcolor[1] = g;
   sensornormcolor[2] = b;
   return 0;
 } // SENSORNORMCOLOR
+
 int set_bw(int geo_setting, int data_setting) {
   setbw = geo_setting;
   setbwdata = data_setting;
 } // SETBW
+
 int set_sprinkleroffcolor(float r, float g, float b) {
   sprinkoffcolor[0] = r;
   sprinkoffcolor[1] = g;
   sprinkoffcolor[2] = b;
   return 0;
 } // SPRINKOFFCOLOR
+
 int set_sprinkleroncolor(float r, float g, float b) {
   sprinkoncolor[0] = r;
   sprinkoncolor[1] = g;
   sprinkoncolor[2] = b;
   return 0;
 } // SPRINKONCOLOR
+
 int set_staticpartcolor(float r, float g, float b) {
   static_color[0] = r;
   static_color[1] = g;
   static_color[2] = b;
   return 0;
 } // STATICPARTCOLOR
+
 int set_timebarcolor(float r, float g, float b) {
   timebarcolor[0] = r;
   timebarcolor[1] = g;
   timebarcolor[2] = b;
   return 0;
 } // TIMEBARCOLOR
+
 int set_ventcolor(float r, float g, float b) {
   ventcolor[0] = r;
   ventcolor[1] = g;
   ventcolor[2] = b;
   return 0;
 } // VENTCOLOR
+
+
+// --    *** SIZES/OFFSETS ***
+int set_gridlinewidth(float v) {
+  gridlinewidth = v;
+  return 0;
+} // GRIDLINEWIDTH
+
+int set_isolinewidth(float v) {
+  isolinewidth = v;
+  return 0;
+} // ISOLINEWIDTH
+
+int set_isopointsize(float v) {
+  isopointsize = v;
+  return 0;
+} // ISOPOINTSIZE
+
+int set_linewidth(float v) {
+  linewidth = v;
+  return 0;
+} // LINEWIDTH
+
+int set_partpointsize(float v) {
+  partpointsize = v;
+  return 0;
+} // PARTPOINTSIZE
+
+int set_plot3dlinewidth(float v){
+  plot3dlinewidth = v;
+  return 0;
+} // PLOT3DLINEWIDTH
+
+int set_plot3dpointsize(float v) {
+  plot3dpointsize = v;
+  return 0;
+} // PLOT3DPOINTSIZE
+
+int set_sensorabssize(float v) {
+  sensorabssize = v;
+  return 0;
+} // SENSORABSSIZE
+
+int set_sensorrelsize(float v) {
+  sensorrelsize = v;
+  return 0;
+} // SENSORRELSIZE
+
+int set_sliceoffset(float v) {
+  sliceoffset_factor = v;
+  return 0;
+} // SLICEOFFSET
+
+int set_smoothlines(int v) {
+  antialiasflag = v;
+  return 0;
+} // SMOOTHLINES
+
+int set_spheresegs(int v) {
+  device_sphere_segments = v;
+  return 0;
+} // SPHERESEGS
+
+int set_sprinklerabssize(float v) {
+  sprinklerabssize = v;
+  return 0;
+} // SPRINKLERABSSIZE
+
+int set_streaklinewidth(float v) {
+  streaklinewidth = v;
+  return 0;
+} // STREAKLINEWIDTH
+
+int set_ticklinewidth(float v) {
+  ticklinewidth = v;
+  return 0;
+} // TICKLINEWIDTH
+
+int set_usenewdrawface(int v) {
+  use_new_drawface = v;
+  return 0;
+} // USENEWDRAWFACE
+
+int set_vecontours(int v) {
+  show_slices_and_vectors = v;
+  return 0;
+} // VECCONTOURS
+
+int set_veclength(int a, float b, float c) {
+  int dummy1 = a; // TODO: what is the point of this value
+  vecfactor = b;
+  int dummy2 = c; // TODO: what is the point of this value
+  return 0;
+} // VECLENGTH
+
+int set_vectorlinewidth(float a, float b) {
+  vectorlinewidth = a;
+  slice_line_contour_width = b;
+  return 0;
+} // VECTORLINEWIDTH
+
+int set_vectorpointsize(float v) {
+  vectorpointsize = v;
+  return 0;
+} // VECTORPOINTSIZE
+
+int set_ventlinewidth(float v) {
+  ventlinewidth = v;
+  return 0;
+} // VENTLINEWIDTH
+
+int set_ventoffset(float v) {
+  ventoffset_factor = v;
+  return 0;
+} // VENTOFFSET
+
+int set_windowoffset(int v) {
+  titlesafe_offsetBASE = v;
+  return 0;
+} // WINDOWOFFSET
+
+int set_windowwidth(int v) {
+  screenWidth = v;
+  return 0;
+} // WINDOWWIDTH
+
+int set_windowheight(int v) {
+  screenHeight = v;
+  return 0;
+} // WINDOWHEIGHT
+
+
+// --  *** DATA LOADING ***
+int set_boundzipstep(int v) {
+  boundzipstep = v;
+  return 0;
+} // BOUNDZIPSTEP
+
+int set_fed(int v) {
+  regenerate_fed = v;
+  return 0;
+} // FED
+
+int set_fedcolorbar(char *name) {
+  if(strlen(name)>0) {
+    strcpy(default_fed_colorbar, name);
+    return 0;
+  } else {
+    return 1;
+  }
+} // FEDCOLORBAR
+
+int set_isozipstep(int v) {
+  isozipstep = v;
+  return 0;
+} // ISOZIPSTEP
+
+int set_nopart(int v) {
+  nopart = v;
+  return 0;
+} // NOPART
+
+// int set_partpointstep(int v) {
+//   partpointstep = v;
+//   return 0;
+// } // PARTPOINTSTEP
+
+int set_showfedarea(int v) {
+  show_fed_area = v;
+  return 0;
+} // SHOWFEDAREA
+
+int set_sliceaverage(int flag, float interval, int vis) {
+  slice_average_flag = flag;
+  slice_average_interval = interval;
+  vis_slice_average = vis;
+  return 0;
+} // SLICEAVERAGE
+
+int set_slicedataout(int v) {
+  output_slicedata = v;
+  return 0;
+} // SLICEDATAOUT
+
+int set_slicezipstep(int v) {
+  slicezipstep = v;
+  return 0;
+} // SLICEZIPSTEP
+
+int set_smoke3dzipstep(int v) {
+  smoke3dzipstep = v;
+  return 0;
+} // SMOKE3DZIPSTEP
+
+int set_userrotate(int index, int show_center, float x, float y, float z) {
+  glui_rotation_index = index;
+  slice_average_interval = show_center;
+  xcenCUSTOM = x;
+  ycenCUSTOM = y;
+  zcenCUSTOM = z;
+  return 0;
+} // USER_ROTATE
+
+
+// --  *** VIEW PARAMETERS ***
+int set_aperature(int v) {
+  apertureindex = v;
+  return 0;
+} // APERTURE
+
+int set_axissmooth(int v) {
+  axislabels_smooth = v;
+  return 0;
+} // AXISSMOOTH
+
+// provided above
+// int set_blocklocation(int v) {
+//   blocklocation = v;
+//   return 0;
+// } // BLOCKLOCATION
+
+int set_boundarytwoside(int v) {
+  showpatch_both = v;
+  return 0;
+} // BOUNDARYTWOSIDE
+
+int set_clip(float v_near, float v_far) {
+  nearclip = v_near;
+  farclip = v_far;
+  return 0;
+} // CLIP
+
+int set_contourtype(int v) {
+  contour_type = v;
+  return 0;
+} // CONTOURTYPE
+
+int set_cullfaces(int v) {
+  cullfaces = v;
+  return 0;
+} // CULLFACES
+
+int set_texturelighting(int v) {
+  enable_texture_lighting = v;
+  return 0;
+} // ENABLETEXTURELIGHTING
+
+int set_eyeview(int v) {
+  rotation_type = v;
+  return 0;
+} // EYEVIEW
+
+int set_eyex(float v) {
+  eyexfactor = v;
+  return 0;
+} // EYEX
+
+int set_eyey(float v) {
+  eyeyfactor = v;
+  return 0;
+} // EYEY
+
+int set_eyez(float v) {
+  eyezfactor = v;
+  return 0;
+} // EYEZ
+
+int set_fontsize(int v) {
+  fontindex = v;
+  return 0;
+} // FONTSIZE
+
+int set_frameratevalue(int v) {
+  frameratevalue = v;
+  return 0;
+} // FRAMERATEVALUE
+
+int set_geomdiags(int structured, int unstructured, int diagnostics) {
+  structured_isopen = structured;
+  unstructured = unstructured_isopen;
+  show_geometry_diagnostics = diagnostics;
+  return 0;
+} // GEOMDIAGS
+
+// int set_geomshow(int )
+// GEOMSHOW
+int set_showfaces_interior(int v) {
+  show_faces_interior = v;
+  return 0;
+}
+int set_showfaces_exterior(int v) {
+  show_faces_exterior = v;
+  return 0;
+}
+int set_showfaces_solid(int v) {
+  frameratevalue = v;
+  return 0;
+}
+int set_showfaces_outline(int v) {
+  show_faces_outline = v;
+  return 0;
+}
+int set_smoothgeomnoral(int v) {
+  smooth_geom_normal = v;
+  return 0;
+}
+int set_showvolumes_interior(int v) {
+  show_volumes_interior = v;
+  return 0;
+}
+int set_showvolumes_exterior(int v) {
+  show_volumes_exterior = v;
+  return 0;
+}
+int set_showvolumes_solid(int v) {
+  show_volumes_solid = v;
+  return 0;
+}
+int set_showvolumes_outline(int v) {
+  show_volumes_outline = v;
+  return 0;
+}
+int set_geomvertexag(int v) {
+  geom_vert_exag = v;
+  return 0;
+}
+int set_geommaxangle(int v) {
+  geom_max_angle = v;
+  return 0;
+}
+
+int set_gversion(int v) {
+  gversion = v;
+  return 0;
+} // GVERSION
+
+int set_isotran2(int v) {
+  transparent_state = v;
+  return 0;
+} // ISOTRAN2
+
+int set_meshvis(int n, int vals[]) {
+  int i;
+  meshdata *meshi;
+  for (i = 0; i < n; i++) {
+    if(i>nmeshes - 1)break;
+    meshi = meshinfo + i;
+    meshi->blockvis = vals[i];
+    ONEORZERO(meshi->blockvis);
+  }
+} // MESHVIS
+
+int set_meshoffset(int meshnum, int value) {
+  if(meshnum >= 0 && meshnum<nmeshes){
+    meshdata *meshi;
+
+    meshi = meshinfo + meshnum;
+    meshi->mesh_offset_ptr = meshi->mesh_offset;
+    return 0;
+  }
+  return 1;
+} // MESHOFFSET
+
+int set_northangle(int vis, float x, float y, float z) {
+  vis_northangle = vis;
+  northangle_position[0] = x;
+  northangle_position[1] = y;
+  northangle_position[2] = z;
+  return 0;
+} // NORTHANGLE
+
+int set_offsetslice(int v) {
+  offset_slice = v;
+  return 0;
+} // OFFSETSLICE
+
+int set_outlinemode(int a, int b) {
+  highlight_flag = a;
+  outline_color_flag = b;
+  return 0;
+} // OUTLINEMODE
+
+int set_p3dsurfacetype(int v) {
+  p3dsurfacetype = v;
+  return 0;
+} // P3DSURFACETYPE
+
+int set_p3dsurfacesmooth(int v) {
+  p3dsurfacesmooth = v;
+  return 0;
+} // P3DSURFACESMOOTH
+
+int set_projection(int v) {
+  projection_type = v;
+  return 0;
+} // PROJECTION
+
+int set_scaledfont(int height2d, float height2dwidth, int thickness2d, int height3d, float height3dwidth, int thickness3d) {
+  scaled_font2d_height = scaled_font2d_height;
+  scaled_font2d_height2width = scaled_font2d_height2width;
+  thickness2d = scaled_font2d_thickness;
+  scaled_font3d_height = scaled_font3d_height;
+  scaled_font3d_height2width = scaled_font3d_height2width;
+  thickness3d = scaled_font3d_thickness;
+  return 0;
+} // SCALEDFONT
+
+int set_showalltextures(int v) {
+  showall_textures = v;
+  return 0;
+} // SHOWALLTEXTURES
+
+int set_showaxislabels(int v) {
+  visaxislabels = v;
+  return 0;
+} // SHOWAXISLABELS TODO: duplicate
+
+int set_showblocklabel(int v) {
+  visMeshlabel = v;
+  return 0;
+} // SHOWBLOCKLABEL
+
+int set_showblocks(int v) {
+  visBlocks = v;
+  return 0;
+} // SHOWBLOCKS
+
+int set_showcadandgrid(int v) {
+  show_cad_and_grid = v;
+  return 0;
+} // SHOWCADANDGRID
+
+int set_showcadopaque(int v) {
+  viscadopaque = v;
+  return 0;
+} // SHOWCADOPAQUE
+
+int set_showceiling(int v) {
+  visCeiling = v;
+  return 0;
+} // SHOWCEILING
+
+int set_showcolorbars(int v) {
+  visColorbar = v;
+  return 0;
+} // SHOWCOLORBARS
+
+int set_showcvents(int a, int b) {
+  visCircularVents = a;
+  circle_outline = b;
+  return 0;
+} // SHOWCVENTS
+
+int set_showdummyvents(int v) {
+  visDummyVents = v;
+  return 0;
+} // SHOWDUMMYVENTS
+
+int set_showevacslices(int a, int b, int c) {
+  show_evac_slices = a;
+  constant_evac_coloring = b;
+  show_evac_colorbar = c;
+  return 0;
+} // SHOWEVACSLICES
+
+int set_showfloor(int v) {
+  visFloor = v;
+  return 0;
+} // SHOWFLOOR
+
+int set_showframe(int v) {
+  visFrame = v;
+  return 0;
+} // SHOWFRAME
+
+int set_showframelabel(int v) {
+  visFramelabel = v;
+  return 0;
+} // SHOWFRAMELABEL
+
+int set_showframerate(int v) {
+  visFramerate = v;
+  return 0;
+} // SHOWFRAMERATE
+
+int set_showgrid(int v) {
+  visGrid = v;
+  return 0;
+} // SHOWGRID
+
+int set_showgridloc(int v) {
+  visgridloc = v;
+  return 0;
+} // SHOWGRIDLOC
+
+int set_showhmstimelabel(int v) {
+  vishmsTimelabel = v;
+  return 0;
+} // SHOWHMSTIMELABEL
+
+int set_showhrrcutoff(int v) {
+  visHRRlabel = v;
+  return 0;
+} // SHOWHRRCUTOFF
+
+int set_showiso(int v) {
+  visAIso = v;
+  return 0;
+} // SHOWISO
+
+int set_showisonormals(int v) {
+  show_iso_normal = v;
+  return 0;
+} // SHOWISONORMALS
+
+int set_showlabels(int v) {
+  visLabels = v;
+  return 0;
+} // SHOWLABELS
+
+#ifdef pp_memstatus
+int set_showmemload(int v) {
+  visAvailmemory = v;
+  return 0;
+} // SHOWMEMLOAD
+#endif
+
+// int set_shownormalwhensmooth(int v); // SHOWNORMALWHENSMOOTH
+int set_showopenvents(int a, int b) {
+  visOpenVents = a;
+  visOpenVentsAsOutline = b;
+  return 0;
+} // SHOWOPENVENTS
+
+int set_showothervents(int v) {
+  visOtherVents = v;
+  return 0;
+} // SHOWOTHERVENTS
+
+int set_showsensors(int a, int b) {
+  visSensor = a;
+  visSensorNorm = b;
+  return 0;
+} // SHOWSENSORS
+
+int set_showsliceinobst(int v) {
+  show_slice_in_obst = v;
+  return 0;
+} // SHOWSLICEINOBST
+
+int set_showsmokepart(int v) {
+  visSmokePart = v;
+  return 0;
+} // SHOWSMOKEPART
+
+int set_showsprinkpart(int v) {
+  visSprinkPart = v;
+  return 0;
+} // SHOWSPRINKPART
+
+int set_showstreak(int show, int step, int showhead, int index) {
+  streak5show = show;
+  streak5step = step;
+  showstreakhead = showhead;
+  streak_index = index;
+  return 0;
+} // SHOWSTREAK
+
+int set_showterrain(int v){
+  visTerrainType = v;
+  return 0;
+} // SHOWTERRAIN
+
+int set_showtetras(int a, int b){
+  show_volumes_solid = a;
+  show_volumes_outline = b;
+  return 0;
+} // SHOWTETRAS
+
+int set_showthreshold(int a, int b, float c){
+  vis_threshold = a;
+  vis_onlythreshold = b;
+  temp_threshold = c;
+  return 0;
+} // SHOWTHRESHOLD
+
+int set_showticks(int v){
+  visFDSticks = v;
+  return 0;
+} // SHOWTICKS
+
+int set_showtimebar(int v){
+  visTimebar = v;
+  return 0;
+} // SHOWTIMEBAR
+
+int set_showtimelabel(int v){
+  visTimelabel = v;
+  return 0;
+} // SHOWTIMELABEL
+
+int set_showtitle(int v){
+  visTitle = v;
+  return 0;
+} // SHOWTITLE
+
+int set_showtracersalways(int v){
+  show_tracers_always = v;
+  return 0;
+} // SHOWTRACERSALWAYS
+
+int set_showtriangles(int a, int b, int c, int d, int e, int f){
+  show_iso_solid = a;
+  show_iso_outline = b;
+  show_iso_points = c;
+  show_iso_normal = d; // TODO: this is overidden to 1
+  smooth_iso_normal = e;
+  return 0;
+} // SHOWTRIANGLES
+
+int set_showtransparent(int v){
+  visTransparentBlockage = v;
+  return 0;
+} // SHOWTRANSPARENT
+
+int set_showtransparentvents(int v){
+  show_transparent_vents = v;
+  return 0;
+} // SHOWTRANSPARENTVENTS
+
+int set_showtrianglecount(int v){
+  show_triangle_count = v;
+  return 0;
+} // SHOWTRIANGLECOUNT
+
+int set_showventflow(int a, int b, int c, int d, int e){
+  visVentHFlow = a;
+  visventslab = b;
+  visventprofile = c;
+  visVentVFlow = d;
+  visVentMFlow = e;
+  return 0;
+} // SHOWVENTFLOW
+
+int set_showvents(int v) {
+  visVents = v;
+  return 0;
+} // SHOWVENTS
+
+int set_showwalls(int v) {
+  visWalls = v;
+  return 0;
+} // SHOWWALLS
+
+int set_skipembedslice(int v) {
+  skip_slice_in_embedded_mesh = v;
+  return 0;
+} // SKIPEMBEDSLICE
+
+#ifdef pp_SLICEUP
+int set_slicedup(int a, int b){
+  slicedup_option = a;
+  vectorslicedup_option = b;
+  return 0;
+} // SLICEDUP
+#endif
+
+int set_smokesensors(int a, int b){
+  show_smokesensors = a;
+  test_smokesensors = b;
+  return 0;
+} // SMOKESENSORS
+
+// int set_smoothblocksolid(int v); // SMOOTHBLOCKSOLID
+#ifdef pp_LANG
+int set_startuplang(char *lang) {
+  char *bufptr;
+
+  strncpy(startup_lang_code, lang, 2);
+  startup_lang_code[2] = '\0';
+  if(strcmp(startup_lang_code, "en") != 0){
+    show_lang_menu = 1;
+  }
+  if(tr_name == NULL){
+    int langlen;
+
+    langlen = strlen(bufptr);
+    NewMemory((void **)&tr_name, langlen + 48 + 1);
+    strcpy(tr_name, bufptr);
+  }
+  return 0;
+} // STARTUPLANG
+#endif
+
+int set_stereo(int v) {
+  showstereo = v;
+  return 0;
+} // STEREO
+
+int set_surfinc(int v) {
+  surfincrement = v;
+  return 0;
+} // SURFINC
+
+int set_terrainparams(int r_min, int g_min, int b_min,
+                      int r_max, int g_max, int b_max, int v) {
+  terrain_rgba_zmin[0] = r_min;
+  terrain_rgba_zmin[1] = g_min;
+  terrain_rgba_zmin[2] = b_min;
+  terrain_rgba_zmin[0] = r_max;
+  terrain_rgba_zmin[1] = g_max;
+  terrain_rgba_zmin[2] = b_max;
+  vertical_factor = v;
+  return 0;
+} // TERRAINPARMS
+
+int set_titlesafe(int v) {
+  titlesafe_offset = v;
+  return 0;
+} // TITLESAFE
+
+int set_trainermode(int v) {
+  trainer_mode = v;
+  return 0;
+} // TRAINERMODE
+
+int set_trainerview(int v) {
+  trainerview = v;
+  return 0;
+} // TRAINERVIEW
+
+int set_transparent(int use_flag, float level) {
+  use_transparency_data = use_flag;
+  transparent_level = level;
+} // TRANSPARENT
+
+int set_treeparms(int minsize, int visx, int visy, int visz) {
+  mintreesize = minsize;
+  vis_xtree = visx;
+  vis_ytree = visy;
+  vis_ztree = visz;
+  return 0;
+} // TREEPARMS
+
+int set_twosidedvents(int internal, int external) {
+  show_bothsides_int = internal;
+  show_bothsides_ext = external;
+  return 0;
+} // TWOSIDEDVENTS
+
+int set_vectorskip(int v) {
+  vectorskip = v;
+  return 0;
+} // VECTORSKIP
+
+int set_volsmoke(int a, int b, int c, int d, int e,
+                 float f, float g, float h, float i,
+                 float j, float k, float l) {
+  glui_compress_volsmoke = a;
+  use_multi_threading = b;
+  load_at_rendertimes = c;
+  volbw = d;
+  show_volsmoke_moving = e;
+  temperature_min = f;
+  temperature_cutoff = g;
+  temperature_max = h;
+  fire_opacity_factor = i;
+  mass_extinct = j;
+  gpu_vol_factor = k;
+  nongpu_vol_factor = l;
+  return 0;
+} // VOLSMOKE
+
+int set_zoom(int a, float b) {
+  zoomindex = a;
+  zoom = b;
+  return 0;
+} // ZOOM
+
+// *** MISC ***
+int set_cellcentertext(int v) {
+  cell_center_text = v;
+  return 0;
+} // CELLCENTERTEXT
+
+int set_inputfile(char *filename) {
+  size_t len;
+  len = strlen(filename);
+
+  FREEMEMORY(INI_fds_filein);
+  if(NewMemory((void **)&INI_fds_filein, (unsigned int)(len + 1)) == 0)return 2;
+  STRCPY(INI_fds_filein, filename);
+  return 0;
+} // INPUT_FILE
+
+int set_labelstartupview(char *startupview) {
+  strcpy(label_startup_view, startupview);
+  update_startup_view = 1;
+  return 0;
+} // LABELSTARTUPVIEW
+
+int set_pixelskip(int v) {
+  pixel_skip = v;
+  return 0;
+} // PIXELSKIP
+
+int set_renderclip(int use_flag, int left, int right, int bottom, int top) {
+  clip_rendered_scene = use_flag;
+  render_clip_left = left;
+  render_clip_right = right;
+  render_clip_bottom = bottom;
+  render_clip_top = top;
+  return 0;
+} // RENDERCLIP
+
+int set_renderfilelabel(int v) {
+  renderfilelabel = v;
+  return 0;
+} // RENDERFILELABEL
+
+int set_renderfiletype(int render, int movie) {
+  renderfiletype = render;
+  moviefiletype = movie;
+  return 0;
+} // RENDERFILETYPE
+
+int set_skybox() {
+  // skyboxdata *skyi;
+
+  // free_skybox();
+  // nskyboxinfo = 1;
+  // NewMemory((void **)&skyboxinfo, nskyboxinfo*sizeof(skyboxdata));
+  // skyi = skyboxinfo;
+
+  // for(i = 0; i<6; i++){
+  //   fgets(buffer, 255, stream);
+  //   loadskytexture(buffer, skyi->face + i);
+  // }
+  ASSERT(FFALSE);
+  return 0;
+} // SKYBOX TODO
+
+int set_renderoption(int opt, int rows) {
+  render_option = opt;
+  nrender_rows = rows;
+  return 0;
+} // RENDEROPTION
+int set_unitclasses(int n, int indices[]) {
+  int i;
+  for(i = 0; i<n; i++){
+    if(i>nunitclasses - 1)continue;
+    unitclasses[i].unit_index = indices[i];
+  }
+  return 0;
+} // UNITCLASSES
+
+int set_zaxisangles(float a, float b, float c) {
+  zaxis_angles[0] = a;
+  zaxis_angles[1] = b;
+  zaxis_angles[2] = c;
+  return 0;
+}
+
+// *** 3D SMOKE INFO ***
+int set_adjustalpha(int v) {
+  adjustalphaflag = v;
+  return 0;
+}
+int set_colorbartype(int type, char *label) {
+  update_colorbartype = 1;
+  colorbartype = type;
+  strcpy(colorbarname, label);
+  return 0;
+} // COLORBARTYPE
+
+int set_extremecolors(int rmin, int gmin, int bmin,
+                      int rmax, int gmax, int bmax) {
+  rgb_below_min[0] = CLAMP(rmin, 0, 255);
+  rgb_below_min[1] = CLAMP(gmin, 0, 255);
+  rgb_below_min[2] = CLAMP(bmin, 0, 255);
+
+  rgb_above_max[0] = CLAMP(rmax, 0, 255);
+  rgb_above_max[1] = CLAMP(gmax, 0, 255);
+  rgb_above_max[2] = CLAMP(bmax, 0, 255);
+  return 0;
+} // EXTREMECOLORS
+
+int set_firecolor(int r, int g, int b) {
+  fire_red = r;
+  fire_green = g;
+  fire_blue = b;
+  return 0;
+} // FIRECOLOR
+
+int set_firecolormap(int type, int index) {
+  firecolormap_type = type;
+  fire_colorbar_index = index;
+  return 0;
+} // FIRECOLORMAP
+
+int set_firedepth(float v) {
+  fire_halfdepth = v;
+  return 0;
+} // FIREDEPTH
+
+// int set_gcolorbar(int ncolorbarini, ) {
+//   colorbardata *cbi;
+//   int r1, g1, b1;
+//   int n;
+
+//   initdefaultcolorbars();
+
+//   ncolorbars = ndefaultcolorbars + ncolorbarini;
+//   if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
+
+//   for(n = ndefaultcolorbars; n<ncolorbars; n++){
+//     char *cb_buffptr;
+
+//     cbi = colorbarinfo + n;
+//     fgets(buffer, 255, stream);
+//     trim_back(buffer);
+//     cb_buffptr = trim_front(buffer);
+//     strcpy(cbi->label, cb_buffptr);
+
+//     fgets(buffer, 255, stream);
+//     sscanf(buffer, "%i %i", &cbi->nnodes, &cbi->nodehilight);
+//     if(cbi->nnodes<0)cbi->nnodes = 0;
+//     if(cbi->nodehilight<0 || cbi->nodehilight >= cbi->nnodes){
+//       cbi->nodehilight = 0;
+//     }
+
+//     cbi->label_ptr = cbi->label;
+//     for(i = 0; i<cbi->nnodes; i++){
+//       int icbar;
+//       int nn;
+
+//       fgets(buffer, 255, stream);
+//       r1 = -1; g1 = -1; b1 = -1;
+//       sscanf(buffer, "%i %i %i %i", &icbar, &r1, &g1, &b1);
+//       cbi->index_node[i] = icbar;
+//       nn = 3 * i;
+//       cbi->rgb_node[nn] = r1;
+//       cbi->rgb_node[nn + 1] = g1;
+//       cbi->rgb_node[nn + 2] = b1;
+//     }
+//     remapcolorbar(cbi);
+//   }
+//   return 0;
+// } // GCOLORBAR
+
+int set_showextremedata(int show_extremedata, int below, int above) {
+  // int below = -1, above = -1, show_extremedata;
+  if(below == -1 && above == -1){
+    if(below == -1)below = 0;
+    if(below != 0)below = 1;
+    if(above == -1)above = 0;
+    if(above != 0)above = 1;
+  }
+  else{
+    if(show_extremedata != 1)show_extremedata = 0;
+    if(show_extremedata == 1){
+      below = 1;
+      above = 1;
+    }
+    else{
+      below = 0;
+      above = 0;
+    }
+  }
+  show_extreme_mindata = below;
+  show_extreme_maxdata = above;
+  return 0;
+} // SHOWEXTREMEDATA
+
+int set_smokecolor(int r, int g, int b) {
+  smoke_red = r;
+  smoke_green = g;
+  smoke_blue = b;
+  return 0;
+} // SMOKECOLOR
+
+int set_smokecull(int v) {
+#ifdef pp_CULL
+  if(gpuactive == 1){
+    cullsmoke = v;
+    if(cullsmoke != 0)cullsmoke = 1;
+  }
+  else{
+    cullsmoke = 0;
+  }
+#else
+  smokecullflag = v;
+#endif
+  return 0;
+} // SMOKECULL
+
+int set_smokeskip(int v) {
+  smokeskipm1 = v;
+  return 0;
+} // SMOKESKIP
+
+int set_smokealbedo(float v) {
+  smoke_albedo = v;
+  return 0;
+} // SMOKEALBEDO
+
+#ifdef pp_GPU
+int set_smokerthick(float v) {
+  smoke3d_rthick = v;
+  smoke3d_rthick = CLAMP(smoke3d_rthick, 1.0, 255.0);
+  smoke3d_thick = log_base2(smoke3d_rthick);
+  return 0;
+} // SMOKERTHICK
+#endif
+
+int set_smokethick(float v) {
+  smoke3d_thick = v;
+  return 0;
+} // SMOKETHICK
+
+#ifdef pp_GPU
+int set_usegpu(int v) {
+  usegpu = v;
+  return 0;
+}
+#endif
+
+// *** ZONE FIRE PARAMETRES ***
+int set_showhazardcolors(int v) {
+  zonecolortype = v;
+  return 0;
+} // SHOWHAZARDCOLORS
+
+int set_showhzone(int v) {
+  visHZone = v;
+  return 0;
+} // SHOWHZONE
+
+int set_showszone(int v) {
+  visSZone = v;
+  return 0;
+} // SHOWSZONE
+
+int set_showvzone(int v) {
+  visVZone = v;
+  return 0;
+} // SHOWVZONE
+
+int set_showzonefire(int v) {
+  viszonefire = v;
+  return 0;
+} // SHOWZONEFIRE
+
+// *** TOUR INFO ***
+int set_showpathnodes(int v) {
+  show_path_knots = v;
+  return 0;
+} // SHOWPATHNODES
+
+int set_showtourroute(int v) {
+  edittour = v;
+  return 0;
+} // SHOWTOURROUTE
+
+//   {
+//     float *col;
+
+//     fprintf(fileout, "TOURCOLORS\n");
+// col = tourcol_selectedpathline;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_selectedpathlineknots;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_selectedknot;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_pathline;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_pathknots;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_text;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         col = tourcol_avatar;
+//         if(fgets(buffer, 255, stream) == NULL)break;
+//         sscanf(buffer, "%f %f %f", col, col + 1, col + 2);
+
+//         continue;
+
+//   }
+int set_tourconstantvel(int v) {
+  tour_constant_vel = v;
+  return 0;
+} // TOURCONSTANTVEL
+
+int set_viewalltours(int v) {
+  viewalltours = v;
+  return 0;
+} // VIEWALLTOURS
+
+int set_viewtimes(float start, float stop, int ntimes) {
+  view_tstart = start;
+  view_tstop = stop;
+  view_ntimes = ntimes;
+  return 0;
+} // VIEWTIMES
+
+int set_viewtourfrompath(int v) {
+  viewtourfrompath = v;
+  return 0;
+} // VIEWTOURFROMPATH

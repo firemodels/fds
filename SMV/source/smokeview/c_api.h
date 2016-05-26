@@ -242,8 +242,8 @@ int set_light0(int setting); // LIGHT0
 int set_light1(int setting); // LIGHT1
 int set_lightmodellocalviewer(int setting); // LIGHTMODELLOCALVIEWER
 int set_lightmodelseparatespecularcolor(int setting); // LIGHTMODELSEPARATESPECULARCOLOR
-int set_lightpos0(float a, float b, float c, float d); // LIGHTPOS0
-int set_lightpos1(float a, float b, float c, float d); // LIGHTPOS1
+int set_lightpos0(float x, float y, float z, float w); // LIGHTPOS0
+int set_lightpos1(float x, float y, float z, float w); // LIGHTPOS1
 int set_sensorcolor(float r, float g, float b); // SENSORCOLOR
 int set_sensornormcolor(float r, float g, float b); // SENSORNORMCOLOR
 int set_bw(int geo_setting, int data_setting); // SETBW
@@ -288,13 +288,11 @@ int set_isozipstep(int v); // ISOZIPSTEP
 int set_nopart(int v); // NOPART
 int set_partpointstep(int v); // PARTPOINTSTEP
 int set_showfedarea(int v); // SHOWFEDAREA
-// -- SLICEAVERAGE
-// --  0 10.000000 0
+int set_sliceaverage(int flag, float interval, int vis); // SLICEAVERAGE
 int set_slicedataout(int v); // SLICEDATAOUT
 int set_slicezipstep(int v); // SLICEZIPSTEP
 int set_smoke3dzipstep(int v); // SMOKE3DZIPSTEP
-// -- USER_ROTATE
-// -- 0 0 0.250000 0.250000 0.500000
+int set_userrotate(int index, int show_center, float x, float y, float z); // USER_ROTATE
 
 // --  *** VIEW PARAMETERS ***
 
@@ -302,8 +300,7 @@ int set_aperature(int v); // APERTURE
 int set_axissmooth(int v); // AXISSMOOTH
 int set_blocklocation(int v); // BLOCKLOCATION
 int set_boundarytwoside(int v); // BOUNDARYTWOSIDE
-// -- CLIP
-// --  0.001000 3.000000
+int set_clip(float near, float far); // CLIP
 int set_contourtype(int v); // CONTOURTYPE
 int set_cullfaces(int v); // CULLFACES
 int set_texturelighting(int v); // ENABLETEXTURELIGHTING
@@ -313,7 +310,7 @@ int set_eyey(float v); // EYEY
 int set_eyez(float v); // EYEZ
 int set_fontsize(int v); // FONTSIZE
 int set_frameratevalue(int v); // FRAMERATEVALUE
-int set_geomdiags(int a, int b, int c); // GEOMDIAGS
+int set_geomdiags(int structured, int unstructured, int diagnostics); // GEOMDIAGS
 int set_gversion(int v); // GVERSION
 int set_isotran2(int v); // ISOTRAN2
 int set_meshvis(int n, int vals[]); // MESHVIS
@@ -321,24 +318,11 @@ int set_offsetslice(int v); // OFFSETSLICE
 int set_outlinemode(int a, int b); // OUTLINEMODE
 int set_p3dsurfacetype(int v); // P3DSURFACETYPE
 int set_p3dsurfacesmooth(int v); // P3DSURFACESMOOTH
-// -- P3VIEW
-// --  0 4 1 4 0 8
-// --  0 122 1 43 0 15
-// --  0 122 1 55 0 15
-// --  0 68 1 15 0 15
-// --  0 64 1 30 0 30
-// --  0 22 1 15 0 15
-// --  0 1 1 46 0 15
-// --  0 1 1 44 0 15
-// --  0 61 1 102 0 15
-// --  0 61 1 102 0 7
 int set_projection(int v); // PROJECTION
 int set_sbatstart(int v); // SBATSTART
-// -- SCALEDFONT
-// --  12 1.000000 1
-// --  32 1.000000 1
+int set_scaledfont(int height2d, float height2dwidth, int thickness2d, int height3d, float height3dwidth, int thickness3d); // SCALEDFONT
 int set_showalltextures(int v); // SHOWALLTEXTURES
-int set_showsxislabels(int v); // SHOWAXISLABELS
+int set_showaxislabels(int v); // SHOWAXISLABELS
 int set_showblocklabel(int v); // SHOWBLOCKLABEL
 int set_showblocks(int v); // SHOWBLOCKS
 int set_showcadandgrid(int v); // SHOWCADANDGRID
@@ -367,7 +351,7 @@ int set_showsensors(int a, int b); // SHOWSENSORS
 int set_showsliceinobst(int v); // SHOWSLICEINOBST
 int set_showsmokepart(int v); // SHOWSMOKEPART
 int set_showsprinkpart(int v); // SHOWSPRINKPART
-int set_showstreak(int a, int b, int c, int d); // SHOWSTREAK
+int set_showstreak(int show, int step, int showhead, int index); // SHOWSTREAK
 int set_showterrain(int v); // SHOWTERRAIN
 int set_showtetras(int a, int b); // SHOWTETRAS
 int set_showthreshold(int a, int b, float c); // SHOWTHRESHOLD
@@ -380,7 +364,7 @@ int set_showtriangles(int a, int b, int c, int d, int e, int f); // SHOWTRIANGLE
 int set_showtransparent(int v); // SHOWTRANSPARENT
 int set_showtransparentvents(int v); // SHOWTRANSPARENTVENTS
 int set_showtrianglecount(int v); // SHOWTRIANGLECOUNT
-int set_showventflow(int a, int b, int c); // SHOWVENTFLOW
+int set_showventflow(int a, int b, int c, int d, int e); // SHOWVENTFLOW
 int set_showvents(int v); // SHOWVENTS
 int set_showwalls(int v); // SHOWWALLS
 int set_skipembedslice(int v); // SKIPEMBEDSLICE
@@ -389,26 +373,24 @@ int set_smoothblocksolid(int v); // SMOOTHBLOCKSOLID
 int set_startuplang(char *lang); // STARTUPLANG
 int set_stereo(int v); // STEREO
 int set_surfinc(int v); // SURFINC
-// -- TERRAINPARMS
-// --  90 50 50
-// --  200 200 200
-// --  1.000000
+int set_terrainparams(int r_min, int g_min, int b_min,
+                      int r_max, int g_max, int b_max, int v); // TERRAINPARMS
 int set_titlesafe(int v); // TITLESAFE
 int set_trainerview(int v); // TRAINERVIEW
 int set_transparent(int a, float b); // TRANSPARENT
-int set_twosidedvents(int a, int b); // TWOSIDEDVENTS
+int set_treeparms(int minsize, int visx, int visy, int visz); // TREEPARMS
+int set_twosidedvents(int internal, int external); // TWOSIDEDVENTS
 int set_vectorskip(int v); // VECTORSKIP
-// -- VOLSMOKE
-// --  0 1 1 0 0
-// --  20.000000 700.000000 1200.000000 3.000000 8700.000000 1.000000 1.000000
-// -- ZOOM
-// --  -2 1.000000
+int set_volsmoke(int a, int b, int c, int d, int e,
+                 float f, float g, float h, float i,
+                 float j, float k, float l); // VOLSMOKE
+int set_zoom(int a, float b); // ZOOM
 
 // --  *** MISC ***
 
 int set_cellcentertext(int v); // CELLCENTERTEXT
 int set_inputfile(char *filename); // INPUT_FILE
-int set_labelstartupview(char *filename); // LABELSTARTUPVIEW
+int set_labelstartupview(char *startupview); // LABELSTARTUPVIEW
 int set_pixelskip(int v); // PIXELSKIP
 int set_renderclip(int a, int b, int c, int d, int e); // RENDERCLIP
 int set_renderfilelabel(int v); // RENDERFILELABEL
