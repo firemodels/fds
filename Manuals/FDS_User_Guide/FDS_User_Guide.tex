@@ -5186,7 +5186,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
 \mathrm{a \, X + b \, Y \overset{H_2O}{\longrightarrow} X_aY_b}
 \end{equation}
 
-However, for the purposes of inputting into FDS, since H$_2$O is neither a product nor a reactant it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
+However, for the purposes of inputting into FDS, since H$_2$O is neither a product nor a reactant it would not be specified in the chemical reaction using either {\ct EQUATION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
 
 Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
 
