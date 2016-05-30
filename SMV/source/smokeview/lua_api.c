@@ -1450,33 +1450,35 @@ int lua_set_boundcolor(lua_State *L) {
   return 0;
 }
 
-float getcolorfield(lua_State *L, const char *key) {
-  if (!lua_istable(L, -1)){
-    fprintf(stderr, "top of stack is not a table, cannot use getcolorfield\n");
+float getcolorfield(lua_State *L, int stack_index,const char *key) {
+  if (!lua_istable(L, stack_index)){
+    fprintf(stderr, "stack is not a table at index, cannot use getcolorfield\n");
     exit(1);
   }
+  // if stack index is relative (negative) convert to absolute (positive)
+  if (stack_index < 0) {
+    stack_index = lua_gettop(L) + stack_index + 1;
+  }
   lua_pushstring(L, key);
-  lua_gettable(L, -2);
+  lua_gettable(L, stack_index);
   float result = lua_tonumber(L, -1);
   lua_pop(L, 1);
   return result;
 }
 
-int get_color(lua_State *L, float *color) {
-  if (!lua_istable(L, -1)){
+int get_color(lua_State *L, int stack_index, float *color) {
+  if (!lua_istable(L, stack_index)){
     fprintf(stderr, "color table is not present\n");
     return 1;
   }
-  float r = getcolorfield(L, "r");
-  float g = getcolorfield(L, "g");
-  float b = getcolorfield(L, "b");
+  float r = getcolorfield(L, stack_index, "r");
+  float g = getcolorfield(L, stack_index, "g");
+  float b = getcolorfield(L, stack_index, "b");
   color[0] = r;
   color[1] = g;
   color[2] = b;
-  lua_pop(L, 1);
   return 0;
 }
-
 int lua_set_colorbar_colors(lua_State *L) {
   int ncolors = lua_tonumber(L, 1);
   if (!lua_istable(L, -1)){
@@ -1489,7 +1491,7 @@ int lua_set_colorbar_colors(lua_State *L) {
   for (i = 1; i <= ncolors; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L,-2);
-    get_color(L, colors[i-1]);
+    get_color(L, -1, colors[i-1]);
   }
 
   int return_code = set_colorbar_colors(ncolors, colors);
@@ -1533,7 +1535,7 @@ int lua_set_color2bar_colors(lua_State *L) {
   for (i = 1; i <= ncolors; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L,-2);
-    get_color(L, colors[i-1]);
+    get_color(L, -1, colors[i-1]);
   }
 
   int return_code = set_color2bar_colors(ncolors, colors);
@@ -1564,6 +1566,71 @@ int lua_get_color2bar_colors(lua_State *L) {
   // Leaves one returned value on the stack, the mesh table.
   return 1;
 }
+
+int lua_set_diffuselight(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_diffuselight(r, g, b);
+  return 0;
+}
+
+int lua_set_directioncolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_directioncolor(r, g, b);
+  return 0;
+}
+
+int lua_set_foregroundcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_foregroundcolor(r, g, b);
+  return 0;
+}
+
+int lua_set_heatoffcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_heatoffcolor(r, g, b);
+  return 0;
+}
+
+int lua_set_heatoncolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_heatoncolor(r, g, b);
+  return 0;
+}
+
+int lua_set_isocolors(lua_State *L) {
+  printf("stack height: %i\n", lua_gettop(L));
+  float shininess = lua_tonumber(L, 1);
+  float default_opaqueness = lua_tonumber(L, 2);
+  float specular[3];
+  get_color(L, 3, specular);
+  int ncolors = lua_tonumber(L, 4);
+  int i;
+  float *color;
+  float colors[ncolors][3];
+  for (i = 1; i <= ncolors; i++) {
+    if (!lua_istable(L, 5)) {
+      fprintf(stderr, "isocolor table is not present\n");
+      return 1;
+    }
+    lua_pushnumber(L, i);
+    lua_gettable(L, 5);
+    get_color(L, -1, colors[i-1]);
+  }
+  // specular = lua_tonumber(L, 3);
+  // int return_code = set_diffuselight(r, g, b);
+  return 0;
+}
+
 
 // add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
@@ -1811,6 +1878,7 @@ void initLua() {
   lua_register(L, "set_blockshininess", lua_set_blockshininess);
   lua_register(L, "set_blockspecular", lua_set_blockspecular);
   lua_register(L, "set_boundcolor", lua_set_boundcolor);
+  lua_register(L, "set_isocolors", lua_set_isocolors);
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 
