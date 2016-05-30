@@ -9985,7 +9985,7 @@ WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
         .
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of lengths 60, 30 and 30, respectively. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
 only program available to view the boundary files.
 
 \section{Particle Data}
