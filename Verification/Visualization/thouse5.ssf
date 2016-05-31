@@ -68,6 +68,37 @@ SETTIMEVAL
 RENDERONCE
  thouse5_slice_060
 
+LABEL
+  render split slice files
+
+UNLOADALL
+LOADINIFILE
+ thouse5_split.ini
+LOADSLICE
+ TEMPERATURE
+ 2 1.6
+ thouse5_01.sf
+KEYBOARD
+ *
+KEYBOARD
+ y
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_slicesplit_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_slicesplit_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_slicesplit_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_slicesplit_060
+
 // render general slices
 
 LABEL
