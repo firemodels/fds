@@ -75,9 +75,9 @@ UNLOADALL
 LOADINIFILE
  thouse5_split.ini
 LOADSLICE
- TEMPERATURE
+ U-VELOCITY
  2 1.6
- thouse5_01.sf
+ thouse5_02.sf
 KEYBOARD
  *
 KEYBOARD
