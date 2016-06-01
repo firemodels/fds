@@ -254,6 +254,7 @@ int set_timebarcolor(float r, float g, float b); // TIMEBARCOLOR
 int set_ventcolor(float r, float g, float b); // VENTCOLOR
 
 // --    *** SIZES/OFFSETS ***
+
 int set_gridlinewidth(float v); // GRIDLINEWIDTH
 int set_isolinewidth(float v); // ISOLINEWIDTH
 int set_isopointsize(float v); // ISOPOINTSIZE
@@ -281,6 +282,7 @@ int set_windowwidth(int v); // WINDOWWIDTH
 int set_windowheight(int v); // WINDOWHEIGHT
 
 // --  *** DATA LOADING ***
+
 int set_boundzipstep(int v); // BOUNDZIPSTEP
 int set_fed(int v); // FED
 int set_fedcolorbar(char *name); // FEDCOLORBAR
@@ -413,9 +415,6 @@ int set_smokeskip(int v); // SMOKESKIP
 int set_smokealbedo(float v); // SMOKEALBEDO
 int set_smokerthick(float v); // SMOKERTHICK
 int set_usegpu(int v); // USEGPU
-// -- VOLSMOKE
-// --  0 1 1 0 0
-// --  20.000000 700.000000 1200.000000 3.000000 8700.000000
 
 // --  *** ZONE FIRE PARAMETRES ***
 
@@ -429,14 +428,7 @@ int set_showzonefire(int v); // SHOWZONEFIRE
 
 int set_showpathnodes(int v); // SHOWPATHNODES
 int set_showtourroute(int v); // SHOWTOURROUTE
-// -- TOURCOLORS
-// --  1.000000 0.000000 0.000000   :selected path line
-// --  1.000000 0.000000 0.000000   :selected path line knots
-// --  0.000000 1.000000 0.000000   :selected knot
-// --  -1.000000 -1.000000 -1.000000   :path line
-// --  -1.000000 -1.000000 -1.000000   :path knots
-// --  -1.000000 -1.000000 -1.000000   :text
-// --  1.000000 0.000000 0.000000   :avatar
+int set_tourcolors(float colors[8][3]); // TOURCOLORS
 int set_tourconstantvel(int v); // TOURCONSTANTVEL
 int set_viewalltours(int v); // VIEWALLTOURS
 int set_viewtimes(float a, float b, int c); // VIEWTIMES
@@ -445,82 +437,36 @@ int set_viewtourfrompath(int v); // VIEWTOURFROMPATH
 // --  ------------ local ini settings ------------
 
 int set_avatarevac(int v); // AVATAREVAC
-// -- GEOMETRYTEST
-// --  0 1 2.000000 10.000000
-// --  1 1 1 1 1
-// --  1 1 1 1 1
-// --  106.000000 318.000000 50.000000 152.000000 4.000000 12.000000
-// --  84.800003 39.799999 3.200000 339.200012 39.799999 3.200000
-// --  212.000000 162.199997 3.200000 212.000000 101.000000 12.800000
-// --  0.000000 0.000000 0.000000
-int set_devicevectordimensions(float a, float b, float c, float d); // DEVICEVECTORDIMENSIONS
+int set_geometrytest(int a, int b, int c, int d, int vals[],
+                     float b1Vals[], float b2Vals[], float b3Vals[]); // GEOMETRYTEST
+int set_devicevectordimensions(float baselength, float basediameter,
+                               float headlength, float headdiameter); // DEVICEVECTORDIMENSIONS
 int set_devicebounds(float a, float b); // DEVICEBOUNDS
 int set_deviceorientation(int a, float b); // DEVICEORIENTATION
-// -- GRIDPARMS
-// --  0 1 0
-// --  398 225 32
-// -- GSLICEPARMS
-// --  0 0 0 0
-// --  212.000000 101.000000 8.000000
-// --  0.000000 90.000000
+int set_gridparms(int vx, int vy, int vz, int px, int py, int pz); // GRIDPARMS
+int set_gsliceparms(int vis_data, int vis_triangles, int vis_triangulation,
+                    int vis_normal, float xyz[], float azelev[]); // GSLICEPARMS
 int set_loadfilesatstartup(int v); // LOADFILESATSTARTUP
 int set_mscale(float a, float b, float c); // MSCALE
-// -- SLICEAUTO
-// --  9
-// --  3
-// --  8
-// --  17
-// --  26
-// --  30
-// --  42
-// --  51
-// --  81
-// --  93
-// -- MSLICEAUTO
-// --  1
-// --  9
+int set_sliceauto(int n, int vals[]);// SLICEAUTO
+int set_msliceauto(int n, int vals[]); // MSLICEAUTO
 int set_compressauto(int v); // COMPRESSAUTO
-// -- PART5PROPDISP
-// --   1  1  1  1  1
+int set_part5propdisp(int vals[]); // PART5PROPDISP
 int set_part5color(int v); // PART5COLOR
-// -- PART5CLASSVIS
-// --  5
-// --  1
-// --  1
-// --  1
-// --  1
-// --  1
-// -- PROPINDEX
-// --  3
-// --  0 0
-// --  1 0
-// --  2 0
-// -- SHOOTER
-// --  0.500000 0.000000 0.018868
-// --  0.250000 0.000000 0.000000
-// --  0.000000 0.000000 0.000000
-// --  1.000000 0.000000 4.000000
-// --  10 1 100 0 0
-// --  1.000000 1.000000
+int set_propindex(int nvals, int vals[][2]); // PROPINDEX
+int set_shooter(float xyz[], float dxyz[], float uvw[],
+                float velmag, float veldir, float pointsize,
+                int fps, int vel_type, int nparts, int vis, int cont_update,
+                float duration, float v_inf); // SHOOTER
 int set_showdevices(int n, char **names); // SHOWDEVICES
 int set_showdevicevals(int showdeviceval, int showvdeviceval,
     int devicetypes_index, int colordeviceval, int vectortype, int vispilot,
     int showdevicetype, int showdeviceunit); // SHOWDEVICEVALS
 int set_showmissingobjects(int v); // SHOWMISSINGOBJECTS
 int set_tourindex(int v); // TOURINDEX
-
-// -- USERTICKS
-// --  0 1 5 1 1 1
-// --  0.000000 -1.000000 0.000000
-// --  0.000000 -1.000000 0.000000
-// --  424.000000 203.000000 16.000000
-// --  1.000000 1.000000 1.000000
-// --  1 1 1
-// -- XYZCLIP
-// --  2
-// --  0 -0.424000 0 424.424011
-// --  0 94.497025 0 203.203995
-// --  0 -0.016000 1 5.193398
+int set_userticks(int vis, int auto_place, int sub, float origin[],
+                  float min[], float max[], float step[],
+                  int show_x, int show_y, int show_z); // USERTICKS
 
 // --  *** TIME/DATA BOUNDS ***
 // --   (0/1 min max skip (1=set, 0=unset)

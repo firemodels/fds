@@ -1926,7 +1926,8 @@ void setgridparms(int x_vis, int y_vis, int z_vis,
 }
 
 /** Set the direction of the colorbar.
- * Is used for the .ini option FLIP.
+ * Is used for the .ini option FLIP. If the values is TRUE, the colorbar
+ * runs in the opposite direction to that specified.
  */
 void setcolorbarflip(int flip) {
 	colorbarflip = flip;
@@ -1934,7 +1935,7 @@ void setcolorbarflip(int flip) {
   UpdateRGBColors(COLORBAR_INDEX_NONE);
 }
 
-/** Get the direction of the colorbar.
+/** Get whether the direction of the colorbar is flipped.
  */
 int getcolorbarflip(int flip) {
     return colorbarflip;
@@ -1950,6 +1951,7 @@ int camera_get_rotation_type() {
   return camera_current->rotation_type;
 }
 
+// TODO: How does the rotation index work.
 void camera_set_rotation_index(int rotation_index) {
   camera_current->rotation_index = rotation_index;
 }
@@ -3462,3 +3464,345 @@ int set_viewtourfrompath(int v) {
   viewtourfrompath = v;
   return 0;
 } // VIEWTOURFROMPATH
+
+int set_avatarevac(int v) {
+  iavatar_evac = v;
+  return 0;
+} // AVATAREVAC
+
+int set_geometrytest(int a, int b, int c, int d, int vals[],
+                     float b1Vals[], float b2Vals[], float b3Vals[]) {
+  int *v;
+  int ii;
+  geomtest_option = a;
+  show_tetratest_labels = b;
+  tetra_line_thickness = c;
+  tetra_point_size = d;
+  v = tetrabox_vis;
+  ONEORZERO(show_tetratest_labels);
+  for(ii = 0; ii<10; ii++){
+    v[ii] = vals[ii];
+    ONEORZERO(v[ii]);
+  }
+  for(ii = 0; ii<6; ii++){
+    box_bounds2[ii] = b1Vals[ii];
+  }
+  for(ii = 0; ii<12; ii++){
+     tetra_vertices[ii] = b2Vals[ii];
+  }
+  for(ii = 0; ii<3; ii++){
+    box_translate[ii] = b3Vals[ii];
+  }
+  return 0;
+} //  GEOMETRYTEST
+
+int set_devicevectordimensions(float baselength, float basediameter,
+                               float headlength, float headdiameter) {
+  vector_baselength = baselength;
+  vector_basediameter = basediameter;
+  vector_headlength = headlength;
+  vector_headdiameter = headdiameter;
+  return 0;
+} // DEVICEVECTORDIMENSIONS
+
+int set_devicebounds(float min, float max) {
+  device_valmin = min;
+  device_valmax = max;
+  return 0;
+} // DEVICEBOUNDS
+
+int set_deviceorientation(int a, float b) {
+  show_device_orientation = a;
+  orientation_scale = b;
+  show_device_orientation = CLAMP(show_device_orientation, 0, 1);
+  orientation_scale = CLAMP(orientation_scale, 0.1, 10.0);
+} // DEVICEORIENTATION
+
+int set_gridparms(int vx, int vy, int vz, int px, int py, int pz) {
+  visx_all = vx;
+  visy_all = vy;
+  visz_all = vz;
+
+  iplotx_all = px;
+  iploty_all = py;
+  iplotz_all = pz;
+
+  if(iplotx_all>nplotx_all - 1)iplotx_all = 0;
+  if(iploty_all>nploty_all - 1)iploty_all = 0;
+  if(iplotz_all>nplotz_all - 1)iplotz_all = 0;
+
+  return 0;
+} // GRIDPARMS
+
+int set_gsliceparms(int vis_data, int vis_triangles, int vis_triangulation,
+                    int vis_normal, float xyz[], float azelev[]) {
+  vis_gslice_data = vis_data;
+  show_gslice_triangles = vis_triangles;
+  show_gslice_triangulation = vis_triangulation;
+  show_gslice_normal = vis_normal;
+  ONEORZERO(vis_gslice_data);
+  ONEORZERO(show_gslice_triangles);
+  ONEORZERO(show_gslice_triangulation);
+  ONEORZERO(show_gslice_normal);
+
+  gslice_xyz[0] = xyz[0];
+  gslice_xyz[1] = xyz[1];
+  gslice_xyz[2] = xyz[2];
+
+  gslice_normal_azelev[0] = azelev[0];
+  gslice_normal_azelev[1] = azelev[1];
+
+  update_gslice = 1;
+
+  return 0;
+} // GSLICEPARMS
+
+int set_loadfilesatstartup(int v) {
+  loadfiles_at_startup = v;
+  return 0;
+} // LOADFILESATSTARTUP
+int set_mscale(float a, float b, float c) {
+  mscale[0] = a;
+  mscale[1] = b;
+  mscale[2] = c;
+  return 0;
+} // MSCALE
+
+int set_sliceauto(int n, int vals[]) {
+  int i;
+  int n3dsmokes = 0;
+  int seq_id;
+  n3dsmokes = n; // TODO: is n3dsmokes the right variable.
+  // TODO: this discards  the values. Verify.
+  for(i = 0; i<n3dsmokes; i++){
+    seq_id = vals[i];
+    get_startup_slice(seq_id);
+  }
+  update_load_Files = 1;
+  return 0;
+} // SLICEAUTO
+
+int set_msliceauto(int n, int vals[]) {
+  int i;
+  int n3dsmokes = 0;
+  int seq_id;
+  n3dsmokes = n; // TODO: is n3dsmokes the right variable
+  for(i = 0; i<n3dsmokes; i++){
+    seq_id = vals[i];
+
+    if(seq_id >= 0 && seq_id<nmultisliceinfo){
+      multislicedata *mslicei;
+
+      mslicei = multisliceinfo + seq_id;
+      mslicei->autoload = 1;
+    }
+  }
+  update_load_Files = 1;
+  return 0;
+} // MSLICEAUTO
+
+int set_compressauto(int v) {
+  compress_autoloaded = v;
+  return 0;
+} // COMPRESSAUTO
+
+// int set_part5propdisp(int vals[]) {
+//   char *token;
+
+//   for(i = 0; i<npart5prop; i++){
+//     partpropdata *propi;
+//     int j;
+
+//     propi = part5propinfo + i;
+//     fgets(buffer, 255, stream);
+
+//     trim_back(buffer);
+//     token = strtok(buffer, " ");
+//     j = 0;
+//     while(token != NULL&&j<npartclassinfo){
+//       int visval;
+
+//       sscanf(token, "%i", &visval);
+//       propi->class_vis[j] = visval;
+//       token = strtok(NULL, " ");
+//       j++;
+//     }
+//   }
+//   CheckMemory;
+//   continue;
+// } // PART5PROPDISP
+
+// int set_part5color(int n, int vals[]) {
+//   int i;
+//   for(i = 0; i<npart5prop; i++){
+//     partpropdata *propi;
+
+//     propi = part5propinfo + i;
+//     propi->display = 0;
+//   }
+//   part5colorindex = 0;
+//   i = n;
+//   if(i >= 0 && i<npart5prop){
+//     partpropdata *propi;
+
+//     part5colorindex = i;
+//     propi = part5propinfo + i;
+//     propi->display = 1;
+//   }
+//   continue;
+//   return 0;
+// } // PART5COLOR
+
+int set_propindex(int nvals, int vals[][2]) {
+  int i;
+  for(i = 0; i<nvals; i++){
+    propdata *propi;
+    int ind, val;
+    ind = vals[0][2];
+    val = vals[1][2];
+    if(ind<0 || ind>npropinfo - 1)return 0;
+    propi = propinfo + ind;
+    if(val<0 || val>propi->nsmokeview_ids - 1)return 0;
+    propi->smokeview_id = propi->smokeview_ids[val];
+    propi->smv_object = propi->smv_objects[val];
+  }
+  for(i = 0; i<npartclassinfo; i++){
+    partclassdata *partclassi;
+
+    partclassi = partclassinfo + i;
+    update_partclass_depend(partclassi);
+
+  }
+  return 0;
+} // PROPINDEX
+
+int set_shooter(float xyz[], float dxyz[], float uvw[],
+                float velmag, float veldir, float pointsize,
+                int fps, int vel_type, int nparts, int vis, int cont_update,
+                float duration, float v_inf) {
+  shooter_xyz[0] = xyz[0];
+  shooter_xyz[1] = xyz[1];
+  shooter_xyz[2] = xyz[2];
+
+  shooter_dxyz[0] = dxyz[0];
+  shooter_dxyz[1] = dxyz[1];
+  shooter_dxyz[2] = dxyz[2];
+
+  shooter_uvw[0] = uvw[0];
+  shooter_uvw[1] = uvw[1];
+  shooter_uvw[2] = uvw[2];
+
+  shooter_velmag = velmag;
+  shooter_veldir = veldir;
+  shooterpointsize = pointsize;
+
+  shooter_fps = fps;
+  shooter_vel_type = vel_type;
+  shooter_nparts = nparts;
+  visShooter = vis;
+  shooter_cont_update = cont_update;
+
+  shooter_duration = duration;
+  shooter_v_inf = v_inf;
+
+  return 0;
+} // SHOOTER
+
+int set_showdevices(int ndevices_ini, char **names) {
+  sv_object *obj_typei;
+  char *dev_label;
+  int i;
+
+  for(i = 0; i<nobject_defs; i++){
+    obj_typei = object_defs[i];
+    obj_typei->visible = 0;
+  }
+  for(i = 0; i<ndevices_ini; i++){
+    obj_typei = get_object(names[i]);
+    if(obj_typei != NULL){
+      obj_typei->visible = 1;
+    }
+  }
+  return 0;
+} // SHOWDEVICES
+
+int set_showdevicevals(int vshowdeviceval, int vshowvdeviceval,
+    int vdevicetypes_index, int vcolordeviceval, int vvectortype,
+    int vvispilot, int vshowdevicetype, int vshowdeviceunit) {
+  showdeviceval = vshowdeviceval;
+  showvdeviceval = vshowvdeviceval;
+  devicetypes_index = vdevicetypes_index;
+  colordeviceval = vcolordeviceval;
+  vectortype = vvectortype;
+  vispilot = vvispilot;
+  showdevicetype = vshowdevicetype;
+  showdeviceunit = vshowdeviceunit;
+  devicetypes_index = CLAMP(vdevicetypes_index, 0, ndevicetypes - 1);
+  update_glui_devices();
+} // SHOWDEVICEVALS
+
+int set_showmissingobjects(int v) {
+  show_missing_objects = v;
+  ONEORZERO(show_missing_objects);
+  return 0;
+} // SHOWMISSINGOBJECTS
+
+int set_tourindex(int v) {
+  selectedtour_index_ini = v;
+  if(selectedtour_index_ini < 0)selectedtour_index_ini = -1;
+  update_selectedtour_index = 1;
+  return 0;
+} // TOURINDEX
+
+int set_userticks(int vis, int auto_place, int sub, float origin[],
+                  float min[], float max[], float step[],
+                  int show_x, int show_y, int show_z) {
+  visUSERticks = vis;
+  auto_user_tick_placement = auto_place;
+  user_tick_sub = sub;
+
+  user_tick_origin[0] = origin[0];
+  user_tick_origin[1] = origin[1];
+  user_tick_origin[2] = origin[2];
+
+  user_tick_min[0] = min[0];
+  user_tick_min[1] = min[1];
+  user_tick_min[2] = min[2];
+
+  user_tick_max[0] = max[0];
+  user_tick_max[1] = max[1];
+  user_tick_max[2] = max[2];
+
+  user_tick_step[0] = step[0];
+  user_tick_step[1] = step[1];
+  user_tick_step[2] = step[2];
+
+  user_tick_show_x = show_x;
+  user_tick_show_y = show_y;
+  user_tick_show_z = show_z;
+
+  return 0;
+} // USERTICKS
+
+// TODO: use functions already defined
+// int set_xyzclip(int vclip_mode, int) {
+//   clip_mode = CLAMP(vclip_mode, 0, 2);
+
+//   clipinfo.clip_xmin = xminflag;
+//   clipinfo.xmin = xminval;
+//   clipinfo.clip_xmax = xmaxflag;
+//   clipinfo.xmax = xmaxval;
+
+//   clipinfo.clip_ymin = yminflag;
+//   clipinfo.ymin = yminval;
+//   clipinfo.clip_ymax = ymaxflag;
+//   clipinfo.ymax = ymaxval;
+
+//   clipinfo.clip_zmin = zminflag;
+//   clipinfo.zmin = zminval;
+//   clipinfo.clip_zmax = zmaxflag;
+//   clipinfo.zmax = zmaxval;
+
+//   updateclipvals = 1;
+//   continue;
+// } // XYZCLIP
