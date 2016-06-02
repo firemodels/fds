@@ -3787,3 +3787,175 @@ int set_userticks(int vis, int auto_place, int sub, float origin[],
 
   return 0;
 } // USERTICKS
+
+int show_smoke3d_showall() {
+  smoke3ddata *smoke3di;
+  int i;
+
+  updatemenu=1;
+  glutPostRedisplay();
+  plotstate=DYNAMIC_PLOTS;
+  for(i=0;i<nsmoke3dinfo;i++){
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->loaded==1)smoke3di->display=1;
+  }
+  glutPostRedisplay();
+  return 0;
+}
+
+int show_smoke3d_hideall() {
+  smoke3ddata *smoke3di;
+  int i;
+
+  updatemenu=1;
+  glutPostRedisplay();
+  for(i=0;i<nsmoke3dinfo;i++){
+    smoke3di = smoke3dinfo + i;
+    if(smoke3di->loaded==1)smoke3di->display=0;
+  }
+  return 0;
+}
+
+int show_slices_showall(){
+  int i;
+
+  updatemenu=1;
+  glutPostRedisplay();
+  for(i=0;i<nsliceinfo;i++){
+    sliceinfo[i].display=1;
+  }
+  show_all_slices=1;
+  updateslicefilenum();
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+
+  updateglui();
+  updateslicelistindex(slicefilenum);
+  Update_Show();
+  glutPostRedisplay();
+  return 0;
+}
+
+int show_slices_hideall(){
+  int i;
+
+  updatemenu=1;
+  glutPostRedisplay();
+  for(i=0;i<nsliceinfo;i++){
+    sliceinfo[i].display=0;
+  }
+  show_all_slices=0;
+  updateslicefilenum();
+  plotstate=getplotstate(DYNAMIC_PLOTS);
+
+  updateglui();
+  updateslicelistindex(slicefilenum);
+  Update_Show();
+  return 0;
+}
+
+
+void useSmoke3DShowMenu(int value){
+  smoke3ddata *smoke3di;
+  int i;
+
+  updatemenu=1;
+  glutPostRedisplay();
+  if(value<0){
+    switch(value){
+    case SHOW_ALL:
+      plotstate=DYNAMIC_PLOTS;
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==1)smoke3di->display=1;
+      }
+      break;
+    case HIDE_ALL:
+      for(i=0;i<nsmoke3dinfo;i++){
+        smoke3di = smoke3dinfo + i;
+        if(smoke3di->loaded==1)smoke3di->display=0;
+      }
+      break;
+    case HAVE_LIGHT:
+      show_smoke_lighting = 1 - show_smoke_lighting;
+      break;
+    default:
+      ASSERT(FFALSE);
+    }
+  }
+  else{
+    smoke3di = smoke3dinfo + value;
+    if(plotstate!=DYNAMIC_PLOTS){
+      plotstate=DYNAMIC_PLOTS;
+      smoke3di->display=1;
+    }
+    else{
+      smoke3di->display = 1 - smoke3di->display;
+    }
+  }
+}
+
+// void useHideSliceMenu(int value){
+//   int i;
+
+//   if(value == MENU_DUMMY)return;
+//   updatemenu=1;
+//   glutPostRedisplay();
+//   if(value<0){
+//     switch(value){
+//     case SHOW_ALL:
+//       for(i=0;i<nsliceinfo;i++){
+//         sliceinfo[i].display=1;
+//       }
+//       show_all_slices=1;
+//       break;
+//     case HIDE_ALL:
+//       for(i=0;i<nsliceinfo;i++){
+//         sliceinfo[i].display=0;
+//       }
+//       show_all_slices=0;
+//       break;
+//     case MENU_SHOWSLICE_INBLOCKAGE:
+//       show_slice_in_obst=1-show_slice_in_obst;
+//       break;
+//     case MENU_SHOWSLICE_OFFSET:
+//       offset_slice=1-offset_slice;
+//       break;
+//     case MENU_SHOWSLICE_TERRAIN:
+//       planar_terrain_slice=1-planar_terrain_slice;
+//       break;
+//     case MENU_SHOWSLICE_FEDAREA:
+//       show_fed_area=1-show_fed_area;
+//       break;
+//     case MENU_SHOWSLICE_SLICEANDVECTORS:
+//       show_slices_and_vectors=1-show_slices_and_vectors;
+//       return;
+//     default:
+//       ASSERT(FFALSE);
+//     }
+//   }
+//   else{
+//     slicedata *sd;
+
+//     sd = sliceinfo + value;
+//     if(islicetype==sd->type){
+//       if(plotstate!=DYNAMIC_PLOTS){
+//         plotstate=DYNAMIC_PLOTS;
+//         sd->display=1;
+//       }
+//       else{
+//         sd->display = 1 - sd->display;
+//       }
+//     }
+//     else{
+//       plotstate=DYNAMIC_PLOTS;
+//       islicetype = sd->type;
+//       sd->display=1;
+//     }
+//   }
+//   updateslicefilenum();
+//   plotstate=getplotstate(DYNAMIC_PLOTS);
+
+//   updateglui();
+//   updateslicelistindex(slicefilenum);
+//   Update_Show();
+// }

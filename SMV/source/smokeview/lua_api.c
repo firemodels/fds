@@ -2282,6 +2282,30 @@ int lua_set_meshoffset(lua_State *L) {
   return 1;
 }
 
+int lua_show_smoke3d_showall(lua_State *L) {
+  int return_code = show_smoke3d_showall();
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_show_smoke3d_hideall(lua_State *L) {
+  int return_code = show_smoke3d_hideall();
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_show_slices_showall(lua_State *L) {
+  int return_code = show_slices_showall();
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_show_slices_hideall(lua_State *L) {
+  int return_code = show_slices_hideall();
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
 
 // add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
@@ -2607,6 +2631,11 @@ void initLua() {
   lua_register(L, "set_isotran2", lua_set_isotran2);
   lua_register(L, "set_meshvis", lua_set_meshvis);
   lua_register(L, "set_meshoffset", lua_set_meshoffset);
+
+  lua_register(L, "show_smoke3d_showall", lua_show_smoke3d_showall);
+  lua_register(L, "show_smoke3d_hideall", lua_show_smoke3d_hideall);
+  lua_register(L, "show_slices_showall", lua_show_slices_showall);
+  lua_register(L, "show_slices_hideall", lua_show_slices_hideall);
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 

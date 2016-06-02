@@ -547,3 +547,8 @@ int set_userticks(int vis, int auto_place, int sub, float origin[],
 // --  2 0 0 0 0 0 1
 // --  -0.424000 -1.204000 -0.016000 424.424011 203.203995 5.193398
 // --  topDown
+
+int show_smoke3d_showall();
+int show_smoke3d_hideall();
+int show_slices_showall();
+int show_slices_hideall();
