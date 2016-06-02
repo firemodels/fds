@@ -299,6 +299,12 @@ int lua_loadslice(lua_State *L) {
   return 0;
 }
 
+
+int lua_get_clipping_mode(lua_State *L) {
+  lua_pushnumber(L, get_clipping_mode());
+  return 1;
+}
+
 /*
   Set the clipping mode, which determines which parts of the model are clipped
   (based on the set clipping values). This function takes an int, which is one
@@ -1572,7 +1578,8 @@ int lua_set_diffuselight(lua_State *L) {
   float g = lua_tonumber(L, 2);
   float b = lua_tonumber(L, 3);
   int return_code = set_diffuselight(r, g, b);
-  return 0;
+  lua_pushnumber(L, return_code);
+  return 1;
 }
 
 int lua_set_directioncolor(lua_State *L) {
@@ -1608,22 +1615,27 @@ int lua_set_heatoncolor(lua_State *L) {
 }
 
 int lua_set_isocolors(lua_State *L) {
-  printf("stack height: %i\n", lua_gettop(L));
   float shininess = lua_tonumber(L, 1);
   float default_opaqueness = lua_tonumber(L, 2);
   float specular[3];
   get_color(L, 3, specular);
-  int ncolors = lua_tonumber(L, 4);
+  int ncolors = 0;
+  // count the number of colours
+  lua_pushnil(L);  /* first key */
+  while (lua_next(L, 4) != 0) {
+    lua_pop(L, 1); // remove value (leave key for next iteration)
+    ncolors++;
+  }
   int i;
   float *color;
   float colors[ncolors][3];
   for (i = 1; i <= ncolors; i++) {
-    if (!lua_istable(L, 5)) {
+    if (!lua_istable(L, 4)) {
       fprintf(stderr, "isocolor table is not present\n");
       return 1;
     }
     lua_pushnumber(L, i);
-    lua_gettable(L, 5);
+    lua_gettable(L, 4);
     get_color(L, -1, colors[i-1]);
   }
   // specular = lua_tonumber(L, 3);
@@ -1631,6 +1643,333 @@ int lua_set_isocolors(lua_State *L) {
   return 0;
 }
 
+int lua_set_colortable(lua_State *L) {
+  // int ncolors = lua_tonumber(L, 1);
+  int ncolors = 0;
+  int i = 0;
+  // count the number of colours
+  lua_pushnil(L);  /* first key */
+  while (lua_next(L, 1) != 0) {
+    lua_pop(L, 1); // remove value (leave key for next iteration)
+    ncolors++;
+  }
+  // initialise arrays using the above count info
+  float colors[ncolors][3];
+  char names[ncolors][255];
+  /* table is in the stack at index 't' */
+  lua_pushnil(L);  /* first key */
+  while (lua_next(L, 1) != 0) {
+    /* uses 'key' (at index -2) and 'value' (at index -1) */
+    strncpy(names[i], lua_tostring(L, -2), 255);
+    get_color(L, -1, colors[i]);
+    /* removes 'value'; keeps 'key' for next iteration */
+    lua_pop(L, 1);
+    i++;
+  }
+  // for (i = 0; i < ncolors; i++) {
+  //   printf("%s: %f %f %f\n", names[i],
+  //     colors[i][0], colors[i][1], colors[i][2]);
+  // }
+  return 0;
+}
+
+int lua_set_light0(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_light0(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_light1(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_light1(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_lightpos0(lua_State *L) {
+  float a = lua_tonumber(L, 1);
+  float b = lua_tonumber(L, 2);
+  float c = lua_tonumber(L, 3);
+  float d = lua_tonumber(L, 4);
+  int return_code = set_lightpos0(a, b, c, d);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_lightpos1(lua_State *L) {
+  float a = lua_tonumber(L, 1);
+  float b = lua_tonumber(L, 2);
+  float c = lua_tonumber(L, 3);
+  float d = lua_tonumber(L, 4);
+  int return_code = set_lightpos1(a, b, c, d);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_lightmodellocalviewer(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_lightmodellocalviewer(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_lightmodelseparatespecularcolor(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_lightmodelseparatespecularcolor(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sensorcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_sensorcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sensornormcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_sensornormcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_bw(lua_State *L) {
+  int a = lua_tonumber(L, 1);
+  int b = lua_tonumber(L, 2);
+  int return_code = set_bw(a, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+
+int lua_set_sprinkleroffcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_sprinkleroffcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sprinkleroncolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_sprinkleroncolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_staticpartcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_staticpartcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_timebarcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_timebarcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_ventcolor(lua_State *L) {
+  float r = lua_tonumber(L, 1);
+  float g = lua_tonumber(L, 2);
+  float b = lua_tonumber(L, 3);
+  int return_code = set_ventcolor(r, g, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_gridlinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_gridlinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_isolinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_isolinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_isopointsize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_isopointsize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_linewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_linewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_partpointsize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_partpointsize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_plot3dlinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_plot3dlinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_plot3dpointsize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_plot3dpointsize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sensorabssize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_sensorabssize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sensorrelsize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_sensorrelsize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sliceoffset(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_sliceoffset(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_smoothlines(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_smoothlines(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_spheresegs(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_spheresegs(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_sprinklerabssize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_sprinklerabssize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_streaklinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_streaklinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_ticklinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_ticklinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_usenewdrawface(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_usenewdrawface(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_vecontours(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_vecontours(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_veclength(lua_State *L) {
+  float a = lua_tonumber(L, 1);
+  float b = lua_tonumber(L, 2);
+  float c = lua_tonumber(L, 3);
+  int return_code = set_veclength(a, b, c);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_vectorlinewidth(lua_State *L) {
+  float a = lua_tonumber(L, 1);
+  float b = lua_tonumber(L, 2);
+  int return_code = set_vectorlinewidth(a, b);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_vectorpointsize(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_vectorpointsize(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_ventlinewidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_ventlinewidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_ventoffset(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_ventoffset(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_windowoffset(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_windowoffset(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_windowwidth(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_windowwidth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_windowheight(lua_State *L) {
+  float v = lua_tonumber(L, 1);
+  int return_code = set_windowheight(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
 
 // add the smokeview bin directory to the Lua path variables
 void addLuaPaths() {
@@ -1824,6 +2163,7 @@ void initLua() {
   lua_register(L, "set_color2bar_colors", lua_set_color2bar_colors);
   lua_register(L, "get_color2bar_colors", lua_get_color2bar_colors);
 
+  // Camera API
   lua_register(L, "camera_mod_eyex", lua_camera_mod_eyex);
   lua_register(L, "camera_set_eyex", lua_camera_set_eyex);
   lua_register(L, "camera_get_eyex", lua_camera_get_eyex);
@@ -1849,18 +2189,13 @@ void initLua() {
   lua_register(L, "camera_get_zoom", lua_camera_get_zoom);
   lua_register(L, "camera_set_zoom", lua_camera_set_zoom);
 
-  lua_register(L, "camera_get_rotation_type"
-      , lua_camera_get_rotation_type);
-      lua_register(L, "camera_get_rotation_index"
-          , lua_camera_get_rotation_index);
-  lua_register(L, "camera_set_rotation_type"
-      , lua_camera_set_rotation_type);
-  lua_register(L, "camera_get_projection_type"
-      , lua_camera_get_projection_type);
-  lua_register(L, "camera_set_projection_type"
-      , lua_camera_set_projection_type);
+  lua_register(L, "camera_get_rotation_type" , lua_camera_get_rotation_type);
+  lua_register(L, "camera_get_rotation_index", lua_camera_get_rotation_index);
+  lua_register(L, "camera_set_rotation_type", lua_camera_set_rotation_type);
+  lua_register(L, "camera_get_projection_type", lua_camera_get_projection_type);
+  lua_register(L, "camera_set_projection_type", lua_camera_set_projection_type);
 
-  // lua_register(L, "get_clipping_mode", lua_get_clipping_mode);
+  lua_register(L, "get_clipping_mode", lua_get_clipping_mode);
   lua_register(L, "set_clipping_mode", lua_set_clipping_mode);
   lua_register(L, "set_sceneclip_x", lua_set_sceneclip_x);
   lua_register(L, "set_sceneclip_x_min", lua_set_sceneclip_x_min);
@@ -1879,6 +2214,45 @@ void initLua() {
   lua_register(L, "set_blockspecular", lua_set_blockspecular);
   lua_register(L, "set_boundcolor", lua_set_boundcolor);
   lua_register(L, "set_isocolors", lua_set_isocolors);
+  lua_register(L, "set_colortable", lua_set_colortable);
+  lua_register(L, "set_light0", lua_set_light0);
+  lua_register(L, "set_light1", lua_set_light1);
+  lua_register(L, "set_lightpos0", lua_set_lightpos0);
+  lua_register(L, "set_lightpos1", lua_set_lightpos1);
+  lua_register(L, "set_lightmodellocalviewer", lua_set_lightmodellocalviewer);
+  lua_register(L, "set_sensorcolor", lua_set_sensorcolor);
+  lua_register(L, "set_sensornormcolor", lua_set_sensornormcolor);
+  lua_register(L, "set_bw", lua_set_bw);
+  lua_register(L, "set_sprinkleroffcolor", lua_set_sprinkleroffcolor);
+  lua_register(L, "set_sprinkleroncolor", lua_set_sprinkleroncolor);
+  lua_register(L, "set_staticpartcolor", lua_set_staticpartcolor);
+  lua_register(L, "set_timebarcolor", lua_set_timebarcolor);
+  lua_register(L, "set_ventcolor", lua_set_ventcolor);
+  lua_register(L, "set_gridlinewidth", lua_set_gridlinewidth);
+  lua_register(L, "set_isolinewidth", lua_set_isolinewidth);
+  lua_register(L, "set_isopointsize", lua_set_isopointsize);
+  lua_register(L, "set_linewidth", lua_set_linewidth);
+  lua_register(L, "set_partpointsize", lua_set_partpointsize);
+  lua_register(L, "set_plot3dlinewidth", lua_set_plot3dlinewidth);
+  lua_register(L, "set_plot3dpointsize", lua_set_plot3dpointsize);
+  lua_register(L, "set_sensorabssize", lua_set_sensorabssize);
+  lua_register(L, "set_sensorrelsize", lua_set_sensorrelsize);
+  lua_register(L, "set_sliceoffset", lua_set_sliceoffset);
+  lua_register(L, "set_smoothlines", lua_set_smoothlines);
+  lua_register(L, "set_spheresegs", lua_set_spheresegs);
+  lua_register(L, "set_sprinklerabssize", lua_set_sprinklerabssize);
+  lua_register(L, "set_streaklinewidth", lua_set_streaklinewidth);
+  lua_register(L, "set_ticklinewidth", lua_set_ticklinewidth);
+  lua_register(L, "set_usenewdrawface", lua_set_usenewdrawface);
+  lua_register(L, "set_vecontours", lua_set_vecontours);
+  lua_register(L, "set_veclength", lua_set_veclength);
+  lua_register(L, "set_vectorlinewidth", lua_set_vectorlinewidth);
+  lua_register(L, "set_vectorpointsize", lua_set_vectorpointsize);
+  lua_register(L, "set_ventlinewidth", lua_set_ventlinewidth);
+  lua_register(L, "set_ventoffset", lua_set_ventoffset);
+  lua_register(L, "set_windowoffset", lua_set_windowoffset);
+  lua_register(L, "set_windowwidth", lua_set_windowwidth);
+  lua_register(L, "set_windowheight", lua_set_windowheight);
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 

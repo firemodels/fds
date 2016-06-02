@@ -99,6 +99,8 @@ void camera_toggle_projection_type();
 int camera_set_projection_type(int projection_type);
 int camera_get_projection_type();
 
+int get_clipping_mode();
+void set_clipping_mode(int mode);
 void set_sceneclip_x(int clipMin, float min, int clipMax, float max);
 void set_sceneclip_x_min(int flag, float value);
 void set_sceneclip_x_max(int flag, float value);
@@ -108,7 +110,6 @@ void set_sceneclip_y_max(int flag, float value);
 void set_sceneclip_z(int clipMin, float min, int clipMax, float max);
 void set_sceneclip_z_min(int flag, float value);
 void set_sceneclip_z_max(int flag, float value);
-void set_clipping_mode(int mode);
 
 int RenderFrameLua(int view_mode, const char *basename);
 char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,

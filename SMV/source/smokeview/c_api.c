@@ -1779,6 +1779,10 @@ int setviewpoint(const char *viewpoint){
   return errorcode;
 }
 
+int get_clipping_mode() {
+  return clip_mode;
+}
+
 void set_clipping_mode(int mode) {
     clip_mode=mode;
     updatefacelists=1;
@@ -1959,7 +1963,6 @@ void camera_set_rotation_index(int rotation_index) {
 int camera_get_rotation_index() {
   return camera_current->rotation_index;
 }
-
 
 void camera_set_viewdir(float xcen, float ycen, float zcen) {
   printf("c_api: Setting viewDir to %f %f %f\n", xcen, ycen, zcen);
@@ -3783,26 +3786,3 @@ int set_userticks(int vis, int auto_place, int sub, float origin[],
 
   return 0;
 } // USERTICKS
-
-// TODO: use functions already defined
-// int set_xyzclip(int vclip_mode, int) {
-//   clip_mode = CLAMP(vclip_mode, 0, 2);
-
-//   clipinfo.clip_xmin = xminflag;
-//   clipinfo.xmin = xminval;
-//   clipinfo.clip_xmax = xmaxflag;
-//   clipinfo.xmax = xmaxval;
-
-//   clipinfo.clip_ymin = yminflag;
-//   clipinfo.ymin = yminval;
-//   clipinfo.clip_ymax = ymaxflag;
-//   clipinfo.ymax = ymaxval;
-
-//   clipinfo.clip_zmin = zminflag;
-//   clipinfo.zmin = zminval;
-//   clipinfo.clip_zmax = zmaxflag;
-//   clipinfo.zmax = zmaxval;
-
-//   updateclipvals = 1;
-//   continue;
-// } // XYZCLIP
