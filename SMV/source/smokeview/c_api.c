@@ -2488,7 +2488,7 @@ int set_fed(int v) {
   return 0;
 } // FED
 
-int set_fedcolorbar(char *name) {
+int set_fedcolorbar(const char *name) {
   if(strlen(name)>0) {
     strcpy(default_fed_colorbar, name);
     return 0;
@@ -2550,7 +2550,7 @@ int set_userrotate(int index, int show_center, float x, float y, float z) {
 
 
 // --  *** VIEW PARAMETERS ***
-int set_aperature(int v) {
+int set_aperture(int v) {
   apertureindex = v;
   return 0;
 } // APERTURE
@@ -2647,7 +2647,7 @@ int set_showfaces_outline(int v) {
   show_faces_outline = v;
   return 0;
 }
-int set_smoothgeomnoral(int v) {
+int set_smoothgeomnormal(int v) {
   smooth_geom_normal = v;
   return 0;
 }
@@ -2695,6 +2695,7 @@ int set_meshvis(int n, int vals[]) {
     meshi->blockvis = vals[i];
     ONEORZERO(meshi->blockvis);
   }
+  return 0;
 } // MESHVIS
 
 int set_meshoffset(int meshnum, int value) {

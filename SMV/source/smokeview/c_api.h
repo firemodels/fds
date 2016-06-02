@@ -286,7 +286,7 @@ int set_windowheight(int v); // WINDOWHEIGHT
 
 int set_boundzipstep(int v); // BOUNDZIPSTEP
 int set_fed(int v); // FED
-int set_fedcolorbar(char *name); // FEDCOLORBAR
+int set_fedcolorbar(const char *name); // FEDCOLORBAR
 int set_isozipstep(int v); // ISOZIPSTEP
 int set_nopart(int v); // NOPART
 int set_partpointstep(int v); // PARTPOINTSTEP
@@ -299,7 +299,7 @@ int set_userrotate(int index, int show_center, float x, float y, float z); // US
 
 // --  *** VIEW PARAMETERS ***
 
-int set_aperature(int v); // APERTURE
+int set_aperture(int v); // APERTURE
 int set_axissmooth(int v); // AXISSMOOTH
 int set_blocklocation(int v); // BLOCKLOCATION
 int set_boundarytwoside(int v); // BOUNDARYTWOSIDE
@@ -314,9 +314,23 @@ int set_eyez(float v); // EYEZ
 int set_fontsize(int v); // FONTSIZE
 int set_frameratevalue(int v); // FRAMERATEVALUE
 int set_geomdiags(int structured, int unstructured, int diagnostics); // GEOMDIAGS
+// GEOMSHOW
+int set_showfaces_interior(int v);
+int set_showfaces_exterior(int v);
+int set_showfaces_solid(int v);
+int set_showfaces_outline(int v);
+int set_smoothgeomnormal(int v);
+int set_showvolumes_interior(int v);
+int set_showvolumes_exterior(int v);
+int set_showvolumes_solid(int v);
+int set_showvolumes_outline(int v);
+int set_geomvertexag(int v);
+int set_geommaxangle(int v);
 int set_gversion(int v); // GVERSION
 int set_isotran2(int v); // ISOTRAN2
 int set_meshvis(int n, int vals[]); // MESHVIS
+int set_meshoffset(int meshnum, int value); // MESHOFFSET
+int set_northangle(int vis, float x, float y, float z); // NORTHANGLE
 int set_offsetslice(int v); // OFFSETSLICE
 int set_outlinemode(int a, int b); // OUTLINEMODE
 int set_p3dsurfacetype(int v); // P3DSURFACETYPE
