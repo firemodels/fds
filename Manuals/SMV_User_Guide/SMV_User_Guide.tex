@@ -987,14 +987,42 @@ The width of the selection region (default 5 pixels) may be selected with this d
 Other data coloring properties such as transparency, order of the colorbar may also be selected.
 
 \begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.916666in]{FIGURES/figDatacoloring}
+\centerline{\includegraphics[width=4.00694444in]{FIGURES/figDatacoloring}
 }\ \caption [Dialog Box for selecting colorbars.] {Dialog
 box for selecting colorbars.  The selected colorbar may be modified by
 shading it continuously, stepped or as a series of discrete lines.  The
 colorbar may also be converted to shades of gray.  Colors for
-extreme data (data outside of specified bounds) may be specified.}
+extreme data (data outside of specified bounds) may be specified. 
+A split colorbar may be specified using one range of colors between the minimum 
+value and the split and another range of colors between the split and the maximum value.}
 \label{figDatacoloring}
 \end{figure}
+
+\begin{figure}[\figoptions]
+\begin{center}
+\begin{tabular}{ccc}
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slicesplit_005}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slicesplit_010}\\
+5.0 s&10.0 s\\
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slicesplit_030}&
+\includegraphics[height=\figheightAbar]{SCRIPT_FIGURES/thouse5_slicesplit_060}&\\
+30.0 s&60.0 s
+&\raisebox{0.0ex}[0pt]{\includegraphics[height=5.0in]{FIGURES/colorbar_uvel}}\\
+\end{tabular}
+\caption [Slice file snapshots of shaded U velocity contours using a colorbar with a split at 0.0~m/s.]
+{Slice file snapshots of shaded U velocity contours at various
+times in a simulation using a colorbar with a split at 0.0~m/s. Velocities greater than 0.0~m/s are colored with shades of red.
+Velocities less than 0.0~m/s are colored with shades of blue. }
+\label{figslicesplit}%
+\end{center}
+\end{figure}
+
+
+A colorbar defined with a split may also be specified with this dialog box.  One range of colors are specified between the minimum
+data value and the split value and another range of colors are specified between the split value and the maximum value. This is useful when highlighting
+data that has a special property, for example a tenability temperature criteria or where flow velocity reverses. 
+Figure \ref{figslicesplit} illustrates a scene using a colorbar with a split at 0.0~m/s. Velocities greater than 0.0~m/s are colored with shades of red.
+Velocities less than 0.0~m/s are colored with shades of blue. 
 
 Fig. \ref{fignewslice}\ illustrates how interpolating color within the colorbar
 improves the visualization.
@@ -1681,49 +1709,41 @@ is visualized using color.}
 
 \chapter{Setting Options}
 \label{chapter:settingoptions}
-\section{Setting Data Bounds}
+\section{Data Bounds}
 
-Normally, Smokeview determines data bounds automatically when it
-loads data. Sometimes, however, it is desirable to override
-Smokeview's choice.  This allows for consistent color shading when
+In order to visualize data, Smokeview maps data values to colorbar indices ranging from 0 to 255 using a mapping of the form
+
+\begin{eqnarray*}
+c=255 \frac{v-v_{\rm min}}{v_{\rm max}-v_{\rm min}}
+\end{eqnarray*}
+
+\noindent where $v$ is a data value and c is a colorbar index (values less than $v_{\rm min}$ are mapped to 0 and values greater than $v_{\rm max}$ are mapped to 255). The terms $v_{\rm min}$ and $v_{\rm max}$ are set to be either global min/max data values (0'th and 100'th percentile values from a data histogram computed by Smokeview), percentile min/max values (1st and 99th percentile values) or min/max values specified by the user.  This choice is set in the Data bounds dialog box as illustrated in Figure \ref{figBOUNDSset}.
+Creating and modifying colorbars are discussed in Chapter \ref{chap:colorbar}.
+User specified min/max values may be used to ensure consistent color shading when
 displaying several data files simultaneously.
+To quickly set bounds for actual data, press {\tt ALT r}\ and reload or update data files. This puts Smokeview into {\em research mode}\ which uses actual global min/max values when mapping data to color and does not smooth colorbar labels.
 
 \begin{figure}[\figoptions]
 \centerline{
-\includegraphics[width=2.77777in]{FIGURES/figBOUNDSplot3d}
-}\ \caption[Dialog box for setting Plot3D file
-options.] {Dialog box for setting Plot3D file
-options. Select a variable and bound type, then enter a lower
-and/or upper bound. Data may be excluded from the plot by
-selecting a {\em Truncate data}\ bound. Select the type of contour
-plot to be displayed. Press {\em Reload...}\ or {\em Update}\ for
-the new bounds to take effect.}\ \label{figBOUNDSplot3d}
+\includegraphics[width=3.458333in]{FIGURES/figBOUNDset}}
+\caption[Dialog box for setting Slice file data bounds.]
+{Dialog box for setting Slice file data bounds.
+Select a variable and bound type (percentile, set or global).  Enter a lower
+and/or upper bound if set bound type was selected. Data may be excluded from the plot by
+selecting a {\em Truncate data}\ bound. Press the {\em Update}\ button for
+the new bounds to take effect.}\ \label{figBOUNDSset}
 \end{figure}
 
-The File/Bounds... dialog box is opened from the {\em
-Dialogs>Data bounds}\ menu. Each file type in Fig. \ref{figBOUNDSplot3d}
+
+The Data bounds dialog box is opened from the {\em
+Dialogs>Data bounds}\ menu. Each file type in Fig. \ref{figBOUNDSset}\
 (slice, particle, Plot3D, etc.) has a set of {\em radio buttons}\
-for selecting the variable type that data bounds are to be applied
-to. These variable types are determined from the files generated
+for selecting the variable type and radio buttons for bounding and truncating data when converting data to color. Variable types are determined from the files generated
 by FDS and are automatically recorded in the {\tt .smv}\ file. The
 data bounds are set in a pair of edit boxes. Radio buttons
 adjacent to the edit boxes determine what type of bounds should be
-applied.  The \frameit{Update}\ and \frameit{Reload}\ buttons are
-pressed to make the new bounds take effect.
-
-\begin{figure}[\figoptions]
-\centerline{\includegraphics[width=2.77777in]{FIGURES/figBOUNDslice}
-}\ \caption[Dialog box for setting slice file
-options.]
-{Dialog box for setting slice file
-options.
-Select a variable and a bound
-type using variable {\em radio button}\ and {\em checkbox/radio button}, then enter a lower and/or upper
-bound. Data may be excluded from the plot by
-selecting a {\em Truncate}\ bound.
- Press {\em Reload...}\ for the new bounds to take
-effect.}\ \label{figBOUNDSslice}
-\end{figure}
+applied.  The \frameit{Update}\ button for slice files and \frameit{Reload}\ button for boundary and PLOT3D files are
+pressed to make new bounds take effect.
 
 \begin{figure}[\figoptions]
 \begin{center}
@@ -1739,14 +1759,14 @@ effect.}\ \label{figBOUNDSslice}
 \caption [Ceiling Jet Visualization.] {   Ceiling jet
 visualization created by {\em chopping data}\ below 140~$^\circ$C
 using the Bounds dialog box as illustrated in
-Fig.~\ref{figBOUNDSslice}. }
+Fig.~\ref{figBOUNDSset}. }
 \label{figceilingjet}%
 \end{center}
 \end{figure}
 
 The {\tt Plot3D}\ and {\tt Slice File}\ portions of the
 File/Bounds dialog box have additional controls used to chop or
-hide data. The settings used in Fig. \ref{figBOUNDSslice}\ were
+hide data. The settings used in Fig. \ref{figBOUNDSset}\ were
 used to generate the ceiling jet visualized in
 Fig.~\ref{figceilingjet}. Data values less than 140~\degC\ are
 chopped or not drawn in the figure.
@@ -1754,7 +1774,22 @@ chopped or not drawn in the figure.
 Slice file data may be time averaged or smoothed over a user
 selectable time interval.  This option is also implemented from
 the Slice File section of the File/Bounds dialog box (see
-Fig. \ref{figBOUNDSslice}.
+Fig. \ref{figBOUNDSset}).
+
+\begin{figure}[\figoptions]
+\centerline{
+\includegraphics[width=4.0972222in]{FIGURES/figBOUNDSplot3d}
+}\ \caption[Dialog box for setting Plot3D file
+options.] {Dialog box for setting Plot3D file
+options. Select a variable and bound type. Enter a lower
+and/or upper bound if set bound type was selected.  Data may be excluded from the plot by
+selecting a {\em Truncate data}\ bound. Select the type of contour
+plot to be displayed. Press the {\em Reload Plot3D files(s)}\ button for
+the new bounds to take effect.}\ \label{figBOUNDSplot3d}
+\end{figure}
+
+The {\tt Plot3D}\ portion of the File/Bounds dialog box as illustrated in Figure \ref{figBOUNDSplot3d} has controls for specifying how Plot3D vectors and isosurfaces appear.
+
 
 The {\em Boundary File}\ portion of the File/Bounds dialog
 box has an {\em Ignition}\ checkbox which allows one to visualize
@@ -1764,6 +1799,7 @@ temperature.
 The bounds dialog for Plot3D display allows one to select between
 three different types of contour plots:  shaded, stepped and line
 contours.
+
 \section{3D Smoke Options}
 \begin{figure}[\figoptions]
 \centerline{\includegraphics[width=3.625in]{FIGURES/fig3DSmoke}
@@ -3666,6 +3702,7 @@ VOLRENDERALL
 
 
 \chapter{Coloring Data}
+\label{chap:colorbar}
 \section{Overview}
 A colorbar is used to map
 data with color.  A colorbar is normally visualized by
