@@ -3800,6 +3800,7 @@ int show_smoke3d_showall() {
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
   glutPostRedisplay();
+  Update_Show();
   return 0;
 }
 
@@ -3813,6 +3814,7 @@ int show_smoke3d_hideall() {
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
+  Update_Show();
   return 0;
 }
 
