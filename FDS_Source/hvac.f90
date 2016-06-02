@@ -751,16 +751,16 @@ IF (HVAC_MASS_TRANSPORT) THEN
       DU%DX = DU%LENGTH/DU%N_CELLS
       SELECT CASE (DU%DUCT_INTERP_TYPE)
          CASE (1) ! duct adopts values from node 1
-            DU%RHO_C(:) = DUCTNODE(DU%NODE_INDEX(1))%RHO
-            DU%TMP_C(:) = DUCTNODE(DU%NODE_INDEX(1))%TMP
+            DU%RHO_C = DUCTNODE(DU%NODE_INDEX(1))%RHO
+            DU%TMP_C = DUCTNODE(DU%NODE_INDEX(1))%TMP
             DO NN = 1, DU%N_CELLS
                DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ
             ENDDO
          CASE (2) ! duct adopts values from node 2
-            DU%RHO_C(:) = DUCTNODE(DU%NODE_INDEX(2))%RHO
-            DU%TMP_C(:) = DUCTNODE(DU%NODE_INDEX(2))%TMP
+            DU%RHO_C = DUCTNODE(DU%NODE_INDEX(2))%RHO
+            DU%TMP_C = DUCTNODE(DU%NODE_INDEX(2))%TMP
             DO NN = 1, DU%N_CELLS
-               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = (DUCTNODE(DU%NODE_INDEX(2))%ZZ
+               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(2))%ZZ
             ENDDO
          CASE DEFAULT ! default, linear interpolation between node 1 and 2
             DRHO = (DUCTNODE(DU%NODE_INDEX(2))%RHO - DUCTNODE(DU%NODE_INDEX(1))%RHO) / DU%N_CELLS
@@ -2411,11 +2411,11 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
    IF (DU%VEL(NEW)>0._EB) THEN
       ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
       DO I = 1,DU%N_CELLS
-          ZZ_F(I,:) = DU%ZZ_C(I,:)
+         ZZ_F(I,:) = DU%ZZ_C(I,:)
       ENDDO
    ELSE
       DO I = 0,DU%N_CELLS-1
-          ZZ_F(I,:) = DU%ZZ_C(I+1,:)
+         ZZ_F(I,:) = DU%ZZ_C(I+1,:)
       ENDDO
       ZZ_F(DU%N_CELLS,:) = DUCTNODE(DU%NODE_INDEX(2))%ZZ(:)
    ENDIF
