@@ -99,6 +99,10 @@ DO K=1,KBAR
                                 ZETA_P(I,J,K),AIT_P(I,J,K),PBAR(K,PRESSURE_ZONE(I,J,K)),&
                                 LES_FILTER_WIDTH_FUNCTION(DX(I),DY(J),DZ(K)),DX(I)*DY(J)*DZ(K) )
          !***************************************************************************************
+         IF (REAC_SOURCE_CHECK) THEN ! Store special diagnostic quantities
+            REAC_SOURCE_TERM(I,J,K,:) = REAC_SOURCE_TERM_TMP
+            Q_REAC(I,J,K,:) = Q_REAC_TMP
+         ENDIF
          IF (CHECK_REALIZABILITY) THEN
             REALIZABLE=IS_REALIZABLE(ZZ_GET)
             IF (.NOT.REALIZABLE) THEN
