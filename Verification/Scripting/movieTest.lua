@@ -13,16 +13,12 @@ string = require "string"
 initsmvdata()
 
 function mkMovie()
-    -- this is a very quick hack of a sript as a demonstration
-    -- depends on ffmpeg and ImageMagick
-    -- it currently needs to save to disk in order to combine the two different
-    -- data sets from Smokeview, however, it is possible to stream images
-    -- directly to ffmpeg.
     local f = assert(io.popen("uname", r))
     local sys = assert(f:read('*a'))
     f:close()
     local sep
     print(sys)
+    -- TODO: create directories properly
     if string.find(sys, "Linux") then sep = "/"
     else sep = "\\"
     end
@@ -49,33 +45,42 @@ function mkMovie()
     camera.set(cam)
     timebar.visibility = true
     local movframes = 500
+    local framerate = 15 -- framerate in frames/s
+    local moviePath = "renders/testMovie.mp4"
     -- step 1: load all the necessary data
     load.datafile("room_fire_01.sf")
     load.datafile("room_fire_01.s3d")
+    show_slices_hideall()
+    show_smoke3d_hideall()
     -- step 2: hide all the data from view
     local movieHndl = assert(io.popen(string.format(
-        "ffmpeg"
-        .. " -y"
-        .. " -r 15"
-        .. " -i pipe:0"
-        .. " renders/testMovie.mp4"), "wb"))
+        "ffmpeg" -- use ffmpeg to make the movie
+        .. " -y" -- answer yes to overwrites
+        .. " -r " .. framerate -- specify framerate (frames/s)
+        .. " -i pipe:0" -- take input from STDIN
+        .. " " .. moviePath -- render to this path
+        ), "wb"))
     for i=0,movframes,1 do
         setframe(i)
         -- step 3: show the temperature data
         show_slices_showall()
         -- step 4: render the temperature data
+        -- TODO: bring image data into lua rather than rendering to file
+        -- this would require modifying the core smokeview code.
         io.stderr:write("rendering temperature data\n")
         render.dir = "renders/tempslice"
         render(function() return tostring(view.framenumber) end)
-        -- step 5: hide the temperature data (via hide all)
+        -- step 5: hide the temperature data (via hide all slices)
         show_slices_hideall()
         -- step 6: show the smoke data
         show_smoke3d_showall()
         -- step 7: render the smoke data
         io.stderr:write("rendering smoke data\n")
         render.dir ="renders/smoke"
+        setframe(i) -- TODO: this is necessary in order to get the
+        -- the smoke to display. Investigate.
         render(function() return tostring(view.framenumber) end)
-        -- step 8: hide the smoke data (via hide all)
+        -- step 8: hide the smoke data (via hide all smoke3d)
         show_smoke3d_hideall()
         -- TODO: use multiple pipes to pipe simultaneous images
         io.stderr:write(string.format("combining frame %d\n",i))
@@ -88,29 +93,11 @@ function mkMovie()
             .. " png:-"
             , i, i, i), "rb"))
         local comb = imgHndl:read('*a')
-        local f = assert(io.open("testfile.png", "wb"))
-        f:write(comb)
         movieHndl:write(comb)
         imgHndl:close()
     end
     movieHndl:close()
-    -- os.execute(string.format(
-    --     "ffmpeg"
-    --     .. " -y"
-    --     .. " -r 15"
-    --     .. " -i renders/combined/%%d.png"
-    --     .. " renders/testMovie.mp4"))
-    -- -- rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
-    -- unload.all()
-    -- print("done load")
-    -- rendermany(0,movframes,1,function() return tostring(view.framenumber) end)
-    -- io.stderr:write("rendering complete\n")
-    -- io.stderr:write("combining frames\n")
+    io.stderr:write("rendering complete\n")
 end
 mkMovie()
 exit()
--- load.datafile("room_fire_01.sf")
--- load.datafile("room_fire_01.s3d")
--- show_smoke3d_hideall()
--- show_slices_hideall()
--- show_smoke3d_showall()
