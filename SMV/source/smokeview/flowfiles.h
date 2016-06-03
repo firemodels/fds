@@ -41,6 +41,14 @@ typedef struct {
   struct _tridata **triangles;
 } vertdata;
 
+/* --------------------------  edgedata ------------------------------------ */
+
+typedef struct {
+  int ntriangles;
+  vertdata *verts[2];
+  struct _tridata *triangles[2];
+} edgedata;
+
 /* --------------------------  tridata ------------------------------------ */
 
 typedef struct _tridata {
@@ -50,6 +58,7 @@ typedef struct _tridata {
   struct _surfdata *surf;
   int vert_index[3], exterior, geomtype, insolid;
   vertdata *verts[3];
+  edgedata *edges[3];
 } tridata;
 
 /* --------------------------  tetdata ------------------------------------ */
@@ -59,6 +68,7 @@ typedef struct _tetdata {
   int vert_index[4],exterior[4],faces[12];
   struct _matldata *matl;
   vertdata *verts[4];
+  edgedata *edges[4];
 } tetdata;
 
 /* --------------------------  geomlistdata ------------------------------------ */
