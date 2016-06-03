@@ -31,44 +31,44 @@ typedef struct {
   int type;
 } csvdata;
 
-/* --------------------------  point ------------------------------------ */
+/* --------------------------  vertdata ------------------------------------ */
 
 typedef struct {
-  float xyz[3],point_norm[3],texture_xy[3];
+  float xyz[3],vert_norm[3],texture_xy[3];
   int itriangle,ntriangles,nused;
   unsigned char on_mesh_boundary;
   int geomtype;
-  struct _triangle **triangles;
-} point;
+  struct _tridata **triangles;
+} vertdata;
 
-/* --------------------------  triangle ------------------------------------ */
+/* --------------------------  tridata ------------------------------------ */
 
-typedef struct _triangle {
+typedef struct _tridata {
   unsigned char skinny;
-  float distance, *color, tpoints[6], tri_norm[3], point_norm[9];
+  float distance, *color, tverts[6], tri_norm[3], vert_norm[9];
   struct _texturedata *textureinfo;
   struct _surfdata *surf;
   int vert_index[3], exterior, geomtype, insolid;
-  point *points[3];
-} triangle;
+  vertdata *verts[3];
+} tridata;
 
-/* --------------------------  tetrahedron ------------------------------------ */
+/* --------------------------  tetdata ------------------------------------ */
 
-typedef struct _tetrahedron {
+typedef struct _tetdata {
   float distance, *color, face_norm[4];
   int vert_index[4],exterior[4],faces[12];
   struct _matldata *matl;
-  point *points[4];
-} tetrahedron;
+  vertdata *verts[4];
+} tetdata;
 
 /* --------------------------  geomlistdata ------------------------------------ */
 
 typedef struct {
-  int npoints,ntriangles,nvolus;
+  int nverts,ntriangles,nvolumes;
   float *zORIG;
-  point *points;
-  triangle *triangles, **triangleptrs;
-  tetrahedron *volumes;
+  vertdata *verts;
+  tridata *triangles, **triangleptrs;
+  tetdata *volumes;
 } geomlistdata;
 
 /* --------------------------  geomobjdata ------------------------------------ */

@@ -295,7 +295,7 @@ GLUI_Checkbox *CHECKBOX_showpatch_both=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
 GLUI_Checkbox *CHECKBOX_show_iso_solid=NULL;
 GLUI_Checkbox *CHECKBOX_show_iso_outline=NULL;
-GLUI_Checkbox *CHECKBOX_show_iso_points=NULL;
+GLUI_Checkbox *CHECKBOX_show_iso_verts=NULL;
 GLUI_Checkbox *CHECKBOX_defer=NULL;
 GLUI_Checkbox *CHECKBOX_script_step=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
@@ -1013,10 +1013,10 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_isolinewidth = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _d("Line width"), GLUI_SPINNER_FLOAT, &isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0, 10.0);
 
-    visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
     CHECKBOX_show_iso_solid = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &show_iso_solid, ISO_SURFACE, Iso_CB);
     CHECKBOX_show_iso_outline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &show_iso_outline, ISO_OUTLINE, Iso_CB);
-    CHECKBOX_show_iso_points = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_points, ISO_POINTS, Iso_CB);
+    CHECKBOX_show_iso_verts = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_verts, ISO_POINTS, Iso_CB);
 
 #ifdef pp_BETA
     CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
@@ -1715,7 +1715,7 @@ extern "C" void updatetracers(void){
 extern "C" void update_glui_isotype(void){
   CHECKBOX_show_iso_solid->set_int_val(visAIso&1);
   CHECKBOX_show_iso_outline->set_int_val((visAIso&2)/2);
-  CHECKBOX_show_iso_points->set_int_val((visAIso&4)/4);
+  CHECKBOX_show_iso_verts->set_int_val((visAIso&4)/4);
 }
 
 
@@ -1891,7 +1891,7 @@ extern "C" void Iso_CB(int var){
   case ISO_SURFACE:
   case  ISO_OUTLINE:
   case ISO_POINTS:
-    visAIso= 1*show_iso_solid + 2*show_iso_outline + 4*show_iso_points;
+    visAIso= 1*show_iso_solid + 2*show_iso_outline + 4*show_iso_verts;
     updatemenu=1;
     break;
   default:
