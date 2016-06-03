@@ -837,7 +837,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
                CASE(-3); KDTDZ(II,JJ,KK-1) =  SF%NET_HEAT_FLUX
             END SELECT
 
-         CASE DEFAULT
+         CASE DEFAULT ! thermally thick
 
             IIG = WC%ONE_D%IIG
             JJG = WC%ONE_D%JJG
@@ -864,6 +864,15 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
 
             WC%ONE_D%TMP_F = TMP_F
             WC%ONE_D%QCONF = HTC*(TMP_G-TMP_F)
+
+            SELECT CASE(IOR)
+               CASE( 1); KDTDX(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDX(II)
+               CASE(-1); KDTDX(II-1,JJ,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDX(II)
+               CASE( 2); KDTDY(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDY(JJ)
+               CASE(-2); KDTDY(II,JJ-1,KK) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDY(JJ)
+               CASE( 3); KDTDZ(II,JJ,KK)   = K_S * 2._EB*(WC%ONE_D%TMP_F-TMP(II,JJ,KK))*RDZ(KK)
+               CASE(-3); KDTDZ(II,JJ,KK-1) = K_S * 2._EB*(TMP(II,JJ,KK)-WC%ONE_D%TMP_F)*RDZ(KK)
+            END SELECT
 
       END SELECT METHOD_OF_HEAT_TRANSFER
 
