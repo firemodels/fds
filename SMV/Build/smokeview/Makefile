@@ -41,7 +41,7 @@ obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_w
       IOpart.o IOzone.o IOiso.o callbacks.o drawGeometry.o\
       glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
       shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o\
-      smv_geometry.o geometry.o showscene.o fdsmodules.o\
+      smv_geometry.o showscene.o fdsmodules.o\
       gsmv.o getdata.o getsizes.o glew.o
 
 ifeq ($(LUA_SCRIPTING),true)
