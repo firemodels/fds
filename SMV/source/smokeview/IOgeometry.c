@@ -979,7 +979,6 @@ void update_triangles(int flag,int update){
         xyznorm = trianglei->tri_norm;
         CalcTriNormal(xyzptr[0],xyzptr[1],xyzptr[2],xyznorm);
       }
-
       for(i=0;i<geomlisti->nverts;i++){
         vertdata *verti;
 
@@ -1038,9 +1037,7 @@ void update_triangles(int flag,int update){
         verti = trianglei->verts[2];
         verti->triangles[verti->itriangle++]=trianglei;
       }
-
       smooth_geom_normals(geomlisti,geomi->geomtype);
-
     }
   }
 
