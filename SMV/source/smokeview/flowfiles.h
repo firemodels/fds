@@ -45,6 +45,7 @@ typedef struct {
 
 typedef struct {
   int ntriangles;
+  int vert_index[2], itri;
   vertdata *verts[2];
   struct _tridata *triangles[2];
 } edgedata;
