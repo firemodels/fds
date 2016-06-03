@@ -3048,7 +3048,7 @@ int set_smokesensors(int a, int b){
 
 // int set_smoothblocksolid(int v); // SMOOTHBLOCKSOLID
 #ifdef pp_LANG
-int set_startuplang(char *lang) {
+int set_startuplang(const char *lang) {
   char *bufptr;
 
   strncpy(startup_lang_code, lang, 2);
@@ -3158,7 +3158,7 @@ int set_cellcentertext(int v) {
   return 0;
 } // CELLCENTERTEXT
 
-int set_inputfile(char *filename) {
+int set_inputfile(const char *filename) {
   size_t len;
   len = strlen(filename);
 
@@ -3168,7 +3168,7 @@ int set_inputfile(char *filename) {
   return 0;
 } // INPUT_FILE
 
-int set_labelstartupview(char *startupview) {
+int set_labelstartupview(const char *startupview) {
   strcpy(label_startup_view, startupview);
   update_startup_view = 1;
   return 0;
@@ -3220,6 +3220,7 @@ int set_renderoption(int opt, int rows) {
   nrender_rows = rows;
   return 0;
 } // RENDEROPTION
+
 int set_unitclasses(int n, int indices[]) {
   int i;
   for(i = 0; i<n; i++){
@@ -3241,7 +3242,8 @@ int set_adjustalpha(int v) {
   adjustalphaflag = v;
   return 0;
 }
-int set_colorbartype(int type, char *label) {
+
+int set_colorbartype(int type, const char *label) {
   update_colorbartype = 1;
   colorbartype = type;
   strcpy(colorbarname, label);
@@ -3437,41 +3439,49 @@ int set_showtourroute(int v) {
   return 0;
 } // SHOWTOURROUTE
 
-int set_tourcolors(float colors[8][3]) {
-  tourcol_selectedpathline[0] = colors[0][0];
-  tourcol_selectedpathline[2] = colors[0][1];
-  tourcol_selectedpathline[3] = colors[0][2];
-
-  tourcol_selectedpathlineknots[0] = colors[1][0];
-  tourcol_selectedpathlineknots[1] = colors[1][1];
-  tourcol_selectedpathlineknots[2] = colors[1][2];
-
-  tourcol_selectedknot[0] = colors[2][0];
-  tourcol_selectedknot[1] = colors[2][1];
-  tourcol_selectedknot[2] = colors[2][2];
-
-  tourcol_selectedpathline[0] = colors[3][0];
-  tourcol_selectedpathline[1] = colors[3][1];
-  tourcol_selectedpathline[2] = colors[3][2];
-
-  tourcol_pathline[0] = colors[4][0];
-  tourcol_pathline[1] = colors[4][1];
-  tourcol_pathline[2] = colors[4][2];
-
-  tourcol_pathknots[0] = colors[5][0];
-  tourcol_pathknots[1] = colors[5][1];
-  tourcol_pathknots[2] = colors[5][2];
-
-  tourcol_text[0] = colors[6][0];
-  tourcol_text[1] = colors[6][1];
-  tourcol_text[2] = colors[6][2];
-
-  tourcol_avatar[0] = colors[7][0];
-  tourcol_avatar[1] = colors[7][1];
-  tourcol_avatar[2] = colors[7][2];
-
+// TOURCOLORS
+int set_tourcolors_selectedpathline(float r, float g, float b) {
+  tourcol_selectedpathline[0] = r;
+  tourcol_selectedpathline[1] = g;
+  tourcol_selectedpathline[2] = b;
   return 0;
-} // TOURCOLORS
+}
+int set_tourcolors_selectedpathlineknots(float r, float g, float b) {
+  tourcol_selectedpathlineknots[0] = r;
+  tourcol_selectedpathlineknots[1] = g;
+  tourcol_selectedpathlineknots[2] = b;
+  return 0;
+}
+int set_tourcolors_selectedknot(float r, float g, float b) {
+  tourcol_selectedknot[0] = r;
+  tourcol_selectedknot[1] = g;
+  tourcol_selectedknot[2] = b;
+  return 0;
+}
+int set_tourcolors_pathline(float r, float g, float b) {
+  tourcol_pathline[0] = r;
+  tourcol_pathline[1] = g;
+  tourcol_pathline[2] = b;
+  return 0;
+}
+int set_tourcolors_pathknots(float r, float g, float b) {
+  tourcol_pathknots[0] = r;
+  tourcol_pathknots[1] = g;
+  tourcol_pathknots[2] = b;
+  return 0;
+}
+int set_tourcolors_text(float r, float g, float b) {
+  tourcol_text[0] = r;
+  tourcol_text[1] = g;
+  tourcol_text[2] = b;
+  return 0;
+}
+int set_tourcolors_avatar(float r, float g, float b) {
+  tourcol_avatar[0] = r;
+  tourcol_avatar[1] = g;
+  tourcol_avatar[2] = b;
+  return 0;
+}
 
 int set_tourconstantvel(int v) {
   tour_constant_vel = v;
@@ -3880,110 +3890,3 @@ int show_slices_hideall(){
   Update_Show();
   return 0;
 }
-
-
-void useSmoke3DShowMenu(int value){
-  smoke3ddata *smoke3di;
-  int i;
-
-  updatemenu=1;
-  glutPostRedisplay();
-  if(value<0){
-    switch(value){
-    case SHOW_ALL:
-      plotstate=DYNAMIC_PLOTS;
-      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3di = smoke3dinfo + i;
-        if(smoke3di->loaded==1)smoke3di->display=1;
-      }
-      break;
-    case HIDE_ALL:
-      for(i=0;i<nsmoke3dinfo;i++){
-        smoke3di = smoke3dinfo + i;
-        if(smoke3di->loaded==1)smoke3di->display=0;
-      }
-      break;
-    case HAVE_LIGHT:
-      show_smoke_lighting = 1 - show_smoke_lighting;
-      break;
-    default:
-      ASSERT(FFALSE);
-    }
-  }
-  else{
-    smoke3di = smoke3dinfo + value;
-    if(plotstate!=DYNAMIC_PLOTS){
-      plotstate=DYNAMIC_PLOTS;
-      smoke3di->display=1;
-    }
-    else{
-      smoke3di->display = 1 - smoke3di->display;
-    }
-  }
-}
-
-// void useHideSliceMenu(int value){
-//   int i;
-
-//   if(value == MENU_DUMMY)return;
-//   updatemenu=1;
-//   glutPostRedisplay();
-//   if(value<0){
-//     switch(value){
-//     case SHOW_ALL:
-//       for(i=0;i<nsliceinfo;i++){
-//         sliceinfo[i].display=1;
-//       }
-//       show_all_slices=1;
-//       break;
-//     case HIDE_ALL:
-//       for(i=0;i<nsliceinfo;i++){
-//         sliceinfo[i].display=0;
-//       }
-//       show_all_slices=0;
-//       break;
-//     case MENU_SHOWSLICE_INBLOCKAGE:
-//       show_slice_in_obst=1-show_slice_in_obst;
-//       break;
-//     case MENU_SHOWSLICE_OFFSET:
-//       offset_slice=1-offset_slice;
-//       break;
-//     case MENU_SHOWSLICE_TERRAIN:
-//       planar_terrain_slice=1-planar_terrain_slice;
-//       break;
-//     case MENU_SHOWSLICE_FEDAREA:
-//       show_fed_area=1-show_fed_area;
-//       break;
-//     case MENU_SHOWSLICE_SLICEANDVECTORS:
-//       show_slices_and_vectors=1-show_slices_and_vectors;
-//       return;
-//     default:
-//       ASSERT(FFALSE);
-//     }
-//   }
-//   else{
-//     slicedata *sd;
-
-//     sd = sliceinfo + value;
-//     if(islicetype==sd->type){
-//       if(plotstate!=DYNAMIC_PLOTS){
-//         plotstate=DYNAMIC_PLOTS;
-//         sd->display=1;
-//       }
-//       else{
-//         sd->display = 1 - sd->display;
-//       }
-//     }
-//     else{
-//       plotstate=DYNAMIC_PLOTS;
-//       islicetype = sd->type;
-//       sd->display=1;
-//     }
-//   }
-//   updateslicefilenum();
-//   plotstate=getplotstate(DYNAMIC_PLOTS);
-
-//   updateglui();
-//   updateslicelistindex(slicefilenum);
-//   Update_Show();
-// }

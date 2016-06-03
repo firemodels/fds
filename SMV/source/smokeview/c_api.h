@@ -389,12 +389,13 @@ int set_showwalls(int v); // SHOWWALLS
 int set_skipembedslice(int v); // SKIPEMBEDSLICE
 int set_smokesensors(int a, int b); // SMOKESENSORS
 int set_smoothblocksolid(int v); // SMOOTHBLOCKSOLID
-int set_startuplang(char *lang); // STARTUPLANG
+int set_startuplang(const char *lang); // STARTUPLANG
 int set_stereo(int v); // STEREO
 int set_surfinc(int v); // SURFINC
 int set_terrainparams(int r_min, int g_min, int b_min,
                       int r_max, int g_max, int b_max, int v); // TERRAINPARMS
 int set_titlesafe(int v); // TITLESAFE
+int set_trainermode(int v); // TRAINERMODE
 int set_trainerview(int v); // TRAINERVIEW
 int set_transparent(int a, float b); // TRANSPARENT
 int set_treeparms(int minsize, int visx, int visy, int visz); // TREEPARMS
@@ -408,19 +409,20 @@ int set_zoom(int a, float b); // ZOOM
 // --  *** MISC ***
 
 int set_cellcentertext(int v); // CELLCENTERTEXT
-int set_inputfile(char *filename); // INPUT_FILE
-int set_labelstartupview(char *startupview); // LABELSTARTUPVIEW
+int set_inputfile(const char *filename); // INPUT_FILE
+int set_labelstartupview(const char *startupview); // LABELSTARTUPVIEW
 int set_pixelskip(int v); // PIXELSKIP
 int set_renderclip(int a, int b, int c, int d, int e); // RENDERCLIP
 int set_renderfilelabel(int v); // RENDERFILELABEL
 int set_renderfiletype(int a, int b); // RENDERFILETYPE
 int set_renderoption(int a, int b); // RENDEROPTION
-int set_unticlasses(int n, int values[]); // UNITCLASSES
+int set_unitclasses(int n, int values[]); // UNITCLASSES
+int set_zaxisangles(float a, float b, float c);
 
 // --  *** 3D SMOKE INFO ***
 
 int set_adjustalpha(int v); // ADJUSTALPHA
-int set_colorbartype(int v, char *label); // COLORBARTYPE
+int set_colorbartype(int v, const char *label); // COLORBARTYPE
 int set_extremecolors(int a, int b, int c, int d, int e, int f); // EXTREMECOLORS
 int set_firecolor(int r, int g, int b); // FIRECOLOR
 int set_firecolormap(int a, int b); // FIRECOLORMAP
@@ -431,6 +433,7 @@ int set_smokecull(int v); // SMOKECULL
 int set_smokeskip(int v); // SMOKESKIP
 int set_smokealbedo(float v); // SMOKEALBEDO
 int set_smokerthick(float v); // SMOKERTHICK
+int set_smokethick(float v); // SMOKETHICK
 int set_usegpu(int v); // USEGPU
 
 // --  *** ZONE FIRE PARAMETRES ***
@@ -445,7 +448,16 @@ int set_showzonefire(int v); // SHOWZONEFIRE
 
 int set_showpathnodes(int v); // SHOWPATHNODES
 int set_showtourroute(int v); // SHOWTOURROUTE
-int set_tourcolors(float colors[8][3]); // TOURCOLORS
+
+// TOURCOLORS
+int set_tourcolors_selectedpathline(float r, float g, float b);
+int set_tourcolors_selectedpathlineknots(float r, float g, float b);
+int set_tourcolors_selectedknot(float r, float g, float b);
+int set_tourcolors_pathline(float r, float g, float b);
+int set_tourcolors_pathknots(float r, float g, float b);
+int set_tourcolors_text(float r, float g, float b);
+int set_tourcolors_avatar(float r, float g, float b);
+
 int set_tourconstantvel(int v); // TOURCONSTANTVEL
 int set_viewalltours(int v); // VIEWALLTOURS
 int set_viewtimes(float a, float b, int c); // VIEWTIMES
