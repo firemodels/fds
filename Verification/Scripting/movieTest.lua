@@ -19,13 +19,7 @@ function mkMovie()
     local sep
     print(sys)
     -- TODO: create directories properly
-    if string.find(sys, "Linux") then sep = "/"
-    else sep = "\\"
-    end
     os.execute("mkdir renders")
-    os.execute("mkdir renders" .. sep .. "tempslice")
-    os.execute("mkdir renders" .. sep .. "smoke")
-    os.execute("mkdir renders" .. sep .. "combined")
     render.type = "PNG"
     unload.all()
     local cam = {
@@ -61,33 +55,35 @@ function mkMovie()
         .. " " .. moviePath -- render to this path
         ), "wb"))
     for i=0,movframes,1 do
+        render.dir = "renders"
         setframe(i)
         -- step 3: show the temperature data
         show_slices_showall()
         -- step 4: render the temperature data
-        -- TODO: bring image data into lua rather than rendering to file
-        -- this would require modifying the core smokeview code.
         io.stderr:write("rendering temperature data\n")
-        render.dir = "renders/tempslice"
-        render(function() return tostring(view.framenumber) end)
+        setframe(i)
+        render("currentTempFrame")
+        local currentTempFrame = render_var()
         -- step 5: hide the temperature data (via hide all slices)
         show_slices_hideall()
         -- step 6: show the smoke data
         show_smoke3d_showall()
         -- step 7: render the smoke data
         io.stderr:write("rendering smoke data\n")
-        render.dir ="renders/smoke"
         setframe(i) -- TODO: this is necessary in order to get the
         -- the smoke to display. Investigate.
-        render(function() return tostring(view.framenumber) end)
+        render("currentSmokeFrame")
+        local currentSmokeFrame = render_var()
         -- step 8: hide the smoke data (via hide all smoke3d)
         show_smoke3d_hideall()
         -- TODO: use multiple pipes to pipe simultaneous images
+        -- need to find a way to write to higher numbered file descriptors
+        -- in order t send multiple images
         io.stderr:write(string.format("combining frame %d\n",i))
         local imgHndl = assert(io.popen(string.format(
             "montage"
-            .. " renders/tempslice/%d.png"
-            .. " renders/smoke/%d.png"
+            .. " renders/currentTempFrame.png"
+            .. " renders/currentSmokeFrame.png"
             .. " -tile 2x1"
             .. " -geometry +0+0"
             .. " png:-"
