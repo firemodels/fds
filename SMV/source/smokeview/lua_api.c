@@ -1606,7 +1606,15 @@ int lua_set_directioncolor(lua_State *L) {
   float g = lua_tonumber(L, 2);
   float b = lua_tonumber(L, 3);
   int return_code = set_directioncolor(r, g, b);
-  return 0;
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_flip(lua_State  *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_flip(v);
+  lua_pushnumber(L, return_code);
+  return 1;
 }
 
 int lua_set_foregroundcolor(lua_State *L) {
@@ -1614,7 +1622,8 @@ int lua_set_foregroundcolor(lua_State *L) {
   float g = lua_tonumber(L, 2);
   float b = lua_tonumber(L, 3);
   int return_code = set_foregroundcolor(r, g, b);
-  return 0;
+  lua_pushnumber(L, return_code);
+  return 1;
 }
 
 int lua_set_heatoffcolor(lua_State *L) {
@@ -3869,6 +3878,12 @@ void initLua() {
   lua_register(L, "set_blockshininess", lua_set_blockshininess);
   lua_register(L, "set_blockspecular", lua_set_blockspecular);
   lua_register(L, "set_boundcolor", lua_set_boundcolor);
+  lua_register(L, "set_diffuselight", lua_set_boundcolor);
+  lua_register(L, "set_directioncolor", lua_set_boundcolor);
+  lua_register(L, "set_flip", lua_set_boundcolor);
+  lua_register(L, "set_foregroundcolor", lua_set_boundcolor);
+  lua_register(L, "set_heatoffcolor", lua_set_boundcolor);
+  lua_register(L, "set_heatoncolor", lua_set_boundcolor);
   lua_register(L, "set_isocolors", lua_set_isocolors);
   lua_register(L, "set_colortable", lua_set_colortable);
   lua_register(L, "set_light0", lua_set_light0);
@@ -3876,6 +3891,8 @@ void initLua() {
   lua_register(L, "set_lightpos0", lua_set_lightpos0);
   lua_register(L, "set_lightpos1", lua_set_lightpos1);
   lua_register(L, "set_lightmodellocalviewer", lua_set_lightmodellocalviewer);
+  lua_register(L, "set_lightmodelseparatespecularcolor",
+               lua_set_lightmodelseparatespecularcolor);
   lua_register(L, "set_sensorcolor", lua_set_sensorcolor);
   lua_register(L, "set_sensornormcolor", lua_set_sensornormcolor);
   lua_register(L, "set_bw", lua_set_bw);

@@ -200,6 +200,14 @@ _color = {
         set = function(v)
             return set_boundcolor(v.r, v.g, v.b)
         end
+    },
+    diffuselight = {
+        -- get = function()
+        --     return get_colorbar_visibility()
+        -- end,
+        set = function(v)
+            return set_diffuselight(v.r, v.g, v.b)
+        end
     }
 }
 setmetatable(view.color, color_mt)

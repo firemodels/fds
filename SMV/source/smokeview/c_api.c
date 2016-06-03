@@ -2209,6 +2209,11 @@ int set_directioncolor(float r, float g, float b) {
   return 0;
 } // DIRECTIONCOLOR
 
+int set_flip(int v) {
+  background_flip = v;
+  return 0;
+} // FLIP
+
 int set_foregroundcolor(float r, float g, float b) {
   foregroundbasecolor[0] = r;
   foregroundbasecolor[1] = g;
