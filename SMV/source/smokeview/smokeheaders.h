@@ -1,6 +1,8 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+#include "gd.h"
+
 EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
 EXTERNCPP void write_part_histogram(partdata *parti);
@@ -902,6 +904,8 @@ EXTERNCPP void setisolabels(float smin, float smax,
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
+EXTERNCPP int SVimage2var(int rendertype, int woffset, int width, int hoffset, int height, gdImagePtr *RENDERimage);
+
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
 EXTERNCPP void CalcTriNormal(float *v1, float *v2, float *v3, float *norm);

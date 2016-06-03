@@ -13,6 +13,7 @@
 #include "lua_api.h"
 
 #include GLUT_H
+#include "gd.h"
 
 lua_State* L;
 int lua_displayCB(lua_State *L);
@@ -106,6 +107,24 @@ int lua_render(lua_State *L) {
   printf("basename(lua): %s\n", basename);
   int ret = render(basename);
   lua_pushnumber(L, ret);
+  return 1;
+}
+
+int lua_render_var(lua_State *L) {
+  gdImagePtr RENDERimage;
+  int return_code;
+  char *imageData;
+  int imageSize;
+
+  // render image to RENDERimage gd buffer
+  return_code = RenderFrameLuaVar(VIEW_CENTER, &RENDERimage);
+  // convert to a simpler byte-buffer
+  imageData = gdImagePngPtr(RENDERimage, &imageSize);
+  // push to stack
+  lua_pushlstring(L, imageData, imageSize);
+  // destroy C copy
+  gdImageDestroy(RENDERimage);
+
   return 1;
 }
 
@@ -2359,6 +2378,7 @@ void initLua() {
   lua_register(L, "displayCB", lua_displayCB);
   lua_register(L, "renderclip", lua_renderclip);
   lua_register(L, "renderC", lua_render);
+  lua_register(L, "render_var", lua_render_var);
   lua_register(L, "gsliceview", lua_gsliceview);
   lua_register(L, "gslicepos", lua_gslicepos);
   lua_register(L, "gsliceorien", lua_gsliceorien);

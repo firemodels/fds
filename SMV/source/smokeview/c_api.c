@@ -12,6 +12,7 @@
 #include "IOvolsmoke.h"
 
 #include "c_api.h"
+#include "gd.h"
 
 #ifdef WIN32
 #define snprintf _snprintf
@@ -575,6 +576,31 @@ int RenderFrameLua(int view_mode, const char *basename) {
   return return_code;
 }
 
+int RenderFrameLuaVar(int view_mode, gdImagePtr *RENDERimage) {
+  char renderfile_name[1024]; // the name the file (including extension)
+  char renderfile_dir[1024]; // the directory into which the image will be
+                            // rendered
+  char renderfile_path[2048]; // the full path of the rendered image
+  int woffset=0,hoffset=0;
+  int screenH;
+  int return_code;
+
+#ifdef WIN32
+  // reset display idle timer to prevent screen saver from activating
+  SetThreadExecutionState(ES_DISPLAY_REQUIRED);
+#endif
+
+  screenH = screenHeight;
+  // we should not be rendering under these conditions
+  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return 0;
+  // render image
+  return_code = SVimage2var(renderfiletype,
+                             woffset,screenWidth,hoffset,screenH, RENDERimage);
+  if(RenderTime==1&&output_slicedata==1){
+    output_Slicedata();
+  }
+  return return_code;
+}
 
 /* ------------------ settourkeyframe ------------------------ */
 

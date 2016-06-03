@@ -1,3 +1,5 @@
+#include "gd.h"
+
 int set_slice_bound_min(const char *slice_type, int set, float value);
 int set_slice_bound_max(const char *slice_type, int set, float value);
 float get_slice_bound_min(const char *slice_type);
@@ -552,3 +554,4 @@ int show_smoke3d_showall();
 int show_smoke3d_hideall();
 int show_slices_showall();
 int show_slices_hideall();
+int RenderFrameLuaVar(int view_mode, gdImagePtr *RENDERimage);
