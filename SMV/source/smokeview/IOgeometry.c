@@ -1881,6 +1881,7 @@ edgedata *get_edge(edgedata *edges, int nedges, int iv1, int iv2) {
   int i, iresult;
   edgedata ei, *elow, *emid, *ehigh;
   int low, mid, high;
+  int ilow, ihigh;
 
   ei.vert_index[0] = MIN(iv1, iv2);
   ei.vert_index[1] = MAX(iv1, iv2);
@@ -1888,11 +1889,17 @@ edgedata *get_edge(edgedata *edges, int nedges, int iv1, int iv2) {
   elow = edges;
   ehigh = edges + nedges - 1;
 
-  if (compare_edges2(&ei, elow) < 0||compare_edges2(&ei, ehigh) > 0)return NULL;
+  ilow = compare_edges2(&ei, elow);
+  if(ilow < 0)return NULL;
+  if(ilow == 0)return elow;
+
+  ihigh = compare_edges2(&ei, ehigh);
+  if(ihigh > 0)return NULL;
+  if(ihigh == 0)return ehigh;
 
   low = 0;
   high = nedges - 1;
-  while (high - low > 1) {
+  while(high - low > 1) {
     mid = (low + high) / 2;
     emid = edges + mid;
     iresult = compare_edges2(&ei, emid);
@@ -2079,11 +2086,11 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       nedges = 0;
       edges2[nedges].vert_index[0] = edges[edgelist[nedges]].vert_index[0];
       edges2[nedges].vert_index[1] = edges[edgelist[nedges]].vert_index[1];
+      nedges++;
       for (ii = 1; ii < nedgelist; ii++) {
-        int jj, iresult;
+        int jj;
         
-        iresult = compare_edges(edgelist + ii - 1, edgelist + ii);
-        if(iresult==0)continue;
+        if(compare_edges(edgelist + ii - 1, edgelist + ii)==0)continue;
         jj = edgelist[ii];
         edges2[nedges].vert_index[0] = edges[jj].vert_index[0];
         edges2[nedges].vert_index[1] = edges[jj].vert_index[1];
@@ -2103,12 +2110,14 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
       for (ii = 0; ii<ntris; ii++) {
         edgedata *edgei;
+        int *vi;
 
-        edgei = get_edge(edges, nedges, triangles[ii].vert_index[0], triangles[ii].vert_index[1]);
+        vi = triangles[ii].vert_index;
+        edgei = get_edge(edges, nedges, vi[0], vi[1]);
         if (edgei != NULL)edgei->ntriangles++;
-        edgei = get_edge(edges, nedges, triangles[ii].vert_index[1], triangles[ii].vert_index[2]);
+        edgei = get_edge(edges, nedges, vi[1], vi[2]);
         if (edgei != NULL)edgei->ntriangles++;
-        edgei = get_edge(edges, nedges, triangles[ii].vert_index[2], triangles[ii].vert_index[0]);
+        edgei = get_edge(edges, nedges, vi[2], vi[0]);
         if (edgei != NULL)edgei->ntriangles++;
       }
 
@@ -2135,7 +2144,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
           break;
         }
       }
-      printf("number of edges: %i\n", nedges);
+      printf("\nnumber of edges: %i\n", nedges);
       printf("edges with 0 triangles: %i\n", ntri0);
       printf("edges with 1 triangles: %i\n", ntri1);
       printf("edges with 2 triangles: %i\n", ntri2);
