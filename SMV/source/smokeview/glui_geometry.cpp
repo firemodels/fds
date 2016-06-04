@@ -48,6 +48,11 @@ GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_show_texture_1dimage = NULL;
 GLUI_Checkbox *CHECKBOX_show_texture_2dimage = NULL;
+GLUI_Checkbox *CHECKBOX_highlight_edge0=NULL;
+GLUI_Checkbox *CHECKBOX_highlight_edge1=NULL;
+GLUI_Checkbox *CHECKBOX_highlight_edge2=NULL;
+GLUI_Checkbox *CHECKBOX_highlight_edgeother=NULL;
+
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Panel *PANEL_geomtest2 = NULL;
@@ -98,6 +103,8 @@ GLUI_Listbox *LIST_surface[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
 GLUI_Panel *PANEL_obj_select=NULL,*PANEL_faces=NULL,*PANEL_volumes=NULL,*PANEL_geom_showhide;
 GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
+GLUI_Panel *PANEL_geomcheck=NULL;
+GLUI_Panel *PANEL_geomedgecheck=NULL;
 
 GLUI_Rollout *ROLLOUT_structured=NULL;
 GLUI_Rollout *ROLLOUT_unstructured=NULL;
@@ -405,6 +412,13 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_outline_ioffset->set_int_limits(0,200);
   SPINNER_face_factor = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
   SPINNER_face_factor->set_float_limits(0.0, 0.5);
+
+  PANEL_geomcheck = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "check geometry");
+  PANEL_geomedgecheck = glui_geometry->add_panel_to_panel(PANEL_geomcheck, "edges - connected triangles");
+  CHECKBOX_highlight_edge0 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "0", &highlight_edge0);
+  CHECKBOX_highlight_edge1 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "1", &highlight_edge1);
+  CHECKBOX_highlight_edge2 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "2", &highlight_edge2);
+  CHECKBOX_highlight_edgeother = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "3 or more", &highlight_edgeother);
 
   // -------------- Cube/Tetra intersection test -------------------
 

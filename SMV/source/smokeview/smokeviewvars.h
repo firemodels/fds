@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(highlight_edge0, 0), SVDECL(highlight_edge1, 0), SVDECL(highlight_edge2, 0), SVDECL(highlight_edgeother, 0);
 SVEXTERN colorbardata SVDECL(*split_colorbar, NULL);
 SVEXTERN int split_colorbar_index;
 #ifdef INMAIN

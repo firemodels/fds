@@ -8616,7 +8616,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "GEOMDIAGS") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics);
+      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics, 
+        &highlight_edge0, &highlight_edge1, &highlight_edge2, &highlight_edgeother);
       continue;
     }
     if(match(buffer, "GEOMSHOW") == 1){
@@ -12106,7 +12107,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "FRAMERATEVALUE\n");
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
-  fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
+  fprintf(fileout, " %i %i %i %i %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics,
+    highlight_edge0, highlight_edge1, highlight_edge2, highlight_edgeother);
   fprintf(fileout, "GEOMSHOW\n");
   fprintf(fileout, " %i %i %i %i %i\n", show_faces_interior, show_faces_exterior, show_faces_solid, show_faces_outline, smooth_geom_normal);
   fprintf(fileout, " %i %i %i %i\n", show_volumes_interior, show_volumes_exterior, show_volumes_solid, show_volumes_outline);
