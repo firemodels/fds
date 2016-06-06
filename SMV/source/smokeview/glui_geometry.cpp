@@ -55,7 +55,8 @@ GLUI_Checkbox *CHECKBOX_highlight_edgeother=NULL;
 
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
-GLUI_Panel *PANEL_geomtest2 = NULL;
+GLUI_Rollout *ROLLOUT_geomtest2 = NULL;
+
 GLUI_Panel *PANEL_geom1 = NULL;
 GLUI_Panel *PANEL_normals = NULL;
 GLUI_Panel *PANEL_geom1a=NULL;
@@ -101,11 +102,12 @@ GLUI_EditText *EDIT_xmax=NULL, *EDIT_ymax=NULL, *EDIT_zmax=NULL;
 
 GLUI_Listbox *LIST_surface[7]={NULL,NULL,NULL,NULL,NULL,NULL,NULL};
 
-GLUI_Panel *PANEL_obj_select=NULL,*PANEL_faces=NULL,*PANEL_volumes=NULL,*PANEL_geom_showhide;
+GLUI_Panel *PANEL_obj_select=NULL,*PANEL_faces=NULL,*PANEL_triangles=NULL,*PANEL_volumes=NULL,*PANEL_geom_showhide;
 GLUI_Panel *PANEL_obj_stretch2=NULL,*PANEL_obj_stretch3=NULL, *PANEL_obj_stretch4=NULL;
-GLUI_Panel *PANEL_geomcheck=NULL;
 GLUI_Panel *PANEL_geomedgecheck=NULL;
+GLUI_Panel *PANEL_group1=NULL;
 
+GLUI_Rollout *ROLLOUT_geomcheck=NULL;
 GLUI_Rollout *ROLLOUT_structured=NULL;
 GLUI_Rollout *ROLLOUT_unstructured=NULL;
 
@@ -360,14 +362,18 @@ extern "C" void glui_geometry_setup(int main_window){
   }
 
   PANEL_geom_showhide = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "", GLUI_PANEL_NONE);
-  PANEL_faces = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"faces");
-  CHECKBOX_faces_interior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "interior", &show_faces_interior);
-  CHECKBOX_faces_exterior = glui_geometry->add_checkbox_to_panel(PANEL_faces, "exterior", &show_faces_exterior);
-  CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_faces, "solid", &show_faces_solid, VOL_SHOWHIDE, Volume_CB);
-  CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_faces, "outline", &show_faces_outline, VOL_SHOWHIDE, Volume_CB);
-  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_faces, "smooth", &smooth_geom_normal);
+  PANEL_group1 = glui_geometry->add_panel_to_panel(PANEL_geom_showhide, "", GLUI_PANEL_NONE);
+  PANEL_triangles = glui_geometry->add_panel_to_panel(PANEL_group1,"faces");
+  CHECKBOX_faces_interior = glui_geometry->add_checkbox_to_panel(PANEL_triangles, "interior", &show_faces_interior);
+  CHECKBOX_faces_exterior = glui_geometry->add_checkbox_to_panel(PANEL_triangles, "exterior", &show_faces_exterior);
+  CHECKBOX_surface_solid = glui_geometry->add_checkbox_to_panel(PANEL_triangles, "solid", &show_faces_solid, VOL_SHOWHIDE, Volume_CB);
+  CHECKBOX_surface_outline = glui_geometry->add_checkbox_to_panel(PANEL_triangles, "outline", &show_faces_outline, VOL_SHOWHIDE, Volume_CB);
+  CHECKBOX_smooth_geom_normal = glui_geometry->add_checkbox_to_panel(PANEL_triangles, "smooth", &smooth_geom_normal);
 
-  PANEL_volumes = glui_geometry->add_panel_to_panel(PANEL_geom_showhide,"volumes");
+  glui_geometry->add_column_to_panel(PANEL_group1,false);
+
+
+  PANEL_volumes = glui_geometry->add_panel_to_panel(PANEL_group1,"volumes");
   CHECKBOX_volumes_interior = glui_geometry->add_checkbox_to_panel(PANEL_volumes, "interior", &show_volumes_interior);
   CHECKBOX_volumes_exterior = glui_geometry->add_checkbox_to_panel(PANEL_volumes, "exterior", &show_volumes_exterior);
   CHECKBOX_interior_solid=glui_geometry->add_checkbox_to_panel(PANEL_volumes,"solid",&show_volumes_solid,VOL_SHOWHIDE,Volume_CB);
@@ -378,43 +384,43 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_geom_ivecfactor = glui_geometry->add_spinner_to_panel(PANEL_normals, "length", GLUI_SPINNER_INT, &geom_ivecfactor, GEOM_IVECFACTOR, Volume_CB);
   SPINNER_geom_ivecfactor->set_int_limits(0, 200);
 
-  PANEL_geomtest2 = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "parameters");
-  SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_VERT_EXAG, Volume_CB);
+  ROLLOUT_geomtest2 = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "parameters",false);
+  SPINNER_geom_vert_exag = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "vertical exaggeration", GLUI_SPINNER_FLOAT, &geom_vert_exag, GEOM_VERT_EXAG, Volume_CB);
   SPINNER_geom_vert_exag->set_float_limits(0.1, 10.0);
-  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
+  CHECKBOX_show_texture_1dimage = glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest2, "show elevation color", &show_texture_1dimage, SHOW_TEXTURE_1D_IMAGE, Volume_CB);
 
   get_geom_zbounds(&terrain_zmin, &terrain_zmax);
-  SPINNER_geom_zmin = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmin", GLUI_SPINNER_FLOAT, &terrain_zmin,TERRAIN_ZMIN,Volume_CB);
+  SPINNER_geom_zmin = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "zmin", GLUI_SPINNER_FLOAT, &terrain_zmin,TERRAIN_ZMIN,Volume_CB);
   SPINNER_geom_zmin->set_float_limits(zbar0ORIG, zbarORIG);
 
-  SPINNER_geom_zmax = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zmax", GLUI_SPINNER_FLOAT, &terrain_zmax,TERRAIN_ZMAX,Volume_CB);
+  SPINNER_geom_zmax = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "zmax", GLUI_SPINNER_FLOAT, &terrain_zmax,TERRAIN_ZMAX,Volume_CB);
   SPINNER_geom_zmax->set_float_limits(zbar0ORIG, zbarORIG);
 
   terrain_zlevel=(terrain_zmin+terrain_zmax)/2.0;
-  CHECKBOX_show_zlevel = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "show zlevel", &show_zlevel, SHOW_ZLEVEL, Volume_CB);
-  SPINNER_geom_zlevel = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "zlevel", GLUI_SPINNER_FLOAT, &terrain_zlevel, TERRAIN_ZLEVEL, Volume_CB);
+  CHECKBOX_show_zlevel = glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest2, "show zlevel", &show_zlevel, SHOW_ZLEVEL, Volume_CB);
+  SPINNER_geom_zlevel = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "zlevel", GLUI_SPINNER_FLOAT, &terrain_zlevel, TERRAIN_ZLEVEL, Volume_CB);
   SPINNER_geom_zlevel->set_float_limits(zbar0ORIG, zbarORIG);
 
   Volume_CB(GEOM_VERT_EXAG);
-  BUTTON_reset_zbounds = glui_geometry->add_button_to_panel(PANEL_geomtest2, _d("Reset zmin/zmax"), RESET_ZBOUNDS, Volume_CB);
+  BUTTON_reset_zbounds = glui_geometry->add_button_to_panel(ROLLOUT_geomtest2, _d("Reset zmin/zmax"), RESET_ZBOUNDS, Volume_CB);
 
   if(have_texture()==1){
     show_texture_2dimage = get_texture_show();
-    CHECKBOX_show_texture_2dimage = glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "image",&show_texture_2dimage, SHOW_TEXTURE_2D_IMAGE, Volume_CB);
+    CHECKBOX_show_texture_2dimage = glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest2, "image",&show_texture_2dimage, SHOW_TEXTURE_2D_IMAGE, Volume_CB);
     Volume_CB(SHOW_TEXTURE_2D_IMAGE);
   }
 
   
-  glui_geometry->add_checkbox_to_panel(PANEL_geomtest2, "use max angle", &use_max_angle, GEOM_MAX_ANGLE, Volume_CB);
-  SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
+  glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest2, "use max angle", &use_max_angle, GEOM_MAX_ANGLE, Volume_CB);
+  SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);
-  SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
+  SPINNER_geom_outline_ioffset = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "outline offset", GLUI_SPINNER_INT, &geom_outline_ioffset, GEOM_OUTLINE_IOFFSET, Volume_CB);
   SPINNER_geom_outline_ioffset->set_int_limits(0,200);
-  SPINNER_face_factor = glui_geometry->add_spinner_to_panel(PANEL_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
+  SPINNER_face_factor = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
   SPINNER_face_factor->set_float_limits(0.0, 0.5);
 
-  PANEL_geomcheck = glui_geometry->add_panel_to_panel(ROLLOUT_unstructured, "check geometry");
-  PANEL_geomedgecheck = glui_geometry->add_panel_to_panel(PANEL_geomcheck, "edges - connected triangles");
+  ROLLOUT_geomcheck = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "check geometry",false);
+  PANEL_geomedgecheck = glui_geometry->add_panel_to_panel(ROLLOUT_geomcheck, "edges - connected triangles");
   CHECKBOX_highlight_edge0 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "0", &highlight_edge0);
   CHECKBOX_highlight_edge1 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "1", &highlight_edge1);
   CHECKBOX_highlight_edge2 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "2", &highlight_edge2);

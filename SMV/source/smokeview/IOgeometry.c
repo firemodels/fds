@@ -219,7 +219,7 @@ void draw_geomdiag(void){
 void get_geom_zbounds(float *zmin, float *zmax){
   int j;
   int first = 1;
-  
+
   for(j = 0; j < ngeominfoptrs; j++){
     geomdata *geomi;
     int iend, ii;
@@ -267,6 +267,7 @@ void draw_geom(int flag, int timestate){
   int i;
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
+  float green[]={0.0,1.0,0.0,1.0};
   float skinny_color[]={1.0,0.0,0.0,1.0};
   float *last_color=NULL;
   float last_transparent_level=-1.0;
@@ -440,6 +441,7 @@ void draw_geom(int flag, int timestate){
     int nvolumes;
     int j;
     float *color;
+    int nedges;
 
     geomi = geominfoptrs[i];
     if(geomi->loaded==0||geomi->display==0)continue;
@@ -450,6 +452,7 @@ void draw_geom(int flag, int timestate){
     else{
       geomlisti = geomi->geomlistinfo+geomi->itime;
     }
+    nedges = geomlisti->nedges;
     ntris = geomlisti->ntriangles;
     nvolumes = geomlisti->nvolumes;
 
@@ -815,6 +818,41 @@ void draw_geom(int flag, int timestate){
       }
       glEnd();
       glPopMatrix();
+    }
+
+    // geometry diagnostics
+
+    if (nedges>0 && (highlight_edge0 == 1||highlight_edge1 == 1 || highlight_edge2 == 1 || highlight_edgeother == 1)) {
+      int ii;
+
+      glPushMatrix();
+      glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
+      glTranslatef(-xbar0, -ybar0, -zbar0);
+      glBegin(GL_LINES);
+      glColor3fv(green);
+
+      for (ii = 0; ii < nedges; ii++) {
+        edgedata *edgei;
+        float *xyz0, *xyz1;
+        vertdata *v0, *v1;
+
+        edgei = geomlisti->edges + ii;
+        v0 = geomlisti->verts + edgei->vert_index[0];
+        xyz0 = v0->xyz;
+        v1 = geomlisti->verts + edgei->vert_index[1];
+        xyz1 = v1->xyz;
+        if(highlight_edge0==1&&edgei->ntriangles==0||
+           highlight_edge1==1&&edgei->ntriangles==1||
+           highlight_edge2==1&&edgei->ntriangles==2||
+           highlight_edgeother==1&&edgei->ntriangles>2){
+          glVertex3fv(xyz0);
+          glVertex3fv(xyz1);
+        }
+      }
+
+      glEnd();
+      glPopMatrix();
+
     }
   }
 }
@@ -2089,7 +2127,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       nedges++;
       for (ii = 1; ii < nedgelist; ii++) {
         int jj;
-        
+
         if(compare_edges(edgelist + ii - 1, edgelist + ii)==0)continue;
         jj = edgelist[ii];
         edges2[nedges].vert_index[0] = edges[jj].vert_index[0];
@@ -2098,10 +2136,11 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       }
       if (nedges>0)ResizeMemory((void **)&edges2, nedges * sizeof(edgedata));
       geomlisti->edges = edges2;
+      geomlisti->nedges = nedges;
       edge_list = edges2;
       FREEMEMORY(edges);
       edges = edges2;
-      
+
       for (ii = 0; ii < nedges; ii++) {
         edges[ii].ntriangles = 0;
       }
