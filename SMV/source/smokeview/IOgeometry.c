@@ -270,7 +270,6 @@ void draw_geom(int flag, int timestate){
   float black[]={0.0,0.0,0.0,1.0};
   float blue[]={0.0,0.0,1.0,1.0};
   float green[]={0.0,1.0,0.0,1.0};
-  float yellow[] = { 1.0,1.0,0.0,1.0 };
   float cyan[] = { 0.0,1.0,1.0,1.0 };
   float magenta[] = { 1.0,0.0,1.0,1.0 };
   float skinny_color[]={1.0,0.0,0.0,1.0};
@@ -1975,7 +1974,7 @@ int Compare_Volume_Faces(const void *arg1, const void *arg2){
 /* ------------------ get_edge ------------------------ */
 
 edgedata *get_edge(edgedata *edges, int nedges, int iv1, int iv2) {
-  int i, iresult;
+  int iresult;
   edgedata ei, *elow, *emid, *ehigh;
   int low, mid, high;
   int ilow, ihigh;
