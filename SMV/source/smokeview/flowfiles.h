@@ -38,6 +38,7 @@ typedef struct {
   int itriangle,ntriangles,nused;
   unsigned char on_mesh_boundary;
   int geomtype;
+  int isdup;
   struct _tridata **triangles;
 } vertdata;
 

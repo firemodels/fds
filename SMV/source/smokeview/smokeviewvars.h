@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(highlight_vertexdup, 0);
 SVEXTERN int SVDECL(highlight_edge0, 0);
 SVEXTERN int SVDECL(highlight_edge1, 0);
 SVEXTERN int SVDECL(highlight_edge2, 0);

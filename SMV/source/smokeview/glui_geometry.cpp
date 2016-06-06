@@ -48,11 +48,12 @@ GLUI_Checkbox *CHECKBOX_volumes_interior=NULL;
 GLUI_Checkbox *CHECKBOX_volumes_exterior=NULL;
 GLUI_Checkbox *CHECKBOX_show_texture_1dimage = NULL;
 GLUI_Checkbox *CHECKBOX_show_texture_2dimage = NULL;
+
 GLUI_Checkbox *CHECKBOX_highlight_edge0=NULL;
 GLUI_Checkbox *CHECKBOX_highlight_edge1=NULL;
 GLUI_Checkbox *CHECKBOX_highlight_edge2=NULL;
 GLUI_Checkbox *CHECKBOX_highlight_edgeother=NULL;
-
+GLUI_Checkbox *CHECKBOX_highlight_vertexdup = NULL;
 
 GLUI_Rollout *ROLLOUT_geomtest=NULL;
 GLUI_Rollout *ROLLOUT_geomtest2 = NULL;
@@ -419,12 +420,14 @@ extern "C" void glui_geometry_setup(int main_window){
   SPINNER_face_factor = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "face factor", GLUI_SPINNER_FLOAT, &face_factor);
   SPINNER_face_factor->set_float_limits(0.0, 0.5);
 
-  ROLLOUT_geomcheck = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "check geometry",false);
+  ROLLOUT_geomcheck = glui_geometry->add_rollout_to_panel(ROLLOUT_unstructured, "checks",false);
   PANEL_geomedgecheck = glui_geometry->add_panel_to_panel(ROLLOUT_geomcheck, "edges - connected triangles");
   CHECKBOX_highlight_edge0 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "0", &highlight_edge0);
   CHECKBOX_highlight_edge1 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "1", &highlight_edge1);
   CHECKBOX_highlight_edge2 = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "2", &highlight_edge2);
   CHECKBOX_highlight_edgeother = glui_geometry->add_checkbox_to_panel(PANEL_geomedgecheck, "3 or more", &highlight_edgeother);
+
+  CHECKBOX_highlight_vertexdup = glui_geometry->add_checkbox_to_panel(ROLLOUT_geomcheck, "duplicate vertices", &highlight_vertexdup);
 
   // -------------- Cube/Tetra intersection test -------------------
 
