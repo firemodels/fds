@@ -1,0 +1,28 @@
+&HEAD CHID='ht3d_nx_160', TITLE='HT3D verification: Carslaw and Jaeger, Sec 3.3'/
+
+&MESH IJK=320,10,10, XB=-1,1,-.5,.5,-.5,.5/
+
+&TIME T_END=0.01, DT=1.953125E-5, LOCK_TIME_STEP=.TRUE./ VN=0.5
+
+&MISC HT3D_TEST=1, NOISE=.FALSE./
+
+&RADI RADIATION=.FALSE./
+
+&SURF ID='cold', TMP_FRONT=20., COLOR='BLUE'/
+&SURF ID='side', ADIABATIC=.TRUE., COLOR='GRAY'/
+
+&MATL ID            = 'test'
+      SPECIFIC_HEAT = 0.001
+      CONDUCTIVITY  = 1.0
+      DENSITY       = 1.0/ thermal diffusivity = 1
+
+&OBST XB=-.5,.5,-.2,.2,-.2,.2, SURF_ID6='cold','cold','side','side','side','side',
+      HT3D=.TRUE.
+      MATL_ID='test'/
+
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
+
+&DEVC XB=-0.496875,0.496875,0,0,0,0, QUANTITY='TEMPERATURE', POINTS=160, TIME_HISTORY=.TRUE., ID='TS'/
+
+&TAIL/
+
