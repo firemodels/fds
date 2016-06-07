@@ -1,8 +1,8 @@
-&HEAD CHID='ht3d_test_1', TITLE='HT3D verification: Carslaw and Jaeger, Sec 3.3'/
+&HEAD CHID='ht3d_nx_160', TITLE='HT3D verification: Carslaw and Jaeger, Sec 3.3'/
 
-&MESH IJK=20,10,10, XB=-1,1,-.5,.5,-.5,.5/
+&MESH IJK=320,10,10, XB=-1,1,-.5,.5,-.5,.5/
 
-&TIME T_END=0.01, DT=0.001, LOCK_TIME_STEP=.TRUE./
+&TIME T_END=0.01, DT=1.953125E-5, LOCK_TIME_STEP=.TRUE./ VN=0.5
 
 &MISC HT3D_TEST=1, NOISE=.FALSE./
 
@@ -21,6 +21,8 @@
       MATL_ID='test'/
 
 &SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
+
+&DEVC XB=-0.496875,0.496875,0,0,0,0, QUANTITY='TEMPERATURE', POINTS=160, TIME_HISTORY=.TRUE., ID='TS'/
 
 &TAIL/
 
