@@ -692,7 +692,7 @@ TYPE (SURFACE_TYPE), POINTER :: SF=>NULL()
 
 IF (ICYC==1) THEN
    SELECT CASE(HT3D_TEST)
-      CASE(1); CALL CARSLAW_JAEGER_TEST_1
+      CASE(1); CALL CRANK_TEST_1
    END SELECT
 ENDIF
 
@@ -904,9 +904,9 @@ ENDDO SUBSTEP_LOOP
 END SUBROUTINE SOLID_HEAT_TRANSFER_3D
 
 
-SUBROUTINE CARSLAW_JAEGER_TEST_1
+SUBROUTINE CRANK_TEST_1
 ! Initialize solid temperature profile for simple 1D verification test
-! Carslaw and Jaeger, Conduction of Heat in Solids, Oxford Press, 1946, Sec 3.3.
+! J. Crank, The Mathematics of Diffusion, 2nd Ed., Oxford Press, 1975, Sec 2.3.
 INTEGER :: I,J,K,IC
 REAL(EB), PARAMETER :: LL=1._EB, AA=100._EB, NN=2._EB, X_0=-.5_EB
 
@@ -920,7 +920,7 @@ DO K=1,KBAR
    ENDDO
 ENDDO
 
-END SUBROUTINE CARSLAW_JAEGER_TEST_1
+END SUBROUTINE CRANK_TEST_1
 
 
 END SUBROUTINE THERMAL_BC
