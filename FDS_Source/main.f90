@@ -465,9 +465,9 @@ MAIN_LOOP: DO
 
    IF (ANY(EVACUATION_ONLY)) CALL EVAC_MAIN_LOOP
 
-   !============================================================================================================================
-   !                                          Start of Predictor part of time step
-   !============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Predictor part of time step
+   !================================================================================================================================
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
@@ -613,9 +613,9 @@ MAIN_LOOP: DO
 
     T = T + DT
 
-   !===============================================================================================================================
-   !                                          Start of Corrector part of time step
-   !===============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Corrector part of time step
+   !================================================================================================================================
 
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
@@ -745,7 +745,7 @@ MAIN_LOOP: DO
 
    ! Dump out diagnostics
 
-   IF (DIAGNOSTICS .OR. T>=T_END) THEN
+   IF (DIAGNOSTICS .OR. T>(T_END-TWO_EPSILON_EB)) THEN
       CALL WRITE_STRINGS
       IF (.NOT.SUPPRESS_DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
       IF (MYID==0) CALL WRITE_DIAGNOSTICS(T,DT)
@@ -753,7 +753,7 @@ MAIN_LOOP: DO
 
    ! Flush output file buffers
 
-   IF (T>=FLUSH_CLOCK .AND. FLUSH_FILE_BUFFERS) THEN
+   IF (T>(FLUSH_CLOCK-TWO_EPSILON_EB) .AND. FLUSH_FILE_BUFFERS) THEN
       IF (MYID==0) CALL FLUSH_GLOBAL_BUFFERS
       IF (MYID==MAX(0,EVAC_PROCESS)) CALL FLUSH_EVACUATION_BUFFERS
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -765,7 +765,7 @@ MAIN_LOOP: DO
 
    ! Dump a restart file if necessary
 
-   IF ((T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR.  RADIATION_COMPLETED)) THEN
+   IF ((T>(RESTART_CLOCK-TWO_EPSILON_EB).OR.STOP_STATUS==USER_STOP).AND.(T>(T_END-TWO_EPSILON_EB).OR.RADIATION_COMPLETED)) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE
          CALL DUMP_RESTART(T,DT,NM)
@@ -779,7 +779,7 @@ MAIN_LOOP: DO
 
    ! Stop the run normally
 
-   IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
+   IF (T>(T_END-TWO_EPSILON_EB) .AND. ICYC>0) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
 
