@@ -10363,10 +10363,14 @@ READ_DEVC_LOOP: DO NN=1,N_DEVC_READ
       DV%COORD_FACTOR      = COORD_FACTOR
       DV%DEPTH             = DEPTH
       DV%IOR               = IOR
-      IF (POINTS>1 .AND. .NOT.LINE_DEVICE) THEN
+      IF (POINTS>1 .AND. POINTS<=99 .AND. .NOT.LINE_DEVICE) THEN
          WRITE(DV%ID,'(A,A,I2.2)') TRIM(ID),'-',I_POINT
+      ELSEIF (POINTS>99 .AND. POINTS<=999 .AND. .NOT.LINE_DEVICE) THEN
+         WRITE(DV%ID,'(A,A,I3.3)') TRIM(ID),'-',I_POINT
+      ELSEIF (POINTS>999 .AND. .NOT.LINE_DEVICE) THEN
+         WRITE(DV%ID,'(A,A,I6.6)') TRIM(ID),'-',I_POINT
       ELSE
-         DV%ID                = ID
+         DV%ID             = ID
       ENDIF
       IF (LINE_DEVICE) DV%LINE = N_DEVC_LINE
       DV%POINT             = I_POINT
