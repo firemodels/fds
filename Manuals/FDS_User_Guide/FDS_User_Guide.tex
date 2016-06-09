@@ -2838,7 +2838,7 @@ burning rate yourself, but you still want to simulate the heating up and ``ignit
 are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
 an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION}
 tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing
-a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. It should have no reaction parameters, product yields, and so on, like
+a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like
 those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
 the conditions of the surrounding environment.
 
