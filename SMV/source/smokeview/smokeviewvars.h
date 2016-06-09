@@ -20,6 +20,12 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(highlight_vertexdup, 0);
+SVEXTERN int SVDECL(highlight_edge0, 0);
+SVEXTERN int SVDECL(highlight_edge1, 0);
+SVEXTERN int SVDECL(highlight_edge2, 0);
+SVEXTERN int SVDECL(highlight_edgeother, 0);
+
 SVEXTERN colorbardata SVDECL(*split_colorbar, NULL);
 SVEXTERN int split_colorbar_index;
 #ifdef INMAIN
@@ -261,11 +267,11 @@ SVEXTERN char startup_lang_code[3];
 SVEXTERN int SVDECL(mouse_down,0);
 SVEXTERN int SVDECL(show_volsmoke_moving,0);
 SVEXTERN int SVDECL(freeze_volsmoke,0);
-SVEXTERN int SVDECL(show_iso_solid,1),SVDECL(show_iso_outline,1),SVDECL(show_iso_points,0);
-SVEXTERN int SVDECL(show_patch_solid, 1), SVDECL(show_patch_outline, 0), SVDECL(show_patch_points, 0);
+SVEXTERN int SVDECL(show_iso_solid,1),SVDECL(show_iso_outline,1),SVDECL(show_iso_verts,0);
+SVEXTERN int SVDECL(show_patch_solid, 1), SVDECL(show_patch_outline, 0), SVDECL(show_patch_verts, 0);
 SVEXTERN int SVDECL(show_patch_ingas, 1), SVDECL(show_patch_insolid, 1), SVDECL(show_patch_incutcell, 1);
 SVEXTERN int SVDECL(show_iso_normal, 0), SVDECL(smooth_iso_normal, 1);
-SVEXTERN int SVDECL(show_faces_solid, 1), SVDECL(show_faces_outline, 1), SVDECL(show_geom_points, 0);
+SVEXTERN int SVDECL(show_faces_solid, 1), SVDECL(show_faces_outline, 1), SVDECL(show_geom_verts, 0);
 SVEXTERN int SVDECL(show_geom_normal, 0), SVDECL(smooth_geom_normal, 1);
 SVEXTERN geomlistdata SVDECL(*geomlistinfo, NULL);
 SVEXTERN int SVDECL(have_volcompressed,0);
@@ -1091,7 +1097,7 @@ SVEXTERN char SVDECL(*zonelonglabels,NULL), SVDECL(*zoneshortlabels,NULL), SVDEC
 SVEXTERN char SVDECL(*smokeviewini,NULL);
 SVEXTERN int overwrite_all,erase_all;
 SVEXTERN int compress_autoloaded;
-SVEXTERN triangle SVDECL(**opaque_triangles,NULL),SVDECL(**transparent_triangles,NULL),SVDECL(**alltriangles,NULL);
+SVEXTERN tridata SVDECL(**opaque_triangles,NULL),SVDECL(**transparent_triangles,NULL),SVDECL(**alltriangles,NULL);
 SVEXTERN int SVDECL(nopaque_triangles,0),SVDECL(ntransparent_triangles,0),SVDECL(nalltriangles,0);
 #ifdef WIN32
 SVEXTERN   char openfilebuffer[1024];
