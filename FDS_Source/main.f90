@@ -289,11 +289,11 @@ ENDDO
 
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
-DO I=1,NUMBER_INITIAL_ITERATIONS
+DO I=1,INITIAL_RADIATION_ITERATIONS
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM)) CYCLE
       CALL WALL_BC(T_BEGIN,DT,NM)
-      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
+      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
    ENDDO
    DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
       CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
@@ -654,9 +654,27 @@ MAIN_LOOP: DO
          CALL BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
          IF (VEG_LEVEL_SET_COUPLED) CALL LEVEL_SET_FIRESPREAD(T,DT,1)
       ENDIF
-      CALL COMPUTE_RADIATION(T,NM)
-      CALL DIVERGENCE_PART_1(T,DT,NM)
    ENDDO COMPUTE_WALL_BC_2A
+
+   DO ITER=1,RADIATION_ITERATIONS
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_SKIP(NM)) CYCLE
+         CALL COMPUTE_RADIATION(T,NM,ITER)
+      ENDDO
+      IF (RADIATION_ITERATIONS>1) THEN  ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
+         DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+            CALL MESH_EXCHANGE(2)
+            IF (ICYC>1) EXIT
+         ENDDO
+      ENDIF
+   ENDDO
+
+   ! Start the computation of the divergence term.
+
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      IF (EVACUATION_SKIP(NM)) CYCLE
+      CALL DIVERGENCE_PART_1(T,DT,NM)
+   ENDDO
 
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
 
@@ -699,12 +717,14 @@ MAIN_LOOP: DO
    CALL POST_RECEIVES(6)
    CALL MESH_EXCHANGE(6)
 
-   ! Exchange radiation at interpolated boundaries
+   ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
 
-   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
-      CALL MESH_EXCHANGE(2)
-      IF (ICYC>1) EXIT
-   ENDDO
+   IF (RADIATION_ITERATIONS==1) THEN
+      DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+         CALL MESH_EXCHANGE(2)
+         IF (ICYC>1) EXIT
+      ENDDO
+   ENDIF
 
    ! Force normal components of velocity to match at interpolated boundaries
 
