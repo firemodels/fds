@@ -454,7 +454,7 @@ MAIN_LOOP: DO
 
    ! Check to see if the time step can be increased
 
-   IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MIN(MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY),T_END-T)
+   IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MIN(MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY),MAX(T_END-T,1.E-10_EB))
 
    ! Determine when to dump out diagnostics to the .out file
 
