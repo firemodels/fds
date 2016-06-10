@@ -1119,7 +1119,7 @@ ONE_D%TMP_F = ONE_D%TMP(1)
 
 ! Check if fire spreads radially over this surface type, and if so, set T_IGN appropriately
 
-IF (SF%XYZ(1)>-1.E5_EB) THEN
+IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
    ONE_D%T_IGN = T_BEGIN + SQRT((LP%X-SF%XYZ(1))**2 +(LP%Y-SF%XYZ(2))**2 +(LP%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
 ELSE
    ONE_D%T_IGN = SF%T_IGN
