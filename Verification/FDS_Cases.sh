@@ -466,6 +466,7 @@ $QFDS -t -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
+$QFDS -t -p 8 -d Pressure_Solver tunnel_demo.fds
 
 $QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
 $QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds
