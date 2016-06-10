@@ -29,7 +29,7 @@ int compare_float( const void *arg1, const void *arg2 ){
 /* ------------------ Update_hrrinfo ------------------------ */
 
 void Update_hrrinfo(int vis) {
-  if (hrrinfo != NULL) {
+  if(hrrinfo != NULL) {
     hrrinfo->display = vis;
 	Update_Times();
   }
@@ -1597,6 +1597,35 @@ void Update_Times(void){
           vi->showtimelist[k]=1;
           listindex=getindex(global_times[k],vi->showtime,vi->nshowtime);
           vi->showtimelist[k]=vi->showhide[listindex];
+        }
+      }
+    }
+  }
+
+  /* determine visibility of each circular vent at each time step */
+
+  for (i = 0; i<nmeshes; i++) {
+    int j;
+    meshdata *meshi;
+
+    meshi = meshinfo + i;
+    if(meshi->cventinfo == NULL)continue;
+    for (j = 0; j<meshi->ncvents; j++) {
+      cventdata *cvi;
+
+      cvi = meshi->cventinfo + j;
+      if(cvi->showtime == NULL)continue;
+      FREEMEMORY(cvi->showtimelist);
+      if(nglobal_times>0) {
+        int k;
+
+        NewMemory((void **)&cvi->showtimelist, nglobal_times * sizeof(int));
+        for (k = 0; k<nglobal_times; k++) {
+          int listindex;
+
+          cvi->showtimelist[k] = 1;
+          listindex = getindex(global_times[k], cvi->showtime, cvi->nshowtime);
+          cvi->showtimelist[k] = cvi->showhide[listindex];
         }
       }
     }
