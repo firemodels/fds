@@ -459,6 +459,9 @@ typedef struct _cventdata {
   float xmin, xmax, ymin, ymax, zmin, zmax;
   unsigned char *blank0, *blank;
   int   imin, imax, jmin, jmax, kmin, kmax;
+  int nshowtime, *showtimelist;
+  float *showtime;
+  unsigned char *showhide;
   int useventcolor,hideboundary;
   float origin[3], radius;
   float *color;
