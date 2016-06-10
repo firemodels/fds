@@ -4486,7 +4486,7 @@ PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
                IF (SS%H_V_REFERENCE_TEMPERATURE < 0._EB) SS%H_V_REFERENCE_TEMPERATURE=TMP_REF
                IF (SS%TMP_V < 0._EB) SS%TMP_V = TMP_V
                IF (SS%TMP_V < 0._EB) THEN
-                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: PARTicle class ',TRIM(SS%ID),' requires a TMP_V'
+                  WRITE(MESSAGE,'(A,A,A)') 'ERROR: SPEC ',TRIM(SS%ID),' requires a VAPORIZATION_TEMPERATURE'
                   CALL SHUTDOWN(MESSAGE) ; RETURN
                ENDIF
                IF (SS%TMP_MELT < 0._EB) SS%TMP_MELT = TMP_MELT
