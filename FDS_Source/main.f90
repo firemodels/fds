@@ -289,11 +289,11 @@ ENDDO
 
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
-DO I=1,NUMBER_INITIAL_ITERATIONS
+DO I=1,INITIAL_RADIATION_ITERATIONS
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM)) CYCLE
       CALL WALL_BC(T_BEGIN,DT,NM)
-      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
+      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
    ENDDO
    DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
       CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
@@ -454,20 +454,20 @@ MAIN_LOOP: DO
 
    ! Check to see if the time step can be increased
 
-   IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY)
+   IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MIN(MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY),MAX(T_END-T,1.E-10_EB))
 
    ! Determine when to dump out diagnostics to the .out file
 
    LO10 = LOG10(REAL(MAX(1,ABS(ICYC)),EB))
-   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. T>=T_END) DIAGNOSTICS = .TRUE.
+   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. (T+DT)>(T_END-TWO_EPSILON_EB)) DIAGNOSTICS = .TRUE.
 
    ! If evacuation, set up special time iteration parameters
 
    IF (ANY(EVACUATION_ONLY)) CALL EVAC_MAIN_LOOP
 
-   !============================================================================================================================
-   !                                          Start of Predictor part of time step
-   !============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Predictor part of time step
+   !================================================================================================================================
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
@@ -613,9 +613,9 @@ MAIN_LOOP: DO
 
     T = T + DT
 
-   !===============================================================================================================================
-   !                                          Start of Corrector part of time step
-   !===============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Corrector part of time step
+   !================================================================================================================================
 
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
@@ -654,9 +654,27 @@ MAIN_LOOP: DO
          CALL BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
          IF (VEG_LEVEL_SET_COUPLED) CALL LEVEL_SET_FIRESPREAD(T,DT,1)
       ENDIF
-      CALL COMPUTE_RADIATION(T,NM)
-      CALL DIVERGENCE_PART_1(T,DT,NM)
    ENDDO COMPUTE_WALL_BC_2A
+
+   DO ITER=1,RADIATION_ITERATIONS
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_SKIP(NM)) CYCLE
+         CALL COMPUTE_RADIATION(T,NM,ITER)
+      ENDDO
+      IF (RADIATION_ITERATIONS>1) THEN  ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
+         DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+            CALL MESH_EXCHANGE(2)
+            IF (ICYC>1) EXIT
+         ENDDO
+      ENDIF
+   ENDDO
+
+   ! Start the computation of the divergence term.
+
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      IF (EVACUATION_SKIP(NM)) CYCLE
+      CALL DIVERGENCE_PART_1(T,DT,NM)
+   ENDDO
 
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
 
@@ -699,12 +717,14 @@ MAIN_LOOP: DO
    CALL POST_RECEIVES(6)
    CALL MESH_EXCHANGE(6)
 
-   ! Exchange radiation at interpolated boundaries
+   ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
 
-   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
-      CALL MESH_EXCHANGE(2)
-      IF (ICYC>1) EXIT
-   ENDDO
+   IF (RADIATION_ITERATIONS==1) THEN
+      DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+         CALL MESH_EXCHANGE(2)
+         IF (ICYC>1) EXIT
+      ENDDO
+   ENDIF
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -745,7 +765,7 @@ MAIN_LOOP: DO
 
    ! Dump out diagnostics
 
-   IF (DIAGNOSTICS .OR. T>=T_END) THEN
+   IF (DIAGNOSTICS) THEN
       CALL WRITE_STRINGS
       IF (.NOT.SUPPRESS_DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
       IF (MYID==0) CALL WRITE_DIAGNOSTICS(T,DT)
@@ -753,7 +773,7 @@ MAIN_LOOP: DO
 
    ! Flush output file buffers
 
-   IF (T>=FLUSH_CLOCK .AND. FLUSH_FILE_BUFFERS) THEN
+   IF (T>(FLUSH_CLOCK-TWO_EPSILON_EB) .AND. FLUSH_FILE_BUFFERS) THEN
       IF (MYID==0) CALL FLUSH_GLOBAL_BUFFERS
       IF (MYID==MAX(0,EVAC_PROCESS)) CALL FLUSH_EVACUATION_BUFFERS
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -765,7 +785,7 @@ MAIN_LOOP: DO
 
    ! Dump a restart file if necessary
 
-   IF ((T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR.  RADIATION_COMPLETED)) THEN
+   IF ((T>(RESTART_CLOCK-TWO_EPSILON_EB).OR.STOP_STATUS==USER_STOP).AND.(T>(T_END-TWO_EPSILON_EB).OR.RADIATION_COMPLETED)) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE
          CALL DUMP_RESTART(T,DT,NM)
@@ -779,7 +799,7 @@ MAIN_LOOP: DO
 
    ! Stop the run normally
 
-   IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
+   IF (T>(T_END-TWO_EPSILON_EB) .AND. ICYC>0) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
 
@@ -2919,7 +2939,7 @@ IF (ANY(EVACUATION_ONLY) .AND. (ICYC<1 .AND. T>T_BEGIN)) RETURN ! No dumps at th
 DISP = DISPLS(MYID)+1
 CNT  = COUNTS(MYID)
 
-IF_DUMP_HRR: IF (T>=HRR_CLOCK) THEN
+IF_DUMP_HRR: IF (T>(HRR_CLOCK-TWO_EPSILON_EB)) THEN
    IF (N_MPI_PROCESSES>1) THEN
       REAL_BUFFER_11 = Q_DOT_SUM
       CALL MPI_GATHERV(REAL_BUFFER_11(1,DISP),COUNTS_Q_DOT(MYID),MPI_DOUBLE_PRECISION, &
@@ -2937,7 +2957,7 @@ ENDIF IF_DUMP_HRR
 
 ! Dump unstructured geometry and boundary element info
 
-IF (N_FACE>0 .AND. T>=GEOM_CLOCK) THEN
+IF (N_FACE>0 .AND. T>(GEOM_CLOCK-TWO_EPSILON_EB)) THEN
    IF (MYID==0) THEN
       CALL DUMP_GEOM(T)
       IF (GEOM_DIAG) THEN
@@ -2947,12 +2967,12 @@ IF (N_FACE>0 .AND. T>=GEOM_CLOCK) THEN
    GEOM_CLOCK = GEOM_CLOCK + DT_GEOM
 ENDIF
 
-IF (N_GEOM>0 .AND. T>=BNDC_CLOCK) THEN
+IF (N_GEOM>0 .AND. T>(BNDC_CLOCK-TWO_EPSILON_EB)) THEN
    IF (MYID==0) CALL DUMP_BNDC(T)
    BNDC_CLOCK = BNDC_CLOCK + DT_BNDC
 ENDIF
 
-IF (N_BNDE>0 .AND. T>=BNDE_CLOCK) THEN
+IF (N_BNDE>0 .AND. T>(BNDE_CLOCK-TWO_EPSILON_EB)) THEN
    IF (MYID==0) CALL DUMP_BNDE(T)
    BNDE_CLOCK = BNDE_CLOCK + DT_BNDE
 ENDIF
@@ -2963,7 +2983,7 @@ IF (MYID==MAX(0,EVAC_PROCESS)) CALL EVAC_CSV(T)
 
 ! Dump out Mass info after first "gathering" data to node 0
 
-IF_DUMP_MASS: IF (T>=MINT_CLOCK) THEN
+IF_DUMP_MASS: IF (T>(MINT_CLOCK-TWO_EPSILON_EB)) THEN
    IF (N_MPI_PROCESSES>1) THEN
       REAL_BUFFER_5 = MINT_SUM
       CALL MPI_GATHERV(REAL_BUFFER_5(0,DISP),COUNTS_MASS(MYID),MPI_DOUBLE_PRECISION, &
@@ -3033,7 +3053,7 @@ ENDIF EXCHANGE_DEVICE
 
 ! Exchange information about Devices that is only needed at print-out time
 
-IF_DUMP_DEVC: IF (T>=DEVC_CLOCK .AND. N_DEVC>0) THEN
+IF_DUMP_DEVC: IF (T>(DEVC_CLOCK-TWO_EPSILON_EB) .AND. N_DEVC>0) THEN
 
    ! Exchange the current COUNT of each DEViCe
 
@@ -3069,14 +3089,14 @@ ENDIF IF_DUMP_DEVC
 
 ! Dump CONTROL info. No gathering required as CONTROL is updated on all meshes
 
-IF (T>=CTRL_CLOCK .AND. N_CTRL>0) THEN
+IF (T>(CTRL_CLOCK-TWO_EPSILON_EB) .AND. N_CTRL>0) THEN
    IF (MYID==0) CALL DUMP_CONTROLS(T)
    CTRL_CLOCK = CTRL_CLOCK + DT_CTRL
 ENDIF
 
 ! Dump CPU time
 
-IF (T>=CPU_CLOCK) THEN
+IF (T>(CPU_CLOCK-TWO_EPSILON_EB)) THEN
    CALL DUMP_CPU_TIME
    CPU_CLOCK = CPU_CLOCK + DT_CPU
 ENDIF
@@ -3149,7 +3169,7 @@ SUBROUTINE EVAC_CSV(T)
 
 REAL(EB), INTENT(IN) :: T
 
-IF (T>=EVAC_CLOCK .AND. ANY(EVACUATION_ONLY)) THEN
+IF (T>(EVAC_CLOCK-TWO_EPSILON_EB) .AND. ANY(EVACUATION_ONLY)) THEN
    CALL DUMP_EVAC_CSV(T)
    EVAC_CLOCK = EVAC_CLOCK + DT_HRR
 ENDIF
