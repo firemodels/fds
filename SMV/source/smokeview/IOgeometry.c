@@ -2241,12 +2241,14 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
           break;
         }
       }
+#ifdef XXX
       printf("\n\nedges\n");
       printf("                       total: %i\n", nedges);
       printf("        0 connected triangle: %i\n", ntri0);
       printf("        1 connected triangle: %i\n", ntri1);
       printf("        2 connected triangle: %i\n", ntri2);
       printf("3 or more connected triangle: %i\n", ntri_other);
+#endif
       FREEMEMORY(edgelist_index);
     }
     if(nverts > 0) {
@@ -2289,10 +2291,12 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         vi = verts + ii;
         if(vi->isdup == 1)ndups++;
       }
+#ifdef XXX
       printf("\nvertices\n");
       printf("\n   total: %i\n", nverts);
       printf("duplicates: %i\n", ndups);
       printf("  (eps=%f m)\n", VERT_EPS);
+#endif
       FREEMEMORY(vertlist_index);
     }
   }
