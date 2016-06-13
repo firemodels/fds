@@ -1,13 +1,13 @@
-Hamins Acetylene Burner
+# Hamins Acetylene Burner
 
-### I. OVERVIEW
+#### OVERVIEW
 
 A series of measurements were made on a variety of gaseous and liquid pool fires including the distribution of radiative heat flux emitted to the surroundings.  This document briefly describes the acetylene results. Analogous results for pool fires burning other fuels are described elsewhere.  The experiments are described in detail in Refs. [1-5]. A full report describing the data is in preparation and will be available soon (see Hamins, “Energetics of Small and Moderate-Scale Gaseous Pool Fires,” NIST TN, 2016, in preparation.)
 
 Experiments were conducted varying the acetylene mass flux for fires burning in a quiescent environment in two circular burners (0.10 m and 0.38 m diameters) for idealized heat release rates varying from 1 kW to 50 kW.  Measurements in the 16 associated files represent the time-averaged distributions of radiative heat flux emitted to the surroundings. The radiative flux results were used to determine the radiative fraction, a key global parameter characterizing the fraction of energy lost to the surroundings. A number of other measurements and calculations were made, including heat loss to the burner and the sensible enthalpy fraction transported by the fire plume via convection.  Hostikka [6] used FDS to simulate the radiative flux distribution from methane fires. 
 
 
-## II. EXPERIMENTAL DESCRIPTION
+#### EXPERIMENTAL DESCRIPTION
 
 The experimental apparatus and procedure is reported in detail in [1, 3]. Steadily burning gaseous acetylene fires were established in a quiescent environment (after several minutes of burning). 
 
@@ -33,7 +33,7 @@ For the 0.35 m acetylene fires, the convected enthalpy (Xc) was determined by me
 
 The heat capacity and density of the exhaust flow was computed as a function of temperature using the ideal gas law. The gas was assumed to be pure air, which is a fair approximation as the exhaust gases are composed mainly of air (with only highly dilute amounts of combustion products such as CO, CO2 and H2O at values of less than about a few percent by volume). With mass conserved in the duct, mass flow measurements were made far downstream from the duct entrance using thermocouples and bidirectional probes.  The combined relative expanded uncertainty in was estimated as 10 % based on a propagation of error analysis and repeat measurements. [7]  The measurement and uncertainty analysis assumed that heat losses from the duct to the surroundings were small relative to transported enthalpy.  The expanded measurement uncertainty for and  was 10 % and 11 %, respectively.  From this information, the expanded uncertainty of  was estimated as 21 %.  For fires in which was not measured,  was calculated.  Assuming a value of unity for, the expanded uncertainty of was estimated as 18 %.  A propagation of error analysis [17] showed that the expanded uncertainty in the calculated value of L was related to the expanded uncertainty in multiplied by the factor: 0.4*(1+ 1.02 D/L), which on average was 4 %.  The full paper goes into some detail on propagation of error analysis (A. Hamins, Energetics of Small and Moderate-Scale Gaseous Pool Fires, NIST TN, 2016, in preparation).
  
-## III. RESULTS
+#### RESULTS
 
 Detailed results for the experiments are shown in Table 1 below (and in the full paper as Table A1.3), including the fire diameter (D), the mass buring rate (m), the idealized heat release rate (Hc), the time-averaged radiative fraction (Xr), the convected enthalpy fraction (Xc), and the enthalpy fraction lost to the burner (Xb), the combustion efficiency (Xa), and the name of the comma delimited datafile containing the distribution of radiative flux in the downward and sideways directions.  Ro is also listed, which defines the radial position of the vertical radiometer array. 
 
@@ -105,7 +105,7 @@ The relative expanded uncertainty of the measurement of Xb was 6 % on average, w
 In summary, a series of measurements was conducted to characterize global fire properties on a variety of gaseous pool fires. The measurements included the distribution of radiative heat flux emitted to the surroundings as a function of fuel mass flux for different burners sizes and fuel types.  This information was used to calculate the fraction of energy emitted as radiation.  Heat transfer to the burner, and sensible enthalpy transfer to the surroundings by convection were also measured.  The measured total fractional heat feedback to the burner () was compared to its calculated value.  For all fuels and burner sizes considered here, the radiative fraction increased and the enthalpy loss to the burner decreased as a function of fuel mass flux.  Future work is needed to directly measure Xa and the yields of smoke and carbon monoxide for all of these fires.
 
 
-## IV. REFERENCES
+#### REFERENCES
 
 1. McGrattan, K., McDermott, R., Hostikka, S., Floyd, J., Weinschenk, C., Overholt, K., Fire Dynamics Simulator, NIST Special Publication 1019, Sixth Edition, April 2016. http://dx.doi.org/10.6028/NIST.SP.1019
 
