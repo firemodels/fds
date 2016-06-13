@@ -4,6 +4,8 @@
 
 &TIME T_END=1./
 
+&DUMP NFRAMES=200/
+
 &MISC NOISE=.FALSE.,
       DNS=.TRUE.,
       GVEC=0,0,0, 
