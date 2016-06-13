@@ -59,21 +59,21 @@ Table 1:  Summary of gaseous acetylene fire experiments, including the fire diam
 
 (a) value assumed equal to 1; (b) calculated value
 
+
 For each of the fires, a complementary file provides the measured distribution of radiative heat flux in the downward (along the radial axis on the burner surface, q”(r)) and the sideways directions (along the vertical axis, ”(z)).  Typical radiative heat flux measurements include both the flux downwards as a function of radial distance from the burner center and the flux sideways as a function of vertical location above the plane defined by the burner surface for locations 0.69 m from the burner axis. Sometimes the radial flux is larger than the horizontal flux, sometimes not, depending on the fire size and shape. The acetylene fire produces copious amounts of soot. In all cases, however, the integrated flux in the horizontal direction is larger than that in the downward direction.  
 
 The temperature of the burner surface was non-uniform for the fires in the 0.10 m sand burner. The temperature varied from 220oC to 370oC, depending on the conditions and the radial location. The measured cooling water temperature at the burner inlet and outlet for the 0.35 m diameter burner was between 30oC and 70oC. Under steady state conditions, the temperature difference between the inlet and outlet provides a basis for determination of heat transfer to the burner.  Results for the 0.1 m and 0.35 m acetylene fires are given in Tables 2 and 3, respectively (and in the full paper as Tables A2.6 and A2.7, respectively).  
 
 
-
 Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire experiments as a function of r (distance away from the burner center). All temperatures are in degrees centigrade. Tavg is the area weighted average temperature.
----------------------------------------
-Test	T(r=0)	T(2.5cm) T(4.5cm) Tavg
-A1	375	483	360	422
-A2	386	437	414	424
-A3	360	466	457	448
-A4	395	459	463	458
-A5	407	469	450	458
----------------------------------------
+
+|Test	|T(r=0)	|T(2.5cm) |T(4.5cm) |Tavg |
+|-----|-------|---------|---------|-----|
+|A1	|375	|483	|360	|422 |
+|A2	|386	|437	|414	|424 |
+|A3	|360	|466	|457	|448 |
+|A4	|395	|459	|463	|458 |
+|A5	|407	|469	|450	|458 |
 
 
 Table 3. The measured temperature of the cooling water at the burner inlet (Tin) and outlet (Tout) for the 0.35 m diameter acetylene fire experiments. Tavg is the average water temperature. The burner surface temperature is best represented by the outlet temperature.  All temperatures are in degrees centigrade. 
