@@ -40,25 +40,26 @@ Table 1:  Summary of gaseous acetylene fire experiments, including the fire diam
 
 | Test |	D(m) |	m(g/s) |	Ro(m) |	Hc(kW) |	 Xr	| Xc 	|  Xb	| Xa 	| Data File |
 | ---- |	---- |	------ |	----- |	------ |	---	| ---	| ---	| ---	| --------- |
-|A1	|0.10 |0.00943	|0.13	|0.45	|0.09	|0.54	|0.37	|1*	|A1.csv|
-|A2	|0.10	|0.0116	|0.13	|0.56	|0.12	|0.57	|0.31	|1*	|A2.csv|
-|A3	|0.10	|0.0188	|0.13	|0.90	|0.15	|0.66	|0.20	|1*	|A3.csv|
-|A4	|0.10	|0.0267	|0.13	|1.29	|0.24	|0.62	|0.14	|1*	|A4.csv|
-|A5	|0.10	|0.0320	|0.13	|1.54	|0.27	|0.61	|0.12	|1*	|A5.csv|
-|A6	|0.35	|0.259	|0.39	|12.5	|0.10	|0.58	|0.30	|0.99**	|A6.csv|
-|A7	|0.35	|0.229	|0.51	|11.0	|0.07	|0.59	|0.34	|1.00**	|A7.csv|
-|A8	|0.35	|0.424	|0.51	|20.4	|0.18	|0.54	|0.23	|0.97**	|A8.csv|
-|A9	|0.35	|0.648	|0.51	|31.3	|0.27	|0.50	|0.18	|0.94**	|A9.csv|
-|A10	|0.35	|0.793	|0.69	|38.2	|0.32	|0.48	|0.15	|0.92**	|A10.csv|
-|A11	|0.35	|1.00	|0.69	|48.0	|0.34	|0.45	|0.14	|0.90**	|A11.csv|
-|A12	|0.35	|1.29	|0.69	|62.4	|0.31	|0.41	|0.12	|0.86**	|A12.csv|
-|A13	|0.35	|1.58	|0.69	|76.3	|0.31	|0.39	|0.10	|0.82**	|A13.csv|
-|A14	|0.35	|2.27	|0.69	|109.2 |0.29	|0.34	|0.08	|0.73**|	A14.csv|
-|A15	|0.35	|2.43 |0.69	|117.2	|0.28	|0.33	|0.09	|0.71**	|A15.csv|
-|A16	|0.35	|2.79	|0.69	|134.7	|0.28	|0.31	|0.06	|0.66**	|A16.csv|
+|A1	|0.10 |0.00943	|0.13	|0.45	|0.09	|0.54	|0.37	|1 (a)	|A1.csv|
+|A2	|0.10	|0.0116	|0.13	|0.56	|0.12	|0.57	|0.31	|1 (a)	|A2.csv|
+|A3	|0.10	|0.0188	|0.13	|0.90	|0.15	|0.66	|0.20	|1 (a)	|A3.csv|
+|A4	|0.10	|0.0267	|0.13	|1.29	|0.24	|0.62	|0.14	|1 (a)	|A4.csv|
+|A5	|0.10	|0.0320	|0.13	|1.54	|0.27	|0.61	|0.12	|1 (a)	|A5.csv|
+|A6	|0.35	|0.259	|0.39	|12.5	|0.10	|0.58	|0.30	|0.99 (b)	|A6.csv|
+|A7	|0.35	|0.229	|0.51	|11.0	|0.07	|0.59	|0.34	|1.00 (b)	|A7.csv|
+|A8	|0.35	|0.424	|0.51	|20.4	|0.18	|0.54	|0.23	|0.97 (b)	|A8.csv|
+|A9	|0.35	|0.648	|0.51	|31.3	|0.27	|0.50	|0.18	|0.94 (b)	|A9.csv|
+|A10	|0.35	|0.793	|0.69	|38.2	|0.32	|0.48	|0.15	|0.92 (b)	|A10.csv|
+|A11	|0.35	|1.00	|0.69	|48.0	|0.34	|0.45	|0.14	|0.90 (b)	|A11.csv|
+|A12	|0.35	|1.29	|0.69	|62.4	|0.31	|0.41	|0.12	|0.86 (b)	|A12.csv|
+|A13	|0.35	|1.58	|0.69	|76.3	|0.31	|0.39	|0.10	|0.82 (b)	|A13.csv|
+|A14	|0.35	|2.27	|0.69	|109.2 |0.29	|0.34	|0.08	|0.73 (b)|	A14.csv|
+|A15	|0.35	|2.43 |0.69	|117.2	|0.28	|0.33	|0.09	|0.71 (b)	|A15.csv|
+|A16	|0.35	|2.79	|0.69	|134.7	|0.28	|0.31	|0.06	|0.66 (b)	|A16.csv|
 
- *    value assumed equal to 1
- **   calculated value
+(a) value assumed equal to 1
+ 
+(b) calculated value
 
 For each of the fires, a complementary file provides the measured distribution of radiative heat flux in the downward (along the radial axis on the burner surface, q”(r)) and the sideways directions (along the vertical axis, ”(z)).  Typical radiative heat flux measurements include both the flux downwards as a function of radial distance from the burner center and the flux sideways as a function of vertical location above the plane defined by the burner surface for locations 0.69 m from the burner axis. Sometimes the radial flux is larger than the horizontal flux, sometimes not, depending on the fire size and shape. The acetylene fire produces copious amounts of soot. In all cases, however, the integrated flux in the horizontal direction is larger than that in the downward direction.  
 
