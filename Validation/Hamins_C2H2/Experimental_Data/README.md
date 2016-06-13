@@ -1,13 +1,12 @@
 ##Hamins Acetylene Burner
 
-#####Overview
+####Overview
 
 A series of measurements were made on a variety of gaseous and liquid pool fires including the distribution of radiative heat flux emitted to the surroundings.  This document briefly describes the acetylene results. Analogous results for pool fires burning other fuels are described elsewhere.  The experiments are described in detail in Refs. [1-5]. A full report describing the data is in preparation and will be available soon (see Hamins, “Energetics of Small and Moderate-Scale Gaseous Pool Fires,” NIST TN, 2016, in preparation.)
 
 Experiments were conducted varying the acetylene mass flux for fires burning in a quiescent environment in two circular burners (0.10 m and 0.38 m diameters) for idealized heat release rates varying from 1 kW to 50 kW.  Measurements in the 16 associated files represent the time-averaged distributions of radiative heat flux emitted to the surroundings. The radiative flux results were used to determine the radiative fraction, a key global parameter characterizing the fraction of energy lost to the surroundings. A number of other measurements and calculations were made, including heat loss to the burner and the sensible enthalpy fraction transported by the fire plume via convection.  Hostikka [6] used FDS to simulate the radiative flux distribution from methane fires. 
 
-
-#####Experimental Description
+####Experimental Description
 
 The experimental apparatus and procedure is reported in detail in [1,3]. Steadily burning gaseous acetylene fires were established in a quiescent environment (after several minutes of burning). 
 
@@ -37,31 +36,29 @@ The heat capacity and density of the exhaust flow was computed as a function of 
 
 Detailed results for the experiments are shown in Table 1 below (and in the full paper as Table A1.3), including the fire diameter (D), the mass buring rate (m), the idealized heat release rate (Hc), the time-averaged radiative fraction (Xr), the convected enthalpy fraction (Xc), and the enthalpy fraction lost to the burner (Xb), the combustion efficiency (Xa), and the name of the comma delimited datafile containing the distribution of radiative flux in the downward and sideways directions.  Ro is also listed, which defines the radial position of the vertical radiometer array. 
 
+Table 1:  Summary of gaseous acetylene fire experiments, including the fire diameter (D), the mass flow (m), the value of Ro (the radial distance from the burner center to the vertical radiometer array, the idealized heat release rate (m*Hc), the radiative fraction (Xr), the convective fraction (Xc), the enthalpy fraction transported to the burner(Xb), the combustion efficiency (Xa), and the name of the comma delimited datafile containing the distribution of radiative flux in the downward and sideways directions as a funciton of position radially and vertically, respectively.
 
-Table 1.  Summary of gaseous acetylene fire experiments, including the fire diameter (D), the mass flow (m), the value of Ro (the radial distance from the burner center to the vertical radiometer array, the idealized heat release rate (m*Hc), the radiative fraction (Xr), the convective fraction (Xc), the enthalpy fraction transported to the burner(Xb), the combustion efficiency (Xa), and the name of the comma delimited datafile containing the distribution of radiative flux in the downward and sideways directions as a funciton of position radially and vertically, respectively.
-
----------------------------------------------------------------------------------
-Test	D(m)	m(g/s)	Ro(m)	Hc(kW)	 Xr	 Xc	 Xb	 Xa	Data File
-A1	0.10	0.00943	0.13	0.45	0.09	0.54	0.37	1*	A1.csv
-A2	0.10	0.0116	0.13	0.56	0.12	0.57	0.31	1*	A2.csv
-A3	0.10	0.0188	0.13	0.90	0.15	0.66	0.20	1*	A3.csv
-A4	0.10	0.0267	0.13	1.29	0.24	0.62	0.14	1*	A4.csv
-A5	0.10	0.0320	0.13	1.54	0.27	0.61	0.12	1*	A5.csv
-A6	0.35	0.259	0.39	12.5	0.10	0.58	0.30	0.99**	A6.csv
-A7	0.35	0.229	0.51	11.0	0.07	0.59	0.34	1.00**	A7.csv
-A8	0.35	0.424	0.51	20.4	0.18	0.54	0.23	0.97**	A8.csv
-A9	0.35	0.648	0.51	31.3	0.27	0.50	0.18	0.94**	A9.csv
-A10	0.35	0.793	0.69	38.2	0.32	0.48	0.15	0.92**	A10.csv
-A11	0.35	1.00	0.69	48.0	0.34	0.45	0.14	0.90**	A11.csv
-A12	0.35	1.29	0.69	62.4	0.31	0.41	0.12	0.86**	A12.csv
-A13	0.35	1.58	0.69	76.3	0.31	0.39	0.10	0.82**	A13.csv
-A14	0.35	2.27	0.69	109.2	0.29	0.34	0.08	0.73**	A14.csv
-A15	0.35	2.43	0.69	117.2	0.28	0.33	0.09	0.71**	A15.csv
-A16	0.35	2.79	0.69	134.7	0.28	0.31	0.06	0.66**	A16.csv
-*     value assumed equal to 1
-**   calculated value
+| Test |	D(m) |	m(g/s) |	Ro(m) |	Hc(kW) |	 Xr	| Xc 	|  Xb	| Xa 	| Data File |
+| ---- |	---- |	------ |	----- |	------ |	---	| ---	| ---	| ---	| --------- |
+|A1	|0.10 |0.00943	|0.13	|0.45	|0.09	|0.54	|0.37	|1*	|A1.csv|
+|A2	|0.10	|0.0116	|0.13	|0.56	|0.12	|0.57	|0.31	|1*	|A2.csv|
+|A3	|0.10	|0.0188	|0.13	|0.90	|0.15	|0.66	|0.20	|1*	|A3.csv|
+|A4	|0.10	|0.0267	|0.13	|1.29	|0.24	|0.62	|0.14	|1*	|A4.csv|
+|A5	|0.10	|0.0320	|0.13	|1.54	|0.27	|0.61	|0.12	|1*	|A5.csv|
+|A6	|0.35	|0.259	|0.39	|12.5	|0.10	|0.58	|0.30	|0.99**	|A6.csv|
+|A7	|0.35	|0.229	|0.51	|11.0	|0.07	|0.59	|0.34	|1.00**	|A7.csv|
+|A8	|0.35	|0.424	|0.51	|20.4	|0.18	|0.54	|0.23	|0.97**	|A8.csv|
+|A9	|0.35	|0.648	|0.51	|31.3	|0.27	|0.50	|0.18	|0.94**	|A9.csv|
+|A10	|0.35	|0.793	|0.69	|38.2	|0.32	|0.48	|0.15	|0.92**	|A10.csv|
+|A11	|0.35	|1.00	|0.69	|48.0	|0.34	|0.45	|0.14	|0.90**	|A11.csv|
+|A12	|0.35	|1.29	|0.69	|62.4	|0.31	|0.41	|0.12	|0.86**	|A12.csv|
+|A13	|0.35	|1.58	|0.69	|76.3	|0.31	|0.39	|0.10	|0.82**	|A13.csv|
+|A14	|0.35	|2.27	|0.69	|109.2 |0.29	|0.34	|0.08	|0.73**|	A14.csv|
+|A15	|0.35	|2.43 |0.69	|117.2	|0.28	|0.33	|0.09	|0.71**	|A15.csv|
+|A16	|0.35	|2.79	|0.69	|134.7	|0.28	|0.31	|0.06	|0.66**	|A16.csv|
 --------------------------------------------------------------------------------
-
+*    value assumed equal to 1
+**   calculated value
 
 For each of the fires, a complementary file provides the measured distribution of radiative heat flux in the downward (along the radial axis on the burner surface, q”(r)) and the sideways directions (along the vertical axis, ”(z)).  Typical radiative heat flux measurements include both the flux downwards as a function of radial distance from the burner center and the flux sideways as a function of vertical location above the plane defined by the burner surface for locations 0.69 m from the burner axis. Sometimes the radial flux is larger than the horizontal flux, sometimes not, depending on the fire size and shape. The acetylene fire produces copious amounts of soot. In all cases, however, the integrated flux in the horizontal direction is larger than that in the downward direction.  
 
