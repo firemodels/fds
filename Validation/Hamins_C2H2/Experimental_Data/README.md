@@ -1,4 +1,6 @@
-## I. OVERVIEW
+Hamins Acetylene Burner
+
+### I. OVERVIEW
 
 A series of measurements were made on a variety of gaseous and liquid pool fires including the distribution of radiative heat flux emitted to the surroundings.  This document briefly describes the acetylene results. Analogous results for pool fires burning other fuels are described elsewhere.  The experiments are described in detail in Refs. [1-5]. A full report describing the data is in preparation and will be available soon (see Hamins, “Energetics of Small and Moderate-Scale Gaseous Pool Fires,” NIST TN, 2016, in preparation.)
 
