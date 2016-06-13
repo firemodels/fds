@@ -73,8 +73,6 @@ sp5 = tight_subplot(1,4, [.01 .01],[.142 .055],[.108 .01]);
 
 figure(1)
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -95,6 +93,8 @@ hold on
 
 axis([0 20 -4E-3 5E-3])
 set(gca,'YTick',[-4E-3:1E-3:5E-3])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 %%%FDS Data%%%
 
@@ -155,8 +155,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cf'])
 
 figure(2)
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -173,6 +171,9 @@ Cp = D.data(I,j);
 h_dat=plot(xoh,Cp,'ko','markersize',10);
 
 hold on
+
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
 
 %%%FDS Data%%%
 
@@ -225,8 +226,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_Cp'])
 
 hx = figure(3);
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -269,6 +268,9 @@ for i = 1:4
 
         axis([-.2 1.0 0 3.5])
 
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
+
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
@@ -304,8 +306,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_U'])
 
 hx = figure(4);
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -341,6 +341,9 @@ for i = 1:4
         plot(w_vel(1:round(length(w_vel)/15):end)/U_0,z(1:round(length(z)/15):end)/h, char(symbol_vect_noleg(q)), 'MarkerSize', 10, 'Color',line_color_vect{q}, 'LineWidth', 1)
 
         axis([-.1 .1 0 3.5])
+
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
 
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
@@ -380,8 +383,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_W'])
 
 hx = figure(5);
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -422,6 +423,9 @@ for i = 1:4
 
         axis([0 0.04 0 3.5])
 
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
+
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
@@ -458,8 +462,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_uu'])
 
 hx = figure(6);
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -501,6 +503,9 @@ for i = 1:4
 
         axis([0 .04 0 3.5])
 
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
+
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
 
@@ -537,8 +542,6 @@ print(gcf,'-dpdf',[pltdir,'backward_facing_step_ww'])
 
 hx = figure(7);
 plot_style
-set(gca,'FontName',Font_Name)
-set(gca,'FontSize',Label_Font_Size)
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
@@ -578,6 +581,9 @@ for i = 1:4
         h_leg(q)=plot(uw_fds(1:round(length(uw_fds)/15):end)/U_0^2,z(1:round(length(z)/15):end)/h,char(symbol_vect_noleg(q)), 'MarkerSize', 10, 'Color',line_color_vect{q}, 'LineWidth', 1);
 
         axis([0 .04 0 3.5])
+
+        set(gca,'FontName',Font_Name)
+        set(gca,'FontSize',Label_Font_Size)
 
         Pos = get(gca,'Position');
         set(gca,'Position',[Pos(1) Pos(2)+.015 Pos(3) Pos(4)*0.98])
