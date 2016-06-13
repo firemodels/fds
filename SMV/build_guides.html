@@ -27,12 +27,43 @@ function get_figs(guide){
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
+<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a> -
 <a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
 <a href="build_smokeview.html"><font size=5>Smokeview</font></a> - 
-<font size=5>Guides</font></a> -
-<a href="../Utilities/build_bundle.html"><font size=5>Bundle</font></a>
+<font size=5>Guides</font></a>
 
 <hr size="1">
+
+<h3>Bundle Steps - Guides</h3>
+<ol>
+<li>Run firebot and smokebot
+<li>After both bots successfully complete, copy guides to FDS_Guides on all three platforms
+</ol>
+
+<h3>Copy Guides to Bundle Directories (FDS_Guides)</h3>
+
+<p><table border=on>
+<tr>
+<td>smokebot SMV guides</td>
+<td><button onclick="copy_guides('from_smv_linux')">==></button></td>
+<td rowspan=2 align=center>Windows <br>~\FDS_Guides</td>
+<td><button onclick="copy_guides('to_linux')">==></button></td>
+<td>Linux ~/FDS_Guides</td>
+</tr>
+
+<tr>
+<td align=center>firebot FDS guides</td>
+<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
+<td><button onclick="copy_guides('to_osx')">==></button></td>
+<td>OSX ~/FDS_Guides</td>
+</tr>
+
+</table>
+
+
+<p><hr>
+
+<p>Steps below not needed to create bundles
 
 <h3>Download Images</h3>
 
@@ -103,7 +134,8 @@ function get_figs(guide){
 </tr>
 </table>
 
-<h3>Copy/Upload Guides</h3>
+
+<h3>Copy Guides To FDS_Guides</h3>
 
 <p><table border=on>
 <tr>
@@ -111,24 +143,6 @@ function get_figs(guide){
 <td><button onclick="copy_guides('from_smv_local')">==></button></td>
 <td rowspan=3>Windows ~\FDS_Guides</td>
 </tr>
-</table>
-
-<p><table border=on>
-<tr>
-<td>smokebot SMV guides</td>
-<td><button onclick="copy_guides('from_smv_linux')">==></button></td>
-<td rowspan=2 align=center>Windows <br>~\FDS_Guides</td>
-<td><button onclick="copy_guides('to_linux')">==></button></td>
-<td>Linux ~/FDS_Guides</td>
-</tr>
-
-<tr>
-<td align=center>firebot FDS guides</td>
-<td><button onclick="copy_guides('from_fds_linux')">==></button></td>
-<td><button onclick="copy_guides('to_osx')">==></button></td>
-<td>OSX ~/FDS_Guides</td>
-</tr>
-
 </table>
 
 <h3>Other</h3>
