@@ -56,9 +56,9 @@ Table 1:  Summary of gaseous acetylene fire experiments, including the fire diam
 |A14	|0.35	|2.27	|0.69	|109.2 |0.29	|0.34	|0.08	|0.73**|	A14.csv|
 |A15	|0.35	|2.43 |0.69	|117.2	|0.28	|0.33	|0.09	|0.71**	|A15.csv|
 |A16	|0.35	|2.79	|0.69	|134.7	|0.28	|0.31	|0.06	|0.66**	|A16.csv|
---------------------------------------------------------------------------------
-*    value assumed equal to 1
-**   calculated value
+
+ *    value assumed equal to 1
+ **   calculated value
 
 For each of the fires, a complementary file provides the measured distribution of radiative heat flux in the downward (along the radial axis on the burner surface, q”(r)) and the sideways directions (along the vertical axis, ”(z)).  Typical radiative heat flux measurements include both the flux downwards as a function of radial distance from the burner center and the flux sideways as a function of vertical location above the plane defined by the burner surface for locations 0.69 m from the burner axis. Sometimes the radial flux is larger than the horizontal flux, sometimes not, depending on the fire size and shape. The acetylene fire produces copious amounts of soot. In all cases, however, the integrated flux in the horizontal direction is larger than that in the downward direction.  
 
