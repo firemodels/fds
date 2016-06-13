@@ -78,20 +78,19 @@ Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire exp
 
 Table 3. The measured temperature of the cooling water at the burner inlet (Tin) and outlet (Tout) for the 0.35 m diameter acetylene fire experiments. Tavg is the average water temperature. The burner surface temperature is best represented by the outlet temperature.  All temperatures are in degrees centigrade. 
 
-------------------------------
-Test	Tin	Tout	Tavg
-A6	19	74	47
-A7	19	63	41
-A8	19	62	41
-A9	18	60	39
-A10	16	59	38
-A11	15	63	39
-A12	13	61	37
-A13	13	66	40
-A14	13	68	41
-A15	13	73	43
-A16	13	68	41
-------------------------------
+|Test	|Tin	|Tout	|Tavg |
+|-----|----|-----|-----|
+|A6	|19	|74	|47 |
+|A7	|19	|63	|41 |
+|A8	|19	|62	|41 |
+|A9	|18	|60	|39 |
+|A10	|16	|59	|38 |
+|A11	|15	|63	|39 |
+|A12	|13	|61	|37 |
+|A13	|13	|66	|40 |
+|A14	|13	|68	|41 |
+|A15	|13	|73	|43 |
+|A16	|13	|68	|41 |
 
 
 The measurement of Qb and Xb was fairly simple, involving measurement of the water cooling mass flow and its temperature difference through the burner. The values of Xb are relatively large (>0.2) for small mass flux (100 g/m2-s to 200 g/m2-s) and rapidly fall-off as the mass flux increases (see Table 1).  
