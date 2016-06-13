@@ -68,7 +68,7 @@ The temperature of the burner surface was non-uniform for the fires in the 0.10 
 Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire experiments as a function of r (distance away from the burner center). Tavg is the area weighted average temperature.
 
 |Test	|T (r=0) (C)	|T (2.5cm) (C) |T (4.5cm) (C) | Tavg (C) |
-|-----|-------|---------|---------|-----|
+|-----|:------:|:---------:|:---------:|:-----:|
 |A1	|375	|483	|360	|422 |
 |A2	|386	|437	|414	|424 |
 |A3	|360	|466	|457	|448 |
@@ -79,7 +79,7 @@ Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire exp
 Table 3. The measured temperature of the cooling water at the burner inlet (Tin) and outlet (Tout) for the 0.35 m diameter acetylene fire experiments. Tavg is the average water temperature. The burner surface temperature is best represented by the outlet temperature. 
 
 |Test	|Tin (C)	|Tout (C)	|Tavg (C) |
-|-----|----|-----|-----|
+|:-----:|:----:|:-----:|:-----:|
 |A6	|19	|74	|47 |
 |A7	|19	|63	|41 |
 |A8	|19	|62	|41 |
