@@ -67,7 +67,7 @@ The temperature of the burner surface was non-uniform for the fires in the 0.10 
 
 Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire experiments as a function of r (distance away from the burner center). All temperatures are in degrees centigrade. Tavg is the area weighted average temperature.
 
-|Test	|T(r=0)	|T(2.5cm) |T(4.5cm) |Tavg |
+|Test	|T [r=0] (C)	|T [2.5cm] (C) |T [4.5cm] (C) | Tavg (C) |
 |-----|-------|---------|---------|-----|
 |A1	|375	|483	|360	|422 |
 |A2	|386	|437	|414	|424 |
