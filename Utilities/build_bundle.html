@@ -21,24 +21,25 @@ function install_fdssmv(platform){
 </script>
 </HEAD>
 <BODY BGCOLOR="#FFFFFF" >
+<font size=5>Bundle</font> -
 <a href="../FDS_Compilation/build_fds.html"><font size=5>FDS</font></a> - 
 <a href="../SMV/build_smokeview.html"><font size=5>Smokeview</font></a> - 
-<a href="../SMV/build_guides.html"><font size=5>Guides</font></a> - 
-<font size=5>Bundle</font>
+<a href="../SMV/build_guides.html"><font size=5>Guides</font></a>
 <hr>
 
-<h3>Checklist</h3>
-<ul>
-<li>Edit <a href="../SMV/scripts/EDIT_setup.bat">config file</a>
-<li><a href="../SMV/scripts/Update_repos_gitlatest.bat">Update FDS-SMV</a> on all three platforms
-<li>Build 
-<a href="../FDS_Compilation/build_fds.html">FDS</a>, 
-<a href="../SMV/build_smokeview.html">Smokeview and utilities</a>
-<li>Update and commit release notes for FDS and Smokeview
-<li><a href="Scripts/CONV_fds_release.bat">Convert</a> FDS wiki to html, then commit
-<li><a href="../SMV/build_guides.html">Copy FDS guides</a> from Linux firebot to ~/FDS_Guides on all three platforms
-<li><a href="../SMV/build_guides.html">Copy Smokeview guides</a> from Linux firebot to ~/FDS_Guides on all three platforms
-</ul>
+<h3>Bundle Steps</h3>
+
+<ol>
+<li><a href="../SMV/scripts/Update_repos_gitlatest.bat">Update all repositories</a>
+<li>Edit <a href="../SMV/scripts/EDIT_setup.bat">configuration file</a> labeling the bundle name (version string for both FDS and Smokeview)
+<li>Run firebot and smokebot (using firebot and smokebot accounts on blaze)
+<li>Build <a href="../FDS_Compilation/build_fds.html">FDS</a>
+<li>Build <a href="../SMV/build_smokeview.html">Smokeview and utilities</a>
+<li><a href="../SMV/build_guides.html">Copy FDS and Smokview manuals</a> to FDS_Guides directories on all three platforms
+<li>Update FDS release notes, <a href="Scripts/CONV_fds_release.bat">Convert</a> FDS wiki to html, then commit
+<li>Update and commit Smokeview release
+<li><a href="../SMV/build_guides.html">Copy FDS Smokeview guides</a> from bot directories to to ~/FDS_Guides on all three platforms
+</ol>
 
 <h3>Bundles</h3>
 <table border=on>
