@@ -65,9 +65,9 @@ For each of the fires, a complementary file provides the measured distribution o
 The temperature of the burner surface was non-uniform for the fires in the 0.10 m sand burner. The temperature varied from 220oC to 370oC, depending on the conditions and the radial location. The measured cooling water temperature at the burner inlet and outlet for the 0.35 m diameter burner was between 30oC and 70oC. Under steady state conditions, the temperature difference between the inlet and outlet provides a basis for determination of heat transfer to the burner.  Results for the 0.1 m and 0.35 m acetylene fires are given in Tables 2 and 3, respectively (and in the full paper as Tables A2.6 and A2.7, respectively).  
 
 
-Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire experiments as a function of r (distance away from the burner center). All temperatures are in degrees centigrade. Tavg is the area weighted average temperature.
+Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire experiments as a function of r (distance away from the burner center). Tavg is the area weighted average temperature.
 
-|Test	|T [r=0] (C)	|T [2.5cm] (C) |T [4.5cm] (C) | Tavg (C) |
+|Test	|T (r=0) (C)	|T (2.5cm) (C) |T (4.5cm) (C) | Tavg (C) |
 |-----|-------|---------|---------|-----|
 |A1	|375	|483	|360	|422 |
 |A2	|386	|437	|414	|424 |
@@ -76,9 +76,9 @@ Table 2. Measured surface temperature for the 0.10 m diameter acetylene fire exp
 |A5	|407	|469	|450	|458 |
 
 
-Table 3. The measured temperature of the cooling water at the burner inlet (Tin) and outlet (Tout) for the 0.35 m diameter acetylene fire experiments. Tavg is the average water temperature. The burner surface temperature is best represented by the outlet temperature.  All temperatures are in degrees centigrade. 
+Table 3. The measured temperature of the cooling water at the burner inlet (Tin) and outlet (Tout) for the 0.35 m diameter acetylene fire experiments. Tavg is the average water temperature. The burner surface temperature is best represented by the outlet temperature. 
 
-|Test	|Tin	|Tout	|Tavg |
+|Test	|Tin (C)	|Tout (C)	|Tavg (C) |
 |-----|----|-----|-----|
 |A6	|19	|74	|47 |
 |A7	|19	|63	|41 |
