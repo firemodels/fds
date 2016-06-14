@@ -9,7 +9,8 @@ if smokeviewEmbedded then execute = true else execute = false end
 
 function buildOpt(opt)
     local option = {name = opt[1], argLines = opt[2]}
-    printOption(option)
+    -- printOption(option)
+    -- local execute = false
     option = inioptions.validate(option, execute)
     return option
 end

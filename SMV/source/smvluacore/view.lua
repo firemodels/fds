@@ -103,7 +103,7 @@ _colorbar = {
             return nil -- getcolorbarflip()
         end,
         set = function (v)
-            return nil -- setcolorbarflip(v)
+            return set_colorbar_textureflag(v)
         end
     },
     index = {
@@ -132,7 +132,7 @@ _colorbar = {
         end,
         set = function(colors)
             print("setting colorbar colors")
-            return set_colorbar_colors(#colors, colors)
+            return set_colorbar_colors(colors)
         end
     }
 }

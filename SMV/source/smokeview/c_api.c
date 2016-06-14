@@ -2459,7 +2459,7 @@ int set_usenewdrawface(int v) {
   return 0;
 } // USENEWDRAWFACE
 
-int set_vecontours(int v) {
+int set_veccontours(int v) {
   show_slices_and_vectors = v;
   return 0;
 } // VECCONTOURS
@@ -2592,10 +2592,10 @@ int set_axissmooth(int v) {
 } // AXISSMOOTH
 
 // provided above
-// int set_blocklocation(int v) {
-//   blocklocation = v;
-//   return 0;
-// } // BLOCKLOCATION
+int set_blocklocation(int v) {
+  blocklocation = v;
+  return 0;
+} // BLOCKLOCATION
 
 int set_boundarytwoside(int v) {
   showpatch_both = v;
@@ -3246,7 +3246,7 @@ int set_zaxisangles(float a, float b, float c) {
 int set_adjustalpha(int v) {
   adjustalphaflag = v;
   return 0;
-}
+} // ADJUSTALPHA
 
 int set_colorbartype(int type, const char *label) {
   update_colorbartype = 1;
@@ -3515,7 +3515,7 @@ int set_avatarevac(int v) {
   return 0;
 } // AVATAREVAC
 
-int set_geometrytest(int a, int b, int c, int d, int vals[],
+int set_geometrytest(int a, int b, float c, float d, int vals[],
                      float b1Vals[], float b2Vals[], float b3Vals[]) {
   int *v;
   int ii;
@@ -3753,17 +3753,20 @@ int set_shooter(float xyz[], float dxyz[], float uvw[],
   return 0;
 } // SHOOTER
 
-int set_showdevices(int ndevices_ini, char **names) {
+int set_showdevices(int ndevices_ini, const char **names) {
   sv_object *obj_typei;
   char *dev_label;
   int i;
+  char tempname[255]; // temporary buffer to convert from const string
 
   for(i = 0; i<nobject_defs; i++){
     obj_typei = object_defs[i];
     obj_typei->visible = 0;
   }
   for(i = 0; i<ndevices_ini; i++){
-    obj_typei = get_object(names[i]);
+    strncpy(tempname, names[i], 255 - 1); // use temp buffer
+    obj_typei = get_object(tempname);
+    // obj_typei = get_object(names[i]);
     if(obj_typei != NULL){
       obj_typei->visible = 1;
     }
@@ -3828,6 +3831,235 @@ int set_userticks(int vis, int auto_place, int sub, float origin[],
 
   return 0;
 } // USERTICKS
+
+int set_c_particles(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label) {
+  if (label == NULL) {
+   label = "";
+  }
+  int l = strlen(label);
+  char label_copy[l+1];
+  // convert to mutable string (mainly to avoid discard const warnings)
+  strcpy(label_copy, label);
+  if(npart5prop>0){
+    int label_index = 0;
+    if(strlen(label)>0)label_index = get_partprop_index_s(label_copy);
+    if(label_index >= 0 && label_index<npart5prop){
+      partpropdata *propi;
+
+      propi = part5propinfo + label_index;
+      propi->setchopmin = minFlag;
+      propi->setchopmax = maxFlag;
+      propi->chopmin = minValue;
+      propi->chopmax = maxValue;
+    }
+  }
+  return 0;
+}
+
+int set_c_slice(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label) {
+  int i;
+  // if there is a label, use it
+  if(strcmp(label, "") != 0){
+    for(i = 0; i<nslice2; i++){
+      if(strcmp(slicebounds[i].datalabel, label) != 0)continue;
+      slicebounds[i].setchopmin = minFlag;
+      slicebounds[i].setchopmax = maxFlag;
+      slicebounds[i].chopmin = minValue;
+      slicebounds[i].chopmax = maxValue;
+      break;
+    }
+  // if there is no label apply values to all slice types
+  } else{
+    for(i = 0; i<nslice2; i++){
+      slicebounds[i].setchopmin = minFlag;
+      slicebounds[i].setchopmax = maxFlag;
+      slicebounds[i].chopmin = minValue;
+      slicebounds[i].chopmax = maxValue;
+    }
+  }
+  return 0;
+}
+
+int set_cache_boundarydata(int setting) {
+  cache_boundarydata = setting;
+  return 0;
+} // CACHE_BOUNDARYDATA
+
+int set_cache_qdata(int setting) {
+  cache_qdata = setting;
+  return 0;
+} // CACHE_QDATA
+
+int set_percentilelevel(int setting) {
+  percentile_level = setting;
+  if(percentile_level<0.0)percentile_level = 0.01;
+  if(percentile_level>0.5)percentile_level = 0.01;
+  return 0;
+} // PERCENTILELEVEL
+
+int set_timeoffset(int setting) {
+  timeoffset = setting;
+  return 0;
+} // TIMEOFFSET
+
+int set_patchdataout(int outputFlag, float tmin, float tmax, float xmin,
+                     float xmax, float ymin, float ymax, float zmin,
+                     float zmax) {
+  output_patchdata = outputFlag;
+  patchout_tmin = tmin;
+  patchout_tmax = tmax;
+  patchout_xmin = xmin;
+  patchout_xmax = xmax;
+  patchout_ymin = ymin;
+  patchout_ymax = ymax;
+  patchout_zmin = zmin;
+  patchout_zmax = zmax;
+  ONEORZERO(output_patchdata);
+  return 0;
+} // PATCHDATAOUT
+
+int set_c_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
+                 int maxVals[]) {
+  int i;
+  if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+  for(i = 0; i<n3d; i++){
+    setp3chopmin[i] = minFlags[i];
+    setp3chopmax[i] = maxFlags[i];
+    p3chopmin[i] = minVals[i];
+    p3chopmax[i] = maxVals[i];
+  }
+  return 0;
+} // C_PLOT3D
+
+int set_v_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
+                 int maxVals[]) {
+  int i;
+  if(n3d>mxplot3dvars)n3d = mxplot3dvars;
+  for(i = 0; i<n3d; i++){
+    setp3min[i] = minFlags[i];
+    setp3max[i] = maxFlags[i];
+    p3min[i] = minVals[i];
+    p3max[i] = maxVals[i];
+  }
+  return 0;
+} // V_PLOT3D
+
+int set_tload(int beginFlag, float beginVal, int endFlag, int endVal,
+              int skipFlag, int skipVal) {
+  use_tload_begin = beginFlag;
+  tload_begin = beginVal;
+  use_tload_end = endFlag;
+  tload_end = endVal;
+  use_tload_skip = skipFlag;
+  tload_skip = skipVal;
+  return 0;
+} // TLOAD
+
+int set_v5_particles(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label) {
+  if (label == NULL) {
+   label = "";
+  }
+  int l = strlen(label);
+  char label_copy[l+1];
+  // convert to mutable string (mainly to avoid discard const warnings)
+  strcpy(label_copy, label);
+  if(npart5prop>0){
+    int label_index = 0;
+
+    if(strlen(label)>0)label_index = get_partprop_index_s(label_copy);
+    if(label_index >= 0 && label_index<npart5prop){
+      partpropdata *propi;
+
+      propi = part5propinfo + label_index;
+      propi->setvalmin = minFlag;
+      propi->setvalmax = maxFlag;
+      propi->valmin = minValue;
+      propi->valmax = maxValue;
+      switch(minFlag){
+        case PERCENTILE_MIN:
+          propi->percentile_min = minValue;
+          break;
+        case GLOBAL_MIN:
+          propi->global_min = minValue;
+          break;
+        case SET_MIN:
+          propi->user_min = minValue;
+          break;
+        default:
+          ASSERT(FFALSE);
+          break;
+      }
+      switch(maxFlag){
+        case PERCENTILE_MAX:
+          propi->percentile_max = maxValue;
+          break;
+        case GLOBAL_MAX:
+          propi->global_max = maxValue;
+          break;
+        case SET_MAX:
+          propi->user_max = maxValue;
+          break;
+        default:
+          ASSERT(FFALSE);
+          break;
+      }
+    }
+  }
+  return 0;
+}
+
+int set_v_particles(int minFlag, float minValue, int maxFlag, float maxValue) {
+  setpartmin = minFlag;
+  partmin = minValue;
+  setpartmax = maxFlag;
+  partmax = maxValue;
+  return 0;
+} // V_PARTICLES
+
+int set_v_target(int minFlag, float minValue, int maxFlag, float maxValue) {
+  settargetmin = minFlag;
+  targetmin = minValue;
+  settargetmax = maxFlag;
+  targetmax = maxValue;
+  return 0;
+} // V_TARGET
+
+int set_v_slice(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label, float lineMin, float lineMax,
+                    int lineNum) {
+  int i;
+  // if there is a label to apply, use it
+  if(strcmp(label, "") != 0){
+    for(i = 0; i<nslice2; i++){
+      if(strcmp(slicebounds[i].datalabel, label) != 0)continue;
+      slicebounds[i].setvalmin = minFlag;
+      slicebounds[i].setvalmax = maxFlag;
+      slicebounds[i].valmin = minValue;
+      slicebounds[i].valmax = maxValue;
+
+      slicebounds[i].line_contour_min = lineMin;
+      slicebounds[i].line_contour_max = lineMax;
+      slicebounds[i].line_contour_num = lineNum;
+      break;
+    }
+  // if there is no label apply values to all slice types
+  } else{
+    for(i = 0; i<nslice2; i++){
+      slicebounds[i].setvalmin = minFlag;
+      slicebounds[i].setvalmax = maxFlag;
+      slicebounds[i].valmin = minValue;
+      slicebounds[i].valmax = maxValue;
+
+      slicebounds[i].line_contour_min = lineMin;
+      slicebounds[i].line_contour_max = lineMax;
+      slicebounds[i].line_contour_num = lineNum;
+    }
+  }
+  return 0;
+} // V_SLICE
 
 int show_smoke3d_showall() {
   smoke3ddata *smoke3di;

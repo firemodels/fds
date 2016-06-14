@@ -65,10 +65,53 @@ options =
             table.insert(colors,{r=r,g=g,b=b})
         end
         return function ()
-            print()
+            -- print("COLORBAR not implemented")
+            set_colorbar_colors(colors)
             -- view.colorbar.colors = colors
+            set_colorbar_textureflag(textureflag ~= 0)
             -- view.colorbar.texture_flag = (textureflag ~= 0)
+            setcolorbarindex(contour_value)
             -- view.colorbar.index = contour_value
+            end
+        end
+    , COLORBAR_SPLIT = function(opt)
+        return function ()
+            print("COLORBAR_SPLIT not implemented")
+            end
+        end
+    , GEOMSHOW = function(opt)
+        return function ()
+            print("GEOMSHOW not implemented")
+            end
+        end
+    , NORTHANGLE = function(opt)
+        return function ()
+            print("NORTHANGLE not implemented")
+            end
+        end
+    , SHOWHRRLABEL = function(opt)
+        return function ()
+            print("SHOWHRRLABEL not implemented")
+            end
+        end
+    , TREEPARMS = function(opt)
+        return function ()
+            print("TREEPARMS not implemented")
+            end
+        end
+    , SCRIPTFILE = function(opt)
+        return function ()
+            print("SCRIPTFILE not implemented")
+            end
+        end
+    , C_BOUNDARY = function(opt)
+        return function ()
+            print("C_BOUNDARY not implemented")
+            end
+        end
+    , V_BOUNDARY = function(opt)
+        return function ()
+            print("V_BOUNDARY not implemented")
             end
         end
     , COLOR2BAR = function(opt)
@@ -82,8 +125,7 @@ options =
             table.insert(colors,{r=r,g=g,b=b})
         end
         return function ()
-            -- view.color2bar.colors = colors
-            print()
+            view.color2bar.colors = colors
             end
         end
     , COLORBAR_FLIP = function(opt)
@@ -158,12 +200,6 @@ options =
         local i
         local colors = {}
         for i=1,ncolors,1 do
-            print(opt.argLines[i+1][1],opt.argLines[i+1][2]
-                ,opt.argLines[i+1][3]
-                ,opt.argLines[i+1][4]
-                , opt.argLines[i+1][5]
-                , opt.argLines[i+1][6]
-                )
             colors[opt.argLines[i+1][6]]
                  = {r=opt.argLines[1+i][1],
                          g=opt.argLines[1+i][2],
@@ -258,6 +294,1192 @@ options =
         local v = opt.argLines[1][1]
         return function () set_isolinewidth(v) end
         end
+    , ISOPOINTSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_isopointsize(v) end
+        end
+    , LINEWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_linewidth(v) end
+        end
+    , PARTPOINTSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_partpointsize(v) end
+        end
+    , PLOT3DLINEWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_plot3dlinewidth(v) end
+        end
+    , PLOT3DPOINTSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_plot3dpointsize(v) end
+        end
+    , SENSORABSSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_sensorabssize(v) end
+        end
+    , SENSORRELSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_sensorrelsize(v) end
+        end
+    , SLICEOFFSET = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_sliceoffset(v) end
+        end
+    , SMOOTHLINES = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_smoothlines(v) end
+        end
+    , SPHERESEGS = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_spheresegs(v) end
+        end
+    , SPRINKLERABSSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_sprinklerabssize(v) end
+        end
+    , STREAKLINEWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_streaklinewidth(v) end
+        end
+    , TICKLINEWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_ticklinewidth(v) end
+        end
+    , USENEWDRAWFACE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_usenewdrawface(v) end
+        end
+    , VECCONTOURS = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_veccontours(v) end
+        end
+    , VECLENGTH = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_veclength(a, b, c) end
+        end
+    , VECTORLINEWIDTH = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_vectorlinewidth(a, b, c) end
+        end
+    , VECTORPOINTSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_vectorpointsize(v) end
+        end
+    , VENTLINEWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_ventlinewidth(v) end
+        end
+    , VENTOFFSET = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_ventoffset(v) end
+        end
+    , WINDOWOFFSET = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_windowoffset(v) end
+        end
+    , WINDOWWIDTH = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_windowwidth(v) end
+        end
+    , WINDOWHEIGHT = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_windowheight(v) end
+        end
+    , BOUNDZIPSTEP = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_boundzipstep(v) end
+        end
+    , FED = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_fed(v) end
+        end
+    , FEDCOLORBAR = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_fedcolorbar(v) end
+        end
+    , ISOZIPSTEP = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_isozipstep(v) end
+        end
+    , NOPART = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_nopart(v) end
+        end
+    , PARTPOINTSIZE = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_partpointsize(v) end
+        end
+    , SHOWFEDAREA = function(opt)
+        local v = opt.argLines[1][1]
+        return function () set_showfedarea(v) end
+        end
+    , SLICEAVERAGE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_sliceaverage(a, b, c) end
+        end
+    , SLICEDATAOUT = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_slicedataout(a) end
+        end
+    , SLICEZIPSTEP = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_slicezipstep(a) end
+        end
+    , SMOKE3DZIPSTEP = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_smoke3dzipstep(a) end
+        end
+    , USER_ROTATE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        return function () set_userrotate(a, b, c, d, e) end
+        end
+    , APERTURE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_aperture(a) end
+        end
+    , AXISSMOOTH = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_axissmooth(a) end
+        end
+    , BLOCKLOCATION = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_blocklocation(a) end
+        end
+    , BOUNDARYTWOSIDE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_boundarytwoside(a) end
+        end
+    , CLIP = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_clip(a, b) end
+        end
+    , CONTOURTYPE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_contourtype(a, b) end
+        end
+    , CULLFACES = function(opt)
+        local b = opt.argLines[1][2]
+        return function () set_cullfaces(a) end
+        end
+    , ENABLETEXTURELIGHTING = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_texturelighting(a) end
+        end
+    , EYEVIEW = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_eyeview(a) end
+        end
+    , EYEX = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_eyex(a) end
+        end
+    , EYEY = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_eyey(a) end
+        end
+    , EYEZ = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_eyez(a) end
+        end
+    , FONTSIZE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_fontsize(a) end
+        end
+    , FRAMERATEVALUE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_frameratevalue(a) end
+        end
+    , GEOMDIAGS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_geomdiags(a, b, c) end
+        end
+    , GVERSION = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_gversion(a) end
+        end
+    , ISOTRAN2 = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_isotran2(a) end
+        end
+    , MESHVIS = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local vals = {}
+        for i=1,n,1 do
+            vals[i] = opt.argLines[1+i][1]
+        end
+        return function ()
+            set_meshvis(vals)
+        end
+        end
+    , OFFSETSLICE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_offsetslice(a) end
+        end
+    , OUTLINEMODE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_outlinemode(a, b) end
+        end
+    , P3DSURFACETYPE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_p3dsurfacetype(a) end
+        end
+    , P3DSURFACESMOOTH = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_p3dsurfacesmooth(a) end
+        end
+    , PROJECTION = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_projection(a) end
+        end
+    , SCALEDFONT = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[2][1]
+        local e = opt.argLines[2][2]
+        local f = opt.argLines[2][3]
+        return function () set_scaledfont(a) end
+        end
+    , SHOWALLTEXTURES = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showalltextures(a) end
+        end
+    , SHOWAXISLABELS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showaxislabels(a) end
+        end
+    , SHOWBLOCKLABEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showblocklabel(a) end
+        end
+    , SHOWBLOCKS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showblocks(a) end
+        end
+    , SHOWCADANDGRID = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showcadandgrid(a) end
+        end
+    , SHOWCADOPAQUE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showcadopaque(a) end
+        end
+    , SHOWCEILING = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showceiling(a) end
+        end
+    , SHOWCOLORBARS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showcolorbars(a) end
+        end
+    , SHOWCVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_showcvents(a) end
+        end
+    , SHOWDUMMYVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showdummyvents(a) end
+        end
+    , SHOWEVACSLICES = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_showevacslices(a,b,c) end
+        end
+    , SHOWFLOOR = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showfloor(a) end
+        end
+    , SHOWFRAME = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showframe(a) end
+        end
+    , SHOWFRAMELABEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showframelabel(a) end
+        end
+    , SHOWFRAMERATE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showframerate(a) end
+        end
+    , SHOWFRAMERATE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showframe(a) end
+        end
+    , SHOWGRID = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showgrid(a) end
+        end
+    , SHOWGRIDLOC = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showgridloc(a) end
+        end
+    , SHOWHMSTIMELABEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showhmstimelabel(a) end
+        end
+    , SHOWHRRCUTOFF = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showhrrcutoff(a) end
+        end
+    , SHOWISO = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showiso(a) end
+        end
+    , SHOWISONORMALS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showisonormals(a) end
+        end
+    , SHOWLABELS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showlabels(a) end
+        end
+    , SHOWMEMLOAD = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showmemload(a) end
+        end
+    , SHOWOPENVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_showopenvents(a, b) end
+        end
+    , SHOWOTHERVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_showothervents(a, b) end
+        end
+    , SHOWSENSORS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_showsensors(a, b) end
+        end
+    , SHOWSLICEINOBST = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showsliceinobst(a) end
+        end
+    , SHOWSMOKEPART = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showsmokepart(a) end
+        end
+    , SHOWSPRINKPART = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showsprinkpart(a) end
+        end
+    , SHOWSTREAK = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        return function () set_showstreak(a,b,c,d) end
+        end
+    , SHOWTERRAIN = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showterrain(a) end
+        end
+    , SHOWTETRAS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_showtetras(a, b) end
+        end
+    , SHOWTHRESHOLD = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_showthreshold(a,b,c) end
+        end
+    , SHOWTICKS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showticks(a) end
+        end
+    , SHOWTIMEBAR = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtimebar(a) end
+        end
+    , SHOWTIMELABEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtimelabel(a) end
+        end
+    , SHOWTITLE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtitle(a) end
+        end
+    , SHOWTRACERSALWAYS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtracersalways(a) end
+        end
+    , SHOWTRIANGLES = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        local f = opt.argLines[1][6]
+        return function () set_showtriangles(a,b,c,d,e,f) end
+        end
+    , SHOWTRANSPARENT = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtransparentvents(a) end
+        end
+    , SHOWTRANSPARENTVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtransparentvents(a) end
+        end
+    , SHOWTRIANGLECOUNT = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtrianglecount(a) end
+        end
+    , SHOWVENTFLOW = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_showventflow(a,b,c) end
+        end
+    , SHOWVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showvents(a) end
+        end
+    , SHOWWALLS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showwalls(a) end
+        end
+    , SKIPEMBEDSLICE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_skipembedslice(a) end
+        end
+    , SMOKESENSORS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_smokesensors(a,b) end
+        end
+    , STARTUPLANG = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_startuplang(a) end
+        end
+    , STEREO = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_stereo(a) end
+        end
+    , SURFINC = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_surfinc(a) end
+        end
+    , TERRAINPARMS = function(opt)
+        local r_min = opt.argLines[1][1]
+        local g_min = opt.argLines[1][2]
+        local b_min = opt.argLines[1][3]
+        local r_max = opt.argLines[2][1]
+        local g_max = opt.argLines[2][2]
+        local b_max = opt.argLines[2][3]
+        local vert_factor = opt.argLines[3][1]
+        return function () set_terrainparams(r_min, g_min, b_min, r_max, g_max,
+                                             b_max, vert_factor) end
+        end
+    , TITLESAFE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_titlesafe(a) end
+        end
+    , TRAINERVIEW = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_trainerview(a) end
+        end
+    , TRANSPARENT = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_transparent(a, b) end
+        end
+    , TWOSIDEDVENTS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_twosidedvents(a, b) end
+        end
+    , VECTORSKIP = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_vectorskip(a) end
+        end
+    , VOLSMOKE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        local f = opt.argLines[2][1]
+        local g = opt.argLines[2][1]
+        local h = opt.argLines[2][1]
+        local i = opt.argLines[2][1]
+        local j = opt.argLines[2][1]
+        local k = opt.argLines[2][1]
+        local l = opt.argLines[2][1]
+        return function () set_volsmoke(a, b, c, d, e, f, g, h, i, j, k, l) end
+        end
+    , ZOOM = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_zoom(a,b) end
+        end
+    , CELLCENTERTEXT = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_cellcentertext(a) end
+        end
+    , INPUT_FILE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_inputfile(a) end
+        end
+    , LABELSTARTUPVIEW = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_labelstartupview(a) end
+        end
+    , PIXELSKIP = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_pixelskip(a) end
+        end
+    , RENDERCLIP = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        return function () set_renderclip(a,b,c,d,e) end
+        end
+    , RENDERFILELABEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_renderfilelabel(a) end
+        end
+    , RENDERFILETYPE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_renderfiletype(a, b) end
+        end
+    , RENDEROPTION = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_renderfiletype(a, b) end
+        end
+    , UNITCLASSES = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local vals = {}
+        for i=1,n,1 do
+            -- table.insert(vals,i)
+            vals[i] = opt.argLines[1+i][1]
+        end
+        return function ()
+            set_unitclasses(vals)
+        end
+        end
+    , ADJUSTALPHA = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_renderfiletype(a, b) end
+        end
+    , COLORBARTYPE = function(opt)
+        local typ = opt.argLines[1][1]
+        local label = opt.argLines[1][3]
+        return function () set_colorbartype(typ, label) end
+        end
+    , EXTREMECOLORS = function(opt)
+        local rmin = opt.argLines[1][1]
+        local gmin = opt.argLines[1][2]
+        local bmin = opt.argLines[1][3]
+        local rmax = opt.argLines[1][4]
+        local gmax = opt.argLines[1][5]
+        local bmax = opt.argLines[1][6]
+        return function ()
+            set_extremecolors(rmin, gmin, bmin, rmax, gmax, bmax)
+            end
+        end
+    , FIRECOLOR = function(opt)
+        local r = opt.argLines[1][1]
+        local g = opt.argLines[1][2]
+        local b = opt.argLines[1][3]
+        return function () set_firecolor(r,g,b) end
+        end
+    , FIRECOLORMAP = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_firecolormap(a,b) end
+        end
+    , FIREDEPTH = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_firedepth(a) end
+        end
+    , SHOWEXTREMEDATA = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_showextremedata(a,b,c) end
+        end
+    , SMOKECOLOR = function(opt)
+        local r = opt.argLines[1][1]
+        local g = opt.argLines[1][2]
+        local b = opt.argLines[1][3]
+        return function () set_smokecolor(r,g,b) end
+        end
+    , SMOKECULL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_smokecull(a) end
+        end
+    , SMOKESKIP = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_smokeskip(a) end
+        end
+    , SMOKEALBEDO = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_smokealbedo(a) end
+        end
+    , SMOKERTHICK = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_smokerthick(a) end
+        end
+    , USEGPU = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_usegpu(a) end
+        end
+    , VOLSMOKE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+
+        local f = opt.argLines[2][1]
+        local g = opt.argLines[2][2]
+        local h = opt.argLines[2][3]
+        local i = opt.argLines[2][4]
+        local j = opt.argLines[2][5]
+        local k = opt.argLines[2][6]
+        local l = opt.argLines[2][7]
+        return function ()
+            set_volsmoke(a,b,c,d,e,f,g,h,i,j,k,l)
+            end
+        end
+    , SHOWHAZARDCOLORS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showhazardcolors(a) end
+        end
+    , SHOWHZONE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showhzone(a) end
+        end
+    , SHOWSZONE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showszone(a) end
+        end
+    , SHOWVZONE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showvzone(a) end
+        end
+    , SHOWZONEFIRE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showzonefire(a) end
+        end
+    , SHOWPATHNODES = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showpathnodes(a) end
+        end
+    , SHOWTOURROUTE = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_showtourroute(a) end
+        end
+    , TOURCOLORS = function(opt)
+        local ar = opt.argLines[1][1]
+        local ab = opt.argLines[1][2]
+        local ac = opt.argLines[1][3]
+
+        local br = opt.argLines[2][1]
+        local bb = opt.argLines[2][2]
+        local bc = opt.argLines[2][3]
+
+        local cr = opt.argLines[3][1]
+        local cb = opt.argLines[3][2]
+        local cc = opt.argLines[3][3]
+
+        local dr = opt.argLines[4][1]
+        local db = opt.argLines[4][2]
+        local dc = opt.argLines[4][3]
+
+        local er = opt.argLines[5][1]
+        local eb = opt.argLines[5][2]
+        local ec = opt.argLines[5][3]
+
+        local fr = opt.argLines[6][1]
+        local fb = opt.argLines[6][2]
+        local fc = opt.argLines[6][3]
+
+        local gr = opt.argLines[7][1]
+        local gb = opt.argLines[7][2]
+        local gc = opt.argLines[7][3]
+        return function ()
+            set_tourcolors_selectedpathline(ar,ab,ac)
+            set_tourcolors_selectedpathlineknots(br,bb,bc)
+            set_tourcolors_selectedknot(cr,cb,cc)
+            set_tourcolors_pathline(dr,db,dc)
+            set_tourcolors_pathknots(er,eb,ec)
+            set_tourcolors_text(fr,fb,fc)
+            set_tourcolors_avatar(gr,gb,gc)
+            end
+        end
+    , TOURCONSTANTVEL = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_tourconstantvel(a) end
+        end
+    , VIEWALLTOURS = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_viewalltours(a) end
+        end
+    , VIEWTIMES = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function () set_viewtimes(a,b,c) end
+        end
+    , VIEWTOURFROMPATH = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_viewtourfrompath(a) end
+        end
+    , AVATAREVAC = function(opt)
+        local a = opt.argLines[1][1]
+        return function () set_avatarevac(a) end
+        end
+    , GEOMETRYTEST = function(opt)
+        local a = opt.argLines[1][1] -- int
+        local b = opt.argLines[1][2] -- int
+        local c = opt.argLines[1][3] -- float
+        local d = opt.argLines[1][4] -- float
+
+        local vals = {}
+        for i=1,5,1 do
+            vals[i] = opt.argLines[2][i]
+        end
+        for i=1,5,1 do
+            vals[i+5] = opt.argLines[3][i]
+        end
+
+        local b1Vals = {}
+        for i=1,6,1 do
+            b1Vals[i] = opt.argLines[4][i]
+        end
+
+        local b2Vals = {}
+        for i=1,6,1 do
+            b2Vals[i] = opt.argLines[5][i]
+        end
+        for i=1,6,1 do
+            b2Vals[i+6] = opt.argLines[6][i]
+        end
+
+        local b3Vals = {}
+        for i=1,3,1 do
+            b3Vals[i] = opt.argLines[7][i]
+        end
+
+        return function ()
+            set_geometrytest(a, b, c, d, vals, b1Vals, b2Vals, b3Vals)
+        end
+        end
+    , DEVICEVECTORDIMENSIONS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        return function () set_devicevectordimensions(a,b,c,d) end
+        end
+    , DEVICEBOUNDS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_devicebounds(a,b) end
+        end
+    , DEVICEORIENTATION = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        return function () set_deviceorientation(a,b) end
+        end
+    , GRIDPARMS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[2][1]
+        local e = opt.argLines[2][2]
+        local f = opt.argLines[2][3]
+        return function ()
+            set_gridparms(a,b,c,d,e,f)
+            end
+        end
+    , GSLICEPARMS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[2][1]
+        local f = opt.argLines[2][2]
+        local g = opt.argLines[2][3]
+        local h = opt.argLines[3][1]
+        local i = opt.argLines[3][2]
+        return function ()
+            set_gridparms(a,b,c,d,{e,f,g},{h,i})
+            end
+        end
+    , LOADFILESATSTARTUP = function(opt)
+        local a = opt.argLines[1][1]
+        return function ()
+            set_loadfilesatstartup(a)
+            end
+        end
+    , MSCALE = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        return function ()
+            set_mscale(a,b,c)
+            end
+        end
+    , SLICEAUTO = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local vals = {}
+        for i=1,n,1 do
+            vals[i] = opt.argLines[1+i][1]
+        end
+        return function ()
+            set_sliceauto(vals)
+        end
+        end
+    , MSLICEAUTO = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local vals = {}
+        for i=1,n,1 do
+            vals[i] = opt.argLines[1+i][1]
+        end
+        return function ()
+            set_msliceauto(vals)
+        end
+        end
+    , COMPRESSAUTO = function(opt)
+        local a = opt.argLines[1][1]
+        return function ()
+            set_compressauto(a)
+        end
+        end
+    , PART5PROPDISP = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        return function ()
+            -- set_part5propdisp(a,b,c,d,e)
+            print("PART5PROPDISP not implemented")
+        end
+        end
+    , PART5COLOR = function(opt)
+        return function ()
+            print("PART5COLOR not implemented")
+        end
+        end
+    -- , PART5CLASSVIS = function(opt)
+    --     local n = opt.argLines[1][1]
+    --     local i
+    --     local vals = {}
+    --     for i=1,n,1 do
+    --         vals[i] = opt.argLines[1+i][1]
+    --     end
+    --     return function ()
+    --         set_part5classvis(vals)
+    --     end
+    --     end
+    , PROPINDEX = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local vals = {}
+        for i=1,n,1 do
+            vals[i] = {}
+            vals[i][1] = opt.argLines[1+i][1]
+            vals[i][2] = opt.argLines[1+i][2]
+        end
+        return function ()
+            set_propindex(vals)
+        end
+        end
+    , partclassdataVIS = function(opt)
+        return function ()
+            print("partclassdataVIS not implemented")
+        end
+        end
+    , SHOOTER = function(opt)
+        -- local n = opt.argLines[1][1]
+        -- local i
+        -- local vals = {}
+        -- for i=1,n,1 do
+        --     vals[i] = opt.argLines[1+i][1]
+        -- end
+        return function ()
+            -- set_part5classvis(vals)
+            print("SHOOTER not implemented")
+        end
+        end
+-- SHOOTER
+--  0.500000 0.000000 0.018868
+--  0.250000 0.000000 0.000000
+--  0.000000 0.000000 0.000000
+--  1.000000 0.000000 4.000000
+--  10 1 100 0 0
+--  1.000000 1.000000
+    , SHOWDEVICES = function(opt)
+        local n = opt.argLines[1][1]
+        local i
+        local names = {}
+        for i=1,n,1 do
+            names[i] = opt.argLines[1+i][1]
+        end
+        return function ()
+            set_showdevices(names)
+        end
+        end
+    , SHOWDEVICEVALS = function(opt)
+        local a = opt.argLines[1][1]
+        local b = opt.argLines[1][2]
+        local c = opt.argLines[1][3]
+        local d = opt.argLines[1][4]
+        local e = opt.argLines[1][5]
+        local f = opt.argLines[1][6]
+        local g = opt.argLines[1][7]
+        local h = opt.argLines[1][8]
+        return function ()
+            set_showdevicevals(a,b,c,d,e,f,g,h)
+        end
+        end
+    , SHOWMISSINGOBJECTS = function(opt)
+        local a = opt.argLines[1][1]
+        return function ()
+            set_showmissingobjects(a)
+        end
+        end
+    , TOURINDEX = function(opt)
+        local a = opt.argLines[1][1]
+        return function ()
+            set_tourindex(vals)
+        end
+        end
+    , USERTICKS = function(opt)
+        -- local n = opt.argLines[1][1]
+        -- local i
+        -- local vals = {}
+        -- for i=1,n,1 do
+        --     vals[i] = opt.argLines[1+i][1]
+        -- end
+        return function ()
+            -- set_part5classvis(vals)
+            print("USERTICKS not implemented")
+        end
+        end
+-- USERTICKS
+--  0 1 5 1 1 1
+--  0.000000 -1.000000 0.000000
+--  0.000000 -1.000000 0.000000
+--  424.000000 203.000000 16.000000
+--  1.000000 1.000000 1.000000
+--  1 1 1
+    , XYZCLIP = function(opt)
+        -- local n = opt.argLines[1][1]
+        -- local i
+        -- local vals = {}
+        -- for i=1,n,1 do
+        --     vals[i] = opt.argLines[1+i][1]
+        -- end
+        return function ()
+            -- set_part5classvis(vals)
+            print("XYZCLIP not implemented")
+        end
+        end
+-- XYZCLIP
+--  2
+--  0 -0.424000 0 424.424011
+--  0 94.497025 0 203.203995
+--  0 -0.016000 1 5.193398
+
+    , C_PARTICLES = function(opt)
+        local minFlag  = opt.argLines[1][1]
+        local minValue = opt.argLines[1][2]
+        local maxFlag  = opt.argLines[1][3]
+        local maxValue = opt.argLines[1][4]
+        local label
+        if (#opt.argLines[1] >= 5)
+            then label = opt.argLines[1][5]
+            else label = ""
+            end
+        return function ()
+            set_c_particles(minFlag, minValue, maxFlag, maxValue, label)
+        end
+        end
+    , C_PLOT3D = function(opt)
+        -- local n = opt.argLines[1][1]
+        -- local i
+        -- local vals = {}
+        -- for i=1,n,1 do
+        --     vals[i] = opt.argLines[1+i][1]
+        -- end
+        return function ()
+            -- set_part5classvis(vals)
+            print("C_PLOT3D not implemented")
+        end
+        end
+-- C_PLOT3D
+--  5
+--  1 0 1.000000 0 -0.000000
+--  2 0 1.000000 0 -0.000000
+--  3 0 1.000000 0 -0.000000
+--  4 0 1.000000 0 -0.000000
+--  5 0 1.000000 0 -0.000000
+    , C_SLICE = function(opt)
+        local minFlag  = opt.argLines[1][1]
+        local minValue = opt.argLines[1][2]
+        local maxFlag  = opt.argLines[1][3]
+        local maxValue = opt.argLines[1][4]
+        local label
+        if (#opt.argLines[1] >= 5)
+            then label = opt.argLines[1][5]
+            else label = ""
+            end
+        return function ()
+            set_c_slice(minFlag, minValue, maxFlag, maxValue, label)
+        end
+        end
+    , CACHE_BOUNDARYDATA = function(opt)
+        local v  = opt.argLines[1][1]
+        return function ()
+            set_cache_boundarydata(v)
+        end
+        end
+    , CACHE_QDATA = function(opt)
+        local v  = opt.argLines[1][1]
+        return function ()
+            set_cache_qdata(v)
+        end
+        end
+    , PATCHDATAOUT = function(opt)
+        local outputFlag  = opt.argLines[1][1]
+        local tmin  = opt.argLines[1][2]
+        local tmax  = opt.argLines[1][3]
+        local xmin  = opt.argLines[1][4]
+        local xmax  = opt.argLines[1][5]
+        local ymin  = opt.argLines[1][6]
+        local ymax  = opt.argLines[1][7]
+        local zmin  = opt.argLines[1][8]
+        local zmax  = opt.argLines[1][9]
+        return function ()
+            set_patchdataout(outputFlag, tmin, tmax, xmin, xmax, ymin, ymax,
+                             zmin, zmax)
+        end
+        end
+    , PERCENTILELEVEL = function(opt)
+        local v  = opt.argLines[1][1]
+        return function ()
+            set_percentilelevel(v)
+        end
+        end
+    , TIMEOFFSET = function(opt)
+        local v  = opt.argLines[1][1]
+        return function ()
+            set_timeoffset(v)
+        end
+        end
+    , TLOAD = function(opt)
+        local beginFlag  = opt.argLines[1][1]
+        local beginVal  = opt.argLines[1][2]
+        local endFlag    = opt.argLines[1][3]
+        local endVal   = opt.argLines[1][4]
+        local skipFlag   = opt.argLines[1][5]
+        local skipVal  = opt.argLines[1][6]
+        return function ()
+            set_tload(beginFlag, beginVal, endFlag, endValue, skipFlag,
+                      skiValue)
+        end
+        end
+    , V_PARTICLES = function(opt)
+        return function ()
+            print("V_PARTICLES not implemented")
+        end
+        end
+-- V_PARTICLES
+--  0 1.000000 0 0.000000
+    , V5_PARTICLES = function(opt)
+        return function ()
+            print("V5_PARTICLES not implemented")
+        end
+        end
+-- V5_PARTICLES
+--  0 1.000000 0 0.000000 Uniform
+    , V_PLOT3D = function(opt)
+        return function ()
+            print("V_PLOT3D not implemented")
+        end
+        end
+-- V_PLOT3D
+--  5
+--  1 0 1.000000 0 1.000000
+--  2 0 1.000000 0 1.000000
+--  3 0 1.000000 0 1.000000
+--  4 0 1.000000 0 1.000000
+--  5 0 1.000000 0 1.000000
+    , V_SLICE = function(opt)
+        local minFlag  = opt.argLines[1][1]
+        local minValue  = opt.argLines[1][2]
+        local maxFlag  = opt.argLines[1][3]
+        local maxValue  = opt.argLines[1][4]
+        local label  = opt.argLines[1][5]
+        -- local colon  = opt.argLines[1][6]
+        local lineMin  = opt.argLines[1][7]
+        local lineMax  = opt.argLines[1][8]
+        local lineNum  = opt.argLines[1][9]
+        return function ()
+            set_v_slice(minFlag, minValue, maxFlag, maxValue,
+                        label, lineMin, lineMax, lineNum)
+        end
+        end
+    , V_TARGET = function(opt)
+        return function ()
+            print("V_TARGET not implemented")
+        end
+        end
+-- V_TARGET
+--  0 1.000000 0 0.000000
+    , VIEWPOINT5 = function(opt)
+        -- local v  = opt.argLines[1][1]
+        return function ()
+            print("VIEWPOINT5 not implemented")
+            -- set_cache_qdata(v)
+        end
+        end
+-- VIEWPOINT5
+--  0 10 2
+--  0.490669 -2.257067 0.018868 1.000000 -2
+--  0.000000 0.000000 0.000000 1
+--  0.500000 0.240566 0.018868
+--  0.000000 90.000000
+--  1.000000 0.000000 0.000000 0.000000
+--  0.000000 1.000000 0.000000 0.000000
+--  0.000000 0.000000 1.000000 0.000000
+--  0.000000 0.000000 0.000000 1.000000
+--  2 0 0 0 0 0 1
+--  -0.424000 -1.204000 -0.016000 424.424011 203.203995 5.193398
+--  topDown
     }
 
 -- an ssfType is either a string or one of the three number types:
@@ -334,7 +1556,8 @@ function inioptions.validate(v, execute)
                 return execFun
             end
         else
-            error("Option " .. v.name .. " not recognised.")
+            print("Option " .. v.name .. " not recognised.")
+            -- error("Option " .. v.name .. " not recognised.")
     end
 end
 

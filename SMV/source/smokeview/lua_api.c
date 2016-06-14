@@ -1475,6 +1475,13 @@ int lua_set_boundcolor(lua_State *L) {
   return 0;
 }
 
+int lua_set_colorbar_textureflag(lua_State *L) {
+  int setting = lua_tonumber(L, 1);
+  int return_code = set_colorbar_textureflag(setting);
+  lua_pushnumber(L, 1);
+  return 1;
+}
+
 float getcolorfield(lua_State *L, int stack_index,const char *key) {
   if (!lua_istable(L, stack_index)){
     fprintf(stderr, "stack is not a table at index, cannot use getcolorfield\n");
@@ -1505,17 +1512,23 @@ int get_color(lua_State *L, int stack_index, float *color) {
   return 0;
 }
 int lua_set_colorbar_colors(lua_State *L) {
-  int ncolors = lua_tonumber(L, 1);
-  if (!lua_istable(L, -1)){
+  printf("running: lua_set_colorbar_colors\n");
+  if (!lua_istable(L, 1)){
     fprintf(stderr, "colorbar table is not present\n");
-    exit(1);
+    return 1;
+  }
+  int ncolors = 0;
+  lua_pushnil(L);
+  while(lua_next(L,1)!=0) {
+    ncolors++;
+    lua_pop(L, 1);
   }
   int i;
   float *color;
   float colors[ncolors][3];
   for (i = 1; i <= ncolors; i++) {
     lua_pushnumber(L, i);
-    lua_gettable(L,-2);
+    lua_gettable(L, 1);
     get_color(L, -1, colors[i-1]);
   }
 
@@ -1648,11 +1661,13 @@ int lua_set_isocolors(lua_State *L) {
   float specular[3];
   get_color(L, 3, specular);
   int ncolors = 0;
+  int x;
   // count the number of colours
   lua_pushnil(L);  /* first key */
   while (lua_next(L, 4) != 0) {
     lua_pop(L, 1); // remove value (leave key for next iteration)
     ncolors++;
+    x = lua_tonumber(L, -1);
   }
   int i;
   float *color;
@@ -1666,6 +1681,10 @@ int lua_set_isocolors(lua_State *L) {
     lua_gettable(L, 4);
     get_color(L, -1, colors[i-1]);
   }
+  // for (i = 0; i < ncolors; i++) {
+  //   printf("%d: %f %f %f\n", i,
+  //     colors[i][0], colors[i][1], colors[i][2]);
+  // }
   // specular = lua_tonumber(L, 3);
   // int return_code = set_diffuselight(r, g, b);
   return 0;
@@ -1694,10 +1713,6 @@ int lua_set_colortable(lua_State *L) {
     lua_pop(L, 1);
     i++;
   }
-  // for (i = 0; i < ncolors; i++) {
-  //   printf("%s: %f %f %f\n", names[i],
-  //     colors[i][0], colors[i][1], colors[i][2]);
-  // }
   return 0;
 }
 
@@ -1933,9 +1948,9 @@ int lua_set_usenewdrawface(lua_State *L) {
   return 1;
 }
 
-int lua_set_vecontours(lua_State *L) {
+int lua_set_veccontours(lua_State *L) {
   float v = lua_tonumber(L, 1);
-  int return_code = set_vecontours(v);
+  int return_code = set_veccontours(v);
   lua_pushnumber(L, return_code);
   return 1;
 }
@@ -2097,6 +2112,13 @@ int lua_set_aperture(lua_State *L) {
 int lua_set_axissmooth(lua_State *L) {
   int v = lua_tonumber(L, 1);
   int return_code = set_axissmooth(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_blocklocation(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_blocklocation(v);
   lua_pushnumber(L, return_code);
   return 1;
 }
@@ -2321,6 +2343,13 @@ int lua_set_northangle(lua_State *L) {
 }
 
 int lua_set_offsetslice(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_offsetslice(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+int lua_set_outlinemode(lua_State *L) {
   int highlight = lua_tonumber(L, 1);
   int outline = lua_tonumber(L, 2);
   int return_code = set_outlinemode(highlight, outline);
@@ -2621,7 +2650,7 @@ int lua_set_showtimebar(lua_State *L) {
   return 1;
 }
 
-int lua_set_showtimebarlabel(lua_State *L) {
+int lua_set_showtimelabel(lua_State *L) {
   int v = lua_tonumber(L, 1);
   int return_code = set_showtimelabel(v);
   lua_pushnumber(L, return_code);
@@ -2915,12 +2944,17 @@ int lua_set_renderoption(lua_State *L) {
 int lua_set_unitclasses(lua_State *L) {
   int i = 0;
   int n = 0;
+  if (!lua_istable(L, -1)){
+    fprintf(stderr, "stack is not a table at index\n");
+    exit(1);
+  }
   lua_pushnil(L);
   while(lua_next(L,-2)!=0) {
     lua_pop(L,1);
     n++;
   }
   int indices[n];
+  lua_pushnil(L);
   while(lua_next(L,-2)!=0) {
     indices[i] = lua_tonumber(L, -1);
     lua_pop(L, 1);
@@ -3246,12 +3280,75 @@ int lua_set_avatarevac(lua_State *L) {
   return 1;
 }
 
-// int lua_set_geometrytest(lua_State *L) {
-//   int v = lua_tonumber(L, 1);
-//   int return_code = set_geometrytest(v);
-//   lua_pushnumber(L, return_code);
-//   return 1;
-// }
+int *lua_get_int_array(lua_State *L, int snumber) {
+  // count the length of vals
+  int nvals = 0;
+  lua_pushnil(L);
+  while(lua_next(L, snumber)!=0) {
+    nvals++;
+    lua_pop(L, 1);
+  }
+  // create array of vals
+  int *vals;
+  vals = (int *) calloc(nvals, sizeof(int));
+  int i = 0;
+  lua_pushnil(L);
+  while(lua_next(L, snumber)!=0) {
+    vals[i] = lua_tonumber(L, -1);
+    i++;
+    lua_pop(L,1);
+  }
+  return vals;
+}
+
+float *lua_get_float_array(lua_State *L, int snumber) {
+  // count the length of vals
+  int nvals = 0;
+  lua_pushnil(L);
+  while(lua_next(L, snumber)!=0) {
+    nvals++;
+    lua_pop(L, 1);
+  }
+  // create array of vals
+  float *vals;
+  vals = (float *) calloc(nvals, sizeof(float));
+  int i = 0;
+  lua_pushnil(L);
+  while(lua_next(L, snumber)!=0) {
+    vals[i] = lua_tonumber(L, -1);
+    i++;
+    lua_pop(L,1);
+  }
+  return vals;
+}
+
+
+int lua_set_geometrytest(lua_State *L) {
+  int a = lua_tonumber(L, 1);
+  int b = lua_tonumber(L, 2);
+  float c = lua_tonumber(L, 3);
+  float d = lua_tonumber(L, 4);
+  // count the length of vals
+  int *vals;
+  float *b1Vals;
+  float *b2Vals;
+  float *b3Vals;
+  // these arrays must be freed
+  vals = lua_get_int_array(L, 5);
+  b1Vals = lua_get_float_array(L, 6);
+  b2Vals = lua_get_float_array(L, 7);
+  b3Vals = lua_get_float_array(L, 8);
+
+  int return_code = set_geometrytest(a, b, c, d, vals, b1Vals, b2Vals, b3Vals);
+  free(vals);
+  free(b1Vals);
+  free(b2Vals);
+  free(b3Vals);
+  // int set_geometrytest(int a, int b, int c, int d, int vals[],
+  //                    float b1Vals[], float b2Vals[], float b3Vals[]); // GEOMETRYTEST
+  lua_pushnumber(L, return_code);
+  return 1;
+}
 
 // int set_geometrytest(int a, int b, int c, int d, int vals[],
 //                      float b1Vals[], float b2Vals[], float b3Vals[]) {
@@ -3372,6 +3469,7 @@ int lua_set_sliceauto(lua_State *L) {
   }
   int i = 0;
   int vals[n];
+  lua_pushnil(L);
   while(lua_next(L, -2) != 0) {
     vals[i] = lua_tonumber(L, -1);
     lua_pop(L, 1);
@@ -3391,6 +3489,7 @@ int lua_set_msliceauto(lua_State *L) {
   }
   int i = 0;
   int vals[n];
+  lua_pushnil(L);
   while(lua_next(L, -2) != 0) {
     vals[i] = lua_tonumber(L, -1);
     lua_pop(L, 1);
@@ -3456,47 +3555,34 @@ int lua_set_compressauto(lua_State *L) {
 //   return 0;
 // } // PART5COLOR
 
-// int lua_set_propindex(lua_State *L) {
-//   lua_pushnil(L);
-//   int n = 0;
-//   while(lua_next(L, -2) != 0) {
-//     lua_pop(L,1);
-//     n++;
-//   }
-//   int i = 0;
-//   int vals[n];
-//   while(lua_next(L, -2) != 0) {
-//     vals[i] = lua_tonumber(L, -1);
-//     lua_pop(L, 1);
-//     i++;
-//   }
-//   int return_code = set_sliceauto(n, vals);
-//   lua_pushnumber(L, return_code);
-//   return 1;
-// }
+int lua_set_propindex(lua_State *L) {
+  lua_pushnil(L);
+  int n = 0;
+  while(lua_next(L, -2) != 0) {
+    lua_pop(L,1);
+    n++;
+  }
+  int i = 0;
+  int vals[n][2];
+  lua_pushnil(L);
+  while(lua_next(L, -2) != 0) {
+    lua_pushnumber(L, 1);
+    lua_gettable(L, -2);
+    vals[i][0] = lua_tonumber(L, -1);
+    lua_pop(L, 1);
 
-// int set_propindex(int nvals, int vals[][2]) {
-//   int i;
-//   for(i = 0; i<nvals; i++){
-//     propdata *propi;
-//     int ind, val;
-//     ind = vals[0][2];
-//     val = vals[1][2];
-//     if(ind<0 || ind>npropinfo - 1)return 0;
-//     propi = propinfo + ind;
-//     if(val<0 || val>propi->nsmokeview_ids - 1)return 0;
-//     propi->smokeview_id = propi->smokeview_ids[val];
-//     propi->smv_object = propi->smv_objects[val];
-//   }
-//   for(i = 0; i<npartclassinfo; i++){
-//     partclassdata *partclassi;
+    lua_pushnumber(L, 1);
+    lua_gettable(L, -2);
+    vals[i][1] = lua_tonumber(L, -1);
+    lua_pop(L, 1);
 
-//     partclassi = partclassinfo + i;
-//     update_partclass_depend(partclassi);
-
-//   }
-//   return 0;
-// } // PROPINDEX
+    lua_pop(L, 1);
+    i++;
+  }
+  int return_code = set_propindex(n, vals);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
 
 
 
@@ -3532,52 +3618,53 @@ int lua_set_compressauto(lua_State *L) {
 //   return 0;
 // } // SHOOTER
 
-// int set_showdevices(int ndevices_ini, char **names) {
-//   sv_object *obj_typei;
-//   char *dev_label;
-//   int i;
+int lua_set_showdevices(lua_State *L) {
+  lua_pushnil(L);
+  int n = 0;
+  while(lua_next(L, -2) != 0) {
+    lua_pop(L,1);
+    n++;
+  }
+  int i = 0;
+  const char *names[n];
+  lua_pushnil(L);
+  while(lua_next(L, -2) != 0) {
+    names[i] = lua_tostring(L, -1);
+    lua_pop(L, 1);
+    i++;
+  }
+  int return_code = set_showdevices(n, names);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // SHOWDEVICES
 
-//   for(i = 0; i<nobject_defs; i++){
-//     obj_typei = object_defs[i];
-//     obj_typei->visible = 0;
-//   }
-//   for(i = 0; i<ndevices_ini; i++){
-//     obj_typei = get_object(names[i]);
-//     if(obj_typei != NULL){
-//       obj_typei->visible = 1;
-//     }
-//   }
-//   return 0;
-// } // SHOWDEVICES
-
-// int set_showdevicevals(int vshowdeviceval, int vshowvdeviceval,
-//     int vdevicetypes_index, int vcolordeviceval, int vvectortype,
-//     int vvispilot, int vshowdevicetype, int vshowdeviceunit) {
-//   showdeviceval = vshowdeviceval;
-//   showvdeviceval = vshowvdeviceval;
-//   devicetypes_index = vdevicetypes_index;
-//   colordeviceval = vcolordeviceval;
-//   vectortype = vvectortype;
-//   vispilot = vvispilot;
-//   showdevicetype = vshowdevicetype;
-//   showdeviceunit = vshowdeviceunit;
-//   devicetypes_index = CLAMP(vdevicetypes_index, 0, ndevicetypes - 1);
-//   update_glui_devices();
-// } // SHOWDEVICEVALS
+int lua_set_showdevicevals(lua_State *L) {
+  int a = lua_tonumber(L, 1);
+  int b = lua_tonumber(L, 2);
+  int c = lua_tonumber(L, 3);
+  int d = lua_tonumber(L, 4);
+  int e = lua_tonumber(L, 5);
+  int f = lua_tonumber(L, 6);
+  int g = lua_tonumber(L, 7);
+  int h = lua_tonumber(L, 8);
+  int return_code = set_showdevicevals(a,b,c,d,e,f,g,h);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // SHOWDEVICEVALS
 
 int lua_set_showmissingobjects(lua_State *L) {
   int v = lua_tonumber(L, 1);
   int return_code = set_showmissingobjects(v);
   lua_pushnumber(L, return_code);
   return 1;
-}
+} // SHOWMISSINGOBJECTS
 
 int lua_set_tourindex(lua_State *L) {
   int v = lua_tonumber(L, 1);
   int return_code = set_tourindex(v);
   lua_pushnumber(L, return_code);
   return 1;
-}
+} // TOURINDEX
 
 // int set_userticks(int vis, int auto_place, int sub, float origin[],
 //                   float min[], float max[], float step[],
@@ -3609,6 +3696,108 @@ int lua_set_tourindex(lua_State *L) {
 //   return 0;
 // } // USERTICKS
 
+int lua_set_c_particles(lua_State *L) {
+  int minFlag = lua_tonumber(L, 1);
+  float minValue = lua_tonumber(L, 2);
+  int maxFlag = lua_tonumber(L, 3);
+  float maxValue = lua_tonumber(L, 4);
+  const char *label = NULL;
+  if (lua_gettop(L) == 5) {
+    label = lua_tostring(L, 5);
+  }
+  int return_code = set_c_particles(minFlag, minValue, maxFlag, maxValue,
+                                    label);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // C_PARTICLES
+
+int lua_set_c_slice(lua_State *L) {
+  int minFlag = lua_tonumber(L, 1);
+  float minValue = lua_tonumber(L, 2);
+  int maxFlag = lua_tonumber(L, 3);
+  float maxValue = lua_tonumber(L, 4);
+  const char *label = NULL;
+  if (lua_gettop(L) == 5) {
+    label = lua_tostring(L, 5);
+  }
+  int return_code = set_c_slice(minFlag, minValue, maxFlag, maxValue,
+                                    label);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // C_SLICE
+
+int lua_set_cache_boundarydata(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_cache_boundarydata(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // CACHE_BOUNDARYDATA
+
+int lua_set_cache_qdata(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_cache_qdata(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // CACHE_QDATA
+
+int lua_set_percentilelevel(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_percentilelevel(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // PERCENTILELEVEL
+
+int lua_set_timeoffset(lua_State *L) {
+  int v = lua_tonumber(L, 1);
+  int return_code = set_timeoffset(v);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // TIMEOFFSET
+
+int lua_set_tload(lua_State *L) {
+  int beginFlag = lua_tonumber(L, 1);
+  float beginVal = lua_tonumber(L, 2);
+  int endFlag = lua_tonumber(L, 3);
+  float endVal = lua_tonumber(L, 4);
+  int skipFlag = lua_tonumber(L, 5);
+  float skipVal = lua_tonumber(L, 6);
+  int return_code = set_tload(beginFlag, beginVal, endFlag, endVal,
+                              skipFlag, skipVal);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // TLOAD
+
+int lua_set_v_slice(lua_State *L) {
+  int minFlag = lua_tonumber(L, 1);
+  float minValue = lua_tonumber(L, 2);
+  int maxFlag = lua_tonumber(L, 3);
+  float maxValue = lua_tonumber(L, 4);
+  const char *label = lua_tostring(L, 5);
+  float lineMin = lua_tonumber(L, 6);
+  float lineMax = lua_tonumber(L, 7);
+  int lineNum = lua_tonumber(L, 8);
+  int return_code = set_v_slice(minFlag, minValue, maxFlag, maxValue,
+                                label, lineMin, lineMax, lineNum);
+  lua_pushnumber(L, return_code);
+  return 1;
+}
+
+
+int lua_set_patchdataout(lua_State *L) {
+  int outputFlag = lua_tonumber(L, 1);
+  int tmin = lua_tonumber(L, 1);
+  int tmax = lua_tonumber(L, 2);
+  int xmin = lua_tonumber(L, 3);
+  int xmax = lua_tonumber(L, 4);
+  int ymin = lua_tonumber(L, 5);
+  int ymax = lua_tonumber(L, 6);
+  int zmin = lua_tonumber(L, 7);
+  int zmax = lua_tonumber(L, 8);
+  int return_code = set_patchdataout(outputFlag, tmin, tmax, xmin, xmax, ymin,
+                                     ymax, zmin, zmax);
+  lua_pushnumber(L, return_code);
+  return 1;
+} // PATCHDATAOUT
 
 int lua_show_smoke3d_showall(lua_State *L) {
   int return_code = show_smoke3d_showall();
@@ -3878,12 +4067,13 @@ void initLua() {
   lua_register(L, "set_blockshininess", lua_set_blockshininess);
   lua_register(L, "set_blockspecular", lua_set_blockspecular);
   lua_register(L, "set_boundcolor", lua_set_boundcolor);
-  lua_register(L, "set_diffuselight", lua_set_boundcolor);
-  lua_register(L, "set_directioncolor", lua_set_boundcolor);
-  lua_register(L, "set_flip", lua_set_boundcolor);
-  lua_register(L, "set_foregroundcolor", lua_set_boundcolor);
-  lua_register(L, "set_heatoffcolor", lua_set_boundcolor);
-  lua_register(L, "set_heatoncolor", lua_set_boundcolor);
+  lua_register(L, "set_colorbar_textureflag", lua_set_colorbar_textureflag);
+  lua_register(L, "set_diffuselight", lua_set_diffuselight);
+  lua_register(L, "set_directioncolor", lua_set_directioncolor);
+  lua_register(L, "set_flip", lua_set_flip);
+  lua_register(L, "set_foregroundcolor", lua_set_foregroundcolor);
+  lua_register(L, "set_heatoffcolor", lua_set_heatoffcolor);
+  lua_register(L, "set_heatoncolor", lua_set_heatoncolor);
   lua_register(L, "set_isocolors", lua_set_isocolors);
   lua_register(L, "set_colortable", lua_set_colortable);
   lua_register(L, "set_light0", lua_set_light0);
@@ -3917,7 +4107,7 @@ void initLua() {
   lua_register(L, "set_streaklinewidth", lua_set_streaklinewidth);
   lua_register(L, "set_ticklinewidth", lua_set_ticklinewidth);
   lua_register(L, "set_usenewdrawface", lua_set_usenewdrawface);
-  lua_register(L, "set_vecontours", lua_set_vecontours);
+  lua_register(L, "set_veccontours", lua_set_veccontours);
   lua_register(L, "set_veclength", lua_set_veclength);
   lua_register(L, "set_vectorlinewidth", lua_set_vectorlinewidth);
   lua_register(L, "set_vectorpointsize", lua_set_vectorpointsize);
@@ -3928,11 +4118,11 @@ void initLua() {
   lua_register(L, "set_windowheight", lua_set_windowheight);
 
   lua_register(L, "set_boundzipstep", lua_set_boundzipstep);
-  lua_register(L, "set_boundzipstep", lua_set_boundzipstep);
+  lua_register(L, "set_fed", lua_set_fed);
   lua_register(L, "set_fedcolorbar", lua_set_fedcolorbar);
   lua_register(L, "set_isozipstep", lua_set_isozipstep);
   lua_register(L, "set_nopart", lua_set_nopart);
-  lua_register(L, "set_fedarea", lua_set_showfedarea);
+  lua_register(L, "set_showfedarea", lua_set_showfedarea);
   lua_register(L, "set_sliceaverage", lua_set_sliceaverage);
   lua_register(L, "set_slicedataout", lua_set_slicedataout);
   lua_register(L, "set_slicezipstep", lua_set_slicezipstep);
@@ -3941,6 +4131,7 @@ void initLua() {
 
   lua_register(L, "set_aperture", lua_set_aperture);
   lua_register(L, "set_axissmooth", lua_set_axissmooth);
+  lua_register(L, "set_blocklocation", lua_set_blocklocation);
   lua_register(L, "set_boundarytwoside", lua_set_boundarytwoside);
   lua_register(L, "set_clip", lua_set_clip);
   lua_register(L, "set_contourtype", lua_set_contourtype);
@@ -3971,6 +4162,7 @@ void initLua() {
 
   lua_register(L, "set_northangle", lua_set_northangle);
   lua_register(L, "set_offsetslice", lua_set_offsetslice);
+  lua_register(L, "set_outlinemode", lua_set_outlinemode);
   lua_register(L, "set_p3dsurfacetype", lua_set_p3dsurfacetype);
   lua_register(L, "set_p3dsurfacesmooth", lua_set_p3dsurfacesmooth);
   lua_register(L, "set_projection", lua_set_projection);
@@ -4005,14 +4197,14 @@ void initLua() {
   lua_register(L, "set_showsensors", lua_set_showsensors);
   lua_register(L, "set_showsliceinobst", lua_set_showsliceinobst);
   lua_register(L, "set_showsmokepart", lua_set_showsmokepart);
-  lua_register(L, "set_showsmokepart", lua_set_showsmokepart);
+  lua_register(L, "set_showsprinkpart", lua_set_showsprinkpart);
   lua_register(L, "set_showstreak", lua_set_showstreak);
   lua_register(L, "set_showterrain", lua_set_showterrain);
   lua_register(L, "set_showtetras", lua_set_showterrain);
   lua_register(L, "set_showthreshold", lua_set_showthreshold);
   lua_register(L, "set_showticks", lua_set_showticks);
   lua_register(L, "set_showtimebar", lua_set_showtimebar);
-  lua_register(L, "set_showtimebarlabel", lua_set_showtimebarlabel);
+  lua_register(L, "set_showtimelabel", lua_set_showtimelabel);
   lua_register(L, "set_showtitle", lua_set_showtitle);
   lua_register(L, "set_showtracersalways", lua_set_showtracersalways);
   lua_register(L, "set_showtriangles", lua_set_showtriangles);
@@ -4099,7 +4291,7 @@ void initLua() {
   lua_register(L, "set_viewtimes", lua_set_viewtimes);
   lua_register(L, "set_viewtourfrompath", lua_set_viewtourfrompath);
   lua_register(L, "set_avatarevac", lua_set_avatarevac);
-  // lua_register(L, "set_geometrytest", lua_set_geometrytest);
+  lua_register(L, "set_geometrytest", lua_set_geometrytest);
   lua_register(L, "set_devicevectordimensions",
                lua_set_devicevectordimensions);
   lua_register(L, "set_devicebounds", lua_set_devicebounds);
@@ -4113,13 +4305,22 @@ void initLua() {
   lua_register(L, "set_compressauto", lua_set_compressauto);
   // lua_register(L, "set_part5propdisp", lua_set_part5propdisp);
   // lua_register(L, "set_part5color", lua_set_part5color);
-  // lua_register(L, "set_propindex", lua_set_propindex);
+  lua_register(L, "set_propindex", lua_set_propindex);
   // lua_register(L, "set_shooter", lua_set_shooter);
-  // lua_register(L, "set_showdevices", lua_set_showdevices);
-  // lua_register(L, "set_showdevicevals", lua_set_showdevicevals);
+  lua_register(L, "set_showdevices", lua_set_showdevices);
+  lua_register(L, "set_showdevicevals", lua_set_showdevicevals);
   lua_register(L, "set_showmissingobjects", lua_set_showmissingobjects);
   lua_register(L, "set_tourindex", lua_set_tourindex);
   // lua_register(L, "set_userticks", lua_set_userticks);
+  lua_register(L, "set_c_particles", lua_set_c_particles);
+  lua_register(L, "set_c_slice", lua_set_c_slice);
+  lua_register(L, "set_cache_boundarydata", lua_set_cache_boundarydata);
+  lua_register(L, "set_cache_qdata", lua_set_cache_qdata);
+  lua_register(L, "set_percentilelevel", lua_set_percentilelevel);
+  lua_register(L, "set_timeoffset", lua_set_timeoffset);
+  lua_register(L, "set_tload", lua_set_tload);
+  lua_register(L, "set_v_slice", lua_set_v_slice);
+  lua_register(L, "set_patchdataout", lua_set_patchdataout);
 
   lua_register(L, "show_smoke3d_showall", lua_show_smoke3d_showall);
   lua_register(L, "show_smoke3d_hideall", lua_show_smoke3d_hideall);

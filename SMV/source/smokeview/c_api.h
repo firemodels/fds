@@ -274,7 +274,7 @@ int set_sprinklerabssize(float v); // SPRINKLERABSSIZE
 int set_streaklinewidth(float v); // STREAKLINEWIDTH
 int set_ticklinewidth(float v); // TICKLINEWIDTH
 int set_usenewdrawface(int v); // USENEWDRAWFACE
-int set_vecontours(int v); // VECCONTOURS
+int set_veccontours(int v); // VECCONTOURS
 int set_veclength(int a, float b, float c); // VECLENGTH
 int set_vectorlinewidth(float a, float b); // VECTORLINEWIDTH
 int set_vectorpointsize(float v); // VECTORPOINTSIZE
@@ -291,7 +291,7 @@ int set_fed(int v); // FED
 int set_fedcolorbar(const char *name); // FEDCOLORBAR
 int set_isozipstep(int v); // ISOZIPSTEP
 int set_nopart(int v); // NOPART
-int set_partpointstep(int v); // PARTPOINTSTEP
+// int set_partpointstep(int v); // PARTPOINTSTEP
 int set_showfedarea(int v); // SHOWFEDAREA
 int set_sliceaverage(int flag, float interval, int vis); // SLICEAVERAGE
 int set_slicedataout(int v); // SLICEDATAOUT
@@ -466,7 +466,7 @@ int set_viewtourfrompath(int v); // VIEWTOURFROMPATH
 // --  ------------ local ini settings ------------
 
 int set_avatarevac(int v); // AVATAREVAC
-int set_geometrytest(int a, int b, int c, int d, int vals[],
+int set_geometrytest(int a, int b, float c, float d, int vals[],
                      float b1Vals[], float b2Vals[], float b3Vals[]); // GEOMETRYTEST
 int set_devicevectordimensions(float baselength, float basediameter,
                                float headlength, float headdiameter); // DEVICEVECTORDIMENSIONS
@@ -487,7 +487,7 @@ int set_shooter(float xyz[], float dxyz[], float uvw[],
                 float velmag, float veldir, float pointsize,
                 int fps, int vel_type, int nparts, int vis, int cont_update,
                 float duration, float v_inf); // SHOOTER
-int set_showdevices(int n, char **names); // SHOWDEVICES
+int set_showdevices(int n, const char **names); // SHOWDEVICES
 int set_showdevicevals(int showdeviceval, int showvdeviceval,
     int devicetypes_index, int colordeviceval, int vectortype, int vispilot,
     int showdevicetype, int showdeviceunit); // SHOWDEVICEVALS
@@ -496,58 +496,32 @@ int set_tourindex(int v); // TOURINDEX
 int set_userticks(int vis, int auto_place, int sub, float origin[],
                   float min[], float max[], float step[],
                   int show_x, int show_y, int show_z); // USERTICKS
-
-// --  *** TIME/DATA BOUNDS ***
-// --   (0/1 min max skip (1=set, 0=unset)
-
-// -- C_PARTICLES
-// --  0 1.000000 0 0.000000
-// -- C_PARTICLES
-// --  0 1.000000 0 0.000000 Uniform
-// -- C_PLOT3D
-// --  5
-// --  1 0 1.000000 0 -0.000000
-// --  2 0 1.000000 0 -0.000000
-// --  3 0 1.000000 0 -0.000000
-// --  4 0 1.000000 0 -0.000000
-// --  5 0 1.000000 0 -0.000000
-// -- C_SLICE
-// --  0 1.000000 0 0.000000 X_CO
-// -- C_SLICE
-// --  0 1.000000 0 0.000000 temp
-// -- C_SLICE
-// --  0 1.000000 0 0.000000 VIS_C0.9H0.1
-// -- CACHE_BOUNDARYDATA
-// --  0
-// -- CACHE_QDATA
-// --  1
-// -- PATCHDATAOUT
-// --  0 1.000000 -1.000000 1.000000 -1.000000 1.000000 -1.000000 1.000000 -1.000000
-// -- PERCENTILELEVEL
-// --  0.010000
-// -- TIMEOFFSET
-// --  0.000000
-// -- TLOAD
-// --  0 0.000000 0 1.000000 0 0
-// -- V_PARTICLES
-// --  0 1.000000 0 0.000000
-// -- V5_PARTICLES
-// --  0 1.000000 0 0.000000 Uniform
-// -- V_PLOT3D
-// --  5
-// --  1 0 1.000000 0 1.000000
-// --  2 0 1.000000 0 1.000000
-// --  3 0 1.000000 0 1.000000
-// --  4 0 1.000000 0 1.000000
-// --  5 0 1.000000 0 1.000000
-// -- V_SLICE
-// --  0 0.000000 0 0.000000 X_CO : 0.000000 1.000000 1
-// -- V_SLICE
-// --  0 1.000000 0 0.000000 temp : 0.000000 1.000000 1
-// -- V_SLICE
-// --  1 0.000000 1 20.000000 VIS_C0.9H0.1 : 0.000000 1.000000 1
-// -- V_TARGET
-// --  0 1.000000 0 0.000000
+int set_c_particles(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label); // C_PARTICLES
+int set_c_slice(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label); // C_SLICE
+int set_cache_boundarydata(int setting); // CACHE_BOUNDARYDATA
+int set_cache_qdata(int setting); // CACHE_QDATA
+int set_percentilelevel(int setting); // PERCENTILELEVEL
+int set_timeoffset(int setting); // TIMEOFFSET
+int set_patchdataout(int outputFlag, float tmin, float tmax, float xmin,
+                     float xmax, float ymin, float ymax, float zmin,
+                     float zmax); // PATCHDATAOUT
+int set_c_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
+                 int maxVals[]); // C_PLOT3D
+int set_v_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
+                 int maxVals[]); // V_PLOT3D
+int set_tload(int beginFlag, float beginVal, int endFlag, int endVal,
+              int skipFlag, int skipVal); // TLOAD
+int set_v5_particles(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label); // V5_PARTICLES
+int set_v_particles(int minFlag, float minValue, int maxFlag, float maxValue);
+    // V_PARTICLES
+int set_v_target(int minFlag, float minValue, int maxFlag, float maxValue);
+    // V_TARGET
+int set_v_slice(int minFlag, float minValue, int maxFlag, float maxValue,
+                    const char *label, float lineMin, float lineMax,
+                    int lineNum); // V_SLICE
 // -- VIEWPOINT5
 // --  0 10 2
 // --  0.490669 -2.257067 0.018868 1.000000 -2
