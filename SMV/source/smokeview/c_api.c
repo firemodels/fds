@@ -2992,8 +2992,8 @@ int set_showtracersalways(int v){
 int set_showtriangles(int a, int b, int c, int d, int e, int f){
   show_iso_solid = a;
   show_iso_outline = b;
-  show_iso_points = c;
-  show_iso_normal = d; // TODO: this is overidden to 1
+  show_iso_verts = c;
+  show_iso_normal = d;
   smooth_iso_normal = e;
   return 0;
 } // SHOWTRIANGLES
