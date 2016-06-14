@@ -732,11 +732,7 @@ EXTERNCPP void drawventdataPROFILE(void);
 EXTERNCPP void drawventdataSLAB(void);
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
-#ifdef LUA__SCRIPTING
-EXTERNCPP void RenderFrame(int view_mode, char *basename);
-#else
 EXTERNCPP void RenderFrame(int view_mode);
-#endif
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
@@ -906,7 +902,7 @@ EXTERNCPP void setisolabels(float smin, float smax,
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
-#ifdef po_LUA
+#ifdef pp_LUA
 EXTERNCPP int SVimage2var(int rendertype, int woffset, int width, int hoffset, int height, gdImagePtr *RENDERimage);
 #endif
 
