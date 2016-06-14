@@ -1,0 +1,28 @@
+&HEAD CHID='ht3d_nx_10', TITLE='J. Crank, The Mathematics of Diffusion, Oxford, 1975, Sec 2.3'/
+
+&MESH IJK=20,10,10, XB=-1,1,-.5,.5,-.5,.5/
+
+&TIME T_END=0.01, DT=0.005, LOCK_TIME_STEP=.TRUE./ VN=0.5
+
+&MISC HT3D_TEST=1, NOISE=.FALSE./
+
+&RADI RADIATION=.FALSE./
+
+&SURF ID='cold', TMP_FRONT=20., COLOR='BLUE'/
+&SURF ID='side', ADIABATIC=.TRUE., COLOR='GRAY'/
+
+&MATL ID            = 'test'
+      SPECIFIC_HEAT = 0.001
+      CONDUCTIVITY  = 1.0
+      DENSITY       = 1.0/ thermal diffusivity = 1
+
+&OBST XB=-.5,.5,-.2,.2,-.2,.2, SURF_ID6='cold','cold','side','side','side','side',
+      HT3D=.TRUE.
+      MATL_ID='test'/
+
+&SLCF PBY=0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE./
+
+&DEVC XB=-0.45,0.45,0,0,0,0, QUANTITY='TEMPERATURE', POINTS=10, TIME_HISTORY=.TRUE., ID='TS'/
+
+&TAIL/
+

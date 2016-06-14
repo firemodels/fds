@@ -1,8 +1,10 @@
 #!/bin/bash
 
 export FIREBOTROOT=/home2/smokevis2/firebot/FDS-SMVgitclean/
+#export FIREBOTROOT=/home4/mcgratta/Git_Repositories/FDS-SMV/
 export FIREBOTMANS=$FIREBOTROOT/Manuals/
 export FIREBOTVER=$FIREBOTROOT/Verification/
+export FIREBOTVAL=$FIREBOTROOT/Validation/
 export FBTG=$FIREBOTMANS/FDS_Technical_Reference_Guide/
 export FBUG=$FIREBOTMANS/FDS_User_Guide/
 export FBVG=$FIREBOTMANS/FDS_Verification_Guide/
@@ -31,4 +33,8 @@ echo Validation Guide Figures Copied
 # Copy Verification Results
 #rsync -v -r --include '*/' --include '*_git.txt' --include '*.csv' --include '*.prt5' --exclude '*' $FIREBOTVER/* $BASEDIR/../Verification/
 #echo Verification Results Copied
+
+# Copy Validation Results
+#rsync -v -r --include '*/' --include 'FDS_Output_Files/*_git.txt' --include 'FDS_Output_Files/*.csv' --exclude '*' $FIREBOTVAL/* $BASEDIR/../Validation/
+#echo Validation Results Copied
 
