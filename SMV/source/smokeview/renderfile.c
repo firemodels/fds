@@ -644,7 +644,7 @@ int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woff
 }
 
 /* ------------------ SVimage2var ------------------------ */
-
+#ifdef pp_LUA
 int SVimage2var(int rendertype,
     int woffset, int width, int hoffset, int height, gdImagePtr *RENDERimage) {
 
@@ -729,6 +729,7 @@ int SVimage2var(int rendertype,
   PRINTF(" Completed.\n");
   return 0;
 }
+#endif
 
 /* ------------------ readpicture ------------------------ */
 
