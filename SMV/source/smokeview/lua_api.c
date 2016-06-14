@@ -4152,7 +4152,7 @@ void initLua() {
   lua_register(L, "set_showvolumes_interior", lua_set_showvolumes_interior);
   lua_register(L, "set_showvolumes_exterior", lua_set_showvolumes_exterior);
   lua_register(L, "set_showvolumes_solid", lua_set_showvolumes_solid);
-  lua_register(L, "set_showfaces_outline", lua_set_showfaces_outline);
+  lua_register(L, "set_showvolumes_outline", lua_set_showvolumes_outline);
   lua_register(L, "set_geomvertexag", lua_set_geomvertexag);
   lua_register(L, "set_geommaxangle", lua_set_geommaxangle);
   lua_register(L, "set_gversion", lua_set_gversion);

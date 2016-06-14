@@ -80,8 +80,33 @@ options =
             end
         end
     , GEOMSHOW = function(opt)
+        local show_faces_interior = opt.argLines[1][1]
+        local show_faces_exterior = opt.argLines[1][2]
+        local show_faces_solid = opt.argLines[1][3]
+        local show_faces_outline = opt.argLines[1][4]
+        local smooth_geom_normal = opt.argLines[1][5]
+
+        local show_volumes_interior = opt.argLines[2][1]
+        local show_volumes_exterior = opt.argLines[2][2]
+        local show_volumes_solid = opt.argLines[2][3]
+        local show_volumes_outline = opt.argLines[2][4]
+
+        local geom_vert_exag = opt.argLines[3][1]
+        local geom_max_angle = opt.argLines[3][2]
         return function ()
-            print("GEOMSHOW not implemented")
+            set_showfaces_interior(show_faces_interior)
+            set_showfaces_exterior(show_faces_exterior)
+            set_showfaces_solid(show_faces_solid)
+            set_showfaces_outline(show_faces_outline)
+            set_smoothgeomnormal(smooth_geom_normal)
+
+            set_showvolumes_interior(show_volumes_interior)
+            set_showvolumes_exterior(show_volumes_exterior)
+            set_showvolumes_solid(show_volumes_solid)
+            set_showvolumes_outline(show_volumes_outline)
+
+            set_geomvertexag(geom_vert_exag)
+            set_geommaxangle(geom_max_angle)
             end
         end
     , NORTHANGLE = function(opt)
