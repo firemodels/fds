@@ -18,7 +18,7 @@ extern "C" void FileShow_CB(int var);
 #ifdef pp_MEMDEBUG
 void Memcheck_CB(int val);
 #endif
-void SETslicemax(int setslicemax, float slicemax,int setslicechopmax, float slicechopmax);
+void SETslicemax(int setslicemax, float slicemax, int setslicechopmax, float slicechopmax);
 void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float slicechopmin);
 void Bounds_DLG_CB(int var);
 void PART_CB(int var);
@@ -134,6 +134,7 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define COLORBAR_SMOOTH 113
 #define RESEARCH_MODE 114
 #define COLORBAND 115
+#define SLICE_IN_OBST 116
 
 #define UPDATE_VECTOR 101
 #define UPDATE_VECTOR_FROM_SMV 102
@@ -155,7 +156,6 @@ GLUI_Rollout *ROLLOUT_zone_bound=NULL;
 #define FILESHOW_isosurface  15
 #define FILESHOW_evac 19
 #define FILESHOW_plot3d 16
-
 
 GLUI *glui_bounds=NULL;
 
@@ -288,13 +288,14 @@ GLUI_EditText *EDIT_part_min=NULL, *EDIT_part_max=NULL;
 GLUI_EditText *EDIT_p3_min=NULL, *EDIT_p3_max=NULL;
 GLUI_EditText *EDIT_p3_chopmin=NULL, *EDIT_p3_chopmax=NULL;
 
+GLUI_Checkbox *CHECKBOX_show_slice_in_obst=NULL;
 GLUI_Checkbox *CHECKBOX_show_slices_and_vectors=NULL;
 GLUI_Checkbox *CHECKBOX_cache_boundarydata=NULL;
 GLUI_Checkbox *CHECKBOX_showpatch_both=NULL;
 GLUI_Checkbox *CHECKBOX_showchar=NULL, *CHECKBOX_showonlychar;
 GLUI_Checkbox *CHECKBOX_show_iso_solid=NULL;
 GLUI_Checkbox *CHECKBOX_show_iso_outline=NULL;
-GLUI_Checkbox *CHECKBOX_show_iso_points=NULL;
+GLUI_Checkbox *CHECKBOX_show_iso_verts=NULL;
 GLUI_Checkbox *CHECKBOX_defer=NULL;
 GLUI_Checkbox *CHECKBOX_script_step=NULL;
 GLUI_Checkbox *CHECKBOX_show_evac_slices=NULL;
@@ -426,6 +427,12 @@ void update_iso_controls(void){
     if(SPINNER_iso_transparency != NULL)SPINNER_iso_transparency->disable();
     if(BUTTON_updatebound != NULL)BUTTON_updatebound->disable();
   }
+}
+
+/* ------------------ update_sliceinobst ------------------------ */
+
+extern "C" void update_show_slice_in_obst(void){
+  CHECKBOX_show_slice_in_obst->set_int_val(show_slice_in_obst);
 }
 
 /* ------------------ update_iso_colorlevel ------------------------ */
@@ -1006,10 +1013,10 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_isolinewidth = glui_bounds->add_spinner_to_panel(ROLLOUT_iso_settings, _d("Line width"), GLUI_SPINNER_FLOAT, &isolinewidth);
     SPINNER_isolinewidth->set_float_limits(1.0, 10.0);
 
-    visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
     CHECKBOX_show_iso_solid = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &show_iso_solid, ISO_SURFACE, Iso_CB);
     CHECKBOX_show_iso_outline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &show_iso_outline, ISO_OUTLINE, Iso_CB);
-    CHECKBOX_show_iso_points = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_points, ISO_POINTS, Iso_CB);
+    CHECKBOX_show_iso_verts = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_verts, ISO_POINTS, Iso_CB);
 
 #ifdef pp_BETA
     CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
@@ -1310,7 +1317,8 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_transparent_level = glui_bounds->add_spinner_to_panel(ROLLOUT_slice, _d("Transparent level"), GLUI_SPINNER_FLOAT, &transparent_level, TRANSPARENTLEVEL, Slice_CB);
     SPINNER_transparent_level->set_float_limits(0.0, 1.0);
 
-    if(nfedinfo>0){
+	CHECKBOX_show_slice_in_obst=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice, "Include data within blockages", &show_slice_in_obst,SLICE_IN_OBST,Slice_CB);
+	if(nfedinfo>0){
       glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,"Regenerate FED data",&regenerate_fed);
     }
     CHECKBOX_research_mode=glui_bounds->add_checkbox_to_panel(ROLLOUT_slice,_d("Research display mode"),&research_mode,RESEARCH_MODE,Slice_CB);
@@ -1707,7 +1715,7 @@ extern "C" void updatetracers(void){
 extern "C" void update_glui_isotype(void){
   CHECKBOX_show_iso_solid->set_int_val(visAIso&1);
   CHECKBOX_show_iso_outline->set_int_val((visAIso&2)/2);
-  CHECKBOX_show_iso_points->set_int_val((visAIso&4)/4);
+  CHECKBOX_show_iso_verts->set_int_val((visAIso&4)/4);
 }
 
 
@@ -1883,7 +1891,7 @@ extern "C" void Iso_CB(int var){
   case ISO_SURFACE:
   case  ISO_OUTLINE:
   case ISO_POINTS:
-    visAIso= 1*show_iso_solid + 2*show_iso_outline + 4*show_iso_points;
+    visAIso= 1*show_iso_solid + 2*show_iso_outline + 4*show_iso_verts;
     updatemenu=1;
     break;
   default:
@@ -2663,6 +2671,9 @@ extern "C" void Slice_CB(int var){
   int last_slice;
 
   updatemenu=1;
+  if(var==SLICE_IN_OBST){
+    return;
+  }
   if(var==DATA_transparent){
     if(CHECKBOX_transparentflag2!=NULL)CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
     update_transparency();

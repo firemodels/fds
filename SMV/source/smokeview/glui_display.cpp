@@ -122,14 +122,14 @@ GLUI_Rollout *ROLLOUT_user_labels=NULL;
 GLUI_Rollout *ROLLOUT_user_tick=NULL;
 GLUI_Rollout *ROLLOUT_general=NULL;
 GLUI_Rollout *ROLLOUT_north = NULL;
+GLUI_Rollout *ROLLOUT_extreme2 = NULL;
+GLUI_Rollout *ROLLOUT_split = NULL;
 
-GLUI_Panel *PANEL_split = NULL;
 GLUI_Panel *PANEL_split1L = NULL, *PANEL_split1H = NULL;
 GLUI_Panel *PANEL_split2L = NULL, *PANEL_split2H = NULL;
 GLUI_Panel *PANEL_split3 = NULL;
 GLUI_Panel *PANEL_extreme=NULL,*PANEL_cb8=NULL,*PANEL_cb7=NULL;
 GLUI_Panel *PANEL_extreme_min=NULL, *PANEL_extreme_max=NULL;
-GLUI_Panel *PANEL_extreme2=NULL;
 GLUI_Panel *PANEL_cb11=NULL;
 GLUI_Panel *PANEL_contours=NULL;
 GLUI_Panel *PANEL_gen1=NULL, *PANEL_gen2=NULL, *PANEL_gen3=NULL;
@@ -456,13 +456,13 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_extreme = glui_labels->add_panel_to_panel(ROLLOUT_coloring,"",GLUI_PANEL_NONE);
 
   if(use_data_extremes==1){
-    PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data");
+    ROLLOUT_extreme2 = glui_labels->add_rollout_to_panel(PANEL_extreme,"Highlight extreme data",false);
   }
   else{
-    PANEL_extreme2 = glui_labels->add_panel_to_panel(PANEL_extreme,"Highlight extreme data (not supported with OpenGL 1.x)");
+    ROLLOUT_extreme2 = glui_labels->add_rollout_to_panel(PANEL_extreme,"Highlight extreme data (not supported with OpenGL 1.x)",false);
   }
 
-  PANEL_extreme_min = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
+  PANEL_extreme_min = glui_labels->add_panel_to_panel(ROLLOUT_extreme2,"",GLUI_PANEL_NONE);
   CHECKBOX_show_extreme_mindata=glui_labels->add_checkbox_to_panel(PANEL_extreme_min,_d("Color below min"),&show_extreme_mindata,COLORBAR_EXTREME,Extreme_CB);
 
   SPINNER_down_red=  glui_labels->add_spinner_to_panel(PANEL_extreme_min,_d("red"),  GLUI_SPINNER_INT,cb_down_rgb,COLORBAR_EXTREME_RGB,Extreme_CB);
@@ -472,9 +472,9 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_down_green->set_int_limits(0,255);
   SPINNER_down_blue->set_int_limits(0,255);
 
-  glui_labels->add_column_to_panel(PANEL_extreme2,false);
+  glui_labels->add_column_to_panel(ROLLOUT_extreme2,false);
 
-  PANEL_extreme_max = glui_labels->add_panel_to_panel(PANEL_extreme2,"",GLUI_PANEL_NONE);
+  PANEL_extreme_max = glui_labels->add_panel_to_panel(ROLLOUT_extreme2,"",GLUI_PANEL_NONE);
 
   CHECKBOX_show_extreme_maxdata=glui_labels->add_checkbox_to_panel(PANEL_extreme_max,_d("Color above max"),&show_extreme_maxdata,COLORBAR_EXTREME,Extreme_CB);
 
@@ -486,43 +486,43 @@ extern "C" void glui_labels_setup(int main_window){
   SPINNER_up_blue->set_int_limits(0,255);
 
   if(use_data_extremes == 0){
-    PANEL_extreme2->disable();
+    ROLLOUT_extreme2->disable();
     CHECKBOX_show_extreme_maxdata->set_int_val(0);
     CHECKBOX_show_extreme_mindata->set_int_val(0);
     Extreme_CB(COLORBAR_EXTREME_RGB);
   }
   colorbar_global2local();
 
-  PANEL_split = glui_labels->add_panel_to_panel(ROLLOUT_coloring, "Split colorbar");
-  PANEL_split1H = glui_labels->add_panel_to_panel(PANEL_split, "color below split");
+  ROLLOUT_split = glui_labels->add_rollout_to_panel(ROLLOUT_coloring, "Define split colorbar",false);
+  PANEL_split1H = glui_labels->add_panel_to_panel(ROLLOUT_split, "color below split");
 
   SPINNER_colorsplit[3] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("red"), GLUI_SPINNER_INT, colorsplit+3, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[4] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("green"), GLUI_SPINNER_INT, colorsplit + 4, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[5] = glui_labels->add_spinner_to_panel(PANEL_split1H, _d("blue"), GLUI_SPINNER_INT, colorsplit + 5, SPLIT_COLORBAR, Split_CB);
 
-  PANEL_split1L = glui_labels->add_panel_to_panel(PANEL_split, "min color");
+  PANEL_split1L = glui_labels->add_panel_to_panel(ROLLOUT_split, "min color");
 
   SPINNER_colorsplit[0] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("red"),  GLUI_SPINNER_INT,colorsplit, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[1] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("green"),  GLUI_SPINNER_INT,colorsplit+1, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[2] = glui_labels->add_spinner_to_panel(PANEL_split1L,_d("blue"),  GLUI_SPINNER_INT,colorsplit+2, SPLIT_COLORBAR, Split_CB);
 
-  glui_labels->add_column_to_panel(PANEL_split, false);
+  glui_labels->add_column_to_panel(ROLLOUT_split, false);
 
-  PANEL_split2H = glui_labels->add_panel_to_panel(PANEL_split, "max color");
+  PANEL_split2H = glui_labels->add_panel_to_panel(ROLLOUT_split, "max color");
 
   SPINNER_colorsplit[9] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("red"),  GLUI_SPINNER_INT,colorsplit+9, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[10] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("green"),  GLUI_SPINNER_INT,colorsplit+10, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[11] =  glui_labels->add_spinner_to_panel(PANEL_split2H,_d("blue"),  GLUI_SPINNER_INT,colorsplit+11, SPLIT_COLORBAR, Split_CB);
 
-  PANEL_split2L = glui_labels->add_panel_to_panel(PANEL_split, "color above split");
+  PANEL_split2L = glui_labels->add_panel_to_panel(ROLLOUT_split, "color above split");
 
   SPINNER_colorsplit[6] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("red"), GLUI_SPINNER_INT, colorsplit+6, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[7] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("green"), GLUI_SPINNER_INT, colorsplit + 7, SPLIT_COLORBAR, Split_CB);
   SPINNER_colorsplit[8] = glui_labels->add_spinner_to_panel(PANEL_split2L, _d("blue"), GLUI_SPINNER_INT, colorsplit + 8, SPLIT_COLORBAR, Split_CB);
 
-  glui_labels->add_column_to_panel(PANEL_split, false);
+  glui_labels->add_column_to_panel(ROLLOUT_split, false);
 
-  PANEL_split3 = glui_labels->add_panel_to_panel(PANEL_split, "vals");
+  PANEL_split3 = glui_labels->add_panel_to_panel(ROLLOUT_split, "vals");
 
   glui_labels->add_spinner_to_panel(PANEL_split3,_d("max"),  GLUI_SPINNER_FLOAT,splitvals+2, SPLIT_COLORBAR, Split_CB);
   glui_labels->add_spinner_to_panel(PANEL_split3,_d("split"),  GLUI_SPINNER_FLOAT,splitvals+1, SPLIT_COLORBAR, Split_CB);

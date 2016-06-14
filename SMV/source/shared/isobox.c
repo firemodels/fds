@@ -1049,7 +1049,7 @@ int CompressIsosurface(isosurface *surface, int reduce_triangles,
 
   /* phase II compression, reduce the number of triangles */
 
-  /* first, eliminate triangles whose nodes (2 or more) are closest to the same grid point */
+  /* first, eliminate triangles whose nodes (2 or more) are closest to the same grid vertdata */
 
   if(NewMemory((void **)&newtriangles2,ntriangles*sizeof(int))==0){
     return 1;

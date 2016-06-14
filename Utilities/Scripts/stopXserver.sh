@@ -1,6 +1,7 @@
 #!/bin/bash
 if [ "`uname`" != "Darwin" ]; then
-  echo shutting down graphics environment
-  sleep 8
+  PAUSE=8
+  echo "shutting down graphics environment (pausing $PAUSE s)"
+  sleep $PAUSE
   kill $SMV_ID
 fi

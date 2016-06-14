@@ -5,6 +5,7 @@
 #include "gd.h"
 #endif
 
+EXTERNCPP void update_show_slice_in_obst(void);
 EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
 EXTERNCPP void write_part_histogram(partdata *parti);
