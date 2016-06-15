@@ -769,7 +769,7 @@ IF (HVAC_MASS_TRANSPORT) THEN
             DO NN = 1, DU%N_CELLS
                DU%RHO_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%RHO + DRHO*(REAL(NN,EB) - 0.5_EB)
                DU%TMP_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%TMP + DTMP*(REAL(NN,EB) - 0.5_EB)
-               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ*(REAL(NN,EB) - 0.5_EB)
+               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ(:)*(REAL(NN,EB) - 0.5_EB)
             ENDDO
       END SELECT
    ENDDO
@@ -2398,16 +2398,18 @@ REAL(EB), INTENT(IN) :: DT
 INTEGER :: ND,I
 TYPE(DUCT_TYPE),POINTER :: DU=>NULL()
 REAL(EB) :: DT_DUCT,MASS_FLUX
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZC,ZZ_F
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F ! ZZ_F: upwind species concentration (inc' upwind HVAC node value)
 
 DUCT_LOOP: DO ND = 1,N_DUCTS
    DU => DUCT(ND)
+   ! Check for zero flow and zero area
    IF (ABS(DU%VEL(NEW))<TWO_EPSILON_EB .OR. DU%AREA<TWO_EPSILON_EB) CYCLE DUCT_LOOP
 
    ! Set upwind indices and allocate flux array
    ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
-   ALLOCATE(RHOZZC(DU%N_CELLS,N_TRACKED_SPECIES))
+   ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
+   ! Sets upwind species concentration, accounting for direction of flow
    IF (DU%VEL(NEW)>0._EB) THEN
       ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
       DO I = 1,DU%N_CELLS
@@ -2421,18 +2423,22 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
    ENDIF
 
    DT_DUCT = MIN(DT,DU%DX/DU%VEL(NEW))
-   MASS_FLUX = DU%RHO_D * DU%VEL(NEW)
+   MASS_FLUX = DU%RHO_D * DU%VEL(NEW) ! total duct mass flow
 
+   ! Compute discretized mass conservation equation
    DO I = 1,DU%N_CELLS
-      RHOZZC(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:) - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
+      RHOZZ_C(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:) - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
    ENDDO
+
+   ! Update values of rho and ZZ in the cells
    DO I = 1,DU%N_CELLS
-      DU%RHO_C(I) = SUM(RHOZZC(I,1:N_TRACKED_SPECIES))
-      DU%ZZ_C(I,:) = RHOZZC(I,:)/DU%RHO_C(I)
+      DU%RHO_C(I) = SUM(RHOZZ_C(I,1:N_TRACKED_SPECIES))
+      DU%ZZ_C(I,:) = RHOZZ_C(I,:)/DU%RHO_C(I)
    ENDDO
-   DEALLOCATE(RHOZZC)
+   DEALLOCATE(RHOZZ_C)
    DEALLOCATE(ZZ_F)
 
+   ! Applying new boundary conditions to HVAC nodes
    IF (DU%VEL(NEW)>0._EB) THEN
       DUCTNODE(DU%NODE_INDEX(2))%RHO = DU%RHO_C(DU%N_CELLS)
       DUCTNODE(DU%NODE_INDEX(2))%ZZ(:) = DU%ZZ_C(DU%N_CELLS,:)
@@ -2447,7 +2453,3 @@ ENDDO DUCT_LOOP
 END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 
 END MODULE HVAC_ROUTINES
-
-
-
-
