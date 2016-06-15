@@ -22,4 +22,4 @@ makefile text eol=lf
 *.psm binary
 
 # Submodules retain attributes of their respective repos
-/Validaiton/Submodules/* text=auto
+/Validation/Submodules/* text=auto
