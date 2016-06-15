@@ -7,3 +7,5 @@
 *.png binary
 *.jpg binary
 *.pdf binary
+*.dwg binary
+*.psm binary
