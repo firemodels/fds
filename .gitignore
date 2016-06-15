@@ -47,6 +47,8 @@ Manuals/*/*Guide.pdf
 *.prt5
 *.end
 *.iso
+*.restart
+*.gc
 *_devc.csv
 *_hrr.csv
 *_mass.csv
