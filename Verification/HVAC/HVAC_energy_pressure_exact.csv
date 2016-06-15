@@ -1,3 +1,6 @@
-Time,Exact Top,Exact Bottom,Exact Enthalpy,Exact Pressure Left,Exact Pressure Right,Exact Delta P
+Time,Ideal Top,Ideal Bottom,Ideal Enthalpy,Ideal Pressure Left,Ideal Pressure Right,Ideal Delta P
 0,10,1,307.1019,101303.1751,101346.8249,43.6498
+5,10,1,307.1019,101303.1751,101346.8249,43.6498
+10,10,1,307.1019,101303.1751,101346.8249,43.6498
+15,10,1,307.1019,101303.1751,101346.8249,43.6498
 20,10,1,307.1019,101303.1751,101346.8249,43.6498
