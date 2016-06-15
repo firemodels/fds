@@ -20,3 +20,6 @@ makefile text eol=lf
 *.pdf binary
 *.dwg binary
 *.psm binary
+
+# Submodules retain attributes of their respective repos
+/Validaiton/Submodules/* text=auto
