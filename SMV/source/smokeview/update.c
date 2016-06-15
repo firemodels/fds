@@ -630,7 +630,7 @@ int get_itime(int n, int *timeslist, float *times, int ntimes){
   int istart=0;
 
   if(n>0)istart=timeslist[n-1];
-  while(istart<ntimes-1&&times[istart+1]<global_times[n]){
+  while(istart<ntimes-1&&times[istart+1]<=global_times[n]){
     istart++;
   }
   istart=CLAMP(istart,0,ntimes-1);
