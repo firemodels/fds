@@ -17,3 +17,9 @@ function bounds.slices.set(name, min, max)
             set_slice_bound_max(name, true, max)
     end
 end
+
+function bounds.slices.get(name)
+    local min = get_slice_bound_min(name)
+    local max = get_slice_bound_max(name)
+    return {min = min, max = max}
+end
