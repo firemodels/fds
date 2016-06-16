@@ -5,6 +5,7 @@
 
 # Declare files that will always have LF line endings on checkout.
 *.fds text eol=lf
+*.smv text eol=lf
 *.tex text eol=lf
 *.csv text eol=lf
 *.f90 text eol=lf
