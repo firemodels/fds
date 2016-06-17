@@ -1,0 +1,64 @@
+&HEAD CHID='methanol_1_m', TITLE='Single pan of burning methanol' /
+
+&MESH IJK=32,32,96, XB=-0.8,0.8,-0.8,0.8,0.0,4.8 /
+
+&TIME T_END=400. / 
+
+&REAC FUEL               = 'METHANOL'
+      FYI                = 'Methanol C_1 H_4 O_1'
+      CO_YIELD           = 0.001
+      SOOT_YIELD         = 0.001 /
+
+&MATL ID                     = 'METHANOL LIQUID'
+      EMISSIVITY             = 1.
+      NU_SPEC                = 1.
+      SPEC_ID                = 'METHANOL'
+      HEAT_OF_REACTION       = 1099
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.48
+      DENSITY                = 796
+      ABSORPTION_COEFFICIENT = 1140
+      BOILING_TEMPERATURE    = 64.8 /
+	  
+&MATL ID            = 'STEEL'
+      EMISSIVITY    = 1.0
+      DENSITY       = 7850.
+      CONDUCTIVITY  = 45.8
+      SPECIFIC_HEAT = 0.46 /
+
+&SURF ID        = 'METHANOL POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'METHANOL LIQUID'
+      THICKNESS = 0.1 /
+
+&SURF ID        = 'STEEL SHEET'
+      COLOR     = 'BLACK'
+      MATL_ID   = 'STEEL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.003 /
+
+&VENT MB='XMIN', SURF_ID = 'OPEN' /
+&VENT MB='XMAX', SURF_ID = 'OPEN' /
+&VENT MB='YMIN', SURF_ID = 'OPEN' /
+&VENT MB='YMAX', SURF_ID = 'OPEN' /
+&VENT MB='ZMAX', SURF_ID = 'OPEN' /
+
+&OBST XB=-.50,0.50,-.50,0.50,0.00,0.05, SURF_IDS='METHANOL POOL','STEEL SHEET','STEEL SHEET' /
+&OBST XB=-.50,-.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=0.50,0.50,-.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=-.50,0.50,-.50,-.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+&OBST XB=-.50,0.50,0.50,0.50,0.00,0.10, SURF_ID='STEEL SHEET' /
+
+&DUMP DT_HRR=5., SIG_FIGS=4, SIG_FIGS_EXP=2 /
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='HRRPUV' /
+
+&BNDF QUANTITY='BURNING RATE' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&TAIL /
+
+
+&DEVC XB=-0.50,0.50,-0.50,0.50,0.05,0.05,QUANTITY='GAUGE HEAT FLUX',STATISTICS='SURFACE INTEGRAL',ID='qdot'/

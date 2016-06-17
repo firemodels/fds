@@ -1,0 +1,196 @@
+Building Smokeview libraries:
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_gd.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_gd2.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_io.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_io_dp.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_io_file.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_ss.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_io_ss.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_png.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_jpeg.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdxpm.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdfontt.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdfonts.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdfontmb.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdfontl.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdfontg.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdtables.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdft.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdcache.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdkanji.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   wbmp.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_wbmp.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gdhelpers.c
+icc -m64 -I. -I../png125 -I../jpeg-6b -I../zlib114 -c -g  -DHAVE_LIBPNG -DHAVE_LIBZ -DHAVE_LIBJPEG -DHAVE_LIBX11   gd_topal.c
+rm -f libgd.a
+ar rc libgd.a gd.o gd_gd.o gd_gd2.o gd_io.o gd_io_dp.o gd_io_file.o gd_ss.o gd_io_ss.o gd_png.o gd_jpeg.o gdxpm.o gdfontt.o gdfonts.o gdfontmb.o gdfontl.o gdfontg.o gdtables.o gdft.o gdcache.o gdkanji.o wbmp.o gd_wbmp.o gdhelpers.o gd_topal.o 
+ranlib libgd.a
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_add_controls.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_bitmap_img_data.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_bitmaps.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_button.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_edittext.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_checkbox.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_node.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_radio.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_statictext.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_panel.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_separator.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_spinner.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_control.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_column.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_translation.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_rotation.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_mouse_iaction.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_listbox.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   glui_rollout.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   arcball.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   algebra3.cpp
+icc -c -D pp_NOCLOSE   -fpermissive -I../include2 -I ../include2/glut -m64   quaternion.cpp
+Creating library
+ar rcs libglui.a glui_add_controls.o glui.o glui_bitmap_img_data.o glui_bitmaps.o glui_button.o glui_edittext.o glui_checkbox.o glui_node.o glui_radio.o glui_statictext.o glui_panel.o glui_separator.o glui_spinner.o glui_control.o glui_column.o glui_translation.o glui_rotation.o glui_mouse_iaction.o glui_listbox.o glui_rollout.o arcball.o algebra3.o quaternion.o
+icc -m64 -c -O2  -I ../include   glut_8x13.c
+icc -m64 -c -O2  -I ../include   glut_9x15.c
+icc -m64 -c -O2  -I ../include   glut_bitmap.c
+icc -m64 -c -O2  -I ../include   glut_bwidth.c
+icc -m64 -c -O2  -I ../include   glut_cindex.c
+icc -m64 -c -O2  -I ../include   glut_cmap.c
+icc -m64 -c -O2  -I ../include   glut_cursor.c
+icc -m64 -c -O2  -I ../include   glut_dials.c
+icc -m64 -c -O2  -I ../include   glut_dstr.c
+glut_dstr.c(442): warning #556: a value of type "int" cannot be assigned to an entity of type "GLXFBConfigSGIX"
+          fbc = glXGetFBConfigFromVisualSGIX(__glutDisplay, vlist[i]);
+              ^
+
+icc -m64 -c -O2  -I ../include   glut_event.c
+icc -m64 -c -O2  -I ../include   glut_ext.c
+icc -m64 -c -O2  -I ../include   glut_fullscrn.c
+icc -m64 -c -O2  -I ../include   glut_gamemode.c
+icc -m64 -c -O2  -I ../include   glut_get.c
+icc -m64 -c -O2  -I ../include   glut_glxext.c
+icc -m64 -c -O2  -I ../include   glut_hel10.c
+icc -m64 -c -O2  -I ../include   glut_hel12.c
+icc -m64 -c -O2  -I ../include   glut_hel18.c
+icc -m64 -c -O2  -I ../include   glut_init.c
+icc -m64 -c -O2  -I ../include   glut_input.c
+icc -m64 -c -O2  -I ../include   glut_joy.c
+icc -m64 -c -O2  -I ../include   glut_key.c
+icc -m64 -c -O2  -I ../include   glut_keyctrl.c
+icc -m64 -c -O2  -I ../include   glut_keyup.c
+icc -m64 -c -O2  -I ../include   glut_menu.c
+icc -m64 -c -O2  -I ../include   glut_menu2.c
+icc -m64 -c -O2  -I ../include   glut_modifier.c
+icc -m64 -c -O2  -I ../include   glut_mroman.c
+icc -m64 -c -O2  -I ../include   glut_overlay.c
+glut_overlay.c(394): warning #556: a value of type "int" cannot be assigned to an entity of type "GLXContext"
+      window->ctx = glXCreateContextWithConfigSGIX(__glutDisplay, fbc,
+                  ^
+
+icc -m64 -c -O2  -I ../include   glut_roman.c
+icc -m64 -c -O2  -I ../include   glut_shapes.c
+icc -m64 -c -O2  -I ../include   glut_space.c
+icc -m64 -c -O2  -I ../include   glut_stroke.c
+icc -m64 -c -O2  -I ../include   glut_swap.c
+icc -m64 -c -O2  -I ../include   glut_swidth.c
+icc -m64 -c -O2  -I ../include   glut_tablet.c
+icc -m64 -c -O2  -I ../include   glut_teapot.c
+icc -m64 -c -O2  -I ../include   glut_tr10.c
+icc -m64 -c -O2  -I ../include   glut_tr24.c
+icc -m64 -c -O2  -I ../include   glut_util.c
+icc -m64 -c -O2  -I ../include   glut_win.c
+glut_win.c(579): warning #556: a value of type "int" cannot be assigned to an entity of type "GLXContext"
+      window->ctx = glXCreateContextWithConfigSGIX(__glutDisplay, fbc,
+                  ^
+
+icc -m64 -c -O2  -I ../include   glut_winmisc.c
+icc -m64 -c -O2  -I ../include   layerutil.c
+icc -m64 -c -O2  -I ../include   glut_mesa.c
+icc -m64 -c -O2  -I ../include   glut_warp.c
+icc -m64 -c -O2  -I ../include   glut_vidresize.c
+ar rc libglut.a glut_8x13.o glut_9x15.o glut_bitmap.o glut_bwidth.o glut_cindex.o glut_cmap.o glut_cursor.o glut_dials.o glut_dstr.o glut_event.o glut_ext.o glut_fullscrn.o glut_gamemode.o glut_get.o glut_glxext.o glut_hel10.o glut_hel12.o glut_hel18.o glut_init.o  glut_input.o glut_joy.o glut_key.o glut_keyctrl.o glut_keyup.o glut_menu.o glut_menu2.o glut_modifier.o glut_mroman.o glut_overlay.o glut_roman.o glut_shapes.o glut_space.o glut_stroke.o   glut_swap.o glut_swidth.o glut_tablet.o glut_teapot.o glut_tr10.o glut_tr24.o glut_util.o glut_win.o glut_winmisc.o layerutil.o glut_mesa.o glut_warp.o glut_vidresize.o
+ranlib libglut.a
+icc -m64 -c -O2  -I.   jcapimin.c
+icc -m64 -c -O2  -I.   jcapistd.c
+icc -m64 -c -O2  -I.   jctrans.c
+icc -m64 -c -O2  -I.   jcparam.c
+icc -m64 -c -O2  -I.   jdatadst.c
+icc -m64 -c -O2  -I.   jcinit.c
+icc -m64 -c -O2  -I.   jcmaster.c
+icc -m64 -c -O2  -I.   jcmarker.c
+icc -m64 -c -O2  -I.   jcmainct.c
+icc -m64 -c -O2  -I.   jcprepct.c
+icc -m64 -c -O2  -I.   jccoefct.c
+icc -m64 -c -O2  -I.   jccolor.c
+icc -m64 -c -O2  -I.   jcsample.c
+icc -m64 -c -O2  -I.   jchuff.c
+icc -m64 -c -O2  -I.   jcphuff.c
+icc -m64 -c -O2  -I.   jcdctmgr.c
+icc -m64 -c -O2  -I.   jfdctfst.c
+icc -m64 -c -O2  -I.   jfdctflt.c
+icc -m64 -c -O2  -I.   jfdctint.c
+icc -m64 -c -O2  -I.   jdapimin.c
+icc -m64 -c -O2  -I.   jdapistd.c
+icc -m64 -c -O2  -I.   jdtrans.c
+icc -m64 -c -O2  -I.   jdatasrc.c
+icc -m64 -c -O2  -I.   jdmaster.c
+icc -m64 -c -O2  -I.   jdinput.c
+icc -m64 -c -O2  -I.   jdmarker.c
+icc -m64 -c -O2  -I.   jdhuff.c
+icc -m64 -c -O2  -I.   jdphuff.c
+icc -m64 -c -O2  -I.   jdmainct.c
+icc -m64 -c -O2  -I.   jdcoefct.c
+icc -m64 -c -O2  -I.   jdpostct.c
+icc -m64 -c -O2  -I.   jddctmgr.c
+icc -m64 -c -O2  -I.   jidctfst.c
+icc -m64 -c -O2  -I.   jidctflt.c
+icc -m64 -c -O2  -I.   jidctint.c
+icc -m64 -c -O2  -I.   jidctred.c
+icc -m64 -c -O2  -I.   jdsample.c
+icc -m64 -c -O2  -I.   jdcolor.c
+icc -m64 -c -O2  -I.   jquant1.c
+icc -m64 -c -O2  -I.   jquant2.c
+icc -m64 -c -O2  -I.   jdmerge.c
+icc -m64 -c -O2  -I.   jcomapi.c
+icc -m64 -c -O2  -I.   jutils.c
+icc -m64 -c -O2  -I.   jerror.c
+icc -m64 -c -O2  -I.   jmemmgr.c
+icc -m64 -c -O2  -I.   jmemnobs.c
+rm -f libjpeg.a
+ar rc libjpeg.a  jcapimin.o jcapistd.o jctrans.o jcparam.o jdatadst.o jcinit.o jcmaster.o jcmarker.o jcmainct.o jcprepct.o jccoefct.o jccolor.o jcsample.o jchuff.o jcphuff.o jcdctmgr.o jfdctfst.o jfdctflt.o jfdctint.o jdapimin.o jdapistd.o jdtrans.o jdatasrc.o jdmaster.o jdinput.o jdmarker.o jdhuff.o jdphuff.o jdmainct.o jdcoefct.o jdpostct.o jddctmgr.o jidctfst.o jidctflt.o jidctint.o jidctred.o jdsample.o jdcolor.o jquant1.o jquant2.o jdmerge.o jcomapi.o jutils.o jerror.o jmemmgr.o jmemnobs.o
+ranlib libjpeg.a
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     png.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngset.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngget.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngrutil.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngtrans.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngwutil.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngread.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngrio.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngwio.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngwrite.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngrtran.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngwtran.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngmem.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngerror.c
+icc -m64 -c -I../zlib114 -Wall -O3 -funroll-loops     pngpread.c
+ar rc libpng.a png.o pngset.o pngget.o pngrutil.o pngtrans.o pngwutil.o pngread.o pngrio.o pngwio.o pngwrite.o pngrtran.o pngwtran.o pngmem.o pngerror.o pngpread.o
+ranlib libpng.a
+icc -c -O2 -m64 adler32.c
+icc -c -O2 -m64 compress.c
+icc -c -O2 -m64 crc32.c
+icc -c -O2 -m64 gzio.c
+icc -c -O2 -m64 uncompr.c
+icc -c -O2 -m64 deflate.c
+icc -c -O2 -m64 trees.c
+icc -c -O2 -m64 zutil.c
+icc -c -O2 -m64 inflate.c
+icc -c -O2 -m64 infblock.c
+icc -c -O2 -m64 inftrees.c
+icc -c -O2 -m64 infcodes.c
+icc -c -O2 -m64 infutil.c
+icc -c -O2 -m64 inffast.c
+ar rc libz.a adler32.o compress.o crc32.o gzio.o uncompr.o deflate.o trees.o zutil.o inflate.o infblock.o inftrees.o infcodes.o infutil.o inffast.o
+ranlib libz.a
+

@@ -1,0 +1,370 @@
+
+Smokeview 6.3.2 - Nov 16 2015
+
+Version: 6.3.2
+Smokeview (64 bit) Build: Git-r4-25-gb4423de
+Platform: LINUX64
+Build Date: Nov 16 2015
+Texture directory path: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: symmetry_test_mpi.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+     examining 1'th slice file
+     examining 101'th slice file
+     examining 104'th slice file
+   pass 4 completed
+symmetry_test_mpi.smv processing completed
+
+beginning wrap up 
+  updating vector slices
+    obtaining parameters from 1'st slice file
+    obtaining parameters from 101'st slice file
+    obtaining parameters from 104'st slice file
+    examining 1'st slice file for vectors
+    examining 101'st slice file for vectors
+    examining 104'st slice file for vectors
+    104 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing blanking array
+  blanking array initialization completed
+initializing 3D smoke/hrrpuv blanking array - complete
+
+  updating smoke3d menu labels
+  update completed
+wrap up completed
+
+processing config file: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/smokeview.ini
+processing config file: symmetry_test_mpi.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: XSCENECLIP
+
+
+script: YSCENECLIP
+
+
+script: ZSCENECLIP
+
+
+script: SCENECLIP
+
+
+script: LOADVSLICE
+script:  VELOCITY
+
+script: loading vector slice files of type: VELOCITY
+
+Loading slice data: symmetry_test_mpi_0001_06.sf
+ global min (slice file): -0.001955 node=(6,10,6)
+ global max (slice file): 0.004650 node=(1,10,10)
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0001_07.sf
+ global min (slice file): -0.000041 node=(1,10,10)
+ global max (slice file): 0.000010 node=(7,10,10)
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0001_08.sf
+ global min (slice file): -0.001955 node=(6,10,6)
+ global max (slice file): 0.004650 node=(10,10,1)
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.04 s)
+Loading slice data: symmetry_test_mpi_0001_05.sf
+ global min (slice file): 0.000000 node=(0,10,0)
+ global max (slice file): 0.004826 node=(0,10,10)
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.04 s)
+Loading slice data: symmetry_test_mpi_0002_06.sf
+ global min (slice file): -0.004650 node=(9,10,10)
+ global max (slice file): 0.001955 node=(4,10,6)
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0002_07.sf
+ global min (slice file): -0.000041 node=(0,10,1)
+ global max (slice file): 0.000010 node=(0,10,7)
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0002_08.sf
+ global min (slice file): -0.001955 node=(4,10,6)
+ global max (slice file): 0.004650 node=(0,10,1)
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.04 s)
+Loading slice data: symmetry_test_mpi_0002_05.sf
+ global min (slice file): 0.000000 node=(0,10,0)
+ global max (slice file): 0.004826 node=(0,10,0)
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 237.5 Mb/s (overhead: 0.04 s)
+Loading slice data: symmetry_test_mpi_0003_06.sf
+ global min (slice file): -0.001955 node=(6,0,6)
+ global max (slice file): 0.004650 node=(1,0,10)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0003_07.sf
+ global min (slice file): -0.000010 node=(7,0,10)
+ global max (slice file): 0.000041 node=(1,0,10)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0003_08.sf
+ global min (slice file): -0.001955 node=(6,0,6)
+ global max (slice file): 0.004650 node=(10,0,1)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 237.5 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0003_05.sf
+ global min (slice file): 0.000000 node=(0,0,0)
+ global max (slice file): 0.004826 node=(0,0,10)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0004_06.sf
+ global min (slice file): -0.004650 node=(9,0,10)
+ global max (slice file): 0.001955 node=(4,0,6)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0004_07.sf
+ global min (slice file): -0.000010 node=(0,0,7)
+ global max (slice file): 0.000041 node=(0,0,1)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0004_08.sf
+ global min (slice file): -0.001955 node=(4,0,6)
+ global max (slice file): 0.004650 node=(0,0,1)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0004_05.sf
+ global min (slice file): 0.000000 node=(0,0,0)
+ global max (slice file): 0.004826 node=(0,0,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.04 s)
+Loading slice data: symmetry_test_mpi_0005_06.sf
+ global min (slice file): -0.001955 node=(6,10,4)
+ global max (slice file): 0.004650 node=(1,10,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.01 s - rate: 269.1 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0005_07.sf
+ global min (slice file): -0.000041 node=(1,10,0)
+ global max (slice file): 0.000010 node=(7,10,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.09 s)
+Loading slice data: symmetry_test_mpi_0005_08.sf
+ global min (slice file): -0.004650 node=(10,10,9)
+ global max (slice file): 0.001955 node=(6,10,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0005_05.sf
+ global min (slice file): 0.000000 node=(0,10,0)
+ global max (slice file): 0.004826 node=(0,10,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 237.5 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0006_06.sf
+ global min (slice file): -0.004650 node=(9,10,0)
+ global max (slice file): 0.001955 node=(4,10,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.07 s)
+Loading slice data: symmetry_test_mpi_0006_07.sf
+ global min (slice file): -0.000041 node=(0,10,9)
+ global max (slice file): 0.000010 node=(0,10,3)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.07 s)
+Loading slice data: symmetry_test_mpi_0006_08.sf
+ global min (slice file): -0.004650 node=(0,10,9)
+ global max (slice file): 0.001955 node=(4,10,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_mpi_0006_05.sf
+ global min (slice file): 0.000000 node=(0,10,2)
+ global max (slice file): 0.004826 node=(0,10,10)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 201.9 Mb/s (overhead: 0.06 s)
+Loading slice data: symmetry_test_mpi_0007_06.sf
+ global min (slice file): -0.001955 node=(6,0,4)
+ global max (slice file): 0.004650 node=(1,0,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.08 s)
+Loading slice data: symmetry_test_mpi_0007_07.sf
+ global min (slice file): -0.000010 node=(7,0,0)
+ global max (slice file): 0.000041 node=(1,0,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.09 s)
+Loading slice data: symmetry_test_mpi_0007_08.sf
+ global min (slice file): -0.004650 node=(10,0,9)
+ global max (slice file): 0.001955 node=(6,0,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.08 s)
+Loading slice data: symmetry_test_mpi_0007_05.sf
+ global min (slice file): 0.000000 node=(0,0,0)
+ global max (slice file): 0.004826 node=(0,0,0)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.08 s)
+Loading slice data: symmetry_test_mpi_0008_06.sf
+ global min (slice file): -0.004650 node=(9,0,0)
+ global max (slice file): 0.001955 node=(4,0,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.16 s)
+Loading slice data: symmetry_test_mpi_0008_07.sf
+ global min (slice file): -0.000010 node=(0,0,3)
+ global max (slice file): 0.000041 node=(0,0,9)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 224.3 Mb/s (overhead: 0.09 s)
+Loading slice data: symmetry_test_mpi_0008_08.sf
+ global min (slice file): -0.004650 node=(0,0,9)
+ global max (slice file): 0.001955 node=(4,0,4)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.08 s)
+Loading slice data: symmetry_test_mpi_0008_05.sf
+ global min (slice file): 0.000000 node=(0,0,2)
+ global max (slice file): 0.004826 node=(0,0,10)
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+computing slice color levels 
+ 0.5 MB loaded in 0.02 s - rate: 212.5 Mb/s (overhead: 0.07 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 483.000000
+
+
+script: RENDERONCE
+script:  symmetry_test_mpi
+
+Rendering to: ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES//symmetry_test_mpi.png . Completed.
