@@ -1,0 +1,82 @@
+erasing SCRIPT_FIGURES png files
+setting up graphics environment
+
+--- generating images for: random_meshes.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript random_meshes
+
+--- generating images for: activate_vents.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript activate_vents
+
+--- generating images for: beam_detector.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript beam_detector
+
+--- generating images for: couch.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript couch
+
+--- generating images for: helium_2d_isothermal.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript helium_2d_isothermal
+
+--- generating images for: symmetry_test.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript symmetry_test
+
+--- generating images for: symmetry_test_mpi.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript symmetry_test_mpi
+
+--- generating images for: jet_fan.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript jet_fan
+
+--- generating images for: velocity_bc_test.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript velocity_bc_test
+
+--- generating images for: HVAC_mass_conservation.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript HVAC_mass_conservation
+
+--- generating images for: HVAC_energy_pressure.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript HVAC_energy_pressure
+
+--- generating images for: leak_test_2.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript leak_test_2
+
+--- generating images for: pyramid.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript pyramid
+
+--- generating images for: ns2d_64.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript ns2d_64
+
+--- generating images for: pressure_boundary.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript pressure_boundary
+
+--- generating images for: dancing_eddies_tight.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript dancing_eddies_tight
+
+--- generating images for: move_slug.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript move_slug
+
+--- generating images for: move_slug_fl1.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript move_slug_fl1
+
+--- generating images for: shunn3_256.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript shunn3_256
+
+--- generating images for: propane_flame_deposition.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript propane_flame_deposition
+
+--- generating images for: cascade.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript cascade
+
+--- generating images for: csmag_64.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript csmag_64
+
+--- generating images for: dsmag_64.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript dsmag_64
+
+--- generating images for: ribbed_channel_80.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript ribbed_channel_80
+
+--- generating images for: objects_static.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript objects_static
+
+--- generating images for: objects_dynamic.smv
+/home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/Build/intel_linux_64/smokeview_linux_64 -bindir /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/ -runscript objects_dynamic
+shutting down graphics environment
+FDS pictures created.

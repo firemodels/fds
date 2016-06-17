@@ -1,0 +1,92 @@
+
+Smokeview 6.3.2 - Nov 16 2015
+
+Version: 6.3.2
+Smokeview (64 bit) Build: Git-r4-25-gb4423de
+Platform: LINUX64
+Build Date: Nov 16 2015
+Texture directory path: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: ns2d_64.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+ns2d_64.smv processing completed
+
+beginning wrap up 
+  updating vector slices
+    8 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing blanking array
+  blanking array initialization completed
+initializing 3D smoke/hrrpuv blanking array - complete
+
+  updating smoke3d menu labels
+  update completed
+wrap up completed
+
+processing config file: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/smokeview.ini
+processing config file: ns2d_64.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: LOADFILE
+script:  ns2d_64_02.sf
+
+script: loading file ns2d_64_02.sf
+
+Loading slice data: ns2d_64_02.sf
+ global min (slice file): -0.998223 node=(61,1,13)
+ global max (slice file): 2.998677 node=(13,1,61)
+computing slice color levels 
+ 16.9 MB loaded in 0.38 s - rate: 361.3 Mb/s (overhead: 0.67 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 0.000000
+
+
+script: RENDERONCE
+script:  ns2d_64_start
+
+Rendering to: ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES//ns2d_64_start.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 6.283000
+
+
+script: RENDERONCE
+script:  ns2d_64_end
+
+Rendering to: ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES//ns2d_64_end.png . Completed.

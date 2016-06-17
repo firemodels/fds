@@ -1,0 +1,97 @@
+
+Smokeview 6.3.2 - Nov 16 2015
+
+Version: 6.3.2
+Smokeview (64 bit) Build: Git-r4-25-gb4423de
+Platform: LINUX64
+Build Date: Nov 16 2015
+Texture directory path: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: jet_fan.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+jet_fan.smv processing completed
+
+beginning wrap up 
+  updating vector slices
+    4 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing blanking array
+  blanking array initialization completed
+initializing 3D smoke/hrrpuv blanking array - complete
+
+  updating smoke3d menu labels
+  update completed
+wrap up completed
+
+processing config file: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/smokeview.ini
+processing config file: jet_fan.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: LOADVFILE
+script:  jet_fan_01.sf
+
+script: loading vector slice file jet_fan_01.sf
+
+Loading slice data: jet_fan_02.sf
+ global min (slice file): -5.329875 node=(25,10,8)
+ global max (slice file): 1.854959 node=(32,10,19)
+computing slice color levels 
+ 2.1 MB loaded in 0.06 s - rate: 299.0 Mb/s (overhead: 0.16 s)
+Loading slice data: jet_fan_03.sf
+ global min (slice file): -1.297107 node=(27,10,13)
+ global max (slice file): 1.190485 node=(27,10,13)
+computing slice color levels 
+ 2.1 MB loaded in 0.05 s - rate: 334.2 Mb/s (overhead: 0.12 s)
+Loading slice data: jet_fan_04.sf
+ global min (slice file): -5.097917 node=(20,10,8)
+ global max (slice file): 5.406272 node=(27,10,16)
+computing slice color levels 
+ 2.1 MB loaded in 0.06 s - rate: 293.9 Mb/s (overhead: 0.16 s)
+Loading slice data: jet_fan_01.sf
+ global min (slice file): 19.305075 node=(26,10,0)
+ global max (slice file): 588.963196 node=(27,10,1)
+computing slice color levels 
+ 2.1 MB loaded in 0.05 s - rate: 321.6 Mb/s (overhead: 0.15 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 5.000000
+
+
+script: RENDERONCE
+script:  jet_fan
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//jet_fan.png . Completed.

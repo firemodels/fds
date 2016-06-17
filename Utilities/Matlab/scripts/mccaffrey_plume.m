@@ -1,3 +1,8 @@
+% Hamins
+% 12-1-15
+% Modificaiton of McDermott's mccaffrey_plume.m to plot like McCaffrey's
+% NBSIR 79-1910
+
 % McDermott
 % 7-7-14
 % mccaffrey_plumes.m

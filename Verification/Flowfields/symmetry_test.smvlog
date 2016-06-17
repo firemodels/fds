@@ -1,0 +1,97 @@
+
+Smokeview 6.3.2 - Nov 16 2015
+
+Version: 6.3.2
+Smokeview (64 bit) Build: Git-r4-25-gb4423de
+Platform: LINUX64
+Build Date: Nov 16 2015
+Texture directory path: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: symmetry_test.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+symmetry_test.smv processing completed
+
+beginning wrap up 
+  updating vector slices
+    12 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing blanking array
+  blanking array initialization completed
+initializing 3D smoke/hrrpuv blanking array - complete
+
+  updating smoke3d menu labels
+  update completed
+wrap up completed
+
+processing config file: /home/ahamins/GitHub/fds-smv_ahamins/Verification/scripts/../../SMV/for_bundle/smokeview.ini
+processing config file: symmetry_test.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: LOADVFILE
+script:  symmetry_test_05.sf
+
+script: loading vector slice file symmetry_test_05.sf
+
+Loading slice data: symmetry_test_06.sf
+ global min (slice file): -0.050000 node=(10,5,5)
+ global max (slice file): 0.050000 node=(0,5,5)
+computing slice color levels 
+ 0.2 MB loaded in 0.01 s - rate: 213.9 Mb/s (overhead: 0.05 s)
+Loading slice data: symmetry_test_07.sf
+ global min (slice file): -0.000000 node=(3,5,9)
+ global max (slice file): 0.000000 node=(6,5,6)
+computing slice color levels 
+ 0.2 MB loaded in 0.01 s - rate: 183.3 Mb/s (overhead: 0.02 s)
+Loading slice data: symmetry_test_08.sf
+ global min (slice file): -0.050000 node=(5,5,10)
+ global max (slice file): 0.050000 node=(5,5,0)
+computing slice color levels 
+ 0.2 MB loaded in 0.01 s - rate: 183.3 Mb/s (overhead: 0.02 s)
+Loading slice data: symmetry_test_05.sf
+ global min (slice file): 0.000000 node=(0,5,0)
+ global max (slice file): 0.048453 node=(0,5,5)
+computing slice color levels 
+ 0.2 MB loaded in 0.01 s - rate: 213.9 Mb/s (overhead: 0.03 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 48.299999
+
+
+script: RENDERONCE
+script:  symmetry_test
+
+Rendering to: ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES//symmetry_test.png . Completed.
