@@ -11,8 +11,8 @@
 *.f90 text eol=lf
 *.f text eol=lf
 *.m text eol=lf
-*.c text eol=lf
-*.h text eol=lf
+*.c text
+*.h text
 makefile text eol=lf
 *.md text eol=lf
 *.py text eol=lf
