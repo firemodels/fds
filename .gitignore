@@ -47,6 +47,8 @@ Manuals/*/*Guide.pdf
 *.prt5
 *.end
 *.iso
+*.restart
+*.gc
 *_devc.csv
 *_hrr.csv
 *_mass.csv
@@ -69,4 +71,3 @@ Manuals/*/SCRIPT_FIGURES/*/*.tex
 
 # Validation script generated csv files
 Validation/*/FDS_Output_Files/*.csv
-#!Validation/*/FDS_Output_Files/*_[devc].csv
