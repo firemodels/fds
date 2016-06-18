@@ -214,11 +214,11 @@ ELSE
       RN => REACTION(NR)
       TAU_D = MAX(TAU_D,D_Z(MIN(4999,NINT(TMP_IN)),RN%FUEL_SMIX_INDEX))
    ENDDO
-   TAU_D = DELTA**2/MAX(TAU_D,TWO_EPSILON_EB) ! FDS Tech Guide (5.21)
+   TAU_D = DELTA**2/MAX(TAU_D,TWO_EPSILON_EB)                       ! FDS Tech Guide (5.20)
    IF (LES) THEN
-      TAU_U = C_U*RHO_IN*DELTA**2/MAX(MU_IN,TWO_EPSILON_EB)     ! FDS Tech Guide (5.22)
-      TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))                        ! FDS Tech Guide (5.23)
-      MIX_TIME_OUT= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME))   ! FDS Tech Guide (5.20)
+      TAU_U = C_U*RHO_IN*DELTA**2/MAX(MU_IN,TWO_EPSILON_EB)         ! FDS Tech Guide (5.21)
+      TAU_G = SQRT(2._EB*DELTA/(GRAV+1.E-10_EB))                    ! FDS Tech Guide (5.22)
+      MIX_TIME_OUT= MAX(TAU_CHEM,MIN(TAU_D,TAU_U,TAU_G,TAU_FLAME))  ! FDS Tech Guide (5.19)
       VEL_RMS = SQRT(TWTH)*MU_IN/(RHO_IN*C_DEARDORFF*DELTA)
    ELSE
       MIX_TIME_OUT= MAX(TAU_CHEM,TAU_D)
@@ -341,7 +341,7 @@ INTEGRATION_LOOP: DO TIME_ITER = 1,MAX_CHEMISTRY_ITERATIONS
 
    END SELECT INTEGRATOR_SELECT
 
-   ZZ_GET = ZETA*ZZ_UNMIXED + (1._EB-ZETA)*ZZ_MIXED ! FDS Tech Guide (5.30)
+   ZZ_GET = ZETA*ZZ_UNMIXED + (1._EB-ZETA)*ZZ_MIXED ! FDS Tech Guide (5.29)
    ZETA_INOUT = ZETA
 
    DT_ITER = DT_ITER + DT_SUB
@@ -430,7 +430,7 @@ MIXED_MASS_0  = ZZ_IN*TOTAL_MIXED_MASS_0
 
 ! Mixing step
 
-ZETA_OUT = MAX(0._EB,ZETA_IN*EXP(-DT_LOC/TAU_MIX)) ! FDS Tech Guide (5.29)
+ZETA_OUT = MAX(0._EB,ZETA_IN*EXP(-DT_LOC/TAU_MIX)) ! FDS Tech Guide (5.28)
 TOTAL_MIXED_MASS = (1._EB-ZETA_OUT)*CELL_MASS
 MIXED_MASS = MAX(0._EB,MIXED_MASS_0 - (ZETA_OUT - ZETA_IN)*ZZ_UNMIXED*CELL_MASS) ! after mixing step, FDS Tech Guide (5.36)
 ZZ_0 = MIXED_MASS/MAX(TOTAL_MIXED_MASS,TWO_EPSILON_EB) ! FDS Tech Guide (5.37)
@@ -789,9 +789,9 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
       ZZ_P = 1._EB - ZZ_F - ZZ_A
 
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.17)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
+      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.15)
+      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.16)
+      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
 
       ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
       ! mixtures.  At this point these composition vectors are not normalized.
@@ -821,7 +821,7 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
 
       ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
       IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
-         ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.19)
+         ZZ_HAT_F*H_F_N  + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) EXTINCT_2 = .TRUE. ! FDS Tech Guide (5.18)
    ENDIF AIT_IF
 
 ENDDO REACTION_LOOP
@@ -857,9 +857,9 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
       ZZ_P = 1._EB - ZZ_F - ZZ_A
 
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.16)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.17)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
+      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S) ! burned fuel, FDS Tech Guide (5.15)
+      ZZ_HAT_A = ZZ_HAT_F*RN%S ! FDS Tech Guide (5.16)
+      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
 
       ! "GET" indicates a composition vector.  Below we are building up the masses of the constituents in the various
       ! mixtures.  At this point these composition vectors are not normalized.
@@ -890,7 +890,7 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       ! See if enough energy is released to raise the fuel and required "air" temperatures above the critical flame temp.
       IF ( ZZ_HAT_F*(H_F_0 + RN%HEAT_OF_COMBUSTION) + ZZ_HAT_A*H_A_0 + ZZ_HAT_P*H_P_0 < &
            ZZ_HAT_F*H_F_N                           + ZZ_HAT_A*H_A_N + ZZ_HAT_P*H_P_N ) THEN
-         EXTINCT_3(NR) = .TRUE. ! FDS Tech Guide (5.19)
+         EXTINCT_3(NR) = .TRUE. ! FDS Tech Guide (5.18)
       ENDIF
    ENDIF AIT_IF
 
@@ -929,9 +929,9 @@ REACTION_LOOP: DO NR=1,N_REACTIONS
       ZZ_A = ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)
       ZZ_P = 1._EB - ZZ_F - ZZ_A
 
-      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S)             ! burned fuel, FDS Tech Guide (5.16)
-      ZZ_HAT_A = ZZ_HAT_F*RN%S                                             ! FDS Tech Guide (5.17)
-      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.18)
+      ZZ_HAT_F = MIN(ZZ_F,ZZ_MIXED_IN(RN%AIR_SMIX_INDEX)/RN%S)             ! burned fuel, FDS Tech Guide (5.15)
+      ZZ_HAT_A = ZZ_HAT_F*RN%S                                             ! FDS Tech Guide (5.16)
+      ZZ_HAT_P = (ZZ_HAT_A/(ZZ_A+TWO_EPSILON_EB))*(ZZ_F - ZZ_HAT_F + ZZ_P) ! reactant diluent concentration, FDS Tech Guide (5.17)
 
       MWCO2 = 1.0_EB ; MWH2O = 1.0_EB ; MWCO = 1.0_EB
       YCO2  = 0.0_EB ;  YH2O = 0.0_EB ;  YCO = 0.0_EB
