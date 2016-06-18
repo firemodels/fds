@@ -280,7 +280,7 @@ run_auto()
   if [[ "$UPDATE" == "1" ]] ; then
     echo Update the branch $BRANCH.
     git remote update
-    git merge origin/development
+    git merge origin/$BRANCH
   fi
 
 # get info for smokeview
@@ -591,7 +591,7 @@ do_FDS_checkout()
      fi
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
      git remote update >> $OUTPUT_DIR/stage0b 2>&1
-     git merge origin/development >> $OUTPUT_DIR/stage0b 2>&1
+     git merge origin/$BRANCH >> $OUTPUT_DIR/stage0b 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage0b 2>&1
      git submodule foreach git remote update >> $OUTPUT_DIR/stage0b 2>&1
      git submodule foreach git merge origin/master  >> $OUTPUT_DIR/stage0b 2>&1
