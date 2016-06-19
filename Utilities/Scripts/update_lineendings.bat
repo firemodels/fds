@@ -17,7 +17,7 @@ erase %untracked_list% %untracked_count%
 if %nuntracked% GTR 0 (
   echo.
   echo *** This repo has %nuntracked% untracked files.
-  echo Before updating line endings, the repo must be cleaned.
+  echo Clean the repo before proceeding.
   echo 1.  cd to the repo root 
   echo 2.  type: git clean -dxf
   goto eof
@@ -32,7 +32,7 @@ erase %dirtycount%
 if %ndirtycount% GTR 0 (
   echo.
   echo ***Warning: This repo has modified files.
-  echo Commit or revert these changes.
+  echo Commit or revert these changes before proceeding.
   echo Type: git status -uno
   echo to see which files have been changed.
   goto eof

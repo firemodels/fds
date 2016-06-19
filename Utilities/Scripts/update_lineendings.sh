@@ -14,7 +14,7 @@ nuntracked=`git clean -dxfn | wc -l`
 if [ $nuntracked -gt 0 ]; then
   echo ""
   echo "***Warning:  This repo has $nuntracked untracked files."
-  echo Before updating line endings, the repo must be cleaned.
+  echo Clean the repo before proceeding.
   echo 1.  cd to the repo root
   echo 2.  type: git clean -dxf
   exit
@@ -26,7 +26,7 @@ IS_DIRTY=`git describe --long --dirty | grep dirty | wc -l`
 if [ "$IS_DIRTY" == "1" ]; then
   echo ""
   echo "***Warning: This repo has uncommitted changes."
-  echo "Before updating line endings, commit or revert these changes"
+  echo "Commit or revert these changes before proceeding."
   echo "Type: git status -uno"
   echo "to see which files have been changed"
   exit
