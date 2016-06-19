@@ -1,0 +1,25 @@
+
+ <h2><a name="Installing Open MPI from precompiled binaries">Installing Open MPI from precompiled binaries</a></h2>These are the steps to set up and run the MPI version of FDS on Mac OS X <br/><br/><ul><li> Download the latest 64-bit compiled version of the Open MPI libraries for OS X from <a href="https://bintray.com/nist-fire-research/releases/Open_MPI" target="_blank">https://bintray.com/nist-fire-research/releases/Open_MPI</a></li><li> Copy the openmpi<code name="code" class="python">...</code>osx<code name="code" class="python">..</code>.tar.gz file to the /shared directory  (you will need to create this directory if it doesn't currently exist).</li><li> cd to the directory /shared and run</li></ul><blockquote><pre class="codeblock python" name="code">
+sudo tar xvzf openmpi...osx...tar.gz
+  </pre>which will extract the Open MPI libraries to /shared/openmpi<code name="code" class="python">_64</code>.</blockquote><ul><li> Test the MPI version of FDS by typing</li></ul><blockquote><pre class="codeblock python python" name="code">
+fds_mpi
+  </pre>You should see the version number of FDS with no errors.</blockquote>
+Then run FDS MPI cases using the command:
+<blockquote><pre class="codeblock python python python" name="code">
+mpirun -np X fds_mpi fds_case.fds
+  </pre></blockquote>
+where <b>X</b> is the number of processors to use, <b>fds_mpi</b> is the FDS MPI executable, and <b>fds_case.fds</b> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<code name="code" class="python">_64</code>/bin) to your PATH to use the mpirun command.<h2><a name="(Alternative) Compiling Open MPI and FDS">(Alternative) Compiling Open MPI and FDS</a></h2>To build Open MPI and FDS, follow the steps below <br/><br/><ul><li> Install Xcode (free from the Mac App Store), which includes the &quot;Developer Tools&quot;.</li><li> Also, install the &quot;Command Line Tools&quot; in Xcode (Preferences &gt; Downloads).</li><li> Install the OS X Intel C, C++, and Fortran compilers. </li><li> Download and extract Open MPI from <a href="http://www.open-mpi.org/" target="_blank">http://www.open-mpi.org/</a></li><li> cd to the directory that you extracted Open MPI to.</li><li> Install Open MPI using the Intel compiler suite; configure and install using:</li></ul><blockquote><pre class="codeblock python python python python" name="code">
+source /opt/intel/composerxe/bin/compilervars.sh intel64
+./configure --prefix /shared/openmpi_64 CC=icc CXX=icpc F77=ifort FC=ifort CFLAGS=-m64 CXXFLAGS=-m64 FFLAGS=-m64 FCFLAGS=-m64
+  </pre>then type<pre class="codeblock python python python python python" name="code">
+  make
+  </pre>then type<pre class="codeblock python python python python python python" name="code">
+  sudo make install
+  </pre></blockquote><ul><li> Build FDS MPI OS X version from the repository:</li></ul><blockquote><pre class="codeblock python python python python python python python" name="code">
+  cd FDS_Compilation/mpi_intel_osx_64
+  </pre>then<pre class="codeblock python python python python python python python python" name="code">
+  ./make_fds.sh
+  </pre></blockquote>
+You can then run FDS MPI cases using the command:<br/><br/><pre class="codeblock python python python python python python python python python" name="code">
+mpirun -np X fds_mpi_executable fds_case.fds
+</pre>where <b>X</b> is the number of processors to use, <b>fds_mpi_executable</b> is the FDS MPI executable that was built in the above steps, and <b>fds_case.fds</b> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<code name="code" class="python">_64</code>/bin) to your PATH to use the mpirun command.

@@ -1,0 +1,315 @@
+<h4 id="fds-6.5.0">FDS 6.5.0</h4>
+<h6 id="general-enhancementsbug-fixes">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Include computation of baroclinic torque term in the pressure iteration scheme. A number of users have reported numerical instabilities when simulating fires in long, sealed tunnels. The cause of the instabilities has been a mismatch in the pressure field that is solved for in the Poisson equation and the lagged pressure of the baroclinic term.</p></li>
+<li><p>Input parameters added to iterate the radiation solver for multiple mesh cases, but no change in functionality has been made.</p></li>
+<li><p>Fix bug related to discontinuity of HRR after restart.</p></li>
+<li><p>Fix bug related to specific location leakage where LEAK_ENTHALPY=.TRUE.</p></li>
+<li><p>Add HVAC quantities to the restart file</p></li>
+</ul>
+<h4 id="fds-6.4.0">FDS 6.4.0</h4>
+<h6 id="general-enhancementsbug-fixes-1">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Fixed bug in reaction divergence causing below ambient temperatures</p></li>
+<li><p>Fixed bug in species boundedness correction for complex chemistry; this bug was affecting the simple CO mechanism used for Smyth Slot Burner and NIST RSE 1994 validation cases; the Arrhenius constant for the forward CO reaction in the modified Andersen mechanism was recalibrated against the Smyth DNS case with multiple grid resolutions</p></li>
+<li><p>Fixed bugs in thermal conductivity and diffusivity for DNS</p></li>
+<li><p>Limit correction to radiative transport equation (<code>RTE_SOURCE_CORRECTION</code>) to 10</p></li>
+<li><p><code>RTE_SOURCE_CORRECTION</code> has been made global, so there is a single value, even for multi-mesh calculations (previously RTE correction was done mesh by mesh)</p></li>
+<li><p>Default Von Neumann stability constraint set to 1 from 0.5. This should speed up cases where spuriously high turbulent viscosity near edges was causing a severe time step restriction.</p></li>
+<li><p>Various structural changes were made to enable FDS to run with thousands of MPI processes. Strong and weak scaling studies were added to the FDS V&amp;V suite and reported in the FDS User's Guide.</p></li>
+<li><p>CPU time usage is no longer reported as part of the diagnostic output in the <code>CHID.out</code> file. Instead, wall clock time of the various major subroutines is reported in a new file called <code>CHID_cpu.csv</code>. The times are reported as a function of the MPI process, not the mesh.</p></li>
+<li><p>Remove clipping from gas temperature array</p></li>
+<li><p>Fixed bug in HVAC bc for leakage vents. Inflow and outflow boundaries are handled with slightly different logic and the HVAC model was not appropriately selecting the correct set of logic.</p></li>
+<li><p>Allow <code>LEAK_AREA</code> to be a function of compartment pressure via new <code>ZONE</code> inputs <code>LEAK_REFERENCE_PRESSURE</code> and <code>LEAK_PRESSURE_EXPONENT</code>.</p></li>
+</ul>
+<h6 id="inputs">Inputs</h6>
+<ul>
+<li><p>Add <code>AUTO_IGNITION_TEMPERATURE</code> to <code>INIT</code> namelist. This addresses the problem of spurious re-ignition at OPEN boundaries. You can now set a low <code>AIT</code> near the burner surface to act as an ignition source and set a high AIT elsewhere in the domain to prevent spurious re-ignition. An example may be found in the <a href="https://github.com/firemodels/fds-smv/tree/development/Validation/UMD_Line_Burner/FDS_Input_Files">UMD_Line_Burner</a> validation series.</p></li>
+<li><p><code>IBLANK_SMV</code> logical on <code>MISC</code>. If <code>.FALSE.</code>, Smokeview does not store blanking array for obstructions (default is <code>.TRUE.</code>). <code>IBLANK_SMV=.FALSE.</code> speeds up loading Smokeview significantly, even for moderately sized jobs.</p></li>
+<li><p>Add <code>RAMP LOSS</code> to HVAC DUCT input. Multiplies the LOSS by the output of the RAMP. This could be used to specify a variable position damper.</p></li>
+<li><p>Add <code>RAMP_CHI_R</code> on <code>REAC</code> line for time variation of radiative fraction</p></li>
+</ul>
+<h6 id="outputs">Outputs</h6>
+<ul>
+<li><p>Add gas phase quantity <code>SPECIFIC INTERNAL ENERGY</code></p></li>
+<li><p>Fixed bug in <code>VOLUME FLOW</code> across multiple meshes</p></li>
+<li><p>Fixed bug in <code>RADIATIVE HEAT FLUX GAS</code> across multiple meshes</p></li>
+<li><p>Fixed bug in <code>HRRPUV REAC</code></p></li>
+</ul>
+<h4 id="fds-6.3.2">FDS 6.3.2</h4>
+<ul>
+<li>Fix an error related to evaporation of fuel droplets. This release is only a minor fix to 6.3.1.</li>
+</ul>
+<h4 id="fds-6.3.1">FDS 6.3.1</h4>
+<h6 id="general-enhancementsbug-fixes-2">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Fix error in mixing step of combustion model for multiple subtimesteps (does not affect simple chemistry)</p></li>
+<li><p>Output a file called CHID_cpu.csv to record timings of individual routines</p></li>
+<li><p>Output the version of the MPI library in the .out and .err files</p></li>
+<li><p>Add a function call for GET_AVERAGE_SENSIBLE_SPECIFIC_HEAT</p></li>
+<li><p>Fix issues involving the heat of formation for user defined fuels</p></li>
+</ul>
+<h6 id="inputs-1">Inputs</h6>
+<ul>
+<li><p>Add SUPPRESS_DIAGNOSTICS=.TRUE. on DUMP to reduce output for large jobs</p></li>
+<li><p>Add the keyword DT_HVAC to MISC. If set, it will use the value of DT_HVAC specified in the HVAC solver rather than the FDS timestep. This can dampen oscillations in flow/pressure resulting from the fact that the HVAC pressure solution and the FDS pressure solution are not fully coupled. The downside is one will lose some time resolution for actual transient flows in ducts (the larger the value, the closer the solver will be to computing a steady-state solution at each timestep).</p></li>
+</ul>
+<h6 id="outputs-1">Outputs</h6>
+<ul>
+<li>Add QUANTITY='HRRPUV REAC' with REAC_ID to parse heat release rate from multiple reactions</li>
+</ul>
+<h4 id="fds-6.3.0">FDS 6.3.0</h4>
+<h6 id="remove-heat-release-rate-limiter-in-combustion-model">Remove heat release rate limiter in combustion model</h6>
+<p>In past versions of FDS, a bound was set to limit the amount of heat that could be released in a given cell over a given time step. The bound was approximately 2000 kW/m<sup>3</sup>. Without this bound, numerical instabilities could occur if too much heat was added to a grid cell too quickly. Physically, it is impossible to for fuel and oxygen to react and produce such large amounts of energy in a given cell, but since we used a simple infinitely fast chemistry model, it could happen in the model. Now, we handle the combustion chemistry in such a way as to control the mixing time and prevent such large releases. Thus, the input parameters HRRPUV_AVERAGE and HRRPUA_SHEET, which allowed the user to set the upper bound on the heat release rate of a given cell, are not needed and have been removed.</p>
+<h6 id="set-default-radiant-fraction-for-various-fuels">Set default radiant fraction for various fuels</h6>
+<p>The default radiative fraction in FDS has been 0.35; that is, the fire is assumed to radiate 35% of its energy. Most users simply accept this value because the literature does not provide an extensive database of these values. Radiative fraction is not an intrinsic property of a fuel; it varies with the size and environment of the fire. However, some fuels, like methane (natural gas), are known to radiate approximately 20%; and some fuels, like heptane and heavier hydrocarbons, radiate approximately 40%. Starting with FDS 6.3.0, certain select fuels like METHANE and HEPTANE will have default values of RADIATIVE_FRACTION other than 35%. METHANE and the alcohols will be 20%; heavier hydrocarbons 40%. Fuels for which we have no traceable reference will remain at 35%. Also, RADIATIVE_FRACTION is now set on the REAC line, not the RADI line. Old input files will be stopped with an ERROR to emphasize the change.</p>
+<h6 id="implement-multi-fuel-radiant-fraction-model-a.-gupta-et-al.-fm-global-2015">Implement multi-fuel radiant fraction model [<a href="https://sites.google.com/site/fmw2015archive/2015-presentations">A. Gupta et al. FM Global 2015</a>]</h6>
+<p>If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value. For example, if the two fuels are 20% and 40% radiative fraction with, respectively, 80% and 20% of the heat in a grid cell, CHI_R would be 0.8 x 0.2 + 0.2 x 0.4 = 0.24. Thus, CHI_R will vary in space and time.</p>
+<h6 id="modify-mu-and-k-calculation-for-gas-mixtures">Modify mu and k calculation for gas mixtures</h6>
+<p>Determining mu (dynamic viscosity) and k (thermal conductivity) for gas mixtures with high accuracy involves a fairly complex averaging process over all pairs of species in the mixture. Prior to FDS 6.3, this cost was avoided by using a simple mole fraction weighting. This method works well if the mixture components have similar molecular weights. For well-ventilated fires of ordinary combustibles, where the mixture in the computational domain is dominated by N2, O2, CO2, and H2O, this limitation is appropriate. In other uses, such as using FDS to examine hydrogen dispersion, this simple approach does not work as well. In FDS 6.3, a new weighting approach has been implemented using a method developed by the US Bureau of Mines. This approach weights by mole fraction and the square root of the molecular weight. Errors for compositions with large molecular weight differences have been reported as under 10 %.</p>
+<h6 id="change-to-nasa-polynomial-fits-for-specific-heats">Change to NASA polynomial fits for specific heats</h6>
+<p>Polynomial fits for specific heats were changed from JANAF data to NASA polynomials where NASA data is available. The main motivation for this change was to make it easier to do direct comparisons between FDS and Cantera, Chemkin, or other kinetics software where NASA polynomials are typically used. For most users this change will go unnoticed as the differences between the two sets of polynomial fits are small.</p>
+<h6 id="general-enhancementsbug-fixes-3">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Do not include molecular viscosity when computing output quantity SUBGRID KINETIC ENERGY</p></li>
+<li><p>Add additional math control functions EXP, LOG, COS, SIN, ACOS, ASIN</p></li>
+<li><p>Improvements to energy conservation in droplet evaporation</p></li>
+<li><p>Correct order of H and HS (pseudo-pressure) calculation in BAROCLINIC_CORRECTION (code now achieves second-order temporal convergence for variable density flows)</p></li>
+<li><p>Correct VEL_T orientation for synthetic eddy method and particle insertion</p></li>
+</ul>
+<h6 id="inputs-2">Inputs</h6>
+<ul>
+<li>RADIATIVE_FRACTION moved from RADI to REAC</li>
+</ul>
+<h6 id="outputs-2">Outputs</h6>
+<ul>
+<li>TURBULENCE RESOLUTION and SCALAR RESOLUTION have been removed from SLCF and DEVC output until proper handling of resolved TURBULENT KINETIC ENERGY is achieved &quot;on the fly&quot;. For the time being, TKE and K_SGS must be output independently as discussed in the FDS User Guide (see section on <em>A Posteriori Mesh Quality Metrics</em>).</li>
+</ul>
+<h4 id="fds-6.2.0">FDS 6.2.0</h4>
+<h6 id="species-mass-density-transport-overhaul">Species Mass Density Transport Overhaul</h6>
+<p>To address potential realizability violations in species mass fractions (realizability requires Y_i &gt;=0 and sum_i Y_i = 1, for all i), we now solve transport equations for all Ns species and obtain the mass density, rho, from sum_i rhoY_i. This guarantees realizability provided rhoY_i &gt;=0 (i.e., we enforce boundedness). An improved boundedness correction is employed that absorbs any errors in the most abundant species locally (the error absorbing species is not specified <em>a</em> <em>priori</em>).</p>
+<h6 id="general-enhancementsbug-fixes-4">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Corrected Deardorff turbulent viscosity at mesh edges, corners, and mirror boundaries.</p></li>
+<li><p>Fix bug in DNS viscosity where previously only the background species molecular viscosity was being used.</p></li>
+<li><p>Added TGA analysis feature whereby one can conduct a simulated thermogravimetric analysis by just adding a flag to the relevant SURF line.</p></li>
+<li><p>Improvements to RESTART capability to increase reliability.</p></li>
+<li><p>New version of RADCAL that includes updating the original RADCAL to Fortran 2008 and adds additional fuel species beyond the original methane.</p></li>
+<li><p>Fix bug in Poisson solver for multi-mesh cylindrical coordinates.</p></li>
+<li><p>Reduction in the size of MPI data exchanges to reduce the potential for MPI timeout errors.</p></li>
+<li><p>Add ability to define a specified leakage location.</p></li>
+<li><p>Add input file line location for namelist error messages.</p></li>
+<li><p>The Windows version of FDS is compiled with Intel MPI, the Linux version is compiled with OpenMPI 1.8.4 and the Mac OSX version is compiled with OpenMPI 1.8.3 .</p></li>
+</ul>
+<h6 id="inputs-3">Inputs</h6>
+<ul>
+<li><p>SPECIFIC_SOURCE_TERM changed to INTERNAL_HEAT_SOURCE.</p></li>
+<li><p>N_LAYER_CELLS_MAX now user definable.</p></li>
+<li><p>HEAT_TRANSFER_COEFFICIENT_BACK added.</p></li>
+<li><p>GRAVITATIONAL_SETTLING added to allow separate control of gas-phase settling from solid-phase deposition.</p></li>
+<li><p>PR_GAS added as SPEC input to allow user to specify molecular Prandtl number of the gas (default 0.7).</p></li>
+</ul>
+<h6 id="outputs-3">Outputs</h6>
+<ul>
+<li><p>Can specify a SPEC_ID for wall flow quantities.</p></li>
+<li><p>DIFFUSIVITY, MASS FLUX WALL CELL, and MACH NUMBER outputs added.</p></li>
+<li><p>MLR_TOTAL added to hrr file (replaces BURN_RATE).</p></li>
+</ul>
+<h4 id="fds-6.1.2">FDS 6.1.2</h4>
+<ul>
+<li><p>Set CHECK_VN=.TRUE. by default (Von Neumann stability check), helps improve stability.</p></li>
+<li><p>Use Intel MPI for Windows version of FDS.</p></li>
+<li><p>Remove OpenMP flags from MPI builds.</p></li>
+<li><p>Make SECOND_ORDER_INTERPOLATED_BOUNDARY mass conserving.</p></li>
+<li><p>Add +/- versions of VOLUME FLOW WALL, MASS FLOW WALL, and HEAT FLOW WALL output quantities.</p></li>
+<li><p>Remove hard coded limit on the number of SPEC inputs, note other inputs with SPEC_ID such as SURF and REAC are still limited to 20 species.</p></li>
+<li><p>Add RAMP_T_I to specify an initial, in-depth, surface temperature profile.</p></li>
+</ul>
+<h4 id="fds-6.1.1">FDS 6.1.1</h4>
+<ul>
+<li><p>Speed up processing of particles and droplets.</p></li>
+<li><p>Fix bug in <code>'RADIATIVE HEAT FLUX GAS'</code> output.</p></li>
+<li><p>Add <code>'NUMBER OF PARTICLES'</code> and <code>'CPU TIME PER STEP'</code> as <code>DEVC</code> output.</p></li>
+<li><p>Fix radiation heat flux to walls that align with mesh boundary.</p></li>
+<li><p>Add relaxation to HVAC pressure boundary condition.</p></li>
+<li><p>Allow for creation of new primitive species based on a predefined species using the keyword PRIMITIVE.</p></li>
+</ul>
+<h4 id="fds-6.1.0">FDS 6.1.0</h4>
+<h6 id="parallel-computing">Parallel Computing</h6>
+<ul>
+<li><p>Release OpenMP version as the default.</p></li>
+<li><p>Include additional bundled libraries for MPI Linux versions of FDS.</p></li>
+<li><p>Use MPI_IN_PLACE in MPI_ALLGATHERV calls.</p></li>
+</ul>
+<h6 id="species-and-combustion">Species and Combustion</h6>
+<ul>
+<li><p>Fix ability to define a SPEC with a formula and have chemistry picked up by SIMPLE CHEMISTRY.</p></li>
+<li><p>Additional predefined gas and liquid species added</p></li>
+<li><p>Can now define THIRD_BODY reactions (i.e., reactions like A + B + M -&gt; C + M)</p></li>
+</ul>
+<h6 id="boundary-conditions">Boundary Conditions</h6>
+<ul>
+<li><p>Fix vent splitting over meshes for HVAC.</p></li>
+<li><p>Add CONVERT_VOLUME_TO_MASS to SURF for VEL type boundary conditions.</p></li>
+<li><p>Change VOLUME_FLUX to VOLUME_FLOW to be consistent with HVAC.</p></li>
+<li><p>Overhauled treatment of mass flux at solid boundaries.</p></li>
+<li><p>Disallow velocity boundary condition for thin obstructions.</p></li>
+<li><p>MAX_LEAK_PATHS may be set by the user</p></li>
+<li><p>The default BACKING is changed from 'VOID' to 'EXPOSED'</p></li>
+</ul>
+<h6 id="particles">Particles</h6>
+<ul>
+<li>For solid particles with more than one ORIENTATION vector, the radiation heat flux is computed as an integrated average over the appropriate fraction of the surface. Previously, the heat flux was computed to a plate normal to the ORIENTATION vector.</li>
+</ul>
+<h6 id="output">Output</h6>
+<ul>
+<li><p>Add MASS FLOW WALL, HEAT FLOW WALL, and VOLUME FLOW WALL as SOLID_PHASE_OUTPUT device quantities.</p></li>
+<li><p>Add SPEC_ID to duct output quantities</p></li>
+<li><p>Add QUANTITY_RANGE to DEVC for limiting integration when STATISTICS is set</p></li>
+<li><p>Add AMPUA_Z, CPUA_Z, MPUA_Z, and MPUV_Z output quantities.</p></li>
+</ul>
+<h4 id="fds-6.0.1">FDS 6.0.1</h4>
+<ul>
+<li><p>The MPI version of FDS is now compiled with Open MPI 1.6.5.</p></li>
+<li><p>Fixes related to lumped species definitions.</p></li>
+<li><p>Use FLUSH statement instead of CLOSE/OPEN in dump routines.</p></li>
+<li><p>Add ability to modify most thermophysical properties for user-defined mixtures.</p></li>
+<li><p>Fix bug in particle tracking algorithm.</p></li>
+<li><p>Fix initialization of back wall temperature.</p></li>
+<li><p>Add inlet velocity profile functionality via RAMP_V_X, etc., on SURF line.</p></li>
+<li><p>Include FDS User, Technical, Verification, Validation, and Configuration guides in bundle.</p></li>
+</ul>
+<h4 id="fds-6.0.0">FDS 6.0.0</h4>
+<h6 id="hydrodynamics-and-turbulence">Hydrodynamics and Turbulence</h6>
+<ul>
+<li><p>Conservative, total variation diminishing (TVD) scalar transport is implemented: Superbee (LES default) and CHARM (DNS default). These schemes prevent over-shoots and under-shoots in species concentrations and temperature.</p></li>
+<li><p>Improved models for the turbulent viscosity are implemented: Deardorff (default), Dynamic Smagorinsky, and Vreman. These models provide more dynamic range to the flow field for coarse resolution and converge to the correct solution at fine resolution.</p></li>
+<li><p>The conservative form of the sensible enthalpy equation is satisfied by construction in the FDS 6 formulation, eliminating temperature anomalies and energy conservation errors due to numerical mixing.</p></li>
+<li><p>The baroclinic torque is included by default.</p></li>
+<li><p>Improvements are made to the wall functions for momentum and heat flux. An optional wall heat flux model accounts for variable Prandtl number fluids.</p></li>
+<li><p>Jarrin's Synthetic Eddy Method (SEM) is implemented for turbulent boundary conditions at vents.</p></li>
+</ul>
+<h6 id="species-and-combustion-1">Species and Combustion</h6>
+<ul>
+<li><p>Custom species mixtures (&quot;lumped species&quot;) can be defined on the SPEC line.</p></li>
+<li><p>Turbulent combustion is handled with a new partially-stirred batch reactor model. At the subgrid level, species exist in one of two states: unmixed or mixed. The degree of mixing evolves over the FDS time step by the interaction by exchange with the mean (IEM) mixing model. Chemical kinetics may be considered infinitely fast or obey an Arrhenius rate law.</p></li>
+<li><p>It is now possible to transport, produce, and consume toxins such as CO and soot. Chemical mechanisms must be provided by the user and may include reversible reactions.</p></li>
+<li><p>It is now possible to deposit aerosol species onto surfaces.</p></li>
+<li><p>Increased number of predefined species that now include liquid properties.</p></li>
+</ul>
+<h6 id="lagrangian-particles">Lagrangian Particles</h6>
+<ul>
+<li><p>Moving particles can be assigned a SURF_ID.</p></li>
+<li><p>More alternatives and user-defined option are available for the liquid droplet size distribution.</p></li>
+<li><p>The user can specify the radiative properties of the liquid droplets.</p></li>
+<li><p>Drag effects of thin porous media (i.e., window screens) can be simulated using planes of particles.</p></li>
+</ul>
+<h6 id="solid-phase-heat-transfer-and-pyrolysis">Solid Phase Heat Transfer and Pyrolysis</h6>
+<ul>
+<li><p>The basic 1-D heat transfer and pyrolysis model for solid surfaces remains the same, but there has been a change in several of the input parameters to expand functionality and readability of the input file.</p></li>
+<li><p>More attention should be paid on the specification of MATL densities for the pyrolysis model. Unlike FDS 5, now the pyrolysis model tries to determine if the surface should shrink or swell, based on the MATL densities.</p></li>
+</ul>
+<h6 id="hvac">HVAC</h6>
+<ul>
+<li><p>Filters, louvered vents, and heating/cooling capability has been added for HVAC systems.</p></li>
+<li><p>HVAC now functional with MPI.</p></li>
+</ul>
+<h6 id="radiation">Radiation</h6>
+<ul>
+<li><p>!RadCal database extended to include additional fuel species.</p></li>
+<li><p>It is now possible to assign a !RadCal species to a SPEC.</p></li>
+<li><p>In cells with heat release, the emission term is based on a corrected sigma T<sup>4</sup> such that when this term is integrated over the flame volume the specified radiative fraction (default 0.3) is recovered. This differs from FDS 5 and earlier where the radiative fraction times the heat release rate is applied locally as the emission term.</p></li>
+</ul>
+<h6 id="multi-mesh-computations">Multi-mesh Computations</h6>
+<ul>
+<li>By default, FDS now iterates pressure and velocity at mesh and solid boundaries. The error tolerance and maximum number of iterations may be set by the user.</li>
+</ul>
+<h6 id="control-functions">Control functions</h6>
+<ul>
+<li><p>CTRL functions have been extended to include math operations.</p></li>
+<li><p>The evaluation of RAMPs and DEVCs can be stopped, freezing their value, based upon the activation of a device or control function.</p></li>
+</ul>
+<h6 id="devices-and-output">Devices and Output</h6>
+<ul>
+<li><p>Multiple pipe networks can be specified for sprinklers for reduction of flow rate based on the number of operating heads.</p></li>
+<li><p>The numerical value of a control function can be output with a DEVC.</p></li>
+<li><p>A line of devices can be specified using a number of POINTS on one DEVC line.</p></li>
+<li><p>Statistical outputs for RMS, covariance, and correlation coefficient are available.</p></li>
+</ul>
+<h4 id="fds-5.5">FDS 5.5</h4>
+<ul>
+<li><p>Restoration of the baroclinic torque term in the momentum equation, by default (removed in 5.5.3)</p></li>
+<li><p>Secondary breakup model for droplets (simplified version of WAVE model by Reitz 1987)</p></li>
+<li><p>Ability to have a RAMP use a DEVC for the independent variable by the keyword DEVC_ID on RAMP</p></li>
+<li><p>Built-in thermophysical properties for a number of liquids (water and some common fuels)</p></li>
+<li><p>Expanded number of gases with built-in thermophysical properties</p></li>
+<li><p>Expanded set of droplet output quantities from PDPA devices</p></li>
+<li><p>RAMPs and TAUs for EXTERNAL_FLUX on SURF</p></li>
+<li><p>RAMP_PART and TAU_PART on SURF to control PARTICLE_MASS_FLUX</p></li>
+<li><p>Use of a SURF line to describe Lagrangian particles</p></li>
+</ul>
+<h4 id="fds-5.4">FDS 5.4</h4>
+<ul>
+<li><p>Pyrolysis model for solid materials has changed. The most important change is the definition of REFERENCE_TEMPERATURE and the elimination of REFERENCE_RATE. See the FDS User's Guide for more details.</p></li>
+<li><p>Werner-Wengle wall model, a better description of the velocity boundary condition.</p></li>
+<li><p>OpenMP parallelization option. This will allow you to use multiple cores/processors on a single computer to process a single mesh case, or when combined with MPI, will allow each mesh on each computer to exploit the multiple cores/processors.</p></li>
+<li><p>ORIFICE_DIAMETER has been added to PROP inputs to provide a simple way to set droplet velocity. This is an alternative to specifying DROPLET_VELOCITY.</p></li>
+<li><p>Thermally-Induced Electrical Failure (THIEF) model added to predict damage to electrical cables.</p></li>
+</ul>
+<h4 id="fds-5.3">FDS 5.3</h4>
+<ul>
+<li><p>New output quantity: Fractional Effective Dose (FED) by Purser.</p></li>
+<li><p>TIME INTEGRAL statistics is available for device outputs.</p></li>
+<li><p>Yields of any explicitly-defined (via the SPEC line) gas species can be specified on the MATL lines using the new parameter NU_GAS.</p></li>
+<li><p>The user can specify how the sprinkler pipe pressure depends on the number of open nozzles. The flow rate, droplet speed and median diameter are updated correspondingly.</p></li>
+<li><p>The logical keyword DRY has been added to DEVC. When using the mixture fraction and specifying either MASS FRACTION or VOLUME FRACTION, use of DRY will give that fraction minus water vapor (i.e. give an output like a typical gas analyzer).</p></li>
+<li><p>A Phase Doppler Particle Analysis (PDPA) device has been defined for detailed measurements of droplet sprays.</p></li>
+<li><p>A new namelist group called MULT (short for multiplier) allows you to multiply OBSTructions and MESHes easily without having to retype the input lines over and over.</p></li>
+<li><p>A new parameter called BULK_DENSITY has been added to the OBST namelist group to indicate more easily the total combustible mass within an OBSTruction that can BURN_AWAY.</p></li>
+<li><p>Pressure ZONEs can now be opened, and sealed compartments can become unsealed via an OPEN boundary.</p></li>
+<li><p>The output quantity that was once called 'soot density' and the newer version, QUANTITY='DENSITY', SPEC_ID='soot', is now in units of kg/m^3.</p></li>
+<li><p>Device (DEVC) output units can be changed via a CONVERSION_FACTOR.</p></li>
+</ul>
+<h4 id="fds-5.2">FDS 5.2</h4>
+<ul>
+<li><p>A simple &quot;Eddy Dissipation&quot; model is added to predict the mixing time of fuel and oxygen. Previous versions of FDS used the time step, which was tied to the flow velocity via the CFL criterion. The eddy dissipation model ties the mixing time to the turbulent diffusion coefficient, which is ultimately related to the eddy viscosity of the Smagorinsky form of LES. The eddy dissipation concept is based on scaling arguments and involves an empirical coefficient which has been determined by comparing calculations to classical fire plume experiments and correlations.</p></li>
+<li><p>The names of the output quantities have changed, but the old names are still acceptable. The idea is to use parameters like SPEC_ID and PART_ID in conjunction with QUANTITY's like 'MASS FRACTION' and 'VOLUME FRACTION.' Details are in the User's Guide. Also, the underscores in QUANTITY names are no longer needed.</p></li>
+<li><p>The default number of droplets introduced in a spray has increased to 5000 per second, and the insertion time has decreased to 0.01 s. The old values were 1000 and 0.05, respectively.</p></li>
+<li><p>The mean beam length (PATH_LENGTH) for the radiation solver is no longer based on the size of the overall domain, but rather it defaults to 5 times the mesh cell size.</p></li>
+<li><p>It is now possible to declare explicitly a surrogate species for smoke that can be visualized with SMOKE3D and a new output QUANTITY called VISIBILITY.</p></li>
+</ul>
+<h4 id="fds-5.1">FDS 5.1</h4>
+<p>In simulations involving multiple meshes, FDS no longer allows the meshes to be arbitrarily connected. Starting with version 5.1, mesh resolution can only increase or decrease in integer increments. This change in functionality means that some input files that ran previously will no longer run.</p>
+<h4 id="details-of-fds-maintenance-releases">Details of FDS Maintenance Releases</h4>
+<p>Version 6.1.2 - September 26, 2014 (SVN Revision 20564)</p>
+<p>Version 6.1.1 - July 10, 2014 (SVN Revision 19882)</p>
+<p>Version 6.1.0 - May 27, 2014 (SVN Revision 19412)</p>
+<p>Version 6.0.1 - November 26, 2013 (SVN Revision 17534)</p>
+<p>Version 6.0.0 - November 4, 2013 (SVN Revision 17279)</p>
+<p>Version 5.5.3 - October 29, 2010 (SVN Revision 7031)</p>
+<p>Version 5.5.2 - September 3, 2010 (SVN Revision 6706)</p>
+<p>Version 5.5.1 - June 23, 2010 (SVN Revision 6385)</p>
+<p>Version 5.5.0 - April 6, 2010 (SVN Revision 6006)</p>
+<p>Version 5.4.3 - December 4, 2009 (SVN Revision 5210)</p>
+<p>Version 5.4.2 - October 19, 2009 (SVN Revision 4957)</p>
+<p>Version 5.4.1 - September 10, 2009 (SVN Revision 4697)</p>
+<p>Version 5.4.0 - September 1, 2009 (SVN Revision 4629)</p>
+<p>Version 5.3.1 - April 8, 2009 (SVN Revision 3729)</p>
+<p>Version 5.3.0 - January 30, 2009 (SVN Revision 3193)</p>
+<p>Version 5.2.5 - December 10, 2008 (SVN Revision 2828)</p>
+<p>Version 5.2.4 - November 11, 2008 (SVN Revision 2651)</p>
+<p>Version 5.2.3 - August 16, 2008 (SVN Revision 2514)</p>
+<p>Version 5.2.2 - August 16, 2008 (SVN Revision 2510)</p>
+<p>Version 5.2.1 - September 15, 2008 (SVN Revision 2376)</p>
+<p>Version 5.2.0 - August 1, 2008 (SVN Revision 2087)</p>
+<p>Version 5.1.6 - May 8, 2008 (SVN Revision 1673)</p>
+<p>Version 5.1.5 - May 8, 2008 (SVN Revision 1650)</p>
+<p>Version 5.1.4 - March 14, 2008 (SVN Revision 1437)</p>
+<p>Version 5.1.3 - February 26, 2008 (SVN Revision 1373)</p>
+<p>Version 5.1.2 - February 1, 2008 (SVN Revision 1262)</p>
+<p>Version 5.1.1 - January 21, 2008 (SVN Revision 1217)</p>
+<p>Version 5.1.0 - January 8, 2008 (SVN Revision 1162)</p>
+<p>Version 5.0.3 - December 5, 2007 (SVN Revision 1069)</p>
+<p>Version 5.0.2 - November 12, 2007 (SVN Revision 977)</p>
+<p>Version 5.0.1 - October 12, 2007 (SVN Revision 836)</p>
+<p>Version 5.0.0 - October 2, 2007 (SVN Revision 721)</p>
