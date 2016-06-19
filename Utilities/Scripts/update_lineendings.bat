@@ -42,7 +42,7 @@ fi
 :: make sure repo is clean (otherwise untracked files will get committed)
 
 echo Press enter to proceed with line ending update or CTRL c to abort
-pause
+pause>Nul
 git clean -dxf
 
 git add . -u
