@@ -34,6 +34,15 @@ fi
 
 # failsafe, should't get here if repo has untracked files
 # make sure repo is clean (otherwise untracked files will get committed)
+while true; do
+  read -p "Proceed with line ending update? (yes/no) " yn
+  case $yn in
+    [Yy]* ) break;;
+    [Nn]* ) echo "Update cancelled";exit;;
+    * ) echo "Please answer yes or no.";;
+  esac
+done
+
 git clean -dxf
 
 git add . -u
