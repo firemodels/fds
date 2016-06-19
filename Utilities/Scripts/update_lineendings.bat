@@ -1,6 +1,6 @@
 @echo off
-:: *** warning: this script cleans your repo
-::     DO NOT RUN if you have any uncommited work you wish to save
+:: *** this script will not run if there are untracked or modified
+::     files in your repository
 
 :: This script uses commands found at:
 :: https://help.github.com/articles/dealing-with-line-endings
@@ -15,6 +15,7 @@ findstr /R /N "^.*" %untracked_list% | find /C ":" > %untracked_count%
 set /p nuntracked=<%untracked_count%
 erase %untracked_list% %untracked_count%
 if %nuntracked% GTR 0 (
+  echo.
   echo *** This repo has %nuntracked% untracked files.
   echo Before updating line endings, the repo must be cleaned.
   echo 1.  cd to the repo root 
@@ -22,7 +23,26 @@ if %nuntracked% GTR 0 (
   goto eof
 )
 
+set dirtycount=dirtycount.txt
+
+git describe --long --dirty | find /C "dirty" > %dirtycount%
+set /p ndirtycount=<%dirtycount%
+erase %dirtycount%
+
+if %ndirtycount% GTR 0 (
+  echo.
+  echo ***Warning: This repo has modified files.
+  echo Commit or revert these changes.
+  echo Type: git status -uno
+  echo to see which files have been changed.
+  goto eof
+fi
+pause
+
+:: failsafe, should't get here if repo has untracked or modfied files
+:: make sure repo is clean (otherwise untracked files will get committed)
 git clean -dxf
+
 git add . -u
 git commit -m "saving files before refreshing line endings"
 git rm --cached -r .
