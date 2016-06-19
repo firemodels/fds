@@ -5,8 +5,8 @@
 :: This script uses commands found at:
 :: https://help.github.com/articles/dealing-with-line-endings
 
-set untracked_list=untracked_list.txt
-set untracked_count=untracked_count.txt
+set untracked_list=%temp%\untracked_list.txt
+set untracked_count=%temp%\untracked_count.txt
 
 set CURDIR=%CD%
 cd ..\..
@@ -23,7 +23,7 @@ if %nuntracked% GTR 0 (
   goto eof
 )
 
-set dirtycount=dirtycount.txt
+set dirtycount=%temp%\dirtycount.txt
 
 git describe --long --dirty | find /C "dirty" > %dirtycount%
 set /p ndirtycount=<%dirtycount%
