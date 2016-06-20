@@ -67,7 +67,7 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 
 smvluacore: $(SMVLUACORE_FILES)
 	cp $(SMVLUACORE_FILES) .
-	# cannot use $^ here
+# cannot use $^ here
 
 # ------------- libraries used by smokeview -------------------
 
@@ -292,7 +292,6 @@ mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 		$(($(LUA_SCRIPTING),true),-I $(SOURCE_DIR)/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
 		-lgdi32 -lwinmm -lcomdlg32 -lpthread
-	echo $(SMVLUACORE_FILES)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -366,7 +365,7 @@ gnu_osx_64 : $(obj)
 
 .PHONY : clean
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod *.lua *.dll
 
 #-------------- force compilation of string_util.c -----------
 
