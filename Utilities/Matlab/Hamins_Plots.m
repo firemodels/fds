@@ -22,6 +22,6 @@ Manuals_Dir = [pwd, '/../../Manuals/'];
 
 % The relevant rows from FDS_validation_dataplot_inputs.csv are the last arguments of the following call:
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir,[2664:2696]);
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir,[2664:2828]);
      
 display('Hamins_Plots completed successfully!')
