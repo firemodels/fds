@@ -1,5 +1,14 @@
-<h4 id="fds-6.4.0">FDS 6.4.0</h4>
+<h4 id="fds-6.5.0">FDS 6.5.0</h4>
 <h6 id="general-enhancementsbug-fixes">General Enhancements/Bug Fixes</h6>
+<ul>
+<li><p>Include computation of baroclinic torque term in the pressure iteration scheme. A number of users have reported numerical instabilities when simulating fires in long, sealed tunnels. The cause of the instabilities has been a mismatch in the pressure field that is solved for in the Poisson equation and the lagged pressure of the baroclinic term.</p></li>
+<li><p>Input parameters added to iterate the radiation solver for multiple mesh cases, but no change in functionality has been made.</p></li>
+<li><p>Fix bug related to discontinuity of HRR after restart.</p></li>
+<li><p>Fix bug related to specific location leakage where LEAK_ENTHALPY=.TRUE.</p></li>
+<li><p>Add HVAC quantities to the restart file</p></li>
+</ul>
+<h4 id="fds-6.4.0">FDS 6.4.0</h4>
+<h6 id="general-enhancementsbug-fixes-1">General Enhancements/Bug Fixes</h6>
 <ul>
 <li><p>Fixed bug in reaction divergence causing below ambient temperatures</p></li>
 <li><p>Fixed bug in species boundedness correction for complex chemistry; this bug was affecting the simple CO mechanism used for Smyth Slot Burner and NIST RSE 1994 validation cases; the Arrhenius constant for the forward CO reaction in the modified Andersen mechanism was recalibrated against the Smyth DNS case with multiple grid resolutions</p></li>
@@ -32,7 +41,7 @@
 <li>Fix an error related to evaporation of fuel droplets. This release is only a minor fix to 6.3.1.</li>
 </ul>
 <h4 id="fds-6.3.1">FDS 6.3.1</h4>
-<h6 id="general-enhancementsbug-fixes-1">General Enhancements/Bug Fixes</h6>
+<h6 id="general-enhancementsbug-fixes-2">General Enhancements/Bug Fixes</h6>
 <ul>
 <li><p>Fix error in mixing step of combustion model for multiple subtimesteps (does not affect simple chemistry)</p></li>
 <li><p>Output a file called CHID_cpu.csv to record timings of individual routines</p></li>
@@ -60,7 +69,7 @@
 <p>Determining mu (dynamic viscosity) and k (thermal conductivity) for gas mixtures with high accuracy involves a fairly complex averaging process over all pairs of species in the mixture. Prior to FDS 6.3, this cost was avoided by using a simple mole fraction weighting. This method works well if the mixture components have similar molecular weights. For well-ventilated fires of ordinary combustibles, where the mixture in the computational domain is dominated by N2, O2, CO2, and H2O, this limitation is appropriate. In other uses, such as using FDS to examine hydrogen dispersion, this simple approach does not work as well. In FDS 6.3, a new weighting approach has been implemented using a method developed by the US Bureau of Mines. This approach weights by mole fraction and the square root of the molecular weight. Errors for compositions with large molecular weight differences have been reported as under 10 %.</p>
 <h6 id="change-to-nasa-polynomial-fits-for-specific-heats">Change to NASA polynomial fits for specific heats</h6>
 <p>Polynomial fits for specific heats were changed from JANAF data to NASA polynomials where NASA data is available. The main motivation for this change was to make it easier to do direct comparisons between FDS and Cantera, Chemkin, or other kinetics software where NASA polynomials are typically used. For most users this change will go unnoticed as the differences between the two sets of polynomial fits are small.</p>
-<h6 id="general-enhancementsbug-fixes-2">General Enhancements/Bug Fixes</h6>
+<h6 id="general-enhancementsbug-fixes-3">General Enhancements/Bug Fixes</h6>
 <ul>
 <li><p>Do not include molecular viscosity when computing output quantity SUBGRID KINETIC ENERGY</p></li>
 <li><p>Add additional math control functions EXP, LOG, COS, SIN, ACOS, ASIN</p></li>
@@ -79,7 +88,7 @@
 <h4 id="fds-6.2.0">FDS 6.2.0</h4>
 <h6 id="species-mass-density-transport-overhaul">Species Mass Density Transport Overhaul</h6>
 <p>To address potential realizability violations in species mass fractions (realizability requires Y_i &gt;=0 and sum_i Y_i = 1, for all i), we now solve transport equations for all Ns species and obtain the mass density, rho, from sum_i rhoY_i. This guarantees realizability provided rhoY_i &gt;=0 (i.e., we enforce boundedness). An improved boundedness correction is employed that absorbs any errors in the most abundant species locally (the error absorbing species is not specified <em>a</em> <em>priori</em>).</p>
-<h6 id="general-enhancementsbug-fixes-3">General Enhancements/Bug Fixes</h6>
+<h6 id="general-enhancementsbug-fixes-4">General Enhancements/Bug Fixes</h6>
 <ul>
 <li><p>Corrected Deardorff turbulent viscosity at mesh edges, corners, and mirror boundaries.</p></li>
 <li><p>Fix bug in DNS viscosity where previously only the background species molecular viscosity was being used.</p></li>
