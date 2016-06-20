@@ -1,6 +1,10 @@
 #ifndef SMOKEHEADERS_H_DEFINED
 #define SMOKEHEADERS_H_DEFINED
 
+#ifdef pp_LUA
+#include "gd.h"
+#endif
+
 EXTERNCPP void update_show_slice_in_obst(void);
 EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
@@ -729,11 +733,7 @@ EXTERNCPP void drawventdataPROFILE(void);
 EXTERNCPP void drawventdataSLAB(void);
 EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
-#ifdef LUA__SCRIPTING
-EXTERNCPP void RenderFrame(int view_mode, char *basename);
-#else
 EXTERNCPP void RenderFrame(int view_mode);
-#endif
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
 EXTERNCPP void PART_CB_INIT(void);
 EXTERNCPP void Slice_CB(int var);
@@ -903,6 +903,10 @@ EXTERNCPP void setisolabels(float smin, float smax,
 EXTERNCPP void getIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
 EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
+#ifdef pp_LUA
+EXTERNCPP int SVimage2var(int rendertype, int woffset, int width, int hoffset, int height, gdImagePtr *RENDERimage);
+#endif
+
 EXTERNCPP void update_showhidebuttons(void);
 EXTERNCPP void update_fileload(void);
 EXTERNCPP void CalcTriNormal(float *v1, float *v2, float *v3, float *norm);

@@ -37,6 +37,11 @@ void DrawCircVentsApproxSolid(int option){
       float dx;
 
       cvi = meshi->cventinfo + j;
+
+      // check for visibility
+
+      if(cvi->showtimelist!=NULL&&cvi->showtimelist[itimes]==0)continue;
+
       glColor3fv(cvi->color);
       if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
         dx=0.001;
@@ -183,6 +188,11 @@ void DrawCircVentsApproxOutline(int option){
       int in_circle;
 
       cvi = meshi->cventinfo + j;
+ 
+      // check for visibility
+
+      if(cvi->showtimelist!=NULL&&cvi->showtimelist[itimes]==0)continue;
+
       glColor3fv(cvi->color);
       if(cvi->dir==UP_X||cvi->dir==UP_Y||cvi->dir==UP_Z){
         dx=0.001;
@@ -350,6 +360,10 @@ void DrawCircVentsExactSolid(int option){
 
       cvi = meshi->cventinfo + j;
 
+      // check for visibility
+
+      if(cvi->showtimelist!=NULL&&cvi->showtimelist[itimes]==0)continue;
+
       if(option==VENT_CIRCLE){
         x0 = cvi->origin[0];
         yy0 = cvi->origin[1];
@@ -455,6 +469,10 @@ void DrawCircVentsExactOutline(int option){
       float width, height;
 
       cvi = meshi->cventinfo + j;
+
+      // check for visibility
+
+      if(cvi->showtimelist!=NULL&&cvi->showtimelist[itimes]==0)continue;
 
       if(option==VENT_CIRCLE){
         x0 = cvi->origin[0];

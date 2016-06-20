@@ -568,6 +568,14 @@ void readsmv_dynamic(char *file){
       FREEMEMORY(vi->showhide);
       FREEMEMORY(vi->showtime);
     }
+    for (j = 0; j<meshi->ncvents; j++) {
+      cventdata *cvi;
+
+      cvi = meshi->cventinfo + j;
+      cvi->nshowtime = 0;
+      FREEMEMORY(cvi->showhide);
+      FREEMEMORY(cvi->showtime);
+    }
   }
   for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
     devicedata *devicei;
@@ -613,15 +621,17 @@ void readsmv_dynamic(char *file){
     ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
+    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1||
+       match(buffer, "OPEN_CVENT") == 1 || match(buffer, "CLOSE_CVENT") == 1) {
       meshdata *meshi;
       int len;
-      ventdata *vi;
-      int showvent, blocknumber, tempval;
+      int showvent, blocknumber, tempval, isvent;
 
       do_pass2=1;
       showvent=1;
-      if(match(buffer,"CLOSE_VENT") == 1)showvent=0;
+      isvent = 0;
+      if(match(buffer, "CLOSE_VENT") == 1 || match(buffer, "OPEN_VENT") == 1)isvent = 1;
+      if(match(buffer,"CLOSE_VENT") == 1 || match(buffer, "CLOSE_CVENT") == 1)showvent = 0;
       if(nmeshes>1){
         blocknumber=ioffset-1;
       }
@@ -650,9 +660,26 @@ void readsmv_dynamic(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time_local);
       tempval--;
-      if(meshi->ventinfo==NULL||tempval<0||tempval>=meshi->nvents)continue;
-      vi=meshi->ventinfo+tempval;
-      vi->nshowtime++;
+      if(tempval<0)continue;
+      if(isvent == 1) {
+        if(meshi->ventinfo == NULL || tempval >= meshi->nvents)continue;
+      }
+      else {
+        if(meshi->cventinfo == NULL || tempval >= meshi->ncvents)continue;
+      }
+      if(isvent == 1) {
+        ventdata *vi;
+
+        vi = meshi->ventinfo + tempval;
+        vi->nshowtime++;
+      }
+      else {
+        cventdata *cvi;
+
+        cvi = meshi->cventinfo + tempval;
+        cvi->showtimelist = NULL;
+        cvi->nshowtime++;
+      }
       continue;
     }
   /*
@@ -991,13 +1018,15 @@ void readsmv_dynamic(char *file){
     ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
+    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1||
+       match(buffer, "OPEN_CVENT") == 1 || match(buffer, "CLOSE_CVENT") == 1) {
       meshdata *meshi;
-      int len,showvent,blocknumber,tempval;
-      ventdata *vi;
+      int len,showvent,blocknumber,tempval,isvent;
 
       showvent=1;
-      if(match(buffer,"CLOSE_VENT") == 1)showvent=0;
+      isvent = 0;
+      if(match(buffer, "CLOSE_VENT") == 1 || match(buffer, "OPEN_VENT") == 1)isvent = 1;
+      if(match(buffer,"CLOSE_VENT") == 1|| match(buffer, "CLOSE_CVENT") == 1)showvent=0;
       if(nmeshes>1){
         blocknumber=ioffset-1;
       }
@@ -1026,23 +1055,46 @@ void readsmv_dynamic(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time_local);
       tempval--;
-      if(meshi->ventinfo==NULL)continue;
-      if(tempval<0||tempval>=meshi->nvents)continue;
-      vi=meshi->ventinfo+tempval;
-      if(vi->showtime==NULL){
-        NewMemory((void **)&vi->showtime,(vi->nshowtime+1)*sizeof(float));
-        NewMemory((void **)&vi->showhide,(vi->nshowtime+1)*sizeof(unsigned char));
-        vi->nshowtime=1;
-        vi->showtime[0]=0.0;
-        vi->showhide[0]=1;
+      if(isvent == 1) {
+        ventdata *vi;
+
+        if(meshi->ventinfo == NULL || tempval < 0 || tempval >= meshi->nvents)continue;
+        vi = meshi->ventinfo + tempval;
+        if(vi->showtime == NULL) {
+          NewMemory((void **)&vi->showtime, (vi->nshowtime + 1) * sizeof(float));
+          NewMemory((void **)&vi->showhide, (vi->nshowtime + 1) * sizeof(unsigned char));
+          vi->nshowtime = 1;
+          vi->showtime[0] = 0.0;
+          vi->showhide[0] = 1;
+        }
+        if(showvent == 1) {
+          vi->showhide[vi->nshowtime] = 1;
+        }
+        else {
+          vi->showhide[vi->nshowtime] = 0;
+        }
+        vi->showtime[vi->nshowtime++] = time_local;
       }
-      if(showvent==1){
-        vi->showhide[vi->nshowtime]=1;
+      else {
+        cventdata *cvi;
+
+        if(meshi->cventinfo == NULL || tempval < 0 || tempval >= meshi->ncvents)continue;
+        cvi = meshi->cventinfo + tempval;
+        if(cvi->showtime == NULL) {
+          NewMemory((void **)&cvi->showtime, (cvi->nshowtime + 1) * sizeof(float));
+          NewMemory((void **)&cvi->showhide, (cvi->nshowtime + 1) * sizeof(unsigned char));
+          cvi->nshowtime = 1;
+          cvi->showtime[0] = 0.0;
+          cvi->showhide[0] = 1;
+        }
+        if(showvent == 1) {
+          cvi->showhide[cvi->nshowtime] = 1;
+        }
+        else {
+          cvi->showhide[cvi->nshowtime] = 0;
+        }
+        cvi->showtime[cvi->nshowtime++] = time_local;
       }
-      else{
-        vi->showhide[vi->nshowtime]=0;
-      }
-      vi->showtime[vi->nshowtime++]=time_local;
       continue;
     }
   /*
@@ -6703,6 +6755,9 @@ typedef struct {
         cvi->cvent_id=-1;
         cvi->color=NULL;
         cvi->blank=NULL;
+        cvi->showtime = NULL;
+        cvi->showhide = NULL;
+        cvi->showtimelist = NULL;
 
         origin=cvi->origin;
         s_num[0]=-1;
@@ -8593,7 +8648,7 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
-    if (match(buffer, "COLORBAR_SPLIT") == 1) {
+    if(match(buffer, "COLORBAR_SPLIT") == 1) {
       int ii;
 
       fgets(buffer, 255, stream);
@@ -8616,7 +8671,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "GEOMDIAGS") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics);
+      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics, 
+        &highlight_edge0, &highlight_edge1, &highlight_edge2, &highlight_edgeother);
       continue;
     }
     if(match(buffer, "GEOMSHOW") == 1){
@@ -8842,10 +8898,10 @@ int readini2(char *inifile, int localfile){
       int dummy;
 
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i %i %i %i", &show_iso_solid, &show_iso_outline, &show_iso_points, &show_iso_normal, &dummy, &smooth_iso_normal);
+      sscanf(buffer, "%i %i %i %i %i %i", &show_iso_solid, &show_iso_outline, &show_iso_verts, &show_iso_normal, &dummy, &smooth_iso_normal);
       ONEORZERO(show_iso_solid);
       ONEORZERO(show_iso_outline);
-      ONEORZERO(show_iso_points);
+      ONEORZERO(show_iso_verts);
       ONEORZERO(show_iso_normal);
       ONEORZERO(smooth_iso_normal);
 #ifdef pp_BETA
@@ -8853,7 +8909,7 @@ int readini2(char *inifile, int localfile){
 #else
       show_iso_normal = 0;
 #endif
-      visAIso = show_iso_solid * 1 + show_iso_outline * 2 + show_iso_points * 4;
+      visAIso = show_iso_solid * 1 + show_iso_outline * 2 + show_iso_verts * 4;
       continue;
     }
     if(match(buffer, "SHOWSTREAK") == 1){
@@ -9099,7 +9155,7 @@ int readini2(char *inifile, int localfile){
       if(devicenorm_length<0.0 || devicenorm_length>1.0)devicenorm_length = 0.1;
       continue;
     }
-	if (match(buffer, "SHOWHRRLABEL") == 1) {
+	if(match(buffer, "SHOWHRRLABEL") == 1) {
 		fgets(buffer, 255, stream);
 		sscanf(buffer, "%i", &visHRRlabel);
 		ONEORZERO(visHRRlabel);
@@ -9732,7 +9788,8 @@ int readini2(char *inifile, int localfile){
 
       CheckMemory;
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i", &nrgb_ini, &usetexturebar, &colorbar_select_index);
+      sscanf(buffer, "%i %i %i %i", &nrgb_ini, &usetexturebar, &colorbar_select_index, &colorband);
+      colorband = CLAMP(colorband, 1, 10);
       FREEMEMORY(rgb_ini);
       if(NewMemory((void **)&rgb_ini, 4 * nrgb_ini*sizeof(float)) == 0)return 2;
       rgb_ini_copy = rgb_ini;
@@ -10314,7 +10371,7 @@ int readini2(char *inifile, int localfile){
       visAIso &= 7;
       show_iso_solid = (visAIso & 1) / 1;
       show_iso_outline = (visAIso & 2) / 2;
-      show_iso_points = (visAIso & 4) / 4;
+      show_iso_verts = (visAIso & 4) / 4;
       continue;
     }
     if(trainer_mode == 0 && windowresized == 0){
@@ -11895,7 +11952,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "BOUNDCOLOR\n");
   fprintf(fileout, " %f %f %f\n", boundcolor[0], boundcolor[1], boundcolor[2]);
   fprintf(fileout, "COLORBAR\n");
-  fprintf(fileout," %i %i %i\n",nrgb,usetexturebar,colorbar_select_index);
+  fprintf(fileout," %i %i %i %i\n",nrgb,usetexturebar,colorbar_select_index,colorband);
   for(i=0;i<nrgb;i++){
     fprintf(fileout," %f %f %f\n",rgb[i][0],rgb[i][1],rgb[i][2]);
   }
@@ -12105,7 +12162,8 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "FRAMERATEVALUE\n");
   fprintf(fileout, " %i\n", frameratevalue);
   fprintf(fileout, "GEOMDIAGS\n");
-  fprintf(fileout, " %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics);
+  fprintf(fileout, " %i %i %i %i %i %i %i\n", structured_isopen, unstructured_isopen, show_geometry_diagnostics,
+    highlight_edge0, highlight_edge1, highlight_edge2, highlight_edgeother);
   fprintf(fileout, "GEOMSHOW\n");
   fprintf(fileout, " %i %i %i %i %i\n", show_faces_interior, show_faces_exterior, show_faces_solid, show_faces_outline, smooth_geom_normal);
   fprintf(fileout, " %i %i %i %i\n", show_volumes_interior, show_volumes_exterior, show_volumes_solid, show_volumes_outline);
@@ -12232,7 +12290,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "SHOWTRACERSALWAYS\n");
   fprintf(fileout, " %i\n", show_tracers_always);
   fprintf(fileout, "SHOWTRIANGLES\n");
-  fprintf(fileout, " %i %i %i %i 1 %i\n", show_iso_solid, show_iso_outline, show_iso_points, show_iso_normal, smooth_iso_normal);
+  fprintf(fileout, " %i %i %i %i 1 %i\n", show_iso_solid, show_iso_outline, show_iso_verts, show_iso_normal, smooth_iso_normal);
   fprintf(fileout, "SHOWTRANSPARENT\n");
   fprintf(fileout, " %i\n", visTransparentBlockage);
   fprintf(fileout, "SHOWTRANSPARENTVENTS\n");

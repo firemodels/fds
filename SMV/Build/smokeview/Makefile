@@ -41,7 +41,7 @@ obj = main.o menus.o IOscript.o IOshooter.o glui_devices.o glui_shooter.o glui_w
       IOpart.o IOzone.o IOiso.o callbacks.o drawGeometry.o\
       glui_colorbar.o skybox.o file_util.o string_util.o startup.o glui_trainer.o\
       shaders.o unit.o threader.o histogram.o translate.o update.o viewports.o\
-      smv_geometry.o geometry.o showscene.o fdsmodules.o\
+      smv_geometry.o showscene.o fdsmodules.o\
       gsmv.o getdata.o getsizes.o glew.o
 
 ifeq ($(LUA_SCRIPTING),true)
@@ -50,7 +50,7 @@ endif
 
 objwin = $(obj:.o=.obj)
 
-INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128
+INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/GLUTINC/glut
 WININC = -I $(SOURCE_DIR)/GLINC -I $(SOURCE_DIR)/pthreads
 
 ifeq ($(LUA_SCRIPTING),true)
@@ -62,10 +62,12 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 	$(SMVLUACORE_DIR)/ssfparser.lua $(SMVLUACORE_DIR)/ssfcommands.lua \
 	$(SMVLUACORE_DIR)/clipping.lua $(SMVLUACORE_DIR)/bounds.lua \
 	$(SMVLUACORE_DIR)/render.lua $(SMVLUACORE_DIR)/load.lua \
-	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua
+	$(SMVLUACORE_DIR)/view.lua $(SMVLUACORE_DIR)/tour.lua \
+	$(SMVLUACORE_DIR)/iniparser.lua $(SMVLUACORE_DIR)/inioptions.lua
 
 smvluacore: $(SMVLUACORE_FILES)
-	cp $(SMVLUACORE_FILES) . # cannot use $^ here
+	cp $(SMVLUACORE_FILES) .
+# cannot use $^ here
 
 # ------------- libraries used by smokeview -------------------
 
@@ -160,7 +162,7 @@ intel_win_64 : CFLAGS    = -O1 -D WIN32 -D pp_INTEL -D _CONSOLE -D X64 -D GLEW_S
 intel_win_64 : LIBLUA    =
 ifeq ($(LUA_SCRIPTING),true)
 intel_win_64 : CFLAGS    += -D pp_LUA
-intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\liblua.lib 
+intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\liblua.lib
 intel_win_64 : SMV_LIBS_WIN += $(WIN_LIBDIR)\lpeg.lib
 intel_win_64 : SMVLUACORE_FILES += $(WIN_LIBDIR)/lpeg.dll
 endif
@@ -180,7 +182,7 @@ intel_win_64 : $(objwin)
 # ------------- intel_linux_64 ----------------
 
 intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
-intel_linux_64 : LIBS_PLAT = 
+intel_linux_64 : LIBS_PLAT =
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
 intel_linux_64 : LIBLUA    =
@@ -290,7 +292,6 @@ mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 		$(($(LUA_SCRIPTING),true),-I $(SOURCE_DIR)/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
 		-lgdi32 -lwinmm -lcomdlg32 -lpthread
-	echo $(SMVLUACORE_FILES)
 
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
 # VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV   OSX   VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV
@@ -364,7 +365,7 @@ gnu_osx_64 : $(obj)
 
 .PHONY : clean
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod *.lua *.dll
 
 #-------------- force compilation of string_util.c -----------
 

@@ -543,7 +543,7 @@ void LabelMenu(int value){
     visHRRlabel=1;
     show_hrrcutoff=1;
     visFramelabel=1;
-	if (hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
+	  if(hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
@@ -814,8 +814,8 @@ void IsoShowMenu(int value){
   case MENU_ISOSHOW_POINTS:
     if(value == MENU_ISOSHOW_SOLID)show_iso_solid=1-show_iso_solid;
     if(value == MENU_ISOSHOW_OUTLINE)show_iso_outline = 1 - show_iso_outline;
-    if(value == MENU_ISOSHOW_POINTS)show_iso_points = 1 - show_iso_points;
-    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    if(value == MENU_ISOSHOW_POINTS)show_iso_verts = 1 - show_iso_verts;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
     if(visAIso!=0){
       plotstate=DYNAMIC_PLOTS;
     }
@@ -870,8 +870,8 @@ void IsoShowMenu(int value){
    case MENU_ISOSHOW_HIDEALL:
     show_iso_solid=0;
     show_iso_outline=0;
-    show_iso_points=0;
-    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    show_iso_verts=0;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=0;
     }
@@ -879,8 +879,8 @@ void IsoShowMenu(int value){
    case MENU_ISOSHOW_SHOWALL:
     show_iso_solid=1;
     show_iso_outline=0;
-    show_iso_points=0;
-    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_points*4;
+    show_iso_verts=0;
+    visAIso=show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
     for(i=0;i<nisolevels;i++){
       showlevels[i]=1;
     }
@@ -2387,6 +2387,8 @@ void ScriptMenu(int value){
 
 /* ------------------ ScriptMenu ------------------------ */
 #ifdef pp_LUA
+// prototype here rather than create a header file for lua_api
+int load_script(char *filename);
 void LuaScriptMenu(int value){
   luascriptfiledata *luascriptfile;
 
@@ -4224,7 +4226,7 @@ void ShowPatchMenu(int value){
       show_patch_outline = 1 - show_patch_outline;
     }
     else if(value == POINTSpatchmenu){
-      show_patch_points = 1 - show_patch_points;
+      show_patch_verts = 1 - show_patch_verts;
     }
     else if(value==INSOLIDpatchmenu){
       show_patch_insolid = 1-show_patch_insolid;
@@ -5232,7 +5234,7 @@ updatemenu=0;
         else{
           glutAddMenuEntry("  outline", OUTLINEpatchmenu);
         }
-        if(show_patch_points==1){
+        if(show_patch_verts==1){
           glutAddMenuEntry("  *points", POINTSpatchmenu);
         }
         else{
