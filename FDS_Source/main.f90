@@ -98,7 +98,7 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = SECOND()
 
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') 'FDS 6.4.0'
+WRITE(VERSION_STRING,'(A)') 'FDS 6.5.0'
 
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
@@ -289,11 +289,11 @@ ENDDO
 
 ! Iterate surface BCs and radiation in case temperatures are not initialized to ambient
 
-DO I=1,NUMBER_INITIAL_ITERATIONS
+DO I=1,INITIAL_RADIATION_ITERATIONS
    DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
       IF (EVACUATION_ONLY(NM)) CYCLE
       CALL WALL_BC(T_BEGIN,DT,NM)
-      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM)
+      IF (RADIATION) CALL COMPUTE_RADIATION(T_BEGIN,NM,1)
    ENDDO
    DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
       CALL MESH_EXCHANGE(2) ! Exchange radiation intensity at interpolated boundaries
@@ -456,18 +456,22 @@ MAIN_LOOP: DO
 
    IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY)
 
+   ! Clip final time step
+
+   IF ((T+DT)>T_END) DT = MAX(T_END-T,1.E-10_EB)
+
    ! Determine when to dump out diagnostics to the .out file
 
    LO10 = LOG10(REAL(MAX(1,ABS(ICYC)),EB))
-   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. T>=T_END) DIAGNOSTICS = .TRUE.
+   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
 
    ! If evacuation, set up special time iteration parameters
 
    IF (ANY(EVACUATION_ONLY)) CALL EVAC_MAIN_LOOP
 
-   !============================================================================================================================
-   !                                          Start of Predictor part of time step
-   !============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Predictor part of time step
+   !================================================================================================================================
 
    PREDICTOR = .TRUE.
    CORRECTOR = .FALSE.
@@ -611,11 +615,11 @@ MAIN_LOOP: DO
 
    ! Advance the time to start the CORRECTOR step
 
-    T = T + DT
+   T = T + DT
 
-   !===============================================================================================================================
-   !                                          Start of Corrector part of time step
-   !===============================================================================================================================
+   !================================================================================================================================
+   !                                           Start of Corrector part of time step
+   !================================================================================================================================
 
    CORRECTOR = .TRUE.
    PREDICTOR = .FALSE.
@@ -654,9 +658,27 @@ MAIN_LOOP: DO
          CALL BNDRY_VEG_MASS_ENERGY_TRANSFER(T,DT,NM)
          IF (VEG_LEVEL_SET_COUPLED) CALL LEVEL_SET_FIRESPREAD(T,DT,1)
       ENDIF
-      CALL COMPUTE_RADIATION(T,NM)
-      CALL DIVERGENCE_PART_1(T,DT,NM)
    ENDDO COMPUTE_WALL_BC_2A
+
+   DO ITER=1,RADIATION_ITERATIONS
+      DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+         IF (EVACUATION_SKIP(NM)) CYCLE
+         CALL COMPUTE_RADIATION(T,NM,ITER)
+      ENDDO
+      IF (RADIATION_ITERATIONS>1) THEN  ! Only do an MPI exchange of radiation intensity if multiple iterations are requested.
+         DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+            CALL MESH_EXCHANGE(2)
+            IF (ICYC>1) EXIT
+         ENDDO
+      ENDIF
+   ENDDO
+
+   ! Start the computation of the divergence term.
+
+   DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
+      IF (EVACUATION_SKIP(NM)) CYCLE
+      CALL DIVERGENCE_PART_1(T,DT,NM)
+   ENDDO
 
    ! In most LES fire cases, a correction to the source term in the radiative transport equation is needed.
 
@@ -699,12 +721,14 @@ MAIN_LOOP: DO
    CALL POST_RECEIVES(6)
    CALL MESH_EXCHANGE(6)
 
-   ! Exchange radiation at interpolated boundaries
+   ! Exchange radiation intensity at interpolated boundaries if only one iteration of the solver is requested.
 
-   DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
-      CALL MESH_EXCHANGE(2)
-      IF (ICYC>1) EXIT
-   ENDDO
+   IF (RADIATION_ITERATIONS==1) THEN
+      DO ANG_INC_COUNTER=1,ANGLE_INCREMENT
+         CALL MESH_EXCHANGE(2)
+         IF (ICYC>1) EXIT
+      ENDDO
+   ENDIF
 
    ! Force normal components of velocity to match at interpolated boundaries
 
@@ -745,7 +769,7 @@ MAIN_LOOP: DO
 
    ! Dump out diagnostics
 
-   IF (DIAGNOSTICS .OR. T>=T_END) THEN
+   IF (DIAGNOSTICS) THEN
       CALL WRITE_STRINGS
       IF (.NOT.SUPPRESS_DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
       IF (MYID==0) CALL WRITE_DIAGNOSTICS(T,DT)
@@ -765,7 +789,7 @@ MAIN_LOOP: DO
 
    ! Dump a restart file if necessary
 
-   IF ((T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR.  RADIATION_COMPLETED)) THEN
+   IF ( (T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR. RADIATION_COMPLETED) ) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE
          CALL DUMP_RESTART(T,DT,NM)
@@ -1117,7 +1141,7 @@ SUBROUTINE PRESSURE_ITERATION_SCHEME
 ! Iterate calls to pressure solver until velocity tolerance is satisfied
 
 INTEGER :: NM_MAX_V,NM_MAX_P
-REAL(EB) :: TNOW,VELOCITY_ERROR_MAX_OLD
+REAL(EB) :: TNOW,VELOCITY_ERROR_MAX_OLD,PRESSURE_ERROR_MAX_OLD
 
 PRESSURE_ITERATIONS = 0
 
@@ -1208,8 +1232,11 @@ PRESSURE_ITERATION_LOOP: DO
    ! Exit the iteration loop if satisfactory progress is not achieved
 
    IF (SUSPEND_PRESSURE_ITERATIONS .AND. ICYC>10) THEN
-      IF (PRESSURE_ITERATIONS>3 .AND.  MAXVAL(VELOCITY_ERROR_MAX)>0.75_EB*VELOCITY_ERROR_MAX_OLD) EXIT PRESSURE_ITERATION_LOOP
+      IF (PRESSURE_ITERATIONS>3 .AND.  &
+         MAXVAL(VELOCITY_ERROR_MAX)>0.75_EB*VELOCITY_ERROR_MAX_OLD .AND. &
+         MAXVAL(PRESSURE_ERROR_MAX)>0.75_EB*PRESSURE_ERROR_MAX_OLD) EXIT PRESSURE_ITERATION_LOOP
       VELOCITY_ERROR_MAX_OLD = MAXVAL(VELOCITY_ERROR_MAX)
+      PRESSURE_ERROR_MAX_OLD = MAXVAL(PRESSURE_ERROR_MAX)
    ENDIF
 
 ENDDO PRESSURE_ITERATION_LOOP

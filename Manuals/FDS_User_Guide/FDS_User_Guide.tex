@@ -1711,7 +1711,7 @@ Another limitation of the pressure solver is that at solid surfaces that are not
 
 If either the error in the normal component of the velocity at a mesh interface or at a solid boundary is large, you can reduce it by making more than the default number of calls to the pressure solver at each time step. To do so, specify {\ct VELOCITY\_TOLERANCE} on the {\ct PRES} line to be the maximum allowable normal velocity component on the solid boundary or the largest error at a mesh interface. It is in units of m/s. If you set this, experiment with different values, and monitor the number of pressure iterations required at each time step to achieve your desired tolerance. The default value is $\dx/2$, where $\dx$ is the characteristic grid cell size. The number of iterations are written out to the file {\ct CHID.out}. If you use a value that is too small, the CPU time required might be prohibitive. The maximum number of iterations for each half of the time step is given by {\ct MAX\_PRESSURE\_ITERATIONS}, also on the {\ct PRES} line. Its default value is 10.
 
-By default, FDS will suspend the pressure iterations if the error is not reduced by at least 25~\% at each step. If you do not want FDS to suspend the pressure iteration, add {\ct SUSPEND\_PRESSURE\_ITERATIONS=.FALSE.} to the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or {\ct MAX\_PRESSURE\_ITERATIONS}.
+By default, FDS will suspend the pressure iterations if the error is not reduced by at least 25~\% at each step. If you do not want FDS to suspend the pressure iteration, set {\ct SUSPEND\_PRESSURE\_ITERATIONS} to {\ct .FALSE.} on the {\ct PRES} line. This will be done automatically if you change the default values of {\ct VELOCITY\_TOLERANCE} or {\ct MAX\_PRESSURE\_ITERATIONS}.
 
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
@@ -1767,16 +1767,34 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 
 \subsection{Pressure Considerations in Long Tunnels}
 
-A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the perturbation pressure, $\tp$. In the momentum equation, the pressure term is decomposed as follows:
+A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the pressure, $\tp$ (the tilde indicates that this is the {\em perturbation} pressure, or pressure above background). To solve for $\tp$, an elliptic PDE is formed by taking the divergence of the momentum equation, which contains the term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
+\be
+   \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n} = \; \cdots
+\ee
+where $n$ indicates the current time step. However, this equation cannot be solved efficiently because the matrix of the linear system of equations that is formed when discretizing it does not have constant coefficients because the density, $\rho^n$, changes with each new time step, $n$. To get around this problem, the pressure term in the momentum equation is decomposed as follows:
 \be
    \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right) \label{p_decomp}
 \ee
-The equation for the pressure perturbation is formed by taking the divergence of the momentum equation. The two terms on the right hand side of Eq.~(\ref{p_decomp}) are treated differently in the pressure equation in that the pressure in the second term (referred to as the baroclinic torque) is taken from the previous time step and the pressure in the first term is the variable that is solved for. The reason for doing this is that the fast Poisson solver used in FDS only works with \emph{separable} equations; that is, equations of the form:
+which leads to a Poisson equation that can be solved efficiently:
 \be
-   \nabla^2 \left( \frac{\tp^n}{\rho^n} \right) = \tp^{n-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
+   \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) = \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) + \; \cdots
 \ee
-To alleviate numerical problems related to a mismatch between the old and new pressure fields, the pressure equation is solved iteratively until the change in the baroclinic term drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size. If a numerical instability occurs in a simulation involving a tunnel, you could try reducing this value to alleviate the mismatch between old and new pressure fields.
+The superscript $k$ indicates that this equation is solved multiple times, and $k$ indicates the iteration. With each iteration, the old and new values of $\tp$ are driven closer together. The iterations continue\footnote{Keep in mind that the pressure equation iterations continue until three criteria are satisfied. The first deals with the decomposition of the pressure term, the second deals with the normal component of velocity at internal solid surfaces, and the third deals with the mismatch of normal velocity components at mesh interfaces.} until the maximum value of the following expression in discretized form:
+\be
+  \epsilon^k = \max_{ijk} \left| \nabla \cdot \left( \frac{1}{\rho^n} \right) \nabla \tp^{n,k} - \nabla^2 \left( \frac{\tp^{n,k}}{\rho^n} \right) + \nabla \cdot \tp^{n,k-1} \, \nabla \left(\frac{1}{\rho^n} \right) \right|
+\ee
+drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is $20/\dx^2$ where $\dx$ is the characteristic grid cell size. If a numerical instability occurs in a simulation involving a tunnel, you could try reducing this value on the {\ct PRES} line to alleviate the mismatch between old and new pressure fields.
 
+A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in column~8. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in column~13.
+
+Figure~\ref{tunnel_demo} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
+
+\begin{figure}[ht]
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity}
+\includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure}
+\caption[Convergence test for the {\ct tunnel\_demo} test case]{Reduction in velocity and pressure error due to iteration of the pressure solver.}
+\label{tunnel_demo}
+\end{figure}
 
 
 \subsection{Parameters Related to the Background Pressure when Breaking Pressure Zones}
@@ -1790,10 +1808,6 @@ breach. Its default value is 1~s, meaning that equilibrium is achieved in roughl
 
 
 
-
-
-
-\clearpage
 
 \section{Setting Limits: The \texorpdfstring{{\tt CLIP}}{CLIP} Namelist Group (Table \ref{tbl:CLIP})}
 \label{info:CLIP}
@@ -2066,12 +2080,13 @@ Periodic vents may not be used to connect offset vents or vents in different coo
 \subsubsection{Circular Vents}
 \label{sec:circvents}
 
-Circular or semi-circular vents may be specified as the intersection of a rectangle with coordinates {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells that are assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the intersection. As discussed in Section~\ref{info:spread}, the coordinates {\ct XYZ} on a {\ct VENT} line also triggers a radially spreading fire.  If this behavior is unwanted, specify a large value for the {\ct SPREAD\_RATE}. In the example case called {\ct Fires/circular\_burner.fds}, the following two lines create a circular vent that is 1~m in diameter and flows propane gas at a rate of 0.02~kg/m$^2$/s:
+Circular or semi-circular vents may be specified as the intersection of a rectangle with coordinates {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells that are assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the intersection. In the example case called {\ct Fires/circular\_burner.fds}, the following two lines create a circular vent that is 1~m in diameter and flows propane gas at a rate of 0.02~kg/m$^2$/s:
 \begin{lstlisting}
 &SURF ID='BURNER', MASS_FLUX(1)=0.02, SPEC_ID(1)='PROPANE', TAU_MF(1)=0.01 /
-&VENT XB=-0.6,0.6,-0.6,0.6,0,0, XYZ=0,0,0, RADIUS=0.5, SURF_ID='BURNER' /
+&VENT XB=-0.6,0.6,-0.6,0.6,0,0, XYZ=0,0,0, RADIUS=0.5, SURF_ID='BURNER',
+      SPREAD_RATE=0.05 /
 \end{lstlisting}
-The {\ct XB} coordinates designate the orientation of the vent. In this case, the extent of the area specified by {\ct XB} is large enough to contain the entire circle. Note also in this example that the coordinates of the center of the circle, {\ct XYZ}, automatically trigger a radially spreading fire whose default spread rate is 0.05~m/s. The mass flux of propane through the vent is plotted in Fig.~\ref{circ_burn}. Notice that the mass flux increases following a ``t-squared'' profile. This is what is expected of a fire which spreads radially at a linear rate. In this case, the fire reaches the {\ct RADIUS} of the circle in 10~s, as expected. Note also that the parameter {\ct TAU\_MF} indicates that the fuel should ramp up quickly once the flame front reaches a given grid cell. In other words, {\ct TAU\_MF} controls the local ramp-up of fuel; the {\ct SPREAD\_RATE} controls the global ramp-up. Following the ramp-up, the fuel flows at a rate equal to the area of the circle times the mass flux of fuel per unit area. Even if the circle is crudely resolved on a coarse grid, the fuel flow rate will be adjusted to produce the desired value governed by the circular vent.
+The {\ct XB} coordinates designate the orientation of the vent. In this case, the extent of the area specified by {\ct XB} is large enough to contain the entire circle. Note also in this example that the parameter {\ct SPREAD\_RATE} causes the fire to spread outward at a rate of 0.05~m/s. The mass flux of propane through the vent is plotted in Fig.~\ref{circ_burn}. Notice that the mass flux increases following a ``t-squared'' profile. This is what is expected of a fire which spreads radially at a linear rate. In this case, the fire reaches the {\ct RADIUS} of the circle in 10~s, as expected. Note also that the parameter {\ct TAU\_MF} indicates that the fuel should ramp up quickly once the flame front reaches a given grid cell. In other words, {\ct TAU\_MF} controls the local ramp-up of fuel; the {\ct SPREAD\_RATE} controls the global ramp-up. Following the ramp-up, the fuel flows at a rate equal to the area of the circle times the mass flux of fuel per unit area. Even if the circle is crudely resolved on a coarse grid, the fuel flow rate will be adjusted to produce the desired value governed by the circular vent.
 \begin{figure}[h]
 \begin{center}
 \includegraphics[width=3in]{SCRIPT_FIGURES/circular_burner}
@@ -2838,7 +2853,7 @@ burning rate yourself, but you still want to simulate the heating up and ``ignit
 are acting in concert. If {\ct HRRPUA} appears alone, the surface will begin burning at the start of the simulation, like a piloted burner. The addition of
 an {\ct IGNITION\_TEMPERATURE} delays burning until your specified temperature is reached. The addition of {\ct HEAT\_OF\_VAPORIZATION}
 tells FDS to account for the energy used to vaporize the fuel. For any of these options, if a {\ct MATL} line is invoked by a {\ct SURF} line containing
-a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. It should have no reaction parameters, product yields, and so on, like
+a specified {\ct HRRPUA}, then that {\ct MATL} ought to have only thermal properties. The {\ct MATL} line should have no reaction parameters, product yields, and so on, like
 those described in the previous sections. By specifying {\ct HRRPUA}, you are controlling the burning rate rather than letting the material pyrolyze based on
 the conditions of the surrounding environment.
 
@@ -5064,7 +5079,7 @@ Here, {\ct T} corresponds to the time and {\ct F} is the fraction of the mass fl
 \caption[HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case]{HRR for {\ct energy\_budget\_adiabatic\_two\_fuels} test case.}
 \label{fig:hrr_two_fuels}
 \end{figure}
-
+Note that when using multiple chemical reactions, you must set {\ct SUPPRESSION=.FALSE.} on the {\ct MISC} line.
 
 \subsection{Special Topic: Using the {\ct EQUATION} input parameter}
 \label{info:EQUATION}
@@ -5186,7 +5201,7 @@ In this case we will combine fast chemistry with finite-rate chemistry to create
 \mathrm{a \, X + b \, Y \overset{H_2O}{\longrightarrow} X_aY_b}
 \end{equation}
 
-However, for the purposes of inputting into FDS, since H$_2$O is neither a product nor a reactant it would not be specified in the chemical reaction using either {\ct REACTION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
+However, for the purposes of inputting into FDS, since H$_2$O is neither a product nor a reactant it would not be specified in the chemical reaction using either {\ct EQUATION} or {\ct NU}.  It would instead be given a rate exponent using {\ct N\_S} to indicate that its presence is required.
 
 Some reactions require the presence of any third body to stabilize the reaction rather than just a specific species.  Reactions of this type are often write in textbooks as
 
@@ -5364,6 +5379,8 @@ Even for a single fuel species the global flame radiative fraction may depend on
 \label{info:RADI_Resolution}
 
 There are several ways to improve the spatial and temporal accuracy of the Finite Volume Method in solving the radiation transport equation (RTE), but these will increase the computation time. You can increase the number of angles from the default 100 with the integer parameter {\ct NUMBER\_RADIATION\_ANGLES}. The frequency of calls to the radiation solver can be changed from every 3 time steps with an integer called {\ct TIME\_STEP\_INCREMENT}. The increment over which the angles are updated can be reduced from 5 with the integer called {\ct ANGLE\_INCREMENT}. If {\ct TIME\_STEP\_INCREMENT} and {\ct ANGLE\_INCREMENT} are both set to 1, the radiation field is completely updated in a single time step, but the cost of the calculation increases significantly. By default, the radiation transport equation is fully updated every 15 time steps.
+
+If you are using multiple meshes, the radiation solver cannot transfer energy from mesh to mesh within a single time step. If you notice an obvious delay in the propagation of radiative intensity from one mesh to another, you can increase the number of times the radiative intensity is updated within a single time step using {\ct RADIATION\_ITERATIONS}, which is 1 by default.
 
 The radiation solver is called before the start of the calculation to establish the radiation field in the event that you specify something to have a non-ambient temperature initially. By default, the radiation and wall boundary routines are iterated 10 times to establish thermal equilibrium. To change the number of iterations, set {\ct NUMBER\_INITIAL\_ITERATIONS} on the {\ct RADI} line.
 
@@ -7487,7 +7504,7 @@ where $t$ is time in minutes and $C_\mathrm{CO}$ is the CO concentration (ppm). 
 \ee
 where $t$ is time in minutes and $C_\mathrm{CN}$ is the concentration (ppm) of HCN corrected for the protective effect of NO$_\mathrm{2}$. $C_\mathrm{CN}$ is calculated as
 \be
-C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2}
+C_\mathrm{CN} = C_\mathrm{HCN} - C_\mathrm{NO_2} - C_\mathrm{NO}
 \ee
 The fraction of an incapacitating dose of NO$_x$ is calculated as
 \be
@@ -9282,15 +9299,16 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \endhead
 {\ct ANGLE\_INCREMENT}              & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 5                 \\ \hline
 {\ct BAND\_LIMITS    }              & Real Array    & Section~\ref{info:RADI_Wide_Band}         &  $\mu$m           &                   \\ \hline
+{\ct INITIAL\_RADIATION\_ITERATIONS}& Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct KAPPA0                   }     & Real          & Section~\ref{info:RADI_Absorption}        & 1/m               & 0                 \\ \hline
 {\ct MIE\_MINIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 0.5               \\ \hline
 {\ct MIE\_MAXIMUM\_DIAMETER}        & Real          & Section~\ref{info:RADI_Absorption}        & $\mu$m            & 1.5$\times D$     \\ \hline
 {\ct MIE\_NDG}                      & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 50                \\ \hline
 {\ct NMIEANG                  }     & Integer       & Section~\ref{info:RADI_Absorption}        &                   & 15                \\ \hline
-{\ct NUMBER\_INITIAL\_ITERATIONS}   & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 10                \\ \hline
 {\ct NUMBER\_RADIATION\_ANGLES}     & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 100               \\ \hline
 {\ct PATH\_LENGTH }                 & Real          & Section~\ref{info:RADI_Wide_Band}         &   m               &                   \\ \hline
 {\ct RADIATION}                     & Logical       & Section~\ref{info:RADI}                   &                   & {\ct .TRUE.}      \\ \hline
+{\ct RADIATION\_ITERATIONS}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 1                 \\ \hline
 {\ct RADTMP                   }     & Real          & Section~\ref{info:RADI_Absorption}        & $^\circ$C         & 900               \\ \hline
 {\ct TIME\_STEP\_INCREMENT}         & Integer       & Section~\ref{info:RADI_Resolution}        &                   & 3                 \\ \hline
 {\ct WIDE\_BAND\_MODEL    }         & Logical       & Section~\ref{info:RADI_Wide_Band}         &                   & {\ct .FALSE.}     \\ \hline
@@ -9552,7 +9570,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RGB(3)}                          & Int.~Triplet    & Section~\ref{info:colors}                 &                     & \small 255,204,102      \\ \hline
 {\ct ROUGHNESS}                       & Real            & Section~\ref{info:WALL_MODEL}             & m                   & 0.                      \\ \hline
 {\ct SPEC\_ID}                        & Character       & Section~\ref{info:MASS_FLUX}              &                     &                         \\ \hline
-{\ct SPREAD\_RATE}                    & Real            & Section~\ref{info:spread}                 & m/s                 & 0.05                    \\ \hline
+{\ct SPREAD\_RATE}                    & Real            & Section~\ref{info:spread}                 & m/s                 &                         \\ \hline
 {\ct STRETCH\_FACTOR(:) }             & Real            & Section~\ref{info:solid_phase_stability}  &                     & 2.                      \\ \hline
 {\ct TAU\_EF}                         & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
 {\ct TAU\_MF(:)}                      & Real            & Section~\ref{info:RAMP_Time}              & s                   & 1.                      \\ \hline
@@ -9985,7 +10003,7 @@ WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2)
 WRITE(LUBF) (((QQ(I,J,K),I=11,I2),J=J1,J2),K=K1,K2) .
         .
 \end{lstlisting}
-{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of lengths 60, 30 and 30, respectively. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
+{\ct QUANTITY}, {\ct SHORT\_NAME} and {\ct UNITS} are character strings of length 30. {\ct NPATCH} is the number of planes (or ``patches'') that make up the solid boundaries plus the external walls. The sextuplet ({\ct I1,I2,J1,J2,K1,K2}) defines the cell nodes of each patch. {\ct IOR} is an integer indicating the orientation of the patch ($\pm 1,\pm 2,\pm 3$). You do not prescribe these. {\ct NB} is the number of the boundary (zero for external walls) and {\ct NM} is the number of the mesh.  Note that the data is planar, thus one pair of cell nodes is the same. Presently, Smokeview is the
 only program available to view the boundary files.
 
 \section{Particle Data}

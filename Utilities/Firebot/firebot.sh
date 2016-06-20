@@ -327,7 +327,8 @@ do_git_checkout()
    echo "Pulling latest revision of branch $BRANCH." >> $OUTPUT_DIR/stage1 2>&1
    if [[ "$UPDATEREPO" == "1" ]] ; then
       echo Updating repo
-      git pull >> $OUTPUT_DIR/stage1 2>&1
+      git remote update >> $OUTPUT_DIR/stage1 2>&1
+      git merge origin/$BRANCH >> $OUTPUT_DIR/stage1 2>&1
    fi
    GIT_REVISION=`git describe --long --dirty`
    GIT_SHORTHASH=`git rev-parse --short HEAD`

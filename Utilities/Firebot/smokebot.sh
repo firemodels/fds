@@ -279,7 +279,8 @@ run_auto()
   fi
   if [[ "$UPDATE" == "1" ]] ; then
     echo Update the branch $BRANCH.
-    git pull 
+    git remote update
+    git merge origin/$BRANCH
   fi
 
 # get info for smokeview
@@ -485,7 +486,8 @@ update_cfast()
           exit
         fi
         echo "Updating cfast repo:" >> $OUTPUT_DIR/stage0a
-        git pull >> $OUTPUT_DIR/stage0a 2>&1
+        git remote update >> $OUTPUT_DIR/stage0a 2>&1
+        git merge origin/master >> $OUTPUT_DIR/stage0a 2>&1
         updateclean="1"
       fi
       if [ "$updateclean" == "" ]; then
@@ -588,7 +590,8 @@ do_FDS_checkout()
        exit
      fi
      echo "Updating branch $BRANCH." >> $OUTPUT_DIR/stage0b 2>&1
-     git pull >> $OUTPUT_DIR/stage0b 2>&1
+     git remote update >> $OUTPUT_DIR/stage0b 2>&1
+     git merge origin/$BRANCH >> $OUTPUT_DIR/stage0b 2>&1
      echo "Updating submodules." >> $OUTPUT_DIR/stage0b 2>&1
      git submodule foreach git remote update >> $OUTPUT_DIR/stage0b 2>&1
      git submodule foreach git merge origin/master  >> $OUTPUT_DIR/stage0b 2>&1

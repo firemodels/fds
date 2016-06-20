@@ -96,7 +96,21 @@ $QFDS -d Heat_Transfer heat_conduction_kc.fds
 $QFDS -d Heat_Transfer insulated_steel_column.fds
 $QFDS -d Heat_Transfer insulated_steel_pipe.fds
 $QFDS -d Heat_Transfer insulated_steel_plate.fds
-$QFDS -d Heat_Transfer ht3d_test_1.fds
+$QFDS -d Heat_Transfer ht3d_nx_10.fds
+$QFDS -d Heat_Transfer ht3d_nx_20.fds
+$QFDS -d Heat_Transfer ht3d_nx_40.fds
+$QFDS -d Heat_Transfer ht3d_nx_80.fds
+$QFDS -d Heat_Transfer ht3d_nx_160.fds
+$QFDS -d Heat_Transfer ht3d_ny_10.fds
+$QFDS -d Heat_Transfer ht3d_ny_20.fds
+$QFDS -d Heat_Transfer ht3d_ny_40.fds
+$QFDS -d Heat_Transfer ht3d_ny_80.fds
+$QFDS -d Heat_Transfer ht3d_ny_160.fds
+$QFDS -d Heat_Transfer ht3d_nz_10.fds
+$QFDS -d Heat_Transfer ht3d_nz_20.fds
+$QFDS -d Heat_Transfer ht3d_nz_40.fds
+$QFDS -d Heat_Transfer ht3d_nz_80.fds
+$QFDS -d Heat_Transfer ht3d_nz_160.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
@@ -462,6 +476,7 @@ $QFDS -t -p 8 -d Pressure_Solver scarc2d_bicg_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_fft_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_cg_8mesh.fds
 $QFDS -t -p 8 -d Pressure_Solver scarc2d_gmg_8mesh.fds
+$QFDS -t -p 8 -d Pressure_Solver tunnel_demo.fds
 
 $QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_32.fds
 $QFDS -t -p 4 -d Scalar_Analytical_Solution shunn3_4mesh_64.fds

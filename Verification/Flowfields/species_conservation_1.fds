@@ -9,7 +9,7 @@
 &SPEC ID='PROPANE' /
 
 &SURF ID='adiabatic wall', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
-&SURF ID='burner', MASS_FLUX(1)=0.0001, SPEC_ID(1)='PROPANE', TMP_FRONT=500., TAU_MF(1)=0.01 / 
+&SURF ID='burner', MASS_FLUX(1)=0.0001, SPEC_ID(1)='PROPANE', TMP_FRONT=500., TAU_MF(1)=0. / 
 
 &VENT XB=-0.5, 0.5,-0.5, 0.5,0.0,0.0,  SURF_ID='burner', COLOR='RED' / 
 &VENT XB=-0.5, 0.5,-0.5, 0.5,4.0,4.0,  SURF_ID='burner', COLOR='RED' / 
