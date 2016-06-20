@@ -179,7 +179,7 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
      cd $FDSREPO
      git remote update &> /dev/null
      git checkout $BRANCH &> /dev/null
-     git pull &> /dev/null
+     git merge origin/$BRANCH &> /dev/null
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [ "$FIREBOTDIR" != "$CURDIR" ]; then
