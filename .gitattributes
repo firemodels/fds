@@ -1,0 +1,52 @@
+# This file is copied from https://help.github.com/articles/dealing-with-line-endings/
+
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Declare files that will always have LF line endings on checkout.
+
+# FDS
+*.f90 text eol=lf
+*.f text eol=lf
+*.fds text eol=lf
+makefile text eol=lf
+Makefile text eol=lf
+
+# smokeview
+*.in text eol=lf
+*.cpp text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.smv text eol=lf
+*.ini text eol=lf
+*.ssf text eol=lf
+*.svo text eol=lf
+*.po text eol=lf
+*.lua text eol=lf
+
+# documents
+*.bib text eol=lf
+*.txt text eol=lf
+*.htm text eol=lf
+*.html text eol=lf
+*.tex text eol=lf
+
+# scripts/output
+*.sh text eol=lf
+# windows batch files need to have crlf line endings on a PC
+*.bat text
+*.csh text eol=lf
+*.csv text eol=lf
+*.m text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.pdf binary
+*.dwg binary
+*.psm binary
+
+# Submodules retain attributes of their respective repos
+/Validation/Submodules/* text=auto

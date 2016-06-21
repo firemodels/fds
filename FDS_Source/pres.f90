@@ -98,17 +98,17 @@ WALL_CELL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          SELECT CASE(IOR)
             CASE( 1)
-               BXS(J,K) = 0.5_EB*(HP(0,J,K)+HP(1,J,K))
+               BXS(J,K) = 0.5_EB*(HP(0,J,K)+HP(1,J,K)) + WALL_WORK1(IW)
             CASE(-1)
-               BXF(J,K) = 0.5_EB*(HP(IBAR,J,K)+HP(IBP1,J,K))
+               BXF(J,K) = 0.5_EB*(HP(IBAR,J,K)+HP(IBP1,J,K)) + WALL_WORK1(IW)
             CASE( 2)
-               BYS(I,K) = 0.5_EB*(HP(I,0,K)+HP(I,1,K))
+               BYS(I,K) = 0.5_EB*(HP(I,0,K)+HP(I,1,K)) + WALL_WORK1(IW)
             CASE(-2)
-               BYF(I,K) = 0.5_EB*(HP(I,JBAR,K)+HP(I,JBP1,K))
+               BYF(I,K) = 0.5_EB*(HP(I,JBAR,K)+HP(I,JBP1,K)) + WALL_WORK1(IW)
             CASE( 3)
-               BZS(I,J) = 0.5_EB*(HP(I,J,0)+HP(I,J,1))
+               BZS(I,J) = 0.5_EB*(HP(I,J,0)+HP(I,J,1)) + WALL_WORK1(IW)
             CASE(-3)
-               BZF(I,J) = 0.5_EB*(HP(I,J,KBAR)+HP(I,J,KBP1))
+               BZF(I,J) = 0.5_EB*(HP(I,J,KBAR)+HP(I,J,KBP1)) + WALL_WORK1(IW)
          END SELECT
 
       ENDIF NOT_OPEN
