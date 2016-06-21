@@ -2,7 +2,9 @@
 
 &MESH IJK=4,4,40,XB=-0.5,0.5,-0.5,0.5, 0,10 /
 
-&TIME T_END=1./ 
+&TIME T_END=1./
+
+&DUMP NFRAMES=200/
 
 &MISC NOISE=.FALSE.,
       DNS=.TRUE.,
