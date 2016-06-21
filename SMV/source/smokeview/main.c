@@ -15,7 +15,7 @@
 #include "lua_api.h"
 #endif
 
-//   version 6.3.5
+//  version 6.3.7
 
 /* ------------------ usage ------------------------ */
 
@@ -101,6 +101,9 @@ void usage(char **argv){
 #endif
 #ifdef pp_LINUX
     strcat(label, ", pp_LINUX");
+#endif
+#ifdef pp_LUA
+    strcat(label, ", pp_LUA");
 #endif
 #ifdef pp_MEMDEBUG
     strcat(label, ", pp_MEMDEBUG");

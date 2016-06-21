@@ -1119,7 +1119,7 @@ ONE_D%TMP_F = ONE_D%TMP(1)
 
 ! Check if fire spreads radially over this surface type, and if so, set T_IGN appropriately
 
-IF (SF%XYZ(1)>-1.E5_EB) THEN
+IF (SF%FIRE_SPREAD_RATE>0._EB) THEN
    ONE_D%T_IGN = T_BEGIN + SQRT((LP%X-SF%XYZ(1))**2 +(LP%Y-SF%XYZ(2))**2 +(LP%Z-SF%XYZ(3))**2)/SF%FIRE_SPREAD_RATE
 ELSE
    ONE_D%T_IGN = SF%T_IGN
@@ -1923,7 +1923,7 @@ ELSE PARTICLE_NON_STATIC_IF ! Drag calculation for stationary, airborne particle
          DRAG_MAX(2) = LP%ACCEL_Y*DT_P/(-VBAR+TWO_EPSILON_EB)
          DRAG_MAX(3) = LP%ACCEL_Z*DT_P/(-WBAR+TWO_EPSILON_EB)
    END SELECT
-   IF (ANY(DRAG_MAX>DRAG_CFL)) DRAG_CFL = MAXVAL(DRAG_MAX)
+   IF (ANY(DRAG_MAX>DRAG_CFL)) DRAG_CFL = MAX(DRAG_CFL,MAXVAL(DRAG_MAX))
 ENDIF PARTICLE_NON_STATIC_IF
 
 END SUBROUTINE MOVE_IN_GAS
@@ -2211,7 +2211,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                         RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*MATERIAL(SF%MATL_INDEX(NMAT))%C_S
                      ELSE
                         RHOCBAR = RHOCBAR + WALL(IW)%ONE_D%RHO(1,NMAT)*&
-                                  EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))*1000._EB/TIME_SHRINK_FACTOR
+                                  EVALUATE_RAMP(TMP_WALL,0._EB,-NINT(MATERIAL(SF%MATL_INDEX(NMAT))%C_S))
                      ENDIF
                   ENDDO
                   MCBAR = RHOCBAR*WALL(IW)%AW*(WALL(IW)%ONE_D%X(1)-WALL(IW)%ONE_D%X(0))
@@ -3090,314 +3090,67 @@ SUBROUTINE PARTICLE_MOMENTUM_TRANSFER(NM)
 
 USE TRAN, ONLY : GET_IJK
 INTEGER, INTENT(IN) :: NM
-REAL(EB), POINTER, DIMENSION(:,:,:) :: FVXS=>NULL(),FVYS=>NULL(),FVZS=>NULL(), &
-                                       FVXN=>NULL(),FVYN=>NULL(),FVZN=>NULL()
-REAL(EB) :: XI,YJ,ZK,SUMX,SUMY,SUMZ,WIDTH,RVC,RK
-INTEGER :: II,JJ,KK,IIX,JJY,KKZ,I,J,K,IC,IW,IOR,IIG,JJG,KKG,III,JJJ,KKK,I1,I2,J1,J2,K1,K2
-TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
-TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
-TYPE(WALL_TYPE), POINTER :: WC=>NULL()
+REAL(EB), POINTER, DIMENSION(:,:,:) :: FVXS,FVYS,FVZS
+REAL(EB) :: XI,YJ,ZK,X_WGT,Y_WGT,Z_WGT
+INTEGER :: II,JJ,KK,I,J,K,IC,IW
+TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP
+TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC
 
 CALL POINT_TO_MESH(NM)
 
-FVXS  => WORK1
-FVYS  => WORK2
-FVZS  => WORK3
+FVXS => WORK1 ; FVXS = 0._EB
+FVYS => WORK2 ; FVYS = 0._EB
+FVZS => WORK3 ; FVZS = 0._EB
 
-FVXS  = 0._EB
-FVYS  = 0._EB
-FVZS  = 0._EB
+SUM_MOMENTUM_LOOP: DO I=1,NLP
+   LP=>LAGRANGIAN_PARTICLE(I)
+   LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
+   IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP
+   IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE SUM_MOMENTUM_LOOP
+   CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
+   IC = CELL_INDEX(II,JJ,KK)
+   IF (SOLID(IC)) CYCLE SUM_MOMENTUM_LOOP
+   X_WGT = XI - FLOOR(XI)
+   Y_WGT = YJ - FLOOR(YJ)
+   Z_WGT = ZK - FLOOR(ZK)
 
-ISO_SELECT: SELECT CASE(ISOTROPIC_PARTICLE_FORCE)
+   IW = WALL_INDEX(IC,-1)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVXS(II-1,JJ,KK) = FVXS(II-1,JJ,KK) - (1._EB-X_WGT)*LP%ACCEL_X
+   IW = WALL_INDEX(IC, 1)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVXS(II,JJ,KK)   = FVXS(II,JJ,KK)   -        X_WGT *LP%ACCEL_X
+   IW = WALL_INDEX(IC,-2)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVYS(II,JJ-1,KK) = FVYS(II,JJ-1,KK) - (1._EB-Y_WGT)*LP%ACCEL_Y
+   IW = WALL_INDEX(IC, 2)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVYS(II,JJ,KK)   = FVYS(II,JJ,KK)   -        Y_WGT *LP%ACCEL_Y
+   IW = WALL_INDEX(IC,-3)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVZS(II,JJ,KK-1) = FVZS(II,JJ,KK-1) - (1._EB-Z_WGT)*LP%ACCEL_Z
+   IW = WALL_INDEX(IC, 3)
+   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) FVZS(II,JJ,KK)   = FVZS(II,JJ,KK)   -        Z_WGT *LP%ACCEL_Z
 
-CASE DEFAULT
-
-   SUM_MOMENTUM_LOOP: DO I=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(I)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET)    CYCLE SUM_MOMENTUM_LOOP
-      CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-      IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE SUM_MOMENTUM_LOOP
-      IIX = FLOOR(XI+.5_EB)
-      JJY = FLOOR(YJ+.5_EB)
-      KKZ = FLOOR(ZK+.5_EB)
-
-      IC = CELL_INDEX(IIX,JJ,KK)
-      IW = WALL_INDEX(IC,1)
-      IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-         FVXS(IIX,JJ,KK) = FVXS(IIX,JJ,KK) - LP%ACCEL_X
-      ENDIF
-      IC = CELL_INDEX(II,JJY,KK)
-      IW = WALL_INDEX(IC,2)
-      IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-         FVYS(II,JJY,KK) = FVYS(II,JJY,KK) - LP%ACCEL_Y
-      ENDIF
-      IC = CELL_INDEX(II,JJ,KKZ)
-      IW = WALL_INDEX(IC,3)
-      IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-         FVZS(II,JJ,KKZ) = FVZS(II,JJ,KKZ) - LP%ACCEL_Z
-      ENDIF
-
-      IF (LPC%PERIODIC_X) THEN
-         IF (IIX==0)    FVXS(IBAR,JJ,KK) = FVXS(IBAR,JJ,KK) - LP%ACCEL_X
-         IF (IIX==IBAR) FVXS(0,JJ,KK)    = FVXS(0,JJ,KK)    - LP%ACCEL_X
-      ENDIF
-      IF (LPC%PERIODIC_Y) THEN
-         IF (JJY==0)    FVYS(II,JBAR,KK) = FVYS(II,JBAR,KK) - LP%ACCEL_Y
-         IF (JJY==JBAR) FVYS(II,0,KK)    = FVYS(II,0,KK)    - LP%ACCEL_Y
-      ENDIF
-      IF (LPC%PERIODIC_Z) THEN
-         IF (KKZ==0)    FVZS(II,JJ,KBAR) = FVZS(II,JJ,KBAR) - LP%ACCEL_Z
-         IF (KKZ==KBAR) FVZS(II,JJ,0)    = FVZS(II,JJ,0)    - LP%ACCEL_Z
-      ENDIF
-
-   ENDDO SUM_MOMENTUM_LOOP
-
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
-            FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
-            FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-
-CASE(1)
-
-   ! experimental
-   SUM_MOMENTUM_LOOP_2: DO I=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(I)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP_2
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET)    CYCLE SUM_MOMENTUM_LOOP_2
-      CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-      IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE SUM_MOMENTUM_LOOP_2
-
-      FVXS(II,JJ,KK) = FVXS(II,JJ,KK) - LP%ACCEL_X
-      FVYS(II,JJ,KK) = FVYS(II,JJ,KK) - LP%ACCEL_Y
-      FVZS(II,JJ,KK) = FVZS(II,JJ,KK) - LP%ACCEL_Z
-   ENDDO SUM_MOMENTUM_LOOP_2
-
-   WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-
-      SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE(SOLID_BOUNDARY)
-            ! apply Dirichlet bc F=0
-            SELECT CASE(ABS(IOR))
-               CASE(1); FVXS(II,JJ,KK) = -FVXS(IIG,JJG,KKG)
-               CASE(2); FVYS(II,JJ,KK) = -FVYS(IIG,JJG,KKG)
-               CASE(3); FVZS(II,JJ,KK) = -FVZS(IIG,JJG,KKG)
-            END SELECT
-         CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
-            ! apply Neumann bc dF/dx=0
-            SELECT CASE(ABS(IOR))
-               CASE(1); FVXS(II,JJ,KK) = FVXS(IIG,JJG,KKG)
-               CASE(2); FVYS(II,JJ,KK) = FVYS(IIG,JJG,KKG)
-               CASE(3); FVZS(II,JJ,KK) = FVZS(IIG,JJG,KKG)
-            END SELECT
-         CASE(PERIODIC_BOUNDARY)
-            SELECT CASE(ABS(IOR))
-               CASE( 1); FVXS(0,JJG,KKG)    = FVXS(IBAR,JJG,KKG)
-               CASE(-1); FVXS(IBP1,JJG,KKG) = FVXS(1,JJG,KKG)
-               CASE( 2); FVYS(IIG,0,KKG)    = FVYS(IIG,JBAR,KKG)
-               CASE(-2); FVYS(IIG,JBP1,KKG) = FVYS(IIG,1,KKG)
-               CASE( 3); FVZS(IIG,JJG,0)    = FVZS(IIG,JJG,KBAR)
-               CASE(-3); FVZS(IIG,JJG,KBP1) = FVZS(IIG,JJG,1)
-            END SELECT
-      END SELECT
-
-   ENDDO WALL_LOOP
-
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            FVX(I,J,K) = FVX(I,J,K) + 0.5_EB*(FVXS(I,J,K)+FVXS(I+1,J,K))
-            FVY(I,J,K) = FVY(I,J,K) + 0.5_EB*(FVYS(I,J,K)+FVYS(I,J+1,K))
-            FVZ(I,J,K) = FVZ(I,J,K) + 0.5_EB*(FVZS(I,J,K)+FVZS(I,J,K+1))
-         ENDDO
-      ENDDO
-   ENDDO
-
-CASE(2) ! Kernel smoothing. Experimental
-
-   FVXN  => WORK4
-   FVYN  => WORK5
-   FVZN  => WORK6
-
-   FVXN  = 0._EB
-   FVYN  = 0._EB
-   FVZN  = 0._EB
-
-   SUMX=0._EB
-   SUMY=0._EB
-   SUMZ=0._EB
-   SUM_MOMENTUM_LOOP2: DO I=1,NLP
-      LP=>LAGRANGIAN_PARTICLE(I)
-      LPC=>LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
-      IF (LPC%MASSLESS_TRACER .OR. LPC%MASSLESS_TARGET) CYCLE SUM_MOMENTUM_LOOP2
-      IF (LP%ONE_D%IOR/=0) CYCLE SUM_MOMENTUM_LOOP2
-      CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,II,JJ,KK)
-      IF (SOLID(CELL_INDEX(II,JJ,KK))) CYCLE SUM_MOMENTUM_LOOP2
-      IF (AVG_DROP_DEN_ALL(II,JJ,KK)<TWO_EPSILON_EB) CYCLE SUM_MOMENTUM_LOOP2
-      ! LOOP over a small neighborhood of the particle [-1,+1]
-      ! Assumming kernel has compact support and half_width DX
-      SUMX=SUMX-LP%ACCEL_X
-      SUMY=SUMY-LP%ACCEL_Y
-      SUMZ=SUMZ-LP%ACCEL_Z
-      IIX = FLOOR(XI+.5_EB)
-      JJY = FLOOR(YJ+.5_EB)
-      KKZ = FLOOR(ZK+.5_EB)
-      I1=MAX(IIX-2,0)
-      I2=MIN(IIX+2,IBAR)
-      J1=MAX(JJ-2,0)
-      J2=MIN(JJ+2,JBAR)
-      K1=MAX(KK-2,0)
-      K2=MIN(KK+2,KBAR)
-      WIDTH=0._EB
-
-      WIDTH=(DX(II)*DY(JJ)*DZ(KK))**(1._EB/3._EB)
-      ! Interpolate force density at (upper) (staggered) cell corners
-      DO III=I1,I2
-          DO JJJ=J1,J2
-             DO KKK=K1,K2
-                   RK=SQRT((XC(III+1)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(Z(KKK)-LP%Z)**2)
-                   FVXN(III,JJJ,KKK) =  FVXN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_X
-
-            ENDDO
-          ENDDO
-      ENDDO
-
-      I1=MAX(II-2,0)
-      I2=MIN(II+2,IBAR)
-      J1=MAX(JJY-2,0)
-      J2=MIN(JJY+2,JBAR)
-      K1=MAX(KK-2,0)
-      K2=MIN(KK+2,KBAR)
-         DO III=I1,I2
-          DO JJJ=J1,J2
-             DO KKK=K1,K2
-                   RK=SQRT((X(III)-LP%X)**2+(YC(JJJ+1)-LP%Y)**2+(Z(KKK)-LP%Z)**2)
-                   FVYN(III,JJJ,KKK) =  FVYN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Y
-             ENDDO
-          ENDDO
-      ENDDO
-
-      I1=MAX(II-2,0)
-      I2=MIN(II+2,IBAR)
-      J1=MAX(JJ-2,0)
-      J2=MIN(JJ+2,JBAR)
-      K1=MAX(KKZ-2,0)
-      K2=MIN(KKZ+2,KBAR)
-      DO III=I1,I2
-          DO JJJ=J1,J2
-             DO KKK=K1,K2
-                IC = CELL_INDEX(III,JJJ,KKK)
-
-                RK=SQRT((X(III)-LP%X)**2+(Y(JJJ)-LP%Y)**2+(ZC(KKK+1)-LP%Z)**2)
-                FVZN(III,JJJ,KKK) =  FVZN(III,JJJ,KKK) - KERNEL(RK,WIDTH) * LP%ACCEL_Z
-              ENDDO
-           ENDDO
-        ENDDO
-   ENDDO SUM_MOMENTUM_LOOP2
-
-   ! Approximate volume integrals
-
-   DO III=0,IBAR
-      DO JJJ=0,JBAR
-         DO KKK=0,KBAR
-            I1=MAX(III-1,0)
-            I2=III
-            J1=MAX(JJJ-1,0)
-            J2=JJJ
-            K1=MAX(KKK-1,0)
-            K2=KKK
-            RVC   = RDX(III)*RRN(III)*RDY(JJJ)*RDZ(KKK)
-            FVXS(III,JJJ,KKK) = 1._EB/8._EB * (FVXN(I1,J1,K1) + FVXN(I1,J1,K2) + FVXN(I1,J2,K2) + &
-                                              FVXN(I2,J2,K2) + FVXN(I2,J2,K1) + FVXN(I2,J1,K1) + &
-                                              FVXN(I1,J2,K1) + FVXN(I2,J1,K2)) / RVC
-            FVYS(III,JJJ,KKK) = 1._EB/8._EB * (FVYN(I1,J1,K1) + FVYN(I1,J1,K2) + FVYN(I1,J2,K2) + &
-                                              FVYN(I2,J2,K2) + FVYN(I2,J2,K1) + FVYN(I2,J1,K1) + &
-                                              FVYN(I1,J2,K1) + FVYN(I2,J1,K2)) / RVC
-            FVZS(III,JJJ,KKK) = 1._EB/8._EB * (FVZN(I1,J1,K1) + FVZN(I1,J1,K2) + FVZN(I1,J2,K2) + &
-                                              FVZN(I2,J2,K2) + FVZN(I2,J2,K1) + FVZN(I2,J1,K1) + &
-                                              FVZN(I1,J2,K1) + FVZN(I2,J1,K2)) / RVC
-         ENDDO
-      ENDDO
-   ENDDO
-   IF (ABS(SUMX)>TWO_EPSILON_EB) FVXS=FVXS*SUMX/SUM(FVXS)
-   IF (ABS(SUMY)>TWO_EPSILON_EB) FVYS=FVYS*SUMY/SUM(FVYS)
-   IF (ABS(SUMZ)>TWO_EPSILON_EB) FVZS=FVZS*SUMZ/SUM(FVZS)
-   WALL_LOOP1: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      WC=>WALL(IW)
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE WALL_LOOP1
-      II  = WC%ONE_D%II
-      JJ  = WC%ONE_D%JJ
-      KK  = WC%ONE_D%KK
-      IOR = WC%ONE_D%IOR
-      IIG = WC%ONE_D%IIG
-      JJG = WC%ONE_D%JJG
-      KKG = WC%ONE_D%KKG
-
-      SELECT CASE(WC%BOUNDARY_TYPE)
-         CASE(SOLID_BOUNDARY)
-            ! apply Dirichlet bc F=0
-            SELECT CASE(ABS(IOR))
-               CASE(1); FVXS(II,JJ,KK) = -FVXS(IIG,JJG,KKG)
-               CASE(2); FVYS(II,JJ,KK) = -FVYS(IIG,JJG,KKG)
-               CASE(3); FVZS(II,JJ,KK) = -FVZS(IIG,JJG,KKG)
-            END SELECT
-         CASE(OPEN_BOUNDARY,MIRROR_BOUNDARY)
-            ! apply Neumann bc dF/dx=0
-            SELECT CASE(ABS(IOR))
-               CASE(1); FVXS(II,JJ,KK) = FVXS(IIG,JJG,KKG)
-               CASE(2); FVYS(II,JJ,KK) = FVYS(IIG,JJG,KKG)
-               CASE(3); FVZS(II,JJ,KK) = FVZS(IIG,JJG,KKG)
-            END SELECT
-         CASE(PERIODIC_BOUNDARY)
-            SELECT CASE(ABS(IOR))
-               CASE( 1); FVXS(0,JJG,KKG)    = FVXS(IBAR,JJG,KKG)
-               CASE(-1); FVXS(IBP1,JJG,KKG) = FVXS(1,JJG,KKG)
-               CASE( 2); FVYS(IIG,0,KKG)    = FVYS(IIG,JBAR,KKG)
-               CASE(-2); FVYS(IIG,JBP1,KKG) = FVYS(IIG,1,KKG)
-               CASE( 3); FVZS(IIG,JJG,0)    = FVZS(IIG,JJG,KBAR)
-               CASE(-3); FVZS(IIG,JJG,KBP1) = FVZS(IIG,JJG,1)
-            END SELECT
-      END SELECT
-   ENDDO WALL_LOOP1
-
-   DO K=0,KBAR
-      DO J=0,JBAR
-         DO I=0,IBAR
-            FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
-            FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
-            FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
-         ENDDO
-      ENDDO
-   ENDDO
-
-END SELECT ISO_SELECT
-
-CONTAINS
-
-REAL(EB) FUNCTION KERNEL(R,DELTA)
-   REAL(EB),INTENT(IN)::R,DELTA
-   IF(R/DELTA>2.0_EB) THEN
-      KERNEL=0._EB
-   ELSE
-      KERNEL = 1._EB/(PI * SQRT(PI) * DELTA**3) * EXP(-(R/DELTA)**2)
+   IF (LPC%PERIODIC_X) THEN
+      IF (II==1)    FVXS(IBAR,JJ,KK) = FVXS(IBAR,JJ,KK) - (1._EB-X_WGT)*LP%ACCEL_X
+      IF (II==IBAR) FVXS(0,JJ,KK)    = FVXS(0,JJ,KK)    -        X_WGT *LP%ACCEL_X
    ENDIF
-END FUNCTION KERNEL
+   IF (LPC%PERIODIC_Y) THEN
+      IF (JJ==1)    FVYS(II,JBAR,KK) = FVYS(II,JBAR,KK) - (1._EB-Y_WGT)*LP%ACCEL_Y
+      IF (JJ==JBAR) FVYS(II,0,KK)    = FVYS(II,0,KK)    -        Y_WGT *LP%ACCEL_Y
+   ENDIF
+   IF (LPC%PERIODIC_Z) THEN
+      IF (KK==1)    FVZS(II,JJ,KBAR) = FVZS(II,JJ,KBAR) - (1._EB-Z_WGT)*LP%ACCEL_Z
+      IF (KK==KBAR) FVZS(II,JJ,0)    = FVZS(II,JJ,0)    -        Z_WGT *LP%ACCEL_Z
+   ENDIF
+
+ENDDO SUM_MOMENTUM_LOOP
+
+DO K=0,KBAR
+   DO J=0,JBAR
+      DO I=0,IBAR
+         FVX(I,J,K) = FVX(I,J,K) + FVXS(I,J,K)
+         FVY(I,J,K) = FVY(I,J,K) + FVYS(I,J,K)
+         FVZ(I,J,K) = FVZ(I,J,K) + FVZS(I,J,K)
+      ENDDO
+   ENDDO
+ENDDO
 
 END SUBROUTINE PARTICLE_MOMENTUM_TRANSFER
 
