@@ -307,6 +307,39 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDIF
 
+   COMPUTE_TMP_NEW_IF_1a: IF (COMPUTE_TMP_NEW) THEN
+
+      ! Predict background pressure at next time step
+
+      DO I=1,N_ZONE
+         PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
+      ENDDO
+
+      ! Compute molecular weight term RSUM=R0*SUM(RHO*Y_i/W_i)
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZS(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Extract predicted temperature at next time step from Equation of State
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/RSUM(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+   ENDIF COMPUTE_TMP_NEW_IF_1a
+
    ! Get rho = sum(rho*Y_alpha)
 
    DO K=1,KBAR
@@ -337,12 +370,6 @@ CASE(.TRUE.) PREDICTOR_STEP
 
    CALL CLIP_PASSIVE_SCALARS
 
-   ! Predict background pressure at next time step
-
-   DO I=1,N_ZONE
-      PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
-   ENDDO
-
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    DO K=1,KBAR
@@ -355,16 +382,26 @@ CASE(.TRUE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   ! Extract predicted temperature at next time step from Equation of State
+   COMPUTE_TMP_NEW_IF_1b: IF (.NOT.COMPUTE_TMP_NEW) THEN
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+      ! Predict background pressure at next time step
+
+      DO I=1,N_ZONE
+         PBAR_S(:,I) = PBAR(:,I) + D_PBAR_DT(I)*DT
+      ENDDO
+
+      ! Extract predicted temperature at next time step from Equation of State
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR_S(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHOS(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+
+   ENDIF COMPUTE_TMP_NEW_IF_1b
 
 ! The CORRECTOR step
 
@@ -448,6 +485,39 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDIF
 
+   COMPUTE_TMP_NEW_IF_2a: IF (COMPUTE_TMP_NEW) THEN
+
+      ! Correct background pressure
+
+      DO I=1,N_ZONE
+         PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
+      ENDDO
+
+      ! Compute molecular weight term RSUM=R0*SUM(RHO*Y_i/W_i)
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               ZZ_GET(1:N_TRACKED_SPECIES) = ZZ(I,J,K,1:N_TRACKED_SPECIES)
+               CALL GET_SPECIFIC_GAS_CONSTANT(ZZ_GET,RSUM(I,J,K))
+            ENDDO
+         ENDDO
+      ENDDO
+
+      ! Extract predicted temperature at next time step from Equation of State
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/RSUM(I,J,K)
+            ENDDO
+         ENDDO
+      ENDDO
+
+   ENDIF COMPUTE_TMP_NEW_IF_2a
+
    ! Get rho = sum(rho*Y_alpha)
 
    DO K=1,KBAR
@@ -478,12 +548,6 @@ CASE(.FALSE.) PREDICTOR_STEP
 
    CALL CLIP_PASSIVE_SCALARS
 
-   ! Correct background pressure
-
-   DO I=1,N_ZONE
-      PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
-   ENDDO
-
    ! Compute molecular weight term RSUM=R0*SUM(Y_i/W_i)
 
    DO K=1,KBAR
@@ -496,16 +560,26 @@ CASE(.FALSE.) PREDICTOR_STEP
       ENDDO
    ENDDO
 
-   ! Extract predicted temperature at next time step from Equation of State
+   COMPUTE_TMP_NEW_IF_2b: IF (.NOT.COMPUTE_TMP_NEW) THEN
 
-   DO K=1,KBAR
-      DO J=1,JBAR
-         DO I=1,IBAR
-            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
-            TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+      ! Correct background pressure
+
+      DO I=1,N_ZONE
+         PBAR(:,I) = 0.5_EB*(PBAR(:,I) + PBAR_S(:,I) + D_PBAR_DT_S(I)*DT)
+      ENDDO
+
+      ! Extract predicted temperature at next time step from Equation of State
+
+      DO K=1,KBAR
+         DO J=1,JBAR
+            DO I=1,IBAR
+               IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+               TMP(I,J,K) = PBAR(K,PRESSURE_ZONE(I,J,K))/(RSUM(I,J,K)*RHO(I,J,K))
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+
+   ENDIF COMPUTE_TMP_NEW_IF_2b
 
 END SELECT PREDICTOR_STEP
 
