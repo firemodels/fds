@@ -98,7 +98,7 @@ ALLOCATE(T_USED(N_TIMERS)) ; T_USED = 0._EB ; T_USED(1) = SECOND()
 
 ! Assign a compilation date (All Nodes)
 
-WRITE(VERSION_STRING,'(A)') 'FDS 6.4.1'
+WRITE(VERSION_STRING,'(A)') 'FDS 6.5.0'
 
 CALL GET_INFO (REVISION,REVISION_DATE,COMPILE_DATE)
 
@@ -456,10 +456,14 @@ MAIN_LOOP: DO
 
    IF (ALL(CHANGE_TIME_STEP_INDEX==1)) DT = MINVAL(DT_NEW,MASK=.NOT.EVACUATION_ONLY)
 
+   ! Clip final time step
+
+   IF ((T+DT)>T_END) DT = MAX(T_END-T,1.E-10_EB)
+
    ! Determine when to dump out diagnostics to the .out file
 
    LO10 = LOG10(REAL(MAX(1,ABS(ICYC)),EB))
-   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. T>=T_END) DIAGNOSTICS = .TRUE.
+   IF (MOD(ICYC,10**LO10)==0 .OR. MOD(ICYC,100)==0 .OR. (T+DT)>=T_END) DIAGNOSTICS = .TRUE.
 
    ! If evacuation, set up special time iteration parameters
 
@@ -611,7 +615,7 @@ MAIN_LOOP: DO
 
    ! Advance the time to start the CORRECTOR step
 
-    T = T + DT
+   T = T + DT
 
    !================================================================================================================================
    !                                           Start of Corrector part of time step
@@ -765,7 +769,7 @@ MAIN_LOOP: DO
 
    ! Dump out diagnostics
 
-   IF (DIAGNOSTICS .OR. T>(T_END-TWO_EPSILON_EB)) THEN
+   IF (DIAGNOSTICS) THEN
       CALL WRITE_STRINGS
       IF (.NOT.SUPPRESS_DIAGNOSTICS) CALL EXCHANGE_DIAGNOSTICS
       IF (MYID==0) CALL WRITE_DIAGNOSTICS(T,DT)
@@ -773,7 +777,7 @@ MAIN_LOOP: DO
 
    ! Flush output file buffers
 
-   IF (T>(FLUSH_CLOCK-TWO_EPSILON_EB) .AND. FLUSH_FILE_BUFFERS) THEN
+   IF (T>=FLUSH_CLOCK .AND. FLUSH_FILE_BUFFERS) THEN
       IF (MYID==0) CALL FLUSH_GLOBAL_BUFFERS
       IF (MYID==MAX(0,EVAC_PROCESS)) CALL FLUSH_EVACUATION_BUFFERS
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
@@ -785,7 +789,7 @@ MAIN_LOOP: DO
 
    ! Dump a restart file if necessary
 
-   IF ((T>(RESTART_CLOCK-TWO_EPSILON_EB).OR.STOP_STATUS==USER_STOP).AND.(T>(T_END-TWO_EPSILON_EB).OR.RADIATION_COMPLETED)) THEN
+   IF ( (T>=RESTART_CLOCK .OR. STOP_STATUS==USER_STOP) .AND. (T>=T_END .OR. RADIATION_COMPLETED) ) THEN
       DO NM=LOWER_MESH_INDEX,UPPER_MESH_INDEX
          IF (EVACUATION_SKIP(NM)) CYCLE
          CALL DUMP_RESTART(T,DT,NM)
@@ -799,7 +803,7 @@ MAIN_LOOP: DO
 
    ! Stop the run normally
 
-   IF (T>(T_END-TWO_EPSILON_EB) .AND. ICYC>0) EXIT MAIN_LOOP
+   IF (T>=T_END .AND. ICYC>0) EXIT MAIN_LOOP
 
 ENDDO MAIN_LOOP
 

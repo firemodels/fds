@@ -154,7 +154,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
 xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
-ylabel('{\it l_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
+ylabel('{\it L_2} Error','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 lh=legend(hh,'FDS {\it \rho}','FDS {\it Z}','FDS {\it u}','FDS {\it H}','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest');
 set(lh,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname',Font_Name)
 legend('boxoff')

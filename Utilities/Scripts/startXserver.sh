@@ -17,12 +17,13 @@ GETNEWPORT ()
 }
 
 if [ "`uname`" != "Darwin" ]; then
-  echo setting up graphics environment
+  PAUSE=30
+  echo "setting up graphics environment (pausing $PAUSE s)"
   XVFB=Xvfb
   GETNEWPORT 
   $XVFB :$display_port -fp /usr/share/X11/fonts/misc -screen 0 1280x1024x24 &
   export SMV_ID=$!
   export DISPLAY=:$display_port
   rm -f $lockfile
-  sleep 30
+  sleep $PAUSE
 fi
