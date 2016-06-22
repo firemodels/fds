@@ -1,16 +1,16 @@
 @echo off
 
-:: Smokeview version and revision
+:: ---- FDS and smokeview version strings for bundle
+set fds_version=6.5.0
+set smv_version=6.3.7
 
-set smv_version=6.3.4
-set smv_revision=b22a887
+:: ---- FDS and smokeview revision version strings
+::      (when creating test releases)
+set smv_revision=3057a8c
+set fds_revision=02a6097
 
-:: FDS version and revision
-
-set fds_version=test
-set fds_revision=59edcfc
-
-set smvlogdate="1-Nov-2015"
+:: ---- for obtaining log entries
+set smvlogdate="01-Mar-2016"
 
 :: PC repo
 
@@ -38,6 +38,6 @@ set linux_logon=%linux_username%@%linux_hostname%
 
 :: OSX user and host name
 
-set osx_hostname=192.168.1.5
+set osx_hostname=bluesky.el.nist.gov
 set osx_username=%username%
 set osx_logon=%osx_username%@%osx_hostname%

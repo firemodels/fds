@@ -821,7 +821,7 @@ void draw_geom(int flag, int timestate){
 
     // geometry diagnostics
 
-    if (geomlisti->nedges>0 && (highlight_edge0 == 1||highlight_edge1 == 1 || highlight_edge2 == 1 || highlight_edgeother == 1)) {
+    if(geomlisti->nedges>0 && (highlight_edge0 == 1||highlight_edge1 == 1 || highlight_edge2 == 1 || highlight_edgeother == 1)) {
       int ii;
 
       glPushMatrix();
@@ -843,10 +843,10 @@ void draw_geom(int flag, int timestate){
            highlight_edge1==1&&edgei->ntriangles==1||
            highlight_edge2==1&&edgei->ntriangles==2||
            highlight_edgeother==1&&edgei->ntriangles>2){
-          if (edgei->ntriangles > 2) {
+          if(edgei->ntriangles > 2) {
             glColor3fv(cyan);
           }
-          else if (edgei->ntriangles == 1) {
+          else if(edgei->ntriangles == 1) {
             glColor3fv(green);
           }
           else {
@@ -861,7 +861,7 @@ void draw_geom(int flag, int timestate){
       glPopMatrix();
 
     }
-    if (geomlisti->nverts>0 && highlight_vertexdup == 1) {
+    if(geomlisti->nverts>0 && highlight_vertexdup == 1) {
       int ii;
 
       glPushMatrix();
@@ -876,7 +876,7 @@ void draw_geom(int flag, int timestate){
         vertdata *verti;
 
         verti = geomlisti->verts + ii;
-        if (verti->isdup == 1) {
+        if(verti->isdup == 1) {
           float *xyz;
 
           xyz = verti->xyz;
@@ -1860,14 +1860,14 @@ int Compare_Verts2(const void *arg1, const void *arg2) {
   vert2 = vert_list + *(int *)arg2;
   xyz2 = vert2->xyz;
 
-  if (xyz1[0]<xyz2[0] - VERT_EPS)return -1;
-  if (xyz1[0]>xyz2[0] + VERT_EPS)return  1;
+  if(xyz1[0]<xyz2[0] - VERT_EPS)return -1;
+  if(xyz1[0]>xyz2[0] + VERT_EPS)return  1;
 
-  if (xyz1[1]<xyz2[1] - VERT_EPS)return -1;
-  if (xyz1[1]>xyz2[1] + VERT_EPS)return  1;
+  if(xyz1[1]<xyz2[1] - VERT_EPS)return -1;
+  if(xyz1[1]>xyz2[1] + VERT_EPS)return  1;
 
-  if (xyz1[2]<xyz2[2] - VERT_EPS)return -1;
-  if (xyz1[2]>xyz2[2] + VERT_EPS)return  1;
+  if(xyz1[2]<xyz2[2] - VERT_EPS)return -1;
+  if(xyz1[2]>xyz2[2] + VERT_EPS)return  1;
   return 0;
 }
 
@@ -1882,11 +1882,11 @@ int Compare_Edges(const void *arg1, const void *arg2) {
   v1 = edge1->vert_index;
   v2 = edge2->vert_index;
 
-  if (v1[0]<v2[0])return -1;
-  if (v1[0]>v2[0])return 1;
+  if(v1[0]<v2[0])return -1;
+  if(v1[0]>v2[0])return 1;
 
-  if (v1[1]<v2[1])return -1;
-  if (v1[1]>v2[1])return 1;
+  if(v1[1]<v2[1])return -1;
+  if(v1[1]>v2[1])return 1;
   return 0;
 }
 
@@ -1898,11 +1898,11 @@ int Compare_Edges2(edgedata *edge1, edgedata *edge2) {
   v1 = edge1->vert_index;
   v2 = edge2->vert_index;
 
-  if (v1[0]<v2[0])return -1;
-  if (v1[0]>v2[0])return 1;
+  if(v1[0]<v2[0])return -1;
+  if(v1[0]>v2[0])return 1;
 
-  if (v1[1]<v2[1])return -1;
-  if (v1[1]>v2[1])return 1;
+  if(v1[1]<v2[1])return -1;
+  if(v1[1]>v2[1])return 1;
   return 0;
 }
 
@@ -1999,8 +1999,8 @@ edgedata *get_edge(edgedata *edges, int nedges, int iv1, int iv2) {
     mid = (low + high) / 2;
     emid = edges + mid;
     iresult = Compare_Edges2(&ei, emid);
-    if (iresult == 0)return emid;
-    if (iresult > 0) {
+    if(iresult == 0)return emid;
+    if(iresult > 0) {
       low = mid;
     }
     else{
@@ -2136,7 +2136,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
       FREEMEMORY(facelist_index);
     }
-    if (ntriangles > 0) {
+    if(ntriangles > 0) {
       vertdata *verts;
       edgedata *edges, *edges2;
       tridata *triangles;
@@ -2192,7 +2192,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         edges2[nedges].vert_index[1] = edges[jj].vert_index[1];
         nedges++;
       }
-      if (nedges>0)ResizeMemory((void **)&edges2, nedges * sizeof(edgedata));
+      if(nedges>0)ResizeMemory((void **)&edges2, nedges * sizeof(edgedata));
       geomlisti->edges = edges2;
       geomlisti->nedges = nedges;
       edge_list = edges2;
@@ -2211,11 +2211,11 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
 
         vi = triangles[ii].vert_index;
         edgei = get_edge(edges, nedges, vi[0], vi[1]);
-        if (edgei != NULL)edgei->ntriangles++;
+        if(edgei != NULL)edgei->ntriangles++;
         edgei = get_edge(edges, nedges, vi[1], vi[2]);
-        if (edgei != NULL)edgei->ntriangles++;
+        if(edgei != NULL)edgei->ntriangles++;
         edgei = get_edge(edges, nedges, vi[2], vi[0]);
-        if (edgei != NULL)edgei->ntriangles++;
+        if(edgei != NULL)edgei->ntriangles++;
       }
 
       ntri0 = 0;
@@ -2241,15 +2241,17 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
           break;
         }
       }
-      printf("\n\nedges\n");
-      printf("                       total: %i\n", nedges);
-      printf("        0 connected triangle: %i\n", ntri0);
-      printf("        1 connected triangle: %i\n", ntri1);
-      printf("        2 connected triangle: %i\n", ntri2);
-      printf("3 or more connected triangle: %i\n", ntri_other);
+#ifdef XXX
+//      printf("\n\nedges\n");
+//      printf("                       total: %i\n", nedges);
+//      printf("        0 connected triangle: %i\n", ntri0);
+//      printf("        1 connected triangle: %i\n", ntri1);
+//      printf("        2 connected triangle: %i\n", ntri2);
+//      printf("3 or more connected triangle: %i\n", ntri_other);
+#endif
       FREEMEMORY(edgelist_index);
     }
-    if (nverts > 0) {
+    if(nverts > 0) {
       int *vertlist_index, nvertlist_index = 0;
       vertdata *verts;
       int ii, ndups;
@@ -2269,7 +2271,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         vi->isdup = 0;
       }
       for (ii = 1; ii < nvertlist_index; ii++) {
-        if (Compare_Verts2(vertlist_index + ii - 1, vertlist_index + ii) == 0) {
+        if(Compare_Verts2(vertlist_index + ii - 1, vertlist_index + ii) == 0) {
           vertdata *v1, *v2;
           int jj1, jj2;
 
@@ -2289,10 +2291,12 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
         vi = verts + ii;
         if(vi->isdup == 1)ndups++;
       }
-      printf("\nvertices\n");
-      printf("\n   total: %i\n", nverts);
-      printf("duplicates: %i\n", ndups);
-      printf("  (eps=%f m)\n", VERT_EPS);
+#ifdef XXX
+//      printf("\nvertices\n");
+//      printf("\n   total: %i\n", nverts);
+//      printf("duplicates: %i\n", ndups);
+//      printf("  (eps=%f m)\n", VERT_EPS);
+#endif
       FREEMEMORY(vertlist_index);
     }
   }
@@ -3425,7 +3429,7 @@ void rotateu2v(float *u, float *v, float *axis, float *angle) {
   sum = NORM3(axis);
   normu = NORM3(u);
   normv = NORM3(v);
-  if (sum>0.0&&normu>0.0&&normv>0.0) {
+  if(sum>0.0&&normu>0.0&&normv>0.0) {
     axis[0] /= sum;
     axis[1] /= sum;
     axis[2] /= sum;
@@ -3451,7 +3455,7 @@ void angleaxis2quat(float angle, float *axis, float *quat) {
 
   sum = sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
 
-  if (sum>0.0) {
+  if(sum>0.0) {
     cosang = cos(angle / 2.0);
     sinang = sin(angle / 2.0);
 
@@ -3521,7 +3525,7 @@ void normalize_quat(float x[4]) {
   float sum;
 
   sum = sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2] + x[3] * x[3]);
-  if (sum>0.0) {
+  if(sum>0.0) {
     x[0] /= sum;
     x[1] /= sum;
     x[2] /= sum;
@@ -3540,7 +3544,7 @@ void xyz2azelev(float *xyz, float *azimuth, float *elevation) {
   // elev=asin(z/||xyz||)
   // az=atan(y/x)
   norm3 = NORM3(xyz);
-  if (norm3>0.00001&&ABS(xyz[2] / norm3) <= 1.0) {
+  if(norm3>0.00001&&ABS(xyz[2] / norm3) <= 1.0) {
     *elevation = RAD2DEG*asin(xyz[2] / norm3);
   }
   else {

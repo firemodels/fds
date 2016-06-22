@@ -11,6 +11,14 @@ require "tour"
 render_startframe = 0
 render_skipframe = 1
 
+-- predefined axes
+X = 1
+Y = 2
+Z = 3
+
+orthogonal = 1
+perspective = 0
+
 smv.getfinalframe = function()return get_nglobal_times()-1 end
 getfinalframe = smv.getfinalframe
 
@@ -97,10 +105,10 @@ timebar = {}
 _timebar = {
     visibility = {
         get = function()
-            return gettimebarvisibility()
+            return get_timebar_visibility()
         end,
         set = function(v)
-            return settimebarvisibility(v)
+            return set_timebar_visibility(v)
         end,
         -- toggle = function ()
         --     timebar.visibility = not timebar.visibility
@@ -214,6 +222,9 @@ function camera.print(camera)
 end
 
 function camera.set(camera)
+    if camera == nil then
+        error("camera.set: camera does not exist")
+    end
     camera_set_eyex(camera.eyePos.x)
     camera_set_eyey(camera.eyePos.y)
     camera_set_eyez(camera.eyePos.z)
@@ -222,6 +233,11 @@ function camera.set(camera)
     camera_set_projection_type(camera.projectionType)
     camera_set_elev(camera.zAngle.elev)
     camera_set_az(camera.zAngle.az)
+end
+time = {}
+function time.set(time)
+    -- TODO: determine if the time is available
+    return settime(time)
 end
 
 

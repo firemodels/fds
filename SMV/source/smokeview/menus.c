@@ -543,7 +543,7 @@ void LabelMenu(int value){
     visHRRlabel=1;
     show_hrrcutoff=1;
     visFramelabel=1;
-	if (hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
+	  if(hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
@@ -2387,6 +2387,8 @@ void ScriptMenu(int value){
 
 /* ------------------ ScriptMenu ------------------------ */
 #ifdef pp_LUA
+// prototype here rather than create a header file for lua_api
+int load_script(char *filename);
 void LuaScriptMenu(int value){
   luascriptfiledata *luascriptfile;
 

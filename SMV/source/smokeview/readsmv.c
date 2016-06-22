@@ -568,6 +568,14 @@ void readsmv_dynamic(char *file){
       FREEMEMORY(vi->showhide);
       FREEMEMORY(vi->showtime);
     }
+    for (j = 0; j<meshi->ncvents; j++) {
+      cventdata *cvi;
+
+      cvi = meshi->cventinfo + j;
+      cvi->nshowtime = 0;
+      FREEMEMORY(cvi->showhide);
+      FREEMEMORY(cvi->showtime);
+    }
   }
   for(i=ndeviceinfo_exp;i<ndeviceinfo;i++){
     devicedata *devicei;
@@ -613,15 +621,17 @@ void readsmv_dynamic(char *file){
     ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
+    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1||
+       match(buffer, "OPEN_CVENT") == 1 || match(buffer, "CLOSE_CVENT") == 1) {
       meshdata *meshi;
       int len;
-      ventdata *vi;
-      int showvent, blocknumber, tempval;
+      int showvent, blocknumber, tempval, isvent;
 
       do_pass2=1;
       showvent=1;
-      if(match(buffer,"CLOSE_VENT") == 1)showvent=0;
+      isvent = 0;
+      if(match(buffer, "CLOSE_VENT") == 1 || match(buffer, "OPEN_VENT") == 1)isvent = 1;
+      if(match(buffer,"CLOSE_VENT") == 1 || match(buffer, "CLOSE_CVENT") == 1)showvent = 0;
       if(nmeshes>1){
         blocknumber=ioffset-1;
       }
@@ -650,9 +660,26 @@ void readsmv_dynamic(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time_local);
       tempval--;
-      if(meshi->ventinfo==NULL||tempval<0||tempval>=meshi->nvents)continue;
-      vi=meshi->ventinfo+tempval;
-      vi->nshowtime++;
+      if(tempval<0)continue;
+      if(isvent == 1) {
+        if(meshi->ventinfo == NULL || tempval >= meshi->nvents)continue;
+      }
+      else {
+        if(meshi->cventinfo == NULL || tempval >= meshi->ncvents)continue;
+      }
+      if(isvent == 1) {
+        ventdata *vi;
+
+        vi = meshi->ventinfo + tempval;
+        vi->nshowtime++;
+      }
+      else {
+        cventdata *cvi;
+
+        cvi = meshi->cventinfo + tempval;
+        cvi->showtimelist = NULL;
+        cvi->nshowtime++;
+      }
       continue;
     }
   /*
@@ -991,13 +1018,15 @@ void readsmv_dynamic(char *file){
     ++++++++++++++++++++++ OPEN_VENT ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1){
+    if(match(buffer,"OPEN_VENT") == 1||match(buffer,"CLOSE_VENT")==1||
+       match(buffer, "OPEN_CVENT") == 1 || match(buffer, "CLOSE_CVENT") == 1) {
       meshdata *meshi;
-      int len,showvent,blocknumber,tempval;
-      ventdata *vi;
+      int len,showvent,blocknumber,tempval,isvent;
 
       showvent=1;
-      if(match(buffer,"CLOSE_VENT") == 1)showvent=0;
+      isvent = 0;
+      if(match(buffer, "CLOSE_VENT") == 1 || match(buffer, "OPEN_VENT") == 1)isvent = 1;
+      if(match(buffer,"CLOSE_VENT") == 1|| match(buffer, "CLOSE_CVENT") == 1)showvent=0;
       if(nmeshes>1){
         blocknumber=ioffset-1;
       }
@@ -1026,23 +1055,46 @@ void readsmv_dynamic(char *file){
       fgets(buffer,255,stream);
       sscanf(buffer,"%i %f",&tempval,&time_local);
       tempval--;
-      if(meshi->ventinfo==NULL)continue;
-      if(tempval<0||tempval>=meshi->nvents)continue;
-      vi=meshi->ventinfo+tempval;
-      if(vi->showtime==NULL){
-        NewMemory((void **)&vi->showtime,(vi->nshowtime+1)*sizeof(float));
-        NewMemory((void **)&vi->showhide,(vi->nshowtime+1)*sizeof(unsigned char));
-        vi->nshowtime=1;
-        vi->showtime[0]=0.0;
-        vi->showhide[0]=1;
+      if(isvent == 1) {
+        ventdata *vi;
+
+        if(meshi->ventinfo == NULL || tempval < 0 || tempval >= meshi->nvents)continue;
+        vi = meshi->ventinfo + tempval;
+        if(vi->showtime == NULL) {
+          NewMemory((void **)&vi->showtime, (vi->nshowtime + 1) * sizeof(float));
+          NewMemory((void **)&vi->showhide, (vi->nshowtime + 1) * sizeof(unsigned char));
+          vi->nshowtime = 1;
+          vi->showtime[0] = 0.0;
+          vi->showhide[0] = 1;
+        }
+        if(showvent == 1) {
+          vi->showhide[vi->nshowtime] = 1;
+        }
+        else {
+          vi->showhide[vi->nshowtime] = 0;
+        }
+        vi->showtime[vi->nshowtime++] = time_local;
       }
-      if(showvent==1){
-        vi->showhide[vi->nshowtime]=1;
+      else {
+        cventdata *cvi;
+
+        if(meshi->cventinfo == NULL || tempval < 0 || tempval >= meshi->ncvents)continue;
+        cvi = meshi->cventinfo + tempval;
+        if(cvi->showtime == NULL) {
+          NewMemory((void **)&cvi->showtime, (cvi->nshowtime + 1) * sizeof(float));
+          NewMemory((void **)&cvi->showhide, (cvi->nshowtime + 1) * sizeof(unsigned char));
+          cvi->nshowtime = 1;
+          cvi->showtime[0] = 0.0;
+          cvi->showhide[0] = 1;
+        }
+        if(showvent == 1) {
+          cvi->showhide[cvi->nshowtime] = 1;
+        }
+        else {
+          cvi->showhide[cvi->nshowtime] = 0;
+        }
+        cvi->showtime[cvi->nshowtime++] = time_local;
       }
-      else{
-        vi->showhide[vi->nshowtime]=0;
-      }
-      vi->showtime[vi->nshowtime++]=time_local;
       continue;
     }
   /*
@@ -6703,6 +6755,9 @@ typedef struct {
         cvi->cvent_id=-1;
         cvi->color=NULL;
         cvi->blank=NULL;
+        cvi->showtime = NULL;
+        cvi->showhide = NULL;
+        cvi->showtimelist = NULL;
 
         origin=cvi->origin;
         s_num[0]=-1;
@@ -8593,7 +8648,7 @@ int readini2(char *inifile, int localfile){
       vis_ztree = CLAMP(vis_ztree, 0, 1);
       continue;
     }
-    if (match(buffer, "COLORBAR_SPLIT") == 1) {
+    if(match(buffer, "COLORBAR_SPLIT") == 1) {
       int ii;
 
       fgets(buffer, 255, stream);
@@ -9100,7 +9155,7 @@ int readini2(char *inifile, int localfile){
       if(devicenorm_length<0.0 || devicenorm_length>1.0)devicenorm_length = 0.1;
       continue;
     }
-	if (match(buffer, "SHOWHRRLABEL") == 1) {
+	if(match(buffer, "SHOWHRRLABEL") == 1) {
 		fgets(buffer, 255, stream);
 		sscanf(buffer, "%i", &visHRRlabel);
 		ONEORZERO(visHRRlabel);
