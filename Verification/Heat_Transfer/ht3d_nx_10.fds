@@ -1,4 +1,4 @@
-&HEAD CHID='ht3d_nx_10', TITLE='HT3D verification: Carslaw and Jaeger, Sec 3.3'/
+&HEAD CHID='ht3d_nx_10', TITLE='J. Crank, The Mathematics of Diffusion, Oxford, 1975, Sec 2.3'/
 
 &MESH IJK=20,10,10, XB=-1,1,-.5,.5,-.5,.5/
 
