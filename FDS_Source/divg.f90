@@ -35,14 +35,13 @@ REAL(EB), POINTER, DIMENSION(:,:) :: PBAR_P
 REAL(EB) :: DELKDELT,VC,VC1,DTDX,DTDY,DTDZ,TNOW, &
             DZDX,DZDY,DZDZ,RDT,RHO_D_DZDN,TSI,TIME_RAMP_FACTOR,DELTA_P,PRES_RAMP_FACTOR,&
             TMP_G,DIV_DIFF_HEAT_FLUX,H_S,ZZZ(1:4),DU,DU_P,DU_M,UN,PROFILE_FACTOR, &
-            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,MW,DV_TMP
+            XHAT,ZHAT,TT,Q_Z,D_Z_TEMP,D_Z_N(0:5000),RHO_D_DZDN_GET(1:N_TRACKED_SPECIES),JCOR,MW
 REAL(EB), ALLOCATABLE, DIMENSION(:) :: ZZ_GET
 TYPE(SURFACE_TYPE), POINTER :: SF
 TYPE(SPECIES_MIXTURE_TYPE), POINTER :: SM
 INTEGER :: IW,N,IOR,II,JJ,KK,IIG,JJG,KKG,I,J,K,IPZ,IOPZ,N_ZZ_MAX
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
-REAL(EB), PARAMETER :: DV_EPS=1.E-10_EB
 
 ! Check whether to skip this routine
 
@@ -322,58 +321,6 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
 ENDIF SPECIES_GT_1_IF
 
-! Store max diffusion velocity for stability check (experimental)
-
-CFL_4_IF: IF (CFL_VELOCITY_NORM>=4 .AND. PREDICTOR) THEN
-
-   DVX=0._EB
-   DVY=0._EB
-   DVZ=0._EB
-
-   DV_SPEC_LOOP: DO N=1,N_TRACKED_SPECIES
-
-      DO K=0,KBAR
-         DO J=0,JBAR
-            DO I=0,IBAR
-
-               ! "upwind" the scalar gradient to avoid divide by zero
-               ! in this way, max value in the difference is always scaled to unity
-
-               IF (RHO_D_DZDX(I,J,K,N)<-DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDX(I,J,K,N)/(RHOS(I,J,K)*ZZS(I,J,K,N))
-               ELSEIF (RHO_D_DZDX(I,J,K,N)>DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDX(I,J,K,N)/(RHOS(I+1,J,K)*ZZS(I+1,J,K,N))
-               ELSE
-                  DV_TMP = 0._EB
-               ENDIF
-               IF (ABS(DV_TMP)>ABS(DVX(I,J,K))) DVX(I,J,K) = DV_TMP
-
-               IF (RHO_D_DZDY(I,J,K,N)<-DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDY(I,J,K,N)/(RHOS(I,J,K)*ZZS(I,J,K,N))
-               ELSEIF (RHO_D_DZDY(I,J,K,N)>DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDY(I,J,K,N)/(RHOS(I,J+1,K)*ZZS(I,J+1,K,N))
-               ELSE
-                  DV_TMP = 0._EB
-               ENDIF
-               IF (ABS(DV_TMP)>ABS(DVY(I,J,K))) DVY(I,J,K) = DV_TMP
-
-               IF (RHO_D_DZDZ(I,J,K,N)<-DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDZ(I,J,K,N)/(RHOS(I,J,K)*ZZS(I,J,K,N))
-               ELSEIF (RHO_D_DZDZ(I,J,K,N)>DV_EPS) THEN
-                  DV_TMP = -RHO_D_DZDZ(I,J,K,N)/(RHOS(I,J,K+1)*ZZS(I,J,K+1,N))
-               ELSE
-                  DV_TMP = 0._EB
-               ENDIF
-               IF (ABS(DV_TMP)>ABS(DVZ(I,J,K))) DVZ(I,J,K) = DV_TMP
-
-            ENDDO
-         ENDDO
-      ENDDO
-
-   ENDDO DV_SPEC_LOOP
-
-ENDIF CFL_4_IF
-
 ! Get the specific heat
 
 CP => WORK5
@@ -522,30 +469,30 @@ ENDDO CORRECTION_LOOP
 ! Compute (q + del dot k del T) and add to the divergence
 
 CYLINDER3: SELECT CASE(CYLINDRICAL)
-   CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
-      !$OMP PARALLEL DO PRIVATE(DELKDELT) SCHEDULE(STATIC)
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
-                          (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
-                          (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
-               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-            ENDDO
+CASE(.FALSE.) CYLINDER3   ! 3D or 2D Cartesian
+   !$OMP PARALLEL DO PRIVATE(DELKDELT) SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            DELKDELT = (KDTDX(I,J,K)-KDTDX(I-1,J,K))*RDX(I) + &
+                       (KDTDY(I,J,K)-KDTDY(I,J-1,K))*RDY(J) + &
+                       (KDTDZ(I,J,K)-KDTDZ(I,J,K-1))*RDZ(K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
-      !$OMP END PARALLEL DO
-   CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
-      DO K=1,KBAR
-         DO J=1,JBAR
-            DO I=1,IBAR
-               DELKDELT = &
-                    (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
-                    (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
-               DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
-            ENDDO
+   ENDDO
+   !$OMP END PARALLEL DO
+CASE(.TRUE.) CYLINDER3   ! 2D Cylindrical
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            DELKDELT = &
+                 (R(I)*KDTDX(I,J,K)-R(I-1)*KDTDX(I-1,J,K))*RDX(I)*RRN(I) + &
+                 (KDTDZ(I,J,K)-            KDTDZ(I,J,K-1))*RDZ(K)
+            DP(I,J,K) = DP(I,J,K) + DELKDELT + Q(I,J,K) + QR(I,J,K)
          ENDDO
       ENDDO
+   ENDDO
 END SELECT CYLINDER3
 
 ! Point to the appropriate velocity components

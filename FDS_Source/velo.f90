@@ -2831,16 +2831,11 @@ DO K=1,KBAR
          UODX = MAXVAL(ABS(US(I-1:I,J,K)))*RDX(I)
          VODY = MAXVAL(ABS(VS(I,J-1:J,K)))*RDY(J)
          WODZ = MAXVAL(ABS(WS(I,J,K-1:K)))*RDZ(K)
-         IF (CFL_VELOCITY_NORM>=4) THEN ! (experimental)
-            UODX = MAXVAL(ABS(US(I-1:I,J,K)+2._EB*DVX(I-1:I,J,K)))*RDX(I)
-            VODY = MAXVAL(ABS(VS(I,J-1:J,K)+2._EB*DVY(I,J-1:J,K)))*RDY(J)
-            WODZ = MAXVAL(ABS(WS(I,J,K-1:K)+2._EB*DVZ(I,J,K-1:K)))*RDZ(K)
-         ENDIF
          SELECT CASE (CFL_VELOCITY_NORM)
-            CASE(0,4) ; UVW = MAX(UODX,VODY,WODZ) + ABS(DS(I,J,K))
-            CASE(1,5) ; UVW = UODX + VODY + WODZ  + ABS(DS(I,J,K))
-            CASE(2,6) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
-            CASE(3,7) ; UVW = MAX(UODX,VODY,WODZ)
+            CASE(0) ; UVW = MAX(UODX,VODY,WODZ) + ABS(DS(I,J,K))
+            CASE(1) ; UVW = UODX + VODY + WODZ  + ABS(DS(I,J,K))
+            CASE(2) ; UVW = SQRT(UODX**2+VODY**2+WODZ**2) + ABS(DS(I,J,K))
+            CASE(3) ; UVW = MAX(UODX,VODY,WODZ)
          END SELECT
          IF (UVW>=UVWMAX) THEN
             UVWMAX = UVW

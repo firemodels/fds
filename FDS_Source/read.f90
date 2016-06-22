@@ -1928,10 +1928,6 @@ H0 = 0.5_EB*(U0**2+V0**2+W0**2)
 
 H_F_REFERENCE_TEMPERATURE = H_F_REFERENCE_TEMPERATURE + TMPM
 
-! Use diffusion velocity in stability check instead of VN (experimental)
-
-IF (CFL_VELOCITY_NORM>=4) CHECK_VN=.FALSE.
-
 END SUBROUTINE READ_MISC
 
 
