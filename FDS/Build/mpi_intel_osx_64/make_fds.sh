@@ -6,4 +6,4 @@ source $IFORT_COMPILER/bin/compilervars.sh $platform
 source ../Scripts/set_mpidist.sh eth $MPIDIST_ETH
 
 echo Building $target
-make -j4 VPATH="../../FDS_Source" -f ../makefile $target
+make -j4 VPATH="../../Source" -f ../makefile $target

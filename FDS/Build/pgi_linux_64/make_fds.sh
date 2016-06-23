@@ -4,4 +4,4 @@ target=${dir##*/}
 
 
 echo Building $target
-make VPATH="../../FDS_Source" -f ../makefile $target
+make VPATH="../../Source" -f ../makefile $target
