@@ -18,6 +18,6 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\FDS_Compilation
+cd %svn_root%\FDS\Build
 echo %CD%
 start wordpad getting_started.html

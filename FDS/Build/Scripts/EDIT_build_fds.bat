@@ -17,5 +17,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\FDS_Compilation
+cd %svn_root%\FDS\Build
 start notepad build_fds.html
