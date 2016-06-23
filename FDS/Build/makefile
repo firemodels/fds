@@ -14,8 +14,8 @@ VPATH = ../FDS_Source
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
   BUILD_DATE := $(shell date /t) $(shell time /t)
-  GIT_HASH := $(shell ..\..\Utilities\Scripts\githash)
-  GIT_DATE := $(shell ..\..\Utilities\Scripts\gitlog)
+  GIT_HASH := $(shell ..\..\..\Utilities\Scripts\githash)
+  GIT_DATE := $(shell ..\..\..\Utilities\Scripts\gitlog)
 else
 # linux/osx
   GIT_HASH := $(shell git describe --long --dirty)
