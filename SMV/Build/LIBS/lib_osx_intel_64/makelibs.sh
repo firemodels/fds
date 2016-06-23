@@ -7,7 +7,7 @@ LUA=$1
 OPTS="-i -6"
 LIBDIR=`pwd`
 rm *.a
-SRCDIR=$LIBDIR/../../../source
+SRCDIR=$LIBDIR/../../../Source
 cd $SRCDIR
 SRCDIR=`pwd`
 

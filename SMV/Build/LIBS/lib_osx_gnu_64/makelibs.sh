@@ -1,7 +1,7 @@
 #!/bin/bash
 OPTS="-g -6"
 LIBDIR=`pwd`
-SRCDIR=$LIBDIR/../../../source
+SRCDIR=$LIBDIR/../../../Source
 rm *.a
 cd $SRCDIR
 SRCDIR=`pwd`

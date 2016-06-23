@@ -10,7 +10,7 @@ OPTS="-i -6"
 source $IFORT_COMPILER/bin/compilervars.sh intel64
 
 LIBDIR=`pwd`
-SRCDIR=$LIBDIR/../../../source
+SRCDIR=$LIBDIR/../../../Source
 cd $SRCDIR
 SRCDIR=`pwd`
 

@@ -4,7 +4,7 @@ set arg1=%1
 set arg2=%2
 
 set LIBDIR=%CD%
-set SRCDIR=%LIBDIR%\..\..\..\source
+set SRCDIR=%LIBDIR%\..\..\..\Source
 erase *.lib
 
 :: ZLIB
