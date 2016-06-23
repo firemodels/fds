@@ -9,7 +9,7 @@ set buildtype=%2
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/Scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -39,11 +39,11 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_linux_64 make_smv.sh %type%
+  plink %linux_logon% %linux_svn_root%/SMV/Scripts/run_command.sh SMV/Build/smokeview/intel_linux_64 make_smv.sh %type%
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_osx_64 make_smv.sh %type%
+  plink %osx_logon% %linux_svn_root%/SMV/Scripts/run_command.sh SMV/Build/smokeview/intel_osx_64 make_smv.sh %type%
   goto eof
 )
 

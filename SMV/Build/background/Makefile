@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../source
+SOURCE_DIR = ../../../Source
 INC_DIR = -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/background
 FILTERC =
 FILTERF =

@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../source/
+SOURCE_DIR = ../../../Source/
 FILTERC =
 FILTERF =
 

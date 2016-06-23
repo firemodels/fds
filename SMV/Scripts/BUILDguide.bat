@@ -1,9 +1,10 @@
 @echo off
+set guide=%1
 
-set envfile="%userprofile%"\fds_smv_env.bat
+set envfile=%userprofile%\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/Scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -12,11 +13,13 @@ goto:eof
 
 :endif_envexist
 
-echo Viewing animation web page
-
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Manuals\SMV_Summary
 
-start explorer index.html
+set CURDIR=%CD%
+
+cd %svn_root%\Manuals\%guide%
+call make_guide
+
+cd %CURDIR%

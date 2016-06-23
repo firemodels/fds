@@ -1,4 +1,4 @@
-SOURCE_DIR = ../../../source/
+SOURCE_DIR = ../../../Source/
 BUILD_DIR = $(SOURCE_DIR)/../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
 INC_DIR =  -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/wind2fds 

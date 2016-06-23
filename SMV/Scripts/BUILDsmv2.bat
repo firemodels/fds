@@ -8,7 +8,7 @@ set whichsmv=%1
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
 echo ***Fatal error.  The environment setup file %envfile% does not exist. 
-echo Create a file named %envfile% and use SMV/scripts/fds_smv_env_template.bat
+echo Create a file named %envfile% and use SMV/Scripts/fds_smv_env_template.bat
 echo as an example.
 echo.
 echo Aborting now...
@@ -45,7 +45,7 @@ if "%whichsmv%" == "linux_smvti" (
   echo  Building linux smokeview incrementally
   Title Building linux smokeview incrementally
   
-  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_linux_64  make_smv_inc.sh
+  plink %linux_logon% %linux_svn_root%/SMV/Scripts/run_command.sh SMV/Build/smokeview/intel_linux_64  make_smv_inc.sh
   goto eof
 )
 if "%whichsmv%" == "osx_smvti" (
@@ -53,7 +53,7 @@ if "%whichsmv%" == "osx_smvti" (
   echo  Building OSX smokeview incrementally
   Title Building OSX smokeview incrementally
 
-  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/smokeview/intel_osx_64  make_smv_inc.sh
+  plink %osx_logon% %linux_svn_root%/SMV/Scripts/run_command.sh SMV/Build/smokeview/intel_osx_64  make_smv_inc.sh
   goto eof
 )
 if "%whichsmv%" == "win_smvti" (
