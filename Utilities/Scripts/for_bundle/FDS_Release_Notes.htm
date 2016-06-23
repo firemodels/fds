@@ -6,6 +6,7 @@
 <li><p>Fix bug related to discontinuity of HRR after restart.</p></li>
 <li><p>Fix bug related to specific location leakage where LEAK_ENTHALPY=.TRUE.</p></li>
 <li><p>Add HVAC quantities to the restart file</p></li>
+<li><p>Improve method of interpolating particle drag onto grid for use in momentum equation. In the past, the drag was applied at the nearest cell face, whereas now the drag is linearly interpolated onto two nearest cell faces.</p></li>
 </ul>
 <h4 id="fds-6.4.0">FDS 6.4.0</h4>
 <h6 id="general-enhancementsbug-fixes-1">General Enhancements/Bug Fixes</h6>
