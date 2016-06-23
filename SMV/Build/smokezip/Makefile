@@ -5,7 +5,7 @@ FILTERC =
 FILTERF =
 OPT =
 
-VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
+VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS/Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)

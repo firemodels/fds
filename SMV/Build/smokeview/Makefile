@@ -3,7 +3,7 @@
 
 #To use this Makefile cd to a sub-directory and type make_smv.sh or make_smv.bat
 
-SOURCE_DIR = ../../../source/
+SOURCE_DIR = ../../../Source/
 BUILD_DIR = ../../../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
 
@@ -26,7 +26,7 @@ GITINFO=-Dpp_GITHASH=\"$(GIT_HASH)\" -Dpp_GITDATE=\""$(GIT_DATE)\""
 
 # The variable VPATH defines the source code directory relative to the current directory
 
-VPATH = $(SOURCE_DIR)/smokeview:../../../../FDS_Source:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
+VPATH = $(SOURCE_DIR)/smokeview:../../../../FDS/Source:$(SOURCE_DIR)/shared:$(SOURCE_DIR)/glew
 bin = .
 
 # Definition of the object variables
