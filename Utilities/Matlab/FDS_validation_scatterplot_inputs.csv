@@ -9,7 +9,7 @@ Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume F
 Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0.001,0.2,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Dioxide_Concentration
 Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),1,600,0.03 0.95,SouthEast,1,19,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Concentration
 Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),1,2000,0.03 0.95,SouthEast,1,23,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure
-Target Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),10,1000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
+Target Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),10,1300,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
 Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,2000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature
 Target Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,SouthEast,1,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
 Surface Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,SouthEast,1,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Heat_Flux
