@@ -1,6 +1,6 @@
 PROGRAM FDS
 
-!  Fire Dynamics Simulator, Main Program, Multiple CPU version.
+! Fire Dynamics Simulator, Main Program, Multiple CPU version.
 
 USE PRECISION_PARAMETERS
 USE MESH_VARIABLES
