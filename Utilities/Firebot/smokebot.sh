@@ -254,7 +254,7 @@ run_auto()
   TRIGGER=$TRIGGER_DIR/smokeview/smokebot_trigger.txt
   GIT_T_FILE=$GIT_STATUSDIR/trigger_revision
 
-  FDS_SOURCE=$fdsrepo/FDS_Source
+  FDS_SOURCE=$fdsrepo/FDS\Source
   GIT_FDS_FILE=$GIT_STATUSDIR/fds_revision
   GIT_FDS_LOG=$GIT_STATUSDIR/FDS_log
 
@@ -550,8 +550,8 @@ clean_FDS_repo()
         fi
         clean_repo $fdsrepo/Verification
         clean_repo $fdsrepo/SMV
-        clean_repo $fdsrepo/FDS_Source
-        clean_repo $fdsrepo/FDS_Compilation
+        clean_repo $fdsrepo/FDS/Source
+        clean_repo $fdsrepo/FDS/Build
         clean_repo $fdsrepo/Manuals
         updateclean="1"
       fi
@@ -622,7 +622,7 @@ compile_fds_mpi_db()
    # Clean and compile mpi FDS debug
    echo "   FDS"
    echo "      debug"
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
+   cd $fdsrepo/FDS/Build/mpi_${COMPILER}_${platform}${size}$IB$DB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB$DB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage1b
@@ -631,7 +631,7 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS debug compilation
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB$DB
+   cd $fdsrepo/FDS/Build/mpi_${COMPILER}_${platform}${size}$IB$DB
    if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB$DB" ]
    then
       stage1b_fdsdb_success=true
@@ -757,7 +757,7 @@ compile_fds_mpi()
 {
    # Clean and compile FDS
    echo "      release"
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
+   cd $fdsrepo/FDS/Build/mpi_${COMPILER}_${platform}${size}$IB
    rm -f fds_mpi_${COMPILER}_${platform}${size}$IB
    make --makefile ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage1c
@@ -766,7 +766,7 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS compilation
-   cd $fdsrepo/FDS_Compilation/mpi_${COMPILER}_${platform}${size}$IB
+   cd $fdsrepo/FDS/Build/mpi_${COMPILER}_${platform}${size}$IB
    if [ -e "fds_mpi_${COMPILER}_${platform}${size}$IB" ]
    then
       stage1c_fdsrel_success=true
