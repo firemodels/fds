@@ -51,7 +51,7 @@ case=$1
 
 source /opt/intel/inspector_xe/inspxe-vars.sh quiet
 
-TARGET=$GITROOT/FDS_Compilation/intel_linux_64_inspect
+TARGET=$GITROOT/FDS/Build/intel_linux_64_inspect
 
 if [ "$showinput" == "" ] ; then
   if [ -d $RESULT_DIR ] ; then
@@ -68,11 +68,11 @@ if [ "$showinput" == "1" ] ; then
   echo inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/FDS_Source \
-          -- $GITROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
+          -- $GITROOT/FDS/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
   exit
 fi
 cd $CURDIR
 inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
           -search-dir src=$GITROOT/FDS_Source \
-          -- $GITROOT/FDS_Compilation/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
+          -- $GITROOT/FDS/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case

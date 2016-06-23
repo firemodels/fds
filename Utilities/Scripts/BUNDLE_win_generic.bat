@@ -4,7 +4,7 @@ set fdsversion=%fds_edition%
 set smvversion=SMV6
 
 set SVNROOT=%svn_root%
-set fdsdir=%svn_root%\FDS_Compilation\intel_win_%platform%
+set fdsdir=%svn_root%\FDS\Build\intel_win_%platform%
 set fdsmpidir=%svn_root%\FDS_Compilation\mpi_intel_win_%platform%
 set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 

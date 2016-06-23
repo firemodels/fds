@@ -4,7 +4,7 @@ curdir=`pwd`
 cd ../..
 reporoot=`pwd`
 dir1=$reporoot/Utilities/Scripts
-dir2=$reporoot/FDS_Compilation/Scripts
+dir2=$reporoot/FDS/Build/Scripts
 dir3=$reporoot/SMV/scripts
 dir4=$reporoot/Verification/scripts
 dir5=$reporoot/Utilities/Firebot

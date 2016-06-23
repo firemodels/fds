@@ -184,10 +184,10 @@ if [ $use_repository -eq 1 ] ; then
 # use fds from repository (-e was not specified)
 # if [ $nmpi_processes -gt 1 ] ; then
 # use mpi version of fds 
-  exe=$FDSROOT/FDS_Compilation/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
+  exe=$FDSROOT/FDS/Build/mpi_intel_linux_64$IB$DB/fds_mpi_intel_linux_64$IB$DB
 # else
 # use non-mpi version of fds 
-#  exe=$FDSROOT/FDS_Compilation/intel_linux_64$DB/fds_intel_linux_64$DB
+#  exe=$FDSROOT/FDS/Build/intel_linux_64$DB/fds_intel_linux_64$DB
 # fi
 fi
 
