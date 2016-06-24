@@ -143,13 +143,13 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
 
-      ! Store max diffusivity for stability check
-
-      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
-
       ! Manufactured solution
 
       IF (PERIODIC_TEST==7) RHO_D = DIFF_MMS
+
+      ! Store max diffusivity for stability check
+
+      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
 
       ! Compute rho*D del Z
 
@@ -328,7 +328,7 @@ R_H_G => WORK9
 
 !$OMP PARALLEL PRIVATE(ZZ_GET, H_S)
 ALLOCATE(ZZ_GET(1:N_TRACKED_SPECIES))
-!$OMP DO SCHEDULE(static)
+!$OMP DO SCHEDULE(STATIC)
 DO K=1,KBAR
    DO J=1,JBAR
       DO I=1,IBAR
@@ -403,9 +403,24 @@ ELSE K_DNS_OR_LES
 
 ENDIF K_DNS_OR_LES
 
+! Store max diffusivity for stability check
+
+IF (CHECK_VN) THEN
+   !$OMP PARALLEL DO SCHEDULE(STATIC)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            IF (SOLID(CELL_INDEX(I,J,K))) CYCLE
+            D_Z_MAX(I,J,K) = MAX(D_Z_MAX(I,J,K),KP(I,J,K)/(CP(I,J,K)*RHOP(I,J,K)))
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END PARALLEL DO
+ENDIF
+
 ! Compute k*dT/dx, etc
 
-!$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE (STATIC)
+!$OMP PARALLEL DO PRIVATE(DTDX, DTDY, DTDZ) SCHEDULE(STATIC)
 DO K=0,KBAR
    DO J=0,JBAR
       DO I=0,IBAR
