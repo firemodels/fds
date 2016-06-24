@@ -143,13 +143,13 @@ SPECIES_GT_1_IF: IF (N_TOTAL_SCALARS>1) THEN
 
       IF (LES .AND. RESEARCH_MODE) RHO_D = RHO_D + RHO_D_TURB
 
-      ! Store max diffusivity for stability check
-
-      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
-
       ! Manufactured solution
 
       IF (PERIODIC_TEST==7) RHO_D = DIFF_MMS
+
+      ! Store max diffusivity for stability check
+
+      IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,RHO_D/RHOP)
 
       ! Compute rho*D del Z
 
@@ -402,6 +402,10 @@ ELSE K_DNS_OR_LES
    KP = MU*CPOPR
 
 ENDIF K_DNS_OR_LES
+
+! Store max diffusivity for stability check
+
+IF (CHECK_VN) D_Z_MAX = MAX(D_Z_MAX,KP/(CP*RHOP))
 
 ! Compute k*dT/dx, etc
 
