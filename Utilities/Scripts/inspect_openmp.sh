@@ -67,12 +67,12 @@ export OMP_NUM_THREADS=2
 if [ "$showinput" == "1" ] ; then
   echo inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
-          -search-dir src=$GITROOT/FDS_Source \
+          -search-dir src=$GITROOT/FDS/Source \
           -- $GITROOT/FDS/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
   exit
 fi
 cd $CURDIR
 inspxe-cl -collect ti3 -knob scope=normal \
           -result-dir $RESULT_DIR \
-          -search-dir src=$GITROOT/FDS_Source \
+          -search-dir src=$GITROOT/FDS/Source \
           -- $GITROOT/FDS/Build/intel_linux_64_inspect/fds_intel_linux_64_inspect $case
