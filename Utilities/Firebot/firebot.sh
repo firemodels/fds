@@ -271,8 +271,8 @@ clean_git_repo()
          clean_repo $fdsrepo/Verification
          clean_repo $fdsrepo/Validation
          clean_repo $fdsrepo/SMV
-         clean_repo $fdsrepo/FDS\Source
-         clean_repo $fdsrepo/FDS\Build
+         clean_repo $fdsrepo/FDS/Source
+         clean_repo $fdsrepo/FDS/Build
          clean_repo $fdsrepo/Manuals
       fi
    # If not, create FDS repository and checkout
@@ -387,7 +387,7 @@ compile_fds_mpi_db()
 {
    # Clean and compile FDS MPI debug
    echo "      MPI debug"
-   cd $fdsrepo/FDS\Build/mpi_intel_${platform}${size}$IB$DB
+   cd $fdsrepo/FDS/Build/mpi_intel_${platform}${size}$IB$DB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2b
 }
@@ -395,7 +395,7 @@ compile_fds_mpi_db()
 check_compile_fds_mpi_db()
 {
    # Check for errors in FDS MPI debug compilation
-   cd $fdsrepo/FDS\Build/mpi_intel_${platform}${size}$IB$DB
+   cd $fdsrepo/FDS/Build/mpi_intel_${platform}${size}$IB$DB
    if [ -e "fds_mpi_intel_${platform}${size}$IB$DB" ]
    then
       stage2b_success=true
@@ -530,7 +530,7 @@ compile_fds_mpi()
 {
    # Clean and compile FDS MPI
    echo "      MPI release"
-   cd $fdsrepo/FDS\Build/mpi_intel_${platform}${size}$IB
+   cd $fdsrepo/FDS/Build/mpi_intel_${platform}${size}$IB
    make -f ../makefile clean &> /dev/null
    ./make_fds.sh &> $OUTPUT_DIR/stage2c
 }
@@ -538,7 +538,7 @@ compile_fds_mpi()
 check_compile_fds_mpi()
 {
    # Check for errors in FDS MPI compilation
-   cd $fdsrepo/FDS\Build/mpi_intel_${platform}${size}$IB
+   cd $fdsrepo/FDS/Build/mpi_intel_${platform}${size}$IB
    if [ -e "fds_mpi_intel_${platform}${size}$IB" ]
    then
       stage2c_success=true

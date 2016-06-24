@@ -254,7 +254,7 @@ run_auto()
   TRIGGER=$TRIGGER_DIR/smokeview/smokebot_trigger.txt
   GIT_T_FILE=$GIT_STATUSDIR/trigger_revision
 
-  FDS_SOURCE=$fdsrepo/FDS\Source
+  FDS_SOURCE=$fdsrepo/FDS/Source
   GIT_FDS_FILE=$GIT_STATUSDIR/fds_revision
   GIT_FDS_LOG=$GIT_STATUSDIR/FDS_log
 
