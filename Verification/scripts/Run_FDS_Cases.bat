@@ -49,7 +49,7 @@ set BACKGROUNDEXE=background.exe
 set SH2BAT=sh2bat
 
 set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
-set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set FDSEXE=%SVNROOT%\FDS\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
 
 :: ---------- Ensure that various programs exists
 

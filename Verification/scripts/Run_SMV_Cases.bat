@@ -44,7 +44,7 @@ set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
 set FDSBASE=fds_mpi_win%size%%DEBUG%.exe
-set FDSEXE=%SVNROOT%\FDS_Compilation\mpi_intel_win%size%%DEBUG%\%FDSBASE%
+set FDSEXE=%SVNROOT%\FDS\Build\mpi_intel_win%size%%DEBUG%\%FDSBASE%
 set CFASTEXE=%CFAST%\Build\CFAST\intel_win%size%\cfast7_win%size%.exe
 set WIND2FDSEXE=%SVNROOT%\SMV\Build\wind2fds\intel_win%size%\wind2fds_win%size%.exe
 
