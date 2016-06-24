@@ -105,8 +105,8 @@ if [ "$FDSNETWORK" == "infiniband" ]; then
   IB=ib
 fi
 
-export FDS=$SVNROOT/FDS_Compilation/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
-export FDSMPI=$SVNROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
+export FDS=$SVNROOT/FDS/Build/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
+export FDSMPI=$SVNROOT/FDS/Build/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
 export QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then

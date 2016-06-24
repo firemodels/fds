@@ -22,7 +22,7 @@ if "%size%" == "" (
   set FDS=fds
 ) else (
   set SMOKEVIEW=%SVNROOT%\SMV\Build\intel_win_%size%\smokeview_win_%size%.exe -bindir %SVNROOT%\SMV\for_bundle
-  set FDS=%SVNROOT%\FDS_Compilation\intel_win_%size%\fds_win_%size%.exe
+  set FDS=%SVNROOT%\FDS\Build\intel_win_%size%\fds_win_%size%.exe
 )
 
 call :is_file_installed %SMOKEVIEW%|| exit /b 1
