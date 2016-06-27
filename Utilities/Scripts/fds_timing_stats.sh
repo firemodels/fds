@@ -21,12 +21,13 @@ if [[ "$TIMING" == "" ]]; then
 else
   export save_benchmark="yes"
 fi
-cd $SVNROOT/Verification
 if [[ "$MODE" == "smokebot" ]]; then
+  cd $SVNROOT/SMV/Verification
   scripts/SMV_Cases.sh >> $tmpout
   scripts/GEOM_Cases.sh >> $tmpout
   scripts/WUI_Cases.sh >> $tmpout
 else
+  cd $SVNROOT/FDS/Verification
   ./FDS_Cases.sh >> $tmpout
 fi
 
