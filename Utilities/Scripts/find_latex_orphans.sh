@@ -5,7 +5,10 @@
 
 SVNROOT=`pwd`/../..
 
-cd $SVNROOT/Manuals
+FDS_MANDIR=$SVNROOT/FDS/Manuals
+SMV_MANDIR=$SVNROOT/SMV/Manuals
+
+cd $FDS_MANDIR
 
 #  =============================================================================
 #  = Make all guides with the -recorder option to output external dependencies =
@@ -65,6 +68,8 @@ then
     echo $output
 fi
 cd ..
+
+cd $SMV_MANDIR
 
 cd SMV_Technical_Reference_Guide
 echo 'Building SMV Technical Reference Guide'
