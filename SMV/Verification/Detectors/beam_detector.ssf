@@ -1,0 +1,12 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ beam_detector_nosmoke
+LOADFILE
+ beam_detector_01.s3d
+SETTIMEVAL
+ 1.028000
+RENDERONCE
+ beam_detector_smoke

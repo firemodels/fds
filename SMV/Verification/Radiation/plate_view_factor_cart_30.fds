@@ -1,0 +1,32 @@
+&HEAD CHID='plate_view_factor_cart_30',TITLE='Heat flux from rectangular plate,SVN $Revision$' /
+
+The RADIATIVE HEAT FLUX should be 81.8 kW/m2.
+
+&MESH IJK=20,20,10, XB=0,2,0,2,0,1 /
+
+&TIME T_END=.01 DT = 0.001 / 
+
+&MISC GVEC=0,0,0,Y_CO2_INFTY=0.,HUMIDITY=0./ 
+
+&RADI NUMBER_RADIATION_ANGLES = 30 /
+
+&SURF ID='HOT'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      TMP_FRONT = 1000.
+      EMISSIVITY = 1.
+      TAU_T = 0.0 /
+
+&SURF ID='COLD'
+      DEFAULT = .TRUE.
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      TMP_FRONT = -273.14
+      EMISSIVITY = 1.
+      TAU_T = 0.0 /
+
+&VENT MB = 'ZMAX' SURF_ID = 'HOT' /
+
+&DEVC XYZ = 1,1,0,IOR = 3, QUANTITY = 'RADIATIVE HEAT FLUX' /
+
+&TAIL /
+
+

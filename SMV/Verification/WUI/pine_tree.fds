@@ -1,0 +1,59 @@
+&HEAD CHID='pine_tree', TITLE='Test for burning vegetation mass conservation' /
+
+&MESH IJK=20,20,40, XB=-1.0,1.0,-1.0,1.0,0.0,4.0 /
+
+&TIME T_END=40. / 
+
+&REAC FUEL = 'GLUCOSE'
+      C = 6. 
+      H = 12. 
+      O = 6. 
+      SOOT_YIELD = 0.001 /
+
+&SPEC ID='WATER VAPOR' /
+
+&SURF ID='HOT WALL', TMP_FRONT=1000., COLOR='RED', DEFAULT=.TRUE., HEAT_TRANSFER_COEFFICIENT=0., COLOR='INVISIBLE' /
+
+&SURF ID                        = 'wet vegetation'
+      MATL_ID(1,1:2)            = 'PINE','MOISTURE'
+      MATL_MASS_FRACTION(1,1:2) = 0.8,0.2
+      THICKNESS                 = 0.001
+      LENGTH                    = 0.05
+      GEOMETRY                  = 'CYLINDRICAL' /
+      
+&MATL ID = 'PINE'
+      DENSITY = 500.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 1.0
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 300.
+      NU_SPEC = 0.8
+      SPEC_ID = 'GLUCOSE'
+      HEAT_OF_REACTION = 1000. /
+ 
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 4.184
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 100.
+      NU_SPEC = 1.0
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION= 2500. /
+
+&PART ID='pine needles', SAMPLING_FACTOR=1, SURF_ID='wet vegetation', PROP_ID='wood image'
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER', STATIC=.TRUE. /
+
+&INIT PART_ID='pine needles', XYZ=0.0,0.0,0.3, RADIUS=0.5, HEIGHT=1.5, SHAPE='CONE', N_PARTICLES=2000, MASS_PER_VOLUME=10.  /
+
+&PROP ID='wood image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.05','D=0.002','RANDXYZ=1' /
+
+&VENT XB=-0.5,0.5,-0.5,0.5,0.,0., SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DEVC XB=-1.0,1.0,-1.0,1.0,0.0,3.2, QUANTITY='MPUV', PART_ID='pine needles', ID='solid mass', STATISTICS='VOLUME INTEGRAL'  /
+
+&SLCF PBY=0., QUANTITY='TEMPERATURE', VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBY=0., QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+
+&TAIL /

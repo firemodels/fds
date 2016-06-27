@@ -1,0 +1,66 @@
+&HEAD CHID='bunsen_burner_methane',TITLE='laminar Bunsen burner flame with methane to test flame speed approach' /
+
+&MESH IJK=60,1,160, XB=0.00000,0.01500, -0.00025,0.00025, -0.010000,0.03000, CYLINDRICAL=.TRUE./ 
+
+&TIME T_END=1/
+
+&DUMP NFRAMES=4000/
+
+&MISC DNS=.TRUE., NOISE=.FALSE. /
+
+&REAC FUEL = 'METHANE'
+      RAMP_FS = 'methane flame speed'
+      FLAME_SPEED = 1.
+      FLAME_SPEED_TEMPERATURE = 27
+      FLAME_SPEED_EXPONENT = 1.5
+      AUTO_IGNITION_TEMPERATURE = 540
+      CRITICAL_FLAME_TEMPERATURE = 1207  /
+
+&RAMP ID='methane flame speed', T=0,    F=0 /
+&RAMP ID='methane flame speed', T=0.506,F=0 / lower flammability limit (C. Beyler, SFPE handbook)
+&RAMP ID='methane flame speed', T=0.600,F=0.09679 /
+&RAMP ID='methane flame speed', T=0.631,F=0.12813 /
+&RAMP ID='methane flame speed', T=0.674,F=0.17265 /
+&RAMP ID='methane flame speed', T=0.725,F=0.20778 /
+&RAMP ID='methane flame speed', T=0.799,F=0.26660 /
+&RAMP ID='methane flame speed', T=0.899,F=0.33420 /
+&RAMP ID='methane flame speed', T=0.979,F=0.36970 /
+&RAMP ID='methane flame speed', T=1.039,F=0.38744 /
+&RAMP ID='methane flame speed', T=1.088,F=0.39041 /
+&RAMP ID='methane flame speed', T=1.130,F=0.37931 /
+&RAMP ID='methane flame speed', T=1.190,F=0.34974 /
+&RAMP ID='methane flame speed', T=1.231,F=0.31111 /
+&RAMP ID='methane flame speed', T=1.269,F=0.25580 /
+&RAMP ID='methane flame speed', T=1.330,F=0.20999 /
+&RAMP ID='methane flame speed', T=1.360,F=0.17057 /
+&RAMP ID='methane flame speed', T=1.430,F=0.12879 /
+&RAMP ID='methane flame speed', T=1.500,F=0.09538 /
+&RAMP ID='methane flame speed', T=1.698,F=0 / upper flammability limit
+&RAMP ID='methane flame speed', T=2.0,  F=0 /
+
+&SURF ID='tube side', TMP_FRONT=20, COLOR='GRAY' /
+&SURF ID='tube top', ADIABATIC=.TRUE., COLOR='IVORY' /
+&SURF ID='ignitor', CONVECTIVE_HEAT_FLUX=5000., COLOR='RED' /
+&SURF ID='burner', 
+      VEL=-0.80, TAU_V=0.0,
+      SPEC_ID(1)='METHANE', MASS_FRACTION(1)=0.055035, TAU_MF(1)=0 /
+
+&VENT XB=0.000,0.005,-0.00025,0.00025,-0.01,-0.01, SURF_ID='burner' /
+
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+
+&OBST XB=0.00500,0.00525,-0.00025,0.00025,-0.01,0.0, SURF_IDS='tube top','tube side','tube side' /
+
+&OBST XB=0.00500,0.00525,-0.00025,0.00025,0.015,0.01525, SURF_ID='ignitor', DEVC_ID='Timer1' /
+
+&DEVC XYZ=0.005,0,0.015, ID='Timer1', QUANTITY='TIME', SETPOINT=0.1, INITIAL_STATE=.TRUE. /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0, QUANTITY='TEMPERATURE',                      CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='HRRPUV',                           CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='UNMIXED FRACTION',                 CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='MASS FRACTION', SPEC_ID='METHANE', CELL_CENTERED=.TRUE. /
+
+&TAIL /

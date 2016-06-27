@@ -1,0 +1,142 @@
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_06.sf
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+plume5c_tslice
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_tslice
+ frames/plume5c_tslice
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_tslice_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+plume5c_3dsmoke
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_3dsmoke
+ frames/plume5c_3dsmoke
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_3dsmoke_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADVFILE
+ plume5c_06.sf
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+ plume5c_vtslice
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_vtslice
+ frames/plume5c_vtslice
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_vtslice_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_02.iso
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+ plume5c_iso
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_iso
+ frames/plume5c_iso
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_iso_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_03.bf
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+ plume5c_tbound
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_tbound
+ frames/plume5c_tbound
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_tbound_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+RENDERTYPE
+ jpg
+MOVIETYPE
+ mp4
+RENDERALL
+ 1
+ plume5c_part
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+MAKEMOVIE
+ plume5c_part
+ frames/plume5c_part
+ 60
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_part_20
+UNLOADALL
+EXIT

@@ -1,0 +1,26 @@
+A simple two-dimensional case testing data to color conversion 
+
+&HEAD CHID='colorconv', TITLE='Test data to color conversion' / 
+&DUMP NFRAMES=800 /
+
+&MESH IJK=100,1,100, XB=0.0,100.0,-1.0,1.0,0.0,100.0 /
+&SURF ID='COOLWALL' TMP_FRONT=20.0 /
+&SURF ID='HOTWALL' TMP_FRONT=100.0 /
+&SURF ID='INSWALL' ADIABATIC=.TRUE. /
+&MISC FLUX_LIMITER=4, CFL_VELOCITY_NORM=1, CHECK_VN=.FALSE. /
+
+&TIME T_END=200.0 / 
+
+&RADI RADIATION=.FALSE. /
+&INIT XB= 0.0, 50.0,-2.0,2.0,0.0,100.0, TEMPERATURE=20. /
+&INIT XB=50.0,100.0,-2.0,2.0,0.0,100.0, TEMPERATURE=100. /
+
+&VENT XB=   0.0, 100.0, -1.0, 1.0,     0.0,   0.0, SURF_ID='COOLWALL' /
+&VENT XB=   0.0, 100.0, -1.0, 1.0,   100.0, 100.0, SURF_ID='HOTWALL' /
+&VENT XB=   0.0,   0.0, -1.0, 1.0,     0.0, 100.0 SURF_ID='INSWALL' /
+&VENT XB= 100.0, 100.0, -1.0, 1.0,     0.0, 100.0 SURF_ID='INSWALL' /
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE' /
+        
+&TAIL /
+

@@ -1,0 +1,30 @@
+// note: The RENDERDIR pathname has been changed to point
+//       to where the Smokeview User guide script figures are kept
+RENDERDIR
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+LOADINIFILE
+ script_test.ini
+SETVIEWPOINT
+ left
+// LOADFILE
+//  script_test_05.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 5.012974
+RENDERONCE
+ script_test_left_05
+SETVIEWPOINT
+ center
+SETTIMEVAL
+ 10.006555
+RENDERONCE
+ script_test_center_10
+SETVIEWPOINT
+ right
+SETTIMEVAL
+ 15.006024
+RENDERONCE
+ script_test_right_15

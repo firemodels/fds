@@ -1,0 +1,27 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ frames
+
+UNLOADALL
+XSCENECLIP
+ 0 -0.300000 0 300.299988
+YSCENECLIP
+ 0 -150.300003 0 150.300003
+ZSCENECLIP
+ 0 -0.100000 0 100.099998
+SCENECLIP
+ 0
+SETVIEWPOINT
+ view 1
+LOADFILE
+ levelset1_lsfs.sf
+RENDERALL
+ 1
+levelset1_movie
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 120.000000
+RENDERONCE
+ levelset_120 

@@ -1,0 +1,80 @@
+&HEAD CHID='water_ice_water',TITLE='Phase change test: freeze-melt water' / 
+
+&MESH IJK=3,1,4, XB=-1.5,1.5,-0.5,0.5,0,4 / 
+
+&TIME T_END=1200., WALL_INCREMENT=1, DT=1.0 /
+
+&MISC TMPA=10. /
+
+&RADI NUMBER_RADIATION_ANGLES = 20 /
+
+&VENT MB='XMIN', SURF_ID='HOT' /
+&VENT MB='XMAX', SURF_ID='HOT' /
+&VENT MB='ZMAX', SURF_ID='HOT' /
+&VENT XB = -1.5,-0.5,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+&VENT XB =  0.5, 1.5,-0.5,0.5,0.0,0.0, SURF_ID = 'HOT' /
+&VENT XB = -0.5, 0.5,-0.5,0.5,0.0,0.0, SURF_ID = 'SAMPLE' /
+
+&SURF ID = 'SAMPLE'
+      HEAT_TRANSFER_COEFFICIENT = 50. 
+      BACKING = 'INSULATED' 
+      THICKNESS = 0.00001
+      MATL_ID = 'LIQUID_WATER' /
+
+&MATL ID = 'LIQUID_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.60
+      SPECIFIC_HEAT = 4.19  
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      MATL_ID = 'ICE_WATER'
+      NU_MATL    = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_SIGN = -1
+      THRESHOLD_TEMPERATURE(1) = 2.
+      HEAT_OF_REACTION(1) = -333. /
+
+&MATL ID = 'ICE_WATER'
+      DENSITY = 1000.
+      CONDUCTIVITY_RAMP = 'KS_ICE'
+      SPECIFIC_HEAT_RAMP = 'CS_ICE' 
+      N_REACTIONS = 1
+      PCR(1) = .TRUE.
+      MATL_ID = 'LIQUID_WATER'
+      NU_MATL    = 1.
+      A(1) = 2.0
+      E(1) = 0.
+      N_S(1) = 0.0
+      N_T(1) = 1.0
+      THRESHOLD_TEMPERATURE(1) = -2.
+      HEAT_OF_REACTION(1) = 333. /
+
+http://www.its.caltech.edu/~atomic/snowcrystals/ice/ice.htm
+
+&RAMP ID = 'KS_ICE' T =  -50. F = 2.76 /
+&RAMP ID = 'KS_ICE' T =    0. F = 2.22 /
+
+&RAMP ID = 'CS_ICE' T = -50 	F = 1.751 /
+&RAMP ID = 'CS_ICE' T = 0 	F = 2.050 /
+
+
+&SURF ID = 'HOT'
+	EMISSIVITY = 1.0
+        HEAT_TRANSFER_COEFFICIENT = 50. 
+	RGB        = 250,0,0
+	TMP_FRONT  = -10.
+	RAMP_T 	   = 'T_RAMP' /
+
+&RAMP ID = 'T_RAMP' T = 0.,   F = 0. /
+&RAMP ID = 'T_RAMP' T = 600., F = 1.0 /
+&RAMP ID = 'T_RAMP' T =1200., F = 0.0 /
+
+&PROF XYZ = 0,0,0, IOR = 3, QUANTITY = 'LIQUID_WATER' /
+
+&DEVC XYZ = 0.0,0.0,4.0,IOR = -3, QUANTITY = 'WALL TEMPERATURE' ID='Wall'/
+&DEVC XYZ = 0.0,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE' ID='Sample'/
+
+&TAIL /

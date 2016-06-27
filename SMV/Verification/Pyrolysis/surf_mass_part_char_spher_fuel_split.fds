@@ -1,0 +1,186 @@
+&HEAD CHID='surf_mass_part_char_spher_fuel_split',TITLE='Surface mass, particles, char, sphere, fuel'/
+
+&MESH 	IJK= 6,6,6,
+	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 / no split
+&MESH 	IJK= 6,6,6,
+	XB = 2.0,5.0,-1.5,1.5,0.0,3.0 / n = 2 (x)
+&MESH 	IJK= 6,6,6,
+	XB = 5.5,8.5,-1.5,1.5,0.0,3.0 / n = 2 (y)
+&MESH 	IJK= 6,6,6,
+	XB = 9.0,12.0,-1.5,1.5,0.0,3.0 / n = 2 (z)
+
+&SURF ID='HOT'
+      DEFAULT=.TRUE.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&TIME T_END=100., DT = 0.01, WALL_INCREMENT = 1 /
+&DUMP DT_HRR = 0.1 DT_DEVC = 0.1  /
+
+&SURF ID                        = 'Wood_1'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.007
+	GEOMETRY                = 'SPHERICAL' /
+
+&SURF ID                        = 'Wood_2'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.008
+	GEOMETRY                = 'SPHERICAL' /
+
+&SURF ID                        = 'Wood_3'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.009
+	GEOMETRY                = 'SPHERICAL' /
+
+&SURF ID                        = 'Wood_4'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.010
+	GEOMETRY                = 'SPHERICAL' /
+      
+&MATL ID = 'PINE'
+      EMISSIVITY 	= 1.0
+	DENSITY 	= 360.
+	CONDUCTIVITY	= 0.05
+	SPECIFIC_HEAT	= 1.0
+	N_REACTIONS	= 1
+	A		= 1E20
+	E 		= 1.6E5
+	N_S		= 1
+	NU_MATL   	= 0.5
+	NU_SPEC		= 0.5
+        SPEC_ID         = 'WOOD'
+	HEAT_OF_REACTION= 1000
+	MATL_ID 	= 'CHAR'
+	HEAT_OF_COMBUSTION(1) = 12000/
+	
+&MATL ID = 'CHAR'
+	EMISSIVITY 	= 1.0
+	DENSITY 	= 180.
+	CONDUCTIVITY	= 1.0
+	SPECIFIC_HEAT	= 1.6 /
+
+&PART ID		='Wood_part_1', 
+SAMPLING_FACTOR	=1,
+SURF_ID		='Wood_1', 
+PROP_ID		='wood image'
+QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+STATIC		=.TRUE. /
+
+&PART ID		='Wood_part_2', 
+SAMPLING_FACTOR	=1,
+SURF_ID		='Wood_2', 
+PROP_ID		='wood image'
+QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+STATIC		=.TRUE. 
+ORIENTATION(1:3,1)=1,0,0,
+ORIENTATION(1:3,2)=-1,0,0 /
+
+&PART ID		='Wood_part_3', 
+SAMPLING_FACTOR	=1,
+SURF_ID		='Wood_3', 
+PROP_ID		='wood image'
+QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+STATIC		=.TRUE. 
+ORIENTATION(1:3,1)=0,1,0,
+ORIENTATION(1:3,2)=0,-1,0 /
+
+&PART ID		='Wood_part_4', 
+SAMPLING_FACTOR	=1,
+SURF_ID		='Wood_4', 
+PROP_ID		='wood image'
+QUANTITIES		='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',
+STATIC		=.TRUE. 
+ORIENTATION(1:3,1)=0,0,1,
+ORIENTATION(1:3,2)=0,0,-1 /
+
+&INIT PART_ID='Wood_part_1', XB = 0.0,0.0,0,0,1.5,1.5, N_PARTICLES = 1  /
+&INIT PART_ID='Wood_part_2', XB=3.5,3.5,0,0,1.5,1.5, N_PARTICLES = 1  /
+&INIT PART_ID='Wood_part_3', XB=7.0,7.0,0,0,1.5,1.5, ,N_PARTICLES = 1  /
+&INIT PART_ID='Wood_part_4', XB=10.5,10.5,0,0,1.5,1.5, ,N_PARTICLES = 1  /
+
+&REAC FUEL = 'WOOD'
+	SOOT_YIELD 	= 0.0
+	CO_YIELD	= 0.0
+	C 		= 3.4
+	H		=6.2
+	O 		=2.5
+	HEAT_OF_COMBUSTION = 12000. 
+	/
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'm_gas_1', 
+	STATISTICS = 'VOLUME INTEGRAL',
+	RELATIVE = .TRUE./
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'MPUV', 
+	PART_ID = 'Wood_part_1', 
+	ID = 'm_solid_1',IOR = 3, 
+	STATISTICS = 'VOLUME INTEGRAL'  /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'HRR', 
+	ID = 'hrr_1', 
+	STATISTICS = 'TIME INTEGRAL',
+	/
+
+&DEVC 	XB = 2,5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'm_gas_2', 
+	STATISTICS = 'VOLUME INTEGRAL',
+	RELATIVE = .TRUE./
+
+&DEVC 	XB = 2,5,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'MPUV', 
+	PART_ID = 'Wood_part_2', 
+	ID = 'm_solid_2',IOR = 3, 
+	STATISTICS = 'VOLUME INTEGRAL'  /
+
+&DEVC 	XB = 2,5,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'HRR', 
+	ID = 'hrr_2', 
+	STATISTICS = 'TIME INTEGRAL',
+	/
+
+&DEVC 	XB = 5.5,8.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'm_gas_3', 
+	STATISTICS = 'VOLUME INTEGRAL',
+	RELATIVE = .TRUE./
+
+&DEVC 	XB = 5.5,8.5,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'MPUV', 
+	PART_ID = 'Wood_part_3', 
+	ID = 'm_solid_3',IOR = 3, 
+	STATISTICS = 'VOLUME INTEGRAL'  /
+
+&DEVC 	XB = 5.5,8.5,-1.5,1.5,0.0,3.0 ,  
+	QUANTITY = 'HRR', 
+	ID = 'hrr_3', 
+	STATISTICS = 'TIME INTEGRAL',
+	/
+
+&DEVC 	XB = 9,12,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'm_gas_4', 
+	STATISTICS = 'VOLUME INTEGRAL',
+	RELATIVE = .TRUE./
+
+&DEVC 	XB = 9,12,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'MPUV', 
+	PART_ID = 'Wood_part_4', 
+	ID = 'm_solid_4',IOR = 3, 
+	STATISTICS = 'VOLUME INTEGRAL'  /
+
+&DEVC 	XB = 9,12,-1.5,1.5,0.0,3.0 ,  
+	QUANTITY = 'HRR', 
+	ID = 'hrr_4', 
+	STATISTICS = 'TIME INTEGRAL',
+	/
+
+&TAIL /

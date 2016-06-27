@@ -1,0 +1,12 @@
+RENDERDIR
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+LOADFILE
+ ns2d_64_02.sf
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ ns2d_64_start
+SETTIMEVAL
+ 6.283
+RENDERONCE
+ ns2d_64_end

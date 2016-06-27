@@ -1,0 +1,65 @@
+&HEAD CHID='velocity_bc_test', TITLE='Test velocity boundary conditions for slightly different geometries' /    
+
+&MESH IJK=125,24,24, XB=-5.0,20.0,-2.4,2.4,-2.4,2.4 /
+&MESH IJK=125,24,24, XB=-5.0,20.0,-2.4,2.4, 2.6,7.4 /
+&MESH IJK=125,24,24, XB=-5.0,20.0,-2.4,2.4, 7.6,12.4 /
+
+&TIME T_END=300. /
+
+&MISC STRATIFICATION=.FALSE. /
+
+&PRES VELOCITY_TOLERANCE=0.001, MAX_PRESSURE_ITERATIONS=100 /
+
+&RADI RADIATION=.FALSE. /
+
+&OBST XB=-5.0,0.0, -0.4,-0.4, -0.4, 0.4 /
+&OBST XB=-5.0,0.0,  0.4, 0.4, -0.4, 0.4 /
+&OBST XB=-5.0,0.0, -0.4, 0.4, -0.4,-0.4 /
+&OBST XB=-5.0,0.0, -0.4, 0.4,  0.4, 0.4 /
+&OBST XB= 0.0,0.0, -2.4, 2.4, -2.4, 2.4 /
+&HOLE XB=-.1,0.1, -0.4, 0.4,  -0.4, 0.4 /
+
+&OBST XB=-5.0,0.0, -2.4, 2.4,  2.6, 7.4 /
+&HOLE XB=-5.1,0.1, -0.4, 0.4,  4.6, 5.4 /
+
+&OBST XB=-5.0,0.0, -0.6,-0.4,  9.4,10.6 /
+&OBST XB=-5.0,0.0,  0.4, 0.6,  9.4,10.6 /
+&OBST XB=-5.0,0.0, -0.6, 0.6,  9.4, 9.6 /
+&OBST XB=-5.0,0.0, -0.6, 0.6, 10.4,10.6 /
+&OBST XB=-0.2,0.0, -2.4, 2.4,  7.6,12.4 /
+&HOLE XB=-.3,0.1, -0.4, 0.4,   9.6,10.4 /
+
+&SURF ID='jet', VEL=-2.0, COLOR='INVISIBLE' /
+
+&VENT XB=-5,-5, -.4,.4, -.4,0.4, SURF_ID='jet' /
+&VENT XB=-5,-5, -.4,.4, 4.6,5.4, SURF_ID='jet' /
+&VENT XB=-5,-5, -.4,.4, 9.6,10.4, SURF_ID='jet' /
+
+&VENT PBX=  20, SURF_ID='OPEN' /
+&VENT PBY=-2.4, SURF_ID='OPEN' /
+&VENT PBY= 2.4, SURF_ID='OPEN' /
+&VENT PBZ=-2.4, SURF_ID='OPEN' /
+&VENT PBZ= 2.4, SURF_ID='OPEN' /
+&VENT PBZ= 2.6, SURF_ID='OPEN' /
+&VENT PBZ= 7.4, SURF_ID='OPEN' /
+&VENT PBZ= 7.6, SURF_ID='OPEN' /
+&VENT PBZ=12.4, SURF_ID='OPEN' /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&SLCF PBY=0, QUANTITY='VISCOSITY', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='VELOCITY', CELL_CENTERED=.TRUE. /
+&SLCF PBY=0, QUANTITY='PRESSURE', CELL_CENTERED=.TRUE. /
+
+&DEVC XB= -5.0,20.0,0,0,0,0, QUANTITY='U-VELOCITY', ID='Vel1', POINTS=126, X_ID='x1v' /
+&DEVC XB= -4.9,19.9,0,0,0,0, QUANTITY='PRESSURE', ID='Pres1',  POINTS=125, X_ID='x1p' /
+
+&DEVC XB= -5.0,20.0,0,0,5,5, QUANTITY='U-VELOCITY', ID='Vel2', POINTS=126, X_ID='x2v' /
+&DEVC XB= -4.9,19.9,0,0,5,5, QUANTITY='PRESSURE', ID='Pres2',  POINTS=125, X_ID='x2p' /
+
+&DEVC XB= -5.0,20.0,0,0,10,10, QUANTITY='U-VELOCITY', ID='Vel3', POINTS=126, X_ID='x3v' /
+&DEVC XB= -4.9,19.9,0,0,10,10, QUANTITY='PRESSURE', ID='Pres3',  POINTS=125, X_ID='x3p' /
+
+&TAIL /
+
+

@@ -1,0 +1,74 @@
+OBJECTDEF
+ luggage
+ 139 69 19 setrgb
+ 0.0 0.0 0.3 translate 0.2 0.6 0.6 scalexyz 1.0 drawcube
+ 
+OBJECTDEF
+ airpack
+ 96 96 96 setrgb
+ push 180.0 rotatey 0.2 drawhsphere pop
+ 0.2 0.55 drawdisk
+ 0.0 0.0 0.55 translate 0.2 drawhsphere
+ 
+OBJECTDEF  // used by smokeview to display smoke thickness
+ helmit
+ 255, 255, 82 setrgb
+ 0.3 drawhsphere
+ 0.4 0.02 drawdisk
+ 
+OBJECTDEF 0.5 0.3 1.0 
+ human          // object name
+ :W=0.5 :D=0.3 :H1=1.0
+ :SX=0.3 :SY=0.3 :SZ=0.3
+ :R=28 :G=64 :B=140
+ :HX :HY :HZ
+ :arm_r=210 :arm_g=180 :arm_b=140
+ :leg_r=28 :leg_g=64 :leg_b=140
+ 
+ 90.0 rotatez
+ "TAN" setcolor // head color  TAN 210 180 140
+ //$SX $SY $SZ scalexyz //  scale by data height
+ //1.0 1.0 0.579 scalexyz 
+ 0.3 0.3 0.3 scalexyz 
+ push  0.0 0.0 5.2 translate 1.1 drawsphere 
+   "BLUE" setcolor // eye color BLUE
+   push -0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   push  0.25 -0.4 0.05 translate 0.2 drawsphere pop // eye
+   pop // head
+ $R $G $B setrgb  // body color 
+ push  0.0 0.0 3.55 translate 0.5 0.3 1.0 scalexyz 1.334 1.33 1.0 scalexyz 2.5 drawsphere pop // trunk
+ $arm_r $arm_g $arm_b setrgb // arm color
+ push -0.9 0.0 3.5 translate  35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ push  0.9 0.0 3.5 translate -35.0 rotatey 0.2  0.2  1.0 scalexyz 3.0 drawsphere pop // arm
+ $leg_r $leg_g $leg_b setrgb // leg color
+ push -0.5 0.0 1.3 translate  30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+ push  0.5 0.0 1.3 translate -30.0 rotatey 0.25 0.25 1.0 scalexyz 3.0 drawsphere pop // leg
+
+ AVATARDEF
+ shorthuman
+ :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0
+ :arm_r=0 :arm_g=0 :arm_b=255
+ push 0.9 0.9 0.9  scalexyz "human" include pop
+ 
+AVATARDEF
+ child
+ :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :arm_r=0 :arm_g=255 :arm_b=0
+ push 1.0 1.0 0.5 scalexyz "human" include pop
+
+AVATARDEF
+ human_fixed          // label, name of avatar
+ :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
+ push "human" include pop
+  
+AVATARDEF
+ human_altered_with_data         // label, name of avatar\
+ :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
+ push "human" include pop
+
+AVATARDEF
+ fire_fighter          // label, name of avatar
+ :W :D=0.1 :H1 :SX :SY :SZ :R=0 :G=0 :B=0 :HX :HY :HZ
+ :arm_r=218 :arm_g=165 :arm_b=32 :leg_r=218 :leg_g=165 :leg_b=32
+ push 0.0 0.0 1.65 translate 1.0 1.0 1.0 scalexyz "helmit" include pop
+ push "human" include pop
+ push -0.2 0.0 0.80 translate "airpack" include pop

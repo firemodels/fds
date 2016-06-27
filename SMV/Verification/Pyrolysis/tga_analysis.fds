@@ -1,0 +1,68 @@
+&HEAD CHID='tga_analysis', TITLE='TGA tutorial' / 
+
+&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
+
+&TIME T_END=60. /
+
+&REAC FUEL='CELLULOSE', C=6, H=10, O=5, SOOT_YIELD=0.015 /
+&SPEC ID='WATER VAPOR' /
+
+&VENT XB=-1,1,-0.5,0.5,0.0,0.0, SURF_ID='SAMPLE' /
+
+&SURF ID             = 'SAMPLE'
+      TGA_ANALYSIS   = .TRUE.
+      COLOR          = 'RED'
+      THICKNESS      = 0.01
+      MATL_ID(1,1) = 'component 1'
+      MATL_ID(1,2) = 'water'
+      MATL_MASS_FRACTION(1,1) = 0.90
+      MATL_MASS_FRACTION(1,2) = 0.10 /
+
+&MATL ID                    = 'component 1'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 315.
+      REFERENCE_RATE        = 0.0056
+      HEATING_RATE          = 10.
+      NU_SPEC 	            = 0.60
+      SPEC_ID               = 'CELLULOSE'
+      NU_MATL               = 0.40
+      MATL_ID               = 'component 2'
+      HEAT_OF_REACTION      = 1000. /  
+
+&MATL ID                    = 'component 2'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 430.
+      REFERENCE_RATE        = 0.0075
+      HEATING_RATE          = 10.
+      NU_SPEC 	            = 0.85
+      SPEC_ID               = 'CELLULOSE'
+      NU_MATL               = 0.15
+      MATL_ID               = 'residue'
+      HEAT_OF_REACTION      = 1000. /
+
+&MATL ID = 'water'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 4.184
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 100.
+      REFERENCE_RATE = 0.0016
+      HEATING_RATE = 10.
+      NU_SPEC = 1.0
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION= 2500. /
+
+&MATL ID                    = 'residue'
+      DENSITY               = 200.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&TAIL /

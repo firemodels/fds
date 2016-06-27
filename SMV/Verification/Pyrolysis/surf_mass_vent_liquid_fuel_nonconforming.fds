@@ -1,0 +1,55 @@
+&HEAD CHID='surf_mass_vent_liquid_fuel_nonconforming',TITLE='Surface mass, vent, liquid, fuel' /
+
+&MESH 	IJK= 5,5,5,
+	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
+
+&TIME T_END=200., DT = 0.01, WALL_INCREMENT = 1 /  
+&DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
+&MISC Y_O2_INFTY=0.0000001/
+
+&REAC FUEL               = 'N-HEPTANE'
+      FYI                = 'Heptane, C_7 H_16'
+      SOOT_YIELD         = 0.0 /
+
+&MATL ID                     = 'N-HEPTANE LIQUID'
+      EMISSIVITY             = 1.
+      NU_SPEC                = 1.
+      SPEC_ID                = 'N-HEPTANE'
+      HEAT_OF_REACTION       = 364.9
+      CONDUCTIVITY           = 0.14
+      SPECIFIC_HEAT          = 2.2464
+      BOILING_TEMPERATURE    = 98.5       
+      DENSITY                = 684.
+      / 
+
+&SURF ID                     = 'N-HEPTANE POOL'
+      BACKING                = 'INSULATED'
+      COLOR                  = 'YELLOW'
+      MATL_ID                = 'N-HEPTANE LIQUID'
+      THICKNESS              = 0.01
+      CELL_SIZE_FACTOR       = 0.5
+      EXTERNAL_FLUX          = 50. /
+
+&VENT ID = 'Sample', SURF_ID = 'N-HEPTANE POOL', XB = -0.5,0.5,-0.5,0.5,0,0.0 /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'density', 
+	STATISTICS = 'VOLUME INTEGRAL', 
+	SPEC_ID='N-HEPTANE' /
+
+&DEVC 	IOR = 3, QUANTITY = 'SURFACE DENSITY', 
+	ID = 'Surface density'
+	STATISTICS = 'SURFACE INTEGRAL' 
+	XB = -0.5,0.5,-0.5,0.5,0.0,0.0 /
+
+&DEVC 	XYZ = 0.0,0.0,0.0,IOR = 3, 
+	QUANTITY = 'BURNING RATE', 
+	ID = 'Burning rate'
+	STATISTICS = 'TIME INTEGRAL' /
+
+&DEVC 	XYZ = 0.0,0.0,0.0,IOR = 3, 
+	QUANTITY = 'WALL THICKNESS', 
+	ID = 'Thickness' /
+
+&TAIL /

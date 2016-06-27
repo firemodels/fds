@@ -1,0 +1,34 @@
+&HEAD CHID='sphere_drag_2', TITLE='Pressure drop in a duct filled with spheres' /
+
+&MESH IJK=100,10,10, XB=0.0,10.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=100. / 
+
+&SURF ID='BLOW', VEL=-0.3 /
+
+&VENT MB='XMIN', SURF_ID='BLOW' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+
+&SURF ID='FREE SLIP WALL', FREE_SLIP=.TRUE., DEFAULT=.TRUE. /
+
+&SURF ID         = 'ball'
+      MATL_ID    = 'stuff'
+      THICKNESS  = 0.001
+      GEOMETRY   = 'SPHERICAL' /
+      
+&MATL ID = 'stuff'
+      DENSITY = 514.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 1.0 /
+ 
+&PART ID='balls', SAMPLING_FACTOR=1, SURF_ID='ball', PROP_ID='ball', STATIC=.TRUE., MONODISPERSE=.TRUE. /
+
+&INIT PART_ID='balls', XB=4.,5.,0.,1.,0.,1., N_PARTICLES=10000, MASS_PER_VOLUME=1.66  /
+
+&PROP ID='ball', SMOKEVIEW_ID='ball', SMOKEVIEW_PARAMETERS='DX=0.002','DY=0.002','DZ=0.002' /
+
+&DEVC XB=0.,10.,0.5,0.5,0.5,0.5, QUANTITY='PRESSURE', ID='pres', POINTS=99 /
+
+&SLCF PBY=0.5, QUANTITY='VELOCITY' /
+&SLCF PBY=0.5, QUANTITY='PRESSURE' /
+
+&TAIL /

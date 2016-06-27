@@ -1,0 +1,15 @@
+&HEAD TITLE='lid_driven_cavity_2d', TITLE='Lid-driven cavity flow' / /
+
+&MESH IJK=32,1,32, XB=0,1,-.5,.5,0,1/
+
+&TIME T_END=10./
+
+&SPEC ID='AIR', VISCOSITY=1., BACKGROUND=.TRUE./
+
+&SURF ID='lid', VEL=-0, VEL_T(1)=1., COLOR='BLUE' /
+
+&VENT XB=0,1,-.5,.5,1,1, SURF_ID='lid'/
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE./
+
+&TAIL/

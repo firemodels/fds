@@ -1,0 +1,7 @@
+RENDERDIR
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+SETVIEWPOINT
+ external
+RENDERONCE
+ sillytexture
+

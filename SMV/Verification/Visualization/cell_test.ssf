@@ -1,0 +1,89 @@
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+// render x direction
+
+UNLOADALL
+KEYBOARD
+ *
+// LOADFILE
+//  cell_test_04.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 1 2.500000
+ 1
+SETTIMEVAL
+ 0.100000
+SETVIEWPOINT
+ view_x
+RENDERCLIP
+ 1 227 230 58 5
+RENDERONCE
+ cell_test_x
+
+// render y direction
+
+UNLOADALL
+KEYBOARD
+ *
+// LOADFILE
+//  cell_test_05.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 2 0.500000
+ 1
+SETTIMEVAL
+ 0.100000
+SETVIEWPOINT
+ view_y
+RENDERCLIP
+ 1 301 298 60 5
+RENDERONCE
+ cell_test_y
+
+// render z direction
+
+UNLOADALL
+KEYBOARD
+ *
+// LOADFILE
+//  cell_test_13.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 3 4.500000
+ 1
+SETTIMEVAL
+ 0.100000
+SETVIEWPOINT
+ view_z
+RENDERCLIP
+ 1 240 281 75 20
+RENDERONCE
+ cell_test_z
+
+// render 3D direction
+
+UNLOADALL
+KEYBOARD
+ *
+// LOADFILE
+//  cell_test_01.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 0 0.000000
+ 1
+SETTIMEVAL
+ 0.100000
+SETVIEWPOINT
+ view_xyz
+KEYBOARD
+ x
+KEYBOARD
+ y
+KEYBOARD
+ z
+RENDERCLIP
+ 1 237 222 60 15
+RENDERONCE
+ cell_test_3D
+

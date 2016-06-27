@@ -1,0 +1,9 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+LOADFILE
+ couch_02.s3d
+SETTIMEVAL
+ 600.000000
+RENDERONCE
+ couch_600
+ 

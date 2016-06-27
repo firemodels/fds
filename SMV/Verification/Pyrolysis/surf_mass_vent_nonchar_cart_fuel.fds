@@ -1,0 +1,58 @@
+&HEAD CHID='surf_mass_vent_nonchar_cart_fuel',TITLE='Surface mass, vent, nonchar, cartesian, fuel' /
+
+&MESH 	IJK= 6,6,6,
+	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
+
+&TIME T_END=200., DT = 0.01, WALL_INCREMENT = 1 /  
+&DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
+&MISC Y_O2_INFTY=0.0000001/
+
+&REAC FUEL = 'WOOD'
+	SOOT_YIELD 	= 0.0
+	CO_YIELD	= 0.0
+	C 		= 3.4
+	H		=6.2
+	O 		=2.5
+	HEAT_OF_COMBUSTION = 12000. /
+
+
+&SURF ID                     	= 'Wood'
+      BACKING                   = 'INSULATED'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+      EXTERNAL_FLUX 		= 50. /
+      
+&MATL ID = 'PINE'
+      EMISSIVITY 	= 1.0
+	DENSITY 	= 360.
+	CONDUCTIVITY	= 0.05
+	SPECIFIC_HEAT	= 1.0
+	N_REACTIONS	= 1
+	A		= 1E20
+	E 		= 1.6E5
+	N_S		= 1
+	NU_MATL   	= 0.0
+	NU_SPEC		= 1.0
+        SPEC_ID         = 'WOOD'
+	HEAT_OF_REACTION= 1000
+	HEAT_OF_COMBUSTION(1) = 12000/
+	
+&VENT ID = 'Sample', SURF_ID = 'Wood', XB = -0.5,0.5,-0.5,0.5,0,0.0 /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'density', 
+	STATISTICS = 'VOLUME INTEGRAL', 
+	SPEC_ID='WOOD' /
+
+&DEVC 	IOR = 3, QUANTITY = 'SURFACE DENSITY', 
+	ID = 'Surface density'
+	STATISTICS = 'SURFACE INTEGRAL' 
+	XB = -0.5,0.5,-0.5,0.5,0.0,0.0 /
+
+&DEVC 	XYZ = 0.0,0.0,0.0,IOR = 3, 
+	QUANTITY = 'BURNING RATE', 
+	ID = 'Burning rate'
+	STATISTICS = 'TIME INTEGRAL' /
+&TAIL /

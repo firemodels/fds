@@ -1,0 +1,39 @@
+Test functionality of obstruction creation and removal multiple times.
+
+&HEAD CHID='cycle_test',TITLE='Test creating and hiding OBSTs multiple times' / 
+
+&MESH IJK=20,10,20 XB=0.0,1.0,0.0,0.5,0.0,1.0 /
+&MESH IJK=20,10,20 XB=0.0,1.0,0.5,1.0,0.0,1.0 /
+
+&TIME T_END=10. /
+
+&OBST XB=0.2,0.8,0.3,0.7,0.2,0.8, COLOR='PURPLE', CTRL_ID='cycling timer' /
+&DEVC ID='TIMER', XYZ=0.0,0.0,0.0, QUANTITY='TIME' /
+&CTRL ID='cycling timer', FUNCTION_TYPE='CUSTOM', INPUT_ID='TIMER', RAMP_ID='cycle' /
+&RAMP ID='cycle', T=  0, F=-1 /
+&RAMP ID='cycle', T=  2, F= 1 /
+&RAMP ID='cycle', T=  4, F= -1 /
+&RAMP ID='cycle', T=  6, F= 1 /
+&RAMP ID='cycle', T=  8, F= -1 /
+&RAMP ID='cycle', T=  10, F= 1 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&SLCF PBY=0,QUANTITY='TEMPERATURE'/
+
+&TAIL /
+
+
+
+
+
+
+
+
+
+

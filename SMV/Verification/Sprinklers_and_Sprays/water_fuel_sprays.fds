@@ -1,0 +1,80 @@
+This example tests the combination of water and fuel droplets in the same simulation.
+
+&HEAD CHID='water_fuel_sprays', TITLE='UL/NFPRF Heptane Spray Burner under 4 sprinklers' /
+
+&MESH IJK=25,25,40, XB=22.0,27.0,19.0,24.0,0.0,7.6 /
+
+&TIME T_END=120. /
+
+&REAC FUEL='N-HEPTANE'
+      FYI='Heptane, C_7 H_16'
+      CO_YIELD=0.006
+      SOOT_YIELD=0.015 /
+
+&SPEC ID='WATER VAPOR'/
+
+&PART ID='water drops', SPEC_ID='WATER VAPOR', QUANTITIES(1:3)='PARTICLE DIAMETER','PARTICLE TEMPERATURE','PARTICLE AGE',
+      DIAMETER=750., SAMPLING_FACTOR=1 /
+
+&PART ID='heptane drops', SPEC_ID='N-HEPTANE',
+      QUANTITIES(1:2)='PARTICLE DIAMETER','PARTICLE TEMPERATURE',
+      DIAMETER=100., SAMPLING_FACTOR=1/
+
+&PROP ID='K-11', QUANTITY='SPRINKLER LINK TEMPERATURE', RTI=148., C_FACTOR=0.7, ACTIVATION_TEMPERATURE=74., OFFSET=0.10, 
+      PART_ID='water drops', FLOW_RATE=189.3, PARTICLE_VELOCITY=10., SPRAY_ANGLE=30.,80., SMOKEVIEW_ID='sprinkler_upright'    /
+
+&PROP ID='nozzle', PART_ID='heptane drops', FLOW_RATE=2.132, FLOW_TAU=-50.,
+      PARTICLE_VELOCITY=5., SPRAY_ANGLE=0.,45.    /
+
+
+&MATL ID            = 'CONCRETE'                                                                    
+      FYI           = 'Quintiere, Fire Behavior'                                                    
+      SPECIFIC_HEAT = 0.88                                                                          
+      DENSITY       = 2100.                                                                         
+      CONDUCTIVITY  = 1.0 /                                                                         
+
+&MATL ID            = 'TILE MATERIAL'                                                                                      
+      FYI           = 'UL Report NC987-96NK37863'
+      DENSITY       = 313.                                                                                              
+      SPECIFIC_HEAT = 0.753
+      CONDUCTIVITY  = 0.0611 /
+
+
+&SURF ID        = 'FLOOR'                                                              
+      RGB       = 150,150,150                                                                
+      MATL_ID   = 'CONCRETE'                                                                    
+      THICKNESS = 0.1 /                    
+
+&SURF ID        = 'CEILING'
+      RGB       = 230,230,230   
+      MATL_ID   = 'TILE MATERIAL'
+      BACKING   = 'EXPOSED'
+      THICKNESS = 0.016 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='FLOOR' /
+&VENT MB='ZMAX', SURF_ID='CEILING' /
+
+&SLCF PBY=21.2,QUANTITY='TEMPERATURE' /
+&SLCF PBY=21.2,QUANTITY='MASS FRACTION',SPEC_ID='WATER VAPOR' /
+&SLCF PBY=21.2,QUANTITY='HRRPUV' /
+&SLCF PBY=21.2,QUANTITY='MASS FRACTION', SPEC_ID='PRODUCTS' /
+&SLCF PBZ= 7.4,QUANTITY='TEMPERATURE' /
+
+
+&DEVC XYZ=22.88 19.76  7.46, PROP_ID='K-11', ID='Spr_60' /
+&DEVC XYZ=25.93 19.76  7.46, PROP_ID='K-11', ID='Spr_56' /
+&DEVC XYZ=22.88 22.81  7.46, PROP_ID='K-11', ID='Spr_61', QUANTITY='TIME', SETPOINT=5.  /
+&DEVC XYZ=25.93 22.81  7.46, PROP_ID='K-11', ID='Spr_57' /
+
+&DEVC XYZ=23.91 21.28  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_1' /
+&DEVC XYZ=24.91 21.28  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_2' /
+&DEVC XYZ=24.41 20.78  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_3' /
+&DEVC XYZ=24.41 21.78  0.50, PROP_ID='nozzle', ORIENTATION=0,0,1, QUANTITY='TIME', SETPOINT=0., ID='noz_4' /
+
+&DEVC XB=22.0,27.0,19.0,24.0,0.0,7.6 QUANTITY = 'TEMPERATURE' STATISTICS='VOLUME MEAN' ID = 'T_ave' /
+
+&TAIL /

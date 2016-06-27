@@ -1,0 +1,11 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+SETVIEWPOINT
+ view 3
+LOADFILE
+ room_fire_02.s3d
+SETTIMEVAL
+ 100.000000
+RENDERONCE
+ room_fire_300
+ 

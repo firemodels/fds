@@ -1,0 +1,7 @@
+RENDERDIR
+ frames
+LOADINIFILE
+ plume5c.ini
+ISORENDERALL
+ 1 0 1
+ plume5c_iso

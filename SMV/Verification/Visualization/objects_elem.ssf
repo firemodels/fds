@@ -1,0 +1,52 @@
+RENDERDIR
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+SETVIEWPOINT
+ drawcone
+SETVIEWPOINT
+ drawcone
+RENDERONCE
+drawcone
+SETVIEWPOINT
+ drawcube
+RENDERONCE
+drawcube
+SETVIEWPOINT
+ drawdisk
+RENDERONCE
+drawdisk
+SETVIEWPOINT
+ drawcdisk
+RENDERONCE
+drawcdisk
+SETVIEWPOINT
+ drawhexdisk
+RENDERONCE
+drawhexdisk
+SETVIEWPOINT
+ drawnotchplate
+RENDERONCE
+drawnotchplate
+SETVIEWPOINT
+ drawnotchplate2
+RENDERONCE
+drawnotchplate2
+SETVIEWPOINT
+ drawpolydisk
+RENDERONCE
+drawpolydisk
+SETVIEWPOINT
+ drawring
+RENDERONCE
+drawring
+SETVIEWPOINT
+ drawsphere
+RENDERONCE
+drawsphere
+SETVIEWPOINT
+ drawtrunccone
+RENDERONCE
+drawtrunccone
+SETVIEWPOINT
+ drawarcdisk
+RENDERONCE
+drawarcdisk

@@ -1,0 +1,33 @@
+Surface with NET_HEAT_FLUX and remaining boundaries adiabatic.  Verify that NET_HEAT_FLUX is achieved and
+that gas temperatures remain stable when flux goes to zero.  
+
+&HEAD CHID='adiabatic_net_flux', TITLE='Net heat flux surface with adiabatic walls' /
+
+&MESH IJK=10,10,10, XB=0.0,2.0,0.0,2.0,0.0,2.0 /
+
+&MISC CONSTANT_SPECIFIC_HEAT_RATIO=.TRUE., STRATIFICATION=.FALSE. /
+&TIME T_END=60.,WALL_INCREMENT=1 /
+&RADI TIME_STEP_INCREMENT=1, ANGLE_INCREMENT=1 /
+
+&SURF ID='HOT', NET_HEAT_FLUX=100., RAMP_Q='HF', COLOR='RED' /
+&RAMP ID='HF',T= 0,    F=1. /
+&RAMP ID='HF',T=30,    F=1. /
+&RAMP ID='HF',T=30.001,F=0. /
+
+&SURF ID='INSULATED', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
+
+&SLCF PBY=1.0, QUANTITY='TEMPERATURE' /
+
+&BNDF QUANTITY='NET HEAT FLUX',    CELL_CENTERED=.TRUE. /
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
+
+&VENT XB=0.8,1.2,0.8,1.2,0.,0., SURF_ID='HOT'/
+
+&DEVC XYZ=1.0,1.0,0.0, QUANTITY='NET HEAT FLUX', ID='HF_Source', IOR= 3 /
+&DEVC XYZ=1.0,1.0,2.0, QUANTITY='NET HEAT FLUX', ID='HF_Target', IOR=-3 /
+&DEVC XB=0.0,2.0,0.0,2.0,0.0,2.0, QUANTITY='TEMPERATURE', ID='temp_gas', STATISTICS='VOLUME MEAN' /
+&DEVC XYZ=1.0,1.0,1.0, QUANTITY='PRESSURE', ID='pres'/
+
+&TAIL /
+
+

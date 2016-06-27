@@ -1,0 +1,31 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+// render slice files
+
+// render iso files (solid)
+
+UNLOADALL
+UNLOADALL
+LOADFILE
+plume5c.prt5_W-VEL.tiso
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_partiso_wvel_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_partiso_wvel_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_partiso_wvel_30
+SETTIMEVAL
+ 40.0
+RENDERONCE
+ plume5c_partiso_wvel_40
+
+

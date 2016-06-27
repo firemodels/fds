@@ -1,0 +1,42 @@
+
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+
+
+// render slice files
+
+UNLOADALL
+// LOADFILE
+//  thouse5_01_diff.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 1.600000
+ 1
+KEYBOARD
+ *
+KEYBOARD
+ y
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ thouse5_slice_diff_005
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ thouse5_slice_diff_010
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ thouse5_slice_diff_030
+SETTIMEVAL
+ 60.000000
+RENDERONCE
+ thouse5_slice_diff_060
+
+
+
+
+
+

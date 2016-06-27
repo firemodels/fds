@@ -1,0 +1,826 @@
+&HEAD CHID='peaks_demo', TITLE='Matlab demo of delaunay' /
+  
+&MESH IJK=32,32,32, XB=0,16,0,16,-8,8/
+  
+&TIME T_END=1./
+  
+&MISC IMMERSED_BOUNDARY_METHOD=0 /
+  
+&SURF ID='terrain', COLOR='GREEN'/
+  
+&VENT MB='XMIN', SURF_ID='OPEN'/
+&VENT MB='XMAX', SURF_ID='OPEN'/
+&VENT MB='YMIN', SURF_ID='OPEN'/
+&VENT MB='YMAX', SURF_ID='OPEN'/
+&VENT MB='ZMIN', SURF_ID='OPEN'/
+&VENT MB='ZMAX', SURF_ID='OPEN'/
+  
+&SLCF XB=0,16,0,16,-8,8, QUANTITY='P MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,16,0,16,-8,8, QUANTITY='U MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,16,0,16,-8,8, QUANTITY='V MASK', CELL_CENTERED=.TRUE. /
+&SLCF XB=0,16,0,16,-8,8, QUANTITY='W MASK', CELL_CENTERED=.TRUE. /
+  
+&VERT X=0,0,6.6713e-05 /
+&VERT X=1,0,0.00040446 /
+&VERT X=2,0,0.0016813 /
+&VERT X=3,0,0.0043395 /
+&VERT X=4,0,0.0041563 /
+&VERT X=5,0,-0.015059 /
+&VERT X=6,0,-0.075219 /
+&VERT X=7,0,-0.17029 /
+&VERT X=8,0,-0.24495 /
+&VERT X=9,0,-0.24193 /
+&VERT X=10,0,-0.16872 /
+&VERT X=11,0,-0.083928 /
+&VERT X=12,0,-0.02976 /
+&VERT X=13,0,-0.0074366 /
+&VERT X=14,0,-0.0012693 /
+&VERT X=15,0,-0.00013542 /
+&VERT X=16,0,-5.8642e-06 /
+&VERT X=0,1,0.00022663 /
+&VERT X=1,1,0.0013643 /
+&VERT X=2,1,0.0055032 /
+&VERT X=3,1,0.012842 /
+&VERT X=4,1,0.0037414 /
+&VERT X=5,1,-0.088896 /
+&VERT X=6,1,-0.35099 /
+&VERT X=7,1,-0.75017 /
+&VERT X=8,1,-1.0541 /
+&VERT X=9,1,-1.0292 /
+&VERT X=10,1,-0.71325 /
+&VERT X=11,1,-0.35325 /
+&VERT X=12,1,-0.1247 /
+&VERT X=13,1,-0.030944 /
+&VERT X=14,1,-0.005205 /
+&VERT X=15,1,-0.00053334 /
+&VERT X=16,1,-1.7714e-05 /
+&VERT X=0,2,0.00054635 /
+&VERT X=1,2,0.0034116 /
+&VERT X=2,2,0.014113 /
+&VERT X=3,2,0.033331 /
+&VERT X=4,2,0.0073729 /
+&VERT X=5,2,-0.25208 /
+&VERT X=6,2,-0.99422 /
+&VERT X=7,2,-2.1385 /
+&VERT X=8,2,-3.022 /
+&VERT X=9,2,-2.9593 /
+&VERT X=10,2,-2.0476 /
+&VERT X=11,2,-1.0054 /
+&VERT X=12,2,-0.34763 /
+&VERT X=13,2,-0.082501 /
+&VERT X=14,2,-0.012501 /
+&VERT X=15,2,-0.00089301 /
+&VERT X=16,2,6.619e-05 /
+&VERT X=0,3,0.00075444 /
+&VERT X=1,3,0.0056228 /
+&VERT X=2,3,0.027001 /
+&VERT X=3,3,0.078451 /
+&VERT X=4,3,0.088812 /
+&VERT X=5,3,-0.2766 /
+&VERT X=6,3,-1.5465 /
+&VERT X=7,3,-3.695 /
+&VERT X=8,3,-5.498 /
+&VERT X=9,3,-5.5195 /
+&VERT X=10,3,-3.8303 /
+&VERT X=11,3,-1.8367 /
+&VERT X=12,3,-0.59306 /
+&VERT X=13,3,-0.11812 /
+&VERT X=14,3,-0.0092232 /
+&VERT X=15,3,0.0020506 /
+&VERT X=16,3,0.00080704 /
+&VERT X=0,4,-0.00045179 /
+&VERT X=1,4,0.0017536 /
+&VERT X=2,4,0.02519 /
+&VERT X=3,4,0.12504 /
+&VERT X=4,4,0.32654 /
+&VERT X=5,4,0.3273 /
+&VERT X=6,4,-0.67975 /
+&VERT X=7,4,-3.1194 /
+&VERT X=8,4,-5.6803 /
+&VERT X=9,4,-6.1865 /
+&VERT X=10,4,-4.3156 /
+&VERT X=11,4,-1.8912 /
+&VERT X=12,4,-0.44049 /
+&VERT X=13,4,0.010025 /
+&VERT X=14,4,0.045435 /
+&VERT X=15,4,0.016965 /
+&VERT X=16,4,0.0035995 /
+&VERT X=0,5,-0.0057072 /
+&VERT X=1,5,-0.022789 /
+&VERT X=2,5,-0.049749 /
+&VERT X=3,5,0.009619 /
+&VERT X=4,5,0.42247 /
+&VERT X=5,5,1.2818 /
+&VERT X=6,5,1.7323 /
+&VERT X=7,5,0.42629 /
+&VERT X=8,5,-2.164 /
+&VERT X=9,5,-3.4825 /
+&VERT X=10,5,-2.3584 /
+&VERT X=11,5,-0.46792 /
+&VERT X=12,5,0.45609 /
+&VERT X=13,5,0.4374 /
+&VERT X=14,5,0.19237 /
+&VERT X=15,5,0.053157 /
+&VERT X=16,5,0.01002 /
+&VERT X=0,6,-0.016644 /
+&VERT X=1,6,-0.079047 /
+&VERT X=2,6,-0.25453 /
+&VERT X=3,6,-0.48907 /
+&VERT X=4,6,-0.28061 /
+&VERT X=5,6,1.0945 /
+&VERT X=6,6,3.0862 /
+&VERT X=7,6,3.4362 /
+&VERT X=8,6,1.3962 /
+&VERT X=9,6,-0.35718 /
+&VERT X=10,6,0.20371 /
+&VERT X=11,6,1.5557 /
+&VERT X=12,6,1.7781 /
+&VERT X=13,6,1.077 /
+&VERT X=14,6,0.41389 /
+&VERT X=15,6,0.10799 /
+&VERT X=16,6,0.019788 /
+&VERT X=0,7,-0.02961 /
+&VERT X=1,7,-0.14881 /
+&VERT X=2,7,-0.52706 /
+&VERT X=3,7,-1.2435 /
+&VERT X=4,7,-1.711 /
+&VERT X=5,7,-0.65568 /
+&VERT X=6,7,1.8874 /
+&VERT X=7,7,3.2505 /
+&VERT X=8,7,1.8589 /
+&VERT X=9,7,0.42114 /
+&VERT X=10,7,1.3679 /
+&VERT X=11,7,2.9255 /
+&VERT X=12,7,2.862 /
+&VERT X=13,7,1.65 /
+&VERT X=14,7,0.62132 /
+&VERT X=15,7,0.16061 /
+&VERT X=16,7,0.0293 /
+&VERT X=0,8,-0.036506 /
+&VERT X=1,8,-0.18768 /
+&VERT X=2,8,-0.68859 /
+&VERT X=3,8,-1.732 /
+&VERT X=4,8,-2.7736 /
+&VERT X=5,8,-2.3039 /
+&VERT X=6,8,0.06357 /
+&VERT X=7,8,1.7807 /
+&VERT X=8,8,0.98101 /
+&VERT X=9,8,0.13078 /
+&VERT X=10,8,1.5728 /
+&VERT X=11,8,3.3827 /
+&VERT X=12,8,3.2695 /
+&VERT X=13,8,1.8732 /
+&VERT X=14,8,0.70342 /
+&VERT X=15,8,0.18163 /
+&VERT X=16,8,0.033125 /
+&VERT X=0,9,-0.032708 /
+&VERT X=1,9,-0.16976 /
+&VERT X=2,9,-0.63168 /
+&VERT X=3,9,-1.6272 /
+&VERT X=4,9,-2.7362 /
+&VERT X=5,9,-2.6279 /
+&VERT X=6,9,-0.79088 /
+&VERT X=7,9,0.77208 /
+&VERT X=8,9,0.41082 /
+&VERT X=9,9,-0.0020998 /
+&VERT X=10,9,1.3852 /
+&VERT X=11,9,2.9549 /
+&VERT X=12,9,2.834 /
+&VERT X=13,9,1.6179 /
+&VERT X=14,9,0.60654 /
+&VERT X=15,9,0.15651 /
+&VERT X=16,9,0.028538 /
+&VERT X=0,10,-0.021598 /
+&VERT X=1,10,-0.11209 /
+&VERT X=2,10,-0.41645 /
+&VERT X=3,10,-1.0667 /
+&VERT X=4,10,-1.7597 /
+&VERT X=5,10,-1.5536 /
+&VERT X=6,10,-0.045815 /
+&VERT X=7,10,1.3869 /
+&VERT X=8,10,1.4226 /
+&VERT X=9,10,1.0835 /
+&VERT X=10,10,1.6492 /
+&VERT X=11,10,2.3066 /
+&VERT X=12,10,1.9925 /
+&VERT X=13,10,1.0964 /
+&VERT X=14,10,0.40452 /
+&VERT X=15,10,0.10355 /
+&VERT X=16,10,0.0188 /
+&VERT X=0,11,-0.01022 /
+&VERT X=1,11,-0.05149 /
+&VERT X=2,11,-0.18067 /
+&VERT X=3,11,-0.40586 /
+&VERT X=4,11,-0.43005 /
+&VERT X=5,11,0.42913 /
+&VERT X=6,11,2.4281 /
+&VERT X=7,11,4.4609 /
+&VERT X=8,11,5.0811 /
+&VERT X=9,11,4.3584 /
+&VERT X=10,11,3.3298 /
+&VERT X=11,11,2.3866 /
+&VERT X=12,11,1.4506 /
+&VERT X=13,11,0.67314 /
+&VERT X=14,11,0.22783 /
+&VERT X=15,11,0.055653 /
+&VERT X=16,11,0.0098331 /
+&VERT X=0,12,-0.0030782 /
+&VERT X=1,12,-0.013117 /
+&VERT X=2,12,-0.029306 /
+&VERT X=3,12,0.028231 /
+&VERT X=4,12,0.47844 /
+&VERT X=5,12,1.8739 /
+&VERT X=6,12,4.3742 /
+&VERT X=7,12,6.9599 /
+&VERT X=8,12,7.9966 /
+&VERT X=9,12,6.9301 /
+&VERT X=10,12,4.7222 /
+&VERT X=11,12,2.6136 /
+&VERT X=12,12,1.1853 /
+&VERT X=13,12,0.43287 /
+&VERT X=14,12,0.12371 /
+&VERT X=15,12,0.026989 /
+&VERT X=16,12,0.0044245 /
+&VERT X=0,13,-0.00029833 /
+&VERT X=1,13,0.0010006 /
+&VERT X=2,13,0.020995 /
+&VERT X=3,13,0.14546 /
+&VERT X=4,13,0.62259 /
+&VERT X=5,13,1.834 /
+&VERT X=6,13,3.8715 /
+&VERT X=7,13,5.986 /
+&VERT X=8,13,6.8867 /
+&VERT X=9,13,5.9787 /
+&VERT X=10,13,3.9712 /
+&VERT X=11,13,2.0437 /
+&VERT X=12,13,0.82251 /
+&VERT X=13,13,0.25978 /
+&VERT X=14,13,0.064204 /
+&VERT X=15,13,0.012322 /
+&VERT X=16,13,0.0018192 /
+&VERT X=0,14,0.00020574 /
+&VERT X=1,14,0.0024328 /
+&VERT X=2,14,0.018283 /
+&VERT X=3,14,0.095852 /
+&VERT X=4,14,0.3626 /
+&VERT X=5,14,1.0062 /
+&VERT X=6,14,2.0681 /
+&VERT X=7,14,3.1711 /
+&VERT X=8,14,3.6493 /
+&VERT X=9,14,3.1697 /
+&VERT X=10,14,2.0894 /
+&VERT X=11,14,1.0509 /
+&VERT X=12,14,0.40522 /
+&VERT X=13,14,0.12021 /
+&VERT X=14,14,0.027488 /
+&VERT X=15,14,0.0048442 /
+&VERT X=16,14,0.00065671 /
+&VERT X=0,15,0.00011713 /
+&VERT X=1,15,0.001084 /
+&VERT X=2,15,0.0072503 /
+&VERT X=3,15,0.035657 /
+&VERT X=4,15,0.13008 /
+&VERT X=5,15,0.35386 /
+&VERT X=6,15,0.72055 /
+&VERT X=7,15,1.1016 /
+&VERT X=8,15,1.2678 /
+&VERT X=9,15,1.1013 /
+&VERT X=10,15,0.72399 /
+&VERT X=11,15,0.36106 /
+&VERT X=12,15,0.13693 /
+&VERT X=13,15,0.039574 /
+&VERT X=14,15,0.00873 /
+&VERT X=15,15,0.0014716 /
+&VERT X=16,15,0.00018962 /
+&VERT X=0,16,3.2235e-05 /
+&VERT X=1,16,0.00028009 /
+&VERT X=2,16,0.0018041 /
+&VERT X=3,16,0.0086682 /
+&VERT X=4,16,0.031176 /
+&VERT X=5,16,0.084129 /
+&VERT X=6,16,0.17064 /
+&VERT X=7,16,0.26054 /
+&VERT X=8,16,0.29987 /
+&VERT X=9,16,0.26052 /
+&VERT X=10,16,0.17106 /
+&VERT X=11,16,0.085004 /
+&VERT X=12,16,0.032008 /
+&VERT X=13,16,0.0091435 /
+&VERT X=14,16,0.0019837 /
+&VERT X=15,16,0.00032712 /
+&VERT X=16,16,4.103e-05 /
+  
+&FACE N=124,140,123, SURF_ID='terrain' /
+&FACE N=54,55,71, SURF_ID='terrain' /
+&FACE N=95,111,94, SURF_ID='terrain' /
+&FACE N=54,37,55, SURF_ID='terrain' /
+&FACE N=90,107,89, SURF_ID='terrain' /
+&FACE N=74,57,58, SURF_ID='terrain' /
+&FACE N=106,105,89, SURF_ID='terrain' /
+&FACE N=72,88,71, SURF_ID='terrain' /
+&FACE N=192,193,209, SURF_ID='terrain' /
+&FACE N=74,73,56, SURF_ID='terrain' /
+&FACE N=46,62,45, SURF_ID='terrain' /
+&FACE N=27,26,10, SURF_ID='terrain' /
+&FACE N=47,48,65, SURF_ID='terrain' /
+&FACE N=32,31,14, SURF_ID='terrain' /
+&FACE N=80,81,97, SURF_ID='terrain' /
+&FACE N=101,84,102, SURF_ID='terrain' /
+&FACE N=196,213,195, SURF_ID='terrain' /
+&FACE N=133,116,117, SURF_ID='terrain' /
+&FACE N=200,201,218, SURF_ID='terrain' /
+&FACE N=186,187,204, SURF_ID='terrain' /
+&FACE N=50,32,33, SURF_ID='terrain' /
+&FACE N=144,143,127, SURF_ID='terrain' /
+&FACE N=114,97,115, SURF_ID='terrain' /
+&FACE N=259,242,260, SURF_ID='terrain' /
+&FACE N=202,219,218, SURF_ID='terrain' /
+&FACE N=261,260,244, SURF_ID='terrain' /
+&FACE N=262,245,263, SURF_ID='terrain' /
+&FACE N=226,242,225, SURF_ID='terrain' /
+&FACE N=268,269,286, SURF_ID='terrain' /
+&FACE N=22,21,4, SURF_ID='terrain' /
+&FACE N=156,155,139, SURF_ID='terrain' /
+&FACE N=19,35,18, SURF_ID='terrain' /
+&FACE N=155,171,154, SURF_ID='terrain' /
+&FACE N=40,39,22, SURF_ID='terrain' /
+&FACE N=54,53,36, SURF_ID='terrain' /
+&FACE N=38,56,55, SURF_ID='terrain' /
+&FACE N=38,55,37, SURF_ID='terrain' /
+&FACE N=69,70,86, SURF_ID='terrain' /
+&FACE N=87,70,88, SURF_ID='terrain' /
+&FACE N=105,123,122, SURF_ID='terrain' /
+&FACE N=121,122,138, SURF_ID='terrain' /
+&FACE N=106,89,107, SURF_ID='terrain' /
+&FACE N=91,90,74, SURF_ID='terrain' /
+&FACE N=107,108,125, SURF_ID='terrain' /
+&FACE N=176,193,175, SURF_ID='terrain' /
+&FACE N=126,109,127, SURF_ID='terrain' /
+&FACE N=211,210,193, SURF_ID='terrain' /
+&FACE N=93,92,76, SURF_ID='terrain' /
+&FACE N=24,25,41, SURF_ID='terrain' /
+&FACE N=92,75,76, SURF_ID='terrain' /
+&FACE N=111,129,128, SURF_ID='terrain' /
+&FACE N=108,107,90, SURF_ID='terrain' /
+&FACE N=56,72,55, SURF_ID='terrain' /
+&FACE N=91,74,92, SURF_ID='terrain' /
+&FACE N=109,110,127, SURF_ID='terrain' /
+&FACE N=29,12,30, SURF_ID='terrain' /
+&FACE N=31,30,14, SURF_ID='terrain' /
+&FACE N=63,46,64, SURF_ID='terrain' /
+&FACE N=64,46,47, SURF_ID='terrain' /
+&FACE N=45,62,44, SURF_ID='terrain' /
+&FACE N=81,64,65, SURF_ID='terrain' /
+&FACE N=67,50,68, SURF_ID='terrain' /
+&FACE N=15,32,14, SURF_ID='terrain' /
+&FACE N=46,30,47, SURF_ID='terrain' /
+&FACE N=64,47,65, SURF_ID='terrain' /
+&FACE N=68,50,51, SURF_ID='terrain' /
+&FACE N=17,33,16, SURF_ID='terrain' /
+&FACE N=84,67,68, SURF_ID='terrain' /
+&FACE N=82,65,83, SURF_ID='terrain' /
+&FACE N=132,148,131, SURF_ID='terrain' /
+&FACE N=82,83,100, SURF_ID='terrain' /
+&FACE N=117,100,118, SURF_ID='terrain' /
+&FACE N=118,101,102, SURF_ID='terrain' /
+&FACE N=79,80,96, SURF_ID='terrain' /
+&FACE N=80,63,64, SURF_ID='terrain' /
+&FACE N=60,61,77, SURF_ID='terrain' /
+&FACE N=76,77,93, SURF_ID='terrain' /
+&FACE N=61,62,78, SURF_ID='terrain' /
+&FACE N=113,114,131, SURF_ID='terrain' /
+&FACE N=165,166,183, SURF_ID='terrain' /
+&FACE N=151,152,168, SURF_ID='terrain' /
+&FACE N=112,111,95, SURF_ID='terrain' /
+&FACE N=177,176,160, SURF_ID='terrain' /
+&FACE N=147,163,146, SURF_ID='terrain' /
+&FACE N=165,181,164, SURF_ID='terrain' /
+&FACE N=166,167,183, SURF_ID='terrain' /
+&FACE N=146,145,129, SURF_ID='terrain' /
+&FACE N=186,169,187, SURF_ID='terrain' /
+&FACE N=221,203,204, SURF_ID='terrain' /
+&FACE N=235,236,253, SURF_ID='terrain' /
+&FACE N=236,237,254, SURF_ID='terrain' /
+&FACE N=237,220,221, SURF_ID='terrain' /
+&FACE N=218,219,235, SURF_ID='terrain' /
+&FACE N=270,271,288, SURF_ID='terrain' /
+&FACE N=238,237,221, SURF_ID='terrain' /
+&FACE N=231,248,247, SURF_ID='terrain' /
+&FACE N=268,252,269, SURF_ID='terrain' /
+&FACE N=217,234,233, SURF_ID='terrain' /
+&FACE N=269,252,253, SURF_ID='terrain' /
+&FACE N=233,249,232, SURF_ID='terrain' /
+&FACE N=287,270,288, SURF_ID='terrain' /
+&FACE N=282,265,283, SURF_ID='terrain' /
+&FACE N=207,208,225, SURF_ID='terrain' /
+&FACE N=243,260,242, SURF_ID='terrain' /
+&FACE N=208,209,225, SURF_ID='terrain' /
+&FACE N=243,244,260, SURF_ID='terrain' /
+&FACE N=259,260,277, SURF_ID='terrain' /
+&FACE N=140,122,123, SURF_ID='terrain' /
+&FACE N=140,124,141, SURF_ID='terrain' /
+&FACE N=126,127,143, SURF_ID='terrain' /
+&FACE N=157,139,140, SURF_ID='terrain' /
+&FACE N=177,194,193, SURF_ID='terrain' /
+&FACE N=209,193,210, SURF_ID='terrain' /
+&FACE N=163,145,146, SURF_ID='terrain' /
+&FACE N=178,195,177, SURF_ID='terrain' /
+&FACE N=138,137,121, SURF_ID='terrain' /
+&FACE N=189,188,172, SURF_ID='terrain' /
+&FACE N=155,137,138, SURF_ID='terrain' /
+&FACE N=139,138,122, SURF_ID='terrain' /
+&FACE N=154,137,155, SURF_ID='terrain' /
+&FACE N=173,156,157, SURF_ID='terrain' /
+&FACE N=173,190,172, SURF_ID='terrain' /
+&FACE N=224,207,225, SURF_ID='terrain' /
+&FACE N=224,225,242, SURF_ID='terrain' /
+&FACE N=240,258,257, SURF_ID='terrain' /
+&FACE N=206,189,190, SURF_ID='terrain' /
+&FACE N=256,257,273, SURF_ID='terrain' /
+&FACE N=21,20,4, SURF_ID='terrain' /
+&FACE N=3,20,2, SURF_ID='terrain' /
+&FACE N=36,35,19, SURF_ID='terrain' /
+&FACE N=2,18,1, SURF_ID='terrain' /
+&FACE N=4,20,3, SURF_ID='terrain' /
+&FACE N=5,22,4, SURF_ID='terrain' /
+&FACE N=39,38,22, SURF_ID='terrain' /
+&FACE N=23,22,6, SURF_ID='terrain' /
+&FACE N=38,20,21, SURF_ID='terrain' /
+&FACE N=38,21,22, SURF_ID='terrain' /
+&FACE N=20,38,37, SURF_ID='terrain' /
+&FACE N=20,37,19, SURF_ID='terrain' /
+&FACE N=36,37,54, SURF_ID='terrain' /
+&FACE N=89,105,88, SURF_ID='terrain' /
+&FACE N=2,20,19, SURF_ID='terrain' /
+&FACE N=2,19,18, SURF_ID='terrain' /
+&FACE N=52,35,36, SURF_ID='terrain' /
+&FACE N=37,36,19, SURF_ID='terrain' /
+&FACE N=53,52,36, SURF_ID='terrain' /
+&FACE N=70,52,53, SURF_ID='terrain' /
+&FACE N=70,53,54, SURF_ID='terrain' /
+&FACE N=70,69,52, SURF_ID='terrain' /
+&FACE N=70,54,71, SURF_ID='terrain' /
+&FACE N=70,71,88, SURF_ID='terrain' /
+&FACE N=104,87,88, SURF_ID='terrain' /
+&FACE N=86,70,87, SURF_ID='terrain' /
+&FACE N=86,87,103, SURF_ID='terrain' /
+&FACE N=104,103,87, SURF_ID='terrain' /
+&FACE N=121,103,104, SURF_ID='terrain' /
+&FACE N=121,104,122, SURF_ID='terrain' /
+&FACE N=121,137,120, SURF_ID='terrain' /
+&FACE N=121,120,103, SURF_ID='terrain' /
+&FACE N=107,125,124, SURF_ID='terrain' /
+&FACE N=107,124,123, SURF_ID='terrain' /
+&FACE N=155,138,139, SURF_ID='terrain' /
+&FACE N=140,139,122, SURF_ID='terrain' /
+&FACE N=142,159,141, SURF_ID='terrain' /
+&FACE N=125,141,124, SURF_ID='terrain' /
+&FACE N=73,90,72, SURF_ID='terrain' /
+&FACE N=55,72,71, SURF_ID='terrain' /
+&FACE N=72,90,89, SURF_ID='terrain' /
+&FACE N=72,89,88, SURF_ID='terrain' /
+&FACE N=104,88,105, SURF_ID='terrain' /
+&FACE N=104,105,122, SURF_ID='terrain' /
+&FACE N=123,105,106, SURF_ID='terrain' /
+&FACE N=123,106,107, SURF_ID='terrain' /
+&FACE N=75,74,58, SURF_ID='terrain' /
+&FACE N=76,59,60, SURF_ID='terrain' /
+&FACE N=74,90,73, SURF_ID='terrain' /
+&FACE N=56,73,72, SURF_ID='terrain' /
+&FACE N=108,90,91, SURF_ID='terrain' /
+&FACE N=108,91,92, SURF_ID='terrain' /
+&FACE N=108,92,109, SURF_ID='terrain' /
+&FACE N=108,109,125, SURF_ID='terrain' /
+&FACE N=125,109,126, SURF_ID='terrain' /
+&FACE N=161,178,160, SURF_ID='terrain' /
+&FACE N=125,126,143, SURF_ID='terrain' /
+&FACE N=125,142,141, SURF_ID='terrain' /
+&FACE N=109,92,110, SURF_ID='terrain' /
+&FACE N=127,110,128, SURF_ID='terrain' /
+&FACE N=112,129,111, SURF_ID='terrain' /
+&FACE N=110,111,128, SURF_ID='terrain' /
+&FACE N=128,129,145, SURF_ID='terrain' /
+&FACE N=128,145,127, SURF_ID='terrain' /
+&FACE N=42,43,60, SURF_ID='terrain' /
+&FACE N=76,60,77, SURF_ID='terrain' /
+&FACE N=92,74,75, SURF_ID='terrain' /
+&FACE N=76,75,58, SURF_ID='terrain' /
+&FACE N=110,92,93, SURF_ID='terrain' /
+&FACE N=110,93,111, SURF_ID='terrain' /
+&FACE N=93,77,94, SURF_ID='terrain' /
+&FACE N=93,94,111, SURF_ID='terrain' /
+&FACE N=41,25,42, SURF_ID='terrain' /
+&FACE N=59,42,60, SURF_ID='terrain' /
+&FACE N=42,25,43, SURF_ID='terrain' /
+&FACE N=60,43,61, SURF_ID='terrain' /
+&FACE N=58,42,59, SURF_ID='terrain' /
+&FACE N=58,59,76, SURF_ID='terrain' /
+&FACE N=56,38,39, SURF_ID='terrain' /
+&FACE N=57,40,58, SURF_ID='terrain' /
+&FACE N=56,39,40, SURF_ID='terrain' /
+&FACE N=58,41,42, SURF_ID='terrain' /
+&FACE N=24,41,23, SURF_ID='terrain' /
+&FACE N=40,41,58, SURF_ID='terrain' /
+&FACE N=56,40,57, SURF_ID='terrain' /
+&FACE N=56,57,74, SURF_ID='terrain' /
+&FACE N=6,22,5, SURF_ID='terrain' /
+&FACE N=7,23,6, SURF_ID='terrain' /
+&FACE N=40,22,23, SURF_ID='terrain' /
+&FACE N=40,23,41, SURF_ID='terrain' /
+&FACE N=8,25,7, SURF_ID='terrain' /
+&FACE N=26,25,9, SURF_ID='terrain' /
+&FACE N=25,8,9, SURF_ID='terrain' /
+&FACE N=7,25,24, SURF_ID='terrain' /
+&FACE N=7,24,23, SURF_ID='terrain' /
+&FACE N=26,9,10, SURF_ID='terrain' /
+&FACE N=27,10,11, SURF_ID='terrain' /
+&FACE N=43,25,26, SURF_ID='terrain' /
+&FACE N=43,26,27, SURF_ID='terrain' /
+&FACE N=44,43,27, SURF_ID='terrain' /
+&FACE N=28,27,11, SURF_ID='terrain' /
+&FACE N=61,43,44, SURF_ID='terrain' /
+&FACE N=61,44,62, SURF_ID='terrain' /
+&FACE N=77,61,78, SURF_ID='terrain' /
+&FACE N=77,78,94, SURF_ID='terrain' /
+&FACE N=62,46,63, SURF_ID='terrain' /
+&FACE N=62,63,79, SURF_ID='terrain' /
+&FACE N=78,62,79, SURF_ID='terrain' /
+&FACE N=78,79,96, SURF_ID='terrain' /
+&FACE N=79,63,80, SURF_ID='terrain' /
+&FACE N=97,98,115, SURF_ID='terrain' /
+&FACE N=28,11,12, SURF_ID='terrain' /
+&FACE N=44,27,28, SURF_ID='terrain' /
+&FACE N=29,28,12, SURF_ID='terrain' /
+&FACE N=46,28,29, SURF_ID='terrain' /
+&FACE N=46,29,30, SURF_ID='terrain' /
+&FACE N=28,46,45, SURF_ID='terrain' /
+&FACE N=28,45,44, SURF_ID='terrain' /
+&FACE N=30,12,13, SURF_ID='terrain' /
+&FACE N=30,13,14, SURF_ID='terrain' /
+&FACE N=47,30,31, SURF_ID='terrain' /
+&FACE N=48,49,66, SURF_ID='terrain' /
+&FACE N=48,31,32, SURF_ID='terrain' /
+&FACE N=33,32,15, SURF_ID='terrain' /
+&FACE N=16,33,15, SURF_ID='terrain' /
+&FACE N=34,33,17, SURF_ID='terrain' /
+&FACE N=51,33,34, SURF_ID='terrain' /
+&FACE N=49,32,50, SURF_ID='terrain' /
+&FACE N=51,50,33, SURF_ID='terrain' /
+&FACE N=83,65,66, SURF_ID='terrain' /
+&FACE N=66,50,67, SURF_ID='terrain' /
+&FACE N=66,67,83, SURF_ID='terrain' /
+&FACE N=47,31,48, SURF_ID='terrain' /
+&FACE N=65,48,66, SURF_ID='terrain' /
+&FACE N=48,32,49, SURF_ID='terrain' /
+&FACE N=66,49,50, SURF_ID='terrain' /
+&FACE N=80,64,81, SURF_ID='terrain' /
+&FACE N=99,82,100, SURF_ID='terrain' /
+&FACE N=81,65,82, SURF_ID='terrain' /
+&FACE N=116,133,115, SURF_ID='terrain' /
+&FACE N=83,67,84, SURF_ID='terrain' /
+&FACE N=83,84,100, SURF_ID='terrain' /
+&FACE N=99,100,117, SURF_ID='terrain' /
+&FACE N=134,135,152, SURF_ID='terrain' /
+&FACE N=119,118,102, SURF_ID='terrain' /
+&FACE N=84,68,85, SURF_ID='terrain' /
+&FACE N=84,85,102, SURF_ID='terrain' /
+&FACE N=100,84,101, SURF_ID='terrain' /
+&FACE N=100,101,118, SURF_ID='terrain' /
+&FACE N=136,118,119, SURF_ID='terrain' /
+&FACE N=117,118,134, SURF_ID='terrain' /
+&FACE N=135,136,152, SURF_ID='terrain' /
+&FACE N=184,183,167, SURF_ID='terrain' /
+&FACE N=152,136,153, SURF_ID='terrain' /
+&FACE N=152,153,169, SURF_ID='terrain' /
+&FACE N=133,117,134, SURF_ID='terrain' /
+&FACE N=133,134,150, SURF_ID='terrain' /
+&FACE N=118,136,135, SURF_ID='terrain' /
+&FACE N=118,135,134, SURF_ID='terrain' /
+&FACE N=167,166,150, SURF_ID='terrain' /
+&FACE N=133,150,132, SURF_ID='terrain' /
+&FACE N=134,152,151, SURF_ID='terrain' /
+&FACE N=134,151,150, SURF_ID='terrain' /
+&FACE N=148,130,131, SURF_ID='terrain' /
+&FACE N=149,132,150, SURF_ID='terrain' /
+&FACE N=115,133,132, SURF_ID='terrain' /
+&FACE N=115,132,131, SURF_ID='terrain' /
+&FACE N=148,132,149, SURF_ID='terrain' /
+&FACE N=148,149,165, SURF_ID='terrain' /
+&FACE N=96,80,97, SURF_ID='terrain' /
+&FACE N=113,129,112, SURF_ID='terrain' /
+&FACE N=81,82,98, SURF_ID='terrain' /
+&FACE N=81,98,97, SURF_ID='terrain' /
+&FACE N=98,82,99, SURF_ID='terrain' /
+&FACE N=98,99,115, SURF_ID='terrain' /
+&FACE N=99,117,116, SURF_ID='terrain' /
+&FACE N=99,116,115, SURF_ID='terrain' /
+&FACE N=78,96,95, SURF_ID='terrain' /
+&FACE N=78,95,94, SURF_ID='terrain' /
+&FACE N=130,129,113, SURF_ID='terrain' /
+&FACE N=96,112,95, SURF_ID='terrain' /
+&FACE N=96,97,114, SURF_ID='terrain' /
+&FACE N=131,114,115, SURF_ID='terrain' /
+&FACE N=96,114,113, SURF_ID='terrain' /
+&FACE N=96,113,112, SURF_ID='terrain' /
+&FACE N=146,129,130, SURF_ID='terrain' /
+&FACE N=131,130,113, SURF_ID='terrain' /
+&FACE N=161,145,162, SURF_ID='terrain' /
+&FACE N=165,147,148, SURF_ID='terrain' /
+&FACE N=130,148,147, SURF_ID='terrain' /
+&FACE N=130,147,146, SURF_ID='terrain' /
+&FACE N=181,180,164, SURF_ID='terrain' /
+&FACE N=164,163,147, SURF_ID='terrain' /
+&FACE N=180,163,164, SURF_ID='terrain' /
+&FACE N=165,164,147, SURF_ID='terrain' /
+&FACE N=162,163,180, SURF_ID='terrain' /
+&FACE N=197,198,215, SURF_ID='terrain' /
+&FACE N=197,214,196, SURF_ID='terrain' /
+&FACE N=179,196,178, SURF_ID='terrain' /
+&FACE N=196,180,197, SURF_ID='terrain' /
+&FACE N=214,197,215, SURF_ID='terrain' /
+&FACE N=196,214,213, SURF_ID='terrain' /
+&FACE N=211,228,210, SURF_ID='terrain' /
+&FACE N=198,216,215, SURF_ID='terrain' /
+&FACE N=217,233,216, SURF_ID='terrain' /
+&FACE N=215,216,232, SURF_ID='terrain' /
+&FACE N=214,215,232, SURF_ID='terrain' /
+&FACE N=214,231,213, SURF_ID='terrain' /
+&FACE N=197,180,181, SURF_ID='terrain' /
+&FACE N=182,181,165, SURF_ID='terrain' /
+&FACE N=198,181,182, SURF_ID='terrain' /
+&FACE N=183,182,165, SURF_ID='terrain' /
+&FACE N=199,216,198, SURF_ID='terrain' /
+&FACE N=181,198,197, SURF_ID='terrain' /
+&FACE N=182,183,199, SURF_ID='terrain' /
+&FACE N=182,199,198, SURF_ID='terrain' /
+&FACE N=149,150,166, SURF_ID='terrain' /
+&FACE N=149,166,165, SURF_ID='terrain' /
+&FACE N=201,184,202, SURF_ID='terrain' /
+&FACE N=151,167,150, SURF_ID='terrain' /
+&FACE N=169,185,168, SURF_ID='terrain' /
+&FACE N=151,168,167, SURF_ID='terrain' /
+&FACE N=170,187,169, SURF_ID='terrain' /
+&FACE N=152,169,168, SURF_ID='terrain' /
+&FACE N=153,170,169, SURF_ID='terrain' /
+&FACE N=167,168,185, SURF_ID='terrain' /
+&FACE N=203,186,204, SURF_ID='terrain' /
+&FACE N=185,169,186, SURF_ID='terrain' /
+&FACE N=236,235,219, SURF_ID='terrain' /
+&FACE N=185,186,202, SURF_ID='terrain' /
+&FACE N=185,202,184, SURF_ID='terrain' /
+&FACE N=202,186,203, SURF_ID='terrain' /
+&FACE N=202,203,219, SURF_ID='terrain' /
+&FACE N=203,221,220, SURF_ID='terrain' /
+&FACE N=203,220,219, SURF_ID='terrain' /
+&FACE N=200,183,184, SURF_ID='terrain' /
+&FACE N=185,184,167, SURF_ID='terrain' /
+&FACE N=199,183,200, SURF_ID='terrain' /
+&FACE N=199,200,216, SURF_ID='terrain' /
+&FACE N=200,184,201, SURF_ID='terrain' /
+&FACE N=218,201,202, SURF_ID='terrain' /
+&FACE N=200,218,217, SURF_ID='terrain' /
+&FACE N=200,217,216, SURF_ID='terrain' /
+&FACE N=217,218,235, SURF_ID='terrain' /
+&FACE N=252,235,253, SURF_ID='terrain' /
+&FACE N=254,253,236, SURF_ID='terrain' /
+&FACE N=220,236,219, SURF_ID='terrain' /
+&FACE N=269,253,270, SURF_ID='terrain' /
+&FACE N=271,254,255, SURF_ID='terrain' /
+&FACE N=236,220,237, SURF_ID='terrain' /
+&FACE N=254,237,238, SURF_ID='terrain' /
+&FACE N=255,254,238, SURF_ID='terrain' /
+&FACE N=272,271,255, SURF_ID='terrain' /
+&FACE N=253,254,271, SURF_ID='terrain' /
+&FACE N=288,271,272, SURF_ID='terrain' /
+&FACE N=289,288,272, SURF_ID='terrain' /
+&FACE N=251,252,268, SURF_ID='terrain' /
+&FACE N=285,268,286, SURF_ID='terrain' /
+&FACE N=253,271,270, SURF_ID='terrain' /
+&FACE N=269,270,286, SURF_ID='terrain' /
+&FACE N=267,268,285, SURF_ID='terrain' /
+&FACE N=286,270,287, SURF_ID='terrain' /
+&FACE N=250,267,249, SURF_ID='terrain' /
+&FACE N=211,212,229, SURF_ID='terrain' /
+&FACE N=250,268,267, SURF_ID='terrain' /
+&FACE N=266,267,283, SURF_ID='terrain' /
+&FACE N=267,285,284, SURF_ID='terrain' /
+&FACE N=267,284,283, SURF_ID='terrain' /
+&FACE N=234,250,233, SURF_ID='terrain' /
+&FACE N=216,233,232, SURF_ID='terrain' /
+&FACE N=235,252,234, SURF_ID='terrain' /
+&FACE N=235,234,217, SURF_ID='terrain' /
+&FACE N=251,268,250, SURF_ID='terrain' /
+&FACE N=233,250,249, SURF_ID='terrain' /
+&FACE N=234,252,251, SURF_ID='terrain' /
+&FACE N=234,251,250, SURF_ID='terrain' /
+&FACE N=232,249,231, SURF_ID='terrain' /
+&FACE N=232,231,214, SURF_ID='terrain' /
+&FACE N=229,230,247, SURF_ID='terrain' /
+&FACE N=230,229,213, SURF_ID='terrain' /
+&FACE N=249,265,248, SURF_ID='terrain' /
+&FACE N=249,248,231, SURF_ID='terrain' /
+&FACE N=266,283,265, SURF_ID='terrain' /
+&FACE N=248,265,247, SURF_ID='terrain' /
+&FACE N=249,267,266, SURF_ID='terrain' /
+&FACE N=249,266,265, SURF_ID='terrain' /
+&FACE N=264,265,281, SURF_ID='terrain' /
+&FACE N=281,265,282, SURF_ID='terrain' /
+&FACE N=246,247,263, SURF_ID='terrain' /
+&FACE N=281,263,264, SURF_ID='terrain' /
+&FACE N=247,265,264, SURF_ID='terrain' /
+&FACE N=247,264,263, SURF_ID='terrain' /
+&FACE N=281,280,263, SURF_ID='terrain' /
+&FACE N=277,260,261, SURF_ID='terrain' /
+&FACE N=279,263,280, SURF_ID='terrain' /
+&FACE N=277,261,278, SURF_ID='terrain' /
+&FACE N=278,261,279, SURF_ID='terrain' /
+&FACE N=227,210,228, SURF_ID='terrain' /
+&FACE N=245,229,246, SURF_ID='terrain' /
+&FACE N=209,226,225, SURF_ID='terrain' /
+&FACE N=261,245,262, SURF_ID='terrain' /
+&FACE N=244,228,245, SURF_ID='terrain' /
+&FACE N=244,245,261, SURF_ID='terrain' /
+&FACE N=212,213,229, SURF_ID='terrain' /
+&FACE N=228,229,245, SURF_ID='terrain' /
+&FACE N=231,247,230, SURF_ID='terrain' /
+&FACE N=231,230,213, SURF_ID='terrain' /
+&FACE N=229,247,246, SURF_ID='terrain' /
+&FACE N=245,246,263, SURF_ID='terrain' /
+&FACE N=279,261,262, SURF_ID='terrain' /
+&FACE N=279,262,263, SURF_ID='terrain' /
+&FACE N=196,195,178, SURF_ID='terrain' /
+&FACE N=161,160,144, SURF_ID='terrain' /
+&FACE N=229,228,211, SURF_ID='terrain' /
+&FACE N=194,211,193, SURF_ID='terrain' /
+&FACE N=195,213,212, SURF_ID='terrain' /
+&FACE N=195,212,211, SURF_ID='terrain' /
+&FACE N=127,145,144, SURF_ID='terrain' /
+&FACE N=143,144,160, SURF_ID='terrain' /
+&FACE N=162,178,161, SURF_ID='terrain' /
+&FACE N=145,161,144, SURF_ID='terrain' /
+&FACE N=179,178,162, SURF_ID='terrain' /
+&FACE N=163,162,145, SURF_ID='terrain' /
+&FACE N=180,196,179, SURF_ID='terrain' /
+&FACE N=180,179,162, SURF_ID='terrain' /
+&FACE N=143,160,142, SURF_ID='terrain' /
+&FACE N=143,142,125, SURF_ID='terrain' /
+&FACE N=142,160,159, SURF_ID='terrain' /
+&FACE N=141,157,140, SURF_ID='terrain' /
+&FACE N=159,160,176, SURF_ID='terrain' /
+&FACE N=158,157,141, SURF_ID='terrain' /
+&FACE N=174,157,175, SURF_ID='terrain' /
+&FACE N=176,175,159, SURF_ID='terrain' /
+&FACE N=160,178,177, SURF_ID='terrain' /
+&FACE N=176,177,193, SURF_ID='terrain' /
+&FACE N=195,211,194, SURF_ID='terrain' /
+&FACE N=195,194,177, SURF_ID='terrain' /
+&FACE N=209,210,227, SURF_ID='terrain' /
+&FACE N=244,227,228, SURF_ID='terrain' /
+&FACE N=206,190,207, SURF_ID='terrain' /
+&FACE N=209,191,192, SURF_ID='terrain' /
+&FACE N=175,193,192, SURF_ID='terrain' /
+&FACE N=175,192,191, SURF_ID='terrain' /
+&FACE N=191,209,208, SURF_ID='terrain' /
+&FACE N=191,208,190, SURF_ID='terrain' /
+&FACE N=191,173,174, SURF_ID='terrain' /
+&FACE N=175,157,158, SURF_ID='terrain' /
+&FACE N=159,175,158, SURF_ID='terrain' /
+&FACE N=159,158,141, SURF_ID='terrain' /
+&FACE N=172,155,173, SURF_ID='terrain' /
+&FACE N=190,173,191, SURF_ID='terrain' /
+&FACE N=173,157,174, SURF_ID='terrain' /
+&FACE N=191,174,175, SURF_ID='terrain' /
+&FACE N=206,205,189, SURF_ID='terrain' /
+&FACE N=173,155,156, SURF_ID='terrain' /
+&FACE N=157,156,139, SURF_ID='terrain' /
+&FACE N=223,222,205, SURF_ID='terrain' /
+&FACE N=171,155,172, SURF_ID='terrain' /
+&FACE N=171,172,188, SURF_ID='terrain' /
+&FACE N=223,240,222, SURF_ID='terrain' /
+&FACE N=205,188,189, SURF_ID='terrain' /
+&FACE N=190,189,172, SURF_ID='terrain' /
+&FACE N=222,240,239, SURF_ID='terrain' /
+&FACE N=223,205,206, SURF_ID='terrain' /
+&FACE N=207,190,208, SURF_ID='terrain' /
+&FACE N=239,240,257, SURF_ID='terrain' /
+&FACE N=256,239,257, SURF_ID='terrain' /
+&FACE N=223,206,207, SURF_ID='terrain' /
+&FACE N=223,207,224, SURF_ID='terrain' /
+&FACE N=240,223,224, SURF_ID='terrain' /
+&FACE N=241,224,242, SURF_ID='terrain' /
+&FACE N=227,244,226, SURF_ID='terrain' /
+&FACE N=227,226,209, SURF_ID='terrain' /
+&FACE N=226,244,243, SURF_ID='terrain' /
+&FACE N=226,243,242, SURF_ID='terrain' /
+&FACE N=241,242,258, SURF_ID='terrain' /
+&FACE N=257,258,275, SURF_ID='terrain' /
+&FACE N=258,242,259, SURF_ID='terrain' /
+&FACE N=258,259,275, SURF_ID='terrain' /
+&FACE N=259,277,276, SURF_ID='terrain' /
+&FACE N=259,276,275, SURF_ID='terrain' /
+&FACE N=240,224,241, SURF_ID='terrain' /
+&FACE N=240,241,258, SURF_ID='terrain' /
+&FACE N=274,257,275, SURF_ID='terrain' /
+&FACE N=273,257,274, SURF_ID='terrain' /
+  
+&TAIL /

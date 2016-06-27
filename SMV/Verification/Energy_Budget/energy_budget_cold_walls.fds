@@ -1,0 +1,18 @@
+&HEAD CHID='energy_budget_cold_walls', TITLE='Test energy balance'  /    
+
+&MESH IJK=40,40,20, XB=0.0,10.0,0.0,10.0,0.0,5.0 /  
+
+&TIME T_END=600. /
+
+&VENT XB= 0.0, 1.0,0.0,1.0,5.0,5.0, SURF_ID='OPEN'/
+&VENT XB=10.0,10.0,0.0,2.0,0.0,2.0, SURF_ID='OPEN'/ 
+
+&SURF ID='FIRE', HRRPUA=300. /
+&REAC C=3,H=8,SOOT_YIELD=0.01,FUEL='PROPANE'/
+&VENT XB=4.0,6.0, 4.0,6.0, 0.0,0.0, SURF_ID='FIRE', COLOR='RED'/
+
+&DUMP DT_HRR=10. /
+
+&TAIL /
+
+

@@ -1,0 +1,10 @@
+RENDERDIR
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+LOADSLICE
+ SLUG MASS FRACTION(cell centered)
+ 2 -0.010000
+SETTIMEVAL
+ 1.00 
+RENDERONCE
+ move_slug_FL1_tf
+

@@ -1,0 +1,35 @@
+&HEAD CHID='colorbar', TITLE='Test of colorbar selection' / 
+REM This test case is used to test Smokeview's ability to 
+REM correctly select the colorbar and shade the appropriate
+REM region black.  
+
+REM To do this, 
+REM  1) press "g" to turn on the grid.
+REM  2) "Page Up" and put a horizonal grid slice "somewhere"
+REM  3) select the colorbar, centering the resulting black band
+REM     on the horizontal grid plane. Note the value.
+REM  4) Use the File/BOunds dialog box to change the min and or max
+REM     setting for the temperature slice file.
+REM  5) repeaset setp 3.  Value noted should remain the same.
+
+&MESH IJK=20,10,10, XB=0.0,2.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=10.0 / 
+
+&MISC  LAPSE_RATE=10.0, TMPA=10. /
+
+&RADI RADIATION=.FALSE./
+
+&SLCF PBY=0.6, QUANTITY='TEMPERATURE' /
+        
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+
+
+
+&TAIL /
+

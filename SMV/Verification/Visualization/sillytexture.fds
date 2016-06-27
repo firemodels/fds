@@ -1,0 +1,24 @@
+&HEAD CHID='sillytexture', TITLE='Silly Test Case' /
+&MISC TEXTURE_ORIGIN=0.1,0.1,0.1 /
+
+&MESH IJK=20,20,02, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+&TIME T_END=0. /
+&SURF ID     = 'TEXTURE 1'
+      TEXTURE_MAP= 'nistleft.jpg'
+      TEXTURE_WIDTH=0.6
+      TEXTURE_HEIGHT=0.2 /
+
+&SURF ID     = 'TEXTURE 2'
+      TEXTURE_MAP= 'nistleft.jpg'
+      TEXTURE_WIDTH=0.4
+      TEXTURE_HEIGHT=0.2 /
+
+&OBST XB=0.1,0.3,0.1,0.7,0.1,0.3, SURF_ID='TEXTURE 1'  /
+&OBST XB=0.5,0.9,0.3,0.7,0.1,0.5, SURF_ID='TEXTURE 2',
+      TEXTURE_ORIGIN=0.5,0.3,0.1  /
+
+&VENT XB=0.0,0.0,0.2,0.8,0.2,0.4, SURF_ID='TEXTURE 1',
+      TEXTURE_ORIGIN=0.0,0.2,0.2 /
+&VENT XB=0.3,0.9,0.0,0.0,0.3,0.5, SURF_ID='TEXTURE 1',
+      TEXTURE_ORIGIN=0.9,0.0,0.3 /
+&TAIL /

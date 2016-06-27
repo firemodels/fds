@@ -1,0 +1,32 @@
+&HEAD CHID='face_demo', TITLE='simple test of vertex/facet method for drawing surfaces' /
+
+&MESH IJK=10,10,10, XB=0,1,0,1,0,1 /
+  
+&TIME T_END=10.0 /
+
+&SURF ID='yx plane', COLOR='BLUE'/
+&SURF ID='xz plane', COLOR='RED'/
+&SURF ID='zy plane', COLOR='GREEN'/
+&SURF ID='cut plane', COLOR='YELLOW'/
+
+&VERT X=0.50,0.50,0.50 /
+&VERT X=0.75,0.50,0.50 /
+&VERT X=0.50,0.75,0.50 /
+&VERT X=0.50,0.50,0.75 /
+
+&BNDE QUANTITY='GAS TEMPERATURE' /
+
+! Facets with vertices, N(3), ordered so that with right-hand rule
+! the surface normal points toward the gas phase (out of the solid).
+
+&FACE N=1,3,2, SURF_ID='yx plane' /
+&FACE N=1,2,4, SURF_ID='xz plane' /
+&FACE N=1,4,3, SURF_ID='zy plane' /
+&FACE N=2,3,4, SURF_ID='cut plane' /
+
+! Tetrahedral volumes composed of unique vertices, N(4). Ordering
+! of the vertices is arbitrary.  
+
+&VOLU N=1,2,3,4, MATL_ID='my solid' /
+
+&TAIL /

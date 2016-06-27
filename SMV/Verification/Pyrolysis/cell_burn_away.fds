@@ -1,0 +1,37 @@
+&HEAD CHID='cell_burn_away', TITLE = 'Burning rate of a single cell obstruction with fixed reaction rate' /
+
+&MESH IJK=5,5,5, XB=-0.1,0.1,-0.1,0.1,0.0,0.2 /
+
+&TIME T_END=110., WALL_INCREMENT=1, DT=0.01 /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+
+&REAC FUEL='PROPANE' /
+
+&SURF ID = 'BLOCK'
+      MATL_ID = 'STUFF'
+      BACKING='INSULATED'
+      THICKNESS = 0.0066666
+      STRETCH_FACTOR = 1.
+      BURN_AWAY = .TRUE. /
+
+&MATL ID = 'STUFF'
+      N_REACTIONS = 1
+      A = 0.05
+      E = 0.
+      N_S = 0.
+      N_T = 0.
+      DENSITY = 50.
+      SPEC_ID = 'PROPANE'
+      NU_SPEC = 1.
+      CONDUCTIVITY = 0.5
+      SPECIFIC_HEAT = 1. /
+
+&OBST XB=-0.02,0.02,-0.02,0.02,0.08,0.12, SURF_ID='BLOCK', BULK_DENSITY=50. /
+
+&TAIL /

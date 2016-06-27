@@ -1,0 +1,19 @@
+&HEAD CHID='smoke_sensor', TITLE='Test smokesensor device' /
+
+  A small white (255,255,255) smokesensor appears over top a grey (128,128,128) obstacle.
+  A red dot indicates where the smoke opacity is recorded and should appear in the middle of the
+  sensor.  Another check is that the sensor should display 255 (the color fo the sensor) not
+  128 (the color of the background).
+
+&MESH IJK=100,64,40, XB=0.0,10.0,0.0,6.4,0.0,4.0 /
+
+&TIME T_END=1.0 /
+
+&SPEC ID='SOOT',MASS_FRACTION_0=0.00007967/ DENSITY=1.0/
+
+&OBST XB=0.0,10.0,6.3,6.4,0.0,4.0 RGB=128,128,128/
+&PROP ID='smoketest' SMOKEVIEW_ID='smokesensor' /
+&DEVC XYZ=8.5,6.0,0.50, ID='vis1' QUANTITY='TEMPERATURE' PROP_ID='smoketest' /
+
+&TAIL /
+

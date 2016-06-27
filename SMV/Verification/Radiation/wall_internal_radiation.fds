@@ -1,0 +1,130 @@
+Wall Internal Radiation 
+=======================
+
+The radiative flux inside the wall is solved using a two-flux model.
+The accuracy of the model is tested in a case similar to the emission
+from a plane layer verification test. The net radiative flux is
+computed for a wall having internal temperature of 1273.15 K and
+ambient temperature of 1 K. The wall thickness is 0.1 m and
+the absorption coefficient is varied to cover a range [0.01 10] of optical
+depths.
+
+The exact solutions for radiative flux are the analytical solutions 
+of plane layer emission [1]
+
+S = Sb*[1-2*E_3(tau)]
+
+where Sb is the blackbody radiation sigma*1273.15^4 and E_3(tau) is
+the third-order exponential integral function of optical depth tau.
+
+tau = kappa * L
+
+tau   kappa (1/m) Exact     FDS      Error (%)
+0.01  0.1         2.8970    2.9495   1.8
+0.1   1.0         24.9403   26.980   8.2
+0.5   5.0         82.9457   93.897   13.
+1.0   10.0        116.2891  128.41   10.
+10.   100.0       148.9698  148.97   0.0001
+
+References
+
+[1] Zel'dovich, Y.B. & Raizer, Y.P. Physics of shock waves and
+high-temperature hydrodynamic phenomena. (translated from the Russian
+and then edited by W.D.Hayes and R.F. Probstein); Dover Publications,
+New York, 2002, 944 pp.
+
+
+-------FDS_Data-----------------------------------------------------
+
+&HEAD CHID='wall_internal_radiation',TITLE='Internal radiation' /
+
+&MESH IJK = 5,3,4, XB = 0.0,0.5,-0.15,0.15,0.0,0.4 /
+
+&TIME T_END=0.0001, WALL_INCREMENT = 1, DT = 0.0001/
+&MISC TMPA = -272.15, Y_CO2_INFTY=0.,HUMIDITY=0./
+
+&SURF ID='TAU_0.01'
+      MATL_ID = 'MAT_0.1'
+      STRETCH_FACTOR = 1.0
+      THICKNESS=0.1
+      HEAT_TRANSFER_COEFFICIENT=0.0
+      TMP_INNER = 1000. /
+&SURF ID='TAU_0.1'
+      MATL_ID = 'MAT_1.0'
+      STRETCH_FACTOR = 1.0
+      THICKNESS=0.1
+      HEAT_TRANSFER_COEFFICIENT=0.0
+      TMP_INNER = 1000. /
+&SURF ID='TAU_0.5'
+      MATL_ID = 'MAT_5.0'
+      STRETCH_FACTOR = 1.0
+      THICKNESS=0.1
+      HEAT_TRANSFER_COEFFICIENT=0.0
+      TMP_INNER = 1000. /
+&SURF ID='TAU_1.0'
+      MATL_ID = 'MAT_10.0'
+      STRETCH_FACTOR = 1.0
+      THICKNESS=0.1
+      HEAT_TRANSFER_COEFFICIENT=0.0
+      TMP_INNER = 1000. /
+&SURF ID='TAU_10.0'
+      MATL_ID = 'MAT_100.0'
+      STRETCH_FACTOR = 1.0
+      THICKNESS=0.1
+      HEAT_TRANSFER_COEFFICIENT=0.0
+      TMP_INNER = 1000. /
+
+&VENT XB = 0.0,0.1,-0.05,0.05,0.0,0.0, SURF_ID = 'TAU_0.01' /
+&VENT XB = 0.1,0.2,-0.05,0.05,0.0,0.0, SURF_ID = 'TAU_0.1' /
+&VENT XB = 0.2,0.3,-0.05,0.05,0.0,0.0, SURF_ID = 'TAU_0.5' /
+&VENT XB = 0.3,0.4,-0.05,0.05,0.0,0.0, SURF_ID = 'TAU_1.0' /
+&VENT XB = 0.4,0.5,-0.05,0.05,0.0,0.0, SURF_ID = 'TAU_10.0' /
+
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'YMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'YMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'ZMAX' SURF_ID = 'OPEN' /
+
+&DEVC XYZ = 0.05,0.0,0.0 IOR = 3 QUANTITY = 'RADIATIVE HEAT FLUX' ID = 'TAU 0.01' /
+&DEVC XYZ = 0.15,0.0,0.0 IOR = 3 QUANTITY = 'RADIATIVE HEAT FLUX' ID = 'TAU 0.1' /
+&DEVC XYZ = 0.25,0.0,0.0 IOR = 3 QUANTITY = 'RADIATIVE HEAT FLUX' ID = 'TAU 0.5' /
+&DEVC XYZ = 0.35,0.0,0.0 IOR = 3 QUANTITY = 'RADIATIVE HEAT FLUX' ID = 'TAU 1.0' /
+&DEVC XYZ = 0.45,0.0,0.0 IOR = 3 QUANTITY = 'RADIATIVE HEAT FLUX' ID = 'TAU 10.0' /
+&DEVC XYZ = 0.05,0.0,0.0 IOR = 3 QUANTITY = 'WALL TEMPERATURE' /
+&DEVC XYZ = 0.05,0.0,0.0 IOR = 3 QUANTITY = 'BACK WALL TEMPERATURE' /
+
+
+&MATL ID = 'MAT_0.1'
+      CONDUCTIVITY=1.0
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 1000.0 
+      ABSORPTION_COEFFICIENT = 0.1 /
+&MATL ID = 'MAT_1.0'
+      CONDUCTIVITY=1.0
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 1000.0 
+      ABSORPTION_COEFFICIENT = 1.0 /
+&MATL ID = 'MAT_5.0'
+      CONDUCTIVITY=1.0
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 1000.0 
+      ABSORPTION_COEFFICIENT = 5.0 /
+&MATL ID = 'MAT_10.0'
+      CONDUCTIVITY=1.0
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 1000.0 
+      ABSORPTION_COEFFICIENT = 10.0 /
+&MATL ID = 'MAT_100.0'
+      CONDUCTIVITY=1.0
+      EMISSIVITY = 1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 1000.0 
+      ABSORPTION_COEFFICIENT = 100.0 /
+
+
+%TAIL/

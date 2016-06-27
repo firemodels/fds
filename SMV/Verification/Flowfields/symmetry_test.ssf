@@ -1,0 +1,10 @@
+RENDERDIR
+ ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+LOADVFILE
+ symmetry_test_05.sf
+SETTIMEVAL
+ 48.3
+RENDERONCE
+ symmetry_test
+
+

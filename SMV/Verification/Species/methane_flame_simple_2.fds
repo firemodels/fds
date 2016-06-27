@@ -1,0 +1,48 @@
+&HEAD CHID='methane_flame_simple_2', TITLE='Verification of simple chemistry flame'/
+
+All material properties etc. are completely fabricated.
+
+&MESH IJK= 10,10,20, XB= 0.0,1.0, 0.0,1.0, 0.0,2.0 /
+
+&TIME T_END=10.0 DT = 0.01 /
+
+&DUMP MASS_FILE=.TRUE., DT_DEVC=0.5 /
+
+Fire
+HRR = 100 kW 
+MLR = 0.002 kg/s Methane
+Duration = 5 s
+ML = 0.01 kg Methane
+Yields       kg/kg fuel	  kg	
+	CO2: 2.59 	  0.0259 
+	H2O: 2.25         0.0225 
+	CO:  0.10         0.0010
+
+&OBST XB = 0.3,0.7,0.3,0.7,0.0,0.10 SURF_IDS = 'BURNER','INERT','INERT' /
+&SURF ID = 'BURNER', HRRPUA = 625. RAMP_Q = 'HRR' / 
+&RAMP ID = 'HRR' T = 0, F = 1 /
+&RAMP ID = 'HRR' T = 5, F = 1 /
+&RAMP ID = 'HRR' T = 5.01, F = 0 /
+
+Species and reactions
+
+&SPEC ID = 'METHANE', LUMPED_COMPONENT_ONLY=.TRUE. /
+&SPEC ID = 'MY_FUEL',
+	SPEC_ID(1)='METHANE', VOLUME_FRACTION(1)=0.5
+	SPEC_ID(2)='METHANE', VOLUME_FRACTION(2)=0.5 /
+
+&REAC FUEL='MY_FUEL',  CO_YIELD = 0.1/
+
+Measurements
+
+&DEVC XB= 0,1,0,1,0,2, QUANTITY='MASS FRACTION', STATISTICS = 'MASS INTEGRAL' 
+	SPEC_ID = 'CARBON DIOXIDE' ID = 'CO2'/
+&DEVC XB= 0,1,0,1,0,2, QUANTITY='MASS FRACTION', STATISTICS = 'MASS INTEGRAL' 
+	SPEC_ID = 'WATER VAPOR' ID = 'H2O'/
+&DEVC XB= 0,1,0,1,0,2, QUANTITY='MASS FRACTION', STATISTICS = 'MASS INTEGRAL' 
+	SPEC_ID = 'CARBON MONOXIDE' ID = 'CO', CONVERSION_FACTOR = 30./
+
+&SLCF PBY = 0.5 QUANTITY = 'TEMPERATURE' /
+&SLCF PBY = 0.5 QUANTITY = 'HRRPUV' /
+
+&TAIL /

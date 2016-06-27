@@ -1,0 +1,25 @@
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+UNLOADALL
+LOADFILE
+ smoke_test2_01.s3d
+SETTIMEVAL
+ 0.159000
+LOADINIFILE
+ smoke_test2_all.ini
+RENDERCLIP
+ 1 30 30 148 104
+RENDERONCE
+ smoke_test2_all
+LOADINIFILE
+ smoke_test2_every2.ini
+RENDERCLIP
+ 1 30 30 148 104
+RENDERONCE
+ smoke_test2_every2
+LOADINIFILE
+ smoke_test2_every3.ini
+RENDERCLIP
+ 1 30 30 148 104
+RENDERONCE
+ smoke_test2_every3

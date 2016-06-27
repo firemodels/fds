@@ -1,0 +1,19 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+LOADFILE
+ activate_vents.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 5.000000
+RENDERONCE
+ activate_vents_5
+SETTIMEVAL
+ 10.000000
+RENDERONCE
+ activate_vents_10
+SETTIMEVAL
+ 15.000000
+RENDERONCE
+ activate_vents_15
+ 

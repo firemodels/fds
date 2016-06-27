@@ -1,0 +1,20 @@
+&HEAD CHID='geom_texture2' /
+
+&MESH IJK=10,10,10,XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&SURF ID='surf1'
+      TEXTURE_MAP='nistleft.jpg'
+      TEXTURE_WIDTH=0.6
+      TEXTURE_HEIGHT=0.2,COLOR='BLUE' /
+&SURF ID='surf2'
+      TEXTURE_MAP='grass.jpg'
+      TEXTURE_WIDTH=0.6
+      TEXTURE_HEIGHT=0.2,COLOR='GREEN' /
+
+&GEOM ID='texture',
+        VERTS=0.0,0.0,0.0, 1.0,0.0,0.0, 1.0,1.0,0.0,
+        FACES=1,2,3,SURF_ID='surf1'/
+
+&GEOM ID='texture2',
+        VERTS=0.0,0.0,0.0, 1.0,1.0,0.0, 0.0,1.0,0.0,
+        FACES=1,2,3,SURF_ID='surf2'/

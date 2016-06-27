@@ -1,0 +1,5 @@
+Time,External Heat Flux,Reference Temperature,Thickness (Simple Theory),Burn Rate (Simple Theory)
+0,50,330,0.025,0.0254
+1169.2,50,330,0,0.0254
+1170,50,330,0,0
+2000,50,330,0,0

@@ -1,0 +1,62 @@
+The calculation of reaction enthalpy is tested by
+heating up a thin slab made of one material that reacts
+and forms a second material at a constant rate.
+The change of enthalpy is zero below 80 C, where
+the specific heat of the first material (MAT_A) suddenly drops
+to one tenth. As a result, the reaction generates
+a positive source term thus increasing the heating
+rate. This is seen as a bump in the temperature
+curve after 80 degC.
+
+&HEAD CHID='enthalpy', TITLE='Test reaction enthalpy' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&TIME T_END=7, DT=0.005, WALL_INCREMENT=1 /
+
+&DUMP DT_PL3D=10000000. /
+
+&SURF ID='SLAB'
+      COLOR='TOMATO 1'
+      EXTERNAL_FLUX = 3.0
+      HEAT_TRANSFER_COEFFICIENT = 0. 
+      MATL_ID(1,:) = 'MAT_A'
+      THICKNESS=0.001 /
+
+&MATL ID = 'MAT_A'
+      EMISSIVITY = 1.0
+      CONDUCTIVITY=10.0
+      SPECIFIC_HEAT_RAMP = 'c_ramp'
+      DENSITY= 30.0 
+      N_REACTIONS = 1
+      A = 0.2
+      E = 0.
+      N_S = 0.
+      NU_MATL = 1.0
+      MATL_ID = 'MAT_B' /
+
+&RAMP ID = 'c_ramp' T = 20 F = 1.0 /
+&RAMP ID = 'c_ramp' T = 80 F = 1.0 /
+&RAMP ID = 'c_ramp' T = 81 F = 0.1 /
+
+&MATL ID = 'MAT_B'
+      EMISSIVITY = 1.0
+      CONDUCTIVITY=10.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 30.0 /
+
+&VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'SLAB' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&DEVC XYZ = 0.,0.,0.,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID='T_slab' /
+&PROF XYZ = 0.,0.,0.,IOR = 3, QUANTITY = 'MAT_A' /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&TAIL /
+

@@ -1,0 +1,62 @@
+&HEAD CHID='box_burn_away2', TITLE='Test BURN_AWAY feature' / 
+
+The FOAM box is evaporated away by the high thermal radiation
+from HOT surfaces. The mass of the box is 0.4^3 m3 * 20 kg/m3 = 1.28 kg.
+This should be compared to the final value of fuel density volume integral, 
+computed by the first DEVC.
+
+The gas species here is additional SPEC.
+
+&MESH IJK=10,10,10 XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=30. DT = 0.01/
+
+&SPEC ID = 'GAS', MW = 50. /
+
+&MATL ID                   = 'FOAM'
+      HEAT_OF_REACTION     = 800.
+      CONDUCTIVITY         = 0.2
+      SPECIFIC_HEAT        = 1.0
+      DENSITY              = 20.
+      N_REACTIONS          = 1
+      SPEC_ID              = 'GAS'
+      NU_SPEC              = 1.
+      REFERENCE_TEMPERATURE= 200. /
+
+&SURF ID                   = 'FOAM SLAB'
+      COLOR                = 'TOMATO 3'
+      MATL_ID              = 'FOAM'
+      THICKNESS            = 0.1
+      BURN_AWAY            = .TRUE.
+      BACKING              = 'EXPOSED' /
+
+&DUMP SMOKE3D = .FALSE. 
+      DT_HRR = 0.01
+      DT_DEVC = 0.01 /
+
+&OBST XB=0.30,0.70,0.30,0.70,0.30,0.70, SURF_ID='FOAM SLAB', BULK_DENSITY=20. /
+
+&SURF ID = 'HOT' TMP_FRONT = 1100. /
+
+&VENT MB='XMIN', SURF_ID='HOT' /
+&VENT MB='XMAX', SURF_ID='HOT' /
+&VENT MB='YMIN', SURF_ID='HOT' /
+&VENT MB='YMAX', SURF_ID='HOT' /
+&VENT MB='ZMIN', SURF_ID='HOT' /
+&VENT MB='ZMAX', SURF_ID='HOT' /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='MASS FLUX' SPEC_ID = 'GAS' /
+&BNDF QUANTITY='NET HEAT FLUX' /
+
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.5, QUANTITY='INTEGRATED INTENSITY' /
+&SLCF PBY=0.5, QUANTITY='VOLUME FRACTION', SPEC_ID = 'GAS'/
+
+&DEVC 	XB = 0,1,0,1,0,1, QUANTITY = 'DENSITY', SPEC_ID = 'GAS', 
+	STATISTICS = 'VOLUME INTEGRAL' ID = 'Mass GAS'/
+&DEVC XB = 0,1,0,1,0,1, QUANTITY = 'HRR' ID = 'HRR' /
+
+&TAIL /
+
+

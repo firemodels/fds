@@ -1,0 +1,15 @@
+RENDERDIR
+../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES
+LOADINIFILE
+ribbed_channel_80.ini
+SETVIEWPOINT
+view5
+RENDERCLIP 
+1 27 30 76 39
+LOADVFILE
+ribbed_channel_80_03.sf
+SETTIMEVAL
+ 100.0
+RENDERONCE
+ribbed_channel_80_s1000 
+

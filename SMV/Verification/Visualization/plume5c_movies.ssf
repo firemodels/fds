@@ -1,0 +1,94 @@
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_06.sf
+RENDERALL
+ 1
+plume5c_tslice
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_tslice_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+RENDERALL
+ 1
+plume5c_3dsmoke
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_3dsmoke_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADVFILE
+ plume5c_06.sf
+RENDERALL
+ 1
+ plume5c_vtslice
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_vtslice_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_02.iso
+RENDERALL
+ 1
+ plume5c_iso
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_iso_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c_03.bf
+RENDERALL
+ 1
+ plume5c_tbound
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_tbound_20
+UNLOADALL
+
+RENDERDIR
+ frames
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+RENDERALL
+ 1
+ plume5c_part
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ plume5c_part_20
+UNLOADALL
+EXIT

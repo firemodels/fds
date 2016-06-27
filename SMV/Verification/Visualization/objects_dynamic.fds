@@ -1,0 +1,82 @@
+&HEAD CHID='objects_dynamic',TITLE='Smokeview device drawing test' /
+ 
+ Test dynamic objects.  Data used to customize the look of the device is obtained from a particle file.
+ 
+&MESH IJK=32,32,64, XB=0.0,3.2,0.0,1.6,0.0,4.2/
+
+&TIME T_END=0.0/
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=3.2,3.2,0.0,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,0.0,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,1.6,1.6,0.0,4.2,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,1.6,4.2,4.2,SURF_ID='OPEN'/
+
+&PROP ID='drawaxis' SMOKEVIEW_ID='drawaxis' /
+
+Dynamic objects
+
+tube labels from objects.svo: :R :G :B :D :L
+
+&PROP ID='tube' SMOKEVIEW_PARAMETERS(1:5)='R=255','G=0','B=0','D=0.2','L=0.6' SMOKEVIEW_ID='tube' /
+&DEVC XYZ=0.5,0.8,0.5, QUANTITY='TEMPERATURE' PROP_ID='tube' /
+
+sphere labels from objects.svo: :R :G :B :D :L
+
+&PROP ID='sphere' SMOKEVIEW_PARAMETERS(1:4)='R=0','G=255','B=0','D=0.5' SMOKEVIEW_ID='sphere' /
+&DEVC XYZ=0.5,0.8,1.5, QUANTITY='TEMPERATURE' PROP_ID='sphere' /
+
+cone labels from objects.svo: :R :G :B :D :H
+
+&PROP ID='cone' SMOKEVIEW_PARAMETERS(1:5)='R=128','G=255','B=192','D=0.4','H=.6' SMOKEVIEW_ID='cone' /
+&DEVC XYZ=0.5,0.8,2.2, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='cone' /
+
+ball labels from objects.svo: :R :G :B :DX :DY :DZ
+
+&PROP ID='ball' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=192','B=255','DX=0.5','DY=.75','DZ=1.0' SMOKEVIEW_ID='ball' /
+&DEVC XYZ=0.5,0.8,3.5, QUANTITY='TEMPERATURE' PROP_ID='ball' /
+
+fan labels from objects.svo:
+  :HUB_R=0 :HUB_G=0 :HUB_B=0 :HUB_D=0.1 :HUB_L=0.12
+  :BLADE_R=128 :BLADE_G=64 :BLADE_B=32 :BLADE_ANGLE=30.0 :BLADE_D=0.5 :BLADE_H=0.09 
+  :ROTATION_RATE=360.0
+
+&PROP ID='fan' SMOKEVIEW_PARAMETERS(1:11)='HUB_R=0','HUB_G=0','HUB_B=0','HUB_D=0.1','HUB_L=0.12',
+  'BLADE_R=128','BLADE_G=64','BLADE_B=32','BLADE_ANGLE=60.0','BLADE_D=0.5','BLADE_H=0.1',SMOKEVIEW_ID='fan' /
+&DEVC XYZ=2.5,0.8,0.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='fan' /
+
+tsphere labels from objects.svo: :R :G :B :AX0 :ELEV0 :ROT0 :ROTATION_RATE :D :tfile
+
+&PROP ID='tsphere' SMOKEVIEW_PARAMETERS(1:9)='R=255','G=255','B=255',
+                      'AX0=0.0','ELEV0=90.0','ROT0=0.0','ROTATION_RATE=-10.0',
+                      'D=1.0','tfile="t%sphere_cover_03.png"' SMOKEVIEW_ID='tsphere' /
+&DEVC XYZ=2.5,0.8,2.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='tsphere' /
+
+vent labels from objects.svo: :R :G :B :W :H :ROT
+
+&PROP ID='vent1' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=64','B=32','W=0.5','H=1.0','ROT=0.0' SMOKEVIEW_ID='vent' /
+&DEVC XYZ=2.0,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent1' INITIAL_STATE=.FALSE. /
+
+&PROP ID='vent2' SMOKEVIEW_PARAMETERS(1:6)='R=128','G=64','B=32','W=0.5','H=1.0','ROT=0.0' SMOKEVIEW_ID='vent' /
+&DEVC XYZ=3.2,0.8,3.5, QUANTITY='TEMPERATURE' ORIENTATION=0.0,1.0,0.0 PROP_ID='vent2' INITIAL_STATE=.TRUE. /
+
+&PROP ID='velegg' SMOKEVIEW_PARAMETERS(1:9)=
+          'R=192','G=64','B=32',
+          'U-VEL=2.0','V-VEL=2.0','W-VEL=4.0', 
+          'VELMIN=0.1','VELMAX=4.0','D=0.2' SMOKEVIEW_ID='velegg' /
+&DEVC XYZ=3.1,0.8,1.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='velegg' /
+
+&PROP ID='veltube' SMOKEVIEW_PARAMETERS(1:9)=
+          'R=64','G=192','B=32',
+          'U-VEL=2.0','V-VEL=2.0','W-VEL=4.0', 
+          'VELMIN=0.1','VELMAX=4.0','D=0.2' SMOKEVIEW_ID='veltube' /
+&DEVC XYZ=2.8,0.8,1.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='veltube' /
+
+&PROP ID='box' SMOKEVIEW_PARAMETERS(1:6)=
+          'R=64','G=192','B=128',
+          'DX=0.25','DY=0.5','DZ=0.125', 
+          SMOKEVIEW_ID='box' /
+&DEVC XYZ=1.5,0.8,1.0, QUANTITY='TEMPERATURE' ORIENTATION=0.0,0.0,1.0 PROP_ID='box' /
+&TAIL /
+
+

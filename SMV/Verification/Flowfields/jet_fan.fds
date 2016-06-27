@@ -1,0 +1,32 @@
+A simple example of a jet fan consisting of a rectangular shroud pushing smoke through a tunnel.
+
+&HEAD CHID='jet_fan', TITLE='How to construct a simple jet fan' /
+
+&MESH IJK=50,20,20, XB=0.0,10.0,-2.0,2.0,0.0,4.0 /
+
+&TIME T_END=10.0 /
+
+&SURF ID='FIRE', HRRPUA=1000., COLOR='YELLOW' /
+&REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
+&OBST XB= 4.0, 5.0,-0.4,-0.2, 1.4, 1.8, COLOR='BLUE' / Fan Shroud
+&OBST XB= 4.0, 5.0, 0.2, 0.4, 1.4, 1.8, COLOR='BLUE' / Fan Shroud
+&OBST XB= 4.0, 5.0,-0.4, 0.4, 1.2, 1.4, COLOR='BLUE' / Fan Shroud
+&OBST XB= 4.0, 5.0,-0.4, 0.4, 1.8, 2.0, COLOR='BLUE' / Fan Shroud
+
+&OBST XB= 4.0, 4.2,-0.2, 0.2, 1.4, 1.8, COLOR='RED' /
+&VENT XB= 4.2, 4.2,-0.2, 0.2, 1.4, 1.8,SURF_ID='HVAC',ID='IN',COLOR='RED'/
+&VENT XB= 4.0, 4.0,-0.2, 0.2, 1.4, 1.8,SURF_ID='HVAC',ID='OUT',UVW= -1,0,-1,COLOR='RED'/
+&HVAC ID='IN',TYPE_ID='NODE',DUCT_ID='JET FAN',VENT_ID='IN'/
+&HVAC ID='OUT',TYPE_ID='NODE',DUCT_ID='JET FAN',VENT_ID='OUT'/
+&HVAC ID='JET FAN',TYPE_ID='DUCT',NODE_ID='IN','OUT',VOLUME_FLOW=0.8,AREA=0.04/
+
+
+&OBST XB= 5.2, 5.6,-0.2, 0.2, 0.0, 0.2, SURF_IDS='FIRE','INERT','INERT' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' / 
+&VENT MB='XMAX', SURF_ID='OPEN' / 
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+
+&TAIL /
+

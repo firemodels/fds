@@ -1,0 +1,24 @@
+&HEAD CHID='species_conservation_1', TITLE='Low flux of hot gas into a box' /
+
+&MESH IJK=20,20,20, XB=-2,2,-2,2,0,4 /
+
+&TIME T_END=60. /
+
+&DUMP MASS_FILE=.TRUE., DT_MASS=1. /
+
+&SPEC ID='PROPANE' /
+
+&SURF ID='adiabatic wall', ADIABATIC=.TRUE., DEFAULT=.TRUE. /
+&SURF ID='burner', MASS_FLUX(1)=0.0001, SPEC_ID(1)='PROPANE', TMP_FRONT=500., TAU_MF(1)=0. / 
+
+&VENT XB=-0.5, 0.5,-0.5, 0.5,0.0,0.0,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5,-0.5, 0.5,4.0,4.0,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-2.0,-2.0,-0.5, 0.5,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB= 2.0, 2.0,-0.5, 0.5,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5,-2.0,-2.0,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+&VENT XB=-0.5, 0.5, 2.0, 2.0,1.5,2.5,  SURF_ID='burner', COLOR='RED' / 
+
+&SLCF PBY=0.0, QUANTITY='MASS FRACTION', SPEC_ID='PROPANE', VECTOR=.TRUE. /
+
+&TAIL /
+

@@ -1,0 +1,60 @@
+&HEAD CHID='pyrolysis_2', TITLE='TGA example case for Users Guide' / 
+
+&MESH IJK=3,1,4, XB=-2,2,-0.5,0.5,0,1 / 
+
+&TIME T_END=9600., WALL_INCREMENT=1, DT=0.2 /
+
+&MISC SOLID_PHASE_ONLY=.TRUE., ASSUMED_GAS_TEMPERATURE=820., ASSUMED_GAS_TEMPERATURE_RAMP='T_RAMP' /
+&RAMP ID = 'T_RAMP' T = 0.,    F = 0. /
+&RAMP ID = 'T_RAMP' T = 9600., F = 1.0 /
+
+&RADI RADIATION=.FALSE. /
+&SPEC ID='METHANE' / 
+
+&VENT XB=-1,1,-0.5,0.5,0.0,0.0, SURF_ID='SAMPLE' /
+
+&SURF ID             = 'SAMPLE'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      THICKNESS      = 0.00001
+      HEAT_TRANSFER_COEFFICIENT = 1000.
+      MATL_ID(1,1:2) = 'stuff','water'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+&MATL ID                    = 'water'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 4.184 
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 100.
+      PYROLYSIS_RANGE       = 10.
+      NU_SPEC               = 1.
+      SPEC_ID               = 'METHANE'
+      HEAT_OF_REACTION      = 2500. /  
+
+&MATL ID                    = 'stuff'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      REFERENCE_TEMPERATURE = 300.
+      PYROLYSIS_RANGE       = 80.
+      NU_SPEC 	            = 0.8
+      SPEC_ID               = 'METHANE'
+      NU_MATL               = 0.2
+      MATL_ID               = 'ash'
+      HEAT_OF_REACTION      = 1000. /
+
+&MATL ID                    = 'ash'
+      EMISSIVITY            = 1.0
+      DENSITY               = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&DEVC ID='mpua',     XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS' /
+&DEVC ID='mlrpua',   XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='NORMALIZED MASS LOSS RATE', SPEC_ID='METHANE' /
+&DEVC ID='TGA temp', XYZ = 0.0,0.0,0.0, IOR=3, QUANTITY='WALL TEMPERATURE' /
+
+&TAIL /

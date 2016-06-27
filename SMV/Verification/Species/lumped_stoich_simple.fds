@@ -1,0 +1,5 @@
+&HEAD CHID='lumped_stoich_simple' /
+&MESH IJK=4,4,4, XB=0,1,0,1,0,1 /
+&TIME T_END=0./
+&REAC FUEL = 'PROPANE', SOOT_YIELD=0.01 /
+&TAIL /

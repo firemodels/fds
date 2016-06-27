@@ -1,0 +1,66 @@
+Create a steel box with 1 m sides. Add a hot inner box 0.8 m on a side centered inside the box, and then record 
+external temperatures of the box sides that are zero or one cell thick. It should not matter whether the sides are zero
+or one cell thick -- the heat conduction should be the same because the steel is 0.5 cm thick on all sides.
+Note that the sides of the box coincide with mesh boundaries. This tests the ability of the code to transfer heat across mesh
+boundaries within a solid. For simplicity there is no convective heat transfer, emissivities are all 1, and the background
+gas is nitrogen. The heat transfer is purely radiative in the gas phase and conductive through the solid walls.
+
+&HEAD CHID='back_wall_test', TITLE='Check heat transfer through interpolated boundaries' /
+
+&MESH IJK=21,20,20, XB=-0.50, 0.55,-0.5, 0.5,-0.5, 0.5 /
+&MESH IJK=19,20,20, XB= 0.55, 1.50,-0.5, 0.5,-0.5, 0.5 /
+&MESH IJK=20,20,20, XB=-1.50,-0.50,-0.5, 0.5,-0.5, 0.5 /
+&MESH IJK=20,20,20, XB=-0.50, 0.50, 0.5, 1.5,-0.5, 0.5 /
+
+&MISC GVEC=0.,0.,0., NOISE=.FALSE., STRATIFICATION=.FALSE. /
+
+&TIME T_END=3600., DT=0.5 /
+
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
+
+&MATL ID                 = 'STEEL'
+      EMISSIVITY         = 1.
+      SPECIFIC_HEAT      = 0.5
+      CONDUCTIVITY       = 50.
+      DENSITY            = 8000. /
+
+&SURF ID='HOT', TMP_FRONT=500., EMISSIVITY=1., COLOR='RED', HEAT_TRANSFER_COEFFICIENT=0. /
+
+&SURF ID        = 'STEEL PLATE'
+      DEFAULT   = .TRUE.
+      COLOR     = 'BLACK'
+      MATL_ID   = 'STEEL'
+      THICKNESS = 0.005
+      HEAT_TRANSFER_COEFFICIENT=0. /
+      
+&OBST XB=-0.40, 0.40,-0.40, 0.40,-0.40, 0.40, SURF_ID='HOT' / 
+
+&OBST XB=-0.55,-0.50,-0.50, 0.50,-0.50, 0.50 / 
+&OBST XB= 0.50, 0.55,-0.50, 0.50,-0.50, 0.50 / 
+&OBST XB=-0.50, 0.50,-0.55,-0.50,-0.50, 0.50 / 
+&OBST XB=-0.50, 0.50, 0.50, 0.50,-0.50, 0.50 / 
+&OBST XB=-0.50, 0.50,-0.50, 0.50,-0.50,-0.50 / 
+&OBST XB=-0.50, 0.50,-0.50, 0.50, 0.50, 0.50 / 
+
+&ZONE XB=-0.30, 0.30,-0.50,-0.40,-0.30, 0.30 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMIN', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&BNDF QUANTITY='WALL TEMPERATURE', CELL_CENTERED=.TRUE. /
+
+&DEVC XYZ=0.49,0.00,0.00, QUANTITY='RADIATIVE HEAT FLUX', ID='Flux_in', IOR=-1 /
+&DEVC XYZ=0.56,0.00,0.00, QUANTITY='RADIATIVE HEAT FLUX', ID='Flux_out', IOR=1, CONVERSION_FACTOR=-1. /
+
+&DEVC XYZ=-.56,0.00,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thick', IOR=-1 /
+&DEVC XYZ=0.00,0.51,0.00, QUANTITY='WALL TEMPERATURE', ID='Temp_thin', IOR=2 /
+
+&SLCF PBY=0., QUANTITY='INTEGRATED INTENSITY', CELL_CENTERED=.TRUE. /
+
+&TAIL /
+
+

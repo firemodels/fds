@@ -1,0 +1,34 @@
+RENDERDIR
+ ..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+LOADFILE
+ geom_sphere_fire_01.s3d
+LOADFILE
+ geom_sphere_fire_02.s3d
+LOADFILE
+ geom_sphere_fire_01.be
+RENDERCLIP
+ 1 0 154 0 60
+SETTIMEVAL
+ 0.000000
+RENDERONCE
+ geom_sphere_fire_000
+SETTIMEVAL
+ 2.0
+RENDERONCE
+ geom_sphere_fire_020
+SETTIMEVAL
+ 4.0
+RENDERONCE
+ geom_sphere_fire_040
+SETTIMEVAL
+ 6.0
+RENDERONCE
+ geom_sphere_fire_060
+SETTIMEVAL
+ 8.0
+RENDERONCE
+ geom_sphere_fire_080
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ geom_sphere_fire_100

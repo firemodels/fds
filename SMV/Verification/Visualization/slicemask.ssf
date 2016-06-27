@@ -1,0 +1,91 @@
+
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+RENDERCLIP
+ 1 106 69 4 10
+
+UNLOADALL
+// LOADFILE
+//  slicemask_01.sf
+LOADSLICEM
+ TEMPERATURE
+ 3 0.500000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_node1
+
+UNLOADALL
+// LOADFILE
+//  slicemask_02.sf
+LOADSLICEM
+ TEMPERATURE
+ 3 0.600000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_node2
+
+UNLOADALL
+// LOADFILE
+//  slicemask_03.sf
+LOADSLICEM
+ TEMPERATURE
+ 3 0.700000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_node3
+
+UNLOADALL
+// LOADFILE
+//  slicemask_04.sf
+LOADSLICEM
+ TEMPERATURE
+ 3 0.800000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_node4
+
+UNLOADALL
+// LOADFILE
+//  slicemask_05.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 3 0.550000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_cell1
+
+UNLOADALL
+// LOADFILE
+//  slicemask_06.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 3 0.650000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_cell2
+
+UNLOADALL
+// LOADFILE
+//  slicemask_07.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 3 0.750000
+ 1
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ slicemask_cell3

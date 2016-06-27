@@ -1,0 +1,34 @@
+&HEAD CHID='plate_view_factor_2D_30',TITLE='View factor from infinite slab'/
+
+The RADIATIVE HEAT FLUX should be 105.34 kW/m2
+
+&MESH IJK=20,1,10, XB=0,2,-.5,.5,0,1 /
+
+&TIME T_END=.1 DT = 0.001 / 
+
+&MISC GVEC=0,0,0,Y_CO2_INFTY=0.,HUMIDITY=0./ 
+
+&RADI NUMBER_RADIATION_ANGLES = 30 /
+
+&SURF ID='HOT'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&SURF ID='COLD'
+      HEAT_TRANSFER_COEFFICIENT = 0.
+      EMISSIVITY = 1.
+      TMP_FRONT = -273.
+      TAU_T = 0.0 /
+
+&VENT MB = 'XMAX' SURF_ID = 'COLD' /
+&VENT MB = 'ZMAX' SURF_ID = 'HOT' /
+&VENT MB = 'ZMIN' SURF_ID = 'COLD' /
+
+&DEVC XYZ = 1,0,0,IOR = 3, QUANTITY = 'RADIATIVE HEAT FLUX' /
+
+
+&TAIL /
+
+

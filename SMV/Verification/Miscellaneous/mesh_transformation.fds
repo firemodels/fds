@@ -1,0 +1,14 @@
+&HEAD CHID='mesh_transformation', TITLE='Test mesh transformation feature' /
+
+&MESH IJK=50,50,4, XB=0.0,1.5,0.0,1.5,0.0,0.1 /
+
+&TRNX CC=0.3, PC=0.5 /
+&TRNX CC=1.2, PC=1.0 /
+
+&TRNY IDERIV=0, CC=0.75, PC=0.75 /
+&TRNY IDERIV=1, CC=0.75, PC=0.50 /
+
+&TIME T_END=0. /
+
+&TAIL /
+

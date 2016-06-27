@@ -1,0 +1,25 @@
+This case just tests general functionality when multiple meshes are overlapping in various ways. 
+
+&HEAD CHID='random_meshes', TITLE='Test of overlapping meshes' /
+
+&MESH IJK=20,1,20, XB=0.0,2.0,-0.1,0.1,0.0,2.0 /
+&MESH IJK=20,1,20, XB=0.8,1.8,-0.1,0.1,0.3,1.3 /
+&MESH IJK=10,1,20, XB=0.4,1.4,-0.1,0.1,0.5,2.5 /
+&MESH IJK=20,1,20, XB=1.2,3.2,-0.1,0.1,1.5,3.5 /
+&MESH IJK=20,1,10, XB=1.4,3.4,-0.1,0.1,1.0,2.0 /
+
+&TIME T_END=300. /
+
+&PRES VELOCITY_TOLERANCE=1.E-4, MAX_PRESSURE_ITERATIONS=100 /
+
+&SURF ID='PLUME', VEL=-0.3, COLOR='RED' /
+
+&VENT XB=0.1,0.3,-0.1,0.1,0.0,0.0, OUTLINE=.TRUE., SURF_ID='PLUME' /
+&VENT XB=2.8,3.0,-0.1,0.1,3.5,3.5, SURF_ID='OPEN' /
+
+&SLCF PBY=0, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=0, QUANTITY='H', CELL_CENTERED=.TRUE. /
+
+&DEVC XB=2.8,3.0,-0.1,0.1,3.5,3.5, QUANTITY='VOLUME FLOW', ID='Vdot' /
+
+&TAIL /

@@ -1,0 +1,95 @@
+A simple example of a burning couch.
+The case is meant as a teaching tool and to test functionality.
+
+&HEAD CHID='couch', TITLE='Single Couch Test Case'  /
+
+&MESH IJK=24,10,24, XB=1.1,3.5,3.6,4.6,0.0,2.4 /
+
+&TIME T_END=600. /
+
+&REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
+&MATL ID                    = 'FABRIC'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.1
+      DENSITY               = 100.0
+      N_REACTIONS           = 1
+      NU_SPEC               = 1.
+      SPEC_ID               = 'PROPANE'
+      REFERENCE_TEMPERATURE = 320.
+      HEAT_OF_REACTION      = 3000.
+      HEAT_OF_COMBUSTION    = 15000. /
+
+&MATL ID                    = 'FOAM'
+      FYI                   = 'Properties completely fabricated'
+      SPECIFIC_HEAT         = 1.0
+      CONDUCTIVITY          = 0.05
+      DENSITY               = 40.0
+      N_REACTIONS           = 1
+      NU_SPEC               = 1.
+      SPEC_ID               = 'PROPANE'
+      REFERENCE_TEMPERATURE = 320.
+      HEAT_OF_REACTION      = 1500.
+      HEAT_OF_COMBUSTION    = 30000. /
+
+&MATL ID            = 'GYPSUM PLASTER'
+      FYI           = 'Quintiere, Fire Behavior'
+      CONDUCTIVITY  = 0.48
+      SPECIFIC_HEAT = 0.84
+      DENSITY       = 1440. /
+
+
+&SURF ID             = 'UPHOLSTERY'
+      FYI            = 'Properties completely fabricated'
+      COLOR          = 'PURPLE'
+      BURN_AWAY      = .TRUE.
+      MATL_ID(1:2,1) = 'FABRIC','FOAM'
+      THICKNESS(1:2) = 0.002,0.1  /
+
+&SURF ID             = 'WALL'
+      DEFAULT        = .TRUE.
+      RGB            = 200,200,200
+      MATL_ID        = 'GYPSUM PLASTER'
+      THICKNESS      = 0.012 /
+
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.00, 0.40 /
+&OBST XB= 1.50, 3.10, 3.80, 4.60, 0.40, 0.60, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
+&OBST XB= 1.30, 1.50, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
+&OBST XB= 3.10, 3.30, 3.80, 4.60, 0.00, 0.90, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
+&OBST XB= 1.50, 3.10, 4.40, 4.60, 0.60, 1.20, SURF_ID='UPHOLSTERY', BULK_DENSITY=41.176 /
+
+&PART ID='ignitor particle', SURF_ID='ignitor', STATIC=.TRUE. /
+&SURF ID='ignitor', TMP_FRONT=1000., GEOMETRY='CYLINDRICAL', LENGTH=0.15, RADIUS=0.01 /
+&INIT XYZ=2.45,4.35,0.65, DX=0.1, PART_ID='ignitor particle', N_PARTICLES=3 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /  
+&VENT MB='XMAX', SURF_ID='OPEN' /  
+&VENT MB='YMIN', SURF_ID='OPEN' /  
+
+&BNDF QUANTITY='RADIATIVE HEAT FLUX' /
+&BNDF QUANTITY='CONVECTIVE HEAT FLUX' /
+&BNDF QUANTITY='NET HEAT FLUX' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='BURNING RATE' /
+
+&SLCF PBX=2.50, QUANTITY='TEMPERATURE',VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.50, QUANTITY='HRRPUV', CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.50, QUANTITY='RADIATION LOSS', CELL_CENTERED=.TRUE. /
+&SLCF PBX=2.50, QUANTITY='VISCOSITY', CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='TEMPERATURE',VECTOR=.TRUE., CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='HRRPUV', CELL_CENTERED=.TRUE. /
+&SLCF PBY=4.40, QUANTITY='RADIATION LOSS', CELL_CENTERED=.TRUE. /
+
+&DEVC XYZ=2.55,4.40,0.75, QUANTITY='WALL TEMPERATURE', IOR=-2, ID='temp' /
+&DEVC XYZ=2.55,4.40,0.75, QUANTITY='BURNING RATE',     IOR=-2, ID='burn' /
+&DEVC XYZ=2.55,4.40,0.75, QUANTITY='RADIATIVE HEAT FLUX',IOR=-2, ID='rad' /
+&DEVC XYZ=2.55,4.40,0.75, QUANTITY='GAUGE HEAT FLUX',IOR=-2, ID='gauge' /
+&DEVC XYZ=2.55,4.40,0.75, QUANTITY='CONVECTIVE HEAT FLUX',IOR=-2, ID='con' /
+&DEVC XYZ=2.55,4.35,0.75, QUANTITY='TEMPERATURE', ID='gas' /
+&DEVC XYZ=2.55,4.35,0.75, QUANTITY='HRRPUV', ID='hrrpuv' /
+&DEVC XYZ=2.55,4.35,0.75, QUANTITY='RADIATION LOSS', ID='qr' /
+&DEVC XYZ=2.55,4.35,0.75, QUANTITY='INTEGRATED INTENSITY', ID='U' /
+
+
+&TAIL /
+

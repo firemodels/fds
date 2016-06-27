@@ -1,0 +1,17 @@
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+SETVIEWPOINT
+ view_left
+RENDERONCE
+ transparency_left
+RENDERONCE
+ transparency_left
+SETVIEWPOINT
+ view_center
+RENDERONCE
+ transparency_center
+SETVIEWPOINT
+ view_right
+RENDERONCE
+ transparency_right
+

@@ -1,0 +1,65 @@
+&HEAD CHID='surf_mass_two_species_spher', TITLE='Test for mass conservation with two emitted gas species' /
+
+&MESH IJK=4,4,4, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=1000., DT=0.02 / 
+&MISC Y_O2_INFTY=0.0000001, Y_CO2_INFTY=0.,HUMIDITY=0./ 
+
+&REAC FUEL = 'FUEL'
+      C = 3.4
+      H = 6.2
+      O = 2.5
+      HEAT_OF_COMBUSTION = 12000.
+      CRITICAL_FLAME_TEMPERATURE=2000 /
+
+&SPEC ID='WATER VAPOR', MASS_FRACTION_0=0. /
+
+&SURF ID='HOT WALL', TMP_FRONT=700.,RAMP_T = 'T_RAMP' COLOR='RED', DEFAULT=.TRUE. /
+
+&RAMP ID = 'T_RAMP', T = 0, F = 0 /
+&RAMP ID = 'T_RAMP', T = 600, F = 1 /
+
+&SURF ID                         = 'SAMPLE'
+      MATL_ID(1,1:2)             = 'SOLID','MOISTURE'
+      MATL_MASS_FRACTION(1,1:2)  = 0.8,0.2
+      THICKNESS                  = 0.0004
+      GEOMETRY                   = 'SPHERICAL' /
+   
+&MATL ID = 'SOLID'
+      DENSITY = 500.
+      CONDUCTIVITY = 0.2
+      SPECIFIC_HEAT= 1.0
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 200.
+      NU_MATL = 0.6
+      NU_SPEC = 0.4
+      SPEC_ID = 'FUEL'
+      HEAT_OF_REACTION= 1000
+      MATL_ID  = 'CHAR' /
+ 
+&MATL ID = 'MOISTURE'
+      DENSITY = 1000.
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT= 4.184
+      N_REACTIONS = 1
+      REFERENCE_TEMPERATURE = 100.
+      NU_SPEC = 1.0
+      SPEC_ID = 'WATER VAPOR'
+      HEAT_OF_REACTION= 2500. /
+
+&MATL ID = 'CHAR'
+      DENSITY  = 200.
+      CONDUCTIVITY = 1.0
+      SPECIFIC_HEAT = 1.6 /
+
+&PART ID='Wood_part', SAMPLING_FACTOR=1,SURF_ID='SAMPLE', 
+      QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER',STATIC=.TRUE. /
+
+&INIT ID = 'init_1', PART_ID='Wood_part', XB=0.,1.,0.,1.,0.,1., N_PARTICLES=1, MASS_PER_VOLUME = 0.1 /
+
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='WALL TEMPERATURE', INIT_ID='init_1', ID='Particle T', STATISTICS = 'MAX'/
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='fuel gas mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='FUEL' /
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='DENSITY', ID='water vapor mass', STATISTICS='VOLUME INTEGRAL', SPEC_ID='WATER VAPOR' /
+&DEVC XB=0.,1.,0.,1.,0.,1., QUANTITY='MPUV', PART_ID='Wood_part', ID='solid mass', STATISTICS='VOLUME INTEGRAL'  /
+
+&TAIL /

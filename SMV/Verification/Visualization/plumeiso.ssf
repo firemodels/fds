@@ -1,0 +1,40 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+// render iso files (solid)
+
+UNLOADALL
+UNLOADALL
+LOADINIFILE
+ plumeiso.ini
+// LOADFILE
+//  plumeiso.prt5.iso
+LOADISOM
+ particle boundary: 0.5
+ 1
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plumeiso_prt5_iso_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plumeiso_prt5_iso_30
+
+// render particle files using points
+
+UNLOADALL
+LOADFILE
+ plumeiso.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plumeiso_prt5_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plumeiso_prt5_30

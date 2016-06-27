@@ -1,0 +1,40 @@
+A test for evaluating the rate of evaporation for one single droplet in an ambient air 
+Comparison of the droplet diameter versus time with experimental data extracted
+from Ranz and Marshall "Evaporation from drops - Part II" Chemical Engineering Progress, 48(4):173-180 (1952)
+ 
+&HEAD CHID='water_evaporation_5' /
+
+&MESH IJK=4,4,4, XB=0.,1.0,0.,1.0,0.0,1.0 /
+
+&TIME T_END = 712. /
+
+&RADI RADIATION=.FALSE. /
+
+&MISC TMPA = 24.9, P_INF = 98791.9, HUMIDITY= 0,Y_CO2_INFTY=0./
+
+&SPEC ID ='WATER VAPOR' /
+
+&DUMP DT_DEVC = 2, MASS_FILE=.TRUE./
+
+&PART ID='water_drops', STATIC = .TRUE., SPEC_ID = 'WATER VAPOR', DIAMETER = 1048.8, SAMPLING_FACTOR = 1, MONODISPERSE = .TRUE.,
+      MINIMUM_DIAMETER = 5, MAXIMUM_DIAMETER = 2000, INITIAL_TEMPERATURE = 9.11 /
+  
+&INIT PART_ID = 'water_drops', MASS_PER_VOLUME = 0.075506905, XB = 0.48 0.5 0.48 0.5 0.48 0.5, N_PARTICLES= 1 /
+ 
+SLCF PBY=0.5, QUANTITY='TEMPERATURE' /
+SLCF PBY=0.5, QUANTITY='PRESSURE' /
+SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+SLCF PBY=0.5, QUANTITY='water_drops_MPUV' /
+
+DEVC XYZ=0.5,0.5,0.5, QUANTITY='TEMPERATURE',ID='Temp', STATISTICS='VOLUME MEAN' /
+DEVC XYZ=0.5,0.5,0.5, QUANTITY='DENSITY' ,ID='dens', STATISTICS='VOLUME MEAN', RELATIVE=.TRUE. / concentration en vapeur d'eau 
+DEVC XYZ=0.5,0.5,0.5, QUANTITY='PRESSURE'  ,ID='pres', STATISTICS='VOLUME MEAN' /
+DEVC XYZ=0.5,0.5,0.5, QUANTITY='MASS FRACTION', SPEC_ID='WATER VAPOR', STATISTICS='VOLUME MEAN', ID='H2O' /
+DEVC XYZ=0.5,0.5,0.5, QUANTITY='RELATIVE HUMIDITY', ID='humid', STATISTICS='VOLUME MEAN' /
+DEVC XYZ=0.2,0.2,0.2, QUANTITY='MPUV', PART_ID='water_drops', ID='concentration', STATISTICS='VOLUME MEAN' /
+
+&PROP ID='pdpa', PART_ID='water_drops',PDPA_M=1, PDPA_N=0, PDPA_RADIUS=0.02, PDPA_START=0.0, PDPA_INTEGRATE=.FALSE. /
+
+&DEVC XYZ=0.49,0.49,0.49, QUANTITY='PDPA', PROP_ID='pdpa', ID='Diameter'/
+
+&TAIL /

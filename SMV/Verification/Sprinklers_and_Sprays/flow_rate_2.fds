@@ -1,0 +1,102 @@
+&HEAD CHID='flow_rate_2', TITLE='Sprinkler Flow Rate Test Case' /
+
+&MESH IJK=40,40,16, XB=-5.0,5.0,-5.0,5.0,0.0,4.0 /
+
+&TIME DT=0.1, T_END=70. /
+&MISC HUMIDITY=100./
+&SPEC ID='WATER VAPOR' /
+
+&RADI RADIATION=.FALSE./
+
+&PART ID='water drops', 
+      SPEC_ID='WATER VAPOR', 
+      DIAMETER=1000. /
+	
+&PROP ID='Head', 
+      OFFSET=0.10, 
+      PART_ID='water drops', 
+      K_FACTOR = 2.5
+      OPERATING_PRESSURE = 1
+      PRESSURE_RAMP = 'PR'
+      PARTICLE_VELOCITY=2., 
+      SPRAY_ANGLE= 0.,60., 
+      SMOKEVIEW_ID='sprinkler_upright' /
+
+
+&RAMP ID='PR',   T= 1., F=16. /     1 x 2.5 x 4 =     10 l/min
+&RAMP ID='PR',   T= 2., F=4. /      2 x 2.5 x 2 =     10 l/min
+&RAMP ID='PR',   T= 3., F=1.778 /   3 x 2.5 x 1.334 = 10 l/min
+&RAMP ID='PR',   T= 4., F=1. /      4 x 2.5 x 1 =     10 l/min
+
+&DEVC XYZ=0.0,0.0,3.0, 
+      QUANTITY = 'CONTROL'
+      PROP_ID='Head', 
+      ID='Spr_1_1', 
+      LATCH = .FALSE.
+      PIPE_INDEX = 1
+      CTRL_ID = 'C1' /
+
+&DEVC XYZ=0.0,0.0,3.0, 
+      QUANTITY = 'CONTROL'
+      PROP_ID='Head', 
+      ID='Spr_2_1', 
+      LATCH = .FALSE.
+      PIPE_INDEX = 1
+      CTRL_ID = 'C2' /
+
+&DEVC XYZ=0.0,0.0,3.0, 
+      QUANTITY = 'CONTROL'
+      PROP_ID='Head', 
+      ID='Spr_3_1', 
+      LATCH = .FALSE.
+      PIPE_INDEX = 1
+      CTRL_ID = 'C3' /
+
+&DEVC XYZ=0.0,0.0,3.0, 
+      QUANTITY = 'CONTROL'
+      PROP_ID='Head', 
+      ID='Spr_4_2', 
+      LATCH = .FALSE.
+      PIPE_INDEX = 2
+      CTRL_ID = 'C4' /
+
+&DEVC XYZ = 0,0,0 ID = 'Tr  0'  QUANTITY='TIME', SETPOINT= 0. /
+&DEVC XYZ = 0,0,0 ID = 'Tr 15'  QUANTITY='TIME', SETPOINT=15. /
+&DEVC XYZ = 0,0,0 ID = 'Tr 30'  QUANTITY='TIME', SETPOINT=30. /
+&DEVC XYZ = 0,0,0 ID = 'Tr 45'  QUANTITY='TIME', SETPOINT=45. /
+&DEVC XYZ = 0,0,0 ID = 'Tr 60'  QUANTITY='TIME', SETPOINT=60. INITIAL_STATE = .TRUE. /
+
+&CTRL ID='C1' FUNCTION_TYPE='ALL', INPUT_ID='Tr  0','Tr 60' LATCH = .FALSE. /
+&CTRL ID='C2' FUNCTION_TYPE='ALL', INPUT_ID='Tr 15','Tr 60' LATCH = .FALSE. /
+&CTRL ID='C3' FUNCTION_TYPE='ALL', INPUT_ID='Tr 30','Tr 60' LATCH = .FALSE. /
+&CTRL ID='C4' FUNCTION_TYPE='ALL', INPUT_ID='Tr 45','Tr 60' LATCH = .FALSE. /
+
+&VENT XB=-5,-5,-5,+5,1,4 SURF_ID='OPEN' /
+&VENT XB=+5,+5,-5,+5,1,4 SURF_ID='OPEN' /
+&VENT XB=-5,+5,-5,-5,1,4 SURF_ID='OPEN' /
+&VENT XB=-5,+5,+5,+5,1,4 SURF_ID='OPEN' /
+
+&SLCF PBY=0.0,QUANTITY='TEMPERATURE' /
+&SLCF PBY=0.0,QUANTITY='MASS FRACTION',SPEC_ID='WATER VAPOR' /
+&SLCF PBY=0.0,QUANTITY='MPUV', PART_ID='water drops' /
+&SLCF PBZ=0.1,QUANTITY='PARTICLE FLUX Z', PART_ID='water drops' /
+&SLCF PBZ=2.5,QUANTITY='PARTICLE FLUX Z', PART_ID='water drops' /
+
+&BNDF QUANTITY = 'AMPUA' PART_ID = 'water drops'/
+
+Measurements
+
+Accumulated Mass Per Unit Area, integrated over 10 m2.
+
+&DEVC QUANTITY='AMPUA', PART_ID='water drops' 
+      ID = 'Water mass'
+      STATISTICS = 'SURFACE INTEGRAL'
+      XB = -5,+5,-5,+5,0,0 /  
+
+Number of open nozzles
+
+&DEVC ID='Nozzles 1', XYZ=0.0,0.0,0.0, QUANTITY='OPEN NOZZLES',PIPE_INDEX=1 /
+&DEVC ID='Nozzles 2', XYZ=0.0,0.0,0.0, QUANTITY='OPEN NOZZLES',PIPE_INDEX=2 /
+
+
+&TAIL /

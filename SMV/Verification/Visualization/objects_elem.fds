@@ -1,0 +1,52 @@
+&HEAD CHID='objects_elem',TITLE='Smokeview device drawing test' /
+
+&MESH IJK=32,32,64, XB=0.0,3.2,0.0,1.6,0.0,12.0/
+
+&TIME T_END=0.0/
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,12.0,SURF_ID='OPEN'/
+&VENT XB=3.2,3.2,0.0,1.6,0.0,12.0,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,0.0,0.0,12.0,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,1.6,1.6,0.0,12.0,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,1.6,12.0,12.0,SURF_ID='OPEN'/
+
+&PROP ID='drawcone' SMOKEVIEW_ID='drawcone' /
+&DEVC XYZ=0.8,0.8,0.5, QUANTITY='TEMPERATURE' ORIENTATION=0,0,1 PROP_ID='drawcone' /
+
+&PROP ID='drawcube' SMOKEVIEW_ID='drawcube' /
+&DEVC XYZ=0.8,0.8,1.5, QUANTITY='TEMPERATURE' PROP_ID='drawcube' /
+
+&PROP ID='drawdisk' SMOKEVIEW_ID='drawdisk' /
+&DEVC XYZ=0.8,0.8,2.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawdisk' /
+
+&PROP ID='drawcdisk' SMOKEVIEW_ID='drawcdisk' /
+&DEVC XYZ=0.8,0.8,3.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawcdisk' /
+
+&PROP ID='drawhexdisk' SMOKEVIEW_ID='drawhexdisk' /
+&DEVC XYZ=0.8,0.8,4.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawhexdisk' /
+
+&PROP ID='drawnotchplate' SMOKEVIEW_ID='drawnotchplate' /
+&DEVC XYZ=0.8,0.8,5.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawnotchplate' /
+
+&PROP ID='drawnotchplate2' SMOKEVIEW_ID='drawnotchplate2' /
+&DEVC XYZ=0.8,0.8,6.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawnotchplate2' /
+
+&PROP ID='drawpolydisk' SMOKEVIEW_ID='drawpolydisk' /
+&DEVC XYZ=0.8,0.8,7.5 QUANTITY='TEMPERATURE'  ORIENTATION=0,0,1 PROP_ID='drawpolydisk' /
+
+&PROP ID='drawring' SMOKEVIEW_ID='drawring' /
+&DEVC XYZ=0.8,0.8,8.5 QUANTITY='TEMPERATURE' ORIENTATION=0,0,1 PROP_ID='drawring' /
+
+&PROP ID='drawsphere' SMOKEVIEW_ID='drawsphere' /
+&DEVC XYZ=0.8,0.8,9.5 QUANTITY='TEMPERATURE' PROP_ID='drawsphere' /
+
+&PROP ID='drawnotchplate' SMOKEVIEW_ID='drawnotchplate' /
+&DEVC XYZ=0.8,0.8,10.5 QUANTITY='TEMPERATURE' ORIENTATION=0,0,1 PROP_ID='drawnotchplate' /
+
+&PROP ID='drawtrunccone' SMOKEVIEW_ID='drawtrunccone' /
+&DEVC XYZ=0.8,0.8,11.5 QUANTITY='TEMPERATURE' ORIENTATION=0,0,1 PROP_ID='drawtrunccone' /
+
+&PROP ID='drawarcdisk' SMOKEVIEW_ID='drawarcdisk' /
+&DEVC XYZ=2.4,0.8,0.5 QUANTITY='TEMPERATURE' ORIENTATION=0,1,0 PROP_ID='drawarcdisk' /
+
+&TAIL /

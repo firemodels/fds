@@ -1,0 +1,34 @@
+This verification case tests the computation of three-dimensional radiation
+from a homogenous, infinitelly wide layer of radiating material. 
+
+&HEAD CHID='radiation_plane_layer_2_2', TITLE='Test wall heat transfer from a plane layer'/
+
+&MESH IJK = 20,20,20, XB= 0.0,1.0,-10.0,10.0,-10.0,10.0 /
+
+&MISC TMPA = 1000.0, Y_CO2_INFTY=0.,HUMIDITY=0./ 
+
+&TIME T_END=0.0001, DT = 0.0001  /
+
+&RADI NUMBER_RADIATION_ANGLES=100   
+      WIDE_BAND_MODEL = .TRUE. 
+      TIME_STEP_INCREMENT = 1 
+      ANGLE_INCREMENT = 1 
+      KAPPA0 = 0.1 /
+
+ VENT MB='XMIN',SURF_ID='HOT' /   KAPPA0=0
+&VENT MB='XMIN',SURF_ID='COLD' /  KAPPA0>0
+
+&VENT MB='XMAX',SURF_ID='COLD' /
+&VENT MB='YMIN',SURF_ID='COLD' /
+&VENT MB='YMAX',SURF_ID='COLD' /
+&VENT MB='ZMIN',SURF_ID='COLD' /
+&VENT MB='ZMAX',SURF_ID='COLD' /
+
+&DUMP NFRAMES = 500, DT_DEVC = 0. /
+
+&SURF ID = 'HOT',  TMP_FRONT = 1000.00, TAU_T = 0., EMISSIVITY=1.0, HEAT_TRANSFER_COEFFICIENT=0. /
+&SURF ID = 'COLD', TMP_FRONT = -272.15, TAU_T = 0., EMISSIVITY=1.0, HEAT_TRANSFER_COEFFICIENT=0. /
+
+&DEVC QUANTITY = 'INCIDENT HEAT FLUX', XYZ = 1.0,0.0,0.0, IOR=-1  /
+
+&TAIL /

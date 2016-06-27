@@ -1,0 +1,16 @@
+RENDERDIR
+..\..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+LOADINIFILE
+dsmag_64.ini
+SETVIEWPOINT
+view 2
+LOADFILE
+dsmag_64_13.sf
+LOADFILE
+dsmag_64_14.sf
+LOADFILE
+dsmag_64_15.sf
+SETTIMEVAL
+ 0.300000
+RENDERONCE
+dsmag_64_300 

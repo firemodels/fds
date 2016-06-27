@@ -1,0 +1,28 @@
+Test of control functions:
+   At 3 s a restart file should be written
+   At 5 s the fire should start
+   DEVC for temperature should show rapid rise over 25 C but OBST should not disappear until 8 s is reached
+   Case should die gracefully at 9 s
+
+&HEAD CHID='control_test', TITLE='Control function testing'/
+
+&MESH XB=-1,1,-1,1,0,2, IJK=20,20,20 /
+&TIME T_END=10/
+&SURF ID='FIRE', HRRPUA=1000. /
+&REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
+&OBST XB=-1,-0.5,-1,-0.5,1.5,2.0, CTRL_ID='all test', COLOR='CYAN' /
+
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT XB=-0.3,0.3,-0.3,0.3,0.0,0.0, COLOR='ORANGE', SURF_ID='FIRE', CTRL_ID='delay test' /
+
+&DEVC ID='timer1', QUANTITY='TIME', SETPOINT=9., XYZ=0,0,0 /
+&DEVC ID='timer2', QUANTITY='TIME', SETPOINT=3., XYZ=0,0,0 /
+&DEVC ID='timer3', QUANTITY='TIME', SETPOINT=8., XYZ=0,0,0 /
+&DEVC ID='temp',   QUANTITY='TEMPERATURE', SETPOINT=25., XYZ=0,0,1.5 /
+
+&CTRL ID='kill test',   FUNCTION_TYPE='KILL',       INPUT_ID='timer1' /
+&CTRL ID='restart test',FUNCTION_TYPE='RESTART',    INPUT_ID='timer2' /
+&CTRL ID='delay test',  FUNCTION_TYPE='TIME_DELAY', INPUT_ID='timer2', DELAY=2. /
+&CTRL ID='all test',    FUNCTION_TYPE='ALL',        INPUT_ID='timer3','temp',  INITIAL_STATE=.TRUE./
+
+&TAIL /

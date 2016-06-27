@@ -1,0 +1,29 @@
+A test of the insertion of solid, non-evaporating particles.
+
+&HEAD CHID='particle_flux', TITLE='Simple test of particle mass flux from a surface' /
+
+&MESH IJK=50,50,25, XB=-5.0,5.0,-5.0,5.0,0.0,5.0 /
+
+&MISC PARTICLE_CFL=.TRUE. /
+
+&TIME DT=0.1, T_END=20. /
+
+&MATL ID='STUFF', DENSITY=1000., CONDUCTIVITY=0.1, SPECIFIC_HEAT=1. /
+&SURF ID='sphere', THICKNESS=0.000375, MATL_ID='STUFF', GEOMETRY='SPHERICAL' /
+
+&PART ID='particles', SURF_ID='sphere', QUANTITIES(1)='PARTICLE DIAMETER' /
+
+&SURF ID='HOLE', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1, COLOR='RED',TAU_PART=0. /
+
+&OBST XB=-0.2, 0.2,-0.2, 0.2, 4.0, 4.4, SURF_IDS='INERT','HOLE','INERT', DEVC_ID='clock' /
+
+&DEVC ID='clock', QUANTITY='TIME', SETPOINT=10., INITIAL_STATE=.TRUE., XYZ=0,0,0 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&DEVC QUANTITY='MPUV', PART_ID='particles', STATISTICS='VOLUME INTEGRAL', ID='mass', XB=-5.0,5.0,-5.0,5.0,0.0,0.2  / 
+
+&TAIL /

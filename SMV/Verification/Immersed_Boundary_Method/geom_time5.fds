@@ -1,0 +1,24 @@
+&HEAD CHID='geom_time5' /
+
+&MESH IJK=10,10,10,XB=-1.0,1.0,-1.0,1.0,-1.0,1.0 /
+&TIME T_END=0.0, T_END_GEOM=1000.0 /
+
+&SURF ID='surf1',RGB=255,0,0 /
+&SURF ID='surf2',RGB=0,255,0 /
+&SURF ID='surf3',RGB=0,0,255 /
+&SURF ID='surf4',RGB=255,0,255 /
+
+***GROUP TEST
+
+&GEOM ID='geom1',
+        VERTS=0.0,0.0,0.0,
+              1.0,0.0,0.0,
+              1.0,0.0,1.0,
+              0.0,0.0,1.0,
+              FACES=1,2,3,1,3,4
+              SURF_ID='surf1',COMPONENT_ONLY=.TRUE./
+
+&GEOM ID='group1',GEOM_IDS(1)='geom1',
+                  GEOM_IDS(2)='geom1',DXYZ(1,2)=2.0,0.0,0.0,DAZIM(2)=-45.0,
+                  AZIM=0.0,AZIM_DOT=0.36 /
+

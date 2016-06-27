@@ -1,0 +1,8 @@
+RENDERDIR
+ ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES
+LOADFILE
+ helium_2d_isothermal_04.sf
+SETTIMEVAL
+ 1.955 
+RENDERONCE
+ helium_2d_isothermal

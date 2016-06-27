@@ -1,0 +1,166 @@
+&HEAD CHID='FED_FIC', TITLE='Verification of FED and FIC outputs'/
+
+ All material properties etc. are completely fabricated.
+
+ This is a verifiaction test case for the gas phase DEVC output
+ quantity FED, which calculates the Fractional Effective Dose 
+ (FED) index, and gas phase output quantity FIC, which calculates the 
+ Fractional Irritant Concentration.
+
+
+ Total FED dose:
+ FED_DOSE = (FED_LCO + FED_LCN + FED_LNOX + FLD_IRR)*FED_VCO2 + FED_LO2;
+ 
+ Time (T) in s, concentration (C_X) in ppm.
+ 
+ ASPHYXIANTS:
+ 
+ CARBON MONOXIDE:
+ FED_LCO = (3.317E-5 * (C_CO)^1.036 * RMV * (T/60)) / D;
+ with RMV=25 [l/min] and D=30 [%] COHB concentration at incapasitation.
+ 
+ CYANIDE:
+ FED_LCN = (EXP(C_CN/43)/220 - 0.0045) * (T/60);
+	WHERE C_CN = C_HCN - C_NO - C_NO2
+	
+ NO2 + NO:
+ FED_LNOX = C_NOX/1500 * (T/60);
+   WHERE C_NOX = C_NO + C_NO2 
+
+ CO2-induced hyperventilation
+ FED_VCO2 = EXP(0.1903*C_CO2/1E4 + 2.0004)/7.1;
+
+ Note that the present version only inlcudes the hyperventilation factor
+ of CO2, not its toxic effects.  CO2 starts to be an asphyxiant at
+ consentrations of approx. 5 percent.
+ 
+ Low oxygen:
+ FED_LO2 = 1/EXP(8.13 - 0.54*(0.209 - C_O2/1E6)) * (T/60);
+	
+ IRRITANTS:
+ FIC_IRR = C_HCL/114000 + C_HBR/114000 + C_HF/87000 + 
+   C_SO2/12000 + C_NO2/1900 + C_CH2CHO/4500 + C_HCHO/22500;
+ 
+&MESH IJK= 20,5,5, XB= 0.0,8.0, 0.0,2.0, 0.0,2.0 /
+
+&TIME T_END=100.0, DT=0.1 /
+
+&DUMP DT_DEVC=0.1 /
+
+&SPEC ID='NITROGEN', BACKGROUND=.TRUE. /
+&SPEC ID='OXYGEN' /
+&SPEC ID='CARBON DIOXIDE' /
+&SPEC ID='CARBON MONOXIDE' /
+&SPEC ID='NITRIC OXIDE' /
+&SPEC ID='NITROGEN DIOXIDE' /
+&SPEC ID='HYDROGEN CYANIDE' /
+&SPEC ID='HYDROGEN CHLORIDE' /
+&SPEC ID='HYDROGEN BROMIDE' /
+&SPEC ID='HYDROGEN FLUORIDE' /
+&SPEC ID='SULFUR DIOXIDE' /
+&SPEC ID='ACROLEIN' /
+&SPEC ID='FORMALDEHYDE' /
+
+&OBST XB = 2,2.4,0,2,0,2 /
+&OBST XB = 4,4.4,0,2,0,2 /
+&OBST XB = 6,6.4,0,2,0,2 /
+
+
+
+! O2, CO2 and CO
+! Concentrations & mass fractions for this test case:
+!   gas    mol/mol     g/g
+!   O2       0.09772709  0.10806110
+!   CO2      0.03430594  0.05215865
+!   CO       0.00324186  0.00313658
+!   N2       0.86472511  0.83664366
+&INIT XB = 0,2,0,2,0,2 
+                        MASS_FRACTION(1)=0.10806110
+                        MASS_FRACTION(2)=0.05215865
+                        MASS_FRACTION(3)=0.00313658
+                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE' /
+
+! Aphyxiants
+! Concentrations & mass fractions for this test case:
+!   gas    mol/mol     g/g
+!   O2       0.09021848  0.10070468
+!   CO2      0.01918864  0.02945107
+!   CO       0.00245582  0.00239861
+!   N2       0.88773686  0.86705462
+!   NO       0.00013487  0.00014113
+!   HCN      0.00026533  0.00024989
+&INIT XB = 2,4,0,2,0,2 
+                        MASS_FRACTION(1)=0.10070468
+                        MASS_FRACTION(2)=0.02945107
+                        MASS_FRACTION(3)=0.00239861
+                        MASS_FRACTION(4)=0.00014113
+                        MASS_FRACTION(5)=0.00024989
+                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC OXIDE','HYDROGEN CYANIDE' /
+
+! Irritants
+! Concentrations & mass fractions for this test case:
+!   gas    mol/mol     g/g
+!   O2       0.20900000  0.23189907
+!   N2       0.79078667  0.76775051
+!   NO2      0.00000114  0.00000182
+!   HCl      0.00006833  0.00008530
+!   HBr      0.00006833  0.00019192
+!   HF       0.00005215  0.00003616
+!   SO2      0.00000719  0.00001596
+!   Acrolein 0.00000270  0.00000524
+!   HCHO     0.00001349  0.00001403
+&INIT XB = 4,6,0,2,0,2 
+                        MASS_FRACTION(1)=0.23189907
+                        MASS_FRACTION(2)=0.00000182
+                        MASS_FRACTION(3)=0.00008530
+                        MASS_FRACTION(4)=0.00019192
+                        MASS_FRACTION(5)=0.00003616
+                        MASS_FRACTION(6)=0.00001596
+                        MASS_FRACTION(7)=0.00000524
+                        MASS_FRACTION(8)=0.00001403
+                        SPEC_ID='OXYGEN','NITROGEN DIOXIDE','HYDROGEN CHLORIDE','HYDROGEN BROMIDE','HYDROGEN FLUORIDE','SULFUR DIOXIDE','ACROLEIN','FORMALDEHYDE' /
+
+! All
+! Concentrations & mass fractions for this test case:
+!   gas    mol/mol     g/g
+!   O2       0.10305454  0.11557385
+!   CO2      0.00746276  0.01150786
+!   CO       0.00166045  0.00162939
+!   N2       0.88742229  0.87082488
+!   NO       0.00008934  0.00009393
+!   NO2      0.00000057  0.00000092
+!   HCN      0.00020396  0.00019300
+!   HCl      0.00003417  0.00004311
+!   HBr      0.00003417  0.00009699
+!   HF       0.00002607  0.00001828
+!   SO2      0.00000360  0.00000807
+!   Acrolein 0.00000135  0.00000265
+!   HCHO     0.00000674  0.00000709
+&INIT XB = 6,8,0,2,0,2 
+                        MASS_FRACTION(1)=0.11557385
+                        MASS_FRACTION(2)=0.01150786
+                        MASS_FRACTION(3)=0.00162939
+                        MASS_FRACTION(4)=0.00009393
+                        MASS_FRACTION(5)=0.00000092
+                        MASS_FRACTION(6)=0.00019300
+                        MASS_FRACTION(7)=0.00004311
+                        MASS_FRACTION(8)=0.00009699
+                        MASS_FRACTION(9)=0.00001828
+                        MASS_FRACTION(10)=0.00000807
+                        MASS_FRACTION(11)=0.00000265
+                        MASS_FRACTION(12)=0.00000709
+                        SPEC_ID='OXYGEN','CARBON DIOXIDE','CARBON MONOXIDE','NITRIC OXIDE','NITROGEN DIOXIDE','HYDROGEN CYANIDE','HYDROGEN CHLORIDE','HYDROGEN BROMIDE','HYDROGEN FLUORIDE','SULFUR DIOXIDE','ACROLEIN','FORMALDEHYDE' /
+
+						
+
+!Devices						
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FED', ID='FED (O2, CO2, CO)' /
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='FED', ID='FED (Asphyxiants)' /
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='FED', ID='FED (Irritants)' /
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='FED', ID='FED (All)' /
+&DEVC XYZ= 1.0,1.0,1.0, QUANTITY='FIC', ID='FIC (O2, CO2, CO)' /
+&DEVC XYZ= 3.0,1.0,1.0, QUANTITY='FIC', ID='FIC (Asphyxiants)' /
+&DEVC XYZ= 5.0,1.0,1.0, QUANTITY='FIC', ID='FIC (Irritants)' /
+&DEVC XYZ= 7.0,1.0,1.0, QUANTITY='FIC', ID='FIC (All)' /
+
+&TAIL /

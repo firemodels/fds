@@ -1,0 +1,30 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+// render slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_diff.ini
+// LOADFILE
+//  plume5c_06_diff.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_diff_slice_00
+SETTIMEVAL
+ 10.05
+RENDERONCE
+ plume5c_diff_slice_10
+SETTIMEVAL
+ 30.05
+RENDERONCE
+ plume5c_diff_slice_30
+
+

@@ -1,0 +1,231 @@
+&HEAD CHID='shrink_swell', TITLE='Test case for shrinking and swelling materials' / 
+
+Mesh 1: Pure shrink
+Mesh 2: Matrix allows shrinking 
+Mesh 3: Matrix prevents shrinking
+Mesh 4: Pure swelling
+Mesh 5: Matrix allows swelling 
+Mesh 6: Matrix prevents swelling
+
+&MESH IJK = 3,3,4, XB = 1.0,1.3,-0.15,0.15,0,0.4 /  Mesh 1
+&MESH IJK = 3,3,4, XB = 2.0,2.3,-0.15,0.15,0,0.4 /  Mesh 2
+&MESH IJK = 3,3,4, XB = 3.0,3.3,-0.15,0.15,0,0.4 /  Mesh 3
+&MESH IJK = 3,3,4, XB = 4.0,4.3,-0.15,0.15,0,0.4 /  Mesh 4
+&MESH IJK = 3,3,4, XB = 5.0,5.3,-0.15,0.15,0,0.4 /  Mesh 5
+&MESH IJK = 3,3,4, XB = 6.0,6.3,-0.15,0.15,0,0.4 /  Mesh 6
+
+&TIME T_END=15. DT = 0.1 /
+
+&MISC SOLID_PHASE_ONLY=.TRUE.,HUMIDITY=0., Y_O2_INFTY=0.01, Y_CO2_INFTY=0. /
+
+&REAC FUEL='METHANE', CRITICAL_FLAME_TEMPERATURE=2000. /  No gas phase reaction
+
+&DUMP DT_DEVC=0.5 /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&VENT XB = 1.1,1.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SHRINK_1' /
+&VENT XB = 2.1,2.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SHRINK_2' /
+&VENT XB = 3.1,3.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SHRINK_3' /
+&VENT XB = 4.1,4.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SWELL_1' /
+&VENT XB = 5.1,5.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SWELL_2' /
+&VENT XB = 6.1,6.2,-0.05,0.05,0.0,0.0, SURF_ID = 'SWELL_3' /
+
+&SURF ID             = 'SHRINK_1'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 40.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT  = 0.
+      MATL_ID(1,1)   = 'shrinking_1'
+      MATL_MASS_FRACTION(1,1) = 1.0 /
+
+
+&SURF ID             = 'SHRINK_2'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 30.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT        = 0.
+      MATL_ID(1,1:2) = 'shrinking_2','shrinkable_matrix'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+&SURF ID             = 'SHRINK_3'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 25.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT        = 0.
+      MATL_ID(1,1:2) = 'shrinking_2','static_matrix_1'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+
+&SURF ID             = 'SWELL_1'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 60.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT        = 0.
+      MATL_ID(1,1)   = 'swelling_1',
+      MATL_MASS_FRACTION(1,1) = 1.0 /
+
+&SURF ID             = 'SWELL_2'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 50.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT        = 0.
+      MATL_ID(1,1:2) = 'swelling_2','swelling_matrix'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+&SURF ID             = 'SWELL_3'
+      COLOR          = 'RED'
+      BACKING        = 'INSULATED' 
+      EXTERNAL_FLUX  = 50.
+      THICKNESS      = 0.001
+      HEAT_TRANSFER_COEFFICIENT        = 0.
+      MATL_ID(1,1:2) = 'swelling_2','static_matrix_2'
+      MATL_MASS_FRACTION(1,1:2) = 0.9,0.1 /
+
+
+&MATL ID                    = 'shrinking_1'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      A 		    = 1.5E11
+      E 		    = 1.48E5
+      NU_MATL               = 1.0
+      MATL_ID               = 'product_1'
+      HEAT_OF_REACTION      = 10. /  
+
+&MATL ID                    = 'shrinking_2'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      A 		    = 1.5E11
+      E 		    = 1.48E5
+      NU_MATL               = 1.0
+      MATL_ID               = 'product_2'
+      HEAT_OF_REACTION      = 10. /  
+
+&MATL ID                    = 'shrinkable_matrix'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&MATL ID                    = 'static_matrix_1'
+      ALLOW_SHRINKING       = .FALSE.
+      ALLOW_SWELLING        = .FALSE.
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&MATL ID                    = 'product_1'
+      EMISSIVITY            = 1.0
+      DENSITY               = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&MATL ID                    = 'product_2'
+      EMISSIVITY            = 1.0
+      DENSITY               = 1125.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+
+
+&MATL ID                    = 'swelling_1'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      A 		    = 1.5E11
+      E 		    = 1.48E5
+      NU_MATL               = 1.0
+      MATL_ID               = 'product_3'
+      HEAT_OF_REACTION      = 10. /  
+
+      ALLOW_SWELLING        = .FALSE.
+&MATL ID                    = 'swelling_2'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 
+      N_REACTIONS           = 1
+      A 		    = 1.5E11
+      E 		    = 1.48E5
+      NU_MATL               = 1.0
+      MATL_ID               = 'product_4'
+      HEAT_OF_REACTION      = 10. /  
+
+&MATL ID                    = 'product_3'
+      EMISSIVITY            = 1.0
+      DENSITY               = 500.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&MATL ID                    = 'product_4'
+      EMISSIVITY            = 1.0
+      DENSITY               = 450.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+
+&MATL ID                    = 'swelling_matrix'
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+&MATL ID                    = 'static_matrix_2'
+      ALLOW_SHRINKING       = .FALSE.
+      ALLOW_SWELLING        = .FALSE.
+      EMISSIVITY            = 1.0
+      DENSITY 	            = 1000.
+      CONDUCTIVITY          = 0.20
+      SPECIFIC_HEAT         = 1.0 /
+
+
+Shrink 1
+&DEVC XYZ = 1.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_1' /
+&DEVC XYZ = 1.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_1' /
+&DEVC XYZ = 1.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_1' /
+
+Shrink 2
+&DEVC XYZ = 2.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_2' /
+&DEVC XYZ = 2.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_2' /
+&DEVC XYZ = 2.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_2' /
+
+Shrink 3
+&DEVC XYZ = 3.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_3' /
+&DEVC XYZ = 3.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_3' /
+&DEVC XYZ = 3.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_3' /
+
+Swell 1
+&DEVC XYZ = 4.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_4' /
+&DEVC XYZ = 4.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_4' /
+&DEVC XYZ = 4.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_4' /
+
+Swell 2
+&DEVC XYZ = 5.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_5' /
+&DEVC XYZ = 5.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_5' /
+&DEVC XYZ = 5.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_5' /
+
+Swell 3
+&DEVC XYZ = 6.15,0.0,0.0,IOR = 3, QUANTITY = 'SURFACE DENSITY',  ID = 'M_6' /
+&DEVC XYZ = 6.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL THICKNESS',   ID = 'L_6' /
+&DEVC XYZ = 6.15,0.0,0.0,IOR = 3, QUANTITY = 'WALL TEMPERATURE', ID = 'T_6' /
+
+
+&TAIL /

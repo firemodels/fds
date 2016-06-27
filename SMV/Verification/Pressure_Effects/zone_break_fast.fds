@@ -1,0 +1,45 @@
+This example case demonstrates how to create pressure ZONEs that can be opened. 
+Each time a ZONE is opened, the pressure of the two connected ZONEs quickly equilibriates.
+The speed of the equilibriation is governed by the PRESSURE_RELAX_TIME.
+
+&HEAD CHID='zone_break_fast', TITLE='Test of opening pressure ZONEs' /
+
+&MESH IJK=50,50,12, XB=0.0,10.0,0.0,10.0,0.0,2.4 /
+
+&TIME T_END=30. / 
+
+&PRES PRESSURE_RELAX_TIME=0.5 /
+
+&SURF ID='BLOW', SPEC_ID='AIR',MASS_FLUX(1)=0.1, COLOR='RED', RAMP_MF(1)='flow' / 
+&RAMP ID='flow', T= 0.0, F=0. /
+&RAMP ID='flow', T= 0.1, F=1. /
+
+&OBST XB= 5.0, 5.2, 0.0,10.0, 0.0, 2.4 /
+&OBST XB= 0.0, 5.0, 5.0, 5.2, 0.0, 2.4 /
+
+&HOLE XB= 4.9, 5.3, 2.0, 3.0, 0.0, 2.0, DEVC_ID='door 1', COLOR='GREEN' /
+&HOLE XB= 4.9, 5.3, 7.0, 8.0, 0.0, 2.0, DEVC_ID='door 2', COLOR='BLUE' /
+
+&ZONE XB= 0.0, 5.0, 0.0, 5.0, 0.0, 2.4 /
+&ZONE XB= 5.0,10.0, 0.0,10.0, 0.0, 2.4 /
+&ZONE XB= 0.0, 5.0, 5.0,10.0, 0.0, 2.4 /
+
+&VENT XB= 2.0, 3.0, 2.0, 3.0, 0.0, 0.0, SURF_ID='BLOW' /
+
+&VENT XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, SURF_ID='OPEN' /
+&OBST XB= 0.0, 0.0, 6.0, 7.0, 0.0, 2.0, DEVC_ID='door 3' /
+
+&DEVC XYZ=1.0,1.0,1.0,ID='pres_1',QUANTITY='PRESSURE' /
+&DEVC XYZ=7.5,5.0,1.0,ID='pres_2',QUANTITY='PRESSURE' /
+&DEVC XYZ=2.5,7.5,1.0,ID='pres_3',QUANTITY='PRESSURE' /
+
+&DEVC XYZ=0.0,0.0,0.0, ID='door 1', SETPOINT=10.0, QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=0.0,0.0,0.0, ID='door 2', SETPOINT=15.0, QUANTITY='TIME', INITIAL_STATE=.FALSE. /
+&DEVC XYZ=0.0,0.0,0.0, ID='door 3', SETPOINT=20.0, QUANTITY='TIME', INITIAL_STATE=.TRUE. /
+
+&SLCF PBZ=1.0,QUANTITY='TEMPERATURE',VECTOR=.TRUE. /
+&SLCF PBZ=1.0,QUANTITY='PRESSURE' /
+&SLCF PBZ=1.0,QUANTITY='DENSITY' /
+
+&TAIL /
+

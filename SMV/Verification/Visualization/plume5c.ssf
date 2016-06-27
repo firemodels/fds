@@ -1,0 +1,899 @@
+// put rendered files in specified directory
+
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+
+UNLOADALL
+LOADINIFILE
+ plume5c_notexturebar.ini
+// LOADFILE
+//  plume5c_06.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.5
+RENDERONCE
+ plume5c_notexturebar
+KEYBOARD
+ T
+RENDERONCE
+ plume5c_texturebar
+KEYBOARD
+ (
+
+
+// render slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_slice.ini
+// LOADFILE
+//  plume5c_06.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_slice_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_30
+
+// render general slice 1
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice.ini
+// LOADFILE
+//  plume5c_30.sf
+LOADSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_gslice_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_gslice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_gslice_30
+
+// render general slice 2
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice2.ini
+// LOADFILE
+//  plume5c_30.sf
+LOADSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_gslice2_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_gslice2_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_gslice2_30
+
+// render general vector slice 1
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice.ini
+// LOADVFILE
+//  plume5c_30.sf
+LOADVSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vgslice_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vgslice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vgslice_30
+
+// render general vector slice 2
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gslice2.ini
+// LOADVFILE
+//  plume5c_30.sf
+LOADVSLICEM
+ TEMPERATURE
+ 0 0.000000
+ 1
+KEYBOARD
+ *
+KEYBOARD
+ w
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vgslice2_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vgslice2_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vgslice2_30
+
+// render cell centered slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_slice_cell.ini
+// LOADFILE
+//  plume5c_14.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 2 0.850000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_slice_cell_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_cell_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_cell_30
+
+// render cell centered slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_slice_cellchop.ini
+// LOADFILE
+//  plume5c_14.sf
+LOADSLICEM
+ TEMPERATURE(cell centered)
+ 2 0.850000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_slice_cellchop_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_cellchop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_cellchop_30
+
+// render slice files with data chopping
+
+UNLOADALL
+LOADINIFILE
+ plume5c_slicechop.ini
+// LOADFILE
+//  plume5c_06.sf
+LOADSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_slice_chop_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_slice_chop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_slice_chop_30
+
+// render vector slice files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_vslice.ini
+// LOADVFILE
+//  plume5c_06.sf
+LOADVSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vslice_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vslice_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vslice_30
+
+// render vector slice files with chopping
+
+UNLOADALL
+LOADINIFILE
+ plume5c_vslicechop.ini
+// LOADVFILE
+//  plume5c_06.sf
+LOADVSLICEM
+ TEMPERATURE
+ 2 0.800000
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_vslicechop_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_vslicechop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_vslicechop_30
+
+// render iso files (solid)
+
+UNLOADALL
+UNLOADALL
+LOADINIFILE
+ plume5c_iso.ini
+// LOADFILE
+//  plume5c_01.iso
+LOADISOM
+ TEMPERATURE: 100.0 °C
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_iso_solid_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_solid_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_solid_30
+
+LOADINIFILE
+ plume5c_iso2.ini
+// LOADFILE
+//  plume5c_01.iso
+LOADISOM
+ TEMPERATURE: 100.0 °C
+ 1
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso2_solid_30
+
+// render iso files (outline)
+
+LOADINIFILE
+ plume5c_iso_outline.ini
+UNLOADALL
+// LOADFILE
+//  plume5c_01.iso
+LOADISOM
+ TEMPERATURE: 100.0 °C
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_iso_outline_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_outline_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_outline_30
+
+// render iso files (points)
+
+LOADINIFILE
+ plume5c_iso_points.ini
+UNLOADALL
+// LOADFILE
+//  plume5c_01.iso
+LOADISOM
+ TEMPERATURE: 100.0 °C
+ 1
+SETTIMEVAL
+ 0.0
+RENDERONCE
+ plume5c_iso_points_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_iso_points_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_iso_points_30
+
+// render particle files using points
+
+LOADINIFILE
+ plume5c_part.ini
+UNLOADALL
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.05
+RENDERONCE
+ plume5c_part_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_30
+RENDERONCE
+ plume5c_part
+
+// render particle files using streaks
+
+UNLOADALL
+LOADINIFILE
+ plume5c_part_streak.ini
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.05
+RENDERONCE
+ plume5c_part_streak_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_streak_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_streak_30
+RENDERONCE
+ plume5c_streak
+
+// render particles using streaks (different length)
+
+UNLOADALL
+LOADINIFILE
+ plume5c_part_streak2.ini
+LOADFILE
+ plume5c.prt5
+PARTCLASSCOLOR
+ Uniform color
+SETTIMEVAL
+ 1.05
+RENDERONCE
+ plume5c_part_streak2_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_part_streak2_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_part_streak2_30
+
+// render boundary files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_bound.ini
+// LOADFILE
+//  plume5c_03.bf
+LOADBOUNDARYM
+ WALL TEMPERATURE
+ 1
+SETTIMEVAL
+ 2.0
+RENDERONCE
+ plume5c_bound_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_30
+
+// render cell centered boundary files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_bound_cellcenter.ini
+// LOADFILE
+//  plume5c_04.bf
+LOADBOUNDARYM
+ WALL TEMPERATURE(cell centered)
+ 1
+SETTIMEVAL
+ 2.0
+RENDERONCE
+ plume5c_bound_cell_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_cell_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_cell_30
+
+// render chopped boundary files
+
+UNLOADALL
+LOADINIFILE
+ plume5c_bound_chop.ini
+// LOADFILE
+//  plume5c_03.bf
+LOADBOUNDARYM
+ WALL TEMPERATURE
+ 1
+SETTIMEVAL
+ 2.0
+RENDERONCE
+ plume5c_bound_chop_00
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_bound_chop_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_bound_chop_30
+
+// render 3D smoke files
+
+UNLOADALL
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 1.05
+RENDERONCE
+ plume5c_smoke_01
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_smoke_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_smoke_30
+
+// render PLOT3D line contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_line.ini
+LOADPLOT3D
+ 1 40.0
+RENDERONCE
+ plume5c_plot3d_line
+
+// render PLOT3D stepped contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_step.ini
+LOADPLOT3D
+ 1 40.0
+RENDERONCE
+ plume5c_plot3d_step
+
+// render PLOT3D continuous contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d_shaded.ini
+LOADPLOT3D
+ 1 40.0
+RENDERONCE
+ plume5c_plot3d_shaded
+
+
+// render OBSTs using solid view
+
+UNLOADALL
+LOADINIFILE
+ plume5c_solid.ini
+RENDERONCE
+ plume5c_solid
+
+// render OBSTs using outline view
+
+LOADINIFILE
+ plume5c_outline.ini
+RENDERONCE
+ plume5c_outline
+
+// render geometry using hidden view (ie don't draw OBSTs)
+
+LOADINIFILE
+ plume5c_hidden.ini
+RENDERONCE
+ plume5c_hidden
+
+// render vents - hide open vents
+
+LOADINIFILE
+ plume5c_noopenvents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_noopen
+
+// render vents - don't show any vents
+
+LOADINIFILE
+ plume5c_novents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_novents
+
+// render vents - show all vents
+
+LOADINIFILE
+ plume5c_allvents.ini
+SETVIEWPOINT
+ external
+RENDERONCE
+ plume5c_allvents
+
+// render 3D smoke GPU off
+
+UNLOADALL
+LOADINIFILE
+ plume5c_nongpu.ini
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 5.05
+RENDERONCE
+ plume5c_smoke_nongpu_05
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_smoke_nongpu_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_smoke_nongpu_30
+
+// render 3D smoke GPU on
+
+UNLOADALL
+LOADINIFILE
+ plume5c_gpu.ini
+LOADFILE
+ plume5c_01.s3d
+LOADFILE
+ plume5c_02.s3d
+SETTIMEVAL
+ 5.05
+RENDERONCE
+ plume5c_smoke_gpu_05
+SETTIMEVAL
+ 10.0
+RENDERONCE
+ plume5c_smoke_gpu_10
+SETTIMEVAL
+ 30.0
+RENDERONCE
+ plume5c_smoke_gpu_30
+
+// render PLOT3D contours
+
+UNLOADALL
+LOADINIFILE
+ plume5c_plot3d.ini
+LOADPLOT3D
+ 1 40.0
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 1.100000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_y1
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.800000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_y2
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.500000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_y3
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.200000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_y4
+
+// render PLOT3D vectors
+
+LOADINIFILE
+ plume5c_plot3dvector.ini
+LOADPLOT3D
+ 1 40.0
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 1.100000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 1 -1 1 20.0
+RENDERONCE
+plume5c_plot3d_v1
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.800000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 1 -1 1 20.0
+RENDERONCE
+plume5c_plot3d_v2
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.500000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 1 -1 1 20.0
+RENDERONCE
+plume5c_plot3d_v3
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.200000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 1 -1 1 20.0
+RENDERONCE
+plume5c_plot3d_v4
+
+// render PLOT3D iso-surface
+
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 0 0.400000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 1 0
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_i1
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 0 0.400000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 1 3
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_i2
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 0 0.400000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 1 6
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_i3
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 0 0.400000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 1 9
+PLOT3DPROPS
+ 1 0 6 1
+RENDERONCE
+plume5c_plot3d_i4
+
+
+// render PLOT3D line contours
+
+LOADINIFILE
+ plume5c_plot3dline.ini
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 1.100000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 2
+RENDERONCE
+plume5c_plot3d_l1
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.800000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 2
+RENDERONCE
+plume5c_plot3d_l2
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.500000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 2
+RENDERONCE
+plume5c_plot3d_l3
+SHOWPLOT3DDATA
+ 1 1 1 0 0.800000
+SHOWPLOT3DDATA
+ 1 2 1 1 0.200000
+SHOWPLOT3DDATA
+ 1 3 1 0 1.600000
+SHOWPLOT3DDATA
+ 1 4 1 0 6
+PLOT3DPROPS
+ 1 0 6 2
+RENDERONCE
+plume5c_plot3d_l4
+
+// render two left/right stereo images
+
+UNLOADALL
+LOADFILE
+ plume5c.prt5
+LOADINIFILE
+ plume5c_lr_stereo.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ plume5c_iso_lr_stereo
+
+// render two stereo images
+
+LABEL
+  render two stereo images
+
+LOADINIFILE
+ plume5c_rc_stereo.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ plume5c_iso_rc_stereo
+
+// render two stereo images
+
+LABEL
+  render two stereo images
+
+LOADINIFILE
+ plume5c_rb_stereo.ini
+SETTIMEVAL
+ 30.000000
+RENDERONCE
+ plume5c_iso_rb_stereo
+

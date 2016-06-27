@@ -1,0 +1,46 @@
+&HEAD CHID='surf_mass_vent_nonchar_cyl_gas',TITLE='Surface mass, vent, nonchar, cylinder, gas' /
+
+&MESH 	IJK= 6,6,6,
+	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
+
+&TIME T_END=150., DT = 0.01, WALL_INCREMENT = 1 / 
+&DUMP DT_HRR = 0.1, DT_DEVC = 0.1  /
+
+&SURF ID                        = 'Wood'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	GEOMETRY                = 'CYLINDRICAL'
+      EXTERNAL_FLUX 		= 50. /
+      
+&MATL ID = 'PINE'
+      EMISSIVITY 	= 1.0
+	DENSITY 	= 360.
+	CONDUCTIVITY	= 0.05
+	SPECIFIC_HEAT	= 1.0
+	N_REACTIONS	= 1
+	A		= 1E20
+	E 		= 1.6E5
+	N_S		= 1
+    SPEC_ID='fuel_gas'
+	NU_SPEC    	= 1.0
+	HEAT_OF_REACTION= 1000
+	HEAT_OF_COMBUSTION(1) = 12000/
+	
+&SPEC ID = 'fuel_gas', MW = 50. /
+	
+
+&VENT ID = 'Sample', SURF_ID = 'Wood', XB = -0.5,0.5,-0.5,0.5,0,0.0 /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'density', 
+	STATISTICS = 'VOLUME INTEGRAL', 
+	SPEC_ID = 'fuel_gas'/
+
+&DEVC 	IOR = 3, QUANTITY = 'SURFACE DENSITY', 
+	ID = 'Surface density'
+	STATISTICS = 'SURFACE INTEGRAL' 
+	XB = -0.5,0.5,-0.5,0.5,0.0,0.0 /
+
+&TAIL /

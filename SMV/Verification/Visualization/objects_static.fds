@@ -1,0 +1,61 @@
+&HEAD CHID='objects_static',TITLE='Smokeview device drawing test' /
+
+&MESH IJK=8,8,16, XB=0.0,3.2,0.0,1.6,0.0,1.5/
+
+&TIME T_END=0.0/
+
+&VENT XB=0.0,0.0,0.0,1.6,0.0,1.5,SURF_ID='OPEN'/
+&VENT XB=3.2,3.2,0.0,1.6,0.0,1.5,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,0.0,0.0,1.5,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,1.6,1.6,0.0,1.5,SURF_ID='OPEN'/
+&VENT XB=0.0,3.2,0.0,1.6,1.5,1.5,SURF_ID='OPEN'/
+
+Static devices - single frame
+
+&PROP ID='target' SMOKEVIEW_ID='target' /
+&DEVC XYZ=0.5,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='target' /
+
+&PROP ID='sensor' SMOKEVIEW_ID='sensor' /
+&DEVC XYZ=0.5,0.8,0.8, QUANTITY='TEMPERATURE' PROP_ID='sensor' /
+
+&PROP ID='thermocouple' SMOKEVIEW_ID='thermocouple' /
+&DEVC XYZ=0.5,0.8,1.0, QUANTITY='TEMPERATURE' PROP_ID='thermocouple' /
+
+Static devices - multiple frames
+
+------------
+&PROP ID='heat_detector0', SMOKEVIEW_ID='heat_detector' /
+&DEVC XYZ=0.5,0.8,0.2, QUANTITY='TEMPERATURE' PROP_ID='heat_detector0', INITIAL_STATE=.FALSE. /
+
+&PROP ID='heat_detector1', SMOKEVIEW_ID='heat_detector' /
+&DEVC XYZ=0.5,0.8,0.4, QUANTITY='TEMPERATURE' PROP_ID='heat_detector1', INITIAL_STATE=.TRUE. /
+
+------------
+&PROP ID='sprinkler_upright0', SMOKEVIEW_ID='sprinkler_upright' /
+&DEVC XYZ=1.0,0.8,0.2, QUANTITY='TEMPERATURE' PROP_ID='sprinkler_upright0', INITIAL_STATE=.FALSE. /
+
+&PROP ID='sprinkler_upright1', SMOKEVIEW_ID='sprinkler_upright' /
+&DEVC XYZ=1.0,0.8,0.4, QUANTITY='TEMPERATURE' PROP_ID='sprinkler_upright1', INITIAL_STATE=.TRUE. /
+
+------------
+&PROP ID='sprinkler_pendent0', SMOKEVIEW_ID='sprinkler_pendent' /
+&DEVC XYZ=1.0,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='sprinkler_pendent0', INITIAL_STATE=.FALSE. /
+
+&PROP ID='sprinkler_pendent1', SMOKEVIEW_ID='sprinkler_pendent' /
+&DEVC XYZ=1.0,0.8,0.8, QUANTITY='TEMPERATURE' PROP_ID='sprinkler_pendent1', INITIAL_STATE=.TRUE. /
+
+------------
+&PROP ID='smoke_detector0', SMOKEVIEW_ID='smoke_detector' /
+&DEVC XYZ=1.5,0.8,0.2, QUANTITY='TEMPERATURE' PROP_ID='smoke_detector0', INITIAL_STATE=.FALSE. /
+
+&PROP ID='smoke_detector1', SMOKEVIEW_ID='smoke_detector' /
+&DEVC XYZ=1.5,0.8,0.4, QUANTITY='TEMPERATURE' PROP_ID='smoke_detector1', INITIAL_STATE=.TRUE. /
+
+------------
+&PROP ID='nozzle0', SMOKEVIEW_ID='nozzle' /
+&DEVC XYZ=1.5,0.8,0.6, QUANTITY='TEMPERATURE' PROP_ID='nozzle0', INITIAL_STATE=.FALSE. /
+
+&PROP ID='nozzle1', SMOKEVIEW_ID='nozzle' /
+&DEVC XYZ=1.5,0.8,0.8, QUANTITY='TEMPERATURE' PROP_ID='nozzle1', INITIAL_STATE=.TRUE. /
+
+&TAIL /

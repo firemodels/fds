@@ -1,0 +1,67 @@
+&HEAD CHID='surf_mass_part_char_spher_fuel',TITLE='Surface mass, particles, char, sphere, fuel'/
+
+&MESH 	IJK= 6,6,6,
+	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 /
+
+
+&TIME T_END=100., DT = 0.01, WALL_INCREMENT = 1 / 
+&DUMP DT_HRR = 0.1 DT_DEVC = 0.1  /
+&MISC Y_O2_INFTY=0.0000001/
+
+&REAC FUEL = 'WOOD'
+	SOOT_YIELD 	= 0.0
+	CO_YIELD	= 0.0
+	C 		= 3.4
+	H		=6.2
+	O 		=2.5
+	HEAT_OF_COMBUSTION = 12000./
+
+&SURF ID                        = 'Wood'
+      COLOR                     = 'IVORY BLACK'
+      MATL_ID(1,1)            	= 'PINE'
+      THICKNESS                 = 0.01
+	GEOMETRY                = 'SPHERICAL'
+      EXTERNAL_FLUX 		= 50. /
+      
+&MATL ID = 'PINE'
+      EMISSIVITY 	= 1.0
+	DENSITY 	= 360.
+	CONDUCTIVITY	= 0.05
+	SPECIFIC_HEAT	= 1.0
+	N_REACTIONS	= 1
+	A		= 1E20
+	E 		= 1.6E5
+	N_S		= 1
+	NU_MATL   	= 0.5
+	NU_SPEC		= 0.5
+        SPEC_ID         = 'WOOD'
+	HEAT_OF_REACTION= 1000
+	MATL_ID 	= 'CHAR'
+	HEAT_OF_COMBUSTION(1) = 12000/
+	
+&MATL ID = 'CHAR'
+	EMISSIVITY 	= 1.0
+	DENSITY 	= 180.
+	CONDUCTIVITY	= 1.0
+	SPECIFIC_HEAT	= 1.6 /
+
+&PART ID='Wood_part', SAMPLING_FACTOR=1,SURF_ID='Wood', PROP_ID='wood image'
+	QUANTITIES='PARTICLE TEMPERATURE','PARTICLE MASS','PARTICLE DIAMETER' ,STATIC=.TRUE./
+
+&INIT PART_ID='Wood_part', XB=-0.5,0.5,-0.5,0.5,0,3.0,N_PARTICLES = 1  /
+
+&PROP ID='wood image', SMOKEVIEW_ID='TUBE', SMOKEVIEW_PARAMETERS='L=0.1','D=0.02' /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0, 
+	QUANTITY = 'DENSITY', 
+	ID = 'density', 
+	STATISTICS = 'VOLUME INTEGRAL',
+	SPEC_ID='WOOD' /
+
+&DEVC 	XB = -1.5,1.5,-1.5,1.5,0.0,3.0 , 
+	QUANTITY = 'MPUV', 
+	PART_ID = 'Wood_part', 
+	ID = 'mpuv',IOR = 3, 
+	STATISTICS = 'VOLUME INTEGRAL'  /
+
+&TAIL /

@@ -1,0 +1,64 @@
+
+The droplet tempererature is increased by the absorption of thermal radiation.
+Considering the total mass of absorbing droplets, the ode for average droplet 
+temperature is
+
+m c_p dT/dt = Q_abs
+
+With constant conditions, the average droplet temperature in the end should be
+
+dT = dt Q_abs / (m c_p)
+
+By setting dt = 0.01 s, m = 0.01 kg and c_p = 1.0 kJ/kg, the numerical 
+value of dT should be equal to the time averaged Q_abs.
+
+--------------------FDS Data-----------------------------
+&HEAD CHID='droplet_absorption_cyl',TITLE='Cylindrical droplet absorption test case' /
+
+&MESH IJK=3,1,3, XB=0.0,3.0,-.5,0.5,0.0,3.0 CYLINDRICAL = .TRUE. /
+
+&TIME T_END=.01 DT = 0.00001 / 
+
+&MISC GVEC=0,0,0, PR = 100., RUN_AVG_FAC=0.,Y_CO2_INFTY=0.,HUMIDITY=0./  
+
+&DUMP NFRAMES=100 /
+
+&RADI RADTMP=1000.
+      NUMBER_RADIATION_ANGLES = 40
+      TIME_STEP_INCREMENT=1 
+      ANGLE_INCREMENT=1 /
+
+&SURF ID='HOT'
+      DEFAULT=.TRUE.
+      EMISSIVITY = 1.
+      TMP_FRONT = 1000.
+      TAU_T = 0.0 /
+
+&SPEC ID='WATER VAPOR'
+      VAPORIZATION_TEMPERATURE = 1000.
+      MELTING_TEMPERATURE = -273.15
+      SPECIFIC_HEAT_LIQUID = 1.0 
+      HEAT_OF_VAPORIZATION = 1000.
+      REFERENCE_ENTHALPY=298.15
+      SPECIFIC_HEAT=1.   /
+
+&PART ID='drops'
+      STATIC = .TRUE.
+      SPEC_ID='WATER VAPOR'
+      INITIAL_TEMPERATURE = 0.
+      DIAMETER=1000.
+      MINIMUM_DIAMETER=10.
+      SAMPLING_FACTOR=1 /
+	
+&INIT N_PARTICLES = 100
+      XB = 1,2,-0.5,0.5,1,2
+      MASS_PER_VOLUME = .01
+      PART_ID = 'drops' /
+
+
+&DEVC QUANTITY='PARTICLE RADIATION LOSS', ID='Absorption', STATISTICS='VOLUME INTEGRAL', XB=0,3,-.5,.5,0,3 /
+&DEVC QUANTITY='ADT', PART_ID='drops', ID='ADT', STATISTICS='VOLUME MEAN', XB=1,2,-.5,.5,1,2 /
+
+&TAIL /
+
+

@@ -1,0 +1,28 @@
+&HEAD CHID='smoke_detector', TITLE='Verification of smoke detector algorithm'/
+
+&MESH IJK=5,5,5, XB=0.0,1.0,0.0,1.0,0.0,1.0 /
+
+&TIME T_END=100.0 /
+
+&DUMP DT_DEVC=1 /
+
+&SPEC ID='SOOT'/
+
+&INIT SPEC_ID='SOOT', MASS_FRACTION(1)=100e-6 /
+
+&SURF ID               = 'INLET'
+      VEL              = -0.25
+      COLOR            = 'RED'
+      SPEC_ID(1)       = 'SOOT'
+      MASS_FRACTION(1) = 100e-6 /
+
+&VENT MB='XMIN', SURF_ID='INLET' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+
+&DEVC ID='SD', PROP_ID='Smoke Detector', XYZ=0.5,0.5,0.5 /
+&PROP ID='Smoke Detector', QUANTITY='CHAMBER OBSCURATION', LENGTH=1.8, ACTIVATION_OBSCURATION=3.24 /
+
+&SLCF PBY=0.5, QUANTITY='MASS FRACTION', SPEC_ID='SOOT' /
+&SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&TAIL /

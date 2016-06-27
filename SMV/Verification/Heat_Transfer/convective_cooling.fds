@@ -1,0 +1,35 @@
+&HEAD CHID='convective_cooling', TITLE='Convective cooling test case' /
+
+&MESH IJK=3,3,3, XB=-0.15,0.15,-0.15,0.15,0.0,0.3 /
+
+&TIME T_END=1800., WALL_INCREMENT=1, DT=0.5 /
+
+&MISC TMPA=0., ASSUMED_GAS_TEMPERATURE=0. / 
+
+&SURF ID        = 'SLAB'
+      MATL_ID   = 'SLAB_A'
+      THICKNESS = 1.
+      TMP_INNER = 1000.
+      HEAT_TRANSFER_COEFFICIENT = 1.
+      BACKING   = 'INSULATED' /
+
+&MATL ID            = 'SLAB_A'
+      CONDUCTIVITY  = 1.0
+      EMISSIVITY    = 0.
+      SPECIFIC_HEAT = 0.001
+      DENSITY       = 1000. /
+
+&VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID='SLAB' /
+
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&DEVC XYZ=0.0,0.0,0.0, IOR=3, ID='inner temp', QUANTITY='INSIDE WALL TEMPERATURE', DEPTH=1.0 /
+
+&TAIL /
+

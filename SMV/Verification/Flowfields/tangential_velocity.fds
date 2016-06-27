@@ -1,0 +1,30 @@
+A simple example of how to use VEL_T.
+
+&HEAD CHID='tangential_velocity', TITLE='Test VEL_T, the Tangential Velocity' /
+
+&MESH IJK=50,50,10, XB=0.0,5.0,0.0,5.0,0.0,1.0 /
+&TIME T_END=20.0 /
+
+&SURF ID='LOUVER', VEL=-2.0, VEL_T=3.0,0.0, TAU_V=5., COLOR='GREEN' /
+
+&VENT MB='XMIN', SURF_ID='LOUVER' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+
+&SLCF PBZ=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+&SLCF PBY=1.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&DUMP DT_DEVC=0.5 /
+&DEVC ID='u', XYZ=0.05,1.65,0.5, QUANTITY='U-VELOCITY' /
+&DEVC ID='v', XYZ=0.05,1.65,0.5, QUANTITY='V-VELOCITY' /
+
+&TAIL /
+
+
+
+
+
+
+
+

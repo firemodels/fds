@@ -1,0 +1,7 @@
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ smoke_sensor
+

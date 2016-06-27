@@ -1,0 +1,66 @@
+&HEAD CHID='activate_sprinklers', TITLE='Test of Sprinkler/Nozzle activation/deactivation' / 
+
+* domain dimensions, 2.1 x 1 x 1 m, cell dimensions, 0.1 x 0.1 x 0.1 m, 2,100 cells 
+&MESH IJK=21,10,10, XB=0.0,2.1,0.0,1.0,0.0,1.0 /
+
+&RADI RADIATION=.FALSE./
+
+* initial time step = 0.05 s, time when finished = 20 s
+&TIME DT=0.05, T_END=20. /
+
+* defines properties of sprinkler and nozzle, particles are individually identified for each, flow rate defined as 151.4 L/min, spray pattern defined in table1
+&PROP ID='Spr1', QUANTITY='SPRINKLER LINK TEMPERATURE', FLOW_RATE=151.4, PART_ID='water_drops1', SPRAY_PATTERN_TABLE='TABLE2', /
+&PROP ID='nozzle', PART_ID='water_drops', FLOW_RATE=151.4, SPRAY_PATTERN_TABLE='TABLE1' /
+
+* defines spray pattern, lat1, lat2, lon1, lon2, doplet velocity in m/s, fraction of the total flow rate
+&TABL ID='TABLE2', TABLE_DATA=89,90,160,180,10,1.0/
+&TABL ID='TABLE1', TABLE_DATA=89,90,0,20,10,1.0/
+
+* defines particles, set to water, droplet diameter defined
+&SPEC ID='WATER VAPOR'/
+&PART ID='water_drops',  SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='PARTICLE DIAMETER', DIAMETER=2000. /
+&PART ID='water_drops1', SPEC_ID='WATER VAPOR', SAMPLING_FACTOR=1, QUANTITIES='PARTICLE DIAMETER', DIAMETER=200. /
+
+* defines sprinkler and nozzle position, quantity = control, control feature assigned, LATCH set to false permits multiple changes of state
+&DEVC XYZ=1.2,0.5,1.0, PROP_ID='Spr1', QUANTITY='CONTROL', CTRL_ID='controller 1', LATCH=.FALSE./
+&DEVC XYZ=0.8,0.5,1.0, PROP_ID='nozzle', QUANTITY='CONTROL', CTRL_ID='controller 2', LATCH=.FALSE./
+
+* creates device that appears as yellow sphere in lower left front corner of domain at (0.1, 0.1, 0,1),identified as 'clock 1', quantity is time 
+&DEVC XYZ=0.1,0.1,0.1, ID='clock 1', QUANTITY='TIME' /
+
+Control Mechanism
+
+Nozzle and Sprinkler turn on and off at prescribed times
+* creates control function  as 'controller 1', which is assigned to both the sprinikler and nozzle
+* ramp causes controller 1 to change state at 3 s, 6 s,and 12 s, LATCH set to false permits multiple changes of state
+* end result is water particles for sprinkler and nozzle appear at 3 s, disappear at 6 s, and reappear at 12 s 
+&CTRL ID='controller 1', FUNCTION_TYPE='CUSTOM', INPUT_ID='clock 1', RAMP_ID='ramp 1', LATCH=.FALSE. /
+&RAMP ID='ramp 1', T= 0.00, F=-1. /
+&RAMP ID='ramp 1', T= 5.99, F=-1. /
+&RAMP ID='ramp 1', T= 6.01, F= 1. /
+&RAMP ID='ramp 1', T= 11.99, F= 1. /
+&RAMP ID='ramp 1', T= 12.01, F=-1. /
+&RAMP ID='ramp 1', T=16.99, F=-1. /
+&RAMP ID='ramp 1', T=17.01, F= 1. /
+
+&CTRL ID='controller 2', FUNCTION_TYPE='CUSTOM', INPUT_ID='clock 1', RAMP_ID='ramp 2', LATCH=.FALSE. /
+&RAMP ID='ramp 2', T= 0.00, F=-1. /
+&RAMP ID='ramp 2', T= 2.99, F=-1. /
+&RAMP ID='ramp 2', T= 3.01, F= 1. /
+&RAMP ID='ramp 2', T= 5.99, F= 1. /
+&RAMP ID='ramp 2', T= 6.01, F=-1. /
+&RAMP ID='ramp 2', T=11.99, F=-1. /
+&RAMP ID='ramp 2', T=12.01, F= 1. /
+
+* creates openings to atmosphere at boundary on all 4 side and top of domain 
+&VENT MB='XMIN', SURF_ID='OPEN' /
+&VENT MB='XMAX', SURF_ID='OPEN' /
+&VENT MB='YMIN', SURF_ID='OPEN' /
+&VENT MB='YMAX', SURF_ID='OPEN' /
+&VENT MB='ZMAX', SURF_ID='OPEN' /
+
+* creates slice file in XZ plane at value of Y = 0.5 showing velocity vectors 
+&SLCF PBY=0.5, QUANTITY='VELOCITY', VECTOR=.TRUE. /
+
+&TAIL /
+

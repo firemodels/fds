@@ -1,0 +1,65 @@
+Test various devices and actions upon activation.
+
+&HEAD CHID='device_test', TITLE='Test sprinklers, heat detectors and smoke detectors' /
+
+&MESH IJK=30,10,10, XB=0.0,3.0,0.0,1.0,0.0,1.0 /
+&MESH IJK=10,40,10, XB=3.0,4.0,0.0,4.0,0.0,1.0 /
+
+&TIME T_END=60.0 /
+
+&SURF ID='FIRE', HRRPUA=500., PART_ID='smoke', DT_INSERT=0.05 /
+&REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
+&VENT XB=3.0,4.0,4.0,4.0,0.0,1.0, SURF_ID='OPEN' /
+&VENT XB=0.6,1.0,0.3,0.7,0.0,0.0, SURF_ID='FIRE' /
+
+&OBST XB=3.1,3.2,1.1,1.2,0.2,0.3, COLOR='PURPLE', DEVC_ID='smoke_1' / Block in Mesh 2 tied to SD in Mesh 1
+&OBST XB=2.1,2.2,0.1,0.2,0.2,0.3, COLOR='BLUE',   DEVC_ID='smoke_2' / Block in Mesh 1 tied to SD in Mesh 2
+
+&PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1 /
+&PART ID='water', SPEC_ID='WATER VAPOR', DIAMETER=500., SAMPLING_FACTOR=5 /
+&SPEC ID='WATER VAPOR' /
+&PROP ID='Acme Smoke', QUANTITY='CHAMBER OBSCURATION' /
+
+&PROP ID='Acme Heat',         
+      QUANTITY='LINK TEMPERATURE', 
+      RTI=100., 
+      ACTIVATION_TEMPERATURE=100. /
+
+&PROP ID='Acme Sprinkler'
+      QUANTITY='SPRINKLER LINK TEMPERATURE'
+      FLOW_RATE=5.
+      RTI=50.
+      ACTIVATION_TEMPERATURE= 74.
+      OFFSET= 0.05
+      PARTICLE_VELOCITY=5.
+      SPRAY_ANGLE=50.,55.
+      PART_ID='water' /
+
+&DEVC XYZ=2.00,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_1' /
+&DEVC XYZ=3.80,0.50,0.95, PROP_ID='Acme Smoke', ID='smoke_2' /
+
+&DEVC XYZ=1.00,0.50,0.95, PROP_ID='Acme Heat', ID='heat_1' /
+&DEVC XYZ=3.50,2.00,0.95, PROP_ID='Acme Heat', ID='heat_2' /
+
+&DEVC XYZ=0.50,0.50,0.95, ID='sprinkler_1', PROP_ID='Acme Sprinkler' /
+&DEVC XYZ=1.50,0.50,0.95, ID='sprinkler_2', PROP_ID='Acme Sprinkler' /
+&DEVC XYZ=2.50,0.50,0.95, ID='sprinkler_3', PROP_ID='Acme Sprinkler' /
+&DEVC XYZ=3.50,0.50,0.95, ID='sprinkler_4', PROP_ID='Acme Sprinkler' /
+&DEVC XYZ=3.50,1.50,0.95, ID='sprinkler_5', PROP_ID='Acme Sprinkler' /
+&DEVC XYZ=3.50,2.50,0.95, ID='sprinkler_6', PROP_ID='Acme Sprinkler' /
+
+&DEVC XYZ=0.75,0.50,0.90, QUANTITY='TEMPERATURE', ID='Plume Temp' /
+&DEVC XYZ=3.50,0.50,0.90, QUANTITY='TEMPERATURE', ID='Overlap Temp' /
+&DEVC XYZ=3.50,2.50,0.90, QUANTITY='TEMPERATURE', ID='Grid 2 Temp' /
+
+&DEVC XB=0.0,2.0,0.0,1.0,0.0,1.0,QUANTITY='PATH OBSCURATION', SETPOINT=50, ID='beam' /
+
+&DEVC XYZ=0.,0.,0., QUANTITY='ACTUATED SPRINKLERS', ID='n_act' /
+
+&SLCF PBY=0.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+&SLCF PBX=3.5, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /
+
+&DUMP DT_PL3D=30. /
+
+&TAIL /
+

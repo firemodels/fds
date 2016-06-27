@@ -1,0 +1,17 @@
+Fill a big box with 3 kg H2 over 3 min.
+Ensure that the right amount of mass has been added.
+
+&HEAD CHID='gas_filling', TITLE='Fill an Empty Room with Hydrogen' /
+&MESH IJK=32,32,15, XB=-3.2,3.2,-3.2,3.2,0.0,3.0 /
+&TIME T_END=300.0 /
+&SPEC ID='HYDROGEN' /
+&SURF ID='LEAK', SPEC_ID='HYDROGEN',MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
+&RAMP ID='leak_ramp', T=  0., F=0.0 /
+&RAMP ID='leak_ramp', T=  1., F=1.0 /
+&RAMP ID='leak_ramp', T=180., F=1.0 /
+&RAMP ID='leak_ramp', T=181., F=0.0 /
+&VENT XB=-0.5,0.5,-0.5,0.5,0.0,0.0, SURF_ID='LEAK', COLOR='RED' / 
+&DUMP MASS_FILE=.TRUE. /
+&SLCF PBY=0.0, QUANTITY='MASS FRACTION',SPEC_ID='HYDROGEN' /
+&TAIL /
+

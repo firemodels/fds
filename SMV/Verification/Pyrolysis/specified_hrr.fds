@@ -1,0 +1,48 @@
+A test of the simple "heat up and burn" pyrolysis model.
+
+&HEAD CHID='specified_hrr', TITLE='Pre-defined HRRPUA' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 /
+
+&TIME T_END=30. /
+
+&DUMP DT_PL3D=10000000./
+&REAC SOOT_YIELD=0.01,FUEL='PROPANE'/
+&SURF ID='TEST'
+      COLOR = 'TOMATO 2'
+      EXTERNAL_FLUX = 50.
+      MATL_ID(1,:) = 'MAT_A'
+      BACKING = 'INSULATED'
+      HRRPUA = 1000.
+      IGNITION_TEMPERATURE = 500.
+      RAMP_Q = 'HRR'
+      THICKNESS=0.01 
+      HEAT_OF_VAPORIZATION = 1000. /
+
+&RAMP ID = 'HRR', T = 0,  F = 0. /
+&RAMP ID = 'HRR', T = 1,  F = 1. /
+&RAMP ID = 'HRR', T = 10, F = 1. /
+&RAMP ID = 'HRR', T = 11, F = 0. /
+
+&MATL ID = 'MAT_A'
+      EMISSIVITY = 1.0
+      CONDUCTIVITY = 0.1
+      SPECIFIC_HEAT = 1.0
+      DENSITY = 1000.0 /
+
+&VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'TEST' /
+
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'YMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'YMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'ZMAX' SURF_ID = 'OPEN' /
+
+&DEVC XYZ = 0.0,0.0,0.,IOR = 3, QUANTITY = 'WALL TEMPERATURE' / 
+&DEVC XYZ = 0.0,0.0,0.,IOR = 3, QUANTITY = 'BURNING RATE' / 
+
+&BNDF QUANTITY='WALL TEMPERATURE' /
+&BNDF QUANTITY='BURNING RATE' /
+
+&TAIL /
+

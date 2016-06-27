@@ -1,0 +1,34 @@
+RENDERDIR
+ ..\..\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+XSCENECLIP
+ 0 -0.002000 0 2.002000
+YSCENECLIP
+ 0 -0.002000 0 2.002000
+ZSCENECLIP
+ 0 -0.002000 0 2.002000
+SCENECLIP
+ 0
+RENDERCLIP
+ 1 87 126 36 34
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ vcirctest_fds
+KEYBOARD
+ q
+RENDERONCE
+ vcirctest_circ
+LOADINIFILE
+ vcirctest_outline.ini
+SETVIEWPOINT
+ view 1
+SETVIEWPOINT
+ view 1
+RENDERONCE
+ vcirctest_fds_outline
+KEYBOARD
+ q
+RENDERONCE
+ vcirctest_circ_outline
+
+

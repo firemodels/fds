@@ -1,0 +1,60 @@
+The emissivity of the TEST surface changes due to the change in 
+the mass fractions of MAT_A and MAT_B, having emissivities of 
+1.0 and 0.0, respectively. The exact solution is a linear function 
+going from 1.0 to 0.0 when time goes from 0 to 10 s.
+
+The emissivity is measured using EMISSIVITY output quantity.
+
+&HEAD CHID='emissivity', TITLE='Test surface emissivity' /
+
+&MESH IJK=3,3,4, XB=-0.15,0.15,-0.15,0.15,0.0,0.4 / 
+
+&TIME T_END=10 DT = 0.01 WALL_INCREMENT = 1/
+
+&DUMP DT_DEVC = 0.2
+      DT_PL3D=10000000./
+
+&SURF ID='TEST'
+      COLOR='TEAL'
+      MATL_ID(1,:) = 'MAT_A'
+      HEAT_TRANSFER_COEFFICIENT=0.
+      THICKNESS=0.001/
+
+&MATL ID = 'MAT_A'
+      EMISSIVITY = 1.0
+      CONDUCTIVITY=1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 10.0 
+      N_REACTIONS = 1
+      A = 0.1
+      E = 0.
+      N_S = 0.
+      NU_MATL    = 1.0
+      MATL_ID = 'MAT_B'/
+
+&MATL ID = 'MAT_B'
+      EMISSIVITY = 0.0
+      CONDUCTIVITY=1.0
+      SPECIFIC_HEAT= 1.0
+      DENSITY= 10.0 /
+
+&VENT XB = -0.05,0.05,-0.05,0.05,0.0,0.0, SURF_ID = 'TEST' /
+
+&VENT MB = 'XMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'XMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'YMIN' SURF_ID = 'OPEN' /
+&VENT MB = 'YMAX' SURF_ID = 'OPEN' /
+&VENT MB = 'ZMAX' SURF_ID = 'OPEN' /
+
+&DEVC XYZ = 0.,0.,0.,IOR = 3, QUANTITY = 'EMISSIVITY' ID = 'EMISSIVITY' /
+&PROF XYZ = 0.,0.,0.,IOR = 3, QUANTITY = 'MAT_A' /
+
+&BNDF QUANTITY='RADIATIVE HEAT FLUX' /
+&BNDF QUANTITY='INCIDENT HEAT FLUX' /
+&BNDF QUANTITY='GAUGE HEAT FLUX' /
+&BNDF QUANTITY='WALL TEMPERATURE' /
+
+&SLCF PBY=0.0, QUANTITY='TEMPERATURE' /
+
+
+&TAIL /
