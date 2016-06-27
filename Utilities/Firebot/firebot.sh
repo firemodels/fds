@@ -163,6 +163,7 @@ fi
 
 export fdsrepo 
 UploadGuides=$fdsrepo/Utilities/Firebot/fds_guides2GD.sh
+FDS_MANUAL_DIR=$fdsrepo/FDS/Manuals
 
 echo ""
 echo "Preliminaries:"
@@ -273,7 +274,7 @@ clean_git_repo()
          clean_repo $fdsrepo/SMV
          clean_repo $fdsrepo/FDS/Source
          clean_repo $fdsrepo/FDS/Build
-         clean_repo $fdsrepo/Manuals
+         clean_repo $FDS_MANUAL_DIR
       fi
    # If not, create FDS repository and checkout
    else
@@ -1020,7 +1021,7 @@ check_guide()
 
 make_fds_user_guide()
 {
-   cd $fdsrepo/Manuals/FDS_User_Guide
+   cd $FDS_MANUAL_DIR/FDS_User_Guide
 
    echo Building guides
    echo "  user guide"
@@ -1028,48 +1029,48 @@ make_fds_user_guide()
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_user_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_user_guide $fdsrepo/Manuals/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_user_guide $FDS_MANUAL_DIR/FDS_User_Guide/FDS_User_Guide.pdf 'FDS User Guide'
 }
 
 make_fds_technical_guide()
 {
-   cd $fdsrepo/Manuals/FDS_Technical_Reference_Guide
+   cd $FDS_MANUAL_DIR/FDS_Technical_Reference_Guide
 
    echo "   technical guide"
    # Build FDS Technical Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_technical_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $fdsrepo/Manuals/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_technical_guide $FDS_MANUAL_DIR/FDS_Technical_Reference_Guide/FDS_Technical_Reference_Guide.pdf 'FDS Technical Reference Guide'
 }
 
 make_fds_verification_guide()
 {
-   cd $fdsrepo/Manuals/FDS_Verification_Guide
+   cd $FDS_MANUAL_DIR/FDS_Verification_Guide
 
    echo "   verification guide"
    # Build FDS Verification Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_verification_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $fdsrepo/Manuals/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_verification_guide $FDS_MANUAL_DIR/FDS_Verification_Guide/FDS_Verification_Guide.pdf 'FDS Verification Guide'
 }
 
 make_fds_validation_guide()
 {
-   cd $fdsrepo/Manuals/FDS_Validation_Guide
+   cd $FDS_MANUAL_DIR/FDS_Validation_Guide
 
    echo "   validation guide"
    # Build FDS Validation Guide
    ./make_guide.sh &> $OUTPUT_DIR/stage8_fds_validation_guide
 
    # Check guide for completion and copy to website if successful
-   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $fdsrepo/Manuals/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
+   check_guide $OUTPUT_DIR/stage8_fds_validation_guide $FDS_MANUAL_DIR/FDS_Validation_Guide/FDS_Validation_Guide.pdf 'FDS Validation Guide'
 }
 
 make_fds_Config_management_plan()
 {
-   cd $fdsrepo/Manuals/FDS_Config_Management_Plan
+   cd $FDS_MANUAL_DIR/FDS_Config_Management_Plan
 
    echo "   Config management guide"
    # Build FDS Config Management Plan
@@ -1077,7 +1078,7 @@ make_fds_Config_management_plan()
 
    # Check guide for completion and copy to website if successful
    # note: script that uploads pdf to google doens't like the name so it has been shortened to FDS_Config_Management_Plan
-   check_guide $OUTPUT_DIR/stage8_fds_Config_management_plan $fdsrepo/Manuals/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf 'FDS Config Management Plan'
+   check_guide $OUTPUT_DIR/stage8_fds_Config_management_plan $FDS_MANUAL_DIR/FDS_Config_Management_Plan/FDS_Config_Management_Plan.pdf 'FDS Config Management Plan'
 }
 
 #  =====================================================
@@ -1172,7 +1173,7 @@ fi
 
 #  upload guides to a google drive directory
 if [[ "$UPLOADGUIDES" == "1" ]]; then
-  $UploadGuides $NEWGUIDE_DIR $fdsrepo/Manuals &> /dev/null
+  $UploadGuides $NEWGUIDE_DIR $FDS_MANUAL_DIR &> /dev/null
 fi
 }
 

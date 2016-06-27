@@ -55,6 +55,8 @@ if "%altemail%" == "1" (
   )
 )
 
+set fdsmanualdir=%fdsroot%\FDS\Manuals
+set smvmanualdir=%fdsroot%\SMV\Manuals
 set debug=1
 set release=0
 set errorlog=%OUTDIR%\stage_errors.txt
@@ -65,7 +67,7 @@ set revisionfilestring=%OUTDIR%\revision.txt
 set revisionfilenum=%OUTDIR%\revision_num.txt
 set stagestatus=%OUTDIR%\stage_status.log
 
-set fromsummarydir=%fdsroot%\Manuals\SMV_Summary
+set fromsummarydir=%smvmanualdir%\SMV_Summary
 set tosummarydir="%SMOKEBOT_SUMMARY_DIR%"
 
 set haveerrors=0
@@ -191,8 +193,9 @@ if %clean% == 0 goto skip_clean2
    call :git_clean %fdsroot%\SMV\source
    call :git_clean %fdsroot%\SMV\Build
    call :git_clean %fdsroot%\FDS\Source
-   call :git_clean %fdsroot%\FDS\Compilation
-   call :git_clean %fdsroot%\Manuals
+   call :git_clean %fdsroot%\FDS\Build
+   call :git_clean %fdsmanualdir%
+   call :git_clean %smvmanualdir%
 
 :skip_clean2
 
@@ -402,16 +405,16 @@ call :GET_TIME MAKEGUIDES_beg
 echo Stage 6 - Building Smokeview guides
 
 echo             Technical Reference
-call :build_guide SMV_Technical_Reference_Guide %fdsroot%\Manuals\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_Technical_Reference_Guide %smvmanualdir%\SMV_Technical_Reference_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             Verification
-call :build_guide SMV_Verification_Guide %fdsroot%\Manuals\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_Verification_Guide %smvmanualdir%\SMV_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 echo             User
-call :build_guide SMV_User_Guide %fdsroot%\Manuals\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+call :build_guide SMV_User_Guide %smvmanualdir%\SMV_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 :: echo             Geom Notes
-:: call :build_guide geom_notes %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+:: call :build_guide geom_notes %fdsmanualdir%\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
 call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
 call :GET_DURATION TOTALTIME %TIME_beg%
@@ -440,7 +443,7 @@ echo . -----------------------------         >> %infofile%
 copy %infofile% %timingslogfile%
 
 if NOT exist %tosummarydir% goto skip_copyfiles
-  echo summary   (local): file://%userprofile%/FDS-SMV/Manuals/SMV_Summary/index.html >> %infofile%
+  echo summary   (local): file://%userprofile%/FDS-SMV/SMV/Manuals/SMV_Summary/index.html >> %infofile%
   echo summary (windows): https://googledrive.com/host/0B-W-dkXwdHWNUElBbWpYQTBUejQ/index.html >> %infofile%
   echo summary   (linux): https://googledrive.com/host/0B-W-dkXwdHWNN3N2eG92X2taRFk/index.html >> %infofile%
   copy %fromsummarydir%\index*.html %tosummarydir%  1> Nul 2>&1

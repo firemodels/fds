@@ -193,13 +193,16 @@ cd
 export fdsrepo
 export cfastrepo
 
-export SMV_SUMMARY="$fdsrepo/Manuals/SMV_Summary"
-WEBFROMDIR="$fdsrepo/Manuals/SMV_Summary"
+FDS_MANUAL_DIR=$fdsrepo/FDS/Manuals
+SMV_MANUAL_DIR=$fdsrepo/SMV/Manuals
 
-SMV_VG_GUIDE=$fdsrepo/Manuals/SMV_Verification_Guide/SMV_Verification_Guide.pdf
-SMV_UG_GUIDE=$fdsrepo/Manuals/SMV_User_Guide/SMV_User_Guide.pdf
-GEOM_NOTES=$fdsrepo/Manuals/FDS_User_Guide/geom_notes.pdf
-UploadGuides=$fdsrepo/Utilities/Firebot/smv_guides2GD.sh
+export SMV_SUMMARY="$SMV_MANUAL_DIR/SMV_Summary"
+WEBFROMDIR="$SMV_MANUAL_DIR/SMV_Summary"
+
+SMV_VG_GUIDE=$SMV_MANUAL_DIR/SMV_Verification_Guide/SMV_Verification_Guide.pdf
+SMV_UG_GUIDE=$SMV_MANUAL_DIR/SMV_User_Guide/SMV_User_Guide.pdf
+GEOM_NOTES=$FDS_MANUAL_DIR/FDS_User_Guide/geom_notes.pdf
+UploadSMVGuides=$fdsrepo/Utilities/Firebot/smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -552,7 +555,8 @@ clean_FDS_repo()
         clean_repo $fdsrepo/SMV
         clean_repo $fdsrepo/FDS/Source
         clean_repo $fdsrepo/FDS/Build
-        clean_repo $fdsrepo/Manuals
+        clean_repo $FDS_MANUAL_DIR
+        clean_repo $SMV_MANUAL_DIR
         updateclean="1"
       fi
    else
@@ -1457,7 +1461,7 @@ fi
 # upload guides to a google drive directory
       if [ "$UPLOADRESULTS" == "1" ];then
         cd $SMOKEBOT_RUNDIR
-        $UploadGuides $NEWGUIDE_DIR $fdsrepo/Manuals &> /dev/null
+        $UploadSMVGuides $NEWGUIDE_DIR $SMV_MANUAL_DIR &> /dev/null
       fi
 
       # Send success message with links to nightly manuals
@@ -1579,13 +1583,13 @@ if [ "$SMOKEBOT_LITE" == "" ]; then
   if [[ $stage1c_fdsrel_success && $stage4b_smvpics_success ]] ; then
      echo Making guides
 #   echo "   geometry notes"
-#  make_guide geom_notes $fdsrepo/Manuals/FDS_User_Guide 'geometry notes'
+#  make_guide geom_notes $FDS_MANUAL_DIR/FDS_User_Guide 'geometry notes'
      echo "   user"
-    make_guide SMV_User_Guide $fdsrepo/Manuals/SMV_User_Guide 'SMV User Guide'
+    make_guide SMV_User_Guide $SMV_MANUAL_DIR/SMV_User_Guide 'SMV User Guide'
      echo "   technical"
-    make_guide SMV_Technical_Reference_Guide $fdsrepo/Manuals/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
+    make_guide SMV_Technical_Reference_Guide $SMV_MANUAL_DIR/SMV_Technical_Reference_Guide 'SMV Technical Reference Guide'
      echo "   verification"
-    make_guide SMV_Verification_Guide $fdsrepo/Manuals/SMV_Verification_Guide 'SMV Verification Guide'
+    make_guide SMV_Verification_Guide $SMV_MANUAL_DIR/SMV_Verification_Guide 'SMV Verification Guide'
   else
     echo Errors found, not building guides
   fi

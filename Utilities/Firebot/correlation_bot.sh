@@ -88,9 +88,9 @@ make_correlation_guide()
    echo ""
    echo "Running Stage 4 - Build Correlation Guide"
    echo ""
-   cd $SVNROOT/Manuals/Correlation_Guide
+   cd $SVNROOT/FDS/Manuals/Correlation_Guide
    ./make_guide.sh
-#  cp $SVNROOT/Manuals/Correlation_Guide/Correlation_Guide.pdf /var/www/html/firebot/correlation_guide/
+#  cp $SVNROOT/FDS/Manuals/Correlation_Guide/Correlation_Guide.pdf /var/www/html/firebot/correlation_guide/
 }
 
 #  =================

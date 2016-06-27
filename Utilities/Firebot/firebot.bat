@@ -61,6 +61,8 @@ if "%altemail%" == "1" (
   )
 )
 
+set fdsmanualdir=%fdsroot%\FDS\Manuals
+set smvmanualdir=%fdsroot%\SMV\Manuals
 set errorlog=%OUTDIR%\firebot_errors.txt
 set timefile=%OUTDIR%\time.txt
 set datefile=%OUTDIR%\date.txt
@@ -75,7 +77,7 @@ set countb=%OUTDIR%\firebot_count0b.txt
 set scratchfile=%OUTDIR%\firebot_scratch.txt
 set have_matlab=0
 
-set fromsummarydir=%fdsroot%\Manuals\SMV_Summary
+set fromsummarydir=%smvmanualdir%\SMV_Summary
 
 set haveerrors=0
 set havewarnings=0
@@ -201,7 +203,8 @@ if %clean% == 0 goto skip_clean1
    call :git_clean %fdsroot%\SMV\Build
    call :git_clean %fdsroot%\FDS\Source
    call :git_clean %fdsroot%\FDS\Build
-   call :git_clean %fdsroot%\Manuals
+   call :git_clean %fdsmanualdir%
+   call :git_clean %smvmanualdir%
 :skip_clean1
 
 :: update FDS/Smokeview repository
@@ -413,17 +416,17 @@ if %lite% == 1 goto skip_lite4
   echo Stage 6 - Building guides
 
   echo             FDS Technical Reference
-  call :build_guide FDS_Technical_Reference_Guide %fdsroot%\Manuals\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
+  call :build_guide FDS_Technical_Reference_Guide %fdsmanualdir%\FDS_Technical_Reference_Guide 1> %OUTDIR%\stage6.txt 2>&1
 
   if have_matlab==0 goto skip_VV
     echo             FDS User
-    call :build_guide FDS_User_Guide %fdsroot%\Manuals\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+    call :build_guide FDS_User_Guide %fdsmanualdir%\FDS_User_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
     echo             FDS Verification
-    call :build_guide FDS_Verification_Guide %fdsroot%\Manuals\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+    call :build_guide FDS_Verification_Guide %fdsmanualdir%\FDS_Verification_Guide 1>> %OUTDIR%\stage6.txt 2>&1
 
     echo             FDS Validation
-    call :build_guide FDS_Validation_Guide %fdsroot%\Manuals\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
+    call :build_guide FDS_Validation_Guide %fdsmanualdir%\FDS_Validation_Guide 1>> %OUTDIR%\stage6.txt 2>&1
   :skip_VV  
 
   call :GET_DURATION MAKEGUIDES %MAKEGUIDES_beg%
