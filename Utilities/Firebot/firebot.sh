@@ -269,12 +269,9 @@ clean_git_repo()
       cd $fdsrepo
       if [[ "$CLEANREPO" == "1" ]] ; then
          echo "   repo"
-         clean_repo $fdsrepo/Verification
          clean_repo $fdsrepo/Validation
          clean_repo $fdsrepo/SMV
-         clean_repo $fdsrepo/FDS/Source
-         clean_repo $fdsrepo/FDS/Build
-         clean_repo $FDS_MANUAL_DIR
+         clean_repo $fdsrepo/FDS
       fi
    # If not, create FDS repository and checkout
    else
@@ -357,7 +354,7 @@ inspect_fds_db()
 {
    # Perform OpenMP thread checking (locate deadlocks and data races)
    echo "      inspection"
-   cd $fdsrepo/Verification/Thread_Check/
+   cd $fdsrepo/FDS/Verification/Thread_Check/
    $fdsrepo/Utilities/Scripts/inspect_openmp.sh  -r $fdsrepo thread_check.fds &> $OUTPUT_DIR/stage2a
 }
 
@@ -476,7 +473,7 @@ check_current_utilization()
 run_verification_cases_debug()
 {
    # Start running all FDS verification cases in delayed stop debug mode
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/FDS/Verification/scripts
    # Run FDS with delayed stop files (with 1 OpenMP thread and 1 iteration)
    echo Running FDS Verification Cases
    echo "   debug"
@@ -488,7 +485,7 @@ run_verification_cases_debug()
    wait_cases_debug_end 'verification'
 
    # Remove all .stop files from Verification directories (recursively)
-   cd $fdsrepo/Verification
+   cd $fdsrepo/FDS/Verification
    find . -name '*.stop' -exec rm -f {} \;
 }
 
@@ -518,7 +515,7 @@ check_cases_debug()
 # copy casename.err to casename.err_stage4 for any cases that had errors
       echo "#/bin/bash" > $OUTPUT_DIR/stage4_filelist
       grep err $OUTPUT_DIR/stage4_errors | awk -F'[-:]' '{ print "cp " $1 " /tmp/."}'  | sort -u >> $OUTPUT_DIR/stage4_filelist
-      cd $fdsrepo/Verification
+      cd $fdsrepo/FDS/Verification
       source $OUTPUT_DIR/stage4_filelist
    fi
 }
@@ -651,7 +648,7 @@ run_verification_cases_release()
    # Start running all FDS verification cases
 
    echo "   release"
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/FDS/Verification/scripts
    # Run FDS with 1 OpenMP thread
    echo 'Running FDS verification cases:' >> $OUTPUT_DIR/stage5
    ./Run_FDS_Cases.sh -o 1 -q $QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage5 2>&1
@@ -767,10 +764,10 @@ make_fds_pictures()
    # Run Make FDS Pictures script
    echo Generating FDS images
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/FDS/Verification/scripts
    ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6
    else
-   $SSH \( cd $fdsrepo/Verification/scripts \; \
+   $SSH \( cd $fdsrepo/FDS/Verification/scripts \; \
    ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6 \)
    fi
 }
@@ -1227,7 +1224,7 @@ fi
 # Depends on successful FDS debug compile
 if [[ $stage2b_success ]] ; then
    run_verification_cases_debug
-   check_cases_debug $fdsrepo/Verification 'verification'
+   check_cases_debug $fdsrepo/FDS/Verification 'verification'
 fi
 
 if [ "$FIREBOT_LITE" == "" ]; then
@@ -1235,7 +1232,7 @@ if [ "$FIREBOT_LITE" == "" ]; then
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
    echo "   cleaning repo"
-   clean_repo $fdsrepo/Verification
+   clean_repo $fdsrepo/FDS/Verification
    clean_repo $fdsrepo/Validation
 fi
 
@@ -1243,7 +1240,7 @@ fi
 # Depends on successful FDS compile
 if [[ $stage2c_success ]] ; then
    run_verification_cases_release
-   check_cases_release $fdsrepo/Verification 'verification'
+   check_cases_release $fdsrepo/FDS/Verification 'verification'
 fi
 
 ### Stage 6 ###

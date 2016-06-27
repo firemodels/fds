@@ -551,12 +551,8 @@ clean_FDS_repo()
           echo "smokebot without the -c (clean) option"
           exit
         fi
-        clean_repo $fdsrepo/Verification
         clean_repo $fdsrepo/SMV
-        clean_repo $fdsrepo/FDS/Source
-        clean_repo $fdsrepo/FDS/Build
-        clean_repo $FDS_MANUAL_DIR
-        clean_repo $SMV_MANUAL_DIR
+        clean_repo $fdsrepo/FDS
         updateclean="1"
       fi
    else
@@ -699,8 +695,8 @@ run_verification_cases_debug()
    echo "Running verification cases"
    if [ "$CLEANREPO" == "1" ]; then
      echo "   cleaning"
-     cd $fdsrepo/Verification
-     clean_repo $fdsrepo/Verification
+     cd $fdsrepo/SMV/Verification
+     clean_repo $fdsrepo/SMV/Verification
    fi
 
    #  =====================
@@ -708,7 +704,7 @@ run_verification_cases_debug()
    #  =====================
 
    echo "   debug"
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/SMV/Verification/scripts
 
    # Submit SMV verification cases and wait for them to start
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3a 2>&1
@@ -722,7 +718,7 @@ run_verification_cases_debug()
 check_verification_cases_debug()
 {
    # Scan and report any errors in FDS verification cases
-   cd $fdsrepo/Verification
+   cd $fdsrepo/SMV/Verification
 
    if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3a` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/*` == "" ]] && \
@@ -947,12 +943,12 @@ run_verification_cases_release()
    # Remove all .stop and .err files from Verification directories (recursively)
    if [ "$CLEANREPO" == "1" ]; then
      echo "   clean"
-     cd $fdsrepo/Verification
-     clean_repo $fdsrepo/Verification
+     cd $fdsrepo/SMV/Verification
+     clean_repo $fdsrepo/SMV/Verification
    fi
    echo "   release"
    # Start running all SMV verification cases
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/SMV/Verification/scripts
    echo 'Running SMV verification cases:' >> $OUTPUT_DIR/stage3b 2>&1
    ./Run_SMV_Cases.sh -c $cfastrepo -I $COMPILER $USEINSTALL2 $RUN_OPENMP -q $SMOKEBOT_QUEUE -j $JOBPREFIX >> $OUTPUT_DIR/stage3b 2>&1
 
@@ -963,7 +959,7 @@ run_verification_cases_release()
 check_verification_cases_release()
 {
    # Scan and report any errors in FDS verification cases
-   cd $fdsrepo/Verification
+   cd $fdsrepo/SMV/Verification
 
    if [[ `grep -rIi 'Run aborted' $OUTPUT_DIR/stage3b` == "" ]] && \
       [[ `grep -rIi 'Segmentation' Visualization/* WUI/* Immersed_Boundary_Method/* ` == "" ]] && \
@@ -1056,11 +1052,11 @@ make_smv_pictures_db()
    # Run Make SMV Pictures script (debug mode)
    if [ "$SSH" == "" ]; then
    echo "making smokeview images"
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/SMV/Verification/scripts
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 &> $OUTPUT_DIR/stage4a_orig
    grep -v FreeFontPath $OUTPUT_DIR/stage4a_orig > $OUTPUT_DIR/stage4a
    else
-   $SSH \( cd $fdsrepo/Verification/scripts \; \
+   $SSH \( cd $fdsrepo/SMV/Verification/scripts \; \
    ./Make_SMV_Pictures.sh $USEINSTALL -d 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4a \)
    fi
 }
@@ -1154,11 +1150,11 @@ make_smv_pictures()
    # Run Make SMV Pictures script (release mode)
    echo Generating images 
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/Verification/scripts
+   cd $fdsrepo/SMV/Verification/scripts
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 &> $OUTPUT_DIR/stage4b_orig
    grep -v FreeFontPath $OUTPUT_DIR/stage4b_orig &> $OUTPUT_DIR/stage4b
    else
-   $SSH \( cd $fdsrepo/Verification/scripts \; \
+   $SSH \( cd $fdsrepo/SMV/Verification/scripts \; \
    ./Make_SMV_Pictures.sh $TESTFLAG $USEINSTALL 2>&1 \| grep -v FreeFontPath &> $OUTPUT_DIR/stage4b \)
    fi
 }
@@ -1199,7 +1195,7 @@ check_smv_pictures()
 
 make_smv_movies()
 {
-   cd $fdsrepo/Verification
+   cd $fdsrepo/SMV/Verification
    scripts/Make_SMV_Movies.sh 2>&1  &> $OUTPUT_DIR/stage4c
 }
 
@@ -1250,12 +1246,12 @@ generate_timing_stats()
 {
    echo "Timing stats"
    echo "   generating"
-   cd $fdsrepo/Verification/scripts/
-   export QFDS="$fdsrepo/Verification/scripts/copyout.sh"
-   export RUNCFAST="$fdsrepo/Verification/scripts/copyout.sh"
-   export RUNTFDS="$fdsrepo/Verification/scripts/copyout.sh"
+   cd $fdsrepo/SMV/Verification/scripts/
+   export QFDS="$fdsrepo/SMV/Verification/scripts/copyout.sh"
+   export RUNCFAST="$fdsrepo/SMV/Verification/scripts/copyout.sh"
+   export RUNTFDS="$fdsrepo/SMV/Verification/scripts/copyout.sh"
 
-   cd $fdsrepo/Verification
+   cd $fdsrepo/SMV/Verification
    scripts/SMV_Cases.sh
    scripts/GEOM_Cases.sh
 
