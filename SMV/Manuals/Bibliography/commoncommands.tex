@@ -1,0 +1,469 @@
+% $Date$
+% $Revision$
+% $Author$
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                                                 %
+% The mathematical style of these documents follows                                               %
+%                                                                                                 %
+% A. Thompson and B.N. Taylor. The NIST Guide for the Use of the International System of Units.   %
+%    NIST Special Publication 881, 2008.                                                          %
+%                                                                                                 %
+% http://www.nist.gov/pml/pubs/sp811/index.cfm                                                    %
+%                                                                                                 %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Packages which force the use of better TeX coding
+% Mostly from http://tex.stackexchange.com/q/19264
+%%\RequirePackage[l2tabu, orthodox]{nag}
+%%\usepackage{fixltx2e}
+%\usepackage{isomath} % Disabled for the moment because it changes the syntax for bold and roman Greek math symbols
+%%\usepackage[all,warning]{onlyamsmath}
+%\usepackage{strict} % Commented out for now because it is uncommon. A copy of style.sty is in Manuals/LaTeX_Style_Files/.
+
+\usepackage{times,mathptmx}
+\usepackage[pdftex]{graphicx}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{pdfsync}
+\usepackage{tikz}
+\usepackage{pgfplots}
+%\pgfplotsset{compat=1.7}
+\usepackage{tocloft}
+\usepackage{color}
+\usepackage{amsmath}
+\definecolor{linknavy}{rgb}{0,0,0.50196}
+\definecolor{linkred}{rgb}{1,0,0}
+\definecolor{linkblue}{rgb}{0,0,1}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{graphpap}
+\usepackage{rotating}
+\usepackage{geometry}
+\usepackage{relsize}
+\usepackage{longtable}
+\usepackage{lscape}
+\usepackage{amssymb}
+\usepackage{makeidx} % Create index at end of document
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography and index in the ToC
+\usepackage{lastpage} % Automatic last page number reference.
+\usepackage[T1]{fontenc}
+\usepackage{enumerate}
+\usepackage{upquote}
+\usepackage{moreverb}
+\usepackage{morefloats}
+
+% FDS Version String
+\newcommand{\fdsversion}{6.5.0}
+
+% Smokeview Version String
+\newcommand{\smvversion}{6.3.8}
+
+\newcommand{\nopart}{\expandafter\def\csname Parent-1\endcsname{}} % To fix table of contents in pdf.
+\newcommand{\ct}{\tt\small} % eventually will be deprecated due to http://www.tex.ac.uk/cgi-bin/texfaq2html?label=2letterfontcmd
+\newcommand{\textct}[1]{\texttt{\small #1}}
+
+\usepackage{tocstyle} % Fix table of contents sections from overlapping section titles
+\usetocstyle{standard}
+\usepackage{siunitx}
+\sisetup{
+    detect-all = true,
+    input-decimal-markers = {.},
+    input-ignore = {,},
+    inter-unit-product = \ensuremath{{}\cdot{}},
+    multi-part-units = repeat,
+    number-unit-product = \text{~},
+    per-mode = fraction,
+    separate-uncertainty = true,
+}
+
+\usepackage{listings}
+\usepackage{textcomp}
+\definecolor{lbcolor}{rgb}{0.96,0.96,0.96}
+\lstset{
+    %backgroundcolor=\color{lbcolor},
+    tabsize=4,
+    rulecolor=,
+    language=Fortran,
+        basicstyle=\footnotesize\ttfamily,
+        upquote=true,
+        aboveskip={\baselineskip},
+        belowskip={\baselineskip},
+        columns=fixed,
+        extendedchars=true,
+        breaklines=true,
+        breakatwhitespace=true,
+        frame=none,
+        showtabs=false,
+        showspaces=false,
+        showstringspaces=false,
+        identifierstyle=\ttfamily,
+        keywordstyle=\color[rgb]{0,0,0},
+        commentstyle=\color[rgb]{0,0,0},
+        stringstyle=\color[rgb]{0,0,0},
+}
+
+\usepackage[pdftex,
+        colorlinks=true,
+        urlcolor=linkblue,     % \href{...}{...} external (URL)
+        citecolor=linkred,     % citation number colors
+        linkcolor=linknavy,    % \ref{...} and \pageref{...}
+        pdfproducer={pdflatex},
+        pagebackref,
+        pdfpagemode=UseNone,
+        bookmarksopen=true,
+        plainpages=false,
+        verbose]{hyperref}
+
+% The Following commented code makes the ``Draft'' watermark on each page.
+%\usepackage{eso-pic}
+%\usepackage{type1cm}
+%\makeatletter
+%   \AddToShipoutPicture{
+%     \setlength{\@tempdimb}{.5\paperwidth}
+%     \setlength{\@tempdimc}{.5\paperheight}
+%     \setlength{\unitlength}{1pt}
+%     \put(\strip@pt\@tempdimb,\strip@pt\@tempdimc){
+%     \makebox(0,0){\rotatebox{45}{\textcolor[gray]{0.75}{\fontsize{8cm}\selectfont{RC6}}}}}
+% }
+%\makeatother
+
+\setlength{\textwidth}{6.5in}
+\setlength{\textheight}{9.0in}
+\setlength{\topmargin}{0.in}
+\setlength{\headheight}{0.in}
+\setlength{\headsep}{0.in}
+\setlength{\parindent}{0.25in}
+\setlength{\oddsidemargin}{0.0in}
+\setlength{\evensidemargin}{0.0in}
+\setlength{\leftmargini}{\parindent} % Controls the indenting of the "bullets" in a list
+\setlength{\cftsecnumwidth}{0.45in}
+\setlength{\cftsubsecnumwidth}{0.5in}
+\setlength{\cftfignumwidth}{0.45in}
+\setlength{\cfttabnumwidth}{0.45in}
+
+\newcommand{\authortitlesigs}
+{
+\begin{flushright}
+Kevin McGrattan \\
+Simo Hostikka \\
+Randall McDermott \\
+Jason Floyd \\
+Craig Weinschenk \\
+Kristopher Overholt
+\end{flushright}
+}
+
+\newcommand{\logosigs}{
+\begin{minipage}[b]{6.5in}
+\parbox[b]{3.5in}{
+\includegraphics[width=1.3in]{../Bibliography/VTT_BLACK_L} \\
+VTT Technical Research Centre of Finland}
+\hfill
+\parbox[b]{3in}{\flushright{\includegraphics[width=2.in]{../Bibliography/nistident_flright_vec}}}
+\end{minipage}
+}
+
+\newcommand{\authorsigs}
+{
+\begin{flushright}
+Kevin McGrattan \\
+Randall McDermott \\
+{\em Fire Research Division \\
+Engineering Laboratory \\
+Gaithersburg, Maryland, USA} \\[.1in]
+Simo Hostikka \\
+{\em Aalto University \\
+Espoo, Finland} \\[.1in]
+Jason Floyd \\
+Craig Weinschenk \\
+{\em Jensen Hughes \\
+Baltimore, Maryland, USA}\\[.1in]
+Kristopher Overholt \\
+{\em Continuum Analytics \\
+Austin, Texas, USA}
+\end{flushright}
+}
+
+\newcommand{\titlesigs}
+{
+\small
+\begin{flushright}
+U.S. Department of Commerce \\
+{\em Penny Pritzker, Secretary} \\
+\hspace{1in} \\
+National Institute of Standards and Technology \\
+{\em Willie May, Under Secretary of Commerce for Standards and Technology and Director}
+\end{flushright}
+}
+
+
+\newcommand{\disclaimer}[1]{
+\begin{minipage}[t][8in][s]{6.5in}
+\fontsize{10}{12}\selectfont
+\flushright{Certain commercial entities, equipment, or materials may be identified in this \\
+document in order to describe an experimental procedure or concept adequately. \\
+Such identification is not intended to imply recommendation or endorsement by the \\
+National Institute of Standards and Technology, nor is it intended to imply that the \\
+entities, materials, or equipment are necessarily the best available for the purpose.\\
+}
+
+\vspace{3in}
+
+\large
+\flushright{\bf National Institute of Standards and Technology Special Publication #1 \\
+Natl.~Inst.~Stand.~Technol.~Spec.~Publ.~#1, \pageref{LastPage} pages (October 2013) \\
+CODEN: NSPUE2 }
+
+\vfill
+
+\hspace{1in}
+
+\end{minipage}
+}
+
+
+
+\newcommand{\gforneybio}
+{
+\item[Glenn Forney] is a computer scientist at the Engineering Laboratory of NIST.  He received a
+bachelor of science degree in mathematics from Salisbury State College and a master of
+science and a doctorate in mathematics from Clemson University.  He joined NIST
+in 1986 (then the National Bureau of Standards) and has since worked on developing tools that
+provide a better understanding of fire phenomena, most notably Smokeview, a software tool for visualizing
+Fire Dynamics Simulator data.
+}
+
+\newcommand{\smvoverview}
+{
+This guide is part of a three volume set of companion documents describing how to use Smokeview
+in Volume I, the Smokeview User's Guide~\cite{Smokeview_Users_Guide}, describing technical details of how the visualizations are performed in Volume II, the Smokeview Technical Reference Guide~\cite{Smokeview_Tech_Guide}, and presents example cases
+verifying the various visualization capabilities of Smokeview in Volume III, the Smokeview Verification Guide~\cite{Smokeview_Verification_Guide}.  Details on the use and technical background of the Fire Dynamics Simulator is contained in the FDS User's~\cite{FDS_Users_Guide} and Technical reference guide~\cite{FDS_Math_Guide}
+respectively.
+}
+
+% commands to use for "official" cover and title pages
+% see smokeview verification guide to see how they are used
+
+\newcommand{\headerA}[1]{
+\begin{flushright}
+\fontsize{20}{24}\selectfont
+\bf{NIST Special Publication #1}
+\end{flushright}
+}
+
+
+\newcommand{\headerB}[1]{
+\begin{flushright}
+\fontsize{28}{33.6}\selectfont
+\bf{#1}
+\end{flushright}
+}
+
+\newcommand{\headerC}[1]{
+\vspace{.15in}
+\begin{flushright}
+\fontsize{12}{14}\selectfont
+#1
+\end{flushright}
+}
+
+\newcommand{\headerD}[1]{
+\begin{flushright}
+\fontsize{12}{14}\selectfont
+http://dx.doi.org/10.6028/NIST.SP.#1
+\end{flushright}
+}
+
+
+
+\newcommand{\dod}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\DoD}[2]{\frac{\mathrm{D} #1}{\mathrm{D} #2}}
+\newcommand{\dsods}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\renewcommand{\d}{\,\mathrm{d}}
+\newcommand{\dx}{\delta x}
+\newcommand{\dy}{\delta y}
+\newcommand{\dz}{\delta z}
+\newcommand{\degF}{$^\circ$F}
+\newcommand{\degC}{$^\circ$C}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\z}{z}
+\newcommand{\dt}{\delta t}
+\newcommand{\dn}{\delta n}
+\newcommand{\cH}{H}
+\newcommand{\hu}{u}
+\newcommand{\hv}{v}
+\newcommand{\hw}{w}
+\newcommand{\la}{\lambda}
+\newcommand{\bO}{{\Omega}}
+\newcommand{\bo}{{\mathbf{\omega}}}
+\newcommand{\btau}{\mathbf{\tau}}
+\newcommand{\bdelta}{{\mathbf{\delta}}}
+\newcommand{\sumyw}{\sum (Y_\alpha/W_\alpha)}
+\newcommand{\oW}{\overline{W}}
+\newcommand{\om}{\ensuremath{\omega}}
+\newcommand{\omx}{\omega_x}
+\newcommand{\omy}{\omega_y}
+\newcommand{\omz}{\omega_z}
+\newcommand{\erf}{\hbox{erf}}
+\newcommand{\erfc}{\hbox{erfc}}
+\newcommand{\bF}{{\mathbf{F}}}
+\newcommand{\bG}{{\mathbf{G}}}
+\newcommand{\bof}{{\mathbf{f}}}
+\newcommand{\bq}{{\mathbf{q}}}
+\newcommand{\br}{{\mathbf{r}}}
+\newcommand{\bu}{{\mathbf{u}}}
+\newcommand{\bx}{{\mathbf{x}}}
+\newcommand{\bk}{{\mathbf{k}}}
+\newcommand{\bv}{{\mathbf{v}}}
+\newcommand{\bg}{{\mathbf{g}}}
+\newcommand{\bn}{{\mathbf{n}}}
+\newcommand{\bS}{{\mathbf{S}}}
+\newcommand{\bW}{\overline{W}}
+\newcommand{\dS}{d{\mathbf{S}}}
+\newcommand{\bs}{{\mathbf{s}}}
+\newcommand{\bI}{{\mathbf{I}}}
+\newcommand{\hp}{H}
+\newcommand{\trho}{\tilde{\rho}}
+\newcommand{\dph}{{\delta\phi}}
+\newcommand{\dth}{{\delta\theta}}
+\newcommand{\tp}{\tilde{p}}
+\newcommand{\bp}{\overline{p}}
+\newcommand{\dQ}{\dot{Q}}
+\newcommand{\dq}{\dot{q}}
+\newcommand{\dbq}{\dot{\mathbf{q}}}
+\newcommand{\dm}{\dot{m}}
+\newcommand{\ha}{\frac{1}{2}}
+\newcommand{\ft}{\frac{4}{3}}
+\newcommand{\ot}{\frac{1}{3}}
+\newcommand{\fofi}{\frac{4}{5}}
+\newcommand{\of}{\frac{1}{4}}
+\newcommand{\twth}{\frac{2}{3}}
+\newcommand{\R}{R}
+\newcommand{\be}{\begin{equation}}
+\newcommand{\ee}{\end{equation}}
+\newcommand{\RE}{\hbox{Re}}
+\newcommand{\LE}{\hbox{Le}}
+\newcommand{\PR}{\hbox{Pr}}
+\newcommand{\PE}{\hbox{Pe}}
+\newcommand{\NU}{\hbox{Nu}}
+\newcommand{\SC}{\hbox{Sc}}
+\newcommand{\SH}{\hbox{Sh}}
+\newcommand{\WE}{\hbox{We}}
+\newcommand{\COTWO}{\text{\tiny \hbox{CO}$_2$}}
+\newcommand{\HTWOO}{\text{\tiny \hbox{H}$_2$\hbox{O}}}
+\newcommand{\OTWO}{\text{\tiny \hbox{O}$_2$}}
+\newcommand{\NTWO}{\text{\tiny \hbox{N}$_2$}}
+\newcommand{\CO}{\text{\tiny \hbox{CO}}}
+\newcommand{\F}{\text{\tiny \hbox{F}}}
+\newcommand{\C}{\text{\tiny \hbox{C}}}
+\newcommand{\Hy}{\text{\tiny \hbox{H}}}
+\newcommand{\So}{\text{\tiny \hbox{S}}}
+\newcommand{\M}{\text{\tiny \hbox{M}}}
+\newcommand{\xx}{\text{\tiny \hbox{x}}}
+\newcommand{\yy}{\text{\tiny \hbox{y}}}
+\newcommand{\zz}{\text{\tiny \hbox{z}}}
+\newcommand{\smvlines}{120~000}
+
+\newcommand{\calH}{\mathcal{H}}
+\newcommand{\calR}{\mathcal{R}}
+
+\newcommand{\dif}{\mathrm{d}}
+\newcommand{\Div}{\nabla\cdot}
+\newcommand{\D}{\mbox{D}}
+\newcommand{\mhalf}{\mbox{$\frac{1}{2}$}}
+\newcommand{\thalf}{\mbox{\tiny $\frac{1}{2}$}}
+\newcommand{\tripleprime}{{\prime\prime\prime}}
+\newcommand{\ppp}{{\prime\prime\prime}}
+\newcommand{\pp}{{\prime\prime}}
+
+\newcommand{\superscript}[1]{\ensuremath{^{\textrm{\tiny #1}}}}
+\newcommand{\subscript}[1]{\ensuremath{_{\textrm{\tiny #1}}}}
+
+\newcommand{\rb}[1]{\raisebox{1.5ex}[0pt]{#1}}
+
+\newcommand{\Ra}{$\Rightarrow$}
+\newcommand{\hhref}[1]{\href{#1}{{\tt #1}}}
+\newcommand{\fdsinput}[1]{{\scriptsize\verbatiminput{../../Verification/Visualization/#1}}}
+
+\definecolor{AQUAMARINE}{rgb}{0.49804,1.00000,0.83137}
+\definecolor{ANTIQUE WHITE}{rgb}{0.98039,0.92157,0.84314}
+\definecolor{BEIGE}{rgb}{0.96078,0.96078,0.86275}
+\definecolor{BLACK}{rgb}{0.00000,0.00000,0.00000}
+\definecolor{BLUE}{rgb}{0.00000,0.00000,1.00000}
+\definecolor{BLUE VIOLET}{rgb}{0.54118,0.16863,0.88627}
+\definecolor{BRICK}{rgb}{0.61176,0.40000,0.12157}
+\definecolor{BROWN}{rgb}{0.64706,0.16471,0.16471}
+\definecolor{BURNT SIENNA}{rgb}{0.54118,0.21176,0.05882}
+\definecolor{BURNT UMBER}{rgb}{0.54118,0.20000,0.14118}
+\definecolor{CADET BLUE}{rgb}{0.37255,0.61961,0.62745}
+\definecolor{CHOCOLATE}{rgb}{0.82353,0.41176,0.11765}
+\definecolor{COBALT}{rgb}{0.23922,0.34902,0.67059}
+\definecolor{CORAL}{rgb}{1.00000,0.49804,0.31373}
+\definecolor{CYAN}{rgb}{0.00000,1.00000,1.00000}
+\definecolor{DIMGRAY }{rgb}{0.41176,0.41176,0.41176}
+\definecolor{EMERALD GREEN}{rgb}{0.00000,0.78824,0.34118}
+\definecolor{FIREBRICK}{rgb}{0.69804,0.13333,0.13333}
+\definecolor{FLESH}{rgb}{1.00000,0.49020,0.25098}
+\definecolor{FOREST GREEN}{rgb}{0.13333,0.54510,0.13333}
+\definecolor{GOLD }{rgb}{1.00000,0.84314,0.00000}
+\definecolor{GOLDENROD}{rgb}{0.85490,0.64706,0.12549}
+\definecolor{GRAY}{rgb}{0.50196,0.50196,0.50196}
+\definecolor{GREEN}{rgb}{0.00000,1.00000,0.00000}
+\definecolor{GREEN YELLOW}{rgb}{0.67843,1.00000,0.18431}
+\definecolor{HONEYDEW}{rgb}{0.94118,1.00000,0.94118}
+\definecolor{HOT PINK}{rgb}{1.00000,0.41176,0.70588}
+\definecolor{INDIAN RED}{rgb}{0.80392,0.36078,0.36078}
+\definecolor{INDIGO}{rgb}{0.29412,0.00000,0.50980}
+\definecolor{IVORY}{rgb}{1.00000,1.00000,0.94118}
+\definecolor{IVORY BLACK}{rgb}{0.16078,0.14118,0.12941}
+\definecolor{KELLY GREEN}{rgb}{0.00000,0.50196,0.00000}
+\definecolor{KHAKI}{rgb}{0.94118,0.90196,0.54902}
+\definecolor{LAVENDER}{rgb}{0.90196,0.90196,0.98039}
+\definecolor{LIME GREEN}{rgb}{0.19608,0.80392,0.19608}
+\definecolor{MAGENTA}{rgb}{1.00000,0.00000,1.00000}
+\definecolor{MAROON}{rgb}{0.50196,0.00000,0.00000}
+\definecolor{MELON}{rgb}{0.89020,0.65882,0.41176}
+\definecolor{MIDNIGHT BLUE}{rgb}{0.09804,0.09804,0.43922}
+\definecolor{MINT}{rgb}{0.74118,0.98824,0.78824}
+\definecolor{NAVY}{rgb}{0.00000,0.00000,0.50196}
+\definecolor{OLIVE}{rgb}{0.50196,0.50196,0.00000}
+\definecolor{OLIVE DRAB}{rgb}{0.41961,0.55686,0.13725}
+\definecolor{ORANGE}{rgb}{1.00000,0.50196,0.00000}
+\definecolor{ORANGE RED}{rgb}{1.00000,0.27059,0.00000}
+\definecolor{ORCHID}{rgb}{0.85490,0.43922,0.83922}
+\definecolor{PINK}{rgb}{1.00000,0.75294,0.79608}
+\definecolor{POWDER BLUE}{rgb}{0.69020,0.87843,0.90196}
+\definecolor{PURPLE}{rgb}{0.50196,0.00000,0.50196}
+\definecolor{RASPBERRY}{rgb}{0.52941,0.14902,0.34118}
+\definecolor{RED}{rgb}{1.00000,0.00000,0.00000}
+\definecolor{ROYAL BLUE}{rgb}{0.25490,0.41176,0.88235}
+\definecolor{SALMON}{rgb}{0.98039,0.50196,0.44706}
+\definecolor{SANDY BROWN}{rgb}{0.95686,0.64314,0.37647}
+\definecolor{SEA GREEN}{rgb}{0.32941,1.00000,0.62353}
+\definecolor{SEPIA}{rgb}{0.36863,0.14902,0.07059}
+\definecolor{SIENNA}{rgb}{0.62745,0.32157,0.17647}
+\definecolor{SILVER}{rgb}{0.75294,0.75294,0.75294}
+\definecolor{SKY BLUE}{rgb}{0.52941,0.80784,0.92157}
+\definecolor{SLATEBLUE}{rgb}{0.41569,0.35294,0.80392}
+\definecolor{SLATE GRAY}{rgb}{0.43922,0.50196,0.56471}
+\definecolor{SPRING GREEN}{rgb}{0.00000,1.00000,0.49804}
+\definecolor{STEEL BLUE}{rgb}{0.27451,0.50980,0.70588}
+\definecolor{TAN}{rgb}{0.82353,0.70588,0.54902}
+\definecolor{TEAL}{rgb}{0.00000,0.50196,0.50196}
+\definecolor{THISTLE}{rgb}{0.84706,0.74902,0.84706}
+\definecolor{TOMATO }{rgb}{1.00000,0.38824,0.27843}
+\definecolor{TURQUOISE}{rgb}{0.25098,0.87843,0.81569}
+\definecolor{VIOLET}{rgb}{0.93333,0.50980,0.93333}
+\definecolor{VIOLET RED}{rgb}{0.81569,0.12549,0.56471}
+\definecolor{WHITE}{rgb}{1.00000,1.00000,1.00000}
+\definecolor{YELLOW}{rgb}{1.00000,1.00000,0.00000}
+
+\floatstyle{boxed}
+\newfloat{notebox}{H}{lon}
+\newfloat{warning}{H}{low}
+
+% Set default longtable alignment
+\setlength\LTleft{0pt}
+\setlength\LTright{0pt}
