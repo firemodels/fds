@@ -13,6 +13,7 @@ cd FAA_Polymers; ./Run_All.sh -y; cd ..
 cd Fleury_Heat_Flux; ./Run_All.sh -y; cd ..
 cd FM_Parallel_Panels; ./Run_All.sh -y; cd ..
 cd Hamins_CH4; ./Run_All.sh -y; cd ..
+cd Heated_Channel_Flow; ./Run_All.sh -y; cd ..
 cd Heskestad_Flame_Height; ./Run_All.sh -y; cd ..
 cd LEMTA_Spray; ./Run_All.sh -y; cd ..
 cd LLNL_Enclosure; ./Run_All.sh -y; cd ..
