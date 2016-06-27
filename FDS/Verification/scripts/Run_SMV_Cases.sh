@@ -80,7 +80,7 @@ is_file_installed()
 CURDIR=`pwd`
 cd ..
 
-export SVNROOT=`pwd`/..
+export SVNROOT=`pwd`/../..
 cd $SVNROOT
 export SVNROOT=`pwd`
 

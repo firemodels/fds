@@ -45,7 +45,7 @@ echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
-cd ../..
+cd ../../..
 export SVNROOT=`pwd`
 cd $CURDIR
 

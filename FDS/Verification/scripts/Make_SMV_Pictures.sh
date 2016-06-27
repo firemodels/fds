@@ -82,7 +82,7 @@ shift $(($OPTIND-1))
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE
 CURDIR=`pwd`
-cd ../..
+cd ../../..
 export SVNROOT=`pwd`
 cd $CURDIR/..
 
