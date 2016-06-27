@@ -1,4 +1,5 @@
 @echo off
+set guide=%1
 
 set envfile="%userprofile%"\fds_smv_env.bat
 IF EXIST %envfile% GOTO endif_envexist
@@ -12,11 +13,11 @@ goto:eof
 
 :endif_envexist
 
-echo Viewing animation web page
+echo Creating figures for the Smokeview User's guide
 
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\SMV\Manuals\SMV_Summary
+cd %svn_root%\FDS\Manuals\%guide%
 
-start explorer index.html
+start acrobat %guide%.pdf

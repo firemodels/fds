@@ -26,26 +26,26 @@ echo.
 if "%whichguides%" == "smvug" (
   Title Download smokeview user guide images
 
-  cd %svn_root%\Manuals\SMV_User_Guide\SCRIPT_FIGURES
-  pscp %linux_logon%:%smokebotrepo%/Manuals/SMV_User_Guide/SCRIPT_FIGURES/* .
+  cd %svn_root%\SMV\Manuals\SMV_User_Guide\SCRIPT_FIGURES
+  pscp %linux_logon%:%smokebotrepo%/SMV/Manuals/SMV_User_Guide/SCRIPT_FIGURES/* .
   goto eof
 )
 if "%whichguides%" == "smvvg" (
   Title Download smokeview verification guide images
 
-  cd %svn_root%\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
-  pscp %linux_logon%:%smokebotrepo%/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/* .
+  cd %svn_root%\SMV\Manuals\SMV_Verification_Guide\SCRIPT_FIGURES
+  pscp %linux_logon%:%smokebotrepo%/SMV/Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/* .
   goto eof
 )
 if "%whichguides%" == "fdsug" (
   Title Download FDS user guide images
 
-  cd %svn_root%\Manuals\FDS_User_Guide\SCRIPT_FIGURES
-  pscp %linux_logon%:%firebotrepo%/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
+  cd %svn_root%\FDS\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+  pscp %linux_logon%:%firebotrepo%/FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/* .
   goto eof
 )
 if "%whichguides%" == "fdsvalg" (
-  cd %svn_root%\Manuals\FDS_Validation_Guide\SCRIPT_FIGURES
+  cd %svn_root%\FDS\Manuals\FDS_Validation_Guide\SCRIPT_FIGURES
   for /D %%d in (*) do (
       echo.
       echo copying files from %%d
@@ -53,7 +53,7 @@ if "%whichguides%" == "fdsvalg" (
 
       Title Download FDS validation guide %%d images
 
-      pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/%%d/* .
+      pscp %linux_logon%:%firebotrepo%/FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/%%d/* .
       cd ..
   )
   goto eof
@@ -61,13 +61,13 @@ if "%whichguides%" == "fdsvalg" (
 if "%whichguides%" == "fdsverg" (
   Title Download FDS verification guide images
 
-  cd %svn_root%\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
-  pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/* .
+  cd %svn_root%\FDS\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES
+  pscp %linux_logon%:%firebotrepo%/FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/* .
 
   Title Download FDS verification guide scatterplot images
 
-  cd %svn_root%\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\Scatterplots
-  pscp %linux_logon%:%firebotrepo%/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/* .
+  cd %svn_root%\FDS\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\Scatterplots
+  pscp %linux_logon%:%firebotrepo%/FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/Scatterplots/* .
   goto eof
 )
 

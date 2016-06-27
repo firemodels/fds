@@ -18,6 +18,6 @@ echo Creating figures for the Smokeview User's guide
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Manuals\%guide%
+cd %svn_root%\SMV\Manuals\%guide%
 
 start acrobat %guide%.pdf

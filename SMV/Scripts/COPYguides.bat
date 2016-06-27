@@ -25,7 +25,7 @@ echo.
 
 
 if "%whichguides%" == "from_smv_local" (
-  set fromdir=%svn_root%\Manuals
+  set fromdir=%svn_root%\SMV\Manuals
   set todir="%userprofile%"\FDS_Guides
 
   Title Copying smokeview guides from local repo to %userprofile%\FDS_Guides
@@ -39,7 +39,7 @@ if "%whichguides%" == "from_smv_local" (
   goto eof
 )
 if "%whichguides%" == "from_smv_linux" (
-  set fromdir=%smokebotrepo%/Manuals
+  set fromdir=%smokebotrepo%/SMV/Manuals
   set todir="%userprofile%"\FDS_Guides
 
   Title Copying smokeview guides from linux smokebot
@@ -53,7 +53,7 @@ if "%whichguides%" == "from_smv_linux" (
   goto eof
 )
 if "%whichguides%" == "from_fds_linux" (
-  set fromdir=%firebotrepo%/Manuals
+  set fromdir=%firebotrepo%/FDS/Manuals
   set todir="%userprofile%"\FDS_Guides
 
   Title Copying FDS guides from linux firebot
