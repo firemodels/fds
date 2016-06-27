@@ -117,10 +117,10 @@ export QFDS=$RUNSMV
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
-export FDSUG=$SVNROOT/Manuals/FDS_User_Guide
-export SMVUG=$SVNROOT/Manuals/SMV_User_Guide
-export SMVVG=$SVNROOT/Manuals/SMV_Verification_Guide
-SUMMARY=$SVNROOT/Manuals/SMV_Summary
+export FDSUG=$SVNROOT/FDS/Manuals/FDS_User_Guide
+export SMVUG=$SVNROOT/SMV/Manuals/SMV_User_Guide
+export SMVVG=$SVNROOT/SMV/Manuals/SMV_Verification_Guide
+SUMMARY=$SVNROOT/SMV/Manuals/SMV_Summary
 
 is_file_installed $SMV
 is_file_installed $SMOKEZIP
@@ -165,11 +165,11 @@ rm -f *.png
 $SMV -version > smokeview.version
 
 if [ "$RUN_SMV" == "1" ] ; then
-  cd $SVNROOT/Verification/Visualization
+  cd $SVNROOT/SMV/Verification/Visualization
   echo Converting particles to isosurfaces in case plumeiso
   $SMOKEZIP -r -part2iso plumeiso
 
-  cd $SVNROOT/Verification/WUI
+  cd $SVNROOT/SMV/Verification/WUI
   echo Converting particles to isosurfaces in case pine_tree
   if  [ -e pine_tree.smv ]; then
     $SMOKEZIP -r -part2iso pine_tree
@@ -186,7 +186,7 @@ if [ "$RUN_SMV" == "1" ] ; then
 
 # difference plume5c and thouse5
 
-  cd $SVNROOT/Verification/Visualization
+  cd $SVNROOT/SMV/Verification/Visualization
   echo Differencing cases plume5c and plume5cdelta
   $SMOKEDIFF -w -r plume5c plume5cdelta
   echo Differencing cases thouse5 and thouse5delta
@@ -195,9 +195,9 @@ if [ "$RUN_SMV" == "1" ] ; then
   echo Generating images
 
   source $STARTX
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/SMV_Cases.sh
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/SMV_DIFF_Cases.sh
   cd $CURDIDR
   source $STOPX
@@ -208,13 +208,13 @@ fi
 
 if [ "$RUN_WUI" == "1" ] ; then
   source $STARTX
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/WUI_Cases.sh
   source $STOPX
 fi
 if [ "$RUN_GEOM" == "1" ] ; then
   source $STARTX
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/GEOM_Cases.sh
   source $STOPX
 fi
