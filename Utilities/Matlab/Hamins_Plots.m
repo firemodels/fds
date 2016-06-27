@@ -18,7 +18,7 @@ addpath 'scripts'
 
 Dataplot_Inputs_File = [pwd,'/FDS_validation_dataplot_inputs.csv'];
 Working_Dir = [pwd, '/../../Validation/'];
-Manuals_Dir = [pwd, '/../../Manuals/'];
+Manuals_Dir = [pwd, '/../../FDS/Manuals/'];
 
 % The relevant rows from FDS_validation_dataplot_inputs.csv are the last arguments of the following call:
 
