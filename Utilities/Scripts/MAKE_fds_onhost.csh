@@ -13,6 +13,6 @@ endif
 echo |& tee -a $out
 date |& tee -a $out
 echo Building FDS in $fdsdir on $host using the target $target |& tee -a $out
-ssh $host svn info $fdsdir/../../../FDS_Source/ | grep Rev | grep Last |& tee -a $out
-ssh $host \( cd \~/$fdsdir \; make VPATH="../../../FDS_Source" -f ../makefile $target \) |& tee -a $out
+ssh $host svn info $fdsdir/../../../FDS/Source/ | grep Rev | grep Last |& tee -a $out
+ssh $host \( cd \~/$fdsdir \; make VPATH="../../../FDS/Source" -f ../makefile $target \) |& tee -a $out
 echo Completed |& tee -a $out

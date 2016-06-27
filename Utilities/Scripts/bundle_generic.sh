@@ -118,7 +118,7 @@ fds2asciiout=fds2ascii$OUT
 
 scp_fds_smvroot=$fds_smvroot
 fds_smvroot=~/$fds_smvroot
-fdsroot=$scp_fds_smvroot/FDS_Compilation
+fdsroot=$scp_fds_smvroot/FDS/Build
 backgroundroot=$scp_fds_smvroot/SMV/Build/background
 smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
 smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip

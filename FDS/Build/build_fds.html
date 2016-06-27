@@ -1,0 +1,102 @@
+<html>
+<head>
+<TITLE>FDS</TITLE>
+<script type="text/javascript">
+// for debugging:
+//document.getElementById("demo").innerHTML = fullcommand;
+
+MyObject = new ActiveXObject("WScript.Shell")
+function get_fullpath(command,platform){
+  var location = window.location.pathname;
+  var directoryPath = location.substring(1, location.lastIndexOf("/")+1);
+  var fullpath = directoryPath.concat(command).concat(platform);
+  return fullpath;
+}
+function build_fds(args){
+  MyObject.Run(get_fullpath("Scripts/BUILDfds.bat ",args));
+}
+</script>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF" >
+<a href="../../Utilities/build_bundle.html"><font size=5>Bundle</font></a> -
+<font size=5>FDS</font> - 
+<a href="../../SMV/build_smokeview.html"><font size=5>Smokeview</font></a> - 
+<a href="../../SMV/build_guides.html"><font size=5>Guides</font></a>
+
+<hr size="1">
+
+<h3>Bundle Steps - FDS</h3>
+<ol>
+<li>Update <a href="../../SMV/scripts/Update_repos_gitlatest.bat">repos</a>
+<li><a href="Scripts/EDIT_setup.bat">Update FDS version string</a> in configuration file
+<li>Build FDS on all three platforms
+<li>Build Teset MPI Utility
+</ol>
+
+
+<h3>FDS</h3>
+<p><table border=on>
+
+<tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+
+
+<tr align="center">
+<td>
+<button onclick="build_fds('windows release')">release</button>
+</td>
+<td>
+<button onclick="build_fds('linux release')">release</button>
+</td>
+<td>
+<button onclick="build_fds('osx release')">release</button>
+</td>
+</tr>
+
+</table>
+
+<h3>Test MPI Utility
+
+<p><table border=on>
+
+<tr><th>Windows</th></tr>
+<tr align="center">
+<td><a href="Scripts/BUILDtestmpiwin64.bat">Build</a></td>
+</tr>
+</table>
+
+<p><hr>
+
+<h3>Other</h3>
+<p>Steps below not needed for bundle
+<p><table border=on>
+
+<tr><th>Windows</th><th>Linux</th><th>OSX</th></tr>
+
+
+<tr align="center">
+<td>
+<button onclick="build_fds('windows debug')">debug</button><br>
+<button onclick="build_fds('windows dev')">dev</button><br>
+</td>
+<td>
+<button onclick="build_fds('linux debug')">debug</button><br>
+<button onclick="build_fds('linux dev')">dev</button><br>
+</td>
+<td>
+<button onclick="build_fds('osx debug')">debug</button><br>
+<button onclick="build_fds('osx dev')">dev</button><br><button onclick="build_fds('osx release')">release</button>
+</td>
+</tr>
+
+</table>
+
+<ul>
+<li><a href="Scripts/EDIT_build_fds.bat">Edit</a> this page
+<li><a href="getting_started.html">FDS/Smokeview build page checklist</a>
+</ul>
+
+
+<p><hr>
+
+</BODY>
+</HTML>

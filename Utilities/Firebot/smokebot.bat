@@ -190,8 +190,8 @@ if %clean% == 0 goto skip_clean2
    call :git_clean %fdsroot%\Verification
    call :git_clean %fdsroot%\SMV\source
    call :git_clean %fdsroot%\SMV\Build
-   call :git_clean %fdsroot%\FDS_Source
-   call :git_clean %fdsroot%\FDS_Compilation
+   call :git_clean %fdsroot%\FDS\Source
+   call :git_clean %fdsroot%\FDS\Compilation
    call :git_clean %fdsroot%\Manuals
 
 :skip_clean2
@@ -237,7 +237,7 @@ echo Stage 1 - Building FDS
 
 echo             parallel debug
 
-cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%_db
+cd %fdsroot%\FDS\Compilation\mpi_intel_win%size%_db
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1b.txt 2>&1
 call make_fds bot ..\makefile mpi_intel_win%size%_db 1>> %OUTDIR%\stage1b.txt 2>&1
 
@@ -246,7 +246,7 @@ call :find_fds_warnings "warning" %OUTDIR%\stage1b.txt "Stage 1b"
 
 echo             parallel release
 
-cd %fdsroot%\FDS_Compilation\mpi_intel_win%size%
+cd %fdsroot%\FDS\Compilation\mpi_intel_win%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage1d.txt 2>&1
 call make_fds bot  1>> %OUTDIR%\stage1d.txt 2>&1
 

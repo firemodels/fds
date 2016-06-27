@@ -1,4 +1,4 @@
-SOURCE_DIR = ..\..\..\source\get_time
+SOURCE_DIR = ..\..\..\Source\get_time
 INC_DIR =  -I $(SOURCE_DIR)
 FILTERC =
 FILTERF =

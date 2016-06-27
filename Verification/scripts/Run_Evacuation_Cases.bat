@@ -4,7 +4,7 @@ set svn_drive=d:
 set BASEDIR=%CD%
 set SVNROOT=%BASEDIR%\..\
 
-set FDS=%SVNROOT%\FDS_Compilation\intel_win_32\fds5_win_32
+set FDS=%SVNROOT%\FDS\Build\intel_win_32\fds5_win_32
 
 set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
 

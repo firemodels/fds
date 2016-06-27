@@ -1,11 +1,11 @@
-SOURCE_DIR = ../../../source/
+SOURCE_DIR = ../../../Source/
 LIB_DIR = ../../LIBS
 INC_DIR =  -I $(SOURCE_DIR)/pthreads -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokezip 
 FILTERC =
 FILTERF =
 OPT =
 
-VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS_Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
+VPATH = $(SOURCE_DIR)/smokezip ../../../../FDS/Source $(SOURCE_DIR)/shared $(SOURCE_DIR)/smokeview 
 bin = .
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
