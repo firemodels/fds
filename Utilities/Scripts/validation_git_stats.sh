@@ -7,7 +7,7 @@
 MAKEGITENTRY(){
 DIR=$1
 gitrevisions=/tmp/gitrevisions.$$
-cat $FDSSMV/Validation/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
+cat $FDSSMV/FDS/Validation/$DIR/FDS_Output_Files/*git.txt 2> /dev/null | sort -u > $gitrevisions
 gitrev=`head -1 $gitrevisions`
 if [ "$gitrev" != "" ] ; then
   gitrevshort=`echo $gitrev | awk -F - '{print $4}' | sed 's/^.\{1\}//'`
@@ -38,7 +38,7 @@ shift $(($OPTIND-1))
 cd $FDSSMV/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics
-OUTPUT_TEX_FILE=$FDSSMV/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
+OUTPUT_TEX_FILE=$FDSSMV/FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex
 
 # Table header
 echo "\begin{longtable}[c]{|l|c|c|}" > $OUTPUT_TEX_FILE
@@ -52,7 +52,7 @@ echo "Dataset  &  FDS Revision Date  &  FDS Revision String\\\\ \hline \hline" >
 echo "\endhead" >> $OUTPUT_TEX_FILE
 
 # Table body
-maketable=$FDSSMV/Validation/Process_All_Output.sh
+maketable=$FDSSMV/FDS/Validation/Process_All_Output.sh
 CASELIST=/tmp/temp.out.$$
 TABLE_ENTRIES=/tmp/temp2.out.$$
 grep VDIR $maketable | awk 'BEGIN { FS = "/" } ; { print $2 }' > $CASELIST
