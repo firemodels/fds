@@ -1230,9 +1230,10 @@ if [ "$FIREBOT_LITE" == "" ]; then
 # clean debug stage
 cd $fdsrepo
 if [[ "$CLEANREPO" == "1" ]] ; then
-   echo "   cleaning repo"
+   echo "   cleaning Verification directories"
    clean_repo $fdsrepo/FDS/Verification
-   clean_repo $fdsrepo/Validation
+   echo "   cleaning Validation directories"
+   clean_repo $fdsrepo/FDS/Validation
 fi
 
 ### Stage 5 ###
