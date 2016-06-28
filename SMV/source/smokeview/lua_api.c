@@ -15,6 +15,8 @@
 #include GLUT_H
 #include "gd.h"
 
+#include <unistd.h>
+
 lua_State* L;
 int lua_displayCB(lua_State *L);
 
@@ -4329,9 +4331,12 @@ void initLua() {
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 
-  //add fdsprefix (the CHID) as a variable in the lua environment
+  //add fdsprefix (the path plus  CHID) as a variable in the lua environment
   lua_pushstring(L, fdsprefix);
   lua_setglobal(L, "fdsprefix");
+
+  lua_pushstring(L, chidfilebase);
+  lua_setglobal(L, "chid");
 
   //nglobal_times is the number of frames
   // this cannot be set as a global at init as it will change
@@ -4395,6 +4400,9 @@ int loadLuaScript(char *filename) {
   runluascript=0;
   lua_displayCB(L);
   runluascript=1;
+  char cwd[1000];
+  getcwd(cwd,1000);
+  printf("cwd: %s\n", cwd);
   printf("loading: %s\n", filename);
   const char *err_msg;
   lua_Debug info;
