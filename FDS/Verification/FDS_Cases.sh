@@ -443,8 +443,8 @@ $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
 
-$QFDS -d Visualization objects_dynamic.fds
-$QFDS -d Visualization objects_static.fds
+$QFDS -d Visualization objects_dynamic2.fds
+$QFDS -d Visualization objects_static2.fds
 
 $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds

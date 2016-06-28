@@ -34,5 +34,5 @@ $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
 $RUNSMV -d Turbulence ribbed_channel_80
-$RUNSMV -d Visualization objects_static
-$RUNSMV -d Visualization objects_dynamic
+$RUNSMV -d Visualization objects_static2
+$RUNSMV -d Visualization objects_dynamic2
