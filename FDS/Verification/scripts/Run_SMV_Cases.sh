@@ -192,9 +192,9 @@ export BASEDIR=`pwd`
 # Remove output files (unless stop option is used)
 if [[ ! $stop_cases ]] ; then
   echo "Removing FDS/CFAST output files"
-  export RUNCFAST="$SVNROOT/Verification/scripts/Remove_CFAST_Files.sh"
-  export QFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
-  export RUNTFDS="$SVNROOT/Verification/scripts/Remove_FDS_Files.sh"
+  export RUNCFAST="$SVNROOT/SMV/Verification/scripts/Remove_CFAST_Files.sh"
+  export QFDS="$SVNROOT/SMV/Verification/scripts/Remove_FDS_Files.sh"
+  export RUNTFDS="$SVNROOT/SMV/Verification/scripts/Remove_FDS_Files.sh"
   scripts/SMV_Cases.sh
   scripts/GEOM_Cases.sh
   scripts/WUI_Cases.sh
@@ -207,13 +207,13 @@ export  RUNCFAST="$QFDSSH -c -e $CFAST $QUEUE $STOPFDS $JOBPREFIX"
 export      QFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $QUEUE $STOPFDS $JOBPREFIX"
 export   RUNTFDS="$QFDSSH -e $FDSEXE $OPENMPOPTS $QUEUE $STOPFDS $JOBPREFIX"
 
-echo "" | $FDSEXE 2> $SVNROOT/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
+echo "" | $FDSEXE 2> $SVNROOT/SMV/Manuals/SMV_User_Guide/SCRIPT_FIGURES/fds.version
 
 if [[ ! $stop_cases ]] ; then
   if [ "$FDS_DEBUG" == "0" ] ; then
     if [ "$RUN_WUI" == "1" ] ; then
       is_file_installed $WIND2FDS
-      cd $SVNROOT/Verification/WUI
+      cd $SVNROOT/SMV/Verification/WUI
       echo Converting wind data
       $WIND2FDS -prefix sd11 -offset " 100.0  100.0 0.0" wind_data1a.csv
     fi
@@ -221,15 +221,15 @@ if [[ ! $stop_cases ]] ; then
 fi
 
 if [ "$RUN_SMV" == "1" ] ; then
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/SMV_Cases.sh
 fi
 if [ "$RUN_GEOM" == "1" ] ; then
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/GEOM_Cases.sh
 fi
 if [ "$RUN_WUI" == "1" ] ; then
-  cd $SVNROOT/Verification
+  cd $SVNROOT/SMV/Verification
   scripts/WUI_Cases.sh
 fi
 if [ "$WAIT" == "1" ] ; then
