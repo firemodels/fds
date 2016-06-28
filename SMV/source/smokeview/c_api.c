@@ -522,7 +522,9 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 
         snprintf(renderfile_name, 1024,
                   "%s%s%s",
-                  fdsprefix, view_suffix, renderfile_ext);
+                  chidfilebase, view_suffix, renderfile_ext);
+        printf("chidfilebase is: %s\n", chidfilebase);
+        printf("fdsprefix is: %s\n", fdsprefix);
         printf("directory is: %s\n", renderfile_dir);
         printf("filename is: %s\n", renderfile_name);
     } else {
