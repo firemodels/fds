@@ -567,20 +567,21 @@ compile_smv_utilities()
 {  
    # smokeview libraries
    if [ "$USEINSTALL" == "" ]; then
-   echo "   Smokeview"
-   echo "      libraries"
-   if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size}
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
-   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
-   echo "" >> $OUTPUT_DIR/stage3a 2>&1
+     echo "   Smokeview"
+     echo "      libraries"
+     if [ "$SSH" == "" ]; then
+       cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size}
+       echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
+       ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
+       echo "" >> $OUTPUT_DIR/stage3a 2>&1
+     else
+       $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size} \; \
+       echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
+       ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
+       echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
+     fi
    else
-   $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size} \; \
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
-   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
-   fi
-   echo "   Smokeview - using installed smokeview"
+     echo "   Smokeview - using installed smokeview"
    fi
 }
 
