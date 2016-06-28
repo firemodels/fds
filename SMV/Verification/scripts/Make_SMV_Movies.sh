@@ -36,10 +36,10 @@ fi
 
 underscore=_
 mov=.m1v
-VDIR=$GITROOT/Verification
-INDIR=$GITROOT/Verification/Visualization/frames
-WUIINDIR=$GITROOT/Verification/WUI/frames
-OUTDIR=$GITROOT/Manuals/SMV_Summary/movies
+VDIR=$GITROOT/SMV/Verification
+INDIR=$GITROOT/SMV/Verification/Visualization/frames
+WUIINDIR=$GITROOT/SMV/Verification/WUI/frames
+OUTDIR=$GITROOT/SMV/Manuals/SMV_Summary/movies
 
 rm -f $INDIR/*.png
 rm -f $WUIINDIR/*.png

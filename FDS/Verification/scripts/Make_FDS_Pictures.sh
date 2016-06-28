@@ -72,7 +72,7 @@ esac
 done
 shift $(($OPTIND-1))
 
-export SVNROOT=`pwd`/../../..
+export SVNROOT=`pwd`/../..
 if [ "$SMV_PATH" == "" ]; then
   SMV_PATH=$SVNROOT/SMV/Build/smokeview/intel_$PLATFORM$SIZE
 fi
