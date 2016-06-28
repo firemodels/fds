@@ -2878,7 +2878,7 @@ PARABOLIC_IF: IF (CHECK_VN) THEN
       DO J=1,JBAR
          I_LOOP: DO I=1,IBAR
             IF (SOLID(CELL_INDEX(I,J,K))) CYCLE I_LOOP
-            MU_TMP = MAX(D_Z_MAX(I,J,K),MAX(RPR,RSC)*MU(I,J,K)/RHOS(I,J,K))
+            MU_TMP = MAX(D_Z_MAX(I,J,K),MU(I,J,K)/RHOS(I,J,K))
             IF (MU_TMP>=MU_MAX) THEN
                MU_MAX = MU_TMP
                I_VN=I
@@ -2912,9 +2912,9 @@ IF ((CFL<CFL_MAX .AND. VN<VN_MAX .AND. PART_CFL<PARTICLE_CFL_MAX .AND. DRAG_CFL 
       CHANGE_TIME_STEP_INDEX(NM) = 1
    ENDIF
 ELSE
-   DT_NEW(NM) = 0.9_EB*MIN( CFL_MAX/MAX(UVWMAX,DT_EPS) , &
+   DT_NEW(NM) = 0.9_EB*MIN( CFL_MAX/MAX(UVWMAX,DT_EPS)               , &
+                            VN_MAX/(2._EB*R_DX2*MAX(MUTRM,DT_EPS))   , &
                             PARTICLE_CFL_MAX/MAX(PART_UVWMAX,DT_EPS) , &
-                            VN_MAX/(2._EB*R_DX2*MAX(MUTRM,DT_EPS)) , &
                             DT*DRAG_CFL_MAX/MAX(DRAG_CFL,DT_EPS))
    DRAG_CFL = 0._EB
    CHANGE_TIME_STEP_INDEX(NM) = -1
