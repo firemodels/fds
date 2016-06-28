@@ -12,4 +12,4 @@ default:
 	echo $(PLATFORM)
 	echo "MINGW64_NT-10.0"
 	echo $(PLAT)
-	$(SMV) $(SMVOPTS) -luascript test1.lua room_fire > test1.log
+	$(SMV) $(SMVOPTS) -luascript test1.lua room_fire/room_fire > test1.log
