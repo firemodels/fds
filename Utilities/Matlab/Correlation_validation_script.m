@@ -31,7 +31,7 @@ addpath 'scripts'
 % Dataplot and scatplot options
 
 Dataplot_Inputs_File = [pwd, '/Correlation_validation_dataplot_inputs.csv'];
-Working_Dir = [pwd, '/../../Validation/'];
+Working_Dir = [pwd, '/../../FDS/Validation/'];
 Manuals_Dir = [pwd, '/../../FDS/Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/Correlation_validation_scatterplot_inputs.csv'];
 
