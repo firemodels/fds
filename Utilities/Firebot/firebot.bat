@@ -198,13 +198,8 @@ echo. 1>> %OUTDIR%\stage0.txt 2>&1
 
 if %clean% == 0 goto skip_clean1
    echo             cleaning %fdsbasename% repository
-   call :git_clean %fdsroot%\Verification
-   call :git_clean %fdsroot%\SMV\source
-   call :git_clean %fdsroot%\SMV\Build
-   call :git_clean %fdsroot%\FDS\Source
-   call :git_clean %fdsroot%\FDS\Build
-   call :git_clean %fdsmanualdir%
-   call :git_clean %smvmanualdir%
+   call :git_clean %fdsroot%\FDS
+   call :git_clean %fdsroot%\SMV
 :skip_clean1
 
 :: update FDS/Smokeview repository
@@ -326,14 +321,14 @@ echo             debug mode
 
 :: run cases
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\FDS\Verification\scripts
 call Run_FDS_cases -debug 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check cases
 
 set haveerrors_now=0
 echo. > %OUTDIR%\stage_error.txt
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\FDS\Verification\scripts
 call Check_FDS_cases 
 
 :: report errors
@@ -346,20 +341,20 @@ if %lite% == 1 goto skip_lite3
 
 :: run cases
 
-  cd %fdsroot%\Verification\
+  cd %fdsroot%\FDS\Verification\
   if %clean% == 0 goto skip_clean2
      echo             cleaning Verification directory
-     call :git_clean %fdsroot%\Verification
+     call :git_clean %fdsroot%\FDS\Verification
 :skip_clean2
 
-  cd %fdsroot%\Verification\scripts
+  cd %fdsroot%\FDS\Verification\scripts
   call Run_FDS_cases  1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check cases
 
   set haveerrors_now=0
   echo. > %OUTDIR%\stage_error.txt
-  cd %fdsroot%\Verification\scripts
+  cd %fdsroot%\FDS\Verification\scripts
   call Check_FDS_cases
 
 :: report errors
@@ -388,7 +383,7 @@ if %lite% == 1 goto skip_lite4
   echo Stage 5 - Making pictures
   echo             FDS verification cases
 
-  cd %fdsroot%\Verification\scripts
+  cd %fdsroot%\FDS\Verification\scripts
   call MAKE_FDS_pictures %smokeview% 1> %OUTDIR%\stage5.txt 2>&1
 
   if %have_matlab%==0 goto skip_matlabplots

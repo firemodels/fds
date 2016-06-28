@@ -189,13 +189,8 @@ if %update% == 0 goto skip_update1
 
 if %clean% == 0 goto skip_clean2
    echo             cleaning %fdsbasename% repository
-   call :git_clean %fdsroot%\Verification
-   call :git_clean %fdsroot%\SMV\source
-   call :git_clean %fdsroot%\SMV\Build
-   call :git_clean %fdsroot%\FDS\Source
-   call :git_clean %fdsroot%\FDS\Build
-   call :git_clean %fdsmanualdir%
-   call :git_clean %smvmanualdir%
+   call :git_clean %fdsroot%\SMV
+   call :git_clean %fdsroot%\FDS
 
 :skip_clean2
 
@@ -349,12 +344,12 @@ echo             debug mode
 
 :: run the cases
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\SMV\Verification\scripts
 call Run_SMV_Cases -debug -smvwui 1> %OUTDIR%\stage4a.txt 2>&1
 
 :: check the cases
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\SMV\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases 
 
@@ -366,12 +361,12 @@ echo             release mode
 
 :: run the cases
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\SMV\Verification\scripts
 call Run_SMV_Cases -smvwui 1> %OUTDIR%\stage4b.txt 2>&1
 
 :: check the cases
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\SMV\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
 call Check_SMV_cases
 
@@ -389,7 +384,7 @@ call :GET_TIME MAKEPICS_beg
 
 echo Stage 5 - Making Smokeview pictures
 
-cd %fdsroot%\Verification\scripts
+cd %fdsroot%\SMV\Verification\scripts
 call Make_SMV_Pictures -smvwui 1> %OUTDIR%\stage5.txt 2>&1
 
 call :find_smokeview_warnings "error" %OUTDIR%\stage5.txt "Stage 5"

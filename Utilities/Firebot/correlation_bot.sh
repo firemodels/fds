@@ -27,7 +27,7 @@ run_correlations()
    echo ""
    echo "Running Stages 1 and 2 - Compile and run correlations program"
    echo ""
-   cd $SVNROOT/Validation
+   cd $SVNROOT/FDS/Validation
    ./Run_Correlation_Cases.sh
 }
 

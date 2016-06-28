@@ -269,7 +269,6 @@ clean_git_repo()
       cd $fdsrepo
       if [[ "$CLEANREPO" == "1" ]] ; then
          echo "   repo"
-         clean_repo $fdsrepo/Validation
          clean_repo $fdsrepo/SMV
          clean_repo $fdsrepo/FDS
       fi
