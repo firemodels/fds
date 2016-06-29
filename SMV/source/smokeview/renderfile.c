@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "smokeviewvars.h"
 
@@ -502,6 +503,121 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     break;
   case JPEG:
     gdImageJpeg(RENDERimage,RENDERfile,-1);
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
+  }
+  fclose(RENDERfile);
+
+  /* free up memory used by both OpenGL and GIF images */
+
+  gdImageDestroy(RENDERimage);
+  FREEMEMORY(renderfile);
+  PRINTF(" Completed\n");
+  return 0;
+}
+
+/* ------------------ sphere_interp ------------------------ */
+
+float sphere_interp(int i, int ni, int j, int nj, float *vals){
+  return vals[0];
+}
+
+/* ------------------ mergescreenbuffers360 ------------------------ */
+
+int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **screenbuffers) {
+
+  char *renderfile, renderfile_base[1024], renderfile2[1024];
+  char *ext;
+  FILE *RENDERfile = NULL;
+  gdImagePtr RENDERimage;
+  int i, j, ibuff;
+  int irow;
+  int width360 = 1024, height360 = 512, i360;
+  int ilat, ilong;
+
+  switch (renderfiletype) {
+  case PNG:
+    ext = ext_png;
+    break;
+  case JPEG:
+    ext = ext_jpg;
+    break;
+  default:
+    renderfiletype = 0;
+    ext = ext_png;
+    break;
+  }
+
+  if (scriptoutstream != NULL&&current_script_command != NULL&&current_script_command->cval2 != NULL) {
+    strcpy(renderfile2, current_script_command->cval2);
+  }
+  else {
+    strcpy(renderfile2, fdsprefix);
+  }
+  if (RenderTime == 1) {
+    sprintf(renderfile_base, "%s_%04i", renderfile2, itimes / RenderSkip);
+  }
+  if (RenderTime == 0) {
+    sprintf(renderfile_base, "%s_s%04i", renderfile2, seqnum);
+    seqnum++;
+  }
+  strcat(renderfile_base, ext);
+  renderfile = get_filename(smokeviewtempdir, renderfile_base, tempdir_flag);
+  if (renderfile == NULL) {
+    fprintf(stderr, "*** Error: unable to write to %s", renderfile_base);
+    return 1;
+  }
+  RENDERfile = fopen(renderfile, "wb");
+  PRINTF("Rendering to: %s .", renderfile);
+  if (RENDERfile == NULL) {
+    fprintf(stderr, "*** Error: unable to write to %s", renderfile);
+    FREEMEMORY(renderfile);
+    return 1;
+  }
+  RENDERimage = gdImageCreateTrueColor(width360, height360);
+
+  for(ibuff=0;ibuff<nscreenbuffers;ibuff++){
+    int j;
+    GLubyte *p;
+    float *longs, *lats;
+    float llong, llat;
+    
+    p = screenbuffers[ibuff];
+    longs = longlatbounds+8*ibuff;
+    lats =  longlatbounds+8*ibuff+4;
+
+    for(j=0;j<screenHeight;j++){
+      int i;
+      
+      for(i=0;i<screenWidth;i++){
+        unsigned int r, g, b;
+        int rgb_local;
+        int ii, jj, ijk;
+
+        llong = sphere_interp(i,screenWidth,j,screenHeight,longs);
+        ii = CLAMP((int)((float)width360*(llong + 180.0)/360.0),0,width360-1);
+        
+        llat = sphere_interp(i,screenWidth,j,screenHeight,lats);
+        jj = CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
+
+        ijk = 3*(j*screenWidth + i);
+        r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
+        rgb_local = (r<<16)|(g<<8)|b;
+        gdImageSetPixel(RENDERimage,jj,ii,rgb_local);
+      }
+    }
+  }
+
+  /* output the image */
+
+  switch (renderfiletype) {
+  case PNG:
+    gdImagePng(RENDERimage, RENDERfile);
+    break;
+  case JPEG:
+    gdImageJpeg(RENDERimage, RENDERfile, -1);
     break;
   default:
     ASSERT(FFALSE);

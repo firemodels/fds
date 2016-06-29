@@ -659,6 +659,7 @@ EXTERNCPP void global2localpatchbounds(const char *key);
 EXTERNCPP void update_loaded_lists(void);
 EXTERNCPP void updateLights(float *pos1, float *pos2);
 EXTERNCPP int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers);
+EXTERNCPP int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **screenbuffers);
 EXTERNCPP GLubyte *getscreenbuffer(void);
 EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 EXTERNCPP int  inblockage(const meshdata *gb,float x, float y, float z);

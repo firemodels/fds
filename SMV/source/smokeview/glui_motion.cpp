@@ -664,6 +664,9 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_render_size->set_int_val(render_size_index);
   SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(ROLLOUT_render, "Resolution multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
   SPINNER_nrender_rows->set_int_limits(2, 10);
+#ifdef pp_RENDER360
+  glui_motion->add_checkbox_to_panel(ROLLOUT_render, "360", &render_360);
+#endif  
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);
