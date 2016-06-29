@@ -2977,7 +2977,6 @@ void Display_CB(void){
       if(RenderOnceNow==1){
         renderdoublenow=1;
       }
-
       if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
         if(itimes>=0&&itimes<nglobal_times&&
           ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
@@ -2986,7 +2985,7 @@ void Display_CB(void){
           renderdoublenow=1;
         }
       }
-      if(renderdoublenow==1){
+      if(renderdoublenow==1&&render_360==0){
         int nrender_cols;
         int i,ibuffer=0;
         GLubyte **screenbuffers;
@@ -3009,6 +3008,42 @@ void Display_CB(void){
         mergescreenbuffers(nrender_rows,screenbuffers);
 
         for(i=0;i<nrender_rows*nrender_cols;i++){
+          FREEMEMORY(screenbuffers[i]);
+        }
+        FREEMEMORY(screenbuffers);
+      }
+      if (render_360 == 1) {
+        int nscreenbuffers;
+        int i, ibuffer = 0;
+        GLubyte **screenbuffers;
+        float *longlatbounds;
+
+        nscreenbuffers = 8;
+        NewMemory((void **)&screenbuffers, nscreenbuffers * sizeof(GLubyte *));
+        NewMemory((void **)&longlatbounds, 8*nscreenbuffers * sizeof(float));
+
+        for (i = 0; i < nscreenbuffers; i++) {
+          longlatbounds[8 * i + 0] = (float)i * 45.0;
+          longlatbounds[8 * i + 1] = (float)i * 45.0;
+          longlatbounds[8 * i + 2] = (float)(i + 1) * 45.0;
+          longlatbounds[8 * i + 3] = (float)(i + 1) * 45.0;
+          longlatbounds[8 * i + 4] = -22.5;
+          longlatbounds[8 * i + 5] =  22.5;
+          longlatbounds[8 * i + 6] = -22.5;
+          longlatbounds[8 * i + 7] =  22.5;
+        }
+
+        glDrawBuffer(GL_BACK);
+
+        for (i = 0; i<nscreenbuffers; i++) {
+          ShowScene(DRAWSCENE, VIEW_CENTER, 1, -(1 + i), -1);
+          screenbuffers[ibuffer++] = getscreenbuffer();
+          if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
+        }
+
+        mergescreenbuffers360(nscreenbuffers,longlatbounds,screenbuffers);
+
+        for (i = 0; i<nscreenbuffers; i++) {
           FREEMEMORY(screenbuffers[i]);
         }
         FREEMEMORY(screenbuffers);
