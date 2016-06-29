@@ -880,7 +880,7 @@ void sort_smoke3dinfo(void){
 
 /* ----------------------- Scene_viewport ----------------------------- */
 
-void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down){
+void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down, float *view_dir){
 
   float fleft, fright, fup, fdown;
   float StereoCameraOffset,FrustumAsymmetry;
@@ -986,19 +986,25 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     float xcen, ycen, zcen;
     float posx, posy, posz;
     float azimuth, elevation;
+    float az0=0.0, elev0=0.0;
+
+    if (view_dir != NULL) {
+      az0 = view_dir[0];
+      elev0 = view_dir[1];
+    }
 
     sn_view_angle=sin(DEG2RAD*camera_current->view_angle);
     cs_view_angle=cos(DEG2RAD*camera_current->view_angle);
 
-    sin_azimuth=sin(DEG2RAD*camera_current->azimuth);
-    cos_azimuth=cos(DEG2RAD*camera_current->azimuth);
+    sin_azimuth=sin(DEG2RAD*(camera_current->azimuth + az0));
+    cos_azimuth=cos(DEG2RAD*(camera_current->azimuth + az0));
 
     xcen = camera_current->xcen;
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation=cos(DEG2RAD*camera_current->elevation);
-    sin_elevation=sin(DEG2RAD*camera_current->elevation);
+    cos_elevation=cos(DEG2RAD*(camera_current->elevation + elev0));
+    sin_elevation=sin(DEG2RAD*(camera_current->elevation + elev0));
 
     sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
     cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;

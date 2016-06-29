@@ -518,10 +518,28 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
-/* ------------------ sphere_interp ------------------------ */
+/* ------------------ interp2d ------------------------ */
 
-float sphere_interp(int i, int ni, int j, int nj, float *vals){
-  return vals[0];
+float interp2d(int i, int ni, int j, int nj, float *vals){
+  float xfact, yfact;
+  float val1, val2, val;
+
+  //        v1------------v3 
+  //        |             |
+  //        j             |
+  //        |             |
+  //        |             |
+  //        v0---i--------v2 
+
+  xfact = (float)i / (float)ni;
+  yfact = (float)j / (float)nj;
+
+  val1 = (1.0 - yfact)*vals[0] + yfact*vals[1];
+  val2 = (1.0 - yfact)*vals[2] + yfact*vals[3];
+
+  val = (1.0 - xfact)*val1 + xfact*val2;
+
+  return val;
 }
 
 /* ------------------ mergescreenbuffers360 ------------------------ */
@@ -588,6 +606,19 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     longs = longlatbounds+8*ibuff;
     lats =  longlatbounds+8*ibuff+4;
 
+    for(j=0;j<height360;j++){
+      int i;
+      
+      for(i=0;i<width360;i++){
+        unsigned int r, g, b;
+        int rgb_local;
+
+        r=0; g=0; b=255*(float)j/(float)height360;
+        rgb_local = (r<<16)|(g<<8)|b;
+        gdImageSetPixel(RENDERimage,i,j,rgb_local);
+      }
+    }
+
     for(j=0;j<screenHeight;j++){
       int i;
       
@@ -596,17 +627,33 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
         int rgb_local;
         int ii, jj, ijk;
 
-        llong = sphere_interp(i,screenWidth,j,screenHeight,longs);
-        ii = CLAMP((int)((float)width360*(llong + 180.0)/360.0),0,width360-1);
+        llong = interp2d(i,screenWidth,j,screenHeight,longs);
+        ii = CLAMP((int)((float)width360*llong/360.0),0,width360-1);
         
-        llat = sphere_interp(i,screenWidth,j,screenHeight,lats);
+        llat = interp2d(i,screenWidth,j,screenHeight,lats);
         jj = CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
 
         ijk = 3*(j*screenWidth + i);
         r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
+        r = 255 ;
+        g = 0;
+        b = 0;
         rgb_local = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage,jj,ii,rgb_local);
+        gdImageSetPixel(RENDERimage,ii,jj,rgb_local);
       }
+    }
+  }
+
+  for(j=0;j<40;j++){
+    for(i=0;i<width360;i++){
+      unsigned int r, g, b;
+      int rgb_local;
+
+      r = 0;
+      g = 255;
+      b = 0;
+      rgb_local = (r<<16)|(g<<8)|b;
+      gdImageSetPixel(RENDERimage,i,j,rgb_local);
     }
   }
 
