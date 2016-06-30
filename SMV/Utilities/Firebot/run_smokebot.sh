@@ -10,7 +10,7 @@ if [ "$FDSSMV" != "" ] ; then
   FDSREPO=$FDSSMV
 fi
 if [ -e .fds_git ]; then
-  cd ../..
+  cd ../../..
   FDSREPO=`pwd`
   cd $CURDIR
 fi

@@ -10,7 +10,7 @@ if [ "$FDSSMV" != "" ] ; then
   reponame=$FDSSMV
 fi
 if [ -e .fds_git ]; then
-  cd ../..
+  cd ../../..
   reponame=`pwd`
   cd $CURDIR
 fi
