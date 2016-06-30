@@ -554,8 +554,6 @@ clean_FDS_repo()
         clean_repo $fdsrepo/SMV/Build
         clean_repo $fdsrepo/SMV/Manuals
         clean_repo $fdsrepo/SMV/Source
-        clean_repo $fdsrepo/SMV/Training
-        clean_repo $fdsrepo/SMV/Validation
         clean_repo $fdsrepo/SMV/Verification
         updateclean="1"
       fi

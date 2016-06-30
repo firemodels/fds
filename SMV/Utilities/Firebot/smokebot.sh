@@ -425,7 +425,6 @@ clean_repo()
   curdir=`pwd`
   dir=$1
   cd $dir
-  echo cleaning $dir
   git clean -dxf &> /dev/null
   git add . &> /dev/null
   git reset --hard HEAD &> /dev/null
