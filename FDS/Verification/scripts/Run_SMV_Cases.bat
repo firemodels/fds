@@ -29,9 +29,9 @@ if %stopscript% == 1 (
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 set WAIT_FILE=%SCRIPT_DIR%\wait.txt
 
-set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast.bat
+set RUNFDS_R=call %SVNROOT%\SMV\Utilities\Scripts\runfds.bat
+set RUNTFDS_R=call %SVNROOT%\SMV\Utilities\Scripts\runfds.bat
+set RUNCFAST_R=call %SVNROOT%\SMV\Utilities\Scripts\runcfast.bat
 
 set RUNFDS_M=call %SVNROOT%\SMV\Verification\scripts\make_stop.bat
 set RUNTFDS_M=call %SVNROOT%\SMV\Verification\scripts\make_stop.bat

@@ -102,8 +102,8 @@ fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 
-export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
-export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
+export STARTX=$SVNROOT/SMV/Utilities/Scripts/startXserver.sh
+export STOPX=$SVNROOT/SMV/Utilities/Scripts/stopXserver.sh
 
 echo Generating smokeview images using:
 echo smokeview : $SMV $SMVBINDIR
@@ -112,7 +112,7 @@ echo smokediff : $SMOKEDIFF
 echo background: $BACKGROUND
 echo
 
-RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
+RUNSMV=$SVNROOT/SMV/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
