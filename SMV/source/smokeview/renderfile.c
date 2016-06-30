@@ -550,10 +550,9 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   char *ext;
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
-  int i, j, ibuff;
-  int irow;
+  int ibuff;
   int width360 = 1024, height360 = 512, i360;
-  int ilat, ilong;
+  int i, j;
 
   switch (renderfiletype) {
   case PNG:
@@ -597,7 +596,6 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   RENDERimage = gdImageCreateTrueColor(width360, height360);
 
   for(ibuff=0;ibuff<nscreenbuffers;ibuff++){
-    int j;
     GLubyte *p;
     float *longs, *lats;
     float llong, llat;
@@ -607,8 +605,6 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     lats =  longlatbounds+8*ibuff+4;
 
     for(j=0;j<height360;j++){
-      int i;
-
       for(i=0;i<width360;i++){
         unsigned int r, g, b;
         int rgb_local;
@@ -620,8 +616,6 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     }
 
     for(j=0;j<screenHeight;j++){
-      int i;
-
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
@@ -646,8 +640,8 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     }
   }
 
-  for(j=0;j<40;j++){
-    for(i=0;i<width360;i++){
+  for(i=0;i<width360;i++){
+    for (j = 0; j<40; j++) {
       unsigned int r, g, b;
       int rgb_local;
 
