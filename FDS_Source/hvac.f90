@@ -265,7 +265,7 @@ DO NN=1,N_HVAC_READ
                CASE('LINEAR_INTERPOLATION')
                   DU%DUCT_INTERP_TYPE_INDEX=LINEAR_INTERPOLATION
                CASE DEFAULT
-                  WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not a known type. Duct ID:',TRIM(DU%ID),&
+                  WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),&
                                               ', HVAC line number',NN
                   CALL SHUTDOWN(MESSAGE); RETURN
             END SELECT
@@ -511,6 +511,7 @@ DAMPER       = .FALSE.
 DEVC_ID      = 'null'
 DIAMETER     = -1._EB
 DUCT_ID      = 'null'
+DUCT_INTERP_TYPE = 'null'
 FAN_ID       = 'null'
 FIXED_Q      = -1.E10_EB
 FILTER_ID    = 'null'
@@ -797,7 +798,7 @@ IF (HVAC_MASS_TRANSPORT) THEN
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
             ENDDO
          CASE DEFAULT
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE has not been specified. Duct ID:',TRIM(DU%ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
       END SELECT
    ENDDO
