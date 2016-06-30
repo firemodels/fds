@@ -39,14 +39,14 @@ run_correlations()
 
 run_matlab_license_test()
 {
-   cd $SVNROOT/Utilities/Firebot
+   cd $SVNROOT/FDS/Utilities/Firebot
    # Run simple test to see if Matlab license is available
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> correlation_bot.log
 }
 
 scan_matlab_license_test()
 {
-   cd $SVNROOT/Utilities/Firebot
+   cd $SVNROOT/FDS/Utilities/Firebot
    # Check for failed license
    if [[ `grep "License checkout failed" correlation_bot.log` == "" ]]
    then
@@ -73,9 +73,9 @@ run_matlab_plotting()
    echo ""
 
    # Run Matlab plotting script
-   cd $SVNROOT/Utilities/Matlab/scripts
+   cd $SVNROOT/FDS/Utilities/Matlab/scripts
 
-   cd $SVNROOT/Utilities/Matlab
+   cd $SVNROOT/FDS/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), Correlation_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit"
 }
 
@@ -99,7 +99,7 @@ make_correlation_guide()
 
 cleanup_logs()
 {
-   cd $SVNROOT/Utilities/Firebot
+   cd $SVNROOT/FDS/Utilities/Firebot
    rm correlation_bot.log
 }
 

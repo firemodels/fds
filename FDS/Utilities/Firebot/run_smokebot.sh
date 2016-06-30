@@ -180,7 +180,7 @@ if [[ "$RUNSMOKEBOT" == "1" ]]; then
      git remote update &> /dev/null
      git checkout $BRANCH &> /dev/null
      git merge origin/$BRANCH &> /dev/null
-     cd Utilities/Firebot
+     cd SMV/Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [ "$FIREBOTDIR" != "$CURDIR" ]; then
        cp $botscript $CURDIR/.

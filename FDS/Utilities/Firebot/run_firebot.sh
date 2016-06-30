@@ -137,7 +137,7 @@ if [[ "$UPDATEREPO" == "1" ]]; then
      git remote update &> /dev/null
      git checkout $BRANCH &> /dev/null
      git merge origin/$BRANCH &> /dev/null
-     cd Utilities/Firebot
+     cd FDS/Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
        cp $botscript $CURDIR/.

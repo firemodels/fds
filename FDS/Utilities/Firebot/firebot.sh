@@ -162,7 +162,7 @@ if [ "$SSH" != "" ]; then
 fi
 
 export fdsrepo 
-UploadGuides=$fdsrepo/Utilities/Firebot/fds_guides2GD.sh
+UploadGuides=$fdsrepo/FDS/Utilities/Firebot/fds_guides2GD.sh
 FDS_MANUAL_DIR=$fdsrepo/FDS/Manuals
 
 echo ""
@@ -354,13 +354,13 @@ inspect_fds_db()
    # Perform OpenMP thread checking (locate deadlocks and data races)
    echo "      inspection"
    cd $fdsrepo/FDS/Verification/Thread_Check/
-   $fdsrepo/Utilities/Scripts/inspect_openmp.sh  -r $fdsrepo thread_check.fds &> $OUTPUT_DIR/stage2a
+   $fdsrepo/FDS/Utilities/Scripts/inspect_openmp.sh  -r $fdsrepo thread_check.fds &> $OUTPUT_DIR/stage2a
 }
 
 check_inspect_fds_db()
 {
    # Scan for errors in thread checking results
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/FDS/Utilities/Scripts
    # grep -v 'Warning: One or more threads in the application accessed ...' ignores a known compiler warning that displays even without errors
       if [[ `grep -i -E 'warning|remark|problem|error' ${FIREBOT_RUNDIR}/output/stage2a | grep -v '0 new problem(s) found' | grep -v 'Warning: One or more threads in the application accessed the stack of another thread'` == "" ]]
    then
@@ -370,8 +370,8 @@ check_inspect_fds_db()
       echo "Errors from Stage 2a - Compile and inspect FDS debug:" >> $ERROR_LOG
       cat ${FIREBOT_RUNDIR}/output/stage2a >> $ERROR_LOG
       echo "" >> $ERROR_LOG
-      echo "For more details, view the inspector log in the FDS-SMV/Utilities/Scripts folder" >> $ERROR_LOG
-      echo "by using the FDS-SMV/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
+      echo "For more details, view the inspector log in the FDS-SMV/FDS/Utilities/Scripts folder" >> $ERROR_LOG
+      echo "by using the FDS-SMV/FDS/Utilities/Scripts/inspect_report.sh script." >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
 }
@@ -811,7 +811,7 @@ run_matlab_license_test()
    echo Matlab
    echo "   license test"
    # Run simple test to see if Matlab license is available
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
    matlab -r "try, disp('Running Matlab License Check'), catch, disp('License Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7_matlab_license
 }
 
@@ -851,7 +851,7 @@ run_matlab_verification()
 {
    echo "   verification plots"
    # Run Matlab plotting script
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Verification script'), FDS_verification_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7a_verification
 }
 
@@ -872,7 +872,7 @@ check_matlab_verification()
 check_verification_stats()
 {
    # Check for existence of verification statistics output file
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
    if [ -e "FDS_verification_scatterplot_output.csv" ]
    then
       # Continue along
@@ -880,12 +880,12 @@ check_verification_stats()
    else
       echo "Warnings from Stage 7a - Matlab plotting and statistics (verification):" >> $WARNING_LOG
       echo "Error: The verification statistics output file does not exist." >> $WARNING_LOG
-      echo "Expected the file Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $WARNING_LOG
+      echo "Expected the file FDS/Utilities/Matlab/FDS_verification_scatterplot_output.csv" >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 
    # Scan for and report warnings for any verification cases that are outside of their specified error tolerance
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
    if [[ `grep "Out of Tolerance" FDS_verification_scatterplot_output.csv` == "" ]]
    then
       # Continue along
@@ -919,7 +919,7 @@ run_matlab_validation()
 {
    echo "   validation plots"
    # Run Matlab plotting script
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
    matlab -r "try, disp('Running Matlab Validation script'), FDS_validation_script, catch, disp('Error'), err = lasterror, err.message, err.stack, end, exit" &> $OUTPUT_DIR/stage7b_validation
 }
 
@@ -939,11 +939,11 @@ check_matlab_validation()
 
 archive_validation_stats()
 {
-   cd $fdsrepo/Utilities/Matlab
+   cd $fdsrepo/FDS/Utilities/Matlab
 
    echo archiving validation stats
    STATS_FILE_BASENAME=FDS_validation_scatterplot_output
-   CURRENT_STATS_FILE=$fdsrepo/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
+   CURRENT_STATS_FILE=$fdsrepo/FDS/Utilities/Matlab/${STATS_FILE_BASENAME}.csv
 
    if [ -e ${CURRENT_STATS_FILE} ]
    then
@@ -953,7 +953,7 @@ archive_validation_stats()
    else
       echo "Warnings from Stage 7b - Matlab plotting and statistics (validation):" >> $WARNING_LOG
       echo "Warning: The validation statistics output file does not exist." >> $WARNING_LOG
-      echo "Expected the file Utilities/Matlab/FDS_validation_scatterplot_output.csv" >> $WARNING_LOG
+      echo "Expected the file FDS/Utilities/Matlab/FDS_validation_scatterplot_output.csv" >> $WARNING_LOG
       echo "" >> $WARNING_LOG
    fi
 }
@@ -961,7 +961,7 @@ archive_validation_stats()
 make_validation_git_stats()
 {
    # Output a LaTeX file with a table of the FDS validation sets and their corresponding GIT information
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/FDS/Utilities/Scripts
    ./validation_git_stats.sh -r $fdsrepo
 }
 
@@ -971,9 +971,9 @@ make_validation_git_stats()
 
 generate_timing_stats()
 {
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/FDS/Utilities/Scripts
    ./fds_timing_stats.sh > fds_timing_stats.csv
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/FDS/Utilities/Scripts
    ./fds_timing_stats.sh firebot 1 > fds_benchmarktiming_stats.csv
    TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
 }
@@ -981,12 +981,12 @@ generate_timing_stats()
 archive_timing_stats()
 {
    echo echo archiving timing stats
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/FDS/Utilities/Scripts
    cp fds_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
    cp fds_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
    TOTAL_FDS_TIMES=`tail -1 fds_benchmarktiming_stats.csv`
   if [ "$UPLOADGUIDES" == "1" ]; then
-    cd $fdsrepo/Utilities/Firebot
+    cd $fdsrepo/FDS/Utilities/Firebot
     ./status_updatepub.sh -F
   fi
 }

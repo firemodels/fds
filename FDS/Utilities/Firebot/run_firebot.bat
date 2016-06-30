@@ -46,7 +46,7 @@ if %force% == 0 goto skip_force
 call :normalise %CD% curdir
 set curdir=%temparg%
 
-call :normalise %fdsrepo%\Utilities\Firebot
+call :normalise %fdsrepo%\FDS\Utilities\Firebot
 set fdsbotdir=%temparg%
 
 set running=%curdir%\firebot.running

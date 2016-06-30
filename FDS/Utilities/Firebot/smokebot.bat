@@ -82,8 +82,8 @@ set /p startdate=<%OUTDIR%\starttime.txt
 time /t > %OUTDIR%\starttime.txt
 set /p starttime=<%OUTDIR%\starttime.txt
 
-call "%fdsroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %fdsroot%\Utilities\Firebot\firebot_email_list.bat
+call "%fdsroot%\SMV\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
+call %fdsroot%\SMV\Utilities\Firebot\firebot_email_list.bat
 if NOT "%emailto%" == "" (
   echo  email: %emailto%
   set mailToSMV=%emailto%
@@ -291,7 +291,7 @@ call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 echo Stage 3 - Building FDS/Smokeview utilities
 
 echo             fds2ascii
-cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
+cd %fdsroot%\SMV\Utilities\fds2ascii\intel_win%size%
 erase *.obj *.mod *.exe 1> %OUTDIR%\stage3c.txt 2>&1
 call make_fds2ascii bot 1>> %OUTDIR%\stage3.txt 2>&1
 call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\stage3.txt|| exit /b 1
