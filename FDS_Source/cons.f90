@@ -41,6 +41,7 @@ INTEGER, PARAMETER :: NO_STOP=0, INSTABILITY_STOP=1, USER_STOP=2, SETUP_STOP=3, 
                       LEVELSET_STOP=7, REALIZABILITY_STOP=8, EVACUATION_STOP=9              ! Program Stop Status
 INTEGER, PARAMETER :: SPHERE_DRAG=1,CYLINDER_DRAG=2,USER_DRAG=3,SCREEN_DRAG=4,POROUS_DRAG=5 ! Options for drag computation
 INTEGER, PARAMETER :: OLD=1,NEW=2,GUESS=3,PREVIOUS=4                                        ! Network solver indices
+INTEGER, PARAMETER :: NODE1=1,NODE2=2,LINEAR_INTERPOLATION=-1                               ! Duct mass transport interpolation
 INTEGER, PARAMETER :: HVAC_BOUNDARY=42
 INTEGER :: MINT_SPECIES=20
 
