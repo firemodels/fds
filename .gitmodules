@@ -1,0 +1,3 @@
+[submodule "FDS/Validation/Submodules/macfp-db"]
+	path = FDS/Validation/Submodules/macfp-db
+	url = git@github.com:MaCFP/macfp-db.git
