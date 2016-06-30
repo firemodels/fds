@@ -42,16 +42,16 @@ fm_datacenter_scatter
 % Dataplot and scatplot options
 
 Dataplot_Inputs_File = [pwd,'/FDS_validation_dataplot_inputs.csv'];
-Working_Dir = [pwd, '/../../FDS/Validation/'];
-Manuals_Dir = [pwd, '/../../FDS/Manuals/'];
+Working_Dir = [pwd, '/../../Validation/'];
+Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/FDS_validation_scatterplot_inputs.csv'];
 
 % Statistics output options
 
 Stats_Output = 'Validation';
 Output_File = [pwd, '/FDS_validation_scatterplot_output.csv'];
-Statistics_Tex_Output = [pwd, '/../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
-Histogram_Tex_Output = [pwd, '/../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
+Statistics_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_statistics.tex'];
+Histogram_Tex_Output = [pwd, '/../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_histograms.tex'];
 
 % Override the plot style options with NRC 1824 plot options
 

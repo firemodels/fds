@@ -6,7 +6,7 @@
 close all
 clear all
 
-dir = '../../FDS/Verification/Immersed_Boundary_Method/';
+dir = '../../Verification/Immersed_Boundary_Method/';
 infile{1} = 'tri_cube_cut_cell_test_01_cc.csv';
 infile{2} = 'tri_cube_cut_cell_test_02_cc.csv';
 infile{3} = 'tri_cube_cut_cell_test_03_cc.csv';
@@ -60,7 +60,7 @@ tri_area(10) = 0.3766;
 tri_area(11) = 1.215;
 tri_area(12) = 1.4614;
 
-filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/cutcell_area.tex';
+filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/cutcell_area.tex';
 fid = fopen(filename,'wt');
 fprintf(fid,'%s\n','\begin{table}[ht]');
 fprintf(fid,'%s\n','\begin{center}');

@@ -21,7 +21,7 @@ global E
 global A
 global residue
 
-addpath('../../FDS/Verification/Pyrolysis')
+addpath('../../Verification/Pyrolysis')
 
 show_fds = 1;
 
@@ -154,9 +154,9 @@ for i_plot=1:2
     set(gcf,'PaperSize',[Paper_Width*1.1 Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width*1.1 Paper_Height]);
     if i_plot==1
-        print(gcf,'-dpdf','../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_1')
+        print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_1')
     else
-        print(gcf,'-dpdf','../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_2')
+        print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/pyrolysis_2')
     end
     
 end

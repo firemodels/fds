@@ -7,8 +7,8 @@
 close all
 clear all
 
-addpath '../../FDS/Validation/Sandia_Plumes/Experimental_Data'
-addpath '../../FDS/Validation/Sandia_Plumes/FDS_Output_Files'
+addpath '../../Validation/Sandia_Plumes/Experimental_Data'
+addpath '../../Validation/Sandia_Plumes/FDS_Output_Files'
 
 exp_stride = 4;
 

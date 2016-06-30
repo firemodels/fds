@@ -5,7 +5,7 @@
 close all
 clear all
 
-dir = '../../FDS/Verification/Radiation/';
+dir = '../../Verification/Radiation/';
 
 infile{1,1}  = 'radiation_plane_layer_1_1_devc.csv';
 infile{2,1}  = 'radiation_plane_layer_2_1_devc.csv';
@@ -64,7 +64,7 @@ for j=1:5
    end
 end
 
-filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex';
+filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex';
 fid = fopen(filename,'wt');
 
 fprintf(fid,'%s\n','\begin{center}');

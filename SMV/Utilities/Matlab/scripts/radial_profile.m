@@ -22,7 +22,7 @@ if nargin<1|nargin>100;
     display('Error in argument list')
 end
 if nargin>=1
-    plotdir = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
+    plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
     iarg = 1;
     plot_file   = varargin{iarg}; iarg=iarg+1;
     data_format = varargin{iarg}; iarg=iarg+1;

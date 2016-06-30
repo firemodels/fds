@@ -62,9 +62,9 @@ yc3 = -(.25-dy3/2):dy3:(.25-dy3/2);
 
 % return
 
-expdir = '../../FDS/Validation/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
-fdsdir = '../../FDS/Validation/UMD_Line_Burner/FDS_Output_Files/';
-pltdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
+expdir = '../../Validation/Submodules/macfp-db/Extinction/UMD_Line_Burner/Experimental_Data/';
+fdsdir = '../../Validation/UMD_Line_Burner/FDS_Output_Files/';
+pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/UMD_Line_Burner/';
 
 F1 = importdata([fdsdir,'methane_dx_1p25cm_line.csv'],',',2);
 F2 = importdata([fdsdir,'methane_dx_p625cm_line.csv'],',',2);

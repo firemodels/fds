@@ -9,7 +9,7 @@ clear all
 
 % Read SMV file and store transformations
 
-datadir = '../../FDS/Verification/Miscellaneous/';
+datadir = '../../Verification/Miscellaneous/';
 
 if ~exist([datadir,'mesh_transformation.smv'])
    display(['Error: File ', [datadir,'mesh_transformation.smv'],' does not exist. Skipping case.'])
@@ -63,7 +63,7 @@ fclose(fid);
 CC = [0.3 1.2];
 PC = [0.5 1.0];
 
-plotdir = '../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
+plotdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 plot_style
 Title_Font_Size=20;
 

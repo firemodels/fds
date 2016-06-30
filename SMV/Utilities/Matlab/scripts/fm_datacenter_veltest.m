@@ -4,8 +4,8 @@
 % Generate velocity comparison plots for the FM datacenter flow mapping tests
 
 % High flow test
-[exp_data]=csvread('../../FDS/Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_high.csv',1);
-[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
+[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_high.csv',1);
+[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
 n_fds_data=size(fds_data,1);
 
 % compute average velocity
@@ -46,7 +46,7 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_git.txt';
+svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -64,7 +64,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -102,7 +102,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -140,7 +140,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -178,14 +178,14 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
 print(gcf,'-dpdf',plotname);
 hold off  
 clear hX
 
 % Low flow test
-[exp_data]=csvread('../../FDS/Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_low.csv',1);
-[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
+[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_low.csv',1);
+[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
 n_fds_data=size(fds_data,1);
 
 % compute average velocity
@@ -219,7 +219,7 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_git.txt';
+svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -237,7 +237,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -275,7 +275,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -313,7 +313,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -351,7 +351,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];
+plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];
 print(gcf,'-dpdf',plotname);
 hold off  
 clear hX

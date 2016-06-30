@@ -52,7 +52,7 @@ axis([1e2 1e8 .005 .2]) % based on MYO
 xlabel('Re_{\it H}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('\it f','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'Rotation',0.0)
 
-repository = '../../FDS/Validation/Moody_Chart/FDS_Output_Files/';
+repository = '../../Validation/Moody_Chart/FDS_Output_Files/';
 
 % gather FDS results (laminar)
 L = 1;
@@ -139,6 +139,6 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[1.1*Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 1.1*Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fds_moody_chart')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fds_moody_chart')
 
 

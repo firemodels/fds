@@ -8,14 +8,14 @@
 clear all
 close all
 
-addpath('../../FDS/Verification/Species/')
+addpath('../../Verification/Species/')
 
 %-----------------------
 % Read in FDS Data File
 %-----------------------
 
 if ~exist('burke_schumann_devc.csv')
-    display(['Error: File ../../FDS/Verification/Species/burke_schumann_devc.csv does not exist. Skipping case.'])
+    display(['Error: File ../../Verification/Species/burke_schumann_devc.csv does not exist. Skipping case.'])
     return
 end
 Burke_Schumann_Data=importdata('burke_schumann_devc.csv');
@@ -116,7 +116,7 @@ for i=1:length(mix_frac)
 end
 
 header1 = {'Mixture_Fraction','Temperature','Fuel','Ox','Prod'};
-filename1 = '../../FDS/Verification/Species/burke_schumann_expected.csv';
+filename1 = '../../Verification/Species/burke_schumann_expected.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
 for j=1:length(mix_frac)
@@ -133,7 +133,7 @@ for i=1:length(mix_frac)
 end
 
 header1 = {'Mixture_Fraction','FDS_Temperature','FDS_Fuel','FDS_Ox','FDS_Prod'};
-filename1 = '../../FDS/Verification/Species/burke_schumann_FDS.csv';
+filename1 = '../../Verification/Species/burke_schumann_FDS.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
 for j=1:length(mix_frac)

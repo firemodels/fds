@@ -8,17 +8,17 @@ close all
 clear all
 
 % this is horrendous, but the ls command was giving file permission problems with Samba
-list_dir = dir('../../FDS/Validation/*');
+list_dir = dir('../../Validation/*');
 k = 0;
 for i=1:length(list_dir)
-    Output_Directory = (['../../FDS/Validation/',list_dir(i).name,'/FDS_Output_Files']);
+    Output_Directory = (['../../Validation/',list_dir(i).name,'/FDS_Output_Files']);
     if exist(Output_Directory)
         list_files = dir([Output_Directory,'/*HGL.input']);
         if size(list_files)>0
             for j=1:length(list_files)
                 if ~strcmp(list_files(j).name(1),'.') % ignore hidden files
                     k=k+1;
-                    output_dir{k} = ['../../FDS/Validation/',list_dir(i).name,'/FDS_Output_Files/'];
+                    output_dir{k} = ['../../Validation/',list_dir(i).name,'/FDS_Output_Files/'];
                     input_file{k} = list_files(j).name;
                 end
             end

@@ -5,7 +5,7 @@
 close all
 clear all
 
-infile  = '../../FDS/Verification/Radiation/wall_internal_radiation_devc.csv';
+infile  = '../../Verification/Radiation/wall_internal_radiation_devc.csv';
 if ~exist(infile)
     display(['Error: File ',infile,' does not exist. Skipping case.'])
     return
@@ -14,7 +14,7 @@ M = csvread(infile,3,0);
    t = M(1,1);
    flux(1:5) = M(1,2:6)';
    
-filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/wall_internal_radiation.tex';
+filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/wall_internal_radiation.tex';
 fid = fopen(filename,'wt');
 
 fprintf(fid,'%s\n','\begin{center}');

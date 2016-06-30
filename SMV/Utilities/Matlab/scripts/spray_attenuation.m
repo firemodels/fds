@@ -5,9 +5,9 @@
 close all
 clear all
 
-addpath('../../FDS/Validation/BRE_Spray/Experimental_Data')
-addpath('../../FDS/Validation/BRE_Spray/FDS_Input_Files')
-addpath('../../FDS/Validation/BRE_Spray/FDS_Output_Files')
+addpath('../../Validation/BRE_Spray/Experimental_Data')
+addpath('../../Validation/BRE_Spray/FDS_Input_Files')
+addpath('../../Validation/BRE_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 
@@ -143,7 +143,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
 
 % w-plot
 
@@ -171,15 +171,15 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
 
 %EOF
 
 %add LEMTA data base to BRE data base
 
-addpath('../../FDS/Validation/LEMTA_Spray/Experimental_Data')
-addpath('../../FDS/Validation/LEMTA_Spray/FDS_Input_Files')
-addpath('../../FDS/Validation/LEMTA_Spray/FDS_Output_Files')
+addpath('../../Validation/LEMTA_Spray/Experimental_Data')
+addpath('../../Validation/LEMTA_Spray/FDS_Input_Files')
+addpath('../../Validation/LEMTA_Spray/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 
@@ -247,4 +247,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');

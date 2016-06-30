@@ -5,7 +5,7 @@ clear all
 
 plot_style
 
-repository = '../../FDS/Verification/Sprinklers_and_Sprays/';
+repository = '../../Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 
@@ -117,7 +117,7 @@ Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 display('Printing plot terminal_velocity_convergence.pdf...')
-print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
+print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/terminal_velocity_convergence');
 
 close all
 clear H
@@ -155,5 +155,5 @@ Git_Filename = [repository, 'terminal_velocity_dt_1_0_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
 
 display('Printing plot position_convergence.pdf...')
-print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
+print(gcf, '-dpdf', '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/position_convergence');
 

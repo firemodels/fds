@@ -8,7 +8,7 @@
 close all
 clear all
 
-datadir = '../../FDS/Verification/WUI/';
+datadir = '../../Verification/WUI/';
 
 z0=5;
 nz=80;
