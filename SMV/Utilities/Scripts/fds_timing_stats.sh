@@ -1,7 +1,7 @@
 #!/bin/bash
 
 curdir=`pwd`
-SVNROOT=`pwd`/../..
+SVNROOT=`pwd`/../../..
 cd $SVNROOT
 SVNROOT=`pwd`
 
