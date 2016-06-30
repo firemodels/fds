@@ -269,8 +269,12 @@ clean_git_repo()
       cd $fdsrepo
       if [[ "$CLEANREPO" == "1" ]] ; then
          echo "   repo"
-         clean_repo $fdsrepo/SMV
-         clean_repo $fdsrepo/FDS
+        clean_repo $fdsrepo/FDS/Build
+        clean_repo $fdsrepo/FDS/Manuals
+        clean_repo $fdsrepo/FDS/Source
+        clean_repo $fdsrepo/FDS/Training
+        clean_repo $fdsrepo/FDS/Validation
+        clean_repo $fdsrepo/FDS/Verification
       fi
    # If not, create FDS repository and checkout
    else
