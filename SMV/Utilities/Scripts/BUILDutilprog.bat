@@ -27,16 +27,16 @@ Title Building %prog% for 64 bit %platform%
 
 
 if "%platform%" == "windows" (
-  cd %svn_root%\Utilities\%prog%\intel_win_64
+  cd %svn_root%\FDS\Utilities\%prog%\intel_win_64
   call make_%prog% %type%
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh Utilities/%prog%/intel_linux_64 make_%prog%.sh 
+  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Utilities/%prog%/intel_linux_64 make_%prog%.sh 
   goto eof
 )
 if "%platform%" == "osx" (
-  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh Utilities/%prog%/intel_osx_64 make_%prog%.sh
+  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Utilities/%prog%/intel_osx_64 make_%prog%.sh
   goto eof
 )
 

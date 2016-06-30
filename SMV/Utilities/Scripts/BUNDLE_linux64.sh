@@ -18,4 +18,4 @@ export INSTALLDIR=FDS/$FDSEDITION
 export INTELLIB=~/FIRE-LOCAL/LIBS/LINUX/LIB64
 export DESTLIB=LIB64
 
-$fds_smvroot/Utilities/Scripts/bundle_generic.sh
+$fds_smvroot/FDS/Utilities/Scripts/bundle_generic.sh

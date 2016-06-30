@@ -1,6 +1,6 @@
 @echo off
 
-call %SVNROOT%\Utilities\Scripts\getopts.bat %*
+call %SVNROOT%\FDS\Utilities\Scripts\getopts.bat %*
 
 :: set dir=%1
 :: set infile=%2

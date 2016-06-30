@@ -115,8 +115,8 @@ if [ "$BINDIR" == "" ]; then
 fi
 SMVBINDIR="-bindir $BINDIR"
 
-STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
-STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
+STARTX=$SVNROOT/FDS/Utilities/Scripts/startXserver.sh
+STOPX=$SVNROOT/FDS/Utilities/Scripts/stopXserver.sh
 
 source $STARTX
 echo "     smokeview: $SMOKEVIEW"

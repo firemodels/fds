@@ -10,21 +10,21 @@ set basename=FDS_%fds_version%-SMV_%smv_version%_win%platform%
 
 set in_pdf=%userprofile%\FDS_Guides
 set in_intel_dll=%userprofile%\FIRE-LOCAL\LIBS\WINDOWS
-set in_fds2ascii=%svn_root%\Utilities\fds2ascii
+set in_fds2ascii=%svn_root%\FDS\Utilities\fds2ascii
 set in_setpath=%svn_root%\SMV\Build\set_path\intel_win_64
 set in_shortcut=%userprofile%\Fire-LOCAL\repo_exes
 set in_smokediff=%svn_root%\SMV\Build\smokediff
 set in_smokezip=%svn_root%\SMV\Build\smokezip
 set in_dem2fds=%svn_root%\SMV\Build\dem2fds
 set in_wind2fds=%svn_root%\SMV\Build\wind2fds
-set in_testmpi=%svn_root%\Utilities\test_mpi\impi_intel_win
+set in_testmpi=%svn_root%\FDS\Utilities\test_mpi\impi_intel_win
 set in_background=%svn_root%\SMV\Build\background
 set in_smv=%svn_root%\SMV\Build\smokeview\intel_win_%platform%
 set in_for_bundle=%svn_root%\SMV\for_bundle
 set in_sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
 set in_impi=%userprofile%\FIRE-LOCAL\LIBS\RUNTIME\WINDOWS_HYDRA2fix
 
-set uploads=%svn_root%\Utilities\uploads
+set uploads=%svn_root%\FDS\Utilities\uploads
 set basedir=%uploads%\%basename%
 
 set out_bundle=%basedir%\firemodels
@@ -46,10 +46,10 @@ set smv_casesbat=%svn_root%\Verification\scripts\SMV_Cases.bat
 set wui_casessh=%svn_root%\Verification\scripts\WUI_Cases.sh
 set wui_casesbat=%svn_root%\Verification\scripts\WUI_Cases.bat
 
-set copyFDScases=%svn_root%\Utilities\Scripts\copyFDScases.bat
-set copyCFASTcases=%svn_root%\Utilities\Scripts\copyCFASTcases.bat
+set copyFDScases=%svn_root%\FDS\Utilities\Scripts\copyFDScases.bat
+set copyCFASTcases=%svn_root%\FDS\Utilities\Scripts\copyCFASTcases.bat
 
-set bundleinfo=%svn_root%\Utilities\Scripts\for_bundle
+set bundleinfo=%svn_root%\FDS\Utilities\Scripts\for_bundle
 
 :: erase the temporary bundle directory if it already exists
 

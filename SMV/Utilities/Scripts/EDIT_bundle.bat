@@ -17,5 +17,5 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\
+cd %svn_root%\FDS\Utilities\
 start notepad build_bundle.html
