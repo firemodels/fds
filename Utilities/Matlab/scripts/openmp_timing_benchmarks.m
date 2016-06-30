@@ -5,7 +5,7 @@
 close all
 clear all
 
-dir = '../../Verification/Timing_Benchmarks/';
+dir = '../../FDS/Verification/Timing_Benchmarks/';
 
 ncores = [1,2,3,4,5,6,7,8];
 a = {'a','b','c','d','e','f','g','h'};

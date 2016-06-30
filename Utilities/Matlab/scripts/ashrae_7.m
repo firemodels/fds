@@ -5,10 +5,10 @@
 close all
 clear all
 
-infile{1} = '../../Verification/HVAC/ashrae_7_exp.csv';
-infile{2} = '../../Verification/HVAC/ashrae7_fixed_flow_devc.csv';
-infile{3} = '../../Verification/HVAC/ashrae7_quadratic_devc.csv';
-infile{4} = '../../Verification/HVAC/ashrae7_table_devc.csv';
+infile{1} = '../../FDS/Verification/HVAC/ashrae_7_exp.csv';
+infile{2} = '../../FDS/Verification/HVAC/ashrae7_fixed_flow_devc.csv';
+infile{3} = '../../FDS/Verification/HVAC/ashrae7_quadratic_devc.csv';
+infile{4} = '../../FDS/Verification/HVAC/ashrae7_table_devc.csv';
 
 label{1} = 'Experiment';
 label{2} = 'Fixed Flow & ';

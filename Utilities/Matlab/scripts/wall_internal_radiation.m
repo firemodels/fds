@@ -5,7 +5,7 @@
 close all
 clear all
 
-infile  = '../../Verification/Radiation/wall_internal_radiation_devc.csv';
+infile  = '../../FDS/Verification/Radiation/wall_internal_radiation_devc.csv';
 if ~exist(infile)
     display(['Error: File ',infile,' does not exist. Skipping case.'])
     return

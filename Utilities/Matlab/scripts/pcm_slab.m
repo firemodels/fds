@@ -37,7 +37,7 @@ for n = 1:nt
    end
 end
 
-addpath('../../Verification/Pyrolysis')
+addpath('../../FDS/Verification/Pyrolysis')
 
 skip_case = 0;
 if ~exist('pcm_slab_prof_01.csv')

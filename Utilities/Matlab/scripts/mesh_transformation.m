@@ -9,7 +9,7 @@ clear all
 
 % Read SMV file and store transformations
 
-datadir = '../../Verification/Miscellaneous/';
+datadir = '../../FDS/Verification/Miscellaneous/';
 
 if ~exist([datadir,'mesh_transformation.smv'])
    display(['Error: File ', [datadir,'mesh_transformation.smv'],' does not exist. Skipping case.'])

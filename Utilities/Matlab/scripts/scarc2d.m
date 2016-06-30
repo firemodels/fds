@@ -10,7 +10,7 @@ plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-data_dir = '../../Verification/Pressure_Solver/';
+data_dir = '../../FDS/Verification/Pressure_Solver/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 skip_case = 0;

@@ -7,7 +7,7 @@ clear all
 
 plot_style
 
-repository = '../../Verification/Flowfields/';
+repository = '../../FDS/Verification/Flowfields/';
 
 
 %gather FDS result(n=16)

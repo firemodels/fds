@@ -12,7 +12,7 @@ nx = 256;
 
 % Output files
 
-datadir = '../../Verification/Scalar_Analytical_Solution/';
+datadir = '../../FDS/Verification/Scalar_Analytical_Solution/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 filename = {'shunn3_256_cfl_1_mms.csv', ...
             'shunn3_256_cfl_p5_mms.csv', ...

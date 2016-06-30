@@ -26,7 +26,7 @@ vd1d_mms_z = @(x,t,u0) f0(x-u0*t)
 
 vd1d_mms_rho = @(x,t,u0) 1/( vd1d_mms_z(x,t,u0)/r1 + (1-vd1d_mms_z(x,t,u0))/r0 )
 
-datadir = '../../Verification/Scalar_Analytical_Solution/';
+datadir = '../../FDS/Verification/Scalar_Analytical_Solution/';
 filename = {'saad_32_mms.csv','saad_64_mms.csv','saad_128_mms.csv','saad_256_mms.csv','saad_512_mms.csv','saad_1024_mms.csv'};
 
 skip_case = 0;

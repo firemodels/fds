@@ -7,7 +7,7 @@
 % keep 'read_dline.m' as clean as possible.  Note that the cell arrays
 % 'parameters' and 'headers' are defined in 'read_dline.m'.
 %
-% Working_Dir = '../../../Verification/'; for example, is also set in read_dline.
+% Working_Dir = '../../../FDS/Verification/'; for example, is also set in read_dline.
 
 Quantity          = char(parameters(find(strcmp(headers,'Quantity'))));
 Group_Key_Label   = parameters(find(strcmp(headers,'Group_Key_Label')));

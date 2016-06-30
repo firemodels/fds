@@ -57,7 +57,7 @@ dx = L./nx;
 % end
 % return
 
-datadir = '../../Verification/Scalar_Analytical_Solution/';
+datadir = '../../FDS/Verification/Scalar_Analytical_Solution/';
 %datadir = '/Volumes/firebot/FDS-SMVgitclean/Verification/Scalar_Analytical_Solution/'; % check firebot run
 filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv'};
 

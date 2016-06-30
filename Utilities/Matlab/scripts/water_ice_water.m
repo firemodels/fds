@@ -9,7 +9,7 @@ clear all
 
 % Set global reaction rate parameters
 
-addpath('../../Verification/Pyrolysis')
+addpath('../../FDS/Verification/Pyrolysis')
 
 close all
     

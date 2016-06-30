@@ -7,7 +7,7 @@
 close all
 clear all
 
-datadir='../../Verification/Flowfields/';
+datadir='../../FDS/Verification/Flowfields/';
 plotdir='../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 if ~exist([datadir,'hot_layer_360_devc.csv'])

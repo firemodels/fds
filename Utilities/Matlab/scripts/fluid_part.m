@@ -9,7 +9,7 @@ clear all
 
 plot_style
 
-ddir='../../Verification/Sprinklers_and_Sprays/';
+ddir='../../FDS/Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 

@@ -6,7 +6,7 @@
 close all
 clear all
 
-dir = '../../Verification/Immersed_Boundary_Method/';
+dir = '../../FDS/Verification/Immersed_Boundary_Method/';
 infile{1} = 'tri_cube_cut_cell_test_01_cc.csv';
 infile{2} = 'tri_cube_cut_cell_test_02_cc.csv';
 infile{3} = 'tri_cube_cut_cell_test_03_cc.csv';

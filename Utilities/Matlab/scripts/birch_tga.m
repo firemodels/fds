@@ -5,7 +5,7 @@
 close all
 clear all
 
-addpath('../../Verification/Pyrolysis')
+addpath('../../FDS/Verification/Pyrolysis')
 
 plot_style
 set(gca,'Units',Plot_Units)

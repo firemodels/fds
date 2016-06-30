@@ -9,7 +9,7 @@
 % Write directory
 %-----------------------
 
-FDS_Output_Files = '../../Verification/Species/';
+FDS_Output_Files = '../../FDS/Verification/Species/';
 
 %----------------------
 % Import files

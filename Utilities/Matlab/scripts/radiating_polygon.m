@@ -5,7 +5,7 @@
 close all
 clear all
 
-datadir='../../Verification/Radiation/';
+datadir='../../FDS/Verification/Radiation/';
 
 skip_case=false;
 

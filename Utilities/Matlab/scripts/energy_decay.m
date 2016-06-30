@@ -14,7 +14,7 @@
 function [] = energy_decay(chid,N)
 
 close all
-addpath('../../Verification/Turbulence')
+addpath('../../FDS/Verification/Turbulence')
 
 L = 0.56549; % \approx 9*(2*pi)/100;
 

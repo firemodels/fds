@@ -5,7 +5,7 @@
 close all
 clear all
 
-dir = '../../Verification/Radiation/';
+dir = '../../FDS/Verification/Radiation/';
 
 infile{1,1}  = 'radiation_plane_layer_1_1_devc.csv';
 infile{2,1}  = 'radiation_plane_layer_2_1_devc.csv';

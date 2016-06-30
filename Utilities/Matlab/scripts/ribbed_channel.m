@@ -5,7 +5,7 @@
 close all
 clear all
 
-datadir = '../../Verification/Turbulence/';
+datadir = '../../FDS/Verification/Turbulence/';
 plotdir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 plot_style

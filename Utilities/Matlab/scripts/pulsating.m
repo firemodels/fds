@@ -10,7 +10,7 @@ plot_style
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-data_dir = '../../Verification/Scalar_Analytical_Solution/';
+data_dir = '../../FDS/Verification/Scalar_Analytical_Solution/';
 plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 devc_col = 3; % (x,y)=(pi,pi)-->devc_col=2, (x,y)=(1.5*pi,1.5*pi)-->devc_col=3

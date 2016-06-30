@@ -16,7 +16,7 @@ close all
 clear all
 
 % Open directory with input files
-input_dir = '../../Verification/NS_Analytical_Solution/';
+input_dir = '../../FDS/Verification/NS_Analytical_Solution/';
 
 %-------------------------------------------------------------------------%
 % Define Parameters and Variables

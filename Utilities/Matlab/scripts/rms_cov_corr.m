@@ -5,7 +5,7 @@
 close all
 clear all
 
-datadir='../../Verification/Controls/';
+datadir='../../FDS/Verification/Controls/';
 
 % load experimental data and FDS prediction
 
@@ -68,7 +68,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf
@@ -100,7 +100,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf
@@ -132,7 +132,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf

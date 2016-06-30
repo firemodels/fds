@@ -179,7 +179,7 @@ dP=[dP;dP;dP;dP;dP;dP];
 yff(:,1) = tspan;
 
 header1 = {'Time','O2','CH4','CO2','H2O'};
-filename1 = '../../Verification/Species/reactionrate_EDC_1step_CH4_nonmix_spec.csv';
+filename1 = '../../FDS/Verification/Species/reactionrate_EDC_1step_CH4_nonmix_spec.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s\n',header1{:});
 for j=8:length(tspan)
@@ -188,7 +188,7 @@ end
 fclose(fid);
 
 header1 = {'Time','TEMP','PRES'};
-filename1 = '../../Verification/Species/reactionrate_EDC_1step_CH4_nonmix_temppres.csv';
+filename1 = '../../FDS/Verification/Species/reactionrate_EDC_1step_CH4_nonmix_temppres.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s\n',header1{:});
 for j=1:length(tss)

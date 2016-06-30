@@ -5,13 +5,13 @@
 close all
 clear all
 
-infile{1} = '../../Verification/Heat_Transfer/convective_cooling_p1_devc.csv';
-infile{2} = '../../Verification/Heat_Transfer/convective_cooling_p05_devc.csv';
-infile{3} = '../../Verification/Heat_Transfer/convective_cooling_p025_devc.csv';
-infile{4} = '../../Verification/Heat_Transfer/convective_cooling_p01_devc.csv';
-infile{5} = '../../Verification/Heat_Transfer/convective_cooling_p005_devc.csv';
-infile{6} = '../../Verification/Heat_Transfer/convective_cooling_p0025_devc.csv';
-infile{7} = '../../Verification/Heat_Transfer/convective_cooling_p00125_devc.csv';
+infile{1} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p1_devc.csv';
+infile{2} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p05_devc.csv';
+infile{3} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p025_devc.csv';
+infile{4} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p01_devc.csv';
+infile{5} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p005_devc.csv';
+infile{6} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p0025_devc.csv';
+infile{7} = '../../FDS/Verification/Heat_Transfer/convective_cooling_p00125_devc.csv';
 
 dx(1) = 0.1;
 dx(2) = 0.05;
@@ -31,7 +31,7 @@ for k=1:7
 end
 
 %Write the error files
-dir = '../../Verification/Heat_Transfer/';
+dir = '../../FDS/Verification/Heat_Transfer/';
 
 filename11 = [dir,'convective_cooling_error.csv'];
 fid11 = fopen(filename11,'wt');

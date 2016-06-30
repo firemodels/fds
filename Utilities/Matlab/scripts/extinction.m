@@ -8,7 +8,7 @@
 clear all
 close all
 
-addpath('../../Verification/Extinction/')
+addpath('../../FDS/Verification/Extinction/')
 
 %-----------------------
 % Initialize species

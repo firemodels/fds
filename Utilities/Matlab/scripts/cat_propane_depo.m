@@ -8,7 +8,7 @@
 
 clear all
 
-FDS_Output_Files = '../../Verification/Species/';
+FDS_Output_Files = '../../FDS/Verification/Species/';
 
 skip_case = 0;
 if ~exist([FDS_Output_Files,'propane_flame_deposition_devc.csv'])

@@ -5,7 +5,7 @@
 close all
 clear all
 
-addpath('../../Verification/Radiation')
+addpath('../../FDS/Verification/Radiation')
 
 % set the plot style parameters
 

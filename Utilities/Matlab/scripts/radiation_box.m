@@ -26,7 +26,7 @@ x(18) = 8.75E-01;
 x(19) = 9.25E-01;
 x(20) = 9.75E-01;
 
-dir = '../../Verification/Radiation/';
+dir = '../../FDS/Verification/Radiation/';
 
 infile{1}  = [dir,'radiation_box__20___50_devc.csv'];
 infile{2}  = [dir,'radiation_box__20__100_devc.csv'];

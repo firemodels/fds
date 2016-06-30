@@ -21,7 +21,7 @@ global E
 global A
 global residue
 
-addpath('../../Verification/Pyrolysis')
+addpath('../../FDS/Verification/Pyrolysis')
 
 show_fds = 1;
 

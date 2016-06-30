@@ -5,7 +5,7 @@ clear all
 
 plot_style
 
-repository = '../../Verification/Sprinklers_and_Sprays/';
+repository = '../../FDS/Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 

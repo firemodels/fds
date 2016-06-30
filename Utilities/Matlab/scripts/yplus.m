@@ -5,7 +5,7 @@
 close all
 clear all
 
-dir = '../../Verification/Turbulence/';
+dir = '../../FDS/Verification/Turbulence/';
 
 skip_case = 0;
 if ~exist([dir,'yplus_8_devc.csv'])

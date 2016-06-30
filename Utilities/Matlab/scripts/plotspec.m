@@ -25,7 +25,7 @@ L = 9*2*pi/100; % box length (m)
 k0 = 2*pi/L;
 kc = 1/2*N*k0;
 
-ddir = '../../Verification/Turbulence/';
+ddir = '../../FDS/Verification/Turbulence/';
 
 uvw_file1 = [ddir,chid,'_uvw_001.csv'];
 uvw_file2 = [ddir,chid,'_uvw_002.csv'];
