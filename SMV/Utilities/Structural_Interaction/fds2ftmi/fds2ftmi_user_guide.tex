@@ -1,0 +1,266 @@
+\documentclass[11pt]{book}
+\input{../../../Manuals/Bibliography/commoncommands}
+
+\begin{document}
+
+
+\bibliographystyle{unsrt}
+\pagestyle{empty}
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+\headerB{FDS2FTMI User's Guide}
+\begin{flushright}
+\fontsize{20}{24}\selectfont
+\bf{
+An automated code to one-way coupling \\
+between FDS and FEM using FTMI \\
+}
+\end{flushright}
+\begin{flushright}
+\fontsize{14}{16}\selectfont
+{
+Julio Cesar Silva  
+}
+
+\end{flushright}
+
+\headerC{
+\today \\
+FDS Version \fdsversion \\
+Revision: 
+Git Hash
+}
+
+\end{minipage}
+
+\newpage
+
+\newpage
+
+\frontmatter
+
+\pagestyle{plain}
+
+\cleardoublepage
+\phantomsection
+\tableofcontents
+
+\mainmatter
+
+
+\chapter{Introduction}
+\label{info:intro}
+
+This document explains the developed strategy to evaluate the behavior of structures under fire conditions by a coupled analysis including Fire Dynamics Simulator (FDS\cite{FDS_Users_Guide}) and Finite Element Method (FEM) codes. Common practice is to extract the results from a fire simulation, and apply those as boundary conditions at the exposed surfaces for the thermomechanical analysis. This kind of approach is commonly referred as one-way coupling. In a two-way coupling strategy, the thermomechanical results, e.g., displacements, collapses, etc. are transposed back to the fire simulation. The two-way approach can lead to a more complex simulation, increasing the amount of data to be transferred between the models. Its advantages are related to cases where displacements can change the fire source or the fluid flow pattern, creating a different fire scenario. Using one-way coupling it is possible to establish each model separately, which means that the same fire simulation results can be used on slightly different thermomechanical models, contributing to development of optimized structures.  
+
+The Fire-ThermoMechanical Interface \cite{FTMI:Methodology} is a one-way coupling procedure that uses the Adiabatic Surface Temperature ($T_{\hbox{\tiny AST}}$) concept \cite{Wickstrom:Interflam2007,Wickstrom_AST} to establish an interface between FDS and FEM codes. The procedure recreates the {\em net} heat flux evaluated in FDS, in the FEM environment by transferring $T_{\hbox{\tiny AST}}$ and the heat transfer coefficient ($h$) from FDS results and adopting the wall temperature ($T_{\rm w}$) provided by the FEM code at each time step  ($h$ can also be adopted as a constant). This heat flux can be calculated by FEM over the elements faces and applied into each node of the exposed surface. FDS2FTMI is a code created to perform these tasks in an automated way, allowing the simulation of the behavior of global structures, discretized with shell and/or solid elements, exposed to fire conditions. FTMI can be used with any FEM code, at this time, FDS2FTMI is implemented between FDS and A{\footnotesize NSYS} or between FDS and LS-DYNA~\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the author or the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}.
+
+The code FDS2FTMI is included in the FDS-SVM repository \cite{FDS-SMV_repository} under \path{Utilities/Structural_Interaction/fds2ftmi}. A makefile is provided to help in the compilation process with different operational systems and compilers. A shell and a bat scripts (\path{scripts/build_fds2ftmi.sh}, \path{scripts/build_fds2ftmi.bat}) are also provided to build this manual, run the Verification cases and check the results~\footnote{Two environment variables are needed to run these scripts: FDS\_GITROOT, which is the path for fds-smv git folder; and ANSYS, which is the path to the ANSYS executable (including the executable).}.  
+
+%If a reference to this methodology is needed, Silva~{\textit {et. al}} \cite{FTMI:Methodology} should be used. 
+Some validation work done with this methodology is provided at Zhang~{\textit {et. al}} \cite{FTMI:Validation}.
+
+\chapter{Getting Started}
+\label{info:start}
+
+Heat can be transferred from flames and hot gases to structures surfaces by radiation and convection. The total heat flux ($\dot{q}_{\rm tot}''$) is defined by the sum of these two parcels: 
+\be \label{eq_qtot} \dot{q}_{\rm tot}'' = \dot{q}_{\rm r}'' + \dot{q}_{\rm c}'' = \epsilon \, \left( {e}_{\rm inc} - \sigma T_{\rm w}^4 \right) + h (T_{\rm g} - T_{\rm w})  \ee  
+where $\dot{q}_{\rm r}''$ is the radiative heat flux, $\dot{q}_{\rm c}''$ is the convective heat flux, $\epsilon$ is the emissivity, ${e}_{\rm inc}$ is the radiative thermal energy incident on the exposed surfaces, $\sigma$ is the Stefan-Boltzmann constant, $T_{\rm w}$ is the wall temperature and $T_{\rm g}$ is the gas temperature.
+
+Advanced fire simulation models provide results that characterize the three dimensional evolution of the fire, the radiative thermal energy incident on the exposed surfaces and the gas temperatures. However, the models are not capable of accurately characterizing the temperature distribution on solids, and thus the surface temperature. Consequently, the total heat flux, as presented on Eq.~\ref{eq_qtot}, cannot be precisely calculated at the end of the fire simulation. Therefore, an additional approach is necessary to cross this barrier.
+
+\section{Adiabatic Surface Temperature}
+
+In order to establish an accurate interface between the fire simulation and the thermomechanical analysis, the Adiabatic Surface Temperature concept is used \cite{Wickstrom:Interflam2007}. A real surface can be replaced by a perfectly insulated surface exposed to the same heating conditions; the total heat flux to this ideal surface is by definition zero :
+\be \label{eq_ast} \epsilon \, \left( {e}_{\rm inc} - \sigma T_{\hbox{\tiny AST}}^4 \right) + h (T_{\rm g} - T_{\hbox{\tiny AST}}) = 0  \ee 
+and the temperature of this idealized surface can be obtained as an output from the fire simulation.
+
+Since the real and the hypothetical surfaces are exposed to the same heating conditions, the total heat flux that will be applied to the thermomechanical model can be obtained by the solution of the system formed by Eqs. (\ref{eq_qtot}) and (\ref{eq_ast}):
+\be \label{eq_ftmi}\dot{q}_{\rm tot}'' = \epsilon \sigma \, \left( T_{\hbox{\tiny AST}}^4 - T_{\rm w}^4 \right) + h (T_{\hbox{\tiny AST}} - T_{\rm w})  \ee
+
+This single variable ($T_{\hbox{\tiny AST}}$) is considered capable of reducing the complexity of the fire simulation into one simple scalar~\cite{FTMI:Duthinh,FTMI:Sandstrom,FTMI:Wickstrom2010}. To achieve a correct definition of the total heat flux, accounting correctly both the convective and radiative heat fluxes, it is also necessary to add the convective heat transfer coefficient (\textit{h}). 
+ 
+During the FDS simulation, $T_{\hbox{\tiny AST}}$ and $h$ can be recorded via {\ct DEVC} or {\ct BNDF} outputs. To use {\ct DEVC}s, the points (or nodes) where the information will be collected need to be determined in advance, before the fire simulation. On other hand, {\ct BNDF} generates outputs at all exposed surfaces (boundary cells marking the interface between gas and solid) into the domain. FDS2FTMI extracts information stored in {\ct BNDF} files, so the coupling procedure can be achieved for different discretization levels (at FEM). Small modifications or dimensioning in FEM does not imply restarting the fire simulation. 
+  
+\section{Capturing the Mesh Information from FEM}
+
+In FDS, the domain is divided into orthogonal cells in a rectilinear grid and geometries are approximated by blocks ({\ct OBST}s). For FEM thermomechanical analysis, the structure is usually discretized with solid (tetrahedrons or hexahedrons) or shell (3D plane) elements. Also, the element size needed at the thermomechanical model can lead to an unfeasible fire simulation. Even for modest structures, with simple geometries, the models generated for each side of this interface may not match perfectly. Therefore, the communication between the two models is based on the spatial position of the nodes on the exposed surfaces (FEM) and the cell faces (FDS). The geometries created for both models need to share a common Cartesian coordinate system, i.e., they need to have the same origin and they need to be consistent. FDS2FTMI main function is to read the {\ct BNDF} files and extract $T_{\hbox{\tiny AST}}$ and $h$ at the exposed surfaces. This code also generates the files that need to be read by the FEM code to apply correct boundary contitions. The source code and a makefile can be found at \path{Utilities/Structural_Interaction/fds2ftmi/scripts}. 
+
+The input parameters for FDS2FTMI are the spatial position of the exposed surfaces at FEM model. These parameters are divided in 2 files, ``nodes.dat'' and ``elements.dat'', and include the node positions (Cartesian coordinates) and the node numbers at the exposed faces ordered using right-hand rule with normal pointing outwards. 
+
+\paragraph{A{\footnotesize NSYS}}~\\ The interface with A{\footnotesize NSYS} is developed using surface effect elements, so the information presented in the files ``nodes.dat'' and ``elements.dat'' are related to those surface effect elements. To help in the generation of the surface effect elements and these two input files, some A{\footnotesize NSYS} macros were created. It is possible to export the mesh information using the macros ``ansys2ftmi.geom'' or ``ansys2ftmi\_shell.geom''. The first can be used for solid elements and the second one is devoted to shell elements. The shell element file creates interfaces on both sides (top and bottom layers) of the shell elements~\footnote{To help convert an A{\footnotesize NSYS} model geometry into {\ct OBST}, an A{\footnotesize NSYS} macro (``ansys2fds\_areas\_obst.geom'') that convert areas into {\ct OBST} is available at scripts.}. These macros were designed to create interface elements attached to the boundary element faces between solid and gas. To select just the exposed surfaces related to a specific scenario, those surfaces can be selected in A{\footnotesize NSYS} before running the macros (Select Entities > Areas). The macros are available at \path{Utilities/Structural_Interaction/fds2ftmi/scrips}. 
+
+\paragraph{LS-DYNA}~\\ To create this interface with LS-DYNA, only the information of the actual mesh needs to be presented in the files ``nodes.dat'' and ``elements.dat''. \\
+
+Examples of these two files are given below:
+
+\paragraph{nodes.dat}~\\
+The first line of this file has the number of nodes and the highest node number in the FEM model. All other lines have just the node number and the Cartesian coordinates (x, y and z). 
+\begin{verbatim}
+   100   2400
+   1    1.000    0.000    0.000
+   2    1.000    0.100    0.000
+   3    1.000    0.200    0.000
+   4    1.000    0.300    0.000
+   .
+   .
+   .
+   100  1.000    1.000    1.000
+\end{verbatim}
+In this example, the exposed surface has 100 nodes and the highest number at the FEM model is 2400. So, when the code generates nodes for interface elements it starts in 2401. All additional lines have the nodes coordinates.
+
+\paragraph{elements.dat}~\\
+The first line of this file has the number of interface elements that compose the exposed surface, and 3 aditional flags. First flag says the type of element used in FEM model: 0 means solid elements and 1 means shell elements. If the thermomechanical model uses shell elements, the interface is defined in both top and bottom layers. The second flag defines in which layer the heat flux is prescribed: 1 means top layer and 2 means bottom layer. The last flag defines the number of the interface element type in A{\footnotesize NSYS}.
+
+\begin{verbatim}
+   200     0     0     2
+   801   120     2   148   117   121   149   139   118
+   802   126   128   130   151   127   144   125   150
+   803   118   120   117   135   119   118   157   136
+   804   128   130   128   126   129   145   127   144
+   .
+   .
+   .
+  1000   178   163    41    69   179   164    10    80
+  END
+\end{verbatim}
+In this example, there are 200 interface elements in this model, they are attached to solid elements (so the first and second flag are 0) and they correspond to the element type 2 in the FEM model. The code FDS2FTMI can work with bilinear or linear elements, which have a different number of nodes. In the case of using linear elements, the non-used positions are filled with zeros. 
+
+In the next example there are 72 interface elements attached to top layer of shell elements (from 73 to 144) and another 72 applying the heat flux to bottom layer of the shell elements (145-216). The input file structure remains the same, but it is split into two parts, each one with its own flags.
+
+\begin{verbatim}
+   72     1     1     2
+   73     1     8    10     2     0     0     0     0
+   74     2    10     9     3     0     0     0     0
+   75     4    11    12     6     0     0     0     0
+   76     2    10    11     4     0     0     0     0
+   .
+   .
+   .
+  144    82    91    90    84     0     0     0     0
+   72     1     2     3
+  145     8     1     2    10     0     0     0     0
+  146    10     2     3     9     0     0     0     0
+  147    11     4     6    12     0     0     0     0
+  148    10     2     4    11     0     0     0     0   
+   .
+   .
+   .
+  216    91    82    84    90     0     0     0     0   
+  END
+\end{verbatim}
+
+\section{Executing the code}
+
+After the definition of the files nodes.dat and elements.dat, the code FDS2FTMI is executed to extract information from FDS boundary files, this code requires some information about the FDS model:
+
+\paragraph{CHID} 
+{\ct CHID} drives the naming convention of FDS output files. It is needed to give the path to the code get information from .smv and .bf files. 
+\paragraph{Cell size} 
+This is used to create a virtual cell over the node position to search for results in {\ct BNDF} files. It is generally adopted as the same value as the cell size in FDS simulation.
+\paragraph{Number of variables} 
+The number of variables (1 or 2) is used to determine if the interface will get $h$ from FDS simulation or use a constant value. 
+If the number of variables is defines as 2, the code will extract both $T_{\hbox{\tiny AST}}$ and $h$ from FDS simulation. If the number of variables is defined as 1, the code will get just the results for $T_{\hbox{\tiny AST}}$ and a constant value of $h$ is prescribed in A{\footnotesize NSYS}. So, just in this case, the next value on this same line is $h$. 
+\paragraph{Time} 
+To address the time boundary, the code needs the starting, ending time and the time interval. The time interval that the results are written into {\ct BNDF} files can be controlled by {\ct DT\_BNDF} at {\ct DUMP} line, the default is given by $2 \Delta t$/{\footnotesize NFRAMES}.
+\paragraph{Number of average points} 
+In some scenarios, a constant exposure condition can be assumed. To calculate a constant steady-state exposure condition from 
+a short time history, a number of average points should be provided. If NO average is wanted, 0 (zero) should be prescribed.
+\paragraph{Time average} 
+The time step at the FEM model can be bigger than the time interval when FDS write results. In this case, an average needs to be performed to calculate the correct thermal exposure of the surfaces. If NO average is wanted, 0 (zero) should be prescribed.  
+\paragraph{FEM Code}
+This is used to tell FDS2FTMI which FEM code will be used in the thermomechanical analysis. At this moment, A{\footnotesize NSYS} and LS-DYNA is supported, and this variable should be equal to 1 for A{\footnotesize NSYS} and 2 for LS-DYNA.
+\paragraph{Output file}
+The code will generate an output file containing all the commands that need to be read by A{\footnotesize NSYS} (File > Read input from). This ouput file will create all elements, parameters and loads necessary to input the heat flux from the flames and hot gases into the nodes of the exposed surfaces. \\
+
+These information can be passed to the code via arguments (command line), input file or just typing as the code steps through execution. As arguments or input file, the paramenters need to be given at the same order they are presented above. For example:
+\begin{verbatim}
+  fds2ftmi_linux_64 simple_panel_hot 0.05 2 0 600 2 0 0 1 simple_panel
+\end{verbatim}
+  or 
+\begin{verbatim}
+  fds2ftmi_linux_64 simple_panel_hot.fds2ftmi 
+\end{verbatim}
+with simple\_fire\_hot.fds2ftmi:
+\begin{verbatim}
+  simple_panel_hot 
+  0.05 
+  2
+  0 600 2 
+  0 0
+  1
+  simple_panel
+\end{verbatim}
+start the code with simple\_panel\_hot as {\ct CHID}, a cell size equal to 0.05, 2 variables, starting at 0s to 600s with 2s as time interval, with no average points, no time average, exporting the results in A{\footnotesize NSYS} format and writting the results at ``simple\_panel.dat''.
+
+The code will search into the {\ct BNDF} files for the results. Searching over every surface in the FDS simulation can slow down this process. To reduce the size of the {\ct BNDF} files, add {\ct BNDF\_DEFAULT=.FALSE.} in {\ct MISC} line and the add {\ct BNDF\_OBST=.TRUE.} at the exposed surfaces {\ct OBST} lines.
+
+\chapter{Verification Cases}
+\label{info:verification}
+
+This chapter contains the Verification cases that test the FDS2FTMI code. The SVN number on the figures is related to the FDS repository \cite{FDS-SMV_repository} subversion control number used to compile the codes and run the cases.  
+
+\section{Simple panel exposed to radiation and convection (\texorpdfstring{\textct{simple\_panel\_hot}}{simple\_panel\_hot})}
+
+This example verifies the FDS2FTMI ability to translate the heat transfer between solid and gas phase at fire simulation into boundary contitions for a FEM model (A{\footnotesize NSYS}). It also demonstrates that the code can extract correctly the results from {\ct BNDF} files. This model is composed by 2 panels, one has a constant temperature of $T_s=1000$~\si{\degree C} and the other one has an initial temperature of $T_s=20$~\si{\degree C}. The temperature evolution at the later panel is the target of this exercise (the input files are provided in \path{examples/simple_panel_hot}). The case is set to be 2D, with only one cell at $y$ axis. These panels are $1$~m height ($z$ axis) and they are $1$~m from each other. Three {\ct DEVC}s were setup to compare the results, they are placed at $0.775$~m (1), $0.525$~m (2) and $0.275$~m (3) in $z$ axis. After the fire simulation, the boundary conditions are translated to A{\footnotesize NSYS} by FTMI. A comparison between the Adiabatic Surface Temperature $T_{\hbox{\tiny AST}}$ and the surface temperature $T_s$ obtained by FTMI and FDS is provided in Fig.~\ref{simple_panel_hot}. 
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/simple_panel_hot_ast} &
+\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/simple_panel_hot_ts}
+\end{tabular*}
+\caption[The \textct{simple\_panel\_hot} results]{Comparison of the results obtained by FTMI (with A{\footnotesize NSYS}) and FDS.}
+\label{simple_panel_hot}
+\end{figure}
+
+\section{H profile column exposed to a localizes fire (\texorpdfstring{\textct{h\_profile}}{h\_profile})}
+
+In this case a simple supported H-profile column is exposed to an adjacent hot panel ($T_s=1000$~\si{\degree C}). The steel column is 3~m tall (\textit{z} axis). The cross section is a 0.3~m (flange, parallel to \textit{x}) x 0.4~m (web, parallel to \textit{y}) with a 12.5~mm thick web and 16~mm thick flanges. The hot panel is parallel to the web and localized 30~cm from the web in \textit{x} direction (or 15~cm from the end of the flange).
+The column is discretized with shell elements (FEM) to verify the use of the code to model shell structures. Each side of these plane elements will have a different thermal exposure, incident radiation and gas temperature around the surface. FDS2FTMI is designed to prescribe the correspondent heat flux at the shell elements top and bottom layers. Points A, B and C are located at the column middle span. A and C are located at the end of the flange (closest points to hot panel), B is located at the middle of the web.
+
+The target of this qualitative verification exercise is to check the thermal gradient due to heat fluxes applied in top and bottom layers, the spatial temperature distribution and the thermomechanical behavior due to heating. The evolution of the surface temperature is presented in Fig.~\ref{h_profile1}. As the hot panel is parallel to the web, the heat flux incident to its surface will be higher than the heat flux incident to the flanges, so the surface temperature ar A is higher than at B. Even with the high conductivity of steel is possible to observe a little gradient between the exposed and back surfaces at A and B. The spatial distribution also presented in Fig.~\ref{h_profile1} shows the expected profile. This profile is not exactly simmetric through column mid-span because of the energy reflected by the ground and the variation on the gas velocities around the column (which changes the heat transfer coefficient - $h$), so the temperature is lower at the top of the column.
+
+\begin{figure}[ht]
+\noindent
+\parbox[c]{22em}{\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/h_profile_ts}} 
+\parbox[c]{11em}{\includegraphics[angle=270, trim=1cm 18cm 2cm 1.4cm, clip=true, origin=l,scale=0.30]{scripts/SCRIPT_FIGURES/h_profile_temp}} 
+\parbox[c]{1em}{\includegraphics[angle=270, trim=1cm 18cm 2cm 1.4cm, clip=true, origin=l,scale=0.30]{scripts/SCRIPT_FIGURES/h_profile_temp3d}} 
+\caption[The \textct{h\_profile} results]{Evolution of surface temperature and spatial distribution at 60 min.}
+\label{h_profile1}
+\end{figure}
+
+This simple supported column is subjected to a vertical load of 325 kN, which correspond to 1/50 of the Euler's buckling critical load. Under these loading conditions, the column will be close to a uniform stress state and remain straight at the beginning of the simulation, then the horizontal displacements generated will be due to the temperature distribution. The evolution of horizontal displacements is presented in Fig.~\ref{h_profile2}. As expected, the horizontal displacements in \textit{x} axis are equal at A and C and represents the maximum achieved at the column, as can be observed at the lateral view. In \textit{y} direction the value of the displacement at these two points are the same, but as column is expanding and they are moving away from each other the signal of these displacements are oposite.
+
+\begin{figure}[ht]
+\noindent
+\parbox[c]{19em}{\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/h_profile_dx}} 
+\parbox[c]{17.5em}{\includegraphics[width=2.785in, trim=1.5cm 0cm 0cm 0cm, clip=true]{scripts/SCRIPT_FIGURES/h_profile_dy}}
+\parbox[c]{1em}{\includegraphics[angle=270, trim=1cm 18cm 3cm 1.4cm, clip=true, origin=l,scale=0.28]{scripts/SCRIPT_FIGURES/h_profile_disp_15x}} 
+\caption[The \textct{h\_profile} results]{Evolution of horizontal displacements in \textit{x} and \textit{y} axis and a lateral view of the plane \textit{xz} (displacements amplified by x15).}
+\label{h_profile2}
+\end{figure}
+
+\section{Summary of Verification Results}
+
+This section summarizes the results from Verification cases with the objective of evaluate the output predicted by FDS2FTMI code. The presented results can help identify errors in the source code.
+
+\begin{longtable}[c]{l c c c c c c }
+\hline
+Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\
+          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline
+\endfirsthead
+\hline
+Case Name & Expected & Predicted & Type of Error & Error & Error     & Within    \\
+          & Metric   & Metric    &               &       & Tolerance & Tolerance \\ \hline \hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+\input{scripts/verification_statistics.tex}
+\end{longtable}
+
+\bibliography{../../../Manuals/Bibliography/FDS_refs,../../../Manuals/Bibliography/FDS_general,../../../Manuals/Bibliography/FDS_mathcomp,scripts/FTMI_refs}
+\end{document}

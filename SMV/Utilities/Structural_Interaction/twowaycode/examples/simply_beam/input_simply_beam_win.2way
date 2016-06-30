@@ -1,0 +1,9 @@
+simply_beam
+%FDS_GITROOT%\FDS_Compilation\intel_win_64\fds_win_64
+%ANSYS%
+600 2
+10
+25
+2
+simply_beam_step1
+simply_beam_step2

@@ -1,0 +1,43 @@
+/batch
+resume,simply_beam_ansys_mechanical,db
+!*
+/POST26 
+*GET,JNAME,ACTIVE,,JOBNAME
+*GET,NUM,ACTIVE,,SET,NSET,,
+*SET,EXPNAME,'simply_beam'
+FILE,JNAME,'rst','.' 
+!* 
+NSOL,2,95,U,Z,dz_A,
+STORE,MERGE 
+NSOL,3,95,U,Y,dy_A,
+STORE,MERGE 
+NSOL,4,95,U,X,dx_A,
+STORE,MERGE 
+!*
+!*
+FORCE,TOTAL 
+SHELL,BOT 
+ESOL,5,182,95 ,BFE,TEMP,Temp_A   
+STORE,MERGE 
+FORCE,TOTAL 
+SHELL,TOP 
+ESOL,6,160,105,BFE,TEMP,Temp_B 
+STORE,MERGE 
+! Save time history variables to file 
+*DEL,TEMP_MATRIX
+*DIM,TEMP_MATRIX,TABLE,NUM,9
+VGET,TEMP_MATRIX(1,0),1 
+VGET,TEMP_MATRIX(1,1),2
+VGET,TEMP_MATRIX(1,2),3
+VGET,TEMP_MATRIX(1,3),4
+VGET,TEMP_MATRIX(1,4),5
+VGET,TEMP_MATRIX(1,5),6
+*cfopen,EXPNAME,'csv','.'
+*VWRITE,'Time','dz_A','dy_A','dx_A','Temp_A','Temp_B'
+%C,%C,%C,%C,%C,%C
+*VWRITE,TEMP_MATRIX(1,0),TEMP_MATRIX(1,1),TEMP_MATRIX(1,2),TEMP_MATRIX(1,3),TEMP_MATRIX(1,4),TEMP_MATRIX(1,5)
+%G,%G,%G,%G,%G,%G
+*cfclose
+! End of time history save  
+
+
