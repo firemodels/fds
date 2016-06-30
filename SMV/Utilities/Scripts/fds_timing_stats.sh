@@ -5,6 +5,9 @@ SVNROOT=`pwd`/../../..
 cd $SVNROOT
 SVNROOT=`pwd`
 
+cd $curdir
+UTILSCRIPTDIR=`pwd`
+
 tmpout=/tmp/timings.$$
 
 # Mode argument: smokebot, or anything else (including no argument) for normal mode
@@ -13,9 +16,10 @@ TIMING=$2
 
 echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $tmpout
 
-export QFDS=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
-export RUNCFAST=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
-export RUNTFDS=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
+export QFDS=$UTILSCRIPTDIR/timing_stats.sh
+export RUNCFAST=$UTILSCRIPTDIR/timing_stats.sh
+export RUNTFDS=$UTILSCRIPTDIR/timing_stats.sh
+
 if [[ "$TIMING" == "" ]]; then 
   export save_benchmark=
 else

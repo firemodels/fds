@@ -35,7 +35,7 @@ esac
 done
 shift $(($OPTIND-1))
 
-cd $FDSSMV/Utilities/Scripts
+cd $FDSSMV/FDS/Utilities/Scripts
 
 # Name and location of output .tex file with validation GIT statistics
 OUTPUT_TEX_FILE=$FDSSMV/FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/validation_git_stats.tex

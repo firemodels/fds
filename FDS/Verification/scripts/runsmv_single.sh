@@ -110,7 +110,17 @@ fi
 VERSION=$PLATFORM$TEST$SIZE$DEBUG
 VERSION2=$PLATFORM$SIZE
 
-SVNROOT=~/FDS-SMV
+curdir=`pwd`
+SVNROOT=`pwd`/../../..
+cd $SVNROOT
+SVNROOT=`pwd`
+
+cd $curdir
+UTILSCRIPTDIR=`pwd`/../../Utilities/Scripts
+cd $UTILSCRIPTDIR
+UTILSCRIPTDIR=`pwd`
+cd $curdir
+
 
 SMOKEVIEW=$SVNROOT/SMV/Build/intel_$VERSION2/smokeview_$VERSION
 
@@ -119,8 +129,8 @@ if [ "$BINDIR" == "" ]; then
 fi
 SMVBINDIR="-bindir $BINDIR"
 
-STARTX=$SVNROOT/SMV/Utilities/Scripts/startXserver.sh
-STOPX=$SVNROOT/SMV/Utilities/Scripts/stopXserver.sh
+STARTX=$UTILSCRIPTDIR/startXserver.sh
+STOPX=$UTILSCRIPTDIR/stopXserver.sh
 
 source $STARTX
 echo "     smokeview: $SMOKEVIEW"
