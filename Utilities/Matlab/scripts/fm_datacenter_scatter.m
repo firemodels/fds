@@ -3,10 +3,10 @@
 
 % Generate fds summary data for scatterplots
 
-[exp_data] = csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_exp.csv',1);
+[exp_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/Experimental_Data/fm_exp.csv',1);
 
 % Low flow test
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
 n_fds_data=size(fds_data,1);
 %compute average pressures
 for i=2:7
@@ -20,7 +20,7 @@ fds_out(2)=fds_avg(1)-fds_avg(2);
 fds_out(3)=fds_avg(5)-fds_avg(6);
 
 % High flow test
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
 
 %compute average pressures
 for i=2:7
@@ -30,7 +30,7 @@ end
 fds_out(4)=fds_avg(1)-fds_avg(2);
 fds_out(5)=fds_avg(5)-fds_avg(6);
 
-fid=fopen('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_fds_data.csv','w+');
+fid=fopen('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_fds_data.csv','w+');
 
 fprintf(fid,'%s, %s, %s, %s, %s \n',fds_header{1:5});
 fprintf(fid,'%f, %f, %f, %f, %f, \n',fds_out(1:5));
@@ -39,37 +39,37 @@ fclose(fid);
 
 %get soot values
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_SF_devc.csv',15);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_SF_devc.csv',15);
 
 fds_out(6) = mean(fds_data(:,28))*1000000;
 fds_out(7) = mean(fds_data(:,46))*1000000;
 fds_out(8) = mean(fds_data(:,65))*1000000;
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_C3H6_SF_devc.csv',15);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_C3H6_SF_devc.csv',15);
 
 fds_out(9)  = mean(fds_data(:,28))*1000000;
 fds_out(10) = mean(fds_data(:,46))*1000000;
 fds_out(11) = mean(fds_data(:,65))*1000000;
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_HA_devc.csv',15);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_HA_devc.csv',15);
 
 fds_out(12) = mean(fds_data(:,28))*1000000;
 fds_out(13) = mean(fds_data(:,46))*1000000;
 fds_out(14) = mean(fds_data(:,65))*1000000;
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_C3H6_HA_devc.csv',15);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_C3H6_HA_devc.csv',15);
 
 fds_out(15) = mean(fds_data(:,28))*1000000;
 fds_out(16) = mean(fds_data(:,46))*1000000;
 fds_out(17) = mean(fds_data(:,65))*1000000;
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_Cable_SF_devc.csv',13);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_Cable_SF_devc.csv',13);
 
 fds_out(18) = mean(fds_data(:,28))*1000000;
 fds_out(19) = mean(fds_data(:,46))*1000000;
 fds_out(20) = mean(fds_data(:,65))*1000000;
 
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_Cable_SF_devc.csv',13);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_High_Cable_SF_devc.csv',13);
 
 fds_out(21) = mean(fds_data(:,28))*1000000;
 fds_out(22) = mean(fds_data(:,46))*1000000;
@@ -105,7 +105,7 @@ ytitle = ['Predicted Soot Concentration (mg/m^3)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-git_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_SF_git.txt';
+git_file = '../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Low_C3H6_SF_git.txt';
 addverstr(gca,git_file,'loglog')
 
 % print to pdf

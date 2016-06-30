@@ -11,7 +11,7 @@ close all;
 % and post processing scripts
 %------------------------------------------------
 
-addpath('../../Validation/NIST_RSE_1994/FDS_Output_Files')
+addpath('../../FDS/Validation/NIST_RSE_1994/FDS_Output_Files')
 
 %------------------------------------------------
 % Read in FDS output files
@@ -118,7 +118,7 @@ header1 = {'HRR','O2Rear_FDS_RI_5','CO2Rear_FDS_RI_5','CORear_FDS_RI_5','UHRear_
     'CORear_FDS_RI_20','UHRear_FDS_RI_20','H2ORear_FDS_RI_20','O2Front_FDS_RI_20','CO2Front_FDS_RI_20',...
     'COFront_FDS_RI_20','UHFront_FDS_RI_20','H2OFront_FDS_RI_20','TRSampA_FDS_RI_20','TRSampBB_FDS_RI_20',...
     'TFSampA_FDS_RI_20','TFSampBB_FDS_RI_20','ITER_RI=20'};
-filename1 = '../../Validation/NIST_RSE_1994/FDS_Output_Files/NIST_RSE_1994_FDS.csv';
+filename1 = '../../FDS/Validation/NIST_RSE_1994/FDS_Output_Files/NIST_RSE_1994_FDS.csv';
 fid = fopen(filename1,'wt');
 fprintf(fid,'%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s\n',header1{:});
 for i=1:9

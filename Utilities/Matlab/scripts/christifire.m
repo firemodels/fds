@@ -9,8 +9,8 @@ clear all
 
 % Set global reaction rate parameters
 
-addpath('../../Validation/CHRISTIFIRE/Experimental_Data')
-addpath('../../Validation/CHRISTIFIRE/FDS_Output_Files')
+addpath('../../FDS/Validation/CHRISTIFIRE/Experimental_Data')
+addpath('../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files')
 
 close all
     
@@ -125,7 +125,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_tga_N2_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_tga_N2_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 
@@ -174,7 +174,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_mcc_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_mcc_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -222,7 +222,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_tga_N2_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_tga_N2_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -270,7 +270,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_mcc_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_mcc_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -325,7 +325,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -367,7 +367,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -409,7 +409,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -451,7 +451,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -493,7 +493,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -535,7 +535,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -577,7 +577,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -619,7 +619,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -661,7 +661,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf

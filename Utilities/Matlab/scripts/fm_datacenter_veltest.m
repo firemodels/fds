@@ -4,8 +4,8 @@
 % Generate velocity comparison plots for the FM datacenter flow mapping tests
 
 % High flow test
-[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_high.csv',1);
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
+[exp_data]=csvread('../../FDS/Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_high.csv',1);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_devc.csv',13);
 n_fds_data=size(fds_data,1);
 
 % compute average velocity
@@ -46,7 +46,7 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_git.txt';
+svn_file = '../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_High_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -184,8 +184,8 @@ hold off
 clear hX
 
 % Low flow test
-[exp_data]=csvread('../../Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_low.csv',1);
-[fds_data] = csvread('../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
+[exp_data]=csvread('../../FDS/Validation/FM_FPRF_Datacenter/Experimental_Data/fm_datacenter_veltest_low.csv',1);
+[fds_data] = csvread('../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_devc.csv',13);
 n_fds_data=size(fds_data,1);
 
 % compute average velocity
@@ -219,7 +219,7 @@ ytitle = ['Predicted U-Velocity (m/s)'];
 xlabel(xtitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 ylabel(ytitle,'Interpreter',Font_Interpreter,'FontSize',Scat_Label_Font_Size)
 
-svn_file = '../../Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_git.txt';
+svn_file = '../../FDS/Validation/FM_FPRF_Datacenter/FDS_Output_Files/FM_Datacenter_Veltest_Low_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')

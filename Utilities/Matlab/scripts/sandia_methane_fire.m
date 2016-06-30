@@ -7,8 +7,8 @@
 close all
 clear all
 
-addpath '../../Validation/Sandia_Plumes/Experimental_Data'
-addpath '../../Validation/Sandia_Plumes/FDS_Output_Files'
+addpath '../../FDS/Validation/Sandia_Plumes/Experimental_Data'
+addpath '../../FDS/Validation/Sandia_Plumes/FDS_Output_Files'
 
 % plot velocity signal and power spectrum
 
@@ -18,7 +18,7 @@ velocity_signal('Sandia_CH4_1m_Test17_dx1p5cm_devc.csv',2,'k-',10,20,0,7,'Time (
                 'Sandia_CH4_1m_Test17_dx1p5cm_git.txt');
 
 close all; clear all
-datadir = '../../Validation/Sandia_Plumes/FDS_Output_Files/';            
+datadir = '../../FDS/Validation/Sandia_Plumes/FDS_Output_Files/';            
 power_spectrum('Sandia_CH4_1m_Test17_dx1p5cm_powerspectrum',0.61,1,'Frequency (Hz)','Autospectral Density (m^2/s)',1e-1,1e3,1e-6,1e1, ...
                'Sandia_CH4_1m_Test17_dx1p5cm_devc.csv',[2:5],10,20,.00223,'k-','k--',...
                'Sandia 1 m Methane Pool Fire, Test 17','FDS W-Velocity, 1.5 cm Resolution', ...

@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
-addpath('../../Validation/Heskestad_Flame_Height/Experimental_Data/');
+addpath('../../FDS/Validation/Heskestad_Flame_Height/FDS_Output_Files/');
+addpath('../../FDS/Validation/Heskestad_Flame_Height/Experimental_Data/');
 
 % list of line files
 filename = {'Qs=p1_RI=05_line.csv',    'Qs=p1_RI=10_line.csv',    'Qs=p1_RI=20_line.csv';   ...
@@ -158,7 +158,7 @@ set(plot_handle,'Position',plot_position)
 
 % add SVN if file is available
 
-svn_file = '../../Validation/Heskestad_Flame_Height/FDS_Output_Files/Qs=10000_RI=05_git.txt';
+svn_file = '../../FDS/Validation/Heskestad_Flame_Height/FDS_Output_Files/Qs=10000_RI=05_git.txt';
 addverstr(gca,svn_file,'loglog')
 
 % if exist(svn_file,'file')

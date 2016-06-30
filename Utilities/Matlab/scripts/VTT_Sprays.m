@@ -2,7 +2,7 @@
 
 plot_style
 
-repository = '../../Validation/VTT_Sprays/';
+repository = '../../FDS/Validation/VTT_Sprays/';
 
 files = dir(strcat(repository,'*_line.csv'));
 

@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../Validation/Beyler_Hood/Experimental_Data')
-addpath('../../Validation/Beyler_Hood/FDS_Output_Files')
+addpath('../../FDS/Validation/Beyler_Hood/Experimental_Data')
+addpath('../../FDS/Validation/Beyler_Hood/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 [exp_data] = csvread('Beyler_Hood_data_lr.csv',2);
@@ -183,7 +183,7 @@ for ns = 1:N_Species
 
    % add SVN if file is available
 
-   svn_file = '../../Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_git.txt';
+   svn_file = '../../FDS/Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_git.txt';
    addverstr(gca,svn_file,'linear')
 
    % if exist(svn_file,'file')

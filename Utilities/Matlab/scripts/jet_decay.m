@@ -5,7 +5,7 @@
 close all
 clear all
 
-addpath ../../Validation/Turbulent_Jet/FDS_Output_Files/
+addpath ../../FDS/Validation/Turbulent_Jet/FDS_Output_Files/
 
 % gather FDS results
 

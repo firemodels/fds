@@ -52,7 +52,7 @@ axis([1e2 1e8 .005 .2]) % based on MYO
 xlabel('Re_{\it H}','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
 ylabel('\it f','Interpreter',Font_Interpreter,'FontSize',Label_Font_Size,'Rotation',0.0)
 
-repository = '../../Validation/Moody_Chart/FDS_Output_Files/';
+repository = '../../FDS/Validation/Moody_Chart/FDS_Output_Files/';
 
 % gather FDS results (laminar)
 L = 1;

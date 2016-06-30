@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../Validation/Cup_Burner/Experimental_Data')
-addpath('../../Validation/Cup_Burner/FDS_Output_Files')
+addpath('../../FDS/Validation/Cup_Burner/Experimental_Data')
+addpath('../../FDS/Validation/Cup_Burner/FDS_Output_Files')
 
 plot_style
 
@@ -109,7 +109,7 @@ legend(hX,XLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
 
-svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
+svn_file = '../../FDS/Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -166,7 +166,7 @@ legend(hY,YLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
 
-svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
+svn_file = '../../FDS/Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')

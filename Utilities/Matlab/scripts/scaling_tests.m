@@ -7,7 +7,7 @@
 clear all
 close all
 
-FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+FDS_Output_Files = '../../FDS/Validation/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1) = importdata([FDS_Output_Files,'strong_scaling_test_001_cpu.csv'],',',1);
 M(2) = importdata([FDS_Output_Files,'strong_scaling_test_008_cpu.csv'],',',1);
@@ -81,7 +81,7 @@ print(gcf,'-dpdf',['../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scali
 clear all
 close all
 
-FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+FDS_Output_Files = '../../FDS/Validation/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1)  = importdata([FDS_Output_Files,'weak_scaling_test_001_cpu.csv'],',',1);
 M(2)  = importdata([FDS_Output_Files,'weak_scaling_test_002_cpu.csv'],',',1);

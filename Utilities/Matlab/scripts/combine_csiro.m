@@ -4,7 +4,7 @@
 %
 % Sew together fire front positions from multiple mesh simulation of grassland fire spread
 
-FDS_Output_Files = '../../Validation/CSIRO_Grassland_Fires/FDS_Output_Files/';
+FDS_Output_Files = '../../FDS/Validation/CSIRO_Grassland_Fires/FDS_Output_Files/';
 
 M1 = importdata([FDS_Output_Files,'Case_C064_devc.csv'],',',2);
 M2 = importdata([FDS_Output_Files,'Case_F19_devc.csv'],',',2);

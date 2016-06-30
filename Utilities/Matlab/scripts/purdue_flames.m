@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath '../../Validation/Purdue_Flames/Experimental_Data'
-addpath '../../Validation/Purdue_Flames/FDS_Output_Files'
+addpath '../../FDS/Validation/Purdue_Flames/Experimental_Data'
+addpath '../../FDS/Validation/Purdue_Flames/FDS_Output_Files'
 
 M = importdata('7p1_cm_methane_4mm_line.csv');
 

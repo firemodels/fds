@@ -7,8 +7,8 @@ function main()
 clear all
 close all
 
-expdir = '../../Validation/Backward_Facing_Step/Experimental_Data/';
-datdir = '../../Validation/Backward_Facing_Step/FDS_Output_Files/';
+expdir = '../../FDS/Validation/Backward_Facing_Step/Experimental_Data/';
+datdir = '../../FDS/Validation/Backward_Facing_Step/FDS_Output_Files/';
 pltdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';
 
 rkappa = 1/.41;
