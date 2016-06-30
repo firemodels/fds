@@ -9,8 +9,8 @@ clear all
 
 % Set global reaction rate parameters
 
-addpath('../../FDS/Validation/CHRISTIFIRE/Experimental_Data')
-addpath('../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files')
+addpath('../../Validation/CHRISTIFIRE/Experimental_Data')
+addpath('../../Validation/CHRISTIFIRE/FDS_Output_Files')
 
 close all
     
@@ -125,7 +125,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_tga_N2_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_tga_N2_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 
@@ -134,7 +134,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_tga';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_tga';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -174,7 +174,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 sheath MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_mcc_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_S701_mcc_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -182,7 +182,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_mcc';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_S701_mcc';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -222,7 +222,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation TGA','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_tga_N2_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_tga_N2_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -230,7 +230,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_tga';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_tga';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -270,7 +270,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 insulation MCC','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_mcc_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_I701_mcc_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -278,7 +278,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_mcc';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_I701_mcc';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -325,7 +325,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -333,7 +333,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_50';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_50';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -367,7 +367,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -375,7 +375,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_25';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_25';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -409,7 +409,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -417,7 +417,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_75';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_hrr_75';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -451,7 +451,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -459,7 +459,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_50';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -493,7 +493,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -501,7 +501,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_25';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_25';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -535,7 +535,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -543,7 +543,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_75';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_mlr_75';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -577,7 +577,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 50','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_50_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -585,7 +585,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_50';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -619,7 +619,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 25','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_25_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -627,7 +627,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_25';
 print(gcf,'-dpdf',plotname);
 
 %return
@@ -661,7 +661,7 @@ Y_Title_Position = y_lim(1)+Title_Scale_Y*(y_lim(2)-y_lim(1));
 text(X_Title_Position,Y_Title_Position,'CHRISTIFIRE cable 701 cone 75','FontName',Font_Name,'FontSize',Title_Font_Size)
 
 % add SVN if file is available
-git_file = '../../FDS/Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
+git_file = '../../Validation/CHRISTIFIRE/FDS_Output_Files/CHRISTIFIRE_C701_cone_75_v1_git.txt';
 addverstr(gca,git_file,'linear')
 
 % print to pdf
@@ -669,7 +669,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-plotname = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75';
+plotname = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/CHRISTIFIRE/CHRISTIFIRE_C701_ehc_75';
 print(gcf,'-dpdf',plotname);
 
 %return

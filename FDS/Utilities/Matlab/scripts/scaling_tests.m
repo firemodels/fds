@@ -7,7 +7,7 @@
 clear all
 close all
 
-FDS_Output_Files = '../../FDS/Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1) = importdata([FDS_Output_Files,'strong_scaling_test_001_cpu.csv'],',',1);
 M(2) = importdata([FDS_Output_Files,'strong_scaling_test_008_cpu.csv'],',',1);
@@ -76,12 +76,12 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',['../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
+print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
 
 clear all
 close all
 
-FDS_Output_Files = '../../FDS/Validation/MPI_Scaling_Tests/FDS_Output_Files/';
+FDS_Output_Files = '../../Validation/MPI_Scaling_Tests/FDS_Output_Files/';
 
 M(1)  = importdata([FDS_Output_Files,'weak_scaling_test_001_cpu.csv'],',',1);
 M(2)  = importdata([FDS_Output_Files,'weak_scaling_test_002_cpu.csv'],',',1);
@@ -131,5 +131,5 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',['../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/weak_scaling_test'])
+print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/weak_scaling_test'])
 

@@ -25,7 +25,7 @@ L = 9*2*pi/100; % box length (m)
 k0 = 2*pi/L;
 kc = 1/2*N*k0;
 
-ddir = '../../FDS/Verification/Turbulence/';
+ddir = '../../Verification/Turbulence/';
 
 uvw_file1 = [ddir,chid,'_uvw_001.csv'];
 uvw_file2 = [ddir,chid,'_uvw_002.csv'];
@@ -138,5 +138,5 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',chid,'_spectra'])
+print(gcf,'-dpdf',['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/',chid,'_spectra'])
     

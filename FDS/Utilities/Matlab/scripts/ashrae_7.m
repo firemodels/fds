@@ -5,10 +5,10 @@
 close all
 clear all
 
-infile{1} = '../../FDS/Verification/HVAC/ashrae_7_exp.csv';
-infile{2} = '../../FDS/Verification/HVAC/ashrae7_fixed_flow_devc.csv';
-infile{3} = '../../FDS/Verification/HVAC/ashrae7_quadratic_devc.csv';
-infile{4} = '../../FDS/Verification/HVAC/ashrae7_table_devc.csv';
+infile{1} = '../../Verification/HVAC/ashrae_7_exp.csv';
+infile{2} = '../../Verification/HVAC/ashrae7_fixed_flow_devc.csv';
+infile{3} = '../../Verification/HVAC/ashrae7_quadratic_devc.csv';
+infile{4} = '../../Verification/HVAC/ashrae7_table_devc.csv';
 
 label{1} = 'Experiment';
 label{2} = 'Fixed Flow & ';
@@ -35,7 +35,7 @@ for n = 2:4
     pressure(n,1:8) = m(length(m(:,1)),1:8);
 end
 
-filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ashrae_7.tex';
+filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ashrae_7.tex';
 fid = fopen(filename, 'wt');
 
 fprintf(fid,'%s\n','\begin{center}');

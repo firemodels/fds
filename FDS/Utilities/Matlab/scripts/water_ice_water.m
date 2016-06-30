@@ -9,7 +9,7 @@ clear all
 
 % Set global reaction rate parameters
 
-addpath('../../FDS/Verification/Pyrolysis')
+addpath('../../Verification/Pyrolysis')
 
 close all
     
@@ -57,4 +57,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/water_ice_water')
+print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/water_ice_water')

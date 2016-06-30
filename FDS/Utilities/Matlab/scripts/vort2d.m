@@ -16,7 +16,7 @@ close all
 clear all
 
 % Open directory with input files
-input_dir = '../../FDS/Verification/NS_Analytical_Solution/';
+input_dir = '../../Verification/NS_Analytical_Solution/';
 
 %-------------------------------------------------------------------------%
 % Define Parameters and Variables
@@ -76,7 +76,7 @@ end
 %-------------------------------------------------------------------------%
 
 % Open directory for plot output
-plot_dir = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Define standard plotting parameters
 plot_style

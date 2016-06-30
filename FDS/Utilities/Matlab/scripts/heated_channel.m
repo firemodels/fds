@@ -17,8 +17,8 @@ plot_style
 
 % plot the DNS results
 
-out_dir='../../FDS/Validation/Heated_Channel_Flow/FDS_Output_Files/';
-exp_dir='../../FDS/Validation/Heated_Channel_Flow/Experimental_Data/';
+out_dir='../../Validation/Heated_Channel_Flow/FDS_Output_Files/';
+exp_dir='../../Validation/Heated_Channel_Flow/Experimental_Data/';
 
 M = importdata([exp_dir,'heated_channel_dns_data.csv'],',',1);
 
@@ -143,7 +143,7 @@ addverstr(gca,Git_Filename,'semilogx')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_uplus')
 
 figure(2)
 
@@ -160,7 +160,7 @@ addverstr(gca,Git_Filename,'semilogx')
 set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/heated_channel_Tplus')
 
 
 % % Compute pressure gradient from Re_tau

@@ -13,7 +13,7 @@ set(gca,'FontName',Font_Name)
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
-addpath('../../FDS/Validation/Heskestad_Flame_Height/FDS_Output_Files/');
+addpath('../../Validation/Heskestad_Flame_Height/FDS_Output_Files/');
 
 M = csvread('box_height.csv',1,0);
 Qs = M(:,1);
@@ -52,7 +52,7 @@ addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 
-plotdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/';
+plotdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/';
 Plot_Filename = 'Flame_Height_check_hrr';
 
 set(gcf,'PaperUnits',Paper_Units);

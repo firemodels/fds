@@ -8,7 +8,7 @@
 clear all
 close all
 
-addpath('../../FDS/Verification/Extinction/')
+addpath('../../Verification/Extinction/')
 
 %-----------------------
 % Initialize species
@@ -272,4 +272,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/extinction');

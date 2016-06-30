@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../FDS/Validation/Cup_Burner/Experimental_Data')
-addpath('../../FDS/Validation/Cup_Burner/FDS_Output_Files')
+addpath('../../Validation/Cup_Burner/Experimental_Data')
+addpath('../../Validation/Cup_Burner/FDS_Output_Files')
 
 plot_style
 
@@ -109,7 +109,7 @@ legend(hX,XLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
 
-svn_file = '../../FDS/Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
+svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -127,7 +127,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_volfrac');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_volfrac');
 
 
 % plot Y
@@ -166,7 +166,7 @@ legend(hY,YLegendStr,'Location','NorthWest')
 
 % add SVN if file is available
 
-svn_file = '../../FDS/Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
+svn_file = '../../Validation/Cup_Burner/FDS_Output_Files/Cup_C7H16_CO2_git.txt';
 addverstr(gca,svn_file,'linear')
 
 % if exist(svn_file,'file')
@@ -184,6 +184,6 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_massfrac');
+print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Cup_Burner/Cup_Burner_massfrac');
 
 %close all

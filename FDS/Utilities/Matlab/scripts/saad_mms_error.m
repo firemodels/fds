@@ -26,7 +26,7 @@ vd1d_mms_z = @(x,t,u0) f0(x-u0*t)
 
 vd1d_mms_rho = @(x,t,u0) 1/( vd1d_mms_z(x,t,u0)/r1 + (1-vd1d_mms_z(x,t,u0))/r0 )
 
-datadir = '../../FDS/Verification/Scalar_Analytical_Solution/';
+datadir = '../../Verification/Scalar_Analytical_Solution/';
 filename = {'saad_32_mms.csv','saad_64_mms.csv','saad_128_mms.csv','saad_256_mms.csv','saad_512_mms.csv','saad_1024_mms.csv'};
 
 skip_case = 0;
@@ -115,7 +115,7 @@ addverstr(gca,SVN_Filename,'loglog')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/saad_mms_convergence')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/saad_mms_convergence')
 
 % check errors
 if e_r(length(e_r)) > 1

@@ -5,7 +5,7 @@
 close all
 clear all
 
-datadir='../../FDS/Verification/Controls/';
+datadir='../../Verification/Controls/';
 
 % load experimental data and FDS prediction
 
@@ -68,7 +68,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf
@@ -76,7 +76,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
     print(gcf,'-dpdf',plotname);
 
     clear h
@@ -100,7 +100,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf
@@ -108,7 +108,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
     print(gcf,'-dpdf',plotname);
 
     clear h
@@ -132,7 +132,7 @@ else
     legend('Analytic','FDS','Location','East')
 
     % add Git revision if file is available
-    git_file = '../../FDS/Verification/Controls/rms_cov_corr_git.txt';
+    git_file = '../../Verification/Controls/rms_cov_corr_git.txt';
     addverstr(gca,git_file,'linear')
 
     % print to pdf
@@ -140,7 +140,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
+    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
     print(gcf,'-dpdf',plotname);
 
     clear h

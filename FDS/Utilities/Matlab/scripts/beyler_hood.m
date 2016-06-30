@@ -5,8 +5,8 @@
 close all
 clear all
 
-addpath('../../FDS/Validation/Beyler_Hood/Experimental_Data')
-addpath('../../FDS/Validation/Beyler_Hood/FDS_Output_Files')
+addpath('../../Validation/Beyler_Hood/Experimental_Data')
+addpath('../../Validation/Beyler_Hood/FDS_Output_Files')
 
 % load experimental data and FDS prediction
 [exp_data] = csvread('Beyler_Hood_data_lr.csv',2);
@@ -183,7 +183,7 @@ for ns = 1:N_Species
 
    % add SVN if file is available
 
-   svn_file = '../../FDS/Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_git.txt';
+   svn_file = '../../Validation/Beyler_Hood/FDS_Output_Files/Beyler_Hood_acetone_117_lr_git.txt';
    addverstr(gca,svn_file,'linear')
 
    % if exist(svn_file,'file')
@@ -201,7 +201,7 @@ for ns = 1:N_Species
    set(gcf,'PaperUnits',Paper_Units);
    set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
    set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-   plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
+   plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Beyler_Hood/Beyler_Hood_' SaveName{ns}];
    print(gcf,'-dpdf',plotname);
    
    clear hX

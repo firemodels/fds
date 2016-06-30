@@ -4,7 +4,7 @@
 %
 % Concatenates columns from coarse and fine line files
 
-FDS_Output_Files = '../../FDS/Validation/McCaffrey_Plume/FDS_Output_Files/';
+FDS_Output_Files = '../../Validation/McCaffrey_Plume/FDS_Output_Files/';
 
 % 14 kW
 

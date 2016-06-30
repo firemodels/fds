@@ -31,16 +31,16 @@ addpath 'scripts'
 % Dataplot and scatplot options
 
 Dataplot_Inputs_File = [pwd, '/Correlation_validation_dataplot_inputs.csv'];
-Working_Dir = [pwd, '/../../FDS/Validation/'];
-Manuals_Dir = [pwd, '/../../FDS/Manuals/'];
+Working_Dir = [pwd, '/../../Validation/'];
+Manuals_Dir = [pwd, '/../../Manuals/'];
 Scatterplot_Inputs_File = [pwd, '/Correlation_validation_scatterplot_inputs.csv'];
 
 % Statistics output options
 
 Stats_Output = 'Validation';
 Output_File = [pwd, '/Correlation_validation_scatterplot_output.csv'];
-Statistics_Tex_Output = [pwd, '/../../FDS/Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
-Histogram_Tex_Output = [pwd, '/../../FDS/Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
+Statistics_Tex_Output = [pwd, '/../../Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_statistics.tex'];
+Histogram_Tex_Output = [pwd, '/../../Manuals/Correlation_Guide/SCRIPT_FIGURES/Scatterplots/validation_histograms.tex'];
 
 % Override the plot style options with NRC 1824 plot options
 

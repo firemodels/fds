@@ -9,7 +9,7 @@ clear all
 
 plot_style
 
-ddir='../../FDS/Verification/Sprinklers_and_Sprays/';
+ddir='../../Verification/Sprinklers_and_Sprays/';
 
 skip_case = 0;
 
@@ -171,7 +171,7 @@ set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
 display('Printing plot fluid_part_momentum.pdf...')
           
-print -dpdf ../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
+print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_momentum
 
 % plot velocities
 
@@ -218,7 +218,7 @@ set(gcf,'PaperSize',[PDF_Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 PDF_Paper_Width Paper_Height]);
 display('Printing plot fluid_part_velocity.pdf...')
           
-print -dpdf ../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
+print -dpdf ../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fluid_part_velocity
 
 
 

@@ -6,23 +6,23 @@
 close all
 clear all
 
-infile{1,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_8_devc.csv';
-infile{2,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_16_devc.csv';
-infile{3,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_32_devc.csv';
-infile{4,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_64_devc.csv';
-infile{1,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_8_nupt1_devc.csv';
-infile{2,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_16_nupt1_devc.csv';
-infile{3,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_32_nupt1_devc.csv';
-infile{4,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_64_nupt1_devc.csv';
+infile{1,1} = '../../Verification/NS_Analytical_Solution/ns2d_8_devc.csv';
+infile{2,1} = '../../Verification/NS_Analytical_Solution/ns2d_16_devc.csv';
+infile{3,1} = '../../Verification/NS_Analytical_Solution/ns2d_32_devc.csv';
+infile{4,1} = '../../Verification/NS_Analytical_Solution/ns2d_64_devc.csv';
+infile{1,2} = '../../Verification/NS_Analytical_Solution/ns2d_8_nupt1_devc.csv';
+infile{2,2} = '../../Verification/NS_Analytical_Solution/ns2d_16_nupt1_devc.csv';
+infile{3,2} = '../../Verification/NS_Analytical_Solution/ns2d_32_nupt1_devc.csv';
+infile{4,2} = '../../Verification/NS_Analytical_Solution/ns2d_64_nupt1_devc.csv';
 
-outfile{1,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_8_exact.csv';
-outfile{2,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_16_exact.csv';
-outfile{3,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_32_exact.csv';
-outfile{4,1} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_64_exact.csv';
-outfile{1,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_8_nupt1_exact.csv';
-outfile{2,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_16_nupt1_exact.csv';
-outfile{3,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_32_nupt1_exact.csv';
-outfile{4,2} = '../../FDS/Verification/NS_Analytical_Solution/ns2d_64_nupt1_exact.csv';
+outfile{1,1} = '../../Verification/NS_Analytical_Solution/ns2d_8_exact.csv';
+outfile{2,1} = '../../Verification/NS_Analytical_Solution/ns2d_16_exact.csv';
+outfile{3,1} = '../../Verification/NS_Analytical_Solution/ns2d_32_exact.csv';
+outfile{4,1} = '../../Verification/NS_Analytical_Solution/ns2d_64_exact.csv';
+outfile{1,2} = '../../Verification/NS_Analytical_Solution/ns2d_8_nupt1_exact.csv';
+outfile{2,2} = '../../Verification/NS_Analytical_Solution/ns2d_16_nupt1_exact.csv';
+outfile{3,2} = '../../Verification/NS_Analytical_Solution/ns2d_32_nupt1_exact.csv';
+outfile{4,2} = '../../Verification/NS_Analytical_Solution/ns2d_64_nupt1_exact.csv';
 
 nu(1) = 0.0;
 nu(2) = 0.1;
@@ -62,7 +62,7 @@ end
 
        
 %Write the error files
-dir = '../../FDS/Verification/NS_Analytical_Solution/';
+dir = '../../Verification/NS_Analytical_Solution/';
 
 filename11 = [dir,'ns2d_error.csv'];
 fid11 = fopen(filename11,'wt');

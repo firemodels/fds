@@ -57,7 +57,7 @@ dx = L./nx;
 % end
 % return
 
-datadir = '../../FDS/Verification/Scalar_Analytical_Solution/';
+datadir = '../../Verification/Scalar_Analytical_Solution/';
 %datadir = '/Volumes/firebot/FDS-SMVgitclean/Verification/Scalar_Analytical_Solution/'; % check firebot run
 filename = {'shunn3_32_mms.csv','shunn3_64_mms.csv','shunn3_128_mms.csv','shunn3_256_mms.csv','shunn3_512_mms.csv'};
 
@@ -168,7 +168,7 @@ addverstr(gca,Git_Filename,'loglog')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
+print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
 
 % check errors
 if e_r(end) > 2e-4
