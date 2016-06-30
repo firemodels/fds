@@ -3,11 +3,11 @@
 curdir=`pwd`
 cd ../..
 reporoot=`pwd`
-dir1=$reporoot/Utilities/Scripts
+dir1=$reporoot/SMV/Utilities/Scripts
 dir2=$reporoot/FDS/Build/Scripts
 dir3=$reporoot/SMV/scripts
 dir4=$reporoot/Verification/scripts
-dir5=$reporoot/Utilities/Firebot
+dir5=$reporoot/SMV/Utilities/Firebot
 h1=$dir1/../build_bundle.html
 h2=$dir2/../build_fds.html
 h3=$dir3/../build_smokeview.html

@@ -17,4 +17,4 @@ export MAJOR=$7
 export FDSOS=_osx_64
 export INSTALLDIR=FDS/$FDSEDITION
 
-$fds_smvroot/Utilities/Scripts/bundle_generic.sh
+$fds_smvroot/FDS/Utilities/Scripts/bundle_generic.sh

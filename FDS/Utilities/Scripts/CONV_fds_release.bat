@@ -33,6 +33,6 @@ git merge origin/master
 echo.
 echo Converting the FDS release notes from wiki to html format
 
-cd %svn_root%\Utilities\Scripts\for_bundle
+cd %svn_root%\FDS\Utilities\Scripts\for_bundle
 pandoc -o FDS_Release_Notes.htm %fdswikirepo%\FDS-Release-Notes.md
 pause

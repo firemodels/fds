@@ -124,24 +124,24 @@ smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
 smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
 dem2fdsroot=$scp_fds_smvroot/SMV/Build/dem2fds
 wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
-uploaddir=$fds_smvroot/Utilities/uploads
+uploaddir=$fds_smvroot/FDS/Utilities/uploads
 bundledir=$bundlebase
-for_bundle=$fds_smvroot/Utilities/Scripts/for_bundle
+for_bundle=$fds_smvroot/FDS/Utilities/Scripts/for_bundle
 mandir=~/FDS_Guides
 smvbindir=$scp_fds_smvroot/SMV/Build/smokeview/$smokeviewdir
 forbundle=$fds_smvroot/SMV/for_bundle
 texturedir=$forbundle/textures
-fds2asciiroot=$scp_fds_smvroot/Utilities/fds2ascii
-wikify=$fds_smvroot/Utilities/Scripts/wikify.py
+fds2asciiroot=$scp_fds_smvroot/FDS/Utilities/fds2ascii
+wikify=$fds_smvroot/FDS/Utilities/Scripts/wikify.py
 fullmanifestdir=$uploaddir/$bundledir/bin
 fullmanifest=$fullmanifestdir/$manifest
-makeinstaller=$fds_smvroot/Utilities/Scripts/make_installer.sh
+makeinstaller=$fds_smvroot/FDS/Utilities/Scripts/make_installer.sh
 
 fds_cases=$fds_smvroot/Verification/FDS_Cases.sh
 smv_cases=$fds_smvroot/Verification/scripts/SMV_Cases.sh
 wui_cases=$fds_smvroot/Verification/scripts/WUI_Cases.sh
-copyfdscase=$fds_smvroot/Utilities/Scripts/copyfdscase.sh
-copycfastcase=$fds_smvroot/Utilities/Scripts/copycfastcase.sh
+copyfdscase=$fds_smvroot/FDS/Utilities/Scripts/copyfdscase.sh
+copycfastcase=$fds_smvroot/FDS/Utilities/Scripts/copycfastcase.sh
 ExamplesDirectory=$fds_smvroot/Verification
 
 cd $uploaddir

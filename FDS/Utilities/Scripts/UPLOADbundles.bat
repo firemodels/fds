@@ -17,7 +17,7 @@ goto:eof
 call %envfile%
 
 %svn_drive%
-cd %svn_root%\Utilities\uploads
+cd %svn_root%\FDS\Utilities\uploads
 explorer .
 start chrome https://drive.google.com/drive/my-drive
 start chrome https://github.com/firemodels/fds-smv/releases

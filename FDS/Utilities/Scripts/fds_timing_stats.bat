@@ -11,5 +11,5 @@ cd %SVNROOT%/Verification
 ::   OUT_FILES=*/*.out
 
 :: Write header information to fds_timing_stats.csv file
-echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > %SVNROOT%\Utilities\Scripts\fds_timing_stats.csv
+echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > %SVNROOT%\FDS\Utilities\Scripts\fds_timing_stats.csv
 

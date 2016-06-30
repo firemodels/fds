@@ -5,7 +5,7 @@ GITROOT=~/FDS-SMVgitclean
 if [ "$FDSSMV" != "" ] ; then
   GITROOT=$FDSSMV
 fi
-RESULT_DIR=$GITROOT/Utilities/Scripts/inspect_openmp_ti3
+RESULT_DIR=$GITROOT/FDS/Utilities/Scripts/inspect_openmp_ti3
 
 function usage {
   echo "Usage: inspect_openmp.sh [-r repository root] [-v] casename.dfs"

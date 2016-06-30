@@ -13,9 +13,9 @@ TIMING=$2
 
 echo 'FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)' > $tmpout
 
-export QFDS=$SVNROOT/Utilities/Scripts/timing_stats.sh
-export RUNCFAST=$SVNROOT/Utilities/Scripts/timing_stats.sh
-export RUNTFDS=$SVNROOT/Utilities/Scripts/timing_stats.sh
+export QFDS=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
+export RUNCFAST=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
+export RUNTFDS=$SVNROOT/FDS/Utilities/Scripts/timing_stats.sh
 if [[ "$TIMING" == "" ]]; then 
   export save_benchmark=
 else

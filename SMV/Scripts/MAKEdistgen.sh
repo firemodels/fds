@@ -66,7 +66,7 @@ SMOKEDIFFDIR=$SVNROOT/SMV/Build/smokediff/intel_$platformsize
 WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_$platformsize
 FORBUNDLE=~/$SVNROOT/SMV/for_bundle
 DIR=smv_${version}_$platform$size
-UPDATER=~/$SVNROOT/Utilities/Scripts/make_updater.sh
+UPDATER=~/$SVNROOT/SMV/Utilities/Scripts/make_updater.sh
 
 cd ~/$SVNROOT/SMV/uploads
 
