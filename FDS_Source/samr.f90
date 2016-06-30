@@ -51,21 +51,21 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: FX1,FY1,FZ1,FX2,FY2,FZ2
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
-  CASE(0)
-     I_LO = INDEX_LIST(1)
-     I_HI = INDEX_LIST(2)
-     J_LO = INDEX_LIST(3)
-     J_HI = INDEX_LIST(4)
-     K_LO = INDEX_LIST(5)
-     K_HI = INDEX_LIST(6)
-     II_LO = INDEX_LIST(7)
-     JJ_LO = INDEX_LIST(8)
-     KK_LO = INDEX_LIST(9)
-     NRX = INDEX_LIST(10)
-     NRY = INDEX_LIST(11)
-     NRZ = INDEX_LIST(12)
-  CASE(1)
-     RETURN
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+   CASE(1)
+      RETURN
 END SELECT
 
 M1=>MESHES(NM1) ! coarse mesh
@@ -89,68 +89,68 @@ FZ2=>M2%SCALAR_SAVE3
 
 SPECIES_LOOP: DO N=0,N_TRACKED_SPECIES
 
-  ! x-direction fluxes
+   ! x-direction fluxes 
 
-  DO K = K_LO,K_HI
-     KK_0 = KK_LO + (K-K_LO)*NRZ
-     DO J = J_LO,J_HI
-        JJ_0 = JJ_LO + (J-J_LO)*NRY
-        DO I = I_LO-1,I_HI !! note: this includes fine mesh boundary
-           II_0 = II_LO + (I-I_LO+1)*NRX !!
+   DO K = K_LO,K_HI
+      KK_0 = KK_LO + (K-K_LO)*NRZ
+      DO J = J_LO,J_HI
+         JJ_0 = JJ_LO + (J-J_LO)*NRY
+         DO I = I_LO-1,I_HI !! note: this includes fine mesh boundary
+            II_0 = II_LO + (I-I_LO+1)*NRX !! 
 
-           FX1(I,J,K,N) = 0._EB
-           DO KK = KK_0+1,KK_0+NRZ
-              DO JJ = JJ_0+1,JJ_0+NRY
-                 FX1(I,J,K,N) = FX1(I,J,K,N) + FX2(II_0,JJ,KK,N)
-              ENDDO
-           ENDDO
-           FX1(I,J,K,N) = FX1(I,J,K,N)/N2X
+            FX1(I,J,K,N) = 0._EB
+            DO KK = KK_0+1,KK_0+NRZ
+               DO JJ = JJ_0+1,JJ_0+NRY
+                  FX1(I,J,K,N) = FX1(I,J,K,N) + FX2(II_0,JJ,KK,N)
+               ENDDO
+            ENDDO
+            FX1(I,J,K,N) = FX1(I,J,K,N)/N2X 
 
-        ENDDO
-     ENDDO
-  ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
 
-  ! y-direction fluxes
+   ! y-direction fluxes 
 
-  DO K = K_LO,K_HI
-     KK_0 = KK_LO + (K-K_LO)*NRZ
-     DO J = J_LO-1,J_HI !!
-        JJ_0 = JJ_LO + (J-J_LO+1)*NRY !!
-        DO I = I_LO,I_HI
-           II_0 = II_LO + (I-I_LO)*NRX
+   DO K = K_LO,K_HI
+      KK_0 = KK_LO + (K-K_LO)*NRZ
+      DO J = J_LO-1,J_HI !!
+         JJ_0 = JJ_LO + (J-J_LO+1)*NRY !!
+         DO I = I_LO,I_HI
+            II_0 = II_LO + (I-I_LO)*NRX 
 
-           FY1(I,J,K,N) = 0._EB
-           DO KK = KK_0+1,KK_0+NRZ
-              DO II = II_0+1,II_0+NRX
-                 FY1(I,J,K,N) = FY1(I,J,K,N) + FY2(II,JJ_0,KK,N)
-              ENDDO
-           ENDDO
-           FY1(I,J,K,N) = FY1(I,J,K,N)/N2Y
+            FY1(I,J,K,N) = 0._EB
+            DO KK = KK_0+1,KK_0+NRZ
+               DO II = II_0+1,II_0+NRX
+                  FY1(I,J,K,N) = FY1(I,J,K,N) + FY2(II,JJ_0,KK,N)
+               ENDDO
+            ENDDO
+            FY1(I,J,K,N) = FY1(I,J,K,N)/N2Y 
 
-        ENDDO
-     ENDDO
-  ENDDO
+         ENDDO
+      ENDDO
+   ENDDO 
 
-  ! z-direction fluxes
+   ! z-direction fluxes 
 
-  DO K = K_LO-1,K_HI !!
-     KK_0 = KK_LO + (K-K_LO+1)*NRZ !!
-     DO J = J_LO,J_HI
-        JJ_0 = JJ_LO + (J-J_LO)*NRY
-        DO I = I_LO,I_HI
-           II_0 = II_LO + (I-I_LO)*NRX
+   DO K = K_LO-1,K_HI !!
+      KK_0 = KK_LO + (K-K_LO+1)*NRZ !!
+      DO J = J_LO,J_HI
+         JJ_0 = JJ_LO + (J-J_LO)*NRY
+         DO I = I_LO,I_HI
+            II_0 = II_LO + (I-I_LO)*NRX 
 
-           FZ1(I,J,K,N) = 0._EB
-           DO JJ = JJ_0+1,JJ_0+NRY
-              DO II = II_0+1,II_0+NRX
-                 FZ1(I,J,K,N) = FZ1(I,J,K,N) + FZ2(II,JJ,KK_0,N)
-              ENDDO
-           ENDDO
-           FZ1(I,J,K,N) = FZ1(I,J,K,N)/N2Z
+            FZ1(I,J,K,N) = 0._EB
+            DO JJ = JJ_0+1,JJ_0+NRY
+               DO II = II_0+1,II_0+NRX
+                  FZ1(I,J,K,N) = FZ1(I,J,K,N) + FZ2(II,JJ,KK_0,N)
+               ENDDO
+            ENDDO
+            FZ1(I,J,K,N) = FZ1(I,J,K,N)/N2Z 
 
-        ENDDO
-     ENDDO
-  ENDDO
+         ENDDO
+      ENDDO
+   ENDDO
 
 ENDDO SPECIES_LOOP
 
@@ -169,21 +169,21 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: UU1,VV1,WW1,UU2,VV2,WW2
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
-  CASE(0)
-     I_LO = INDEX_LIST(1)
-     I_HI = INDEX_LIST(2)
-     J_LO = INDEX_LIST(3)
-     J_HI = INDEX_LIST(4)
-     K_LO = INDEX_LIST(5)
-     K_HI = INDEX_LIST(6)
-     II_LO = INDEX_LIST(7)
-     JJ_LO = INDEX_LIST(8)
-     KK_LO = INDEX_LIST(9)
-     NRX = INDEX_LIST(10)
-     NRY = INDEX_LIST(11)
-     NRZ = INDEX_LIST(12)
-  CASE(1)
-     RETURN
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+   CASE(1)
+      RETURN
 END SELECT
 
 M1=>MESHES(NM1) ! coarse mesh
@@ -194,19 +194,19 @@ N2Y = NRX*NRZ
 N2Z = NRX*NRY
 
 IF (PREDICTOR) THEN
-  UU1=>M1%U
-  VV1=>M1%V
-  WW1=>M1%W
-  UU2=>M2%U
-  VV2=>M2%V
-  WW2=>M2%W
+   UU1=>M1%U
+   VV1=>M1%V
+   WW1=>M1%W
+   UU2=>M2%U
+   VV2=>M2%V
+   WW2=>M2%W
 ELSEIF (CORRECTOR) THEN
-  UU1=>M1%US
-  VV1=>M1%VS
-  WW1=>M1%WS
-  UU2=>M2%US
-  VV2=>M2%VS
-  WW2=>M2%WS
+   UU1=>M1%US
+   VV1=>M1%VS
+   WW1=>M1%WS
+   UU2=>M2%US
+   VV2=>M2%VS
+   WW2=>M2%WS
 ENDIF
 
 ! Restrict fine mesh to coarse mesh for embedded cells
@@ -214,64 +214,64 @@ ENDIF
 ! U-VELOCITY
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO J = J_LO,J_HI
-     JJ_0 = JJ_LO + (J-J_LO)*NRY
-     DO I = I_LO,I_HI-1 ! excludes boundary values
-        II_0 = II_LO + (I-I_LO+1)*NRX
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI-1 ! excludes boundary values
+         II_0 = II_LO + (I-I_LO+1)*NRX 
 
-        UU1(I,J,K) = 0._EB
-        DO KK = KK_0+1,KK_0+NRZ
-           DO JJ = JJ_0+1,JJ_0+NRY
-              UU1(I,J,K) = UU1(I,J,K) + UU2(II_0,JJ,KK)
-           ENDDO
-        ENDDO
-        UU1(I,J,K) = UU1(I,J,K)/N2X
+         UU1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               UU1(I,J,K) = UU1(I,J,K) + UU2(II_0,JJ,KK)
+            ENDDO
+         ENDDO
+         UU1(I,J,K) = UU1(I,J,K)/N2X 
 
-     ENDDO
-  ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 ! V-VELOCITY
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO J = J_LO,J_HI-1 ! excludes boundary values
-     JJ_0 = JJ_LO + (J-J_LO+1)*NRY
-     DO I = I_LO,I_HI
-        II_0 = II_LO + (I-I_LO)*NRX
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI-1 ! excludes boundary values
+      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX 
 
-        VV1(I,J,K) = 0._EB
-        DO KK = KK_0+1,KK_0+NRZ
-           DO II = II_0+1,II_0+NRX
-              VV1(I,J,K) = VV1(I,J,K) + VV2(II,JJ_0,KK)
-           ENDDO
-        ENDDO
-        VV1(I,J,K) = VV1(I,J,K)/N2Y
+         VV1(I,J,K) = 0._EB
+         DO KK = KK_0+1,KK_0+NRZ
+            DO II = II_0+1,II_0+NRX
+               VV1(I,J,K) = VV1(I,J,K) + VV2(II,JJ_0,KK)
+            ENDDO
+         ENDDO
+         VV1(I,J,K) = VV1(I,J,K)/N2Y 
 
-     ENDDO
-  ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 ! W-VELOCITY
 
 DO K = K_LO,K_HI-1 ! excludes boundary values
-  KK_0 = KK_LO + (K-K_LO+1)*NRZ
-  DO J = J_LO,J_HI
-     JJ_0 = JJ_LO + (J-J_LO)*NRY
-     DO I = I_LO,I_HI
-        II_0 = II_LO + (I-I_LO)*NRX
+   KK_0 = KK_LO + (K-K_LO+1)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX 
 
-        WW1(I,J,K) = 0._EB
-        DO JJ = JJ_0+1,JJ_0+NRY
-           DO II = II_0+1,II_0+NRX
-              WW1(I,J,K) = WW1(I,J,K) + WW2(II,JJ,KK_0)
-           ENDDO
-        ENDDO
-        WW1(I,J,K) = WW1(I,J,K)/N2Z
+         WW1(I,J,K) = 0._EB
+         DO JJ = JJ_0+1,JJ_0+NRY
+            DO II = II_0+1,II_0+NRX
+               WW1(I,J,K) = WW1(I,J,K) + WW2(II,JJ,KK_0)
+            ENDDO
+         ENDDO
+         WW1(I,J,K) = WW1(I,J,K)/N2Z 
 
-     ENDDO
-  ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 END SUBROUTINE VELOCITY_EMB
@@ -290,94 +290,94 @@ REAL(EB), POINTER, DIMENSION(:,:,:,:) :: ZZ1,ZZ2
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
-  CASE(0)
-     I_LO = INDEX_LIST(1)
-     I_HI = INDEX_LIST(2)
-     J_LO = INDEX_LIST(3)
-     J_HI = INDEX_LIST(4)
-     K_LO = INDEX_LIST(5)
-     K_HI = INDEX_LIST(6)
-     II_LO = INDEX_LIST(7)
-     JJ_LO = INDEX_LIST(8)
-     KK_LO = INDEX_LIST(9)
-     NRX = INDEX_LIST(10)
-     NRY = INDEX_LIST(11)
-     NRZ = INDEX_LIST(12)
-     DV1 = VOLUME_LIST(1)
-     DV2 = VOLUME_LIST(2)
-     DVRAT = VOLUME_LIST(3)
-  CASE(1)
-     RETURN
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+      DV1 = VOLUME_LIST(1)
+      DV2 = VOLUME_LIST(2)
+      DVRAT = VOLUME_LIST(3)
+   CASE(1)
+      RETURN
 END SELECT
 
 M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
 
 IF (PREDICTOR) THEN
-  RHO1 => M1%RHOS
-  RHO2 => M2%RHOS
-  IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZS
-  IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZS
+   RHO1 => M1%RHOS
+   RHO2 => M2%RHOS
+   IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZS
+   IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZS
 ELSEIF (CORRECTOR) THEN
-  RHO1 => M1%RHO
-  RHO2 => M2%RHO
-  IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZ
-  IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZ
+   RHO1 => M1%RHO
+   RHO2 => M2%RHO
+   IF (N_TRACKED_SPECIES>0) ZZ1  => M1%ZZ
+   IF (N_TRACKED_SPECIES>0) ZZ2  => M2%ZZ
 ENDIF
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO J = J_LO,J_HI
-     JJ_0 = JJ_LO + (J-J_LO)*NRY
-     DO I = I_LO,I_HI
-        II_0 = II_LO + (I-I_LO)*NRX
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX 
 
-        RHO1(I,J,K) = 0._EB
+         RHO1(I,J,K) = 0._EB 
 
-        DO KK = KK_0+1,KK_0+NRZ
-           DO JJ = JJ_0+1,JJ_0+NRY
-              DO II = II_0+1,II_0+NRX
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               DO II = II_0+1,II_0+NRX 
 
-                 RHO1(I,J,K) = RHO1(I,J,K) + RHO2(II,JJ,KK)*DVRAT
+                  RHO1(I,J,K) = RHO1(I,J,K) + RHO2(II,JJ,KK)*DVRAT 
 
-              ENDDO
-           ENDDO
-        ENDDO
+               ENDDO
+            ENDDO
+         ENDDO 
 
-     ENDDO
-  ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 IF (N_TRACKED_SPECIES>0) THEN
 
-  SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES
+   SPECIES_LOOP: DO N=1,N_TRACKED_SPECIES 
 
-     DO K = K_LO,K_HI
-        KK_0 = KK_LO + (K-K_LO)*NRZ
-        DO J = J_LO,J_HI
-           JJ_0 = JJ_LO + (J-J_LO)*NRY
-           DO I = I_LO,I_HI
-              II_0 = II_LO + (I-I_LO)*NRX
+      DO K = K_LO,K_HI
+         KK_0 = KK_LO + (K-K_LO)*NRZ
+         DO J = J_LO,J_HI
+            JJ_0 = JJ_LO + (J-J_LO)*NRY
+            DO I = I_LO,I_HI
+               II_0 = II_LO + (I-I_LO)*NRX 
 
-              ZZ1(I,J,K,N) = 0._EB
+               ZZ1(I,J,K,N) = 0._EB 
 
-              DO KK = KK_0+1,KK_0+NRZ
-                 DO JJ = JJ_0+1,JJ_0+NRY
-                    DO II = II_0+1,II_0+NRX
+               DO KK = KK_0+1,KK_0+NRZ
+                  DO JJ = JJ_0+1,JJ_0+NRY
+                     DO II = II_0+1,II_0+NRX 
 
-                       ZZ1(I,J,K,N) = ZZ1(I,J,K,N) + RHO2(II,JJ,KK)*ZZ2(II,JJ,KK,N)*DV2
+                        ZZ1(I,J,K,N) = ZZ1(I,J,K,N) + RHO2(II,JJ,KK)*ZZ2(II,JJ,KK,N)*DV2 
 
-                    ENDDO
-                 ENDDO
-              ENDDO
+                     ENDDO
+                  ENDDO
+               ENDDO 
 
-              ZZ1(I,J,K,N) = ZZ1(I,J,K,N)/(RHO1(I,J,K)*DV1)
+               ZZ1(I,J,K,N) = ZZ1(I,J,K,N)/(RHO1(I,J,K)*DV1) 
 
-           ENDDO
-        ENDDO
-     ENDDO
+            ENDDO
+         ENDDO
+      ENDDO 
 
-  ENDDO SPECIES_LOOP
+   ENDDO SPECIES_LOOP
 
 ENDIF
 
@@ -396,58 +396,58 @@ REAL(EB), POINTER, DIMENSION(:,:,:) :: DP1,DP2
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
-  CASE(0)
-     I_LO = INDEX_LIST(1)
-     I_HI = INDEX_LIST(2)
-     J_LO = INDEX_LIST(3)
-     J_HI = INDEX_LIST(4)
-     K_LO = INDEX_LIST(5)
-     K_HI = INDEX_LIST(6)
-     II_LO = INDEX_LIST(7)
-     JJ_LO = INDEX_LIST(8)
-     KK_LO = INDEX_LIST(9)
-     NRX = INDEX_LIST(10)
-     NRY = INDEX_LIST(11)
-     NRZ = INDEX_LIST(12)
-     DVRAT = VOLUME_LIST(3)
-  CASE(1)
-     RETURN
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+      DVRAT = VOLUME_LIST(3)
+   CASE(1)
+      RETURN
 END SELECT
 
 M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
 
 IF (PREDICTOR) THEN
-  DP1 => M1%DS
-  DP2 => M2%DS
+   DP1 => M1%DS
+   DP2 => M2%DS
 ELSEIF (CORRECTOR) THEN
-  DP1 => M1%D
-  DP2 => M2%D
+   DP1 => M1%D
+   DP2 => M2%D
 ENDIF
 
 ! Restrict divergence
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO J = J_LO,J_HI
-     JJ_0 = JJ_LO + (J-J_LO)*NRY
-     DO I = I_LO,I_HI
-        II_0 = II_LO + (I-I_LO)*NRX
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY
+      DO I = I_LO,I_HI
+         II_0 = II_LO + (I-I_LO)*NRX 
 
-        DP1(I,J,K) = 0._EB
+         DP1(I,J,K) = 0._EB 
 
-        DO KK = KK_0+1,KK_0+NRZ
-           DO JJ = JJ_0+1,JJ_0+NRY
-              DO II = II_0+1,II_0+NRX
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               DO II = II_0+1,II_0+NRX 
 
-                 DP1(I,J,K) = DP1(I,J,K) + DP2(II,JJ,KK)*DVRAT
+                  DP1(I,J,K) = DP1(I,J,K) + DP2(II,JJ,KK)*DVRAT 
 
-              ENDDO
-           ENDDO
-        ENDDO
+               ENDDO
+            ENDDO
+         ENDDO 
 
-     ENDDO
-  ENDDO
+      ENDDO
+   ENDDO
 ENDDO
 
 END SUBROUTINE RESTRICT_DIV_EMB
@@ -554,54 +554,54 @@ ENDDO
 
 IF (.TRUE.) THEN
 
-  POIS_ERR = 0._EB
-  DO K=1,KBAR
-     DO J=1,JBAR
-        DO I=1,IBAR
-           LHSS = ((PP(I+1,J,K)-PP(I,J,K))*RDXN(I) - (PP(I,J,K)-PP(I-1,J,K))*RDXN(I-1) )*RDX(I) &
-                + ((PP(I,J+1,K)-PP(I,J,K))*RDYN(J) - (PP(I,J,K)-PP(I,J-1,K))*RDYN(J-1) )*RDY(J) &
-                + ((PP(I,J,K+1)-PP(I,J,K))*RDZN(K) - (PP(I,J,K)-PP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
-           RES = ABS(PRHS_SAVE(I,J,K)-LHSS)
-           POIS_ERR = MAX(RES,POIS_ERR)
-        ENDDO
-     ENDDO
-  ENDDO
+   POIS_ERR = 0._EB
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            LHSS = ((PP(I+1,J,K)-PP(I,J,K))*RDXN(I) - (PP(I,J,K)-PP(I-1,J,K))*RDXN(I-1) )*RDX(I) &
+                 + ((PP(I,J+1,K)-PP(I,J,K))*RDYN(J) - (PP(I,J,K)-PP(I,J-1,K))*RDYN(J-1) )*RDY(J) &
+                 + ((PP(I,J,K+1)-PP(I,J,K))*RDZN(K) - (PP(I,J,K)-PP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+            RES = ABS(PRHS_SAVE(I,J,K)-LHSS)
+            POIS_ERR = MAX(RES,POIS_ERR)
+         ENDDO
+      ENDDO
+   ENDDO 
 
-  IF (PREDICTOR) THEN
-    WRITE(0,*) 'PREDICTOR'
-  ELSE
-    WRITE(0,*) 'CORRECTOR'
-  ENDIF
-  WRITE(0,*) 'POIS ERROR:',pois_ptb,pois_err
+   IF (PREDICTOR) THEN
+     WRITE(0,*) 'PREDICTOR'
+   ELSE
+     WRITE(0,*) 'CORRECTOR'
+   ENDIF
+   WRITE(0,*) 'POIS ERROR:',pois_ptb,pois_err
 
 ENDIF
 
 ! correct velocities
 
 DO K=1,KBAR
-  DO J=1,JBAR
-     DO I=0,IBAR
-        UU(I,J,K) = UU(I,J,K) - RDXN(I)*(PP(I+1,J,K)-PP(I,J,K))
-     ENDDO
-  ENDDO
+   DO J=1,JBAR
+      DO I=0,IBAR
+         UU(I,J,K) = UU(I,J,K) - RDXN(I)*(PP(I+1,J,K)-PP(I,J,K))
+      ENDDO
+   ENDDO
 ENDDO
 
 IF (.NOT.TWO_D) THEN
 DO K=1,KBAR
-  DO J=0,JBAR
-     DO I=1,IBAR
-        VV(I,J,K) = VV(I,J,K) - RDYN(J)*(PP(I,J+1,K)-PP(I,J,K))
-     ENDDO
-  ENDDO
+   DO J=0,JBAR
+      DO I=1,IBAR
+         VV(I,J,K) = VV(I,J,K) - RDYN(J)*(PP(I,J+1,K)-PP(I,J,K))
+      ENDDO
+   ENDDO
 ENDDO
 ENDIF
 
 DO K=0,KBAR
-  DO J=1,JBAR
-     DO I=1,IBAR
-        WW(I,J,K) = WW(I,J,K) - RDZN(K)*(PP(I,J,K+1)-PP(I,J,K))
-     ENDDO
-  ENDDO
+   DO J=1,JBAR
+      DO I=1,IBAR
+         WW(I,J,K) = WW(I,J,K) - RDZN(K)*(PP(I,J,K+1)-PP(I,J,K))
+      ENDDO
+   ENDDO
 ENDDO
 
 ! check divergence
@@ -645,14 +645,14 @@ MLMIN = MINVAL(MESHES(1:NMESHES)%MESH_LEVEL)
 IRANK=0
 
 DO ML=MLMAX,MLMIN,-1
-  DO NM=1,NMESHES
+   DO NM=1,NMESHES 
 
-     IF (MESHES(NM)%MESH_LEVEL==ML) THEN
-        IRANK=IRANK+1
-        MESH_LIST_EMB(IRANK)=NM
-     ENDIF
+      IF (MESHES(NM)%MESH_LEVEL==ML) THEN
+         IRANK=IRANK+1
+         MESH_LIST_EMB(IRANK)=NM
+      ENDIF 
 
-  ENDDO
+   ENDDO
 ENDDO
 
 !PRINT *,MLMIN,MLMAX
@@ -680,21 +680,21 @@ TYPE(WALL_TYPE), POINTER :: WC=>NULL()
 
 CALL LOCATE_MESH(INDEX_LIST,VOLUME_LIST,NM1,NM2,IERROR)
 SELECT CASE (IERROR)
-  CASE(0)
-     I_LO = INDEX_LIST(1)
-     I_HI = INDEX_LIST(2)
-     J_LO = INDEX_LIST(3)
-     J_HI = INDEX_LIST(4)
-     K_LO = INDEX_LIST(5)
-     K_HI = INDEX_LIST(6)
-     II_LO = INDEX_LIST(7)
-     JJ_LO = INDEX_LIST(8)
-     KK_LO = INDEX_LIST(9)
-     NRX = INDEX_LIST(10)
-     NRY = INDEX_LIST(11)
-     NRZ = INDEX_LIST(12)
-  CASE(1)
-     RETURN
+   CASE(0)
+      I_LO = INDEX_LIST(1)
+      I_HI = INDEX_LIST(2)
+      J_LO = INDEX_LIST(3)
+      J_HI = INDEX_LIST(4)
+      K_LO = INDEX_LIST(5)
+      K_HI = INDEX_LIST(6)
+      II_LO = INDEX_LIST(7)
+      JJ_LO = INDEX_LIST(8)
+      KK_LO = INDEX_LIST(9)
+      NRX = INDEX_LIST(10)
+      NRY = INDEX_LIST(11)
+      NRZ = INDEX_LIST(12)
+   CASE(1)
+      RETURN
 END SELECT
 
 !print *, INDEX_LIST
@@ -706,19 +706,19 @@ M1=>MESHES(NM1) ! coarse mesh
 M2=>MESHES(NM2) ! fine mesh
 
 IF (PREDICTOR) THEN
-  UU1=>M1%US
-  VV1=>M1%VS
-  WW1=>M1%WS
-  UU2=>M2%US
-  VV2=>M2%VS
-  WW2=>M2%WS
+   UU1=>M1%US
+   VV1=>M1%VS
+   WW1=>M1%WS
+   UU2=>M2%US
+   VV2=>M2%VS
+   WW2=>M2%WS
 ELSEIF (CORRECTOR) THEN
-  UU1=>M1%U
-  VV1=>M1%V
-  WW1=>M1%W
-  UU2=>M2%U
-  VV2=>M2%V
-  WW2=>M2%W
+   UU1=>M1%U
+   VV1=>M1%V
+   WW1=>M1%W
+   UU2=>M2%U
+   VV2=>M2%V
+   WW2=>M2%W
 ENDIF
 
 ! Set fine mesh boundary value to corresponding coarse mesh value
@@ -726,109 +726,109 @@ ENDIF
 ! U-VELOCITY
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO J = J_LO,J_HI
-     JJ_0 = JJ_LO + (J-J_LO)*NRY
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO J = J_LO,J_HI
+      JJ_0 = JJ_LO + (J-J_LO)*NRY 
 
-     ! east face
-     I = I_HI
-     II_0 = II_LO + (I-I_LO+1)*NRX
-     IF (II_0==M2%IBAR) THEN
-        DO KK = KK_0+1,KK_0+NRZ
-           DO JJ = JJ_0+1,JJ_0+NRY
-              UU2(II_0,JJ,KK) = UU1(I,J,K)
-              !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
-              !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
-           ENDDO
-        ENDDO
-     ENDIF
+      ! east face
+      I = I_HI
+      II_0 = II_LO + (I-I_LO+1)*NRX
+      IF (II_0==M2%IBAR) THEN
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               UU2(II_0,JJ,KK) = UU1(I,J,K)
+               !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
+               !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
+            ENDDO
+         ENDDO
+      ENDIF 
 
-     ! west face
-     I = I_LO-1
-     II_0 = II_LO + (I-I_LO+1)*NRX
-     IF (II_0==0) THEN
-        DO KK = KK_0+1,KK_0+NRZ
-           DO JJ = JJ_0+1,JJ_0+NRY
-              UU2(II_0,JJ,KK) = UU1(I,J,K)
-              !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
-              !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
-           ENDDO
-        ENDDO
-     ENDIF
+      ! west face
+      I = I_LO-1
+      II_0 = II_LO + (I-I_LO+1)*NRX
+      IF (II_0==0) THEN
+         DO KK = KK_0+1,KK_0+NRZ
+            DO JJ = JJ_0+1,JJ_0+NRY
+               UU2(II_0,JJ,KK) = UU1(I,J,K)
+               !UU2(II_0,JJ,KK) = PROLONG_VEL(1,II_0,JJ,KK,I,J,K)
+               !UU2(II_0,JJ,KK) = NS_U_EXACT(M2%X(II_0),M2%ZC(KK),T,M2%MU(II_0,JJ,KK),M2%RHO(II_0,JJ,KK),2._EB)
+            ENDDO
+         ENDDO
+      ENDIF 
 
-  ENDDO
+   ENDDO
 ENDDO
 
 ! V-VELOCITY
 
 DO K = K_LO,K_HI
-  KK_0 = KK_LO + (K-K_LO)*NRZ
-  DO I = I_LO,I_HI
-     II_0 = II_LO + (I-I_LO)*NRX
+   KK_0 = KK_LO + (K-K_LO)*NRZ
+   DO I = I_LO,I_HI
+      II_0 = II_LO + (I-I_LO)*NRX 
 
-     ! north face
-     J = J_HI
-     JJ_0 = JJ_LO + (J-J_LO+1)*NRY
-     IF (JJ_0==M2%JBAR) THEN
-        DO KK = KK_0+1,KK_0+NRZ
-           DO II = II_0+1,II_0+NRX
-              VV2(II,JJ_0,KK) = VV1(I,J,K)
-              !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
-              !VV2(II,JJ_0,KK) = 0._EB
-           ENDDO
-        ENDDO
-     ENDIF
+      ! north face
+      J = J_HI
+      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
+      IF (JJ_0==M2%JBAR) THEN
+         DO KK = KK_0+1,KK_0+NRZ
+            DO II = II_0+1,II_0+NRX
+               VV2(II,JJ_0,KK) = VV1(I,J,K)
+               !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
+               !VV2(II,JJ_0,KK) = 0._EB
+            ENDDO
+         ENDDO
+      ENDIF 
 
-     ! south face
-     J = J_LO-1
-     JJ_0 = JJ_LO + (J-J_LO+1)*NRY
-     IF (JJ_0==0) THEN
-        DO KK = KK_0+1,KK_0+NRZ
-           DO II = II_0+1,II_0+NRX
-              VV2(II,JJ_0,KK) = VV1(I,J,K)
-              !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
-              !VV2(II,JJ_0,KK) = 0._EB
-           ENDDO
-        ENDDO
-     ENDIF
+      ! south face
+      J = J_LO-1
+      JJ_0 = JJ_LO + (J-J_LO+1)*NRY
+      IF (JJ_0==0) THEN
+         DO KK = KK_0+1,KK_0+NRZ
+            DO II = II_0+1,II_0+NRX
+               VV2(II,JJ_0,KK) = VV1(I,J,K)
+               !VV2(II,JJ_0,KK) = PROLONG_VEL(2,II,JJ_0,KK,I,J,K)
+               !VV2(II,JJ_0,KK) = 0._EB
+            ENDDO
+         ENDDO
+      ENDIF 
 
-  ENDDO
+   ENDDO
 ENDDO
 
 ! W-VELOCITY
 
 DO J = J_LO,J_HI
-  JJ_0 = JJ_LO + (J-J_LO)*NRY
-  DO I = I_LO,I_HI
-     II_0 = II_LO + (I-I_LO)*NRX
+   JJ_0 = JJ_LO + (J-J_LO)*NRY
+   DO I = I_LO,I_HI
+      II_0 = II_LO + (I-I_LO)*NRX 
 
-     ! top face
-     K = K_HI
-     KK_0 = KK_LO + (K-K_LO+1)*NRZ
-     IF (KK_0==M2%KBAR) THEN
-        DO JJ = JJ_0+1,JJ_0+NRY
-           DO II = II_0+1,II_0+NRX
-              WW2(II,JJ,KK_0) = WW1(I,J,K)
-              !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
-              !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
-           ENDDO
-        ENDDO
-     ENDIF
+      ! top face
+      K = K_HI
+      KK_0 = KK_LO + (K-K_LO+1)*NRZ
+      IF (KK_0==M2%KBAR) THEN
+         DO JJ = JJ_0+1,JJ_0+NRY
+            DO II = II_0+1,II_0+NRX
+               WW2(II,JJ,KK_0) = WW1(I,J,K)
+               !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
+               !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
+            ENDDO
+         ENDDO
+      ENDIF 
 
-     ! bottom face
-     K = K_LO-1
-     KK_0 = KK_LO + (K-K_LO+1)*NRZ
-     IF (KK_0==0) THEN
-        DO JJ = JJ_0+1,JJ_0+NRY
-           DO II = II_0+1,II_0+NRX
-              WW2(II,JJ,KK_0) = WW1(I,J,K)
-              !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
-              !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
-           ENDDO
-        ENDDO
-     ENDIF
+      ! bottom face
+      K = K_LO-1
+      KK_0 = KK_LO + (K-K_LO+1)*NRZ
+      IF (KK_0==0) THEN
+         DO JJ = JJ_0+1,JJ_0+NRY
+            DO II = II_0+1,II_0+NRX
+               WW2(II,JJ,KK_0) = WW1(I,J,K)
+               !WW2(II,JJ,KK_0) = PROLONG_VEL(3,II,JJ,KK_0,I,J,K)
+               !WW2(II,JJ,KK_0) = NS_V_EXACT(M2%XC(II),M2%Z(KK_0),T,M2%MU(II,JJ,KK_0),M2%RHO(II,JJ,KK_0),2._EB)
+            ENDDO
+         ENDDO
+      ENDIF 
 
-  ENDDO
+   ENDDO
 ENDDO
 
 ! fine mesh boundary loop
@@ -1318,22 +1318,22 @@ M2=>MESHES(NM2) ! fine mesh
 I_LO = MAX(1,       NINT((M2%XS-M1%XS)/M1%DX(1))+1 )
 I_HI = MIN(M1%IBAR, NINT((M2%XF-M1%XS)/M1%DX(1))   )
 IF (I_LO>M1%IBAR .OR. I_HI<1) THEN ! meshes do not overlap
-  IERROR=1
-  RETURN
+   IERROR=1
+   RETURN
 ENDIF
 
 J_LO = MAX(1,       NINT((M2%YS-M1%YS)/M1%DY(1))+1 )
 J_HI = MIN(M1%JBAR, NINT((M2%YF-M1%YS)/M1%DY(1))   )
 IF (J_LO>M1%JBAR .OR. J_HI<1) THEN ! meshes do not overlap
-  IERROR=1
-  RETURN
+   IERROR=1
+   RETURN
 ENDIF
 
 K_LO = MAX(1,       NINT((M2%ZS-M1%ZS)/M1%DZ(1))+1 )
 K_HI = MIN(M1%KBAR, NINT((M2%ZF-M1%ZS)/M1%DZ(1))   )
 IF (K_LO>M1%KBAR .OR. K_HI<1) THEN ! meshes do not overlap
-  IERROR=1
-  RETURN
+   IERROR=1
+   RETURN
 ENDIF
 
 ! Find fine mesh off-set
