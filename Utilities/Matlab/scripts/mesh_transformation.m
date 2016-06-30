@@ -63,7 +63,7 @@ fclose(fid);
 CC = [0.3 1.2];
 PC = [0.5 1.0];
 
-plotdir = '../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
+plotdir = '../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 plot_style
 Title_Font_Size=20;
 

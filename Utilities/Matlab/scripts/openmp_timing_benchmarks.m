@@ -68,7 +68,7 @@ addverstr(gca,svn_file,'linear')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/openmp_timing_benchmarks')
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/openmp_timing_benchmarks')
 
 % check errors
 if time64(4) > 56.

@@ -76,7 +76,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
+    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_rms'];
     print(gcf,'-dpdf',plotname);
 
     clear h
@@ -108,7 +108,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
+    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_cov'];
     print(gcf,'-dpdf',plotname);
 
     clear h
@@ -140,7 +140,7 @@ else
     set(gcf,'PaperUnits',Paper_Units);
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-    plotname = ['../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
+    plotname = ['../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/rms_cov_corr_corr'];
     print(gcf,'-dpdf',plotname);
 
     clear h

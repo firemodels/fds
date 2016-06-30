@@ -76,7 +76,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
+print(gcf,'-dpdf',['../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/strong_scaling_test'])
 
 clear all
 close all
@@ -131,5 +131,5 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf',['../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/weak_scaling_test'])
+print(gcf,'-dpdf',['../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/weak_scaling_test'])
 

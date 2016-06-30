@@ -139,6 +139,6 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[1.1*Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 1.1*Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fds_moody_chart')
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/fds_moody_chart')
 
 

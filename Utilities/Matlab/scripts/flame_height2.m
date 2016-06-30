@@ -180,5 +180,5 @@ set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]); 
 display('Printing plot Flame_Height2...')
-print -dpdf ../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2
+print -dpdf ../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/Flame_Height2
 

@@ -143,7 +143,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_Diameter');
 
 % w-plot
 
@@ -171,7 +171,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_Spray_W');
 
 %EOF
 
@@ -247,4 +247,4 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Height Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Height Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/BRE_LEMTA_Spray/BRE_LEMTA_Spray_Attenuation');

@@ -11,7 +11,7 @@ set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 
 data_dir = '../../FDS/Verification/Scalar_Analytical_Solution/';
-plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+plot_dir = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 skip_case = 0;
 

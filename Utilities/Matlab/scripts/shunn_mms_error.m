@@ -168,7 +168,7 @@ addverstr(gca,Git_Filename,'loglog')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/shunn_mms_convergence')
 
 % check errors
 if e_r(end) > 2e-4

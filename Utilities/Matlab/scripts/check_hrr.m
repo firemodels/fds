@@ -52,7 +52,7 @@ addverstr(gca,Git_Filename,'loglog')
 
 % print to pdf
 
-plotdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/';
+plotdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Heskestad/';
 Plot_Filename = 'Flame_Height_check_hrr';
 
 set(gcf,'PaperUnits',Paper_Units);

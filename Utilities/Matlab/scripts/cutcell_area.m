@@ -60,7 +60,7 @@ tri_area(10) = 0.3766;
 tri_area(11) = 1.215;
 tri_area(12) = 1.4614;
 
-filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/cutcell_area.tex';
+filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/cutcell_area.tex';
 fid = fopen(filename,'wt');
 fprintf(fid,'%s\n','\begin{table}[ht]');
 fprintf(fid,'%s\n','\begin{center}');

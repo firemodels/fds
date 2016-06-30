@@ -78,7 +78,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_40.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_40');
 
 figure(2)
 
@@ -112,7 +112,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_40');
 
 figure(3)
 
@@ -146,7 +146,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_40.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_40');
 
 
 figure(4)
@@ -181,7 +181,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_velo_62.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_velo_62');
 
 figure(5)
 
@@ -215,7 +215,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_diam_62');
 
 figure(6)
 
@@ -249,7 +249,7 @@ git_file = [repository, 'FDS_Output_Files/LN02_4_git.txt'];
 addverstr(gca,git_file,'linear')
 
 display('Printing plot LN02_diam_62.pdf...')
-print(gcf, '-dpdf', '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62');
+print(gcf, '-dpdf', '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/VTT_Sprays/LN02_flux_62');
 
 
 close all

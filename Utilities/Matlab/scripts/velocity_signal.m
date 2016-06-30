@@ -5,7 +5,7 @@
 function []=velocity_signal(devc_file,devc_col,vel_style,tmin,tmax,vmin,vmax,xaxis_title,yaxis_title, ...
                             title_label,text_label,signal_file,git_file)
 
-plotdir = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
+plotdir = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/'];
 datadir = ['../../Validation/Sandia_Plumes/FDS_Output_Files/'];
 
 M = csvread([datadir,devc_file],2,0);

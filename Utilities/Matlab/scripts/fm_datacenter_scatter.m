@@ -113,11 +113,11 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Soot'];
 print(gcf,'-dpdf',plotname);
 hold off   
 
-filename = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex';
+filename = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/pressure.tex';
 fid = fopen(filename,'wt');
 
 pres_dump(1)=fds_out(2);

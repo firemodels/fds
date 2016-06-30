@@ -122,9 +122,9 @@ for i_plot=1:2
     set(gcf,'PaperSize',[Paper_Width Paper_Height]);
     set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
     if i_plot==1
-        print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_xf')
+        print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_xf')
     else
-        print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_T')
+        print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/pcm_slab_T')
     end
     
 end

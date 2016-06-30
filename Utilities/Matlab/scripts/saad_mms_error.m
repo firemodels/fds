@@ -115,7 +115,7 @@ addverstr(gca,SVN_Filename,'loglog')
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/saad_mms_convergence')
+print(gcf,'-dpdf','../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/saad_mms_convergence')
 
 % check errors
 if e_r(length(e_r)) > 1

@@ -64,7 +64,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_u'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -102,7 +102,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_v'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -140,7 +140,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_w'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -178,7 +178,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_High_vel'];
 print(gcf,'-dpdf',plotname);
 hold off  
 clear hX
@@ -237,7 +237,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_u'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -275,7 +275,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_v'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -313,7 +313,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_w'];
 print(gcf,'-dpdf',plotname);
 hold off   
 clear hX
@@ -351,7 +351,7 @@ set(gcf,'Visible',Figure_Visibility);
 set(gcf,'PaperUnits',Paper_Units);
 set(gcf,'PaperSize',[Scat_Paper_Width Scat_Paper_Height]);
 set(gcf,'PaperPosition',[0 0 Scat_Paper_Width Scat_Paper_Height]);
-plotname = ['../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];
+plotname = ['../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/FM_FPRF_Datacenter/FM_Datacenter_Veltest_Low_vel'];
 print(gcf,'-dpdf',plotname);
 hold off  
 clear hX

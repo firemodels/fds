@@ -100,7 +100,7 @@ hold off
 %-------------------------------------------------------------------------%
 
 % Define output location
-plot_dir = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
+plot_dir = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/';
 
 % Define plot range
 axis([-0.05,0.05,-0.05,0.05]);

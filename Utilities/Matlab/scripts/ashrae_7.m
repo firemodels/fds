@@ -35,7 +35,7 @@ for n = 2:4
     pressure(n,1:8) = m(length(m(:,1)),1:8);
 end
 
-filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ashrae_7.tex';
+filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ashrae_7.tex';
 fid = fopen(filename, 'wt');
 
 fprintf(fid,'%s\n','\begin{center}');

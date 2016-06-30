@@ -6,7 +6,7 @@ close all
 clear all
 
 datadir='../../FDS/Verification/Turbulence/';
-plotdir='../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
+plotdir='../../FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/';
 
 error_tolerance = 0.01;
 

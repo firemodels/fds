@@ -64,7 +64,7 @@ for j=1:5
    end
 end
 
-filename = '../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex';
+filename = '../../FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/radiation_plane_layer.tex';
 fid = fopen(filename,'wt');
 
 fprintf(fid,'%s\n','\begin{center}');

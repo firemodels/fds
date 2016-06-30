@@ -9,7 +9,7 @@ close all
 
 expdir = '../../Validation/Backward_Facing_Step/Experimental_Data/';
 datdir = '../../Validation/Backward_Facing_Step/FDS_Output_Files/';
-pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';
+pltdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Backward_Facing_Step/';
 
 rkappa = 1/.41;
 B = 5.2;

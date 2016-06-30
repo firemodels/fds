@@ -18,7 +18,7 @@ DS = (Q/(rho*cp*T0*sqrt(g))).^(2/5); % m
 
 %datadir = '../../Validation/McCaffrey_Plume/FDS_Output_Files/';
 datadir = '../../Validation/McCaffrey_Plume/Test2/';
-plotdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/';
+plotdir = '../../FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/McCaffrey_Plume/';
 
 chid = {'McCaffrey_14_kW_11','McCaffrey_22_kW_11','McCaffrey_33_kW_11','McCaffrey_45_kW_11','McCaffrey_57_kW_11'};
 %chid = {'McCaffrey_14_kW_21','McCaffrey_22_kW_21','McCaffrey_33_kW_21','McCaffrey_45_kW_21','McCaffrey_57_kW_21'};
