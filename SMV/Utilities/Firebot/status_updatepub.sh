@@ -2,7 +2,7 @@
 FORCE=$1
 
 gitwebrepo=~/FDS-SMVgitweb
-firebotdir=~/FDS-SMVgitclean/Utilities/Firebot
+firebotdir=~/FDS-SMVgitclean/SMV/Utilities/Firebot
 oldpage=~/.firebot/oldpage
 newpage=~/.firebot/newpage
 olddata=~/.firebot/old_data

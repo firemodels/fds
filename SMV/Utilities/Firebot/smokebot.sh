@@ -202,7 +202,7 @@ WEBFROMDIR="$SMV_MANUAL_DIR/SMV_Summary"
 SMV_VG_GUIDE=$SMV_MANUAL_DIR/SMV_Verification_Guide/SMV_Verification_Guide.pdf
 SMV_UG_GUIDE=$SMV_MANUAL_DIR/SMV_User_Guide/SMV_User_Guide.pdf
 GEOM_NOTES=$FDS_MANUAL_DIR/FDS_User_Guide/geom_notes.pdf
-UploadSMVGuides=$fdsrepo/Utilities/Firebot/smv_guides2GD.sh
+UploadSMVGuides=$fdsrepo/SMV/Utilities/Firebot/smv_guides2GD.sh
 
 THIS_FDS_AUTHOR=
 THIS_FDS_FAILED=0
@@ -1255,9 +1255,9 @@ generate_timing_stats()
    scripts/SMV_Cases.sh
    scripts/GEOM_Cases.sh
 
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/SMV/Utilities/Scripts
    ./fds_timing_stats.sh smokebot > smv_timing_stats.csv
-   cd $fdsrepo/Utilities/Scripts
+   cd $fdsrepo/SMV/Utilities/Scripts
    ./fds_timing_stats.sh smokebot 1 > smv_benchmarktiming_stats.csv
    TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
 }
@@ -1265,16 +1265,16 @@ generate_timing_stats()
 archive_timing_stats()
 {
   echo "   archiving"
-  cd $fdsrepo/Utilities/Scripts
+  cd $fdsrepo/SMV/Utilities/Scripts
   cp smv_timing_stats.csv "$HISTORY_DIR/${GIT_REVISION}_timing.csv"
   cp smv_benchmarktiming_stats.csv "$HISTORY_DIR/${GIT_REVISION}_benchmarktiming.csv"
   TOTAL_SMV_TIMES=`tail -1 smv_benchmarktiming_stats.csv`
   if [ "$UPLOADRESULTS" == "1" ]; then
-    cd $fdsrepo/Utilities/Firebot
+    cd $fdsrepo/SMV/Utilities/Firebot
     ./smvstatus_updatepub.sh -F
   fi
   if [ ! "$web_DIR" == "" ]; then
-    cd $fdsrepo/Utilities/Firebot
+    cd $fdsrepo/SMV/Utilities/Firebot
     ./make_smv_summary.sh > $web_DIR/index.html
   fi
 }

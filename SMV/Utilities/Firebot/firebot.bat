@@ -88,8 +88,8 @@ set gettimeexe=%userprofile%\FIRE-LOCAL\repo_exes\get_time.exe
 
 call :get_datetime startdate starttime
 
-call "%fdsroot%\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
-call %fdsroot%\Utilities\Firebot\firebot_email_list.bat
+call "%fdsroot%\FDS\Utilities\Scripts\setup_intel_compilers.bat" 1> Nul 2>&1
+call %fdsroot%\FDS\Utilities\Firebot\firebot_email_list.bat
 
 set mailToList=%mailToFDS%
 if NOT "%emailto%" == "" (
@@ -289,7 +289,7 @@ if %lite% == 1 goto skip_lite2
   echo Stage 3 - Building Utilities
 
   echo             fds2ascii
-  cd %fdsroot%\Utilities\fds2ascii\intel_win%size%
+  cd %fdsroot%\FDS\Utilities\fds2ascii\intel_win%size%
   erase *.obj *.mod *.exe 1> Nul 2>&1
   call make_fds2ascii bot 1> %OUTDIR%\makefds2ascii.log 2>&1
   call :does_file_exist fds2ascii_win%size%.exe %OUTDIR%\makefds2ascii.log|| exit /b 1
@@ -388,14 +388,14 @@ if %lite% == 1 goto skip_lite4
 
   if %have_matlab%==0 goto skip_matlabplots
     echo             matlab verification plots
-    cd %fdsroot%\Utilities\Matlab
-    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
+    cd %fdsroot%\FDS\Utilities\Matlab
+    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\FDS\Utilities\Matlab\FDS_verification_script.m'); catch; end; quit
 
     echo             matlab validation plots
-    cd %fdsroot%\Utilities\Matlab
-    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
+    cd %fdsroot%\FDS\Utilities\Matlab
+    matlab -automation -wait -noFigureWindows -r "try; run('%fdsroot%\FDS\Utilities\Matlab\FDS_validation_script.m'); catch; end; quit
 
-    cd %fdsroot%\Utilities\Scripts
+    cd %fdsroot%\FDS\Utilities\Scripts
     validation_git_stats
 
   :skip_matlabplots

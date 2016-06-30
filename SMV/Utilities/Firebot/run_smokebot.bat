@@ -53,7 +53,7 @@ if %stopscript% == 1 (
 call :normalise %CD% curdir
 set curdir=%temparg%
 
-call :normalise %fdsrepo%\Utilities\Firebot
+call :normalise %fdsrepo%\SMV\Utilities\Firebot
 set fdsbotdir=%temparg%
 
 call :normalise %cfastrepo% 
