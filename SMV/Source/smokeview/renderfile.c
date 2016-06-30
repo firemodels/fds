@@ -524,12 +524,12 @@ float interp2d(int i, int ni, int j, int nj, float *vals){
   float xfact, yfact;
   float val1, val2, val;
 
-  //        v1------------v3 
+  //        v1------------v3
   //        |             |
   //        j             |
   //        |             |
   //        |             |
-  //        v0---i--------v2 
+  //        v0---i--------v2
 
   xfact = (float)i / (float)ni;
   yfact = (float)j / (float)nj;
@@ -550,10 +550,9 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   char *ext;
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
-  int i, j, ibuff;
-  int irow;
+  int ibuff;
   int width360 = 1024, height360 = 512, i360;
-  int ilat, ilong;
+  int i, j;
 
   switch (renderfiletype) {
   case PNG:
@@ -597,18 +596,15 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   RENDERimage = gdImageCreateTrueColor(width360, height360);
 
   for(ibuff=0;ibuff<nscreenbuffers;ibuff++){
-    int j;
     GLubyte *p;
     float *longs, *lats;
     float llong, llat;
-    
+
     p = screenbuffers[ibuff];
     longs = longlatbounds+8*ibuff;
     lats =  longlatbounds+8*ibuff+4;
 
     for(j=0;j<height360;j++){
-      int i;
-      
       for(i=0;i<width360;i++){
         unsigned int r, g, b;
         int rgb_local;
@@ -620,8 +616,6 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     }
 
     for(j=0;j<screenHeight;j++){
-      int i;
-      
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
@@ -629,9 +623,11 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
 
         llong = interp2d(i,screenWidth,j,screenHeight,longs);
         ii = CLAMP((int)((float)width360*llong/360.0),0,width360-1);
-        
+        ii = width360*(float)(ibuff*screenWidth + i) / (float)(nscreenbuffers*screenWidth);
+
         llat = interp2d(i,screenWidth,j,screenHeight,lats);
         jj = CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
+        jj = height360*(float)j / (float)screenHeight;
 
         ijk = 3*(j*screenWidth + i);
         r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
@@ -644,8 +640,8 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     }
   }
 
-  for(j=0;j<40;j++){
-    for(i=0;i<width360;i++){
+  for(i=0;i<width360;i++){
+    for (j = 0; j<40; j++) {
       unsigned int r, g, b;
       int rgb_local;
 
