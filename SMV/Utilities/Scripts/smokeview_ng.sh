@@ -25,6 +25,10 @@ else
   PLATFORM=linux
 fi
 
+pushd `dirname $0` > /dev/null
+UTILSCRIPTDIR=`pwd`
+popd > /dev/null
+
 NOSHOW=1
 SIZE=_64
 DEBUG=
@@ -115,8 +119,8 @@ if [ "$BINDIR" == "" ]; then
 fi
 SMVBINDIR="-bindir $BINDIR"
 
-STARTX=$SVNROOT/FDS/Utilities/Scripts/startXserver.sh
-STOPX=$SVNROOT/FDS/Utilities/Scripts/stopXserver.sh
+STARTX=$UTILSCRIPTDIR/startXserver.sh
+STOPX=$UTILSCRIPTDIR/stopXserver.sh
 
 source $STARTX
 echo "     smokeview: $SMOKEVIEW"
