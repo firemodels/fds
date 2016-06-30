@@ -798,7 +798,8 @@ IF (HVAC_MASS_TRANSPORT) THEN
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
             ENDDO
          CASE DEFAULT
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),', HVAC line number:',NN
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),&
+                                        ', HVAC line number:',NN
             CALL SHUTDOWN(MESSAGE); RETURN
       END SELECT
    ENDDO
