@@ -45,7 +45,7 @@ echo "     format for PBS: hh:mm:ss, format for SLURM: dd-hh:mm:ss"
 exit
 }
 
-cd ../..
+cd ../../..
 export SVNROOT=`pwd`
 cd $CURDIR
 
@@ -107,7 +107,7 @@ fi
 
 export FDS=$SVNROOT/FDS/Build/${OPENMP}intel_$PLATFORM$DEBUG/fds_${OPENMP}intel_$PLATFORM$DEBUG
 export FDSMPI=$SVNROOT/FDS/Build/mpi_intel_$PLATFORM$IB$DEBUG/fds_mpi_intel_$PLATFORM$IB$DEBUG
-export QFDSSH="$SVNROOT/Utilities/Scripts/qfds.sh $RUNOPTION"
+export QFDSSH="$SVNROOT/FDS/Utilities/Scripts/qfds.sh $RUNOPTION"
 
 if [ "$resource_manager" == "SLURM" ]; then
    export RESOURCE_MANAGER="SLURM"

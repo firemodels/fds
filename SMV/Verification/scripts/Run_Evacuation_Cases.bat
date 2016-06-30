@@ -6,7 +6,7 @@ set SVNROOT=%BASEDIR%\..\
 
 set FDS=%SVNROOT%\FDS\Build\intel_win_32\fds5_win_32
 
-set RUNFDS=call %SVNROOT%\Utilities\Scripts\runfds_win32.bat
+set RUNFDS=call %SVNROOT%\FDS\Utilities\Scripts\runfds_win32.bat
 
 echo You are about to run the Verification Test Suite for Evacuation.
 pause Press any key to continue or CTRL-C to abort > Nul
