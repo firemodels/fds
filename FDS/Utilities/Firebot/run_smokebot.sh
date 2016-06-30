@@ -28,12 +28,14 @@ UPLOAD=
 FORCE=
 COMPILER=intel
 SMOKEBOT_LITE=
+UPLOADWEB=
 
 WEB_URL=
 web_DIR=/var/www/html/`whoami`
 if [ -d $web_DIR ]; then
   IP=`wget http://ipinfo.io/ip -qO -`
   HOST=`host $IP | awk '{printf("%s\n",$5);}'`
+  HOST=${HOST:0:$(expr ${#HOST} - 1)}
   WEB_URL=http://$HOST/`whoami`
 else
   web_DIR=
@@ -144,6 +146,7 @@ case $OPTION  in
    ;;
   W)
    WEB_URL="$OPTARG"
+   UPLOADWEB=1
    ;;
 esac
 done
@@ -154,6 +157,10 @@ if [ ! "$web_DIR" == "" ]; then
 fi
 if [ ! "$WEB_URL" == "" ]; then
   WEB_URL="-W $WEB_URL"
+fi
+if [ "$UPLOADWEB" == "" ]; then
+  web_DIR=
+  WEB_URL=
 fi
 
 COMPILER="-I $COMPILER"
