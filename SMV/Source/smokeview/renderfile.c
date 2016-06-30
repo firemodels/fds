@@ -551,7 +551,7 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
   int ibuff;
-  int width360 = 1024, height360 = 512, i360;
+  int width360 = 1024, height360 = 512;
   int i, j;
 
   switch (renderfiletype) {
