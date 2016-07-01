@@ -11,7 +11,6 @@
 #include GLUT_H
 #include "gd.h"
 
-#define RENDER_TYPE 0
 #define RENDER_START 3
 
 /* ------------------ does_movie_exist ------------------------ */
@@ -604,17 +603,6 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     longs = longlatbounds+8*ibuff;
     lats =  longlatbounds+8*ibuff+4;
 
-    for(j=0;j<height360;j++){
-      for(i=0;i<width360;i++){
-        unsigned int r, g, b;
-        int rgb_local;
-
-        r=0; g=0; b=255*(float)j/(float)height360;
-        rgb_local = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage,i,j,rgb_local);
-      }
-    }
-
     for(j=0;j<screenHeight;j++){
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
@@ -623,33 +611,15 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
 
         llong = interp2d(i,screenWidth,j,screenHeight,longs);
         ii = CLAMP((int)((float)width360*llong/360.0),0,width360-1);
-        ii = width360*(float)(ibuff*screenWidth + i) / (float)(nscreenbuffers*screenWidth);
 
         llat = interp2d(i,screenWidth,j,screenHeight,lats);
-        jj = CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
-        jj = height360*(float)j / (float)screenHeight;
+        jj = height360 - 1 - CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
 
         ijk = 3*(j*screenWidth + i);
         r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
-        r = 255 ;
-        g = 0;
-        b = 0;
         rgb_local = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage,ii,jj,rgb_local);
+        gdImageSetPixel(RENDERimage, ii, jj, rgb_local);
       }
-    }
-  }
-
-  for(i=0;i<width360;i++){
-    for (j = 0; j<40; j++) {
-      unsigned int r, g, b;
-      int rgb_local;
-
-      r = 0;
-      g = 255;
-      b = 0;
-      rgb_local = (r<<16)|(g<<8)|b;
-      gdImageSetPixel(RENDERimage,i,j,rgb_local);
     }
   }
 
