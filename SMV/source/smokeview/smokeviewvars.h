@@ -20,6 +20,8 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(render_360, 0);
+
 SVEXTERN int SVDECL(highlight_vertexdup, 0);
 SVEXTERN int SVDECL(highlight_edge0, 0);
 SVEXTERN int SVDECL(highlight_edge1, 0);
@@ -333,7 +335,10 @@ SVEXTERN int SVDECL(ngeominfo,0);
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(update_startup_view,0);
-SVEXTERN int render_multi,render_multi_state,render_multi_menu,render_from_menu;
+SVEXTERN int SVDECL(render_multi,0);
+SVEXTERN int SVDECL(render_multi_state,0);
+SVEXTERN int SVDECL(render_multi_menu, 0);
+SVEXTERN int SVDECL(render_from_menu,0);
 SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
 SVEXTERN int SVDECL(cullgeom_portsize,16);

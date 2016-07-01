@@ -663,7 +663,10 @@ extern "C" void glui_motion_setup(int main_window){
   LIST_render_size->add_item(RenderWindow, _d("Current"));
   LIST_render_size->set_int_val(render_size_index);
   SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(ROLLOUT_render, "Resolution multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
-  SPINNER_nrender_rows->set_int_limits(2, 10);
+  SPINNER_nrender_rows->set_int_limits(1, 10);
+#ifdef pp_RENDER360
+  glui_motion->add_checkbox_to_panel(ROLLOUT_render, "360", &render_360);
+#endif  
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);
@@ -1767,11 +1770,11 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
-      if((render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
+      if(render_360==0&&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
       else{
-        if(nrender_rows==1){
+        if(nrender_rows==1&&render_360==0){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
         else{
