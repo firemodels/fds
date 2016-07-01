@@ -1,5 +1,5 @@
 RENDERDIR
-..\..\FDS\Manuals\FDS_User_Guide\SCRIPT_FIGURES
+..\..\Manuals\FDS_User_Guide\SCRIPT_FIGURES
 RENDERCLIP
  1 120 150 140 160
 SETVIEWPOINT
@@ -58,48 +58,3 @@ RENDERONCE
  nozzle_1
 RENDERCLIP
  0 125 125 70 300
-RENDERDIR
-..\..\Manuals\SMV_User_Guide\SCRIPT_FIGURES
-SETVIEWPOINT
- sprinkler_upright_0
-RENDERONCE
- sprinkler_inact
-SETVIEWPOINT
- sprinkler_upright_1
-RENDERONCE
- sprinkler_act
-SETVIEWPOINT
- smoke_detector_0
-RENDERONCE
- smokedetector_inact
-SETVIEWPOINT
- smoke_detector_1
-RENDERONCE
- smokedetector_act
-RENDERCLIP
- 1 120 150 140 160
-SETVIEWPOINT
- heat_detector_0
-RENDERONCE
- heatdetector_inact
-SETVIEWPOINT
- heat_detector_1
-RENDERONCE
- heatdetector_act
-RENDERCLIP
- 1 0 0 0 85
-SETVIEWPOINT
- target
-RENDERONCE
- target
-RENDERCLIP
- 0 50 50 90 360
-SETVIEWPOINT
- sensor
-RENDERONCE
- sensor
-RENDERONCE
- sensorplain
-
-
-
