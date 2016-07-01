@@ -552,6 +552,7 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
   int ibuff;
   int width360 = 1024, height360 = 512;
   int i, j;
+  int *screenbuffer;
 
   switch (renderfiletype) {
   case PNG:
@@ -593,6 +594,12 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(width360, height360);
+  NewMemory((void **)&screenbuffer,width360*height360 * sizeof(int));
+
+  for(i=0;i<width360*height360;i++){
+    screenbuffer[i]=0;
+  }
+
 
   for(ibuff=0;ibuff<nscreenbuffers;ibuff++){
     GLubyte *p;
@@ -618,8 +625,14 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
         ijk = 3*(j*screenWidth + i);
         r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
         rgb_local = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage, ii, jj, rgb_local);
+        screenbuffer[jj*width360+ii]=rgb_local;
       }
+    }
+  }
+
+  for(j=0;j<height360;j++){
+    for(i=0;i<width360;i++){
+      gdImageSetPixel(RENDERimage, i, j, screenbuffer[j*width360+i]);
     }
   }
 
@@ -642,6 +655,7 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
+  FREEMEMORY(screenbuffer);
   PRINTF(" Completed\n");
   return 0;
 }
