@@ -613,7 +613,7 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
         ii = CLAMP((int)((float)width360*llong/360.0),0,width360-1);
 
         llat = interp2d(i,screenWidth,j,screenHeight,lats);
-        jj = CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
+        jj = height360 - 1 - CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
 
         ijk = 3*(j*screenWidth + i);
         r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
