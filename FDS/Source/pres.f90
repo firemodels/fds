@@ -483,7 +483,8 @@ SUBROUTINE COMPUTE_VELOCITY_ERROR(DT,NM)
 ! Check the maximum velocity error at a solid boundary
 
 USE COMP_FUNCTIONS, ONLY: SECOND
-USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED
+USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,VELOCITY_ERROR_MAX,SOLID_BOUNDARY,INTERPOLATED_BOUNDARY,VELOCITY_ERROR_MAX_LOC,T_USED,&
+                            EXTERNAL_BOUNDARY_CORRECTION
 
 REAL(EB), INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NM
@@ -505,6 +506,12 @@ ENDIF
 
 VELOCITY_ERROR_MAX(NM) = 0._EB
 WALL_WORK1 = 0._EB
+
+! Solve Laplace equation for pressure correction, H_PRIME, and add to H or HS.
+
+IF (EXTERNAL_BOUNDARY_CORRECTION) CALL LAPLACE_EXTERNAL_VELOCITY_CORRECTION(DT,NM)
+
+! Loop over wall cells and check velocity error.
 
 CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
@@ -572,73 +579,121 @@ CHECK_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
       JJO2 = EWC%JJO_MAX
       KKO2 = EWC%KKO_MAX
 
-      IF (PREDICTOR) THEN
-         SELECT CASE(IOR)
+      PREDICTOR_IF: IF (PREDICTOR) THEN
+         IOR_SELECT_1: SELECT CASE(IOR)
             CASE( 1)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%H(IIO+1,JJO,KKO)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO,JJO,KKO)   + DT*DUDT
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-1)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO-1,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%U(IIO-1,JJO,KKO) + DT*DUDT
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE( 2)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO,KKO)   + DT*DVDT
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%H(IIO,JJO+1,KKO)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO,KKO)   + DT*DVDT
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-2)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO-1,KKO) + DT*DVDT
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO-1,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%V(IIO,JJO-1,KKO) + DT*DVDT
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE( 3)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO)   + DT*DWDT
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%H(IIO,JJO,KKO+1)-OM%H(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO)   + DT*DWDT
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-3)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
-                  UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO-1) + DT*DWDT
-               ENDDO ; ENDDO ; ENDDO
-         END SELECT
-      ELSE
-         SELECT CASE(IOR)
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%H(IIO,JJO,KKO)-OM%H(IIO,JJO,KKO-1))
+                        UN_NEW_OTHER = UN_NEW_OTHER + OM%W(IIO,JJO,KKO-1) + DT*DWDT
+                     ENDDO
+                  ENDDO
+               ENDDO
+         END SELECT IOR_SELECT_1
+      ELSE PREDICTOR_IF
+         IOR_SELECT_2: SELECT CASE(IOR)
             CASE( 1)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DUDT = -OM%FVX(IIO,JJO,KKO)   - M2%RDXN(IIO)  *(OM%HS(IIO+1,JJO,KKO)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO,JJO,KKO)+OM%US(IIO,JJO,KKO)     + DT*DUDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-1)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DUDT = -OM%FVX(IIO-1,JJO,KKO) - M2%RDXN(IIO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO-1,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%U(IIO-1,JJO,KKO)+OM%US(IIO-1,JJO,KKO) + DT*DUDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE( 2)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DVDT = -OM%FVY(IIO,JJO,KKO)   - M2%RDYN(JJO)  *(OM%HS(IIO,JJO+1,KKO)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO,KKO)+OM%VS(IIO,JJO,KKO)     + DT*DVDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-2)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DVDT = -OM%FVY(IIO,JJO-1,KKO) - M2%RDYN(JJO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO-1,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%V(IIO,JJO-1,KKO)+OM%VS(IIO,JJO-1,KKO) + DT*DVDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE( 3)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
-               ENDDO ; ENDDO ; ENDDO
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DWDT = -OM%FVZ(IIO,JJO,KKO)   - M2%RDZN(KKO)  *(OM%HS(IIO,JJO,KKO+1)-OM%HS(IIO,JJO,KKO))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO)+OM%WS(IIO,JJO,KKO)     + DT*DWDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
             CASE(-3)
-               DO KKO=KKO1,KKO2 ; DO JJO=JJO1,JJO2 ; DO IIO=IIO1,IIO2
-                  DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
-                  UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
-               ENDDO ; ENDDO ; ENDDO
-         END SELECT
-      ENDIF
+               DO KKO=KKO1,KKO2
+                  DO JJO=JJO1,JJO2
+                     DO IIO=IIO1,IIO2
+                        DWDT = -OM%FVZ(IIO,JJO,KKO-1) - M2%RDZN(KKO-1)*(OM%HS(IIO,JJO,KKO)-OM%HS(IIO,JJO,KKO-1))
+                        UN_NEW_OTHER = UN_NEW_OTHER + 0.5_EB*(OM%W(IIO,JJO,KKO-1)+OM%WS(IIO,JJO,KKO-1) + DT*DWDT)
+                     ENDDO
+                  ENDDO
+               ENDDO
+         END SELECT IOR_SELECT_2
+      ENDIF PREDICTOR_IF
 
       N_INT_CELLS  = (EWC%IIO_MAX-EWC%IIO_MIN+1) * (EWC%JJO_MAX-EWC%JJO_MIN+1) * (EWC%KKO_MAX-EWC%KKO_MIN+1)
       UN_NEW_OTHER = UN_NEW_OTHER/REAL(N_INT_CELLS,EB)
@@ -680,6 +735,248 @@ ENDDO CHECK_WALL_LOOP
 
 T_USED(5)=T_USED(5)+SECOND()-TNOW
 END SUBROUTINE COMPUTE_VELOCITY_ERROR
+
+
+SUBROUTINE LAPLACE_EXTERNAL_VELOCITY_CORRECTION(DT,NM)
+USE POIS, ONLY: H3CZSS,H2CZSS
+USE GLOBAL_CONSTANTS, ONLY: PREDICTOR,TWO_D,SOLID_BOUNDARY,OPEN_BOUNDARY
+
+REAL(EB), INTENT(IN) :: DT
+INTEGER, INTENT(IN) :: NM
+INTEGER :: I,J,K,IOR,II,JJ,KK,IW
+REAL(EB) :: AXS_SUM,AXF_SUM,AYS_SUM,AYF_SUM,AZS_SUM,AZF_SUM,BXS_SUM,BXF_SUM,BYS_SUM,BYF_SUM,BZS_SUM,BZF_SUM,&
+            UN_NEW,UN_NEW_OTHER,LHSS,DT_FAC
+REAL(EB), POINTER, DIMENSION(:,:,:) :: HP
+TYPE(WALL_TYPE), POINTER :: WC
+
+CALL POINT_TO_MESH(NM)
+
+! Build Neumann boundary conditions from external wall velocity errors
+
+AXS_SUM=0._EB
+AXF_SUM=0._EB
+AYS_SUM=0._EB
+AYF_SUM=0._EB
+AZS_SUM=0._EB
+AZF_SUM=0._EB
+
+BXS_SUM=0._EB
+BXF_SUM=0._EB
+BYS_SUM=0._EB
+BYF_SUM=0._EB
+BZS_SUM=0._EB
+BZF_SUM=0._EB
+
+BXS=0._EB
+BXF=0._EB
+BYS=0._EB
+BYF=0._EB
+BZS=0._EB
+BZF=0._EB
+
+IF (PREDICTOR) THEN
+   DT_FAC=1._EB
+ELSE
+   DT_FAC=2._EB
+ENDIF
+
+EXTERNAL_SOLID_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+   WC=>WALL(IW)
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   ! Sum OPEN flow area for compatibility correction used later
+
+   IF (WC%BOUNDARY_TYPE==OPEN_BOUNDARY) THEN
+      SELECT CASE(IOR)
+         CASE( 1)
+            AXS_SUM  = AXS_SUM + DY(JJ)*DZ(KK)
+         CASE(-1)
+            AXF_SUM  = AXF_SUM + DY(JJ)*DZ(KK)
+         CASE( 2)
+            AYS_SUM  = AYS_SUM + DX(II)*DZ(KK) 
+         CASE(-2)
+            AYF_SUM  = AYF_SUM + DX(II)*DZ(KK)
+         CASE( 3)
+            AZS_SUM  = AZS_SUM + DX(II)*DY(JJ)
+         CASE(-3)
+            AZF_SUM  = AZF_SUM + DX(II)*DY(JJ)
+      END SELECT
+      CYCLE EXTERNAL_SOLID_BOUNDARY_LOOP
+   ENDIF
+
+   IF (WC%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE EXTERNAL_SOLID_BOUNDARY_LOOP
+
+   ! Update normal component of velocity at the mesh boundary
+
+   IF (PREDICTOR) THEN
+      SELECT CASE(IOR)
+         CASE( 1)
+            UN_NEW = U(II,JJ,KK)   - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(H(II+1,JJ,KK)-H(II,JJ,KK)))
+         CASE(-1)
+            UN_NEW = U(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(H(II,JJ,KK)-H(II-1,JJ,KK)))
+         CASE( 2)
+            UN_NEW = V(II,JJ,KK)   - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(H(II,JJ+1,KK)-H(II,JJ,KK)))
+         CASE(-2)
+            UN_NEW = V(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(H(II,JJ,KK)-H(II,JJ-1,KK)))
+         CASE( 3)
+            UN_NEW = W(II,JJ,KK)   - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(H(II,JJ,KK+1)-H(II,JJ,KK)))
+         CASE(-3)
+            UN_NEW = W(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(H(II,JJ,KK)-H(II,JJ,KK-1)))
+      END SELECT
+   ELSE
+      SELECT CASE(IOR)
+         CASE( 1)
+            UN_NEW = 0.5_EB*(U(II,JJ,KK)+US(II,JJ,KK)     - DT*(FVX(II,JJ,KK)   + RDXN(II)  *(HS(II+1,JJ,KK)-HS(II,JJ,KK))))
+         CASE(-1)
+            UN_NEW = 0.5_EB*(U(II-1,JJ,KK)+US(II-1,JJ,KK) - DT*(FVX(II-1,JJ,KK) + RDXN(II-1)*(HS(II,JJ,KK)-HS(II-1,JJ,KK))))
+         CASE( 2)
+            UN_NEW = 0.5_EB*(V(II,JJ,KK)+VS(II,JJ,KK)     - DT*(FVY(II,JJ,KK)   + RDYN(JJ)  *(HS(II,JJ+1,KK)-HS(II,JJ,KK))))
+         CASE(-2)
+            UN_NEW = 0.5_EB*(V(II,JJ-1,KK)+VS(II,JJ-1,KK) - DT*(FVY(II,JJ-1,KK) + RDYN(JJ-1)*(HS(II,JJ,KK)-HS(II,JJ-1,KK))))
+         CASE( 3)
+            UN_NEW = 0.5_EB*(W(II,JJ,KK)+WS(II,JJ,KK)     - DT*(FVZ(II,JJ,KK)   + RDZN(KK)  *(HS(II,JJ,KK+1)-HS(II,JJ,KK))))
+         CASE(-3)
+            UN_NEW = 0.5_EB*(W(II,JJ,KK-1)+WS(II,JJ,KK-1) - DT*(FVZ(II,JJ,KK-1) + RDZN(KK-1)*(HS(II,JJ,KK)-HS(II,JJ,KK-1))))
+      END SELECT
+   ENDIF
+
+   ! At solid boundaries, compare updated normal velocity with specified normal velocity
+
+   IF (WC%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+      IF (PREDICTOR) THEN
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UWS
+      ELSE
+         UN_NEW_OTHER = -SIGN(1._EB,REAL(IOR,EB))*WC%ONE_D%UW
+      ENDIF
+   ENDIF
+
+   ! Compute velocity error and apply as Neumann BC to Laplace
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         BXS(JJ,KK) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BXS_SUM  = BXS_SUM + BXS(JJ,KK)*DY(JJ)*DZ(KK)
+      CASE(-1)
+         BXF(JJ,KK) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BXF_SUM  = BXF_SUM + BXF(JJ,KK)*DY(JJ)*DZ(KK)
+      CASE( 2)
+         BYS(II,KK) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BYS_SUM  = BYS_SUM + BYS(II,KK)*DX(II)*DZ(KK) 
+      CASE(-2)
+         BYF(II,KK) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BYF_SUM  = BYF_SUM + BYF(II,KK)*DX(II)*DZ(KK)
+      CASE( 3)
+         BZS(II,JJ) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BZS_SUM  = BZS_SUM + BZS(II,JJ)*DX(II)*DY(JJ)
+      CASE(-3)
+         BZF(II,JJ) = DT_FAC*(UN_NEW - UN_NEW_OTHER)/DT
+         BZF_SUM  = BZF_SUM + BZF(II,JJ)*DX(II)*DY(JJ)
+   END SELECT
+
+ENDDO EXTERNAL_SOLID_BOUNDARY_LOOP
+
+! Now loop over OPEN boundary and set Neumann BC
+
+EXTERNAL_OPEN_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
+
+   WC=>WALL(IW)
+
+   IF (WC%BOUNDARY_TYPE/=OPEN_BOUNDARY) CYCLE EXTERNAL_OPEN_BOUNDARY_LOOP
+
+   II  = WC%ONE_D%II
+   JJ  = WC%ONE_D%JJ
+   KK  = WC%ONE_D%KK
+   IOR = WC%ONE_D%IOR
+
+   SELECT CASE(IOR)
+      CASE( 1)
+         BXS(JJ,KK) = -BXS_SUM/AXS_SUM ! there should be no div by zero problem, if ASX_SUM=0 there is a problem elsewhere
+      CASE(-1)
+         BXF(JJ,KK) = -BXF_SUM/AXF_SUM
+      CASE( 2)
+         BYS(II,KK) = -BYS_SUM/AYS_SUM
+      CASE(-2)
+         BYF(II,KK) = -BYF_SUM/AYF_SUM
+      CASE( 3)
+         BZS(II,JJ) = -BZS_SUM/AZS_SUM
+      CASE(-3)
+         BZF(II,JJ) = -BZF_SUM/AZF_SUM
+   END SELECT
+
+ENDDO EXTERNAL_OPEN_BOUNDARY_LOOP
+
+! Initialize solution and Laplace RHS (zero)
+
+HP=>H_PRIME; HP=0._EB
+PRHS=0._EB
+
+! Solve Laplace equation
+
+IF (.NOT.TWO_D) CALL H3CZSS(BXS,BXF,BYS,BYF,BZS,BZF,ITRN,JTRN,PRHS,LAPLACE_PTB,SAVE2,WORK,HX)
+HP(1:IBAR,1:JBAR,1:KBAR) = PRHS
+
+! All external BCs are FISHPAK_BC_NEUMANN_NEUMANN
+
+DO K=1,KBAR
+   DO J=1,JBAR
+      HP(0,J,K)    = HP(1,J,K)    - DXI*BXS(J,K)
+      HP(IBP1,J,K) = HP(IBAR,J,K) + DXI*BXF(J,K)
+   ENDDO
+ENDDO
+
+DO K=1,KBAR
+   DO I=1,IBAR
+      HP(I,0,K)    = HP(I,1,K)    - DETA*BYS(I,K)
+      HP(I,JBP1,K) = HP(I,JBAR,K) + DETA*BYF(I,K)
+   ENDDO
+ENDDO
+
+DO J=1,JBAR
+   DO I=1,IBAR
+      HP(I,J,0)    = HP(I,J,1)    - DZETA*BZS(I,J)
+      HP(I,J,KBP1) = HP(I,J,KBAR) + DZETA*BZF(I,J)
+   ENDDO
+ENDDO
+
+! ************************* Check the Solution *************************
+
+IF (.FALSE.) THEN
+
+   LAPLACE_ERR = 0._EB
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            LHSS = ((HP(I+1,J,K)-HP(I,J,K))*RDXN(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1) )*RDX(I) &
+                 + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J) - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1) )*RDY(J) &
+                 + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K) - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+            LAPLACE_ERR = MAX(ABS(LHSS),LAPLACE_ERR)
+         ENDDO
+      ENDDO
+   ENDDO 
+
+   IF (PREDICTOR) THEN
+      WRITE(0,*) 'PREDICTOR'
+   ELSE
+      WRITE(0,*) 'CORRECTOR'
+   ENDIF
+   WRITE(0,*) 'LAPLACE PTB/ERROR:',LAPLACE_PTB,LAPLACE_ERR
+
+ENDIF
+
+! Add correction to H or HS field
+
+IF (PREDICTOR) THEN
+   H  = H  + HP
+ELSE
+   HS = HS + HP
+ENDIF
+
+END SUBROUTINE LAPLACE_EXTERNAL_VELOCITY_CORRECTION
 
 
 ! SUBROUTINE BUILD_SPARSE_MATRIX_LAPLACE(NM)

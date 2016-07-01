@@ -1,0 +1,55 @@
+
+/post1
+
+esel,S,type,,1  														! Select just the solid elements (exclude surface effect elements)
+nsle,r,corner															! Select just the corner nodes (exclude midside nodes)
+
+*get,NCOUNT,node,,count 												! Get total number of selected nodes
+*get,ECOUNT,elem,,count 												! Get total number of selected elements
+*dim,NARRAY,array,NCOUNT,3												! Create NCOUNT x 3 array
+*dim,EARRAY,array,ECOUNT,8												! Create ECOUNT x 8 array
+*dim,N2V,array,NCOUNT,1													! Create NCOUNT x 1 array
+*dim,ELM,array,ECOUNT,1 												! Create ECOUNT x 1 array
+
+*get,NUMBER,active,,set,nset											! Get number of substeps
+*cfopen,DISPNAME,dat 													! Create file called “displacements.dat”
+
+set,,, ,,, ,NUMBER
+
+*get,CONV,active,,solu,cnvg 											! Get the solution status - 0 unconverged, 1 converged
+
+*if,CONV,EQ,0,THEN
+	SET,LAST
+	SET,PREVIOUS
+*endif
+
+*get,TIME,active,,set,TIME 												! Get the time of the current substep
+
+*vget,N2V(1),node,,nlist												! Fill N2V with node ID, VERTs ID is the vector line
+*do,I,1,NCOUNT
+	*get,NARRAY(I,1),node,N2V(I),U,x 									! Fill first column with x-coord.
+	*get,NARRAY(I,2),node,N2V(I),U,y 									! Fill second column with y-coord.
+	*get,NARRAY(I,3),node,N2V(I),U,z 									! Fill third column with z-coord.
+*enddo
+
+*do,I,1,ncount
+NARRAY(I,1)=NARRAY(I,1)				
+NARRAY(I,2)=NARRAY(I,2)
+NARRAY(I,3)=NARRAY(I,3)
+*enddo
+
+*vwrite,TIME															! Writing Nodes
+%8.3F
+*vwrite,N2V(1),NARRAY(1,1),NARRAY(1,2),NARRAY(1,3)						! Write NARRAY to file
+%8I%8.5F%8.5F%8.5F 
+
+*cfclose																! Close file called “displacements.dat”
+
+*del,NCOUNT																! Delete created variables
+*del,ECOUNT
+*del,NARRAY
+*del,EARRAY
+*del,N2V
+*del,ELM
+*del,NUMBER
+*del,TIME

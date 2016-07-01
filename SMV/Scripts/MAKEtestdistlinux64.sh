@@ -61,7 +61,7 @@ SMDDIR=$SVNROOT/SMV/Build/smokediff/intel_linux_64
 WINDDIR=$SVNROOT/SMV/Build/wind2fds/intel_linux_64
 FORBUNDLE=$SVNROOT/SMV/for_bundle
 LINUXDIR=smv_test\_$revision\_linux64
-UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
+UPDATER=$SVNROOT/SMV/Utilities/Scripts/make_updater.sh
 
 cd $SVNROOT/SMV/uploads
 

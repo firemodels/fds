@@ -63,7 +63,7 @@ SMDDIR=$REMOTESVNROOT/SMV/Build/smokediff/intel_osx_64
 WINDDIR=$REMOTESVNROOT/SMV/Build/wind2fds/intel_osx_64
 FORBUNDLE=$SVNROOT/SMV/for_bundle
 OSXDIR=smv_test\_$revision\_osx64
-UPDATER=$SVNROOT/Utilities/Scripts/make_updater.sh
+UPDATER=$SVNROOT/SMV/Utilities/Scripts/make_updater.sh
 
 cd $SVNROOT/SMV/uploads
 

@@ -19,7 +19,7 @@ call %envfile%
 
 %svn_drive%
 
-cd %svn_root%\Utilities\test_mpi\impi_intel_win
+cd %svn_root%\FDS\Utilities\test_mpi\impi_intel_win
 erase *.obj 
 erase *.mod
 .\make_test_mpi

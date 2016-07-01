@@ -1,0 +1,14 @@
+/batch
+!
+/filname,h_profile_M_ansys,0
+/prep7
+/input,h_profile_M,ans
+save
+/output,ansys_output,dat
+*set,THeNAME,'h_profile_T_ansys'
+/input,solucmds_all,ans
+*set,EXPNAME,'h_profile'
+/input,export_data_h_profile,ans
+save
+finish
+!

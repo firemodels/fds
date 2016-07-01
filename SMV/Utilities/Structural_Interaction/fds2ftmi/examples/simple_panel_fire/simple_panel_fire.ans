@@ -1,0 +1,84 @@
+/PREP7
+K,    1,  1.000000,     1.0000000,      0.000000 
+K,    2,  1.000000,     0.5000000,      0.000000 
+K,    3,  1.010000,     0.5000000,      0.000000 
+K,    4,  1.010000,     1.0000000,      0.000000 
+K,    5,  1.000000,     1.0000000,      1.000000 
+K,    6,  1.000000,     0.5000000,      1.000000 
+K,    7,  1.010000,     0.5000000,      1.000000 
+K,    8,  1.010000,     1.0000000,      1.000000 
+!*
+V, 1, 2, 3, 4, 5, 6, 7, 8
+!*
+LESIZE, 2, , ,2, , , , ,1
+LESIZE, 4, , ,2, , , , ,1
+LESIZE, 8, , ,2, , , , ,1
+LESIZE,12, , ,2, , , , ,1
+!*
+LESIZE, 1, , ,10, , , , ,1
+LESIZE, 3, , ,10, , , , ,1
+LESIZE, 6, , ,10, , , , ,1
+LESIZE,10, , ,10, , , , ,1
+!*
+LESIZE, 5, , ,20, , , , ,1
+LESIZE, 7, , ,20, , , , ,1
+LESIZE, 9, , ,20, , , , ,1
+LESIZE,11, , ,20, , , , ,1
+!*
+ET,1,SOLID90
+!*  
+KEYOPT,1,1,0
+!*  
+TOFFST,273  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,KXX,1,,54
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,C,1,,425 
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,DENS,1,,7850 
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EMIS,1,,0.8  
+!
+TYPE,   1   
+MAT,       1
+REAL,   
+ESYS,       0   
+SECNUM, 
+TSHAP,LINE  
+!*
+MSHAPE,0,3D 
+MSHKEY,1
+!*  
+CM,_Y,VOLU  
+VSEL, , , ,       1 
+CM,_Y1,VOLU 
+CHKMSH,'VOLU'   
+CMSEL,S,_Y  
+!*  
+VMESH,_Y1   
+!*  
+CMDELE,_Y   
+CMDELE,_Y1  
+CMDELE,_Y2  
+!*  
+ASEL,S, , ,2 
+ASEL,A, , ,4 
+!*
+ANTYPE,4
+!*  
+TRNOPT,FULL 
+LUMPM,0 
+!*  
+DELTIM,2,0,0   
+OUTRES,ERASE
+OUTRES,ALL,15   
+KBC,0   
+TIME,600
+!*
+TUNIF,20,   
+TREF,20,
+!*

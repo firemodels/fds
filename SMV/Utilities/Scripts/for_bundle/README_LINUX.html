@@ -1,0 +1,43 @@
+
+ <h2><a name="Installing Open MPI using a package manager">Installing Open MPI using a package manager</a></h2><ul><li> To install Open MPI on Ubuntu Linux use the  following command (other systems use yum or rpm)</li></ul><blockquote><pre class="codeblock python" name="code">
+sudo apt-get install openmpi-bin
+  </pre></blockquote>
+<ul><li> Test the MPI version of FDS by typing</li></ul><blockquote><pre class="codeblock python python" name="code">
+fds_mpi
+  </pre>and you should see the version number of FDS print with no errors.</blockquote>
+You can then run FDS MPI cases using the command:
+<blockquote><pre class="codeblock python python python" name="code">
+mpirun -np X fds_mpi fds_case.fds
+  </pre></blockquote>
+where <b>X</b> is the number of processors to use, <b>fds_mpi</b> is the FDS MPI executable, and <b>fds_case.fds</b> is the FDS case that you want to run.<br/><br/>It has been reported that the openmpi installer for Ubuntu 13.10 results in errors like the following when running fds_mpi<br/><br/><blockquote><code class="codeblock python python python python" name="code"> /opt/FDS/FDS6/bin/fds_mpi: error while loading shared libraries: libmpi_f77.so.1: cannot open shared object file: No such file or directory </code></blockquote>
+These errors are occurring because the installer did not provide the files libmpi_f77.so.1 and libmpi.so.1 .  To fix this, type the following<br/><br/><blockquote><pre class="codeblock python python python python python" name="code"> 
+   sudo ln -s /usr/lib/libmpi_f77.so.0 /usr/lib/libmpi_f77.so.1
+   sudo ln -s /usr/lib/libmpi.so.0 /usr/lib/libmpi.so.1
+   </pre></blockquote>
+<h2><a name="Installing Open MPI from precompiled binaries">Installing Open MPI from precompiled binaries</a></h2><ul><li> Download the latest 64-bit compiled version of the Open MPI libraries for Linux from <a href="https://bintray.com/nist-fire-research/releases/Open_MPI" target="_blank">https://bintray.com/nist-fire-research/releases/Open_MPI</a></li><li> Copy the openmpi<code name="code" class="python">...</code>linux<code name="code" class="python">..</code>.tar.gz file to the /shared directory</li></ul>
+<ul><li> cd to /shared and run</li></ul><blockquote><pre class="codeblock python python python python python python" name="code">
+sudo tar xvzf openmpi...linux...tar.gz
+  </pre></blockquote>
+<ul><li> Test the MPI version of FDS by typing</li></ul><blockquote><pre class="codeblock python python python python python python python" name="code">
+fds_mpi
+  </pre>and you should see the version number of FDS print with no errors.</blockquote>
+You can then run FDS MPI cases using the command:
+<blockquote><pre class="codeblock python python python python python python python python" name="code">
+mpirun -np X fds_mpi fds_case.fds
+  </pre></blockquote>
+where <b>X</b> is the number of processors to use, <b>fds_mpi</b> is the FDS MPI executable, and <b>fds_case.fds</b> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<code name="code" class="python">_</code><code name="code" class="python">*</code>/bin) to your PATH to use the mpirun command.<h2><a name="(Alternative) Compiling Open MPI and FDS">(Alternative) Compiling Open MPI and FDS</a></h2><ul><li> Install the Linux Intel C/C++, and Fortran compilers. </li></ul>
+<ul><li> Download and extract the latest version of Open MPI from <a href="http://www.open-mpi.org/" target="_blank">http://www.open-mpi.org/</a></li><li> cd to the directory that you extracted Open MPI to.</li><li> Install Open MPI using the Intel compiler suite; configure and install using:</li></ul><blockquote><pre class="codeblock python python python python python python python python python" name="code">
+source /opt/intel/composerxe/bin/compilervars.sh intel64
+./configure --prefix /shared/openmpi_64 CC=icc CXX=icpc F77=ifort FC=ifort CFLAGS=-m64 CXXFLAGS=-m64 FFLAGS=-m64 FCFLAGS=-m64
+  </pre>then type<pre class="codeblock python python python python python python python python python python" name="code">
+  make
+  </pre>then type<pre class="codeblock python python python python python python python python python python python" name="code">
+  sudo make install
+  </pre></blockquote><ul><li> Build FDS MPI Linux version from the repository:</li></ul><blockquote><pre class="codeblock python python python python python python python python python python python python" name="code">
+  cd FDS_Compilation/mpi_intel_linux_64
+  </pre>then<pre class="codeblock python python python python python python python python python python python python python" name="code">
+  ./make_fds.sh
+  </pre></blockquote>
+You can then run FDS MPI cases using the command:<br/><br/><pre class="codeblock python python python python python python python python python python python python python python" name="code">
+mpirun -np X fds_mpi_executable fds_case.fds
+</pre>where <b>X</b> is the number of processors to use, <b>fds_mpi_execuatable</b> is the FDS MPI executable that was built in the above steps, and <b>fds_case.fds</b> is the FDS case that you want to run. Note that you might need to add the location of mpirun (/shared/openmpi<code name="code" class="python">_64</code>/bin) to your PATH to use the mpirun command.

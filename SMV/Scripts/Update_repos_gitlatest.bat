@@ -29,7 +29,7 @@ git checkout development
 git merge origin/development
 git merge firemodels/development
 
-set scriptdir=%linux_svn_root%/Utilities/Scripts/
+set scriptdir=%linux_svn_root%/SMV/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.

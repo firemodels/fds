@@ -1,0 +1,15 @@
+/batch
+!
+/filname,simple_panel_hot_ansys,0
+resume
+/prep7
+save
+/input,simple_panel_hot_to_ansys,dat
+/output,ansys_output,dat
+/solu
+solve
+*set,EXPNAME,'simple_panel_hot'
+/input,export_data_hot,ans
+save
+finish
+!

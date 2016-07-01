@@ -1,0 +1,112 @@
+\documentclass[12pt]{article}
+
+%\usepackage{graphicx}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{amsfonts}
+\usepackage{sectsty}
+\sectionfont{\small}
+
+\title{Research Topics for FDS Radiation Solver}
+\newcommand{\bx}{{\bf x}}
+
+\begin{document}
+\maketitle
+
+
+
+\section{Problem A: Computation and tabulation of local $\kappa$ and $\sigma$}
+\label{Problem_A}
+
+
+Absorption and scattering coefficients are integrated over the droplet
+size distribution in the beginning of the simulation and stored in
+lookup tables. For a spray with median diameter of $d_m$, the
+coefficients are 
+\begin{eqnarray}
+\kappa_{\lambda,d}(\bx) = N(\bx) \int\limits_{r=0}^{\infty}~f(r,d_{m}(\bx))~C_{a}(r,\lambda)\textrm{d}r\label{kappa}\\
+\sigma_{\lambda,d}(\bx) = N(\bx) \int\limits_{r=0}^{\infty}~f(r,d_{m}(\bx))~C_{s}(r,\lambda)\textrm{d}r\label{sigma}
+\end{eqnarray}
+\noindent
+where:
+\begin{itemize}
+\item $\bx$ is the location vector ;
+\item $r$ is the droplet radius ;
+\item $C_{a}$ and $C_{s}$ are absorption and scattering cross
+sections, respectively, calculated from the Mie theory with Wiscombe
+code [Wiscombe] during the initialization phase ; 
+\item $f$ is a size distribution similar to that used to define a
+polydisperse spray at the injection point ;
+\item $N(\bx)$ is the droplet density in the grid cell. By definition, it is equal to the number of drops contained in the cell divided by the cell volume :
+\begin{equation}
+ N (\bx)    =  \frac{\sum_i n_i }{\delta x~\delta y~\delta z} \label{N}
+\end{equation}
+\end{itemize}
+The integrals of equations~\ref{kappa} and \ref{sigma} are not computed during the simulation for each cell again and again. Instead, they are pre-computed
+during the initialization phase for a range of $d_m$ values, and the local values during the simulation are found by table lookup using the local value
+$d_m(\bx)$.
+
+Traditionally, the absorption and scattering coefficients have been stored as ''efficiency factors'' instead
+of mean cross sections. For that purpose, the integrand has been divided by the cross section area of the median drop size, and the
+coefficient have been computed by multiplying the integrals with mean area $A_d(\bx)$ instead of $N(\bx)$
+\begin{eqnarray}
+\kappa_{\lambda,d}(\bx) = A_d(\bx) \int\limits_{r=0}^{\infty}\frac{f(r,d_{m}(\bx))~C_{a}(r,\lambda)}{\pi (d_m/2)^2}\textrm{d}r\\
+\sigma_{\lambda,d}(\bx) = A_d(\bx) \int\limits_{r=0}^{\infty}\frac{f(r,d_{m}(\bx))~C_{s}(r,\lambda)}{\pi (d_m/2)^2}\textrm{d}r
+\end{eqnarray}
+The mean area has been computed as 
+\begin{equation}
+A_d(\bx)\approx \frac{\rho_d(\bx)}{2\rho_w d_m(\bx)/3}
+\end{equation}
+where $\rho_d$ is the local mass concentration of droplets and $\rho_w$ is the water density.
+
+In FDS 5.5, $A_d$ is computed as a direct sum of droplet cross sectional areas
+\begin{equation}
+A_d(\bx)    =  \frac{\sum_i n_i \pi r_i^2 }{\delta x~\delta y~\delta z}
+\end{equation}
+
+In principle, it should be possible, and even desirable to compute the radiative coefficients directly using equations~\ref{kappa} and \ref{sigma}.
+The droplet number density would then be computed from Eq.~\ref{N}. However, numerical experiments have shown that this leads to substantial over-prediction
+of the radiation attenuation both in the large scale spray (BRE\_Spray) and and small scale water mist micro nozzles.
+\newline
+
+{\em Task: Find out why the use of local number density and actual absorption and scattering coefficients leads to different results than
+using absorption and scattering efficiency factors with local droplet area.}
+
+
+\section{Problem B: Generalized liquid properties}
+
+Currently, the complex refractive index is only available for water. One possible topic would be the inclusion of radiative properties 
+other liquids than water, and generalizing the algorithm in that sense. 
+
+\section{Problem C: Error analysis of wavelength limits}
+
+In spray-radiation interaction model, the integration limits for the wavelenght integration are 1 and 200 $\mu$~m. For the gas phase properties,
+the tails of the gray body radiation (soot) are taken into account, but not for sprays. \newline
+
+{\em How big is the error caused by the 1 micron lower integration limit for hottest practical fires?}
+
+\section{Problem D: Computational efficiency for fine water mists}
+
+Simulations of laboratory scale radiation attenuation in small water mist sprays has shown that we need to resolve the spray dynamics extramely 
+well in order to get enough attenuation. This means hundred times more droplets per second than what we do usually. 
+Currently it is not known if this is completely radiation or completely spray issue, or mixture of both. 
+\newline
+
+{\em Find computationally efficient way to get the accurate description of the fine water mist sprays.}
+
+\section{Problem E: Effect of the varying shape of the droplet size distribution}
+
+In the precalculation of mean absorption and scattering cross sections, we assume that the droplet size distribution is the same as what
+was introduced on the droplet boundary condition. This is not true far away in the spray. 
+\newline
+
+{\em How big is the error caused by this assumption? How to characterize the size distributions? How to consider in the radiation solver?}
+
+\section{Problem F: Sooty water}
+
+In fires, the water droplets absorb soot (clening the smoke). Should this be taken into account? How?
+
+
+
+\end{document}
+

@@ -20,12 +20,12 @@ cd $CURDIR
 
 export SMV=$GITROOT/SMV/Build/smokeview/intel_$PLATFORM/smokeview_$PLATFORM
 FDSEXE=$GITROOT/FDS/Build/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
-RUNSMV="$GITROOT/Utilities/Scripts/runsmv.sh"
+RUNSMV="$GITROOT/SMV/Utilities/Scripts/runsmv.sh"
 export SMVBINDIR="-bindir $GITROOT/SMV/for_bundle"
-MAKEMOVIE=$GITROOT/Utilities/Scripts/make_movie.sh
-STARTX=$GITROOT/Utilities/Scripts/startXserver.sh
-STOPX=$GITROOT/Utilities/Scripts/stopXserver.sh
-QFDS=$GITROOT/Utilities/Scripts/qfds.sh
+MAKEMOVIE=$GITROOT/SMV/Utilities/Scripts/make_movie.sh
+STARTX=$GITROOT/SMV/Utilities/Scripts/startXserver.sh
+STOPX=$GITROOT/SMV/Utilities/Scripts/stopXserver.sh
+QFDS=$GITROOT/SMV/Utilities/Scripts/qfds.sh
 
 export BASEDIR=`pwd`
 

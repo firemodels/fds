@@ -10,6 +10,6 @@ cd ..
 set SVNROOT="%CD%"
 cd %BASEDIR%
 
-set QFDS=call %SVNROOT%\Utilities\Scripts\checkfds.bat
+set QFDS=call %SVNROOT%\FDS\Utilities\Scripts\checkfds.bat
 
 call FDS_Cases.bat

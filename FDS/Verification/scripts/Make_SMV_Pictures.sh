@@ -102,8 +102,8 @@ fi
 
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle"
 
-export STARTX=$SVNROOT/Utilities/Scripts/startXserver.sh
-export STOPX=$SVNROOT/Utilities/Scripts/stopXserver.sh
+export STARTX=$SVNROOT/SMV/Utilities/Scripts/startXserver.sh
+export STOPX=$SVNROOT/SMV/Utilities/Scripts/stopXserver.sh
 
 echo Generating smokeview images using:
 echo smokeview : $SMV $SMVBINDIR
@@ -112,12 +112,11 @@ echo smokediff : $SMOKEDIFF
 echo background: $BACKGROUND
 echo
 
-RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
+RUNSMV=$SVNROOT/SMV/Utilities/Scripts/runsmv.sh
 export QFDS=$RUNSMV
 export RUNCFAST=$RUNSMV
 export BASEDIR=`pwd`
 
-export FDSUG=$SVNROOT/FDS/Manuals/FDS_User_Guide
 export SMVUG=$SVNROOT/SMV/Manuals/SMV_User_Guide
 export SMVVG=$SVNROOT/SMV/Manuals/SMV_Verification_Guide
 SUMMARY=$SVNROOT/SMV/Manuals/SMV_Summary
@@ -222,6 +221,5 @@ fi
 # copy generated images to web summary directory
 
 cp $SMVVG/FIGURES/graysquares.png $SUMMARY/images/.
-cp $FDSUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 cp $SMVUG/SCRIPT_FIGURES/*.png $SUMMARY/images/.
 cp $SMVVG/SCRIPT_FIGURES/*.png $SUMMARY/images/.

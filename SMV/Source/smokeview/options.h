@@ -64,6 +64,7 @@
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
+#define pp_RENDER360
 #endif
 
 // for debugging, set particle values to 100*parti->seq_id + small random number

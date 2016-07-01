@@ -1,0 +1,13 @@
+/batch
+!
+/filname,h_profile_T_ansys,0
+/prep7
+/input,h_profile_T,ans
+save
+/output,ansys_output,dat
+/input,h_profile_to_ansys,dat
+/solu
+solve
+save
+finish
+!

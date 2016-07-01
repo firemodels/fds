@@ -29,17 +29,17 @@ if %stopscript% == 1 (
 set TIME_FILE=%SCRIPT_DIR%\smv_case_times.txt
 set WAIT_FILE=%SCRIPT_DIR%\wait.txt
 
-set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNCFAST_R=call %SVNROOT%\Utilities\Scripts\runcfast.bat
+set RUNFDS_R=call %SVNROOT%\SMV\Utilities\Scripts\runfds.bat
+set RUNTFDS_R=call %SVNROOT%\SMV\Utilities\Scripts\runfds.bat
+set RUNCFAST_R=call %SVNROOT%\SMV\Utilities\Scripts\runcfast.bat
 
-set RUNFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
-set RUNTFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
-set RUNCFAST_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+set RUNFDS_M=call %SVNROOT%\SMV\Verification\scripts\make_stop.bat
+set RUNTFDS_M=call %SVNROOT%\SMV\Verification\scripts\make_stop.bat
+set RUNCFAST_M=call %SVNROOT%\SMV\Verification\scripts\make_stop.bat
 
-set RUNFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
-set RUNTFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
-set RUNCFAST_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
+set RUNFDS_E=call %SVNROOT%\SMV\Verification\scripts\erase_stop.bat
+set RUNTFDS_E=call %SVNROOT%\SMV\Verification\scripts\erase_stop.bat
+set RUNCFAST_E=call %SVNROOT%\SMV\Verification\scripts\erase_stop.bat
 
 :: VVVVVVVVVVVV set parameters VVVVVVVVVVVVVVVVVVVVVV
 
@@ -76,7 +76,7 @@ echo.
 
 echo Converting wind data
 echo .
-cd %SVNROOT%\Verification\WUI
+cd %SVNROOT%\SMV\Verification\WUI
 %WIND2FDSEXE% -prefix sd11 -offset " 50.0  50.0 0.0" wind_data1a.csv
 %WIND2FDSEXE% -prefix sd12 -offset " 50.0 150.0 0.0" wind_data1b.csv
 %WIND2FDSEXE% -prefix sd21 -offset "150.0  50.0 0.0" wind_data1c.csv
@@ -105,7 +105,7 @@ time /t >> %TIME_FILE%
 :: create a text file containing the FDS version used to run these tests.
 :: This file is included in the smokeview user's guide
 
-set smvug="%SVNROOT%\Manuals\SMV_User_Guide\"
+set smvug="%SVNROOT%\SMV\Manuals\SMV_User_Guide\"
 echo | %FDSEXE% 2> "%smvug%\SCRIPT_FIGURES\fds.version"
 
 if "%rundebug%" == "1" (

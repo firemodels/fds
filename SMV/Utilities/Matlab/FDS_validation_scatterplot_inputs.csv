@@ -1,0 +1,29 @@
+Scatter_Plot_Title,Ind_Title,Dep_Title,Plot_Min,Plot_Max,Title_Position,Key_Position,Paper_Width_Factor,Sigma_E,Weight_Data,Plot_Type,Plot_Filename
+"HGL Temperature, Forced Ventilation",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),10,1000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_HGL_Temperature_Forced_Ventilation
+"HGL Temperature, Natural Ventilation",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),10,2000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_HGL_Temperature_Natural_Ventilation
+"HGL Temperature, No Ventilation",Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,500,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_HGL_Temperature_No_Ventilation
+HGL Depth,Measured Layer Depth (m),Predicted Layer Depth (m),0.1,20,0.03 0.95,SouthEast,1,5,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_HGL_Depth
+Ceiling Jet Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,2000,0.03 0.95,EastOutside,1.5,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Flat_Ceiling_Jet_Temperature
+Plume Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,2000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Plume_Temperature
+Oxygen Concentration,Measured Drop in Volume Fraction,Predicted Drop in Volume Fraction,0.01,0.25,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Oxygen_Concentration
+Carbon Dioxide Concentration,Measured Rise in Volume Fraction,Predicted Rise in Volume Fraction,0.001,0.2,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Dioxide_Concentration
+Smoke Concentration,Measured Density (mg/m^3),Predicted Density (mg/m^3),1,600,0.03 0.95,SouthEast,1,19,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Concentration
+Compartment Over-Pressure,Measured Pressure Rise (Pa),Predicted Pressure Rise (Pa),1,2000,0.03 0.95,SouthEast,1,23,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Compartment_Pressure
+Target Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),10,1300,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Temperature
+Surface Temperature,Measured Temperature Rise (\circC),Predicted Temperature Rise (\circC),1,2000,0.03 0.95,SouthEast,1,7,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Temperature
+Target Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,SouthEast,1,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Target_Heat_Flux
+Surface Heat Flux,Measured Heat Flux (kW/m^2),Predicted Heat Flux (kW/m^2),0.1,200,0.03 0.95,SouthEast,1,11,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Surface_Heat_Flux
+Velocity,Measured Velocity (m/s),Predicted Velocity (m/s),0.1,10,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Velocity
+Sprinkler Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),10,500,0.03 0.95,SouthEast,1,6,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuation_Time
+Smoke Detector Activation Time,Measured Time to Activation (s),Predicted Time to Activation (s),1,300,0.03 0.95,SouthEast,1,34,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time
+"Smoke Detector Activation Time, Temp. Rise",Measured Time to Activation (s),Predicted Time to Activation (s),1,300,0.03 0.95,SouthEast,1,34,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Detector_Activation_Time_Temp_Rise
+Cable Failure Time,Measured Time to Threshold Temperature (s),Predicted Time to Threshold Temperature (s),100,2000,0.03 0.95,SouthEast,1,12,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Cable_Failure_Time
+Sprinkler Actuations,Measured Actuations,Predicted Actuations,1,100,0.03 0.95,SouthEast,1,15,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Sprinkler_Actuations
+Aerosol Deposition Velocity,Measured Deposition Velocity (m/s),Predicted Deposition Velocity (m/s),1.00E-07,1.00E-01,0.03 0.95,SouthEast,1,-1,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Aerosol_Deposition_Velocity
+Burning Rate,Measured Burning Rate (kg/m^2/s),Predicted Burning Rate (kg/m^2/s),0.001,0.1,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Burning_Rates
+Carbon Monoxide Concentration,Measured Change in Volume Fraction,Predicted Change in Volume Fraction,0.00001,0.2,0.03 0.95,SouthEast,1,19,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Carbon_Monoxide_Concentration
+Entrainment,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,SouthEast,1,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Entrainment
+Extinction Time,Measured Time (s),Predicted Time (s),10,1000,0.03 0.95,SouthEast,1,10,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Extinction_Time
+Species Concentration,Measured Change in Volume Fraction (%),Predicted Change in Volume Fraction (%),1,100,0.03 0.95,SouthEast,1,8,yes,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Species_Concentration
+Smoke Obscuration,Measured Obscuration (%/m),Predicted Obscuration (%/m),1,100,0.03 0.95,SouthEast,1,20,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Smoke_Obscuration
+Mass Flow Rate,Measured Mass Flow Rate (kg/s),Predicted Mass Flow Rate (kg/s),0.01,1,0.03 0.95,SouthEast,1,8,no,loglog,FDS_Validation_Guide/SCRIPT_FIGURES/ScatterPlots/FDS_Convective_Heat_Flux

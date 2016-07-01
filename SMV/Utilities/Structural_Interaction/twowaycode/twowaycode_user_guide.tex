@@ -1,0 +1,99 @@
+\documentclass[11pt]{book}
+\input{../../../Manuals/Bibliography/commoncommands}
+
+\begin{document}
+
+
+\bibliographystyle{unsrt}
+\pagestyle{empty}
+
+\begin{minipage}[t][9in][s]{6.5in}
+
+\headerB{TWOWAYCODE User's Guide}
+\begin{flushright}
+\fontsize{20}{24}\selectfont
+\bf{
+An automated code to two-way coupling \\
+between FDS and FEM using IBM \\
+}
+\end{flushright}
+\begin{flushright}
+\fontsize{14}{16}\selectfont
+{
+Julio Cesar Silva  
+}
+
+\end{flushright}
+
+\headerC{
+\today \\
+FDS Version \fdsversion \\
+\emph{
+Git Hash
+}
+}
+
+\end{minipage}
+
+\newpage
+
+\newpage
+
+\frontmatter
+
+\pagestyle{plain}
+
+\cleardoublepage
+\phantomsection
+\tableofcontents
+
+\mainmatter
+
+
+\chapter{Introduction}
+\label{info:intro}
+
+This document explains the strategy (under development) to evaluate the behavior of structures under fire conditions by a two-way coupled analysis including Fire Dynamics Simulator (FDS\cite{FDS_Users_Guide}) and Finite Element Method (FEM) codes~\footnote{Certain commercial entities, equipment, or materials may be identified in this document in order to describe an experimental procedure or concept adequately. Such identification is not intended to imply recommendation or endorsement by the author or the National Institute of Standards and Technology, nor is it intended to imply that the entities, materials, or equipment are necessarily the best available for the purpose.}. In a two-way coupling strategy, the thermomechanical results, e.g., displacements, collapses, etc. are transposed back to the fire simulation. The two-way approach can lead to a more complex simulation, increasing the amount of data to be transferred between the models. Its advantages are related to cases where displacements can change the fire source or the fluid flow pattern, creating a different fire scenario. 
+
+The code TWOWAYCODE is included in the FDS-SVM repository \cite{FDS-SMV_repository} under \path{Utilities/Structural_Interaction/twowaycode}. A makefile is provided to help in the compilation process with different operational systems and compilers. A shell script (\path{scripts/build_2waycode.sh}) and a bat script (\path{scripts/build_2waycode.bat}) are also provided to build this manual, run the Verification cases and check the results.  
+
+\chapter{Examples}
+\label{info:examples}
+
+This chapter contains examples that test the TWOWAYCODE. The SVN number on the figures is related to the FDS repository \cite{FDS-SMV_repository} subversion control number used to compile the codes and run the cases.  
+
+\section{Simply supported beam exposed to a localized fire (\texorpdfstring{\textct{simply\_beam}}{simply\_beam})}
+
+This example shows the TWOWAYCODE ability to translate the boundary contitions for a FEM model (A{\footnotesize NSYS}). This model is composed by a simply supported I-beam with $3$~m span ($x$ axis) and the cross section is $10$~cm x $15$~cm. The web is $4.3$~mm thick and the flanges are $4.9$~mm thick. The total load is equal to $3.5$~kN applied at the midspan.
+
+The results for temperature and displacements evolution are provided below.
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/simply_beam_ts}
+\end{tabular*}
+\caption[The \textct{simply\_beam} results]{Temperature evolution at the bottom of the midspan (A) and at bottom with x=0.5m (B).}
+\label{simply_beam_ts}
+\end{figure}
+
+\begin{figure}[ht]
+\noindent
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/simply_beam_dz}
+\includegraphics[width=3.0in]{scripts/SCRIPT_FIGURES/simply_beam_dx_dy}
+\end{tabular*}
+\caption[The \textct{simply\_beam} results]{Displacements evolution at the bottom of the midspan (A).}
+\label{simply_beam_disp}
+\end{figure}
+
+\begin{figure}[ht]
+\center
+\includegraphics[angle=270,trim=15cm 0cm 1.2cm 0cm,clip=true,width=6.0in]{scripts/SCRIPT_FIGURES/simply_beam_temp}
+\caption[The \textct{simply\_beam} results]{Structures geometry at the end of the simulation.}
+\label{simply_beam_deformed}
+\end{figure}
+
+\bibliography{../../../Manuals/Bibliography/FDS_refs,../../../Manuals/Bibliography/FDS_general,../../../Manuals/Bibliography/FDS_mathcomp}
+
+\end{document}

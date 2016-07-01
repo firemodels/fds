@@ -31,14 +31,14 @@ set TIME_FILE="%BASEDIR%\fds_case_times.txt"
 
 :: set up environment variables for making and erasing stop files and running fds and cfast
 
-set RUNFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
-set RUNTFDS_R=call %SVNROOT%\Utilities\Scripts\runfds.bat
+set RUNFDS_R=call %SVNROOT%\FDS\Utilities\Scripts\runfds.bat
+set RUNTFDS_R=call %SVNROOT%\FDS\Utilities\Scripts\runfds.bat
 
-set RUNFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
-set RUNTFDS_M=call %SVNROOT%\Verification\scripts\make_stop.bat
+set RUNFDS_M=call %SVNROOT%\FDS\Verification\scripts\make_stop.bat
+set RUNTFDS_M=call %SVNROOT%\FDS\Verification\scripts\make_stop.bat
 
-set RUNFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
-set RUNTFDS_E=call %SVNROOT%\Verification\scripts\erase_stop.bat
+set RUNFDS_E=call %SVNROOT%\FDS\Verification\scripts\erase_stop.bat
+set RUNTFDS_E=call %SVNROOT%\FDS\Verification\scripts\erase_stop.bat
 
 :: program locations
 
