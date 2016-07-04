@@ -20,6 +20,10 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(nscreeninfo,0);
+SVEXTERN screendata SVDECL(*screeninfo,NULL);
+SVEXTERN int SVDECL(nwidth360,1024), SVDECL(nheight360,512);
+
 SVEXTERN int SVDECL(render_360, 0);
 
 SVEXTERN int SVDECL(highlight_vertexdup, 0);

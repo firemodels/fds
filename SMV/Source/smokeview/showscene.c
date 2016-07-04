@@ -17,7 +17,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 
 /* ------------------ ShowScene ------------------------ */
 
-void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, float *view_dir){
+void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, screendata *screen){
   CheckMemory;
 
   LOCK_IBLANK
@@ -60,7 +60,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, fl
       SNIFF_ERRORS("after TITLE_viewport");
     }
 
-    Scene_viewport(quad, view_mode, s_left, s_down, view_dir);
+    Scene_viewport(quad, view_mode, s_left, s_down, screen);
     SNIFF_ERRORS("after Scene_viewport");
   }
 
