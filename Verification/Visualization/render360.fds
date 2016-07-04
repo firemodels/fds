@@ -1,0 +1,15 @@
+&HEAD CHID='render360',TITLE='test generation of 360 deg render files' /
+
+
+&MESH IJK=20,20,20, XB=0.0,10.0,0.0,10.0,0.0,10.0 /
+
+&OBST XB= 0.0,10.0, 0.0,10.0, 0.0, 0.0,COLOR="GRAY" /
+&OBST XB= 0.0,10.0, 0.0,10.0,10.0,10.0,COLOR="WHITE" /
+&OBST XB= 0.0, 0.0, 0.0,10.0, 0.0,10.0,COLOR="GREEN" /
+&OBST XB=10.0,10.0, 0.0,10.0, 0.0,10.0,COLOR="YELLOW" /
+&OBST XB= 0.0,10.0, 0.0, 0.0, 0.0,10.0,COLOR="BLUE" /
+&OBST XB= 0.0,10.0,10.0,10.0, 0.0,10.0,COLOR="MAGENTA" /
+
+&TIME T_END=0. /  Total simulation time
+
+&TAIL /
