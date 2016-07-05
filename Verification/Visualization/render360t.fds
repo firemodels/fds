@@ -1,0 +1,35 @@
+&HEAD CHID='render360t',TITLE='test generation of 360 deg render files' /
+&MISC TEXTURE_ORIGIN=0.1,0.1,0.1 /
+
+&MESH IJK=40,40,40, XB=0.0,10.0,0.0,10.0,0.0,10.0 /
+
+&SURF ID     = 'TEXTURE 1'
+      TEXTURE_MAP= 'nistleft.jpg'
+      TEXTURE_WIDTH=5.0
+      TEXTURE_HEIGHT=2.5 /
+
+&VENT XB= 0.0,10.0, 0.0,10.0, 0.0, 0.0,RGB=64,64,64, SURF_ID='TEXTURE 1' 
+      TEXTURE_ORIGIN=0.0,0.0,0.0  /
+/
+&VENT XB= 0.0,10.0, 0.0,10.0,10.0,10.0,RGB=192,192,192, SURF_ID='TEXTURE 1'
+      TEXTURE_ORIGIN=0.0,0.0,10.0  /
+
+&VENT XB= 0.0, 0.0, 0.0,10.0, 0.0,10.0,RGB=  255,  0, 0, SURF_ID='TEXTURE 1' 
+      TEXTURE_ORIGIN=0.0,0.0,0.0  /
+
+
+&VENT XB=10.0,10.0, 0.0,10.0, 0.0,10.0,RGB=  0,255,  0, SURF_ID='TEXTURE 1' 
+      TEXTURE_ORIGIN=10.0,0.0,0.0  /
+
+
+&VENT XB= 0.0,10.0, 0.0, 0.0, 0.0,10.0,RGB=  0,0,255, SURF_ID='TEXTURE 1' 
+      TEXTURE_ORIGIN=0.0,0.0,0.0  /
+
+
+&VENT XB= 0.0,10.0,10.0,10.0, 0.0,10.0,RGB=0,255,255, SURF_ID='TEXTURE 1' 
+      TEXTURE_ORIGIN=0.0,10.0,0.0  /
+
+
+&TIME T_END=0. /  Total simulation time
+
+&TAIL /
