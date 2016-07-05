@@ -6,25 +6,18 @@ echo.
 echo *** Testing whether Windows is 64 bit
 echo.
 
-set is64bitfile="%TEMP%\is64bit"
-systeminfo | findstr /C:"System Type" | findstr /C:"x64" | find /V /C "^"> %is64bitfile%
-set /p is64bit=<%is64bitfile%
-
-
-erase %is64bitfile%
-if %is64bit% == 1 (
-  echo *** Congratulations! Windows is 64 bit
+if defined PROGRAMFILES(X86) (
+  echo *** 64 bit Windows detected
   echo *** Wrapup proceeding
   echo.
 ) else (
-  echo *** Fatal error: Windows is not 64 bit.  
+  echo *** Fatal error: 32 bit Windows detected
   echo     FDS and Smokeview only run on 64 bit systems
   echo     Installation wrap up aborted
   echo *** Press any key to continue.    ***
 pause>NUL
   goto abort
 )
-
 
 echo *** Removing previous FDS/Smokeview entries from the system and user path.
 call "%CD%\set_path.exe" -s -m -b -r "nist\fds" >Nul
