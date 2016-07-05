@@ -713,9 +713,9 @@ int mergescreenbuffers360(void) {
     screendata *screeni;
     int *map;
 
-#ifdef pp_RENDER360_DEBUG    
+#ifdef pp_RENDER360_DEBUG
     if (screenvis[ibuff] == 0)continue;
-#endif    
+#endif
     screeni = screeninfo + ibuff;
     map = screeni->map;
 

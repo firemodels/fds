@@ -1198,7 +1198,7 @@ void initvars(void){
   for (i = 0; i < nscreeninfo; i++) {
     screenvis[i] = 1;
   }
-#endif  
+#endif
 
   cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
   if(moviefiletype==WMV){

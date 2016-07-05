@@ -684,10 +684,10 @@ extern "C" void glui_motion_setup(int main_window){
 #ifdef pp_RENDER360
   glui_motion->add_checkbox_to_panel(ROLLOUT_render, "360", &render_360);
 
-#ifdef pp_RENDER360_DEBUG  
+#ifdef pp_RENDER360_DEBUG
 
   NewMemory((void **)&CHECKBOX_screenvis,nscreeninfo*sizeof(GLUI_Checkbox *));
-  
+
 
   ROLLOUT_screenvis = glui_motion->add_rollout_to_panel(ROLLOUT_render, "screenvis",false);
   CHECKBOX_screenvis[0] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "bottom", screenvis);
@@ -726,9 +726,9 @@ extern "C" void glui_motion_setup(int main_window){
   CHECKBOX_screenvis[25] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "top", screenvis+25);
   BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
   BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
-#endif  
-  
-#endif  
+#endif
+
+#endif
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);
@@ -1578,12 +1578,12 @@ void Viewpoint_CB(int var){
   char *label;
   cameradata *prev, *next;
   int view_id;
-#ifdef pp_RENDER360_DEBUG  
+#ifdef pp_RENDER360_DEBUG
   int i;
-#endif  
+#endif
 
   switch(var){
-#ifdef pp_RENDER360_DEBUG  
+#ifdef pp_RENDER360_DEBUG
   case SHOWALL_SCREENS:
     for(i=0;i<nscreeninfo;i++){
       screenvis[i]=1;
@@ -1596,7 +1596,7 @@ void Viewpoint_CB(int var){
       CHECKBOX_screenvis[i]->set_int_val(screenvis[i]);
     }
     break;
-#endif    
+#endif
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:
