@@ -517,41 +517,149 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
-/* ------------------ interp2d ------------------------ */
+/* ------------------ setup_screeninfo ------------------------ */
 
-float interp2d(int i, int ni, int j, int nj, float *vals){
-  float xfact, yfact;
-  float val1, val2, val;
+void setup_screeninfo(void){
+  int ibuf;
 
-  //        v1------------v3
-  //        |             |
-  //        j             |
-  //        |             |
-  //        |             |
-  //        v0---i--------v2
+  nscreeninfo = 26;
+  NewMemory((void **)&screeninfo, nscreeninfo * sizeof(screendata));
 
-  xfact = (float)i / (float)ni;
-  yfact = (float)j / (float)nj;
+  for(ibuf = 0; ibuf < nscreeninfo; ibuf++){
+    screendata *screeni;
+    float azimuth, elevation;
+    float *right, *view, *up, *center;
+    float sina, cosa;
+    float cose, sine;
+    float aspect_ratio;
+    int j, *map;
+    float aperture_width, aperture_height;
 
-  val1 = (1.0 - yfact)*vals[0] + yfact*vals[1];
-  val2 = (1.0 - yfact)*vals[2] + yfact*vals[3];
+    aperture_width = 45.0;
+    screeni = screeninfo + ibuf;
+    screeni->map = NULL;
+    screeni->nwidth=VP_scene.width;
+    screeni->nheight=VP_scene.height;
+    aspect_ratio = (float)screeni->nwidth/(float)screeni->nheight;
+    screeni->width=2.0*tan(DEG2RAD*aperture_width/2.0);
+    screeni->height = screeni->width / aspect_ratio;
+    aperture_height = 2.0*RAD2DEG*atan(screeni->height / 2.0);
 
-  val = (1.0 - xfact)*val1 + xfact*val2;
+    if (ibuf == 0){
+      azimuth = 0.0;
+      elevation = -90;
+    }
+    else if (ibuf >= 1 && ibuf < 9){
+      int ii;
 
-  return val;
+      ii = ibuf - 1;
+      azimuth = ii*45.0;
+      elevation = -90.0+aperture_height;
+    }
+    else if (ibuf >= 9 && ibuf < 17){
+      int ii;
+
+      ii = ibuf - 9;
+      azimuth = ii*45.0;
+      elevation = -90.0 + 2.0*aperture_height;
+    }
+    else if (ibuf >= 17 && ibuf < 25){
+      int ii;
+
+      ii = ibuf - 17;
+      azimuth = ii*45.0;
+      elevation = 45.0;
+      elevation = -90.0 + 3.0*aperture_height;
+    }
+    else if (ibuf == 25){
+      azimuth = 0.0;
+      elevation = -90.0 + 4.0*aperture_height;
+    }
+
+    cosa = cos(DEG2RAD*azimuth);
+    sina = sin(DEG2RAD*azimuth);
+    cose = cos(DEG2RAD*elevation);
+    sine = sin(DEG2RAD*elevation);
+
+    view = screeni->view;
+    view[0] = sina*cose;
+    view[1] = cosa*cose;
+    view[2] = sine;
+
+    up = screeni->up;
+    if(ABS(sine) < 0.001){
+      up[0] = 0.0;
+      up[1] = 0.0;
+      up[2] = 1.0;
+    }
+    else {
+      float denom;
+
+      denom = sqrt(1.0 + cose*cose/(sine*sine));
+      up[0] = -sina / denom;
+      up[1] = -cosa / denom;
+      up[2] = (cose / sine) / denom;
+    }
+
+    right = screeni->right;
+    if (sine < 0.0) {
+      right[0] = -cosa;
+      right[1] = sina;
+      right[2] = 0.0;
+    }
+    else {
+      right[0] = cosa;
+      right[1] = -sina;
+      right[2] = 0.0;
+    }
+
+    NewMemory((void **)&map, screeni->nheight*screeni->nwidth * sizeof(int));
+    screeni->map = map;
+
+    for(j = 0; j < screeni->nheight; j++){
+      int i;
+      float facty;
+
+      facty = screeni->height*(float)(j - screeni->nheight / 2)/ (float)screeni->nheight;
+
+      for(i = 0; i < screeni->nwidth; i++){
+        float factx, xyz[3], xyznorm;
+        float elev, az;
+        int ijk, ijk360;
+        int i360, j360;
+
+        factx = screeni->width*(float)(i - screeni->nwidth / 2) / (float)screeni->nwidth;
+
+        xyz[0] = view[0] + factx*right[0] + facty*up[0];
+        xyz[1] = view[1] + factx*right[1] + facty*up[1];
+        xyz[2] = view[2] + factx*right[2] + facty*up[2];
+        xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
+
+        elev = CLAMP(asin(xyz[2] / xyznorm)*RAD2DEG, -90.0, 90.0);
+        az = CLAMP(atan2(xyz[0], xyz[1])*RAD2DEG,-180.0,180.0);
+
+        ijk = j*screeni->nwidth + i;
+        j360 = CLAMP(nheight360-1-nheight360*(elev + 90.0) / 180.0,0,nheight360-1);
+        i360 = CLAMP(nwidth360*(az + 180.0) / 360.0,0,nwidth360-1);
+        ijk360 = j360*nwidth360 + i360;
+        map[ijk] = ijk360;
+      }
+    }
+
+  }
 }
 
 /* ------------------ mergescreenbuffers360 ------------------------ */
 
-int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **screenbuffers) {
+int mergescreenbuffers360(void) {
 
   char *renderfile, renderfile_base[1024], renderfile2[1024];
   char *ext;
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
   int ibuff;
-  int width360 = 1024, height360 = 512;
   int i, j;
+  int *screenbuffer;
 
   switch (renderfiletype) {
   case PNG:
@@ -592,34 +700,48 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
     FREEMEMORY(renderfile);
     return 1;
   }
-  RENDERimage = gdImageCreateTrueColor(width360, height360);
+  RENDERimage = gdImageCreateTrueColor(nwidth360, nheight360);
+  NewMemory((void **)&screenbuffer,nwidth360*nheight360 * sizeof(int));
 
-  for(ibuff=0;ibuff<nscreenbuffers;ibuff++){
+  for(i=0;i<nwidth360*nheight360;i++){
+    screenbuffer[i]=0;
+  }
+
+
+  for(ibuff=0;ibuff<nscreeninfo;ibuff++){
     GLubyte *p;
-    float *longs, *lats;
-    float llong, llat;
+    screendata *screeni;
+    int *map;
 
-    p = screenbuffers[ibuff];
-    longs = longlatbounds+8*ibuff;
-    lats =  longlatbounds+8*ibuff+4;
+#ifdef pp_RENDER360_DEBUG
+    if (screenvis[ibuff] == 0)continue;
+#endif
+    screeni = screeninfo + ibuff;
+    map = screeni->map;
+
+    p = screeni->screenbuffer;
 
     for(j=0;j<screenHeight;j++){
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
-        int ii, jj, ijk;
+        int ii, jj;
+        int ijk, ijk360;
 
-        llong = interp2d(i,screenWidth,j,screenHeight,longs);
-        ii = CLAMP((int)((float)width360*llong/360.0),0,width360-1);
-
-        llat = interp2d(i,screenWidth,j,screenHeight,lats);
-        jj = height360 - 1 - CLAMP((int)((float)height360*(llat + 90.0)/180.0),0,height360-1);
-
-        ijk = 3*(j*screenWidth + i);
-        r=p[ijk]; g=p[ijk+1]; b=p[ijk+2];
+        ijk = j*screenWidth + i;
+        r=p[3*ijk];
+        g=p[3*ijk+1];
+        b=p[3*ijk+2];
         rgb_local = (r<<16)|(g<<8)|b;
-        gdImageSetPixel(RENDERimage, ii, jj, rgb_local);
+        ijk360 = map[ijk];
+        screenbuffer[ijk360]=rgb_local;
       }
+    }
+  }
+
+  for(j=0;j<nheight360;j++){
+    for(i=0;i<nwidth360;i++){
+      gdImageSetPixel(RENDERimage, i, j, screenbuffer[j*nwidth360+i]);
     }
   }
 
@@ -642,6 +764,7 @@ int mergescreenbuffers360(int nscreenbuffers, float *longlatbounds, GLubyte **sc
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
+  FREEMEMORY(screenbuffer);
   PRINTF(" Completed\n");
   return 0;
 }
