@@ -933,7 +933,6 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 
   FrustumAsymmetry=0.0;
   StereoCameraOffset=0.0;
-  aperture_temp=aperture;
   aperture_temp = zoom2aperture(zoom);
 
   if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
@@ -983,7 +982,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     float sn_view_angle, cs_view_angle;
     float cos_elevation, sin_elevation;
     float xcen, ycen, zcen;
-    float posx, posy, posz;
+    float pos[3];
     float azimuth, elevation;
 
     sn_view_angle=sin(DEG2RAD*camera_current->view_angle);
@@ -1002,14 +1001,13 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
     cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
 
+    pos[0] = eyexINI+StereoCameraOffset*cos_dv_sum;
+    pos[1] = eyeyINI-StereoCameraOffset*sin_dv_sum;
+    pos[2] = eyezINI;
 
-    posx = eyexINI+StereoCameraOffset*cos_dv_sum;
-    posy = eyeyINI-StereoCameraOffset*sin_dv_sum;
-    posz = eyezINI;
-
-    viewx = posx + sin_dv_sum*cos_elevation;
-    viewy = posy + cos_dv_sum*cos_elevation;
-    viewz = posz + sin_elevation;
+    viewx = pos[0] + sin_dv_sum*cos_elevation;
+    viewy = pos[1] + cos_dv_sum*cos_elevation;
+    viewz = pos[2] + sin_elevation;
 
     elevation = camera_current->az_elev[1];
     azimuth = camera_current->az_elev[0];
@@ -1044,19 +1042,23 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 
       uup = camera_current->up;
       gluLookAt(
-        (double)(posx), (double)(posy), (double)posz,
+        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
         (double)viewx,  (double)viewy,  (double)viewz,
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }
     else {
       float *view, *uup;
+      float viewpos[3];
 
       view = screen->view;
       uup = screen->up;
+      viewpos[0] = pos[0] + view[0];
+      viewpos[1] = pos[1] + view[1];
+      viewpos[2] = pos[2] + view[2];
       gluLookAt(
-        (double)(posx), (double)(posy), (double)posz,
-        (double)view[0], (double)view[1], (double)view[2],
+        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
+        (double)viewpos[0], (double)viewpos[1], (double)viewpos[2],
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }

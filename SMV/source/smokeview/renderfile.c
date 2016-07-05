@@ -517,30 +517,6 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
-/* ------------------ interp2d ------------------------ */
-
-float interp2d(int i, int ni, int j, int nj, float *vals){
-  float xfact, yfact;
-  float val1, val2, val;
-
-  //        v1------------v3
-  //        |             |
-  //        j             |
-  //        |             |
-  //        |             |
-  //        v0---i--------v2
-
-  xfact = (float)i / (float)ni;
-  yfact = (float)j / (float)nj;
-
-  val1 = (1.0 - yfact)*vals[0] + yfact*vals[1];
-  val2 = (1.0 - yfact)*vals[2] + yfact*vals[3];
-
-  val = (1.0 - xfact)*val1 + xfact*val2;
-
-  return val;
-}
-
 /* ------------------ setup_screeninfo ------------------------ */
 
 void setup_screeninfo(void){
@@ -557,14 +533,17 @@ void setup_screeninfo(void){
     float cose, sine;
     float aspect_ratio;
     int j, *map;
+    float aperture_width, aperture_height;
 
+    aperture_width = 45.0;
     screeni = screeninfo + ibuf;
     screeni->map = NULL;
     screeni->nwidth=VP_scene.width;
     screeni->nheight=VP_scene.height;
-    aspect_ratio = screeni->width/screeni->height;
-    screeni->width=2.0*tan(DEG2RAD*aperture/2.0);
+    aspect_ratio = (float)screeni->nwidth/(float)screeni->nheight;
+    screeni->width=2.0*tan(DEG2RAD*aperture_width/2.0);
     screeni->height = screeni->width / aspect_ratio;
+    aperture_height = 2.0*RAD2DEG*atan(screeni->height / 2.0);
 
     if (ibuf == 0){
       azimuth = 0.0;
@@ -574,26 +553,27 @@ void setup_screeninfo(void){
       int ii;
 
       ii = ibuf - 1;
-      azimuth = ii*45.0;;
-      elevation = -45.0;
+      azimuth = ii*45.0;
+      elevation = -90.0+aperture_height;
     }
     else if (ibuf >= 9 && ibuf < 17){
       int ii;
 
       ii = ibuf - 9;
-      azimuth = ii*45.0;;
-      elevation = 0.0;
+      azimuth = ii*45.0;
+      elevation = -90.0 + 2.0*aperture_height;
     }
     else if (ibuf >= 17 && ibuf < 25){
       int ii;
 
       ii = ibuf - 17;
-      azimuth = ii*45.0;;
+      azimuth = ii*45.0;
       elevation = 45.0;
+      elevation = -90.0 + 3.0*aperture_height;
     }
     else if (ibuf == 25){
       azimuth = 0.0;
-      elevation = 90;
+      elevation = -90.0 + 4.0*aperture_height;
     }
 
     cosa = cos(DEG2RAD*azimuth);
@@ -602,8 +582,8 @@ void setup_screeninfo(void){
     sine = sin(DEG2RAD*elevation);
 
     view = screeni->view;
-    view[0] = cosa*cose;
-    view[1] = sina*cose;
+    view[0] = sina*cose;
+    view[1] = cosa*cose;
     view[2] = sine;
 
     up = screeni->up;
@@ -616,14 +596,14 @@ void setup_screeninfo(void){
       float denom;
 
       denom = sqrt(1.0 + cose*cose/(sine*sine));
-      up[0] = -cosa / denom;
-      up[1] = -sina / denom;
+      up[0] = -sina / denom;
+      up[1] = -cosa / denom;
       up[2] = (cose / sine) / denom;
     }
 
     right = screeni->right;
-    right[0] = sina;
-    right[1] = -cosa;
+    right[0] =  cosa;
+    right[1] = -sina;
     right[2] = 0.0;
 
     NewMemory((void **)&map, screeni->nheight*screeni->nwidth * sizeof(int));
@@ -642,12 +622,15 @@ void setup_screeninfo(void){
         int i360, j360;
 
         factx = screeni->width*(float)(i - screeni->nwidth / 2) / (float)screeni->nwidth;
+
         xyz[0] = view[0] + factx*right[0] + facty*up[0];
         xyz[1] = view[1] + factx*right[1] + facty*up[1];
         xyz[2] = view[2] + factx*right[2] + facty*up[2];
         xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
+
         elev = CLAMP(asin(xyz[2] / xyznorm)*RAD2DEG, -90.0, 90.0);
-        az = CLAMP(atan2(xyz[1], xyz[0])*RAD2DEG,-180.0,180.0);
+        az = CLAMP(atan2(xyz[0], xyz[1])*RAD2DEG,-180.0,180.0);
+
         ijk = j*screeni->nwidth + i;
         j360 = CLAMP(nheight360-1-nheight360*(elev + 90.0) / 180.0,0,nheight360-1);
         i360 = CLAMP(nwidth360*(az + 180.0) / 360.0,0,nwidth360-1);
@@ -723,6 +706,11 @@ int mergescreenbuffers360(void) {
     screendata *screeni;
     int *map;
 
+   // if(ibuff>=1&&ibuff<=3){
+   // }
+   // else{
+   //   continue;
+   // }
     screeni = screeninfo + ibuff;
     map = screeni->map;
 
@@ -732,8 +720,8 @@ int mergescreenbuffers360(void) {
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
-        int ii, jj, ijk;
-        int ijk360;
+        int ii, jj;
+        int ijk, ijk360;
 
         ijk = j*screenWidth + i;
         r=p[3*ijk];

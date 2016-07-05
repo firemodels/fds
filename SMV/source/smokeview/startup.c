@@ -1801,7 +1801,7 @@ void initvars(void){
   showstereo_frame=2;
   show_parallax=0;
   stereoactive=0;
-  apertureindex=2;
+  apertureindex=1;
   zoomindex=2;
   projection_type=0;
   apertures[0]=30.;
@@ -1811,15 +1811,15 @@ void initvars(void){
   apertures[3]=90.;
   planar_terrain_slice=0;
 
-  aperture=60.;
-  aperture_glui=aperture;
-  aperture_default=aperture;
   zooms[0]=0.25;
   zooms[1]=0.5;
   zooms[2]=1.0;
   zooms[3]=2.0;
   zooms[4]=4.0;
   zoom=1.0;
+  aperture = zoom2aperture(zoom);
+  aperture_glui = aperture;
+  aperture_default = aperture;
 
   {
     int ii;

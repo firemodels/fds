@@ -1319,9 +1319,7 @@ void ApertureMenu(int value){
   if(opengldefined==1){
     glutPostRedisplay();
   }
-  apertureindex=value;
-  if(apertureindex<0)apertureindex=0;
-  if(apertureindex>4)apertureindex=4;
+  apertureindex = CLAMP(value, 0, 4);
   aperture=apertures[apertureindex];
 }
 
