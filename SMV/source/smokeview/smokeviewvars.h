@@ -20,7 +20,10 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN int SVDECL(nscreeninfo,0);
+SVEXTERN int SVDECL(nscreeninfo,26);
+#ifdef pp_RENDER360_DEBUG
+SVEXTERN int SVDECL(*screenvis,NULL);
+#endif
 SVEXTERN screendata SVDECL(*screeninfo,NULL);
 SVEXTERN int SVDECL(nwidth360,1024), SVDECL(nheight360,512);
 

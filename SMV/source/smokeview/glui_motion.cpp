@@ -48,6 +48,10 @@
 #define PLAY_MOVIE 29
 #define MOVIE_NAME 30
 #define CLOSE_MOTION 1
+#ifdef pp_RENDER360_DEBUG
+#define SHOWALL_SCREENS 31
+#define HIDEALL_SCREENS 32
+#endif
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -105,6 +109,12 @@ GLUI_Rollout *ROLLOUT_viewpoints=NULL;
 GLUI_Rollout *ROLLOUT_make_movie = NULL;
 GLUI_Rollout *ROLLOUT_gslice = NULL;
 GLUI_Rollout *ROLLOUT_translaterotate=NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Rollout *ROLLOUT_screenvis = NULL;
+GLUI_Rollout *ROLLOUT_lower = NULL;
+GLUI_Rollout *ROLLOUT_middle = NULL;
+GLUI_Rollout *ROLLOUT_upper = NULL;
+#endif
 
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
@@ -141,6 +151,9 @@ GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Checkbox *CHECKBOX_gvec_down=NULL;
 GLUI_Checkbox *CHECKBOX_showgravity=NULL;
 GLUI_Checkbox *CHECKBOX_overwrite_movie = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Checkbox **CHECKBOX_screenvis = NULL;
+#endif
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
@@ -169,6 +182,10 @@ GLUI_Button *BUTTON_motion_2=NULL;
 GLUI_Button *BUTTON_window_update=NULL;
 GLUI_Button *BUTTON_make_movie = NULL;
 GLUI_Button *BUTTON_play_movie = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Button *BUTTON_screen_hideall = NULL;
+GLUI_Button *BUTTON_screen_showall = NULL;
+#endif
 
 GLUI_EditText *EDIT_view_label=NULL;
 GLUI_EditText *EDIT_movie_name = NULL;
@@ -666,6 +683,51 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_nrender_rows->set_int_limits(1, 10);
 #ifdef pp_RENDER360
   glui_motion->add_checkbox_to_panel(ROLLOUT_render, "360", &render_360);
+
+#ifdef pp_RENDER360_DEBUG  
+
+  NewMemory((void **)&CHECKBOX_screenvis,nscreeninfo*sizeof(GLUI_Checkbox *));
+  
+
+  ROLLOUT_screenvis = glui_motion->add_rollout_to_panel(ROLLOUT_render, "screenvis",false);
+  CHECKBOX_screenvis[0] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "bottom", screenvis);
+
+  ROLLOUT_lower = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "lower",false);
+  CHECKBOX_screenvis[1] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "1", screenvis+1);
+  CHECKBOX_screenvis[2] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "2", screenvis + 2);
+  CHECKBOX_screenvis[3] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "3", screenvis + 3);
+  CHECKBOX_screenvis[4] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "4", screenvis + 4);
+  CHECKBOX_screenvis[5] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "5", screenvis + 5);
+  CHECKBOX_screenvis[6] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "6", screenvis + 6);
+  CHECKBOX_screenvis[7] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "7", screenvis + 7);
+  CHECKBOX_screenvis[8] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "8", screenvis + 8);
+
+
+  ROLLOUT_middle = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "middle", false);
+  CHECKBOX_screenvis[9] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "1", screenvis + 9);
+  CHECKBOX_screenvis[10] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "2", screenvis + 10);
+  CHECKBOX_screenvis[11] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "3", screenvis + 11);
+  CHECKBOX_screenvis[12] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "4", screenvis + 12);
+  CHECKBOX_screenvis[13] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "5", screenvis + 13);
+  CHECKBOX_screenvis[14] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "6", screenvis + 14);
+  CHECKBOX_screenvis[15] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "7", screenvis + 15);
+  CHECKBOX_screenvis[16] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "8", screenvis + 16);
+
+  ROLLOUT_upper = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "upper", false);
+  CHECKBOX_screenvis[17] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "1", screenvis + 17);
+  CHECKBOX_screenvis[18] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "2", screenvis + 18);
+  CHECKBOX_screenvis[19] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "3", screenvis + 19);
+  CHECKBOX_screenvis[20] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "4", screenvis + 20);
+  CHECKBOX_screenvis[21] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "5", screenvis + 21);
+  CHECKBOX_screenvis[22] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "6", screenvis + 22);
+  CHECKBOX_screenvis[23] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "7", screenvis + 23);
+  CHECKBOX_screenvis[24] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "8", screenvis + 24);
+
+  CHECKBOX_screenvis[25] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "top", screenvis+25);
+  BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
+  BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
+#endif  
+  
 #endif  
 
   render_skip_index = RENDER_CURRENT_SINGLE;
@@ -1516,8 +1578,25 @@ void Viewpoint_CB(int var){
   char *label;
   cameradata *prev, *next;
   int view_id;
+#ifdef pp_RENDER360_DEBUG  
+  int i;
+#endif  
 
   switch(var){
+#ifdef pp_RENDER360_DEBUG  
+  case SHOWALL_SCREENS:
+    for(i=0;i<nscreeninfo;i++){
+      screenvis[i]=1;
+      CHECKBOX_screenvis[i]->set_int_val(screenvis[i]);
+    }
+    break;
+  case HIDEALL_SCREENS:
+    for(i=0;i<nscreeninfo;i++){
+      screenvis[i]=0;
+      CHECKBOX_screenvis[i]->set_int_val(screenvis[i]);
+    }
+    break;
+#endif    
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:

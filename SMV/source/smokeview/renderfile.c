@@ -602,9 +602,16 @@ void setup_screeninfo(void){
     }
 
     right = screeni->right;
-    right[0] =  cosa;
-    right[1] = -sina;
-    right[2] = 0.0;
+    if (sine < 0.0) {
+      right[0] = -cosa;
+      right[1] = sina;
+      right[2] = 0.0;
+    }
+    else {
+      right[0] = cosa;
+      right[1] = -sina;
+      right[2] = 0.0;
+    }
 
     NewMemory((void **)&map, screeni->nheight*screeni->nwidth * sizeof(int));
     screeni->map = map;
@@ -706,11 +713,9 @@ int mergescreenbuffers360(void) {
     screendata *screeni;
     int *map;
 
-   // if(ibuff>=1&&ibuff<=3){
-   // }
-   // else{
-   //   continue;
-   // }
+#ifdef pp_RENDER360_DEBUG    
+    if (screenvis[ibuff] == 0)continue;
+#endif    
     screeni = screeninfo + ibuff;
     map = screeni->map;
 

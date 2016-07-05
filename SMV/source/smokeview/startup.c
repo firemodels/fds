@@ -1193,6 +1193,13 @@ void init_texturedir(void){
 void initvars(void){
   int i;
 
+#ifdef pp_RENDER360_DEBUG
+  NewMemory((void **)&screenvis, nscreeninfo * sizeof(int));
+  for (i = 0; i < nscreeninfo; i++) {
+    screenvis[i] = 1;
+  }
+#endif  
+
   cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
   if(moviefiletype==WMV){
     strcpy(movie_ext, ".wmv");
