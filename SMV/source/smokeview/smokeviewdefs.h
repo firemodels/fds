@@ -557,6 +557,7 @@ void _Sniff_Errors(char *whereat);
 #define RenderCancel 999
 #define RENDER_CURRENT_SINGLE 998
 #define RENDER_CURRENT_MULTIPLE 978
+#define RENDER_CURRENT_360 991
 #define RenderJPEG 997
 #define RenderPNG 996
 #define Render320 995
