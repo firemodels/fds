@@ -188,7 +188,7 @@ void DrawCircVentsApproxOutline(int option){
       int in_circle;
 
       cvi = meshi->cventinfo + j;
- 
+
       // check for visibility
 
       if(cvi->showtimelist!=NULL&&cvi->showtimelist[itimes]==0)continue;
