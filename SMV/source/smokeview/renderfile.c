@@ -528,7 +528,7 @@ void setup_screeninfo(void){
   for(ibuf = 0; ibuf < nscreeninfo; ibuf++){
     screendata *screeni;
     float azimuth, elevation;
-    float *right, *view, *up, *center;
+    float *right, *view, *up;
     float sina, cosa;
     float cose, sine;
     float aspect_ratio;
@@ -725,7 +725,6 @@ int mergescreenbuffers360(void) {
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
-        int ii, jj;
         int ijk, ijk360;
 
         ijk = j*screenWidth + i;
