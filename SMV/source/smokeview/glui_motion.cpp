@@ -1864,6 +1864,11 @@ void Render_CB(int var){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
         else if (render_360 == 1) {
+          if(glui_screenWidth!=glui_screenHeight){
+            glui_screenWidth = MAX(glui_screenWidth,glui_screenHeight);
+            glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
+            Motion_CB(WINDOW_RESIZE);
+          }
           RenderMenu(RENDER_CURRENT_360);
         }
         else{

@@ -1550,6 +1550,8 @@ void RenderMenu(int value){
     keyboard('r',FROM_SMOKEVIEW);
      break;
   case RENDER_CURRENT_360:
+    LabelMenu(MENU_LABEL_HideAll);
+    get_viewport_info();
     RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu = 1;
     render_multi_state = 1;
