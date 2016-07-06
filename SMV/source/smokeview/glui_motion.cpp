@@ -1849,6 +1849,13 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
+      if (render_frame != NULL) {
+        int i;
+
+        for (i = 0; i < nglobal_times; i++) {
+          render_frame[i] = 0;
+        }
+      }
       if(render_360==0&&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
@@ -1856,11 +1863,15 @@ void Render_CB(int var){
         if(nrender_rows==1&&render_360==0){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
+        else if (render_360 == 1) {
+          RenderMenu(RENDER_CURRENT_360);
+        }
         else{
           RenderMenu(RENDER_CURRENT_MULTIPLE);
         }
         // change render skip to render one frame (there is no RENDER_CURRENT_MULTIPLE in the list)
         LIST_render_skip->set_int_val(RENDER_CURRENT_SINGLE);
+        keyboard('0', FROM_SMOKEVIEW);
       }
       break;
     case RENDER_STOP:
