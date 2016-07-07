@@ -2137,7 +2137,6 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       FREEMEMORY(facelist_index);
     }
     if(ntriangles > 0) {
-      vertdata *verts;
       edgedata *edges, *edges2;
       tridata *triangles;
       int ii;
@@ -2146,7 +2145,6 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
       int *edgelist_index, nedgelist_index = 0;
 
       ntris = geomlisti->ntriangles;
-      verts = geomlisti->verts;
       triangles = geomlisti->triangles;
 
       NewMemory((void **)&edges, 3 * ntris * sizeof(edgedata));
@@ -2281,7 +2279,7 @@ void classify_geom(geomdata *geomi,int *geom_frame_index){
           v1 = verts + jj1;
           v2 = verts + jj2;
           v1->isdup = 1;
-          v1->isdup = 1;
+          v2->isdup = 1;
         }
       }
       ndups = 0;

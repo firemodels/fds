@@ -19,7 +19,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.3.8"
+#define PROGVERSION "6.3.9"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
@@ -65,6 +65,11 @@
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
 #define pp_RENDER360
+#ifdef _DEBUG
+#ifdef pp_RENDER360
+#define pp_RENDER360_DEBUG
+#endif
+#endif
 #endif
 
 // for debugging, set particle values to 100*parti->seq_id + small random number

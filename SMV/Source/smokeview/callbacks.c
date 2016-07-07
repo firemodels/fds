@@ -3012,46 +3012,28 @@ void Display_CB(void){
         }
         FREEMEMORY(screenbuffers);
       }
-      if (render_360 == 1) {
-        int nscreenbuffers;
+      if (render_360 == 1){
         int i;
-        GLubyte **screenbuffers;
-        float *longlatbounds;
-
-        nscreenbuffers = 8;
-        NewMemory((void **)&screenbuffers, nscreenbuffers * sizeof(GLubyte *));
-        NewMemory((void **)&longlatbounds, 8*nscreenbuffers * sizeof(float));
-
-        for (i = 0; i < nscreenbuffers; i++) {
-          longlatbounds[8 * i + 0] = (float)i * 45.0;
-          longlatbounds[8 * i + 1] = (float)i * 45.0;
-          longlatbounds[8 * i + 2] = (float)(i + 1) * 45.0;
-          longlatbounds[8 * i + 3] = (float)(i + 1) * 45.0;
-          longlatbounds[8 * i + 4] = -22.5;
-          longlatbounds[8 * i + 5] =  22.5;
-          longlatbounds[8 * i + 6] = -22.5;
-          longlatbounds[8 * i + 7] =  22.5;
-        }
 
         glDrawBuffer(GL_BACK);
 
-        for (i = 0; i<nscreenbuffers; i++) {
-          float view_dir[2];
+        if (screeninfo == NULL)setup_screeninfo();
 
-          view_dir[0]=(float)i*45.0;
-          view_dir[1]=0.0;
-          ShowScene(DRAWSCENE, VIEW_CENTER, 0, 0, 0, view_dir);
-          screenbuffers[i] = getscreenbuffer();
+        for(i = 0; i < nscreeninfo; i++){
+          screendata *screeni;
+
+          screeni = screeninfo + i;
+          ShowScene(DRAWSCENE, VIEW_CENTER, 0, 0, 0, screeni);
+          screeni->screenbuffer = getscreenbuffer();
           if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
         }
+        mergescreenbuffers360();
+        for(i = 0; i < nscreeninfo; i++){
+          screendata *screeni;
 
-        mergescreenbuffers360(nscreenbuffers,longlatbounds,screenbuffers);
-
-        for (i = 0; i<nscreenbuffers; i++) {
-          FREEMEMORY(screenbuffers[i]);
+          screeni = screeninfo + i;
+          FREEMEMORY(screeni->screenbuffer);
         }
-        FREEMEMORY(screenbuffers);
-        FREEMEMORY(longlatbounds);
       }
       if(renderdoublenow==0||RenderOnceNow==1){
         ASSERT(RenderSkip>0);

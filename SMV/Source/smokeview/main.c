@@ -15,7 +15,7 @@
 #include "lua_api.h"
 #endif
 
-//  version 6.3.7
+// version 6.3.7
 
 /* ------------------ usage ------------------------ */
 
