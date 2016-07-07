@@ -8,6 +8,7 @@ echo.
 
 if defined PROGRAMFILES(X86) (
   echo *** 64 bit Windows detected
+  echo.
   echo *** Wrapup proceeding
   echo.
 ) else (
