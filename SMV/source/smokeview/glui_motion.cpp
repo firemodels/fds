@@ -1844,7 +1844,9 @@ extern "C" void rotation_type_CB(int var){
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
+#ifdef pp_RENDER360
   char widthlabel[1024];
+#endif
 
   updatemenu=1;
   switch(var){
