@@ -82,6 +82,7 @@ void Motion_Rollout_CB(int var);
 
 GLUI *glui_motion=NULL;
 
+GLUI_Panel *PANEL_xy = NULL;
 GLUI_Panel *PANEL_render_file = NULL;
 GLUI_Panel *PANEL_render_format = NULL;
 GLUI_Panel *PANEL_movie_type = NULL;
@@ -108,7 +109,6 @@ GLUI_Panel *PANEL_change_zaxis=NULL;
 #ifdef pp_RENDER360
 GLUI_Rollout *ROLLOUT_render360 = NULL;
 #endif
-GLUI_Rollout *ROLLOUT_xy = NULL;
 GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
@@ -159,6 +159,9 @@ GLUI_Spinner *SPINNER_window_height360=NULL;
 GLUI_StaticText *STATIC_width360=NULL;
 #endif
 
+#ifdef pp_RENDER360
+GLUI_Checkbox *CHECKBOX_render360 = NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
 GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
@@ -680,12 +683,15 @@ extern "C" void glui_motion_setup(int main_window){
   EDIT_render_file_base = glui_motion->add_edittext_to_panel(ROLLOUT_render, "prefix:", GLUI_EDITTEXT_TEXT, render_file_base);
   EDIT_render_file_base->set_w(200);
 
-  PANEL_file_suffix = glui_motion->add_panel_to_panel(ROLLOUT_render, "suffix:", true);
+  PANEL_render_file = glui_motion->add_panel_to_panel(ROLLOUT_render, "", false);
+
+  PANEL_file_suffix = glui_motion->add_panel_to_panel(PANEL_render_file, "suffix:", true);
   RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &renderfilelabel, RENDER_LABEL, Render_CB);
   RADIOBUTTON_1f = glui_motion->add_radiobutton_to_group(RADIO_render_label, "frame number");
   RADIOBUTTON_1g = glui_motion->add_radiobutton_to_group(RADIO_render_label, "time (s)");
 
-  PANEL_render_file = glui_motion->add_panel_to_panel(ROLLOUT_render, "", false);
+
+  glui_motion->add_column_to_panel(PANEL_render_file, false);
 
   PANEL_file_type = glui_motion->add_panel_to_panel(PANEL_render_file, "type:", true);
   RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
@@ -693,26 +699,19 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "jpg");
 
 
-  glui_motion->add_column_to_panel(PANEL_render_file, false);
-  PANEL_render_format = glui_motion->add_panel_to_panel(PANEL_render_file, "format:", true);
-  RADIO_render_format = glui_motion->add_radiogroup_to_panel(PANEL_render_format, &render_360);
-  glui_motion->add_radiobutton_to_group(RADIO_render_format, "XY");
-#ifdef pp_RENDER360
-  glui_motion->add_radiobutton_to_group(RADIO_render_format, "360");
-#endif
-
-  ROLLOUT_xy = glui_motion->add_rollout_to_panel(ROLLOUT_render, "XY resolution", false);
+  PANEL_xy = glui_motion->add_panel_to_panel(ROLLOUT_render, "resolution", true);
   render_size_index = RenderWindow;
-  LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_xy, _d("Resolution:"), &render_size_index, RENDER_RESOLUTION, Render_CB);
+  LIST_render_size = glui_motion->add_listbox_to_panel(PANEL_xy, _d(""), &render_size_index, RENDER_RESOLUTION, Render_CB);
   LIST_render_size->add_item(Render320, "320x240");
   LIST_render_size->add_item(Render640, "640x480");
   LIST_render_size->add_item(RenderWindow, _d("Current"));
   LIST_render_size->set_int_val(render_size_index);
-  SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(ROLLOUT_xy, "Resolution multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
+  SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(PANEL_xy, "multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
   SPINNER_nrender_rows->set_int_limits(1, 10);
 
 #ifdef pp_RENDER360
-  ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 resolution", false);
+  ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
+  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
   SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360, Render_CB);
   SPINNER_window_height360->set_int_limits(100, max_screenHeight);
