@@ -517,6 +517,38 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
+/* ------------------ getscreenmap360 ------------------------ */
+
+unsigned int getscreenmap360(float *xyz) {
+  int ibuff, i, j;
+
+  for (ibuff = 0; ibuff < nscreeninfo; ibuff++) {
+    screendata *screeni;
+    float *view, *up, *right, t;
+    float A, B;
+
+    screeni = screeninfo + ibuff;
+    view = screeni->view;
+    up = screeni->up;
+    right = screeni->right;
+
+    t = 1.0/DOT3(view, xyz);
+    A = t*DOT3(xyz, right);
+    B = t*DOT3(xyz, up);
+    if (-screeni->width / 2.0 <= A&&A <= screeni->width / 2.0&&-screeni->height / 2.0 <= B&&B <= screeni->height / 2.0) {
+      int ix, iy, index;
+      unsigned int return_val;
+
+      ix = CLAMP(screeni->nwidth*((float)screeni->width / 2.0 + A) / (float)screeni->width, 0, screeni->nwidth - 1);
+      iy = CLAMP(screeni->nheight*((float)screeni->height / 2.0 + B) / (float)screeni->height, 0, screeni->height - 1);
+      index = iy*screeni->nwidth + ix;
+      return_val = ((ibuff+1) << 24) |  index;
+      return return_val;
+    }
+  }
+  return 0;
+}
+
 /* ------------------ setup_screeninfo ------------------------ */
 
 void setup_screeninfo(void){
@@ -645,7 +677,46 @@ void setup_screeninfo(void){
         map[ijk] = ijk360;
       }
     }
+  }
 
+  NewMemory((void **)&screenmap360, nwidth360*nheight360 * sizeof(unsigned int));
+  {
+    int i,j;
+    float *cosa, *sina, *cose, *sine;
+
+    NewMemory((void **)&sina, nwidth360 * sizeof(float));
+    NewMemory((void **)&cosa, nwidth360 * sizeof(float));
+    NewMemory((void **)&sine, nheight360 * sizeof(float));
+    NewMemory((void **)&cose, nheight360 * sizeof(float));
+
+    for (i = 0; i < nwidth360; i++) {
+      float alpha;
+
+      alpha = -180.0 + (float)i*360.0 / (float)nwidth360;
+      sina[i] = sin(DEG2RAD*alpha);
+      cosa[i] = cos(DEG2RAD*alpha);
+    }
+    for (i = 0; i < nheight360; i++) {
+      float eps;
+
+      eps = -90.0 + (float)i*180.0 / (float)nheight360;
+      sine[i] = sin(DEG2RAD*eps);
+      cose[i] = cos(DEG2RAD*eps);
+    }
+    for (j = 0; j < nheight360; j++) {
+      for (i = 0; i < nwidth360; i++) {
+        float xyz[3];
+
+        xyz[0] = sina[i] * cose[j];
+        xyz[1] = cosa[i] * cose[j];
+        xyz[2] = sine[j];
+        screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
+      }
+    }
+    FREEMEMORY(sina);
+    FREEMEMORY(cosa);
+    FREEMEMORY(sine);
+    FREEMEMORY(cose);
   }
 }
 
@@ -658,7 +729,7 @@ int mergescreenbuffers360(void) {
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
   int ibuff;
-  int i, j;
+  int i, j, ijk360;
   int *screenbuffer;
 
   switch (renderfiletype) {
@@ -707,7 +778,33 @@ int mergescreenbuffers360(void) {
     screenbuffer[i]=0;
   }
 
+//#define pp_RENDER360NEW
 
+#ifdef pp_RENDER360NEW
+  ijk360 = 0;
+  for(j=0;j<nheight360;j++){
+    for(i=0;i<nwidth360;i++){
+      GLubyte *p;
+      int ibuff, ijk, rgb_local;
+      screendata *screeni;
+      unsigned int r, g, b;
+
+      ibuff = screenmap360[ijk360] >> 24;
+      if (ibuff == 0)continue;
+      ibuff--;
+      screeni = screeninfo + ibuff;
+      p = screeni->screenbuffer;
+      
+      ijk = screenmap360[ijk360] & 0xffffff;
+      r=p[3*ijk];
+      g=p[3*ijk+1];
+      b=p[3*ijk+2];
+      rgb_local = (r<<16)|(g<<8)|b;
+      screenbuffer[ijk360]=rgb_local;
+      ijk360++;
+    }
+  }
+#else
   for(ibuff=0;ibuff<nscreeninfo;ibuff++){
     GLubyte *p;
     screendata *screeni;
@@ -737,10 +834,12 @@ int mergescreenbuffers360(void) {
       }
     }
   }
+#endif  
 
+  ijk360 = 0;
   for(j=0;j<nheight360;j++){
     for(i=0;i<nwidth360;i++){
-      gdImageSetPixel(RENDERimage, i, j, screenbuffer[j*nwidth360+i]);
+      gdImageSetPixel(RENDERimage, i, j, screenbuffer[ijk360++]);
     }
   }
 
