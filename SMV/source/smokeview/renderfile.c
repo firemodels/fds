@@ -543,17 +543,17 @@ unsigned int getscreenmap360(float *xyz) {
     t = DOT3(xyz,view);
     A = DOT3(xyz, right)/t;
     B = DOT3(xyz, up)/t;
-    
+
     {
       int ix, iy, index;
       unsigned int return_val;
 
       ix = screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width;
       if(ix<0||ix>screeni->nwidth-1)continue;
-      
+
       iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
       if(iy<0||iy>screeni->nheight - 1)continue;
-      
+
       index = iy*screeni->nwidth + ix;
       return_val = ((ibuff+1) << 24) |  index;
       return return_val;

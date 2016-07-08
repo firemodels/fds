@@ -8671,7 +8671,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "GEOMDIAGS") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics, 
+      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics,
         &highlight_edge0, &highlight_edge1, &highlight_edge2, &highlight_edgeother);
       continue;
     }

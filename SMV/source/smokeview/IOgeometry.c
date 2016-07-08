@@ -869,7 +869,7 @@ void draw_geom(int flag, int timestate){
       glTranslatef(-xbar0, -ybar0, -zbar0);
       glPointSize(5.0);
       glBegin(GL_POINTS);
-      
+
       glColor3fv(magenta);
 
       for (ii = 0; ii < geomlisti->nverts; ii++) {
