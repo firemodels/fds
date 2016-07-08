@@ -851,7 +851,7 @@ int mergescreenbuffers360(void){
 #endif
 
   ijk360 = 0;
-  for(j=0;j<nheight360;j++){
+  for(j=nheight360-1;j>=0;j--){
     for(i=0;i<nwidth360;i++){
       gdImageSetPixel(RENDERimage, i, j, screenbuffer[ijk360++]);
     }
