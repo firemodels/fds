@@ -235,7 +235,8 @@ void RenderFrame(int view_mode){
     if(
       (current_script_command->command==SCRIPT_RENDERONCE||
        current_script_command->command==SCRIPT_RENDERALL||
-       current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+        current_script_command->command == SCRIPT_RENDER360ALL ||
+        current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
        current_script_command->command==SCRIPT_ISORENDERALL
        )&&
        current_script_command->cval2!=NULL
@@ -292,7 +293,8 @@ void RenderFrame(int view_mode){
   if(use_scriptfile==0||
     (current_script_command!=NULL&&
     (current_script_command->command==SCRIPT_RENDERALL||
-     current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+      current_script_command->command == SCRIPT_RENDER360ALL ||
+      current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
      current_script_command->command==SCRIPT_ISORENDERALL
      ))){
     int image_num;
