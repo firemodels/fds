@@ -12,6 +12,7 @@
 #include "gd.h"
 
 #define RENDER_START 3
+//#define pp_RENDER360NEW
 
 /* ------------------ does_movie_exist ------------------------ */
 
@@ -522,7 +523,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 unsigned int getscreenmap360(float *xyz) {
   int ibuff, i, j;
 
-  for (ibuff = 0; ibuff < nscreeninfo; ibuff++) {
+  for (ibuff = 0; ibuff < nscreeninfo; ibuff++){
     screendata *screeni;
     float *view, *up, *right, t;
     float A, B;
@@ -532,15 +533,18 @@ unsigned int getscreenmap360(float *xyz) {
     up = screeni->up;
     right = screeni->right;
 
-    t = 1.0/DOT3(view, xyz);
-    A = t*DOT3(xyz, right);
-    B = t*DOT3(xyz, up);
-    if (-screeni->width / 2.0 <= A&&A <= screeni->width / 2.0&&-screeni->height / 2.0 <= B&&B <= screeni->height / 2.0) {
+    t = DOT3(xyz,view);
+//    if (t < 0.0)continue;
+
+    A = DOT3(xyz, right)/t;
+    B = DOT3(xyz, up)/t;
+    
+    if(ABS(A)<=screeni->width/2.0 && ABS(B)<=screeni->height/2.0){
       int ix, iy, index;
       unsigned int return_val;
 
-      ix = CLAMP(screeni->nwidth*((float)screeni->width / 2.0 + A) / (float)screeni->width, 0, screeni->nwidth - 1);
-      iy = CLAMP(screeni->nheight*((float)screeni->height / 2.0 + B) / (float)screeni->height, 0, screeni->height - 1);
+      ix = CLAMP(screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width,    0, screeni->nwidth - 1);
+      iy = CLAMP(screeni->nheight*(screeni->height / 2.0 + B) / screeni->height, 0, screeni->nheight - 1);
       index = iy*screeni->nwidth + ix;
       return_val = ((ibuff+1) << 24) |  index;
       return return_val;
@@ -577,25 +581,25 @@ void setup_screeninfo(void){
     screeni->height = screeni->width / aspect_ratio;
     aperture_height = 2.0*RAD2DEG*atan(screeni->height / 2.0);
 
-    if (ibuf == 0){
+    if(ibuf == 0){
       azimuth = 0.0;
       elevation = -90;
     }
-    else if (ibuf >= 1 && ibuf < 9){
+    else if(ibuf >= 1 && ibuf < 9){
       int ii;
 
       ii = ibuf - 1;
       azimuth = ii*45.0;
       elevation = -90.0+aperture_height;
     }
-    else if (ibuf >= 9 && ibuf < 17){
+    else if(ibuf >= 9 && ibuf < 17){
       int ii;
 
       ii = ibuf - 9;
       azimuth = ii*45.0;
       elevation = -90.0 + 2.0*aperture_height;
     }
-    else if (ibuf >= 17 && ibuf < 25){
+    else if(ibuf >= 17 && ibuf < 25){
       int ii;
 
       ii = ibuf - 17;
@@ -603,7 +607,7 @@ void setup_screeninfo(void){
       elevation = 45.0;
       elevation = -90.0 + 3.0*aperture_height;
     }
-    else if (ibuf == 25){
+    else if(ibuf == 25){
       azimuth = 0.0;
       elevation = -90.0 + 4.0*aperture_height;
     }
@@ -634,7 +638,7 @@ void setup_screeninfo(void){
     }
 
     right = screeni->right;
-    if (sine < 0.0) {
+    if(sine < 0.0){
       right[0] = -cosa;
       right[1] = sina;
       right[2] = 0.0;
@@ -689,23 +693,24 @@ void setup_screeninfo(void){
     NewMemory((void **)&sine, nheight360 * sizeof(float));
     NewMemory((void **)&cose, nheight360 * sizeof(float));
 
-    for (i = 0; i < nwidth360; i++) {
+    for (i = 0; i < nwidth360; i++){
       float alpha;
 
       alpha = -180.0 + (float)i*360.0 / (float)nwidth360;
       sina[i] = sin(DEG2RAD*alpha);
       cosa[i] = cos(DEG2RAD*alpha);
     }
-    for (i = 0; i < nheight360; i++) {
+    for (i = 0; i < nheight360; i++){
       float eps;
 
       eps = -90.0 + (float)i*180.0 / (float)nheight360;
       sine[i] = sin(DEG2RAD*eps);
       cose[i] = cos(DEG2RAD*eps);
     }
-    for (j = 0; j < nheight360; j++) {
-      for (i = 0; i < nwidth360; i++) {
+    for (j = 0; j < nheight360; j++){
+      for (i = 0; i < nwidth360; i++){
         float xyz[3];
+        int buff;
 
         xyz[0] = sina[i] * cose[j];
         xyz[1] = cosa[i] * cose[j];
@@ -722,17 +727,19 @@ void setup_screeninfo(void){
 
 /* ------------------ mergescreenbuffers360 ------------------------ */
 
-int mergescreenbuffers360(void) {
+int mergescreenbuffers360(void){
 
   char *renderfile, renderfile_base[1024], renderfile2[1024];
   char *ext;
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
+#ifndef pp_RENDER360NEW
   int ibuff;
+#endif
   int i, j, ijk360;
   int *screenbuffer;
 
-  switch (renderfiletype) {
+  switch (renderfiletype){
   case PNG:
     ext = ext_png;
     break;
@@ -745,28 +752,28 @@ int mergescreenbuffers360(void) {
     break;
   }
 
-  if (scriptoutstream != NULL&&current_script_command != NULL&&current_script_command->cval2 != NULL) {
+  if(scriptoutstream != NULL&&current_script_command != NULL&&current_script_command->cval2 != NULL){
     strcpy(renderfile2, current_script_command->cval2);
   }
   else {
     strcpy(renderfile2, fdsprefix);
   }
-  if (RenderTime == 1) {
+  if(RenderTime == 1){
     sprintf(renderfile_base, "%s_%04i", renderfile2, itimes / RenderSkip);
   }
-  if (RenderTime == 0) {
+  if(RenderTime == 0){
     sprintf(renderfile_base, "%s_s%04i", renderfile2, seqnum);
     seqnum++;
   }
   strcat(renderfile_base, ext);
   renderfile = get_filename(smokeviewtempdir, renderfile_base, tempdir_flag);
-  if (renderfile == NULL) {
+  if(renderfile == NULL){
     fprintf(stderr, "*** Error: unable to write to %s", renderfile_base);
     return 1;
   }
   RENDERfile = fopen(renderfile, "wb");
   PRINTF("Rendering to: %s .", renderfile);
-  if (RENDERfile == NULL) {
+  if(RENDERfile == NULL){
     fprintf(stderr, "*** Error: unable to write to %s", renderfile);
     FREEMEMORY(renderfile);
     return 1;
@@ -778,8 +785,6 @@ int mergescreenbuffers360(void) {
     screenbuffer[i]=0;
   }
 
-//#define pp_RENDER360NEW
-
 #ifdef pp_RENDER360NEW
   ijk360 = 0;
   for(j=0;j<nheight360;j++){
@@ -790,11 +795,11 @@ int mergescreenbuffers360(void) {
       unsigned int r, g, b;
 
       ibuff = screenmap360[ijk360] >> 24;
-      if (ibuff == 0)continue;
+      if(ibuff == 0)continue;
       ibuff--;
       screeni = screeninfo + ibuff;
       p = screeni->screenbuffer;
-      
+
       ijk = screenmap360[ijk360] & 0xffffff;
       r=p[3*ijk];
       g=p[3*ijk+1];
@@ -811,7 +816,7 @@ int mergescreenbuffers360(void) {
     int *map;
 
 #ifdef pp_RENDER360_DEBUG
-    if (screenvis[ibuff] == 0)continue;
+    if(screenvis[ibuff] == 0)continue;
 #endif
     screeni = screeninfo + ibuff;
     map = screeni->map;
@@ -822,7 +827,7 @@ int mergescreenbuffers360(void) {
       for(i=0;i<screenWidth;i++){
         unsigned int r, g, b;
         int rgb_local;
-        int ijk, ijk360;
+        int ijk;
 
         ijk = j*screenWidth + i;
         r=p[3*ijk];
@@ -834,7 +839,7 @@ int mergescreenbuffers360(void) {
       }
     }
   }
-#endif  
+#endif
 
   ijk360 = 0;
   for(j=0;j<nheight360;j++){
@@ -845,7 +850,7 @@ int mergescreenbuffers360(void) {
 
   /* output the image */
 
-  switch (renderfiletype) {
+  switch (renderfiletype){
   case PNG:
     gdImagePng(RENDERimage, RENDERfile);
     break;
