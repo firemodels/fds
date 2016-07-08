@@ -522,29 +522,37 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
 unsigned int getscreenmap360(float *xyz) {
   int ibuff, i, j;
+  float xyznorm;
+
+  xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
 
   for (ibuff = 0; ibuff < nscreeninfo; ibuff++){
     screendata *screeni;
     float *view, *up, *right, t;
     float A, B;
+    float cosangle;
 
     screeni = screeninfo + ibuff;
     view = screeni->view;
     up = screeni->up;
     right = screeni->right;
+    cosangle = DOT3(view, xyz) / xyznorm;
+    if(cosangle <= screeni->cosmax-0.001)continue;
 
     t = DOT3(xyz,view);
-//    if (t < 0.0)continue;
-
     A = DOT3(xyz, right)/t;
     B = DOT3(xyz, up)/t;
     
-    if(ABS(A)<=screeni->width/2.0 && ABS(B)<=screeni->height/2.0){
+    {
       int ix, iy, index;
       unsigned int return_val;
 
-      ix = CLAMP(screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width,    0, screeni->nwidth - 1);
-      iy = CLAMP(screeni->nheight*(screeni->height / 2.0 + B) / screeni->height, 0, screeni->nheight - 1);
+      ix = screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width;
+      if(ix<0||ix>screeni->nwidth-1)continue;
+      
+      iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
+      if(iy<0||iy>screeni->nheight - 1)continue;
+      
       index = iy*screeni->nwidth + ix;
       return_val = ((ibuff+1) << 24) |  index;
       return return_val;
@@ -580,6 +588,7 @@ void setup_screeninfo(void){
     screeni->width=2.0*tan(DEG2RAD*aperture_width/2.0);
     screeni->height = screeni->width / aspect_ratio;
     aperture_height = 2.0*RAD2DEG*atan(screeni->height / 2.0);
+    screeni->cosmax = 1.0 / sqrt(screeni->height*screeni->height + screeni->width*screeni->width);
 
     if(ibuf == 0){
       azimuth = 0.0;
