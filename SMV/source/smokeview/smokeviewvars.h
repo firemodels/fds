@@ -26,7 +26,7 @@ SVEXTERN int SVDECL(*screenvis,NULL);
 #endif
 SVEXTERN screendata SVDECL(*screeninfo,NULL);
 SVEXTERN int SVDECL(nwidth360,1024), SVDECL(nheight360,512);
-
+SVEXTERN unsigned int SVDECL(*screenmap360, NULL);
 SVEXTERN int SVDECL(render_360, 0);
 
 SVEXTERN int SVDECL(highlight_vertexdup, 0);
