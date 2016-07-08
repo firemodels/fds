@@ -119,7 +119,7 @@ typedef struct {
 /* --------------------------  screendata ------------------------------------ */
 
 typedef struct {
-  int nwidth, nheight, *map;
+  int nwidth, nheight;
   GLubyte *screenbuffer;
   float width, height, cosmax;
   float view[3], up[3], right[3];

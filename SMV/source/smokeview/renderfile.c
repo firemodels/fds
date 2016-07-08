@@ -12,7 +12,6 @@
 #include "gd.h"
 
 #define RENDER_START 3
-//#define pp_RENDER360NEW
 
 /* ------------------ does_movie_exist ------------------------ */
 
@@ -576,12 +575,11 @@ void setup_screeninfo(void){
     float sina, cosa;
     float cose, sine;
     float aspect_ratio;
-    int j, *map;
+    int j;
     float aperture_width, aperture_height;
 
     aperture_width = 45.0;
     screeni = screeninfo + ibuf;
-    screeni->map = NULL;
     screeni->nwidth=VP_scene.width;
     screeni->nheight=VP_scene.height;
     aspect_ratio = (float)screeni->nwidth/(float)screeni->nheight;
@@ -657,39 +655,6 @@ void setup_screeninfo(void){
       right[1] = -sina;
       right[2] = 0.0;
     }
-
-    NewMemory((void **)&map, screeni->nheight*screeni->nwidth * sizeof(int));
-    screeni->map = map;
-
-    for(j = 0; j < screeni->nheight; j++){
-      int i;
-      float facty;
-
-      facty = screeni->height*(float)(j - screeni->nheight / 2)/ (float)screeni->nheight;
-
-      for(i = 0; i < screeni->nwidth; i++){
-        float factx, xyz[3], xyznorm;
-        float elev, az;
-        int ijk, ijk360;
-        int i360, j360;
-
-        factx = screeni->width*(float)(i - screeni->nwidth / 2) / (float)screeni->nwidth;
-
-        xyz[0] = view[0] + factx*right[0] + facty*up[0];
-        xyz[1] = view[1] + factx*right[1] + facty*up[1];
-        xyz[2] = view[2] + factx*right[2] + facty*up[2];
-        xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
-
-        elev = CLAMP(asin(xyz[2] / xyznorm)*RAD2DEG, -90.0, 90.0);
-        az = CLAMP(atan2(xyz[0], xyz[1])*RAD2DEG,-180.0,180.0);
-
-        ijk = j*screeni->nwidth + i;
-        j360 = CLAMP(nheight360-1-nheight360*(elev + 90.0) / 180.0,0,nheight360-1);
-        i360 = CLAMP(nwidth360*(az + 180.0) / 360.0,0,nwidth360-1);
-        ijk360 = j360*nwidth360 + i360;
-        map[ijk] = ijk360;
-      }
-    }
   }
 
   NewMemory((void **)&screenmap360, nwidth360*nheight360 * sizeof(unsigned int));
@@ -742,9 +707,6 @@ int mergescreenbuffers360(void){
   char *ext;
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
-#ifndef pp_RENDER360NEW
-  int ibuff;
-#endif
   int i, j, ijk360;
   int *screenbuffer;
 
@@ -794,7 +756,6 @@ int mergescreenbuffers360(void){
     screenbuffer[i]=0;
   }
 
-#ifdef pp_RENDER360NEW
   ijk360 = 0;
   for(j=0;j<nheight360;j++){
     for(i=0;i<nwidth360;i++){
@@ -818,37 +779,6 @@ int mergescreenbuffers360(void){
       ijk360++;
     }
   }
-#else
-  for(ibuff=0;ibuff<nscreeninfo;ibuff++){
-    GLubyte *p;
-    screendata *screeni;
-    int *map;
-
-#ifdef pp_RENDER360_DEBUG
-    if(screenvis[ibuff] == 0)continue;
-#endif
-    screeni = screeninfo + ibuff;
-    map = screeni->map;
-
-    p = screeni->screenbuffer;
-
-    for(j=0;j<screenHeight;j++){
-      for(i=0;i<screenWidth;i++){
-        unsigned int r, g, b;
-        int rgb_local;
-        int ijk;
-
-        ijk = j*screenWidth + i;
-        r=p[3*ijk];
-        g=p[3*ijk+1];
-        b=p[3*ijk+2];
-        rgb_local = (r<<16)|(g<<8)|b;
-        ijk360 = map[ijk];
-        screenbuffer[ijk360]=rgb_local;
-      }
-    }
-  }
-#endif
 
   ijk360 = 0;
   for(j=nheight360-1;j>=0;j--){
