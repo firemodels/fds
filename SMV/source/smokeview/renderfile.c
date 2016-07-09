@@ -522,7 +522,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 /* ------------------ getscreenmap360 ------------------------ */
 
 unsigned int getscreenmap360(float *xyz) {
-  int ibuff, i, j;
+  int ibuff;
   float xyznorm;
 
   xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
@@ -621,7 +621,6 @@ void setup_screeninfo(void){
     float sina, cosa;
     float cose, sine;
     float aspect_ratio;
-    int j;
     float aperture_width, aperture_height;
 
     aperture_width = 45.0;
@@ -730,7 +729,6 @@ void setup_screeninfo(void){
     for (j = 0; j < nheight360; j++){
       for (i = 0; i < nwidth360; i++){
         float xyz[3];
-        int buff;
 
         xyz[0] = sina[i] * cose[j];
         xyz[1] = cosa[i] * cose[j];
