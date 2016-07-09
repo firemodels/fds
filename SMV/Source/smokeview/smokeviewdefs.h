@@ -254,6 +254,7 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_RENDERONCE 101
 #define SCRIPT_RENDERDOUBLEONCE 102
 #define SCRIPT_RENDERALL 103
+#define SCRIPT_RENDER360ALL 119
 #define SCRIPT_VOLSMOKERENDERALL 104
 #define SCRIPT_RENDERDIR 105
 #define SCRIPT_RENDERCLIP 106
@@ -557,6 +558,7 @@ void _Sniff_Errors(char *whereat);
 #define RenderCancel 999
 #define RENDER_CURRENT_SINGLE 998
 #define RENDER_CURRENT_MULTIPLE 978
+#define RENDER_CURRENT_360 991
 #define RenderJPEG 997
 #define RenderPNG 996
 #define Render320 995

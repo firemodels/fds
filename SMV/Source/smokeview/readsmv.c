@@ -8671,7 +8671,7 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "GEOMDIAGS") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics, 
+      sscanf(buffer, " %i %i %i %i %i %i %i", &structured_isopen, &unstructured_isopen, &show_geometry_diagnostics,
         &highlight_edge0, &highlight_edge1, &highlight_edge2, &highlight_edgeother);
       continue;
     }
@@ -10354,8 +10354,14 @@ int readini2(char *inifile, int localfile){
       continue;
     }
     if(match(buffer, "RENDEROPTION") == 1){
+      int nheight360_temp = 0;
+
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i", &render_option, &nrender_rows);
+      sscanf(buffer, "%i %i %i", &render_option, &nrender_rows, &nheight360_temp);
+      if (nheight360_temp > 0) {
+        nheight360 = nheight360_temp;
+        nwidth360 = 2 * nheight360;
+      }
       RenderMenu(render_option);
       continue;
     }
@@ -12396,7 +12402,7 @@ void writeini(int flag,char *filename){
     }
   }
   fprintf(fileout, "RENDEROPTION\n");
-  fprintf(fileout, " %i %i\n", render_option, nrender_rows);
+  fprintf(fileout, " %i %i %i\n", render_option, nrender_rows, nheight360);
   fprintf(fileout, "UNITCLASSES\n");
   fprintf(fileout, " %i\n", nunitclasses);
   for(i = 0; i<nunitclasses; i++){

@@ -1549,6 +1549,15 @@ void RenderMenu(int value){
     render_from_menu=1;
     keyboard('r',FROM_SMOKEVIEW);
      break;
+  case RENDER_CURRENT_360:
+    LabelMenu(MENU_LABEL_HideAll);
+    get_viewport_info();
+    RenderMenu(RENDER_CURRENT_SINGLE);
+    render_from_menu = 1;
+    render_multi_state = 1;
+    render_multi = render_multi_state;
+    keyboard('R', FROM_SMOKEVIEW);
+    break;
   case RENDER_CURRENT_MULTIPLE:
     if(nrender_rows==1)RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu=1;

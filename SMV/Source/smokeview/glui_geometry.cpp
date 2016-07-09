@@ -411,7 +411,7 @@ extern "C" void glui_geometry_setup(int main_window){
     Volume_CB(SHOW_TEXTURE_2D_IMAGE);
   }
 
-  
+
   glui_geometry->add_checkbox_to_panel(ROLLOUT_geomtest2, "use max angle", &use_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle = glui_geometry->add_spinner_to_panel(ROLLOUT_geomtest2, "max angle", GLUI_SPINNER_FLOAT, &geom_max_angle, GEOM_MAX_ANGLE, Volume_CB);
   SPINNER_geom_max_angle->set_float_limits(0.0,180.0);

@@ -133,7 +133,7 @@ void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valm
 
   free_histogram(histogram);
   init_histogram(histogram, nbuckets);
-  
+
   ntotal = 0;
   for(i = 0; i < nbuckets; i++){
     histogram->buckets[i] = buckets[i];
