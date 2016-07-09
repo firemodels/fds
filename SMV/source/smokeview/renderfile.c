@@ -522,7 +522,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 /* ------------------ getscreenmap360 ------------------------ */
 
 unsigned int getscreenmap360(float *xyz) {
-  int ibuff, i, j;
+  int ibuff;
   float xyznorm;
 
   xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
@@ -543,17 +543,17 @@ unsigned int getscreenmap360(float *xyz) {
     t = DOT3(xyz,view);
     A = DOT3(xyz, right)/t;
     B = DOT3(xyz, up)/t;
-    
+
     {
       int ix, iy, index;
       unsigned int return_val;
 
       ix = screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width;
       if(ix<0||ix>screeni->nwidth-1)continue;
-      
+
       iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
       if(iy<0||iy>screeni->nheight - 1)continue;
-      
+
       index = iy*screeni->nwidth + ix;
       return_val = ((ibuff+1) << 24) |  index;
       return return_val;
@@ -561,6 +561,50 @@ unsigned int getscreenmap360(float *xyz) {
   }
   return 0;
 }
+
+#ifdef pp_RENDER360_DEBUG
+/* ------------------ draw_screeninfo ------------------------ */
+
+void draw_screeninfo(void){
+  int i;
+  int j;
+
+  if(screeninfo == NULL)setup_screeninfo();
+  glPushMatrix();
+  glScalef(0.5,0.5,0.5);
+  glTranslatef(1.0,1.0,1.0);
+
+  glBegin(GL_LINES);
+  for(i = 0; i < nscreeninfo; i++){
+    screendata *screeni;
+    float xyz[12];
+    float *view, *right, *up;
+
+    screeni = screeninfo + i;
+    view = screeni->view;
+    right = screeni->right;
+    up = screeni->up;
+
+    for(j = 0; j < 3; j++){
+      xyz[j+0] = view[j] - right[j]/2.0 - up[j] / 2.0;
+      xyz[j+3] = view[j] + right[j] / 2.0 - up[j] / 2.0;
+      xyz[j+6] = view[j] + right[j] / 2.0 + up[j] / 2.0;
+      xyz[j+9] = view[j] - right[j] / 2.0 + up[j] / 2.0
+        ;
+    }
+    glVertex3fv(xyz);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz);
+  }
+  glEnd();
+  glPopMatrix();
+}
+#endif
 
 /* ------------------ setup_screeninfo ------------------------ */
 
@@ -577,7 +621,6 @@ void setup_screeninfo(void){
     float sina, cosa;
     float cose, sine;
     float aspect_ratio;
-    int j;
     float aperture_width, aperture_height;
 
     aperture_width = 45.0;
@@ -686,7 +729,6 @@ void setup_screeninfo(void){
     for (j = 0; j < nheight360; j++){
       for (i = 0; i < nwidth360; i++){
         float xyz[3];
-        int buff;
 
         xyz[0] = sina[i] * cose[j];
         xyz[1] = cosa[i] * cose[j];

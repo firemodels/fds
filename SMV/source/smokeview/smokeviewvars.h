@@ -22,6 +22,7 @@
 
 SVEXTERN int SVDECL(nscreeninfo,26);
 #ifdef pp_RENDER360_DEBUG
+SVEXTERN int SVDECL(screenview, 0);
 SVEXTERN int SVDECL(*screenvis,NULL);
 #endif
 SVEXTERN screendata SVDECL(*screeninfo,NULL);
