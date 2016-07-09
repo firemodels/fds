@@ -161,6 +161,9 @@ GLUI_StaticText *STATIC_width360=NULL;
 
 #ifdef pp_RENDER360
 GLUI_Checkbox *CHECKBOX_render360 = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Checkbox *CHECKBOX_screenview = NULL;
+#endif
 #endif
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
@@ -721,6 +724,7 @@ extern "C" void glui_motion_setup(int main_window){
   NewMemory((void **)&CHECKBOX_screenvis, nscreeninfo * sizeof(GLUI_Checkbox *));
 
   ROLLOUT_screenvis = glui_motion->add_rollout_to_panel(ROLLOUT_render360, "screenvis", false);
+  CHECKBOX_screenview = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "view screens", &screenview);
   CHECKBOX_screenvis[0] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "bottom", screenvis);
 
   ROLLOUT_lower = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "lower", false);
@@ -1844,7 +1848,9 @@ extern "C" void rotation_type_CB(int var){
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
+#ifdef pp_RENDER360
   char widthlabel[1024];
+#endif
 
   updatemenu=1;
   switch(var){

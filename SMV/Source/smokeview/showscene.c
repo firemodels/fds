@@ -145,6 +145,12 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     }
 #endif
 
+    /* ++++++++++++++++++++++++ draw screeninfo +++++++++++++++++++++++++ */
+
+#ifdef pp_RENDER360_DEBUG
+    if(screenview == 1)draw_screeninfo();
+#endif
+
 /* ++++++++++++++++++++++++ draw circular vents +++++++++++++++++++++++++ */
 
     if(ncvents>0&&visCircularVents!=VENT_HIDE){
