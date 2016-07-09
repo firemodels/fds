@@ -562,6 +562,50 @@ unsigned int getscreenmap360(float *xyz) {
   return 0;
 }
 
+#ifdef pp_RENDER360_DEBUG
+/* ------------------ draw_screeninfo ------------------------ */
+
+void draw_screeninfo(void){
+  int i;
+  int j;
+
+  if(screeninfo == NULL)setup_screeninfo();
+  glPushMatrix();
+  glScalef(0.5,0.5,0.5);
+  glTranslatef(1.0,1.0,1.0);
+
+  glBegin(GL_LINES);
+  for(i = 0; i < nscreeninfo; i++){
+    screendata *screeni;
+    float xyz[12];
+    float *view, *right, *up;
+
+    screeni = screeninfo + i;
+    view = screeni->view;
+    right = screeni->right;
+    up = screeni->up;
+
+    for(j = 0; j < 3; j++){
+      xyz[j+0] = view[j] - right[j]/2.0 - up[j] / 2.0;
+      xyz[j+3] = view[j] + right[j] / 2.0 - up[j] / 2.0;
+      xyz[j+6] = view[j] + right[j] / 2.0 + up[j] / 2.0;
+      xyz[j+9] = view[j] - right[j] / 2.0 + up[j] / 2.0
+        ;
+    }
+    glVertex3fv(xyz);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz);
+  }
+  glEnd();
+  glPopMatrix();
+}
+#endif
+
 /* ------------------ setup_screeninfo ------------------------ */
 
 void setup_screeninfo(void){
