@@ -2653,6 +2653,7 @@ void setScreenSize(int *width, int *height){
 /* ------------------ Reshape_CB ------------------------ */
 
 void Reshape_CB(int width, int height){
+  if(disable_reshape==1)return;
   updatemenu=1;
   window_aspect_ratio = (float)width/(float)height;
   if(window_aspect_ratio<1.0)window_aspect_ratio=1.0/window_aspect_ratio;
