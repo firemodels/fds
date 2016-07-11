@@ -1845,6 +1845,24 @@ extern "C" void rotation_type_CB(int var){
   handle_rotation_type(ROTATION_2AXIS);
 }
 
+#ifdef pp_RENDER360
+/* ------------------ Enable360Zoom ------------------------ */
+
+extern "C" void Enable360Zoom(void){
+  if(disable_reshape==1){
+    SPINNER_window_height360->enable();
+    disable_reshape=0;
+  }
+}
+
+/* ------------------ Disable360Zoom ------------------------ */
+
+void Disable360Zoom(void){
+  SPINNER_window_height360->disable();
+  disable_reshape=1;
+}
+#endif
+
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
@@ -1912,14 +1930,17 @@ void Render_CB(int var){
         if(nrender_rows==1&&render_360==0){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
+#ifdef pp_RENDER360          
         else if (render_360 == 1) {
           if(glui_screenWidth!=glui_screenHeight){
             glui_screenWidth = MAX(glui_screenWidth,glui_screenHeight);
             glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
             Motion_CB(WINDOW_RESIZE);
           }
+          Disable360Zoom();
           RenderMenu(RENDER_CURRENT_360);
         }
+#endif          
         else{
           RenderMenu(RENDER_CURRENT_MULTIPLE);
         }
