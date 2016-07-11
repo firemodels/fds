@@ -71,9 +71,7 @@
 #define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
-#ifdef pp_RENDER360
 #define RENDER_360 9
-#endif
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -106,9 +104,7 @@ GLUI_Panel *PANEL_reset=NULL;
 GLUI_Panel *PANEL_specify=NULL;
 GLUI_Panel *PANEL_change_zaxis=NULL;
 
-#ifdef pp_RENDER360
 GLUI_Rollout *ROLLOUT_render360 = NULL;
-#endif
 GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
@@ -151,19 +147,13 @@ GLUI_Spinner *SPINNER_xcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_ycenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_zcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_framerate = NULL;
-#ifdef pp_RENDER360
 GLUI_Spinner *SPINNER_window_height360=NULL;
-#endif
 
-#ifdef pp_RENDER360
 GLUI_StaticText *STATIC_width360=NULL;
-#endif
 
-#ifdef pp_RENDER360
 GLUI_Checkbox *CHECKBOX_render360 = NULL;
 #ifdef pp_RENDER360_DEBUG
 GLUI_Checkbox *CHECKBOX_screenview = NULL;
-#endif
 #endif
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
@@ -712,7 +702,6 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(PANEL_xy, "multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
   SPINNER_nrender_rows->set_int_limits(1, 10);
 
-#ifdef pp_RENDER360
   ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
   CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
@@ -761,8 +750,6 @@ extern "C" void glui_motion_setup(int main_window){
   CHECKBOX_screenvis[25] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "top", screenvis + 25);
   BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
   BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
-#endif
-
 #endif
 
   update_glui_filelabel(renderfilelabel);
@@ -1845,22 +1832,34 @@ extern "C" void rotation_type_CB(int var){
   handle_rotation_type(ROTATION_2AXIS);
 }
 
+/* ------------------ Enable360Zoom ------------------------ */
+
+extern "C" void Enable360Zoom(void){
+  if(disable_reshape==1){
+    SPINNER_window_height360->enable();
+    disable_reshape=0;
+  }
+}
+
+/* ------------------ Disable360Zoom ------------------------ */
+
+void Disable360Zoom(void){
+  SPINNER_window_height360->disable();
+  disable_reshape=1;
+}
+
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
-#ifdef pp_RENDER360
   char widthlabel[1024];
-#endif
 
   updatemenu=1;
   switch(var){
-#ifdef pp_RENDER360
     case RENDER_360:
       nwidth360 = nheight360*2;
       sprintf(widthlabel,"width: %i",nwidth360);
       STATIC_width360->set_name(widthlabel);
       break;
-#endif
     case MOVIE_NAME:
       enable_disable_playmovie();
       break;
@@ -1918,6 +1917,7 @@ void Render_CB(int var){
             glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
             Motion_CB(WINDOW_RESIZE);
           }
+          Disable360Zoom();
           RenderMenu(RENDER_CURRENT_360);
         }
         else{

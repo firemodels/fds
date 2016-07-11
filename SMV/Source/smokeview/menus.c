@@ -1488,6 +1488,7 @@ void RenderState(int onoff){
     }
   }
   else{
+    Enable360Zoom();
     render_multi=0;
     render_multi_state=0;
     setScreenSize(&saveW,&saveH);

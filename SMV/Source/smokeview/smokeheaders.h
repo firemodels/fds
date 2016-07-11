@@ -5,6 +5,7 @@
 #include "gd.h"
 #endif
 
+EXTERNCPP void Enable360Zoom(void);
 #ifdef pp_RENDER360_DEBUG
 EXTERNCPP void draw_screeninfo(void);
 #endif
