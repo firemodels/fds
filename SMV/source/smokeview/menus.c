@@ -1488,6 +1488,9 @@ void RenderState(int onoff){
     }
   }
   else{
+#ifdef pp_RENDER360  
+    Enable360Zoom();
+#endif    
     render_multi=0;
     render_multi_state=0;
     setScreenSize(&saveW,&saveH);
