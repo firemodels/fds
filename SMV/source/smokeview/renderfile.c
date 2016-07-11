@@ -612,6 +612,7 @@ void setup_screeninfo(void){
   int ibuf;
 
   nscreeninfo = 26;
+  FREEMEMORY(screeninfo);
   NewMemory((void **)&screeninfo, nscreeninfo * sizeof(screendata));
 
   for(ibuf = 0; ibuf < nscreeninfo; ibuf++){
@@ -641,22 +642,21 @@ void setup_screeninfo(void){
       int ii;
 
       ii = ibuf - 1;
-      azimuth = ii*45.0;
+      azimuth = ii*aperture_width;
       elevation = -90.0+aperture_height;
     }
     else if(ibuf >= 9 && ibuf < 17){
       int ii;
 
       ii = ibuf - 9;
-      azimuth = ii*45.0;
+      azimuth = ii*aperture_width;
       elevation = -90.0 + 2.0*aperture_height;
     }
     else if(ibuf >= 17 && ibuf < 25){
       int ii;
 
       ii = ibuf - 17;
-      azimuth = ii*45.0;
-      elevation = 45.0;
+      azimuth = ii*aperture_width;
       elevation = -90.0 + 3.0*aperture_height;
     }
     else if(ibuf == 25){
@@ -702,6 +702,7 @@ void setup_screeninfo(void){
     }
   }
 
+  FREEMEMORY(screenmap360);
   NewMemory((void **)&screenmap360, nwidth360*nheight360 * sizeof(unsigned int));
   {
     int i,j;
