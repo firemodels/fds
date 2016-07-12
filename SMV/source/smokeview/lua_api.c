@@ -418,13 +418,12 @@ int lua_set_sceneclip_z_max(lua_State *L) {
 int lua_get_global_times(lua_State *L) {
   PRINTF("lua: initialising global time table\n");
   lua_createtable(L, 0, nglobal_times);
-  int i;
-    for (i = 0; i < nglobal_times; i++) {
-      lua_pushnumber(L, i);
-      lua_pushnumber(L, global_times[i]);
-      lua_settable(L, -3);
-    }
-    return 1;
+  for (int i = 0; i < nglobal_times; i++) {
+    lua_pushnumber(L, i);
+    lua_pushnumber(L, global_times[i]);
+    lua_settable(L, -3);
+  }
+  return 1;
 }
 
 /*
@@ -453,8 +452,7 @@ int lua_get_meshes(lua_State *L) {
   meshdata *infotable = meshinfo;
   PRINTF("lua: initialising mesh table\n");
   lua_createtable(L, 0, entries);
-  int i;
-  for (i = 0; i < entries; i++) {
+  for (int i = 0; i < entries; i++) {
     lua_pushnumber(L, i);
     lua_createtable(L, 0, 2);
 
@@ -490,8 +488,7 @@ int lua_get_devices(lua_State *L) {
   devicedata *infotable = deviceinfo;
   PRINTF("lua: initialising device table\n");
   lua_createtable(L, 0, entries);
-  int i;
-  for (i = 0; i < entries; i++) {
+  for (int i = 0; i < entries; i++) {
     lua_pushnumber(L, i);
     lua_createtable(L, 0, 2);
 
@@ -589,8 +586,7 @@ int lua_initsmvproginfo(lua_State *L) {
 int lua_get_sliceinfo(lua_State *L) {
   PRINTF("lua: initialising slice table\n");
   lua_createtable(L, 0, nsliceinfo);
-  int i;
-  for (i = 0; i < nsliceinfo; i++) {
+  for (int i = 0; i < nsliceinfo; i++) {
     lua_pushnumber(L, i);
     lua_createtable(L, 0, 16);
 
@@ -661,8 +657,7 @@ int lua_get_sliceinfo(lua_State *L) {
 int lua_get_csvinfo(lua_State *L) {
   PRINTF("lua: initialising csv table\n");
   lua_createtable(L, 0, ncsvinfo);
-  int i;
-  for (i = 0; i < ncsvinfo; i++) {
+  for (int i = 0; i < ncsvinfo; i++) {
     lua_pushnumber(L, i);
     lua_createtable(L, 0, 4);
 
@@ -1525,10 +1520,9 @@ int lua_set_colorbar_colors(lua_State *L) {
     ncolors++;
     lua_pop(L, 1);
   }
-  int i;
   float *color;
   float colors[ncolors][3];
-  for (i = 1; i <= ncolors; i++) {
+  for (int i = 1; i <= ncolors; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L, 1);
     get_color(L, -1, colors[i-1]);
@@ -1539,10 +1533,9 @@ int lua_set_colorbar_colors(lua_State *L) {
 }
 
 int lua_get_colorbar_colors(lua_State *L) {
-  int i;
   float *rgb_ini_copy_p = rgb_ini;
   lua_createtable(L, 0, nrgb_ini);
-  for (i = 0; i < nrgb_ini; i++) {
+  for (int i = 0; i < nrgb_ini; i++) {
     lua_pushnumber(L, i+1);
     lua_createtable(L, 0, 2);
 
@@ -1569,10 +1562,9 @@ int lua_set_color2bar_colors(lua_State *L) {
     fprintf(stderr, "colorbar table is not present\n");
     return 1;
   }
-  int i;
   float *color;
   float colors[ncolors][3];
-  for (i = 1; i <= ncolors; i++) {
+  for (int i = 1; i <= ncolors; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L,-2);
     get_color(L, -1, colors[i-1]);
@@ -1583,10 +1575,9 @@ int lua_set_color2bar_colors(lua_State *L) {
 }
 
 int lua_get_color2bar_colors(lua_State *L) {
-  int i;
   float *rgb_ini_copy_p = rgb2_ini;
   lua_createtable(L, 0, nrgb2_ini);
-  for (i = 0; i < nrgb2_ini; i++) {
+  for (int i = 0; i < nrgb2_ini; i++) {
     lua_pushnumber(L, i+1);
     lua_createtable(L, 0, 2);
 
@@ -1671,10 +1662,9 @@ int lua_set_isocolors(lua_State *L) {
     ncolors++;
     x = lua_tonumber(L, -1);
   }
-  int i;
   float *color;
   float colors[ncolors][3];
-  for (i = 1; i <= ncolors; i++) {
+  for (int i = 1; i <= ncolors; i++) {
     if (!lua_istable(L, 4)) {
       fprintf(stderr, "isocolor table is not present\n");
       return 1;
@@ -1683,7 +1673,7 @@ int lua_set_isocolors(lua_State *L) {
     lua_gettable(L, 4);
     get_color(L, -1, colors[i-1]);
   }
-  // for (i = 0; i < ncolors; i++) {
+  // for (int i = 0; i < ncolors; i++) {
   //   printf("%d: %f %f %f\n", i,
   //     colors[i][0], colors[i][1], colors[i][2]);
   // }
@@ -3418,14 +3408,13 @@ int lua_set_gridparms(lua_State *L) {
 }
 
 int lua_set_gsliceparms(lua_State *L) {
-  int i;
   int vis_data = lua_tonumber(L, 1);
   int vis_triangles = lua_tonumber(L, 2);
   int vis_triangulation = lua_tonumber(L, 3);
   int vis_normal = lua_tonumber(L, 4);
   float xyz[3];
   // TODO: use named fields (e.g. xyz)
-  for (i = 0; i < 3; i++) {
+  for (int i = 0; i < 3; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L, 5);
     xyz[i] = lua_tonumber(L, -1);
@@ -3433,7 +3422,7 @@ int lua_set_gsliceparms(lua_State *L) {
     i++;
   }
   float azelev[2];
-  for (i = 0; i < 2; i++) {
+  for (int i = 0; i < 2; i++) {
     lua_pushnumber(L, i);
     lua_gettable(L, 6);
     azelev[i] = lua_tonumber(L, -1);
