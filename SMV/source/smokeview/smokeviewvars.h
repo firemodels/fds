@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
 SVEXTERN int SVDECL(nscreeninfo,26);
 #ifdef pp_RENDER360_DEBUG
@@ -99,7 +100,7 @@ SVEXTERN int SVDECL(update_readiso_geom_wrapup, UPDATE_ISO_OFF);
 SVEXTERN int SVDECL(nmemory_ids, 0);
 SVEXTERN int SVDECL(update_playmovie, 0);
 SVEXTERN int SVDECL(play_movie_now, 1);
-SVEXTERN int SVDECL(update_makemovie, 0),SVDECL(moviefiletype,AVI);
+SVEXTERN int SVDECL(update_makemovie, 0),SVDECL(movie_filetype,AVI);
 SVEXTERN char movie_name[1024], movie_ext[10], render_file_base[1024];
 SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0), SVDECL(overwrite_movie, 1);
 
@@ -1120,7 +1121,7 @@ SVEXTERN   int openfileflag;
 SVEXTERN float xyzmaxdiff;
 SVEXTERN char ext_png[5];
 SVEXTERN char ext_jpg[5];
-SVEXTERN int renderfiletype;
+SVEXTERN int render_filetype;
 SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];

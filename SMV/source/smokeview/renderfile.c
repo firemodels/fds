@@ -76,7 +76,7 @@ void MakeMovie(void){
 
   if(render_state == ON)return;
 
-  if(renderfiletype==JPEG){
+  if(render_filetype==JPEG){
     strcpy(image_ext, ".jpg");
   }
   else{
@@ -123,6 +123,12 @@ void MakeMovie(void){
     sprintf(command_line, "ffmpeg %s -r %i -i ", overwrite_flag,movie_framerate);
     strcat(command_line, movie_frames);
     strcat(command_line, " ");
+    {
+      char bitrate_label[100];
+
+      sprintf(bitrate_label," -b %ik ",movie_bitrate);
+      strcat(command_line,bitrate_label);
+    }
     strcat(command_line, moviefile_path);
 
 // make movie
@@ -374,15 +380,15 @@ void RenderFrame(int view_mode){
 
   // filename extension
 
-  switch(renderfiletype){
-  case 0:
+  switch(render_filetype){
+  case PNG:
     renderfile_ext=ext_png;
     break;
-  case 1:
+  case JPEG:
     renderfile_ext=ext_jpg;
     break;
   default:
-    renderfiletype=2;
+    render_filetype=PNG;
     renderfile_ext=ext_png;
     break;
   }
@@ -395,7 +401,7 @@ void RenderFrame(int view_mode){
 
   // render image
 
-  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,hoffset,screenH);
+  SVimage2file(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -438,7 +444,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   int irow;
 
   nscreen_cols=nscreen_rows;
-  switch(renderfiletype){
+  switch(render_filetype){
   case PNG:
     ext=ext_png;
     break;
@@ -446,7 +452,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     ext=ext_jpg;
     break;
   default:
-    renderfiletype=0;
+    render_filetype=PNG;
     ext=ext_png;
     break;
   }
@@ -498,7 +504,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   /* output the image */
 
-  switch(renderfiletype){
+  switch(render_filetype){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
@@ -755,7 +761,7 @@ int mergescreenbuffers360(void){
   int i, j, ijk360;
   int *screenbuffer;
 
-  switch (renderfiletype){
+  switch (render_filetype){
   case PNG:
     ext = ext_png;
     break;
@@ -763,7 +769,7 @@ int mergescreenbuffers360(void){
     ext = ext_jpg;
     break;
   default:
-    renderfiletype = 0;
+    render_filetype = PNG;
     ext = ext_png;
     break;
   }
@@ -834,7 +840,7 @@ int mergescreenbuffers360(void){
 
   /* output the image */
 
-  switch (renderfiletype){
+  switch (render_filetype){
   case PNG:
     gdImagePng(RENDERimage, RENDERfile);
     break;

@@ -1201,10 +1201,10 @@ void initvars(void){
 #endif
 
   cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
-  if(moviefiletype==WMV){
+  if(movie_filetype==WMV){
     strcpy(movie_ext, ".wmv");
   }
-  else if(moviefiletype==MP4){
+  else if(movie_filetype==MP4){
     strcpy(movie_ext, ".mp4");
   }
   else{
@@ -1850,7 +1850,7 @@ void initvars(void){
   compress_autoloaded=0;
   strcpy(ext_png,".png");
   strcpy(ext_jpg,".jpg");
-  renderfiletype=0;
+  render_filetype=PNG;
   strcpy(part_ext,".part");
   strcpy(ini_ext,".ini");
 
