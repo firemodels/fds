@@ -784,10 +784,6 @@ EXTERNAL_SOLID_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
    WC=>WALL(IW)
 
-   ! ! CYCLE if the domain boundary is forced to be pure Dirichlet in init (combination INTERPOLATED + NEUMANN)
-
-   ! IF (WC%LAPLACE_BC_INDEX==DIRICHLET) CYCLE EXTERNAL_SOLID_BOUNDARY_LOOP
-
    II  = WC%ONE_D%II
    JJ  = WC%ONE_D%JJ
    KK  = WC%ONE_D%KK
