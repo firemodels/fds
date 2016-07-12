@@ -111,6 +111,7 @@ void _Sniff_Errors(char *whereat);
 
 #define PNG 0
 #define JPEG 1
+#define IMAGE_NONE 2
 
 #define AVI 0
 #define MP4 1
