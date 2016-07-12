@@ -1,4 +1,4 @@
-&HEAD CHID='external_boundary_correction', TITLE='Test idea for correcting velocity errors on external boundaries'/ 
+&HEAD CHID='external_vel_bc_1', TITLE='Test idea for correcting velocity errors on external boundaries'/ 
 
 &MESH IJK=20,20,20, XB=0,10,-5,5,0,10 /
 
