@@ -36,7 +36,7 @@ set linux_fdsdir=%linux_svn_root%
 echo.
 echo ------------------------------------------------------------------------
 echo Updating the Linux GIT repository, %linux_svn_root%, on %linux_hostname% to the latest revision
-plink %linux_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %linux_hostname%
+plink %linux_logon% %scriptdir%/UPDATE_thishost.sh  %linux_svn_root% %linux_hostname%
 
 echo.
 echo ------------------------------------------------------------------------
