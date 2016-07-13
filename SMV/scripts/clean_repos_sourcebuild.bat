@@ -24,7 +24,7 @@ echo Cleaning source and build directories in the Windows repository %svn_root%
 %svn_drive%
 cd %svn_root%\SMV\Build
 git clean -dxf
-cd %svn_root%\SMV\Source
+cd %svn_root%\SMV\source
 git clean -dxf
 
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
