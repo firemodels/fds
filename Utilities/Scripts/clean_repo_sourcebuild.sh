@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURDIR=`pwd
+CURDIR=`pwd`
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 GITROOT=$SCRIPTDIR/../..
 cd $GITROOT
