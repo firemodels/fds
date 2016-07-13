@@ -599,9 +599,24 @@ int main(int argc, char **argv){
 
   progname=argv_sv[0];
   parse_commandline(argc, argv_sv);
+#ifdef pp_LUA
+  if(smokeview_bindir==NULL){
+    smokeview_bindir=getprogdir(progname,&smokeviewpath);
+#ifdef WIN32
+    NewMemory((void **)&smokeview_bindir_abs,_MAX_PATH);
+    _fullpath(smokeview_bindir_abs,smokeview_bindir,_MAX_PATH);
+#else
+    NewMemory((void **)&smokeview_bindir_abs,PATH_MAX);
+    realpath(smokeview_bindir, smokeview_bindir_abs);
+#endif
+  }
+  parse_commandline(argc, argv_sv);
+#else
+  parse_commandline(argc, argv_sv);
   if(smokeview_bindir==NULL){
     smokeview_bindir=getprogdir(progname,&smokeviewpath);
   }
+#endif
   init_texturedir();
   smokezippath=get_smokezippath(smokeview_bindir);
 #ifdef pp_ffmpeg
