@@ -574,16 +574,16 @@ SVEXTERN char label_startup_view[256];
 SVEXTERN char SVDECL(*camera_label,NULL), SVDECL(*colorbar_label,NULL);
 
 SVEXTERN int visPatchType[7];
-SVEXTERN int setp3min[MAXPLOT3DVARS],p3_extreme_min[MAXPLOT3DVARS],p3_extreme_max[MAXPLOT3DVARS];
-SVEXTERN float p3min[MAXPLOT3DVARS];
-SVEXTERN float p3chopmin[MAXPLOT3DVARS];
-SVEXTERN int setp3max[MAXPLOT3DVARS];
-SVEXTERN int setp3chopmin[6];
-SVEXTERN int setp3chopmax[6];
+SVEXTERN int p3_extreme_min[MAXPLOT3DVARS], p3_extreme_max[MAXPLOT3DVARS];
 
+SVEXTERN int setp3min[MAXPLOT3DVARS], setp3min_save[MAXPLOT3DVARS];
+SVEXTERN float p3min[MAXPLOT3DVARS], p3min_save[MAXPLOT3DVARS];
 
-SVEXTERN float p3max[MAXPLOT3DVARS];
-SVEXTERN float p3chopmax[MAXPLOT3DVARS];
+SVEXTERN int setp3max[MAXPLOT3DVARS], setp3max_save[MAXPLOT3DVARS];
+SVEXTERN float p3max[MAXPLOT3DVARS], p3max_save[MAXPLOT3DVARS];
+
+SVEXTERN int setp3chopmin[MAXPLOT3DVARS], setp3chopmax[MAXPLOT3DVARS];
+SVEXTERN float p3chopmin[MAXPLOT3DVARS], p3chopmax[MAXPLOT3DVARS];
 
 SVEXTERN int trainer_pause;
 SVEXTERN int trainee_location;
@@ -678,6 +678,7 @@ SVEXTERN int setpartmin, setpartmax, SVDECL(endian_smv,0);
 SVEXTERN int SVDECL(setslicemin,PERCENTILE_MIN), SVDECL(setslicemax,PERCENTILE_MAX);
 SVEXTERN int SVDECL(setslicemin_save,PERCENTILE_MIN), SVDECL(setslicemax_save,PERCENTILE_MAX);
 SVEXTERN int SVDECL(setpatchmin_save, PERCENTILE_MIN), SVDECL(setpatchmax_save, PERCENTILE_MAX);
+SVEXTERN int SVDECL(setpartmin_save, PERCENTILE_MIN), SVDECL(setpartmax_save, PERCENTILE_MAX);
 
 SVEXTERN float slice_line_contour_min;
 SVEXTERN float slice_line_contour_max;
@@ -708,6 +709,7 @@ SVEXTERN float partmin, partmax;
 SVEXTERN float slicemin, slicemax;
 SVEXTERN float slicemin_save, slicemax_save;
 SVEXTERN float patchmin_save, patchmax_save;
+SVEXTERN float partmin_save, partmax_save;
 
 SVEXTERN float SVDECL(zonemin,1.0), SVDECL(zonemax,0.0);
 SVEXTERN float speedmax;
