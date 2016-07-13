@@ -217,7 +217,7 @@ GLUI_Button *BUTTON_label_4=NULL;
 #define TRANSPARENTLEVEL 110
 
 #define UPDATEPLOT 10
-extern "C" void PLOT3D_CB(int var);
+extern "C" void Plot3D_CB(int var);
 extern "C" void Extreme_CB(int var);
 extern "C" void Split_CB(int var);
 
@@ -431,7 +431,7 @@ extern "C" void glui_labels_setup(int main_window){
   PANEL_cb11=glui_labels->add_panel_to_panel(ROLLOUT_coloring,"",GLUI_PANEL_NONE);
 
   PANEL_contours = glui_labels->add_panel_to_panel(PANEL_cb11,_d("Colorbar type:"));
-  RADIO2_plot3d_display=glui_labels->add_radiogroup_to_panel(PANEL_contours,&contour_type,UPDATEPLOT,PLOT3D_CB);
+  RADIO2_plot3d_display=glui_labels->add_radiogroup_to_panel(PANEL_contours,&contour_type,UPDATEPLOT,Plot3D_CB);
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_d("Continuous"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_d("Stepped"));
   glui_labels->add_radiobutton_to_group(RADIO2_plot3d_display,_d("Line"));

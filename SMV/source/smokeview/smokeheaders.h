@@ -741,7 +741,7 @@ EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void RenderFrame(int view_mode);
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
-EXTERNCPP void PART_CB_INIT(void);
+EXTERNCPP void Part_CB_Init(void);
 EXTERNCPP void Slice_CB(int var);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);

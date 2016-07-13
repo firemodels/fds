@@ -20,6 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
 SVEXTERN int SVDECL(nscreeninfo,26);
 #ifdef pp_RENDER360_DEBUG
@@ -99,7 +100,7 @@ SVEXTERN int SVDECL(update_readiso_geom_wrapup, UPDATE_ISO_OFF);
 SVEXTERN int SVDECL(nmemory_ids, 0);
 SVEXTERN int SVDECL(update_playmovie, 0);
 SVEXTERN int SVDECL(play_movie_now, 1);
-SVEXTERN int SVDECL(update_makemovie, 0),SVDECL(moviefiletype,AVI);
+SVEXTERN int SVDECL(update_makemovie, 0),SVDECL(movie_filetype,AVI);
 SVEXTERN char movie_name[1024], movie_ext[10], render_file_base[1024];
 SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0), SVDECL(overwrite_movie, 1);
 
@@ -573,16 +574,16 @@ SVEXTERN char label_startup_view[256];
 SVEXTERN char SVDECL(*camera_label,NULL), SVDECL(*colorbar_label,NULL);
 
 SVEXTERN int visPatchType[7];
-SVEXTERN int setp3min[MAXPLOT3DVARS],p3_extreme_min[MAXPLOT3DVARS],p3_extreme_max[MAXPLOT3DVARS];
-SVEXTERN float p3min[MAXPLOT3DVARS];
-SVEXTERN float p3chopmin[MAXPLOT3DVARS];
-SVEXTERN int setp3max[MAXPLOT3DVARS];
-SVEXTERN int setp3chopmin[6];
-SVEXTERN int setp3chopmax[6];
+SVEXTERN int p3_extreme_min[MAXPLOT3DVARS], p3_extreme_max[MAXPLOT3DVARS];
 
+SVEXTERN int setp3min[MAXPLOT3DVARS], setp3min_save[MAXPLOT3DVARS];
+SVEXTERN float p3min[MAXPLOT3DVARS], p3min_save[MAXPLOT3DVARS];
 
-SVEXTERN float p3max[MAXPLOT3DVARS];
-SVEXTERN float p3chopmax[MAXPLOT3DVARS];
+SVEXTERN int setp3max[MAXPLOT3DVARS], setp3max_save[MAXPLOT3DVARS];
+SVEXTERN float p3max[MAXPLOT3DVARS], p3max_save[MAXPLOT3DVARS];
+
+SVEXTERN int setp3chopmin[MAXPLOT3DVARS], setp3chopmax[MAXPLOT3DVARS];
+SVEXTERN float p3chopmin[MAXPLOT3DVARS], p3chopmax[MAXPLOT3DVARS];
 
 SVEXTERN int trainer_pause;
 SVEXTERN int trainee_location;
@@ -676,6 +677,9 @@ SVEXTERN int frameratevalue;
 SVEXTERN int setpartmin, setpartmax, SVDECL(endian_smv,0);
 SVEXTERN int SVDECL(setslicemin,PERCENTILE_MIN), SVDECL(setslicemax,PERCENTILE_MAX);
 SVEXTERN int SVDECL(setslicemin_save,PERCENTILE_MIN), SVDECL(setslicemax_save,PERCENTILE_MAX);
+SVEXTERN int SVDECL(setpatchmin_save, PERCENTILE_MIN), SVDECL(setpatchmax_save, PERCENTILE_MAX);
+SVEXTERN int SVDECL(setpartmin_save, PERCENTILE_MIN), SVDECL(setpartmax_save, PERCENTILE_MAX);
+
 SVEXTERN float slice_line_contour_min;
 SVEXTERN float slice_line_contour_max;
 SVEXTERN int slice_line_contour_num;
@@ -704,6 +708,9 @@ SVEXTERN float targetmin, targetmax;
 SVEXTERN float partmin, partmax;
 SVEXTERN float slicemin, slicemax;
 SVEXTERN float slicemin_save, slicemax_save;
+SVEXTERN float patchmin_save, patchmax_save;
+SVEXTERN float partmin_save, partmax_save;
+
 SVEXTERN float SVDECL(zonemin,1.0), SVDECL(zonemax,0.0);
 SVEXTERN float speedmax;
 SVEXTERN int SVDECL(axislabels_smooth,1),SVDECL(axislabels_smooth_save,1);
@@ -1120,7 +1127,7 @@ SVEXTERN   int openfileflag;
 SVEXTERN float xyzmaxdiff;
 SVEXTERN char ext_png[5];
 SVEXTERN char ext_jpg[5];
-SVEXTERN int renderfiletype;
+SVEXTERN int render_filetype;
 SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
