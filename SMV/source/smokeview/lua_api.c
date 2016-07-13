@@ -3819,14 +3819,22 @@ int lua_show_slices_hideall(lua_State *L) {
 void addLuaPaths() {
   // package.path is a path variable where Lua scripts and modules may be
   // found, typiclly text based files with the .lua extension.
+#ifdef _WIN32
+  char smokeview_bindir_abs[_MAX_PATH];
+  _fullpath(smokeview_bindir_abs,smokeview_bindir,_MAX_PATH);
+#else
+  char smokeview_bindir_abs[PATH_MAX];
+  realpath(smokeview_bindir,smokeview_bindir_abs);
+#endif
+
   lua_getglobal(L, "package");
   int pathType = lua_getfield(L, -1, "path");
   const char *oldPath = lua_tostring(L, -1);
-  int newLength = strlen(oldPath) + 1 + strlen(smokeview_bindir) + 5 +1;
+  int newLength = strlen(oldPath) + 1 + strlen(smokeview_bindir_abs) + 5 +1;
   char newPath[newLength];
   strcpy(newPath, oldPath);
   strcat(newPath,";");
-  strcat(newPath,smokeview_bindir);
+  strcat(newPath,smokeview_bindir_abs);
   strcat(newPath,"?.lua");
   lua_pushstring(L, newPath);
   lua_setfield(L, -3, "path");
@@ -3836,13 +3844,13 @@ void addLuaPaths() {
   // typically binary (C based) files such as .dll or .so.
   int cpathType = lua_getfield(L, -1, "cpath");
   const char *oldCPath = lua_tostring(L, -1);
-  int newLengthC = strlen(oldCPath) + 1 + 2*strlen(smokeview_bindir) + 10 +1;
+  int newLengthC = strlen(oldCPath) + 1 + 2*strlen(smokeview_bindir_abs) + 10 +1;
   char newCPath[newLengthC];
   strcpy(newCPath, oldCPath);
   strcat(newCPath,";");
-  strcat(newCPath,smokeview_bindir);
+  strcat(newCPath,smokeview_bindir_abs);
   strcat(newCPath,"?.dll;");
-  strcat(newCPath,smokeview_bindir);
+  strcat(newCPath,smokeview_bindir_abs);
   strcat(newCPath,"?.so");
   lua_pushstring(L, newCPath);
   lua_setfield(L, -3, "cpath");
