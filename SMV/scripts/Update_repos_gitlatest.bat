@@ -28,6 +28,7 @@ git remote update
 git checkout development
 git merge origin/development
 git merge firemodels/development
+echo git tag: git describe --dirty
 
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
