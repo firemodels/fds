@@ -1,0 +1,25 @@
+RENDERDIR
+ frames
+LOADINI
+ thouse5_movies.ini
+RENDERDIR
+ frames
+LOADINI
+ thouse5_movies.ini
+LOADFILE
+ thouse5_01.s3d
+LOADFILE
+ thouse5_02.s3d
+SETVIEWPOINT
+ view 4
+RENDER360ALL
+ 1
+thouse5_smoke3d
+RENDERDIR
+ ../../Manuals/SMV_Summary/movies
+SETTIMEVAL
+ 20.0
+RENDERONCE
+ thouse5_smoke3d_20
+UNLOADALL
+
