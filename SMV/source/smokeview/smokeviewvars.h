@@ -677,6 +677,8 @@ SVEXTERN int frameratevalue;
 SVEXTERN int setpartmin, setpartmax, SVDECL(endian_smv,0);
 SVEXTERN int SVDECL(setslicemin,PERCENTILE_MIN), SVDECL(setslicemax,PERCENTILE_MAX);
 SVEXTERN int SVDECL(setslicemin_save,PERCENTILE_MIN), SVDECL(setslicemax_save,PERCENTILE_MAX);
+SVEXTERN int SVDECL(setpatchmin_save, PERCENTILE_MIN), SVDECL(setpatchmax_save, PERCENTILE_MAX);
+
 SVEXTERN float slice_line_contour_min;
 SVEXTERN float slice_line_contour_max;
 SVEXTERN int slice_line_contour_num;
@@ -705,6 +707,8 @@ SVEXTERN float targetmin, targetmax;
 SVEXTERN float partmin, partmax;
 SVEXTERN float slicemin, slicemax;
 SVEXTERN float slicemin_save, slicemax_save;
+SVEXTERN float patchmin_save, patchmax_save;
+
 SVEXTERN float SVDECL(zonemin,1.0), SVDECL(zonemax,0.0);
 SVEXTERN float speedmax;
 SVEXTERN int SVDECL(axislabels_smooth,1),SVDECL(axislabels_smooth_save,1);
