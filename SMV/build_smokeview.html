@@ -46,7 +46,9 @@ function install_smv(args){
 <h3>Bundle Steps - Smokeview</h3>
 <ol>
 <li>Update <a href="scripts/Update_repos_gitlatest.bat">repos</a> on all three platforms
-<li>Edit <a href="scripts/EDIT_setup.bat">configuration file</a> labeling the bundle name
+<li>Edit <a href="scripts/EDIT_setup.bat">configuration file</a> labeling the bundle name 
+using <a href="scripts/GET_revision.bat">repo revision</a>
+
 <li>Update smokeview release notes:
 <ol>
 <li><a href="scripts/GET_smvlog.bat">Add smokeview log entries</a> to release notes (for commits made after <a href="scripts/EDIT_setup.bat">smvlogdate</a> defined in config file) 
@@ -215,7 +217,6 @@ function install_smv(args){
 <li><a href="scripts/EDIT_build_smokeview.bat">Edit</a> this page
 <li><a href="scripts/COPYhome2config.bat">configuration file ===>> repo.</a>
 <li><a href="scripts/COPYconfig2home.bat">configuration file <<=== repo.</a>
-<li><a href="scripts/GET_revision.bat">Get repo revision</a>
 <li><a href="scripts/TEST_setup.bat">Test</a> settings and build/bundle environment. 
 <li><a href="../FDS_Compilation/getting_started.html">FDS/Smokeview build page checklist</a>
 </ul>
