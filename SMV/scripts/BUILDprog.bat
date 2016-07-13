@@ -32,15 +32,15 @@ if "%platform%" == "windows" (
   goto eof
 )
 if "%platform%" == "linux" (
-  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/%prog%/intel_linux_64 make_%prog%.sh 
+  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/%prog%/intel_linux_64 make_%prog%.sh
+  pause
   goto eof
 )
 if "%platform%" == "osx" (
   plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh SMV/Build/%prog%/intel_osx_64 make_%prog%.sh
+  pause
   goto eof
 )
 
 :eof
 echo.
-echo compilation complete
-pause
