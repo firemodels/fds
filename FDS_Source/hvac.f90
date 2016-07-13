@@ -2531,7 +2531,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       RHOCPT(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%RHO*CPT(DU%N_CELLS)
    ENDIF
 
-   DT_DUCT = MIN(DT,DU%DX/DU%VEL(NEW))
+   DT_DUCT = MIN(DT,DU%DX/(2*DU%VEL(NEW))) ! Applies CFL for Godunov pure upwinding scheme
    MASS_FLUX = DU%RHO_D * DU%VEL(NEW) ! total duct mass flow
 
    ! Compute discretized mass conservation equation
