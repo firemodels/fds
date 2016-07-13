@@ -703,6 +703,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(PANEL_xy, "multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
   SPINNER_nrender_rows->set_int_limits(1, 10);
 
+#ifdef pp_RENDER360
   ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
   CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
@@ -751,6 +752,7 @@ extern "C" void glui_motion_setup(int main_window){
   CHECKBOX_screenvis[25] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "top", screenvis + 25);
   BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
   BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
+#endif
 #endif
 
   update_glui_filelabel(renderfilelabel);
