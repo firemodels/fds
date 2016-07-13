@@ -2776,7 +2776,19 @@ extern "C" void Slice_CB(int var){
         slicemax_save=slicemax;
         setslicemax=GLOBAL_MAX;
         Slice_CB(SETVALMAX);
-        PRINTF("resarch mode on\n");
+
+        setpatchmin_save = setpatchmin;
+        patchmin_save = patchmin;
+        setpatchmin = GLOBAL_MIN;
+        Bound_CB(SETVALMIN);
+
+        setpatchmax_save = setpatchmax;
+        patchmax_save = patchmax;
+        setpatchmax = GLOBAL_MAX;
+        Bound_CB(SETVALMAX);
+        Bound_CB(FILERELOAD);
+
+        PRINTF("research mode on\n");
       }
       else{
         axislabels_smooth=axislabels_smooth_save;
@@ -2791,7 +2803,19 @@ extern "C" void Slice_CB(int var){
         Slice_CB(SETVALMAX);
         slicemax=slicemax_save;
         Slice_CB(VALMAX);
-        PRINTF("resarch mode off\n");
+
+        setpatchmin = setpatchmin_save;
+        Bound_CB(SETVALMIN);
+        patchmin = patchmin_save;
+        Bound_CB(VALMIN);
+
+        setpatchmax = setpatchmax_save;
+        Bound_CB(SETVALMAX);
+        patchmax = patchmax_save;
+        Bound_CB(VALMAX);
+        Bound_CB(FILERELOAD);
+
+        PRINTF("research mode off\n");
       }
       update_axislabels_smooth();
       Slice_CB(FILEUPDATE);
