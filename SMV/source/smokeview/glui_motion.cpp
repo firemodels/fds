@@ -71,9 +71,7 @@
 #define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
-#ifdef pp_RENDER360
 #define RENDER_360 9
-#endif
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -106,9 +104,7 @@ GLUI_Panel *PANEL_reset=NULL;
 GLUI_Panel *PANEL_specify=NULL;
 GLUI_Panel *PANEL_change_zaxis=NULL;
 
-#ifdef pp_RENDER360
 GLUI_Rollout *ROLLOUT_render360 = NULL;
-#endif
 GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
@@ -151,16 +147,14 @@ GLUI_Spinner *SPINNER_xcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_ycenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_zcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_framerate = NULL;
-#ifdef pp_RENDER360
+GLUI_Spinner *SPINNER_bitrate = NULL;
 GLUI_Spinner *SPINNER_window_height360=NULL;
-#endif
 
-#ifdef pp_RENDER360
 GLUI_StaticText *STATIC_width360=NULL;
-#endif
 
-#ifdef pp_RENDER360
 GLUI_Checkbox *CHECKBOX_render360 = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Checkbox *CHECKBOX_screenview = NULL;
 #endif
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
@@ -272,15 +266,15 @@ void enable_disable_makemovie(int onoff){
 /* ------------------ update_movie_type ------------------------ */
 
 void update_movie_type(int type){
-  moviefiletype = type;
-  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
+  movie_filetype = type;
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(movie_filetype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
-  renderfiletype = type;
-  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
+  render_filetype = type;
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(render_filetype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -694,7 +688,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_column_to_panel(PANEL_render_file, false);
 
   PANEL_file_type = glui_motion->add_panel_to_panel(PANEL_render_file, "type:", true);
-  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
+  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &render_filetype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "png");
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "jpg");
 
@@ -721,6 +715,7 @@ extern "C" void glui_motion_setup(int main_window){
   NewMemory((void **)&CHECKBOX_screenvis, nscreeninfo * sizeof(GLUI_Checkbox *));
 
   ROLLOUT_screenvis = glui_motion->add_rollout_to_panel(ROLLOUT_render360, "screenvis", false);
+  CHECKBOX_screenview = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "view screens", &screenview);
   CHECKBOX_screenvis[0] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "bottom", screenvis);
 
   ROLLOUT_lower = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "lower", false);
@@ -758,7 +753,6 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
   BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
 #endif
-
 #endif
 
   update_glui_filelabel(renderfilelabel);
@@ -802,12 +796,14 @@ extern "C" void glui_motion_setup(int main_window){
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
     PANEL_movie_type = glui_motion->add_panel_to_panel(ROLLOUT_make_movie, "movie type:", true);
-    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &moviefiletype, MOVIE_TYPE, Render_CB);
+    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &movie_filetype, MOVIE_TYPE, Render_CB);
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "avi");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "mp4");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
+    SPINNER_bitrate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "bit rate (Kb/s)", GLUI_SPINNER_INT, &movie_bitrate);
+    SPINNER_bitrate->set_int_limits(100, 20000);
     glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
@@ -1841,22 +1837,34 @@ extern "C" void rotation_type_CB(int var){
   handle_rotation_type(ROTATION_2AXIS);
 }
 
+/* ------------------ Enable360Zoom ------------------------ */
+
+extern "C" void Enable360Zoom(void){
+  if(disable_reshape==1){
+    SPINNER_window_height360->enable();
+    disable_reshape=0;
+  }
+}
+
+/* ------------------ Disable360Zoom ------------------------ */
+
+void Disable360Zoom(void){
+  SPINNER_window_height360->disable();
+  disable_reshape=1;
+}
+
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
-#ifdef pp_RENDER360
   char widthlabel[1024];
-#endif
 
   updatemenu=1;
   switch(var){
-#ifdef pp_RENDER360
     case RENDER_360:
       nwidth360 = nheight360*2;
       sprintf(widthlabel,"width: %i",nwidth360);
       STATIC_width360->set_name(widthlabel);
       break;
-#endif
     case MOVIE_NAME:
       enable_disable_playmovie();
       break;
@@ -1876,10 +1884,10 @@ void Render_CB(int var){
     case RENDER_TYPE:
       break;
     case MOVIE_TYPE:
-      if(moviefiletype==WMV){
+      if(movie_filetype==WMV){
         strcpy(movie_ext, ".wmv");
       }
-      else if(moviefiletype==MP4){
+      else if(movie_filetype==MP4){
         strcpy(movie_ext, ".mp4");
       }
       else{
@@ -1914,6 +1922,7 @@ void Render_CB(int var){
             glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
             Motion_CB(WINDOW_RESIZE);
           }
+          Disable360Zoom();
           RenderMenu(RENDER_CURRENT_360);
         }
         else{

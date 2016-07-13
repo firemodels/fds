@@ -111,6 +111,7 @@ void _Sniff_Errors(char *whereat);
 
 #define PNG 0
 #define JPEG 1
+#define IMAGE_NONE 2
 
 #define AVI 0
 #define MP4 1
@@ -254,6 +255,7 @@ void _Sniff_Errors(char *whereat);
 #define SCRIPT_RENDERONCE 101
 #define SCRIPT_RENDERDOUBLEONCE 102
 #define SCRIPT_RENDERALL 103
+#define SCRIPT_RENDER360ALL 119
 #define SCRIPT_VOLSMOKERENDERALL 104
 #define SCRIPT_RENDERDIR 105
 #define SCRIPT_RENDERCLIP 106

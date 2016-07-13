@@ -1488,6 +1488,7 @@ void RenderState(int onoff){
     }
   }
   else{
+    Enable360Zoom();
     render_multi=0;
     render_multi_state=0;
     setScreenSize(&saveW,&saveH);
@@ -1581,11 +1582,11 @@ void RenderMenu(int value){
     update_glui_filelabel(renderfilelabel);
     break;
   case RenderPNG:
-     renderfiletype=0;
+     render_filetype=PNG;
      updatemenu=1;
      break;
   case RenderJPEG:
-     renderfiletype=1;
+     render_filetype=JPEG;
      updatemenu=1;
      break;
   default:
@@ -7517,15 +7518,15 @@ updatemenu=0;
     if(render_current==1)glutAddSubMenu(_("Resolution multiplier"),resolutionmultipliermenu);
 
     glutAddMenuEntry(_("Type:"),11000);
-    if(renderfiletype==0){
+    if(render_filetype==PNG){
       glutAddMenuEntry("  *PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }
-    if(renderfiletype==1){
+    if(render_filetype==JPEG){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  *JPEG",RenderJPEG);
     }
-    if(renderfiletype==2){
+    if(render_filetype==IMAGE_NONE){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }
