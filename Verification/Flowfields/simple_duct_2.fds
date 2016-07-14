@@ -1,7 +1,7 @@
 &HEAD CHID='simple_duct_2', TITLE='Test of mass conservation with 2nd-order interpolated boundaries' /
 
 &TIME T_END=30.0 /
-&MISC Y_CO2_INFTY=0., HUMIDITY=0., SECOND_ORDER_INTERPOLATED_BOUNDARY=.TRUE./ 
+&MISC Y_CO2_INFTY=0., HUMIDITY=0.,  / 
 
 &PRES VELOCITY_TOLERANCE=0.001, MAX_PRESSURE_ITERATIONS=100 /
 
