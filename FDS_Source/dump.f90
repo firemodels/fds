@@ -2485,7 +2485,7 @@ SPEC_LOOP: DO N=1,N_SPECIES
    END SELECT
    WRITE(LU_OUTPUT,'(A,F11.5)')   '   Molecular Weight (g/mol)         ',SS%MW
    WRITE(LU_OUTPUT,'(A,F8.3)')    '   Ambient Density (kg/m^3)         ',SS%MW*P_INF/(TMPA*R0)
-   IF (SS%H_F == -2.E23_EB) THEN
+   IF (SS%H_F < -1.E23_EB) THEN
       WRITE(LU_OUTPUT,'(A,A)')    '   Enthalpy of Formation (J/kg)     ','not specified'
    ELSE
       WRITE(LU_OUTPUT,'(A,ES9.2)')'   Enthalpy of Formation (J/kg)       ',SS%H_F/SS%MW*1000._EB
