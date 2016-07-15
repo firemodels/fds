@@ -1065,8 +1065,8 @@ ITER_LOOP: DO
             ZZSUM = 0
             CPTSUM = 0
             DU_DX = DU%LENGTH/REAL(DU%N_CELLS,EB)
-            IF (DU%VEL(NEW) > 0._EB) THEN ! if there is flow and it is from node 1 to node 2
-               DO NC = DU%N_CELLS,1,-1 ! loop starts at N_CELLS and goes backwards
+            IF (DU%VEL(NEW) > 0._EB) THEN
+               DO NC = DU%N_CELLS,1,-1
                   IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
                      DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
                      ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
@@ -1078,8 +1078,8 @@ ITER_LOOP: DO
                      CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
                   ENDIF
                ENDDO
-            ELSE ! either if there is reverse flow or zero flow
-               DO NC = 1,DU%N_CELLS ! loop starts at 1 and goes through to N_CELLS
+            ELSE
+               DO NC = 1,DU%N_CELLS
                   IF (MSUM + DU%RHO_C(NC)*DU_DX > MFLOW) THEN
                      DU_DX = (MFLOW - MSUM)/DU%RHO_C(NC)
                      ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
