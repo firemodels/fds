@@ -1837,7 +1837,7 @@ void initvars(void){
   reset_frame=0;
   reset_time=0.0,start_frametime=0.0,stop_frametime=0.0;
   reset_time_flag=0;
-  RenderOnceNow=0, RenderOnceNowR=0, RenderOnceNowL=0;
+  RenderOnceNow=0;
 
   nsorted_surfidlist=0;
 

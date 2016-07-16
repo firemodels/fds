@@ -1077,7 +1077,7 @@ SVEXTERN int niso_compressed;
 SVEXTERN int nslice_loaded, npatch_loaded;
 SVEXTERN int SVDECL(*slice_loaded_list,NULL), SVDECL(*patch_loaded_list,NULL);
 SVEXTERN int SVDECL(*render_frame,NULL);
-SVEXTERN int RenderOnceNow, RenderOnceNowR, RenderOnceNowL;
+SVEXTERN int RenderOnceNow;
 SVEXTERN char SVDECL(*fdsprefix,NULL), SVDECL(*fdsprefix2,NULL);
 SVEXTERN char SVDECL(*endian_filename,NULL);
 SVEXTERN char SVDECL(*target_filename,NULL);

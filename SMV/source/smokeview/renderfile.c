@@ -166,9 +166,7 @@ void Render(int view_mode){
       }
     }
   }
-  if(RenderOnceNow==0&&RenderOnceNowR==0&&RenderOnceNowL==0&&
-     render_state==RENDER_ON&&render_multi==0&&
-     plotstate==DYNAMIC_PLOTS && nglobal_times>0){
+  if(RenderOnceNow==0&&render_state==RENDER_ON&&render_multi==0&&plotstate==DYNAMIC_PLOTS && nglobal_times>0){
     if(itimes>=0&&itimes<nglobal_times&&
      ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
      ){
@@ -182,20 +180,19 @@ void Render(int view_mode){
     }
   }
 
-  if(render_multi==0){
-    SNIFF_ERRORS("after render");
-  }
-
-  if(RenderOnceNow==1||RenderOnceNowL==1||RenderOnceNowR==1){
+  if(RenderOnceNow==1){
     if(render_multi==0)RenderFrame(view_mode);
     RenderOnceNow=0;
-    if(view_mode==VIEW_LEFT)RenderOnceNowL=0;
-    if(view_mode==VIEW_RIGHT)RenderOnceNowR=0;
-    if(RenderOnceNowR==0&&RenderOnceNowL==0&&render_multi==0){
+    if(render_multi==0){
       RenderState(RENDER_OFF);
       RenderSkip=1;
     }
   }
+  
+  if(render_multi==0){
+    SNIFF_ERRORS("after render");
+  }
+  
   if(script_render==1){
     script_render=0;
     RenderState(RENDER_OFF);

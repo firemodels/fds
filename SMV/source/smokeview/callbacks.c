@@ -1860,10 +1860,6 @@ void keyboard(unsigned char key, int flag){
           fprintf(scriptoutstream," %s\n",script_renderfile);
         }
         RenderOnceNow=1;
-        if(stereotype!=STEREO_NONE){
-          RenderOnceNowL=1;
-          RenderOnceNowR=1;
-        }
         RenderState(RENDER_ON);
         render_from_menu=0;
       }
