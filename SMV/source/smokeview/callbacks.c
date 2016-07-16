@@ -3024,6 +3024,8 @@ void Display_CB(void){
         }
 
         mergescreenbuffers(nrender_rows,screenbuffers);
+        Render(VIEW_CENTER);
+
 
         for(i=0;i<nrender_rows*nrender_cols;i++){
           FREEMEMORY(screenbuffers[i]);
@@ -3046,6 +3048,8 @@ void Display_CB(void){
           if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
         }
         mergescreenbuffers360();
+        Render(VIEW_CENTER);
+
         for(i = 0; i < nscreeninfo; i++){
           screendata *screeni;
 
