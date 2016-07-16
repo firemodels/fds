@@ -2714,10 +2714,16 @@ int DoStereo(void){
     if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_LEFT,0,0,0,NULL);
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_LEFT);
+#endif
     glDrawBuffer(GL_BACK_RIGHT);
     if(stereotype_frame==RIGHT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_RIGHT);
+#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=1;
   }
@@ -2740,6 +2746,9 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,NULL);
       screenWidth=screenWidth_save;
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_CENTER);
+#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=2;
   }
@@ -2763,6 +2772,9 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_CENTER);
+#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=3;
   }
@@ -2786,6 +2798,9 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_CENTER);
+#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=4;
   }
@@ -2828,6 +2843,9 @@ int DoStereo(void){
 
       glFlush();
     }
+#ifdef pp_RENDERNEW
+    Render(VIEW_CENTER);
+#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
@@ -2968,6 +2986,9 @@ void Display_CB(void){
     if(render_multi==0){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
+#ifdef pp_RENDERNEW
+      Render(VIEW_CENTER);
+#endif
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{

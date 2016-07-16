@@ -78,8 +78,6 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
 #ifndef pp_RENDERNEW
   Render(view_mode);
-#else  
-  Render(view_mode);
 #endif
 
   SNIFF_ERRORS("end of ShowScene");
