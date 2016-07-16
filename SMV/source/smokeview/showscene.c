@@ -76,12 +76,13 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
   if(viscolorbarpath==0||colorbar_hidescene==0)ShowScene2(mode, view_mode, quad, s_left, s_down);
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
-
+#ifndef pp_RENDERNEW
   Render(view_mode);
+#else  
+  Render(view_mode);
+#endif
 
- /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
-
-  SNIFF_ERRORS("end of loop");
+  SNIFF_ERRORS("end of ShowScene");
   UNLOCK_IBLANK
 }
 

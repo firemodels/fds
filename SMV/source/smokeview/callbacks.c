@@ -3043,23 +3043,6 @@ void Display_CB(void){
       }
     }
   }
-  if(touring == 1 ){
-    if(render_state==RENDER_ON){
-      if(nglobal_times>0)angle_global += 2.0*PI/((float)nglobal_times/(float)RenderSkip);
-      if(nglobal_times==0)angle_global += 2.0*PI/((float)maxtourframes/(float)RenderSkip);
-    }
-    else{
-      angle_global += dang_global;
-    }
-    if(angle_global>PI){angle_global -= -2.0f*PI;}
-    if(rotation_type==ROTATION_2AXIS||rotation_type==ROTATION_1AXIS){
-      camera_current->az_elev[0] = anglexy0 + angle_global*RAD2DEG;
-    }
-    else{
-      camera_current->azimuth = azimuth0 + angle_global*RAD2DEG;
-    }
-    glutPostRedisplay();
-  }
 }
 
 /* ------------------ ResizeWindow ------------------------ */

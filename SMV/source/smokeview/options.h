@@ -65,6 +65,7 @@
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
 #define pp_RENDER360
+#define pp_RENDERNEW
 #ifdef _DEBUG
 #define pp_RENDER360_DEBUG
 #endif

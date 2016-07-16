@@ -604,7 +604,6 @@ SVEXTERN int SVDECL(slice_average_flag,0);
 SVEXTERN int show_slice_average,vis_slice_average;
 SVEXTERN float slice_average_interval;
 
-SVEXTERN float SVDECL(angle_global,0.0), SVDECL(dang_global,0.025f), SVDECL(tourangle_global,0.0);
 SVEXTERN int maxtourframes;
 SVEXTERN int blockageSelect;
 SVEXTERN int SVDECL(ntourknots,0);
