@@ -148,7 +148,7 @@ void MakeMovie(void){
 
 void Render(int view_mode){
   if(current_script_command!=NULL&&(current_script_command->command==SCRIPT_VOLSMOKERENDERALL||current_script_command->command==SCRIPT_ISORENDERALL)){
-    if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
+    if( (render_frame[itimes]>0&&stereotype==STEREO_NONE)||(render_frame[itimes]>1&&stereotype!=STEREO_NONE) ){
       if(itimes==0){
         current_script_command->remove_frame=itimes;
         current_script_command->exit=1;
@@ -157,14 +157,14 @@ void Render(int view_mode){
       }
     }
   //  render_frame[itimes]++; //xxx check whether this is needed
-    if( (render_frame[itimes]>0&&showstereo==STEREO_NONE)||(render_frame[itimes]>1&&showstereo!=STEREO_NONE) ){
+    if( (render_frame[itimes]>0&&stereotype==STEREO_NONE)||(render_frame[itimes]>1&&stereotype!=STEREO_NONE) ){
       current_script_command->remove_frame=itimes;
     }
   }
   if(RenderOnceNow==0&&RenderOnceNowR==0&&RenderOnceNowL==0&&render_state==RENDER_ON&&render_multi==0){
     if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
      if(itimes>=0&&itimes<nglobal_times&&
-       ((render_frame[itimes] == 0&&showstereo==STEREO_NONE)||(render_frame[itimes]<2&&showstereo!=STEREO_NONE))
+       ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
        ){
        render_frame[itimes]++;
        RenderFrame(view_mode);
@@ -222,7 +222,7 @@ void RenderFrame(int view_mode){
 #endif
 
   screenH = screenHeight;
-  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return;
+  if(view_mode==VIEW_LEFT&&stereotype==STEREO_RB)return;
 
 // construct filename for image to be rendered
 
@@ -264,12 +264,12 @@ void RenderFrame(int view_mode){
     strcpy(suffix,"");
     switch(view_mode){
     case VIEW_LEFT:
-      if(showstereo==STEREO_LR){
+      if(stereotype==STEREO_LR){
         strcat(suffix,"_L");
       }
       break;
     case VIEW_RIGHT:
-      if(showstereo==STEREO_LR){
+      if(stereotype==STEREO_LR){
         strcat(suffix,"_R");
       }
       break;
@@ -355,12 +355,12 @@ void RenderFrame(int view_mode){
       if(RenderTime==0)seqnum++;
       break;
     case VIEW_LEFT:
-        if(showstereo==STEREO_LR){
+        if(stereotype==STEREO_LR){
           strcat(suffix,"_L");
         }
       break;
     case VIEW_RIGHT:
-      if(showstereo==STEREO_NONE||showstereo==STEREO_TIME||showstereo==STEREO_LR){
+      if(stereotype==STEREO_NONE||stereotype==STEREO_TIME||stereotype==STEREO_LR){
         strcat(suffix,"_R");
       }
       if(RenderTime==0)seqnum++;
@@ -372,7 +372,7 @@ void RenderFrame(int view_mode){
     strcat(renderfile_suffix,suffix);
   }
 
-  if(showstereo==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+  if(stereotype==STEREO_LR&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
     hoffset=screenHeight/4;
     screenH = screenHeight/2;
     if(view_mode==VIEW_RIGHT)woffset=screenWidth;

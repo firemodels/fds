@@ -366,7 +366,7 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i], "-stereo", 7) == 0){
       stereoactive = 1;
-      showstereo = STEREO_TIME;
+      stereotype = STEREO_TIME;
       PRINTF("stereo option activated\n");
     }
 #ifdef pp_LANG

@@ -1803,11 +1803,6 @@ void initvars(void){
 
   right_green=0.0;
   right_blue=1.0;
-  showstereo=STEREO_NONE;
-  showstereoOLD=showstereo;
-  showstereo_frame=2;
-  show_parallax=0;
-  stereoactive=0;
   apertureindex=1;
   zoomindex=2;
   projection_type=0;

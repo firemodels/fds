@@ -888,7 +888,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
 
-  if(showstereo==STEREO_LR){
+  if(stereotype==STEREO_LR){
     VP_scene.left=screen_left;
     VP_scene.width=screenWidth;
   }
@@ -959,11 +959,11 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fup = scene_aspect_ratio*widthdiv2;
   fdown = -scene_aspect_ratio*widthdiv2;
 
-  if(showstereo==STEREO_NONE||view_mode==VIEW_CENTER){
+  if(stereotype==STEREO_NONE||view_mode==VIEW_CENTER){
     StereoCameraOffset=0.0;
     FrustumAsymmetry=0.0;
   }
-  else if(showstereo!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+  else if(stereotype!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
     StereoCameraOffset = SCALE2SMV(fzero)/30.0;
     if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
     FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/SCALE2SMV(fzero);
@@ -1118,7 +1118,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       getsmokedir(modelview_scratch);
       SNIFF_ERRORS("after getsmokedir");
 #ifdef pp_CULL
-      if(showstereo==STEREO_NONE){
+      if(stereotype==STEREO_NONE){
         if(cullsmoke==1){
           getPixelCount();
           SNIFF_ERRORS("after getPixelCount");

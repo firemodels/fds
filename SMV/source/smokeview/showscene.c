@@ -28,7 +28,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
   /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
 
   update_ShowScene();
-  if(showstereo == STEREO_NONE || showstereo == STEREO_TIME)ClearBuffers(mode);
+  if(stereotype == STEREO_NONE || stereotype == STEREO_TIME)ClearBuffers(mode);
 
   /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 

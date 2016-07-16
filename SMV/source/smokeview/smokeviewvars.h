@@ -1042,11 +1042,13 @@ SVEXTERN int SVDECL(*mvslice_loadstack,NULL),SVDECL(nmvslice_loadstack,0),SVDECL
 SVEXTERN int SVDECL(*subslice_menuindex,NULL),SVDECL(*subvslice_menuindex,NULL);
 
 SVEXTERN float xtimeleft, xtimeright;
-SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
+
+SVEXTERN int SVDECL(stereoactive,0);
+SVEXTERN int SVDECL(stereotype,STEREO_NONE), SVDECL(stereotypeOLD, STEREO_NONE);
+SVEXTERN int SVDECL(show_parallax,0), SVDECL(stereotype_frame, BOTH_EYES);
 
 SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
 SVEXTERN int trainerview;
-SVEXTERN int stereoactive;
 SVEXTERN int apertureindex;
 SVEXTERN int zoomindex;
 SVEXTERN int projection_type;
