@@ -568,6 +568,53 @@ unsigned int getscreenmap360(float *xyz) {
   return 0;
 }
 
+
+#define LEFT 0
+#define RIGHT 1
+/* ------------------ getscreenmap360LR ------------------------ */
+
+unsigned int getscreenmap360LR(int side, float *xyz) {
+  int ibuff;
+  float xyznorm;
+
+  xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
+
+  for(ibuff = 0; ibuff < nscreeninfo; ibuff++){
+    screendata *screeni;
+    float *view, *up, *right, t;
+    float A, B;
+    float cosangle;
+
+    screeni = screeninfo + ibuff;
+    view = screeni->view;
+    up = screeni->up;
+    right = screeni->right;
+    cosangle = DOT3(view, xyz) / xyznorm;
+    if(cosangle <= screeni->cosmax - 0.001)continue;
+
+    t = DOT3(xyz, view);
+    A = DOT3(xyz, right) / t;
+    B = DOT3(xyz, up) / t;
+
+    {
+      int ix, iy, index;
+      unsigned int return_val;
+
+      ix = (screeni->nwidth/2)*(screeni->width / 2.0 + A) / screeni->width;
+      if(ix<0 || ix>screeni->nwidth/2 - 1)continue;
+
+      iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
+      if(iy<0 || iy>screeni->nheight - 1)continue;
+
+      index = iy*screeni->nwidth + ix;
+      if(side == RIGHT)index += screeni->nwidth / 2;
+      return_val = ((ibuff + 1) << 24) | index;
+      return return_val;
+    }
+  }
+  return 0;
+}
+
 #ifdef pp_RENDER360_DEBUG
 /* ------------------ draw_screeninfo ------------------------ */
 
@@ -713,16 +760,21 @@ void setup_screeninfo(void){
   {
     int i,j;
     float *cosa, *sina, *cose, *sine;
+    float dazimuth;
+    int nazimuth; 
 
     NewMemory((void **)&sina, nwidth360 * sizeof(float));
     NewMemory((void **)&cosa, nwidth360 * sizeof(float));
     NewMemory((void **)&sine, nheight360 * sizeof(float));
     NewMemory((void **)&cose, nheight360 * sizeof(float));
 
-    for (i = 0; i < nwidth360; i++){
+    nazimuth = nwidth360;
+    if(stereotype == STEREO_LR)nazimuth /= 2;
+    dazimuth = 360.0/(float)nazimuth;
+    for(i = 0; i < nazimuth; i++){
       float alpha;
 
-      alpha = -180.0 + (float)i*360.0 / (float)nwidth360;
+      alpha = -180.0 + (float)i*dazimuth;
       sina[i] = sin(DEG2RAD*alpha);
       cosa[i] = cos(DEG2RAD*alpha);
     }
@@ -734,13 +786,26 @@ void setup_screeninfo(void){
       cose[i] = cos(DEG2RAD*eps);
     }
     for (j = 0; j < nheight360; j++){
-      for (i = 0; i < nwidth360; i++){
-        float xyz[3];
+      if(stereotype==STEREO_LR){
+        for(i = 0; i < nazimuth; i++){
+          float xyz[3];
 
-        xyz[0] = sina[i] * cose[j];
-        xyz[1] = cosa[i] * cose[j];
-        xyz[2] = sine[j];
-        screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
+          xyz[0] = sina[i] * cose[j];
+          xyz[1] = cosa[i] * cose[j];
+          xyz[2] = sine[j];
+          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT,xyz);
+          screenmap360[j*nwidth360 + nwidth360/2 + i] = getscreenmap360LR(RIGHT,xyz);
+        }
+      }
+      else{
+        for(i = 0; i < nazimuth; i++){
+          float xyz[3];
+
+          xyz[0] = sina[i] * cose[j];
+          xyz[1] = cosa[i] * cose[j];
+          xyz[2] = sine[j];
+          screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
+        }
       }
     }
     FREEMEMORY(sina);
