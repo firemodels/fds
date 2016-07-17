@@ -2728,28 +2728,51 @@ int DoStereo(void){
     return_code=1;
   }
   else if(stereotype==STEREO_LR){             // left/right stereo
+    int i;
+    int nscreens;
+
     glDrawBuffer(GL_BACK);
     ClearBuffers(DRAWSCENE);
-    if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
-      int screenWidth_save;
 
-      screenWidth_save=screenWidth;
-      screenWidth/=2;
-      ShowScene(DRAWSCENE,VIEW_LEFT,0,0,0,NULL);
-      screenWidth=screenWidth_save;
+    nscreens = 1;
+    if(render_360==1&&render_multi!=0){
+      nscreens = nscreeninfo;
+      if (screeninfo == NULL)setup_screeninfo();
     }
-    if(stereotype_frame==RIGHT_EYE||stereotype_frame==BOTH_EYES){
-      int screenWidth_save;
 
-      screenWidth_save=screenWidth;
-      screenWidth/=2;
-      ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,NULL);
-      screenWidth=screenWidth_save;
+    for(i = 0; i < nscreens; i++){
+      screendata *screeni;
+
+      screeni = NULL;
+      if(render_360==1&&render_multi!=0)screeni = screeninfo + i;
+      if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
+        int screenWidth_save;
+
+        screenWidth_save=screenWidth;
+        screenWidth/=2;
+        ShowScene(DRAWSCENE,VIEW_LEFT,0,0,0,screeni);
+        screenWidth=screenWidth_save;
+      }
+      if(stereotype_frame==RIGHT_EYE||stereotype_frame==BOTH_EYES){
+        int screenWidth_save;
+
+        screenWidth_save=screenWidth;
+        screenWidth/=2;
+        ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
+        screenWidth=screenWidth_save;
+      }
+      if(render_360==1&&render_multi!=0)screeni->screenbuffer = getscreenbuffer();
+      if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
-#ifdef pp_RENDERNEW
-    Render(VIEW_CENTER);
-#endif
-    if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
+    if(render_360==1&&render_multi!=0){
+      MergeRenderScreenBuffers360();
+      for(i = 0; i < nscreeninfo; i++){
+        screendata *screeni;
+
+        screeni = screeninfo + i;
+        FREEMEMORY(screeni->screenbuffer);
+      }
+    }
     return_code=2;
   }
   else if(stereotype==STEREO_RB){             // red/blue stereo
@@ -3023,9 +3046,7 @@ void Display_CB(void){
           }
         }
 
-        mergescreenbuffers(nrender_rows,screenbuffers);
-        Render(VIEW_CENTER);
-
+        MergeRenderScreenBuffers(nrender_rows,screenbuffers);
 
         for(i=0;i<nrender_rows*nrender_cols;i++){
           FREEMEMORY(screenbuffers[i]);
@@ -3047,8 +3068,7 @@ void Display_CB(void){
           screeni->screenbuffer = getscreenbuffer();
           if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
         }
-        mergescreenbuffers360();
-        Render(VIEW_CENTER);
+        MergeRenderScreenBuffers360();
 
         for(i = 0; i < nscreeninfo; i++){
           screendata *screeni;

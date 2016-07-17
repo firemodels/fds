@@ -188,11 +188,11 @@ void Render(int view_mode){
       RenderSkip=1;
     }
   }
-  
+
   if(render_multi==0){
     SNIFF_ERRORS("after render");
   }
-  
+
   if(script_render==1){
     script_render=0;
     RenderState(RENDER_OFF);
@@ -429,9 +429,9 @@ GLubyte *getscreenbuffer(void){
 
 }
 
-/* ------------------ mergescreenbuffers ------------------------ */
+/* ------------------ MergeRenderScreenBuffers ------------------------ */
 
-int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
+int MergeRenderScreenBuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   char *renderfile,renderfile_base[1024],renderfile2[1024];
   char *ext;
@@ -521,6 +521,9 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
+  if(render_frame != NULL&&itimes >= 0 && itimes < nglobal_times){
+    render_frame[itimes]++;
+  }
   PRINTF(" Completed\n");
   return 0;
 }
@@ -761,7 +764,7 @@ void setup_screeninfo(void){
     int i,j;
     float *cosa, *sina, *cose, *sine;
     float dazimuth;
-    int nazimuth; 
+    int nazimuth;
 
     NewMemory((void **)&sina, nwidth360 * sizeof(float));
     NewMemory((void **)&cosa, nwidth360 * sizeof(float));
@@ -794,7 +797,7 @@ void setup_screeninfo(void){
           xyz[1] = cosa[i] * cose[j];
           xyz[2] = sine[j];
           screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT,xyz);
-          screenmap360[j*nwidth360 + nwidth360/2 + i] = getscreenmap360LR(RIGHT,xyz);
+          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT,xyz);
         }
       }
       else{
@@ -815,9 +818,9 @@ void setup_screeninfo(void){
   }
 }
 
-/* ------------------ mergescreenbuffers360 ------------------------ */
+/* ------------------ MergeRenderScreenBuffers360 ------------------------ */
 
-int mergescreenbuffers360(void){
+int MergeRenderScreenBuffers360(void){
 
   char *renderfile, renderfile_base[1024], renderfile2[1024];
   char *ext;
@@ -923,6 +926,9 @@ int mergescreenbuffers360(void){
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
   FREEMEMORY(screenbuffer);
+  if(render_frame!=NULL&&itimes>=0&&itimes<nglobal_times){
+    render_frame[itimes]++;
+  }
   PRINTF(" Completed\n");
   return 0;
 }
