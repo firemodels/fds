@@ -2769,28 +2769,32 @@ extern "C" void Slice_CB(int var){
 
         // slice files
 
-        setslicemin_save=setslicemin;
-        slicemin_save=slicemin;
-        setslicemin=GLOBAL_MIN;
-        Slice_CB(SETVALMIN);
+        if (nsliceloaded > 0) {
+          setslicemin_save = setslicemin;
+          slicemin_save = slicemin;
+          setslicemin = GLOBAL_MIN;
+          Slice_CB(SETVALMIN);
 
-        setslicemax_save=setslicemax;
-        slicemax_save=slicemax;
-        setslicemax=GLOBAL_MAX;
-        Slice_CB(SETVALMAX);
+          setslicemax_save = setslicemax;
+          slicemax_save = slicemax;
+          setslicemax = GLOBAL_MAX;
+          Slice_CB(SETVALMAX);
+        }
 
         // boundary files
 
-        setpatchmin_save = setpatchmin;
-        patchmin_save = patchmin;
-        setpatchmin = GLOBAL_MIN;
-        Bound_CB(SETVALMIN);
+        if (npatchloaded > 0) {
+          setpatchmin_save = setpatchmin;
+          patchmin_save = patchmin;
+          setpatchmin = GLOBAL_MIN;
+          Bound_CB(SETVALMIN);
 
-        setpatchmax_save = setpatchmax;
-        patchmax_save = patchmax;
-        setpatchmax = GLOBAL_MAX;
-        Bound_CB(SETVALMAX);
-        Bound_CB(FILERELOAD);
+          setpatchmax_save = setpatchmax;
+          patchmax_save = patchmax;
+          setpatchmax = GLOBAL_MAX;
+          Bound_CB(SETVALMAX);
+          Bound_CB(FILERELOAD);
+        }
 
         // particle files
 
