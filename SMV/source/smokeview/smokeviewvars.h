@@ -22,11 +22,13 @@
 
 SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
+
 SVEXTERN int SVDECL(nscreeninfo,26);
 #ifdef pp_RENDER360_DEBUG
 SVEXTERN int SVDECL(screenview, 0);
 SVEXTERN int SVDECL(*screenvis,NULL);
 #endif
+SVEXTERN int SVDECL(update_screeninfo, 0);
 SVEXTERN screendata SVDECL(*screeninfo,NULL);
 SVEXTERN int SVDECL(nwidth360,1024), SVDECL(nheight360,512);
 SVEXTERN unsigned int SVDECL(*screenmap360, NULL);

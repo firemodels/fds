@@ -625,7 +625,7 @@ void draw_screeninfo(void){
   int i;
   int j;
 
-  if(screeninfo == NULL)setup_screeninfo();
+  if(screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
   glPushMatrix();
   glScalef(0.5,0.5,0.5);
   glTranslatef(1.0,1.0,1.0);
@@ -667,6 +667,7 @@ void draw_screeninfo(void){
 void setup_screeninfo(void){
   int ibuf;
 
+  update_screeninfo = 0;
   nscreeninfo = 26;
   FREEMEMORY(screeninfo);
   NewMemory((void **)&screeninfo, nscreeninfo * sizeof(screendata));

@@ -1472,6 +1472,7 @@ void ResetMenu(int value){
 void RenderState(int onoff){
   render_state=onoff;
   if(onoff==RENDER_ON){
+    update_screeninfo = 1;
     saveW=screenWidth;
     saveH=screenHeight;
     if(renderW==0||renderH==0){

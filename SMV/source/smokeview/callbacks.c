@@ -2737,7 +2737,7 @@ int DoStereo(void){
     nscreens = 1;
     if(render_360==1&&render_multi!=0){
       nscreens = nscreeninfo;
-      if (screeninfo == NULL)setup_screeninfo();
+      if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
     }
 
     for(i = 0; i < nscreens; i++){
@@ -3058,7 +3058,7 @@ void Display_CB(void){
 
         glDrawBuffer(GL_BACK);
 
-        if (screeninfo == NULL)setup_screeninfo();
+        if (screeninfo == NULL||update_screeninfo==1)setup_screeninfo();
 
         for(i = 0; i < nscreeninfo; i++){
           screendata *screeni;
