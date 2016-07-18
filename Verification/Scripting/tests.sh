@@ -94,7 +94,7 @@ fi
 # simply run smokeview to determine if it is present
 # if it is not present, abort testing
 echo -n "running smokeview... "
-"$SMV" -version > /dev/nul
+"$SMV" -version > /dev/null
 if [ $? -ne 0 ]
 then
     echo "Smokeview could not be found at: $SMV"
@@ -106,7 +106,7 @@ fi
 # simply run fds to determine if it is present
 # if it is not present, abort testing
 echo -n "running fds... "
-"$FDS" << EOF 2> /dev/nul
+"$FDS" << EOF 2> /dev/null
 EOF
 if [ $? -ne 0 ]
 then
