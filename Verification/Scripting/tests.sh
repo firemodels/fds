@@ -74,21 +74,25 @@ echo BUILD_TARGET=$BUILD_TARGET
 if [ "$USE_SYSTEM_SMV" = "true" ]
 then
     SMV=smokeview
-    SMV=$(which $SMV) # use absolute path
+    SMV=$(which "$SMV")
+    SMV=$(readlink -f "$SMV") # use absolute path
 else
     SMV=../../SMV/Build/smokeview/${BUILD_TARGET}_${WORD_SIZE}/smokeview_${PLATFORM}_${WORD_SIZE}${EXT}
-    SMV=$(which $SMV) # use absolute path
+    SMV=$(which "$SMV")
+    SMV=$(readlink -f "$SMV") # use absolute path
 fi
 
 if [ "$USE_SYSTEM_FDS" = "true" ]
 then
     FDS=fds
-    FDS=$(which $FDS) # use absolute path
+    FDS=$(which "$FDS")
+    FDS=$(readlink -f "$FDS") # use absolute path
 else
     FDS=fds
     # TODO: complete this
     #FDS=../../FDS_Compilation/smokeview/${BUILD_TARGET}_${WORD_SIZE}/smokeview_${PLATFORM}_${WORD_SIZE}${EXT}
-    FDS=$(which $FDS) # use absolute path
+    FDS=$(which "$FDS")
+    FDS=$(readlink -f "$FDS") # use absolute path
 fi
 
 # simply run smokeview to determine if it is present
