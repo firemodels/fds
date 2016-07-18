@@ -330,7 +330,7 @@ int loadfile(const char *filename) {
     }
   }
 
-  fprintf(stderr,"*** Error: file %s failed to load\n",filename);
+  fprintf(stderr,"*** Error: file %s is not listed in .smv file\n",filename);
   return 1;
 }
 

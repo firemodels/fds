@@ -145,8 +145,9 @@ end
 
 -- load each different type of data file
 test("load slice file", function() load.datafile("room_fire_02.sf") end)
+-- TODO: smokeview will not load unlisted data files.
 test("load unlisted data file", function()
-    local file = "room_fire_01.sf"
+    local file = "room_firez_01.sf"
     test("pre-reqs", function()
         -- does the necessary file exists for testing
         assert(isFile(file), "file " .. file .. " does not exist")
@@ -159,7 +160,7 @@ test("load unlisted data file", function()
         load.datafile(file)
         end)
 end)
--- test("load boundary file", function() load.datafile("room_fire_01.bf") end)
+test("load boundary file", function() load.datafile("room_fire_01.bf") end)
 test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
 test("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.sz") end)
 test("load particle file", function() load.datafile("room_fire.prt5") end)
@@ -170,7 +171,7 @@ testException("load smoke3d vector file", function() load.vdatafile("room_fire_0
 testException("load compressed smoke3d vector file", function() load.vdatafile("room_fire_01.s3d.sz") end)
 testException("load particle vector file", function() load.vdatafile("room_fire_01.prt5") end)
 testException("load non-existant vector file", function() load.vdatafile("qwert.yu") end)
-
+-- TODO: try loading corrupt file and ensure the outputted errors are correct
 -- unload all the loaded data
 test("unload all data", function() unload.all()end)
 test("window.size()", function() window.size(1024,768)end)
