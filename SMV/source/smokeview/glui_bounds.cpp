@@ -2794,31 +2794,35 @@ extern "C" void Slice_CB(int var){
 
         // particle files
 
-        setpartmin_save = setpartmin;
-        partmin_save = partmin;
-        setpartmin = GLOBAL_MIN;
-        Part_CB(SETVALMIN);
+        if(npartloaded>0){
+          setpartmin_save = setpartmin;
+          partmin_save = partmin;
+          setpartmin = GLOBAL_MIN;
+          Part_CB(SETVALMIN);
 
-        setpartmax_save = setpartmax;
-        partmax_save = partmax;
-        setpartmax = GLOBAL_MAX;
-        Part_CB(SETVALMAX);
-        Part_CB(FILERELOAD);
+          setpartmax_save = setpartmax;
+          partmax_save = partmax;
+          setpartmax = GLOBAL_MAX;
+          Part_CB(SETVALMAX);
+          Part_CB(FILERELOAD);
+        }
         
         // plot3d files
 
-        for (i = 0; i < MAXPLOT3DVARS; i++) {
-          setp3min_save[i] = setp3min[i];
-          p3min_save[i] = p3min[i];
-          setp3min[i] = GLOBAL_MIN;
+        if(nplot3dloaded>0){
+          for (i = 0; i < MAXPLOT3DVARS; i++) {
+            setp3min_save[i] = setp3min[i];
+            p3min_save[i] = p3min[i];
+            setp3min[i] = GLOBAL_MIN;
 
-          setp3max_save[i] = setp3max[i];
-          p3max_save[i] = p3max[i];
-          setp3max[i] = GLOBAL_MAX;
+            setp3max_save[i] = setp3max[i];
+            p3max_save[i] = p3max[i];
+            setp3max[i] = GLOBAL_MAX;
+          }
+          Plot3D_CB(SETVALMIN);
+          Plot3D_CB(SETVALMAX);
+          Plot3D_CB(FILERELOAD);
         }
-        Plot3D_CB(SETVALMIN);
-        Plot3D_CB(SETVALMAX);
-        Plot3D_CB(FILERELOAD);
 
         PRINTF("research mode on\n");
       }
