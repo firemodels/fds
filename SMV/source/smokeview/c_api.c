@@ -486,24 +486,26 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
         if(can_write_to_dir(renderfile_dir)==0){
             printf("Creating directory: %s\n", renderfile_dir);
 
-// #if defined(WIN32)
-//             CreateDirectory (renderfile_dir, NULL);
-// #elif defined(_MINGW32_)
-//             CreateDirectory (renderfile_dir, NULL);
-// #else
-//             mkdir(renderfile_dir, 0700);
-// #endif
             // TODO: ensure this can be made cross-platform
             if (strlen(renderfile_dir)>0) {
                 printf("making dir: %s", renderfile_dir);
-#ifdef MINGW
-                mkdir(renderfile_dir);
-#elif defined(pp_LINUX)
-                mkdir(renderfile_dir, 0755);
+#if defined(__MINGW32__)
+            mkdir(renderfile_dir);
+#elif defined(WIN32)
+            CreateDirectory(renderfile_dir, NULL);
+#else // linux or osx
+            mkdir(renderfile_dir, 0755);
 #endif
-#ifdef pp_OSX
-                mkdir(renderfile_dir, 0755);
-#endif
+// #ifdef __MINGW32__
+//                 fprintf(stderr, "%s\n", "making directory(mingw)\n");
+//                 mkdir(renderfile_dir);
+// #elif defined(pp_LINUX)
+//                 fprintf(stderr, "%s\n", "making directory(linux)\n");
+//                 mkdir(renderfile_dir, 0755);
+// #endif
+// #ifdef pp_OSX
+//                 mkdir(renderfile_dir, 0755);
+// #endif
             }
         }
         if(showstereo==STEREO_LR
@@ -1869,7 +1871,20 @@ int setrenderdir(const char *dir) {
   int l = strlen(dir);
   char *dir_path_temp = malloc(l+1);
   strncpy(dir_path_temp,dir,l+1);
+  // TODO: should we make the directory at this point?
 	if(dir!=NULL&&strlen(dir_path_temp)>0){
+    printf("making dir: %s", dir_path_temp);
+
+#if defined(__MINGW32__)
+    fprintf(stderr, "%s\n", "making directory(mingw)\n");
+    mkdir(dir_path_temp);
+#elif defined(WIN32)
+    fprintf(stderr, "%s\n", "making directory(win32)\n");
+    CreateDirectory(dir_path_temp, NULL);
+#else // linux or osx
+    fprintf(stderr, "%s\n", "making directory(linux/osx)\n");
+    mkdir(dir_path_temp, 0755);
+#endif
       if(can_write_to_dir(dir_path_temp)==0){
         fprintf(stderr,"*** Error: Cannot write to the RENDERDIR "
                 "directory: %s\n",dir_path_temp);

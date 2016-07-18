@@ -127,12 +127,15 @@ then
 else
     mkdir -p test_outputs/room_fire
     cp test_inputs/room_fire.fds test_outputs/room_fire
-    (cd test_outputs/room_fire && "$FDS" room_fire.fds && touch room_fire.stop)
+    (cd test_outputs/room_fire && "$FDS" room_fire.fds && \
+          cp room_fire_01.sf room_firez_01.sf && \
+          touch room_fire.stop)
 fi
 echo "running test1.log"
 (cd test_outputs/room_fire \
     && "$SMV" -killscript -luascript ../../tests/test1.lua \
         room_fire > test1.log)
+test1_result=$?
 
 echo "testing paths"
 (mkdir -p test_outputs/path_testing/obs1/obs2/obs3/obs4/room_fire \
@@ -140,4 +143,21 @@ echo "testing paths"
     && cd test_outputs/path_testing/obs1/obs2/obs3 \
     && pwd \
     && "$SMV" -killscript -luascript ../../../../../tests/test1.lua \
-        obs4/room_fire/room_fire.smv > test1.log)
+        obs4/room_fire/room_fire.smv > test1paths.log)
+test2_result=$?
+
+echo -n "Test 1 (test1.lua): "
+if [ $test1_result -eq 0 ]
+then
+    cecho "[OK]" $green
+else
+    cecho "[Failure]" $red
+fi
+
+echo -n "Test 2 (test1.lua with paths): "
+if [ $test1_result -eq 0 ]
+then
+    cecho "[OK]" $green
+else
+    cecho "[Failure]" $red
+fi
