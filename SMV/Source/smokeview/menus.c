@@ -1472,6 +1472,7 @@ void ResetMenu(int value){
 void RenderState(int onoff){
   render_state=onoff;
   if(onoff==RENDER_ON){
+    update_screeninfo = 1;
     saveW=screenWidth;
     saveH=screenHeight;
     if(renderW==0||renderH==0){
@@ -1582,18 +1583,17 @@ void RenderMenu(int value){
     update_glui_filelabel(renderfilelabel);
     break;
   case RenderPNG:
-     renderfiletype=0;
+     render_filetype=PNG;
      updatemenu=1;
      break;
   case RenderJPEG:
-     renderfiletype=1;
+     render_filetype=JPEG;
      updatemenu=1;
      break;
   default:
     if(RenderTime==0&&touring==0)return;
     if(touring==1){
       rendertourcount=0;
-      tourangle_global=0.0;
     }
     if(stept==0){
       keyboard('t',FROM_SMOKEVIEW);
@@ -7518,15 +7518,15 @@ updatemenu=0;
     if(render_current==1)glutAddSubMenu(_("Resolution multiplier"),resolutionmultipliermenu);
 
     glutAddMenuEntry(_("Type:"),11000);
-    if(renderfiletype==0){
+    if(render_filetype==PNG){
       glutAddMenuEntry("  *PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }
-    if(renderfiletype==1){
+    if(render_filetype==JPEG){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  *JPEG",RenderJPEG);
     }
-    if(renderfiletype==2){
+    if(render_filetype==IMAGE_NONE){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }

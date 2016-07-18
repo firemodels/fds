@@ -147,6 +147,7 @@ GLUI_Spinner *SPINNER_xcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_ycenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_zcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_framerate = NULL;
+GLUI_Spinner *SPINNER_bitrate = NULL;
 GLUI_Spinner *SPINNER_window_height360=NULL;
 
 GLUI_StaticText *STATIC_width360=NULL;
@@ -228,10 +229,10 @@ void update_render_start_button(void){
   int is_enabled;
 
   is_enabled = BUTTON_render_start->enabled;
-  if(render_state == ON&&is_enabled == 1){
+  if(render_state == RENDER_ON&&is_enabled == 1){
     BUTTON_render_start->disable();
   }
-  else if(render_state == OFF&&is_enabled == 0&&update_makemovie==0){
+  else if(render_state == RENDER_OFF&&is_enabled == 0&&update_makemovie==0){
     BUTTON_render_start->enable();
   }
 }
@@ -265,15 +266,15 @@ void enable_disable_makemovie(int onoff){
 /* ------------------ update_movie_type ------------------------ */
 
 void update_movie_type(int type){
-  moviefiletype = type;
-  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
+  movie_filetype = type;
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(movie_filetype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
-  renderfiletype = type;
-  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
+  render_filetype = type;
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(render_filetype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -687,7 +688,7 @@ extern "C" void glui_motion_setup(int main_window){
   glui_motion->add_column_to_panel(PANEL_render_file, false);
 
   PANEL_file_type = glui_motion->add_panel_to_panel(PANEL_render_file, "type:", true);
-  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
+  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &render_filetype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "png");
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "jpg");
 
@@ -702,6 +703,7 @@ extern "C" void glui_motion_setup(int main_window){
   SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(PANEL_xy, "multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
   SPINNER_nrender_rows->set_int_limits(1, 10);
 
+#ifdef pp_RENDER360
   ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
   CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
@@ -751,6 +753,7 @@ extern "C" void glui_motion_setup(int main_window){
   BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
   BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
 #endif
+#endif
 
   update_glui_filelabel(renderfilelabel);
 
@@ -793,12 +796,14 @@ extern "C" void glui_motion_setup(int main_window){
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
     PANEL_movie_type = glui_motion->add_panel_to_panel(ROLLOUT_make_movie, "movie type:", true);
-    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &moviefiletype, MOVIE_TYPE, Render_CB);
+    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &movie_filetype, MOVIE_TYPE, Render_CB);
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "avi");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "mp4");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
+    SPINNER_bitrate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "bit rate (Kb/s)", GLUI_SPINNER_INT, &movie_bitrate);
+    SPINNER_bitrate->set_int_limits(100, 20000);
     glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
@@ -1879,10 +1884,10 @@ void Render_CB(int var){
     case RENDER_TYPE:
       break;
     case MOVIE_TYPE:
-      if(moviefiletype==WMV){
+      if(movie_filetype==WMV){
         strcpy(movie_ext, ".wmv");
       }
-      else if(moviefiletype==MP4){
+      else if(movie_filetype==MP4){
         strcpy(movie_ext, ".mp4");
       }
       else{

@@ -8929,10 +8929,10 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "STEREO") == 1){
       fgets(buffer, 255, stream);
-      showstereoOLD = showstereo;
-      sscanf(buffer, "%i", &showstereo);
-      showstereo = CLAMP(showstereo, 0, 5);
-      if(showstereo == STEREO_TIME&&videoSTEREO != 1)showstereo = STEREO_NONE;
+      stereotypeOLD = stereotype;
+      sscanf(buffer, "%i", &stereotype);
+      stereotype = CLAMP(stereotype, 0, 5);
+      if(stereotype == STEREO_TIME&&videoSTEREO != 1)stereotype = STEREO_NONE;
       Update_Glui_Stereo();
       continue;
     }
@@ -9969,7 +9969,12 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "RENDERFILETYPE") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i", &renderfiletype, &moviefiletype);
+      sscanf(buffer, "%i %i", &render_filetype, &movie_filetype);
+      continue;
+    }
+    if(match(buffer, "MOVIEFILETYPE") == 1){
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i", &movie_filetype,&movie_framerate,&movie_bitrate);
       continue;
     }
     if(match(buffer, "RENDERFILELABEL") == 1){
@@ -12322,7 +12327,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %s\n", startup_lang_code);
 #endif
   fprintf(fileout, "STEREO\n");
-  fprintf(fileout, " %i\n", showstereo);
+  fprintf(fileout, " %i\n", stereotype);
   fprintf(fileout, "SURFINC\n");
   fprintf(fileout, " %i\n", surfincrement);
   fprintf(fileout, "TERRAINPARMS\n");
@@ -12379,7 +12384,9 @@ void writeini(int flag,char *filename){
   fprintf(fileout, "RENDERFILELABEL\n");
   fprintf(fileout, " %i\n", renderfilelabel);
   fprintf(fileout, "RENDERFILETYPE\n");
-  fprintf(fileout," %i %i\n",renderfiletype,moviefiletype);
+  fprintf(fileout," %i %i\n",render_filetype,movie_filetype);
+  fprintf(fileout, "MOVIEFILETYPE\n");
+  fprintf(fileout," %i %i %i\n",movie_filetype,movie_framerate,movie_bitrate);
   if(nskyboxinfo>0){
     int iskybox;
     skyboxdata *skyi;

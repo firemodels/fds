@@ -19,7 +19,7 @@
 
 #ifdef pp_release
 #ifdef pp_OFFICIAL_RELEASE
-#define PROGVERSION "6.3.9"
+#define PROGVERSION "6.3.10"
 #else
 #define PROGVERSION "Unofficial release"
 #endif
@@ -64,6 +64,8 @@
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
+#define pp_RENDER360
+#define pp_RENDERNEW
 #ifdef _DEBUG
 #define pp_RENDER360_DEBUG
 #endif

@@ -43,7 +43,7 @@ REAL(EB) :: AREA,DIAMETER,XYZ(3),LOSS(MAX_DUCTS,MAX_DUCTS),VOLUME_FLOW,MAX_FLOW,
             TAU_FAN,TAU_VF,FIXED_Q,CLEAN_LOSS,&
             COOLANT_MASS_FLOW,COOLANT_SPECIFIC_HEAT,COOLANT_TEMPERATURE,PERIMETER,MASS_FLOW
 REAL(EB) :: LOADING(MAX_SPECIES),EFFICIENCY(MAX_SPECIES),LOADING_MULTIPLIER(MAX_SPECIES)
-LOGICAL :: ROUND, SQUARE, DAMPER, REVERSE, AMBIENT,LEAK_ENTHALPY
+LOGICAL :: ROUND, SQUARE, DAMPER, REVERSE, AMBIENT,LEAK_ENTHALPY,INITIALIZED_HVAC_MASS_TRANSPORT
 CHARACTER(LABEL_LENGTH) :: AIRCOIL_ID,CTRL_ID,DEVC_ID,DUCT_ID(MAX_DUCTS),DUCT_INTERP_TYPE,FAN_ID,FILTER_ID,ID,NODE_ID(2),RAMP_ID,&
                            RAMP_LOSS,SPEC_ID(MAX_SPECIES),TYPE_ID,VENT_ID,VENT2_ID
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
@@ -255,7 +255,7 @@ DO NN=1,N_HVAC_READ
             IF (N_CELLS > 0) THEN 
                DU%N_CELLS = N_CELLS
             ELSE
-               DU%N_CELLS = NINT(DU%LENGTH*10._EB) !Default to 10 cm cells
+               DU%N_CELLS = NINT(DU%LENGTH*10._EB) ! Default to 10 cm cells
             ENDIF
             SELECT CASE(DUCT_INTERP_TYPE) ! Reads duct interpolation type user input and sets duct interpolation index
                CASE('NODE1')
@@ -525,6 +525,7 @@ MAX_FLOW     = 1.E7_EB
 MAX_PRESSURE = 1.E7_EB
 N_CELLS      = -999
 NODE_ID      = 'null'
+INITIALIZED_HVAC_MASS_TRANSPORT=.FALSE.
 PERIMETER    = -1._EB
 RAMP_ID      = 'null'
 RAMP_LOSS    = 'null'
@@ -553,7 +554,7 @@ SUBROUTINE PROC_HVAC
 USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
 !INTEGER :: I1,I2,J1,J2,K1,K2,IOR
 INTEGER :: N,ND,ND2,NM,NN,NF,NV
-REAL(EB) :: DRHO,DTMP,DZZ(1:N_TRACKED_SPECIES),TNOW,ZZ_GET(1:N_TRACKED_SPECIES)
+REAL(EB) :: TNOW,ZZ_GET(1:N_TRACKED_SPECIES)
 TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
 TYPE(SURFACE_TYPE), POINTER :: SF=>NULL()
@@ -629,6 +630,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDIF
    ENDDO
 
+   ! Initialises duct node species and RSUM with ambient/background
    ALLOCATE(DN%ZZ(N_TRACKED_SPECIES))
    DN%ZZ(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
    ALLOCATE(DN%ZZ_V(N_TRACKED_SPECIES))
@@ -636,6 +638,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
    ZZ_GET(1:N_TRACKED_SPECIES) = DN%ZZ_V(1:N_TRACKED_SPECIES)
    DN%RSUM   = RSUM0
 
+   ! If node is LEAKAGE related then values are adopted as ambient/background
    IF (DN%LEAKAGE) THEN
       DN%TMP  = TMPA
       DN%RHO  = RHOA
@@ -722,8 +725,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDIF
    ENDDO
 
-   !Initialize duct node properties
-
+   ! Initialize duct node properties
    IF (STRATIFICATION .AND. DN%XYZ(3) > -1.E9_EB) THEN
       DN%TMP  = TMPA + LAPSE_RATE*DN%XYZ(3)
       IF (ABS(LAPSE_RATE)>TWO_EPSILON_EB) THEN
@@ -731,11 +733,11 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ELSE
          DN%P = P_INF*EXP(GVEC(3)*(DN%XYZ(3)-GROUND_LEVEL)/(RSUM0*TMPA))
       ENDIF
-      DN%RHO   =  DN%P/(DN%TMP*RSUM0)
+      DN%RHO  =  DN%P/(DN%TMP*RSUM0)
    ELSE
       DN%TMP  = TMPA
-      DN%P      = P_INF
-      DN%RHO    = RHOA
+      DN%P    = P_INF
+      DN%RHO  = RHOA
    ENDIF
    DN%P_OLD = DN%P
    IF (DN%VENT) DN%P = -1.E10_EB
@@ -759,51 +761,6 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
       ENDDO
    ENDIF
 ENDDO NODE_LOOP
-
-!Initialize arrays for duct mass transport
-IF (HVAC_MASS_TRANSPORT) THEN
-   DO ND = 1, N_DUCTS
-      DU => DUCT(ND)
-      IF (DU%LEAKAGE) CYCLE
-      IF (DU%N_CELLS==1) CYCLE
-      ALLOCATE(DU%RHO_C(DU%N_CELLS))
-      ALLOCATE(DU%TMP_C(DU%N_CELLS))
-      ALLOCATE(DU%CP_C(DU%N_CELLS))
-      ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
-      DU%DX = DU%LENGTH/DU%N_CELLS
-      SELECT CASE (DU%DUCT_INTERP_TYPE_INDEX)
-         CASE (NODE1) ! duct adopts values from node 1
-            DU%RHO_C = DUCTNODE(DU%NODE_INDEX(1))%RHO
-            DU%TMP_C = DUCTNODE(DU%NODE_INDEX(1))%TMP
-            DU%CP_C = DUCTNODE(DU%NODE_INDEX(1))%CP
-            DO NN = 1, DU%N_CELLS
-               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ
-            ENDDO
-         CASE (NODE2) ! duct adopts values from node 2
-            DU%RHO_C = DUCTNODE(DU%NODE_INDEX(2))%RHO
-            DU%TMP_C = DUCTNODE(DU%NODE_INDEX(2))%TMP
-            DU%CP_C = DUCTNODE(DU%NODE_INDEX(2))%CP
-            DO NN = 1, DU%N_CELLS
-               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(2))%ZZ
-            ENDDO
-         CASE (LINEAR_INTERPOLATION) ! linear interpolation between node 1 and 2
-            DRHO = (DUCTNODE(DU%NODE_INDEX(2))%RHO - DUCTNODE(DU%NODE_INDEX(1))%RHO) / DU%N_CELLS
-            DTMP = (DUCTNODE(DU%NODE_INDEX(2))%TMP - DUCTNODE(DU%NODE_INDEX(1))%TMP) / DU%N_CELLS
-            DZZ(1:N_TRACKED_SPECIES) = (DUCTNODE(DU%NODE_INDEX(2))%ZZ - DUCTNODE(DU%NODE_INDEX(1))%ZZ) / DU%N_CELLS
-            DO NN = 1, DU%N_CELLS
-               DU%RHO_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%RHO + DRHO*(REAL(NN,EB) - 0.5_EB)
-               DU%TMP_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%TMP + DTMP*(REAL(NN,EB) - 0.5_EB)
-               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ(:)*(REAL(NN,EB) - 0.5_EB)
-               ZZ_GET = DU%ZZ_C(NN,1:N_TRACKED_SPECIES)
-               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
-            ENDDO
-         CASE DEFAULT
-            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),&
-                                        ', HVAC line number:',NN
-            CALL SHUTDOWN(MESSAGE); RETURN
-      END SELECT
-   ENDDO
-ENDIF
 
 !Temp arrays for input processing
 IF (ALLOCATED(DUCT_NODE_A)) DEALLOCATE(DUCT_NODE_A)
@@ -855,9 +812,11 @@ SUBROUTINE HVAC_CALC(T,DT,FIRST_PASS)
 INTEGER :: NNE,NN
 REAL(EB), INTENT(IN) :: T,DT
 LOGICAL :: CHANGE=.TRUE.
+LOGICAL, SAVE :: INITIALIZED_HVAC_MASS_TRANSPORT
 LOGICAL, INTENT(IN):: FIRST_PASS
 TYPE(NETWORK_TYPE), POINTER:: NE=>NULL()
 
+! Sets time step, using user input DT_HVAC
 IF (DT_HVAC>0._EB) THEN
    DT_HV = MAX(DT_HVAC,DT)
 ELSE
@@ -875,6 +834,8 @@ ENDIF
 
 IF (FIRST_PASS) THEN
    CALL COLLAPSE_HVAC_BC
+   IF (.NOT. INITIALIZED_HVAC_MASS_TRANSPORT .AND. HVAC_MASS_TRANSPORT) CALL INIT_HVAC_MASS_TRANSPORT
+   INITIALIZED_HVAC_MASS_TRANSPORT=.TRUE.
    CALL FIND_NETWORKS(CHANGE,T)
 ENDIF
 
@@ -931,6 +892,60 @@ IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
 
 END SUBROUTINE HVAC_CALC
 
+SUBROUTINE INIT_HVAC_MASS_TRANSPORT
+! Initialises cell densities, temperatures, specific heats and species' for discretised ducts
+
+USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
+INTEGER :: ND,NN
+REAL(EB) :: DRHO,DTMP,DZZ(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
+TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
+
+! Initialize arrays for duct mass transport
+IF (HVAC_MASS_TRANSPORT) THEN
+   DO ND = 1, N_DUCTS
+      DU => DUCT(ND)
+      IF (DU%LEAKAGE) CYCLE
+      IF (DU%N_CELLS==1) CYCLE ! Duct is not sub-celled, no requirement to set cell values.
+      ALLOCATE(DU%RHO_C(DU%N_CELLS))
+      ALLOCATE(DU%TMP_C(DU%N_CELLS))
+      ALLOCATE(DU%CP_C(DU%N_CELLS))
+      ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
+      DU%DX = DU%LENGTH/DU%N_CELLS
+      SELECT CASE (DU%DUCT_INTERP_TYPE_INDEX)
+         CASE (NODE1) ! duct adopts values from node 1
+            DU%RHO_C(:) = DUCTNODE(DU%NODE_INDEX(1))%RHO
+            DU%TMP_C(:) = DUCTNODE(DU%NODE_INDEX(1))%TMP
+            DU%CP_C(:) = DUCTNODE(DU%NODE_INDEX(1))%CP
+            DO NN = 1, DU%N_CELLS
+               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ
+            ENDDO
+         CASE (NODE2) ! duct adopts values from node 2
+            DU%RHO_C = DUCTNODE(DU%NODE_INDEX(2))%RHO
+            DU%TMP_C = DUCTNODE(DU%NODE_INDEX(2))%TMP
+            DU%CP_C = DUCTNODE(DU%NODE_INDEX(2))%CP
+            DO NN = 1, DU%N_CELLS
+               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(2))%ZZ
+            ENDDO
+         CASE (LINEAR_INTERPOLATION) ! linear interpolation between node 1 and 2
+            DRHO = (DUCTNODE(DU%NODE_INDEX(2))%RHO - DUCTNODE(DU%NODE_INDEX(1))%RHO) / DU%N_CELLS
+            DTMP = (DUCTNODE(DU%NODE_INDEX(2))%TMP - DUCTNODE(DU%NODE_INDEX(1))%TMP) / DU%N_CELLS
+            DZZ(1:N_TRACKED_SPECIES) = (DUCTNODE(DU%NODE_INDEX(2))%ZZ - DUCTNODE(DU%NODE_INDEX(1))%ZZ) / DU%N_CELLS
+            DO NN = 1, DU%N_CELLS
+               DU%RHO_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%RHO + DRHO*(REAL(NN,EB) - 0.5_EB)
+               DU%TMP_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%TMP + DTMP*(REAL(NN,EB) - 0.5_EB)
+               DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ(:)*(REAL(NN,EB) - 0.5_EB)
+               ZZ_GET = DU%ZZ_C(NN,1:N_TRACKED_SPECIES)
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
+            ENDDO
+         CASE DEFAULT
+            WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),&
+                                        ', HVAC line number:',NN
+            CALL SHUTDOWN(MESSAGE); RETURN
+      END SELECT
+   ENDDO
+ENDIF
+
+END SUBROUTINE INIT_HVAC_MASS_TRANSPORT
 
 SUBROUTINE MATRIX_SOLVE(NNE)
 USE MATH_FUNCTIONS,ONLY : GAUSSJ
@@ -958,11 +973,10 @@ END SUBROUTINE MATRIX_SOLVE
 SUBROUTINE HVAC_UPDATE(NNE,DT)
 
 !Iterate duct network to update all ducts and nodes
-
 USE COMP_FUNCTIONS, ONLY: SECOND
 USE PHYSICAL_FUNCTIONS, ONLY : GET_AVERAGE_SPECIFIC_HEAT,GET_SPECIFIC_GAS_CONSTANT
-REAL(EB) :: TNOW,MTOT,ETOT,ZZTOT(1:N_TRACKED_SPECIES),TGUESS,VFLOW,ZZ_GET(1:N_TRACKED_SPECIES),CP,CP2,DCPDT, &
-            DU_DX, ZZSUM(1:N_TRACKED_SPECIES), CPTSUM, MFLOW, MSUM
+REAL(EB) :: CP,CP2,CPTSUM,DCPDT,DU_DX,ETOT,MFLOW,MSUM,MTOT,TGUESS,TNOW,VFLOW,ZZ_GET(1:N_TRACKED_SPECIES),&
+            ZZSUM(1:N_TRACKED_SPECIES),ZZTOT(1:N_TRACKED_SPECIES)
 REAL(EB),INTENT(IN) :: DT
 INTEGER, INTENT(IN) :: NNE
 INTEGER :: NN,ND,NC,NS,ITMP,ITCOUNT
@@ -1030,7 +1044,7 @@ ITER_LOOP: DO
          IF (.NOT. DU%UPDATED) CYCLE NODE_LOOP
 
          MASS_TRANSPORT_IF: IF (DU%N_CELLS==1) THEN
-            ! Duct is not subnoded
+            ! Duct is not discretized
             VFLOW = ABS(DU%VEL(NEW)*DU%AREA)
             MTOT = MTOT + VFLOW * DU%RHO_D
             ETOT = ETOT + VFLOW * DU%RHO_D * DU%TMP_D * DU%CP_D
@@ -1045,7 +1059,7 @@ ITER_LOOP: DO
             ENDIF
             ZZTOT = ZZTOT + VFLOW * DU%RHO_D * DU%ZZ
          ELSE MASS_TRANSPORT_IF
-            ! Duct is subnoded
+            ! Duct is discretized
             MFLOW = ABS(DU%VEL(NEW)*DU%RHO_D)*DT
             MSUM = 0
             ZZSUM = 0
@@ -1060,7 +1074,7 @@ ITER_LOOP: DO
                      EXIT
                   ELSE
                      MSUM = MSUM + DU%RHO_C(NC)*DU_DX
-                     ZZSUM(:) = ZZSUM (:)+ DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
+                     ZZSUM(:) = ZZSUM(:) + DU%RHO_C(NC)*DU%ZZ_C(NC,:)*DU_DX
                      CPTSUM = CPTSUM + DU%RHO_C(NC)*DU%TMP_C(NC)*DU%CP_C(NC)*DU_DX
                   ENDIF
                ENDDO
@@ -1949,7 +1963,7 @@ END FUNCTION COMPUTE_FRICTION_FACTOR
 
 SUBROUTINE SET_GUESS(NNE,T)
 INTEGER, INTENT(IN) :: NNE
-REAL(EB), INTENT(IN)::T
+REAL(EB), INTENT(IN):: T
 INTEGER :: ND
 REAL(EB) :: VEL_TMP
 TYPE(DUCT_TYPE),POINTER :: DU=>NULL()
@@ -2063,7 +2077,7 @@ TYPE(DUCTNODE_TYPE), POINTER :: DN=>NULL()
 
 NE => NETWORK(NNE)
 CONVERGED = .TRUE.
-!Check duct velocity convergence
+! Check duct velocity convergence
 DO ND=1,NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
    IF (DU%AREA < TWO_EPSILON_EB) CYCLE
@@ -2084,7 +2098,7 @@ DO ND=1,NE%N_DUCTS
 ENDDO
 IF (.NOT. CONVERGED) RETURN
 
-!Check node mass conservation convergence
+! Check node mass conservation convergence
 DO NN=1,NE%N_DUCTNODES
    DN => DUCTNODE(NE%NODE_INDEX(NN))
    IF (DN%FIXED) CYCLE
@@ -2199,7 +2213,6 @@ VENT_CUSTOM_AMBIENT: DO NN=1,N_DUCTNODES
          ENDIF
          TMP_SUM = TMP_NEW
       ENDDO
-      
       DN%TMP_V = TMP_NEW
       DN%CP_V = CPBAR
    ENDIF INTERNAL_NODE_IF
@@ -2475,92 +2488,100 @@ END SUBROUTINE ADJUST_LEAKAGE_AREA
 SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT(DT)
 USE PHYSICAL_FUNCTIONS,ONLY: GET_AVERAGE_SPECIFIC_HEAT
 REAL(EB), INTENT(IN) :: DT
-INTEGER :: ND,I,ITCOUNT
+INTEGER :: N_SUBSTEPS,ND,NS,I,ITCOUNT
 TYPE(DUCT_TYPE),POINTER :: DU=>NULL()
-REAL(EB) :: DT_DUCT,MASS_FLUX,ZZ_GET(N_TRACKED_SPECIES),CP,CP2,DCPDT,TGUESS
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: CPT,RHOCPT
-REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F ! ZZ_F: upwind species concentration (inc' upwind HVAC node value)
+REAL(EB) :: CP,CP2,DCPDT,DT_CFL,DT_DUCT,MASS_FLUX,TGUESS,ZZ_GET(N_TRACKED_SPECIES)
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: CPT_F,RHOCPT
+REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F
 
 DUCT_LOOP: DO ND = 1,N_DUCTS
    DU => DUCT(ND)
-   IF (DU%N_CELLS == 1 ) CYCLE DUCT_LOOP !No mass transport needed
+   IF (DU%N_CELLS == 1 ) CYCLE DUCT_LOOP
+
    ! Check for zero flow and zero area
    IF (ABS(DU%VEL(NEW))<=TWO_EPSILON_EB .OR. DU%AREA<=TWO_EPSILON_EB) CYCLE DUCT_LOOP
 
-   ! Set upwind indices and allocate flux array
-   ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
-   ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
-   ALLOCATE(CPT(0:DU%N_CELLS))
-   ALLOCATE(RHOCPT(0:DU%N_CELLS))
+   MASS_FLUX = DU%RHO_D * DU%VEL(NEW)
 
-   ! Sets upwind species concentration, accounting for direction of flow
-   IF (DU%VEL(NEW)>0._EB) THEN
-      ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
-      CPT(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
-      RHOCPT(0) = DUCTNODE(DU%NODE_INDEX(1))%RHO*CPT(0)
-      DO I = 1,DU%N_CELLS
+   ! Set up of CFL and sub time step
+   DT_CFL = DU%DX/(2*DU%VEL(NEW)) ! CFL for Godunov pure upwinding scheme
+   N_SUBSTEPS = MAX(1,CEILING(DT/DT_CFL))
+   DT_DUCT = DT/REAL(N_SUBSTEPS,EB)
+
+   SUBSTEP_LOOP: DO NS = 1,N_SUBSTEPS
+      ! Set upwind face indices and allocate flux arrays
+      ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
+      ALLOCATE(CPT_F(0:DU%N_CELLS))
+      ALLOCATE(RHOCPT(0:DU%N_CELLS))
+      ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
+
+      ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
+      IF (DU%VEL(NEW)>0._EB) THEN
+         ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
+         CPT_F(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
+         RHOCPT(0) = DUCTNODE(DU%NODE_INDEX(1))%RHO*CPT_F(0)
+         DO I = 1,DU%N_CELLS
+            ZZ_GET = DU%ZZ_C(I,:)
+            ZZ_F(I,:) = DU%ZZ_C(I,:) ! Godunov upwinding
+            CPT_F(I) = DU%TMP_C(I)*DU%CP_C(I) ! Godunov upwinding
+            RHOCPT(I) = DU%RHO_C(I)*DU%TMP_C(I)*DU%CP_C(I)
+         ENDDO
+      ELSE
+         ZZ_F(DU%N_CELLS,:) = DUCTNODE(DU%NODE_INDEX(2))%ZZ(:)
+         CPT_F(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%TMP*DUCTNODE(DU%NODE_INDEX(2))%CP
+         RHOCPT(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%RHO*CPT_F(DU%N_CELLS)
+         DO I = 0,DU%N_CELLS-1
+            ZZ_GET = DU%ZZ_C(I+1,:)
+            ZZ_F(I,:) = ZZ_GET
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,DU%TMP_C(I))
+            CPT_F(I) = DU%TMP_C(I+1)*DU%CP_C(I+1)
+            RHOCPT(I) = DU%RHO_C(I+1)*CPT_F(I)
+         ENDDO
+      ENDIF
+
+      ! Compute discretized conservation equations using explicit Euler method with Godunov upwinding profile
+         DO I = 1,DU%N_CELLS
+            RHOZZ_C(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:) - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
+            RHOCPT(I) = RHOCPT(I) - DT_DUCT / DU%DX * MASS_FLUX * ( CPT_F(I) - CPT_F(I-1) )
+         ENDDO
+
+      ! Update variables in cell centres and faces
+      DU_UPDATE_LOOP: DO I = 1,DU%N_CELLS
+         DU%RHO_C(I) = SUM(RHOZZ_C(I,1:N_TRACKED_SPECIES))
+         DU%ZZ_C(I,:) = RHOZZ_C(I,:)/DU%RHO_C(I)
+         CPT_F(I) = RHOCPT(I)/DU%RHO_C(I)
          ZZ_GET = DU%ZZ_C(I,:)
-         ZZ_F(I,:) = ZZ_GET
-         CPT(I) = DU%TMP_C(I)*DU%CP_C(I)
-         RHOCPT(I) = DU%RHO_C(I)*CPT(I)
-      ENDDO
-   ELSE
-      DO I = 0,DU%N_CELLS-1
-         ZZ_GET = DU%ZZ_C(I+1,:)
-         ZZ_F(I,:) = ZZ_GET
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,DU%TMP_C(I))
-         CPT(I) = DU%TMP_C(I+1)*DU%CP_C(I+1)
-         RHOCPT(I) = DU%RHO_C(I+1)*CPT(I)
-      ENDDO
-      ZZ_F(DU%N_CELLS,:) = DUCTNODE(DU%NODE_INDEX(2))%ZZ(:)
-      CPT(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%TMP*DUCTNODE(DU%NODE_INDEX(2))%CP
-      RHOCPT(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%RHO*CPT(DU%N_CELLS)
-   ENDIF
-
-   DT_DUCT = MIN(DT,DU%DX/DU%VEL(NEW))
-   MASS_FLUX = DU%RHO_D * DU%VEL(NEW) ! total duct mass flow
-
-   ! Compute discretized mass conservation equation
-   DO I = 1,DU%N_CELLS
-      RHOZZ_C(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:) - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
-      RHOCPT(I) = RHOCPT(I) - DT_DUCT / DU%DX * MASS_FLUX * ( CPT(I) - CPT(I-1) )
-   ENDDO
-
-   ! Update values of rho and ZZ in the cells
-   DU_UPDATE_LOOP: DO I = 1,DU%N_CELLS
-      DU%RHO_C(I) = SUM(RHOZZ_C(I,1:N_TRACKED_SPECIES))
-      DU%ZZ_C(I,:) = RHOZZ_C(I,:)/DU%RHO_C(I)
-      CPT(I) = RHOCPT(I)/DU%RHO_C(I)
-      ZZ_GET = DU%ZZ_C(I,:)
-      TGUESS = DU%TMP_C(I)
-      ITCOUNT = 0
-      CP_LOOP: DO
-         ITCOUNT = ITCOUNT + 1
-         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
-         IF (TGUESS>1._EB) THEN
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
-            DCPDT = CP - CP2
-         ELSE
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
-            DCPDT = CP2- CP
-         ENDIF
-
-         DU%TMP_C(I) =TGUESS+(CPT(I)-CP*TGUESS)/(CP+TGUESS*DCPDT)
-         IF (ABS(DU%TMP_C(I) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
-         IF ((DU%TMP_C(I) - TGUESS)/DU%TMP_C(I) < 0.0005_EB) EXIT CP_LOOP
-         IF (ITCOUNT > 10) THEN
-            DU%TMP_C(I) = 0.5_EB*(DU%TMP_C(I)+TGUESS)
-            EXIT CP_LOOP
-         ENDIF
          TGUESS = DU%TMP_C(I)
-      ENDDO CP_LOOP
-      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(I),DU%TMP_C(I))
-   ENDDO DU_UPDATE_LOOP
+         ITCOUNT = 0
+         CP_LOOP: DO
+            ITCOUNT = ITCOUNT + 1
+            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
+            IF (TGUESS>1._EB) THEN
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS-1._EB)
+               DCPDT = CP - CP2
+            ELSE
+               CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
+               DCPDT = CP2- CP
+            ENDIF
 
-   DEALLOCATE(RHOZZ_C)
-   DEALLOCATE(ZZ_F)
-   DEALLOCATE(CPT)
-   DEALLOCATE(RHOCPT)
+            DU%TMP_C(I) = TGUESS+(CPT_F(I)-CP*TGUESS)/(CP+TGUESS*DCPDT)
+            IF (ABS(DU%TMP_C(I) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
+            IF ((DU%TMP_C(I) - TGUESS)/DU%TMP_C(I) < 0.0005_EB) EXIT CP_LOOP
+            IF (ITCOUNT > 10) THEN
+               DU%TMP_C(I) = 0.5_EB*(DU%TMP_C(I)+TGUESS)
+               EXIT CP_LOOP
+            ENDIF
+            TGUESS = DU%TMP_C(I)
+         ENDDO CP_LOOP
+         CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(I),DU%TMP_C(I))
+      ENDDO DU_UPDATE_LOOP
+
+      DEALLOCATE(RHOZZ_C)
+      DEALLOCATE(ZZ_F)
+      DEALLOCATE(CPT_F)
+      DEALLOCATE(RHOCPT)
+
+   ENDDO SUBSTEP_LOOP
 
 ENDDO DUCT_LOOP
 
@@ -2568,7 +2589,6 @@ ENDDO DUCT_LOOP
 END SUBROUTINE UPDATE_HVAC_MASS_TRANSPORT
 
 END MODULE HVAC_ROUTINES
-
 
 
 

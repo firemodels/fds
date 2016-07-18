@@ -1201,10 +1201,10 @@ void initvars(void){
 #endif
 
   cos_geom_max_angle = cos(DEG2RAD*geom_max_angle);
-  if(moviefiletype==WMV){
+  if(movie_filetype==WMV){
     strcpy(movie_ext, ".wmv");
   }
-  else if(moviefiletype==MP4){
+  else if(movie_filetype==MP4){
     strcpy(movie_ext, ".mp4");
   }
   else{
@@ -1803,11 +1803,6 @@ void initvars(void){
 
   right_green=0.0;
   right_blue=1.0;
-  showstereo=STEREO_NONE;
-  showstereoOLD=showstereo;
-  showstereo_frame=2;
-  show_parallax=0;
-  stereoactive=0;
   apertureindex=1;
   zoomindex=2;
   projection_type=0;
@@ -1842,7 +1837,7 @@ void initvars(void){
   reset_frame=0;
   reset_time=0.0,start_frametime=0.0,stop_frametime=0.0;
   reset_time_flag=0;
-  RenderOnceNow=0, RenderOnceNowR=0, RenderOnceNowL=0;
+  RenderOnceNow=0;
 
   nsorted_surfidlist=0;
 
@@ -1850,7 +1845,7 @@ void initvars(void){
   compress_autoloaded=0;
   strcpy(ext_png,".png");
   strcpy(ext_jpg,".jpg");
-  renderfiletype=0;
+  render_filetype=PNG;
   strcpy(part_ext,".part");
   strcpy(ini_ext,".ini");
 
@@ -1941,7 +1936,6 @@ void initvars(void){
   streak5step=0;
   showstreakhead=1;
   npartclassinfo=0;
-  prop_index=1;
   noutlineinfo=0;
   nmultisliceinfo=0;
   nmultivsliceinfo=0;

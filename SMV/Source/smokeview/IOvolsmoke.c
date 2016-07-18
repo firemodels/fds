@@ -1985,8 +1985,7 @@ void unload_volsmoke_frame_allmeshes(int framenum){
 
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
-    if(vr->smokeslice==NULL||vr->fireslice==NULL)continue;
-    if(vr->loaded==0)continue;
+    if(vr->smokeslice==NULL||vr->fireslice==NULL||vr->loaded==0)continue;
     FREEMEMORY(vr->firedataptrs[framenum]);
     FREEMEMORY(vr->smokedataptrs[framenum]);
 //    vr->loaded=0;

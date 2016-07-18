@@ -50,7 +50,7 @@ endif
 
 objwin = $(obj:.o=.obj)
 
-INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/GLUTINC/glut
+INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128 
 WININC = -I $(SOURCE_DIR)/GLINC -I $(SOURCE_DIR)/pthreads
 
 ifeq ($(LUA_SCRIPTING),true)
