@@ -2735,7 +2735,7 @@ int DoStereo(void){
     ClearBuffers(DRAWSCENE);
 
     nscreens = 1;
-    if(render_360==1&&render_multi!=0){
+    if(render_360==1&&render_state==RENDER_ON){
       nscreens = nscreeninfo;
       if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
     }
@@ -2744,7 +2744,7 @@ int DoStereo(void){
       screendata *screeni;
 
       screeni = NULL;
-      if(render_360==1&&render_multi!=0)screeni = screeninfo + i;
+      if(render_360==1 && render_state == RENDER_ON)screeni = screeninfo + i;
       if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
         int screenWidth_save;
 
@@ -2761,10 +2761,10 @@ int DoStereo(void){
         ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
         screenWidth=screenWidth_save;
       }
-      if(render_360==1&&render_multi!=0)screeni->screenbuffer = getscreenbuffer();
+      if(render_360==1 && render_state == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
-    if(render_360==1&&render_multi!=0){
+    if(render_360==1 && render_state == RENDER_ON){
       MergeRenderScreenBuffers360();
       for(i = 0; i < nscreeninfo; i++){
         screendata *screeni;

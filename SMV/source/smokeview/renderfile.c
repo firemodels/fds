@@ -74,7 +74,7 @@ void MakeMovie(void){
 
 // wait to make movie until after images are rendered
 
-  if(render_state == ON)return;
+  if(render_state == RENDER_ON)return;
 
   if(render_filetype==JPEG){
     strcpy(image_ext, ".jpg");

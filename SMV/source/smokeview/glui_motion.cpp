@@ -229,10 +229,10 @@ void update_render_start_button(void){
   int is_enabled;
 
   is_enabled = BUTTON_render_start->enabled;
-  if(render_state == ON&&is_enabled == 1){
+  if(render_state == RENDER_ON&&is_enabled == 1){
     BUTTON_render_start->disable();
   }
-  else if(render_state == OFF&&is_enabled == 0&&update_makemovie==0){
+  else if(render_state == RENDER_OFF&&is_enabled == 0&&update_makemovie==0){
     BUTTON_render_start->enable();
   }
 }
