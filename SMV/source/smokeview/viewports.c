@@ -883,7 +883,7 @@ void sort_smoke3dinfo(void){
 void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down, screendata *screen){
 
   float fleft, fright, fup, fdown;
-  float StereoCameraOffset,FrustumAsymmetry;
+  float EyeSeparation,FrustumAsymmetry,dEyeSeparation[3];
   float aperture_temp;
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
@@ -931,8 +931,6 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
 
-  FrustumAsymmetry=0.0;
-  StereoCameraOffset=0.0;
   aperture_temp = zoom2aperture(zoom);
 
   if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
@@ -959,14 +957,12 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
   fup = scene_aspect_ratio*widthdiv2;
   fdown = -scene_aspect_ratio*widthdiv2;
 
-  if(stereotype==STEREO_NONE||view_mode==VIEW_CENTER){
-    StereoCameraOffset=0.0;
-    FrustumAsymmetry=0.0;
-  }
-  else if(stereotype!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
-    StereoCameraOffset = SCALE2SMV(fzero)/30.0;
-    if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
-    FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/SCALE2SMV(fzero);
+  EyeSeparation=0.0;
+  FrustumAsymmetry=0.0;
+  if(stereotype!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+    EyeSeparation = SCALE2SMV(fzero) / 30.0;
+    if (view_mode == VIEW_LEFT)EyeSeparation = -EyeSeparation;
+    FrustumAsymmetry = -0.5*EyeSeparation*fnear / SCALE2SMV(fzero);
   }
 
   if(SUB_portfrustum(quad,&VP_scene,
@@ -1001,12 +997,15 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
     sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
     cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
 
-    pos[0] = eyexINI+StereoCameraOffset*cos_dv_sum;
-    pos[1] = eyeyINI-StereoCameraOffset*sin_dv_sum;
+    dEyeSeparation[0] =  cos_dv_sum*EyeSeparation/2.0;
+    dEyeSeparation[1] = -sin_dv_sum*EyeSeparation/2.0;
+
+    pos[0] = eyexINI;
+    pos[1] = eyeyINI;
     pos[2] = eyezINI;
 
-    viewx = pos[0] + sin_dv_sum*cos_elevation;
-    viewy = pos[1] + cos_dv_sum*cos_elevation;
+    viewx = pos[0] + dEyeSeparation[0] + sin_dv_sum*cos_elevation;
+    viewy = pos[1] + dEyeSeparation[1] + cos_dv_sum*cos_elevation;
     viewz = pos[2] + sin_elevation;
 
     elevation = camera_current->az_elev[1];
@@ -1028,8 +1027,8 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
             pj = touri->pathnodes + frame_index;
           }
 
-          viewx = pj->tour_view[0]+StereoCameraOffset*cos_dv_sum;
-          viewy = pj->tour_view[1]-StereoCameraOffset*sin_dv_sum;
+          viewx = pj->tour_view[0]+dEyeSeparation[0];
+          viewy = pj->tour_view[1]-dEyeSeparation[1];
           viewz = pj->tour_view[2];
           elevation=0.0;
           azimuth=0.0;
@@ -1042,23 +1041,27 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
 
       uup = camera_current->up;
       gluLookAt(
-        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
+        (double)(pos[0]+dEyeSeparation[0]), (double)(pos[1]+dEyeSeparation[1]), (double)pos[2],
         (double)viewx,  (double)viewy,  (double)viewz,
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }
     else {
-      float *view, *uup;
+      float *view, *uup, *right;
       float viewpos[3];
 
       view = screen->view;
       uup = screen->up;
+      right = screen->right;
       viewpos[0] = pos[0] + view[0];
       viewpos[1] = pos[1] + view[1];
       viewpos[2] = pos[2] + view[2];
+      dEyeSeparation[0] = EyeSeparation*right[0]/2.0;
+      dEyeSeparation[1] = EyeSeparation*right[1]/2.0;
+      dEyeSeparation[2] = EyeSeparation*right[2]/2.0;
       gluLookAt(
-        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
-        (double)viewpos[0], (double)viewpos[1], (double)viewpos[2],
+        (double)(    pos[0]+dEyeSeparation[0]), (double)(    pos[1]+dEyeSeparation[1]), (double)(    pos[2]+dEyeSeparation[2]),
+        (double)(viewpos[0]+dEyeSeparation[0]), (double)(viewpos[1]+dEyeSeparation[1]), (double)(viewpos[2]+dEyeSeparation[2]),
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }
