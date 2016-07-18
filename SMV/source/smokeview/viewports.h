@@ -1,10 +1,10 @@
 #ifndef VIEWPORTS_H_DEFINED
 #define VIEWPORTS_H_DEFINED
 
-void CLIP_viewport(int quad, GLint s_left, GLint s_down);
-void INFO_viewport(int quad, GLint s_left, GLint s_down);
-void TIMEBAR_viewport(int quad, GLint s_left, GLint s_down);
-void COLORBAR_viewport(int quad, GLint s_left, GLint s_down);
-void TITLE_viewport(int quad, GLint s_left, GLint s_down);
-void Scene_viewport(int quad, int view_mode, GLint s_left, GLint s_down, screendata *screen);
+void ViewportClip(int quad, GLint s_left, GLint s_down);
+void ViewportInfo(int quad, GLint s_left, GLint s_down);
+void ViewportTimebar(int quad, GLint s_left, GLint s_down);
+void ViewportColorbar(int quad, GLint s_left, GLint s_down);
+void ViewportTitle(int quad, GLint s_left, GLint s_down);
+void ViewportScene(int quad, int view_mode, GLint s_left, GLint s_down, screendata *screen);
 #endif

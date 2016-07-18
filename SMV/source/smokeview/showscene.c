@@ -36,32 +36,32 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
     get_viewport_info();
 
     if(clip_rendered_scene == 1){
-      CLIP_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after CLIP_viewport");
+      ViewportClip(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportClip");
     }
 
     if(VP_info.doit == 1){
-      INFO_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after INFO_viewport");
+      ViewportInfo(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportInfo");
     }
 
     if(VP_timebar.doit == 1){
-      TIMEBAR_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after TIMEBAR_viewport");
+      ViewportTimebar(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportTimebar");
     }
 
     if(VP_colorbar.doit == 1){
-      COLORBAR_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after COLORBAR_viewport");
+      ViewportColorbar(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportColorbar");
     }
 
     if(VP_title.doit == 1){
-      TITLE_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after TITLE_viewport");
+      ViewportTitle(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportTitle");
     }
 
-    Scene_viewport(quad, view_mode, s_left, s_down, screen);
-    SNIFF_ERRORS("after Scene_viewport");
+    ViewportScene(quad, view_mode, s_left, s_down, screen);
+    SNIFF_ERRORS("after ViewportScene");
   }
 
 

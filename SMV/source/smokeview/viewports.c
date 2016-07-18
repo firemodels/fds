@@ -461,9 +461,9 @@ int SUB_portfrustum(int quad,
   return 1;
 }
 
- /* ------------------------ CLIP_viewport ------------------------- */
+ /* ------------------------ ViewportClip ------------------------- */
 
-void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportClip(int quad, GLint screen_left, GLint screen_down){
   GLdouble x_left, x_right, x_down, x_top;
   float c_left, c_right, c_top, c_bottom;
 
@@ -507,9 +507,9 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
    glEnd();
 }
 
- /* ------------------------ INFO_viewport ------------------------- */
+ /* ------------------------ ViewportInfo ------------------------- */
 
-void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
   char slicelabel[255];
   meshdata *mesh_xyz=NULL;
   float xyz[3];
@@ -634,9 +634,9 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ------------------------ TIMEBAR_viewport ------------------------- */
+/* ------------------------ ViewportTimebar ------------------------- */
 
-void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
 #ifdef pp_memstatus
   unsigned int availmemory;
   char percen[]="%";
@@ -725,9 +725,9 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #endif
 }
 
-/* --------------------- COLORBAR_viewport ------------------------- */
+/* --------------------- ViewportColorbar ------------------------- */
 
-void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportColorbar(int quad, GLint screen_left, GLint screen_down){
   if(SUB_portortho2(quad,&VP_colorbar,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
@@ -736,9 +736,9 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   drawColorBars();
 }
 
-    /* -------------------------- TITLE_viewport -------------------------- */
+    /* -------------------------- ViewportTitle -------------------------- */
 
-void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportTitle(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
 
   if(SUB_portortho2(quad,&VP_title,screen_left,screen_down)==0)return;
@@ -878,9 +878,9 @@ void sort_smoke3dinfo(void){
   }
 }
 
-/* ----------------------- Scene_viewport ----------------------------- */
+/* ----------------------- ViewportScene ----------------------------- */
 
-void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down, screendata *screen){
+void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down, screendata *screen){
 
   float fleft, fright, fup, fdown;
   float StereoCameraOffset,FrustumAsymmetry;
