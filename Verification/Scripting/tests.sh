@@ -62,7 +62,7 @@ then
   EXT=.exe
 elif [ "$UNAME" = "Linux" ]
 then
-  PLAT=gnu_linux
+  PLATFORM=linux
   BUILD_TARGET=gnu_linux
 else
     echo "platform could not be determined"
