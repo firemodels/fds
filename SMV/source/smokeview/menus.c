@@ -2855,7 +2855,7 @@ void update_streakvalue(float value){
     parti = partinfo + i;
     if(parti->loaded==1)break;
   }
-  if(parti!=NULL&&parti->ntimes>1){
+  if(parti!=NULL&&parti->loaded==1&&parti->ntimes>1){
     for(i=0;i<parti->ntimes-1;i++){
       if(parti->times[i]<=value&&value<parti->times[i+1]){
         streak5step=i;
@@ -3051,7 +3051,6 @@ void LoadParticleMenu(int value){
       }
     }
     else{
-      ReadPartFile=1;
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
