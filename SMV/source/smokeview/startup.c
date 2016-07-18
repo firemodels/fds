@@ -1941,7 +1941,6 @@ void initvars(void){
   streak5step=0;
   showstreakhead=1;
   npartclassinfo=0;
-  prop_index=1;
   noutlineinfo=0;
   nmultisliceinfo=0;
   nmultivsliceinfo=0;
