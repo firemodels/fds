@@ -2764,6 +2764,11 @@ int DoStereo(void){
       if(render_360==1 && render_state == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
+#ifdef pp_RENDERNEW
+    if(render_360 == 0){
+      Render(VIEW_CENTER);
+    }
+#endif
     if(render_360==1 && render_state == RENDER_ON){
       MergeRenderScreenBuffers360();
       for(i = 0; i < nscreeninfo; i++){
