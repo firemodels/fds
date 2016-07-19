@@ -29,7 +29,8 @@ void LoadVolSmoke3DMenu(int value);
 void UnLoadVolSmoke3DMenu(int value);
 
 int set_slice_bound_min(const char *slice_type, int set, float value) {
-  for (int i = 0; i < nslice2; i++) {
+	int i;
+  for(i = 0; i < nslice2; i++) {
       printf("setting %s min bound ", slice_type);
       if(set) {printf("ON");} else {printf("OFF");}
       printf(" with value of %f\n", value);
@@ -43,8 +44,9 @@ int set_slice_bound_min(const char *slice_type, int set, float value) {
 }
 
 float get_slice_bound_min(const char *slice_type) {
+  int i;
   float min, max;
-  for (int i = 0; i < nslice2; i++) {
+  for(i = 0; i < nslice2; i++) {
       if(!strcmp(slice_type, slicebounds[i].datalabel)) {
           min=slicebounds[i].valmin;
           // max=slicebounds[i].valmax;
@@ -54,8 +56,9 @@ float get_slice_bound_min(const char *slice_type) {
 }
 
 float get_slice_bound_max(const char *slice_type) {
+  int i;
   float min, max;
-  for (int i = 0; i < nslice2; i++) {
+  for(i = 0; i < nslice2; i++) {
       if(!strcmp(slice_type, slicebounds[i].datalabel)) {
           // min=slicebounds[i].valmin;
           max=slicebounds[i].valmax;
@@ -65,7 +68,8 @@ float get_slice_bound_max(const char *slice_type) {
 }
 
 int set_slice_bound_max(const char *slice_type, int set, float value) {
-  for (int i = 0; i < nslice2; i++) {
+	int i;
+  for(i = 0; i < nslice2; i++) {
       printf("setting %s max bound ", slice_type);
       if(set) {printf("ON");} else {printf("OFF");}
       printf(" with value of %f\n", value);
@@ -1444,7 +1448,7 @@ void partclasstype(const char *part_type){
 
     propi = part5propinfo + i;
     if(propi->display==0)continue;
-    for (int j=0;j<npartclassinfo;j++){
+    for(j=0;j<npartclassinfo;j++){
       partclassdata *partclassj;
 
       if(propi->class_present[j]==0)continue;
@@ -3935,8 +3939,9 @@ int set_patchdataout(int outputFlag, float tmin, float tmax, float xmin,
 
 int set_c_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
                  int maxVals[]) {
+  int i;
   if(n3d>mxplot3dvars)n3d = mxplot3dvars;
-  for (int i = 0; i<n3d; i++){
+  for(i = 0; i<n3d; i++){
     setp3chopmin[i] = minFlags[i];
     setp3chopmax[i] = maxFlags[i];
     p3chopmin[i] = minVals[i];
@@ -3947,8 +3952,9 @@ int set_c_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
 
 int set_v_plot3d(int n3d, int minFlags[], int minVals[], int maxFlags[],
                  int maxVals[]) {
+  int i;
   if(n3d>mxplot3dvars)n3d = mxplot3dvars;
-  for (int i = 0; i<n3d; i++){
+  for(i = 0; i<n3d; i++){
     setp3min[i] = minFlags[i];
     setp3max[i] = maxFlags[i];
     p3min[i] = minVals[i];
@@ -4041,9 +4047,10 @@ int set_v_target(int minFlag, float minValue, int maxFlag, float maxValue) {
 int set_v_slice(int minFlag, float minValue, int maxFlag, float maxValue,
                     const char *label, float lineMin, float lineMax,
                     int lineNum) {
+  int i;
   // if there is a label to apply, use it
   if(strcmp(label, "") != 0){
-    for (int i = 0; i<nslice2; i++){
+    for(i = 0; i<nslice2; i++){
       if(strcmp(slicebounds[i].datalabel, label) != 0)continue;
       slicebounds[i].setvalmin = minFlag;
       slicebounds[i].setvalmax = maxFlag;
@@ -4057,7 +4064,7 @@ int set_v_slice(int minFlag, float minValue, int maxFlag, float maxValue,
     }
   // if there is no label apply values to all slice types
   } else{
-    for (int i = 0; i<nslice2; i++){
+    for(i = 0; i<nslice2; i++){
       slicebounds[i].setvalmin = minFlag;
       slicebounds[i].setvalmax = maxFlag;
       slicebounds[i].valmin = minValue;
@@ -4073,11 +4080,12 @@ int set_v_slice(int minFlag, float minValue, int maxFlag, float maxValue,
 
 int show_smoke3d_showall() {
   smoke3ddata *smoke3di;
+  int i;
 
   updatemenu=1;
   glutPostRedisplay();
   plotstate=DYNAMIC_PLOTS;
-  for (int i=0;i<nsmoke3dinfo;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
@@ -4088,10 +4096,11 @@ int show_smoke3d_showall() {
 
 int show_smoke3d_hideall() {
   smoke3ddata *smoke3di;
+  int i;
 
   updatemenu=1;
   glutPostRedisplay();
-  for (int i=0;i<nsmoke3dinfo;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
@@ -4100,9 +4109,11 @@ int show_smoke3d_hideall() {
 }
 
 int show_slices_showall(){
+  int i;
+
   updatemenu=1;
   glutPostRedisplay();
-  for (int i=0;i<nsliceinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     sliceinfo[i].display=1;
   }
   show_all_slices=1;
@@ -4117,9 +4128,11 @@ int show_slices_showall(){
 }
 
 int show_slices_hideall(){
+  int i;
+
   updatemenu=1;
   glutPostRedisplay();
-  for (int i=0;i<nsliceinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     sliceinfo[i].display=0;
   }
   show_all_slices=0;
