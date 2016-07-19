@@ -380,7 +380,6 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
 
 void RenderFrame(int view_mode){
   char renderfile_full[1024];
-  int use_scriptfile;
   int woffset=0,hoffset=0;
   int screenH;
   char *renderfile_dir_ptr;
@@ -603,10 +602,11 @@ unsigned int getscreenmap360LR(int side, float *xyz) {
       int ix, iy, index;
       unsigned int return_val;
 
-      ix = (screeni->nwidth/2)*(screeni->width / 2.0 + A) / screeni->width;
+      ix = (screeni->nwidth/2)*(A/(screeni->width / 4.0) + 1.0) - 0.5;
       if(ix<0 || ix>screeni->nwidth/2 - 1)continue;
 
       iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
+      iy = (screeni->nwidth / 2)*(A / (screeni->width / 4.0) + 1.0) - 0.5;
       if(iy<0 || iy>screeni->nheight - 1)continue;
 
       index = iy*screeni->nwidth + ix;
