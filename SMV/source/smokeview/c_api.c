@@ -248,6 +248,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
 /* ------------------ loadfile ------------------------ */
 
 int loadfile(const char *filename) {
+  int i;
   int errorcode;
 
   FREEMEMORY(loaded_file);
@@ -256,7 +257,7 @@ int loadfile(const char *filename) {
     NewMemory((void **)&loaded_file,strlen(filename)+1);
     strcpy(loaded_file,filename);
   }
-  for (int i=0;i<nsliceinfo;i++){
+  for(i=0;i<nsliceinfo;i++){
     slicedata *sd;
 
     sd = sliceinfo + i;
@@ -270,7 +271,7 @@ int loadfile(const char *filename) {
       return errorcode;
     }
   }
-  for (int i=0;i<npatchinfo;i++){
+  for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
 
     patchi = patchinfo + i;
@@ -280,7 +281,7 @@ int loadfile(const char *filename) {
     }
   }
   npartframes_max=get_min_partframes();
-  for (int i=0;i<npartinfo;i++){
+  for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
@@ -289,7 +290,7 @@ int loadfile(const char *filename) {
       return errorcode;
     }
   }
-  for (int i=0;i<nisoinfo;i++){
+  for(i=0;i<nisoinfo;i++){
     isodata *isoi;
 
     isoi = isoinfo + i;
@@ -298,7 +299,7 @@ int loadfile(const char *filename) {
       return errorcode;
     }
   }
-  for (int i=0;i<nsmoke3dinfo;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
@@ -309,7 +310,7 @@ int loadfile(const char *filename) {
       return errorcode;
     }
   }
-  for (int i=0;i<nzoneinfo;i++){
+  for(i=0;i<nzoneinfo;i++){
     zonedata *zonei;
 
     zonei = zoneinfo + i;
@@ -318,7 +319,7 @@ int loadfile(const char *filename) {
       return errorcode;
     }
   }
-  for (int i=0;i<nplot3dinfo;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
@@ -347,9 +348,10 @@ void loadinifile(const char *filepath){
 /* ------------------ loadvfile ------------------------ */
 
 int loadvfile(const char *filepath){
+  int i;
   FREEMEMORY(loaded_file);
   PRINTF("loading vector slice file %s\n\n",filepath);
-  for (int i=0;i<nvsliceinfo;i++){
+  for(i=0;i<nvsliceinfo;i++){
     slicedata *val;
     vslicedata *vslicei;
 
@@ -373,13 +375,14 @@ int loadvfile(const char *filepath){
 /* ------------------ loadboundaryfile ------------------------ */
 
 void loadboundaryfile(const char *filepath){
+  int i;
   int errorcode;
   int count=0;
 
   FREEMEMORY(loaded_file);
   PRINTF("loading boundary files of type: %s\n\n",filepath);
 
-  for (int i=0;i<npatchinfo;i++){
+  for(i=0;i<npatchinfo;i++){
     patchdata *patchi;
 
     patchi = patchinfo + i;
@@ -1092,7 +1095,8 @@ void set_units(int unitclass, int unit_index) {
 }
 
 void set_units_default() {
-  for (int i=0;i<nunitclasses;i++){
+  int i;
+  for(i=0;i<nunitclasses;i++){
       unitclasses[i].unit_index=0;
     }
   updatemenu=1;
@@ -1237,7 +1241,7 @@ void loadvolsmokeframe(int meshnumber, int framenumber, int flag) {
   index = meshnumber;
   framenum = framenumber;
   if(index > nmeshes - 1)index = -1;
-  for (i = 0; i < nmeshes; i++){
+  for(i = 0; i < nmeshes; i++){
     if(index == i || index < 0){
       meshdata *meshi;
       volrenderdata *vr;
@@ -1275,13 +1279,14 @@ void loadvolsmokeframe(int meshnumber, int framenumber, int flag) {
 /* ------------------ load3dsmoke ------------------------ */
 
 void load3dsmoke(const char *smoke_type){
+  int i;
   int errorcode;
   int count=0;
 
   FREEMEMORY(loaded_file);
   PRINTF("script: loading smoke3d files of type: %s\n\n",smoke_type);
 
-  for (int i=0;i<nsmoke3dinfo;i++){
+  for(i=0;i<nsmoke3dinfo;i++){
     smoke3ddata *smoke3di;
 
     smoke3di = smoke3dinfo + i;
@@ -1341,11 +1346,12 @@ void makemovie(const char *name, const char *base, float framerate) {
 /* ------------------ script_loadtour ------------------------ */
 
 int loadtour(const char *tourname) {
+  int i;
   int count=0;
   int errorcode = 0;
   PRINTF("loading tour %s\n\n", tourname);
 
-  for (int i=0;i<ntours;i++){
+  for(i=0;i<ntours;i++){
     tourdata *touri;
 
     touri = tourinfo + i;
@@ -1371,6 +1377,7 @@ int loadtour(const char *tourname) {
 /* ------------------ loadparticles ------------------------ */
 
 void loadparticles(const char *name){
+  int i;
   int errorcode;
   int count=0;
 
@@ -1379,7 +1386,7 @@ void loadparticles(const char *name){
   PRINTF("script: loading particles files\n\n");
 
   npartframes_max=get_min_partframes();
-  for (int i=0;i<npartinfo;i++){
+  for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
@@ -1387,7 +1394,7 @@ void loadparticles(const char *name){
     readpart(parti->file,i,UNLOAD,PARTDATA,&errorcode);
     count++;
   }
-  for (int i=0;i<npartinfo;i++){
+  for(i=0;i<npartinfo;i++){
     partdata *parti;
 
     parti = partinfo + i;
@@ -1408,9 +1415,10 @@ void loadparticles(const char *name){
 /* ------------------ partclasscolor ------------------------ */
 
 void partclasscolor(const char *color){
+  int i;
   int count=0;
 
-  for (int i=0;i<npart5prop;i++){
+  for(i=0;i<npart5prop;i++){
 	partpropdata *propi;
 
 	propi = part5propinfo + i;
@@ -1427,9 +1435,10 @@ void partclasscolor(const char *color){
 /* ------------------ partclasstype ------------------------ */
 
 void partclasstype(const char *part_type){
+  int i;
   int count=0;
 
-  for (int i=0;i<npart5prop;i++){
+  for(i=0;i<npart5prop;i++){
     partpropdata *propi;
     int j;
 
@@ -1455,7 +1464,7 @@ void partclasstype(const char *part_type){
 
 void plot3dprops(int variable_index, int showvector, int vector_length_index,
                  int display_type, float vector_length) {
-  int p_index;
+  int i, p_index;
 
   p_index = variable_index;
   if(p_index<1)p_index=1;
@@ -1488,7 +1497,7 @@ void plot3dprops(int variable_index, int showvector, int vector_length_index,
     meshdata *gbsave,*gbi;
 
     gbsave=current_mesh;
-    for (int i=0;i<nmeshes;i++){
+    for(i=0;i<nmeshes;i++){
       gbi = meshinfo + i;
       if(gbi->plot3dfilenum==-1)continue;
       update_current_mesh(gbi);
@@ -1564,13 +1573,14 @@ void plot3dprops(int variable_index, int showvector, int vector_length_index,
 /* ------------------ loadplot3d ------------------------ */
 
 void loadplot3d(int meshnumber, float time_local){
+  int i;
   int blocknum;
   int count=0;
 
   time_local = time_local;
   blocknum = meshnumber-1;
 
-  for(int i=0;i<nplot3dinfo;i++){
+  for(i=0;i<nplot3dinfo;i++){
     plot3ddata *plot3di;
 
     plot3di = plot3dinfo + i;
@@ -1589,13 +1599,14 @@ void loadplot3d(int meshnumber, float time_local){
 /* ------------------ loadiso ------------------------ */
 
 void loadiso(const char *type) {
+  int i;
   int count=0;
 
   FREEMEMORY(loaded_file);
   PRINTF("loading isosurface files of type: %s\n\n",type);
 
   update_readiso_geom_wrapup = UPDATE_ISO_START_ALL;
-  for (int i = 0; i<nisoinfo; i++){
+  for(i = 0; i<nisoinfo; i++){
     int errorcode;
     isodata *isoi;
 
@@ -1621,13 +1632,15 @@ void loadiso(const char *type) {
 /* ------------------ loadslice ------------------------ */
 
 void loadslice(const char *type, int axis, float distance){
+  int i;
   int count=0;
 
   PRINTF("loading slice files of type: %s\n\n",type);
 
-  for (int i=0;i<nmultisliceinfo;i++){
+  for(i=0;i<nmultisliceinfo;i++){
     multislicedata *mslicei;
     slicedata *slicei;
+    int j;
     float delta_orig;
 
     mslicei = multisliceinfo + i;
@@ -1641,7 +1654,7 @@ void loadslice(const char *type, int axis, float distance){
     if(delta_orig<0.0)delta_orig = -delta_orig;
     if(delta_orig>slicei->delta_orig)continue;
 
-    for (int j=0;j<mslicei->nslices;j++){
+    for(j=0;j<mslicei->nslices;j++){
       LoadSliceMenu(mslicei->islices[j]);
       count++;
     }
@@ -1654,13 +1667,15 @@ void loadslice(const char *type, int axis, float distance){
 /* ------------------ loadvslice ------------------------ */
 
 void loadvslice(const char *type, int axis, float distance){
+  int i;
   float delta_orig;
   int count=0;
 
   PRINTF("loading vector slice files of type: %s\n\n",type);
 
-  for (int i=0;i<nmultivsliceinfo;i++){
+  for(i=0;i<nmultivsliceinfo;i++){
     multivslicedata *mvslicei;
+    int j;
     slicedata *slicei;
 
     mvslicei = multivsliceinfo + i;
@@ -1672,7 +1687,7 @@ void loadvslice(const char *type, int axis, float distance){
     if(delta_orig<0.0)delta_orig = -delta_orig;
     if(delta_orig>slicei->delta_orig)continue;
 
-    for (int j=0;j<mvslicei->nvslices;j++){
+    for(j=0;j<mvslicei->nvslices;j++){
       LoadVSliceMenu(mvslicei->ivslices[j]);
       count++;
     }
@@ -1685,7 +1700,7 @@ void loadvslice(const char *type, int axis, float distance){
 /* ------------------ unloadslice ------------------------ */
 
 void unloadslice(int value){
-  int errorcode;
+  int errorcode,i;
 
   updatemenu=1;
   glutPostRedisplay();
@@ -1694,7 +1709,7 @@ void unloadslice(int value){
   }
   else{
     if(value==UNLOAD_ALL){
-      for (int i=0;i<nsliceinfo;i++){
+      for(i=0;i<nsliceinfo;i++){
         readslice("",i,UNLOAD,SET_SLICECOLOR,&errorcode);
       }
     }
@@ -1713,6 +1728,7 @@ void unloadslice(int value){
 
 void unloadall() {
   int errorcode;
+  int i;
   int ii;
 
    // leaving code here commented in case I later decide to unload terrain files
@@ -1730,25 +1746,25 @@ void unloadall() {
     if(nvolrenderinfo>0){
       LoadVolSmoke3DMenu(UNLOAD_ALL);
     }
-    for (int i=0;i<nsliceinfo;i++){
+    for(i=0;i<nsliceinfo;i++){
       readslice("",i,UNLOAD,SET_SLICECOLOR,&errorcode);
     }
-    for (int i=0;i<nplot3dinfo;i++){
+    for(i=0;i<nplot3dinfo;i++){
       readplot3d("",i,UNLOAD,&errorcode);
     }
-    for (int i=0;i<npatchinfo;i++){
+    for(i=0;i<npatchinfo;i++){
       readpatch(i,UNLOAD,&errorcode);
     }
-    for (int i=0;i<npartinfo;i++){
+    for(i=0;i<npartinfo;i++){
       readpart("",i,UNLOAD,PARTDATA,&errorcode);
     }
-    for (int i=0;i<nisoinfo;i++){
+    for(i=0;i<nisoinfo;i++){
       readiso("",i,UNLOAD,NULL,&errorcode);
     }
-    for (int i=0;i<nzoneinfo;i++){
+    for(i=0;i<nzoneinfo;i++){
       readzone(i,UNLOAD,&errorcode);
     }
-    for (int i=0;i<nsmoke3dinfo;i++){
+    for(i=0;i<nsmoke3dinfo;i++){
       readsmoke3d(i,UNLOAD,&errorcode);
     }
     if(nvolrenderinfo>0){
@@ -2146,12 +2162,13 @@ int get_colorbar_textureflag() {
 }
 
 int set_colorbar_colors(int ncolors, float colors[][3]) {
+  int i;
   float *rgb_ini_copy;
   float *rgb_ini_copy_p;
   CheckMemory;
   if(NewMemory((void **)&rgb_ini_copy, 4 * ncolors*sizeof(float)) == 0)return 2;
   rgb_ini_copy_p = rgb_ini_copy;
-  for (int i = 0; i < ncolors; i++) {
+  for (i = 0; i < ncolors; i++) {
     float *r = rgb_ini_copy_p;
     float *g = rgb_ini_copy_p + 1;
     float *b = rgb_ini_copy_p + 2;
@@ -2169,12 +2186,13 @@ int set_colorbar_colors(int ncolors, float colors[][3]) {
 }
 
 int set_color2bar_colors(int ncolors, float colors[][3]) {
+  int i;
   float *rgb_ini_copy;
   float *rgb_ini_copy_p;
   CheckMemory;
   if(NewMemory((void **)&rgb_ini_copy, 4 * ncolors*sizeof(float)) == 0)return 2;;
   rgb_ini_copy_p = rgb_ini_copy;
-  for (int i = 0; i < ncolors; i++) {
+  for (i = 0; i < ncolors; i++) {
     float *r = rgb_ini_copy_p;
     float *g = rgb_ini_copy_p + 1;
     float *b = rgb_ini_copy_p + 2;
@@ -2232,6 +2250,7 @@ int set_heatoncolor(float r, float g, float b) {
 
 int set_isocolors(float shininess, float default_opaqueness, float specular[3],
                   int nlevels, float colors[][4]) {
+  int i;
 
   iso_shininess = shininess;
   iso_transparency = default_opaqueness;
@@ -2239,7 +2258,7 @@ int set_isocolors(float shininess, float default_opaqueness, float specular[3],
   iso_specular[1] = specular[1];
   iso_specular[2] = specular[2];
 
-  for (int i = 0; i < nlevels; i++) {
+  for (i = 0; i < nlevels; i++) {
     iso_colors[0] = CLAMP(colors[i][0], 0.0, 1.0);
     iso_colors[1] = CLAMP(colors[i][1], 0.0, 1.0);
     iso_colors[2] = CLAMP(colors[i][2], 0.0, 1.0);
@@ -2712,8 +2731,9 @@ int set_isotran2(int v) {
 } // ISOTRAN2
 
 int set_meshvis(int n, int vals[]) {
+  int i;
   meshdata *meshi;
-  for (int i = 0; i < n; i++) {
+  for (i = 0; i < n; i++) {
     if(i>nmeshes - 1)break;
     meshi = meshinfo + i;
     meshi->blockvis = vals[i];
