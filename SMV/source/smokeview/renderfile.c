@@ -790,24 +790,17 @@ void setup_screeninfo(void){
       cose[i] = cos(DEG2RAD*eps);
     }
     for (j = 0; j < nheight360; j++){
-      if(stereotype==STEREO_LR){
-        for(i = 0; i < nazimuth; i++){
-          float xyz[3];
+      for(i = 0; i < nazimuth; i++){
+        float xyz[3];
 
-          xyz[0] = sina[i] * cose[j];
-          xyz[1] = cosa[i] * cose[j];
-          xyz[2] = sine[j];
-          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT,xyz);
-          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT,xyz);
+        xyz[0] = sina[i] * cose[j];
+        xyz[1] = cosa[i] * cose[j];
+        xyz[2] = sine[j];
+        if(stereotype == STEREO_LR){
+          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT, xyz);
+          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT, xyz);
         }
-      }
-      else{
-        for(i = 0; i < nazimuth; i++){
-          float xyz[3];
-
-          xyz[0] = sina[i] * cose[j];
-          xyz[1] = cosa[i] * cose[j];
-          xyz[2] = sine[j];
+        else{
           screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
         }
       }
