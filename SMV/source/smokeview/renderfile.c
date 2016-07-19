@@ -181,7 +181,11 @@ void Render(int view_mode){
   }
 
   if(RenderOnceNow==1){
+#ifdef pp_RENDERNEW
+    RenderFrame(view_mode);
+#else
     if(render_multi==0)RenderFrame(view_mode);
+#endif
     RenderOnceNow=0;
     if(render_multi==0){
       RenderState(RENDER_OFF);
@@ -602,11 +606,10 @@ unsigned int getscreenmap360LR(int side, float *xyz) {
       int ix, iy, index;
       unsigned int return_val;
 
-      ix = (screeni->nwidth/2)*(A/(screeni->width / 4.0) + 1.0) - 0.5;
+      ix = (screeni->nwidth/2)*(screeni->width / 2.0 + A) / screeni->width;
       if(ix<0 || ix>screeni->nwidth/2 - 1)continue;
 
       iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
-      iy = (screeni->nwidth / 2)*(A / (screeni->width / 4.0) + 1.0) - 0.5;
       if(iy<0 || iy>screeni->nheight - 1)continue;
 
       index = iy*screeni->nwidth + ix;
