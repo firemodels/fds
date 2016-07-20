@@ -608,7 +608,7 @@ of velocity, $(x_{N/2},\bar{z}_{N/2})$, which is different in each case, $N =\{8
    \end{tabular*}
    \caption[Velocity time history, qualitative convergence]{Time history of the $u$-component of velocity half a grid cell below the center of the domain for a range of grid resolutions.
    The domain is a square of side $L = 2\pi$ m.  The $N \times N$ grid is uniform.  Progressing from left to right and top to bottom we have resolutions $N =\{8,16,32,64\}$
-   clearly showing convergence of the FDS numerical solution (dotted line) to the analytical solution (solid line).
+   clearly showing convergence of the FDS numerical solution (dashed line) to the analytical solution (solid line).
    The case is run with constant properties, $\rho=1$ \si{kg/m^3} and $\mu = 0.1$ kg/m/s, and a Courant-Friedrichs-Lewy (CFL) of 0.25.}
    \label{fig_ns2d_timehistory}
 \end{figure}
@@ -628,7 +628,7 @@ the corresponding location in space and time.  The figure confirms that the adve
       \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_error} } &
       \scalebox{1}{ \includegraphics[width=3.2in]{SCRIPT_FIGURES/ns2d_nupt1_error} }
    \end{tabular*}
-   \caption[Navier-Stokes convergence study]{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The triangles represent the rms error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
+   \caption[Navier-Stokes convergence study]{(Left) Convergence rate for the $u$-component of velocity with $\nu = 0$ showing that the advective terms in the FDS code are second-order accurate.  The asterisks represent the RMS error in the $u$-component for grid spacings of $\delta x = L/N$ where $L = 2\pi$ m and $N = \{8,16,32,64\}$. The solid line represents first-order accuracy and the dashed line represents second-order accuracy. The simulation is run to a time of $t = 2\pi$~s with a CFL of $0.25$.  The $u$-component at the center of the domain is compared with the analytical solution at the same location.  (Right) Same case, except $\nu=0.1$, showing that the viscous terms in the FDS code are second-order accurate.}
    \label{fig_ns2d_convergence}
 \end{figure}
 
@@ -1454,7 +1454,7 @@ In the transition region, viscous mixing spreads over the entire jet flow and th
 \frac{u_{max}(x)}{u_0} = \frac{x_0}{x}\sqrt{\frac{b}{h}} = \frac{1}{mx} \sqrt{bh}
 \end{equation}
 
-Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dotted lines) and $h/\delta x=16$ (colored solid lines).
+Four turbulence models are tested: (1) Constant Smagorinsky (csmag), (2) Dynamic Smagorinsky (dsmag), (3) Deardorff (FDS default), and (4) Vreman.  The results are plotted in Fig.~\ref{fig_jet_decay}. For each model, two grid resolutions are run, corresponding to $h/\delta x = 8$ (colored dashed lines) and $h/\delta x=16$ (colored solid lines).
 \begin{figure}[h]
 \centering
 \includegraphics[width=.8\textwidth]{SCRIPT_FIGURES/jet_decay}
@@ -1796,11 +1796,11 @@ In this case, the particles are replaced by a small, solid block blowing propane
 
 \subsection{Realizability of Species Mass Fractions (\texorpdfstring{\textct{realizable\_mass\_fractions}}{realizable\_mass\_fractions})}
 
-In order for species mass fractions to be physically realizable they must all be positive (semi-definite) and sum to unity, $Y_\alpha\ge0$ and $\sum_\alpha Y_\alpha=1$.  In this test case, a simple methane burner is used to test the realizability of mass fractions.  A device is placed near the base of the center of the flame to measure the local mass fractions.  In Fig.~\ref{fig:realizable_mass_fractions} we plot the time history of the mass fractions for Fuel, Air, and Products along with the sum (dotted line).  This sum should remain perfectly one at all times.
+In order for species mass fractions to be physically realizable they must all be positive (semi-definite) and sum to unity, $Y_\alpha\ge0$ and $\sum_\alpha Y_\alpha=1$.  In this test case, a simple methane burner is used to test the realizability of mass fractions.  A device is placed near the base of the center of the flame to measure the local mass fractions.  In Fig.~\ref{fig:realizable_mass_fractions} we plot the time history of the mass fractions for Fuel, Air, and Products along with the sum (dashed line).  This sum should remain perfectly one at all times.
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/realizable_mass_fractions}
-\caption[The \textct{realizable\_mass\_fractions} test case]{Results of the \textct{realizable\_mass\_fractions} test case.  The sum of the mass fractions (dotted line) should remain perfectly one at all times.}
+\caption[The \textct{realizable\_mass\_fractions} test case]{Results of the \textct{realizable\_mass\_fractions} test case.  The sum of the mass fractions (dashed line) should remain perfectly one at all times.}
 \label{fig:realizable_mass_fractions}
 \end{figure}
 
