@@ -973,43 +973,55 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
   glLoadIdentity();
 
   {
-    float sin_dv_sum, cos_dv_sum;
-    float sin_azimuth, cos_azimuth;
-    float sn_view_angle, cs_view_angle;
-    float cos_elevation, sin_elevation;
     float xcen, ycen, zcen;
     float pos[3];
-    float azimuth, elevation;
-
-    sn_view_angle=sin(DEG2RAD*camera_current->view_angle);
-    cs_view_angle=cos(DEG2RAD*camera_current->view_angle);
-
-    sin_azimuth=sin(DEG2RAD*camera_current->azimuth);
-    cos_azimuth=cos(DEG2RAD*camera_current->azimuth);
+    int use_tour=0;
 
     xcen = camera_current->xcen;
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation=cos(DEG2RAD*camera_current->elevation);
-    sin_elevation=sin(DEG2RAD*camera_current->elevation);
+    if(rotation_type == EYE_CENTERED){
+      float sin_dv_sum, cos_dv_sum;
+      float sin_azimuth, cos_azimuth;
+      float sn_view_angle, cs_view_angle;
+      float cos_elevation, sin_elevation;
 
-    sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
-    cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
+      sn_view_angle = sin(DEG2RAD*camera_current->view_angle);
+      cs_view_angle = cos(DEG2RAD*camera_current->view_angle);
 
-    dEyeSeparation[0] =  cos_dv_sum*EyeSeparation/2.0;
-    dEyeSeparation[1] = -sin_dv_sum*EyeSeparation/2.0;
+      sin_azimuth = sin(DEG2RAD*camera_current->azimuth);
+      cos_azimuth = cos(DEG2RAD*camera_current->azimuth);
 
-    pos[0] = eyexINI;
-    pos[1] = eyeyINI;
-    pos[2] = eyezINI;
+      cos_elevation = cos(DEG2RAD*camera_current->elevation);
+      sin_elevation = sin(DEG2RAD*camera_current->elevation);
 
-    viewx = pos[0] + dEyeSeparation[0] + sin_dv_sum*cos_elevation;
-    viewy = pos[1] + dEyeSeparation[1] + cos_dv_sum*cos_elevation;
-    viewz = pos[2] + sin_elevation;
+      sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
+      cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
 
-    elevation = camera_current->az_elev[1];
-    azimuth = camera_current->az_elev[0];
+      dEyeSeparation[0] = cos_dv_sum*EyeSeparation / 2.0;
+      dEyeSeparation[1] = -sin_dv_sum*EyeSeparation / 2.0;
+
+      pos[0] = eyexINI + dEyeSeparation[0];
+      pos[1] = eyeyINI + dEyeSeparation[1];
+      pos[2] = eyezINI;
+
+      viewx = pos[0] + sin_dv_sum*cos_elevation;
+      viewy = pos[1] + cos_dv_sum*cos_elevation;
+      viewz = pos[2] + sin_elevation;
+    }
+    else{
+      dEyeSeparation[0] = EyeSeparation / 2.0;
+      dEyeSeparation[1] = 0.0;
+
+      pos[0] = eyexINI + dEyeSeparation[0];
+      pos[1] = eyeyINI + dEyeSeparation[1];
+      pos[2] = eyezINI;
+
+      viewx = pos[0];
+      viewy = pos[1] + 1.0;
+      viewz = pos[2] + 0.0;
+    }
 
     /* set view direction for virtual tour */
     {
@@ -1030,8 +1042,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
           viewx = pj->tour_view[0]+dEyeSeparation[0];
           viewy = pj->tour_view[1]-dEyeSeparation[1];
           viewz = pj->tour_view[2];
-          elevation=0.0;
-          azimuth=0.0;
+          use_tour = 1;
         }
       }
     }
@@ -1041,28 +1052,31 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
 
       uup = camera_current->up;
       gluLookAt(
-        (double)(pos[0]+dEyeSeparation[0]), (double)(pos[1]+dEyeSeparation[1]), (double)pos[2],
+        (double)pos[0], (double)pos[1], (double)pos[2],
         (double)viewx,  (double)viewy,  (double)viewz,
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }
     else {
       float *view, *uup, *right;
-      float viewpos[3];
+      float ppos[3], vview[3];
 
       view = screen->view;
       uup = screen->up;
       right = screen->right;
-      viewpos[0] = pos[0] + view[0];
-      viewpos[1] = pos[1] + view[1];
-      viewpos[2] = pos[2] + view[2];
-      dEyeSeparation[0] = EyeSeparation*right[0]/2.0;
-      dEyeSeparation[1] = EyeSeparation*right[1]/2.0;
-      dEyeSeparation[2] = EyeSeparation*right[2]/2.0;
+      dEyeSeparation[0] = EyeSeparation*right[0] / 2.0;
+      dEyeSeparation[1] = EyeSeparation*right[1] / 2.0;
+      dEyeSeparation[2] = EyeSeparation*right[2] / 2.0;
+      ppos[0] = eyexINI + dEyeSeparation[0];
+      ppos[1] = eyeyINI + dEyeSeparation[1];
+      ppos[2] = eyezINI + dEyeSeparation[2];
+      vview[0] = ppos[0] + view[0];
+      vview[1] = ppos[1] + view[1];
+      vview[2] = ppos[2] + view[2];
       gluLookAt(
-        (double)(    pos[0]+dEyeSeparation[0]), (double)(    pos[1]+dEyeSeparation[1]), (double)(    pos[2]+dEyeSeparation[2]),
-        (double)(viewpos[0]+dEyeSeparation[0]), (double)(viewpos[1]+dEyeSeparation[1]), (double)(viewpos[2]+dEyeSeparation[2]),
-        (double)uup[0], (double)uup[1], (double)uup[2]
+         (double)ppos[0], (double)ppos[1], (double)ppos[2],
+        (double)vview[0],(double)vview[1],(double)vview[2],
+          (double)uup[0],  (double)uup[1],  (double)uup[2]
       );
     }
 
@@ -1078,10 +1092,16 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
       glMultMatrixf(quat_rotation);
     }
     else{
-      if(rotation_type==ROTATION_2AXIS){
-        glRotatef(elevation,1.0,0.0,0.0);  /* rotate about x axis */
+      if(use_tour == 0){
+        float azimuth, elevation;
+
+        elevation = camera_current->az_elev[1];
+        azimuth = camera_current->az_elev[0];
+        if(rotation_type == ROTATION_2AXIS){
+          glRotatef(elevation, 1.0, 0.0, 0.0);  /* rotate about x axis */
+        }
+        glRotatef(azimuth, 0.0, 0.0, 1.0);      /* rotate about z axis */
       }
-      glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
     {
       float u[3], axis[3], angle;
