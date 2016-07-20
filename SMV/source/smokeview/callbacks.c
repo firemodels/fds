@@ -1760,7 +1760,7 @@ void keyboard(unsigned char key, int flag){
         }
 
 
-        if(strncmp((const char *)&key2,"R",1)==0){
+        if(strncmp((const char *)&key2,"R",1)==0||render_360==1){
           if(nrender_rows==1)nrender_rows=2;
           render_multi=2;
           rflag=1;
