@@ -2491,7 +2491,7 @@ REAL(EB), INTENT(IN) :: DT
 INTEGER :: N_SUBSTEPS,ND,NS,I,ITCOUNT
 TYPE(DUCT_TYPE),POINTER :: DU=>NULL()
 REAL(EB) :: CP,CP2,DCPDT,DT_CFL,DT_DUCT,MASS_FLUX,TGUESS,ZZ_GET(N_TRACKED_SPECIES)
-REAL(EB), ALLOCATABLE, DIMENSION(:) :: CPT_F,RHOCPT
+REAL(EB), ALLOCATABLE, DIMENSION(:) :: CPT_C,CPT_F,RHOCPT_C
 REAL(EB), ALLOCATABLE, DIMENSION(:,:) :: RHOZZ_C,ZZ_F
 
 DUCT_LOOP: DO ND = 1,N_DUCTS
@@ -2512,45 +2512,39 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       ! Set upwind face indices and allocate flux arrays
       ALLOCATE(ZZ_F(0:DU%N_CELLS,N_TRACKED_SPECIES))
       ALLOCATE(CPT_F(0:DU%N_CELLS))
-      ALLOCATE(RHOCPT(0:DU%N_CELLS))
+      ALLOCATE(CPT_C(DU%N_CELLS))
+      ALLOCATE(RHOCPT_C(DU%N_CELLS))
       ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
       ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
       IF (DU%VEL(NEW)>0._EB) THEN
          ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
          CPT_F(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
-         RHOCPT(0) = DUCTNODE(DU%NODE_INDEX(1))%RHO*CPT_F(0)
          DO I = 1,DU%N_CELLS
-            ZZ_GET = DU%ZZ_C(I,:)
             ZZ_F(I,:) = DU%ZZ_C(I,:) ! Godunov upwinding
             CPT_F(I) = DU%TMP_C(I)*DU%CP_C(I) ! Godunov upwinding
-            RHOCPT(I) = DU%RHO_C(I)*DU%TMP_C(I)*DU%CP_C(I)
          ENDDO
       ELSE
          ZZ_F(DU%N_CELLS,:) = DUCTNODE(DU%NODE_INDEX(2))%ZZ(:)
          CPT_F(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%TMP*DUCTNODE(DU%NODE_INDEX(2))%CP
-         RHOCPT(DU%N_CELLS) = DUCTNODE(DU%NODE_INDEX(2))%RHO*CPT_F(DU%N_CELLS)
          DO I = 0,DU%N_CELLS-1
-            ZZ_GET = DU%ZZ_C(I+1,:)
-            ZZ_F(I,:) = ZZ_GET
-            CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,DU%TMP_C(I))
+            ZZ_F(I,:) = DU%ZZ_C(I+1,:)
             CPT_F(I) = DU%TMP_C(I+1)*DU%CP_C(I+1)
-            RHOCPT(I) = DU%RHO_C(I+1)*CPT_F(I)
          ENDDO
       ENDIF
 
       ! Compute discretized conservation equations using explicit Euler method with Godunov upwinding profile
-         DO I = 1,DU%N_CELLS
-            RHOZZ_C(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:) - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
-            RHOCPT(I) = RHOCPT(I) - DT_DUCT / DU%DX * MASS_FLUX * ( CPT_F(I) - CPT_F(I-1) )
-         ENDDO
+      DO I = 1,DU%N_CELLS
+         RHOZZ_C(I,:) = DU%RHO_C(I)*DU%ZZ_C(I,:)           - DT_DUCT / DU%DX * MASS_FLUX * ( ZZ_F(I,:) - ZZ_F(I-1,:) )
+         RHOCPT_C(I) =  DU%RHO_C(I)*DU%TMP_C(I)*DU%CP_C(I) - DT_DUCT / DU%DX * MASS_FLUX * ( CPT_F(I) - CPT_F(I-1) )
+      ENDDO
 
-      ! Update variables in cell centres and faces
+      ! Update cell centre variables
       DU_UPDATE_LOOP: DO I = 1,DU%N_CELLS
          DU%RHO_C(I) = SUM(RHOZZ_C(I,1:N_TRACKED_SPECIES))
          DU%ZZ_C(I,:) = RHOZZ_C(I,:)/DU%RHO_C(I)
-         CPT_F(I) = RHOCPT(I)/DU%RHO_C(I)
-         ZZ_GET = DU%ZZ_C(I,:)
+         CPT_C(I) = RHOCPT_C(I)/DU%RHO_C(I) 
+         ZZ_GET = DU%ZZ_C(I,:) ! Single dimension to be used with GET_AVERAGE ...
          TGUESS = DU%TMP_C(I)
          ITCOUNT = 0
          CP_LOOP: DO
@@ -2561,10 +2555,9 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
                DCPDT = CP - CP2
             ELSE
                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP2,TGUESS+1._EB)
-               DCPDT = CP2- CP
+               DCPDT = CP2 - CP
             ENDIF
-
-            DU%TMP_C(I) = TGUESS+(CPT_F(I)-CP*TGUESS)/(CP+TGUESS*DCPDT)
+            DU%TMP_C(I) = TGUESS + ( CPT_C(I) - CP * TGUESS ) / ( CP + TGUESS * DCPDT )
             IF (ABS(DU%TMP_C(I) - TGUESS) < TWO_EPSILON_EB) EXIT CP_LOOP
             IF ((DU%TMP_C(I) - TGUESS)/DU%TMP_C(I) < 0.0005_EB) EXIT CP_LOOP
             IF (ITCOUNT > 10) THEN
@@ -2579,7 +2572,8 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       DEALLOCATE(RHOZZ_C)
       DEALLOCATE(ZZ_F)
       DEALLOCATE(CPT_F)
-      DEALLOCATE(RHOCPT)
+      DEALLOCATE(CPT_C)
+      DEALLOCATE(RHOCPT_C)
 
    ENDDO SUBSTEP_LOOP
 
