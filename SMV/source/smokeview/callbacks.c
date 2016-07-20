@@ -3015,7 +3015,7 @@ void Display_CB(void){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
 #ifdef pp_RENDERNEW
-      Render(VIEW_CENTER);
+      if(render_360==0)Render(VIEW_CENTER);
 #endif
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
