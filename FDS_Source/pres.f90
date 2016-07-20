@@ -981,9 +981,9 @@ IF (CHECK_POISSON) THEN
    DO K=1,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
-            LHSS = ((HP(I+1,J,K)-HP(I,J,K))*RDXN(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1) )*RDX(I) &
-                 + ((HP(I,J+1,K)-HP(I,J,K))*RDYN(J) - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1) )*RDY(J) &
-                 + ((HP(I,J,K+1)-HP(I,J,K))*RDZN(K) - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
+            LHSS = ( (HP(I+1,J,K)-HP(I,J,K))*RDXN(I) - (HP(I,J,K)-HP(I-1,J,K))*RDXN(I-1) )*RDX(I) &
+                 + ( (HP(I,J+1,K)-HP(I,J,K))*RDYN(J) - (HP(I,J,K)-HP(I,J-1,K))*RDYN(J-1) )*RDY(J) &
+                 + ( (HP(I,J,K+1)-HP(I,J,K))*RDZN(K) - (HP(I,J,K)-HP(I,J,K-1))*RDZN(K-1) )*RDZ(K)
             LAPLACE_ERR = MAX(ABS(LHSS),LAPLACE_ERR)
          ENDDO
       ENDDO
