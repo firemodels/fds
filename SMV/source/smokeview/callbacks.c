@@ -3020,6 +3020,9 @@ void Display_CB(void){
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{
+      int stop_rendering;
+
+      stop_rendering = 1;
       if(RenderOnceNow==1){
         renderdoublenow=1;
       }
@@ -3029,6 +3032,7 @@ void Display_CB(void){
           ){
           render_frame[itimes]++;
           renderdoublenow=1;
+          stop_rendering = 0;
         }
       }
       if(renderdoublenow==1&&render_360==0){
@@ -3082,7 +3086,8 @@ void Display_CB(void){
           FREEMEMORY(screeni->screenbuffer);
         }
       }
-      if(renderdoublenow==0||RenderOnceNow==1){
+//      if(renderdoublenow==0||RenderOnceNow==1){
+      if(stop_rendering==1){
         ASSERT(RenderSkip>0);
         RenderState(RENDER_OFF);
         RenderSkip=1;
