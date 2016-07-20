@@ -20,6 +20,9 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int render_mode;
+SVEXTERN int render_number;
+
 SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
 

@@ -1620,6 +1620,7 @@ void RenderMenu(int value){
       fprintf(scriptoutstream," %i\n",RenderSkip);
       fprintf(scriptoutstream,"\n");
     }
+    render_mode = RENDER_ALLTIMES;
     break;
   }
   update_nrender_rows();
