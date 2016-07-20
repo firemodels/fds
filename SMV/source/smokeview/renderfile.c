@@ -181,7 +181,11 @@ void Render(int view_mode){
   }
 
   if(RenderOnceNow==1){
+#ifdef pp_RENDERNEW
+    RenderFrame(view_mode);
+#else
     if(render_multi==0)RenderFrame(view_mode);
+#endif
     RenderOnceNow=0;
     if(render_multi==0){
       RenderState(RENDER_OFF);
@@ -380,7 +384,6 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
 
 void RenderFrame(int view_mode){
   char renderfile_full[1024];
-  int use_scriptfile;
   int woffset=0,hoffset=0;
   int screenH;
   char *renderfile_dir_ptr;
@@ -577,45 +580,42 @@ unsigned int getscreenmap360(float *xyz) {
 /* ------------------ getscreenmap360LR ------------------------ */
 
 unsigned int getscreenmap360LR(int side, float *xyz) {
-  int ibuff;
-  float xyznorm;
+  int ibuff, imax, ix, iy, index;
+  float xyznorm, maxcosangle;
+  float *view, *up, *right, t;
+  float A, B, cosangle;
+  screendata *screeni;
 
   xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
 
+  maxcosangle = -2.0;
+  imax = 0;
   for(ibuff = 0; ibuff < nscreeninfo; ibuff++){
-    screendata *screeni;
-    float *view, *up, *right, t;
-    float A, B;
-    float cosangle;
-
     screeni = screeninfo + ibuff;
     view = screeni->view;
-    up = screeni->up;
-    right = screeni->right;
     cosangle = DOT3(view, xyz) / xyznorm;
-    if(cosangle <= screeni->cosmax - 0.001)continue;
-
-    t = DOT3(xyz, view);
-    A = DOT3(xyz, right) / t;
-    B = DOT3(xyz, up) / t;
-
-    {
-      int ix, iy, index;
-      unsigned int return_val;
-
-      ix = (screeni->nwidth/2)*(screeni->width / 2.0 + A) / screeni->width;
-      if(ix<0 || ix>screeni->nwidth/2 - 1)continue;
-
-      iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
-      if(iy<0 || iy>screeni->nheight - 1)continue;
-
-      index = iy*screeni->nwidth + ix;
-      if(side == RIGHT)index += screeni->nwidth / 2;
-      return_val = ((ibuff + 1) << 24) | index;
-      return return_val;
+    if(cosangle > maxcosangle){
+      imax = ibuff;
+      maxcosangle = cosangle;
     }
   }
-  return 0;
+
+  ibuff = imax;
+  screeni = screeninfo + ibuff;
+  view = screeni->view;
+  up = screeni->up;
+  right = screeni->right;
+
+  t = DOT3(xyz, view);
+  A = DOT3(xyz, right) / t;
+  B = DOT3(xyz, up) / t;
+
+  ix = CLAMP((screeni->nwidth/2)*(0.5 + A*t/screeni->width),0,screeni->nwidth/2-1);
+  if(side == RIGHT)ix += screeni->nwidth / 2;
+  iy = CLAMP( screeni->nheight*(  0.5 + B*t/screeni->height),0,screeni->nheight-1);
+
+  index = iy*screeni->nwidth + ix;
+  return (unsigned int)(((ibuff + 1) << 24) | index);
 }
 
 #ifdef pp_RENDER360_DEBUG
@@ -763,14 +763,14 @@ void setup_screeninfo(void){
   NewMemory((void **)&screenmap360, nwidth360*nheight360 * sizeof(unsigned int));
   {
     int i,j;
-    float *cosa, *sina, *cose, *sine;
+    float *cos_az, *sin_az, *cos_elev, *sin_elev;
     float dazimuth;
     int nazimuth;
 
-    NewMemory((void **)&sina, nwidth360 * sizeof(float));
-    NewMemory((void **)&cosa, nwidth360 * sizeof(float));
-    NewMemory((void **)&sine, nheight360 * sizeof(float));
-    NewMemory((void **)&cose, nheight360 * sizeof(float));
+    NewMemory((void **)&sin_az, nwidth360 * sizeof(float));
+    NewMemory((void **)&cos_az, nwidth360 * sizeof(float));
+    NewMemory((void **)&sin_elev, nheight360 * sizeof(float));
+    NewMemory((void **)&cos_elev, nheight360 * sizeof(float));
 
     nazimuth = nwidth360;
     if(stereotype == STEREO_LR)nazimuth /= 2;
@@ -779,43 +779,36 @@ void setup_screeninfo(void){
       float alpha;
 
       alpha = -180.0 + (float)i*dazimuth;
-      sina[i] = sin(DEG2RAD*alpha);
-      cosa[i] = cos(DEG2RAD*alpha);
+      sin_az[i] = sin(DEG2RAD*alpha);
+      cos_az[i] = cos(DEG2RAD*alpha);
     }
     for (i = 0; i < nheight360; i++){
       float eps;
 
       eps = -90.0 + (float)i*180.0 / (float)nheight360;
-      sine[i] = sin(DEG2RAD*eps);
-      cose[i] = cos(DEG2RAD*eps);
+      sin_elev[i] = sin(DEG2RAD*eps);
+      cos_elev[i] = cos(DEG2RAD*eps);
     }
     for (j = 0; j < nheight360; j++){
-      if(stereotype==STEREO_LR){
-        for(i = 0; i < nazimuth; i++){
-          float xyz[3];
+      for(i = 0; i < nazimuth; i++){
+        float xyz[3];
 
-          xyz[0] = sina[i] * cose[j];
-          xyz[1] = cosa[i] * cose[j];
-          xyz[2] = sine[j];
-          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT,xyz);
-          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT,xyz);
+        xyz[0] = sin_az[i] * cos_elev[j];
+        xyz[1] = cos_az[i] * cos_elev[j];
+        xyz[2] = sin_elev[j];
+        if(stereotype == STEREO_LR){
+          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT, xyz);
+          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT, xyz);
         }
-      }
-      else{
-        for(i = 0; i < nazimuth; i++){
-          float xyz[3];
-
-          xyz[0] = sina[i] * cose[j];
-          xyz[1] = cosa[i] * cose[j];
-          xyz[2] = sine[j];
+        else{
           screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
         }
       }
     }
-    FREEMEMORY(sina);
-    FREEMEMORY(cosa);
-    FREEMEMORY(sine);
-    FREEMEMORY(cose);
+    FREEMEMORY(sin_az);
+    FREEMEMORY(cos_az);
+    FREEMEMORY(sin_elev);
+    FREEMEMORY(cos_elev);
   }
 }
 
@@ -828,7 +821,7 @@ int MergeRenderScreenBuffers360(void){
   FILE *RENDERfile = NULL;
   gdImagePtr RENDERimage;
   int i, j, ijk360;
-  int *screenbuffer;
+  int *screenbuffer360;
 
   switch (render_filetype){
   case PNG:
@@ -870,10 +863,10 @@ int MergeRenderScreenBuffers360(void){
     return 1;
   }
   RENDERimage = gdImageCreateTrueColor(nwidth360, nheight360);
-  NewMemory((void **)&screenbuffer,nwidth360*nheight360 * sizeof(int));
+  NewMemory((void **)&screenbuffer360,nwidth360*nheight360 * sizeof(int));
 
   for(i=0;i<nwidth360*nheight360;i++){
-    screenbuffer[i]=0;
+    screenbuffer360[i]=0;
   }
 
   ijk360 = 0;
@@ -888,14 +881,14 @@ int MergeRenderScreenBuffers360(void){
       if(ibuff == 0)continue;
       ibuff--;
       screeni = screeninfo + ibuff;
-      p = screeni->screenbuffer;
 
       ijk = screenmap360[ijk360] & 0xffffff;
-      r=p[3*ijk];
-      g=p[3*ijk+1];
-      b=p[3*ijk+2];
+      p = screeni->screenbuffer+3*ijk;
+      r= *p++;
+      g= *p++;
+      b= *p++;
       rgb_local = (r<<16)|(g<<8)|b;
-      screenbuffer[ijk360]=rgb_local;
+      screenbuffer360[ijk360]=rgb_local;
       ijk360++;
     }
   }
@@ -903,7 +896,7 @@ int MergeRenderScreenBuffers360(void){
   ijk360 = 0;
   for(j=nheight360-1;j>=0;j--){
     for(i=0;i<nwidth360;i++){
-      gdImageSetPixel(RENDERimage, i, j, screenbuffer[ijk360++]);
+      gdImageSetPixel(RENDERimage, i, j, screenbuffer360[ijk360++]);
     }
   }
 
@@ -926,7 +919,7 @@ int MergeRenderScreenBuffers360(void){
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
-  FREEMEMORY(screenbuffer);
+  FREEMEMORY(screenbuffer360);
   if(render_frame!=NULL&&itimes>=0&&itimes<nglobal_times){
     render_frame[itimes]++;
   }

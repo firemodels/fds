@@ -1760,7 +1760,7 @@ void keyboard(unsigned char key, int flag){
         }
 
 
-        if(strncmp((const char *)&key2,"R",1)==0){
+        if(strncmp((const char *)&key2,"R",1)==0||render_360==1){
           if(nrender_rows==1)nrender_rows=2;
           render_multi=2;
           rflag=1;
@@ -2764,6 +2764,11 @@ int DoStereo(void){
       if(render_360==1 && render_state == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
+#ifdef pp_RENDERNEW
+    if(render_360 == 0){
+      Render(VIEW_CENTER);
+    }
+#endif
     if(render_360==1 && render_state == RENDER_ON){
       MergeRenderScreenBuffers360();
       for(i = 0; i < nscreeninfo; i++){
@@ -3010,11 +3015,14 @@ void Display_CB(void){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
 #ifdef pp_RENDERNEW
-      Render(VIEW_CENTER);
+      if(render_360==0)Render(VIEW_CENTER);
 #endif
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{
+      int stop_rendering;
+
+      stop_rendering = 1;
       if(RenderOnceNow==1){
         renderdoublenow=1;
       }
@@ -3024,6 +3032,7 @@ void Display_CB(void){
           ){
           render_frame[itimes]++;
           renderdoublenow=1;
+          stop_rendering = 0;
         }
       }
       if(renderdoublenow==1&&render_360==0){
@@ -3077,7 +3086,8 @@ void Display_CB(void){
           FREEMEMORY(screeni->screenbuffer);
         }
       }
-      if(renderdoublenow==0||RenderOnceNow==1){
+//      if(renderdoublenow==0||RenderOnceNow==1){
+      if(stop_rendering==1){
         ASSERT(RenderSkip>0);
         RenderState(RENDER_OFF);
         RenderSkip=1;
