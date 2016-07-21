@@ -202,8 +202,8 @@ void Render(int view_mode){
 
 /* ------------------ GetRenderFileName ------------------------ */
 
-void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfile_full){
-  char renderfile_name[1024], renderfile_dir[1024], renderfile_suffix[1024], *renderfile_ext;
+void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfile_dir, char *renderfile_full){
+  char renderfile_name[1024], renderfile_suffix[1024], *renderfile_ext;
   int use_scriptfile;
 
   // construct filename for image to be rendered
@@ -380,7 +380,8 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
   /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
-  char renderfile_full[1024];
+  char renderfile_full[1024], renderfile_dir[1024];
+
   int woffset=0,hoffset=0;
   int screenH;
   char *renderfile_dir_ptr;
@@ -399,7 +400,7 @@ void RenderFrame(int view_mode){
     if(view_mode == VIEW_RIGHT)woffset = screenWidth;
   }
 
-  GetRenderFileName(view_mode, &renderfile_dir_ptr, renderfile_full);
+  GetRenderFileName(view_mode, &renderfile_dir_ptr, renderfile_dir, renderfile_full);
 
   SVimage2file(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
