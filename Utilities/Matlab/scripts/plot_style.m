@@ -15,39 +15,94 @@
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
 
-% Font properties
-Font_Name = 'Times';
-Font_Interpreter = 'TeX';
-Key_Font_Size   = 12;
-Title_Font_Size = 16;
-Label_Font_Size = 16;
-Scat_Title_Font_Size = 14;
-Scat_Label_Font_Size = 14;
-Marker_Size = 4;
+style = 'fds'; % set to 'fds', 'paper', etc., as needed (default 'fds')
 
-% Line properties
-Line_Width      = 1.0;
+switch style
 
-% Plot properties
-Plot_Units      = 'inches';
-Plot_Width      = 5.0;
-Plot_Height     = 3.4;
-Plot_X          = 1.2;
-Plot_Y          = 0.8;
+    case 'fds'
 
-Scat_Plot_Width      = 4.75;
-Scat_Plot_Height     = 4.75;
-Scat_Plot_X          = 0.75;
-Scat_Plot_Y          = 0.75;
-Subtitle_Text_Offset = 0.05;
+        % Font properties
+        Font_Name = 'Times';
+        Font_Interpreter = 'TeX';
+        Key_Font_Size   = 12;
+        Title_Font_Size = 16;
+        Label_Font_Size = 16;
+        Scat_Title_Font_Size = 14;
+        Scat_Label_Font_Size = 14;
+        Marker_Size = 4;
 
-% Paper properties
-Paper_Units     = 'inches';
-Paper_Width     = 6.5;
-Paper_Height    = 4.5;
-Scat_Paper_Height = 6.0;
-Scat_Paper_Width  = 6.0;
+        % Line properties
+        Line_Width      = 1.0;
 
-% Print properties
-Figure_Visibility = 'on';
-Image_File_Type = '-dpdf';
+        % Plot properties
+        Plot_Units      = 'inches';
+        Plot_Width      = 5.0;
+        Plot_Height     = 3.4;
+        Plot_X          = 1.2;
+        Plot_Y          = 0.8;
+
+        Scat_Plot_Width      = 4.75;
+        Scat_Plot_Height     = 4.75;
+        Scat_Plot_X          = 0.75;
+        Scat_Plot_Y          = 0.75;
+        Subtitle_Text_Offset = 0.05;
+
+        % Paper properties
+        Paper_Units     = 'inches';
+        Paper_Width     = 6.5;
+        Paper_Height    = 4.5;
+        Scat_Paper_Height = 6.0;
+        Scat_Paper_Width  = 6.0;
+
+        % Print properties
+        Figure_Visibility = 'on';
+        Image_File_Type = '-dpdf';
+
+    case 'paper'
+
+        % Font properties
+        Font_Name = 'Helvetica'; %get(gca,'fontname')
+        Font_Interpreter = 'TeX';
+        Key_Font_Size   = 16;
+        Title_Font_Size = 20;
+        Label_Font_Size = 20;
+        Marker_Size = 10;
+        Scat_Title_Font_Size = 14;
+        Scat_Label_Font_Size = 14;
+
+        % Line properties
+        Line_Width      = 1; % get(gca,'linewidth')
+
+        % Plot properties
+        Plot_Units      = 'normalized'; %get(gca,'units')
+        Pos             = [0.1300    0.1100    0.7750    0.8150]; %get(gca,'position') % [left bottom width height]
+        YLabel_Offset   = -0.05; % normalized units
+        XLabel_Offset   = -0.09; % normalized units
+        Plot_X          = Pos(1);
+        Plot_Y          = Pos(2) - 0.35*XLabel_Offset;
+        Plot_Width      = Pos(3);
+        Plot_Height     = Pos(4)*.95; % use for exponential notation on y-axis tick labels
+
+        Scat_Plot_Width      = 4.75;
+        Scat_Plot_Height     = 4.75;
+        Scat_Plot_X          = 0.75;
+        Scat_Plot_Y          = 0.75;
+        Subtitle_Text_Offset = 0.05;
+
+        % Paper properties
+        Paper_Units     = 'inches'; %get(gcf,'paperunits')
+        Paper_Pos       = [0.2500    2.5000    8.0000    6.0000]; %get(gcf,'paperposition')
+        Paper_Width     = Paper_Pos(3);
+        Paper_Height    = Paper_Pos(4);
+        Scat_Paper_Height = 6.0;
+        Scat_Paper_Width  = 6.0;
+
+        % Print properties
+        Figure_Visibility = 'on';
+        Image_File_Type = '-dpdf';
+
+    otherwise
+
+end
+
+
