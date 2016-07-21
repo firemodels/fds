@@ -9979,8 +9979,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "RENDERFILELABEL") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i ", &renderfilelabel);
-      ONEORZERO(renderfilelabel);
+      sscanf(buffer, "%i ", &render_label_type);
+      ONEORZERO(render_label_type);
       continue;
     }
     if(match(buffer, "CELLCENTERTEXT") == 1){
@@ -12382,7 +12382,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i %i %i %i %i\n",
     clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
   fprintf(fileout, "RENDERFILELABEL\n");
-  fprintf(fileout, " %i\n", renderfilelabel);
+  fprintf(fileout, " %i\n", render_label_type);
   fprintf(fileout, "RENDERFILETYPE\n");
   fprintf(fileout," %i %i\n",render_filetype,movie_filetype);
   fprintf(fileout, "MOVIEFILETYPE\n");

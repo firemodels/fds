@@ -680,7 +680,7 @@ extern "C" void glui_motion_setup(int main_window){
   PANEL_render_file = glui_motion->add_panel_to_panel(ROLLOUT_render, "", false);
 
   PANEL_file_suffix = glui_motion->add_panel_to_panel(PANEL_render_file, "suffix:", true);
-  RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &renderfilelabel, RENDER_LABEL, Render_CB);
+  RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &render_label_type, RENDER_LABEL, Render_CB);
   RADIOBUTTON_1f = glui_motion->add_radiobutton_to_group(RADIO_render_label, "frame number");
   RADIOBUTTON_1g = glui_motion->add_radiobutton_to_group(RADIO_render_label, "time (s)");
 
@@ -755,7 +755,7 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 #endif
 
-  update_glui_filelabel(renderfilelabel);
+  update_glui_filelabel(render_label_type);
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);

@@ -1557,12 +1557,12 @@ void RenderMenu(int value){
     RenderState(RENDER_OFF);
     break;
   case RenderLABELframenumber:
-    renderfilelabel=0;
-    update_glui_filelabel(renderfilelabel);
+    render_label_type=RENDER_LABEL_FRAMENUM;
+    update_glui_filelabel(render_label_type);
     break;
   case RenderLABELtime:
-    renderfilelabel=1;
-    update_glui_filelabel(renderfilelabel);
+    render_label_type=RENDER_LABEL_TIME;
+    update_glui_filelabel(render_label_type);
     break;
   case RenderPNG:
      render_filetype=PNG;
@@ -1602,7 +1602,7 @@ void RenderMenu(int value){
       fprintf(scriptoutstream," %i\n",RenderSkip);
       fprintf(scriptoutstream,"\n");
     }
-    render_number = RENDER_ALLTIMES;
+    render_times = RENDER_ALLTIMES;
     break;
   }
   update_nrender_rows();
@@ -7514,11 +7514,11 @@ updatemenu=0;
     }
 
     glutAddMenuEntry(_("File suffix:"),11000);
-    if(renderfilelabel==0){
+    if(render_label_type==RENDER_LABEL_FRAMENUM){
       glutAddMenuEntry(_("  *Frame number"),RenderLABELframenumber);
       glutAddMenuEntry(_("  Time"),RenderLABELtime);
     }
-    if(renderfilelabel==1){
+    if(render_label_type==RENDER_LABEL_TIME){
       glutAddMenuEntry(_("  Frame number"),RenderLABELframenumber);
       glutAddMenuEntry(_("  *Time"),RenderLABELtime);
     }
