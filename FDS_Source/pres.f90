@@ -887,17 +887,17 @@ EXTERNAL_SOLID_BOUNDARY_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS
 
          SELECT CASE(IOR)
             CASE( 1)
-               BXS(JJ,KK) = (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC)*DXN(II)
+               BXS(JJ,KK) = 0._EB ! (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC) * DXN(II)
             CASE(-1)
-               BXF(JJ,KK) = (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC)*DXN(II-1)
+               BXF(JJ,KK) = 0._EB ! (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC) * DXN(II-1)
             CASE( 2)
-               BYS(II,KK) = (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC)*DYN(JJ)
+               BYS(II,KK) = 0._EB ! (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC) * DYN(JJ)
             CASE(-2)
-               BYF(II,KK) = (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC)*DYN(JJ-1)
+               BYF(II,KK) = 0._EB ! (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC) * DYN(JJ-1)
             CASE( 3)
-               BZS(II,JJ) = (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC)*DZN(KK)
+               BZS(II,JJ) = 0._EB ! (UN_NEW_OTHER - UN_NEW)/(2._EB*DT_LOC) * DZN(KK)
             CASE(-3)
-               BZF(II,JJ) = (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC)*DZN(KK-1)
+               BZF(II,JJ) = 0._EB ! (UN_NEW - UN_NEW_OTHER)/(2._EB*DT_LOC) * DZN(KK-1)
          END SELECT
 
    END SELECT LAPLACE_BC_INDEX_SELECT
