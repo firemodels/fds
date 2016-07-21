@@ -167,7 +167,7 @@ void Render(int view_mode){
       }
     }
   }
-  if(render_times = RENDER_ALLTIMES && rendering_status == RENDER_ON&&render_mode == RENDER_XYSINGLE && plotstate == DYNAMIC_PLOTS && nglobal_times > 0){
+  if(render_times == RENDER_ALLTIMES && rendering_status == RENDER_ON&&render_mode == RENDER_XYSINGLE && plotstate == DYNAMIC_PLOTS && nglobal_times > 0){
     if(itimes>=0&&itimes<nglobal_times&&
      ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
      ){
