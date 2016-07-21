@@ -1768,7 +1768,7 @@ void keyboard(unsigned char key, int flag){
             render_mode = RENDER_XYMULTI;
           }
         }
-        render_number = RENDER_SINGLETIME;
+        render_times = RENDER_SINGLETIME;
 
         if(strncmp((const char *)&key2,"R",1)==0|| render_mode == RENDER_360){
           if(nrender_rows==1)nrender_rows=2;

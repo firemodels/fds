@@ -20,7 +20,7 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
-SVEXTERN int render_mode, render_number;
+SVEXTERN int render_mode, render_times;
 SVEXTERN int SVDECL(render_from_menu, 0);
 SVEXTERN int SVDECL(render_360, 0);
 SVEXTERN int SVDECL(rendering_status, 0);
@@ -31,6 +31,13 @@ SVEXTERN int SVDECL(render_clip_left, 0);
 SVEXTERN int SVDECL(render_clip_right, 0);
 SVEXTERN int SVDECL(render_clip_bottom, 0);
 SVEXTERN int SVDECL(render_clip_top, 0);
+SVEXTERN int render_size_index;
+SVEXTERN int render_skip_index;
+SVEXTERN int SVDECL(renderW, 640), SVDECL(renderH, 480), render_window_size;
+SVEXTERN int render_filetype;
+SVEXTERN int SVDECL(render_label_type, RENDER_LABEL_FRAMENUM);
+SVEXTERN int SVDECL(skip_render_frames, 0);
+SVEXTERN int SVDECL(*render_frame, NULL);
 
 SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
@@ -209,7 +216,6 @@ SVEXTERN int SVDECL(disable_gpu,0);
 SVEXTERN int SVDECL(script_startframe,-1), SVDECL(script_skipframe,-1);
 SVEXTERN int SVDECL(vol_startframe0,-1), SVDECL(vol_skipframe0,-1);
 SVEXTERN int SVDECL(startframe0,-1), SVDECL(skipframe0,-1);
-SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
 SVEXTERN int SVDECL(combine_meshes,1);
 SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
@@ -635,7 +641,6 @@ SVEXTERN int UpdateLIGHTS;
 
 SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);
 SVEXTERN int SVDECL(screenWidthINI,640), SVDECL(screenHeightINI,480);
-SVEXTERN int SVDECL(renderW,640), SVDECL(renderH,480), render_window_size;
 SVEXTERN int SVDECL(glui_screenWidth,640), SVDECL(glui_screenHeight,480);
 SVEXTERN int windowsize_pointer;
 SVEXTERN int SVDECL(zonecolortype, ZONETEMP_COLOR);
@@ -1077,7 +1082,6 @@ SVEXTERN float SVDECL(velocity_range,0.0);
 SVEXTERN int niso_compressed;
 SVEXTERN int nslice_loaded, npatch_loaded;
 SVEXTERN int SVDECL(*slice_loaded_list,NULL), SVDECL(*patch_loaded_list,NULL);
-SVEXTERN int SVDECL(*render_frame,NULL);
 SVEXTERN char SVDECL(*fdsprefix,NULL), SVDECL(*fdsprefix2,NULL);
 SVEXTERN char SVDECL(*endian_filename,NULL);
 SVEXTERN char SVDECL(*target_filename,NULL);
@@ -1128,8 +1132,6 @@ SVEXTERN   int openfileflag;
 SVEXTERN float xyzmaxdiff;
 SVEXTERN char ext_png[5];
 SVEXTERN char ext_jpg[5];
-SVEXTERN int render_filetype;
-SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
@@ -1357,8 +1359,6 @@ SVEXTERN blockagedata SVDECL(*bchighlight,NULL),SVDECL(*bchighlight_old,NULL);
 SVEXTERN cadgeomdata SVDECL(*cadgeominfo,NULL);
 
 SVEXTERN int smokediff;
-SVEXTERN int render_size_index;
-SVEXTERN int render_skip_index;
 SVEXTERN int buffertype;
 SVEXTERN int opengldefined;
 SVEXTERN int SVDECL(restart_time,0);

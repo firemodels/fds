@@ -167,7 +167,7 @@ void Render(int view_mode){
       }
     }
   }
-  if(render_number = RENDER_ALLTIMES && rendering_status == RENDER_ON&&render_mode == RENDER_XYSINGLE && plotstate == DYNAMIC_PLOTS && nglobal_times > 0){
+  if(render_times == RENDER_ALLTIMES && rendering_status == RENDER_ON&&render_mode == RENDER_XYSINGLE && plotstate == DYNAMIC_PLOTS && nglobal_times > 0){
     if(itimes>=0&&itimes<nglobal_times&&
      ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
      ){
@@ -181,7 +181,7 @@ void Render(int view_mode){
     }
   }
 
-  if(render_number == RENDER_SINGLETIME){
+  if(render_times == RENDER_SINGLETIME){
 #ifdef pp_RENDERNEW
     RenderFrame(view_mode);
 #else
@@ -202,8 +202,8 @@ void Render(int view_mode){
 
 /* ------------------ GetRenderFileName ------------------------ */
 
-void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfile_full){
-  char renderfile_name[1024], renderfile_dir[1024], renderfile_suffix[1024], *renderfile_ext;
+void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfile_dir, char *renderfile_full){
+  char renderfile_name[1024], renderfile_suffix[1024], *renderfile_ext;
   int use_scriptfile;
 
   // construct filename for image to be rendered
@@ -301,7 +301,7 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
         image_num = itimes / RenderSkip;
       }
     }
-    if(renderfilelabel == 0 || RenderTime == 0){
+    if(render_label_type == RENDER_LABEL_FRAMENUM || RenderTime == 0){
       float time_local;
       int code;
 
@@ -312,7 +312,7 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
         sprintf(suffix, "%04i", image_num);
       }
       code = getplot3dtime(&time_local);
-      if(code == 1 && renderfilelabel == 1){
+      if(code == 1 && render_label_type == RENDER_LABEL_TIME){
         char timelabel_local[20], *timelabelptr, dt = 1.0;
 
         timelabelptr = time2timelabel(time_local, dt, timelabel_local);
@@ -380,7 +380,8 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
   /* ------------------ RenderFrame ------------------------ */
 
 void RenderFrame(int view_mode){
-  char renderfile_full[1024];
+  char renderfile_full[1024], renderfile_dir[1024];
+
   int woffset=0,hoffset=0;
   int screenH;
   char *renderfile_dir_ptr;
@@ -399,7 +400,7 @@ void RenderFrame(int view_mode){
     if(view_mode == VIEW_RIGHT)woffset = screenWidth;
   }
 
-  GetRenderFileName(view_mode, &renderfile_dir_ptr, renderfile_full);
+  GetRenderFileName(view_mode, &renderfile_dir_ptr, renderfile_dir, renderfile_full);
 
   SVimage2file(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
