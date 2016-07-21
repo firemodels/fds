@@ -283,7 +283,7 @@ cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
 erase *.obj *.mod smokeview_win%size%.exe 1> %OUTDIR%\stage2b.txt 2>&1
 call make_smv -r bot 1>> %OUTDIR%\stage2b.txt 2>&1
 
-call :does_file_exist smokeview_win%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
+call :does_file_exist smokeview_win%size%.exe %OUTDIR%\stage2b.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
 :: -------------------------------------------------------------
