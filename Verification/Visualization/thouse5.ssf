@@ -631,6 +631,8 @@ SETTOURKEYFRAME
   40.0
 SETVIEWPOINT
  upz2
+SETTIMEVAL
+ 0.000000
 RENDERONCE
  thouse5_Circular_tour
 
@@ -646,6 +648,8 @@ SETTOURVIEW
   1   0 0 0.0
 SETVIEWPOINT
  tour_view1
+SETTIMEVAL
+ 0.000000
 RENDERONCE
  thouse5_start_tour
 
@@ -661,6 +665,8 @@ SETTOURVIEW
   1   0 0 0.0
 SETVIEWPOINT
  tour_view1
+SETTIMEVAL
+ 0.000000
 RENDERONCE
  thouse5_example_tour1
 
@@ -672,6 +678,8 @@ LABEL
 
 SETVIEWPOINT
  tour_view2
+SETTIMEVAL
+ 0.000000
 RENDERONCE
  thouse5_example_tour2
 
@@ -684,6 +692,8 @@ SETTOURVIEW
   1   0 0 0.75
 SETVIEWPOINT
  tour_view2
+SETTIMEVAL
+ 0.000000
 RENDERONCE
  thouse5_example_tour3
 
