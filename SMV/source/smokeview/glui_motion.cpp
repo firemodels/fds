@@ -71,7 +71,7 @@
 #define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
-#define RENDER_360 9
+#define RENDER_360CB 9
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -229,10 +229,10 @@ void update_render_start_button(void){
   int is_enabled;
 
   is_enabled = BUTTON_render_start->enabled;
-  if(render_state == RENDER_ON&&is_enabled == 1){
+  if(rendering_status == RENDER_ON&&is_enabled == 1){
     BUTTON_render_start->disable();
   }
-  else if(render_state == RENDER_OFF&&is_enabled == 0&&update_makemovie==0){
+  else if(rendering_status == RENDER_OFF&&is_enabled == 0&&update_makemovie==0){
     BUTTON_render_start->enable();
   }
 }
@@ -705,11 +705,11 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_RENDER360
   ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
-  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
+  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360,RENDER_360CB,Render_CB);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
-  SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360, Render_CB);
+  SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360CB, Render_CB);
   SPINNER_window_height360->set_int_limits(100, max_screenHeight);
-  Render_CB(RENDER_360);
+  Render_CB(RENDER_360CB);
 #ifdef pp_RENDER360_DEBUG
 
   NewMemory((void **)&CHECKBOX_screenvis, nscreeninfo * sizeof(GLUI_Checkbox *));
@@ -1860,7 +1860,13 @@ void Render_CB(int var){
 
   updatemenu=1;
   switch(var){
-    case RENDER_360:
+    case RENDER_360CB:
+      if(render_360 == 1){
+        render_mode = RENDER_360;
+      }
+      else{
+        render_mode = RENDER_XYSINGLE;
+      }
       nwidth360 = nheight360*2;
       sprintf(widthlabel,"width: %i",nwidth360);
       STATIC_width360->set_name(widthlabel);
@@ -1902,6 +1908,7 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
+      if(render_360 == 1)render_mode = RENDER_360;
       if (render_frame != NULL) {
         int i;
 
@@ -1909,14 +1916,14 @@ void Render_CB(int var){
           render_frame[i] = 0;
         }
       }
-      if(render_360==0&&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
+      if(render_mode != RENDER_360 &&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
       else{
-        if(nrender_rows==1&&render_360==0){
+        if(nrender_rows==1&& render_mode != RENDER_360){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
-        else if (render_360 == 1) {
+        else if (render_mode == RENDER_360) {
           if(glui_screenWidth!=glui_screenHeight){
             glui_screenWidth = MAX(glui_screenWidth,glui_screenHeight);
             glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);

@@ -954,7 +954,6 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
   Update_Framenumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
   if(flag == 1)script_render = 1;// called when only rendering a single frame
 }
 
@@ -1035,7 +1034,6 @@ void script_loadisoframe(scriptdata *scripti, int flag){
   Update_Framenumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
   if(flag == 1)script_render = 1;// called when only rendering a single frame
 }
 

@@ -74,7 +74,7 @@ void MakeMovie(void){
 
 // wait to make movie until after images are rendered
 
-  if(render_state == RENDER_ON)return;
+  if(rendering_status == RENDER_ON)return;
 
   if(render_filetype==JPEG){
     strcpy(image_ext, ".jpg");
@@ -147,6 +147,7 @@ void MakeMovie(void){
 /* ------------------ Render ------------------------ */
 
 void Render(int view_mode){
+  if(rendering_status == RENDER_OFF)return;
   if(current_script_command!=NULL&&(current_script_command->command==SCRIPT_VOLSMOKERENDERALL||current_script_command->command==SCRIPT_ISORENDERALL)){
     int command;
 
@@ -166,7 +167,7 @@ void Render(int view_mode){
       }
     }
   }
-  if(RenderOnceNow==0&&render_state==RENDER_ON&&render_multi==0&&plotstate==DYNAMIC_PLOTS && nglobal_times>0){
+  if(render_number = RENDER_ALLTIMES && rendering_status == RENDER_ON&&render_mode == RENDER_XYSINGLE && plotstate == DYNAMIC_PLOTS && nglobal_times > 0){
     if(itimes>=0&&itimes<nglobal_times&&
      ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
      ){
@@ -180,21 +181,17 @@ void Render(int view_mode){
     }
   }
 
-  if(RenderOnceNow==1){
+  if(render_number == RENDER_SINGLETIME){
 #ifdef pp_RENDERNEW
     RenderFrame(view_mode);
 #else
-    if(render_multi==0)RenderFrame(view_mode);
+    if(render_mode == RENDER_XYSINGLE)RenderFrame(view_mode);
 #endif
-    RenderOnceNow=0;
-    if(render_multi==0){
+    if(render_mode == RENDER_XYSINGLE){
       RenderState(RENDER_OFF);
       RenderSkip=1;
+      SNIFF_ERRORS("after render");
     }
-  }
-
-  if(render_multi==0){
-    SNIFF_ERRORS("after render");
   }
 
   if(script_render==1){

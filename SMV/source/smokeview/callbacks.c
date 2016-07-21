@@ -478,7 +478,7 @@ void checktimebound(void){
   if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
     itimes=first_frame_index;
-    if(render_state==RENDER_ON){
+    if(rendering_status==RENDER_ON){
       RenderMenu(RenderCancel);
       // following exits render command, do this a better way
       if(current_script_command!=NULL)current_script_command->exit=1;
@@ -1759,10 +1759,8 @@ void keyboard(unsigned char key, int flag){
           return;
         }
 
-        if (render_360 == 1) {
-          render_mode = RENDER_360;
-        }
-        else {
+        if(render_360 == 1)render_mode = RENDER_360;
+        if (render_mode!=RENDER_360) {
           if (strncmp((const char *)&key2, "r", 1) == 0) {
             render_mode = RENDER_XYSINGLE;
           }
@@ -1772,13 +1770,11 @@ void keyboard(unsigned char key, int flag){
         }
         render_number = RENDER_SINGLETIME;
 
-        if(strncmp((const char *)&key2,"R",1)==0||render_360==1){
+        if(strncmp((const char *)&key2,"R",1)==0|| render_mode == RENDER_360){
           if(nrender_rows==1)nrender_rows=2;
-          render_multi=2;
           rflag=1;
         }
         else{
-          render_multi=0;
           if(render_from_menu==0){
             renderW=0;
             renderH=0;
@@ -1871,7 +1867,6 @@ void keyboard(unsigned char key, int flag){
           }
           fprintf(scriptoutstream," %s\n",script_renderfile);
         }
-        RenderOnceNow=1;
         RenderState(RENDER_ON);
         render_from_menu=0;
       }
@@ -2550,7 +2545,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   float totalcpu;
   float elapsed_time;
 
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||rendering_status==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
 
     oldcpuframe=cpuframe-10;
@@ -2570,7 +2565,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     lasttime = thistime;
     if(nglobal_times>0){
       *changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && render_state==RENDER_OFF){
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && rendering_status==RENDER_OFF){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
@@ -2593,7 +2588,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           }
         }
       }
-      if(stept==1&&timebar_drag==0&&render_state==RENDER_ON){
+      if(stept==1&&timebar_drag==0&&rendering_status==RENDER_ON){
         itimes+=RenderSkip*FlowDir;
       }
 
@@ -2747,7 +2742,7 @@ int DoStereo(void){
     ClearBuffers(DRAWSCENE);
 
     nscreens = 1;
-    if(render_360==1&&render_state==RENDER_ON){
+    if(render_mode == RENDER_360&&rendering_status==RENDER_ON){
       nscreens = nscreeninfo;
       if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
     }
@@ -2756,7 +2751,7 @@ int DoStereo(void){
       screendata *screeni;
 
       screeni = NULL;
-      if(render_360==1 && render_state == RENDER_ON)screeni = screeninfo + i;
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni = screeninfo + i;
       if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
         int screenWidth_save;
 
@@ -2773,15 +2768,15 @@ int DoStereo(void){
         ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
         screenWidth=screenWidth_save;
       }
-      if(render_360==1 && render_state == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
 #ifdef pp_RENDERNEW
-    if(render_360 == 0){
+    if(render_mode != RENDER_360){
       Render(VIEW_CENTER);
     }
 #endif
-    if(render_360==1 && render_state == RENDER_ON){
+    if(render_mode == RENDER_360 && rendering_status == RENDER_ON){
       MergeRenderScreenBuffers360();
       for(i = 0; i < nscreeninfo; i++){
         screendata *screeni;
@@ -2963,7 +2958,7 @@ void DoScript(void){
         current_script_command->exit=0;
       }
     }
-    if(render_state==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
+    if(rendering_status==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
       if(runscript==2&&noexit==0&&current_script_command==NULL){
@@ -3009,7 +3004,6 @@ void DoScript(void){
 void Display_CB(void){
   int dostereo;
 
-  renderdoublenow=0;
   DoScript();
 #ifdef pp_LUA
   DoScriptLua();
@@ -3023,11 +3017,11 @@ void Display_CB(void){
     dostereo=DoStereo();
   }
   if(dostereo==0){
-    if(render_multi==0){
+    if(render_mode == RENDER_XYSINGLE||rendering_status==RENDER_OFF){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
 #ifdef pp_RENDERNEW
-      if(render_360==0)Render(VIEW_CENTER);
+      if(render_mode != RENDER_360)Render(VIEW_CENTER);
 #endif
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
@@ -3035,19 +3029,15 @@ void Display_CB(void){
       int stop_rendering;
 
       stop_rendering = 1;
-      if(RenderOnceNow==1){
-        renderdoublenow=1;
-      }
       if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
         if(itimes>=0&&itimes<nglobal_times&&
           ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
           ){
           render_frame[itimes]++;
-          renderdoublenow=1;
           stop_rendering = 0;
         }
       }
-      if(renderdoublenow==1&&render_360==0){
+      if(rendering_status == RENDER_ON&&render_mode==RENDER_XYMULTI){
         int nrender_cols;
         int i,ibuffer=0;
         GLubyte **screenbuffers;
@@ -3074,7 +3064,7 @@ void Display_CB(void){
         }
         FREEMEMORY(screenbuffers);
       }
-      if (render_360 == 1){
+      if (render_mode == RENDER_360){
         int i;
 
         glDrawBuffer(GL_BACK);
@@ -3098,7 +3088,6 @@ void Display_CB(void){
           FREEMEMORY(screeni->screenbuffer);
         }
       }
-//      if(renderdoublenow==0||RenderOnceNow==1){
       if(stop_rendering==1){
         ASSERT(RenderSkip>0);
         RenderState(RENDER_OFF);
@@ -3113,7 +3102,7 @@ void Display_CB(void){
 void ResizeWindow(int width, int height){
   float wscaled, hscaled;
 
-  if(render_multi!=0)return;
+  if(render_mode != RENDER_XYSINGLE)return;
   glutSetWindow(mainwindow_id);
   wscaled = (float)width/(float)max_screenWidth;
   hscaled = (float)height/(float)max_screenHeight;

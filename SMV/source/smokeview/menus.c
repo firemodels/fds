@@ -1470,7 +1470,7 @@ void ResetMenu(int value){
 /* ------------------ RenderState ------------------------ */
 
 void RenderState(int onoff){
-  render_state=onoff;
+  rendering_status=onoff;
   if(onoff==RENDER_ON){
     update_screeninfo = 1;
     saveW=screenWidth;
@@ -1480,7 +1480,6 @@ void RenderState(int onoff){
     }
     else{
       if(renderW>max_screenWidth){
-        render_multi=render_multi_state;
         ResizeWindow(max_screenWidth,max_screenHeight);
       }
       else{
@@ -1490,8 +1489,7 @@ void RenderState(int onoff){
   }
   else{
     Enable360Zoom();
-    render_multi=0;
-    render_multi_state=0;
+    render_mode = RENDER_XYSINGLE;
     setScreenSize(&saveW,&saveH);
     ResizeWindow(screenWidth,screenHeight);
   }
@@ -1516,33 +1514,25 @@ void RenderMenu(int value){
   }
   switch(value){
   case RenderCustom:
-    render_multi_menu = 0;
-    render_option = value;
-    render_multi_state = 0;
+    render_window_size = value;
     renderW = script_render_width;
     renderH = script_render_height;
     render_size_index = value;
     break;
   case Render320:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=320;
     renderH=240;
     render_size_index=value;
     break;
   case Render640:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=640;
     renderH=480;
     render_size_index=value;
     break;
   case RenderWindow:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=0;
     renderH=0;
     render_size_index=value;
@@ -1556,22 +1546,14 @@ void RenderMenu(int value){
     get_viewport_info();
     RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu = 1;
-    render_multi_state = 1;
-    render_multi = render_multi_state;
     keyboard('R', FROM_SMOKEVIEW);
     break;
   case RENDER_CURRENT_MULTIPLE:
     if(nrender_rows==1)RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu=1;
-    if(render_multi_menu==1)render_multi_state=1;
-    render_multi_state=nrender_rows;
-    render_multi=render_multi_state;
     keyboard('R',FROM_SMOKEVIEW);
     break;
   case RenderCancel:
-    render_multi_menu=0;
-    render_multi=0;
-    render_multi_state=0;
     RenderState(RENDER_OFF);
     break;
   case RenderLABELframenumber:
@@ -1620,7 +1602,7 @@ void RenderMenu(int value){
       fprintf(scriptoutstream," %i\n",RenderSkip);
       fprintf(scriptoutstream,"\n");
     }
-    render_mode = RENDER_ALLTIMES;
+    render_number = RENDER_ALLTIMES;
     break;
   }
   update_nrender_rows();
