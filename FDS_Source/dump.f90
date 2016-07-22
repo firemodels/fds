@@ -614,6 +614,9 @@ IF (N_DEVC_LINE>0) THEN
             CASE(3)
                LINE_DEVC_LABEL(NN) = TRIM(DV%Z_ID)//','//TRIM(DV%ID)
                LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
+            CASE(4)
+               LINE_DEVC_LABEL(NN) = TRIM(DV%R_ID)//','//TRIM(DV%ID)
+               LINE_DEVC_UNITS(NN) = 'm,'//TRIM(DV%UNITS)
             CASE(12)
                LINE_DEVC_LABEL(NN) = TRIM(DV%X_ID)//','//TRIM(DV%Y_ID)//','//TRIM(DV%ID)
                LINE_DEVC_UNITS(NN) = 'm,m,'//TRIM(DV%UNITS)
@@ -7095,7 +7098,7 @@ IF (N_DEVC_LINE>0) THEN
          SELECT CASE(DV%LINE_COORD_CODE)
             CASE(0)
                LINE_DEVC_VALUE(DV%LINE,:) = 'NaN'
-            CASE(1:3)
+            CASE(1:4)
                LINE_DEVC_VALUE(DV%LINE,:) = 'NaN,NaN'
             CASE(12:23)
                LINE_DEVC_VALUE(DV%LINE,:) = 'NaN,NaN,NaN'
@@ -7121,6 +7124,10 @@ IF (N_DEVC_LINE>0) THEN
             CASE(3)
                WRITE(TCFORM,'(5A)') "(1(",FMT_R,",A),",FMT_R,")"
                WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),TCFORM) DV%Z*DV%COORD_FACTOR,',',DV%VALUE/DV%TIME_INTERVAL
+            CASE(4)
+               WRITE(TCFORM,'(5A)') "(1(",FMT_R,",A),",FMT_R,")"
+               WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),TCFORM) SQRT(DV%X**2+DV%Y**2+DV%Z**2)*DV%COORD_FACTOR, &
+                                                               ',',DV%VALUE/DV%TIME_INTERVAL
             CASE(12)
                WRITE(TCFORM,'(5A)') "(2(",FMT_R,",A),",FMT_R,")"
                WRITE(LINE_DEVC_VALUE(DV%LINE,DV%POINT),TCFORM) &
