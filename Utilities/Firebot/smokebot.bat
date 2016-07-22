@@ -353,7 +353,7 @@ call Run_SMV_Cases -debug -smvwui 1> %OUTDIR%\stage4a.txt 2>&1
 
 cd %fdsroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
-call Check_SMV_cases 
+call Check_SMV_cases -smvwui
 
 :: report errors
 
@@ -370,7 +370,7 @@ call Run_SMV_Cases -smvwui 1> %OUTDIR%\stage4b.txt 2>&1
 
 cd %fdsroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
-call Check_SMV_cases
+call Check_SMV_cases -smvwui
 
 :: report errors
 
