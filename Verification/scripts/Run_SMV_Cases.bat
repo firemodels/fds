@@ -83,15 +83,15 @@ cd %SVNROOT%\Verification\WUI
 %WIND2FDSEXE% -prefix sd22 -offset "150.0 150.0 0.0" wind_data1d.csv
 
 cd %SCRIPT_DIR%
-if %runsmvcases% == 1 (
+if "%runsmvcases%" == "1" (
   echo creating case list from SMV_Cases.sh
   %SH2BAT% SMV_Cases.sh SMV_Cases.bat
 )
-if %rungeomcases% == 1 (
+if "%rungeomcases%" == "1" (
   echo creating case list from GEOM_Cases.sh
   %SH2BAT% GEOM_Cases.sh GEOM_Cases.bat
 )
-if %runwuicases% == 1 (
+if "%runwuicases%" == "1" (
   echo creating case list from WUI_Cases.sh
   %SH2BAT% WUI_Cases.sh WUI_Cases.bat
 )
@@ -120,13 +120,16 @@ if "%rundebug%" == "1" (
 
 :: create or erase stop files
 
-if %runsmvcases% == 1 (
+if "%runsmvcases%" == "1" (
+  echo erasing SMV cases
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-if %rungeomcases% == 1 (
+if "%rungeomcases%" == "1" (
+  echo erasing GEOM cases
   call %SCRIPT_DIR%\GEOM_Cases.bat
 )
-if %runwuicases% == 1 (
+if "%runwuicases%" == "1" (
+  echo erasing WUI cases
   call %SCRIPT_DIR%\WUI_Cases.bat
 )
 
@@ -136,13 +139,16 @@ SET QFDS=%RUNFDS_R%
 SET RUNTFDS=%RUNTFDS_R%
 SET RUNCFAST=%RUNCFAST_R%
 
-if %runsmvcases% == 1 (
+if "%runsmvcases%" == "1" (
+  echo running SMV cases
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
-if %rungeomcases% == 1 (
+if "%rungeomcases%" == "1" (
+  echo running GEOM cases
   call %SCRIPT_DIR%\GEOM_Cases.bat
 )
-if %runwuicases% == 1 (
+if "%runwuicases%" == "1" (
+  echo running WUI cases
   call %SCRIPT_DIR%\WUI_Cases.bat
 )
 call :wait_until_finished
