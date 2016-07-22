@@ -219,7 +219,6 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
     strcpy(renderfile_name, render_file_base);
   }
   else{
-    char suffix[20];
     int command;
 
     command = current_script_command->command;
@@ -244,25 +243,6 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
         *renderfile_dir_ptr = renderfile_dir;
       }
     }
-    strcpy(suffix, "");
-    switch(view_mode){
-    case VIEW_LEFT:
-      if(stereotype == STEREO_LR){
-        strcat(suffix, "_L");
-      }
-      break;
-    case VIEW_RIGHT:
-      if(stereotype == STEREO_LR){
-        strcat(suffix, "_R");
-      }
-      break;
-    case VIEW_CENTER:
-      break;
-    default:
-      ASSERT(FFALSE);
-      break;
-    }
-    strcat(renderfile_suffix, suffix);
   }
 
   // directory
@@ -335,18 +315,10 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
     }
     switch(view_mode){
     case VIEW_CENTER:
+    case VIEW_RIGHT:
       if(RenderTime == 0)seqnum++;
       break;
     case VIEW_LEFT:
-      if(stereotype == STEREO_LR){
-        strcat(suffix, "_L");
-      }
-      break;
-    case VIEW_RIGHT:
-      if(stereotype == STEREO_NONE || stereotype == STEREO_TIME || stereotype == STEREO_LR){
-        strcat(suffix, "_R");
-      }
-      if(RenderTime == 0)seqnum++;
       break;
     default:
       ASSERT(FFALSE);
