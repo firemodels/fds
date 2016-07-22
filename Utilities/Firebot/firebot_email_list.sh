@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Mailing list for Smokebot status report
-mailToSMV="gforney@gmail.com"
+mailToSMV="gforney@gmail.com denis.lehane@nist.gov carl.spangler@nist.gov "
 
 # Mailing list for Smokebot status report
 mailToCFAST="gforney@gmail.com, rpeacoc@gmail.com"
