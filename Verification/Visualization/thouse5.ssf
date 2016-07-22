@@ -411,6 +411,8 @@ UNLOADALL
 LABEL
   render 3D smoke with no clipping
 
+LOADINIFILE
+ thouse5.ini
 UNLOADALL
 LOAD3DSMOKE
  soot mass fraction
