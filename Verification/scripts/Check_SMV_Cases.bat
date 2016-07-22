@@ -25,15 +25,12 @@ set RUNCFAST=call %SVNROOT%\Utilities\Scripts\checkcfast.bat
 set RUNTFDS=call %SVNROOT%\Utilities\Scripts\checkfds.bat
 
 if "%runsmvcases%" == "1" (
-  echo checking SMV cases
   call %SCRIPT_DIR%\SMV_Cases.bat
 )
 if "%rungeomcases%" == "1" (
-  echo checking GEOM cases
   call %SCRIPT_DIR%\GEOM_Cases.bat
 )
 if "%runwuicases%" == "1" (
-  echo checking WUI cases
   call %SCRIPT_DIR%\WUI_Cases.bat
 )
 
