@@ -418,6 +418,7 @@ extern "C" void update_cursor_checkbox(void){
 extern "C" void UpdateGluiViewList(void){
   cameradata *ca;
 
+  if(LIST_viewpoints == NULL)return;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
     LIST_viewpoints->delete_item(ca->name);
   }
