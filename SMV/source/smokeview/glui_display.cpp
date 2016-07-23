@@ -1156,7 +1156,7 @@ extern "C" void update_extreme_vals(void){
   if(SPINNER_up_blue!=NULL)SPINNER_up_blue->set_int_val(  (int)(rgb_local[2]));
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ update_extreme ------------------------ */
 
 extern "C" void update_extreme(void){
   if(CHECKBOX_show_extreme_mindata!=NULL){

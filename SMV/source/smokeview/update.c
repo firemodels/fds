@@ -1894,7 +1894,7 @@ void update_ShowScene(void){
   if(update_startup_view == 1){
     cameradata *ca;
 
-    ca = get_camera(label_startup_view);
+    ca = GetCamera(label_startup_view);
     if(ca != NULL){
       ResetMenu(ca->view_id);
     }
@@ -1920,7 +1920,7 @@ void update_ShowScene(void){
     update_rotation_center_ini = 0;
   }
   if(camera_current->dirty == 1){
-    update_camera(camera_current);
+    UpdateCamera(camera_current);
   }
   if(updateclipvals == 1){
     clip2cam(camera_current);

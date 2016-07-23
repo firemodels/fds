@@ -578,7 +578,7 @@ SVEXTERN cameradata SVDECL(*camera_current,NULL), SVDECL(*camera_save,NULL), SVD
 SVEXTERN cameradata SVDECL(*camera_external,NULL), SVDECL(*camera_internal,NULL);
 SVEXTERN cameradata SVDECL(*camera_ini,NULL), SVDECL(*camera_external_save,NULL);
 SVEXTERN cameradata camera_list_first, camera_list_last, SVDECL(**camera_list,NULL);
-SVEXTERN int ncamera_list,i_view_list,init_camera_list_flag;
+SVEXTERN int ncamera_list,i_view_list,SVDECL(init_camera_list, 1);
 SVEXTERN int camera_max_id;
 SVEXTERN int startup,startup_view_ini,selected_view;
 SVEXTERN char label_startup_view[256];

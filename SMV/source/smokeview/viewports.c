@@ -920,7 +920,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
     camera_current->eye[2]=selected_avatar_pos[2];
     camera_current->azimuth=selected_avatar_angle;
     camera_current->view_angle=0.0;
-    update_camera(camera_current);
+    UpdateCamera(camera_current);
   }
 
   eyexINI = camera_current->eye[0];

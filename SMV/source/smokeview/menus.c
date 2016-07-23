@@ -1283,7 +1283,7 @@ void ZoomMenu(int value){
     }
     if(projection_type!=0){
       camera_current->projection_type=projection_type;
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
       update_projection_type();
     }
   }
@@ -1291,7 +1291,7 @@ void ZoomMenu(int value){
     camera_current->projection_type=projection_type;
     update_projection_type();
     if(projection_type==0){
-      update_camera_ypos(camera_current);
+      UpdateCameraYpos(camera_current);
     }
     else{
       camera_current->eye[1]=camera_current->isometric_y;
@@ -1303,7 +1303,7 @@ void ZoomMenu(int value){
     if(zoomindex>4)zoomindex=2;
     zoom=zooms[zoomindex];
     if(projection_type!=0){
-      ResetView(RESTORE_EXTERIOR_VIEW_ZOOM);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW_ZOOM);
       camera_current->projection_type=projection_type;
       update_projection_type();
     }
@@ -2657,7 +2657,7 @@ void TourMenu(int value){
       touri->display=touri->display2;
     }
     if(viewtourfrompath==1){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
     for(i=0;i<ntours;i++){
@@ -2675,7 +2675,7 @@ void TourMenu(int value){
       touri->display=0;
     }
     if(viewtourfrompath==1){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
     selected_tour=NULL;
@@ -2699,14 +2699,14 @@ void TourMenu(int value){
     break;
   case MENU_TOUR_VIEWFROMROUTE:               // view from route
     viewtourfrompath = 1 - viewtourfrompath;
-    if(viewtourfrompath==0)ResetView(RESTORE_EXTERIOR_VIEW);
+    if(viewtourfrompath==0)SetViewPoint(RESTORE_EXTERIOR_VIEW);
     break;
   case MENU_TOUR_DEFAULT:
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       touri->display=0;
     }
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     defaulttour();
     break;
   default:

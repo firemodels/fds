@@ -401,9 +401,9 @@ extern "C" void update_glui_zoom(void){
   if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ UpdateCameraLabel ------------------------ */
 
-extern "C" void update_camera_label(void){
+extern "C" void UpdateCameraLabel(void){
   EDIT_view_label->set_text(camera_label);
 }
 
@@ -413,13 +413,16 @@ extern "C" void update_cursor_checkbox(void){
   CHECKBOX_cursor_blockpath->set_int_val(cursorPlot3D);
 }
 
-/* ------------------ update_view_gluilist ------------------------ */
+/* ------------------ UpdateGluiViewList ------------------------ */
 
-extern "C" void update_view_gluilist(void){
+extern "C" void UpdateGluiViewList(void){
   cameradata *ca;
 
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-    LIST_viewpoints->add_item(ca->view_id,ca->name);
+    LIST_viewpoints->delete_item(ca->name);
+  }
+  for(ca = camera_list_first.next; ca->next != NULL; ca = ca->next){
+    LIST_viewpoints->add_item(ca->view_id, ca->name);
   }
   LIST_viewpoints->set_int_val(startup_view_ini);
   selected_view=startup_view_ini;
@@ -1631,7 +1634,7 @@ void Viewpoint_CB(int var){
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:
-    ResetView(var);
+    SetViewPoint(var);
     break;
   case SAVE_VIEW:
     strcpy(camera_current->name,camera_label);
@@ -1660,7 +1663,7 @@ void Viewpoint_CB(int var){
     prev=ca->prev;
     next=ca->next;
     view_id=ca->view_id;
-    copy_camera(ca,camera_current);
+    CopyCamera(ca,camera_current);
     ca->prev=prev;
     ca->next=next;
     ca->view_id=view_id;
@@ -1692,7 +1695,7 @@ void Viewpoint_CB(int var){
     }
     LIST_viewpoints->delete_item(ival);
     prev=cam1->prev;
-    delete_camera(cam1);
+    DeleteCamera(cam1);
     if(prev->view_id!=-1){
       LIST_viewpoints->set_int_val(prev->view_id);
       selected_view=prev->view_id;
@@ -1712,7 +1715,7 @@ void Viewpoint_CB(int var){
     }
 
     rotation_type_save = ca->rotation_type;
-    copy_camera(camera_current,ca);
+    CopyCamera(camera_current,ca);
     if(rotation_type==ROTATION_3AXIS)camera2quat(camera_current,quat_general,quat_rotation);
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
     camera_current->rotation_type=rotation_type_save;
@@ -1816,7 +1819,7 @@ extern "C" void add_list_view(char *label_in){
   else{
     cam1=cex;
   }
-  cam2 = insert_camera(cam1,camera_current,label);
+  cam2 = InsertCamera(cam1,camera_current,label);
   if(cam2!=NULL){
     LIST_viewpoints->add_item(cam2->view_id,cam2->name);
     LIST_viewpoints->set_int_val(cam2->view_id);

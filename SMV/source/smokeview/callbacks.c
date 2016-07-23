@@ -858,7 +858,7 @@ void mouse_CB(int button, int state, int xm, int ym){
     if(visTimebar==1&&showtime==1){
       if(timebar_click(xm,ym)==1)return;
     }
-    copy_camera(camera_last,camera_current);
+    CopyCamera(camera_last,camera_current);
     if(canrestorelastview==0){
       updatemenu=1;
       canrestorelastview=1;
@@ -2167,19 +2167,19 @@ void handle_rotation_type(int flag){
   case ROTATION_3AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-        ResetView(RESTORE_EXTERIOR_VIEW);
+        SetViewPoint(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case ROTATION_2AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (2 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-        ResetView(RESTORE_EXTERIOR_VIEW);
+        SetViewPoint(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case EYE_CENTERED:
        az_elev[1]=0.0;
        if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old!=EYE_CENTERED){
-         ResetView(RESTORE_EXTERIOR_VIEW);
+         SetViewPoint(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)PRINTF("eye centered\n");
       break;
@@ -2187,7 +2187,7 @@ void handle_rotation_type(int flag){
     az_elev[1]=0.0;
     if(trainer_mode==0)PRINTF("Scene centered (level rotation)\n");
     if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     break;
   default:
@@ -2502,7 +2502,7 @@ void handle_move_keys(int  key){
       *elevation-=LOOKANGLE_CHANGE;
       break;
     case GLUT_KEY_END:
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
       break;
     case GLUT_KEY_F4:
       camera_current->view_angle-=LOOKANGLE_CHANGE;
@@ -2662,9 +2662,9 @@ void Reshape_CB(int width, int height){
   if(window_aspect_ratio<1.0)window_aspect_ratio=1.0/window_aspect_ratio;
   setScreenSize(&width,&height);
   windowresized=1;
-  update_camera_ypos(camera_external);
+  UpdateCameraYpos(camera_external);
   if(strcmp(camera_current->name,"external")==0&&in_external==1){
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
   }
   update_windowsizelist();
 #ifdef pp_GPU

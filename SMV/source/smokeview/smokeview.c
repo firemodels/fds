@@ -111,9 +111,9 @@ void transparentoff(void){
 }
 
 
-/* ------------------ ResetView ------------------------ */
+/* ------------------ SetViewPoint ------------------------ */
 
-void ResetView(int option){
+void SetViewPoint(int option){
   in_external=0;
   switch(option){
     int rotation_type_save;
@@ -125,7 +125,7 @@ void ResetView(int option){
     in_external=1;
     rotation_type_save = camera_current->rotation_type;
     projection_type_save = camera_current->projection_type;
-    copy_camera(camera_current,camera_external);
+    CopyCamera(camera_current,camera_external);
     camera_current->rotation_type=rotation_type_save;
     camera_current->projection_type=projection_type_save;
     if(camera_current->projection_type==1){
@@ -135,12 +135,12 @@ void ResetView(int option){
   case RESTORE_INTERIOR_VIEW:
     rotation_type_save = camera_current->rotation_type;
     projection_type_save = camera_current->projection_type;
-    copy_camera(camera_current,camera_internal);
+    CopyCamera(camera_current,camera_internal);
     camera_current->rotation_type=rotation_type_save;
     camera_current->projection_type=projection_type_save;
     break;
   case RESTORE_SAVED_VIEW:
-    copy_camera(camera_current,camera_save);
+    CopyCamera(camera_current,camera_save);
     break;
   case 3:
   case 4:

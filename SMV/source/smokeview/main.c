@@ -159,7 +159,7 @@ void parse_commandline(int argc, char **argv){
     exit(1);
   }
   if(strncmp(argv[1], "-ini", 3) == 0){
-    init_camera_list();
+    InitCameraList();
     InitOpenGL();
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     writeini(GLOBAL_INI, NULL);
@@ -167,7 +167,7 @@ void parse_commandline(int argc, char **argv){
   }
 
   if(strncmp(argv[1], "-ng_ini", 6) == 0){
-    init_camera_list();
+    InitCameraList();
     use_graphics = 0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     writeini(GLOBAL_INI, NULL);
