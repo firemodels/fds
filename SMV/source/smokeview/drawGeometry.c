@@ -3856,7 +3856,7 @@ int isblockagevisible(blockagedata *bc, float local_time){
   int listindex,val;
 
   if(bc->showhide==NULL||local_time<0.0)return 1;
-  listindex=getindex(local_time,bc->showtime,bc->nshowtime);
+  listindex=GetIndex(local_time,bc->showtime,bc->nshowtime);
   val = bc->showhide[listindex];
   return val;
 }

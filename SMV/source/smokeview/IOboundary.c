@@ -493,7 +493,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
   meshi->patchfilenum=ifile;
   patchi->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 
   nbb = meshi->nbptrs;
   if(nbb==0)nbb=1;
@@ -545,7 +545,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
 
     update_patchtype();
     update_unit_defs();
-    Update_Times();
+    UpdateTimes();
     meshi->npatches=0;
     for(i=0;i<npatchinfo;i++){
       patchdata *patchii;
@@ -1367,9 +1367,9 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   showexterior=1-showexterior;
   allexterior = 1-allexterior;
   ShowPatchMenu(EXTERIORwallmenu);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   if(patchi->compression_type==COMPRESSED_ZLIB)disable_boundary_glui();
-  Update_Times();
+  UpdateTimes();
   update_unit_defs();
   updatechopcolors();
 #ifdef pp_MEMPRINT

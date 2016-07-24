@@ -138,7 +138,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   if(flag==UNLOAD){
     p->loaded=0;
     p->display=0;
-    plotstate=getplotstate(STATIC_PLOTS);
+    plotstate=GetPlotState(STATIC_PLOTS);
     meshi=meshinfo+p->blocknumber;
     meshi->plot3dfilenum=-1;
     if(nloaded==0){
@@ -150,13 +150,13 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     PRINTF("After plot3d unload: \n");
     PrintMemoryInfo;
 #endif
-    Update_Times();
+    UpdateTimes();
     update_unit_defs();
     update_glui_plot3d();
     return;
   }
   if(ReadPlot3dFile==0){
-    plotstate=getplotstate(STATIC_PLOTS);
+    plotstate=GetPlotState(STATIC_PLOTS);
     return;
   }
 
@@ -369,7 +369,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   PRINTF("After plot3d load: \n");
   PrintMemoryInfo;
 #endif
-  Update_Times();
+  UpdateTimes();
   update_unit_defs();
   Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
@@ -1753,9 +1753,9 @@ void updateshowstep(int val, int slicedir){
     ASSERT(FFALSE);
     break;
   }
-  plotstate=getplotstate(STATIC_PLOTS);
+  plotstate=GetPlotState(STATIC_PLOTS);
   stept=0;
-  if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)Update_Times();
+  if(ReadVolSlice==0&&plotstate==DYNAMIC_PLOTS&&visGrid==0)UpdateTimes();
   {
     int i;
     float xmin, xmax;

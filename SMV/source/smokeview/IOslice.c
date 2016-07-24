@@ -799,7 +799,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     vd->display=0;
     showvslice=0;
     updatemenu=1;
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(vd->iu!=-1){
@@ -885,9 +885,9 @@ void readvslice(int ivslice, int flag, int *errorcode){
   }
   vd->display=1;
   vd->loaded=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
-  Update_Times();
+  UpdateTimes();
 
   valmax=-100000.0;
   valmin=100000.0;
@@ -997,7 +997,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
       sd->loaded=0;
       sd->vloaded=0;
       sd->display=0;
-      plotstate = getplotstate(DYNAMIC_PLOTS);
+      plotstate = GetPlotState(DYNAMIC_PLOTS);
       ReadVolSlice=0;
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sdi;
@@ -1064,7 +1064,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 
       updateglui();
       update_unit_defs();
-      Update_Times();
+      UpdateTimes();
 #ifdef pp_MEMPRINT
       PRINTF("After slice unload: \n");
       PrintMemoryInfo;
@@ -1298,9 +1298,9 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
   sd->loaded=1;
   if(sd->vloaded==0)sd->display=1;
   islicetype=getslicetype(sd);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   update_unit_defs();
-  Update_Times();
+  UpdateTimes();
   CheckMemory;
 
   if(use_set_slicecolor==0||set_slicecolor == SET_SLICECOLOR){

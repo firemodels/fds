@@ -391,8 +391,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   FREEMEMORY(meshi->merge_color);
 
   if(flag==UNLOAD){
-    plotstate=getplotstate(DYNAMIC_PLOTS);
-    Update_Times();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
+    UpdateTimes();
     Read3DSmoke3DFile=0;
     setsmokecolorflags();
 
@@ -593,8 +593,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   Read3DSmoke3DFile=1;
   update_makeiblank_smoke3d=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif

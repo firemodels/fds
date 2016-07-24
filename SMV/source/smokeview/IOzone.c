@@ -663,8 +663,8 @@ void readzone(int ifile, int flag, int *errorcode){
     nzone_times=0;
     ReadZoneFile=0;
     showzone=0;
-    plotstate=getplotstate(DYNAMIC_PLOTS);
-    Update_Times();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
+    UpdateTimes();
     updatemenu=1;
     return;
   }
@@ -682,7 +682,7 @@ void readzone(int ifile, int flag, int *errorcode){
   CheckMemory;
   if(error!=0||nrooms!=nrooms2||nzone_times==0||nzhvents!=nzhvents2||nzvvents!=nzvvents2||nzmvents!=nzmvents2){
     showzone=0;
-    Update_Times();
+    UpdateTimes();
     ReadZoneFile=0;
     if(nrooms!=nrooms2){
       fprintf(stderr,"*** Error: number of rooms specified in the smv file (%i)\n",nrooms);
@@ -858,8 +858,8 @@ void readzone(int ifile, int flag, int *errorcode){
   showzone=1;
   zonei->loaded=1;
   zonei->display=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   updatemenu=1;
   activezone = zoneinfo + ifile;
   if(nzhvents>0||nzvvents>0||nzmvents>0){

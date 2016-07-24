@@ -215,9 +215,9 @@ void drawfilled2tetra(float *v1, float *v2, float *v3, float *v4,
   glEnd();
 }
 
-/* ------------------ compare_floats ------------------------ */
+/* ------------------ CompareFloats ------------------------ */
 
-int compare_floats( const void *arg1, const void *arg2 ){
+int CompareFloats( const void *arg1, const void *arg2 ){
   float x, y;
   x=*(float *)arg1;
   y=*(float *)arg2;
@@ -237,7 +237,7 @@ void removedupfloats(float **valsptr, int *nvals,int *ivals, float dval_min){
   if(*nvals==0)return;
   nv = *nvals;
   vals = *valsptr;
-  qsort( (float *)vals, (size_t)nv, sizeof( float ), compare_floats );
+  qsort( (float *)vals, (size_t)nv, sizeof( float ), CompareFloats );
   ii=1;
   for(i=1;i<nv;i++){
     if(ABS(vals[i]-vals[i-1])<=dval_min)continue;

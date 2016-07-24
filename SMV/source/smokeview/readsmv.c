@@ -9159,7 +9159,7 @@ int readini2(char *inifile, int localfile){
 		fgets(buffer, 255, stream);
 		sscanf(buffer, "%i", &visHRRlabel);
 		ONEORZERO(visHRRlabel);
-		Update_hrrinfo(visHRRlabel);
+		UpdateHrrinfo(visHRRlabel);
 		continue;
 	}
 	if(match(buffer, "SHOWHRRCUTOFF") == 1){
@@ -11318,8 +11318,8 @@ int readini2(char *inifile, int localfile){
             }
             update_tour_menulabels();
             createtourpaths();
-            Update_Times();
-            plotstate = getplotstate(DYNAMIC_PLOTS);
+            UpdateTimes();
+            plotstate = GetPlotState(DYNAMIC_PLOTS);
             selectedtour_index = TOURINDEX_MANUAL;
             selected_frame = NULL;
             selected_tour = NULL;
