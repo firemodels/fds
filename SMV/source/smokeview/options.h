@@ -29,6 +29,7 @@
 
 #define pp_GPU
 #define pp_ffmpeg
+#define pp_RENDERNEW
 
 #ifdef pp_GPU
 #define pp_CULL
@@ -65,7 +66,6 @@
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
 #define pp_RENDER360
-#define pp_RENDERNEW
 #ifdef _DEBUG
 #define pp_RENDER360_DEBUG
 #endif
