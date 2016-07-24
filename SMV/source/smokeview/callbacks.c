@@ -2721,16 +2721,12 @@ int DoStereo(void){
     if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_LEFT,0,0,0,NULL);
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_LEFT);
-#endif
     glDrawBuffer(GL_BACK_RIGHT);
     if(stereotype_frame==RIGHT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_RIGHT);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=1;
   }
@@ -2771,18 +2767,18 @@ int DoStereo(void){
       if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
-#ifdef pp_RENDERNEW
-    if(render_mode != RENDER_360){
-      Render(VIEW_CENTER);
-    }
-#endif
-    if(render_mode == RENDER_360 && rendering_status == RENDER_ON){
-      MergeRenderScreenBuffers360();
-      for(i = 0; i < nscreeninfo; i++){
-        screendata *screeni;
+    if(rendering_status == RENDER_ON){
+      if(render_mode == RENDER_360){
+        MergeRenderScreenBuffers360();
+        for(i = 0; i < nscreeninfo; i++){
+          screendata *screeni;
 
-        screeni = screeninfo + i;
-        FREEMEMORY(screeni->screenbuffer);
+          screeni = screeninfo + i;
+          FREEMEMORY(screeni->screenbuffer);
+        }
+      }
+      else{
+        Render(VIEW_CENTER);
       }
     }
     return_code=2;
@@ -2807,9 +2803,7 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=3;
   }
@@ -2833,9 +2827,7 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=4;
   }
@@ -2878,9 +2870,7 @@ int DoStereo(void){
 
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
@@ -3020,9 +3010,7 @@ void Display_CB(void){
     if(render_mode == RENDER_XYSINGLE||rendering_status==RENDER_OFF){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
-#ifdef pp_RENDERNEW
       if(render_mode != RENDER_360)Render(VIEW_CENTER);
-#endif
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{
