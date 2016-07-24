@@ -35,6 +35,7 @@ RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 TESTFLAG=
+TEST=
 CLEANREPO=0
 UPDATEREPO=0
 SSH=
@@ -91,6 +92,7 @@ case $OPTION in
    ;;
   t)
    TESTFLAG="-t"
+   TEST="_test"
    ;;
   U)
    UPLOADRESULTS=1
@@ -1020,7 +1022,7 @@ check_compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   if [ -e "smokeview_${platform}${size}_db" ]
+   if [ -e "smokeview_${platform}${TEST}${size}_db" ]
    then
       stage2b_success=true
    else
@@ -1117,12 +1119,12 @@ check_compile_smv()
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   if [ -e "smokeview_${platform}${size}" ]
+   if [ -e "smokeview_${platform}${TEST}${size}" ]
    then
       stage2c_smv_success=true
    else
       echo "Errors from Stage 2c - Compile SMV release:" >> $ERROR_LOG
-      echo "The program smokeview_${platform}${size} does not exist."
+      echo "The program smokeview_${platform}${TEST}${size} does not exist."
       cat $OUTPUT_DIR/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
