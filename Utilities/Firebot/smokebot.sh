@@ -1006,13 +1006,13 @@ compile_smv_db()
    echo "   smokeview"
    echo "      debug"
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   rm -f smokeview_${platform}${size}_db
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
+   rm -f smokeview_${platform}${TEST}${size}_db
+   ./make_smv_db.sh $TESTFLAG &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
-   rm -f smokeview_${platform}${size}_db \; \
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
+   rm -f smokeview_${platform}${TEST}${size}_db \; \
+   ./make_smv_db.sh $TESTFLAG &> $OUTPUT_DIR/stage2b \)
    fi
    fi
 }
@@ -1103,12 +1103,12 @@ compile_smv()
    # Clean and compile SMV
    echo "      release"
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   rm -f smokeview_${platform}${size}
+   rm -f smokeview_${platform}${TEST}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
-   rm -f smokeview_${platform}${size} \; \
+   rm -f smokeview_${platform}${TEST}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
    fi
