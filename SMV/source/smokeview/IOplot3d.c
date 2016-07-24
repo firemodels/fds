@@ -151,7 +151,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
     PrintMemoryInfo;
 #endif
     UpdateTimes();
-    update_unit_defs();
+    UpdateUnitDefs();
     update_glui_plot3d();
     return;
   }
@@ -370,7 +370,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
   PrintMemoryInfo;
 #endif
   UpdateTimes();
-  update_unit_defs();
+  UpdateUnitDefs();
   Idle_CB();
   local_stoptime0 = glutGet(GLUT_ELAPSED_TIME);
   delta_time0=(local_stoptime0-local_starttime0)/1000.0;
@@ -492,14 +492,14 @@ void drawplot3d_texture(meshdata *meshi){
     drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=noGridnoProbe){
-      if(use_transparency_data==1)transparentoff();
+      if(use_transparency_data==1)TransparentOff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
       return;
     }
   }
 
   if(use_transparency_data==1){
-    transparenton();
+    TransparentOn();
   }
   if(visVector==0&&contour_type!=STEPPED_CONTOURS){
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
@@ -558,7 +558,7 @@ void drawplot3d_texture(meshdata *meshi){
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
@@ -584,7 +584,7 @@ void drawplot3d_texture(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for yz vectors */
 
@@ -663,7 +663,7 @@ void drawplot3d_texture(meshdata *meshi){
       unsigned char*xzcolor;
 
       xzcolor=xzcolorbase;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -689,7 +689,7 @@ void drawplot3d_texture(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for xz vectors */
 
@@ -772,7 +772,7 @@ void drawplot3d_texture(meshdata *meshi){
       unsigned char *xycolor;
 
       xycolor=xycolorbase;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -798,7 +798,7 @@ void drawplot3d_texture(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for xy vectors */
 
@@ -834,7 +834,7 @@ void drawplot3d_texture(meshdata *meshi){
     glDisable(GL_TEXTURE_1D);
   }
   if(use_transparency_data==1){
-    transparentoff();
+    TransparentOff();
   }
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
@@ -934,13 +934,13 @@ void drawplot3d(meshdata *meshi){
     drawstaticiso(currentsurfptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(surfincrement!=0)drawstaticiso(currentsurf2ptr,p3dsurfacetype,p3dsurfacesmooth,2,0,plot3dlinewidth);
     if(visGrid!=noGridnoProbe){
-      if(use_transparency_data==1)transparentoff();
+      if(use_transparency_data==1)TransparentOff();
       if(cullfaces==1)glEnable(GL_CULL_FACE);
       return;
     }
   }
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
   /* +++++++++++++++++++++++++++   draw yz contours +++++++++++++++++++++++++++++++++++++ */
 
@@ -993,7 +993,7 @@ void drawplot3d(meshdata *meshi){
 
       yzcolor=yzcolorbase;
       dx_yzcopy=dx_yz; dy_yzcopy=dy_yz; dz_yzcopy=dz_yz;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(j=0; j<=jbar; j+=vectorskip){
@@ -1019,7 +1019,7 @@ void drawplot3d(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for yz vectors */
 
@@ -1098,7 +1098,7 @@ void drawplot3d(meshdata *meshi){
       unsigned char *xzcolor;
 
       xzcolor=xzcolorbase;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -1124,7 +1124,7 @@ void drawplot3d(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for xz vectors */
 
@@ -1207,7 +1207,7 @@ void drawplot3d(meshdata *meshi){
       unsigned char *xycolor;
 
       xycolor=xycolorbase;
-      antialias(ON);
+      Antialias(ON);
       glLineWidth(vectorlinewidth);
       glBegin(GL_LINES);
       for(i=0; i<=ibar; i+=vectorskip){
@@ -1233,7 +1233,7 @@ void drawplot3d(meshdata *meshi){
         }
       }
       glEnd();
-      antialias(OFF);
+      Antialias(OFF);
 
       /* draw points for xy vectors */
 
@@ -1265,7 +1265,7 @@ void drawplot3d(meshdata *meshi){
       glEnd();
     }
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -1833,7 +1833,7 @@ void drawgrid(const meshdata *meshi){
   }
   if(visx_all==0&&visy_all==0&&visz_all==0)return;
   if(visGrid==GridProbe||visGrid==GridnoProbe){
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(gridlinewidth);
     if(meshi->meshrgb_ptr!=NULL){
       glColor3fv(meshi->meshrgb);
@@ -1877,7 +1877,7 @@ void drawgrid(const meshdata *meshi){
     }
 
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
 }
 

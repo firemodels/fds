@@ -4071,7 +4071,7 @@ void LoadPatchMenu(int value){
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    patchtypenew=getpatchtype(patchinfo+value);
+    patchtypenew=GetPatchType(patchinfo+value);
     if(patchtypenew!=-1){
       for(ii=0;ii<npatch_loaded;ii++){
         patchdata *patchi;
@@ -4149,9 +4149,9 @@ void ShowPatchMenu(int value){
     }
     else{
       patchi->display=1;
-      ipatchtype=getpatchtype(patchi);
+      ipatchtype=GetPatchType(patchi);
     }
-    update_patchtype();
+    UpdatePatchType();
   }
   if(value==SHOW_CHAR){
     vis_threshold = 1 - vis_threshold;

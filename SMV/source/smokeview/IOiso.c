@@ -820,7 +820,7 @@ void drawiso_orig(int tranflag){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
 
     iso_specular[3] = 1.0;
-    if(tranflag==DRAW_TRANSPARENT)transparenton();
+    if(tranflag==DRAW_TRANSPARENT)TransparentOn();
 
     if(usetexturebar==1&&isoi->dataflag==1){
       glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
@@ -900,7 +900,7 @@ void drawiso_orig(int tranflag){
     if(usetexturebar==1&&isoi->dataflag==1)glDisable(GL_TEXTURE_1D);
 
 
-    if(tranflag==DRAW_TRANSPARENT)transparentoff();
+    if(tranflag==DRAW_TRANSPARENT)TransparentOff();
     if(cullfaces==1)glEnable(GL_CULL_FACE);
     CheckMemory;
   }
@@ -909,7 +909,7 @@ void drawiso_orig(int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
     glPushAttrib(GL_LIGHTING_BIT);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<niso_trans;i++){
@@ -967,14 +967,14 @@ void drawiso_orig(int tranflag){
       glVertex3fv(xyz1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopAttrib();
   }
 
   if((visAIso&4)==4){
     asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
-    antialias(ON);
+    Antialias(ON);
     glPointSize(isopointsize);
     asurface--;
     glBegin(GL_POINTS);
@@ -1021,7 +1021,7 @@ void drawiso_orig(int tranflag){
       glVertex3fv(xyz3);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
 }
 
@@ -1051,7 +1051,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
-  int transparenton_flag=0;
+  int TransparentOn_flag=0;
 
   get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
@@ -1094,8 +1094,8 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         if(rgbtemp[3]<0.99){
           drawing_transparent=1;
           drawing_blockage_transparent=1;
-          transparenton_flag=1;
-          transparenton();
+          TransparentOn_flag=1;
+          TransparentOn();
         }
     }
     iso_specular[3] = 1.0;
@@ -1111,7 +1111,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
     }
 
-    if(transparenton_flag==1){
+    if(TransparentOn_flag==1){
       glColor4fv(rgbtemp);
     }
     else{
@@ -1160,12 +1160,12 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     }
 
     glPopAttrib();
-    if(transparenton_flag==1)transparentoff();
+    if(TransparentOn_flag==1)TransparentOff();
   }
 
   if(surfacetype==SURFACE_OUTLINE){
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3fv(asurface->color);
@@ -1191,13 +1191,13 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glVertex3fv(vv1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 
   if(surfacetype==SURFACE_POINTS){
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glPointSize(plot3dpointsize);
     glBegin(GL_POINTS);
     glColor3fv(asurface->color);
@@ -1214,14 +1214,14 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glVertex3fv(vv1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 
   if(show_iso_normal==1){
 
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3f((float)1.,(float)1.,(float)1.);
@@ -1272,7 +1272,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 }

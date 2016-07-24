@@ -243,13 +243,13 @@ void drawLabels(void){
           xb[i] = xyz[i]+xyztick[i];
           xe[i] = xb[i]+xyztickdir[i];
         }
-        antialias(ON);
+        Antialias(ON);
         glLineWidth(ticklinewidth);
         glBegin(GL_LINES);
         glVertex3fv(xb);
         glVertex3fv(xe);
         glEnd();
-        antialias(OFF);
+        Antialias(OFF);
       }
     }
   }

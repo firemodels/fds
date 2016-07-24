@@ -292,7 +292,7 @@ void draw_geom(int flag, int timestate){
 
   // draw geometry surface
 
-    if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)transparenton();
+    if(flag==DRAW_TRANSPARENT&&use_transparency_data==1)TransparentOn();
     if(cullfaces == 1)glDisable(GL_CULL_FACE);
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
@@ -433,7 +433,7 @@ void draw_geom(int flag, int timestate){
     glDisable(GL_LIGHTING);
     glPopMatrix();
     if(flag==DRAW_TRANSPARENT){
-      if(use_transparency_data==1)transparentoff();
+      if(use_transparency_data==1)TransparentOff();
       return;
     }
     if(cullfaces==1)glEnable(GL_CULL_FACE);
@@ -2361,8 +2361,8 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   FREEMEMORY(patchi->geom_times);
   if(load_flag==UNLOAD){
     plotstate=GetPlotState(DYNAMIC_PLOTS);
-    update_patchtype();
-    update_unit_defs();
+    UpdatePatchType();
+    UpdateUnitDefs();
     UpdateTimes();
     return;
   }
@@ -2426,10 +2426,10 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   FREEMEMORY(patchi->geom_vals);
   patchi->loaded=1;
   patchi->display=1;
-  ipatchtype=getpatchtype(patchinfo+ifile);
+  ipatchtype=GetPatchType(patchinfo+ifile);
   plotstate=GetPlotState(DYNAMIC_PLOTS);
-  update_patchtype();
-  update_unit_defs();
+  UpdatePatchType();
+  UpdateUnitDefs();
   UpdateTimes();
   UpdateFrameNumber(1);
 }
@@ -2682,10 +2682,10 @@ void draw_test_outline(void){
     output3Text(foregroundcolor, v4[0], v4[1], v4[2] + EPS, "v4");
   }
 
-  antialias(ON);
+  Antialias(ON);
   glLineWidth(tetra_line_thickness);
   drawtetra_outline(v1,v2,v3,v4,tetracoloroutline);
-  antialias(OFF);
+  Antialias(OFF);
 
   glPopMatrix();
   // tetrahedron
@@ -2791,10 +2791,10 @@ void draw_test_outline(void){
     output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
   }
 
-  antialias(ON);
+  Antialias(ON);
   glLineWidth(tetra_line_thickness);
   drawcubec_outline(1.0,cubecolor);
-  antialias(OFF);
+  Antialias(OFF);
 
   glPopMatrix();
   glPopMatrix();
@@ -2854,7 +2854,7 @@ void draw_test_triangle(void){
   glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
   glTranslatef(-xbar0, -ybar0, -zbar0);
 
-  antialias(ON);
+  Antialias(ON);
 
   FORTget_in_triangle(v4, v1, v2, v3, &flag);
   FORTget_is_angle_ge_180(v1, v2, v3, &flag2);
@@ -2888,7 +2888,7 @@ void draw_test_triangle(void){
   }
   glVertex3f(v4[0],v4[1],0.0);
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
   output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
   output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
   output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
@@ -2914,7 +2914,7 @@ void draw_test_polygon(void){
   glScalef(SCALE2SMV(1.0), SCALE2SMV(1.0), SCALE2SMV(1.0));
   glTranslatef(-xbar0, -ybar0, -zbar0);
 
-  antialias(ON);
+  Antialias(ON);
 
   verts[0] = v1[0];
   verts[1] = v1[1];
@@ -2951,7 +2951,7 @@ void draw_test_polygon(void){
     glVertex3f(verts[2 * iip1], verts[2 * iip1 + 1], 0.0);
   }
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
   output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
   output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
   output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
@@ -2992,7 +2992,7 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
       ntris = geomlisti->ntriangles;
       if(ntris == 0)continue;
 
-      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)transparenton();
+      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)TransparentOn();
 
       glEnable(GL_NORMALIZE);
       glShadeModel(GL_SMOOTH);
@@ -3099,7 +3099,7 @@ void draw_geomdata(int flag, patchdata *patchi, int geom_type){
       glPopMatrix();
       glDisable(GL_COLOR_MATERIAL);
       if(patchi->slice == 0)glDisable(GL_LIGHTING);
-      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)transparentoff();
+      if(flag == DRAW_TRANSPARENT&&use_transparency_data == 1 && patchi->slice == 1)TransparentOff();
     }
   }
   if(show_patch_outline == 1){

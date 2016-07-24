@@ -8360,7 +8360,7 @@ typedef struct {
   updateslicetypes();
   updatesliceboundlabels();
   updateisotypes();
-  updatepatchtypes();
+  UpdatePatchTypes();
   if(autoterrain==1){
     for(i=0;i<nmeshes;i++){
       meshdata *meshi;

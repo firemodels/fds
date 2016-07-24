@@ -9,9 +9,9 @@
 
 #include "smokeviewvars.h"
 
-/* ------------------ get_unit_class ------------------------ */
+/* ------------------ GetUnitClass ------------------------ */
 
-f_units *get_unit_class(char *unit){
+f_units *GetUnitClass(char *unit){
   int i;
 
   for(i=0;i<nunitclasses;i++){
@@ -24,25 +24,25 @@ f_units *get_unit_class(char *unit){
   return NULL;
 }
 
-/* ------------------ unit_type_match ------------------------ */
+/* ------------------ UnitTypeMatch ------------------------ */
 
-int unit_type_match(char *unit, f_units *unit_class){
+int UnitTypeMatch(char *unit, f_units *unit_class){
 
   if(strlen(unit_class->units->unit)!=strlen(unit))return 1;
   if(strcmp(unit_class->units->unit,unit)!=0)return 1;
   return 0;
 }
 
-/* ------------------ is_unit_present ------------------------ */
+/* ------------------ IsUnitPresent ------------------------ */
 
-int is_unit_present(char *label, char *unit){
+int IsUnitPresent(char *label, char *unit){
   if(strlen(label)!=strlen(unit)||STRCMP(label,unit)!=0)return 0;
   return 1;
 }
 
-/* ------------------ set_unit_vis ------------------------ */
+/* ------------------ SetUnitVis ------------------------ */
 
-void set_unit_vis(void){
+void SetUnitVis(void){
   int i;
   int j;
 
@@ -56,7 +56,7 @@ void set_unit_vis(void){
       slicedata *slicej;
 
       slicej = sliceinfo + j;
-      if(is_unit_present(slicej->label.unit,uci->units->unit)==1){
+      if(IsUnitPresent(slicej->label.unit,uci->units->unit)==1){
         uci->visible=1;
         break;
       }
@@ -67,7 +67,7 @@ void set_unit_vis(void){
       patchdata *patchj;
 
       patchj = patchinfo + j;
-      if(is_unit_present(patchj->label.unit,uci->units->unit)==1){
+      if(IsUnitPresent(patchj->label.unit,uci->units->unit)==1){
         uci->visible=1;
         break;
       }
@@ -80,7 +80,7 @@ void set_unit_vis(void){
 
       plot3dj = plot3dinfo + j;
       for(n=0;n<5;n++){
-        if(is_unit_present(plot3dj->label[n].unit,uci->units->unit)==1){
+        if(IsUnitPresent(plot3dj->label[n].unit,uci->units->unit)==1){
           uci->visible=1;
           break;
         }
@@ -90,9 +90,9 @@ void set_unit_vis(void){
   }
 }
 
-/* ------------------ init_unit_defs ------------------------ */
+/* ------------------ InitUnitDefs ------------------------ */
 
-void init_unit_defs(void){
+void InitUnitDefs(void){
   if(unitclasses_ini!=NULL){
     unitclasses=unitclasses_ini;
     nunitclasses=nunitclasses_ini;
@@ -104,9 +104,9 @@ void init_unit_defs(void){
   CheckMemory;
 }
 
-/* ------------------ update_unit_defs ------------------------ */
+/* ------------------ UpdateUnitDefs ------------------------ */
 
-void update_unit_defs(void){
+void UpdateUnitDefs(void){
   int i, j;
 
   if(smokediff==0)return;
@@ -120,7 +120,7 @@ void update_unit_defs(void){
 
       patchj = patchinfo + j;
       if(patchj->loaded==0||patchj->display==0)continue;
-      if(unit_type_match(patchj->label.unit,unitclasses+i)!=0)continue;
+      if(UnitTypeMatch(patchj->label.unit,unitclasses+i)!=0)continue;
       if(firstpatch==1){
         firstpatch=0;
         valmin=patchj->diff_valmin;
@@ -138,7 +138,7 @@ void update_unit_defs(void){
 
       slicej = sliceinfo + j;
       if(slicej->loaded==0||slicej->display==0)continue;
-      if(unit_type_match(slicej->label.unit,unitclasses+i)!=0)continue;
+      if(UnitTypeMatch(slicej->label.unit,unitclasses+i)!=0)continue;
       if(firstslice==1){
         firstslice=0;
         valmin=slicej->diff_valmin;
@@ -158,7 +158,7 @@ void update_unit_defs(void){
       plot3dj = plot3dinfo + j;
       if(plot3dj->loaded==0||plot3dj->display==0)continue;
       for(n=0;n<5;n++){
-        if(unit_type_match(plot3dj->label[n].unit,unitclasses+i)!=0)continue;
+        if(UnitTypeMatch(plot3dj->label[n].unit,unitclasses+i)!=0)continue;
         if(firstplot3d==1){
           firstplot3d=0;
           valmin=plot3dj->diff_valmin[n];
@@ -190,9 +190,9 @@ void update_unit_defs(void){
 
 }
 
-/* ------------------ getunitval ------------------------ */
+/* ------------------ GetUnitVal ------------------------ */
 
-float getunitval(const char *unittype, float oldval){
+float GetUnitVal(const char *unittype, float oldval){
   int i;
 
   for(i=0;i<nunitclasses;i++){
@@ -211,9 +211,9 @@ float getunitval(const char *unittype, float oldval){
   return oldval;
 }
 
-/* ------------------ getunitinfo ------------------------ */
+/* ------------------ GetUnitInfo ------------------------ */
 
-void getunitinfo(const char *unitlabel, int *unitclass, int *unittype){
+void GetUnitInfo(const char *unitlabel, int *unitclass, int *unittype){
   int i;
 
   *unitclass=-1;

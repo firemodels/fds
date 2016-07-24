@@ -1216,7 +1216,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  transparenton();
+  TransparentOn();
   switch(ssmokedir){
 
     // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
@@ -2900,7 +2900,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
       ASSERT(FFALSE);
       break;
   }
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 //  PRINTF("majorcull=%i minorcull=%i\n",majorcull,minorcull);
 }
@@ -3017,7 +3017,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   glUniform1f(GPU_fire_alpha, smoke3di->fire_alpha);
   glUniform1f(GPU_smoke_albedo, smoke_albedo);
 
-  transparenton();
+  TransparentOn();
   switch(ssmokedir){
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
@@ -4027,7 +4027,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
       ASSERT(FFALSE);
       break;
   }
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -4101,7 +4101,7 @@ void drawsmoke3dCULL(void){
 
   CheckMemory;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  transparenton();
+  TransparentOn();
 
   SNIFF_ERRORS("before drawsmoke3dcull");
   value[0]=255;
@@ -4767,7 +4767,7 @@ void drawsmoke3dCULL(void){
   }
   glEnd();
   SNIFF_ERRORS("in drawsmoke3dcull 12");
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   SNIFF_ERRORS("after drawsmokecull");
 }

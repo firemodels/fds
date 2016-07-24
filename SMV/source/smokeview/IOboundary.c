@@ -543,8 +543,8 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     int enableflag=1;
     int i;
 
-    update_patchtype();
-    update_unit_defs();
+    UpdatePatchType();
+    UpdateUnitDefs();
     UpdateTimes();
     meshi->npatches=0;
     for(i=0;i<npatchinfo;i++){
@@ -1313,7 +1313,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   patchscale = patchi->scale;
   patchbase = patchinfo + getpatchindex(patchi);
   patchi->loaded=1;
-  ipatchtype=getpatchtype(patchi);
+  ipatchtype=GetPatchType(patchi);
   switch(loadpatchbysteps){
   case UNCOMPRESSED_ALLFRAMES:
     getBoundaryColors3(patchi,meshi->patchval, npatchvals, meshi->cpatchval,
@@ -1363,14 +1363,14 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   }
   patchi->loaded=1;
   patchi->display=1;
-  ipatchtype=getpatchtype(patchi);
+  ipatchtype=GetPatchType(patchi);
   showexterior=1-showexterior;
   allexterior = 1-allexterior;
   ShowPatchMenu(EXTERIORwallmenu);
   plotstate=GetPlotState(DYNAMIC_PLOTS);
   if(patchi->compression_type==COMPRESSED_ZLIB)disable_boundary_glui();
   UpdateTimes();
-  update_unit_defs();
+  UpdateUnitDefs();
   updatechopcolors();
 #ifdef pp_MEMPRINT
   PRINTF("After boundary file load: \n");
@@ -1777,7 +1777,7 @@ void drawpatch_texture(const meshdata *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOn();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
@@ -2038,7 +2038,7 @@ void drawpatch_texture(const meshdata *meshi){
     glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOff();
 }
 
 /* ------------------ drawpatch_texture_threshold ------------------------ */
@@ -2701,7 +2701,7 @@ void drawpatch(const meshdata *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOn();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -3051,7 +3051,7 @@ void drawpatch(const meshdata *meshi){
   if(hidepatchsurface==1){
     glEnd();
   }
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOff();
 }
 
 /* ------------------ drawpatch_cellcenter ------------------------ */
@@ -3117,7 +3117,7 @@ void drawpatch_cellcenter(const meshdata *meshi){
 
   /* if a contour boundary does not match a blockage face then draw "both sides" of boundary */
 
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparenton();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOn();
   nn =0;
   glBegin(GL_TRIANGLES);
   for(n=0;n<meshi->npatches;n++){
@@ -3368,7 +3368,7 @@ void drawpatch_cellcenter(const meshdata *meshi){
   if(hidepatchsurface==1){
     glEnd();
   }
-  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)transparentoff();
+  if((use_transparency_data==1&&contour_type==LINE_CONTOURS)||setpatchchopmin==1||setpatchchopmax==1)TransparentOff();
 }
 
 /* ------------------ drawolythreshold ------------------------ */
@@ -3668,9 +3668,9 @@ void drawonlythreshold(const meshdata *meshi){
   glEnd();
 }
 
-/* ------------------ updatepatchtypes ------------------------ */
+/* ------------------ UpdatePatchTypes ------------------------ */
 
-void updatepatchtypes(void){
+void UpdatePatchTypes(void){
   int i;
   patchdata *patchi;
 
@@ -3681,13 +3681,13 @@ void updatepatchtypes(void){
   }
   for(i=0;i<npatchinfo;i++){
     patchi = patchinfo+i;
-    patchi->type=getpatchtype(patchi);
+    patchi->type=GetPatchType(patchi);
   }
 }
 
-/* ------------------ getpatchtype ------------------------ */
+/* ------------------ GetPatchType ------------------------ */
 
-int getpatchtype(const patchdata *patchi){
+int GetPatchType(const patchdata *patchi){
   int j;
 
   for(j=0;j<npatchtypes;j++){
@@ -3699,9 +3699,9 @@ int getpatchtype(const patchdata *patchi){
   return -1;
 }
 
-/* ------------------ update_patchtype ------------------------ */
+/* ------------------ UpdatePatchType ------------------------ */
 
-void update_patchtype(){
+void UpdatePatchType(){
   int i;
 
   for(i=0;i<npatchinfo;i++){

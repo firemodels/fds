@@ -297,8 +297,8 @@ int setup_case(int argc, char **argv){
   /* initialize units */
 
   InitUnits();
-  init_unit_defs();
-  set_unit_vis();
+  InitUnitDefs();
+  SetUnitVis();
 
   CheckMemory;
   readini(NULL);
@@ -323,7 +323,7 @@ int setup_case(int argc, char **argv){
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 
-  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
+  if(UpdateLIGHTS==1)UpdateLights(light_position0,light_position1);
 
   glutReshapeWindow(screenWidth,screenHeight);
 
@@ -592,7 +592,7 @@ void InitOpenGL(void){
   light_position1[3]=0.f;
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-  updateLights(light_position0,light_position1);
+  UpdateLights(light_position0,light_position1);
 
   {
     glGetIntegerv(GL_RED_BITS,&nredbits);

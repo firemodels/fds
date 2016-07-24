@@ -54,7 +54,7 @@ EXTERNCPP void update_glui_devices(void);
 EXTERNCPP void update_colordevs(void);
 EXTERNCPP void update_visaxislabels(void);
 EXTERNCPP void update_geometry_controls(void);
-EXTERNCPP void init_volrender_script(char *prefix, char *tour_label, int startframe, int skipframe);
+EXTERNCPP void InitVolrenderScript(char *prefix, char *tour_label, int startframe, int skipframe);
 
 // glui headers
 
@@ -571,17 +571,17 @@ EXTERNCPP void handle_plot3d_keys(int  key);
 EXTERNCPP void handle_move_keys(int  key);
 EXTERNCPP int get_interval(float val, float *array, int n);
 
-EXTERNCPP void set_unit_vis(void);
+EXTERNCPP void SetUnitVis(void);
 EXTERNCPP void memorystatus(void);
 EXTERNCPP void showhide_translate(int var);
 EXTERNCPP void updateallplotslices(void);
 EXTERNCPP int makeiblank(void);
 EXTERNCPP int makeiblank_carve(void);
 EXTERNCPP void makeiblank_smoke3d(void);
-EXTERNCPP void getunitinfo(const char *unitlabel, int *unitclass, int *unittype);
-EXTERNCPP float getunitval(const char *unitlabel, float oldval);
+EXTERNCPP void GetUnitInfo(const char *unitlabel, int *unitclass, int *unittype);
+EXTERNCPP float GetUnitVal(const char *unitlabel, float oldval);
 
-EXTERNCPP void update_unit_defs(void);
+EXTERNCPP void UpdateUnitDefs(void);
 
 EXTERNCPP void SmoothIsoSurface(isosurface *surfacedata);
 EXTERNCPP void updateslicefilenum(void);
@@ -647,12 +647,12 @@ EXTERNCPP void get_blockvals(float *xmin, float *xmax,
                    float *ymin, float *ymax,
                    float *zmin, float *zmax,
                    int *imin, int *jmin, int *kmin);
-EXTERNCPP void transparentoff(void);
-EXTERNCPP void transparenton(void);
+EXTERNCPP void TransparentOff(void);
+EXTERNCPP void TransparentOn(void);
 EXTERNCPP void getobstlabels(const char *filein);
 EXTERNCPP void update_usetextures(void);
 EXTERNCPP int updatergbhist(int width, int height,int maketable, int *colortable, int nrgb);
-EXTERNCPP void antialias(int flag);
+EXTERNCPP void Antialias(int flag);
 EXTERNCPP void saveview(void);
 EXTERNCPP void savelastview(void);
 EXTERNCPP void setslicebounds(int islicetype);
@@ -660,7 +660,7 @@ EXTERNCPP void setisobounds(int islicetype);
 EXTERNCPP void local2globalpatchbounds(const char *key);
 EXTERNCPP void global2localpatchbounds(const char *key);
 EXTERNCPP void update_loaded_lists(void);
-EXTERNCPP void updateLights(float *pos1, float *pos2);
+EXTERNCPP void UpdateLights(float *pos1, float *pos2);
 EXTERNCPP int MergeRenderScreenBuffers(int nscreen_rows, GLubyte **screenbuffers);
 EXTERNCPP void setup_screeninfo(void);
 EXTERNCPP int MergeRenderScreenBuffers360(void);
@@ -701,9 +701,9 @@ EXTERNCPP int getisottype(const isodata *isoi);
 EXTERNCPP int getisoindex(const isodata *isoi);
 EXTERNCPP void update_isotype(void);
 EXTERNCPP void updateisotypes(void);
-EXTERNCPP int getpatchtype(const patchdata *patchi);
-EXTERNCPP void update_patchtype(void);
-EXTERNCPP void updatepatchtypes(void);
+EXTERNCPP int GetPatchType(const patchdata *patchi);
+EXTERNCPP void UpdatePatchType(void);
+EXTERNCPP void UpdatePatchTypes(void);
 
 EXTERNCPP void update_mesh_terrain(void);
 EXTERNCPP void update_terrain_options(void);
@@ -745,7 +745,7 @@ EXTERNCPP void Slice_CB(int var);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);
 EXTERNCPP void Visible(int state);
-EXTERNCPP void display_version_info(char *progname);
+EXTERNCPP void DisplayVersionInfo(char *progname);
 EXTERNCPP void draw_demo(int nlat, int nlong);
 EXTERNCPP void draw_demo2(int option);
 EXTERNCPP void init_demo(float rad, int nlat, int nlong);
@@ -801,9 +801,9 @@ EXTERNCPP int Update_Bounds(void);
 
 EXTERNCPP void freecadinfo(void);
 
-EXTERNCPP void init_unit_defs(void);
+EXTERNCPP void InitUnitDefs(void);
 EXTERNCPP void InitUnits(void);
-EXTERNCPP f_units *get_unit_class(char *unit);
+EXTERNCPP f_units *GetUnitClass(char *unit);
 
 EXTERNCPP void readcad2geom(cadgeomdata *cd);
 EXTERNCPP void readcadgeom(cadgeomdata *cd);

@@ -89,7 +89,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(rotation_type==EYE_CENTERED&&nskyboxinfo>0)draw_skybox();
 
-  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
+  if(UpdateLIGHTS==1)UpdateLights(light_position0,light_position1);
 
   if(mode==DRAWSCENE){
     glPointSize((float)1.0);
@@ -176,10 +176,10 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
  /* ++++++++++++++++++++++++ draw user ticks +++++++++++++++++++++++++ */
 
     if(visUSERticks==1){
-      antialias(ON);
+      Antialias(ON);
       UNCLIP;
       draw_user_ticks();
-      antialias(OFF);
+      Antialias(OFF);
       SNIFF_ERRORS("after drawticks");
     }
 
@@ -288,14 +288,14 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(show_parallax==1){
     UNCLIP;
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     glColor3fv(foregroundcolor);
     glVertex3f(0.75,0.0,0.25);
     glVertex3f(0.75,1.0,0.25);
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */

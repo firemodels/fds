@@ -1033,7 +1033,7 @@ void drawroomgeom(void){
 
 /* draw the frame */
 
-  antialias(ON);
+  Antialias(ON);
   glBegin(GL_LINES);
 
   for(i=0;i<nrooms;i++){
@@ -1099,7 +1099,7 @@ void drawroomgeom(void){
     glVertex3f(xroom0,yroom,zroom);
   }
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
 
   if(visVents==1){
     glLineWidth(ventlinewidth);
@@ -1896,7 +1896,7 @@ void drawfiredata(void){
       }
     }
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -1915,7 +1915,7 @@ void drawroomdata(void){
   if(zone_times[0]>global_times[itimes])return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
   izonetubase = izonetu + izone*nrooms;
   hazardcolorbase = hazardcolor + izone*nrooms;
@@ -1993,7 +1993,7 @@ void drawroomdata(void){
   }
 #endif
 
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 

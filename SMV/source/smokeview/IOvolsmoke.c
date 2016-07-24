@@ -898,7 +898,7 @@ void drawsmoke3dVOL(void){
   int iwall;
   int ii;
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
     meshdata *meshi;
@@ -1220,7 +1220,7 @@ void drawsmoke3dVOL(void){
     }
     glEnd();
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
 }
 
 /* ------------------ set_super_index ------------------------ */
@@ -1446,7 +1446,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
 
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
     volfacelistdata *vi;
@@ -1618,7 +1618,7 @@ void drawsmoke3dGPUVOL(void){
     glEnd();
   }
   SNIFF_ERRORS("after drawsmoke3dGPUVOL after loop");
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
 }
 
 #define HEADER_SIZE 4

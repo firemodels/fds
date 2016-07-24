@@ -634,7 +634,7 @@ void drawoutlines(void){
   int i;
 
   if(noutlineinfo<=0)return;
-  antialias(ON);
+  Antialias(ON);
   glLineWidth(linewidth);
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
@@ -657,7 +657,7 @@ void drawoutlines(void){
     }
   }
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
 }
 /* ------------------ drawcbox ------------------------ */
 
@@ -1823,7 +1823,7 @@ void drawcad2geom(const cadgeomdata *cd, int trans_flag){
   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_LIGHTING);
-  if(trans_flag==DRAW_TRANSPARENT)transparenton();
+  if(trans_flag==DRAW_TRANSPARENT)TransparentOn();
   glBegin(GL_QUADS);
   colorindex=0;
   for(ii=0;ii<cd->nquads;ii++){
@@ -1975,7 +1975,7 @@ void drawcad2geom(const cadgeomdata *cd, int trans_flag){
 
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
-  if(trans_flag==DRAW_TRANSPARENT)transparentoff();
+  if(trans_flag==DRAW_TRANSPARENT)TransparentOff();
   if(cullfaces==1){
     glEnable(GL_CULL_FACE);
   }
@@ -3295,7 +3295,7 @@ void draw_faces(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -3347,7 +3347,7 @@ void draw_faces(){
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
   if(nface_textures>0){
     int j;
@@ -3467,7 +3467,7 @@ void draw_transparent_faces(){
 
   if(nface_transparent<=0&&nface_transparent_double<=0)return;
 
-  if(drawing_transparent==1)transparenton();
+  if(drawing_transparent==1)TransparentOn();
 
   if(nface_transparent>0){
     int i;
@@ -3597,7 +3597,7 @@ void draw_transparent_faces(){
     glDisable(GL_LIGHTING);
   }
 
-  if(drawing_transparent==1)transparentoff();
+  if(drawing_transparent==1)TransparentOff();
 }
 
 /* ------------------ UpdateHiddenFaces ------------------------ */
@@ -4335,7 +4335,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[0]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[0]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
@@ -4429,7 +4429,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[1]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[1]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
@@ -4518,7 +4518,7 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
       }
       xyz2[2]=xyz[2];
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[2]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[2]));
       trimzeros(label);
       output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
@@ -4993,7 +4993,7 @@ void draw_facesOLD(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -5049,7 +5049,7 @@ void draw_facesOLD(){
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
   if(nface_textures>0){
     int j;
