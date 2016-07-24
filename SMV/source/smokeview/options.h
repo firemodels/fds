@@ -29,7 +29,6 @@
 
 #define pp_GPU
 #define pp_ffmpeg
-#define pp_RENDERNEW
 
 #ifdef pp_GPU
 #define pp_CULL

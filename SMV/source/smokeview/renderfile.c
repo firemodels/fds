@@ -182,11 +182,7 @@ void Render(int view_mode){
   }
 
   if(render_times == RENDER_SINGLETIME){
-#ifdef pp_RENDERNEW
     RenderFrame(view_mode);
-#else
-    if(render_mode == RENDER_XYSINGLE)RenderFrame(view_mode);
-#endif
     if(render_mode == RENDER_XYSINGLE){
       RenderState(RENDER_OFF);
       RenderSkip=1;

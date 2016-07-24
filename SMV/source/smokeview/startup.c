@@ -1820,7 +1820,7 @@ void initvars(void){
   zooms[3]=2.0;
   zooms[4]=4.0;
   zoom=1.0;
-  aperture = zoom2aperture(zoom);
+  aperture = Zoom2Aperture(zoom);
   aperture_glui = aperture;
   aperture_default = aperture;
 

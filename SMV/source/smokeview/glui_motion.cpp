@@ -397,7 +397,7 @@ extern "C" void update_glui_filelabel(int var){
 
 extern "C" void update_glui_zoom(void){
   if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
-  aperture_glui=zoom2aperture(zoom);
+  aperture_glui=Zoom2Aperture(zoom);
   if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
 }
 
@@ -631,7 +631,7 @@ extern "C" void glui_motion_setup(int main_window){
   RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _d("Size preserving"));
   SPINNER_zoom = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _d("Zoom"), GLUI_SPINNER_FLOAT, &zoom, ZOOM, Motion_CB);
   SPINNER_zoom->set_float_limits(0.10, 10.0, GLUI_LIMIT_CLAMP);
-  aperture_glui = zoom2aperture(zoom);
+  aperture_glui = Zoom2Aperture(zoom);
   SPINNER_aperture = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _d("aperture"), GLUI_SPINNER_FLOAT, &aperture_glui,
     APERTURE, Motion_CB);
   glui_motion->add_separator_to_panel(ROLLOUT_projection);
@@ -1329,15 +1329,15 @@ extern "C" void Motion_CB(int var){
         }
       }
       camera_current->zoom=zoom;
-      aperture_glui=zoom2aperture(zoom);
+      aperture_glui=Zoom2Aperture(zoom);
       if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
       break;
     case APERTURE:
-      zoom=aperture2zoom(aperture_glui);
+      zoom=Aperture2Zoom(aperture_glui);
       if(zoom<0.1||zoom>10.0){
         if(zoom<0.1)zoom=0.1;
         if(zoom>10.0)zoom=10.0;
-        aperture_glui=zoom2aperture(zoom);
+        aperture_glui=Zoom2Aperture(zoom);
         if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
       }
       zoomindex=-1;
@@ -1345,7 +1345,7 @@ extern "C" void Motion_CB(int var){
         if(ABS(zoom-zooms[i])<0.001){
           zoomindex=i;
           zoom=zooms[i];
-          aperture_glui=zoom2aperture(zoom);
+          aperture_glui=Zoom2Aperture(zoom);
           if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
           break;
         }

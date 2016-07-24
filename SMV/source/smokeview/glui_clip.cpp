@@ -301,7 +301,7 @@ void CLIP_CB(int var){
     break;
   }
   if(var>=CLIP_xlower&&var<=CLIP_zupper){
-    clip2cam(camera_current);
+    Clip2Cam(camera_current);
   }
 }
 
