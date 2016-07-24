@@ -941,17 +941,17 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
       vr->display = 1;
     }
   }
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
   stept = 1;
-  Update_Times();
+  UpdateTimes();
   force_redisplay = 1;
-  Update_Framenumber(framenum);
+  UpdateFrameNumber(framenum);
   i = framenum;
   itimes = i;
   script_itime = i;
   stept = 1;
   force_redisplay = 1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
   if(flag == 1)script_render = 1;// called when only rendering a single frame
@@ -1021,17 +1021,17 @@ void script_loadisoframe(scriptdata *scripti, int flag){
   if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
   update_readiso_geom_wrapup = UPDATE_ISO_OFF;
 
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
   stept = 1;
-  Update_Times();
+  UpdateTimes();
   force_redisplay = 1;
-  Update_Framenumber(framenum);
+  UpdateFrameNumber(framenum);
   i = framenum;
   itimes = i;
   script_itime = i;
   stept = 1;
   force_redisplay = 1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
   if(flag == 1)script_render = 1;// called when only rendering a single frame
@@ -1121,7 +1121,7 @@ void script_loadparticles(scriptdata *scripti){
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   updatemenu=1;
 }
 
@@ -1409,7 +1409,7 @@ void script_loadboundary(scriptdata *scripti, int meshnum){
   if(count==0)fprintf(stderr,"*** Error: Boundary files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
 
 }
 
@@ -1826,7 +1826,7 @@ void script_settimeval(scriptdata *scripti){
     script_itime=imin;
     stept=0;
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
     UpdateTimeLabels();
   }
 }
@@ -1889,7 +1889,7 @@ void settimeval(float timeval){
         itimes=i;
         stept=1;
         force_redisplay=1;
-        Update_Framenumber(0);
+        UpdateFrameNumber(0);
         UpdateTimeLabels();
         keyboard('t',FROM_SMOKEVIEW);
         break;

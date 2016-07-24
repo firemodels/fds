@@ -343,11 +343,11 @@ void ShowMultiSliceMenu(int value){
     break;
   }
   updateslicefilenum();
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
 }
 
 /* ------------------ ShowAllSlices ------------------------ */
@@ -543,7 +543,7 @@ void LabelMenu(int value){
     visHRRlabel=1;
     show_hrrcutoff=1;
     visFramelabel=1;
-	  if(hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
+	  if(hrrinfo != NULL&&hrrinfo->display != 1)UpdateHrrinfo(1);
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
@@ -559,7 +559,7 @@ void LabelMenu(int value){
     visMeshlabel=0;
     visHRRlabel=0;
     show_hrrcutoff=0;
-	if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+	if (hrrinfo != NULL&&hrrinfo->display != 0)UpdateHrrinfo(0);
     if(ntickinfo>0)visFDSticks=0;
     visgridloc=0;
     vis_slice_average=0;
@@ -587,7 +587,7 @@ void LabelMenu(int value){
      if(visFramelabel==1)visTimebar=1;
      if(visFramelabel==1){
        visHRRlabel=0;
-	   Update_hrrinfo(visHRRlabel);
+	   UpdateHrrinfo(visHRRlabel);
      }
      break;
    case MENU_LABEL_meshlabel:
@@ -621,7 +621,7 @@ void LabelMenu(int value){
    case MENU_LABEL_hrr:
      visHRRlabel=1-visHRRlabel;
      if(visHRRlabel==1)visTimebar=1;
-	 Update_hrrinfo(visHRRlabel);
+	 UpdateHrrinfo(visHRRlabel);
      break;
    case MENU_LABEL_hrrcutoff:
      show_hrrcutoff=1-show_hrrcutoff;
@@ -906,7 +906,7 @@ void IsoShowMenu(int value){
          iisotype=isoi->type;
        }
      }
-     Update_Show();
+     UpdateShow();
     }
     else if(value>=SHOWALL_ISO){
       if(value==SHOWALL_ISO){
@@ -920,7 +920,7 @@ void IsoShowMenu(int value){
           isoinfo[i].display=0;
         }
       }
-     Update_Show();
+     UpdateShow();
     }
   }
   update_iso_showlevels();
@@ -946,7 +946,7 @@ void ShowVSliceMenu(int value){
       vd->display=1;
     }
     show_all_slices=1;
-    Update_Times();
+    UpdateTimes();
     return;
   }
   if(value==HIDE_ALL){
@@ -956,7 +956,7 @@ void ShowVSliceMenu(int value){
       vd->display=0;
     }
     show_all_slices=0;
-    Update_Times();
+    UpdateTimes();
     return;
   }
   if(value == MENU_SHOWSLICE_INBLOCKAGE){
@@ -1010,8 +1010,8 @@ void ShowVSliceMenu(int value){
     islicetype = sliceinfo[vd->ival].type;
     vd->display=1;
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Show();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateShow();
 }
 
 /* ------------------ ShowHideSliceMenu ------------------------ */
@@ -1076,11 +1076,11 @@ void ShowHideSliceMenu(int value){
     }
   }
   updateslicefilenum();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
 }
 
 /* ------------------ ShowHideMenu ------------------------ */
@@ -1108,7 +1108,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visEvac=1;
     }
-    Update_Times();
+    UpdateTimes();
     break;
   case MENU_SHOWHIDE_PARTICLES:
     if(plotstate==DYNAMIC_PLOTS){
@@ -1118,7 +1118,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visParticles=1;
     }
-    Update_Times();
+    UpdateTimes();
     break;
   case MENU_SHOWHIDE_SENSOR:
     visSensor=1-visSensor;
@@ -1440,7 +1440,7 @@ void ResetMenu(int value){
     }
     break;
   case MENU_TIMEVIEW:
-    Update_Times();
+    UpdateTimes();
     break;
   case SAVE_VIEWPOINT:
     Get_Next_View_Label(view_label);
@@ -1543,7 +1543,7 @@ void RenderMenu(int value){
      break;
   case RENDER_CURRENT_360:
     LabelMenu(MENU_LABEL_HideAll);
-    get_viewport_info();
+    GetViewportInfo();
     RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu = 1;
     keyboard('R', FROM_SMOKEVIEW);
@@ -1581,7 +1581,7 @@ void RenderMenu(int value){
       keyboard('t',FROM_SMOKEVIEW);
     }
     RenderState(RENDER_ON);
-    reset_itimes0();
+    ResetItimes0();
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->itime=0;
@@ -1623,7 +1623,7 @@ void EvacShowMenu(int value){
     parti->display = 1 - parti->display;
     updatemenu=1;
     glutPostRedisplay();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
@@ -1665,7 +1665,7 @@ void EvacShowMenu(int value){
     }
   }
   updatemenu=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   glutPostRedisplay();
 
 }
@@ -1685,7 +1685,7 @@ void ParticleShowMenu(int value){
     parti->display = 1 - parti->display;
     updatemenu=1;
     glutPostRedisplay();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
@@ -1780,7 +1780,7 @@ void ParticleShowMenu(int value){
     }
   }
   updatemenu=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   glutPostRedisplay();
 }
 
@@ -2083,7 +2083,7 @@ void Plot3DShowMenu(int value){
      }
      break;
   }
-  plotstate=getplotstate(STATIC_PLOTS);
+  plotstate=GetPlotState(STATIC_PLOTS);
   if(plotstate==STATIC_PLOTS&&visiso==1){
     updatesurface();
   }
@@ -2695,7 +2695,7 @@ void TourMenu(int value){
       touri = tourinfo + i;
       touri->display=1;
     }
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     break;
   case MENU_TOUR_VIEWFROMROUTE:               // view from route
     viewtourfrompath = 1 - viewtourfrompath;
@@ -2749,8 +2749,8 @@ void TourMenu(int value){
   delete_tourlist();
   create_tourlist();
   update_tourcontrols();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  if(value!=-5&&value!=-4)Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  if(value!=-5&&value!=-4)UpdateTimes();
   callfrom_tourglui=0;
 
 }
@@ -2796,7 +2796,7 @@ void EvacMenu(int value){
       }
     }
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
   }
   if(value>=0){
     ReadEvacFile=1;
@@ -3052,7 +3052,7 @@ void LoadParticleMenu(int value){
         readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       }
       force_redisplay=1;
-      Update_Framenumber(0);
+      UpdateFrameNumber(0);
     }
   }
   updatemenu=1;
@@ -4119,7 +4119,7 @@ void LoadPatchMenu(int value){
       }
     }
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
   }
   else if(value==MENU_UPDATEBOUNDS){
     Update_All_Patch_Bounds();
@@ -4239,7 +4239,7 @@ void ShowPatchMenu(int value){
       }
     }
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 }
 
 /* ------------------ VentMenu ------------------------ */

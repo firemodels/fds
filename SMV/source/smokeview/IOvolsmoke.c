@@ -2006,8 +2006,8 @@ void unload_volsmoke_allframes(volrenderdata *vr){
   }
   vr->loaded=0;
   vr->display=0;
-  plotstate = getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   PRINTF("completed\n");
 }
 
@@ -2032,9 +2032,9 @@ void read_volsmoke_allframes(volrenderdata *vr){
   }
   vr->loaded=1;
   vr->display=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   stept=1;
-  Update_Times();
+  UpdateTimes();
 }
 
 /* ------------------ read_volsmoke_frame_allmeshes ------------------------ */
@@ -2174,9 +2174,9 @@ void read_volsmoke_allframes_allmeshes(void){
       }
     }
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   stept=1;
-  Update_Times();
+  UpdateTimes();
 #ifdef pp_THREAD
   if(use_multi_threading==1){
     mt_read_volsmoke_allframes_allmeshes2();

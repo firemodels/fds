@@ -2360,10 +2360,10 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   FREEMEMORY(patchi->geom_ivals);
   FREEMEMORY(patchi->geom_times);
   if(load_flag==UNLOAD){
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     update_patchtype();
     update_unit_defs();
-    Update_Times();
+    UpdateTimes();
     return;
   }
 
@@ -2427,11 +2427,11 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   patchi->loaded=1;
   patchi->display=1;
   ipatchtype=getpatchtype(patchinfo+ifile);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   update_patchtype();
   update_unit_defs();
-  Update_Times();
-  Update_Framenumber(1);
+  UpdateTimes();
+  UpdateFrameNumber(1);
 }
 
 /* ------------------ draw_test_clip ------------------------ */

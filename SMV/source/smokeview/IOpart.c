@@ -1397,14 +1397,14 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   parti->data_type = data_type;
   parti->loaded = 0;
   parti->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
 
   FREEMEMORY(parti->times);
 
   if(loadflag==UNLOAD){
     update_partcolorbounds(parti);
-    Update_Times();
+    UpdateTimes();
     updatemenu=1;
     updatePart5extremes();
 #ifdef pp_MEMPRINT
@@ -1417,7 +1417,7 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   lenfile = strlen(file);
   if(lenfile==0){
     readpart("",ifile,UNLOAD,PARTDATA,&error);
-    Update_Times();
+    UpdateTimes();
     return;
   }
 
@@ -1473,8 +1473,8 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   parttype=0;
   Part_CB_Init();
   ParticlePropShowMenu(part5colorindex);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   updatePart5extremes();
   updatemenu=1;
   Idle_CB();

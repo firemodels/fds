@@ -156,7 +156,7 @@ void readiso_geom_wrapup(void){
   GetGeomInfoPtrs(&geominfoptrs, &ngeominfoptrs);
   update_triangles(GEOM_DYNAMIC,GEOM_UPDATE_ALL);
 
-  Update_Times();
+  UpdateTimes();
   get_faceinfo();
   Idle_CB();
 }
@@ -221,7 +221,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_in
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   ReadIsoFile=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
   iisotype=getisotype(isoi);
 
@@ -276,8 +276,8 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   unload_iso_trans();
   ib->loaded=0;
   ib->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   *errorcode = 0;
 
 #ifdef _DEBUG
@@ -652,7 +652,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   ReadIsoFile=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
   iisotype=getisotype(ib);
 
@@ -664,7 +664,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     CheckMemory;
   }
 
-  Update_Times();
+  UpdateTimes();
 #ifdef pp_MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
@@ -776,7 +776,7 @@ void unloadiso(meshdata *meshi){
 
   ib->loaded=0;
   ib->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   meshi->isofilenum=-1;
   for(i=0;i<nmeshes;i++){
     meshi2 = meshinfo+i;
@@ -786,7 +786,7 @@ void unloadiso(meshdata *meshi){
     ReadIsoFile=0;
   }
 
-  Update_Times();
+  UpdateTimes();
   updatemenu=1;
   Idle_CB();
 

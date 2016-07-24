@@ -656,7 +656,7 @@ void createtourpaths(void){
       f2 = 1-f1;
       vtime = view_tstart*f1 + view_tstop*f2;
 
-      iframe_local = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_local);
+      iframe_local = ISearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_local);
       kf1 = touri->keyframe_list[iframe_local];
       kf2 = touri->keyframe_list[iframe_local+1];
       pj->keysnap=&kf1->nodeval;
@@ -797,7 +797,7 @@ void createtourpaths(void){
       float f1, f2;
 
       vdist = tour_dist2[j];
-      iframe_local = isearch(tour_dist,view_ntimes,vdist,iframe_local);
+      iframe_local = ISearch(tour_dist,view_ntimes,vdist,iframe_local);
       f1 = (vdist-tour_dist[iframe_local])/(tour_dist[iframe_local+1]-tour_dist[iframe_local]);
       f2 = 1 - f1;
       tour_t2[j] = f2*tour_t[iframe_local] + f1*tour_t[iframe_local+1] ;
@@ -813,7 +813,7 @@ void createtourpaths(void){
       pj = touri->pathnodes + j;
       vtime = tour_t2[j];
       vtime2 = touri->keyframe_list[0]->nodeval.time + j*vdt;
-      iframe_new = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
+      iframe_new = ISearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
       kf1 = touri->keyframe_list[iframe_new];
       kf2 = touri->keyframe_list[iframe_new+1];
       dt = kf2->nodeval.time - kf1->nodeval.time;
@@ -1182,7 +1182,7 @@ tourdata *add_tour(char *label){
 
   update_tour_menulabels();
   createtourpaths();
-  Update_Times();
+  UpdateTimes();
   create_tourlist();
   return tourinfo + ntours-1;
 }
@@ -1233,7 +1233,7 @@ void delete_tour(int tour_index){
   }
   set_glui_keyframe();
   update_tour_menulabels();
-  Update_Times();
+  UpdateTimes();
   create_tourlist();
 
 }
@@ -1278,8 +1278,8 @@ void setup_tour(void){
     init_circulartour();
     update_tour_menulabels();
     createtourpaths();
-    Update_Times();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    UpdateTimes();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     selectedtour_index = TOURINDEX_MANUAL;
     selectedtour_index = TOURINDEX_MANUAL;
     selected_frame=NULL;

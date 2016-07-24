@@ -1905,7 +1905,7 @@ void keyboard(unsigned char key, int flag){
       default:
         stept=(stept+1)%2;
         if(stept==1){
-          plotstate=getplotstate(DYNAMIC_PLOTS);
+          plotstate=GetPlotState(DYNAMIC_PLOTS);
           if(plotstate==DYNAMIC_PLOTS){
             reset_gltime();
           }
@@ -1983,14 +1983,14 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visx_all=1-visx_all;
-        plotstate = getplotstate(STATIC_PLOTS);
+        plotstate = GetPlotState(STATIC_PLOTS);
         updatemenu = 1;
       }
       break;
     case 'y':
     case 'Y':
       visy_all = 1-visy_all;
-      plotstate = getplotstate(STATIC_PLOTS);
+      plotstate = GetPlotState(STATIC_PLOTS);
       updatemenu = 1;
       break;
     case 'z':
@@ -2000,13 +2000,13 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visz_all = 1 - visz_all;
-        plotstate = getplotstate(STATIC_PLOTS);
+        plotstate = GetPlotState(STATIC_PLOTS);
         updatemenu = 1;
       }
       break;
     case '0':
       if(plotstate==DYNAMIC_PLOTS){
-        Update_Times();
+        UpdateTimes();
         reset_time_flag=1;
         return;
       }
@@ -2097,9 +2097,9 @@ void keyboard(unsigned char key, int flag){
     if(stepclip_ymax==1  )clip_J += skip_global*ClipDir;
     if(stepclip_zmax==1  )clip_K += skip_global*ClipDir;
 
-    Update_Clipbounds(clipinfo.clip_xmin,&clip_i,clipinfo.clip_xmax,&clip_I,current_mesh->ibar);
-    Update_Clipbounds(clipinfo.clip_ymin,&clip_j,clipinfo.clip_ymax,&clip_J,current_mesh->jbar);
-    Update_Clipbounds(clipinfo.clip_zmin,&clip_k,clipinfo.clip_zmax,&clip_K,current_mesh->kbar);
+    UpdateClipbounds(clipinfo.clip_xmin,&clip_i,clipinfo.clip_xmax,&clip_I,current_mesh->ibar);
+    UpdateClipbounds(clipinfo.clip_ymin,&clip_j,clipinfo.clip_ymax,&clip_J,current_mesh->jbar);
+    UpdateClipbounds(clipinfo.clip_zmin,&clip_k,clipinfo.clip_zmax,&clip_K,current_mesh->kbar);
     return;
   }
 
@@ -2136,7 +2136,7 @@ void keyboard(unsigned char key, int flag){
       break;
   }
   if(ReadPlot3dFile==1){
-    plotstate = getplotstate(STATIC_PLOTS);
+    plotstate = GetPlotState(STATIC_PLOTS);
     if(visiso!=0&&current_mesh->slicedir==ISO){
       plotiso[plotn-1] += FlowDir;
       updatesurface();
@@ -2357,7 +2357,7 @@ void handle_plot3d_keys(int  key){
   if(iplot_state!=0)updateplotslice(iplot_state);
   return;
 
-//  plotstate=getplotstate(STATIC_PLOTS);
+//  plotstate=GetPlotState(STATIC_PLOTS);
 
 }
 
@@ -2577,7 +2577,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
             ){
             elapsed_time = gmod(elapsed_time,global_times[nglobal_times-1]-global_times[0])+global_times[0];
           }
-          itimes = isearch(global_times,nglobal_times,elapsed_time,itimes);
+          itimes = ISearch(global_times,nglobal_times,elapsed_time,itimes);
         }
         else{
           if(script_render_flag==0){
@@ -2603,7 +2603,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
         }
       }
       if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
-        reset_itimes0();
+        ResetItimes0();
       }
       checktimebound();
       UpdateTimeLabels();
@@ -2621,7 +2621,7 @@ void Idle_CB(void){
 
   CheckMemory;
   glutSetWindow(mainwindow_id);
-  Update_Show();
+  UpdateShow();
   thistime = glutGet(GLUT_ELAPSED_TIME);
   thisinterval = thistime - lasttime;
   frame_count++;
@@ -2635,7 +2635,7 @@ void Idle_CB(void){
     checktimebound();
     UpdateTimeLabels();
   }
-  Update_Framenumber(changetime);
+  UpdateFrameNumber(changetime);
   if(redisplay==1){
     glutPostRedisplay();
   }
@@ -2998,7 +2998,7 @@ void Display_CB(void){
 #ifdef pp_LUA
   DoScriptLua();
 #endif
-  update_Display();
+  UpdateDisplay();
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(stereotype==STEREO_NONE){
     dostereo=0;

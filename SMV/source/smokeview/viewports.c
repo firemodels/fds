@@ -12,9 +12,9 @@
 
 #define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
-/* ------------------------ getStringWidth ------------------------- */
+/* ------------------------ GetStringWidth ------------------------- */
 
-int getStringWidth(char *string){
+int GetStringWidth(char *string){
   char *c;
   int length=0;
 
@@ -41,17 +41,17 @@ int getStringWidth(char *string){
   return length;
 }
 
-/* ------------------------ get_viewport_info ------------------------- */
+/* ------------------------ GetViewportInfo ------------------------- */
 
-void get_viewport_info(void){
+void GetViewportInfo(void){
   int doit;
   float text_height;
   float text_width;
   int ninfo_lines=0;
   int info_width;
 
-  info_width = getStringWidth("y: 115, 11.5 m");
-  colorbar_label_width = getStringWidth("*10^-02");
+  info_width = GetStringWidth("y: 115, 11.5 m");
+  colorbar_label_width = GetStringWidth("*10^-02");
 
   v_space = 2;
   text_height=18;
@@ -646,8 +646,8 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
 
   if(SUB_portortho2(quad,&VP_timebar,screen_left,screen_down)==0)return;
 
-  timebar_left_width = getStringWidth("Time: 1234.11");
-  timebar_right_width = getStringWidth("Frame rate: 99.99");
+  timebar_left_width = GetStringWidth("Time: 1234.11");
+  timebar_right_width = GetStringWidth("Frame rate: 99.99");
 
   timebar_left_pos = VP_timebar.left+timebar_left_width;
   timebar_right_pos= VP_timebar.right-timebar_right_width-h_space;
@@ -780,9 +780,9 @@ void ViewportTitle(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ----------------------- compare_meshes ----------------------------- */
+/* ----------------------- CompareMeshes ----------------------------- */
 
-int compare_meshes(const void *arg1, const void *arg2){
+int CompareMeshes(const void *arg1, const void *arg2){
   smoke3ddata *smoke3di, *smoke3dj;
   meshdata *meshi, *meshj;
   float *xyzmini, *xyzmaxi;
@@ -870,11 +870,11 @@ int compare_meshes(const void *arg1, const void *arg2){
   return returnval;
 }
 
-/* ------------------ sort_smoke3dinfo ------------------------ */
+/* ------------------ SortSmoke3dinfo ------------------------ */
 
-void sort_smoke3dinfo(void){
+void SortSmoke3dinfo(void){
   if(nsmoke3dinfo > 1){
-    qsort((meshdata **)smoke3dinfo_sorted, (size_t)nsmoke3dinfo, sizeof(smoke3ddata *), compare_meshes);
+    qsort((meshdata **)smoke3dinfo_sorted, (size_t)nsmoke3dinfo, sizeof(smoke3ddata *), CompareMeshes);
   }
 }
 
@@ -1137,7 +1137,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
 #endif
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
-      sort_smoke3dinfo();
+      SortSmoke3dinfo();
       getsmokedir(modelview_scratch);
       SNIFF_ERRORS("after getsmokedir");
 #ifdef pp_CULL
