@@ -1923,7 +1923,7 @@ void update_ShowScene(void){
     UpdateCamera(camera_current);
   }
   if(updateclipvals == 1){
-    clip2cam(camera_current);
+    Clip2Cam(camera_current);
     update_clip_all();
     updateclipvals = 0;
   }

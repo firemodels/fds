@@ -6,9 +6,9 @@
 
 #include "smokeviewvars.h"
 
-/* ------------------ zoom2aperture ------------------------ */
+/* ------------------ Zoom2Aperture ------------------------ */
 
-float zoom2aperture(float zoom0){
+float Zoom2Aperture(float zoom0){
   float ap;
   // note tan(46*PI/360)~(W/2)/D  where W=17==monitor width
   //                                D=20==distance from eye to monitor
@@ -18,9 +18,9 @@ float zoom2aperture(float zoom0){
   return ap;
 }
 
-/* ------------------ aperture2zoom ------------------------ */
+/* ------------------ Aperture2Zoom ------------------------ */
 
-float aperture2zoom(float ap){
+float Aperture2Zoom(float ap){
   float zoom0;
   zoom0 = tan(45.0*DEG2RAD/2.0)/tan(ap*DEG2RAD/2.0);
   return zoom0;
@@ -70,7 +70,7 @@ void UpdateCameraYpos(cameradata *ci){
   float width;
   float asp;
 
-  local_aperture_default=zoom2aperture(1.0);
+  local_aperture_default=Zoom2Aperture(1.0);
   asp=(float)screenHeight/(float)screenWidth;
   width=xbar;
   if(zbar/asp>xbar){
@@ -131,12 +131,12 @@ void InitCamera(cameradata *ci,char *name){
   ci->projection_type=projection_type;
   ci->dirty=0;
 
-  clip2cam(ci);
+  Clip2Cam(ci);
 }
 
-/* ------------------ clip2cam ------------------------ */
+/* ------------------ Clip2Cam ------------------------ */
 
-  void clip2cam(cameradata *cam){
+  void Clip2Cam(cameradata *cam){
     cam->clip_mode=clip_mode;
     cam->clip_xmin=clipinfo.clip_xmin;
     cam->clip_ymin=clipinfo.clip_ymin;
@@ -156,9 +156,9 @@ void InitCamera(cameradata *ci,char *name){
   }
 
 
-/* ------------------ clip2cam ------------------------ */
+/* ------------------ Clip2Cam ------------------------ */
 
-  void cam2clip(cameradata *cam){
+  void Cam2Clip(cameradata *cam){
     clip_mode = cam->clip_mode;
     clipinfo.clip_xmin = cam->clip_xmin;
     clipinfo.clip_ymin = cam->clip_ymin;
@@ -190,7 +190,7 @@ void CopyCamera(cameradata *to, cameradata *from){
   }
   to->dirty=1;
   if(to==camera_current&&updateclipvals==0){
-    cam2clip(camera_current);
+    Cam2Clip(camera_current);
   }
   if(to==camera_current&&to->quat_defined==1){
     quat_general[0]=to->quaternion[0];

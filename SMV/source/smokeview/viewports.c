@@ -931,7 +931,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
 
-  aperture_temp = zoom2aperture(zoom);
+  aperture_temp = Zoom2Aperture(zoom);
 
   if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
     if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
@@ -947,7 +947,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
         pj = touri->pathnodes + frame_index;
       }
 
-      aperture_temp=zoom2aperture(pj->zoom);
+      aperture_temp=Zoom2Aperture(pj->zoom);
     }
   }
 
