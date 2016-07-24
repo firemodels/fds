@@ -1,4 +1,8 @@
 #!/bin/bash
+TEST=$1
+if [ "$TEST" "-t" ]; then
+  TEST=_test
+fi
 
 size=_64
 IB=
