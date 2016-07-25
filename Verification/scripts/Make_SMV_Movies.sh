@@ -1,4 +1,5 @@
 #!/bin/bash
+TEST=$1
 
 size=_64
 IB=
@@ -8,9 +9,9 @@ fi
 
 OS=`uname`
 if [ "$OS" == "Darwin" ]; then
-  PLATFORM=osx$size
+  PLATFORM=_osx
 else
-  PLATFORM=linux$size
+  PLATFORM=_linux
 fi
 
 CURDIR=`pwd`
@@ -18,8 +19,8 @@ cd ..
 GITROOT=`pwd`
 cd $CURDIR
 
-export SMV=$GITROOT/SMV/Build/smokeview/intel_$PLATFORM/smokeview_$PLATFORM
-FDSEXE=$GITROOT/FDS_Compilation/mpi_intel_$PLATFORM$IB/fds_mpi_intel_$PLATFORM$IB
+export SMV=$GITROOT/SMV/Build/smokeview/intel$PLATFORM$size/smokeview$PLATFORM$TEST$size
+FDSEXE=$GITROOT/FDS_Compilation/mpi_intel$PLATFORM$size$IB/fds_mpi_intel$PLATFORM$size$IB
 RUNSMV="$GITROOT/Utilities/Scripts/runsmv.sh"
 export SMVBINDIR="-bindir $GITROOT/SMV/for_bundle"
 MAKEMOVIE=$GITROOT/Utilities/Scripts/make_movie.sh
