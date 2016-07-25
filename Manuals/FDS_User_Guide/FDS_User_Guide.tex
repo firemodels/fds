@@ -4132,7 +4132,7 @@ Simulating a fire in the outdoors is not much different than a fire indoors, but
 
 \subsubsection{Parabolic}
 
-{\ct PROFILE='PARABOLIC'} produces a parabolic profile with {\ct VEL} being the maximum velocity.
+{\ct PROFILE='PARABOLIC'} produces a parabolic profile with {\ct VEL} (m/s) being the maximum velocity or {\ct VOLUME\_FLOW} (m$^3$/s) being the desired volume flow.
 
 \subsubsection{Atmospheric}
 
@@ -6971,7 +6971,7 @@ Sometimes it is convenient to calculate a steady-state profile. For example, the
 \end{lstlisting}
 In a file called {\ct CHID\_line.csv}, there will be between 1 and 4 columns of data associated with this single {\ct DEVC} line. If {\ct X1} is different than {\ct X2}, there will be a column of $x$ coordinates associated with the linear array of points. The same holds for the $y$ and $z$ coordinates. The last column contains the 20 temperature points averaged over the last {\ct DT\_DEVC\_LINE} of the simulation---{\ct DT\_DEVC\_LINE} is set on the {\ct DUMP} line.  It is half the total simulation time by default. This is a convenient way to output a time-averaged linear profile of a quantity, like an array of thermocouples.  Note that the statistics output to the {\ct \_line.csv} file start being averaged at {\ct T=T\_END-DT\_DEVC\_LINE}.  Prior to this point in the simulation, the raw values are output.  This prevents initial transients from biasing the stat values and forces the ``line'' file output at the end of the simulation to be equivalent to manually processing a point {\ct DEVC} time history over the last {\ct DT\_DEVC\_LINE} of the simulation.
 
-A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates.
+A single ``line'' file can hold more than a single line of data. By default, the coordinate columns are labeled using the {\ct ID} of the {\ct DEVC} appended with either {\ct -x}, {\ct -y}, or {\ct -z}. To change these labels, use {\ct X\_ID}, {\ct Y\_ID}, and/or {\ct Z\_ID}. To suppress the coordinate columns altogether, add {\ct HIDE\_COORDINATES=.TRUE.} to the {\ct DEVC} line. This is convenient if you have multiple arrays of data that use the same coordinates. If you want the data plotted as a function of the distance from the origin, $r=\sqrt{x^2+y^2+z^2}$, provide the label {\ct R\_ID}.
 
 \subsubsection{Time-Varying Profile}
 
@@ -7288,32 +7288,33 @@ where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the inte
 $h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
-\subsection{Heat Fluxes and Thermal Radiation}
+\subsection{Heat Flux}
 \label{info:heat_flux}
 
-There are various ways of recording the heat flux at a solid boundary. If you want to record the {\em net} heat flux to the surface, $\dq_{\rm c}'' + \dq_{\rm r}''$, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you want to compare predicted heat flux with a measurement, you often need to use {\ct 'GAUGE HEAT FLUX'}. The difference between {\ct 'NET HEAT FLUX'} and {\ct 'GAUGE HEAT FLUX'} is that
-the former is the rate at which energy is absorbed by the solid surface; the latter is the amount of energy that would be absorbed if the surface were cold (or some specified temperature $T_{\rm G}$):
+There are various output quantities related to heat flux. First, consider the {\em net} heat flux to a solid surface:
 \be
-   \dq_{\rm gauge}'' = \dq_{\rm r}''/\epsilon + \dq_{\rm c}'' + h(T_{\rm w}-T_{\rm G}) + \sigma (T_{\rm w}^4-T_{\rm G}^4)
+   \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than that of the surrounding surface, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm G}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. If you want to output the {\em net} heat flux, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively.
+
+If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
 \be
-   \dq_{\rm radiometer}'' = \dq_{\rm r}''/\epsilon + \sigma (T_{\rm w}^4-T_\infty^4)
+   \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
 \ee
-For diagnostic purposes it is sometimes convenient to output the {\ct 'INCIDENT HEAT FLUX'}:
+If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than that of the surrounding surface, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
 \be
-   \dq_{\rm inc}'' = \dq_{\rm r}''/\epsilon + \sigma T_{\rm w}^4 +\dq_{\rm c}''
+   \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
-Note that the sign of the output of heat flux is different than the sign of the input of a heat flux.  A positive output quantity for heat flux means heat is being transferred into the surface.
+For diagnostic purposes it is sometimes convenient to output $\dq_{\rm inc,rad}''$ using {\ct 'INCIDENT HEAT FLUX'}.
 
 All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
-&DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=0.45,0.0,0.3, ORIENTATION=-1,0,0 /
+&DEVC ID='flux', QUANTITY='RADIATIVE HEAT FLUX GAS', XYZ=..., ORIENTATION=-1,0,0 /
 \end{lstlisting}
 Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  This single line of input is a special shortcut\footnote{This feature maintains backward compatibility with FDS~5.} for the following lines of input that make use of a Lagrangian particle as a surrogate target:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
-&INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=1, PART_ID='rad gauge' /
+&INIT ID='f1', XYZ=..., N_PARTICLES=1, PART_ID='rad gauge' /
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
 &SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
 \end{lstlisting}
@@ -7322,9 +7323,21 @@ Note that the {\ct DEVC} line does not contain device coordinates, but rather a 
 The functionality of surrogate particles can be extended to model an array of devices. Instead of one heat flux gauge, we can create a line of them:
 \begin{lstlisting}
 &DEVC ID='flux', INIT_ID='f1', POINTS=34, QUANTITY='RADIATIVE HEAT FLUX', X_ID='x' /
-&INIT ID='f1', XYZ=0.45,0.0,0.3, N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
+&INIT ID='f1', XYZ=..., N_PARTICLES=34, DX=0.05, PART_ID='rad gauge' /
 \end{lstlisting}
 For more information about specifying arrays of devices via the parameter {\ct POINTS}, see Section~\ref{info:line_file}. Note also the parameter {\ct DX} on the {\ct INIT} line that creates a line of particles starting at the point {\ct XYZ} and repeating every 0.05~m.
+
+
+\subsection{Adiabatic Surface Temperature}
+\label{info:AST}
+
+FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, $T_{\hbox{\tiny AST}}$ is the surface temperature for which the net heat flux (Eq.~(\ref{net_flux}) is zero. The following equation can be solved using an analytical solution given by Malendowski~\cite{Malendowski:FSJ}:
+\be
+   \epsilon \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm gas} - T_{\hbox{\tiny AST}}) = 0
+\ee
+where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
+
+The usefulness of the AST is that it represents an effective gas temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
 
 
 
@@ -7433,16 +7446,6 @@ The following example is used to write out a histogram of droplet size using 20 
 
 
 
-\subsection{Adiabatic Surface Temperature}
-\label{info:AST}
-
-FDS solves a one-dimensional heat conduction equation for each boundary cell marking the interface between gas and solid, assuming that material properties for the material layer(s) are provided. The results can be transferred (via either {\ct DEVC} or {\ct BNDF} output) to other models that predict the mechanical response of the walls or structure. For many applications, the 1-D solution of the heat conduction equation is adequate, but in situations where it is not, another approach can be followed. FDS includes a calculation of the adiabatic surface temperature (AST), a quantity that is representative of the heat flux to a solid surface. Following the idea proposed by Ulf Wickstr\"{o}m~\cite{Wickstrom:Interflam2007}, the following equation can be solved for $T_{\hbox{\tiny AST}}$ using an analytical solution given by Malendowski~\cite{Malendowski:FSJ}:
-\be
-   \epsilon \, \left( \dq_{\rm inc}'' - \sigma \, T_{\hbox{\tiny AST}}^4 \right) + h \, (T_{\rm g} - T_{\hbox{\tiny AST}}) = 0
-\ee
-where, $\dot{q}_{\rm inc}''$ is the {\em incident} heat flux onto the solid surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm g}$ is the surrounding gas temperature.
-
-The usefulness of the AST is that it represents an effective gas temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
 
 
 \subsection{Useful Solid Phase Outputs}
@@ -8513,6 +8516,7 @@ properties be specified as well. Simply prescribing as many properties as possib
 {\ct QUANTITY2}             & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct QUANTITY\_RANGE}       & Real(2)         & Section~\ref{info:statistics}                                   &       & -1.E50,1.E50  \\ \hline
 {\ct RELATIVE}              & Logical         & Section~\ref{info:out:DEVC}                                     &       & {\ct .FALSE.} \\ \hline
+{\ct R\_ID}                 & Character       & Section~\ref{info:line_file}                                    &       &               \\ \hline
 {\ct ROTATION}              & Real            & Section~\ref{info:DEVC}                                         & deg.  & 0             \\ \hline
 {\ct SETPOINT}              & Real            & Section~\ref{info:basic_control}                                &       &               \\ \hline
 {\ct STATISTICS}            & Character       & Section~\ref{info:statistics}                                   &       &               \\ \hline

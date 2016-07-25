@@ -430,10 +430,10 @@ $QFDS -d Turbulence rng_64.fds
 $QFDS -d Turbulence yplus_8.fds
 $QFDS -d Turbulence yplus_16.fds
 $QFDS -d Turbulence yplus_32.fds
-$QFDS -d Turbulence heated_channel_Pr_0p10_32.fds
-$QFDS -d Turbulence heated_channel_Pr_0p71_32.fds
-$QFDS -d Turbulence heated_channel_Pr_1p00_32.fds
-$QFDS -d Turbulence heated_channel_Pr_2p00_32.fds
+# $QFDS -d Turbulence heated_channel_Pr_0p10_32.fds
+# $QFDS -d Turbulence heated_channel_Pr_0p71_32.fds
+# $QFDS -d Turbulence heated_channel_Pr_1p00_32.fds
+# $QFDS -d Turbulence heated_channel_Pr_2p00_32.fds
 $QFDS -d Turbulence ribbed_channel_20.fds
 $QFDS -d Turbulence ribbed_channel_40.fds
 $QFDS -d Turbulence ribbed_channel_80.fds

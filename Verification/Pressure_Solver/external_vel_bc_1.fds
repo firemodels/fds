@@ -1,0 +1,25 @@
+&HEAD CHID='external_vel_bc_1', TITLE='Test idea for correcting velocity errors on external boundaries'/ 
+
+&MESH IJK=20,20,20, XB=0,10,-5,5,0,10 /
+
+&TIME T_END=10.0 /
+
+&DUMP VELOCITY_ERROR_FILE=.TRUE. /
+
+&MISC EXTERNAL_BOUNDARY_CORRECTION=.TRUE., STRATIFICATION=.FALSE. /
+
+&RADI RADIATION=.FALSE. /
+
+&SURF ID='BLOW', VEL=-10, COLOR='LIGHT BLUE' /
+
+&VENT PBX=0.0, SURF_ID='BLOW' /
+&VENT XB=10,10,-1,1,0,5, SURF_ID='OPEN' / door
+&VENT XB=4,6,5,5,4,6,    SURF_ID='OPEN' / window
+
+&BNDF QUANTITY='VELOCITY ERROR' /
+
+&SLCF PBY=0.,QUANTITY='VELOCITY',VECTOR=.TRUE. /
+
+&TAIL /
+
+
