@@ -1393,17 +1393,19 @@ void script_loadboundary(scriptdata *scripti, int meshnum){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(meshnum != -1 && patchi->blocknumber + 1 != meshnum)continue;
-    if(strcmp(patchi->label.longlabel,scripti->cval)==0){
-      LOCK_COMPRESS
-      readpatch(i,LOAD,&errorcode);
-      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
-        FREEMEMORY(loaded_file);
-        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
-        strcpy(loaded_file,scripti->cval);
+    if (meshnum == -1 || patchi->blocknumber + 1 == meshnum) {
+      if (strcmp(patchi->label.longlabel, scripti->cval) == 0) {
+        LOCK_COMPRESS
+          readpatch(i, LOAD, &errorcode);
+        if (scripti->cval != NULL&&strlen(scripti->cval) > 0) {
+          FREEMEMORY(loaded_file);
+          NewMemory((void **)&loaded_file, strlen(scripti->cval) + 1);
+          strcpy(loaded_file, scripti->cval);
+        }
+        count++;
+        if (meshnum == -1)break;
+        UNLOCK_COMPRESS
       }
-      count++;
-      UNLOCK_COMPRESS
     }
   }
   if(count==0)fprintf(stderr,"*** Error: Boundary files of type %s failed to load\n",scripti->cval);
