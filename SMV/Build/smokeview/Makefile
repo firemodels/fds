@@ -365,7 +365,7 @@ gnu_osx_64 : $(obj)
 
 .PHONY : clean
 clean:
-	rm -f *.o *.mod *.lua *.dll
+	rm -f *.o *.mod *.lua *.dll *.so
 
 #-------------- force compilation of string_util.c -----------
 
