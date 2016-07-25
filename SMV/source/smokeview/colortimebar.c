@@ -898,7 +898,7 @@ void initdefaultcolorbars(void){
   cbi->rgb_node[10]=254;
   cbi->rgb_node[11]=255;
   cbi++;
-  
+
   // split
 
   split_colorbar_index = cbi - colorbarinfo;
@@ -917,7 +917,7 @@ void initdefaultcolorbars(void){
     cbi->rgb_node[i] = colorsplit[i];
   }
   cbi++;
-  
+
   // construct colormaps from color node info
 
   for(i=0;i<ndefaultcolorbars;i++){

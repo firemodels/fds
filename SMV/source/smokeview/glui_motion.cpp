@@ -48,6 +48,10 @@
 #define PLAY_MOVIE 29
 #define MOVIE_NAME 30
 #define CLOSE_MOTION 1
+#ifdef pp_RENDER360_DEBUG
+#define SHOWALL_SCREENS 31
+#define HIDEALL_SCREENS 32
+#endif
 
 #define RENDER_TYPE 0
 #define RENDER_RESOLUTION 1
@@ -67,6 +71,7 @@
 #define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
+#define RENDER_360 9
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -75,6 +80,9 @@ void Motion_Rollout_CB(int var);
 
 GLUI *glui_motion=NULL;
 
+GLUI_Panel *PANEL_xy = NULL;
+GLUI_Panel *PANEL_render_file = NULL;
+GLUI_Panel *PANEL_render_format = NULL;
 GLUI_Panel *PANEL_movie_type = NULL;
 GLUI_Panel *PANEL_motion = NULL;
 GLUI_Panel *PANEL_viewA = NULL;
@@ -96,6 +104,7 @@ GLUI_Panel *PANEL_reset=NULL;
 GLUI_Panel *PANEL_specify=NULL;
 GLUI_Panel *PANEL_change_zaxis=NULL;
 
+GLUI_Rollout *ROLLOUT_render360 = NULL;
 GLUI_Rollout *ROLLOUT_rotation_type = NULL;
 GLUI_Rollout *ROLLOUT_orientation=NULL;
 GLUI_Rollout *ROLLOUT_scene_clip=NULL;
@@ -105,6 +114,12 @@ GLUI_Rollout *ROLLOUT_viewpoints=NULL;
 GLUI_Rollout *ROLLOUT_make_movie = NULL;
 GLUI_Rollout *ROLLOUT_gslice = NULL;
 GLUI_Rollout *ROLLOUT_translaterotate=NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Rollout *ROLLOUT_screenvis = NULL;
+GLUI_Rollout *ROLLOUT_lower = NULL;
+GLUI_Rollout *ROLLOUT_middle = NULL;
+GLUI_Rollout *ROLLOUT_upper = NULL;
+#endif
 
 
 GLUI_Spinner *SPINNER_nrender_rows=NULL;
@@ -132,7 +147,15 @@ GLUI_Spinner *SPINNER_xcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_ycenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_zcenCUSTOM=NULL;
 GLUI_Spinner *SPINNER_framerate = NULL;
+GLUI_Spinner *SPINNER_bitrate = NULL;
+GLUI_Spinner *SPINNER_window_height360=NULL;
 
+GLUI_StaticText *STATIC_width360=NULL;
+
+GLUI_Checkbox *CHECKBOX_render360 = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Checkbox *CHECKBOX_screenview = NULL;
+#endif
 GLUI_Checkbox *CHECKBOX_show_rotation_center=NULL;
 GLUI_Checkbox *CHECKBOX_clip_rendered_scene=NULL;
 GLUI_Checkbox *CHECKBOX_general_rotation=NULL;
@@ -141,10 +164,14 @@ GLUI_Checkbox *CHECKBOX_gslice_data=NULL;
 GLUI_Checkbox *CHECKBOX_gvec_down=NULL;
 GLUI_Checkbox *CHECKBOX_showgravity=NULL;
 GLUI_Checkbox *CHECKBOX_overwrite_movie = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Checkbox **CHECKBOX_screenvis = NULL;
+#endif
 
 GLUI_Translation *ROTATE_2axis=NULL,*ROTATE_eye_z=NULL;
 GLUI_Translation *TRANSLATE_z=NULL,*TRANSLATE_xy=NULL;
 
+GLUI_RadioGroup *RADIO_render_format = NULL;
 GLUI_RadioGroup *RADIO_projection=NULL,*RADIO_rotation_type=NULL;
 GLUI_RadioGroup *RADIO_render_type=NULL;
 GLUI_RadioGroup *RADIO_render_label=NULL;
@@ -169,6 +196,10 @@ GLUI_Button *BUTTON_motion_2=NULL;
 GLUI_Button *BUTTON_window_update=NULL;
 GLUI_Button *BUTTON_make_movie = NULL;
 GLUI_Button *BUTTON_play_movie = NULL;
+#ifdef pp_RENDER360_DEBUG
+GLUI_Button *BUTTON_screen_hideall = NULL;
+GLUI_Button *BUTTON_screen_showall = NULL;
+#endif
 
 GLUI_EditText *EDIT_view_label=NULL;
 GLUI_EditText *EDIT_movie_name = NULL;
@@ -181,6 +212,7 @@ GLUI_Listbox *LIST_render_size=NULL;
 GLUI_Listbox *LIST_render_skip=NULL;
 
 void enable_disable_views(void);
+void Render_CB(int var);
 
 procdata motionprocinfo[9];
 int nmotionprocinfo = 0;
@@ -234,15 +266,15 @@ void enable_disable_makemovie(int onoff){
 /* ------------------ update_movie_type ------------------------ */
 
 void update_movie_type(int type){
-  moviefiletype = type;
-  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(moviefiletype);
+  movie_filetype = type;
+  if(RADIO_movie_type!=NULL)RADIO_movie_type->set_int_val(movie_filetype);
 }
 
 /* ------------------ update_render_type ------------------------ */
 
 void update_render_type(int type){
-  renderfiletype = type;
-  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(renderfiletype);
+  render_filetype = type;
+  if(RADIO_render_type!=NULL)RADIO_render_type->set_int_val(render_filetype);
 }
 
 /* ------------------ update_zaxis_angles ------------------------ */
@@ -641,29 +673,89 @@ extern "C" void glui_motion_setup(int main_window){
   ROLLOUT_render = glui_motion->add_rollout(_d("Images"), false,RENDER_ROLLOUT,Motion_Rollout_CB);
   ADDPROCINFO(motionprocinfo,nmotionprocinfo,ROLLOUT_render,RENDER_ROLLOUT);
 
-  EDIT_render_file_base = glui_motion->add_edittext_to_panel(ROLLOUT_render, "file prefix:", GLUI_EDITTEXT_TEXT, render_file_base);
+  ROLLOUT_render = ROLLOUT_render;
+  EDIT_render_file_base = glui_motion->add_edittext_to_panel(ROLLOUT_render, "prefix:", GLUI_EDITTEXT_TEXT, render_file_base);
   EDIT_render_file_base->set_w(200);
 
-  PANEL_file_suffix = glui_motion->add_panel_to_panel(ROLLOUT_render, "file suffix:", true);
+  PANEL_render_file = glui_motion->add_panel_to_panel(ROLLOUT_render, "", false);
+
+  PANEL_file_suffix = glui_motion->add_panel_to_panel(PANEL_render_file, "suffix:", true);
   RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &renderfilelabel, RENDER_LABEL, Render_CB);
   RADIOBUTTON_1f = glui_motion->add_radiobutton_to_group(RADIO_render_label, "frame number");
   RADIOBUTTON_1g = glui_motion->add_radiobutton_to_group(RADIO_render_label, "time (s)");
 
-  PANEL_file_type = glui_motion->add_panel_to_panel(ROLLOUT_render, "file type:", true);
-  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &renderfiletype, RENDER_TYPE, Render_CB);
+
+  glui_motion->add_column_to_panel(PANEL_render_file, false);
+
+  PANEL_file_type = glui_motion->add_panel_to_panel(PANEL_render_file, "type:", true);
+  RADIO_render_type = glui_motion->add_radiogroup_to_panel(PANEL_file_type, &render_filetype, RENDER_TYPE, Render_CB);
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "png");
   glui_motion->add_radiobutton_to_group(RADIO_render_type, "jpg");
 
-  update_glui_filelabel(renderfilelabel);
 
+  PANEL_xy = glui_motion->add_panel_to_panel(ROLLOUT_render, "resolution", true);
   render_size_index = RenderWindow;
-  LIST_render_size = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Resolution:"), &render_size_index, RENDER_RESOLUTION, Render_CB);
+  LIST_render_size = glui_motion->add_listbox_to_panel(PANEL_xy, _d(""), &render_size_index, RENDER_RESOLUTION, Render_CB);
   LIST_render_size->add_item(Render320, "320x240");
   LIST_render_size->add_item(Render640, "640x480");
   LIST_render_size->add_item(RenderWindow, _d("Current"));
   LIST_render_size->set_int_val(render_size_index);
-  SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(ROLLOUT_render, "Resolution multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
-  SPINNER_nrender_rows->set_int_limits(2, 10);
+  SPINNER_nrender_rows = glui_motion->add_spinner_to_panel(PANEL_xy, "multiplier:", GLUI_SPINNER_INT, &nrender_rows, RENDER_MULTIPLIER, Render_CB);
+  SPINNER_nrender_rows->set_int_limits(1, 10);
+
+#ifdef pp_RENDER360
+  ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
+  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
+  STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
+  SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360, Render_CB);
+  SPINNER_window_height360->set_int_limits(100, max_screenHeight);
+  Render_CB(RENDER_360);
+#ifdef pp_RENDER360_DEBUG
+
+  NewMemory((void **)&CHECKBOX_screenvis, nscreeninfo * sizeof(GLUI_Checkbox *));
+
+  ROLLOUT_screenvis = glui_motion->add_rollout_to_panel(ROLLOUT_render360, "screenvis", false);
+  CHECKBOX_screenview = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "view screens", &screenview);
+  CHECKBOX_screenvis[0] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "bottom", screenvis);
+
+  ROLLOUT_lower = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "lower", false);
+  CHECKBOX_screenvis[1] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "1", screenvis + 1);
+  CHECKBOX_screenvis[2] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "2", screenvis + 2);
+  CHECKBOX_screenvis[3] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "3", screenvis + 3);
+  CHECKBOX_screenvis[4] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "4", screenvis + 4);
+  CHECKBOX_screenvis[5] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "5", screenvis + 5);
+  CHECKBOX_screenvis[6] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "6", screenvis + 6);
+  CHECKBOX_screenvis[7] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "7", screenvis + 7);
+  CHECKBOX_screenvis[8] = glui_motion->add_checkbox_to_panel(ROLLOUT_lower, "8", screenvis + 8);
+
+
+  ROLLOUT_middle = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "middle", false);
+  CHECKBOX_screenvis[9] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "1", screenvis + 9);
+  CHECKBOX_screenvis[10] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "2", screenvis + 10);
+  CHECKBOX_screenvis[11] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "3", screenvis + 11);
+  CHECKBOX_screenvis[12] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "4", screenvis + 12);
+  CHECKBOX_screenvis[13] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "5", screenvis + 13);
+  CHECKBOX_screenvis[14] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "6", screenvis + 14);
+  CHECKBOX_screenvis[15] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "7", screenvis + 15);
+  CHECKBOX_screenvis[16] = glui_motion->add_checkbox_to_panel(ROLLOUT_middle, "8", screenvis + 16);
+
+  ROLLOUT_upper = glui_motion->add_rollout_to_panel(ROLLOUT_screenvis, "upper", false);
+  CHECKBOX_screenvis[17] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "1", screenvis + 17);
+  CHECKBOX_screenvis[18] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "2", screenvis + 18);
+  CHECKBOX_screenvis[19] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "3", screenvis + 19);
+  CHECKBOX_screenvis[20] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "4", screenvis + 20);
+  CHECKBOX_screenvis[21] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "5", screenvis + 21);
+  CHECKBOX_screenvis[22] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "6", screenvis + 22);
+  CHECKBOX_screenvis[23] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "7", screenvis + 23);
+  CHECKBOX_screenvis[24] = glui_motion->add_checkbox_to_panel(ROLLOUT_upper, "8", screenvis + 24);
+
+  CHECKBOX_screenvis[25] = glui_motion->add_checkbox_to_panel(ROLLOUT_screenvis, "top", screenvis + 25);
+  BUTTON_screen_showall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Show All"), SHOWALL_SCREENS, Viewpoint_CB);
+  BUTTON_screen_hideall = glui_motion->add_button_to_panel(ROLLOUT_screenvis, _d("Hide All"), HIDEALL_SCREENS, Viewpoint_CB);
+#endif
+#endif
+
+  update_glui_filelabel(renderfilelabel);
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);
@@ -691,6 +783,8 @@ extern "C" void glui_motion_setup(int main_window){
 
   CHECKBOX_clip_rendered_scene = glui_motion->add_checkbox_to_panel(ROLLOUT_scene_clip, "clip rendered scene", &clip_rendered_scene);
 
+  glui_motion->add_separator_to_panel(ROLLOUT_render);
+
   BUTTON_render_start = glui_motion->add_button_to_panel(ROLLOUT_render, _d("Generate Images"), RENDER_START, Render_CB);
   BUTTON_render_stop = glui_motion->add_button_to_panel(ROLLOUT_render, _d("Stop Image Generation"), RENDER_STOP, Render_CB);
 
@@ -702,12 +796,14 @@ extern "C" void glui_motion_setup(int main_window){
     EDIT_movie_name = glui_motion->add_edittext_to_panel(ROLLOUT_make_movie, "movie prefix:", GLUI_EDITTEXT_TEXT, movie_name, MOVIE_NAME, Render_CB);
     EDIT_movie_name->set_w(200);
     PANEL_movie_type = glui_motion->add_panel_to_panel(ROLLOUT_make_movie, "movie type:", true);
-    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &moviefiletype, MOVIE_TYPE, Render_CB);
+    RADIO_movie_type = glui_motion->add_radiogroup_to_panel(PANEL_movie_type, &movie_filetype, MOVIE_TYPE, Render_CB);
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "avi");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "mp4");
     glui_motion->add_radiobutton_to_group(RADIO_movie_type, "wmv");
     SPINNER_framerate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "frame rate", GLUI_SPINNER_INT, &movie_framerate);
     SPINNER_framerate->set_int_limits(1, 100);
+    SPINNER_bitrate = glui_motion->add_spinner_to_panel(ROLLOUT_make_movie, "bit rate (Kb/s)", GLUI_SPINNER_INT, &movie_bitrate);
+    SPINNER_bitrate->set_int_limits(100, 20000);
     glui_motion->add_button_to_panel(ROLLOUT_make_movie, _d("Generate Images"), RENDER_START, Render_CB);
     BUTTON_make_movie = glui_motion->add_button_to_panel(ROLLOUT_make_movie, "Make Movie", MAKE_MOVIE, Render_CB);
     if(have_ffplay == 1){
@@ -1513,8 +1609,25 @@ void Viewpoint_CB(int var){
   char *label;
   cameradata *prev, *next;
   int view_id;
+#ifdef pp_RENDER360_DEBUG
+  int i;
+#endif
 
   switch(var){
+#ifdef pp_RENDER360_DEBUG
+  case SHOWALL_SCREENS:
+    for(i=0;i<nscreeninfo;i++){
+      screenvis[i]=1;
+      CHECKBOX_screenvis[i]->set_int_val(screenvis[i]);
+    }
+    break;
+  case HIDEALL_SCREENS:
+    for(i=0;i<nscreeninfo;i++){
+      screenvis[i]=0;
+      CHECKBOX_screenvis[i]->set_int_val(screenvis[i]);
+    }
+    break;
+#endif
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:
@@ -1724,12 +1837,34 @@ extern "C" void rotation_type_CB(int var){
   handle_rotation_type(ROTATION_2AXIS);
 }
 
+/* ------------------ Enable360Zoom ------------------------ */
+
+extern "C" void Enable360Zoom(void){
+  if(disable_reshape==1){
+    SPINNER_window_height360->enable();
+    disable_reshape=0;
+  }
+}
+
+/* ------------------ Disable360Zoom ------------------------ */
+
+void Disable360Zoom(void){
+  SPINNER_window_height360->disable();
+  disable_reshape=1;
+}
+
 /* ------------------ Render_CB ------------------------ */
 
 void Render_CB(int var){
+  char widthlabel[1024];
 
   updatemenu=1;
   switch(var){
+    case RENDER_360:
+      nwidth360 = nheight360*2;
+      sprintf(widthlabel,"width: %i",nwidth360);
+      STATIC_width360->set_name(widthlabel);
+      break;
     case MOVIE_NAME:
       enable_disable_playmovie();
       break;
@@ -1749,10 +1884,10 @@ void Render_CB(int var){
     case RENDER_TYPE:
       break;
     case MOVIE_TYPE:
-      if(moviefiletype==WMV){
+      if(movie_filetype==WMV){
         strcpy(movie_ext, ".wmv");
       }
-      else if(moviefiletype==MP4){
+      else if(movie_filetype==MP4){
         strcpy(movie_ext, ".mp4");
       }
       else{
@@ -1767,18 +1902,35 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
-      if((render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
+      if (render_frame != NULL) {
+        int i;
+
+        for (i = 0; i < nglobal_times; i++) {
+          render_frame[i] = 0;
+        }
+      }
+      if(render_360==0&&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
       else{
-        if(nrender_rows==1){
+        if(nrender_rows==1&&render_360==0){
           RenderMenu(RENDER_CURRENT_SINGLE);
+        }
+        else if (render_360 == 1) {
+          if(glui_screenWidth!=glui_screenHeight){
+            glui_screenWidth = MAX(glui_screenWidth,glui_screenHeight);
+            glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
+            Motion_CB(WINDOW_RESIZE);
+          }
+          Disable360Zoom();
+          RenderMenu(RENDER_CURRENT_360);
         }
         else{
           RenderMenu(RENDER_CURRENT_MULTIPLE);
         }
         // change render skip to render one frame (there is no RENDER_CURRENT_MULTIPLE in the list)
         LIST_render_skip->set_int_val(RENDER_CURRENT_SINGLE);
+        keyboard('0', FROM_SMOKEVIEW);
       }
       break;
     case RENDER_STOP:

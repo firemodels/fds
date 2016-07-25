@@ -116,6 +116,15 @@ typedef struct {
   geomdata *geom;
 } geomdiagdata;
 
+/* --------------------------  screendata ------------------------------------ */
+
+typedef struct {
+  int nwidth, nheight;
+  GLubyte *screenbuffer;
+  float width, height, cosmax;
+  float view[3], up[3], right[3];
+} screendata;
+
 /* --------------------------  bounddata ------------------------------------ */
 
 typedef struct {

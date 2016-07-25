@@ -1319,9 +1319,7 @@ void ApertureMenu(int value){
   if(opengldefined==1){
     glutPostRedisplay();
   }
-  apertureindex=value;
-  if(apertureindex<0)apertureindex=0;
-  if(apertureindex>4)apertureindex=4;
+  apertureindex = CLAMP(value, 0, 4);
   aperture=apertures[apertureindex];
 }
 
@@ -1490,6 +1488,7 @@ void RenderState(int onoff){
     }
   }
   else{
+    Enable360Zoom();
     render_multi=0;
     render_multi_state=0;
     setScreenSize(&saveW,&saveH);
@@ -1551,6 +1550,15 @@ void RenderMenu(int value){
     render_from_menu=1;
     keyboard('r',FROM_SMOKEVIEW);
      break;
+  case RENDER_CURRENT_360:
+    LabelMenu(MENU_LABEL_HideAll);
+    get_viewport_info();
+    RenderMenu(RENDER_CURRENT_SINGLE);
+    render_from_menu = 1;
+    render_multi_state = 1;
+    render_multi = render_multi_state;
+    keyboard('R', FROM_SMOKEVIEW);
+    break;
   case RENDER_CURRENT_MULTIPLE:
     if(nrender_rows==1)RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu=1;
@@ -1574,11 +1582,11 @@ void RenderMenu(int value){
     update_glui_filelabel(renderfilelabel);
     break;
   case RenderPNG:
-     renderfiletype=0;
+     render_filetype=PNG;
      updatemenu=1;
      break;
   case RenderJPEG:
-     renderfiletype=1;
+     render_filetype=JPEG;
      updatemenu=1;
      break;
   default:
@@ -7510,15 +7518,15 @@ updatemenu=0;
     if(render_current==1)glutAddSubMenu(_("Resolution multiplier"),resolutionmultipliermenu);
 
     glutAddMenuEntry(_("Type:"),11000);
-    if(renderfiletype==0){
+    if(render_filetype==PNG){
       glutAddMenuEntry("  *PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }
-    if(renderfiletype==1){
+    if(render_filetype==JPEG){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  *JPEG",RenderJPEG);
     }
-    if(renderfiletype==2){
+    if(render_filetype==IMAGE_NONE){
       glutAddMenuEntry("  PNG",RenderPNG);
       glutAddMenuEntry("  JPEG",RenderJPEG);
     }

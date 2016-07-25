@@ -4,13 +4,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <math.h>
 
 #include "smokeviewvars.h"
 
 #include GLUT_H
 #include "gd.h"
 
-#define RENDER_TYPE 0
 #define RENDER_START 3
 
 /* ------------------ does_movie_exist ------------------------ */
@@ -76,7 +76,7 @@ void MakeMovie(void){
 
   if(render_state == ON)return;
 
-  if(renderfiletype==JPEG){
+  if(render_filetype==JPEG){
     strcpy(image_ext, ".jpg");
   }
   else{
@@ -123,6 +123,12 @@ void MakeMovie(void){
     sprintf(command_line, "ffmpeg %s -r %i -i ", overwrite_flag,movie_framerate);
     strcat(command_line, movie_frames);
     strcat(command_line, " ");
+    {
+      char bitrate_label[100];
+
+      sprintf(bitrate_label," -b %ik ",movie_bitrate);
+      strcat(command_line,bitrate_label);
+    }
     strcat(command_line, moviefile_path);
 
 // make movie
@@ -235,7 +241,8 @@ void RenderFrame(int view_mode){
     if(
       (current_script_command->command==SCRIPT_RENDERONCE||
        current_script_command->command==SCRIPT_RENDERALL||
-       current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+        current_script_command->command == SCRIPT_RENDER360ALL ||
+        current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
        current_script_command->command==SCRIPT_ISORENDERALL
        )&&
        current_script_command->cval2!=NULL
@@ -292,7 +299,8 @@ void RenderFrame(int view_mode){
   if(use_scriptfile==0||
     (current_script_command!=NULL&&
     (current_script_command->command==SCRIPT_RENDERALL||
-     current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
+      current_script_command->command == SCRIPT_RENDER360ALL ||
+      current_script_command->command==SCRIPT_VOLSMOKERENDERALL||
      current_script_command->command==SCRIPT_ISORENDERALL
      ))){
     int image_num;
@@ -372,15 +380,15 @@ void RenderFrame(int view_mode){
 
   // filename extension
 
-  switch(renderfiletype){
-  case 0:
+  switch(render_filetype){
+  case PNG:
     renderfile_ext=ext_png;
     break;
-  case 1:
+  case JPEG:
     renderfile_ext=ext_jpg;
     break;
   default:
-    renderfiletype=2;
+    render_filetype=PNG;
     renderfile_ext=ext_png;
     break;
   }
@@ -393,7 +401,7 @@ void RenderFrame(int view_mode){
 
   // render image
 
-  SVimage2file(renderfile_dir_ptr,renderfile_full,renderfiletype,woffset,screenWidth,hoffset,screenH);
+  SVimage2file(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
@@ -436,7 +444,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
   int irow;
 
   nscreen_cols=nscreen_rows;
-  switch(renderfiletype){
+  switch(render_filetype){
   case PNG:
     ext=ext_png;
     break;
@@ -444,7 +452,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
     ext=ext_jpg;
     break;
   default:
-    renderfiletype=0;
+    render_filetype=PNG;
     ext=ext_png;
     break;
   }
@@ -496,7 +504,7 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   /* output the image */
 
-  switch(renderfiletype){
+  switch(render_filetype){
   case PNG:
     gdImagePng(RENDERimage,RENDERfile);
     break;
@@ -513,6 +521,343 @@ int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers){
 
   gdImageDestroy(RENDERimage);
   FREEMEMORY(renderfile);
+  PRINTF(" Completed\n");
+  return 0;
+}
+
+/* ------------------ getscreenmap360 ------------------------ */
+
+unsigned int getscreenmap360(float *xyz) {
+  int ibuff;
+  float xyznorm;
+
+  xyznorm = sqrt(xyz[0] * xyz[0] + xyz[1] * xyz[1] + xyz[2] * xyz[2]);
+
+  for (ibuff = 0; ibuff < nscreeninfo; ibuff++){
+    screendata *screeni;
+    float *view, *up, *right, t;
+    float A, B;
+    float cosangle;
+
+    screeni = screeninfo + ibuff;
+    view = screeni->view;
+    up = screeni->up;
+    right = screeni->right;
+    cosangle = DOT3(view, xyz) / xyznorm;
+    if(cosangle <= screeni->cosmax-0.001)continue;
+
+    t = DOT3(xyz,view);
+    A = DOT3(xyz, right)/t;
+    B = DOT3(xyz, up)/t;
+
+    {
+      int ix, iy, index;
+      unsigned int return_val;
+
+      ix = screeni->nwidth*(screeni->width / 2.0 + A) / screeni->width;
+      if(ix<0||ix>screeni->nwidth-1)continue;
+
+      iy = screeni->nheight*(screeni->height / 2.0 + B) / screeni->height;
+      if(iy<0||iy>screeni->nheight - 1)continue;
+
+      index = iy*screeni->nwidth + ix;
+      return_val = ((ibuff+1) << 24) |  index;
+      return return_val;
+    }
+  }
+  return 0;
+}
+
+#ifdef pp_RENDER360_DEBUG
+/* ------------------ draw_screeninfo ------------------------ */
+
+void draw_screeninfo(void){
+  int i;
+  int j;
+
+  if(screeninfo == NULL)setup_screeninfo();
+  glPushMatrix();
+  glScalef(0.5,0.5,0.5);
+  glTranslatef(1.0,1.0,1.0);
+
+  glBegin(GL_LINES);
+  for(i = 0; i < nscreeninfo; i++){
+    screendata *screeni;
+    float xyz[12];
+    float *view, *right, *up;
+
+    screeni = screeninfo + i;
+    view = screeni->view;
+    right = screeni->right;
+    up = screeni->up;
+
+    for(j = 0; j < 3; j++){
+      xyz[j+0] = view[j] - right[j]/2.0 - up[j] / 2.0;
+      xyz[j+3] = view[j] + right[j] / 2.0 - up[j] / 2.0;
+      xyz[j+6] = view[j] + right[j] / 2.0 + up[j] / 2.0;
+      xyz[j+9] = view[j] - right[j] / 2.0 + up[j] / 2.0
+        ;
+    }
+    glVertex3fv(xyz);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+3);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+6);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz+9);
+    glVertex3fv(xyz);
+  }
+  glEnd();
+  glPopMatrix();
+}
+#endif
+
+/* ------------------ setup_screeninfo ------------------------ */
+
+void setup_screeninfo(void){
+  int ibuf;
+
+  nscreeninfo = 26;
+  FREEMEMORY(screeninfo);
+  NewMemory((void **)&screeninfo, nscreeninfo * sizeof(screendata));
+
+  for(ibuf = 0; ibuf < nscreeninfo; ibuf++){
+    screendata *screeni;
+    float azimuth, elevation;
+    float *right, *view, *up;
+    float sina, cosa;
+    float cose, sine;
+    float aspect_ratio;
+    float aperture_width, aperture_height;
+
+    aperture_width = 45.0;
+    screeni = screeninfo + ibuf;
+    screeni->nwidth=VP_scene.width;
+    screeni->nheight=VP_scene.height;
+    aspect_ratio = (float)screeni->nwidth/(float)screeni->nheight;
+    screeni->width=2.0*tan(DEG2RAD*aperture_width/2.0);
+    screeni->height = screeni->width / aspect_ratio;
+    aperture_height = 2.0*RAD2DEG*atan(screeni->height / 2.0);
+    screeni->cosmax = 1.0 / sqrt(screeni->height*screeni->height + screeni->width*screeni->width);
+
+    if(ibuf == 0){
+      azimuth = 0.0;
+      elevation = -90;
+    }
+    else if(ibuf >= 1 && ibuf < 9){
+      int ii;
+
+      ii = ibuf - 1;
+      azimuth = ii*aperture_width;
+      elevation = -90.0+aperture_height;
+    }
+    else if(ibuf >= 9 && ibuf < 17){
+      int ii;
+
+      ii = ibuf - 9;
+      azimuth = ii*aperture_width;
+      elevation = -90.0 + 2.0*aperture_height;
+    }
+    else if(ibuf >= 17 && ibuf < 25){
+      int ii;
+
+      ii = ibuf - 17;
+      azimuth = ii*aperture_width;
+      elevation = -90.0 + 3.0*aperture_height;
+    }
+    else if(ibuf == 25){
+      azimuth = 0.0;
+      elevation = -90.0 + 4.0*aperture_height;
+    }
+
+    cosa = cos(DEG2RAD*azimuth);
+    sina = sin(DEG2RAD*azimuth);
+    cose = cos(DEG2RAD*elevation);
+    sine = sin(DEG2RAD*elevation);
+
+    view = screeni->view;
+    view[0] = sina*cose;
+    view[1] = cosa*cose;
+    view[2] = sine;
+
+    up = screeni->up;
+    if(ABS(sine) < 0.001){
+      up[0] = 0.0;
+      up[1] = 0.0;
+      up[2] = 1.0;
+    }
+    else {
+      float denom;
+
+      denom = sqrt(1.0 + cose*cose/(sine*sine));
+      up[0] = -sina / denom;
+      up[1] = -cosa / denom;
+      up[2] = (cose / sine) / denom;
+    }
+
+    right = screeni->right;
+    if(sine < 0.0){
+      right[0] = -cosa;
+      right[1] = sina;
+      right[2] = 0.0;
+    }
+    else {
+      right[0] = cosa;
+      right[1] = -sina;
+      right[2] = 0.0;
+    }
+  }
+
+  FREEMEMORY(screenmap360);
+  NewMemory((void **)&screenmap360, nwidth360*nheight360 * sizeof(unsigned int));
+  {
+    int i,j;
+    float *cosa, *sina, *cose, *sine;
+
+    NewMemory((void **)&sina, nwidth360 * sizeof(float));
+    NewMemory((void **)&cosa, nwidth360 * sizeof(float));
+    NewMemory((void **)&sine, nheight360 * sizeof(float));
+    NewMemory((void **)&cose, nheight360 * sizeof(float));
+
+    for (i = 0; i < nwidth360; i++){
+      float alpha;
+
+      alpha = -180.0 + (float)i*360.0 / (float)nwidth360;
+      sina[i] = sin(DEG2RAD*alpha);
+      cosa[i] = cos(DEG2RAD*alpha);
+    }
+    for (i = 0; i < nheight360; i++){
+      float eps;
+
+      eps = -90.0 + (float)i*180.0 / (float)nheight360;
+      sine[i] = sin(DEG2RAD*eps);
+      cose[i] = cos(DEG2RAD*eps);
+    }
+    for (j = 0; j < nheight360; j++){
+      for (i = 0; i < nwidth360; i++){
+        float xyz[3];
+
+        xyz[0] = sina[i] * cose[j];
+        xyz[1] = cosa[i] * cose[j];
+        xyz[2] = sine[j];
+        screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
+      }
+    }
+    FREEMEMORY(sina);
+    FREEMEMORY(cosa);
+    FREEMEMORY(sine);
+    FREEMEMORY(cose);
+  }
+}
+
+/* ------------------ mergescreenbuffers360 ------------------------ */
+
+int mergescreenbuffers360(void){
+
+  char *renderfile, renderfile_base[1024], renderfile2[1024];
+  char *ext;
+  FILE *RENDERfile = NULL;
+  gdImagePtr RENDERimage;
+  int i, j, ijk360;
+  int *screenbuffer;
+
+  switch (render_filetype){
+  case PNG:
+    ext = ext_png;
+    break;
+  case JPEG:
+    ext = ext_jpg;
+    break;
+  default:
+    render_filetype = PNG;
+    ext = ext_png;
+    break;
+  }
+
+  if(scriptoutstream != NULL&&current_script_command != NULL&&current_script_command->cval2 != NULL){
+    strcpy(renderfile2, current_script_command->cval2);
+  }
+  else {
+    strcpy(renderfile2, fdsprefix);
+  }
+  if(RenderTime == 1){
+    sprintf(renderfile_base, "%s_%04i", renderfile2, itimes / RenderSkip);
+  }
+  if(RenderTime == 0){
+    sprintf(renderfile_base, "%s_s%04i", renderfile2, seqnum);
+    seqnum++;
+  }
+  strcat(renderfile_base, ext);
+  renderfile = get_filename(smokeviewtempdir, renderfile_base, tempdir_flag);
+  if(renderfile == NULL){
+    fprintf(stderr, "*** Error: unable to write to %s", renderfile_base);
+    return 1;
+  }
+  RENDERfile = fopen(renderfile, "wb");
+  PRINTF("Rendering to: %s .", renderfile);
+  if(RENDERfile == NULL){
+    fprintf(stderr, "*** Error: unable to write to %s", renderfile);
+    FREEMEMORY(renderfile);
+    return 1;
+  }
+  RENDERimage = gdImageCreateTrueColor(nwidth360, nheight360);
+  NewMemory((void **)&screenbuffer,nwidth360*nheight360 * sizeof(int));
+
+  for(i=0;i<nwidth360*nheight360;i++){
+    screenbuffer[i]=0;
+  }
+
+  ijk360 = 0;
+  for(j=0;j<nheight360;j++){
+    for(i=0;i<nwidth360;i++){
+      GLubyte *p;
+      int ibuff, ijk, rgb_local;
+      screendata *screeni;
+      unsigned int r, g, b;
+
+      ibuff = screenmap360[ijk360] >> 24;
+      if(ibuff == 0)continue;
+      ibuff--;
+      screeni = screeninfo + ibuff;
+      p = screeni->screenbuffer;
+
+      ijk = screenmap360[ijk360] & 0xffffff;
+      r=p[3*ijk];
+      g=p[3*ijk+1];
+      b=p[3*ijk+2];
+      rgb_local = (r<<16)|(g<<8)|b;
+      screenbuffer[ijk360]=rgb_local;
+      ijk360++;
+    }
+  }
+
+  ijk360 = 0;
+  for(j=nheight360-1;j>=0;j--){
+    for(i=0;i<nwidth360;i++){
+      gdImageSetPixel(RENDERimage, i, j, screenbuffer[ijk360++]);
+    }
+  }
+
+  /* output the image */
+
+  switch (render_filetype){
+  case PNG:
+    gdImagePng(RENDERimage, RENDERfile);
+    break;
+  case JPEG:
+    gdImageJpeg(RENDERimage, RENDERfile, -1);
+    break;
+  default:
+    ASSERT(FFALSE);
+    break;
+  }
+  fclose(RENDERfile);
+
+  /* free up memory used by both OpenGL and GIF images */
+
+  gdImageDestroy(RENDERimage);
+  FREEMEMORY(renderfile);
+  FREEMEMORY(screenbuffer);
   PRINTF(" Completed\n");
   return 0;
 }
