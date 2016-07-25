@@ -1198,7 +1198,7 @@ check_smv_pictures()
 make_smv_movies()
 {
    cd $fdsrepo/Verification
-   scripts/Make_SMV_Movies.sh $TESTFLAG 2>&1  &> $OUTPUT_DIR/stage4c
+   scripts/Make_SMV_Movies.sh $TEST 2>&1  &> $OUTPUT_DIR/stage4c
 }
 
 check_smv_movies()
