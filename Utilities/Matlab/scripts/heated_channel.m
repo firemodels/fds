@@ -17,9 +17,10 @@ plot_style
 
 % plot the DNS results
 
-datadir='../../Verification/Turbulence/';
+out_dir='../../Validation/Heated_Channel_Flow/FDS_Output_Files/';
+exp_dir='../../Validation/Heated_Channel_Flow/Experimental_Data/';
 
-M = importdata([datadir,'heated_channel_dns_data.csv'],',',1);
+M = importdata([exp_dir,'heated_channel_dns_data.csv'],',',1);
 
 yp_up_mean      = M.data(:,find(strcmp(M.colheaders,'yp_up_mean')));
 up_mean         = M.data(:,find(strcmp(M.colheaders,'up_mean')));
@@ -90,23 +91,23 @@ skip_case = 0;
         
 for i = [1,2,3,4]
     
-    if ~exist([datadir,devcfile{i}])
-        display(['Error: File ' [datadir,devcfile{i}] ' does not exist. Skipping case.'])
+    if ~exist([out_dir,devcfile{i}])
+        display(['Error: File ' [out_dir,devcfile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
     
-    M = importdata([datadir,devcfile{i}],',',2);
+    M = importdata([out_dir,devcfile{i}],',',2);
     q_w = mean(M.data(3,2:3));
     T_tau = q_w/(rho*u_tau*cp);
     
-    if ~exist([datadir,linefile{i}])
-        display(['Error: File ' [datadir,linefile{i}] ' does not exist. Skipping case.'])
+    if ~exist([out_dir,linefile{i}])
+        display(['Error: File ' [out_dir,linefile{i}] ' does not exist. Skipping case.'])
         skip_case = 1;
         continue
     end
     
-    M = importdata([datadir,linefile{i}],',',2);
+    M = importdata([out_dir,linefile{i}],',',2);
     
     zp = M.data(1:16,1)/delta_nu;
     
@@ -132,19 +133,10 @@ figure(1)
 h = legend(hfig1,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git if file is available
 
-SVN_Filename = [datadir,'heated_channel_Pr_1p00_32_git.txt'];
-addverstr(gca,SVN_Filename,'semilogx')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [out_dir,'heated_channel_Pr_1p00_32_git.txt'];
+addverstr(gca,Git_Filename,'semilogx')
 
 % print pdf
 
@@ -158,19 +150,10 @@ figure(2)
 h = legend(hfig2,'FDS','DNS Re_\tau=180','Location','Northwest');
 set(h,'Interpreter',Font_Interpreter)
 
-% add SVN if file is available
+% add Git if file is available
 
-SVN_Filename = [datadir,'heated_channel_Pr_0p71_32_git.txt'];
-addverstr(gca,SVN_Filename,'semilogx')
-% if exist(SVN_Filename,'file')
-%     SVN = importdata(SVN_Filename);
-%     x_lim = get(gca,'XLim');
-%     y_lim = get(gca,'YLim');
-%     X_SVN_Position = 10^( log10(x_lim(1))+ SVN_Scale_X*( log10(x_lim(2)) - log10(x_lim(1)) ) );
-%     Y_SVN_Position = y_lim(1)+SVN_Scale_Y*(y_lim(2)-y_lim(1));
-%     text(X_SVN_Position,Y_SVN_Position,['SVN ',num2str(SVN)], ...
-%         'FontSize',10,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-% end
+Git_Filename = [out_dir,'heated_channel_Pr_0p71_32_git.txt'];
+addverstr(gca,Git_Filename,'semilogx')
 
 % print pdf
 

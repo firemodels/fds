@@ -6343,19 +6343,6 @@ CONTAINS
                    HR%Angle = HR%Angle + 2.0_EB*Pi
                 END DO
 
-                ! EVHO (evacuation hole) checking
-                EH_Loop: DO ie = 1, n_holes
-                   EHX => EVAC_HOLES(ie)
-                   IF (EHX%IMESH /= NM) CYCLE EH_Loop
-                   IF ( TRIM(EHX%EVAC_ID) /= 'null' .AND. TRIM(EHX%EVAC_ID) /= TRIM(HPT%ID)) CYCLE EH_Loop
-                   IF ( TRIM(EHX%PERS_ID) /= 'null' .AND. TRIM(EHX%PERS_ID) /= TRIM(HPT%CLASS_NAME)) CYCLE EH_Loop
-                   IF ( (EHX%Y1 <= HR%Y .AND. EHX%Y2 >= HR%Y) .AND. (EHX%X1 <= HR%X .AND. EHX%X2 >= HR%X) ) THEN
-                      ! User should not give too large EVHO:s
-                      i_endless_loop = i_endless_loop + 1
-                      CYCLE BLK_LOOP
-                   END IF
-                END DO EH_Loop
-
                 !Check, that a person is not put on top of some other person
                 IF (HPT_ORDERED) THEN
                    ! High density is wanted
@@ -6378,6 +6365,19 @@ CONTAINS
                    HR%COLOR_INDEX = EVAC_AVATAR_NCOLOR  ! Cyan
                    EXIT INITIALIZATION_LOOP
                 END IF
+
+                ! EVHO (evacuation hole) checking
+                EH_Loop: DO ie = 1, n_holes
+                   EHX => EVAC_HOLES(ie)
+                   IF (EHX%IMESH /= NM) CYCLE EH_Loop
+                   IF ( TRIM(EHX%EVAC_ID) /= 'null' .AND. TRIM(EHX%EVAC_ID) /= TRIM(HPT%ID)) CYCLE EH_Loop
+                   IF ( TRIM(EHX%PERS_ID) /= 'null' .AND. TRIM(EHX%PERS_ID) /= TRIM(HPT%CLASS_NAME)) CYCLE EH_Loop
+                   IF ( (EHX%Y1 <= HR%Y .AND. EHX%Y2 >= HR%Y) .AND. (EHX%X1 <= HR%X .AND. EHX%X2 >= HR%X) ) THEN
+                      ! User should not give too large EVHO:s
+                      i_endless_loop = i_endless_loop + 1
+                      CYCLE BLK_LOOP
+                   END IF
+                END DO EH_Loop
 
                 ! Put a human in a mesh, if there is enough empty space, i.e., check the OBSTs.
                 Is_Solid = .FALSE.
