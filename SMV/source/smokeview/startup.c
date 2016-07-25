@@ -62,35 +62,36 @@ void Init(void){
 
   {
     char name_external[32];
+
     strcpy(name_external,"external");
-    init_camera(camera_external,name_external);
+    InitCamera(camera_external,name_external);
     camera_external->view_id=EXTERNAL_LIST_ID;
   }
-  if(camera_ini->defined==1){
-    copy_camera(camera_current,camera_ini);
+  if(camera_ini!=NULL&&camera_ini->defined==1){
+    CopyCamera(camera_current,camera_ini);
   }
   else{
     camera_external->zoom=zoom;
-    copy_camera(camera_current,camera_external);
+    CopyCamera(camera_current,camera_external);
   }
   strcpy(camera_label,camera_current->name);
-  update_camera_label();
+  UpdateCameraLabel();
   {
     char name_internal[32];
     strcpy(name_internal,"internal");
-    init_camera(camera_internal,name_internal);
+    InitCamera(camera_internal,name_internal);
   }
   camera_internal->eye[0]=0.5*xbar;
   camera_internal->eye[1]=0.5*ybar;
   camera_internal->eye[2]=0.5*zbar;
   camera_internal->view_id=0;
-  copy_camera(camera_save,camera_current);
-  copy_camera(camera_last,camera_current);
+  CopyCamera(camera_save,camera_current);
+  CopyCamera(camera_last,camera_current);
 
-  init_camera_list();
-  add_default_views();
-  copy_camera(camera_external_save,camera_external);
-  update_view_gluilist();
+  InitCameraList();
+  AddDefaultViews();
+  CopyCamera(camera_external_save,camera_external);
+  UpdateGluiViewList();
 
   //reset_glui_view(i_view_list);
 
@@ -115,7 +116,7 @@ void Init(void){
   mat_specular2[3] = 1.0;
 
   reset_glui_view(startup_view_ini);
-  Update_Show();
+  UpdateShow();
 }
 
 /* ------------------ init_lang ------------------------ */
@@ -296,8 +297,8 @@ int setup_case(int argc, char **argv){
   /* initialize units */
 
   InitUnits();
-  init_unit_defs();
-  set_unit_vis();
+  InitUnitDefs();
+  SetUnitVis();
 
   CheckMemory;
   readini(NULL);
@@ -322,7 +323,7 @@ int setup_case(int argc, char **argv){
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 
-  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
+  if(UpdateLIGHTS==1)UpdateLights(light_position0,light_position1);
 
   glutReshapeWindow(screenWidth,screenHeight);
 
@@ -591,7 +592,7 @@ void InitOpenGL(void){
   light_position1[3]=0.f;
 
   glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
-  updateLights(light_position0,light_position1);
+  UpdateLights(light_position0,light_position1);
 
   {
     glGetIntegerv(GL_RED_BITS,&nredbits);
@@ -1159,7 +1160,7 @@ void InitOpenGL(void){
       if(patchi->autoload==1)readpatch(i,LOAD,&errorcode);
     }
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
     updatemenu=1;
     update_load_Files=0;
     hide_glui_alert();
@@ -1662,8 +1663,8 @@ void initvars(void){
   isozipstep=1, isozipskip=0;
   slicezipstep=1, slicezipskip=0;
   evacframeskip=0, evacframestep=1;
-  render_option=RenderWindow;
-  RenderMenu(render_option);
+  render_window_size=RenderWindow;
+  RenderMenu(render_window_size);
   viewoption=0;
 
   partpointsize=4.0,vectorpointsize=3.0,streaklinewidth=1.0;
@@ -1819,7 +1820,7 @@ void initvars(void){
   zooms[3]=2.0;
   zooms[4]=4.0;
   zoom=1.0;
-  aperture = zoom2aperture(zoom);
+  aperture = Zoom2Aperture(zoom);
   aperture_glui = aperture;
   aperture_default = aperture;
 
@@ -1837,7 +1838,6 @@ void initvars(void){
   reset_frame=0;
   reset_time=0.0,start_frametime=0.0,stop_frametime=0.0;
   reset_time_flag=0;
-  RenderOnceNow=0;
 
   nsorted_surfidlist=0;
 
@@ -2168,9 +2168,12 @@ void initvars(void){
 
   nrgb2=8;
 
-  ncamera_list=0,i_view_list=1,init_camera_list_flag=1;
+  ncamera_list=0;
+  i_view_list=1;
   camera_max_id=2;
-  startup=0,startup_view_ini=1,selected_view=-999;
+  startup=0;
+  startup_view_ini=1;
+  selected_view=-999;
 
 
   {

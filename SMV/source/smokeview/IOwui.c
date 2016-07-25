@@ -857,7 +857,7 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
     free_terraincell(terri);
     terri->loaded=0;
     terri->display=0;
-    Update_Times();
+    UpdateTimes();
     return;
   }
 
@@ -899,8 +899,8 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
   }
   terri->loaded=1;
   visTerrainType=TERRAIN_3D;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
 #ifdef pp_MEMPRINT
   PRINTF("After terrain file load: \n");
   PrintMemoryInfo;

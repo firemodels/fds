@@ -663,8 +663,8 @@ void readzone(int ifile, int flag, int *errorcode){
     nzone_times=0;
     ReadZoneFile=0;
     showzone=0;
-    plotstate=getplotstate(DYNAMIC_PLOTS);
-    Update_Times();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
+    UpdateTimes();
     updatemenu=1;
     return;
   }
@@ -682,7 +682,7 @@ void readzone(int ifile, int flag, int *errorcode){
   CheckMemory;
   if(error!=0||nrooms!=nrooms2||nzone_times==0||nzhvents!=nzhvents2||nzvvents!=nzvvents2||nzmvents!=nzmvents2){
     showzone=0;
-    Update_Times();
+    UpdateTimes();
     ReadZoneFile=0;
     if(nrooms!=nrooms2){
       fprintf(stderr,"*** Error: number of rooms specified in the smv file (%i)\n",nrooms);
@@ -858,8 +858,8 @@ void readzone(int ifile, int flag, int *errorcode){
   showzone=1;
   zonei->loaded=1;
   zonei->display=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   updatemenu=1;
   activezone = zoneinfo + ifile;
   if(nzhvents>0||nzvvents>0||nzmvents>0){
@@ -1033,7 +1033,7 @@ void drawroomgeom(void){
 
 /* draw the frame */
 
-  antialias(ON);
+  Antialias(ON);
   glBegin(GL_LINES);
 
   for(i=0;i<nrooms;i++){
@@ -1099,7 +1099,7 @@ void drawroomgeom(void){
     glVertex3f(xroom0,yroom,zroom);
   }
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
 
   if(visVents==1){
     glLineWidth(ventlinewidth);
@@ -1896,7 +1896,7 @@ void drawfiredata(void){
       }
     }
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -1915,7 +1915,7 @@ void drawroomdata(void){
   if(zone_times[0]>global_times[itimes])return;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
   izonetubase = izonetu + izone*nrooms;
   hazardcolorbase = hazardcolor + izone*nrooms;
@@ -1993,7 +1993,7 @@ void drawroomdata(void){
   }
 #endif
 
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 

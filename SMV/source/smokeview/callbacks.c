@@ -478,7 +478,7 @@ void checktimebound(void){
   if(timebar_drag==0&&itimes>nglobal_times-1||timebar_drag==1&&itimes<0){
     izone=0;
     itimes=first_frame_index;
-    if(render_state==RENDER_ON){
+    if(rendering_status==RENDER_ON){
       RenderMenu(RenderCancel);
       // following exits render command, do this a better way
       if(current_script_command!=NULL)current_script_command->exit=1;
@@ -858,7 +858,7 @@ void mouse_CB(int button, int state, int xm, int ym){
     if(visTimebar==1&&showtime==1){
       if(timebar_click(xm,ym)==1)return;
     }
-    copy_camera(camera_last,camera_current);
+    CopyCamera(camera_last,camera_current);
     if(canrestorelastview==0){
       updatemenu=1;
       canrestorelastview=1;
@@ -1759,14 +1759,22 @@ void keyboard(unsigned char key, int flag){
           return;
         }
 
+        if(render_360 == 1)render_mode = RENDER_360;
+        if (render_mode!=RENDER_360) {
+          if (strncmp((const char *)&key2, "r", 1) == 0) {
+            render_mode = RENDER_XYSINGLE;
+          }
+          else {
+            render_mode = RENDER_XYMULTI;
+          }
+        }
+        render_times = RENDER_SINGLETIME;
 
-        if(strncmp((const char *)&key2,"R",1)==0||render_360==1){
+        if(strncmp((const char *)&key2,"R",1)==0|| render_mode == RENDER_360){
           if(nrender_rows==1)nrender_rows=2;
-          render_multi=2;
           rflag=1;
         }
         else{
-          render_multi=0;
           if(render_from_menu==0){
             renderW=0;
             renderH=0;
@@ -1859,7 +1867,6 @@ void keyboard(unsigned char key, int flag){
           }
           fprintf(scriptoutstream," %s\n",script_renderfile);
         }
-        RenderOnceNow=1;
         RenderState(RENDER_ON);
         render_from_menu=0;
       }
@@ -1898,7 +1905,7 @@ void keyboard(unsigned char key, int flag){
       default:
         stept=(stept+1)%2;
         if(stept==1){
-          plotstate=getplotstate(DYNAMIC_PLOTS);
+          plotstate=GetPlotState(DYNAMIC_PLOTS);
           if(plotstate==DYNAMIC_PLOTS){
             reset_gltime();
           }
@@ -1976,14 +1983,14 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visx_all=1-visx_all;
-        plotstate = getplotstate(STATIC_PLOTS);
+        plotstate = GetPlotState(STATIC_PLOTS);
         updatemenu = 1;
       }
       break;
     case 'y':
     case 'Y':
       visy_all = 1-visy_all;
-      plotstate = getplotstate(STATIC_PLOTS);
+      plotstate = GetPlotState(STATIC_PLOTS);
       updatemenu = 1;
       break;
     case 'z':
@@ -1993,13 +2000,13 @@ void keyboard(unsigned char key, int flag){
       }
       else{
         visz_all = 1 - visz_all;
-        plotstate = getplotstate(STATIC_PLOTS);
+        plotstate = GetPlotState(STATIC_PLOTS);
         updatemenu = 1;
       }
       break;
     case '0':
       if(plotstate==DYNAMIC_PLOTS){
-        Update_Times();
+        UpdateTimes();
         reset_time_flag=1;
         return;
       }
@@ -2090,9 +2097,9 @@ void keyboard(unsigned char key, int flag){
     if(stepclip_ymax==1  )clip_J += skip_global*ClipDir;
     if(stepclip_zmax==1  )clip_K += skip_global*ClipDir;
 
-    Update_Clipbounds(clipinfo.clip_xmin,&clip_i,clipinfo.clip_xmax,&clip_I,current_mesh->ibar);
-    Update_Clipbounds(clipinfo.clip_ymin,&clip_j,clipinfo.clip_ymax,&clip_J,current_mesh->jbar);
-    Update_Clipbounds(clipinfo.clip_zmin,&clip_k,clipinfo.clip_zmax,&clip_K,current_mesh->kbar);
+    UpdateClipbounds(clipinfo.clip_xmin,&clip_i,clipinfo.clip_xmax,&clip_I,current_mesh->ibar);
+    UpdateClipbounds(clipinfo.clip_ymin,&clip_j,clipinfo.clip_ymax,&clip_J,current_mesh->jbar);
+    UpdateClipbounds(clipinfo.clip_zmin,&clip_k,clipinfo.clip_zmax,&clip_K,current_mesh->kbar);
     return;
   }
 
@@ -2129,7 +2136,7 @@ void keyboard(unsigned char key, int flag){
       break;
   }
   if(ReadPlot3dFile==1){
-    plotstate = getplotstate(STATIC_PLOTS);
+    plotstate = GetPlotState(STATIC_PLOTS);
     if(visiso!=0&&current_mesh->slicedir==ISO){
       plotiso[plotn-1] += FlowDir;
       updatesurface();
@@ -2160,19 +2167,19 @@ void handle_rotation_type(int flag){
   case ROTATION_3AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (3 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-        ResetView(RESTORE_EXTERIOR_VIEW);
+        SetViewPoint(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case ROTATION_2AXIS:
       if(trainer_mode==0)PRINTF("Scene centered (2 axis rotation)\n");
       if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-        ResetView(RESTORE_EXTERIOR_VIEW);
+        SetViewPoint(RESTORE_EXTERIOR_VIEW);
       }
       break;
   case EYE_CENTERED:
        az_elev[1]=0.0;
        if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old!=EYE_CENTERED){
-         ResetView(RESTORE_EXTERIOR_VIEW);
+         SetViewPoint(RESTORE_EXTERIOR_VIEW);
        }
       if(trainer_mode==0)PRINTF("eye centered\n");
       break;
@@ -2180,7 +2187,7 @@ void handle_rotation_type(int flag){
     az_elev[1]=0.0;
     if(trainer_mode==0)PRINTF("Scene centered (level rotation)\n");
     if(showtrainer_dialog==0&&flag==ROTATION_2AXIS&&rotation_type_old==EYE_CENTERED){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     break;
   default:
@@ -2350,7 +2357,7 @@ void handle_plot3d_keys(int  key){
   if(iplot_state!=0)updateplotslice(iplot_state);
   return;
 
-//  plotstate=getplotstate(STATIC_PLOTS);
+//  plotstate=GetPlotState(STATIC_PLOTS);
 
 }
 
@@ -2495,7 +2502,7 @@ void handle_move_keys(int  key){
       *elevation-=LOOKANGLE_CHANGE;
       break;
     case GLUT_KEY_END:
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
       break;
     case GLUT_KEY_F4:
       camera_current->view_angle-=LOOKANGLE_CHANGE;
@@ -2538,7 +2545,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
   float totalcpu;
   float elapsed_time;
 
-  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||render_state==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
+  if(showtime==1&&((stept==1&&(float)thisinterval>frameinterval)||rendering_status==RENDER_ON||timebar_drag==1)){       /* ready for a new frame */
     cputimes[cpuframe]=thistime/1000.;
 
     oldcpuframe=cpuframe-10;
@@ -2558,7 +2565,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
     lasttime = thistime;
     if(nglobal_times>0){
       *changetime=1;
-      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && render_state==RENDER_OFF){
+      if(stept ==1 && plotstate == DYNAMIC_PLOTS && timebar_drag==0 && rendering_status==RENDER_OFF){
         /*  skip frames here if displaying in real time and frame rate is too slow*/
         if(global_times!=NULL&&realtime_flag!=0&&FlowDir>0){
           elapsed_time = (float)thistime/1000.0 - reset_time;
@@ -2570,7 +2577,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
             ){
             elapsed_time = gmod(elapsed_time,global_times[nglobal_times-1]-global_times[0])+global_times[0];
           }
-          itimes = isearch(global_times,nglobal_times,elapsed_time,itimes);
+          itimes = ISearch(global_times,nglobal_times,elapsed_time,itimes);
         }
         else{
           if(script_render_flag==0){
@@ -2581,7 +2588,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
           }
         }
       }
-      if(stept==1&&timebar_drag==0&&render_state==RENDER_ON){
+      if(stept==1&&timebar_drag==0&&rendering_status==RENDER_ON){
         itimes+=RenderSkip*FlowDir;
       }
 
@@ -2596,7 +2603,7 @@ void UpdateFrame(float thisinterval, int *changetime, int *redisplay){
         }
       }
       if(shooter_firstframe==1&&visShooter!=0&&shooter_active==1){
-        reset_itimes0();
+        ResetItimes0();
       }
       checktimebound();
       UpdateTimeLabels();
@@ -2614,7 +2621,7 @@ void Idle_CB(void){
 
   CheckMemory;
   glutSetWindow(mainwindow_id);
-  Update_Show();
+  UpdateShow();
   thistime = glutGet(GLUT_ELAPSED_TIME);
   thisinterval = thistime - lasttime;
   frame_count++;
@@ -2628,7 +2635,7 @@ void Idle_CB(void){
     checktimebound();
     UpdateTimeLabels();
   }
-  Update_Framenumber(changetime);
+  UpdateFrameNumber(changetime);
   if(redisplay==1){
     glutPostRedisplay();
   }
@@ -2655,9 +2662,9 @@ void Reshape_CB(int width, int height){
   if(window_aspect_ratio<1.0)window_aspect_ratio=1.0/window_aspect_ratio;
   setScreenSize(&width,&height);
   windowresized=1;
-  update_camera_ypos(camera_external);
+  UpdateCameraYpos(camera_external);
   if(strcmp(camera_current->name,"external")==0&&in_external==1){
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
   }
   update_windowsizelist();
 #ifdef pp_GPU
@@ -2714,16 +2721,12 @@ int DoStereo(void){
     if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_LEFT,0,0,0,NULL);
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_LEFT);
-#endif
     glDrawBuffer(GL_BACK_RIGHT);
     if(stereotype_frame==RIGHT_EYE||stereotype_frame==BOTH_EYES){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_RIGHT);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=1;
   }
@@ -2735,7 +2738,7 @@ int DoStereo(void){
     ClearBuffers(DRAWSCENE);
 
     nscreens = 1;
-    if(render_360==1&&render_state==RENDER_ON){
+    if(render_mode == RENDER_360&&rendering_status==RENDER_ON){
       nscreens = nscreeninfo;
       if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
     }
@@ -2744,7 +2747,7 @@ int DoStereo(void){
       screendata *screeni;
 
       screeni = NULL;
-      if(render_360==1 && render_state == RENDER_ON)screeni = screeninfo + i;
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni = screeninfo + i;
       if(stereotype_frame==LEFT_EYE||stereotype_frame==BOTH_EYES){
         int screenWidth_save;
 
@@ -2761,21 +2764,21 @@ int DoStereo(void){
         ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
         screenWidth=screenWidth_save;
       }
-      if(render_360==1 && render_state == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
-#ifdef pp_RENDERNEW
-    if(render_360 == 0){
-      Render(VIEW_CENTER);
-    }
-#endif
-    if(render_360==1 && render_state == RENDER_ON){
-      MergeRenderScreenBuffers360();
-      for(i = 0; i < nscreeninfo; i++){
-        screendata *screeni;
+    if(rendering_status == RENDER_ON){
+      if(render_mode == RENDER_360){
+        MergeRenderScreenBuffers360();
+        for(i = 0; i < nscreeninfo; i++){
+          screendata *screeni;
 
-        screeni = screeninfo + i;
-        FREEMEMORY(screeni->screenbuffer);
+          screeni = screeninfo + i;
+          FREEMEMORY(screeni->screenbuffer);
+        }
+      }
+      else{
+        Render(VIEW_CENTER);
       }
     }
     return_code=2;
@@ -2800,9 +2803,7 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=3;
   }
@@ -2826,9 +2827,7 @@ int DoStereo(void){
       ShowScene(DRAWSCENE,VIEW_RIGHT,0,0,0,NULL);
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     return_code=4;
   }
@@ -2871,9 +2870,7 @@ int DoStereo(void){
 
       glFlush();
     }
-#ifdef pp_RENDERNEW
     Render(VIEW_CENTER);
-#endif
     if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
@@ -2951,7 +2948,7 @@ void DoScript(void){
         current_script_command->exit=0;
       }
     }
-    if(render_state==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
+    if(rendering_status==RENDER_OFF){  // don't advance command if Smokeview is executing a RENDERALL command
       current_script_command++;
       script_render_flag=run_script();
       if(runscript==2&&noexit==0&&current_script_command==NULL){
@@ -2997,12 +2994,11 @@ void DoScript(void){
 void Display_CB(void){
   int dostereo;
 
-  renderdoublenow=0;
   DoScript();
 #ifdef pp_LUA
   DoScriptLua();
 #endif
-  update_Display();
+  UpdateDisplay();
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
   if(stereotype==STEREO_NONE){
     dostereo=0;
@@ -3011,31 +3007,25 @@ void Display_CB(void){
     dostereo=DoStereo();
   }
   if(dostereo==0){
-    if(render_multi==0){
+    if(render_mode == RENDER_XYSINGLE||rendering_status==RENDER_OFF){
       glDrawBuffer(GL_BACK);
       ShowScene(DRAWSCENE,VIEW_CENTER,0,0,0,NULL);
-#ifdef pp_RENDERNEW
-      if(render_360==0)Render(VIEW_CENTER);
-#endif
+      if(render_mode != RENDER_360)Render(VIEW_CENTER);
       if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
     }
     else{
       int stop_rendering;
 
       stop_rendering = 1;
-      if(RenderOnceNow==1){
-        renderdoublenow=1;
-      }
       if(plotstate==DYNAMIC_PLOTS && nglobal_times>0){
         if(itimes>=0&&itimes<nglobal_times&&
           ((render_frame[itimes] == 0&&stereotype==STEREO_NONE)||(render_frame[itimes]<2&&stereotype!=STEREO_NONE))
           ){
           render_frame[itimes]++;
-          renderdoublenow=1;
           stop_rendering = 0;
         }
       }
-      if(renderdoublenow==1&&render_360==0){
+      if(rendering_status == RENDER_ON&&render_mode==RENDER_XYMULTI){
         int nrender_cols;
         int i,ibuffer=0;
         GLubyte **screenbuffers;
@@ -3062,7 +3052,7 @@ void Display_CB(void){
         }
         FREEMEMORY(screenbuffers);
       }
-      if (render_360 == 1){
+      if (render_mode == RENDER_360){
         int i;
 
         glDrawBuffer(GL_BACK);
@@ -3086,7 +3076,6 @@ void Display_CB(void){
           FREEMEMORY(screeni->screenbuffer);
         }
       }
-//      if(renderdoublenow==0||RenderOnceNow==1){
       if(stop_rendering==1){
         ASSERT(RenderSkip>0);
         RenderState(RENDER_OFF);
@@ -3101,7 +3090,7 @@ void Display_CB(void){
 void ResizeWindow(int width, int height){
   float wscaled, hscaled;
 
-  if(render_multi!=0)return;
+  if(render_mode != RENDER_XYSINGLE)return;
   glutSetWindow(mainwindow_id);
   wscaled = (float)width/(float)max_screenWidth;
   hscaled = (float)height/(float)max_screenHeight;

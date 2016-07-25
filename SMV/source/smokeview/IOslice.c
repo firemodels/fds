@@ -799,7 +799,7 @@ void readvslice(int ivslice, int flag, int *errorcode){
     vd->display=0;
     showvslice=0;
     updatemenu=1;
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(vd->iu!=-1){
@@ -885,9 +885,9 @@ void readvslice(int ivslice, int flag, int *errorcode){
   }
   vd->display=1;
   vd->loaded=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
-  Update_Times();
+  UpdateTimes();
 
   valmax=-100000.0;
   valmin=100000.0;
@@ -997,7 +997,7 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
       sd->loaded=0;
       sd->vloaded=0;
       sd->display=0;
-      plotstate = getplotstate(DYNAMIC_PLOTS);
+      plotstate = GetPlotState(DYNAMIC_PLOTS);
       ReadVolSlice=0;
       for(ii=0;ii<nslice_loaded;ii++){
         slicedata *sdi;
@@ -1063,8 +1063,8 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
       }
 
       updateglui();
-      update_unit_defs();
-      Update_Times();
+      UpdateUnitDefs();
+      UpdateTimes();
 #ifdef pp_MEMPRINT
       PRINTF("After slice unload: \n");
       PrintMemoryInfo;
@@ -1298,9 +1298,9 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
   sd->loaded=1;
   if(sd->vloaded==0)sd->display=1;
   islicetype=getslicetype(sd);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  update_unit_defs();
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateUnitDefs();
+  UpdateTimes();
   CheckMemory;
 
   if(use_set_slicecolor==0||set_slicecolor == SET_SLICECOLOR){
@@ -3825,7 +3825,7 @@ void drawgslice_dataGPU(slicedata *slicei){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
 
   sb=slicebounds+islicetype;
@@ -3854,7 +3854,7 @@ void drawgslice_dataGPU(slicedata *slicei){
     glVertex3fv(xyz3);
   }
   glEnd();
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   glPopMatrix();
 }
@@ -3881,7 +3881,7 @@ void drawgslice_data(slicedata *slicei){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
   sb=slicebounds+islicetype;
   valmin = sb->levels256[0]*sb->fscale;
@@ -3906,7 +3906,7 @@ void drawgslice_data(slicedata *slicei){
 
     draw_triangle(xyz1,xyz2,xyz3,t1,t2,t3,del,0);
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   glPopMatrix();
 }
@@ -3936,7 +3936,7 @@ void drawvgslice_data(vslicedata *vslicei){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
 
   sb=slicebounds+islicetype;
   valmin = sb->levels256[0]*sb->fscale;
@@ -3961,7 +3961,7 @@ void drawvgslice_data(vslicedata *vslicei){
 
     draw_triangle_vector(xyz1,xyz2,xyz3,del,0);
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   glPopMatrix();
 }
@@ -4009,7 +4009,7 @@ void drawvolslice_texture(const slicedata *sd){
   nxy = nx*ny;
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -4197,7 +4197,7 @@ void drawvolslice_texture(const slicedata *sd){
    glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -4250,7 +4250,7 @@ void drawvolslice_terrain(const slicedata *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
   glEnable(GL_TEXTURE_1D);
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
@@ -4454,7 +4454,7 @@ void drawvolslice_terrain(const slicedata *sd){
     glEnd();
   }
   glDisable(GL_TEXTURE_1D);
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -4504,7 +4504,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
     float constval;
     int maxj;
@@ -4763,7 +4763,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
       }
     }
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
@@ -4815,7 +4815,7 @@ void drawvolslice(const slicedata *sd){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   if((sd->volslice==1&&plotx>=0&&visx_all==1)||(sd->volslice==0&&sd->idir==XDIR)){
    int maxj;
 
@@ -4969,7 +4969,7 @@ void drawvolslice(const slicedata *sd){
    }
    glEnd();
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
