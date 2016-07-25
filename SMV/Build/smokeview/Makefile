@@ -197,7 +197,7 @@ intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
 
-intel_linux_64 : $(obj)  $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+intel_linux_64 : $(obj)  $(if ($(LUA_SCRIPTING),true),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR_PLAT) $(SMV_LIBS_LINUX) \
         $(INTEL_LIBS_LINUX)\
         $(SYSTEM_LIBS_LINUX) $(LIBLUA)
@@ -259,10 +259,10 @@ gnu_linux_64 : CPP       = g++
 gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
-gnu_linux_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+gnu_linux_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
 		$(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX) \
-		$(ifeq ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
+		$(if ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
 
 # ------------- mingw_win_64 ----------------
 
@@ -286,7 +286,7 @@ mingw_win_64 : CPP       = g++
 mingw_win_64 : FC        = gfortran
 mingw_win_64 : exe       = smokeview_mingw_$(SMV_TESTSTRING)64
 
-mingw_win_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+mingw_win_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
 		$(($(LUA_SCRIPTING),true),-I $(SOURCE_DIR)/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
@@ -318,7 +318,7 @@ intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
-intel_osx_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+intel_osx_64 : $(obj) $(if ($(LUA_SCRIPTING),true),smvluacore)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR_PLAT) $(SMV_LIBS_OSX) \
         $(OSX_INTEL_LIBS) $(LIBLUA)
 
