@@ -1403,8 +1403,8 @@ void script_loadboundary(scriptdata *scripti, int meshnum){
           strcpy(loaded_file, scripti->cval);
         }
         count++;
-        if (meshnum == -1)break;
         UNLOCK_COMPRESS
+          if(meshnum == -1)break;
       }
     }
   }
