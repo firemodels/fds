@@ -5,6 +5,10 @@
 #include "gd.h"
 #endif
 
+EXTERNCPP void Enable360Zoom(void);
+#ifdef pp_RENDER360_DEBUG
+EXTERNCPP void draw_screeninfo(void);
+#endif
 EXTERNCPP void update_show_slice_in_obst(void);
 EXTERNCPP void get_geom_zbounds(float *zmin, float *zmax);
 EXTERNCPP void get_allpart_histogram(void);
@@ -659,8 +663,10 @@ EXTERNCPP void global2localpatchbounds(const char *key);
 EXTERNCPP void update_loaded_lists(void);
 EXTERNCPP void updateLights(float *pos1, float *pos2);
 EXTERNCPP int mergescreenbuffers(int nscreen_rows, GLubyte **screenbuffers);
+EXTERNCPP void setup_screeninfo(void);
+EXTERNCPP int mergescreenbuffers360(void);
 EXTERNCPP GLubyte *getscreenbuffer(void);
-EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
+EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, screendata *screen);
 EXTERNCPP int  inblockage(const meshdata *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
 EXTERNCPP void updateglui(void);
@@ -735,7 +741,7 @@ EXTERNCPP void ResetView(int option);
 EXTERNCPP void UpdateTimeLabels(void);
 EXTERNCPP void RenderFrame(int view_mode);
 EXTERNCPP void update_terrain(int allocate_memory, float vertical_factor);
-EXTERNCPP void PART_CB_INIT(void);
+EXTERNCPP void Part_CB_Init(void);
 EXTERNCPP void Slice_CB(int var);
 EXTERNCPP void RenderMenu(int value);
 EXTERNCPP void LoadSmoke3DMenu(int value);

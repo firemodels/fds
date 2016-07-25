@@ -17,7 +17,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down);
 
 /* ------------------ ShowScene ------------------------ */
 
-void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
+void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, screendata *screen){
   CheckMemory;
 
   LOCK_IBLANK
@@ -60,7 +60,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       SNIFF_ERRORS("after TITLE_viewport");
     }
 
-    Scene_viewport(quad, view_mode, s_left, s_down);
+    Scene_viewport(quad, view_mode, s_left, s_down, screen);
     SNIFF_ERRORS("after Scene_viewport");
   }
 
@@ -143,6 +143,12 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
       CLIP_GEOMETRY;
       draw_test_polygon();
     }
+#endif
+
+    /* ++++++++++++++++++++++++ draw screeninfo +++++++++++++++++++++++++ */
+
+#ifdef pp_RENDER360_DEBUG
+    if(screenview == 1)draw_screeninfo();
 #endif
 
 /* ++++++++++++++++++++++++ draw circular vents +++++++++++++++++++++++++ */

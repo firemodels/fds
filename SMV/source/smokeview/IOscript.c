@@ -10,6 +10,8 @@
 #include "smokeviewvars.h"
 #include "IOvolsmoke.h"
 
+#define RENDER_START 3
+
 void update_menu(void);
 
 /* ------------------ get_newscriptfilename ------------------------ */
@@ -274,6 +276,7 @@ int get_script_keyword_index(char *keyword){
   if(match_upper(keyword,"PARTCLASSTYPE") == MATCH)return SCRIPT_PARTCLASSTYPE;
   if(match_upper(keyword,"PLOT3DPROPS") == MATCH)return SCRIPT_PLOT3DPROPS;
   if(match_upper(keyword,"RENDERALL") == MATCH)return SCRIPT_RENDERALL;
+  if (match_upper(keyword, "RENDER360ALL") == MATCH)return SCRIPT_RENDER360ALL;
   if(match_upper(keyword,"RENDERCLIP") == MATCH)return SCRIPT_RENDERCLIP;
   if(match_upper(keyword,"RENDERDIR") == MATCH)return SCRIPT_RENDERDIR;
   if(match_upper(keyword,"RENDERTYPE") == MATCH)return SCRIPT_RENDERTYPE;
@@ -596,7 +599,22 @@ int compile_script(char *scriptfile){
         SETcval2;
         break;
 
-// VOLSMOKERENDERALL
+// RENDER360ALL
+//  skip (int)
+// file name base (char) (or blank to use smokeview default)
+      case SCRIPT_RENDER360ALL:
+        SETbuffer;
+        scripti->ival = 1;   // skip
+        scripti->ival3 = 0;  // first frame
+        sscanf(buffer, "%i %i", &scripti->ival, &scripti->ival3);
+        scripti->ival = MAX(scripti->ival, 1);
+        scripti->ival3 = MAX(scripti->ival3, 0);
+        first_frame_index = scripti->ival3;
+
+        SETcval2;
+        break;
+        
+        // VOLSMOKERENDERALL
 //  skip (int) start_frame (int)
 // file name base (char) (or blank to use smokeview default)
       case SCRIPT_VOLSMOKERENDERALL:
@@ -872,6 +890,28 @@ void script_renderall(scriptdata *scripti){
   PRINTF("script: Rendering every %i frame(s) starting at frame %i\n\n",skip_local,scripti->ival3);
   skip_render_frames=1;
   RenderMenu(skip_local);
+}
+
+/* ------------------ script_render360all ------------------------ */
+
+void script_render360all(scriptdata *scripti) {
+  int skip_local;
+
+
+  if (script_startframe>0)scripti->ival3 = script_startframe;
+  if (startframe0 >= 0)scripti->ival3 = startframe0;
+  first_frame_index = scripti->ival3;
+  itimes = first_frame_index;
+
+  if (script_skipframe>0)scripti->ival = script_skipframe;
+  if (skipframe0>0)scripti->ival = skipframe0;
+  skip_local = MAX(1, scripti->ival);
+
+  PRINTF("script: Rendering every %i frame(s) starting at frame %i\n\n", skip_local, scripti->ival3);
+  skip_render_frames = 1;
+  //RenderMenu(skip_local);
+  render_360=1;
+  Render_CB(RENDER_START);
 }
 
 /* ------------------ script_loadvolsmokeframe ------------------------ */
@@ -2005,6 +2045,9 @@ int run_script(void){
       break;
     case SCRIPT_RENDERALL:
       script_renderall(scripti);
+      break;
+    case SCRIPT_RENDER360ALL:
+      script_render360all(scripti);
       break;
     case SCRIPT_VOLSMOKERENDERALL:
       script_volsmokerenderall(scripti);
