@@ -1047,7 +1047,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             OM => MESHES(NOM)
          ENDIF
          IC = OM%CELL_INDEX(II,JJ,KK)
-         IF (.NOT.OM%SOLID(IC)) THEN ! the back wall face is found
+         IF (.NOT.OM%SOLID(IC) .AND. OM%WALL_INDEX(IC,IOR)>0) THEN ! the back wall face is found
             WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
             WC%BACK_MESH  = NOM
             EXIT ZERO_OR_ONE_CELL_THICK
