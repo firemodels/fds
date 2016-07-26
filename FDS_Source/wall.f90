@@ -1753,11 +1753,11 @@ SELECT CASE(SF%BACKING)
          CASE(1:) ! Solid backing
 
             IF (WC%BACK_MESH/=NM .AND. WC%BACK_MESH>0) THEN  ! Back side is in other mesh.
-               TMP_BACK = OMESH(WC%BACK_MESH)%BACK_WALL(IWB)%TMP_GAS
+               TMP_BACK = OMESH(WC%BACK_MESH)%EXPOSED_WALL(IWB)%TMP_GAS
                DTMP = TMP_BACK - TMP_B
                HTCB = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED_B,SF%GEOMETRY,SF%CONV_LENGTH,HT_MODEL=0,ROUGHNESS=0._EB, &
                                                 SURF_INDEX=SURF_INDEX)
-               QRADINB  = OMESH(WC%BACK_MESH)%BACK_WALL(IWB)%QRADIN
+               QRADINB  = OMESH(WC%BACK_MESH)%EXPOSED_WALL(IWB)%QRADIN
             ELSE  ! Back side is in current mesh.
                WALL_P => WALL(IWB)
                IIB = WALL_P%ONE_D%IIG
