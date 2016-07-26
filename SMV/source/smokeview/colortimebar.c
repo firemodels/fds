@@ -1212,7 +1212,7 @@ void drawColorBars(void){
     if(parttype!=0){
       int partunitclass, partunittype;
 
-      getunitinfo(partunitlabel2,&partunitclass,&partunittype);
+      GetUnitInfo(partunitlabel2,&partunitclass,&partunittype);
       if(partunitclass>=0&&partunitclass<nunitclasses){
         if(partunittype>=0){
           partflag=1;
@@ -1236,7 +1236,7 @@ void drawColorBars(void){
 
     sb = slicebounds + islicetype;
     strcpy(unitlabel,sb->label->unit);
-    getunitinfo(sb->label->unit,&sliceunitclass,&sliceunittype);
+    GetUnitInfo(sb->label->unit,&sliceunitclass,&sliceunittype);
     if(sliceunitclass>=0&&sliceunitclass<nunitclasses){
       if(sliceunittype>0){
         sliceflag=1;
@@ -1295,7 +1295,7 @@ void drawColorBars(void){
 
     patchi = patchinfo + patchtypes[ipatchtype];
     strcpy(unitlabel,patchi->label.unit);
-    getunitinfo(patchi->label.unit,&patchunitclass,&patchunittype);
+    GetUnitInfo(patchi->label.unit,&patchunitclass,&patchunittype);
     if(patchunitclass>=0&&patchunitclass<nunitclasses){
       if(patchunittype>0){
         patchflag=1;
@@ -1326,7 +1326,7 @@ void drawColorBars(void){
 
     up3label = plot3dinfo[0].label[plotn-1].unit;
     strcpy(unitlabel,up3label);
-    getunitinfo(up3label,&plot3dunitclass,&plot3dunittype);
+    GetUnitInfo(up3label,&plot3dunitclass,&plot3dunittype);
     if(plot3dunitclass>=0&&plot3dunitclass<nunitclasses){
       if(plot3dunittype>0){
         plot3dflag=1;
@@ -1358,7 +1358,7 @@ void drawColorBars(void){
     int zoneunitclass, zoneunittype;
 
     strcpy(unitlabel,degC);
-    getunitinfo(unitlabel,&zoneunitclass,&zoneunittype);
+    GetUnitInfo(unitlabel,&zoneunitclass,&zoneunittype);
     if(zoneunitclass>=0&&zoneunitclass<nunitclasses){
       if(zoneunittype>0){
         zoneflag=1;

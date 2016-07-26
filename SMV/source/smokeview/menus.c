@@ -343,11 +343,11 @@ void ShowMultiSliceMenu(int value){
     break;
   }
   updateslicefilenum();
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
 }
 
 /* ------------------ ShowAllSlices ------------------------ */
@@ -543,7 +543,7 @@ void LabelMenu(int value){
     visHRRlabel=1;
     show_hrrcutoff=1;
     visFramelabel=1;
-	  if(hrrinfo != NULL&&hrrinfo->display != 1)Update_hrrinfo(1);
+	  if(hrrinfo != NULL&&hrrinfo->display != 1)UpdateHrrinfo(1);
     gversion=1;
     break;
    case MENU_LABEL_HideAll:
@@ -559,7 +559,7 @@ void LabelMenu(int value){
     visMeshlabel=0;
     visHRRlabel=0;
     show_hrrcutoff=0;
-	if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+	if (hrrinfo != NULL&&hrrinfo->display != 0)UpdateHrrinfo(0);
     if(ntickinfo>0)visFDSticks=0;
     visgridloc=0;
     vis_slice_average=0;
@@ -587,7 +587,7 @@ void LabelMenu(int value){
      if(visFramelabel==1)visTimebar=1;
      if(visFramelabel==1){
        visHRRlabel=0;
-	   Update_hrrinfo(visHRRlabel);
+	   UpdateHrrinfo(visHRRlabel);
      }
      break;
    case MENU_LABEL_meshlabel:
@@ -621,7 +621,7 @@ void LabelMenu(int value){
    case MENU_LABEL_hrr:
      visHRRlabel=1-visHRRlabel;
      if(visHRRlabel==1)visTimebar=1;
-	 Update_hrrinfo(visHRRlabel);
+	 UpdateHrrinfo(visHRRlabel);
      break;
    case MENU_LABEL_hrrcutoff:
      show_hrrcutoff=1-show_hrrcutoff;
@@ -906,7 +906,7 @@ void IsoShowMenu(int value){
          iisotype=isoi->type;
        }
      }
-     Update_Show();
+     UpdateShow();
     }
     else if(value>=SHOWALL_ISO){
       if(value==SHOWALL_ISO){
@@ -920,7 +920,7 @@ void IsoShowMenu(int value){
           isoinfo[i].display=0;
         }
       }
-     Update_Show();
+     UpdateShow();
     }
   }
   update_iso_showlevels();
@@ -946,7 +946,7 @@ void ShowVSliceMenu(int value){
       vd->display=1;
     }
     show_all_slices=1;
-    Update_Times();
+    UpdateTimes();
     return;
   }
   if(value==HIDE_ALL){
@@ -956,7 +956,7 @@ void ShowVSliceMenu(int value){
       vd->display=0;
     }
     show_all_slices=0;
-    Update_Times();
+    UpdateTimes();
     return;
   }
   if(value == MENU_SHOWSLICE_INBLOCKAGE){
@@ -1010,8 +1010,8 @@ void ShowVSliceMenu(int value){
     islicetype = sliceinfo[vd->ival].type;
     vd->display=1;
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Show();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateShow();
 }
 
 /* ------------------ ShowHideSliceMenu ------------------------ */
@@ -1076,11 +1076,11 @@ void ShowHideSliceMenu(int value){
     }
   }
   updateslicefilenum();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
 }
 
 /* ------------------ ShowHideMenu ------------------------ */
@@ -1108,7 +1108,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visEvac=1;
     }
-    Update_Times();
+    UpdateTimes();
     break;
   case MENU_SHOWHIDE_PARTICLES:
     if(plotstate==DYNAMIC_PLOTS){
@@ -1118,7 +1118,7 @@ void ShowHideMenu(int value){
       plotstate=DYNAMIC_PLOTS;
       visParticles=1;
     }
-    Update_Times();
+    UpdateTimes();
     break;
   case MENU_SHOWHIDE_SENSOR:
     visSensor=1-visSensor;
@@ -1283,7 +1283,7 @@ void ZoomMenu(int value){
     }
     if(projection_type!=0){
       camera_current->projection_type=projection_type;
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
       update_projection_type();
     }
   }
@@ -1291,7 +1291,7 @@ void ZoomMenu(int value){
     camera_current->projection_type=projection_type;
     update_projection_type();
     if(projection_type==0){
-      update_camera_ypos(camera_current);
+      UpdateCameraYpos(camera_current);
     }
     else{
       camera_current->eye[1]=camera_current->isometric_y;
@@ -1303,7 +1303,7 @@ void ZoomMenu(int value){
     if(zoomindex>4)zoomindex=2;
     zoom=zooms[zoomindex];
     if(projection_type!=0){
-      ResetView(RESTORE_EXTERIOR_VIEW_ZOOM);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW_ZOOM);
       camera_current->projection_type=projection_type;
       update_projection_type();
     }
@@ -1440,7 +1440,7 @@ void ResetMenu(int value){
     }
     break;
   case MENU_TIMEVIEW:
-    Update_Times();
+    UpdateTimes();
     break;
   case SAVE_VIEWPOINT:
     Get_Next_View_Label(view_label);
@@ -1470,8 +1470,9 @@ void ResetMenu(int value){
 /* ------------------ RenderState ------------------------ */
 
 void RenderState(int onoff){
-  render_state=onoff;
+  rendering_status=onoff;
   if(onoff==RENDER_ON){
+    update_screeninfo = 1;
     saveW=screenWidth;
     saveH=screenHeight;
     if(renderW==0||renderH==0){
@@ -1479,7 +1480,6 @@ void RenderState(int onoff){
     }
     else{
       if(renderW>max_screenWidth){
-        render_multi=render_multi_state;
         ResizeWindow(max_screenWidth,max_screenHeight);
       }
       else{
@@ -1489,8 +1489,7 @@ void RenderState(int onoff){
   }
   else{
     Enable360Zoom();
-    render_multi=0;
-    render_multi_state=0;
+    render_mode = RENDER_XYSINGLE;
     setScreenSize(&saveW,&saveH);
     ResizeWindow(screenWidth,screenHeight);
   }
@@ -1515,33 +1514,25 @@ void RenderMenu(int value){
   }
   switch(value){
   case RenderCustom:
-    render_multi_menu = 0;
-    render_option = value;
-    render_multi_state = 0;
+    render_window_size = value;
     renderW = script_render_width;
     renderH = script_render_height;
     render_size_index = value;
     break;
   case Render320:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=320;
     renderH=240;
     render_size_index=value;
     break;
   case Render640:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=640;
     renderH=480;
     render_size_index=value;
     break;
   case RenderWindow:
-    render_multi_menu=0;
-    render_option=value;
-    render_multi_state=0;
+    render_window_size=value;
     renderW=0;
     renderH=0;
     render_size_index=value;
@@ -1552,34 +1543,26 @@ void RenderMenu(int value){
      break;
   case RENDER_CURRENT_360:
     LabelMenu(MENU_LABEL_HideAll);
-    get_viewport_info();
+    GetViewportInfo();
     RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu = 1;
-    render_multi_state = 1;
-    render_multi = render_multi_state;
     keyboard('R', FROM_SMOKEVIEW);
     break;
   case RENDER_CURRENT_MULTIPLE:
     if(nrender_rows==1)RenderMenu(RENDER_CURRENT_SINGLE);
     render_from_menu=1;
-    if(render_multi_menu==1)render_multi_state=1;
-    render_multi_state=nrender_rows;
-    render_multi=render_multi_state;
     keyboard('R',FROM_SMOKEVIEW);
     break;
   case RenderCancel:
-    render_multi_menu=0;
-    render_multi=0;
-    render_multi_state=0;
     RenderState(RENDER_OFF);
     break;
   case RenderLABELframenumber:
-    renderfilelabel=0;
-    update_glui_filelabel(renderfilelabel);
+    render_label_type=RENDER_LABEL_FRAMENUM;
+    update_glui_filelabel(render_label_type);
     break;
   case RenderLABELtime:
-    renderfilelabel=1;
-    update_glui_filelabel(renderfilelabel);
+    render_label_type=RENDER_LABEL_TIME;
+    update_glui_filelabel(render_label_type);
     break;
   case RenderPNG:
      render_filetype=PNG;
@@ -1593,13 +1576,12 @@ void RenderMenu(int value){
     if(RenderTime==0&&touring==0)return;
     if(touring==1){
       rendertourcount=0;
-      tourangle_global=0.0;
     }
     if(stept==0){
       keyboard('t',FROM_SMOKEVIEW);
     }
     RenderState(RENDER_ON);
-    reset_itimes0();
+    ResetItimes0();
     for(i=0;i<nsliceinfo;i++){
       sd=sliceinfo+i;
       sd->itime=0;
@@ -1620,6 +1602,7 @@ void RenderMenu(int value){
       fprintf(scriptoutstream," %i\n",RenderSkip);
       fprintf(scriptoutstream,"\n");
     }
+    render_times = RENDER_ALLTIMES;
     break;
   }
   update_nrender_rows();
@@ -1640,7 +1623,7 @@ void EvacShowMenu(int value){
     parti->display = 1 - parti->display;
     updatemenu=1;
     glutPostRedisplay();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
@@ -1682,7 +1665,7 @@ void EvacShowMenu(int value){
     }
   }
   updatemenu=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   glutPostRedisplay();
 
 }
@@ -1702,7 +1685,7 @@ void ParticleShowMenu(int value){
     parti->display = 1 - parti->display;
     updatemenu=1;
     glutPostRedisplay();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     return;
   }
   if(plotstate==DYNAMIC_PLOTS){
@@ -1797,7 +1780,7 @@ void ParticleShowMenu(int value){
     }
   }
   updatemenu=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   glutPostRedisplay();
 }
 
@@ -2100,7 +2083,7 @@ void Plot3DShowMenu(int value){
      }
      break;
   }
-  plotstate=getplotstate(STATIC_PLOTS);
+  plotstate=GetPlotState(STATIC_PLOTS);
   if(plotstate==STATIC_PLOTS&&visiso==1){
     updatesurface();
   }
@@ -2674,7 +2657,7 @@ void TourMenu(int value){
       touri->display=touri->display2;
     }
     if(viewtourfrompath==1){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
     for(i=0;i<ntours;i++){
@@ -2692,7 +2675,7 @@ void TourMenu(int value){
       touri->display=0;
     }
     if(viewtourfrompath==1){
-      ResetView(RESTORE_EXTERIOR_VIEW);
+      SetViewPoint(RESTORE_EXTERIOR_VIEW);
     }
     from_glui_trainer=0;
     selected_tour=NULL;
@@ -2712,18 +2695,18 @@ void TourMenu(int value){
       touri = tourinfo + i;
       touri->display=1;
     }
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     break;
   case MENU_TOUR_VIEWFROMROUTE:               // view from route
     viewtourfrompath = 1 - viewtourfrompath;
-    if(viewtourfrompath==0)ResetView(RESTORE_EXTERIOR_VIEW);
+    if(viewtourfrompath==0)SetViewPoint(RESTORE_EXTERIOR_VIEW);
     break;
   case MENU_TOUR_DEFAULT:
     for(i=0;i<ntours;i++){
       touri = tourinfo + i;
       touri->display=0;
     }
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     defaulttour();
     break;
   default:
@@ -2766,8 +2749,8 @@ void TourMenu(int value){
   delete_tourlist();
   create_tourlist();
   update_tourcontrols();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  if(value!=-5&&value!=-4)Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  if(value!=-5&&value!=-4)UpdateTimes();
   callfrom_tourglui=0;
 
 }
@@ -2813,7 +2796,7 @@ void EvacMenu(int value){
       }
     }
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
   }
   if(value>=0){
     ReadEvacFile=1;
@@ -2855,7 +2838,7 @@ void update_streakvalue(float value){
     parti = partinfo + i;
     if(parti->loaded==1)break;
   }
-  if(parti!=NULL&&parti->ntimes>1){
+  if(parti!=NULL&&parti->loaded==1&&parti->ntimes>1){
     for(i=0;i<parti->ntimes-1;i++){
       if(parti->times[i]<=value&&value<parti->times[i+1]){
         streak5step=i;
@@ -3051,7 +3034,6 @@ void LoadParticleMenu(int value){
       }
     }
     else{
-      ReadPartFile=1;
       if(scriptoutstream!=NULL){
         fprintf(scriptoutstream,"LOADPARTICLES\n");
       }
@@ -3070,7 +3052,7 @@ void LoadParticleMenu(int value){
         readpart(parti->file, i, LOAD, PARTDATA,&errorcode);
       }
       force_redisplay=1;
-      Update_Framenumber(0);
+      UpdateFrameNumber(0);
     }
   }
   updatemenu=1;
@@ -4089,7 +4071,7 @@ void LoadPatchMenu(int value){
 
   glutSetCursor(GLUT_CURSOR_WAIT);
   if(value>=0){
-    patchtypenew=getpatchtype(patchinfo+value);
+    patchtypenew=GetPatchType(patchinfo+value);
     if(patchtypenew!=-1){
       for(ii=0;ii<npatch_loaded;ii++){
         patchdata *patchi;
@@ -4137,7 +4119,7 @@ void LoadPatchMenu(int value){
       }
     }
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
   }
   else if(value==MENU_UPDATEBOUNDS){
     Update_All_Patch_Bounds();
@@ -4167,9 +4149,9 @@ void ShowPatchMenu(int value){
     }
     else{
       patchi->display=1;
-      ipatchtype=getpatchtype(patchi);
+      ipatchtype=GetPatchType(patchi);
     }
-    update_patchtype();
+    UpdatePatchType();
   }
   if(value==SHOW_CHAR){
     vis_threshold = 1 - vis_threshold;
@@ -4257,7 +4239,7 @@ void ShowPatchMenu(int value){
       }
     }
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 }
 
 /* ------------------ VentMenu ------------------------ */
@@ -7532,11 +7514,11 @@ updatemenu=0;
     }
 
     glutAddMenuEntry(_("File suffix:"),11000);
-    if(renderfilelabel==0){
+    if(render_label_type==RENDER_LABEL_FRAMENUM){
       glutAddMenuEntry(_("  *Frame number"),RenderLABELframenumber);
       glutAddMenuEntry(_("  Time"),RenderLABELtime);
     }
-    if(renderfilelabel==1){
+    if(render_label_type==RENDER_LABEL_TIME){
       glutAddMenuEntry(_("  Frame number"),RenderLABELframenumber);
       glutAddMenuEntry(_("  *Time"),RenderLABELtime);
     }

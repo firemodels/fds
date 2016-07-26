@@ -1966,7 +1966,7 @@ extern "C"  void glui_script_disable(void){
       script_skipframe=-1;
       script_step=0;
       glui_script_enable();
-      render_state=RENDER_OFF;
+      rendering_status=RENDER_OFF;
       break;
     case SCRIPT_RENDER_DIR:
       strcpy(label,script_renderdir);
@@ -2769,56 +2769,64 @@ extern "C" void Slice_CB(int var){
 
         // slice files
 
-        setslicemin_save=setslicemin;
-        slicemin_save=slicemin;
-        setslicemin=GLOBAL_MIN;
-        Slice_CB(SETVALMIN);
+        if (nsliceloaded > 0) {
+          setslicemin_save = setslicemin;
+          slicemin_save = slicemin;
+          setslicemin = GLOBAL_MIN;
+          Slice_CB(SETVALMIN);
 
-        setslicemax_save=setslicemax;
-        slicemax_save=slicemax;
-        setslicemax=GLOBAL_MAX;
-        Slice_CB(SETVALMAX);
+          setslicemax_save = setslicemax;
+          slicemax_save = slicemax;
+          setslicemax = GLOBAL_MAX;
+          Slice_CB(SETVALMAX);
+        }
 
         // boundary files
 
-        setpatchmin_save = setpatchmin;
-        patchmin_save = patchmin;
-        setpatchmin = GLOBAL_MIN;
-        Bound_CB(SETVALMIN);
+        if (npatchloaded > 0) {
+          setpatchmin_save = setpatchmin;
+          patchmin_save = patchmin;
+          setpatchmin = GLOBAL_MIN;
+          Bound_CB(SETVALMIN);
 
-        setpatchmax_save = setpatchmax;
-        patchmax_save = patchmax;
-        setpatchmax = GLOBAL_MAX;
-        Bound_CB(SETVALMAX);
-        Bound_CB(FILERELOAD);
+          setpatchmax_save = setpatchmax;
+          patchmax_save = patchmax;
+          setpatchmax = GLOBAL_MAX;
+          Bound_CB(SETVALMAX);
+          Bound_CB(FILERELOAD);
+        }
 
         // particle files
 
-        setpartmin_save = setpartmin;
-        partmin_save = partmin;
-        setpartmin = GLOBAL_MIN;
-        Part_CB(SETVALMIN);
+        if(npartloaded>0){
+          setpartmin_save = setpartmin;
+          partmin_save = partmin;
+          setpartmin = GLOBAL_MIN;
+          Part_CB(SETVALMIN);
 
-        setpartmax_save = setpartmax;
-        partmax_save = partmax;
-        setpartmax = GLOBAL_MAX;
-        Part_CB(SETVALMAX);
-        Part_CB(FILERELOAD);
+          setpartmax_save = setpartmax;
+          partmax_save = partmax;
+          setpartmax = GLOBAL_MAX;
+          Part_CB(SETVALMAX);
+          Part_CB(FILERELOAD);
+        }
         
         // plot3d files
 
-        for (i = 0; i < MAXPLOT3DVARS; i++) {
-          setp3min_save[i] = setp3min[i];
-          p3min_save[i] = p3min[i];
-          setp3min[i] = GLOBAL_MIN;
+        if(nplot3dloaded>0){
+          for (i = 0; i < MAXPLOT3DVARS; i++) {
+            setp3min_save[i] = setp3min[i];
+            p3min_save[i] = p3min[i];
+            setp3min[i] = GLOBAL_MIN;
 
-          setp3max_save[i] = setp3max[i];
-          p3max_save[i] = p3max[i];
-          setp3max[i] = GLOBAL_MAX;
+            setp3max_save[i] = setp3max[i];
+            p3max_save[i] = p3max[i];
+            setp3max[i] = GLOBAL_MAX;
+          }
+          Plot3D_CB(SETVALMIN);
+          Plot3D_CB(SETVALMAX);
+          Plot3D_CB(FILERELOAD);
         }
-        Plot3D_CB(SETVALMIN);
-        Plot3D_CB(SETVALMAX);
-        Plot3D_CB(FILERELOAD);
 
         PRINTF("research mode on\n");
       }
@@ -2828,69 +2836,77 @@ extern "C" void Slice_CB(int var){
 
         // slice files
 
-        setslicemin=setslicemin_save;
-        Slice_CB(SETVALMIN);
-        slicemin=slicemin_save;
-        Slice_CB(VALMIN);
+        if (nsliceloaded > 0) {
+          setslicemin = setslicemin_save;
+          Slice_CB(SETVALMIN);
+          slicemin = slicemin_save;
+          Slice_CB(VALMIN);
 
-        setslicemax=setslicemax_save;
-        Slice_CB(SETVALMAX);
-        slicemax=slicemax_save;
-        Slice_CB(VALMAX);
+          setslicemax = setslicemax_save;
+          Slice_CB(SETVALMAX);
+          slicemax = slicemax_save;
+          Slice_CB(VALMAX);
+        }
 
         // boundary files
 
-        setpatchmin = setpatchmin_save;
-        Bound_CB(SETVALMIN);
-        patchmin = patchmin_save;
-        Bound_CB(VALMIN);
+        if (npatchloaded > 0) {
+          setpatchmin = setpatchmin_save;
+          Bound_CB(SETVALMIN);
+          patchmin = patchmin_save;
+          Bound_CB(VALMIN);
 
-        setpatchmax = setpatchmax_save;
-        Bound_CB(SETVALMAX);
-        patchmax = patchmax_save;
-        Bound_CB(VALMAX);
-        Bound_CB(FILERELOAD);
-
-        // particle files
-
-        setpartmin = setpartmin_save;
-        Part_CB(SETVALMIN);
-        partmin = partmin_save;
-        Part_CB(VALMIN);
-
-        setpartmax = setpartmax_save;
-        Part_CB(SETVALMAX);
-        partmax = partmax_save;
-        Part_CB(VALMAX);
-        Part_CB(FILERELOAD);
+          setpatchmax = setpatchmax_save;
+          Bound_CB(SETVALMAX);
+          patchmax = patchmax_save;
+          Bound_CB(VALMAX);
+          Bound_CB(FILERELOAD);
+        }
 
         // particle files
 
-        setpartmin = setpartmin_save;
-        Part_CB(SETVALMIN);
-        partmin = partmin_save;
-        Part_CB(VALMIN);
+        if (npartloaded > 0) {
+          setpartmin = setpartmin_save;
+          Part_CB(SETVALMIN);
+          partmin = partmin_save;
+          Part_CB(VALMIN);
 
-        setpartmax = setpartmax_save;
-        Part_CB(SETVALMAX);
-        partmax = partmax_save;
-        Part_CB(VALMAX);
-        Part_CB(FILERELOAD);
+          setpartmax = setpartmax_save;
+          Part_CB(SETVALMAX);
+          partmax = partmax_save;
+          Part_CB(VALMAX);
+          Part_CB(FILERELOAD);
+
+          // particle files
+
+          setpartmin = setpartmin_save;
+          Part_CB(SETVALMIN);
+          partmin = partmin_save;
+          Part_CB(VALMIN);
+
+          setpartmax = setpartmax_save;
+          Part_CB(SETVALMAX);
+          partmax = partmax_save;
+          Part_CB(VALMAX);
+          Part_CB(FILERELOAD);
+        }
 
         // Plot3D files
 
-        for (i = 0; i < MAXPLOT3DVARS; i++) {
-          setp3min[i] = setp3min_save[i];
-          p3min[i] = p3min_save[i];
+        if (nplot3dloaded > 0) {
+          for (i = 0; i < MAXPLOT3DVARS; i++) {
+            setp3min[i] = setp3min_save[i];
+            p3min[i] = p3min_save[i];
 
-          setp3max[i] = setp3max_save[i];
-          p3max[i] = p3max_save[i];
+            setp3max[i] = setp3max_save[i];
+            p3max[i] = p3max_save[i];
+          }
+          Plot3D_CB(SETVALMIN);
+          Plot3D_CB(VALMIN);
+          Plot3D_CB(SETVALMAX);
+          Plot3D_CB(VALMAX);
+          Plot3D_CB(FILERELOAD);
         }
-        Plot3D_CB(SETVALMIN);
-        Plot3D_CB(VALMIN);
-        Plot3D_CB(SETVALMAX);
-        Plot3D_CB(VALMAX);
-        Plot3D_CB(FILERELOAD);
 
         PRINTF("research mode off\n");
       }

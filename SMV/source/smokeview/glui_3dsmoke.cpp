@@ -649,7 +649,7 @@ extern "C" void Smoke3d_CB(int var){
     trim_back(vol_prefix);
     vol_prefixptr=trim_front(vol_prefix);
     if(strlen(vol_prefixptr)==0)vol_prefixptr=fdsprefix;
-    init_volrender_script(vol_prefixptr, tour_label, vol_startframe0, vol_skipframe0);
+    InitVolrenderScript(vol_prefixptr, tour_label, vol_startframe0, vol_skipframe0);
     break;
   case NONGPU_VOL_FACTOR:
     init_volrender_surface(NOT_FIRSTCALL);

@@ -12,9 +12,9 @@
 
 #define CONV(p,pl,pr,pxl,pxr) ( (pxl) + ((pxr)-(pxl))*((p)-(pl))/((pr)-(pl)) )
 
-/* ------------------------ getStringWidth ------------------------- */
+/* ------------------------ GetStringWidth ------------------------- */
 
-int getStringWidth(char *string){
+int GetStringWidth(char *string){
   char *c;
   int length=0;
 
@@ -41,17 +41,17 @@ int getStringWidth(char *string){
   return length;
 }
 
-/* ------------------------ get_viewport_info ------------------------- */
+/* ------------------------ GetViewportInfo ------------------------- */
 
-void get_viewport_info(void){
+void GetViewportInfo(void){
   int doit;
   float text_height;
   float text_width;
   int ninfo_lines=0;
   int info_width;
 
-  info_width = getStringWidth("y: 115, 11.5 m");
-  colorbar_label_width = getStringWidth("*10^-02");
+  info_width = GetStringWidth("y: 115, 11.5 m");
+  colorbar_label_width = GetStringWidth("*10^-02");
 
   v_space = 2;
   text_height=18;
@@ -461,9 +461,9 @@ int SUB_portfrustum(int quad,
   return 1;
 }
 
- /* ------------------------ CLIP_viewport ------------------------- */
+ /* ------------------------ ViewportClip ------------------------- */
 
-void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportClip(int quad, GLint screen_left, GLint screen_down){
   GLdouble x_left, x_right, x_down, x_top;
   float c_left, c_right, c_top, c_bottom;
 
@@ -507,9 +507,9 @@ void CLIP_viewport(int quad, GLint screen_left, GLint screen_down){
    glEnd();
 }
 
- /* ------------------------ INFO_viewport ------------------------- */
+ /* ------------------------ ViewportInfo ------------------------- */
 
-void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
   char slicelabel[255];
   meshdata *mesh_xyz=NULL;
   float xyz[3];
@@ -634,9 +634,9 @@ void INFO_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ------------------------ TIMEBAR_viewport ------------------------- */
+/* ------------------------ ViewportTimebar ------------------------- */
 
-void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
 #ifdef pp_memstatus
   unsigned int availmemory;
   char percen[]="%";
@@ -646,8 +646,8 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 
   if(SUB_portortho2(quad,&VP_timebar,screen_left,screen_down)==0)return;
 
-  timebar_left_width = getStringWidth("Time: 1234.11");
-  timebar_right_width = getStringWidth("Frame rate: 99.99");
+  timebar_left_width = GetStringWidth("Time: 1234.11");
+  timebar_right_width = GetStringWidth("Frame rate: 99.99");
 
   timebar_left_pos = VP_timebar.left+timebar_left_width;
   timebar_right_pos= VP_timebar.right-timebar_right_width-h_space;
@@ -725,9 +725,9 @@ void TIMEBAR_viewport(int quad, GLint screen_left, GLint screen_down){
 #endif
 }
 
-/* --------------------- COLORBAR_viewport ------------------------- */
+/* --------------------- ViewportColorbar ------------------------- */
 
-void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportColorbar(int quad, GLint screen_left, GLint screen_down){
   if(SUB_portortho2(quad,&VP_colorbar,screen_left, screen_down)==0)return;
 
   glMatrixMode(GL_MODELVIEW);
@@ -736,9 +736,9 @@ void COLORBAR_viewport(int quad, GLint screen_left, GLint screen_down){
   drawColorBars();
 }
 
-    /* -------------------------- TITLE_viewport -------------------------- */
+    /* -------------------------- ViewportTitle -------------------------- */
 
-void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
+void ViewportTitle(int quad, GLint screen_left, GLint screen_down){
   float left, textdown;
 
   if(SUB_portortho2(quad,&VP_title,screen_left,screen_down)==0)return;
@@ -780,9 +780,9 @@ void TITLE_viewport(int quad, GLint screen_left, GLint screen_down){
   }
 }
 
-/* ----------------------- compare_meshes ----------------------------- */
+/* ----------------------- CompareMeshes ----------------------------- */
 
-int compare_meshes(const void *arg1, const void *arg2){
+int CompareMeshes(const void *arg1, const void *arg2){
   smoke3ddata *smoke3di, *smoke3dj;
   meshdata *meshi, *meshj;
   float *xyzmini, *xyzmaxi;
@@ -870,25 +870,25 @@ int compare_meshes(const void *arg1, const void *arg2){
   return returnval;
 }
 
-/* ------------------ sort_smoke3dinfo ------------------------ */
+/* ------------------ SortSmoke3dinfo ------------------------ */
 
-void sort_smoke3dinfo(void){
+void SortSmoke3dinfo(void){
   if(nsmoke3dinfo > 1){
-    qsort((meshdata **)smoke3dinfo_sorted, (size_t)nsmoke3dinfo, sizeof(smoke3ddata *), compare_meshes);
+    qsort((meshdata **)smoke3dinfo_sorted, (size_t)nsmoke3dinfo, sizeof(smoke3ddata *), CompareMeshes);
   }
 }
 
-/* ----------------------- Scene_viewport ----------------------------- */
+/* ----------------------- ViewportScene ----------------------------- */
 
-void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_down, screendata *screen){
+void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down, screendata *screen){
 
   float fleft, fright, fup, fdown;
-  float StereoCameraOffset,FrustumAsymmetry;
+  float EyeSeparation,FrustumAsymmetry,dEyeSeparation[3];
   float aperture_temp;
   float widthdiv2;
   float eyexINI, eyeyINI, eyezINI;
 
-  if(showstereo==STEREO_LR){
+  if(stereotype==STEREO_LR){
     VP_scene.left=screen_left;
     VP_scene.width=screenWidth;
   }
@@ -920,7 +920,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
     camera_current->eye[2]=selected_avatar_pos[2];
     camera_current->azimuth=selected_avatar_angle;
     camera_current->view_angle=0.0;
-    update_camera(camera_current);
+    UpdateCamera(camera_current);
   }
 
   eyexINI = camera_current->eye[0];
@@ -931,9 +931,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   if(fnear<nearclip)fnear=nearclip;
   ffar = fnear + farclip;
 
-  FrustumAsymmetry=0.0;
-  StereoCameraOffset=0.0;
-  aperture_temp = zoom2aperture(zoom);
+  aperture_temp = Zoom2Aperture(zoom);
 
   if(plotstate==DYNAMIC_PLOTS&&selected_tour!=NULL&&selected_tour->timeslist!=NULL){
     if((viewtourfrompath==1&&selectedtour_index>=0)||keyframe_snap==1){
@@ -949,7 +947,7 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
         pj = touri->pathnodes + frame_index;
       }
 
-      aperture_temp=zoom2aperture(pj->zoom);
+      aperture_temp=Zoom2Aperture(pj->zoom);
     }
   }
 
@@ -959,14 +957,12 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   fup = scene_aspect_ratio*widthdiv2;
   fdown = -scene_aspect_ratio*widthdiv2;
 
-  if(showstereo==STEREO_NONE||view_mode==VIEW_CENTER){
-    StereoCameraOffset=0.0;
-    FrustumAsymmetry=0.0;
-  }
-  else if(showstereo!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
-    StereoCameraOffset = SCALE2SMV(fzero)/30.0;
-    if(view_mode==VIEW_LEFT)StereoCameraOffset = -StereoCameraOffset;
-    FrustumAsymmetry= -0.5*StereoCameraOffset*fnear/SCALE2SMV(fzero);
+  EyeSeparation=0.0;
+  FrustumAsymmetry=0.0;
+  if(stereotype!=STEREO_NONE&&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
+    EyeSeparation = SCALE2SMV(fzero) / 30.0;
+    if (view_mode == VIEW_LEFT)EyeSeparation = -EyeSeparation;
+    FrustumAsymmetry = -0.5*EyeSeparation*fnear / SCALE2SMV(fzero);
   }
 
   if(SUB_portfrustum(quad,&VP_scene,
@@ -977,40 +973,55 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
   glLoadIdentity();
 
   {
-    float sin_dv_sum, cos_dv_sum;
-    float sin_azimuth, cos_azimuth;
-    float sn_view_angle, cs_view_angle;
-    float cos_elevation, sin_elevation;
     float xcen, ycen, zcen;
     float pos[3];
-    float azimuth, elevation;
-
-    sn_view_angle=sin(DEG2RAD*camera_current->view_angle);
-    cs_view_angle=cos(DEG2RAD*camera_current->view_angle);
-
-    sin_azimuth=sin(DEG2RAD*camera_current->azimuth);
-    cos_azimuth=cos(DEG2RAD*camera_current->azimuth);
+    int use_tour=0;
 
     xcen = camera_current->xcen;
     ycen = camera_current->ycen;
     zcen = camera_current->zcen;
 
-    cos_elevation=cos(DEG2RAD*camera_current->elevation);
-    sin_elevation=sin(DEG2RAD*camera_current->elevation);
+    if(rotation_type == EYE_CENTERED){
+      float sin_dv_sum, cos_dv_sum;
+      float sin_azimuth, cos_azimuth;
+      float sn_view_angle, cs_view_angle;
+      float cos_elevation, sin_elevation;
 
-    sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
-    cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
+      sn_view_angle = sin(DEG2RAD*camera_current->view_angle);
+      cs_view_angle = cos(DEG2RAD*camera_current->view_angle);
 
-    pos[0] = eyexINI+StereoCameraOffset*cos_dv_sum;
-    pos[1] = eyeyINI-StereoCameraOffset*sin_dv_sum;
-    pos[2] = eyezINI;
+      sin_azimuth = sin(DEG2RAD*camera_current->azimuth);
+      cos_azimuth = cos(DEG2RAD*camera_current->azimuth);
 
-    viewx = pos[0] + sin_dv_sum*cos_elevation;
-    viewy = pos[1] + cos_dv_sum*cos_elevation;
-    viewz = pos[2] + sin_elevation;
+      cos_elevation = cos(DEG2RAD*camera_current->elevation);
+      sin_elevation = sin(DEG2RAD*camera_current->elevation);
 
-    elevation = camera_current->az_elev[1];
-    azimuth = camera_current->az_elev[0];
+      sin_dv_sum = sin_azimuth*cs_view_angle + cos_azimuth*sn_view_angle;
+      cos_dv_sum = cos_azimuth*cs_view_angle - sin_azimuth*sn_view_angle;
+
+      dEyeSeparation[0] = cos_dv_sum*EyeSeparation / 2.0;
+      dEyeSeparation[1] = -sin_dv_sum*EyeSeparation / 2.0;
+
+      pos[0] = eyexINI + dEyeSeparation[0];
+      pos[1] = eyeyINI + dEyeSeparation[1];
+      pos[2] = eyezINI;
+
+      viewx = pos[0] + sin_dv_sum*cos_elevation;
+      viewy = pos[1] + cos_dv_sum*cos_elevation;
+      viewz = pos[2] + sin_elevation;
+    }
+    else{
+      dEyeSeparation[0] = EyeSeparation / 2.0;
+      dEyeSeparation[1] = 0.0;
+
+      pos[0] = eyexINI + dEyeSeparation[0];
+      pos[1] = eyeyINI + dEyeSeparation[1];
+      pos[2] = eyezINI;
+
+      viewx = pos[0];
+      viewy = pos[1] + 1.0;
+      viewz = pos[2] + 0.0;
+    }
 
     /* set view direction for virtual tour */
     {
@@ -1028,11 +1039,10 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
             pj = touri->pathnodes + frame_index;
           }
 
-          viewx = pj->tour_view[0]+StereoCameraOffset*cos_dv_sum;
-          viewy = pj->tour_view[1]-StereoCameraOffset*sin_dv_sum;
+          viewx = pj->tour_view[0]+dEyeSeparation[0];
+          viewy = pj->tour_view[1]-dEyeSeparation[1];
           viewz = pj->tour_view[2];
-          elevation=0.0;
-          azimuth=0.0;
+          use_tour = 1;
         }
       }
     }
@@ -1042,24 +1052,31 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 
       uup = camera_current->up;
       gluLookAt(
-        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
+        (double)pos[0], (double)pos[1], (double)pos[2],
         (double)viewx,  (double)viewy,  (double)viewz,
         (double)uup[0], (double)uup[1], (double)uup[2]
       );
     }
     else {
-      float *view, *uup;
-      float viewpos[3];
+      float *view, *uup, *right;
+      float ppos[3], vview[3];
 
       view = screen->view;
       uup = screen->up;
-      viewpos[0] = pos[0] + view[0];
-      viewpos[1] = pos[1] + view[1];
-      viewpos[2] = pos[2] + view[2];
+      right = screen->right;
+      dEyeSeparation[0] = EyeSeparation*right[0] / 2.0;
+      dEyeSeparation[1] = EyeSeparation*right[1] / 2.0;
+      dEyeSeparation[2] = EyeSeparation*right[2] / 2.0;
+      ppos[0] = eyexINI + dEyeSeparation[0];
+      ppos[1] = eyeyINI + dEyeSeparation[1];
+      ppos[2] = eyezINI + dEyeSeparation[2];
+      vview[0] = ppos[0] + view[0];
+      vview[1] = ppos[1] + view[1];
+      vview[2] = ppos[2] + view[2];
       gluLookAt(
-        (double)(pos[0]), (double)(pos[1]), (double)pos[2],
-        (double)viewpos[0], (double)viewpos[1], (double)viewpos[2],
-        (double)uup[0], (double)uup[1], (double)uup[2]
+         (double)ppos[0], (double)ppos[1], (double)ppos[2],
+        (double)vview[0],(double)vview[1],(double)vview[2],
+          (double)uup[0],  (double)uup[1],  (double)uup[2]
       );
     }
 
@@ -1075,10 +1092,16 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
       glMultMatrixf(quat_rotation);
     }
     else{
-      if(rotation_type==ROTATION_2AXIS){
-        glRotatef(elevation,1.0,0.0,0.0);  /* rotate about x axis */
+      if(use_tour == 0){
+        float azimuth, elevation;
+
+        elevation = camera_current->az_elev[1];
+        azimuth = camera_current->az_elev[0];
+        if(rotation_type == ROTATION_2AXIS){
+          glRotatef(elevation, 1.0, 0.0, 0.0);  /* rotate about x axis */
+        }
+        glRotatef(azimuth, 0.0, 0.0, 1.0);      /* rotate about z axis */
       }
-      glRotatef(azimuth,0.0,0.0,1.0);      /* rotate about z axis */
     }
     {
       float u[3], axis[3], angle;
@@ -1114,11 +1137,11 @@ void Scene_viewport(int quad, int view_mode, GLint screen_left, GLint screen_dow
 #endif
     }
     if(nsmoke3dinfo>0&&show3dsmoke==1){
-      sort_smoke3dinfo();
+      SortSmoke3dinfo();
       getsmokedir(modelview_scratch);
       SNIFF_ERRORS("after getsmokedir");
 #ifdef pp_CULL
-      if(showstereo==STEREO_NONE){
+      if(stereotype==STEREO_NONE){
         if(cullsmoke==1){
           getPixelCount();
           SNIFF_ERRORS("after getPixelCount");

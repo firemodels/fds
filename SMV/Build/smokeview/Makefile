@@ -205,12 +205,12 @@ intel_linux_64 : $(obj)  $(if $(LUA_SCRIPTING),smvluacore)
 # ------------- intel_linux_64_db ----------------
 
 intel_linux_64_db : FFLAGS    = -O0 -m64 -static-intel -traceback -g -fpe0 -fltconsistency -WB -fpp -D pp_noappend -stand:f08
-intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
+intel_linux_64_db : CFLAGS    = -O0 -g -m64 -static-intel $(SMV_TESTFLAG) -D pp_LINUX -D pp_INTEL $(SMV_PROFILEFLAG) -Wall -Wextra -check=stack,uninit -fp-stack-check -fp-trap-all=divzero,invalid,overflow -ftrapuv -Wuninitialized -Wunused-function -Wunused-variable $(GITINFO)
 intel_linux_64_db : LFLAGS    = -m64 -static-intel
 intel_linux_64_db : CC        = icc
 intel_linux_64_db : CPP       = icpc
 intel_linux_64_db : FC        = ifort
-intel_linux_64_db : exe       = smokeview_linux_64_db$(SMV_PROFILESTRING)
+intel_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64_db$(SMV_PROFILESTRING)
 
 intel_linux_64_db : $(obj)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX)

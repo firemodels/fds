@@ -113,9 +113,9 @@ extern "C" void hide_glui_colorbar(void){
     update_extreme();
   }
   if(glui_colorbar!=NULL){
-    copy_camera(camera_external,camera_external_save);
+    CopyCamera(camera_external,camera_external_save);
     Reshape_CB(screenWidth,screenHeight);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->hide();
   }
   updatemenu=1;
@@ -139,7 +139,7 @@ extern "C" void show_glui_colorbar(void){
   }
   if(glui_colorbar!=NULL){
     Reshape_CB(screenWidth,screenHeight);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->show();
   }
 }

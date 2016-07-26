@@ -159,7 +159,7 @@ void parse_commandline(int argc, char **argv){
     exit(1);
   }
   if(strncmp(argv[1], "-ini", 3) == 0){
-    init_camera_list();
+    InitCameraList();
     InitOpenGL();
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     writeini(GLOBAL_INI, NULL);
@@ -167,7 +167,7 @@ void parse_commandline(int argc, char **argv){
   }
 
   if(strncmp(argv[1], "-ng_ini", 6) == 0){
-    init_camera_list();
+    InitCameraList();
     use_graphics = 0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     writeini(GLOBAL_INI, NULL);
@@ -366,7 +366,7 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i], "-stereo", 7) == 0){
       stereoactive = 1;
-      showstereo = STEREO_TIME;
+      stereotype = STEREO_TIME;
       PRINTF("stereo option activated\n");
     }
 #ifdef pp_LANG
@@ -459,7 +459,7 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i], "-volrender", 10) != 0 && (strncmp(argv[i], "-version", 8) == 0 || strncmp(argv[i], "-v", 2) == 0)
       ){
-      display_version_info("Smokeview ");
+      DisplayVersionInfo("Smokeview ");
       exit(0);
     }
     else if(
@@ -578,7 +578,7 @@ void parse_commandline(int argc, char **argv){
     STRCPY(volrender_scriptname, fdsprefix);
     STRCAT(volrender_scriptname, "_volrender.ssf");
 
-    init_volrender_script(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
+    InitVolrenderScript(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
   }
 }
 
@@ -593,7 +593,7 @@ int main(int argc, char **argv){
   initMALLOC();
   init_rand_ab(1000000);
   initvars();
-  if(argc==1)display_version_info("Smokeview ");
+  if(argc==1)DisplayVersionInfo("Smokeview ");
   copy_args(&argc, argv, &argv_sv);
   if(argc==0||argc==1)return 0;
 
@@ -613,7 +613,7 @@ int main(int argc, char **argv){
   have_ffplay = have_prog("ffplay -version >/dev/null 2>/dev/null");
 #endif
 #endif
-  display_version_info("Smokeview ");
+  DisplayVersionInfo("Smokeview ");
   setup_glut(argc,argv_sv);
 
 #ifdef pp_LUA

@@ -8360,7 +8360,7 @@ typedef struct {
   updateslicetypes();
   updatesliceboundlabels();
   updateisotypes();
-  updatepatchtypes();
+  UpdatePatchTypes();
   if(autoterrain==1){
     for(i=0;i<nmeshes;i++){
       meshdata *meshi;
@@ -8929,10 +8929,10 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "STEREO") == 1){
       fgets(buffer, 255, stream);
-      showstereoOLD = showstereo;
-      sscanf(buffer, "%i", &showstereo);
-      showstereo = CLAMP(showstereo, 0, 5);
-      if(showstereo == STEREO_TIME&&videoSTEREO != 1)showstereo = STEREO_NONE;
+      stereotypeOLD = stereotype;
+      sscanf(buffer, "%i", &stereotype);
+      stereotype = CLAMP(stereotype, 0, 5);
+      if(stereotype == STEREO_TIME&&videoSTEREO != 1)stereotype = STEREO_NONE;
       Update_Glui_Stereo();
       continue;
     }
@@ -9159,7 +9159,7 @@ int readini2(char *inifile, int localfile){
 		fgets(buffer, 255, stream);
 		sscanf(buffer, "%i", &visHRRlabel);
 		ONEORZERO(visHRRlabel);
-		Update_hrrinfo(visHRRlabel);
+		UpdateHrrinfo(visHRRlabel);
 		continue;
 	}
 	if(match(buffer, "SHOWHRRCUTOFF") == 1){
@@ -9979,8 +9979,8 @@ int readini2(char *inifile, int localfile){
     }
     if(match(buffer, "RENDERFILELABEL") == 1){
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i ", &renderfilelabel);
-      ONEORZERO(renderfilelabel);
+      sscanf(buffer, "%i ", &render_label_type);
+      ONEORZERO(render_label_type);
       continue;
     }
     if(match(buffer, "CELLCENTERTEXT") == 1){
@@ -10362,12 +10362,12 @@ int readini2(char *inifile, int localfile){
       int nheight360_temp = 0;
 
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%i %i %i", &render_option, &nrender_rows, &nheight360_temp);
+      sscanf(buffer, "%i %i %i", &render_window_size, &nrender_rows, &nheight360_temp);
       if (nheight360_temp > 0) {
         nheight360 = nheight360_temp;
         nwidth360 = 2 * nheight360;
       }
-      RenderMenu(render_option);
+      RenderMenu(render_window_size);
       continue;
     }
     if(match(buffer, "SHOWISONORMALS") == 1){
@@ -10564,88 +10564,73 @@ int readini2(char *inifile, int localfile){
       STRCPY(INI_fds_filein, buffer);
       continue;
     }
-    if(match(buffer, "VIEWPOINT3") == 1
-      || match(buffer, "VIEWPOINT4") == 1
-      || match(buffer, "VIEWPOINT5") == 1
-      || match(buffer, "VIEWPOINT6") == 1
-      ){
+    if(match(buffer, "VIEWPOINT5") == 1 || match(buffer, "VIEWPOINT6") == 1){
       int p_type;
       float *eye, mat[16], *az_elev;
-      int is_viewpoint4 = 0;
-      int is_viewpoint5 = 0;
       int is_viewpoint6 = 0;
       float xyzmaxdiff_local = -1.0;
       float xmin_local = 0.0, ymin_local = 0.0, zmin_local = 0.0;
+      char name_ini[32];
+      float zoom_in;
+      int zoomindex_in;
+      cameradata *ci;
+      char *bufferptr;
 
-      if(match(buffer, "VIEWPOINT4") == 1)is_viewpoint4 = 1;
-      if(match(buffer, "VIEWPOINT5") == 1){
-        is_viewpoint4 = 1;
-        is_viewpoint5 = 1;
-      }
-      if(match(buffer, "VIEWPOINT6") == 1){
-        is_viewpoint4 = 1;
-        is_viewpoint5 = 1;
-        is_viewpoint6 = 1;
-      }
-      eye = camera_ini->eye;
-      az_elev = camera_ini->az_elev;
+      ci = camera_ini;
 
-      {
-        char name_ini[32];
-        strcpy(name_ini, "ini");
-        init_camera(camera_ini, name_ini);
-      }
+      if(match(buffer, "VIEWPOINT6") == 1)is_viewpoint6 = 1;
+
+      eye = ci->eye;
+      az_elev = ci->az_elev;
+
+      strcpy(name_ini, "ini");
+      InitCamera(ci, name_ini);
 
       fgets(buffer, 255, stream);
       sscanf(buffer, "%i %i %i %f %f %f %f",
-        &camera_ini->rotation_type, &camera_ini->rotation_index, &camera_ini->view_id,
+        &ci->rotation_type, &ci->rotation_index, &ci->view_id,
         &xyzmaxdiff_local, &xmin_local, &ymin_local, &zmin_local);
 
-      {
-        float zoom_in;
-        int zoomindex_in;
-
-        zoom_in = zoom;
-        zoomindex_in = zoomindex;
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f %i", eye, eye + 1, eye + 2, &zoom_in, &zoomindex_in);
-        if(xyzmaxdiff_local>0.0){
-          eye[0] = xmin_local + eye[0] * xyzmaxdiff_local;
-          eye[1] = ymin_local + eye[1] * xyzmaxdiff_local;
-          eye[2] = zmin_local + eye[2] * xyzmaxdiff_local;
-        }
-        zoom = zoom_in;
-        zoomindex = zoomindex_in;
-        if(zoomindex != -1){
-          if(zoomindex<0)zoomindex = 2;
-          if(zoomindex>4)zoomindex = 2;
-          zoom = zooms[zoomindex];
-        }
-        else{
-          if(zoom<zooms[0]){
-            zoom = zooms[0];
-            zoomindex = 0;
-          }
-          if(zoom>zooms[4]){
-            zoom = zooms[4];
-            zoomindex = 4;
-          }
-        }
-        updatezoommenu = 1;
+      zoom_in = zoom;
+      zoomindex_in = zoomindex;
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f %i", eye, eye + 1, eye + 2, &zoom_in, &zoomindex_in);
+      if(xyzmaxdiff_local>0.0){
+        eye[0] = xmin_local + eye[0] * xyzmaxdiff_local;
+        eye[1] = ymin_local + eye[1] * xyzmaxdiff_local;
+        eye[2] = zmin_local + eye[2] * xyzmaxdiff_local;
       }
+      zoom = zoom_in;
+      zoomindex = zoomindex_in;
+      if(zoomindex != -1){
+        if(zoomindex<0)zoomindex = 2;
+        if(zoomindex>4)zoomindex = 2;
+        zoom = zooms[zoomindex];
+      }
+      else{
+        if(zoom<zooms[0]){
+          zoom = zooms[0];
+          zoomindex = 0;
+        }
+        if(zoom>zooms[4]){
+          zoom = zooms[4];
+          zoomindex = 4;
+        }
+      }
+      updatezoommenu = 1;
 
       p_type = 0;
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%f %f %f %i", &camera_ini->view_angle, &camera_ini->azimuth, &camera_ini->elevation, &p_type);
+      sscanf(buffer, "%f %f %f %i", &ci->view_angle, &ci->azimuth, &ci->elevation, &p_type);
       if(p_type != 1)p_type = 0;
-      camera_ini->projection_type = p_type;
+      ci->projection_type = p_type;
 
       fgets(buffer, 255, stream);
-      sscanf(buffer, "%f %f %f", &camera_ini->xcen, &camera_ini->ycen, &camera_ini->zcen);
+      sscanf(buffer, "%f %f %f", &ci->xcen, &ci->ycen, &ci->zcen);
       if(xyzmaxdiff_local>0.0){
-        camera_ini->xcen = xmin_local + camera_ini->xcen*xyzmaxdiff_local;
-        camera_ini->ycen = ymin_local + camera_ini->ycen*xyzmaxdiff_local;
-        camera_ini->zcen = zmin_local + camera_ini->zcen*xyzmaxdiff_local;
+        ci->xcen = xmin_local + ci->xcen*xyzmaxdiff_local;
+        ci->ycen = ymin_local + ci->ycen*xyzmaxdiff_local;
+        ci->zcen = zmin_local + ci->zcen*xyzmaxdiff_local;
       }
 
       fgets(buffer, 255, stream);
@@ -10658,59 +10643,51 @@ int readini2(char *inifile, int localfile){
           mat[i] = 0.0;
           if(i % 5 == 0)mat[i] = 1.0;
         }
-        q = camera_ini->quaternion;
+        q = ci->quaternion;
         fgets(buffer, 255, stream);
-        sscanf(buffer, "%i %f %f %f %f", &camera_ini->quat_defined, q, q + 1, q + 2, q + 3);
+        sscanf(buffer, "%i %f %f %f %f", &ci->quat_defined, q, q + 1, q + 2, q + 3);
       }
-      else{
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f", mat, mat + 1, mat + 2, mat + 3);
 
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f", mat + 4, mat + 5, mat + 6, mat + 7);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", mat, mat + 1, mat + 2, mat + 3);
 
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f", mat + 8, mat + 9, mat + 10, mat + 11);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", mat + 4, mat + 5, mat + 6, mat + 7);
 
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f", mat + 12, mat + 13, mat + 14, mat + 15);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", mat + 8, mat + 9, mat + 10, mat + 11);
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f", mat + 12, mat + 13, mat + 14, mat + 15);
+
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%i %i %i %i %i %i %i",
+        &ci->clip_mode,
+        &ci->clip_xmin, &ci->clip_ymin, &ci->clip_zmin,
+        &ci->clip_xmax, &ci->clip_ymax, &ci->clip_zmax);
+      fgets(buffer, 255, stream);
+      sscanf(buffer, "%f %f %f %f %f %f",
+        &ci->xmin, &ci->ymin, &ci->zmin,
+        &ci->xmax, &ci->ymax, &ci->zmax);
+      if(xyzmaxdiff_local>0.0){
+        ci->xmin = xmin_local + ci->xmin*xyzmaxdiff_local;
+        ci->xmax = xmin_local + ci->xmax*xyzmaxdiff_local;
+        ci->ymin = ymin_local + ci->ymin*xyzmaxdiff_local;
+        ci->zmax = ymin_local + ci->ymax*xyzmaxdiff_local;
+        ci->ymin = zmin_local + ci->zmin*xyzmaxdiff_local;
+        ci->zmax = zmin_local + ci->zmax*xyzmaxdiff_local;
       }
-      if(is_viewpoint5 == 1){
-        cameradata *ci;
 
-        ci = camera_ini;
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%i %i %i %i %i %i %i",
-          &ci->clip_mode,
-          &ci->clip_xmin, &ci->clip_ymin, &ci->clip_zmin,
-          &ci->clip_xmax, &ci->clip_ymax, &ci->clip_zmax);
-        fgets(buffer, 255, stream);
-        sscanf(buffer, "%f %f %f %f %f %f",
-          &ci->xmin, &ci->ymin, &ci->zmin,
-          &ci->xmax, &ci->ymax, &ci->zmax);
-        if(xyzmaxdiff_local>0.0){
-          ci->xmin = xmin_local + ci->xmin*xyzmaxdiff_local;
-          ci->xmax = xmin_local + ci->xmax*xyzmaxdiff_local;
-          ci->ymin = ymin_local + ci->ymin*xyzmaxdiff_local;
-          ci->zmax = ymin_local + ci->ymax*xyzmaxdiff_local;
-          ci->ymin = zmin_local + ci->zmin*xyzmaxdiff_local;
-          ci->zmax = zmin_local + ci->zmax*xyzmaxdiff_local;
-        }
-      }
-      if(is_viewpoint4 == 1){
-        char *bufferptr;
-
-        fgets(buffer, 255, stream);
-        trim_back(buffer);
-        bufferptr = trim_front(buffer);
-        strcpy(camera_ini->name, bufferptr);
-        init_camera_list();
-        insert_camera(&camera_list_first, camera_ini, bufferptr);
-      }
+      fgets(buffer, 255, stream);
+      trim_back(buffer);
+      bufferptr = trim_front(buffer);
+      strcpy(camera_ini->name, bufferptr);
+      InitCameraList();
+      InsertCamera(&camera_list_first, camera_ini, bufferptr);
 
       enable_reset_saved_view();
-      camera_ini->dirty = 1;
-      camera_ini->defined = 1;
+      ci->dirty = 1;
+      ci->defined = 1;
       continue;
     }
     if(match(buffer, "COLORTABLE") == 1){
@@ -11341,8 +11318,8 @@ int readini2(char *inifile, int localfile){
             }
             update_tour_menulabels();
             createtourpaths();
-            Update_Times();
-            plotstate = getplotstate(DYNAMIC_PLOTS);
+            UpdateTimes();
+            plotstate = GetPlotState(DYNAMIC_PLOTS);
             selectedtour_index = TOURINDEX_MANUAL;
             selected_frame = NULL;
             selected_tour = NULL;
@@ -12327,7 +12304,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %s\n", startup_lang_code);
 #endif
   fprintf(fileout, "STEREO\n");
-  fprintf(fileout, " %i\n", showstereo);
+  fprintf(fileout, " %i\n", stereotype);
   fprintf(fileout, "SURFINC\n");
   fprintf(fileout, " %i\n", surfincrement);
   fprintf(fileout, "TERRAINPARMS\n");
@@ -12370,7 +12347,7 @@ void writeini(int flag,char *filename){
   {
     char *label;
 
-    label = get_camera_label(startup_view_ini);
+    label = GetCameraLabel(startup_view_ini);
     if(label != NULL){
       fprintf(fileout, "LABELSTARTUPVIEW\n");
       fprintf(fileout, " %s\n", label);
@@ -12382,7 +12359,7 @@ void writeini(int flag,char *filename){
   fprintf(fileout, " %i %i %i %i %i\n",
     clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
   fprintf(fileout, "RENDERFILELABEL\n");
-  fprintf(fileout, " %i\n", renderfilelabel);
+  fprintf(fileout, " %i\n", render_label_type);
   fprintf(fileout, "RENDERFILETYPE\n");
   fprintf(fileout," %i %i\n",render_filetype,movie_filetype);
   fprintf(fileout, "MOVIEFILETYPE\n");
@@ -12409,7 +12386,7 @@ void writeini(int flag,char *filename){
     }
   }
   fprintf(fileout, "RENDEROPTION\n");
-  fprintf(fileout, " %i %i %i\n", render_option, nrender_rows, nheight360);
+  fprintf(fileout, " %i %i %i\n", render_window_size, nrender_rows, nheight360);
   fprintf(fileout, "UNITCLASSES\n");
   fprintf(fileout, " %i\n", nunitclasses);
   for(i = 0; i<nunitclasses; i++){
