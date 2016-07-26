@@ -373,7 +373,7 @@ LOADINIFILE
 SETTIMEVAL
  30.000000
 RENDERONCE
- thouse5_iso_lr_stereo
+ thouse5_lr_stereo
 
 // render two stereo images
 
