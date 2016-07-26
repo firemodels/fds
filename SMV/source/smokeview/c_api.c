@@ -452,7 +452,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
     char* view_suffix;
 
     // determine the extension to be used, and set renderfile_ext to it
-    switch(renderfiletype) {
+    switch(render_filetype) {
         case 0:
             renderfile_ext = ext_png;
             break;
@@ -460,7 +460,7 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
             renderfile_ext = ext_jpg;
             break;
         default:
-            renderfiletype = 2;
+            render_filetype = 2;
             renderfile_ext = ext_png;
             break;
     }
@@ -572,7 +572,7 @@ int RenderFrameLua(int view_mode, const char *basename) {
 
   printf("renderfile_name: %s\n", renderfile_name);
   // render image
-  return_code = SVimage2file(renderfile_dir,renderfile_name,renderfiletype,
+  return_code = SVimage2file(renderfile_dir,renderfile_name,render_filetype,
                              woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
@@ -598,7 +598,7 @@ int RenderFrameLuaVar(int view_mode, gdImagePtr *RENDERimage) {
   // we should not be rendering under these conditions
   if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return 0;
   // render image
-  return_code = SVimage2var(renderfiletype,
+  return_code = SVimage2var(render_filetype,
                              woffset,screenWidth,hoffset,screenH, RENDERimage);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
@@ -1321,7 +1321,7 @@ void rendertype(const char *type) {
 }
 
 int get_rendertype() {
-    return renderfiletype;
+    return render_filetype;
 }
 
 void set_movietype(const char *type) {
@@ -1337,7 +1337,7 @@ void set_movietype(const char *type) {
 }
 
 int get_movietype() {
-    return moviefiletype;
+    return movie_filetype;
 }
 
 void makemovie(const char *name, const char *base, float framerate) {
@@ -3216,8 +3216,8 @@ int set_renderfilelabel(int v) {
 } // RENDERFILELABEL
 
 int set_renderfiletype(int render, int movie) {
-  renderfiletype = render;
-  moviefiletype = movie;
+  render_filetype = render;
+  movie_filetype = movie;
   return 0;
 } // RENDERFILETYPE
 

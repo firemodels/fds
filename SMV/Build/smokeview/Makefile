@@ -11,7 +11,7 @@ SMV_TESTFLAG =
 SMV_TESTSTRING =
 SMV_PROFILEFLAG =
 SMV_PROFILESTRING =
-LUA_SCRIPTING = false
+LUA_SCRIPTING =
 ifeq ($(shell echo "check_quotes"),"check_quotes")
   GIT_HASH := $(shell ..\..\..\..\Utilities\Scripts\githash)
   GIT_DATE := $(shell ..\..\..\..\Utilities\Scripts\gitlog)
@@ -50,7 +50,7 @@ endif
 
 objwin = $(obj:.o=.obj)
 
-INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128 
+INC = -I $(SOURCE_DIR)/glut-3.7.6 -I $(SOURCE_DIR)/glui_v2_1_beta -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/smokeview -I $(SOURCE_DIR)/glew -I $(SOURCE_DIR)/zlib128
 WININC = -I $(SOURCE_DIR)/GLINC -I $(SOURCE_DIR)/pthreads
 
 ifeq ($(LUA_SCRIPTING),true)
@@ -198,7 +198,7 @@ intel_linux_64 : CPP       = icpc
 intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64$(SMV_PROFILESTRING)
 
-intel_linux_64 : $(obj)  $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+intel_linux_64 : $(obj)  $(if $(LUA_SCRIPTING),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR_PLAT) $(SMV_LIBS_LINUX) \
         $(INTEL_LIBS_LINUX)\
         $(SYSTEM_LIBS_LINUX) $(LIBLUA)
@@ -260,10 +260,10 @@ gnu_linux_64 : CPP       = g++
 gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
-gnu_linux_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+gnu_linux_64 : $(obj) $(if $(LUA_SCRIPTING),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
 		$(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX) \
-		$(ifeq ($(LUA_SCRIPTING),true),$(LIB_DIR_PLAT)/liblua.a -ldl)
+		$(if $(LUA_SCRIPTING),$(LIB_DIR_PLAT)/liblua.a -ldl)
 
 # ------------- mingw_win_64 ----------------
 
@@ -287,7 +287,7 @@ mingw_win_64 : CPP       = g++
 mingw_win_64 : FC        = gfortran
 mingw_win_64 : exe       = smokeview_mingw_$(SMV_TESTSTRING)64
 
-mingw_win_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+mingw_win_64 : $(obj) $(if $(LUA_SCRIPTING),smvluacore)
 	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR_PLAT) \
 		$(($(LUA_SCRIPTING),true),-I $(SOURCE_DIR)/lua-5.3.1/src) \
 		$(LIBS_PLAT) -lgfortran -lm -lopengl32 -lglu32 \
@@ -318,7 +318,7 @@ intel_osx_64 : CPP       = icpc
 intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokeview_osx_$(SMV_TESTSTRING)64 $(SMV_PROFILESTRING)
 
-intel_osx_64 : $(obj) $(ifeq ($(LUA_SCRIPTING),true),smvluacore)
+intel_osx_64 : $(obj) $(if $(LUA_SCRIPTING),smvluacore)
 	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR_PLAT) $(SMV_LIBS_OSX) \
         $(OSX_INTEL_LIBS) $(LIBLUA)
 
@@ -365,7 +365,7 @@ gnu_osx_64 : $(obj)
 
 .PHONY : clean
 clean:
-	rm -f *.o *.mod *.lua *.dll
+	rm -f *.o *.mod *.lua *.dll *.so
 
 #-------------- force compilation of string_util.c -----------
 
