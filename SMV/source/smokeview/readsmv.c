@@ -8251,7 +8251,7 @@ typedef struct {
   else{
     highlight_flag=1;
   }
-  initcadcolors();
+  InitCadColors();
 
   // update loaded lists
 
@@ -9048,7 +9048,7 @@ int readini2(char *inifile, int localfile){
       label = strchr(buffer, '%');
       if(label == NULL){
         sscanf(buffer, "%i", &colorbartype);
-        remap_colorbartype(colorbartype, colorbarname);
+        RemapColorbarType(colorbartype, colorbarname);
       }
       else{
         label++;
@@ -9798,7 +9798,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer, "%f %f %f ", rgb_ini_copy, rgb_ini_copy + 1, rgb_ini_copy + 2);
         rgb_ini_copy += 3;
       }
-      initrgb();
+      InitRGB();
       if(colorbar_select_index >= 0 && colorbar_select_index <= 255){
         update_colorbar_select_index = 1;
       }
@@ -10935,7 +10935,7 @@ int readini2(char *inifile, int localfile){
         ncolorbarini = 0;
         sscanf(buffer, "%i", &ncolorbarini);
 
-        initdefaultcolorbars();
+        InitDefaultColorbars();
 
         ncolorbars = ndefaultcolorbars + ncolorbarini;
         if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
@@ -10970,7 +10970,7 @@ int readini2(char *inifile, int localfile){
             cbi->rgb_node[nn + 1] = g1;
             cbi->rgb_node[nn + 2] = b1;
           }
-          remapcolorbar(cbi);
+          RemapColorbar(cbi);
         }
       }
 
@@ -11422,7 +11422,7 @@ int readini(char *inifile){
   updateglui();
   if(showall_textures==1)TextureShowMenu(MENU_TEXTURE_SHOWALL);
   if(ncolorbars<=ndefaultcolorbars){
-    initdefaultcolorbars();
+    InitDefaultColorbars();
   }
   updatezoommenu=1;
   getsliceparams2();

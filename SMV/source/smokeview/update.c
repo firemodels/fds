@@ -1971,12 +1971,12 @@ void UpdateDisplay(void){
   }
   if(update_smokecolorbar == 1){
     update_smokecolorbar = 0;
-    SmokeColorBarMenu(fire_colorbar_index);
+    SmokeColorbarMenu(fire_colorbar_index);
   }
   if(update_colorbartype == 1){
     colorbardata *cb;
 
-    cb = getcolorbar(colorbarname);
+    cb = GetColorbar(colorbarname);
     if(cb != NULL){
       colorbartype = cb - colorbarinfo;
       UpdateCurrentColorbar(cb);
@@ -2017,7 +2017,7 @@ void UpdateDisplay(void){
     updatemenu = 0;
   }
   if(update_fire_colorbar_index == 1){
-    SmokeColorBarMenu(fire_colorbar_index_ini);
+    SmokeColorbarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index = 0;
   }
   if(update_colorbar_select_index == 1 && colorbar_select_index >= 0 && colorbar_select_index <= 255){

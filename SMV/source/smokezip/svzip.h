@@ -273,7 +273,7 @@ void makesvd(char *destdir, char *smvfile);
 void usage(char *prog);
 void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
-void smoothlabel(float *a, float *b, int n);
+void SmoothLabel(float *a, float *b, int n);
 #ifdef pp_PART
 void compress_parts(void *arg);
 void *convert_parts2iso(void *arg);

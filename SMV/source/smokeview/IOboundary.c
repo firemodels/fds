@@ -1371,7 +1371,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
   if(patchi->compression_type==COMPRESSED_ZLIB)disable_boundary_glui();
   UpdateTimes();
   UpdateUnitDefs();
-  updatechopcolors();
+  UpdateChopColors();
 #ifdef pp_MEMPRINT
   PRINTF("After boundary file load: \n");
   PrintMemoryInfo;
@@ -4122,7 +4122,7 @@ void Update_All_Patch_Bounds_st(void){
 
     patchi = patchinfo + i;
     total+=update_patch_hist(patchi);
-    update_patch_bounds(patchi);
+    UpdatePatchBounds(patchi);
   }
   if(total==0){
     PRINTF("Boundary file bounds already computed.\n");

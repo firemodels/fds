@@ -881,7 +881,7 @@ extern "C" void Labels_CB(int var){
   switch(var){
     case FLIP:
       colorbarflip = 1 - colorbarflip;
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
   case LABELS_hide_overlaps:
     updatefacelists=1;
@@ -942,15 +942,15 @@ extern "C" void Labels_CB(int var){
     ShowHideMenu(MENU_SHOWHIDE_FLIP);
     break;
   case LABELS_shade:
-    initrgb();
+    InitRGB();
     break;
   case LABELS_shadedata:
     if(setbwdata==1){
       colorbartype_save=colorbartype;
-      ColorBarMenu(bw_colorbar_index);
+      ColorbarMenu(bw_colorbar_index);
     }
     else{
-      ColorBarMenu(colorbartype_save);
+      ColorbarMenu(colorbartype_save);
     }
     break;
   case LABELS_close:
@@ -1078,8 +1078,8 @@ extern "C" void Split_CB(int var) {
 	for(i = 0; i < 12; i++) {
 	  split_colorbar->rgb_node[i] = colorsplit[i] & 0xFF;
   	}
-    remapcolorbar(split_colorbar);
-    update_colorbar_splits(split_colorbar);
+    RemapColorbar(split_colorbar);
+    UpdateColorbarSplits(split_colorbar);
 	UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   }
@@ -1116,7 +1116,7 @@ extern "C" void Extreme_CB(int var){
       }
       if(colorbartype<0||colorbartype>=ncolorbars)return;
       cbi = colorbarinfo + colorbartype;
-      remapcolorbar(cbi);
+      RemapColorbar(cbi);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       updatemenu=1;
       break;
@@ -1132,7 +1132,7 @@ extern "C" void Extreme_CB(int var){
       for(i=0;i<3;i++){
         rgb_nodes[i]=cb_down_rgb[i];
       }
-      remapcolorbar(cbi);
+      RemapColorbar(cbi);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
       break;
     default:

@@ -730,7 +730,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
 #define COLORBAR_LIST2 112
 
-    cb = getcolorbar(default_fed_colorbar);
+    cb = GetColorbar(default_fed_colorbar);
     if(cb!=NULL){
       colorbartype=cb-colorbarinfo;
       set_colorbar_list_index(colorbartype);
@@ -1368,10 +1368,10 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 
   if(colorbartype_ini==-1){
     if(strcmp(sd->label.shortlabel,"thick")==0){
-      ColorBarMenu(wallthickness_colorbar);
+      ColorbarMenu(wallthickness_colorbar);
     }
     if(strcmp(sd->label.shortlabel,"phifield")==0){
-      ColorBarMenu(levelset_colorbar);
+      ColorbarMenu(levelset_colorbar);
     }
   }
   push_slice_loadstack(slicefilenumber);
@@ -3165,7 +3165,7 @@ void setslicecolors(float smin, float smax,
   PRINTF("computing slice color levels \n");
   scale=sb->scale;
   if(sd->qslicedata==NULL)return;
-  getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
+  GetSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
                 smin,smax,
                 nrgb_full,nrgb,
                 sb->colorlabels,&scale,&sb->fscale,sb->levels256,
@@ -3188,7 +3188,7 @@ void setslicelabels(float smin, float smax,
   *errorcode=0;
   PRINTF("setting up slice labels \n");
   scale=sb->scale;
-  getSliceLabels(smin,smax,nrgb,
+  GetSliceLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,&sb->fscale,sb->levels256);
 }
 
@@ -3376,7 +3376,7 @@ void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
 
     }
     if(axislabels_smooth==1){
-      smoothlabel(pmin,pmax,nrgb);
+      SmoothLabel(pmin,pmax,nrgb);
     }
 
 }

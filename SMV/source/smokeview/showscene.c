@@ -70,7 +70,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 
   if(viscolorbarpath == 1){
     if(colorbar_hidescene == 1)UNCLIP;
-    drawcolorbarpath();
+    DrawColorbarPath();
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
   if(viscolorbarpath==0||colorbar_hidescene==0)ShowScene2(mode, view_mode, quad, s_left, s_down);

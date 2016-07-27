@@ -55,9 +55,9 @@ void UpdateTimeLabels(void){
   }
 }
 
-/* ------------------ drawTimeBar ------------------------ */
+/* ------------------ DrawTimebar ------------------------ */
 
-void drawTimeBar(float xleft, float xright, float ybot, float ytop){
+void DrawTimebar(float xleft, float xright, float ybot, float ytop){
   float xxright;
 
   if(xright<=xleft)return;
@@ -87,44 +87,9 @@ void drawTimeBar(float xleft, float xright, float ybot, float ytop){
   glEnd();
 }
 
-/* ------------------ newcolorbar ------------------------ */
+/* ------------------ AddColorbar ------------------------ */
 
-colorbardata *Newcolorbar(char *name, unsigned char *table, int ntable){
-  colorbardata *newcolorbar;
-  int i;
-  unsigned char *rgb_node;
-
-  ncolorbars++;
-  CheckMemory;
-  ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
-  CheckMemory;
-
-  // new colorbar
-
-  newcolorbar = colorbarinfo+ncolorbars-1;
-
-  strcpy(newcolorbar->label, name);
-  newcolorbar->label_ptr = newcolorbar->label;
-  newcolorbar->nnodes = ntable;
-  newcolorbar->nodehilight = 0;
-  rgb_node = newcolorbar->rgb_node;
-  for(i = 0; i<ntable; i++){
-    int ii;
-
-    ii = i*255/(ntable-1);
-    newcolorbar->index_node[i]=ii;
-    *rgb_node++ = *table++;
-    *rgb_node++ = *table++;
-    *rgb_node++ = *table++;
-  }
-
-  remapcolorbar(newcolorbar);
-  return newcolorbar;
-}
-
-/* ------------------ addcolorbar ------------------------ */
-
-void addcolorbar(int icolorbar){
+void AddColorbar(int icolorbar){
   colorbardata *cb_to, *cb_from;
 
   ncolorbars++;
@@ -144,13 +109,13 @@ void addcolorbar(int icolorbar){
   strcat(cb_to->label,cb_from->label);
   cb_to->label_ptr=cb_to->label;
 
-  remapcolorbar(cb_to);
+  RemapColorbar(cb_to);
 
 }
 
-/* ------------------ drawcolorbarpath ------------------------ */
+/* ------------------ DrawColorbarPath ------------------------ */
 
-void drawcolorbarpath(void){
+void DrawColorbarPath(void){
   int i;
   colorbardata *cbi;
   int ncolors;
@@ -337,9 +302,9 @@ void drawcolorbarpath(void){
   }
 }
 
-/* ------------------ getcolorbar ------------------------ */
+/* ------------------ GetColorbar ------------------------ */
 
-colorbardata *getcolorbar(char *label){
+colorbardata *GetColorbar(char *label){
   int i;
 
   for(i=0;i<ncolorbars;i++){
@@ -378,9 +343,9 @@ void UpdateCurrentColorbar(colorbardata *cb){
   if(is_fed_colorbar==1&&fed_loaded==1)Slice_CB(FILEUPDATE);
 }
 
-/* ------------------ remapcolorbar ------------------------ */
+/* ------------------ RemapColorbar ------------------------ */
 
-void remapcolorbar(colorbardata *cbi){
+void RemapColorbar(colorbardata *cbi){
   int i;
   float *colorbar;
   unsigned char *rgb_node;
@@ -460,9 +425,9 @@ void remapcolorbar(colorbardata *cbi){
   CheckMemory;
 }
 
-/* ------------------ remap_colorbartype ------------------------ */
+/* ------------------ RemapColorbarType ------------------------ */
 
-void remap_colorbartype(int cb_oldtype, char *cb_newname){
+void RemapColorbarType(int cb_oldtype, char *cb_newname){
   switch(cb_oldtype){
     case 0:
       strcpy(cb_newname,"Rainbow");
@@ -529,9 +494,9 @@ void remap_colorbartype(int cb_oldtype, char *cb_newname){
   }
 }
 
-/* ------------------ initdefaultcolorbars ------------------------ */
+/* ------------------ InitDefaultColorbars ------------------------ */
 
-void initdefaultcolorbars(void){
+void InitDefaultColorbars(void){
   int i;
   colorbardata *cbi;
 
@@ -923,14 +888,14 @@ void initdefaultcolorbars(void){
   for(i=0;i<ndefaultcolorbars;i++){
     cbi = colorbarinfo + i;
 
-    remapcolorbar(cbi);
-    update_colorbar_splits(cbi);
+    RemapColorbar(cbi);
+    UpdateColorbarSplits(cbi);
   }
 }
 
-/* ------------------ update_colorbar_splits ------------------------ */
+/* ------------------ UpdateColorbarSplits ------------------------ */
 
-void update_colorbar_splits(colorbardata *cbi){
+void UpdateColorbarSplits(colorbardata *cbi){
   int i;
 
   cbi->nsplits=0;
@@ -942,9 +907,9 @@ void update_colorbar_splits(colorbardata *cbi){
   }
 }
 
-/* ------------------ drawColorBars ------------------------ */
+/* ------------------ DrawColorbars ------------------------ */
 
-void drawColorBars(void){
+void DrawColorbars(void){
   int ilabel=0;
 
   int i,i3;

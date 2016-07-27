@@ -937,9 +937,9 @@ void Colorbar_SplitDrag(int xm, int ym){
     ii=current_colorbar->splits[0];
     current_colorbar->index_node[ii]=colorbar_index;
     current_colorbar->index_node[ii-1]=colorbar_index;
-    remapcolorbar(current_colorbar);
+    RemapColorbar(current_colorbar);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    update_colorbar_splits(current_colorbar);
+    UpdateColorbarSplits(current_colorbar);
   }
 }
 
@@ -2068,7 +2068,7 @@ void keyboard(unsigned char key, int flag){
       update_edit_tour();
       break;
     case ';':
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
   }
 

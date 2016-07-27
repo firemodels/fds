@@ -2157,11 +2157,11 @@ int run_script(void){
       break;
     case SCRIPT_CBARFLIP:
       colorbarflip=0;
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
     case SCRIPT_CBARNORMAL:
       colorbarflip=1;
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
     default:
       ASSERT(FFALSE);

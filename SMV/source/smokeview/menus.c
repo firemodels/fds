@@ -639,9 +639,9 @@ void LabelMenu(int value){
   set_labels_controls();
 }
 
-/* ------------------ SmokeColorBarMenu ------------------------ */
+/* ------------------ SmokeColorbarMenu ------------------------ */
 
-void SmokeColorBarMenu(int value){
+void SmokeColorbarMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;
 
@@ -660,9 +660,9 @@ void SmokeColorBarMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ ColorBarMenu ------------------------ */
+/* ------------------ ColorbarMenu ------------------------ */
 
-void ColorBarMenu(int value){
+void ColorbarMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;
   glutPostRedisplay();
@@ -695,16 +695,16 @@ void ColorBarMenu(int value){
       setbwdata = 1 - setbwdata;
       if(setbwdata==1){
         colorbartype_save=colorbartype;
-        ColorBarMenu(bw_colorbar_index);
+        ColorbarMenu(bw_colorbar_index);
       }
       else{
-        ColorBarMenu(colorbartype_save);
+        ColorbarMenu(colorbartype_save);
       }
       Iso_CB(ISO_COLORS);
       break;
     case COLORBAR_TOGGLE_BW:
       setbw=1-setbw;
-      initrgb();
+      InitRGB();
       set_labels_controls();
       break;
    case COLORBAR_TRANSPARENT:
@@ -6604,7 +6604,7 @@ updatemenu=0;
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
-    CREATEMENU(smokecolorbarmenu,SmokeColorBarMenu);
+    CREATEMENU(smokecolorbarmenu,SmokeColorbarMenu);
 
     glutAddMenuEntry(_("Smoke map:"),MENU_DUMMY);
     for(i=0;i<ncolorbars;i++){
@@ -6773,7 +6773,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
 
-  CREATEMENU(colorbarshademenu,ColorBarMenu);
+  CREATEMENU(colorbarshademenu,ColorbarMenu);
   if(contour_type==SHADED_CONTOURS){
     glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
     glutAddMenuEntry("Stepped",COLORBAR_STEPPED);
@@ -6808,7 +6808,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  Flip"), COLORBAR_FLIP);
   }
 
-  CREATEMENU(colorbarsmenu,ColorBarMenu);
+  CREATEMENU(colorbarsmenu,ColorbarMenu);
   {
     colorbardata *cbi;
     char ccolorbarmenu[256];
@@ -6830,7 +6830,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
 
-  CREATEMENU(colorbarmenu,ColorBarMenu);
+  CREATEMENU(colorbarmenu,ColorbarMenu);
   glutAddSubMenu(_("Colorbar"),colorbarsmenu);
   glutAddSubMenu(_("Colorbar type"), colorbarshademenu);
   if(use_transparency_data==1){

@@ -429,7 +429,7 @@ void drawselect_tours(void){
           framej = touri->keyframe_list[j];
           eye = framej->nodeval.eye;
 
-          getrgb(color_index+1,&r,&g,&b);
+          GetRGB(color_index+1,&r,&g,&b);
           glColor3ub(r,g,b);
           glVertex3fv(eye);
         }

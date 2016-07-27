@@ -3086,7 +3086,7 @@ void drawselect_faces(){
         facek = meshi->faceinfo + 6*j + sides[k];
 
         vertices = facek->approx_vertex_coords;
-        getrgb(color_index+1,&r,&g,&b);
+        GetRGB(color_index+1,&r,&g,&b);
         glColor3ub(r,g,b);
         color_index++;
         glVertex3fv(vertices);

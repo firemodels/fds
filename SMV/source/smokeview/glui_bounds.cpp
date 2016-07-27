@@ -1555,10 +1555,10 @@ extern "C" void Plot3D_CB(int var){
     updateplotslice(ZDIR);
     break;
   case CHOPUPDATE:
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETCHOPMINVAL:
-    updatechopcolors();
+    UpdateChopColors();
     switch(setp3chopmin_temp){
       case DISABLE:
         EDIT_p3_chopmin->disable();
@@ -1572,7 +1572,7 @@ extern "C" void Plot3D_CB(int var){
     }
     break;
   case SETCHOPMAXVAL:
-    updatechopcolors();
+    UpdateChopColors();
     switch(setp3chopmax_temp){
       case DISABLE:
         EDIT_p3_chopmax->disable();
@@ -1589,13 +1589,13 @@ extern "C" void Plot3D_CB(int var){
     p3chopmin[list_p3_index]=p3chopmin_temp;
     setp3chopmin[list_p3_index]=setp3chopmin_temp;
 
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case CHOPVALMAX:
     p3chopmax[list_p3_index]=p3chopmax_temp;
     setp3chopmax[list_p3_index]=setp3chopmax_temp;
 
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case PLOTISO:
     visiso = 1 - visiso;
@@ -1777,7 +1777,7 @@ extern "C" void updateplot3dlistindex(void){
     Plot3D_CB(SETCHOPMINVAL);
     Plot3D_CB(SETCHOPMAXVAL);
   }
-  updatechopcolors();
+  UpdateChopColors();
   updateglui();
 }
 
@@ -2162,10 +2162,10 @@ void Bound_CB(int var){
     updatemenu=1;
     break;
   case CHOPUPDATE:
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETCHOPMINVAL:
-    updatechopcolors();
+    UpdateChopColors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmin){
       case DISABLE:
@@ -2181,7 +2181,7 @@ void Bound_CB(int var){
     update_hidepatchsurface();
     break;
   case SETCHOPMAXVAL:
-    updatechopcolors();
+    UpdateChopColors();
     local2globalpatchbounds(patchlabellist[list_patch_index]);
     switch(setpatchchopmax){
       case DISABLE:
@@ -2200,13 +2200,13 @@ void Bound_CB(int var){
     ASSERT(EDIT_patch_min!=NULL);
     EDIT_patch_min->set_float_val(patchmin);
     local2globalpatchbounds(patchlabellist[list_patch_index]);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case CHOPVALMAX:
     ASSERT(EDIT_patch_max!=NULL);
     EDIT_patch_max->set_float_val(patchmax);
     local2globalpatchbounds(patchlabellist[list_patch_index]);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SHOWCHAR:
     if(CHECKBOX_showchar!=NULL&&CHECKBOX_showonlychar!=NULL){
@@ -2503,12 +2503,12 @@ void Part_CB(int var){
     updatemenu=1;
     break;
   case CHOPUPDATE:
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETCHOPMINVAL:
     prop_new->setchopmin=setpartchopmin;
     prop_new->chopmin=partchopmin;
-    updatechopcolors();
+    UpdateChopColors();
     switch(setpartchopmin){
       case DISABLE:
       EDIT_part_chopmin->disable();
@@ -2524,7 +2524,7 @@ void Part_CB(int var){
   case SETCHOPMAXVAL:
     prop_new->setchopmax=setpartchopmax;
     prop_new->chopmax=partchopmax;
-    updatechopcolors();
+    UpdateChopColors();
     switch(setpartchopmax){
       case DISABLE:
       EDIT_part_chopmax->disable();
@@ -2541,13 +2541,13 @@ void Part_CB(int var){
     prop_new->setchopmin=setpartchopmin;
     prop_new->chopmin=partchopmin;
     if(EDIT_part_chopmin!=NULL)EDIT_part_chopmin->set_float_val(partchopmin);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case CHOPVALMAX:
     prop_new->setchopmax=setpartchopmax;
     prop_new->chopmax=partchopmax;
     if(EDIT_part_chopmax!=NULL)EDIT_part_chopmax->set_float_val(partchopmax);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETVALMIN:
     if(setpartmin_old==SET_MIN){
@@ -2677,7 +2677,7 @@ extern "C" void Slice_CB(int var){
   if(var==DATA_transparent){
     if(CHECKBOX_transparentflag2!=NULL)CHECKBOX_transparentflag2->set_int_val(use_transparency_data);
     update_transparency();
-    updatechopcolors();
+    UpdateChopColors();
     update_iso_controls();
     return;
   }
@@ -2689,7 +2689,7 @@ extern "C" void Slice_CB(int var){
   if(var==COLORBAR_LIST2){
       selectedcolorbar_index=get_colorbar_list_index();
       update_colorbar_list();
-      ColorBarMenu(selectedcolorbar_index);
+      ColorbarMenu(selectedcolorbar_index);
       colorbar_global2local();
   }
   if(var==COLORBAR_SMOOTH){
@@ -2706,12 +2706,12 @@ extern "C" void Slice_CB(int var){
       if(SPINNER_plot3dvectorskip!=NULL)SPINNER_plot3dvectorskip->set_int_val(vectorskip);
       break;
     case ZONEVALMIN:
-      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
+      GetZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
         colorlabelzone, zonescale, zonelevels256);
       zoneusermin=zonemin;
       break;
     case ZONEVALMAX:
-      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
+      GetZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
         colorlabelzone, zonescale, zonelevels256);
       zoneusermax=zonemax;
       break;
@@ -2725,7 +2725,7 @@ extern "C" void Slice_CB(int var){
         EDIT_zone_min->disable();
         EDIT_zone_min->set_float_val(zoneglobalmin);
       }
-      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
+      GetZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
         colorlabelzone, zonescale, zonelevels256);
       break;
     case SETZONEVALMAX:
@@ -2738,13 +2738,13 @@ extern "C" void Slice_CB(int var){
         EDIT_zone_max->disable();
         EDIT_zone_max->set_float_val(zoneglobalmax);
       }
-      getZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
+      GetZoneColors(zonetu, nzonetotal, izonetu,zonemin, zonemax, nrgb, nrgb_full,
         colorlabelzone, zonescale, zonelevels256);
       break;
     case COLORBAR_LIST2:
       if(selectedcolorbar_index2 == bw_colorbar_index){
         setbwdata = 1;
-        ColorBarMenu(bw_colorbar_index);
+        ColorbarMenu(bw_colorbar_index);
       }
       else{
         setbwdata = 0;
@@ -2983,10 +2983,10 @@ extern "C" void Slice_CB(int var){
     updatemenu=1;
     break;
   case CHOPUPDATE:
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETCHOPMINVAL:
-    updatechopcolors();
+    UpdateChopColors();
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
     switch(setslicechopmin){
       case DISABLE:
@@ -3001,7 +3001,7 @@ extern "C" void Slice_CB(int var){
     }
     break;
   case SETCHOPMAXVAL:
-    updatechopcolors();
+    UpdateChopColors();
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
     switch(setslicechopmax){
       case DISABLE:
@@ -3018,12 +3018,12 @@ extern "C" void Slice_CB(int var){
   case CHOPVALMIN:
     if(EDIT_slice_min!=NULL)EDIT_slice_min->set_float_val(slicemin);
     SETslicemin(setslicemin,slicemin,setslicechopmin,slicechopmin);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case CHOPVALMAX:
     if(EDIT_slice_max!=NULL)EDIT_slice_max->set_float_val(slicemax);
     SETslicemax(setslicemax,slicemax,setslicechopmax,slicechopmax);
-    updatechopcolors();
+    UpdateChopColors();
     break;
   case SETVALMIN:
     switch(setslicemin){
