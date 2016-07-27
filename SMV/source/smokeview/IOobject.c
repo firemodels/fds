@@ -1278,7 +1278,7 @@ void draw_devices(void){
       xyznorm[1]=world_eyepos[1]-devicei->xyz[1];
       xyznorm[2]=world_eyepos[2]-devicei->xyz[2];
 
-      get_elevaz(xyznorm,&devicei->dtheta,devicei->rotate_axis, &dpsi);
+      GetElevAz(xyznorm,&devicei->dtheta,devicei->rotate_axis, &dpsi);
     }
     {
       float *axis;

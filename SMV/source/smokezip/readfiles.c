@@ -7,7 +7,7 @@
 #include "svzip.h"
 #include "MALLOC.h"
 
-int readsmv(char *smvfile){
+int ReadSMV(char *smvfile){
 
   FILE *streamsmv;
   int ioffset;
@@ -901,9 +901,9 @@ int readsmv(char *smvfile){
 }
 
 
-/* ------------------ readini ------------------------ */
+/* ------------------ ReadINI ------------------------ */
 
-void readini(char *casenameini){
+void ReadINI(char *casenameini){
   char *smoketemp;
   char globalini[256],smokeviewini[256];
   char *globaliniptr, *smokeviewiniptr;
@@ -920,14 +920,14 @@ void readini(char *casenameini){
   globaliniptr=globalini;
   smokeviewiniptr=smokeviewini;
   strcpy(smokeviewini,"smokeview.ini");
-  if(smoketemp!=NULL)readini2(globaliniptr);
-  readini2(smokeviewiniptr);
-  readini2(casenameini);
+  if(smoketemp!=NULL)ReadINI2(globaliniptr);
+  ReadINI2(smokeviewiniptr);
+  ReadINI2(casenameini);
 }
 
-/* ------------------ readini2 ------------------------ */
+/* ------------------ ReadINI2 ------------------------ */
 
-void readini2(char *inifile){
+void ReadINI2(char *inifile){
   char buffer[255],buffer2[255];
   char *type_buffer;
   FILE *stream;

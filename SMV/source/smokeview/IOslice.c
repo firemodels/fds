@@ -1945,13 +1945,13 @@ void getgsliceparams(void){
   }
 }
 
-/* ------------------ is_slice_duplicate ------------------------ */
+/* ------------------ IsSliceDuplicate ------------------------ */
 
 #ifdef pp_SLICEDUP
 #define SLICEEPS 0.001
 #define COUNT_DUPLICATES 1
 #define FIND_DUPLICATES 0
-int is_slice_duplicate(multislicedata *mslicei, int ii, int flag){
+int IsSliceDuplicate(multislicedata *mslicei, int ii, int flag){
   int jj;
   float *xyzmini, *xyzmaxi;
   slicedata *slicei;
@@ -2021,7 +2021,7 @@ int count_slicedups(void){
 
     mslicei = multisliceinfo + i;
     for(ii = 0; ii < mslicei->nslices; ii++){
-      count += is_slice_duplicate(mslicei, ii, COUNT_DUPLICATES);
+      count += IsSliceDuplicate(mslicei, ii, COUNT_DUPLICATES);
     }
   }
   return count;
@@ -2054,7 +2054,7 @@ void update_slicedups(void){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      slicei->skip = is_slice_duplicate(mslicei,ii, FIND_DUPLICATES);
+      slicei->skip = IsSliceDuplicate(mslicei,ii, FIND_DUPLICATES);
     }
   }
 }

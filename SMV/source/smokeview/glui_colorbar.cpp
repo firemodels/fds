@@ -266,7 +266,7 @@ void Colorbar_CB(int var){
     break;
   case COLORBAR_SAVE:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case COLORBAR_ADDPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;

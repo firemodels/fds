@@ -1655,7 +1655,7 @@ void UpdateTimes(void){
 int GetPlotState(int choice){
   int i;
 
-  update_loaded_lists();
+  UpdateLoadedLists();
   switch(choice){
     case STATIC_PLOTS:
     case STATIC_PLOTS_NORECURSE:
@@ -1941,7 +1941,7 @@ void UpdateShowScene(void){
     ZoomMenu(UPDATE_PROJECTION);
   }
   if(convert_ini == 1){
-    writeini(SCRIPT_INI, ini_to);
+    WriteINI(SCRIPT_INI, ini_to);
     exit(0);
   }
   if(convert_ssf==1||update_ssf==1){

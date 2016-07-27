@@ -29,7 +29,7 @@ EXTERNCPP colortabledata *get_colortable(char *label);
 EXTERNCPP void update_iso_colorlevel(void);
 EXTERNCPP void readiso_geom_wrapup(void);
 EXTERNCPP void psystem(char *commandline);
-EXTERNCPP char *get_moviefile_path(char *moviefile_path);
+EXTERNCPP char *GetMovieFilePath(char *moviefile_path);
   EXTERNCPP int get_num_activedevices(void);
 #ifdef CPP
 EXTERNCPP void toggle_rollout(procdata *procinfo, int nprocinfo, int motion_id);
@@ -228,7 +228,7 @@ EXTERNCPP void GetGeomInfoPtrs(geomdata ***geominfoptrs_local,int *ngeominfoptrs
 EXTERNCPP devicedata *getdevice(char *label, int index);
 EXTERNCPP void setup_glut(int argc, char **argv);
 EXTERNCPP int get_ndevices(char *file);
-EXTERNCPP void readhrr(int flag, int *errorcode);
+EXTERNCPP void ReadHRR(int flag, int *errorcode);
 EXTERNCPP void read_device_data(char *file, int filetype, int flag);
 EXTERNCPP void setup_zone_devs(void);
 EXTERNCPP void setup_device_data(void);
@@ -344,7 +344,7 @@ EXTERNCPP void Cam2Clip(cameradata *cam);
 EXTERNCPP void init_object_defs(void);
 EXTERNCPP void update_device_textures(void);
 EXTERNCPP char *get_device_label(char *buffer);
-EXTERNCPP void get_elevaz(float *xyznorm,float *dtheta, float *rotate_axis, float *dpsi);
+EXTERNCPP void GetElevAz(float *xyznorm,float *dtheta, float *rotate_axis, float *dpsi);
 EXTERNCPP void drawTargetNorm(void);
 EXTERNCPP void draw_devices(void);
 EXTERNCPP void free_SVOBJECT(sv_object *object);
@@ -610,9 +610,9 @@ EXTERNCPP void handle_rotation_type(int flag);
 
 EXTERNCPP void init_texturedir(void);
 EXTERNCPP void GetRGB(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
-EXTERNCPP unsigned char *readpicture(char *filename, int *width, int *height, int printflag);
-EXTERNCPP unsigned char *readjpeg(const char *filename,int *width, int *height, int skip);
-EXTERNCPP unsigned char *readpng(const char *filename,int *width, int *height);
+EXTERNCPP unsigned char *ReadPicture(char *filename, int *width, int *height, int printflag);
+EXTERNCPP unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip);
+EXTERNCPP unsigned char *ReadPNG(const char *filename,int *width, int *height);
 
 EXTERNCPP void Update_Blockvals(int flag);
 
@@ -650,7 +650,7 @@ EXTERNCPP void get_blockvals(float *xmin, float *xmax,
 EXTERNCPP void TransparentOff(void);
 EXTERNCPP void TransparentOn(void);
 EXTERNCPP void getobstlabels(const char *filein);
-EXTERNCPP void update_usetextures(void);
+EXTERNCPP void UpdateUseTextures(void);
 EXTERNCPP int updatergbhist(int width, int height,int maketable, int *colortable, int nrgb);
 EXTERNCPP void Antialias(int flag);
 EXTERNCPP void saveview(void);
@@ -659,12 +659,12 @@ EXTERNCPP void setslicebounds(int islicetype);
 EXTERNCPP void setisobounds(int islicetype);
 EXTERNCPP void local2globalpatchbounds(const char *key);
 EXTERNCPP void global2localpatchbounds(const char *key);
-EXTERNCPP void update_loaded_lists(void);
+EXTERNCPP void UpdateLoadedLists(void);
 EXTERNCPP void UpdateLights(float *pos1, float *pos2);
 EXTERNCPP int MergeRenderScreenBuffers(int nscreen_rows, GLubyte **screenbuffers);
-EXTERNCPP void setup_screeninfo(void);
+EXTERNCPP void SetupScreeninfo(void);
 EXTERNCPP int MergeRenderScreenBuffers360(void);
-EXTERNCPP GLubyte *getscreenbuffer(void);
+EXTERNCPP GLubyte *GetScreenBuffer(void);
 EXTERNCPP void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, screendata *screen);
 EXTERNCPP int  inblockage(const meshdata *gb,float x, float y, float z);
 EXTERNCPP int inmesh_smoke(float x, float y, float z, int n, int flag);
@@ -781,8 +781,8 @@ EXTERNCPP void InitCadColors(void);
 EXTERNCPP void UpdateRGBColors(int colorindex);
 EXTERNCPP void InitRGB(void);
 EXTERNCPP void UpdateChopColors(void);
-EXTERNCPP int readini(char *inifile);
-EXTERNCPP void writeini(int flag,char *file);
+EXTERNCPP int ReadINI(char *inifile);
+EXTERNCPP void WriteINI(int flag,char *file);
 EXTERNCPP void DrawFirePlume(float radius, float height, float maxheight);
 EXTERNCPP void AdjustDataBounds(const float *pdata, int skip, int ndata, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void AdjustPartBounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink,
@@ -836,8 +836,8 @@ EXTERNCPP void readiso(const char *file, int ifile, int flag, int *geom_frame_in
 
 EXTERNCPP void InitMenus(int unload);
 EXTERNCPP void SmoothLabel(float *min, float *max, int n);
-EXTERNCPP int readsmv(char *file, char *file2);
-EXTERNCPP void readsmv_dynamic(char *file);
+EXTERNCPP int ReadSMV(char *file, char *file2);
+EXTERNCPP void ReadSMVDynamic(char *file);
 EXTERNCPP int STRCMP(const char *s1, const char *s2);
 EXTERNCPP void outputAxisLabels(void);
 EXTERNCPP void outputLargeText(float x, float y, char *string);
@@ -903,7 +903,7 @@ EXTERNCPP void setisolabels(float smin, float smax,
                     isodata *sd, int *errorcode);
 EXTERNCPP void GetIsoLabels(float tmin, float tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256);
-EXTERNCPP int SVimage2file(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
+EXTERNCPP int SmokeviewImage2File(char *directory, char *GIFfilename, int rendertype, int woffset, int width, int hoffset, int height);
 #ifdef pp_LUA
 EXTERNCPP int SVimage2var(int rendertype, int woffset, int width, int hoffset, int height, gdImagePtr *RENDERimage);
 #endif

@@ -929,7 +929,7 @@ extern "C" void Labels_CB(int var){
     if(visUSERticks==1)ROLLOUT_user_tick->open();
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case LABELS_showall:
     LabelMenu(MENU_LABEL_ShowAll);

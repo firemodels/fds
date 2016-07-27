@@ -393,7 +393,7 @@ int main(int argc, char **argv){
 
   // make sure smv file can be opened
 
-  if(readsmv(smvfile)!=0)return 1;
+  if(ReadSMV(smvfile)!=0)return 1;
 
 #ifdef pp_PLOT3D
   if(nplot3dinfo>0){
@@ -462,7 +462,7 @@ int main(int argc, char **argv){
   }
   if(endian_info==1)return 0;
 
-  readini(inifile);
+  ReadINI(inifile);
 
 #ifdef pp_THREAD
   mt_compress_all();

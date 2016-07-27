@@ -2022,7 +2022,7 @@ void keyboard(unsigned char key, int flag){
       cell_center_text = 1 - cell_center_text;
       break;
     case '#':
-      writeini(LOCAL_INI,NULL);
+      WriteINI(LOCAL_INI,NULL);
       break;
     case '$':
       trainer_active=1-trainer_active;
@@ -2740,7 +2740,7 @@ int DoStereo(void){
     nscreens = 1;
     if(render_mode == RENDER_360&&rendering_status==RENDER_ON){
       nscreens = nscreeninfo;
-      if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
+      if (screeninfo == NULL || update_screeninfo == 1)SetupScreeninfo();
     }
 
     for(i = 0; i < nscreens; i++){
@@ -2764,7 +2764,7 @@ int DoStereo(void){
         ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
         screenWidth=screenWidth_save;
       }
-      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = GetScreenBuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
     if(rendering_status == RENDER_ON){
@@ -3040,7 +3040,7 @@ void Display_CB(void){
 
           for(j=0;j<nrender_cols;j++){
             ShowScene(DRAWSCENE,VIEW_CENTER,1,j*screenWidth,i*screenHeight,NULL);
-            screenbuffers[ibuffer++]=getscreenbuffer();
+            screenbuffers[ibuffer++]=GetScreenBuffer();
             if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
           }
         }
@@ -3057,14 +3057,14 @@ void Display_CB(void){
 
         glDrawBuffer(GL_BACK);
 
-        if (screeninfo == NULL||update_screeninfo==1)setup_screeninfo();
+        if (screeninfo == NULL||update_screeninfo==1)SetupScreeninfo();
 
         for(i = 0; i < nscreeninfo; i++){
           screendata *screeni;
 
           screeni = screeninfo + i;
           ShowScene(DRAWSCENE, VIEW_CENTER, 0, 0, 0, screeni);
-          screeni->screenbuffer = getscreenbuffer();
+          screeni->screenbuffer = GetScreenBuffer();
           if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
         }
         MergeRenderScreenBuffers360();

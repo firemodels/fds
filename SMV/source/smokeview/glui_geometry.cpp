@@ -650,7 +650,7 @@ void Blockedit_DLG_CB(int var){
   switch(var){
   case SAVE_SETTINGS:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CLOSE_WINDOW:
     DialogMenu(DIALOG_GEOMETRY);
@@ -807,7 +807,7 @@ extern "C" void OBJECT_CB(int var){
           changed_idlist[bchighlight->blockage_id]=1;
         }
         blockages_dirty=1;
-        update_usetextures();
+        UpdateUseTextures();
         UpdateFaces();
       }
       break;

@@ -225,12 +225,12 @@ int main(int argc, char **argv){
 
   PRINTF("reading %s\n",smoke1);
   FFLUSH();
-  readsmv(stream_in1, stream_out, caseinfo);
+  ReadSMV(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
 
   PRINTF("reading %s\n",smoke2);
   FFLUSH();
-  readsmv(stream_in2, NULL, caseinfo+1);
+  ReadSMV(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
 
   if(no_plot3d==0){
