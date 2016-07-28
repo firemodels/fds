@@ -329,7 +329,7 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
         return;
       }
     }
-    getPlot3DColors(nn,
+    GetPlot3DColors(nn,
                   setp3min[nn],p3min+nn, setp3max[nn],p3max+nn,
                   nrgb_full, nrgb-1, *(colorlabelp3+nn),*(colorlabeliso+nn),scalep3copy,fscalep3+nn,p3levels[nn],p3levels256[nn],
                   plot3dinfo[ifile].extreme_min+nn,plot3dinfo[ifile].extreme_max+nn);

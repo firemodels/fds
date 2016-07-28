@@ -11,9 +11,9 @@
 
 int iseed=0;
 
-  /* ------------------ smoothlabel ------------------------ */
+  /* ------------------ SmoothLabel ------------------------ */
 
-void smoothlabel(float *a, float *b, int n){
+void SmoothLabel(float *a, float *b, int n){
   float delta, factor, logdelta;
   int ndigits;
 

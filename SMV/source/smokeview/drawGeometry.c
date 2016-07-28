@@ -1613,7 +1613,7 @@ void readcad2geom(cadgeomdata *cd){
       PRINTF("       Loading texture: %s",texti->file);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht,0);
+      floortex=ReadPicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
         PRINTF(" - failed\n");
         fprintf(stderr,"*** Error: Texture file %s failed to load\n",texti->file);
@@ -3086,7 +3086,7 @@ void drawselect_faces(){
         facek = meshi->faceinfo + 6*j + sides[k];
 
         vertices = facek->approx_vertex_coords;
-        getrgb(color_index+1,&r,&g,&b);
+        GetRGB(color_index+1,&r,&g,&b);
         glColor3ub(r,g,b);
         color_index++;
         glVertex3fv(vertices);

@@ -33,7 +33,7 @@ void PlayMovie(void){
   char command_line[1024], moviefile_path[1024];
 
   if(play_movie_now==0)return;
-  if(file_exists(get_moviefile_path(moviefile_path)) == 1){
+  if(file_exists(GetMovieFilePath(moviefile_path)) == 1){
     strcpy(command_line, "ffplay ");
     strcat(command_line,moviefile_path);
     psystem(command_line);
@@ -43,9 +43,9 @@ void PlayMovie(void){
   }
 }
 
-/* ------------------ get_moviefile_path ------------------------ */
+/* ------------------ GetMovieFilePath ------------------------ */
 
-char *get_moviefile_path(char *moviefile_path){
+char *GetMovieFilePath(char *moviefile_path){
   char moviefile[1024], *movie;
 
   trim_back(movie_name);
@@ -95,7 +95,7 @@ void MakeMovie(void){
 
 // construct full pathname of movie
 
-  get_moviefile_path(moviefile_path);
+  GetMovieFilePath(moviefile_path);
 
 // add -y option if overwriting movie file
 
@@ -370,15 +370,15 @@ void RenderFrame(int view_mode){
 
   GetRenderFileName(view_mode, &renderfile_dir_ptr, renderfile_dir, renderfile_full);
 
-  SVimage2file(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
+  SmokeviewImage2File(renderfile_dir_ptr,renderfile_full,render_filetype,woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
   }
 }
 
-/* ------------------ getscreenbuffer --------- */
+/* ------------------ GetScreenBuffer --------- */
 
-GLubyte *getscreenbuffer(void){
+GLubyte *GetScreenBuffer(void){
 
   GLubyte *OpenGLimage=NULL;
 
@@ -497,9 +497,9 @@ int MergeRenderScreenBuffers(int nscreen_rows, GLubyte **screenbuffers){
   return 0;
 }
 
-/* ------------------ getscreenmap360 ------------------------ */
+/* ------------------ GetScreenMap360 ------------------------ */
 
-unsigned int getscreenmap360(float *xyz) {
+unsigned int GetScreenMap360(float *xyz) {
   int ibuff;
   float xyznorm;
 
@@ -543,9 +543,9 @@ unsigned int getscreenmap360(float *xyz) {
 
 #define LEFT 0
 #define RIGHT 1
-/* ------------------ getscreenmap360LR ------------------------ */
+/* ------------------ GetScreenMap360LR ------------------------ */
 
-unsigned int getscreenmap360LR(int side, float *xyz) {
+unsigned int GetScreenMap360LR(int side, float *xyz) {
   int ibuff, imax, ix, iy, index;
   float xyznorm, maxcosangle;
   float *view, *up, *right, t;
@@ -591,7 +591,7 @@ void draw_screeninfo(void){
   int i;
   int j;
 
-  if(screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
+  if(screeninfo == NULL || update_screeninfo == 1)SetupScreeninfo();
   glPushMatrix();
   glScalef(0.5,0.5,0.5);
   glTranslatef(1.0,1.0,1.0);
@@ -628,9 +628,9 @@ void draw_screeninfo(void){
 }
 #endif
 
-/* ------------------ setup_screeninfo ------------------------ */
+/* ------------------ SetupScreeninfo ------------------------ */
 
-void setup_screeninfo(void){
+void SetupScreeninfo(void){
   int ibuf;
 
   update_screeninfo = 0;
@@ -763,11 +763,11 @@ void setup_screeninfo(void){
         xyz[1] = cos_az[i] * cos_elev[j];
         xyz[2] = sin_elev[j];
         if(stereotype == STEREO_LR){
-          screenmap360[j*nwidth360 + i] = getscreenmap360LR(LEFT, xyz);
-          screenmap360[j*nwidth360 + nazimuth + i] = getscreenmap360LR(RIGHT, xyz);
+          screenmap360[j*nwidth360 + i] = GetScreenMap360LR(LEFT, xyz);
+          screenmap360[j*nwidth360 + nazimuth + i] = GetScreenMap360LR(RIGHT, xyz);
         }
         else{
-          screenmap360[j*nwidth360 + i] = getscreenmap360(xyz);
+          screenmap360[j*nwidth360 + i] = GetScreenMap360(xyz);
         }
       }
     }
@@ -930,9 +930,9 @@ void SetSmokeSensor(gdImagePtr RENDERimage, int width, int height){
   }
 }
 
-/* ------------------ SVimage2file ------------------------ */
+/* ------------------ SmokeviewImage2File ------------------------ */
 
-int SVimage2file(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int hoffset, int height){
+int SmokeviewImage2File(char *directory, char *RENDERfilename, int rendertype, int woffset, int width, int hoffset, int height){
 
   FILE *RENDERfile;
   char *renderfile=NULL;
@@ -1107,9 +1107,9 @@ int SVimage2var(int rendertype,
 }
 #endif
 
-/* ------------------ readpicture ------------------------ */
+/* ------------------ ReadPicture ------------------------ */
 
-unsigned char *readpicture(char *filename, int *width, int *height, int printflag){
+unsigned char *ReadPicture(char *filename, int *width, int *height, int printflag){
   char *ext;
   unsigned char *returncode;
   char *filebuffer=NULL;
@@ -1157,10 +1157,10 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
   if(printflag==1)PRINTF("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
-    returncode = readjpeg(filebuffer,width,height,pixel_skip);
+    returncode = ReadJPEG(filebuffer,width,height,pixel_skip);
   }
   else if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
-    returncode = readpng(filebuffer,width,height);
+    returncode = ReadPNG(filebuffer,width,height);
   }
   else{
     if(allocated==1){
@@ -1184,9 +1184,9 @@ unsigned char *readpicture(char *filename, int *width, int *height, int printfla
 
 }
 
-/* ------------------ readjpeg ------------------------ */
+/* ------------------ ReadJPEG ------------------------ */
 
-unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_local){
+unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip_local){
 
   FILE *file;
   gdImagePtr image;
@@ -1231,9 +1231,9 @@ unsigned char *readjpeg(const char *filename,int *width, int *height, int skip_l
 
 }
 
-/* ------------------ readpng ------------------------ */
+/* ------------------ ReadPNG ------------------------ */
 
-unsigned char *readpng(const char *filename,int *width, int *height){
+unsigned char *ReadPNG(const char *filename,int *width, int *height){
 
   FILE *file;
   gdImagePtr image;

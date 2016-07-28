@@ -185,7 +185,7 @@ void init_lang(void){
     }
     nlanglistinfo++;
   }
-  init_translate(smokeview_bindir,tr_name);
+  InitTranslate(smokeview_bindir,tr_name);
 }
 #endif
 
@@ -270,7 +270,7 @@ int setup_case(int argc, char **argv){
     else{
       input_file=smv_filename;
     }
-    return_code=readsmv(input_file,iso_filename);
+    return_code=ReadSMV(input_file,iso_filename);
     if(return_code==0){
       show_glui_trainer();
       show_glui_alert();
@@ -278,7 +278,7 @@ int setup_case(int argc, char **argv){
   }
   else{
     input_file=smv_filename;
-    return_code=readsmv(input_file,iso_filename);
+    return_code=ReadSMV(input_file,iso_filename);
   }
   switch(return_code){
     case 1:
@@ -288,7 +288,7 @@ int setup_case(int argc, char **argv){
       fprintf(stderr,"*** Error: problem reading Smokeview file, %s\n",input_file);
       return 2;
     case 0:
-      readsmv_dynamic(input_file);
+      ReadSMVDynamic(input_file);
       break;
     default:
       ASSERT(FFALSE);
@@ -301,7 +301,7 @@ int setup_case(int argc, char **argv){
   SetUnitVis();
 
   CheckMemory;
-  readini(NULL);
+  ReadINI(NULL);
   readboundini();
   if(use_graphics==0)return 0;
 #ifdef pp_LANG

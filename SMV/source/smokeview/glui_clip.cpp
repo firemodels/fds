@@ -203,7 +203,7 @@ void CLIP_CB(int var){
     }
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CLIP_CLOSE:
     hide_glui_clip();

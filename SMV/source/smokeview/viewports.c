@@ -666,7 +666,7 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
     if(visHRRlabel==1&&hrrinfo!=NULL){
       outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, hrrinfo->hrrlabel);
     }
-    drawTimeBar(timebar_left_pos,timebar_right_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
+    DrawTimebar(timebar_left_pos,timebar_right_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
   }
 
   if(visFramerate==1&&showtime==1){
@@ -733,7 +733,7 @@ void ViewportColorbar(int quad, GLint screen_left, GLint screen_down){
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  drawColorBars();
+  DrawColorbars();
 }
 
     /* -------------------------- ViewportTitle -------------------------- */

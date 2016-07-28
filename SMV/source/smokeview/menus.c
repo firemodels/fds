@@ -639,9 +639,9 @@ void LabelMenu(int value){
   set_labels_controls();
 }
 
-/* ------------------ SmokeColorBarMenu ------------------------ */
+/* ------------------ SmokeColorbarMenu ------------------------ */
 
-void SmokeColorBarMenu(int value){
+void SmokeColorbarMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;
 
@@ -660,9 +660,9 @@ void SmokeColorBarMenu(int value){
   glutPostRedisplay();
 }
 
-/* ------------------ ColorBarMenu ------------------------ */
+/* ------------------ ColorbarMenu ------------------------ */
 
-void ColorBarMenu(int value){
+void ColorbarMenu(int value){
   if(value==MENU_DUMMY)return;
   updatemenu=1;
   glutPostRedisplay();
@@ -695,16 +695,16 @@ void ColorBarMenu(int value){
       setbwdata = 1 - setbwdata;
       if(setbwdata==1){
         colorbartype_save=colorbartype;
-        ColorBarMenu(bw_colorbar_index);
+        ColorbarMenu(bw_colorbar_index);
       }
       else{
-        ColorBarMenu(colorbartype_save);
+        ColorbarMenu(colorbartype_save);
       }
       Iso_CB(ISO_COLORS);
       break;
     case COLORBAR_TOGGLE_BW:
       setbw=1-setbw;
-      initrgb();
+      InitRGB();
       set_labels_controls();
       break;
    case COLORBAR_TRANSPARENT:
@@ -2206,7 +2206,7 @@ void CompressMenu(int value){
 
 void IniSubMenu(int value){
   if(value==MENU_READCASEINI){
-    readini(NULL);
+    ReadINI(NULL);
   }
   else{
     char *ini_filename;
@@ -2217,7 +2217,7 @@ void IniSubMenu(int value){
     script_filename2=script_filename;
     strcpy(script_filename,ini_filename);
     windowresized=0;
-    readini(script_filename2);
+    ReadINI(script_filename2);
   }
 }
 
@@ -2226,14 +2226,14 @@ void IniSubMenu(int value){
 void SmokeviewIniMenu(int value){
   switch(value){
   case MENU_READINI:
-    readini(NULL);
+    ReadINI(NULL);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   case MENU_WRITEINI:
-    writeini(GLOBAL_INI,NULL);
+    WriteINI(GLOBAL_INI,NULL);
     break;
   case MENU_WRITECASEINI:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case MENU_READSVO:
     init_object_defs();
@@ -2361,7 +2361,7 @@ void ScriptMenu(int value){
         if(scriptfile->id!=value)continue;
         error_code=compile_script(file);
         if(error_code==0){
-      //    readini(NULL);
+      //    ReadINI(NULL);
           start_script();
         }
         else{
@@ -2458,7 +2458,7 @@ void LoadUnloadMenu(int value){
       fprintf(scriptoutstream,"UNLOADALL\n");
     }
     if(hrr_csv_filename!=NULL){
-      readhrr(UNLOAD, &errorcode);
+      ReadHRR(UNLOAD, &errorcode);
     }
     if(nvolrenderinfo>0){
       LoadVolSmoke3DMenu(UNLOAD_ALL);
@@ -2497,9 +2497,9 @@ void LoadUnloadMenu(int value){
     int last_slice_loaded;
 
     LOCK_COMPRESS
-    readsmv_dynamic(smv_filename);
+    ReadSMVDynamic(smv_filename);
     if(hrr_csv_filename!=NULL){
-      readhrr(LOAD, &errorcode);
+      ReadHRR(LOAD, &errorcode);
     }
     islicetype_save=islicetype;
     for(i=0;i<nsliceinfo;i++){
@@ -6604,7 +6604,7 @@ updatemenu=0;
     colorbardata *cbi;
     char ccolorbarmenu[256];
 
-    CREATEMENU(smokecolorbarmenu,SmokeColorBarMenu);
+    CREATEMENU(smokecolorbarmenu,SmokeColorbarMenu);
 
     glutAddMenuEntry(_("Smoke map:"),MENU_DUMMY);
     for(i=0;i<ncolorbars;i++){
@@ -6773,7 +6773,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
 
-  CREATEMENU(colorbarshademenu,ColorBarMenu);
+  CREATEMENU(colorbarshademenu,ColorbarMenu);
   if(contour_type==SHADED_CONTOURS){
     glutAddMenuEntry("*Continuous",COLORBAR_CONTINUOUS);
     glutAddMenuEntry("Stepped",COLORBAR_STEPPED);
@@ -6808,7 +6808,7 @@ updatemenu=0;
     glutAddMenuEntry(_("  Flip"), COLORBAR_FLIP);
   }
 
-  CREATEMENU(colorbarsmenu,ColorBarMenu);
+  CREATEMENU(colorbarsmenu,ColorbarMenu);
   {
     colorbardata *cbi;
     char ccolorbarmenu[256];
@@ -6830,7 +6830,7 @@ updatemenu=0;
 
 /* -------------------------------- colorbarmenu -------------------------- */
 
-  CREATEMENU(colorbarmenu,ColorBarMenu);
+  CREATEMENU(colorbarmenu,ColorbarMenu);
   glutAddSubMenu(_("Colorbar"),colorbarsmenu);
   glutAddSubMenu(_("Colorbar type"), colorbarshademenu);
   if(use_transparency_data==1){

@@ -144,7 +144,7 @@ void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr, int *nv
   }
   FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axislabels_smooth==1){
-    smoothlabel(tmin_local,tmax_local,nrgb);
+    SmoothLabel(tmin_local,tmax_local,nrgb);
   }
 }
 
@@ -1455,7 +1455,7 @@ void setisolabels(float smin, float smax,
   *errorcode=0;
   PRINTF("setting up iso labels \n");
   scale=sb->scale;
-  getIsoLabels(smin,smax,nrgb,
+  GetIsoLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
 

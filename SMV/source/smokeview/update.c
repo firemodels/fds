@@ -1655,7 +1655,7 @@ void UpdateTimes(void){
 int GetPlotState(int choice){
   int i;
 
-  update_loaded_lists();
+  UpdateLoadedLists();
   switch(choice){
     case STATIC_PLOTS:
     case STATIC_PLOTS_NORECURSE:
@@ -1941,7 +1941,7 @@ void UpdateShowScene(void){
     ZoomMenu(UPDATE_PROJECTION);
   }
   if(convert_ini == 1){
-    writeini(SCRIPT_INI, ini_to);
+    WriteINI(SCRIPT_INI, ini_to);
     exit(0);
   }
   if(convert_ssf==1||update_ssf==1){
@@ -1971,12 +1971,12 @@ void UpdateDisplay(void){
   }
   if(update_smokecolorbar == 1){
     update_smokecolorbar = 0;
-    SmokeColorBarMenu(fire_colorbar_index);
+    SmokeColorbarMenu(fire_colorbar_index);
   }
   if(update_colorbartype == 1){
     colorbardata *cb;
 
-    cb = getcolorbar(colorbarname);
+    cb = GetColorbar(colorbarname);
     if(cb != NULL){
       colorbartype = cb - colorbarinfo;
       UpdateCurrentColorbar(cb);
@@ -2017,7 +2017,7 @@ void UpdateDisplay(void){
     updatemenu = 0;
   }
   if(update_fire_colorbar_index == 1){
-    SmokeColorBarMenu(fire_colorbar_index_ini);
+    SmokeColorbarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index = 0;
   }
   if(update_colorbar_select_index == 1 && colorbar_select_index >= 0 && colorbar_select_index <= 255){

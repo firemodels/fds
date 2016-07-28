@@ -162,7 +162,7 @@ void parse_commandline(int argc, char **argv){
     InitCameraList();
     InitOpenGL();
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI, NULL);
+    WriteINI(GLOBAL_INI, NULL);
     exit(0);
   }
 
@@ -170,7 +170,7 @@ void parse_commandline(int argc, char **argv){
     InitCameraList();
     use_graphics = 0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI, NULL);
+    WriteINI(GLOBAL_INI, NULL);
     exit(0);
   }
   strcpy(SMVFILENAME, "");
@@ -624,7 +624,7 @@ int main(int argc, char **argv){
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
   if(convert_ini==1){
-    readini(ini_from);
+    ReadINI(ini_from);
   }
 
   glutMainLoop();

@@ -40,7 +40,7 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   *extreme_min=0;
   *extreme_max=0;
   local_skip=0;
-  adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
+  AdjustDataBounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
   }
@@ -130,7 +130,7 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   *tmin_arg = tmin2;
   *tmax_arg = tmax2;
   local_skip=0;
-  adjustdatabounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
+  AdjustDataBounds(t,local_skip,nt,settmin,&tmin2,settmax,&tmax2);
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
   }
@@ -165,45 +165,9 @@ void getBoundaryColors2(float *t, int nt, unsigned char *it,
   }
 }
 
-/* ------------------ remap_patchdata ------------------------ */
+/* ------------------ WriteBoundINI ------------------------ */
 
-void remap_patchdata(patchdata *patchi,float valmin, float valmax, int *extreme_min, int *extreme_max){
-  int i;
-  meshdata *meshi;
-  unsigned char *cpatchval;
-  int npqq_local;
-  int upper, lower;
-
-  meshi = meshinfo + patchi->blocknumber;
-  cpatchval = meshi->cpatchval;
-  npqq_local = meshi->npatch_times*meshi->npatchsize;
-  upper = 255 - extreme_data_offset;
-  lower = extreme_data_offset;
-  for(i=0;i<npqq_local;i++){
-    float val;
-    int ival;
-
-    ival = cpatchval[i];
-    val = (patchi->local_valmin*(upper-ival)+patchi->local_valmax*(ival-lower))/(float)(upper-lower);
-
-    if(val<valmin){
-      ival=0;
-      *extreme_min=1;
-    }
-    else if(val>valmax){
-      ival=255;
-      *extreme_max=1;
-    }
-    else{
-      ival=extreme_data_offset+(254-extreme_data_offset)*(val-valmin)/(valmax-valmin);
-    }
-    cpatchval[i]=ival;
-  }
-}
-
-/* ------------------ writeboundini ------------------------ */
-
-void writeboundini(void){
+void WriteBoundINI(void){
   FILE *stream = NULL;
   char *fullfilename = NULL;
   int i;
@@ -248,9 +212,9 @@ void writeboundini(void){
   FREEMEMORY(fullfilename);
 }
 
-/* ------------------ update_patch_bounds ------------------------ */
+/* ------------------ UpdatePatchBounds ------------------------ */
 
-void update_patch_bounds(patchdata *patchi){
+void UpdatePatchBounds(patchdata *patchi){
   histogramdata full_histogram;
   bounddata *boundi;
   int j;
@@ -283,7 +247,7 @@ void update_patch_bounds(patchdata *patchi){
     boundj = &patchj->bounds;
     memcpy(boundj,boundi,sizeof(bounddata));
   }
-  writeboundini();
+  WriteBoundINI();
   free_histogram(&full_histogram);
 }
 
@@ -302,7 +266,7 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   int itt;
   float new_tmin, new_tmax, tmin2, tmax2;
 
-  update_patch_bounds(patchi);
+  UpdatePatchBounds(patchi);
 
   CheckMemory;
   tmin2=patchi->bounds.global_min;
@@ -319,7 +283,7 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
     tmax2=patchi->bounds.percentile_max;
   }
   if(axislabels_smooth==1){
-    smoothlabel(&tmin2,&tmax2,nrgb);
+    SmoothLabel(&tmin2,&tmax2,nrgb);
   }
   if(settmin!=SET_MIN){
     *ttmin=tmin2;
@@ -459,9 +423,9 @@ void getBoundaryLabels(
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
-/* ------------------ updatePart5extremes ------------------------ */
+/* ------------------ UpdatePart5Extremes ------------------------ */
 
-void updatePart5extremes(void){
+void UpdatePart5Extremes(void){
   int ii,i,j,k,m;
   part5data *datacopy;
 
@@ -511,9 +475,9 @@ void updatePart5extremes(void){
   }
 }
 
-/* ------------------ getPart5Colors ------------------------ */
+/* ------------------ GetPart5Colors ------------------------ */
 
-void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
+void GetPart5Colors(partdata *parti, int nlevel, int convert_flag){
   int i;
   part5data *datacopy;
   // float *diameter_data;
@@ -766,146 +730,10 @@ void getPart5Colors(partdata *parti, int nlevel, int convert_flag){
   }
 
 }
-/* ------------------ getPartColors ------------------------ */
 
-void getPartColors(const float *t, int local_skip, int nt,
-                   unsigned char *it,const unsigned char *isprink, int particle_type, int droplet_type,
-              const float *ttmin, const float *ttmax, int nlevel,
-              char **labels, char *scale, float *ppartlevels256){
-  int n;
-  float factor, tval, range;
-  float local_tmin, local_tmax;
-  int expmax, expmin;
-  int itt;
-  const unsigned char *isprinkcopy;
-  const float *tcopy;
-  unsigned char *itcopy;
+/* ------------------ GetZoneColor ------------------------ */
 
-  isprinkcopy=isprink;
-  itcopy = it;
-  tcopy = t;
-
-  STRCPY(scale,"");
-  t += local_skip;
-  it += local_skip;
-  isprink += local_skip;
-  if(particle_type==0){
-    for (n=local_skip;n<nt;n++){
-      if(*isprink==0){  /* its not a sprinkler drop so color it according to below ... */
-        if(     *t>-0.1&&*t<0.1 ){
-          *it=rgb_white;
-        }
-        else if(*t>0.9 &&*t<1.1 ){
-          *it=rgb_yellow;
-        }
-        else if(*t>1.9&&*t<2.1){
-          *it=rgb_blue;
-        }
-        else if(*t>2.9&&*t<3.1){
-          *it=rgb_red;
-        }
-        else if(*t>3.9&&*t<4.1){
-          *it=rgb_green;
-        }
-        else if(*t>4.9&&*t<5.1){
-          *it=rgb_magenta;
-        }
-        else if(*t>5.9&&*t<6.1){
-          *it=rgb_cyan;
-        }
-        else if(*t>6.9&&*t<7.1){
-          *it=rgb_black;
-        }
-        else{
-           *it=rgb_white;
-         }
-      }
-      else {
-        *it=rgb_blue;
-      }  /* its a sprinkler drop (*isprink=1) so color it blue */
-      t++;
-      it++;
-      isprink++;
-    }
-    STRCPY(&labels[1][0],"0.0");
-    for (n=2;n<nlevel-1;n++){
-      STRCPY(&labels[n][0]," ");
-    }
-    STRCPY(&labels[nlevel-1][0],"1.0");
-    if(particle_type==0&&droplet_type==0)return;
-  }
-
-  isprink=isprinkcopy;
-  it=itcopy;
-  t=tcopy;
-
-  local_tmin=*ttmin;
-  local_tmax=*ttmax;
-  range = local_tmax - local_tmin;
-  factor=0.0f;
-  if(range!=0.0f){
-    factor = (float)(255-2*extreme_data_offset)/range;
-  }
-  for(n=local_skip;n<nt;n++){
-    if((particle_type==1&&*isprink==0)||(*isprink==1&&droplet_type==1)){
-      float val;
-
-      val = *t;
-      if(val<local_tmin){
-        itt=0;
-      }
-      else if(val>local_tmax){
-        itt=255;
-      }
-      else{
-        itt=extreme_data_offset+(int)(factor*(*t-local_tmin));
-      }
-      *it = CLAMP(itt,colorbar_offset,255-colorbar_offset);
-    }
-    if(droplet_type==0&&*isprink==1){
-      *it=rgb_blue;
-    }
-    it++;
-    t++;
-    isprink++;
-  }
-
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
-  if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
-    sprintf(scale,"*10^%i",expmin);
-  }
-  if(expmin==0&&(expmax<EXPMIN||expmax>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmax);
-    local_tmax *= pow((double)10.0,(double)-expmax);
-    sprintf(scale,"*10^%i",expmax);
-  }
-  if(expmax==0&&(expmin<EXPMIN||expmin>EXPMAX)){
-    local_tmin *= pow((double)10.0,(double)-expmin);
-    local_tmax *= pow((double)10.0,(double)-expmin);
-    sprintf(scale,"*10^%i",expmin);
-  }
-  range = local_tmax - local_tmin;
-
-  factor = range/(nlevel-2);
-  for (n=1;n<nlevel-2;n++){
-    tval = local_tmin + (n-1)*factor;
-    num2string(&labels[n][0],tval,range);
-  }
-  for(n=0;n<256;n++){
-    ppartlevels256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
-  }
-  tval = local_tmin + (nlevel-3)*factor;
-  num2string(&labels[nlevel-2][0],tval,range);
-  tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval,range);
-}
-
-/* ------------------ getZoneColor ------------------------ */
-
-int getZoneColor(float t, float local_tmin, float local_tmax, int nlevel){
+int GetZoneColor(float t, float local_tmin, float local_tmax, int nlevel){
   int level;
 
   if(t<=local_tmin)return 0;
@@ -918,9 +746,9 @@ int getZoneColor(float t, float local_tmin, float local_tmax, int nlevel){
 }
 
 
-/* ------------------ getZoneColors ------------------------ */
+/* ------------------ GetZoneColors ------------------------ */
 
-void getZoneColors(const float *t, int nt, unsigned char *it,
+void GetZoneColors(const float *t, int nt, unsigned char *it,
                float ttmin, float ttmax, int nlevel, int nlevel_full,
                char **labels, char *scale, float *tvals256
                ){
@@ -990,9 +818,9 @@ void getZoneColors(const float *t, int nt, unsigned char *it,
 
 }
 
-/* ------------------ getPlot3DColors ------------------------ */
+/* ------------------ GetPlot3DColors ------------------------ */
 
-void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax,
+void GetPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, float *ttmax,
               int ndatalevel, int nlevel,
               char **labels,char **labelsiso,char **scale, float *fscale, float *tlevels, float *tlevels256,
               int *extreme_min, int *extreme_max
@@ -1061,7 +889,7 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   else{
     local_tmax=*ttmax;
   }
-  adjustPlot3Dbounds(plot3dvar,settmin,&local_tmin,settmax,&local_tmax);
+  AdjustPlot3DBounds(plot3dvar,settmin,&local_tmin,settmax,&local_tmax);
 
   *ttmin=local_tmin;
   *ttmax=local_tmax;
@@ -1168,9 +996,9 @@ void getPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   }
 }
 
-/* ------------------ getSliceColors ------------------------ */
+/* ------------------ GetSliceColors ------------------------ */
 
-void getSliceColors(const float *t, int nt, unsigned char *it,
+void GetSliceColors(const float *t, int nt, unsigned char *it,
               float local_tmin, float local_tmax,
               int ndatalevel, int nlevel,
               char labels[12][11],char **scale, float *fscale, float *tlevels256,
@@ -1249,7 +1077,7 @@ void getSliceColors(const float *t, int nt, unsigned char *it,
 
 /* ------------------ getSliceLabelels ------------------------ */
 
-void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
+void GetSliceLabels(float local_tmin, float local_tmax, int nlevel,
               char labels[12][11],char **scale, float *fscale, float *tlevels256){
   int n;
   float dt, tval;
@@ -1295,9 +1123,9 @@ void getSliceLabels(float local_tmin, float local_tmax, int nlevel,
 }
 
 
-/* ------------------ getIsoLabels ------------------------ */
+/* ------------------ GetIsoLabels ------------------------ */
 
-void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
+void GetIsoLabels(float local_tmin, float local_tmax, int nlevel,
               char labels[12][11],char **scale, float *tlevels256){
   int n;
   float dt, tval;
@@ -1338,9 +1166,9 @@ void getIsoLabels(float local_tmin, float local_tmax, int nlevel,
   num2string(&labels[nlevel-1][0],tval,range);
 }
 
-/* ------------------ initcadcolors ------------------------ */
+/* ------------------ InitCadColors ------------------------ */
 
-void initcadcolors(void){
+void InitCadColors(void){
   int n, i1, i2, i;
   float xx, f1, f2, sum;
   switch(setbw){
@@ -1380,47 +1208,47 @@ void initcadcolors(void){
   }
 }
 
-/* ------------------ Update_Texturebar ------------------------ */
+/* ------------------ UpdateTexturebar ------------------------ */
 
-void Update_Texturebar(void){
+void UpdateTexturebar(void){
   if(use_graphics==0)return;
   glBindTexture(GL_TEXTURE_1D, terrain_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 256, 0, GL_RGBA, GL_FLOAT, rgb_terrain2);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_terrain2) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_terrain2) ");
 
   glBindTexture(GL_TEXTURE_1D, texture_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_full);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_full) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_full) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_slice_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_slice);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slice) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_slice) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_patch_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_patch);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_patch) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_patch) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_plot3d_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_plot3d);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_plot3d) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_plot3d) ");
 
   glBindTexture(GL_TEXTURE_1D,texture_iso_colorbar_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,256,0,GL_RGBA,GL_FLOAT,rgb_iso);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_iso) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_iso) ");
 
   glBindTexture(GL_TEXTURE_1D,slicesmoke_colormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_slicesmokecolormap);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_slicesmokecolormap) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_slicesmokecolormap) ");
 
   glBindTexture(GL_TEXTURE_1D,volsmoke_colormap_id);
   glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA,MAXSMOKERGB,0,GL_RGBA,GL_FLOAT,rgb_volsmokecolormap);
-  SNIFF_ERRORS("Update_Texturebar - glTexImage1D (rgb_volsmokecolormap) ");
+  SNIFF_ERRORS("UpdateTexturebar - glTexImage1D (rgb_volsmokecolormap) ");
 
 #ifdef pp_GPU
   if(gpuactive==1&&nvolrenderinfo>0&&showvolrender==1){
     glActiveTexture(GL_TEXTURE2);
     glTexSubImage1D(GL_TEXTURE_1D,0,0,MAXSMOKERGB,GL_RGBA,GL_FLOAT, rgb_volsmokecolormap);
-    SNIFF_ERRORS("Update_Texturebar - glTexSubImage1D (rgb_volsmokecolormap) ");
+    SNIFF_ERRORS("UpdateTexturebar - glTexSubImage1D (rgb_volsmokecolormap) ");
     glActiveTexture(GL_TEXTURE0);
   }
   if(gpuactive==1&&SHOW_gslice_data==1){
@@ -1433,9 +1261,9 @@ void Update_Texturebar(void){
 
 }
 
-/* ------------------ initrgb ------------------------ */
+/* ------------------ InitRGB ------------------------ */
 
-void initrgb(void){
+void InitRGB(void){
   int n;
   float transparent_level_local=1.0;
 
@@ -1472,9 +1300,9 @@ void initrgb(void){
   }
 }
 
-/* ------------------ Update_Smokecolormap ------------------------ */
+/* ------------------ UpdateSmokeColormap ------------------------ */
 
-void Update_Smokecolormap(int option){
+void UpdateSmokeColormap(int option){
   int n;
   float transparent_level_local=1.0;
   unsigned char *alpha;
@@ -1525,7 +1353,7 @@ void Update_Smokecolormap(int option){
           rgb_colormap[4*n+3]=transparent_level_local;
         }
       }
-      Update_Texturebar();
+      UpdateTexturebar();
       break;
     case FIRECOLORMAP_NOCONSTRAINT:
     case FIRECOLORMAP_CONSTRAINT:
@@ -1567,7 +1395,7 @@ void Update_Smokecolormap(int option){
       ASSERT(FFALSE);
       break;
   }
-  Update_Texturebar();
+  UpdateTexturebar();
 }
 
 /* ------------------ UpdateRGBColors ------------------------ */
@@ -1585,8 +1413,8 @@ void UpdateRGBColors(int colorbar_index){
 
   if(use_transparency_data==1)transparent_level_local=transparent_level;
 
-  initcadcolors();
-  initrgb();
+  InitCadColors();
+  InitRGB();
   nrgb_full = MAXRGB;
   for(n=0;n<nrgb_full;n++){
     rgb_trans[4*n]=0.0;
@@ -1612,8 +1440,8 @@ void UpdateRGBColors(int colorbar_index){
         rgb_full[n][3]=transparent_level_local;
       }
     }
-    Update_Smokecolormap(RENDER_SLICE);
-    Update_Smokecolormap(RENDER_VOLUME);
+    UpdateSmokeColormap(RENDER_SLICE);
+    UpdateSmokeColormap(RENDER_VOLUME);
   }
   else{
     for(n=0;n<nrgb_full;n++){
@@ -1786,14 +1614,14 @@ void UpdateRGBColors(int colorbar_index){
       facej->color=foregroundcolor;
     }
   }
-  updatechopcolors();
-  initcadcolors();
-  Update_Texturebar();
+  UpdateChopColors();
+  InitCadColors();
+  UpdateTexturebar();
 }
 
-/* ------------------ updatechopcolors ------------------------ */
+/* ------------------ UpdateChopColors ------------------------ */
 
-void updatechopcolors(void){
+void UpdateChopColors(void){
   int i;
   int ichopmin=0,ichopmax=nrgb_full;
 #define NCHOP 8
@@ -2023,14 +1851,14 @@ void updatechopcolors(void){
 
     parti = partinfo + i;
     if(parti->loaded==0)continue;
-    adjustpart5chops(parti);
+    AdjustPart5Chops(parti);
   }
-  Update_Texturebar();
+  UpdateTexturebar();
 }
 
-/* ------------------ getrgb ------------------------ */
+/* ------------------ GetRGB ------------------------ */
 
-void getrgb(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb){
+void GetRGB(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb){
   unsigned char r, g, b;
 
   r = val >> (ngreenbits+nbluebits);
