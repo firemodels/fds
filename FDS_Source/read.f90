@@ -5854,19 +5854,10 @@ READ_SURF_LOOP: DO N=0,N_SURF
 
    IF (MASS_FLUX_TOTAL >= 0._EB) THEN
       SF%MASS_FLUX_TOTAL = MASS_FLUX_TOTAL
-      TAU_V = TAU_MF(1)
-      RAMP_V = RAMP_MF(1)
-      TAU_MF = 1._EB
-      RAMP_MF = 'null'
    ELSE
-      IF (TRIM(SPEC_ID(1))=='null') THEN
-         SPEC_ID(1) = SPECIES_MIXTURE(1)%ID
-         MASS_FLUX(1) = -MASS_FLUX_TOTAL
-      ELSE
-         MASS_FLUX = -MASS_FLUX_TOTAL*MASS_FRACTION
-      ENDIF
-      MASS_FLUX_TOTAL = 0._EB
-      MASS_FRACTION = 0._EB
+      WRITE (MESSAGE,'(A,A,A)') 'ERROR: Problem with SURF: ',TRIM(SF%ID), &
+      '. MASS_FLUX_TOTAL should only be used for outflow. Use MASS_FLUX for inflow'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
    ! Error checking
