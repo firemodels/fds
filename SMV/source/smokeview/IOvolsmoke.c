@@ -764,7 +764,7 @@ void drawsmoke3dVOLdebug(void){
         y[1] = yplt[jbar];
         z[0] = zplt[0];
         z[1] = zplt[kbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       case YWALLMIN:
       case YWALLMAX:
@@ -780,7 +780,7 @@ void drawsmoke3dVOLdebug(void){
         x[1] = xplt[ibar];
         z[0] = zplt[0];
         z[1] = zplt[kbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       case ZWALLMIN:
       case ZWALLMAX:
@@ -796,7 +796,7 @@ void drawsmoke3dVOLdebug(void){
         x[1] = xplt[ibar];
         y[0] = yplt[0];
         y[1] = yplt[jbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       default:
         ASSERT(FFALSE);

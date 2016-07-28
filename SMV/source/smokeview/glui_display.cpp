@@ -241,7 +241,7 @@ void Display_Rollout_CB(int var){
 /* ------------------ update_glui_label_text ------------------------ */
 
 extern "C" void update_glui_label_text(void){
-  if(LABEL_Get_Nuserlabels()>0){
+  if(LabelGetNUserLabels()>0){
     labeldata *gl;
 
     gl=&LABEL_local;
@@ -762,7 +762,7 @@ void Text_Labels_CB(int var){
         LIST_LB_labels->delete_item(thislabel->glui_id);
       }
       strcpy(LABEL_global_ptr->name,gl->name);
-      //LABEL_resort(LABEL_global_ptr);
+      //LabelResort(LABEL_global_ptr);
 
       count=0;
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -781,36 +781,36 @@ void Text_Labels_CB(int var){
       memcpy(&LABEL_global_ptr->useforegroundcolor,&gl->useforegroundcolor,sizeof(int));
       break;
     case LB_PREVIOUS:
-      new_label=LABEL_get(LIST_LB_labels->curr_text);
-      new_label=LABEL_Previous(new_label);
+      new_label=LabelGet(LIST_LB_labels->curr_text);
+      new_label=LabelPrevious(new_label);
       if(new_label==NULL)break;
       LABEL_global_ptr=new_label;
       if(new_label!=NULL){
-        LABEL_copy(gl,new_label);
+        LabelCopy(gl,new_label);
         update_glui_label_text();
       }
       break;
     case LB_NEXT:
-      new_label=LABEL_get(LIST_LB_labels->curr_text);
-      new_label=LABEL_Next(new_label);
+      new_label=LabelGet(LIST_LB_labels->curr_text);
+      new_label=LabelNext(new_label);
       if(new_label==NULL)break;
       LABEL_global_ptr=new_label;
       if(new_label!=NULL){
-        LABEL_copy(gl,new_label);
+        LabelCopy(gl,new_label);
         update_glui_label_text();
       }
       break;
     case LB_LIST:
-      new_label=LABEL_get(LIST_LB_labels->curr_text);
+      new_label=LabelGet(LIST_LB_labels->curr_text);
       LABEL_global_ptr=new_label;
       if(new_label!=NULL){
-        LABEL_copy(gl,new_label);
+        LabelCopy(gl,new_label);
       }
       update_glui_label_text();
       break;
     case LB_ADD:
       updatemenu=1;
-      if(LABEL_Get_Nuserlabels()>0){
+      if(LabelGetNUserLabels()>0){
         strcpy(name,"copy of ");
         strcat(name,gl->name);
         strcpy(gl->name,name);
@@ -823,7 +823,7 @@ void Text_Labels_CB(int var){
         if(thislabel->glui_id<0)continue;
         LIST_LB_labels->delete_item(thislabel->glui_id);
       }
-      LABEL_insert(gl);
+      LabelInsert(gl);
       count=0;
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
         if(thislabel->labeltype==TYPE_SMV)continue;
@@ -838,9 +838,9 @@ void Text_Labels_CB(int var){
         if(thislabel->glui_id<0)continue;
         LIST_LB_labels->delete_item(thislabel->glui_id);
       }
-      thislabel=LABEL_get(name);
+      thislabel=LabelGet(name);
       if(thislabel!=NULL){
-        LABEL_delete(thislabel);
+        LabelDelete(thislabel);
       }
       count=0;
       for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -906,7 +906,7 @@ extern "C" void Labels_CB(int var){
       SPINNER_cullgeom_portsize->disable();
     }
     update_initcullgeom=1;
-    set_cull_vis();
+    SetCullVis();
     */
     updatefacelists=1;
     break;

@@ -1263,7 +1263,7 @@ extern "C" void Motion_CB(int var){
       }
       break;
     case SNAPSCENE:
-      snap_scene();
+      SnapScene();
       break;
     case WINDOW_RESIZE:
       setScreenSize(&glui_screenWidth,&glui_screenHeight);
@@ -1953,9 +1953,9 @@ void Render_CB(int var){
   }
 }
 
-/* ------------------ update_glui_render ------------------------ */
+/* ------------------ UpdateGluiRender ------------------------ */
 
-extern "C" void update_glui_render(void){
+extern "C" void UpdateGluiRender(void){
   if(RenderTime==1&&RenderTimeOld==0){
     if(LIST_render_skip!=NULL&&render_skip_index==RENDER_CURRENT_SINGLE){
       render_skip_index=1;

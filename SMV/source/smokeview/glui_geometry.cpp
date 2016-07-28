@@ -672,7 +672,7 @@ extern "C" void Update_Blockvals(int flag){
   float *xplt_orig, *yplt_orig, *zplt_orig;
   int ibar, jbar, kbar;
 
-  get_blockvals(&xmin,&xmax,&ymin,&ymax,&zmin,&zmax,&imin,&jmin,&kmin);
+  GetBlockVals(&xmin,&xmax,&ymin,&ymax,&zmin,&zmax,&imin,&jmin,&kmin);
 
   xplt_orig = current_mesh->xplt_orig;
   yplt_orig = current_mesh->yplt_orig;

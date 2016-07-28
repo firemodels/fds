@@ -168,7 +168,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(visaxislabels==1){
       UNCLIP;
-      outputAxisLabels();
+      OutputAxisLabels();
       SNIFF_ERRORS("after outputAxisLables");
     }
 
@@ -178,17 +178,17 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
     if(visUSERticks==1){
       Antialias(ON);
       UNCLIP;
-      draw_user_ticks();
+      DrawUserTicks();
       Antialias(OFF);
-      SNIFF_ERRORS("after drawticks");
+      SNIFF_ERRORS("after DrawTicks");
     }
 
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
     if(visFDSticks==1&&ntickinfo>0){
       UNCLIP;
-      drawticks();
-      SNIFF_ERRORS("after drawticks");
+      DrawTicks();
+      SNIFF_ERRORS("after DrawTicks");
     }
 
     /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
@@ -206,8 +206,8 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
       CLIP_GEOMETRY;
-      drawoutlines();
-      SNIFF_ERRORS("after drawoutlines");
+      DrawOutlines();
+      SNIFF_ERRORS("after DrawOutlines");
     }
 
     if(show_rotation_center==1){
@@ -301,8 +301,8 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   CLIP_GEOMETRY;
-  drawBlockages(mode,DRAW_OPAQUE);
-  SNIFF_ERRORS("drawBlockages");
+  DrawBlockages(mode,DRAW_OPAQUE);
+  SNIFF_ERRORS("DrawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
 
@@ -409,7 +409,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(visLabels==1){
     CLIP_GEOMETRY;
-    drawLabels();
+    DrawLabels();
   }
 
 /* ++++++++++++++++++++++++ draw animated isosurfaces +++++++++++++++++++++++++ */
@@ -465,7 +465,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
   CLIP_GEOMETRY;
-  draw_transparent_faces();
+  DrawTransparentFaces();
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
@@ -505,10 +505,10 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 
-//  draw_demo(20,20);
-//  draw_demo2(1);
+//  DrawDemo(20,20);
+//  DrawDemo2(1);
   CLIP_GEOMETRY;
-  drawBlockages(mode,DRAW_TRANSPARENT);
+  DrawBlockages(mode,DRAW_TRANSPARENT);
   SNIFF_ERRORS("after drawBlokcages");
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */

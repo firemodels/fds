@@ -2676,10 +2676,10 @@ void draw_test_outline(void){
   glTranslatef(-xbar0,-ybar0,-zbar0);
 
   if(show_tetratest_labels == 1){
-    output3Text(foregroundcolor, v1[0] - EPS, v1[1] - EPS, v1[2] - EPS, "v1");
-    output3Text(foregroundcolor, v2[0] + EPS, v2[1] - EPS, v2[2] - EPS, "v2");
-    output3Text(foregroundcolor, v3[0], v3[1] + EPS, v3[2] - EPS, "v3");
-    output3Text(foregroundcolor, v4[0], v4[1], v4[2] + EPS, "v4");
+    Output3Text(foregroundcolor, v1[0] - EPS, v1[1] - EPS, v1[2] - EPS, "v1");
+    Output3Text(foregroundcolor, v2[0] + EPS, v2[1] - EPS, v2[2] - EPS, "v2");
+    Output3Text(foregroundcolor, v3[0], v3[1] + EPS, v3[2] - EPS, "v3");
+    Output3Text(foregroundcolor, v4[0], v4[1], v4[2] + EPS, "v4");
   }
 
   Antialias(ON);
@@ -2768,27 +2768,27 @@ void draw_test_outline(void){
 
     sprintf(label,"xmin area=%f",areas[0]);
     trimzeros(label);
-    output3Text(foregroundcolor, -EPS, 0.5, 0.5, label);
+    Output3Text(foregroundcolor, -EPS, 0.5, 0.5, label);
 
     sprintf(label,"xmax area=%f",areas[1]);
     trimzeros(label);
-    output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, label);
+    Output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, label);
 
     sprintf(label,"ymin area=%f",areas[2]);
     trimzeros(label);
-    output3Text(foregroundcolor, 0.5, -EPS, 0.5, label);
+    Output3Text(foregroundcolor, 0.5, -EPS, 0.5, label);
 
     sprintf(label,"ymax area=%f",areas[3]);
     trimzeros(label);
-    output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, label);
+    Output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, label);
 
     sprintf(label,"zmin area=%f",areas[4]);
     trimzeros(label);
-    output3Text(foregroundcolor, 0.5, 0.5, -EPS, label);
+    Output3Text(foregroundcolor, 0.5, 0.5, -EPS, label);
 
     sprintf(label,"zmax area=%f",areas[5]);
     trimzeros(label);
-    output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
+    Output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
   }
 
   Antialias(ON);
@@ -2889,10 +2889,10 @@ void draw_test_triangle(void){
   glVertex3f(v4[0],v4[1],0.0);
   glEnd();
   Antialias(OFF);
-  output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
-  output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
-  output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
-  output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
+  Output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
+  Output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
+  Output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
+  Output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
 
   glPopMatrix();
 }
@@ -2952,10 +2952,10 @@ void draw_test_polygon(void){
   }
   glEnd();
   Antialias(OFF);
-  output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
-  output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
-  output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
-  output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
+  Output3Text(foregroundcolor, v1[0], v1[1], 0.0, "1");
+  Output3Text(foregroundcolor, v2[0], v2[1], 0.0, "2");
+  Output3Text(foregroundcolor, v3[0], v3[1], 0.0, "3");
+  Output3Text(foregroundcolor, v4[0], v4[1], 0.0, "4");
 
   glPopMatrix();
 }

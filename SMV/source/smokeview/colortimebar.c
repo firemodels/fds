@@ -194,7 +194,7 @@ void DrawColorbarPath(void){
 
     xdenorm = DENORMALIZE_X(1.55);
     ydenorm = DENORMALIZE_Y(0.0);
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     glPushMatrix();
     glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
     glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -205,7 +205,7 @@ void DrawColorbarPath(void){
       dzpoint = (float)cbi->index_node[i]/255.0;
       zdenorm = DENORMALIZE_Z(dzpoint);
       sprintf(cbuff,"%i",(int)cbi->index_node[i]);
-      output3Text(foregroundcolor, xdenorm,ydenorm,zdenorm, cbuff);
+      Output3Text(foregroundcolor, xdenorm,ydenorm,zdenorm, cbuff);
     }
     glPopMatrix();
     glLineWidth(5.0);
@@ -236,13 +236,13 @@ void DrawColorbarPath(void){
         vval_max=temperature_max;
       }
       sprintf(vvlabel,"%4.0f",vval_min);
-      output3Text(foregroundcolor, 1.0,0.0,0.0,vvlabel);
+      Output3Text(foregroundcolor, 1.0,0.0,0.0,vvlabel);
 
       sprintf(vvlabel,"%4.0f",vval_cutoff);
-      output3Text(foregroundcolor, 1.0,0.0,(vval_cutoff-vval_min)/(vval_max-vval_min),vvlabel);
+      Output3Text(foregroundcolor, 1.0,0.0,(vval_cutoff-vval_min)/(vval_max-vval_min),vvlabel);
 
       sprintf(vvlabel,"%4.0f",vval_max);
-      output3Text(foregroundcolor, 1.0,0.0,1.0,vvlabel);
+      Output3Text(foregroundcolor, 1.0,0.0,1.0,vvlabel);
     }
 
     if(show_firecolormap==1){
@@ -1049,19 +1049,19 @@ void DrawColorbars(void){
           0.0);
         sprintf(area_label,"%i%s",fed_areas[0],percen);
         yy = MIX2(0.15,3.0,colorbar_top_pos,colorbar_down_pos)-VP_colorbar.text_height/2;
-        outputBarText(0.0,yy,foreground_color,area_label);
+        OutputBarText(0.0,yy,foreground_color,area_label);
 
         sprintf(area_label,"%i%s",fed_areas[1],percen);
         yy = MIX2(0.65,3.0,colorbar_top_pos,colorbar_down_pos)-VP_colorbar.text_height/2;
-        outputBarText(0.0,yy,foreground_color,area_label);
+        OutputBarText(0.0,yy,foreground_color,area_label);
 
         sprintf(area_label,"%i%s",fed_areas[2],percen);
         yy = MIX2(2.0,3.0,colorbar_top_pos,colorbar_down_pos)-VP_colorbar.text_height/2;
-        outputBarText(0.0,yy,foreground_color,area_label);
+        OutputBarText(0.0,yy,foreground_color,area_label);
 
         sprintf(area_label,"%i%s",fed_areas[3],percen);
         yy = MIX2(3.0,3.0,colorbar_top_pos,colorbar_down_pos)-VP_colorbar.text_height/2;
-        outputBarText(0.0,yy+10,foreground_color,area_label);
+        OutputBarText(0.0,yy+10,foreground_color,area_label);
         glPopMatrix();
       }
 
@@ -1159,8 +1159,8 @@ void DrawColorbars(void){
       colorbar_top_pos+v_space+colorbar_delta,
       0.0);
     if(parttype!=0){
-      if(showsmoke==1&&showevac==0)outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Part");
-      if(showevac==1)outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Human");
+      if(showsmoke==1&&showevac==0)OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Part");
+      if(showevac==1)OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Human");
     }
     if(parttype==-1){
       strcpy(partshortlabel2,"temp");
@@ -1185,9 +1185,9 @@ void DrawColorbars(void){
           strcpy(partunitlabel,unitclasses[partunitclass].units[partunittype].unit);
         }
       }
-      outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,partshortlabel);
-      outputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,partunitlabel);
-      outputBarText(0.0,0.0,foreground_color,partscale);
+      OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,partshortlabel);
+      OutputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,partunitlabel);
+      OutputBarText(0.0,0.0,foreground_color,partscale);
     }
     glPopMatrix();
   }
@@ -1215,16 +1215,16 @@ void DrawColorbars(void){
       colorbar_top_pos+v_space+colorbar_delta,
       0.0);
     glTranslatef(-leftslice*(colorbar_label_width+h_space),0.0,0.0);
-    outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Slice");
-    outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,sb->label->shortlabel);
-    outputBarText(0.0,  (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
+    OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Slice");
+    OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,sb->label->shortlabel);
+    OutputBarText(0.0,  (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
     if(strcmp(unitlabel,"ppm")==0&&slicefactor!=NULL){
       slicefactor2[0]=*slicefactor*sb->fscale;
       slicefactor2[1]=0.0;
       slicefactor=slicefactor2;
     }
     else{
-      outputBarText(0.0,0.0,foreground_color,sb->scale);
+      OutputBarText(0.0,0.0,foreground_color,sb->scale);
     }
     glPopMatrix();
     ilabel++;
@@ -1244,10 +1244,10 @@ void DrawColorbars(void){
       colorbar_top_pos+v_space+colorbar_delta,
       0.0);
     glTranslatef(-leftiso*(colorbar_label_width+h_space),0.0,0.0);
-    outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Iso");
-    outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,sb->label->shortlabel);
-    outputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,unitlabel);
-    outputBarText(0.0,0.0,foreground_color,sb->scale);
+    OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Iso");
+    OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,sb->label->shortlabel);
+    OutputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,unitlabel);
+    OutputBarText(0.0,0.0,foreground_color,sb->scale);
     glPopMatrix();
   }
 
@@ -1274,10 +1274,10 @@ void DrawColorbars(void){
       colorbar_top_pos+v_space+colorbar_delta,
       0.0);
     glTranslatef(-leftpatch*(colorbar_label_width+h_space),0.0,0.0);
-    outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Bndry");
-    outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,patchi->label.shortlabel);
-    outputBarText(0.0,  (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
-    outputBarText(0.0,0.0,foreground_color,patchi->scale);
+    OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Bndry");
+    OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,patchi->label.shortlabel);
+    OutputBarText(0.0,  (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
+    OutputBarText(0.0,0.0,foreground_color,patchi->scale);
     glPopMatrix();
   }
 
@@ -1305,16 +1305,16 @@ void DrawColorbars(void){
       colorbar_left_pos-colorbar_label_width,
       colorbar_top_pos+v_space+colorbar_delta,
       0.0);
-    outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Plot3d");
-    outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,p3label);
-    outputBarText(0.0, (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
+    OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Plot3d");
+    OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,p3label);
+    OutputBarText(0.0, (VP_colorbar.text_height+v_space),foreground_color,unitlabel);
     if(strcmp(unitlabel,"ppm")==0&&plot3dfactor!=NULL){
       plot3dfactor2[0]=*plot3dfactor*fscalep3[plotn-1];
       plot3dfactor2[1]=0.0;
       plot3dfactor=plot3dfactor2;
     }
     else{
-      outputBarText(0.0,0.0,foreground_color,scalep3[plotn-1]);
+      OutputBarText(0.0,0.0,foreground_color,scalep3[plotn-1]);
     }
     glPopMatrix();
   }
@@ -1334,10 +1334,10 @@ void DrawColorbars(void){
     glPushMatrix();
     glTranslatef(colorbar_left_pos-colorbar_label_width,colorbar_top_pos+v_space+colorbar_delta,0.0);
     glTranslatef(-leftzone*(colorbar_label_width+h_space),0.0,0.0);
-    outputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Zone");
-    outputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,"Temp");
-    outputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,unitlabel);
-    outputBarText(0.0,0.0,foreground_color,zonescale);
+    OutputBarText(0.0,3*(VP_colorbar.text_height+v_space),foreground_color,"Zone");
+    OutputBarText(0.0,2*(VP_colorbar.text_height+v_space),foreground_color,"Temp");
+    OutputBarText(0.0,(VP_colorbar.text_height+v_space),foreground_color,unitlabel);
+    OutputBarText(0.0,0.0,foreground_color,zonescale);
     glPopMatrix();
     SNIFF_ERRORS("After ZONE labels");
   }
@@ -1371,7 +1371,7 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,isocolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,isocolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
@@ -1388,7 +1388,7 @@ void DrawColorbars(void){
         scalefloat2string(val,isocolorlabel, isofactor, isorange);
         isocolorlabel_ptr=isocolorlabel;
       }
-      outputBarText(0.0,vert_position,foreground_color,isocolorlabel_ptr);
+      OutputBarText(0.0,vert_position,foreground_color,isocolorlabel_ptr);
     }
     glPopMatrix();
   }
@@ -1424,7 +1424,7 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,partcolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,partcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
@@ -1452,7 +1452,7 @@ void DrawColorbars(void){
         scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
         partcolorlabel_ptr=partcolorlabel;
       }
-      outputBarText(0.0,vert_position,foreground_color,partcolorlabel_ptr);
+      OutputBarText(0.0,vert_position,foreground_color,partcolorlabel_ptr);
     }
     glPopMatrix();
   }
@@ -1486,23 +1486,23 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,slicecolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,slicecolorlabel_ptr);
     }
     if(fed_slice==1){
       for (i=0; i<nrgb-1; i++){
         float vert_position;
 
         vert_position = MIX2(0.0,3.0,colorbar_top_pos,colorbar_down_pos);
-        outputBarText(0.0,vert_position,foreground_color,"0.00");
+        OutputBarText(0.0,vert_position,foreground_color,"0.00");
 
         vert_position = MIX2(0.3,3.0,colorbar_top_pos,colorbar_down_pos);
-        outputBarText(0.0,vert_position,foreground_color,"0.30");
+        OutputBarText(0.0,vert_position,foreground_color,"0.30");
 
         vert_position = MIX2(1.0,3.0,colorbar_top_pos,colorbar_down_pos);
-        outputBarText(0.0,vert_position,foreground_color,"1.00");
+        OutputBarText(0.0,vert_position,foreground_color,"1.00");
 
         vert_position = MIX2(3.0,3.0,colorbar_top_pos,colorbar_down_pos);
-        outputBarText(0.0,vert_position,foreground_color,"3.00");
+        OutputBarText(0.0,vert_position,foreground_color,"3.00");
       }
     }
     else{
@@ -1521,7 +1521,7 @@ void DrawColorbars(void){
           scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
           slicecolorlabel_ptr=slicecolorlabel;
         }
-        outputBarText(0.0,vert_position,foreground_color,slicecolorlabel_ptr);
+        OutputBarText(0.0,vert_position,foreground_color,slicecolorlabel_ptr);
       }
     }
     glPopMatrix();
@@ -1553,7 +1553,7 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,patchcolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,patchcolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       char patchcolorlabel[256];
@@ -1571,7 +1571,7 @@ void DrawColorbars(void){
         scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
         patchcolorlabel_ptr=patchcolorlabel;
       }
-      outputBarText(0.0,vert_position,foreground_color,patchcolorlabel_ptr);
+      OutputBarText(0.0,vert_position,foreground_color,patchcolorlabel_ptr);
     }
     glPopMatrix();
   }
@@ -1601,7 +1601,7 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,zonecolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,zonecolorlabel_ptr);
     }
     for (i=0; i<nrgb-1; i++){
       float vert_position;
@@ -1618,7 +1618,7 @@ void DrawColorbars(void){
         scalefloat2string(val,zonecolorlabel, zonefactor, zonerange);
         zonecolorlabel_ptr=zonecolorlabel;
       }
-      outputBarText(0.0,vert_position,foreground_color,zonecolorlabel_ptr);
+      OutputBarText(0.0,vert_position,foreground_color,zonecolorlabel_ptr);
     }
     SNIFF_ERRORS("after zone left labels");
     glPopMatrix();
@@ -1650,7 +1650,7 @@ void DrawColorbars(void){
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
       iposition = MIX2(global_colorbar_index,255,nrgb-1,0);
-      outputBarText(0.0,vert_position,red_color,plot3dcolorlabel_ptr);
+      OutputBarText(0.0,vert_position,red_color,plot3dcolorlabel_ptr);
     }
     if(visiso==0){
       float vert_position;
@@ -1669,7 +1669,7 @@ void DrawColorbars(void){
           scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
-        outputBarText(0.0,vert_position,foreground_color,plot3dcolorlabel_ptr);
+        OutputBarText(0.0,vert_position,foreground_color,plot3dcolorlabel_ptr);
       }
     }
     else{
@@ -1691,10 +1691,10 @@ void DrawColorbars(void){
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
         if(isolevelindex==i||isolevelindex2==i){
-          outputBarText(0.0,vert_position,red_color,plot3dcolorlabel_ptr);
+          OutputBarText(0.0,vert_position,red_color,plot3dcolorlabel_ptr);
         }
         else{
-          outputBarText(0.0,vert_position,foreground_color,plot3dcolorlabel_ptr);
+          OutputBarText(0.0,vert_position,foreground_color,plot3dcolorlabel_ptr);
         }
       }
     }

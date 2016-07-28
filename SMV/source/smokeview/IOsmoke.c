@@ -5139,7 +5139,7 @@ void initcullplane(int cullflag){
     meshi->culldefined=1;
 
     culli=meshi->cullinfo;
-    get_cullskips(meshi,cullflag, cull_portsize, &iskip,&jskip,&kskip);
+    GetCullSkips(meshi,cullflag, cull_portsize, &iskip,&jskip,&kskip);
 
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
@@ -5711,7 +5711,7 @@ void initcull(int cullflag){
 
     meshi=meshinfo+ii;
 
-    get_cullskips(meshi,cullflag,cull_portsize,&iskip,&jskip,&kskip);
+    GetCullSkips(meshi,cullflag,cull_portsize,&iskip,&jskip,&kskip);
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
     nz = meshi->kbar/kskip + 1;

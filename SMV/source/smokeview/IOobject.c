@@ -457,7 +457,7 @@ void draw_devices_val(void){
   float black[3]={0.0,0.0,0.0};
   int doit=0;
 
-  if(fontindex==SCALED_FONT)scale_3dfont();
+  if(fontindex==SCALED_FONT)ScaleFont3D();
   glPushMatrix();
   glScalef(SCALE2SMV(1.0),SCALE2SMV(1.0),SCALE2SMV(1.0));
   glTranslatef(-xbar0,-ybar0,-zbar0);
@@ -514,10 +514,10 @@ void draw_devices_val(void){
           break;
       }
       if(devicei->visval>128){
-        output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
+        Output3Text(black,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
       else{
-        output3Text(white,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
+        Output3Text(white,xyz[0]+0.2*xyznorm[0],xyz[1]+0.2*xyznorm[1],xyz[2]+0.2*xyznorm[2],label);
       }
     }
   }
@@ -676,7 +676,7 @@ void Output_Device_Val(devicedata *devicei){
   float val;
   int valid;
 
-  if(fontindex==SCALED_FONT)scale_3dfont();
+  if(fontindex==SCALED_FONT)ScaleFont3D();
   val=get_device_val(global_times[itimes],devicei,&valid);
   if(valid==1){
     f_units *unitclass;
@@ -703,11 +703,11 @@ void Output_Device_Val(devicedata *devicei){
     strcat(label, valuelabel);
     strcat(label, " ");
     if(showdeviceunit == 1)strcat(label, unit);
-    output3Text(foregroundcolor,0.0,0.0,0.0,label);
+    Output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
   else{
     sprintf(label,"not available");
-    output3Text(foregroundcolor,0.0,0.0,0.0,label);
+    Output3Text(foregroundcolor,0.0,0.0,0.0,label);
   }
 }
 

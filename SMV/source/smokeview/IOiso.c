@@ -1053,7 +1053,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
   int TransparentOn_flag=0;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
