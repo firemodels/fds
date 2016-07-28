@@ -844,13 +844,13 @@ void readzone(int ifile, int flag, int *errorcode){
 
   PRINTF("computing zone color levels \n");
 
-  getzoneglobalbounds(zonetu,ntotal,&zoneglobalmin,&zoneglobalmax);
+  GetZoneGlobalBounds(zonetu,ntotal,&zoneglobalmin,&zoneglobalmax);
   if(setzonemin==GLOBAL_MIN)zonemin = zoneglobalmin;
   if(setzonemax==GLOBAL_MAX)zonemax = zoneglobalmax;
   if(setzonemin==SET_MIN)zonemin = zoneusermin;
   if(setzonemax==SET_MAX)zonemax = zoneusermax;
   update_glui_zonebounds();
-  getZoneColors(zonetu, ntotal, izonetu, zonemin, zonemax, nrgb, nrgb_full,
+  GetZoneColors(zonetu, ntotal, izonetu, zonemin, zonemax, nrgb, nrgb_full,
     colorlabelzone, zonescale, zonelevels256);
 
   ReadZoneFile=1;
@@ -927,8 +927,8 @@ void fill_zonedata(int izone_index){
     roomi->ylay=ylay0[iroom];
     roomi->tl=C2K(tl0[iroom]);
     roomi->tu=C2K(tu0[iroom]);
-    roomi->itl=getZoneColor(tl0[iroom],zonemin,zonemax,nrgb_full);
-    roomi->itu=getZoneColor(tu0[iroom],zonemin,zonemax,nrgb_full);
+    roomi->itl=GetZoneColor(tl0[iroom],zonemin,zonemax,nrgb_full);
+    roomi->itu=GetZoneColor(tu0[iroom],zonemin,zonemax,nrgb_full);
     if(zone_rho==1){
       roomi->rho_L = rhol0[iroom];
       roomi->rho_U = rhou0[iroom];
@@ -945,8 +945,8 @@ void fill_zonedata(int izone_index){
   roomi->ylay=99999.0;
   roomi->tl=tamb;
   roomi->tu=tamb;
-  roomi->itl=getZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
-  roomi->itu=getZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
+  roomi->itl=GetZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
+  roomi->itu=GetZoneColor(K2C(tamb),zonemin,zonemax,nrgb_full);
   roomi->rho_L=(pref+pamb)/R/roomi->tl;
   roomi->rho_U=(pref+pamb)/R/roomi->tu;
   roomi->z0=0.0;
@@ -1374,7 +1374,7 @@ void drawventdataSLAB(void){
       slab_bot = NORMALIZE_Z(zvi->slab_bot[islab]);
       slab_top = NORMALIZE_Z(zvi->slab_top[islab]);
       tslab = zvi->slab_temp[islab];
-      itslab = getZoneColor(K2C(tslab), zonemin, zonemax, nrgb_full);
+      itslab = GetZoneColor(K2C(tslab), zonemin, zonemax, nrgb_full);
       tcolor = rgb_full[itslab];
       glColor3fv(tcolor);
 

@@ -5,9 +5,9 @@
 
 #include "smokeviewvars.h"
 
-/* ------------------ adjustdatabounds ------------------------ */
+/* ------------------ AdjustDataBounds ------------------------ */
 
-void adjustdatabounds(const float *pdata, int local_skip, int ndata,
+void AdjustDataBounds(const float *pdata, int local_skip, int ndata,
                    int setpmin, float *pmin, int setpmax, float *pmax)
 {
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
@@ -54,14 +54,14 @@ void adjustdatabounds(const float *pdata, int local_skip, int ndata,
       FreeMemory(buckets);
     }
     if(axislabels_smooth==1){
-      smoothlabel(pmin,pmax,nrgb);
+      SmoothLabel(pmin,pmax,nrgb);
     }
 }
 
 
-/* ------------------ adjustpart5chops ------------------------ */
+/* ------------------ AdjustPart5Chops ------------------------ */
 
-void adjustpart5chops(partdata *parti){
+void AdjustPart5Chops(partdata *parti){
   int i;
 
   for(i=0;i<npart5prop;i++){
@@ -87,9 +87,9 @@ void adjustpart5chops(partdata *parti){
   }
 }
 
-/* ------------------ adjustpart5bounds ------------------------ */
+/* ------------------ AdjustPart5Bounds ------------------------ */
 
-void adjustpart5bounds(partdata *parti){
+void AdjustPart5Bounds(partdata *parti){
   int i;
 
   if(parti->valmin==NULL){
@@ -143,15 +143,15 @@ void adjustpart5bounds(partdata *parti){
     parti->valmin[i] = propi->valmin;
     parti->valmax[i] = propi->valmax;
   }
-  adjustpart5chops(parti);
+  AdjustPart5Chops(parti);
 #ifdef _DEBUG
   print_partprop();
 #endif
 }
 
-/* ------------------ adjustpartbounds ------------------------ */
+/* ------------------ AdjustPartBounds ------------------------ */
 
-void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink,
+void AdjustPartBounds(const float *pdata, int particle_type, int droplet_type, const unsigned char *isprink,
                       int local_skip, int ndataloop, int setpmin, float *pmin, int setpmax, float *pmax)
 {
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
@@ -207,13 +207,13 @@ void adjustpartbounds(const float *pdata, int particle_type, int droplet_type, c
       FreeMemory(buckets);
     }
     if(axislabels_smooth==1){
-      smoothlabel(pmin,pmax,nrgb);
+      SmoothLabel(pmin,pmax,nrgb);
     }
 }
 
-/* ------------------ adjustPlot3Dbounds ------------------------ */
+/* ------------------ AdjustPlot3DBounds ------------------------ */
 
-void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, float *pmax)
+void AdjustPlot3DBounds(int plot3dvar, int setpmin, float *pmin, int setpmax, float *pmax)
 {
     int nsmall, nbig, *buckets=NULL, n, level, total, alpha05;
     float dp, pmin2, pmax2;
@@ -277,13 +277,13 @@ void adjustPlot3Dbounds(int plot3dvar, int setpmin, float *pmin, int setpmax, fl
       FreeMemory(buckets);
     }
     if(axislabels_smooth==1&&setpmin!=SET_MIN&&setpmax!=SET_MAX){
-      smoothlabel(pmin,pmax,nrgb);
+      SmoothLabel(pmin,pmax,nrgb);
     }
 }
 
-/* ------------------ getzoneglobalbounds ------------------------ */
+/* ------------------ GetZoneGlobalBounds ------------------------ */
 
-void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float *pglobalmax)
+void GetZoneGlobalBounds(const float *pdata, int ndata, float *pglobalmin, float *pglobalmax)
 {
     int n;
     float pmin2, pmax2, val;
@@ -299,9 +299,9 @@ void getzoneglobalbounds(const float *pdata, int ndata, float *pglobalmin, float
     *pglobalmax = pmax2;
 }
 
-/* ------------------ smoothlabel ------------------------ */
+/* ------------------ SmoothLabel ------------------------ */
 
-void smoothlabel(float *a, float *b, int n){
+void SmoothLabel(float *a, float *b, int n){
   double delta, factor, logdelta;
   int ndigits;
   double half;

@@ -660,7 +660,7 @@ extern "C" void Smoke3d_CB(int var){
     define_volsmoke_textures();
     break;
   case SHOW_FIRECOLORMAP:
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     if(show_firecolormap==1){
       show_glui_colorbar();
     }
@@ -672,19 +672,19 @@ extern "C" void Smoke3d_CB(int var){
     temp_min = 20.0;
     temp_max = (float)(10.0*(int)(temperature_cutoff/10.0)-10.0);
     SPINNER_temperature_min->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     break;
   case TEMP_CUTOFF:
     temp_min = (float)(10*(int)(temperature_min/10.0) + 10.0);
     temp_max = (float)(10*(int)(temperature_max/10.0) - 10.0);
     SPINNER_temperature_cutoff->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     break;
   case TEMP_MAX:
     temp_min = (float)(10*(int)(temperature_cutoff/10.0)+10.0);
     temp_max = 1800.0;
     SPINNER_temperature_max->set_float_limits(temp_min,temp_max);
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     break;
   case LOAD_COMPRESSED_DATA:
     if(load_volcompressed==1){
@@ -753,10 +753,10 @@ extern "C" void Smoke3d_CB(int var){
       ROLLOUT_colormap3->disable();
       ROLLOUT_colormap3->close();
       if(fire_colorbar_index_save!=-1){
-        SmokeColorBarMenu(fire_colorbar_index_save);
+        SmokeColorbarMenu(fire_colorbar_index_save);
       }
       else{
-        SmokeColorBarMenu(fire_colorbar_index);
+        SmokeColorbarMenu(fire_colorbar_index);
       }
     }
     else{
@@ -775,16 +775,16 @@ extern "C" void Smoke3d_CB(int var){
 
       fire_colorbar_index_save=fire_colorbar_index;
       UpdateRGBColors(COLORBAR_INDEX_NONE);
-      Update_Smokecolormap(smoke_render_option);
+      UpdateSmokeColormap(smoke_render_option);
     }
     if(LISTBOX_smoke_colorbar->get_int_val()!=fire_colorbar_index){
       LISTBOX_smoke_colorbar->set_int_val(fire_colorbar_index);
     }
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     break;
   case SMOKE_COLORBAR_LIST:
-    SmokeColorBarMenu(fire_colorbar_index);
-    Update_Smokecolormap(smoke_render_option);
+    SmokeColorbarMenu(fire_colorbar_index);
+    UpdateSmokeColormap(smoke_render_option);
     updatemenu=1;
     break;
   case SMOKETEST:
@@ -795,13 +795,13 @@ extern "C" void Smoke3d_CB(int var){
     updatemenu=1;
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case GLOBAL_FIRE_CUTOFF:
     glutPostRedisplay();
     force_redisplay=1;
     Idle_CB();
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     break;
   case UPDATE_SMOKEFIRE_COLORS:
   case FIRE_RED:
@@ -814,7 +814,7 @@ extern "C" void Smoke3d_CB(int var){
     glutPostRedisplay();
     force_redisplay=1;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     Idle_CB();
     break;
   case FIRE_HALFDEPTH:
@@ -826,7 +826,7 @@ extern "C" void Smoke3d_CB(int var){
     }
     glutPostRedisplay();
     force_redisplay=1;
-    Update_Smokecolormap(smoke_render_option);
+    UpdateSmokeColormap(smoke_render_option);
     Idle_CB();
    break;
 #ifdef pp_GPU

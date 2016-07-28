@@ -6,9 +6,9 @@
 #include "svdiff.h"
 #include "MALLOC.h"
 
-/* ------------------ readsmv ------------------------ */
+/* ------------------ ReadSMV ------------------------ */
 
-int readsmv(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
+int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
   int igrid,ipdim;
   int islice,iplot3d,iboundary;

@@ -242,7 +242,7 @@ void update_render_start_button(void){
 void enable_disable_playmovie(void){
   char moviefile_path[1024];
 
-  if(file_exists(get_moviefile_path(moviefile_path)) == 1&&play_movie_now==1){
+  if(file_exists(GetMovieFilePath(moviefile_path)) == 1&&play_movie_now==1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
   else{
@@ -1533,7 +1533,7 @@ void Motion_DLG_CB(int var){
     break;
   case SAVE_SETTINGS:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   default:
     ASSERT(FFALSE);
@@ -1743,7 +1743,7 @@ void Viewpoint_CB(int var){
   case STARTUP:
     startup_view_ini=LIST_viewpoints->get_int_val();
     selected_view=startup_view_ini;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CYCLEVIEWS:
     ival=LIST_viewpoints->get_int_val();
