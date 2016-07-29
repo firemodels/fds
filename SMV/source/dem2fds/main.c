@@ -75,6 +75,9 @@ void generate_fds(char *filebase, int option){
   int i,j;
   float llat1, llat2, llong1, llong2;
   float xmax, ymax, zmin, zmax;
+  float xmin_clip = -1.0, xmax_clip = -1.0;
+  float ymin_clip = -1.0, ymax_clip = -1.0;
+  int clip_vals = 0;
   float *xgrid, *ygrid;
   int count;
   int ibar, jbar, kbar;
@@ -83,7 +86,16 @@ void generate_fds(char *filebase, int option){
 
   fgets(buffer, LENBUFFER, stdin);
   trim_back(buffer);
-  sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
+  sscanf(buffer, "%f %f %i %f %f %i %f %f %i %f %f %f %f",
+    &llong1, &llong2,&nlong,
+    &llat1, &llat2, &nlat,
+    &zmin,&zmax,&nz,
+    &xmin_clip, &xmax_clip, &ymin_clip, &ymax_clip
+  );
+  if (xmin_clip > -0.5&&xmax_clip > -0.5&&xmax_clip > xmin_clip&&
+    ymin_clip > -0.5&&ymax_clip > -0.5&&ymax_clip > ymin_clip) {
+    clip_vals = 1;
+  }
 
   xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
 
@@ -152,13 +164,16 @@ void generate_fds(char *filebase, int option){
   }
   if(option==GENERATE_OBSTS){
     for(j = 0; j < jbar; j++){
-      float *vals, *valsp1;
+      float *vals, *valsp1, ycen;
 
       vals = valptrs[j];
       valsp1 = valptrs[j+1];
+      ycen = (ygrid[j] + ygrid[j + 1]) / 2.0;
       for(i = 0; i < ibar; i++){
-        float vavg;
+        float vavg, xcen;
 
+        xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
+        if (clip_vals == 1 && xcen > xmin_clip&&xcen<xmax_clip&&ycen>ymin_clip&&ycen < ymax_clip)continue;
         vavg = (vals[i]+vals[i+1]+valsp1[i]+valsp1[i+1])/4.0;
         printf("&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
       }
