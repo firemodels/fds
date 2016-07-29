@@ -17,9 +17,9 @@
 
 // version 6.3.7
 
-/* ------------------ usage ------------------------ */
+/* ------------------ Usage ------------------------ */
 
-void usage(char **argv){
+void Usage(char **argv){
   char buffer[1000];
 
   PRINTF("%s\n", release_title);
@@ -141,9 +141,9 @@ void usage(char **argv){
   }
 }
 
-/* ------------------ parse_commandline ------------------------ */
+/* ------------------ ParseCommandline ------------------------ */
 
-void parse_commandline(int argc, char **argv){
+void ParseCommandline(int argc, char **argv){
   int i, len_casename;
   int iarg;
   size_t len_memory;
@@ -439,7 +439,7 @@ void parse_commandline(int argc, char **argv){
     }
 #endif
     else if(strncmp(argv[i], "-h", 2) == 0){
-      usage(argv);
+      Usage(argv);
       exit(0);
     }
     else if(strncmp(argv[i], "-noblank", 8) == 0){
@@ -548,12 +548,12 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i], "-build", 6) == 0){
       showbuild = 1;
-      usage(argv);
+      Usage(argv);
       exit(0);
     }
     else {
       fprintf(stderr, "*** Error: unknown option: %s\n", argv[i]);
-      usage(argv);
+      Usage(argv);
       exit(1);
     }
   }
@@ -598,7 +598,7 @@ int main(int argc, char **argv){
   if(argc==0||argc==1)return 0;
 
   progname=argv_sv[0];
-  parse_commandline(argc, argv_sv);
+  ParseCommandline(argc, argv_sv);
   if(smokeview_bindir==NULL){
     smokeview_bindir=getprogdir(progname,&smokeviewpath);
   }

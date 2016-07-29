@@ -270,7 +270,7 @@ int slicedup(slice *slicej, int islice);
 void *compress_plot3ds(void *arg);
 void initpdf(pdfdata *pdf);
 void makesvd(char *destdir, char *smvfile);
-void usage(char *prog);
+void Usage(char *prog);
 void getpdf(float *vals, int nvals, pdfdata *pdf);
 void mergepdf(pdfdata *pdf1, pdfdata *pdf2, pdfdata *pdfmerge);
 void SmoothLabel(float *a, float *b, int n);

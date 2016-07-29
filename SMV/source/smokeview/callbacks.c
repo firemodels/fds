@@ -743,7 +743,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       }
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
-     // level_scene(0,1,quat_general);
+     // LevelScene(0,1,quat_general);
       quat2rot(quat_general,quat_rotation);
     }
   }
@@ -755,7 +755,7 @@ void update_mouseinfo(int flag, int xm, int ym){
     axis[2]=0.0;
     angleaxis2quat(-delta_angle2,axis,quat_temp);
     mult_quat(quat_temp,quat_general,quat_general);
-   // level_scene(0,1,quat_general);
+   // LevelScene(0,1,quat_general);
     quat2rot(quat_general,quat_rotation);
   }
 #ifdef _DEBUG
@@ -1877,7 +1877,7 @@ void keyboard(unsigned char key, int flag){
         DialogMenu(DIALOG_3DSMOKE); // 3d smoke dialog
         break;
       case GLUT_ACTIVE_CTRL:
-        snap_scene();
+        SnapScene();
         break;
       default:
         if(rotation_type==EYE_CENTERED){
@@ -2012,11 +2012,11 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case '~':
-      level_scene(1,1,quat_general);
+      LevelScene(1,1,quat_general);
       quat2rot(quat_general,quat_rotation);
       break;
     case '!':
-      snap_scene();
+      SnapScene();
       break;
     case '@':
       cell_center_text = 1 - cell_center_text;

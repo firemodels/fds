@@ -34,7 +34,7 @@ void usage(char *prog){
   fprintf(stderr, "  -h - display this message\n");
   fprintf(stderr, "  -v - show versioning information\n\n");
   fprintf(stderr, " Usage examples:\n");
-  fprintf(stderr, " 1. create elevation files:                dem2fds -e casename < casename.in\n");
+  fprintf(stderr, " 1. create elevation files:                dem2fds -e casename.in\n");
   fprintf(stderr, " 2. create FDS file using &GEOM keywords : dem2fds -g casename\n");
   fprintf(stderr, " 3. create FDS file using &OBST keywords : dem2fds -o casename\n");
 }
@@ -67,23 +67,52 @@ float dist(float llong1, float llong2, float llat1, float llat2){
   return distance;
 }
 
-/* ------------------ generate_elevs ------------------------ */
+/* ------------------ generate_fds ------------------------ */
 
-void generate_fds(char *filebase, int option){
-  char buffer[LENBUFFER];
+void generate_fds(char *casename, int option){
+  char buffer[LENBUFFER], elevfile[LENBUFFER], fdsfile[LENBUFFER];
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
   float xmax, ymax, zmin, zmax;
+  float xmin_clip = -1.0, xmax_clip = -1.0;
+  float ymin_clip = -1.0, ymax_clip = -1.0;
+  int clip_vals = 0;
   float *xgrid, *ygrid;
   int count;
   int ibar, jbar, kbar;
   float **valptrs;
+  FILE *streamin = NULL, *streamout = NULL;
 
+  strcpy(elevfile,casename);
+  strcat(elevfile,"_elevs.csv");
+  streamin = fopen(elevfile,"r");
+  if(streamin==NULL){
+    printf("***error: unable to open %s for input\n",elevfile);
+    return;
+  }
 
-  fgets(buffer, LENBUFFER, stdin);
+  strcpy(fdsfile,casename);
+  strcat(fdsfile,".fds");
+  streamout = fopen(fdsfile,"w");
+  if(streamout==NULL){
+    printf("***error: unable to open %s for output\n",fdsfile);
+    fclose(streamin);
+    return;
+  }
+  
+  fgets(buffer, LENBUFFER, streamin);
   trim_back(buffer);
-  sscanf(buffer, "%f %f %i %f %f %i %f %f %i", &llong1, &llong2,&nlong,&llat1, &llat2, &nlat, &zmin,&zmax,&nz);
+  sscanf(buffer, "%f %f %i %f %f %i %f %f %i %f %f %f %f",
+    &llong1, &llong2,&nlong,
+    &llat1, &llat2, &nlat,
+    &zmin,&zmax,&nz,
+    &xmin_clip, &xmax_clip, &ymin_clip, &ymax_clip
+  );
+  if (xmin_clip > -0.5&&xmax_clip > -0.5&&xmax_clip > xmin_clip&&
+    ymin_clip > -0.5&&ymax_clip > -0.5&&ymax_clip > ymin_clip) {
+    clip_vals = 1;
+  }
 
   xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
 
@@ -104,19 +133,19 @@ void generate_fds(char *filebase, int option){
   }
 
 
-  printf("&HEAD CHID='%s', TITLE='terrain' /\n",filebase);
-  printf("&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",ibar,jbar,kbar,xmax,ymax,zmin,zmax);
+  fprintf(streamout,"&HEAD CHID='%s', TITLE='terrain' /\n",casename);
+  fprintf(streamout,"&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",ibar,jbar,kbar,xmax,ymax,zmin,zmax);
   if(option==GENERATE_OBSTS){
-    printf("&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", filebase);
+    fprintf(streamout,"&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", casename);
   }
-  printf("&TIME T_END = 0. /\n");
-  printf("&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
-  printf("&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
-  printf("&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
-  printf("&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
-  printf("&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
-  printf("&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
-  printf("&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n",filebase);
+  fprintf(streamout,"&TIME T_END = 0. /\n");
+  fprintf(streamout,"&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
+  fprintf(streamout,"&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
+  fprintf(streamout,"&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
+  fprintf(streamout,"&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
+  fprintf(streamout,"&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
+  fprintf(streamout,"&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
+  fprintf(streamout,"&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n",casename);
 
 
   NewMemory((void **)&valptrs, sizeof(float *)*nlat);
@@ -128,14 +157,14 @@ void generate_fds(char *filebase, int option){
     NewMemory((void **)&vals, sizeof(float)*nlong);
     valptrs[j] = vals;
     for(i = 0; i < nlong; i++){
-      fgets(buffer, LENBUFFER, stdin);
+      fgets(buffer, LENBUFFER, streamin);
       sscanf(buffer, "%i,%f,%f,%f,%f", &idummy, &llat, &llong, &dummy, &elev);
       vals[i] = elev;
     }
   }
 
   if(option==GENERATE_GEOM){
-    printf("&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
+    fprintf(streamout,"&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
                       nlong,nlat,0.0,xmax,0.0,ymax);
     count = 1;
     for(j = 0; j < jbar + 1; j++){
@@ -143,56 +172,73 @@ void generate_fds(char *filebase, int option){
 
       vals = valptrs[jbar - j];
       for(i = 0; i < ibar + 1; i++){
-        printf(" %f,", vals[i]);
-        if(count % 10 == 0)printf("\n");
+        fprintf(streamout," %f,", vals[i]);
+        if(count % 10 == 0)fprintf(streamout,"\n");
         count++;
       }
     }
-    printf("/\n");
+    fprintf(streamout,"/\n");
   }
   if(option==GENERATE_OBSTS){
     for(j = 0; j < jbar; j++){
-      float *vals, *valsp1;
+      float *vals, *valsp1, ycen;
 
       vals = valptrs[j];
       valsp1 = valptrs[j+1];
+      ycen = (ygrid[j] + ygrid[j + 1]) / 2.0;
       for(i = 0; i < ibar; i++){
-        float vavg;
+        float vavg, xcen;
 
+        xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
+        if (clip_vals == 1 && xcen > xmin_clip&&xcen<xmax_clip&&ycen>ymin_clip&&ycen < ymax_clip)continue;
         vavg = (vals[i]+vals[i+1]+valsp1[i]+valsp1[i+1])/4.0;
-        printf("&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
+        fprintf(streamout,"&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
       }
     }
   }
-  printf("&TAIL /\n");
+  fprintf(streamout,"&TAIL /\n");
 }
 
   /* ------------------ generate_latlongs ------------------------ */
 
-void generate_longlats(char *filebase){
-  char buffer[LENBUFFER];
+void generate_longlats(char *elevfile){
+  char buffer[LENBUFFER], casename[LENBUFFER], *ext;
   char fileout[LENBUFFER];
   float lat1, lat2, long1, long2;
   int nlat, nlong;
   int line_count, file_count;
-  FILE *streamout = NULL;
+  FILE *streamin=NULL, *streamout = NULL;
   int i;
 
-  sprintf(fileout, "%s_longlats_%03i.csv", filebase, 1);
+  strcpy(casename, elevfile);
+  ext=strrchr(casename, '.');
+  if (ext != NULL)ext[0] = 0;
 
-  fgets(buffer, LENBUFFER, stdin);
+  streamin = fopen(elevfile, "r");
+  if (streamin == NULL) {
+    printf("***error: unable to open %s for input\n", elevfile);
+    return;
+  }
+
+  fgets(buffer, LENBUFFER, streamin);
   sscanf(buffer, "%f %f %i %f %f %i", &long1, &long2, &nlong, &lat1, &lat2, &nlat);
   if (nlat < 2)nlat = 2;
   if (nlong < 2)nlong = 2;
   line_count = 1;
   file_count = 1;
+
+  sprintf(fileout, "%s_longlats_%03i.csv", casename, file_count);
   streamout = fopen(fileout, "w");
+  if (streamout == NULL) {
+    printf("***error: unable to open %s for output\n", fileout);
+    fclose(streamin);
+    return;
+  }
   for(i = 0; i < nlat; i++){
     int j;
     float llat;
 
     llat = (lat1*(float)(nlat - 1 - i) + lat2*(float)i) / (float)(nlat - 1);
-
     for(j = 0; j<nlong; j++){
       float llong;
 
@@ -200,13 +246,17 @@ void generate_longlats(char *filebase){
       if(line_count>nelevsperfile){
         file_count++;
         fclose(streamout);
-        sprintf(fileout, "%s_longlats_%03i.csv", filebase, file_count);
+        sprintf(fileout, "%s_longlats_%03i.csv", casename, file_count);
         streamout = fopen(fileout, "w");
+        if (streamout == NULL) {
+          printf("***error: unable to open %s for output\n", fileout);
+          fclose(streamin);
+          return;
+        }
         line_count = 1;
       }
       fprintf(streamout, "%f,%f\n", llong, llat);
       line_count++;
-
     }
   }
 }
@@ -218,7 +268,7 @@ int main(int argc, char **argv){
   int i;
   int gen_fdsgeom = 0;
   int gen_fdsobst = 0;
-  char *filebase = NULL;
+  char *casename = NULL;
   char file_default[1000];
 
   strcpy(file_default, "terrain");
@@ -261,19 +311,18 @@ int main(int argc, char **argv){
       }
     }
     else{
-      if(filebase == NULL){
-        filebase = argv[i];
-      }
+      if(casename == NULL)casename = argv[i];
     }
   }
-  if(filebase == NULL)filebase = file_default;
+  if(casename == NULL)casename = file_default;
   if(gen_fdsgeom == 1){
-    generate_fds(filebase,GENERATE_GEOM);
+    generate_fds(casename,GENERATE_GEOM);
   }
   else if(gen_fdsobst == 1){
-    generate_fds(filebase,GENERATE_OBSTS);
+    generate_fds(casename,GENERATE_OBSTS);
   }
   else{
-    generate_longlats(filebase);
+    generate_longlats(casename);
   }
+  return 0;
 }

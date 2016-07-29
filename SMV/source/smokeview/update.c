@@ -1951,7 +1951,7 @@ void UpdateShowScene(void){
   UpdateShow();
   if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
   if(updatefaces==1)UpdateFaces();
-  if(updatefacelists==1)UpdateFacelists();
+  if(updatefacelists==1)UpdateFaceLists();
 }
 
 /* ------------------ UpdateDisplay ------------------------ */

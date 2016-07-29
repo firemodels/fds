@@ -2375,7 +2375,7 @@ void UpdateMeshCoords(void){
         NORMALIZE_XYZ(quadi->xyzpoints+3*k,quadi->xyzpoints+3*k);
       }
       if(cd->version==2&&quadi->cadlookq->textureinfo.loaded==1){
-        update_cadtextcoords(quadi);
+        UpdateCADTextCoords(quadi);
       }
     }
   }
@@ -3308,7 +3308,7 @@ int ReadSMV(char *file, char *file2){
   }
   nisoinfo=0;
 
-  freecadinfo();
+  FreeCADInfo();
 
   updateindexcolors=0;
   ntrnx=0;
@@ -3354,7 +3354,7 @@ int ReadSMV(char *file, char *file2){
   FREEMEMORY(surfinfo);
   FREEMEMORY(terrain_texture);
 
-  if(cadgeominfo!=NULL)freecadinfo();
+  if(cadgeominfo!=NULL)FreeCADInfo();
 
   if(file==NULL){
     initvars();
@@ -4047,7 +4047,7 @@ int ReadSMV(char *file, char *file2){
     matli->color = getcolorptr(s_color);
   }
 
-  if(cadgeominfo!=NULL)freecadinfo();
+  if(cadgeominfo!=NULL)FreeCADInfo();
   if(ncadgeom>0){
     if(NewMemory((void **)&cadgeominfo,ncadgeom*sizeof(cadgeomdata))==0)return 2;
   }
@@ -4717,7 +4717,7 @@ int ReadSMV(char *file, char *file2){
         rgbtemp[0]=frgbtemp[0]*255;
         rgbtemp[1]=frgbtemp[1]*255;
         rgbtemp[2]=frgbtemp[2]*255;
-        LABEL_insert(labeli);
+        LabelInsert(labeli);
       }
       continue;
     }
@@ -4875,7 +4875,7 @@ int ReadSMV(char *file, char *file2){
         STRCPY(cadgeominfo[ncadgeom].file,bufferptr);
         PRINTF("%s %s",_("     reading cad file: "),bufferptr);
         PRINTF("%s\n",bufferptr);
-        readcadgeom(cadgeominfo+ncadgeom);
+        ReadCADGeom(cadgeominfo+ncadgeom);
         PRINTF("     CAD file reading completed\n");
         ncadgeom++;
       }
@@ -8215,7 +8215,7 @@ typedef struct {
   update_isocolors();
   CheckMemory;
 
-  //remove_dup_blockages();
+  //RemoveDupBlockages();
   initcullgeom(cullgeom);
   InitEvacProp();
 
@@ -8356,7 +8356,7 @@ typedef struct {
   if(stream2!=NULL)fclose(stream2);
   stream=NULL;
 
-  update_selectfaces();
+  UpdateSelectFaces();
   updateslicetypes();
   updatesliceboundlabels();
   updateisotypes();
@@ -8389,7 +8389,7 @@ typedef struct {
   update_iso_menulabels();
   update_part_menulabels();
   update_tour_menulabels();
-  init_user_ticks();
+  InitUserTicks();
   clip_I=ibartemp; clip_J=jbartemp; clip_K=kbartemp;
 
   // define changed_idlist used for blockage editing
@@ -11090,7 +11090,7 @@ int ReadINI2(char *inifile, int localfile){
         trim_back(buffer);
         bufferptr = trim_front(buffer);
         strcpy(labeli->name, bufferptr);
-        LABEL_insert(labeli);
+        LabelInsert(labeli);
         continue;
       }
 
