@@ -5769,7 +5769,7 @@ void setup_zone_devs(void){
     NewMemory((void **)&devclabels,ncols*sizeof(char *));
     fgets(buffer,buffer_len,stream);
     fgets(buffer,buffer_len,stream);
-    parsecsv(buffer,devclabels,ncols,&ntokens);
+    parsecsv(buffer,devclabels,&ntokens);
     for(j=0;j<ntokens;j++){
       devicedata *devi;
 
@@ -5856,14 +5856,14 @@ void read_device_data(char *file, int filetype, int loadstatus){
   }
 
   fgets(buffer,buffer_len,stream);
-  parsecsv(buffer,devcunits,ncols,&ntokens);
+  parsecsv(buffer,devcunits,&ntokens);
   for(i=0;i<ntokens;i++){
     trim_back(devcunits[i]);
     devcunits[i]=trim_front(devcunits[i]);
   }
 
   fgets(buffer2,buffer_len,stream);
-  parsecsv(buffer2,devclabels,ncols,&ntokens);
+  parsecsv(buffer2,devclabels,&ntokens);
   for(i=0;i<ntokens;i++){
     trim_back(devclabels[i]);
     devclabels[i]=trim_front(devclabels[i]);

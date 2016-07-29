@@ -1363,10 +1363,10 @@ void DrawColorbars(void){
       float vert_position;
 
       tttval = sb->levels256[valindex];
-      num2string(isolabel,tttval,isorange);
+      num2string(isolabel,tttval);
       isocolorlabel_ptr=isolabel;
       if(isoflag==1){
-        scalefloat2string(tttval,isocolorlabel, isofactor, isorange);
+        scalefloat2string(tttval,isocolorlabel, isofactor);
         isocolorlabel_ptr=isocolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1385,7 +1385,7 @@ void DrawColorbars(void){
         float val;
 
         val = tttmin + i*isorange/(nrgb-2);
-        scalefloat2string(val,isocolorlabel, isofactor, isorange);
+        scalefloat2string(val,isocolorlabel, isofactor);
         isocolorlabel_ptr=isocolorlabel;
       }
       OutputBarText(0.0,vert_position,foreground_color,isocolorlabel_ptr);
@@ -1416,10 +1416,10 @@ void DrawColorbars(void){
       float vert_position;
 
       tttval = partlevels256_ptr[valindex];
-      num2string(partlabel,tttval,partrange);
+      num2string(partlabel,tttval);
       partcolorlabel_ptr=partlabel;
       if(partflag==1){
-        scalefloat2string(tttval,partcolorlabel, partfactor, partrange);
+        scalefloat2string(tttval,partcolorlabel, partfactor);
         partcolorlabel_ptr=partcolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1448,8 +1448,8 @@ void DrawColorbars(void){
         float val;
 
         val = tttmin + i*partrange/(nrgb-2);
-        scalefloat2string(val,partcolorlabel, partfactor, partrange);
-        scalestring(partcolorlabel_ptr,partcolorlabel, partfactor, partrange);
+        scalefloat2string(val,partcolorlabel, partfactor);
+        scalestring(partcolorlabel_ptr,partcolorlabel, partfactor);
         partcolorlabel_ptr=partcolorlabel;
       }
       OutputBarText(0.0,vert_position,foreground_color,partcolorlabel_ptr);
@@ -1478,10 +1478,10 @@ void DrawColorbars(void){
       float vert_position;
 
       tttval = sb->levels256[valindex];
-      num2string(slicelabel,tttval,slicerange);
+      num2string(slicelabel,tttval);
       slicecolorlabel_ptr=slicelabel;
       if(sliceflag==1){
-        scalefloat2string(tttval,slicecolorlabel, slicefactor, slicerange);
+        scalefloat2string(tttval,slicecolorlabel, slicefactor);
         slicecolorlabel_ptr=slicecolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1518,7 +1518,7 @@ void DrawColorbars(void){
           float val;
 
           val = tttmin + i*slicerange/(nrgb-2);
-          scalefloat2string(val,slicecolorlabel, slicefactor, slicerange);
+          scalefloat2string(val,slicecolorlabel, slicefactor);
           slicecolorlabel_ptr=slicecolorlabel;
         }
         OutputBarText(0.0,vert_position,foreground_color,slicecolorlabel_ptr);
@@ -1545,10 +1545,10 @@ void DrawColorbars(void){
 
       // draw boundary file value selected with mouse
       tttval = boundarylevels256[valindex];
-      num2string(boundarylabel,tttval,tttmax-tttmin);
+      num2string(boundarylabel,tttval);
       patchcolorlabel_ptr=&(boundarylabel[0]);
       if(patchflag==1){
-        scalefloat2string(tttval,patchcolorlabel, patchfactor, patchrange);
+        scalefloat2string(tttval,patchcolorlabel, patchfactor);
         patchcolorlabel_ptr=patchcolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1568,7 +1568,7 @@ void DrawColorbars(void){
         float val;
 
         val = tttmin + i*patchrange/(nrgb-2);
-        scalefloat2string(val,patchcolorlabel, patchfactor, patchrange);
+        scalefloat2string(val,patchcolorlabel, patchfactor);
         patchcolorlabel_ptr=patchcolorlabel;
       }
       OutputBarText(0.0,vert_position,foreground_color,patchcolorlabel_ptr);
@@ -1593,10 +1593,10 @@ void DrawColorbars(void){
       float vert_position;
 
       tttval = zonelevels256[valindex];
-      num2string(zonelabel,tttval,tttmax-tttmin);
+      num2string(zonelabel,tttval);
       zonecolorlabel_ptr=&(zonelabel[0]);
       if(zoneflag==1){
-        scalefloat2string(tttval,zonecolorlabel, zonefactor, zonerange);
+        scalefloat2string(tttval,zonecolorlabel, zonefactor);
         zonecolorlabel_ptr=zonecolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1615,7 +1615,7 @@ void DrawColorbars(void){
         float val;
 
         val = tttmin + (i-1)*zonerange/(nrgb-2);
-        scalefloat2string(val,zonecolorlabel, zonefactor, zonerange);
+        scalefloat2string(val,zonecolorlabel, zonefactor);
         zonecolorlabel_ptr=zonecolorlabel;
       }
       OutputBarText(0.0,vert_position,foreground_color,zonecolorlabel_ptr);
@@ -1642,10 +1642,10 @@ void DrawColorbars(void){
       float vert_position;
 
       tttval = p3lev[valindex];
-      num2string(p3dlabel,tttval,tttmax-tttmin);
+      num2string(p3dlabel,tttval);
       plot3dcolorlabel_ptr = p3dlabel;
       if(plot3dflag==1){
-        scalefloat2string(tttval,plot3dcolorlabel, plot3dfactor, plot3drange);
+        scalefloat2string(tttval,plot3dcolorlabel, plot3dfactor);
         plot3dcolorlabel_ptr=plot3dcolorlabel;
       }
       vert_position = MIX2(global_colorbar_index,255,colorbar_top_pos,colorbar_down_pos);
@@ -1666,7 +1666,7 @@ void DrawColorbars(void){
           float val;
 
           val = tttmin + i*plot3drange/(nrgb-2);
-          scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
+          scalefloat2string(val,plot3dcolorlabel, plot3dfactor);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
         OutputBarText(0.0,vert_position,foreground_color,plot3dcolorlabel_ptr);
@@ -1687,7 +1687,7 @@ void DrawColorbars(void){
           float val;
 
           val = tttmin + (i-1)*plot3drange/(nrgb-2);
-          scalefloat2string(val,plot3dcolorlabel, plot3dfactor, plot3drange);
+          scalefloat2string(val,plot3dcolorlabel, plot3dfactor);
           plot3dcolorlabel_ptr=plot3dcolorlabel;
         }
         if(isolevelindex==i||isolevelindex2==i){
