@@ -2148,6 +2148,7 @@ ELSE
 21 REWIND(LU_INPUT) ; INPUT_FILE_LINE_NUMBER = 0
    IF (BACKGROUND) THEN
       N_SPECIES = 0
+      DEFINED_BACKGROUND = .TRUE.
    ELSE
       N_SPECIES = 4
       PREDEFINED(1:4)       = .TRUE.
@@ -2156,6 +2157,7 @@ ELSE
       PREDEFINED_SPEC_ID(3) = 'CARBON DIOXIDE'
       PREDEFINED_SPEC_ID(4) = 'WATER VAPOR'
       PREDEFINED_SMIX(1) = .TRUE.
+      DEFINED_BACKGROUND = .FALSE.
    ENDIF
 ENDIF
 
@@ -2170,7 +2172,11 @@ COUNT_SPEC_LOOP: DO
    N_SPEC_READ = N_SPEC_READ + 1
    SPEC_ID_READ(N_SPEC_READ) = ID
 
-
+   !Prevent use of 'AIR' unless a new BACKGROUND has been defined.
+   IF (ID=='AIR' .AND. .NOT. DEFINED_BACKGROUND) THEN
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot redefine AIR without defining a BACKGROUND species'
+      CALL SHUTDOWN(MESSAGE) ; RETURN
+   ENDIF
    !Make sure both ramps and constant values have not been given
    IF (SPECIFIC_HEAT > 0._EB .AND. RAMP_CP/='null') THEN
       WRITE(MESSAGE,'(A,I2,A)') 'ERROR: SPEC ',N_SPEC_READ,': Cannot specify both SPECIFIC_HEAT and RAMP_CP'
@@ -4244,7 +4250,7 @@ READ_PART_LOOP: DO N=1,N_LAGRANGIAN_CLASSES
       IF (ANY(ABS(ORIENTATION(1:3,NN))>TWO_EPSILON_EB)) LPC%N_ORIENTATION = LPC%N_ORIENTATION + 1
    ENDDO
    IF (TRIM(DRAG_LAW)=='SCREEN' .AND. LPC%N_ORIENTATION/=1) THEN
-      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: PART line ',N,'.  Must specifiy exactly one ORIENTATION for SCREEN drag law.'
+      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: PART line ',N,'.  Must specify exactly one ORIENTATION for SCREEN drag law.'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
