@@ -14,9 +14,9 @@
 
 void ParticleStreakShowMenu(int var);
 
-/* ------------------ compare_float ------------------------ */
+/* ------------------ CompareFloat ------------------------ */
 
-int compare_float( const void *arg1, const void *arg2 ){
+int CompareFloat( const void *arg1, const void *arg2 ){
   float x, y;
 
   x=*(float *)arg1;
@@ -26,18 +26,18 @@ int compare_float( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ Update_hrrinfo ------------------------ */
+/* ------------------ UpdateHrrinfo ------------------------ */
 
-void Update_hrrinfo(int vis) {
+void UpdateHrrinfo(int vis) {
   if(hrrinfo != NULL) {
     hrrinfo->display = vis;
-	Update_Times();
+	UpdateTimes();
   }
 }
 
-/* ------------------ Update_Framenumber ------------------------ */
+/* ------------------ UpdateFrameNumber ------------------------ */
 
-void Update_Framenumber(int changetime){
+void UpdateFrameNumber(int changetime){
   if(force_redisplay==1||(itimeold!=itimes&&changetime==1)){
     int i;
 
@@ -226,9 +226,9 @@ void Update_Framenumber(int changetime){
   }
 }
 
-/* ------------------ Update_Show ------------------------ */
+/* ------------------ UpdateShow ------------------------ */
 
-void Update_Show(void){
+void UpdateShow(void){
   int i,evacflag,sliceflag,vsliceflag,partflag,patchflag,isoflag,smoke3dflag,tisoflag;
   int slicecolorbarflag;
   int shooter_flag;
@@ -624,9 +624,9 @@ void Update_Show(void){
   }
 }
 
-/* ------------------ get_itime ------------------------ */
+/* ------------------ GetItime ------------------------ */
 
-int get_itime(int n, int *timeslist, float *times, int ntimes){
+int GetItime(int n, int *timeslist, float *times, int ntimes){
   int istart=0;
 
   if(n>0)istart=timeslist[n-1];
@@ -637,9 +637,9 @@ int get_itime(int n, int *timeslist, float *times, int ntimes){
   return istart;
 }
 
-/* ------------------ Synch_Times ------------------------ */
+/* ------------------ SynchTimes ------------------------ */
 
-void Synch_Times(void){
+void SynchTimes(void){
   int n,i,istart,igrid;
 
   /* synchronize smooth blockage times */
@@ -654,7 +654,7 @@ void Synch_Times(void){
 
       tourj = tourinfo + j;
       if(tourj->display==0)continue;
-      tourj->timeslist[n]=get_itime(n,tourj->timeslist,tourj->path_times,tourj->ntimes);
+      tourj->timeslist[n]=GetItime(n,tourj->timeslist,tourj->path_times,tourj->ntimes);
     }
 
     /* synchronize terrain times */
@@ -664,10 +664,10 @@ void Synch_Times(void){
 
       terri = terraininfo + j;
       if(terri->loaded==0)continue;
-      terri->timeslist[n]=get_itime(n,terri->timeslist,terri->times,terri->ntimes);
+      terri->timeslist[n]=GetItime(n,terri->timeslist,terri->times,terri->ntimes);
     }
     if(hrrinfo!=NULL&&hrrinfo->loaded==1&&hrrinfo->display==1){
-      hrrinfo->timeslist[n]=get_itime(n,hrrinfo->timeslist,hrrinfo->times,hrrinfo->ntimes);
+      hrrinfo->timeslist[n]=GetItime(n,hrrinfo->timeslist,hrrinfo->times,hrrinfo->ntimes);
     }
 
   /* synchronize geometry times */
@@ -677,7 +677,7 @@ void Synch_Times(void){
 
       geomi = geominfoptrs[j];
       if(geomi->loaded==0||geomi->display==0)continue;
-      geomi->timeslist[n]=get_itime(n,geomi->timeslist,geomi->times,geomi->ntimes);
+      geomi->timeslist[n]=GetItime(n,geomi->timeslist,geomi->times,geomi->ntimes);
     }
 
   /* synchronize particle times */
@@ -687,7 +687,7 @@ void Synch_Times(void){
 
       parti=partinfo+j;
       if(parti->loaded==0)continue;
-      parti->timeslist[n]=get_itime(n,parti->timeslist,parti->times,parti->ntimes);
+      parti->timeslist[n]=GetItime(n,parti->timeslist,parti->times,parti->ntimes);
     }
 
   /* synchronize shooter times */
@@ -715,7 +715,7 @@ void Synch_Times(void){
 
       j = slice_loaded_list[jj];
       sd = sliceinfo + j;
-      sd->timeslist[n]=get_itime(n,sd->timeslist,sd->times,sd->ntimes);
+      sd->timeslist[n]=GetItime(n,sd->timeslist,sd->times,sd->ntimes);
     }
 
   /* synchronize smoke times */
@@ -725,7 +725,7 @@ void Synch_Times(void){
       for(jj=0;jj<nsmoke3dinfo;jj++){
         smoke3di = smoke3dinfo + jj;
         if(smoke3di->loaded==0)continue;
-        smoke3di->timeslist[n]=get_itime(n,smoke3di->timeslist,smoke3di->times,smoke3di->ntimes);
+        smoke3di->timeslist[n]=GetItime(n,smoke3di->timeslist,smoke3di->times,smoke3di->ntimes);
       }
     }
 
@@ -737,7 +737,7 @@ void Synch_Times(void){
       patchi = patchinfo + j;
       if(patchi->loaded==0)continue;
       if(patchi->filetype != PATCH_GEOMETRY)continue;
-      patchi->geom_timeslist[n]=get_itime(n,patchi->geom_timeslist,patchi->geom_times,patchi->ngeom_times);
+      patchi->geom_timeslist[n]=GetItime(n,patchi->geom_timeslist,patchi->geom_times,patchi->ngeom_times);
     }
     for(j=0;j<nmeshes;j++){
       patchdata *patchi;
@@ -747,7 +747,7 @@ void Synch_Times(void){
       if(meshi->patchfilenum<0||meshi->patch_times==NULL)continue;
       patchi=patchinfo+meshi->patchfilenum;
       if(patchi->filetype==PATCH_GEOMETRY)continue;
-      meshi->patch_timeslist[n]=get_itime(n,meshi->patch_timeslist,meshi->patch_times,meshi->npatch_times);
+      meshi->patch_timeslist[n]=GetItime(n,meshi->patch_timeslist,meshi->patch_times,meshi->npatch_times);
     }
 
   /* synchronize isosurface times */
@@ -757,7 +757,7 @@ void Synch_Times(void){
 
       meshi=meshinfo+igrid;
       if(meshi->iso_times==NULL)continue;
-      meshi->iso_timeslist[n]=get_itime(n,meshi->iso_timeslist,meshi->iso_times,meshi->niso_times);
+      meshi->iso_timeslist[n]=GetItime(n,meshi->iso_timeslist,meshi->iso_times,meshi->niso_times);
     }
 
   /* synchronize volume render times */
@@ -772,22 +772,22 @@ void Synch_Times(void){
         if(vr->smokeslice==NULL)continue;
         if(vr->loaded==0||vr->display==0)continue;
         if(vr->times==NULL)continue;
-        vr->timeslist[n]=get_itime(n,vr->timeslist,vr->times,vr->ntimes);
+        vr->timeslist[n]=GetItime(n,vr->timeslist,vr->times,vr->ntimes);
       }
     }
     /* synchronize zone times */
 
     if(showzone==1){
-      zone_timeslist[n]=get_itime(n,zone_timeslist,zone_times,nzone_times);
+      zone_timeslist[n]=GetItime(n,zone_timeslist,zone_times,nzone_times);
     }
 
   }
   reset_gltime();
 }
 
-/* ------------------ get_loadvfileinfo ------------------------ */
+/* ------------------ GetLoadvfileinfo ------------------------ */
 
-int get_loadvfileinfo(FILE *stream, char *filename){
+int GetLoadvfileinfo(FILE *stream, char *filename){
   int i;
   char *fileptr;
 
@@ -815,9 +815,9 @@ int get_loadvfileinfo(FILE *stream, char *filename){
   return 0;
 }
 
-/* ------------------ get_loadfileinfo ------------------------ */
+/* ------------------ GetLoadfileinfo ------------------------ */
 
-int get_loadfileinfo(FILE *stream, char *filename){
+int GetLoadfileinfo(FILE *stream, char *filename){
   int i;
   char *fileptr;
 
@@ -873,9 +873,9 @@ int get_loadfileinfo(FILE *stream, char *filename){
   return 0;
 }
 
-  /* ------------------ Convert_ssf ------------------------ */
+  /* ------------------ ConvertSsf ------------------------ */
 
-void Convert_ssf(void){
+void ConvertSsf(void){
   FILE *stream_from, *stream_to;
   int outeqin = 0;
 #define LENTEMP 20
@@ -911,14 +911,14 @@ void Convert_ssf(void){
     trim_back(buffer);
     if(strlen(buffer)>=8 && strncmp(buffer, "LOADFILE", 8)==0){
       if(fgets(filename, 255, stream_from)==NULL)break;
-      if(get_loadfileinfo(stream_to,filename)==0){
+      if(GetLoadfileinfo(stream_to,filename)==0){
         fprintf(stream_to, "%s\n", buffer);
         fprintf(stream_to, "%s\n", filename);
       }
     }
     else if(strlen(buffer)>=9&&strncmp(buffer, "LOADVFILE", 9)==0){
       if(fgets(filename, 255, stream_from)==NULL)break;
-      if(get_loadvfileinfo(stream_to, filename)==0){
+      if(GetLoadvfileinfo(stream_to, filename)==0){
         fprintf(stream_to, "%s\n", buffer);
         fprintf(stream_to, "%s\n", filename);
       }
@@ -938,9 +938,9 @@ void Convert_ssf(void){
   }
 }
 
-  /* ------------------ Update_Times ------------------------ */
+  /* ------------------ UpdateTimes ------------------------ */
 
-void Update_Times(void){
+void UpdateTimes(void){
   int ntimes2;
   float *timescopy;
   int i;
@@ -952,7 +952,7 @@ void Update_Times(void){
 
   // pass 1 - determine ntimes
 
-  Update_Show();
+  UpdateShow();
   CheckMemory;
   nglobal_times = 0;
 
@@ -1291,7 +1291,7 @@ void Update_Times(void){
 
   // sort times array and remove duplicates
 
-  if(nglobal_times>0)qsort( (float *)global_times, (size_t)nglobal_times, sizeof( float ), compare_float );
+  if(nglobal_times>0)qsort( (float *)global_times, (size_t)nglobal_times, sizeof( float ), CompareFloat );
 
   {
     int n,n2;
@@ -1488,7 +1488,7 @@ void Update_Times(void){
   // pass 4 - initialize individual time pointers
 
   izone=0;
-  reset_itimes0();
+  ResetItimes0();
   for(i=0;i<ngeominfoptrs;i++){
     geomdata *geomi;
 
@@ -1544,7 +1544,7 @@ void Update_Times(void){
           int listindex;
 
           bc->showtimelist[k]=1;
-          listindex=getindex(global_times[k],bc->showtime,bc->nshowtime);
+          listindex=GetIndex(global_times[k],bc->showtime,bc->nshowtime);
           bc->showtimelist[k]=bc->showhide[listindex];
         }
       }
@@ -1567,7 +1567,7 @@ void Update_Times(void){
       for(k=0;k<nglobal_times;k++){
         int listindex;
 
-        listindex=getindex(global_times[k],devicei->act_times,devicei->nstate_changes);
+        listindex=GetIndex(global_times[k],devicei->act_times,devicei->nstate_changes);
         devicei->showstatelist[k]=devicei->state_values[listindex];
       }
     }
@@ -1595,7 +1595,7 @@ void Update_Times(void){
           int listindex;
 
           vi->showtimelist[k]=1;
-          listindex=getindex(global_times[k],vi->showtime,vi->nshowtime);
+          listindex=GetIndex(global_times[k],vi->showtime,vi->nshowtime);
           vi->showtimelist[k]=vi->showhide[listindex];
         }
       }
@@ -1624,14 +1624,14 @@ void Update_Times(void){
           int listindex;
 
           cvi->showtimelist[k] = 1;
-          listindex = getindex(global_times[k], cvi->showtime, cvi->nshowtime);
+          listindex = GetIndex(global_times[k], cvi->showtime, cvi->nshowtime);
           cvi->showtimelist[k] = cvi->showhide[listindex];
         }
       }
     }
   }
 
-  if(nglobal_times>0)Synch_Times();
+  if(nglobal_times>0)SynchTimes();
   updatefaces=1;
   if(nglobal_times>0){
     UpdateTimeLabels();
@@ -1650,12 +1650,12 @@ void Update_Times(void){
   }
 }
 
-/* ------------------ getplotstate ------------------------ */
+/* ------------------ GetPlotState ------------------------ */
 
-int getplotstate(int choice){
+int GetPlotState(int choice){
   int i;
 
-  update_loaded_lists();
+  UpdateLoadedLists();
   switch(choice){
     case STATIC_PLOTS:
     case STATIC_PLOTS_NORECURSE:
@@ -1672,7 +1672,7 @@ int getplotstate(int choice){
         return STATIC_PLOTS;
       }
       if(choice!=STATIC_PLOTS_NORECURSE){
-        return getplotstate(DYNAMIC_PLOTS_NORECURSE);
+        return GetPlotState(DYNAMIC_PLOTS_NORECURSE);
       }
       break;
     case DYNAMIC_PLOTS:
@@ -1761,7 +1761,7 @@ int getplotstate(int choice){
       if(visShooter!=0&&shooter_active==1){
         return DYNAMIC_PLOTS;
       }
-      if(choice!=DYNAMIC_PLOTS_NORECURSE)return getplotstate(STATIC_PLOTS_NORECURSE);
+      if(choice!=DYNAMIC_PLOTS_NORECURSE)return GetPlotState(STATIC_PLOTS_NORECURSE);
       break;
     default:
       ASSERT(FFALSE);
@@ -1771,9 +1771,9 @@ int getplotstate(int choice){
   return NO_PLOTS;
 }
 
-/* ------------------ getindex ------------------------ */
+/* ------------------ GetIndex ------------------------ */
 
-int getindex(float key, const float *list, int nlist){
+int GetIndex(float key, const float *list, int nlist){
   int i;
 
   if(nlist==1)return 0;
@@ -1785,9 +1785,9 @@ int getindex(float key, const float *list, int nlist){
   return 0;
 }
 
-/* ------------------ isearch ------------------------ */
+/* ------------------ ISearch ------------------------ */
 
-int isearch(float *list, int nlist, float key, int guess){
+int ISearch(float *list, int nlist, float key, int guess){
   /*
      find val such that list[val]<=key<list[val+1]
      start with val=guess
@@ -1816,17 +1816,17 @@ int isearch(float *list, int nlist, float key, int guess){
   return low;
 }
 
-/* ------------------ reset_itimes0 ------------------------ */
+/* ------------------ ResetItimes0 ------------------------ */
 
-void reset_itimes0(void){
+void ResetItimes0(void){
   if(current_script_command==NULL||current_script_command->command!=SCRIPT_VOLSMOKERENDERALL||current_script_command->command!=SCRIPT_ISORENDERALL){
     itimes=first_frame_index;
   }
 }
 
-/* ------------------ Update_Clipbounds ------------------------ */
+/* ------------------ UpdateClipbounds ------------------------ */
 
-void Update_Clipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
+void UpdateClipbounds(int set_i0, int *i0, int set_i1, int *i1, int imax){
 
   if(set_i0==0&&set_i1==0)return;
   if(set_i0==1&&set_i1==1){
@@ -1874,9 +1874,9 @@ void UpdateColorTable(colortabledata *ctableinfo, int nctableinfo){
   UpdateColorTableList(ncolortableinfo_old);
 }
 
-/* ------------------ update_ShowScene ------------------------ */
+/* ------------------ UpdateShowScene ------------------------ */
 
-void update_ShowScene(void){
+void UpdateShowScene(void){
   if(update_playmovie==1){
     enable_disable_playmovie();
     update_playmovie = 0;
@@ -1886,7 +1886,7 @@ void update_ShowScene(void){
   if(compute_fed == 1)DefineAllFEDs();
   if(restart_time == 1){
     restart_time = 0;
-    reset_itimes0();
+    ResetItimes0();
   }
   if(loadfiles_at_startup==1&&update_load_Files == 1){
     load_Files();
@@ -1894,7 +1894,7 @@ void update_ShowScene(void){
   if(update_startup_view == 1){
     cameradata *ca;
 
-    ca = get_camera(label_startup_view);
+    ca = GetCamera(label_startup_view);
     if(ca != NULL){
       ResetMenu(ca->view_id);
     }
@@ -1920,10 +1920,10 @@ void update_ShowScene(void){
     update_rotation_center_ini = 0;
   }
   if(camera_current->dirty == 1){
-    update_camera(camera_current);
+    UpdateCamera(camera_current);
   }
   if(updateclipvals == 1){
-    clip2cam(camera_current);
+    Clip2Cam(camera_current);
     update_clip_all();
     updateclipvals = 0;
   }
@@ -1941,23 +1941,23 @@ void update_ShowScene(void){
     ZoomMenu(UPDATE_PROJECTION);
   }
   if(convert_ini == 1){
-    writeini(SCRIPT_INI, ini_to);
+    WriteINI(SCRIPT_INI, ini_to);
     exit(0);
   }
   if(convert_ssf==1||update_ssf==1){
-    Convert_ssf();
+    ConvertSsf();
     exit(0);
   }
-  Update_Show();
+  UpdateShow();
   if(global_times!=NULL&&updateUpdateFrameRateMenu==1)FrameRateMenu(frameratevalue);
   if(updatefaces==1)UpdateFaces();
-  if(updatefacelists==1)UpdateFacelists();
+  if(updatefacelists==1)UpdateFaceLists();
 }
 
-/* ------------------ update_Display ------------------------ */
+/* ------------------ UpdateDisplay ------------------------ */
 #define TERRAIN_FIRE_LINE_UPDATE 39
 
-void update_Display(void){
+void UpdateDisplay(void){
 
   LOCK_IBLANK
   if(update_setvents==1){
@@ -1971,12 +1971,12 @@ void update_Display(void){
   }
   if(update_smokecolorbar == 1){
     update_smokecolorbar = 0;
-    SmokeColorBarMenu(fire_colorbar_index);
+    SmokeColorbarMenu(fire_colorbar_index);
   }
   if(update_colorbartype == 1){
     colorbardata *cb;
 
-    cb = getcolorbar(colorbarname);
+    cb = GetColorbar(colorbarname);
     if(cb != NULL){
       colorbartype = cb - colorbarinfo;
       UpdateCurrentColorbar(cb);
@@ -2017,7 +2017,7 @@ void update_Display(void){
     updatemenu = 0;
   }
   if(update_fire_colorbar_index == 1){
-    SmokeColorBarMenu(fire_colorbar_index_ini);
+    SmokeColorbarMenu(fire_colorbar_index_ini);
     update_fire_colorbar_index = 0;
   }
   if(update_colorbar_select_index == 1 && colorbar_select_index >= 0 && colorbar_select_index <= 255){

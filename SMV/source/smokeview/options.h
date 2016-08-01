@@ -64,7 +64,7 @@
 #define pp_HAZARD
 //#define pp_GPUDEPTH
 #define pp_MEMPRINT
-#define PP_RENDER360
+#define pp_RENDER360
 #ifdef _DEBUG
 #define pp_RENDER360_DEBUG
 #endif

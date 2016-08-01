@@ -71,7 +71,7 @@
 #define ROTATION_ROLLOUT 6
 #define ORIENTATION_ROLLOUT 7
 #define MOVIE_ROLLOUT 8
-#define RENDER_360 9
+#define RENDER_360CB 9
 
 void Motion_DLG_CB(int var);
 void Viewpoint_CB(int var);
@@ -229,10 +229,10 @@ void update_render_start_button(void){
   int is_enabled;
 
   is_enabled = BUTTON_render_start->enabled;
-  if(render_state == ON&&is_enabled == 1){
+  if(rendering_status == RENDER_ON&&is_enabled == 1){
     BUTTON_render_start->disable();
   }
-  else if(render_state == OFF&&is_enabled == 0&&update_makemovie==0){
+  else if(rendering_status == RENDER_OFF&&is_enabled == 0&&update_makemovie==0){
     BUTTON_render_start->enable();
   }
 }
@@ -242,7 +242,7 @@ void update_render_start_button(void){
 void enable_disable_playmovie(void){
   char moviefile_path[1024];
 
-  if(file_exists(get_moviefile_path(moviefile_path)) == 1&&play_movie_now==1){
+  if(file_exists(GetMovieFilePath(moviefile_path)) == 1&&play_movie_now==1){
     if(BUTTON_play_movie != NULL)BUTTON_play_movie->enable();
   }
   else{
@@ -397,13 +397,13 @@ extern "C" void update_glui_filelabel(int var){
 
 extern "C" void update_glui_zoom(void){
   if(SPINNER_zoom!=NULL)SPINNER_zoom->set_float_val(zoom);
-  aperture_glui=zoom2aperture(zoom);
+  aperture_glui=Zoom2Aperture(zoom);
   if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
 }
 
-/* ------------------ update_camera_label ------------------------ */
+/* ------------------ UpdateCameraLabel ------------------------ */
 
-extern "C" void update_camera_label(void){
+extern "C" void UpdateCameraLabel(void){
   EDIT_view_label->set_text(camera_label);
 }
 
@@ -413,13 +413,17 @@ extern "C" void update_cursor_checkbox(void){
   CHECKBOX_cursor_blockpath->set_int_val(cursorPlot3D);
 }
 
-/* ------------------ update_view_gluilist ------------------------ */
+/* ------------------ UpdateGluiViewList ------------------------ */
 
-extern "C" void update_view_gluilist(void){
+extern "C" void UpdateGluiViewList(void){
   cameradata *ca;
 
+  if(LIST_viewpoints == NULL)return;
   for(ca=camera_list_first.next;ca->next!=NULL;ca=ca->next){
-    LIST_viewpoints->add_item(ca->view_id,ca->name);
+    LIST_viewpoints->delete_item(ca->name);
+  }
+  for(ca = camera_list_first.next; ca->next != NULL; ca = ca->next){
+    LIST_viewpoints->add_item(ca->view_id, ca->name);
   }
   LIST_viewpoints->set_int_val(startup_view_ini);
   selected_view=startup_view_ini;
@@ -627,7 +631,7 @@ extern "C" void glui_motion_setup(int main_window){
   RADIOBUTTON_1b = glui_motion->add_radiobutton_to_group(RADIO_projection, _d("Size preserving"));
   SPINNER_zoom = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _d("Zoom"), GLUI_SPINNER_FLOAT, &zoom, ZOOM, Motion_CB);
   SPINNER_zoom->set_float_limits(0.10, 10.0, GLUI_LIMIT_CLAMP);
-  aperture_glui = zoom2aperture(zoom);
+  aperture_glui = Zoom2Aperture(zoom);
   SPINNER_aperture = glui_motion->add_spinner_to_panel(ROLLOUT_projection, _d("aperture"), GLUI_SPINNER_FLOAT, &aperture_glui,
     APERTURE, Motion_CB);
   glui_motion->add_separator_to_panel(ROLLOUT_projection);
@@ -680,7 +684,7 @@ extern "C" void glui_motion_setup(int main_window){
   PANEL_render_file = glui_motion->add_panel_to_panel(ROLLOUT_render, "", false);
 
   PANEL_file_suffix = glui_motion->add_panel_to_panel(PANEL_render_file, "suffix:", true);
-  RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &renderfilelabel, RENDER_LABEL, Render_CB);
+  RADIO_render_label = glui_motion->add_radiogroup_to_panel(PANEL_file_suffix, &render_label_type, RENDER_LABEL, Render_CB);
   RADIOBUTTON_1f = glui_motion->add_radiobutton_to_group(RADIO_render_label, "frame number");
   RADIOBUTTON_1g = glui_motion->add_radiobutton_to_group(RADIO_render_label, "time (s)");
 
@@ -705,11 +709,11 @@ extern "C" void glui_motion_setup(int main_window){
 
 #ifdef pp_RENDER360
   ROLLOUT_render360 = glui_motion->add_rollout_to_panel(ROLLOUT_render, "360 rendering", false);
-  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360);
+  CHECKBOX_render360=glui_motion->add_checkbox_to_panel(ROLLOUT_render360,"activate",&render_360,RENDER_360CB,Render_CB);
   STATIC_width360 = glui_motion->add_statictext_to_panel(ROLLOUT_render360, "width");
-  SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360, Render_CB);
+  SPINNER_window_height360 = glui_motion->add_spinner_to_panel(ROLLOUT_render360, _d("height"), GLUI_SPINNER_INT, &nheight360, RENDER_360CB, Render_CB);
   SPINNER_window_height360->set_int_limits(100, max_screenHeight);
-  Render_CB(RENDER_360);
+  Render_CB(RENDER_360CB);
 #ifdef pp_RENDER360_DEBUG
 
   NewMemory((void **)&CHECKBOX_screenvis, nscreeninfo * sizeof(GLUI_Checkbox *));
@@ -755,7 +759,7 @@ extern "C" void glui_motion_setup(int main_window){
 #endif
 #endif
 
-  update_glui_filelabel(renderfilelabel);
+  update_glui_filelabel(render_label_type);
 
   render_skip_index = RENDER_CURRENT_SINGLE;
   LIST_render_skip = glui_motion->add_listbox_to_panel(ROLLOUT_render, _d("Which frame(s):"), &render_skip_index, RENDER_SKIP, Render_CB);
@@ -1259,7 +1263,7 @@ extern "C" void Motion_CB(int var){
       }
       break;
     case SNAPSCENE:
-      snap_scene();
+      SnapScene();
       break;
     case WINDOW_RESIZE:
       setScreenSize(&glui_screenWidth,&glui_screenHeight);
@@ -1325,15 +1329,15 @@ extern "C" void Motion_CB(int var){
         }
       }
       camera_current->zoom=zoom;
-      aperture_glui=zoom2aperture(zoom);
+      aperture_glui=Zoom2Aperture(zoom);
       if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
       break;
     case APERTURE:
-      zoom=aperture2zoom(aperture_glui);
+      zoom=Aperture2Zoom(aperture_glui);
       if(zoom<0.1||zoom>10.0){
         if(zoom<0.1)zoom=0.1;
         if(zoom>10.0)zoom=10.0;
-        aperture_glui=zoom2aperture(zoom);
+        aperture_glui=Zoom2Aperture(zoom);
         if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
       }
       zoomindex=-1;
@@ -1341,7 +1345,7 @@ extern "C" void Motion_CB(int var){
         if(ABS(zoom-zooms[i])<0.001){
           zoomindex=i;
           zoom=zooms[i];
-          aperture_glui=zoom2aperture(zoom);
+          aperture_glui=Zoom2Aperture(zoom);
           if(SPINNER_aperture!=NULL)SPINNER_aperture->set_float_val(aperture_glui);
           break;
         }
@@ -1529,7 +1533,7 @@ void Motion_DLG_CB(int var){
     break;
   case SAVE_SETTINGS:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   default:
     ASSERT(FFALSE);
@@ -1631,7 +1635,7 @@ void Viewpoint_CB(int var){
   case RESTORE_EXTERIOR_VIEW:
   case RESTORE_INTERIOR_VIEW:
   case RESTORE_SAVED_VIEW:
-    ResetView(var);
+    SetViewPoint(var);
     break;
   case SAVE_VIEW:
     strcpy(camera_current->name,camera_label);
@@ -1660,7 +1664,7 @@ void Viewpoint_CB(int var){
     prev=ca->prev;
     next=ca->next;
     view_id=ca->view_id;
-    copy_camera(ca,camera_current);
+    CopyCamera(ca,camera_current);
     ca->prev=prev;
     ca->next=next;
     ca->view_id=view_id;
@@ -1692,7 +1696,7 @@ void Viewpoint_CB(int var){
     }
     LIST_viewpoints->delete_item(ival);
     prev=cam1->prev;
-    delete_camera(cam1);
+    DeleteCamera(cam1);
     if(prev->view_id!=-1){
       LIST_viewpoints->set_int_val(prev->view_id);
       selected_view=prev->view_id;
@@ -1712,7 +1716,7 @@ void Viewpoint_CB(int var){
     }
 
     rotation_type_save = ca->rotation_type;
-    copy_camera(camera_current,ca);
+    CopyCamera(camera_current,ca);
     if(rotation_type==ROTATION_3AXIS)camera2quat(camera_current,quat_general,quat_rotation);
     if(strcmp(ca->name,"external")==0||strcmp(ca->name,"internal")==0)updatezoommenu=1;
     camera_current->rotation_type=rotation_type_save;
@@ -1739,7 +1743,7 @@ void Viewpoint_CB(int var){
   case STARTUP:
     startup_view_ini=LIST_viewpoints->get_int_val();
     selected_view=startup_view_ini;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CYCLEVIEWS:
     ival=LIST_viewpoints->get_int_val();
@@ -1816,7 +1820,7 @@ extern "C" void add_list_view(char *label_in){
   else{
     cam1=cex;
   }
-  cam2 = insert_camera(cam1,camera_current,label);
+  cam2 = InsertCamera(cam1,camera_current,label);
   if(cam2!=NULL){
     LIST_viewpoints->add_item(cam2->view_id,cam2->name);
     LIST_viewpoints->set_int_val(cam2->view_id);
@@ -1860,7 +1864,13 @@ void Render_CB(int var){
 
   updatemenu=1;
   switch(var){
-    case RENDER_360:
+    case RENDER_360CB:
+      if(render_360 == 1){
+        render_mode = RENDER_360;
+      }
+      else{
+        render_mode = RENDER_XYSINGLE;
+      }
       nwidth360 = nheight360*2;
       sprintf(widthlabel,"width: %i",nwidth360);
       STATIC_width360->set_name(widthlabel);
@@ -1902,6 +1912,7 @@ void Render_CB(int var){
     case RENDER_SKIP:
       break;
     case RENDER_START:
+      if(render_360 == 1)render_mode = RENDER_360;
       if (render_frame != NULL) {
         int i;
 
@@ -1909,14 +1920,14 @@ void Render_CB(int var){
           render_frame[i] = 0;
         }
       }
-      if(render_360==0&&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
+      if(render_mode != RENDER_360 &&(render_skip_index != RENDER_CURRENT_SINGLE)&&(RenderTime == 1 || touring == 1)){
         RenderMenu(render_skip_index);
       }
       else{
-        if(nrender_rows==1&&render_360==0){
+        if(nrender_rows==1&& render_mode != RENDER_360){
           RenderMenu(RENDER_CURRENT_SINGLE);
         }
-        else if (render_360 == 1) {
+        else if (render_mode == RENDER_360) {
           if(glui_screenWidth!=glui_screenHeight){
             glui_screenWidth = MAX(glui_screenWidth,glui_screenHeight);
             glui_screenHeight = MAX(glui_screenWidth,glui_screenHeight);
@@ -1942,9 +1953,9 @@ void Render_CB(int var){
   }
 }
 
-/* ------------------ update_glui_render ------------------------ */
+/* ------------------ UpdateGluiRender ------------------------ */
 
-extern "C" void update_glui_render(void){
+extern "C" void UpdateGluiRender(void){
   if(RenderTime==1&&RenderTimeOld==0){
     if(LIST_render_skip!=NULL&&render_skip_index==RENDER_CURRENT_SINGLE){
       render_skip_index=1;

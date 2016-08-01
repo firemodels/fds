@@ -113,9 +113,9 @@ extern "C" void hide_glui_colorbar(void){
     update_extreme();
   }
   if(glui_colorbar!=NULL){
-    copy_camera(camera_external,camera_external_save);
+    CopyCamera(camera_external,camera_external_save);
     Reshape_CB(screenWidth,screenHeight);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->hide();
   }
   updatemenu=1;
@@ -139,7 +139,7 @@ extern "C" void show_glui_colorbar(void){
   }
   if(glui_colorbar!=NULL){
     Reshape_CB(screenWidth,screenHeight);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     glui_colorbar->show();
   }
 }
@@ -242,8 +242,8 @@ void Colorbar_CB(int var){
       cbi->index_node[colorbarpoint]=cb_colorindex;
 
       colorbar_global2local();
-      update_colorbar_splits(current_colorbar);
-      remapcolorbar(cbi);
+      UpdateColorbarSplits(current_colorbar);
+      RemapColorbar(cbi);
       UpdateRGBColors(COLORBAR_INDEX_NONE);
     }
     break;
@@ -266,7 +266,7 @@ void Colorbar_CB(int var){
     break;
   case COLORBAR_SAVE:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case COLORBAR_ADDPOINT:
     if(colorbartype<ndefaultcolorbars||colorbartype>=ncolorbars)return;
@@ -304,8 +304,8 @@ void Colorbar_CB(int var){
     }
 
     colorbar_global2local();
-    update_colorbar_splits(current_colorbar);
-    remapcolorbar(cbi);
+    UpdateColorbarSplits(current_colorbar);
+    RemapColorbar(cbi);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
 
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
@@ -327,9 +327,9 @@ void Colorbar_CB(int var){
       rgb1[2]=rgb2_local[2];
     }
     cbi->nnodes--;
-    //update_colorbar_splits(current_colorbar);
-    update_colorbar_splits(cbi);
-    remapcolorbar(cbi);
+    //UpdateColorbarSplits(current_colorbar);
+    UpdateColorbarSplits(cbi);
+    RemapColorbar(cbi);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     if(colorbarpoint==cbi->nnodes)colorbarpoint=cbi->nnodes-1;
     break;
@@ -342,14 +342,14 @@ void Colorbar_CB(int var){
     for(i=0;i<3;i++){
       rgb_nodes[i]=cb_rgb[i];
     }
-    remapcolorbar(cbi);
+    RemapColorbar(cbi);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
     break;
   case COLORBAR_LIST:
     {
       selectedcolorbar_index2=LISTBOX_colorbar->get_int_val();
       update_colorbar_list2();
-      ColorBarMenu(selectedcolorbar_index2);
+      ColorbarMenu(selectedcolorbar_index2);
       colorbar_global2local();
     }
     break;
@@ -373,11 +373,11 @@ void Colorbar_CB(int var){
     break;
   case COLORBAR_NEW:
     if(colorbartype<0||colorbartype>=ncolorbars)return;
-    addcolorbar(colorbartype);
+    AddColorbar(colorbartype);
     colorbartype=ncolorbars-1;
     UpdateCurrentColorbar(colorbarinfo + colorbartype);
-    update_colorbar_splits(current_colorbar);
-    cbi = colorbarinfo + colorbartype;  //addcolorbar resizes (and possibly moves) colorbarinfo
+    UpdateColorbarSplits(current_colorbar);
+    cbi = colorbarinfo + colorbartype;  //AddColorbar resizes (and possibly moves) colorbarinfo
     LISTBOX_colorbar->add_item(colorbartype,cbi->label);
     LISTBOX_colorbar->set_int_val(colorbartype);
     add_colorbar_list2(colorbartype,cbi->label);

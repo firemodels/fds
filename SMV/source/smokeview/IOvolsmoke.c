@@ -764,7 +764,7 @@ void drawsmoke3dVOLdebug(void){
         y[1] = yplt[jbar];
         z[0] = zplt[0];
         z[1] = zplt[kbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       case YWALLMIN:
       case YWALLMAX:
@@ -780,7 +780,7 @@ void drawsmoke3dVOLdebug(void){
         x[1] = xplt[ibar];
         z[0] = zplt[0];
         z[1] = zplt[kbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       case ZWALLMIN:
       case ZWALLMAX:
@@ -796,7 +796,7 @@ void drawsmoke3dVOLdebug(void){
         x[1] = xplt[ibar];
         y[0] = yplt[0];
         y[1] = yplt[jbar];
-        output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
+        Output3Text(foregroundcolor, (x[0]+x[1])/2.0,(y[0]+y[1])/2.0,(z[0]+z[1])/2.0, label);
         break;
       default:
         ASSERT(FFALSE);
@@ -898,7 +898,7 @@ void drawsmoke3dVOL(void){
   int iwall;
   int ii;
 
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volfacelistdata *vi;
     meshdata *meshi;
@@ -1220,7 +1220,7 @@ void drawsmoke3dVOL(void){
     }
     glEnd();
   }
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
 }
 
 /* ------------------ set_super_index ------------------------ */
@@ -1446,7 +1446,7 @@ void drawsmoke3dGPUVOL(void){
   glUniform1i(GPUvol_block_volsmoke,block_volsmoke);
 
   SNIFF_ERRORS("after drawsmoke3dGPUVOL before loop");
-  if(use_transparency_data==1)transparenton();
+  if(use_transparency_data==1)TransparentOn();
   for(ii=0;ii<nvolfacelistinfo;ii++){
     volrenderdata *vr;
     volfacelistdata *vi;
@@ -1618,7 +1618,7 @@ void drawsmoke3dGPUVOL(void){
     glEnd();
   }
   SNIFF_ERRORS("after drawsmoke3dGPUVOL after loop");
-  if(use_transparency_data==1)transparentoff();
+  if(use_transparency_data==1)TransparentOff();
 }
 
 #define HEADER_SIZE 4
@@ -1985,8 +1985,7 @@ void unload_volsmoke_frame_allmeshes(int framenum){
 
     meshi = meshinfo + i;
     vr = &meshi->volrenderinfo;
-    if(vr->smokeslice==NULL||vr->fireslice==NULL)continue;
-    if(vr->loaded==0)continue;
+    if(vr->smokeslice==NULL||vr->fireslice==NULL||vr->loaded==0)continue;
     FREEMEMORY(vr->firedataptrs[framenum]);
     FREEMEMORY(vr->smokedataptrs[framenum]);
 //    vr->loaded=0;
@@ -2007,8 +2006,8 @@ void unload_volsmoke_allframes(volrenderdata *vr){
   }
   vr->loaded=0;
   vr->display=0;
-  plotstate = getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   PRINTF("completed\n");
 }
 
@@ -2033,9 +2032,9 @@ void read_volsmoke_allframes(volrenderdata *vr){
   }
   vr->loaded=1;
   vr->display=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   stept=1;
-  Update_Times();
+  UpdateTimes();
 }
 
 /* ------------------ read_volsmoke_frame_allmeshes ------------------------ */
@@ -2175,9 +2174,9 @@ void read_volsmoke_allframes_allmeshes(void){
       }
     }
   }
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   stept=1;
-  Update_Times();
+  UpdateTimes();
 #ifdef pp_THREAD
   if(use_multi_threading==1){
     mt_read_volsmoke_allframes_allmeshes2();

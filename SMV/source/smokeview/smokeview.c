@@ -27,9 +27,9 @@ void _Sniff_Errors(char *whereat){
   }
 }
 
-/* ------------------ updateLights ------------------------ */
+/* ------------------ UpdateLights ------------------------ */
 
-void updateLights(float *pos1, float *pos2){
+void UpdateLights(float *pos1, float *pos2){
   int i;
   GLfloat ambientlight2[4], diffuselight2[4];
   int lightCount;
@@ -78,7 +78,7 @@ void updateLights(float *pos1, float *pos2){
 
 /* ------------------ antialias ------------------------ */
 
-void antialias(int flag){
+void Antialias(int flag){
   if(antialiasflag==1){
     if(flag==1){
       glEnable(GL_LINE_SMOOTH);
@@ -95,25 +95,25 @@ void antialias(int flag){
   }
 }
 
-/* ------------------ transparenton ------------------------ */
+/* ------------------ TransparentOn ------------------------ */
 
-void transparenton(void){
+void TransparentOn(void){
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
   glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 }
 
-/* ------------------ transparentoff ------------------------ */
+/* ------------------ TransparentOff ------------------------ */
 
-void transparentoff(void){
+void TransparentOff(void){
   glDepthMask(GL_TRUE);
   glDisable(GL_BLEND);
 }
 
 
-/* ------------------ ResetView ------------------------ */
+/* ------------------ SetViewPoint ------------------------ */
 
-void ResetView(int option){
+void SetViewPoint(int option){
   in_external=0;
   switch(option){
     int rotation_type_save;
@@ -125,7 +125,7 @@ void ResetView(int option){
     in_external=1;
     rotation_type_save = camera_current->rotation_type;
     projection_type_save = camera_current->projection_type;
-    copy_camera(camera_current,camera_external);
+    CopyCamera(camera_current,camera_external);
     camera_current->rotation_type=rotation_type_save;
     camera_current->projection_type=projection_type_save;
     if(camera_current->projection_type==1){
@@ -135,12 +135,12 @@ void ResetView(int option){
   case RESTORE_INTERIOR_VIEW:
     rotation_type_save = camera_current->rotation_type;
     projection_type_save = camera_current->projection_type;
-    copy_camera(camera_current,camera_internal);
+    CopyCamera(camera_current,camera_internal);
     camera_current->rotation_type=rotation_type_save;
     camera_current->projection_type=projection_type_save;
     break;
   case RESTORE_SAVED_VIEW:
-    copy_camera(camera_current,camera_save);
+    CopyCamera(camera_current,camera_save);
     break;
   case 3:
   case 4:
@@ -183,9 +183,9 @@ void ResetView(int option){
   update_glui_zoom();
 }
 
-/* ------------------ init_volrender_script ------------------------ */
+/* ------------------ InitVolrenderScript ------------------------ */
 
-void init_volrender_script(char *prefix, char *tour_label, int startframe, int skipframe){
+void InitVolrenderScript(char *prefix, char *tour_label, int startframe, int skipframe){
   scriptfiledata *sfd;
   FILE *script_stream;
 
@@ -216,9 +216,9 @@ void init_volrender_script(char *prefix, char *tour_label, int startframe, int s
   }
 }
 
-/* ------------------ display_version_info ------------------------ */
+/* ------------------ DisplayVersionInfo ------------------------ */
 
-void display_version_info(char *progname){
+void DisplayVersionInfo(char *progname){
   PRINTversion(progname);
   if(fds_version!=NULL){
     PRINTF("FDS Build: %s\n",fds_githash);

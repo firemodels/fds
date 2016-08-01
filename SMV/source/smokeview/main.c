@@ -17,9 +17,9 @@
 
 // version 6.3.7
 
-/* ------------------ usage ------------------------ */
+/* ------------------ Usage ------------------------ */
 
-void usage(char **argv){
+void Usage(char **argv){
   char buffer[1000];
 
   PRINTF("%s\n", release_title);
@@ -141,9 +141,9 @@ void usage(char **argv){
   }
 }
 
-/* ------------------ parse_commandline ------------------------ */
+/* ------------------ ParseCommandline ------------------------ */
 
-void parse_commandline(int argc, char **argv){
+void ParseCommandline(int argc, char **argv){
   int i, len_casename;
   int iarg;
   size_t len_memory;
@@ -159,18 +159,18 @@ void parse_commandline(int argc, char **argv){
     exit(1);
   }
   if(strncmp(argv[1], "-ini", 3) == 0){
-    init_camera_list();
+    InitCameraList();
     InitOpenGL();
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI, NULL);
+    WriteINI(GLOBAL_INI, NULL);
     exit(0);
   }
 
   if(strncmp(argv[1], "-ng_ini", 6) == 0){
-    init_camera_list();
+    InitCameraList();
     use_graphics = 0;
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    writeini(GLOBAL_INI, NULL);
+    WriteINI(GLOBAL_INI, NULL);
     exit(0);
   }
   strcpy(SMVFILENAME, "");
@@ -366,7 +366,7 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i], "-stereo", 7) == 0){
       stereoactive = 1;
-      showstereo = STEREO_TIME;
+      stereotype = STEREO_TIME;
       PRINTF("stereo option activated\n");
     }
 #ifdef pp_LANG
@@ -439,7 +439,7 @@ void parse_commandline(int argc, char **argv){
     }
 #endif
     else if(strncmp(argv[i], "-h", 2) == 0){
-      usage(argv);
+      Usage(argv);
       exit(0);
     }
     else if(strncmp(argv[i], "-noblank", 8) == 0){
@@ -459,7 +459,7 @@ void parse_commandline(int argc, char **argv){
     else if(
       strncmp(argv[i], "-volrender", 10) != 0 && (strncmp(argv[i], "-version", 8) == 0 || strncmp(argv[i], "-v", 2) == 0)
       ){
-      display_version_info("Smokeview ");
+      DisplayVersionInfo("Smokeview ");
       exit(0);
     }
     else if(
@@ -548,12 +548,12 @@ void parse_commandline(int argc, char **argv){
     }
     else if(strncmp(argv[i], "-build", 6) == 0){
       showbuild = 1;
-      usage(argv);
+      Usage(argv);
       exit(0);
     }
     else {
       fprintf(stderr, "*** Error: unknown option: %s\n", argv[i]);
-      usage(argv);
+      Usage(argv);
       exit(1);
     }
   }
@@ -578,7 +578,7 @@ void parse_commandline(int argc, char **argv){
     STRCPY(volrender_scriptname, fdsprefix);
     STRCAT(volrender_scriptname, "_volrender.ssf");
 
-    init_volrender_script(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
+    InitVolrenderScript(fdsprefix, NULL, vol_startframe0, vol_skipframe0);
   }
 }
 
@@ -593,12 +593,12 @@ int main(int argc, char **argv){
   initMALLOC();
   init_rand_ab(1000000);
   initvars();
-  if(argc==1)display_version_info("Smokeview ");
+  if(argc==1)DisplayVersionInfo("Smokeview ");
   copy_args(&argc, argv, &argv_sv);
   if(argc==0||argc==1)return 0;
 
   progname=argv_sv[0];
-  parse_commandline(argc, argv_sv);
+  ParseCommandline(argc, argv_sv);
   if(smokeview_bindir==NULL){
     smokeview_bindir=getprogdir(progname,&smokeviewpath);
   }
@@ -613,7 +613,7 @@ int main(int argc, char **argv){
   have_ffplay = have_prog("ffplay -version >/dev/null 2>/dev/null");
 #endif
 #endif
-  display_version_info("Smokeview ");
+  DisplayVersionInfo("Smokeview ");
   setup_glut(argc,argv_sv);
 
 #ifdef pp_LUA
@@ -624,7 +624,7 @@ int main(int argc, char **argv){
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
   if(convert_ini==1){
-    readini(ini_from);
+    ReadINI(ini_from);
   }
 
   glutMainLoop();

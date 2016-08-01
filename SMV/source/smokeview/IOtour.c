@@ -141,7 +141,7 @@ void drawtours(void){
     /* path line (non-selected)*/
 
     if(showtours_whenediting==1){
-      antialias(ON);
+      Antialias(ON);
       glColor3fv(tmp_tourcol_pathline);
       glBegin(GL_LINES);
       for(i=0;i<ntours;i++){
@@ -162,7 +162,7 @@ void drawtours(void){
         }
       }
      glEnd();
-     antialias(OFF);
+     Antialias(OFF);
     }
 
     /* path line (selected)*/
@@ -173,7 +173,7 @@ void drawtours(void){
       tourdata *touri;
 
       glColor3fv(tourcol_selectedpathline);
-      if(tour_antialias==1)antialias(ON);
+      if(tour_antialias==1)Antialias(ON);
       glBegin(GL_LINES);
       touri = tourinfo + selectedtour_index;
 
@@ -187,7 +187,7 @@ void drawtours(void){
         glVertex3fv(pj->eye);
       }
       glEnd();
-      if(tour_antialias==1)antialias(OFF);
+      if(tour_antialias==1)Antialias(OFF);
 
     }
 
@@ -275,7 +275,7 @@ void drawtours(void){
     SNIFF_ERRORS("after select path, selected keyframe");
     CheckMemory;
 
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     for(i=0;i<ntours;i++){
       int j;
       tourdata *touri;
@@ -294,7 +294,7 @@ void drawtours(void){
           char label[128];
           sprintf(label,"%8.2f",framej->disp_time+0.005);
           trimzeros(label);
-          output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
+          Output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
         }
       }
     }
@@ -307,7 +307,7 @@ void drawtours(void){
   if(show_tourlocus==1){
     switch(tourlocus_type){
       case 0:
-        antialias(ON);
+        Antialias(ON);
         glBegin(GL_LINES);
         glColor3fv(tourcol_avatar);
         for(i=0;i<ntours;i++){
@@ -330,7 +330,7 @@ void drawtours(void){
           glVertex3fv(pj->tour_view);
         }
         glEnd();
-        antialias(OFF);
+        Antialias(OFF);
         break;
       case 1:
         for(i=0;i<ntours;i++){
@@ -429,7 +429,7 @@ void drawselect_tours(void){
           framej = touri->keyframe_list[j];
           eye = framej->nodeval.eye;
 
-          getrgb(color_index+1,&r,&g,&b);
+          GetRGB(color_index+1,&r,&g,&b);
           glColor3ub(r,g,b);
           glVertex3fv(eye);
         }
@@ -656,7 +656,7 @@ void createtourpaths(void){
       f2 = 1-f1;
       vtime = view_tstart*f1 + view_tstop*f2;
 
-      iframe_local = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_local);
+      iframe_local = ISearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_local);
       kf1 = touri->keyframe_list[iframe_local];
       kf2 = touri->keyframe_list[iframe_local+1];
       pj->keysnap=&kf1->nodeval;
@@ -797,7 +797,7 @@ void createtourpaths(void){
       float f1, f2;
 
       vdist = tour_dist2[j];
-      iframe_local = isearch(tour_dist,view_ntimes,vdist,iframe_local);
+      iframe_local = ISearch(tour_dist,view_ntimes,vdist,iframe_local);
       f1 = (vdist-tour_dist[iframe_local])/(tour_dist[iframe_local+1]-tour_dist[iframe_local]);
       f2 = 1 - f1;
       tour_t2[j] = f2*tour_t[iframe_local] + f1*tour_t[iframe_local+1] ;
@@ -813,7 +813,7 @@ void createtourpaths(void){
       pj = touri->pathnodes + j;
       vtime = tour_t2[j];
       vtime2 = touri->keyframe_list[0]->nodeval.time + j*vdt;
-      iframe_new = isearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
+      iframe_new = ISearch(touri->keyframe_times,touri->nkeyframes,vtime,iframe_old);
       kf1 = touri->keyframe_list[iframe_new];
       kf2 = touri->keyframe_list[iframe_new+1];
       dt = kf2->nodeval.time - kf1->nodeval.time;
@@ -949,7 +949,6 @@ void defaulttour(void){
   float *eye_xyz,*az_elev;
 
   touring=1;
-  angle_global=0;
   eye_xyz = camera_current->eye;
   az_elev = camera_current->az_elev;
 
@@ -1183,7 +1182,7 @@ tourdata *add_tour(char *label){
 
   update_tour_menulabels();
   createtourpaths();
-  Update_Times();
+  UpdateTimes();
   create_tourlist();
   return tourinfo + ntours-1;
 }
@@ -1234,7 +1233,7 @@ void delete_tour(int tour_index){
   }
   set_glui_keyframe();
   update_tour_menulabels();
-  Update_Times();
+  UpdateTimes();
   create_tourlist();
 
 }
@@ -1279,8 +1278,8 @@ void setup_tour(void){
     init_circulartour();
     update_tour_menulabels();
     createtourpaths();
-    Update_Times();
-    plotstate=getplotstate(DYNAMIC_PLOTS);
+    UpdateTimes();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
     selectedtour_index = TOURINDEX_MANUAL;
     selectedtour_index = TOURINDEX_MANUAL;
     selected_frame=NULL;
