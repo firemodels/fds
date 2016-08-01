@@ -10,6 +10,7 @@
 #include "datadefs.h"
 #include "MALLOC.h"
 
+
 /* --------------------------  elevdata ------------------------------------ */
 
 typedef struct {
@@ -22,10 +23,8 @@ typedef struct {
   float *valbuffer;
 } elevdata;
 
-#define GENERATE_GEOM 1
-#define GENERATE_OBSTS 2
-
-int nelevsperfile=400;
+#define FDS_OBST 0
+#define FDS_GEOM 1
 
 /* ------------------ usage ------------------------ */
 
@@ -38,17 +37,15 @@ void usage(char *prog){
   fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
   fprintf(stderr, "  Create an FDS input file using elevation data.\n\n");
   fprintf(stderr, "Usage:\n\n");
-  fprintf(stderr, "  dem2fds [-e|-g|-o][-h][-n n][-v] casename\n\n");
+  fprintf(stderr, "  dem2fds [-g|-o][-h][-v] casename.in\n\n");
   fprintf(stderr, "where\n\n");
   fprintf(stderr, "  -g - create FDS input file from elevations using &GEOM keywords\n");
   fprintf(stderr, "  -o - create FDS input file from elevations using &OBST keywords\n");
-  fprintf(stderr, "  -n n - number of elevations per file. default: %i \n",nelevsperfile);
   fprintf(stderr, "  -h - display this message\n");
   fprintf(stderr, "  -v - show versioning information\n\n");
   fprintf(stderr, " Usage examples:\n");
-  fprintf(stderr, " 1. create an elevation file using gridfloat files   dem2fds casename.in\n");
-  fprintf(stderr, " 2. create an FDS input file using &GEOM keywords : dem2fds -g casename\n");
-  fprintf(stderr, " 3. create an FDS input file using &OBST keywords : dem2fds -o casename\n");
+  fprintf(stderr, " 1. create an FDS input file using &GEOM keywords : dem2fds -g casename.in\n");
+  fprintf(stderr, " 2. create an FDS input file using &OBST keywords : dem2fds -o casename.in\n");
 }
 
 #define ABS(a) ((a)>=0 ? (a) : (-(a)))
@@ -82,7 +79,8 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 /* ------------------ generate_fds ------------------------ */
 
 void generate_fds(char *casename, int option){
-  char buffer[LENBUFFER], elevfile[LENBUFFER], fdsfile[LENBUFFER];
+  char buffer[LENBUFFER], elevfile[LENBUFFER], fdsfile[LENBUFFER],*ext;
+  char basename[LENBUFFER];
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
@@ -96,19 +94,23 @@ void generate_fds(char *casename, int option){
   float **valptrs;
   FILE *streamin = NULL, *streamout = NULL;
 
-  strcpy(elevfile,casename);
+  strcpy(basename, casename);
+  ext = strrchr(basename, '.');
+  if (ext != NULL)ext[0] = 0;
+
+  strcpy(elevfile,basename);
   strcat(elevfile,"_elevs.csv");
   streamin = fopen(elevfile,"r");
   if(streamin==NULL){
-    printf("***error: unable to open %s for input\n",elevfile);
+    fprintf(stderr,"***error: unable to open %s for input\n",elevfile);
     return;
   }
 
-  strcpy(fdsfile,casename);
+  strcpy(fdsfile,basename);
   strcat(fdsfile,".fds");
   streamout = fopen(fdsfile,"w");
   if(streamout==NULL){
-    printf("***error: unable to open %s for output\n",fdsfile);
+    fprintf(stderr,"***error: unable to open %s for output\n",fdsfile);
     fclose(streamin);
     return;
   }
@@ -145,9 +147,9 @@ void generate_fds(char *casename, int option){
   }
 
 
-  fprintf(streamout,"&HEAD CHID='%s', TITLE='terrain' /\n",casename);
+  fprintf(streamout,"&HEAD CHID='%s', TITLE='terrain' /\n",basename);
   fprintf(streamout,"&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n",ibar,jbar,kbar,xmax,ymax,zmin,zmax);
-  if(option==GENERATE_OBSTS){
+  if(option==FDS_OBST){
     fprintf(streamout,"&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", casename);
   }
   fprintf(streamout,"&TIME T_END = 0. /\n");
@@ -175,7 +177,7 @@ void generate_fds(char *casename, int option){
     }
   }
 
-  if(option==GENERATE_GEOM){
+  if(option==FDS_GEOM){
     fprintf(streamout,"&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
                       nlong,nlat,0.0,xmax,0.0,ymax);
     count = 1;
@@ -191,7 +193,7 @@ void generate_fds(char *casename, int option){
     }
     fprintf(streamout,"/\n");
   }
-  if(option==GENERATE_OBSTS){
+  if(option==FDS_OBST){
     for(j = 0; j < jbar; j++){
       float *vals, *valsp1, ycen;
 
@@ -258,10 +260,10 @@ float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latv
 
 /* ------------------ generate_elevs ------------------------ */
 
-void generate_elevs(char *elevfile){
+int generate_elevs(char *elevfile){
   int nelevinfo,i,j;
   filelistdata *fileheaders;
-  FILE *stream_in;
+  FILE *stream_in, *stream_out;
   elevdata *elevinfo;
   int ibar, jbar, kbar;
   float dx, dy;
@@ -271,11 +273,12 @@ void generate_elevs(char *elevfile){
   float longmin, longmax, latmin, latmax;
   int nlongs, nlats;
   float dlat, dlong;
-  int count=1;
-  float valmin, valmax;
+  int count=0, *have_vals;
+  float valmin, valmax, *vals;
+  char outfile[1024],*ext;
 
   nelevinfo = get_nfilelist(".", "*.hdr");
-  if(nelevinfo == 0)return;
+  if(nelevinfo == 0)return 0;
 
   get_filelist(".","*.hdr", nelevinfo, &fileheaders);
   NewMemory((void **)&elevinfo, nelevinfo*sizeof(elevdata));
@@ -340,19 +343,10 @@ void generate_elevs(char *elevfile){
     fclose(stream_in);
   }
 
-  // GRID
-  //  ibar jbar kbar
-  // DXDY
-  //   deltax deltay
-  // LONGLATCENTER
-  //  longlat
-  // LONGLATLL
-  //  long lat
-
   stream_in = fopen(elevfile, "r");
   if (stream_in == NULL) {
-    printf("***error: unable to open file: %s\n", elevfile);
-    return;
+    fprintf(stderr,"***error: unable to open file %s for input\n", elevfile);
+    return 0;
   }
   while(!feof(stream_in)){
     char buffer[255];
@@ -403,31 +397,38 @@ void generate_elevs(char *elevfile){
   }
   fclose(stream_in);
 
+  strcpy(outfile,elevfile);
+  ext = strrchr(outfile, '.');
+  if (ext != NULL)ext[0] = 0;
+  strcat(outfile, "_elevs.csv");
+  stream_out = fopen(outfile, "w");
+
   if(
     get_elevfile(elevinfo, nelevinfo, longmin, latmin) == NULL ||
     get_elevfile(elevinfo, nelevinfo, longmin, latmax) == NULL ||
     get_elevfile(elevinfo, nelevinfo, longmax, latmin) == NULL ||
     get_elevfile(elevinfo, nelevinfo, longmax, latmax) == NULL
     ){
-    printf("***error: elevation data not available for all longitudes/latitude \n");
-    printf("          pairs within the rectangle (%f,%f) (%f %f)\n", longmin, latmin, longmax, latmax);
+    fprintf(stderr,"***error: elevation data not available for all longitudes/latitude \n");
+    fprintf(stderr,"          pairs within the rectangle (%f,%f) (%f %f)\n", longmin, latmin, longmax, latmax);
     for(i = 0; i < nelevinfo; i++){
       elevdata *elevi;
 
       elevi = elevinfo + i;
-      printf(" header file: %s bounds: %f %f %f %f\n",
+      fprintf(stream_out," header file: %s bounds: %f %f %f %f\n",
         elevi->fileheader, elevi->long_min, elevi->lat_min, elevi->long_max, elevi->lat_max);
     }
-    return;
+    return 0;
   }
 
   dlat = (latmax - latmin) / (float)(nlats-1);
   dlong = (longmax - longmin) / (float)(nlongs-1);
-  printf(" %f %f %i %f %f %i\n", longmin, longmax, nlongs, latmin, latmax, nlats);
+  NewMemory((void **)&vals, nlongs*nlats*sizeof(float));
+  NewMemory((void **)&have_vals, nlongs*nlats*sizeof(int));
   for(j = 0; j < nlats; j++){
     float latj;
 
-    latj = latmax - (float)j*dlat;
+    latj = latmin + (float)j*dlat;
     for(i = 0; i < nlongs; i++){
       float longi;
       float elevij;
@@ -436,93 +437,52 @@ void generate_elevs(char *elevfile){
       longi = longmin + (float)i*dlong;
 
       elevij = get_elevation(elevinfo, nelevinfo, longi, latj, &have_val);
+      vals[count]=elevij;
+      have_vals[count] = have_val;
       if(have_val == 1){
-        printf(" %i,%f,%f,%f,%f\n", count, longi, latj, 39.37*elevij/12.0, elevij);
-        if(count == 1){
+        if(count == 0){
           valmin = elevij;
           valmax = elevij;
-          count++;
         }
         else{
           valmin = MIN(valmin, elevij);
           valmax = MAX(valmax, elevij);
         }
       }
+      count++;
     }
   }
-  printf("valmin=%f valmax=%f\n", valmin, valmax);
-}
+  count = 0;
+  fprintf(stream_out," %f %f %i %f %f %i %f %f %i\n", longmin, longmax, nlongs, latmin, latmax, nlats,valmin,valmax,30);
+  for(j = 0; j < nlats; j++){
+    float latj;
 
-  /* ------------------ generate_latlongs ------------------------ */
+    latj = latmin + (float)j*dlat;
+    for(i = 0; i < nlongs; i++){
+      float longi;
 
-void generate_longlats(char *elevfile){
-  char buffer[LENBUFFER], casename[LENBUFFER], *ext;
-  char fileout[LENBUFFER];
-  float lat1, lat2, long1, long2;
-  int nlat, nlong;
-  int line_count, file_count;
-  FILE *streamin=NULL, *streamout = NULL;
-  int i;
+      longi = longmin + (float)i*dlong;
 
-  strcpy(casename, elevfile);
-  ext=strrchr(casename, '.');
-  if (ext != NULL)ext[0] = 0;
+      if(have_vals[count] == 1){
+        float elevij;
 
-  streamin = fopen(elevfile, "r");
-  if (streamin == NULL) {
-    printf("***error: unable to open %s for input\n", elevfile);
-    return;
-  }
-
-  fgets(buffer, LENBUFFER, streamin);
-  sscanf(buffer, "%f %f %i %f %f %i", &long1, &long2, &nlong, &lat1, &lat2, &nlat);
-  if (nlat < 2)nlat = 2;
-  if (nlong < 2)nlong = 2;
-  line_count = 1;
-  file_count = 1;
-
-  sprintf(fileout, "%s_longlats_%03i.csv", casename, file_count);
-  streamout = fopen(fileout, "w");
-  if (streamout == NULL) {
-    printf("***error: unable to open %s for output\n", fileout);
-    fclose(streamin);
-    return;
-  }
-  for(i = 0; i < nlat; i++){
-    int j;
-    float llat;
-
-    llat = (lat1*(float)(nlat - 1 - i) + lat2*(float)i) / (float)(nlat - 1);
-    for(j = 0; j<nlong; j++){
-      float llong;
-
-      llong = (long1*(float)(nlong - 1 - j) + long2*(float)j) / (float)(nlong - 1);
-      if(line_count>nelevsperfile){
-        file_count++;
-        fclose(streamout);
-        sprintf(fileout, "%s_longlats_%03i.csv", casename, file_count);
-        streamout = fopen(fileout, "w");
-        if (streamout == NULL) {
-          printf("***error: unable to open %s for output\n", fileout);
-          fclose(streamin);
-          return;
-        }
-        line_count = 1;
+        elevij = vals[count];
+        fprintf(stream_out, " %i,%f,%f,%f,%f\n", count+1, longi, latj, 39.37*elevij/12.0, elevij);
       }
-      fprintf(streamout, "%f,%f\n", llong, llat);
-      line_count++;
+      count++;
     }
   }
+  fclose(stream_out);
+  FREEMEMORY(have_vals);
+  FREEMEMORY(vals);
+  return 1;
 }
 
 /* ------------------ main ------------------------ */
 
-
 int main(int argc, char **argv){
   int i;
-  int gen_fdsgeom = 0;
-  int gen_fdsobst = 0;
-  int gen_elevs = 2;
+  int gen_fds = FDS_OBST;
   char *casename = NULL;
   char file_default[1000];
 
@@ -543,20 +503,10 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'o':
-        gen_fdsobst = 1;
-        gen_elevs = 0;
-        break;
-      case 'e':
-        gen_elevs = 1;
-        break;
-      case 'n':
-        ++i;
-        if(i < argc)sscanf(argv[i], "%i", &nelevsperfile);
-        printf("nelevsperfile=%i\n",nelevsperfile);
+        gen_fds = FDS_OBST;
         break;
       case 'g':
-        gen_fdsgeom = 1;
-        gen_elevs = 0;
+        gen_fds = FDS_GEOM;
         break;
       case 'v':
         PRINTversion("dem2geom");
@@ -573,17 +523,8 @@ int main(int argc, char **argv){
     }
   }
   if(casename == NULL)casename = file_default;
-  if(gen_fdsgeom == 1){
-    generate_fds(casename,GENERATE_GEOM);
-  }
-  else if(gen_fdsobst == 1){
-    generate_fds(casename,GENERATE_OBSTS);
-  }
-  else if(gen_elevs==1){
-    generate_longlats(casename);
-  }
-  else{
-    generate_elevs(casename);
+  if (generate_elevs(casename) == 1) {
+    generate_fds(casename, gen_fds);
   }
   return 0;
 }
