@@ -20,7 +20,6 @@ typedef struct {
   float long_min, long_max;
   float dlong, dlat;
   float *valbuffer;
-  FILE *stream_data;
 } elevdata;
 
 #define GENERATE_GEOM 1
@@ -233,19 +232,21 @@ elevdata *get_elevfile(elevdata *elevinfo, int nelevinfo, float longval, float l
 float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latval, int *have_val){
   elevdata *elevi;
   int index, ival, jval;
-  float *data_buffer, return_val;
+  float return_val;
 
   *have_val = 0;
   elevi = get_elevfile(elevinfo, nelevinfo, longval, latval);
   if(elevi == NULL)return 0.0;
-  if(elevi->stream_data == NULL){
-    elevi->stream_data = fopen(elevi->filedata, "rb");
-    if(elevi->stream_data == NULL)return 0.0;
-  }
   if(elevi->valbuffer == NULL){
+    FILE *stream;
+    float *data_buffer;
+
+    stream = fopen(elevi->filedata, "rb");
+    if (stream == NULL)return 0.0;
     NewMemory((void **)&data_buffer, elevi->ncols*elevi->nrows * sizeof(float));
     elevi->valbuffer = data_buffer;
-    fread(data_buffer, sizeof(float), elevi->ncols*elevi->nrows, elevi->stream_data);
+    fread(data_buffer, sizeof(float), elevi->ncols*elevi->nrows, stream);
+    fclose(stream);
   }
   ival = CLAMP((longval - elevi->long_min)/elevi->cellsize,0,elevi->ncols-1);
   jval = CLAMP((elevi->lat_max - latval)/elevi->cellsize,0,elevi->nrows-1);
@@ -273,10 +274,10 @@ void generate_elevs(char *elevfile){
   int count=1;
   float valmin, valmax;
 
-  nelevinfo = get_nfilelist(".", "float*.hdr");
+  nelevinfo = get_nfilelist(".", "*.hdr");
   if(nelevinfo == 0)return;
 
-  get_filelist(".","float*.hdr", nelevinfo, &fileheaders);
+  get_filelist(".","*.hdr", nelevinfo, &fileheaders);
   NewMemory((void **)&elevinfo, nelevinfo*sizeof(elevdata));
   for(i = 0; i < nelevinfo; i++){
     filelistdata *filei;
@@ -302,7 +303,6 @@ void generate_elevs(char *elevfile){
 
     elevi = elevinfo + i;
     elevi->use_it = 0;
-    elevi->stream_data = NULL;
 
     stream_in = fopen(elevi->fileheader, "r");
     if(stream_in == NULL)continue;
@@ -312,15 +312,19 @@ void generate_elevs(char *elevfile){
     sscanf(buffer+5," %i", &elevi->ncols);
 
     if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    trim_back(buffer);
     sscanf(buffer+5, " %i", &elevi->nrows);
 
     if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    trim_back(buffer);
     sscanf(buffer+9, " %f", &elevi->xllcorner);
 
     if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    trim_back(buffer);
     sscanf(buffer+9, " %f", &elevi->yllcorner);
 
     if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    trim_back(buffer);
     sscanf(buffer+8, " %f", &elevi->cellsize);
 
     elevi->long_min = elevi->xllcorner;
@@ -329,7 +333,6 @@ void generate_elevs(char *elevfile){
     elevi->lat_min = elevi->yllcorner;
     elevi->lat_max = elevi->lat_min + (float)elevi->nrows*elevi->cellsize;
 
-    elevi->stream_data = NULL;
     elevi->valbuffer = NULL;
 
     elevi->use_it = 1;
@@ -347,6 +350,10 @@ void generate_elevs(char *elevfile){
   //  long lat
 
   stream_in = fopen(elevfile, "r");
+  if (stream_in == NULL) {
+    printf("***error: unable to open file: %s\n", elevfile);
+    return;
+  }
   while(!feof(stream_in)){
     char buffer[255];
 
@@ -416,6 +423,7 @@ void generate_elevs(char *elevfile){
 
   dlat = (latmax - latmin) / (float)(nlats-1);
   dlong = (longmax - longmin) / (float)(nlongs-1);
+  printf(" %f %f %i %f %f %i\n", longmin, longmax, nlongs, latmin, latmax, nlats);
   for(j = 0; j < nlats; j++){
     float latj;
 
@@ -443,13 +451,6 @@ void generate_elevs(char *elevfile){
     }
   }
   printf("valmin=%f valmax=%f\n", valmin, valmax);
-
-  for(i = 0; i < nelevinfo; i++){
-    elevdata *elevi;
-
-    elevi = elevinfo + i;
-    if(elevi->stream_data != NULL)fclose(elevi->stream_data);
-  }
 }
 
   /* ------------------ generate_latlongs ------------------------ */
