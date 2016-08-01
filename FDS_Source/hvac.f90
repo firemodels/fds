@@ -1622,7 +1622,7 @@ NODE_LOOP: DO NN = 1, N_DUCTNODES
          IF (DU%FIXED .OR. DU%AREA < TWO_EPSILON_EB) COUNTER = COUNTER + 1
       ENDDO
       IF (COUNTER==DN%N_DUCTS) THEN
-         WRITE(MESSAGE,'(A,A)') 'ERROR: Cannot specifiy fixed flows for all branches of internal DUCTNODE:',TRIM(DN%ID)
+         WRITE(MESSAGE,'(A,A)') 'ERROR: Cannot specify fixed flows for all branches of internal DUCTNODE:',TRIM(DN%ID)
          CALL SHUTDOWN(MESSAGE); RETURN
       ENDIF
 ENDDO NODE_LOOP

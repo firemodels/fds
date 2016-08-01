@@ -3416,7 +3416,7 @@ Note also that if the {\ct VENT} or {\ct OBST} crosses mesh boundaries, the spec
 
 \label{info:MASS_FLUX_TOTAL}
 
-Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density.
+Most often, you specify a simple supply or exhaust vent by setting either a normal velocity or volume flux at a solid surface. However, you may wish to control the total mass flow rate per unit area (\si{kg/(m$^2$.s)}) via the parameter {\ct MASS\_FLUX\_TOTAL}. This parameter uses the same sign convention as {\ct VEL} above.  In fact, the value entered for {\ct MASS\_FLUX\_TOTAL} is converted internally into a velocity boundary condition whose value for an outflow is adjusted based on the local density. Note that {\ct MASS\_FLUX\_TOTAL} should only be used for an outflow boundary condition; for inflow use {\ct MASS\_FLUX} which is discussed in Section~\ref{info:MASS_FLUX}.
 
 
 \subsection{Heaters}
@@ -5361,7 +5361,7 @@ All other species        & 0.35 \\ \hline\end{tabular}
 
 \paragraph{Multi-fuel radiative fraction}
 
-If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time.
+If multiple fuels are present, e.g., one fuel for cardboard and one fuel for polystyrene combustion, then the radiant fraction will be computed locally as reaction-weighted value, similar to the approach described by Gupta et al.~\cite{Gupta:2015}. For example, if the two fuels are 20\% and 40\% radiative fraction with, respectively, 80\% and 20\% of the heat in a grid cell, $\chi_{\rm r}$ would be $0.8 \times 0.2 + 0.2 \times 0.4 = 0.24$. Thus, $\chi_{\rm r}$ will vary in space and time. The value of the multi-fuel radiative fraction can be output using the output {\ct QUANTITY} of {\ct CHI\_R}.
 
 \paragraph{Time variation of radiative fraction}
 
@@ -7337,7 +7337,7 @@ FDS includes a calculation of the adiabatic surface temperature (AST), a quantit
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective gas temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
+The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
 
 
 
@@ -8112,6 +8112,7 @@ Here, the {\ct ID} is just a label in the output file. When an output quantity i
 {\ct BACK WALL TEMPERATURE}                     & Section~\ref{info:BACK}                       & $^\circ$C      & B,D          \\ \hline
 {\ct BURNING RATE}                              & Mass loss rate of fuel                        & \si{kg/(m$^2$.s)} & B,D       \\ \hline
 {\ct CHAMBER OBSCURATION}                       & Section~\ref{info:smoke_detector}             & \%/m           & D            \\ \hline
+{\ct CHI\_R}                                    & Section~\ref{info:CHI_R}             &                & D,I,S        \\ \hline
 {\ct CONDUCTIVITY}                              & Thermal conductivity                          & \si{W/(m.K)}   & D,I,P,S      \\ \hline
 {\ct CONTROL}                                   & Section~\ref{info:CTRL}                       &                & D            \\ \hline
 {\ct CONTROL VALUE}                             & Section~\ref{info:CTRL}                       &                & D            \\ \hline
