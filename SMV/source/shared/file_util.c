@@ -1,5 +1,3 @@
-#define IN_FILE
-
 #include "options.h"
 #include <stdio.h>
 #include <stdarg.h>

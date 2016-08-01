@@ -11,6 +11,10 @@
 #include "MALLOC.h"
 
 
+#define FDS_OBST 0
+#define FDS_GEOM 1
+#define LEN_BUFFER 1024
+
 /* --------------------------  elevdata ------------------------------------ */
 
 typedef struct {
@@ -23,33 +27,36 @@ typedef struct {
   float *valbuffer;
 } elevdata;
 
-#define FDS_OBST 0
-#define FDS_GEOM 1
-
 /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
- char githash[256];
- char gitdate[256];
+ char githash[LEN_BUFFER];
+ char gitdate[LEN_BUFFER];
 
   getGitInfo(githash,gitdate);    // get githash
 
   fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
-  fprintf(stderr, "  Create an FDS input file using elevation data.\n\n");
-  fprintf(stderr, "Usage:\n\n");
-  fprintf(stderr, "  dem2fds [-g|-o][-h][-v] casename.in\n\n");
-  fprintf(stderr, "where\n\n");
-  fprintf(stderr, "  -g - create FDS input file from elevations using &GEOM keywords\n");
-  fprintf(stderr, "  -o - create FDS input file from elevations using &OBST keywords\n");
+  fprintf(stderr, "Create an FDS input file using elevation data\n");
+  fprintf(stderr, "  obtained from http://viewer.nationalmap.gov \n\n");
+  fprintf(stderr, "Usage:\n");
+  fprintf(stderr, "  dem2fds [-g|-o][-h][-v] casename.in\n");
+  fprintf(stderr, "where\n");
+  fprintf(stderr, "  -g - create an FDS input file using &GEOM keywords\n");
+  fprintf(stderr, "  -o - create an FDS input file using &OBST keywords (default)\n");
   fprintf(stderr, "  -h - display this message\n");
-  fprintf(stderr, "  -v - show versioning information\n\n");
-  fprintf(stderr, " Usage examples:\n");
-  fprintf(stderr, " 1. create an FDS input file using &GEOM keywords : dem2fds -g casename.in\n");
-  fprintf(stderr, " 2. create an FDS input file using &OBST keywords : dem2fds -o casename.in\n");
+  fprintf(stderr, "  -v - show version information\n\n");
+  fprintf(stderr, " input file:\n");
+  fprintf(stderr, "   Define longitude/latitude bounds and number of longitudes/latitudes\n");
+  fprintf(stderr, "   in casename.in using:\n");
+  fprintf(stderr, " LONGMINMAX\n");
+  fprintf(stderr, "  -77.25 -77.20 100\n");
+  fprintf(stderr, " LATMINMAX\n");
+  fprintf(stderr, "  39.12 39.15 100\n\n");
+  fprintf(stderr, " Create an FDS input file using &GEOM keywords : dem2fds -g casename.in\n");
+  fprintf(stderr, " Create an FDS input file using &OBST keywords : dem2fds -o casename.in\n");
 }
 
-#define ABS(a) ((a)>=0 ? (a) : (-(a)))
-#define LENBUFFER 1024
+/* ------------------ dist ------------------------ */
 
 float dist(float llong1, float llong2, float llat1, float llat2){
   // https://en.wikipedia.org/wiki/Great-circle_distance
@@ -79,8 +86,8 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 /* ------------------ generate_fds ------------------------ */
 
 void generate_fds(char *casename, int option){
-  char buffer[LENBUFFER], elevfile[LENBUFFER], fdsfile[LENBUFFER],*ext;
-  char basename[LENBUFFER];
+  char buffer[LEN_BUFFER], elevfile[LEN_BUFFER], fdsfile[LEN_BUFFER],*ext;
+  char basename[LEN_BUFFER];
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
@@ -115,7 +122,7 @@ void generate_fds(char *casename, int option){
     return;
   }
 
-  fgets(buffer, LENBUFFER, streamin);
+  fgets(buffer, LEN_BUFFER, streamin);
   trim_back(buffer);
   sscanf(buffer, "%f %f %i %f %f %i %f %f %i %f %f %f %f",
     &llong1, &llong2,&nlong,
@@ -171,7 +178,7 @@ void generate_fds(char *casename, int option){
     NewMemory((void **)&vals, sizeof(float)*nlong);
     valptrs[j] = vals;
     for(i = 0; i < nlong; i++){
-      fgets(buffer, LENBUFFER, streamin);
+      fgets(buffer, LEN_BUFFER, streamin);
       sscanf(buffer, "%i,%f,%f,%f,%f", &idummy, &llat, &llong, &dummy, &elev);
       vals[i] = elev;
     }
@@ -275,7 +282,7 @@ int generate_elevs(char *elevfile){
   float dlat, dlong;
   int count=0, *have_vals;
   float valmin, valmax, *vals;
-  char outfile[1024],*ext;
+  char outfile[LEN_BUFFER], *ext;
 
   nelevinfo = get_nfilelist(".", "*.hdr");
   if(nelevinfo == 0)return 0;
@@ -285,7 +292,7 @@ int generate_elevs(char *elevfile){
   for(i = 0; i < nelevinfo; i++){
     filelistdata *filei;
     elevdata *elevi;
-    char file[1024], *ext, *filedatai;
+    char file[LEN_BUFFER], *filedatai;
     int lenfile;
 
     filei = fileheaders + i;
@@ -302,7 +309,7 @@ int generate_elevs(char *elevfile){
   }
   for(i = 0; i < nelevinfo; i++){
     elevdata *elevi;
-    char buffer[1024];
+    char buffer[LEN_BUFFER];
 
     elevi = elevinfo + i;
     elevi->use_it = 0;
@@ -310,23 +317,23 @@ int generate_elevs(char *elevfile){
     stream_in = fopen(elevi->fileheader, "r");
     if(stream_in == NULL)continue;
 
-    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
     trim_back(buffer);
     sscanf(buffer+5," %i", &elevi->ncols);
 
-    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
     trim_back(buffer);
     sscanf(buffer+5, " %i", &elevi->nrows);
 
-    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
     trim_back(buffer);
     sscanf(buffer+9, " %f", &elevi->xllcorner);
 
-    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
     trim_back(buffer);
     sscanf(buffer+9, " %f", &elevi->yllcorner);
 
-    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
     trim_back(buffer);
     sscanf(buffer+8, " %f", &elevi->cellsize);
 
@@ -349,7 +356,7 @@ int generate_elevs(char *elevfile){
     return 0;
   }
   while(!feof(stream_in)){
-    char buffer[255];
+    char buffer[LEN_BUFFER];
 
     CheckMemory;
 
@@ -484,7 +491,7 @@ int main(int argc, char **argv){
   int i;
   int gen_fds = FDS_OBST;
   char *casename = NULL;
-  char file_default[1000];
+  char file_default[LEN_BUFFER];
 
   strcpy(file_default, "terrain");
 
