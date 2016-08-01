@@ -7,7 +7,21 @@
 #include <math.h>
 #include "string_util.h"
 #include "file_util.h"
+#include "datadefs.h"
 #include "MALLOC.h"
+
+/* --------------------------  elevdata ------------------------------------ */
+
+typedef struct {
+  int ncols, nrows, use_it;
+  float xllcorner, yllcorner, cellsize;
+  char *fileheader, *filedata;
+  float lat_min, lat_max;
+  float long_min, long_max;
+  float dlong, dlat;
+  float *valbuffer;
+  FILE *stream_data;
+} elevdata;
 
 #define GENERATE_GEOM 1
 #define GENERATE_OBSTS 2
@@ -27,16 +41,15 @@ void usage(char *prog){
   fprintf(stderr, "Usage:\n\n");
   fprintf(stderr, "  dem2fds [-e|-g|-o][-h][-n n][-v] casename\n\n");
   fprintf(stderr, "where\n\n");
-  fprintf(stderr, "  -e - create elevation files (default)\n");
   fprintf(stderr, "  -g - create FDS input file from elevations using &GEOM keywords\n");
   fprintf(stderr, "  -o - create FDS input file from elevations using &OBST keywords\n");
   fprintf(stderr, "  -n n - number of elevations per file. default: %i \n",nelevsperfile);
   fprintf(stderr, "  -h - display this message\n");
   fprintf(stderr, "  -v - show versioning information\n\n");
   fprintf(stderr, " Usage examples:\n");
-  fprintf(stderr, " 1. create elevation files:                dem2fds -e casename.in\n");
-  fprintf(stderr, " 2. create FDS file using &GEOM keywords : dem2fds -g casename\n");
-  fprintf(stderr, " 3. create FDS file using &OBST keywords : dem2fds -o casename\n");
+  fprintf(stderr, " 1. create an elevation file using gridfloat files   dem2fds casename.in\n");
+  fprintf(stderr, " 2. create an FDS input file using &GEOM keywords : dem2fds -g casename\n");
+  fprintf(stderr, " 3. create an FDS input file using &OBST keywords : dem2fds -o casename\n");
 }
 
 #define ABS(a) ((a)>=0 ? (a) : (-(a)))
@@ -100,7 +113,7 @@ void generate_fds(char *casename, int option){
     fclose(streamin);
     return;
   }
-  
+
   fgets(buffer, LENBUFFER, streamin);
   trim_back(buffer);
   sscanf(buffer, "%f %f %i %f %f %i %f %f %i %f %f %f %f",
@@ -199,6 +212,246 @@ void generate_fds(char *casename, int option){
   fprintf(streamout,"&TAIL /\n");
 }
 
+/* ------------------ get_elevfile ------------------------ */
+
+elevdata *get_elevfile(elevdata *elevinfo, int nelevinfo, float longval, float latval){
+  int i;
+
+  for(i = 0; i < nelevinfo; i++){
+    elevdata *elevi;
+
+    elevi = elevinfo + i;
+    if(longval<elevi->long_min || longval>elevi->long_max)continue;
+    if(latval<elevi->lat_min || latval>elevi->lat_max)continue;
+    return elevi;
+  }
+  return NULL;
+}
+
+/* ------------------ get_elev ------------------------ */
+
+float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latval, int *have_val){
+  elevdata *elevi;
+  int index, ival, jval;
+  float *data_buffer, return_val;
+
+  *have_val = 0;
+  elevi = get_elevfile(elevinfo, nelevinfo, longval, latval);
+  if(elevi == NULL)return 0.0;
+  if(elevi->stream_data == NULL){
+    elevi->stream_data = fopen(elevi->filedata, "rb");
+    if(elevi->stream_data == NULL)return 0.0;
+  }
+  if(elevi->valbuffer == NULL){
+    NewMemory((void **)&data_buffer, elevi->ncols*elevi->nrows * sizeof(float));
+    elevi->valbuffer = data_buffer;
+    fread(data_buffer, sizeof(float), elevi->ncols*elevi->nrows, elevi->stream_data);
+  }
+  ival = CLAMP((longval - elevi->long_min)/elevi->cellsize,0,elevi->ncols-1);
+  jval = CLAMP((elevi->lat_max - latval)/elevi->cellsize,0,elevi->nrows-1);
+  index = jval*elevi->ncols +ival;
+  return_val = elevi->valbuffer[index];
+  *have_val = 1;
+  return return_val;
+}
+
+/* ------------------ generate_elevs ------------------------ */
+
+void generate_elevs(char *elevfile){
+  int nelevinfo,i,j;
+  filelistdata *fileheaders;
+  FILE *stream_in;
+  elevdata *elevinfo;
+  int ibar, jbar, kbar;
+  float dx, dy;
+  float longc, latc;
+  int longlat_defined = 0;
+  float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
+  float longmin, longmax, latmin, latmax;
+  int nlongs, nlats;
+  float dlat, dlong;
+  int count=1;
+  float valmin, valmax;
+
+  nelevinfo = get_nfilelist(".", "float*.hdr");
+  if(nelevinfo == 0)return;
+
+  get_filelist(".","float*.hdr", nelevinfo, &fileheaders);
+  NewMemory((void **)&elevinfo, nelevinfo*sizeof(elevdata));
+  for(i = 0; i < nelevinfo; i++){
+    filelistdata *filei;
+    elevdata *elevi;
+    char file[1024], *ext, *filedatai;
+    int lenfile;
+
+    filei = fileheaders + i;
+    elevi = elevinfo + i;
+    strcpy(file, filei->file);
+    ext = strrchr(file, '.');
+    if(ext!=NULL)ext[0] = 0;
+    strcat(file, ".flt");
+    lenfile = strlen(file);
+    NewMemory((void **)&filedatai, (lenfile + 1) * sizeof(char));
+    strcpy(filedatai, file);
+    elevi->fileheader = filei->file;
+    elevi->filedata = filedatai;
+  }
+  for(i = 0; i < nelevinfo; i++){
+    elevdata *elevi;
+    char buffer[1024];
+
+    elevi = elevinfo + i;
+    elevi->use_it = 0;
+    elevi->stream_data = NULL;
+
+    stream_in = fopen(elevi->fileheader, "r");
+    if(stream_in == NULL)continue;
+
+    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    trim_back(buffer);
+    sscanf(buffer+5," %i", &elevi->ncols);
+
+    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    sscanf(buffer+5, " %i", &elevi->nrows);
+
+    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    sscanf(buffer+9, " %f", &elevi->xllcorner);
+
+    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    sscanf(buffer+9, " %f", &elevi->yllcorner);
+
+    if(fgets(buffer, 1024, stream_in) == NULL)continue;
+    sscanf(buffer+8, " %f", &elevi->cellsize);
+
+    elevi->long_min = elevi->xllcorner;
+    elevi->long_max = elevi->long_min + (float)elevi->ncols*elevi->cellsize;
+
+    elevi->lat_min = elevi->yllcorner;
+    elevi->lat_max = elevi->lat_min + (float)elevi->nrows*elevi->cellsize;
+
+    elevi->stream_data = NULL;
+    elevi->valbuffer = NULL;
+
+    elevi->use_it = 1;
+
+    fclose(stream_in);
+  }
+
+  // GRID
+  //  ibar jbar kbar
+  // DXDY
+  //   deltax deltay
+  // LONGLATCENTER
+  //  longlat
+  // LONGLATLL
+  //  long lat
+
+  stream_in = fopen(elevfile, "r");
+  while(!feof(stream_in)){
+    char buffer[255];
+
+    CheckMemory;
+
+    if(fgets(buffer, 255, stream_in) == NULL)break;
+
+    if(match(buffer, "GRID") == 1){
+      ibar = 10;
+      jbar = 10;
+      kbar = 10;
+      if(fgets(buffer, 255, stream_in) == NULL)break;
+      sscanf(buffer, "%i %i %i", &ibar, &jbar, &kbar);
+      continue;
+    }
+
+    if(match(buffer, "DXDY") == 1){
+      dx = 1000.0;
+      dy = 1000.0;
+      if(fgets(buffer, 255, stream_in) == NULL)break;
+      sscanf(buffer, "%f %f", &dx, &dy);
+      continue;
+    }
+
+    if(match(buffer, "LONGMINMAX") == 1){
+      longc = 1000.0;
+      latc = 1000.0;
+      if(fgets(buffer, 255, stream_in) == NULL)break;
+      sscanf(buffer, "%f %f %i", &longmin, &longmax, &nlongs);
+      continue;
+    }
+
+    if(match(buffer, "LATMINMAX") == 1){
+      longc = 1000.0;
+      latc = 1000.0;
+      if(fgets(buffer, 255, stream_in) == NULL)break;
+      sscanf(buffer, "%f %f %i", &latmin, &latmax, &nlats);
+      continue;
+    }
+
+    if(match(buffer, "EXCLUDE") == 1){
+      if(fgets(buffer, 255, stream_in) == NULL)break;
+      sscanf(buffer, "%f %f %f %f", &xmin_exclude, &ymin_exclude, &xmax_exclude, &ymax_exclude);
+      longlat_defined = 1;
+      continue;
+    }
+  }
+  fclose(stream_in);
+
+  if(
+    get_elevfile(elevinfo, nelevinfo, longmin, latmin) == NULL ||
+    get_elevfile(elevinfo, nelevinfo, longmin, latmax) == NULL ||
+    get_elevfile(elevinfo, nelevinfo, longmax, latmin) == NULL ||
+    get_elevfile(elevinfo, nelevinfo, longmax, latmax) == NULL
+    ){
+    printf("***error: elevation data not available for all longitudes/latitude \n");
+    printf("          pairs within the rectangle (%f,%f) (%f %f)\n", longmin, latmin, longmax, latmax);
+    for(i = 0; i < nelevinfo; i++){
+      elevdata *elevi;
+
+      elevi = elevinfo + i;
+      printf(" header file: %s bounds: %f %f %f %f\n",
+        elevi->fileheader, elevi->long_min, elevi->lat_min, elevi->long_max, elevi->lat_max);
+    }
+    return;
+  }
+
+  dlat = (latmax - latmin) / (float)(nlats-1);
+  dlong = (longmax - longmin) / (float)(nlongs-1);
+  for(j = 0; j < nlats; j++){
+    float latj;
+
+    latj = latmax - (float)j*dlat;
+    for(i = 0; i < nlongs; i++){
+      float longi;
+      float elevij;
+      int have_val;
+
+      longi = longmin + (float)i*dlong;
+
+      elevij = get_elevation(elevinfo, nelevinfo, longi, latj, &have_val);
+      if(have_val == 1){
+        printf(" %i,%f,%f,%f,%f\n", count, longi, latj, 39.37*elevij/12.0, elevij);
+        if(count == 1){
+          valmin = elevij;
+          valmax = elevij;
+          count++;
+        }
+        else{
+          valmin = MIN(valmin, elevij);
+          valmax = MAX(valmax, elevij);
+        }
+      }
+    }
+  }
+  printf("valmin=%f valmax=%f\n", valmin, valmax);
+
+  for(i = 0; i < nelevinfo; i++){
+    elevdata *elevi;
+
+    elevi = elevinfo + i;
+    if(elevi->stream_data != NULL)fclose(elevi->stream_data);
+  }
+}
+
   /* ------------------ generate_latlongs ------------------------ */
 
 void generate_longlats(char *elevfile){
@@ -268,6 +521,7 @@ int main(int argc, char **argv){
   int i;
   int gen_fdsgeom = 0;
   int gen_fdsobst = 0;
+  int gen_elevs = 2;
   char *casename = NULL;
   char file_default[1000];
 
@@ -289,8 +543,10 @@ int main(int argc, char **argv){
         break;
       case 'o':
         gen_fdsobst = 1;
+        gen_elevs = 0;
         break;
       case 'e':
+        gen_elevs = 1;
         break;
       case 'n':
         ++i;
@@ -299,6 +555,7 @@ int main(int argc, char **argv){
         break;
       case 'g':
         gen_fdsgeom = 1;
+        gen_elevs = 0;
         break;
       case 'v':
         PRINTversion("dem2geom");
@@ -321,8 +578,11 @@ int main(int argc, char **argv){
   else if(gen_fdsobst == 1){
     generate_fds(casename,GENERATE_OBSTS);
   }
-  else{
+  else if(gen_elevs==1){
     generate_longlats(casename);
+  }
+  else{
+    generate_elevs(casename);
   }
   return 0;
 }

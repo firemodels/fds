@@ -429,7 +429,8 @@ int get_nfilelist(const char *path, char *key){
     return 0;
   }
   while( (entry = readdir(dp)) ){
-    if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
+  //  if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
+    if((entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
       maxfiles++;
       continue;
     }
@@ -446,7 +447,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   int nfiles=0;
   filelistdata *flist;
 
-  // DT_DIR - is a diretory
+  // DT_DIR - is a directory
   // DT_REG - is a regular file
 
   dp = opendir(path);
@@ -461,6 +462,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
     return 0;
   }
   NewMemory((void **)&flist,maxfiles*sizeof(filelistdata));
+  /*
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
     if(entry->d_type==DT_DIR&&entry->d_name[0]!='.'){
       char *file;
@@ -475,6 +477,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
     }
   }
   rewinddir(dp);
+  */
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
     if(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1){
       char *file;
