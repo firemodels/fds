@@ -1,11 +1,12 @@
 &HEAD CHID='water_evaporation_7', TITLE='Water spray on a hot wall' /
 
-&MESH IJK=10,10,50, XB=0.0,1.0,0.0,1.0,0.0,5.0 /
+&MESH IJK=10,10,60, XB=0.0,1.0,0.0,1.0,0.0,6.0 /
 
 &TIME T_END=300. /
 &DUMP DT_HRR=60./
 &MISC HUMIDITY=0./
 &REAC FUEL='PROPANE', SOOT_YIELD=0.015 /
+&PRES VELOCITY_TOLERANCE=0.001,MAX_PRESSURE_ITERATIONS=100/
 
 &SPEC ID='WATER VAPOR' /
 
@@ -15,7 +16,7 @@
 &PROP ID='nozzle', PART_ID='water drops', FLOW_RATE=1.0, PARTICLE_VELOCITY=5., PARTICLES_PER_SECOND=500, 
       SPRAY_ANGLE=100.,101., SMOKEVIEW_ID='nozzle' /
 
-&DEVC XYZ=0.5,0.5,4.0, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=60., ID='noz_1' /
+&DEVC XYZ=0.5,0.5,5.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=60., ID='noz_1' /
 
 &MATL ID            = 'STEEL'                                                                                      
       DENSITY       = 7850.                                                                                             
@@ -31,7 +32,7 @@
 &SURF ID        = 'FIRE'
       COLOR     = 'ORANGE'   
       HEAT_TRANSFER_COEFFICIENT   = 0.
-      HRRPUA    = 500. /
+      HRRPUA    = 600. /
 
 &SURF ID        = 'WALL'
       COLOR     = 'SILVER'   
@@ -41,7 +42,7 @@
       COLOR     = 'INVISIBLE'
       VEL       = -1.    /
 
-&OBST XB=0.1,0.9,0.1,0.9,1.0,1.1, SURF_IDS='FIRE','WALL','WALL' /
+&OBST XB=0.1,0.9,0.1,0.9,0.5,0.6, SURF_IDS='FIRE','WALL','WALL' /
 
 &VENT MB='XMIN', SURF_ID='PLATE' /
 &VENT MB='XMAX', SURF_ID='PLATE' /
