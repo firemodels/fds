@@ -1928,7 +1928,7 @@ SELECT CASE (SPEC_ID_USE)
          CP = CP / 56.06326_EB * 1000._EB !J/kg/K
       ENDIF
       H = -5125986.652_EB !J/kg
-   CASE('AIR') ! NASA/TP-2002-211556
+   CASE('LJ AIR') ! NASA/TP-2002-211556
       TE = MIN(6000._EB,MAX(TE,200._EB))
       IF (TE<1000._EB) THEN
          CP = 22103.71497_EB*TE**(-2)-381.846182_EB/TE+6.08273836_EB-0.00853091441_EB*TE+0.00001384646189_EB*TE**2 &
@@ -2839,7 +2839,7 @@ SUBROUTINE GAS_PROPS(GAS_NAME,SIGMA,EPSOK,PR_GAS,MW,FORMULA,LISTED,ATOM_COUNTS,H
 ! Brodkey, R. and Hershey, H. Transport Phenomena: A Unified Approach. McGraw-Hill. 1988
 ! Heat of Formation (H_F) has units of kJ/mol (see NIST Webbook)
 ! Some species (O,H,OH,HO2,H2O2) LJ parameters were taken from Jasper and Miller, Combustion and Flame, Vol. 161, 2014.
-USE GLOBAL_CONSTANTS, ONLY: MW_AIR, PR
+USE GLOBAL_CONSTANTS, ONLY: PR, Y_CO2_INFTY,Y_O2_INFTY
 REAL(EB) :: SIGMA,EPSOK,MW,SIGMAIN,EPSOKIN,MWIN,ATOM_COUNTS(118),H_F,H_FIN,PR_GAS
 CHARACTER(LABEL_LENGTH) :: GAS_NAME,RADCAL_NAME
 CHARACTER(100) :: FORMULA,FORMULAIN
@@ -2876,10 +2876,10 @@ SELECT CASE(GAS_NAME)
       FORMULA = 'C3H4O'
       H_F = -272.8_EB
       IF (RADCAL_NAME=='null') RADCAL_NAME='MMA'
-   CASE('AIR')
+   CASE('LJ AIR')
       SIGMA = 3.711_EB
       EPSOK = 78.6_EB
-      MW = MW_AIR
+      MW = 1._EB/(Y_O2_INFTY/31.9988_EB+Y_CO2_INFTY/44.0095_EB+(1._EB-Y_O2_INFTY-Y_CO2_INFTY)/28.0134_EB)
       FORMULA = 'Air'
       PR_GAS = 0.71 ! JPCRD 19(5)
       H_F = 0._EB !Computed in read.f90
@@ -3150,10 +3150,12 @@ SELECT CASE(GAS_NAME)
       H_F = -241.826_EB
       PR_GAS = 1.0 ! Bergman, Lavine, Icropera, Dewitt Fundamentals of Heat and Mass Trasnfer 2011
       IF (RADCAL_NAME=='null') RADCAL_NAME='WATER VAPOR'
-   CASE DEFAULT
-      SIGMA = 3.711_EB
-      EPSOK = 78.6_EB
-      MW = MW_AIR
+   CASE DEFAULT !Uses NITROGEN
+      SIGMA = 3.798_EB
+      EPSOK = 71.4_EB
+      H_F = 0._EB
+      MW = 28.01340_EB
+      PR_GAS = 0.71_EB ! JPCRD 19(5)
       LISTED = .FALSE.
    END SELECT
 
@@ -3180,7 +3182,7 @@ SELECT CASE(GAS_NAME)
       RETURN
    CASE('ACROLEIN')
       RETURN
-   CASE('AIR')
+   CASE('LJ AIR')
       RETURN
    CASE('AMMONIA')
       RETURN
