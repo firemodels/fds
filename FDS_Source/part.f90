@@ -2683,8 +2683,8 @@ REAL(EB) :: R_DROP,NUSSELT,K_AIR,H_V,H_V_REF, H_L,H_V2,&
             CP,H_NEW,ZZ_GET(1:N_TRACKED_SPECIES),ZZ_GET2(1:N_TRACKED_SPECIES), &
             M_GAS_NEW,MW_GAS,CP2,DELTA_H_G,TMP_G_I,H_G_OLD,H_S_G_OLD,H_D_OLD, &
             TMP_G_NEW,DT_SUM,DCPDT,X_EQUIL,Y_EQUIL,Y_ALL(1:N_SPECIES),H_S_B,H_S,C_DROP2,&
-            T_BOIL_EFF,P_RATIO,K_LIQUID,CP_LIQUID,MU_LIQUID,NU_LIQUID,BETA_LIQUID,PR_LIQUID,RAYLEIGH,GR,RHOCBAR,MCBAR,&
-            M_GAS_OLD,TMP_G_OLD
+            T_BOIL_EFF,P_RATIO,RAYLEIGH,GR,RHOCBAR,MCBAR,&
+            M_GAS_OLD,TMP_G_OLD,NU_LIQUID
 INTEGER :: IP,II,JJ,KK,IW,N_LPC,NS,N_SUBSTEPS,ITMP,ITMP2,ITCOUNT,Y_INDEX,Z_INDEX,I_BOIL,I_MELT,I_FUEL,NMAT
 REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
@@ -2719,14 +2719,6 @@ SH_FAC_GAS             = 0.6_EB*SC_AIR**ONTH
 NU_FAC_GAS             = 0.6_EB*PR_AIR**ONTH
 SH_FAC_WALL            = 0.037_EB*SC_AIR**ONTH
 NU_FAC_WALL            = 0.037_EB*PR_AIR**ONTH
-
-! Liquid properties (temporary place)
-
-MU_LIQUID              = 1040E-6_EB  ! Ns/m2
-BETA_LIQUID            = 0.18E-3_EB  ! Volumetric thermal expansion 1/K
-K_LIQUID               = 0.60_EB     ! Conductivity W/(m.K)
-CP_LIQUID              = 4.19E3_EB   ! J/(kg.K)
-PR_LIQUID              = MU_LIQUID*CP_LIQUID/K_LIQUID
 
 TMP_WALL_INTERIM=>WALL_WORK1
 
@@ -2784,6 +2776,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    ! Loop through all PARTICLEs within the class and determine mass/energy transfer
 
    PARTICLE_LOOP: DO IP=1,NLP
+      !WRITE(*,*) 'AAAAA',IP
       LP  => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
       IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE PARTICLE_LOOP
@@ -2809,7 +2802,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       WGT      = LP%PWT
 
       TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
-
+         !IF (IP==1) WRITE(*,*) 'BBBBB',DT_SUBSTEP,DT
          KILL_RADIUS_CHECK: IF (LP%ONE_D%X(1)>LPC%KILL_RADIUS) THEN
 
             ! Gas conditions
@@ -2834,14 +2827,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
-            !IF (IP==605) WRITE(*,*) 'I TG YG, HG',IP,TMP_G,Y_GAS,H_G_OLD
+            !IF (IP==1) WRITE(*,*) 'I TG YG, HG',IP,TMP_G,Y_GAS,H_G_OLD
             ! Initialize PARTICLE thermophysical data
 
             R_DROP   = LP%ONE_D%X(1)
             FTPR     = FOTHPI * LP%ONE_D%RHO(1,1)
             M_DROP   = FTPR*R_DROP**3
             TMP_DROP = LP%ONE_D%TMP(1)
-            !IF (IP==605) WRITE(*,*) 'MD TD W',M_DROP,TMP_DROP,WGT
+            !IF (IP==1) WRITE(*,*) 'MD TD W',M_DROP,TMP_DROP,WGT
             CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%H_V,1),SS%H_V,TMP_DROP,H_V)
             IF (H_V < 0._EB) THEN
                WRITE(MESSAGE,'(A,A)') 'Numerical instability in particle energy transport, H_V for ',TRIM(SS%ID)
@@ -2864,7 +2857,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   Q_DOT_RAD = 0._EB
                ENDIF
             ENDIF SOLID_OR_GAS_PHASE_1
-            !IF (IP==605) WRITE(*,*) 'QR',Q_DOT_RAD*DT,M_DROP*H_V
+            !IF (IP==1) WRITE(*,*) 'QR',Q_DOT_RAD*DT,M_DROP*H_V
             BOIL_ALL: IF (Q_DOT_RAD*DT > M_DROP*H_V) THEN
                M_VAP = M_DROP
                Q_RAD = M_VAP*H_V
@@ -2966,23 +2959,23 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   IF (.NOT.CONSTANT_H_SOLID) THEN
                      LENGTH = 2._EB*R_DROP
 
-                     NU_LIQUID = MU_LIQUID / LPC%DENSITY
+                     NU_LIQUID = SS%MU_LIQUID / LPC%DENSITY
                      !Grashoff number
-                     GR = MAXVAL(ABS(GVEC))*LENGTH**3*BETA_LIQUID*ABS(TMP_WALL-TMP_DROP)/(NU_LIQUID**2)
-                     RAYLEIGH = GR*PR_LIQUID
+                     GR = MAXVAL(ABS(GVEC))*LENGTH**3*SS%BETA_LIQUID*ABS(TMP_WALL-TMP_DROP)/(NU_LIQUID**2)
+                     RAYLEIGH = GR*SS%PR_LIQUID
                         DIRECTION2: SELECT CASE(LP%ONE_D%IOR)
                         CASE (-2:-1,1:2) DIRECTION2
                            ! Vertical boundary layers (Churchill, S.W.)
                            NUSSELT = 0.68_EB+0.67_EB*RAYLEIGH**(0.25_EB)/&
-                                     ((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
+                                     ((1._EB+(0.492_EB/SS%PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
                         CASE (-3,3) DIRECTION2
                            ! Horizontal, unstable boundary layers (top of hot plate)
                            ! Raithby, G.D., Hollands, K.G.T. Natural convection. In Rohsenoh, W.M.,
                            ! Hartnett, J.P., and Cho, Y.I. (eds.), Handbook of Heat Transfer, chapter
                            ! 4. McGraw-Hill, New York, 3rd edition, 1998.
-                           NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
+                           NUSSELT = 0.560_EB*RAYLEIGH**(0.25_EB)/((1._EB+(0.492_EB/SS%PR_LIQUID)**(9._EB/16._EB))**(4._EB/9._EB))
                      END SELECT DIRECTION2
-                     H_WALL   = NUSSELT*K_LIQUID/LENGTH
+                     H_WALL   = NUSSELT*SS%K_LIQUID/LENGTH
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
       !               NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
@@ -3016,7 +3009,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                AGHRHO = A_DROP*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H_V+H_L)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
-               !IF (IP==605) WRITE(*,*) 'TH:',M_DROP*WGT*C_DROP,M_GAS*CP,A_DROP*WGT,RHO_G,H_V,H_V+H_L
+               !IF (IP==1) WRITE(*,*) 'TH:',M_DROP*WGT*C_DROP,M_GAS*CP,A_DROP*WGT,RHO_G,H_V,H_V+H_L
                SELECT CASE (ARRAY_CASE)
                   CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
@@ -3064,11 +3057,11 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
 
-               !IF (IP==605) WRITE(*,*) 'DT',DT_SUBSTEP,DT
-               !IF (IP==605) WRITE(*,*) 'TG',TMP_G_NEW,TMP_G
-               !IF (IP==605) WRITE(*,*) 'TW',TMP_WALL_NEW,TMP_WALL
-               !IF (IP==605) WRITE(*,*) 'TD',TMP_DROP_NEW,TMP_DROP
-               !IF (IP==605) WRITE(*,*) 'M',M_VAP,M_DROP
+               !IF (IP==1) WRITE(*,*) 'DT',DT_SUBSTEP,DT
+               !IF (IP==1) WRITE(*,*) 'TG',TMP_G_NEW,TMP_G
+               !IF (IP==1) WRITE(*,*) 'TW',TMP_WALL_NEW,TMP_WALL
+               !IF (IP==1) WRITE(*,*) 'TD',TMP_DROP_NEW,TMP_DROP
+               !IF (IP==1) WRITE(*,*) 'M',M_VAP,M_DROP
                ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
                Q_RAD      = DT_SUBSTEP*Q_DOT_RAD
@@ -3076,7 +3069,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                Q_CON_WALL = DT_SUBSTEP*A_DROP*H_WALL*0.5_EB*(TMP_WALL+TMP_WALL_NEW-TMP_DROP-TMP_DROP_NEW)
                Q_TOT = Q_RAD+Q_CON_GAS+Q_CON_WALL
                IF (Q_TOT >= M_DROP*H_V) M_VAP = M_DROP
-               !IF (IP==605) WRITE(*,*) 'Q',Q_RAD,Q_CON_GAS,Q_CON_WALL
+               !IF (IP==1) WRITE(*,*) 'Q',Q_RAD,Q_CON_GAS,Q_CON_WALL
                ! Adjust drop temperature for variable liquid CP
 
                EVAP_ALL: IF (M_VAP < M_DROP) THEN
@@ -3085,7 +3078,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ITMP2 = MIN(I_BOIL,MAX(I_MELT,NINT(TMP_DROP_NEW)))
                   IF (ITMP/=ITMP2) THEN
                      C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,ITMP2):MAX(ITMP,ITMP2)))/REAL(ABS(ITMP2-ITMP)+1,EB)
-                     !IF (IP==605) WRITE(*,*) C_DROP2
+                     !IF (IP==1) WRITE(*,*) C_DROP2
                      TMP_DROP_NEW = TMP_DROP + (Q_TOT - M_VAP * H_V)/(C_DROP2 * (M_DROP - M_VAP))
                   ENDIF
                   IF (TMP_DROP_NEW<TMP_MELT) THEN
@@ -3095,8 +3088,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      ! If the PARTICLE temperature reaches boiling, use only enough energy from gas to vaporize liquid
                      ITMP = NINT(TMP_DROP)
                      C_DROP2 = SUM(SS%C_P_L(MIN(ITMP,I_BOIL):MAX(ITMP,ITMP2)))/REAL(ABS(I_BOIL-ITMP)+1,EB)
-                     !IF (IP==605) WRITE(*,*) TMP_DROP_NEW,TMP_DROP,T_BOIL_EFF
-                     !IF (IP==605) WRITE(*,*) Q_TOT,M_DROP,C_DROP2,H_V
+                     !IF (IP==1) WRITE(*,*) TMP_DROP_NEW,TMP_DROP,T_BOIL_EFF
+                     !IF (IP==1) WRITE(*,*) Q_TOT,M_DROP,C_DROP2,H_V
                      M_VAP  = MIN(M_DROP,(Q_TOT-M_DROP*C_DROP2*(T_BOIL_EFF-TMP_DROP))/(H_V-C_DROP2*(T_BOIL_EFF-TMP_DROP)))
                      IF (M_VAP == M_DROP) THEN
                         Q_FRAC = M_VAP*H_V/Q_TOT
@@ -3113,8 +3106,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   Q_CON_WALL = Q_CON_WALL*Q_FRAC
                   TMP_DROP_NEW = T_BOIL_EFF
                ENDIF EVAP_ALL
-               !IF (IP==605) WRITE(*,*) 'TD2',TMP_DROP_NEW,TMP_DROP
-               !IF (IP==605) WRITE(*,*) 'M2',M_VAP,M_DROP
+               !IF (IP==1) WRITE(*,*) 'TD2',TMP_DROP_NEW,TMP_DROP
+               !IF (IP==1) WRITE(*,*) 'M2',M_VAP,M_DROP
 
                IF (IW>0) TMP_WALL_NEW = TMP_WALL-Q_CON_WALL/MCBAR
                M_DROP = M_DROP - M_VAP
@@ -3128,7 +3121,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (LPC%Z_INDEX==I_FUEL .AND. I_FUEL>0) M_VAP = LPC%ADJUST_EVAPORATION*M_VAP
 
                M_GAS_NEW = M_GAS + WGT*M_VAP
-               !IF (IP==605) WRITE(*,*) 'YGN',M_GAS_NEW,M_GAS,WGT*M_VAP,Y_GAS
+               !IF (IP==1) WRITE(*,*) 'YGN',M_GAS_NEW,M_GAS,WGT*M_VAP,Y_GAS
                Y_GAS_NEW = (Y_GAS*M_GAS+WGT*M_VAP)/M_GAS_NEW
                ZZ_GET2 = M_GAS/M_GAS_NEW*ZZ_GET
                ZZ_GET2(Z_INDEX) = ZZ_GET2(Z_INDEX) + WGT*M_VAP/M_GAS_NEW
@@ -3137,7 +3130,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DHOR     = H_V2*MW_DROP/R0
                X_EQUIL  = MIN(1._EB,P_RATIO*EXP(DHOR*(1._EB/TMP_BOIL-1._EB/TMP_DROP_NEW)))
                Y_EQUIL  = X_EQUIL/(MW_RATIO + (1._EB-MW_RATIO)*X_EQUIL)
-               !IF (IP==605) WRITE(*,*) 'Y',Y_GAS_NEW,Y_EQUIL
+               !IF (IP==1) WRITE(*,*) 'Y',Y_GAS_NEW,Y_EQUIL
 
                ! Limit drop temperature decrease
 
@@ -3173,8 +3166,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,H_L)
 
                H_NEW = H_G_OLD + (H_D_OLD - M_DROP*TMP_DROP_NEW*H_L)*WGT + Q_CON_WALL + Q_RAD
-               !IF (IP==605) WRITE(*,*) 'H2',H_NEW , M_DROP*TMP_DROP_NEW*H_L*WGT , H_NEW + M_DROP*TMP_DROP_NEW*H_L*WGT
-               !IF (IP==605) WRITE(*,*) 'H2a', Q_CON_WALL,Q_RAD
+               !IF (IP==1) WRITE(*,*) 'H2',H_NEW , M_DROP*TMP_DROP_NEW*H_L*WGT , H_NEW + M_DROP*TMP_DROP_NEW*H_L*WGT
+               !IF (IP==1) WRITE(*,*) 'H2a', Q_CON_WALL,Q_RAD
                TMP_G_I = TMP_G
                TMP_G_NEW = TMP_G
 
@@ -3193,7 +3186,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP,TMP_G_I+1._EB)
                      DCPDT = CP-CP2
                   ENDIF
-                  !IF (IP==605) WRITE(*,*) 'CPI',CP,CP2,TMP_G_I
+                  !IF (IP==1) WRITE(*,*) 'CPI',CP,CP2,TMP_G_I
                   TMP_G_I = TMP_G_I+(H_NEW-CP2*TMP_G_I*M_GAS_NEW)/(M_GAS_NEW*(CP2+TMP_G_I*DCPDT))
 
                   IF (TMP_G_I < 0._EB) THEN
@@ -3225,15 +3218,15 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   CYCLE TIME_ITERATION_LOOP
                ENDIF
 
-               !IF (IP==605) WRITE(*,*) 'T_N',TMP_G_NEW,TMP_DROP_NEW!,TMP_WALL_NEW
+               !IF (IP==1) WRITE(*,*) 'T_N',TMP_G_NEW,TMP_DROP_NEW!,TMP_WALL_NEW
                !CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET2,CP_BAR,TMP_G_NEW)
-               !!IF (IP==605) WRITE(*,*) 'T2',H_NEW/(CP_BAR*M_GAS_NEW)
+               !!IF (IP==1) WRITE(*,*) 'T2',H_NEW/(CP_BAR*M_GAS_NEW)
                !TMP_G_NEW = H_NEW/(CP_BAR*M_GAS_NEW)
-               !!IF (IP==605) WRITE(*,*) 'H2a',H_NEW,CP_BAR,M_GAS_NEW
+               !!IF (IP==1) WRITE(*,*) 'H2a',H_NEW,CP_BAR,M_GAS_NEW
                !H_NEW = CP_BAR * TMP_G_NEW * M_GAS_NEW
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,H_L)
                H_NEW= H_NEW + M_DROP*WGT*TMP_DROP_NEW*H_L
-               !IF (IP==605) WRITE(*,*) 'H3',H_G_OLD+H_D_OLD*WGT,H_NEW
+               !IF (IP==1) WRITE(*,*) 'H3',H_G_OLD+H_D_OLD*WGT,H_NEW
 
                IF (TMP_G_NEW < 0.9999_EB*TMP_G .AND. TMP_G_NEW < TMP_DROP_NEW) THEN
                   DT_SUBSTEP = DT_SUBSTEP * 0.5_EB
