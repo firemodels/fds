@@ -23,7 +23,7 @@ void SETslicemin(int setslicemin, float slicemin, int setslicechopmin, float sli
 void Bounds_DLG_CB(int var);
 void Part_CB(int var);
 void Bound_CB(int var);
-extern "C" void Iso_CB(int var);
+extern "C" void IsoCB(int var);
 void Smoke3D_CB(int var);
 void Time_CB(int var);
 void Script_CB(int var);
@@ -438,8 +438,8 @@ extern "C" void update_show_slice_in_obst(void){
 /* ------------------ update_iso_colorlevel ------------------------ */
 
 extern "C" void update_iso_colorlevel(void){
-  Iso_CB(ISO_LEVEL);
-  Iso_CB(ISO_COLORS);
+  IsoCB(ISO_LEVEL);
+  IsoCB(ISO_COLORS);
 }
 
 /* ------------------ Plot3d_Rollout_CB ------------------------ */
@@ -603,9 +603,9 @@ extern "C" void update_defer(void){
   CHECKBOX_defer->set_int_val(defer_file_loading);
 }
 
-/* ------------------ update_script_step ------------------------ */
+/* ------------------ UpdateScriptStep ------------------------ */
 
-extern "C" void update_script_step(void){
+extern "C" void UpdateScriptStep(void){
   CHECKBOX_script_step->set_int_val(script_step);
   if(script_step==1){
     BUTTON_step->enable();
@@ -757,7 +757,7 @@ extern "C" void glui_bounds_setup(int main_window){
     }
     if(nisoinfo > 0){
       SPINNER_isozipstep = glui_bounds->add_spinner_to_panel(ROLLOUT_compress, _d("Compressed file frame skip"), GLUI_SPINNER_INT, &isozipskip,
-        FRAMELOADING, Iso_CB);
+        FRAMELOADING, IsoCB);
       SPINNER_isozipstep->set_int_limits(0, 100);
     }
     if(nsmoke3dinfo > 0){
@@ -795,7 +795,7 @@ extern "C" void glui_bounds_setup(int main_window){
   glui_bounds->add_column_to_panel(PANEL_script1b, false);
   CHECKBOX_script_step = glui_bounds->add_checkbox_to_panel(PANEL_run, _d("Step through script"), &script_step, SCRIPT_STEP, Script_CB);
   BUTTON_step = glui_bounds->add_button_to_panel(PANEL_run, _d("Next"), SCRIPT_STEP_NOW, Script_CB);
-  update_script_step();
+  UpdateScriptStep();
   glui_bounds->add_button_to_panel(PANEL_run, _d("Cancel script"), SCRIPT_CANCEL_NOW, Script_CB);
 
   LIST_scriptlist = glui_bounds->add_listbox_to_panel(PANEL_script1b, _d("Select:"), &script_index, SCRIPT_LIST, Script_CB);
@@ -1014,9 +1014,9 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_isolinewidth->set_float_limits(1.0, 10.0);
 
     visAIso = show_iso_solid*1+show_iso_outline*2+show_iso_verts*4;
-    CHECKBOX_show_iso_solid = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &show_iso_solid, ISO_SURFACE, Iso_CB);
-    CHECKBOX_show_iso_outline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &show_iso_outline, ISO_OUTLINE, Iso_CB);
-    CHECKBOX_show_iso_verts = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_verts, ISO_POINTS, Iso_CB);
+    CHECKBOX_show_iso_solid = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Solid"), &show_iso_solid, ISO_SURFACE, IsoCB);
+    CHECKBOX_show_iso_outline = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Outline"), &show_iso_outline, ISO_OUTLINE, IsoCB);
+    CHECKBOX_show_iso_verts = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Points"), &show_iso_verts, ISO_POINTS, IsoCB);
 
 #ifdef pp_BETA
     CHECKBOX_sort2 = glui_bounds->add_checkbox_to_panel(ROLLOUT_iso_settings, _d("Sort transparent surfaces:"), &sort_iso_triangles, SORT_SURFACES, Slice_CB);
@@ -1030,17 +1030,17 @@ extern "C" void glui_bounds_setup(int main_window){
 
     PANEL_iso_alllevels = glui_bounds->add_panel_to_panel(ROLLOUT_iso_color, "All levels", true);
 
-    SPINNER_iso_transparency = glui_bounds->add_spinner_to_panel(PANEL_iso_alllevels, "alpha", GLUI_SPINNER_INT, &glui_iso_transparency, ISO_TRANSPARENCY, Iso_CB);
-    BUTTON_updatebound = glui_bounds->add_button_to_panel(PANEL_iso_alllevels, _d("Apply"), GLOBAL_ALPHA, Iso_CB);
+    SPINNER_iso_transparency = glui_bounds->add_spinner_to_panel(PANEL_iso_alllevels, "alpha", GLUI_SPINNER_INT, &glui_iso_transparency, ISO_TRANSPARENCY, IsoCB);
+    BUTTON_updatebound = glui_bounds->add_button_to_panel(PANEL_iso_alllevels, _d("Apply"), GLOBAL_ALPHA, IsoCB);
 
     PANEL_iso_eachlevel = glui_bounds->add_panel_to_panel(ROLLOUT_iso_color, "Each level", true);
-    SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, Iso_CB);
+    SPINNER_iso_level = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "level:", GLUI_SPINNER_INT, &glui_iso_level, ISO_LEVEL, IsoCB);
     SPINNER_iso_level->set_int_limits(1, MAX_ISO_COLORS);
-    LIST_colortable = glui_bounds->add_listbox_to_panel(PANEL_iso_eachlevel, _d("Color:"), &i_colortable_list, COLORTABLE_LIST, Iso_CB);
-    SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "red:", GLUI_SPINNER_INT, glui_iso_colors+0, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "green:", GLUI_SPINNER_INT, glui_iso_colors+1, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "blue:", GLUI_SPINNER_INT, glui_iso_colors+2, ISO_COLORS, Iso_CB);
-    SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "alpha:", GLUI_SPINNER_INT, glui_iso_colors+3, ISO_COLORS, Iso_CB);
+    LIST_colortable = glui_bounds->add_listbox_to_panel(PANEL_iso_eachlevel, _d("Color:"), &i_colortable_list, COLORTABLE_LIST, IsoCB);
+    SPINNER_iso_colors[0] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "red:", GLUI_SPINNER_INT, glui_iso_colors+0, ISO_COLORS, IsoCB);
+    SPINNER_iso_colors[1] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "green:", GLUI_SPINNER_INT, glui_iso_colors+1, ISO_COLORS, IsoCB);
+    SPINNER_iso_colors[2] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "blue:", GLUI_SPINNER_INT, glui_iso_colors+2, ISO_COLORS, IsoCB);
+    SPINNER_iso_colors[3] = glui_bounds->add_spinner_to_panel(PANEL_iso_eachlevel, "alpha:", GLUI_SPINNER_INT, glui_iso_colors+3, ISO_COLORS, IsoCB);
 
     UpdateColorTableList(-1);
 
@@ -1048,8 +1048,8 @@ extern "C" void glui_bounds_setup(int main_window){
     SPINNER_iso_colors[1]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
     SPINNER_iso_colors[2]->set_int_limits(0, 255, GLUI_LIMIT_CLAMP);
     SPINNER_iso_colors[3]->set_int_limits(1, 255, GLUI_LIMIT_CLAMP);
-    Iso_CB(ISO_LEVEL);
-    Iso_CB(ISO_COLORS);
+    IsoCB(ISO_LEVEL);
+    IsoCB(ISO_COLORS);
   }
 
   /* Particle File Bounds  */
@@ -1811,9 +1811,9 @@ colortabledata *get_colortable(char *label){
   return NULL;
 }
 
-/* ------------------ Iso_CB ------------------------ */
+/* ------------------ IsoCB ------------------------ */
 
-extern "C" void Iso_CB(int var){
+extern "C" void IsoCB(int var){
   int i;
   float *iso_color;
 
@@ -1827,7 +1827,7 @@ extern "C" void Iso_CB(int var){
       glui_iso_colors[1] = cti->color[1];
       glui_iso_colors[2] = cti->color[2];
       glui_iso_colors[3] = cti->color[3];
-      Iso_CB(ISO_COLORS);
+      IsoCB(ISO_COLORS);
       if(SPINNER_iso_colors[0]!=NULL)SPINNER_iso_colors[0]->set_int_val(glui_iso_colors[0]);
       if(SPINNER_iso_colors[1]!=NULL)SPINNER_iso_colors[1]->set_int_val(glui_iso_colors[1]);
       if(SPINNER_iso_colors[2]!=NULL)SPINNER_iso_colors[2]->set_int_val(glui_iso_colors[2]);
@@ -1856,7 +1856,7 @@ extern "C" void Iso_CB(int var){
       iso_colors[4 * i + 3] = iso_transparency;
     }
     if(SPINNER_iso_colors[3]!=NULL)SPINNER_iso_colors[3]->set_int_val(glui_iso_transparency);
-    Iso_CB(ISO_COLORS);
+    IsoCB(ISO_COLORS);
     break;
   case ISO_TRANSPARENCY:
     iso_transparency = ((float)glui_iso_transparency + 0.1) / 255.0;
@@ -1912,9 +1912,9 @@ void Smoke3D_CB(int var){
   }
 }
 
-/* ------------------ add_scriptlist ------------------------ */
+/* ------------------ AddScriptList ------------------------ */
 
-extern "C" void add_scriptlist(char *file, int id){
+extern "C" void AddScriptList(char *file, int id){
   if(file!=NULL&&strlen(file)>0&&LIST_scriptlist!=NULL){
     LIST_scriptlist->add_item(id,file);
   }
@@ -2091,7 +2091,7 @@ extern "C"  void glui_script_disable(void){
       }
       break;
     case SCRIPT_STEP:
-      update_script_step();
+      UpdateScriptStep();
       updatemenu=1;
       break;
     case SCRIPT_FILE_LOADING:
@@ -2484,7 +2484,7 @@ void Part_CB(int var){
 
     break;
   case STREAKLENGTH:
-    update_streakvalue(float_streak5value-0.001);
+    UpdateStreakValue(float_streak5value-0.001);
     if(float_streak5value==0.0){
       streak5show=0;
     }
@@ -2749,7 +2749,7 @@ extern "C" void Slice_CB(int var){
       else{
         setbwdata = 0;
       }
-      Iso_CB(ISO_COLORS);
+      IsoCB(ISO_COLORS);
       set_labels_controls();
       break;
     case RESEARCH_MODE:
@@ -3454,7 +3454,7 @@ extern "C" void update_tbounds(void){
 
   Smoke3D_CB(FRAMELOADING);
   Bound_CB(FRAMELOADING);
-  Iso_CB(FRAMELOADING);
+  IsoCB(FRAMELOADING);
   Part_CB(FRAMELOADING);
   Slice_CB(FRAMELOADING);
 }

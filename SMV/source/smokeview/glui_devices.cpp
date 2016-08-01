@@ -137,7 +137,7 @@ extern "C" void glui_device_setup(int main_window){
     SPINNER_orientation_scale=glui_device->add_spinner_to_panel(PANEL_smvobjects,_d("Orientation scale"),GLUI_SPINNER_FLOAT,&orientation_scale);
     SPINNER_orientation_scale->set_float_limits(0.1,10.0);
 
-    if(get_num_activedevices()>0||isZoneFireModel==1){
+    if(GetNumActiveDevices()>0||isZoneFireModel==1){
       PANEL_velocityvectors = glui_device->add_panel_to_panel(PANEL_objects, "Flow vectors", true);
       if(nvdeviceinfo==0)PANEL_velocityvectors->disable();
       CHECKBOX_device_1=glui_device->add_checkbox_to_panel(PANEL_velocityvectors,_d("Show"),&showvdeviceval);

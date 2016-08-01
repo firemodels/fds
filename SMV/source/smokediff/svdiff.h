@@ -104,7 +104,7 @@ typedef struct {
 //************************** headers ****************************************
 
 int getendian(void);
-void usage(void);
+void Usage(void);
 int mesh_match(meshdata *mesh1, meshdata *mesh2);
 int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase);
 void setup_boundary(FILE *stream_out);

@@ -553,7 +553,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     }
     strcat(slicelabel,buff_label);
     if(visgridloc==1){
-      outputText(VP_info.left+h_space,VP_info.down+v_space, slicelabel);
+      OutputText(VP_info.left+h_space,VP_info.down+v_space, slicelabel);
       info_lines++;
     }
   }
@@ -583,7 +583,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     }
     strcat(slicelabel,buff_label);
     if(visgridloc==1){
-      outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
+      OutputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
       info_lines++;
     }
   }
@@ -613,7 +613,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     }
     strcat(slicelabel,buff_label);
     if(visgridloc==1){
-      outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
+      OutputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), slicelabel);
       info_lines++;
     }
   }
@@ -630,7 +630,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
       imesh = mesh_xyz-meshinfo+1;
       sprintf(meshlabel,"mesh: %i",imesh);
     }
-    outputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), meshlabel);
+    OutputText(VP_info.left+h_space,VP_info.down+v_space+info_lines*(v_space+VP_info.text_height), meshlabel);
   }
 }
 
@@ -658,24 +658,24 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
 
   if( visTimebar==1&&showtime==1){
     if(visTimelabel==1){
-      outputText(VP_timebar.left,v_space, timelabel);
+      OutputText(VP_timebar.left,v_space, timelabel);
     }
     if(visFramelabel==1&&(visHRRlabel==0||hrrinfo==NULL)){
-      outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, framelabel);
+      OutputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, framelabel);
     }
     if(visHRRlabel==1&&hrrinfo!=NULL){
-      outputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, hrrinfo->hrrlabel);
+      OutputText(VP_timebar.left,v_space+VP_timebar.text_height+v_space, hrrinfo->hrrlabel);
     }
     DrawTimebar(timebar_left_pos,timebar_right_pos,v_space+VP_timebar.down,v_space+(VP_timebar.down+20));
   }
 
   if(visFramerate==1&&showtime==1){
     sprintf(frameratelabel," Frame rate:%4.1f",framerate);
-    outputText(right_label_pos,v_space,frameratelabel);
+    OutputText(right_label_pos,v_space,frameratelabel);
   }
   if(show_slice_average==1&&vis_slice_average==1&&slice_average_flag==1){
     sprintf(frameratelabel," AVG: %4.1f",slice_average_interval);
-    outputText(right_label_pos,3*v_space+2*VP_timebar.text_height, frameratelabel); // test print
+    OutputText(right_label_pos,3*v_space+2*VP_timebar.text_height, frameratelabel); // test print
   }
   if(hrrpuv_loaded==1&&show_hrrcutoff==1&&current_mesh!=NULL){
     char hrrcut_label[256];
@@ -684,7 +684,7 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
     ihrrcut = (int)global_hrrpuv_cutoff;
 
     sprintf(hrrcut_label,">%i (kW/m3)",ihrrcut);
-    outputText(right_label_pos+5+h_space,3*v_space+2*VP_timebar.text_height,hrrcut_label);
+    OutputText(right_label_pos+5+h_space,3*v_space+2*VP_timebar.text_height,hrrcut_label);
 
     glBegin(GL_QUADS);
     glColor3f(fire_red/255.0,fire_green/255.0,fire_blue/255.0);
@@ -699,10 +699,10 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
     MEMSTATUS(0,&availmemory,NULL,NULL);
     sprintf(frameratelabel," Mem Load:%u%s",availmemory,percen);
     if(visFramerate==1&&showtime==1){
-      outputText(right_label_pos,2*v_space+VP_timebar.text_height,frameratelabel);
+      OutputText(right_label_pos,2*v_space+VP_timebar.text_height,frameratelabel);
     }
     else{
-      outputText(right_label_pos,v_space,frameratelabel);
+      OutputText(right_label_pos,v_space,frameratelabel);
     }
   }
 #endif
@@ -716,10 +716,10 @@ void ViewportTimebar(int quad, GLint screen_left, GLint screen_down){
 
       getMemusage(MMtotalmemory,MEMlabel);
       if(visFramerate==1&&showtime==1){
-        outputText(right_label_pos,2*v_space+VP_timebar.text_height,MEMlabel);
+        OutputText(right_label_pos,2*v_space+VP_timebar.text_height,MEMlabel);
       }
       else{
-        outputText(right_label_pos,v_space,MEMlabel);
+        OutputText(right_label_pos,v_space,MEMlabel);
       }
   }
 #endif
@@ -751,10 +751,10 @@ void ViewportTitle(int quad, GLint screen_left, GLint screen_down){
 
   if(gversion==0){
     if(visFullTitle==1&&showplot3d==1){
-      outputText(left,textdown, plot3d_title);
+      OutputText(left,textdown, plot3d_title);
     }
     else{
-      outputText(left,textdown, release_title);
+      OutputText(left,textdown, release_title);
     }
   }
   else{
@@ -770,12 +770,12 @@ void ViewportTitle(int quad, GLint screen_left, GLint screen_down){
       smv_top=textdown;
       smv_top2=smv_top+VP_title.text_height+v_space;
     }
-    outputText(left,smv_top2,release_title);
+    OutputText(left,smv_top2,release_title);
     sprintf(label,"Smokeview (64 bit) build: %s",smv_githash);
-    outputText(left,smv_top,label);
+    OutputText(left,smv_top,label);
     if(fds_githash!=NULL){
       sprintf(label,"FDS build:%s",fds_githash);
-      outputText(left,fds_top,label);
+      OutputText(left,fds_top,label);
     }
   }
 }
@@ -1153,7 +1153,7 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
       }
 #endif
     }
-    if(nface_transparent>0&&sort_transparent_faces==1)Sort_Transparent_Faces(modelview_scratch);
+    if(nface_transparent>0&&sort_transparent_faces==1)SortTransparentFaces(modelview_scratch);
     if(showiso==1)Update_Isotris(0);
     FREEMEMORY(geominfoptrs);
     ngeominfoptrs=0;
@@ -1163,6 +1163,6 @@ void ViewportScene(int quad, int view_mode, GLint screen_left, GLint screen_down
 
     glScalef(mscale[0],mscale[1],mscale[2]);
     ExtractFrustum();
-    set_cull_vis();
+    SetCullVis();
   }
 }

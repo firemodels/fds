@@ -12,7 +12,7 @@
 
 #define RENDER_START 3
 
-void update_menu(void);
+void UpdateMenu(void);
 
 /* ------------------ get_newscriptfilename ------------------------ */
 
@@ -1653,7 +1653,7 @@ void script_loadfile(scriptdata *scripti){
     if(strcmp(plot3di->file,scripti->cval)==0){
       ReadPlot3dFile=1;
       readplot3d(plot3di->file,i,LOAD,&errorcode);
-      update_menu();
+      UpdateMenu();
       return;
     }
   }
@@ -1699,7 +1699,7 @@ void script_loadplot3d(scriptdata *scripti){
   set_labels_controls();
   if(count==0)fprintf(stderr,"*** Error: Plot3d file failed to load\n");
 
-  //update_menu();
+  //UpdateMenu();
 }
 
 /* ------------------ script_loadvfile ------------------------ */

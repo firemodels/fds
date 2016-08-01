@@ -1412,9 +1412,9 @@ void readpatch(int ifile, int load_flag, int *errorcode){
   }
 }
 
-/* ------------------ nodeinblockage ------------------------ */
+/* ------------------ NodeInBlockage ------------------------ */
 
-int nodeinblockage(const meshdata *meshnode, int i,int j,int k, int *imesh, int *iblockage){
+int NodeInBlockage(const meshdata *meshnode, int i,int j,int k, int *imesh, int *iblockage){
   int ii;
   float xn, yn, zn;
 
@@ -1621,7 +1621,7 @@ void nodein_extvent(int ipatch, int *patchblank, const meshdata *meshi,
 
         iii=(k-k1)*(j2+1-j1) + (j-j1);
         if(patchblank[iii]==GAS)continue;
-        patchblank[iii] = nodeinblockage(meshi,i1,j,k,&imesh,&iblockage);
+        patchblank[iii] = NodeInBlockage(meshi,i1,j,k,&imesh,&iblockage);
       }
     }
     break;
@@ -1633,7 +1633,7 @@ void nodein_extvent(int ipatch, int *patchblank, const meshdata *meshi,
 
         iii=(k-k1)*(i2+1-i1) + (i-i1);
         if(patchblank[iii]==GAS)continue;
-        patchblank[iii]=nodeinblockage(meshi,i,j1,k,&imesh,&iblockage);
+        patchblank[iii]=NodeInBlockage(meshi,i,j1,k,&imesh,&iblockage);
         if(imesh!=-1){
           meshblock = meshinfo+imesh;
           ASSERT(iblockage>=0&&iblockage<meshblock->nbptrs);
@@ -1650,7 +1650,7 @@ void nodein_extvent(int ipatch, int *patchblank, const meshdata *meshi,
 
         iii=(j-j1)*(i2+1-i1) + (i-i1);
         if(patchblank[iii]==GAS)continue;
-        patchblank[iii]=nodeinblockage(meshi,i,j,k1,&imesh,&iblockage);
+        patchblank[iii]=NodeInBlockage(meshi,i,j,k1,&imesh,&iblockage);
       }
     }
     break;
