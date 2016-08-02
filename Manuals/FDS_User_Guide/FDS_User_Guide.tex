@@ -4441,7 +4441,6 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct ACETYLENE}          & 26.037280  & C$_2$H$_2$       & 4.033    & 231.8    &          &  {\ct PROPYLENE}           \\ \hline
 {\ct ACROLEIN}           & 56.063260  & C$_3$H$_4$O      & 4.549    & 576.7    &  Y       &  {\ct MMA}                 \\ \hline
 {\ct AMMONIA}            & 17.03052  & NH$_3$            & 2.9      & 558.3    &  Y       &                            \\ \hline
-%{\ct AIR}                & 28.848523  &                  & 3.711    & 78.6     &  Y       &                            \\ \hline
 {\ct ARGON}              & 39.948000  & Ar               & 3.42     & 124.0    &  Y       &                            \\ \hline
 {\ct BENZENE}            & 78.11184   & C$_6$H$_6$       & 5.349    & 412.3    &  Y       &  {\ct TOLUENE}             \\ \hline
 {\ct BUTANE}             & 58.122200  & C$_4$H$_{10}$    & 4.687    & 531.4    &  Y       &  {\ct PROPANE}             \\ \hline
@@ -4465,6 +4464,7 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 {\ct HYDROPEROXY RADICAL}& 33.006740  & HO$_2$           & 3.02     & 106.5    &          &                            \\ \hline
 {\ct HYDROXYL RADICAL}   & 17.007340  & OH               & 2.66     & 92.1     &          &                            \\ \hline
 {\ct ISOPROPANOL}        & 60.095020  & C$_3$H$_7$OH     & 4.549    & 576.7    &  Y       &  {\ct METHANOL}            \\ \hline
+{\ct LJ AIR}             & 28.854760  &                  & 3.711    & 78.6     &          &                            \\ \hline
 {\ct METHANE}            & 16.042460  & CH$_4$           & 3.758    & 148.6    &  Y       &  {\ct METHANE}             \\ \hline
 {\ct METHANOL}           & 32.041860  & CH$_2$OH         & 3.626    & 481.8    &  Y       &  {\ct METHANOL}            \\ \hline
 {\ct N-DECANE}           & 142.281680 & C$_{10}$H$_{22}$ & 5.233    & 226.46   &  Y       &  {\ct N-HEPTANE}           \\ \hline
@@ -4490,15 +4490,15 @@ Species &   Mol.~Wt.            & Formula          & $\sigma$ & $\epsilon/k$   &
 
 \subsubsection{Option 2: User-Specified Properties}
 
-If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of air will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
+If the gas species is not included in Table~\ref{tab:gasspecies}, then you must specify its thermophysical properties.  By using the inputs discussed below, you can also override the default properties for a pre-defined gas species.  For a gas species not included in Table~\ref{tab:gasspecies}, its molecular weight, {\ct MW}, should be specified on the {\ct SPEC} line in units of g/mol, otherwise the molecular weight of nitrogen will be used.  If the species is participating in a reaction, then the {\ct ENTHALPY\_OF\_FORMATION} in units of kJ/mol must also be specified. Additional discussion on the enthalpy of formation can be found in Chapter~\ref{chap:combustion}.  The remaining thermophysical properties of conductivity, diffusivity, enthalpy, viscosity, absorptivity (thermal radiation), and liquid properties are discussed below. Most properties can be defined as a constant value or as a temperature dependent look-up table using a {\ct RAMP}. For the latter, if the temperature in a gas cell is above or below the endpoints of the {\ct RAMP}, the endpoint value will be used. FDS will not extrapolate beyond the ends of the {\ct RAMP}.
 
 \subsubsection{Conductivity}
 
-Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using {\ct MW} and the Lennard-Jones parameters for air.
+Conductivity can be specified in one of three ways: it can be defined as a constant using {\ct CONDUCTIVITY} (\si{W/(m.K)}), it can be defined as a temperature vs. specific heat ramp  using {\ct RAMP\_K}, or it can be computed by FDS using {\ct MW}, {\ct PR\_GAS} on {\ct SPEC} (default value is {\ct PR} on {\ct MISC}), and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the conductivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
 \subsubsection{Diffusivity}
 
-Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivty can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using {\ct MW} and the Lennard-Jones parameters for air.
+Diffusivity is assumed to be the binary diffusion coefficient between the given species and the background species. Diffusivty can be specified in one of three ways:  it can be defined as a constant using {\ct DIFFUSIVITY} (m$^2$/s), it can be defined as a temperature vs. diffusivity ramp  using {\ct RAMP\_D}, or it can be computed by FDS using {\ct MW} and the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no inputs are specified, FDS will compute the diffusivity using the {\ct MW} and the Lennard-Jones parameters for nitrogen.
 
 \subsubsection{Enthalpy}
 \label{info:Enthalpy}
@@ -4519,7 +4519,7 @@ The reference enthalpy can also be determined by defining the {\ct ENTHALPY\_OF\
 
 \subsubsection{Viscosity}
 
-The dynamic viscosity of the gas species can be specified in one of three ways:  it can be defined as a constant using {\ct VISCOSITY}, it can be defined as a temperature vs. viscosity ramp  using {\ct RAMP\_MU}, or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for air.
+The dynamic viscosity of the gas species can be specified in one of three ways:  it can be defined as a constant using {\ct VISCOSITY}, it can be defined as a temperature vs. viscosity ramp  using {\ct RAMP\_MU}, or it can be computed  using the Lennard-Jones potential parameters $\sigma$ ({\ct SIGMALJ}) and $\epsilon/k$ ({\ct EPSILONKLJ}).  If no viscosity inputs are provided, FDS will use the Lennard-Jones values for nitrogen.
 
 \subsubsection{Radiative Properties}
 \label{info:radiative_spec_props}
@@ -4543,6 +4543,8 @@ If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, 
 \ee
 More detail is included in Chapter~\ref{info:PART}.
 
+\subsection{Air}
+There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost. 
 
 \subsubsection{Specifying a Chemical Formula}
 \label{info:FORMULA}
@@ -6082,7 +6084,7 @@ Here $\dm_{\rm f,0}''(t)$ is the user-specified burning rate per unit area when 
 \be
 k(t) = \hbox{\ct E\_COEFFICIENT} \; m_{\rm w}''(t) \quad          \si{1/s}
 \ee
-The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinkler is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate.
+The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is expressed in units of \si{m$^2$/(kg.s)}. Usually, this type of suppression algorithm is invoked when the fuel is complicated, like a cartoned commodity.  The example case {\ct e\_coefficient} demonstrates the use of this parameter.  A sprinkler is placed over a burner defined with an {\ct E\_COEFFICIENT} as shown below.  The sprinkler is set to operate at 5~s.  Figure~\ref{e_coef_fig} shows the heat release rate and burning rate. Note that expected value is computed using the sprinkler flow rate and the FDS results are delayed slightly by the time it takes for droplets to reach and accumulate on the burning surface.
 \begin{lstlisting}
 &SURF ID='FUEL', HRRPUA=100., E_COEFFICIENT=4. /
 \end{lstlisting}
