@@ -2763,7 +2763,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
    ! Loop through all PARTICLEs within the class and determine mass/energy transfer
 
    PARTICLE_LOOP: DO IP=1,NLP
-      !WRITE(*,*) 'AAAAA',IP
       LP  => LAGRANGIAN_PARTICLE(IP)
       LPC => LAGRANGIAN_PARTICLE_CLASS(LP%CLASS_INDEX)
       IF (LPC%Z_INDEX/=Z_INDEX)     CYCLE PARTICLE_LOOP
@@ -2779,7 +2778,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       P_RATIO = P_STP/PBAR(0,PRESSURE_ZONE(II,JJ,KK))
       ! Boiling temperature at current background pressure
       T_BOIL_EFF = MAX(0._EB,DHOR*TMP_BOIL/(DHOR-TMP_BOIL*LOG(1._EB/P_RATIO)+TWO_EPSILON_EB))
-      !IF (IP==605) WRITE(*,*)'TB', DHOR,P_RATIO,T_BOIL_EFF
       I_BOIL   = INT(T_BOIL_EFF)
       ! Determine how many sub-time step iterations are needed and then iterate over the time step.
 
@@ -2833,7 +2831,8 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                IW   = LP%WALL_INDEX
                A_DROP = M_DROP/(FILM_THICKNESS(IW)*LPC%DENSITY)
-               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW*DT/(WGT*DT_SUBSTEP))*WALL(IW)%ONE_D%QRADIN
+               !IF (IP==1) WRITE(*,*) 'FILM',FILM_THICKNESS(IW),M_DROP/(FILM_THICKNESS(IW)*LPC%DENSITY),WALL(IW)%AW/LP%PWT
+               Q_DOT_RAD = MIN(A_DROP,WALL(IW)%AW/LP%PWT)*WALL(IW)%ONE_D%QRADIN
                TMP_WALL = MAX(TMPMIN,TMP_WALL_INTERIM(IW))
             ELSE SOLID_OR_GAS_PHASE_1
                IW = -1
@@ -2845,7 +2844,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                ENDIF
             ENDIF SOLID_OR_GAS_PHASE_1
             !IF (IP==1) WRITE(*,*) 'QR',Q_DOT_RAD*DT,M_DROP*H_V
-            BOIL_ALL: IF (Q_DOT_RAD*DT > M_DROP*H_V) THEN
+            BOIL_ALL: IF (Q_DOT_RAD*DT_SUBSTEP > M_DROP*H_V) THEN
                M_VAP = M_DROP
                Q_RAD = M_VAP*H_V
                I_FUEL = 0
@@ -2908,7 +2907,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                IF (Y_DROP<=Y_GAS) H_MASS = 0._EB
 
                DYDT = (MW_RATIO/(X_DROP*(1._EB-MW_RATIO)+MW_RATIO)**2)*DHOR*X_DROP/TMP_DROP**2
-
+               !IF (IP==1) WRITE(*,*) 'xyd',Y_DROP,Y_GAS,DYDT
                ! Set variables for heat transfer on solid
 
                SOLID_OR_GAS_PHASE_2: IF (LP%ONE_D%IOR/=0 .AND. LP%WALL_INDEX>0) THEN
@@ -2969,12 +2968,14 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ELSE
                      LENGTH   = 1._EB
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
-                     NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB
-                     SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB
+                     !IF (IP==1) WRITE(*,*) 'HM',RE_L,VEL,MU_AIR,RHO_G*VEL*LENGTH/MU_AIR
+                     !Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
+                     NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
+                     SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
                      H_WALL    = H_SOLID
                   ENDIF
-                  H_HEAT   = MIN(2._EB,NUSSELT)*K_AIR/LENGTH
-                  H_MASS   = MIN(2._EB,SHERWOOD)*D_AIR/LENGTH
+                  H_HEAT   = MAX(2._EB,NUSSELT)*K_AIR/LENGTH
+                  H_MASS   = MAX(2._EB,SHERWOOD)*D_AIR/LENGTH
 
                ELSE SOLID_OR_GAS_PHASE_2
 
@@ -2986,7 +2987,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
-              !IF (IP==605) WRITE(*,*)'H',H_HEAT,H_MASS,H_WALL
+              IF (IP==1) WRITE(*,*)'H',H_HEAT,H_MASS,H_WALL
               !Build and solve implicit arrays for updating particle, gas, and wall temperatures
                
                DTOP = DT_SUBSTEP/(2._EB*M_DROP*WGT*C_DROP)
@@ -2994,6 +2995,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                DTGOG = DT_SUBSTEP*A_DROP*WGT*H_HEAT/(2._EB*M_GAS*CP)
                DTGOP = DT_SUBSTEP*A_DROP*WGT*H_HEAT/(2._EB*M_DROP*WGT*C_DROP)
                AGHRHO = A_DROP*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
+               !IF (IP==1) WRITE(*,*) 'AGHRHO',AGHRHO,A_DROP,RHO_G,A_DROP*H_MASS*RHO_G,(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H_V+H_L)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
                !IF (IP==1) WRITE(*,*) 'TH:',M_DROP*WGT*C_DROP,M_GAS*CP,A_DROP*WGT,RHO_G,H_V,H_V+H_L
