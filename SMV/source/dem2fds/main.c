@@ -502,7 +502,7 @@ int main(int argc, char **argv){
   char file_default[LEN_BUFFER];
 
   if(argc == 1){
-    usage("dem2geom");
+    usage("dem2fds");
     return 0;
   }
 
@@ -523,7 +523,7 @@ int main(int argc, char **argv){
         exit(1);
         break;
       case 'h':
-        usage("dem2geom");
+        usage("dem2fds");
         exit(1);
         break;
       case 'o':
@@ -533,11 +533,11 @@ int main(int argc, char **argv){
         gen_fds = FDS_GEOM;
         break;
       case 'v':
-        PRINTversion("dem2geom");
+        PRINTversion("dem2fds");
         exit(1);
         break;
       default:
-        usage("dem2geom");
+        usage("dem2fds");
         exit(1);
         break;
       }
