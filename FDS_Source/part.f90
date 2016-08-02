@@ -2987,7 +2987,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   TMP_WALL = TMPA
                   ARRAY_CASE = 1
                ENDIF SOLID_OR_GAS_PHASE_2
-              IF (IP==1) WRITE(*,*)'H',H_HEAT,H_MASS,H_WALL
+              !IF (IP==1) WRITE(*,*)'H',H_HEAT,H_MASS,H_WALL
               !Build and solve implicit arrays for updating particle, gas, and wall temperatures
                
                DTOP = DT_SUBSTEP/(2._EB*M_DROP*WGT*C_DROP)
