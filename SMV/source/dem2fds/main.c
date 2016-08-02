@@ -23,6 +23,7 @@ typedef struct {
   char *fileheader, *filedata;
   float lat_min, lat_max;
   float long_min, long_max;
+  float val_min, val_max;
   float dlong, dlat;
   float *valbuffer;
 } elevdata;
@@ -85,55 +86,41 @@ float dist(float llong1, float llong2, float llat1, float llat2){
 
 /* ------------------ generate_fds ------------------------ */
 
-void generate_fds(char *casename, int option){
-  char buffer[LEN_BUFFER], elevfile[LEN_BUFFER], fdsfile[LEN_BUFFER],*ext;
+void generate_fds(char *casename, elevdata *fds_elevs, int option){
+  char fdsfile[LEN_BUFFER],*ext;
   char basename[LEN_BUFFER];
   int nlong, nlat,nz;
   int i,j;
   float llat1, llat2, llong1, llong2;
   float xmax, ymax, zmin, zmax;
-  float xmin_clip = -1.0, xmax_clip = -1.0;
-  float ymin_clip = -1.0, ymax_clip = -1.0;
-  int clip_vals = 0;
   float *xgrid, *ygrid;
   int count;
   int ibar, jbar, kbar;
-  float **valptrs;
-  FILE *streamin = NULL, *streamout = NULL;
+  float *vals, *valsp1;
+  FILE *streamout = NULL;
 
   strcpy(basename, casename);
   ext = strrchr(basename, '.');
   if (ext != NULL)ext[0] = 0;
-
-  strcpy(elevfile,basename);
-  strcat(elevfile,"_elevs.csv");
-  streamin = fopen(elevfile,"r");
-  if(streamin==NULL){
-    fprintf(stderr,"***error: unable to open %s for input\n",elevfile);
-    return;
-  }
 
   strcpy(fdsfile,basename);
   strcat(fdsfile,".fds");
   streamout = fopen(fdsfile,"w");
   if(streamout==NULL){
     fprintf(stderr,"***error: unable to open %s for output\n",fdsfile);
-    fclose(streamin);
     return;
   }
 
-  fgets(buffer, LEN_BUFFER, streamin);
-  trim_back(buffer);
-  sscanf(buffer, "%f %f %i %f %f %i %f %f %i %f %f %f %f",
-    &llong1, &llong2,&nlong,
-    &llat1, &llat2, &nlat,
-    &zmin,&zmax,&nz,
-    &xmin_clip, &xmax_clip, &ymin_clip, &ymax_clip
-  );
-  if (xmin_clip > -0.5&&xmax_clip > -0.5&&xmax_clip > xmin_clip&&
-    ymin_clip > -0.5&&ymax_clip > -0.5&&ymax_clip > ymin_clip) {
-    clip_vals = 1;
-  }
+  llong1 = fds_elevs->long_min;
+  llong2 = fds_elevs->long_max;
+  nlong = fds_elevs->ncols;
+  llat1 = fds_elevs->lat_min;
+  llat2 = fds_elevs->lat_max;
+  nlat = fds_elevs->nrows;
+  zmin = fds_elevs->val_min;
+  zmax = fds_elevs->val_max;
+  vals = fds_elevs->valbuffer;
+  nz = 30;
 
   xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
 
@@ -169,31 +156,13 @@ void generate_fds(char *casename, int option){
   fprintf(streamout,"&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n",casename);
 
 
-  NewMemory((void **)&valptrs, sizeof(float *)*nlat);
-  for(j = 0; j < nlat; j++){
-    int idummy;
-    float dummy, llat, llong, elev;
-    float *vals;
-
-    NewMemory((void **)&vals, sizeof(float)*nlong);
-    valptrs[j] = vals;
-    for(i = 0; i < nlong; i++){
-      fgets(buffer, LEN_BUFFER, streamin);
-      sscanf(buffer, "%i,%f,%f,%f,%f", &idummy, &llat, &llong, &dummy, &elev);
-      vals[i] = elev;
-    }
-  }
-
   if(option==FDS_GEOM){
     fprintf(streamout,"&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
                       nlong,nlat,0.0,xmax,0.0,ymax);
     count = 1;
     for(j = 0; j < jbar + 1; j++){
-      float *vals;
-
-      vals = valptrs[jbar - j];
       for(i = 0; i < ibar + 1; i++){
-        fprintf(streamout," %f,", vals[i]);
+        fprintf(streamout," %f,", vals[count-1]);
         if(count % 10 == 0)fprintf(streamout,"\n");
         count++;
       }
@@ -201,18 +170,17 @@ void generate_fds(char *casename, int option){
     fprintf(streamout,"/\n");
   }
   if(option==FDS_OBST){
+    count = 0;
+    valsp1 = vals + nlong;
     for(j = 0; j < jbar; j++){
-      float *vals, *valsp1, ycen;
+      float ycen;
 
-      vals = valptrs[j];
-      valsp1 = valptrs[j+1];
       ycen = (ygrid[j] + ygrid[j + 1]) / 2.0;
       for(i = 0; i < ibar; i++){
         float vavg, xcen;
 
         xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
-        if (clip_vals == 1 && xcen > xmin_clip&&xcen<xmax_clip&&ycen>ymin_clip&&ycen < ymax_clip)continue;
-        vavg = (vals[i]+vals[i+1]+valsp1[i]+valsp1[i+1])/4.0;
+        vavg = (vals[count]+vals[count+1]+valsp1[count]+valsp1[count+1])/4.0;
         fprintf(streamout,"&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n", xgrid[i],xgrid[i+1],ygrid[j],ygrid[j+1],vavg);
       }
     }
@@ -238,7 +206,7 @@ elevdata *get_elevfile(elevdata *elevinfo, int nelevinfo, float longval, float l
 
 /* ------------------ get_elev ------------------------ */
 
-float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latval, int *have_val){
+float get_elevation2(elevdata *elevinfo, int nelevinfo, float longval, float latval, int *have_val){
   elevdata *elevi;
   int index, ival, jval;
   float return_val;
@@ -265,12 +233,66 @@ float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latv
   return return_val;
 }
 
+#define INTERP1D(f,v1,v2) ((1.0-f)*(v1)+(f)*(v2))
+
+/* ------------------ get_elev2 ------------------------ */
+
+float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latval, int *have_val){
+  elevdata *elevi;
+  int ival, jval;
+  int ival2, jval2;
+  int index11, index12, index21, index22;
+  float val11, val12, val21, val22;
+  float val1, val2;
+  float factor_x, factor_y;
+  float return_val;
+
+  *have_val = 0;
+  elevi = get_elevfile(elevinfo, nelevinfo, longval, latval);
+  if(elevi == NULL)return 0.0;
+  if(elevi->valbuffer == NULL){
+    FILE *stream;
+    float *data_buffer;
+
+    stream = fopen(elevi->filedata, "rb");
+    if (stream == NULL)return 0.0;
+    NewMemory((void **)&data_buffer, elevi->ncols*elevi->nrows * sizeof(float));
+    elevi->valbuffer = data_buffer;
+    fread(data_buffer, sizeof(float), elevi->ncols*elevi->nrows, stream);
+    fclose(stream);
+  }
+  ival = CLAMP((longval - elevi->long_min)/elevi->cellsize,0,elevi->ncols-1);
+  ival2 = CLAMP(ival+1, 0, elevi->ncols - 1);
+  jval = CLAMP((elevi->lat_max - latval)/elevi->cellsize,0,elevi->nrows-1);
+  jval2 = CLAMP(jval-1, 0, elevi->nrows - 1);
+  
+  index11 = jval*elevi->ncols +ival;
+  index12 = jval2*elevi->ncols + ival;
+  index21 = jval*elevi->ncols + ival2;
+  index22 = jval2*elevi->ncols + ival2;
+  
+  val11 = elevi->valbuffer[index11];
+  val12 = elevi->valbuffer[index12];
+  val21 = elevi->valbuffer[index21];
+  val22 = elevi->valbuffer[index22];
+
+  factor_x = (longval - elevi->long_min - ival*elevi->cellsize)/elevi->cellsize; 
+  factor_x = CLAMP(factor_x,0.0,1.0); 
+  factor_y = (elevi->lat_max - latval - jval*elevi->cellsize)/elevi->cellsize;
+  factor_y = CLAMP(factor_y,0.0,1.0);
+  val1 = INTERP1D(factor_x,val11,val12);
+  val2 = INTERP1D(factor_x,val21,val22);
+  return_val = INTERP1D(factor_y,val1,val2);
+  *have_val = 1;
+  return return_val;
+}
+
 /* ------------------ generate_elevs ------------------------ */
 
-int generate_elevs(char *elevfile){
+int generate_elevs(char *elevfile, elevdata *fds_elevs){
   int nelevinfo,i,j;
   filelistdata *fileheaders;
-  FILE *stream_in, *stream_out;
+  FILE *stream_in;
   elevdata *elevinfo;
   int ibar, jbar, kbar;
   float dx, dy;
@@ -282,7 +304,7 @@ int generate_elevs(char *elevfile){
   float dlat, dlong;
   int count=0, *have_vals;
   float valmin, valmax, *vals;
-  char outfile[LEN_BUFFER], *ext;
+  char *ext;
 
   nelevinfo = get_nfilelist(".", "*.hdr");
   if(nelevinfo == 0)return 0;
@@ -404,12 +426,6 @@ int generate_elevs(char *elevfile){
   }
   fclose(stream_in);
 
-  strcpy(outfile,elevfile);
-  ext = strrchr(outfile, '.');
-  if (ext != NULL)ext[0] = 0;
-  strcat(outfile, "_elevs.csv");
-  stream_out = fopen(outfile, "w");
-
   if(
     get_elevfile(elevinfo, nelevinfo, longmin, latmin) == NULL ||
     get_elevfile(elevinfo, nelevinfo, longmin, latmax) == NULL ||
@@ -422,7 +438,7 @@ int generate_elevs(char *elevfile){
       elevdata *elevi;
 
       elevi = elevinfo + i;
-      fprintf(stream_out," header file: %s bounds: %f %f %f %f\n",
+      fprintf(stderr," header file: %s bounds: %f %f %f %f\n",
         elevi->fileheader, elevi->long_min, elevi->lat_min, elevi->long_max, elevi->lat_max);
     }
     return 0;
@@ -432,6 +448,14 @@ int generate_elevs(char *elevfile){
   dlong = (longmax - longmin) / (float)(nlongs-1);
   NewMemory((void **)&vals, nlongs*nlats*sizeof(float));
   NewMemory((void **)&have_vals, nlongs*nlats*sizeof(int));
+  fds_elevs->valbuffer = vals;
+  fds_elevs->nrows = nlats;
+  fds_elevs->ncols = nlongs;
+  fds_elevs->long_min = longmin;
+  fds_elevs->long_max = longmax;
+  fds_elevs->lat_min = latmin;
+  fds_elevs->lat_max = latmax;
+
   for(j = 0; j < nlats; j++){
     float latj;
 
@@ -459,29 +483,9 @@ int generate_elevs(char *elevfile){
       count++;
     }
   }
-  count = 0;
-  fprintf(stream_out," %f %f %i %f %f %i %f %f %i\n", longmin, longmax, nlongs, latmin, latmax, nlats,valmin,valmax,30);
-  for(j = 0; j < nlats; j++){
-    float latj;
-
-    latj = latmin + (float)j*dlat;
-    for(i = 0; i < nlongs; i++){
-      float longi;
-
-      longi = longmin + (float)i*dlong;
-
-      if(have_vals[count] == 1){
-        float elevij;
-
-        elevij = vals[count];
-        fprintf(stream_out, " %i,%f,%f,%f,%f\n", count+1, longi, latj, 39.37*elevij/12.0, elevij);
-      }
-      count++;
-    }
-  }
-  fclose(stream_out);
+  fds_elevs->val_min = valmin;
+  fds_elevs->val_max = valmax;
   FREEMEMORY(have_vals);
-  FREEMEMORY(vals);
   return 1;
 }
 
@@ -492,6 +496,7 @@ int main(int argc, char **argv){
   int gen_fds = FDS_OBST;
   char *casename = NULL;
   char file_default[LEN_BUFFER];
+  elevdata fds_elevs;
 
   strcpy(file_default, "terrain");
 
@@ -530,8 +535,8 @@ int main(int argc, char **argv){
     }
   }
   if(casename == NULL)casename = file_default;
-  if (generate_elevs(casename) == 1) {
-    generate_fds(casename, gen_fds);
+  if (generate_elevs(casename,&fds_elevs) == 1) {
+    generate_fds(casename, &fds_elevs, gen_fds);
   }
   return 0;
 }
