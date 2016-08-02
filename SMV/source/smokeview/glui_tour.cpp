@@ -514,7 +514,7 @@ void TOUR_CB(int var){
     hide_glui_tour();
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case SHOWTOURROUTE:
     edittour = 1 - edittour;

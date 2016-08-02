@@ -46,14 +46,14 @@ extern "C" void Update_Glui_Stereo(void){
   if(stereotypeOLD==3&&stereotype!=3){
     if(setbw!=setbwSAVE){
       setbw=1-setbwSAVE;
-      ColorBarMenu(COLORBAR_TOGGLE_BW);
+      ColorbarMenu(COLORBAR_TOGGLE_BW);
     }
   }
   else if(stereotypeOLD!=3&&stereotype==3){
     setbwSAVE=setbw;
     if(setbw==0){
       setbwSAVE=setbw;
-      ColorBarMenu(COLORBAR_TOGGLE_BW);
+      ColorbarMenu(COLORBAR_TOGGLE_BW);
     }
   }
 }
@@ -150,7 +150,7 @@ void STEREO_CB(int var){
     hide_glui_stereo();
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   default:
     ASSERT(FFALSE);

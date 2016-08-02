@@ -730,7 +730,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
 
 #define COLORBAR_LIST2 112
 
-    cb = getcolorbar(default_fed_colorbar);
+    cb = GetColorbar(default_fed_colorbar);
     if(cb!=NULL){
       colorbartype=cb-colorbarinfo;
       set_colorbar_list_index(colorbartype);
@@ -1209,10 +1209,10 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
     switch(sd->idir){
      case XDIR:
       offset=sliceoffset_factor*(xplt_local[1]-xplt_local[0]);
-      if(inblockage(meshi,xslicemid-offset,yslicemid,zslicemid)==1){
+      if(InBlockage(meshi,xslicemid-offset,yslicemid,zslicemid)==1){
         sd->sliceoffset=offset;
       }
-      if(inblockage(meshi,xslicemid+offset,yslicemid,zslicemid)==1){
+      if(InBlockage(meshi,xslicemid+offset,yslicemid,zslicemid)==1){
         sd->sliceoffset=-offset;
       }
       sd->nslicex=sd->js2+1-sd->js1;
@@ -1220,10 +1220,10 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
       break;
      case YDIR:
       offset = sliceoffset_factor*(yplt_local[1]-yplt_local[0]);
-      if(inblockage(meshi,xslicemid,yslicemid-offset,zslicemid)==1){
+      if(InBlockage(meshi,xslicemid,yslicemid-offset,zslicemid)==1){
         sd->sliceoffset=offset;
       }
-      if(inblockage(meshi,xslicemid,yslicemid+offset,zslicemid)==1){
+      if(InBlockage(meshi,xslicemid,yslicemid+offset,zslicemid)==1){
         sd->sliceoffset=-offset;
       }
       sd->nslicex=sd->is2+1-sd->is1;
@@ -1231,10 +1231,10 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
       break;
      case ZDIR:
       offset=sliceoffset_factor*(zplt_local[1]-zplt_local[0]);
-      if(inblockage(meshi,xslicemid,yslicemid,zslicemid-offset)==1){
+      if(InBlockage(meshi,xslicemid,yslicemid,zslicemid-offset)==1){
         sd->sliceoffset=offset;
       }
-      if(inblockage(meshi,xslicemid,yslicemid,zslicemid+offset)==1){
+      if(InBlockage(meshi,xslicemid,yslicemid,zslicemid+offset)==1){
         sd->sliceoffset=-offset;
       }
       sd->nslicex=sd->is2+1-sd->is1;
@@ -1368,10 +1368,10 @@ void readslice(char *file, int ifile, int flag, int set_slicecolor, int *errorco
 
   if(colorbartype_ini==-1){
     if(strcmp(sd->label.shortlabel,"thick")==0){
-      ColorBarMenu(wallthickness_colorbar);
+      ColorbarMenu(wallthickness_colorbar);
     }
     if(strcmp(sd->label.shortlabel,"phifield")==0){
-      ColorBarMenu(levelset_colorbar);
+      ColorbarMenu(levelset_colorbar);
     }
   }
   push_slice_loadstack(slicefilenumber);
@@ -1945,13 +1945,13 @@ void getgsliceparams(void){
   }
 }
 
-/* ------------------ is_slice_duplicate ------------------------ */
+/* ------------------ IsSliceDuplicate ------------------------ */
 
 #ifdef pp_SLICEDUP
 #define SLICEEPS 0.001
 #define COUNT_DUPLICATES 1
 #define FIND_DUPLICATES 0
-int is_slice_duplicate(multislicedata *mslicei, int ii, int flag){
+int IsSliceDuplicate(multislicedata *mslicei, int ii, int flag){
   int jj;
   float *xyzmini, *xyzmaxi;
   slicedata *slicei;
@@ -2021,15 +2021,15 @@ int count_slicedups(void){
 
     mslicei = multisliceinfo + i;
     for(ii = 0; ii < mslicei->nslices; ii++){
-      count += is_slice_duplicate(mslicei, ii, COUNT_DUPLICATES);
+      count += IsSliceDuplicate(mslicei, ii, COUNT_DUPLICATES);
     }
   }
   return count;
 }
 
-/* ------------------ update_slicedups ------------------------ */
+/* ------------------ UpdateSliceDups ------------------------ */
 
-void update_slicedups(void){
+void UpdateSliceDups(void){
   int i;
 
   for(i=0;i<nmultisliceinfo;i++){
@@ -2054,14 +2054,14 @@ void update_slicedups(void){
       slicedata *slicei;
 
       slicei = sliceinfo + mslicei->islices[ii];
-      slicei->skip = is_slice_duplicate(mslicei,ii, FIND_DUPLICATES);
+      slicei->skip = IsSliceDuplicate(mslicei,ii, FIND_DUPLICATES);
     }
   }
 }
 
-/* ------------------ update_vslicedups ------------------------ */
+/* ------------------ UpdateVSliceDups ------------------------ */
 
-void update_vslicedups(void){
+void UpdateVSliceDups(void){
   int ii;
 
   for(ii=0;ii<nvsliceinfo;ii++){
@@ -2385,7 +2385,7 @@ void getsliceparams(void){
     slicei->skip = 0;
   }
 #ifdef pp_SLICEDUP
-  update_slicedups();
+  UpdateSliceDups();
   nslicedups = count_slicedups();
 #endif
   for(i = 0; i < nmultisliceinfo; i++){
@@ -2840,7 +2840,7 @@ void updatevslices(void){
   }
 
 #ifdef pp_SLICEDUP
-  update_vslicedups();
+  UpdateVSliceDups();
 #endif
 
   for(i = 0; i<nmultivsliceinfo; i++){
@@ -3165,7 +3165,7 @@ void setslicecolors(float smin, float smax,
   PRINTF("computing slice color levels \n");
   scale=sb->scale;
   if(sd->qslicedata==NULL)return;
-  getSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
+  GetSliceColors(sd->qslicedata,sd->nslicetotal,sd->slicelevel,
                 smin,smax,
                 nrgb_full,nrgb,
                 sb->colorlabels,&scale,&sb->fscale,sb->levels256,
@@ -3188,7 +3188,7 @@ void setslicelabels(float smin, float smax,
   *errorcode=0;
   PRINTF("setting up slice labels \n");
   scale=sb->scale;
-  getSliceLabels(smin,smax,nrgb,
+  GetSliceLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,&sb->fscale,sb->levels256);
 }
 
@@ -3376,7 +3376,7 @@ void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax){
 
     }
     if(axislabels_smooth==1){
-      smoothlabel(pmin,pmax,nrgb);
+      SmoothLabel(pmin,pmax,nrgb);
     }
 
 }
@@ -4588,7 +4588,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
           index_cell = (plotx + 1 -incx-sd->is1)*sd->nslicej*sd->nslicek + (j+1-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
 
           GET_VAL(sd,val,index_cell);
-          output3Val(constval,(yy1+y3)/2.0,(z1+z3)/2.0,val);
+          Output3Val(constval,(yy1+y3)/2.0,(z1+z3)/2.0,val);
         }
       }
     }
@@ -4673,7 +4673,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
           GET_VAL(sd,val,index_cell);
-          output3Val((x1+x3)/2.0,constval,(z1+z3)/2.0,val);
+          Output3Val((x1+x3)/2.0,constval,(z1+z3)/2.0,val);
         }
       }
     }
@@ -4758,7 +4758,7 @@ void drawvolslice_cellfacecenter(const slicedata *sd, int flag){
         val(i,j,k) = di*nj*nk + dj*nk + dk
        */
           GET_VAL(sd,val,index_cell);
-          output3Val((x1+x3)/2.0,(yy1+y3)/2.0,constval,val);
+          Output3Val((x1+x3)/2.0,(yy1+y3)/2.0,constval,val);
         }
       }
     }
@@ -5418,7 +5418,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
             index_v = (plotx-sd->is1)*sd->nslicej*sd->nslicek + (j-sd->js1)*sd->nslicek + k - sd->ks1 + 1;
             GET_VAL(v,val,index_v);
-            output3Val(constval,yy1,zhalf,val);
+            Output3Val(constval,yy1,zhalf,val);
           }
           if(j!=maxj){
             int index_w;
@@ -5427,7 +5427,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
             index_w = (plotx-sd->is1)*sd->nslicej*sd->nslicek;
             index_w += (j+1-sd->js1)*sd->nslicek + k-sd->ks1;
             GET_VAL(w,val,index_w);
-            output3Val(constval,yhalf,z1,val);
+            Output3Val(constval,yhalf,z1,val);
           }
         }
       }
@@ -5581,7 +5581,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
             index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k + 1 - sd->ks1;
             GET_VAL(u,val,index_u);
-            output3Val(x1,constval,zhalf,val);
+            Output3Val(x1,constval,zhalf,val);
           }
           if(i!=sd->is2){
             int index_w;
@@ -5589,7 +5589,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
             index_w = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (ploty-sd->js1)*sd->nslicek + k - sd->ks1;
             GET_VAL(w,val,index_w);
-            output3Val(xhalf,constval,z1,val);
+            Output3Val(xhalf,constval,z1,val);
           }
         }
       }
@@ -5747,7 +5747,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
             index_u = (i-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j+1-sd->js1)*sd->nslicek;
             GET_VAL(u,val,index_u);
-            output3Val(x1,yhalf,constval,val);
+            Output3Val(x1,yhalf,constval,val);
           }
           if(i!=sd->is2){
             int index_v;
@@ -5755,7 +5755,7 @@ void drawvvolslice_cellcenter(const vslicedata *vd){
 
             index_v = (i+1-sd->is1)*sd->nslicej*sd->nslicek + (plotz-sd->ks1)+(j-sd->js1)*sd->nslicek;
             GET_VAL(v,val,index_v);
-            output3Val(xhalf,yy1,constval,val);
+            Output3Val(xhalf,yy1,constval,val);
           }
         }
       }

@@ -275,7 +275,7 @@ void drawtours(void){
     SNIFF_ERRORS("after select path, selected keyframe");
     CheckMemory;
 
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     for(i=0;i<ntours;i++){
       int j;
       tourdata *touri;
@@ -294,7 +294,7 @@ void drawtours(void){
           char label[128];
           sprintf(label,"%8.2f",framej->disp_time+0.005);
           trimzeros(label);
-          output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
+          Output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
         }
       }
     }
@@ -429,7 +429,7 @@ void drawselect_tours(void){
           framej = touri->keyframe_list[j];
           eye = framej->nodeval.eye;
 
-          getrgb(color_index+1,&r,&g,&b);
+          GetRGB(color_index+1,&r,&g,&b);
           glColor3ub(r,g,b);
           glVertex3fv(eye);
         }

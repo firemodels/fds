@@ -743,7 +743,7 @@ void update_mouseinfo(int flag, int xm, int ym){
       }
       angleaxis2quat(delta_angle,axis,quat_temp);
       mult_quat(quat_temp,quat_general,quat_general);
-     // level_scene(0,1,quat_general);
+     // LevelScene(0,1,quat_general);
       quat2rot(quat_general,quat_rotation);
     }
   }
@@ -755,7 +755,7 @@ void update_mouseinfo(int flag, int xm, int ym){
     axis[2]=0.0;
     angleaxis2quat(-delta_angle2,axis,quat_temp);
     mult_quat(quat_temp,quat_general,quat_general);
-   // level_scene(0,1,quat_general);
+   // LevelScene(0,1,quat_general);
     quat2rot(quat_general,quat_rotation);
   }
 #ifdef _DEBUG
@@ -937,9 +937,9 @@ void Colorbar_SplitDrag(int xm, int ym){
     ii=current_colorbar->splits[0];
     current_colorbar->index_node[ii]=colorbar_index;
     current_colorbar->index_node[ii-1]=colorbar_index;
-    remapcolorbar(current_colorbar);
+    RemapColorbar(current_colorbar);
     UpdateRGBColors(COLORBAR_INDEX_NONE);
-    update_colorbar_splits(current_colorbar);
+    UpdateColorbarSplits(current_colorbar);
   }
 }
 
@@ -1877,7 +1877,7 @@ void keyboard(unsigned char key, int flag){
         DialogMenu(DIALOG_3DSMOKE); // 3d smoke dialog
         break;
       case GLUT_ACTIVE_CTRL:
-        snap_scene();
+        SnapScene();
         break;
       default:
         if(rotation_type==EYE_CENTERED){
@@ -2012,17 +2012,17 @@ void keyboard(unsigned char key, int flag){
       }
       break;
     case '~':
-      level_scene(1,1,quat_general);
+      LevelScene(1,1,quat_general);
       quat2rot(quat_general,quat_rotation);
       break;
     case '!':
-      snap_scene();
+      SnapScene();
       break;
     case '@':
       cell_center_text = 1 - cell_center_text;
       break;
     case '#':
-      writeini(LOCAL_INI,NULL);
+      WriteINI(LOCAL_INI,NULL);
       break;
     case '$':
       trainer_active=1-trainer_active;
@@ -2068,7 +2068,7 @@ void keyboard(unsigned char key, int flag){
       update_edit_tour();
       break;
     case ';':
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
   }
 
@@ -2740,7 +2740,7 @@ int DoStereo(void){
     nscreens = 1;
     if(render_mode == RENDER_360&&rendering_status==RENDER_ON){
       nscreens = nscreeninfo;
-      if (screeninfo == NULL || update_screeninfo == 1)setup_screeninfo();
+      if (screeninfo == NULL || update_screeninfo == 1)SetupScreeninfo();
     }
 
     for(i = 0; i < nscreens; i++){
@@ -2764,7 +2764,7 @@ int DoStereo(void){
         ShowScene(DRAWSCENE,VIEW_RIGHT,0,screenWidth,0,screeni);
         screenWidth=screenWidth_save;
       }
-      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = getscreenbuffer();
+      if(render_mode == RENDER_360 && rendering_status == RENDER_ON)screeni->screenbuffer = GetScreenBuffer();
       if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
     }
     if(rendering_status == RENDER_ON){
@@ -3040,7 +3040,7 @@ void Display_CB(void){
 
           for(j=0;j<nrender_cols;j++){
             ShowScene(DRAWSCENE,VIEW_CENTER,1,j*screenWidth,i*screenHeight,NULL);
-            screenbuffers[ibuffer++]=getscreenbuffer();
+            screenbuffers[ibuffer++]=GetScreenBuffer();
             if(buffertype==DOUBLE_BUFFER)glutSwapBuffers();
           }
         }
@@ -3057,14 +3057,14 @@ void Display_CB(void){
 
         glDrawBuffer(GL_BACK);
 
-        if (screeninfo == NULL||update_screeninfo==1)setup_screeninfo();
+        if (screeninfo == NULL||update_screeninfo==1)SetupScreeninfo();
 
         for(i = 0; i < nscreeninfo; i++){
           screendata *screeni;
 
           screeni = screeninfo + i;
           ShowScene(DRAWSCENE, VIEW_CENTER, 0, 0, 0, screeni);
-          screeni->screenbuffer = getscreenbuffer();
+          screeni->screenbuffer = GetScreenBuffer();
           if (buffertype == DOUBLE_BUFFER)glutSwapBuffers();
         }
         MergeRenderScreenBuffers360();

@@ -1323,7 +1323,7 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
 void update_partcolorbounds(partdata *parti){
   int j;
 
-  adjustpart5bounds(parti);
+  AdjustPart5Bounds(parti);
   if(colorlabelpart!=NULL){
     NewMemory((void **)&colorlabelpart, MAXRGB*sizeof(char *));
     {
@@ -1343,10 +1343,10 @@ void update_partcolorbounds(partdata *parti){
     partj = partinfo+j;
     if(partj->loaded==0||partj->display==0)continue;
     if(partj==parti){
-      getPart5Colors(partj, nrgb, PARTFILE_MAP);
+      GetPart5Colors(partj, nrgb, PARTFILE_MAP);
     }
     else{
-      getPart5Colors(partj, nrgb, PARTFILE_REMAP);
+      GetPart5Colors(partj, nrgb, PARTFILE_REMAP);
     }
   }
 }
@@ -1406,7 +1406,7 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
     update_partcolorbounds(parti);
     UpdateTimes();
     updatemenu=1;
-    updatePart5extremes();
+    UpdatePart5Extremes();
 #ifdef pp_MEMPRINT
     if(data_type==PARTDATA)PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
@@ -1475,7 +1475,7 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   ParticlePropShowMenu(part5colorindex);
   plotstate=GetPlotState(DYNAMIC_PLOTS);
   UpdateTimes();
-  updatePart5extremes();
+  UpdatePart5Extremes();
   updatemenu=1;
   Idle_CB();
 

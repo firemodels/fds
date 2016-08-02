@@ -30,9 +30,9 @@
 #define DEVICE_SPRK 3
 #define DEVICE_SMOKE 4
 
-/* ------------------ readhrr ------------------------ */
+/* ------------------ ReadHRR ------------------------ */
 #define LENBUFFER 1024
-void readhrr(int flag, int *errorcode){
+void ReadHRR(int flag, int *errorcode){
   FILE *HRRFILE;
   int ntimeshrr, nfirst;
   char buffer[LENBUFFER];
@@ -66,7 +66,7 @@ void readhrr(int flag, int *errorcode){
 
   HRRFILE = fopen(hrrinfo->file, "r");
   if(HRRFILE==NULL){
-    readhrr(UNLOAD, errorcode);
+    ReadHRR(UNLOAD, errorcode);
     return;
   }
 
@@ -111,9 +111,9 @@ void readhrr(int flag, int *errorcode){
   fclose(HRRFILE);
 }
 
-/* ------------------ init_prop ------------------------ */
+/* ------------------ InitProp ------------------------ */
 
-void init_prop(propdata *propi, int nsmokeview_ids, char *label){
+void InitProp(propdata *propi, int nsmokeview_ids, char *label){
   int nlabel;
 
   nlabel = strlen(label);
@@ -147,9 +147,9 @@ void init_prop(propdata *propi, int nsmokeview_ids, char *label){
   propi->draw_evac = 0;
 }
 
-/* ------------------ init_default_prop ------------------------ */
+/* ------------------ InitDefaultProp ------------------------ */
 
-void init_default_prop(void){
+void InitDefaultProp(void){
 /*
 PROP
  Human_props
@@ -176,7 +176,7 @@ PROP
 
   nsmokeview_ids=4;                                   // from input
 
-  init_prop(propi,nsmokeview_ids,proplabel);
+  InitProp(propi,nsmokeview_ids,proplabel);
   for(i=0;i<nsmokeview_ids;i++){
     if(i==0)strcpy(buffer,"human_fixed");             // from input
     if(i==1)strcpy(buffer,"human_altered_with_data"); // from input
@@ -259,9 +259,9 @@ PROP
   propi->ntextures=ntextures_local;
 }
 
-/* ------------------ update_inilist ------------------------ */
+/* ------------------ UpdateINIList ------------------------ */
 
-void update_inilist(void){
+void UpdateINIList(void){
   char filter[256];
   int i;
 
@@ -282,17 +282,17 @@ void update_inilist(void){
   }
 }
 
-/* ------------------ free_labels ------------------------ */
+/* ------------------ FreeLabels ------------------------ */
 
-void free_labels(flowlabels *flowlabel){
+void FreeLabels(flowlabels *flowlabel){
   FREEMEMORY(flowlabel->longlabel);
   FREEMEMORY(flowlabel->shortlabel);
   FREEMEMORY(flowlabel->unit);
 }
 
-/* ------------------ init_mesh ------------------------ */
+/* ------------------ InitMesh ------------------------ */
 
-void init_mesh(meshdata *meshi){
+void InitMesh(meshdata *meshi){
   meshi->ncutcells = 0;
   meshi->cutcells = NULL;
   meshi->slice_min[0] = 1.0;
@@ -513,9 +513,9 @@ void init_mesh(meshdata *meshi){
   meshi->select_max = 0;
 }
 
-/* ------------------ readsmv_dynamic ------------------------ */
+/* ------------------ ReadSMVDynamic ------------------------ */
 
-void readsmv_dynamic(char *file){
+void ReadSMVDynamic(char *file){
   FILE *stream;
   int ioffset;
   float time_local;
@@ -536,7 +536,7 @@ void readsmv_dynamic(char *file){
 
       plot3di = plot3dinfo + i;
       for(n=0;n<6;n++){
-        free_labels(&plot3di->label[n]);
+        FreeLabels(&plot3di->label[n]);
       }
       FREEMEMORY(plot3di->reg_file);
       FREEMEMORY(plot3di->comp_file);
@@ -1244,9 +1244,9 @@ void readsmv_dynamic(char *file){
 }
 
 
-/* ------------------ get_labels ------------------------ */
+/* ------------------ GetLabels ------------------------ */
 
-void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){
+void GetLabels(char *buffer, int kind, char **label1, char **label2, char prop_buffer[255]){
   char *tok0, *tok1, *tok2;
 
   tok0 = NULL;
@@ -1277,9 +1277,9 @@ void get_labels(char *buffer, int kind, char **label1, char **label2, char prop_
   if(label1 != NULL)*label1 = tok1;
 }
 
-/* ------------------ get_prop_id ------------------------ */
+/* ------------------ GetPropID ------------------------ */
 
-propdata *get_prop_id(char *prop_id){
+propdata *GetPropID(char *prop_id){
   int i;
 
   if(propinfo == NULL || prop_id == NULL || strlen(prop_id) == 0)return NULL;
@@ -1342,14 +1342,14 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
 
   sscanf(buffer,"%f %f %f %f %f %f %i %i %i",
     xyz,xyz+1,xyz+2,xyzn,xyzn+1,xyzn+2,&state0,&nparams,&nparams_textures);
-  get_labels(buffer,-1,&prop_id,NULL,prop_buffer);
-  devicei->prop=get_prop_id(prop_id);
+  GetLabels(buffer,-1,&prop_id,NULL,prop_buffer);
+  devicei->prop=GetPropID(prop_id);
   if(prop_id!=NULL&&devicei->prop!=NULL&&devicei->prop->smv_object!=NULL){
     devicei->object=devicei->prop->smv_object;
   }
   else{
     NewMemory((void **)&devicei->prop,sizeof(propdata));
-    init_prop(devicei->prop,1,devicei->label);
+    InitProp(devicei->prop,1,devicei->label);
     devicei->prop->smv_object=devicei->object;
     devicei->prop->smv_objects[0]=devicei->prop->smv_object;
   }
@@ -1396,7 +1396,7 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
     }
     init_device(devicei,xyz,xyzn,state0,nparams,params,labelptr);
   }
-  get_elevaz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
+  GetElevAz(devicei->xyznorm,&devicei->dtheta,devicei->rotate_axis,NULL);
   if(nparams_textures>0){
     fgets(buffer,255,stream);
     trim_commas(buffer);
@@ -1407,9 +1407,9 @@ void parse_device_keyword(FILE *stream, devicedata *devicei){
   }
 }
 
-/* ------------------ get_inpf ------------------------ */
+/* ------------------ GetInpf ------------------------ */
 
-int get_inpf(char *file, char *file2){
+int GetInpf(char *file, char *file2){
   FILE *stream=NULL,*stream1=NULL,*stream2=NULL;
   char buffer[255],*bufferptr;
   int len;
@@ -1488,9 +1488,9 @@ int get_inpf(char *file, char *file2){
   return 0;
 }
 
-/* ------------------ init_textures ------------------------ */
+/* ------------------ InitTextures ------------------------ */
 
-void init_textures(void){
+void InitTextures(void){
   // get texture filename from SURF and device info
   int i;
 
@@ -1576,7 +1576,7 @@ void init_textures(void){
       PRINTF("       Loading texture: %s",filename);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht,0);
+      floortex=ReadPicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
          PRINTF("%s",_(" - failed"));
          PRINTF("\n");
@@ -1732,7 +1732,7 @@ void init_textures(void){
     errorcode=1;
     if(tt->file!=NULL){
       PRINTF(": %s",tt->file);
-      floortex=readpicture(tt->file,&texwid,&texht,0);
+      floortex=ReadPicture(tt->file,&texwid,&texht,0);
     }
     if(floortex!=NULL){
       errorcode=gluBuild2DMipmaps(GL_TEXTURE_2D,4, texwid, texht, GL_RGBA, GL_UNSIGNED_BYTE, floortex);
@@ -1754,9 +1754,9 @@ void init_textures(void){
   PRINTF("     Surface texture loading completed\n");
 }
 
-/* ------------------ update_bound_info ------------------------ */
+/* ------------------ UpdateBoundInfo ------------------------ */
 
-void update_bound_info(void){
+void UpdateBoundInfo(void){
   int i,n;
 
   if(nisoinfo>0){
@@ -1877,9 +1877,9 @@ void update_bound_info(void){
   updatechar();
 }
 
-/* ------------------ update_endian_info ------------------------ */
+/* ------------------ UpdateEndianInfo ------------------------ */
 
-void update_endian_info(void){
+void UpdateEndianInfo(void){
   if(setendian==0){
     if(match(LESsystem,"AIX")==1||match(LESsystem,"SGI")==1||match(LESendian,"b")==1||match(LESendian,"B")==1){
       endian_data=1;
@@ -1927,9 +1927,9 @@ blocktype: 0 regular block non-textured
 r g b           colors used if colorindex==-3
 */
 
-/* ------------------ backup_blockage ------------------------ */
+/* ------------------ BackupBlockage ------------------------ */
 
-void backup_blockage(blockagedata *bc){
+void BackupBlockage(blockagedata *bc){
   int i;
 
   bc->xyzORIG[0] = bc->xmin;
@@ -1950,9 +1950,9 @@ void backup_blockage(blockagedata *bc){
   }
 }
 
-/* ------------------ update_mesh_coords ------------------------ */
+/* ------------------ UpdateMeshCoords ------------------------ */
 
-void update_mesh_coords(void){
+void UpdateMeshCoords(void){
   int nn, i,n;
   float dxsbar, dysbar, dzsbar;
   int factor;
@@ -2357,7 +2357,7 @@ void update_mesh_coords(void){
       blockagedata *bc;
 
       bc=meshi->blockageinfoptrs[i];
-      backup_blockage(bc);
+      BackupBlockage(bc);
     }
   }
 
@@ -2375,7 +2375,7 @@ void update_mesh_coords(void){
         NORMALIZE_XYZ(quadi->xyzpoints+3*k,quadi->xyzpoints+3*k);
       }
       if(cd->version==2&&quadi->cadlookq->textureinfo.loaded==1){
-        update_cadtextcoords(quadi);
+        UpdateCADTextCoords(quadi);
       }
     }
   }
@@ -2478,9 +2478,9 @@ void update_mesh_coords(void){
   }
 }
 
-/* ------------------ is_slice_dup ------------------------ */
+/* ------------------ IsSliceDup ------------------------ */
 
-int is_slice_dup(slicedata *sd){
+int IsSliceDup(slicedata *sd){
   int i;
 
   if(sd->is1<0||sd->is2<0)return 0;
@@ -2506,9 +2506,9 @@ int is_slice_dup(slicedata *sd){
   return 0;
 }
 
-/* ------------------ create_nulllabel ------------------------ */
+/* ------------------ CreateNullLabel ------------------------ */
 
-int create_nulllabel(flowlabels *flowlabel){
+int CreateNullLabel(flowlabels *flowlabel){
   char buffer[255];
   size_t len;
 
@@ -2538,9 +2538,9 @@ int create_nulllabel(flowlabels *flowlabel){
   return 0;
 }
 
-/* ------------------ get_surface ------------------------ */
+/* ------------------ GetSurface ------------------------ */
 
-surfdata *get_surface(char *label){
+surfdata *GetSurface(char *label){
   int i;
 
   for(i = 0; i < nsurfinfo; i++){
@@ -2552,9 +2552,9 @@ surfdata *get_surface(char *label){
   return surfacedefault;
 }
 
-/* ------------------ init_evac_prop ------------------------ */
+/* ------------------ InitEvacProp ------------------------ */
 
-void init_evac_prop(void){
+void InitEvacProp(void){
   char label[256];
   char *smokeview_id;
   int nsmokeview_ids;
@@ -2564,7 +2564,7 @@ void init_evac_prop(void){
   NewMemory((void **)&prop_evacdefault, sizeof(propdata));
   nsmokeview_ids = 1;
 
-  init_prop(prop_evacdefault, nsmokeview_ids, label);
+  InitProp(prop_evacdefault, nsmokeview_ids, label);
 
 
   NewMemory((void **)&smokeview_id, 6 + 1);
@@ -2578,16 +2578,16 @@ void init_evac_prop(void){
   prop_evacdefault->ntextures = 0;
 }
 
-/* ------------------ init_matl ------------------------ */
+/* ------------------ InitMatl ------------------------ */
 
-void init_matl(matldata *matl){
+void InitMatl(matldata *matl){
   matl->matllabel = NULL;
   matl->color = block_ambient2;
 }
 
-/* ------------------ initobst ------------------------ */
+/* ------------------ InitObst ------------------------ */
 
-void init_obst(blockagedata *bc, surfdata *surf, int index, int meshindex){
+void InitObst(blockagedata *bc, surfdata *surf, int index, int meshindex){
   int colorindex, blocktype;
   int i;
   char blocklabel[255];
@@ -2660,9 +2660,9 @@ void init_obst(blockagedata *bc, surfdata *surf, int index, int meshindex){
   strcpy(bc->label, blocklabel);
 }
 
-/* ------------------ init_surface ------------------------ */
+/* ------------------ InitSurface ------------------------ */
 
-void init_surface(surfdata *surf){
+void InitSurface(surfdata *surf){
   surf->iso_level = -1;
   surf->used_by_obst = 0;
   surf->used_by_vent = 0;
@@ -2681,9 +2681,9 @@ void init_surface(surfdata *surf){
   surf->transparent = 0;
 }
 
-/* ------------------ init_ventsurface ------------------------ */
+/* ------------------ InitVentSurface ------------------------ */
 
-void init_ventsurface(surfdata *surf){
+void InitVentSurface(surfdata *surf){
   surf->emis = 1.0;
   surf->temp_ignition = TEMP_IGNITION_MAX;
   surf->surfacelabel = NULL;
@@ -2697,10 +2697,10 @@ void init_ventsurface(surfdata *surf){
 
 }
 
-/* ----------------------- read_device_header ----------------------------- */
+/* ----------------------- ReadDeviceHeader ----------------------------- */
 #define BUFFER_LEN 255
 
-void read_device_header(char *file, devicedata *devices, int ndevices){
+void ReadDeviceHeader(char *file, devicedata *devices, int ndevices){
   FILE *stream;
   devicedata *devicecopy;
   char buffer[BUFFER_LEN], *comma;
@@ -2728,9 +2728,9 @@ void read_device_header(char *file, devicedata *devices, int ndevices){
   fclose(stream);
 }
 
-/* ------------------ set_surfaceindex ------------------------ */
+/* ------------------ SetSurfaceIndex ------------------------ */
 
-void set_surfaceindex(blockagedata *bc){
+void SetSurfaceIndex(blockagedata *bc){
   int i, j, jj;
   surfdata *surfj;
   char *surflabel, *bclabel;
@@ -2778,9 +2778,9 @@ void set_surfaceindex(blockagedata *bc){
 
 }
 
-/* ------------------ surfid_compare ------------------------ */
+/* ------------------ SurfIdCompare ------------------------ */
 
-int surfid_compare(const void *arg1, const void *arg2){
+int SurfIdCompare(const void *arg1, const void *arg2){
   surfdata *surfi, *surfj;
   int i, j;
 
@@ -2795,7 +2795,7 @@ int surfid_compare(const void *arg1, const void *arg2){
 
 /* ------------------ updated_sorted_surfidlist ------------------------ */
 
-void update_sorted_surfidlist(void){
+void UpdateSortedSurfIdList(void){
   int i;
 
   FREEMEMORY(sorted_surfidlist);
@@ -2809,15 +2809,15 @@ void update_sorted_surfidlist(void){
     sorted_surfidlist[i] = i;
   }
 
-  qsort((int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), surfid_compare);
+  qsort((int *)sorted_surfidlist, (size_t)nsurfinfo, sizeof(int), SurfIdCompare);
   for(i = 0; i<nsorted_surfidlist; i++){
     inv_sorted_surfidlist[sorted_surfidlist[i]] = i;
   }
 }
 
-/* ------------------ parse_database ------------------------ */
+/* ------------------ ParseDatabase ------------------------ */
 
-void parse_database(char *file){
+void ParseDatabase(char *file){
   FILE *stream;
   char buffer[1000], *buffer2 = NULL, *buffer3, *slashptr;
   size_t lenbuffer, lenbuffer2;
@@ -3000,17 +3000,17 @@ void parse_database(char *file){
     for(j = 0; j<nsurfids; j++){
       if(surfids[j].show==0)continue;
       surfj++;
-      init_surface(surfj);
+      InitSurface(surfj);
       surfj->surfacelabel = surfids[j].label;
     }
     nsurfinfo += nsurfids_shown;
   }
-  update_sorted_surfidlist();
+  UpdateSortedSurfIdList();
 }
 
-/* ------------------ readsmv ------------------------ */
+/* ------------------ ReadSMV ------------------------ */
 
-int readsmv(char *file, char *file2){
+int ReadSMV(char *file, char *file2){
 
 /* read the .smv file */
 
@@ -3129,15 +3129,15 @@ int readsmv(char *file, char *file2){
   nrooms=0;
 
   if(file!=NULL){
-    init_surface(&sdefault);
+    InitSurface(&sdefault);
     NewMemory((void **)&sdefault.surfacelabel,(5+1));
     strcpy(sdefault.surfacelabel,"INERT");
 
-    init_ventsurface(&v_surfacedefault);
+    InitVentSurface(&v_surfacedefault);
     NewMemory((void **)&v_surfacedefault.surfacelabel,(4+1));
     strcpy(v_surfacedefault.surfacelabel,"VENT");
 
-    init_surface(&e_surfacedefault);
+    InitSurface(&e_surfacedefault);
     NewMemory((void **)&e_surfacedefault.surfacelabel,(8+1));
     strcpy(e_surfacedefault.surfacelabel,"EXTERIOR");
     e_surfacedefault.color=mat_ambient2;
@@ -3158,7 +3158,7 @@ int readsmv(char *file, char *file2){
           flowlabels *labelj;
 
           labelj = partclassi->labels+j;
-          free_labels(labelj);
+          FreeLabels(labelj);
         }
         FREEMEMORY(partclassi->labels);
         partclassi->ntypes=0;
@@ -3184,7 +3184,7 @@ int readsmv(char *file, char *file2){
 
   // get input file name
 
-    return_code=get_inpf(file,file2);
+    return_code=GetInpf(file,file2);
     if(return_code!=0)return return_code;
   }
 
@@ -3211,7 +3211,7 @@ int readsmv(char *file, char *file2){
 
       zonei = zoneinfo + i;
       for(n=0;n<4;n++){
-        free_labels(&zonei->label[n]);
+        FreeLabels(&zonei->label[n]);
       }
       FREEMEMORY(zonei->file);
     }
@@ -3253,7 +3253,7 @@ int readsmv(char *file, char *file2){
     for(i=0;i<nsliceinfo;i++){
       slicedata *sd;
       sd = sliceinfo + i;
-      free_labels(&sliceinfo[i].label);
+      FreeLabels(&sliceinfo[i].label);
       FREEMEMORY(sd->reg_file);
       FREEMEMORY(sd->comp_file);
       FREEMEMORY(sd->size_file);
@@ -3290,7 +3290,7 @@ int readsmv(char *file, char *file2){
       patchdata *patchi;
 
       patchi = patchinfo + i;
-      free_labels(&patchi->label);
+      FreeLabels(&patchi->label);
       FREEMEMORY(patchi->reg_file);
       FREEMEMORY(patchi->comp_file);
       FREEMEMORY(patchi->size_file);
@@ -3301,14 +3301,14 @@ int readsmv(char *file, char *file2){
 
   if(nisoinfo>0){
     for(i=0;i<nisoinfo;i++){
-      free_labels(&isoinfo[i].surface_label);
+      FreeLabels(&isoinfo[i].surface_label);
       FREEMEMORY(isoinfo[i].file);
     }
     FREEMEMORY(isoinfo);
   }
   nisoinfo=0;
 
-  freecadinfo();
+  FreeCADInfo();
 
   updateindexcolors=0;
   ntrnx=0;
@@ -3354,7 +3354,7 @@ int readsmv(char *file, char *file2){
   FREEMEMORY(surfinfo);
   FREEMEMORY(terrain_texture);
 
-  if(cadgeominfo!=NULL)freecadinfo();
+  if(cadgeominfo!=NULL)FreeCADInfo();
 
   if(file==NULL){
     initvars();
@@ -3859,7 +3859,7 @@ int readsmv(char *file, char *file2){
    partclassi->labels=NULL;
 
    NewMemory((void **)&partclassi->labels,sizeof(flowlabels));
-   create_nulllabel(partclassi->labels);
+   CreateNullLabel(partclassi->labels);
 
    npartclassinfo=0;
 
@@ -4039,7 +4039,7 @@ int readsmv(char *file, char *file2){
     FREEMEMORY(matlinfo);
     if(NewMemory((void **)&matlinfo,nmatlinfo*sizeof(matldata))==0)return 2;
     matli = matlinfo;
-    init_matl(matli);
+    InitMatl(matli);
     s_color[0]=matli->color[0];
     s_color[1]=matli->color[1];
     s_color[2]=matli->color[2];
@@ -4047,7 +4047,7 @@ int readsmv(char *file, char *file2){
     matli->color = getcolorptr(s_color);
   }
 
-  if(cadgeominfo!=NULL)freecadinfo();
+  if(cadgeominfo!=NULL)FreeCADInfo();
   if(ncadgeom>0){
     if(NewMemory((void **)&cadgeominfo,ncadgeom*sizeof(cadgeomdata))==0)return 2;
   }
@@ -4074,7 +4074,7 @@ int readsmv(char *file, char *file2){
 
   if(npropinfo>0){
     npropinfo=0;
-    init_default_prop();
+    InitDefaultProp();
     npropinfo=1;
   }
 
@@ -4311,7 +4311,7 @@ int readsmv(char *file, char *file2){
             if(surflabel!=NULL){
               trim_back(surflabel);
               surflabel=trim_front(surflabel+1);
-              geomi->surf=get_surface(surflabel);
+              geomi->surf=GetSurface(surflabel);
             }
           }
 
@@ -4397,7 +4397,7 @@ int readsmv(char *file, char *file2){
       }
       sscanf(buffer,"%i",&nsmokeview_ids);
 
-      init_prop(propi,nsmokeview_ids,fbuffer);
+      InitProp(propi,nsmokeview_ids,fbuffer);
       for(i=0;i<nsmokeview_ids;i++){
         if(fgets(buffer,255,stream)==NULL){
           BREAK; // smokeview_id
@@ -4530,7 +4530,7 @@ int readsmv(char *file, char *file2){
       if(match(buffer,"CLASS_OF_HUMANS") == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
 
-      get_labels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
+      GetLabels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
       if(prop_id!=NULL){
         device_ptr=NULL;
       }
@@ -4717,7 +4717,7 @@ int readsmv(char *file, char *file2){
         rgbtemp[0]=frgbtemp[0]*255;
         rgbtemp[1]=frgbtemp[1]*255;
         rgbtemp[2]=frgbtemp[2]*255;
-        LABEL_insert(labeli);
+        LabelInsert(labeli);
       }
       continue;
     }
@@ -4875,7 +4875,7 @@ int readsmv(char *file, char *file2){
         STRCPY(cadgeominfo[ncadgeom].file,bufferptr);
         PRINTF("%s %s",_("     reading cad file: "),bufferptr);
         PRINTF("%s\n",bufferptr);
-        readcadgeom(cadgeominfo+ncadgeom);
+        ReadCADGeom(cadgeominfo+ncadgeom);
         PRINTF("     CAD file reading completed\n");
         ncadgeom++;
       }
@@ -5058,7 +5058,7 @@ int readsmv(char *file, char *file2){
       char *buffer3;
 
       surfi = surfinfo + nsurfinfo;
-      init_surface(surfi);
+      InitSurface(surfi);
       fgets(buffer,255,stream);
       trim_back(buffer);
       len=strlen(buffer);
@@ -5153,7 +5153,7 @@ int readsmv(char *file, char *file2){
       int len;
 
       matli = matlinfo + nmatlinfo;
-      init_matl(matli);
+      InitMatl(matli);
 
       fgets(buffer,255,stream);
       trim_back(buffer);
@@ -5201,7 +5201,7 @@ int readsmv(char *file, char *file2){
       igrid++;
       if(meshinfo!=NULL){
         meshi=meshinfo+igrid-1;
-        init_mesh(meshi);
+        InitMesh(meshi);
         {
           size_t len_meshlabel;
           char *meshlabel;
@@ -5397,7 +5397,7 @@ int readsmv(char *file, char *file2){
   PRINTF("\n");
 
   CheckMemory;
-  parse_database(database_filename);
+  ParseDatabase(database_filename);
 
 
   if(setGRID==0){
@@ -5430,7 +5430,7 @@ int readsmv(char *file, char *file2){
       zp[nn]=zbar0+(float)nn*(zbar-zbar0)/(float)kbartemp;
     }
     meshi=meshinfo;
-    init_mesh(meshi);
+    InitMesh(meshi);
     meshi->xplt=xp;
     meshi->yplt=yp;
     meshi->zplt=zp;
@@ -5623,7 +5623,7 @@ int readsmv(char *file, char *file2){
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,thcp_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+          GetElevAz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
           init_device(devicecopy,xyz,xyznorm,0,0,NULL,"target");
           devicecopy->prop=NULL;
@@ -5700,7 +5700,7 @@ int readsmv(char *file, char *file2){
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,sprinkler_upright_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+          GetElevAz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
 
@@ -5778,7 +5778,7 @@ int readsmv(char *file, char *file2){
           else{
             devicecopy->object = get_SVOBJECT_type(device_label,heat_detector_object_backup);
           }
-          get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+          GetElevAz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
           init_device(devicecopy,NULL,xyznorm,0,0,NULL,NULL);
           devicecopy->prop=NULL;
@@ -5837,7 +5837,7 @@ int readsmv(char *file, char *file2){
         else{
           devicecopy->object = get_SVOBJECT_type(device_label,smoke_detector_object_backup);
         }
-        get_elevaz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
+        GetElevAz(xyznorm,&devicecopy->dtheta,devicecopy->rotate_axis,NULL);
 
         init_device(devicecopy,xyz,xyznorm,0,0,NULL,NULL);
 
@@ -5886,7 +5886,7 @@ int readsmv(char *file, char *file2){
 
       csvi = csvinfo + i;
       if(csvi->type==CSVTYPE_EXT){
-        read_device_header(csvi->file,devicecopy2,nexp_devices[i]);
+        ReadDeviceHeader(csvi->file,devicecopy2,nexp_devices[i]);
         devicecopy2 += nexp_devices[i];
       }
     }
@@ -5900,7 +5900,7 @@ int readsmv(char *file, char *file2){
   if(nsurfinfo>0||ndevice_texture_list>0){
     if(NewMemory((void **)&textureinfo,(nsurfinfo+ndevice_texture_list)*sizeof(texturedata))==0)return 2;
   }
-  init_textures();
+  InitTextures();
 
 /*
     Initialize blockage labels and blockage surface labels
@@ -5995,8 +5995,8 @@ int readsmv(char *file, char *file2){
       if(match(buffer,"CLASS_OF_HUMANS") == 1)partclassi->kind=HUMANS;
       fgets(buffer,255,stream);
 
-      get_labels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
-      partclassi->prop=get_prop_id(prop_id);
+      GetLabels(buffer,partclassi->kind,&device_ptr,&prop_id,prop_buffer);
+      partclassi->prop=GetPropID(prop_id);
       update_partclass_depend(partclassi);
 
       npartclassinfo++;
@@ -6497,7 +6497,7 @@ typedef struct {
         meshi->blockageinfoptrs[nn]=NULL;
         NewMemory((void **)&meshi->blockageinfoptrs[nn],sizeof(blockagedata));
         bc=meshi->blockageinfoptrs[nn];
-        init_obst(bc,surfacedefault,nn+1,iobst-1);
+        InitObst(bc,surfacedefault,nn+1,iobst-1);
         fgets(buffer,255,stream);
         trim_back(buffer);
         for(i=0;i<6;i++){
@@ -6565,7 +6565,7 @@ typedef struct {
         for(i=0;i<6;i++){
           bc->surf[i]->used_by_obst=1;
         }
-        set_surfaceindex(bc);
+        SetSurfaceIndex(bc);
       }
 
       nn=-1;
@@ -7658,7 +7658,7 @@ typedef struct {
         meshi = meshinfo + blocknumber;
         sd->mesh_type=meshi->mesh_type;
       }
-      if(is_slice_dup(sd)==1){
+      if(IsSliceDup(sd)==1){
         FREEMEMORY(sd->reg_file);
         FREEMEMORY(sd->comp_file);
         FREEMEMORY(sd->vol_file);
@@ -8215,17 +8215,17 @@ typedef struct {
   update_isocolors();
   CheckMemory;
 
-  //remove_dup_blockages();
+  //RemoveDupBlockages();
   initcullgeom(cullgeom);
-  init_evac_prop();
+  InitEvacProp();
 
-  update_inilist();
+  UpdateINIList();
 
   if(meshinfo!=NULL&&meshinfo->jbar==1)force_isometric=1;
 
 // update csv data
 
-  if(hrr_csv_filename!=NULL)readhrr(LOAD, &errorcode);
+  if(hrr_csv_filename!=NULL)ReadHRR(LOAD, &errorcode);
   read_device_data(NULL,CSV_FDS,UNLOAD);
   read_device_data(NULL,CSV_EXP,UNLOAD);
   for(i=0;i<ncsvinfo;i++){
@@ -8251,7 +8251,7 @@ typedef struct {
   else{
     highlight_flag=1;
   }
-  initcadcolors();
+  InitCadColors();
 
   // update loaded lists
 
@@ -8263,14 +8263,14 @@ typedef struct {
   if(npatchinfo>0){
     NewMemory((void **)&patch_loaded_list,npatchinfo*sizeof(int));
   }
-  update_loaded_lists();
+  UpdateLoadedLists();
 
-  update_mesh_coords();
+  UpdateMeshCoords();
 
   /*
     Associate a surface with each block.
   */
-  update_usetextures();
+  UpdateUseTextures();
 
   /* compute global bar's and box's */
 
@@ -8344,9 +8344,9 @@ typedef struct {
   xcenCUSTOM=xbar/2.0;  ycenCUSTOM=ybar/2.0; zcenCUSTOM=zbar/2.0;
   glui_rotation_index = nmeshes;
 
-  update_endian_info();
+  UpdateEndianInfo();
 
-  update_bound_info();
+  UpdateBoundInfo();
 
   update_object_used();
 
@@ -8356,7 +8356,7 @@ typedef struct {
   if(stream2!=NULL)fclose(stream2);
   stream=NULL;
 
-  update_selectfaces();
+  UpdateSelectFaces();
   updateslicetypes();
   updatesliceboundlabels();
   updateisotypes();
@@ -8389,7 +8389,7 @@ typedef struct {
   update_iso_menulabels();
   update_part_menulabels();
   update_tour_menulabels();
-  init_user_ticks();
+  InitUserTicks();
   clip_I=ibartemp; clip_J=jbartemp; clip_K=kbartemp;
 
   // define changed_idlist used for blockage editing
@@ -8437,9 +8437,9 @@ typedef struct {
   return 0;
 }
 
-/* ------------------ update_usetextures ------------------------ */
+/* ------------------ UpdateUseTextures ------------------------ */
 
-void update_usetextures(void){
+void UpdateUseTextures(void){
   int i;
 
   for(i=0;i<ntextures;i++){
@@ -8533,9 +8533,9 @@ void update_usetextures(void){
   }
 }
 
-/* ------------------ readini2 ------------------------ */
+/* ------------------ ReadINI2 ------------------------ */
 
-int readini2(char *inifile, int localfile){
+int ReadINI2(char *inifile, int localfile){
   int i;
   FILE *stream;
 
@@ -8554,7 +8554,7 @@ int readini2(char *inifile, int localfile){
   nunitclasses_ini = 0;
 
   if(localfile == 1){
-    update_inilist();
+    UpdateINIList();
   }
 
   PRINTF("%s", _("processing config file: "));
@@ -9048,7 +9048,7 @@ int readini2(char *inifile, int localfile){
       label = strchr(buffer, '%');
       if(label == NULL){
         sscanf(buffer, "%i", &colorbartype);
-        remap_colorbartype(colorbartype, colorbarname);
+        RemapColorbarType(colorbartype, colorbarname);
       }
       else{
         label++;
@@ -9798,7 +9798,7 @@ int readini2(char *inifile, int localfile){
         sscanf(buffer, "%f %f %f ", rgb_ini_copy, rgb_ini_copy + 1, rgb_ini_copy + 2);
         rgb_ini_copy += 3;
       }
-      initrgb();
+      InitRGB();
       if(colorbar_select_index >= 0 && colorbar_select_index <= 255){
         update_colorbar_select_index = 1;
       }
@@ -10935,7 +10935,7 @@ int readini2(char *inifile, int localfile){
         ncolorbarini = 0;
         sscanf(buffer, "%i", &ncolorbarini);
 
-        initdefaultcolorbars();
+        InitDefaultColorbars();
 
         ncolorbars = ndefaultcolorbars + ncolorbarini;
         if(ncolorbarini>0)ResizeMemory((void **)&colorbarinfo, ncolorbars*sizeof(colorbardata));
@@ -10970,7 +10970,7 @@ int readini2(char *inifile, int localfile){
             cbi->rgb_node[nn + 1] = g1;
             cbi->rgb_node[nn + 2] = b1;
           }
-          remapcolorbar(cbi);
+          RemapColorbar(cbi);
         }
       }
 
@@ -11090,7 +11090,7 @@ int readini2(char *inifile, int localfile){
         trim_back(buffer);
         bufferptr = trim_front(buffer);
         strcpy(labeli->name, bufferptr);
-        LABEL_insert(labeli);
+        LabelInsert(labeli);
         continue;
       }
 
@@ -11348,9 +11348,9 @@ int readini2(char *inifile, int localfile){
 
 }
 
-/* ------------------ readini ------------------------ */
+/* ------------------ ReadINI ------------------------ */
 
-int readini(char *inifile){
+int ReadINI(char *inifile){
   char smvprogini[1024];
   char *smvprogini_ptr=NULL;
 
@@ -11384,20 +11384,20 @@ int readini(char *inifile){
   // smokeview.ini ini in install directory
 
   if(smvprogini_ptr!=NULL){
-    if(readini2(smvprogini_ptr,0)==2)return 2;
+    if(ReadINI2(smvprogini_ptr,0)==2)return 2;
     update_terrain_options();
   }
 
   // smokeview.ini in case directory
 
   if(INIfile!=NULL){
-    if(readini2(INIfile,0)==2)return 2;
+    if(ReadINI2(INIfile,0)==2)return 2;
   }
 
   // read in casename.ini
 
   if(caseini_filename!=NULL){
-    if(readini2(caseini_filename,1)==2)return 2;
+    if(ReadINI2(caseini_filename,1)==2)return 2;
   }
 
   // read in ini file specified in script
@@ -11405,7 +11405,7 @@ int readini(char *inifile){
   if(inifile!=NULL){
     int return_code;
 
-    return_code = readini2(inifile,1);
+    return_code = ReadINI2(inifile,1);
 
     if(return_code==1||return_code==2){
       if(inifile==NULL){
@@ -11422,16 +11422,16 @@ int readini(char *inifile){
   updateglui();
   if(showall_textures==1)TextureShowMenu(MENU_TEXTURE_SHOWALL);
   if(ncolorbars<=ndefaultcolorbars){
-    initdefaultcolorbars();
+    InitDefaultColorbars();
   }
   updatezoommenu=1;
   getsliceparams2();
   return 0;
 }
 
-/* ------------------ output_viewpoints ------------------------ */
+/* ------------------ OutputViewpoints ------------------------ */
 
-void output_viewpoints(FILE *fileout){
+void OutputViewpoints(FILE *fileout){
   float *eye, *az_elev, *mat;
   cameradata *ca;
 
@@ -11475,9 +11475,9 @@ void output_viewpoints(FILE *fileout){
   }
 }
 
-  /* ------------------ writeini_local ------------------------ */
+  /* ------------------ WriteINILocal ------------------------ */
 
-void writeini_local(FILE *fileout){
+void WriteINILocal(FILE *fileout){
   int i;
   int ndevice_vis = 0;
   sv_object *obj_typei;
@@ -11879,9 +11879,9 @@ void writeini_local(FILE *fileout){
 
 }
 
-  /* ------------------ writeini ------------------------ */
+  /* ------------------ WriteINI ------------------------ */
 
-void writeini(int flag,char *filename){
+void WriteINI(int flag,char *filename){
   FILE *fileout=NULL;
   int i;
 
@@ -12530,10 +12530,10 @@ void writeini(int flag,char *filename){
   fprintf(fileout," %i\n",viewtourfrompath);
 
 
-  if(flag == LOCAL_INI)writeini_local(fileout);
+  if(flag == LOCAL_INI)WriteINILocal(fileout);
   if(
     ((INI_fds_filein != NULL&&fds_filein != NULL&&strcmp(INI_fds_filein, fds_filein) == 0) ||
-    flag == LOCAL_INI))output_viewpoints(fileout);
+    flag == LOCAL_INI))OutputViewpoints(fileout);
 
   {
     char version[256];
@@ -12595,9 +12595,9 @@ void writeini(int flag,char *filename){
   if(fileout!=stdout)fclose(fileout);
 }
 
-/* ------------------ update_loaded_lists ------------------------ */
+/* ------------------ UpdateLoadedLists ------------------------ */
 
-void update_loaded_lists(void){
+void UpdateLoadedLists(void){
   int i;
   slicedata *slicei;
   patchdata *patchi;
@@ -12622,9 +12622,9 @@ void update_loaded_lists(void){
 
 }
 
-/* ------------------ get_elevaz ------------------------ */
+/* ------------------ GetElevAz ------------------------ */
 
-void get_elevaz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
+void GetElevAz(float *xyznorm,float *dtheta,float *rotate_axis, float *dpsi){
 
   // cos(dtheta) = (xyznorm .dot. vec3(0,0,1))/||xyznorm||
   // rotate_axis = xyznorm .cross. vec3(0,0,1)

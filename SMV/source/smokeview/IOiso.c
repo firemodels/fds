@@ -144,7 +144,7 @@ void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr, int *nv
   }
   FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axislabels_smooth==1){
-    smoothlabel(tmin_local,tmax_local,nrgb);
+    SmoothLabel(tmin_local,tmax_local,nrgb);
   }
 }
 
@@ -1053,7 +1053,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
   int TransparentOn_flag=0;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1455,7 +1455,7 @@ void setisolabels(float smin, float smax,
   *errorcode=0;
   PRINTF("setting up iso labels \n");
   scale=sb->scale;
-  getIsoLabels(smin,smax,nrgb,
+  GetIsoLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
 

@@ -6,9 +6,9 @@
 
 #include "smokeviewvars.h"
 
-/* ------------------ outputAxisLabels ------------------------ */
+/* ------------------ OutputAxisLabels ------------------------ */
 
-void outputAxisLabels(){
+void OutputAxisLabels(){
   float x, y, z;
   float x0, y0, z0;
 
@@ -23,16 +23,16 @@ void outputAxisLabels(){
   y0 = ybar0 - SCALE2FDS(0.02);
   z0 = zbar0 - SCALE2FDS(0.02);
 
-  output3Text(foregroundcolor,   x,y0, z0, "X");
-  output3Text(foregroundcolor, x0,  y, z0, "Y");
-  output3Text(foregroundcolor, x0,y0,   z, "Z");
+  Output3Text(foregroundcolor,   x,y0, z0, "X");
+  Output3Text(foregroundcolor, x0,  y, z0, "Y");
+  Output3Text(foregroundcolor, x0,y0,   z, "Z");
 
   glPopMatrix();
 }
 
-/* ------------------ outputSText3 ------------------------ */
+/* ------------------ OutputSText3 ------------------------ */
 
-void outputSText3(float x, float y, float z, char *string){
+void OutputSText3(float x, float y, float z, char *string){
   char *c;
   float u[3]={0.0,0.0,1.0},v[3];
   float axis[3],angle,theta;
@@ -66,9 +66,9 @@ void outputSText3(float x, float y, float z, char *string){
 }
 
 
-/* ------------------ outputSText2r ------------------------ */
+/* ------------------ OutputSText2r ------------------------ */
 
-void outputSText2r(float x, float y, float z, char *string){
+void OutputSText2r(float x, float y, float z, char *string){
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -93,9 +93,9 @@ void outputSText2r(float x, float y, float z, char *string){
   glPopMatrix();
 }
 
-/* ------------------ outputSText2 ------------------------ */
+/* ------------------ OutputSText2 ------------------------ */
 
-void outputSText2(float x, float y, float z, char *string){
+void OutputSText2(float x, float y, float z, char *string){
   char *c;
   int total_width=0;
   float scale_x, scale_y;
@@ -121,27 +121,27 @@ void outputSText2(float x, float y, float z, char *string){
   glPopMatrix();
 }
 
-/* ------------------ output3Val ------------------------ */
+/* ------------------ Output3Val ------------------------ */
 
-void output3Val(float x, float y, float z, float val){
+void Output3Val(float x, float y, float z, float val){
   char string[256];
 
   sprintf(string,"%f",val);
   trimzeros(string);
-  output3Text(foregroundcolor,x,y,z,string);
+  Output3Text(foregroundcolor,x,y,z,string);
 }
 
-/* ------------------ output3Text ------------------------ */
+/* ------------------ Output3Text ------------------------ */
 
-void output3Text(float *color, float x, float y, float z, char *string){
+void Output3Text(float *color, float x, float y, float z, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(color);
 
   if(fontindex==SCALED_FONT){
-    scale_3dfont();
-    outputSText3(x,y,z,string);
+    ScaleFont3D();
+    OutputSText3(x,y,z,string);
   }
   else{
     glRasterPos3f(x, y, z);
@@ -151,9 +151,9 @@ void output3Text(float *color, float x, float y, float z, char *string){
   }
 }
 
-/* ------------------ outputLargeText ------------------------ */
+/* ------------------ OutputLargeText ------------------------ */
 
-void outputLargeText(float x, float y, char *string){
+void OutputLargeText(float x, float y, char *string){
   char *c;
 
   if(string==NULL)return;
@@ -164,16 +164,16 @@ void outputLargeText(float x, float y, char *string){
   }
 }
 
-/* ------------------ outputText ------------------------ */
+/* ------------------ OutputText ------------------------ */
 
-void outputText(float x, float y, char *string){
+void OutputText(float x, float y, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(foregroundcolor);
   if(fontindex==SCALED_FONT){
-    scale_2dfont();
-    outputSText2(x,y,0.0,string);
+    ScaleFont2D();
+    OutputSText2(x,y,0.0,string);
     return;
   }
   else{
@@ -184,17 +184,17 @@ void outputText(float x, float y, char *string){
   }
 }
 
-/* ------------------ outputBarText ------------------------ */
+/* ------------------ OutputBarText ------------------------ */
 
-void outputBarText(float x, float y, const GLfloat *color, char *string){
+void OutputBarText(float x, float y, const GLfloat *color, char *string){
   char *c;
 
   if(string==NULL)return;
   glColor3fv(color);
 
   if(fontindex==SCALED_FONT){
-    scale_2dfont();
-    outputSText2(x,y,0.0,string);
+    ScaleFont2D();
+    OutputSText2(x,y,0.0,string);
   }
   else{
     glRasterPos2f(x, y);
@@ -204,9 +204,9 @@ void outputBarText(float x, float y, const GLfloat *color, char *string){
   }
 }
 
-/* ------------------ drawLabels ------------------------ */
+/* ------------------ DrawLabels ------------------------ */
 
-void drawLabels(void){
+void DrawLabels(void){
   labeldata *thislabel;
 
   glPushMatrix();
@@ -231,7 +231,7 @@ void drawLabels(void){
       if(drawlabel==0&&global_times[itimes]>=tstart_stop[0]-0.05&&global_times[itimes]<=tstart_stop[1]+0.05)drawlabel=1;
     }
     if(drawlabel==1){
-      output3Text(labelcolor,xyz[0],xyz[1],xyz[2],thislabel->name);
+      Output3Text(labelcolor,xyz[0],xyz[1],xyz[2],thislabel->name);
       if(thislabel->show_tick==1){
         float *xyztick, *xyztickdir;
         float xb[3], xe[3];
@@ -256,9 +256,9 @@ void drawLabels(void){
   glPopMatrix();
 }
 
-/* ------------------ LABEL_Next ------------------------ */
+/* ------------------ LabelNext ------------------------ */
 
-labeldata *LABEL_Next(labeldata *label){
+labeldata *LabelNext(labeldata *label){
   labeldata *thislabel;
 
   if(label==NULL)return NULL;
@@ -271,9 +271,9 @@ labeldata *LABEL_Next(labeldata *label){
   return NULL;
 }
 
-/* ------------------ LABEL_Previous ------------------------ */
+/* ------------------ LabelPrevious ------------------------ */
 
-labeldata *LABEL_Previous(labeldata *label){
+labeldata *LabelPrevious(labeldata *label){
   labeldata *thislabel;
 
   if(label==NULL)return NULL;
@@ -286,22 +286,22 @@ labeldata *LABEL_Previous(labeldata *label){
   return NULL;
 }
 
-/* ------------------ LABEL_Init ------------------------ */
+/* ------------------ LabelInit ------------------------ */
 
-int LABEL_Init(labeldata *gl){
+int LabelInit(labeldata *gl){
   labeldata *thislabel;
 
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
     if(thislabel->labeltype==TYPE_SMV)continue;
-    LABEL_copy(gl,thislabel);
+    LabelCopy(gl,thislabel);
     return 1;
   }
   return 0;
 }
 
-/* ------------------ LABEL_Get_Nuserlabels ------------------------ */
+/* ------------------ LabelGetNUserLabels ------------------------ */
 
-int LABEL_Get_Nuserlabels(void){
+int LabelGetNUserLabels(void){
   int count=0;
   labeldata *thislabel;
 
@@ -311,9 +311,9 @@ int LABEL_Get_Nuserlabels(void){
   return count;
 }
 
-/* ------------------ LABEL_get ------------------------ */
+/* ------------------ LabelGet ------------------------ */
 
-labeldata *LABEL_get(char *name){
+labeldata *LabelGet(char *name){
   labeldata *thislabel;
 
   if(name==NULL)return NULL;
@@ -324,9 +324,9 @@ labeldata *LABEL_get(char *name){
   return NULL;
 }
 
-/* ------------------ LABEL_insert_before ------------------------ */
+/* ------------------ LabelInsertBefore ------------------------ */
 
-void LABEL_insert_before(labeldata *listlabel, labeldata *label){
+void LabelInsertBefore(labeldata *listlabel, labeldata *label){
   labeldata *prev, *next;
 
   next = listlabel;
@@ -337,9 +337,9 @@ void LABEL_insert_before(labeldata *listlabel, labeldata *label){
   label->next=next;
 }
 
-/* ------------------ LABEL_delete ------------------------ */
+/* ------------------ LabelDelete ------------------------ */
 
-void LABEL_delete(labeldata *label){
+void LabelDelete(labeldata *label){
   labeldata *prev, *next;
 
   prev = label->prev;
@@ -350,9 +350,9 @@ void LABEL_delete(labeldata *label){
   next->prev=prev;
 }
 
-/* ------------------ LABEL_copy ------------------------ */
+/* ------------------ LabelCopy ------------------------ */
 
-void LABEL_copy(labeldata *label_to, labeldata *label_from){
+void LabelCopy(labeldata *label_to, labeldata *label_from){
   labeldata *prev, *next;
 
   prev=label_to->prev;
@@ -363,21 +363,21 @@ void LABEL_copy(labeldata *label_to, labeldata *label_from){
 
 }
 
-/* ------------------ LABEL_resort ------------------------ */
+/* ------------------ LabelResort ------------------------ */
 
-void LABEL_resort(labeldata *label){
+void LabelResort(labeldata *label){
   labeldata labelcopy;
 
   CheckMemory;
   memcpy(&labelcopy,label,sizeof(labeldata));
   CheckMemory;
-  LABEL_delete(label);
-  LABEL_insert(&labelcopy);
+  LabelDelete(label);
+  LabelInsert(&labelcopy);
 }
 
-/* ------------------ LABEL_insert_after ------------------------ */
+/* ------------------ LabelInsertAfter ------------------------ */
 
-void LABEL_insert_after(labeldata *listlabel, labeldata *label){
+void LabelInsertAfter(labeldata *listlabel, labeldata *label){
   labeldata *prev, *next;
 
   prev = listlabel;
@@ -388,9 +388,9 @@ void LABEL_insert_after(labeldata *listlabel, labeldata *label){
   label->next=next;
 }
 
-/* ------------------ LABEL_print ------------------------ */
+/* ------------------ LabelPrint ------------------------ */
 
-void LABEL_print(void){
+void LabelPrint(void){
   labeldata *thislabel;
   float *xyz;
 
@@ -400,18 +400,18 @@ void LABEL_print(void){
   }
 }
 
-/* ------------------ LABEL_insert ------------------------ */
+/* ------------------ LabelInsert ------------------------ */
 
-labeldata *LABEL_insert(labeldata *labeltemp){
+labeldata *LabelInsert(labeldata *labeltemp){
   labeldata *newlabel, *thislabel;
   labeldata *firstuserptr, *lastuserptr;
 
   NewMemory((void **)&newlabel,sizeof(labeldata));
   memcpy(newlabel,labeltemp,sizeof(labeldata));
 
-  thislabel = LABEL_get(newlabel->name);
+  thislabel = LabelGet(newlabel->name);
   if(thislabel!=NULL){
-    LABEL_insert_after(thislabel->prev,newlabel);
+    LabelInsertAfter(thislabel->prev,newlabel);
     return newlabel;
   }
 
@@ -422,15 +422,15 @@ labeldata *LABEL_insert(labeldata *labeltemp){
   if(lastuserptr==label_first_ptr)lastuserptr=NULL;
 
   if(firstuserptr!=NULL&&strcmp(newlabel->name,firstuserptr->name)<0){
-    LABEL_insert_before(firstuserptr,newlabel);
+    LabelInsertBefore(firstuserptr,newlabel);
     return newlabel;
   }
   if(lastuserptr!=NULL&&strcmp(newlabel->name,lastuserptr->name)>0){
-    LABEL_insert_after(lastuserptr,newlabel);
+    LabelInsertAfter(lastuserptr,newlabel);
     return newlabel;
   }
   if(firstuserptr==NULL&&lastuserptr==NULL){
-    LABEL_insert_after(label_first_ptr,newlabel);
+    LabelInsertAfter(label_first_ptr,newlabel);
     return newlabel;
   }
   for(thislabel=label_first_ptr->next;thislabel->next!=NULL;thislabel=thislabel->next){
@@ -438,16 +438,16 @@ labeldata *LABEL_insert(labeldata *labeltemp){
 
     nextlabel=thislabel->next;
     if(strcmp(thislabel->name,newlabel->name)<0&&strcmp(newlabel->name,nextlabel->name)<0){
-      LABEL_insert_after(thislabel,newlabel);
+      LabelInsertAfter(thislabel,newlabel);
       return newlabel;
     }
   }
   return NULL;
 }
 
-/* ----------------------- scale_2dfont ----------------------------- */
+/* ----------------------- ScaleFont2D ----------------------------- */
 
-void scale_2dfont(void){
+void ScaleFont2D(void){
   if(render_mode != RENDER_XYSINGLE){
     glLineWidth((float)nrender_rows*(float)scaled_font2d_thickness);
   }
@@ -456,9 +456,9 @@ void scale_2dfont(void){
   }
 }
 
-/* ----------------------- scale_3dfont ----------------------------- */
+/* ----------------------- ScaleFont3D ----------------------------- */
 
-void scale_3dfont(void){
+void ScaleFont3D(void){
   if(render_mode != RENDER_XYSINGLE){
     glLineWidth((float)nrender_rows*(float)scaled_font3d_thickness);
   }
