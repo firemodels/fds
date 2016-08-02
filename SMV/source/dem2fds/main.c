@@ -28,7 +28,19 @@ typedef struct {
   float *valbuffer;
 } elevdata;
 
-/* ------------------ usage ------------------------ */
+/* ------------------ example ------------------------ */
+
+void show_example(void){
+  fprintf(stderr, " Example input file for generating an FDS input file from elevation data\n\n");
+  fprintf(stderr, " // minimum longitude, maximum longitude, number of longitudes\n");
+  fprintf(stderr, " LONGMINMAX\n");
+  fprintf(stderr, "  -77.25 -77.20 100\n\n");
+  fprintf(stderr, " // minimum latitude, maximum latitude, number of latitudes\n");
+  fprintf(stderr, " LATMINMAX\n");
+  fprintf(stderr, "  39.12 39.15 100\n");
+}
+
+  /* ------------------ usage ------------------------ */
 
 void usage(char *prog){
  char githash[LEN_BUFFER];
@@ -42,19 +54,11 @@ void usage(char *prog){
   fprintf(stderr, "Usage:\n");
   fprintf(stderr, "  dem2fds [-g|-o][-h][-v] casename.in\n");
   fprintf(stderr, "where\n");
+  fprintf(stderr, "  -e - show an example input file\n");
   fprintf(stderr, "  -g - create an FDS input file using &GEOM keywords\n");
   fprintf(stderr, "  -o - create an FDS input file using &OBST keywords (default)\n");
   fprintf(stderr, "  -h - display this message\n");
-  fprintf(stderr, "  -v - show version information\n\n");
-  fprintf(stderr, " input file:\n");
-  fprintf(stderr, "   Define longitude/latitude bounds and number of longitudes/latitudes\n");
-  fprintf(stderr, "   in casename.in using:\n");
-  fprintf(stderr, " LONGMINMAX\n");
-  fprintf(stderr, "  -77.25 -77.20 100\n");
-  fprintf(stderr, " LATMINMAX\n");
-  fprintf(stderr, "  39.12 39.15 100\n\n");
-  fprintf(stderr, " Create an FDS input file using &GEOM keywords : dem2fds -g casename.in\n");
-  fprintf(stderr, " Create an FDS input file using &OBST keywords : dem2fds -o casename.in\n");
+  fprintf(stderr, "  -v - show version information\n");
 }
 
 /* ------------------ dist ------------------------ */
@@ -378,17 +382,21 @@ int generate_elevs(char *elevfile, elevdata *fds_elevs){
     return 0;
   }
   while(!feof(stream_in)){
-    char buffer[LEN_BUFFER];
+    char buffer[LEN_BUFFER], *buffer2;
 
     CheckMemory;
 
-    if(fgets(buffer, 255, stream_in) == NULL)break;
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+    buffer2 = strstr(buffer, "//");
+    if(buffer2 != NULL)buffer2[0] = 0;
+    buffer2 = trim_frontback(buffer);
+    if(strlen(buffer2) == 0)continue;
 
     if(match(buffer, "GRID") == 1){
       ibar = 10;
       jbar = 10;
       kbar = 10;
-      if(fgets(buffer, 255, stream_in) == NULL)break;
+      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%i %i %i", &ibar, &jbar, &kbar);
       continue;
     }
@@ -396,7 +404,7 @@ int generate_elevs(char *elevfile, elevdata *fds_elevs){
     if(match(buffer, "DXDY") == 1){
       dx = 1000.0;
       dy = 1000.0;
-      if(fgets(buffer, 255, stream_in) == NULL)break;
+      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &dx, &dy);
       continue;
     }
@@ -404,7 +412,7 @@ int generate_elevs(char *elevfile, elevdata *fds_elevs){
     if(match(buffer, "LONGMINMAX") == 1){
       longc = 1000.0;
       latc = 1000.0;
-      if(fgets(buffer, 255, stream_in) == NULL)break;
+      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f %i", &longmin, &longmax, &nlongs);
       continue;
     }
@@ -412,13 +420,13 @@ int generate_elevs(char *elevfile, elevdata *fds_elevs){
     if(match(buffer, "LATMINMAX") == 1){
       longc = 1000.0;
       latc = 1000.0;
-      if(fgets(buffer, 255, stream_in) == NULL)break;
+      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f %i", &latmin, &latmax, &nlats);
       continue;
     }
 
     if(match(buffer, "EXCLUDE") == 1){
-      if(fgets(buffer, 255, stream_in) == NULL)break;
+      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f %f %f", &xmin_exclude, &ymin_exclude, &xmax_exclude, &ymax_exclude);
       longlat_defined = 1;
       continue;
@@ -498,6 +506,11 @@ int main(int argc, char **argv){
   char file_default[LEN_BUFFER];
   elevdata fds_elevs;
 
+  if(argc == 1){
+    usage("dem2fds");
+    return 0;
+  }
+
   strcpy(file_default, "terrain");
 
   initMALLOC();
@@ -510,8 +523,12 @@ int main(int argc, char **argv){
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
       switch(arg[1]){
+      case 'e':
+        show_example();
+        exit(1);
+        break;
       case 'h':
-        usage("dem2geom");
+        usage("dem2fds");
         exit(1);
         break;
       case 'o':
@@ -521,11 +538,11 @@ int main(int argc, char **argv){
         gen_fds = FDS_GEOM;
         break;
       case 'v':
-        PRINTversion("dem2geom");
+        PRINTversion("dem2fds");
         exit(1);
         break;
       default:
-        usage("dem2geom");
+        usage("dem2fds");
         exit(1);
         break;
       }
