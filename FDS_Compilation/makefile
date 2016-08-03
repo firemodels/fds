@@ -431,7 +431,7 @@ gnu_win_64_db : obj = fds_gnu_win_64
 gnu_win_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
+gnu_linux_64 : FFLAGS = -O3 $(GITINFOGNU)
 gnu_linux_64 : FCOMPL = gfortran
 gnu_linux_64 : FOPENMPFLAGS = -fopenmp
 gnu_linux_64 : obj = fds_linux_64
@@ -459,7 +459,7 @@ gnu_osx_64_db : obj     = fds_osx_64_db
 gnu_osx_64_db : $(obj_serial)
 	$(FCOMPL) $(FFLAGS) $(FOPENMPFLAGS) -o $(obj) $(obj_serial)
 
-mpi_gnu_linux_64 : FFLAGS = -O2 $(GITINFOGNU)
+mpi_gnu_linux_64 : FFLAGS = -O3 $(GITINFOGNU)
 mpi_gnu_linux_64 : FCOMPL = mpifort
 mpi_gnu_linux_64 : FOPENMPFLAGS = 
 mpi_gnu_linux_64 : obj = fds_mpi_gnu_linux_64
