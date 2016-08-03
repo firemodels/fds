@@ -333,13 +333,13 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   int longlat_defined = 0;
   float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
   float longmin, longmax, latmin, latmax;
-  int nlongs, nlats;
+  int nlongs=100, nlats=100;
   float dlat, dlong;
   int count, *have_vals, have_data=0;
   float valmin, valmax, *vals;
   char *ext;
   float longref=-1000.0, latref=-1000.0;
-  float xref=-1.0, yref=-1.0;
+  float xref=0.0, yref=0.0;
   float xmax = -1000.0, ymax = -1000.0, zmin=-1000.0, zmax=-1000.0;
   float *longlats = NULL, *longlatsorig;
 
@@ -444,8 +444,6 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     }
 
     if (match(buffer, "XYREF") == 1) {
-      xref = 0.0;
-      yref = 0.0;
       if (fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &xref, &yref);
       continue;
@@ -496,29 +494,35 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   }
   fclose(stream_in);
 
-  if(
-    GetElevFile(elevinfo, nelevinfo, longmin, latmin) == NULL ||
-    GetElevFile(elevinfo, nelevinfo, longmin, latmax) == NULL ||
-    GetElevFile(elevinfo, nelevinfo, longmax, latmin) == NULL ||
-    GetElevFile(elevinfo, nelevinfo, longmax, latmax) == NULL
-    ){
-    fprintf(stderr,"***error: elevation data not available for all longitudes/latitude \n");
-    fprintf(stderr,"          pairs within the rectangle (%f,%f) (%f %f)\n", longmin, latmin, longmax, latmax);
-    for(i = 0; i < nelevinfo; i++){
-      elevdata *elevi;
+  NewMemory((void **)&longlatsorig, 2 * nlongs*nlats * sizeof(float));
+  longlats = longlatsorig;
+  GetLongLats(longref, latref, xref, yref,
+    xmax, ymax, nlongs, nlats, longlats);
 
-      elevi = elevinfo + i;
-      fprintf(stderr," header file: %s bounds: %f %f %f %f\n",
-        elevi->fileheader, elevi->long_min, elevi->lat_min, elevi->long_max, elevi->lat_max);
+  for (i = 0; i < nlongs*nlats; i++) {
+    float llong, llat;
+
+    llong = *longlats++;
+    llat = *longlats++;
+    if (GetElevFile(elevinfo, nelevinfo, llong, llat) == NULL) {
+      fprintf(stderr, "***error: elevation data not available for \n");
+      fprintf(stderr, "    longitude/latitude: (%f %f) \n",llong, llat);
+      for (i = 0; i < nelevinfo; i++) {
+        elevdata *elevi;
+
+        elevi = elevinfo + i;
+        fprintf(stderr, " header file: %s bounds: %f %f %f %f\n",
+          elevi->fileheader, elevi->long_min, elevi->lat_min, elevi->long_max, elevi->lat_max);
+      }
+      FREEMEMORY(longlatsorig);
+      return 0;
     }
-    return 0;
   }
 
   dlat = (latmax - latmin) / (float)(nlats-1);
   dlong = (longmax - longmin) / (float)(nlongs-1);
   NewMemory((void **)&vals, nlongs*nlats*sizeof(float));
   NewMemory((void **)&have_vals, nlongs*nlats*sizeof(int));
-  NewMemory((void **)&longlatsorig, 2*nlongs*nlats * sizeof(float));
   longlats = longlatsorig;
   fds_elevs->valbuffer = vals;
   fds_elevs->nrows = nlats;
@@ -533,9 +537,6 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   fds_elevs->yref = yref;
   fds_elevs->longref = longref;
   fds_elevs->latref = latref;
-
-  GetLongLats(longref, latref, xref, yref,
-    xmax, ymax, nlongs, nlats, longlats);
 
   count = 0;
   for (j = 0; j < nlats; j++) {
