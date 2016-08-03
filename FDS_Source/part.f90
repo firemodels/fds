@@ -82,6 +82,12 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
          ENDDO UL_LOOP
          LPC%W_CNF(I) = LPC%CNF(IU) - LPC%CNF(IL)
       ENDDO STRATIFY
+      ! mean droplet volume
+      LPC%MEAN_DROPLET_VOLUME = 0._EB
+      DO I=1,NDC
+         DD = FOTHPI*( 0.5_EB*( LPC%R_CNF(I) + LPC%R_CNF(I-1) ) )**3
+         LPC%MEAN_DROPLET_VOLUME = LPC%MEAN_DROPLET_VOLUME + ( LPC%CNF(I) - LPC%CNF(I-1) ) * DD
+      ENDDO
    ENDIF IF_SIZE_DISTRIBUTION
 
    ! If pacticles/PARTICLEs can break up, compute normalized (median = 1) size distribution for child PARTICLEs
@@ -251,7 +257,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          D_PRES_FACTOR = 1.0_EB
          FLOW_RATE = PY%FLOW_RATE
       ENDIF
-      FLOW_RATE = FLOW_RATE*(LPC%DENSITY/1000._EB)/60._EB  ! kg/s
+      FLOW_RATE = FLOW_RATE*(LPC%DENSITY/1000._EB)/60._EB  ! convert from L/min to kg/s
    ENDIF
 
    FLOW_RATE = EVALUATE_RAMP(TSI,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*FLOW_RATE ! kg/s
@@ -447,7 +453,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    ! Compute weighting factor for the PARTICLEs just inserted
 
    IF (DROP_SUM > 0) THEN
-      PWT0 = FLOW_RATE*(T-DV%T)/MASS_SUM
+      !PWT0 = FLOW_RATE*(T-DV%T)/MASS_SUM
+      PWT0 = LPC%N_STRATA * FLOW_RATE / ( LPC%DENSITY * LPC%MEAN_DROPLET_VOLUME * REAL(PY%PARTICLES_PER_SECOND,EB) )
       DO I=1,N_INSERT
          N = LP_INDEX_LOOKUP(I)
          LAGRANGIAN_PARTICLE(N)%PWT = LAGRANGIAN_PARTICLE(N)%PWT*PWT0
