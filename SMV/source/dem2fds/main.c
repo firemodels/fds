@@ -292,7 +292,7 @@ float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latv
 
   val1 = INTERP1D(factor_x,val11,val12);
   val2 = INTERP1D(factor_x,val21,val22);
-  
+
   return_val = INTERP1D(factor_y,val2,val1);
   *have_val = 1;
   return return_val;
