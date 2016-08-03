@@ -14,6 +14,7 @@
 #define FDS_OBST 0
 #define FDS_GEOM 1
 #define LEN_BUFFER 1024
+#define EARTH_RADIUS 6371000.0
 
 /* --------------------------  elevdata ------------------------------------ */
 
@@ -61,6 +62,38 @@ void usage(char *prog){
   fprintf(stderr, "  -v - show version information\n");
 }
 
+/* ------------------ GetLongLats ------------------------ */
+
+void GetLongLats(
+  float longref, float latref, float xref, float yref,
+  float xmax, float ymax, int nxmax, int nymax,
+  float *longlats
+) {
+  int j;
+  float dx, dy;
+
+  dy = ymax / (float)(nymax - 1);
+  dx = xmax / (float)(nxmax - 1);
+
+  for (j = nymax-1; j >=0; j--) {
+    int i;
+    float dlat, dyval, coslat;
+
+    dyval = (float)j*dy - yref;
+    dlat = dyval / EARTH_RADIUS;
+    coslat = cos(latref + dlat);
+    for (i = 0; i < nxmax; i++) {
+      float dxval, top, dlong;
+
+      dxval = (float)i*dx - xref;
+      top = sin(dxval / (2.0*EARTH_RADIUS));
+      dlong = 2.0*asin(top / coslat);
+      *longlats++ = longref + RAD2DEG*dlong;
+      *longlats++ = latref + RAD2DEG*dlat;
+    }
+  }
+}
+
 /* ------------------ dist ------------------------ */
 
 float sphere_distance(float llong1, float llat1, float llong2, float llat2){
@@ -71,7 +104,7 @@ float sphere_distance(float llong1, float llat1, float llong2, float llat2){
   // R = 6371000
 
   float deg2rad;
-  float a, c, R, distance;
+  float a, c;
   float dlat, dlong;
 
   deg2rad = 4.0*atan(1.0)/180.0;
@@ -82,10 +115,8 @@ float sphere_distance(float llong1, float llat1, float llong2, float llat2){
   dlat = llat2 - llat1;
   dlong = llong2 - llong1;
   a = pow(sin(dlat / 2.0), 2) + cos(llat1)*cos(llat2)*pow(sin(dlong / 2.0), 2);
-  c = 2 * asin(sqrt(ABS(a)));
-  R = 6371000;
-  distance = R*c;
-  return distance;
+  c = 2.0 * asin(sqrt(ABS(a)));
+  return EARTH_RADIUS*c;
 }
 
 /* ------------------ generate_fds ------------------------ */
