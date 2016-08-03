@@ -63,7 +63,7 @@ void usage(char *prog){
 
 /* ------------------ dist ------------------------ */
 
-float dist(float llong1, float llong2, float llat1, float llat2){
+float sphere_distance(float llong1, float llat1, float llong2, float llat2){
   // https://en.wikipedia.org/wiki/Great-circle_distance
   // a = sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlong/2)^2
   // c = 2*asin(sqrt(a))
@@ -118,17 +118,19 @@ void generate_fds(char *casename, elevdata *fds_elevs, int option){
   llong1 = fds_elevs->long_min;
   llong2 = fds_elevs->long_max;
   nlong = fds_elevs->ncols;
+
   llat1 = fds_elevs->lat_min;
   llat2 = fds_elevs->lat_max;
   nlat = fds_elevs->nrows;
+
   zmin = fds_elevs->val_min;
   zmax = fds_elevs->val_max;
-  vals = fds_elevs->valbuffer;
   nz = 30;
 
-  xmax = (int)(dist(llong1, llong2, llat1, llat1)+0.5);
+  vals = fds_elevs->valbuffer;
 
-  ymax = (int)(dist(llong1, llong1, llat1, llat2)+0.5);
+  xmax = (int)(sphere_distance(llong1, llat1, llong2, llat1)+0.5);
+  ymax = (int)(sphere_distance(llong1, llat1, llong1, llat2)+0.5);
 
   ibar = nlong - 1;
   jbar = nlat - 1;
@@ -237,7 +239,7 @@ float get_elevation2(elevdata *elevinfo, int nelevinfo, float longval, float lat
   return return_val;
 }
 
-#define INTERP1D(f,v1,v2) ((1.0-f)*(v1)+(f)*(v2))
+#define INTERP1D(f,v1,v2) ((1.0-(f))*(v1)+(f)*(v2))
 
 /* ------------------ get_elev2 ------------------------ */
 
@@ -250,6 +252,7 @@ float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latv
   float val1, val2;
   float factor_x, factor_y;
   float return_val;
+  float ivalx, jvaly;
 
   *have_val = 0;
   elevi = get_elevfile(elevinfo, nelevinfo, longval, latval);
@@ -265,28 +268,32 @@ float get_elevation(elevdata *elevinfo, int nelevinfo, float longval, float latv
     fread(data_buffer, sizeof(float), elevi->ncols*elevi->nrows, stream);
     fclose(stream);
   }
-  ival = CLAMP((longval - elevi->long_min)/elevi->cellsize,0,elevi->ncols-1);
+
+  ivalx = (longval - elevi->long_min)/elevi->cellsize;
+   ival = CLAMP(ivalx,0,elevi->ncols-1);
   ival2 = CLAMP(ival+1, 0, elevi->ncols - 1);
-  jval = CLAMP((elevi->lat_max - latval)/elevi->cellsize,0,elevi->nrows-1);
+
+  jvaly = (elevi->lat_max - latval)/elevi->cellsize;
+   jval = CLAMP(jvaly,0,elevi->nrows-1);
   jval2 = CLAMP(jval-1, 0, elevi->nrows - 1);
-  
-  index11 = jval*elevi->ncols +ival;
-  index12 = jval2*elevi->ncols + ival;
-  index21 = jval*elevi->ncols + ival2;
+
+  index11 =  jval*elevi->ncols + ival;
+  index12 =  jval*elevi->ncols + ival2;
+  index21 = jval2*elevi->ncols + ival;
   index22 = jval2*elevi->ncols + ival2;
-  
+
   val11 = elevi->valbuffer[index11];
   val12 = elevi->valbuffer[index12];
   val21 = elevi->valbuffer[index21];
   val22 = elevi->valbuffer[index22];
 
-  factor_x = (longval - elevi->long_min - ival*elevi->cellsize)/elevi->cellsize; 
-  factor_x = CLAMP(factor_x,0.0,1.0); 
-  factor_y = (elevi->lat_max - latval - jval*elevi->cellsize)/elevi->cellsize;
-  factor_y = CLAMP(factor_y,0.0,1.0);
+  factor_x = CLAMP(ivalx - ival,0.0,1.0);
+  factor_y = CLAMP(jvaly - jval,0.0,1.0);
+
   val1 = INTERP1D(factor_x,val11,val12);
   val2 = INTERP1D(factor_x,val21,val22);
-  return_val = INTERP1D(factor_y,val1,val2);
+  
+  return_val = INTERP1D(factor_y,val2,val1);
   *have_val = 1;
   return return_val;
 }
