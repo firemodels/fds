@@ -226,8 +226,8 @@ void GenerateFDS(char *casename, elevdata *fds_elevs, int option){
   fprintf(stderr, "  FDS input file: %s\n",fdsfile);
   fprintf(stderr, "            xmax: %f\n", xmax);
   fprintf(stderr, "            ymax: %f\n", ymax);
-  fprintf(stderr, "            zmin: %f\n", zmin);
-  fprintf(stderr, "            zmax: %f\n", zmax);
+  fprintf(stderr, "   min elevation: %f\n", zmin);
+  fprintf(stderr, "   max elevation: %f\n", zmax);
   fprintf(stderr, "longitude <==> x: %f <==> %f \n", fds_elevs->longref, fds_elevs->xref);
   fprintf(stderr, " latitude <==> y: %f <==> %f \n", fds_elevs->latref, fds_elevs->yref);
 }
