@@ -316,8 +316,8 @@ float GetElevation(elevdata *elevinfo, int nelevinfo, float longval, float latva
 /* ------------------ GenerateElevs ------------------------ */
 
 int GenerateElevs(char *elevfile, elevdata *fds_elevs){
-  int nelevinfo,i,j;
-  filelistdata *fileheaders;
+  int nelevinfo,nimageinfo,i,j;
+  filelistdata *fileheaders, *imageheaders;
   FILE *stream_in;
   elevdata *elevinfo;
   int ibar, jbar, kbar;
@@ -337,6 +337,15 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
 
   RENDERimage = gdImageCreateTrueColor(100,100);
   gdImageDestroy(RENDERimage);
+
+  nimageinfo = get_nfilelist(libdir, "*.hdi");
+  if(nimageinfo > 0){
+    NewMemory((void **)&imageheaders, nimageinfo * sizeof(filelistdata));
+    get_filelist(libdir, "*.hdr", nimageinfo, &imageheaders);
+  }
+  for(i = 0; i < nimageinfo; i++){
+
+  }
 
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
