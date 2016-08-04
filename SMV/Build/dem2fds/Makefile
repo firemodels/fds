@@ -1,7 +1,7 @@
 SOURCE_DIR = ../../../source/
 BUILD_DIR = ../../../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
-INC_DIR =  -I $(SOURCE_DIR)/gd-2.1.1 -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
+INC_DIR =  -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
 
 WIN_LIBDIR = $(LIB_DIR)/lib_win_intel_64
 LIBS_WIN = $(WIN_LIBDIR)\gd.lib $(WIN_LIBDIR)\jpeg.lib $(WIN_LIBDIR)\png.lib $(WIN_LIBDIR)\zlib.lib
@@ -12,7 +12,7 @@ LIBS_OSX = -lgd -ljpeg -lpng -lz
 
 #--- Linux
 
-LIBS_LINUX = $(SMV_LIBS_OSX)
+LIBS_LINUX = $(LIBS_OSX)
 
 
 FILTERC =
