@@ -1,5 +1,19 @@
 SOURCE_DIR = ../../../source/
-INC_DIR =  -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
+BUILD_DIR = ../../../Build
+LIB_DIR = $(BUILD_DIR)/LIBS
+INC_DIR =  -I $(SOURCE_DIR)/gd-2.1.1 -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
+
+WIN_LIBDIR = $(LIB_DIR)/lib_win_intel_64
+LIBS_WIN = $(WIN_LIBDIR)\gd.lib $(WIN_LIBDIR)\jpeg.lib $(WIN_LIBDIR)\png.lib $(WIN_LIBDIR)\zlib.lib
+
+#--- OSX
+
+LIBS_OSX = -lgd -ljpeg -lpng -lz
+
+#--- Linux
+
+LIBS_LINUX = $(SMV_LIBS_OSX)
+
 
 FILTERC =
 FILTERF =
@@ -42,25 +56,27 @@ intel_win_64 : CC        = icl
 intel_win_64 : exe       = dem2fds_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CC) -o $(bin)/$(exe) $(objwin)
+	$(CC) -o $(bin)/$(exe) $(objwin) $(LIBS_WIN)
 
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
+intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
 intel_linux_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_linux_64 : CC        = icc
 intel_linux_64 : exe       = dem2fds_linux_64
 
 intel_linux_64 : $(obj)
-	$(CC) -o $(bin)/$(exe) $(obj) 
+	$(CC) -o $(bin)/$(exe) $(obj) -L$(LIB_DIR_PLAT) $(LIBS_LINUX)
 
 	
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
+intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
 intel_osx_64 : CFLAGS    = -O2 -m64 $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : exe       = dem2fds_osx_64
 
 intel_osx_64 : $(obj)
-	$(CC) -o $(bin)/$(exe) -m64 $(obj)
+	$(CC) -o $(bin)/$(exe) -m64 $(obj) -L $(LIB_DIR_PLAT)  $(LIBS_OSX)

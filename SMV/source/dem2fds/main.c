@@ -9,6 +9,7 @@
 #include "file_util.h"
 #include "datadefs.h"
 #include "MALLOC.h"
+#include "gd.h"
 
 
 #define FDS_OBST 0
@@ -332,6 +333,11 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   float xref=0.0, yref=0.0;
   float xmax = -1000.0, ymax = -1000.0, zmin=-1000.0, zmax=-1000.0;
   float *longlats = NULL, *longlatsorig;
+  gdImagePtr RENDERimage;
+
+  RENDERimage = gdImageCreateTrueColor(100,100);
+  gdImageDestroy(RENDERimage);
+
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
   if(nelevinfo == 0){
