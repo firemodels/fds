@@ -313,13 +313,30 @@ float GetElevation(elevdata *elevinfo, int nelevinfo, float longval, float latva
   return return_val;
 }
 
+/* ------------------ CopyString ------------------------ */
+
+void CopyString(char *cval, char **p, int len, int *val) {
+  if (**p == '0') {
+    strncpy(cval, *p+1, len-1);
+    cval[len-1] = 0;
+  }
+  else {
+    strncpy(cval, *p, len);
+    cval[len] = 0;
+  }
+  *p += len;
+
+  if (val == NULL)return;
+  sscanf(cval, "%i", val);
+}
+
 /* ------------------ GenerateElevs ------------------------ */
 
 int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   int nelevinfo,nimageinfo,i,j;
-  filelistdata *fileheaders, *imageheaders;
+  filelistdata *headerfiles, *imagefiles;
   FILE *stream_in;
-  elevdata *elevinfo;
+  elevdata *elevinfo, *imageinfo;
   int ibar, jbar, kbar;
   int longlat_defined = 0;
   float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
@@ -338,15 +355,55 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   RENDERimage = gdImageCreateTrueColor(100,100);
   gdImageDestroy(RENDERimage);
 
-  nimageinfo = get_nfilelist(libdir, "*.hdi");
+  nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
-    NewMemory((void **)&imageheaders, nimageinfo * sizeof(filelistdata));
-    get_filelist(libdir, "*.hdr", nimageinfo, &imageheaders);
+    NewMemory((void **)&imagefiles, nimageinfo * sizeof(filelistdata));
+    NewMemory((void **)&imageinfo, nimageinfo * sizeof(elevdata));
+    get_filelist(libdir, "m_*.jpg", nimageinfo, &imagefiles);
   }
   for(i = 0; i < nimageinfo; i++){
+    elevdata *imagei;
+    filelistdata *imagefilei;
+    char dummy[2], clat[3], clong[4], coffset[4], cquarter[3];
+    int llat, llong, offset, icol, irow;
+    char *p;
 
+    imagei = imageinfo + i;
+    imagefilei = imagefiles + i;
+    imagei->datafile = imagefilei->file;
+    p = imagefilei->file + 2;
+
+    CopyString(clat, &p, 2, &llat);
+    CopyString(clong, &p, 3, &llong);
+    CopyString(coffset, &p, 2, &offset);
+    CopyString(dummy, &p, 1, NULL);
+    CopyString(cquarter, &p, 2, NULL);
+
+    irow = 7 - (offset - 1) / 8;
+    icol = 7 - (offset - 1) % 8;
+    imagei->lat_min = (float)llat + (float)irow*7.5/60;
+    imagei->long_min = (float)llong + (float)icol*7.5 / 60.0;
+    if (strcmp(cquarter, "ne") == 0) {
+      imagei->lat_min +=  3.75 / 60;
+      imagei->long_min += 3.75 / 60;
+    }
+    else if (strcmp(cquarter, "nw") == 0) {
+      imagei->lat_min += 3.75 / 60;
+      imagei->long_min += 7.5 / 60;
+    }
+    else if (strcmp(cquarter, "se") == 0) {
+      imagei->long_min += 3.75 / 60;
+    }
+    else if (strcmp(cquarter, "sw") == 0) {
+      imagei->long_min += 7.5 / 60;
+    }
+    imagei->long_min = -imagei->long_min;
+    imagei->long_max = imagei->long_min + 3.75 / 60.0;
+    imagei->lat_max = imagei->lat_min + 3.75 / 60.0;
+    printf("file: %s\n", imagefilei->file);
+    printf("long min/max %f %f\n", imagei->long_min, imagei->long_max);
+    printf(" lat min/max %f %f\n", imagei->lat_min, imagei->lat_max);
   }
-
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
   if(nelevinfo == 0){
@@ -354,7 +411,7 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     return 0;
   }
 
-  get_filelist(libdir,"*.hdr", nelevinfo, &fileheaders);
+  get_filelist(libdir,"*.hdr", nelevinfo, &headerfiles);
   NewMemory((void **)&elevinfo, nelevinfo*sizeof(elevdata));
   for(i = 0; i < nelevinfo; i++){
     filelistdata *headerfilei;
@@ -362,7 +419,7 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     char basefile[LEN_BUFFER], *datafile, *headerfile;
     int lenfile;
 
-    headerfilei = fileheaders + i;
+    headerfilei = headerfiles + i;
     elevi = elevinfo + i;
 
     strcpy(basefile, headerfilei->file);
