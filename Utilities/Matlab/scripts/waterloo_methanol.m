@@ -54,7 +54,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -96,7 +96,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -137,7 +137,7 @@ for z=[2:2:20,30],
     %text(.03,.24,'Waterloo Methanol','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -183,7 +183,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -191,7 +191,7 @@ for z=[2:2:20,30],
     figure;
     plot_style;
     % load data
-    var = ['Wp',num2str(z)];
+    var = ['Wrms',num2str(z)];
     r = F1.data(:,1)*100;
     ubar1 = F1.data(:,find(strcmp(F1.colheaders,var)));
     ubar2 = F2.data(:,find(strcmp(F2.colheaders,var)));
@@ -225,7 +225,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -266,7 +266,7 @@ for z=[2:2:20,30],
     %text(.03,.24,'Waterloo Methanol','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     % print to pdf
-    outfile = ['waterloo_methanol_',var];
+    outfile = ['Waterloo_Methanol_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
 end
