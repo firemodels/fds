@@ -31,6 +31,7 @@ typedef struct {
   float val_min, val_max;
   float dlong, dlat;
   float *valbuffer;
+  unsigned char *visbuffer;
   float xmax, ymax, zmin, zmax;
   float xref, yref;
   float longref, latref;
@@ -313,6 +314,46 @@ float GetElevation(elevdata *elevinfo, int nelevinfo, float longval, float latva
   return return_val;
 }
 
+/* ------------------ ReadJPEG ------------------------ */
+
+unsigned char *ReadJPEG(const char *filename, int *width, int *height) {
+
+  FILE *file;
+  gdImagePtr image;
+  unsigned char *dataptr, *dptr;
+  int i, j;
+  unsigned int intrgb;
+  int WIDTH, HEIGHT;
+  int jump;
+
+  file = fopen(filename, "rb");
+  if (file == NULL)return NULL;
+  image = gdImageCreateFromJpeg(file);
+  fclose(file);
+  if (image == NULL)return NULL;
+  WIDTH = gdImageSX(image);
+  HEIGHT = gdImageSY(image);
+  *width = WIDTH;
+  *height = HEIGHT;
+  if (NewMemory((void **)&dataptr, (unsigned int)(4 * WIDTH*HEIGHT)) == 0) {
+    gdImageDestroy(image);
+    return NULL;
+  }
+  dptr = dataptr;
+  for (i = 0; i < HEIGHT; i += jump) {
+    for (j = 0; j < WIDTH; j += jump) {
+      intrgb = (unsigned int)gdImageGetPixel(image, j, (unsigned int)(HEIGHT - (1 + i)));
+      *dptr++ = (intrgb >> 16) & 255;
+      *dptr++ = (intrgb >> 8) & 255;
+      *dptr++ = intrgb & 255;
+      *dptr++ = 0xff;
+    }
+  }
+  gdImageDestroy(image);
+  return dataptr;
+
+}
+
 /* ------------------ CopyString ------------------------ */
 
 void CopyString(char *cval, char **p, int len, int *val) {
@@ -354,6 +395,9 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
 
   RENDERimage = gdImageCreateTrueColor(100,100);
   gdImageDestroy(RENDERimage);
+  // stream = fopen("jpegfile","rb");
+  // RENDERimage = gdImageCreateFromJpeg(stream);
+  // fclose(stream);
 
   nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
@@ -400,9 +444,12 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     imagei->long_min = -imagei->long_min;
     imagei->long_max = imagei->long_min + 3.75 / 60.0;
     imagei->lat_max = imagei->lat_min + 3.75 / 60.0;
+    imagei->visbuffer = ReadJPEG(imagei->datafile, &imagei->ncols, &imagei->nrows);
+
     printf("file: %s\n", imagefilei->file);
     printf("long min/max %f %f\n", imagei->long_min, imagei->long_max);
     printf(" lat min/max %f %f\n", imagei->lat_min, imagei->lat_max);
+    printf(" image width/height: %i %i \n", imagei->ncols, imagei->nrows);
   }
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
