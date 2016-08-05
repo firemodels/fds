@@ -324,7 +324,6 @@ unsigned char *ReadJPEG(const char *filename, int *width, int *height) {
   int i, j;
   unsigned int intrgb;
   int WIDTH, HEIGHT;
-  int jump;
 
   file = fopen(filename, "rb");
   if (file == NULL)return NULL;
@@ -340,8 +339,8 @@ unsigned char *ReadJPEG(const char *filename, int *width, int *height) {
     return NULL;
   }
   dptr = dataptr;
-  for (i = 0; i < HEIGHT; i += jump) {
-    for (j = 0; j < WIDTH; j += jump) {
+  for (i = 0; i < HEIGHT; i ++) {
+    for (j = 0; j < WIDTH; j ++) {
       intrgb = (unsigned int)gdImageGetPixel(image, j, (unsigned int)(HEIGHT - (1 + i)));
       *dptr++ = (intrgb >> 16) & 255;
       *dptr++ = (intrgb >> 8) & 255;
@@ -371,6 +370,71 @@ void CopyString(char *cval, char **p, int len, int *val) {
   sscanf(cval, "%i", val);
 }
 
+/* ------------------ GetColor ------------------------ */
+
+int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
+  int i;
+
+  for (i = 0; i < nimageinfo; i++) {
+    elevdata *imagei;
+
+    imagei = imageinfo + i;
+    if (imagei->long_min <= llong&&llong <= imagei->long_max&&imagei->lat_min <= llat&&llat <= imagei->lat_max) {
+      int irow, icol, color_index;
+
+      irow = imagei->nrows*(llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
+      icol = imagei->ncols*(llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
+      irow = CLAMP(irow, 0, imagei->nrows-1);
+      icol = CLAMP(icol, 0, imagei->ncols - 1);
+      color_index = irow*imagei->nrows + icol;
+      return imagei->visbuffer[color_index];
+    }
+  }
+  return 0;
+}
+
+/* ------------------ GenerateImage ------------------------ */
+
+void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int nimageinfo) {
+  int nrows, ncols, j;
+  gdImagePtr RENDERimage;
+  float dx, dy;
+  char imagefile[1024];
+  FILE *stream;
+  char *ext;
+
+  ncols = 1000;
+  nrows = ncols*fds_elevs->ymax / fds_elevs->xmax;
+  dx = (fds_elevs->long_max - fds_elevs->long_min) / (float)ncols;
+  dy = (fds_elevs->lat_max - fds_elevs->lat_min) / (float)nrows;
+
+  RENDERimage = gdImageCreateTrueColor(ncols, nrows);
+  for (j = 0; j < nrows; j++) {
+    int i;
+    float llat;
+
+    llat = fds_elevs->lat_max - (float)j*dy;
+    for (i = 0; i < ncols; i++) {
+      float llong;
+      int rgb_local;
+
+      llong = fds_elevs->long_min + (float)i*dx;
+
+      rgb_local = GetColor(llong, llat, imageinfo, nimageinfo);
+      gdImageSetPixel(RENDERimage,i,j,rgb_local);
+    }
+
+  }
+
+  strcpy(imagefile, elevfile);
+  ext = strrchr(imagefile, '.');
+  if (ext != NULL)ext[0] = 0;
+  strcat(imagefile, ".png");
+  stream = fopen(imagefile, "wb");
+  if(stream!=NULL)gdImagePng(RENDERimage,stream);
+  gdImageDestroy(RENDERimage);
+}
+
 /* ------------------ GenerateElevs ------------------------ */
 
 int GenerateElevs(char *elevfile, elevdata *fds_elevs){
@@ -391,13 +455,6 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   float xref=0.0, yref=0.0;
   float xmax = -1000.0, ymax = -1000.0, zmin=-1000.0, zmax=-1000.0;
   float *longlats = NULL, *longlatsorig;
-  gdImagePtr RENDERimage;
-
-  RENDERimage = gdImageCreateTrueColor(100,100);
-  gdImageDestroy(RENDERimage);
-  // stream = fopen("jpegfile","rb");
-  // RENDERimage = gdImageCreateFromJpeg(stream);
-  // fclose(stream);
 
   nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
@@ -411,10 +468,20 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     char dummy[2], clat[3], clong[4], coffset[4], cquarter[3];
     int llat, llong, offset, icol, irow;
     char *p;
+    char imagefilename[1024];
 
     imagei = imageinfo + i;
     imagefilei = imagefiles + i;
     imagei->datafile = imagefilei->file;
+    strcpy(imagefilename, "");
+    if (strcmp(libdir, ".") != 0) {
+      strcat(imagefilename, libdir);
+      strcat(imagefilename, dirseparator);
+    }
+    strcat(imagefilename, imagefilei->file);
+    NewMemory((void **)&imagei->datafile, strlen(imagefilename) + 1);
+    strcpy(imagei->datafile, imagefilename);
+
     p = imagefilei->file + 2;
 
     CopyString(clat, &p, 2, &llat);
@@ -696,6 +763,8 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   fds_elevs->val_max = valmax;
   FREEMEMORY(have_vals);
   FREEMEMORY(longlatsorig);
+
+  GenerateImage(elevfile,fds_elevs, imageinfo, nimageinfo);
   return 1;
 }
 
