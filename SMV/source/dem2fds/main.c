@@ -79,7 +79,7 @@ void GetLongLats(
 
     dyval = (float)j*dy - yref;
     dlat = dyval / EARTH_RADIUS;
-    coslat = cos(latref + dlat);
+    coslat = cos(DEG2RAD*latref + dlat);
     for (i = 0; i < nxmax; i++) {
       float dxval, top, dlong;
 
