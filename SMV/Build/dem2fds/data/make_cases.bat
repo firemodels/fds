@@ -9,7 +9,7 @@ set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set dem2fds=dem2fds
 
 ::set case=blodget
-::%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+%dem2fds% %option% -d %userprofile%\terrain\blodget blodget.in 
 
 echo NIST
 %dem2fds% %option% -d %userprofile%\terrain\nist nist.in 
