@@ -1157,7 +1157,7 @@ unsigned char *ReadPicture(char *filename, int *width, int *height, int printfla
   if(printflag==1)PRINTF("Loading texture:%s ",filebuffer);
   ext = filebuffer + strlen(filebuffer) - 4;
   if(strncmp(ext,".jpg",4)==0||strncmp(ext,".JPG",4)==0){
-    returncode = ReadJPEG(filebuffer,width,height,pixel_skip);
+    returncode = ReadJPEG(filebuffer,width,height);
   }
   else if(strncmp(ext,".png",4)==0||strncmp(ext,".PNG",4)==0){
     returncode = ReadPNG(filebuffer,width,height);
@@ -1186,7 +1186,7 @@ unsigned char *ReadPicture(char *filename, int *width, int *height, int printfla
 
 /* ------------------ ReadJPEG ------------------------ */
 
-unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip_local){
+unsigned char *ReadJPEG(const char *filename,int *width, int *height){
 
   FILE *file;
   gdImagePtr image;
@@ -1194,8 +1194,6 @@ unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip_l
   int i,j;
   unsigned int intrgb;
   int WIDTH, HEIGHT;
-  int NEWWIDTH, NEWHEIGHT;
-  int jump;
 
   file = fopen(filename, "rb");
   if(file == NULL)return NULL;
@@ -1204,21 +1202,15 @@ unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip_l
   if(image==NULL)return NULL;
   WIDTH=gdImageSX(image);
   HEIGHT=gdImageSY(image);
-  if(skip_local<0)skip_local=0;
-  jump = skip_local + 1;
-  NEWWIDTH=WIDTH/jump;
-  if(WIDTH%jump!=0)NEWWIDTH++;
-  NEWHEIGHT=HEIGHT/jump;
-  if(HEIGHT%jump!=0)NEWHEIGHT++;
-  *width=NEWWIDTH;
-  *height=NEWHEIGHT;
-  if( NewMemory((void **)&dataptr,(unsigned int)(4*NEWWIDTH*NEWHEIGHT) )==0){
+  *width=WIDTH;
+  *height=HEIGHT;
+  if( NewMemory((void **)&dataptr,(unsigned int)(4*WIDTH*HEIGHT) )==0){
     gdImageDestroy(image);
     return NULL;
   }
   dptr=dataptr;
-  for (i = 0; i<HEIGHT; i+=jump){
-    for(j=0;j<WIDTH;j+=jump){
+  for (i = 0; i<HEIGHT; i++){
+    for(j=0;j<WIDTH;j++){
       intrgb=(unsigned int)gdImageGetPixel(image,j,(unsigned int)(HEIGHT-(1+i)));
       *dptr++ = (intrgb>>16)&255;
       *dptr++ = (intrgb>>8)&255;

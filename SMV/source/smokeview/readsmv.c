@@ -9338,11 +9338,6 @@ int ReadINI2(char *inifile, int localfile){
       sscanf(buffer, "%i", &enable_texture_lighting);
       continue;
     }
-    if(match(buffer, "PIXELSKIP") == 1){
-      fgets(buffer, 255, stream);
-      sscanf(buffer, "%i", &pixel_skip);
-      continue;
-    }
     if(match(buffer, "PROJECTION") == 1){
       fgets(buffer, 255, stream);
       sscanf(buffer, "%i", &projection_type);
@@ -12353,8 +12348,6 @@ void WriteINI(int flag,char *filename){
       fprintf(fileout, " %s\n", label);
     }
   }
-  fprintf(fileout, "PIXELSKIP\n");
-  fprintf(fileout, " %i\n", pixel_skip);
   fprintf(fileout, "RENDERCLIP\n");
   fprintf(fileout, " %i %i %i %i %i\n",
     clip_rendered_scene, render_clip_left, render_clip_right, render_clip_bottom, render_clip_top);
