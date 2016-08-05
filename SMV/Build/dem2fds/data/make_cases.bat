@@ -11,12 +11,14 @@ set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set case=blodget
 ::%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
 
-::set case=nist
-::%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+echo NIST
+%dem2fds% %option% -d %userprofile%\terrain\nist nist.in 
 
+echo tower
 %dem2fds% %option% -d %userprofile%\terrain\tower tower.in 
 
+echo sugarloaf
 %dem2fds% %option% -d %userprofile%\terrain\sugarloaf sugarloaf.in 
 
-
+echo trails
 %dem2fds% %option% -d %userprofile%\terrain\trails trails.in 
