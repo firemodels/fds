@@ -938,8 +938,7 @@ int SmokeviewImage2File(char *directory, char *RENDERfilename, int rendertype, i
   char *renderfile=NULL;
   GLubyte *OpenGLimage, *p;
   gdImagePtr RENDERimage;
-  unsigned int r, g, b;
-  int i,j,rgb_local;
+  int i,j;
   int width_beg, width_end, height_beg, height_end;
   int width2, height2;
 
@@ -988,6 +987,9 @@ int SmokeviewImage2File(char *directory, char *RENDERfilename, int rendertype, i
 
   for (i = height2-1 ; i>=0; i--){
     for(j=0;j<width2;j++){
+      unsigned int r, g, b;
+      int rgb_local;
+
       r=*p++; g=*p++; b=*p++;
       rgb_local = (r<<16)|(g<<8)|b;
       gdImageSetPixel(RENDERimage,j,i,rgb_local);
