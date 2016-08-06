@@ -26,15 +26,12 @@ typedef struct {
   int ncols, nrows, use_it;
   float xllcorner, yllcorner, cellsize;
   char *headerfile, *datafile;
-  float lat_min, lat_max;
-  float long_min, long_max;
+  float lat_min, lat_max, long_min, long_max, dlong, dlat;
   float val_min, val_max;
-  float dlong, dlat;
-  float *valbuffer;
-  unsigned char *visbuffer;
   float xmax, ymax, zmin, zmax;
-  float xref, yref;
-  float longref, latref;
+  float xref, yref, longref, latref;
+  float *valbuffer;
+  gdImagePtr image;
 } elevdata;
 
 char libdir[1024];
@@ -314,43 +311,24 @@ float GetElevation(elevdata *elevinfo, int nelevinfo, float longval, float latva
   return return_val;
 }
 
-/* ------------------ ReadJPEG ------------------------ */
+/* ------------------ ReadJPEGImage ------------------------ */
 
-unsigned char *ReadJPEG(const char *filename, int *width, int *height) {
+gdImagePtr ReadJPEGImage(const char *filename, int *width, int *height) {
 
   FILE *file;
   gdImagePtr image;
-  unsigned char *dataptr, *dptr;
-  int i, j;
-  unsigned int intrgb;
-  int WIDTH, HEIGHT;
 
+  *width = 0;
+  *height = 0;
   file = fopen(filename, "rb");
   if (file == NULL)return NULL;
   image = gdImageCreateFromJpeg(file);
   fclose(file);
-  if (image == NULL)return NULL;
-  WIDTH = gdImageSX(image);
-  HEIGHT = gdImageSY(image);
-  *width = WIDTH;
-  *height = HEIGHT;
-  if (NewMemory((void **)&dataptr, (unsigned int)(4 * WIDTH*HEIGHT)) == 0) {
-    gdImageDestroy(image);
-    return NULL;
+  if (image != NULL){
+    *width = gdImageSX(image);
+    *height = gdImageSY(image);
   }
-  dptr = dataptr;
-  for (i = 0; i < HEIGHT; i ++) {
-    for (j = 0; j < WIDTH; j ++) {
-      intrgb = (unsigned int)gdImageGetPixel(image, j, (unsigned int)(HEIGHT - (1 + i)));
-      *dptr++ = (intrgb >> 16) & 255;
-      *dptr++ = (intrgb >> 8) & 255;
-      *dptr++ = intrgb & 255;
-      *dptr++ = 0xff;
-    }
-  }
-  gdImageDestroy(image);
-  return dataptr;
-
+  return image;
 }
 
 /* ------------------ CopyString ------------------------ */
@@ -380,14 +358,15 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
 
     imagei = imageinfo + i;
     if (imagei->long_min <= llong&&llong <= imagei->long_max&&imagei->lat_min <= llat&&llat <= imagei->lat_max) {
-      int irow, icol, color_index;
+      int irow, icol;
 
-      irow = imagei->nrows*(llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
+	  if(imagei->image == NULL)imagei->image = ReadJPEGImage(imagei->datafile, &imagei->ncols, &imagei->nrows);
+
+	  irow = imagei->nrows - 1 - imagei->nrows*(llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
       icol = imagei->ncols*(llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
       irow = CLAMP(irow, 0, imagei->nrows-1);
       icol = CLAMP(icol, 0, imagei->ncols - 1);
-      color_index = irow*imagei->nrows + icol;
-      return imagei->visbuffer[color_index];
+      return gdImageGetPixel(imagei->image,icol,irow);
     }
   }
   return 0;
@@ -421,9 +400,8 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
       llong = fds_elevs->long_min + (float)i*dx;
 
       rgb_local = GetColor(llong, llat, imageinfo, nimageinfo);
-      gdImageSetPixel(RENDERimage,i,j,rgb_local);
+      gdImageSetPixel(RENDERimage,i,nrows-1-j,rgb_local);
     }
-
   }
 
   strcpy(imagefile, elevfile);
@@ -511,12 +489,11 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     imagei->long_min = -imagei->long_min;
     imagei->long_max = imagei->long_min + 3.75 / 60.0;
     imagei->lat_max = imagei->lat_min + 3.75 / 60.0;
-    imagei->visbuffer = ReadJPEG(imagei->datafile, &imagei->ncols, &imagei->nrows);
+	imagei->image = NULL;
 
     printf("file: %s\n", imagefilei->file);
     printf("long min/max %f %f\n", imagei->long_min, imagei->long_max);
     printf(" lat min/max %f %f\n", imagei->lat_min, imagei->lat_max);
-    printf(" image width/height: %i %i \n", imagei->ncols, imagei->nrows);
   }
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
