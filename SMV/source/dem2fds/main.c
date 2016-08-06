@@ -169,7 +169,7 @@ void GenerateFDS(char *casename, elevdata *fds_elevs, int option){
 
   NewMemory((void **)&ygrid, sizeof(float)*(jbar+1));
   for(i=0;i<jbar+1;i++){
-    ygrid[i] = ymax*(float)i/(float)jbar;
+    ygrid[i] = ymax*(float)(jbar-1-i)/(float)jbar;
   }
 
 
@@ -400,7 +400,7 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
       llong = fds_elevs->long_min + (float)i*dx;
 
       rgb_local = GetColor(llong, llat, imageinfo, nimageinfo);
-      gdImageSetPixel(RENDERimage,i,nrows-1-j,rgb_local);
+      gdImageSetPixel(RENDERimage,i,j,rgb_local);
     }
   }
 
@@ -433,6 +433,7 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
   float xref=0.0, yref=0.0;
   float xmax = -1000.0, ymax = -1000.0, zmin=-1000.0, zmax=-1000.0;
   float *longlats = NULL, *longlatsorig;
+  float long_min, long_max, lat_min, lat_max;
 
   nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
@@ -494,7 +495,22 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
     printf("file: %s\n", imagefilei->file);
     printf("long min/max %f %f\n", imagei->long_min, imagei->long_max);
     printf(" lat min/max %f %f\n", imagei->lat_min, imagei->lat_max);
+	if(i == 0){
+		lat_min = imagei->lat_min;
+		lat_max = imagei->lat_max;
+		long_min = imagei->long_min;
+		long_max = imagei->long_max;
+	}
+	else{
+		lat_min = MIN(imagei->lat_min,lat_min);
+		lat_max = MAX(imagei->lat_max,lat_max);
+		long_min = MIN(imagei->long_min, long_min);
+		long_max = MAX(imagei->long_max, long_max);
+	}
   }
+  printf("GLOBAL bounds:\n");
+  printf(" long min / max %f %f\n", long_min, long_max);
+  printf(" lat min/max %f %f\n", lat_min, lat_max);
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
   if(nelevinfo == 0){
