@@ -4,61 +4,82 @@
 </head>
 
 <BODY BGCOLOR="#FFFFFF" >
-<h3>Creating a Terrain Input File</h3>
+<h3>Creating a Terrain Input File for Use with FDS</h3>
 
 <h4>Preliminaries</h4>
   Install or verify that the following is installed:
 
 <ul>
-  <li>  Google Earth
+  <li>  <a href="http://www.imagemagick.org/script/binary-releases.php">Imagemagick</a>
   <li>  latest
   <a href="https://pages.nist.gov/fds-smv/downloads.html">installed</a>
   or
   <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing">test smokeview</a>
-  <li>  screen capture program
 </ul>
 
 <h4>Create FDS Input File</h4>
+<li> Go to the <a href="https://viewer.nationalmap.gov/basic/">USGS National Map</a> website.  You should see a map of the United States on the right and a set of data options on the left.
 <ol>
-  <li> Open Google Earth and identify a rectangular region of interest in the USA (elevation data not available at web site used below).
-  <li> Record the lat/lon coordinates of two opposite corners of this region.
-  <li> Create an image for this region using a screen capture program.  Name this image casename.png where casename is the 'CHID' parameter in the FDS input file
-  <li> Create a file named <tt>casename.in</tt> containing the following line:<br>
-    <tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes</tt>
+  <li> Obtaining Elevation data
+<ol>
+<li>Select the <em>Elevation Products (3DEP)</em> checkbox.
+<li>Select 1/3 arc-second DEM checkbox and <em>GridFloat</em> File format radio button
+<li>Click on the map and zoom in on a region of interest.
+<li>Click on the <em>Find Products</em> button.  You should see one or more 
+entries listed with headings beginning with
+USGS NED 1/3 arc-second ...... 1 x 1 degree .  Make sure that <em>GridFloat</em> is listed in heading
+(if not, click on Return to Search and verify you selected <em>GridFloat</em> option)
+<li>Click on the <em>Footprint</em> link to verify where various files are located.
+<li>Click on <em>Download</em> link to download files of interest.
+<li>Unzip these files (using a program like winzip). Copy the .flt and .hdr files to a directory. 
+</ol>
+<li>Obtaining Image data
+<ol>
+<li>Click on the <em>Return to Search</em> button and uncheck the <em>Elevation Products (3DEP)</em> checkbox
+<li>Select the <em>Imagery - 1 meter (NAIP)</em> checkbox
+<li>Click on the map and zoom in on a region of interest (same region selected for elevtaion files)
+<li>Click on the <em>Find Products</em> button.  You should see one or more 
+entries listed with headings beginning with <tt>m_</tt> and ending with <tt>.jp2</tt> .  
+<li>Click on the <em>Footprint</em> link to verify where various files are located.
+<li>Click on <em>Download</em> link to download files of interest.
+<li>Copy the downloaded files to the same directory you copied the .flt and .hdr elevation files.
+<li>The .jp2 files you just downloaded are in <em>jpeg 2000</em> format.  
+They need to be converted to jpeg format . To do this,
+run the following command (on a PC) for each <em>jp2</em> file:
+<pre>
+  magick imagefilename.jp2 imagefilename.jpg
+</pre>
+Note, this Imagemagick command is named <em>convert</em> on a Linux or Mac.
+</ol>
 
-  <ol>
-     <li> Google Earth gives latitudes and longitudes as d=degrees, m=minutes and  s=seconds.
-       The coordinates in <tt>casename.in</tt> are decimal <em>i.e.</em> d + m/60 + s/3600
-     <li>Note that longitudes in the United States are negative.
-  </ol>
 
-<li> Type the command:<br>
-     <tt>dem2fds casename < casename.in</tt><br>
- 
-     This command generated a series of files named casename_longlats_xxx.csv .  Each file contains 400 longitude/latitude pairs
-
-<li> Go to <a href="http://viewer.nationalmap.gov/theme/elevation/">http://viewer.nationalmap.gov/theme/elevation/</a> and click on bulk
-
-  <ol>
-    <li>  Click on Choose Files and select a file for each casename_longlats_xxx.csv generated in step 5
-    <li>  Click on Get Elevations
-    <li>  After that web site retrieved all the data requested save the file
-  </ol>
-
-<li> Concatenate all elevation files generated in step 6 after removing the header line in each file.
-Call this file <tt>casename_elevs.csv</tt> .  The first line of <tt>casename_elevs.csv</tt> should be <br>
-<tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes zmin zmax nz</tt>
 
 <li> Creating an FDS input file
 
    <ol>
-     <li>Using obstacles (&OBST lines):<br>
-     <tt>dem2fds -o casename < casename_elevs.csv</tt><br>
+<li>create a file named <tt>casename.in</tt> containing the following two lines<br>
+<pre>
+LONGLATMINMAX
+  longmin  longmax nlongs latmin latmax nlats
+</pre>
+where <tt> longmin  longmax </tt> are the minimum and maximum longitude of the region  you are modeling,
+<tt> latmin  latmax </tt> are the miniumum and maximum latitude and <tt>nlong</tt> and <tt>nlat</tt>
+are the number of longitudes and latitudes.
 
-     <li>Using geometry (&GEOM lines):<br>
-     <tt>dem2fds -e casename < casename_elevs.csv</tt><br>
+     <li>Run the command:<br>
+<pre>
+ dem2fds -d elevation_directory -o casename.in
+</pre>
+where <tt>elevation_directory</tt> is the path for the directory containing the elevation and image files you downloaded.
+<li>An FDS input file has been created.  To view the case, run the commands:
+<pre>
+fds casename.fds
+smokeview casename
+</pre>
    </ol>
 
+Note, the FDS input file, <em>casename.fds</em> is only a starting point.  You will need to
+edit it to model your scenario as you wish.
 </ol>
 
 </BODY>
