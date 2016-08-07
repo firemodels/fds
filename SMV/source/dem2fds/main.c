@@ -349,24 +349,30 @@ void CopyString(char *cval, char **p, int len, int *val) {
 }
 
 /* ------------------ GetColor ------------------------ */
-
+#define IMAGE_OFFSET 0
 int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
   int i;
 
-  for (i = 0; i < nimageinfo; i++) {
+  for(i = 0; i < nimageinfo; i++) {
     elevdata *imagei;
 
     imagei = imageinfo + i;
-    if (imagei->long_min <= llong&&llong <= imagei->long_max&&imagei->lat_min <= llat&&llat <= imagei->lat_max) {
+    if(imagei->long_min <= llong&&llong <= imagei->long_max&&imagei->lat_min <= llat&&llat <= imagei->lat_max) {
       int irow, icol;
+      float latfact, longfact;
 
-	  if(imagei->image == NULL)imagei->image = ReadJPEGImage(imagei->datafile, &imagei->ncols, &imagei->nrows);
+      if(imagei->image == NULL)imagei->image = ReadJPEGImage(imagei->datafile, &imagei->ncols, &imagei->nrows);
 
-	  irow = imagei->nrows - 1 - imagei->nrows*(llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
-      icol = imagei->ncols*(llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
-      irow = CLAMP(irow, 0, imagei->nrows-1);
+      latfact = (llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
+      longfact = (llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
+
+      irow = IMAGE_OFFSET + (imagei->nrows - 1 - 2 * IMAGE_OFFSET)*latfact;
+      irow = imagei->nrows - 1 - irow;
+      irow = CLAMP(irow, 0, imagei->nrows - 1);
+
+      icol = IMAGE_OFFSET + (imagei->ncols - 1 - 2 * IMAGE_OFFSET)*longfact;
       icol = CLAMP(icol, 0, imagei->ncols - 1);
-      return gdImageGetPixel(imagei->image,icol,irow);
+      return gdImageGetPixel(imagei->image, icol, irow);
     }
   }
   return 0;
@@ -382,7 +388,7 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
   FILE *stream;
   char *ext;
 
-  ncols = 1000;
+  ncols = 2000;
   nrows = ncols*fds_elevs->ymax / fds_elevs->xmax;
   dx = (fds_elevs->long_max - fds_elevs->long_min) / (float)ncols;
   dy = (fds_elevs->lat_max - fds_elevs->lat_min) / (float)nrows;
@@ -508,9 +514,11 @@ int GenerateElevs(char *elevfile, elevdata *fds_elevs){
 		long_max = MAX(imagei->long_max, long_max);
 	}
   }
-  printf("GLOBAL bounds:\n");
-  printf(" long min / max %f %f\n", long_min, long_max);
-  printf(" lat min/max %f %f\n", lat_min, lat_max);
+  if(nimageinfo > 0){
+    printf("GLOBAL bounds:\n");
+	printf(" long min / max %f %f\n", long_min, long_max);
+	printf(" lat min/max %f %f\n", lat_min, lat_max);
+  }
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
   if(nelevinfo == 0){
