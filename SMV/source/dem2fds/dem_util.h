@@ -20,8 +20,8 @@ typedef struct {
   gdImagePtr image;
 } elevdata;
 
-void GenerateFDS(char *casename, elevdata *fds_elevs, int option);
-int GenerateElevs(char *elevfile, elevdata *fds_elevs);
+EXTERNCPP void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option);
+EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs);
 
 SVEXTERN char libdir[1024];
 

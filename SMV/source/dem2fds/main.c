@@ -93,8 +93,8 @@ int main(int argc, char **argv){
     }
   }
   if(casename == NULL)casename = file_default;
-  if (GenerateElevs(casename,&fds_elevs) == 1) {
-    GenerateFDS(casename, &fds_elevs, gen_fds);
+  if (GetElevations(casename,&fds_elevs) == 1) {
+    GenerateFDSInputFile(casename, &fds_elevs, gen_fds);
   }
   return 0;
 }
