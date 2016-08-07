@@ -349,7 +349,8 @@ void CopyString(char *cval, char **p, int len, int *val) {
 }
 
 /* ------------------ GetColor ------------------------ */
-#define IMAGE_OFFSET 0
+#define IMAGE_OFFSETR 0
+#define IMAGE_OFFSETC 0
 int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
   int i;
 
@@ -366,11 +367,11 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
       latfact = (llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
       longfact = (llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
 
-      irow = IMAGE_OFFSET + (imagei->nrows - 1 - 2 * IMAGE_OFFSET)*latfact;
+      irow = IMAGE_OFFSETR + (imagei->nrows - 1 - 2 * IMAGE_OFFSETR)*latfact;
       irow = imagei->nrows - 1 - irow;
       irow = CLAMP(irow, 0, imagei->nrows - 1);
 
-      icol = IMAGE_OFFSET + (imagei->ncols - 1 - 2 * IMAGE_OFFSET)*longfact;
+      icol = IMAGE_OFFSETC + (imagei->ncols - 1 - 2 * IMAGE_OFFSETC)*longfact;
       icol = CLAMP(icol, 0, imagei->ncols - 1);
       return gdImageGetPixel(imagei->image, icol, irow);
     }
