@@ -29,28 +29,28 @@
 &RAMP ID='PR',   T= 3., F=1.778 /   3 x 2.5 x 1.334 = 10 l/min
 &RAMP ID='PR',   T= 4., F=1. /      4 x 2.5 x 1 =     10 l/min
 
-&DEVC XYZ=0.0,0.0,3.0, 
+&DEVC XYZ=-1.0,-1.0,3.0, 
       QUANTITY = 'CONTROL'
       PROP_ID='Head', 
       ID='Spr_1', 
       LATCH = .FALSE.
       CTRL_ID = 'C1' /
 
-&DEVC XYZ=0.0,0.0,3.0, 
+&DEVC XYZ=-1.0,1.0,3.0, 
       QUANTITY = 'CONTROL'
       PROP_ID='Head', 
       ID='Spr_2', 
       LATCH = .FALSE.
       CTRL_ID = 'C2' /
 
-&DEVC XYZ=0.0,0.0,3.0, 
+&DEVC XYZ=1.0,1.0,3.0, 
       QUANTITY = 'CONTROL'
       PROP_ID='Head', 
       ID='Spr_3', 
       LATCH = .FALSE.
       CTRL_ID = 'C3' /
 
-&DEVC XYZ=0.0,0.0,3.0, 
+&DEVC XYZ=1.0,-1.0,3.0, 
       QUANTITY = 'CONTROL'
       PROP_ID='Head', 
       ID='Spr_4', 
