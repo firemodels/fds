@@ -2,10 +2,10 @@
 
 &MESH IJK=10,10,60, XB=0.0,1.0,0.0,1.0,0.0,6.0 /
 
-&TIME T_END=300. /
+&TIME T_END=300./
 &DUMP DT_HRR=60./
 &MISC HUMIDITY=0./
-&REAC FUEL='PROPANE', SOOT_YIELD=0.015 /
+&REAC FUEL='PROPANE', SOOT_YIELD=0.015/
 &PRES VELOCITY_TOLERANCE=0.001,MAX_PRESSURE_ITERATIONS=100/
 
 &SPEC ID='WATER VAPOR' /
@@ -18,13 +18,13 @@
 
 &DEVC XYZ=0.5,0.5,5.5, PROP_ID='nozzle', QUANTITY='TIME', SETPOINT=60., ID='noz_1' /
 
-&MATL ID            = 'STEEL'                                                                                      
-      DENSITY       = 7850.                                                                                             
+&MATL ID            = 'STEEL'
+      DENSITY       = 7850.
       SPECIFIC_HEAT = 0.465
       CONDUCTIVITY  = 54. /
 
 &SURF ID        = 'PLATE'
-      COLOR     = 'BLACK'   
+      COLOR     = 'BLACK'
       MATL_ID   = 'STEEL'
       BACKING   = 'INSULATED'
       THICKNESS = 0.0001 /
@@ -35,7 +35,7 @@
       HRRPUA    = 600. /
 
 &SURF ID        = 'WALL'
-      COLOR     = 'SILVER'   
+      COLOR     = 'SILVER'
       ADIABATIC = .TRUE. /
 
 &SURF ID        = 'FLOW'
