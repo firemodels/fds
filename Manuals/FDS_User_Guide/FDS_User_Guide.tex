@@ -4544,7 +4544,7 @@ If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, 
 More detail is included in Chapter~\ref{info:PART}.
 
 \subsection{Air}
-There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost. 
+There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost.
 
 \subsubsection{Specifying a Chemical Formula}
 \label{info:FORMULA}
@@ -7287,7 +7287,7 @@ The output quantity {\ct THERMOCOUPLE} is the temperature of a modeled thermocou
    \label{TC}
 \ee
 where $\epsilon_{\rm TC}$ is the emissivity of the thermocouple, $U$ is the integrated radiative intensity, $T_{\rm g}$ is the true gas temperature, and
-$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct BEAD\_DIAMETER}, {\ct BEAD\_EMISSIVITY}, {\ct BEAD\_DENSITY}, and {\ct BEAD\_SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct BEAD\_HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
+$h$ is the heat transfer coefficient to a small sphere, $h=k \, \NU / D_{\rm TC}$. The bead {\ct DIAMETER}, {\ct EMISSIVITY}, {\ct DENSITY}, and {\ct SPECIFIC\_HEAT} are given on the associated {\ct PROP} line. To over-ride the calculated value of the heat transfer coefficient, set {\ct HEAT\_TRANSFER\_COEFFICIENT} on the {\ct PROP} line (\si{W/(m.K)}). The default value for the bead diameter is 0.001~m. The default emissivity is 0.85. The default values for the bead density and specific heat are that of nickel; 8908~kg/m$^3$ and 0.44~kJ/kg/K, respectively. See the discussion on heat transfer to a water droplet in the Technical Reference Guide for details of the convective heat transfer to a small sphere.
 
 
 \subsection{Heat Flux}
@@ -7297,17 +7297,25 @@ There are various output quantities related to heat flux. First, consider the {\
 \be
    \dq_{\rm net}'' = \epsilon_{\rm s} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm s}^4 \right) + h \, (T_{\rm gas} - T_{\rm s}) \label{net_flux}
 \ee
-where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. If you want to output the {\em net} heat flux, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively.
+where $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux, $\epsilon_{\rm s}$ is the surface emissivity, $h$ is the convective heat transfer coefficient, $T_{\rm s}$ is the surface temperature, and $T_{\rm gas}$ is the gas temperature in the vicinity of the surface. If you want to output the {\em net} heat flux, use the {\ct QUANTITY} called {\ct 'NET HEAT FLUX'}. The individual components, the {\em net} convective and radiative fluxes, are {\ct 'CONVECTIVE HEAT FLUX'} and {\ct 'RADIATIVE HEAT FLUX'}, respectively. If you just want to output $\dq_{\rm inc,rad}''$, use {\ct 'INCIDENT HEAT FLUX'}.
 
 If you want to compare the heat flux predicted by FDS to a measurement made with a heat flux gauge, use {\ct 'GAUGE HEAT FLUX'}:
 \be
    \dq_{\rm gauge}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right) + h \, (T_{\rm gas} - T_{\rm gauge})
 \ee
-If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than that of the surrounding surface, set {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device.  When comparing against a radiometer measurement, use {\ct RADIOMETER}:
+If the heat flux gauge used in an experiment has a temperature other than ambient or an emissivity other than 1, use {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) on the {\ct PROP} line associated with the device:
+\begin{lstlisting}
+&DEVC ID='hf', XYZ=..., IOR=-2, QUANTITY='GAUGE HEAT FLUX', PROP_ID='hf props' /
+&PROP ID='hf props', GAUGE_TEMPERATURE=80., GAUGE_EMISSIVITY=0.9 /
+\end{lstlisting}
+The heat transfer coefficient, $h$, is that of the solid surface to which the device is attached.
+
+Similar to a heat flux gauge, a {\ct 'RADIOMETER'} measures only the radiative heat flux:
 \be
    \dq_{\rm radiometer}'' = \epsilon_{\rm gauge} \, \left( \dq_{\rm inc,rad}'' - \sigma \, T_{\rm gauge}^4 \right)
 \ee
-For diagnostic purposes it is sometimes convenient to output $\dq_{\rm inc,rad}''$ using {\ct 'INCIDENT HEAT FLUX'}.
+The {\ct GAUGE\_TEMPERATURE} ($T_{\rm gauge}$) and {\ct GAUGE\_EMISSIVITY} ($\epsilon_{\rm gauge}$) can be set on the {\ct PROP} line associated with the device if their values are different than ambient and 1, respectively.
+
 
 All of the above heat flux output quantities are defined at a solid surface. To record the radiative heat flux away from a solid surface, add a device with the following format:
 \begin{lstlisting}
@@ -7318,7 +7326,7 @@ Note that {\ct XB} and {\ct STATISTICS} are not appropriate for this quantity.  
 &DEVC ID='flux', INIT_ID='f1', QUANTITY='RADIATIVE HEAT FLUX' /
 &INIT ID='f1', XYZ=..., N_PARTICLES=1, PART_ID='rad gauge' /
 &PART ID='rad gauge', STATIC=.TRUE., ORIENTATION(1:3,1)=-1,0,0, SURF_ID='target' /
-&SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL' /
+&SURF ID='target', RADIUS=0.001, GEOMETRY='SPHERICAL', EMISSIVITY=1. /
 \end{lstlisting}
 Note that the {\ct DEVC} line does not contain device coordinates, but rather a reference to the {\ct INIT} line that positions the single surrogate particle at the point {\ct XYZ}. The {\ct INIT} line references the {\ct PART} line, which provides information about the particle, in particular the orientation of the heat flux gauge. The reference to the {\ct SURF} line is mainly for consistency -- FDS needs to know something about the particle's geometry even though it is really just a ``target.''
 
@@ -7339,18 +7347,20 @@ FDS includes a calculation of the adiabatic surface temperature (AST), a quantit
 \ee
 where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto the surface, $\epsilon$ is the surface emissivity, $h$ is the convective heat transfer coefficient, and $T_{\rm gas}$ is the surrounding gas temperature.
 
-The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide.
-
+The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
+\begin{lstlisting}
+&DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
+      ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
+&PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
+\end{lstlisting}
+This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
 
 
 
 \subsection{Special Topic: Detailed Spray Properties}
 \label{PDPA}
 
-Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article
-\underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration.
-A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the
-measurement are defined using an associated {\ct PROP} line.
+Detailed experimental measurements of sprays using \underline{P}hase \underline{D}oppler \underline{P}article \underline{A}nalysis (PDPA) provide information on the droplet size distribution, speed and concentration. A special device type is defined via a {\ct DEVC} line to simulate the PDPA measurement. The actual quantity to measure, and the details of the measurement are defined using an associated {\ct PROP} line.
 
 By default, the PDPA device output at time $t$ is computed as a time integral
 \be
@@ -7366,20 +7376,14 @@ f_1(t) =  \left(\frac{\sum_i n_i D_i^m \, \phi}{\sum_i n_i D_i^n}\right)^{\frac{
 \quad ; \quad
 f_2(t) = \frac{\sum_i n_i \, \phi}{V}
 \ee
-where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$
-is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere
-with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
+where $n_i$ is the number of real particles represented by the single simulated particle, $D_i$ is the particle diameter, and $\phi$ is the quantity to be measured. In each case, the summation goes over all the particles within a sphere with radius {\ct PDPA\_RADIUS} and centered at the location given by the device {\ct XYZ}.
 
-The first form $f_1(t)$ is used for the computation of various mean diameters, with
-associated properties defined using the following keywords on the {\ct PROP} line:
+The first form $f_1(t)$ is used for the computation of various mean diameters, with associated properties defined using the following keywords on the {\ct PROP} line:
 \begin{description}
 \item[{\ct PDPA\_M}] $m$, exponent $m$ of diameter.
 \item[{\ct PDPA\_N}] $n$, exponent $n$ of diameter. In case $m=n$, the exponent $1/(m-n)$ is removed from the formula.
 \end{description}
-The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting.
-The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}.
-The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}.
-A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
+The second form ($f_2(t)$) is used for the computation of mass and energy related variables that do not include the diameter weighting. The concentrations are based on the sampling volume, $V$, defined by {\ct PDPA\_RADIUS}. The quantity used for $x$ can be chosen with the keyword {\ct QUANTITY}. A summary of the available PDPA quantities is shown in Table~\ref{tbl:pdpa}.
 
 \begin{table}[!ht]
 \caption[Output quantities available for PDPA]{Output quantities available for PDPA.}
@@ -9237,20 +9241,19 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct ACTIVATION\_TEMPERATURE}           & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & 74.        \\ \hline
 {\ct ALPHA\_C}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 1.8       \\ \hline
 {\ct ALPHA\_E}                          & Real          & Section~\ref{info:smoke_detector}         &                       & 0.       \\ \hline
-{\ct BEAD\_DENSITY}                     & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
-{\ct BEAD\_DIAMETER}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
-{\ct BEAD\_EMISSIVITY}                  & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
-{\ct \footnotesize BEAD\_HEAT\_TRANSFER\_COEFFICIENT} & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
-{\ct BEAD\_SPECIFIC\_HEAT}              & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
 {\ct BETA\_C}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct BETA\_E}                           & Real          & Section~\ref{info:smoke_detector}         &                       & 1.       \\ \hline
 {\ct CHARACTERISTIC\_VELOCITY}          & Real          & Section~\ref{info:wind}                   & m/s                   & 1.       \\ \hline
 {\ct C\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & (m/s)$^{1/2}$         & 0.        \\ \hline
+{\ct DENSITY}                           & Real          & Section~\ref{info:THERMOCOUPLE}           & kg/m$^3$              & 8908.     \\ \hline
+{\ct DIAMETER}                          & Real          & Section~\ref{info:THERMOCOUPLE}           & m                     & 0.001     \\ \hline
+{\ct EMISSIVITY}                        & Real          & Section~\ref{info:THERMOCOUPLE}           &                       & 0.85      \\ \hline
 {\ct FLOW\_RAMP}                        & Character     & Section~\ref{info:sprinklers}             &                       &           \\ \hline
 {\ct FLOW\_RATE}                        & Real          & Section~\ref{info:sprinklers}             & L/min                 &           \\ \hline
 {\ct FLOW\_TAU}                         & Real          & Section~\ref{info:sprinklers}             &                       & 0.       \\ \hline
 {\ct GAUGE\_EMISSIVITY}                 & Real          & Section~\ref{info:heat_flux}              &                       & 0.9       \\ \hline
 {\ct GAUGE\_TEMPERATURE}                & Real          & Section~\ref{info:heat_flux}              & $^\circ$C             & {\ct TMPA}\\ \hline
+{\ct HEAT\_TRANSFER\_COEFFICIENT}       & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{W/(m$^2$.K)}      &           \\ \hline
 {\ct ID}                                & Character     & Section~\ref{info:PROP}                   &                       &           \\ \hline
 {\ct INITIAL\_TEMPERATURE}              & Real          & Section~\ref{info:sprinklers}             & $^\circ$C             & {\ct TMPA}\\ \hline
 {\ct K\_FACTOR}                         & Real          & Section~\ref{info:sprinklers}             & $\si{L/(min.bar^{\ha})}$ & 1.        \\ \hline
@@ -9280,6 +9283,7 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct SMOKEVIEW\_ID}                     & Char.~Array   & Section~\ref{info:SMOKEVIEW_ID}           &                       &           \\ \hline
 {\ct SMOKEVIEW\_PARAMETERS}             & Char.~Array   & Section~\ref{info:SMOKEVIEW_PARAMETERS}   &                       &           \\ \hline
 {\ct SPEC\_ID}                          & Character     & Section~\ref{info:alternative_smoke}      &                       &           \\ \hline
+{\ct SPECIFIC\_HEAT}                    & Real          & Section~\ref{info:THERMOCOUPLE}           & \si{kJ/(kg.K)}        & 0.44      \\ \hline
 {\ct SPRAY\_ANGLE(2,2)}                 & Real          & Section~\ref{info:sprinklers}             & deg.                  & 60.,75.   \\ \hline
 {\ct SPRAY\_PATTERN\_BETA}              & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 5          \\ \hline
 {\ct SPRAY\_PATTERN\_MU}                & Integer       & Section~\ref{info:sprinklers}             & deg.                  & 0          \\ \hline
