@@ -4544,7 +4544,7 @@ If the species listed in Table~\ref{tab:gasspecies} includes liquid properties, 
 More detail is included in Chapter~\ref{info:PART}.
 
 \subsection{Air}
-There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost. 
+There are two predefined species for air in FDS. The first predefined species is the default background species of {\ct AIR}. This is a lumped species consisting of oxygen, nitrogen, carbon dioxide, and water vapor whose mass fractions are controlled by the {\ct Y\_CO2\_INFTY}, {\ct Y\_O2\_INFTY}, and {\ct HUMIDITY} inputs. This lumped species is automatically defined by FDS if no other {\ct SPEC} input is defined as the {\ct BACKGROUND}. Note that {\ct ID='AIR'} cannot be used on a {\ct SPEC} input unless that input or some other {\ct SPEC} input is defined as the {\ct BACKGROUND}. The second predefined species is the primitive species of {\ct LJ AIR}. This is an effective gas species whose molecular weight and enthalpy are defined based on the {\ct Y\_CO2\_INFTY} and {\ct Y\_O2\_INFTY} inputs, and whose other thermophysical properties use the Lennard-Jones parameters for air. For simulations without combustion, using {\ct LJ AIR} as the {\ct BACKGROUND} species will slightly reduce the computational cost.
 
 \subsubsection{Specifying a Chemical Formula}
 \label{info:FORMULA}
@@ -7349,11 +7349,11 @@ where, $\dot{q}_{\rm inc,rad}''$ is the {\em incident} radiative heat flux onto 
 
 The usefulness of the AST is that it represents an effective exposure temperature that the solid surface ``sees.'' It provides the gas phase thermal boundary condition in a single quantity, and it is not affected by the uncertainty associated with the simple solid phase heat conduction model within FDS. Obviously, the objective in passing information to a more detailed model is to get a better prediction of the solid temperature (and ultimately its mechanical response) than FDS can provide. To reinforce this notion, you can output the adiabatic surface temperature even when there is no actual solid surface using the following lines:
 \begin{lstlisting}
-&DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS', 
-      ORIENTATION=0,1,0,, PROP_ID='props' /
+&DEVC ID='AST', XYZ=..., QUANTITY='ADIABATIC SURFACE TEMPERATURE GAS',
+      ORIENTATION=0.707,0.0,0.707, PROP_ID='props' /
 &PROP ID='props', EMISSIVITY=0.9, HEAT_TRANSFER_COEFFICIENT=10. /
 \end{lstlisting}
-This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in the direction indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
+This output indicates the maximum achievable solid surface temperature at the given location {\ct XYZ} that is \emph{not} actually in the vicinity of a solid surface, facing in any direction as indicated by the {\ct ORIENTATION} vector. Note that you {\em must} set the {\ct EMISSIVITY} and {\ct HEAT\_TRANSFER\_COEFFICIENT} (W/(m$^2\cdot$K)) on the {\ct PROP} line because there is no actual solid surface from which to infer these values.
 
 
 
