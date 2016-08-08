@@ -40,12 +40,12 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
 
    ! If particles/PARTICLEs have a size distribution, initialize here
 
-   IF_SIZE_DISTRIBUTION: IF (.NOT.LPC%MONODISPERSE .AND. (LPC%DIAMETER > 0._EB) .OR. LPC%CNF_RAMP_INDEX>=0) THEN
+   IF_SIZE_DISTRIBUTION: IF (.NOT.LPC%MONODISPERSE .AND. (LPC%DIAMETER>0._EB) .OR. LPC%CNF_RAMP_INDEX>=0) THEN
       IF (LPC%CNF_RAMP_INDEX<0) THEN
          CALL PARTICLE_SIZE_DISTRIBUTION(LPC%DIAMETER,LPC%R_CNF(:),LPC%CNF(:),LPC%CVF(:),NDC,LPC%GAMMA,LPC%SIGMA,LPC%DISTRIBUTION)
       ELSE
          RM=>RAMPS(LPC%CNF_RAMP_INDEX)
-         LPC%DIAMETER = RM%SPAN*0.5_EB ! This isn't actually used, but some routines might expect it to be set.
+         LPC%DIAMETER = RM%SPAN*0.5_EB ! Not used for MONODISPERSE
          DD           = RM%SPAN/NDC
          LPC%R_CNF(0) = RM%T_MIN
          LPC%CNF(0)   = 0._EB
@@ -56,7 +56,7 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
             LPC%CNF(I)   = EVALUATE_RAMP(DI,0._EB,LPC%CNF_RAMP_INDEX)
             LPC%CVF(I)   = LPC%CVF(I-1) + (DI-0.5*DD)**3*(LPC%CNF(I)-LPC%CNF(I-1))
          ENDDO
-         LPC%R_CNF = 1.E-6_EB*0.5_EB*LPC%R_CNF  ! Convert diameter in microns to radius in meters.
+         LPC%R_CNF = 1.E-6_EB*0.5_EB*LPC%R_CNF ! Convert diameter in microns to radius in meters.
          LPC%CNF   = LPC%CNF/LPC%CNF(NDC)
          LPC%CVF   = LPC%CVF/LPC%CVF(NDC)
       ENDIF
@@ -81,15 +81,15 @@ PART_CLASS_LOOP: DO ILPC=1,N_LAGRANGIAN_CLASSES
             ENDIF
          ENDDO UL_LOOP
          LPC%W_CNF(I) = LPC%CNF(IU) - LPC%CNF(IL)
-
-         ! ! experimental weighting for each stratum
-         ! SV = 0._EB
-         ! DO II=IL,IU
-         !    SV = SV + ( LPC%CNF(II) - LPC%CNF(II-1) ) * FOTHPI*LPC%R_CNF(II-1)**3
-         ! ENDDO
-         ! LPC%W_CNF(I) = LPC%W_CNF(I) / ( LPC%DENSITY * SV )
-
       ENDDO STRATIFY
+
+      ! Compute mean droplet volume for distribution
+
+      LPC%MEAN_DROPLET_VOLUME = 0._EB
+      DO I=1,NDC
+         LPC%MEAN_DROPLET_VOLUME = LPC%MEAN_DROPLET_VOLUME + ( LPC%CNF(I) - LPC%CNF(I-1) ) * FOTHPI*LPC%R_CNF(I-1)**3
+      ENDDO
+
    ENDIF IF_SIZE_DISTRIBUTION
 
    ! If pacticles/PARTICLEs can break up, compute normalized (median = 1) size distribution for child PARTICLEs
@@ -211,8 +211,8 @@ N_ACTUATED_SPRINKLERS = 0
 COUNT_OPEN_NOZZLES_LOOP: DO KS=1,N_DEVC ! Loop over all devices, but look for sprinklers or nozzles
    DV => DEVICE(KS)
    PY => PROPERTY(DV%PROP_INDEX)
-   IF (.NOT. DV%CURRENT_STATE) CYCLE COUNT_OPEN_NOZZLES_LOOP
-   IF (PY%PART_ID == 'null')   CYCLE COUNT_OPEN_NOZZLES_LOOP
+   IF (.NOT.DV%CURRENT_STATE) CYCLE COUNT_OPEN_NOZZLES_LOOP
+   IF (PY%PART_ID == 'null')  CYCLE COUNT_OPEN_NOZZLES_LOOP
    N_OPEN_NOZZLES = N_OPEN_NOZZLES + 1
    IF (PY%QUANTITY=='SPRINKLER LINK TEMPERATURE') N_ACTUATED_SPRINKLERS = N_ACTUATED_SPRINKLERS + 1
 ENDDO COUNT_OPEN_NOZZLES_LOOP
@@ -225,7 +225,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    PY => PROPERTY(DV%PROP_INDEX)
    IF (PY%PART_ID == 'null')   CYCLE SPRINKLER_INSERT_LOOP
    IF (DV%MESH/=NM)            CYCLE SPRINKLER_INSERT_LOOP
-   IF (.NOT. DV%CURRENT_STATE) CYCLE SPRINKLER_INSERT_LOOP
+   IF (.NOT.DV%CURRENT_STATE) CYCLE SPRINKLER_INSERT_LOOP
    LPC=>LAGRANGIAN_PARTICLE_CLASS(PY%PART_INDEX)
 
    IF (ABS(DV%T_CHANGE-T)<=TWO_EPSILON_EB) THEN
@@ -259,7 +259,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
          D_PRES_FACTOR = 1.0_EB
          FLOW_RATE = PY%FLOW_RATE
       ENDIF
-      FLOW_RATE = FLOW_RATE*(LPC%DENSITY/1000._EB)/60._EB  ! convert from L/min to kg/s
+      FLOW_RATE = FLOW_RATE*LPC%DENSITY/1000._EB/60._EB  ! convert from L/min to kg/s
    ENDIF
 
    FLOW_RATE = EVALUATE_RAMP(TSI,PY%FLOW_TAU,PY%FLOW_RAMP_INDEX)*FLOW_RATE ! kg/s
@@ -313,7 +313,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
       ! Randomly choose particle direction angles, theta and phi
 
       CHOOSE_COORDS: DO
-         PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN !Use spray pattern table
+         PICK_PATTERN: IF(PY%SPRAY_PATTERN_INDEX>0) THEN ! Use spray pattern table
             TA => TABLES(PY%SPRAY_PATTERN_INDEX)
             CALL RANDOM_NUMBER(RN)
             FIND_ROW: DO II=1,TA%NUMBER_ROWS
@@ -334,7 +334,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
             ELSE
                PARTICLE_SPEED = TA%TABLE_DATA(II,5)
             ENDIF
-         ELSE PICK_PATTERN !Use conical spray
+         ELSE PICK_PATTERN ! Use conical spray
             CALL RANDOM_CHOICE(PY%SPRAY_LON_CDF(:),PY%SPRAY_LON,NDC2,PHI_RN)
             ILAT=MINLOC(ABS(PY%SPRAY_LON-PHI_RN),1)-1
             CALL RANDOM_CHOICE(PY%SPRAY_LAT_CDF(:,ILAT),PY%SPRAY_LAT,NDC2,THETA_RN)
@@ -455,8 +455,8 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    ! Compute weighting factor for the PARTICLEs just inserted
 
    IF (DROP_SUM > 0) THEN
-      PWT0 = FLOW_RATE*(T-DV%T)/MASS_SUM
-      !PWT0 = FLOW_RATE / REAL(PY%PARTICLES_PER_SECOND,EB)
+      !PWT0 = FLOW_RATE*(T-DV%T)/MASS_SUM
+      PWT0 = LPC%N_STRATA*FLOW_RATE/(LPC%DENSITY*LPC%MEAN_DROPLET_VOLUME*REAL(PY%PARTICLES_PER_SECOND,EB))/D_PRES_FACTOR**3
       DO I=1,N_INSERT
          N = LP_INDEX_LOOKUP(I)
          LP => LAGRANGIAN_PARTICLE(N)
@@ -602,7 +602,7 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
 
       LP=>MESHES(NM)%LAGRANGIAN_PARTICLE(NLP)
       SF=>SURFACE(LPC%SURF_INDEX)
-      IF (.NOT. LPC%MASSLESS_TRACER .AND. .NOT.LPC%MASSLESS_TARGET) THEN
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. .NOT.LPC%MASSLESS_TARGET) THEN
          MASS_SUM = MASS_SUM + LP%PWT*LPC%FTPR*LP%ONE_D%X(SF%N_CELLS_INI)**3
       ENDIF
 
@@ -621,8 +621,8 @@ WALL_INSERT_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
          FLOW_RATE = EVALUATE_RAMP(TSI,SF%TAU(TIME_PART),SF%RAMP_INDEX(TIME_PART))*SF%PARTICLE_MASS_FLUX
          DO I=1,SF%NPPC
             N = LP_INDEX_LOOKUP(I)
-            LAGRANGIAN_PARTICLE(N)%PWT = LAGRANGIAN_PARTICLE(N)%PWT*&
-                                         FLOW_RATE*WALL(IW)%ONE_D%AREA_ADJUST*WALL(IW)%AW*SF%DT_INSERT/MASS_SUM
+            LP => LAGRANGIAN_PARTICLE(N)
+            LP%PWT = LP%PWT * FLOW_RATE*WALL(IW)%ONE_D%AREA_ADJUST*WALL(IW)%AW*SF%DT_INSERT/MASS_SUM
          ENDDO
       ENDIF
    ENDIF
@@ -2797,6 +2797,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
       WGT      = LP%PWT
 
       TIME_ITERATION_LOOP: DO WHILE (DT_SUM < DT)
+
          KILL_RADIUS_CHECK: IF (LP%ONE_D%X(1)>LPC%KILL_RADIUS) THEN
 
             ! Gas conditions
@@ -2821,6 +2822,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
             U2 = 0.5_EB*(U(II,JJ,KK)+U(II-1,JJ,KK))
             V2 = 0.5_EB*(V(II,JJ,KK)+V(II,JJ-1,KK))
             W2 = 0.5_EB*(W(II,JJ,KK)+W(II,JJ,KK-1))
+
             ! Initialize PARTICLE thermophysical data
 
             R_DROP   = LP%ONE_D%X(1)
@@ -2849,7 +2851,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   Q_DOT_RAD = 0._EB
                ENDIF
             ENDIF SOLID_OR_GAS_PHASE_1
-
             BOIL_ALL: IF (Q_DOT_RAD*DT_SUBSTEP > M_DROP*H_V) THEN
                M_VAP = M_DROP
                Q_RAD = M_VAP*H_V
@@ -2974,6 +2975,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                   ELSE
                      LENGTH   = 1._EB
                      RE_L     = MAX(5.E5_EB,RHO_G*VEL*LENGTH/MU_AIR)
+
                      !Incropera and Dewitt, Fundamentals of Heat and Mass Transfer, 7th Edition
                      NUSSELT  = NU_FAC_WALL*RE_L**0.8_EB-871._EB
                      SHERWOOD = SH_FAC_WALL*RE_L**0.8_EB-871._EB
@@ -3002,7 +3004,6 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                AGHRHO = A_DROP*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H_V+H_L)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
-
                SELECT CASE (ARRAY_CASE)
                   CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
