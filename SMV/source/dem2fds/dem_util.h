@@ -9,7 +9,7 @@
 /* --------------------------  elevdata ------------------------------------ */
 
 typedef struct {
-  int ncols, nrows, use_it;
+  int ncols, nrows, nz, use_it;
   float xllcorner, yllcorner, cellsize;
   char *headerfile, *datafile;
   float lat_min, lat_max, long_min, long_max, dlong, dlat;

@@ -11,6 +11,11 @@
 #include "gd.h"
 #include "dem_util.h"
 
+#define LONGLATREF_NONE -1
+#define LONGLATREF_ORIG 0
+#define LONGLATREF_CENTER 1
+#define LONGLATREF_MINMAX 2
+
 /* ------------------ CopyString ------------------------ */
 
 void CopyString(char *cval, char **p, int len, int *val) {
@@ -265,7 +270,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   filelistdata *headerfiles, *imagefiles;
   FILE *stream_in;
   elevdata *elevinfo, *imageinfo;
-  int ibar, jbar, kbar;
+  int kbar;
   int longlat_defined = 0;
   float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
   float longmin, longmax, latmin, latmax;
@@ -279,6 +284,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   float xmax = -1000.0, ymax = -1000.0, zmin = -1000.0, zmax = -1000.0;
   float *longlats = NULL, *longlatsorig;
   float long_min, long_max, lat_min, lat_max;
+  int longlatref_mode = LONGLATREF_NONE;
+  int xymax_defined=0;
 
   nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
@@ -466,40 +473,28 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     if(strlen(buffer2) == 0)continue;
 
     if(match(buffer, "GRID") == 1){
-      ibar = 10;
-      jbar = 10;
+      nlongs = 10;
+      nlats = 10;
       kbar = 10;
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%i %i %i", &ibar, &jbar, &kbar);
+      sscanf(buffer, "%i %i %i %f %f %f %f", &nlongs, &nlats, &kbar, &xmax, &ymax, &zmin, &zmax);
+      if(xmax>0.0&&ymax>0.0)xymax_defined=1;
       continue;
     }
 
-    if(match(buffer, "LONGLATREF") == 1){
-      have_data = 1;
-      longref = 1000.0;
-      latref = 1000.0;
+    if(match(buffer, "LONGLATORIG") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &longref, &latref);
+      longlatref_mode = LONGLATREF_ORIG;
+      xref = 0.0;
+      yref = 0.0;
       continue;
     }
 
-    if(match(buffer, "XYREF") == 1) {
+    if(match(buffer, "LONGLATCENTER") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f", &xref, &yref);
-      continue;
-    }
-
-    if(match(buffer, "XYMAX") == 1) {
-      xmax = 1000.0;
-      ymax = 1000.0;
-      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f", &xmax, &ymax);
-      continue;
-    }
-
-    if(match(buffer, "ZMINMAX") == 1) {
-      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f", &zmin, &zmax);
+      sscanf(buffer, "%f %f", &longref, &latref);
+      longlatref_mode = LONGLATREF_CENTER;
       continue;
     }
 
@@ -508,19 +503,20 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       longmin = -1000.0;
       longmax = -1000.0;
       nlongs = 50;
-      ibar = nlongs;
       latmin = -1000.0;
       latmax = -1000.0;
       nlats = 50;
       kbar = nlats;
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f %i %f %f %i", &longmin, &longmax, &nlongs, &latmin, &latmax, &nlats);
+      sscanf(buffer, "%f %f %f %f", &longmin, &longmax, &latmin, &latmax);
+      longlatref_mode = LONGLATREF_MINMAX;
       longref = (longmin + longmax) / 2.0;
       latref = (latmin + latmax) / 2.0;
       xmax = SphereDistance(longmin, latref, longmax, latref);
       ymax = SphereDistance(longref, latmin, longref, latmax);
       xref = xmax / 2.0;
       yref = ymax / 2.0;
+      xymax_defined=1;
 
       continue;
     }
@@ -533,6 +529,54 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
   }
   fclose(stream_in);
+
+  switch (longlatref_mode){
+    case LONGLATREF_NONE:
+      fprintf(stderr, "***error: A longitude and latitude must be specified with either the LONGLATBOUNDS, \n");
+      fprintf(stderr,"           LONGLATORIG or LONGLATCENTER keywords\n");
+      return 0;
+      break;
+
+    case LONGLATREF_MINMAX:
+      break;
+
+      // a = sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlong/2)^2
+      // c = 2*asin(sqrt(a))
+      // d = R*c
+      // R = RAD_EARTH
+
+      // dlat = 0 ==> d = 2*R*asin(cos(lat1)*sin(dlong/2))
+      //              dlong = 2*asin(sin(d/(2*R))/cos(lat1))
+      // dlong = 0 ==> d = R*dlat
+      //               dlat = d/R
+    case LONGLATREF_ORIG:
+      xref = xmax;
+      yref = ymax;
+      dlat = yref / EARTH_RADIUS;
+      latmax = latref + RAD2DEG*dlat;
+      latmin = latref;
+      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
+      longmax = longref + RAD2DEG*dlong;
+      longmin = longref;
+      break;
+
+
+    case LONGLATREF_CENTER:
+
+      xref = xmax/2.0;
+      yref = ymax/2.0;
+      dlat = yref / EARTH_RADIUS;
+      latmax = latref + RAD2DEG*dlat;
+      latmin = latref - RAD2DEG*dlat;
+      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
+      longmax = longref + RAD2DEG*dlong;
+      longmin = longref - RAD2DEG*dlong;
+      break;
+  }
+  if(xymax_defined==0){
+    fprintf(stderr,"***error: The domain size must be defined by using the GRID or LONGLATMINMAX keyword\n");
+    return 0;
+  }
 
   NewMemory((void **)&longlatsorig, 2 * nlongs*nlats * sizeof(float));
   longlats = longlatsorig;
@@ -567,6 +611,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   fds_elevs->valbuffer = vals;
   fds_elevs->nrows = nlats;
   fds_elevs->ncols = nlongs;
+  fds_elevs->nz = kbar;
   fds_elevs->long_min = longmin;
   fds_elevs->long_max = longmax;
   fds_elevs->lat_min = latmin;
@@ -604,6 +649,18 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   }
   fds_elevs->val_min = valmin;
   fds_elevs->val_max = valmax;
+  if(zmin>-1000.0){
+    fds_elevs->zmin = zmin;
+  }
+  else{
+    fds_elevs->zmin = valmin;
+  }
+  if(zmax>-1000.0){
+    fds_elevs->zmax = zmax;
+  }
+  else{
+    fds_elevs->zmax = valmax;
+  }
   FREEMEMORY(have_vals);
   FREEMEMORY(longlatsorig);
 
@@ -646,9 +703,9 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   llat2 = fds_elevs->lat_max;
   nlat = fds_elevs->nrows;
 
-  zmin = fds_elevs->val_min;
-  zmax = fds_elevs->val_max;
-  nz = 30;
+  zmin = fds_elevs->zmin;
+  zmax = fds_elevs->zmax;
+  nz = fds_elevs->nz;
 
   vals = fds_elevs->valbuffer;
 
@@ -719,13 +776,13 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   }
   fprintf(streamout, "&TAIL /\n");
 
-  fprintf(stderr, "\n", fdsfile);
-  fprintf(stderr, "Summary:\n", fdsfile);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Summary:\n");
   fprintf(stderr, "  FDS input file: %s\n", fdsfile);
   fprintf(stderr, "            xmax: %f\n", xmax);
   fprintf(stderr, "            ymax: %f\n", ymax);
-  fprintf(stderr, "   min elevation: %f\n", zmin);
-  fprintf(stderr, "   max elevation: %f\n", zmax);
-  fprintf(stderr, "longitude <==> x: %f <==> %f \n", fds_elevs->longref, fds_elevs->xref);
-  fprintf(stderr, " latitude <==> y: %f <==> %f \n", fds_elevs->latref, fds_elevs->yref);
+  fprintf(stderr, "   min elevation: %f\n", fds_elevs->val_min);
+  fprintf(stderr, "   max elevation: %f\n", fds_elevs->val_max);
+  fprintf(stderr, "longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
+  fprintf(stderr, " latitude=%f at y=%f\n", fds_elevs->latref, fds_elevs->yref);
 }
