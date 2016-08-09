@@ -3020,6 +3020,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                AGHRHO = A_DROP*WGT*H_MASS*RHO_G/(1._EB+0.5_EB*RVC*DT_SUBSTEP*A_DROP*WGT*H_MASS) 
                DADYDTHVHL=DTOG*AGHRHO*DYDT*(H1-H2)
                DADYDTHV=DTOP*AGHRHO*DYDT*H_V
+
                SELECT CASE (ARRAY_CASE)
                   CASE(1) ! Gas Only
                      A_COL(1) = 1._EB+DTGOG
@@ -3065,7 +3066,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
                      TMP_G_NEW = (D_VEC(1)-B_COL(1)*TMP_DROP_NEW)/A_COL(1)
                END SELECT
 
-               M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
+               M_VAP = MAX(0._EB,MIN(M_DROP, DT_SUBSTEP * AGHRHO/WGT * (Y_DROP-Y_GAS+0.5_EB*DYDT*(TMP_DROP_NEW-TMP_DROP))))
 
                ! Compute the total amount of heat extracted from the gas, wall and radiative fields
 
@@ -3160,8 +3161,7 @@ SPECIES_LOOP: DO Z_INDEX = 1,N_TRACKED_SPECIES
 
                ! Update gas temperature
                CALL INTERPOLATE1D_UNIFORM(LBOUND(SS%C_P_L_BAR,1),SS%C_P_L_BAR,TMP_DROP_NEW,H_L)
-
-               H_NEW = H_G_OLD + (H_D_OLD - M_DROP*TMP_DROP_NEW*H_L)*WGT + Q_CON_WALL + Q_RAD
+               H_NEW = H_G_OLD + (H_D_OLD - M_DROP*TMP_DROP_NEW*H_L + Q_CON_WALL + Q_RAD)*WGT
                TMP_G_I = TMP_G
                TMP_G_NEW = TMP_G
 
