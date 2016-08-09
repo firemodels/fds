@@ -111,6 +111,7 @@ $QFDS -d Heat_Transfer ht3d_nz_20.fds
 $QFDS -d Heat_Transfer ht3d_nz_40.fds
 $QFDS -d Heat_Transfer ht3d_nz_80.fds
 $QFDS -d Heat_Transfer ht3d_nz_160.fds
+$QFDS -d Heat_Transfer ht3d_slab.fds
 
 $QFDS -d HVAC ashrae7_fixed_flow.fds
 $QFDS -d HVAC ashrae7_quadratic.fds
