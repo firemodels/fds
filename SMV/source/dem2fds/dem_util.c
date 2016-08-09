@@ -257,7 +257,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
   }
 
 #define SCALE_IMAGE_I(ival) (CLAMP(ncols*((ival) - fds_elevs->long_min) / (fds_elevs->long_max - fds_elevs->long_min),0,ncols-1))
-#define SCALE_IMAGE_J(jval) (CLAMP(nrows*((jval) - fds_elevs->lat_min) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
+#define SCALE_IMAGE_J(jval) (CLAMP(nrows*(fds_elevs->lat_max - (jval)) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
 
   if(examine_map_images == 1){
     int i;
@@ -283,8 +283,8 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
       imin = SCALE_IMAGE_I(imagei->long_min);
       imax = SCALE_IMAGE_I(imagei->long_max);
 
-      jmin = SCALE_IMAGE_J(imagei->lat_min);
-      jmax = SCALE_IMAGE_J(imagei->lat_max);
+      jmin = SCALE_IMAGE_J(imagei->lat_max); // max latitude occcurs first in file (ie has a smaller 'j' index)
+      jmax = SCALE_IMAGE_J(imagei->lat_min);
 
       for(jj = jmin; jj <= jmax; jj++){
         int kk;
