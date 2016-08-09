@@ -252,7 +252,7 @@ SPRINKLER_INSERT_LOOP: DO KS=1,N_DEVC
    ELSE
       IF (PY%PRESSURE_RAMP_INDEX>0) THEN
          PIPE_PRESSURE = EVALUATE_RAMP(REAL(DEVC_PIPE_OPERATING(DV%PIPE_INDEX),EB),0._EB,PY%PRESSURE_RAMP_INDEX)
-         D_PRES_FACTOR = (PY%OPERATING_PRESSURE/PIPE_PRESSURE)**(1._EB/3._EB)
+         D_PRES_FACTOR = (PY%OPERATING_PRESSURE/PIPE_PRESSURE)**ONTH
          FLOW_RATE = PY%K_FACTOR*SQRT(PIPE_PRESSURE)
       ELSE
          PIPE_PRESSURE = PY%OPERATING_PRESSURE
@@ -1232,7 +1232,7 @@ SUBROUTINE MOVE_PARTICLES(T,DT,NM)
 USE TRAN, ONLY: GET_IJK
 REAL(EB), INTENT(IN) :: T,DT
 REAL     :: RN
-REAL(EB) :: SURFACE_PARTICLE_DIAMETER,XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,THETA_RN,STEP_FRACTION(-3:3),THROHALF,B_1,&
+REAL(EB) :: XI,YJ,ZK,R_D,R_D_0,X_OLD,Y_OLD,Z_OLD,THETA_RN,STEP_FRACTION(-3:3),&
             DT_CFL,DT_P
 LOGICAL :: HIT_SOLID
 INTEGER :: IP,ICN,IIN,JJN,KKN,IW,IWP1,IWM1,IWP2,IWM2,IWP3,IWM3,IOR_OLD,IC,IOR_FIRST,IML,IIG,JJG,KKG,N_ITER,ITER
@@ -1241,15 +1241,12 @@ TYPE (LAGRANGIAN_PARTICLE_TYPE), POINTER :: LP=>NULL()
 TYPE (LAGRANGIAN_PARTICLE_CLASS_TYPE), POINTER :: LPC=>NULL()
 TYPE (SURFACE_TYPE), POINTER :: SF
 REAL(EB), POINTER, DIMENSION(:,:,:) :: NDPC=>NULL()
+REAL(EB), PARAMETER :: ONTHHALF=0.5_EB**ONTH, B_1=1.7321_EB
+REAL(EB), PARAMETER :: SURFACE_PARTICLE_DIAMETER=0.001_EB ! All PARTICLEs adjusted to this size when on solid (m)
 
 CALL POINT_TO_MESH(NM)
 
 DRAG_CFL = 0._EB
-
-THROHALF = (0.5_EB)**(1./3.)
-B_1 =  1.7321_EB ! SQRT(3)
-
-SURFACE_PARTICLE_DIAMETER = 0.001_EB  ! All PARTICLEs adjusted to this size when on solid (m)
 
 ! Sum up the number of PARTICLEs/particles in each grid cell (NDPC -- Number PARTICLEs Per Cell)
 
@@ -1284,212 +1281,154 @@ PARTICLE_LOOP: DO IP=1,NLP
    DT_P   = DT/REAL(N_ITER,EB)
 
    ! Time stepping loop
+
    LP%ACCEL_X = 0._EB
    LP%ACCEL_Y = 0._EB
    LP%ACCEL_Z = 0._EB
+
    TIME_STEP_LOOP: DO ITER=1,N_ITER
 
-   ! Determine particle radius
+      ! Determine particle radius
 
-   IF (LPC%LIQUID_DROPLET) THEN
-      R_D = LP%ONE_D%X(1)
-   ELSEIF (LPC%SOLID_PARTICLE) THEN
-      R_D = SUM(LP%ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
-   ELSEIF (LPC%MASSLESS_TRACER) THEN
-      R_D = 0._EB
-   ELSEIF (LPC%MASSLESS_TARGET) THEN
-      CYCLE PARTICLE_LOOP
-   ENDIF
-
-   IF (.NOT. LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT. LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
-
-   R_D_0 = R_D
-
-   ! Determine the current coordinates of the particle
-
-   IIG = LP%ONE_D%IIG
-   JJG = LP%ONE_D%JJG
-   KKG = LP%ONE_D%KKG
-
-   IC = CELL_INDEX(IIG,JJG,KKG)
-
-   X_OLD = LP%X
-   Y_OLD = LP%Y
-   Z_OLD = LP%Z
-
-   ! Throw out particles that are inside a solid obstruction
-
-   IF (SOLID(IC)) THEN
-      LP%X = 1.E6_EB
-      CYCLE PARTICLE_LOOP
-   ENDIF
-
-   SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0) THEN
-
-      CALL MOVE_ON_SOLID
-
-   ELSE SOLID_GAS_MOVE
-
-      CALL MOVE_IN_GAS
-
-      ! If the particle does not move, but does drag, go on to the next particle
-
-      IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. LPC%STATIC) CYCLE PARTICLE_LOOP
-
-   ENDIF SOLID_GAS_MOVE
-
-   ! Special case where a particle hits a POROUS_FLOOR
-
-   IF (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%LIQUID_DROPLET) THEN
-      IC = CELL_INDEX(IIG,JJG,1)
-      IW = WALL_INDEX(IC,-3)
-      IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. ACCUMULATE_WATER .AND. .NOT.LP%SPLAT) THEN
-         WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3*WALL(IW)%RAW
-         LP%SPLAT = .TRUE.
-      ENDIF
-      CYCLE PARTICLE_LOOP
-   ENDIF
-
-   ! Where is the PARTICLE now? Limit the location by UBOUND and LBOUND due to the possible super fast PARTICLEs
-
-   IIN = MAX(LBOUND(CELLSI,1),MIN(UBOUND(CELLSI,1),FLOOR((LP%X-XS)*RDXINT)))
-   JJN = MAX(LBOUND(CELLSJ,1),MIN(UBOUND(CELLSJ,1),FLOOR((LP%Y-YS)*RDYINT)))
-   KKN = MAX(LBOUND(CELLSK,1),MIN(UBOUND(CELLSK,1),FLOOR((LP%Z-ZS)*RDZINT)))
-   XI  = CELLSI(IIN)
-   YJ  = CELLSJ(JJN)
-   ZK  = CELLSK(KKN)
-   IIN = FLOOR(XI+1._EB)
-   JJN = FLOOR(YJ+1._EB)
-   KKN = FLOOR(ZK+1._EB)
-   IF (IIN<0 .OR. IIN>IBP1) CYCLE PARTICLE_LOOP
-   IF (JJN<0 .OR. JJN>JBP1) CYCLE PARTICLE_LOOP
-   IF (KKN<0 .OR. KKN>KBP1) CYCLE PARTICLE_LOOP
-   ICN = CELL_INDEX(IIN,JJN,KKN)
-   IF (IC==0 .OR. ICN==0) CYCLE PARTICLE_LOOP
-
-   IF (LP%X<XS .AND. WALL(WALL_INDEX(IC,-1))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-   IF (LP%X>XF .AND. WALL(WALL_INDEX(IC, 1))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-   IF (LP%Y<YS .AND. WALL(WALL_INDEX(IC,-2))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-   IF (LP%Y>YF .AND. WALL(WALL_INDEX(IC, 2))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-   IF (LP%Z<ZS .AND. WALL(WALL_INDEX(IC,-3))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-   IF (LP%Z>ZF .AND. WALL(WALL_INDEX(IC, 3))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
-
-   ! If PARTICLE hits an obstacle, change its properties
-
-   AIR_TO_SOLID: IF (IIG/=IIN .OR. JJG/=JJN .OR. KKG/=KKN) THEN
-
-      IOR_OLD   = LP%ONE_D%IOR
-      HIT_SOLID = .FALSE.
-
-      ! Check if any solid boundaries of original grid cell have been crossed
-
-      IWP1 = WALL_INDEX(IC, 1)
-      IWM1 = WALL_INDEX(IC,-1)
-      IWP2 = WALL_INDEX(IC, 2)
-      IWM2 = WALL_INDEX(IC,-2)
-      IWP3 = WALL_INDEX(IC, 3)
-      IWM3 = WALL_INDEX(IC,-3)
-      STEP_FRACTION = 1._EB
-
-      IF (KKN>KKG .AND. WALL(IWP3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR=-3
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG)-Z_OLD-0.05_EB*DZ(KKG))/(LP%Z-Z_OLD))
-      ENDIF
-      IF (KKN<KKG .AND. WALL(IWM3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR= 3
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG-1)-Z_OLD+0.05_EB*DZ(KKG-1))/(LP%Z-Z_OLD))
-      ENDIF
-      IF (IIN>IIG .AND. WALL(IWP1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR=-1
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG)-X_OLD-0.05_EB*DX(IIG))/(LP%X-X_OLD))
-      ENDIF
-      IF (IIN<IIG .AND. WALL(IWM1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR= 1
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG-1)-X_OLD+0.05_EB*DX(IIG-1))/(LP%X-X_OLD))
-      ENDIF
-      IF (JJN>JJG .AND. WALL(IWP2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR=-2
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG)-Y_OLD-0.05_EB*DY(JJG))/(LP%Y-Y_OLD))
-      ENDIF
-      IF (JJN<JJG .AND. WALL(IWM2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
-         LP%ONE_D%IOR= 2
-         HIT_SOLID = .TRUE.
-         STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG-1)-Y_OLD+0.05_EB*DY(JJG-1))/(LP%Y-Y_OLD))
-      ENDIF
-
-      ! Remove the particle if it is not allowed on a surface
-
-      IF (LP%ONE_D%IOR/=0 .AND. .NOT.ALLOW_SURFACE_PARTICLES) THEN
-         LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
+      IF (LPC%LIQUID_DROPLET) THEN
+         R_D = LP%ONE_D%X(1)
+      ELSEIF (LPC%SOLID_PARTICLE) THEN
+         R_D = SUM(LP%ONE_D%LAYER_THICKNESS(1:SF%N_LAYERS))
+      ELSEIF (LPC%MASSLESS_TRACER) THEN
+         R_D = 0._EB
+      ELSEIF (LPC%MASSLESS_TARGET) THEN
          CYCLE PARTICLE_LOOP
       ENDIF
 
-      ! Get the wall index of the surface
+      IF (.NOT.LPC%MASSLESS_TRACER .AND. (R_D<=0._EB .OR. (.NOT.LPC%STATIC .AND. LP%MASS<=TWO_EPSILON_EB))) CYCLE PARTICLE_LOOP
 
-      IML = MINLOC(STEP_FRACTION,DIM=1)
-      IOR_FIRST = 0
-      SELECT CASE(IML)
-         CASE(1)
-            IOR_FIRST = -3
-         CASE(2)
-            IOR_FIRST = -2
-         CASE(3)
-            IOR_FIRST = -1
-         CASE(5)
-            IOR_FIRST =  1
-         CASE(6)
-            IOR_FIRST =  2
-         CASE(7)
-            IOR_FIRST =  3
-      END SELECT
-      LP%WALL_INDEX = WALL_INDEX(IC,-IOR_FIRST)
+      R_D_0 = R_D
 
-      ! If no solid boundaries of original cell have been crossed, check boundaries of new grid cell
+      ! Determine the current coordinates of the particle
 
-      IF (LP%WALL_INDEX==0) THEN
-         IWP1 = WALL_INDEX(ICN, 1)
-         IWM1 = WALL_INDEX(ICN,-1)
-         IWP2 = WALL_INDEX(ICN, 2)
-         IWM2 = WALL_INDEX(ICN,-2)
-         IWP3 = WALL_INDEX(ICN, 3)
-         IWM3 = WALL_INDEX(ICN,-3)
+      IIG = LP%ONE_D%IIG
+      JJG = LP%ONE_D%JJG
+      KKG = LP%ONE_D%KKG
+
+      IC = CELL_INDEX(IIG,JJG,KKG)
+
+      X_OLD = LP%X
+      Y_OLD = LP%Y
+      Z_OLD = LP%Z
+
+      ! Throw out particles that are inside a solid obstruction
+
+      IF (SOLID(IC)) THEN
+         LP%X = 1.E6_EB
+         CYCLE PARTICLE_LOOP
+      ENDIF
+
+      SOLID_GAS_MOVE: IF (LP%ONE_D%IOR/=0) THEN
+
+         CALL MOVE_ON_SOLID
+
+      ELSE SOLID_GAS_MOVE
+
+         CALL MOVE_IN_GAS
+
+         ! If the particle does not move, but does drag, go on to the next particle
+
+         IF (LPC%MASSLESS_TRACER .OR. LP%PWT<=TWO_EPSILON_EB .OR. LPC%STATIC) CYCLE PARTICLE_LOOP
+
+      ENDIF SOLID_GAS_MOVE
+
+      ! Special case where a particle hits a POROUS_FLOOR
+
+      IF (POROUS_FLOOR .AND. LP%Z<ZS .AND. LPC%LIQUID_DROPLET) THEN
+         IC = CELL_INDEX(IIG,JJG,1)
+         IW = WALL_INDEX(IC,-3)
+         IF (WALL(IW)%BOUNDARY_TYPE==SOLID_BOUNDARY .AND. ACCUMULATE_WATER .AND. .NOT.LP%SPLAT) THEN
+            WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(IW)%A_LP_MPUA(LPC%ARRAY_INDEX) + LP%PWT*LPC%FTPR*R_D**3*WALL(IW)%RAW
+            LP%SPLAT = .TRUE.
+         ENDIF
+         CYCLE PARTICLE_LOOP
+      ENDIF
+
+      ! Where is the PARTICLE now? Limit the location by UBOUND and LBOUND due to the possible super fast PARTICLEs
+
+      IIN = MAX(LBOUND(CELLSI,1),MIN(UBOUND(CELLSI,1),FLOOR((LP%X-XS)*RDXINT)))
+      JJN = MAX(LBOUND(CELLSJ,1),MIN(UBOUND(CELLSJ,1),FLOOR((LP%Y-YS)*RDYINT)))
+      KKN = MAX(LBOUND(CELLSK,1),MIN(UBOUND(CELLSK,1),FLOOR((LP%Z-ZS)*RDZINT)))
+      XI  = CELLSI(IIN)
+      YJ  = CELLSJ(JJN)
+      ZK  = CELLSK(KKN)
+      IIN = FLOOR(XI+1._EB)
+      JJN = FLOOR(YJ+1._EB)
+      KKN = FLOOR(ZK+1._EB)
+      IF (IIN<0 .OR. IIN>IBP1) CYCLE PARTICLE_LOOP
+      IF (JJN<0 .OR. JJN>JBP1) CYCLE PARTICLE_LOOP
+      IF (KKN<0 .OR. KKN>KBP1) CYCLE PARTICLE_LOOP
+      ICN = CELL_INDEX(IIN,JJN,KKN)
+      IF (IC==0 .OR. ICN==0) CYCLE PARTICLE_LOOP
+
+      IF (LP%X<XS .AND. WALL(WALL_INDEX(IC,-1))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+      IF (LP%X>XF .AND. WALL(WALL_INDEX(IC, 1))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+      IF (LP%Y<YS .AND. WALL(WALL_INDEX(IC,-2))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+      IF (LP%Y>YF .AND. WALL(WALL_INDEX(IC, 2))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+      IF (LP%Z<ZS .AND. WALL(WALL_INDEX(IC,-3))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+      IF (LP%Z>ZF .AND. WALL(WALL_INDEX(IC, 3))%BOUNDARY_TYPE/=SOLID_BOUNDARY) CYCLE PARTICLE_LOOP
+
+      ! If PARTICLE hits an obstacle, change its properties
+
+      AIR_TO_SOLID: IF (IIG/=IIN .OR. JJG/=JJN .OR. KKG/=KKN) THEN
+
+         IOR_OLD   = LP%ONE_D%IOR
          HIT_SOLID = .FALSE.
+
+         ! Check if any solid boundaries of original grid cell have been crossed
+
+         IWP1 = WALL_INDEX(IC, 1)
+         IWM1 = WALL_INDEX(IC,-1)
+         IWP2 = WALL_INDEX(IC, 2)
+         IWM2 = WALL_INDEX(IC,-2)
+         IWP3 = WALL_INDEX(IC, 3)
+         IWM3 = WALL_INDEX(IC,-3)
          STEP_FRACTION = 1._EB
-         IF (KKN>KKG .AND. WALL(IWM3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+
+         IF (KKN>KKG .AND. WALL(IWP3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR=-3
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG)-Z_OLD-0.05_EB*DZ(KKG))/(LP%Z-Z_OLD))
          ENDIF
-         IF (KKN<KKG .AND. WALL(IWP3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (KKN<KKG .AND. WALL(IWM3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR= 3
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG-1)-Z_OLD+0.05_EB*DZ(KKG-1))/(LP%Z-Z_OLD))
          ENDIF
-         IF (IIN>IIG .AND. WALL(IWM1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (IIN>IIG .AND. WALL(IWP1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR=-1
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG)-X_OLD-0.05_EB*DX(IIG))/(LP%X-X_OLD))
          ENDIF
-         IF (IIN<IIG .AND. WALL(IWP1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (IIN<IIG .AND. WALL(IWM1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR= 1
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG-1)-X_OLD+0.05_EB*DX(IIG-1))/(LP%X-X_OLD))
          ENDIF
-         IF (JJN>JJG .AND. WALL(IWM2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (JJN>JJG .AND. WALL(IWP2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR=-2
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG)-Y_OLD-0.05_EB*DY(JJG))/(LP%Y-Y_OLD))
          ENDIF
-         IF (JJN<JJG .AND. WALL(IWP2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+         IF (JJN<JJG .AND. WALL(IWM2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
             LP%ONE_D%IOR= 2
             HIT_SOLID = .TRUE.
             STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG-1)-Y_OLD+0.05_EB*DY(JJG-1))/(LP%Y-Y_OLD))
          ENDIF
+
+         ! Remove the particle if it is not allowed on a surface
+
+         IF (LP%ONE_D%IOR/=0 .AND. .NOT.ALLOW_SURFACE_PARTICLES) THEN
+            LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
+            CYCLE PARTICLE_LOOP
+         ENDIF
+
+         ! Get the wall index of the surface
 
          IML = MINLOC(STEP_FRACTION,DIM=1)
          IOR_FIRST = 0
@@ -1507,139 +1446,199 @@ PARTICLE_LOOP: DO IP=1,NLP
             CASE(7)
                IOR_FIRST =  3
          END SELECT
-         LP%WALL_INDEX = WALL_INDEX(ICN,IOR_FIRST)
-      ENDIF
+         LP%WALL_INDEX = WALL_INDEX(IC,-IOR_FIRST)
 
-      ! Special case where the particle is inside a solid but cannot be processed for some reason. Just return the particle to its
-      ! starting position and set its velocity to 0.
+         ! If no solid boundaries of original cell have been crossed, check boundaries of new grid cell
 
-      IF (SOLID(ICN) .AND. .NOT.HIT_SOLID) THEN
-         LP%X = X_OLD
-         LP%Y = Y_OLD
-         LP%Z = Z_OLD
-         LP%U = 0._EB
-         LP%V = 0._EB
-         LP%W = 0._EB
-         CYCLE PARTICLE_LOOP
-      ENDIF
+         IF (LP%WALL_INDEX==0) THEN
+            IWP1 = WALL_INDEX(ICN, 1)
+            IWM1 = WALL_INDEX(ICN,-1)
+            IWP2 = WALL_INDEX(ICN, 2)
+            IWM2 = WALL_INDEX(ICN,-2)
+            IWP3 = WALL_INDEX(ICN, 3)
+            IWM3 = WALL_INDEX(ICN,-3)
+            HIT_SOLID = .FALSE.
+            STEP_FRACTION = 1._EB
+            IF (KKN>KKG .AND. WALL(IWM3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR=-3
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG)-Z_OLD-0.05_EB*DZ(KKG))/(LP%Z-Z_OLD))
+            ENDIF
+            IF (KKN<KKG .AND. WALL(IWP3)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR= 3
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Z(KKG-1)-Z_OLD+0.05_EB*DZ(KKG-1))/(LP%Z-Z_OLD))
+            ENDIF
+            IF (IIN>IIG .AND. WALL(IWM1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR=-1
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG)-X_OLD-0.05_EB*DX(IIG))/(LP%X-X_OLD))
+            ENDIF
+            IF (IIN<IIG .AND. WALL(IWP1)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR= 1
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(X(IIG-1)-X_OLD+0.05_EB*DX(IIG-1))/(LP%X-X_OLD))
+            ENDIF
+            IF (JJN>JJG .AND. WALL(IWM2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR=-2
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG)-Y_OLD-0.05_EB*DY(JJG))/(LP%Y-Y_OLD))
+            ENDIF
+            IF (JJN<JJG .AND. WALL(IWP2)%BOUNDARY_TYPE==SOLID_BOUNDARY) THEN
+               LP%ONE_D%IOR= 2
+               HIT_SOLID = .TRUE.
+               STEP_FRACTION(LP%ONE_D%IOR) = MAX(0._EB,(Y(JJG-1)-Y_OLD+0.05_EB*DY(JJG-1))/(LP%Y-Y_OLD))
+            ENDIF
 
-      ! Check if PARTICLE has crossed no solid planes or too many
-
-      IF_HIT_SOLID: IF (HIT_SOLID) THEN
-
-         IF (LP%WALL_INDEX==0) CYCLE PARTICLE_LOOP
-
-         ! Add PARTICLE mass to accumulated liquid array
-
-         IF (ACCUMULATE_WATER .AND. HIT_SOLID .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
-            WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX)+&
-               LP%PWT*LPC%FTPR*R_D**3*WALL(LP%WALL_INDEX)%RAW
-            LP%SPLAT = .TRUE.
+            IML = MINLOC(STEP_FRACTION,DIM=1)
+            IOR_FIRST = 0
+            SELECT CASE(IML)
+               CASE(1)
+                  IOR_FIRST = -3
+               CASE(2)
+                  IOR_FIRST = -2
+               CASE(3)
+                  IOR_FIRST = -1
+               CASE(5)
+                  IOR_FIRST =  1
+               CASE(6)
+                  IOR_FIRST =  2
+               CASE(7)
+                  IOR_FIRST =  3
+            END SELECT
+            LP%WALL_INDEX = WALL_INDEX(ICN,IOR_FIRST)
          ENDIF
 
-         ! Adjust the size of the PARTICLE and weighting factor
+         ! Special case where the particle is inside a solid but cannot be processed for some reason.
+         ! Just return the particle to its starting position and set its velocity to 0.
 
-         IF (LPC%LIQUID_DROPLET) THEN
-            R_D = MIN(0.5_EB*SURFACE_PARTICLE_DIAMETER,LP%PWT**ONTH*R_D)
-            LP%PWT = LP%PWT*(R_D_0/R_D)**3
-            LP%ONE_D%X(1) = R_D
-            LP%ONE_D%LAYER_THICKNESS(1) = R_D
-            LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
-         ENDIF
-
-         ! Move particle to where it almost hits solid
-
-         LP%X = X_OLD + MINVAL(STEP_FRACTION)*(LP%X-X_OLD)
-         LP%Y = Y_OLD + MINVAL(STEP_FRACTION)*(LP%Y-Y_OLD)
-         LP%Z = Z_OLD + MINVAL(STEP_FRACTION)*(LP%Z-Z_OLD)
-
-         CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
-
-         IIG = LP%ONE_D%IIG
-         JJG = LP%ONE_D%JJG
-         KKG = LP%ONE_D%KKG
-
-         ICN = CELL_INDEX(IIG,JJG,KKG)
-         IF (IOR_OLD==LP%ONE_D%IOR) CYCLE PARTICLE_LOOP
-
-         ! Check if PARTICLE has not found surface. Simply remove for now. Todo: search algorithm
-
-         IW = WALL_INDEX(ICN, -LP%ONE_D%IOR)
-         IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
-            LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
+         IF (SOLID(ICN) .AND. .NOT.HIT_SOLID) THEN
+            LP%X = X_OLD
+            LP%Y = Y_OLD
+            LP%Z = Z_OLD
+            LP%U = 0._EB
+            LP%V = 0._EB
+            LP%W = 0._EB
             CYCLE PARTICLE_LOOP
          ENDIF
 
-         ! Choose a direction for the PARTICLEs to move
+         ! Check if PARTICLE has crossed no solid planes or too many
 
-         DIRECTION: SELECT CASE(LP%ONE_D%IOR)
-            CASE (-2:-1,1:2) DIRECTION
-               LP%U = 0._EB
-               LP%V = 0._EB
-               LP%W = -LPC%VERTICAL_VELOCITY
-            CASE (-3) DIRECTION
-               IF (.NOT.ALLOW_UNDERSIDE_PARTICLES) THEN
+         IF_HIT_SOLID: IF (HIT_SOLID) THEN
+
+            IF (LP%WALL_INDEX==0) CYCLE PARTICLE_LOOP
+
+            ! Add PARTICLE mass to accumulated liquid array
+
+            IF (ACCUMULATE_WATER .AND. HIT_SOLID .AND. .NOT.LP%SPLAT .AND. LPC%LIQUID_DROPLET) THEN
+               WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX) = WALL(LP%WALL_INDEX)%A_LP_MPUA(LPC%ARRAY_INDEX)+&
+                  LP%PWT*LPC%FTPR*R_D**3*WALL(LP%WALL_INDEX)%RAW
+               LP%SPLAT = .TRUE.
+            ENDIF
+
+            ! Adjust the size of the PARTICLE and weighting factor
+
+            IF (LPC%LIQUID_DROPLET) THEN
+               R_D = MIN(0.5_EB*SURFACE_PARTICLE_DIAMETER,LP%PWT**ONTH*R_D)
+               LP%PWT = LP%PWT*(R_D_0/R_D)**3
+               LP%ONE_D%X(1) = R_D
+               LP%ONE_D%LAYER_THICKNESS(1) = R_D
+               LP%MASS = FOTHPI*LP%ONE_D%RHO(1,1)*R_D**3
+            ENDIF
+
+            ! Move particle to where it almost hits solid
+
+            LP%X = X_OLD + MINVAL(STEP_FRACTION)*(LP%X-X_OLD)
+            LP%Y = Y_OLD + MINVAL(STEP_FRACTION)*(LP%Y-Y_OLD)
+            LP%Z = Z_OLD + MINVAL(STEP_FRACTION)*(LP%Z-Z_OLD)
+
+            CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+
+            IIG = LP%ONE_D%IIG
+            JJG = LP%ONE_D%JJG
+            KKG = LP%ONE_D%KKG
+
+            ICN = CELL_INDEX(IIG,JJG,KKG)
+            IF (IOR_OLD==LP%ONE_D%IOR) CYCLE PARTICLE_LOOP
+
+            ! Check if PARTICLE has not found surface. Simply remove for now. Todo: search algorithm
+
+            IW = WALL_INDEX(ICN, -LP%ONE_D%IOR)
+            IF (WALL(IW)%BOUNDARY_TYPE==NULL_BOUNDARY) THEN
+               LP%ONE_D%X(1) = 0.9_EB*LPC%KILL_RADIUS
+               CYCLE PARTICLE_LOOP
+            ENDIF
+
+            ! Choose a direction for the PARTICLEs to move
+
+            DIRECTION: SELECT CASE(LP%ONE_D%IOR)
+               CASE (-2:-1,1:2) DIRECTION
                   LP%U = 0._EB
                   LP%V = 0._EB
                   LP%W = -LPC%VERTICAL_VELOCITY
-                  LP%ONE_D%IOR = 0
-               ELSE
+               CASE (-3) DIRECTION
+                  IF (.NOT.ALLOW_UNDERSIDE_PARTICLES) THEN
+                     LP%U = 0._EB
+                     LP%V = 0._EB
+                     LP%W = -LPC%VERTICAL_VELOCITY
+                     LP%ONE_D%IOR = 0
+                  ELSE
+                     CALL RANDOM_NUMBER(RN)
+                     THETA_RN = TWOPI*REAL(RN,EB)
+                     LP%U = LPC%HORIZONTAL_VELOCITY*COS(THETA_RN)
+                     LP%V = LPC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
+                     LP%W = 0._EB
+                  ENDIF
+               CASE (3) DIRECTION
                   CALL RANDOM_NUMBER(RN)
                   THETA_RN = TWOPI*REAL(RN,EB)
                   LP%U = LPC%HORIZONTAL_VELOCITY*COS(THETA_RN)
                   LP%V = LPC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
                   LP%W = 0._EB
-               ENDIF
-            CASE (3) DIRECTION
-               CALL RANDOM_NUMBER(RN)
-               THETA_RN = TWOPI*REAL(RN,EB)
-               LP%U = LPC%HORIZONTAL_VELOCITY*COS(THETA_RN)
-               LP%V = LPC%HORIZONTAL_VELOCITY*SIN(THETA_RN)
-               LP%W = 0._EB
-         END SELECT DIRECTION
+            END SELECT DIRECTION
 
-         ! If the particle is solid, as opposed to a liquid droplet, do not make it stick to the wall.
+            ! If the particle is solid, as opposed to a liquid droplet, do not make it stick to the wall.
 
-         IF (LPC%SOLID_PARTICLE) LP%ONE_D%IOR = 0
+            IF (LPC%SOLID_PARTICLE) LP%ONE_D%IOR = 0
 
-      ENDIF IF_HIT_SOLID
+         ENDIF IF_HIT_SOLID
 
-   ENDIF AIR_TO_SOLID
+      ENDIF AIR_TO_SOLID
 
-   ! Check if PARTICLEs that were attached to a solid are still attached after the time update
+      ! Check if PARTICLEs that were attached to a solid are still attached after the time update
 
-   IW = WALL_INDEX(ICN, -LP%ONE_D%IOR)
+      IW = WALL_INDEX(ICN, -LP%ONE_D%IOR)
 
-   IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-      SELECT CASE(LP%ONE_D%IOR)
-         CASE( 1)
-            LP%X = LP%X - 0.2_EB*DX(IIG)
-            LP%W = -LP%W
-         CASE(-1)
-            LP%X = LP%X + 0.2_EB*DX(IIG)
-            LP%W = -LP%W
-         CASE( 2)
-            LP%Y = LP%Y - 0.2_EB*DY(JJG)
-            LP%W = -LP%W
-         CASE(-2)
-            LP%Y = LP%Y + 0.2_EB*DY(JJG)
-            LP%W = -LP%W
-         CASE( 3) ! Particle has reached the edge of a horizontal surface
-            LP%U = -LP%U
-            LP%V = -LP%V
-            LP%Z =  LP%Z - 0.2_EB*DZ(KKG)
-         CASE(-3)
-      END SELECT
-   ENDIF
+      IF (WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+         SELECT CASE(LP%ONE_D%IOR)
+            CASE( 1)
+               LP%X = LP%X - 0.2_EB*DX(IIG)
+               LP%W = -LP%W
+            CASE(-1)
+               LP%X = LP%X + 0.2_EB*DX(IIG)
+               LP%W = -LP%W
+            CASE( 2)
+               LP%Y = LP%Y - 0.2_EB*DY(JJG)
+               LP%W = -LP%W
+            CASE(-2)
+               LP%Y = LP%Y + 0.2_EB*DY(JJG)
+               LP%W = -LP%W
+            CASE( 3) ! Particle has reached the edge of a horizontal surface
+               LP%U = -LP%U
+               LP%V = -LP%V
+               LP%Z =  LP%Z - 0.2_EB*DZ(KKG)
+            CASE(-3)
+         END SELECT
+      ENDIF
 
-   IF (LP%ONE_D%IOR/=0 .AND. WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
-      LP%ONE_D%IOR = 0
-      LP%WALL_INDEX = 0
-   ELSE
-      LP%WALL_INDEX = WALL_INDEX(ICN,-LP%ONE_D%IOR)
-   ENDIF
+      IF (LP%ONE_D%IOR/=0 .AND. WALL(IW)%BOUNDARY_TYPE/=SOLID_BOUNDARY) THEN
+         LP%ONE_D%IOR = 0
+         LP%WALL_INDEX = 0
+      ELSE
+         LP%WALL_INDEX = WALL_INDEX(ICN,-LP%ONE_D%IOR)
+      ENDIF
 
-   CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
+      CALL GET_IJK(LP%X,LP%Y,LP%Z,NM,XI,YJ,ZK,LP%ONE_D%IIG,LP%ONE_D%JJG,LP%ONE_D%KKG)
 
    ENDDO TIME_STEP_LOOP
 
@@ -1785,7 +1784,7 @@ DRAG_LAW_SELECT: SELECT CASE (LPC%DRAG_LAW)
          ! PARTICLE age is larger than smallest characteristic breakup time
          AGE_IF: IF ((T-LP%T_INSERT) > MIN(T_BU_BAG,T_BU_STRIP)) THEN
             IF (LPC%MONODISPERSE) THEN
-               R_D = THROHALF*R_D
+               R_D = ONTHHALF*R_D
             ELSE
                DO WHILE (R_D >= R_D_0)
                   BREAKUP_RADIUS = LPC%BREAKUP_RATIO*R_D_0*LPC%BREAKUP_R_CNF(:)
@@ -1968,7 +1967,7 @@ REAL(EB), INTENT(IN)  :: DROP_VOL_FRAC,RE
 REAL(EB), INTENT(OUT) :: WAKE_VEL
 REAL(EB) :: LODM,RELOD
 
-LODM = (PI/(6._EB*DROP_VOL_FRAC))**(1./3.) - 0.5_EB
+LODM = (PI/(6._EB*DROP_VOL_FRAC))**ONTH - 0.5_EB
 RELOD = RE/(16._EB * LODM)
 WAKE_VEL = 1._EB - 0.5_EB*C_DRAG*(1._EB - EXP(-RELOD))
 WAKE_VEL = MAX(WAKE_VEL,0.15_EB)
@@ -1997,7 +1996,7 @@ IF (WE>2.0_EB) THEN
     ! calculate the ratio of projected surface areas of a sphere and an
     ! ellipsoid of the same volume with aspect ratio E.
     E=1._EB-0.75_EB*TANH(0.07_EB*WE)
-    SHAPE_DEFORMATION=C_DRAGNEW*E**(-2.0_EB/3.0_EB)
+    SHAPE_DEFORMATION=C_DRAGNEW*E**(-TWTH)
 ELSE
     SHAPE_DEFORMATION=C_DRAG
 ENDIF
