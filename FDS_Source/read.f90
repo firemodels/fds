@@ -2207,7 +2207,7 @@ COUNT_SPEC_LOOP: DO
    ENDIF
 
    IF (ID=='null') THEN
-      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ+1, ' needs a name (ID=...)'
+      WRITE(MESSAGE,'(A,I2,A)') 'ERROR: Species ',N_SPEC_READ, ' needs a name (ID=...)'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
@@ -3682,7 +3682,7 @@ REAC_LOOP: DO NR=1,N_REACTIONS
    ENDIF
 
    IF (TRIM(RN%FUEL)=='null') THEN
-      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',N_REACTIONS,'. FUEL must be defined'
+      WRITE(MESSAGE,'(A,I3,A)') 'ERROR: Problem with REAC ',NR,'. FUEL must be defined'
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 
