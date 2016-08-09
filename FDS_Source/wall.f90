@@ -736,34 +736,38 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
          ENDDO
       ENDDO
    ENDDO
-   DO K=1,KBAR
-      DO J=0,JBAR
-         DO I=1,IBAR
-            ICM = CELL_INDEX(I,J,K)
-            ICP = CELL_INDEX(I,J+1,K)
-            IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
-            OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
-            OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
-            IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
-            MLM => MATERIAL(OBM%MATL_INDEX)
-            MLP => MATERIAL(OBP%MATL_INDEX)
-            IF (MLM%K_S>0._EB) THEN
-               K_S_M = MLM%K_S
-            ELSE
-               NR = -NINT(MLM%K_S)
-               K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
-            ENDIF
-            IF (MLP%K_S>0._EB) THEN
-               K_S_P = MLP%K_S
-            ELSE
-               NR = -NINT(MLP%K_S)
-               K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
-            ENDIF
-            K_S = 0.5_EB*(K_S_M+K_S_P)
-            KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+   TWO_D_IF: IF (.NOT.TWO_D) THEN
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               ICM = CELL_INDEX(I,J,K)
+               ICP = CELL_INDEX(I,J+1,K)
+               IF (.NOT.(SOLID(ICM).AND.SOLID(ICP))) CYCLE
+               OBM => OBSTRUCTION(OBST_INDEX_C(ICM))
+               OBP => OBSTRUCTION(OBST_INDEX_C(ICP))
+               IF (.NOT.(OBM%HT3D.AND.OBP%HT3D)) CYCLE
+               MLM => MATERIAL(OBM%MATL_INDEX)
+               MLP => MATERIAL(OBP%MATL_INDEX)
+               IF (MLM%K_S>0._EB) THEN
+                  K_S_M = MLM%K_S
+               ELSE
+                  NR = -NINT(MLM%K_S)
+                  K_S_M = EVALUATE_RAMP(TMP(I,J,K),0._EB,NR)
+               ENDIF
+               IF (MLP%K_S>0._EB) THEN
+                  K_S_P = MLP%K_S
+               ELSE
+                  NR = -NINT(MLP%K_S)
+                  K_S_P = EVALUATE_RAMP(TMP(I,J+1,K),0._EB,NR)
+               ENDIF
+               K_S = 0.5_EB*(K_S_M+K_S_P)
+               KDTDY(I,J,K) = K_S * (TMP(I,J+1,K)-TMP(I,J,K))*RDYN(J)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
+   ELSE TWO_D_IF
+      KDTDY(I,J,K) = 0._EB
+   ENDIF TWO_D_IF
    DO K=0,KBAR
       DO J=1,JBAR
          DO I=1,IBAR
@@ -795,17 +799,18 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
 
    ! build fluxes on boundaries (later hook into pyrolysis code)
    HT3D_WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
-      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
       WC => WALL(IW)
+      IF (WC%BOUNDARY_TYPE==NULL_BOUNDARY) CYCLE HT3D_WALL_LOOP
+
       SURF_INDEX = WC%SURF_INDEX
       SF => SURFACE(SURF_INDEX)
       II = WC%ONE_D%II
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
-      IC = CELL_INDEX(II,JJ,KK)
-      IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
-      OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D) CYCLE HT3D_WALL_LOOP
+      IC = CELL_INDEX(II,JJ,KK);           IF (.NOT.SOLID(IC)) CYCLE HT3D_WALL_LOOP
+      OB => OBSTRUCTION(OBST_INDEX_C(IC)); IF (.NOT.OB%HT3D  ) CYCLE HT3D_WALL_LOOP
       ML => MATERIAL(OB%MATL_INDEX)
+
       IF (ML%K_S>0._EB) THEN
          K_S = ML%K_S
       ELSE
@@ -850,6 +855,7 @@ SUBSTEP_LOOP: DO WHILE ( ABS(T_LOC-DT)>TWO_EPSILON_EB )
             WC%ONE_D%HEAT_TRANS_COEF = HEAT_TRANSFER_COEFFICIENT(DTMP,SF%H_FIXED,SF%GEOMETRY,SF%CONV_LENGTH,&
                                        SF%HEAT_TRANSFER_MODEL,SF%ROUGHNESS,WC%SURF_INDEX,WALL_INDEX=IW)
             HTC = WC%ONE_D%HEAT_TRANS_COEF
+
             SELECT CASE(ABS(IOR))
                CASE( 1); RDN = RDX(II)
                CASE( 2); RDN = RDY(JJ)
