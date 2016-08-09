@@ -98,8 +98,8 @@ legend('boxoff')
 
 % add SVN if file is available
 
-SVN_Filename = [ddir,'ht3d_nx_160_git.txt'];
-addverstr(gca,SVN_Filename,'loglog')
+Git_Filename = [ddir,'ht3d_nx_160_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
 
 % % print to pdf
 % set(gcf,'PaperUnits',Paper_Units);
