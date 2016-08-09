@@ -9,6 +9,7 @@
 #include "datadefs.h"
 #include "MALLOC.h"
 #include "gd.h"
+#include "gdfontg.h"
 #include "dem_util.h"
 
 #define LONGLATREF_NONE -1
@@ -222,9 +223,9 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
   return 0;
 }
 
-/* ------------------ GenerateImage ------------------------ */
+/* ------------------ GenerateMapImage ------------------------ */
 
-void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int nimageinfo) {
+void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int nimageinfo, int examine_map_images) {
   int nrows, ncols, j;
   gdImagePtr RENDERimage;
   float dx, dy;
@@ -233,6 +234,7 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
   char *ext;
 
   ncols = 2000;
+  if(examine_map_images == 1)ncols = 750;
   nrows = ncols*fds_elevs->ymax / fds_elevs->xmax;
   dx = (fds_elevs->long_max - fds_elevs->long_min) / (float)ncols;
   dy = (fds_elevs->lat_max - fds_elevs->lat_min) / (float)nrows;
@@ -254,6 +256,56 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
     }
   }
 
+#define SCALE_IMAGE_I(ival) (CLAMP(nrows*((ival) - fds_elevs->lat_min) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
+#define SCALE_IMAGE_J(jval) (CLAMP(ncols*((jval) - fds_elevs->long_min) / (fds_elevs->long_max - fds_elevs->long_min),0,ncols-1))
+
+  if(examine_map_images == 1){
+    int i;
+
+    for(i = 0; i < nimageinfo; i++) {
+      elevdata *imagei;
+      float longcen, latcen;
+      int icen, jcen;
+      int textline_color;
+      int imin, imax, jmin, jmax;
+      int ii, jj;
+
+      imagei = imageinfo + i;
+      longcen = (imagei->long_max + imagei->long_min) / 2.0;
+      jcen = SCALE_IMAGE_J(longcen);
+
+      latcen = (imagei->lat_max + imagei->lat_min) / 2.0;
+      icen = SCALE_IMAGE_I(latcen);
+      textline_color = (0 << 16) | (0 << 8) | 0;
+
+      // gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, and gdFontGiant
+      gdImageString(RENDERimage, gdFontGiant, jcen, icen, (unsigned char *)imagei->filelabel, textline_color);
+
+      jmin = SCALE_IMAGE_J(imagei->long_min);
+      jmax = SCALE_IMAGE_J(imagei->long_max);
+
+      imin = SCALE_IMAGE_I(imagei->lat_min);
+      imax = SCALE_IMAGE_I(imagei->lat_max);
+
+      for(ii = imin; ii <= imax; ii++){
+        int kk;
+
+        for(kk = -1; kk < 2; kk++){
+          gdImageSetPixel(RENDERimage, jmin + kk, ii, textline_color);
+          gdImageSetPixel(RENDERimage, jmax + kk, ii, textline_color);
+        }
+      }
+      for(jj = jmin; jj <= jmax; jj++){
+        int kk;
+
+        for(kk = -1; kk < 2; kk++){
+          gdImageSetPixel(RENDERimage, jj, imin + kk, textline_color);
+          gdImageSetPixel(RENDERimage, jj, imax + kk, textline_color);
+        }
+      }
+    }
+  }
+
   strcpy(imagefile, elevfile);
   ext = strrchr(imagefile, '.');
   if(ext != NULL)ext[0] = 0;
@@ -265,7 +317,7 @@ void GenerateImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int
 
 /* ------------------ GetElevations ------------------------ */
 
-int GetElevations(char *elevfile, elevdata *fds_elevs){
+int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
   int nelevinfo, nimageinfo, i, j;
   filelistdata *headerfiles, *imagefiles;
   FILE *stream_in;
@@ -273,7 +325,6 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   int kbar;
   int longlat_defined = 0;
   float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
-  float longmin, longmax, latmin, latmax;
   int nlongs = 100, nlats = 100;
   float dlat, dlong;
   int count, *have_vals, have_data = 0;
@@ -314,6 +365,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     strcpy(imagei->datafile, imagefilename);
 
     p = imagefilei->file + 2;
+    strncpy(imagei->filelabel, imagefilei->file, 12);
+    imagei->filelabel[12] = 0;
 
     CopyString(clat, &p, 2, &llat);
     CopyString(clong, &p, 3, &llong);
@@ -482,43 +535,57 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       continue;
     }
 
-    if(match(buffer, "LONGLATORIG") == 1){
-      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f", &longref, &latref);
-      longlatref_mode = LONGLATREF_ORIG;
-      xref = 0.0;
-      yref = 0.0;
-      continue;
+    if(examine_map_images == 0){
+      if(match(buffer, "LONGLATORIG") == 1){
+        if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+        sscanf(buffer, "%f %f", &longref, &latref);
+        longlatref_mode = LONGLATREF_ORIG;
+        xref = 0.0;
+        yref = 0.0;
+        continue;
+      }
+
+      if(match(buffer, "LONGLATCENTER") == 1){
+        if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+        sscanf(buffer, "%f %f", &longref, &latref);
+        longlatref_mode = LONGLATREF_CENTER;
+        continue;
+      }
+
+      if(match(buffer, "LONGLATMINMAX") == 1){
+        have_data = 1;
+        long_min = -1000.0;
+        long_max = -1000.0;
+        lat_min = -1000.0;
+        lat_max = -1000.0;
+        if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+        sscanf(buffer, "%f %f %f %f", &long_min, &long_max, &lat_min, &lat_max);
+        longlatref_mode = LONGLATREF_MINMAX;
+        longref = (long_min + long_max) / 2.0;
+        latref = (lat_min + lat_max) / 2.0;
+        xmax = SphereDistance(long_min, latref, long_max, latref);
+        ymax = SphereDistance(longref, lat_min, longref, lat_max);
+        xref = xmax / 2.0;
+        yref = ymax / 2.0;
+        xymax_defined = 1;
+
+        continue;
+      }
     }
-
-    if(match(buffer, "LONGLATCENTER") == 1){
-      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f", &longref, &latref);
-      longlatref_mode = LONGLATREF_CENTER;
-      continue;
-    }
-
-    if(match(buffer, "LONGLATMINMAX") == 1){
-      have_data = 1;
-      longmin = -1000.0;
-      longmax = -1000.0;
-      nlongs = 50;
-      latmin = -1000.0;
-      latmax = -1000.0;
-      nlats = 50;
-      kbar = nlats;
-      if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f %f %f", &longmin, &longmax, &latmin, &latmax);
-      longlatref_mode = LONGLATREF_MINMAX;
-      longref = (longmin + longmax) / 2.0;
-      latref = (latmin + latmax) / 2.0;
-      xmax = SphereDistance(longmin, latref, longmax, latref);
-      ymax = SphereDistance(longref, latmin, longref, latmax);
-      xref = xmax / 2.0;
-      yref = ymax / 2.0;
-      xymax_defined=1;
-
-      continue;
+    else{
+      if(match(buffer, "LONGLATORIG") == 1 || match(buffer, "LONGLATCENTER") == 1 || match(buffer, "LONGLATMINMAX") == 1){
+        have_data = 1;
+        if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+        longlatref_mode = LONGLATREF_MINMAX;
+        longref = (long_min + long_max) / 2.0;
+        latref = (lat_min + lat_max) / 2.0;
+        xmax = SphereDistance(long_min, latref, long_max, latref);
+        ymax = SphereDistance(longref, lat_min, longref, lat_max);
+        xref = xmax / 2.0;
+        yref = ymax / 2.0;
+        xymax_defined = 1;
+        continue;
+      }
     }
 
     if(match(buffer, "EXCLUDE") == 1){
@@ -553,24 +620,22 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       xref = xmax;
       yref = ymax;
       dlat = yref / EARTH_RADIUS;
-      latmax = latref + RAD2DEG*dlat;
-      latmin = latref;
+      lat_max = latref + RAD2DEG*dlat;
+      lat_min = latref;
       dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
-      longmax = longref + RAD2DEG*dlong;
-      longmin = longref;
+      long_max = longref + RAD2DEG*dlong;
+      long_min = longref;
       break;
 
-
     case LONGLATREF_CENTER:
-
       xref = xmax/2.0;
       yref = ymax/2.0;
       dlat = yref / EARTH_RADIUS;
-      latmax = latref + RAD2DEG*dlat;
-      latmin = latref - RAD2DEG*dlat;
+      lat_max = latref + RAD2DEG*dlat;
+      lat_min = latref - RAD2DEG*dlat;
       dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
-      longmax = longref + RAD2DEG*dlong;
-      longmin = longref - RAD2DEG*dlong;
+      long_max = longref + RAD2DEG*dlong;
+      long_min = longref - RAD2DEG*dlong;
       break;
   }
   if(xymax_defined==0){
@@ -603,8 +668,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
   }
 
-  dlat = (latmax - latmin) / (float)(nlats - 1);
-  dlong = (longmax - longmin) / (float)(nlongs - 1);
+  dlat = (lat_max - lat_min) / (float)(nlats - 1);
+  dlong = (long_max - long_min) / (float)(nlongs - 1);
   NewMemory((void **)&vals, nlongs*nlats * sizeof(float));
   NewMemory((void **)&have_vals, nlongs*nlats * sizeof(int));
   longlats = longlatsorig;
@@ -612,10 +677,10 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   fds_elevs->nrows = nlats;
   fds_elevs->ncols = nlongs;
   fds_elevs->nz = kbar;
-  fds_elevs->long_min = longmin;
-  fds_elevs->long_max = longmax;
-  fds_elevs->lat_min = latmin;
-  fds_elevs->lat_max = latmax;
+  fds_elevs->long_min = long_min;
+  fds_elevs->long_max = long_max;
+  fds_elevs->lat_min = lat_min;
+  fds_elevs->lat_max = lat_max;
   fds_elevs->xmax = xmax;
   fds_elevs->ymax = ymax;
   fds_elevs->xref = xref;
@@ -664,7 +729,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   FREEMEMORY(have_vals);
   FREEMEMORY(longlatsorig);
 
-  GenerateImage(elevfile, fds_elevs, imageinfo, nimageinfo);
+  GenerateMapImage(elevfile, fds_elevs, imageinfo, nimageinfo,examine_map_images);
   return 1;
 }
 

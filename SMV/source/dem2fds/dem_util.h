@@ -12,6 +12,7 @@ typedef struct {
   int ncols, nrows, nz, use_it;
   float xllcorner, yllcorner, cellsize;
   char *headerfile, *datafile;
+  char filelabel[13];
   float lat_min, lat_max, long_min, long_max, dlong, dlat;
   float val_min, val_max;
   float xmax, ymax, zmin, zmax;
@@ -21,7 +22,7 @@ typedef struct {
 } elevdata;
 
 EXTERNCPP void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option);
-EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs);
+EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images);
 
 SVEXTERN char libdir[1024];
 

@@ -41,6 +41,7 @@ int main(int argc, char **argv){
   char *casename = NULL;
   char file_default[LEN_BUFFER];
   elevdata fds_elevs;
+  int examine_map_images=0;
 
   if(argc == 1){
     Usage("dem2fds");
@@ -68,6 +69,9 @@ int main(int argc, char **argv){
           strcpy(libdir, libdirptr);
         }
         break;
+      case 'e':
+        examine_map_images = 1;
+        break;
       case 'h':
         Usage("dem2fds");
         exit(1);
@@ -93,7 +97,7 @@ int main(int argc, char **argv){
     }
   }
   if(casename == NULL)casename = file_default;
-  if (GetElevations(casename,&fds_elevs) == 1) {
+  if (GetElevations(casename,&fds_elevs,examine_map_images) == 1) {
     GenerateFDSInputFile(casename, &fds_elevs, gen_fds);
   }
   return 0;
