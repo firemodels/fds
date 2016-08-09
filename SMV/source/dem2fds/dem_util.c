@@ -256,51 +256,50 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
     }
   }
 
-#define SCALE_IMAGE_I(ival) (CLAMP(nrows*((ival) - fds_elevs->lat_min) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
-#define SCALE_IMAGE_J(jval) (CLAMP(ncols*((jval) - fds_elevs->long_min) / (fds_elevs->long_max - fds_elevs->long_min),0,ncols-1))
+#define SCALE_IMAGE_I(ival) (CLAMP(ncols*((ival) - fds_elevs->long_min) / (fds_elevs->long_max - fds_elevs->long_min),0,ncols-1))
+#define SCALE_IMAGE_J(jval) (CLAMP(nrows*((jval) - fds_elevs->lat_min) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
 
   if(examine_map_images == 1){
     int i;
 
     for(i = 0; i < nimageinfo; i++) {
       elevdata *imagei;
-      float longcen, latcen;
-      int icen, jcen;
+      float latcen;
+      int ileft, jcen;
       int textline_color;
       int imin, imax, jmin, jmax;
       int ii, jj;
 
       imagei = imageinfo + i;
-      longcen = (imagei->long_max + imagei->long_min) / 2.0;
-      jcen = SCALE_IMAGE_J(longcen);
+      ileft = 10+SCALE_IMAGE_I(imagei->long_min);
 
       latcen = (imagei->lat_max + imagei->lat_min) / 2.0;
-      icen = SCALE_IMAGE_I(latcen);
+      jcen = SCALE_IMAGE_J(latcen);
       textline_color = (0 << 16) | (0 << 8) | 0;
 
       // gdFontTiny, gdFontSmall, gdFontMediumBold, gdFontLarge, and gdFontGiant
-      gdImageString(RENDERimage, gdFontGiant, jcen, icen, (unsigned char *)imagei->filelabel, textline_color);
+      gdImageString(RENDERimage, gdFontGiant, ileft, jcen, (unsigned char *)imagei->filelabel, textline_color);
 
-      jmin = SCALE_IMAGE_J(imagei->long_min);
-      jmax = SCALE_IMAGE_J(imagei->long_max);
+      imin = SCALE_IMAGE_I(imagei->long_min);
+      imax = SCALE_IMAGE_I(imagei->long_max);
 
-      imin = SCALE_IMAGE_I(imagei->lat_min);
-      imax = SCALE_IMAGE_I(imagei->lat_max);
+      jmin = SCALE_IMAGE_J(imagei->lat_min);
+      jmax = SCALE_IMAGE_J(imagei->lat_max);
 
-      for(ii = imin; ii <= imax; ii++){
-        int kk;
-
-        for(kk = -1; kk < 2; kk++){
-          gdImageSetPixel(RENDERimage, jmin + kk, ii, textline_color);
-          gdImageSetPixel(RENDERimage, jmax + kk, ii, textline_color);
-        }
-      }
       for(jj = jmin; jj <= jmax; jj++){
         int kk;
 
         for(kk = -1; kk < 2; kk++){
-          gdImageSetPixel(RENDERimage, jj, imin + kk, textline_color);
-          gdImageSetPixel(RENDERimage, jj, imax + kk, textline_color);
+          gdImageSetPixel(RENDERimage, imin + kk, jj, textline_color);
+          gdImageSetPixel(RENDERimage, imax + kk, jj, textline_color);
+        }
+      }
+      for(ii = imin; ii <= imax; ii++){
+        int kk;
+
+        for(kk = -1; kk < 2; kk++){
+          gdImageSetPixel(RENDERimage, ii, jmin + kk, textline_color);
+          gdImageSetPixel(RENDERimage, ii, jmax + kk, textline_color);
         }
       }
     }
