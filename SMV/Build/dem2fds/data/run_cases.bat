@@ -27,3 +27,4 @@ echo sugarloaf
 echo.
 echo trails
 %fds% trails.fds 
+%fds% trails2.fds 

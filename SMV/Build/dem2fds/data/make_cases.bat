@@ -5,6 +5,9 @@
 :: generate terrain with &OBST
 set option=-o
 
+:: generate terrain with &OBST and examine map images
+:: set option=-e -o
+
 set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set dem2fds=dem2fds
 
