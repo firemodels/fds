@@ -1,5 +1,8 @@
 @echo off
 set option=%1 %2 
+if x%option% NEQ x goto skip
+set option=-o
+:skip
 
 set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set dem2fds=dem2fds
