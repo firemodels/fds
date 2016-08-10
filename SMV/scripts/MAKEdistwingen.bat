@@ -28,6 +28,7 @@ set BUILDDIR=intel_win_%platform%
 set version=%smv_version%
 set bundledir=%svn_root%\smv\for_bundle
 set smvbuild=%svn_root%\SMV\Build\smokeview\%BUILDDIR%
+set smvscripts=%svn_root%\SMV\scripts
 set svzipbuild=%svn_root%\SMV\Build\smokezip\%BUILDDIR%
 set dem2fdsbuild=%svn_root%\SMV\Build\dem2fds\%BUILDDIR%
 set svdiffbuild=%svn_root%\SMV\Build\smokediff\%BUILDDIR%
@@ -50,6 +51,8 @@ mkdir %smvdir%
 CALL :COPY  ..\..\SMV\Build\set_path\intel_win_64\set_path64.exe "%smvdir%\set_path.exe"
 
 CALL :COPY  %smvbuild%\smokeview_win_%platform%.exe %smvdir%\smokeview.exe
+
+CALL :COPY  %smvscripts%\jp2conv.bat %smvdir%\jp2conv.bat
 
 echo copying .po files
 copy *.po %smvdir%\.>Nul

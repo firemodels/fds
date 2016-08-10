@@ -26,6 +26,7 @@ set platform=%1
 set version=test_%smv_revision%
 set zipbase=smv_%version%_win%platform%
 set smvdir=%svn_root%\SMV\uploads\%zipbase%
+set smvscripts=%svn_root%\SMV\scripts
 set sh2bat=%svn_root%\SMV\Build\sh2bat\intel_win_64
 
 cd %svn_root%\SMV\for_bundle
@@ -37,6 +38,8 @@ IF EXIST %smvdir% rmdir /S /Q %smvdir%
 mkdir %smvdir%
 
 CALL :COPY ..\Build\smokeview\intel_win_%platform%\smokeview_win_test_%platform%.exe %smvdir%\smokeview.exe
+
+CALL :COPY  %smvscripts%\jp2conv.bat %smvdir%\jp2conv.bat
 
 echo copying .po files
 copy *.po %smvdir%\.>Nul
