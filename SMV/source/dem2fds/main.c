@@ -28,8 +28,9 @@ void Usage(char *prog){
   fprintf(stderr, "where\n");
   fprintf(stderr, "  -d dir - directory containing elevation files (default .)\n");
   fprintf(stderr, "  -g - create an FDS input file using &GEOM keywords\n");
-  fprintf(stderr, "  -o - create an FDS input file using &OBST keywords (default)\n");
   fprintf(stderr, "  -h - display this message\n");
+  fprintf(stderr, "  -n - no buffer ( 0 pixel overlap) between terrain images\n");
+  fprintf(stderr, "  -o - create an FDS input file using &OBST keywords (default)\n");
   fprintf(stderr, "  -v - show version information\n");
 }
 
@@ -47,6 +48,7 @@ int main(int argc, char **argv){
     Usage("dem2fds");
     return 0;
   }
+  border_buffer = 300;
 
   strcpy(file_default, "terrain");
   strcpy(libdir, ".");
@@ -75,6 +77,9 @@ int main(int argc, char **argv){
       case 'h':
         Usage("dem2fds");
         exit(1);
+        break;
+      case 'n':
+        border_buffer = 0;
         break;
       case 'o':
         gen_fds = FDS_OBST;

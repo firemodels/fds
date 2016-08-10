@@ -193,8 +193,7 @@ gdImagePtr GetJPEGImage(const char *filename, int *width, int *height) {
 }
 
 /* ------------------ GetColor ------------------------ */
-#define IMAGE_OFFSETR 0
-#define IMAGE_OFFSETC 0
+
 int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
   int i;
 
@@ -211,11 +210,11 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
       latfact = (llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
       longfact = (llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
 
-      irow = IMAGE_OFFSETR + (imagei->nrows - 1 - 2 * IMAGE_OFFSETR)*latfact;
+      irow = border_buffer + (imagei->nrows - 1 - 2 * border_buffer)*latfact;
       irow = imagei->nrows - 1 - irow;
       irow = CLAMP(irow, 0, imagei->nrows - 1);
 
-      icol = IMAGE_OFFSETC + (imagei->ncols - 1 - 2 * IMAGE_OFFSETC)*longfact;
+      icol = border_buffer + (imagei->ncols - 1 - 2 * border_buffer)*longfact;
       icol = CLAMP(icol, 0, imagei->ncols - 1);
       return gdImageGetPixel(imagei->image, icol, irow);
     }
@@ -283,7 +282,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
       imin = SCALE_IMAGE_I(imagei->long_min);
       imax = SCALE_IMAGE_I(imagei->long_max);
 
-      jmin = SCALE_IMAGE_J(imagei->lat_max); // max latitude occcurs first in file (ie has a smaller 'j' index)
+      jmin = SCALE_IMAGE_J(imagei->lat_max); // max latitude occurs first in file (ie has a smaller 'j' index)
       jmax = SCALE_IMAGE_J(imagei->lat_min);
 
       for(jj = jmin; jj <= jmax; jj++){

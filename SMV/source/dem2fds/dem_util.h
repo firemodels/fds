@@ -25,4 +25,5 @@ EXTERNCPP void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int opt
 EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images);
 
 SVEXTERN char libdir[1024];
+SVEXTERN int border_buffer;
 
