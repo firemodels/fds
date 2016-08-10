@@ -758,6 +758,19 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
+
+   ! Handle the case where OBST lives on an external boundary
+   IF (IW>N_EXTERNAL_WALL_CELLS) THEN
+      SELECT CASE(IOR)
+         CASE( 1); IF (IIG>IBAR) CYCLE WALL_LOOP
+         CASE(-1); IF (IIG<1)    CYCLE WALL_LOOP
+         CASE( 2); IF (JJG>JBAR) CYCLE WALL_LOOP
+         CASE(-2); IF (JJG<1)    CYCLE WALL_LOOP
+         CASE( 3); IF (KKG>KBAR) CYCLE WALL_LOOP
+         CASE(-3); IF (KKG<1)    CYCLE WALL_LOOP
+      END SELECT
+   ENDIF
+
    ZZ_GET(1:N_TRACKED_SPECIES) = WC%ZZ_F(1:N_TRACKED_SPECIES)
    CALL GET_SENSIBLE_ENTHALPY(ZZ_GET,H_S,WC%TMP_F_GAS)
 
@@ -941,6 +954,18 @@ WALL_LOOP: DO IW=1,N_EXTERNAL_WALL_CELLS+N_INTERNAL_WALL_CELLS
    JJG = WC%ONE_D%JJG
    KKG = WC%ONE_D%KKG
    IOR = WC%ONE_D%IOR
+
+   ! Handle the case where OBST lives on an external boundary
+   IF (IW>N_EXTERNAL_WALL_CELLS) THEN
+      SELECT CASE(IOR)
+         CASE( 1); IF (IIG>IBAR) CYCLE WALL_LOOP
+         CASE(-1); IF (IIG<1)    CYCLE WALL_LOOP
+         CASE( 2); IF (JJG>JBAR) CYCLE WALL_LOOP
+         CASE(-2); IF (JJG<1)    CYCLE WALL_LOOP
+         CASE( 3); IF (KKG>KBAR) CYCLE WALL_LOOP
+         CASE(-3); IF (KKG<1)    CYCLE WALL_LOOP
+      END SELECT
+   ENDIF
 
    ! Overwrite first off-wall advective flux if flow is away from the wall and if the face is not also a wall cell
 
