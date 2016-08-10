@@ -65,11 +65,10 @@ entries listed with headings beginning with <tt>m_</tt> and ending with <tt>.jp2
 cover the region you are using to define an FDS input file.
 <li>Copy the downloaded files to the same directory you used to copy the .flt and .hdr elevation files.
 <li>The .jp2 files you just downloaded are in <em>jpeg 2000</em> format.  
-They need to be converted to jpeg format . To do this,
-run the following command (on a PC) for each <em>jp2</em> file:
-<pre>
-  magick imagefilename.jp2 imagefilename.jpg
-</pre>
+They need to be converted to jpeg format . 
+To do this on a PC, run the <tt>jp2conv</tt> command.
+On Linux or a Mac, run the <tt>jp2conv.sh</tt> command.  
+These commands are installed with the latest Smokeview test bundle.<br>
 Notes:
 <ul>
 <li>make sure that you installed Imagemagick
