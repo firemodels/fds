@@ -13,8 +13,8 @@ set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 
 echo.
 echo demtest
-%dem2fds% %option% -d %userprofile%\terrain\demtest demtest1.in 
-%dem2fds% %option% -d %userprofile%\terrain\demtest demtest2.in 
+%dem2fds% %option% -n -d %userprofile%\terrain\demtest demtest1.in 
+%dem2fds% %option% -n -d %userprofile%\terrain\demtest demtest2.in 
 
 echo.
 echo blodget
@@ -22,7 +22,7 @@ echo blodget
 
 echo.
 echo NIST
-%dem2fds% %option% -d %userprofile%\terrain\nist nist.in 
+%dem2fds% %option% -n -d %userprofile%\terrain\nist nist.in 
 
 echo.
 echo tower
@@ -30,7 +30,7 @@ echo tower
 
 echo.
 echo sugarloaf
-%dem2fds% %option% -d %userprofile%\terrain\sugarloaf sugarloaf.in 
+%dem2fds% %option% -n -d %userprofile%\terrain\sugarloaf sugarloaf.in 
 
 echo.
 echo trails
