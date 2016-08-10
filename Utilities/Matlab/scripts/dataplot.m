@@ -290,8 +290,12 @@ for i=2:n_plots
         % Skips case upon any Matlab error
         try
             for j=1:length(S2)
+
+                if strcmp(char(style(j)),'none')
+                    continue
+                end
                 
-                % check for "+" operator on columns 
+                % check for "+" operator on columns (see hrrpuv_reac for examples)
                 SP = parseplus(S2(j));
 
                 d2_Ind_Col = find(strcmp(H,R2(min(j,length(R2)))));
