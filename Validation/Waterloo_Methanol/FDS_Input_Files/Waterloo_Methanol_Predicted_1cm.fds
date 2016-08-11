@@ -1,10 +1,12 @@
 &HEAD CHID="Waterloo_Methanol_Predicted_1cm", TITLE="University of Waterloo Pool Burner"
-&TIME T_END=20/
+&TIME T_END=15/
+
+&DUMP DT_DEVC_LINE=10/
 
 &MESH XB=-0.32,0.0,-0.32,0.0,0.0,0.32,IJK=32,32,32, MULT_ID='ARRAY'/
 &MULT ID='ARRAY', DX=0.32,DY=0.32,DZ=0.32,I_UPPER=1,J_UPPER=1,K_UPPER=3/
 
-&MISC  FLUX_LIMITER=4, RESEARCH_MODE=.TRUE./
+&MISC FLUX_LIMITER=4, RESEARCH_MODE=.TRUE./
 
 &REAC FUEL               = 'METHANOL'
       FYI                = 'Methanol C_1 H_4 O_1'
