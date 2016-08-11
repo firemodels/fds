@@ -115,6 +115,18 @@ SPECIES_LOOP: DO N=1,N_TOTAL_SCALARS
       KKG = WC%ONE_D%KKG
       IOR = WC%ONE_D%IOR
 
+      ! Handle the case where OBST lives on an external boundary
+      IF (IW>N_EXTERNAL_WALL_CELLS) THEN
+         SELECT CASE(IOR)
+            CASE( 1); IF (IIG>IBAR) CYCLE WALL_LOOP_2
+            CASE(-1); IF (IIG<1)    CYCLE WALL_LOOP_2
+            CASE( 2); IF (JJG>JBAR) CYCLE WALL_LOOP_2
+            CASE(-2); IF (JJG<1)    CYCLE WALL_LOOP_2
+            CASE( 3); IF (KKG>KBAR) CYCLE WALL_LOOP_2
+            CASE(-3); IF (KKG<1)    CYCLE WALL_LOOP_2
+         END SELECT
+      ENDIF
+
       SELECT CASE(IOR)
          CASE( 1)
             FX(IIG-1,JJG,KKG,N) = WC%RHO_F*WC%ZZ_F(N)
