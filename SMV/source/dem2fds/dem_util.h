@@ -14,6 +14,7 @@ typedef struct {
   char *headerfile, *datafile;
   char filelabel[13];
   float lat_min, lat_max, long_min, long_max, dlong, dlat;
+  float lat_min_orig, lat_max_orig, long_min_orig, long_max_orig;
   float val_min, val_max;
   float xmax, ymax, zmin, zmax;
   float xref, yref, longref, latref;
