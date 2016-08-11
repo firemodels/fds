@@ -35,7 +35,6 @@ cat_mccaffrey
 NIST_RSE
 sippola_aerosol_deposition
 layer_height
-Hamins_CH4_Average
 combine_csiro
 fm_datacenter_scatter
 
