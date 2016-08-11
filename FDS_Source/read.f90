@@ -5356,7 +5356,7 @@ ENDIF
 DO N=1,N_MATL
    ML => MATERIAL(N)
    IF ((1.0_EB-ML%POROSITY) < 1.0E-5_EB) THEN
-      WRITE(MESSAGE,'(A)') 'ERROR: Too high porosity for material ',TRIM(MATL_NAME(N))
+      WRITE(MESSAGE,'(2A)') 'ERROR: Too high porosity for material ',TRIM(MATL_NAME(N))
       CALL SHUTDOWN(MESSAGE) ; RETURN
    ENDIF
 !   ML%RHO_NONPOROUS        = DENSITY/(1._EB-POROSITY)
