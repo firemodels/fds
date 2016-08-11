@@ -455,7 +455,7 @@ for i=2:n_plots
                         Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
                 end
             end
-            
+
             if size(Key_Position)>0
                 if ~ftest
                     legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
@@ -497,7 +497,7 @@ for i=2:n_plots
             if ~ftest
                 addverstr(gca,VerStr_Filename,Plot_Type)
             end
-            
+
             % Save plot file
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
