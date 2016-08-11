@@ -437,22 +437,25 @@ for i=2:n_plots
             end
 
             set(gca,'FontName',Font_Name)
-            set(gca,'FontSize',Label_Font_Size) 
-
-            if strcmp(Flip_Axis,'no')
-                xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-                ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-                axis([Min_Ind Max_Ind Min_Dep Max_Dep])
-                text(X_Title_Position,Y_Title_Position,...
-                    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
-            else
-                xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-                ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
-                axis([Min_Dep Max_Dep Min_Ind Max_Ind])
-                text(X_Title_Position,Y_Title_Position,...
-                    Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+            set(gca,'FontSize',Label_Font_Size)
+            
+            % Inserts title, skips if 'f' switch (avoids overplotting)
+            if ~ftest
+                if strcmp(Flip_Axis,'no')
+                    xlabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                    ylabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                    axis([Min_Ind Max_Ind Min_Dep Max_Dep])
+                    text(X_Title_Position,Y_Title_Position,...
+                        Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                else
+                    xlabel(Dep_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                    ylabel(Ind_Title,'Interpreter',Font_Interpreter,'FontSize',Label_Font_Size)
+                    axis([Min_Dep Max_Dep Min_Ind Max_Ind])
+                    text(X_Title_Position,Y_Title_Position,...
+                        Plot_Title,'FontSize',Title_Font_Size,'FontName',Font_Name,'Interpreter',Font_Interpreter)
+                end
             end
-
+            
             if size(Key_Position)>0
                 if ~ftest
                     legend_handle = legend(K,[parsepipe(d1_Key),parsepipe(d2_Key)],'Location',Key_Position);
@@ -490,9 +493,11 @@ for i=2:n_plots
                 end
             end
 
-            % Add version string if file is available
-            addverstr(gca,VerStr_Filename,Plot_Type)
-
+            % Add version string if file is available, skips if 'f' switch (avoids overplotting)
+            if ~ftest
+                addverstr(gca,VerStr_Filename,Plot_Type)
+            end
+            
             % Save plot file
             PDF_Paper_Width = Paper_Width_Factor*Paper_Width;
 
