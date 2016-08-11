@@ -23,20 +23,31 @@
 % Dataplot creates most of the plots for the Validation Guide.
 % It must be run before scatplot, which makes the scatter plots.
 
-close all
-clear all
+function [] = FDS_validation_script(varargin)
 
 addpath 'scripts'
 
+% Process variable argument list
+
+skip_to_dataplot=false;
+if nargin>0
+    skip_to_dataplot=true;
+else
+    close all
+    clear all
+end
+
 % Scripts that run prior to dataplot
 
-flame_height
-cat_mccaffrey
-NIST_RSE
-sippola_aerosol_deposition
-layer_height
-combine_csiro
-fm_datacenter_scatter
+if ~skip_to_dataplot
+    flame_height
+    cat_mccaffrey
+    NIST_RSE
+    sippola_aerosol_deposition
+    layer_height
+    combine_csiro
+    fm_datacenter_scatter
+end
 
 % Dataplot and scatplot options
 
@@ -59,7 +70,9 @@ Append_To_Scatterplot_Title = '';
 
 % Run dataplot and scatplot scripts
 
-[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir);
+varargin
+
+[saved_data,drange] = dataplot(Dataplot_Inputs_File, Working_Dir, Manuals_Dir, varargin);
 scatplot(saved_data, drange, ...
          'Manuals_Dir', Manuals_Dir, ...
          'Scatterplot_Inputs_File', Scatterplot_Inputs_File, ...
@@ -72,18 +85,20 @@ scatplot(saved_data, drange, ...
      
 % Miscellaneous other scripts for special cases
 
-backward_facing_step
-beyler_hood
-sandia_helium_plume
-sandia_methane_fire
-spray_attenuation
-Cup_burner
-flame_height2
-purdue_flames
-christifire
-pressure_coefficient
-VTT_Sprays
-fm_datacenter_veltest
-umd_line_burner
+if ~skip_to_dataplot
+    backward_facing_step
+    beyler_hood
+    sandia_helium_plume
+    sandia_methane_fire
+    spray_attenuation
+    Cup_burner
+    flame_height2
+    purdue_flames
+    christifire
+    pressure_coefficient
+    VTT_Sprays
+    fm_datacenter_veltest
+    umd_line_burner
+end
 
 display('validation scripts completed successfully!')
