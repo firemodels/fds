@@ -24,14 +24,14 @@ void Usage(char *prog){
   fprintf(stderr, "Create an FDS input file using elevation data\n");
   fprintf(stderr, "  obtained from http://viewer.nationalmap.gov \n\n");
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "  dem2fds [-g|-o][-h][-v] casename.in\n");
+  fprintf(stderr, "  dem2fds [-g][-h][-v] casename.in\n");
   fprintf(stderr, "where\n");
-  fprintf(stderr, "  -d dir - directory containing elevation files (default .)\n");
-  fprintf(stderr, "  -g - create an FDS input file using &GEOM keywords\n");
-  fprintf(stderr, "  -h - display this message\n");
-  fprintf(stderr, "  -n - no buffer ( 0 pixel overlap) between terrain images\n");
-  fprintf(stderr, "  -o - create an FDS input file using &OBST keywords (default)\n");
-  fprintf(stderr, "  -v - show version information\n");
+  fprintf(stderr, "  -dir dir  - directory containing elevation files (default .)\n");
+  fprintf(stderr, "  -obst     - create an FDS input file using &OBST keywords\n");
+  fprintf(stderr, "  -geom     - create an FDS input file using &GEOM keywords\n");
+  fprintf(stderr, "  -help     - display this message\n");
+  fprintf(stderr, "  -nobuffer - no buffer ( 0 pixel overlap) between terrain images\n");
+  fprintf(stderr, "  -version  - show version information\n");
 }
 
 /* ------------------ main ------------------------ */
@@ -63,38 +63,35 @@ int main(int argc, char **argv){
     arg=argv[i];
     lenarg=strlen(arg);
     if(arg[0]=='-'&&lenarg>1){
-      switch(arg[1]){
-      case 'd':
+      if(strncmp(arg, "-dir", 4) == 0){
         i++;
         libdirptr = argv[i];
         if(file_exists(libdirptr) == 1){
           strcpy(libdir, libdirptr);
         }
-        break;
-      case 'e':
+      }
+      else if(strncmp(arg, "-debug", 6)==0){
         examine_map_images = 1;
-        break;
-      case 'h':
+      }
+      else if(strncmp(arg, "-help", 5) == 0){
         Usage("dem2fds");
-        exit(1);
-        break;
-      case 'n':
+      }
+      else if(strncmp(arg, "-nobuffer", 8) == 0){
         border_buffer = 0;
-        break;
-      case 'o':
+      }
+      else if(strncmp(arg, "-obst", 5) == 0){
         gen_fds = FDS_OBST;
-        break;
-      case 'g':
+      }
+      else if(strncmp(arg, "-geom", 5) == 0){
         gen_fds = FDS_GEOM;
-        break;
-      case 'v':
+      }
+      else if(strncmp(arg, "-version", 8) == 0){
         PRINTversion("dem2fds");
         exit(1);
-        break;
-      default:
+      }
+      else{
         Usage("dem2fds");
         exit(1);
-        break;
       }
     }
     else{
