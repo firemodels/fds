@@ -7,16 +7,22 @@
 % subfolder called "scripts". 
 %
 % The most important script is called dataplot. It reads the file called
-% FDS_validation_dataplot_inputs.csv and generates 1000+ plots. If you
-% want to process only some of these plots, comment out the other 
-% scripts and change the data plot line as follows:
+% FDS_validation_dataplot_inputs.csv and generates 1000+ plots.
 %
-% [saved_data,drange] = dataplot(Dataplot_Inputs_File,Validation_Dir,Manuals_Dir,[a:b]);
+% Usage:
 %
-% where a and b are the lines in the .csv file you want to process.
-% Alternatively, you can specify the "Dataname" you want:
+% >> FDS_validation_script([drange]);
 %
-% [saved_data,drange] = dataplot(Dataplot_Inputs_File,Validation_Dir,Manuals_Dir,'WTC');
+% where drange is an optional argument.
+%
+% If you know the lines in the .csv file you want to process, set drange = [a:b],
+% where a and b are the start and finish of the lines to be processed.  Note that
+% drange is simply a list of array elements, so it is permissible to use, for example,
+% [a:b,c].
+%
+% Alternatively, you can specify the "Dataname" for the case you want to plot:
+%
+% >> FDS_validation_script('WTC');
 %
 % In this case, all the WTC results will be plotted.
 %
@@ -39,14 +45,29 @@ end
 
 % Scripts that run prior to dataplot
 
-if ~skip_to_dataplot
-    flame_height
-    cat_mccaffrey
-    NIST_RSE
-    sippola_aerosol_deposition
-    layer_height
-    combine_csiro
-    fm_datacenter_scatter
+switch varargin
+    case {'Heskestad Flame Height'}
+        flame_height
+    case {'McCaffrey Plume'}
+        cat_mccaffrey
+    case {'NIST RSE 1994'}
+        NIST_RSE
+    case {'Sippola Aerosol Deposition'}
+        sippola_aerosol_deposition
+    case {'ATF Corridors','FM/SNL','NIST FSE 2008','NIST/NRC','NRCC Smoke Tower','PRISME','UL/NIST Vents','VTT','WTC'}
+        layer_height
+    case {'CSIRO Grassland Fires'}
+        combine_csiro
+    case {'FM Datacenter'}
+        fm_datacenter_scatter
+    otherwise
+        flame_height
+        cat_mccaffrey
+        NIST_RSE
+        sippola_aerosol_deposition
+        layer_height
+        combine_csiro
+        fm_datacenter_scatter
 end
 
 % Dataplot and scatplot options
