@@ -1,4 +1,4 @@
-&HEAD CHID="Waterloo_Methanol_0p5cm", TITLE="University of Waterloo Pool Burner"
+&HEAD CHID="Waterloo_Methanol_Predicted_0p5cm", TITLE="University of Waterloo Pool Burner"
 &TIME T_END=10/
 
 &MESH XB=-0.32,0.0,-0.32,0.0,0.0,0.16,IJK=64,64,32, MULT_ID='ARRAY'/
@@ -16,12 +16,23 @@
 &SLCF PBY=0.0, QUANTITY='TEMPERATURE', CELL_CENTERED=.TRUE. /
 &SLCF PBY=0.0, QUANTITY='DENSITY', CELL_CENTERED=.TRUE. /
 
-796 kg/m3 * 1.35 cm3/s / (pi*.1525^2)  = 0.014708 kg/m^2s
-&SURF ID='POOL'
-      SPEC_ID='METHANOL'
-      MASS_FLUX = 0.014708
-      TMP_FRONT=64.7
-      /
+&MATL ID                     = 'METHANOL LIQUID'
+      EMISSIVITY             = 1.
+      NU_SPEC                = 1.
+      SPEC_ID                = 'METHANOL'
+      HEAT_OF_REACTION       = 1099
+      CONDUCTIVITY           = 0.20
+      SPECIFIC_HEAT          = 2.48
+      DENSITY                = 796
+      ABSORPTION_COEFFICIENT = 1140
+      BOILING_TEMPERATURE    = 64.8 /
+      
+
+
+&SURF ID        = 'POOL'
+      COLOR     = 'YELLOW'
+      MATL_ID   = 'METHANOL LIQUID'
+      THICKNESS = 0.1 /
 
 &VENT XB=-0.1525,0.1525,-0.1525,0.1525,0,0, XYZ=0,0,0.0001, RADIUS=0.1525, COLOR='BLUE', SURF_ID='POOL', SPREAD_RATE=1000/
 
