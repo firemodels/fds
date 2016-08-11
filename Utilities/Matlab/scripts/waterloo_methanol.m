@@ -6,9 +6,12 @@ expdir = '../../Validation/Submodules/macfp-db/Liquid_Pool_Fires/Waterloo_Methan
 fdsdir = '../../Validation/Waterloo_Methanol/FDS_Output_Files/';
 pltdir = '../../Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/Waterloo_Methanol/';
 
-F3 = importdata([fdsdir,'Waterloo_Methanol_0p25cm_line.csv'],',',2);
-F2 = importdata([fdsdir,'Waterloo_Methanol_0p5cm_line.csv'],',',2);
-F1 = importdata([fdsdir,'Waterloo_Methanol_1cm_line.csv'],',',2);
+for predc={'Prescribed','Predicted'},
+pred = predc{1};
+F3 = importdata([fdsdir,'Waterloo_Methanol_',pred,'_0p25cm_line.csv'],',',2);
+F2 = importdata([fdsdir,'Waterloo_Methanol_',pred,'_0p5cm_line.csv'],',',2);
+F1 = importdata([fdsdir,'Waterloo_Methanol_',pred,'_1cm_line.csv'],',',2);
+git_file = [fdsdir,'Waterloo_Methanol_',pred,'_0p25cm_git.txt'];
 
 
 %% Mean and RMS velocities at different z-offsets
@@ -41,7 +44,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -54,7 +56,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -83,7 +85,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -96,7 +97,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -125,7 +126,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -137,7 +137,7 @@ for z=[2:2:20,30],
     %text(.03,.24,'Waterloo Methanol','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -170,7 +170,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -183,7 +182,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -212,7 +211,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -225,7 +223,7 @@ for z=[2:2:20,30],
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
 
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
     
@@ -254,7 +252,6 @@ for z=[2:2:20,30],
     lh = legend(H,'Exp','FDS 1 cm','FDS 0.5 cm','FDS 0.25 cm');
     set(lh,'FontName',Font_Name,'FontSize',Label_Font_Size,'Interpreter',Font_Interpreter)
     % add Git revision if file is available
-    git_file = [fdsdir,'Waterloo_Methanol_0p25cm_git.txt'];
     addverstr(gca,git_file,'linear')
 
     set(gca,'FontName',Font_Name)
@@ -266,10 +263,10 @@ for z=[2:2:20,30],
     %text(.03,.24,'Waterloo Methanol','FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     text(.03,.08,['{\it z} = ',num2str(z),' cm'],'FontName',Font_Name,'FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Units','normalized')
     % print to pdf
-    outfile = ['Waterloo_Methanol_',var];
+    outfile = ['Waterloo_Methanol_',pred,'_',var];
     print(gcf,'-dpdf',[pltdir,outfile])
     close
 end
-
+end
 
 
