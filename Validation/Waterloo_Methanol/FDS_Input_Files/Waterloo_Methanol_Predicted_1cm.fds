@@ -28,8 +28,6 @@
       DENSITY                = 796
       ABSORPTION_COEFFICIENT = 1140
       BOILING_TEMPERATURE    = 64.8 /
-      
-
 
 &SURF ID        = 'POOL'
       COLOR     = 'YELLOW'
