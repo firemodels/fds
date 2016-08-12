@@ -51,7 +51,7 @@ no_target:
 
 # ********  rules for each platform supported *************
 
-intel_win_64 : CFLAGS    = -Od -D WIN32 /nologo $(GITINFO)
+intel_win_64 : CFLAGS    = -Od -D WIN32 -D pp_INTEL /nologo $(GITINFO)
 intel_win_64 : CC        = icl
 intel_win_64 : exe       = dem2fds_win_64.exe
 
@@ -62,7 +62,7 @@ intel_win_64 : $(objwin)
 #  64 bit linux
 
 intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
-intel_linux_64 : CFLAGS    = -O2 -m64 $(GITINFO)
+intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_INTEL $(GITINFO)
 intel_linux_64 : CC        = icc
 intel_linux_64 : exe       = dem2fds_linux_64
 
@@ -74,7 +74,7 @@ intel_linux_64 : $(obj)
 #  64 bit OSX
 
 intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
-intel_osx_64 : CFLAGS    = -O2 -m64 $(GITINFO)
+intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_INTEL $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : exe       = dem2fds_osx_64
 
