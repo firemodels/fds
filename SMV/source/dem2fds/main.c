@@ -74,6 +74,7 @@ int main(int argc, char **argv){
       }
       else if(strncmp(arg, "-help", 5) == 0|| strncmp(arg, "-h", 2) == 0){
         Usage("dem2fds");
+        return 1;
       }
       else if(strncmp(arg, "-nobuffer", 8) == 0|| strncmp(arg, "-n", 2) == 0){
         border_buffer = 0;
@@ -86,11 +87,11 @@ int main(int argc, char **argv){
       }
       else if(strncmp(arg, "-version", 8) == 0|| strncmp(arg, "-v", 2) == 0){
         PRINTversion("dem2fds");
-        exit(1);
+        return 1;
       }
       else{
         Usage("dem2fds");
-        exit(1);
+        return 1;
       }
     }
     else{
