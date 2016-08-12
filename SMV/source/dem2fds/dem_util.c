@@ -233,7 +233,6 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
   char *ext;
 
   ncols = 2000;
-  if(examine_map_images == 1)ncols = 750;
   nrows = ncols*fds_elevs->ymax / fds_elevs->xmax;
   dx = (fds_elevs->long_max - fds_elevs->long_min) / (float)ncols;
   dy = (fds_elevs->lat_max - fds_elevs->lat_min) / (float)nrows;
