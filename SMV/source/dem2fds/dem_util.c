@@ -224,7 +224,7 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
 
 /* ------------------ GenerateMapImage ------------------------ */
 
-void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int nimageinfo, int examine_map_images) {
+void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, int nimageinfo) {
   int nrows, ncols, j;
   gdImagePtr RENDERimage;
   float dx, dy;
@@ -257,7 +257,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
 #define SCALE_IMAGE_I(ival) (CLAMP(ncols*((ival) - fds_elevs->long_min) / (fds_elevs->long_max - fds_elevs->long_min),0,ncols-1))
 #define SCALE_IMAGE_J(jval) (CLAMP(nrows*(fds_elevs->lat_max - (jval)) / (fds_elevs->lat_max - fds_elevs->lat_min), 0, nrows - 1))
 
-  if(examine_map_images == 1){
+  if(show_maps == 1){
     int i;
 
     // draw outline of each terrain map (downloaded form usgs website)
@@ -348,7 +348,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
 
 /* ------------------ GetElevations ------------------------ */
 
-int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
+int GetElevations(char *elevfile, elevdata *fds_elevs){
   int nelevinfo, nimageinfo, i, j;
   filelistdata *headerfiles, *imagefiles;
   FILE *stream_in;
@@ -655,7 +655,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
       fds_long_min = longref - RAD2DEG*dlong;
       break;
   }
-  if(examine_map_images==1){
+  if(show_maps==1){
     have_data = 1;
     longlatref_mode = LONGLATREF_MINMAX;
     longref = (image_long_min + image_long_max) / 2.0;
@@ -696,7 +696,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
     }
   }
 
-  if(examine_map_images==1){
+  if(show_maps==1){
     fds_elevs->long_min = image_long_min;
     fds_elevs->long_max = image_long_max;
     fds_elevs->lat_min = image_lat_min;
@@ -770,7 +770,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
   FREEMEMORY(have_vals);
   FREEMEMORY(longlatsorig);
 
-  GenerateMapImage(elevfile, fds_elevs, imageinfo, nimageinfo,examine_map_images);
+  GenerateMapImage(elevfile, fds_elevs, imageinfo, nimageinfo);
   return 1;
 }
 

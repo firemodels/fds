@@ -23,8 +23,8 @@ typedef struct {
 } elevdata;
 
 EXTERNCPP void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option);
-EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images);
+EXTERNCPP int GetElevations(char *elevfile, elevdata *fds_elevs);
 
 SVEXTERN char libdir[1024];
-SVEXTERN int border_buffer;
+SVEXTERN int SVDECL(border_buffer,300), SVDECL(show_maps,0);
 
