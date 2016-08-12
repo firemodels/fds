@@ -11,7 +11,6 @@
 <li><a href="#images">Obtaining Images</a>
 <li><a href="#fdsinput">Creating an FDS Input File</a>
 <li><a href="#dem2fds">DEM2FDS Input Keywords</a>
-<li><a href="#examples">Examples</a>
 </ul>
 <p><hr>
 
@@ -20,20 +19,18 @@
   Install or verify that the following is installed:
 
 <ul>
-  <li>  latest 
-  <a href="https://pages.nist.gov/fds-smv/downloads.html" target="_blank">release</a>
-  or
+  <li>  latest
   <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing" target="_blank">test</a>
-FDS and Smokeview
+Smokeview
   <li>  <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">Imagemagick</a> - used to convert downloaded images
 files from jpeg 2000 to jpeg format
 </ul>
 
 <h4>Creating an FDS Input File</h4>
 <li> Go to the <a href="https://viewer.nationalmap.gov/basic/" target="_blank">USGS National Map</a> website.  
-A map of the United States is on the right and a set of data options on the left.
-We will be using the <em>Elevation Products (3DEP)</em> option to obtain elevation data
-and the <em>Imagery - 1 meter (NAIP)</em> option to obtain images.
+A map of the United States is on the right and a set of data download options is on the left.
+These notes use <em>Elevation Products (3DEP)</em> 
+and <em>Imagery - 1 meter (NAIP)</em> data.
 <ol>
 <a name="elevation"><a>
   <li> Obtaining Elevation data
@@ -41,7 +38,7 @@ and the <em>Imagery - 1 meter (NAIP)</em> option to obtain images.
 <li>Select the <em>Elevation Products (3DEP)</em> checkbox.
 <li>Select 1/3 arc-second DEM checkbox
 <li>Select the <em>GridFloat</em> File format option
-<li>Click on the map and zoom in on a region of interest.
+<li>Click on the map and zoom in to a region of interest.
 <li>Click on the <em>Find Products</em> button.  You should see one or more 
 entries listed with headings beginning with
 USGS NED 1/3 arc-second ...... 1 x 1 degree .  
@@ -51,12 +48,13 @@ USGS NED 1/3 arc-second ...... 1 x 1 degree .
 copy the .flt and .hdr files to a directory where you'll keep your elevation and image files. 
 </ol>
 <a name="images"><a>
-<li>Obtaining Image data
+
+<p><li>Obtaining Image data
 <ol>
 <li>Click on the <em>Return to Search</em> button 
 and uncheck (if checked) the <em>Elevation Products (3DEP)</em> checkbox
 <li>Select the <em>Imagery - 1 meter (NAIP)</em> checkbox
-<li>Click on the map and zoom in on 
+<li>Click on the map and zoom in to 
 a region of interest (within the elevation region selected for for elevation files).
 <li>Click on the <em>Find Products</em> button.  You should see one or more 
 entries with each entry beginning with <tt>m_</tt> and ending with <tt>.jp2</tt> .  
@@ -74,7 +72,7 @@ These commands are installed with the latest Smokeview test bundle.<br>
 
 
 <a name="fdsinput"><a>
-<li> Creating an FDS input file
+<p><li> Creating an FDS input file
 
    <ol>
 <li>create a file named <tt>casename.in</tt> containing the following lines 
@@ -86,27 +84,45 @@ LONGLATMINMAX
   longmin  longmax latmin latmax
 </pre>
 where <tt>ibar</tt> and <tt>jbar</tt> are the number of longitude and latitidude divisions
-and <tt>kbar</tt> is the number of z direction divisions and
-<tt> longmin  longmax </tt> are the minimum and maximum longitude of the region  modeled,
-<tt> latmin  latmax </tt> are the miniumum and maximum latitude of the region modeled. 
-<p>A second method for specifying a terrain region is to use
+and <tt>kbar</tt> is the number of divisions along the z direction and
+<tt> longmin</tt>, <tt>longmax</tt>, <tt>latmin</tt> and <tt>latmax </tt> 
+are the minimum and maximum 
+longitude and latitude of the region  being modeled modeled. 
+<p>Two other methods for specifying a terrain region are to use the 
+<tt>LONGLATCENTER</tt> or <tt>LONGLATORIG</tt> keywords as in
 <pre>
 GRID
   ibar jbar kbar dx dy
-LONGLATMINMAX
+LONGLATCENTER
   longcen  latcen
 </pre>
-where <tt>dx</tt> and <tt>dy</tt> are the width and length of the scenario in meters
-and <tt>longcen</tt> and <tt>latcen</tt> are the longitude and latitude at the center of the 
-scenario (at position (<tt>dx/2</tt>, <tt>dy/2</tt>)).  
-
-
-<li>Run the command:<br>
+or
 <pre>
- dem2fds -d elevation_directory -o casename.in
+GRID
+  ibar jbar kbar dx dy
+LONGLATORIG
+  longorig  latorig
 </pre>
-where <tt>elevation_directory</tt> is the path for the directory containing the elevation and image files you downloaded.
-<li>An FDS input file has been created.  To view the case, run the commands:
+
+where <tt>dx</tt> and <tt>dy</tt> are the scenario width and length in meters 
+( <tt>ibar</tt>, <tt>jbar</tt> and <tt>kbar</tt> are defined as before), 
+<tt>longcen</tt> and <tt>latcen</tt> are the longitude and 
+latitude at the scenario center, 
+<em>i.e.</em> at position (<tt>dx/2</tt>, <tt>dy/2</tt>)
+and <tt>longorig</tt> and <tt>latorig</tt> are the longitude and 
+latitude at the scenario origin, 
+<em>i.e.</em> at position (<tt>0.0</tt>, <tt>0.0</tt>).
+
+
+
+<li>To create an FDS input file, run the command:<br>
+<pre>
+ dem2fds -d elevation_directory casename.in
+</pre>
+where <tt>elevation_directory</tt> is the path of the directory containing the 
+elevation and image files downloaded previously and 
+casename.in is the file containing <tt>GRID</tt> and <tt>LATLONG...</tt> keywords.
+<li>To view the case, run the commands:
 <pre>
 fds casename.fds
 smokeview casename
@@ -120,14 +136,52 @@ edit it to model your scenario as you wish.
 <a name="dem2fds"><a>
 <h4>DEM2FDS Input Keywords</h4>
 <ul>
-<li><tt>GRID</tt>
-<li><tt>LONGLATCENTER</tt>
-<li><tt>LONGLATORIG</tt>
-<li><tt>LONGLATMINMAX</tt>
+<li>GRID - Specifying the simlulation grid
+<pre>
+GRID
+ ibar jbar kbar dx dy zmin zmax
+</pre>
+<ul>
+<li>ibar, jbar, bar - number of divisions along the x, y and z directions
+<li>dx, dy - distance along the x and y axis.  
+Note, dx and dy are required if <tt>LATLONGCENTER</tt> or
+<tt>LATLONGORIG</tt> are used to specify a terrain region and 
+optional if <tt>LATLONGMINMAX</tt> is used to specify a terrain region (dem2fds computes
+dx and dy for <tt>LATLONGMINMAX</tt> keywords).
+<li>zmin, zmax - minimum and maximum z elevation.  These parameters are optional.
 </ul>
 
-<a name="examples"><a>
-<h4>Examples</h4>
+<p><li>LONGLATCENTER - specifying the longitude and latitude at the scenario center
+<pre>
+LONGLATCENTER
+ longcen latcen
+</pre>
+<ul>
+<li> longcen, latcen - longitude and latitude at the center of the scenario, at 
+position (dx/2,dy/2) .
+</ul>
+
+<p><li>LONGLATORIG- specifying the longitude and latitude at the scenario origin
+<pre>
+LONGLATORIG 
+ longorig latorig
+</pre>
+<ul>
+<li> longorig, latorig - longitude and latitude at the origin of the scenario, at 
+position (0,0) .
+</ul>
+
+<p><li>LONGLATMINMAX - specifying longitudes and latitudes that bound the scenario 
+<pre>
+LONGLATMINMAX
+ longmin longmax latmin latmax
+</pre>
+<ul>
+<li>longmin, longmax - minimum and maximum longitude
+<li>latmin, latmax - minimum and maximum latitude
+</ul>
+</ul>
+
 
 </BODY>
 </HTML>
