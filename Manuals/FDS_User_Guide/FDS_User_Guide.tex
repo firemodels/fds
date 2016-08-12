@@ -1389,24 +1389,9 @@ For certain types of diagnostic tests, it is useful to turn off the velocity fie
 \subsection{Special Topic: Defying Gravity}
 \label{info:GVEC}
 
-By default, gravity points in the negative $z$ direction, or more simply, downward.
-However, to change the direction of gravity to model
-a sloping roof or tunnel, for example, specify the gravity
-vector on the {\ct MISC} line with a triplet of numbers of the form
-{\ct GVEC=0.,0.,-9.81},
-with units of m/s$^2$. This is the default, but it
-can be changed to be any direction.
+By default, gravity points in the negative $z$ direction, or more simply, downward. However, to change the direction of gravity to model a sloping roof or tunnel, for example, specify the gravity vector on the {\ct MISC} line with a triplet of numbers of the form {\ct GVEC=0.,0.,-9.81}, with units of m/s$^2$. This is the default, but it can be changed to be any direction.
 
-There are a few special applications where you might want to vary the gravity vector as a function of time
-or as a function of the first spatial coordinate, $x$. For example, on board space craft, small motions can
-cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel
-fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope
-of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity.
-For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the
-{\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.},
-which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX},
-{\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of
-{\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
+There are a few special applications where you might want to vary the gravity vector as a function of time or as a function of the first spatial coordinate, $x$. For example, on board space craft, small motions can cause temporal changes in the normally zero level of gravity, an effect known as ``g-jitter.'' More commonly, in tunnel fire simulations, it is sometimes convenient to change the direction of gravity to mimic the change in slope. The slope of the tunnel might change as you travel through it; thus, you can tell FDS where to redirect gravity. For either a spatially or temporally varying direction and/or magnitude of gravity, do the following. First, on the {\ct MISC} line, set the three components of gravity, {\ct GVEC}, to some ``base'' state like {\ct GVEC=1.,1.,1.}, which gives you the flexibility to vary all three components. Next, designate ``ramps'' for the individual components, {\ct RAMP\_GX}, {\ct RAMP\_GY}, and {\ct RAMP\_GZ}, all of which are specified on the {\ct MISC} line. There is more discussion of {\ct RAMP}s in Section~\ref{info:RAMP}, but for now you can use the following as a simple template to follow:
 \begin{lstlisting}
 &MISC GVEC=1.,0.,1., RAMP_GX='x-ramp', RAMP_GZ='z-ramp' /
 
@@ -1420,15 +1405,7 @@ which gives you the flexibility to vary all three components. Next, designate ``
 &RAMP ID='z-ramp', X= 51., F=-9.80 /
 &RAMP ID='z-ramp', X=100., F=-9.80 /
 \end{lstlisting}
-Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the
-$x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why
-using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly.
-The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope
-upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that
-0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$,
-respectively. To check your math, the sum of the squares of the gravity components ought to equal 9.81.
-Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
-
+Note that both the $x$ and $z$ components of gravity are functions of $x$. FDS has been programmed to only allow variation in the $x$ coordinate. Note also that {\ct F} is just a multiplier of the ``base'' gravity vector components, given by {\ct GVEC}. This is why using the number 1 is convenient -- it allows you to specify the gravity components on the {\ct RAMP} lines directly. The effect of these lines is to model the first 50~m of a tunnel without a slope, but the second 50~m with a 5~\% slope upwards. Note that the angle from vertical of the gravity vector due to a 5~\% slope is $\tan^{-1} 0.05=2.86^\circ$ and that 0.49 and 9.80 are equal to the magnitude of the gravity vector, 9.81~m/s$^2$, multiplied by the sine and cosine of 2.86$^\circ$, respectively. To check your math, the sum of the squares of the gravity components ought to equal 9.81. Notice in this case that the $y$ direction has been left out because there is no $y$ variation in the gravity vector.
 To vary the direction and/or magnitude of gravity in time, follow the same procedure but replace the {\ct X} in the {\ct RAMP}
 lines with a {\ct T}.
 
@@ -1438,29 +1415,16 @@ lines with a {\ct T}.
 \label{baroclinic_torque}
 
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
-\be \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  \ee
-The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the
-``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on
-the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable.
-This term is sometimes referred to as the baroclinic torque, and it is responsible for
-generating vorticity due to the non-alignment of pressure and density gradients.
-In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical
-instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line.
-For example, in the simple helium plume test case below,
-neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant.
-For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
+\be 
+   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  
+\ee 
+The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the ``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. This term is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
 
 \subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
 
-This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume.
-Note that the governing equations solved in FDS are written in terms of a
-three dimensional Cartesian coordinate system. However,
-a two dimensional Cartesian or two dimensional cylindrical
-(axially-symmetric) calculation can be performed by setting the number of
-cells in the $y$ direction to 1.
-An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
+This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
 
 \begin{figure}[ht]
 \noindent
@@ -1595,16 +1559,16 @@ as the basis for the time step restriction. To be clear, the CFL constraint is n
 \subsubsection{Stability of particle transport}
 \label{info:PART_Stability}
 
-The movement of Lagrangian particles within a time step is calculated using an analytical solution and remains stable regardless of the time step. In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step.
+The movement of Lagrangian particles over the course of a time step is calculated using an analytical solution and remains stable regardless of the time step used by the flow solver. However, if the particle moves over the width of several grid cells in a single time step, the momentum transferred between the particle and the gas cannot be allocated properly to all of the affected cells. To overcome this problem, FDS subdivides the gas phase time step based on each particle's velocity. For example, if the particle travels across two cells in a single gas phase time step, then its trajectory is calculated by subdividing the time step into two.
 
-Because very fast nozzle velocities can cause extremely small time steps and hence very long run times, the {\ct PARTICLE\_CFL} constraint is set to {\ct .FALSE.} by default.  Setting {\ct PARTICLE\_CFL} to {\ct .TRUE.} on the {\ct MISC} line activates this constraint.
+In some cases with extremely fast particles, however, the stability of the overall flow behavior may require setting an additional parameter that limits the time step of the flow solver according to the speed of the fastest particle in the simulation.  The actual value of of the constraint is set using {\ct PARTICLE\_CFL\_MAX} on the {\ct MISC} line. A value of 1 (default) means that the fastest moving particle can move a distance of one grid cell during the time step. Because very fast nozzle velocities can cause extremely small time steps and hence very long run times, the {\ct PARTICLE\_CFL} constraint is set to {\ct .FALSE.} by default.  Setting {\ct PARTICLE\_CFL} to {\ct .TRUE.} on the {\ct MISC} line activates this constraint.
+
+One additional parameter might be useful in some special cases. The numerical transport scheme for particles is first order accurate in time. If you want to improve the accuracy of the scheme, set \linebreak[4] {\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} to {\ct .TRUE.} on the {\ct PART} line. There is an increased computational cost incurred by this option, so check whether or not the extra cost is worth the extra accuracy. For most applications, given the relatively small time step of the gas phase solver, and the subdivision of the particle trajectory calculation to enforce a local particle CFL constraint, the improved accuracy is not worth the additional cost.
+
 
 \subsubsection{Heat Transfer Constraint}
 
-Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$.
-Anytime we have a velocity scale to resolve we have a CFL-type stability restriction.
-Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$.
-This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
+Note that the heat transfer coefficient, $h$, has units of \si{W/(m$^2$.K)}.  Thus, a velocity scale may be formed from $h/(\rho\, c_p)$. Anytime we have a velocity scale to resolve we have a CFL-type stability restriction. Therefore, the heat transfer stability check loops over all wall cells to ensure $\delta t \le \delta x \,\rho \,c_p/h$. This check may be invoked by setting {\ct CHECK\_HT=.TRUE.} on the {\ct MISC} line. It is {\ct .FALSE.} by default.
 
 
 \subsubsection{Adjusting the Time Step}
@@ -1637,10 +1601,6 @@ CHARM (DNS default)    & {\ct 4}  \\
 MP5                    & {\ct 5}  \\ \hline
 \end{tabular}
 \end{table}
-
-\subsubsection{Multi-Mesh Calculations}
-
-Currently, the default behavior in FDS is to revert to first-order upwinding at interpolated boundaries (mesh interfaces) for scalar transport.  The reason for this is that no information is passed via MPI for flow obstructions and therefore we cannot make the assumption that two upwind scalar values will be available to compute a second-order limiter.  If there is no mesh refinement at mesh interfaces and you have avoided placing obstructions within two cells of the interface, then you may invoke a conservative second-order flux limiter by including {\ct SECOND\_ORDER\_INTERPOLATED\_BOUNDARY=.TRUE.} on {\ct MISC}.
 
 
 
@@ -5723,7 +5683,7 @@ For  {\ct 'CYLINDRICAL'} or {\ct 'SPHERICAL'} particles, specify the {\ct INNER\
 \subsection{Drag}
 \label{info:particle_drag}
 
-For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
+For solid particles, the default drag law (i.e., the drag coefficient correlation as a function of the Reynolds number based on particle diameter) is that of a sphere. To invoke the cylinder drag law, set {\ct DRAG\_LAW} to {\ct 'CYLINDER'} on the {\ct PART} line, and to invoke the screen drag law (see Section~\ref{info:particle_screen}), set it to {\ct 'SCREEN'}.  If neither of these options is applicable, you may specify a constant value of the drag coefficient for a particle class (a specific {\ct PART\_ID}) by setting a {\ct DRAG\_COEFFICIENT} on the {\ct PART} line. The {\ct DRAG\_COEFFICIENT} over-rides the {\ct DRAG\_LAW}. If the local particle density is very high, the drag may be reduced by particle wake effects. The threshold volume fraction for considering three-way coupling effects is controlled by the {\ct DENSE\_VOLUME\_FRACTION} parameter. Setting this parameter to 1 will turn off the three-way coupling model.
 
 \subsection{Splitting Particles}
 \label{info:particle_split}
@@ -6097,8 +6057,6 @@ The parameter {\ct E\_COEFFICIENT} must be obtained experimentally, and it is ex
 \caption[Results of the {\ct e\_coefficient} test case]{Output of the  {\ct e\_coefficient} test case.}
 \label{e_coef_fig}
 \end{figure}
-
-
 
 
 
@@ -8979,8 +8937,6 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 {\ct RICHARDSON\_ERROR\_TOLERANCE}              & Real          & Section~\ref{info:REAC}                               &               & 1.0 E-3           \\ \hline
 {\ct RUN\_AVG\_FAC}                             & Real          & Section~\ref{radiative_part_props}                    &               & 0.5               \\ \hline
 {\ct SC}                                        & Real          & Section~\ref{info:LES}                                &               & 0.5               \\ \hline
-{\ct \footnotesize SECOND\_ORDER\_INTERPOLATED\_BOUNDARY}     & Logical       & Section~\ref{info:flux_limiters}                      &               & {\ct .FALSE.}     \\ \hline
-%{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT}        & Logical       & Section~\ref{info:PART}                               &               & {\ct .FALSE.}     \\ \hline
 {\ct SHARED\_FILE\_SYSTEM}                      & Logical       & Section~\ref{info:multimesh}                          &               & {\ct .TRUE.}      \\ \hline
 {\ct SMOKE\_ALBEDO}                             & Real          & Reference~\cite{Smokeview_Users_Guide}                &               & 0.3               \\ \hline
 {\ct SOLID\_PHASE\_ONLY}                        & Logical       & Section~\ref{solid_phase_verification}                &               & {\ct .FALSE.}     \\ \hline
@@ -9112,51 +9068,52 @@ $\Delta t$={\ct T\_END-T\_BEGIN}
 \multicolumn{5}{|c|}{{\ct PART} (Lagrangian Particles/Droplets)} \\
 \hline \hline
 \endhead
-{\ct AGE}                           & Real            & Section~\ref{info:part_output}          & s         & $1\times 10^5$ \\ \hline
-{\ct BREAKUP}                       & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
-{\ct BREAKUP\_CNF\_RAMP\_ID}        & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
-{\ct BREAKUP\_DISTRIBUTION}         & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN...'} \\ \hline
-{\ct BREAKUP\_GAMMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           & 2.4           \\ \hline
-{\ct BREAKUP\_RATIO}                & Real            & Section~\ref{info:secondary_breakup}    &           & $3/7$         \\ \hline
-{\ct BREAKUP\_SIGMA\_D}             & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
-{\ct CHECK\_DISTRIBUTION}           & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
-{\ct CNF\_RAMP\_ID}                 & Character       & Section~\ref{info:particle_size}        &           &               \\ \hline
-{\ct COLOR}                         & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
-{\ct COMPLEX\_REFRACTIVE\_INDEX}    & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
-{\ct CTRL\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-{\ct DENSE\_VOLUME\_FRACTION}       & Real            & Section~\ref{info:particle_drag}        & m$^3$/m$^3$ & $1\times 10^{-5}$ \\ \hline
-{\ct DEVC\_ID}                      & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
-{\ct DIAMETER}                      & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
-{\ct DISTRIBUTION}                  & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
-{\ct DRAG\_COEFFICIENT(3)}          & Real Array      & Section~\ref{info:particle_drag}        &           &               \\ \hline
-{\ct DRAG\_LAW}                     & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
-{\ct FREE\_AREA\_FRACTION}          & Real            & Section~\ref{info:particle_screen}               &           &               \\ \hline
-{\ct GAMMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
-{\ct HEAT\_OF\_COMBUSTION}          & Real            & Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
-{\ct HORIZONTAL\_VELOCITY}          & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
-{\ct ID}                            & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
-{\ct INITIAL\_TEMPERATURE}          & Real            & Section~\ref{thermal_part_props}        & $^\circ$C & {\ct TMPA}    \\ \hline
-{\ct MASSLESS}                      & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
-{\ct MAXIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & Infinite      \\ \hline
-{\ct MINIMUM\_DIAMETER}             & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
-{\ct MONODISPERSE}                  & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
-{\ct N\_STRATA}                     & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
-{\ct ORIENTATION(1:3,:)}            & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
-{\ct PERMEABILITY(3)}               & Real Array      & Section~\ref{info:porous_media}        &           &               \\ \hline
-{\ct PROP\_ID}                      & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
-{\ct QUANTITIES(10)}                & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
-{\ct QUANTITIES\_SPEC\_ID(10)}      & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
-{\ct RADIATIVE\_PROPERTY\_TABLE}    & Real            & Section~\ref{radiative_part_props}      &           &               \\ \hline
-{\ct REAL\_REFRACTIVE\_INDEX}       & Real            & Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
-{\ct RGB(3)}                        & Integers        & Section~\ref{info:part_output}          &           &               \\ \hline
-{\ct SAMPLING\_FACTOR}              & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
-{\ct SIGMA\_D}                      & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
-{\ct SPEC\_ID}                      & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
-{\ct STATIC}                        & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
-{\ct SURFACE\_TENSION}              & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^4$  \\ \hline
-{\ct SURF\_ID}                      & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
-{\ct TURBULENT\_DISPERSION}         & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
-{\ct VERTICAL\_VELOCITY}            & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
+{\ct AGE}                                & Real            & Section~\ref{info:part_output}          & s         & $1\times 10^5$ \\ \hline
+{\ct BREAKUP}                            & Logical         & Section~\ref{info:secondary_breakup}    &           & {\ct .FALSE.} \\ \hline
+{\ct BREAKUP\_CNF\_RAMP\_ID}             & Character       & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
+{\ct BREAKUP\_DISTRIBUTION}              & Character       & Section~\ref{info:secondary_breakup}    &           & {\ct 'ROSIN...'} \\ \hline
+{\ct BREAKUP\_GAMMA\_D}                  & Real            & Section~\ref{info:secondary_breakup}    &           & 2.4           \\ \hline
+{\ct BREAKUP\_RATIO}                     & Real            & Section~\ref{info:secondary_breakup}    &           & $3/7$         \\ \hline
+{\ct BREAKUP\_SIGMA\_D}                  & Real            & Section~\ref{info:secondary_breakup}    &           &               \\ \hline
+{\ct CHECK\_DISTRIBUTION}                & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
+{\ct CNF\_RAMP\_ID}                      & Character       & Section~\ref{info:particle_size}        &           &               \\ \hline
+{\ct COLOR}                              & Character       & Section~\ref{info:part_output}          &           & {\ct 'BLACK'} \\ \hline
+{\ct COMPLEX\_REFRACTIVE\_INDEX}         & Real            & Section~\ref{radiative_part_props}      &           & 0.01          \\ \hline
+{\ct CTRL\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
+{\ct DENSE\_VOLUME\_FRACTION}            & Real            & Section~\ref{info:particle_drag}        &           & $1\times 10^{-5}$ \\ \hline
+{\ct DEVC\_ID}                           & Character       & Section~\ref{info:particle_flux}        &           &               \\ \hline
+{\ct DIAMETER}                           & Real            & Section~\ref{info:particle_size}        & $\mu$m    &               \\ \hline
+{\ct DISTRIBUTION}                       & Character       & Section~\ref{info:particle_size}        &           & {\ct 'ROSIN...'} \\ \hline
+{\ct DRAG\_COEFFICIENT(3)}               & Real Array      & Section~\ref{info:particle_drag}        &           &               \\ \hline
+{\ct DRAG\_LAW}                          & Character       & Section~\ref{info:particle_drag}        &           & {\ct 'SPHERE'}\\ \hline
+{\ct FREE\_AREA\_FRACTION}               & Real            & Section~\ref{info:particle_screen}      &           &               \\ \hline
+{\ct GAMMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           & 2.4           \\ \hline
+{\ct HEAT\_OF\_COMBUSTION}               & Real            & Section~\ref{info:fuel_droplets}        & kJ/kg     &               \\ \hline
+{\ct HORIZONTAL\_VELOCITY}               & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.2          \\ \hline
+{\ct ID}                                 & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
+{\ct INITIAL\_TEMPERATURE}               & Real            & Section~\ref{thermal_part_props}        & $^\circ$C & {\ct TMPA}    \\ \hline
+{\ct MASSLESS}                           & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
+{\ct MAXIMUM\_DIAMETER}                  & Real            & Section~\ref{info:particle_size}        & $\mu$m    & Infinite      \\ \hline
+{\ct MINIMUM\_DIAMETER}                  & Real            & Section~\ref{info:particle_size}        & $\mu$m    & 20.           \\ \hline
+{\ct MONODISPERSE}                       & Logical         & Section~\ref{info:particle_size}        &           & {\ct .FALSE.} \\ \hline
+{\ct N\_STRATA}                          & Integer         & Section~\ref{info:particle_size}        &           & 7             \\ \hline
+{\ct ORIENTATION(1:3,:)}                 & Real Array      & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct PERMEABILITY(3)}                    & Real Array      & Section~\ref{info:porous_media}         &           &               \\ \hline
+{\ct PROP\_ID}                           & Character       & Section~\ref{info:PART_Basics}          &           &               \\ \hline
+{\ct QUANTITIES(10)}                     & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct QUANTITIES\_SPEC\_ID(10)}           & Character       & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct RADIATIVE\_PROPERTY\_TABLE}         & Real            & Section~\ref{radiative_part_props}      &           &               \\ \hline
+{\ct REAL\_REFRACTIVE\_INDEX}            & Real            & Section~\ref{radiative_part_props}      &           & 1.33          \\ \hline
+{\ct RGB(3)}                             & Integers        & Section~\ref{info:part_output}          &           &               \\ \hline
+{\ct SAMPLING\_FACTOR}                   & Integer         & Section~\ref{info:part_output}          &           & 1             \\ \hline
+{\ct SECOND\_ORDER\_PARTICLE\_TRANSPORT} & Logical         & Section~\ref{info:PART_Stability}       &           & {\ct .FALSE.} \\ \hline
+{\ct SIGMA\_D}                           & Real            & Section~\ref{info:particle_size}        &           &               \\ \hline
+{\ct SPEC\_ID}                           & Character       & Section~\ref{thermal_part_props}        &           &               \\ \hline
+{\ct STATIC}                             & Logical         & Section~\ref{info:PART_SURF}            &           & {\ct .FALSE.} \\ \hline
+{\ct SURFACE\_TENSION}                   & Real            & Section~\ref{info:secondary_breakup}    & N/m       & $7.28 \times 10^4$  \\ \hline
+{\ct SURF\_ID}                           & Character       & Section~\ref{info:PART_SURF}            &           &               \\ \hline
+{\ct TURBULENT\_DISPERSION}              & Logical         & Section~\ref{info:MASSLESS}             &           & {\ct .FALSE.} \\ \hline
+{\ct VERTICAL\_VELOCITY}                 & Real            & Section~\ref{info:surface_droplets}     & m/s       &  0.5          \\ \hline
 \end{longtable}
 
 \vspace{\baselineskip}
