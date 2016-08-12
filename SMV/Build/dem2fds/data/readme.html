@@ -44,11 +44,11 @@ and the <em>Imagery - 1 meter (NAIP)</em> option to obtain images.
 <li>Click on the map and zoom in on a region of interest.
 <li>Click on the <em>Find Products</em> button.  You should see one or more 
 entries listed with headings beginning with
-USGS NED 1/3 arc-second ...... 1 x 1 degree .  Make sure that <em>GridFloat</em> is listed in heading
-(if not, click on Return to Search and verify you selected <em>GridFloat</em> option)
+USGS NED 1/3 arc-second ...... 1 x 1 degree .  
 <li>Click on the <em>Footprint</em> link to verify where various files are located.
 <li>Click on <em>Download</em> link to download files of interest.
-<li>Unzip these files (using a program like winzip). Copy the .flt and .hdr files to a directory. 
+<li>Unzip these files (using a program like winzip). Open the directory created with the unzip operation and
+copy the .flt and .hdr files to a directory where you'll keep your elevation and image files. 
 </ol>
 <a name="images"><a>
 <li>Obtaining Image data
@@ -57,10 +57,10 @@ USGS NED 1/3 arc-second ...... 1 x 1 degree .  Make sure that <em>GridFloat</em>
 and uncheck (if checked) the <em>Elevation Products (3DEP)</em> checkbox
 <li>Select the <em>Imagery - 1 meter (NAIP)</em> checkbox
 <li>Click on the map and zoom in on 
-a region of interest (same region selected for elevation files).
+a region of interest (within the elevation region selected for for elevation files).
 <li>Click on the <em>Find Products</em> button.  You should see one or more 
-entries listed with headings beginning with <tt>m_</tt> and ending with <tt>.jp2</tt> .  
-<li>Click on the <em>Footprint</em> link to verify where various files are located.
+entries with each entry beginning with <tt>m_</tt> and ending with <tt>.jp2</tt> .  
+<li>Click on the <em>Footprint</em> link to verify image file locations.
 <li>Click on <em>Download</em> link to download files of interest. The image files should
 cover the region you are using to define an FDS input file.
 <li>Copy the downloaded files to the same directory you used to copy the .flt and .hdr elevation files.
@@ -69,11 +69,6 @@ They need to be converted to jpeg format .
 To do this on a PC, run the <tt>jp2conv</tt> command.
 On Linux or a Mac, run the <tt>jp2conv.sh</tt> command.  
 These commands are installed with the latest Smokeview test bundle.<br>
-Notes:
-<ul>
-<li>make sure that you installed Imagemagick
-<li>the command <em>magick</em> is named <em>convert</em> on a Linux or Mac
-</ul>
 </ol>
 
 
@@ -83,7 +78,6 @@ Notes:
 
    <ol>
 <li>create a file named <tt>casename.in</tt> containing the following lines 
-(other methods are described below)
 <br>
 <pre>
 GRID
@@ -94,9 +88,20 @@ LONGLATMINMAX
 where <tt>ibar</tt> and <tt>jbar</tt> are the number of longitude and latitidude divisions
 and <tt>kbar</tt> is the number of z direction divisions and
 <tt> longmin  longmax </tt> are the minimum and maximum longitude of the region  modeled,
-<tt> latmin  latmax </tt> are the miniumum and maximum latitude of the region modeled.
+<tt> latmin  latmax </tt> are the miniumum and maximum latitude of the region modeled. 
+<p>A second method for specifying a terrain region is to use
+<pre>
+GRID
+  ibar jbar kbar dx dy
+LONGLATMINMAX
+  longcen  latcen
+</pre>
+where <tt>dx</tt> and <tt>dy</tt> are the width and length of the scenario in meters
+and <tt>longcen</tt> and <tt>latcen</tt> are the longitude and latitude at the center of the 
+scenario (at position (<tt>dx/2</tt>, <tt>dy/2</tt>)).  
 
-     <li>Run the command:<br>
+
+<li>Run the command:<br>
 <pre>
  dem2fds -d elevation_directory -o casename.in
 </pre>
