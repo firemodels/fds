@@ -24,13 +24,14 @@ void Usage(char *prog){
   fprintf(stderr, "Create an FDS input file using elevation data\n");
   fprintf(stderr, "  obtained from http://viewer.nationalmap.gov \n\n");
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "  dem2fds [-g][-h][-v] casename.in\n");
+  fprintf(stderr, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in\n");
   fprintf(stderr, "where\n");
-  fprintf(stderr, "  -dir dir  - directory containing elevation files (default .)\n");
-  fprintf(stderr, "  -obst     - create an FDS input file using &OBST keywords\n");
+  fprintf(stderr, "  -dir dir  - directory containing elevation and map files (default .)\n");
   fprintf(stderr, "  -geom     - create an FDS input file using &GEOM keywords\n");
   fprintf(stderr, "  -help     - display this message\n");
-  fprintf(stderr, "  -nobuffer - no buffer ( 0 pixel overlap) between terrain images\n");
+  fprintf(stderr, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
+  fprintf(stderr, "              Otherwise assume that a 300 pixel buffer exists bewteen maps.\n");
+  fprintf(stderr, "  -obst     - create an FDS input file using &OBST keywords\n");
   fprintf(stderr, "  -version  - show version information\n");
 }
 
@@ -68,22 +69,22 @@ int main(int argc, char **argv){
           strcpy(libdir, libdirptr);
         }
       }
-      else if(strncmp(arg, "-show", 5)==0){
+      else if(strncmp(arg, "-show", 5)==0|| strncmp(arg, "-s", 2) == 0){
         show_maps = 1;
       }
-      else if(strncmp(arg, "-help", 5) == 0){
+      else if(strncmp(arg, "-help", 5) == 0|| strncmp(arg, "-h", 2) == 0){
         Usage("dem2fds");
       }
-      else if(strncmp(arg, "-nobuffer", 8) == 0){
+      else if(strncmp(arg, "-nobuffer", 8) == 0|| strncmp(arg, "-n", 2) == 0){
         border_buffer = 0;
       }
-      else if(strncmp(arg, "-obst", 5) == 0){
+      else if(strncmp(arg, "-obst", 5) == 0|| strncmp(arg, "-o", 2) == 0){
         gen_fds = FDS_OBST;
       }
-      else if(strncmp(arg, "-geom", 5) == 0){
+      else if(strncmp(arg, "-geom", 5) == 0|| strncmp(arg, "-g", 2) == 0){
         gen_fds = FDS_GEOM;
       }
-      else if(strncmp(arg, "-version", 8) == 0){
+      else if(strncmp(arg, "-version", 8) == 0|| strncmp(arg, "-v", 2) == 0){
         PRINTversion("dem2fds");
         exit(1);
       }
