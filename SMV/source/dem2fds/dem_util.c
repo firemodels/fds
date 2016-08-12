@@ -262,7 +262,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
     int i;
 
     // draw outline of each terrain map (downloaded form usgs website)
-    
+
     for(i = 0; i < nimageinfo; i++) {
       elevdata *imagei;
       float latcen;
@@ -306,7 +306,7 @@ void GenerateMapImage(char *elevfile, elevdata *fds_elevs, elevdata *imageinfo, 
     }
     {
     // draw outline of fds domain
-    
+
       int imin, imax;
       int jmin, jmax;
       int red_color;
@@ -370,6 +370,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
   float fds_long_min, fds_long_max, fds_lat_min, fds_lat_max;
   int longlatref_mode = LONGLATREF_NONE;
   int xymax_defined=0;
+
+  fprintf(stderr, "\ncase: %s\n\n", elevfile);
 
   nimageinfo = get_nfilelist(libdir, "m_*.jpg");
   if(nimageinfo > 0){
@@ -449,10 +451,11 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
     }
   }
   if(nimageinfo > 0){
-    printf("\n");
-    printf("GLOBAL bounds (terrain maps):\n");
-    printf(" long min / max %f %f\n", image_long_min, image_long_max);
-    printf(" lat min/max %f %f\n", image_lat_min, image_lat_max);
+    fprintf(stderr, "terrain map bounds:\n");
+    fprintf(stderr, " min longitude: %f\n", image_long_min);
+    fprintf(stderr, " max longitude: %f\n", image_long_max);
+    fprintf(stderr, "  min latitude: %f\n", image_lat_min);
+    fprintf(stderr, "  max latitude: %f\n", image_lat_max);
   }
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
@@ -699,7 +702,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs, int examine_map_images){
     fds_elevs->long_max = image_long_max;
     fds_elevs->lat_min = image_lat_min;
     fds_elevs->lat_max = image_lat_max;
-    
+
     fds_elevs->long_min_orig = fds_long_min;
     fds_elevs->long_max_orig = fds_long_max;
     fds_elevs->lat_min_orig = fds_lat_min;
@@ -881,10 +884,10 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   fprintf(streamout, "&TAIL /\n");
 
   fprintf(stderr, "\n");
-  fprintf(stderr, "Summary:\n");
-  fprintf(stderr, "  FDS input file: %s\n", fdsfile);
-  fprintf(stderr, "            xmax: %f\n", xmax);
-  fprintf(stderr, "            ymax: %f\n", ymax);
+  fprintf(stderr, "FDS input file properties:\n");
+  fprintf(stderr, "       file name: %s\n", fdsfile);
+  fprintf(stderr, "           max x: %f\n", xmax);
+  fprintf(stderr, "           max y: %f\n", ymax);
   fprintf(stderr, "   min elevation: %f\n", fds_elevs->val_min);
   fprintf(stderr, "   max elevation: %f\n", fds_elevs->val_max);
   fprintf(stderr, "longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
