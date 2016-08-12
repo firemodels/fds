@@ -16,4 +16,5 @@ set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 
 %dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\sugarloaf sugarloaf.in 
 
-%dem2fds% %option% %option2% -dir %userprofile%\terrain\trails trails.in 
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\trails trails.in 
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\trails trails2.in 
