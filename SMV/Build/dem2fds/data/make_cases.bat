@@ -8,7 +8,7 @@ set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 %dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\demtest demtest1.in 
 %dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\demtest demtest2.in 
 
-%dem2fds% %option% %option2% -dir %userprofile%\terrain\blodget blodget.in 
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\blodget blodget.in 
 
 %dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\nist nist.in 
 
