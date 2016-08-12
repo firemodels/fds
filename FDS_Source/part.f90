@@ -1895,7 +1895,7 @@ PARTICLE_NON_STATIC_IF: IF (.NOT.LPC%STATIC) THEN ! Move airborne, non-stationar
 
    ! 2nd-order terms for the particle relative velocities (experimental)
 
-   IF (SECOND_ORDER_PARTICLE_TRANSPORT .AND. DT_P>BETA*HALF_DT2) THEN
+   IF (LPC%SECOND_ORDER_PARTICLE_TRANSPORT .AND. DT_P>BETA*HALF_DT2) THEN
       HAB = ALPHA*BETA*HALF_DT2/OPA
       QREL2=QREL*QREL
       IF (QREL2<TWO_EPSILON_EB) THEN
