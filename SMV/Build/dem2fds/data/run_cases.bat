@@ -28,3 +28,6 @@ echo tower
 echo.
 echo trails
 %fds% trails.fds 
+echo.
+echo trails2
+%fds% trails2.fds 
