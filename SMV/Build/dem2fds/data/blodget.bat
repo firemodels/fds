@@ -5,6 +5,4 @@
 set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set dem2fds=dem2fds
 
-echo.
-echo blodget
 %dem2fds% %option% -debug -dir %userprofile%\terrain\blodget blodget.in 
