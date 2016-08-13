@@ -74,7 +74,7 @@ smvluacore: $(SMVLUACORE_FILES)
 
 WIN_LIBS = user32.lib gdi32.lib comdlg32.lib shell32.lib
 
-WIN_LIBDIR = $(LIB_DIR)/lib_win_intel_64
+WIN_LIBDIR = $(LIB_DIR)/intel_win_64
 SMV_LIBS_WIN = $(WIN_LIBDIR)\glui.lib $(WIN_LIBDIR)\glut32.lib $(WIN_LIBDIR)\gd.lib $(WIN_LIBDIR)\jpeg.lib $(WIN_LIBDIR)\png.lib $(WIN_LIBDIR)\zlib.lib $(WIN_LIBDIR)\pthreads.lib
 
 #--- OSX
@@ -180,7 +180,7 @@ intel_win_64 : $(objwin)
 
 # ------------- intel_linux_64 ----------------
 
-intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
+intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/intel_linux_64
 intel_linux_64 : LIBS_PLAT =
 intel_linux_64 : FFLAGS    = -O0 -traceback -m64 -static-intel -fpp -D pp_noappend
 intel_linux_64 : CFLAGS    = -O0 -traceback -m64 -static-intel -D pp_LINUX -D pp_INTEL $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
@@ -213,7 +213,7 @@ intel_linux_64_db : FC        = ifort
 intel_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64_db$(SMV_PROFILESTRING)
 
 intel_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/intel_linux_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX)
 
 
 # ------------- intel_linux_64_profile ----------------
@@ -227,7 +227,7 @@ intel_linux_64_profile : FC        = ifort
 intel_linux_64_profile : exe       = smokeview_linux_64p
 
 intel_linux_64_profile : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_linux_intel_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX) -p
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/intel_linux_64 $(SMV_LIBS_LINUX) $(INTEL_LIBS_LINUX) $(SYSTEM_LIBS_LINUX) -p
 
 # ------------- gnu_linux_64_db ----------------
 
@@ -240,11 +240,11 @@ gnu_linux_64_db : FC        = gfortran
 gnu_linux_64_db : exe       = smokeview_linux_$(SMV_TESTSTRING)64
 
 gnu_linux_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/lib_linux_gnu_64 $(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX)
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L $(LIB_DIR)/gnu_linux_64 $(SMV_LIBS_LINUX) -lgfortran $(SYSTEM_LIBS_LINUX)
 
 # ------------- gnu_linux_64 ----------------
 
-gnu_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_gnu_64
+gnu_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/gnu_linux_64
 gnu_linux_64 : LIBS_PLAT =
 gnu_linux_64 : FFLAGS    = -O0 -m64 -x f95-cpp-input -D pp_GCC -D pp_noappend -ffree-form -frecord-marker=4
 gnu_linux_64 : CFLAGS    = -O0 -m64 -D pp_LINUX -Wno-write-strings
@@ -266,7 +266,7 @@ gnu_linux_64 : $(obj) $(if $(LUA_SCRIPTING),smvluacore)
 
 # ------------- mingw_win_64 ----------------
 
-mingw_win_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_win_mingw_64
+mingw_win_64 : LIB_DIR_PLAT = $(LIB_DIR)/mingw_win_64
 mingw_win_64 : LIBS_PLAT = $(LIB_DIR_PLAT)/libglui.a \
 	$(LIB_DIR_PLAT)/libgd.a $(LIB_DIR_PLAT)/libjpeg.a \
 	$(LIB_DIR_PLAT)/libpng.a $(LIB_DIR_PLAT)/libz.a \
@@ -300,7 +300,7 @@ OSX_INTEL_LIBS = $(IFORT_COMPILER_LIB)/libifcoremt.a $(IFORT_COMPILER_LIB)/libim
 
 # ------------- intel_osx_64 ----------------
 
-intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
+intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/intel_osx_64
 intel_osx_64 : LIBS_PLAT =
 intel_osx_64 : FFLAGS    = -O0 -m64 -static-intel -fpp -D pp_OSX -mmacosx-version-min=10.4
 intel_osx_64 : CFLAGS    = -O0 -m64 -static-intel -D pp_OSX  -D pp_INTEL -mmacosx-version-min=10.4 $(SMV_TESTFLAG) $(SMV_PROFILEFLAG) $(GITINFO)
@@ -332,7 +332,7 @@ intel_osx_64_db : FC        = ifort
 intel_osx_64_db : exe       = smokeview_osx_$(SMV_TESTSTRING)64_db $(SMV_PROFILESTRING)
 
 intel_osx_64_db : $(obj)
-	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/lib_osx_intel_64 $(SMV_LIBS_OSX) $(OSX_INTEL_LIBS)
+	icpc -o $(bin)/$(exe) $(LFLAGS) $(obj)  -L $(LIB_DIR)/intel_osx_64 $(SMV_LIBS_OSX) $(OSX_INTEL_LIBS)
 
 # ------------- gnu_osx_64_db ----------------
 
@@ -345,7 +345,7 @@ gnu_osx_64_db : FC        = gfortran
 gnu_osx_64_db : exe       = smokeview_osx_64_db
 
 gnu_osx_64_db : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/gnu_osx_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
 
 # ------------- gnu_osx_64 ----------------
 
@@ -358,7 +358,7 @@ gnu_osx_64 : FC        = gfortran
 gnu_osx_64 : exe       = smokeview_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/lib_osx_gnu_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L$(LIB_DIR)/gnu_osx_64 $(SMV_LIBS_OSX) -L $(GLIBDIR) -lgfortran
 
 #-------------- Clean Target to remove Object and Module files -----------
 

@@ -3,7 +3,7 @@ BUILD_DIR = ../../../Build
 LIB_DIR = $(BUILD_DIR)/LIBS
 INC_DIR =  -I $(SOURCE_DIR)/gd-2.0.15 -I $(SOURCE_DIR)/zlib128 -I $(SOURCE_DIR)/shared -I $(SOURCE_DIR)/dem2fds
 
-WIN_LIBDIR = $(LIB_DIR)/lib_win_intel_64
+WIN_LIBDIR = $(LIB_DIR)/intel_win_64
 LIBS_WIN = $(WIN_LIBDIR)\gd.lib $(WIN_LIBDIR)\jpeg.lib $(WIN_LIBDIR)\png.lib $(WIN_LIBDIR)\zlib.lib
 
 #--- OSX
@@ -61,7 +61,7 @@ intel_win_64 : $(objwin)
 # ------------- Linux 64 ----------------
 #  64 bit linux
 
-intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_linux_intel_64
+intel_linux_64 : LIB_DIR_PLAT = $(LIB_DIR)/intel_linux_64
 intel_linux_64 : CFLAGS    = -O2 -m64 -D pp_INTEL $(GITINFO)
 intel_linux_64 : CC        = icc
 intel_linux_64 : exe       = dem2fds_linux_64
@@ -73,7 +73,7 @@ intel_linux_64 : $(obj)
 # ------------- OSX 64 ----------------
 #  64 bit OSX
 
-intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/lib_osx_intel_64
+intel_osx_64 : LIB_DIR_PLAT = $(LIB_DIR)/intel_osx_64
 intel_osx_64 : CFLAGS    = -O2 -m64 -D pp_INTEL $(GITINFO)
 intel_osx_64 : CC        = icc
 intel_osx_64 : exe       = dem2fds_osx_64
