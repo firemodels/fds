@@ -20,19 +20,19 @@ void Usage(char *prog){
 
   getGitInfo(githash,gitdate);    // get githash
 
-  fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
-  fprintf(stderr, "Create an FDS input file using elevation data\n");
-  fprintf(stderr, "  obtained from http://viewer.nationalmap.gov \n\n");
-  fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in\n");
-  fprintf(stderr, "where\n");
-  fprintf(stderr, "  -dir dir  - directory containing elevation and map files (default .)\n");
-  fprintf(stderr, "  -geom     - create an FDS input file using &GEOM keywords\n");
-  fprintf(stderr, "  -help     - display this message\n");
-  fprintf(stderr, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
-  fprintf(stderr, "              Otherwise assume that a 300 pixel buffer exists bewteen maps.\n");
-  fprintf(stderr, "  -obst     - create an FDS input file using &OBST keywords\n");
-  fprintf(stderr, "  -version  - show version information\n");
+  fprintf(stdout, "\n%s (%s) %s\n", prog, githash, __DATE__);
+  fprintf(stdout, "Create an FDS input file using elevation data\n");
+  fprintf(stdout, "  obtained from http://viewer.nationalmap.gov \n\n");
+  fprintf(stdout, "Usage:\n");
+  fprintf(stdout, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in\n");
+  fprintf(stdout, "where\n");
+  fprintf(stdout, "  -dir dir  - directory containing elevation and map files (default .)\n");
+  fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords\n");
+  fprintf(stdout, "  -help     - display this message\n");
+  fprintf(stdout, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
+  fprintf(stdout, "              Otherwise assume that a 300 pixel buffer exists bewteen maps.\n");
+  fprintf(stdout, "  -obst     - create an FDS input file using &OBST keywords\n");
+  fprintf(stdout, "  -version  - show version information\n");
 }
 
 /* ------------------ main ------------------------ */
