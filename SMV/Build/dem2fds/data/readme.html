@@ -10,20 +10,19 @@
 <li><a href="#elevation">Obtaining Elevation Data</a>
 <li><a href="#images">Obtaining Images</a>
 <li><a href="#fdsinput">Creating an FDS Input File</a>
-<li><a href="#dem2fds">DEM2FDS Input Keywords</a>
+<li><a href="#dem2fds"><tt>dem2fds</tt> Input Keywords</a>
+<li><a href="#options"><tt>dem2fds</tt> Command Line Options</a>
 </ul>
 <p><hr>
 
-<a name=preliminaries><a>
+<a name=preliminaries></a>
 <h4>Preliminaries</h4>
-  Install or verify that the following is installed:
 
 <ul>
-  <li>  latest
-  <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing" target="_blank">test</a>
-Smokeview
-  <li>  <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">Imagemagick</a> - used to convert downloaded images
-files from jpeg 2000 to jpeg format
+  <li>  <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing" target="_blank">Install</a>
+ the latest test Smokeview
+  <li>  <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">Install</a>  
+Imagemagick - used to convert terrain images files from jpeg 2000 to jpeg format
 </ul>
 
 <h4>Creating an FDS Input File</h4>
@@ -32,7 +31,7 @@ A map of the United States is on the right and a set of data download options is
 These notes use <em>Elevation Products (3DEP)</em> 
 and <em>Imagery - 1 meter (NAIP)</em> data.
 <ol>
-<a name="elevation"><a>
+<a name="elevation"></a>
   <li> Obtaining Elevation data
 <ol>
 <li>Select the <em>Elevation Products (3DEP)</em> checkbox.
@@ -47,7 +46,7 @@ USGS NED 1/3 arc-second ...... 1 x 1 degree .
 <li>Unzip these files (using a program like winzip). Open the directory created with the unzip operation and
 copy the .flt and .hdr files to a directory where you'll keep your elevation and image files. 
 </ol>
-<a name="images"><a>
+<a name="images"></a>
 
 <p><li>Obtaining Image data
 <ol>
@@ -71,7 +70,7 @@ These commands are installed with the latest Smokeview test bundle.<br>
 
 
 
-<a name="fdsinput"><a>
+<a name="fdsinput"></a>
 <p><li> Creating an FDS input file
 
    <ol>
@@ -133,8 +132,8 @@ Note, the FDS input file, <em>casename.fds</em> is only a starting point.  You w
 edit it to model your scenario as you wish.
 </ol>
 
-<a name="dem2fds"><a>
-<h4>DEM2FDS Input Keywords</h4>
+<a name="dem2fds"></a>
+<h4>dem2fds Input Keywords</h4>
 <ul>
 <li>GRID - Specifying the simlulation grid
 <pre>
@@ -146,7 +145,7 @@ GRID
 <li>dx, dy - distance along the x and y axis.  
 Note, dx and dy are required if <tt>LATLONGCENTER</tt> or
 <tt>LATLONGORIG</tt> are used to specify a terrain region and 
-optional if <tt>LATLONGMINMAX</tt> is used to specify a terrain region (dem2fds computes
+optional if <tt>LATLONGMINMAX</tt> is used to specify a terrain region (<tt>dem2fds</tt> computes
 dx and dy for <tt>LATLONGMINMAX</tt> keywords).
 <li>zmin, zmax - minimum and maximum z elevation.  These parameters are optional.
 </ul>
@@ -180,6 +179,28 @@ LONGLATMINMAX
 <li>longmin, longmax - minimum and maximum longitude
 <li>latmin, latmax - minimum and maximum latitude
 </ul>
+</ul>
+
+<a name="options"></a>
+<h4><tt>dem2fds</tt> Command Line Options</h4>
+<pre>
+  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in
+where
+  -dir dir  - directory containing elevation and map files (default .)
+  -geom     - create an FDS input file using &GEOM keywords
+  -help     - display this message
+  -nobuffer - create a terrain map assuming no buffer exists between maps.
+              Otherwise assume that a 300 pixel buffer exists bewteen maps.
+  -obst     - create an FDS input file using &OBST keywords
+  -version  - show version information
+</pre>
+
+<ul>
+<li>The <tt>-obst</tt> option is used by default.
+<li>The <tt>-geom</tt> option is experimental testing the new geometry file format.
+<li>All terrain images should contain a 300 pixel overlap buffer.  However
+this is not always the case.  The <tt>-nobuffer</tt> option is used for those
+case when there is no overlap between two adjacent images.
 </ul>
 
 
