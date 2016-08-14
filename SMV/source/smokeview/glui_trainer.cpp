@@ -243,7 +243,7 @@ void ROTATE_CB(int var){
   if(rotation_type!=ROTATION_2AXIS){
     rotation_type=ROTATION_2AXIS;
     handle_rotation_type(ROTATION_2AXIS);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
   }
 
   if(trainer_viewpoints!=-1){
@@ -356,7 +356,7 @@ void TRAINER_CB(int var){
   case MOVETYPE:
     rotation_type=ROTATION_2AXIS;
     handle_rotation_type(ROTATION_2AXIS);
-    ResetView(RESTORE_EXTERIOR_VIEW);
+    SetViewPoint(RESTORE_EXTERIOR_VIEW);
     break;
   case LOAD_SMOKE:
     TrainerViewMenu(MENU_TRAINER_smoke);
@@ -369,15 +369,15 @@ void TRAINER_CB(int var){
       }
     }
     TrainerViewMenu(MENU_TRAINER_temp);
-    updatechopcolors();
+    UpdateChopColors();
     if(slicebounds!=NULL&&islicetype!=-1){
       if(setslicechopmin==1||setslicechopmax==1){
        setslicebounds(islicetype);
       }
     }
-    updatechopcolors();
+    UpdateChopColors();
     colorbarflip=1;
-    ColorBarMenu(COLORBAR_FLIP);
+    ColorbarMenu(COLORBAR_FLIP);
     break;
   case LOAD_OXY:
 // kind of a hack, having to put in code seg twice, but this is required to get data chopping to work
@@ -387,15 +387,15 @@ void TRAINER_CB(int var){
       }
     }
     TrainerViewMenu(MENU_TRAINER_oxy);
-    updatechopcolors();
+    UpdateChopColors();
     if(slicebounds!=NULL&&islicetype!=-1){
       if(setslicechopmin==1||setslicechopmax==1){
        setslicebounds(islicetype);
       }
     }
-    updatechopcolors();
+    UpdateChopColors();
     colorbarflip=0;
-    ColorBarMenu(COLORBAR_FLIP);
+    ColorbarMenu(COLORBAR_FLIP);
     break;
   default:
     ASSERT(FFALSE);

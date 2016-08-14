@@ -203,7 +203,7 @@ void CLIP_CB(int var){
     }
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CLIP_CLOSE:
     hide_glui_clip();
@@ -301,7 +301,7 @@ void CLIP_CB(int var){
     break;
   }
   if(var>=CLIP_xlower&&var<=CLIP_zupper){
-    clip2cam(camera_current);
+    Clip2Cam(camera_current);
   }
 }
 

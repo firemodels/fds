@@ -628,13 +628,13 @@ void UpdateIndexColors(void){
   updatefaces=1;
 }
 
-/* ------------------ drawoutlines ------------------------ */
+/* ------------------ DrawOutlines ------------------------ */
 
-void drawoutlines(void){
+void DrawOutlines(void){
   int i;
 
   if(noutlineinfo<=0)return;
-  antialias(ON);
+  Antialias(ON);
   glLineWidth(linewidth);
   glBegin(GL_LINES);
   glColor3fv(foregroundcolor);
@@ -657,11 +657,11 @@ void drawoutlines(void){
     }
   }
   glEnd();
-  antialias(OFF);
+  Antialias(OFF);
 }
-/* ------------------ drawcbox ------------------------ */
+/* ------------------ DrawCBox ------------------------ */
 
-void drawcbox(float x, float y, float z, float size){
+void DrawCBox(float x, float y, float z, float size){
   float xx[8], yy[8], zz[8];
   float xbound[2],ybound[2],zbound[2];
   int i;
@@ -713,9 +713,9 @@ void drawcbox(float x, float y, float z, float size){
   glVertex3f(xx[7],yy[7],zz[7]);
 }
 
-/* ------------------ get_blockvals ------------------------ */
+/* ------------------ GetBlockVals ------------------------ */
 
-void get_blockvals(  float *xmin, float *xmax,
+void GetBlockVals(  float *xmin, float *xmax,
                      float *ymin, float *ymax,
                      float *zmin, float *zmax,
                      int *imin, int *jmin, int *kmin){
@@ -1293,9 +1293,9 @@ void SetVentDirs(void){
   }
 }
 
-/* ------------------ inblockage ------------------------ */
+/* ------------------ InBlockage ------------------------ */
 
-int inblockage(const meshdata *meshi,float x, float y, float z){
+int InBlockage(const meshdata *meshi,float x, float y, float z){
   int i;
   float *xplt, *yplt, *zplt;
 
@@ -1316,9 +1316,9 @@ int inblockage(const meshdata *meshi,float x, float y, float z){
   return(0);
 }
 
-/* ------------------ freecadinfo ------------------------ */
+/* ------------------ FreeCADInfo ------------------------ */
 
-void freecadinfo(void){
+void FreeCADInfo(void){
   if(cadgeominfo!=NULL)return;
   if(ncadgeom>0){
     int i;
@@ -1336,9 +1336,9 @@ void freecadinfo(void){
 }
 
 
-/* ------------------ calcQuadNormal ------------------------ */
+/* ------------------ CalcQuadNormal ------------------------ */
 
-void calcQuadNormal(float *xyz, float *out){
+void CalcQuadNormal(float *xyz, float *out){
   float u[3],v[3];
   static const int x = 0;
   static const int y = 1;
@@ -1382,9 +1382,9 @@ void calcQuadNormal(float *xyz, float *out){
 
 }
 
-/* ------------------ readcadgeom ------------------------ */
+/* ------------------ ReadCADGeom ------------------------ */
 
-void readcadgeom(cadgeomdata *cd){
+void ReadCADGeom(cadgeomdata *cd){
   char buffer[255];
   float lastcolor[3];
   FILE *stream;
@@ -1402,7 +1402,7 @@ void readcadgeom(cadgeomdata *cd){
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
     fclose(stream);
-    readcad2geom(cd);
+    ReadCAD2Geom(cd);
     return;
   }
   else{
@@ -1417,7 +1417,7 @@ void readcadgeom(cadgeomdata *cd){
   cd->nquads=nquads;
   rewind(stream);
   if(NewMemory((void **)&cd->quad,nquads*sizeof(cadquad))==0){
-    freecadinfo();
+    FreeCADInfo();
     fclose(stream);
     return;
   }
@@ -1444,7 +1444,7 @@ void readcadgeom(cadgeomdata *cd){
       xyzpoints+6, xyzpoints+7, xyzpoints+8,
       xyzpoints+9,xyzpoints+10,xyzpoints+11
       );
-    calcQuadNormal(xyzpoints, normal);
+    CalcQuadNormal(xyzpoints, normal);
 
     if(fgets(buffer,255,stream)==NULL)break;
     colors=strstr(buffer," ");
@@ -1480,9 +1480,9 @@ void readcadgeom(cadgeomdata *cd){
 
 }
 
-/* ------------------ quadcompare ------------------------ */
+/* ------------------ CompareQuad ------------------------ */
 
-int quadcompare( const void *arg1, const void *arg2 ){
+int CompareQuad( const void *arg1, const void *arg2 ){
   int i1, i2;
   cadgeomdata *cd;
   cadquad *quadi, *quadj;
@@ -1504,9 +1504,9 @@ int quadcompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ readcad2geom ------------------------ */
+/* ------------------ ReadCAD2Geom ------------------------ */
 
-void readcad2geom(cadgeomdata *cd){
+void ReadCAD2Geom(cadgeomdata *cd){
   char buffer[255];
   FILE *stream;
   int nquads=0;
@@ -1613,7 +1613,7 @@ void readcad2geom(cadgeomdata *cd){
       PRINTF("       Loading texture: %s",texti->file);
       glGenTextures(1,&texti->name);
       glBindTexture(GL_TEXTURE_2D,texti->name);
-      floortex=readpicture(texti->file,&texwid,&texht,0);
+      floortex=ReadPicture(texti->file,&texwid,&texht,0);
       if(floortex==NULL){
         PRINTF(" - failed\n");
         fprintf(stderr,"*** Error: Texture file %s failed to load\n",texti->file);
@@ -1649,7 +1649,7 @@ void readcad2geom(cadgeomdata *cd){
   if(NewMemory((void **)&cd->quad,nquads*sizeof(cadquad))==0||
      NewMemory((void **)&cd->order,nquads*sizeof(int))==0
     ){
-    freecadinfo();
+    FreeCADInfo();
     return;
   }
 
@@ -1682,7 +1682,7 @@ void readcad2geom(cadgeomdata *cd){
     quadi->colors[2]=cl->rgb[2];
     quadi->colors[3]=1.0;
     quadi->time_show=time_show;
-    calcQuadNormal(xyzpoints, normal);
+    CalcQuadNormal(xyzpoints, normal);
   }
   if(iquad<nquads){
     fprintf(stderr,"*** Warning: number of faces expected=%i number of faces found=%i\n",cd->nquads,iquad);
@@ -1692,16 +1692,16 @@ void readcad2geom(cadgeomdata *cd){
     cd->order[i]=i;
   }
   current_cadgeom=cd;
-  qsort(cd->order,(size_t)cd->nquads,sizeof(int),quadcompare);
+  qsort(cd->order,(size_t)cd->nquads,sizeof(int),CompareQuad);
   fclose(stream);
   if(have_textures==1){
     PRINTF("     CAD textures loading completed\n");
   }
 }
 
-/* ------------------ updaate_cadtextcoords ------------------------ */
+/* ------------------ UpdateCADTextCoords ------------------------ */
 
-void update_cadtextcoords(cadquad *quadi){
+void UpdateCADTextCoords(cadquad *quadi){
   float twidth, theight;
   float nx, ny, nz;
   float l1, l2;
@@ -1746,9 +1746,9 @@ void update_cadtextcoords(cadquad *quadi){
   }
 }
 
-/* ------------------ drawcadgeom ------------------------ */
+/* ------------------ DrawCADGeom ------------------------ */
 
-void drawcadgeom(const cadgeomdata *cd){
+void DrawCADGeom(const cadgeomdata *cd){
   int i;
   int last_colorindex=-999;
   float *lastcolor;
@@ -1800,14 +1800,14 @@ void drawcadgeom(const cadgeomdata *cd){
   glEnd();
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_LIGHTING);
-  SNIFF_ERRORS("drawcadgeom");
+  SNIFF_ERRORS("DrawCADGeom");
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 
 }
 
-/* ------------------ drawcadgeom2 ------------------------ */
+/* ------------------ DrawCAD2Geom ------------------------ */
 
-void drawcad2geom(const cadgeomdata *cd, int trans_flag){
+void DrawCAD2Geom(const cadgeomdata *cd, int trans_flag){
   int ii;
   float *thiscolor,*lastcolor;
   int thisonesided, lastonesided;
@@ -1823,7 +1823,7 @@ void drawcad2geom(const cadgeomdata *cd, int trans_flag){
   glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
   glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,block_specular2);
   glEnable(GL_LIGHTING);
-  if(trans_flag==DRAW_TRANSPARENT)transparenton();
+  if(trans_flag==DRAW_TRANSPARENT)TransparentOn();
   glBegin(GL_QUADS);
   colorindex=0;
   for(ii=0;ii<cd->nquads;ii++){
@@ -1975,7 +1975,7 @@ void drawcad2geom(const cadgeomdata *cd, int trans_flag){
 
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
-  if(trans_flag==DRAW_TRANSPARENT)transparentoff();
+  if(trans_flag==DRAW_TRANSPARENT)TransparentOff();
   if(cullfaces==1){
     glEnable(GL_CULL_FACE);
   }
@@ -1989,7 +1989,7 @@ void drawcad2geom(const cadgeomdata *cd, int trans_flag){
 void UpdateFaces(void){
   int i;
 
-  allocate_faces();
+  AllocateFaces();
   updatefaces=0;
   have_vents_int=0;
   for(i=0;i<nmeshes;i++){
@@ -2004,21 +2004,21 @@ void UpdateFaces(void){
 
       bc = meshi->blockageinfoptrs[j];
       if(visTerrainType!=TERRAIN_HIDDEN&&bc->is_wuiblock==1)continue;
-      obst_or_vent2faces(meshi,bc,NULL,faceptr,BLOCK_face);
+      ObstOrVent2Faces(meshi,bc,NULL,faceptr,BLOCK_face);
       faceptr += 6;
     }
     for(j=0;j<meshi->nvents;j++){
       ventdata *vi;
 
       vi = meshi->ventinfo+j;
-      obst_or_vent2faces(meshi,NULL,vi,faceptr,VENT_face);
+      ObstOrVent2Faces(meshi,NULL,vi,faceptr,VENT_face);
       faceptr++;
     }
     for(j=meshi->nvents;j<meshi->nvents+6;j++){
       ventdata *vi;
 
       vi = meshi->ventinfo+j;
-      obst_or_vent2faces(meshi,NULL,vi,faceptr,OUTLINE_FRAME_face);
+      ObstOrVent2Faces(meshi,NULL,vi,faceptr,OUTLINE_FRAME_face);
       ASSERT(faceptr->color!=NULL);
       faceptr++;
     }
@@ -2026,21 +2026,21 @@ void UpdateFaces(void){
       ventdata *vi;
 
       vi = meshi->ventinfo+j;
-      obst_or_vent2faces(meshi,NULL,vi,faceptr,SHADED_FRAME_face);
+      ObstOrVent2Faces(meshi,NULL,vi,faceptr,SHADED_FRAME_face);
       ASSERT(faceptr->color!=NULL);
       faceptr++;
     }
     meshi->nfaces=faceptr-meshi->faceinfo;
   }
   UpdateHiddenFaces();
-  UpdateFacelists();
-  update_selectfaces();
-  update_selectblocks();
+  UpdateFaceLists();
+  UpdateSelectFaces();
+  UpdateSelectBlocks();
 }
 
-/* ------------------ obst_or_vent2faces ------------------------ */
+/* ------------------ ObstOrVent2Faces ------------------------ */
 
-void obst_or_vent2faces(const meshdata *meshi,blockagedata *bc,
+void ObstOrVent2Faces(const meshdata *meshi,blockagedata *bc,
                         ventdata *vi, facedata *faceptr, int facetype){
   /*
 
@@ -2511,9 +2511,9 @@ void obst_or_vent2faces(const meshdata *meshi,blockagedata *bc,
   }
 }
 
-/* ------------------ Clip_Face ------------------------ */
+/* ------------------ ClipFace ------------------------ */
 
-int Clip_Face(clipdata *ci, facedata *facei){
+int ClipFace(clipdata *ci, facedata *facei){
   if(clip_mode==CLIP_OFF||clip_mode==CLIP_DATA)return 0;
   if(ci->clip_xmin==1&&DENORMALIZE_X(facei->xmax)<ci->xmin)return 1;
   if(ci->clip_xmax==1&&DENORMALIZE_X(facei->xmin)>ci->xmax)return 1;
@@ -2524,14 +2524,14 @@ int Clip_Face(clipdata *ci, facedata *facei){
   return 0;
 }
 
-/* ------------------ set_cull_vis ------------------------ */
+/* ------------------ SetCullVis ------------------------ */
 
-void set_cull_vis(void){
+void SetCullVis(void){
   int imesh;
 
   if(update_initcullgeom==1){
     initcullgeom(cullgeom);
-    UpdateFacelists();
+    UpdateFaceLists();
   }
   for(imesh=0;imesh<nmeshes;imesh++){
     int iport;
@@ -2588,9 +2588,9 @@ void set_cull_vis(void){
   }
 }
 
-/* ------------------ comparesinglefaces0 ------------------------ */
+/* ------------------ CompareSingleFaces0 ------------------------ */
 
-int comparesinglefaces0( const void *arg1, const void *arg2 ){
+int CompareSingleFaces0( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
   int dirs[6];
 
@@ -2660,9 +2660,9 @@ int comparesinglefaces0( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ comparesinglefaces ------------------------ */
+/* ------------------ CompareSingleFaces ------------------------ */
 
-int comparesinglefaces( const void *arg1, const void *arg2 ){
+int CompareSingleFaces( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
 
   facei = *(facedata **)arg1;
@@ -2704,9 +2704,9 @@ int comparesinglefaces( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ comparecolorfaces ------------------------ */
+/* ------------------ CompareColorFaces ------------------------ */
 
-int comparecolorfaces( const void *arg1, const void *arg2 ){
+int CompareColorFaces( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
 
   facei = *(facedata **)arg1;
@@ -2717,15 +2717,15 @@ int comparecolorfaces( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ UpdateFacelists ------------------------ */
+/* ------------------ UpdateFaceLists ------------------------ */
 
-void UpdateFacelists(void){
+void UpdateFaceLists(void){
   int n_textures, n_outlines;
   int n_normals_single, n_normals_double, n_transparent_double;
   int i;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(updatehiddenfaces==1)UpdateHiddenFaces();
   updatefacelists=0;
@@ -2809,7 +2809,7 @@ void UpdateFacelists(void){
       if(showonly_hiddenfaces==1&&facej->hidden==0)continue;
       if(facej->thinface==1)continue;
       if(facej->bc!=NULL&&facej->bc->prop!=NULL&&facej->bc->prop->blockvis==0)continue;
-      if(Clip_Face(&clipinfo,facej)==1)continue;
+      if(ClipFace(&clipinfo,facej)==1)continue;
 
       if(showedit_dialog == 1 && geomtest_option == NO_TEST && j<vent_offset){
         if(facej->show_bothsides==0)meshi->face_normals_single[n_normals_single++]=facej;
@@ -2958,7 +2958,7 @@ void UpdateFacelists(void){
       int nhidden;
 
       nhidden=0;
-      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces0);
+      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),CompareSingleFaces0);
       meshi->face_normals_single[0]->dup=0;
       for(iface=1;iface<meshi->nface_normals_single;iface++){
         facedata *facei;
@@ -2990,12 +2990,12 @@ void UpdateFacelists(void){
         meshi->nface_normals_single=n_normals_single;
       }
 
-      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),comparesinglefaces);
+      qsort((facedata **)meshi->face_normals_single,(size_t)n_normals_single,sizeof(facedata *),CompareSingleFaces);
       for(iface=0;iface<meshi->nface_normals_single;iface++){
         facedata *facei;
 
         facei=meshi->face_normals_single[iface];
-        facei->cullport=get_face_port(meshi,facei);
+        facei->cullport=GetFacePort(meshi,facei);
         switch(facei->dir){
           case DOWN_X:
             if(istartD==-1){
@@ -3046,10 +3046,10 @@ void UpdateFacelists(void){
       }
     }
     if(n_normals_double>1){
-      qsort((facedata **)meshi->face_normals_double,(size_t)n_normals_double,sizeof(facedata *),comparecolorfaces);
+      qsort((facedata **)meshi->face_normals_double,(size_t)n_normals_double,sizeof(facedata *),CompareColorFaces);
     }
     if(n_outlines>1){
-      qsort((facedata **)meshi->face_outlines,(size_t)n_outlines,sizeof(facedata *),comparecolorfaces);
+      qsort((facedata **)meshi->face_outlines,(size_t)n_outlines,sizeof(facedata *),CompareColorFaces);
     }
   }
   n_geom_triangles=0;
@@ -3061,9 +3061,9 @@ void UpdateFacelists(void){
   }
 }
 
-/* ------------------ drawselect_faces ------------------------ */
+/* ------------------ DrawSelectFaces ------------------------ */
 
-void drawselect_faces(){
+void DrawSelectFaces(){
   int i;
   int color_index=0;
 
@@ -3086,7 +3086,7 @@ void drawselect_faces(){
         facek = meshi->faceinfo + 6*j + sides[k];
 
         vertices = facek->approx_vertex_coords;
-        getrgb(color_index+1,&r,&g,&b);
+        GetRGB(color_index+1,&r,&g,&b);
         glColor3ub(r,g,b);
         color_index++;
         glVertex3fv(vertices);
@@ -3141,9 +3141,9 @@ void drawselect_faces(){
         glVertex3fv(vertices+6);\
         glVertex3fv(vertices+9);
 
-/* ------------------ draw_faces ------------------------ */
+/* ------------------ DrawFaces ------------------------ */
 
-void draw_faces(){
+void DrawFaces(){
   float *new_color,*old_color=NULL;
   int **showtimelist_handle, *showtimelist;
   float up_color[4]={0.9,0.9,0.9,1.0};
@@ -3295,7 +3295,7 @@ void draw_faces(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -3347,7 +3347,7 @@ void draw_faces(){
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
   if(nface_textures>0){
     int j;
@@ -3414,9 +3414,9 @@ void draw_faces(){
   }
 }
 
-/* ------------------ comparetransparentfaces ------------------------ */
+/* ------------------ CompareTransparentFaces ------------------------ */
 
-int comparetransparentfaces( const void *arg1, const void *arg2 ){
+int CompareTransparentFaces( const void *arg1, const void *arg2 ){
   facedata *facei, *facej;
 
   facei = *(facedata **)arg1;
@@ -3427,9 +3427,9 @@ int comparetransparentfaces( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ Sort_Transparent_Faces ------------------------ */
+/* ------------------ SortTransparentFaces ------------------------ */
 
-void Sort_Transparent_Faces(float *mm){
+void SortTransparentFaces(float *mm){
   int i;
 
   for(i=0;i<nface_transparent;i++){
@@ -3447,12 +3447,12 @@ void Sort_Transparent_Faces(float *mm){
     xyzeye[2]/=mscale[2];
     facei->dist2eye=xyzeye[0]*xyzeye[0]+xyzeye[1]*xyzeye[1]+xyzeye[2]*xyzeye[2];
   }
-  qsort((facedata **)face_transparent,(size_t)nface_transparent,sizeof(facedata *),comparetransparentfaces);
+  qsort((facedata **)face_transparent,(size_t)nface_transparent,sizeof(facedata *),CompareTransparentFaces);
 }
 
-/* ------------------ draw_transparent_faces ------------------------ */
+/* ------------------ DrawTransparentFaces ------------------------ */
 
-void draw_transparent_faces(){
+void DrawTransparentFaces(){
   float old_color[4]={(float)-1.0,(float)-1.0,(float)-1.0,(float)-1.0};
   float *new_color;
   int **showtimelist_handle, *showtimelist;
@@ -3463,11 +3463,11 @@ void draw_transparent_faces(){
 
   if(blocklocation==BLOCKlocation_cad||(ncadgeom!=0&&show_cad_and_grid==1))return;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(nface_transparent<=0&&nface_transparent_double<=0)return;
 
-  if(drawing_transparent==1)transparenton();
+  if(drawing_transparent==1)TransparentOn();
 
   if(nface_transparent>0){
     int i;
@@ -3597,7 +3597,7 @@ void draw_transparent_faces(){
     glDisable(GL_LIGHTING);
   }
 
-  if(drawing_transparent==1)transparentoff();
+  if(drawing_transparent==1)TransparentOff();
 }
 
 /* ------------------ UpdateHiddenFaces ------------------------ */
@@ -3644,9 +3644,9 @@ void UpdateHiddenFaces(){
   if(hide_overlaps!=0)PRINTF(" complete\n");
 }
 
-/* ------------------ allocate_faces ------------------------ */
+/* ------------------ AllocateFaces ------------------------ */
 
-void allocate_faces(){
+void AllocateFaces(){
   int i;
   int ntotal2=0;
   int abortflag=0;
@@ -3732,9 +3732,9 @@ void allocate_faces(){
   PRINTF("\n");
 }
 
-/* ------------------ blockcompare ------------------------ */
+/* ------------------ CompareBlock ------------------------ */
 
-int blockcompare( const void *arg1, const void *arg2 ){
+int CompareBlock( const void *arg1, const void *arg2 ){
   blockagedata *bc1,*bc2;
   int i1, i2;
 
@@ -3753,9 +3753,9 @@ int blockcompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ update_selectblocks ------------------------ */
+/* ------------------ UpdateSelectBlocks ------------------------ */
 
-void update_selectblocks(void){
+void UpdateSelectBlocks(void){
   int i;
   int ntotal=0;
   int local_count=0;
@@ -3788,13 +3788,13 @@ void update_selectblocks(void){
       selectblockinfo[local_count++]=bc;
     }
   }
-  qsort(sortedblocklist,(size_t)ntotal,sizeof(int),blockcompare);
+  qsort(sortedblocklist,(size_t)ntotal,sizeof(int),CompareBlock);
   nselectblocks=ntotal;
 }
 
-/* ------------------ update_selectfaces ------------------------ */
+/* ------------------ UpdateSelectFaces ------------------------ */
 
-void update_selectfaces(void){
+void UpdateSelectFaces(void){
 
   /* store info about faces that could be selected */
 
@@ -3850,20 +3850,20 @@ void update_selectfaces(void){
   }
 }
 
-/* ------------------ isblockagevisible ------------------------ */
+/* ------------------ IsBlockageVisible ------------------------ */
 
-int isblockagevisible(blockagedata *bc, float local_time){
+int IsBlockageVisible(blockagedata *bc, float local_time){
   int listindex,val;
 
   if(bc->showhide==NULL||local_time<0.0)return 1;
-  listindex=getindex(local_time,bc->showtime,bc->nshowtime);
+  listindex=GetIndex(local_time,bc->showtime,bc->nshowtime);
   val = bc->showhide[listindex];
   return val;
 }
 
-/* ------------------ init_demo ------------------------ */
+/* ------------------ InitDemo ------------------------ */
 
-void init_demo(float rad, int nlat, int nlong){
+void InitDemo(float rad, int nlat, int nlong){
   int i,j;
   float phi, psi;
   extern float *sphere_xyz;
@@ -3886,9 +3886,9 @@ void init_demo(float rad, int nlat, int nlong){
   }
 }
 
-/* ------------------ calcNormal3 ------------------------ */
+/* ------------------ CalcNormal3 ------------------------ */
 
-void calcNormal3(const float *v1,
+void CalcNormal3(const float *v1,
                  const float *v2,
                  const float *v3,
                  float *out){
@@ -3910,9 +3910,9 @@ void calcNormal3(const float *v1,
 
 }
 
-/* ------------------ calcNormal4 ------------------------ */
+/* ------------------ CalcNormal4 ------------------------ */
 
-void calcNormal4(const float *v1,
+void CalcNormal4(const float *v1,
                  float *out){
   out[0]=v1[0]-0.2143;
   out[1]=v1[1]-0.2143;
@@ -3924,9 +3924,9 @@ void calcNormal4(const float *v1,
 
 }
 
-/* ------------------ draw_demo2 ------------------------ */
+/* ------------------ DrawDemo2 ------------------------ */
 
-void draw_demo2(int option){
+void DrawDemo2(int option){
       demo_mode++;
       glBegin(GL_QUADS);
       if(demo_mode%2==0){
@@ -3942,9 +3942,9 @@ void draw_demo2(int option){
       glEnd();
 }
 
-/* ------------------ draw_demo ------------------------ */
+/* ------------------ DrawDemo ------------------------ */
 
-void draw_demo(int nlat, int nlong){
+void DrawDemo(int nlat, int nlong){
   int i, j;
   extern float *sphere_xyz;
   extern int update_demo,demo_mode;
@@ -3959,7 +3959,7 @@ void draw_demo(int nlat, int nlong){
 #define sphere_index(ilat,ilong) (3*((ilong)*nlat + (ilat)))
 
   if(nlat<=0||nlong<=0)return;
-  if(update_demo==1)init_demo(0.4,nlat,nlong);
+  if(update_demo==1)InitDemo(0.4,nlat,nlong);
   switch(demo_mode){
     case 0:
       glPointSize(6.0);
@@ -4027,9 +4027,9 @@ void draw_demo(int nlat, int nlong){
           xyz01 = sphere_xyz + sphere_index(i+1,j);
           xyz11 = sphere_xyz + sphere_index(i+1,j+1);
 
-          if(demo_mode==3)calcNormal3(xyz00,xyz11,xyz01,norm);
+          if(demo_mode==3)CalcNormal3(xyz00,xyz11,xyz01,norm);
           glBegin(GL_TRIANGLES);
-          if(demo_mode!=3)calcNormal4(xyz00,norm);
+          if(demo_mode!=3)CalcNormal4(xyz00,norm);
           glNormal3fv(norm);
           red = COLOR(xyz00[0]);
           green = COLOR(xyz00[1]);
@@ -4038,7 +4038,7 @@ void draw_demo(int nlat, int nlong){
 
           red = COLOR(xyz11[0]);
           green = COLOR(xyz11[1]);
-          if(demo_mode!=3)calcNormal4(xyz11,norm);
+          if(demo_mode!=3)CalcNormal4(xyz11,norm);
           glNormal3fv(norm);
           glColor3f(red,green,1.0);
           glVertex3fv(xyz11);
@@ -4046,7 +4046,7 @@ void draw_demo(int nlat, int nlong){
           red = COLOR(xyz01[0]);
           green = COLOR(xyz01[1]);
           glColor3f(red,green,1.0);
-          if(demo_mode!=3)calcNormal4(xyz01,norm);
+          if(demo_mode!=3)CalcNormal4(xyz01,norm);
           glNormal3fv(norm);
           glVertex3fv(xyz01);
 
@@ -4060,27 +4060,27 @@ void draw_demo(int nlat, int nlong){
             glEnd();
           }
 
-          if(demo_mode==3)calcNormal3(xyz00,xyz11,xyz01,norm);
+          if(demo_mode==3)CalcNormal3(xyz00,xyz11,xyz01,norm);
           glBegin(GL_TRIANGLES);
-          if(demo_mode==3)calcNormal3(xyz00,xyz11,xyz01,norm);
+          if(demo_mode==3)CalcNormal3(xyz00,xyz11,xyz01,norm);
           red = COLOR(xyz00[0]);
           green = COLOR(xyz00[1]);
           glColor3f(red,green,1.0);
-          if(demo_mode!=3)calcNormal4(xyz00,norm);
+          if(demo_mode!=3)CalcNormal4(xyz00,norm);
           glNormal3fv(norm);
           glVertex3fv(xyz00);
 
           red = COLOR(xyz10[0]);
           green = COLOR(xyz10[1]);
           glColor3f(red,green,1.0);
-          if(demo_mode!=3)calcNormal4(xyz10,norm);
+          if(demo_mode!=3)CalcNormal4(xyz10,norm);
           glNormal3fv(norm);
           glVertex3fv(xyz10);
 
           red = COLOR(xyz11[0]);
           green = COLOR(xyz11[1]);
           glColor3f(red,green,1.0);
-          if(demo_mode!=3)calcNormal4(xyz11,norm);
+          if(demo_mode!=3)CalcNormal4(xyz11,norm);
           glNormal3fv(norm);
           glVertex3fv(xyz11);
 
@@ -4096,9 +4096,9 @@ void draw_demo(int nlat, int nlong){
   }
 }
 
-/* ------------------ init_user_ticks ------------------------ */
+/* ------------------ InitUserTicks ------------------------ */
 
-void init_user_ticks(void){
+void InitUserTicks(void){
   int i;
 
   user_tick_min[0]=1000000000.0;
@@ -4136,9 +4136,9 @@ void init_user_ticks(void){
 
 }
 
-/* ------------------ draw_user_ticks ------------------------ */
+/* ------------------ DrawUserTicks ------------------------ */
 
-void draw_user_ticks(void){
+void DrawUserTicks(void){
   int i;
   float xyz[3],xyz2[3];
   float tick_origin[3], step[3];
@@ -4317,7 +4317,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     for(i=0;i<user_tick_nxyz[0];i++){
       char label[128];
 
@@ -4335,9 +4335,9 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[0]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[0]));
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
+      Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 
@@ -4407,7 +4407,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     for(i=0;i<user_tick_nxyz[1];i++){
       char label[128];
 
@@ -4429,9 +4429,9 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[1]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[1]));
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
+      Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 
@@ -4498,7 +4498,7 @@ void draw_user_ticks(void){
       }
     }
     glEnd();
-    if(fontindex==SCALED_FONT)scale_3dfont();
+    if(fontindex==SCALED_FONT)ScaleFont3D();
     for(i=0;i<user_tick_nxyz[2];i++){
       char label[128];
 
@@ -4518,9 +4518,9 @@ void draw_user_ticks(void){
         xyz2[1]=xyz[1];
       }
       xyz2[2]=xyz[2];
-      sprintf(label,"%5.1f",getunitval("Distance",xyz[2]));
+      sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[2]));
       trimzeros(label);
-      output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
+      Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
 
@@ -4627,15 +4627,15 @@ void DrawGravityAxis(void){
   glVertex3f(xbar/2.0+gvecunit[0],ybar/2.0+gvecunit[1],zbar/2.0+gvecunit[2]);
 
   glEnd();
-  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0, zbar / 2.0 + 0.5, "x");
-  output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0 + 0.5, zbar / 2.0, "y");
-  output3Text(foregroundcolor, xbar / 2.0 + 0.5, ybar / 2.0, zbar / 2.0, "x");
-  output3Text(foregroundcolor, xbar / 2.0 + gvecunit[0], ybar / 2.0 + gvecunit[1], zbar / 2.0 + gvecunit[2], "g");
+  Output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0, zbar / 2.0 + 0.5, "x");
+  Output3Text(foregroundcolor, xbar / 2.0, ybar / 2.0 + 0.5, zbar / 2.0, "y");
+  Output3Text(foregroundcolor, xbar / 2.0 + 0.5, ybar / 2.0, zbar / 2.0, "x");
+  Output3Text(foregroundcolor, xbar / 2.0 + gvecunit[0], ybar / 2.0 + gvecunit[1], zbar / 2.0 + gvecunit[2], "g");
 }
 
-/* ------------------ drawticks ------------------------ */
+/* ------------------ DrawTicks ------------------------ */
 
-void drawticks(void){
+void DrawTicks(void){
   int i,j;
   tickdata *ticki;
   float *dxyz,xyz[3],xyz2[3],*begt,*endt,dbar[3];
@@ -4683,31 +4683,31 @@ void drawticks(void){
   }
 }
 
-/* ------------------ drawBlockages ------------------------ */
+/* ------------------ DrawBlockages ------------------------ */
 
-void drawBlockages(int mode, int trans_flag){
+void DrawBlockages(int mode, int trans_flag){
   int i;
   cadgeomdata *cd;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   if(trans_flag!=DRAW_TRANSPARENT&&blocklocation!=BLOCKlocation_cad){
     if(mode==SELECTOBJECT){
       if(blockageSelect==1){
         get_geom_dialog_state();
         if(structured_isopen == 1 && unstructured_isopen == 0){
-          drawselect_faces();
+          DrawSelectFaces();
           return;
         }
       }
     }
     else{
       if(use_new_drawface==1){
-        draw_faces();
+        DrawFaces();
       }
       else{
-        draw_facesOLD();
+        DrawFacesOLD();
       }
     }
   }
@@ -4720,12 +4720,12 @@ void drawBlockages(int mode, int trans_flag){
       if(cd->version==1){
         if(trans_flag==DRAW_TRANSPARENT)continue;
         if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
-        drawcadgeom(cd);
+        DrawCADGeom(cd);
         if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
       }
       else if(cd->version==2){
         if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(&clipinfo,CLIP_ON);
-        drawcad2geom(cd,trans_flag);
+        DrawCAD2Geom(cd,trans_flag);
         if(clip_mode==CLIP_BLOCKAGES)setClipPlanes(NULL,CLIP_OFF);
       }
       ntriangles+=2*cd->nquads;
@@ -4733,9 +4733,9 @@ void drawBlockages(int mode, int trans_flag){
     if(show_triangle_count==1)printf("cad triangles: %i\n",ntriangles);
   }
 }
-/* ------------------ level_scene ------------------------ */
+/* ------------------ LevelScene ------------------------ */
 
-void level_scene(int level_x, int level_y, float *quat){
+void LevelScene(int level_x, int level_y, float *quat){
   if(rotation_type==ROTATION_2AXIS&&key_state == KEY_NONE){
     float *elev;
 
@@ -4764,9 +4764,9 @@ void level_scene(int level_x, int level_y, float *quat){
   }
 }
 
-/* ------------------ snap_scene ------------------------ */
+/* ------------------ SnapScene ------------------------ */
 
-void snap_scene(void){
+void SnapScene(void){
   float *az, *elev;
   int iaz, ielev;
 
@@ -4814,9 +4814,9 @@ void snap_scene(void){
 
 }
 
-/* ------------------ get_drawing_parms ------------------------ */
+/* ------------------ GetDrawingParms ------------------------ */
 
-void get_drawing_parms(int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent){
+void GetDrawingParms(int *drawing_transparent, int *drawing_blockage_transparent, int *drawing_vent_transparent){
   *drawing_transparent=0;
   *drawing_blockage_transparent=0;
   *drawing_vent_transparent=0;
@@ -4834,9 +4834,9 @@ void get_drawing_parms(int *drawing_transparent, int *drawing_blockage_transpare
   }
 }
 
-/* ------------------ draw_facesOLD ------------------------ */
+/* ------------------ DrawFacesOLD ------------------------ */
 
-void draw_facesOLD(){
+void DrawFacesOLD(){
   float *new_color,*old_color=NULL;
   int **showtimelist_handle, *showtimelist;
   float up_color[4]={0.9,0.9,0.9,1.0};
@@ -4993,7 +4993,7 @@ void draw_facesOLD(){
     int j;
 
     glDisable(GL_LIGHTING);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     for(j=0;j<nmeshes;j++){
@@ -5049,7 +5049,7 @@ void draw_facesOLD(){
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
   if(nface_textures>0){
     int j;
@@ -5138,7 +5138,7 @@ void initcullgeom(int cullgeomflag){
 
     meshi=meshinfo+imesh;
 
-    get_cullskips(meshi,cullgeomflag,cullgeom_portsize,&iskip,&jskip,&kskip);
+    GetCullSkips(meshi,cullgeomflag,cullgeom_portsize,&iskip,&jskip,&kskip);
     nx = (meshi->ibar-1)/iskip + 1;
     ny = (meshi->jbar-1)/jskip + 1;
     nz = (meshi->kbar-1)/kskip + 1;
@@ -5211,9 +5211,9 @@ void initcullgeom(int cullgeomflag){
   }
 }
 
-/* ------------------ get_cullskips ------------------------ */
+/* ------------------ GetCullSkips ------------------------ */
 
-void get_cullskips(meshdata *meshi, int cullflag, int cull_portsize_local, int *iiskip, int *jjskip, int *kkskip){
+void GetCullSkips(meshdata *meshi, int cullflag, int cull_portsize_local, int *iiskip, int *jjskip, int *kkskip){
   int iskip, jskip, kskip;
 
   if(cullflag==1){
@@ -5239,9 +5239,9 @@ void get_cullskips(meshdata *meshi, int cullflag, int cull_portsize_local, int *
   *kkskip=kskip;
 }
 
-/* ------------------ get_face_port ------------------------ */
+/* ------------------ GetFacePort ------------------------ */
 
-culldata *get_face_port(meshdata *meshi, facedata *facei){
+culldata *GetFacePort(meshdata *meshi, facedata *facei){
   int ii1, jj1, kk1;
   int ii2, jj2, kk2;
   int nx, ny, nz;
@@ -5283,9 +5283,9 @@ culldata *get_face_port(meshdata *meshi, facedata *facei){
   return return_cull;
 }
 
-/* ------------------ blockagecompare ------------------------ */
+/* ------------------ CompareBlockage ------------------------ */
 
-int blockagecompare( const void *arg1, const void *arg2 ){
+int CompareBlockage( const void *arg1, const void *arg2 ){
   blockagedata *bc1, *bc2;
   int *ijk1, *ijk2;
 
@@ -5310,9 +5310,9 @@ int blockagecompare( const void *arg1, const void *arg2 ){
   return 0;
 }
 
-/* ------------------ remove_dup_blockages ------------------------ */
+/* ------------------ RemoveDupBlockages ------------------------ */
 
-void remove_dup_blockages(void){
+void RemoveDupBlockages(void){
   int i;
 
   for(i=0;i<nmeshes;i++){
@@ -5325,7 +5325,7 @@ void remove_dup_blockages(void){
       int jj,j;
 
       bclist=meshi->blockageinfoptrs;
-      qsort(bclist,(size_t)meshi->nbptrs,sizeof(blockagedata *),blockagecompare);
+      qsort(bclist,(size_t)meshi->nbptrs,sizeof(blockagedata *),CompareBlockage);
       for(j=1;j<meshi->nbptrs;j++){
         blockagedata *bc, *bcm1;
         int *ijk1, *ijk2;
@@ -5359,9 +5359,9 @@ void remove_dup_blockages(void){
   updatefacelists=1;
 }
 
-/* ------------------ getobstlabels ------------------------ */
+/* ------------------ GetObstLabels ------------------------ */
 
-void getobstlabels(const char *filein){
+void GetObstLabels(const char *filein){
 
   FILE *stream_in;
   int fdsobstcount=0;

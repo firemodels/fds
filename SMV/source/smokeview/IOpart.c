@@ -1323,7 +1323,7 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
 void update_partcolorbounds(partdata *parti){
   int j;
 
-  adjustpart5bounds(parti);
+  AdjustPart5Bounds(parti);
   if(colorlabelpart!=NULL){
     NewMemory((void **)&colorlabelpart, MAXRGB*sizeof(char *));
     {
@@ -1343,10 +1343,10 @@ void update_partcolorbounds(partdata *parti){
     partj = partinfo+j;
     if(partj->loaded==0||partj->display==0)continue;
     if(partj==parti){
-      getPart5Colors(partj, nrgb, PARTFILE_MAP);
+      GetPart5Colors(partj, nrgb, PARTFILE_MAP);
     }
     else{
-      getPart5Colors(partj, nrgb, PARTFILE_REMAP);
+      GetPart5Colors(partj, nrgb, PARTFILE_REMAP);
     }
   }
 }
@@ -1397,16 +1397,16 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   parti->data_type = data_type;
   parti->loaded = 0;
   parti->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
 
   FREEMEMORY(parti->times);
 
   if(loadflag==UNLOAD){
     update_partcolorbounds(parti);
-    Update_Times();
+    UpdateTimes();
     updatemenu=1;
-    updatePart5extremes();
+    UpdatePart5Extremes();
 #ifdef pp_MEMPRINT
     if(data_type==PARTDATA)PRINTF("After particle file unload: \n");
     PrintMemoryInfo;
@@ -1417,7 +1417,7 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   lenfile = strlen(file);
   if(lenfile==0){
     readpart("",ifile,UNLOAD,PARTDATA,&error);
-    Update_Times();
+    UpdateTimes();
     return;
   }
 
@@ -1473,9 +1473,9 @@ void readpart(char *file, int ifile, int loadflag, int data_type, int *errorcode
   parttype=0;
   Part_CB_Init();
   ParticlePropShowMenu(part5colorindex);
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
-  updatePart5extremes();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
+  UpdatePart5Extremes();
   updatemenu=1;
   Idle_CB();
 

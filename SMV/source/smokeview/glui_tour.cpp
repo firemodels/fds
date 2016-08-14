@@ -514,7 +514,7 @@ void TOUR_CB(int var){
     hide_glui_tour();
     break;
   case SAVE_SETTINGS:
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case SHOWTOURROUTE:
     edittour = 1 - edittour;
@@ -582,7 +582,7 @@ void TOUR_CB(int var){
   case VIEW_times:
     ReallocTourMemory();
     createtourpaths();
-    Update_Times();
+    UpdateTimes();
     break;
   case KEYFRAME_viewXYZ:
     if(selected_frame!=NULL){
@@ -686,7 +686,7 @@ void TOUR_CB(int var){
   case CONSTANTTOURVEL:
     update_tourcontrols();
     createtourpaths();
-    Update_Times();
+    UpdateTimes();
     set_glui_keyframe();
     break;
   case KEYFRAME_INSERT:

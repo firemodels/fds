@@ -304,13 +304,13 @@ int main(int argc, char **argv){
         break;
 #endif
       case 'h':
-        usage(prog);
+        Usage(prog);
         return 1;
       case 'v':
         PRINTversion("Smokezip ");
         return 1;
       default:
-        usage(prog);
+        Usage(prog);
         return 1;
       }
     }
@@ -328,7 +328,7 @@ int main(int argc, char **argv){
   // construct smv filename
 
   if(filebase==NULL){
-    usage(prog);
+    Usage(prog);
     return 1;
   }
 #ifdef pp_THREAD
@@ -393,7 +393,7 @@ int main(int argc, char **argv){
 
   // make sure smv file can be opened
 
-  if(readsmv(smvfile)!=0)return 1;
+  if(ReadSMV(smvfile)!=0)return 1;
 
 #ifdef pp_PLOT3D
   if(nplot3dinfo>0){
@@ -462,7 +462,7 @@ int main(int argc, char **argv){
   }
   if(endian_info==1)return 0;
 
-  readini(inifile);
+  ReadINI(inifile);
 
 #ifdef pp_THREAD
   mt_compress_all();
@@ -529,7 +529,7 @@ void makesvd(char *in_dir, char *smvfile){
 
 /* ------------------ usage ------------------------ */
 
-void usage(char *prog){
+void Usage(char *prog){
   char smv_version[100];
   char buffer[1000];
   char githash[256];

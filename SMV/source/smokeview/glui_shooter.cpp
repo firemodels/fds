@@ -241,7 +241,7 @@ extern "C" void glui_shooter_setup(int main_window){
 void SHOOTER_CB(int var){
   float ang;
   if(shooter_firstframe==1){
-    reset_itimes0();
+    ResetItimes0();
   }
   switch(var){
     case SHOOTER_LOADPLOT3D:
@@ -254,8 +254,8 @@ void SHOOTER_CB(int var){
     case SHOOTER_FIRSTFRAME:
       break;
     case SHOOTER_SHOW:
-      plotstate=getplotstate(DYNAMIC_PLOTS);
-      Update_Times();
+      plotstate=GetPlotState(DYNAMIC_PLOTS);
+      UpdateTimes();
       break;
     case SHOOTER_TERMINAL_VEL:
       if(shooter_v_inf<0.0){
@@ -330,8 +330,8 @@ void SHOOTER_CB(int var){
 
       if(allocate_shooter()==0){
         solve_shooter_data();
-        plotstate=getplotstate(DYNAMIC_PLOTS);
-        Update_Times();
+        plotstate=GetPlotState(DYNAMIC_PLOTS);
+        UpdateTimes();
       }
       break;
     case SHOOTER_VEL_TYPE:
@@ -356,7 +356,7 @@ void SHOOTER_CB(int var){
       }
       break;
     case SAVE_SETTINGS:
-      writeini(LOCAL_INI,NULL);
+      WriteINI(LOCAL_INI,NULL);
       break;
     case SHOOTER_CLOSE:
       hide_glui_shooter();

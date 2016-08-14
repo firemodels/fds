@@ -144,7 +144,7 @@ void getisosizes(const char *isofile, int dataflag, FILE **isostreamptr, int *nv
   }
   FSEEK(*isostreamptr,beg,SEEK_SET);
   if(dataflag==1&&axislabels_smooth==1){
-    smoothlabel(tmin_local,tmax_local,nrgb);
+    SmoothLabel(tmin_local,tmax_local,nrgb);
   }
 }
 
@@ -156,7 +156,7 @@ void readiso_geom_wrapup(void){
   GetGeomInfoPtrs(&geominfoptrs, &ngeominfoptrs);
   update_triangles(GEOM_DYNAMIC,GEOM_UPDATE_ALL);
 
-  Update_Times();
+  UpdateTimes();
   get_faceinfo();
   Idle_CB();
 }
@@ -221,7 +221,7 @@ void readiso_geom(const char *file, int ifile, int load_flag, int *geom_frame_in
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   ReadIsoFile=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
   iisotype=getisotype(isoi);
 
@@ -276,8 +276,8 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   unload_iso_trans();
   ib->loaded=0;
   ib->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
   *errorcode = 0;
 
 #ifdef _DEBUG
@@ -652,7 +652,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
   loaded_isomesh=get_loaded_isomesh();
   update_iso_showlevels();
   ReadIsoFile=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   updatemenu=1;
   iisotype=getisotype(ib);
 
@@ -664,7 +664,7 @@ void readiso_orig(const char *file, int ifile, int flag, int *errorcode){
     CheckMemory;
   }
 
-  Update_Times();
+  UpdateTimes();
 #ifdef pp_MEMPRINT
   PRINTF("After iso load: \n");
   PrintMemoryInfo;
@@ -776,7 +776,7 @@ void unloadiso(meshdata *meshi){
 
   ib->loaded=0;
   ib->display=0;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
   meshi->isofilenum=-1;
   for(i=0;i<nmeshes;i++){
     meshi2 = meshinfo+i;
@@ -786,7 +786,7 @@ void unloadiso(meshdata *meshi){
     ReadIsoFile=0;
   }
 
-  Update_Times();
+  UpdateTimes();
   updatemenu=1;
   Idle_CB();
 
@@ -820,7 +820,7 @@ void drawiso_orig(int tranflag){
     if(cullfaces==1)glDisable(GL_CULL_FACE);
 
     iso_specular[3] = 1.0;
-    if(tranflag==DRAW_TRANSPARENT)transparenton();
+    if(tranflag==DRAW_TRANSPARENT)TransparentOn();
 
     if(usetexturebar==1&&isoi->dataflag==1){
       glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_REPLACE);
@@ -900,7 +900,7 @@ void drawiso_orig(int tranflag){
     if(usetexturebar==1&&isoi->dataflag==1)glDisable(GL_TEXTURE_1D);
 
 
-    if(tranflag==DRAW_TRANSPARENT)transparentoff();
+    if(tranflag==DRAW_TRANSPARENT)TransparentOff();
     if(cullfaces==1)glEnable(GL_CULL_FACE);
     CheckMemory;
   }
@@ -909,7 +909,7 @@ void drawiso_orig(int tranflag){
     asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
     glPushAttrib(GL_LIGHTING_BIT);
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(isolinewidth);
     glBegin(GL_LINES);
     for(i=0;i<niso_trans;i++){
@@ -967,14 +967,14 @@ void drawiso_orig(int tranflag){
       glVertex3fv(xyz1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopAttrib();
   }
 
   if((visAIso&4)==4){
     asurface = meshi->animatedsurfaces + meshi->iso_itime*meshi->nisolevels;
 
-    antialias(ON);
+    Antialias(ON);
     glPointSize(isopointsize);
     asurface--;
     glBegin(GL_POINTS);
@@ -1021,7 +1021,7 @@ void drawiso_orig(int tranflag){
       glVertex3fv(xyz3);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
 }
 
@@ -1051,9 +1051,9 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
   int ntriangles;
   float xyzmin[3], xyzmaxdiff_local;
   int drawing_transparent, drawing_blockage_transparent, drawing_vent_transparent;
-  int transparenton_flag=0;
+  int TransparentOn_flag=0;
 
-  get_drawing_parms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
+  GetDrawingParms(&drawing_transparent, &drawing_blockage_transparent, &drawing_vent_transparent);
 
   xyzmin[0] = asurface->xmin;
   xyzmin[1] = asurface->ymin;
@@ -1094,8 +1094,8 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
         if(rgbtemp[3]<0.99){
           drawing_transparent=1;
           drawing_blockage_transparent=1;
-          transparenton_flag=1;
-          transparenton();
+          TransparentOn_flag=1;
+          TransparentOn();
         }
     }
     iso_specular[3] = 1.0;
@@ -1111,7 +1111,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,iso_specular);
     }
 
-    if(transparenton_flag==1){
+    if(TransparentOn_flag==1){
       glColor4fv(rgbtemp);
     }
     else{
@@ -1160,12 +1160,12 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
     }
 
     glPopAttrib();
-    if(transparenton_flag==1)transparentoff();
+    if(TransparentOn_flag==1)TransparentOff();
   }
 
   if(surfacetype==SURFACE_OUTLINE){
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3fv(asurface->color);
@@ -1191,13 +1191,13 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glVertex3fv(vv1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 
   if(surfacetype==SURFACE_POINTS){
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glPointSize(plot3dpointsize);
     glBegin(GL_POINTS);
     glColor3fv(asurface->color);
@@ -1214,14 +1214,14 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       glVertex3fv(vv1);
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 
   if(show_iso_normal==1){
 
     glPushMatrix();
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(line_width);
     glBegin(GL_LINES);
     glColor3f((float)1.,(float)1.,(float)1.);
@@ -1272,7 +1272,7 @@ void drawstaticiso(const isosurface *asurface,int surfacetype,
       }
     }
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
     glPopMatrix();
   }
 }
@@ -1455,7 +1455,7 @@ void setisolabels(float smin, float smax,
   *errorcode=0;
   PRINTF("setting up iso labels \n");
   scale=sb->scale;
-  getIsoLabels(smin,smax,nrgb,
+  GetIsoLabels(smin,smax,nrgb,
                 sb->colorlabels,&scale,sb->levels256);
 }
 

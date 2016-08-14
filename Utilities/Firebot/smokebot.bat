@@ -283,7 +283,7 @@ cd %fdsroot%\SMV\Build\smokeview\intel_win%size%
 erase *.obj *.mod smokeview_win%size%.exe 1> %OUTDIR%\stage2b.txt 2>&1
 call make_smv -r bot 1>> %OUTDIR%\stage2b.txt 2>&1
 
-call :does_file_exist smokeview_win%size%.exe %OUTDIR%\stage2b.txt|| aexit /b 1
+call :does_file_exist smokeview_win%size%.exe %OUTDIR%\stage2b.txt|| exit /b 1
 call :find_smokeview_warnings "warning" %OUTDIR%\stage2b.txt "Stage 2b"
 
 :: -------------------------------------------------------------
@@ -353,7 +353,7 @@ call Run_SMV_Cases -debug -smvwui 1> %OUTDIR%\stage4a.txt 2>&1
 
 cd %fdsroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
-call Check_SMV_cases 
+call Check_SMV_cases -smvwui
 
 :: report errors
 
@@ -370,7 +370,7 @@ call Run_SMV_Cases -smvwui 1> %OUTDIR%\stage4b.txt 2>&1
 
 cd %fdsroot%\Verification\scripts
 echo. > %OUTDIR%\stage_error.txt
-call Check_SMV_cases
+call Check_SMV_cases -smvwui
 
 :: report errors
 

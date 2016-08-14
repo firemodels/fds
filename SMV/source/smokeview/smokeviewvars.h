@@ -20,17 +20,37 @@
 #include "smokeheaders.h"
 #include "threader.h"
 
+SVEXTERN int render_mode, render_times;
+SVEXTERN int SVDECL(render_from_menu, 0);
+SVEXTERN int SVDECL(render_360, 0);
+SVEXTERN int SVDECL(rendering_status, 0);
+SVEXTERN int SVDECL(nrender_rows, 2);
+SVEXTERN char render_file_base[1024];
+SVEXTERN int SVDECL(script_render_width, 320), SVDECL(script_render_height, 240);
+SVEXTERN int SVDECL(render_clip_left, 0);
+SVEXTERN int SVDECL(render_clip_right, 0);
+SVEXTERN int SVDECL(render_clip_bottom, 0);
+SVEXTERN int SVDECL(render_clip_top, 0);
+SVEXTERN int render_size_index;
+SVEXTERN int render_skip_index;
+SVEXTERN int SVDECL(renderW, 640), SVDECL(renderH, 480), render_window_size;
+SVEXTERN int render_filetype;
+SVEXTERN int SVDECL(render_label_type, RENDER_LABEL_FRAMENUM);
+SVEXTERN int SVDECL(skip_render_frames, 0);
+SVEXTERN int SVDECL(*render_frame, NULL);
+
 SVEXTERN int SVDECL(movie_bitrate, 5000);
 SVEXTERN int SVDECL(disable_reshape, 0);
+
 SVEXTERN int SVDECL(nscreeninfo,26);
 #ifdef pp_RENDER360_DEBUG
 SVEXTERN int SVDECL(screenview, 0);
 SVEXTERN int SVDECL(*screenvis,NULL);
 #endif
+SVEXTERN int SVDECL(update_screeninfo, 0);
 SVEXTERN screendata SVDECL(*screeninfo,NULL);
 SVEXTERN int SVDECL(nwidth360,1024), SVDECL(nheight360,512);
 SVEXTERN unsigned int SVDECL(*screenmap360, NULL);
-SVEXTERN int SVDECL(render_360, 0);
 
 SVEXTERN int SVDECL(highlight_vertexdup, 0);
 SVEXTERN int SVDECL(highlight_edge0, 0);
@@ -101,12 +121,11 @@ SVEXTERN int SVDECL(nmemory_ids, 0);
 SVEXTERN int SVDECL(update_playmovie, 0);
 SVEXTERN int SVDECL(play_movie_now, 1);
 SVEXTERN int SVDECL(update_makemovie, 0),SVDECL(movie_filetype,AVI);
-SVEXTERN char movie_name[1024], movie_ext[10], render_file_base[1024];
+SVEXTERN char movie_name[1024], movie_ext[10];
 SVEXTERN int SVDECL(movie_framerate, 10), SVDECL(have_ffmpeg, 0), SVDECL(have_ffplay, 0), SVDECL(overwrite_movie, 1);
 
 SVEXTERN int SVDECL(show_missing_objects, 1),SVDECL(have_missing_objects,0);
 SVEXTERN int SVDECL(toggle_dialogs, 1);
-SVEXTERN int SVDECL(script_render_width, 320), SVDECL(script_render_height, 240);
 SVEXTERN int SVDECL(show_tetratest_labels, 1);
 SVEXTERN float SVDECL(tetra_line_thickness, 2.0);
 SVEXTERN float SVDECL(tetra_point_size, 10.0);
@@ -194,11 +213,9 @@ SVEXTERN char SVDECL(*volrender_scriptname,NULL);
 SVEXTERN float SVDECL(nongpu_vol_factor,1.0);
 SVEXTERN float SVDECL(gpu_vol_factor,1.0);
 SVEXTERN int SVDECL(disable_gpu,0);
-SVEXTERN int SVDECL(render_state,0);
 SVEXTERN int SVDECL(script_startframe,-1), SVDECL(script_skipframe,-1);
 SVEXTERN int SVDECL(vol_startframe0,-1), SVDECL(vol_skipframe0,-1);
 SVEXTERN int SVDECL(startframe0,-1), SVDECL(skipframe0,-1);
-SVEXTERN int SVDECL(skip_render_frames,0);
 SVEXTERN int SVDECL(update_smokecolorbar,0);
 SVEXTERN int SVDECL(combine_meshes,1);
 SVEXTERN int colorbar_left_pos, colorbar_right_pos, colorbar_down_pos, colorbar_top_pos;
@@ -213,8 +230,6 @@ SVEXTERN int SVDECL(in_external,0);
 SVEXTERN int SVDECL(label_list_index,0);
 SVEXTERN labeldata LABEL_local, SVDECL(*LABEL_global_ptr,NULL), LABEL_default;
 
-SVEXTERN int SVDECL(renderdoublenow,0);
-SVEXTERN int SVDECL(nrender_rows,2);
 SVEXTERN int port_pixel_width, port_pixel_height;
 SVEXTERN float port_unit_width, port_unit_height;
 SVEXTERN int SVDECL(scaled_font2d_height,12);
@@ -345,10 +360,6 @@ SVEXTERN int SVDECL(ngeominfo,0);
 SVEXTERN int npartframes_max;
 SVEXTERN int force_isometric;
 SVEXTERN int SVDECL(update_startup_view,0);
-SVEXTERN int SVDECL(render_multi,0);
-SVEXTERN int SVDECL(render_multi_state,0);
-SVEXTERN int SVDECL(render_multi_menu, 0);
-SVEXTERN int SVDECL(render_from_menu,0);
 SVEXTERN int SVDECL(usetexturebar,1);
 SVEXTERN int show_smokelighting;
 SVEXTERN int SVDECL(cullgeom_portsize,16);
@@ -567,7 +578,7 @@ SVEXTERN cameradata SVDECL(*camera_current,NULL), SVDECL(*camera_save,NULL), SVD
 SVEXTERN cameradata SVDECL(*camera_external,NULL), SVDECL(*camera_internal,NULL);
 SVEXTERN cameradata SVDECL(*camera_ini,NULL), SVDECL(*camera_external_save,NULL);
 SVEXTERN cameradata camera_list_first, camera_list_last, SVDECL(**camera_list,NULL);
-SVEXTERN int ncamera_list,i_view_list,init_camera_list_flag;
+SVEXTERN int ncamera_list,i_view_list,SVDECL(init_camera_list, 1);
 SVEXTERN int camera_max_id;
 SVEXTERN int startup,startup_view_ini,selected_view;
 SVEXTERN char label_startup_view[256];
@@ -604,7 +615,6 @@ SVEXTERN int SVDECL(slice_average_flag,0);
 SVEXTERN int show_slice_average,vis_slice_average;
 SVEXTERN float slice_average_interval;
 
-SVEXTERN float SVDECL(angle_global,0.0), SVDECL(dang_global,0.025f), SVDECL(tourangle_global,0.0);
 SVEXTERN int maxtourframes;
 SVEXTERN int blockageSelect;
 SVEXTERN int SVDECL(ntourknots,0);
@@ -631,7 +641,6 @@ SVEXTERN int UpdateLIGHTS;
 
 SVEXTERN int SVDECL(screenWidth,640), SVDECL(screenHeight,480);
 SVEXTERN int SVDECL(screenWidthINI,640), SVDECL(screenHeightINI,480);
-SVEXTERN int SVDECL(renderW,640), SVDECL(renderH,480), render_option;
 SVEXTERN int SVDECL(glui_screenWidth,640), SVDECL(glui_screenHeight,480);
 SVEXTERN int windowsize_pointer;
 SVEXTERN int SVDECL(zonecolortype, ZONETEMP_COLOR);
@@ -868,10 +877,6 @@ SVEXTERN float SVDECL(gridlinewidth,2.0),SVDECL(ticklinewidth,2.0);
 SVEXTERN int SVDECL(zone_highlight,0),SVDECL(zone_highlight_room,0);
 SVEXTERN int SVDECL(script_step,0), SVDECL(script_step_now,0);
 SVEXTERN int SVDECL(script_keystate,0);
-SVEXTERN int SVDECL(render_clip_left,0);
-SVEXTERN int SVDECL(render_clip_right,0);
-SVEXTERN int SVDECL(render_clip_bottom,0);
-SVEXTERN int SVDECL(render_clip_top,0);
 SVEXTERN int SVDECL(clip_rendered_scene,0);
 
 SVEXTERN float sprinklerabssize, sensorabssize, heatabssize;
@@ -1042,11 +1047,13 @@ SVEXTERN int SVDECL(*mvslice_loadstack,NULL),SVDECL(nmvslice_loadstack,0),SVDECL
 SVEXTERN int SVDECL(*subslice_menuindex,NULL),SVDECL(*subvslice_menuindex,NULL);
 
 SVEXTERN float xtimeleft, xtimeright;
-SVEXTERN int showstereo, showstereoOLD, show_parallax, showstereo_frame;
+
+SVEXTERN int SVDECL(stereoactive,0);
+SVEXTERN int SVDECL(stereotype,STEREO_NONE), SVDECL(stereotypeOLD, STEREO_NONE);
+SVEXTERN int SVDECL(show_parallax,0), SVDECL(stereotype_frame, BOTH_EYES);
 
 SVEXTERN int SVDECL(show_hrrcutoff,1), SVDECL(show_hrrcutoff_active,0),SVDECL(hrrpuv_loaded,0);
 SVEXTERN int trainerview;
-SVEXTERN int stereoactive;
 SVEXTERN int apertureindex;
 SVEXTERN int zoomindex;
 SVEXTERN int projection_type;
@@ -1075,8 +1082,6 @@ SVEXTERN float SVDECL(velocity_range,0.0);
 SVEXTERN int niso_compressed;
 SVEXTERN int nslice_loaded, npatch_loaded;
 SVEXTERN int SVDECL(*slice_loaded_list,NULL), SVDECL(*patch_loaded_list,NULL);
-SVEXTERN int SVDECL(*render_frame,NULL);
-SVEXTERN int RenderOnceNow, RenderOnceNowR, RenderOnceNowL;
 SVEXTERN char SVDECL(*fdsprefix,NULL), SVDECL(*fdsprefix2,NULL);
 SVEXTERN char SVDECL(*endian_filename,NULL);
 SVEXTERN char SVDECL(*target_filename,NULL);
@@ -1130,8 +1135,6 @@ SVEXTERN   int openfileflag;
 SVEXTERN float xyzmaxdiff;
 SVEXTERN char ext_png[5];
 SVEXTERN char ext_jpg[5];
-SVEXTERN int render_filetype;
-SVEXTERN int SVDECL(renderfilelabel,0);
 SVEXTERN char part_ext[6];
 SVEXTERN char ini_ext[5];
 
@@ -1359,8 +1362,6 @@ SVEXTERN blockagedata SVDECL(*bchighlight,NULL),SVDECL(*bchighlight_old,NULL);
 SVEXTERN cadgeomdata SVDECL(*cadgeominfo,NULL);
 
 SVEXTERN int smokediff;
-SVEXTERN int render_size_index;
-SVEXTERN int render_skip_index;
 SVEXTERN int buffertype;
 SVEXTERN int opengldefined;
 SVEXTERN int SVDECL(restart_time,0);
