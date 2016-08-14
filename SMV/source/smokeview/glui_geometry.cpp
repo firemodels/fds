@@ -127,7 +127,7 @@ char *updatelabel=NULL;
 
 extern "C" void TextureShowMenu(int val);
 extern "C" void get_geom_zbounds(float *zmin, float *zmax);
-extern "C" void updatechopcolors(void);
+extern "C" void UpdateChopColors(void);
 extern "C" void update_geom_normals();
 
 
@@ -534,7 +534,7 @@ extern "C" void Volume_CB(int var){
     break;
   case SHOW_ZLEVEL:
   case TERRAIN_ZLEVEL:
-    updatechopcolors();
+    UpdateChopColors();
   break;
   case RESET_ZBOUNDS:
     get_geom_zbounds(&terrain_zmin, &terrain_zmax);
@@ -548,7 +548,7 @@ extern "C" void Volume_CB(int var){
       SPINNER_geom_zmax->set_float_val(terrain_zmax);
     }
     SPINNER_geom_zlevel->set_float_limits(terrain_zmin, terrain_zmax);
-    updatechopcolors();
+    UpdateChopColors();
   case SHOW_TEXTURE_1D_IMAGE:
     if(show_texture_1dimage == 1 && show_texture_2dimage == 1){
       show_texture_2dimage=0;
@@ -650,7 +650,7 @@ void Blockedit_DLG_CB(int var){
   switch(var){
   case SAVE_SETTINGS:
     updatemenu=1;
-    writeini(LOCAL_INI,NULL);
+    WriteINI(LOCAL_INI,NULL);
     break;
   case CLOSE_WINDOW:
     DialogMenu(DIALOG_GEOMETRY);
@@ -672,7 +672,7 @@ extern "C" void Update_Blockvals(int flag){
   float *xplt_orig, *yplt_orig, *zplt_orig;
   int ibar, jbar, kbar;
 
-  get_blockvals(&xmin,&xmax,&ymin,&ymax,&zmin,&zmax,&imin,&jmin,&kmin);
+  GetBlockVals(&xmin,&xmax,&ymin,&ymax,&zmin,&zmax,&imin,&jmin,&kmin);
 
   xplt_orig = current_mesh->xplt_orig;
   yplt_orig = current_mesh->yplt_orig;
@@ -807,7 +807,7 @@ extern "C" void OBJECT_CB(int var){
           changed_idlist[bchighlight->blockage_id]=1;
         }
         blockages_dirty=1;
-        update_usetextures();
+        UpdateUseTextures();
         UpdateFaces();
       }
       break;

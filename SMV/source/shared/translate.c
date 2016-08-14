@@ -7,9 +7,9 @@
 #include "MALLOC.h"
 #include "translate.h"
 
-/* ------------------ compare_trdata ------------------------ */
+/* ------------------ CompareTrdata ------------------------ */
 
-int compare_trdata( const void *arg1, const void *arg2 ){
+int CompareTrdata( const void *arg1, const void *arg2 ){
   trdata *tri, *trj;
   int compval;
 
@@ -21,9 +21,9 @@ int compare_trdata( const void *arg1, const void *arg2 ){
   return strcmp(tri->key,trj->key);
 }
 
-/* ------------------ parse_lang ------------------------ */
+/* ------------------ ParseLang ------------------------ */
 
-int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
+int ParseLang(char *file, trdata **trinfoptr, int *ntrinfoptr){
 
 //  read a po file and put english/foreign language string pairs into
 //  the trinfo data structure
@@ -120,13 +120,13 @@ int parse_lang(char *file, trdata **trinfoptr, int *ntrinfoptr){
   }
   fclose(stream);
 
-  qsort(trinfo_local,ntrinfo_local,sizeof(trdata),compare_trdata);
+  qsort(trinfo_local,ntrinfo_local,sizeof(trdata),CompareTrdata);
   return 1;
 }
 
-/* ------------------ init_translate ------------------------ */
+/* ------------------ InitTranslate ------------------------ */
 
-void init_translate(char *bindir, char *tr_name){
+void InitTranslate(char *bindir, char *tr_name){
 
 //  initialize po language translation data structures
 
@@ -161,7 +161,7 @@ void init_translate(char *bindir, char *tr_name){
       fclose(stream);
       tr_otherlang=1;
     }
-    tr_otherlang=parse_lang(smokeview_lang,&trinfo,&ntrinfo);
+    tr_otherlang=ParseLang(smokeview_lang,&trinfo,&ntrinfo);
     if(tr_otherlang==1){
       PRINTF("Using translation file: %s",smokeview_lang);
       PRINTF("\n");
@@ -174,9 +174,9 @@ void init_translate(char *bindir, char *tr_name){
   }
 }
 
-/* ------------------ translate ------------------------ */
+/* ------------------ Translate ------------------------ */
 
-char *translate(char *string,int option){
+char *Translate(char *string,int option){
   int i, len, nchars_before=0, nchars_after=0;
   unsigned int nchars_in=0;
   char *string_before, *string_in, *string_out, *string_after;
@@ -246,7 +246,7 @@ char *translate(char *string,int option){
 
     tr_in.key=string_in;
 
-    tr_out = bsearch(&tr_in,trinfo,ntrinfo,sizeof(trdata),compare_trdata);
+    tr_out = bsearch(&tr_in,trinfo,ntrinfo,sizeof(trdata),CompareTrdata);
     if(tr_out==NULL||tr_out->value==NULL)return string;
     string_out=tr_out->value;
   }

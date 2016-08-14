@@ -35,6 +35,7 @@ RUNDEBUG="1"
 OPENMP=
 RUN_OPENMP=
 TESTFLAG=
+TEST=
 CLEANREPO=0
 UPDATEREPO=0
 SSH=
@@ -91,6 +92,7 @@ case $OPTION in
    ;;
   t)
    TESTFLAG="-t"
+   TEST="_test"
    ;;
   U)
    UPLOADRESULTS=1
@@ -1004,13 +1006,13 @@ compile_smv_db()
    echo "   smokeview"
    echo "      debug"
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   rm -f smokeview_${platform}${size}_db
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b
+   rm -f smokeview_${platform}${TEST}${size}_db
+   ./make_smv_db.sh $TESTFLAG &> $OUTPUT_DIR/stage2b
    else
    $SSH \(
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
-   rm -f smokeview_${platform}${size}_db \; \
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage2b \)
+   rm -f smokeview_${platform}${TEST}${size}_db \; \
+   ./make_smv_db.sh $TESTFLAG &> $OUTPUT_DIR/stage2b \)
    fi
    fi
 }
@@ -1020,7 +1022,7 @@ check_compile_smv_db()
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV debug compilation
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   if [ -e "smokeview_${platform}${size}_db" ]
+   if [ -e "smokeview_${platform}${TEST}${size}_db" ]
    then
       stage2b_success=true
    else
@@ -1101,12 +1103,12 @@ compile_smv()
    # Clean and compile SMV
    echo "      release"
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   rm -f smokeview_${platform}${size}
+   rm -f smokeview_${platform}${TEST}${size}
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c
    else
    $SSH \( \
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size} \; \
-   rm -f smokeview_${platform}${size} \; \
+   rm -f smokeview_${platform}${TEST}${size} \; \
    ./make_smv.sh $TESTFLAG &> $OUTPUT_DIR/stage2c \)
    fi
    fi
@@ -1117,12 +1119,12 @@ check_compile_smv()
    if [ "$haveCC" == "1" ] ; then
    # Check for errors in SMV release compilation
    cd $fdsrepo/SMV/Build/smokeview/${COMPILER}_${platform}${size}
-   if [ -e "smokeview_${platform}${size}" ]
+   if [ -e "smokeview_${platform}${TEST}${size}" ]
    then
       stage2c_smv_success=true
    else
       echo "Errors from Stage 2c - Compile SMV release:" >> $ERROR_LOG
-      echo "The program smokeview_${platform}${size} does not exist."
+      echo "The program smokeview_${platform}${TEST}${size} does not exist."
       cat $OUTPUT_DIR/stage2c >> $ERROR_LOG
       echo "" >> $ERROR_LOG
    fi
@@ -1196,7 +1198,7 @@ check_smv_pictures()
 make_smv_movies()
 {
    cd $fdsrepo/Verification
-   scripts/Make_SMV_Movies.sh 2>&1  &> $OUTPUT_DIR/stage4c
+   scripts/Make_SMV_Movies.sh $TEST 2>&1  &> $OUTPUT_DIR/stage4c
 }
 
 check_smv_movies()

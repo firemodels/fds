@@ -338,7 +338,7 @@ void draw_smokeframe(void){
   }
 #endif
 #ifdef pp_CULL
-  if(cullsmoke==1&&showstereo==STEREO_NONE&&nsmoke3dinfo>0&&show3dsmoke==1){
+  if(cullsmoke==1&&stereotype==STEREO_NONE&&nsmoke3dinfo>0&&show3dsmoke==1){
     setPixelCount();
   }
 #endif
@@ -391,8 +391,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
   FREEMEMORY(meshi->merge_color);
 
   if(flag==UNLOAD){
-    plotstate=getplotstate(DYNAMIC_PLOTS);
-    Update_Times();
+    plotstate=GetPlotState(DYNAMIC_PLOTS);
+    UpdateTimes();
     Read3DSmoke3DFile=0;
     setsmokecolorflags();
 
@@ -593,8 +593,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
 
   Read3DSmoke3DFile=1;
   update_makeiblank_smoke3d=1;
-  plotstate=getplotstate(DYNAMIC_PLOTS);
-  Update_Times();
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
+  UpdateTimes();
 #ifdef pp_CULL
     if(cullactive==1)initcull(cullsmoke);
 #endif
@@ -1216,7 +1216,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
 
   if(cullfaces==1)glDisable(GL_CULL_FACE);
 
-  transparenton();
+  TransparentOn();
   switch(ssmokedir){
 
     // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
@@ -2900,7 +2900,7 @@ void drawsmoke3d(smoke3ddata *smoke3di){
       ASSERT(FFALSE);
       break;
   }
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 //  PRINTF("majorcull=%i minorcull=%i\n",majorcull,minorcull);
 }
@@ -3017,7 +3017,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
   glUniform1f(GPU_fire_alpha, smoke3di->fire_alpha);
   glUniform1f(GPU_smoke_albedo, smoke_albedo);
 
-  transparenton();
+  TransparentOn();
   switch(ssmokedir){
   // +++++++++++++++++++++++++++++++++++ DIR 1 +++++++++++++++++++++++++++++++++++++++
 
@@ -4027,7 +4027,7 @@ void drawsmoke3dGPU(smoke3ddata *smoke3di){
       ASSERT(FFALSE);
       break;
   }
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
 }
 
@@ -4101,7 +4101,7 @@ void drawsmoke3dCULL(void){
 
   CheckMemory;
   if(cullfaces==1)glDisable(GL_CULL_FACE);
-  transparenton();
+  TransparentOn();
 
   SNIFF_ERRORS("before drawsmoke3dcull");
   value[0]=255;
@@ -4767,7 +4767,7 @@ void drawsmoke3dCULL(void){
   }
   glEnd();
   SNIFF_ERRORS("in drawsmoke3dcull 12");
-  transparentoff();
+  TransparentOff();
   if(cullfaces==1)glEnable(GL_CULL_FACE);
   SNIFF_ERRORS("after drawsmokecull");
 }
@@ -5139,7 +5139,7 @@ void initcullplane(int cullflag){
     meshi->culldefined=1;
 
     culli=meshi->cullinfo;
-    get_cullskips(meshi,cullflag, cull_portsize, &iskip,&jskip,&kskip);
+    GetCullSkips(meshi,cullflag, cull_portsize, &iskip,&jskip,&kskip);
 
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
@@ -5711,7 +5711,7 @@ void initcull(int cullflag){
 
     meshi=meshinfo+ii;
 
-    get_cullskips(meshi,cullflag,cull_portsize,&iskip,&jskip,&kskip);
+    GetCullSkips(meshi,cullflag,cull_portsize,&iskip,&jskip,&kskip);
     nx = meshi->ibar/iskip + 1;
     ny = meshi->jbar/jskip + 1;
     nz = meshi->kbar/kskip + 1;

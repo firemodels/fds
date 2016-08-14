@@ -27,41 +27,41 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 
   /* ++++++++++++++++++++++++ update variables as needed +++++++++++++++++++++++++ */
 
-  update_ShowScene();
-  if(showstereo == STEREO_NONE || showstereo == STEREO_TIME)ClearBuffers(mode);
+  UpdateShowScene();
+  if(stereotype == STEREO_NONE || stereotype == STEREO_TIME)ClearBuffers(mode);
 
   /* ++++++++++++++++++++++++ setup viewports +++++++++++++++++++++++++ */
 
   if(mode == DRAWSCENE){
-    get_viewport_info();
+    GetViewportInfo();
 
     if(clip_rendered_scene == 1){
-      CLIP_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after CLIP_viewport");
+      ViewportClip(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportClip");
     }
 
     if(VP_info.doit == 1){
-      INFO_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after INFO_viewport");
+      ViewportInfo(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportInfo");
     }
 
     if(VP_timebar.doit == 1){
-      TIMEBAR_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after TIMEBAR_viewport");
+      ViewportTimebar(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportTimebar");
     }
 
     if(VP_colorbar.doit == 1){
-      COLORBAR_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after COLORBAR_viewport");
+      ViewportColorbar(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportColorbar");
     }
 
     if(VP_title.doit == 1){
-      TITLE_viewport(quad, s_left, s_down);
-      SNIFF_ERRORS("after TITLE_viewport");
+      ViewportTitle(quad, s_left, s_down);
+      SNIFF_ERRORS("after ViewportTitle");
     }
 
-    Scene_viewport(quad, view_mode, s_left, s_down, screen);
-    SNIFF_ERRORS("after Scene_viewport");
+    ViewportScene(quad, view_mode, s_left, s_down, screen);
+    SNIFF_ERRORS("after ViewportScene");
   }
 
 
@@ -70,18 +70,17 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 
   if(viscolorbarpath == 1){
     if(colorbar_hidescene == 1)UNCLIP;
-    drawcolorbarpath();
+    DrawColorbarPath();
     SNIFF_ERRORS("after setColorbarClipPlanes 1");
   }
   if(viscolorbarpath==0||colorbar_hidescene==0)ShowScene2(mode, view_mode, quad, s_left, s_down);
 
 /* ++++++++++++++++++++++++ render scene +++++++++++++++++++++++++ */
+// if rendering is not working remove following comment
+// then determine where Render should have been called
+//  Render(view_mode);
 
-  Render(view_mode);
-
- /* ++++++++++++++++++++++++ draw "fancy" colorbar +++++++++++++++++++++++++ */
-
-  SNIFF_ERRORS("end of loop");
+  SNIFF_ERRORS("end of ShowScene");
   UNLOCK_IBLANK
 }
 
@@ -90,7 +89,7 @@ void ShowScene(int mode, int view_mode, int quad, GLint s_left, GLint s_down, sc
 void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
   if(rotation_type==EYE_CENTERED&&nskyboxinfo>0)draw_skybox();
 
-  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
+  if(UpdateLIGHTS==1)UpdateLights(light_position0,light_position1);
 
   if(mode==DRAWSCENE){
     glPointSize((float)1.0);
@@ -169,7 +168,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(visaxislabels==1){
       UNCLIP;
-      outputAxisLabels();
+      OutputAxisLabels();
       SNIFF_ERRORS("after outputAxisLables");
     }
 
@@ -177,19 +176,19 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
  /* ++++++++++++++++++++++++ draw user ticks +++++++++++++++++++++++++ */
 
     if(visUSERticks==1){
-      antialias(ON);
+      Antialias(ON);
       UNCLIP;
-      draw_user_ticks();
-      antialias(OFF);
-      SNIFF_ERRORS("after drawticks");
+      DrawUserTicks();
+      Antialias(OFF);
+      SNIFF_ERRORS("after DrawTicks");
     }
 
  /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
 
     if(visFDSticks==1&&ntickinfo>0){
       UNCLIP;
-      drawticks();
-      SNIFF_ERRORS("after drawticks");
+      DrawTicks();
+      SNIFF_ERRORS("after DrawTicks");
     }
 
     /* ++++++++++++++++++++++++ draw ticks +++++++++++++++++++++++++ */
@@ -207,8 +206,8 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
     if(isZoneFireModel==0&&visFrame==1&&highlight_flag==2){
       CLIP_GEOMETRY;
-      drawoutlines();
-      SNIFF_ERRORS("after drawoutlines");
+      DrawOutlines();
+      SNIFF_ERRORS("after DrawOutlines");
     }
 
     if(show_rotation_center==1){
@@ -289,21 +288,21 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(show_parallax==1){
     UNCLIP;
-    antialias(ON);
+    Antialias(ON);
     glLineWidth(linewidth);
     glBegin(GL_LINES);
     glColor3fv(foregroundcolor);
     glVertex3f(0.75,0.0,0.25);
     glVertex3f(0.75,1.0,0.25);
     glEnd();
-    antialias(OFF);
+    Antialias(OFF);
   }
 
   /* ++++++++++++++++++++++++ draw blockages +++++++++++++++++++++++++ */
 
   CLIP_GEOMETRY;
-  drawBlockages(mode,DRAW_OPAQUE);
-  SNIFF_ERRORS("drawBlockages");
+  DrawBlockages(mode,DRAW_OPAQUE);
+  SNIFF_ERRORS("DrawBlockages");
 
   /* ++++++++++++++++++++++++ draw triangles +++++++++++++++++++++++++ */
 
@@ -410,7 +409,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
   if(visLabels==1){
     CLIP_GEOMETRY;
-    drawLabels();
+    DrawLabels();
   }
 
 /* ++++++++++++++++++++++++ draw animated isosurfaces +++++++++++++++++++++++++ */
@@ -466,7 +465,7 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 /* ++++++++++++++++++++++++ draw transparent faces +++++++++++++++++++++++++ */
 
   CLIP_GEOMETRY;
-  draw_transparent_faces();
+  DrawTransparentFaces();
 
 /* ++++++++++++++++++++++++ draw 3D smoke +++++++++++++++++++++++++ */
 
@@ -506,10 +505,10 @@ void ShowScene2(int mode, int view_mode, int quad, GLint s_left, GLint s_down){
 
 /* ++++++++++++++++++++++++ draw transparent blockages +++++++++++++++++++++++++ */
 
-//  draw_demo(20,20);
-//  draw_demo2(1);
+//  DrawDemo(20,20);
+//  DrawDemo2(1);
   CLIP_GEOMETRY;
-  drawBlockages(mode,DRAW_TRANSPARENT);
+  DrawBlockages(mode,DRAW_TRANSPARENT);
   SNIFF_ERRORS("after drawBlokcages");
 
 /* ++++++++++++++++++++++++ draw vector slice files +++++++++++++++++++++++++ */

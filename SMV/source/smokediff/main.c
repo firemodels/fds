@@ -79,7 +79,7 @@ int main(int argc, char **argv){
         }
         break;
       case 'h':
-        usage();
+        Usage();
         return 1;
       case 'n':
         if(arg[2]=='p'){
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
           no_boundary=1;
         }
         else{
-          usage();
+          Usage();
           return 1;
         }
         break;
@@ -129,7 +129,7 @@ int main(int argc, char **argv){
         display_warnings=0;
         break;
       default:
-        usage();
+        Usage();
         return 1;
       }
     }
@@ -225,12 +225,12 @@ int main(int argc, char **argv){
 
   PRINTF("reading %s\n",smoke1);
   FFLUSH();
-  readsmv(stream_in1, stream_out, caseinfo);
+  ReadSMV(stream_in1, stream_out, caseinfo);
   fclose(stream_in1);
 
   PRINTF("reading %s\n",smoke2);
   FFLUSH();
-  readsmv(stream_in2, NULL, caseinfo+1);
+  ReadSMV(stream_in2, NULL, caseinfo+1);
   fclose(stream_in2);
 
   if(no_plot3d==0){
@@ -260,7 +260,7 @@ int main(int argc, char **argv){
 
 /* ------------------ usage ------------------------ */
 
-void usage(void){
+void Usage(void){
   char smv_version[100];
   char githash[100];
   char gitdate[100];

@@ -15,7 +15,7 @@ void compress_svzip2(void){
   PRINTF("Compressing...\n");
   compress_onoff(OFF);
 
-  writeini(LOCAL_INI, NULL);
+  WriteINI(LOCAL_INI, NULL);
 
   // surround smokezip path name with "'s so that the system call can handle embedded blanks
 
@@ -107,7 +107,7 @@ void *mt_makeiblank(void *arg){
 void *mt_psystem(void *arg){
   char command_line[1024], moviefile_path[1024];
 
-  if(file_exists(get_moviefile_path(moviefile_path))==1){
+  if(file_exists(GetMovieFilePath(moviefile_path))==1){
     strcpy(command_line, "ffplay ");
     strcat(command_line, moviefile_path);
 #ifdef WIN32

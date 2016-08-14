@@ -151,6 +151,18 @@ void _Sniff_Errors(char *whereat);
 #define RENDER_ON 1
 #define RENDER_OFF 0
 
+// render_mode values:
+#define RENDER_XYSINGLE 0
+#define RENDER_XYMULTI 1
+#define RENDER_360 2
+
+// render_times values:
+#define RENDER_SINGLETIME 0
+#define RENDER_ALLTIMES 1
+
+#define RENDER_LABEL_FRAMENUM 0
+#define RENDER_LABEL_TIME 1
+
 #ifndef TYPE_SMV
 #define TYPE_SMV 0
 #endif

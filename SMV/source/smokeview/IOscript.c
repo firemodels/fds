@@ -12,7 +12,7 @@
 
 #define RENDER_START 3
 
-void update_menu(void);
+void UpdateMenu(void);
 
 /* ------------------ get_newscriptfilename ------------------------ */
 
@@ -941,20 +941,19 @@ void script_loadvolsmokeframe(scriptdata *scripti, int flag){
       vr->display = 1;
     }
   }
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
   stept = 1;
-  Update_Times();
+  UpdateTimes();
   force_redisplay = 1;
-  Update_Framenumber(framenum);
+  UpdateFrameNumber(framenum);
   i = framenum;
   itimes = i;
   script_itime = i;
   stept = 1;
   force_redisplay = 1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
   if(flag == 1)script_render = 1;// called when only rendering a single frame
 }
 
@@ -1022,20 +1021,19 @@ void script_loadisoframe(scriptdata *scripti, int flag){
   if(update_readiso_geom_wrapup == UPDATE_ISO_ALL_NOW)readiso_geom_wrapup();
   update_readiso_geom_wrapup = UPDATE_ISO_OFF;
 
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
   stept = 1;
-  Update_Times();
+  UpdateTimes();
   force_redisplay = 1;
-  Update_Framenumber(framenum);
+  UpdateFrameNumber(framenum);
   i = framenum;
   itimes = i;
   script_itime = i;
   stept = 1;
   force_redisplay = 1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
   keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
   if(flag == 1)script_render = 1;// called when only rendering a single frame
 }
 
@@ -1123,7 +1121,7 @@ void script_loadparticles(scriptdata *scripti){
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   updatemenu=1;
 }
 
@@ -1395,23 +1393,25 @@ void script_loadboundary(scriptdata *scripti, int meshnum){
     patchdata *patchi;
 
     patchi = patchinfo + i;
-    if(meshnum != -1 && patchi->blocknumber + 1 != meshnum)continue;
-    if(strcmp(patchi->label.longlabel,scripti->cval)==0){
-      LOCK_COMPRESS
-      readpatch(i,LOAD,&errorcode);
-      if(scripti->cval!=NULL&&strlen(scripti->cval)>0){
-        FREEMEMORY(loaded_file);
-        NewMemory((void **)&loaded_file,strlen(scripti->cval)+1);
-        strcpy(loaded_file,scripti->cval);
+    if (meshnum == -1 || patchi->blocknumber + 1 == meshnum) {
+      if (strcmp(patchi->label.longlabel, scripti->cval) == 0) {
+        LOCK_COMPRESS
+          readpatch(i, LOAD, &errorcode);
+        if (scripti->cval != NULL&&strlen(scripti->cval) > 0) {
+          FREEMEMORY(loaded_file);
+          NewMemory((void **)&loaded_file, strlen(scripti->cval) + 1);
+          strcpy(loaded_file, scripti->cval);
+        }
+        count++;
+        UNLOCK_COMPRESS
+          if(meshnum == -1)break;
       }
-      count++;
-      UNLOCK_COMPRESS
     }
   }
   if(count==0)fprintf(stderr,"*** Error: Boundary files of type %s failed to load\n",scripti->cval);
   force_redisplay=1;
   updatemenu=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
 
 }
 
@@ -1570,7 +1570,7 @@ void script_partclasstype(scriptdata *scripti){
 void script_loadinifile(scriptdata *scripti){
   PRINTF("script: loading ini file %s\n\n",scripti->cval);
   windowresized=0;
-  readini(scripti->cval);
+  ReadINI(scripti->cval);
 }
 
 /* ------------------ script_loadfile ------------------------ */
@@ -1653,7 +1653,7 @@ void script_loadfile(scriptdata *scripti){
     if(strcmp(plot3di->file,scripti->cval)==0){
       ReadPlot3dFile=1;
       readplot3d(plot3di->file,i,LOAD,&errorcode);
-      update_menu();
+      UpdateMenu();
       return;
     }
   }
@@ -1699,7 +1699,7 @@ void script_loadplot3d(scriptdata *scripti){
   set_labels_controls();
   if(count==0)fprintf(stderr,"*** Error: Plot3d file failed to load\n");
 
-  //update_menu();
+  //UpdateMenu();
 }
 
 /* ------------------ script_loadvfile ------------------------ */
@@ -1828,7 +1828,7 @@ void script_settimeval(scriptdata *scripti){
     script_itime=imin;
     stept=0;
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
     UpdateTimeLabels();
   }
 }
@@ -1891,7 +1891,7 @@ void settimeval(float timeval){
         itimes=i;
         stept=1;
         force_redisplay=1;
-        Update_Framenumber(0);
+        UpdateFrameNumber(0);
         UpdateTimeLabels();
         keyboard('t',FROM_SMOKEVIEW);
         break;
@@ -2157,11 +2157,11 @@ int run_script(void){
       break;
     case SCRIPT_CBARFLIP:
       colorbarflip=0;
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
     case SCRIPT_CBARNORMAL:
       colorbarflip=1;
-      ColorBarMenu(COLORBAR_FLIP);
+      ColorbarMenu(COLORBAR_FLIP);
       break;
     default:
       ASSERT(FFALSE);

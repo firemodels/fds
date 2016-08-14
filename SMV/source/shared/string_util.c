@@ -21,7 +21,7 @@ unsigned int *random_ints, nrandom_ints;
 /* ----------------------- init_rand_ab ----------------------------- */
 
 void init_rand_ab(int size){
-  int i;
+  unsigned int i;
 
   nrandom_ints=size;
   NewMemory((void **)&random_ints,nrandom_ints*sizeof(unsigned int));
@@ -66,7 +66,7 @@ void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
 
 /* ----------------------- parsecsv ----------------------------- */
 
-void parsecsv(char *buffer, char **tokens, int ncols, int *ntokens){
+void parsecsv(char *buffer, char **tokens, int *ntokens){
 
 //  copy comma delimited values from buffer into character array tokens
 //  returning number of values found in ntokens
@@ -335,26 +335,26 @@ char *STRSTR(char *string, const char *key){
 
 /* ------------------ scalestring ------------------------ */
 
-void scalestring(const char *stringfrom, char *stringto, const float *scale, float range){
+void scalestring(const char *stringfrom, char *stringto, const float *scale){
   float val;
 
   sscanf(stringfrom,"%f",&val);
   val = scale[0]*val+scale[1];
-  num2string(stringto,val,scale[0]*range);
+  num2string(stringto,val);
 }
 
 /* ------------------ scalefloat2string ------------------------ */
 
-void scalefloat2string(float floatfrom, char *stringto, const float *scale, float range){
+void scalefloat2string(float floatfrom, char *stringto, const float *scale){
   float val;
 
   val = scale[0]*floatfrom+scale[1];
-  num2string(stringto,val,scale[0]*range);
+  num2string(stringto,val);
 }
 
 /* ------------------ num2string ------------------------ */
 
-void num2string(char *string, float tval,float range){
+void num2string(char *string, float tval){
   float tval2,mant10;
   int exp10;
 
