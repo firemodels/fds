@@ -21,17 +21,18 @@ void Usage(char *prog){
   getGitInfo(githash,gitdate);    // get githash
 
   fprintf(stdout, "\n%s (%s) %s\n", prog, githash, __DATE__);
-  fprintf(stdout, "Create an FDS input file using elevation data\n");
-  fprintf(stdout, "  obtained from http://viewer.nationalmap.gov \n\n");
+  fprintf(stdout, "Create an FDS input file using elevation and image\n");
+  fprintf(stdout, "  data obtained from http://viewer.nationalmap.gov \n\n");
   fprintf(stdout, "Usage:\n");
-  fprintf(stdout, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in\n");
-  fprintf(stdout, "where\n");
-  fprintf(stdout, "  -dir dir  - directory containing elevation and map files (default .)\n");
-  fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords\n");
+  fprintf(stdout, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-show][-version] casename.in\n");
+  fprintf(stdout, "  -dir dir  - directory containing elevation and map files (default: '.')\n");
+  fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords (experimental)\n");
   fprintf(stdout, "  -help     - display this message\n");
   fprintf(stdout, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
   fprintf(stdout, "              Otherwise assume that a 300 pixel buffer exists bewteen maps.\n");
   fprintf(stdout, "  -obst     - create an FDS input file using &OBST keywords\n");
+  fprintf(stdout, "  -show     - show image boundaries (black outline) and \n");
+  fprintf(stdout, "              fds scenario boundary (red outline)\n");
   fprintf(stdout, "  -version  - show version information\n");
 }
 

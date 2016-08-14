@@ -459,7 +459,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
 
   nelevinfo = get_nfilelist(libdir, "*.hdr");
   if(nelevinfo == 0){
-    fprintf(stderr, "***error: unable to create an FDS input file, elevation files not found\n");
+    fprintf(stderr, "***error: unable to create an FDS input file, elevation files\n");
+    fprintf(stderr, "          not found in directory: %s\n",libdir);
     return 0;
   }
 
