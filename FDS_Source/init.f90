@@ -740,9 +740,10 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO K=OB%K1+1,OB%K2
       DO J=OB%J1+1,OB%J2
          I = OB%I1+1
-         IF (I==1) CYCLE   ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (I==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I-1,J,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE ! Permanently covered face
          IOR = -1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -762,9 +763,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO K=OB%K1+1,OB%K2
       DO J=OB%J1+1,OB%J2
          I = OB%I2
-         IF (I==M%IBAR) CYCLE  ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (I==M%IBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I+1,J,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
          IOR = 1
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -784,9 +787,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO K=OB%K1+1,OB%K2
       DO I=OB%I1+1,OB%I2
          J = OB%J1+1
-         IF (J==1) CYCLE   ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (J==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J-1,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
          IOR = -2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -806,9 +811,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO K=OB%K1+1,OB%K2
       DO I=OB%I1+1,OB%I2
          J = OB%J2
-         IF (J==M%JBAR) CYCLE  ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (J==M%JBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J+1,K)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
          IOR = 2
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -828,9 +835,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO J=OB%J1+1,OB%J2
       DO I=OB%I1+1,OB%I2
          K = OB%K1+1
-         IF (K==1) CYCLE   ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (K==1 .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J,K-1)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
          IOR = -3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -850,9 +859,11 @@ OBST_LOOP_2: DO N=1,M%N_OBST
    DO J=OB%J1+1,OB%J2
       DO I=OB%I1+1,OB%I2
          K = OB%K2
-         IF (K==M%KBAR) CYCLE  ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         ! Don't assign wall cell index to obstruction face pointing out of the computational domain
+         IF (K==M%KBAR .AND. .NOT.OB%HT3D) CYCLE
          IC = M%CELL_INDEX(I,J,K+1)
-         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE) CYCLE   ! Permanently covered face
+         ! Permanently covered face
+         IF (M%SOLID(IC) .AND. .NOT.M%OBSTRUCTION(M%OBST_INDEX_C(IC))%REMOVABLE .AND. .NOT.OB%HT3D) CYCLE
          IOR = 3
          SURF_INDEX = OB%SURF_INDEX(IOR)
          IW  = M%WALL_INDEX(IC,-IOR)
@@ -999,17 +1010,20 @@ WALL_LOOP_0: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 
 ENDDO WALL_LOOP_0
 
-! DEFINITION N_BACK_WALL_CELLS
-! DEFINITION BACK_WALL_CELL_INDEX
-! Determine back wall index for wall cells that have an EXPOSED backing and are assigned to OBSTructions that are either 0 or 1
-! cell thick. If the OBSTruction backs up to the exterior face of a MESH, look for the adjacent mesh and assign a back wall index
-! if the OBSTruction is 0 or 1 cell thick. For OBSTructions that abut or cross mesh boundaries, count the wall cells so that they
-! may be exchanged via MPI.
+! Loop through all internal and external wall cells and look for thermally thick
+! solids with EXPOSED back wall cells. If the exposed back wall cell is in
+! another mesh, store the cell info into arrays that are to be MPI exchanged.
+
+! DEFINITION MESHES(NM)%OMESH(NOM)%N_EXPOSED_WALL_CELLS
+! Number of wall cells in Mesh NM whose exposed back faces are in Mesh NOM.
+
+! DEFINITION MESHES(NM)%OMESH(NOM)%EXPOSED_WALL_CELL_BACK_INDICES(1:N_EXPOSED_WALL_CELLS)
+! Wall indices of the back faces of the exposed wall cells.
 
 NON_EVAC_IF: IF (.NOT.EVACUATION_ONLY(NM)) THEN
 
 DO NOM=1,NMESHES
-   M%OMESH(NOM)%N_BACK_WALL_CELLS = 0
+   M%OMESH(NOM)%N_EXPOSED_WALL_CELLS = 0 
 ENDDO
 
 WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
@@ -1029,7 +1043,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       JJ = WC%ONE_D%JJ
       KK = WC%ONE_D%KK
 
-      ZERO_OR_ONE_CELL_THICK: DO ITER=1,2 ! Look for the back wall cell face
+      ZERO_OR_ONE_CELL_THICK: DO ITER=1,2  ! Look for the back wall cell face if the obstruction is either zero or one cell thick.
 
          IF (II==0 .OR. II==OM%IBP1 .OR. JJ==0 .OR. JJ==OM%JBP1 .OR. KK==0 .OR. KK==OM%KBP1) THEN
             XXC=OM%XC(II) ; YYC=OM%YC(JJ) ; ZZC=OM%ZC(KK)
@@ -1044,7 +1058,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
             OM => MESHES(NOM)
          ENDIF
          IC = OM%CELL_INDEX(II,JJ,KK)
-         IF (.NOT.OM%SOLID(IC)) THEN ! the back wall face is found
+         IF (.NOT.OM%SOLID(IC) .AND. OM%WALL_INDEX(IC,IOR)>0) THEN ! the back wall face is found
             WC%BACK_INDEX = OM%WALL_INDEX(IC,IOR)
             WC%BACK_MESH  = NOM
             EXIT ZERO_OR_ONE_CELL_THICK
@@ -1063,7 +1077,7 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
       ENDDO ZERO_OR_ONE_CELL_THICK
 
       IF (NOM/=NM) THEN ! count the number of wall cells that need to be exchanged
-         M%OMESH(NOM)%N_BACK_WALL_CELLS = M%OMESH(NOM)%N_BACK_WALL_CELLS + 1
+         M%OMESH(NOM)%N_EXPOSED_WALL_CELLS = M%OMESH(NOM)%N_EXPOSED_WALL_CELLS + 1
       ENDIF
 
    ENDIF IF_THERM_THICK_EXPOSED
@@ -1071,17 +1085,18 @@ WALL_LOOP: DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
 ENDDO WALL_LOOP
 
 DO NOM=1,NMESHES
-   IF (M%OMESH(NOM)%N_BACK_WALL_CELLS==0) CYCLE
-   ALLOCATE(M%OMESH(NOM)%BACK_WALL_CELL_INDEX(M%OMESH(NOM)%N_BACK_WALL_CELLS))
+   IF (M%OMESH(NOM)%N_EXPOSED_WALL_CELLS==0) CYCLE
+   ALLOCATE(M%OMESH(NOM)%EXPOSED_WALL_CELL_BACK_INDICES(M%OMESH(NOM)%N_EXPOSED_WALL_CELLS))
 ENDDO
 
-ALLOCATE(IW_EXPORT(NMESHES)) ; IW_EXPORT = 0
+ALLOCATE(IW_EXPORT(NMESHES)) ; IW_EXPORT = 0  ! This is just a counter for each neighboring mesh.
 
 DO IW=1,M%N_EXTERNAL_WALL_CELLS+M%N_INTERNAL_WALL_CELLS
    WC => M%WALL(IW)
-   IF (WC%BACK_MESH/=NM) THEN
+   IF (WC%BACK_MESH/=NM) THEN ! Save the back wall cell index, and then reset the index to form a short list of exposed back cells.
       IW_EXPORT(WC%BACK_MESH) = IW_EXPORT(WC%BACK_MESH) + 1
-      M%OMESH(WC%BACK_MESH)%BACK_WALL_CELL_INDEX(IW_EXPORT(WC%BACK_MESH)) = IW
+      M%OMESH(WC%BACK_MESH)%EXPOSED_WALL_CELL_BACK_INDICES(IW_EXPORT(WC%BACK_MESH)) = WC%BACK_INDEX
+      WC%BACK_INDEX = IW_EXPORT(WC%BACK_MESH)
    ENDIF
 ENDDO
 
@@ -2144,6 +2159,8 @@ ENDIF
 
 IF (M%SOLID(ICG)) BOUNDARY_TYPE = NULL_BOUNDARY
 
+IF (M%OBSTRUCTION(OBST_INDEX)%HT3D) BOUNDARY_TYPE = SOLID_BOUNDARY
+
 ! Check for neighboring meshes in a multiple mesh calculation
 
 NOM_FOUND = 0
@@ -3159,6 +3176,7 @@ ENDIF
 
 END SUBROUTINE GET_BOUNDARY_TYPE
 
+
 SUBROUTINE REDEFINE_EDGE(II,JJ,KK,IEC)
 
 ! Change a few properties of the EDGEs that have been exposed or covered up by a blockage
@@ -3182,6 +3200,7 @@ IF (IE>0) THEN
 ENDIF
 
 END SUBROUTINE REDEFINE_EDGE
+
 
 END SUBROUTINE CREATE_OR_REMOVE_OBST
 

@@ -679,59 +679,462 @@ The plots on the following pages contain comparisons of predicted and measured h
 
 \clearpage
 
-\subsection{Hamins Methane Burner Experiments}
+\subsection{Hamins Gas Burner Experiments}
 
-Predicted and measured radial and vertical heat flux profiles from six experiments conducted by Anthony Hamins at NIST are shown on the following pages. The relevant information about the fires is included in Table~\ref{Hamins_Table}. These are challenging simulations because the neither the gray gas assumption nor the radiative fraction is assumed. Rather, the model is calculating the temperature and species concentrations necessary to predict the radiant energy from the fire.
+Predicted and measured radial and vertical heat flux profiles from 30 methane, 34 propane, and 16 acetylene gas burner fires conducted by Anthony Hamins at NIST are shown in this section. The relevant information about the fires is included in Table~\ref{Hamins_Methane_Table}.
 
 \begin{table}[ht]
 \caption{Summary of Hamins methane burner experiments. }
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-Case     & Test     & $D$  & $\dot{Q}$   &  $\dot{Q}''$   & $Q^*$   \\
-         & Number   & (m)  & (kW)        &  (kW/m$^2$)    &         \\ \hline \hline
-A        & 1        & 0.10 & 0.42        &  53.8          & 0.12    \\ \hline
-B        & 5        & 0.10 & 1.88        &  240           & 0.53    \\ \hline
-C        & 23       & 0.38 & 33.5        &  295           & 0.34    \\ \hline
-D        & 21       & 0.38 & 175         &  1550          & 1.8     \\ \hline
-E        & 7        & 1.0  & 49.0        &  62.4          & 0.044   \\ \hline
-F        & 19       & 1.0  & 162         &  206           & 0.14    \\ \hline
+Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$       \\
+No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &             \\ \hline \hline
+1        & 0.1      & 0.13       & 0.42        &  0.0085               &  53.5          & 0.12        \\ \hline
+2        & 0.1      & 0.13       & 0.61        &  0.0122               &  77.7          & 0.18        \\ \hline
+3        & 0.1      & 0.13       & 0.78        &  0.0155               &  99.3          & 0.22        \\ \hline
+4        & 0.1      & 0.13       & 1.11        &  0.0222               &  141.3         & 0.32        \\ \hline
+5        & 0.1      & 0.13       & 1.89        &  0.0378               &  240.6         & 0.54        \\ \hline
+6        & 0.35     & 0.40       & 11.2        &  0.226                &  115.9         & 0.14        \\ \hline
+7        & 0.35     & 0.40       & 15.3        &  0.310                &  159.0         & 0.19        \\ \hline
+8        & 0.35     & 0.40       & 10.5        &  0.212                &  109.0         & 0.13        \\ \hline
+9        & 0.35     & 0.40       & 6.67        &  0.135                &  69.3          & 0.08        \\ \hline
+10       & 0.35     & 0.64       & 19.3        &  0.391                &  200.7         & 0.24        \\ \hline
+11       & 0.35     & 0.63       & 27.0        &  0.546                &  280.3         & 0.34        \\ \hline
+12       & 0.35     & 0.81       & 40.6        &  0.822                &  422.2         & 0.51        \\ \hline
+13       & 0.35     & 0.92       & 63.5        &  1.285                &  659.9         & 0.80        \\ \hline
+14       & 0.35     & 0.92       & 90.3        &  1.828                &  938.7         & 1.13        \\ \hline
+15       & 0.35     & 0.92       & 178         &  3.567                &  1854.6        & 2.24        \\ \hline
+16       & 0.35     & 0.92       & 210         &  4.194                &  2180.8        & 2.63        \\ \hline
+17       & 0.35     & 0.92       & 34.0        &  0.679                &  353.2         & 0.43        \\ \hline
+18       & 0.35     & 0.90       & 145         &  2.904                &  1510.0        & 1.82        \\ \hline
+19       & 0.35     & 0.90       & 125         &  2.495                &  1297.7        & 1.56        \\ \hline
+20       & 1.0      & 1.00       & 49.0        &  0.997                &  62.4          & 0.04        \\ \hline
+21       & 1.0      & 1.00       & 81.0        &  1.648                &  103.1         & 0.07        \\ \hline
+22       & 1.0      & 1.00       & 112         &  2.282                &  142.8         & 0.10        \\ \hline
+23       & 1.0      & 1.00       & 129         &  2.635                &  164.8         & 0.12        \\ \hline
+24       & 1.0      & 0.79       & 52.7        &  1.069                &  67.1          & 0.05        \\ \hline
+25       & 1.0      & 0.79       & 69.7        &  1.414                &  88.8          & 0.06        \\ \hline
+26       & 1.0      & 0.79       & 87.3        &  1.771                &  111.2         & 0.08        \\ \hline
+27       & 1.0      & 0.79       & 102         &  2.081                &  130.6         & 0.09        \\ \hline
+28       & 1.0      & 0.79       & 121         &  2.462                &  154.5         & 0.11        \\ \hline
+29       & 1.0      & 0.79       & 138         &  2.793                &  175.3         & 0.12        \\ \hline
+30       & 1.0      & 0.79       & 172         &  3.482                &  218.5         & 0.16        \\ \hline
 \end{tabular}
 \end{center}
-\label{Hamins_Table}
+\label{Hamins_Methane_Table}
 \end{table}
 
 \newpage
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_01_Radial_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_05_Radial_Heat_Flux} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_23_Radial_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_21_Radial_Heat_Flux} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_07_Radial_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_19_Radial_Heat_Flux}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M1_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M1_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M2_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M2_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M3_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M3_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M4_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M4_Vertical_Heat_Flux}
 \end{tabular*}
-\label{Hamins_CH4_Radial}
-\caption[Radial heat flux predictions, Hamins methane burner experiments.]
-{Comparison of predicted and measured heat fluxes to the ``floor'' as a function of radial distance from a methane burner, Hamins experiments.}
+\label{Hamins_Methane_1-4}
+\caption[Heat flux predictions, Hamins methane burner Tests 1-4]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 1-4.}
 \end{figure}
 
 \begin{figure}[p]
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_01_Vertical_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_05_Vertical_Heat_Flux} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_23_Vertical_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_21_Vertical_Heat_Flux} \\
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_07_Vertical_Heat_Flux} &
-\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_CH4/Hamins_CH4_19_Vertical_Heat_Flux}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M5_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M5_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M6_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M6_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M7_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M7_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M8_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M8_Vertical_Heat_Flux}
 \end{tabular*}
-\label{Hamins_CH4_Vertical}
-\caption[Vertical heat flux predictions, Hamins methane burner experiments.]
-{Comparison of predicted and measured heat fluxes from a methane burner to a ``wall'' as a function of the height from the burner surface, Hamins experiments.}
+\label{Hamins_Methane_5-8}
+\caption[Heat flux predictions, Hamins methane burner Tests 5-8]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 5-8.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M9_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M9_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M10_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M10_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M11_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M11_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M12_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M12_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_9-12}
+\caption[Heat flux predictions, Hamins methane burner Tests 9-12]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 9-12.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M13_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M13_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M14_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M14_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M15_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M15_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M16_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M16_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_13-16}
+\caption[Heat flux predictions, Hamins methane burner Tests 13-16]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 13-16.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M17_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M17_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M18_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M18_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M19_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M19_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M20_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M20_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_17-20}
+\caption[Heat flux predictions, Hamins methane burner Tests 17-20]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 17-20.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M21_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M21_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M22_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M22_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M23_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M23_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M24_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M24_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_21-24}
+\caption[Heat flux predictions, Hamins methane burner Tests 21-24]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 21-24.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M25_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M25_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M26_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M26_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M27_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M27_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M28_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M28_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_25-28}
+\caption[Heat flux predictions, Hamins methane burner Tests 25-28]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 25-28.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M29_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M29_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M30_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/M30_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Methane_29-30}
+\caption[Heat flux predictions, Hamins methane burner Tests 29-30]
+{Comparison of predicted and measured heat fluxes, Hamins Methane Tests 29-30.}
+\end{figure}
+
+\begin{table}[ht]
+\caption{Summary of Hamins propane burner experiments. }
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$      \\
+No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &            \\ \hline \hline
+1        & 0.1      & 0.26       & 2.7         &  0.058                &  343.8         & 0.78       \\ \hline
+2        & 0.1      & 0.26       & 6.8         &  0.148                &  870.9         & 1.96       \\ \hline
+3        & 0.1      & 0.26       & 11.8        &  0.254                &  1499.9        & 3.38       \\ \hline
+4        & 0.1      & 0.37       & 17.9        &  0.386                &  2277.8        & 5.14       \\ \hline
+5        & 0.1      & 0.37       & 25.2        &  0.543                &  3203.5        & 7.22       \\ \hline
+6        & 0.1      & 0.49       & 36.9        &  0.796                &  4698.3        & 10.6       \\ \hline
+7        & 0.1      & 0.13       & 0.4         &  0.010                &  56.0          & 0.13       \\ \hline
+8        & 0.1      & 0.13       & 0.8         &  0.017                &  99.3          & 0.22       \\ \hline
+9        & 0.1      & 0.13       & 0.6         &  0.013                &  76.4          & 0.17       \\ \hline
+10       & 0.1      & 0.13       & 1.0         &  0.021                &  123.5         & 0.28       \\ \hline
+11       & 0.1      & 0.13       & 1.4         &  0.031                &  183.3         & 0.41       \\ \hline
+12       & 0.1      & 0.13       & 2.2         &  0.046                &  273.7         & 0.62       \\ \hline
+13       & 0.1      & 0.19       & 3.4         &  0.074                &  434.2         & 0.98       \\ \hline
+14       & 0.1      & 0.19       & 5.6         &  0.122                &  718.1         & 1.62       \\ \hline
+15       & 0.1      & 0.28       & 11.9        &  0.257                &  1513.9        & 3.41       \\ \hline
+16       & 0.1      & 0.28       & 24.8        &  0.535                &  3156.4        & 7.12       \\ \hline
+17       & 0.35     & 0.92       & 33.9        &  0.732                &  352.8         & 0.43       \\ \hline
+18       & 0.35     & 0.92       & 124.9       &  2.694                &  1298.1        & 1.56       \\ \hline
+19       & 0.35     & 0.57       & 20.0        &  0.431                &  207.9         & 0.25       \\ \hline
+20       & 0.35     & 0.57       & 15.6        &  0.336                &  162.0         & 0.20       \\ \hline
+21       & 0.35     & 0.39       & 19.0        &  0.409                &  197.3         & 0.24       \\ \hline
+22       & 0.35     & 0.39       & 14.6        &  0.316                &  152.2         & 0.18       \\ \hline
+23       & 0.35     & 0.68       & 108.2       &  2.334                &  1124.5        & 1.36       \\ \hline
+24       & 0.35     & 0.68       & 102.3       &  2.207                &  1063.7        & 1.28       \\ \hline
+25       & 0.35     & 0.68       & 79.7        &  1.719                &  828.4         & 1.00       \\ \hline
+26       & 0.35     & 0.51       & 12.0        &  0.258                &  124.5         & 0.15       \\ \hline
+27       & 1.0      & 0.81       & 55.2        &  1.190                &  70.2          & 0.05       \\ \hline
+28       & 1.0      & 0.81       & 81.7        &  1.761                &  104.0         & 0.07       \\ \hline
+29       & 1.0      & 0.81       & 107.3       &  2.315                &  136.7         & 0.10       \\ \hline
+30       & 1.0      & 1.00       & 136.4       &  2.943                &  173.7         & 0.12       \\ \hline
+31       & 1.0      & 0.97       & 55.6        &  1.199                &  70.8          & 0.05       \\ \hline
+32       & 1.0      & 0.97       & 82.5        &  1.779                &  105.0         & 0.07       \\ \hline
+33       & 1.0      & 0.97       & 107.9       &  2.326                &  137.3         & 0.10       \\ \hline
+34       & 1.0      & 0.97       & 137.3       &  2.963                &  174.9         & 0.12       \\ \hline
+\end{tabular}
+\end{center}
+\label{Hamins_Propane_Table}
+\end{table}
+
+\newpage
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P1_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P1_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P2_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P2_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P3_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P3_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P4_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P4_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_1-4}
+\caption[Heat flux predictions, Hamins propane burner Tests 1-4]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 1-4.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P5_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P5_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P6_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P6_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P7_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P7_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P8_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P8_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_5-8}
+\caption[Heat flux predictions, Hamins propane burner Tests 5-8]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 5-8.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P9_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P9_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P10_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P10_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P11_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P11_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P12_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P12_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_9-12}
+\caption[Heat flux predictions, Hamins propane burner Tests 9-12]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 9-12.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P13_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P13_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P14_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P14_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P15_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P15_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P16_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P16_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_13-16}
+\caption[Heat flux predictions, Hamins propane burner Tests 13-16]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 13-16.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P17_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P17_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P18_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P18_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P19_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P19_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P20_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P20_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_17-20}
+\caption[Heat flux predictions, Hamins propane burner Tests 17-20]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 17-20.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P21_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P21_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P22_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P22_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P23_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P23_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P24_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P24_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_21-24}
+\caption[Heat flux predictions, Hamins propane burner Tests 21-24]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 21-24.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P25_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P25_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P26_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P26_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P27_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P27_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P28_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P28_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_25-28}
+\caption[Heat flux predictions, Hamins propane burner Tests 25-28]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 25-28.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P29_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P29_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P30_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P30_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P31_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P31_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P32_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P32_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_29-32}
+\caption[Heat flux predictions, Hamins propane burner Tests 29-32]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 29-32.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P33_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P33_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P34_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/P34_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Propane_33-34}
+\caption[Heat flux predictions, Hamins propane burner Tests 33-34]
+{Comparison of predicted and measured heat fluxes, Hamins Propane Tests 33-34.}
 \end{figure}
 
 
+\begin{table}[ht]
+\caption{Summary of Hamins acetylene burner experiments. }
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$      \\
+No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &            \\ \hline \hline
+1        & 0.10     & 0.13       & 0.45        &  0.009                &  57.3          & 0.13       \\ \hline
+2        & 0.10     & 0.13       & 0.56        &  0.012                &  71.3          & 0.16       \\ \hline
+3        & 0.10     & 0.13       & 0.90        &  0.019                &  114.6         & 0.26       \\ \hline
+4        & 0.10     & 0.13       & 1.29        &  0.027                &  164.2         & 0.37       \\ \hline
+5        & 0.10     & 0.13       & 1.54        &  0.032                &  196.1         & 0.44       \\ \hline
+6        & 0.35     & 0.39       & 12.5        &  0.259                &  129.9         & 0.16       \\ \hline
+7        & 0.35     & 0.51       & 11.0        &  0.229                &  114.3         & 0.14       \\ \hline
+8        & 0.35     & 0.51       & 20.4        &  0.424                &  212.0         & 0.26       \\ \hline
+9        & 0.35     & 0.51       & 31.3        &  0.648                &  325.3         & 0.39       \\ \hline
+10       & 0.35     & 0.69       & 38.2        &  0.793                &  397.0         & 0.48       \\ \hline
+11       & 0.35     & 0.69       & 48.0        &  1.000                &  498.9         & 0.60       \\ \hline
+12       & 0.35     & 0.69       & 62.4        &  1.290                &  648.6         & 0.78       \\ \hline
+13       & 0.35     & 0.69       & 76.3        &  1.580                &  793.0         & 0.96       \\ \hline
+14       & 0.35     & 0.69       & 109.2       &  2.270                &  1135.0        & 1.37       \\ \hline
+15       & 0.35     & 0.69       & 117.2       &  2.430                &  1218.2        & 1.47       \\ \hline
+16       & 0.35     & 0.69       & 134.7       &  2.790                &  1400.0        & 1.69       \\ \hline
+\end{tabular}
+\end{center}
+\label{Hamins_Acetylene_Table}
+\end{table}
+
+\newpage
+
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A1_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A1_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A2_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A2_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A3_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A3_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A4_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A4_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Acetylene_1-4}
+\caption[Heat flux predictions, Hamins acetylene burner Tests 1-4]
+{Comparison of predicted and measured heat fluxes, Hamins Acetylene Tests 1-4.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A5_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A5_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A6_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A6_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A7_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A7_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A8_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A8_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Acetylene_5-8}
+\caption[Heat flux predictions, Hamins acetylene burner Tests 5-8]
+{Comparison of predicted and measured heat fluxes, Hamins Acetylene Tests 5-8.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A9_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A9_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A10_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A10_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A11_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A11_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A12_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A12_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Acetylene_9-12}
+\caption[Heat flux predictions, Hamins acetylene burner Tests 9-12]
+{Comparison of predicted and measured heat fluxes, Hamins Acetylene Tests 9-12.}
+\end{figure}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A13_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A13_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A14_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A14_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A15_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A15_Vertical_Heat_Flux} \\
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A16_Radial_Heat_Flux} &
+\includegraphics[height=2.15in]{SCRIPT_FIGURES/Hamins_Gas_Burners/A16_Vertical_Heat_Flux}
+\end{tabular*}
+\label{Hamins_Acetylene_13-16}
+\caption[Heat flux predictions, Hamins acetylene burner Tests 13-16]
+{Comparison of predicted and measured heat fluxes, Hamins Acetylene Tests 13-16.}
+\end{figure}
 
 \clearpage
 
