@@ -3850,38 +3850,33 @@ The $L_\infty$ (maximum) error of the FDS computed terminal velocity and positio
 
 \subsection{Particle Trajectory (\texorpdfstring\textct{flat\_fire}{flat\_fire})}
 
-There are no known solutions of the drag equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is never very significant compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u$, is a good approximation for the velocity magnitude, $|\mathbf{u}|$.
-
-%In 2D, this approximation decouples the $x$ equation of motion from the $y$ equation of motion and reduces the $y$ equation of motion to a linear ODE.
-%\begin{align*}
-%   \ddot{x} = -K \dot{x} \sqrt{\dot{x}^2 + \dot{y}^2} \quad &; \quad \ddot{y} = -K \dot{y} \sqrt{\dot{x}^2 + \dot{y^2}} - g \\
-%   &\Downarrow \\
-%   \ddot{x} = -K \dot{x}^2 \quad &; \quad \ddot{y} = -K \dot{y} \dot{x} - g
-%\end{align*}
-To ensure that the flat fire assumption is valid, the following ICs are used: $x(0) = 0$, $\dot{x}(0) = u(0) = V_0$, $z(0) = h$, $\dot{z}(0) = w(0) = 0$. The exact solution to this system is given below.
-\be
-    x = \frac{\text{log}(V_0 K t + 1)}{K} \quad ; \quad
-    z = h + \frac{g \text{log}(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \quad ; \quad
-    K \equiv \frac{3 \rho_a C_d}{4 \rho_d D_d}
-\ee
-\be
-    u = \frac{\d x}{\d t} = \frac{V_0}{V_0 K t + 1} \quad ; \quad w = \frac{\d z}{\d t} = \frac{g}{2 V_0 K (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
-\ee
+There are no known solutions of the particle trajectory equations in multiple dimensions. However, ballisticians have developed an approximate solution useful for computing trajectories of projectiles when guns are shot within a certain range of angles. This solution makes use of the ``flat fire'' assumption. In short, if a particle is launched with its velocity in only the horizontal direction and its vertical velocity is relatively small compared to the horizontal velocity, then throughout the entire trajectory the horizontal velocity component, $u_{\rm p}$, is a good approximation for the velocity magnitude, $|\mathbf{u_{\rm p}}|$. In 2D, this approximation decouples the horizontal ($x$) equation of motion from the vertical ($z$) and reduces the vertical equation of motion to a linear ODE:
+\begin{align}
+   &\frac{\d u_{\rm p}}{\d t} = -K \, u_{\rm p}^2 \quad ;  \quad K \equiv \frac{3 \rho_{\rm a} C_{\rm d}}{8 \rho_{\rm p} r_{\rm p}} \\[.1in]
+   &\frac{\d w_{\rm p}}{\d t} = -K \, u_{\rm p} \, w_{\rm p} - g
+\end{align}
+Given the initial conditions, $x_{\rm p}(0) = 0$, $u_{\rm p}(0) = V_0$, $z_{\rm p}(0) = h$, $w_{\rm p}(0) = 0$, the exact solution to the ODE is:
+\begin{align}
+    x_{\rm p} = \frac{\ln(V_0 K t + 1)}{K} \quad ;& \quad
+    z_{\rm p} = h + \frac{g \, \ln(V_0 K t + 1)}{2 (V_0 K)^2} - \frac{g t^2}{4} - \frac{g t}{2 V_0 K} \\[.1in]
+    u_{\rm p} = \frac{V_0}{V_0 K t + 1} \quad ;& \quad w_{\rm p} = \frac{g}{2 V_0 K \, (V_0 K t + 1)} - \frac{g t}{2} - \frac{g}{2 V_0 K}
+\end{align}
 The following case was run in FDS and compared against the approximate solution:
 \begin{center}
 \begin{tabular}{|r|c|l|}
 \hline
-Drag coefficient of droplet & $C_d$ & 0.2 \\
-Diameter of droplet & $D_d$ & 5~mm \\
-Gravitational acceleration & $g$ & 9.8~m/s$^2$ \\
-Droplet fluid density & $\rho_d$ & 1000~\si{kg/m^3} \\
-Starting $x$-velocity & $V_0$ & 400~m/s \\
+Drag coefficient                  & $C_{\rm d}$          & 0.2 \\
+Particle diameter                 & $2\, r_{\rm p}$      & 5~mm \\
+Gravitational acceleration        & $g$                  & 9.8~m/s$^2$ \\
+Particle density                  & $\rho_{\rm p}$       & 1000~\si{kg/m^3} \\
+Air density                       & $\rho_{\rm a}$       & 1.2~\si{kg/m^3} \\
+Initial horizontal velocity       & $V_0$                & 400~m/s \\
+Initial height                    & $h$                  & 8 m \\
 \hline
 \end{tabular}
 \end{center}
-As can be seen in Fig.~\ref{flat_fire_plots}, FDS agrees well with this approximate solution. The flat fire solution should have slightly faster vertical velocities, $w$, at extended times because the speed of the particle is approximated with $u$, which is lower than the true speed at extended times. This ensures the drag force is lower than it should be, and consequently $w$ is too fast. In the lower left plot in Fig.~\ref{flat_fire_plots} the $w$-velocity from FDS is slightly slower than the flat fire solution.
+Figure~\ref{flat_fire_plots} compares the first and second order accurate FDS solutions to the ``flat fire'' solution given above. The ``flat fire'' solution should have a slightly faster vertical velocity component, $w_{\rm p}$, at extended times because the speed of the particle is approximated with $u_{\rm p}$, which is lower than the true speed. This ensures the drag force is lower than it should be, and consequently $|w_{\rm p}|$ is larger in the ``flat fire'' solution. In the lower left plot in Fig.~\ref{flat_fire_plots} $|w_{\rm p}|$ computed by FDS using the second order accurate scheme is slightly less than the ``flat fire'' solution.
 \begin{figure}[p]
-\noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_trajectory} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_x} \\
@@ -3889,7 +3884,7 @@ As can be seen in Fig.~\ref{flat_fire_plots}, FDS agrees well with this approxim
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_u} \\
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flat_fire_w} &
 \end{tabular*}
-\caption[The \textct{flat\_fire} case]{Output of test case \textct{flat\_fire}.}
+\caption[Results of the \textct{flat\_fire} test case.]{Results of the \textct{flat\_fire} test case.}
 \label{flat_fire_plots}
 \end{figure}
 
@@ -4041,7 +4036,7 @@ The final temperature is calculated to be 445.2~K (172.0~$^\circ$C) and the pres
 In this case, a gas burner lies near the bottom of a 1~m by 1~m by 5~m high vertical channel whose walls are made of a thin sheet of insulated steel. Air at ambient temperature is forced into the bottom of the channel at 1~m/s. Monodisperse water droplets with a diameter of 2,000~$\mu$m are
 introduced via a nozzle in the middle of the channel at a rate of 1~L/min, starting at 60~s. The water temperature is 20~\si{\degree C}, and the spray is directed at the walls with an initial velocity of 5~m/s.
 The water completely evaporates before it drips down to the bottom of the channel.
-Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 320~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
+Figure~\ref{water_evaporation_7_plot} displays the energy balance for this case. The heat release rate, \textct{HRR}, of the fire is expected to be 384~kW. The rate at which the water droplets extract energy from the system, \textct{Q\_PART}, is expected to be
 \be - \left( 4.189 \; \hbox{\si{kJ/(kg.K)}} \times 80 \; \hbox{K} + 2269 \; \hbox{kJ/kg} \right) \times 1/60 \; \hbox{kg/s} = -43.4 \; \hbox{kW} \ee
 The sum of all the terms, \textct{Q\_TOTAL}, is expected to be zero. The three other quantities, \textct{Q\_COND}, \textct{Q\_RADI}, \textct{Q\_CONV}, all have plausible values, but there is no way to determine the exact values.
 
