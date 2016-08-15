@@ -13,9 +13,10 @@ L = 10;
 t0 = 0;
 
 % Analytical solution (using Anonymous Function)
-% Y = @(t) 0 .*(t <= L/u) + 1 .*(t > L/u);
-Y = @(t) 0 .*(t <= 10.825) + 1 .*(t > 10.825); % a hack for now as solver is wrong
+Y = @(t) 0 .*(t <= L/u) + 1 .*(t > L/u);
+% Y = @(t) 0 .*(t <= 10.027) + 1 .*(t > 10.027); % a hack for now as solver is wrong
 
+% Plot analytical solution (not used for analysis, just plot)
 nt = 1000;
 dt = t_end/nt;
 tc = (t0+dt/2) : dt : (t_end-dt/2);
@@ -37,16 +38,18 @@ dxx = []; % init dtt vector
 % Loop over cases, plotting FDS results (hold on) and computing error vector
 for i=1:length(fnt)
     M = importdata([ddir,fnt{i},'_devc.csv'],',',2);
-    Y_fds = M.data(1:end,2);
-    Y_fds = Y_fds.';
+    Y_fds = M.data(1:end,2); % FDS species data
+    t_fds = M.data(1:end,1); % FDS time
+    Y_fds = interp1(t_fds,Y_fds,0:0.02:20); % re-sample Y(t)
     nt = length(Y_fds);
     dt = t_end/nt;
-    tc = (t0+dt/2) : dt : (t_end-dt/2);
+    tc = (t0+dt/2) : dt : (t_end-dt/2) ;
     plot(tc,Y_fds,plt_style{i})
     dx = dx_array{i};
     e_vec = Y_fds - Y(tc);
-    ert = [ert,norm(e_vec)/sqrt(length(e_vec))] % populates ert vector, element-by-element
-    dxx = [dxx,dx] % populates dtt vector, element-by-element
+%     plot(e_vec)
+    ert = [ert,norm(e_vec)/sqrt(length(e_vec))]; % populates ert vector, element-by-element
+    dxx = [dxx,dx]; % populates dtt vector, element-by-element
 end
 
 figure
