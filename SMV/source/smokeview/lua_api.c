@@ -2915,12 +2915,13 @@ int lua_set_renderclip(lua_State *L) {
   return 1;
 }
 
-int lua_set_renderfilelabel(lua_State *L) {
-  int v = lua_tonumber(L, 1);
-  int return_code = set_renderfilelabel(v);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_renderfilelabel(lua_State *L) {
+//   int v = lua_tonumber(L, 1);
+//   int return_code = set_renderfilelabel(v);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_renderfiletype(lua_State *L) {
   int render = lua_tonumber(L, 1);
@@ -2935,13 +2936,14 @@ int lua_set_renderfiletype(lua_State *L) {
 //   return 0;
 // }
 
-int lua_set_renderoption(lua_State *L) {
-  int opt = lua_tonumber(L, 1);
-  int rows = lua_tonumber(L, 1);
-  int return_code = set_renderoption(opt, rows);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_renderoption(lua_State *L) {
+//   int opt = lua_tonumber(L, 1);
+//   int rows = lua_tonumber(L, 1);
+//   int return_code = set_renderoption(opt, rows);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_unitclasses(lua_State *L) {
   int i = 0;
@@ -4245,11 +4247,11 @@ void initLua() {
   lua_register(L, "set_labelstartupview", lua_set_labelstartupview);
   lua_register(L, "set_pixelskip", lua_set_pixelskip);
   lua_register(L, "set_renderclip", lua_set_renderclip);
-  lua_register(L, "set_renderfilelabel", lua_set_renderfilelabel);
+  // lua_register(L, "set_renderfilelabel", lua_set_renderfilelabel);
   lua_register(L, "set_renderfiletype", lua_set_renderfiletype);
 
   // lua_register(L, "set_skybox", lua_set_skybox);
-  lua_register(L, "set_renderoption", lua_set_renderoption);
+  // lua_register(L, "set_renderoption", lua_set_renderoption);
   lua_register(L, "set_unitclasses", lua_set_unitclasses);
   lua_register(L, "set_zaxisangles", lua_set_zaxisangles);
   lua_register(L, "set_adjustalpha", lua_set_adjustalpha);

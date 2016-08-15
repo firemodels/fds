@@ -24,7 +24,7 @@ void readboundini(void);
 void init_lang(void);
 void Init(void);
 // from menus.c
-void update_menu(void);
+void UpdateMenu(void);
 void LoadVolSmoke3DMenu(int value);
 void UnLoadVolSmoke3DMenu(int value);
 
@@ -330,7 +330,7 @@ int loadfile(const char *filename) {
     if(strcmp(plot3di->file,filename)==0){
       ReadPlot3dFile=1;
       readplot3d(plot3di->file,i,LOAD,&errorcode);
-      update_menu();
+      UpdateMenu();
       return errorcode;
     }
   }
@@ -1596,7 +1596,7 @@ void loadplot3d(int meshnumber, float time_local){
   set_labels_controls();
   if(count==0)fprintf(stderr,"*** Error: Plot3d file failed to load\n");
 
-  //update_menu();
+  //UpdateMenu();
 }
 
 /* ------------------ loadiso ------------------------ */
