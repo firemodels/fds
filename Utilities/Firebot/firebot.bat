@@ -262,7 +262,7 @@ if %lite% == 1 goto skip_lite2
 
     echo             libs
 
-    cd %fdsroot%\SMV\Build\LIBS\lib_win_intel%size%
+    cd %fdsroot%\SMV\Build\LIBS\intel_win%size%
     call makelibs bot 1>> %OUTDIR%\stage2a.txt 2>&1
 
     echo             debug
