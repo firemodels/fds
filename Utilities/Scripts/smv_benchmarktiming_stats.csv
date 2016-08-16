@@ -1,0 +1,8 @@
+FDS Case,Wall Clock Time (s),CPU Time (s),Number of Cells,Number of Time Steps,Performance Metric (1e-6)
+mplume5c8_bench.fds,407.651, 3.994E+02,64,900,6934
+plume5c_bench.fds,288.826, 2.809E+02,8192,900,38
+thouse5_bench.fds,679.007, 6.703E+02,23040,900,32
+wind_test2_bench.fds,334.428, 3.255E+02,100,614,5301
+hill_structure_bench.fds,333.823, 3.249E+02,100,614,5291
+fef4a56
+2001.000

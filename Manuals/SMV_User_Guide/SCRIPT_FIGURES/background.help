@@ -1,0 +1,25 @@
+
+background 1.1(Git-r17-404-gfef4a56) - Aug 12 2016
+  Runs a program in the background when resources are available
+
+Usage:
+
+  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/Build/background/intel_linux_64/background [-d delay time (s) -h -u max_usage -v] prog [arguments]
+
+where
+
+  -d dtime  - wait dtime seconds before running prog in the background
+  -debug    - display debug messages
+  -h        - display this message
+  -hosts hostfiles - file containing a list of host names to run jobs on
+  -m max    - wait to run prog until memory usage is less than max (25-100%)
+  -p path   - specify directory path to change to after ssh'ing to remote host
+  -u max    - wait to run prog until cpu usage is less than max (25-100%)
+  -v        - display version information
+  prog      - program to run in the background
+  arguments - command line arguments of prog
+
+Example:
+  background -d 1.5 -u 50 prog arg1 arg2
+    runs prog (with arguments arg1 and arg2) after 1.5 seconds
+    and when the CPU usage drops below 50%

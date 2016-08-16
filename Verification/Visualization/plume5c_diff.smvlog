@@ -1,0 +1,122 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: plume5c_diff.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+   pass 5 started
+   pass 5 completed
+plume5c_diff.smv processing completed
+
+beginning wrap up 
+nblocks=1027 sizeblocks=8545806
+  updating vector slices
+    33 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=2300 sizeblocks=10600596
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: plume5c_diff.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: UNLOADALL
+
+
+script: LOADINIFILE
+script:  plume5c_diff.ini
+
+script: loading ini file plume5c_diff.ini
+
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: plume5c_diff.ini
+processing config file: plume5c_diff.ini
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: plume5c_06_diff.sf
+ global min (slice file): -1243.750366 node=(2,8,13)
+ global max (slice file): 650.110413 node=(6,8,4)
+computing slice color levels 
+After slice file load: 
+nblocks=2585 sizeblocks=12757139
+ 0.9 MB loaded in 0.02 s - rate: 344.2 Mb/s (overhead: 0.03 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 0.000000
+
+
+script: RENDERONCE
+script:  plume5c_diff_slice_00
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//plume5c_diff_slice_00.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 10.050000
+
+
+script: RENDERONCE
+script:  plume5c_diff_slice_10
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//plume5c_diff_slice_10.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 30.049999
+
+
+script: RENDERONCE
+script:  plume5c_diff_slice_30
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//plume5c_diff_slice_30.png . Completed.

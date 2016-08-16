@@ -1,0 +1,25 @@
+
+  smokediff [options] smv_case1 smv_case2
+    version: 1.0.10 (githash Git-r17-404-gfef4a56) - Aug 12 2016
+
+  smokediff compares two FDS cases by subtracting data referenced in smv_case2 from
+  corresponding data referenced in smv_case1 (smv_case1 - smv_case2).  Slice, PLOT3d
+  and boundary files are supported.  Differenced results may be viewed by opening
+  smv_case1_diff.smv in Smokeview or by using the -smv option when running smokediff.
+
+  Mesh bounds must be identical for corresponding meshes.  Mesh resolutions must be
+  identical when differencing boundary and PLOT3D files.  The x, y, and z mesh
+  resolutions in smv_case2 must be integer multiples of the corresponding x, y, z mesh
+  resolutions in smv_case1 when differencing slice files.
+
+  -h  - display this message
+  -v  - display version information
+  -s1 dir1 - directory containing case smv_case1.smv
+  -s2 dir2 - directory containing case smv_case2.smv
+  -d  dir  - directory containing created differenced files
+  -nb      - do not difference boundary files
+  -np      - do not difference Plot3d files
+  -ns      - do not difference slice files
+  -smv     - view case in smokeview when differencing is complete
+  -type label - difference only data of type label (in boundary and slice files)
+  smv_case1,smv_case2 - Two smokeview cases to compare.
