@@ -573,12 +573,12 @@ compile_smv_utilities()
    echo "   Smokeview"
    echo "      libraries"
    if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size}
+   cd $fdsrepo/SMV/Build/LIBS/intel_${platform}${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
    echo "" >> $OUTPUT_DIR/stage3a 2>&1
    else
-   $SSH \( cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_intel${size} \; \
+   $SSH \( cd $fdsrepo/SMV/Build/LIBS/intel_${platform}${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
    echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
