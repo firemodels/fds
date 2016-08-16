@@ -1,0 +1,183 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: objects_dynamic.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading texture: sphere_cover_03.png - completed
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+objects_dynamic.smv processing completed
+
+beginning wrap up 
+nblocks=863 sizeblocks=6743190
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=896 sizeblocks=6758926
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: objects_dynamic.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: SETVIEWPOINT
+script:  tsphere
+
+script: set viewpoint to tsphere
+
+
+
+script: RENDERONCE
+script:  tsphere
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//tsphere.png . Completed.
+
+script: SETVIEWPOINT
+script:  ball
+
+script: set viewpoint to ball
+
+
+
+script: RENDERONCE
+script:  ball
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//ball.png . Completed.
+
+script: SETVIEWPOINT
+script:  tube
+
+script: set viewpoint to tube
+
+
+
+script: RENDERONCE
+script:  tube
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//tube.png . Completed.
+
+script: SETVIEWPOINT
+script:  cone
+
+script: set viewpoint to cone
+
+
+
+script: RENDERONCE
+script:  cone
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//cone.png . Completed.
+
+script: SETVIEWPOINT
+script:  fan
+
+script: set viewpoint to fan
+
+
+
+script: RENDERONCE
+script:  fan
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//fan.png . Completed.
+
+script: SETVIEWPOINT
+script:  vent(inactive)
+
+script: set viewpoint to vent(inactive)
+
+
+
+script: RENDERONCE
+script:  vent1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//vent1.png . Completed.
+
+script: SETVIEWPOINT
+script:  vent(active)
+
+script: set viewpoint to vent(active)
+
+
+
+script: RENDERONCE
+script:  vent2
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//vent2.png . Completed.
+
+script: SETVIEWPOINT
+script:  velegg
+
+script: set viewpoint to velegg
+
+
+
+script: RENDERONCE
+script:  velegg
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//velegg.png . Completed.
+
+script: SETVIEWPOINT
+script:  veltube
+
+script: set viewpoint to veltube
+
+
+
+script: RENDERONCE
+script:  veltube
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//veltube.png . Completed.
+
+script: SETVIEWPOINT
+script:  box
+
+script: set viewpoint to box
+
+
+
+script: RENDERONCE
+script:  box
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//box.png . Completed.
