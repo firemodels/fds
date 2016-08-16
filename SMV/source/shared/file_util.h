@@ -56,6 +56,9 @@ EXTERNCPP FILE_SIZE get_filesize(const char *filename);
 EXTERNCPP time_t file_modtime(char *filename);
 EXTERNCPP int is_file_newer(char *file1, char *file2);
 EXTERNCPP char *getprogdir(char *progname, char **svpath);
+#ifdef
+EXTERNCPP char *getprogdirabs(char *progname, char **svpath);
+#endif
 
 EXTERNCPP char *lastname(char *argi);
 
