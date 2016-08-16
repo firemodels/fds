@@ -1,0 +1,137 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: vcirctest.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+vcirctest.smv processing completed
+
+beginning wrap up 
+nblocks=785 sizeblocks=8346539
+  updating vector slices
+    4 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=861 sizeblocks=8449223
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: vcirctest.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: XSCENECLIP
+
+
+script: YSCENECLIP
+
+
+script: ZSCENECLIP
+
+
+script: SCENECLIP
+
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: RENDERONCE
+script:  vcirctest_fds
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//vcirctest_fds.png . Completed.
+
+script: KEYBOARD
+script:  q
+
+
+script: RENDERONCE
+script:  vcirctest_circ
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//vcirctest_circ.png . Completed.
+
+script: LOADINIFILE
+script:  vcirctest_outline.ini
+
+script: loading ini file vcirctest_outline.ini
+
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: vcirctest.ini
+processing config file: vcirctest_outline.ini
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: RENDERONCE
+script:  vcirctest_fds_outline
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//vcirctest_fds_outline.png . Completed.
+
+script: KEYBOARD
+script:  q
+
+
+script: RENDERONCE
+script:  vcirctest_circ_outline
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//vcirctest_circ_outline.png . Completed.

@@ -1,0 +1,141 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: script_slice_test.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+script_slice_test.smv processing completed
+
+beginning wrap up 
+nblocks=935 sizeblocks=8044741
+  updating vector slices
+    20 vector slices found
+    updating vector slice menus
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=1299 sizeblocks=8613343
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: script_slice_test.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: XSCENECLIP
+
+
+script: YSCENECLIP
+
+
+script: ZSCENECLIP
+
+
+script: SCENECLIP
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: script_slice_test_05.sf
+ global min (slice file): 19.993225 node=(8,8,4)
+ global max (slice file): 1316.292358 node=(5,8,10)
+computing slice color levels 
+After slice file load: 
+nblocks=1426 sizeblocks=11207486
+ 1.1 MB loaded in 0.03 s - rate: 348.4 Mb/s (overhead: 0.05 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.001744
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  script_slice_test_10
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//script_slice_test_10.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 20.009329
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  script_slice_test_20
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//script_slice_test_20.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 30.001192
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  script_slice_test_30
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//script_slice_test_30.png . Completed.
+
+script: SETTIMEVAL
+
+script: setting time to 40.009205
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  script_slice_test_40
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//script_slice_test_40.png . Completed.
