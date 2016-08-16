@@ -2,75 +2,83 @@
 % 12-8-2016
 % hvac_mass_transport.m
 %
-% Convergence study for HVAC transient mass transport.
+% Convergence study for HVAC transient mass transport (mass fraction at
+% downstream duct node).
 
 close all
 clear all
 
-t_end = 20;
-u = 1;
-L = 10;
+% Input parameters
 t0 = 0;
+t_end = 2;
+u = 1;
+L = 1;
 
 % Analytical solution (using Anonymous Function)
 Y = @(t) 0 .*(t <= L/u) + 1 .*(t > L/u);
-% Y = @(t) 0 .*(t <= 10.027) + 1 .*(t > 10.027); % a hack for now as solver is wrong
 
-% Plot analytical solution (not used for analysis, just plot)
+% Create mass fraction plot and plot analytical solution
 nt = 1000;
 dt = t_end/nt;
-tc = (t0+dt/2) : dt : (t_end-dt/2);
-
+tc = t0 : dt : t_end;
+figure
+plot(tc,Y(tc), 'k--');
 hold on
-plot(tc,Y(tc), 'm-');
 
 % Gather FDS results
 ddir = [pwd, '\..\..\Verification\HVAC\'];
-fnt = {'HVAC_mass_transport_conv_0320','HVAC_mass_transport_conv_0640',...
-    'HVAC_mass_transport_conv_1280','HVAC_mass_transport_conv_2560',...
-    'HVAC_mass_transport_conv_5120'};
+fnt = {'HVAC_mass_transport_conv_0020','HVAC_mass_transport_conv_0040',...
+    'HVAC_mass_transport_conv_0080','HVAC_mass_transport_conv_0160',...
+    'HVAC_mass_transport_conv_0320'};
 plt_style = {'b-','g-','r-','m-','c-'};
-dx_array = {10/320,10/640,10/1280,10/2560,10/5120};
+nc_array = {20,40,80,160,320};
+dx_array = {1/20,1/40,1/80,1/160,1/320};
 
-ert = []; % initialize error norm vector
-dxx = []; % init dtt vector
+L2e = []; % initialize L2 error vector
+dxx = []; % init dxx vector
 
-% Loop over cases, plotting FDS results (hold on) and computing error vector
+% Loop over cases, plotting FDS results (hold on) and computing L2 error vector
 for i=1:length(fnt)
     M = importdata([ddir,fnt{i},'_devc.csv'],',',2);
     Y_fds = M.data(1:end,2); % FDS species data
     t_fds = M.data(1:end,1); % FDS time
-    Y_fds = interp1(t_fds,Y_fds,0:0.02:20); % re-sample Y(t)
-    nt = length(Y_fds);
-    dt = t_end/nt;
-    tc = (t0+dt/2) : dt : (t_end-dt/2) ;
-    plot(tc,Y_fds,plt_style{i})
-    dx = dx_array{i};
-    e_vec = Y_fds - Y(tc);
-%     plot(e_vec)
-    ert = [ert,norm(e_vec)/sqrt(length(e_vec))]; % populates ert vector, element-by-element
-    dxx = [dxx,dx]; % populates dtt vector, element-by-element
+    plot(t_fds,Y_fds,plt_style{i})
+    L2e = [L2e,sqrt(1/nc_array{i}*sum((Y(t_fds)-Y_fds).^2))]; % populates L2 error vector, element-by-element
+    dxx = [dxx,dx_array{i}]; % populates dxx vector, element-by-element
 end
 
-figure
-
-hh(1)=loglog(dxx,ert,'ksq-'); hold on
-
-hh(2)=loglog(dxx,50*dxx,'k--');
-hh(3)=loglog(dxx,50*(dxx.^2),'k-');
-
+% Mass fraction plot settings
 plot_style
+set(gca,'Units',Plot_Units)
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Label_Font_Size)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+
+xlabel('Time (s)')
+ylabel('Mass fraction (kg/kg)')
+legend({'Exact solution','FDS N\_CELLS = 20','FDS N\_CELLS = 40','FDS N\_CELLS = 80',...
+    'FDS N\_CELLS = 160','FDS N\_CELLS = 320'},'FontSize',Key_Font_Size,'location','southeast')
+legend('boxoff')
+
+Git_Filename = [ddir,'HVAC_mass_transport_conv_0320_git.txt'];
+addverstr(gca,Git_Filename,'linear')
+
+% Plot L2 error convergence
+figure
+hh(1)=loglog(dxx,L2e,'ksq-'); 
+hold on
+hh(2)=loglog(dxx,500*dxx,'k--');
+hh(3)=loglog(dxx,10*(dxx.^2),'k-');
+
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel('{\it \Deltax} (m)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-ylabel('L2 error (seconds)','FontSize',Title_Font_Size,'Interpreter',Font_Interpreter,'Fontname','Times')
-legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','northwest')
+xlabel('{\it \Deltax} (m)')
+ylabel('L2 error (kg/kg)')
+legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','southeast')
 legend('boxoff')
-
-% add SVN if file is available
 
 Git_Filename = [ddir,'HVAC_mass_transport_conv_0320_git.txt'];
 addverstr(gca,Git_Filename,'loglog')
