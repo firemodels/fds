@@ -1,0 +1,272 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: slicemask.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+slicemask.smv processing completed
+
+beginning wrap up 
+nblocks=740 sizeblocks=6750616
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=792 sizeblocks=6800436
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: slicemask.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: RENDERCLIP
+
+
+script: UNLOADALL
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: slicemask_01.sf
+ global min (slice file): 19.999981 node=(7,11,5)
+ global max (slice file): 499.785065 node=(0,9,5)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 266.9 Mb/s (overhead: 0.03 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_node1
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_node1.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: slicemask_02.sf
+ global min (slice file): 19.999981 node=(7,11,6)
+ global max (slice file): 499.765533 node=(0,14,6)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 286.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_node2
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_node2.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: slicemask_03.sf
+ global min (slice file): 19.999985 node=(0,20,7)
+ global max (slice file): 501.931671 node=(3,9,7)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 266.9 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_node3
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_node3.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: slicemask_04.sf
+ global min (slice file): 19.999983 node=(2,9,8)
+ global max (slice file): 500.010925 node=(3,10,8)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 364.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_node4
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_node4.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: slicemask_05.sf
+ global min (slice file): 19.999958 cell=(8,11,6)
+ global max (slice file): 499.821167 cell=(1,10,6)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 308.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_cell1
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_cell1.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: slicemask_06.sf
+ global min (slice file): 19.999971 cell=(6,5,7)
+ global max (slice file): 506.956818 cell=(5,13,7)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 364.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_cell2
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_cell2.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=889 sizeblocks=7121792
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: slicemask_07.sf
+ global min (slice file): 19.999935 cell=(3,10,8)
+ global max (slice file): 502.377228 cell=(4,10,8)
+computing slice color levels 
+After slice file load: 
+nblocks=902 sizeblocks=8124552
+ 0.5 MB loaded in 0.01 s - rate: 308.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 10.000000
+
+
+script: RENDERONCE
+script:  slicemask_cell3
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//slicemask_cell3.png . Completed.

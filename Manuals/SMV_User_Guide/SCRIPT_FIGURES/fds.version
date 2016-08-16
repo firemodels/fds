@@ -1,0 +1,18 @@
+
+ Fire Dynamics Simulator
+
+ Current Date     : August 12, 2016  04:48:00
+ Version          : FDS 6.5.1
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12, 2016  04:31:25
+
+ MPI Enabled; Number of MPI Processes:          1
+ OpenMP Enabled; Number of OpenMP Threads:   4
+
+ MPI version: 3.0
+ MPI library version: Open MPI v1.8.4, package: Open MPI gforney@blaze Distribution, ident: 1.8.4, repo rev: v1.8.3-330-g0344f04, Dec 19, 2014
+
+ Consult FDS Users Guide Chapter, Running FDS, for further instructions.
+
+ Hit Enter to Escape...

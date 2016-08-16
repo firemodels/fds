@@ -1,0 +1,336 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: objects_static.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+objects_static.smv processing completed
+
+beginning wrap up 
+nblocks=731 sizeblocks=6741715
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=764 sizeblocks=6755577
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: objects_static.ini
+
+script: RENDERDIR
+script:  ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  heat_detector_0
+
+script: set viewpoint to heat_detector_0
+
+
+
+script: RENDERONCE
+script:  heat_detector_0
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//heat_detector_0.png . Completed.
+
+script: SETVIEWPOINT
+script:  heat_detector_1
+
+script: set viewpoint to heat_detector_1
+
+
+
+script: RENDERONCE
+script:  heat_detector_1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//heat_detector_1.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  target
+
+script: set viewpoint to target
+
+
+
+script: RENDERONCE
+script:  target
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//target.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  sensor
+
+script: set viewpoint to sensor
+
+
+
+script: RENDERONCE
+script:  sensor
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//sensor.png . Completed.
+
+script: SETVIEWPOINT
+script:  sprinkler_upright_0
+
+script: set viewpoint to sprinkler_upright_0
+
+
+
+script: RENDERONCE
+script:  sprinkler_upright_0
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//sprinkler_upright_0.png . Completed.
+
+script: SETVIEWPOINT
+script:  sprinkler_upright_1
+
+script: set viewpoint to sprinkler_upright_1
+
+
+
+script: RENDERONCE
+script:  sprinkler_upright_1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//sprinkler_upright_1.png . Completed.
+
+script: SETVIEWPOINT
+script:  sprinkler_pendent_0
+
+script: set viewpoint to sprinkler_pendent_0
+
+
+
+script: RENDERONCE
+script:  sprinkler_pendent_0
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//sprinkler_pendent_0.png . Completed.
+
+script: SETVIEWPOINT
+script:  sprinkler_pendent_1
+
+script: set viewpoint to sprinkler_pendent_1
+
+
+
+script: RENDERONCE
+script:  sprinkler_pendent_1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//sprinkler_pendent_1.png . Completed.
+
+script: SETVIEWPOINT
+script:  smoke_detector_0
+
+script: set viewpoint to smoke_detector_0
+
+
+
+script: RENDERONCE
+script:  smoke_detector_0
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//smoke_detector_0.png . Completed.
+
+script: SETVIEWPOINT
+script:  smoke_detector_1
+
+script: set viewpoint to smoke_detector_1
+
+
+
+script: RENDERONCE
+script:  smoke_detector_1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//smoke_detector_1.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  nozzle_0
+
+script: set viewpoint to nozzle_0
+
+
+
+script: RENDERONCE
+script:  nozzle_0
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//nozzle_0.png . Completed.
+
+script: SETVIEWPOINT
+script:  nozzle_1
+
+script: set viewpoint to nozzle_1
+
+
+
+script: RENDERONCE
+script:  nozzle_1
+
+Rendering to: ../../Manuals/FDS_User_Guide/SCRIPT_FIGURES//nozzle_1.png . Completed.
+
+script: RENDERCLIP
+
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES/
+
+script: SETVIEWPOINT
+script:  sprinkler_upright_0
+
+script: set viewpoint to sprinkler_upright_0
+
+
+
+script: RENDERONCE
+script:  sprinkler_inact
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//sprinkler_inact.png . Completed.
+
+script: SETVIEWPOINT
+script:  sprinkler_upright_1
+
+script: set viewpoint to sprinkler_upright_1
+
+
+
+script: RENDERONCE
+script:  sprinkler_act
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//sprinkler_act.png . Completed.
+
+script: SETVIEWPOINT
+script:  smoke_detector_0
+
+script: set viewpoint to smoke_detector_0
+
+
+
+script: RENDERONCE
+script:  smokedetector_inact
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//smokedetector_inact.png . Completed.
+
+script: SETVIEWPOINT
+script:  smoke_detector_1
+
+script: set viewpoint to smoke_detector_1
+
+
+
+script: RENDERONCE
+script:  smokedetector_act
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//smokedetector_act.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  heat_detector_0
+
+script: set viewpoint to heat_detector_0
+
+
+
+script: RENDERONCE
+script:  heatdetector_inact
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//heatdetector_inact.png . Completed.
+
+script: SETVIEWPOINT
+script:  heat_detector_1
+
+script: set viewpoint to heat_detector_1
+
+
+
+script: RENDERONCE
+script:  heatdetector_act
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//heatdetector_act.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  target
+
+script: set viewpoint to target
+
+
+
+script: RENDERONCE
+script:  target
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//target.png . Completed.
+
+script: RENDERCLIP
+
+
+script: SETVIEWPOINT
+script:  sensor
+
+script: set viewpoint to sensor
+
+
+
+script: RENDERONCE
+script:  sensor
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//sensor.png . Completed.
+
+script: RENDERONCE
+script:  sensorplain
+
+Rendering to: ../../Manuals/SMV_User_Guide/SCRIPT_FIGURES//sensorplain.png . Completed.

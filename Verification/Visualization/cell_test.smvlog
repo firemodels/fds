@@ -1,0 +1,244 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: cell_test.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+cell_test.smv processing completed
+
+beginning wrap up 
+nblocks=771 sizeblocks=6780573
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=820 sizeblocks=6812157
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: cell_test.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: UNLOADALL
+
+
+script: KEYBOARD
+script:  *
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: cell_test_04.sf
+ global min (slice file): 311.000000 cell=(3,1,1)
+ global max (slice file): 345.000000 cell=(3,4,5)
+computing slice color levels 
+After slice file load: 
+nblocks=943 sizeblocks=7137893
+ 0.0 MB loaded in 0.00 s - rate: 3.4 Mb/s (overhead: 0.01 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 0.100000
+
+
+script: SETVIEWPOINT
+script:  view_x
+
+script: set viewpoint to view_x
+
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  cell_test_x
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//cell_test_x.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=924 sizeblocks=7137277
+
+
+script: KEYBOARD
+script:  *
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: cell_test_05.sf
+ global min (slice file): 111.000000 cell=(1,1,1)
+ global max (slice file): 315.000000 cell=(3,1,5)
+computing slice color levels 
+After slice file load: 
+nblocks=943 sizeblocks=7137797
+ 0.0 MB downloaded in 0.00 s (overhead: 0.00 s)
+
+script: SETTIMEVAL
+
+script: setting time to 0.100000
+
+
+script: SETVIEWPOINT
+script:  view_y
+
+script: set viewpoint to view_y
+
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  cell_test_y
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//cell_test_y.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=924 sizeblocks=7137277
+
+
+script: KEYBOARD
+script:  *
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: cell_test_13.sf
+ global min (slice file): 115.000000 cell=(1,1,5)
+ global max (slice file): 345.000000 cell=(3,4,5)
+computing slice color levels 
+After slice file load: 
+nblocks=943 sizeblocks=7137733
+ 0.0 MB downloaded in 0.00 s (overhead: 0.00 s)
+
+script: SETTIMEVAL
+
+script: setting time to 0.100000
+
+
+script: SETVIEWPOINT
+script:  view_z
+
+script: set viewpoint to view_z
+
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  cell_test_z
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//cell_test_z.png . Completed.
+
+script: UNLOADALL
+
+After slice unload: 
+nblocks=924 sizeblocks=7137277
+
+
+script: KEYBOARD
+script:  *
+
+
+script: LOADSLICEM
+script:  TEMPERATURE(cell centered)
+
+script: loading slice files of type: TEMPERATURE(cell centered) in mesh 1
+
+Loading slice data: cell_test_01.sf
+ global min (slice file): 111.000000 cell=(1,1,1)
+ global max (slice file): 345.000000 cell=(3,4,5)
+computing slice color levels 
+After slice file load: 
+nblocks=943 sizeblocks=7138305
+ 0.0 MB downloaded in 0.00 s (overhead: 0.00 s)
+
+script: SETTIMEVAL
+
+script: setting time to 0.100000
+
+
+script: SETVIEWPOINT
+script:  view_xyz
+
+script: set viewpoint to view_xyz
+
+
+
+script: KEYBOARD
+script:  x
+
+
+script: KEYBOARD
+script:  y
+
+
+script: KEYBOARD
+script:  z
+
+
+script: RENDERCLIP
+
+
+script: RENDERONCE
+script:  cell_test_3D
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//cell_test_3D.png . Completed.

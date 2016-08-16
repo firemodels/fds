@@ -1,0 +1,9 @@
+Status at T =    9.00E+02 DT =   0.600    
+ 
+ Compartment   Upper   Lower   Inter.  Pyrol     Fire      Pressure
+               Temp.   Temp.   Height  Rate      Size
+               (C)     (C)     (m)     (kg/s)    (W)       (Pa)
+ --------------------------------------------------------------------
+    1          124.4    52.0    1.5      0.00      0.00     -1.08    
+    2          256.2    99.3    1.9     8.969E-04 2.350E+04 -2.24    
+  Outside                                        1.881E-13
