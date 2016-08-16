@@ -1864,7 +1864,7 @@ inject the nitrogen at a specified rate into the particular grid cell that each 
 \subsection{Gas Injection via a Non-Isentropic Process (\texorpdfstring{\textct{isentropic2}}{isentropic2})}
 \label{isentropic2}
 
-This example checks that if a given mass of nitrogen is added via an external vent to a sealed compartment with adiabatic (i.e., no heat loss) walls, that the density, pressure and temperature ought to rise to the same values regardless of the duration of the injection time.  The results are plotted in Fig.~\ref{isentropic2}. In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the second case in 50~s. The temperature of the gas in both cases is 500~\si{\degree C}. It is expected that the pressure, $p$, should rise at the rate:
+This example checks that if a given mass of nitrogen is added via an external vent to a sealed compartment with adiabatic (i.e., no heat loss) walls, that the density, pressure and temperature ought to rise to the same values regardless of the duration of the injection time.  The results are plotted in Fig.~\ref{isentropic2_fig}. In the two cases, 0.2~kg of N$_2$ are added to a compartment that is 1~m$^3$ in volume. In the first case, the injection occurs in 10~s, in the second case in 50~s. The temperature of the gas in both cases is 500~\si{\degree C}. It is expected that the pressure, $p$, should rise at the rate:
 \be
    \frac{\d p}{\d t} = \frac{\gamma \, p \, u \, A}{V}
 \ee
@@ -1893,7 +1893,7 @@ Adding in the work due to the pressure yields the change in total enthalpy:
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/isentropic2_enthalpy}
 \end{tabular*}
 \caption[The \textct{isentropic2} test case]{Density, pressure, temperature, and enthalpy rise due to the injection of nitrogen into a sealed compartment.}
-\label{isentropic2}
+\label{isentropic2_fig}
 \end{figure}
 
 
