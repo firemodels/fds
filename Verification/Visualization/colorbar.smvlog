@@ -1,0 +1,183 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: colorbar.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+colorbar.smv processing completed
+
+beginning wrap up 
+nblocks=699 sizeblocks=6718546
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=745 sizeblocks=6732096
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: colorbar.ini
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+
+script: setting render path to ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES/
+clipping off
+
+
+script: LOADSLICEM
+script:  TEMPERATURE
+
+script: loading slice files of type: TEMPERATURE in mesh 1
+
+Loading slice data: colorbar_01.sf
+ global min (slice file): 9.963462 node=(17,6,0)
+ global max (slice file): 20.033611 node=(18,6,10)
+computing slice color levels 
+After slice file load: 
+nblocks=854 sizeblocks=7176768
+ 0.1 MB loaded in 0.00 s - rate: 246.0 Mb/s (overhead: 0.02 s)
+
+
+script: SETTIMEVAL
+
+script: setting time to 9.961175
+
+
+script: LOADINIFILE
+script:  colorbar_low.ini
+
+script: loading ini file colorbar_low.ini
+
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: colorbar.ini
+processing config file: colorbar_low.ini
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: RENDERONCE
+script:  colorbar_low
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_low.png . Completed.
+
+script: RENDERONCE
+script:  colorbar_low
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_low.png . Completed.
+
+script: LOADINIFILE
+script:  colorbar_med.ini
+
+script: loading ini file colorbar_med.ini
+
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: colorbar.ini
+processing config file: colorbar_med.ini
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: RENDERONCE
+script:  colorbar_med
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_med.png . Completed.
+
+script: RENDERONCE
+script:  colorbar_med
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_med.png . Completed.
+
+script: LOADINIFILE
+script:  colorbar_high.ini
+
+script: loading ini file colorbar_high.ini
+
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: colorbar.ini
+processing config file: colorbar_high.ini
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: SETVIEWPOINT
+script:  view 1
+
+script: set viewpoint to view 1
+
+
+
+script: RENDERONCE
+script:  colorbar_high
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_high.png . Completed.
+
+script: RENDERONCE
+script:  colorbar_high
+
+Rendering to: ../../Manuals/SMV_Verification_Guide/SCRIPT_FIGURES//colorbar_high.png . Completed.

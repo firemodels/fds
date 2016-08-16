@@ -1,0 +1,383 @@
+
+ Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+
+ Version          : Test
+ Revision         : Git-r17-404-gfef4a56
+ Revision Date    : Thu Aug 11 17:09:38 2016 -0400
+ Compilation Date : Aug 12 2016 04:40:03
+ Platform         : LINUX64
+Texture directory path: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/textures
+Scratch directory: /tmp/
+
+Initializing Glut
+Glut initialization completed
+
+Initializing OpenGL
+   Smokeview is running on a system using OpenGL 1.2 (1.5 Mesa 6.5.1)
+   OpenGL 2.0 or later is required to use the GPU.
+   GPU smoke shader not supported.
+   GPU shader initialization failed
+OpenGL initialization completed
+
+Processing object file:  /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/objects.svo
+Object file processing complete
+
+processing smokeview file: wind_test1.smv
+   pass 1 started
+   pass 1 completed
+   pass 2 started
+   pass 2 completed
+   pass 3 started
+     Loading surface textures
+       Loading colorbar texture - completed
+     Surface texture loading completed
+   pass 3 completed
+   pass 4 started
+   pass 4 completed
+wind_test1.smv processing completed
+
+beginning wrap up 
+nblocks=1243 sizeblocks=7017698
+  updating vector slices
+    0 vector slices found
+  vector slices update completed
+
+  initializing 3D smoke/hrrpuv blanking array - complete
+Creating blanking arrays in the background
+  initializing blanking array
+  blanking array initialization completed
+
+  updating smoke3d menu labels - completed
+wrap up completed
+
+nblocks=1838 sizeblocks=7398268
+processing config file: /home2/smokevis2/smokebot/FDS-SMVgitclean/SMV/for_bundle/smokeview.ini
+processing config file: wind_test1.ini
+
+script: RENDERDIR
+script:  frames/
+
+script: setting render path to frames/
+clipping off
+
+
+script: XSCENECLIP
+
+
+script: YSCENECLIP
+
+
+script: ZSCENECLIP
+
+
+script: SCENECLIP
+
+
+script: RENDERALL
+script:  wind_test1_movie
+
+script: Rendering every 1 frame(s) starting at frame 0
+
+Rendering to: frames//wind_test1_movie_0000.png . Completed.
+Rendering to: frames//wind_test1_movie_0001.png . Completed.
+Rendering to: frames//wind_test1_movie_0002.png . Completed.
+Rendering to: frames//wind_test1_movie_0003.png . Completed.
+Rendering to: frames//wind_test1_movie_0004.png . Completed.
+Rendering to: frames//wind_test1_movie_0005.png . Completed.
+Rendering to: frames//wind_test1_movie_0006.png . Completed.
+Rendering to: frames//wind_test1_movie_0007.png . Completed.
+Rendering to: frames//wind_test1_movie_0008.png . Completed.
+Rendering to: frames//wind_test1_movie_0009.png . Completed.
+Rendering to: frames//wind_test1_movie_0010.png . Completed.
+Rendering to: frames//wind_test1_movie_0011.png . Completed.
+Rendering to: frames//wind_test1_movie_0012.png . Completed.
+Rendering to: frames//wind_test1_movie_0013.png . Completed.
+Rendering to: frames//wind_test1_movie_0014.png . Completed.
+Rendering to: frames//wind_test1_movie_0015.png . Completed.
+Rendering to: frames//wind_test1_movie_0016.png . Completed.
+Rendering to: frames//wind_test1_movie_0017.png . Completed.
+Rendering to: frames//wind_test1_movie_0018.png . Completed.
+Rendering to: frames//wind_test1_movie_0019.png . Completed.
+Rendering to: frames//wind_test1_movie_0020.png . Completed.
+Rendering to: frames//wind_test1_movie_0021.png . Completed.
+Rendering to: frames//wind_test1_movie_0022.png . Completed.
+Rendering to: frames//wind_test1_movie_0023.png . Completed.
+Rendering to: frames//wind_test1_movie_0024.png . Completed.
+Rendering to: frames//wind_test1_movie_0025.png . Completed.
+Rendering to: frames//wind_test1_movie_0026.png . Completed.
+Rendering to: frames//wind_test1_movie_0027.png . Completed.
+Rendering to: frames//wind_test1_movie_0028.png . Completed.
+Rendering to: frames//wind_test1_movie_0029.png . Completed.
+Rendering to: frames//wind_test1_movie_0030.png . Completed.
+Rendering to: frames//wind_test1_movie_0031.png . Completed.
+Rendering to: frames//wind_test1_movie_0032.png . Completed.
+Rendering to: frames//wind_test1_movie_0033.png . Completed.
+Rendering to: frames//wind_test1_movie_0034.png . Completed.
+Rendering to: frames//wind_test1_movie_0035.png . Completed.
+Rendering to: frames//wind_test1_movie_0036.png . Completed.
+Rendering to: frames//wind_test1_movie_0037.png . Completed.
+Rendering to: frames//wind_test1_movie_0038.png . Completed.
+Rendering to: frames//wind_test1_movie_0039.png . Completed.
+Rendering to: frames//wind_test1_movie_0040.png . Completed.
+Rendering to: frames//wind_test1_movie_0041.png . Completed.
+Rendering to: frames//wind_test1_movie_0042.png . Completed.
+Rendering to: frames//wind_test1_movie_0043.png . Completed.
+Rendering to: frames//wind_test1_movie_0044.png . Completed.
+Rendering to: frames//wind_test1_movie_0045.png . Completed.
+Rendering to: frames//wind_test1_movie_0046.png . Completed.
+Rendering to: frames//wind_test1_movie_0047.png . Completed.
+Rendering to: frames//wind_test1_movie_0048.png . Completed.
+Rendering to: frames//wind_test1_movie_0049.png . Completed.
+Rendering to: frames//wind_test1_movie_0050.png . Completed.
+Rendering to: frames//wind_test1_movie_0051.png . Completed.
+Rendering to: frames//wind_test1_movie_0052.png . Completed.
+Rendering to: frames//wind_test1_movie_0053.png . Completed.
+Rendering to: frames//wind_test1_movie_0054.png . Completed.
+Rendering to: frames//wind_test1_movie_0055.png . Completed.
+Rendering to: frames//wind_test1_movie_0056.png . Completed.
+Rendering to: frames//wind_test1_movie_0057.png . Completed.
+Rendering to: frames//wind_test1_movie_0058.png . Completed.
+Rendering to: frames//wind_test1_movie_0059.png . Completed.
+Rendering to: frames//wind_test1_movie_0060.png . Completed.
+Rendering to: frames//wind_test1_movie_0061.png . Completed.
+Rendering to: frames//wind_test1_movie_0062.png . Completed.
+Rendering to: frames//wind_test1_movie_0063.png . Completed.
+Rendering to: frames//wind_test1_movie_0064.png . Completed.
+Rendering to: frames//wind_test1_movie_0065.png . Completed.
+Rendering to: frames//wind_test1_movie_0066.png . Completed.
+Rendering to: frames//wind_test1_movie_0067.png . Completed.
+Rendering to: frames//wind_test1_movie_0068.png . Completed.
+Rendering to: frames//wind_test1_movie_0069.png . Completed.
+Rendering to: frames//wind_test1_movie_0070.png . Completed.
+Rendering to: frames//wind_test1_movie_0071.png . Completed.
+Rendering to: frames//wind_test1_movie_0072.png . Completed.
+Rendering to: frames//wind_test1_movie_0073.png . Completed.
+Rendering to: frames//wind_test1_movie_0074.png . Completed.
+Rendering to: frames//wind_test1_movie_0075.png . Completed.
+Rendering to: frames//wind_test1_movie_0076.png . Completed.
+Rendering to: frames//wind_test1_movie_0077.png . Completed.
+Rendering to: frames//wind_test1_movie_0078.png . Completed.
+Rendering to: frames//wind_test1_movie_0079.png . Completed.
+Rendering to: frames//wind_test1_movie_0080.png . Completed.
+Rendering to: frames//wind_test1_movie_0081.png . Completed.
+Rendering to: frames//wind_test1_movie_0082.png . Completed.
+Rendering to: frames//wind_test1_movie_0083.png . Completed.
+Rendering to: frames//wind_test1_movie_0084.png . Completed.
+Rendering to: frames//wind_test1_movie_0085.png . Completed.
+Rendering to: frames//wind_test1_movie_0086.png . Completed.
+Rendering to: frames//wind_test1_movie_0087.png . Completed.
+Rendering to: frames//wind_test1_movie_0088.png . Completed.
+Rendering to: frames//wind_test1_movie_0089.png . Completed.
+Rendering to: frames//wind_test1_movie_0090.png . Completed.
+Rendering to: frames//wind_test1_movie_0091.png . Completed.
+Rendering to: frames//wind_test1_movie_0092.png . Completed.
+Rendering to: frames//wind_test1_movie_0093.png . Completed.
+Rendering to: frames//wind_test1_movie_0094.png . Completed.
+Rendering to: frames//wind_test1_movie_0095.png . Completed.
+Rendering to: frames//wind_test1_movie_0096.png . Completed.
+Rendering to: frames//wind_test1_movie_0097.png . Completed.
+Rendering to: frames//wind_test1_movie_0098.png . Completed.
+Rendering to: frames//wind_test1_movie_0099.png . Completed.
+Rendering to: frames//wind_test1_movie_0100.png . Completed.
+Rendering to: frames//wind_test1_movie_0101.png . Completed.
+Rendering to: frames//wind_test1_movie_0102.png . Completed.
+Rendering to: frames//wind_test1_movie_0103.png . Completed.
+Rendering to: frames//wind_test1_movie_0104.png . Completed.
+Rendering to: frames//wind_test1_movie_0105.png . Completed.
+Rendering to: frames//wind_test1_movie_0106.png . Completed.
+Rendering to: frames//wind_test1_movie_0107.png . Completed.
+Rendering to: frames//wind_test1_movie_0108.png . Completed.
+Rendering to: frames//wind_test1_movie_0109.png . Completed.
+Rendering to: frames//wind_test1_movie_0110.png . Completed.
+Rendering to: frames//wind_test1_movie_0111.png . Completed.
+Rendering to: frames//wind_test1_movie_0112.png . Completed.
+Rendering to: frames//wind_test1_movie_0113.png . Completed.
+Rendering to: frames//wind_test1_movie_0114.png . Completed.
+Rendering to: frames//wind_test1_movie_0115.png . Completed.
+Rendering to: frames//wind_test1_movie_0116.png . Completed.
+Rendering to: frames//wind_test1_movie_0117.png . Completed.
+Rendering to: frames//wind_test1_movie_0118.png . Completed.
+Rendering to: frames//wind_test1_movie_0119.png . Completed.
+Rendering to: frames//wind_test1_movie_0120.png . Completed.
+Rendering to: frames//wind_test1_movie_0121.png . Completed.
+Rendering to: frames//wind_test1_movie_0122.png . Completed.
+Rendering to: frames//wind_test1_movie_0123.png . Completed.
+Rendering to: frames//wind_test1_movie_0124.png . Completed.
+Rendering to: frames//wind_test1_movie_0125.png . Completed.
+Rendering to: frames//wind_test1_movie_0126.png . Completed.
+Rendering to: frames//wind_test1_movie_0127.png . Completed.
+Rendering to: frames//wind_test1_movie_0128.png . Completed.
+Rendering to: frames//wind_test1_movie_0129.png . Completed.
+Rendering to: frames//wind_test1_movie_0130.png . Completed.
+Rendering to: frames//wind_test1_movie_0131.png . Completed.
+Rendering to: frames//wind_test1_movie_0132.png . Completed.
+Rendering to: frames//wind_test1_movie_0133.png . Completed.
+Rendering to: frames//wind_test1_movie_0134.png . Completed.
+Rendering to: frames//wind_test1_movie_0135.png . Completed.
+Rendering to: frames//wind_test1_movie_0136.png . Completed.
+Rendering to: frames//wind_test1_movie_0137.png . Completed.
+Rendering to: frames//wind_test1_movie_0138.png . Completed.
+Rendering to: frames//wind_test1_movie_0139.png . Completed.
+Rendering to: frames//wind_test1_movie_0140.png . Completed.
+Rendering to: frames//wind_test1_movie_0141.png . Completed.
+Rendering to: frames//wind_test1_movie_0142.png . Completed.
+Rendering to: frames//wind_test1_movie_0143.png . Completed.
+Rendering to: frames//wind_test1_movie_0144.png . Completed.
+Rendering to: frames//wind_test1_movie_0145.png . Completed.
+Rendering to: frames//wind_test1_movie_0146.png . Completed.
+Rendering to: frames//wind_test1_movie_0147.png . Completed.
+Rendering to: frames//wind_test1_movie_0148.png . Completed.
+Rendering to: frames//wind_test1_movie_0149.png . Completed.
+Rendering to: frames//wind_test1_movie_0150.png . Completed.
+Rendering to: frames//wind_test1_movie_0151.png . Completed.
+Rendering to: frames//wind_test1_movie_0152.png . Completed.
+Rendering to: frames//wind_test1_movie_0153.png . Completed.
+Rendering to: frames//wind_test1_movie_0154.png . Completed.
+Rendering to: frames//wind_test1_movie_0155.png . Completed.
+Rendering to: frames//wind_test1_movie_0156.png . Completed.
+Rendering to: frames//wind_test1_movie_0157.png . Completed.
+Rendering to: frames//wind_test1_movie_0158.png . Completed.
+Rendering to: frames//wind_test1_movie_0159.png . Completed.
+Rendering to: frames//wind_test1_movie_0160.png . Completed.
+Rendering to: frames//wind_test1_movie_0161.png . Completed.
+Rendering to: frames//wind_test1_movie_0162.png . Completed.
+Rendering to: frames//wind_test1_movie_0163.png . Completed.
+Rendering to: frames//wind_test1_movie_0164.png . Completed.
+Rendering to: frames//wind_test1_movie_0165.png . Completed.
+Rendering to: frames//wind_test1_movie_0166.png . Completed.
+Rendering to: frames//wind_test1_movie_0167.png . Completed.
+Rendering to: frames//wind_test1_movie_0168.png . Completed.
+Rendering to: frames//wind_test1_movie_0169.png . Completed.
+Rendering to: frames//wind_test1_movie_0170.png . Completed.
+Rendering to: frames//wind_test1_movie_0171.png . Completed.
+Rendering to: frames//wind_test1_movie_0172.png . Completed.
+Rendering to: frames//wind_test1_movie_0173.png . Completed.
+Rendering to: frames//wind_test1_movie_0174.png . Completed.
+Rendering to: frames//wind_test1_movie_0175.png . Completed.
+Rendering to: frames//wind_test1_movie_0176.png . Completed.
+Rendering to: frames//wind_test1_movie_0177.png . Completed.
+Rendering to: frames//wind_test1_movie_0178.png . Completed.
+Rendering to: frames//wind_test1_movie_0179.png . Completed.
+Rendering to: frames//wind_test1_movie_0180.png . Completed.
+Rendering to: frames//wind_test1_movie_0181.png . Completed.
+Rendering to: frames//wind_test1_movie_0182.png . Completed.
+Rendering to: frames//wind_test1_movie_0183.png . Completed.
+Rendering to: frames//wind_test1_movie_0184.png . Completed.
+Rendering to: frames//wind_test1_movie_0185.png . Completed.
+Rendering to: frames//wind_test1_movie_0186.png . Completed.
+Rendering to: frames//wind_test1_movie_0187.png . Completed.
+Rendering to: frames//wind_test1_movie_0188.png . Completed.
+Rendering to: frames//wind_test1_movie_0189.png . Completed.
+Rendering to: frames//wind_test1_movie_0190.png . Completed.
+Rendering to: frames//wind_test1_movie_0191.png . Completed.
+Rendering to: frames//wind_test1_movie_0192.png . Completed.
+Rendering to: frames//wind_test1_movie_0193.png . Completed.
+Rendering to: frames//wind_test1_movie_0194.png . Completed.
+Rendering to: frames//wind_test1_movie_0195.png . Completed.
+Rendering to: frames//wind_test1_movie_0196.png . Completed.
+Rendering to: frames//wind_test1_movie_0197.png . Completed.
+Rendering to: frames//wind_test1_movie_0198.png . Completed.
+Rendering to: frames//wind_test1_movie_0199.png . Completed.
+Rendering to: frames//wind_test1_movie_0200.png . Completed.
+Rendering to: frames//wind_test1_movie_0201.png . Completed.
+Rendering to: frames//wind_test1_movie_0202.png . Completed.
+Rendering to: frames//wind_test1_movie_0203.png . Completed.
+Rendering to: frames//wind_test1_movie_0204.png . Completed.
+Rendering to: frames//wind_test1_movie_0205.png . Completed.
+Rendering to: frames//wind_test1_movie_0206.png . Completed.
+Rendering to: frames//wind_test1_movie_0207.png . Completed.
+Rendering to: frames//wind_test1_movie_0208.png . Completed.
+Rendering to: frames//wind_test1_movie_0209.png . Completed.
+Rendering to: frames//wind_test1_movie_0210.png . Completed.
+Rendering to: frames//wind_test1_movie_0211.png . Completed.
+Rendering to: frames//wind_test1_movie_0212.png . Completed.
+Rendering to: frames//wind_test1_movie_0213.png . Completed.
+Rendering to: frames//wind_test1_movie_0214.png . Completed.
+Rendering to: frames//wind_test1_movie_0215.png . Completed.
+Rendering to: frames//wind_test1_movie_0216.png . Completed.
+Rendering to: frames//wind_test1_movie_0217.png . Completed.
+Rendering to: frames//wind_test1_movie_0218.png . Completed.
+Rendering to: frames//wind_test1_movie_0219.png . Completed.
+Rendering to: frames//wind_test1_movie_0220.png . Completed.
+Rendering to: frames//wind_test1_movie_0221.png . Completed.
+Rendering to: frames//wind_test1_movie_0222.png . Completed.
+Rendering to: frames//wind_test1_movie_0223.png . Completed.
+Rendering to: frames//wind_test1_movie_0224.png . Completed.
+Rendering to: frames//wind_test1_movie_0225.png . Completed.
+Rendering to: frames//wind_test1_movie_0226.png . Completed.
+Rendering to: frames//wind_test1_movie_0227.png . Completed.
+Rendering to: frames//wind_test1_movie_0228.png . Completed.
+Rendering to: frames//wind_test1_movie_0229.png . Completed.
+Rendering to: frames//wind_test1_movie_0230.png . Completed.
+Rendering to: frames//wind_test1_movie_0231.png . Completed.
+Rendering to: frames//wind_test1_movie_0232.png . Completed.
+Rendering to: frames//wind_test1_movie_0233.png . Completed.
+Rendering to: frames//wind_test1_movie_0234.png . Completed.
+Rendering to: frames//wind_test1_movie_0235.png . Completed.
+Rendering to: frames//wind_test1_movie_0236.png . Completed.
+Rendering to: frames//wind_test1_movie_0237.png . Completed.
+Rendering to: frames//wind_test1_movie_0238.png . Completed.
+Rendering to: frames//wind_test1_movie_0239.png . Completed.
+Rendering to: frames//wind_test1_movie_0240.png . Completed.
+Rendering to: frames//wind_test1_movie_0241.png . Completed.
+Rendering to: frames//wind_test1_movie_0242.png . Completed.
+Rendering to: frames//wind_test1_movie_0243.png . Completed.
+Rendering to: frames//wind_test1_movie_0244.png . Completed.
+Rendering to: frames//wind_test1_movie_0245.png . Completed.
+Rendering to: frames//wind_test1_movie_0246.png . Completed.
+Rendering to: frames//wind_test1_movie_0247.png . Completed.
+Rendering to: frames//wind_test1_movie_0248.png . Completed.
+Rendering to: frames//wind_test1_movie_0249.png . Completed.
+Rendering to: frames//wind_test1_movie_0250.png . Completed.
+Rendering to: frames//wind_test1_movie_0251.png . Completed.
+Rendering to: frames//wind_test1_movie_0252.png . Completed.
+Rendering to: frames//wind_test1_movie_0253.png . Completed.
+Rendering to: frames//wind_test1_movie_0254.png . Completed.
+Rendering to: frames//wind_test1_movie_0255.png . Completed.
+Rendering to: frames//wind_test1_movie_0256.png . Completed.
+Rendering to: frames//wind_test1_movie_0257.png . Completed.
+Rendering to: frames//wind_test1_movie_0258.png . Completed.
+Rendering to: frames//wind_test1_movie_0259.png . Completed.
+Rendering to: frames//wind_test1_movie_0260.png . Completed.
+Rendering to: frames//wind_test1_movie_0261.png . Completed.
+Rendering to: frames//wind_test1_movie_0262.png . Completed.
+Rendering to: frames//wind_test1_movie_0263.png . Completed.
+Rendering to: frames//wind_test1_movie_0264.png . Completed.
+Rendering to: frames//wind_test1_movie_0265.png . Completed.
+Rendering to: frames//wind_test1_movie_0266.png . Completed.
+Rendering to: frames//wind_test1_movie_0267.png . Completed.
+Rendering to: frames//wind_test1_movie_0268.png . Completed.
+Rendering to: frames//wind_test1_movie_0269.png . Completed.
+Rendering to: frames//wind_test1_movie_0270.png . Completed.
+Rendering to: frames//wind_test1_movie_0271.png . Completed.
+Rendering to: frames//wind_test1_movie_0272.png . Completed.
+Rendering to: frames//wind_test1_movie_0273.png . Completed.
+Rendering to: frames//wind_test1_movie_0274.png . Completed.
+Rendering to: frames//wind_test1_movie_0275.png . Completed.
+Rendering to: frames//wind_test1_movie_0276.png . Completed.
+Rendering to: frames//wind_test1_movie_0277.png . Completed.
+Rendering to: frames//wind_test1_movie_0278.png . Completed.
+Rendering to: frames//wind_test1_movie_0279.png . Completed.
+Rendering to: frames//wind_test1_movie_0280.png . Completed.
+Rendering to: frames//wind_test1_movie_0281.png . Completed.
+Rendering to: frames//wind_test1_movie_0282.png . Completed.
+Rendering to: frames//wind_test1_movie_0283.png . Completed.
+Rendering to: frames//wind_test1_movie_0284.png . Completed.
+Rendering to: frames//wind_test1_movie_0285.png . Completed.
+Rendering to: frames//wind_test1_movie_0286.png . Completed.
+Rendering to: frames//wind_test1_movie_0287.png . Completed.
+
+script: RENDERDIR
+script:  ../../Manuals/SMV_Summary/movies/
+
+script: setting render path to ../../Manuals/SMV_Summary/movies/
+
+script: SETTIMEVAL
+
+script: setting time to 33114.980469
+
+
+script: RENDERONCE
+script:  wind_test1_002
+
+Rendering to: ../../Manuals/SMV_Summary/movies//wind_test1_002.png . Completed.

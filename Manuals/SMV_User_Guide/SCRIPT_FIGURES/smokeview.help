@@ -1,0 +1,25 @@
+Smokeview Test (Git-r17-404-gfef4a56) - Aug 12 2016 - 04:40:03
+Visualize fire/smoke flow simulations.
+
+Usage: smokeview_linux_test_64 [options] casenamewhere 
+
+ casename       - project id (file names without the extension)
+ -bindir dir    - specify location of smokeview bin directory
+ -build         - show directives used in this build of Smokeview
+ -convert_ini case1.ini case2.ini - update case1.ini to the current format
+                  and save results into case2.ini
+ -demo          - use demonstrator mode of Smokeview
+ -fed            - pre-calculate all FED slice files
+ -help          - display this message
+ -ini           - output default smokeview parameters to smokeview.ini
+ -ng_ini        - No graphics version of -ini.
+ -runscript     - run the script file casename.ssf
+ -script scriptfile - run the script file scriptfile
+ -skipframe n   - render every n frames
+ -startframe n  - start rendering at frame n
+ -stereo        - activate stereo mode
+ -tempdir       - forces output files to be written to the temporary directory
+ -update_bounds - calculate boundary file bounds and save to casename.bini
+ -update_ini case.ini - update case.ini to the current format
+ -version       - display version information
+ -volrender     - generate images of volume rendered smoke and fire
