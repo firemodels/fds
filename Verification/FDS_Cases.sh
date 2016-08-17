@@ -460,7 +460,6 @@ $QFDS -t -p 4 -d Adaptive_Mesh_Refinement random_meshes.fds
 $QFDS -t -p 8 -d Fires circular_burner.fds
 
 $QFDS -t -p 5 -d Flowfields simple_duct.fds
-$QFDS -t -p 5 -d Flowfields simple_duct_2.fds
 $QFDS -t -p 8 -d Flowfields symmetry_test_mpi.fds
 $QFDS -t -p 8 -d Flowfields volume_flow_1.fds
 $QFDS -t -p 8 -d Flowfields volume_flow_2.fds

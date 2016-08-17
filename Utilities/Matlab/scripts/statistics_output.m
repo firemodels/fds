@@ -37,14 +37,14 @@ if strcmp(Stats_Output, 'Verification')
     fid = fopen(Statistics_Tex_Output, 'wt');
     % Generate table header information in .tex file
     fprintf(fid, '%s\n', '\scriptsize');
-    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|}');
+    fprintf(fid, '%s\n', '\begin{longtable}[c]{@{\extracolsep{\fill}}|l|c|c|c|c|c|c|c|}');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          &         & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endfirsthead');
     fprintf(fid, '%s\n', '\hline');
-    fprintf(fid, '%s\n', 'Case Name & Expected & Predicted & Type of & Error & Error     & Within    \\');
-    fprintf(fid, '%s\n', '          & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
+    fprintf(fid, '%s\n', 'Case Name & Section & Expected & Predicted & Type of & Error & Error     & Within    \\');
+    fprintf(fid, '%s\n', '          &         & Value    & Value     & Error   &       & Tolerance & Tol.      \\ \hline \hline');
     fprintf(fid, '%s\n', '\endhead');
     fprintf(fid, '%s\n', '\hline');
     fprintf(fid, '%s\n', '\endfoot');
@@ -56,6 +56,7 @@ if strcmp(Stats_Output, 'Verification')
         m = output_stats;
         % Escape underscores for LaTeX
         case_name = strrep(m{i_row, 3}, '_', '\_');
+        case_name_section = ['\ref{',m{i_row,3},'}'];
         % Additional columns
         expected_value = m{i_row, 5};
         predicted_value = m{i_row, 6};
@@ -69,6 +70,7 @@ if strcmp(Stats_Output, 'Verification')
         
         % Write out all columns to .tex file
         fprintf(fid, '%s', case_name, ' & ');
+        fprintf(fid, '%s', case_name_section, ' & ');
         fprintf(fid, '%s', num2str(expected_value, '%1.2e'), ' & ');
         fprintf(fid, '%s', num2str(predicted_value, '%1.2e'), ' & ');
         fprintf(fid, '%s', error_type, ' & ');
