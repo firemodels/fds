@@ -26,6 +26,7 @@ void Usage(char *prog){
   fprintf(stdout, "Usage:\n");
   fprintf(stdout, "  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-show][-version] casename.in\n");
   fprintf(stdout, "  -dir dir  - directory containing elevation and map files (default: '.')\n");
+  fprintf(stdout, "  -elevs    - only output elevations, do not create a complete FDS input file\n");
   fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords (experimental)\n");
   fprintf(stdout, "  -help     - display this message\n");
   fprintf(stdout, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
@@ -80,6 +81,9 @@ int main(int argc, char **argv){
       else if(strncmp(arg, "-nobuffer", 8) == 0|| strncmp(arg, "-n", 2) == 0){
         border_buffer = 0;
       }
+      else if(strncmp(arg, "-elevs", 6) == 0 || strncmp(arg, "-e", 2) == 0) {
+        elev_file = 1;
+      }
       else if(strncmp(arg, "-obst", 5) == 0|| strncmp(arg, "-o", 2) == 0){
         gen_fds = FDS_OBST;
       }
@@ -100,7 +104,7 @@ int main(int argc, char **argv){
     }
   }
   if(casename == NULL)casename = file_default;
-  if (GetElevations(casename,&fds_elevs) == 1) {
+  if(GetElevations(casename,&fds_elevs) == 1) {
     GenerateFDSInputFile(casename, &fds_elevs, gen_fds);
   }
   return 0;
