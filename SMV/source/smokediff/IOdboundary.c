@@ -49,7 +49,7 @@ boundary *getboundary(boundary *boundaryin, casedata *case2){
     boundaryout = case2->boundaryinfo + i;
     if(boundaryin->boundarytype!=boundaryout->boundarytype)continue;
     if(strcmp(boundaryin->label.longlabel,boundaryout->label.longlabel)!=0)continue;
-    if(mesh_match(boundaryin->boundarymesh,boundaryout->boundarymesh)==0)continue;
+    if(mesh_Match(boundaryin->boundarymesh,boundaryout->boundarymesh)==0)continue;
     patch2index=boundaryin->patch2index;
     for(j=0;j<boundaryin->npatches;j++){
       patch2index[j]=getpatchindex(j,boundaryin,boundaryout);
