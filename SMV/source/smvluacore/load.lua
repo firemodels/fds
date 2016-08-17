@@ -41,6 +41,7 @@ function load.slice_std(slice_type, axis, distance)
     return loadslice_std(slice_type, axis, distance)
 end
 
+-- TODO: load using path relative to simulation directory
 function load.datafile(filename)
     local errorcode = loaddatafile(filename)
     if errorcode == 1 then

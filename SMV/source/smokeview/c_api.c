@@ -24,7 +24,7 @@ void readboundini(void);
 void init_lang(void);
 void Init(void);
 // from menus.c
-void update_menu(void);
+void UpdateMenu(void);
 void LoadVolSmoke3DMenu(int value);
 void UnLoadVolSmoke3DMenu(int value);
 
@@ -99,7 +99,7 @@ int loadsmvall(const char *input_filename) {
   if(return_code==0&&update_bounds==1)return_code=Update_Bounds();
   if(return_code!=0)return 1;
   // if(convert_ini==1){
-    // readini(ini_from);
+    // ReadINI(ini_from);
   // }
 }
 
@@ -175,7 +175,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
     else{
       input_file=smv_filename;
     }
-    return_code=readsmv(input_file,iso_filename);
+    return_code=ReadSMV(input_file,iso_filename);
     if(return_code==0){
       show_glui_trainer();
       show_glui_alert();
@@ -183,7 +183,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
   }
   else{
     input_file=smv_filename;
-    return_code=readsmv(input_file,iso_filename);
+    return_code=ReadSMV(input_file,iso_filename);
   }
   switch(return_code){
     case 1:
@@ -194,7 +194,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
               input_file);
       return 2;
     case 0:
-      readsmv_dynamic(input_file);
+      ReadSMVDynamic(input_file);
       break;
     default:
       ASSERT(FFALSE);
@@ -203,11 +203,11 @@ int loadsmv(char *input_filename, char *input_filename_ext){
   /* initialize units */
 
   InitUnits();
-  init_unit_defs();
-  set_unit_vis();
+  InitUnitDefs();
+  SetUnitVis();
 
   CheckMemory;
-  readini(NULL);
+  ReadINI(NULL);
   readboundini();
   if(use_graphics==0)return 0;
 #ifdef pp_LANG
@@ -230,7 +230,7 @@ int loadsmv(char *input_filename, char *input_filename_ext){
   glui_stereo_setup(mainwindow_id);
   glui_3dsmoke_setup(mainwindow_id);
 
-  if(UpdateLIGHTS==1)updateLights(light_position0,light_position1);
+  if(UpdateLIGHTS==1)UpdateLights(light_position0,light_position1);
 
   glutReshapeWindow(screenWidth,screenHeight);
 
@@ -330,12 +330,12 @@ int loadfile(const char *filename) {
     if(strcmp(plot3di->file,filename)==0){
       ReadPlot3dFile=1;
       readplot3d(plot3di->file,i,LOAD,&errorcode);
-      update_menu();
+      UpdateMenu();
       return errorcode;
     }
   }
 
-  fprintf(stderr,"*** Error: file %s failed to load\n",filename);
+  fprintf(stderr,"*** Error: file %s is not listed in .smv file\n",filename);
   return 1;
 }
 
@@ -346,7 +346,7 @@ void loadinifile(const char *filepath){
   windowresized=0;
   char f[1048];
   strcpy(f,filepath);
-  readini(f);
+  ReadINI(f);
 }
 
 /* ------------------ loadvfile ------------------------ */
@@ -406,7 +406,7 @@ void loadboundaryfile(const char *filepath){
                              "load\n",filepath);
   force_redisplay=1;
   updatemenu=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
 
 }
 
@@ -473,12 +473,12 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 
         switch(view_mode) {
             case VIEW_LEFT:
-                if(showstereo==STEREO_LR){
+                if(stereotype==STEREO_LR){
                     view_suffix = "_L";
                 }
                 break;
             case VIEW_RIGHT:
-                if(showstereo==STEREO_LR){
+                if(stereotype==STEREO_LR){
                     view_suffix = "_R";
                 }
                 break;
@@ -493,27 +493,29 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
         if(can_write_to_dir(renderfile_dir)==0){
             printf("Creating directory: %s\n", renderfile_dir);
 
-// #if defined(WIN32)
-//             CreateDirectory (renderfile_dir, NULL);
-// #elif defined(_MINGW32_)
-//             CreateDirectory (renderfile_dir, NULL);
-// #else
-//             mkdir(renderfile_dir, 0700);
-// #endif
             // TODO: ensure this can be made cross-platform
             if (strlen(renderfile_dir)>0) {
                 printf("making dir: %s", renderfile_dir);
-#ifdef MINGW
-                mkdir(renderfile_dir);
-#elif defined(pp_LINUX)
-                mkdir(renderfile_dir, 0755);
+#if defined(__MINGW32__)
+            mkdir(renderfile_dir);
+#elif defined(WIN32)
+            CreateDirectory(renderfile_dir, NULL);
+#else // linux or osx
+            mkdir(renderfile_dir, 0755);
 #endif
-#ifdef pp_OSX
-                mkdir(renderfile_dir, 0755);
-#endif
+// #ifdef __MINGW32__
+//                 fprintf(stderr, "%s\n", "making directory(mingw)\n");
+//                 mkdir(renderfile_dir);
+// #elif defined(pp_LINUX)
+//                 fprintf(stderr, "%s\n", "making directory(linux)\n");
+//                 mkdir(renderfile_dir, 0755);
+// #endif
+// #ifdef pp_OSX
+//                 mkdir(renderfile_dir, 0755);
+// #endif
             }
         }
-        if(showstereo==STEREO_LR
+        if(stereotype==STEREO_LR
             &&(view_mode==VIEW_LEFT||view_mode==VIEW_RIGHT)){
           hoffset=screenHeight/4;
           screenH = screenHeight/2;
@@ -522,7 +524,9 @@ char* form_filename(int view_mode, char *renderfile_name, char *renderfile_dir,
 
         snprintf(renderfile_name, 1024,
                   "%s%s%s",
-                  fdsprefix, view_suffix, renderfile_ext);
+                  chidfilebase, view_suffix, renderfile_ext);
+        printf("chidfilebase is: %s\n", chidfilebase);
+        printf("fdsprefix is: %s\n", fdsprefix);
         printf("directory is: %s\n", renderfile_dir);
         printf("filename is: %s\n", renderfile_name);
     } else {
@@ -561,14 +565,14 @@ int RenderFrameLua(int view_mode, const char *basename) {
 
   screenH = screenHeight;
   // we should not be rendering under these conditions
-  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return 0;
+  if(view_mode==VIEW_LEFT&&stereotype==STEREO_RB)return 0;
   // construct filename for image to be rendered
   form_filename(view_mode, renderfile_name, renderfile_dir, renderfile_path,
                 woffset, hoffset, screenH, basename);
 
   printf("renderfile_name: %s\n", renderfile_name);
   // render image
-  return_code = SVimage2file(renderfile_dir,renderfile_name,render_filetype,
+  return_code = SmokeviewImage2File(renderfile_dir,renderfile_name,render_filetype,
                              woffset,screenWidth,hoffset,screenH);
   if(RenderTime==1&&output_slicedata==1){
     output_Slicedata();
@@ -592,7 +596,7 @@ int RenderFrameLuaVar(int view_mode, gdImagePtr *RENDERimage) {
 
   screenH = screenHeight;
   // we should not be rendering under these conditions
-  if(view_mode==VIEW_LEFT&&showstereo==STEREO_RB)return 0;
+  if(view_mode==VIEW_LEFT&&stereotype==STEREO_RB)return 0;
   // render image
   return_code = SVimage2var(render_filetype,
                              woffset,screenWidth,hoffset,screenH, RENDERimage);
@@ -738,7 +742,7 @@ int settime(float timeval) {
     script_itime=imin;
     stept=0;
     force_redisplay=1;
-    Update_Framenumber(0);
+    UpdateFrameNumber(0);
     UpdateTimeLabels();
     PRINTF("script: time set to %f s (i.e. frame number: %d)\n\n",
          global_times[itimes], itimes);
@@ -755,11 +759,11 @@ void set_slice_in_obst(int setting) {
 	if(show_slice_in_obst==0)PRINTF("Not showing slices witin blockages.\n");
   if(show_slice_in_obst==1)PRINTF("Showing slices within blockages.\n");
   // updateslicefilenum();
-  // plotstate=getplotstate(DYNAMIC_PLOTS);
+  // plotstate=GetPlotState(DYNAMIC_PLOTS);
 	//
   // updateglui();
   // updateslicelistindex(slicefilenum);
-  // Update_Show();
+  // UpdateShow();
 }
 
 int get_slice_in_obst() {
@@ -846,7 +850,7 @@ void set_framelabel_visibility(int setting) {
     visHRRlabel=0;
     if(hrrinfo!=NULL){
       hrrinfo->display=visHRRlabel;
-      Update_Times();
+      UpdateTimes();
     }
   }
   if(visFramelabel==0)PRINTF("Frame label hidden\n");
@@ -866,7 +870,7 @@ void toggle_framelabel_visibility() {
       visHRRlabel=0;
       if(hrrinfo!=NULL){
         hrrinfo->display=visHRRlabel;
-        Update_Times();
+        UpdateTimes();
       }
   }
   if(visFramelabel==0)PRINTF("Frame label hidden\n");
@@ -927,7 +931,7 @@ void toggle_hrrcutoff_visibility() {
 // HRR label
 void set_hrrlabel_visibility(int setting) {
   visHRRlabel = setting;
-  if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+  if (hrrinfo != NULL&&hrrinfo->display != 0)UpdateHrrinfo(0);
   if(show_hrrcutoff==0)PRINTF("HRR label hidden\n");
   if(show_hrrcutoff==1)PRINTF("HRR label visible\n");
 }
@@ -938,7 +942,7 @@ int get_hrrlabel_visibility() {
 
 void toggle_hrrlabel_visibility() {
   visHRRlabel = 1 - visHRRlabel;
-  if (hrrinfo != NULL&&hrrinfo->display != 0)Update_hrrinfo(0);
+  if (hrrinfo != NULL&&hrrinfo->display != 0)UpdateHrrinfo(0);
   if(show_hrrcutoff==0)PRINTF("HRR label hidden\n");
   if(show_hrrcutoff==1)PRINTF("HRR label visible\n");
 }
@@ -1201,7 +1205,7 @@ void setframe(int framenumber) {
   script_itime=itimes;
   stept=0;
   force_redisplay=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
 }
 
@@ -1258,21 +1262,20 @@ void loadvolsmokeframe(int meshnumber, int framenumber, int flag) {
       vr->display = 1;
     }
   }
-  plotstate = getplotstate(DYNAMIC_PLOTS);
+  plotstate = GetPlotState(DYNAMIC_PLOTS);
   stept = 1;
-  Update_Times();
+  UpdateTimes();
   force_redisplay = 1;
-  Update_Framenumber(framenum);
+  UpdateFrameNumber(framenum);
   i = framenum;
   itimes = i;
   script_itime = i;
   stept = 1;
   force_redisplay = 1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   UpdateTimeLabels();
   // TODO: replace with a call to render()
   keyboard('r', FROM_SMOKEVIEW);
-  RenderOnceNow = 0;
   if(flag == 1)script_render = 1;// called when only rendering a single frame
 }
 
@@ -1409,7 +1412,7 @@ void loadparticles(const char *name){
   }
   if(count==0)fprintf(stderr,"*** Error: Particles files failed to load\n");
   force_redisplay=1;
-  Update_Framenumber(0);
+  UpdateFrameNumber(0);
   updatemenu=1;
 }
 /* ------------------ partclasscolor ------------------------ */
@@ -1593,7 +1596,7 @@ void loadplot3d(int meshnumber, float time_local){
   set_labels_controls();
   if(count==0)fprintf(stderr,"*** Error: Plot3d file failed to load\n");
 
-  //update_menu();
+  //UpdateMenu();
 }
 
 /* ------------------ loadiso ------------------------ */
@@ -1887,7 +1890,20 @@ int setrenderdir(const char *dir) {
   int l = strlen(dir);
   char *dir_path_temp = malloc(l+1);
   strncpy(dir_path_temp,dir,l+1);
+  // TODO: should we make the directory at this point?
 	if(dir!=NULL&&strlen(dir_path_temp)>0){
+    printf("making dir: %s", dir_path_temp);
+
+#if defined(__MINGW32__)
+    fprintf(stderr, "%s\n", "making directory(mingw)\n");
+    mkdir(dir_path_temp);
+#elif defined(WIN32)
+    fprintf(stderr, "%s\n", "making directory(win32)\n");
+    CreateDirectory(dir_path_temp, NULL);
+#else // linux or osx
+    fprintf(stderr, "%s\n", "making directory(linux/osx)\n");
+    mkdir(dir_path_temp, 0755);
+#endif
       if(can_write_to_dir(dir_path_temp)==0){
         fprintf(stderr,"*** Error: Cannot write to the RENDERDIR "
                 "directory: %s\n",dir_path_temp);
@@ -2168,7 +2184,7 @@ int set_colorbar_colors(int ncolors, float colors[][3]) {
   FREEMEMORY(rgb_ini);
   rgb_ini = rgb_ini_copy;
   nrgb_ini = ncolors;
-  initrgb();
+  InitRGB();
   return 0;
 }
 
@@ -2268,7 +2284,7 @@ int set_colortable(int ncolors, int colors[][4], char **names) {
       colortabledata *rgbi;
       rgbi = ctableinfo + i;
       // TODO: This sets the default alpha value to 255, as per the
-      // original readsmv.c function, but is defunct in this context
+      // original ReadSMV.c function, but is defunct in this context
       // as this value is required by the function prototype.
       // color[i][3] = 255;
       strcpy(rgbi->label, names[i]);
@@ -3073,7 +3089,7 @@ int set_startuplang(const char *lang) {
 #endif
 
 int set_stereo(int v) {
-  showstereo = v;
+  stereotype = v;
   return 0;
 } // STEREO
 
@@ -3193,10 +3209,11 @@ int set_renderclip(int use_flag, int left, int right, int bottom, int top) {
   return 0;
 } // RENDERCLIP
 
-int set_renderfilelabel(int v) {
-  renderfilelabel = v;
-  return 0;
-} // RENDERFILELABEL
+// DEPRECATED
+// int set_renderfilelabel(int v) {
+//   renderfilelabel = v;
+//   return 0;
+// } // RENDERFILELABEL
 
 int set_renderfiletype(int render, int movie) {
   render_filetype = render;
@@ -3220,11 +3237,12 @@ int set_skybox() {
   return 0;
 } // SKYBOX TODO
 
-int set_renderoption(int opt, int rows) {
-  render_option = opt;
-  nrender_rows = rows;
-  return 0;
-} // RENDEROPTION
+// DEPRECATED
+// int set_renderoption(int opt, int rows) {
+//   render_option = opt;
+//   nrender_rows = rows;
+//   return 0;
+// } // RENDEROPTION
 
 int set_unitclasses(int n, int indices[]) {
   int i;
@@ -4073,7 +4091,7 @@ int show_smoke3d_showall() {
     if(smoke3di->loaded==1)smoke3di->display=1;
   }
   glutPostRedisplay();
-  Update_Show();
+  UpdateShow();
   return 0;
 }
 
@@ -4087,7 +4105,7 @@ int show_smoke3d_hideall() {
     smoke3di = smoke3dinfo + i;
     if(smoke3di->loaded==1)smoke3di->display=0;
   }
-  Update_Show();
+  UpdateShow();
   return 0;
 }
 
@@ -4101,11 +4119,11 @@ int show_slices_showall(){
   }
   show_all_slices=1;
   updateslicefilenum();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
   glutPostRedisplay();
   return 0;
 }
@@ -4120,10 +4138,10 @@ int show_slices_hideall(){
   }
   show_all_slices=0;
   updateslicefilenum();
-  plotstate=getplotstate(DYNAMIC_PLOTS);
+  plotstate=GetPlotState(DYNAMIC_PLOTS);
 
   updateglui();
   updateslicelistindex(slicefilenum);
-  Update_Show();
+  UpdateShow();
   return 0;
 }

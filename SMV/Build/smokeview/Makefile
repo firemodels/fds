@@ -66,7 +66,8 @@ SMVLUACORE_FILES = $(SMVLUACORE_DIR)/smv.lua $(SMVLUACORE_DIR)/ssf.lua \
 	$(SMVLUACORE_DIR)/iniparser.lua $(SMVLUACORE_DIR)/inioptions.lua
 
 smvluacore: $(SMVLUACORE_FILES)
-	cp $(SMVLUACORE_FILES) . # cannot use $^ here
+	cp $(SMVLUACORE_FILES) .
+# cannot use $^ here
 
 # ------------- libraries used by smokeview -------------------
 

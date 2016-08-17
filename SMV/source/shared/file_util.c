@@ -586,6 +586,24 @@ char *getprogdir(char *progname, char **svpath){
   return progpath;
 }
 
+/* ------------------ getprogdir ------------------------ */
+
+#ifdef pp_LUA
+char *getprogdirabs(char *progname, char **svpath){
+
+// returns the absolute path of the directory containing the file progname
+  char *progpath;
+#ifdef WIN32
+  NewMemory((void **)&progpath,_MAX_PATH);
+  _fullpath(progpath,getprogdir(progname,svpath),_MAX_PATH);
+#else
+  NewMemory((void **)&progpath,PATH_MAX);
+  realpath(getprogdir(progname,svpath),progpath);
+#endif
+  return progpath;
+}
+#endif
+
 /* ------------------ lastname ------------------------ */
 
 char *lastname(char *argi){
