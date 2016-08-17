@@ -58,7 +58,7 @@ intel_win_64 : FC        = ifort
 intel_win_64 : exe       = smokezip_win_64.exe
 
 intel_win_64 : $(objwin)
-	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/lib_win_intel_64/pthreads.lib $(LIB_DIR)/lib_win_intel_64/zlib.lib
+	$(CPP) -o $(bin)/$(exe) $(objwin) $(LIB_DIR)/intel_win_64/pthreads.lib $(LIB_DIR)/intel_win_64/zlib.lib
 
 # ------------- gnu Linux ----------------
 #  gnu linux
@@ -72,7 +72,7 @@ gnu_linux_64 : FC        = gfortran
 gnu_linux_64 : exe       = smokezip_linux_64
 
 gnu_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -lgfortran -L $(LIB_DIR)/gnu_linux_64 -lz -lpthread
 
 # ------------- gnu OSX ----------------
 #  gnu linux
@@ -86,7 +86,7 @@ gnu_osx_64 : FC        = gfortran
 gnu_osx_64 : exe       = smokezip_osx_64
 
 gnu_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L/usr/local/lib/gcc/5 -lgfortran -L $(LIB_DIR)/lib_linux_gnu_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) $(obj) $(LFLAGS) -L/usr/local/lib/gcc/5 -lgfortran -L $(LIB_DIR)/gnu_linux_64 -lz -lpthread
 
 
 # ------------- Linux 64 ----------------
@@ -103,7 +103,7 @@ intel_linux_64 : FC        = ifort
 intel_linux_64 : exe       = smokezip_linux_64
 
 intel_linux_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64) -L $(LIB_DIR)/lib_linux_intel_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -static-intel $(obj) $(LINUXFORTLIBS_64) -L $(LIB_DIR)/intel_linux_64 -lz -lpthread
 
 	
 OSXFORTLIBS=$(FORTLIBDIR)/libifcoremt.a $(FORTLIBDIR)/libimf.a $(FORTLIBDIR)/libirc.a $(FORTLIBDIR)/libsvml.a
@@ -119,7 +119,7 @@ intel_osx_64 : FC        = ifort
 intel_osx_64 : exe       = smokezip_osx_64
 
 intel_osx_64 : $(obj)
-	$(CPP) -o $(bin)/$(exe) -m64 -static-intel $(obj)  -mmacosx-version-min=10.4 $(OSXFORTLIBS) -L $(LIB_DIR)/lib_osx_intel_64 -lz -lpthread
+	$(CPP) -o $(bin)/$(exe) -m64 -static-intel $(obj)  -mmacosx-version-min=10.4 $(OSXFORTLIBS) -L $(LIB_DIR)/intel_osx_64 -lz -lpthread
 
 #-------------- compile sring_util.c so revision strings are updated -----------
 

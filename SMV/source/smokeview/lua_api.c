@@ -15,6 +15,8 @@
 #include GLUT_H
 #include "gd.h"
 
+#include <unistd.h>
+
 lua_State* L;
 int lua_displayCB(lua_State *L);
 
@@ -2895,12 +2897,13 @@ int lua_set_labelstartupview(lua_State *L) {
   return 1;
 }
 
-int lua_set_pixelskip(lua_State *L) {
-  int v = lua_tonumber(L, 1);
-  int return_code = set_pixelskip(v);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_pixelskip(lua_State *L) {
+//   int v = lua_tonumber(L, 1);
+//   int return_code = set_pixelskip(v);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_renderclip(lua_State *L) {
   int use_flag = lua_tonumber(L, 1);
@@ -2913,12 +2916,13 @@ int lua_set_renderclip(lua_State *L) {
   return 1;
 }
 
-int lua_set_renderfilelabel(lua_State *L) {
-  int v = lua_tonumber(L, 1);
-  int return_code = set_renderfilelabel(v);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_renderfilelabel(lua_State *L) {
+//   int v = lua_tonumber(L, 1);
+//   int return_code = set_renderfilelabel(v);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_renderfiletype(lua_State *L) {
   int render = lua_tonumber(L, 1);
@@ -2933,13 +2937,14 @@ int lua_set_renderfiletype(lua_State *L) {
 //   return 0;
 // }
 
-int lua_set_renderoption(lua_State *L) {
-  int opt = lua_tonumber(L, 1);
-  int rows = lua_tonumber(L, 1);
-  int return_code = set_renderoption(opt, rows);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_renderoption(lua_State *L) {
+//   int opt = lua_tonumber(L, 1);
+//   int rows = lua_tonumber(L, 1);
+//   int return_code = set_renderoption(opt, rows);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_unitclasses(lua_State *L) {
   int i = 0;
@@ -3825,17 +3830,19 @@ int lua_show_slices_hideall(lua_State *L) {
 
 
 // add the smokeview bin directory to the Lua path variables
-void addLuaPaths() {
+void addLuaPaths(lua_State *L) {
   // package.path is a path variable where Lua scripts and modules may be
   // found, typiclly text based files with the .lua extension.
+
   lua_getglobal(L, "package");
   int pathType = lua_getfield(L, -1, "path");
   const char *oldPath = lua_tostring(L, -1);
-  int newLength = strlen(oldPath) + 1 + strlen(smokeview_bindir) + 5 +1;
+  int newLength = strlen(oldPath) + 1 + strlen(smokeview_bindir_abs) + 1 + 5 +1;
   char newPath[newLength];
   strcpy(newPath, oldPath);
   strcat(newPath,";");
-  strcat(newPath,smokeview_bindir);
+  strcat(newPath,smokeview_bindir_abs);
+  strcat(newPath,"/");
   strcat(newPath,"?.lua");
   lua_pushstring(L, newPath);
   lua_setfield(L, -3, "path");
@@ -3845,13 +3852,15 @@ void addLuaPaths() {
   // typically binary (C based) files such as .dll or .so.
   int cpathType = lua_getfield(L, -1, "cpath");
   const char *oldCPath = lua_tostring(L, -1);
-  int newLengthC = strlen(oldCPath) + 1 + 2*strlen(smokeview_bindir) + 10 +1;
+  int newLengthC = strlen(oldCPath) + 1 + 2*strlen(smokeview_bindir_abs) + 2*1 + 10 +1;
   char newCPath[newLengthC];
   strcpy(newCPath, oldCPath);
   strcat(newCPath,";");
-  strcat(newCPath,smokeview_bindir);
+  strcat(newCPath,smokeview_bindir_abs);
+  strcat(newCPath,"/");
   strcat(newCPath,"?.dll;");
-  strcat(newCPath,smokeview_bindir);
+  strcat(newCPath,smokeview_bindir_abs);
+  strcat(newCPath,"/");
   strcat(newCPath,"?.so");
   lua_pushstring(L, newCPath);
   lua_setfield(L, -3, "cpath");
@@ -3864,7 +3873,7 @@ void initLua() {
 
   luaL_openlibs(L);
   lua_initsmvproginfo(L);
-  addLuaPaths();
+  addLuaPaths(L);
   lua_register(L, "set_slice_bound_min", lua_set_slice_bound_min);
   lua_register(L, "set_slice_bound_max", lua_set_slice_bound_max);
   lua_register(L, "get_slice_bound_min", lua_get_slice_bound_min);
@@ -4237,13 +4246,13 @@ void initLua() {
   lua_register(L, "set_cellcentertext", lua_set_cellcentertext);
   lua_register(L, "set_inputfile", lua_set_inputfile);
   lua_register(L, "set_labelstartupview", lua_set_labelstartupview);
-  lua_register(L, "set_pixelskip", lua_set_pixelskip);
+  // lua_register(L, "set_pixelskip", lua_set_pixelskip);
   lua_register(L, "set_renderclip", lua_set_renderclip);
-  lua_register(L, "set_renderfilelabel", lua_set_renderfilelabel);
+  // lua_register(L, "set_renderfilelabel", lua_set_renderfilelabel);
   lua_register(L, "set_renderfiletype", lua_set_renderfiletype);
 
   // lua_register(L, "set_skybox", lua_set_skybox);
-  lua_register(L, "set_renderoption", lua_set_renderoption);
+  // lua_register(L, "set_renderoption", lua_set_renderoption);
   lua_register(L, "set_unitclasses", lua_set_unitclasses);
   lua_register(L, "set_zaxisangles", lua_set_zaxisangles);
   lua_register(L, "set_adjustalpha", lua_set_adjustalpha);
@@ -4329,9 +4338,12 @@ void initLua() {
 
   lua_register(L, "get_nglobal_times", lua_get_nglobal_times);
 
-  //add fdsprefix (the CHID) as a variable in the lua environment
+  //add fdsprefix (the path plus  CHID) as a variable in the lua environment
   lua_pushstring(L, fdsprefix);
   lua_setglobal(L, "fdsprefix");
+
+  lua_pushstring(L, chidfilebase);
+  lua_setglobal(L, "chid");
 
   //nglobal_times is the number of frames
   // this cannot be set as a global at init as it will change
@@ -4395,6 +4407,9 @@ int loadLuaScript(char *filename) {
   runluascript=0;
   lua_displayCB(L);
   runluascript=1;
+  char cwd[1000];
+  getcwd(cwd,1000);
+  printf("cwd: %s\n", cwd);
   printf("loading: %s\n", filename);
   const char *err_msg;
   lua_Debug info;

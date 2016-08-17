@@ -1,5 +1,5 @@
 #!/bin/bash
-LIBDIR=../../LIBS/lib_linux_gnu_64/
+LIBDIR=../../LIBS/gnu_linux_64/
 source ../../scripts/test_libs.sh lua
 LUA_SCRIPTING="LUA_SCRIPTING=true"
 

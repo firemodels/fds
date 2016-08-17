@@ -1095,6 +1095,9 @@ SVEXTERN float temp_threshold;
 SVEXTERN char SVDECL(*smv_filename,NULL),SVDECL(*fed_filename,NULL),fed_filename_base[1024],SVDECL(*stop_filename,NULL);
 SVEXTERN char SVDECL(*sliceinfo_filename,NULL);
 SVEXTERN char SVDECL(*database_filename,NULL),SVDECL(*smokeview_bindir,NULL),SVDECL(*iso_filename,NULL);
+#ifdef pp_LUA
+SVEXTERN char SVDECL(*smokeview_bindir_abs,NULL);
+#endif
 SVEXTERN scriptfiledata first_scriptfile, last_scriptfile, SVDECL(*default_script,NULL);
 #ifdef pp_LUA
 SVEXTERN luascriptfiledata first_luascriptfile, last_luascriptfile, SVDECL(*default_luascript,NULL);
@@ -1203,7 +1206,6 @@ SVEXTERN char luascript_filename[1024];
 SVEXTERN int highlight_block, highlight_mesh, highlight_flag;
 SVEXTERN int SVDECL(updategetobstlabels,1);
 
-SVEXTERN int pixel_skip;
 SVEXTERN float smoke_extinct,smoke_dens,smoke_pathlength;
 SVEXTERN int smoke_alpha;
 SVEXTERN int smoketest,show_smoketest;
