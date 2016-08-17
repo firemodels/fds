@@ -598,6 +598,9 @@ int main(int argc, char **argv){
   if(argc==0||argc==1)return 0;
 
   progname=argv_sv[0];
+#ifdef pp_LUA
+  smokeview_bindir_abs=getprogdirabs(progname,&smokeviewpath);
+#endif
   ParseCommandline(argc, argv_sv);
   if(smokeview_bindir==NULL){
     smokeview_bindir=getprogdir(progname,&smokeviewpath);
