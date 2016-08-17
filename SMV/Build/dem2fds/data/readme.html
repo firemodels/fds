@@ -164,14 +164,17 @@ LONGLATMINMAX
 
 <h3><tt>dem2fds</tt> Command Line Options</h3>
 <pre>
-  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in
-where
-  -dir dir  - directory containing elevation and map files (default .)
-  -geom     - create an FDS input file using &GEOM keywords
+  dem2fds [options] casename.in
+  -dir dir  - directory containing elevation and map files (default: '.')
+  -elevs    - only output elevations, do not create a complete FDS input file
+  -geom     - create an FDS input file using &GEOM keywords (experimental)
   -help     - display this message
   -nobuffer - create a terrain map assuming no buffer exists between maps.
-              Otherwise assume that a 300 pixel buffer exists bewteen maps.
+              Otherwise assume that a 300 pixel buffer exists between maps.
   -obst     - create an FDS input file using &OBST keywords
+  -show     - show image boundaries (black outline) and 
+              fds scenario boundary (red outline)
+  -surf surf_id - specify surf ID for use by OBSTs or geometry 
   -version  - show version information
 </pre>
 
