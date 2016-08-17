@@ -123,6 +123,7 @@ backgroundroot=$scp_fds_smvroot/SMV/Build/background
 smokediffroot=$scp_fds_smvroot/SMV/Build/smokediff
 smokeziproot=$scp_fds_smvroot/SMV/Build/smokezip
 dem2fdsroot=$scp_fds_smvroot/SMV/Build/dem2fds
+smvscriptdir=$scp_fds_smvroot/SMV/scripts
 wind2fdsroot=$scp_fds_smvroot/SMV/Build/wind2fds
 uploaddir=$fds_smvroot/Utilities/uploads
 bundledir=$bundlebase
@@ -178,6 +179,7 @@ SCP $fdshost $smokeziproot/$smokezipdir $smokezip $bundledir/bin $smokezipout
 # dem2fds
 
 SCP $fdshost $dem2fdsroot/$dem2fdsdir $dem2fds $bundledir/bin $dem2fdsout
+SCP $fdshost $smvscriptdir jp2conv.sh $bundledir/bin jp2conv.sh
 
 # wind2fds
 
