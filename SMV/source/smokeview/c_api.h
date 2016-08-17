@@ -411,11 +411,11 @@ int set_zoom(int a, float b); // ZOOM
 int set_cellcentertext(int v); // CELLCENTERTEXT
 int set_inputfile(const char *filename); // INPUT_FILE
 int set_labelstartupview(const char *startupview); // LABELSTARTUPVIEW
-int set_pixelskip(int v); // PIXELSKIP
+// int set_pixelskip(int v); // PIXELSKIP
 int set_renderclip(int a, int b, int c, int d, int e); // RENDERCLIP
-int set_renderfilelabel(int v); // RENDERFILELABEL
+// int set_renderfilelabel(int v); // RENDERFILELABEL
 int set_renderfiletype(int a, int b); // RENDERFILETYPE
-int set_renderoption(int a, int b); // RENDEROPTION
+// int set_renderoption(int a, int b); // RENDEROPTION
 int set_unitclasses(int n, int values[]); // UNITCLASSES
 int set_zaxisangles(float a, float b, float c);
 
