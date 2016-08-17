@@ -128,8 +128,8 @@
 
 &OBST XB=11.00,11.10, 2.10, 3.00, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='east controller' / North-East Door
 &OBST XB=11.00,11.10, 3.00, 3.90, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='west controller' / North-West Door
-&OBST XB=-0.10, 0.00, 2.70, 3.50, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='south controller' / South Door
-&OBST XB=-0.10, 0.00, 2.60, 2.70, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='south controller2' / South Door Opening
+&OBST XB=-0.10, 0.00, 2.80, 3.50, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='south controller' / South Door
+&OBST XB=-0.10, 0.00, 2.60, 2.80, 0.00, 2.00, SURF_ID='DOOR', PERMIT_HOLE=.FALSE., CTRL_ID='south controller2' / South Door Opening
 
 &HOLE XB= 5.10, 6.30, 4.00, 5.20, 2.39, 2.51 / Hole in Ceiling leading to Roof Cavity
 &OBST XB= 5.00, 5.10, 3.90, 5.30, 2.50, 2.70, SURF_ID='CONCRETE BOARD' / Roof Cavity
