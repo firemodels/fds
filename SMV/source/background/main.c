@@ -204,7 +204,7 @@ int main(int argc, char **argv){
         char *hostname;
 
         if(fgets(buffer,255,stream)==NULL)break;
-        trim_back(buffer);
+        TrimBack(buffer);
         hostname=malloc(strlen(buffer)+1);
         strcpy(hostname,buffer);
         hd->hostname=hostname;
@@ -307,8 +307,8 @@ void usage(char *prog){
   char gitdate[100];
   char pp[] = "%";
 
-  getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitInfo(githash,gitdate);    // get githash
+  GetProgVersion(prog_version);  // get version (ie 5.x.z)
+  GetGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("background %s(%s) - %s\n",prog_version,githash,__DATE__);
