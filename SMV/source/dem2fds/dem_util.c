@@ -512,23 +512,23 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     if(stream_in == NULL)continue;
 
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
-    trim_back(buffer);
+    TrimBack(buffer);
     sscanf(buffer + 5, " %i", &elevi->ncols);
 
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
-    trim_back(buffer);
+    TrimBack(buffer);
     sscanf(buffer + 5, " %i", &elevi->nrows);
 
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
-    trim_back(buffer);
+    TrimBack(buffer);
     sscanf(buffer + 9, " %f", &elevi->xllcorner);
 
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
-    trim_back(buffer);
+    TrimBack(buffer);
     sscanf(buffer + 9, " %f", &elevi->yllcorner);
 
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)continue;
-    trim_back(buffer);
+    TrimBack(buffer);
     sscanf(buffer + 8, " %f", &elevi->cellsize);
 
     elevi->long_min = elevi->xllcorner;
@@ -557,10 +557,10 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
     buffer2 = strstr(buffer, "//");
     if(buffer2 != NULL)buffer2[0] = 0;
-    buffer2 = trim_frontback(buffer);
+    buffer2 = TrimFrontBack(buffer);
     if(strlen(buffer2) == 0)continue;
 
-    if(match(buffer, "GRID") == 1){
+    if(Match(buffer, "GRID") == 1){
       nlongs = 10;
       nlats = 10;
       kbar = 10;
@@ -570,7 +570,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       continue;
     }
 
-    if(match(buffer, "LONGLATORIG") == 1){
+    if(Match(buffer, "LONGLATORIG") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &longref, &latref);
       longlatref_mode = LONGLATREF_ORIG;
@@ -579,14 +579,14 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       continue;
     }
 
-    if(match(buffer, "LONGLATCENTER") == 1){
+    if(Match(buffer, "LONGLATCENTER") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &longref, &latref);
       longlatref_mode = LONGLATREF_CENTER;
       continue;
     }
 
-    if(match(buffer, "LONGLATMINMAX") == 1){
+    if(Match(buffer, "LONGLATMINMAX") == 1){
       have_data = 1;
       fds_long_min = -1000.0;
       fds_long_max = -1000.0;
@@ -605,7 +605,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       continue;
     }
 
-    if(match(buffer, "EXCLUDE") == 1){
+    if(Match(buffer, "EXCLUDE") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f %f %f", &xmin_exclude, &ymin_exclude, &xmax_exclude, &ymax_exclude);
       longlat_defined = 1;
