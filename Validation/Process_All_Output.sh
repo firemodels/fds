@@ -21,7 +21,7 @@ $VDIR/CAROLFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CHRISTIFIRE/FDS_Output_Files/Process_Output.csh
 $VDIR/CSIRO_Grassland_Fires/FDS_Output_Files/Process_Output.csh
 $VDIR/Cup_Burner/FDS_Output_Files/Process_Output.csh
-#$VDIR/DelCo_Trainers/FDS_Output_Files/Process_Output.csh
+$VDIR/DelCo_Trainers/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Cargo_Compartments/FDS_Output_Files/Process_Output.csh
 $VDIR/FAA_Polymers/FDS_Output_Files/Process_Output.csh
 $VDIR/Fleury_Heat_Flux/FDS_Output_Files/Process_Output.csh
