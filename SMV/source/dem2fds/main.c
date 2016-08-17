@@ -18,7 +18,7 @@ void Usage(char *prog){
  char githash[LEN_BUFFER];
  char gitdate[LEN_BUFFER];
 
-  getGitInfo(githash,gitdate);    // get githash
+  GetGitInfo(githash,gitdate);    // get githash
 
   fprintf(stdout, "\n%s (%s) %s\n", prog, githash, __DATE__);
   fprintf(stdout, "Create an FDS input file using elevation and image\n");

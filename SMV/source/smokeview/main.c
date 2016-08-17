@@ -231,7 +231,7 @@ void ParseCommandline(int argc, char **argv){
     c_ext = strrchr(argi, '.');
     if(c_ext != NULL){
       STRCPY(input_filename_ext, c_ext);
-      to_lower(input_filename_ext);
+      ToLower(input_filename_ext);
 
       if(c_ext != NULL &&
         (strcmp(input_filename_ext, ".smv") == 0 ||
@@ -591,7 +591,7 @@ int main(int argc, char **argv){
 
   set_stdout(stdout);
   initMALLOC();
-  init_rand_ab(1000000);
+  InitRandAB(1000000);
   initvars();
   if(argc==1)DisplayVersionInfo("Smokeview ");
   copy_args(&argc, argv, &argv_sv);

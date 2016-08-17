@@ -18,9 +18,9 @@
 
 unsigned int *random_ints, nrandom_ints;
 
-/* ----------------------- init_rand_ab ----------------------------- */
+/* ----------------------- InitRandAB ----------------------------- */
 
-void init_rand_ab(int size){
+void InitRandAB(int size){
   unsigned int i;
 
   nrandom_ints=size;
@@ -30,16 +30,16 @@ void init_rand_ab(int size){
   }
 }
 
-/* ----------------------- rand_ab ----------------------------- */
+/* ----------------------- RandAB ----------------------------- */
 
-float rand_ab(int seed, float minval, float maxval){
+float RandAB(int seed, float minval, float maxval){
   seed = (1 + ABS(seed)) % nrandom_ints;
   return  minval + (maxval-minval)*(float)random_ints[seed]/(float)RAND_MAX;
 }
 
-/* ----------------------- fparsecsv ----------------------------- */
+/* ----------------------- FParseCSV ----------------------------- */
 
-void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
+void FParseCSV(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
 
 //  copy comma delimited values from buffer into floating point array vals
 //  returning number of values found in ntokens
@@ -59,14 +59,14 @@ void fparsecsv(char *buffer, float *vals, int *valids, int ncols, int *ntokens){
     }
     nt++;
     token=strtok(NULL,",");
-    if(token!=NULL)trim_back(token);
+    if(token!=NULL)TrimBack(token);
   }
   *ntokens=nt;
 }
 
-/* ----------------------- parsecsv ----------------------------- */
+/* ----------------------- ParseCSV ----------------------------- */
 
-void parsecsv(char *buffer, char **tokens, int *ntokens){
+void ParseCSV(char *buffer, char **tokens, int *ntokens){
 
 //  copy comma delimited values from buffer into character array tokens
 //  returning number of values found in ntokens
@@ -94,9 +94,9 @@ void parsecsv(char *buffer, char **tokens, int *ntokens){
   *ntokens=nt;
 }
 
-/* ------------------ getrowcols ------------------------ */
+/* ------------------ GetRowCols ------------------------ */
 
-int getrowcols(FILE *stream, int *nrows, int *ncols){
+int GetRowCols(FILE *stream, int *nrows, int *ncols){
 
 //  find number of rows (nrows) and number of columns (ncols) in
 //  comma delimited file pointed to by stream and returns the length
@@ -127,7 +127,7 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
   return maxlinelength;
 }
 
-/* ------------------ getGitInfo ------------------------ */
+/* ------------------ GetGitInfo ------------------------ */
 
 #ifndef pp_GITHASH
   #define pp_GITHASH "unknown"
@@ -135,12 +135,12 @@ int getrowcols(FILE *stream, int *nrows, int *ncols){
 #ifndef pp_GITDATE
 #define pp_GITDATE "unknown"
 #endif
-void getGitInfo(char *githash, char *gitdate){
+void GetGitInfo(char *githash, char *gitdate){
   char rev[256], *beg=NULL;
 
   strcpy(rev,pp_GITHASH);
-  trim_back(rev);
-  beg = trim_front(rev);
+  TrimBack(rev);
+  beg = TrimFront(rev);
   if(strlen(beg)>0){
     strcpy(githash,beg);
   }
@@ -149,8 +149,8 @@ void getGitInfo(char *githash, char *gitdate){
   }
 
   strcpy(rev, pp_GITDATE);
-  trim_back(rev);
-  beg = trim_front(rev);
+  TrimBack(rev);
+  beg = TrimFront(rev);
   if(strlen(beg)>0){
     strcpy(gitdate, beg);
   }
@@ -160,9 +160,9 @@ void getGitInfo(char *githash, char *gitdate){
 }
 
 
-/* ------------------ stripquotes ------------------------ */
+/* ------------------ StripQuotes ------------------------ */
 
-void stripquotes(char *buffer){
+void StripQuotes(char *buffer){
 
 // replaces quotes (") with blanks in the character string buffer
 
@@ -172,9 +172,9 @@ void stripquotes(char *buffer){
     if(*c=='"')*c=' ';
   }
 }
-/* ------------------ stripcommas ------------------------ */
+/* ------------------ StripCommas ------------------------ */
 
-void stripcommas(char *buffer){
+void StripCommas(char *buffer){
 
 //  replaces commas (,) with blanks in the character string buffer
 
@@ -185,9 +185,9 @@ void stripcommas(char *buffer){
   }
 }
 
-/* ------------------ randint ------------------------ */
+/* ------------------ RandInt ------------------------ */
 
-int randint(int min, int max){
+int RandInt(int min, int max){
 
 //  returns a random integer inclusively between min and max
 
@@ -202,9 +202,9 @@ int randint(int min, int max){
   return return_val;
 }
 
-/* ------------------ randstr ------------------------ */
+/* ------------------ RandStr ------------------------ */
 
-char *randstr(char* str, int length){
+char *RandStr(char* str, int length){
 
 //  returns a random character string of length length
 
@@ -213,15 +213,15 @@ char *randstr(char* str, int length){
     if(str==NULL||length<=0)return NULL;
 
     for (i=0;i<length;i++){
-      str[i]=(char)randint(65,90);
+      str[i]=(char)RandInt(65,90);
     }
     str[length]=0;
     return str;
 }
 
-/* ------------------ trim_commas ------------------------ */
+/* ------------------ TrimCommas ------------------------ */
 
-void trim_commas(char *line){
+void TrimCommas(char *line){
   char *c;
 
   for(c = line + strlen(line) - 1;c>=line;c--){
@@ -233,7 +233,7 @@ void trim_commas(char *line){
 
 /* ------------------ trim ------------------------ */
 
-void trim_back(char *line){
+void TrimBack(char *line){
 
   //  removes trailing white space from the character string line
 
@@ -251,9 +251,9 @@ void trim_back(char *line){
   *line='\0';
 }
 
-/* ------------------ trim_front ------------------------ */
+/* ------------------ TrimFront ------------------------ */
 
-char *trim_front(char *line){
+char *TrimFront(char *line){
 
 //  returns first non-blank character at the begininn of line
 
@@ -265,9 +265,9 @@ char *trim_front(char *line){
   return line;
 }
 
-/* ------------------ trimzeros ------------------------ */
+/* ------------------ TrimZeros ------------------------ */
 
-void trimzeros(char *line){
+void TrimZeros(char *line){
   char *c;
 
   //  removes trailing zeros in the floating point number found in line
@@ -282,21 +282,21 @@ void trimzeros(char *line){
   line[0] = '\0';
 }
 
-/* ------------------ trimmzeros ------------------------ */
+/* ------------------ TrimMZeros ------------------------ */
 
-void trimmzeros(char *line){
+void TrimMZeros(char *line){
 
 //  removes trailing zeros in each floating point number found in line
 
   char linecopy[1024];
   char *token;
 
-  trim_back(line);
+  TrimBack(line);
   strcpy(linecopy,line);
   token=strtok(linecopy," ");
   strcpy(line,"");
   while(token!=NULL){
-    trimzeros(token);
+    TrimZeros(token);
     strcat(line,token);
     strcat(line," ");
     token=strtok(NULL," ");
@@ -333,28 +333,28 @@ char *STRSTR(char *string, const char *key){
   return NULL;
 }
 
-/* ------------------ scalestring ------------------------ */
+/* ------------------ ScaleString ------------------------ */
 
-void scalestring(const char *stringfrom, char *stringto, const float *scale){
+void ScaleString(const char *stringfrom, char *stringto, const float *scale){
   float val;
 
   sscanf(stringfrom,"%f",&val);
   val = scale[0]*val+scale[1];
-  num2string(stringto,val);
+  Num2String(stringto,val);
 }
 
-/* ------------------ scalefloat2string ------------------------ */
+/* ------------------ ScaleFloat2String ------------------------ */
 
-void scalefloat2string(float floatfrom, char *stringto, const float *scale){
+void ScaleFloat2String(float floatfrom, char *stringto, const float *scale){
   float val;
 
   val = scale[0]*floatfrom+scale[1];
-  num2string(stringto,val);
+  Num2String(stringto,val);
 }
 
-/* ------------------ num2string ------------------------ */
+/* ------------------ Num2String ------------------------ */
 
-void num2string(char *string, float tval){
+void Num2String(char *string, float tval){
   float tval2,mant10;
   int exp10;
 
@@ -384,7 +384,7 @@ void num2string(char *string, float tval){
     STRCPY(string,"0.00");
   }
   else{
-    mant10 = frexp10(tval,&exp10);
+    mant10 = FrExp10(tval,&exp10);
     mant10 = (float)((int)(10.0f*mant10+0.5f))/10.0f;
     if(mant10>=10.0f){
       mant10/=10.0f;
@@ -413,20 +413,20 @@ void num2string(char *string, float tval){
   if(strlen(string)>9)fprintf(stderr,"***fatal error - overwriting string\n");
 }
 
-/* ------------------ trim_frontback ------------------------ */
+/* ------------------ TrimFrontBack ------------------------ */
 
-char *trim_frontback(char *buffer){
+char *TrimFrontBack(char *buffer){
 
 //  removes trailing blanks from buffer and returns a pointer to the first non-blank character
 
   if(buffer==NULL)return NULL;
-  trim_back(buffer);
-  return trim_front(buffer);
+  TrimBack(buffer);
+  return TrimFront(buffer);
 }
 
-/* ------------------ get_chid ------------------------ */
+/* ------------------ GetChid ------------------------ */
 
-char *get_chid(char *file, char *buffer){
+char *GetChid(char *file, char *buffer){
   FILE *stream;
   char *chidptr,*c;
   unsigned int i;
@@ -474,9 +474,9 @@ char *get_chid(char *file, char *buffer){
 }
 #ifdef pp_GPU
 
-/* ------------------ log_base2 ------------------------ */
+/* ------------------ LogBase2 ------------------------ */
 
-int log_base2(float xx){
+int LogBase2(float xx){
 
 //  returns the log base 2 of the floating point number xx
 
@@ -491,9 +491,9 @@ int log_base2(float xx){
 }
 #endif
 
-/* ------------------ array2string ------------------------ */
+/* ------------------ Array2String ------------------------ */
 
-void array2string(float *vals, int nvals, char *string){
+void Array2String(float *vals, int nvals, char *string){
 
 //  convert an array of floating point numbers to a character string
 
@@ -504,18 +504,18 @@ void array2string(float *vals, int nvals, char *string){
   if(nvals==0)return;
   for(i=0;i<nvals-1;i++){
     sprintf(cval,"%f",vals[i]);
-    trimzeros(cval);
+    TrimZeros(cval);
     strcat(string,cval);
     strcat(string,", ");
   }
   sprintf(cval,"%f",vals[nvals-1]);
-  trimzeros(cval);
+  TrimZeros(cval);
   strcat(string,cval);
 }
 
-/* ------------------ frexp10 ------------------------ */
+/* ------------------ FrExp10 ------------------------ */
 
-float frexp10(float x, int *exp10){
+float FrExp10(float x, int *exp10){
   float xabs, mantissa;
 
   xabs = ABS((double)x);
@@ -531,9 +531,9 @@ float frexp10(float x, int *exp10){
   return mantissa;
 }
 
-/* ------------------ getstring ------------------------ */
+/* ------------------ GetString ------------------------ */
 
-char *getstring(char *buffer){
+char *GetString(char *buffer){
 
 //  return pointer to string contained between a pair of double quotes
 
@@ -548,15 +548,15 @@ char *getstring(char *buffer){
   end=strrchr(begin,'"');
   if(end==NULL)return NULL;
   end[0]=0;
-  trim_back(begin);
-  begin = trim_front(begin);
+  TrimBack(begin);
+  begin = TrimFront(begin);
   if(strlen(begin)>0)return begin;
   return NULL;
 }
 
-  /* ------------------ time2timelabel ------------------------ */
+  /* ------------------ Time2TimeLabel ------------------------ */
 
-char *time2timelabel(float sv_time, float dt, char *timelabel){
+char *Time2TimeLabel(float sv_time, float dt, char *timelabel){
   char *timelabelptr;
 
   if(dt<0.001){
@@ -571,15 +571,15 @@ char *time2timelabel(float sv_time, float dt, char *timelabel){
   else{
     sprintf(timelabel,"%4.1f",sv_time);
   }
-  trimzeros(timelabel);
-  trim_back(timelabel);
-  timelabelptr=trim_front(timelabel);
+  TrimZeros(timelabel);
+  TrimBack(timelabel);
+  timelabelptr=TrimFront(timelabel);
   return timelabelptr;
 }
 
-/* ------------------ match ------------------------ */
+/* ------------------ Match ------------------------ */
 
-int match(char *buffer, const char *key){
+int Match(char *buffer, const char *key){
   size_t lenbuffer;
   size_t lenkey;
 
@@ -591,15 +591,15 @@ int match(char *buffer, const char *key){
   return MATCH;
 }
 
-/* ------------------ match_upper ------------------------ */
+/* ------------------ MatchUpper ------------------------ */
 
-int match_upper(char *buffer, const char *key){
+int MatchUpper(char *buffer, const char *key){
   size_t lenbuffer;
   size_t lenkey;
   size_t i;
 
   lenkey=strlen(key);
-  trim_back(buffer);
+  TrimBack(buffer);
   lenbuffer=strlen(buffer);
 
   if(lenbuffer<lenkey)return 0;
@@ -611,16 +611,16 @@ int match_upper(char *buffer, const char *key){
   return 1;
 }
 
-/* ----------------------- match_wild ----------------------------- */
+/* ----------------------- MatchWild ----------------------------- */
 
-int match_wild(char *pTameText, char *pWildText){
+int MatchWild(char *pTameText, char *pWildText){
 // This function compares text strings, the second of which can have wildcards ('*').
 //
 //Matching Wildcards: An Algorithm
 //by Kirk J. Krauss
 // http://drdobbs.com/windows/210200888
 // (modified from original by setting bCaseSensitive and cAltTerminator in the
-//  body of the routine and changing routine name to match_wild, also changed
+//  body of the routine and changing routine name to MatchWild, also changed
 //  formatting to be consistent with smokeview coding style)
 
   char cAltTerminator='\0';
@@ -694,31 +694,31 @@ int match_wild(char *pTameText, char *pWildText){
   return bMatch;
 }
 
-/* ----------------------- remove_comment ----------------------------- */
+/* ----------------------- RemoveComment ----------------------------- */
 
-char *remove_comment(char *buffer){
+char *RemoveComment(char *buffer){
   char *comment;
 
   comment = strstr(buffer,"//");
   if(comment!=NULL)comment[0]=0;
-  trim_back(buffer);
-  return trim_front(buffer);
+  TrimBack(buffer);
+  return TrimFront(buffer);
 }
 
-/* ------------------ getPROGversion ------------------------ */
+/* ------------------ GetProgVersion ------------------------ */
 
-void getPROGversion(char *PROGversion){
+void GetProgVersion(char *PROGversion){
   strcpy(PROGversion,PROGVERSION);
 }
 
 /* ------------------ setisolabels ------------------------ */
 
-int setlabels_iso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit, float *levels, int nlevels){
+int SetLabelsIso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit, float *levels, int nlevels){
   char buffer[255];
   size_t len;
   char clevels[1024];
 
-  array2string(levels,nlevels,clevels);
+  Array2String(levels,nlevels,clevels);
   if(longlabel==NULL){
     strcpy(buffer,"*");
   }
@@ -754,9 +754,9 @@ int setlabels_iso(flowlabels *flowlabel, char *longlabel, char *shortlabel, char
   return 0;
 }
 
-/* ------------------ setlabels ------------------------ */
+/* ------------------ SetLabels ------------------------ */
 
-int setlabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit){
+int SetLabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *unit){
   char buffer[255];
   size_t len;
 
@@ -793,9 +793,9 @@ int setlabels(flowlabels *flowlabel, char *longlabel, char *shortlabel, char *un
   return 0;
 }
 
-/* ------------------ readlabels ------------------------ */
+/* ------------------ ReadLabels ------------------------ */
 
-int readlabels(flowlabels *flowlabel, FILE *stream){
+int ReadLabels(flowlabels *flowlabel, FILE *stream){
   char buffer2[255], *buffer;
   size_t len;
 
@@ -805,8 +805,8 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -818,8 +818,8 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -830,8 +830,8 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -852,9 +852,9 @@ int readlabels(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ readlabels_facecenter ------------------------ */
+/* ------------------ ReadLabelsFaceCenter ------------------------ */
 
-int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
+int ReadLabelsFaceCenter(flowlabels *flowlabel, FILE *stream){
   char buffer2[255], *buffer;
   size_t len;
 
@@ -864,8 +864,8 @@ int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
 
   len = strlen(buffer2);
   buffer2[len - 1] = '\0';
-  buffer = trim_front(buffer2);
-  trim_back(buffer);
+  buffer = TrimFront(buffer2);
+  TrimBack(buffer);
   len = strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel, (unsigned int)(len + 1 + 15)) == 0)return 2;
   STRCPY(flowlabel->longlabel, buffer);
@@ -877,8 +877,8 @@ int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
 
   len = strlen(buffer2);
   buffer2[len - 1] = '\0';
-  buffer = trim_front(buffer2);
-  trim_back(buffer);
+  buffer = TrimFront(buffer2);
+  TrimBack(buffer);
   len = strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel, (unsigned int)(len + 1)) == 0)return 2;
   STRCPY(flowlabel->shortlabel, buffer);
@@ -889,8 +889,8 @@ int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
 
   len = strlen(buffer2);
   buffer2[len - 1] = '\0';
-  buffer = trim_front(buffer2);
-  trim_back(buffer);
+  buffer = TrimFront(buffer2);
+  TrimBack(buffer);
   len = strlen(buffer) + 1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit, (unsigned int)(len + 1)) == 0)return 2;
 #ifdef pp_DEG
@@ -911,9 +911,9 @@ int readlabels_facecenter(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ readlabels_cellcenter ------------------------ */
+/* ------------------ ReadLabelsCellCenter ------------------------ */
 
-int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
+int ReadLabelsCellCenter(flowlabels *flowlabel, FILE *stream){
   char buffer2[255], *buffer;
   size_t len;
 
@@ -923,8 +923,8 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+15))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -936,8 +936,8 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -948,8 +948,8 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -970,9 +970,9 @@ int readlabels_cellcenter(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ readlabels_terrain ------------------------ */
+/* ------------------ ReadLabelsTerrain ------------------------ */
 
-int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
+int ReadLabelsTerrain(flowlabels *flowlabel, FILE *stream){
   char buffer2[255],*buffer;
   size_t len;
 
@@ -982,8 +982,8 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->longlabel,(unsigned int)(len+1+9))==0)return 2;
   STRCPY(flowlabel->longlabel,buffer);
@@ -995,8 +995,8 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer);
   if(NewMemory((void **)&flowlabel->shortlabel,(unsigned int)(len+1))==0)return 2;
   STRCPY(flowlabel->shortlabel,buffer);
@@ -1007,8 +1007,8 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
 
   len=strlen(buffer2);
   buffer2[len-1]='\0';
-  buffer=trim_front(buffer2);
-  trim_back(buffer);
+  buffer=TrimFront(buffer2);
+  TrimBack(buffer);
   len=strlen(buffer)+1;// allow room for deg C symbol in case it is present
   if(NewMemory((void *)&flowlabel->unit,(unsigned int)(len+1))==0)return 2;
 #ifdef pp_DEG
@@ -1029,9 +1029,9 @@ int readlabels_terrain(flowlabels *flowlabel, FILE *stream){
   return 0;
 }
 
-/* ------------------ date2day ------------------------ */
+/* ------------------ Date2Day ------------------------ */
 
-unsigned int date2day(char *tokenorig){
+unsigned int Date2Day(char *tokenorig){
   // mm/dd/yyyy -> days after 1/1/2000
   // (/yyyy optional, if absent assume current year)
   char token[256];
@@ -1081,9 +1081,9 @@ unsigned int date2day(char *tokenorig){
   return days_local;
 }
 
-/* ------------------ to_lower ------------------------ */
+/* ------------------ ToLower ------------------------ */
 
-void to_lower(char *string){
+void ToLower(char *string){
    char *c;
 
    if(string==NULL)return;
@@ -1092,9 +1092,9 @@ void to_lower(char *string){
    }
 }
 
-/* ------------------ time2sec ------------------------ */
+/* ------------------ Time2Sec ------------------------ */
 
-unsigned int time2sec(char *tokenorig){
+unsigned int Time2Sec(char *tokenorig){
 // hh:mm:ss --> seconds after midnight
 //  (:ss optional)
   char token[256];
@@ -1150,9 +1150,9 @@ char *STRCHRR(char *strbeg, char *searchbeg, int c){
   }
 }
 
-/* ------------------ date2sec2 ------------------------ */
+/* ------------------ Date2Sec2 ------------------------ */
 
-unsigned int date2sec2(char *tokenorig){
+unsigned int Date2Sec2(char *tokenorig){
   char token[256];
   char *colon;
   char *tim=NULL,*timend=NULL;
@@ -1166,15 +1166,15 @@ unsigned int date2sec2(char *tokenorig){
   if(tim!=NULL){
     timend=strchr(tim,' ');
     if(timend!=NULL)*timend=0;
-    secs=time2sec(tim);
+    secs=Time2Sec(tim);
   }
   local_time=secs;
   return local_time;
 }
 
-/* ------------------ date2sec ------------------------ */
+/* ------------------ Date2Sec ------------------------ */
 
-unsigned int date2sec(char *tokenorig){
+unsigned int Date2Sec(char *tokenorig){
   char token[256];
   char *slash, *colon;
   char *date=NULL,*dateend=NULL;
@@ -1191,39 +1191,39 @@ unsigned int date2sec(char *tokenorig){
   if(date!=NULL){
     dateend=strchr(slash,' ');
     if(dateend!=NULL)*dateend=0;
-    days=date2day(date);
+    days=Date2Day(date);
   }
   if(tim!=NULL){
     timend=strchr(tim,' ');
     if(timend!=NULL)*timend=0;
-    secs=time2sec(tim);
+    secs=Time2Sec(tim);
   }
   local_time=86400*days+secs;
   return local_time;
 }
 
-/* ------------------ diffdate ------------------------ */
+/* ------------------ DiffDate ------------------------ */
 
-unsigned int diffdate(char *token, char *tokenbase){
+unsigned int DiffDate(char *token, char *tokenbase){
   int difft;
 
-  difft = date2sec(token) - date2sec(tokenbase);
+  difft = Date2Sec(token) - Date2Sec(tokenbase);
   return difft;
 }
 
-/* ------------------ getBaseTitle ------------------------ */
+/* ------------------ GetBaseTitle ------------------------ */
 
-void getBaseTitle(char *progname, char *title_base){
+void GetBaseTitle(char *progname, char *title_base){
   char version[100];
   char svn_version[100];
   char svn_date[100];
 
-  getGitInfo(svn_version, svn_date);    // get githash
+  GetGitInfo(svn_version, svn_date);    // get githash
 
   // construct string of the form:
   //   5.x.y_#
 
-  getPROGversion(version);
+  GetProgVersion(version);
 
   strcpy(title_base, progname);
 
@@ -1242,12 +1242,12 @@ void getBaseTitle(char *progname, char *title_base){
   strcat(title_base, " - ");
 }
 
-/* ------------------ getTitle ------------------------ */
+/* ------------------ GetTitle ------------------------ */
 
-void getTitle(char *progname, char *fulltitle){
+void GetTitle(char *progname, char *fulltitle){
   char title_base[1024];
 
-  getBaseTitle(progname, title_base);
+  GetBaseTitle(progname, title_base);
 
   STRCPY(fulltitle, title_base);
   STRCAT(fulltitle, __DATE__);
@@ -1265,9 +1265,9 @@ void PRINTversion(char *progname){
   char gitdate[256];
   char releasetitle[1024];
 
-  getPROGversion(version);
-  getGitInfo(githash, gitdate);    // get githash
-  getTitle(progname, releasetitle);
+  GetProgVersion(version);
+  GetGitInfo(githash, gitdate);    // get githash
+  GetTitle(progname, releasetitle);
   PRINTF("\n");
   PRINTF(" %s\n\n", releasetitle);
   PRINTF(" Version          : %s\n", version);

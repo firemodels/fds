@@ -180,8 +180,8 @@ char *get_filename(char *temp_dir, char *file, int flag){
   char *file_out=NULL;
   FILE *stream=NULL;
 
-  trim_back(file);
-  file2=trim_front(file);
+  TrimBack(file);
+  file2=TrimFront(file);
   if(flag==0){
     stream=fopen(file2,"r");
     if(can_write_to_dir(".")==1||stream!=NULL){
@@ -205,8 +205,8 @@ char *get_filename(char *temp_dir, char *file, int flag){
 void fullfile(char *file_out, char *dir, char *file){
   char *file2;
 
-  trim_back(file);
-  file2=trim_front(file);
+  TrimBack(file);
+  file2=TrimFront(file);
   strcpy(file_out,"");
   if(dir!=NULL)strcat(file_out,dir);
   strcat(file_out,file2);
@@ -269,8 +269,8 @@ int filecat(char *file_in1, char *file_in2, char *file_out){
 void make_outfile(char *outfile, char *destdir, char *file1, char *ext){
   char filename_buffer[1024], *file1_noext;
 
-  trim_back(file1);
-  strcpy(filename_buffer,trim_front(file1));
+  TrimBack(file1);
+  strcpy(filename_buffer,TrimFront(file1));
   file1_noext=strstr(filename_buffer,ext);
   strcpy(outfile,"");
   if(file1_noext==NULL)return;
@@ -297,7 +297,7 @@ int can_write_to_dir(char *dir){
 
   if(dir==NULL||strlen(dir)==0)return 0;
 
-  file_name_ptr=randstr(file_name,20);
+  file_name_ptr=RandStr(file_name,20);
   if(file_name_ptr==NULL)return 0;
 
   len = strlen(dir) + 20 + 1 + 1;
@@ -427,8 +427,8 @@ int get_nfilelist(const char *path, char *key){
     return 0;
   }
   while( (entry = readdir(dp)) ){
-  //  if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
-    if((entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1)){
+  //  if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1)){
+    if((entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1)){
       maxfiles++;
       continue;
     }
@@ -477,7 +477,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   rewinddir(dp);
   */
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
-    if(entry->d_type==DT_REG&&match_wild(entry->d_name,key)==1){
+    if(entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1){
       char *file;
       filelistdata *flisti;
 

@@ -70,9 +70,9 @@ float atan3(float dy,float dx){
 }
 
 
-/* ------------------ rand_absdir ------------------------ */
+/* ------------------ RandABsdir ------------------------ */
 
-void rand_absdir(float xyz[3], int dir){
+void RandABsdir(float xyz[3], int dir){
   float x=1.0, y=1.0, z=1.0;
   float sum;
 

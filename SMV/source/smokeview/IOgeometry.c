@@ -2767,27 +2767,27 @@ void draw_test_outline(void){
     char label[30];
 
     sprintf(label,"xmin area=%f",areas[0]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, -EPS, 0.5, 0.5, label);
 
     sprintf(label,"xmax area=%f",areas[1]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, 1.0+EPS, 0.5, 0.5, label);
 
     sprintf(label,"ymin area=%f",areas[2]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, 0.5, -EPS, 0.5, label);
 
     sprintf(label,"ymax area=%f",areas[3]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, 0.5, 1.0+EPS, 0.5, label);
 
     sprintf(label,"zmin area=%f",areas[4]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, 0.5, 0.5, -EPS, label);
 
     sprintf(label,"zmax area=%f",areas[5]);
-    trimzeros(label);
+    TrimZeros(label);
     Output3Text(foregroundcolor, 0.5, 0.5, 1.0+EPS, label);
   }
 

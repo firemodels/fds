@@ -2313,8 +2313,8 @@ void ScriptMenu(int value){
         {
           char *renderdir;
 
-          trim_back(script_renderdir);
-          renderdir = trim_front(script_renderdir);
+          TrimBack(script_renderdir);
+          renderdir = TrimFront(script_renderdir);
           if(strlen(renderdir)>0&&strcmp(renderdir,".")!=0){
             fprintf(scriptoutstream,"RENDERDIR\n");
             fprintf(scriptoutstream," %s\n",renderdir);
@@ -6234,7 +6234,7 @@ updatemenu=0;
         else{
           sprintf(streaklabel,"%f",streak_rvalue[iii]);
         }
-        trimzeros(streaklabel);
+        TrimZeros(streaklabel);
         strcat(streaklabel," s");
         glutAddMenuEntry(streaklabel,iii);
       }
@@ -8833,7 +8833,7 @@ updatemenu=0;
           strcpy(menulabel,plot3di->longlabel);
           glutAddMenuEntry(menulabel,MENU_PLOT3D_DUMMY);
           sprintf(menulabel,"  %f",plot3di->time);
-          trimzeros(menulabel);
+          TrimZeros(menulabel);
           strcat(menulabel," s");
           if(nmeshes>1){
             glutAddSubMenu(menulabel,loadsubplot3dmenu[nloadsubplot3dmenu]);
@@ -8858,7 +8858,7 @@ updatemenu=0;
           }
           if(ABS(plot3di->time-plot3dim1->time)>0.1){
             sprintf(menulabel,"  %f",plot3di->time);
-            trimzeros(menulabel);
+            TrimZeros(menulabel);
             strcat(menulabel," s");
             if(nmeshes>1){
               glutAddSubMenu(menulabel,loadsubplot3dmenu[nloadsubplot3dmenu]);

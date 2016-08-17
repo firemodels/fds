@@ -543,7 +543,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     plotval/=100;
 
     sprintf(buff_label,"%f",plotval);
-    trimzeros(buff_label);
+    TrimZeros(buff_label);
     strcat(buff_label," m");
     if(cursorPlot3D==1){
       sprintf(slicelabel,"*x: %i, ",iplotval);
@@ -573,7 +573,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     plotval/=100;
 
     sprintf(buff_label,"%f",plotval);
-    trimzeros(buff_label);
+    TrimZeros(buff_label);
     strcat(buff_label," m");
     if(cursorPlot3D==1){
       sprintf(slicelabel,"*y: %i, ",iplotval);
@@ -603,7 +603,7 @@ void ViewportInfo(int quad, GLint screen_left, GLint screen_down){
     plotval/=100;
 
     sprintf(buff_label,"%f",plotval);
-    trimzeros(buff_label);
+    TrimZeros(buff_label);
     strcat(buff_label," m");
     if(cursorPlot3D==1){
       sprintf(slicelabel,"*z: %i, ",iplotval);

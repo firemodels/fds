@@ -33,7 +33,7 @@ int clean_boundary(patch *patchi){
   strcpy(filetype,"");
   shortlabel=patchi->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim_back(filetype);
+  TrimBack(filetype);
 
   BOUNDARYFILE=fopen(boundary_file,"rb");
   if(BOUNDARYFILE==NULL){
@@ -136,7 +136,7 @@ int convert_boundary(patch *patchi, int *thread_index){
   strcpy(filetype,"");
   shortlabel=patchi->label.shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim_back(filetype);
+  TrimBack(filetype);
 
   if(getfileinfo(boundary_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",boundary_file);
@@ -207,14 +207,14 @@ int convert_boundary(patch *patchi, int *thread_index){
   strcpy(units,"");
   unit=patchi->label.unit;
   if(strlen(unit)>0)strcat(units,unit);
-  trim_back(units);
+  TrimBack(units);
   sprintf(cval,"%f",patchi->valmin);
-  trimzeros(cval);
+  TrimZeros(cval);
 #ifndef pp_THREAD
   PRINTF("  using min=%s %s",cval,units);
 #endif
   sprintf(cval,"%f",patchi->valmax);
-  trimzeros(cval);
+  TrimZeros(cval);
 #ifndef pp_THREAD
   PRINTF(" max=%s %s\n",cval,units);
 #endif

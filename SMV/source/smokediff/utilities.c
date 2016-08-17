@@ -10,7 +10,7 @@
 
 /* ------------------ mesh_match ------------------------ */
 
-int mesh_match(meshdata *mesh1, meshdata *mesh2){
+int mesh_Match(meshdata *mesh1, meshdata *mesh2){
   int ibar, jbar, kbar;
 
   if(mesh1->ibar!=mesh2->ibar)return 0;

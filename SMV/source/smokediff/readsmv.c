@@ -36,31 +36,31 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     if(strncmp(buffer," ",1)==0)continue;
 
     if(
-      match(buffer,"SLCF") == 1||
-      match(buffer,"SLCC") == 1||
-      match(buffer, "SLCD") == 1 ||
-      match(buffer, "SLFL") == 1 ||
-      match(buffer,"SLCT") == 1
+      Match(buffer,"SLCF") == 1||
+      Match(buffer,"SLCC") == 1||
+      Match(buffer, "SLCD") == 1 ||
+      Match(buffer, "SLFL") == 1 ||
+      Match(buffer,"SLCT") == 1
       ){
       nsliceinfo++;
       continue;
     }
-    if(match(buffer,"BNDF") == 1||
-       match(buffer,"BNDC") == 1
+    if(Match(buffer,"BNDF") == 1||
+       Match(buffer,"BNDC") == 1
        ){
       nboundary_files++;
       continue;
     }
     if(
-      match(buffer,"PL3D") == 1){
+      Match(buffer,"PL3D") == 1){
       nplot3dinfo++;
       continue;
     }
-    if(match(buffer,"GRID") == 1){
+    if(Match(buffer,"GRID") == 1){
       nmeshes++;
       continue;
     }
-    if(match(buffer,"PDIM") == 1){
+    if(Match(buffer,"PDIM") == 1){
       ipdim++;
       continue;
     }
@@ -134,7 +134,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ GRID ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"GRID") == 1){
+    if(Match(buffer,"GRID") == 1){
       meshdata *meshi;
       float *xp, *yp, *zp;
       int ibar, jbar, kbar;
@@ -154,7 +154,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       meshi->zplt=zp;
 
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"GRID\n%s\n",buffer);
       }
 
@@ -165,7 +165,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ PDIM ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PDIM") == 1){
+    if(Match(buffer,"PDIM") == 1){
       meshdata *meshi;
 
       meshi=meshinfo+ipdim;
@@ -173,7 +173,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       fgets(buffer,255,streamsmv);
       sscanf(buffer,"%f %f %f %f %f %f",&meshi->xbar0,&meshi->xbar,&meshi->ybar0,&meshi->ybar,&meshi->zbar0,&meshi->zbar);
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"PDIM\n%s\n",buffer);
       }
       continue;
@@ -183,13 +183,13 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNX ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNX")==1){
+    if(Match(buffer,"TRNX")==1){
       float *xpltcopy, *xplt;
       int ibar, idummy, nn;
       meshdata *meshi;
 
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrnx++;
@@ -200,21 +200,21 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       ibar=meshi->ibar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=ibar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,xpltcopy);
@@ -229,13 +229,13 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNY ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNY")==1){
+    if(Match(buffer,"TRNY")==1){
       float *ypltcopy, *yplt;
       int jbar, idummy, nn;
       meshdata *meshi;
 
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrny++;
@@ -245,21 +245,21 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       jbar=meshi->jbar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=jbar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,ypltcopy);
@@ -273,13 +273,13 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ TRNZ ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"TRNZ")==1){
+    if(Match(buffer,"TRNZ")==1){
       float *zpltcopy,*zplt;
       int kbar, idummy, nn;
       meshdata *meshi;
 
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       itrnz++;
@@ -289,21 +289,21 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       kbar=meshi->kbar;
       fgets(buffer,255,streamsmv);
       if(stream_out!=NULL){
-        trim_back(buffer);
+        TrimBack(buffer);
         fprintf(stream_out,"%s\n",buffer);
       }
       sscanf(buffer,"%i ",&idummy);
       for(nn=0;nn<idummy;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
       }
       for(nn=0;nn<=kbar;nn++){
         fgets(buffer,255,streamsmv);
         if(stream_out!=NULL){
-          trim_back(buffer);
+          TrimBack(buffer);
           fprintf(stream_out,"%s\n",buffer);
         }
         sscanf(buffer,"%i %f",&idummy,zpltcopy);
@@ -312,7 +312,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       meshi->dz = zplt[1]-zplt[0];
       continue;
     }
-    if(match(buffer,"ENDF") == 1){
+    if(Match(buffer,"ENDF") == 1){
       char endian_filename[1024];
       FILE *ENDIANfile;
       int endian=0, endian_native, endian_data, len;
@@ -320,7 +320,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       if(fgets(buffer,255,streamsmv)==NULL)break;
       len=strlen(buffer);
       buffer[len-1]='\0';
-      trim_back(buffer);
+      TrimBack(buffer);
       fullfile(endian_filename,smvcase->dir,buffer);
       ENDIANfile = fopen(endian_filename,"rb");
       if(ENDIANfile!=NULL){
@@ -348,7 +348,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ PL3D ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"PL3D") == 1){
+    if(Match(buffer,"PL3D") == 1){
       meshdata *plot3dmesh;
       plot3d *plot3di;
       float time_local;
@@ -365,7 +365,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       plot3di = plot3dinfo + iplot3d;
       plot3di->plot3dmesh=plot3dmesh;
       plot3di->time=time_local;
-      trim_back(buffer);
+      TrimBack(buffer);
       strcpy(plot3di->keyword,buffer);
 
       fgets(buffer,255,streamsmv);
@@ -380,13 +380,13 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         }
 
         CheckMemory;
-        strcpy(plot3di->file,trim_front(buffer));
+        strcpy(plot3di->file,TrimFront(buffer));
         CheckMemory;
-        if(readlabels(plot3di->labels+0,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+1,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+2,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+3,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+4,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+0,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+1,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+2,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+3,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+4,streamsmv)==2)break;
 
         CheckMemory;
 
@@ -395,11 +395,11 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       else{
         if(display_warnings==1)fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",full_file);
         CheckMemory;
-        if(readlabels(plot3di->labels+0,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+1,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+2,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+3,streamsmv)==2)break;
-        if(readlabels(plot3di->labels+4,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+0,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+1,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+2,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+3,streamsmv)==2)break;
+        if(ReadLabels(plot3di->labels+4,streamsmv)==2)break;
         nplot3dinfo--;
         smvcase->nplot3dinfo=nplot3dinfo;
       }
@@ -412,11 +412,11 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
     if(
-      match(buffer,"SLCF") == 1||
-      match(buffer,"SLCC") == 1||
-      match(buffer, "SLCD") == 1 ||
-      match(buffer, "SLFL") == 1 ||
-      match(buffer,"SLCT") == 1)
+      Match(buffer,"SLCF") == 1||
+      Match(buffer,"SLCC") == 1||
+      Match(buffer, "SLCD") == 1 ||
+      Match(buffer, "SLFL") == 1 ||
+      Match(buffer,"SLCT") == 1)
     {
       int version_local=0;
       int len;
@@ -435,27 +435,27 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       slicemesh = smvcase->meshinfo+meshnumber-1;
       slicei->slicemesh = slicemesh;
-      trim_back(buffer);
+      TrimBack(buffer);
 
       strcpy(slicei->keyword,buffer);
 
-      if(match(buffer,"SLCF") == 1){
+      if(Match(buffer,"SLCF") == 1){
         slicei->slicetype=1;
       }
-      if(match(buffer,"SLCC") == 1||match(buffer, "SLCD") == 1){
+      if(Match(buffer,"SLCC") == 1||Match(buffer, "SLCD") == 1){
           slicei->slicetype = 2;
       }
-      if(match(buffer,"SLFL") == 1){
+      if(Match(buffer,"SLFL") == 1){
         slicei->slicetype=3;
       }
-      if(match(buffer,"SLCT") == 1){
+      if(Match(buffer,"SLCT") == 1){
         slicei->slicetype=4;
       }
 
       slicei->version=version_local;
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
-      trim_back(buffer);
+      TrimBack(buffer);
       if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
@@ -469,8 +469,8 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&slicei->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&slicei->histogram,sizeof(histogramdata));
         init_histogram(slicei->histogram,NHIST_BUCKETS);
-        STRCPY(slicei->file, trim_front(buffer));
-        if(readlabels(&slicei->label,streamsmv)==2){
+        STRCPY(slicei->file, TrimFront(buffer));
+        if(ReadLabels(&slicei->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading SLCF entry\n");
           break;
         }
@@ -498,7 +498,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       }
       else{
         if(display_warnings==1)fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&sliceinfo[islice].label,streamsmv)==2)break;
+        if(ReadLabels(&sliceinfo[islice].label,streamsmv)==2)break;
         nsliceinfo--;
         smvcase->nsliceinfo=nsliceinfo;
       }
@@ -509,8 +509,8 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     ++++++++++++++++++++++ BNDF ++++++++++++++++++++++++++++++
     +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   */
-    if(match(buffer,"BNDF") == 1||
-       match(buffer,"BNDC") == 1
+    if(Match(buffer,"BNDF") == 1||
+       Match(buffer,"BNDC") == 1
        ){
       int version_local=0;
       int len;
@@ -529,21 +529,21 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
 
       boundarymesh = smvcase->meshinfo+meshnumber-1;
       boundaryi->boundarymesh = boundarymesh;
-      trim_back(buffer);
+      TrimBack(buffer);
 
       strcpy(boundaryi->keyword,buffer);
 
       boundaryi->version=version_local;
 
-      if(match(buffer,"BNDF") == 1){
+      if(Match(buffer,"BNDF") == 1){
         boundaryi->boundarytype=1;
       }
-      if(match(buffer,"BNDC") == 1){
+      if(Match(buffer,"BNDC") == 1){
         boundaryi->boundarytype=2;
       }
 
       if(fgets(buffer,255,streamsmv)==NULL)break;
-      trim_back(buffer);
+      TrimBack(buffer);
       if(strlen(buffer)==0)break;
       fullfile(full_file,smvcase->dir,buffer);
       if(getfileinfo(full_file,NULL,&filesize)==0){
@@ -552,8 +552,8 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         NewMemory((void **)&boundaryi->file,(unsigned int)(strlen(full_file)+1));
         NewMemory((void **)&boundaryi->histogram,sizeof(histogramdata));
         init_histogram(boundaryi->histogram,NHIST_BUCKETS);
-        STRCPY(boundaryi->file, trim_front(buffer));
-        if(readlabels(&boundaryi->label,streamsmv)==2){
+        STRCPY(boundaryi->file, TrimFront(buffer));
+        if(ReadLabels(&boundaryi->label,streamsmv)==2){
           fprintf(stderr,"*** Warning: problem reading BNDF entry\n");
           break;
         }
@@ -606,7 +606,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       }
       else{
         fprintf(stderr,"*** Warning: the file, %s, does not exist.\n",buffer);
-        if(readlabels(&boundaryinfo[iboundary].label,streamsmv)==2)break;
+        if(ReadLabels(&boundaryinfo[iboundary].label,streamsmv)==2)break;
         nboundary_files--;
         smvcase->nboundary_files=nboundary_files;
       }
@@ -622,22 +622,22 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
     // skip over the following keywords
 
     if(
-       match(buffer,"ISOF") == 1||
-       match(buffer,"ISOG") == 1||
-       match(buffer,"TISOF")==1||
-       match(buffer,"SMOKE3D")==1||
-       match(buffer,"SMOKF3D")==1||
-       match(buffer,"VSMOKF3D")==1||
-       match(buffer,"PART")==1||
-       match(buffer,"EVAC")==1||
-       match(buffer,"PRT5")==1||
-       match(buffer,"EVA5")==1
+       Match(buffer,"ISOF") == 1||
+       Match(buffer,"ISOG") == 1||
+       Match(buffer,"TISOF")==1||
+       Match(buffer,"SMOKE3D")==1||
+       Match(buffer,"SMOKF3D")==1||
+       Match(buffer,"VSMOKF3D")==1||
+       Match(buffer,"PART")==1||
+       Match(buffer,"EVAC")==1||
+       Match(buffer,"PRT5")==1||
+       Match(buffer,"EVA5")==1
        ){
       char comm[1024];
 
       strcpy(comm,buffer);
       fgets(buffer,255,streamsmv);
-      if(match(comm,"PRT5")==1||match(comm,"EVA5")==1){
+      if(Match(comm,"PRT5")==1||Match(comm,"EVA5")==1){
         int i, nlines;
 
         fgets(buffer,255,streamsmv);
@@ -651,7 +651,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
         fgets(buffer,255,streamsmv);
         fgets(buffer,255,streamsmv);
       }
-      if(match(comm,"TISOF")==1){
+      if(Match(comm,"TISOF")==1){
         int i;
 
         for(i=0;i<3;i++){
@@ -661,7 +661,7 @@ int ReadSMV(FILE *streamsmv, FILE *stream_out, casedata *smvcase){
       continue;
     }
     if(stream_out!=NULL){
-      trim_back(buffer);
+      TrimBack(buffer);
       fprintf(stream_out,"%s\n",buffer);
     }
     continue;

@@ -58,8 +58,8 @@ int ParseLang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     char *key;
 
     if(fgets(buffer,1000,stream)==NULL)break;
-    buf=trim_front(buffer);
-    trim_back(buf);
+    buf=TrimFront(buffer);
+    TrimBack(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key!=NULL&&key==buf)ntrinfo_local++;
@@ -84,14 +84,14 @@ int ParseLang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     int doit;
 
     if(fgets(buffer,1000,stream)==NULL)break;
-    buf=trim_front(buffer);
-    trim_back(buf);
+    buf=TrimFront(buffer);
+    TrimBack(buf);
     if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)continue;
     key = strstr(buf,"msgid");
     if(key==NULL||key!=buf)continue;
     ntrinfo_local++;
     tri = trinfo_local + ntrinfo_local - 1;
-    key = getstring(key+5);
+    key = GetString(key+5);
     if(key==NULL){
       tri->key=NULL;
     }
@@ -104,11 +104,11 @@ int ParseLang(char *file, trdata **trinfoptr, int *ntrinfoptr){
     for(doit=1;doit==1;){
       doit=0;
       if(fgets(buffer,1000,stream)==NULL)break;
-      buf=trim_front(buffer);
-      trim_back(buf);
+      buf=TrimFront(buffer);
+      TrimBack(buf);
       if(strlen(buf)>=2&&strncmp(buf,"//",2)==0)doit=1;
     }
-    value = getstring(buf+6);
+    value = GetString(buf+6);
     if(value==NULL){
       tri->value=value;
     }

@@ -71,7 +71,7 @@ int prompt_user(char *path_type_local, char *pathbuffer){
   printf("%s ?\n",pathbuffer);
   printf("y=yes, n=no\n");
   scanf("%s",c_answer);
-  c_answer_ptr=trim_front(c_answer);
+  c_answer_ptr=TrimFront(c_answer);
   if(c_answer_ptr!=NULL&&strlen(c_answer_ptr)>0&&toupper(c_answer_ptr[0])=='Y')answer=1;
   return answer;
 }
@@ -393,7 +393,7 @@ void usage(void){
   char githash[100];
   char gitdate[100];
 
-  getGitInfo(githash,gitdate);
+  GetGitInfo(githash,gitdate);
 
   printf("set_path Build:%s\n",githash);
   printf("  Modify or display the User or System path environmental variables.\n\n");

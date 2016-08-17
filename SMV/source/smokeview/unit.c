@@ -182,7 +182,7 @@ void UpdateUnitDefs(void){
         idiff = diff_maxmin + 0.5;
         diff_maxmin=idiff;
         sprintf(unitclasses[i].units[diff_index].rel_val,"%f",diff_maxmin);
-        trimzeros(unitclasses[i].units[diff_index].rel_val);
+        TrimZeros(unitclasses[i].units[diff_index].rel_val);
         unitclasses[i].units[diff_index].rel_defined=1;
       }
     }

@@ -185,7 +185,7 @@ extern "C" void glui_shooter_setup(int main_window){
       char label[255];
 
       sprintf(label,"%f",plot3dtimelist[i]);
-      trimzeros(label);
+      TrimZeros(label);
       LIST_shooter_times->add_item(i,label);
     }
   }

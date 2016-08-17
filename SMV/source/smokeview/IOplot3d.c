@@ -403,7 +403,7 @@ void update_plot3dtitle(void){
   meshdata *meshi;
   char title_base[1024];
 
-  getBaseTitle("Smokeview ", title_base);
+  GetBaseTitle("Smokeview ", title_base);
   STRCPY(plot3d_title,title_base);
   meshi=current_mesh;
   if(meshi==NULL)meshi=meshinfo;
@@ -1902,7 +1902,7 @@ void update_plot3d_menulabels(void){
       STRCPY(plot3di->menulabel,"");
       if(plot3di->time>=0.0){
         sprintf(label,"%f",plot3di->time);
-        trimzeros(label);
+        TrimZeros(label);
         STRCAT(label," s");
         STRCAT(plot3di->menulabel,label);
       }
