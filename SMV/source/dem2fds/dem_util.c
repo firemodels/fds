@@ -851,12 +851,12 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
     fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
   }
-  fprintf(streamout, "&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", basename);
+  fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id,basename);
 
 
   if(option == FDS_GEOM){
-    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
-      nlong, nlat, 0.0, xmax, 0.0, ymax);
+    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
+      surf_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
     count = 1;
     for(j = 0; j < jbar + 1; j++){
       for(i = 0; i < ibar + 1; i++){
@@ -880,8 +880,8 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
         xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
         if(xmin_exclude <= xcen&&xcen <= xmax_exclude&&ymin_exclude <= ycen&&ycen <= ymax_exclude)continue;
         vavg = (vals[count] + vals[count + 1] + valsp1[count] + valsp1[count + 1]) / 4.0;
-        fprintf(streamout, "&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n",
-          xgrid[i], xgrid[i + 1], ygrid[j], ygrid[j + 1], vavg);
+        fprintf(streamout, "&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='%s'/\n",
+          xgrid[i], xgrid[i + 1], ygrid[j], ygrid[j + 1], vavg,surf_id);
         count++;
       }
       count++;

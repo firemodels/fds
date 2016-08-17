@@ -30,4 +30,5 @@ SVEXTERN int SVDECL(border_buffer,300), SVDECL(show_maps,0);
 SVEXTERN float SVDECL(xmin_exclude, -1.0), SVDECL(xmax_exclude, -1.0);
 SVEXTERN float SVDECL(ymin_exclude, -1.0), SVDECL(ymax_exclude, -1.0);
 SVEXTERN int SVDECL(elev_file, 0);
+SVEXTERN char surf_id[1024];
 
