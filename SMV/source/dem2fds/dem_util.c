@@ -355,7 +355,6 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   elevdata *elevinfo, *imageinfo;
   int kbar;
   int longlat_defined = 0;
-  float xmin_exclude, ymin_exclude, xmax_exclude, ymax_exclude;
   int nlongs = 100, nlats = 100;
   float dlat, dlong;
   int count, *have_vals, have_data = 0;
@@ -778,7 +777,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
 /* ------------------ GenerateFDSInputFile ------------------------ */
 
 void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
-  char fdsfile[LEN_BUFFER], *ext;
+  char output_file[LEN_BUFFER], *ext;
   char basename[LEN_BUFFER];
   int nlong, nlat, nz;
   int i, j;
@@ -794,11 +793,16 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   ext = strrchr(basename, '.');
   if(ext != NULL)ext[0] = 0;
 
-  strcpy(fdsfile, basename);
-  strcat(fdsfile, ".fds");
-  streamout = fopen(fdsfile, "w");
+  strcpy(output_file, basename);
+  if(elev_file==1){
+    strcat(output_file, ".elev");
+  }
+  else{
+    strcat(output_file, ".fds");
+  }
+  streamout = fopen(output_file, "w");
   if(streamout == NULL){
-    fprintf(stderr, "***error: unable to open %s for output\n", fdsfile);
+    fprintf(stderr, "***error: unable to open %s for output\n", output_file);
     return;
   }
 
@@ -833,19 +837,20 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     ygrid[i] = ymax*(float)(jbar - 1 - i) / (float)jbar;
   }
 
-
-  fprintf(streamout, "&HEAD CHID='%s', TITLE='terrain' /\n", basename);
-  fprintf(streamout, "&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n", ibar, jbar, kbar, xmax, ymax, zmin, zmax);
-  if(option == FDS_OBST){
-    fprintf(streamout, "&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", basename);
+  if(elev_file == 0) {
+    fprintf(streamout, "&HEAD CHID='%s', TITLE='terrain' /\n", basename);
+    fprintf(streamout, "&MESH IJK = %i, %i, %i, XB = 0.0, %f, 0.0, %f, %f, %f /\n", ibar, jbar, kbar, xmax, ymax, zmin, zmax);
+    if(option == FDS_OBST) {
+      fprintf(streamout, "&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", basename);
+    }
+    fprintf(streamout, "&TIME T_END = 0. /\n");
+    fprintf(streamout, "&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
+    fprintf(streamout, "&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
+    fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
+    fprintf(streamout, "&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
+    fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
+    fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
   }
-  fprintf(streamout, "&TIME T_END = 0. /\n");
-  fprintf(streamout, "&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
-  fprintf(streamout, "&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
-  fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
-  fprintf(streamout, "&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
-  fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
-  fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
   fprintf(streamout, "&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", basename);
 
 
@@ -873,6 +878,7 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
         float vavg, xcen;
 
         xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
+        if(xmin_exclude <= xcen&&xcen <= xmax_exclude&&ymin_exclude <= ycen&&ycen <= ymax_exclude)continue;
         vavg = (vals[count] + vals[count + 1] + valsp1[count] + valsp1[count + 1]) / 4.0;
         fprintf(streamout, "&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n",
           xgrid[i], xgrid[i + 1], ygrid[j], ygrid[j + 1], vavg);
@@ -881,15 +887,25 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
       count++;
     }
   }
-  fprintf(streamout, "&TAIL /\n");
+  if(elev_file == 1) {
+    fprintf(streamout, "&TAIL /\n");
+  }
 
   fprintf(stderr, "\n");
   fprintf(stderr, "FDS input file properties:\n");
-  fprintf(stderr, "       file name: %s\n", fdsfile);
-  fprintf(stderr, "           max x: %f\n", xmax);
-  fprintf(stderr, "           max y: %f\n", ymax);
-  fprintf(stderr, "   min elevation: %f\n", fds_elevs->val_min);
-  fprintf(stderr, "   max elevation: %f\n", fds_elevs->val_max);
-  fprintf(stderr, "longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
-  fprintf(stderr, " latitude=%f at y=%f\n", fds_elevs->latref, fds_elevs->yref);
+  fprintf(stderr, "  output file name: %s\n", output_file);
+  fprintf(stderr, "             max x: %f\n", xmax);
+  fprintf(stderr, "             max y: %f\n", ymax);
+  fprintf(stderr, "     min elevation: %f\n", fds_elevs->val_min);
+  fprintf(stderr, "     max elevation: %f\n", fds_elevs->val_max);
+  fprintf(stderr, "  longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
+  fprintf(stderr, "   latitude=%f at y=%f\n", fds_elevs->latref, fds_elevs->yref);
+  if(xmin_exclude >= 0 || ymin_exclude >= 0.0 || xmax_exclude >= 0.0 || ymax_exclude >= 0.0) {
+    fprintf(stderr, "  exclude region:\n");
+    fprintf(stderr, "    min x: %f\n",xmin_exclude);
+    fprintf(stderr, "    max x: %f\n", xmax_exclude);
+    fprintf(stderr, "    min y: %f\n", ymin_exclude);
+    fprintf(stderr, "    max y: %f\n", xmax_exclude);
+
+  }
 }
