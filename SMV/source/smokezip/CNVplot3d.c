@@ -44,7 +44,7 @@ int convert_plot3d(plot3d *plot3di){
   strcpy(filetype,"");
   shortlabel=plot3di->labels[0].shortlabel;
   if(strlen(shortlabel)>0)strcat(filetype,shortlabel);
-  trim_back(filetype);
+  TrimBack(filetype);
 
   if(getfileinfo(plot3d_file,NULL,NULL)!=0){
     fprintf(stderr,"*** Warning: The file %s does not exist\n",plot3d_file);
