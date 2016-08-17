@@ -1415,14 +1415,15 @@ lines with a {\ct T}.
 \label{baroclinic_torque}
 
 The pressure term in the momentum transport equation solved by FDS is decomposed as follows:
-\be 
-   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)  
-\ee 
+\be
+   \frac{1}{\rho} \nabla \tp = \nabla \left( \frac{\tp}{\rho}\right) - \tp \, \nabla \left(\frac{1}{\rho} \right)
+\ee
 The pressure term is written like this so that a separable elliptic partial differential equation can be solved for the ``total'' pressure, $\cH \equiv |\bu|^2/2 + \tp/\rho$, using a direct solver. The second term is calculated based on the pressure field from the previous time step, a slight approximation necessary to render the pressure equation separable. This term is sometimes referred to as the baroclinic torque, and it is responsible for generating vorticity due to the non-alignment of pressure and density gradients. In versions of FDS prior to 6, the inclusion of the baroclinic torque term was found to sometimes cause numerical instabilities. If it is suspected that the term is responsible for numerical problems, it can be removed by setting {\ct BAROCLINIC=.FALSE.} on the {\ct MISC} line. For example, in the simple helium plume test case below, neglecting the baroclinic torque changes the puffing behavior noticeably. In other applications, however, its effect is less significant. For further discussion of its effect, see Ref.~\cite{Xin:JSS2005}.
 
 
 
 \subsubsection{Example Case: Flowfields/helium\_2d\_isothermal}
+\label{helium_2d_isothermal}
 
 This case demonstrates the use of baroclinic correction for an axially-symmetric helium plume. Note that the governing equations solved in FDS are written in terms of a three dimensional Cartesian coordinate system. However, a two dimensional Cartesian or two dimensional cylindrical (axially-symmetric) calculation can be performed by setting the number of cells in the $y$ direction to 1. An example of an axially-symmetric helium plume is shown in Fig.~\ref{helium_plume}.
 
@@ -1676,10 +1677,9 @@ By default, FDS will suspend the pressure iterations if the error is not reduced
 If {\ct .TRUE.}, the parameter {\ct CHECK\_POISSON} tells FDS to check that the left-hand and right-hand sides of the Poisson equation for $H$ are equivalent (see the FDS Tech Guide \cite{FDS_Math_Guide}).  The error is printed to the {\ct CHID.out} file.
 
 \subsubsection{Example Case: Pressure\_Solver/duct\_flow}
+\label{duct_flow}
 
-To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the
-duct. Figure~\ref{duct_flow} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match
-the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.
+To demonstrate how to improve the accuracy of the pressure solver, consider the flow of air through a square duct that crosses several meshes. In the sample input file, {\ct duct\_flow.fds}, air is pushed through a 1 m$^2$ duct at 1~m/s. With no thermal expansion, the volume flow into the duct ought to equal the volume flow out of the duct. Figure~\ref{duct_flow_fig} displays the computed inflow and outflow as a function of time, and the number of pressure iterations required. The outflow does not match the inflow exactly because of inaccuracies at the solid and mesh boundaries. The {\ct VELOCITY\_TOLERANCE} has been set to 0.001~m/s with {\ct MAX\_PRESSURE\_ITERATIONS} set to 1000 and the grid cell size is 0.2~m.
 
 \begin{figure}[ht]
 \begin{center}
@@ -1687,7 +1687,7 @@ the inflow exactly because of inaccuracies at the solid and mesh boundaries. The
 \includegraphics[width=3in]{SCRIPT_FIGURES/duct_flow_iterations}
 \end{center}
 \caption[Results of the {\ct duct\_flow} test case]{(Left) Volume flow into and out of a square duct. (Right) The number of pressure iterations as a function of time.}
-\label{duct_flow}
+\label{duct_flow_fig}
 \end{figure}
 
 
@@ -1726,6 +1726,7 @@ In Section \ref{sec:periodic}, we discuss how to set periodic boundaries.  By de
 
 
 \subsection{Pressure Considerations in Long Tunnels}
+\label{tunnel_demo}
 
 A common application of FDS is tunnel fires, but simulations of fires in long, relatively tight tunnels can have spurious fluctuations in the pressure field that can lead to numerical instabilities. The root cause of the problem is the way that FDS solves the equation for the pressure, $\tp$ (the tilde indicates that this is the {\em perturbation} pressure, or pressure above background). To solve for $\tp$, an elliptic PDE is formed by taking the divergence of the momentum equation, which contains the term $\nabla \tp / \rho$. Ideally, this PDE would be of the form:
 \be
@@ -1747,13 +1748,13 @@ drops below a specified tolerance. By default, the {\ct PRESSURE\_TOLERANCE} is 
 
 A simple test case, {\ct Pressure\_Solver/tunnel\_demo.fds}, demonstrates some of the issues discussed in this section. An 8~MW fire is situated in a 4~m by 4~m by 128~m long tunnel that is sloped 10$^\circ$, closed at the lower end and open at the upper end. The tunnel is divided into 8 meshes, all the same size, with a uniform grid of 20~cm. The case runs for a relatively short amount of time, and a diagnostic file\footnote{Caution: the velocity error file can be quite large. Use it only for relatively short simulations only.} containing information about the velocity and pressure errors is printed out. This file is generated by setting {\ct VELOCITY\_ERROR\_FILE} to {\ct .TRUE.} on the {\ct DUMP} line. The name of the file is {\ct tunnel\_demo\_pressit.csv}. Column~1 of the file is the time step iteration. Column~2 is the pressure iteration within the time step. Column~3 is the total number of pressure iterations for the entire simulation. Columns~4-7 contain the mesh and cell indices where the maximum velocity error occurs, which is listed in column~8. Columns~9-12 contain the mesh and cell indices where the maximum pressure error occurs, which is listed in column~13.
 
-Figure~\ref{tunnel_demo} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
+Figure~\ref{tunnel_demo_fig} shows the velocity and pressure errors over a short span of the simulation. For each quantity, there is a default error tolerance which may or may not be reached depending on whether or not the {\ct MAX\_PRESSURE\_ITERATIONS} (default 10) has been reached, or whether or not the error is reduced by at least 25~\% over the previous iteration. In some situations, the error decreases slowly, and these criteria have been added to avoid excessive iterations that lead to little improvement in accuracy. The errors shown in Fig.~\ref{tunnel_demo_fig} are relatively large because fires in long, closed enclosures like tunnels can generate large fluctuations in pressure that challenge both the multiple mesh capability and the pressure solving algorithm discussed above.
 
 \begin{figure}[ht]
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_velocity}
 \includegraphics[width=3in]{SCRIPT_FIGURES/tunnel_demo_pressure}
 \caption[Convergence test for the {\ct tunnel\_demo} test case]{Reduction in velocity and pressure error due to iteration of the pressure solver.}
-\label{tunnel_demo}
+\label{tunnel_demo_fig}
 \end{figure}
 
 
@@ -2039,6 +2040,7 @@ Periodic vents may not be used to connect offset vents or vents in different coo
 
 \subsubsection{Circular Vents}
 \label{sec:circvents}
+\label{circular_burner}
 
 Circular or semi-circular vents may be specified as the intersection of a rectangle with coordinates {\ct XB} and a circle with center {\ct XYZ} and radius {\ct RADIUS}.  The rectangular surface cells that are assigned the corresponding {\ct SURF\_ID} will be those whose centroid falls within the intersection. In the example case called {\ct Fires/circular\_burner.fds}, the following two lines create a circular vent that is 1~m in diameter and flows propane gas at a rate of 0.02~kg/m$^2$/s:
 \begin{lstlisting}
@@ -3199,6 +3201,12 @@ The burnout time of a liquid fuel is calculated automatically based on the liqui
 
 \subsubsection{Special topic: Making Fuels Disappear}
 \label{info:BURN_AWAY}
+\label{box_burn_away1}
+\label{box_burn_away2}
+\label{box_burn_away3}
+\label{box_burn_away4}
+\label{box_burn_away_2D}
+\label{box_burn_away_2D_residue}
 
 If a burning object is to disappear from the simulation once it is consumed, set {\ct BURN\_AWAY=.TRUE.} on the corresponding {\ct SURF} line. The solid object disappears from the calculation cell by cell, as the mass contained within each solid cell is consumed either by the pyrolysis reactions or by the prescribed HRR. The following issues should be kept in mind when using {\ct BURN\_AWAY}:
 \begin{itemize}
@@ -3344,6 +3352,8 @@ model the entire HVAC system, read Section~\ref{info:HVAC}.
 The ventilation system of individual compartments within a building is described using velocity {\em boundary conditions}. For example, fresh air can be blown into, and smoke can be drawn from, a compartment by specifying a velocity in the {\em normal} direction to a solid surface. However, there are various other facets of velocity boundary conditions that are described below.
 
 \subsection{Simple Supply and Exhaust Vents}
+\label{volume_flow_1}
+\label{volume_flow_2}
 
 The easiest way to describe a supply or exhaust fan is to specify a {\ct VENT} on a solid surface, and designate a {\ct SURF\_ID} with some form of specified velocity or volume flow rate. The normal component of velocity is usually specified directly via the parameter {\ct VEL}. If {\ct VEL} is negative, the flow is directed {\em into} the computational domain, i.e., a supply vent. If {\ct VEL} is positive, the flow is drawn {\em out of} the domain, i.e., an exhaust vent. For example, the lines
 \begin{lstlisting}
@@ -3392,8 +3402,8 @@ Note that if {\ct HRRPUA} or solid phase reaction parameters are specified, no v
 
 
 \subsection{Louvered Vents}
-
 \label{info:louvers}
+\label{tangential_velocity}
 
 Most real supply vents are covered with some sort of grill or louvers which act to redirect, or {\em diffuse}, the incoming air stream. It is possible to mimic this effect, to some extent, by prescribing both a normal and the tangential components of the flow. The normal component is specified with {\ct VEL} as described above. The tangential is prescribed via a pair of real numbers {\ct VEL\_T} representing the desired tangential velocity components in the other two coordinate directions ($x$ or $y$ should precede $y$ or $z$). For example, the line in the example case {\ct Flowfields/tangential\_velocity.fds}
 \begin{lstlisting}
@@ -3768,16 +3778,14 @@ Note that a filter input refers to a class of filters and that multiple ducts ca
 
 \subsection{HVAC Aircoil Parameters}
 \label{info:HVACaircoil}
+\label{HVAC_aircoil}
 
 An aircoil refers to a device that either adds or removes heat from air flowing through a duct.  In a typical HVAC system this is done by blowing the air over a heat exchanger (hence the term aircoil) containing a working fluid such as chilled water or a refrigerant.  A sample input line is as follows:
-
 \begin{lstlisting}
 &HVAC TYPE_ID='AIRCOIL', ID='aircoil 1', EFFICIENCY=0.5,
       COOLANT_SPECIFIC_HEAT=4.186, COOLANT_TEMPERATURE=10., COOLANT_MASS_FLOW=1./
 \end{lstlisting}
-
-\noindent where:
-
+where:
 \begin{description}
 \item[{\ct COOLANT\_MASS\_FLOW}] is the flow rate of the working fluid (kg/s).
 \item[{\ct COOLANT\_SPECIFIC\_HEAT}] is the specific heat (\si{kJ/(kg.K)}) of the working fluid.
@@ -3786,16 +3794,14 @@ An aircoil refers to a device that either adds or removes heat from air flowing 
 \item[{\ct FIXED\_Q}] is the constant heat exchange rate. A negative value indicates heat removal from the duct.  The heat exchange rate can be controlled by either {\ct RAMP\_ID} or by {\ct TAU\_AC}.
 \item[{\ct TAU\_AC}]  defines a tanh ({\ct TAU\_AC}>0) or t$^2$ ramp ({\ct TAU\_AC}<0) for the aircoil.  This is applied to the {\ct FIXED\_Q} of the aircoil. Alternatively, a {\ct RAMP\_ID} can be given.
 \end{description}
-
-\noindent
 Note that either {\ct FIXED\_Q} or the set {\ct COOLANT\_SPECIFIC\_HEAT}, {\ct COOLANT\_MASS\_FLOW}, \linebreak[4]{\ct COOLANT\_TEMPERATURE}, and {\ct EFFICIENCY} should be specified.  In the latter case, the heat exchange is computed as a two step process.  First, the outlet temperature is determined assuming 100 \% efficient (i.e., both fluids exit at the same temperature):
-\be T_{\rm fluid,out}=\frac{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} \, T_{\rm duct,in} + c_{p,{\rm fluid}} \, \dm_{\rm fluid} \, T_{\rm fluid,in}}{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} + c_{p,{\rm fluid}} \, \dm_{\rm fluid}}
+\be
+  T_{\rm fluid,out}=\frac{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} \, T_{\rm duct,in} + c_{p,{\rm fluid}} \, \dm_{\rm fluid} \, T_{\rm fluid,in}}{c_{p,{\rm gas}} \, u_{\rm duct} \, A_{\rm duct} \, \rho_{\rm duct} + c_{p,{\rm fluid}} \, \dm_{\rm fluid}}
 \ee
 Second, the actual heat exchanged is computed using the {\ct EFFICIENCY}.
-\be \dq_{\rm coil}=\eta \, c_{p,{\rm fluid}} \, \dm_{\rm fluid} \left( T_{\rm fluid,in} - T_{\rm fluid,out} \right)
+\be
+  \dq_{\rm coil}=\eta \, c_{p,{\rm fluid}} \, \dm_{\rm fluid} \left( T_{\rm fluid,in} - T_{\rm fluid,out} \right)
 \ee
-
-\noindent
 Note that an aircoil input refers to a class of aircoils and that multiple ducts can reference the same aircoil definition.
 
 The sample input file {\ct HVAC\_aircoil.fds} demonstrates the use of the aircoil inputs.  A constant flow duct removes air (defined as 28~g/mol with a specific heat of 1~\si{kJ/(kg.K)}) from the floor and injects in through the ceiling at a volume flow rate of 1~\si{m^3/s}.  An aircoil is defined with a working fluid flowing at 10~kg/s and 100~$^\circ$C with a specific heat of 4~\si{kJ/(kg.K)}.  The aircoil has an efficiency of 50~\%.  Using the above equations the aircoil will add 45.2~kW of heat to the gas flowing through the duct resulting in a duct exit temperature of 332~K. These results are shown in  Fig.~\ref{fig_aircoil}.
@@ -3867,6 +3873,7 @@ For the special case where a zone has periodic boundaries ({\ct SURF\_ID='PERIOD
 
 
 \subsubsection{Example Case: Pressure Rise in a Compartment}
+\label{pressure_rise}
 
 This example tests several basic features of FDS. A narrow channel, 3~m long, 0.002~m wide, and 1~m tall, has air injected at a rate of
 0.1~kg/m$^2$/s over an area of 0.2~m by 0.002~m for 60 s, with a linear ramp-up and ramp-down over 1 s. The total mass of air in the channel at the
@@ -3875,7 +3882,7 @@ STRATIFICATION} is set to {\ct .FALSE.} simply to remove the slight change in pr
 The domain is divided into three meshes, each 1~m long and each with identical gridding.  We expect the pressure,
 temperature and density to rise during the 60~s injection period. Afterwards, the
 temperature, density, and pressure should remain constant, according to the equation of state.
-Figure~\ref{pressure_rise} shows the results of this calculation.  The density matches exactly showing
+Figure~\ref{pressure_rise_fig} shows the results of this calculation.  The density matches exactly showing
 that FDS is injecting the appropriate amount of mass. The steady state values of the pressure, density and temperature are consistent with
 the ideal values obtained from the first law of thermodynamics.
 
@@ -3886,12 +3893,13 @@ the ideal values obtained from the first law of thermodynamics.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/pressure_rise_R} &
 \end{tabular*}
 \caption[Results of the {\ct pressure\_rise} test case]{Output of {\ct pressure\_rise} test case.}
-\label{pressure_rise}
+\label{pressure_rise_fig}
 \end{figure}
 
 
 \subsubsection{Example Case: Breaking Pressure Zones}
-\label{zone_break_example}
+\label{zone_break_slow}
+\label{zone_break_fast}
 
 In this example, three simple compartments are initially isolated from each other and from the ambient environment outside. Each compartment is a separate pressure zone. Air is blown into Zone~1 at a constant rate of 0.1~kg/s, increasing its pressure approximately 2000~Pa by 10~s, at which time Zone~1 is opened to Zone~2, decreasing the overall pressure in the two zones to roughly one-third the original value because the volume of the combined pressure zone has been roughly tripled. At 15~s, the pressure is further decreased by opening a door to Zone~3, and, finally, at 20~s the pressure returns to ambient following the opening of a door to the outside. Figure~\ref{zone_break} displays the pressure within each compartment.
 \begin{figure}[ht]
@@ -3913,15 +3921,15 @@ Do not use FDS to study the sudden rupture of pressure vessels! Its low Mach num
 are very important in such analyses. The zone breaking functionality described in this example is only intended to be used for relatively small pressure differences (<0.1~atm) between compartments. Real buildings cannot withstand substantially larger pressures anyway.
 
 \subsubsection{Example Case: Irregularly Shaped Zone}
-\label{zone_shape_example}
+\label{zone_shape}
 
-This example is similar to the ones in the previous section, except in this case, the pressure zone is L-shaped and split across two meshes. The objective is simply to ensure that the specification of the pressure zone is properly accounted for in the model. Figure~\ref{zone_shape} compares the predicted pressure in the compartment compared to an exact solution. Air is injected into the compartment for 5~s, after which the compartment is opened to a smaller compartment. At 15~s, the smaller compartment is opened to the outside.
+This example is similar to the ones in the previous section, except in this case, the pressure zone is L-shaped and split across two meshes. The objective is simply to ensure that the specification of the pressure zone is properly accounted for in the model. Figure~\ref{zone_shape_fig} compares the predicted pressure in the compartment compared to an exact solution. Air is injected into the compartment for 5~s, after which the compartment is opened to a smaller compartment. At 15~s, the smaller compartment is opened to the outside.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/zone_shape}
 \caption[Results of the {\ct zone\_shape} test case]{Output of {\ct zone\_shape} test case. Shown is the pressure in an L-shaped compartment that is opened to another compartment at 5~s, and the outdoors at 15~s.}
-\label{zone_shape}
+\label{zone_shape_fig}
 \end{figure}
 
 
@@ -3981,6 +3989,7 @@ This approach also has the option of changing the flow loss by specifying {\ct L
 Note, for this approach it is not required that one have pressure zones defined; however, it is recommended to do so if different pressure zones do in fact exist in the model.
 
 \subsubsection{Example Case: door\_crack}
+\label{door_crack}
 
 This example involves a small compartment that contains a fan in one wall and a closed door with leakage at its bottom in the opposite wall.
 A small (160~kW) fire is added to the compartment. Initially, the pressure rises due to the heat from the fire and the fan blowing air into the compartment.
@@ -3988,7 +3997,6 @@ Eventually the pressure rise inside the compartment exceeds the maximum pressure
 Pressure will continue to rise due to the fire until the pressure relief due to leakage and back flow through the fan equals the pressure increase from the fire.
 
 \begin{figure}[ht]
-\noindent
 \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_Pressure} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/door_crack_HRR}
@@ -3999,6 +4007,7 @@ Pressure will continue to rise due to the fire until the pressure relief due to 
 
 \subsection{Special Topic: Stack Effect}
 \label{info:stackeffect}
+\label{stack_effect}
 
 Tall buildings often experience buoyancy-induced air movement due to temperature differences between the interior and exterior, known as {\em stack effect}~\cite{Klote_Milke}. These temperature differences create flows within vertical shafts (stairwells, atriums, elevator shafts, etc.) due to leaks or openings at different levels. To simulate this phenomenon in FDS, you must include the entire building, or a substantial fraction of it, both inside and out, in the computational domain. It is important to capture the pressure and density decrease in the atmosphere based on the specified temperature {\ct LAPSE\_RATE} ($^\circ$C/m) that is entered on the {\ct MISC} line.
 
@@ -4323,19 +4332,10 @@ If a species is only to be used as part of one or more lumped species, {\ct LUMP
 Note that while you can define as many species using {\ct SPEC} as you wish in an input file, any namelist input tied to a list of species, such as any {\ct SPEC\_ID} input or {\ct MASS\_FRACTION} input, is limited to using no more than 20 species.
 
 \subsection{Basics}
-
 \label{info:SPEC_Basics}
+\label{gas_filling}
 
-Each {\ct SPEC} line should include at the very least
-the name of the species via a character string, {\ct ID}. Once the extra species has been declared, you introduce it at surfaces via the
-parameters {\ct MASS\_FRACTION(:)} or {\ct MASS\_FLUX(:)} along with the character array {\ct SPEC\_ID(:)}.
-Following is a very simple example of how a gas---in this case hydrogen---can be introduced into the simulation.
-
-\vskip\baselineskip
-\noindent{\bf Sample Case: Filling a Compartment with Gas}
-\vskip\baselineskip
-
-\noindent A simple input file called {\ct gas\_filling.fds} demonstrates how to add a gas species to your simulation. The relevant lines are as follows:
+Each {\ct SPEC} line should include at the very least the name of the species via a character string, {\ct ID}. Once the extra species has been declared, you introduce it at surfaces via the parameters {\ct MASS\_FRACTION(:)} or {\ct MASS\_FLUX(:)} along with the character array {\ct SPEC\_ID(:)}. A very simple example of how a gas---in this case hydrogen---can be introduced into the simulation is given by the simple input file called {\ct gas\_filling.fds}. The relevant lines are as follows:
 \begin{lstlisting}
 &SPEC ID='HYDROGEN' /
 &SURF ID='LEAK', SPEC_ID(1)='HYDROGEN', MASS_FLUX(1)=0.01667, RAMP_MF(1)='leak_ramp' /
@@ -4346,15 +4346,14 @@ Following is a very simple example of how a gas---in this case hydrogen---can be
 &VENT XB=-0.6,0.4,-0.6,0.4,0.0,0.0, SURF_ID='LEAK', COLOR='RED' /
 &DUMP MASS_FILE=.TRUE. /
 \end{lstlisting}
+The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling_fig}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
 
-\noindent
-The hydrogen is injected through a 1~m by 1~m vent at a rate of 0.01667~\si{kg/(m$^2$.s)} and shut off after 3~min. The total mass of hydrogen at that point ought to be 3~kg (see Fig.~\ref{gas_filling}). Notice that no properties were needed for the {\ct HYDROGEN} because it is a species whose properties are included in Table~\ref{tab:gasspecies}. The background species in this case is assumed to be air. The mass flow rate of the hydrogen is controlled via the ramping parameter {\ct RAMP\_MF(1)}. The parameter {\ct MASS\_FILE=.TRUE.} instructs FDS to produce an output file that contains a time history of the hydrogen mass.
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.1in]{SCRIPT_FIGURES/gas_filling_mass}
 \end{center}
 \caption[Results of the {\ct gas\_filling} test case]{Hydrogen mass vs.~time for {\ct gas\_filling} test case.}
-\label{gas_filling}
+\label{gas_filling_fig}
 \end{figure}
 
 \subsubsection{Initial Conditions}
@@ -4373,7 +4372,6 @@ If you are using the default background lumped species {\ct AIR}, then you can s
 If you are defining the primitive species of {\ct WATER VAPOR}, then {\ct MASS\_FRACTION\_0} is independent of {\ct HUMIDITY}.  That is setting {\ct MASS\_FRACTION\_0} for the species {\ct WATER VAPOR} will not change the ambient humidity, it will add additional water vapor.
 
 \subsection{Specifying Gas and Liquid Species Properties}
-
 \label{gas_species_props}
 
 There are several options for specifying the properties of gas and liquid species.
@@ -4382,7 +4380,7 @@ There are several options for specifying the properties of gas and liquid specie
 
 Gases and liquids whose properties are tabulated within FDS are listed in Table~\ref{tab:gasspecies}. The physical properties of these species are known and do not need to be specified. When using one of these gases you need only specify the correct {\ct ID} and provide, if needed, the initial mass fraction. FDS will then use precompiled data to compute the various thermophysical properties from 0 K to 5000 K.
 
-\clearpage
+\newpage
 \begin{longtable}{@{\extracolsep{\fill}}|l|c|c|c|c|c|l|}
 \caption[Optional gas and liquid species]{Optional gas and liquid species~\cite{Reid:1}}
 \label{tab:gasspecies}\\
@@ -4950,6 +4948,7 @@ Note that the sign of {\ct NU} corresponds to whether that species is consumed (
 
 \subsection{Multiple Chemical Reactions}
 \label{info:multi-reac}
+\label{energy_budget_adiabatic_two_fuels}
 
 There may be times when the your design/model fire is best described by more than one fuel or by more than a single-step chemical reaction. For this example consider two simultaneous, mixing-controlled reactions of polyurethane and wood. Both of these fuels are complex molecules not included in Table~\ref{tab:gasspecies}, so they must be defined on the {\ct SPEC line}. Polyurethane is defined by the chemical formula C$_{25}$H$_{42}$O$_{6}$N$_{2}$ and wood is defined by CH$_{1.7}$O$_{0.74}$N$_{0.002}$. Consider a combustion reaction for polyurethane with a soot yield of $y_{\rm s}$ = 0.131 and a CO yield of $y_{\mathrm{CO}}$= 0.01 \cite{SFPE:Tewarson} is:
 \begin{multline}\label{eq:pu_combust}
@@ -5524,6 +5523,7 @@ For calculating the absorption of thermal radiation by particles, FDS uses a run
 
 \subsection{Size Distribution}
 \label{info:particle_size}
+\label{droplet_distributions_2}
 
 The size distribution of liquid droplets is specified using a cumulative volume fraction (CVF)\footnote{The CVF indicates the fraction of total mass carried by droplets less than the given diameter.} indicated by the character string {\ct DISTRIBUTION} on the {\ct PART} line. The default is \linebreak[3] {\ct 'ROSIN-RAMMLER-LOGNORMAL'}:
 \be F(D) = \left\{
@@ -5592,15 +5592,9 @@ in the same way as those for a sprinkler.  If the fuel species is present in the
 Note that to limit the computational cost of sprinkler simulations, liquid droplets disappear when they hit the ``floor'' of the computational domain, regardless of whether it is solid or not. However, this may not be desired when using liquid fuels. To stop FDS from removing liquid droplets from the floor of the domain, add the phrase {\ct POROUS\_FLOOR=.FALSE.} to the {\ct MISC} line. An altnerate solution is make sure the {\ct OBST} the fuel is landing on is at least one cell thick.
 
 \subsubsection{Example Case: spray\_burner}
+\label{spray_burner}
 
-Controlled fire experiments are often conducted using a spray burner,
-where a liquid fuel is sprayed out of a nozzle and ignited. In this
-example ({\ct spray\_burner.fds}), heptane from two nozzles is
-sprayed downwards into a steel pan.  The flow rate is increased
-linearly so that the fire grows to 2~MW in 20 s, burns steadily for
-another 20 s, and then ramps down linearly in 20 s. The key input
-parameters are given here:
-
+Controlled fire experiments are often conducted using a spray burner, where a liquid fuel is sprayed out of a nozzle and ignited. In this example ({\ct spray\_burner.fds}), heptane from two nozzles is sprayed downwards into a steel pan.  The flow rate is increased linearly so that the fire grows to 2~MW in 20 s, burns steadily for another 20 s, and then ramps down linearly in 20 s. The key input parameters are given here:
 \begin{lstlisting}
 &REAC FUEL='N-HEPTANE',SOOT_YIELD=0.01,HEAT_OF_COMBUSTION=44500./
 
@@ -5619,34 +5613,23 @@ parameters are given here:
 &RAMP ID='fuel', T=40.0, F=1.0  /
 &RAMP ID='fuel', T=60.0, F=0.0  /
 \end{lstlisting}
-
-\noindent
 Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
-\be 2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
-\frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
-\frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} \ee
-The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall
-reaction scheme. Thus, if other droplets or solid objects have different
-heats of combustion, the effective burning rates are adjusted so that the
-total heat release rate is that which you expect. However, exercises
-like this ought to be conducted just to ensure that this is the case.
-The HRR curve for this example is given in Fig.~\ref{spray_burner}.
+\be 
+   2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
+   \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
+   \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} 
+\ee
+The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets or solid objects have different heats of combustion, the effective burning rates are adjusted so that the total heat release rate is that which you expect. However, exercises like this ought to be conducted just to ensure that this is the case. The HRR curve for this example is given in Fig.~\ref{spray_burner_fig}.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=3.5in]{SCRIPT_FIGURES/spray_burner_HRR}
 \end{center}
 \caption[Results of the {\ct spray\_burner} test case]{Heat Release Rate (HRR) of spray burner test.}
-\label{spray_burner}
+\label{spray_burner_fig}
 \end{figure}
 
-Note also that this feature is subject to mesh
-dependence. If the mesh cells are too coarse, the
-evaporating fuel can be diluted to such a degree that it
-may not burn. Proper resolution depends on the type of
-fuel and the amount of fuel being ejected from the
-nozzle. Always test your burner at the resolution of your overall simulation.
-
+Note also that this feature is subject to mesh dependence. If the mesh cells are too coarse, the evaporating fuel can be diluted to such a degree that it may not burn. Proper resolution depends on the type of fuel and the amount of fuel being ejected from the nozzle. Always test your burner at the resolution of your overall simulation.
 
 \clearpage
 
@@ -5714,6 +5697,7 @@ Note that if only a single {\ct ORIENTATION} vector is assigned on a {\ct PART} 
 
 \subsection{Gas Generating Particles}
 \label{info:particle_mass_generation}
+\label{surf_mass_part_specified}
 
 Lagrangian particles can be used to generate gases at a specified rate. The syntax is similar to that used for a solid wall. For example, the following input lines create three particles -- one shaped like a rectangular plate, one a cylinder, and one a sphere -- that generate argon, sulfur dioxide, and helium, respectively. The particles have no mass; they simply are used to generate the gases at a specified rate.
 \begin{lstlisting}
@@ -5736,20 +5720,21 @@ Lagrangian particles can be used to generate gases at a specified rate. The synt
 &SURF ID='ball bc',  GEOMETRY='SPHERICAL', RADIUS=0.01, SPEC_ID(1)='HELIUM',
       MASS_FLUX(1)=0.1, TAU_MF(1)=0.001 /
 \end{lstlisting}
-In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times $\pi$ times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
+In this case, there is no calculation of heat conduction in depth. Only the surface area is important. For the plate, the surface area is twice the length times the width. For the cylinder, the area is twice the radius times $\pi$ times the length. For the sphere, the area is $4\pi$ times the radius squared. Figure~\ref{surf_mass_part_specified_fig} displays the output of the test case called {\ct surf\_mass\_part\_specified.fds}, demonstrating that the production rate of the gases is as expected.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/surf_mass_part_specified}
 \end{center}
 \caption[Example of specified gas mass production from particles]{Gas production from three Lagrangian particles.}
-\label{surf_mass_part_specified}
+\label{surf_mass_part_specified_fig}
 \end{figure}
 
 
 
 \subsection{Vegetation}
 \label{info:vegetation}
+\label{pine_needles}
 
 Lagrangian particles can be used to represent different types of vegetation, like leaves, grass, and so on. The best way to explain how to use this feature is by way of example. Suppose we want to describe a collection of wet pine needles that occupy a certain volume. The following lines have been extracted from the sample file {\ct WUI/pine\_needles.fds}. Note that all of the values have been chosen simply to demonstrate the technique. These values should not be used for a real calculation.
 
@@ -5795,23 +5780,24 @@ Lagrangian particles can be used to represent different types of vegetation, lik
       CONDUCTIVITY = 1.0
       SPECIFIC_HEAT = 1.6 /
 \end{lstlisting}
-In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
+In the example, 1~kg of pine needles occupy 1~m$^3$. The number of particles used to represent the pine needles is somewhat arbitrary. FDS will automatically weight the specified number so that the total mass per volume is 1~kg. The needles are modeled as cylinders that are 0.5~mm in diameter. The {\ct THICKNESS} on the {\ct SURF} line refers to the radius of the cylinder in units of m. The needles are all 0.1~m long. The needles contain 20~\% (by mass) moisture, and 80~\% cellulose. The moisture is set to evaporate at 100~$^\circ$C to create water vapor and the cellulose pyrolyzes at 300~$^\circ$C to form fuel gas and char. In the example case, the original 1~kg of vegetation is heated until all of the water and fuel evaporate. The fuel is not allowed to burn by setting the ambient oxygen concentration to 1~\%. Figure~\ref{pine_needles_fig} shows the evolution of the fuel, water and char mass. Agreement with the expected values means that mass is conserved.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/pine_needles}
 \end{center}
 \caption[Example of burning vegetation]{Evolution of vegetation mass in the {\ct pine\_needles} test case.}
-\label{pine_needles}
+\label{pine_needles_fig}
 \end{figure}
 
 
 \subsection{Firebrands}
 \label{info:firebrands}
+\label{dragon_5a}
 
 Firebrands are small pieces of burning wood and vegetation that can be lofted into the air and blown by the wind ahead of a wildland fire front. Manzello et~al.~\cite{Manzello:FSJ2008a} have developed a variety of experimental apparatus designed to generate firebrands in a laboratory setting. The example input file called {\ct dragon\_5a} in the {\ct WUI} (Wildland-Urban Interface) folder is a very simple mock-up of one of these experiments. The word ``dragon'' is based on the nickname of the apparatus; 5a is the figure number in Ref.~\cite{Manzello:FSJ2008a} on which this example case is loosely based. In the experiment, 700~g of small dowels (length 50~mm, diameter 8~mm) made of Ponderosa Pine wood were poured into a small steel chamber equipped with several propane burners. The dowels were left to burn for roughly a minute subject to a slow induced air flow after which time the air flow was increased and firebrands were propelled horizontally out of a 15~cm duct 2.25~m above the lab floor. It is reported that after several replicate experiments, the average mass of the firebrands collected from pans on the floor was 57~g. The average diameter of the collected dowels was 5.6~mm, and the average length was 13.5~mm.
 
-It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
+It is not possible to simulate the experiment in FDS exactly as it was performed. The reason is that in the experiment, all 700~g of the wooden dowels were poured into the heating chamber at once. FDS cannot handle such a dense packing of Lagrangian particles. Instead, the simulated dowels are introduced at a rate of 10 per second. FDS also does not have a mechanism to break-up the dowels, reducing their length from 50~mm to 13.5~mm. Thus, the initial cylindrical particles are 13.5~mm and remain that length throughout the simulation. The diameter of the cylindrical particles is reduced, however, from 8~mm to 5.6~mm, which takes the initial density of 440~kg/m$^3$ down to 71~kg/m$^3$ because the mass of the firebrands is assumed to be 8~\% of the original. The plot in Fig.~\ref{dragon_5a_fig} shows the increasing mass of firebrands thrown to the floor in the simulation after 100~s of particle insertion. The total mass of particles inserted into the apparatus is:
 \be \pi \, (0.004 \; {\rm m})^2 \times (0.0135 \; {\rm m}) \times (440 \; {\rm kg/m}^3) \times (10 \; {\rm part/s}) \times (100 \; {\rm s}) \approx 0.3 \; {\rm kg} \ee
 The amount expected on the floor is approximately 0.024~kg.
 
@@ -5820,7 +5806,7 @@ The amount expected on the floor is approximately 0.024~kg.
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/dragon_5a}
 \end{center}
 \caption[Mass generation of firebrands in the {\ct dragon\_5a} test case]{Mass generation of firebrands in the {\ct dragon\_5a} test case.}
-\label{dragon_5a}
+\label{dragon_5a_fig}
 \end{figure}
 
 \subsection{Porous Media}
@@ -5918,6 +5904,7 @@ It is not unusual to include hundreds of thousands of particles in a simulation.
 
 \subsection{Particles Introduced at a Solid Surface}
 \label{info:particle_flux}
+\label{particle_flux}
 
 If the particles have mass and are introduced from a solid surface, specify {\ct PARTICLE\_MASS\_FLUX} on the {\ct SURF} line. The number of particles inserted at each solid cell every {\ct DT\_INSERT} seconds is specified by {\ct NPPC} (Number of Particles Per Cell) on the {\ct SURF} line defining the solid surface. The default value of {\ct DT\_INSERT} is 0.01~s and {\ct NPPC} is 1. As an example, the following set of input lines:
 \begin{lstlisting}
@@ -5925,14 +5912,14 @@ If the particles have mass and are introduced from a solid surface, specify {\ct
 &SURF ID='SLOT', PART_ID='particles', VEL=-5., PARTICLE_MASS_FLUX=0.1 /
 &OBST XB=-0.2,0.2,-0.2,0.2,4.0,4.4, SURF_IDS='INERT','SLOT','INERT' /
 \end{lstlisting}
-creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux}.
+creates an obstruction that ejects particles out of its sides at a rate of 0.1~\si{kg/(m$^2$.s)} and a velocity of 5~m/s (the minus sign indicates the particles are ejected from the surface). FDS will adjust the mass flux if the obstruction or vent dimensions are changed to conform to the numerical grid. The {\ct ID}s have no meaning other than as identifiers. The surface on which particles are specified must have a non-zero normal velocity directed into the computational domain. This happens automatically if the surface is burning, but must be specified if it is not. There is a simple input file called {\ct particle\_flux.fds} that demonstrates how the above input lines can produce a stream of particles from a block. The total mass flux from the block is the product of the {\ct PARTICLE\_MASS\_FLUX} times the total area of the sides of the block, 0.4~m $\times$ 0.4~m $\times$ 4. The expected accumulated mass of particles on the ground after 10~s is expected to be 0.64~kg, as shown in Fig.~\ref{particle_flux_fig}.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/particle_flux}
 \end{center}
 \caption[Results of the {\ct particle\_flux} test case]{Simple test case to demonstrate mass conservation of particles ejected from an obstruction.}
-\label{particle_flux}
+\label{particle_flux_fig}
 \end{figure}
 
 Note also that you can independently control particles that emanate from a solid surface. For example, a device might control the activation of a fan, but you can over-ride the device and control the particles separately. To do this, specify either a device or controller via a {\ct DEVC\_ID} or {\ct CTRL\_ID} on the {\ct PART} line that defines the particles. For more information on devices and controls, see Sections~\ref{info:basic_control}~and~\ref{info:CTRL}.
@@ -5975,6 +5962,7 @@ Use {\ct PARTICLE\_WEIGHT\_FACTOR} to specify how many actual particles each of 
 
 
 \subsubsection{Single Particle Insertion}
+\label{bucket_test_3}
 
 If you introduce only a single particle, which is often a handy way of creating a target, you may use the real triplet {\ct XYZ} rather than {\ct XB} to designate the particle's position.  You can give this single particle an initial velocity using the real triplet {\ct UVW}. You can also add {\ct DX}, {\ct DY}, and/or {\ct DZ} to create a line of particles that are offset from {\ct XYZ} by these increments in units of meters. For example,
 \begin{lstlisting}
@@ -6035,6 +6023,7 @@ A useful sample case to demonstrate various features of droplet motion on solid 
 
 
 \subsection{Reduction of the Burning Rate}
+\label{e_coefficient}
 
 Water reduces the fuel pyrolysis rate by cooling the fuel surface and also changing the chemical reactions that liberate fuel gases from the solid. If the solid or liquid fuel has been given reaction parameters via the {\ct MATL} line, there is no need to set any additional suppression parameters. It is assumed that water impinging on the fuel surface takes energy away from the pyrolysis process and thereby reduces the burning rate of the fuel. If the surface has been assigned a {\ct HRRPUA} (Heat Release Rate Per Unit Area), a parameter needs to be specified that governs the suppression of the fire by water because this type of simulated fire essentially acts like a gas burner whose flow rate is explicitly specified. An empirical way to account for fire suppression by water is to characterize the reduction of the pyrolysis rate in terms of an exponential function. The local mass loss rate of the fuel is expressed in the form
 \be
@@ -6156,6 +6145,7 @@ For more information about sprinklers, their activation and spray dynamics, read
 \subsubsection{Special Topic: Specifying Complex Spray Patterns}
 \label{info:spraypattern}
 \label{info:TABL}
+\label{bucket_test_2}
 
 As an example of the more advanced sprinkler options, a sprinkler with an elliptical spray pattern and uniform mass flux distribution within the spray angle is given by:
 \begin{lstlisting}
@@ -6245,8 +6235,9 @@ designate two nozzles of the same type, one which activates at time zero, the ot
 {\ct PROP\_ID}, and the {\ct PROP} line must have a designated {\ct PART\_ID} to describe the liquid droplets.
 
 \subsubsection{Example Case: Setting the Flow Rate of a Nozzle}
+\label{flow_rate}
 
-This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values is shown in Fig.~\ref{flow_rate}.  Note that {\ct 'OPEN NOZZLES'} counts only nozzles belonging to the specified {\ct PIPE\_INDEX}. The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
+This example demonstrates the use of pressure ramps and control logic for opening and closing nozzles. It also serves as a verification test for the water flow rate. There are four nozzles that open at designated times: 0 s, 15 s, 30 s and 45 s. At time 60 s, all the nozzles are closed. The number of open nozzles is measured using a device with quantity {\ct 'OPEN NOZZLES'}. A comparison of the FDS result and the exact, intended values is shown in Fig.~\ref{flow_rate_fig}.  Note that {\ct 'OPEN NOZZLES'} counts only nozzles belonging to the specified {\ct PIPE\_INDEX}. The pressure ramp has been designed to deliver a total flow rate of 10~L/min at all values of open nozzles. Mathematically this means that
 \be
 n K \sqrt{p} = 10 \;\hbox{L/min} \quad \Rightarrow \quad
 p = \left( \frac{10 \;\hbox{L/min}}{n K}\right)^2
@@ -6261,7 +6252,7 @@ where $n$ is the number of open nozzles. The corresponding nozzle and pressure r
 &RAMP ID='PR',   T= 3., F=1.778 /
 &RAMP ID='PR',   T= 4., F=1. /
 \end{lstlisting}
-The water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. The total mass of water should increase from zero to 10~kg in 60~s. A comparison of the FDS prediction and this analytical result is shown in Fig.~\ref{flow_rate}. The slight delay of the FDS result is caused by the time it takes from the droplets to fall down on the floor.
+The water is tracked using a device measuring the accumulated mass per unit area, integrated over the total floor area. The total mass of water should increase from zero to 10~kg in 60~s. A comparison of the FDS prediction and this analytical result is shown in Fig.~\ref{flow_rate_fig}. The slight delay of the FDS result is caused by the time it takes from the droplets to fall down on the floor.
 
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lr}
@@ -6269,7 +6260,7 @@ The water is tracked using a device measuring the accumulated mass per unit area
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/flow_rate_water_mass}
 \end{tabular*}
 \caption[Results of the {\ct flow\_rate} test case]{Output of the {\ct flow\_rate} test case.}
-\label{flow_rate}
+\label{flow_rate_fig}
 \end{figure}
 
 \subsection{Special Topic: Specified Entrainment (Velocity Patch)}
@@ -6426,15 +6417,16 @@ domain (accounts for portions of the sampling network lying outside the domain d
 where $\dm_i$ is the mass {\ct FLOWRATE} at sampling location $i$, $\rho_{{\rm s},i}( t-t_{{\rm d},i})$ is the soot density at sampling location $i$, $t_{{\rm d},i}$~s prior ({\ct DELAY}) to the current time $t$, and $K_{\rm m}$ is the {\ct MASS\_EXTINCTION\_COEFFICIENT} associated with visible light.
 
 \subsubsection{Example Case: aspiration\_detector}
+\label{aspiration_detector}
 
-A cubical compartment, 2~m on a side has a three sampling location aspiration system.  The three locations have equal flow rates of 0.3~kg/s, and transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The {\ct SOOT\_YIELD=0.001}. Mass is removed from the top of the compartment at a rate of 1~kg/s. The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in the initial increase which results from the 50~s transport time for the first sampling location plus a short period of time to transport the combustion products to the sampling location.  The detector response has three plateaus that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents an additional one third of the soot being transported to the detector.  The soot density at the sampling point is $7.1 \times 10^{-5}$~kg/m$^3$.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen in Fig.~\ref{aspiration_detector}.
+A cubical compartment, 2~m on a side has a three sampling location aspiration system.  The three locations have equal flow rates of 0.3~kg/s, and transport times of 50, 100, and 150~s, respectively.  No bypass flow rate is specified for the aspiration detector.  Combustion products are forced into the bottom of the compartment at a rate of 1~kg/s. The {\ct SOOT\_YIELD=0.001}. Mass is removed from the top of the compartment at a rate of 1~kg/s. The aspiration detector shows an increasing obscuration over time.  There is a delay of slightly over 50~s in the initial increase which results from the 50~s transport time for the first sampling location plus a short period of time to transport the combustion products to the sampling location.  The detector response has three plateaus that result from the delay times of the sampling locations.  The sampling points are co-located, so each plateau represents an additional one third of the soot being transported to the detector.  The soot density at the sampling point is $7.1 \times 10^{-5}$~kg/m$^3$.  Using this value the plateaus are computed as 18~\%, 33.2~\%, and 45.7~\%, as seen in Fig.~\ref{aspiration_detector_fig}.
 
 \begin{figure}[ht]
 \begin{center}
 \includegraphics[width=4.in]{SCRIPT_FIGURES/aspiration_detector}
 \end{center}
 \caption[Results of the {\ct aspiration\_detector} test case]{Output of {\ct aspiration\_detector} test case.}
-\label{aspiration_detector}
+\label{aspiration_detector_fig}
 \end{figure}
 
 
@@ -6738,6 +6730,7 @@ specified with {\ct QUANTITY='CONTROL'}.
 \end{lstlisting}
 
 \subsubsection{Example Case: control\_test\_2 }
+\label{control_test_2}
 
 The {\ct control\_test\_2} example demonstrates the use of the mathematical and PID control functions.  Two compartments are defined with the left hand compartment initialized to 20 $^\circ$C and the right hand compartment to 10 $^\circ$C.    Control functions are defined to:
 
@@ -6799,8 +6792,9 @@ control functions, will then flow water.
 
 
 \subsection{Example Case: activate\_vents}
+\label{activate_vents}
 
-The simple test case called {\ct activate\_vents} demonstrates the several of the control functions. Figure~\ref{activate_vents} shows seven
+The simple test case called {\ct activate\_vents} demonstrates the several of the control functions. Figure~\ref{activate_vents_fig} shows seven
 multiply-colored vents that activate at different times, depending on the particular timing or control function.
 \begin{figure}[ht]
 \begin{tabular*}{\textwidth}{lll}
@@ -6809,7 +6803,7 @@ multiply-colored vents that activate at different times, depending on the partic
 \includegraphics[width=2.05in]{SCRIPT_FIGURES/activate_vents_15}
 \end{tabular*}
 \caption[Snapshots of the {\ct activate\_vents} test case]{Output of the {\ct activate\_vents} test case at 5, 10, and 15~s.}
-\label{activate_vents}
+\label{activate_vents_fig}
 \end{figure}
 
 
@@ -7080,6 +7074,7 @@ The {\ct MASS\_EXTINCTION\_COEFFICIENT} is passed to Smokeview to be used for vi
 This section discusses output options for Lagrangian particles.
 
 \subsection{Liquid Droplets that are Attached to Solid Surfaces}
+\label{bucket_test_1}
 
 Liquid droplets (as opposed to solid particles) ``stick'' to solid surfaces unless directed otherwise. There are various quantities that describe these populations. For example, {\ct 'MPUA'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea of the droplets defined by {\ct PART\_ID}. Likewise, {\ct 'AMPUA'} is the \underline{A}ccumulated \underline{M}ass \underline{P}er \underline{U}nit \underline{A}rea. Both of these are given in units of kg/m$^2$. Think of these outputs as measures of the instantaneous mass density per unit area, and the accumulated total, respectively. These quantities are not identical measures.  The quantity {\ct 'AMPUA'} is analogous to a ``bucket test,'' where the droplets are collected in buckets and the total mass determined at the end of a given time period. In this case each grid cell on the floor is considered its own bucket.  Each droplet is counted only once when it reaches the floor\footnote{Be aware of the fact that the default behavior for liquid droplets hitting the ``floor,'' that is, the plane $z=\hbox{\ct ZMIN}$, is to disappear ({\ct POROUS\_FLOOR=.TRUE.} on the {\ct MISC} line). In this case, {\ct 'MPUA'} will be zero, but {\ct 'AMPUA'} will not. FDS stores the droplet mass just before removing the droplet from the simulation for the purpose of saving CPU time.}. {\ct MPUA} counts a droplet whenever it is on any solid surface, including the walls. If the droplet moves from one solid wall cell to another, it will be counted again. The cooling of a solid surface by droplets of a given type is given by {\ct 'CPUA'}, the \underline{C}ooling \underline{P}er \underline{U}nit \underline{A}rea in units of kW/m$^2$. Since a typical sprinkler simulation only tracks a small fraction of the droplets emitted from a sprinkler, both {\ct MPUA} and {\ct CPUA} also perform an exponential smoothing. This avoids having spotted distributions on surfaces due to the infrequent arrival of droplets that likely have a high weighting factor.
 
@@ -7109,6 +7104,7 @@ The volume over which to integrate, {\ct XB}, should be at least one grid cell t
 
 
 \subsection{Droplet and Particle Densities and Fluxes in the Gas Phase}
+\label{bucket_test_4}
 
 Away from solid surfaces, {\ct 'MPUV'} is the \underline{M}ass \underline{P}er \underline{U}nit \underline{V}olume of particles or droplets of type ({\ct PART\_ID}) in units of kg/m$^3$.  {\ct 'MPUV\_Z'} provides the same information integrated over all droplets of a single species, ({\ct SPEC\_ID}).
 
@@ -7159,6 +7155,7 @@ This section lists a variety of output quantities that are useful for studying t
 
 \subsection{Heat Release Rate}
 \label{info:HRR}
+\label{hallways}
 
 Quantities associated with the overall energy budget are reported in the comma delimited file {\ct CHID\_hrr.csv}.  This file is automatically generated; the only input parameter associated with it is {\ct DT\_HRR} on the {\ct DUMP} line. The columns in this file record the time history of the integrals of the terms in the enthalpy transport equation. The columns are defined as follows:
 \begin{eqnarray}
