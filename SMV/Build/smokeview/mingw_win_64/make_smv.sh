@@ -1,6 +1,6 @@
 # !/bin/bash
 # source ../../scripts/setopts.sh $*
-LIBDIR=../../LIBS/lib_win_mingw_64/
+LIBDIR=../../LIBS/mingw_win_64/
 source ../../scripts/test_libs.sh
 
 make -f ../Makefile clean
