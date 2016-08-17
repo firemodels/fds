@@ -1,15 +1,24 @@
 #!/bin/bash
-case=blodget
-dem2fds -e $case < ${case}_elevs.csv > ${case}.fds
+option=$1 $2 
+if [ "$option" == ""]; then
+  option=-obst
+fi
 
-case=nist
-dem2fds -e $case < ${case}_elevs.csv > ${case}.fds
+dem2fds=dem2fds
+#dem2fds=../intel_linux_64/dem2fds_linux_64
 
-case=sugarloaf
-dem2fds -e $case < ${case}_elevs.csv > ${case}.fds
+terraindir=~/terrain
 
-case=test
-dem2fds -e $case < ${case}_elevs.csv > ${case}.fds
+$dem2fds $option -nobuffer -dir $terraindir/demtest demtest1.in 
+$dem2fds $option -nobuffer -dir $terraindir/demtest demtest2.in 
 
-case=trails
-dem2fds -e $case < ${case}_elevs.csv > ${case}.fds
+$dem2fds $option -nobuffer -dir $terraindir/blodget blodget.in 
+
+$dem2fds $option -nobuffer -dir $terraindir/nist nist.in 
+
+$dem2fds $option -nobuffer -dir $terraindir/sugarloaf sugarloaf.in 
+
+$dem2fds $option -dir $terraindir/tower tower.in 
+
+$dem2fds $option -nobuffer -dir $terraindir/trails trails.in 
+$dem2fds $option -nobuffer -dir $terraindir/trails trails2.in 

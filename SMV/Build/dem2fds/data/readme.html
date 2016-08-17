@@ -4,62 +4,185 @@
 </head>
 
 <BODY BGCOLOR="#FFFFFF" >
-<h3>Creating a Terrain Input File</h3>
-
-<h4>Preliminaries</h4>
-  Install or verify that the following is installed:
+<h3>Creating FDS Terrain Input Files</h3>
 
 <ul>
-  <li>  Google Earth
-  <li>  latest
-  <a href="https://pages.nist.gov/fds-smv/downloads.html">installed</a>
-  or
-  <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing">test smokeview</a>
-  <li>  screen capture program
+  <li>  <a href="https://drive.google.com/folderview?id=0B_wB1pJL2bFQc1F4cjJWY2duWTA&usp=sharing" target="_blank">Install</a>
+ the latest test Smokeview
+  <li>  <a href="http://www.imagemagick.org/script/binary-releases.php" target="_blank">Install</a>  
+Imagemagick - used to convert terrain images files from jpeg 2000 to jpeg format
 </ul>
 
-<h4>Create FDS Input File</h4>
+<ul>
+<li>Go to the <a href="https://viewer.nationalmap.gov/basic/" target="_blank">USGS National Map</a> website.  
+A map of the United States is on the right and a set of data download options is on the left.
+ <p> <li> Obtain Elevation data
 <ol>
-  <li> Open Google Earth and identify a rectangular region of interest in the USA (elevation data not available at web site used below).
-  <li> Record the lat/lon coordinates of two opposite corners of this region.
-  <li> Create an image for this region using a screen capture program.  Name this image casename.png where casename is the 'CHID' parameter in the FDS input file
-  <li> Create a file named <tt>casename.in</tt> containing the following line:<br>
-    <tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes</tt>
+<li>Select the <em>Elevation Products (3DEP)</em> checkbox.
+<li>Select 1/3 arc-second DEM checkbox
+<li>Select the <em>GridFloat</em> File format option
+<li>Click on the map and zoom in to a region of interest.
+<li>Click on the <em>Find Products</em> button.  You should see one or more 
+entries listed with headings beginning with
+USGS NED 1/3 arc-second ...... 1 x 1 degree .  
+<li>Click on the <em>Footprint</em> link to verify where various files are located.
+<li>Click on <em>Download</em> link to download files of interest.
+<li>Unzip these files (using a program like winzip). Open the directory created with the unzip operation and
+copy the .flt and .hdr files to a directory where you'll keep your elevation and image files. 
+</ol>
 
-  <ol>
-     <li> Google Earth gives latitudes and longitudes as d=degrees, m=minutes and  s=seconds.
-       The coordinates in <tt>casename.in</tt> are decimal <em>i.e.</em> d + m/60 + s/3600
-     <li>Note that longitudes in the United States are negative.
-  </ol>
+<p><li>Obtain Terrain Images
+<ol>
+<li>Click on the <em>Return to Search</em> button 
+and uncheck (if checked) the <em>Elevation Products (3DEP)</em> checkbox
+<li>Select the <em>Imagery - 1 meter (NAIP)</em> checkbox
+<li>Click on the map and zoom in to 
+a region of interest (within the elevation region selected for for elevation files).
+<li>Click on the <em>Find Products</em> button.  You should see one or more 
+entries with each entry beginning with <tt>m_</tt> and ending with <tt>.jp2</tt> .  
+<li>Click on the <em>Footprint</em> link to verify image file locations.
+<li>Click on <em>Download</em> link to download files of interest. The image files should
+cover the region you are using to define an FDS input file.
+<li>Copy the downloaded files to the same directory you used to copy the .flt and .hdr elevation files.
+<li>The .jp2 files you just downloaded are in <em>jpeg 2000</em> format.  
+They need to be converted to jpeg format . 
+To do this on a PC, run the <tt>jp2conv</tt> command.
+On Linux or a Mac, run the <tt>jp2conv.sh</tt> command.  
+These commands are installed with the latest Smokeview test bundle.<br>
+</ol>
 
-<li> Type the command:<br>
-     <tt>dem2fds casename < casename.in</tt><br>
- 
-     This command generated a series of files named casename_longlats_xxx.csv .  Each file contains 400 longitude/latitude pairs
 
-<li> Go to <a href="http://viewer.nationalmap.gov/theme/elevation/">http://viewer.nationalmap.gov/theme/elevation/</a> and click on bulk
 
-  <ol>
-    <li>  Click on Choose Files and select a file for each casename_longlats_xxx.csv generated in step 5
-    <li>  Click on Get Elevations
-    <li>  After that web site retrieved all the data requested save the file
-  </ol>
-
-<li> Concatenate all elevation files generated in step 6 after removing the header line in each file.
-Call this file <tt>casename_elevs.csv</tt> .  The first line of <tt>casename_elevs.csv</tt> should be <br>
-<tt>longitude_begin  longitude_end n_longitudes  latitude_begin latitude_end n_latitudes zmin zmax nz</tt>
-
-<li> Creating an FDS input file
+<p><li> Create an FDS input file
 
    <ol>
-     <li>Using obstacles (&OBST lines):<br>
-     <tt>dem2fds -o casename < casename_elevs.csv</tt><br>
+<li>create a file named <tt>casename.in</tt> containing the following lines 
+<br>
+<pre>
+GRID
+  ibar jbar kbar
+LONGLATMINMAX
+  longmin  longmax latmin latmax
+</pre>
+where <tt>ibar</tt> and <tt>jbar</tt> are the number of longitude and latitidude divisions
+and <tt>kbar</tt> is the number of divisions along the z direction and
+<tt> longmin</tt>, <tt>longmax</tt>, <tt>latmin</tt> and <tt>latmax </tt> 
+are the minimum and maximum 
+longitude and latitude of the region  being modeled modeled. 
+<p>Two other methods for specifying a terrain region are to use the 
+<tt>LONGLATCENTER</tt> or <tt>LONGLATORIG</tt> keywords as in
+<pre>
+GRID
+  ibar jbar kbar dx dy
+LONGLATCENTER
+  longcen  latcen
+</pre>
+or
+<pre>
+GRID
+  ibar jbar kbar dx dy
+LONGLATORIG
+  longorig  latorig
+</pre>
 
-     <li>Using geometry (&GEOM lines):<br>
-     <tt>dem2fds -e casename < casename_elevs.csv</tt><br>
-   </ol>
+where <tt>dx</tt> and <tt>dy</tt> are the scenario width and length in meters 
+( <tt>ibar</tt>, <tt>jbar</tt> and <tt>kbar</tt> are defined as before), 
+<tt>longcen</tt> and <tt>latcen</tt> are the longitude and 
+latitude at the scenario center, 
+<em>i.e.</em> at position (<tt>dx/2</tt>, <tt>dy/2</tt>)
+and <tt>longorig</tt> and <tt>latorig</tt> are the longitude and 
+latitude at the scenario origin, 
+<em>i.e.</em> at position (<tt>0.0</tt>, <tt>0.0</tt>).
 
+
+
+<li>To create an FDS input file, run the command:<br>
+<pre>
+ dem2fds -d elevation_directory casename.in
+</pre>
+where <tt>elevation_directory</tt> is the path of the directory containing the 
+elevation and image files downloaded previously and 
+casename.in is the file containing <tt>GRID</tt> and <tt>LATLONG...</tt> keywords.
+<li>To view the case, run the commands:
+<pre>
+fds casename.fds
+smokeview casename
+</pre>
+   </ul>
+
+Note, the FDS input file, <em>casename.fds</em> is only a starting point.  You will need to
+edit it to model your scenario as you wish.
 </ol>
+
+<h3>dem2fds Input Keywords</h3>
+<ul>
+<li>GRID - Specifying the simlulation grid
+<pre>
+GRID
+ ibar jbar kbar dx dy zmin zmax
+</pre>
+<ul>
+<li>ibar, jbar, bar - number of divisions along the x, y and z directions
+<li>dx, dy - distance along the x and y axis.  
+Note, dx and dy are required if <tt>LATLONGCENTER</tt> or
+<tt>LATLONGORIG</tt> are used to specify a terrain region and 
+optional if <tt>LATLONGMINMAX</tt> is used to specify a terrain region (<tt>dem2fds</tt> computes
+dx and dy for <tt>LATLONGMINMAX</tt> keywords).
+<li>zmin, zmax - minimum and maximum z elevation.  These parameters are optional.
+</ul>
+
+<p><li>LONGLATCENTER - specifying the longitude and latitude at the scenario center
+<pre>
+LONGLATCENTER
+ longcen latcen
+</pre>
+<ul>
+<li> longcen, latcen - longitude and latitude at the center of the scenario, at 
+position (dx/2,dy/2) .
+</ul>
+
+<p><li>LONGLATORIG- specifying the longitude and latitude at the scenario origin
+<pre>
+LONGLATORIG 
+ longorig latorig
+</pre>
+<ul>
+<li> longorig, latorig - longitude and latitude at the origin of the scenario, at 
+position (0,0) .
+</ul>
+
+<p><li>LONGLATMINMAX - specifying longitudes and latitudes that bound the scenario 
+<pre>
+LONGLATMINMAX
+ longmin longmax latmin latmax
+</pre>
+<ul>
+<li>longmin, longmax - minimum and maximum longitude
+<li>latmin, latmax - minimum and maximum latitude
+</ul>
+</ul>
+
+<h3><tt>dem2fds</tt> Command Line Options</h3>
+<pre>
+  dem2fds [-dir dir][-geom|-obst][-help][-nobuffer][-version] casename.in
+where
+  -dir dir  - directory containing elevation and map files (default .)
+  -geom     - create an FDS input file using &GEOM keywords
+  -help     - display this message
+  -nobuffer - create a terrain map assuming no buffer exists between maps.
+              Otherwise assume that a 300 pixel buffer exists bewteen maps.
+  -obst     - create an FDS input file using &OBST keywords
+  -version  - show version information
+</pre>
+
+<ul>
+<li>The <tt>-obst</tt> option is used by default.
+<li>The <tt>-geom</tt> option is experimental testing the new geometry file format.
+<li>All terrain images should contain a 300 pixel overlap buffer.  However
+this is not always the case.  The <tt>-nobuffer</tt> option is used for those
+cases when there is no overlap between two adjacent images.
+</ul>
+
 
 </BODY>
 </HTML>

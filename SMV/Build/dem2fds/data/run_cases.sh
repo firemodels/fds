@@ -3,27 +3,16 @@ fds=fds
 #fds=../../../../FDS_Compilation/intel_linux_64_db/fds_linux_64_db
 #fds=../../../../FDS_Compilation/intel_linux_64/fds_linux_64
 
-case=blodget
-fds ${case}.fds
+$fds blodget.fds
 
-case=nist
-fds ${case}.fds
+$fds demtest1.fds
+$fds demtest2.fds
 
-case=sugarloaf
-fds ${case}.fds
+$fds nist.fds
 
-case=trails
-fds ${case}.fds
+$fds sugarloaf.fds
 
-case=test1x1
-$fds ${case}.fds
+$fds tower.fds
 
-case=test1x2
-$fds ${case}.fds
-
-case=test2x2
-$fds ${case}.fds
-
-case=test3x3
-$fds ${case}.fds
-
+$fds trails.fds
+$fds trails2.fds

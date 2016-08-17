@@ -611,7 +611,7 @@ EXTERNCPP void handle_rotation_type(int flag);
 EXTERNCPP void init_texturedir(void);
 EXTERNCPP void GetRGB(unsigned int val, unsigned char *rr, unsigned char *gg, unsigned char *bb);
 EXTERNCPP unsigned char *ReadPicture(char *filename, int *width, int *height, int printflag);
-EXTERNCPP unsigned char *ReadJPEG(const char *filename,int *width, int *height, int skip);
+EXTERNCPP unsigned char *ReadJPEG(const char *filename,int *width, int *height);
 EXTERNCPP unsigned char *ReadPNG(const char *filename,int *width, int *height);
 
 EXTERNCPP void Update_Blockvals(int flag);

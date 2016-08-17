@@ -1,21 +1,20 @@
 @echo off
-:: generate terrain with &GEOM
-set option=-e
+set option=%1
+set option2=%2
 
-:: generate terrain with &OBST
-::set option=-o
+set dem2fds=..\intel_win_64\dem2fds_win_64.exe
+::set dem2fds=dem2fds
 
-::set dem2fds=..\intel_win_64\dem2fds_win_64.exe
-set dem2fds=dem2fds
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\demtest demtest1.in 
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\demtest demtest2.in 
 
-set case=blodget
-%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\blodget blodget.in 
 
-set case=nist
-%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\nist nist.in 
 
-set case=sugarloaf
-%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\sugarloaf sugarloaf.in 
 
-set case=trails
-%dem2fds% %option% %case% < %case%_elevs.csv > %case%.fds
+%dem2fds% %option% %option2% -dir %userprofile%\terrain\tower tower.in 
+
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\trails trails.in 
+%dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\trails trails2.in 
