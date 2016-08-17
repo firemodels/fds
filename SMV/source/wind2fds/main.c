@@ -18,8 +18,8 @@ void usage(char *prog){
   char gitdate[100];
   char buffer[1024];
 
-  getPROGversion(prog_version);  // get version (ie 5.x.z)
-  getGitInfo(githash,gitdate);    // get githash
+  GetProgVersion(prog_version);  // get version (ie 5.x.z)
+  GetGitInfo(githash,gitdate);    // get githash
 
   printf("\n");
   printf("wind2fds %s(%s) - %s\n", prog_version, githash, __DATE__);
@@ -56,8 +56,8 @@ int gettokens(char *tokens, char **tokenptrs){
     token=strtok(NULL,",");
   }
   for(i=0;i<ntokenptrs;i++){
-    trim_back(tokenptrs[i]);
-    tokenptrs[i]=trim_front(tokenptrs[i]);
+    TrimBack(tokenptrs[i]);
+    tokenptrs[i]=TrimFront(tokenptrs[i]);
   }
   return ntokenptrs;
 }
@@ -141,7 +141,7 @@ int main(int argc, char **argv){
       c_mintime_ptr=c_mintime;
       strcpy(c_mintime_ptr,arg);
       have_mintime=1;
-      i_mintime=date2sec2(c_mintime_ptr);
+      i_mintime=Date2Sec2(c_mintime_ptr);
       continue;
     }
     else if(strcmp(arg,"-maxtime")==0){
@@ -151,7 +151,7 @@ int main(int argc, char **argv){
       c_maxtime_ptr=c_maxtime;
       strcpy(c_maxtime_ptr,arg);
       have_maxtime=1;
-      i_maxtime=date2sec2(c_maxtime_ptr);
+      i_maxtime=Date2Sec2(c_maxtime_ptr);
       continue;
     }
     else if(strcmp(arg,"-mindate")==0){
@@ -162,10 +162,10 @@ int main(int argc, char **argv){
       strcpy(c_mindatetime_ptr,arg);
       if(strchr(c_mindatetime_ptr,':')!=NULL){
         have_mindatetime=1;
-        i_mindatetime=date2sec(c_mindatetime_ptr);
+        i_mindatetime=Date2Sec(c_mindatetime_ptr);
       }
       else{
-        i_mindatetime=date2day(c_mindatetime_ptr);
+        i_mindatetime=Date2Day(c_mindatetime_ptr);
       }
       continue;
     }
@@ -177,10 +177,10 @@ int main(int argc, char **argv){
       strcpy(c_maxdatetime_ptr,arg);
       if(strchr(c_maxdatetime_ptr,':')!=NULL){
         have_maxdatetime=1;
-        i_maxdatetime=date2sec(c_maxdatetime_ptr);
+        i_maxdatetime=Date2Sec(c_maxdatetime_ptr);
       }
       else{
-        i_maxdatetime=date2day(c_maxdatetime_ptr);
+        i_maxdatetime=Date2Day(c_maxdatetime_ptr);
       }
       continue;
     }
@@ -251,7 +251,7 @@ int main(int argc, char **argv){
 
   initMALLOC();
 
-  buffer_len=getrowcols(stream_in, &nrows, &ncols);
+  buffer_len=GetRowCols(stream_in, &nrows, &ncols);
   buffer_len+=10;
 
   NewMemory((void **)&buffer,buffer_len);
@@ -352,7 +352,7 @@ int main(int argc, char **argv){
     if(useprefix==1)strcat(token2,prefix);
     strcat(token2,labelptrs[i]);
     sprintf(coffset,"%f %f %f",xyzoffset[0],xyzoffset[1],xyzoffset[2]+zdev[i]);
-    trimmzeros(coffset);
+    TrimMZeros(coffset);
     if(transfer[i]==2){
       fprintf(stream_out,"DEVICE\n");
       fprintf(stream_out," %s %s VELOCITY %s sensor\n",token2,percen,percen);
@@ -457,25 +457,25 @@ int main(int argc, char **argv){
             break;
           }
           if(c_mintime_ptr!=NULL){
-            if(have_mintime==1&&date2sec2(token)<i_mintime){
+            if(have_mintime==1&&Date2Sec2(token)<i_mintime){
               skip_time=1;
               break;
             }
           }
           if(c_maxtime_ptr!=NULL){
-            if(have_maxtime==1&&date2sec2(token)<i_maxtime){
+            if(have_maxtime==1&&Date2Sec2(token)<i_maxtime){
               skip_time=1;
               break;
             }
           }
           if(c_mindatetime_ptr!=NULL){
-            if(have_mindatetime==0&&date2day(token)<i_mindatetime||have_mindatetime==1&&date2sec(token)<i_mindatetime){
+            if(have_mindatetime==0&&Date2Day(token)<i_mindatetime||have_mindatetime==1&&Date2Sec(token)<i_mindatetime){
               skip_time=1;
               break;
             }
           }
           if(c_maxdatetime_ptr!=NULL){
-            if(have_maxdatetime==0&&date2day(token)>i_maxdatetime||have_maxdatetime==1&&date2sec(token)>i_maxdatetime){
+            if(have_maxdatetime==0&&Date2Day(token)>i_maxdatetime||have_maxdatetime==1&&Date2Sec(token)>i_maxdatetime){
               skip_time=1;
               break;
             }
@@ -486,7 +486,7 @@ int main(int argc, char **argv){
             time_local=0;
           }
           else{
-            time_local = diffdate(token,tokenbaseptr);
+            time_local = DiffDate(token,tokenbaseptr);
           }
           fprintf(stream_out,"%i,%s",time_local,token);
         }
