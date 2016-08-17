@@ -5,7 +5,9 @@ All material properties are completely fabricated.
 
 &MESH IJK=52,54,24, XB=0.0,5.2,-0.8,4.6,0.0,2.4 / 
 
-&TIME T_END=300.0 / 
+&TIME T_END=5.0 / 
+
+&DUMP NFRAMES=25 /
 
 &REAC FUEL       = 'POLYURETHANE'
       FYI        = 'C_6.3 H_7.1 N O_2.1, NFPA Handbook, Babrauskas'
