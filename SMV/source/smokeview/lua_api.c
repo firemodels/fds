@@ -2897,12 +2897,13 @@ int lua_set_labelstartupview(lua_State *L) {
   return 1;
 }
 
-int lua_set_pixelskip(lua_State *L) {
-  int v = lua_tonumber(L, 1);
-  int return_code = set_pixelskip(v);
-  lua_pushnumber(L, return_code);
-  return 1;
-}
+// DEPRECATED
+// int lua_set_pixelskip(lua_State *L) {
+//   int v = lua_tonumber(L, 1);
+//   int return_code = set_pixelskip(v);
+//   lua_pushnumber(L, return_code);
+//   return 1;
+// }
 
 int lua_set_renderclip(lua_State *L) {
   int use_flag = lua_tonumber(L, 1);
@@ -4245,7 +4246,7 @@ void initLua() {
   lua_register(L, "set_cellcentertext", lua_set_cellcentertext);
   lua_register(L, "set_inputfile", lua_set_inputfile);
   lua_register(L, "set_labelstartupview", lua_set_labelstartupview);
-  lua_register(L, "set_pixelskip", lua_set_pixelskip);
+  // lua_register(L, "set_pixelskip", lua_set_pixelskip);
   lua_register(L, "set_renderclip", lua_set_renderclip);
   // lua_register(L, "set_renderfilelabel", lua_set_renderfilelabel);
   lua_register(L, "set_renderfiletype", lua_set_renderfiletype);

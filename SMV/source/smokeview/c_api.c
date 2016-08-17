@@ -3195,10 +3195,11 @@ int set_labelstartupview(const char *startupview) {
   return 0;
 } // LABELSTARTUPVIEW
 
-int set_pixelskip(int v) {
-  pixel_skip = v;
-  return 0;
-} // PIXELSKIP
+// DEPRECATED
+// int set_pixelskip(int v) {
+//   pixel_skip = v;
+//   return 0;
+// } // PIXELSKIP
 
 int set_renderclip(int use_flag, int left, int right, int bottom, int top) {
   clip_rendered_scene = use_flag;
