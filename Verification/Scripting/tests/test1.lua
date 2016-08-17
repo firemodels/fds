@@ -128,12 +128,41 @@ test("print smokeview info", function()
 
 end)
 -- print information on the model
+function exists(name)
+    if type(name)~="string" then return false end
+    return os.rename(name,name) and true or false
+end
+function isFile(name)
+    if type(name)~="string" then return false end
+    if not exists(name) then return false end
+    local f = io.open(name)
+    if f then
+        f:close()
+        return true
+    end
+    return false
+end
 
 -- load each different type of data file
 test("load slice file", function() load.datafile("room_fire_02.sf") end)
--- test("load boundary file", function() load.datafile("room_fire_01.bf") end)
+-- TODO: smokeview will not load unlisted data files.
+test("load unlisted data file", function()
+    local file = "room_firez_01.sf"
+    test("pre-reqs", function()
+        -- does the necessary file exists for testing
+        assert(isFile(file), "file " .. file .. " does not exist")
+        end)
+    test("load the listed file", function()
+        load.datafile("room_fire_01.sf")
+        end)
+    unload.all()
+    test("load the unlisted file", function()
+        load.datafile(file)
+        end)
+end)
+test("load boundary file", function() load.datafile("room_fire_01.bf") end)
 test("load smoke3d file", function() load.datafile("room_fire_01.s3d") end)
-testException("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.zs") end)
+test("load compressed smoke3d file", function() load.datafile("room_fire_01.s3d.sz") end)
 test("load particle file", function() load.datafile("room_fire.prt5") end)
 testException("load non-existant file", function() load.datafile("abcdefg.hi") end)
 test("load slice vector file", function() load.vdatafile("room_fire_01.sf") end)
@@ -142,7 +171,7 @@ testException("load smoke3d vector file", function() load.vdatafile("room_fire_0
 testException("load compressed smoke3d vector file", function() load.vdatafile("room_fire_01.s3d.sz") end)
 testException("load particle vector file", function() load.vdatafile("room_fire_01.prt5") end)
 testException("load non-existant vector file", function() load.vdatafile("qwert.yu") end)
-
+-- TODO: try loading corrupt file and ensure the outputted errors are correct
 -- unload all the loaded data
 test("unload all data", function() unload.all()end)
 test("window.size()", function() window.size(1024,768)end)
@@ -560,7 +589,7 @@ test("no loaded file tests", function()
     -- remember that this is being used with no data loaded
     -- also the time set is not guaranteed, so get may not always match set
     test("time no data ", function()
-        test("set", function() settime(127) end)
+        test("set", function() settime(4) end)
         test("get", function() return gettime() end)
         test("equal", function()
             assert(gettime() == nil, "time is not nil")
@@ -575,12 +604,13 @@ test("no loaded file tests", function()
     end)
     load.datafile("room_fire_02.sf")
     test("time data ", function()
-        test("set", function() settime(127) end)
+        local t_value = 4
+        test("set", function() settime(t_value) end)
         test("get", function() return gettime() end)
         test("equal", function()
             local ret_time =  math.floor(gettime() + 0.5) -- round to nearest
                                                           -- whole number
-            assert(ret_time == 127, "time data should be " .. 127 .. " but is "
+            assert(ret_time == t_value, "time data should be " .. t_value .. " but is "
                  .. ret_time)
         end)
     end)
