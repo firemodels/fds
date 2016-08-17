@@ -803,7 +803,7 @@ compile_smv_utilities()
    if [ "$SSH" == "" ] ; then 
    # smokeview libraries
    echo "      libraries"
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size}
+   cd $fdsrepo/SMV/Build/LIBS/${COMPILER}_${platform}${size}
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1
    ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1
 
@@ -839,7 +839,7 @@ compile_smv_utilities()
    echo "" >> $OUTPUT_DIR/stage2a 2>&1
    else
    $SSH \( \
-   cd $fdsrepo/SMV/Build/LIBS/lib_${platform}_${COMPILER}${size} \; \
+   cd $fdsrepo/SMV/Build/LIBS/${COMPILER}${platform}${size} \; \
    echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage2a 2>&1 \; \
    ./makelibs.sh >> $OUTPUT_DIR/stage2a 2>&1 \; \
    cd $fdsrepo/SMV/Build/smokezip/${COMPILER}_${platform}${size} \; \
