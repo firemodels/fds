@@ -1940,7 +1940,7 @@ void getgsliceparams(void){
         position = (grid[kk1] + grid[kk2]) / 2.0;
         sprintf(patchi->gslicedir, "Z=%f", position);
       }
-      trimzeros(patchi->gslicedir);
+      TrimZeros(patchi->gslicedir);
     }
   }
 }
@@ -2271,7 +2271,7 @@ void getsliceparams(void){
         }
       }
       sd->position_orig=position;
-      trimzeros(sd->slicedir);
+      TrimZeros(sd->slicedir);
     }
     {
       float *xplt, *yplt, *zplt;
@@ -2567,10 +2567,10 @@ void update_fedinfo(void){
     sd->fedptr=fedi;
     sd->slicetype=co2->slicetype;
     if(sd->slicetype==SLICE_CELL_CENTER){
-      setlabels(&(sd->label),"Fractional effective dose(cell centered)","FED"," ");
+      SetLabels(&(sd->label),"Fractional effective dose(cell centered)","FED"," ");
     }
     else{
-      setlabels(&(sd->label),"Fractional effective dose","FED"," ");
+      SetLabels(&(sd->label),"Fractional effective dose","FED"," ");
     }
     sd->reg_file=NULL;
     sd->comp_file=NULL;
@@ -2639,7 +2639,7 @@ void update_fedinfo(void){
       isoi->dataflag=0;
       isoi->geomflag=0;
       isoi->levels=NULL;
-      setlabels(&(isoi->surface_label),"Fractional effective dose","FED"," ");
+      SetLabels(&(isoi->surface_label),"Fractional effective dose","FED"," ");
 
       isoi->nlevels=3;
       NewMemory((void **)&(isoi->levels),3*sizeof(float));
@@ -2651,7 +2651,7 @@ void update_fedinfo(void){
       isoi->levels[0]=0.3;
       isoi->levels[1]=1.0;
       isoi->levels[2]=3.0;
-      setlabels_iso(&(isoi->surface_label),"Fractional effective dose","FED"," ",isoi->levels,isoi->nlevels);
+      SetLabelsIso(&(isoi->surface_label),"Fractional effective dose","FED"," ",isoi->levels,isoi->nlevels);
       isoi->normaltable=NULL;
       isoi->color_label.longlabel=NULL;
       isoi->color_label.shortlabel=NULL;
@@ -6068,7 +6068,7 @@ void output_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim_back(flabel);
+    TrimBack(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");
@@ -6143,7 +6143,7 @@ void init_Slicedata(void){
       ext[0]=0;
     }
     sprintf(flabel,"%i",itimes);
-    trim_back(flabel);
+    TrimBack(flabel);
     strcat(datafile,"_sf_");
     strcat(datafile,flabel);
     strcat(datafile,".csv");

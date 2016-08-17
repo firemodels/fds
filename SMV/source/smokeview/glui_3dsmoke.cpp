@@ -295,11 +295,11 @@ void update_alpha(void){
   if(smoke_alpha<0)smoke_alpha=0;
   if(smoke_alpha>255)smoke_alpha=255;
   sprintf(label1,"%f",smoke_extinct);
-  trimzeros(label1);
+  TrimZeros(label1);
   sprintf(label2,"%f",smoke_dens);
-  trimzeros(label2);
+  TrimZeros(label2);
   sprintf(label3,"%f",smoke_pathlength);
-  trimzeros(label3);
+  TrimZeros(label3);
   sprintf(label,"alpha=%i=255*(1.0-exp(-%s*%s*%s))",smoke_alpha,label1,label2,label3);
   if(PANEL_testsmoke!=NULL){
     TEXT_smokealpha->set_text(label);
@@ -514,7 +514,7 @@ extern "C" void glui_3dsmoke_setup(int main_window){
     SPINNER_smoke3d_rthick=glui_3dsmoke->add_spinner_to_panel(ROLLOUT_slices,_d("Thickness"),
       GLUI_SPINNER_FLOAT,&smoke3d_rthick,SMOKE_RTHICK,Smoke3d_CB);
     SPINNER_smoke3d_rthick->set_float_limits(1.0,255.0);
-    smoke3d_thick = log_base2(smoke3d_rthick);
+    smoke3d_thick = LogBase2(smoke3d_rthick);
 #else
     SPINNER_smoke3d_thick=glui_3dsmoke->add_spinner_to_panel(PANEL_colormap,"Thickness",
     GLUI_SPINNER_INT,&smoke3d_thick,SMOKE_THICK,Smoke3d_CB);
@@ -646,8 +646,8 @@ extern "C" void Smoke3d_CB(int var){
     else{
       tour_label=selected_tour->label;
     }
-    trim_back(vol_prefix);
-    vol_prefixptr=trim_front(vol_prefix);
+    TrimBack(vol_prefix);
+    vol_prefixptr=TrimFront(vol_prefix);
     if(strlen(vol_prefixptr)==0)vol_prefixptr=fdsprefix;
     InitVolrenderScript(vol_prefixptr, tour_label, vol_startframe0, vol_skipframe0);
     break;
@@ -832,7 +832,7 @@ extern "C" void Smoke3d_CB(int var){
 #ifdef pp_GPU
   case SMOKE_RTHICK:
 
-    smoke3d_thick = log_base2(smoke3d_rthick);
+    smoke3d_thick = LogBase2(smoke3d_rthick);
     glutPostRedisplay();
     force_redisplay=1;
     Idle_CB();

@@ -72,8 +72,8 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
     *it++ = CLAMP(itt, colorbar_offset, ndatalevel - 1 - colorbar_offset);
     t++;
   }
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -93,15 +93,15 @@ void getBoundaryColors(float *t, int nt, unsigned char *it,
   factor = range/(nlevel-2);
   for (n=1;n<nlevel-2;n++){
     tval = local_tmin + (n-1)*factor;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   tval = local_tmin + (nlevel-3)*factor;
   for(n=0;n<256;n++){
     tvals256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
   }
-  num2string(&labels[nlevel-2][0],tval);
+  Num2String(&labels[nlevel-2][0],tval);
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 /* ------------------ getBoundaryColors2 ------------------------ */
@@ -322,8 +322,8 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   }
   CheckMemory;
   STRCPY(scale,"");
-  frexp10(new_tmax, &expmax);
-  frexp10(new_tmin, &expmin);
+  FrExp10(new_tmax, &expmax);
+  FrExp10(new_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
     new_tmin *= pow((double)10.0,(double)-expmin);
     new_tmax *= pow((double)10.0,(double)-expmin);
@@ -343,15 +343,15 @@ void getBoundaryColors3(patchdata *patchi, float *t, int nt, unsigned char *it,
   factor = range/(nlevel-2);
   for (n=1;n<nlevel-2;n++){
     tval = new_tmin + (n-1)*factor;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   tval = new_tmin + (nlevel-3)*factor;
   for(n=0;n<256;n++){
     tvals256[n] = (new_tmin*(255-n) + n*new_tmax)/255.;
   }
-  num2string(&labels[nlevel-2][0],tval);
+  Num2String(&labels[nlevel-2][0],tval);
   tval = new_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 /* ------------------ UpdateAllPatchColors ------------------------ */
@@ -391,8 +391,8 @@ void getBoundaryLabels(
 
   STRCPY(scale,"");
 
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -412,15 +412,15 @@ void getBoundaryLabels(
   factor = range/(nlevel-2);
   for (n=1;n<nlevel-2;n++){
     tval = local_tmin + (n-1)*factor;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   tval = local_tmin + (nlevel-3)*factor;
   for(n=0;n<256;n++){
     tvals256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
   }
-  num2string(&labels[nlevel-2][0],tval);
+  Num2String(&labels[nlevel-2][0],tval);
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 /* ------------------ UpdatePart5Extremes ------------------------ */
@@ -695,8 +695,8 @@ void GetPart5Colors(partdata *parti, int nlevel, int convert_flag){
 
     strcpy(scale,"");
 
-    frexp10(local_tmax, &expmax);
-    frexp10(local_tmin, &expmin);
+    FrExp10(local_tmax, &expmax);
+    FrExp10(local_tmin, &expmin);
     if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
       local_tmin *= pow((double)10.0,(double)-expmin);
       local_tmax *= pow((double)10.0,(double)-expmin);
@@ -717,15 +717,15 @@ void GetPart5Colors(partdata *parti, int nlevel, int convert_flag){
     factor = range/(nlevel-2);
     for (n=1;n<nlevel-2;n++){
       tval = local_tmin + (n-1)*factor;
-      num2string(&labels[n][0],tval);
+      Num2String(&labels[n][0],tval);
     }
     for(n=0;n<256;n++){
       ppartlevels256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
     }
     tval = local_tmin + (nlevel-3)*factor;
-    num2string(&labels[nlevel-2][0],tval);
+    Num2String(&labels[nlevel-2][0],tval);
     tval = local_tmax;
-    num2string(&labels[nlevel-1][0],tval);
+    Num2String(&labels[nlevel-1][0],tval);
     CheckMemory;
   }
 
@@ -785,8 +785,8 @@ void GetZoneColors(const float *t, int nt, unsigned char *it,
 
   STRCPY(scale,"");
 
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<-2||expmin>2)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -806,15 +806,15 @@ void GetZoneColors(const float *t, int nt, unsigned char *it,
   factor = range/(nlevel-2);
   for (n=1;n<nlevel-2;n++){
     tval = local_tmin + (n-1)*factor;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   tval = local_tmin + (nlevel-3)*factor;
   for(n=0;n<256;n++){
     tvals256[n] = (local_tmin*(255-n) + n*local_tmax)/255.;
   }
-  num2string(&labels[nlevel-2][0],tval);
+  Num2String(&labels[nlevel-2][0],tval);
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 
 }
 
@@ -934,8 +934,8 @@ void GetPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   }
 
   STRCPY(*scale,"");
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -960,15 +960,15 @@ void GetPlot3DColors(int plot3dvar, int settmin, float *ttmin, int settmax, floa
   dtorig = (tmaxorig-tminorig)/(float)(nlevel-1);
   for (n=0;n<nlevel-1;n++){
     tval = local_tmin + n*dt;
-    num2string(&labels[n][0],tval);
-    num2string(&labelsiso[n][0],tval+dt/2.0);
+    Num2String(&labels[n][0],tval);
+    Num2String(&labelsiso[n][0],tval+dt/2.0);
   }
   for(n=0;n<256;n++){
     tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
   }
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
-  num2string(&labelsiso[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
+  Num2String(&labelsiso[nlevel-1][0],tval);
 
   for(n=0;n<nlevel;n++){
     tlevels[n]=tminorig+(float)n*dtorig;
@@ -1040,8 +1040,8 @@ void GetSliceColors(const float *t, int nt, unsigned char *it,
   }
 
   STRCPY(*scale,"");
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   *fscale=1.0;
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
@@ -1066,13 +1066,13 @@ void GetSliceColors(const float *t, int nt, unsigned char *it,
   dt = range/(float)(nlevel-2);
   for (n=1;n<nlevel-1;n++){
     tval = local_tmin + (n-1)*dt;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   for(n=0;n<256;n++){
     tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
   }
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 /* ------------------ getSliceLabelels ------------------------ */
@@ -1088,8 +1088,8 @@ void GetSliceLabels(float local_tmin, float local_tmax, int nlevel,
 
   STRCPY(*scale,"");
   *fscale=1.0;
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -1113,13 +1113,13 @@ void GetSliceLabels(float local_tmin, float local_tmax, int nlevel,
   dt = range/(float)(nlevel-2);
   for (n=1;n<nlevel-1;n++){
     tval = local_tmin + (n-1)*dt;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   for(n=0;n<256;n++){
     tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
   }
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 
@@ -1135,8 +1135,8 @@ void GetIsoLabels(float local_tmin, float local_tmax, int nlevel,
   range = local_tmax-local_tmin;
 
   STRCPY(*scale,"");
-  frexp10(local_tmax, &expmax);
-  frexp10(local_tmin, &expmin);
+  FrExp10(local_tmax, &expmax);
+  FrExp10(local_tmin, &expmin);
   if(expmin!=0&&expmax!=0&&expmax-expmin<=2&&(expmin<EXPMIN||expmin>EXPMAX)){
     local_tmin *= pow((double)10.0,(double)-expmin);
     local_tmax *= pow((double)10.0,(double)-expmin);
@@ -1157,13 +1157,13 @@ void GetIsoLabels(float local_tmin, float local_tmax, int nlevel,
   dt = range/(float)(nlevel-2);
   for (n=1;n<nlevel-1;n++){
     tval = local_tmin + (n-1)*dt;
-    num2string(&labels[n][0],tval);
+    Num2String(&labels[n][0],tval);
   }
   for(n=0;n<256;n++){
     tlevels256[n] = (local_tmin*(255-n) + local_tmax*n)/255.;
   }
   tval = local_tmax;
-  num2string(&labels[nlevel-1][0],tval);
+  Num2String(&labels[nlevel-1][0],tval);
 }
 
 /* ------------------ InitCadColors ------------------------ */

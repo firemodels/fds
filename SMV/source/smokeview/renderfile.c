@@ -19,8 +19,8 @@ int does_movie_exist(char *mov_name, char *moviefile){
   char *movie;
 
   if(mov_name == NULL || strlen(mov_name) < 1)return 0;
-  trim_back(mov_name);
-  movie = trim_front(mov_name);
+  TrimBack(mov_name);
+  movie = TrimFront(mov_name);
   strcpy(moviefile, movie);
   strcat(moviefile, ".mp4");
   if(file_exists(moviefile) == 1)return 1;
@@ -48,8 +48,8 @@ void PlayMovie(void){
 char *GetMovieFilePath(char *moviefile_path){
   char moviefile[1024], *movie;
 
-  trim_back(movie_name);
-  movie = trim_front(movie_name);
+  TrimBack(movie_name);
+  movie = TrimFront(movie_name);
   strcpy(moviefile, movie);
   strcat(moviefile, movie_ext);
   strcpy(moviefile_path, "");
@@ -291,7 +291,7 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
       if(code == 1 && render_label_type == RENDER_LABEL_TIME){
         char timelabel_local[20], *timelabelptr, dt = 1.0;
 
-        timelabelptr = time2timelabel(time_local, dt, timelabel_local);
+        timelabelptr = Time2TimeLabel(time_local, dt, timelabel_local);
         strcat(suffix, "_");
         strcat(suffix, timelabelptr);
         strcat(suffix, "s");
@@ -305,7 +305,7 @@ void GetRenderFileName(int view_mode, char **renderfile_dir_ptr, char *renderfil
       time_local = global_times[itimes];
       dt = global_times[1] - global_times[0];
       if(dt < 0.0)dt = -dt;
-      timelabelptr = time2timelabel(time_local, dt, timelabel_local);
+      timelabelptr = Time2TimeLabel(time_local, dt, timelabel_local);
       strcpy(suffix, timelabelptr);
       strcat(suffix, "s");
     }

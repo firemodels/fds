@@ -574,7 +574,7 @@ void get_partdata(partdata *parti, int partframestep_local, int nf_all, float *d
 #ifdef pp_PARTTEST
           for(jjj = 0; jjj < numtypes[2 * i]; jjj++){
             for(iii = 0; iii < nparts; iii++){
-              datacopy->rvals[iii+jjj*nparts] = 1000.0*parti->seq_id + 200*jjj+ (float)randint(-1000, 1000) / 1000.0;
+              datacopy->rvals[iii+jjj*nparts] = 1000.0*parti->seq_id + 200*jjj+ (float)RandInt(-1000, 1000) / 1000.0;
             }
           }
 #endif
@@ -805,7 +805,7 @@ void get_histfile_data(partdata *parti, int partframestep_local, int nf_all){
 #ifdef pp_PARTTEST
           for(jjj = 0; jjj < numtypes[2 * i]; jjj++){
             for(iii = 0; iii < nparts; iii++){
-              rvals[iii + jjj*nparts] = 1000.0*parti->seq_id + 200 * jjj + (float)randint(-1000, 1000) / 1000.0;
+              rvals[iii + jjj*nparts] = 1000.0*parti->seq_id + 200 * jjj + (float)RandInt(-1000, 1000) / 1000.0;
             }
           }
 #endif
@@ -1080,8 +1080,8 @@ int get_npartframes(partdata *parti){
     int lenreg, lensize, error;
     int angle_flag=0;
 
-    trim_back(reg_file);
-    trim_back(size_file);
+    TrimBack(reg_file);
+    TrimBack(size_file);
     lenreg=strlen(reg_file);
     lensize=strlen(size_file);
     if(parti->evac==1){
@@ -1164,8 +1164,8 @@ void get_partheader(partdata *parti, int partframestep_local, int *nf_all){
     int lenreg, lensize, error;
     int angle_flag = 0;
 
-    trim_back(reg_file);
-    trim_back(size_file);
+    TrimBack(reg_file);
+    TrimBack(size_file);
     lenreg = strlen(reg_file);
     lensize = strlen(size_file);
     if(parti->evac == 1){

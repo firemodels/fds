@@ -155,8 +155,8 @@ void init_lang(void){
     filelisti = filelistinfo + i;
     file=filelisti->file;
     if(strstr(file,"template")!=NULL||filelisti->type==1)continue;
-    trim_back(file);
-    file=trim_front(file);
+    TrimBack(file);
+    file=TrimFront(file);
     len=strlen(file);
     langi->file=file;
     strncpy(langi->lang_code,file+len-5,2);
@@ -212,7 +212,7 @@ void readboundini(void){
     CheckMemory;
     if(fgets(buffer, 255, stream) == NULL)break;
 
-    if(match(buffer, "B_BOUNDARY") == 1){
+    if(Match(buffer, "B_BOUNDARY") == 1){
       float gmin, gmax;
       float pmin, pmax;
       int filetype;
@@ -223,8 +223,8 @@ void readboundini(void){
       fgets(buffer, 255, stream);
       strcpy(buffer2, "");
       sscanf(buffer, "%f %f %f %f %i %s", &gmin, &pmin, &pmax, &gmax, &filetype, buffer2);
-      trim_back(buffer2);
-      buffer2ptr = trim_front(buffer2);
+      TrimBack(buffer2);
+      buffer2ptr = TrimFront(buffer2);
       lenbuffer2 = strlen(buffer2ptr);
       for(i = 0; i < npatchinfo; i++){
         patchdata *patchi;
@@ -1386,7 +1386,7 @@ void initvars(void){
   navatar_colors=0;
   avatar_colors=NULL;
   view_from_selected_avatar=0;
-  getGitInfo(smv_githash,smv_gitdate);
+  GetGitInfo(smv_githash,smv_gitdate);
   force_isometric=0;
   cb_valmin=0.0;
   cb_valmax=100.0;
@@ -1971,8 +1971,8 @@ void initvars(void){
   buffertype=DOUBLE_BUFFER;
   opengldefined=0;
 
-  getTitle("Smokeview ", release_title);
-  getTitle("Smokeview ", plot3d_title);
+  GetTitle("Smokeview ", release_title);
+  GetTitle("Smokeview ", plot3d_title);
 
   strcpy(INIfile,"smokeview.ini");
   strcpy(WRITEINIfile,"Write smokeview.ini");

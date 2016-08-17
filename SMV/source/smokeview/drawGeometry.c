@@ -1398,7 +1398,7 @@ void ReadCADGeom(cadgeomdata *cd){
     fclose(stream);
     return;
   }
-  trim_back(buffer);
+  TrimBack(buffer);
   if(strncmp(buffer,"[APPEARANCE]",12)==0){
     cd->version=2;
     fclose(stream);
@@ -1588,7 +1588,7 @@ void ReadCAD2Geom(cadgeomdata *cd){
     if(rrgb[0]<0.0||rrgb[1]<0.0||rrgb[2]<0.0)rrgb[3]=1.0;
 
     if(fgets(buffer,255,stream)==NULL)return;
-    trim_back(buffer);
+    TrimBack(buffer);
     len=strlen(buffer);
 
     texti = &cdi->textureinfo;
@@ -4336,7 +4336,7 @@ void DrawUserTicks(void){
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
       sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[0]));
-      trimzeros(label);
+      TrimZeros(label);
       Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
@@ -4430,7 +4430,7 @@ void DrawUserTicks(void){
         xyz2[2]=xyz[2]-TEXT_FACTOR*SCALE2FDS(user_tick_length);
       }
       sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[1]));
-      trimzeros(label);
+      TrimZeros(label);
       Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
@@ -4519,7 +4519,7 @@ void DrawUserTicks(void){
       }
       xyz2[2]=xyz[2];
       sprintf(label,"%5.1f",GetUnitVal("Distance",xyz[2]));
-      trimzeros(label);
+      TrimZeros(label);
       Output3Text(foregroundcolor,xyz2[0],xyz2[1],xyz2[2], label);
     }
   }
@@ -5404,8 +5404,8 @@ void GetObstLabels(const char *filein){
     }
     obstlabel++;
     lenlabel=strlen(obstlabel);
-    obstlabel=trim_front(obstlabel);
-    trim_back(obstlabel);
+    obstlabel=TrimFront(obstlabel);
+    TrimBack(obstlabel);
     lenlabel=strlen(obstlabel);
     if(lenlabel>0){
       NewMemory((void **)&obstlabels[fdsobstcount-1],(unsigned int)(lenlabel+1));

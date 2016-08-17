@@ -364,7 +364,7 @@ EXTERNCPP int plot3dcompare( const void *arg1, const void *arg2 );
 EXTERNCPP void update_plot_xyz(meshdata *current_mesh);
 EXTERNCPP void updateplotslice_mesh(meshdata *mesh_in, int slicedir);
 
-EXTERNCPP char *get_chid(char *file, char *buffer);
+EXTERNCPP char *GetChid(char *file, char *buffer);
 EXTERNCPP void AddColorbar(int icolorbar);
 EXTERNCPP void ReloadMenu(int value);
 EXTERNCPP void ColorbarMenu(int val);
@@ -595,7 +595,7 @@ EXTERNCPP void getisosizes(const char *isofile, int dataflag, FILE **isostreampt
                            int *nvertices, int *ntriangles, float **levels, int *nisolevels,
                            int *niso_times, float *tmin, float *tmax, int endian);
 #endif
-EXTERNCPP void array2string(float *array, int narray, char *string);
+EXTERNCPP void Array2String(float *array, int narray, char *string);
 EXTERNCPP void getisolevels(const char *isofile, int dataflag, float **levelsptr, float ***colorlevelsptr, int *nisolevels);
 
 EXTERNCPP void updatevslices(void);
@@ -792,9 +792,9 @@ EXTERNCPP void AdjustPart5Bounds(partdata *parti);
 EXTERNCPP void AdjustPlot3DBounds(int iplot3d, int setpmin, float *pmin, int setpmax, float *pmax);
 EXTERNCPP void adjustslicebounds(const slicedata *sd, float *pmin, float *pmax);
 EXTERNCPP void getslicedatabounds(const slicedata *sd, float *pmin, float *pmax);
-EXTERNCPP void scalefloat2string(float floatfrom, char *stringto, const float *scale);
-EXTERNCPP void scalestring(const char *stringfrom, char *stringto, const float *scale);
-EXTERNCPP void num2string(char *string, float tval);
+EXTERNCPP void ScaleFloat2String(float floatfrom, char *stringto, const float *scale);
+EXTERNCPP void ScaleString(const char *stringfrom, char *stringto, const float *scale);
+EXTERNCPP void Num2String(char *string, float tval);
 EXTERNCPP int setup_case(int argc, char **argv);
 EXTERNCPP int get_min_partframes(void);
 EXTERNCPP int Update_Bounds(void);

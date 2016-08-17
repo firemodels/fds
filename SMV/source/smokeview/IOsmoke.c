@@ -564,8 +564,8 @@ void readsmoke3d(int ifile,int flag, int *errorcode){
       complevel/=10.0;
       if(complevel<0.0)complevel=-complevel;
       sprintf(compstring," compression ratio: %.1f",complevel);
-      trim_back(compstring);
-      trimzeros(compstring);
+      TrimBack(compstring);
+      TrimZeros(compstring);
       PRINTF("%s\n",compstring);
     }
     else{
@@ -4061,7 +4061,7 @@ int init_cull_exts(void){
     err=0;
   }
   else{
-    trim_back(version_label);
+    TrimBack(version_label);
     PRINTF("Smokeview is running on a system using OpenGL %s\n",version_label2);
     PRINTF("Smoke culling is not not supported, it requires OpenGL 2.0 or later.\n");
     cullsmoke=0;

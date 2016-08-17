@@ -486,7 +486,7 @@ void draw_devices_val(void){
         case SMOKESENSORS_01:
           val = devicei->visval/255.0;
           sprintf(label,"%.2f",val);
-          trimzeros(label);
+          TrimZeros(label);
           break;
         case SMOKESENSORS_SCALED:
         case SMOKESENSORS_0INF:
@@ -506,7 +506,7 @@ void draw_devices_val(void){
             else{
               sprintf(label,"%.0f",val);
             }
-            trimzeros(label);
+            TrimZeros(label);
           }
           break;
         default:
@@ -1607,7 +1607,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       if(ABS(arg[0]-1.0)<0.01){
         float random_angle=0.0;
 
-        random_angle=rand_ab(prop->tag_number,0.0,360.0);
+        random_angle=RandAB(prop->tag_number,0.0,360.0);
         glRotatef(random_angle,0.0,0.0,1.0);
       }
       break;
@@ -1615,7 +1615,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       if(ABS(arg[0]-1.0)<0.01){
         float random_angle=0.0;
 
-        random_angle=rand_ab(prop->tag_number,0.0,360.0);
+        random_angle=RandAB(prop->tag_number,0.0,360.0);
         glRotatef(random_angle,0.0,1.0,0.0);
       }
       break;
@@ -1623,7 +1623,7 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
       if(ABS(arg[0]-1.0)<0.01){
         float random_angle=0.0;
 
-        random_angle=rand_ab(prop->tag_number,0.0,360.0);
+        random_angle=RandAB(prop->tag_number,0.0,360.0);
         glRotatef(random_angle,1.0,0.0,0.0);
       }
       break;
@@ -1637,8 +1637,8 @@ void draw_SVOBJECT(sv_object *object_dev, int iframe_local, propdata *prop, int 
 //    Let x = r * cos(t).
 //    Let y = r * sin(t).
 
-        zz = rand_ab(2*prop->tag_number-1,-1.0,1.0);
-        tt = rand_ab(2*prop->tag_number,0.0,2.0*PI);
+        zz = RandAB(2*prop->tag_number-1,-1.0,1.0);
+        tt = RandAB(2*prop->tag_number,0.0,2.0*PI);
         rr = sqrt(ABS(1.0-zz*zz));
         xx = rr*cos(tt);
         yy = rr*sin(tt);
@@ -4543,8 +4543,8 @@ sv_object *get_SVOBJECT_type(char *olabel,sv_object *default_object){
   if(olabel==NULL)return default_object;
   strcpy(label,olabel);
   labelptr=label;
-  trim_back(label);
-  labelptr = trim_front(label);
+  TrimBack(label);
+  labelptr = TrimFront(label);
   if(strlen(labelptr)==0)return default_object;
   for(i=0;i<nobject_defs;i++){
     objecti = object_defs[i];
@@ -4565,8 +4565,8 @@ sv_object *get_SVOBJECT_type2(char *olabel,sv_object *default_object){
   if(olabel==NULL)return default_object;
   strcpy(label,olabel);
   labelptr=label;
-  trim_back(label);
-  labelptr = trim_front(label);
+  TrimBack(label);
+  labelptr = TrimFront(label);
   if(strlen(labelptr)==0)return default_object;
   object_start = object_def_first.next;
   objecti = object_start;
@@ -5212,17 +5212,17 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
   *eof = 0;
 
   frame->error=0;
-  trim_back(buffer);
+  TrimBack(buffer);
   strcpy(object_buffer,buffer);
   while(stream!=NULL&&!feof(stream)){
     if(fgets(buffer,255,stream)==NULL){
       *eof=1;
       break;
     }
-    buffer2=remove_comment(buffer);
-    if(match(buffer2,"OBJECTDEF") == 1||
-       match(buffer2,"AVATARDEF") == 1||
-       match(buffer2,"NEWFRAME") == 1){
+    buffer2=RemoveComment(buffer);
+    if(Match(buffer2,"OBJECTDEF") == 1||
+       Match(buffer2,"AVATARDEF") == 1||
+       Match(buffer2,"NEWFRAME") == 1){
          buffer_ptr=buffer2;
          break;
     }
@@ -5383,13 +5383,13 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
             quoted_string++;
             len=strlen(quoted_string);
             if(quoted_string[len-1]=='"')quoted_string[len-1]=' ';
-            trim_back(quoted_string);
-            quoted_string=trim_front(quoted_string);
+            TrimBack(quoted_string);
+            quoted_string=TrimFront(quoted_string);
             strcpy(toki->default_string,quoted_string);
             quoted_string=strstr(quoted_string,"t%");
             if(quoted_string!=NULL){
               quoted_string+=2;
-              quoted_string=trim_front(quoted_string);
+              quoted_string=TrimFront(quoted_string);
               strcpy(toki->default_string,quoted_string);
               toki->is_texturefile=1;
             }
@@ -5429,8 +5429,8 @@ char *parse_device_frame(char *buffer, FILE *stream, int *eof, sv_object_frame *
       }
       lenstr=strlen(sptr);
       if(sptr[lenstr-1]=='"')sptr[lenstr-1]=' ';
-      trim_back(sptr);
-      sptr=trim_front(sptr);
+      TrimBack(sptr);
+      sptr=TrimFront(sptr);
       strcpy(toki->string,sptr);
     }
     else{
@@ -5538,7 +5538,7 @@ void rewind_device_file(FILE *stream){
   fgets(buffer,buffer_len,stream);
   comma=strchr(buffer,',');
   if(comma!=NULL)*comma=0;
-  trim_back(buffer);
+  TrimBack(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     rewind(stream);
     return;
@@ -5547,7 +5547,7 @@ void rewind_device_file(FILE *stream){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
     if(comma!=NULL)*comma=0;
-    trim_back(buffer);
+    TrimBack(buffer);
     if(strcmp(buffer,"//DATA")==0){
       found_data=1;
       break;
@@ -5572,7 +5572,7 @@ int get_ndevices(char *file){
   fgets(buffer,buffer_len,stream);
   comma=strchr(buffer,',');
   if(comma!=NULL)*comma=0;
-  trim_back(buffer);
+  TrimBack(buffer);
   if(strcmp(buffer,"//HEADER")!=0){
     fclose(stream);
     return 0;
@@ -5582,7 +5582,7 @@ int get_ndevices(char *file){
     fgets(buffer,buffer_len,stream);
     comma=strchr(buffer,',');
     if(comma!=NULL)*comma=0;
-    trim_back(buffer);
+    TrimBack(buffer);
     if(strcmp(buffer,"//DATA")==0){
       break;
     }
@@ -5757,7 +5757,7 @@ void setup_zone_devs(void){
 
     stream=fopen(file,"r");
     if(stream==NULL)continue;
-    buffer_len=getrowcols(stream,&nrows,&ncols);
+    buffer_len=GetRowCols(stream,&nrows,&ncols);
     if(nrows<=0||ncols<=0||buffer_len<=0){
       fclose(stream);
       continue;
@@ -5769,12 +5769,12 @@ void setup_zone_devs(void){
     NewMemory((void **)&devclabels,ncols*sizeof(char *));
     fgets(buffer,buffer_len,stream);
     fgets(buffer,buffer_len,stream);
-    parsecsv(buffer,devclabels,&ntokens);
+    ParseCSV(buffer,devclabels,&ntokens);
     for(j=0;j<ntokens;j++){
       devicedata *devi;
 
-      trim_back(devclabels[j]);
-      devclabels[j]=trim_front(devclabels[j]);
+      TrimBack(devclabels[j]);
+      devclabels[j]=TrimFront(devclabels[j]);
       devi = getdevice(devclabels[j],-1);
       if(devi!=NULL)devi->in_zone_csv=1;
     }
@@ -5835,7 +5835,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
   stream=fopen(file,"r");
   if(stream==NULL)return;
   rewind_device_file(stream);
-  buffer_len=getrowcols(stream,&nrows,&ncols);
+  buffer_len=GetRowCols(stream,&nrows,&ncols);
   if(nrows<=0||ncols<=0||buffer_len<=0){
     fclose(stream);
     return;
@@ -5856,17 +5856,17 @@ void read_device_data(char *file, int filetype, int loadstatus){
   }
 
   fgets(buffer,buffer_len,stream);
-  parsecsv(buffer,devcunits,&ntokens);
+  ParseCSV(buffer,devcunits,&ntokens);
   for(i=0;i<ntokens;i++){
-    trim_back(devcunits[i]);
-    devcunits[i]=trim_front(devcunits[i]);
+    TrimBack(devcunits[i]);
+    devcunits[i]=TrimFront(devcunits[i]);
   }
 
   fgets(buffer2,buffer_len,stream);
-  parsecsv(buffer2,devclabels,&ntokens);
+  ParseCSV(buffer2,devclabels,&ntokens);
   for(i=0;i<ntokens;i++){
-    trim_back(devclabels[i]);
-    devclabels[i]=trim_front(devclabels[i]);
+    TrimBack(devclabels[i]);
+    devclabels[i]=TrimFront(devclabels[i]);
   }
 
   NewMemory((void **)&times_local,nrows*sizeof(float));
@@ -5904,7 +5904,7 @@ void read_device_data(char *file, int filetype, int loadstatus){
     int icol=0;
 
     fgets(buffer,buffer_len,stream);
-    fparsecsv(buffer,vals,valids,ncols,&ntokens);
+    FParseCSV(buffer,vals,valids,ncols,&ntokens);
     times_local[irow-2]=vals[icol];
     for(icol=1;icol<ncols;icol++){
       devicedata *devicei;
@@ -6442,7 +6442,7 @@ int read_object_defs(char *file){
       if(eof==1||fgets(buffer,255,stream)==NULL)break;
       buffer_ptr=buffer;
     }
-    trim_buffer=remove_comment(buffer_ptr);
+    trim_buffer=RemoveComment(buffer_ptr);
     lenbuffer=strlen(buffer_ptr);
     if(lenbuffer<1){
       buffer_ptr=NULL;
@@ -6450,20 +6450,20 @@ int read_object_defs(char *file){
     }
 
 
-    if(match(buffer_ptr,"OBJECTDEF") == 1||
-       match(buffer_ptr,"AVATARDEF") == 1
+    if(Match(buffer_ptr,"OBJECTDEF") == 1||
+       Match(buffer_ptr,"AVATARDEF") == 1
       ){
         int object_type=IS_NOT_AVATAR;
       char *label;
 
       sv_object_frame *first_frame, *last_frame;
 
-      if(match(buffer_ptr,"AVATARDEF") == 1){
+      if(Match(buffer_ptr,"AVATARDEF") == 1){
         object_type=IS_AVATAR;
       }
       ndevices++;
       if(fgets(buffer,255,stream)==NULL)break;
-      label=remove_comment(buffer);
+      label=RemoveComment(buffer);
       temp_object=get_object(label);
       if(temp_object!=NULL){
         free_object(temp_object);
@@ -6499,7 +6499,7 @@ int read_object_defs(char *file){
       buffer_ptr=NULL;
       continue;
     }
-    if(match(trim_buffer,"NEWFRAME") == 1||firstdef==1){
+    if(Match(trim_buffer,"NEWFRAME") == 1||firstdef==1){
       sv_object_frame *prev_frame,*next_frame;
 
       if(firstdef==-1)continue;
@@ -6522,7 +6522,7 @@ int read_object_defs(char *file){
       current_object->nframes++;
 
       firstdef=0;
-      if(match(trim_buffer,"NEWFRAME")==1){
+      if(Match(trim_buffer,"NEWFRAME")==1){
         buffer_ptr=NULL;
         continue;
       }
@@ -6619,8 +6619,8 @@ char *get_device_label(char *buffer){
   }
   label_present[0]=0;
   label_present++;
-  label_present=trim_front(label_present);
-  trim_back(label_present);
+  label_present=TrimFront(label_present);
+  TrimBack(label_present);
   if(strlen(label_present)==0)return NULL;
   return label_present;
 }

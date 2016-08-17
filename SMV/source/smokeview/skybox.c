@@ -15,7 +15,7 @@ void loadskytexture(char *filebase, texturedata *texti){
   int errorcode;
   unsigned char *floortex;
 
-  trim_back(filebase);
+  TrimBack(filebase);
   texti->name=0;
   texti->loaded=0;
   if(strcmp(filebase,"NULL")==0)return;

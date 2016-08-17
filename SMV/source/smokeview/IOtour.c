@@ -293,7 +293,7 @@ void drawtours(void){
         {
           char label[128];
           sprintf(label,"%8.2f",framej->disp_time+0.005);
-          trimzeros(label);
+          TrimZeros(label);
           Output3Text(tmp_tourcol_text,eye[0]+0.02f,eye[1]+0.015f,eye[2]+0.015f,label);
         }
       }
@@ -1129,7 +1129,7 @@ tourdata *add_tour(char *label){
     sprintf(touri->label,"Tour %i",ntours);
   }
   else{
-    strcpy(touri->label,trim_front(label));
+    strcpy(touri->label,TrimFront(label));
   }
   nkeyframes=2;
   NewMemory((void **)&touri->keyframe_times, nkeyframes*sizeof(float));
