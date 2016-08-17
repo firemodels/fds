@@ -15,7 +15,7 @@ void usage(char *prog){
  char githash[256];
  char gitdate[256];
 
-  getGitInfo(githash,gitdate);    // get githash
+  GetGitInfo(githash,gitdate);    // get githash
 
   fprintf(stderr, "\n%s (%s) %s\n", prog, githash, __DATE__);
   fprintf(stderr, "convert a bash script to a windows batch file\n\n");
@@ -87,7 +87,7 @@ int main(int argc, char **argv){
   fprintf(streamout,"@echo off\n");
   for(;;){
     if(fgets(buffer,1024,streamin)==NULL)break;
-    trim_back(buffer);
+    TrimBack(buffer);
     if(strlen(buffer)==0){
       fprintf(streamout,"\n");
       continue;
@@ -110,7 +110,7 @@ int main(int argc, char **argv){
       data = comm_end+1;
       *comm_end=0;
 
-      trim_back(data);
+      TrimBack(data);
       fprintf(streamout,"%s%s%s %s\n","%",comm_beg,"%",data);
       continue;
 
