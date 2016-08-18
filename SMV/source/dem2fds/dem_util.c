@@ -448,10 +448,10 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       image_long_max = MAX(imagei->long_max, image_long_max);
     }
   }
+  fprintf(stderr, "map properties:\n");
+  fprintf(stderr, "     image dir: %s\n", image_dir);
+  fprintf(stderr, " elevation dir: %s\n", elev_dir);
   if(nimageinfo > 0){
-    fprintf(stderr, "map properties:\n");
-    fprintf(stderr, "     image dir: %s\n", image_dir);
-    fprintf(stderr, " elevation dir: %s\n", elev_dir);
     fprintf(stderr, " min longitude: %f\n", image_long_min);
     fprintf(stderr, " max longitude: %f\n", image_long_max);
     fprintf(stderr, "  min latitude: %f\n", image_lat_min);
