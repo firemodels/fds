@@ -549,6 +549,10 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     fprintf(stderr, "***error: unable to open file %s for input\n", elevfile);
     return 0;
   }
+
+  // pass 1
+
+  nexcludeinfo = 0;
   while(!feof(stream_in)){
     char buffer[LEN_BUFFER], *buffer2;
 
@@ -566,23 +570,72 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       kbar = 10;
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%i %i %i %f %f %f %f", &nlongs, &nlats, &kbar, &xmax, &ymax, &zmin, &zmax);
-      if(xmax>0.0&&ymax>0.0)xymax_defined=1;
+      if(xmax > 0.0&&ymax > 0.0)xymax_defined = 1;
       continue;
     }
+    if(Match(buffer, "EXCLUDE") == 1){
+      nexcludeinfo++;
+      continue;
+    }
+  }
+
+  if(nexcludeinfo > 0){
+    NewMemory((void **)&excludeinfo, nexcludeinfo * sizeof(excludedata));
+  }
+
+  // pass 2
+
+  rewind(stream_in);
+  nexcludeinfo = 0;
+  while(!feof(stream_in)){
+    char buffer[LEN_BUFFER], *buffer2;
+
+    CheckMemory;
+
+    if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
+    buffer2 = strstr(buffer, "//");
+    if(buffer2 != NULL)buffer2[0] = 0;
+    buffer2 = TrimFrontBack(buffer);
+    if(strlen(buffer2) == 0)continue;
 
     if(Match(buffer, "LONGLATORIG") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &longref, &latref);
       longlatref_mode = LONGLATREF_ORIG;
-      xref = 0.0;
-      yref = 0.0;
+
+      xref = xmax;
+      yref = ymax;
+      dlat = yref / EARTH_RADIUS;
+      fds_lat_max = latref + RAD2DEG*dlat;
+      fds_lat_min = latref;
+      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
+      fds_long_max = longref + RAD2DEG*dlong;
+      fds_long_min = longref;
       continue;
     }
+
+      // a = sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlong/2)^2
+      // c = 2*asin(sqrt(a))
+      // d = R*c
+      // R = RAD_EARTH
+
+      // dlat = 0 ==> d = 2*R*asin(cos(lat1)*sin(dlong/2))
+      //              dlong = 2*asin(sin(d/(2*R))/cos(lat1))
+      // dlong = 0 ==> d = R*dlat
+      //               dlat = d/R
 
     if(Match(buffer, "LONGLATCENTER") == 1){
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
       sscanf(buffer, "%f %f", &longref, &latref);
       longlatref_mode = LONGLATREF_CENTER;
+      xref = xmax/2.0;
+      yref = ymax/2.0;
+      dlat = yref / EARTH_RADIUS;
+      fds_lat_max = latref + RAD2DEG*dlat;
+      fds_lat_min = latref - RAD2DEG*dlat;
+      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
+      fds_long_max = longref + RAD2DEG*dlong;
+      fds_long_min = longref - RAD2DEG*dlong;
       continue;
     }
 
@@ -606,55 +659,27 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
 
     if(Match(buffer, "EXCLUDE") == 1){
+      excludedata *exi;
+
+      exi = excludeinfo + nexcludeinfo++;
       if(fgets(buffer, LEN_BUFFER, stream_in) == NULL)break;
-      sscanf(buffer, "%f %f %f %f", &xmin_exclude, &ymin_exclude, &xmax_exclude, &ymax_exclude);
+      exi->xmin = -1.0;
+      exi->xmax = -1.0;
+      exi->ymin = -1.0;
+      exi->ymax = -1.0;
+      sscanf(buffer, "%f %f %f %f", &exi->xmin, &exi->ymin, &exi->xmax, &exi->ymax);
       longlat_defined = 1;
       continue;
     }
   }
   fclose(stream_in);
 
-  switch (longlatref_mode){
-    case LONGLATREF_NONE:
-      fprintf(stderr, "***error: A longitude and latitude must be specified with either the LONGLATBOUNDS, \n");
-      fprintf(stderr,"           LONGLATORIG or LONGLATCENTER keywords\n");
-      return 0;
-      break;
-
-    case LONGLATREF_MINMAX:
-      break;
-
-      // a = sin(dlat/2)^2 + cos(lat1)*cos(lat2)*sin(dlong/2)^2
-      // c = 2*asin(sqrt(a))
-      // d = R*c
-      // R = RAD_EARTH
-
-      // dlat = 0 ==> d = 2*R*asin(cos(lat1)*sin(dlong/2))
-      //              dlong = 2*asin(sin(d/(2*R))/cos(lat1))
-      // dlong = 0 ==> d = R*dlat
-      //               dlat = d/R
-    case LONGLATREF_ORIG:
-      xref = xmax;
-      yref = ymax;
-      dlat = yref / EARTH_RADIUS;
-      fds_lat_max = latref + RAD2DEG*dlat;
-      fds_lat_min = latref;
-      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
-      fds_long_max = longref + RAD2DEG*dlong;
-      fds_long_min = longref;
-      break;
-
-    case LONGLATREF_CENTER:
-      xref = xmax/2.0;
-      yref = ymax/2.0;
-      dlat = yref / EARTH_RADIUS;
-      fds_lat_max = latref + RAD2DEG*dlat;
-      fds_lat_min = latref - RAD2DEG*dlat;
-      dlong = ABS(2.0*asin(sin(xref / (2.0*EARTH_RADIUS)) / cos(DEG2RAD*latref)));
-      fds_long_max = longref + RAD2DEG*dlong;
-      fds_long_min = longref - RAD2DEG*dlong;
-      break;
+  if(longlatref_mode==LONGLATREF_NONE){
+    fprintf(stderr, "***error: A longitude and latitude must be specified with either the LONGLATMINMAX, \n");
+    fprintf(stderr,"           LONGLATORIG or LONGLATCENTER keywords\n");
+    return 0;
   }
+
   if(show_maps==1){
     have_data = 1;
     longlatref_mode = LONGLATREF_MINMAX;
@@ -851,12 +876,12 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
     fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
   }
-  fprintf(streamout, "&SURF ID = 'surf1', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", basename);
+  fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id,basename);
 
 
   if(option == FDS_GEOM){
-    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='surf1',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
-      nlong, nlat, 0.0, xmax, 0.0, ymax);
+    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
+      surf_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
     count = 1;
     for(j = 0; j < jbar + 1; j++){
       for(i = 0; i < ibar + 1; i++){
@@ -876,12 +901,25 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
       ycen = (ygrid[j] + ygrid[j + 1]) / 2.0;
       for(i = 0; i < ibar; i++){
         float vavg, xcen;
+        int k;
+        int exclude;
 
         xcen = (xgrid[i] + xgrid[i + 1]) / 2.0;
-        if(xmin_exclude <= xcen&&xcen <= xmax_exclude&&ymin_exclude <= ycen&&ycen <= ymax_exclude)continue;
+
+        exclude = 0;
+        for(k = 0; k < nexcludeinfo; k++){
+          excludedata *exi;
+
+          exi = excludeinfo + k;
+          if(exi->xmin <= xcen&&xcen <= exi->xmax&&exi->ymin <= ycen&&ycen <= exi->ymax){
+            exclude = 1;
+            break;
+          }
+        }
+        if(exclude == 1)continue;
         vavg = (vals[count] + vals[count + 1] + valsp1[count] + valsp1[count + 1]) / 4.0;
-        fprintf(streamout, "&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='surf1'/\n",
-          xgrid[i], xgrid[i + 1], ygrid[j], ygrid[j + 1], vavg);
+        fprintf(streamout, "&OBST XB=%f,%f,%f,%f,0.0,%f SURF_ID='%s'/\n",
+          xgrid[i], xgrid[i + 1], ygrid[j], ygrid[j + 1], vavg,surf_id);
         count++;
       }
       count++;
@@ -900,12 +938,20 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   fprintf(stderr, "     max elevation: %f\n", fds_elevs->val_max);
   fprintf(stderr, "  longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
   fprintf(stderr, "   latitude=%f at y=%f\n", fds_elevs->latref, fds_elevs->yref);
-  if(xmin_exclude >= 0 || ymin_exclude >= 0.0 || xmax_exclude >= 0.0 || ymax_exclude >= 0.0) {
-    fprintf(stderr, "  exclude region:\n");
-    fprintf(stderr, "    min x: %f\n",xmin_exclude);
-    fprintf(stderr, "    max x: %f\n", xmax_exclude);
-    fprintf(stderr, "    min y: %f\n", ymin_exclude);
-    fprintf(stderr, "    max y: %f\n", xmax_exclude);
+  if(nexcludeinfo>0) {
+    int k;
 
+    if(nexcludeinfo==1){
+      fprintf(stderr, "  exclude region:\n");
+    }
+    else{
+      fprintf(stderr, "  exclude regions:\n");
+    }
+    for(k = 0; k < nexcludeinfo; k++){
+      excludedata *exi;
+
+      exi = excludeinfo + k;
+      fprintf(stderr, "    %i: %f %f %f %f\n", k+1,exi->xmin, exi->xmax, exi->ymin, exi->ymax);
+    }
   }
 }
