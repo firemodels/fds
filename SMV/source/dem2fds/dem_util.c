@@ -449,7 +449,7 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
   }
   if(nimageinfo > 0){
-    fprintf(stderr, "terrain map bounds:\n");
+    fprintf(stderr, "map bounds:\n");
     fprintf(stderr, " min longitude: %f\n", image_long_min);
     fprintf(stderr, " max longitude: %f\n", image_long_max);
     fprintf(stderr, "  min latitude: %f\n", image_lat_min);
