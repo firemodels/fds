@@ -447,14 +447,12 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
   }
   fprintf(stderr, "\nmap properties:\n");
-  fprintf(stderr, "     input file: %s\n", elevfile);
-  fprintf(stderr, "      image dir: %s\n", image_dir);
-  fprintf(stderr, "  elevation dir: %s\n", elev_dir);
+  fprintf(stderr, "        input file: %s\n", elevfile);
+  fprintf(stderr, "         image dir: %s\n", image_dir);
+  fprintf(stderr, "     elevation dir: %s\n", elev_dir);
   if(nimageinfo > 0){
-    fprintf(stderr, "  min longitude: %f\n", image_long_min);
-    fprintf(stderr, "  max longitude: %f\n", image_long_max);
-    fprintf(stderr, "   min latitude: %f\n", image_lat_min);
-    fprintf(stderr, "   max latitude: %f\n", image_lat_max);
+    fprintf(stderr, "  longitude bounds: %f %f\n", image_long_min, image_long_max);
+    fprintf(stderr, "   latitude bounds: %f %f\n", image_lat_min, image_lat_max);
   }
 
   nelevinfo = get_nfilelist(elev_dir, "*.hdr");
@@ -935,8 +933,7 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   fprintf(stderr, "         file name: %s\n", output_file);
   fprintf(stderr, "             max x: %f\n", xmax);
   fprintf(stderr, "             max y: %f\n", ymax);
-  fprintf(stderr, "     min elevation: %f\n", fds_elevs->val_min);
-  fprintf(stderr, "     max elevation: %f\n", fds_elevs->val_max);
+  fprintf(stderr, "  elevation bounds: %f %f\n", fds_elevs->val_min, fds_elevs->val_max);
   fprintf(stderr, "  longitude=%f at x=%f\n", fds_elevs->longref, fds_elevs->xref);
   fprintf(stderr, "   latitude=%f at y=%f\n", fds_elevs->latref, fds_elevs->yref);
   if(nexcludeinfo>0) {
