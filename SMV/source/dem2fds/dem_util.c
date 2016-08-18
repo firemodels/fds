@@ -369,8 +369,6 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
   int longlatref_mode = LONGLATREF_NONE;
   int xymax_defined=0;
 
-  fprintf(stderr, "\ncase: %s\n\n", elevfile);
-
   nimageinfo = get_nfilelist(image_dir, "m_*.jpg");
   if(nimageinfo > 0){
     NewMemory((void **)&imagefiles, nimageinfo * sizeof(filelistdata));
@@ -448,14 +446,15 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
       image_long_max = MAX(imagei->long_max, image_long_max);
     }
   }
-  fprintf(stderr, "map properties:\n");
-  fprintf(stderr, "     image dir: %s\n", image_dir);
-  fprintf(stderr, " elevation dir: %s\n", elev_dir);
+  fprintf(stderr, "\nmap properties:\n");
+  fprintf(stderr, "     input file: %s\n", elevfile);
+  fprintf(stderr, "      image dir: %s\n", image_dir);
+  fprintf(stderr, "  elevation dir: %s\n", elev_dir);
   if(nimageinfo > 0){
-    fprintf(stderr, " min longitude: %f\n", image_long_min);
-    fprintf(stderr, " max longitude: %f\n", image_long_max);
-    fprintf(stderr, "  min latitude: %f\n", image_lat_min);
-    fprintf(stderr, "  max latitude: %f\n", image_lat_max);
+    fprintf(stderr, "  min longitude: %f\n", image_long_min);
+    fprintf(stderr, "  max longitude: %f\n", image_long_max);
+    fprintf(stderr, "   min latitude: %f\n", image_lat_min);
+    fprintf(stderr, "   max latitude: %f\n", image_lat_max);
   }
 
   nelevinfo = get_nfilelist(elev_dir, "*.hdr");
@@ -933,7 +932,7 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
 
   fprintf(stderr, "\n");
   fprintf(stderr, "FDS input file properties:\n");
-  fprintf(stderr, "  output file name: %s\n", output_file);
+  fprintf(stderr, "         file name: %s\n", output_file);
   fprintf(stderr, "             max x: %f\n", xmax);
   fprintf(stderr, "             max y: %f\n", ymax);
   fprintf(stderr, "     min elevation: %f\n", fds_elevs->val_min);
