@@ -34,7 +34,8 @@ plt_style = {'b-','g-','r-','m-','c-'};
 nc_array = {20,40,80,160,320};
 dx_array = {1/20,1/40,1/80,1/160,1/320};
 
-L2e = []; % initialize L2 error vector
+L1e = []; % initialize L1 norm error vector
+L2e = []; % initialize L2 norm error vector
 dxx = []; % init dxx vector
 
 % Loop over cases, plotting FDS results (hold on) and computing L2 error vector
@@ -43,7 +44,8 @@ for i=1:length(fnt)
     Y_fds = M.data(1:end,2); % FDS species data
     t_fds = M.data(1:end,1); % FDS time
     plot(t_fds,Y_fds,plt_style{i})
-    L2e = [L2e,sqrt(1/nc_array{i}*sum((Y(t_fds)-Y_fds).^2))]; % populates L2 error vector, element-by-element
+    L1e = [L1e,1/nc_array{i}*sum(abs(Y(t_fds)-Y_fds))]; % populates L1 norm error vector, element-by-element
+    L2e = [L2e,sqrt(1/nc_array{i}*sum((Y(t_fds)-Y_fds).^2))]; % populates L2 error norm vector, element-by-element
     dxx = [dxx,dx_array{i}]; % populates dxx vector, element-by-element
 end
 
@@ -63,21 +65,26 @@ legend('boxoff')
 Git_Filename = [ddir,'HVAC_mass_transport_conv_0320_git.txt'];
 addverstr(gca,Git_Filename,'linear')
 
-% Plot L2 error convergence
+% % print to pdf
+% set(gcf,'PaperUnits',Paper_Units);
+% set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+% set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_1')
+
+% Plot L1 norm error convergence
 figure
-hh(1)=loglog(dxx,L2e,'ksq-'); 
+hh(1)=loglog(dxx,L1e,'ksq-'); 
 hold on
-hh(2)=loglog(dxx,500*dxx,'k--');
-hh(3)=loglog(dxx,10*(dxx.^2),'k-');
+hh(2)=loglog(dxx,(dxx.^0.5)/10,'k--');
 
 set(gca,'Units',Plot_Units)
 set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
 set(gca,'FontName',Font_Name)
 set(gca,'FontSize',Title_Font_Size)
 
-xlabel('{\it \Deltax} (m)')
-ylabel('L2 error (kg/kg)')
-legend(hh,'FDS','{\it O(\Deltax)}','{\it O(\Deltax^2)}','location','southeast')
+xlabel('{\it \Delta x} (m)')
+ylabel('L1 error (kg/kg)')
+legend(hh,'FDS','{\it O(\Delta x^{1/2})}','location','southeast')
 legend('boxoff')
 
 Git_Filename = [ddir,'HVAC_mass_transport_conv_0320_git.txt'];
@@ -87,5 +94,30 @@ addverstr(gca,Git_Filename,'loglog')
 % set(gcf,'PaperUnits',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/ht3d_test_1_convergence')
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_2')
+
+% Plot L2 error convergence
+figure
+hh(1)=loglog(dxx,L2e,'ksq-'); 
+hold on
+hh(2)=loglog(dxx,dxx.^(1/4)/10,'k--');
+
+set(gca,'Units',Plot_Units)
+set(gca,'Position',[Plot_X,Plot_Y,Plot_Width,Plot_Height])
+set(gca,'FontName',Font_Name)
+set(gca,'FontSize',Title_Font_Size)
+
+xlabel('{\it \Deltax} (m)')
+ylabel('L2 error (kg/kg)')
+legend(hh,'FDS','{\it O(\Delta x^{1/4})}','location','southeast')
+legend('boxoff')
+
+Git_Filename = [ddir,'HVAC_mass_transport_conv_0320_git.txt'];
+addverstr(gca,Git_Filename,'loglog')
+
+% % print to pdf
+% set(gcf,'PaperUnits',Paper_Units);
+% set(gcf,'PaperSize',[Paper_Width Paper_Height]);
+% set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_3')
 
