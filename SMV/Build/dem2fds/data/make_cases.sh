@@ -9,10 +9,10 @@ dem2fds=dem2fds
 
 terraindir=~/terrain
 
+$dem2fds $option -nobuffer -dir $terraindir/blodget blodget.in 
+
 $dem2fds $option -nobuffer -dir $terraindir/demtest demtest1.in 
 $dem2fds $option -nobuffer -dir $terraindir/demtest demtest2.in 
-
-$dem2fds $option -nobuffer -dir $terraindir/blodget blodget.in 
 
 $dem2fds $option -nobuffer -dir $terraindir/nist nist.in 
 
