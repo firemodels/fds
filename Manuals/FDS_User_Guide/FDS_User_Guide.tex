@@ -5270,26 +5270,11 @@ temperature are relatively small.
 
 \subsection{Radiative Fraction}
 \label{info:CHI_R}
+\label{ramp_chi_r}
 
-The most important radiation parameter is the fraction of energy released from the
-fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature
-and chemical composition, neither of which are reliably calculated in a large
-scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid.
-In calculations in which the mesh cells are on the order of a centimeter or
-larger, the temperature near the flame surface cannot be relied upon when
-computing the source term in the radiation transport equation, especially
-because of the $T^4$ dependence.
-As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the
-fraction of the total combustion energy that is released in the form of thermal radiation.
-Some of that energy may be reabsorbed elsewhere, yielding a net radiative
-loss from the fire or compartment that is less than the {\ct RADIATIVE\_FRACTION}, depending mainly on the size of
-the fire and the soot loading. If it is desired to use the radiation transport
-equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero,
-and the source term in the radiative transport equation is then based solely
-on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
+The most important radiation parameter is the fraction of energy released from the fire as thermal radiation, commonly referred to as the {\em radiative fraction}, symbolically denoted $\chi_{\rm r}$. It is a function of both the flame temperature and chemical composition, neither of which are reliably calculated in a large scale fire calculation because the flame sheet is not well-resolved on a relatively coarse numerical grid. In calculations in which the mesh cells are on the order of a centimeter or larger, the temperature near the flame surface cannot be relied upon when computing the source term in the radiation transport equation, especially because of the $T^4$ dependence. As a practical alternative, the parameter {\ct RADIATIVE\_FRACTION} on the {\ct REAC} line allows you to specify explicitly the fraction of the total combustion energy that is released in the form of thermal radiation. Some of that energy may be reabsorbed elsewhere, yielding a net radiative loss from the fire or compartment that is less than the {\ct RADIATIVE\_FRACTION}, depending mainly on the size of the fire and the soot loading. If it is desired to use the radiation transport equation as is, then {\ct RADIATIVE\_FRACTION} ought to be set to zero, and the source term in the radiative transport equation is then based solely on the gas temperature and the chemical composition. By default, the {\ct RADIATIVE\_FRACTION} is based on the reaction's {\ct FUEL} for an LES calculation (see \ref{tab:chi_r}), and zero for DNS.
 
-\clearpage
-\begin{table}[ht]
+\begin{table}[!ht]
 \caption[Default Radiative Fraction based on FUEL]{Default Radiative Fraction based on species}
 \vspace{0.1in}
 \label{tab:chi_r}
@@ -5614,10 +5599,10 @@ Controlled fire experiments are often conducted using a spray burner, where a li
 &RAMP ID='fuel', T=60.0, F=0.0  /
 \end{lstlisting}
 Many of these parameters are self-explanatory. Note that a 2~MW fire is achieved via 2 nozzles flowing heptane at 1.96~L/min each:
-\be 
+\be
    2 \times 1.97 \; \frac{\hbox{L}}{\hbox{min}} \times \frac{1}{60} \; \frac{\hbox{min}}{\hbox{s}} \times 684 \;
    \frac{\hbox{kg}}{\hbox{m}^3} \times \frac{1}{1000} \; \frac{\hbox{m}^3}{\hbox{L}} \times 44500 \;
-   \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW} 
+   \frac{\hbox{kJ}}{\hbox{kg}} = 2000 \; \hbox{kW}
 \ee
 The parameter {\ct HEAT\_OF\_COMBUSTION} over-rides that for the overall reaction scheme. Thus, if other droplets or solid objects have different heats of combustion, the effective burning rates are adjusted so that the total heat release rate is that which you expect. However, exercises like this ought to be conducted just to ensure that this is the case. The HRR curve for this example is given in Fig.~\ref{spray_burner_fig}.
 
