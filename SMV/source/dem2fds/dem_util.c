@@ -219,7 +219,7 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
       return gdImageGetPixel(imagei->image, icol, irow);
     }
   }
-  return 0;
+  return       (122 << 16) | (117 << 8) | 48;
 }
 
 /* ------------------ GenerateMapImage ------------------------ */
@@ -371,11 +371,11 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
 
   fprintf(stderr, "\ncase: %s\n\n", elevfile);
 
-  nimageinfo = get_nfilelist(libdir, "m_*.jpg");
+  nimageinfo = get_nfilelist(image_dir, "m_*.jpg");
   if(nimageinfo > 0){
     NewMemory((void **)&imagefiles, nimageinfo * sizeof(filelistdata));
     NewMemory((void **)&imageinfo, nimageinfo * sizeof(elevdata));
-    get_filelist(libdir, "m_*.jpg", nimageinfo, &imagefiles);
+    get_filelist(image_dir, "m_*.jpg", nimageinfo, &imagefiles);
   }
   for(i = 0; i < nimageinfo; i++){
     elevdata *imagei;
@@ -389,8 +389,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     imagefilei = imagefiles + i;
     imagei->datafile = imagefilei->file;
     strcpy(imagefilename, "");
-    if(strcmp(libdir, ".") != 0) {
-      strcat(imagefilename, libdir);
+    if(strcmp(image_dir, ".") != 0) {
+      strcat(imagefilename, image_dir);
       strcat(imagefilename, dirseparator);
     }
     strcat(imagefilename, imagefilei->file);
@@ -449,21 +449,23 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     }
   }
   if(nimageinfo > 0){
-    fprintf(stderr, "terrain map bounds:\n");
+    fprintf(stderr, "map properties:\n");
+    fprintf(stderr, "     image dir: %s\n", image_dir);
+    fprintf(stderr, " elevation dir: %s\n", elev_dir);
     fprintf(stderr, " min longitude: %f\n", image_long_min);
     fprintf(stderr, " max longitude: %f\n", image_long_max);
     fprintf(stderr, "  min latitude: %f\n", image_lat_min);
     fprintf(stderr, "  max latitude: %f\n", image_lat_max);
   }
 
-  nelevinfo = get_nfilelist(libdir, "*.hdr");
+  nelevinfo = get_nfilelist(elev_dir, "*.hdr");
   if(nelevinfo == 0){
     fprintf(stderr, "***error: unable to create an FDS input file, elevation files\n");
-    fprintf(stderr, "          not found in directory: %s\n",libdir);
+    fprintf(stderr, "          not found in directory: %s\n",elev_dir);
     return 0;
   }
 
-  get_filelist(libdir, "*.hdr", nelevinfo, &headerfiles);
+  get_filelist(elev_dir, "*.hdr", nelevinfo, &headerfiles);
   NewMemory((void **)&elevinfo, nelevinfo * sizeof(elevdata));
   for(i = 0; i < nelevinfo; i++){
     filelistdata *headerfilei;
@@ -478,12 +480,12 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
     ext = strrchr(basefile, '.');
     if(ext != NULL)ext[0] = 0;
 
-    lenfile = strlen(libdir) + strlen(dirseparator) + strlen(basefile) + 4 + 1;
+    lenfile = strlen(elev_dir) + strlen(dirseparator) + strlen(basefile) + 4 + 1;
 
     NewMemory((void **)&datafile, lenfile);
     strcpy(datafile, "");
-    if(strcmp(libdir, ".") != 0){
-      strcat(datafile, libdir);
+    if(strcmp(elev_dir, ".") != 0){
+      strcat(datafile, elev_dir);
       strcat(datafile, dirseparator);
     }
     strcat(datafile, basefile);
@@ -491,8 +493,8 @@ int GetElevations(char *elevfile, elevdata *fds_elevs){
 
     NewMemory((void **)&headerfile, lenfile);
     strcpy(headerfile, "");
-    if(strcmp(libdir, ".") != 0){
-      strcat(headerfile, libdir);
+    if(strcmp(elev_dir, ".") != 0){
+      strcat(headerfile, elev_dir);
       strcat(headerfile, dirseparator);
     }
     strcat(headerfile, basefile);

@@ -25,7 +25,9 @@ void Usage(char *prog){
   fprintf(stdout, "  data obtained from http://viewer.nationalmap.gov \n\n");
   fprintf(stdout, "Usage:\n");
   fprintf(stdout, "  dem2fds [options] casename.in\n");
-  fprintf(stdout, "  -dir dir  - directory containing elevation and map files (default: '.')\n");
+  fprintf(stdout, "  -dir dir  - directory containing map files and elevation files if -elevdir \n");
+  fprintf(stdout, "              is not specified (default: '.')\n");
+  fprintf(stdout, "  -elevdir dir  - directory containing elevation files\n");
   fprintf(stdout, "  -elevs    - only output elevations, do not create a complete FDS input file\n");
   fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords (experimental)\n");
   fprintf(stdout, "  -help     - display this message\n");
@@ -53,14 +55,15 @@ int main(int argc, char **argv){
   }
 
   strcpy(file_default, "terrain");
-  strcpy(libdir, ".");
+  strcpy(image_dir, ".");
+  strcpy(elev_dir, "");
   strcpy(surf_id, "surf1");
 
   initMALLOC();
   set_stdout(stdout);
   for(i = 1; i<argc; i++){
     int lenarg;
-    char *arg,*libdirptr;
+    char *arg;
 
 
     arg=argv[i];
@@ -68,12 +71,26 @@ int main(int argc, char **argv){
     if(arg[0]=='-'&&lenarg>1){
       if(strncmp(arg, "-dir", 4) == 0){
         i++;
-        libdirptr = argv[i];
-        if(file_exists(libdirptr) == 1){
-          strcpy(libdir, libdirptr);
+        if(file_exists(argv[i]) == 1){
+          strcpy(image_dir, argv[i]);
+          if (strlen(elev_dir) == 0) {
+            strcpy(elev_dir, image_dir);
+          }
+        }
+        else {
+          fprintf(stderr, "***error: directory %s does not exist or cannot be accessed\n",argv[i]);
         }
       }
-      else if(strncmp(arg, "-elevs", 6) == 0 || strncmp(arg, "-e", 2) == 0) {
+      else if (strncmp(arg, "-elevdir", 8) == 0) {
+        i++;
+        if (file_exists(argv[i]) == 1) {
+          strcpy(elev_dir, argv[i]);
+        }
+        else {
+          fprintf(stderr, "***error: directory %s does not exist or cannot be accessed\n", argv[i]);
+        }
+      }
+      else if(strncmp(arg, "-elevs", 6) == 0 ) {
         elev_file = 1;
       }
       else if(strncmp(arg, "-geom", 5) == 0 || strncmp(arg, "-g", 2) == 0){
@@ -108,6 +125,9 @@ int main(int argc, char **argv){
     else{
       if(casename == NULL)casename = argv[i];
     }
+  }
+  if (strlen(elev_dir) == 0) {
+    strcpy(elev_dir, image_dir);
   }
   if(casename == NULL)casename = file_default;
   if(GetElevations(casename,&fds_elevs) == 1) {
