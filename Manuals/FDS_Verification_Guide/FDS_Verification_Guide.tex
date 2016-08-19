@@ -2460,7 +2460,9 @@ Detailed discussion on the combustion routines can be found in the FDS Technical
 \label{reactionrate_EDC_1step_CH4_nonmix}
 \label{reactionrate_EDC_O2lim_1step}
 \label{reactionrate_EDC_O2lim_2fuel}
+\label{reactionrate_series_reaction}
 \label{reactionrate_EDC_flim_2step}
+\label{reactionrate_lumped_two_air}
 
 The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic ``reactor'' with a fixed mixing time of $\tau_{\rm mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air'' is defined to be 21 \% oxygen and 79 \% nitrogen by volume.
 \begin{equation}\label{eq:1step_methane}
@@ -2545,7 +2547,22 @@ Each cell in the model reaction is initialized with an oxygen rich mixture and t
 \label{fig:EDC_2Step_fuel}
 \end{figure}
 
-The second test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
+The second reaction test case is a consecutive three-step, fuel limited propane reaction:
+\begin{align}\label{eq:3step_propane}
+\mathrm{C_3H_8 + 1.5 \, O_2} &\rightarrow  \mathrm{3 \,CO + 4 \, H_2} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} \\
+\nonumber \mathrm{H_2 + 0.5 \, O_2} &\rightarrow \mathrm{H_2O}
+\end{align}
+The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_series_reaction}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
+\caption[Results of the {\ct reactionrate\_series\_reaction} case]{Results of the {\ct reactionrate\_series\_reaction} case.}
+\label{fig:reactionrate_series_reaction}
+\end{figure}
+
+The third test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
 \begin{align}\label{eq:2step_o2_lim}
 \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O} \\
 \nonumber \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}
@@ -2559,6 +2576,30 @@ The species evolutions are compared to expected values in Fig.~\ref{fig:EDC_2Ste
 \label{fig:EDC_2Step_ox}
 \end{figure}
 
+The fourth test case has propane (fuel), competing with two identical but separately lumped air species. Each cell is initialized with stoichiometric amount of fuel and air; each air is initialized in equal quantities.
+\begin{align}\label{eq:lumped_2_air}
+\mathrm{C_3H_8 + 5 \, AIR1} &\rightarrow  \mathrm{PRODUCTS} \\
+\nonumber \mathrm{C_3H_8 + 5 \, AIR2} &\rightarrow \mathrm{PRODUCTS}
+\end{align}
+The lumped species used in these reactions are defined by:
+\begin{lstlisting}
+&SPEC ID = 'PROPANE' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
+
+&SPEC ID = 'AIR1', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76, BACKGROUND=.TRUE. /
+&SPEC ID = 'AIR2', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76 /
+&SPEC ID = 'PRODUCTS', SPEC_ID = 'CARBON DIOXIDE', 'WATER VAPOR', 'NITROGEN',VOLUME_FRACTION = 3,4,18.8 /
+\end{lstlisting}
+The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_lumped_two_air}.
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
+\caption[Results of the {\ct reactionrate\_lumped\_two\_species} case]{Results of the {\ct reactionrate\_lumped\_two\_species} case.}
+\label{fig:reactionrate_lumped_two_air}
+\end{figure}
 
 \clearpage
 
@@ -2704,33 +2745,6 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
-
-
-\clearpage
-
-\subsection{Lumped Species Reaction Mechanisms (\textct{reactionrate\_lumped\_two\_air})}
-\label{reactionrate_lumped_two_air}
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
-\caption[Results of the {\ct reactionrate\_lumped\_two\_species} case]{Results of the {\ct reactionrate\_lumped\_two\_species} case.}
-\label{fig:reactionrate_lumped_two_air}
-\end{figure}
-
-
-\clearpage
-
-\subsection{Series Reaction Mechanisms (\textct{reactionrate\_series\_reaction})}
-\label{reactionrate_series_reaction}
-
-\begin{figure}[!ht]
-\centering
-\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
-\caption[Results of the {\ct reactionrate\_series\_reaction} case]{Results of the {\ct reactionrate\_series\_reaction} case.}
-\label{fig:reactionrate_series_reaction}
-\end{figure}
-
 
 \clearpage
 
