@@ -3,7 +3,7 @@
 # Add LaTeX search path; Paths are ':' separated
 export TEXINPUTS=".:../LaTeX_Style_Files:"
 AUXUSER=../FDS_User_Guide/FDS_User_Guide.aux
-PDFVER=FDS_Verification_Guide.pdf
+PDFUSER=../FDS_User_Guide/FDS_User_Guide.pdf
 
 if [ -e "$AUXUSER" ]; then
   cp $AUXUSER .
@@ -23,8 +23,8 @@ pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Gui
 bibtex FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
-if [ -e "$PDFVER" ]; then
-  cp $PDFVER ../FDS_User_Guide/.
+if [ -e "$PDFUSER" ]; then
+  cp $PDFUSER .
 fi
 
 # Scan and report any errors in the LaTeX build process
