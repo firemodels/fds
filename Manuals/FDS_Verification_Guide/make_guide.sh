@@ -27,13 +27,13 @@ if [[ `grep -E "Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing
 fi
 
 # Check for LaTeX warnings (undefined references or duplicate labels)
-if [[ `grep -E "undefined|multiply defined|multiply-defined" -I FDS_Verification_Guide.err` == "" ]]
+if [[ `grep -E "undefined|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage` == "" ]]
    then
       # Continue along
       :
    else
       echo "LaTeX warnings detected:"
-      grep -E "undefined|multiply defined|multiply-defined" -I FDS_Verification_Guide.err
+      grep -E "undefined|multiply defined" -I FDS_Verification_Guide.err | grep -v RF1 | grep -v LastPage
       clean_build=0
 fi
 
