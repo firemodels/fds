@@ -3,6 +3,7 @@ set option=%1
 set option2=%2
 
 set dem2fds=..\intel_win_64\dem2fds_win_64.exe
+if NOT exist %dem2fds% set dem2fds=dem2fds
 ::set dem2fds=dem2fds
 
 %dem2fds% %option% %option2% -nobuffer -dir %userprofile%\terrain\blodget blodget.in 

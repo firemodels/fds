@@ -48,6 +48,7 @@ int main(int argc, char **argv){
   char *casename = NULL;
   char file_default[LEN_BUFFER];
   elevdata fds_elevs;
+  int fatal_error = 0;
 
   if(argc == 1){
     Usage("dem2fds");
@@ -61,6 +62,42 @@ int main(int argc, char **argv){
 
   initMALLOC();
   set_stdout(stdout);
+
+  for(i = 1; i<argc; i++){
+    int lenarg;
+    char *arg;
+
+
+    arg=argv[i];
+    lenarg=strlen(arg);
+    if(arg[0]=='-'&&lenarg>1){
+      if(strncmp(arg, "-dir", 4) == 0){
+        i++;
+        if(file_exists(argv[i]) != 1)fatal_error = 1;
+      }
+      else if (strncmp(arg, "-elevdir", 8) == 0) {
+        i++;
+        if (file_exists(argv[i]) != 1)fatal_error = 1;
+      }
+    }
+    else{
+      if(casename == NULL)casename = argv[i];
+    }
+  }
+
+  if(casename==NULL){
+    fprintf(stderr, "\n***error: input file not specified\n");
+    return 1;
+  }
+  if(file_exists(casename)!=1){
+    fprintf(stderr, "\n***error: input file %s does not exist\n",casename);
+    return 1;
+  }
+  if (fatal_error == 1) {
+    fprintf(stderr, "\ncase: %s\n", casename);
+  }
+
+  fatal_error=0;
   for(i = 1; i<argc; i++){
     int lenarg;
     char *arg;
@@ -79,6 +116,7 @@ int main(int argc, char **argv){
         }
         else {
           fprintf(stderr, "***error: directory %s does not exist or cannot be accessed\n",argv[i]);
+          fatal_error = 1;
         }
       }
       else if (strncmp(arg, "-elevdir", 8) == 0) {
@@ -88,6 +126,7 @@ int main(int argc, char **argv){
         }
         else {
           fprintf(stderr, "***error: directory %s does not exist or cannot be accessed\n", argv[i]);
+          fatal_error = 1;
         }
       }
       else if(strncmp(arg, "-elevs", 6) == 0 ) {
@@ -126,6 +165,9 @@ int main(int argc, char **argv){
       if(casename == NULL)casename = argv[i];
     }
   }
+
+  if (fatal_error == 1) return 1;
+
   if (strlen(elev_dir) == 0) {
     strcpy(elev_dir, image_dir);
   }
