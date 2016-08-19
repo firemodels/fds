@@ -1306,6 +1306,64 @@ In Fig.~\ref{fig_vort2d_pointvelocity}, we show the $u$-velocity at a single poi
 \end{figure}
 
 
+\clearpage
+
+\section{Boundedness Tests}
+
+\subsection{Species Bounds (\texorpdfstring{\textct{bound\_test}}{bound\_test})}
+\label{bound_test_1}
+\label{bound_test_2}
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_1} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/bound_test_2}
+   \end{tabular*}
+   \caption[Results of the {\ct bound\_test} cases]{Results of the {\ct bound\_test} cases.}
+   \label{bound_test}
+\end{figure}
+
+
+\subsection{Temperature Bounds (\texorpdfstring{\textct{helium\_air\_jet\_floor}}{helium\_air\_jet\_floor})}
+\label{helium_air_jet_floor}
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_air_jet_floor_minT} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/helium_air_jet_floor_maxT}
+   \end{tabular*}
+   \caption[Results of the {\ct helium\_air\_jet\_floor} case]{Results of the {\ct helium\_air\_jet\_floor} case.}
+   \label{helium_air_jet}
+\end{figure}
+
+\subsection{Temperature Bounds for Large Differences in Molecular Weight (\texorpdfstring{\textct{mwtest\_cfl}}{mwtest\_cfl})}
+\label{mwtest_cfl}
+
+Hydrogen gas (2~g/mol) is injected into a small compartment filled with sulfur hexafluoride (146~g/mol). There should be no change in temperature, as shown in Fig.~\ref{mwtest_cfl_fig}.
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/mwtest_cfl_minT} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/mwtest_cfl_maxT}
+   \end{tabular*}
+   \caption[Results of the {\ct mwtest\_cfl} case]{Results of the {\ct mwtest\_cfl} case.}
+   \label{mwtest_cfl_fig}
+\end{figure}
+
+\subsection{Temperature Lower Bound in a Fire Simulation (\texorpdfstring{\textct{tmp\_lower\_limit}}{tmp\_lower\_limit})}
+\label{tmp_lower_limit}
+
+A 2-D methane-air diffusion flame calculation is run three different ways to check that the temperature does not fall below the ambient (20~$^\circ$C). The results are shown in Fig.~\ref{tmp_lower_limit_fig}. The upper left plot shows the global minimum temperature for the case where the reaction stoichiometry is specified explicitly. The upper right plot is for the case where the initial time step is lowered to 0.001~s. The lower plot is for the case where the simple chemistry model is used.
+
+\begin{figure}[!ht]
+   \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_default} &
+      \includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_dt_p001} \\
+      \multicolumn{2}{c}{\includegraphics[width=3.2in]{SCRIPT_FIGURES/tmp_lower_limit_simple}}
+   \end{tabular*}
+   \caption[Results of the {\ct tmp\_lower\_limit} cases]{Results of the {\ct tmp\_lower\_limit} cases.}
+   \label{tmp_lower_limit_fig}
+\end{figure}
 
 
 \chapter{Turbulence}
@@ -1952,6 +2010,25 @@ This case tests the ability of FDS to properly conserve the total of the solid p
 \end{figure}
 
 
+\subsection{Energy Conservation at Walls (\texorpdfstring\textct{mass\_heat\_wall\_device\_test}{mass\_heat\_wall\_device\_test})}
+\label{mass_heat_wall_device_test}
+\label{mass_heat_wall_device_test_2}
+
+\begin{figure}[p]
+\begin{tabular*}{\textwidth}{lr}
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in} &
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_out} \\
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_in_2} &
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_massflow_out_2} \\
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in} &
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out} \\
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_in_2} &
+\includegraphics[width=3.1in]{SCRIPT_FIGURES/wall_device_test_heatflow_out_2}
+\end{tabular*}
+\caption[The \textct{wall\_device\_test} cases]{The \textct{wall\_device\_test} cases.}
+\label{mass_heat_wall_device}
+\end{figure}
+
 
 \chapter{Checking for Coding Errors}
 
@@ -1962,7 +2039,8 @@ This chapter presents a number of cases that are designed to check whether or no
 \label{symmetry_test_mpi}
 
 These examples are very simple tests to determine if there are coding errors in the basic flow solver. A closed box, 1~m on a side, has 6 injection vents, one centered on each face. Air is pumped into the box at a steady rate. Anything that might lead to an asymmetry in the flow field is turned off, for example, gravity, atmospheric stratification, natural convection, and random noise. One case is performed on a single mesh; the other on multiple meshes. The cases are not identical. The resulting flow fields are shown at the left in Fig.~\ref{symmetry_test_fig}. On the right are plots of the three components of velocity at equidistant corners of the enclosure. Ideally, there should be two equal and opposite time histories of the three components. Even the slightest error in coding will throw this off almost immediately.
-\begin{figure}[ht]
+
+\begin{figure}[p]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/symmetry_test_plot} \\
@@ -1973,11 +2051,14 @@ These examples are very simple tests to determine if there are coding errors in 
 \label{symmetry_test_fig}
 \end{figure}
 
+\clearpage
+
 \section{Axial symmetry (\texorpdfstring{\textct{cyl\_test}}{cyl\_test})}
 \label{cyl_test}
 
 FDS has an option to perform an axially-symmetric calculation, which can be useful for simulating a laminar diffusion flame, like a bunsen burner or candle. When invoking this option, the user still specifies three coordinates, $x$, $y$, and $z$, but it is understood that $x$ is the radial coordinate, $r$, and $z$ is the vertical coordinate. The coordinate, $y$, is used only by Smokeview to draw the domain, and it should not influence the calculation at all. However, since FDS is primarily a three-dimensional, cartesian code, there is a possibility that a coding error might cause the specification of the $y$ dimension to have an effect on the result. Figure~\ref{cyl_test_fig} displays results of two sets of axially-symmetric simulations. On the left is an LES simulation in which the lateral size of the cells, $\delta y$, is 2~mm and 2~cm. The two curves ought to lie exactly upon each other, which is indicated by a single red curve. On the right is a DNS simulation of a laminar diffusion flame, with $\delta y$ equal to 2~mm and 4~mm.
-\begin{figure}[h!]
+
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cyl_test} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/cyl_test_3-4}
@@ -1991,14 +2072,14 @@ FDS has an option to perform an axially-symmetric calculation, which can be usef
 
 In this example, a simple jet is created by pushing air through a square duct. The obstructions forming the duct are built three different ways. The first way is to build the duct with thin (zero cell thick) plates. The second is to carve the duct out of a solid block. The third way is to build the duct out of one cell thick plates. The three approaches are illustrated in Fig.~\ref{velocity_bc_test_image}. Ideally, the three jets ought to be exactly the same, but subtle differences in the pressure solution and the random generation of noise lead to three unique flow patterns that are only the same in a time-averaged sense. To test this, the centerline pressure and velocity are recorded for a 2~m/s jet emanating from a 0.8~m square duct that is 5~m long. The grid resolution is fairly crude (0.2~m) because the purpose of this exercise is to show that the steady-state velocity and pressure profiles are essentially the same. Figure~\ref{velocity_bc_test_plot} displays the profiles. The curves ought to overlap each other. Errors in the implementation of the velocity boundary conditions are likely to throw the three cases out of alignment.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=\textwidth]{SCRIPT_FIGURES/velocity_bc_test}
 \caption[Images of the \textct{velocity\_bc\_test} test case]{Time-averaged contours of velocity for the \textct{velocity\_bc\_test} case.}
 \label{velocity_bc_test_image}
 \end{figure}
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_pres} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/velocity_bc_test_vel}
@@ -2012,7 +2093,8 @@ In this example, a simple jet is created by pushing air through a square duct. T
 \label{divergence_test}
 
 Because of the low Mach number approximation, an initially divergence free flow field ought to remain divergence free if there are no heat sources or sinks. In this example, air is pushed through a 1~m cube at a speed of 1~m/s. The air is extracted at the same rate, and there should be no pressure rise and the flow should remain divergence free. There are also a few obstructions that are created and removed during the simulation to check that this does not cause any errors. Figure~\ref{divergence_test_fig} displays the minimum and maximum divergence as a function of time. These ought to remain below approximately $1 \times 10^{-10}$~s$^{-1}$ in absolute value.
-\begin{figure}[ht]
+
+\begin{figure}[!ht]
 \centering
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/divergence_test}
 \caption[The \textct{divergence\_test} case]{Minimum and maximum divergence for the \textct{divergence\_test} case.}
@@ -2024,7 +2106,7 @@ Because of the low Mach number approximation, an initially divergence free flow 
 
 A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The volume is divided vertically into four equal meshes with each mesh having a 10 cm grid resolution.  There should be a smooth drop in both temperature and pressure that matches the analytic values, as shown in Fig.~\ref{lapse_rate_fig}.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_T} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/lapse_rate_P}
@@ -2039,7 +2121,7 @@ A 10 m x 10 m x 40 m volume is initialized with {\ct LAPSE\_RATE=-0.01}.  The vo
 
 In most FDS simulations, multiple meshes are positioned adjacent to each other to allow two-way communication. However, in some instances, meshes need to overlap, and this case verifies the functionality of meshes that overlap in a variety of ways. It is a 2-D case that runs fast and is easy to visualize. There are five overlapping meshes shown at left in Fig.~\ref{random_meshes_fig}. Air is blown in at the bottom and exhausted via an open vent at the top. The volume flow rate is fixed at 0.012~m$^3$/s, and the plot at right in Fig.~\ref{random_meshes_fig} verifies that the simulation matches to within a few percent. The case uses the default normal velocity tolerance at solid and interpolated boundaries; thus, there is some error expected in the volume flow due to the solution of the Poisson equation. As a further check that the mesh allocations are being properly handled, there is a fine mesh embedded within the coarse, and the case is run with four MPI processes rather than five.
 
-\begin{figure}[ht]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.png} &
 \includegraphics[width=3.2in]{SCRIPT_FIGURES/random_meshes.pdf}
@@ -2049,6 +2131,17 @@ In most FDS simulations, multiple meshes are positioned adjacent to each other t
 \end{figure}
 
 
+\section{Spurious Obstruction Effects (\texorpdfstring{\textct{hole}}{hole})}
+\label{hole}
+
+It is not uncommon for subtle differences between two nearly identical input files to lead to noticeable results in the simulation output. In this particular case, a {\ct HOLE} in an obstruction that was set to never open still led to slightly different results when compared to a case with no {\ct HOLE}. The reason for the difference was attributed to slightly different boundary conditions at the edge of the {\ct HOLE}. The problem has been fixed, as confirmed by Fig.~\ref{hole_fig}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/hole_no_hole} 
+\caption[Results of the \textct{hole/no hole} test case]{Heat release rates of two nearly identical calculations.}
+\label{hole_fig}
+\end{figure}
 
 
 
@@ -2367,14 +2460,16 @@ Detailed discussion on the combustion routines can be found in the FDS Technical
 \label{reactionrate_EDC_1step_CH4_nonmix}
 \label{reactionrate_EDC_O2lim_1step}
 \label{reactionrate_EDC_O2lim_2fuel}
+\label{reactionrate_series_reaction}
 \label{reactionrate_EDC_flim_2step}
+\label{reactionrate_lumped_two_air}
 
 The cases presented in the section are designed to examine species evolutions for reactions of varying complexity using the EDC model with infinitely fast chemistry. The first test case is a one-step methane reaction that occurs in a constant volume, adiabatic ``reactor'' with a fixed mixing time of $\tau_{\rm mix}=0.125$~s. Each computational cell contains a stoichiometric mixture of fuel and air. In this problem ``air'' is defined to be 21 \% oxygen and 79 \% nitrogen by volume.
 \begin{equation}\label{eq:1step_methane}
 \mathrm{CH_4 + 2\, O_2 \rightarrow  CO_2 + 2\, H_2O}
 \end{equation}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_spec}
 \caption[Species evolution in a 1-step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
@@ -2389,7 +2484,7 @@ where ${\rm P}$ represents the products, ${\rm R}$ represents the reactants, and
 \begin{equation}\label{eq:ideal_gas}
 PV = n \R T
 \end{equation}
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_temp} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_CH4_pres}
@@ -2402,13 +2497,16 @@ Under the same conditions as the methane case, species, temperature, and pressur
 \begin{equation}\label{eq:1step_propane}
 \mathrm{C_3H_8 + 5\, O_2 \rightarrow  3\, CO_2 + 4\, H_2O}
 \end{equation}
-\begin{figure}[h!]
+The results for the propane case are shown in Figs.~\ref{fig:EDC_1Step_prop_spec} (species) and \ref{fig:EDC_1Step_prop_temppres} (temperature and pressure).
+
+\begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_spec}
 \caption[Species evolution in a 1-step propane EDC reaction]{Time evolution of species mass fraction for a one-step propane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_spec}
 \end{figure}
-\begin{figure}[h!]
+
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_temp} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_1step_C3H8_pres}
@@ -2416,18 +2514,17 @@ Under the same conditions as the methane case, species, temperature, and pressur
 \caption[Temperature and pressure evolution in a 1-step propane EDC reaction]{Time evolution of temperature and pressure for a one-step propane EDC reaction with a fixed mixing time of $\tau_{mix}=0.125$~s.}
 \label{fig:EDC_1Step_prop_temppres}
 \end{figure}
-The results for the propane case are shown in Figs.~\ref{fig:EDC_1Step_prop_spec} (species) and \ref{fig:EDC_1Step_prop_temppres} (temperature and pressure).
 
 In the previous two examples, each computational cell contained a stoichiometric mixture of fuel and air. For this third example, the cells are initialized to be all fuel in one part of the reactor and all air in the remaining volume. Globally, the reactor is fuel rich and follows the same one-step methane reaction as described by \ref{eq:1step_methane}. Figures \ref{fig:EDC_meth_non_spec} and \ref{fig:EDC_meth_non_temppres} show the species concentrations, temperature, and pressure from FDS and the expected values. In this case, the final state is not reached until approximately 35 s compared to 1 s for the cases where each cell contained a flammable composition.
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_spec}
 \caption[Species evolution in 1-Step methane EDC reaction]{Time evolution of species mass fraction for a one-step methane EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.125$~s. }
 \label{fig:EDC_meth_non_spec}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \begin{tabular*}{\textwidth}{lr}
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_temp} &
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_1step_nonmix_pres}
@@ -2443,28 +2540,68 @@ The EDC reaction implementation is also tested to check species evolution for ch
 \end{align}
 Each cell in the model reaction is initialized with an oxygen rich mixture and the mixing time, $\tau_{\rm mix}$, is fixed at $0.05$~s (Fig.~\ref{fig:EDC_2Step_fuel}).
 
-\begin{figure}[h!]
+\begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_flim_2step}
 \caption[Species evolution in 2-step methane EDC reaction]{Time evolution of species mass fraction for a series, fuel-limited EDC reaction with a fixed mixing time of $\tau_{\rm mix}=0.05$~s.}
 \label{fig:EDC_2Step_fuel}
 \end{figure}
 
-The second test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
+The second reaction test case is a consecutive three-step, fuel limited propane reaction:
+\begin{align}\label{eq:3step_propane}
+\mathrm{C_3H_8 + 1.5 \, O_2} &\rightarrow  \mathrm{3 \,CO + 4 \, H_2} \\
+\nonumber \mathrm{CO + 0.5 \, O_2} &\rightarrow \mathrm{CO_2} \\
+\nonumber \mathrm{H_2 + 0.5 \, O_2} &\rightarrow \mathrm{H_2O}
+\end{align}
+The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_series_reaction}.
+
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_series_reaction}
+\caption[Results of the {\ct reactionrate\_series\_reaction} case]{Results of the {\ct reactionrate\_series\_reaction} case.}
+\label{fig:reactionrate_series_reaction}
+\end{figure}
+
+The third test case has two competing, oxygen-limited reactions; a one-step methane and one-step propane reaction.
 \begin{align}\label{eq:2step_o2_lim}
 \mathrm{CH_4 + 2 \, O_2} &\rightarrow  \mathrm{CO_2 + 2 \, H_2O} \\
 \nonumber \mathrm{C_3H_8 + 5 \, O_2} &\rightarrow \mathrm{3 \,CO_2 + 4 \, H_2O}
 \end{align}
 The species evolutions are compared to expected values in Fig.~\ref{fig:EDC_2Step_ox}.
-\begin{figure}[h!]
+
+\begin{figure}[!ht]
 \centering
 \includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_EDC_O2lim_2fuel}
 \caption[Species evolution in two parallel EDC reactions]{Time evolution of species mass fraction for oxygen-limited EDC two fuel reaction set with a fixed mixing time of $\tau_{\rm mix}=0.1$~s.}
 \label{fig:EDC_2Step_ox}
 \end{figure}
 
+The fourth test case has propane (fuel), competing with two identical but separately lumped air species. Each cell is initialized with stoichiometric amount of fuel and air; each air is initialized in equal quantities.
+\begin{align}\label{eq:lumped_2_air}
+\mathrm{C_3H_8 + 5 \, AIR1} &\rightarrow  \mathrm{PRODUCTS} \\
+\nonumber \mathrm{C_3H_8 + 5 \, AIR2} &\rightarrow \mathrm{PRODUCTS}
+\end{align}
+The lumped species used in these reactions are defined by:
+\begin{lstlisting}
+&SPEC ID = 'PROPANE' /
+&SPEC ID = 'OXYGEN',            LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'NITROGEN',          LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'WATER VAPOR',       LUMPED_COMPONENT_ONLY = .TRUE. /
+&SPEC ID = 'CARBON DIOXIDE',    LUMPED_COMPONENT_ONLY = .TRUE. /
 
+&SPEC ID = 'AIR1', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76, BACKGROUND=.TRUE. /
+&SPEC ID = 'AIR2', SPEC_ID = 'OXYGEN','NITROGEN', VOLUME_FRACTION =1,3.76 /
+&SPEC ID = 'PRODUCTS', SPEC_ID = 'CARBON DIOXIDE', 'WATER VAPOR', 'NITROGEN',VOLUME_FRACTION = 3,4,18.8 /
+\end{lstlisting}
+The species evolutions are compared to expected values in Fig.~\ref{fig:reactionrate_lumped_two_air}.
+\begin{figure}[!ht]
+\centering
+\includegraphics[height=2.2in]{SCRIPT_FIGURES/reactionrate_lumped_two_air}
+\caption[Results of the {\ct reactionrate\_lumped\_two\_species} case]{Results of the {\ct reactionrate\_lumped\_two\_species} case.}
+\label{fig:reactionrate_lumped_two_air}
+\end{figure}
 
+\clearpage
 
 \subsection{Finite Rate Reactions (\texorpdfstring\textct{reactionrate\_arrhenius}{reactionrate\_arrhenius})}
 \label{finite_rate_reactions}
@@ -2608,7 +2745,6 @@ Equilibrium values were determined using the NASA code Chemical Equilibrium with
 \caption[Temperature and pressure evolution for equilibrium case]{Time evolution of temperature (left) and pressure (right) for two-step Arrhenius finite rate propane reactions compared to equilibrium values.}
 \label{fig:Arrhenius_175Order_23stepb}
 \end{figure}
-
 
 \clearpage
 
@@ -3104,6 +3240,19 @@ lines are FDS results and the circles are the HEATING results. An example input 
 
 \clearpage
 
+\section{Heat Transfer through a Semi-Infinite Slab (\texorpdfstring{\textct{ht3d\_slab}}{ht3d\_slab})}
+\label{ht3d_slab}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3.2in]{SCRIPT_FIGURES/ht3d_slab}
+\caption[Results of the \textct{ht3d\_slab} test case]{Results of the \textct{ht3d\_slab} test case.}
+\label{ht3d_slab_fig}
+\end{figure}
+
+
+\clearpage
+
 \section{Convective Cooling (\texorpdfstring{\textct{convective\_cooling}}{convective\_cooling})}
 \label{convective_cooling}
 
@@ -3239,7 +3388,7 @@ In most cases, the wall thickness (or radius for cylindrical and spherical geome
 
 \subsection{Pyrolysis at a Solid Surface}
 \label{surf_mass_vent_char_cart_fuel}
-\label{surf_mass_vent_char_cart_gas} 
+\label{surf_mass_vent_char_cart_gas}
 \label{surf_mass_vent_char_cyl_fuel}
 \label{surf_mass_vent_char_cyl_gas}
 \label{surf_mass_vent_char_spher_fuel}
@@ -4348,16 +4497,16 @@ The sample case \textct{HVAC\_filter} demonstrates the use of the filter input. 
 \label{fan_test}
 
 Two compartments share a common wall. Both compartments are considered as separate ``pressure zones.'' Two, 0.04~m$^2$ HVAC ducts are defined.  One has a quadratic fan with a maximum volumetric flow of 0.16~\si{m^3/s} and a stall pressure of 10~Pa. The second is an open duct with a flow loss of 10. The volume flow through the fans is obtained from the equation below:
-\be 
+\be
    \dot{V}_{\hbox{\footnotesize fan}} = \dot{V}_{\hbox{\footnotesize max}} \; \hbox{sign} (\Delta p_{\hbox{\footnotesize max}}-\Delta p) \sqrt{ \frac{ |\Delta p - \Delta p_{\hbox{\footnotesize max}}|}{\Delta p_{\hbox{\footnotesize max}} } }  \label{fan_curve2}
 \ee
 $\dot{V}_{\hbox{\footnotesize max}}=0.16$~\si{m^3/s} is the maximum output of the fan from Zone~1 to Zone~2 and 0.2~m/s is the flow speed from Zone~2 to Zone~1. $\Delta p_{\hbox{\footnotesize max}}=10$~Pa is the maximum pressure difference at which the fan can operate. In steady state, the volume flow from compartment to compartment should be equal and opposite in sign. This occurs when the positive pressure added by the fan equals the pressure drop due to the flow loss, $K$, through the return duct.  The volume flow through the duct for a given pressure drop can be found from the duct momentum equation ignoring all terms but the flow loss:
-\be  
-   \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}} 
+\be
+   \dot{V}_{\hbox{\footnotesize fan}}=A_{\hbox{\footnotesize duct}} \sqrt{\frac{2 \Delta p}{\rho K}}
 \ee
 Setting the above equation equal to Eq.~(\ref{fan_curve2}), the pressure drop can be determined:
-\be  
-   \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{\si{kg/m^3}}) 10}} (0.04 \; \hbox{m}^2) = (0.16 \; \hbox{\si{m^3/s}})  \; \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  } 
+\be
+   \sqrt{\frac {2 |p_2-p_1|}{ (1.2 \; \hbox{\si{kg/m^3}}) 10}} (0.04 \; \hbox{m}^2) = (0.16 \; \hbox{\si{m^3/s}})  \; \sqrt{ \frac{ |p_1-p_2-10 \; \hbox{Pa}|}{10 \; \hbox{Pa}}  }
 \ee
 The solution is $p_2=4.5$~Pa and $p_1=-4.5$~Pa (see Fig.~\ref{fan_test_fig}). Note that the sign of the volume flow in the duct indicates whether the flow is moving from the first node to the second (positive) or the second node to the first (negative). This convention can make these types of calculations a bit tricky.
 
