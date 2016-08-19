@@ -4105,7 +4105,7 @@ Simulating a fire in the outdoors is not much different than a fire indoors, but
 
 \subsubsection{Atmospheric}
 
-{\ct PROFILE='ATMOSPHERIC'} produces a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather some height where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at $z=0$. To change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be the appropriate value of $z$. Be careful not to apply an atmospheric velocity profile below {\ct GROUND\_LEVEL} or FDS will stop with an error.
+{\ct PROFILE='ATMOSPHERIC'} produces a power law atmospheric wind profile of the form $u=u_0 (z/z_0)^p$ where $z$ is the height above the ground. If an atmospheric profile is prescribed, also prescribe {\ct Z0} for $z_0$  and {\ct PLE} for $p$. {\ct VEL} specifies the reference velocity $u_0$. Note that $z_0$ is not the ground, but rather the height above the ground where the wind speed is measured, like an elevated weather station. It is assumed that the ground is located at 0~m; to change this assumption, set {\ct GROUND\_LEVEL} on the {\ct MISC} line to be the appropriate elevation. Be careful not to apply an atmospheric velocity profile (e.g. negative $z$) below {\ct GROUND\_LEVEL} or FDS will stop with an error.
 
 \subsubsection{Boundary Layer (Circular Vent)}
 
