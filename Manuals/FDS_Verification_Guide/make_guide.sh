@@ -2,6 +2,15 @@
 
 # Add LaTeX search path; Paths are ':' separated
 export TEXINPUTS=".:../LaTeX_Style_Files:"
+AUXUSER=../FDS_User_Guide/FDS_User_Guide.aux
+PDFVER=FDS_Verification_Guide.pdf
+
+if [ -e "$AUXUSER" ]; then
+  cp $AUXUSER .
+else
+  echo "***warning: $AUXUSER does not exist. Build the FDS User's"
+  echo "            guide before building the Verification guide"
+fi
 
 clean_build=1
 
@@ -14,6 +23,9 @@ pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Gui
 bibtex FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
 pdflatex -interaction nonstopmode FDS_Verification_Guide &> FDS_Verification_Guide.err
+if [ -e "$PDFVER" ]; then
+  cp $PDFVER ../FDS_User_Guide/.
+fi
 
 # Scan and report any errors in the LaTeX build process
 if [[ `grep -E "Error:|Fatal error|! LaTeX Error:|Paragraph ended before|Missing \\\$ inserted|Misplaced" -I FDS_Verification_Guide.err | grep -v "xpdf supports version 1.5"` == "" ]]
