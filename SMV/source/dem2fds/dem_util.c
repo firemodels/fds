@@ -879,7 +879,6 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
   }
   fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id,basename);
 
-
   if(option == FDS_GEOM){
     fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
       surf_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
