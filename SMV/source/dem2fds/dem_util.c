@@ -875,11 +875,13 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     fprintf(streamout, "&VENT MB = 'ZMAX', SURF_ID = 'OPEN' /\n");
   }
 
+  fprintf(streamout, "\nTerrain Geometry\n\n");
+
   if(option == FDS_GEOM){
-    fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
+    fprintf(streamout, "&MATL ID = '%s', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n",matl_id);
     fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id, basename);
-    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
-      surf_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
+    fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='%s',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
+      surf_id,matl_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
     count = 1;
     for(j = 0; j < jbar + 1; j++){
       for(i = 0; i < ibar + 1; i++){
@@ -890,9 +892,9 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     }
     fprintf(streamout, "/\n");
   }
-  
+
   if(option == FDS_OBST){
-    fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 /\n", surf_id, basename);
+    fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 /\n", surf_id);
     count = 0;
     valsp1 = vals + nlong;
     for(j = 0; j < jbar; j++){
@@ -926,7 +928,7 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     }
   }
   if(elev_file == 0) {
-    fprintf(streamout, "&TAIL /\n");
+    fprintf(streamout, "\n&TAIL /\n");
   }
 
   fprintf(stderr, "\n");

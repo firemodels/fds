@@ -31,6 +31,7 @@ void Usage(char *prog){
   fprintf(stdout, "  -elevs    - only output elevations, do not create a complete FDS input file\n");
   fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords (experimental)\n");
   fprintf(stdout, "  -help     - display this message\n");
+  fprintf(stdout, "  -matl matl_id - specify MATL ID for use by -geom option \n");
   fprintf(stdout, "  -nobuffer - create a terrain map assuming no buffer exists between maps.\n");
   fprintf(stdout, "              Otherwise assume that a 300 pixel buffer exists between maps.\n");
   fprintf(stdout, "  -obst     - create an FDS input file using &OBST keywords\n");
@@ -59,6 +60,7 @@ int main(int argc, char **argv){
   strcpy(image_dir, ".");
   strcpy(elev_dir, "");
   strcpy(surf_id, "surf1");
+  strcpy(matl_id, "matl1");
 
   initMALLOC();
   set_stdout(stdout);
@@ -78,6 +80,14 @@ int main(int argc, char **argv){
       else if (strncmp(arg, "-elevdir", 8) == 0) {
         i++;
         if (file_exists(argv[i]) != 1)fatal_error = 1;
+      }
+      else if(strncmp(arg, "-help", 5) == 0 || strncmp(arg, "-h", 2) == 0){
+        Usage("dem2fds");
+        return 1;
+      }
+      else if(strncmp(arg, "-version", 8) == 0|| strncmp(arg, "-v", 2) == 0){
+        PRINTversion("dem2fds");
+        return 1;
       }
     }
     else{
@@ -135,10 +145,6 @@ int main(int argc, char **argv){
       else if(strncmp(arg, "-geom", 5) == 0 || strncmp(arg, "-g", 2) == 0){
         gen_fds = FDS_GEOM;
       }
-      else if(strncmp(arg, "-help", 5) == 0 || strncmp(arg, "-h", 2) == 0){
-        Usage("dem2fds");
-        return 1;
-      }
       else if(strncmp(arg, "-nobuffer", 8) == 0 || strncmp(arg, "-n", 2) == 0){
         border_buffer = 0;
       }
@@ -152,9 +158,9 @@ int main(int argc, char **argv){
         i++;
         strcpy(surf_id, argv[i]);
       }
-      else if(strncmp(arg, "-version", 8) == 0|| strncmp(arg, "-v", 2) == 0){
-        PRINTversion("dem2fds");
-        return 1;
+      else if(strncmp(arg, "-matl", 5) == 0){
+        i++;
+        strcpy(matl_id, argv[i]);
       }
       else{
         Usage("dem2fds");
