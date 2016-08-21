@@ -868,18 +868,16 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
       fprintf(streamout, "&MISC TERRAIN_CASE = .TRUE., TERRAIN_IMAGE = '%s.png' /\n", basename);
     }
     fprintf(streamout, "&TIME T_END = 0.0 /\n");
-    fprintf(streamout, "&VENT XB = 0.0, 0.0, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", ymax, zmin, zmax);
-    fprintf(streamout, "&VENT XB =  %f,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, xmax, ymax, zmin, zmax);
-    fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0, 0.0, %f, %f, SURF_ID = 'OPEN' /\n", xmax, zmin, zmax);
-    fprintf(streamout, "&VENT XB = 0.0,  %f,  %f,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, ymax, zmin, zmax);
-    fprintf(streamout, "&VENT XB = 0.0,  %f, 0.0,  %f, %f, %f, SURF_ID = 'OPEN' /\n", xmax, ymax, zmax, zmax);
-    if(option == FDS_GEOM){
-      fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
-    }
+    fprintf(streamout, "&VENT MB = 'XMIN', SURF_ID = 'OPEN' /\n");
+    fprintf(streamout, "&VENT MB = 'XMAX', SURF_ID = 'OPEN' /\n");
+    fprintf(streamout, "&VENT MB = 'YMIN', SURF_ID = 'OPEN' /\n");
+    fprintf(streamout, "&VENT MB = 'YMAX', SURF_ID = 'OPEN' /\n");
+    fprintf(streamout, "&VENT MB = 'ZMAX', SURF_ID = 'OPEN' /\n");
   }
-  fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id,basename);
 
   if(option == FDS_GEOM){
+    fprintf(streamout, "&MATL ID = 'matl1', DENSITY = 1000., CONDUCTIVITY = 1., SPECIFIC_HEAT = 1., RGB = 122,117,48 /\n");
+    fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 TEXTURE_MAP='%s.png' /\n", surf_id, basename);
     fprintf(streamout, "&GEOM ID='terrain', SURF_ID='%s',MATL_ID='matl1',\nIJK=%i,%i,XB=%f,%f,%f,%f,\nZVALS=\n",
       surf_id,nlong, nlat, 0.0, xmax, 0.0, ymax);
     count = 1;
@@ -892,7 +890,9 @@ void GenerateFDSInputFile(char *casename, elevdata *fds_elevs, int option){
     }
     fprintf(streamout, "/\n");
   }
+  
   if(option == FDS_OBST){
+    fprintf(streamout, "&SURF ID = '%s', RGB = 122,117,48 /\n", surf_id, basename);
     count = 0;
     valsp1 = vals + nlong;
     for(j = 0; j < jbar; j++){
