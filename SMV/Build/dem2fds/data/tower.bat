@@ -5,4 +5,4 @@
 set dem2fds=..\intel_win_64\dem2fds_win_64.exe
 ::set dem2fds=dem2fds
 
-%dem2fds% %option% -show -dir %userprofile%\terrain\tower tower.in 
+%dem2fds% %option% -overlap -show -dir %userprofile%\terrain\tower tower.in 

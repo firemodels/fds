@@ -9,16 +9,16 @@ dem2fds=dem2fds
 
 terraindir=~/terrain
 
-$dem2fds $option -nobuffer -dir $terraindir/blodget blodget.in 
+$dem2fds $option -dir $terraindir/blodget blodget.in 
 
-$dem2fds $option -nobuffer -dir $terraindir/demtest demtest1.in 
-$dem2fds $option -nobuffer -dir $terraindir/demtest demtest2.in 
+$dem2fds $option -dir $terraindir/demtest demtest1.in 
+$dem2fds $option -dir $terraindir/demtest demtest2.in 
 
-$dem2fds $option -nobuffer -dir $terraindir/nist nist.in 
+$dem2fds $option -dir $terraindir/nist nist.in 
 
-$dem2fds $option -nobuffer -dir $terraindir/sugarloaf sugarloaf.in 
+$dem2fds $option -dir $terraindir/sugarloaf sugarloaf.in 
 
-$dem2fds $option -dir $terraindir/tower tower.in 
+$dem2fds $option -overlap -dir $terraindir/tower tower.in 
 
-$dem2fds $option -nobuffer -dir $terraindir/trails trails.in 
-$dem2fds $option -nobuffer -dir $terraindir/trails trails2.in 
+$dem2fds $option -dir $terraindir/trails trails.in 
+$dem2fds $option -dir $terraindir/trails trails2.in 
