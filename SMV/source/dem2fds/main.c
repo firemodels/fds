@@ -144,11 +144,15 @@ int main(int argc, char **argv){
       else if(strncmp(arg, "-geom", 5) == 0 ){
         gen_fds = FDS_GEOM;
       }
-      else if(strncmp(arg, "-overlap", 8) == 0 ){
-        overlap_size = 300;
+      else if(strncmp(arg, "-matl", 5) == 0){
+        i++;
+        strcpy(matl_id, argv[i]);
       }
       else if(strncmp(arg, "-obst", 5) == 0 ){
         gen_fds = FDS_OBST;
+      }
+      else if(strncmp(arg, "-overlap", 8) == 0){
+        overlap_size = 300;
       }
       else if(strncmp(arg, "-show", 5) == 0){
         show_maps = 1;
@@ -156,10 +160,6 @@ int main(int argc, char **argv){
       else if(strncmp(arg, "-surf", 5) == 0){
         i++;
         strcpy(surf_id, argv[i]);
-      }
-      else if(strncmp(arg, "-matl", 5) == 0){
-        i++;
-        strcpy(matl_id, argv[i]);
       }
       else{
         Usage("dem2fds");
