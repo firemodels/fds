@@ -25,18 +25,16 @@ void Usage(char *prog){
   fprintf(stdout, "  data obtained from http://viewer.nationalmap.gov \n\n");
   fprintf(stdout, "Usage:\n");
   fprintf(stdout, "  dem2fds [options] casename.in\n");
-  fprintf(stdout, "  -dir dir  - directory containing map files and elevation files if -elevdir \n");
-  fprintf(stdout, "              is not specified (default: '.')\n");
-  fprintf(stdout, "  -elevdir dir - directory containing elevation files\n");
-  fprintf(stdout, "  -elevs    - only output elevations, do not create an FDS input file\n");
-  fprintf(stdout, "  -geom     - create an FDS input file using &GEOM keywords (experimental)\n");
+  fprintf(stdout, "  -dir dir  - directory containing map and elevation files\n");
+  fprintf(stdout, "  -elevdir dir - directory containing elevation files (if different than -dir directory)\n");
+  fprintf(stdout, "  -elevs    - output elevations, do not create an FDS input file\n");
+  fprintf(stdout, "  -geom     - represent terrain using using &GEOM keywords (experimental)\n");
   fprintf(stdout, "  -help     - display this message\n");
-  fprintf(stdout, "  -matl matl_id - specify a MATL ID for use by the -geom option \n");
-  fprintf(stdout, "  -overlap - create a terrain map assuming that there is a 300 pixel overlap between maps.\n");
-  fprintf(stdout, "  -obst     - create an FDS input file using &OBST keywords\n");
-  fprintf(stdout, "  -show     - show image boundaries (black outline) and \n");
-  fprintf(stdout, "              fds scenario boundary (red outline)\n");
-  fprintf(stdout, "  -surf surf_id - specify surf ID for use by OBSTs or geometry \n");
+  fprintf(stdout, "  -matl matl_id - specify a MATL ID for use with the -geom option \n");
+  fprintf(stdout, "  -overlap - assume that there is a 300 pixel overlap between maps.\n");
+  fprintf(stdout, "  -obst     - represent terrain using &OBST keywords \n");
+  fprintf(stdout, "  -show     - highlight image and fds scenario boundaries\n");
+  fprintf(stdout, "  -surf surf_id - specify surf ID for use with OBSTs or geometry \n");
   fprintf(stdout, "  -version  - show version information\n");
 }
 
