@@ -167,13 +167,12 @@ LONGLATMINMAX
   dem2fds [options] casename.in
   -dir dir  - directory containing map files and elevation files if -elevdir 
               is not specified (default: '.')
-  -elevdir dir  - directory containing elevation files
-  -elevs    - only output elevations, do not create a complete FDS input file
+  -elevdir dir - directory containing elevation files
+  -elevs    - only output elevations, do not create an FDS input file
   -geom     - create an FDS input file using &GEOM keywords (experimental)
   -help     - display this message
-  -matl matl_id - specify MATL ID for use by -geom option 
-  -nobuffer - create a terrain map assuming no buffer exists between maps.
-              Otherwise assume that a 300 pixel buffer exists between maps.
+  -matl matl_id - specify a MATL ID for use by the -geom option 
+  -overlap - create a terrain map assuming that there is a 300 pixel overlap between maps.
   -obst     - create an FDS input file using &OBST keywords
   -show     - show image boundaries (black outline) and 
               fds scenario boundary (red outline)
