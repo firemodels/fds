@@ -25,7 +25,7 @@ mass, energy, and momentum (in that order) are:
 \be \rho_j L_j \frac{\d u_j}{\d t} = \left(p_i - p_k\right)+\left(\rho g \Delta z\right)_j+\Delta p_j - \frac{1}{2}K_j \rho_j \left| u_j \right| u_j  \label{HVACmomentum} \ee
 where $u$ is the duct velocity, $A$ is the duct area, and $h$ is the enthalpy of the fluid in the duct.
 The subscript $j$ indicates a duct segment, the subscripts $i$ and $k$ indicate nodes (where one or more ducts join or where a duct terminates in a compartment).
-$\Delta P$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the dimensionless loss coefficient of the duct segment.
+$\Delta p$ is a fixed source of momentum (a fan or blower), $L$ is the length of the duct segment, and $K$ is the total dimensionless loss coefficient of the duct segment (which includes wall friction losses and minor losses).
 
 Since nodes have no volume, the mass and energy conservation equations require that what flows into a node must also flow out. In the momentum equation the terms on the right hand side consist of the pressure gradient between the upstream and the downstream node, the buoyancy head, pressure rise due to an external source (e.g., a fan or blower), and the pressure losses due to wall friction or the presence of duct fittings.
 
@@ -102,8 +102,8 @@ Some nodes in the modeled HVAC system will represent items such as tees.  Flow t
 
 \subsection{Duct Losses}
 
-The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates) plus losses due to wall friction.  Wall friction losses are modeled as follows:
-\be K \; = \; \frac{f \, L}{D} \ee
+The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates), \(K_{\mbox{\tiny minor}}\), plus losses due to wall friction, \(K_{\mbox{\tiny wall}}\)).  Minor losses are a user input. If a duct roughness is set, wall friction losses are modeled as follows:
+\be \(K_{\mbox{\tiny wall}}\) \; = \; \frac{f \, L}{D} \ee
 where $D$ is the duct diameter.  $f$ is determined from the Colebrook equation. However, since this equation does not have an analytical solution, an approximation by Zigrang and Sylvester is used~\cite{Zigrang:1}.
 \be \frac{1}{\sqrt{f}} \; = \; -2 \, \log_{10} \left(\frac{\epsilon/D}{3.7}\; - \; \frac{4.518}{\mathrm{Re}_D} \, \log_{10} \left(
 \frac{6.9}{\mathrm{Re}_D}+\left( \frac{\epsilon/D}{3.7} \right)^{1.11} \right) \right) \ee
