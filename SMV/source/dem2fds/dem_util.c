@@ -210,11 +210,11 @@ int GetColor(float llong, float llat, elevdata *imageinfo, int nimageinfo) {
       latfact = (llat - imagei->lat_min) / (imagei->lat_max - imagei->lat_min);
       longfact = (llong - imagei->long_min) / (imagei->long_max - imagei->long_min);
 
-      irow = border_buffer + (imagei->nrows - 1 - 2 * border_buffer)*latfact;
+      irow = overlap_size + (imagei->nrows - 1 - 2 * overlap_size)*latfact;
       irow = imagei->nrows - 1 - irow;
       irow = CLAMP(irow, 0, imagei->nrows - 1);
 
-      icol = border_buffer + (imagei->ncols - 1 - 2 * border_buffer)*longfact;
+      icol = overlap_size + (imagei->ncols - 1 - 2 * overlap_size)*longfact;
       icol = CLAMP(icol, 0, imagei->ncols - 1);
       return gdImageGetPixel(imagei->image, icol, irow);
     }
