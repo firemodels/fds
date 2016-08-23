@@ -905,11 +905,11 @@ void update_slice_hist(void){
 
     sliceframesize=(is2+1-is1)*(js2+1-js1)*(ks2+1-ks1);
     NewMemory((void **)&sliceframe,sliceframesize*sizeof(float));
-    reset_histogram(slicei->histogram);
+    ResetHistogram(slicei->histogram);
     testslice=0;
     while(error1==0){
       FORTgetsliceframe(&unit1, &is1, &is2, &js1, &js2, &ks1, &ks2, &slicetime1, sliceframe, &testslice,&error1);
-      update_histogram(sliceframe,sliceframesize,slicei->histogram);
+      UpdateHistogram(sliceframe,sliceframesize,slicei->histogram);
     }
     FREEMEMORY(sliceframe);
 
@@ -978,10 +978,10 @@ void Get_Slice_Bounds(void){
 
       slicej = sliceinfo + j;
       if(strcmp(slicei->label.shortlabel,slicej->label.shortlabel)!=0)continue;
-      merge_histogram(slicei->histogram,slicej->histogram);
+      MergeHistogram(slicei->histogram,slicej->histogram);
     }
-    slicei->valmax=get_histogram_value(slicei->histogram,0.99);
-    slicei->valmin=get_histogram_value(slicei->histogram,0.01);
+    slicei->valmax=GetHistogramVal(slicei->histogram,0.99);
+    slicei->valmin=GetHistogramVal(slicei->histogram,0.01);
     slicei->setvalmax=1;
     slicei->setvalmin=1;
     for(j=i+1;j<nsliceinfo;j++){

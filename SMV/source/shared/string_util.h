@@ -17,6 +17,11 @@
 #define MATCH 1
 #define NOTMATCH 0
 
+#define LABEL_OK 0
+#define LABEL_ERR 2
+
+#define DEG_SYMBOL 176
+
 /* --------------------------  flowlabels ------------------------------------ */
 
 typedef struct {

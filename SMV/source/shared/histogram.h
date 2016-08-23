@@ -28,23 +28,23 @@ typedef struct {
 
 //************************** headers ****************************************
 
-void complete_histogram(histogramdata *histogram);
-void copy_buckets2histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram);
-void copy_data2histogram(float *vals, int nvals, histogramdata *histogram);
-void copy_polardata2histogram(float *speed, float *angle, int nvals, float rmin, float rmax, histogramdata *histogram);
-void copy_uvdata2histogram(float *uvals, float *vvals, int nvals, float rmin, float rmax, histogramdata *histogram);
+void CompleteHistogram(histogramdata *histogram);
+void CopyBuckets2Histogram(int *buckets, int nbuckets, float valmin, float valmax, histogramdata *histogram);
+void CopyU2Histogram(float *vals, int nvals, histogramdata *histogram);
+void CopyPolar2Histogram(float *speed, float *angle, int nvals, float rmin, float rmax, histogramdata *histogram);
+void CopyUV2Histogram(float *uvals, float *vvals, int nvals, float rmin, float rmax, histogramdata *histogram);
 
-void free_histogram(histogramdata *histogram);
-void free_histogram2d(histogramdata *histogram);
-void get_2dminmax(float *uvals, float *vvals, int nvals, float *rmin, float *rmax, int flag);
-void get_polarminmax(float *speed, int nvals, float *rmin, float *rmax, int flag);
-float get_histogram_value(histogramdata *histogram, float cdf);
-void get_histogram_statistics(histogramdata *histogram);
-void init_histogram(histogramdata *histogram, int nbuckets);
-void init_histogram2d(histogramdata *histogram, int nx, int ny);
-void merge_histogram(histogramdata *histogramto, histogramdata *histogramfrom);
-void reset_histogram(histogramdata *histogram);
-void reset_histogram2d(histogramdata *histogram);
-void update_histogram(float *vals, int nvals, histogramdata *histogram);
+void FreeHistogram(histogramdata *histogram);
+void FreeHistogram2d(histogramdata *histogram);
+void Get2DMinMax(float *uvals, float *vvals, int nvals, float *rmin, float *rmax, int flag);
+void GetPolarMinMax(float *speed, int nvals, float *rmin, float *rmax, int flag);
+float GetHistogramVal(histogramdata *histogram, float cdf);
+void GetHistogramStats(histogramdata *histogram);
+void InitHistogram(histogramdata *histogram, int nbuckets);
+void InitHistogram2D(histogramdata *histogram, int nx, int ny);
+void MergeHistogram(histogramdata *histogramto, histogramdata *histogramfrom);
+void ResetHistogram(histogramdata *histogram);
+void ResetHistogram2d(histogramdata *histogram);
+void UpdateHistogram(float *vals, int nvals, histogramdata *histogram);
 
 #endif

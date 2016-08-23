@@ -307,11 +307,11 @@ void get_part_histogram(partdata *parti){
     NewMemory((void **)&parti->histograms, npart5prop*sizeof(histogramdata *));
     for(i = 0; i < npart5prop; i++){
       NewMemory((void **)&parti->histograms[i], sizeof(histogramdata));
-      init_histogram(parti->histograms[i], NHIST_BUCKETS);
+      InitHistogram(parti->histograms[i], NHIST_BUCKETS);
     }
   }
   for(i = 0; i < npart5prop; i++){
-    reset_histogram(parti->histograms[i]);
+    ResetHistogram(parti->histograms[i]);
   }
   if(file_exists(parti->hist_file)==1&&get_histfile_status(parti)==HIST_OK){
     read_part_histogram(parti);
@@ -340,7 +340,7 @@ void get_part_histogram(partdata *parti){
             if(prop_id==NULL)continue;
 
             partprop_index = prop_id-part5propinfo;
-            update_histogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
+            UpdateHistogram(rvals, datacopy->npoints, parti->histograms[partprop_index]);
             rvals += datacopy->npoints;
           }
         }
@@ -361,7 +361,7 @@ void get_allpart_histogram(void){
   // for subsequent calls histograms will only be updated if particle files are newer than histogram files
   // ie if FDS is running the case while smokeview is viewing it
 
-  if(force_update_histograms==0){
+  if(force_UpdateHistograms==0){
     update = 0;  // if not forced, update histograms only if they do not exist or are out of date
     for(i = 0; i < npartinfo; i++){
       partdata *parti;
@@ -375,7 +375,7 @@ void get_allpart_histogram(void){
     if(update == 0)return;
   }
 
-  force_update_histograms = 0;
+  force_UpdateHistograms = 0;
   npartframes_max=get_min_partframes();
 
   for(i = 0; i < npartinfo; i++){
@@ -388,7 +388,7 @@ void get_allpart_histogram(void){
     partpropdata *propi;
 
     propi = part5propinfo + i;
-    reset_histogram(&propi->histogram);
+    ResetHistogram(&propi->histogram);
   }
   for(i = 0; i < npartinfo; i++){
     partdata *parti;
@@ -399,7 +399,7 @@ void get_allpart_histogram(void){
       partpropdata *propj;
 
       propj = part5propinfo + j;
-      merge_histogram(&propj->histogram, parti->histograms[j]);
+      MergeHistogram(&propj->histogram, parti->histograms[j]);
     }
   }
 }
@@ -696,7 +696,7 @@ void read_part_histogram(partdata *parti){
     nbuckets = nbuffer/4;
 
     histi = parti->histograms[i];
-    copy_buckets2histogram(buckets, nbuckets, valminmax[0], valminmax[1], histi);
+    CopyBuckets2Histogram(buckets, nbuckets, valminmax[0], valminmax[1], histi);
   }
   FREEMEMORY(buckets);
   fclose(STREAM_HIST);
@@ -1000,7 +1000,7 @@ void init_partprop(void){
             propi->partlabels[ii]=labeli;
           }
           NewMemory((void **)&propi->scale,256);
-          init_histogram(&propi->histogram, NHIST_BUCKETS);
+          InitHistogram(&propi->histogram, NHIST_BUCKETS);
 
           npart5prop++;
         }

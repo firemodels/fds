@@ -324,9 +324,9 @@ void Device_CB(int var){
 #ifdef pp_PILOT
   case DEVICE_NBUCKETS:
 #ifdef pp_WINDROSE
-    setup_pilot_data(npilot_buckets,npilot_nr,npilot_ntheta,NOT_FIRST_TIME);
+    SummarizeWindData(npilot_buckets,npilot_nr,npilot_ntheta,NOT_FIRST_TIME);
 #else
-    setup_pilot_data(npilot_buckets);
+    SummarizeWindData(npilot_buckets);
 #endif
     break;
 #endif

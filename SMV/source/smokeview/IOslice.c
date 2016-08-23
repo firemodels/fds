@@ -7199,8 +7199,8 @@ void slicedata2hist(slicedata *sd, float *xyz, float *dxyz, float time, float dt
       }
     }
   }
-  init_histogram(histogram, NHIST_BUCKETS);
-  copy_data2histogram(vals, nvals, histogram);
+  InitHistogram(histogram, NHIST_BUCKETS);
+  CopyU2Histogram(vals, nvals, histogram);
   FREEMEMORY(vals);
 }
 

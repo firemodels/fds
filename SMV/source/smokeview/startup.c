@@ -1225,7 +1225,7 @@ void initvars(void){
     b_state[i]=-1;
   }
 #ifdef pp_DEG
-  degC[0]=176; // deg symbol (small superscript 0)
+  degC[0]=DEG_SYMBOL;
   degC[1]='C';
   degC[2]='\0';
 #else
@@ -1233,7 +1233,7 @@ void initvars(void){
 #endif
 
 #ifdef pp_DEG
-  degF[0]=176; // deg symbol (small superscript 0)
+  degF[0]=DEG_SYMBOL;
   degF[1]='F';
   degF[2]='\0';
 #else

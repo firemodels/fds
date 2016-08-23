@@ -6022,13 +6022,13 @@ int is_dup_device_label(int index, int direction){
   return 0;
 }
 
-/* ----------------------- setup_pilot_data ----------------------------- */
+/* ----------------------- SummarizeWindData ----------------------------- */
 
 #ifdef pp_PILOT
 #ifdef pp_WINDROSE
-void setup_pilot_data(int nbuckets, int nr, int ntheta, int flag){
+void SummarizeWindData(int nbuckets, int nr, int ntheta, int flag){
 #else
-void setup_pilot_data(int nbuckets){
+void SummarizeWindData(int nbuckets){
 #endif
   int i;
   float dangle;
@@ -6039,7 +6039,8 @@ void setup_pilot_data(int nbuckets){
     devicedata *udev, *vdev, *wdev;
     devicedata *angledev, *veldev;
     int j, ibucket;
-	pilotdata *piloti;
+  	pilotdata *piloti;
+    float *vel, *fraction;
 
     vdevicei = vdeviceinfo + i;
     udev = vdevicei->udev;
@@ -6049,20 +6050,17 @@ void setup_pilot_data(int nbuckets){
     veldev = vdevicei->veldev;
 
     piloti = &(vdevicei->pilotinfo);
-    {
-       float *vel, *fraction;
 
-       vel = piloti->vel;
-       fraction = piloti->fraction;
-       vel = piloti->vel;
-       FREEMEMORY(fraction);
-       FREEMEMORY(vel);
-       NewMemory((void **)&fraction, nbuckets*sizeof(float));
-       NewMemory((void **)&vel, nbuckets*sizeof(float));
-       piloti->vel = vel;
-       piloti->fraction = fraction;
-       piloti->nbuckets = nbuckets;
-    }
+    vel = piloti->vel;
+    fraction = piloti->fraction;
+    vel = piloti->vel;
+    FREEMEMORY(fraction);
+    FREEMEMORY(vel);
+    NewMemory((void **)&fraction, nbuckets*sizeof(float));
+    NewMemory((void **)&vel, nbuckets*sizeof(float));
+    piloti->vel = vel;
+    piloti->fraction = fraction;
+    piloti->nbuckets = nbuckets;
 
     for(j = 0; j < nbuckets; j++){
       piloti->fraction[j] = 0.0;
@@ -6096,11 +6094,11 @@ void setup_pilot_data(int nbuckets){
 
         histogram = &(piloti->histogram);
         if(flag != FIRST_TIME){
-          free_histogram2d(histogram);
+          FreeHistogram2d(histogram);
         }
-        init_histogram2d(histogram, nr, ntheta);
-        get_2dminmax(udev->vals, vdev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
-        copy_uvdata2histogram(udev->vals,vdev->vals,nvals,rmin,rmax,histogram);
+        InitHistogram2D(histogram, nr, ntheta);
+        Get2DMinMax(udev->vals, vdev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        CopyUV2Histogram(udev->vals,vdev->vals,nvals,rmin,rmax,histogram);
       }
 #endif
     }
@@ -6125,11 +6123,11 @@ void setup_pilot_data(int nbuckets){
 
         histogram = &(piloti->histogram);
         if(flag != FIRST_TIME){
-          free_histogram2d(histogram);
+          FreeHistogram2d(histogram);
         }
-        init_histogram2d(histogram, nr, ntheta);
-        get_polarminmax(veldev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
-        copy_polardata2histogram(veldev->vals,angledev->vals,nvals,rmin,rmax,histogram);
+        InitHistogram2D(histogram, nr, ntheta);
+        GetPolarMinMax(veldev->vals, nvals, &rmin, &rmax, HIST_COMPUTE_BOUNDS);
+        CopyPolar2Histogram(veldev->vals,angledev->vals,nvals,rmin,rmax,histogram);
       }
 #endif
     }
@@ -6402,9 +6400,9 @@ void setup_device_data(void){
   // convert velocities to pilot chart format
 #ifdef pp_PILOT
 #ifdef pp_WINDROSE
-  setup_pilot_data(npilot_buckets,npilot_nr,npilot_ntheta,FIRST_TIME);
+  SummarizeWindData(npilot_buckets,npilot_nr,npilot_ntheta,FIRST_TIME);
 #else
-  setup_pilot_data(npilot_buckets);
+  SummarizeWindData(npilot_buckets);
 #endif
 #endif
 
