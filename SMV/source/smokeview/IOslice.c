@@ -6720,7 +6720,7 @@ void update_slicedir_count(void){
 
 float get_texture_index(float *xyz){
   int i, j, k;
-  float *vv, *vv2;
+  float *vv;
   float *xplt, *yplt, *zplt;
   float dxbar, dybar, dzbar;
   int ibar, jbar, kbar;
