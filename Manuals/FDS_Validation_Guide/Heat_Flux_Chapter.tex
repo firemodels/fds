@@ -681,45 +681,53 @@ The plots on the following pages contain comparisons of predicted and measured h
 
 \subsection{Hamins Gas Burner Experiments}
 
-Predicted and measured radial and vertical heat flux profiles from 30 methane, 34 propane, and 16 acetylene gas burner fires conducted by Anthony Hamins at NIST are shown in this section. The relevant information about the fires is included in Table~\ref{Hamins_Methane_Table}.
+Predicted and measured radial and vertical heat flux profiles from 30 methane, 34 propane, and 16 acetylene gas burner fire experiments conducted by Anthony Hamins~\cite{Hamins:TN2016} are displayed in this section. The relevant information about the fires is included in Tables~\ref{Hamins_Methane_Table}, \ref{Hamins_Propane_Table}, and \ref{Hamins_Acetylene_Table}. In each table, $D$ is the diameter of the burner and $R_0$ is the radial distance from the burner centerline to the position of the vertical heat flux measurements. $\dot{Q}$ is the product of the mass loss rate, $\dot{m}$, and the heat of combustion. The heat of combustion of acetylene is 48.2~kJ/g; and for propane, 46.4~kJ/g. For the methane experiments, either methane (50.03~kJ/g) or natural gas (49.4~kJ/g) was used. $\dot{Q}''$ is the heat release rate per unit area, and
+\be
+   \dot{Q}^* = \frac{\dot{Q}}{\rho_\infty \, T_\infty \, c_p \, \sqrt{g D} \, D^2 }   \quad ; \quad    D^* = \left( \frac{\dot{Q}}{\rho_\infty \, T_\infty \, c_p \, \sqrt{g} } \right)^{2/5}
+\ee
+Note that in the test matrices, the values to the right of the double lines indicate parameters used in the simulations.  The values for radiative fraction, $\chi_{\rm rad}$, are suggested by Hamins~\cite{Hamins:TN2016}. The quantity $D^*/\delta x$ is an indicator of grid resolution, where $D^*$ is the characteristic burner dimension and $\delta x$ is the grid cell size. 
 
-\begin{table}[ht]
-\caption{Summary of Hamins methane burner experiments. }
+\newpage
+
+\subsubsection{Methane Experiments}
+
+\begin{table}[!ht]
+\caption[Parameters of the Hamins methane burner experiments]{Parameters of the Hamins methane burner experiments. The asterisk after the Test No. indicates that natural gas was used as fuel. The soot and CO yields were assumed to be zero.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c||c|c|}
 \hline
-Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$       \\
-No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &             \\ \hline \hline
-1        & 0.1      & 0.13       & 0.42        &  0.0085               &  53.5          & 0.12        \\ \hline
-2        & 0.1      & 0.13       & 0.61        &  0.0122               &  77.7          & 0.18        \\ \hline
-3        & 0.1      & 0.13       & 0.78        &  0.0155               &  99.3          & 0.22        \\ \hline
-4        & 0.1      & 0.13       & 1.11        &  0.0222               &  141.3         & 0.32        \\ \hline
-5        & 0.1      & 0.13       & 1.89        &  0.0378               &  240.6         & 0.54        \\ \hline
-6        & 0.35     & 0.40       & 11.2        &  0.226                &  115.9         & 0.14        \\ \hline
-7        & 0.35     & 0.40       & 15.3        &  0.310                &  159.0         & 0.19        \\ \hline
-8        & 0.35     & 0.40       & 10.5        &  0.212                &  109.0         & 0.13        \\ \hline
-9        & 0.35     & 0.40       & 6.67        &  0.135                &  69.3          & 0.08        \\ \hline
-10       & 0.35     & 0.64       & 19.3        &  0.391                &  200.7         & 0.24        \\ \hline
-11       & 0.35     & 0.63       & 27.0        &  0.546                &  280.3         & 0.34        \\ \hline
-12       & 0.35     & 0.81       & 40.6        &  0.822                &  422.2         & 0.51        \\ \hline
-13       & 0.35     & 0.92       & 63.5        &  1.285                &  659.9         & 0.80        \\ \hline
-14       & 0.35     & 0.92       & 90.3        &  1.828                &  938.7         & 1.13        \\ \hline
-15       & 0.35     & 0.92       & 178         &  3.567                &  1854.6        & 2.24        \\ \hline
-16       & 0.35     & 0.92       & 210         &  4.194                &  2180.8        & 2.63        \\ \hline
-17       & 0.35     & 0.92       & 34.0        &  0.679                &  353.2         & 0.43        \\ \hline
-18       & 0.35     & 0.90       & 145         &  2.904                &  1510.0        & 1.82        \\ \hline
-19       & 0.35     & 0.90       & 125         &  2.495                &  1297.7        & 1.56        \\ \hline
-20       & 1.0      & 1.00       & 49.0        &  0.997                &  62.4          & 0.04        \\ \hline
-21       & 1.0      & 1.00       & 81.0        &  1.648                &  103.1         & 0.07        \\ \hline
-22       & 1.0      & 1.00       & 112         &  2.282                &  142.8         & 0.10        \\ \hline
-23       & 1.0      & 1.00       & 129         &  2.635                &  164.8         & 0.12        \\ \hline
-24       & 1.0      & 0.79       & 52.7        &  1.069                &  67.1          & 0.05        \\ \hline
-25       & 1.0      & 0.79       & 69.7        &  1.414                &  88.8          & 0.06        \\ \hline
-26       & 1.0      & 0.79       & 87.3        &  1.771                &  111.2         & 0.08        \\ \hline
-27       & 1.0      & 0.79       & 102         &  2.081                &  130.6         & 0.09        \\ \hline
-28       & 1.0      & 0.79       & 121         &  2.462                &  154.5         & 0.11        \\ \hline
-29       & 1.0      & 0.79       & 138         &  2.793                &  175.3         & 0.12        \\ \hline
-30       & 1.0      & 0.79       & 172         &  3.482                &  218.5         & 0.16        \\ \hline
+Test      & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   &               &            &          \\                                                      
+No.       & (m)      & (m)        & (kW)        &  (g/s)                &  (kW/m$^2$)    & \raisebox{1.5ex}[0pt]{$\dot{Q}^*$} & \raisebox{1.5ex}[0pt]{$\chi_{\rm rad}$} & \raisebox{1.5ex}[0pt]{$D^*/\delta x$} \\ \hline \hline
+1         & 0.1      & 0.13       & 0.42        &  0.0085               &  53.5          & 0.12          & 0.13       & 8.6     \\ \hline
+2         & 0.1      & 0.13       & 0.61        &  0.0122               &  77.7          & 0.18          & 0.13       & 10.0     \\ \hline
+3         & 0.1      & 0.13       & 0.78        &  0.0155               &  99.3          & 0.22          & 0.13       & 11.0     \\ \hline
+4         & 0.1      & 0.13       & 1.11        &  0.0222               &  141.3         & 0.32          & 0.16       & 12.7      \\ \hline
+5         & 0.1      & 0.13       & 1.89        &  0.0378               &  240.6         & 0.54          & 0.16       & 15.7      \\ \hline
+6*        & 0.35     & 0.40       & 11.2        &  0.226                &  115.9         & 0.14          & 0.08       & 6.4      \\ \hline
+7*        & 0.35     & 0.40       & 15.3        &  0.310                &  159.0         & 0.19          & 0.10       & 7.2      \\ \hline
+8*        & 0.35     & 0.40       & 10.5        &  0.212                &  109.0         & 0.13          & 0.08       & 6.2      \\ \hline
+9*        & 0.35     & 0.40       & 6.67        &  0.135                &  69.3          & 0.08          & 0.07       & 5.2      \\ \hline
+10*       & 0.35     & 0.64       & 19.3        &  0.391                &  200.7         & 0.24          & 0.12       & 7.9      \\ \hline
+11*       & 0.35     & 0.63       & 27.0        &  0.546                &  280.3         & 0.34          & 0.15       & 9.1      \\ \hline
+12*       & 0.35     & 0.81       & 40.6        &  0.822                &  422.2         & 0.51          & 0.18       & 10.7      \\ \hline
+13*       & 0.35     & 0.92       & 63.5        &  1.285                &  659.9         & 0.80          & 0.21       & 12.8       \\ \hline
+14*       & 0.35     & 0.92       & 90.3        &  1.828                &  938.7         & 1.13          & 0.22       & 14.7       \\ \hline
+15        & 0.35     & 0.92       & 178         &  3.567                &  1854.6        & 2.24          & 0.20       & 19.3       \\ \hline
+16        & 0.35     & 0.92       & 210         &  4.194                &  2180.8        & 2.63          & 0.20       & 20.6       \\ \hline
+17        & 0.35     & 0.92       & 34.0        &  0.679                &  353.2         & 0.43          & 0.16       & 9.9      \\ \hline
+18        & 0.35     & 0.90       & 145         &  2.904                &  1510.0        & 1.82          & 0.28       & 17.8       \\ \hline
+19        & 0.35     & 0.90       & 125         &  2.495                &  1297.7        & 1.56          & 0.23       & 16.7       \\ \hline
+20*       & 1.0      & 1.00       & 49.0        &  0.997                &  62.4          & 0.04          & 0.14       & 5.8      \\ \hline
+21*       & 1.0      & 1.00       & 81.0        &  1.648                &  103.1         & 0.07          & 0.15       & 7.0      \\ \hline
+22*       & 1.0      & 1.00       & 112         &  2.282                &  142.8         & 0.10          & 0.17       & 8.0       \\ \hline
+23*       & 1.0      & 1.00       & 129         &  2.635                &  164.8         & 0.12          & 0.18       & 8.5       \\ \hline
+24*       & 1.0      & 0.79       & 52.7        &  1.069                &  67.1          & 0.05          & 0.12       & 5.9      \\ \hline
+25*       & 1.0      & 0.79       & 69.7        &  1.414                &  88.8          & 0.06          & 0.12       & 6.6      \\ \hline
+26*       & 1.0      & 0.79       & 87.3        &  1.771                &  111.2         & 0.08          & 0.13       & 7.3       \\ \hline
+27*       & 1.0      & 0.79       & 102         &  2.081                &  130.6         & 0.09          & 0.13       & 7.7       \\ \hline
+28*       & 1.0      & 0.79       & 121         &  2.462                &  154.5         & 0.11          & 0.14       & 8.3       \\ \hline
+29*       & 1.0      & 0.79       & 138         &  2.793                &  175.3         & 0.12          & 0.16       & 8.7       \\ \hline
+30*       & 1.0      & 0.79       & 172         &  3.482                &  218.5         & 0.16          & 0.18       & 9.5       \\ \hline
 \end{tabular}
 \end{center}
 \label{Hamins_Methane_Table}
@@ -851,47 +859,51 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 {Comparison of predicted and measured heat fluxes, Hamins Methane Tests 29-30.}
 \end{figure}
 
-\begin{table}[ht]
-\caption{Summary of Hamins propane burner experiments. }
+\clearpage
+
+\subsubsection{Propane Experiments}
+
+\begin{table}[!h]
+\caption[Parameters of the Hamins propane burner experiments]{Parameters of the Hamins propane burner experiments. Note that in all cases, the soot and CO yields were taken to be 0.024 and 0.005, respectively, based on the measurements of Tewarson~\cite{SFPE:Tewarson}.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c||c|c|}
 \hline
-Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$      \\
-No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &            \\ \hline \hline
-1        & 0.1      & 0.26       & 2.7         &  0.058                &  343.8         & 0.78       \\ \hline
-2        & 0.1      & 0.26       & 6.8         &  0.148                &  870.9         & 1.96       \\ \hline
-3        & 0.1      & 0.26       & 11.8        &  0.254                &  1499.9        & 3.38       \\ \hline
-4        & 0.1      & 0.37       & 17.9        &  0.386                &  2277.8        & 5.14       \\ \hline
-5        & 0.1      & 0.37       & 25.2        &  0.543                &  3203.5        & 7.22       \\ \hline
-6        & 0.1      & 0.49       & 36.9        &  0.796                &  4698.3        & 10.6       \\ \hline
-7        & 0.1      & 0.13       & 0.4         &  0.010                &  56.0          & 0.13       \\ \hline
-8        & 0.1      & 0.13       & 0.8         &  0.017                &  99.3          & 0.22       \\ \hline
-9        & 0.1      & 0.13       & 0.6         &  0.013                &  76.4          & 0.17       \\ \hline
-10       & 0.1      & 0.13       & 1.0         &  0.021                &  123.5         & 0.28       \\ \hline
-11       & 0.1      & 0.13       & 1.4         &  0.031                &  183.3         & 0.41       \\ \hline
-12       & 0.1      & 0.13       & 2.2         &  0.046                &  273.7         & 0.62       \\ \hline
-13       & 0.1      & 0.19       & 3.4         &  0.074                &  434.2         & 0.98       \\ \hline
-14       & 0.1      & 0.19       & 5.6         &  0.122                &  718.1         & 1.62       \\ \hline
-15       & 0.1      & 0.28       & 11.9        &  0.257                &  1513.9        & 3.41       \\ \hline
-16       & 0.1      & 0.28       & 24.8        &  0.535                &  3156.4        & 7.12       \\ \hline
-17       & 0.35     & 0.92       & 33.9        &  0.732                &  352.8         & 0.43       \\ \hline
-18       & 0.35     & 0.92       & 124.9       &  2.694                &  1298.1        & 1.56       \\ \hline
-19       & 0.35     & 0.57       & 20.0        &  0.431                &  207.9         & 0.25       \\ \hline
-20       & 0.35     & 0.57       & 15.6        &  0.336                &  162.0         & 0.20       \\ \hline
-21       & 0.35     & 0.39       & 19.0        &  0.409                &  197.3         & 0.24       \\ \hline
-22       & 0.35     & 0.39       & 14.6        &  0.316                &  152.2         & 0.18       \\ \hline
-23       & 0.35     & 0.68       & 108.2       &  2.334                &  1124.5        & 1.36       \\ \hline
-24       & 0.35     & 0.68       & 102.3       &  2.207                &  1063.7        & 1.28       \\ \hline
-25       & 0.35     & 0.68       & 79.7        &  1.719                &  828.4         & 1.00       \\ \hline
-26       & 0.35     & 0.51       & 12.0        &  0.258                &  124.5         & 0.15       \\ \hline
-27       & 1.0      & 0.81       & 55.2        &  1.190                &  70.2          & 0.05       \\ \hline
-28       & 1.0      & 0.81       & 81.7        &  1.761                &  104.0         & 0.07       \\ \hline
-29       & 1.0      & 0.81       & 107.3       &  2.315                &  136.7         & 0.10       \\ \hline
-30       & 1.0      & 1.00       & 136.4       &  2.943                &  173.7         & 0.12       \\ \hline
-31       & 1.0      & 0.97       & 55.6        &  1.199                &  70.8          & 0.05       \\ \hline
-32       & 1.0      & 0.97       & 82.5        &  1.779                &  105.0         & 0.07       \\ \hline
-33       & 1.0      & 0.97       & 107.9       &  2.326                &  137.3         & 0.10       \\ \hline
-34       & 1.0      & 0.97       & 137.3       &  2.963                &  174.9         & 0.12       \\ \hline
+Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   &               &           &           \\
+No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    & \raisebox{1.5ex}[0pt]{$\dot{Q}^*$} & \raisebox{1.5ex}[0pt]{$\chi_{\rm rad}$} & \raisebox{1.5ex}[0pt]{$D^*/\delta x$} \\ \hline \hline
+1        & 0.1      & 0.26       & 2.7         &  0.058                &  343.8         & 0.78          & 0.22      & 9.0          \\ \hline
+2        & 0.1      & 0.26       & 6.8         &  0.148                &  870.9         & 1.96          & 0.27      & 13.1          \\ \hline
+3        & 0.1      & 0.26       & 11.8        &  0.254                &  1499.9        & 3.38          & 0.29      & 16.3          \\ \hline
+4        & 0.1      & 0.37       & 17.9        &  0.386                &  2277.8        & 5.14          & 0.29      & 19.2          \\ \hline
+5        & 0.1      & 0.37       & 25.2        &  0.543                &  3203.5        & 7.22          & 0.30      & 22.1          \\ \hline
+6        & 0.1      & 0.49       & 36.9        &  0.796                &  4698.3        & 10.6          & 0.30      & 25.7          \\ \hline
+7        & 0.1      & 0.13       & 0.4         &  0.010                &  56.0          & 0.13          & 0.12      & 4.4          \\ \hline
+8        & 0.1      & 0.13       & 0.8         &  0.017                &  99.3          & 0.22          & 0.12      & 5.5          \\ \hline
+9        & 0.1      & 0.13       & 0.6         &  0.013                &  76.4          & 0.17          & 0.12      & 4.9          \\ \hline
+10       & 0.1      & 0.13       & 1.0         &  0.021                &  123.5         & 0.28          & 0.15      & 6.0          \\ \hline
+11       & 0.1      & 0.13       & 1.4         &  0.031                &  183.3         & 0.41          & 0.18      & 7.0          \\ \hline
+12       & 0.1      & 0.13       & 2.2         &  0.046                &  273.7         & 0.62          & 0.23      & 8.2          \\ \hline
+13       & 0.1      & 0.19       & 3.4         &  0.074                &  434.2         & 0.98          & 0.24      & 9.9          \\ \hline
+14       & 0.1      & 0.19       & 5.6         &  0.122                &  718.1         & 1.62          & 0.26      & 12.1          \\ \hline
+15       & 0.1      & 0.28       & 11.9        &  0.257                &  1513.9        & 3.41          & 0.26      & 16.3          \\ \hline
+16       & 0.1      & 0.28       & 24.8        &  0.535                &  3156.4        & 7.12          & 0.29      & 21.9          \\ \hline
+17       & 0.35     & 0.92       & 33.9        &  0.732                &  352.8         & 0.43          & 0.25      & 9.9          \\ \hline
+18       & 0.35     & 0.92       & 124.9       &  2.694                &  1298.1        & 1.56          & 0.30      & 16.7          \\ \hline
+19       & 0.35     & 0.57       & 20.0        &  0.431                &  207.9         & 0.25          & 0.18      & 8.0          \\ \hline
+20       & 0.35     & 0.57       & 15.6        &  0.336                &  162.0         & 0.20          & 0.14      & 7.3          \\ \hline
+21       & 0.35     & 0.39       & 19.0        &  0.409                &  197.3         & 0.24          & 0.13      & 7.9          \\ \hline
+22       & 0.35     & 0.39       & 14.6        &  0.316                &  152.2         & 0.18          & 0.10      & 7.1          \\ \hline
+23       & 0.35     & 0.68       & 108.2       &  2.334                &  1124.5        & 1.36          & 0.29      & 15.8          \\ \hline
+24       & 0.35     & 0.68       & 102.3       &  2.207                &  1063.7        & 1.28          & 0.31      & 15.5          \\ \hline
+25       & 0.35     & 0.68       & 79.7        &  1.719                &  828.4         & 1.00          & 0.28      & 14.0          \\ \hline
+26       & 0.35     & 0.51       & 12.0        &  0.258                &  124.5         & 0.15          & 0.08      & 6.6          \\ \hline
+27       & 1.0      & 0.81       & 55.2        &  1.190                &  70.2          & 0.05          & 0.11      & 6.0          \\ \hline
+28       & 1.0      & 0.81       & 81.7        &  1.761                &  104.0         & 0.07          & 0.15      & 7.1          \\ \hline
+29       & 1.0      & 0.81       & 107.3       &  2.315                &  136.7         & 0.10          & 0.18      & 7.9          \\ \hline
+30       & 1.0      & 1.00       & 136.4       &  2.943                &  173.7         & 0.12          & 0.22      & 8.7          \\ \hline
+31       & 1.0      & 0.97       & 55.6        &  1.199                &  70.8          & 0.05          & 0.12      & 6.1          \\ \hline
+32       & 1.0      & 0.97       & 82.5        &  1.779                &  105.0         & 0.07          & 0.14      & 7.1          \\ \hline
+33       & 1.0      & 0.97       & 107.9       &  2.326                &  137.3         & 0.10          & 0.17      & 7.9          \\ \hline
+34       & 1.0      & 0.97       & 137.3       &  2.963                &  174.9         & 0.12          & 0.23      & 8.7          \\ \hline
 \end{tabular}
 \end{center}
 \label{Hamins_Propane_Table}
@@ -1040,30 +1052,33 @@ No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$
 {Comparison of predicted and measured heat fluxes, Hamins Propane Tests 33-34.}
 \end{figure}
 
+\clearpage
+
+\subsubsection{Acetylene Experiments}
 
 \begin{table}[ht]
-\caption{Summary of Hamins acetylene burner experiments. }
+\caption[Parameters of the Hamins acetylene burner experiments]{Parameters of the Hamins acetylene burner experiments. Note that in all cases, the soot and CO yields were taken to be 0.096 and 0.042, respectively, based on the measurements of Tewarson~\cite{SFPE:Tewarson}.}
 \begin{center}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c||c|c|}
 \hline
-Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   & $Q^*$      \\
-No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    &            \\ \hline \hline
-1        & 0.10     & 0.13       & 0.45        &  0.009                &  57.3          & 0.13       \\ \hline
-2        & 0.10     & 0.13       & 0.56        &  0.012                &  71.3          & 0.16       \\ \hline
-3        & 0.10     & 0.13       & 0.90        &  0.019                &  114.6         & 0.26       \\ \hline
-4        & 0.10     & 0.13       & 1.29        &  0.027                &  164.2         & 0.37       \\ \hline
-5        & 0.10     & 0.13       & 1.54        &  0.032                &  196.1         & 0.44       \\ \hline
-6        & 0.35     & 0.39       & 12.5        &  0.259                &  129.9         & 0.16       \\ \hline
-7        & 0.35     & 0.51       & 11.0        &  0.229                &  114.3         & 0.14       \\ \hline
-8        & 0.35     & 0.51       & 20.4        &  0.424                &  212.0         & 0.26       \\ \hline
-9        & 0.35     & 0.51       & 31.3        &  0.648                &  325.3         & 0.39       \\ \hline
-10       & 0.35     & 0.69       & 38.2        &  0.793                &  397.0         & 0.48       \\ \hline
-11       & 0.35     & 0.69       & 48.0        &  1.000                &  498.9         & 0.60       \\ \hline
-12       & 0.35     & 0.69       & 62.4        &  1.290                &  648.6         & 0.78       \\ \hline
-13       & 0.35     & 0.69       & 76.3        &  1.580                &  793.0         & 0.96       \\ \hline
-14       & 0.35     & 0.69       & 109.2       &  2.270                &  1135.0        & 1.37       \\ \hline
-15       & 0.35     & 0.69       & 117.2       &  2.430                &  1218.2        & 1.47       \\ \hline
-16       & 0.35     & 0.69       & 134.7       &  2.790                &  1400.0        & 1.69       \\ \hline
+Test     & $D$      & $R_0$      & $\dot{Q}$   &  $\dot{m}$            &  $\dot{Q}''$   &               &         &             \\                                                      
+No.      & (m)      & (m)        & (kW)        &  (kg/s)               &  (kW/m$^2$)    & \raisebox{1.5ex}[0pt]{$\dot{Q}^*$} & \raisebox{1.5ex}[0pt]{$\chi_{\rm rad}$} & \raisebox{1.5ex}[0pt]{$D^*/\delta x$} \\ \hline \hline
+1        & 0.10     & 0.13       & 0.45        &  0.009                &  57.3          & 0.13         & 0.12     & 4.4             \\ \hline
+2        & 0.10     & 0.13       & 0.56        &  0.012                &  71.3          & 0.16         & 0.15     & 4.8             \\ \hline
+3        & 0.10     & 0.13       & 0.90        &  0.019                &  114.6         & 0.26         & 0.18     & 5.8             \\ \hline
+4        & 0.10     & 0.13       & 1.29        &  0.027                &  164.2         & 0.37         & 0.27     & 6.7             \\ \hline
+5        & 0.10     & 0.13       & 1.54        &  0.032                &  196.1         & 0.44         & 0.31     & 7.2             \\ \hline
+6        & 0.35     & 0.39       & 12.5        &  0.259                &  129.9         & 0.16         & 0.13     & 6.7             \\ \hline
+7        & 0.35     & 0.51       & 11.0        &  0.229                &  114.3         & 0.14         & 0.09     & 6.3             \\ \hline
+8        & 0.35     & 0.51       & 20.4        &  0.424                &  212.0         & 0.26         & 0.22     & 8.1             \\ \hline
+9        & 0.35     & 0.51       & 31.3        &  0.648                &  325.3         & 0.39         & 0.33     & 9.6             \\ \hline
+10       & 0.35     & 0.69       & 38.2        &  0.793                &  397.0         & 0.48         & 0.38     & 10.4             \\ \hline
+11       & 0.35     & 0.69       & 48.0        &  1.000                &  498.9         & 0.60         & 0.41     & 11.4             \\ \hline
+12       & 0.35     & 0.69       & 62.4        &  1.290                &  648.6         & 0.78         & 0.42     & 12.7             \\ \hline
+13       & 0.35     & 0.69       & 76.3        &  1.580                &  793.0         & 0.96         & 0.43     & 13.8             \\ \hline
+14       & 0.35     & 0.69       & 109.2       &  2.270                &  1135.0        & 1.37         & 0.44     & 15.9             \\ \hline
+15       & 0.35     & 0.69       & 117.2       &  2.430                &  1218.2        & 1.47         & 0.43     & 16.3             \\ \hline
+16       & 0.35     & 0.69       & 134.7       &  2.790                &  1400.0        & 1.69         & 0.46     & 17.3             \\ \hline
 \end{tabular}
 \end{center}
 \label{Hamins_Acetylene_Table}
