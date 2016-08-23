@@ -6720,7 +6720,7 @@ void update_slicedir_count(void){
 
 float get_texture_index(float *xyz){
   int i, j, k;
-  float *vv;
+  float *vv, *vv2;
   float *xplt, *yplt, *zplt;
   float dxbar, dybar, dzbar;
   int ibar, jbar, kbar;
@@ -6733,6 +6733,7 @@ float get_texture_index(float *xyz){
   float val0, val1;
   float val, val_fraction;
   int ijk;
+  int iplus=0, jplus=0, kplus=0, *ijk_min, *ijk_max;
 
   float *slicedata0;
   float valmin, valmax;
@@ -6764,7 +6765,9 @@ float get_texture_index(float *xyz){
   GETINDEX(k,xyz[2],zplt[0],dzbar,nz);
 
      // val(i,j,k) = di*nj*nk + dj*nk + dk
-  ijk = (i-gslice->ijk_min[0])*slice_nz*slice_ny + (j-gslice->ijk_min[1])*slice_nz + (k-gslice->ijk_min[2]);
+  ijk_min = gslice->ijk_min;
+  ijk_max = gslice->ijk_max;
+  ijk = (i-ijk_min[0])*slice_nz*slice_ny + (j-ijk_min[1])*slice_nz + (k-ijk_min[2]);
 
   dx = (xyz[0] - xplt[i])/dxbar;
   dx = CLAMP(dx,0.0,1.0);
@@ -6774,20 +6777,21 @@ float get_texture_index(float *xyz){
   dz = CLAMP(dz,0.0,1.0);
 
   vv = slicedata0 + ijk;
+  if(i+1<=ijk_max[0])iplus=slice_nz*slice_ny;
+  if(j+1<=ijk_max[1])jplus=slice_nz;
+  if(k+1<=ijk_max[2])kplus=1;
+  
   val000 = (float)vv[0]; // i,j,k
-  val001 = (float)vv[1]; // i,j,k+1
+  val001 = (float)vv[kplus]; // i,j,k+1
 
-  vv += slice_nz;
-  val010 = (float)vv[0]; // i,j+1,k
-  val011 = (float)vv[1]; // i,j+1,k+1
+  val010 = (float)vv[jplus]; // i,j+1,k
+  val011 = (float)vv[jplus+kplus]; // i,j+1,k+1
 
-  vv += (slice_nz*slice_ny-slice_nz);
-  val100 = (float)vv[0]; // i+1,j,k
-  val101 = (float)vv[1]; // i+1,j,k+1
+  val100 = (float)vv[iplus]; // i+1,j,k
+  val101 = (float)vv[iplus+kplus]; // i+1,j,k+1
 
-  vv += slice_nz;
-  val110 = (float)vv[0]; // i+1,j+1,k
-  val111 = (float)vv[1]; // i+1,j+1,k+1
+  val110 = (float)vv[iplus+jplus]; // i+1,j+1,k
+  val111 = (float)vv[iplus+jplus+kplus]; // i+1,j+1,k+1
 
   val00 = MIX(dx,val100,val000);
   val10 = MIX(dx,val110,val010);
@@ -6817,7 +6821,7 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   float val00,val10,val01,val11;
   float val0, val1;
   float val;
-  int ijk;
+  int ijk,ip1=0, jp1=0, kp1=0, *ijk_min, *ijk_max;
 
   meshdata *valmesh;
 
@@ -6844,7 +6848,10 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   GETINDEX(k,xyz[2],zplt[0],dzbar,nz);
 
   // val(i,j,k) = di*nj*nk + dj*nk + dk
-  ijk = (i-sd->ijk_min[0])*slice_nz*slice_ny + (j-sd->ijk_min[1])*slice_nz + (k-sd->ijk_min[2]);
+  ijk_min = sd->ijk_min;
+  ijk_max = sd->ijk_max;
+  
+  ijk = (i-ijk_min[0])*slice_nz*slice_ny + (j-ijk_min[1])*slice_nz + (k-ijk_min[2]);
 
   dx = (xyz[0] - xplt[i])/dxbar;
   dx = CLAMP(dx,0.0,1.0);
@@ -6853,21 +6860,26 @@ float get_3dslice_val(slicedata *sd, float *xyz){
   dz = (xyz[2] - zplt[k])/dzbar;
   dz = CLAMP(dz,0.0,1.0);
 
+  
   // ijk
+  if(i<=ijk_max[0])ip1=slice_nz*slice_ny;
+  if(j<=ijk_max[1])jp1=slice_nz;
+  if(k<=ijk_max[2])kp1=1;
+  
   val000 = (float)GET_VAL_N(sd,ijk);     // i,j,k
-  val001 = (float)GET_VAL_N(sd,ijk + 1); // i,j,k+1
+  val001 = (float)GET_VAL_N(sd,ijk + kp1); // i,j,k+1
 
   // ijk + slice_nz
-  val010 = (float)GET_VAL_N(sd,ijk+slice_nz);     // i,j+1,k
-  val011 = (float)GET_VAL_N(sd,ijk+slice_nz + 1); // i,j+1,k+1
+  val010 = (float)GET_VAL_N(sd,ijk+jp1);     // i,j+1,k
+  val011 = (float)GET_VAL_N(sd,ijk+jp1+kp1); // i,j+1,k+1
 
   // ijk + slice_nz*slice_ny
-  val100 = (float)GET_VAL_N(sd,ijk + slice_nz*slice_ny);     // i+1,j,k
-  val101 = (float)GET_VAL_N(sd,ijk + slice_nz*slice_ny + 1); // i+1,j,k+1
+  val100 = (float)GET_VAL_N(sd,ijk + ip1);     // i+1,j,k
+  val101 = (float)GET_VAL_N(sd,ijk + ip1+kp1); // i+1,j,k+1
 
   // ijk + slice_nz + slice_nz*slice_ny
-  val110 = (float)GET_VAL_N(sd,ijk + slice_nz + slice_nz*slice_ny);   // i+1,j+1,k
-  val111 = (float)GET_VAL_N(sd,ijk + slice_nz + slice_nz*slice_ny + 1); // i+1,j+1,k+1
+  val110 = (float)GET_VAL_N(sd,ijk + ip1+jp1);   // i+1,j+1,k
+  val111 = (float)GET_VAL_N(sd,ijk + ip1+jp1+kp1); // i+1,j+1,k+1
 
   val00 = MIX(dx,val100,val000);
   val10 = MIX(dx,val110,val010);
