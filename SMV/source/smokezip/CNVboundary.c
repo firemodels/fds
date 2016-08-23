@@ -581,13 +581,13 @@ void update_patch_hist(void){
       patchframesize+=patchi->patchsize[j];
     }
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    reset_histogram(patchi->histogram);
+    ResetHistogram(patchi->histogram);
     while(error1==0){
       int ndummy;
 
       FORTgetpatchdata(&unit1, &patchi->npatches,
         pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &ndummy,&error1);
-      update_histogram(patchframe,patchframesize,patchi->histogram);
+      UpdateHistogram(patchframe,patchframesize,patchi->histogram);
     }
     LOCK_COMPRESS;
     FORTclosefortranfile(&unit1);
@@ -659,10 +659,10 @@ void Get_Boundary_Bounds(void){
 
       patchj = patchinfo + j;
       if(strcmp(patchi->label.shortlabel,patchj->label.shortlabel)!=0)continue;
-      merge_histogram(patchi->histogram,patchj->histogram);
+      MergeHistogram(patchi->histogram,patchj->histogram);
     }
-    patchi->valmax=get_histogram_value(patchi->histogram,0.99);
-    patchi->valmin=get_histogram_value(patchi->histogram,0.01);
+    patchi->valmax=GetHistogramVal(patchi->histogram,0.99);
+    patchi->valmin=GetHistogramVal(patchi->histogram,0.01);
     patchi->setvalmax=1;
     patchi->setvalmin=1;
     for(j=i+1;j<npatchinfo;j++){

@@ -4207,14 +4207,14 @@ int update_patch_hist(patchdata *patchj){
     FORTopenboundary(patchi->file,&unit1,&patchi->version,&error1,lenfile);
 
     NewMemory((void **)&patchframe,patchframesize*sizeof(float));
-    reset_histogram(patchi->histogram);
+    ResetHistogram(patchi->histogram);
     error1=0;
     while(error1==0){
       int ndummy;
 
       FORTgetpatchdata(&unit1, &npatches,
         pi1, pi2, pj1, pj2, pk1, pk2, &patchtime1, patchframe, &ndummy,&error1);
-      update_histogram(patchframe,patchframesize,patchi->histogram);
+      UpdateHistogram(patchframe,patchframesize,patchi->histogram);
     }
     FORTclosefortranfile(&unit1);
     FREEMEMORY(patchframe);
@@ -4226,7 +4226,7 @@ int update_patch_hist(patchdata *patchj){
     FREEMEMORY(pk2);
     FREEMEMORY(patchdir);
     FREEMEMORY(patchsize);
-    complete_histogram(patchi->histogram);
+    CompleteHistogram(patchi->histogram);
   }
   return sum;
 }

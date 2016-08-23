@@ -235,7 +235,7 @@ void diff_boundaryes(FILE *stream_out){
       valmin=1000000000.0;
       valmax=-valmin;
 
-      reset_histogram(boundary1->histogram);
+      ResetHistogram(boundary1->histogram);
 
       FORTgetpatchdata(&unit1, &boundary1->npatches,
         p1i1, p1i2, p1j1, p1j2, p1k1, p1k2, &patchtime1, pqq1, &npqq1, &error1);
@@ -286,7 +286,7 @@ void diff_boundaryes(FILE *stream_out){
             if(pq1[kk]>valmax)valmax=pq1[kk];
           }
         }
-        update_histogram(pqq1, nsize1, boundary1->histogram);
+        UpdateHistogram(pqq1, nsize1, boundary1->histogram);
         FORToutpatchframe(&unit3, &npatches3,
                         p3i1, p3i2, p3j1, p3j2, p3k1, p3k2,
                         &patchtime1, pqq3, &error3);
@@ -303,8 +303,8 @@ void diff_boundaryes(FILE *stream_out){
       }
       PRINTF("\n");
       FFLUSH();
-      valmin_percentile = get_histogram_value(boundary1->histogram, 0.01);
-      valmax_percentile = get_histogram_value(boundary1->histogram, 0.99);
+      valmin_percentile = GetHistogramVal(boundary1->histogram, 0.01);
+      valmax_percentile = GetHistogramVal(boundary1->histogram, 0.99);
 
       fprintf(stream_out,"MINMAXBNDF\n");
       fprintf(stream_out,"  %s\n",outfile2);

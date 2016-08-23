@@ -557,7 +557,7 @@ void Get_Part_Bounds(void){
     propi = part5propinfo + i;
 
     NewMemory((void **)&propi->histogram,sizeof(histogramdata));
-    init_histogram(propi->histogram,NHIST_BUCKETS);
+    InitHistogram(propi->histogram,NHIST_BUCKETS);
   }
 
   NewMemory((void **)&pdata,1000000*sizeof(float));
@@ -624,7 +624,7 @@ void Get_Part_Bounds(void){
           partpropdata *propi;
 
           propi=getpartprop(classj->labels[k].shortlabel);
-          update_histogram(vals,npoints[j],propi->histogram);
+          UpdateHistogram(vals,npoints[j],propi->histogram);
 
           vals += npoints[j];
         }
@@ -647,8 +647,8 @@ void Get_Part_Bounds(void){
 
     propi = part5propinfo + i;
 
-    propi->valmax=get_histogram_value(propi->histogram,0.99);
-    propi->valmin=get_histogram_value(propi->histogram,0.01);
+    propi->valmax=GetHistogramVal(propi->histogram,0.99);
+    propi->valmin=GetHistogramVal(propi->histogram,0.01);
     propi->setvalmax=1;
     propi->setvalmin=1;
     PRINTF(" %s min: %f max: %f\n",propi->label.shortlabel,propi->valmin,propi->valmax);
