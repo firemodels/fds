@@ -141,9 +141,9 @@ EXTERNCPP void getsliceparams2(void);
 #ifdef pp_PILOT
 EXTERNCPP void draw_pilot(void);
 #ifdef pp_WINDROSE
-EXTERNCPP void setup_pilot_data(int nbuckets, int nr, int ntheta, int flag);
+EXTERNCPP void SummarizeWindData(int nbuckets, int nr, int ntheta, int flag);
 #else
-EXTERNCPP void setup_pilot_data(int nbuckets);
+EXTERNCPP void SummarizeWindData(int nbuckets);
 #endif
 #endif
 EXTERNCPP void DefineAllFEDs(void);
