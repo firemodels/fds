@@ -530,7 +530,7 @@ PERIMETER    = -1._EB
 RAMP_ID      = 'null'
 RAMP_LOSS    = 'null'
 REVERSE      = .FALSE.
-ROUGHNESS    = 0._EB
+ROUGHNESS    = -1._EB
 ROUND        = .TRUE.
 SPEC_ID      = 'null'
 SQUARE       = .FALSE.
@@ -893,60 +893,6 @@ IF (ALLOCATED(DPSTAR)) DEALLOCATE(DPSTAR)
 
 END SUBROUTINE HVAC_CALC
 
-! SUBROUTINE INIT_HVAC_MASS_TRANSPORT
-! ! Initialises cell densities, temperatures, specific heats and species' for discretised ducts
-
-! USE PHYSICAL_FUNCTIONS, ONLY: GET_AVERAGE_SPECIFIC_HEAT
-! INTEGER :: ND,NN
-! REAL(EB) :: DRHO,DTMP,DZZ(1:N_TRACKED_SPECIES),ZZ_GET(1:N_TRACKED_SPECIES)
-! TYPE(DUCT_TYPE), POINTER :: DU=>NULL()
-
-! ! Initialize arrays for duct mass transport
-! IF (HVAC_MASS_TRANSPORT) THEN
-!    DO ND = 1, N_DUCTS
-!       DU => DUCT(ND)
-!       IF (DU%LEAKAGE) CYCLE
-!       IF (DU%N_CELLS==1) CYCLE ! Duct is not sub-celled, no requirement to set cell values.
-!       ALLOCATE(DU%RHO_C(DU%N_CELLS))
-!       ALLOCATE(DU%TMP_C(DU%N_CELLS))
-!       ALLOCATE(DU%CP_C(DU%N_CELLS))
-!       ALLOCATE(DU%ZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
-!       DU%DX = DU%LENGTH/DU%N_CELLS
-!       SELECT CASE (DU%DUCT_INTERP_TYPE_INDEX)
-!          CASE (NODE1) ! duct adopts values from node 1
-!             DU%RHO_C(:) = DUCTNODE(DU%NODE_INDEX(1))%RHO
-!             DU%TMP_C(:) = DUCTNODE(DU%NODE_INDEX(1))%TMP
-!             DU%CP_C(:) = DUCTNODE(DU%NODE_INDEX(1))%CP
-!             DO NN = 1, DU%N_CELLS
-!                DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ
-!             ENDDO
-!          CASE (NODE2) ! duct adopts values from node 2
-!             DU%RHO_C = DUCTNODE(DU%NODE_INDEX(2))%RHO
-!             DU%TMP_C = DUCTNODE(DU%NODE_INDEX(2))%TMP
-!             DU%CP_C = DUCTNODE(DU%NODE_INDEX(2))%CP
-!             DO NN = 1, DU%N_CELLS
-!                DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(2))%ZZ
-!             ENDDO
-!          CASE (LINEAR_INTERPOLATION) ! linear interpolation between node 1 and 2
-!             DRHO = (DUCTNODE(DU%NODE_INDEX(2))%RHO - DUCTNODE(DU%NODE_INDEX(1))%RHO) / DU%N_CELLS
-!             DTMP = (DUCTNODE(DU%NODE_INDEX(2))%TMP - DUCTNODE(DU%NODE_INDEX(1))%TMP) / DU%N_CELLS
-!             DZZ(1:N_TRACKED_SPECIES) = (DUCTNODE(DU%NODE_INDEX(2))%ZZ - DUCTNODE(DU%NODE_INDEX(1))%ZZ) / DU%N_CELLS
-!             DO NN = 1, DU%N_CELLS
-!                DU%RHO_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%RHO + DRHO*(REAL(NN,EB) - 0.5_EB)
-!                DU%TMP_C(NN) = DUCTNODE(DU%NODE_INDEX(1))%TMP + DTMP*(REAL(NN,EB) - 0.5_EB)
-!                DU%ZZ_C(NN,1:N_TRACKED_SPECIES) = DUCTNODE(DU%NODE_INDEX(1))%ZZ + DZZ(:)*(REAL(NN,EB) - 0.5_EB)
-!                ZZ_GET = DU%ZZ_C(NN,1:N_TRACKED_SPECIES)
-!                CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,DU%CP_C(NN),DU%TMP_C(NN))
-!             ENDDO
-!          CASE DEFAULT
-!             WRITE(MESSAGE,'(A,A,A,I5)') 'ERROR: DUCT_INTERP_TYPE is not correctly specified. Duct ID:',TRIM(DU%ID),&
-!                                         ', HVAC line number:',NN
-!             CALL SHUTDOWN(MESSAGE); RETURN
-!       END SELECT
-!    ENDDO
-! ENDIF
-
-! END SUBROUTINE INIT_HVAC_MASS_TRANSPORT
 
 SUBROUTINE MATRIX_SOLVE(NNE)
 USE MATH_FUNCTIONS,ONLY : GAUSSJ
@@ -2024,7 +1970,7 @@ ENDDO NODELOOP
 
 DO ND = 1, NE%N_DUCTS
    DU => DUCT(NE%DUCT_INDEX(ND))
-   IF (DU%ROUGHNESS > TWO_EPSILON_EB) THEN
+   IF (DU%ROUGHNESS > -TWO_EPSILON_EB) THEN
       ZZ_GET(1:N_TRACKED_SPECIES) = DU%ZZ(1:N_TRACKED_SPECIES)
       CALL GET_VISCOSITY(ZZ_GET,VISCOSITY,DU%TMP_D)
       FRICTION_FACTOR = COMPUTE_FRICTION_FACTOR(DU%RHO_D,VISCOSITY,ABS(DU%VEL(GUESS)),DU%DIAMETER,DU%ROUGHNESS)
@@ -2705,7 +2651,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       ALLOCATE(RHOCPT_C(DU%N_CELLS))
       ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
-      ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
+      ! Populates upwind face variable, accounting for direction of flow (i.e. includes relevant node value as first/last face)
       IF (DU%VEL(NEW)>0._EB) THEN
          ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
          CPT_F(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
@@ -2733,10 +2679,10 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
          DU%RHO_C(NC) = SUM(RHOZZ_C(NC,1:N_TRACKED_SPECIES))
          DU%ZZ_C(NC,:) = RHOZZ_C(NC,:)/DU%RHO_C(NC)
          CPT_C(NC) = RHOCPT_C(NC)/DU%RHO_C(NC) 
-         ZZ_GET = DU%ZZ_C(NC,:) ! Single dimension to be used with GET_AVERAGE ...
+         ZZ_GET = DU%ZZ_C(NC,:) ! Single dimension to be used with GET_AVERAGE_ ...
          TGUESS = DU%TMP_C(NC)
          ITCOUNT = 0
-         CP_LOOP: DO
+         CP_LOOP: DO ! Uses Newton method to iterate on temperature to get new TMP_C and CP_C
             ITCOUNT = ITCOUNT + 1
             CALL GET_AVERAGE_SPECIFIC_HEAT(ZZ_GET,CP,TGUESS)
             IF (TGUESS>1._EB) THEN
