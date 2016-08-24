@@ -1,8 +1,8 @@
-#!/bin/csh -f
+#!/bin/bash
 
-set directory=$1
-set    branch=$2
-set      host=$3
+directory=$1
+branch=$2
+host=$3
 
 echo
 echo Updating the GIT repository: $directory, branch: $branch on host: $host to the latest revision

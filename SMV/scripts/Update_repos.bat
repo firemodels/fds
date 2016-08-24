@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 
 echo.
-echo ------------------local PC --------------------------------------------
+echo ------------------ local PC ------------------
 echo Updating the Windows Git repository, %svn_root%, to the latest revision
 
 %svn_drive%
@@ -35,11 +35,11 @@ set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.
-echo ------------------ linux: %linux_hostname% --------------------------------------------
+echo ------------------ linux: %linux_hostname% ------------------
 plink %linux_logon% %scriptdir%/UPDATE_thishost.sh            %linux_svn_root% development %linux_hostname%
 
 echo.
-echo ------------------ linux: %osx_hostname% --------------------------------------------
-plink %osx_logon%   %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% development %osx_hostname%
+echo ------------------ osx: %osx_hostname% ------------------
+plink %osx_logon%   %scriptdir%/UPDATE_otherhost.sh  %linux_svn_root% development %osx_hostname%
 
 pause
