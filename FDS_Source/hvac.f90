@@ -482,7 +482,7 @@ DO NN=1,N_HVAC_READ
          DUCT_NODE_A(I_DUCT,2) = VENT2_ID
          DU%MASS_FLOW_INITIAL = 1.E7_EB
          DU%VOLUME_FLOW_INITIAL = 1.E7_EB
-         DU%ROUGHNESS = 0._EB
+         DU%ROUGHNESS = -1._EB
          DU%TAU = 1._EB
          DU%RAMP_INDEX = TANH_RAMP
          DU%LEAKAGE = .FALSE.
@@ -2456,7 +2456,7 @@ DO NZ1 = 0, N_ZONE
          DU%NODE_INDEX(2) = I_DUCTNODE+1
          DU%RHO_D = RHOA
          DU%TMP_D = TMPA
-         DU%ROUGHNESS = 0._EB
+         DU%ROUGHNESS = -1._EB
          DU%VEL = 0._EB
          ALLOCATE(DU%ZZ(N_TRACKED_SPECIES))
          ZZ_GET(1:N_TRACKED_SPECIES) = SPECIES_MIXTURE(1:N_TRACKED_SPECIES)%ZZ0
@@ -2651,7 +2651,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       ALLOCATE(RHOCPT_C(DU%N_CELLS))
       ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
-      ! Populates upwind face variable, accounting for direction of flow (i.e. includes relevant node value as first/last face)
+      ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
       IF (DU%VEL(NEW)>0._EB) THEN
          ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
          CPT_F(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
