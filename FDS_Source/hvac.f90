@@ -2651,7 +2651,7 @@ DUCT_LOOP: DO ND = 1,N_DUCTS
       ALLOCATE(RHOCPT_C(DU%N_CELLS))
       ALLOCATE(RHOZZ_C(DU%N_CELLS,N_TRACKED_SPECIES))
 
-      ! Populates upwind face variable, accounting for direction of flow (i.e. includes relevant node value as first/last face)
+      ! Populates upwind face variables, accounting for direction of flow (i.e. includes relevant node value as first/last face)
       IF (DU%VEL(NEW)>0._EB) THEN
          ZZ_F(0,:) = DUCTNODE(DU%NODE_INDEX(1))%ZZ(:)
          CPT_F(0) = DUCTNODE(DU%NODE_INDEX(1))%CP*DUCTNODE(DU%NODE_INDEX(1))%TMP
