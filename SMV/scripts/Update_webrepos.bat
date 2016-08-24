@@ -1,4 +1,4 @@
-@echo off
+ @echo off
 
 :: batch file used to update Windows, Linux and OSX GIT repos
 
@@ -19,7 +19,7 @@ goto:eof
 call %envfile%
 
 echo.
-echo ------------------------------------------------------------------------
+echo ------------------local PC --------------------------------------------
 echo Updating the Windows Git repository, %svn_webroot%, to the latest revision
 
 %svn_drive%
@@ -32,8 +32,12 @@ git merge origin/nist-pages
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
+echo.
+echo ------------------ linux: %linux_hostname% --------------------------------------------
 plink %linux_logon% %scriptdir%/UPDATE_thishost.sh            %linux_svn_webroot% nist-pages %linux_hostname%
 
+echo.
+echo ------------------ linux: %osx_hostname% --------------------------------------------
 plink %osx_logon%   %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_webroot% nist-pages %osx_hostname%
 
 pause
