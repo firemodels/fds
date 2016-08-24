@@ -81,12 +81,12 @@ void readplot3d(char *file, int ifile, int flag, int *errorcode){
 
   freesurface(&meshi->currentsurf);
   freesurface(&meshi->currentsurf2);
-  freecontour(&meshi->plot3dcontour1);
-  freecontour(&meshi->plot3dcontour2);
-  freecontour(&meshi->plot3dcontour3);
-  initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
-  initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
-  initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
+  FreeContour(&meshi->plot3dcontour1);
+  FreeContour(&meshi->plot3dcontour2);
+  FreeContour(&meshi->plot3dcontour3);
+  InitContour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
+  InitContour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
+  InitContour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
 
 
   for(i=0;i<nmeshes;i++){
@@ -1625,10 +1625,10 @@ void updateplotslice_mesh(meshdata *mesh_in, int slicedir){
         }
       }
     }
-    freecontour(plot3dcontour1ptr);
-    initcontour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb);
-    setcontourslice(plot3dcontour1ptr,1,xplt[plotx]);
-    getcontours(yplt,zplt,jbar+1,kbar+1,yzcolorfbase, iblank_yz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour1ptr);
+    FreeContour(plot3dcontour1ptr);
+    InitContour(plot3dcontour1ptr,rgb_plot3d_contour,nrgb);
+    SetContourSlice(plot3dcontour1ptr,1,xplt[plotx]);
+    GetContours(yplt,zplt,jbar+1,kbar+1,yzcolorfbase, iblank_yz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour1ptr);
     FREEMEMORY(iblank_yz);
   }
   else if(ploty>=0&&slicedir==YDIR){
@@ -1672,10 +1672,10 @@ void updateplotslice_mesh(meshdata *mesh_in, int slicedir){
         *dz_xzcopy++=vecfactor*veclength*qval/speedmax;
       }
     }}
-    freecontour(plot3dcontour2ptr);
-    initcontour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb);
-    setcontourslice(plot3dcontour2ptr,2,yplt[ploty]);
-    getcontours(xplt,zplt,ibar+1,kbar+1,xzcolorfbase, iblank_xz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour2ptr);
+    FreeContour(plot3dcontour2ptr);
+    InitContour(plot3dcontour2ptr,rgb_plot3d_contour,nrgb);
+    SetContourSlice(plot3dcontour2ptr,2,yplt[ploty]);
+    GetContours(xplt,zplt,ibar+1,kbar+1,xzcolorfbase, iblank_xz,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour2ptr);
     FREEMEMORY(iblank_xz);
   }
   else if(plotz>=0&&slicedir==ZDIR){
@@ -1719,10 +1719,10 @@ void updateplotslice_mesh(meshdata *mesh_in, int slicedir){
         *dz_xycopy++=vecfactor*veclength*qval/speedmax;
       }
     }}
-    freecontour(plot3dcontour3ptr);
-    initcontour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb);
-    setcontourslice(plot3dcontour3ptr,3,zplt[plotz]);
-    getcontours(xplt,yplt,ibar+1,jbar+1,xycolorfbase, iblank_xy,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour3ptr);
+    FreeContour(plot3dcontour3ptr);
+    InitContour(plot3dcontour3ptr,rgb_plot3d_contour,nrgb);
+    SetContourSlice(plot3dcontour3ptr,3,zplt[plotz]);
+    GetContours(xplt,yplt,ibar+1,jbar+1,xycolorfbase, iblank_xy,p3levels[plotn-1],DONT_GET_AREAS,DATA_FORTRAN,plot3dcontour3ptr);
     FREEMEMORY(iblank_xy);
   }
 }

@@ -492,6 +492,12 @@ void initterrain_all(void){
       zmax = MAX(zmax,*znode);
     }
   }
+  {
+    float zzmin=zmin, zzmax=zmax;
+
+    zmin = zmin + 0.0001*(zzmax - zzmin);
+    zmax = zmax - 0.000*(zzmax - zzmin);
+  }
   dz = (zmax - zmin)/12.0;
   for(imesh=0;imesh<nmeshes;imesh++){
     meshdata *meshi;
@@ -505,13 +511,13 @@ void initterrain_all(void){
     }
     terri->levels[12]=zmax;
 
-    freecontour(&meshi->terrain_contour);
-    initcontour(&meshi->terrain_contour,rgbptr,nrgb);
+    FreeContour(&meshi->terrain_contour);
+    InitContour(&meshi->terrain_contour,rgbptr,nrgb);
 
     meshi->terrain_contour.idir=3;
     meshi->terrain_contour.xyzval=zmin;
 
-    getcontours(meshi->xplt_orig,meshi->yplt_orig,terri->nx+1,terri->ny+1,
+    GetContours(meshi->xplt_orig,meshi->yplt_orig,terri->nx+1,terri->ny+1,
       terri->znode, NULL, terri->levels,DONT_GET_AREAS,DATA_FORTRAN,
       &meshi->terrain_contour);
 
@@ -1207,7 +1213,7 @@ void update_terrain(int allocate_memory, float vertical_factor_local){
       ymax = meshi->yplt_orig[ny];
 
       initterrain_znode(meshi, terri, xmin, xmax, nx, ymin, ymax, ny, allocate_memory);
-      initcontour(&meshi->terrain_contour,rgbptr,nrgb);
+      InitContour(&meshi->terrain_contour,rgbptr,nrgb);
     }
     initterrain_all();
   }

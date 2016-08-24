@@ -101,9 +101,9 @@ int contourline_list[81][5]={
   {2,5,7},{0},{0}
 };
 
-/*  ------------------ initlinecontours ------------------------ */
+/*  ------------------ InitLineContoursI ------------------------ */
 
-void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
+void InitLineContoursI(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
   int i;
 
   contour *cont;
@@ -122,7 +122,7 @@ void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours,float cons
     int j;
 
     ci = cont+i;
-    initcontour(ci,rgbptr,nlevels);
+    InitContour(ci,rgbptr,nlevels);
     ci->xyzval=constval;
     ci->idir=idir;
     for(j=0;j<nlevels;j++){
@@ -132,9 +132,9 @@ void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours,float cons
 
 }
 
-/*  ------------------ initcontours ------------------------ */
+/*  ------------------ InitContours ------------------------ */
 
-void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
+void InitContours(contour **ci_ptr, float **rgbptr, int ncontours,float constval, int idir, float level_min, float level_max, int nlevels){
   int i;
 
   contour *cont;
@@ -153,7 +153,7 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
     int j;
 
     ci = cont+i;
-    initcontour(ci,rgbptr,nlevels);
+    InitContour(ci,rgbptr,nlevels);
     ci->xyzval=constval;
     ci->idir=idir;
     for(j=0;j<nlevels+1;j++){
@@ -163,9 +163,9 @@ void initcontours(contour **ci_ptr, float **rgbptr, int ncontours,float constval
 
 }
 
-/*  ------------------ initcontour ------------------------ */
+/*  ------------------ InitContour ------------------------ */
 
-void initcontour(contour *ci, float **rgbptr, int nlevels){
+void InitContour(contour *ci, float **rgbptr, int nlevels){
   int n;
 
   ci->nlevels=nlevels;
@@ -190,21 +190,21 @@ void initcontour(contour *ci, float **rgbptr, int nlevels){
   }
 }
 
-/*  ------------------ freecontours ------------------------ */
+/*  ------------------ FreeContours ------------------------ */
 
-void freecontours(contour *contours,int ncontours){
+void FreeContours(contour *contours,int ncontours){
   int i;
   contour *ci;
 
   for(i=0;i<ncontours;i++){
     ci = contours + i;
-    freecontour(ci);
+    FreeContour(ci);
   }
 }
 
-/*  ------------------ freecontour ------------------------ */
+/*  ------------------ FreeContour ------------------------ */
 
-void freecontour(contour *ci){
+void FreeContour(contour *ci){
 
   int n;
 
@@ -229,17 +229,16 @@ void freecontour(contour *ci){
   ci->nlevels=0;
 }
 
-/*  ------------------ setcontourslice ------------------------ */
+/*  ------------------ SetContourSlice ------------------------ */
 
-void setcontourslice(contour *ci,int idir,float xyz){
+void SetContourSlice(contour *ci,int idir,float xyz){
   ci->idir=idir;
   ci->xyzval=xyz;
-
 }
 
-/*  ------------------ getcontours ------------------------ */
+/*  ------------------ GetContours ------------------------ */
 
-void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
+void GetContours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float *levels,int cellflag,int dataflag,
                  const contour *ci){
   int n,i,j;
@@ -361,7 +360,7 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
         v[1]=(double)vals[ij2];
         v[2]=(double)vals[i2j2];
         v[3]=(double)vals[i2j];
-        getcontournodes(n,nlevels,x,y,v,contlow,minfill,conthigh,maxfill,
+        GetContourNodes(n,nlevels,x,y,v,contlow,minfill,conthigh,maxfill,
           &nnode, xnodecopy, ynodecopy,
           &nnode2,xlinecopy,ylinecopy,
           &casen,blankit);
@@ -424,9 +423,9 @@ void getcontours(const  float *xgrid, const float *ygrid, int nx, int ny,
 
 }
 
-/*  ------------------ getlinecontours ------------------------ */
+/*  ------------------ GetLineContours ------------------------ */
 
-void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
+void GetLineContours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float line_min, const float line_max,
                  const contour *ci){
   int n,i,j;
@@ -482,7 +481,7 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
           v[1]=(double)vals[ij2];
           v[2]=(double)vals[i2j2];
           v[3]=(double)vals[i2j];
-          getlinecontournodes(linelevel,x,y,v,
+          GetLineContourNodes(linelevel,x,y,v,
             &nnode2,xlinecopy,ylinecopy,
             blankit);
           if(nnode2!=0){
@@ -503,9 +502,9 @@ void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
   }
 }
 
-/*  ------------------ getcontournodes ------------------------ */
+/*  ------------------ GetContourNodes ------------------------ */
 
-void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4], const double val[4],
+void GetContourNodes(int ilev, int nlevels, const double x[4], const double y[4], const double val[4],
                      double  contlow, int minfill, double conthigh,int maxfill,
                      int *nnode, float *xnode, float *ynode,
                      int *nnode2,float *xline, float *yline,
@@ -593,9 +592,9 @@ void getcontournodes(int ilev, int nlevels, const double x[4], const double y[4]
   }
 }
 
-/*  ------------------ getlinecontournodes ------------------------ */
+/*  ------------------ GetLineContourNodes ------------------------ */
 
-void getlinecontournodes(double linelevel, const double x[4], const double y[4], const double val[4],
+void GetLineContourNodes(double linelevel, const double x[4], const double y[4], const double val[4],
                      int *nline_nodes,float *xline, float *yline,
                      int blankit){
   int state[4]={1,1,1,1}, n,casenum;
@@ -652,9 +651,9 @@ void getlinecontournodes(double linelevel, const double x[4], const double y[4],
   }
 }
 
-/*  ------------------ getarea ------------------------ */
+/*  ------------------ GetArea ------------------------ */
 
-float getarea(float *xnodes, float *ynodes, int ind){
+float GetArea(float *xnodes, float *ynodes, int ind){
   float v1[2], v2[2];
   float area;
 
@@ -697,7 +696,7 @@ void GetContourAreas(const contour *ci){
       for(j=1;j<polysize[ipoly]-1;j++){
         float area;
 
-        area=getarea(xnode,ynode,j);
+        area=GetArea(xnode,ynode,j);
         areas[n]+=area;
       }
       xnode+=polysize[ipoly];
