@@ -533,7 +533,7 @@ void readpatch_bndf(int ifile, int flag, int *errorcode){
     ASSERT(meshi->npatches>0&&meshi->mxpatch_frames>0);
     for(i=0;i<meshi->npatches*meshi->mxpatch_frames;i++){
       if(meshi->patch_contours[i]!=NULL){
-        freecontour(meshi->patch_contours[i]);
+        FreeContour(meshi->patch_contours[i]);
       }
     }
     FREEMEMORY(meshi->patch_contours);

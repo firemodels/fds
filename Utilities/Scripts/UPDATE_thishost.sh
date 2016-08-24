@@ -1,13 +1,14 @@
 #!/bin/bash
 
 directory=$1
-host=$2
+branch=$2
+host=$3
 
-echo Updating the GIT repository $directory on $host to the latest revision
+echo
+echo Updating the GIT repository: $directory, branch: $branch on host: $host to the latest revision
 echo
 cd ~/$directory
-git checkout development
+git checkout $branch
 git remote update
-git merge origin/development
-git merge firemodels/development 
+git merge origin/$branch
 git describe --dirty 

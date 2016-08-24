@@ -545,8 +545,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         contour *fed_contours=NULL;
 
         NewMemory((void **)&fed_contours,sizeof(contour));
-        initcontour(fed_contours,NULL,nlevels);
-        getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+        InitContour(fed_contours,NULL,nlevels);
+        GetContours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
         areas = fed_contours->areas;
         contour_areas[0]=(areas[0]+areas[3])*area_factor;
         contour_areas[1]=areas[1]*area_factor;
@@ -561,7 +561,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
         contour_areas_percen[1]=(int)fareas[1];
         contour_areas_percen[2]=(int)fareas[2];
         contour_areas_percen[3]=(int)fareas[3];
-        freecontour(fed_contours);
+        FreeContour(fed_contours);
         FREEMEMORY(fed_contours);
       }
       fprintf(AREA_STREAM,"\"time\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\",\"0.0->0.3\",\"0.3->1.0\",\"1.0->3.0\",\"3.0->\"\n");
@@ -633,8 +633,8 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           contour *fed_contours=NULL;
 
           NewMemory((void **)&fed_contours,sizeof(contour));
-          initcontour(fed_contours,NULL,nlevels);
-          getcontours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
+          InitContour(fed_contours,NULL,nlevels);
+          GetContours(xgrid, ygrid, nxdata, nydata, fed_frame, iblank, levels, GET_NODE_AREAS, DATA_C, fed_contours);
           areas = fed_contours->areas;
           contour_areas[0]=(areas[0]+areas[3])*area_factor;
           contour_areas[1]=areas[1]*area_factor;
@@ -650,7 +650,7 @@ void readfed(int file_index, int flag, int file_type, int *errorcode){
           contour_areas_percen[2]=(int)fareas[2];
           contour_areas_percen[3]=(int)fareas[3];
 
-          freecontour(fed_contours);
+          FreeContour(fed_contours);
           FREEMEMORY(fed_contours);
         }
         if(AREA_STREAM!=NULL){
@@ -2984,13 +2984,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         break;
     }
 
-    freecontours(sd->line_contours,sd->nline_contours);
+    FreeContours(sd->line_contours,sd->nline_contours);
     sd->nline_contours=sd->ntimes;
     if(slice_contour_type==SLICE_LINE_CONTOUR){
-      initlinecontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
+      InitLineContoursI(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values);
     }
     else{
-      initcontours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values-1);
+      InitContours(&sd->line_contours,sd->rgb_slice_ptr,sd->nline_contours,constval,sd->idir,line_min,line_max,nline_values-1);
     }
     for(i=0;i<sd->nline_contours;i++){
       float *vals;
@@ -3002,13 +3002,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         PRINTF("updating line contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
           case XDIR:
-            getlinecontours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
+            GetLineContours(yplt,zplt,ny,nz,vals,NULL,line_min, line_max,ci);
             break;
           case YDIR:
-            getlinecontours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
+            GetLineContours(xplt,zplt,nx,nz,vals,NULL,line_min,line_max,ci);
           break;
           case ZDIR:
-            getlinecontours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
+            GetLineContours(xplt,yplt,nx,ny,vals,NULL,line_min,line_max,ci);
           break;
           default:
             ASSERT(FFALSE);
@@ -3019,13 +3019,13 @@ void update_slice_contours(int slice_type_index, float line_min, float line_max,
         PRINTF("updating stepped contour: %i of %i\n",i+1,sd->nline_contours);
         switch(sd->idir){
           case XDIR:
-            getcontours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            GetContours(yplt,zplt,jbar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
           case YDIR:
-            getcontours(xplt,zplt,ibar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            GetContours(xplt,zplt,ibar+1,kbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
           case ZDIR:
-            getcontours(xplt,yplt,ibar+1,jbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
+            GetContours(xplt,yplt,ibar+1,jbar+1,vals,NULL,ci->levels,DONT_GET_AREAS,DATA_FORTRAN,ci);
             break;
           default:
             ASSERT(FFALSE);

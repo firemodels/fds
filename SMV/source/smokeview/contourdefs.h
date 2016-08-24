@@ -29,30 +29,30 @@ typedef struct {
   int idir;
 } contour;
 
-void getcontournodes(int n, int levels, const double x[4], const double y[4], const double val[4],
+void GetContourNodes(int n, int levels, const double x[4], const double y[4], const double val[4],
                      double contlow, int modelow, double conthigh, int modehigh,
                      int *nnode, float *xnode, float *ynode,
                      int *nnode2,float *xline, float *yline,
                      int *casen,int blankit);
-void getlinecontournodes(double linelevel, const double x[4], const double y[4], const double val[4],
+void GetLineContourNodes(double linelevel, const double x[4], const double y[4], const double val[4],
                      int *nline_nodes,float *xline, float *yline,
                      int blankit);
 
 void GetContourAreas(const contour *ci);
 void DrawContours(const contour *ci);
 void DrawLineContours(const contour *ci, float linewidth);
-void setcontourslice(contour *ci,int idir,float xyz);
-void getcontours(const float *xgrid, const float *ygrid, int nx, int ny,
+void SetContourSlice(contour *ci,int idir,float xyz);
+void GetContours(const float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float *levels,int cellflag, int dataflag,
                  const contour *ci);
-void getlinecontours(const  float *xgrid, const float *ygrid, int nx, int ny,
+void GetLineContours(const  float *xgrid, const float *ygrid, int nx, int ny,
                  const float *vals, const char *iblank, const float level_min, const float level_max,
                  const contour *ci);
-void initcontour(contour *ci, float **rgbptr, int nlevels);
-void initlinecontours(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
-void initcontours(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
-void freecontour(contour *ci);
-void freecontours(contour *contours,int ncontours);
+void InitContour(contour *ci, float **rgbptr, int nlevels);
+void InitLineContoursI(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
+void InitContours(contour **ci_ptr, float **rgbptr, int ncontours, float constval, int idir, float level_min, float level_max, int nlevels);
+void FreeContour(contour *ci);
+void FreeContours(contour *contours,int ncontours);
 
 #endif
 

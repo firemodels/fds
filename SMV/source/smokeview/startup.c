@@ -43,9 +43,9 @@ void Init(void){
     meshdata *meshi;
 
     meshi=meshinfo+i;
-    initcontour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
-    initcontour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
-    initcontour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
+    InitContour(&meshi->plot3dcontour1,rgb_plot3d_contour,nrgb);
+    InitContour(&meshi->plot3dcontour2,rgb_plot3d_contour,nrgb);
+    InitContour(&meshi->plot3dcontour3,rgb_plot3d_contour,nrgb);
   }
 
   for(i=0;i<nmeshes;i++){

@@ -116,6 +116,10 @@ extern "C" void glui_wui_setup(int main_window){
     RADIOBUTTON_wui_1c=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_d("2D lines"));
     RADIOBUTTON_texture=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_d("Image"));
     RADIOBUTTON_wui_1d=glui_wui->add_radiobutton_to_group(RADIO_terrain_type,_d("Hidden"));
+#ifndef pp_SHOWTERRAIN
+    RADIOBUTTON_wui_1b->disable();
+    RADIOBUTTON_wui_1c->disable();
+#endif
 
     if(terrain_texture==NULL||terrain_texture->loaded==0){
       RADIOBUTTON_texture->disable();
