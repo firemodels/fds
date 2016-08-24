@@ -4,6 +4,7 @@ directory=$1
 branch=$2
 host=$3
 
+echo
 echo Updating the GIT repository: $directory, branch: $branch on host: $host to the latest revision
 echo
 cd ~/$directory
