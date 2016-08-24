@@ -294,8 +294,8 @@ int get_script_keyword_index(char *keyword){
   if(MatchUpper(keyword,"UNLOADALL") == MATCH)return SCRIPT_UNLOADALL;
   if(MatchUpper(keyword,"UNLOADTOUR") == MATCH)return SCRIPT_UNLOADTOUR;
   if(MatchUpper(keyword,"VOLSMOKERENDERALL") == MATCH)return SCRIPT_VOLSMOKERENDERALL;
-  if(MatchUpper(keyword, "ISORENDERALL")==1)return SCRIPT_ISORENDERALL;
-  if(MatchUpper(keyword, "XSCENECLIP")==1)return SCRIPT_XSCENECLIP;
+  if(MatchUpper(keyword, "ISORENDERALL")==MATCH)return SCRIPT_ISORENDERALL;
+  if(MatchUpper(keyword, "XSCENECLIP")==MATCH)return SCRIPT_XSCENECLIP;
   if(MatchUpper(keyword,"YSCENECLIP") == MATCH)return SCRIPT_YSCENECLIP;
   if(MatchUpper(keyword,"ZSCENECLIP") == MATCH)return SCRIPT_ZSCENECLIP;
 
@@ -383,7 +383,7 @@ void removeDEG(char *string){
     unsigned char c;
 
     c = (unsigned char)string[i];
-    if(c == 176)continue;
+    if(c == DEG_SYMBOL)continue;
     string[ii] = string[i];
     ii++;
   }

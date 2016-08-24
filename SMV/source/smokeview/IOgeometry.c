@@ -2385,11 +2385,11 @@ void read_geomdata(int ifile, int load_flag, int *errorcode){
   FORTgetembeddata(file, &ntimes_local, &nvals, patchi->geom_times,
     patchi->geom_nstatics, patchi->geom_ndynamics, patchi->geom_vals, &redirect, &error, lenfile);
 
-  reset_histogram(patchi->histogram);
+  ResetHistogram(patchi->histogram);
 
-  update_histogram(patchi->geom_vals,nvals,patchi->histogram);
+  UpdateHistogram(patchi->geom_vals,nvals,patchi->histogram);
 
-  complete_histogram(patchi->histogram);
+  CompleteHistogram(patchi->histogram);
 
   patchi->ngeom_times=ntimes_local;
   patchi->geom_nvals=nvals;

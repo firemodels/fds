@@ -102,11 +102,14 @@ Some nodes in the modeled HVAC system will represent items such as tees.  Flow t
 
 \subsection{Duct Losses}
 
-The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates), \(K_{\mbox{\tiny minor}}\), plus losses due to wall friction, \(K_{\mbox{\tiny wall}}\)).  Minor losses are a user input. If a duct roughness is set, wall friction losses are modeled as follows:
-\be \(K_{\mbox{\tiny wall}}\) \; = \; \frac{f \, L}{D} \ee
+The total flow loss in the duct, $K$, is the sum of fitting losses in the duct (e.g. elbows, expansion/reduction, orifice plates), $K_{\mbox{\tiny minor}}$, plus losses due to wall friction, $K_{\mbox{\tiny wall}}$.  Minor losses are a user input. If a duct roughness is set, wall friction losses are modeled as follows:
+\be 
+   K_{\mbox{\tiny wall}} = \frac{f \, L}{D} 
+\ee
 where $D$ is the duct diameter.  $f$ is determined from the Colebrook equation. However, since this equation does not have an analytical solution, an approximation by Zigrang and Sylvester is used~\cite{Zigrang:1}.
-\be \frac{1}{\sqrt{f}} \; = \; -2 \, \log_{10} \left(\frac{\epsilon/D}{3.7}\; - \; \frac{4.518}{\mathrm{Re}_D} \, \log_{10} \left(
-\frac{6.9}{\mathrm{Re}_D}+\left( \frac{\epsilon/D}{3.7} \right)^{1.11} \right) \right) \ee
+\be 
+   \frac{1}{\sqrt{f}} \; = \; -2 \, \log_{10} \left(\frac{\epsilon/D}{3.7}\; - \; \frac{4.518}{\mathrm{Re}_D} \, \log_{10} \left( \frac{6.9}{\mathrm{Re}_D}+\left( \frac{\epsilon/D}{3.7} \right)^{1.11} \right) \right) 
+\ee
 where $\epsilon$ is the absolute roughness of the duct.
 
 \subsection{Heating and Coiling Coils}

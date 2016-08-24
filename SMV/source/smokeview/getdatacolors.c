@@ -221,20 +221,20 @@ void UpdatePatchBounds(patchdata *patchi){
 
   boundi = &patchi->bounds;
   if(boundi->defined==1)return;
-  init_histogram(&full_histogram,NHIST_BUCKETS);
+  InitHistogram(&full_histogram,NHIST_BUCKETS);
 
   for(j=0;j<npatchinfo;j++){
     patchdata *patchj;
 
     patchj=patchinfo+j;
     if(patchj->type!=patchi->type||patchj->filetype!=patchi->filetype)continue;
-    merge_histogram(&full_histogram,patchj->histogram);
+    MergeHistogram(&full_histogram,patchj->histogram);
   }
 
-  boundi->global_min = get_histogram_value(&full_histogram, 0.0);
-  boundi->global_max = get_histogram_value(&full_histogram, 1.0);
-  boundi->percentile_min = get_histogram_value(&full_histogram, percentile_level);
-  boundi->percentile_max = get_histogram_value(&full_histogram, 1.0-percentile_level);
+  boundi->global_min = GetHistogramVal(&full_histogram, 0.0);
+  boundi->global_max = GetHistogramVal(&full_histogram, 1.0);
+  boundi->percentile_min = GetHistogramVal(&full_histogram, percentile_level);
+  boundi->percentile_max = GetHistogramVal(&full_histogram, 1.0-percentile_level);
   boundi->defined=1;
 
   for(j=0;j<npatchinfo;j++){
@@ -248,7 +248,7 @@ void UpdatePatchBounds(patchdata *patchi){
     memcpy(boundj,boundi,sizeof(bounddata));
   }
   WriteBoundINI();
-  free_histogram(&full_histogram);
+  FreeHistogram(&full_histogram);
 }
 
 /* ------------------ getBoundaryColors3 ------------------------ */
