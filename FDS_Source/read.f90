@@ -11627,6 +11627,8 @@ MESH_LOOP: DO NM=1,NMESHES
          IF (PBZ>-1.E5_EB) XB(5:6) = PBZ
       ENDIF
 
+      CALL CHECK_XB(XB)
+
       XB(1) = MAX(XB(1),XS)
       XB(2) = MIN(XB(2),XF)
       XB(3) = MAX(XB(3),YS)
