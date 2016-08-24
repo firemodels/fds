@@ -20,7 +20,8 @@ call %envfile%
 
 echo.
 echo ------------------------------------------------------------------------
-echo Updating the Windows repository, %svn_root%, to the latest revision
+echo Updating the Windows Git repository, %svn_root%, to the latest revision
+
 %svn_drive%
 cd %svn_root%
 echo Updating the repo:%svn_root%
@@ -30,17 +31,39 @@ git merge origin/development
 git merge firemodels/development
 git describe --dirty
 
+echo.
+echo ------------------------------------------------------------------------
+echo Updating the Windows Git repository, %svn_webroot%, to the latest revision
+
+%svn_drive%
+cd %svn_webroot%
+echo Updating the repo:%svn_webroot%
+git remote update
+git checkout nist-pages
+git merge origin/nist-pages
+git describe --dirty
+
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
 echo.
 echo ------------------------------------------------------------------------
-echo Updating the Linux GIT repository, %linux_svn_root%, on %linux_hostname% to the latest revision
-plink %linux_logon% %scriptdir%/UPDATE_thishost.sh  %linux_svn_root% %linux_hostname%
+echo Updating the Linux Git repository, %linux_svn_root%, on %linux_hostname% to the latest revision
+plink %linux_logon% %scriptdir%/UPDATE_thishost.sh  %linux_svn_root% development %linux_hostname%
+
+echo.
+echo ------------------------------------------------------------------------
+echo Updating the Linux Git repository, %linux_svn_webroot%, on %linux_hostname% to the latest revision
+plink %linux_logon% %scriptdir%/UPDATE_thishost.sh  %linux_svn_webroot% nist-pages %linux_hostname%
 
 echo.
 echo ------------------------------------------------------------------------
 echo Updating the OSX GIT repository, %linux_svn_root%, on %osx_hostname% to the latest revision
-plink %osx_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% %osx_hostname%
+plink %osx_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% development %osx_hostname%
+
+echo.
+echo ------------------------------------------------------------------------
+echo Updating the OSX GIT repository, %linux_svn_webroot%, on %osx_hostname% to the latest revision
+plink %osx_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_webroot% nist-pages %osx_hostname%
 
 pause
