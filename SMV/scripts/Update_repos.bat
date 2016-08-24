@@ -34,14 +34,8 @@ git describe --dirty
 set scriptdir=%linux_svn_root%/Utilities/Scripts/
 set linux_fdsdir=%linux_svn_root%
 
-echo.
-echo ------------------------------------------------------------------------
-echo Updating the Linux Git repository, %linux_svn_root%, on %linux_hostname% to the latest revision
-plink %linux_logon% %scriptdir%/UPDATE_thishost.sh  %linux_svn_root% development %linux_hostname%
+plink %linux_logon% %scriptdir%/UPDATE_thishost.sh            %linux_svn_root% development %linux_hostname%
 
-echo.
-echo ------------------------------------------------------------------------
-echo Updating the OSX GIT repository, %linux_svn_root%, on %osx_hostname% to the latest revision
-plink %osx_logon% %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% development %osx_hostname%
+plink %osx_logon%   %scriptdir%/UPDATE_latest_fds_onhost.csh  %linux_svn_root% development %osx_hostname%
 
 pause
