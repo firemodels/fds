@@ -492,13 +492,7 @@ void initterrain_all(void){
       zmax = MAX(zmax,*znode);
     }
   }
-  {
-    float zzmin=zmin, zzmax=zmax;
-
-    zmin = zmin + 0.0001*(zzmax - zzmin);
-    zmax = zmax - 0.000*(zzmax - zzmin);
-  }
-  dz = (zmax - zmin)/12.0;
+  dz = (zmax - zmin) / 10.0;
   for(imesh=0;imesh<nmeshes;imesh++){
     meshdata *meshi;
     terraindata *terri;
@@ -506,10 +500,10 @@ void initterrain_all(void){
 
     meshi = meshinfo + imesh;
     terri = meshi->terrain;
-    for(i=0;i<13;i++){
+    for(i=0;i<10;i++){
       terri->levels[i]=zmin + i*dz;
     }
-    terri->levels[12]=zmax;
+    terri->levels[10]=zmax;
 
     FreeContour(&meshi->terrain_contour);
     InitContour(&meshi->terrain_contour,rgbptr,nrgb);
@@ -520,7 +514,6 @@ void initterrain_all(void){
     GetContours(meshi->xplt_orig,meshi->yplt_orig,terri->nx+1,terri->ny+1,
       terri->znode, NULL, terri->levels,DONT_GET_AREAS,DATA_FORTRAN,
       &meshi->terrain_contour);
-
   }
   {
     int nx, ny;
@@ -888,12 +881,15 @@ void readterrain(char *file, int ifile, int flag, int *errorcode){
 
   x = terri->x;
   y = terri->y;
-  dx = (xmax-xmin)/nx;
-  dy = (ymax-ymin)/ny;
+  
+  dx = (xmax-xmin)/(float)nx;
+  dy = (ymax-ymin)/(float)ny;
+  
   for(i=0;i<nx;i++){
     x[i] = xmin + dx*i;
   }
   x[nx] = xmax;
+  
   for(i=0;i<ny;i++){
     y[i] = ymin + dy*i;
   }
