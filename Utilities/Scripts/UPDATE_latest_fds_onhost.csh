@@ -1,9 +1,10 @@
 #!/bin/csh -f
 
 set directory=$1
-set      host=$2
+set    branch=$2
+set      host=$3
 
-echo Updating the GIT repository $directory on $host to the latest revision
+echo Updating the GIT repository $directory, branch $branch on $host to the latest revision
 echo
-ssh -q $host \( cd \~/$directory \; git checkout development \; git remote update \; git merge origin/development \; git merge firemodels/development  \)
+ssh -q $host \( cd \~/$directory \; git checkout $branch \; git remote update \; git merge origin/$branch \)
 ssh -q $host \( cd \~/$directory \; git describe --dirty  \)
