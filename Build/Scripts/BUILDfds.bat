@@ -40,7 +40,7 @@ if "%buildtype%" == "release" (
 )
 
 if "%platform%" == "windows" (
-  cd %svn_root%\FDS_Compilation\%mpi%intel_win_64%type%
+  cd %svn_root%\FDS\Build\%mpi%intel_win_64%type%
   if "%buildtype%" == "release" (
     erase *.obj *.mod *.exe
   )
@@ -49,17 +49,17 @@ if "%platform%" == "windows" (
 )
 if "%platform%" == "linux" (
   if "%buildtype%" == "release" (
-    plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/%mpi%intel_linux_64%type% clean_fds.sh
+    plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Build/%mpi%intel_linux_64%type% clean_fds.sh
   )
-  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/%mpi%intel_linux_64%type% make_fds.sh
+  plink %linux_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Build/%mpi%intel_linux_64%type% make_fds.sh
   pause
   goto eof
 )
 if "%platform%" == "osx" (
   if "%buildtype%" == "release" (
-    plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/%mpi%intel_osx_64%type% clean_fds.sh
+    plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Build/%mpi%intel_osx_64%type% clean_fds.sh
   )
-  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS_Compilation/%mpi%intel_osx_64%type% make_fds.sh
+  plink %osx_logon% %linux_svn_root%/SMV/scripts/run_command.sh FDS/Build/%mpi%intel_osx_64%type% make_fds.sh
   pause
   goto eof
 )
