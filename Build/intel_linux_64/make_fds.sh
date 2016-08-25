@@ -6,4 +6,4 @@ target=${dir##*/}
 source $IFORT_COMPILER/bin/compilervars.sh $platform
 
 echo Building $target
-make VPATH="../../FDS_Source" -f ../makefile $target
+make VPATH="../../Source" -f ../makefile $target
