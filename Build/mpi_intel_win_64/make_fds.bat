@@ -8,7 +8,7 @@ call ..\..\Utilities\Scripts\setup_intel_compilers.bat
 
 Title Building FDS (mpi) for 64 bit Windows
 
-make SHELL="%ComSpec%" VPATH="../../FDS_Source" -f ..\makefile mpi_intel_win_64
+make SHELL="%ComSpec%" VPATH="../../Source" -f ..\makefile mpi_intel_win_64
 if x%arg1% == xbot goto skip2
 pause
 :skip2

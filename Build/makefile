@@ -9,7 +9,7 @@
 
 # The variable VPATH defines where the source code is relative to the current directory
 
-VPATH = ../FDS_Source
+VPATH = ../Source
 
 ifeq ($(shell echo "check_quotes"),"check_quotes")
 # windows
