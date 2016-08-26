@@ -3,4 +3,4 @@ dir=`pwd`
 target=${dir##*/}
 
 echo Building $target
-make -j4 VPATH="../../FDS_Source" -f ../makefile $target
+make -j4 VPATH="../../Source" -f ../makefile $target
