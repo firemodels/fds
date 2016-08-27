@@ -1,6 +1,8 @@
 $RUNSMV -d Adaptive_Mesh_Refinement random_meshes
 $RUNSMV -d Controls activate_vents
 $RUNSMV -d Detectors beam_detector
+$RUNSMV -d Detectors objects_static
+$RUNSMV -d Detectors objects_dynamic
 $RUNSMV -d Fires couch
 $RUNSMV -d Flowfields helium_2d_isothermal
 $RUNSMV -d Flowfields symmetry_test
@@ -34,5 +36,3 @@ $RUNSMV -d Sprinklers_and_Sprays cascade
 $RUNSMV -d Turbulence csmag_64
 $RUNSMV -d Turbulence dsmag_64
 $RUNSMV -d Turbulence ribbed_channel_80
-$RUNSMV -d Visualization objects_static
-$RUNSMV -d Visualization objects_dynamic
