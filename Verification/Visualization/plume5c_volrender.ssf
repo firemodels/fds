@@ -1,7 +1,0 @@
-RENDERDIR
- frames
-LOADINIFILE
- plume5c_volrender.ini
-VOLSMOKERENDERALL
- 1 0
- plume5c_vol
