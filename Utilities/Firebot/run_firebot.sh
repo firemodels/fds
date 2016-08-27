@@ -24,9 +24,6 @@ notfound=`qstat -a 2>&1 | tail -1 | grep "not found" | wc -l`
 if [ $notfound -eq 1 ] ; then
   QUEUE=none
 fi
-
-
-
 function usage {
 echo "Verification and validation testing script for FDS"
 echo ""
@@ -53,7 +50,6 @@ echo "-U - upload guides (only by user firebot)"
 echo "-v - show options used to run firebot"
 exit
 }
-
 USEINSTALL=
 BRANCH=master
 botscript=firebot.sh
@@ -145,6 +141,7 @@ if [[ "$UPDATEREPO" == "1" ]]; then
      if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
         echo "***error: firebot not running in the $FIREBOTDIR"
         exit
+     fi
      cd $CURDIR
   fi
 fi
