@@ -72,29 +72,33 @@ esac
 done
 shift $(($OPTIND-1))
 
-export SVNROOT=`pwd`/../..
+export SVNROOT=`pwd`/../../..
+cd $SVNROOT
+export SVNROOT=`pwd`
+cd $CURDIR
+
 if [ "$SMV_PATH" == "" ]; then
   SMV_PATH=$SVNROOT/SMV/Build/smokeview/intel_$PLATFORM$SIZE
 fi
 export SMV=$SMV_PATH/smokeview_$PLATFORM$TEST$SIZE$DEBUG
-export RUNSMV=$SVNROOT/Utilities/Scripts/runsmv.sh
+export RUNSMV=$SVNROOT/FDS/Utilities/Scripts/runsmv.sh
 export SMVBINDIR="-bindir $SVNROOT/SMV/for_bundle/"
 export BASEDIR=`pwd`/..
 
 echo "erasing SCRIPT_FIGURES png files"
-rm -f $SVNROOT/Manuals/FDS_Configuration_Management_Plan/SCRIPT_FIGURES/*.png
-rm -f $SVNROOT/Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/*.png
-rm -f $SVNROOT/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
-rm -f $SVNROOT/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
-rm -f $SVNROOT/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/FDS/Manuals/FDS_Configuration_Management_Plan/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/FDS/Manuals/FDS_Technical_Reference_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/FDS/Manuals/FDS_User_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/FDS/Manuals/FDS_Validation_Guide/SCRIPT_FIGURES/*.png
+rm -f $SVNROOT/FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
 
 if [ "$START_X" == "yes" ]; then
-  source $SVNROOT/Utilities/Scripts/startXserver.sh 2>/dev/null
+  source $SVNROOT/FDS/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi
 cd $SVNROOT/Verification
 ./FDS_Pictures.sh
 if [ "$START_X" == "yes" ]; then
-  source $SVNROOT/Utilities/Scripts/stopXserver.sh 2>/dev/null
+  source $SVNROOT/FDS/Utilities/Scripts/stopXserver.sh 2>/dev/null
 fi
 cd $CURDIR
 echo $progname complete
