@@ -70,7 +70,6 @@ echo "-q - queue_name - run cases using the queue queue_name"
 echo "     default: $QUEUE"
 echo "-r - repository location [default: $fdsrepo]"
 echo "-s - skip matlab and document building stages"
-echo "-S host - generate images on host"
 echo "-u - update repo"
 echo "-U - upload guides"
 exit
@@ -78,11 +77,10 @@ exit
 
 UPLOADGUIDES=0
 GIT_REVISION=
-SSH=
 SKIPMATLAB=
 SKIPFIGURES=
 FIREBOT_LITE=
-while getopts 'b:cFhiLm:q:r:sS:uUv:' OPTION
+while getopts 'b:cFhiLm:q:r:suUv:' OPTION
 do
 case $OPTION in
   b)
@@ -115,9 +113,6 @@ case $OPTION in
   s)
    SKIPMATLAB=1
    ;;
-  S)
-   SSH="$OPTARG "
-   ;;
   u)
    UPDATEREPO=1
    ;;
@@ -149,16 +144,6 @@ if [ "$USEINSTALL" != "" ]; then
       echo "Error: smokeview not found. firebot aborted." >> $OUTPUT_DIR/stage1 2>&1
       exit
    fi
-fi
-
-if [ "$SSH" != "" ]; then
-  sshok=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $SSH echo ok 2>/dev/null)
-  if [ "$sshok" != "ok" ]; then
-    echo unable to make an ssh connection to $SSH
-    echo firebot aborted
-    exit
-  fi
-  SSH="ssh $SSH "
 fi
 
 export fdsrepo 
@@ -584,20 +569,14 @@ compile_smv_utilities()
 {  
    # smokeview libraries
    if [ "$USEINSTALL" == "" ]; then
-   echo "   Smokeview"
-   echo "      libraries"
-   if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/LIBS/intel_${platform}${size}
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
-   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
-   echo "" >> $OUTPUT_DIR/stage3a 2>&1
+     echo "   Smokeview"
+     echo "      libraries"
+     cd $fdsrepo/SMV/Build/LIBS/intel_${platform}${size}
+     echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1
+     ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1
+     echo "" >> $OUTPUT_DIR/stage3a 2>&1
    else
-   $SSH \( cd $fdsrepo/SMV/Build/LIBS/intel_${platform}${size} \; \
-   echo 'Building Smokeview libraries:' >> $OUTPUT_DIR/stage3a 2>&1 \; \
-   ./makelibs.sh >> $OUTPUT_DIR/stage3a 2>&1 \; \
-   echo "" >> $OUTPUT_DIR/stage3a 2>&1 \)
-   fi
-   echo "   Smokeview - using installed smokeview"
+     echo "   Smokeview - using installed smokeview"
    fi
 }
 
@@ -682,14 +661,9 @@ compile_smv_db()
 {
    # Clean and compile SMV debug
    if [ "$USEINSTALL" == "" ]; then
-   echo "      debug"
-   if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage3b
-   else
-   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
-   ./make_smv_db.sh &> $OUTPUT_DIR/stage3b \)
-   fi
+     echo "      debug"
+     cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
+     ./make_smv_db.sh &> $OUTPUT_DIR/stage3b
    fi
 }
 
@@ -731,14 +705,9 @@ compile_smv()
 {
    # Clean and compile SMV
    if [ "$USEINSTALL" == "" ]; then
-   echo "      release"
-   if [ "$SSH" == "" ]; then
-   cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
-   ./make_smv.sh &> $OUTPUT_DIR/stage3c
-   else
-   $SSH \( cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size} \; \
-   ./make_smv.sh &> $OUTPUT_DIR/stage3c \)
-   fi
+     echo "      release"
+     cd $fdsrepo/SMV/Build/smokeview/intel_${platform}${size}
+     ./make_smv.sh &> $OUTPUT_DIR/stage3c
    fi
 }
 
@@ -779,13 +748,8 @@ make_fds_pictures()
 {
    # Run Make FDS Pictures script
    echo Generating FDS images
-   if [ "$SSH" == "" ]; then
    cd $fdsrepo/FDS/Verification/scripts
    ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6
-   else
-   $SSH \( cd $fdsrepo/FDS/Verification/scripts \; \
-   ./Make_FDS_Pictures.sh $USEINSTALL &> $OUTPUT_DIR/stage6 \)
-   fi
 }
 
 check_fds_pictures()
