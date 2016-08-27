@@ -17,6 +17,8 @@ $QFDS -d Controls rms_cov_corr.fds
 
 $QFDS -d Detectors aspiration_detector.fds
 $QFDS -d Detectors beam_detector.fds
+$QFDS -d Detectors objects_dynamic.fds
+$QFDS -d Detectors objects_static.fds
 $QFDS -d Detectors smoke_detector.fds
 
 $QFDS -d Energy_Budget energy_budget_adiabatic_walls.fds
@@ -444,9 +446,6 @@ $QFDS -d Turbulence sem_par_leddy_p2.fds
 $QFDS -d Turbulence sem_atm_leddy_p2.fds
 $QFDS -d Turbulence sem_ramp_leddy_p2.fds
 $QFDS -d Turbulence ramp_prof_u_z.fds
-
-$QFDS -d Visualization objects_dynamic.fds
-$QFDS -d Visualization objects_static.fds
 
 $QFDS -d WUI dragon_5a.fds
 $QFDS -d WUI pine_needles.fds
