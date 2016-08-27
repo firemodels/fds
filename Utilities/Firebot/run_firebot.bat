@@ -12,13 +12,13 @@ set force=0
 set installed=0
 set lite=0
 
-set fdsrepo=%userprofile%\FDS-SMVgitclean
+set fdsrepo=%userprofile%\FDS-SMVnew
 if exist .fds_git (
-  set fdsrepo=..\..
+  set fdsrepo=..\..\..
 )
 if x%FDSGIT% == x goto skip_fdsgit
-  if EXIST %FDSGIT% (
-    set fdsrepo=%FDSGIT%
+  if EXIST %FDSGITNEW% (
+    set fdsrepo=%FDSGITNEW%
   )
 :skip_fdsgit
 call :normalise %fdsrepo%
@@ -46,8 +46,13 @@ if %force% == 0 goto skip_force
 call :normalise %CD% curdir
 set curdir=%temparg%
 
-call :normalise %fdsrepo%\Utilities\Firebot
+call :normalise %fdsrepo%\FDS\Utilities\Firebot
 set fdsbotdir=%temparg%
+if not %fdsbotdir% == %curdir% (
+   echo "***error: firebot not running in the FDS\Utilities\Firebot"
+   echo exiting firebot
+   exit
+)
 
 set running=%curdir%\firebot.running
 
@@ -56,14 +61,19 @@ if exist %running% goto skip_running
 :: get latest firebot
 
     if %update% == 0 goto no_update
-    echo getting latest firebot
-    cd %fdsrepo%
-    git fetch origin
-    git pull 1> Nul 2>&1
-    if not %fdsbotdir% == %curdir% (
-      copy %fdsbotdir%\firebot.bat %curdir%
-    )
-    cd %curdir%
+       echo Updating FDS repo
+       cd %fdsrepo%\FDS
+       git remote update
+       git merge origin/master 1> Nul 2>&1
+       git merge remote/master 1> Nul 2>&1
+       
+       echo Updating SMV repo
+       cd %fdsrepo%\SMV
+       git remote update
+       git merge origin/master 1> Nul 2>&1
+       git merge remote/master 1> Nul 2>&1
+
+       cd %curdir%
     :no_update
 
 :: run firebot
@@ -145,7 +155,7 @@ if not (%1)==() goto getopts
 exit /b
 
 :usage  
-echo run_smokebot [options]
+echo run_firebot [options]
 echo. 
 echo -help           - display this message
 echo -fdsrepo name   - specify the FDS-SMV repository
