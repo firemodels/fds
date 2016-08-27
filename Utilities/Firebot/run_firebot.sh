@@ -6,13 +6,16 @@ running=~/.fdssmvgit/bot_running
 
 CURDIR=`pwd`
 reponame=~/FDS-SMVgitclean
-if [ "$FDSSMV" != "" ] ; then
-  reponame=$FDSSMV
+if [ "$FDSSMVNEW" != "" ] ; then
+  reponame=$FDSSMVNEW
 fi
 if [ -e .fds_git ]; then
-  cd ../..
+  cd ../../..
   reponame=`pwd`
   cd $CURDIR
+else
+  echo "***error: firebot not running in the FDS repo"
+  exit
 fi
 
 # checking to see if a queing system is available
@@ -52,7 +55,7 @@ exit
 }
 
 USEINSTALL=
-BRANCH=development
+BRANCH=master
 botscript=firebot.sh
 UPDATEREPO=
 CLEANREPO=0
@@ -132,7 +135,7 @@ if [[ "$EMAIL" != "" ]]; then
 fi
 if [[ "$UPDATEREPO" == "1" ]]; then
    UPDATE=-u
-   cd $reponame
+   cd $reponame/FDS
    if [[ "$RUNFIREBOT" == "1" ]]; then
      git remote update &> /dev/null
      git checkout $BRANCH &> /dev/null
@@ -140,8 +143,8 @@ if [[ "$UPDATEREPO" == "1" ]]; then
      cd Utilities/Firebot
      FIREBOTDIR=`pwd`
      if [[ "$CURDIR" != "$FIREBOTDIR" ]]; then
-       cp $botscript $CURDIR/.
-     fi
+        echo "***error: firebot not running in the $FIREBOTDIR"
+        exit
      cd $CURDIR
   fi
 fi
