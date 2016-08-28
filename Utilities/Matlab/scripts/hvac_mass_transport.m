@@ -69,7 +69,7 @@ addverstr(gca,Git_Filename,'linear')
 % set(gcf,'PaperUnits',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_1')
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC_mass_transport_convergence_1')
 
 % Plot L1 norm error convergence
 figure
@@ -94,7 +94,7 @@ addverstr(gca,Git_Filename,'loglog')
 % set(gcf,'PaperUnits',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_2')
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC_mass_transport_convergence_2')
 
 % Plot L2 error convergence
 figure
@@ -119,5 +119,5 @@ addverstr(gca,Git_Filename,'loglog')
 % set(gcf,'PaperUnits',Paper_Units);
 % set(gcf,'PaperSize',[Paper_Width Paper_Height]);
 % set(gcf,'PaperPosition',[0 0 Paper_Width Paper_Height]);
-% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/hvac_mass_transport_convergence_3')
+% print(gcf,'-dpdf','../../Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/HVAC_mass_transport_convergence_3')
 
