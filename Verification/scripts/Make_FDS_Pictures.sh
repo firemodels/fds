@@ -95,7 +95,7 @@ rm -f $SVNROOT/FDS/Manuals/FDS_Verification_Guide/SCRIPT_FIGURES/*.png
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/FDS/Utilities/Scripts/startXserver.sh 2>/dev/null
 fi
-cd $SVNROOT/Verification
+cd $SVNROOT/FDS/Verification
 ./FDS_Pictures.sh
 if [ "$START_X" == "yes" ]; then
   source $SVNROOT/FDS/Utilities/Scripts/stopXserver.sh 2>/dev/null
