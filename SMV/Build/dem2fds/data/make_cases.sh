@@ -11,12 +11,12 @@ terraindir=~/terrain
 
 $dem2fds $option -dir $terraindir/blodget blodget.in 
 
-$dem2fds $option -dir $terraindir/demtest demtest1.in 
-$dem2fds $option -dir $terraindir/demtest demtest2.in 
+$dem2fds $option -elevdir $terraindir/N40W078 -dir $terraindir/demtest demtest1.in 
+$dem2fds $option -elevdir $terraindir/N40W078 -dir $terraindir/demtest demtest2.in 
 
-$dem2fds $option -dir $terraindir/nist nist.in 
+$dem2fds $option -elevdir $terraindir/N40W078 -dir $terraindir/nist nist.in 
 
-$dem2fds $option -dir $terraindir/sugarloaf sugarloaf.in 
+$dem2fds $option -elevdir $terraindir/N40W078 -dir $terraindir/sugarloaf sugarloaf.in 
 
 $dem2fds $option -overlap -dir $terraindir/tower tower.in 
 

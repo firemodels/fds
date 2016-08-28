@@ -428,7 +428,7 @@ int get_nfilelist(const char *path, char *key){
   }
   while( (entry = readdir(dp)) ){
   //  if((entry->d_type==DT_DIR&&entry->d_name[0]!='.')||(entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1)){
-    if((entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1)){
+    if(((entry->d_type==DT_REG||entry->d_type==DT_UNKNOWN)&&MatchWild(entry->d_name,key)==1)){
       maxfiles++;
       continue;
     }
@@ -462,7 +462,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   NewMemory((void **)&flist,maxfiles*sizeof(filelistdata));
   /*
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
-    if(entry->d_type==DT_DIR&&entry->d_name[0]!='.'){
+    if((entry->d_type==DT_DIR||entry->d_type==DT_UNKNOWN)&&entry->d_name[0]!='.'){
       char *file;
       filelistdata *flisti;
 
@@ -477,7 +477,7 @@ int get_filelist(const char *path, char *key, int maxfiles, filelistdata **filel
   rewinddir(dp);
   */
   while( (entry = readdir(dp))&&nfiles<maxfiles ){
-    if(entry->d_type==DT_REG&&MatchWild(entry->d_name,key)==1){
+    if((entry->d_type==DT_REG||entry->d_type==DT_UNKNOWN)&&MatchWild(entry->d_name,key)==1){
       char *file;
       filelistdata *flisti;
 
