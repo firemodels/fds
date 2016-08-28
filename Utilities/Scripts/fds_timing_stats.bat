@@ -7,7 +7,7 @@ set CURDIR=%CD%
 cd ..\..
 set SVNROOT=%CD%
 
-cd %SVNROOT%/Verification
+cd %SVNROOT%\FDS\Verification
 ::   OUT_FILES=*/*.out
 
 :: Write header information to fds_timing_stats.csv file

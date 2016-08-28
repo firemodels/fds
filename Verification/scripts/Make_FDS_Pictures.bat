@@ -19,7 +19,7 @@ echo.
 echo erasing Verification scripted figures generated previously
 erase ..\Manuals\FDS_Verification_Guide\SCRIPT_FIGURES\*.png 1> Nul 2>&1
 
-cd ..
+cd ..\..
 set SVNROOT=%CD%
 
 cd %BASEDIR%
