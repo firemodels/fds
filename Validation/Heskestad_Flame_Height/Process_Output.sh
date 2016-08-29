@@ -1,6 +1,9 @@
 #!/bin/bash
+PDIR=..
+CUR=`pwd`
+DIR=`basename $CUR`
  
-WDIR=FDS_Output_Files
+WDIR=$PDIR/$DIR/FDS_Output_Files
 DDIR=Current_Results
 cp $DDIR/Qs*line.csv $WDIR
 cp $DDIR/Qs*hrr.csv  $WDIR
