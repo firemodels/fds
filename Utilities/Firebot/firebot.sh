@@ -1229,6 +1229,7 @@ if [[ "$SKIPFIGURES" == "" ]] ; then
    if [[ $stage3c_success ]] ; then
       make_fds_pictures
       check_fds_pictures
+      echo after check_fds_pictures
    fi
 fi
 
@@ -1238,7 +1239,9 @@ if [ "$SKIPMATLAB" == "" ] ; then
    if [ $matlab_success == true ]; then
      run_matlab_verification
      check_matlab_verification
+     echo after check_matlab_verification
      check_verification_stats
+     echo after check_verification_stats
    fi
 
 ### Stage 7b ###
@@ -1246,13 +1249,17 @@ if [ "$SKIPMATLAB" == "" ] ; then
    if [ $matlab_success == true ]; then
      run_matlab_validation
      check_matlab_validation
+     echo after check_matlab_validation
      archive_validation_stats
+     echo after archive_validation_stats
      make_validation_git_stats
+     echo after make_validation_stats
    fi
 fi
 
 ### Stage 7c ###
    generate_timing_stats
+   echo after generate_timing_stats
 
 ### Stage 8 ###
 if [ "$SKIPMATLAB" == "" ] ; then
