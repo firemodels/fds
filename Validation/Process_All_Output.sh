@@ -4,7 +4,7 @@ PROCESS()
 {
   case=$1
   curdir=`pwd`
-  cd $case/FDS_Output_Files
+  cd $case
   ./Process_Output.sh 
   cd $curdir
 }
