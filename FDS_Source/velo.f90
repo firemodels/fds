@@ -2937,16 +2937,16 @@ ENDIF
 END SUBROUTINE CHECK_STABILITY
 
 
-SUBROUTINE BAROCLINIC_CORRECTION(T,NM)
+SUBROUTINE BAROCLINIC_CORRECTION(T,DT,NM)
 
 ! Add baroclinic term to the momentum equation
 
 USE MATH_FUNCTIONS, ONLY: EVALUATE_RAMP
-REAL(EB), INTENT(IN) :: T
+REAL(EB), INTENT(IN) :: T,DT
 INTEGER, INTENT(IN) :: NM
 REAL(EB), POINTER, DIMENSION(:,:,:) :: UU=>NULL(),VV=>NULL(),WW=>NULL(),RHOP=>NULL(),HP=>NULL(),RHMK=>NULL(),RRHO=>NULL()
 INTEGER  :: I,J,K,II,JJ,KK,IIG,JJG,KKG,IOR,IW
-REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,TNOW
+REAL(EB) :: P_EXTERNAL,TSI,TIME_RAMP_FACTOR,DUMMY,UN,TNOW,BLIM_LOC,TWO_DT
 LOGICAL  :: INFLOW
 TYPE(VENTS_TYPE), POINTER :: VT=>NULL()
 TYPE(WALL_TYPE), POINTER :: WC=>NULL()
@@ -3056,7 +3056,6 @@ DO K=1,KBAR
       DO I=0,IBAR
          FVX_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I+1,J,K)+RHMK(I+1,J,K)*RHOP(I,J,K))*(RRHO(I+1,J,K)-RRHO(I,J,K))*RDXN(I)/ &
                          (RHOP(I+1,J,K)+RHOP(I,J,K))
-         FVX(I,J,K) = FVX(I,J,K) + FVX_B(I,J,K)
       ENDDO
    ENDDO
 ENDDO
@@ -3071,7 +3070,6 @@ IF (.NOT.TWO_D) THEN
          DO I=1,IBAR
             FVY_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J+1,K)+RHMK(I,J+1,K)*RHOP(I,J,K))*(RRHO(I,J+1,K)-RRHO(I,J,K))*RDYN(J)/ &
                             (RHOP(I,J+1,K)+RHOP(I,J,K))
-            FVY(I,J,K) = FVY(I,J,K) + FVY_B(I,J,K)
          ENDDO
       ENDDO
    ENDDO
@@ -3086,11 +3084,61 @@ DO K=0,KBAR
       DO I=1,IBAR
          FVZ_B(I,J,K) = -(RHMK(I,J,K)*RHOP(I,J,K+1)+RHMK(I,J,K+1)*RHOP(I,J,K))*(RRHO(I,J,K+1)-RRHO(I,J,K))*RDZN(K)/ &
                          (RHOP(I,J,K+1)+RHOP(I,J,K))
-         FVZ(I,J,K) = FVZ(I,J,K) + FVZ_B(I,J,K)
       ENDDO
    ENDDO
 ENDDO
 !$OMP END DO nowait
+
+LIMIT_BARO_IF: IF (LIMIT_BAROCLINIC_TERM) THEN
+   TWO_DT = 2._EB*DT
+
+   !$OMP DO SCHEDULE(static)
+   DO K=1,KBAR
+      DO J=1,JBAR
+         DO I=0,IBAR
+            BLIM_LOC = MIN( ABS(FVX_B(I,J,K)), ABS(UU(I,J,K)/TWO_DT) ) / (ABS(FVX_B(I,J,K)+TWO_EPSILON_EB))
+            FVX_B(I,J,K) = FVX_B(I,J,K)*BLIM_LOC
+            IF (STORE_B_LIMITER) BLIM(I,J,K) = BLIM_LOC
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END DO nowait
+
+   ! Compute baroclinic term in the y momentum equation, p*d/dy(1/rho)
+
+   IF (.NOT.TWO_D) THEN
+   !$OMP DO SCHEDULE(static)
+      DO K=1,KBAR
+         DO J=0,JBAR
+            DO I=1,IBAR
+               BLIM_LOC = MIN( ABS(FVY_B(I,J,K)), ABS(VV(I,J,K)/TWO_DT) ) / (ABS(FVY_B(I,J,K)+TWO_EPSILON_EB))
+               FVY_B(I,J,K) = FVY_B(I,J,K)*BLIM_LOC
+               IF (STORE_B_LIMITER) BLIM(I,J,K) = MIN(BLIM(I,J,K),BLIM_LOC)
+            ENDDO
+         ENDDO
+      ENDDO
+   !$OMP END DO nowait
+   ENDIF
+
+   ! Compute baroclinic term in the z momentum equation, p*d/dz(1/rho)
+
+   !$OMP DO SCHEDULE(static)
+   DO K=0,KBAR
+      DO J=1,JBAR
+         DO I=1,IBAR
+            BLIM_LOC = MIN( ABS(FVZ_B(I,J,K)), ABS(WW(I,J,K)/TWO_DT) ) / (ABS(FVZ_B(I,J,K)+TWO_EPSILON_EB))
+            FVZ(I,J,K) = FVZ(I,J,K) + FVZ_B(I,J,K)*BLIM_LOC
+            IF (STORE_B_LIMITER) BLIM(I,J,K) = MIN(BLIM(I,J,K),BLIM_LOC)
+         ENDDO
+      ENDDO
+   ENDDO
+   !$OMP END DO nowait
+
+ENDIF LIMIT_BARO_IF
+
+FVX = FVX + FVX_B
+FVY = FVY + FVY_B
+FVZ = FVZ + FVZ_B
 !$OMP END PARALLEL
 
 T_USED(4) = T_USED(4) + SECOND() - TNOW
